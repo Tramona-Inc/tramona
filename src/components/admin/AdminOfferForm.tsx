@@ -242,7 +242,7 @@ export default function AdminOfferForm({
       imageUrls: propertyData.imageUrls.map((urlObject) => urlObject.value),
       mapScreenshot: url,
 
-      originalListingSite: originalListing?.Site.siteName,
+      originalListingPlatform: originalListing?.Site.siteName,
       originalListingId: originalListing?.listingId,
       roomsWithBeds,
     };

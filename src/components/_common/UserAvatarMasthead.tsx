@@ -25,9 +25,9 @@ export default function UserAvatarMastHead({
   image?: string | null;
 } & AvatarVariants) {
   if (!name && !email && !image) return <AnonymousAvatar size={size} />;
-  const fallback = name ? getInitials(name) : email?.[0] ?? "?";
+  const fallback = name ? getInitials(name) : (email?.[0] ?? "?");
   return (
-    <Avatar className="border-2 border-white" size={size}>
+    <Avatar className="border-2 border-[#EBF5F4]" size={size}>
       {image ? (
         <AvatarImage src={image} alt="" />
       ) : (

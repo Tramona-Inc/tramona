@@ -1,8 +1,7 @@
 import {
   ALL_CANCELLATION_POLICIES,
   ALL_PROPERTY_ROOM_TYPES,
-  ALL_PROPERTY_TYPES,
-} from "@/server/db/schema/tables/properties";
+} from "@/server/db/schema";
 import { zodInteger, zodString } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -36,6 +35,7 @@ import {
 import { capitalize } from "@/utils/utils";
 import { SelectIcon } from "@radix-ui/react-select";
 import { CaretSortIcon } from "@radix-ui/react-icons";
+import { ALL_PROPERTY_TYPES } from "@/server/db/schema";
 
 const formSchema = z.object({
   hostId: zodString(),

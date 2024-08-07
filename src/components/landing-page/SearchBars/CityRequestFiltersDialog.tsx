@@ -32,7 +32,7 @@ import {
 } from "@/server/db/schema";
 import { cn } from "@/utils/utils";
 import { HotTubIcon } from "@/components/_icons/HotTubIcon";
-import { Total } from "@/components/property/PropertyFilter";
+import { Total } from "@/components/_common/Total";
 
 export function CityRequestFiltersDialog({
   form,

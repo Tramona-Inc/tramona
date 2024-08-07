@@ -1,163 +1,146 @@
-import React, { useEffect, useState } from "react";
+import { LINK_REQUEST_DISCOUNT_PERCENTAGE } from "@/utils/constants";
+import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import DateRangeInput from "@/components/_common/DateRangeInput";
-import { CalendarIcon, Users2Icon } from "lucide-react";
-import Spinner from "@/components/_common/Spinner";
-import { useLinkRequestForm } from "./useLinkRequestForm";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from "@/components/ui/form";
 import RequestSubmittedDialog from "./DesktopRequestComponents/RequestSubmittedDialog";
+import { type LinkInputProperty } from "@/server/db/schema/tables/linkInputProperties";
+import { type Request } from "@/server/db/schema";
+import { api } from "@/utils/api";
+import { errorToast } from "@/utils/toasts";
+import {
+  CalendarIcon,
+  DollarSignIcon,
+  MapPinIcon,
+  Users2Icon,
+} from "lucide-react";
+import { LinkInputPropertyCard } from "@/components/_common/LinkInputPropertyCard";
+import {
+  formatCurrency,
+  formatDateRange,
+  getNumNights,
+  plural,
+} from "@/utils/utils";
 
-interface LinkConfirmationProps {
+export interface LinkConfirmationProps {
   open: boolean;
   setOpen: (open: boolean) => void;
-  extractedLinkDataState:
-    | {
-        checkIn: string;
-        checkOut: string;
-        numOfGuests: number;
-      }
-    | undefined;
-  extractIsLoading: boolean;
-  airbnbLink: string;
+  property: LinkInputProperty;
+  request: Pick<
+    Request,
+    "checkIn" | "checkOut" | "numGuests" | "location" | "maxTotalPrice"
+  >;
+  originalPrice: number;
 }
 
 const LinkConfirmation: React.FC<LinkConfirmationProps> = ({
   open,
   setOpen,
-  extractedLinkDataState,
-  extractIsLoading,
-  airbnbLink,
+  property,
+  request,
+  originalPrice,
 }) => {
   const [requestSubmittedDialogOpen, setRequestSubmittedDialogOpen] =
     useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [madeByGroupId, setMadeByGroupId] = useState<number>();
 
-  const { form, onSubmit } = useLinkRequestForm({
-    afterSubmit() {
-      setOpen(false);
-      setRequestSubmittedDialogOpen(true);
-      setShowConfetti(true);
-      form.reset();
-    },
-    setMadeByGroupId,
+  const { mutateAsync: createRequestWithLink, isLoading } =
+    api.requests.createRequestWithLink.useMutation();
+
+  async function submitRequest() {
+    await createRequestWithLink({ property, request })
+      .then(({ madeByGroupId }) => {
+        setMadeByGroupId(madeByGroupId);
+        setRequestSubmittedDialogOpen(true);
+        setShowConfetti(true);
+      })
+      .catch((e) => {
+        console.error(e);
+        errorToast();
+      });
+  }
+  const fmtdDateRange = formatDateRange(request.checkIn, request.checkOut, {
+    withWeekday: true,
   });
-
-  useEffect(() => {
-    if (extractedLinkDataState) {
-      const checkInDate = new Date(extractedLinkDataState.checkIn);
-      const checkOutDate = new Date(extractedLinkDataState.checkOut);
-
-      if (!isNaN(checkInDate.getTime()) && !isNaN(checkOutDate.getTime())) {
-        form.setValue("date.from", checkInDate);
-        form.setValue("date.to", checkOutDate);
-        form.setValue("numGuests", extractedLinkDataState.numOfGuests);
-        form.setValue("airbnbLink", airbnbLink);
-      } else {
-        console.error("Invalid date extracted", { checkInDate, checkOutDate });
-      }
-    }
-  }, [extractedLinkDataState, airbnbLink, form]);
-
-  const handleCancel = () => {
-    setOpen(false);
-    form.reset(); // Reset the form
-  };
-
+  const numNights = getNumNights(request.checkIn, request.checkOut);
+  const fmtdOriginalNightlyPrice = formatCurrency(originalPrice / numNights);
+  const fmtdNightlyPrice = (
+    <span>
+      <b>{formatCurrency(request.maxTotalPrice / numNights)}</b>
+      <span className="text-xs">/night</span>
+    </span>
+  );
   return (
     <div>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTitle>Please confirm your request details</DialogTitle>
-        <DialogContent className="sm:p-12">
-          <h3 className="mb-10 text-center text-xl font-semibold">
-            Please confirm your request details
-          </h3>
-          <Form {...form}>
-            <form className="flex flex-col gap-y-4" onSubmit={onSubmit}>
-              {extractIsLoading ? (
-                <Spinner />
-              ) : (
-                <div className="space-y-2">
-                  <FormField
-                    control={form.control}
-                    name={`date`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <DateRangeInput
-                            {...field}
-                            label="Check in/out"
-                            icon={CalendarIcon}
-                            variant="lpDesktop"
-                            disablePast
-                            className="bg-white"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name={`numGuests`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            label="Guests"
-                            placeholder="Add guests"
-                            icon={Users2Icon}
-                            variant="lpDesktop"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    name="airbnbLink"
-                    control={form.control}
-                    render={({ field }) => (
-                      <Input
-                        {...field}
-                        label="Airbnb Link"
-                        placeholder={airbnbLink}
-                        disabled
-                        icon={Users2Icon}
-                        variant="lpDesktop"
-                      />
-                    )}
-                  />
+        <DialogContent className="@container">
+          <DialogHeader>
+            <DialogTitle>Confirm your request details</DialogTitle>
+          </DialogHeader>
+
+          <div>
+            <p className="pb-1 text-sm font-bold uppercase tracking-wide text-muted-foreground">
+              Linked property
+            </p>
+
+            <LinkInputPropertyCard property={property} />
+
+            <p className="pb-1 pt-4 text-sm font-bold uppercase tracking-wide text-muted-foreground">
+              Generated request
+            </p>
+
+            <div className="space-y-2 rounded-lg border p-2">
+              {[
+                { icon: MapPinIcon, content: request.location },
+                {
+                  icon: DollarSignIcon,
+                  content: (
+                    <div className="flex items-center gap-2">
+                      <s className="text-muted-foreground">
+                        {fmtdOriginalNightlyPrice}
+                      </s>
+                      {fmtdNightlyPrice}
+                      <Badge size="sm">
+                        -{LINK_REQUEST_DISCOUNT_PERCENTAGE}%
+                      </Badge>
+                    </div>
+                  ),
+                },
+                { icon: CalendarIcon, content: fmtdDateRange },
+                {
+                  icon: Users2Icon,
+                  content: plural(request.numGuests, "guest"),
+                },
+              ].map(({ icon: Icon, content }, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <div className="rounded-full bg-zinc-200 p-1.5">
+                    <Icon className="size-4 text-zinc-600" />
+                  </div>
+                  <div className="text-sm font-medium">{content}</div>
                 </div>
-              )}
-              <div className="flex w-full flex-row-reverse justify-between gap-x-2">
-                <Button
-                  type="submit"
-                  disabled={extractIsLoading || form.formState.isSubmitting}
-                  variant="greenPrimary"
-                >
-                  {extractIsLoading ? "Submitting..." : "Confirm"}
-                </Button>
-                <Button onClick={handleCancel} variant="secondary">
-                  Cancel
-                </Button>
-              </div>
-            </form>
-          </Form>
+              ))}
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button onClick={() => setOpen(false)} variant="secondary">
+              Cancel
+            </Button>
+            <Button
+              onClick={submitRequest}
+              disabled={isLoading}
+              variant="greenPrimary"
+            >
+              Submit request
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
@@ -166,7 +149,6 @@ const LinkConfirmation: React.FC<LinkConfirmationProps> = ({
         setOpen={setRequestSubmittedDialogOpen}
         showConfetti={showConfetti}
         madeByGroupId={madeByGroupId}
-        form={form}
       />
     </div>
   );

@@ -11,6 +11,17 @@ export const Vrbo: ListingSite<"Vrbo"> = {
     return new URL(url).pathname.split("/")[1];
   },
 
+  parseUrlParams(url) {
+    const urlObj = new URL(url);
+    const numGuestsStr = urlObj.searchParams.get("adults");
+
+    return {
+      checkIn: urlObj.searchParams.get("startDate") ?? undefined,
+      checkOut: urlObj.searchParams.get("endDate") ?? undefined,
+      numGuests: numGuestsStr ? parseInt(numGuestsStr) : undefined,
+    };
+  },
+
   createListing(id) {
     return {
       id,
@@ -41,6 +52,9 @@ export const Vrbo: ListingSite<"Vrbo"> = {
       getCheckoutUrl(params) {
         const listingUrl = this.getListingUrl(params);
         return `${listingUrl}&pwaDialogNested=price-details`;
+      },
+      getPrice(params) {
+        throw new Error("not implemented"); // TODO
       },
     };
   },
