@@ -4,7 +4,7 @@ import { cn } from "@/utils/utils";
 import { type VariantProps, cva } from "class-variance-authority";
 
 const cardVariants = cva(
-  "border text-card-foreground relative flex flex-col bg-card border-zinc-100",
+  " text-card-foreground relative flex flex-col bg-card ",
   {
     variants: {
       size: {

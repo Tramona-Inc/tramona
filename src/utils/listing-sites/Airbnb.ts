@@ -73,6 +73,7 @@ export const Airbnb: ListingSite<"Airbnb"> = {
 
       async getPrice(params) {
         const checkoutUrl = this.getCheckoutUrl(params);
+
         const jsonStr = await fetch(checkoutUrl)
           .then((res) => res.text())
           .then((html) => {
@@ -80,14 +81,15 @@ export const Airbnb: ListingSite<"Airbnb"> = {
             return $("#data-deferred-state-0").text();
           });
 
-        const priceRegex = /"amountMicros":"(\d+)"/;
+        const priceRegex =
+          /"priceBreakdown":.*"total":.*"total":.*"amountMicros":"(\d+)"/;
 
-        // "amountMicros" are hundredths of cents (e.g. $100 <-> 1,000,000)
-        const priceCents = Math.round(
-          Number(jsonStr.match(priceRegex)![1]!) / 10000,
-        );
+        const match = jsonStr.match(priceRegex);
 
-        return priceCents;
+        if (!match?.[1]) throw new Error("Failed to extract price");
+
+        // "amountMicros" are ten-thousands of cents (e.g. $100 <-> 100,000,000)
+        return Math.round(Number(match[1]) / 10000);
       },
     };
   },

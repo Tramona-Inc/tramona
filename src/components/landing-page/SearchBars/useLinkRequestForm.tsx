@@ -105,7 +105,12 @@ export function useLinkRequestForm({
             break;
         }
       })
-      .catch(() => errorToast());
+      .catch((e) => {
+        console.error(e);
+        errorToast();
+        form.reset();
+        setTimeout(() => form.setFocus("url"), 0); // idk why you have to do this but ya
+      });
   });
 
   return {
