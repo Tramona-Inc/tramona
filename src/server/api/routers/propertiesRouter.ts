@@ -452,6 +452,7 @@ export const propertiesRouter = createTRPCRouter({
     }),
   getHostPropertiesWithRequests: roleRestrictedProcedure(["host"]).query(
     async ({ ctx }) => {
+      // TODO: USE DRIZZLE
       const rawData = await ctx.db.execute(sql`
           WITH host_properties AS (
             SELECT
@@ -519,7 +520,7 @@ export const propertiesRouter = createTRPCRouter({
           hostawayListingId: row.hostaway_listing_id,
           hostName: row.host_name,
           // Add other property fields here
-        } as Property;
+        } as unknown as Property;
 
         const request = {
           id: row.request_id,
@@ -543,8 +544,8 @@ export const propertiesRouter = createTRPCRouter({
           latLngPoint: row.lat_lng_point,
           radius: row.radius,
           amenities: row.amenities,
+          linkInputPropertyId: row.link_input_property_id,
           traveler: { name: row.user_name, image: row.image },
-          // Add other request fields here
         } as HostRequestsPageData["requests"][number]["request"];
 
         const city = row.property_city as string;

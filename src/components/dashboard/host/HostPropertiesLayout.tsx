@@ -304,7 +304,7 @@ export function HostPropertyEditBtn({
     });
 
   const handlePublishProperty = () => {
-    publishProperty({ id: property.id });
+    void publishProperty({ id: property.id });
   };
 
   return (
