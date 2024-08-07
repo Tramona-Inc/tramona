@@ -35,7 +35,6 @@ export default async function webhook(
   if (req.method === "POST") {
     const buf = await buffer(req);
     const sig = req.headers["stripe-signature"] as string;
-    console.log("atleast we got a request");
     let event;
 
     try {
@@ -58,7 +57,6 @@ export default async function webhook(
     // * You can add other event types to catch
     switch (event.type) {
       case "charge.succeeded": //use to be payment_intent.succeeded
-        console.log("charge.succeeded");
         const paymentIntentSucceeded = event.data.object;
         paymentIntentSucceeded.metadata.offer_id === undefined
           ? undefined
@@ -67,7 +65,6 @@ export default async function webhook(
         const user = await db.query.users.findFirst({
           where: eq(users.id, paymentIntentSucceeded.metadata.user_id!),
         });
-        console.log("User is: ", user!);
 
         if (!paymentIntentSucceeded.metadata.bid_id) {
           const confirmedAt = paymentIntentSucceeded.metadata.confirmed_at;
@@ -135,7 +132,6 @@ export default async function webhook(
                     userId: user!.id,
                     trip: currentTrip[0]!,
                   }); //creating a superhog reservation
-                  console.log("Superhog reservation created");
                 } else {
                   console.log("Superhog reservation already exists");
                 }

@@ -128,7 +128,7 @@ export const requestsRouter = createTRPCRouter({
         ),
         with: {
           offers: { columns: { id: true } },
-          //linkInputProperty: true,
+          linkInputProperty: true,
           requestGroup: true,
           madeByGroup: {
             with: {
