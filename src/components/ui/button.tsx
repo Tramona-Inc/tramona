@@ -44,7 +44,8 @@ const buttonVariants = cva(
         increment:
           "rounded-full border-2 flex items-center justify-center hover:border-black transition-all duration-200",
         underline: "hover:bg-accent text-zinc-800 underline",
-        greenPrimary: "bg-teal-900 hover:bg-teal-950 text-white",
+        greenPrimary:
+          "bg-teal-900 hover:bg-teal-950 text-white disabled:bg-zinc-400 disabled:text-secondary-foreground",
         secondaryLight:
           "bg-[#F2F1EF] border border-[#D9D6D1] hover:bg-zinc-200 font-semibold",
         greenPrimaryOutline:

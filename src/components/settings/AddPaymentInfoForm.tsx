@@ -72,7 +72,7 @@ export default function AddPaymentInfoForm() {
     }
 
     // Clear form fields and error message
-    elements.getElement('address')?.clear();
+    elements.getElement("address")?.clear();
     elements.getElement("payment")?.clear();
     setErrorMessage(undefined);
 
@@ -83,7 +83,7 @@ export default function AddPaymentInfoForm() {
     setLoading(false);
 
     // Clear form fields and error message
-    elements.getElement('address')?.clear();
+    elements.getElement("address")?.clear();
     elements.getElement("payment")?.clear();
 
     if (error) {
@@ -101,10 +101,14 @@ export default function AddPaymentInfoForm() {
     <form onSubmit={handleSubmit}>
       <AddressElement options={{ mode: "billing" }} />
       <PaymentElement />
-      <Button className={"mt-5"} type="submit" disabled={!stripe || loading}>
+      <Button
+        variant="greenPrimary"
+        className={"mt-4"}
+        type="submit"
+        disabled={!stripe || loading}
+      >
         Add Payment Method
       </Button>
-      {errorMessage && <div>{errorMessage}</div>}
     </form>
   );
 }

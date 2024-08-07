@@ -4,30 +4,24 @@ import { CircleCheckBig, Sparkles } from "lucide-react";
 import Confetti from "react-confetti";
 import Link from "next/link";
 import RequestEmailInvitation from "./RequestEmaiInvitation";
-import type { CityRequestForm } from "@/components/landing-page/SearchBars/useCityRequestForm";
-import type { LinkRequestForm } from "@/components/landing-page/SearchBars/useLinkRequestForm";
-import { isCityRequestForm } from "../schemas";
 import { api } from "@/utils/api";
 interface RequestSubmittedDialogProps {
   open: boolean;
   setOpen: (open: boolean) => void;
-  form: CityRequestForm | LinkRequestForm;
   showConfetti: boolean;
   madeByGroupId: number | undefined;
+  location?: string;
 }
 
 const RequestSubmittedDialog: React.FC<RequestSubmittedDialogProps> = ({
   open,
   setOpen,
-  form,
   showConfetti,
   madeByGroupId,
+  location: city,
 }) => {
   // Watch the specific data entry for the current tab
-  const formData = (form as CityRequestForm).watch();
-  const isCityForm = isCityRequestForm(form);
   // Now we can directly access location or use a fallback
-  const location = isCityForm && formData.location;
   const [groupId, setGroupId] = useState<number | null>(null);
   const [inviteLink, setInviteLink] = useState<string | null>(null);
 
@@ -49,15 +43,15 @@ const RequestSubmittedDialog: React.FC<RequestSubmittedDialogProps> = ({
           <CircleCheckBig color="#528456" className="mr-2" /> Request sent!
         </div>
         <p className="mb-4 ml-8">
-          {isCityForm ? (
+          {city ? (
             <>
-              We sent your request out to every host in <b>{location}</b>. In
-              the next 24 hours, hosts will send you properties that match your
+              We sent your request out to every host in <b>{city}</b>. In the
+              next 24 hours, hosts will send you properties that match your
               requirements. To check out matches,{" "}
             </>
           ) : (
             <>
-              Your link has been submitted, either we will get you that property
+              Your link has been submitted! Either we will get you that property
               or one just like it. Over the next 24 hours, hosts will reach out
               with properties that meet your criteria. To view your matches,{" "}
             </>
