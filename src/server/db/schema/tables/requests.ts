@@ -15,10 +15,11 @@ import {
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { groups } from "./groups";
-import { propertyTypeEnum } from "./properties";
+import { propertyTypeEnum } from "../common";
 import { users } from "./users";
 import { z } from "zod";
 import { sql } from "drizzle-orm";
+import { linkInputProperties } from "./linkInputProperties";
 
 export const ALL_REQUESTABLE_AMENITIES = [
   "Pool",
@@ -46,6 +47,10 @@ export const requests = pgTable(
     requestGroupId: integer("request_group_id")
       .notNull()
       .references(() => requestGroups.id, { onDelete: "cascade" }),
+    linkInputPropertyId: integer("link_input_property_id").references(
+      () => linkInputProperties.id,
+      { onDelete: "set null" },
+    ),
     maxTotalPrice: integer("max_total_price").notNull(), // in cents
     location: varchar("location", { length: 255 }).notNull(), // TODO: use postGIS
     checkIn: date("check_in", { mode: "date" }).notNull(),
@@ -60,7 +65,6 @@ export const requests = pgTable(
       .notNull()
       .default(sql`'{}'`),
     note: varchar("note", { length: 255 }),
-    airbnbLink: varchar("airbnb_link", { length: 512 }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),

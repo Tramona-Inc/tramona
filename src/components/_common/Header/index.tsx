@@ -145,27 +145,22 @@ function LargeHeader(props: HeaderProps) {
       </div>
 
       <div className="mt-1 flex items-center justify-center gap-x-5 leading-tight text-muted-foreground">
-        {props.type === "marketing" && (
-          <>
-            {status !== "authenticated" &&
-              headerLinks1.map((link) => (
-                <NavLink
-                  key={link.href}
-                  href={link.href}
-                  render={({ selected }) => (
-                    <span
-                      className={cn(
-                        "text-sm font-bold xl:text-base",
-                        selected && "underline underline-offset-2",
-                      )}
-                    >
-                      {link.name}
-                    </span>
-                  )}
-                />
-              ))}
-          </>
-        )}
+        {headerLinks1.map((link) => (
+          <NavLink
+            key={link.href}
+            href={link.href}
+            render={({ selected }) => (
+              <span
+                className={cn(
+                  "text-sm font-bold xl:text-base",
+                  selected && "underline underline-offset-2",
+                )}
+              >
+                {link.name}
+              </span>
+            )}
+          />
+        ))}
       </div>
 
       <div className="flex flex-1 items-center justify-end gap-2">

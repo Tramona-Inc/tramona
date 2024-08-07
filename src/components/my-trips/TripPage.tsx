@@ -211,13 +211,6 @@ export default function TripPage({ tripData }: { tripData: TripWithDetails }) {
               <div className="pt-5">
                 <p className="pb-3 font-bold">Support</p>
 
-                {/* <p>
-                  Lorem ipsum dolor, sit amet consectetur adipisicing elit.
-                  Maiores, mollitia eaque libero ab facere quaerat quasi veniam
-                  ullam non voluptate doloribus minus possimus repellat deserunt
-                  pariatur laboriosam. Veniam, sunt laudantium.
-                </p> */}
-
                 <Link
                   href={"/help-center"}
                   className="flex justify-between pb-3 pt-5 font-semibold hover:underline"
