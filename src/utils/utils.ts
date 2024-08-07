@@ -242,6 +242,26 @@ export function getNumNights(from: Date | string, to: Date | string) {
   );
 }
 
+export function getPriceBreakdown(bookingCost: number, numNights: number, superhogFee: number, tax: number) {
+  const superhogFeePaid = numNights * superhogFee * 100;
+  const taxPaid = (bookingCost + superhogFeePaid) * tax
+  const totalMinusStripe = bookingCost + superhogFeePaid + taxPaid;
+  const stripeFee = Math.ceil(totalMinusStripe * 0.035);
+  const serviceFee = superhogFeePaid + stripeFee;
+  const finalTotal = totalMinusStripe + stripeFee;
+
+  const priceBreakdown = {
+    bookingCost: bookingCost,
+    taxPaid: taxPaid,
+    serviceFee: serviceFee,
+    firstTotal: totalMinusStripe,
+    finalTotal: finalTotal
+  };
+  console.log(priceBreakdown);
+  return priceBreakdown;
+}
+
+
 export function getPropertyId(url: string): number | null {
   const parsedUrl = new URL(url);
   const pathSegments = parsedUrl.pathname.split("/");
