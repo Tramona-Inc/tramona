@@ -1,5 +1,6 @@
 // tramona-specific constants
 export const TAX_PERCENTAGE = 0.08;
+export const SUPERHOG_FEE = 3;
 export const AVG_AIRBNB_MARKUP = 1.13868;
 export const LINK_REQUEST_DISCOUNT_PERCENTAGE = 15;
 

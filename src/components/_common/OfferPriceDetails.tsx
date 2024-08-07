@@ -17,6 +17,22 @@ export function OfferPriceDetails({
   const { bookingCost, taxPaid, serviceFee, firstTotal, finalTotal } = getPriceBreakdown(offer.totalPrice, numberOfNights, SUPERHOG_FEE, TAX_PERCENTAGE);
 
   const items = [
+    // {
+    //   title: `${formatCurrency(nightlyPrice)} x ${plural(numberOfNights, "night")}`,
+    //   price: `${formatCurrency(offer.totalPrice)}`,
+    // },
+    // {
+    //   title: "Cleaning fee",
+    //   price: "Included",
+    // },
+    // {
+    //   title: "Tramona service fee",
+    //   price: `${formatCurrency(offer.tramonaFee)}`,
+    // },
+    // {
+    //   title: "Taxes",
+    //   price: `${formatCurrency(tax)}`,
+    // },
     {
       title: `${formatCurrency(nightlyPrice)} x ${plural(numberOfNights, "night")}`,
       price: `${formatCurrency(offer.totalPrice)}`,
@@ -27,11 +43,11 @@ export function OfferPriceDetails({
     },
     {
       title: "Tramona service fee",
-      price: `${formatCurrency(offer.tramonaFee)}`,
+      price: `${formatCurrency(serviceFee)}`,
     },
     {
       title: "Taxes",
-      price: `${formatCurrency(tax)}`,
+      price: `${formatCurrency(taxPaid)}`,
     },
   ];
 
@@ -49,7 +65,7 @@ export function OfferPriceDetails({
       <Separator />
       <div className="flex items-center justify-between pb-4 font-bold">
         <p>Total (USD)</p>
-        <p>{formatCurrency(total)}</p>
+        <p>{formatCurrency(finalTotal)}</p>
       </div>
     </div>
   );
