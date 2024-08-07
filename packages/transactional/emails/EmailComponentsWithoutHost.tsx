@@ -59,8 +59,8 @@ interface BookingCardProps {
 }
 
 interface EmailConfirmationCardProps {
-  startDate?: Date;
-  endDate?: Date;
+  startDate?: string;
+  endDate?: string;
   address?: string;
   placeName?: string;
   property_image_link?: string;
@@ -542,7 +542,7 @@ export const EmailConfirmationCard: React.FC<EmailConfirmationCardProps> = ({
             <tr>
               <td style={{ padding: "0 15px 15px 15px" }}>
                 <p style={{ color: "#707070", margin: "0", fontSize: "14px" }}>
-                  {startDate?.toDateString()} - {endDate?.toDateString()}
+                  {startDate} - {endDate}
                 </p>
                 <p
                   style={{

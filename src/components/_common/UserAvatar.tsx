@@ -5,7 +5,6 @@ import {
   AvatarImage,
   type AvatarVariants,
 } from "../ui/avatar";
-// import NotionAvatar from 'public/assets/images/profile-avatars/notion-avatar-1719249636611 1.png'
 import { cn } from '@/utils/utils';
 function getInitials(name: string) {
   return name

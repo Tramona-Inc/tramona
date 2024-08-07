@@ -100,7 +100,7 @@ export function MessageConversation({
 }
 
 export type SidebarProps = {
-  selectedConversation: Conversation | AdminConversation ;
+  selectedConversation: Conversation & AdminConversation ;
   setSelected: (arg0: Conversation | AdminConversation) => void;
 };
 

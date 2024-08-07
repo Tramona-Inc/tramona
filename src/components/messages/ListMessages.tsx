@@ -144,6 +144,7 @@ export default function ListMessages({
   //this is for loggedin users
   useEffect(() => {
     console.log("for logged in users", conversationId);
+    if((messages.find((conversation) => conversation.conversationId === conversationId) !== undefined)) {
       const channel = supabase
         .channel(`${conversationId}`)
         .on(
@@ -160,8 +161,9 @@ export default function ListMessages({
       return () => {
         void channel.unsubscribe();
       };
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-}, [supabase]);
+}, [supabase, messages, optimisticIds]);
 
 const handlePostgresChange = async (payload: { new: MessageDbType }) => {
   console.log("Handling postgres change")
@@ -196,6 +198,7 @@ const handlePostgresChange = async (payload: { new: MessageDbType }) => {
   //this is for logged out users conversations
   useEffect(() => {
     console.log("in AdminMessages", currentConversationId)
+    if((adminMessages.find((convo) => convo.conversationId === conversationId) !== undefined)) {
       const channel = supabase
         .channel(`${conversationId}`)
         .on(
@@ -213,6 +216,7 @@ const handlePostgresChange = async (payload: { new: MessageDbType }) => {
       return () => {
         void channel.unsubscribe();
       };
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [supabase, adminMessages, optimisticIds]);
 

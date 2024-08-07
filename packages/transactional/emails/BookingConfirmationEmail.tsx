@@ -22,26 +22,38 @@ interface BookingConfirmationEmailProps {
   address: string;
   propertyImageLink: string;
   tripDetailLink: string;
-  originalPrice: number;
+  // originalPrice: number;
   tramonaPrice: number;
   offerLink: string;
   numOfNights: number;
-  tramonaServiceFee: number;
+  serviceFee: number;
+  receiptNumber: string;
+  tramonaServiceFee? : number,
+  paymentMethod: string,
+  datePaid: string
+  tax: number,
+  totalPricePaid: number,
 }
 
 export default function BookingConfirmationEmail({
-  userName ,
-  placeName,
-  startDate,
-  endDate,
-  address,
-  propertyImageLink,
-  tripDetailLink,
-  originalPrice,
-  tramonaPrice,
-  offerLink,
-  numOfNights,
+  userName = "User",
+  placeName = "Tropical getaway in Mexico",
+  startDate = new Date("Nov 6, 2023"),
+  endDate = new Date("Nov 11, 2024"),
+  address = "101 Street Planet Earth",
+  propertyImageLink = "https://via.placeholder.com/600x300",
+  tripDetailLink = "https://www.tramona.com/",
+  // originalPrice = 1000,
+  tramonaPrice = 500,
+  offerLink = "http://tramona/offers{offer.id}",
+  numOfNights = 3,
+  serviceFee = 20,
+  receiptNumber = "12345",
   tramonaServiceFee,
+  paymentMethod = "Card",
+  datePaid = "27-02",
+  tax = 0,
+  totalPricePaid = 0,
 }: BookingConfirmationEmailProps) {
   return (
     <Layout title_preview="Booking confirmation/Payment received">
@@ -63,57 +75,78 @@ export default function BookingConfirmationEmail({
           confirmation_link={tripDetailLink}
         />
       </Section>
-      <CustomButton link={offerLink} title="View trip detail" />
+      <CustomButton link={offerLink} title="View trip details" />
       <Section
         className="flex flex-col items-center justify-center px-6 pb-6 pt-6"
         style={{ width: "100%" }}
       >
         <Row className="">
-          <Column>
-            <Text className="whitespace-no-wrap text-xs">Original Price</Text>
+          <Column className="">
+            <Text className="my-0 mt-2 text-[#606060] pr-4">Amount Paid</Text>
+            <Text className="my-1 mb-2">{formatCurrency(tramonaPrice)}</Text>
           </Column>
-          <Column
-            className="whitespace-no-wrap text-xs text-[#606060]"
-            style={{ paddingLeft: "5px" }}
-          >
-            x{numOfNights} nights
+          <Column className="">
+          <Text className="my-0 mt-2 text-[#606060] pr-8">Date Paid</Text>
+          <Text className="my-1 mb-2">{datePaid}</Text>
           </Column>
-          <Column className="text-right" style={{ paddingLeft: "150px" }}>
-            {formatCurrency(originalPrice)}
+          <Column className="">
+          <Text className="my-0 mt-2 text-[#606060] pl-2">Payment Method</Text>
+          <Text className="my-1 mb-2 pl-2">Card - {paymentMethod}</Text>
           </Column>
         </Row>
-        <Row className="">
+        <Row>
           <Column>
-            <Text className="whitespace-no-wrap text-xs">
-              Tramona&apos;s Price
-            </Text>
+          <Text>Charges Breakdown</Text>
+          </Column>
+        </Row>
+        {/* <Row className="">
+          <Column>
+            <Text className="whitespace-no-wrap text-xs">Payment Method</Text>
           </Column>
           <Column
             className="whitespace-no-wrap text-xs text-[#606060]"
             style={{ paddingLeft: "5px" }}
           >
-            x{numOfNights} nights
+            x{numOfNights} nights 
           </Column>
-          <Column style={{ paddingLeft: "150px" }}>
+          <Column className="text-right" style={{ paddingLeft: "150px" }}>
+            {paymentMethod}
+          </Column>
+        </Row> */}
+        <Row className="">
+          <Column>
+            <Text className="whitespace-no-wrap text-base">
+            {formatCurrency(tramonaPrice/numOfNights)} x {numOfNights} nights
+            </Text>
+          </Column>
+          <Column className="text-end" style={{ paddingLeft: "150px" }}>
             {formatCurrency(tramonaPrice)}
           </Column>
         </Row>
         <Row className="">
           <Column>
-            <Text className="text-xs">Service Fee</Text>
+            <Text className="text-base">Service Fee</Text>
           </Column>
-          <Column className="text-xs text-white" style={{ paddingLeft: "5px" }}>
-            x{numOfNights} nights
-          </Column>
+          {/* <Column className="text-xs text-white" style={{ paddingLeft: "5px" }}>
+            x {numOfNights} nights
+          </Column> */}
           <Column className="text-end" style={{ paddingLeft: "150px" }}>
-            {formatCurrency(tramonaServiceFee)}
+            {formatCurrency(serviceFee ?? 0)}
+          </Column>
+        </Row>
+        <Row>
+          <Column>
+            <Text className="text-base">Tax</Text>
+          </Column>
+          <Column className="text-end" style={{paddingLeft: "150px"}}>
+          {formatCurrency(tax)}
           </Column>
         </Row>
         <Hr className="pt-5" />
         <Row className="font-bold">
           <Column>Total (USD)</Column>
           <Column className="text-right">
-            {formatCurrency(tramonaPrice + tramonaServiceFee)}
+            {formatCurrency(totalPricePaid + serviceFee)}
           </Column>
         </Row>
       </Section>
