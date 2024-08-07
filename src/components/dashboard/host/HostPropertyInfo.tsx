@@ -53,11 +53,62 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
     setIsEditing(!isEditing);
   };
 
+  const [dateIntervals, setDateIntervals] = useState<
+    Array<{ start: string; end: string }>
+  >([]);
+
+  const fetchCalendarMutation =
+    api.calendar.fetchHospitableCalendar.useMutation({
+      onSuccess: (data) => {
+        setDateIntervals(data);
+        toast({
+          title: "Success!",
+          description: "Calendar data fetched successfully.",
+          variant: "default",
+        });
+      },
+      onError: (error) => {
+        console.error("Error fetching calendar data:", error);
+        toast({
+          title: "Fetch Failed",
+          description:
+            error.message || "An error occurred while fetching calendar data.",
+          variant: "destructive",
+        });
+      },
+    });
+
+  const handleFetchCalendarData = () => {
+    fetchCalendarMutation.mutate({ propertyId: property.id });
+  };
+
   return (
     <div key={property.id} className="space-y-4 p-4 sm:p-6">
       <Link href="/host/properties" className="xl:hidden">
         <ChevronLeft />
       </Link>
+      <div>
+        <Button
+          onClick={handleFetchCalendarData}
+          disabled={fetchCalendarMutation.isLoading}
+        >
+          {fetchCalendarMutation.isLoading
+            ? "Fetching..."
+            : "Click me to fetch calendar data"}
+        </Button>
+      </div>
+      {dateIntervals.length > 0 && (
+        <div>
+          <h2 className="text-xl font-bold mt-4 mb-2">Reserved Date Intervals</h2>
+          <ul>
+            {dateIntervals.map((interval, index) => (
+              <li key={index}>
+                From {interval.start} to {interval.end}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       <div>
         {!property.iCalLink && (
           <div className="mb-10 space-y-4">
@@ -145,7 +196,10 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
           >
             Cancellation policy
             {!property.cancellationPolicy && (
-              <AlertCircle className="absolute top-0 right-0 text-red-600" size={16} />
+              <AlertCircle
+                className="absolute right-0 top-0 text-red-600"
+                size={16}
+              />
             )}
           </TabsTrigger>
         </TabsList>

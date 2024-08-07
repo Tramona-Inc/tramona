@@ -42,6 +42,54 @@ export async function syncCalendar({
   });
 }
 
+export async function getListingUnavailableDates(listingId: string) {
+  try {
+    const response = await axios.get(
+      `https://connect.hospitable.com/api/v1/listings/${listingId}/calendar`,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
+        },
+      }
+    );
+
+    const calendarData = response.data.data.dates;
+    let unavailablePeriods = [];
+    let currentPeriod = null;
+
+    for (const day of calendarData) {
+      if (!day.availability.available) {
+        if (!currentPeriod) {
+          currentPeriod = { start_date: day.date, end_date: day.date };
+        } else {
+          currentPeriod.end_date = day.date;
+        }
+      } else {
+        if (currentPeriod) {
+          unavailablePeriods.push(currentPeriod);
+          currentPeriod = null;
+        }
+      }
+    }
+
+    // Add the last period if it exists
+    if (currentPeriod) {
+      unavailablePeriods.push(currentPeriod);
+    }
+
+    return unavailablePeriods;
+  } catch (error) {
+    console.error(`Error fetching calendar for listing ${listingId}:`, error);
+    throw new Error(`Failed to fetch calendar for listing ${listingId}`);
+  }
+}
+
+// Usage
+const listingId = "8fe70a29-c618-49c4-8632-c6de445b3060";
+getListingUnavailableDates(listingId).then((unavailablePeriods) => {
+  console.log("Unavailable periods:", unavailablePeriods);
+});
+
 export const calendarRouter = createTRPCRouter({
   syncCalendar: publicProcedure
     .input(
@@ -68,5 +116,58 @@ export const calendarRouter = createTRPCRouter({
         .where(eq(reservedDateRanges.propertyId, propertyId));
 
       return dates;
+    }),
+
+
+    fetchHospitableCalendar: publicProcedure
+    .input(z.object({ propertyId: z.number() }))
+    .mutation(async ({ input, ctx }) => {
+      const { propertyId } = input;
+
+      try {
+        const response = await axios.get(
+          // `https://connect.hospitable.com/api/v1/listings/${propertyId}/calendar`,
+          `https://connect.hospitable.com/api/v1/listings/8fe70a29-c618-49c4-8632-c6de445b3060/calendar`,
+          
+          {
+            headers: {
+              Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
+            },
+            params: {
+              start_date: new Date().toISOString().split('T')[0],
+              end_date: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            }
+          }
+        );
+
+        const calendarData = response.data.data.dates;
+        
+        let currentRange: { start: string; end: string } | null = null;
+        const reservedIntervals: Array<{ start: string; end: string }> = [];
+
+        calendarData.forEach((day: { date: string; availability: { available: boolean } }) => {
+          if (!day.availability.available) {
+            if (currentRange) {
+              currentRange.end = day.date;
+            } else {
+              currentRange = { start: day.date, end: day.date };
+            }
+          } else {
+            if (currentRange) {
+              reservedIntervals.push(currentRange);
+              currentRange = null;
+            }
+          }
+        });
+
+        if (currentRange) {
+          reservedIntervals.push(currentRange);
+        }
+
+        return reservedIntervals;
+      } catch (error) {
+        console.error("Error fetching Hospitable calendar:", error);
+        throw new Error("Failed to fetch Hospitable calendar");
+      }
     }),
 });
