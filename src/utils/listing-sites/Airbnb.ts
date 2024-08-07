@@ -89,6 +89,9 @@ export const Airbnb: ListingSite<"Airbnb"> = {
             console.log({ html });
             const $ = cheerio.load(html);
             return $("#data-deferred-state-0").text();
+          }).catch((err) => {
+            console.error(err);
+            throw err;
           });
 
         const priceRegex =
