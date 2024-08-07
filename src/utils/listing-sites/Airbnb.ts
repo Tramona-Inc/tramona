@@ -86,7 +86,7 @@ export const Airbnb: ListingSite<"Airbnb"> = {
 
         const match = jsonStr.match(priceRegex);
 
-        console.log(match);
+        console.log({ match, jsonStr });
 
         if (!match?.[1]) throw new Error("Failed to extract price");
 
