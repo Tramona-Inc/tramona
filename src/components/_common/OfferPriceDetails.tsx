@@ -1,7 +1,7 @@
 import { Separator } from "../ui/separator";
-import { formatCurrency, getNumNights } from "@/utils/utils";
+import { formatCurrency, getNumNights, getPriceBreakdown } from "@/utils/utils";
 import { plural } from "@/utils/utils";
-import { TAX_PERCENTAGE } from "@/utils/constants";
+import { TAX_PERCENTAGE, SUPERHOG_FEE } from "@/utils/constants";
 import { type Offer } from "@/server/db/schema";
 
 export function OfferPriceDetails({
@@ -13,6 +13,8 @@ export function OfferPriceDetails({
   const nightlyPrice = offer.totalPrice / numberOfNights;
   const tax = (offer.totalPrice + offer.tramonaFee) * TAX_PERCENTAGE;
   const total = offer.totalPrice + offer.tramonaFee + tax;
+
+  const { bookingCost, taxPaid, serviceFee, firstTotal, finalTotal } = getPriceBreakdown(offer.totalPrice, numberOfNights, SUPERHOG_FEE, TAX_PERCENTAGE);
 
   const items = [
     {
