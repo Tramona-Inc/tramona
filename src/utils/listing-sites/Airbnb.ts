@@ -81,7 +81,7 @@ export const Airbnb: ListingSite<"Airbnb"> = {
 
         console.log("checkoutUrl:", checkoutUrl);
 
-        const proxyAgent = new HttpsProxyAgent('http://us-ca.proxymesh.com:31280'); // Replace with your proxy URL
+        const proxyAgent = new HttpsProxyAgent('http://sasha14:!Matd4Qe4dUHBn8@us-ca.proxymesh.com:31280'); // Replace with your proxy URL
 
         const response = await axios.get(checkoutUrl, {
           headers: airbnbRequestHeaders,
