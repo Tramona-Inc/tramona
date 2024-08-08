@@ -8,16 +8,12 @@ import { formatDateRange } from "@/utils/utils";
 import Image from "next/image";
 import UserAvatar from "../_common/UserAvatar";
 import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
-import { type RouterOutputs } from "@/utils/api";
+import { type TripCardDetails } from "@/pages/my-trips";
 
 // Plugin for relative time
 dayjs.extend(relativeTime);
 
-export default function UpcomingTripCard({
-  trip,
-}: {
-  trip: RouterOutputs["trips"]["getMyTrips"][number];
-}) {
+export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
   const chatWithAdmin = useChatWithAdmin();
 
   return (

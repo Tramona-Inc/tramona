@@ -1,27 +1,17 @@
 import EmptyStateValue from "@/components/_common/EmptyStateSvg/EmptyStateValue";
 import Spinner from "@/components/_common/Spinner";
-import { RequestCards } from "@/components/requests/RequestCards";
 import { api } from "@/utils/api";
-import PropertyOfferCard from "./PropertyOfferCard";
+import RequestCard from "./RequestCard";
 
-export default function PastRequestsAndOffersTab() {
+export default function PastRequestsTab() {
   const { data: requests } = api.requests.getMyRequests.useQuery();
-  const { data: unfilteredOffers } = api.biddings.getMyBids.useQuery();
-  const offers = unfilteredOffers?.filter(
-    (offer) => offer.status !== "Pending",
-  );
 
-  if (!requests || !offers) return <Spinner />;
+  if (!requests) return <Spinner />;
 
-  return requests.inactiveRequestGroups.length !== 0 ? (
-    <div className="grid grid-cols-1 gap-4 pb-32 md:grid-cols-2">
-      <RequestCards requestGroups={requests.inactiveRequestGroups} />
-      {offers.map((offer) => (
-        <PropertyOfferCard
-          key={offer.id}
-          offer={offer}
-          isGuestDashboard={true}
-        />
+  return requests.inactiveRequests.length !== 0 ? (
+    <div className="space-y-4 pb-32">
+      {requests.inactiveRequests.map((request) => (
+        <RequestCard key={request.id} type="guest" request={request} />
       ))}
     </div>
   ) : (

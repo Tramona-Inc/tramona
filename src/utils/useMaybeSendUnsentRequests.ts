@@ -25,7 +25,7 @@ export function useMaybeSendUnsentRequests() {
     localStorage.removeItem("unsentRequests");
 
     const res = requestInsertSchema
-      .omit({ madeByGroupId: true, requestGroupId: true })
+      .omit({ madeByGroupId: true })
       // overwrite checkIn and checkOut because JSON.parse doesnt handle dates
       .extend({ checkIn: z.coerce.date(), checkOut: z.coerce.date() })
       .safeParse(JSON.parse(unsentRequestsJSON));

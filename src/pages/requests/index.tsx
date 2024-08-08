@@ -3,36 +3,29 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMaybeSendUnsentRequests } from "@/utils/useMaybeSendUnsentRequests";
 import { HistoryIcon, MapPinIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
-import CityRequestsTab from "../../components/requests/CityRequestsTab";
-import PastRequestsAndOffersTab from "../../components/requests/PastRequestsAndOffersTab";
+import ActiveRequestsTab from "../../components/requests/CityRequestsTab";
+import PastRequestsTab from "../../components/requests/PastRequestsAndOffersTab";
 import { NextSeo } from "next-seo";
 import { CongratsDialog } from "@/components/landing-page/SearchBars/CongratsDialog";
 
 function RequestsTabs() {
   return (
-    <Tabs defaultValue="cityRequests" className="space-y-4">
+    <Tabs defaultValue="activeRequests" className="space-y-4">
       <TabsList>
-        <TabsTrigger value="cityRequests">
+        <TabsTrigger value="activeRequests">
           <MapPinIcon className="hidden sm:block" />
-          City Requests
+          Active Requests
         </TabsTrigger>
-        {/* <TabsTrigger value="propertyOffers">
-          <HomeIcon className="hidden sm:block" />
-          Property Offers
-        </TabsTrigger> */}
         <TabsTrigger value="history">
           <HistoryIcon className="hidden sm:block" />
           History
         </TabsTrigger>
       </TabsList>
-      <TabsContent value="cityRequests">
-        <CityRequestsTab />
+      <TabsContent value="activeRequests">
+        <ActiveRequestsTab />
       </TabsContent>
-      {/* <TabsContent value="propertyOffers">
-        <PropertyOfferTab />
-      </TabsContent> */}
       <TabsContent value="history">
-        <PastRequestsAndOffersTab />
+        <PastRequestsTab />
       </TabsContent>
     </Tabs>
   );
@@ -81,12 +74,11 @@ export default function Page() {
         {openCongratsDialog && location && <CongratsDialog location={location}/>}
         
         <div className="min-h-screen-minus-header px-4 pb-footer-height pt-5">
-          <div className="mx-auto max-w-7xl">
+          <div className="mx-auto max-w-5xl">
             <div className="flex items-center">
               <h1 className="flex-1 py-4 text-2xl font-bold tracking-tight text-black lg:text-4xl">
                 Requests
               </h1>
-              {/* <NewRequestButton /> */}
             </div>
             <RequestsTabs />
           </div>
