@@ -30,7 +30,7 @@ const FAQ = () => {
   ];
 
   return (
-    <section className="mx-4 lg:mx-24">
+    <section className="mx-4 lg:mx-24 md:mx-12">
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div>
           <h1 className="text-3xl font-bold md:text-4xl">

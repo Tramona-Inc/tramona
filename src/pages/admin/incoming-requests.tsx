@@ -16,21 +16,17 @@ function IncomingRequestCards({
   requests: AdminDashboardRequst[] | undefined;
 }) {
   return requests ? (
-    <div className="grid gap-4 lg:grid-cols-2">
+    <div className="space-y-4">
       {requests.map((request) => (
         <RequestCard type="admin" key={request.id} request={request}>
           <DeleteRequestDialog requestId={request.id}>
-            <Button className="rounded-full" variant="outline">
-              Delete
-            </Button>
+            <Button variant="secondary">Delete</Button>
           </DeleteRequestDialog>
           <RejectRequestDialog request={request}>
-            <Button className="rounded-full" variant="outline">
-              Reject
-            </Button>
+            <Button variant="secondary">Reject</Button>
           </RejectRequestDialog>
           <AdminOfferDialog request={request}>
-            <Button className="rounded-full">Make an offer</Button>
+            <Button>Make an offer</Button>
           </AdminOfferDialog>
         </RequestCard>
       ))}

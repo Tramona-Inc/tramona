@@ -4,7 +4,7 @@ import Link from "next/link";
 
 const ReferAndEarn = () => {
   return (
-    <section className="bg-white md:px-2">
+    <section className="bg-white md:px-2 md:mx-12">
       <div className="flex flex-col rounded-3xl lg:flex-row">
         <div className="mb-4 w-full lg:mb-0 lg:mr-8 lg:w-1/2">
           <div className="h-48 w-full overflow-hidden md:rounded-lg lg:h-auto lg:rounded-none">

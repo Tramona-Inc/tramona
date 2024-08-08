@@ -61,7 +61,7 @@ const buttonVariants = cva(
     },
     defaultVariants: {
       size: "default",
-      variant: "default",
+      variant: "greenPrimary",
     },
   },
 );

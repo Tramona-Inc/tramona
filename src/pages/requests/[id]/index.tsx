@@ -54,14 +54,6 @@ function Page({
     }
   }, [offers, effectHasRun]);
 
-  // ik this seems dumb but its better because it reuses the same
-  // getMyRequests query that we (probably) already have cached
-  const { data: requests } = api.requests.getMyRequestsPublic.useQuery();
-  const request = requests?.activeRequestGroups
-    .map((group) => group.requests)
-    .flat(1)
-    .find(({ id }) => id === requestId);
-
   if (router.isFallback) {
     return <Spinner />;
   }
@@ -89,7 +81,7 @@ function Page({
           site_name: "Tramona",
         }}
       />
-      {request && offers ? (
+      {offers ? (
         <div className="min-h-screen-minus-header pb-footer-height pt-5 lg:px-4">
           <div className="mx-auto max-w-7xl">
             <Button asChild variant="ghost" className="rounded-full">
@@ -113,7 +105,7 @@ function Page({
                     ))}
                   </TabsList>
                   <ShareButton
-                    id={request.id}
+                    id={offers[0]!.requestId!}
                     isRequest={true}
                     propertyName={offers[0]!.property.name}
                   />
@@ -139,7 +131,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const isProduction = process.env.NODE_ENV === "production";
   const baseUrl = isProduction
     ? "https://www.tramona.com"
-    : "http://localhost:3000/"; //change to your live dev server
+    : "https://6fb1-104-32-193-204.ngrok-free.app"; //change to your live dev server
 
   const firstPropertyOfRequest = await db.query.offers.findFirst({
     where: and(eq(offers.requestId, serverRequestId)),

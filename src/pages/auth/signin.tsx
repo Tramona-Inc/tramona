@@ -23,12 +23,10 @@ import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useInviteStore } from "@/utils/store/inviteLink";
-import { CongratsDialog }  from '@/components/landing-page/SearchBars/CongratsDialog'
 
 export default function SignIn({
   providers,
@@ -76,12 +74,7 @@ export default function SignIn({
 
   const { query } = useRouter();
   const [inviteLinkId] = useInviteStore((state) => [state.inviteLinkId]);
-  // const { mutate: inviteUser } = api.groups.inviteCurUserToGroup.useMutation();
-  const { status } = useSession();
-  const router = useRouter();
-  const [openCongratsDialog, setOpenCongratsDialog] = useState(false);
-  const[location, setLocation] = useState("")
-
+  const { mutate: inviteUser } = api.groups.inviteCurUserToGroup.useMutation();
 
   const handleSubmit = async ({
     email,
@@ -90,22 +83,15 @@ export default function SignIn({
     // Relies on middleware to redirect to dashbaord
     // onboarding checks if user has a phone number else go to dashboard
     const from = query.from as string | undefined;
-    console.log(from);
+
     await signIn("credentials", {
       email: email,
       password: password,
       callbackUrl: from ?? `${window.location.origin}`,
     }).then(() => {
-      // const unsentRequests = localStorage.getItem("unsentRequests");
-      // if(unsentRequests){
-      //   localStorage.setItem("showCongratsDialog", "true");
-      //   void router.push("/requests").then(()=> {
-      //     <CongratsDialog location={location} />
-      //   })
-      // }
-      // if (inviteLinkId) {
-      //   void inviteUser({ inviteLinkId });
-      // }
+      if (inviteLinkId) {
+        void inviteUser({ inviteLinkId });
+      }
     });
   };
 
@@ -126,33 +112,7 @@ export default function SignIn({
     }
   }, [query.error, query.isVerified]);
 
-
-  // useEffect(() => {
-  //   const newRequests = localStorage.getItem("unsentRequests");
-  //   if(status === "unauthenticated" && typeof window !== "undefined") {
-  //     if(newRequests) {
-  //       const request :Property[] = JSON.parse(newRequests) as Property[]
-  //       setLocation(request[0]?.location ?? "");
-  //     }
-  //     const showCongratsDialog = localStorage.getItem("showCongratsDialog");
-      
-  //     if(showCongratsDialog){
-  //       setOpenCongratsDialog(true)
-  //       localStorage.removeItem("showCongratsDialog");
-  //     }
-  //   }
-    // if(status === "authenticated" && newRequests){
-    //   void router.push('/requests').then(()=> {
-    //     // <CongratsDialog location={location} />
-    //   })
-    // }
-  // }, [])
-
-  
-
   return (
-    <>
-    {openCongratsDialog && <CongratsDialog location={location}/>}
     <MainLayout>
       <Head>
         <title>Log in | Tramona</title>
@@ -262,7 +222,6 @@ export default function SignIn({
         </p>
       </div>
     </MainLayout>
-    </>
   );
 }
 
@@ -271,16 +230,3 @@ export async function getStaticProps() {
     props: { providers: await getProviders() },
   };
 }
-
-export type Property = {
-  location: string;
-  numGuests: number;
-  minNumBeds?: number | undefined;
-  minNumBedrooms?: number | undefined;
-  minNumBathrooms?: number | undefined;
-  note?: string | undefined;
-  airbnbLink?: string | undefined;
-  checkIn: Date;
-  checkOut: Date;
-  maxTotalPrice: number;
-};

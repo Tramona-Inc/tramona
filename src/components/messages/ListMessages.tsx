@@ -1,18 +1,21 @@
-import { type MessageDbType, type GuestMessageType } from "@/types/supabase.message";
-import { type GuestMessage, useMessage, type ChatMessageType } from "@/utils/store/messages";
+import {
+  type MessageDbType,
+  type GuestMessageType,
+} from "@/types/supabase.message";
+import {
+  type GuestMessage,
+  useMessage,
+  type ChatMessageType,
+} from "@/utils/store/messages";
 import supabase from "@/utils/supabase-client";
 import { useEffect, useRef, useState } from "react";
 import { Icons } from "../_icons/icons";
 import { api } from "@/utils/api";
 import { useConversation } from "@/utils/store/conversations";
-
 import { useSession } from "next-auth/react";
 import LoadMoreMessages from "./LoadMoreMessages";
 import { groupMessages } from "./groupMessages";
 import { MessageGroup } from "./MessageGroup";
-import { errorToast } from "@/utils/toasts";
-
-
 
 function NoMessages() {
   return (
@@ -22,21 +25,23 @@ function NoMessages() {
   );
 }
 
-function isChatMessage(message: ChatMessageType | GuestMessage): message is ChatMessageType {
-  return (message as ChatMessageType).userId !== undefined;
+function isChatMessage(
+  message: ChatMessageType | GuestMessage,
+): message is ChatMessageType {
+  return !!(message as ChatMessageType).userId;
 }
 
-function isGuestMessage(message: ChatMessageType | GuestMessage): message is GuestMessage {
-  return (message as GuestMessage).userToken !== undefined;
+function isGuestMessage(
+  message: ChatMessageType | GuestMessage,
+): message is GuestMessage {
+  return !!(message as GuestMessage).userToken;
 }
-
 
 export default function ListMessages({
   conversationId,
 }: {
-  conversationId: string,
-} 
-) {
+  conversationId: string;
+}) {
   const scrollRef = useRef() as React.MutableRefObject<HTMLDivElement>;
 
   const [userScrolled, setUserScrolled] = useState(false);
@@ -44,7 +49,7 @@ export default function ListMessages({
   const [notification, setNotification] = useState(0);
 
   const optimisticIds = useMessage((state) => state.optimisticIds);
-  const setOptimisticIds = useMessage((state) => state.setOptimisticIds)
+  const setOptimisticIds = useMessage((state) => state.setOptimisticIds);
   const currentConversationId = useMessage(
     (state) => state.currentConversationId,
   );
@@ -62,30 +67,29 @@ export default function ListMessages({
 
   const setConversationToTop = useConversation(
     (state) => state.setConversationToTop,
-  )
+  );
   const { mutateAsync } = api.messages.setMessagesToRead.useMutation();
-  const { mutateAsync: adminMessagesToRead } = api.messages.setGuestMessagesToRead.useMutation();
-  const {data: checkConversationId} = api.messages.checkConversationWithAdmin.useQuery({conversationId: conversationId})
+  const { mutateAsync: adminMessagesToRead } =
+    api.messages.setGuestMessagesToRead.useMutation();
 
   const { data: session } = useSession();
 
-
-
-  const messages = currentConversationId
-    ? conversations[currentConversationId]?.messages ?? []
+  const messages = conversationId
+    ? (conversations[conversationId]?.messages ?? [])
     : [];
 
-  const adminMessages = currentConversationId ? adminConversations[currentConversationId]?.messages ?? [] : [];
-
-
-
+  const adminMessages = conversationId
+    ? (adminConversations[conversationId]?.messages ?? [])
+    : [];
 
   // Set all the messages to read when loaded
   useEffect(() => {
     const unreadMessageIds = messages
       .filter(
         (message) =>
-          message.read === false && isChatMessage(message) && message.userId !== session?.user.id,
+          message.read === false &&
+          isChatMessage(message) &&
+          message.userId !== session?.user.id,
       )
       .map((message) => message.id);
 
@@ -97,28 +101,29 @@ export default function ListMessages({
 
   useEffect(() => {
     const unreadAdminMessagesIds = adminMessages
-    .filter((message) => 
-      message.read === false && isGuestMessage(message) && message.userToken !== session?.user.id, 
-    )
-    .map((message) => message.id);
+      .filter(
+        (message) =>
+          message.read === false &&
+          isGuestMessage(message) &&
+          message.userToken !== session?.user.id,
+      )
+      .map((message) => message.id);
 
-    if(unreadAdminMessagesIds.length > 0){
-      void adminMessagesToRead( {unreadMessageIds: unreadAdminMessagesIds} )
+    if (unreadAdminMessagesIds.length > 0) {
+      void adminMessagesToRead({ unreadMessageIds: unreadAdminMessagesIds });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentConversationId, adminMessages])
-
+  }, [currentConversationId, adminMessages]);
 
   const hasMore = currentConversationId
-    ? conversations[currentConversationId]?.hasMore ?? false
+    ? (conversations[currentConversationId]?.hasMore ?? false)
     : false;
 
-  console.log(optimisticIds)
-  
-
-  const handlePostgresChangeOnGuest = async (payload: {new: GuestMessageType}) => {
-    console.log("in ListMessages -> in handlePostgresChangeOnGuest")
-    if(!optimisticIds.includes(payload.new.id)) {
+  const handlePostgresChangeOnGuest = async (payload: {
+    new: GuestMessageType;
+  }) => {
+    console.log("in ListMessages -> in handlePostgresChangeOnGuest");
+    if (!optimisticIds.includes(payload.new.id)) {
       const newMessage: GuestMessage = {
         id: payload.new.id,
         conversationId: payload.new.conversation_id,
@@ -129,8 +134,8 @@ export default function ListMessages({
         read: payload.new.read,
       };
       addMessageToAdminConversation(payload.new.conversation_id, newMessage);
-      setConversationToTop(payload.new.conversation_id, newMessage)
-      // setOptimisticIds(payload.new.id)
+      setConversationToTop(payload.new.conversation_id, newMessage);
+      // setOptimisticIds(payload.new.id);
     }
     const scrollContainer = scrollRef.current;
     if (
@@ -139,35 +144,11 @@ export default function ListMessages({
     ) {
       setNotification((current) => current + 1);
     }
-  }
+  };
 
-  //this is for loggedin users
-  useEffect(() => {
-    console.log("for logged in users", conversationId);
-    if((messages.find((conversation) => conversation.conversationId === conversationId) !== undefined)) {
-      const channel = supabase
-        .channel(`${conversationId}`)
-        .on(
-          "postgres_changes",
-          {
-            event: "INSERT",
-            schema: "public",
-            table: "messages",
-          },
-          (payload: { new: MessageDbType }) => 
-            void handlePostgresChange(payload)
-        )
-        .subscribe(status=>console.log(status));
-      return () => {
-        void channel.unsubscribe();
-      };
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-}, [supabase, messages, optimisticIds]);
-
-const handlePostgresChange = async (payload: { new: MessageDbType }) => {
-  console.log("Handling postgres change")
-  if(!optimisticIds.includes(payload.new.id)) {
+  const handlePostgresChange = async (payload: { new: MessageDbType }) => {
+    console.log("Handling postgres change");
+    if (!optimisticIds.includes(payload.new.id)) {
       const newMessage: ChatMessageType = {
         id: payload.new.id,
         conversationId: payload.new.conversation_id,
@@ -180,27 +161,54 @@ const handlePostgresChange = async (payload: { new: MessageDbType }) => {
 
       addMessageToConversation(payload.new.conversation_id, newMessage);
       setConversationToTop(payload.new.conversation_id, newMessage);
-      setOptimisticIds(payload.new.id) 
+      setOptimisticIds(payload.new.id);
     }
-  //   }
-  // }
 
-  const scrollContainer = scrollRef.current;
-  if (
-    scrollContainer.scrollTop <
-    scrollContainer.scrollHeight - scrollContainer.clientHeight - 10
-  ) {
-    setNotification((current) => current + 1);
-  }
-};
-
+    const scrollContainer = scrollRef.current;
+    if (
+      scrollContainer.scrollTop <
+      scrollContainer.scrollHeight - scrollContainer.clientHeight - 10
+    ) {
+      setNotification((current) => current + 1);
+    }
+  };
 
   //this is for logged out users conversations
   useEffect(() => {
-    console.log("in AdminMessages", currentConversationId)
-    if((adminMessages.find((convo) => convo.conversationId === conversationId) !== undefined)) {
+    if (
+      messages.find(
+        (conversation) => conversation.conversationId === currentConversationId,
+      ) !== undefined
+    ) {
       const channel = supabase
-        .channel(`${conversationId}`)
+        .channel(`${currentConversationId}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "messages",
+          },
+          (payload: { new: MessageDbType }) =>
+            void handlePostgresChange(payload),
+        )
+        .subscribe((status) => console.log(status));
+      return () => {
+        void channel.unsubscribe();
+      };
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [supabase, messages, currentConversationId]);
+
+  useEffect(() => {
+    console.log("conversationId found", adminMessages.find((convo) => convo.conversationId === conversationId))
+    if (
+      adminMessages.find(
+        (conversation) => conversation.conversationId === currentConversationId,
+      ) !== undefined
+    ) {
+      const channel = supabase
+        .channel(`${currentConversationId}`)
         .on(
           "postgres_changes",
           {
@@ -211,14 +219,14 @@ const handlePostgresChange = async (payload: { new: MessageDbType }) => {
           (payload: { new: GuestMessageType }) =>
             void handlePostgresChangeOnGuest(payload),
         )
-        .subscribe(status=>console.log(status));
-  
+        .subscribe((status) => console.log(status));
+
       return () => {
         void channel.unsubscribe();
       };
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [supabase, adminMessages, optimisticIds]);
+  }, [supabase, adminMessages, currentConversationId]);
 
   useEffect(() => {
     const scrollContainer = scrollRef.current;
@@ -266,10 +274,11 @@ const handlePostgresChange = async (payload: { new: MessageDbType }) => {
 
   const adminConversationIndex = adminConversationList.findIndex(
     (conversation) => conversation.id === currentConversationId,
-  )
+  );
   const participants = conversationList[conversationIndex]?.participants;
 
-  const guest_participants = adminConversationList[adminConversationIndex]?.guest_participants;
+  const guest_participants =
+    adminConversationList[adminConversationIndex]?.guest_participants;
 
   // console.log(conversationList)
   // console.log(adminConversationList)
@@ -289,11 +298,12 @@ const handlePostgresChange = async (payload: { new: MessageDbType }) => {
 
       const user =
         participants.find(
-          (participant) => isChatMessage(message) && participant.id === message.userId,
+          (participant) =>
+            isChatMessage(message) && participant.id === message.userId,
         ) ?? null;
-        // ) ?? guest_participants?.find(
-        //   (participant) => participant.userToken === message.userToken
-        // ) ?? null; // null means its a deleted user
+      // ) ?? guest_participants?.find(
+      //   (participant) => participant.userToken === message.userToken
+      // ) ?? null; // null means its a deleted user
 
       return { message, user };
     })
@@ -302,23 +312,26 @@ const handlePostgresChange = async (payload: { new: MessageDbType }) => {
   const messageGroups = groupMessages(messagesWithUser);
 
   const messageWithGuest = adminMessages
-  .slice()
-  .reverse()
-  .map((message) => {
-    if(!guest_participants || !session) return null;
+    .slice()
+    .reverse()
+    .map((message) => {
+      if (!guest_participants || !session) return null;
 
-    if(isGuestMessage(message) && message.userToken === session.user.id){
-      return {message, user: session.user};
-    }
+      if (isGuestMessage(message) && message.userToken === session.user.id) {
+        return { message, user: session.user };
+      }
 
-    const user = guest_participants.find(
-      (participant) => isGuestMessage(message) && participant.userToken === message.userToken) 
-      ?? null;
+      const user =
+        guest_participants.find(
+          (participant) =>
+            isGuestMessage(message) &&
+            participant.userToken === message.userToken,
+        ) ?? null;
 
-      return {message, user};
-  })
-  .filter(Boolean);
-  
+      return { message, user };
+    })
+    .filter(Boolean);
+
   const adminMessageGroups = groupMessages(messageWithGuest);
   return (
     <>
@@ -343,6 +356,7 @@ const handlePostgresChange = async (payload: { new: MessageDbType }) => {
             />
           ))}
         </div>
+
         {messages.length === 0 && adminMessages.length === 0 && (
           <div className="flex h-full w-full items-center justify-center">
             <NoMessages />

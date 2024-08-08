@@ -18,8 +18,6 @@ import {
 } from "@/server/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { buffer } from "micro";
-import { sendEmail } from "@/server/server-utils";
-import PostStayEmail from "packages/transactional/emails/PostStayEmail";
 import { type NextApiRequest, type NextApiResponse } from "next";
 import { superhogRequests } from "../../server/db/schema/tables/superhogRequests";
 
@@ -89,19 +87,22 @@ export default async function webhook(
               );
 
             const requestId = paymentIntentSucceeded.metadata.request_id;
+
             if (requestId && !isNaN(parseInt(requestId))) {
               await db
                 .update(requests)
                 .set({ resolvedAt: confirmedDate })
                 .where(eq(requests.id, parseInt(requestId)));
 
+              //lets test with out the propertyID
               const offer = await db.query.offers.findFirst({
-                with: { request: true, property: true },
+                with: { request: true },
                 where: eq(
                   offers.id,
                   parseInt(paymentIntentSucceeded.metadata.offer_id!),
                 ),
               });
+
               //create trip here
               if (offer?.request) {
                 const currentTrip = await db
@@ -118,7 +119,7 @@ export default async function webhook(
                     totalPriceAfterFees: paymentIntentSucceeded.amount,
                   })
                   .returning();
-
+                console.log("Created trip", currentTrip);
                 //superhog reservation
 
                 //creating a superhog reservation only if does not exist

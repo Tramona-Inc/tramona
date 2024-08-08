@@ -14,18 +14,11 @@ export function useMaybeSendUnsentRequests() {
     if (status !== "authenticated") return;
 
     const unsentRequestsJSON = localStorage.getItem("unsentRequests");
-    if(unsentRequestsJSON){
-    const requests: Property[] = JSON.parse(unsentRequestsJSON) as Property[];
-      localStorage.setItem("showCongratsDialog", "true")
-      localStorage.setItem("requestLocation", requests[0]?.location ?? "");
-      localStorage.setItem("showCongratsDialog", "true");
-      void router.push("/requests")
-    }
     if (!unsentRequestsJSON) return;
     localStorage.removeItem("unsentRequests");
 
     const res = requestInsertSchema
-      .omit({ madeByGroupId: true, requestGroupId: true })
+      .omit({ madeByGroupId: true })
       // overwrite checkIn and checkOut because JSON.parse doesnt handle dates
       .extend({ checkIn: z.coerce.date(), checkOut: z.coerce.date() })
       .safeParse(JSON.parse(unsentRequestsJSON));

@@ -7,8 +7,8 @@ import { Button, buttonVariants } from "../ui/button";
 import { Avatar, AvatarFallback } from "@radix-ui/react-avatar";
 
 export type ContentProps = {
-  selectedConversation: Conversation & AdminConversation;
-  setSelected: (arg0: Conversation & AdminConversation | null) => void;
+  selectedConversation: Conversation | AdminConversation;
+  setSelected: (arg0: Conversation | AdminConversation | null) => void;
 };
 
 export default function ChatHeader({
@@ -26,7 +26,7 @@ export default function ChatHeader({
             {<ChevronLeft size="2em" />}
           </Button>
         </div>
-        {!selectedConversation.guest_messages ? 
+        {"messages" in selectedConversation ? 
         <UserAvatar
           email={selectedConversation.participants[0]?.email ?? ""}
           image={selectedConversation.participants[0]?.image ?? ""}
@@ -39,7 +39,7 @@ export default function ChatHeader({
 
         <div className="flex flex-col">
           <p className="text-2xl font-bold">
-            {!selectedConversation.guest_messages ? selectedConversation.participants[0]?.name : selectedConversation.guest_participants[0]?.userToken}
+            {"messages" in selectedConversation ? selectedConversation.participants[0]?.name : selectedConversation.guest_participants[0]?.userToken}
           </p>
           {/* <p className="text-muted-foreground">Active 19m ago</p> */}
         </div>

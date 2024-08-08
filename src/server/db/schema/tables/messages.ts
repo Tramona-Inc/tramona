@@ -26,18 +26,15 @@ export const messages = pgTable(
     conversationId: varchar("conversation_id")
       .notNull()
       .references(() => conversations.id, { onDelete: "cascade" }),
-      userId: text("user_id").references(() => users.id, {
-        onDelete: "set null",
-      }),
+    userId: text("user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
     // userToken: text("user_token")
     // .references(() => conversationParticipants.userToken),
     message: varchar("message", { length: 1500 }).notNull(),
     read: boolean("read").default(false),
     isEdit: boolean("is_edit").default(false),
-    createdAt: timestamp(
-      "created_at",
-      { withTimezone: true, mode: "string" },
-    )
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
       .notNull()
       .defaultNow(),
   },
@@ -50,28 +47,23 @@ export const messages = pgTable(
 export const guestMessages = pgTable(
   "guest_messages",
   {
-    id: varchar("id", {length: 21}).primaryKey().$defaultFn(nanoid),
+    id: varchar("id", { length: 21 }).primaryKey().$defaultFn(nanoid),
     conversationId: varchar("conversation_id")
-    .notNull()
-    .references(() => conversations.id, { onDelete: "cascade" }),
-    userToken: text("user_token")
-    .references(() => conversationGuests.userToken),
+      .notNull()
+      .references(() => conversations.id, { onDelete: "cascade" }),
+    userToken: text("user_token"),
     message: varchar("message", { length: 1500 }).notNull(),
     read: boolean("read").default(false),
     isEdit: boolean("is_edit").default(false),
-    createdAt: timestamp(
-      "created_at",
-      { withTimezone: true, mode: "string" },
-    )
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
       .notNull()
       .defaultNow(),
   },
   (t) => ({
     conversationidIdx: index().on(t.conversationId),
     usertokenIdx: index().on(t.userToken),
-  })
-)
-
+  }),
+);
 
 export const conversationParticipants = pgTable(
   "conversation_participants",
@@ -80,7 +72,8 @@ export const conversationParticipants = pgTable(
       .notNull()
       .references(() => conversations.id, { onDelete: "cascade" }),
     userId: text("user_id")
-      .references(() => users.id, { onDelete: "cascade" }).notNull(),
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
     // userToken: text("user_token").unique(),
   },
   (t) => ({
@@ -93,15 +86,15 @@ export const conversationGuests = pgTable(
   {
     conversationId: varchar("conversation_id")
       .notNull()
-      .references(() => conversations.id, {onDelete: "cascade"}),
+      .references(() => conversations.id, { onDelete: "cascade" }),
 
     userToken: text("user_token").unique().notNull(),
-    adminId:text("admin_id").notNull(),
+    adminId: text("admin_id").notNull(),
   },
   (t) => ({
-    compoundKey: primaryKey({ columns: [t.conversationId, t.userToken]})
-  })
-)
+    compoundKey: primaryKey({ columns: [t.conversationId, t.userToken] }),
+  }),
+);
 
 export type MessageType = typeof messages.$inferSelect;
 export type GuestMessageType = typeof guestMessages.$inferSelect;

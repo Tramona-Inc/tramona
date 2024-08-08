@@ -4,7 +4,7 @@ import { Layout } from "./EmailComponents";
 
 interface BookingModificationEmailProps {
   userName: string;
-  // confirmationNumber: string;
+  confirmationNumber: string;
   property: string;
   previousDates: { from: string; to: string };
   changedDates: { from: string; to: string };
@@ -12,7 +12,7 @@ interface BookingModificationEmailProps {
 
 export default function BookingModificationEmail({
   userName = "User",
-  // confirmationNumber = "ABC123456",
+  confirmationNumber = "ABC123456",
   property = "Property",
   previousDates = { from: "06-01-2024", to: "06-02-2024" },
   changedDates = { from: "06-03-2024", to: "06-04-2024" },

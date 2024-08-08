@@ -74,7 +74,7 @@ export const guestNavLinks = [
 
 export const unloggedNavLinks = [
   { href: "/", name: "Home", icon: HomeIcon },
-  { href: "/link-input", name: "Link Input", icon: LinkIcon },
+  // { href: "/link-input", name: "Link Input", icon: LinkIcon },
   { href: "/exclusive-offers", name: "Recent Deals", icon: HandshakeIcon },
   { href: "/admin-messages", name: "admin-messages", icon: MessageCircleMoreIcon},
   // { href: "/explore", name: "Explore", icon: Search },

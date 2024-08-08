@@ -7,8 +7,6 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { cityRequestSchema } from "./schemas";
 
-// import {CongratsDialog} from './CongratsDialog'
-
 export function useCityRequestForm({
   afterSubmit,
   setMadeByGroupId,
@@ -16,7 +14,6 @@ export function useCityRequestForm({
   afterSubmit?: () => void;
   setMadeByGroupId?: (val: number) => void;
 }) {
-  // const [open, setOpen] = useState(true);
   const form = useZodForm({
     schema: cityRequestSchema,
     defaultValues: { amenities: [] },

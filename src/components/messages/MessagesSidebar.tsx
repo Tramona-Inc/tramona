@@ -1,11 +1,18 @@
-import { type GuestMessageType, type MessageDbType } from "@/types/supabase.message";
+import {
+  type GuestMessageType,
+  type MessageDbType,
+} from "@/types/supabase.message";
 import { api } from "@/utils/api";
 import {
   useConversation,
   type Conversation,
   type AdminConversation,
 } from "@/utils/store/conversations";
-import { type GuestMessage, useMessage, type ChatMessageType } from "@/utils/store/messages";
+import {
+  type GuestMessage,
+  useMessage,
+  type ChatMessageType,
+} from "@/utils/store/messages";
 import supabase from "@/utils/supabase-client";
 
 import { cn } from "@/utils/utils";
@@ -17,17 +24,14 @@ import Spinner from "../_common/Spinner";
 import UserAvatar from "../_common/UserAvatar";
 import { ScrollArea } from "../ui/scroll-area";
 import { SidebarConversation } from "./SidebarConversation";
-import { AdminSidebar } from './AdminSidebar'
-
-
-
+import { AdminSidebar } from "./AdminSidebar";
 
 export function MessageConversation({
   conversation,
   isSelected,
   setSelected,
 }: {
-  conversation: Conversation ;
+  conversation: Conversation;
   isSelected: boolean;
   setSelected: (arg0: Conversation) => void;
 }) {
@@ -100,7 +104,7 @@ export function MessageConversation({
 }
 
 export type SidebarProps = {
-  selectedConversation: Conversation & AdminConversation ;
+  selectedConversation: Conversation | AdminConversation;
   setSelected: (arg0: Conversation | AdminConversation) => void;
 };
 
@@ -114,20 +118,26 @@ export default function MessagesSidebar({
       refetchOnWindowFocus: false,
       // refetchOnMount: false,
     });
-    const{data: adminid} = api.messages.fetchAdminId.useQuery();
-    const participant = fetchedConversations?.find((conversation) => conversation.participants.filter((user) => user.id !== adminid))
-    
-    fetchedConversations?.filter((conversation) => conversation.id !== participant?.id)
-  const {data: fetchedConversationsForAdmin} = api.messages.getConversationForAdmin.useQuery(undefined, {
-    refetchOnWindowFocus: false,
-  });
+  const { data: adminid } = api.messages.fetchAdminId.useQuery();
+  const participant = fetchedConversations?.find((conversation) =>
+    conversation.participants.filter((user) => user.id !== adminid),
+  );
 
-  
+  fetchedConversations?.filter(
+    (conversation) => conversation.id !== participant?.id,
+  );
+  const { data: fetchedConversationsForAdmin } =
+    api.messages.getConversationForAdmin.useQuery(undefined, {
+      refetchOnWindowFocus: false,
+    });
+
   // console.log("fetchedConversationsForAdmin",fetchedConversationsForAdmin)
 
   const conversations = useConversation((state) => state.conversationList);
 
-  const adminConversation = useConversation((state) => state.adminConversationList)
+  const adminConversation = useConversation(
+    (state) => state.adminConversationList,
+  );
 
   const setConversationList = useConversation(
     (state) => state.setConversationList,
@@ -135,15 +145,15 @@ export default function MessagesSidebar({
 
   const setAdminConversationList = useConversation(
     (state) => state.setAdminConversationList,
-  )
+  );
 
   useEffect(() => {
     // Check if data has been fetched and hasn't been processed yet
     if (fetchedConversations) {
       setConversationList(fetchedConversations);
-    if(fetchedConversationsForAdmin){
-      setAdminConversationList(fetchedConversationsForAdmin);
-    }
+      if (fetchedConversationsForAdmin) {
+        setAdminConversationList(fetchedConversationsForAdmin);
+      }
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -157,23 +167,25 @@ export default function MessagesSidebar({
 
   const { data: session } = useSession();
 
-  // Map and listen to all the connects the user is part of
   useEffect(() => {
+    // Map and listen to all the connects the user is part of
     const handlePostgresChange = async (payload: { new: MessageDbType }) => {
-          const newMessage: ChatMessageType = {
-            id: payload.new.id,
-            conversationId: payload.new.conversation_id,
-            userId: payload.new.user_id ?? "",
-            // userToken: "",
-            message: payload.new.message,
-            isEdit: payload.new.is_edit,
-            createdAt: payload.new.created_at,
-            read: payload.new.read,
-          };
-          setConversationToTop(payload.new.conversation_id, newMessage);
-        }
-    
-    const handlePostgresChangeOnGuest = async (payload: { new: GuestMessageType }) => {
+      const newMessage: ChatMessageType = {
+        id: payload.new.id,
+        conversationId: payload.new.conversation_id,
+        userId: payload.new.user_id ?? "",
+        // userToken: "",
+        message: payload.new.message,
+        isEdit: payload.new.is_edit,
+        createdAt: payload.new.created_at,
+        read: payload.new.read,
+      };
+      setConversationToTop(payload.new.conversation_id, newMessage);
+    };
+
+    const handlePostgresChangeOnGuest = async (payload: {
+      new: GuestMessageType;
+    }) => {
       const newMessage: GuestMessage = {
         id: payload.new.id,
         conversationId: payload.new.conversation_id,
@@ -184,12 +196,11 @@ export default function MessagesSidebar({
         read: payload.new.read,
       };
       setConversationToTop(payload.new.conversation_id, newMessage);
-    }
-
+    };
     const fetchConversationIds = async () => {
       if (session) {
         const channels = conversations
-        .filter((conversation) => conversation.id )
+          .filter((conversation) => conversation.id)
           .map((conversation) => conversation.id)
           // When channel is selected turn of here so it can listen in the child
           .filter(
@@ -214,11 +225,10 @@ export default function MessagesSidebar({
         return () => {
           channels.forEach((channel) => void channel.unsubscribe());
         };
-
       }
-      if(adminConversation) {
+      if (adminConversation) {
         const channels = adminConversation
-        .filter((conversation) => conversation.id )
+          .filter((conversation) => conversation.id)
           .map((conversation) => conversation.id)
           // When channel is selected turn of here so it can listen in the child
           .filter(
@@ -239,7 +249,6 @@ export default function MessagesSidebar({
               )
               .subscribe(),
           );
-
         return () => {
           channels.forEach((channel) => void channel.unsubscribe());
         };
@@ -247,14 +256,8 @@ export default function MessagesSidebar({
     };
 
     void fetchConversationIds();
-  }, [
-    conversations,
-    optimisticIds,
-    selectedConversation?.id,
-    session,
-    setConversationToTop,
-    adminConversation,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conversations, adminConversation]);
 
   // console.log("in Messages Sidebar");
 
@@ -266,27 +269,29 @@ export default function MessagesSidebar({
 
       <ScrollArea className="h-full p-2">
         {!isLoading ? (
-          conversations.length > 0 ? session?.user.id !== adminid ? (
-            conversations.filter((conversation) => conversation.id !== participant?.id).map((conversation) => (
-              <SidebarConversation
-                key={conversation.id}
-                conversation={conversation}
-                isSelected={selectedConversation?.id === conversation.id}
-                setSelected={setSelected}
-              />
-            ))
-          ):
-          (
-            conversations.map((conversation) => (
-              <SidebarConversation
-                key={conversation.id}
-                conversation={conversation}
-                isSelected={selectedConversation?.id === conversation.id}
-                setSelected={setSelected}
-              />
-            ))
-          )
-          : (
+          conversations.length > 0 ? (
+            session?.user.id !== adminid ? (
+              conversations
+                .filter((conversation) => conversation.id !== participant?.id)
+                .map((conversation) => (
+                  <SidebarConversation
+                    key={conversation.id}
+                    conversation={conversation}
+                    isSelected={selectedConversation?.id === conversation.id}
+                    setSelected={setSelected}
+                  />
+                ))
+            ) : (
+              conversations.map((conversation) => (
+                <SidebarConversation
+                  key={conversation.id}
+                  conversation={conversation}
+                  isSelected={selectedConversation?.id === conversation.id}
+                  setSelected={setSelected}
+                />
+              ))
+            )
+          ) : (
             <div className="flex h-full flex-col items-center justify-center">
               <MessageEmptySvg />
               <h2 className="text-2xl font-bold">No conversations yet</h2>
@@ -300,19 +305,17 @@ export default function MessagesSidebar({
             <Spinner />
           </div>
         )}
-        {session?.user.role === "admin" && 
-        (adminConversation.length > 0 && (
+        {session?.user.role === "admin" &&
+          adminConversation.length > 0 &&
           adminConversation.map((conversation) => (
-            <AdminSidebar 
-            key={conversation.id}
-            // conversation={conversation}
-            adminConversation={conversation}
-            isSelected = {selectedConversation?.id === conversation.id}
-            setSelected={setSelected}
+            <AdminSidebar
+              key={conversation.id}
+              // conversation={conversation}
+              adminConversation={conversation}
+              isSelected={selectedConversation?.id === conversation.id}
+              setSelected={setSelected}
             />
-          ))
-        ) 
-      )}
+          ))}
       </ScrollArea>
     </div>
   );

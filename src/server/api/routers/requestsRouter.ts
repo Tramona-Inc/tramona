@@ -8,7 +8,6 @@ import { db } from "@/server/db";
 import {
   groupMembers,
   groups,
-  requestGroups,
   requestInsertSchema,
   requestSelectSchema,
   requestUpdatedInfo,
@@ -25,8 +24,7 @@ import { sendSlackMessage } from "@/server/slack";
 import { isIncoming } from "@/utils/formatters";
 import { formatCurrency, formatDateRange, plural } from "@/utils/utils";
 import { TRPCError } from "@trpc/server";
-import { and, count, eq, exists } from "drizzle-orm";
-import { groupBy } from "lodash";
+import { and, eq, exists } from "drizzle-orm";
 import { z } from "zod";
 import type { Session } from "next-auth";
 import {
@@ -44,76 +42,8 @@ const updateRequestInputSchema = z.object({
 });
 
 export const requestsRouter = createTRPCRouter({
-  getMyRequestsPublic: publicProcedure.query(async ({ ctx }) => {
-    const groupedRequests = await ctx.db.query.requests
-      .findMany({
-        where: exists(
-          db
-            .select()
-            .from(groupMembers)
-            .where(
-              and(
-                eq(groupMembers.groupId, requests.madeByGroupId),
-                // eq(groupMembers.userId, ctx.user.id),
-              ),
-            ),
-        ),
-        with: {
-          offers: { columns: { id: true } },
-          requestGroup: true,
-          madeByGroup: {
-            with: {
-              invites: true,
-              members: {
-                with: {
-                  user: {
-                    columns: { name: true, email: true, image: true, id: true },
-                  },
-                },
-              },
-            },
-          },
-        },
-      })
-      // 1. extract offer count & sort
-      .then((requests) =>
-        requests
-          .map(({ offers, ...request }) => ({
-            ...request,
-            numOffers: offers.length,
-          }))
-          .sort(
-            (a, b) =>
-              b.numOffers - a.numOffers ||
-              b.createdAt.getTime() - a.createdAt.getTime(),
-          ),
-      )
-
-      // 2. group by requestGroupId
-      .then((requests) => {
-        const groups = groupBy(requests, (req) => req.requestGroupId);
-        return Object.entries(groups).map(([_, requests]) => ({
-          group: requests[0]!.requestGroup,
-          requests,
-        }));
-      });
-
-    // 3. group by active/inactive (and put partially-active groups on active)
-    const activeRequestGroups = groupedRequests.filter((group) =>
-      group.requests.some((request) => request.resolvedAt === null),
-    );
-
-    const inactiveRequestGroups = groupedRequests.filter(
-      (group) => !activeRequestGroups.includes(group),
-    );
-
-    return {
-      activeRequestGroups,
-      inactiveRequestGroups,
-    };
-  }),
   getMyRequests: protectedProcedure.query(async ({ ctx }) => {
-    const groupedRequests = await ctx.db.query.requests
+    const myRequests = await ctx.db.query.requests
       .findMany({
         where: exists(
           db
@@ -129,7 +59,6 @@ export const requestsRouter = createTRPCRouter({
         with: {
           offers: { columns: { id: true } },
           linkInputProperty: true,
-          requestGroup: true,
           madeByGroup: {
             with: {
               invites: true,
@@ -144,7 +73,7 @@ export const requestsRouter = createTRPCRouter({
           },
         },
       })
-      // 1. extract offer count & sort
+      // extract offer count & sort
       .then((requests) =>
         requests
           .map(({ offers, ...request }) => ({
@@ -156,28 +85,15 @@ export const requestsRouter = createTRPCRouter({
               b.numOffers - a.numOffers ||
               b.createdAt.getTime() - a.createdAt.getTime(),
           ),
-      )
-      // 2. group by requestGroupId
-      .then((requests) => {
-        const groups = groupBy(requests, (req) => req.requestGroupId);
-        return Object.entries(groups).map(([_, requests]) => ({
-          group: requests[0]!.requestGroup,
-          requests,
-        }));
-      });
+      );
 
-    // 3. group by active/inactive (and put partially-active groups on active)
-    const activeRequestGroups = groupedRequests.filter((group) =>
-      group.requests.some((request) => request.resolvedAt === null),
-    );
-
-    const inactiveRequestGroups = groupedRequests.filter(
-      (group) => !activeRequestGroups.includes(group),
-    );
-    console.log("UHHHHH");
     return {
-      activeRequestGroups,
-      inactiveRequestGroups,
+      activeRequests: myRequests.filter(
+        (request) => request.resolvedAt === null,
+      ),
+      inactiveRequests: myRequests.filter(
+        (request) => request.resolvedAt !== null,
+      ),
     };
   }),
 
@@ -187,7 +103,7 @@ export const requestsRouter = createTRPCRouter({
       .findMany({
         with: {
           offers: { columns: { id: true } },
-          requestGroup: true,
+          linkInputProperty: true,
           madeByGroup: {
             with: {
               invites: true,
@@ -227,7 +143,6 @@ export const requestsRouter = createTRPCRouter({
     .input(
       requestInsertSchema.omit({
         madeByGroupId: true,
-        requestGroupId: true,
         latLngPoint: true,
       }),
     )
@@ -240,7 +155,6 @@ export const requestsRouter = createTRPCRouter({
       z.object({
         request: requestInsertSchema.omit({
           madeByGroupId: true,
-          requestGroupId: true,
           latLngPoint: true,
         }),
         property: linkInputPropertyInsertSchema,
@@ -266,28 +180,6 @@ export const requestsRouter = createTRPCRouter({
         .where(eq(requests.id, requestId));
 
       return { madeByGroupId };
-    }),
-
-  updateConfirmation: protectedProcedure
-    .input(z.object({ requestGroupId: z.number() }))
-    .mutation(async ({ ctx, input }) => {
-      await ctx.db
-        .update(requestGroups)
-        .set({ confirmationSentAt: new Date() })
-        .where(eq(requestGroups.id, input.requestGroupId));
-
-      if (ctx.user.isWhatsApp) {
-        await sendWhatsApp({
-          templateId: "HXaf0ed60e004002469e866e535a2dcb45",
-          to: ctx.user.phoneNumber!,
-        });
-      } else {
-        await sendText({
-          to: ctx.user.phoneNumber!,
-          content:
-            "You just submitted a request on Tramona! Reply 'YES' if you're serious about your travel plans and we can send the request to our network of hosts!",
-        });
-      }
     }),
 
   resolve: roleRestrictedProcedure(["admin"])
@@ -358,23 +250,9 @@ export const requestsRouter = createTRPCRouter({
       }
 
       await ctx.db.delete(requests).where(eq(requests.id, input.id));
-
-      const remainingRequests = await ctx.db
-        .select({ count: count() })
-        .from(requests)
-        .where(eq(requests.requestGroupId, input.id))
-        .then((res) => res[0]?.count ?? 0);
-
-      if (remainingRequests === 0) {
-        await ctx.db
-          .delete(requestGroups)
-          .where(eq(requestGroups.id, input.id));
-      }
     }),
 
-  // update request
-  // todo: slack message
-  updateRequest: protectedProcedure
+  update: protectedProcedure
     .input(updateRequestInputSchema)
     .mutation(async ({ ctx, input }) => {
       const { requestId, updatedRequestInfo } = input;
@@ -520,7 +398,6 @@ export const requestsRouter = createTRPCRouter({
 //Reusable functions
 const modifiedRequestSchema = requestInsertSchema.omit({
   madeByGroupId: true,
-  requestGroupId: true,
   latLngPoint: true,
 });
 
@@ -533,11 +410,6 @@ export async function handleRequestSubmission(
 ) {
   // Begin a transaction
   const transactionResults = await db.transaction(async (tx) => {
-    const requestGroupId = await tx
-      .insert(requestGroups)
-      .values({ createdByUserId: user.id })
-      .returning()
-      .then((res) => res[0]!.id);
     const madeByGroupId = await tx
       .insert(groups)
       .values({ ownerId: user.id })
@@ -550,11 +422,7 @@ export async function handleRequestSubmission(
 
     const { requestId } = await tx
       .insert(requests)
-      .values({
-        ...input,
-        madeByGroupId,
-        requestGroupId,
-      })
+      .values({ ...input, madeByGroupId })
       .returning({ requestId: requests.id })
       .then((res) => res[0]!);
 
@@ -579,13 +447,15 @@ export async function handleRequestSubmission(
   const fmtdDateRange = formatDateRange(input.checkIn, input.checkOut);
   const fmtdNumGuests = plural(input.numGuests ?? 1, "guest");
 
-  sendSlackMessage(
-    [
-      `*${name} just made a request: ${input.location}*`,
-      `requested ${fmtdPrice}/night · ${fmtdDateRange} · ${fmtdNumGuests}`,
-      `<https://tramona.com/admin|Go to admin dashboard>`,
-    ].join("\n"),
-  );
+  if (user.role !== "admin") {
+    sendSlackMessage(
+      [
+        `*${name} just made a request: ${input.location}*`,
+        `requested ${fmtdPrice}/night · ${fmtdDateRange} · ${fmtdNumGuests}`,
+        `<https://tramona.com/admin|Go to admin dashboard>`,
+      ].join("\n"),
+    );
+  }
 
   return transactionResults;
 }
