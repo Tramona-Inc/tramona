@@ -5,9 +5,14 @@ import {
   BadgeXIcon,
   Clock2Icon,
   Edit,
+  Ellipsis,
   Facebook,
   InfoIcon,
   Instagram,
+  Mail,
+  MessageCircle,
+  MessageCircleMore,
+  MessagesSquare,
   Twitter,
   Youtube,
 } from "lucide-react";
@@ -18,6 +23,7 @@ import IdentityModal from "../_utils/IdentityModal";
 import { VerificationProvider } from "../_utils/VerificationContext";
 import { Button } from "../ui/button";
 import EditProfileDialog from "./EditProfileDialog";
+import { useMemo, useState } from "react";
 
 export default function ProfilePage() {
   const { data: session } = useSession({ required: true });
