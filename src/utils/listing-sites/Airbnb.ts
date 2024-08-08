@@ -1,7 +1,7 @@
 import { type ListingSite } from ".";
 import { formatDateYearMonthDay } from "../utils";
 import * as cheerio from "cheerio";
-
+import HttpsProxyAgent from 'https-proxy-agent';
 export const Airbnb: ListingSite<"Airbnb"> = {
   siteName: "Airbnb",
   baseUrl: "https://www.airbnb.com",
@@ -80,8 +80,11 @@ export const Airbnb: ListingSite<"Airbnb"> = {
 
         console.log("checkoutUrl:", checkoutUrl);
 
+        const proxyAgent = new HttpsProxyAgent('http://us-ca.proxymesh.com:31280'); // Replace with your proxy URL
+
         const jsonStr = await fetch(checkoutUrl, {
           headers: airbnbRequestHeaders,
+          agent: proxyAgent
         })
           .then((res) => {
             console.log("the first then:",{ res });
