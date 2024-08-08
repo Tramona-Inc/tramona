@@ -77,7 +77,7 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
                 <DialogContent className="max-w-3xl p-8">
                   <DialogHeader>
                     <DialogTitle className="mb-4 text-2xl font-bold">
-                      How to Sync Your Property's iCal
+                      How to Sync Your Property&apos;s iCal
                     </DialogTitle>
                   </DialogHeader>
                   <div className="space-y-6">
@@ -87,15 +87,19 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
                       </h3>
                       <ol className="list-inside list-decimal space-y-1">
                         <li>Log in to your Airbnb account</li>
-                        <li>Go to "Manage Listings" from your profile menu</li>
-                        <li>Click on the "Calendar" tab</li>
+                        <li>
+                          Go to &quot;Manage Listings&quot; from your profile
+                          menu
+                        </li>
+                        <li>Click on the &quot;Calendar&quot; tab</li>
                         <li>Select the property you want to sync</li>
                         <li>
-                          On the right-hand side, navigate to "Availability"
+                          On the right-hand side, navigate to
+                          &quot;Availability&quot;
                         </li>
                         <li>
-                          Scroll to "Connect to another website" and copy the
-                          iCal link
+                          Scroll to &quot;Connect to another website&quot; and
+                          copy the iCal link
                         </li>
                       </ol>
                     </section>
@@ -106,13 +110,15 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
                       </h3>
                       <ol className="list-inside list-decimal space-y-1">
                         <li>Log in to your host account on our website</li>
-                        <li>Find "Properties" on the left-hand side</li>
+                        <li>
+                          Find &quot;Properties&quot; on the left-hand side
+                        </li>
                         <li>
                           Navigate to your listing corresponding to the copied
                           iCal
                         </li>
                         <li>Paste the Airbnb iCal link</li>
-                        <li>Click "Sync"</li>
+                        <li>Click &quot;Sync&quot;</li>
                       </ol>
                     </section>
 
@@ -123,8 +129,8 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
                       <ul className="list-inside list-disc space-y-1">
                         <li>Wait a few minutes for synchronization</li>
                         <li>
-                          Check that Airbnb bookings appear on our platform's
-                          calendar
+                          Check that Airbnb bookings appear on our
+                          platform&apos;s calendar
                         </li>
                       </ul>
                     </section>
@@ -173,7 +179,7 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
                 <DialogContent className="max-w-3xl p-8">
                   <DialogHeader>
                     <DialogTitle className="mb-4 text-2xl font-bold">
-                      How to Sync Your Property's iCal
+                      How to Sync Your Property&apos;s iCal
                     </DialogTitle>
                   </DialogHeader>
                   <div className="space-y-6">
@@ -183,15 +189,19 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
                       </h3>
                       <ol className="list-inside list-decimal space-y-1">
                         <li>Log in to your Airbnb account</li>
-                        <li>Go to "Manage Listings" from your profile menu</li>
-                        <li>Click on the "Calendar" tab</li>
+                        <li>
+                          Go to &quot;Manage Listings&quot; from your profile
+                          menu
+                        </li>
+                        <li>Click on the &quot;Calendar&quot; tab</li>
                         <li>Select the property you want to sync</li>
                         <li>
-                          On the right-hand side, navigate to "Availability"
+                          On the right-hand side, navigate to
+                          &quot;Availability&quot;
                         </li>
                         <li>
-                          Scroll to "Connect to another website" and copy the
-                          iCal link
+                          Scroll to &quot;Connect to another website&quot; and
+                          copy the iCal link
                         </li>
                       </ol>
                     </section>
@@ -202,13 +212,15 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
                       </h3>
                       <ol className="list-inside list-decimal space-y-1">
                         <li>Log in to your host account on our website</li>
-                        <li>Find "Properties" on the left-hand side</li>
+                        <li>
+                          Find &quot;Properties&quot; on the left-hand side
+                        </li>
                         <li>
                           Navigate to your listing corresponding to the copied
                           iCal
                         </li>
                         <li>Paste the Airbnb iCal link</li>
-                        <li>Click "Sync"</li>
+                        <li>Click &quot;Sync&quot;</li>
                       </ol>
                     </section>
 
@@ -219,8 +231,8 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
                       <ul className="list-inside list-disc space-y-1">
                         <li>Wait a few minutes for synchronization</li>
                         <li>
-                          Check that Airbnb bookings appear on our platform's
-                          calendar
+                          Check that Airbnb bookings appear on our
+                          platform&apos;s calendar
                         </li>
                       </ul>
                     </section>
