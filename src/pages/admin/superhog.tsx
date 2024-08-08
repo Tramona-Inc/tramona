@@ -2,7 +2,6 @@
 
 import CreateSuperhog from "@/components/admin/superhog/CreateSuperhog";
 import EditSuperhogForm from "@/components/admin/superhog/EditSuperhogForm";
-import Dashboard from "../feed";
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import Head from "next/head";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -16,7 +15,7 @@ export default function Page() {
         <title>Superhog verification form | Tramona</title>
       </Head>
       <div className="flex w-full items-center justify-center">
-        <Tabs defaultValue="Create Verification" className=" w-[800px]">
+        <Tabs defaultValue="Create Verification" className="w-[800px]">
           <TabsList className="">
             <TabsTrigger value="Create Verification">
               Create Verification
