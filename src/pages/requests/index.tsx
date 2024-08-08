@@ -4,7 +4,7 @@ import { useMaybeSendUnsentRequests } from "@/utils/useMaybeSendUnsentRequests";
 import { HistoryIcon, MapPinIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import ActiveRequestsTab from "../../components/requests/CityRequestsTab";
-import PastRequestsTab from "../../components/requests/PastRequestsAndOffersTab";
+import PastRequestsTab from "../../components/requests/PastRequestsTab";
 import { NextSeo } from "next-seo";
 
 function RequestsTabs() {
