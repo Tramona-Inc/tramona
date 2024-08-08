@@ -45,7 +45,7 @@ export default function SuperhogForm() {
       echoToken: uuidv4(),
     },
     listing: {
-      listingId: "0",
+      listingId: "31",
       listingName: "Padron retreat house",
       address: {
         addressLine1: "Peper street number 32",
@@ -57,7 +57,7 @@ export default function SuperhogForm() {
       petsAllowed: "True",
     },
     reservation: {
-      reservationId: "02389sdfax2547a",
+      reservationId: "42",
       checkIn: formatDateYearMonthDay(addDays(new Date(), 1)).toString(),
       checkOut: formatDateYearMonthDay(addDays(new Date(), 2)).toString(),
       channel: "Tramona",

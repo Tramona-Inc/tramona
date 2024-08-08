@@ -19,6 +19,8 @@ import type { Trip } from "@/server/db/schema/tables/trips";
 import { formatDateYearMonthDay } from "@/utils/utils";
 import { getCountryISO, getPostcode } from "@/server/google-maps";
 import { sendSlackMessage } from "@/server/slack";
+
+import { stripe } from "@/server/api/routers/stripeRouter";
 export interface ReservationInterface {
   id: number;
   checkIn: string;
@@ -87,12 +89,12 @@ type ResponseType = {
 //   //check to see if the reservation has already been created by checking the trips table since this will becalled on everyupdate
 
 export async function createSuperhogReservation({
-  listingId,
+  paymentIntentId,
   propertyId,
   userId,
   trip,
 }: {
-  listingId: number;
+  paymentIntentId: string;
   propertyId: number;
   userId: string;
   trip: Trip;
@@ -209,6 +211,16 @@ export async function createSuperhogReservation({
           `*SUPERHOG REQUEST*: The verification was created successfully but was denied with status of ${verification.status} for tripID ${trip.id} for ${user.name}`,
         ].join("\n"),
       );
+    } else {
+      console.log("Superhog was approved and just need to capture the payment");
+      //approved we can take the payment
+      const intent = await stripe.paymentIntents.capture(paymentIntentId); //will capture the authorized amount by default
+      // Update trips table
+      await db
+        .update(trips)
+        .set({ paymentCaptured: true })
+        .where(eq(trips.id, trip.id));
+      return intent;
     }
   }
   //top level if statement
@@ -292,7 +304,7 @@ export const superhogRouter = createTRPCRouter({
             `SUPERHOG REQUEST ERROR: there was no verification for ${input.metadata.echoToken}`,
           ].join("\n"),
         );
-        throw new TRPCError({ code: "NOT_FOUND" });
+        throw new Error("There was no verification");
       }
 
       const superhogRequestId = await db
@@ -303,23 +315,42 @@ export const superhogRouter = createTRPCRouter({
           superhogVerificationId: verification.verificationId,
           superhogReservationId: input.reservation.reservationId, //this is actually the trip id
           userId: ctx.user.id, //since we dont have access to the user id
-          propertyId: 5000, //since we dont have access to the property id THIS FUNCTION IS JUST SO WE CAN GET CERTIFIED
+          propertyId: parseInt(input.listing.listingId), //since we dont have access to the property id THIS FUNCTION IS JUST SO WE CAN GET CERTIFIED
         })
         .returning({ id: superhogRequests.id });
-
       //update the trip with the superhog request id
       //check if trip even exists if it doesnt return an error
       const tripExists = await db.query.trips.findFirst({
-        where: eq(trips.id, parseInt(input.listing.listingId)),
+        where: eq(trips.id, parseInt(input.reservation.reservationId)),
       });
+
       if (tripExists) {
         await db
           .update(trips)
           .set({
             superhogRequestId: superhogRequestId[0]!.id,
           })
-          .where(eq(trips.id, parseInt(input.listing.listingId)));
+          .where(eq(trips.id, parseInt(input.reservation.reservationId)));
+        //super temp for testing
+        sendSlackMessage(
+          [
+            `SUPERHOG REQUEST SUCCESS: TRIP ID  ${input.reservation.reservationId} was created successfully for property ${input.listing.listingName}`,
+          ].join("\n"),
+        );
       } else {
+        await db.insert(superhogErrors).values({
+          echoToken: input.metadata.echoToken,
+          error: "The trip does not exist",
+          propertiesId: parseInt(input.listing.listingId), //only for testing
+          userId: null, //only for testing
+          tripId: null,
+          action: "create",
+        });
+        sendSlackMessage(
+          [
+            `SUPERHOG REQUEST ERROR: TRIP ID  ${input.reservation.reservationId} does not exist for ${input.listing.listingName}`,
+          ].join("\n"),
+        );
         throw new Error("The trip does not exist");
       }
     }),

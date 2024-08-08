@@ -15,6 +15,8 @@ import { Button } from "../ui/button";
 import { errorToast } from "@/utils/toasts";
 import { useToast } from "@/components/ui/use-toast";
 import { formatPhoneNumberWithParentheses } from "@/utils/formatters";
+import { PlusIcon } from "lucide-react";
+import { on } from "events";
 
 const formSchema = z.object({
   emergencyEmail: z.string().email(),
@@ -59,45 +61,44 @@ export default function ContactInfoForm() {
   }
 
   return (
-    <div className="flex flex-col gap-y-4">
+    <div className="flex flex-col gap-y-1">
       <h3 className="text-lg font-semibold">Contact Information</h3>
       <p className="text-sm text-muted-foreground">
         We encourage every traveler to have the travel details in case of
         emergencies.
       </p>
 
-      <div className="grid gap-4">
-        {emergencyContacts?.map((contact) => (
-          <div
-            key={contact.id}
-            className="flex rounded-lg border border-muted px-4 pb-2 pt-3"
-          >
-            <div className="flex flex-1 flex-row justify-between">
-              <div className="mr-4 flex flex-col">
-                <span className="text-xs font-bold">Email:</span>
-                <span>{contact.emergencyEmail}</span>
+      {emergencyContacts && emergencyContacts.length > 0 && (
+        <div className="grid gap-4 rounded-lg border border-zinc-200 bg-zinc-50 py-1">
+          {emergencyContacts.map((contact) => (
+            <div key={contact.id} className="flex rounded-lg px-4 pb-1 pt-1">
+              <div className="flex flex-1 flex-row justify-between">
+                <div className="mr-4 flex flex-col">
+                  <span className="text-xs font-semibold">Email:</span>
+                  <span>{contact.emergencyEmail}</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xs font-semibold">Phone:</span>
+                  <span>
+                    {formatPhoneNumberWithParentheses(contact.emergencyPhone)}
+                  </span>
+                </div>
               </div>
-              <div className="flex flex-col">
-                <span className="text-xs font-bold">Phone:</span>
-                <span>
-                  {formatPhoneNumberWithParentheses(contact.emergencyPhone)}
-                </span>
-              </div>
+              <Button
+                onClick={() => deleteEmergencyContact({ id: contact.id })}
+                variant="link"
+                className="ml-4 mt-2 text-destructive"
+              >
+                Remove
+              </Button>
             </div>
-            <Button
-              onClick={() => deleteEmergencyContact({ id: contact.id })}
-              variant="link"
-              className="ml-4 mt-2 text-destructive"
-            >
-              Remove
-            </Button>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="">
-          <div className="flex items-end gap-x-2">
+          <div className="flex flex-col items-end gap-y-2">
             <FormField
               name="emergencyEmail"
               control={form.control}
@@ -125,12 +126,13 @@ export default function ContactInfoForm() {
               )}
             />
             <Button
-              type="submit"
-              variant="greenPrimary"
+              onClick={() => form.handleSubmit(onSubmit)()}
+              variant="ghost"
               disabled={form.formState.isSubmitting}
-              className="mb-1"
+              className="mb-1 text-teal-900"
             >
               Add
+              <PlusIcon size={16} className="ml-1" />
             </Button>
           </div>
         </form>

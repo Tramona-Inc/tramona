@@ -309,7 +309,7 @@ function SmallHeader(props: HeaderProps) {
             <AvatarDropdown session={session} size="sm" />
             <HamburgerMenu
               links={
-                pathname.includes("/host")
+                pathname && pathname.includes("/host")
                   ? hamburgerLinksHostMobileToTraveler
                   : hamburgerLinksHostMobileToHost
               }

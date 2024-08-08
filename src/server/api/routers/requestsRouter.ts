@@ -157,7 +157,6 @@ export const requestsRouter = createTRPCRouter({
               b.createdAt.getTime() - a.createdAt.getTime(),
           ),
       )
-
       // 2. group by requestGroupId
       .then((requests) => {
         const groups = groupBy(requests, (req) => req.requestGroupId);
@@ -175,7 +174,7 @@ export const requestsRouter = createTRPCRouter({
     const inactiveRequestGroups = groupedRequests.filter(
       (group) => !activeRequestGroups.includes(group),
     );
-
+    console.log("UHHHHH");
     return {
       activeRequestGroups,
       inactiveRequestGroups,

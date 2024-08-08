@@ -35,7 +35,6 @@ export default async function webhook(
   if (req.method === "POST") {
     const buf = await buffer(req);
     const sig = req.headers["stripe-signature"] as string;
-    console.log("atleast we got a request");
     let event;
 
     try {
@@ -57,12 +56,15 @@ export default async function webhook(
 
     // * You can add other event types to catch
     switch (event.type) {
-      case "payment_intent.succeeded":
+      case "charge.succeeded": //use to be payment_intent.succeeded
         const paymentIntentSucceeded = event.data.object;
-        const offerId =
-          paymentIntentSucceeded.metadata.listing_id === undefined
-            ? undefined
-            : parseInt(paymentIntentSucceeded.metadata.listing_id);
+        paymentIntentSucceeded.metadata.offer_id === undefined
+          ? undefined
+          : parseInt(paymentIntentSucceeded.metadata.offer_id);
+
+        const user = await db.query.users.findFirst({
+          where: eq(users.id, paymentIntentSucceeded.metadata.user_id!),
+        });
 
         if (!paymentIntentSucceeded.metadata.bid_id) {
           const confirmedAt = paymentIntentSucceeded.metadata.confirmed_at;
@@ -80,23 +82,9 @@ export default async function webhook(
               .where(
                 eq(
                   offers.id,
-                  parseInt(paymentIntentSucceeded.metadata.listing_id!),
+                  parseInt(paymentIntentSucceeded.metadata.offer_id!),
                 ),
               );
-
-            // await db
-            //   .update(trips)
-            //   .set({
-            //     paymentIntentId: paymentIntentSucceeded.id,
-            //     checkoutSessionId:
-            //       paymentIntentSucceeded.metadata.checkout_session_id,
-            //   })
-            //   .where(
-            //     eq(
-            //       trips.offerId,
-            //       parseInt(paymentIntentSucceeded.metadata.listing_id!),
-            //     ),
-            //   ); // setting the paymentIntentId in the trips table
 
             const requestId = paymentIntentSucceeded.metadata.request_id;
             if (requestId && !isNaN(parseInt(requestId))) {
@@ -105,148 +93,168 @@ export default async function webhook(
                 .set({ resolvedAt: confirmedDate })
                 .where(eq(requests.id, parseInt(requestId)));
 
-              if (offerId) {
-                const offer = await db.query.offers.findFirst({
-                  with: { request: true, property: true, },
-                  where: eq(offers.id, offerId),
-                });
-
-                if (offer?.request) {
-                  await db.insert(trips).values({
+              const offer = await db.query.offers.findFirst({
+                with: { request: true, property: true },
+                where: eq(
+                  offers.id,
+                  parseInt(paymentIntentSucceeded.metadata.offer_id!),
+                ),
+              });
+              //create trip here
+              if (offer?.request) {
+                const currentTrip = await db
+                  .insert(trips)
+                  .values({
                     checkIn: offer.checkIn,
                     checkOut: offer.checkOut,
                     numGuests: offer.request.numGuests,
                     groupId: offer.request.madeByGroupId,
                     propertyId: offer.propertyId,
                     offerId: offer.id,
+                    paymentIntentId:
+                      paymentIntentSucceeded.payment_intent?.toString() ?? "",
+                    totalPriceAfterFees: paymentIntentSucceeded.amount,
+                  })
+                  .returning();
+
+                //superhog reservation
+
+                //creating a superhog reservation only if does not exist
+                const currentSuperhogReservation =
+                  await db.query.trips.findFirst({
+                    where: eq(trips.superhogRequestId, superhogRequests.id),
                   });
+                if (!currentSuperhogReservation) {
+                  void createSuperhogReservation({
+                    paymentIntentId:
+                      paymentIntentSucceeded.payment_intent?.toString() ?? "",
+                    propertyId: offer.propertyId,
+                    userId: user!.id,
+                    trip: currentTrip[0]!,
+                  }); //creating a superhog reservation
+                } else {
+                  console.log("Superhog reservation already exists");
                 }
               }
             }
-          } else {
-            // Handle case where confirmed_at is missing or invalid
-            console.error("Confirmed_at is missing or invalid.");
           }
+        } else {
+          // Handle case where confirmed_at is missing or invalid
+          console.error("Confirmed_at is missing or invalid.");
+        }
 
-          const user = await db.query.users.findFirst({
-            where: eq(users.id, paymentIntentSucceeded.metadata.user_id!),
-          });
+        // const propertyID = parseInt(
+        //   paymentIntentSucceeded.metadata.property_id!,
+        //   10,
+        // );
+        // const requestID = parseInt(
+        //   paymentIntentSucceeded.metadata.request_id!,
+        // );
+        // const property = await ({
+        //   where: eq(properties.id, propertyID),
+        // });
+        // const request = await db.query.requests.findFirst({
+        //   where: eq(requests.id, requestID),
+        // });
+        // const offer = await db.query.offers.findFirst({
+        //   where: eq(offers.requestId, requestID),
+        // });
 
-          // const propertyID = parseInt(
-          //   paymentIntentSucceeded.metadata.property_id!,
-          //   10,
-          // );
-          // const requestID = parseInt(
-          //   paymentIntentSucceeded.metadata.request_id!,
-          // );
-          // const property = await ({
-          //   where: eq(properties.id, propertyID),
-          // });
-          // const request = await db.query.requests.findFirst({
-          //   where: eq(requests.id, requestID),
-          // });
-          // const offer = await db.query.offers.findFirst({
-          //   where: eq(offers.requestId, requestID),
-          // });
+        // const bidID = parseInt(paymentIntentSucceeded.metadata.bid_id!);
+        // const bid = await db.query.bids.findFirst({
+        //   where: eq(bids.id, bidID),
+        // });
 
-          // const bidID = parseInt(paymentIntentSucceeded.metadata.bid_id!);
-          // const bid = await db.query.bids.findFirst({
-          //   where: eq(bids.id, bidID),
-          // });
+        //send BookingConfirmationEmail
+        //Send user confirmation email
+        //getting num of nights
+        // const checkInDate = request?.checkIn ?? new Date(); // Use current date as default
+        // const checkOutDate = request?.checkOut ?? new Date(); // Use current date as default
+        // const numOfNights = getNumNights(checkInDate, checkOutDate);
+        // const originalPrice = property?.originalNightlyPrice ?? 0 * numOfNights;
+        // const savings =
+        //   (property?.originalNightlyPrice ?? 0) - (offer?.totalPrice ?? 0);
+        // const tramonaServiceFee = getTramonaFeeTotal(savings);
+        // const offerIdString = await sendEmail({
+        //   to: user!.email,
+        //   subject: `Tramona Booking Confirmation ${property?.name}`,
+        //   content: BookingConfirmationEmail({
+        //     userName: user?.name ?? "",
+        //     placeName: property?.name ?? "",
+        //     hostName: property?.hostName ?? "",
+        //     hostImageUrl: "https://via.placeholder.com/150",
+        //     startDate: formatDate(request!.checkIn, "MM/dd/yyyy") ?? "",
+        //     endDate: formatDate(request!.checkOut, "MM/dd/yyyy") ?? "",
+        //     address: property!.address ?? "",
+        //     propertyImageLink: property!.imageUrls?.[0] ?? "",
+        //     tripDetailLink: `https://www.tramona.com/offers/${offers.id.name}`,
+        //     originalPrice: originalPrice,
+        //     tramonaPrice: offer?.totalPrice ?? 0,
+        //     offerLink: `https://www.tramona.com/offers/${offer?.id.toString()}`,
+        //     numOfNights: numOfNights,
+        //     tramonaServiceFee: tramonaServiceFee ?? 0,
+        //   }),
+        // });
+        // const twilioMutation = api.twilio.sendSMS.useMutation();
+        // const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
 
-          //send BookingConfirmationEmail
-          //Send user confirmation email
-          //getting num of nights
-          // const checkInDate = request?.checkIn ?? new Date(); // Use current date as default
-          // const checkOutDate = request?.checkOut ?? new Date(); // Use current date as default
-          // const numOfNights = getNumNights(checkInDate, checkOutDate);
-          // const originalPrice = property?.originalNightlyPrice ?? 0 * numOfNights;
-          // const savings =
-          //   (property?.originalNightlyPrice ?? 0) - (offer?.totalPrice ?? 0);
-          // const tramonaServiceFee = getTramonaFeeTotal(savings);
-          // const offerIdString = await sendEmail({
-          //   to: user!.email,
-          //   subject: `Tramona Booking Confirmation ${property?.name}`,
-          //   content: BookingConfirmationEmail({
-          //     userName: user?.name ?? "",
-          //     placeName: property?.name ?? "",
-          //     hostName: property?.hostName ?? "",
-          //     hostImageUrl: "https://via.placeholder.com/150",
-          //     startDate: formatDate(request!.checkIn, "MM/dd/yyyy") ?? "",
-          //     endDate: formatDate(request!.checkOut, "MM/dd/yyyy") ?? "",
-          //     address: property!.address ?? "",
-          //     propertyImageLink: property!.imageUrls?.[0] ?? "",
-          //     tripDetailLink: `https://www.tramona.com/offers/${offers.id.name}`,
-          //     originalPrice: originalPrice,
-          //     tramonaPrice: offer?.totalPrice ?? 0,
-          //     offerLink: `https://www.tramona.com/offers/${offer?.id.toString()}`,
-          //     numOfNights: numOfNights,
-          //     tramonaServiceFee: tramonaServiceFee ?? 0,
-          //   }),
-          // });
-          // const twilioMutation = api.twilio.sendSMS.useMutation();
-          // const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
+        // if (user?.isWhatsApp) {
+        //   await twilioWhatsAppMutation.mutateAsync({
+        //     templateId: "HXb0989d91e9e67396e9a508519e19a46c",
+        //     to: paymentIntentSucceeded.metadata.phoneNumber!,
+        //   });
+        // } else {
+        //   await twilioMutation.mutateAsync({
+        //     to: paymentIntentSucceeded.metadata.phoneNumber!,
+        //     msg: "Your Tramona booking is confirmed! Please see the My Trips page to access your trip information!",
+        //   });
+        // }
 
-          // if (user?.isWhatsApp) {
-          //   await twilioWhatsAppMutation.mutateAsync({
-          //     templateId: "HXb0989d91e9e67396e9a508519e19a46c",
-          //     to: paymentIntentSucceeded.metadata.phoneNumber!,
-          //   });
-          // } else {
-          //   await twilioMutation.mutateAsync({
-          //     to: paymentIntentSucceeded.metadata.phoneNumber!,
-          //     msg: "Your Tramona booking is confirmed! Please see the My Trips page to access your trip information!",
-          //   });
-          // }
+        // console.log("PaymentIntent was successful!");
 
-          // console.log("PaymentIntent was successful!");
+        const referralCode = user?.referralCodeUsed;
 
-          const referralCode = user?.referralCodeUsed;
+        if (referralCode) {
+          const offerId = parseInt(paymentIntentSucceeded.metadata.listing_id!);
+          const refereeId = paymentIntentSucceeded.metadata.user_id!;
 
-          if (referralCode) {
-            const offerId = parseInt(
-              paymentIntentSucceeded.metadata.listing_id!,
-            );
-            const refereeId = paymentIntentSucceeded.metadata.user_id!;
+          const tramonaFee =
+            parseInt(paymentIntentSucceeded.metadata.total_savings!) * 0.2;
+          const cashbackMultiplier =
+            user.referralTier === "Ambassador" ? 0.5 : 0.3;
+          const cashbackEarned = tramonaFee * cashbackMultiplier;
 
-            const tramonaFee =
-              parseInt(paymentIntentSucceeded.metadata.total_savings!) * 0.2;
-            const cashbackMultiplier =
-              user.referralTier === "Ambassador" ? 0.5 : 0.3;
-            const cashbackEarned = tramonaFee * cashbackMultiplier;
+          await db
+            .insert(referralEarnings)
+            .values({ offerId, cashbackEarned, refereeId, referralCode });
 
-            await db
-              .insert(referralEarnings)
-              .values({ offerId, cashbackEarned, refereeId, referralCode });
+          await db
+            .update(referralCodes)
+            .set({
+              totalBookingVolume: sql`${referralCodes.totalBookingVolume} + ${cashbackEarned}`,
+              numBookingsUsingCode: sql`${referralCodes.numBookingsUsingCode} + ${1}`,
+            })
+            .where(eq(referralCodes.referralCode, referralCode));
+        }
 
-            await db
-              .update(referralCodes)
-              .set({
-                totalBookingVolume: sql`${referralCodes.totalBookingVolume} + ${cashbackEarned}`,
-                numBookingsUsingCode: sql`${referralCodes.numBookingsUsingCode} + ${1}`,
-              })
-              .where(eq(referralCodes.referralCode, referralCode));
-          }
+        // TODO
+        // Add two two users to conversation
+        // void addTwoUserToConversation(
+        //   paymentIntentSucceeded.metadata.user_id!,
+        //   paymentIntentSucceeded.metadata.host_id!,
+        // );
 
-          // TODO
-          // Add two two users to conversation
-          // void addTwoUserToConversation(
-          //   paymentIntentSucceeded.metadata.user_id!,
-          //   paymentIntentSucceeded.metadata.host_id!,
-          // );
+        // ! For now will add user to admin
+        if (paymentIntentSucceeded.metadata.user_id) {
+          const conversationId = await fetchConversationWithAdmin(
+            paymentIntentSucceeded.metadata.user_id,
+          );
 
-          // ! For now will add user to admin
-          if (paymentIntentSucceeded.metadata.user_id) {
-            const conversationId = await fetchConversationWithAdmin(
+          // Create conversation with admin if it doesn't exist
+          if (!conversationId) {
+            await createConversationWithAdmin(
               paymentIntentSucceeded.metadata.user_id,
             );
-
-            // Create conversation with admin if it doesn't exist
-            if (!conversationId) {
-              await createConversationWithAdmin(
-                paymentIntentSucceeded.metadata.user_id,
-              );
-            }
           }
         }
 
@@ -270,6 +278,7 @@ export default async function webhook(
         } else {
           // console.error("Metadata or listing_id is null or undefined");
         }
+
         break;
       case "charge.updated":
         {
@@ -294,7 +303,6 @@ export default async function webhook(
             ),
           });
           //extract metadata from the charge object
-          const listingId = parseInt(chargeObject.metadata.listing_id!);
           const propertyId = parseInt(chargeObject.metadata.property_id!);
           const userId = chargeObject.metadata.user_id!;
 
@@ -304,7 +312,7 @@ export default async function webhook(
           });
           if (!currentSuperhogReservation && trip) {
             void createSuperhogReservation({
-              listingId,
+              paymentIntentId: chargeObject.payment_intent?.toString() ?? "",
               propertyId,
               userId,
               trip,
