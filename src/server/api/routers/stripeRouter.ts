@@ -261,7 +261,7 @@ export const stripeRouter = createTRPCRouter({
     }),
 
   // Get the customer info
-  authorizePayment: protectedProcedure //this is how will now creat a checkout session using a custom flow
+  authorizePayment: protectedProcedure // this is how will now creat a checkout session using a custom flow
     .input(
       z.object({
         offerId: z.number(),

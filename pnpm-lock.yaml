@@ -251,6 +251,9 @@ importers:
       html2canvas:
         specifier: ^1.4.1
         version: 1.4.1
+      https-proxy-agent:
+        specifier: ^7.0.5
+        version: 7.0.5
       ical:
         specifier: ^0.8.0
         version: 0.8.0
@@ -296,6 +299,9 @@ importers:
       ngrok:
         specifier: 5.0.0-beta.2
         version: 5.0.0-beta.2
+      node-fetch:
+        specifier: ^3.3.2
+        version: 3.3.2
       node-ical:
         specifier: ^0.18.0
         version: 0.18.0
