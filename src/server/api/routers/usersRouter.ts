@@ -109,19 +109,6 @@ export const usersRouter = createTRPCRouter({
       return updatedUser;
     }),
 
-    insertAvatar: publicProcedure
-    .input(z.object({
-      userId: z.string(),
-      avatar: z.string(),
-    }))
-    .mutation(async ({ctx, input}) => {
-      await ctx.db
-      .update(users)
-      .set({avatar: input.avatar})
-      .where(eq(users.id, input.userId))
-      .returning()
-    }),
-
   createUrlToBeHost: protectedProcedure
     .input(
       z.object({

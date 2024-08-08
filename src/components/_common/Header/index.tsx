@@ -1,15 +1,14 @@
 import {
   BadgeHelp,
   BadgeInfo,
-  DoorOpen,
   Home,
   Menu,
   MenuIcon,
   MessageCircleQuestion,
   X,
+  DoorOpen,
 } from "lucide-react";
 import Link from "next/link";
-// import { useMediaQuery } from "@/components/_utils/useMediaQuery";
 import HeaderTopRight from "./HeaderTopRight";
 
 import { Button } from "@/components/ui/button";
@@ -29,7 +28,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
 import AvatarDropdown from "./AvatarDropdown";
-import { Separator } from "@/components/ui/separator";
 
 type HeaderProps =
   | {
@@ -66,7 +64,6 @@ const headerLinks2 = [
 const hamburgerLinksDesktop = [
   { name: "FAQ", href: "/faq", icon: <MessageCircleQuestion /> },
   { name: "Contact", href: "/support", icon: <BadgeInfo /> },
-  { name: "For Hosts", href: "/for-hosts", icon: <DoorOpen /> },
 ];
 
 const hamburgerLinksMobile = [
@@ -97,65 +94,19 @@ function HamburgerMenu({
   links: {
     name: string;
     href: string;
-    icon?: React.ReactNode | null;
+    icon: React.ReactNode;
   }[];
 }) {
-  // const isMobile = useMediaQuery("(max-width:810px)")
   const [open, setOpen] = useState(false);
 
   return (
-    // <Dialog open={open} onOpenChange={setOpen}>
-    //   <DialogTrigger>
-    //   <div className="pl-2">
-    //       <MenuIcon />
-    //     </div>
-    //   </DialogTrigger>
-    //   <DialogContent className="min-w-full h-screen">
-    //     <DialogTitle>
-    //     <div className="flex items-center gap-3">
-    //         <button
-    //           className="rounded-full border border-teal-900 bg-zinc-200 p-2"
-    //           onClick={() => setOpen(!open)}
-    //         >
-    //           <X size={20} />
-    //         </button>
-    //         <h3>Tramona</h3>
-    //       </div>
-    //     </DialogTitle>
-    //     <DropdownMenuSeparator className="mt-3"/>
-    //     {links.map((link) => (
-    //       <Link key={link.href} href={link.href}>
-    //           {link.icon ? 
-    //           <>
-    //           <div className="flex flex-row my-1 px-2 py-4 font-bold text-teal-900 focus:bg-zinc-100 focus:text-teal-900">
-    //           <div className="flex p-1">{link.icon}</div>
-    //           <div className="flex p-1">{link.name}</div>
-    //         </div>
-    //           <Separator className=""/>
-    //           </>
-    //           : 
-    //           <>
-    //           <div className="px-2 font-bold text-teal-900 focus:bg-zinc-100 focus:text-teal-900">
-    //           <div className="p-2">
-    //             {link.name}
-    //           </div>
-    //         </div>
-    //         <Separator />
-    //         </>
-    //           }
-    //       </Link>
-    //     ))}
-    //   </DialogContent>
-    // </Dialog>
     <DropdownMenu open={open} onOpenChange={setOpen}>
-       <DropdownMenuTrigger>
-         <div className="pl-2">
-           <MenuIcon />
-         </div>
-       </DropdownMenuTrigger>
-        {/* <DropdownMenuPortal container={document.body}> */}
-        {/* {isMobile ?  */}
-        <DropdownMenuContent className="sm:hidden fixed -top-[3rem] -right-12 w-screen h-screen bg-white z-50 p-4 overflow-y-auto">
+      <DropdownMenuTrigger>
+        <div className="pl-2">
+          <MenuIcon />
+        </div>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="bg-white">
         <DropdownMenuLabel className="text-xl font-bold text-teal-900">
           <div className="flex items-center gap-3">
             <button
@@ -170,67 +121,14 @@ function HamburgerMenu({
         <DropdownMenuSeparator />
         {links.map((link) => (
           <Link key={link.href} href={link.href}>
-              {link.icon ? 
-              <>
-                <DropdownMenuItem className="my-2 px-2 py-4 font-bold text-teal-900 focus:bg-zinc-100 focus:text-teal-900">
-              <div className="p-1">{link.icon}</div>
-              <div>{link.name}</div>
+            <DropdownMenuItem className="my-2 px-2 py-6 font-bold text-teal-900 focus:bg-zinc-100 focus:text-teal-900">
+              <div className="rounded-full bg-zinc-200 p-2">{link.icon}</div>
+              {link.name}
             </DropdownMenuItem>
-              <Separator />
-              </>
-              : 
-              <>
-              <DropdownMenuItem className="px-2 font-bold text-teal-900 focus:bg-zinc-100 focus:text-teal-900">
-              <div className="p-2">
-                {link.name}
-              </div>
-            </DropdownMenuItem>
-            <Separator />
-            </>
-              }
           </Link>
         ))}
-        </DropdownMenuContent>
-        
-          <DropdownMenuContent className="bg-white hidden">
-            <DropdownMenuLabel className="text-xl font-bold text-teal-900">
-          <div className="flex items-center gap-3">
-            <button
-              className="rounded-full border border-teal-900 bg-zinc-200 p-2"
-              onClick={() => setOpen(!open)}
-            >
-              <X size={20} />
-            </button>
-            <h3>Tramona</h3>
-          </div>
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        {links.map((link) => (
-          <Link key={link.href} href={link.href}>
-              {link.icon ? 
-              <>
-                <DropdownMenuItem className="my-2 px-2 py-4 font-bold text-teal-900 focus:bg-zinc-100 focus:text-teal-900">
-              <div className="p-1">{link.icon}</div>
-              <div>{link.name}</div>
-            </DropdownMenuItem>
-              <Separator />
-              </>
-              : 
-              <>
-              <DropdownMenuItem className="px-2 font-bold text-teal-900 focus:bg-zinc-100 focus:text-teal-900">
-              <div className="p-2">
-                {link.name}
-              </div>
-            </DropdownMenuItem>
-            <Separator />
-            </>
-              }
-          </Link>
-        ))}
-        </DropdownMenuContent>
-        {/* } */}
-        {/* </DropdownMenuPortal> */}
-      </DropdownMenu> 
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
@@ -347,28 +245,6 @@ function LargeHeader(props: HeaderProps) {
     </header>
   );
 }
-
-// function SmallSidebar(props: HeaderProps) {
-//   const isVisible = !useIsLg();
-//   if (!isVisible || props.type === "marketing") return null;
-
-//   return (
-//     <Sheet>
-//       <SheetTrigger asChild>
-//         <Button variant="ghost" size="icon">
-//           <MenuIcon />
-//         </Button>
-//       </SheetTrigger>
-//       <SheetContent side="left" className="w-max p-0">
-//         {props.type === "dashboard" && (
-//           <aside className="sticky bottom-0 top-header-height h-screen-minus-header">
-//             <Sidebar withLogo type={props.sidebarType} />
-//           </aside>
-//         )}
-//       </SheetContent>
-//     </Sheet>
-//   );
-// }
 
 function SmallHeader(props: HeaderProps) {
   const { status, data: session } = useSession();

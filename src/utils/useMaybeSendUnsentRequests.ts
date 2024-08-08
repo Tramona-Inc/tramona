@@ -14,13 +14,6 @@ export function useMaybeSendUnsentRequests() {
     if (status !== "authenticated") return;
 
     const unsentRequestsJSON = localStorage.getItem("unsentRequests");
-    if(unsentRequestsJSON){
-    const requests: Property[] = JSON.parse(unsentRequestsJSON) as Property[];
-      localStorage.setItem("showCongratsDialog", "true")
-      localStorage.setItem("requestLocation", requests[0]?.location ?? "");
-      localStorage.setItem("showCongratsDialog", "true");
-      void router.push("/requests")
-    }
     if (!unsentRequestsJSON) return;
     localStorage.removeItem("unsentRequests");
 

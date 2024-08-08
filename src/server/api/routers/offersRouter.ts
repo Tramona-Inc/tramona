@@ -15,12 +15,10 @@ import {
   requestSelectSchema,
   trips,
 } from "@/server/db/schema";
-
 import { getCity, getCoordinates } from "@/server/google-maps";
-import { sendEmail, sendText, sendWhatsApp } from "@/server/server-utils";
+import { sendText, sendWhatsApp } from "@/server/server-utils";
 import { formatDateRange } from "@/utils/utils";
-import NewOfferReceivedEmail from "packages/transactional/emails/NewOfferReceivedEmail";
-import BookingConfirmationEmail from "packages/transactional/emails/BookingConfirmationEmail";
+
 import { TRPCError } from "@trpc/server";
 import {
   and,
@@ -301,76 +299,6 @@ export const offersRouter = createTRPCRouter({
         throw new TRPCError({ code: "BAD_REQUEST" });
       }
       return offer;
-    }),
-  
-    sendByEmail: protectedProcedure
-    .input(z.object({
-      to: z.string(),
-      userName: z.string(),
-      property: z.string(),
-      airbnbPrice: z.number(),
-      ourPrice: z.number(),
-      discountPercentage: z.number(),
-      nights: z.number(),
-      adults: z.number(),
-      checkInDateTime: z.date(),
-      checkOutDateTime: z.date(),}
-    ))
-    .mutation(async ({input}) => {
-      const { to, userName, property, airbnbPrice, ourPrice, discountPercentage, nights, adults, checkInDateTime, checkOutDateTime } = input
-      await sendEmail({
-        to: to,
-        subject: "You have a new offer for your request",
-        content: NewOfferReceivedEmail({
-          userName,
-          property,
-          airbnbPrice, 
-          ourPrice, 
-          discountPercentage, 
-          nights, 
-          adults, 
-          checkInDateTime, 
-          checkOutDateTime,
-        })
-      }) 
-    }),
-
-    bookingConfirmationEmail: protectedProcedure
-    .input(z.object({
-      to: z.string(),
-      userName: z.string(),
-      placeName: z.string(),
-      startDate: z.date(),
-      endDate: z.date(),
-      address: z.string(),
-      propertyImageLink: z.string(),
-      tripDetailLink: z.string(),
-      originalPrice: z.number(),
-      tramonaPrice: z.number(),
-      offerLink: z.string(),
-      numOfNights: z.number(),
-      tramonaServiceFee: z.number(),
-    }))
-    .mutation( async ({ input }) => {
-      const { to, userName, placeName, startDate, endDate, address, propertyImageLink, tripDetailLink, originalPrice, tramonaPrice, offerLink, numOfNights, tramonaServiceFee } = input
-      await sendEmail({
-        to,
-        subject: "Your booking has been confirmed",
-        content: BookingConfirmationEmail({
-          userName,
-          placeName, 
-          startDate, 
-          endDate, 
-          address, 
-          propertyImageLink, 
-          tripDetailLink, 
-          originalPrice, 
-          tramonaPrice, 
-          offerLink, 
-          numOfNights, 
-          tramonaServiceFee,
-        })
-      })
     }),
 
   makePublic: roleRestrictedProcedure(["admin", "host"])

@@ -2,8 +2,6 @@ import { cn } from "@/utils/utils";
 import React from "react";
 import Header from "../../Header";
 import Footer from "../DesktopFooter";
-import { Button } from "@/components/ui/button";
-import {MessageCircleIcon} from 'lucide-react'
 
 type MainLayoutProps = {
   className?: string;
@@ -11,14 +9,12 @@ type MainLayoutProps = {
   type?: "marketing" | "auth";
 };
 
-
 export default function MainLayout({
   className,
   children,
   type,
 }: MainLayoutProps) {
   return (
-    
     <div vaul-drawer-wrapper="">
       {type === "auth" ? (
         <Header type="dashboard" sidebarType="guest" />

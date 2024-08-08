@@ -24,9 +24,10 @@ export default function VerifyEmail() {
       if (conversationId && userId) {
         void addUserToConversation({ userId, conversationId });
       }
+
       void router.push({
-        pathname: "/auth/onboarding",
-        query: { isVerified: true, Id: userId },
+        pathname: "/auth/signin",
+        query: { isVerified: true },
       });
     },
   });

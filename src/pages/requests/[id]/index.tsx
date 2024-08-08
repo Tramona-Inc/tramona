@@ -131,7 +131,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const isProduction = process.env.NODE_ENV === "production";
   const baseUrl = isProduction
     ? "https://www.tramona.com"
-    : "http://localhost:3000/"; //change to your live dev server
+    : "https://6fb1-104-32-193-204.ngrok-free.app"; //change to your live dev server
 
   const firstPropertyOfRequest = await db.query.offers.findFirst({
     where: and(eq(offers.requestId, serverRequestId)),

@@ -18,8 +18,6 @@ import {
 } from "@/server/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { buffer } from "micro";
-import { sendEmail } from "@/server/server-utils";
-import PostStayEmail from "packages/transactional/emails/PostStayEmail";
 import { type NextApiRequest, type NextApiResponse } from "next";
 import { superhogRequests } from "../../server/db/schema/tables/superhogRequests";
 

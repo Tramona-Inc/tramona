@@ -15,7 +15,7 @@ import {
 } from "@/server/db/schema";
 import { api } from "@/utils/api";
 import { errorToast, successfulAdminOfferToast } from "@/utils/toasts";
-import { capitalize, plural, getDiscountPercentage } from "@/utils/utils";
+import { capitalize, plural } from "@/utils/utils";
 import {
   optional,
   zodInteger,
@@ -190,7 +190,6 @@ export default function AdminOfferForm({
   const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
   // const getOwnerMutation = api.groups.getGroupOwner.useMutation();
   const getMembersMutation = api.groups.getGroupMembers.useMutation();
-  const twilioEmailMutation = api.offers.sendByEmail.useMutation();
 
   const onSubmit = form.handleSubmit(async (data) => {
     const res = zodRoomsWithBedsParser.safeParse(data.roomsWithBeds);
@@ -326,21 +325,6 @@ export default function AdminOfferForm({
             msg: `https://www.tramona.com/requests/${request ? request.id : ""}`,
           });
         }
-      }
-
-      if(traveler.email){
-        await twilioEmailMutation.mutateAsync({
-          to: traveler.email ?? "",
-          userName: traveler.name ?? "",
-          property: propertyData.propertyName,
-          airbnbPrice: propertyData.originalNightlyPriceUSD,
-          ourPrice: offer?.totalPrice ?? 100,
-          discountPercentage: getDiscountPercentage(propertyData.originalNightlyPriceUSD, propertyData.offeredPriceUSD ?? 0),
-          nights: getNumNights(request.checkIn, request.checkOut),
-          adults: request.numGuests,
-          checkInDateTime: request.checkIn,
-          checkOutDateTime: request.checkOut,
-        })
       }
     }
 

@@ -85,7 +85,7 @@ export const stripeRouter = createTRPCRouter({
                 name: input.name,
                 description: input.description,
                 metadata: metadata,
-                // images: input.images,
+                images: input.images,
               },
             },
             quantity: 1,

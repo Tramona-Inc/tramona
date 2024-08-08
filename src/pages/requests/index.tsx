@@ -4,9 +4,8 @@ import { useMaybeSendUnsentRequests } from "@/utils/useMaybeSendUnsentRequests";
 import { HistoryIcon, MapPinIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import ActiveRequestsTab from "../../components/requests/CityRequestsTab";
-import PastRequestsTab from "../../components/requests/PastRequestsAndOffersTab";
+import PastRequestsTab from "../../components/requests/PastRequestsTab";
 import { NextSeo } from "next-seo";
-import { CongratsDialog } from "@/components/landing-page/SearchBars/CongratsDialog";
 
 function RequestsTabs() {
   return (
@@ -34,15 +33,6 @@ function RequestsTabs() {
 export default function Page() {
   useSession({ required: true });
   useMaybeSendUnsentRequests();
-  console.log("this should work");
-  const openCongratsDialog = localStorage.getItem("showCongratsDialog");
-  const location = localStorage.getItem("requestLocation")
-  console.log(openCongratsDialog, " ", location)
-  // if(openCongratsDialog && location){
-  //   <CongratsDialog location={location}/>
-  //   // localStorage.removeItem("requestLocation");
-  //   // localStorage.removeItem("showCongratsDialog");
-  // }
   const isProduction = process.env.NODE_ENV === "production";
   const baseUrl = isProduction
     ? "https://www.tramona.com"
@@ -71,8 +61,6 @@ export default function Page() {
         }}
       />
       <DashboardLayout type="guest">
-        {openCongratsDialog && location && <CongratsDialog location={location}/>}
-        
         <div className="min-h-screen-minus-header px-4 pb-footer-height pt-5">
           <div className="mx-auto max-w-5xl">
             <div className="flex items-center">
