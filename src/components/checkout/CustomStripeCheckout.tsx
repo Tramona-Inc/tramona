@@ -1,6 +1,10 @@
 import { api } from "@/utils/api";
 import { useStripe } from "@/utils/stripe-client";
-import { formatDateRange, getNumNights, getPriceBreakdown } from "@/utils/utils";
+import {
+  formatDateRange,
+  getNumNights,
+  getPriceBreakdown,
+} from "@/utils/utils";
 import StripeCheckoutForm from "./StripeCheckoutForm";
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { usePathname } from "next/navigation";
@@ -34,10 +38,16 @@ const CustomStripeCheckout = ({
   );
 
   const { serviceFee, finalTotal } = useMemo(
-    () => getPriceBreakdown(offer.totalPrice, numNights, SUPERHOG_FEE, TAX_PERCENTAGE),
-    [offer.totalPrice, numNights]
+    () =>
+      getPriceBreakdown({
+        bookingCost: offer.totalPrice,
+        numNights,
+        superhogFee: SUPERHOG_FEE,
+        tax: TAX_PERCENTAGE,
+      }),
+    [offer.totalPrice, numNights],
   );
-  
+
   const [options, setOptions] = useState<StripeElementsOptions | undefined>(
     undefined,
   );

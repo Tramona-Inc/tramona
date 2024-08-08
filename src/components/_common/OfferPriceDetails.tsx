@@ -12,7 +12,12 @@ export function OfferPriceDetails({
   const numberOfNights = getNumNights(offer.checkIn, offer.checkOut);
   const nightlyPrice = offer.totalPrice / numberOfNights;
 
-  const { bookingCost, taxPaid, serviceFee, finalTotal } = getPriceBreakdown(offer.totalPrice, numberOfNights, SUPERHOG_FEE, TAX_PERCENTAGE);
+  const { bookingCost, taxPaid, serviceFee, finalTotal } = getPriceBreakdown({
+    bookingCost: offer.totalPrice,
+    numNights: numberOfNights,
+    superhogFee: SUPERHOG_FEE,
+    tax: TAX_PERCENTAGE,
+  });
 
   const items = [
     {

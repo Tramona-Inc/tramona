@@ -314,7 +314,7 @@ export const stripeRouter = createTRPCRouter({
         ...(metadata.host_stripe_id
           ? {
               transfer_data: {
-                amount: metadata.price - metadata.tramonaServiceFee,
+                amount: metadata.price - metadata.tramonaServiceFee, // we need to change this too.
                 destination: metadata.host_stripe_id,
               },
             }
