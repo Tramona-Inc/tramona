@@ -22,7 +22,7 @@ export type RequestWithGroup = InferQueryModel<
       };
     };
   }
-> & { requestGroup?: { hasApproved: boolean } };
+>;
 
 export function getRequestWithGroupDetails({
   request,
