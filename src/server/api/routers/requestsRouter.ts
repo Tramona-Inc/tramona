@@ -1,7 +1,6 @@
 import {
   createTRPCRouter,
   protectedProcedure,
-  publicProcedure,
   roleRestrictedProcedure,
 } from "@/server/api/trpc";
 import { db } from "@/server/db";
@@ -31,6 +30,7 @@ import {
   linkInputProperties,
   linkInputPropertyInsertSchema,
 } from "@/server/db/schema/tables/linkInputProperties";
+import { getNumNights } from "@/utils/utils";
 
 const updateRequestInputSchema = z.object({
   requestId: z.number(),
@@ -442,7 +442,8 @@ export async function handleRequestSubmission(
 
   // Messaging based on user preferences or environment
   const name = user.name ?? user.email;
-  const pricePerNight = input.maxTotalPrice;
+  const pricePerNight =
+    input.maxTotalPrice / getNumNights(input.checkIn, input.checkOut);
   const fmtdPrice = formatCurrency(pricePerNight);
   const fmtdDateRange = formatDateRange(input.checkIn, input.checkOut);
   const fmtdNumGuests = plural(input.numGuests ?? 1, "guest");
