@@ -77,24 +77,12 @@ export default function AvatarDropdown({
         <DropdownMenuContent align="end" className="w-80 font-medium">
           <DropdownTop session={session} />
           <DropdownMenuSeparator />
-          {session.user.role === "admin" && (
-            <>
-              <DropdownMenuItem asChild>
-                <Link href="/admin">
-                  <UserCheckIcon />
-                  Admin Dashboard
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-            </>
-          )}
           <DropdownMenuItem asChild>
             <Link href="/account">
               <HandCoinsIcon />
               Refer and earn
             </Link>
           </DropdownMenuItem>
-          <DropdownMenuSeparator />
           <DropdownMenuItem asChild>
             <Link href="/settings">
               <SettingsIcon />
