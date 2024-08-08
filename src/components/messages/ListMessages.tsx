@@ -203,9 +203,9 @@ export default function ListMessages({
   useEffect(() => {
     console.log("conversationId found", adminMessages.find((convo) => convo.conversationId === conversationId))
     if (
-      messages.find(
+      adminMessages.find(
         (conversation) => conversation.conversationId === currentConversationId,
-      ) === undefined
+      ) !== undefined
     ) {
       const channel = supabase
         .channel(`${currentConversationId}`)
