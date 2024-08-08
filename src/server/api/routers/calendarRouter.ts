@@ -6,6 +6,7 @@ import { db } from "@/server/db";
 import { reservedDateRanges } from "@/server/db/schema/tables/reservedDateRanges";
 import { eq } from "drizzle-orm";
 import { properties } from "@/server/db/schema/tables/properties";
+import { updateHospitableCalendar } from '@/pages/api/hospitable';
 
 export async function syncCalendar({
   iCalLink,
