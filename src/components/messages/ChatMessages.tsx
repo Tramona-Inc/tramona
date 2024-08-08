@@ -1,6 +1,7 @@
 import { useMessage } from "@/utils/store/messages";
 import { useEffect } from "react";
 import ListMessages from "./ListMessages";
+import { api } from "@/utils/api";
 
 export const LIMIT_MESSAGE = 20;
 

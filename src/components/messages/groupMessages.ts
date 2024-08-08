@@ -28,7 +28,7 @@ export function groupMessages(
   messages.forEach(({ message, user }) => {
     const lastGroup = groups[groups.length - 1];
 
-    if (!user || (lastGroup  && "id" in user && user.id !== lastGroup.user?.id )) {
+    if (!user || (lastGroup  && "id" in user && (user.id !== lastGroup.user?.id) )) {
       groups.push({
         user,
         messages: [message],

@@ -17,7 +17,7 @@ function MessageDisplay() {
   const [selectedConversation, setSelectedConversation] =
     useState<Conversation | AdminConversation | null>(null);
 
-  const selectConversation = (conversation: Conversation | null) => {
+  const selectConversation = (conversation: Conversation | AdminConversation | null) => {
     setSelectedConversation(conversation);
   };
 
@@ -43,6 +43,7 @@ function MessageDisplay() {
       setIsViewd(true);
     }
   }, [conversations, isViewed, query.conversationId, selectedConversation?.id]);
+
 
   return (
     <div className="flex h-screen-minus-header-n-footer divide-x">
