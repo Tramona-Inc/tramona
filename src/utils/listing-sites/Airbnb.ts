@@ -2,7 +2,7 @@ import axios from "axios";
 import { type ListingSite } from ".";
 import { formatDateYearMonthDay } from "../utils";
 import * as cheerio from "cheerio";
-import {HttpsProxyAgent} from 'https-proxy-agent';
+import { HttpsProxyAgent } from "https-proxy-agent";
 export const Airbnb: ListingSite<"Airbnb"> = {
   siteName: "Airbnb",
   baseUrl: "https://www.airbnb.com",
@@ -81,17 +81,21 @@ export const Airbnb: ListingSite<"Airbnb"> = {
 
         console.log("checkoutUrl:", checkoutUrl);
 
-        const proxyAgent = new HttpsProxyAgent('http://sasha14:!Matd4Qe4dUHBn8@us-ca.proxymesh.com:31280'); // Replace with your proxy URL
+        const proxyAgent = new HttpsProxyAgent(
+          "http://sasha14:!Matd4Qe4dUHBn8@us-ca.proxymesh.com:31280",
+        ); // Replace with your proxy URL
 
-        const response = await axios.get(checkoutUrl, {
-          headers: airbnbRequestHeaders,
-          httpAgent: proxyAgent,
-          httpsAgent: proxyAgent,
-        }).catch((err) => {
-          console.error(err);
-          console.log("got here");
-          throw err;
-        });
+        const response = await axios
+          .get(checkoutUrl, {
+            headers: airbnbRequestHeaders,
+            httpAgent: proxyAgent,
+            httpsAgent: proxyAgent,
+          })
+          .catch((err) => {
+            console.error(err);
+            console.log("got here");
+            throw err;
+          });
 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const html = response.data;
@@ -160,19 +164,22 @@ export const Airbnb: ListingSite<"Airbnb"> = {
 // };
 
 const airbnbRequestHeaders = {
-  "accept": "*/*",
+  accept: "*/*",
   "accept-encoding": "gzip, deflate, br, zstd",
   "accept-language": "en-US,en;q=0.9",
-  "connection": "keep-alive",
+  connection: "keep-alive",
   "content-type": "application/json",
-  "cookie": "crisp-client%2Fsession%2F79f3a12a-3c61-4fd3-bd63-aaadec5b3ffa=session_47edc385-1362-497b-ac02-456c1e117165; __stripe_mid=7ba8e57f-1941-49bb-8235-dee5ce5a478ab64782; _ga=GA1.1.1416031810.1711429582; next-auth.csrf-token=9206e0792965772f98e944568a066af269af0ca19dc6bce9072a806e8422b50a%7C4b91c6af8a265df2cb26dccf70841eac05907c09fa5e18e2f28cb65188f07548; next-auth.callback-url=http%3A%2F%2Flocalhost%3A3000; _clck=i30kzv%7C2%7Cfo5%7C0%7C1546; _ga_WBTN40GDLM=GS1.1.1723078842.282.1.1723078883.0.0.0; _clsk=1p9j890%7C1723078884351%7C4%7C1%7Cs.clarity.ms%2Fcollect; next-auth.session-token=eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..9Ce1n_v4cRtOITm0.ca3OvVS5vEKdHvAhaQ8qblL1Bz_zvpEtCwRMWyYckIFZGpIjnBQlFSi-Yiyc1H9QdsbMpdOrYb_j6fF2ioUVz5Nkx0PeFr5FGEaxCF9y958w1XzQuZkKbY3PfPlV39LuT53BX5lgr6eEiNe6LqN8l-93IzUZk3gfY3BjWEMLKwo_qehzEgJsoKQhAXk_l8ieLbUwXRLn4LBt8SyE7QhepTC7v1cKpzGBcWmLaA7UtH-QIlEKoyH95L7xUU47fBI7kUWIucgGKS18KrGy8pIuYBBgPLxZLeJyLuXlDlUrXW3SSuBPK79R8OHdWa6Q_k2D_SrEndq6EHaUNoyoU2ZeKM76GdmWSanieX2Fin-FF76-2PPetv1smKV965ycjuM-PlIG5keYPQMUJ5Qvaufyid0E1zK7L0A1Tp3XuGlf5c0OGDndUpUpFVnyV_Em4H7u5OpD51uYRs4BnotsyMrsokw0N_p65riVVIt7pFIPC_O3AQjcug7X5FcS47a2wqrgJ6Nj4174qkDFA3hYRpJxMLhj7abMuz0a3U7229YQOIpo6LZdxQo8NARq0B_ucKqdxChQihVn6U94ILss-gjoKRyN80TyuU1FuDsCh7f6LIImsD6acgOZNq7O94yKGxg2iJwcxN0Wfr623XkMyJtL0F9jYcNbXTFHkOWaRgMsi5kP0KzLY4UDbp7fLjUDejhS3aVCUDbSqWk8uXxn62_pED_Zdac2.GYz2LvOlwdaZgZu-nEzJfw",
-  "host": "localhost:3000",
-  "referer": "http://localhost:3000/",
-  "sec-ch-ua": '"Not)A;Brand";v="99", "Google Chrome";v="127", "Chromium";v="127"',
+  cookie:
+    "crisp-client%2Fsession%2F79f3a12a-3c61-4fd3-bd63-aaadec5b3ffa=session_47edc385-1362-497b-ac02-456c1e117165; __stripe_mid=7ba8e57f-1941-49bb-8235-dee5ce5a478ab64782; _ga=GA1.1.1416031810.1711429582; next-auth.csrf-token=9206e0792965772f98e944568a066af269af0ca19dc6bce9072a806e8422b50a%7C4b91c6af8a265df2cb26dccf70841eac05907c09fa5e18e2f28cb65188f07548; next-auth.callback-url=http%3A%2F%2Flocalhost%3A3000; _clck=i30kzv%7C2%7Cfo5%7C0%7C1546; _ga_WBTN40GDLM=GS1.1.1723078842.282.1.1723078883.0.0.0; _clsk=1p9j890%7C1723078884351%7C4%7C1%7Cs.clarity.ms%2Fcollect; next-auth.session-token=eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..9Ce1n_v4cRtOITm0.ca3OvVS5vEKdHvAhaQ8qblL1Bz_zvpEtCwRMWyYckIFZGpIjnBQlFSi-Yiyc1H9QdsbMpdOrYb_j6fF2ioUVz5Nkx0PeFr5FGEaxCF9y958w1XzQuZkKbY3PfPlV39LuT53BX5lgr6eEiNe6LqN8l-93IzUZk3gfY3BjWEMLKwo_qehzEgJsoKQhAXk_l8ieLbUwXRLn4LBt8SyE7QhepTC7v1cKpzGBcWmLaA7UtH-QIlEKoyH95L7xUU47fBI7kUWIucgGKS18KrGy8pIuYBBgPLxZLeJyLuXlDlUrXW3SSuBPK79R8OHdWa6Q_k2D_SrEndq6EHaUNoyoU2ZeKM76GdmWSanieX2Fin-FF76-2PPetv1smKV965ycjuM-PlIG5keYPQMUJ5Qvaufyid0E1zK7L0A1Tp3XuGlf5c0OGDndUpUpFVnyV_Em4H7u5OpD51uYRs4BnotsyMrsokw0N_p65riVVIt7pFIPC_O3AQjcug7X5FcS47a2wqrgJ6Nj4174qkDFA3hYRpJxMLhj7abMuz0a3U7229YQOIpo6LZdxQo8NARq0B_ucKqdxChQihVn6U94ILss-gjoKRyN80TyuU1FuDsCh7f6LIImsD6acgOZNq7O94yKGxg2iJwcxN0Wfr623XkMyJtL0F9jYcNbXTFHkOWaRgMsi5kP0KzLY4UDbp7fLjUDejhS3aVCUDbSqWk8uXxn62_pED_Zdac2.GYz2LvOlwdaZgZu-nEzJfw",
+  host: "localhost:3000",
+  referer: "http://localhost:3000/",
+  "sec-ch-ua":
+    '"Not)A;Brand";v="99", "Google Chrome";v="127", "Chromium";v="127"',
   "sec-ch-ua-mobile": "?0",
   "sec-ch-ua-platform": '"macOS"',
   "sec-fetch-dest": "empty",
   "sec-fetch-mode": "cors",
   "sec-fetch-site": "same-origin",
-  "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36",
+  "user-agent":
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36",
 };

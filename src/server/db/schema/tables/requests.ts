@@ -1,5 +1,4 @@
 import {
-  boolean,
   date,
   doublePrecision,
   geometry,
@@ -16,7 +15,6 @@ import {
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { groups } from "./groups";
 import { propertyTypeEnum } from "../common";
-import { users } from "./users";
 import { z } from "zod";
 import { sql } from "drizzle-orm";
 import { linkInputProperties } from "./linkInputProperties";
@@ -44,9 +42,6 @@ export const requests = pgTable(
     madeByGroupId: integer("made_by_group_id")
       .notNull()
       .references(() => groups.id, { onDelete: "cascade" }),
-    requestGroupId: integer("request_group_id")
-      .notNull()
-      .references(() => requestGroups.id, { onDelete: "cascade" }),
     linkInputPropertyId: integer("link_input_property_id").references(
       () => linkInputProperties.id,
       { onDelete: "set null" },
@@ -80,7 +75,6 @@ export const requests = pgTable(
   },
   (t) => ({
     madeByGroupidIdx: index().on(t.madeByGroupId),
-    requestGroupidIdx: index().on(t.requestGroupId),
     requestSpatialIndex: index("request_spacial_index").using(
       "gist",
       t.latLngPoint,
@@ -94,8 +88,6 @@ export const requestInsertSchema = createInsertSchema(requests, {
   latLngPoint: z.object({ x: z.number(), y: z.number() }),
   amenities: z.array(z.enum(ALL_REQUESTABLE_AMENITIES)),
 });
-
-export const MAX_REQUEST_GROUP_SIZE = 10;
 
 // TO-DO: maybe add relation
 export const requestUpdatedInfo = pgTable(
@@ -113,28 +105,3 @@ export const requestUpdatedInfo = pgTable(
     requestidIdx: index().on(t.requestId),
   }),
 );
-
-export const requestGroups = pgTable(
-  "request_groups",
-  {
-    id: serial("id").primaryKey(),
-    createdByUserId: text("created_by_user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    hasApproved: boolean("has_approved").default(false).notNull(),
-    confirmationSentAt: timestamp("confirmation_sent_at", {
-      withTimezone: true,
-    })
-      .notNull()
-      .defaultNow(),
-    haveSentFollowUp: boolean("have_sent_follow_up").default(false).notNull(),
-  },
-  (t) => ({
-    createdByUseridIdx: index().on(t.createdByUserId),
-  }),
-);
-
-export type RequestGroup = typeof requestGroups.$inferSelect;
-export type NewRequestGroup = typeof requestGroups.$inferInsert;
-export const requestGroupSelectSchema = createSelectSchema(requestGroups);
-export const requestGroupInsertSchema = createInsertSchema(requestGroups);
