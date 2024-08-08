@@ -94,14 +94,15 @@ export default async function webhook(
                 .set({ resolvedAt: confirmedDate })
                 .where(eq(requests.id, parseInt(requestId)));
 
+              //lets test with out the propertyID
               const offer = await db.query.offers.findFirst({
-                with: { request: true, property: true },
+                with: { request: true },
                 where: eq(
                   offers.id,
                   parseInt(paymentIntentSucceeded.metadata.offer_id!),
                 ),
               });
-              console.log("Creating trip here is the offer first", offer);
+
               //create trip here
               if (offer?.request) {
                 const currentTrip = await db

@@ -4,6 +4,7 @@ import EmptyStateValue from "../_common/EmptyStateSvg/EmptyStateValue";
 import RequestEmptySvg from "../_common/EmptyStateSvg/RequestEmptySvg";
 import { NewCityRequestBtn } from "./NewCityRequestBtn";
 import RequestCard from "./RequestCard";
+import { RequestCardAction } from "./RequestCardAction";
 
 export default function ActiveRequestsTab() {
   const { data: requests } = api.requests.getMyRequests.useQuery();
@@ -14,7 +15,9 @@ export default function ActiveRequestsTab() {
     <div className="space-y-4 pb-32">
       <NewCityRequestBtn />
       {requests.activeRequests.map((request) => (
-        <RequestCard key={request.id} type="guest" request={request} />
+        <RequestCard key={request.id} type="guest" request={request}>
+          <RequestCardAction request={request} />
+        </RequestCard>
       ))}
     </div>
   ) : (
