@@ -47,12 +47,10 @@ export default function MastHead() {
           <div className="flex flex-col justify-center">
             <div className="relative pt-10 text-center">
               <h1 className="mx-auto max-w-3xl text-balance text-3xl font-bold text-zinc-900 lg:text-5xl">
-                Book the same properties you see on Airbnb for less
+                Agree on a Price with Hosts Every Time
               </h1>
               <p className="mx-auto max-w-[38rem] pt-4 text-xs font-semibold text-zinc-900 lg:pt-4 lg:text-base">
-                With Airbnb hosts averaging 60% vacancy rates year-round,
-                Tramona matches you with hosts who are willing to meet your
-                price.
+                Traveling outside your budget, now within reach.
               </p>
               <div className="hidden items-center justify-center pt-4 lg:flex">
                 <div className="-ml-2">
