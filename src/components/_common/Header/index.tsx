@@ -16,7 +16,6 @@ import { cn } from "@/utils/utils";
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { TramonaLogo } from "./TramonaLogo";
-import QuestionMarkIcon from "@/components/_icons/QuestionMarkIcon";
 import NavLink from "@/components/_utils/NavLink";
 import {
   DropdownMenu,
@@ -64,19 +63,12 @@ const headerLinks2 = [
 const hamburgerLinksDesktop = [
   { name: "FAQ", href: "/faq", icon: <MessageCircleQuestion /> },
   { name: "Contact", href: "/support", icon: <BadgeInfo /> },
-  { name: "For Hosts", href: "/for-hosts", icon: <DoorOpen /> },
 ];
 
 const hamburgerLinksMobile = [
   { name: "Become a host", href: "/for-hosts", icon: <Home /> },
   { name: "How it works", href: "/how-it-works", icon: <Menu /> },
   { name: "24/7 Support", href: "/help-center", icon: <BadgeHelp /> },
-  // { name: "FAQ", href: "/faq", icon: <MessageCircleQuestion /> },
-  // { name: "Contact", href: "/support", icon: <BadgeInfo /> },
-  // { name: "For Hosts", href: "/for-hosts", icon: <DoorOpen /> },
-  // { name: "Link Input", href: "/link-input", icon: <Link2 /> },
-  // { name: "Unclaimed Offers", href: "/unclaimed-offers", icon: <Tag /> },
-  // { name: "Recent Deals", href: "/exclusive-offers", icon: <BadgePercent /> },
 ];
 
 export const hamburgerLinksHostMobileToTraveler = [
@@ -180,6 +172,12 @@ function LargeHeader(props: HeaderProps) {
         {props.type === "dashboard" ? (
           <>
             <Link
+              href="/how-it-works"
+              className="whitespace-nowrap rounded-full border bg-white px-3 py-2 text-sm font-bold text-teal-900 xl:text-base"
+            >
+              How it works
+            </Link>
+            <Link
               href="/help-center"
               className="whitespace-nowrap rounded-full border bg-white px-3 py-2 text-sm font-bold text-teal-900 xl:text-base"
             >
@@ -240,28 +238,6 @@ function LargeHeader(props: HeaderProps) {
     </header>
   );
 }
-
-// function SmallSidebar(props: HeaderProps) {
-//   const isVisible = !useIsLg();
-//   if (!isVisible || props.type === "marketing") return null;
-
-//   return (
-//     <Sheet>
-//       <SheetTrigger asChild>
-//         <Button variant="ghost" size="icon">
-//           <MenuIcon />
-//         </Button>
-//       </SheetTrigger>
-//       <SheetContent side="left" className="w-max p-0">
-//         {props.type === "dashboard" && (
-//           <aside className="sticky bottom-0 top-header-height h-screen-minus-header">
-//             <Sidebar withLogo type={props.sidebarType} />
-//           </aside>
-//         )}
-//       </SheetContent>
-//     </Sheet>
-//   );
-// }
 
 function SmallHeader(props: HeaderProps) {
   const { status, data: session } = useSession();
