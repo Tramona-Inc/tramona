@@ -300,8 +300,9 @@ export default function Welcome() {
             )}
             <Button
               size="lg"
+              variant="greenPrimary"
               onClick={isLastStep ? () => router.push("/") : nextStep}
-              className="flex-1 rounded-lg bg-teal-900 font-semibold hover:bg-teal-950"
+              className="flex-1"
             >
               {isLastStep ? "Start Traveling" : "Next"}
             </Button>

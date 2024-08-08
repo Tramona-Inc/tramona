@@ -12,7 +12,7 @@ import {
 } from "../ui/dialog";
 import { cities } from "./cities";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
-import { type RefObject, useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import { useRouter } from "next/router";
 
 export function FiltersBtn() {

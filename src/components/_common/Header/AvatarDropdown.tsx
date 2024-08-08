@@ -8,16 +8,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  HandCoinsIcon,
   LogOutIcon,
+  SettingsIcon,
   User2Icon,
-  UserCheck2Icon,
   UserCheckIcon,
 } from "lucide-react";
 import { type Session } from "next-auth";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
-import HostTeamsDropdownItems from "./HostTeamsDropdownItems";
-import { api } from "@/utils/api";
+//import HostTeamsDropdownItems from "./HostTeamsDropdownItems"; // removed host teams for now
+
 import { useState } from "react";
 import CreateHostTeamDialog from "./CreateHostTeamDialog";
 
@@ -49,9 +50,15 @@ function DropdownTop({ session }: { session: Session }) {
   );
 }
 
-export default function AvatarDropdown({ session }: { session: Session }) {
-  const { data: hostProfile } = api.users.getMyHostProfile.useQuery();
-  const { data: hostTeams } = api.hostTeams.getMyHostTeams.useQuery();
+export default function AvatarDropdown({
+  session,
+  size,
+}: {
+  session: Session;
+  size?: "sm" | "md" | "lg" | "huge";
+}) {
+  // const { data: hostProfile } = api.users.getMyHostProfile.useQuery();
+  // const { data: hostTeams } = api.hostTeams.getMyHostTeams.useQuery(); //removed host teams for now
 
   const [chtDialogOpen, setChtDialogOpen] = useState(false);
 
@@ -64,6 +71,7 @@ export default function AvatarDropdown({ session }: { session: Session }) {
             name={session.user.name}
             email={session.user.email}
             image={session.user.image}
+            size={size}
           />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-80 font-medium">
@@ -80,44 +88,25 @@ export default function AvatarDropdown({ session }: { session: Session }) {
               <DropdownMenuSeparator />
             </>
           )}
-          {hostProfile && (
-            <>
-              <HostTeamsDropdownItems
-                hostProfile={hostProfile}
-                hostTeams={hostTeams}
-                setChtDialogOpen={setChtDialogOpen}
-              />
-              <DropdownMenuItem asChild>
-                <Link href="/host">
-                  <UserCheck2Icon />
-                  Host Dashboard
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-            </>
-          )}
-          {/* {session.user.role === "guest" && (
-            <>
-              <DropdownMenuItem asChild>
-                <Link href="/host-onboarding">
-                  <UserCheck2Icon />
-                  Become a Host
-                </Link>
-              </DropdownMenuItem>
-            </>
-          )} */}
+          <DropdownMenuItem asChild>
+            <Link href="/account">
+              <HandCoinsIcon />
+              Refer and earn
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem asChild>
+            <Link href="/settings">
+              <SettingsIcon />
+              Settings
+            </Link>
+          </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link href="/profile">
               <User2Icon />
               Profile
             </Link>
           </DropdownMenuItem>
-          {/* <DropdownMenuItem asChild>
-     <Link href="/">
-       <ExternalLinkIcon />
-       Tramona Homepage
-     </Link>
-   </DropdownMenuItem> */}
           <DropdownMenuSeparator />
           <DropdownMenuItem
             red

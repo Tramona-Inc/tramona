@@ -6,7 +6,7 @@ import {
   EmptyStateTitle,
 } from "@/components/ui/empty-state";
 import { type Property } from "@/server/db/schema/tables/properties";
-import { FenceIcon } from "lucide-react";
+import { AlertCircle, FenceIcon } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import { NewPropertyBtn } from "./HostPropertiesLayout";
@@ -60,7 +60,7 @@ function PropertyCard({ property }: { property: Property }) {
       onClick={() => router.push(`/host/properties/${property.id}`)}
       className="cursor-pointer"
     >
-      <div className="flex items-center gap-2 overflow-clip rounded-lg border-zinc-100 bg-card px-2 py-3 hover:bg-zinc-100">
+      <div className="relative flex items-center gap-2 overflow-clip rounded-lg border-zinc-100 bg-card px-2 py-3 hover:bg-zinc-100">
         <div className="relative h-20 w-20">
           <Image
             src={property.imageUrls[0]!}
@@ -84,6 +84,9 @@ function PropertyCard({ property }: { property: Property }) {
               .join(" · ")}
           </p> */}
         </div>
+        {!property.cancellationPolicy && (
+          <AlertCircle className="absolute top-1 right-1 text-red-600" size={16} />
+        )}
         {/* <div className="p-1">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

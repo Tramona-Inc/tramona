@@ -16,14 +16,21 @@ import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
 import { formatCurrency, plural } from "@/utils/utils";
 import "leaflet/dist/leaflet.css";
 import SingleLocationMap from "../_common/GoogleMaps/SingleLocationMap";
-import Spinner from "../_common/Spinner";
 import { type RouterOutputs } from "@/utils/api";
+import { getCancellationPolicyDescription } from "@/config/getCancellationPolicyDescription";
 export type TripWithDetails = RouterOutputs["trips"]["getMyTripsPageDetails"];
+export type TripWithDetailsConfirmation =
+  RouterOutputs["trips"]["getMyTripsPageDetailsByPaymentIntentId"];
 
 // Plugin for relative time
 dayjs.extend(relativeTime);
 
-export default function TripPage({ tripData }: { tripData: TripWithDetails }) {
+export default function TripPage({
+  tripData,
+}: {
+  tripData: TripWithDetails | TripWithDetailsConfirmation;
+  isConfirmation?: boolean;
+}) {
   const chatWithAdmin = useChatWithAdmin();
 
   const { trip, coordinates } = tripData;
@@ -72,7 +79,7 @@ export default function TripPage({ tripData }: { tripData: TripWithDetails }) {
               <div className="flex justify-between pt-2">
                 <div className="flex gap-2">
                   <UserAvatar
-                    name={trip.property.hostName}
+                    name={trip.property.host?.name}
                     // image={trip.property.host?.image}
                     image={
                       trip.property.host?.image ??
@@ -148,14 +155,12 @@ export default function TripPage({ tripData }: { tripData: TripWithDetails }) {
                 <p>Los Angeles, CA, USA</p> */}
                 <p>{trip.property.address}</p>
 
-                {coordinates && (
-                  <div className="relative z-10 my-3 overflow-clip rounded-lg">
-                    <SingleLocationMap
-                      lat={coordinates.location.lat}
-                      lng={coordinates.location.lng}
-                    />
-                  </div>
-                )}
+                <div className="relative z-10 my-3 overflow-clip rounded-lg">
+                  <SingleLocationMap
+                    lat={coordinates.location.lat}
+                    lng={coordinates.location.lng}
+                  />
+                </div>
               </div>
               <Link
                 href={`/property/${trip.property.id}`}
@@ -174,7 +179,7 @@ export default function TripPage({ tripData }: { tripData: TripWithDetails }) {
                     Paid {dayjs(trip.createdAt).format("MMM D")}
                   </p>
                 </div>
-                <p>{formatCurrency(trip.totalPriceAfterFees)}</p>
+                <p>{formatCurrency(trip.totalPriceAfterFees!)}</p>
 
                 {/* <Link
                   href={`/`}
@@ -194,53 +199,22 @@ export default function TripPage({ tripData }: { tripData: TripWithDetails }) {
                   </>
                 )}
 
-                <p className="pb-2 font-bold">Cancelation Policy</p>
-
-                <ol type="1" className="list-inside list-decimal">
-                  <li>
-                    Cancelation Period:
-                    <ul className="list-inside list-disc">
-                      <li>
-                        Guests must notify us of any cancellation in writing
-                        within the designated cancellation period.
-                      </li>
-                    </ul>
-                  </li>
-
-                  <li>
-                    Cancellation Fees:
-                    <ul className="list-inside list-disc">
-                      <li>
-                        If cancellation is made <strong>14 days</strong> or more
-                        prior to the scheduled arrival date, guests will receive
-                        a full refund of the booking deposit.
-                      </li>
-                      <li>
-                        If cancellation is made within <strong>7 days</strong>{" "}
-                        of the scheduled arrival date, guests will forfeit the
-                        booking deposit.
-                      </li>
-                      <li>
-                        In the event of a no-show or cancellation on the day of
-                        check-in, guests will be charged the full amount of the
-                        reservation.
-                      </li>
-                    </ul>
-                  </li>
-                </ol>
+                {trip.property.cancellationPolicy !== null && (
+                  <>
+                    <p className="pb-2 font-bold">Cancellation Policy</p>
+                    <p>
+                      {getCancellationPolicyDescription(
+                        trip.property.cancellationPolicy,
+                      )}
+                    </p>
+                  </>
+                )}
               </div>
 
               <div className="h-[2px] rounded-full bg-zinc-200"></div>
 
               <div className="pt-5">
                 <p className="pb-3 font-bold">Support</p>
-
-                {/* <p>
-                  Lorem ipsum dolor, sit amet consectetur adipisicing elit.
-                  Maiores, mollitia eaque libero ab facere quaerat quasi veniam
-                  ullam non voluptate doloribus minus possimus repellat deserunt
-                  pariatur laboriosam. Veniam, sunt laudantium.
-                </p> */}
 
                 <Link
                   href={"/help-center"}

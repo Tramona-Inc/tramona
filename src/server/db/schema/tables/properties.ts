@@ -22,72 +22,25 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 import { ALL_PROPERTY_AMENITIES } from "./propertyAmenities";
 import { users } from "./users";
-import { ALL_LISTING_SITE_NAMES } from "@/utils/listing-sites";
+import { ALL_LISTING_SITE_NAMES, propertyTypeEnum } from "../common";
 
-export const ALL_PROPERTY_TYPES = [
-  "Condominium",
-  "Apartment",
-  "Guesthouse",
-  "House",
-  "Loft",
-  "Boat",
-  "Camper/RV",
-  "Chalet",
-  "Bed & Breakfast",
-  "Castle",
-  "Tent",
-  "Cabin",
-  "Townhouse",
-  "Bungalow",
-  "Hut",
-  "Dorm",
-  "Aparthotel",
-  "Hotel",
-  "Yurt",
-  "Treehouse",
-  "Cottage",
-  "Guest Suite",
-  "Tiny House",
-  "Plane",
-  "Igloo",
-  "Serviced apartment",
-  "Other",
-  "Lighthouse",
-  "Tipi",
-  "Cave",
-  "Island",
-  "Earth House",
-  "Train",
-  "Boutique hotel",
-  "Nature lodge",
-  "Hostel",
-  "Timeshare",
-  "Minsu (Taiwan)",
-  "Ryokan (Japan)",
-  "Pension (Korea)",
-  "Heritage hotel (India)",
-  "Barn",
-  "Campsite",
-  "Casa Particular (Cuba)",
-  "Cycladic House",
-  "Dammusi",
-  "Dome House",
-  "Farm Stay",
-  "Holiday Park",
-  "Houseboat",
-  "Kezhan",
-  "Ranch",
-  "Religious Building",
-  "Riad",
-  "Shipping Container",
-  "Tower",
-  "Trullo",
-  "Windmill",
-  "Shepherd’s Hut",
-  "Villa",
+export const ALL_CANCELLATION_POLICIES = [
+  "Flexible",
+  "Moderate",
+  "Firm",
+  "Strict",
+  "Super Strict 30 Days",
+  "Super Strict 60 Days",
+  "Long Term",
+  "Non-refundable",
 ] as const;
 
-export type PropertyType = (typeof ALL_PROPERTY_TYPES)[number];
+export type CancellationPolicy = (typeof ALL_CANCELLATION_POLICIES)[number];
+
+export const cancellationPolicyEnum = pgEnum(
+  "cancellation_policy",
+  ALL_CANCELLATION_POLICIES,
+);
 
 export const ALL_PROPERTY_ROOM_TYPES_WITHOUT_OTHER = [
   "Entire place",
@@ -95,12 +48,12 @@ export const ALL_PROPERTY_ROOM_TYPES_WITHOUT_OTHER = [
   "Private room",
 ] as const;
 
+export type PropertyRoomType = (typeof ALL_PROPERTY_ROOM_TYPES)[number];
+
 export const ALL_PROPERTY_ROOM_TYPES = [
   ...ALL_PROPERTY_ROOM_TYPES_WITHOUT_OTHER,
   "Other",
 ] as const;
-
-export const propertyTypeEnum = pgEnum("property_type", ALL_PROPERTY_TYPES);
 
 export const propertyRoomTypeEnum = pgEnum(
   "property_room_type",
@@ -112,28 +65,6 @@ export const ALL_HOUSE_RULE_ITEMS = ["Pets allowed", "Smoking Allowed"];
 export const propertyAmenitiesEnum = pgEnum(
   "property_amenities",
   ALL_PROPERTY_AMENITIES,
-);
-
-export const ALL_PROPERTY_STANDOUT_AMENITIES = [
-  "Pool",
-  "Hot tub",
-  "Patio",
-  "BBQ grill",
-  "Outdoor dining area",
-  "Fire pit",
-  "Pool table",
-  "Indoor fireplace",
-  "Piano",
-  "Exercise equipment",
-  "Lake access",
-  "Beach access",
-  "Ski-in/Ski-out",
-  "Outdoor shower",
-] as const;
-
-export const propertyStandoutAmenitiesEnum = pgEnum(
-  "property_standout_amenities",
-  ALL_PROPERTY_STANDOUT_AMENITIES,
 );
 
 export const ALL_PROPERTY_SAFETY_ITEMS = [
@@ -179,11 +110,14 @@ export const propertyStatusEnum = pgEnum("property_status", [
   "Archived",
 ]);
 
-export const ALL_PROPERTY_PMS = ["Hostaway"] as const;
+export const ALL_PROPERTY_PMS = ["Hostaway", "Hospitable", "Ownerrez"] as const;
 
 export const propertyPMSEnum = pgEnum("property_pms", ALL_PROPERTY_PMS);
 
-export const listingSiteEnum = pgEnum("listing_site", ALL_LISTING_SITE_NAMES);
+export const listingPlatformEnum = pgEnum("listing_platform", [
+  ...ALL_LISTING_SITE_NAMES,
+  ...ALL_PROPERTY_PMS,
+]);
 
 export const ALL_BED_TYPES = [
   "Single Bed",
@@ -270,7 +204,7 @@ export const properties = pgTable(
     hostTeamId: integer("host_team_id"), //.references(() => hostTeams.id, { onDelete: "cascade" }),
 
     // null = only on Tramona
-    originalListingSite: listingSiteEnum("original_listing_site"),
+    originalListingPlatform: listingPlatformEnum("original_listing_platform"),
     originalListingId: varchar("original_listing_id"),
 
     roomsWithBeds: jsonb("rooms_with_beds").$type<RoomWithBeds[]>(),
@@ -284,7 +218,7 @@ export const properties = pgTable(
     numBeds: smallint("num_beds").notNull(),
     numBedrooms: smallint("num_bedrooms").notNull(),
     numBathrooms: doublePrecision("num_bathrooms"),
-    // propertyPMS: propertyPMS("property_pms"),
+    // propertyPMS: propertyPMSEnum("property_pms"),
 
     // for when blake/preju manually upload, otherwise get the host's name via hostId
     hostName: varchar("host_name", { length: 255 }),
@@ -330,23 +264,25 @@ export const properties = pgTable(
     originalNightlyPrice: integer("original_nightly_price"), // in cents
     areaDescription: text("area_description"),
     mapScreenshot: text("map_screenshot"),
-    cancellationPolicy: text("cancellation_policy"),
+    cancellationPolicy: cancellationPolicyEnum("cancellation_policy"),
 
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
     isPrivate: boolean("is_private").notNull().default(false),
     ageRestriction: integer("age_restriction"),
+    priceRestriction: integer("price_restriction"),
     propertyStatus: propertyStatusEnum("property_status").default("Listed"),
     airbnbBookUrl: varchar("airbnb_book_url"),
     hostImageUrl: varchar("host_image_url"),
     pricingScreenUrl: varchar("pricing_screen_url"),
-    hostawayListingId: integer("hostaway_listing_id"),
+    // hostawayListingId: integer("hostaway_listing_id"),
     latLngPoint: geometry("lat_lng_point", {
       type: "point",
       mode: "xy",
       srid: 4326,
     }),
+    iCalLink: text("ical_link"),
   },
   (t) => ({
     spatialIndex: index("spacial_index").using("gist", t.latLngPoint),

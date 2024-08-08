@@ -30,8 +30,16 @@ export const tripsRouter = createTRPCRouter({
             imageUrls: true,
             address: true,
             city: true,
+            cancellationPolicy: true,
           },
           with: { host: { columns: { name: true, image: true } } },
+        },
+        offer: {
+          columns: {
+            paymentIntentId: true,
+            checkIn: true,
+            checkOut: true,
+          },
         },
       },
     });
@@ -80,6 +88,15 @@ export const tripsRouter = createTRPCRouter({
           property: {
             columns: {
               latLngPoint: false,
+              id: true,
+              imageUrls: true,
+              city: true,
+              name: true,
+              latitude: true,
+              longitude: true,
+              checkInInfo: true,
+              address: true,
+              cancellationPolicy: true,
             },
             with: {
               host: {
@@ -99,5 +116,44 @@ export const tripsRouter = createTRPCRouter({
         },
       };
       return { trip, coordinates };
+    }),
+  getMyTripsPageDetailsByPaymentIntentId: protectedProcedure
+    .input(z.object({ paymentIntentId: z.string() }))
+    .query(async ({ input }) => {
+      const trip = await db.query.trips.findFirst({
+        where: eq(trips.paymentIntentId, input.paymentIntentId),
+        with: {
+          property: {
+            columns: {
+              id: true,
+              latLngPoint: false,
+              imageUrls: true,
+              city: true,
+              name: true,
+              latitude: true,
+              longitude: true,
+              checkInInfo: true,
+              address: true,
+              cancellationPolicy: true,
+            },
+            with: {
+              host: {
+                columns: { name: true, email: true, image: true, id: true },
+              },
+            },
+          },
+        },
+      });
+      if (!trip) {
+        throw new Error("Trip not found");
+      } else {
+        const coordinates = {
+          location: {
+            lat: trip.property.latitude,
+            lng: trip.property.longitude,
+          },
+        };
+        return { trip, coordinates };
+      }
     }),
 });

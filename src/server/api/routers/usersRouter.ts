@@ -14,6 +14,7 @@ import {
   hostTeamMembers,
   hostTeams,
   properties,
+  propertyInsertSchema,
   referralCodes,
   userUpdateSchema,
   users,
@@ -450,7 +451,7 @@ export const usersRouter = createTRPCRouter({
           {},
         );
 
-        const hostawayProperties: ListingsResponse = await axios
+        const hostawayProperties = await axios
           .get<ListingsResponse>(`https://api.hostaway.com/v1/listings`, {
             headers: {
               Authorization: `Bearer ${input.hostawayBearerToken}`,
@@ -458,7 +459,7 @@ export const usersRouter = createTRPCRouter({
           })
           .then((res) => res.data);
 
-        const listings: Listing[] = hostawayProperties.result;
+        const listings = hostawayProperties.result;
 
         try {
           const propertyObjects = await Promise.all(
@@ -477,12 +478,12 @@ export const usersRouter = createTRPCRouter({
               longitude: property.lng,
               city: await getCity({ lat: property.lat, lng: property.lng }),
               hostName: property.contactName,
-              hostawayListingId: property.id,
+              originalListingId: property.id.toString(),
               checkInTime: convertToTimeString(property.checkInTimeStart),
               checkOutTime: convertToTimeString(property.checkOutTime),
               name: property.name,
               about: property.description,
-              propertyPMS: "Hostaway",
+              originalListingPlatform: "Hostaway" as const,
               address: property.address,
               avgRating: property.starRating ?? 0,
               hostTeamId: teamId,
@@ -490,7 +491,9 @@ export const usersRouter = createTRPCRouter({
               amenities: property.listingAmenities.map(
                 (amenity) => amenity.amenityName,
               ), // Keep amenities as an array
-              cancellationPolicy: property.cancellationPolicy,
+              cancellationPolicy: propertyInsertSchema.shape.cancellationPolicy
+                .catch(null)
+                .parse(property.cancellationPolicy),
             })),
           );
 
@@ -500,7 +503,7 @@ export const usersRouter = createTRPCRouter({
             .values(propertyObjects)
             .returning({
               id: properties.id,
-              listingId: properties.hostawayListingId,
+              listingId: properties.originalListingId,
             });
 
           const today = new Date().toISOString().split("T")[0]; // Get today's date in YYYY-MM-DD format

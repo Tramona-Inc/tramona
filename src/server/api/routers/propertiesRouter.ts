@@ -112,16 +112,20 @@ export const propertiesRouter = createTRPCRouter({
   update: roleRestrictedProcedure(["admin", "host"])
     .input(propertyUpdateSchema.omit({ hostId: true, latLngPoint: true }))
     .mutation(async ({ ctx, input }) => {
-      if (ctx.user.role === "admin" && !input.hostName) {
-        throw new TRPCError({ code: "BAD_REQUEST" });
-      }
+      // TODO: auth
 
       await ctx.db
         .update(properties)
-        .set({
-          ...input,
-          hostId: ctx.user.role === "admin" ? null : ctx.user.id,
-        })
+        .set(input)
+        .where(eq(properties.id, input.id));
+    }),
+
+  publishProperty: roleRestrictedProcedure(["admin", "host"])
+    .input(propertySelectSchema.pick({ id: true }))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db
+        .update(properties)
+        .set({ propertyStatus: "Listed" })
         .where(eq(properties.id, input.id));
     }),
 
@@ -208,19 +212,6 @@ export const propertiesRouter = createTRPCRouter({
           originalNightlyPrice: properties.originalNightlyPrice,
           lat: properties.latitude,
           long: properties.longitude,
-          // isOnBucketList: ctx.user
-          //   ? exists(
-          //       ctx.db
-          //         .select()
-          //         .from(bucketListProperties)
-          //         .where(
-          //           and(
-          //             eq(bucketListProperties.propertyId, properties.id),
-          //             eq(bucketListProperties.userId, ctx.user.id),
-          //           ),
-          //         ),
-          //     )
-          //   : sql`FALSE`,
           distance: sql`
             6371 * ACOS(
               SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})
@@ -461,6 +452,7 @@ export const propertiesRouter = createTRPCRouter({
     }),
   getHostPropertiesWithRequests: roleRestrictedProcedure(["host"]).query(
     async ({ ctx }) => {
+      // TODO: USE DRIZZLE
       const rawData = await ctx.db.execute(sql`
           WITH host_properties AS (
             SELECT
@@ -476,6 +468,7 @@ export const propertiesRouter = createTRPCRouter({
               hp.city
             FROM host_properties hp
             JOIN ${requests} r ON hp.request_id = r.id
+            WHERE r.check_in >= CURRENT_DATE 
             GROUP BY hp.city, hp.request_id
           )
           SELECT
@@ -491,7 +484,7 @@ export const propertiesRouter = createTRPCRouter({
           JOIN ${properties} p ON p.city = cr.city AND p.host_id = ${ctx.user.id}
           JOIN ${groups} g ON r.made_by_group_id = g.id
           JOIN ${users} u ON g.owner_id = u.id
-          ORDER BY cr.city, r.id, p.id
+          ORDER BY r.check_in, cr.city, r.id, p.id
         `);
 
       const organizedData: HostRequestsPageData[] = [];
@@ -527,7 +520,7 @@ export const propertiesRouter = createTRPCRouter({
           hostawayListingId: row.hostaway_listing_id,
           hostName: row.host_name,
           // Add other property fields here
-        } as Property;
+        } as unknown as Property;
 
         const request = {
           id: row.request_id,
@@ -551,8 +544,8 @@ export const propertiesRouter = createTRPCRouter({
           latLngPoint: row.lat_lng_point,
           radius: row.radius,
           amenities: row.amenities,
+          linkInputPropertyId: row.link_input_property_id,
           traveler: { name: row.user_name, image: row.image },
-          // Add other request fields here
         } as HostRequestsPageData["requests"][number]["request"];
 
         const city = row.property_city as string;

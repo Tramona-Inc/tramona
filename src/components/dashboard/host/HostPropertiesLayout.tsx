@@ -15,7 +15,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Pencil, PlusIcon } from "lucide-react";
+import { Pencil, PlusIcon, CircleCheckBig } from "lucide-react";
 import HostProperties from "./HostProperties";
 import Link from "next/link";
 import {
@@ -24,6 +24,7 @@ import {
 } from "@/utils/store/host-onboarding";
 import { api } from "@/utils/api";
 import { type Property } from "@/server/db/schema/tables/properties";
+import { toast } from "@/components/ui/use-toast";
 
 export default function HostPropertiesLayout({
   children,
@@ -243,6 +244,9 @@ export function HostPropertyEditBtn({
   const setOtherHouseRules = useHostOnboarding(
     (state) => state.setOtherHouseRules,
   );
+  const setCancellationPolicy = useHostOnboarding(
+    (state) => state.setCancellationPolicy,
+  );
 
   const addressWithApt: LocationType = {
     country: property.address.split(", ")[4] ?? "",
@@ -286,6 +290,21 @@ export function HostPropertyEditBtn({
     setSmokingAllowed(property.smokingAllowed ?? false);
     setOtherHouseRules(property.otherHouseRules ?? "");
     setEditing(!editing);
+    setCancellationPolicy(property.cancellationPolicy);
+  };
+
+  const { mutateAsync: publishProperty } =
+    api.properties.publishProperty.useMutation({
+      onSuccess: () => {
+        toast({
+          title: "Property listed!",
+          description: "Your property was successfully listed",
+        });
+      },
+    });
+
+  const handlePublishProperty = () => {
+    void publishProperty({ id: property.id });
   };
 
   return (
@@ -297,7 +316,7 @@ export function HostPropertyEditBtn({
           </Button>
           <Button
             variant="secondary"
-            className="rounded-full bg-white font-bold shadow-md sm:rounded-lg sm:border-2 sm:shadow-none"
+            className="shadow-lg sm:shadow-none"
             onClick={() => {
               setEditing(!editing);
               onSubmit?.();
@@ -308,15 +327,28 @@ export function HostPropertyEditBtn({
           </Button>
         </div>
       ) : (
-        <Button
-          variant="secondary"
-          className="rounded-full bg-white font-bold shadow-md sm:rounded-lg sm:border-2 sm:shadow-none"
-          onClick={handleEditClick}
-          type="button"
-        >
-          <Pencil size={20} />
-          Enter edit mode
-        </Button>
+        <div className="space-x-2">
+          <Button
+            variant="secondary"
+            className="rounded-full bg-white font-bold shadow-md sm:rounded-lg sm:border-2 sm:shadow-none"
+            onClick={handleEditClick}
+            type="button"
+          >
+            <Pencil size={20} />
+            Enter edit mode
+          </Button>
+          {property.propertyStatus === "Drafted" && (
+            <Button
+              variant="secondary"
+              className="rounded-full bg-white font-bold shadow-md sm:rounded-lg sm:border-2 sm:shadow-none"
+              onClick={handlePublishProperty}
+              type="button"
+            >
+              <CircleCheckBig size={20} />
+              Make it public
+            </Button>
+          )}
+        </div>
       )}
     </div>
   );

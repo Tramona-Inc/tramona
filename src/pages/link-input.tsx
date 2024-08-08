@@ -1,4 +1,3 @@
-import MainLayout from "@/components/_common/Layout/MainLayout";
 import linkInputBg from "public/assets/images/link-input-bg.jpg";
 import priceComparison from "public/assets/images/pricecomparison.jpg";
 import { Button } from "@/components/ui/button";
@@ -6,29 +5,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { Clock8, Handshake, CircleDollarSign } from "lucide-react";
 import { TestimonialCarousel } from "@/components/landing-page/_sections/testimonials/TestimonialCarousel";
-import AddAirbnbLink from "../components/link-input/AddAirbnbLink";
-
-// ... (other imports)
+import LinkRequestForm from "../components/link-input/LinkRequestForm";
+import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 
 export default function Page() {
-  // Create a wrapper function that matches the expected SubmitHandler signature
-
-  const handleEnterLink = (event: { preventDefault: () => void }) => {
-    event.preventDefault(); // Prevent default form submission behavior
-    // Submit form data using form.onSubmit or other logic here
-
-    const scrollToTop = () => {
-      const c = document.documentElement.scrollTop || document.body.scrollTop;
-      if (c > 0) {
-        window.requestAnimationFrame(scrollToTop);
-        window.scrollTo(0, c - c / 16);
-      }
-    };
-    scrollToTop();
-  };
-
   return (
-    <MainLayout>
+    <DashboardLayout type="guest">
       <section className="relative bg-white pb-4">
         <div className="relative h-[500px] lg:h-[511px]">
           <div className="absolute inset-0">
@@ -48,12 +30,12 @@ export default function Page() {
                 <h1 className="mx-auto max-w-3xl text-balance text-[32px] font-bold text-gray-900 lg:text-5xl">
                   Already have a property you like?
                 </h1>
-                <p className="mx-auto max-w-[38rem] pt-4 text-[14px] font-bold text-[#584F3E] lg:pt-4 lg:text-base">
+                <p className="mx-auto max-w-[38rem] pt-4 text-[14px] font-bold opacity-70 lg:pt-4 lg:text-base">
                   Let us get you the same property, or their next door neighbor,
                   for a better price
                 </p>
                 <div className="mx-auto mt-8 max-w-3xl">
-                  <AddAirbnbLink fromRequestDealTab={false} />
+                  <LinkRequestForm />
                 </div>
               </div>
             </div>
@@ -164,7 +146,7 @@ export default function Page() {
           </p>
           <Button
             type="submit"
-            onClick={handleEnterLink}
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
             className="text-md h-[62px] w-[294px] rounded-full bg-[#004236] text-[24px] font-semibold text-white"
           >
             Enter Link
@@ -177,10 +159,9 @@ export default function Page() {
         </h2>
 
         {/* testimonial carousel */}
-        <div className="flex mx-4 mt-20 justify-center space-y-4 lg:mx-0 lg:mt-16 lg:space-y-8">
+        <div className="mx-4 mt-20 flex justify-center space-y-4 lg:mx-0 lg:mt-16 lg:space-y-8">
           <TestimonialCarousel />
         </div>
-
       </section>
 
       <div className="mt-32 bg-teal-700/15 px-4 py-8 lg:rounded-xl">
@@ -196,6 +177,6 @@ export default function Page() {
           </Button>
         </div>
       </div>
-    </MainLayout>
+    </DashboardLayout>
   );
 }

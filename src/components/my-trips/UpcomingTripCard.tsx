@@ -1,21 +1,12 @@
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { HelpCircleIcon, InfoIcon, MessageCircle } from "lucide-react";
+import { HelpCircleIcon, MessageCircle } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { formatDateRange } from "@/utils/utils";
 import Image from "next/image";
 import UserAvatar from "../_common/UserAvatar";
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "../ui/sheet";
 import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
 import { type TripCardDetails } from "@/pages/my-trips";
 
@@ -94,85 +85,6 @@ export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
               <MessageCircle className="size-4" />
               Message your host
             </Button>
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="secondary">
-                  <InfoIcon className="size-5" />
-                  Cancelation Policy
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="bottom" className="p-0">
-                <SheetHeader className="border-b-[1px] p-5">
-                  <SheetTitle className="text-xl font-bold lg:text-2xl">
-                    Cancelation Policy
-                  </SheetTitle>
-                </SheetHeader>
-
-                <div className="border-b-[1px] px-5 py-10">
-                  <ol type="1" className="list-inside list-decimal">
-                    <li>
-                      Cancelation Period:
-                      <ul className="list-inside list-disc">
-                        <li>
-                          Guests must notify us of any cancellation in writing
-                          within the designated cancellation period.
-                        </li>
-                      </ul>
-                    </li>
-
-                    <li>
-                      Cancellation Fees:
-                      <ul className="list-inside list-disc">
-                        <li>
-                          If cancellation is made <strong>14 days</strong> or
-                          more prior to the scheduled arrival date, guests will
-                          receive a full refund of the booking deposit.
-                        </li>
-                        <li>
-                          If cancellation is made within <strong>7 days</strong>{" "}
-                          of the scheduled arrival date, guests will forfeit the
-                          booking deposit.
-                        </li>
-                        <li>
-                          In the event of a no-show or cancellation on the day
-                          of check-in, guests will be charged the full amount of
-                          the reservation.
-                        </li>
-                      </ul>
-                    </li>
-
-                    <li>
-                      Reservation Modifications:
-                      <ul className="list-inside list-disc">
-                        <li>
-                          Guests may request modifications to their reservation
-                          dates, subject to availability. Any changes must be
-                          requested in writing and approved by us.
-                        </li>
-                      </ul>
-                    </li>
-
-                    <li>
-                      Refunds:
-                      <ul className="list-inside list-disc">
-                        <li>
-                          Refunds, if applicable, will be processed within{" "}
-                          <strong>30 business days</strong> from the date of
-                          cancellation confirmation.
-                        </li>
-                      </ul>
-                    </li>
-                  </ol>
-                </div>
-
-                <SheetFooter className="p-5">
-                  <SheetClose asChild>
-                    <Button className="w-full lg:w-[200px]">Done</Button>
-                  </SheetClose>
-                </SheetFooter>
-              </SheetContent>
-            </Sheet>
-
             <Button asChild variant="secondary">
               <Link href="/faq">
                 <HelpCircleIcon />

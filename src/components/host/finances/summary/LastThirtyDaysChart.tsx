@@ -74,7 +74,13 @@ const LastThirtyDaysChart = ({
       const total = transformedData.reduce((sum, day) => sum + day.Earnings, 0);
       setTotalRevenue(total);
     }
-  }, [allPayments]);
+  }, [
+    allPayments,
+    endDate,
+    setTotalRevenue,
+    startDate,
+    transformPaymentsToDailyChartData,
+  ]);
 
   const emptyData = generateInitialDailyData(startDate, endDate);
 

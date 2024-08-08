@@ -41,6 +41,7 @@ import {
   SmokingRule,
 } from "./HouseRules";
 import { OfferPriceDetails } from "../_common/OfferPriceDetails";
+import { getCancellationPolicyDescription } from "@/config/getCancellationPolicyDescription";
 
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 
@@ -329,6 +330,7 @@ export default function OfferPage({
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 font-semibold text-teal-700 underline underline-offset-2"
                 href={originalListing.getReviewsUrl({
+                  // TODO
                   checkIn: offer.checkIn,
                   checkOut: offer.checkOut,
                   numGuests: request?.numGuests ?? 1,
@@ -390,11 +392,16 @@ export default function OfferPage({
                 )}
               </div>
             </div>
-            <h3 className="pb-2 pt-4 font-bold">Cancellation Policy</h3>
-            <p>
-              {property.cancellationPolicy ??
-                "This property has a no-cancellation policy. All payments are final and non-refundable if a cancellation occurs."}
-            </p>
+            {property.cancellationPolicy !== null && (
+              <>
+                <h3 className="pb-2 pt-4 font-bold">Cancellation Policy</h3>
+                <p>
+                  {getCancellationPolicyDescription(
+                    property.cancellationPolicy,
+                  )}
+                </p>
+              </>
+            )}
           </section>
 
           <section>

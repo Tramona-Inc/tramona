@@ -8,9 +8,9 @@ import { getDiscountPercentage, getNumNights, useIsSm } from "@/utils/utils";
 import { type OfferWithDetails } from "../offers/OfferPage";
 import { formatDateMonthDay, plural } from "@/utils/utils";
 import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
-import StripePaymentInfo from "../requests/StripePaymentInfo";
-import CheckoutInfoForm from "./ContactInfoForm";
+import CustomStripeCheckout from "./CustomStripeCheckout";
 import { OfferPriceDetails } from "../_common/OfferPriceDetails";
+import { getCancellationPolicyDescription } from "@/config/getCancellationPolicyDescription";
 
 export default function Checkout({
   offer: { property, request, ...offer },
@@ -63,35 +63,13 @@ export default function Checkout({
   }
 
   function CancellationPolicy() {
+    if (property.cancellationPolicy === null) return null;
+
     return (
       <div className="space-y-2">
         <h3 className="text-lg font-semibold">Cancellation Policy</h3>
         <p className="text-sm font-semibold leading-5 text-muted-foreground">
-          {property.cancellationPolicy
-            ? property.cancellationPolicy
-            : "No cancellation policy"}
-        </p>
-      </div>
-    );
-  }
-
-  function TermsAndSubmit() {
-    return (
-      <div className="md:mt-8">
-        <div className="mb-8 space-y-4 text-muted-foreground">
-          <p className="text-sm font-semibold leading-5">
-            On behalf of Tramona we ask that you please follow the house rules
-            and treat the house as if it were your own
-          </p>
-          <p className="px-2 text-xs md:px-0">
-            By selecting the button, I agree to the booking terms. I also agree
-            to the Terms of Service, Payment Terms of Service and I acknowledge
-            the Privacy Policy
-          </p>
-        </div>
-        <p className="my-4 text-center text-xs font-semibold text-muted-foreground md:my-0">
-          As soon as you book you will get an email and text confirmation with
-          all booking details
+          {getCancellationPolicyDescription(property.cancellationPolicy)}
         </p>
       </div>
     );
@@ -221,12 +199,8 @@ export default function Checkout({
           <Separator className="my-4" />
           <CancellationPolicy />
           <Separator className="my-4" />
-          <CheckoutInfoForm />
-          <Separator className="my-4" />
-          <TermsAndSubmit />
-          <Separator className="my-4" />
           {!isMobile && (
-            <StripePaymentInfo offer={{ property, request, ...offer }} />
+            <CustomStripeCheckout offer={{ property, request, ...offer }} />
           )}
         </div>
         <div className="md:hidden">
@@ -238,12 +212,8 @@ export default function Checkout({
           <Separator className="my-6" />
           <CancellationPolicy />
           <Separator className="my-6" />
-          <CheckoutInfoForm />
-          <Separator className="my-6" />
-          <TermsAndSubmit />
-          <Separator className="my-6" />
           {isMobile && (
-            <StripePaymentInfo offer={{ property, request, ...offer }} />
+            <CustomStripeCheckout offer={{ property, request, ...offer }} />
           )}
           <Separator className="my-6" />
           <CustomerReview />

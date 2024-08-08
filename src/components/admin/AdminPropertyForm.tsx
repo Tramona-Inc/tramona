@@ -1,7 +1,7 @@
 import {
+  ALL_CANCELLATION_POLICIES,
   ALL_PROPERTY_ROOM_TYPES,
-  ALL_PROPERTY_TYPES,
-} from "@/server/db/schema/tables/properties";
+} from "@/server/db/schema";
 import { zodInteger, zodString } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -35,6 +35,7 @@ import {
 import { capitalize } from "@/utils/utils";
 import { SelectIcon } from "@radix-ui/react-select";
 import { CaretSortIcon } from "@radix-ui/react-icons";
+import { ALL_PROPERTY_TYPES } from "@/server/db/schema";
 
 const formSchema = z.object({
   hostId: zodString(),
@@ -68,6 +69,8 @@ const formSchema = z.object({
   smokingAllowed: z.enum(["yes", "no"]).transform((s) => s === "yes"),
 
   otherHouseRules: z.string().max(1000).optional(),
+
+  cancellationPolicy: z.enum(ALL_CANCELLATION_POLICIES),
 });
 
 type FormSchema = z.infer<typeof formSchema>;
@@ -428,6 +431,26 @@ export default function AdminPropertyForm() {
                 <Textarea {...field} />
               </FormControl>
               <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="cancellationPolicy"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Cancellation Policy</FormLabel>
+              <FormControl>
+                <Select {...field}>
+                  <SelectContent>
+                    {ALL_CANCELLATION_POLICIES.map((policy) => (
+                      <SelectItem key={policy} value={policy}>
+                        {policy}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormControl>
             </FormItem>
           )}
         />

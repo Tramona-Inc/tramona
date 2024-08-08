@@ -22,9 +22,6 @@ import UserAvatar from "../_common/UserAvatar";
 import IdentityModal from "../_utils/IdentityModal";
 import { VerificationProvider } from "../_utils/VerificationContext";
 import { Button } from "../ui/button";
-import AddBucketListDestinationDialog from "./AddBucketListDestinationDialog";
-import DeleteBucketListDestinationDialog from "./DeleteBucketListDestinationDialog";
-import EditBucketListDestinationDialog from "./EditBucketListDestinationDialog";
 import EditProfileDialog from "./EditProfileDialog";
 import { useMemo, useState } from "react";
 
@@ -40,57 +37,9 @@ export default function ProfilePage() {
       : data?.referralCode;
   const url = `https://tramona.com/auth/signup?code=${code}`;
 
-  const socials = [
-    {
-      name: "Twitter",
-      icon: <Twitter />,
-    },
-    {
-      name: "Email",
-      icon: <Mail />,
-    },
-    {
-      name: "Messages",
-      icon: <MessagesSquare />,
-    },
-    {
-      name: "WhatsApp",
-      icon: <MessageCircle />,
-    },
-    {
-      name: "Messenger",
-      icon: <MessageCircleMore />,
-    },
-    {
-      name: "Facebook",
-      icon: <Facebook />,
-    },
-    {
-      name: "More Options",
-      icon: <Ellipsis />,
-    },
-  ];
-
   const { data: profileInfo } = api.profile.getProfileInfo.useQuery();
 
-  // const { data: bucketListProperties } =
-  //   api.profile.getAllPropertiesWithDetails.useQuery();
-
-  const [selectedBLDestinationId, setSelectedBLDestinationId] = useState<
-    number | null
-  >(null);
-
-  const selectedBLDestination = useMemo(() => {
-    return profileInfo?.bucketListDestinations.find(
-      (d) => d.id === selectedBLDestinationId,
-    );
-  }, [profileInfo, selectedBLDestinationId]);
-
   const editProfileDialogState = useDialogState();
-  const editBLDestinationDialogState = useDialogState();
-  const addBLDestinationDialogState = useDialogState();
-
-  const deleteBLDDialogState = useDialogState();
 
   return (
     <div className="mx-auto min-h-screen-minus-header max-w-4xl space-y-3 pb-10">
@@ -195,168 +144,6 @@ export default function ProfilePage() {
                 : "")}
         </p>
       </section>
-
-      {/* Bucket List */}
-      {/* <section className="space-y-5 rounded-lg border p-4">
-        <div className="flex items-center justify-between">
-          <h2 className="font-bold">Bucket List</h2>
-          <div className="flex items-center">
-            Share Dialog (not functional yet)
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="hidden font-bold text-teal-900 lg:flex"
-                >
-                  <Share />
-                  Share
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader className="border-b-2 pb-4">
-                  <DialogTitle>
-                    <h2 className="text-center">Share</h2>
-                  </DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <h2 className="text-lg font-bold">Your link</h2>
-                  <div className="flex gap-2">
-                    <div className="basis-5/6">
-                      <Input value={url} className="text-base" disabled />
-                    </div>
-                    <CopyToClipboardBtn
-                      message={url}
-                      render={({ justCopied, copyMessage }) => (
-                        <Button
-                          onClick={copyMessage}
-                          className="w-full bg-teal-900 px-6 lg:w-auto"
-                        >
-                          {justCopied ? "Copied!" : "Copy"}
-                        </Button>
-                      )}
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    {socials.map((social, i) => (
-                      <div
-                        key={i}
-                        className="flex items-center gap-2 rounded-lg border-2 p-4"
-                      >
-                        {social.icon}
-                        <p className="font-semibold">{social.name}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="font-bold text-teal-900">
-                  <Plus />
-                  Add
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <Link href="/">
-                  <DropdownMenuItem>Property</DropdownMenuItem>
-                </Link>
-                <DropdownMenuItem
-                  onClick={() => addBLDestinationDialogState.setState("open")}
-                >
-                  Destination
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-        <Tabs defaultValue="properties" className="space-y-4">
-          <TabsList>
-            <TabsTrigger
-              value="properties"
-              className="font-bold data-[state=active]:border-teal-900 data-[state=active]:text-teal-900"
-            >
-              Properties
-            </TabsTrigger>
-            <TabsTrigger
-              value="destinations"
-              className="font-bold data-[state=active]:border-teal-900 data-[state=active]:text-teal-900"
-            >
-              Destinations
-            </TabsTrigger>
-          </TabsList>
-
-          Properties Tab 
-          <TabsContent value="properties">
-            <div className="grid grid-cols-1 gap-3 lg:grid-cols-3 lg:gap-4">
-              {bucketListProperties?.length ? (
-                bucketListProperties.map((property) => (
-                  <BucketListHomeOfferCard
-                    key={property.id}
-                    property={{
-                      ...property,
-                      propertyId: property.id,
-                      bucketListPropertyId: property.bucketListId,
-                    }}
-                  />
-                ))
-              ) : (
-                <div className="col-span-full py-8 text-center text-muted-foreground">
-                  <div className="flex items-center justify-center">
-                    <EmptyBagSvg />
-                  </div>
-                  Your bucket list is empty! Add a property to view here.
-                  <div className="mt-6 flex justify-center">
-                    <Button
-                      asChild
-                      className="cursor-pointer rounded-lg bg-teal-900 px-4 py-2 text-white hover:bg-teal-950"
-                    >
-                      <Link href="/explore">Explore Properties</Link>
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </TabsContent>
-
-          Destinations Tab
-          <TabsContent value="destinations">
-            <div className="grid grid-cols-1 gap-3 lg:grid-cols-3 lg:gap-4">
-              {profileInfo?.bucketListDestinations.length ? (
-                profileInfo.bucketListDestinations.map((destination) => (
-                  <DestinationCard
-                    key={destination.id}
-                    destination={destination}
-                    onEdit={() => {
-                      setSelectedBLDestinationId(destination.id);
-                      editBLDestinationDialogState.setState("open");
-                    }}
-                    onDelete={() => {
-                      setSelectedBLDestinationId(destination.id);
-                      deleteBLDDialogState.setState("open");
-                    }}
-                  />
-                ))
-              ) : (
-                <p className="col-span-full py-8 text-center text-muted-foreground">
-                  No destinations yet
-                </p>
-              )}
-            </div>
-          </TabsContent>
-        </Tabs>
-      </section> */}
-
-      <AddBucketListDestinationDialog state={addBLDestinationDialogState} />
-      <EditBucketListDestinationDialog
-        state={editBLDestinationDialogState}
-        destinationData={selectedBLDestination!}
-      />
-      <DeleteBucketListDestinationDialog
-        state={deleteBLDDialogState}
-        destinationId={selectedBLDestinationId!}
-      />
 
       {profileInfo && (
         <EditProfileDialog

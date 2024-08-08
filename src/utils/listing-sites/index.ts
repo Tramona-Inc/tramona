@@ -3,11 +3,11 @@ import { zodUrl } from "../zod-utils";
 import { Airbnb } from "./Airbnb";
 import { BookingDotCom } from "./BookingDotCom";
 import { Vrbo } from "./Vrbo";
-import { type Property } from "@/server/db/schema";
+import { type ListingSiteName } from "@/server/db/schema";
 
 export type ListingSiteUrlParams = {
-  checkIn?: Date;
-  checkOut?: Date;
+  checkIn?: string | Date;
+  checkOut?: string | Date;
   numGuests: number;
 };
 
@@ -20,25 +20,22 @@ export type OriginalListing<
   getListingUrl(params: ListingSiteUrlParams): string;
   getReviewsUrl(params: ListingSiteUrlParams): string;
   getCheckoutUrl(params: ListingSiteUrlParams): string;
+  getPrice(params: ListingSiteUrlParams): Promise<number>;
 };
 
 export type ListingSite<TSiteName extends ListingSiteName> = {
   readonly siteName: TSiteName;
   readonly baseUrl: string;
   readonly parseId: (url: string) => string | undefined;
-
-  createListing: (id: string) => OriginalListing<TSiteName>;
+  readonly parseUrlParams: (url: string) => {
+    checkIn?: string;
+    checkOut?: string;
+    numGuests?: number;
+  };
+  readonly createListing: (id: string) => OriginalListing<TSiteName>;
 };
 
 const ALL_LISTING_SITES = [Airbnb, BookingDotCom, Vrbo] as const;
-
-export const ALL_LISTING_SITE_NAMES = [
-  Airbnb.siteName,
-  BookingDotCom.siteName,
-  Vrbo.siteName,
-] as const;
-
-type ListingSiteName = (typeof ALL_LISTING_SITE_NAMES)[number];
 
 function getSiteURLParser<TSiteName extends ListingSiteName>(
   Site: ListingSite<TSiteName>,
@@ -89,9 +86,10 @@ export function createListing({
   return Site.createListing(id);
 }
 
-export function getOriginalListing(
-  property: Pick<Property, "originalListingId" | "originalListingSite">,
-) {
+export function getOriginalListing(property: {
+  originalListingId?: string | null;
+  originalListingSite?: ListingSiteName | null;
+}) {
   if (!property.originalListingSite || !property.originalListingId) {
     return null;
   }

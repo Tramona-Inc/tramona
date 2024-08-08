@@ -81,6 +81,7 @@ export function capitalize(str: string) {
  * "Jan 1, 2021 – Feb 2, 2022"
  * ```
  */
+
 export function formatDateRange(
   fromDate: Date,
   toDate?: Date,
@@ -95,13 +96,13 @@ export function formatDateRange(
 
   if (withWeekday) {
     if (!to || isSameDay(from, to)) {
-      return formatDate(from, "EEE, MMMM d, yyyy");
+      return formatDate(from, "EEE, MMM d, yyyy");
     }
 
     if (sameYear) {
-      return `${formatDate(from, "EEE, MMMM d")} – ${formatDate(
+      return `${formatDate(from, "EEE, MMM d")} – ${formatDate(
         to,
-        isCurYear ? "d, yyyy" : "MMM d, yyyy",
+        isCurYear ? "EEE, MMM d" : "EEE, MMM d, yyyy",
       )}`;
     }
   }
@@ -126,27 +127,56 @@ export function formatDateRange(
   return `${formatDate(from, "MMM d, yyyy")} – ${formatDate(to, "MMM d, yyyy")}`;
 }
 
-function removeTimezoneFromDate(date: Date) {
+/**
+ * wrapper for formatDate for YYYY-MM-DD strings only that adds a T00:00
+ * to the end of the date string to prevent the timezone from getting converted
+ * to UTC and the formatted date being 1 day off.
+ *
+ * @example
+ * ```js
+ * formatDateString("2023-03-01", "MMM d, yyyy"); // Mar 1, 2023
+ * ```
+ */
+export function formatDateString(
+  date: string,
+  formatStr: string,
+  options: FormatOptions = {},
+) {
+  if (!date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+    throw new Error("Invalid date format, must be YYYY-MM-DD");
+  }
+  return formatDate(`${date}T00:00`, formatStr, options);
+}
+
+// TODO: clean this all up (make it for strings only)
+
+function removeTimezoneFromDate(date: Date | string) {
+  if (typeof date === "string") return date;
   return new Date(date).toISOString().split("Z")[0]!;
 }
 
-export function formatDateMonthDay(date: Date) {
+export function formatDateMonthDay(date: Date | string) {
+  if (typeof date === "string") return formatDateString(date, "MMMM d");
   return formatDate(removeTimezoneFromDate(date), "MMMM d");
 }
 
-export function formatDateWeekMonthDay(date: Date) {
+export function formatDateWeekMonthDay(date: Date | string) {
+  if (typeof date === "string") return formatDateString(date, "EEE, MMMM d");
   return formatDate(removeTimezoneFromDate(date), "EEE, MMMM d");
 }
 
-export function formatDateMonthDayYear(date: Date) {
+export function formatDateMonthDayYear(date: Date | string) {
+  if (typeof date === "string") return formatDateString(date, "MMMM d, yyyy");
   return formatDate(removeTimezoneFromDate(date), "MMMM d, yyyy");
 }
 
-export function formatDateYearMonthDay(date: Date) {
+export function formatDateYearMonthDay(date: Date | string) {
+  if (typeof date === "string") return formatDateString(date, "yyyy-MM-dd");
   return formatDate(removeTimezoneFromDate(date), "yyyy-MM-dd"); //ex 2021-12-31
 }
 
-export function formatShortDate(date: Date) {
+export function formatShortDate(date: Date | string) {
+  if (typeof date === "string") return formatDateString(date, "M/d/yyyy");
   return formatDate(removeTimezoneFromDate(date), "M/d/yyyy");
 }
 
@@ -205,10 +235,22 @@ export function getDisplayedName(realname: string | null): string {
 // }
 
 // TODO: fix hacky
+
 export function getNumNights(from: Date | string, to: Date | string) {
   return Math.round(
     (new Date(to).getTime() - new Date(from).getTime()) / (1000 * 60 * 60 * 24),
   );
+}
+
+export function getPropertyId(url: string): number | null {
+  const parsedUrl = new URL(url);
+  const pathSegments = parsedUrl.pathname.split("/");
+  const propertyId = pathSegments[pathSegments.length - 1];
+  if (propertyId) {
+    return parseInt(propertyId);
+  } else {
+    return null;
+  }
 }
 
 /**
@@ -429,25 +471,4 @@ export function formatTime(time: string) {
   return hour > 12
     ? `${hour - 12}:${fmtdMinutes} PM`
     : `${hour}:${fmtdMinutes} AM`;
-}
-
-/**
- * wrapper for formatDate for YYYY-MM-DD strings only that adds a T00:00
- * to the end of the date string to prevent the timezone from getting converted
- * to UTC and the formatted date being 1 day off.
- *
- * @example
- * ```js
- * formatDateString("2023-03-01", "MMM d, yyyy"); // Mar 1, 2023
- * ```
- */
-export function formatDateString(
-  date: string,
-  formatStr: string,
-  options: FormatOptions = {},
-) {
-  if (!date.match(/^\d{4}-\d{2}-\d{2}$/)) {
-    throw new Error("Invalid date format, must be YYYY-MM-DD");
-  }
-  return formatDate(`${date}T00:00`, formatStr, options);
 }

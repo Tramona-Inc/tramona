@@ -8,7 +8,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { ALL_PROPERTY_TYPES, type Request } from "@/server/db/schema";
+import {
+  ALL_CANCELLATION_POLICIES,
+  ALL_PROPERTY_TYPES,
+  type Request,
+} from "@/server/db/schema";
 import { api } from "@/utils/api";
 import { errorToast, successfulAdminOfferToast } from "@/utils/toasts";
 import { capitalize, plural } from "@/utils/utils";
@@ -79,7 +83,7 @@ const formSchema = z.object({
   checkInInfo: optional(zodString()),
   checkInTime: optional(zodTime),
   checkOutTime: optional(zodTime),
-  cancellationPolicy: optional(zodString()),
+  cancellationPolicy: z.enum(ALL_CANCELLATION_POLICIES),
   imageUrls: z.object({ value: zodUrl() }).array(),
   reviews: z
     .object({
@@ -238,7 +242,7 @@ export default function AdminOfferForm({
       imageUrls: propertyData.imageUrls.map((urlObject) => urlObject.value),
       mapScreenshot: url,
 
-      originalListingSite: originalListing?.Site.siteName,
+      originalListingPlatform: originalListing?.Site.siteName,
       originalListingId: originalListing?.listingId,
       roomsWithBeds,
     };

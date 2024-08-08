@@ -20,6 +20,13 @@ export default function SaveAndExit() {
       setProgress(0);
       void router.push("/host/properties");
     },
+    onError: () => {
+      toast({
+        title: "Can't save property",
+        description:
+          "Some essential information is missing from your property details",
+      });
+    },
   });
 
   function handleSaveAndExit() {
@@ -54,6 +61,7 @@ export default function SaveAndExit() {
       smokingAllowed: listing.smokingAllowed,
       otherHouseRules: listing.otherHouseRules ?? undefined,
       propertyStatus: "Drafted",
+      cancellationPolicy: listing.cancellationPolicy,
     });
   }
 

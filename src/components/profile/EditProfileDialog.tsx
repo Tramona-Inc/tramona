@@ -38,11 +38,6 @@ export default function EditProfileDialog({ state, profileInfo }: Props) {
     defaultValues: profileInfo,
   });
 
-  // React.useEffect(() => {
-  //   if (!profileInfo) return;
-  //   form.reset(profileInfo);
-  // }, [profileInfo]);
-
   const { mutate: updateProfileInfo } =
     api.profile.updateProfileInfo.useMutation({
       onSuccess: () => {
@@ -75,9 +70,7 @@ export default function EditProfileDialog({ state, profileInfo }: Props) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Name</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
+                    <FormControl>{<Input {...field} />}</FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -101,6 +94,7 @@ export default function EditProfileDialog({ state, profileInfo }: Props) {
 
               <PlacesInput
                 name="location"
+                // @ts-expect-error TODO !!!
                 control={form.control}
                 formLabel="Location"
                 className="col-span-full sm:col-span-1"
@@ -112,9 +106,7 @@ export default function EditProfileDialog({ state, profileInfo }: Props) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Facebook Link</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
+                    <FormControl>{<Input {...field} />}</FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -126,9 +118,7 @@ export default function EditProfileDialog({ state, profileInfo }: Props) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>YouTube Link</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
+                    <FormControl>{<Input {...field} />}</FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -140,9 +130,7 @@ export default function EditProfileDialog({ state, profileInfo }: Props) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Instagram Link</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
+                    <FormControl>{<Input {...field} />}</FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -154,9 +142,7 @@ export default function EditProfileDialog({ state, profileInfo }: Props) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Twitter Link</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
+                    <FormControl>{<Input {...field} />}</FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
