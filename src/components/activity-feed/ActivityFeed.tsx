@@ -11,7 +11,7 @@ export default function ActivityFeed({
 }: {
   fillerOnly?: boolean;
 }) {
-  const { data: feed, isLoading: loadingFeed } = api.feed.getFeed.useQuery({});
+  const { data: feed } = api.feed.getFeed.useQuery({});
 
   if (!feed) return <Spinner />;
 
@@ -26,17 +26,16 @@ export default function ActivityFeed({
 
   return (
     <div className="max-w-lg space-y-4 overflow-y-auto">
-      {!loadingFeed &&
-        dataInDisplay?.map((item) => {
-          switch (item.type) {
-            case "request":
-              return <FeedRequestCard key={item.uniqueId} request={item} />;
-            case "offer":
-              return <FeedOfferCard key={item.uniqueId} offer={item} />;
-            case "booking":
-              return <FeedBookingCard key={item.uniqueId} booking={item} />;
-          }
-        })}
+      {dataInDisplay.map((item) => {
+        switch (item.type) {
+          case "request":
+            return <FeedRequestCard key={item.uniqueId} request={item} />;
+          case "offer":
+            return <FeedOfferCard key={item.uniqueId} offer={item} />;
+          case "booking":
+            return <FeedBookingCard key={item.uniqueId} booking={item} />;
+        }
+      })}
     </div>
   );
 }
