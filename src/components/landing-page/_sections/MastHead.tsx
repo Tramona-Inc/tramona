@@ -18,6 +18,13 @@ import CompletedRequestsSection from "./CompletedRequests";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 
+const scrollToTop = () => {
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  });
+};
+
 export default function MastHead() {
 
   return (
@@ -278,7 +285,12 @@ export default function MastHead() {
           <p className="mb-6 text-sm text-zinc-600">
             properties your matches will be coming from
           </p>
-          <Button variant="greenPrimary" size="lg" className="rounded-full">
+          <Button
+            onClick={scrollToTop}
+            variant="greenPrimary"
+            size="lg"
+            className="rounded-full"
+          >
             Submit a request
           </Button>
         </div>
@@ -296,8 +308,13 @@ export default function MastHead() {
           <p className="mb-6 text-sm text-zinc-600">
             increase in occupancy when using Tramona
           </p>
-          <Button variant="greenPrimary" size="lg" className="rounded-full">
-            List my place
+          <Button
+            asChild
+            variant="greenPrimary"
+            size="lg"
+            className="rounded-full"
+          >
+            <Link href="/for-hosts">List my place</Link>
           </Button>
         </div>
 

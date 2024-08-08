@@ -281,6 +281,12 @@ function LargeHeader(props: HeaderProps) {
         {props.type === "dashboard" ? (
           <>
             <Link
+              href="/how-it-works"
+              className="whitespace-nowrap rounded-full border bg-white px-3 py-2 text-sm font-bold text-teal-900 xl:text-base"
+            >
+              How it works
+            </Link>
+            <Link
               href="/help-center"
               className="whitespace-nowrap rounded-full border bg-white px-3 py-2 text-sm font-bold text-teal-900 xl:text-base"
             >
