@@ -2,6 +2,7 @@ import EmptyStateValue from "@/components/_common/EmptyStateSvg/EmptyStateValue"
 import Spinner from "@/components/_common/Spinner";
 import { api } from "@/utils/api";
 import RequestCard from "./RequestCard";
+import { RequestCardAction } from "./RequestCardAction";
 
 export default function PastRequestsTab() {
   const { data: requests } = api.requests.getMyRequests.useQuery();
@@ -11,7 +12,9 @@ export default function PastRequestsTab() {
   return requests.inactiveRequests.length !== 0 ? (
     <div className="space-y-4 pb-32">
       {requests.inactiveRequests.map((request) => (
-        <RequestCard key={request.id} type="guest" request={request} />
+        <RequestCard key={request.id} type="guest" request={request}>
+          <RequestCardAction request={request} />
+        </RequestCard>
       ))}
     </div>
   ) : (

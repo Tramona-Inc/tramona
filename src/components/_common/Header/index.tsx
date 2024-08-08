@@ -16,7 +16,6 @@ import { cn } from "@/utils/utils";
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { TramonaLogo } from "./TramonaLogo";
-import QuestionMarkIcon from "@/components/_icons/QuestionMarkIcon";
 import NavLink from "@/components/_utils/NavLink";
 import {
   DropdownMenu,
@@ -70,12 +69,6 @@ const hamburgerLinksMobile = [
   { name: "Become a host", href: "/for-hosts", icon: <Home /> },
   { name: "How it works", href: "/how-it-works", icon: <Menu /> },
   { name: "24/7 Support", href: "/help-center", icon: <BadgeHelp /> },
-  // { name: "FAQ", href: "/faq", icon: <MessageCircleQuestion /> },
-  // { name: "Contact", href: "/support", icon: <BadgeInfo /> },
-  // { name: "For Hosts", href: "/for-hosts", icon: <DoorOpen /> },
-  // { name: "Link Input", href: "/link-input", icon: <Link2 /> },
-  // { name: "Unclaimed Offers", href: "/unclaimed-offers", icon: <Tag /> },
-  // { name: "Recent Deals", href: "/exclusive-offers", icon: <BadgePercent /> },
 ];
 
 export const hamburgerLinksHostMobileToTraveler = [
