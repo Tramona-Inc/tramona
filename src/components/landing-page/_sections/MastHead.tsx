@@ -23,6 +23,13 @@ const scrollToTop = () => {
 };
 
 export default function MastHead() {
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
   return (
     <section className="relative bg-white pb-32">
       <div className="relative sm:mb-24 sm:h-[700px] lg:mb-0">
@@ -77,11 +84,11 @@ export default function MastHead() {
                     size={"md"}
                     className="flex items-center justify-center border-2 border-[#EBF5F4] bg-teal-900 text-xs font-semibold text-white"
                   >
-                    +450
+                    +800
                   </Avatar>
                 </div>
                 <p className="ml-2 text-xs font-semibold text-[#7E7564]">
-                  Requests made in the last 2 months
+                  Requests made in the last 1 month
                 </p>
               </div>
             </div>
@@ -193,58 +200,87 @@ export default function MastHead() {
         <h2 className="text-center text-2xl font-extrabold lg:text-4xl">
           Why use Tramona?
         </h2>
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-          <div className="flex flex-col items-start gap-3 rounded-lg p-4">
-            <div className="mb-4 flex items-center gap-2">
+        <div className="grid basis-1/3 grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <div className="flex grow flex-col items-start gap-3 rounded-lg p-4">
+            <div className="mb-2 flex items-center gap-2">
               <div className="rounded-lg bg-[#D8E5E3] p-2">
                 <ShieldIcon className="h-6 w-6 text-teal-900" />
               </div>
               <h3 className="text-lg font-bold">Safety</h3>
             </div>
-            <p className="text-sm text-[#584F3E]">
-              Every host we work with{" "}
+            <ul className="basi-1/3 flex h-72 list-inside list-disc flex-col gap-2 text-sm text-[#584F3E]">
+              <li className="h-16 pb-2">
+                Our hosts lists and are also verified on Airbnb
+              </li>
+              <li className="h-16 pb-2">
+                We provide direct links to listings on this platforms
+              </li>
+              <li className="h-16 pb-2">
+                All travelers are verified for your peace of mind.
+              </li>
+              <li className="h-16 pb-2">
+                Minimum of $50,000 coverage per booking
+              </li>
+            </ul>
+            <p className="basis-1/3 place-content-end text-center text-sm text-[#584F3E]">
               <strong className="font-extrabold text-black">
-                also lists on Airbnb
+                Hosts benefits from our strict verification process ensuring
+                reliable guests.
               </strong>
-              . We give you the link to see the property before you book with
-              us.
             </p>
           </div>
-          <div className="flex flex-col items-start gap-3 rounded-lg p-4">
-            <div className="mb-4 flex items-center gap-2">
+          <div className="flex basis-1/3 flex-col items-start gap-3 rounded-lg p-4">
+            <div className="mb-2 flex items-center gap-2">
               <div className="rounded-lg bg-[#D8E5E3] p-2">
                 <CircleDollarSign className="h-6 w-6 text-teal-900" />
               </div>
               <h3 className="text-lg font-bold">Price Transparency</h3>
             </div>
-            <p className="text-sm text-[#584F3E]">
-              We have{" "}
+            <ul className="flex h-72 basis-1/3 list-inside list-disc flex-col gap-2 text-sm text-[#584F3E]">
+              <li className="h-16 pb-2">
+                50% lower fees than Airbnb and other major platforms.
+              </li>
+              <li className="h-16 pb-2">
+                We show you the listings on Airbnb for each property.
+              </li>
+              <li className="h-16 pb-2">
+                Easily compare our prices with Airbnb.
+              </li>
+            </ul>
+            <p className="basis-1/3 place-content-end pb-5 text-center text-sm text-[#584F3E]">
               <strong className="font-extrabold text-black">
-                $0 fees for travelers
-              </strong>{" "}
-              and show you the listing on Airbnb to encourage you to check
-              pricing on the same property.
+                Hosts can earn more with our lower fee structure.
+              </strong>
             </p>
           </div>
-          <div className="flex flex-col items-start gap-3 rounded-lg p-4">
-            <div className="mb-4 flex items-center gap-2">
+          <div className="flex basis-1/3 flex-col items-start gap-3 rounded-lg p-4">
+            <div className="mb-2 flex items-center gap-2">
               <div className="rounded-lg bg-[#D8E5E3] p-2">
                 <TableProperties className="h-6 w-6 text-teal-900" />
               </div>
               <h3 className="text-lg font-bold">Submitting a Request</h3>
             </div>
-            <p className="text-sm text-[#584F3E]">
-              Send your travel details to all hosts in your destination city.
-              They&apos;ll respond by offering you{" "}
+            <ul className="flex h-72 basis-1/3 list-inside list-disc flex-col gap-2 text-sm text-[#584F3E]">
+              <li className="h-16 pb-2">
+                Send travel details to all hosts in your destination.
+              </li>
+              <li className="h-16 pb-2">
+                Receive offers for properties outside your budget on Airbnb,
+                within your budget on Tramona.
+              </li>
+              <li className="h-16 pb-2">
+                Compare directly to the property on Airbnb to see the savings.
+              </li>
+            </ul>
+            <p className="basis-1/3 place-content-end pb-5 text-center text-sm text-[#584F3E]">
               <strong className="font-extrabold text-black">
-                properties outside of your budget on Airbnb, in your budget on
-                Tramona
+                Hosts receive more booking requests from price-conscious
+                travelers.
               </strong>
-              .
             </p>
           </div>
-          <div className="flex flex-col items-start gap-3 rounded-lg p-4 lg:-mt-1">
-            <div className="mb-4 flex items-center gap-2">
+          <div className="flex basis-1/3 flex-col items-start gap-3 rounded-lg p-4 lg:-mt-1">
+            <div className="mb-2 flex items-center gap-2">
               <div className="rounded-lg bg-[#D8E5E3] p-2">
                 <Handshake className="h-6 w-6 text-teal-900" />
               </div>
@@ -252,17 +288,20 @@ export default function MastHead() {
                 Before you book, check Tramona
               </h3>
             </div>
-            <p className="text-sm text-[#584F3E]">
-              Tramona is{" "}
+            <ul className="flex h-72 basis-1/3 list-inside list-disc flex-col gap-2 text-sm text-[#584F3E]">
+              <li className="h-16 pb-2">Tramona is completely free to use.</li>
+              <li className="h-16 pb-2">
+                See exclusive, one-of-a-kind deals everytime.
+              </li>
+              <li className="h-16 pb-2">
+                Effortlessly compare pricing to Airbnb or other platforms before
+                booking.
+              </li>
+            </ul>
+            <p className="basis-1/3 place-content-end pb-5 text-center text-sm text-[#584F3E]">
               <strong className="font-extrabold text-black">
-                completely free to use
+                Hosts get increased visibility and more booking opportunities
               </strong>
-              , and we think you&apos;ll like it. Before you book, check Tramona
-              to see{" "}
-              <strong className="font-extrabold text-black">
-                which special deals hosts will offer you
-              </strong>
-              .
             </p>
           </div>
         </div>

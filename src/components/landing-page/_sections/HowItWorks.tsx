@@ -35,7 +35,7 @@ const HowItWorks: React.FC = () => {
   const divRef = useRef<HTMLDivElement>(null);
 
   return (
-    <section className="relative bg-white md:px-2">
+    <section className="relative bg-white md:px-2 md:mx-12">
       <div className="m-12 flex items-center justify-center">
         <h1 className="text-3xl font-bold md:text-5xl">How it works</h1>
       </div>
@@ -60,28 +60,28 @@ const HowItWorks: React.FC = () => {
           <div className="flex h-full flex-col justify-between">
             <Step
               number={1}
-              title="Specify travel plans"
-              description="Tell us your destination, dates, and budget."
+              title="Travelers make a request"
+              description="They tell us their destination, dates and budget."
             />
             <Step
               number={2}
-              title="That request goes out"
-              description="Your request gets sent to every host with a vacant property your requested city."
+              title="That request goes out to all hosts on Tramona"
+              description="If hosts have a vacancy, they will see that request in the host dashboard."
             />
             <Step
               number={3}
               title="Host response"
-              description="Hosts may accept, deny, or counter your request. If it is a match, you will get a text and it will show up in your requests tab."
+              description="Hosts get the chance to accept, counter offer, or reject and request in their area."
             />
             <Step
               number={4}
-              title="Choose a match you like"
-              description="Choose between all the matches hosts have sent. Get ready to travel!"
+              title="Traveler picks a match"
+              description="The traveler looks through the different matches they received and makes a decision."
             />
             <Step
               number={5}
-              title="Book and enjoy!"
-              description="Book and enjoy!"
+              title="Booking"
+              description="Traveler books and hosts get 1 less vacancy."
               isLast={true}
             />
           </div>
