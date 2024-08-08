@@ -29,10 +29,15 @@ function SingleLocationMap({ lat, lng, icon }: MapPointerProps) {
           defaultCenter={location}
           defaultZoom={13}
           disableDefaultUI={true}
+          // @ts-expect-error their typedefs are wrong
           options={icon ? mapOptions : undefined} // Apply mapOptions only if icon is true
           maxZoom={17}
         >
-          {icon ? <Marker position={location} /> : <MapPointer location={location} />}
+          {icon ? (
+            <Marker position={location} />
+          ) : (
+            <MapPointer location={location} />
+          )}
         </Map>
       )}
     </div>

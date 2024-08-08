@@ -26,7 +26,7 @@ export function LinkInputPropertyCard({
             <p>{property.listingSite}</p>
             <ExternalLinkIcon className="size-[1em]" />
           </div>
-          <p className="line-clamp-1 font-semibold underline-offset-2 group-hover:underline @sm:line-clamp-2">
+          <p className="line-clamp-1 font-semibold underline-offset-2 group-hover:underline @sm:line-clamp-2 @sm:min-h-[2lh]">
             {property.title}
           </p>
           <p className="line-clamp-2 text-sm text-muted-foreground">

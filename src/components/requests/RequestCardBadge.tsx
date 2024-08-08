@@ -24,7 +24,6 @@ export default function RequestCardBadge({
           <TooltipTrigger>
             <Badge size={size} variant="yellow">
               Pending {fmtdTimeAgo}
-              {/* <QuestionMarkCircledIcon /> */}
             </Badge>
           </TooltipTrigger>
           <TooltipContent>

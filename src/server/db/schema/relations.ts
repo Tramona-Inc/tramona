@@ -18,7 +18,7 @@ import {
 import { emergencyContacts } from "./tables/emergencyContacts";
 import { offers } from "./tables/offers";
 import { bookedDates, properties } from "./tables/properties";
-import { requestGroups, requests } from "./tables/requests";
+import { requests } from "./tables/requests";
 import { requestsToProperties } from "./tables/requestsToProperties";
 import { reservedDateRanges } from "./tables/reservedDateRanges";
 import { superhogActionOnTrips } from "./tables/superhogActionsOnTrips";
@@ -41,7 +41,6 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   hostProfile: one(hostProfiles),
   groups: many(groupMembers),
   ownedGroups: many(groups),
-  requestGroupsCreated: many(requestGroups),
   reservedDateRanges: many(reservedDateRanges),
   hostTeams: many(hostTeamMembers),
   bids: many(bids),
@@ -112,10 +111,6 @@ export const requestsRelations = relations(requests, ({ one, many }) => ({
     fields: [requests.madeByGroupId],
     references: [groups.id],
   }),
-  requestGroup: one(requestGroups, {
-    fields: [requests.requestGroupId],
-    references: [requestGroups.id],
-  }),
   offers: many(offers),
   requestsToProperties: many(requestsToProperties),
   linkInputProperty: one(linkInputProperties, {
@@ -146,17 +141,6 @@ export const countersRelations = relations(counters, ({ one }) => ({
     references: [properties.id],
   }),
 }));
-
-export const requestGroupsRelations = relations(
-  requestGroups,
-  ({ one, many }) => ({
-    requests: many(requests),
-    createdByUser: one(users, {
-      fields: [requestGroups.createdByUserId],
-      references: [users.id],
-    }),
-  }),
-);
 
 export const requestsToPropertiesRelations = relations(
   requestsToProperties,
