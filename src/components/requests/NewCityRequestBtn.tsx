@@ -1,7 +1,5 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import CityRequestFormContainer from "../landing-page/SearchBars/CityRequestFormContainer";
-
 import {
   Dialog,
   DialogContent,
@@ -11,12 +9,10 @@ import {
 import { PlusIcon } from "lucide-react";
 
 export function NewCityRequestBtn() {
-  const [open, setOpen] = useState(false);
-
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog>
       <DialogTrigger asChild>
-        <Button className="mb-4 rounded-md pr-3" variant="secondary">
+        <Button variant="secondary">
           <PlusIcon className="-ml-1 size-5" />
           New request
         </Button>
