@@ -23,6 +23,7 @@ import { bookedDates, properties } from "./tables/properties";
 import { requestGroups, requests } from "./tables/requests";
 import { requestsToProperties } from "./tables/requestsToProperties";
 import { reservedDateRanges } from "./tables/reservedDateRanges";
+import { superhogActionOnTrips } from "./tables/superhogActionsOnTrips";
 import { superhogRequests } from "./tables/superhogRequests";
 import { referralCodes, referralEarnings, users } from "./tables/users";
 import { trips } from "./tables/trips";
@@ -332,6 +333,20 @@ export const superhogRequestsRelations = relations(
       references: [users.id],
     }),
     trip: many(trips),
+    superhogActionOnTrips: many(superhogActionOnTrips),
+  }),
+);
+export const superhogActionOnTripsRelations = relations(
+  superhogActionOnTrips,
+  ({ one }) => ({
+    trip: one(trips, {
+      fields: [superhogActionOnTrips.tripId],
+      references: [trips.id],
+    }),
+    superhogRequest: one(superhogRequests, {
+      fields: [superhogActionOnTrips.superhogRequestId],
+      references: [superhogRequests.id],
+    }),
   }),
 );
 
@@ -372,6 +387,7 @@ export const tripsRelations = relations(trips, ({ one, many }) => ({
     references: [superhogRequests.id],
   }),
   superhogErrors: many(superhogErrors),
+  superhogActions: many(superhogActionOnTrips),
 }));
 
 export const emergencyContactsRelations = relations(

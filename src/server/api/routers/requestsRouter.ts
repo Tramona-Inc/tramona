@@ -579,13 +579,15 @@ export async function handleRequestSubmission(
   const fmtdDateRange = formatDateRange(input.checkIn, input.checkOut);
   const fmtdNumGuests = plural(input.numGuests ?? 1, "guest");
 
-  sendSlackMessage(
-    [
-      `*${name} just made a request: ${input.location}*`,
-      `requested ${fmtdPrice}/night · ${fmtdDateRange} · ${fmtdNumGuests}`,
-      `<https://tramona.com/admin|Go to admin dashboard>`,
-    ].join("\n"),
-  );
+  if (user.role !== "admin") {
+    sendSlackMessage(
+      [
+        `*${name} just made a request: ${input.location}*`,
+        `requested ${fmtdPrice}/night · ${fmtdDateRange} · ${fmtdNumGuests}`,
+        `<https://tramona.com/admin|Go to admin dashboard>`,
+      ].join("\n"),
+    );
+  }
 
   return transactionResults;
 }

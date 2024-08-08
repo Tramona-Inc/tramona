@@ -43,11 +43,11 @@ export const trips = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
+    paymentCaptured: boolean("payment_captured").notNull().default(false),
+    hostPayed: boolean("host_payed").notNull().default(false),
     superhogRequestId: integer("superhog_request_id").references(
       () => superhogRequests.id,
     ),
-    paymentCaptured: boolean("payment_captured").notNull().default(false),
-    hostPayed: boolean("host_payed").notNull().default(false),
   },
   (t) => ({
     groupIdIdx: index().on(t.groupId),

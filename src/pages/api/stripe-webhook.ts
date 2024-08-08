@@ -89,6 +89,7 @@ export default async function webhook(
               );
 
             const requestId = paymentIntentSucceeded.metadata.request_id;
+
             if (requestId && !isNaN(parseInt(requestId))) {
               await db
                 .update(requests)
@@ -102,6 +103,7 @@ export default async function webhook(
                   parseInt(paymentIntentSucceeded.metadata.offer_id!),
                 ),
               });
+              console.log("Creating trip here is the offer first", offer);
               //create trip here
               if (offer?.request) {
                 const currentTrip = await db
@@ -118,7 +120,7 @@ export default async function webhook(
                     totalPriceAfterFees: paymentIntentSucceeded.amount,
                   })
                   .returning();
-
+                console.log("Created trip", currentTrip);
                 //superhog reservation
 
                 //creating a superhog reservation only if does not exist
