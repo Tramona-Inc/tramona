@@ -15,18 +15,16 @@ import { Input } from "@/components/ui/input";
 import { getNumNights, getPropertyId } from "@/utils/utils";
 import { api } from "@/utils/api";
 import { errorToast } from "@/utils/toasts";
-import { type FeedItem } from "@/components/activity-feed/ActivityFeed";
+import { type FeedBookingItem } from "@/components/activity-feed/ActivityFeed";
+import { zodUrl, zodString, optional } from "@/utils/zod-utils";
 
 const formSchema = z.object({
-  userName: z.string().min(1, "User name is required"),
-  userProfilePicUrl: z.union([
-    z.literal(""),
-    z.string().trim().url("Must be a valid URL"),
-  ]),
-  checkIn: z.string().min(1, "Start date is required"),
-  checkOut: z.string().min(1, "End date is required"),
-  propertyUrl: z.string().trim().url("Must be a valid URL"),
-  entryCreationTime: z.string().min(1, "Offer creation time is required"),
+  userName: zodString(),
+  userProfilePicUrl: optional(zodUrl()),
+  checkIn: zodString(),
+  checkOut: zodString(),
+  propertyUrl: zodUrl(),
+  entryCreationTime: zodString(),
   nightlyPrice: z.number().min(1, "Nightly price must be at least 1"),
   originalNightlyPrice: z
     .number()
@@ -39,7 +37,7 @@ export default function CreateBookingForm({
   booking,
   afterSubmit,
 }: {
-  booking?: FeedItem & { type: "booking" };
+  booking?: FeedBookingItem;
   afterSubmit?: () => void;
 }) {
   const createFillerBooking = api.feed.createFillerBooking.useMutation();

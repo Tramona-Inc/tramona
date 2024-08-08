@@ -10,7 +10,7 @@ import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 
 export default function Page() {
   return (
-    <DashboardLayout type="guest">
+    <DashboardLayout>
       <section className="relative bg-white pb-4">
         <div className="relative h-[500px] lg:h-[511px]">
           <div className="absolute inset-0">

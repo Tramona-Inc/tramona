@@ -20,7 +20,7 @@ export default function TripDetailsPage() {
   );
 
   return (
-    <DashboardLayout type="guest">
+    <DashboardLayout>
       <Head>
         <title>My Trips | Tramona</title>
       </Head>

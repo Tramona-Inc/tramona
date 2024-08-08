@@ -1,5 +1,3 @@
-"use client";
-
 import React, { type ReactElement, useEffect } from "react";
 
 import { useState } from "react";

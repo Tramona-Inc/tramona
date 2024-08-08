@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { useState } from "react";
 import CreateBookingForm from "./BookingForm";
-import { type FeedItem } from "@/components/activity-feed/ActivityFeed";
+import { type FeedBookingItem } from "@/components/activity-feed/ActivityFeed";
 import { toast } from "@/components/ui/use-toast";
 import { api } from "@/utils/api";
 import { errorToast } from "@/utils/toasts";
@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 export default function CreateBookingDialog({
   children,
   booking,
-}: React.PropsWithChildren<{ booking?: FeedItem & { type: "booking" } }>) {
+}: React.PropsWithChildren<{ booking?: FeedBookingItem }>) {
   const [isOpen, setIsOpen] = useState(false);
   const deleteFillerBooking = api.feed.deleteFillerBooking.useMutation();
 

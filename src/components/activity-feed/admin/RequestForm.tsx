@@ -16,7 +16,7 @@ import PlacesInput from "@/components/_common/PlacesInput";
 import { getNumNights } from "@/utils/utils";
 import { api } from "@/utils/api";
 import { errorToast } from "@/utils/toasts";
-import { type FeedItem } from "@/components/activity-feed/ActivityFeed";
+import { type FeedRequestItem } from "@/components/activity-feed/ActivityFeed";
 import {
   createCreationTime,
   createRandomDate,
@@ -43,7 +43,7 @@ export default function CreateRequestForm({
   request,
   afterSubmit,
 }: {
-  request?: FeedItem & { type: "request" };
+  request?: FeedRequestItem;
   afterSubmit?: () => void;
 }) {
   const createFillerRequest = api.feed.createFillerRequest.useMutation();
@@ -112,7 +112,7 @@ export default function CreateRequestForm({
     const userData = await createUserNameAndPic();
     let userName = "";
     let userProfilePicUrl = "";
-    if (userData?.[0]) {
+    if (userData[0]) {
       userName = userData[0].name;
       userProfilePicUrl = userData[0].picture;
     }
@@ -122,10 +122,8 @@ export default function CreateRequestForm({
     const locationAndPrices = promise.data;
 
     form.setValue("entryCreationTime", creationTime);
-    if (userData) {
-      form.setValue("userName", userName);
-      form.setValue("userProfilePicUrl", userProfilePicUrl);
-    }
+    form.setValue("userName", userName);
+    form.setValue("userProfilePicUrl", userProfilePicUrl);
     if (checkIn && checkOut) {
       form.setValue("checkIn", checkIn);
       form.setValue("checkOut", checkOut);
@@ -240,7 +238,6 @@ export default function CreateRequestForm({
         />
 
         <PlacesInput
-          // @ts-expect-error TODO !!!
           control={form.control}
           name="location"
           formLabel="Location"
