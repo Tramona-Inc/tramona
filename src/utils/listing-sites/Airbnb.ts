@@ -1,7 +1,8 @@
+import axios from "axios";
 import { type ListingSite } from ".";
 import { formatDateYearMonthDay } from "../utils";
 import * as cheerio from "cheerio";
-import HttpsProxyAgent from 'https-proxy-agent';
+import {HttpsProxyAgent} from 'https-proxy-agent';
 export const Airbnb: ListingSite<"Airbnb"> = {
   siteName: "Airbnb",
   baseUrl: "https://www.airbnb.com",
@@ -82,23 +83,40 @@ export const Airbnb: ListingSite<"Airbnb"> = {
 
         const proxyAgent = new HttpsProxyAgent('http://us-ca.proxymesh.com:31280'); // Replace with your proxy URL
 
-        const jsonStr = await fetch(checkoutUrl, {
+        const response = await axios.get(checkoutUrl, {
           headers: airbnbRequestHeaders,
-          agent: proxyAgent
-        })
-          .then((res) => {
-            console.log("the first then:",{ res });
-            return res.text();
-          })
-          .then((html) => {
-            console.log("the second then:", { html });
-            const $ = cheerio.load(html);
-            return $("#data-deferred-state-0").text();
-          }).catch((err) => {
-            console.error(err);
-            console.log('got here');
-            throw err;
-          });
+          httpAgent: proxyAgent,
+          httpsAgent: proxyAgent,
+        }).catch((err) => {
+          console.error(err);
+          console.log("got here");
+          throw err;
+        });
+
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        const html = response.data;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        const $ = cheerio.load(html);
+        const jsonStr = $("#data-deferred-state-0").text();
+
+        // const jsonStr = await fetch(checkoutUrl, {
+        //   headers: airbnbRequestHeaders,
+        //   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        //   agent: proxyAgent
+        // })
+        //   .then((res) => {
+        //     console.log("the first then:",{ res });
+        //     return res.text();
+        //   })
+        //   .then((html) => {
+        //     console.log("the second then:", { html });
+        //     const $ = cheerio.load(html);
+        //     return $("#data-deferred-state-0").text();
+        //   }).catch((err) => {
+        //     console.error(err);
+        //     console.log('got here');
+        //     throw err;
+        //   });
 
         const priceRegex =
           /"priceBreakdown":.*"total":.*"total":.*"amountMicros":"(\d+)"/;
