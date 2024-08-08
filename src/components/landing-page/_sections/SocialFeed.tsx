@@ -213,7 +213,7 @@ const InfiniteScroll: React.FC = () => {
 const SocialFeed: React.FC = () => {
   return (
     <>
-      <section className="relative bg-white md:px-2">
+      <section className="relative bg-white md:px-2 md:mx-12">
         <div className="mx-auto flex items-center justify-center p-5 sm:p-0 md:mt-2 lg:mt-2 2xl:mt-48">
           <div className="md:text-center md:mx-24 md:mb-12">
             <div className="md:px-4 py-2">
