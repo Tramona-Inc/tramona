@@ -1,6 +1,7 @@
 import {
   BadgeHelp,
   BadgeInfo,
+  DoorOpen,
   Home,
   Menu,
   MenuIcon,
