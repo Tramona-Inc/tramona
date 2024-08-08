@@ -75,8 +75,9 @@ export default function MessagesPopover() {
 
   if (!session) {
     void fetchMessagesForGuest(conversationId ?? "");
+  }else{
+    void fetchInitialMessages(conversationId ?? "");
   }
-  void fetchInitialMessages(conversationId ?? "");
 
   const messages = conversationId
     ? (conversations[conversationId]?.messages ?? [])
