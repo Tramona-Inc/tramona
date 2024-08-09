@@ -61,7 +61,7 @@ export default function DateOfBirth() {
   }
 
   return (
-    <MainLayout type="auth" className="flex flex-col justify-center gap-5 p-4">
+    <MainLayout className="flex flex-col justify-center gap-5 p-4">
       <Head>
         <title>Date of Birth | Tramona</title>
       </Head>

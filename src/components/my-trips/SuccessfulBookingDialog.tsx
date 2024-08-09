@@ -33,7 +33,7 @@ export default function SuccessfulBidDialog({
                 <Image
                   src={booking.trip.property.imageUrls[0]!}
                   alt=""
-                  layout="fill"
+                  fill
                   objectFit="cover"
                 />
               </div>

@@ -1,13 +1,13 @@
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { buttonVariants } from "../ui/button";
 import { useSession } from "next-auth/react";
 import { api } from "@/utils/api";
 import { formatCurrency } from "@/utils/utils";
 import Spinner from "../_common/Spinner";
+import { useRouter } from "next/router";
 
 export default function AccountSidebar() {
-  const pathname = usePathname();
+  const { pathname } = useRouter();
   const { data: session, status } = useSession({ required: true });
   const { data, isLoading } = api.users.myReferralCode.useQuery();
 

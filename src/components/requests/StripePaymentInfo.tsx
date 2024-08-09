@@ -6,7 +6,7 @@ import {
   EmbeddedCheckout,
 } from "@stripe/react-stripe-js";
 import React, { useEffect, useState, useCallback, useMemo } from "react";
-import { usePathname } from "next/navigation";
+import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import { TAX_PERCENTAGE } from "@/utils/constants";
 import type { OfferWithDetails } from "../offers/OfferPage";
@@ -23,7 +23,7 @@ const StripePaymentInfo = ({
   offer: OfferWithDetails;
 }) => {
   const stripePromise = useStripe();
-  const cancelUrl = usePathname();
+  const { pathname } = useRouter();
   const session = useSession({ required: true });
 
   const numNights = useMemo(
@@ -60,7 +60,7 @@ const StripePaymentInfo = ({
         price: total,
         tramonaServiceFee: tramonaServiceFee,
         description: "From: " + formatDateRange(offer.checkIn, offer.checkOut),
-        cancelUrl: cancelUrl,
+        cancelUrl: pathname,
         images: property.imageUrls,
         totalSavings: originalTotal - (total + tax),
         phoneNumber: session.data.user.phoneNumber ?? "",

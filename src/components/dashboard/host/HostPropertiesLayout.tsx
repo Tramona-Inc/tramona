@@ -1,4 +1,3 @@
-import HostPropertyForm from "@/components/host/HostPropertyForm";
 import {
   Accordion,
   AccordionContent,
@@ -6,14 +5,6 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Pencil, PlusIcon, CircleCheckBig } from "lucide-react";
 import HostProperties from "./HostProperties";
@@ -174,38 +165,6 @@ export default function HostPropertiesLayout({
         )}
       </div>
     </div>
-  );
-}
-
-export function NewPropertyBtn({
-  open,
-  setOpen,
-}: {
-  open: boolean;
-  setOpen: (open: boolean) => void;
-}) {
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button
-          className="bg-white pl-3 font-semibold"
-          variant="secondaryLight"
-        >
-          <PlusIcon />
-          New Listing
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Add your Property</DialogTitle>
-          <DialogDescription>
-            Please input all the information necessary for travelers to start
-            booking with your property.
-          </DialogDescription>
-        </DialogHeader>
-        <HostPropertyForm setOpen={setOpen} />
-      </DialogContent>
-    </Dialog>
   );
 }
 

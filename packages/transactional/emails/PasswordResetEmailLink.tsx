@@ -12,17 +12,17 @@ export default function PasswordResetEmailLink({
     <Layout title_preview="Reset Your Password">
       <div className="pt-2" style={{ textAlign: "center" }}>
         <div className="text-brand px-6 text-left text-base">
-          <Text className="text-brand text-left text-4xl font-bold">
-            {name ? `Hi ${name},` : ""}
-          </Text>
+          {name && (
+            <Text className="text-brand text-left text-4xl font-bold">
+              name ? `Hi ${name},`
+            </Text>
+          )}
           <Text className="text-brand text-left">
             Please click on the following link to reset your password
           </Text>
-          <Text className="text-brand">
-            <i>
-              Please note that this link will expire in <strong>30 mins</strong>
-              .
-            </i>
+          <Text className="text-muted">
+            Please note that this link will expire in{" "}
+            <strong>30 minutes</strong>.
           </Text>
         </div>
         <CustomButton link={url} title="Reset Password" />

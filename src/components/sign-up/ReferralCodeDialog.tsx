@@ -29,18 +29,6 @@ import Spinner from "../_common/Spinner";
 import { errorToast } from "@/utils/toasts";
 import UserAvatar from "../_common/UserAvatar";
 
-export default function ReferralCodeDialog() {
-  const [open, setOpen] = useState(true);
-
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent>
-        <ReferralCodeForm />
-      </DialogContent>
-    </Dialog>
-  );
-}
-
 export function ReferralCodeForm() {
   const mutation = api.referralCodes.startUsingCode.useMutation();
 

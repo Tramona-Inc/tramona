@@ -1,4 +1,4 @@
-import { type FeedItem } from "@/components/activity-feed/ActivityFeed";
+import { type FeedBookingItem } from "@/components/activity-feed/ActivityFeed";
 import { cn, formatCurrency, getNumNights } from "@/utils/utils";
 import BaseCard from "./BaseCard";
 import { CarouselDots } from "../_common/carousel-dots";
@@ -20,7 +20,7 @@ import { useSession } from "next-auth/react";
 export default function FeedBookingCard({
   booking,
 }: {
-  booking: FeedItem & { type: "booking" };
+  booking: FeedBookingItem;
 }) {
   const { data: session } = useSession();
   const isAdmin = session && session.user.role === "admin";

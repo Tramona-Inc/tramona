@@ -8,12 +8,13 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import PlacesPopover from "./PlacesPopover";
 import { LocateFixed } from "lucide-react";
 import { Button } from "../ui/button";
-import { MapModal } from "../MapModal";
+import { MapModal } from "./MapModal";
+import { FieldValues } from "react-hook-form";
 
 /**
  * pass setRadius and setLatLng to show the map pin
  */
-export default function PlacesInput({
+export default function PlacesInput<TFieldValues extends FieldValues>({
   className,
   formLabel,
   placeholder,
@@ -24,7 +25,7 @@ export default function PlacesInput({
   latLng,
   setLatLng,
   ...props
-}: Omit<React.ComponentProps<typeof FormField>, "render"> & {
+}: Omit<React.ComponentProps<typeof FormField<TFieldValues>>, "render"> & {
   className?: string;
   formLabel: string;
   placeholder?: string;
@@ -32,7 +33,7 @@ export default function PlacesInput({
   icon?: React.FC<{ className?: string }>;
   radius?: number;
   setRadius?: (radius?: number) => void;
-  latLng: { lat: number; lng: number };
+  latLng?: { lat: number; lng: number };
   setLatLng?: (latLng: { lat: number; lng: number }) => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -43,7 +44,8 @@ export default function PlacesInput({
       {...props}
       render={({ field }) => {
         const fieldIsFilled = !!field.value;
-        const showMapPin = fieldIsFilled && setLatLng && setRadius;
+        const showMapPin =
+          fieldIsFilled && !!latLng && !!setLatLng && !!setRadius;
 
         const mapPin = !showMapPin ? null : (
           <Dialog>

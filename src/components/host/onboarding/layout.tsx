@@ -1,4 +1,4 @@
-import Header from "@/components/_common/Header";
+import { Header } from "@/components/_common/Layout/header/Header";
 import { useSession } from "next-auth/react";
 
 export default function OnboardingLayout({
@@ -10,7 +10,7 @@ export default function OnboardingLayout({
 
   return (
     <>
-      <Header type="dashboard" sidebarType={"host"} />
+      <Header />
       <div className="flex min-h-screen-minus-header flex-col">{children}</div>
     </>
   );

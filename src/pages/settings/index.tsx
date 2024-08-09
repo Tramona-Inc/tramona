@@ -7,7 +7,7 @@ import Link from "next/link";
 
 export default function Settings() {
   return (
-    <DashboardLayout type="guest">
+    <DashboardLayout>
       <Head>
         <title>Settings | Tramona</title>
       </Head>
@@ -15,19 +15,19 @@ export default function Settings() {
       <div className="min-h-screen-minus-header space-y-4 p-6">
         <h1 className="text-3xl font-bold">Settings</h1>
         <div>
-        {settingsLinks.map(({ href, label }) => (
-          <Button
-            key={href}
-            variant="ghost"
-            asChild
-            className="w-full justify-between"
-          >
-            <Link href={href}>
-              {label}
-              <ChevronRight />
-            </Link>
-          </Button>
-        ))}
+          {settingsLinks.map(({ href, label }) => (
+            <Button
+              key={href}
+              variant="ghost"
+              asChild
+              className="w-full justify-between"
+            >
+              <Link href={href}>
+                {label}
+                <ChevronRight />
+              </Link>
+            </Button>
+          ))}
         </div>
       </div>
     </DashboardLayout>
