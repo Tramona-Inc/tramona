@@ -31,7 +31,7 @@ export default function AdminMessages() {
   // console.log(conversationId)
 
   const { fetchMessagesForGuest, fetchInitialMessages } = useMessage();
-  if (!session || session.user.role === "admin") {
+  if (!session) {
     void fetchMessagesForGuest(conversationId ?? "");
     // void fetchInitialMessages(conversationId ?? "")
   } else {
