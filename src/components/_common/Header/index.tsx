@@ -110,7 +110,9 @@ function LargeHeader() {
       <div className="flex-1" />
 
       {isHostLoading ? (
-        <Skeleton className="h-9 w-32 rounded-full" />
+        status === "loading" ? null : (
+          <Skeleton className="h-9 w-32 rounded-full" />
+        )
       ) : isHost ? (
         <HostDashboardSwitcher />
       ) : (
@@ -122,7 +124,7 @@ function LargeHeader() {
         </Link>
       )}
 
-      {status == "unauthenticated" && (
+      {status === "unauthenticated" && (
         <>
           {headerLinks2.map((link) => (
             <Link

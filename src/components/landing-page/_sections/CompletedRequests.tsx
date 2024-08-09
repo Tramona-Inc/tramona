@@ -83,7 +83,7 @@ const PropertyCard = ({
           <span className="ml-2 text-sm text-gray-500 line-through">
             ${property.originalPrice}
           </span>
-          <span className="ml-2 rounded bg-blue-500 px-2 py-1 text-xs text-white">
+          <span className="ml-2 rounded bg-primaryGreen px-2 py-1 text-xs text-white">
             {Math.round(
               ((property.originalPrice - property.tramonaPrice) /
                 property.originalPrice) *
@@ -99,7 +99,7 @@ const PropertyCard = ({
 
 export default function CompletedRequestsSection() {
   return (
-    <div className="relative flex h-96 flex-row items-center justify-center overflow-hidden rounded-lg sm:px-20 lg:border lg:bg-background lg:shadow-xl">
+    <div className="relative flex h-[500px] flex-row items-center justify-center overflow-hidden sm:px-20">
       <Marquee pauseOnHover vertical className="[--duration:20s]">
         {leftImages.map((property, index) => (
           <PropertyCard key={index} property={property} />

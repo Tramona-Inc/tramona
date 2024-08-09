@@ -23,13 +23,6 @@ const scrollToTop = () => {
 };
 
 export default function MastHead() {
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  };
-
   return (
     <section className="relative bg-white pb-32">
       <div className="relative sm:mb-24 sm:h-[700px] lg:mb-0">
@@ -46,13 +39,11 @@ export default function MastHead() {
         <div className="relative grid h-full grid-cols-1 p-4 lg:grid-cols-1">
           <div className="flex flex-col justify-center">
             <div className="relative pt-10 text-center">
-              <h1 className="mx-auto max-w-3xl text-balance text-3xl font-bold text-zinc-900 lg:text-5xl">
-                Book the same properties you see on Airbnb for less
+              <h1 className="mx-auto max-w-3xl text-balance text-3xl font-bold lg:text-5xl">
+                Agree on a Price with Hosts Every Time
               </h1>
-              <p className="mx-auto max-w-[38rem] pt-4 text-xs font-semibold text-zinc-900 lg:pt-4 lg:text-base">
-                With Airbnb hosts averaging 60% vacancy rates year-round,
-                Tramona matches you with hosts who are willing to meet your
-                price.
+              <p className="mx-auto max-w-[38rem] pt-4 text-xs font-semibold lg:pt-4 lg:text-base">
+                Traveling outside your budget, now within reach.
               </p>
               <div className="hidden items-center justify-center pt-4 lg:flex">
                 <div className="-ml-2">
@@ -88,7 +79,7 @@ export default function MastHead() {
                   </Avatar>
                 </div>
                 <p className="ml-2 text-xs font-semibold text-[#7E7564]">
-                  Requests made in the last 1 month
+                  Requests made this month
                 </p>
               </div>
             </div>
@@ -171,7 +162,7 @@ export default function MastHead() {
       </div>
 
       <div className="flex justify-center">
-        <div className="mt-20 lg:grid lg:grid-cols-2 xl:gap-24">
+        <div className="mt-20 p-4 lg:grid lg:grid-cols-2 xl:gap-24">
           <div className="flex flex-col space-y-1 pb-6 text-left lg:mr-24 lg:flex lg:flex-col lg:justify-center lg:space-y-4">
             <h2 className="text-2xl font-extrabold lg:text-4xl">
               See completed requests
@@ -185,9 +176,7 @@ export default function MastHead() {
               </Button>
             </div>
           </div>
-          <div className="flex items-center justify-center">
-            <CompletedRequestsSection />
-          </div>
+          <CompletedRequestsSection />
           <div className="flex justify-center pt-8 lg:hidden">
             <Button asChild variant="greenPrimary" size="lg">
               <Link href="/exclusive-offers">View deals</Link>
