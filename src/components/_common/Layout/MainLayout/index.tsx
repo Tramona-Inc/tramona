@@ -1,6 +1,6 @@
 import { cn } from "@/utils/utils";
 import React from "react";
-import Header from "../../header/Header";
+import { Header } from "../header/Header";
 import Footer from "../Footer";
 
 type MainLayoutProps = {

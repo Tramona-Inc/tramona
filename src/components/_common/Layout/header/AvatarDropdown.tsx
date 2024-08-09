@@ -12,7 +12,6 @@ import {
   LogOutIcon,
   SettingsIcon,
   User2Icon,
-  UserCheckIcon,
 } from "lucide-react";
 import { type Session } from "next-auth";
 import { signOut } from "next-auth/react";

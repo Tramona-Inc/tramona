@@ -8,10 +8,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SkeletonText } from "@/components/ui/skeleton";
 import { api } from "@/utils/api";
-import UserAvatar from "../UserAvatar";
 import { type HostTeam, type HostProfile } from "@/server/db/schema";
 import { PlusCircleIcon } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
+import UserAvatar from "../../UserAvatar";
 
 export default function HostTeamsDropdownItems({
   hostProfile,

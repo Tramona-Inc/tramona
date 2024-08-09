@@ -6,7 +6,7 @@ import { useIsMd } from "@/utils/utils";
 import { api } from "@/utils/api";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
-import { Header } from "../../header/Header";
+import { Header } from "../header/Header";
 
 type DashboardLayoutProps = {
   children: React.ReactNode;
