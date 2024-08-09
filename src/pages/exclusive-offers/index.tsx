@@ -59,7 +59,7 @@ export default function ExclusiveOffersPage() {
         }}
       />
       <DashboardLayout>
-        <div className="flex min-h-screen-minus-header items-start justify-center px-4 pb-footer-height pt-5">
+        <div className="flex min-h-screen-minus-header items-start justify-center px-4 pb-32 pt-5">
           <div className="mx-auto max-w-7xl">
             <div className="flex items-center">
               <h1 className="flex-1 py-4 text-center text-2xl font-bold tracking-tight text-black lg:text-4xl">

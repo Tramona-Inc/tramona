@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { api } from "@/utils/api";
 import { useRequireNoAuth } from "@/utils/auth-utils";
 import { errorToast } from "@/utils/toasts";
-import { zodEmail, zodPassword, zodString } from "@/utils/zod-utils";
+import { zodEmail, zodPassword } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { InferGetStaticPropsType } from "next";
 import { getProviders, signIn } from "next-auth/react";
