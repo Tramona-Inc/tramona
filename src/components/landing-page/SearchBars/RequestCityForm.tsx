@@ -115,7 +115,7 @@ export default function RequestCityForm() {
                 <Input
                   {...field}
                   label="Maximum nightly price"
-                  placeholder="Price per night"
+                  placeholder="Name your price"
                   suffix="/night"
                   icon={DollarSignIcon}
                   variant="lpDesktop"

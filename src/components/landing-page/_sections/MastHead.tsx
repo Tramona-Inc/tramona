@@ -21,7 +21,7 @@ const scrollToTop = () => {
 export default function MastHead() {
   return (
     <section className="relative bg-white pb-32">
-      <div className="relative sm:mb-24 sm:h-[700px] lg:mb-0">
+      <div className="relative sm:mb-24 sm:h-[640px] lg:mb-0">
         <div className="absolute inset-0">
           <Image
             src={landingBg}

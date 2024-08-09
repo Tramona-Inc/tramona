@@ -239,7 +239,7 @@ function WhatAreYouWaitingFor() {
 }
 
 export async function getStaticProps() {
-  const requests = await getFeed();
+  const requests = await getFeed({ maxNumEntries: 10 });
 
   return {
     props: { serializedRequests: SuperJSON.serialize(requests) },
