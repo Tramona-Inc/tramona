@@ -29,10 +29,10 @@ import {
 import { sample } from "lodash";
 import { db } from "@/server/db";
 
-async function getFeed({ minNumEntries = 30 } = {}) {
+export async function getFeed({ minNumEntries = 30 } = {}) {
   {
     // 1. get the requests
-    const groupedRequests = await db.query.requests.findMany({
+    const requests = await db.query.requests.findMany({
       columns: {
         madeByGroupId: true,
         id: true,
@@ -185,7 +185,7 @@ async function getFeed({ minNumEntries = 30 } = {}) {
 
     // Merge and sort the data
     const mergedData = [
-      ...groupedRequests.map((item) => ({
+      ...requests.map((item) => ({
         ...item,
         uniqueId: `req-${item.id}`,
         type: "request" as const,
@@ -525,8 +525,11 @@ export const feedRouter = createTRPCRouter({
       if (randomDate.checkIn && randomDate.checkOut) {
         numNights = getNumNights(randomDate.checkIn, randomDate.checkOut);
       }
-      if (randomDate.checkIn && randomDate.checkOut && offer) {
-        // @ts-expect-error TODO !!!
+      if (
+        randomDate.checkIn &&
+        randomDate.checkOut &&
+        offer?.property.originalNightlyPrice
+      ) {
         await db.insert(fillerOffers).values({
           userName: username,
           userProfilePicUrl: picture,
@@ -556,8 +559,12 @@ export const feedRouter = createTRPCRouter({
       if (randomDate.checkIn && randomDate.checkOut) {
         numNights = getNumNights(randomDate.checkIn, randomDate.checkOut);
       }
-      if (booking && randomDate.checkIn && randomDate.checkOut) {
-        // @ts-expect-error TODO !!!
+      if (
+        booking &&
+        randomDate.checkIn &&
+        randomDate.checkOut &&
+        booking.property.originalNightlyPrice
+      ) {
         await db.insert(fillerBookings).values({
           userName: username,
           userProfilePicUrl: picture,

@@ -13,16 +13,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { cn } from "@/utils/utils";
-import { type FeedItem } from "./ActivityFeed";
+import { type FeedOfferItem } from "./ActivityFeed";
 import { Button } from "@/components/ui/button";
 import OfferDialog from "./admin/OfferDialog";
 import { useSession } from "next-auth/react";
 
-export default function FeedOfferCard({
-  offer,
-}: {
-  offer: FeedItem & { type: "offer" };
-}) {
+export default function FeedOfferCard({ offer }: { offer: FeedOfferItem }) {
   const { data: session } = useSession();
   const isAdmin = session && session.user.role === "admin";
 

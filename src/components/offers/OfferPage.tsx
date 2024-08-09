@@ -132,7 +132,7 @@ export default function OfferPage({
                         className={`hover:opacity-90 ${
                           index === 0 || index % 3 === 0
                             ? "col-span-2 row-span-2"
-                            : property.imageUrls.length - 1 == index &&
+                            : property.imageUrls.length - 1 === index &&
                                 index % 4 === 0
                               ? "col-span-2 row-span-2"
                               : "col-span-1 row-span-1"

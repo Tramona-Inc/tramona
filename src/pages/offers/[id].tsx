@@ -32,7 +32,7 @@ export default function Listings() {
   }
 
   return (
-    <DashboardLayout type="guest">
+    <DashboardLayout>
       <Head>
         <title>Listing Property | Tramona</title>
       </Head>

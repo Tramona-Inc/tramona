@@ -3,7 +3,7 @@ import TravelerPage from "@/components/landing-page/TravelerPage";
 
 export default function Home() {
   return (
-    <DashboardLayout type={"guest"}>
+    <DashboardLayout>
       <TravelerPage />
     </DashboardLayout>
   );

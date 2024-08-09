@@ -1,5 +1,3 @@
-"use client";
-
 import { ConnectPayments, ConnectPayouts } from "@stripe/react-connect-js";
 import { Card, CardHeader } from "@/components/ui/card";
 

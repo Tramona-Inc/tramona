@@ -7,7 +7,7 @@ export default function Page() {
   const { data: offers } = api.biddings.getAllHostPending.useQuery();
 
   return (
-    <DashboardLayout type="host">
+    <DashboardLayout>
       <Head>
         <title>Offers & Requests | Tramona</title>
       </Head>

@@ -71,7 +71,7 @@ async function sendVerificationEmail(user: User) {
   };
 
   // Create token
-  const token = jwt.sign(payload, env.NEXTAUTH_SECRET!, {
+  const token = jwt.sign(payload, env.NEXTAUTH_SECRET, {
     expiresIn: "30m",
   });
 
@@ -94,7 +94,7 @@ async function sendVerificationEmailWithConversation(
   };
 
   // Create token
-  const token = jwt.sign(payload, env.NEXTAUTH_SECRET!, {
+  const token = jwt.sign(payload, env.NEXTAUTH_SECRET, {
     expiresIn: "30m",
   });
 
@@ -292,7 +292,7 @@ export const authRouter = createTRPCRouter({
       } else {
         // Verify the token
         try {
-          const payload = jwt.verify(input.token, env.NEXTAUTH_SECRET!);
+          const payload = jwt.verify(input.token, env.NEXTAUTH_SECRET);
 
           await ctx.db
             .update(users)
@@ -337,7 +337,7 @@ export const authRouter = createTRPCRouter({
       };
 
       // Create token
-      const token = jwt.sign(payload, env.NEXTAUTH_SECRET!, {
+      const token = jwt.sign(payload, env.NEXTAUTH_SECRET, {
         expiresIn: "30m",
       });
 
@@ -386,7 +386,7 @@ export const authRouter = createTRPCRouter({
       }
 
       try {
-        const payload = jwt.verify(input.token, env.NEXTAUTH_SECRET!);
+        const payload = jwt.verify(input.token, env.NEXTAUTH_SECRET);
         return payload;
       } catch (error) {
         throw new TRPCError({
@@ -423,7 +423,7 @@ export const authRouter = createTRPCRouter({
       }
 
       try {
-        jwt.verify(input.token, process.env.NEXTAUTH_SECRET!);
+        jwt.verify(input.token, env.NEXTAUTH_SECRET);
       } catch (error) {
         throw new TRPCError({
           code: "BAD_REQUEST",
@@ -462,7 +462,7 @@ export const authRouter = createTRPCRouter({
     )
     .mutation(async ({ input }) => {
       try {
-        const payload = jwt.verify(input.token, env.NEXTAUTH_SECRET!);
+        const payload = jwt.verify(input.token, env.NEXTAUTH_SECRET);
         return payload;
       } catch (error) {
         throw new TRPCError({

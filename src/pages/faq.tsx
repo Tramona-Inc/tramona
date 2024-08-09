@@ -15,7 +15,7 @@ export default function FAQ() {
         <title>FAQ | Tramona</title>
       </Head>
 
-      <DashboardLayout type="guest">
+      <DashboardLayout>
         <div className="mx-auto max-w-3xl p-4 pb-32">
           <h1 className="pb-12 pt-20 text-center text-3xl font-bold">
             Frequently Asked Questions

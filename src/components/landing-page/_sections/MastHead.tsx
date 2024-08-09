@@ -23,13 +23,6 @@ const scrollToTop = () => {
 };
 
 export default function MastHead() {
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  };
-
   return (
     <section className="relative bg-white pb-32">
       <div className="relative sm:mb-24 sm:h-[700px] lg:mb-0">
@@ -86,7 +79,7 @@ export default function MastHead() {
                   </Avatar>
                 </div>
                 <p className="ml-2 text-xs font-semibold text-[#7E7564]">
-                  Requests made in the last 1 month
+                  Requests made this month
                 </p>
               </div>
             </div>
@@ -169,7 +162,7 @@ export default function MastHead() {
       </div>
 
       <div className="flex justify-center">
-        <div className="mt-20 lg:grid lg:grid-cols-2 xl:gap-24">
+        <div className="mt-20 p-4 lg:grid lg:grid-cols-2 xl:gap-24">
           <div className="flex flex-col space-y-1 pb-6 text-left lg:mr-24 lg:flex lg:flex-col lg:justify-center lg:space-y-4">
             <h2 className="text-2xl font-extrabold lg:text-4xl">
               See completed requests
@@ -183,9 +176,7 @@ export default function MastHead() {
               </Button>
             </div>
           </div>
-          <div className="flex items-center justify-center">
-            <CompletedRequestsSection />
-          </div>
+          <CompletedRequestsSection />
           <div className="flex justify-center pt-8 lg:hidden">
             <Button asChild variant="greenPrimary" size="lg">
               <Link href="/exclusive-offers">View deals</Link>
