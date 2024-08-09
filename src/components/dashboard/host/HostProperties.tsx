@@ -2,14 +2,11 @@ import Spinner from "@/components/_common/Spinner";
 import {
   EmptyState,
   EmptyStateDescription,
-  EmptyStateFooter,
   EmptyStateTitle,
 } from "@/components/ui/empty-state";
 import { type Property } from "@/server/db/schema/tables/properties";
 import { AlertCircle, FenceIcon } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
-import { NewPropertyBtn } from "./HostPropertiesLayout";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/router";
 
@@ -18,8 +15,6 @@ export default function HostProperties({
 }: {
   properties: Property[] | null;
 }) {
-  const [open, setOpen] = useState(false);
-
   return (
     <div>
       <div className="mx-auto max-w-7xl space-y-4">
@@ -39,9 +34,6 @@ export default function HostProperties({
               <EmptyStateDescription>
                 Add a property to get started!
               </EmptyStateDescription>
-              <EmptyStateFooter>
-                <NewPropertyBtn open={open} setOpen={setOpen} />
-              </EmptyStateFooter>
             </EmptyState>
           )
         ) : (
@@ -85,7 +77,10 @@ function PropertyCard({ property }: { property: Property }) {
           </p> */}
         </div>
         {!property.cancellationPolicy && (
-          <AlertCircle className="absolute top-1 right-1 text-red-600" size={16} />
+          <AlertCircle
+            className="absolute right-1 top-1 text-red-600"
+            size={16}
+          />
         )}
         {/* <div className="p-1">
         <DropdownMenu>
