@@ -5,6 +5,14 @@ import * as cheerio from "cheerio";
 import * as https from 'https';
 
 import { HttpsProxyAgent } from "https-proxy-agent";
+
+const userAgents = [
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Safari/605.1.15',
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:89.0) Gecko/20100101 Firefox/89.0',
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:89.0) Gecko/20100101 Firefox/89.0',
+  'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+];
 export const Airbnb: ListingSite<"Airbnb"> = {
   siteName: "Airbnb",
   baseUrl: "https://www.airbnb.com",
@@ -74,6 +82,7 @@ export const Airbnb: ListingSite<"Airbnb"> = {
         return url.toString();
       },
 
+
       async getPrice(params) {
         await fetch("https://api.ipify.org/")
           .then((res) => res.text())
@@ -92,6 +101,7 @@ export const Airbnb: ListingSite<"Airbnb"> = {
 
         const proxyAgent = new HttpsProxyAgent(proxyUrl);
 
+        const userAgent = userAgents[Math.floor(Math.random() * userAgents.length)];
 
         // const proxyAgent = new HttpsProxyAgent({
         //   host: 'us-ca.proxymesh.com',
@@ -105,10 +115,14 @@ export const Airbnb: ListingSite<"Airbnb"> = {
         const response = await axios
           .get(checkoutUrl, {
             headers: {
-              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+              'User-Agent': userAgent,
+              'Accept-Language': 'en-US,en;q=0.9',
+              'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+              'Referer': 'https://www.google.com/'
             },
             httpsAgent: proxyAgent,
             proxy: false,
+            timeout: 30000
           })
           .catch((err) => {
             console.error('Error details:', {
