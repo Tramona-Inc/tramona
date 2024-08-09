@@ -4,10 +4,9 @@ import { useSession } from "next-auth/react";
 import Header from "../../Header";
 import Footer from "../DesktopFooter";
 import { useIsMd } from "@/utils/utils";
-import { useRouter } from "next/router";
 import { api } from "@/utils/api";
 import { useEffect } from "react";
-import { usePathname } from "next/navigation";
+import { useRouter } from "next/router";
 
 type DashboardLayoutProps = {
   children: React.ReactNode;
@@ -33,7 +32,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     }
   }, [onboardingStep, router]);
 
-  const pathname = usePathname();
+  const { pathname } = useRouter();
 
   const navType =
     status === "unauthenticated"

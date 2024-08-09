@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/utils/utils";
 import { useSession } from "next-auth/react";
-import { usePathname } from "next/navigation";
+import { useRouter } from "next/router";
 import { TramonaLogo } from "./TramonaLogo";
 import NavLink from "@/components/_utils/NavLink";
 import {
@@ -147,7 +147,7 @@ function LargeHeader() {
 
 function SmallHeader() {
   const { status, data: session } = useSession();
-  const pathname = usePathname();
+  const { pathname } = useRouter();
 
   const links =
     status === "authenticated"
@@ -174,7 +174,7 @@ function SmallHeader() {
 }
 
 function HostDashboardSwitcher() {
-  const pathname = usePathname();
+  const { pathname } = useRouter();
 
   return pathname.includes("/host") ? (
     <Link
