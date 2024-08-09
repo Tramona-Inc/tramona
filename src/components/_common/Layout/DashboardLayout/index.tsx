@@ -33,7 +33,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     }
   }, [onboardingStep, router]);
 
-  const pathname = usePathname();
+  const pathname = useRouter().pathname;
 
   const navType =
     status === "unauthenticated"
