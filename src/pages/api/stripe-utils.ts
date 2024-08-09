@@ -15,12 +15,11 @@ export async function createPayHostTransfer({
   destination,
   tripId,
 }: CreatePayHostTransfer) {
-  //not using rn becuase the logic is the cron job
   const transfer = await stripe.transfers.create({
     amount: amount, // amount in cents
     currency: "usd",
     destination: destination, // connected account ID
-    transfer_group: tripId,
+    // transfer_group: tripId,
     metadata: {
       trip_id: tripId,
       host_stripe_account_id: destination,

@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { db } from "@/server/db";
-import { eq, and } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 import { hostProfiles, trips } from "@/server/db/schema/index";
 import { createPayHostTransfer } from "@/pages/api/stripe-utils"; // Your custom utility to create Stripe transfer
 
@@ -8,10 +8,13 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
+  //will run every hour
   if (req.method === "POST") {
     try {
+      const now = new Date();
+
       // Fetch bookings that are scheduled for payout
-      const upcomingTrips = await db.query.trips.findMany({
+      const TripsAfter24HourCheckIn = await db.query.trips.findMany({
         with: {
           offer: {
             columns: {
@@ -26,23 +29,20 @@ export default async function handler(
         },
         where: and(
           eq(trips.hostPayed, false),
-          eq(
-            trips.checkIn,
-            new Date(new Date().setDate(new Date().getDate() + 1)),
-          ),
+          sql`${trips.checkIn} <= ${now} - interval '24 hours'`,
         ),
       });
 
       // Process each booking and create a transfer made an array in case host has multiple trips within 24 hours
-      for (const trip of upcomingTrips) {
+      for (const trip of TripsAfter24HourCheckIn) {
         const hostAccount = await db.query.hostProfiles.findFirst({
           where: eq(hostProfiles.userId, trip.property.hostId!),
         });
 
         await createPayHostTransfer({
           amount: trip.offer!.totalPrice,
-          destination: hostAccount!.stripeAccountId!, // Example field, adjust according to your schema
-          tripId: trip.id.toString(), // Example field, adjust according to your schema
+          destination: hostAccount!.stripeAccountId!,
+          tripId: trip.id.toString(),
         });
       }
 

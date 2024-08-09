@@ -5,7 +5,10 @@ import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import Stripe from "stripe";
 import { z } from "zod";
+
 import { hostProfiles } from "@/server/db/schema";
+
+import { createPayHostTransfer } from "@/pages/api/stripe-utils";
 
 export const config = {
   api: {
@@ -311,14 +314,14 @@ export const stripeRouter = createTRPCRouter({
         setup_future_usage: "off_session", // is both of and on session
         // In the latest version of the API, specifying the `automatic_payment_methods` parameter is optional because Stripe enables its functionality by default.
         automatic_payment_methods: { enabled: true },
-        ...(metadata.host_stripe_id
-          ? {
-              transfer_data: {
-                amount: metadata.price - metadata.tramonaServiceFee, // we need to change this too.
-                destination: metadata.host_stripe_id,
-              },
-            }
-          : {}),
+        // ...(metadata.host_stripe_id
+        //   ? {
+        //       transfer_data: {
+        //         amount: metadata.price - metadata.tramonaServiceFee, // we need to change this too.
+        //         destination: metadata.host_stripe_id,
+        //       },
+        //     }
+        //   : {}),
       };
 
       const response = await stripe.paymentIntents.create(options);
@@ -740,4 +743,21 @@ export const stripeRouter = createTRPCRouter({
 
     return result;
   }),
+
+  paymentTest: protectedProcedure
+    .input(
+      z.object({
+        amount: z.number(),
+        destination: z.string(),
+        tripId: z.string(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      await createPayHostTransfer({
+        amount: input.amount,
+        destination: input.destination,
+        tripId: input.tripId,
+      });
+      console.log("Payment test successful");
+    }),
 });
