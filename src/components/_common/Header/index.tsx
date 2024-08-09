@@ -157,7 +157,7 @@ function SmallHeader() {
       : hamburgerLinksMobile;
 
   return (
-    <header className="container sticky top-0 z-50 flex h-header-height items-center gap-2 border-b bg-white text-sm sm:text-base">
+    <header className="sticky top-0 z-50 flex h-header-height items-center gap-2 border-b bg-white px-2 pl-4 text-sm sm:text-base">
       <TramonaLogo />
 
       <div className="flex-1" />

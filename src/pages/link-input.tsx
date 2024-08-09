@@ -17,7 +17,7 @@ export default function Page() {
             <Image
               src={linkInputBg}
               alt=""
-              layout="fill"
+              fill
               objectFit="cover"
               placeholder="blur"
               className="select-none"

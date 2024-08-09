@@ -39,7 +39,7 @@ export default function HostStaysCards({
                 <Image
                   src={trip.property.imageUrls[0]!}
                   alt={trip.property.name}
-                  layout="fill"
+                  fill
                   className="object-cover"
                 />
               </div>

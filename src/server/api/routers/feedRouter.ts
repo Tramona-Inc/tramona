@@ -29,7 +29,7 @@ import {
 import { sample } from "lodash";
 import { db } from "@/server/db";
 
-export async function getFeed({ minNumEntries = 30 } = {}) {
+export async function getFeed({ maxNumEntries = 30 } = {}) {
   {
     // 1. get the requests
     const requests = await db.query.requests.findMany({
@@ -56,7 +56,7 @@ export async function getFeed({ minNumEntries = 30 } = {}) {
           },
         },
       },
-      limit: minNumEntries,
+      limit: maxNumEntries,
       orderBy: (requests, { desc }) => [desc(requests.createdAt)],
     });
 
@@ -93,7 +93,7 @@ export async function getFeed({ minNumEntries = 30 } = {}) {
           },
         },
       },
-      limit: minNumEntries,
+      limit: maxNumEntries,
       orderBy: (offers, { desc }) => [desc(offers.createdAt)],
     });
 
@@ -132,7 +132,7 @@ export async function getFeed({ minNumEntries = 30 } = {}) {
           },
         },
       },
-      limit: minNumEntries,
+      limit: maxNumEntries,
       orderBy: (trips, { desc }) => [desc(trips.createdAt)],
     });
 
@@ -148,7 +148,7 @@ export async function getFeed({ minNumEntries = 30 } = {}) {
         userProfilePicUrl: true,
         entryCreationTime: true,
       },
-      limit: minNumEntries,
+      limit: maxNumEntries,
       orderBy: (fillerRequests, { desc }) => [
         desc(fillerRequests.entryCreationTime),
       ],
@@ -162,7 +162,7 @@ export async function getFeed({ minNumEntries = 30 } = {}) {
           },
         },
       },
-      limit: minNumEntries,
+      limit: maxNumEntries,
       orderBy: (fillerOffers, { desc }) => [
         desc(fillerOffers.entryCreationTime),
       ],
@@ -177,7 +177,7 @@ export async function getFeed({ minNumEntries = 30 } = {}) {
           },
         },
       },
-      limit: minNumEntries,
+      limit: maxNumEntries,
       orderBy: (fillerBookings, { desc }) => [
         desc(fillerBookings.entryCreationTime),
       ],
@@ -283,7 +283,7 @@ export const feedRouter = createTRPCRouter({
     .input(
       z
         .object({
-          minNumEntries: zodNumber().optional(),
+          maxNumEntries: zodNumber().optional(),
         })
         .optional(),
     )
