@@ -186,8 +186,8 @@ function ProgramTiers() {
           referral code!
         </p>
 
-        <div className="flex flex-col items-center gap-5  lg:flex-row">
-          <Card className="relative w-[345px]  max-w-lg rounded-3xl border-black sm:w-[400px] xl:w-[500px]">
+        <div className="flex flex-col items-center gap-5 lg:flex-row">
+          <Card className="relative w-[345px] max-w-lg rounded-3xl border-black sm:w-[400px] xl:w-[500px]">
             <div className="absolute inset-x-0 -top-0 mx-auto w-24 -translate-y-1/2 rounded-full bg-black py-1 text-center text-sm font-bold text-white sm:text-base">
               TIER 1
             </div>

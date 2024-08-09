@@ -40,7 +40,7 @@ const config = {
     "@typescript-eslint/no-explicit-any": "warn",
     "@typescript-eslint/no-unnecessary-condition": "warn",
     // "no-console": "warn",
-    eqeqeq: ["warn", "always", { null: "ignore" }],
+    eqeqeq: ["warn", "smart"],
     "prefer-const": "warn",
     "react/no-deprecated": "error",
     "react/jsx-no-target-blank": "error",

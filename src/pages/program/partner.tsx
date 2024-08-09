@@ -1,8 +1,6 @@
 import MainLayout from "@/components/_common/Layout/MainLayout";
-import StarIcon from "@/components/_icons/StarIcon";
 import { Button } from "@/components/ui/button";
 import Head from "next/head";
-import Image from "next/image";
 import Link from "next/link";
 
 const steps = [
@@ -82,7 +80,7 @@ export default function Page() {
         <h2 className="text-center text-4xl font-bold">
           What you need to know
         </h2>
-        <div className="flex flex-col space-y-5 ">
+        <div className="flex flex-col space-y-5">
           {steps.map((step) => (
             <Card key={step.id} {...step} />
           ))}
