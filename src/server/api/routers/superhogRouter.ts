@@ -213,7 +213,7 @@ export async function createSuperhogReservation({
 
     if (
       verification.status === "Rejected" ||
-      verification.status == "Flagged"
+      verification.status === "Flagged"
     ) {
       sendSlackMessage(
         [

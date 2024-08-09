@@ -23,7 +23,7 @@ export default function MyTrips() {
   }, [allTrips]);
 
   return (
-    <DashboardLayout type="guest">
+    <DashboardLayout>
       <Head>
         <title>My Trips | Tramona</title>
       </Head>

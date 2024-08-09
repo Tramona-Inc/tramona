@@ -3,7 +3,7 @@ import CounterForm from "@/components/counter/CounterForm";
 
 export default function Counters() {
   return (
-    <DashboardLayout type={"guest"}>
+    <DashboardLayout>
       <CounterForm />
     </DashboardLayout>
   );

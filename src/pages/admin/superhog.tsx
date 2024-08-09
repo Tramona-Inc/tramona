@@ -1,5 +1,3 @@
-"use client";
-
 import CreateSuperhog from "@/components/admin/superhog/CreateSuperhog";
 import EditSuperhogForm from "@/components/admin/superhog/EditSuperhogForm";
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
@@ -10,7 +8,7 @@ import DeleteSuperhog from "@/components/admin/superhog/DeleteSuperhog";
 
 export default function Page() {
   return (
-    <DashboardLayout type="admin">
+    <DashboardLayout>
       <Head>
         <title>Superhog verification form | Tramona</title>
       </Head>

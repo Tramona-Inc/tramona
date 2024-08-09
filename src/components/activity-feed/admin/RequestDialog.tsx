@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { useState } from "react";
 import CreateRequestForm from "./RequestForm";
-import { type FeedItem } from "@/components/activity-feed/ActivityFeed";
+import { type FeedRequestItem } from "@/components/activity-feed/ActivityFeed";
 import { toast } from "@/components/ui/use-toast";
 import { api } from "@/utils/api";
 import { errorToast } from "@/utils/toasts";
@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 export default function CreateRequestDialog({
   children,
   request,
-}: React.PropsWithChildren<{ request?: FeedItem & { type: "request" } }>) {
+}: React.PropsWithChildren<{ request?: FeedRequestItem }>) {
   const [isOpen, setIsOpen] = useState(false);
   const deleteFillerRequest = api.feed.deleteFillerRequest.useMutation();
 

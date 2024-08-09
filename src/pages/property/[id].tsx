@@ -65,7 +65,7 @@ export default function Property({
           site_name: "Tramona",
         }}
       />
-      <DashboardLayout type="guest">
+      <DashboardLayout>
         <div className="px-4 pb-64 pt-6">
           <div className="mx-auto max-w-5xl">
             {property ? <PropertyPage property={property} /> : <Spinner />}

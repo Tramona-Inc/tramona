@@ -5,6 +5,9 @@ import FeedBookingCard from "@/components/activity-feed/FeedBookingCard";
 import Spinner from "../_common/Spinner";
 
 export type FeedItem = RouterOutputs["feed"]["getFeed"][number];
+export type FeedRequestItem = Extract<FeedItem, { type: "request" }>;
+export type FeedOfferItem = Extract<FeedItem, { type: "offer" }>;
+export type FeedBookingItem = Extract<FeedItem, { type: "booking" }>;
 
 export default function ActivityFeed({
   fillerOnly = false,

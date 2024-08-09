@@ -20,7 +20,7 @@ export default function Page() {
   if (!session) return null;
 
   return (
-    <DashboardLayout type="host">
+    <DashboardLayout>
       <Head>
         <title>Team | Tramona</title>
       </Head>

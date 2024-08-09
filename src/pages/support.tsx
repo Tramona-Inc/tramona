@@ -122,42 +122,44 @@ function ContactForm() {
 
 export default function Page() {
   return (
-    <DashboardLayout type="guest">
-    <div className="mx-auto max-w-3xl space-y-8 p-4 pb-32">
-      <h1 className="pt-20 text-3xl font-bold">Get support</h1>
-      <section className="space-y-4 rounded-xl border p-4 shadow-md">
-        <div className="flex items-center gap-4">
-          <Icons iconName={"contact"} />
-          <h2 className="text-xl font-bold">Contact Us</h2>
-        </div>
-        <h3 className="text-muted-foreground">
-          Get in touch and let us know how we can help.
-        </h3>
-        <p>
-          Please email us at{" "}
-          <a
-            className="underline underline-offset-2 hover:text-black"
-            href="mailto:info@tramona.com"
-            target="_blank"
-            rel="noreferrer"
-          >
-            info@tramona.com
-          </a>
-          .
-        </p>
-      </section>
-      <section className="space-y-4 rounded-xl border p-4 shadow-md">
-        <div className="flex items-center gap-4">
-          <Icons iconName={"edit"} />
-          <h2 className="text-xl font-bold">Report a Bug/Request a Feature</h2>
-        </div>
-        <h3 className="text-muted-foreground">
-          Provide some details to our team and we will be in touch by email to
-          assist.
-        </h3>
-        <ContactForm />
-      </section>
-    </div>
+    <DashboardLayout>
+      <div className="mx-auto max-w-3xl space-y-8 p-4 pb-32">
+        <h1 className="pt-20 text-3xl font-bold">Get support</h1>
+        <section className="space-y-4 rounded-xl border p-4 shadow-md">
+          <div className="flex items-center gap-4">
+            <Icons iconName={"contact"} />
+            <h2 className="text-xl font-bold">Contact Us</h2>
+          </div>
+          <h3 className="text-muted-foreground">
+            Get in touch and let us know how we can help.
+          </h3>
+          <p>
+            Please email us at{" "}
+            <a
+              className="underline underline-offset-2 hover:text-black"
+              href="mailto:info@tramona.com"
+              target="_blank"
+              rel="noreferrer"
+            >
+              info@tramona.com
+            </a>
+            .
+          </p>
+        </section>
+        <section className="space-y-4 rounded-xl border p-4 shadow-md">
+          <div className="flex items-center gap-4">
+            <Icons iconName={"edit"} />
+            <h2 className="text-xl font-bold">
+              Report a Bug/Request a Feature
+            </h2>
+          </div>
+          <h3 className="text-muted-foreground">
+            Provide some details to our team and we will be in touch by email to
+            assist.
+          </h3>
+          <ContactForm />
+        </section>
+      </div>
     </DashboardLayout>
   );
 }

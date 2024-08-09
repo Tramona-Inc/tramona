@@ -58,7 +58,7 @@ export default function FirstAndLastName() {
   }
 
   return (
-    <MainLayout type="auth" className="flex flex-col justify-center gap-5 p-4">
+    <MainLayout className="flex flex-col justify-center gap-5 p-4">
       <Head>
         <title>First and Last Name | Tramona</title>
       </Head>

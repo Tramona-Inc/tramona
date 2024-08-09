@@ -1,4 +1,4 @@
-import { type FeedItem } from "@/components/activity-feed/ActivityFeed";
+import { type FeedRequestItem } from "@/components/activity-feed/ActivityFeed";
 import { formatCurrency, formatDateRange, getNumNights } from "@/utils/utils";
 import BaseCard from "./BaseCard";
 import RequestDialog from "./admin/RequestDialog";
@@ -8,7 +8,7 @@ import { useSession } from "next-auth/react";
 export default function FeedRequestCard({
   request,
 }: {
-  request: FeedItem & { type: "request" };
+  request: FeedRequestItem;
 }) {
   const { data: session } = useSession();
   const isAdmin = session && session.user.role === "admin";
@@ -18,8 +18,8 @@ export default function FeedRequestCard({
     request.maxTotalPrice / getNumNights(request.checkIn, request.checkOut),
   );
 
-  const userName = request.madeByGroup.owner.name ?? "";
-  const userImage = request.madeByGroup.owner.image ?? "";
+  const userName = request?.madeByGroup?.owner?.name ?? "";
+  const userImage = request?.madeByGroup?.owner?.image ?? "";
 
   return (
     <BaseCard item={request} userName={userName} userImage={userImage}>

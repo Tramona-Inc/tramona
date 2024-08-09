@@ -255,7 +255,7 @@ export default function Welcome() {
     });
 
   return (
-    <MainLayout type="auth">
+    <MainLayout>
       <Head>
         <title>Welcome | Tramona</title>
       </Head>

@@ -59,7 +59,7 @@ function Page({
   }
 
   return (
-    <DashboardLayout type="guest">
+    <DashboardLayout>
       <NextSeo
         title={serverFirstPropertyName}
         description={`Check out your tramona offers in ${serverRequestLocation}`}

@@ -154,7 +154,7 @@ export default function Onboarding() {
   }, [code]);
 
   return (
-    <MainLayout type="auth" className="flex flex-col justify-center gap-5 p-4">
+    <MainLayout className="flex flex-col justify-center gap-5 p-4">
       <h1 className="text-center text-4xl font-bold tracking-tight">
         Verify your phone number
       </h1>
