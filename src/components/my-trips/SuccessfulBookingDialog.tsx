@@ -2,7 +2,6 @@ import Image from "next/image";
 import { Button } from "../ui/button";
 import { DialogContent, Dialog, DialogTrigger } from "../ui/dialog";
 import { formatDateMonthDay } from "@/utils/utils";
-import { useState } from "react";
 import Confetti from "react-confetti";
 import SharePropertyDialogContent from "../_common/ShareLink/SharePropertyDialogContent";
 import { type RouterOutputs } from "@/utils/api";

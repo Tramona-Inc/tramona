@@ -65,7 +65,7 @@ const InputComponent = React.forwardRef<HTMLInputElement, InputProps>(
 );
 InputComponent.displayName = "InputComponent";
 
-type CountrySelectOption = { label: string; value: RPNInput.Country };
+type CountrySelectOption = { label: string; value?: RPNInput.Country };
 
 type CountrySelectProps = {
   disabled?: boolean;
@@ -113,7 +113,13 @@ const CountrySelect = ({
             <CommandEmpty>No country found.</CommandEmpty>
             <CommandGroup>
               {options
-                .filter((x) => x.value)
+                .filter(
+                  (
+                    x,
+                  ): x is typeof x & {
+                    value: NonNullable<(typeof x)["value"]>;
+                  } => x.value !== undefined,
+                )
                 .map((option) => (
                   <CommandItem
                     className="gap-2"
@@ -125,11 +131,9 @@ const CountrySelect = ({
                       countryName={option.label}
                     />
                     <span className="flex-1 text-sm">{option.label}</span>
-                    {option.value && (
-                      <span className="text-sm text-foreground/50">
-                        {`+${RPNInput.getCountryCallingCode(option.value)}`}
-                      </span>
-                    )}
+                    <span className="text-sm text-foreground/50">
+                      {`+${RPNInput.getCountryCallingCode(option.value)}`}
+                    </span>
                     <CheckIcon
                       className={cn(
                         "ml-auto h-4 w-4",

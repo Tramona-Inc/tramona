@@ -109,7 +109,11 @@ function LargeHeader() {
           <SkeletonText className="w-24" />
         </div>
       ) : (
-        <Button asChild variant="ghost">
+        <Button
+          asChild
+          variant="ghost"
+          className={cn(hostBtn.href !== "/for-hosts" && "rounded-full")}
+        >
           <Link href={hostBtn.href}>{hostBtn.name}</Link>
         </Button>
       )}

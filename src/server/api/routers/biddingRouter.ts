@@ -61,35 +61,6 @@ async function updateBidStatus({
   });
 }
 
-async function userWithBid({
-  userId,
-  bidId,
-}: {
-  userId: string;
-  bidId: number;
-}) {
-  const hostId = await db.query.bids
-    .findFirst({
-      where: eq(bids.id, bidId),
-      columns: {},
-      with: { property: { columns: { hostId: true } } },
-    })
-    .then((res) => res?.property.hostId);
-
-  const bidInfo = await db.query.bids.findFirst({
-    where: eq(bids.id, bidId),
-    with: {
-      madeByGroup: {
-        with: { members: { with: { user: true } }, invites: true },
-      },
-    },
-  });
-
-  const bidUserId = bidInfo?.madeByGroup.ownerId;
-
-  return bidUserId === userId || hostId === userId;
-}
-
 export const biddingRouter = createTRPCRouter({
   // ! update query so host/admin can see all the queries (add when we work on host flow)
   getMyBids: protectedProcedure.query(async ({ ctx }) => {
@@ -565,7 +536,7 @@ export const biddingRouter = createTRPCRouter({
       numGuests: random(1, 5),
     });
   }),
-  
+
   getAllHostPending: roleRestrictedProcedure(["host"]).query(
     async ({ ctx }) => {
       const allHostProperties = (

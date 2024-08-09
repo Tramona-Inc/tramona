@@ -18,8 +18,7 @@ import { api } from "@/utils/api";
 import { errorToast } from "@/utils/toasts";
 import { zodEmail } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { type InferGetStaticPropsType } from "next";
-import { getProviders, signIn } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -27,10 +26,9 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useInviteStore } from "@/utils/store/inviteLink";
+import { authProviders } from "@/config/authProviders";
 
-export default function SignIn({
-  providers,
-}: InferGetStaticPropsType<typeof getStaticProps>) {
+export default function SignIn() {
   const utils = api.useUtils();
 
   const formSchema = z
@@ -178,25 +176,19 @@ export default function SignIn({
           </div>
 
           <div className="my-5 flex w-full flex-col gap-5">
-            {providers &&
-              Object.values(providers)
-                .slice(1) // remove the email provider
-                .map((provider) => {
-                  return (
-                    <Button
-                      key={provider.name}
-                      variant={"darkOutline"}
-                      onClick={() => signIn(provider.id)}
-                      className="grid w-[350px] grid-cols-5 place-content-center gap-5 rounded-3xl"
-                    >
-                      <Icons iconName={provider.name} />
-                      <span className="col-span-3 text-lg font-extrabold tracking-tight">
-                        Log in with
-                        {" " + provider.name}
-                      </span>
-                    </Button>
-                  );
-                })}
+            {authProviders.map((provider) => (
+              <Button
+                key={provider.name}
+                variant={"darkOutline"}
+                onClick={() => signIn(provider.id)}
+                className="grid w-[350px] grid-cols-5 place-content-center gap-5 rounded-3xl"
+              >
+                <Icons iconName={provider.name} />
+                <span className="col-span-3 text-lg font-extrabold tracking-tight">
+                  Sign up with {provider.name}
+                </span>
+              </Button>
+            ))}
           </div>
 
           <Link
@@ -223,10 +215,4 @@ export default function SignIn({
       </div>
     </MainLayout>
   );
-}
-
-export async function getStaticProps() {
-  return {
-    props: { providers: await getProviders() },
-  };
 }

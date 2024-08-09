@@ -502,3 +502,7 @@ export function formatTime(time: string) {
     ? `${hour - 12}:${fmtdMinutes} PM`
     : `${hour}:${fmtdMinutes} AM`;
 }
+
+export function scrollToTop() {
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}

@@ -10,13 +10,13 @@ import {
 } from "@/components/ui/form";
 import Icons from "@/components/ui/icons";
 import { Input } from "@/components/ui/input";
+import { authProviders } from "@/config/authProviders";
 import { api } from "@/utils/api";
 import { useRequireNoAuth } from "@/utils/auth-utils";
 import { errorToast } from "@/utils/toasts";
 import { zodEmail, zodPassword } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { InferGetStaticPropsType } from "next";
-import { getProviders, signIn } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -38,9 +38,7 @@ const formSchema = z
 
 type FormSchema = z.infer<typeof formSchema>;
 
-export default function SignUp({
-  providers,
-}: InferGetStaticPropsType<typeof getStaticProps>) {
+export default function SignUp() {
   useRequireNoAuth();
 
   const router = useRouter();
@@ -161,24 +159,19 @@ export default function SignUp({
           </div>
 
           <div className="my-5 flex w-full flex-col items-center justify-center gap-5">
-            {Object.values(providers)
-              .slice(1) // remove the email provider
-              .map((provider) => {
-                return (
-                  <Button
-                    key={provider.name}
-                    variant={"darkOutline"}
-                    onClick={() => signIn(provider.id)}
-                    className="grid w-[350px] grid-cols-5 place-content-center gap-5 rounded-3xl"
-                  >
-                    <Icons iconName={provider.name} />
-                    <span className="col-span-3 text-lg font-extrabold tracking-tight">
-                      Sign up with
-                      {" " + provider.name}
-                    </span>
-                  </Button>
-                );
-              })}
+            {authProviders.map((provider) => (
+              <Button
+                key={provider.name}
+                variant={"darkOutline"}
+                onClick={() => signIn(provider.id)}
+                className="grid w-[350px] grid-cols-5 place-content-center gap-5 rounded-3xl"
+              >
+                <Icons iconName={provider.name} />
+                <span className="col-span-3 text-lg font-extrabold tracking-tight">
+                  Sign up with {provider.name}
+                </span>
+              </Button>
+            ))}
           </div>
         </section>
         <p>
@@ -210,12 +203,4 @@ export default function SignUp({
       </div>
     </MainLayout>
   );
-}
-
-export async function getStaticProps() {
-  const providers = await getProviders();
-
-  return {
-    props: { providers: providers ?? [] },
-  };
 }
