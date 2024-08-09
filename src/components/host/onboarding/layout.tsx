@@ -10,7 +10,7 @@ export default function OnboardingLayout({
 
   return (
     <>
-      <Header type="dashboard" sidebarType={"host"} />
+      <Header />
       <div className="flex min-h-screen-minus-header flex-col">{children}</div>
     </>
   );

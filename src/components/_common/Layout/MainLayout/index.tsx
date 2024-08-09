@@ -6,21 +6,12 @@ import Footer from "../DesktopFooter";
 type MainLayoutProps = {
   className?: string;
   children: React.ReactNode;
-  type?: "marketing" | "auth";
 };
 
-export default function MainLayout({
-  className,
-  children,
-  type,
-}: MainLayoutProps) {
+export default function MainLayout({ className, children }: MainLayoutProps) {
   return (
     <div vaul-drawer-wrapper="">
-      {type === "auth" ? (
-        <Header type="dashboard" sidebarType="guest" />
-      ) : (
-        <Header type="marketing" />
-      )}
+      <Header />
       <main className={cn("min-h-screen-minus-header", className)}>
         {children}
       </main>

@@ -31,7 +31,7 @@ export default function CashbackBalance() {
       <Head>
         <title>Cashback Balance | Tramona</title>
       </Head>
-      <DashboardLayout type="guest">
+      <DashboardLayout>
         <div className="mx-auto flex min-h-screen-minus-header-n-footer max-w-4xl flex-col">
           <div className="mt-6 grid grid-cols-1 px-4 lg:mt-16 lg:px-0">
             {isLoading ? (

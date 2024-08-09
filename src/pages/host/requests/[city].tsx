@@ -5,7 +5,7 @@ import Head from "next/head";
 
 export default function Page() {
   return (
-    <DashboardLayout type="host">
+    <DashboardLayout>
       <Head>
         <title>Offers & Requests | Tramona</title>
       </Head>

@@ -31,7 +31,7 @@ const Page = ({ offer, firstImage, baseUrl }: PageProps) => {
   const metaDescription = "Check out this offer! | Tramona";
 
   return (
-    <DashboadLayout type="guest">
+    <DashboadLayout>
       <NextSeo
         title={metaTitle}
         description={metaDescription}

@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { useState } from "react";
 import CreateOfferForm from "./OfferForm";
-import { type FeedItem } from "@/components/activity-feed/ActivityFeed";
+import { type FeedOfferItem } from "@/components/activity-feed/ActivityFeed";
 import { toast } from "@/components/ui/use-toast";
 import { api } from "@/utils/api";
 import { errorToast } from "@/utils/toasts";
@@ -18,14 +18,14 @@ import { Button } from "@/components/ui/button";
 export default function CreateOfferDialog({
   children,
   offer,
-}: React.PropsWithChildren<{ offer?: FeedItem & { type: "offer" } }>) {
+}: React.PropsWithChildren<{ offer?: FeedOfferItem }>) {
   const [isOpen, setIsOpen] = useState(false);
   const deleteFillerOffer = api.feed.deleteFillerOffer.useMutation();
 
   async function deleteOffer() {
     if (!offer) return;
     await deleteFillerOffer
-      .mutateAsync({ id: offer?.id })
+      .mutateAsync({ id: offer.id })
       .then(() => toast({ title: "Sucessfully deleted offer" }))
       .catch(() => errorToast());
     setIsOpen(false);

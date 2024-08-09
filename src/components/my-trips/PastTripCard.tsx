@@ -3,9 +3,13 @@ import { Badge } from "../ui/badge";
 import UserAvatar from "../_common/UserAvatar";
 import { formatDateRange } from "@/utils/utils";
 import Image from "next/image";
-import { type TripCardDetails } from "@/pages/my-trips";
+import { type RouterOutputs } from "@/utils/api";
 
-export default function PastTripCard({ trip }: { trip: TripCardDetails }) {
+export default function PastTripCard({
+  trip,
+}: {
+  trip: RouterOutputs["trips"]["getMyTrips"][number];
+}) {
   return (
     <div className="w-full">
       <div className="flex overflow-clip rounded-lg border">

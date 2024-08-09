@@ -4,7 +4,7 @@ import Link from "next/link";
 
 const ForHosts = () => {
   return (
-    <section className="bg-white md:px-2">
+    <section className="bg-white md:px-2 md:mx-12">
       <div className="flex flex-col-reverse md:flex-row">
         <div className="flex flex-1 flex-col justify-center p-6 md:mr-8">
           <div className="mt-4">

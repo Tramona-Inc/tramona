@@ -53,20 +53,18 @@ function PastRequestCards({
   requests: AdminDashboardRequst[] | undefined;
 }) {
   return requests ? (
-    <div className="grid gap-4 lg:grid-cols-2">
+    <div className="space-y-4">
       {requests.map((request) => (
         <RequestCard type="admin" key={request.id} request={request}>
           <RequestUpdateChecker request={request} />
           <DeleteRequestDialog requestId={request.id}>
-            <Button className="rounded-full" variant="outline">
-              Delete
-            </Button>
+            <Button variant="secondary">Delete</Button>
           </DeleteRequestDialog>
-          <Button className="rounded-full" variant="outline" asChild>
+          <Button variant="secondary" asChild>
             <Link href={`/admin/${request.id}`}>Edit offers</Link>
           </Button>
           <AdminOfferDialog request={request}>
-            <Button className="rounded-full">Make another offer</Button>
+            <Button>Make another offer</Button>
           </AdminOfferDialog>
         </RequestCard>
       ))}
@@ -80,7 +78,7 @@ export default function Page() {
   const { data: requests } = api.requests.getAll.useQuery();
 
   return (
-    <DashboardLayout type="admin">
+    <DashboardLayout>
       <Head>
         <title>Past Requests | Tramona</title>
       </Head>
