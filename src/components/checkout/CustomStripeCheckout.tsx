@@ -1,11 +1,15 @@
 import { api } from "@/utils/api";
 import { useStripe } from "@/utils/stripe-client";
-import { formatDateRange, getNumNights } from "@/utils/utils";
+import {
+  formatDateRange,
+  getNumNights,
+  getPriceBreakdown,
+} from "@/utils/utils";
 import StripeCheckoutForm from "./StripeCheckoutForm";
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { TAX_PERCENTAGE } from "@/utils/constants";
+import { TAX_PERCENTAGE, SUPERHOG_FEE } from "@/utils/constants";
 import type { OfferWithDetails } from "../offers/OfferPage";
 import type { Stripe } from "stripe";
 import { Elements } from "@stripe/react-stripe-js";
@@ -32,15 +36,16 @@ const CustomStripeCheckout = ({
     () => property.originalNightlyPrice! * numNights,
     [property.originalNightlyPrice, numNights],
   );
-  const tramonaServiceFee = offer.tramonaFee;
 
-  const tax = useMemo(
-    () => (offer.totalPrice + offer.tramonaFee) * TAX_PERCENTAGE,
-    [offer.totalPrice, offer.tramonaFee],
-  );
-  const total = useMemo(
-    () => offer.totalPrice + offer.tramonaFee + tax,
-    [offer.totalPrice, offer.tramonaFee, tax],
+  const { serviceFee, finalTotal } = useMemo(
+    () =>
+      getPriceBreakdown({
+        bookingCost: offer.totalPrice,
+        numNights,
+        superhogFee: SUPERHOG_FEE,
+        tax: TAX_PERCENTAGE,
+      }),
+    [offer.totalPrice, numNights],
   );
 
   const [options, setOptions] = useState<StripeElementsOptions | undefined>(
@@ -59,12 +64,13 @@ const CustomStripeCheckout = ({
         propertyId: property.id,
         requestId: offer.requestId ?? null,
         name: property.name,
-        price: total,
-        tramonaServiceFee: tramonaServiceFee,
+        price: finalTotal,
+        tramonaServiceFee: serviceFee,
         description: "From: " + formatDateRange(offer.checkIn, offer.checkOut),
         cancelUrl: cancelUrl,
         images: property.imageUrls,
-        totalSavings: originalTotal - (total + tax),
+        // totalSavings: originalTotal - (total + tax), <-- check math on this
+        totalSavings: originalTotal - finalTotal,
         phoneNumber: session.data.user.phoneNumber ?? "",
         userId: session.data.user.id,
         hostStripeId: property.host?.hostProfile?.stripeAccountId ?? "",

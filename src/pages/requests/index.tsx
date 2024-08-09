@@ -60,7 +60,7 @@ export default function Page() {
           site_name: "Tramona",
         }}
       />
-      <DashboardLayout type="guest">
+      <DashboardLayout>
         <div className="min-h-screen-minus-header px-4 pb-footer-height pt-5">
           <div className="mx-auto max-w-5xl">
             <div className="flex items-center">

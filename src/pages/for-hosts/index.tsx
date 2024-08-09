@@ -2,7 +2,7 @@ import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 
 import MainLayout from "@/components/_common/Layout/MainLayout";
 import HowItWorksHost from "@/pages/how-it-works-host";
@@ -13,6 +13,11 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import RequestFeed from "@/components/activity-feed/RequestFeed";
+
+import { type FeedRequestItem } from "@/components/activity-feed/ActivityFeed";
+import { getFeed } from "@/server/api/routers/feedRouter";
+import SuperJSON from "superjson";
+import { type InferGetStaticPropsType } from "next";
 
 const DamageProtection = () => {
   const protectionMethods = [
@@ -30,7 +35,7 @@ const DamageProtection = () => {
     },
   ];
   return (
-    <section className="space-y-10 bg-white px-4 py-10 md:px-6 lg:px-8">
+    <section className="space-y-10 px-4 py-10 md:px-6 lg:px-8">
       <h1 className="text-center text-3xl font-bold md:text-5xl">
         Tramona Cover
       </h1>
@@ -59,8 +64,8 @@ const DamageProtection = () => {
             Property Protection
           </h2>
           <p className="text-sm text-gray-700 md:text-base">
-            Tramona offers $50,000 in protection for each booking.This will move
-            up to 1M in the coming months
+            Tramona offers $50,000 in protection for each booking. This will
+            move up to 1M in the coming months
           </p>
         </div>
         <div className="flex-1 space-y-6 p-6 text-center md:mr-8 md:text-left">
@@ -111,9 +116,9 @@ const contents: Tabs[] = [
   },
 ];
 
-function IntroSection() {
+function IntroSection({ requests }: { requests: FeedRequestItem[] }) {
   return (
-    <section className="relative mx-auto flex max-w-7xl justify-center bg-white px-2">
+    <section className="relative mx-auto flex max-w-7xl justify-center px-2">
       <div className="flex flex-col items-center space-y-8 lg:flex-row lg:space-x-10 xl:space-x-20">
         <div className="max-w-xl space-y-5">
           <h2 className="text-center text-4xl font-bold tracking-tight text-primaryGreen md:text-6xl">
@@ -127,7 +132,7 @@ function IntroSection() {
           </p>
         </div>
         <div className="rounded-lg border px-2 py-2 shadow-xl">
-          <RequestFeed />
+          <RequestFeed requests={requests} />
         </div>
       </div>
     </section>
@@ -182,43 +187,6 @@ function FAQ() {
   );
 }
 
-function ReadytoListOnTramona() {
-  return (
-    <>
-      <section className="mx-auto hidden max-w-7xl px-2 py-4 text-end sm:block">
-        <div className="flex items-center justify-end space-x-2">
-          <div className="text-sm">Ready to list on Tramona?</div>
-          <Link
-            href="/host-onboarding"
-            className={buttonVariants({
-              variant: "greenPrimary",
-              size: "sm",
-            })}
-          >
-            Become a Host
-          </Link>
-        </div>
-      </section>
-      <section className="fixed bottom-0 z-10 w-full bg-white p-4 shadow-inner sm:hidden">
-        <div className="flex flex-col justify-center gap-4 shadow-2xl">
-          <div className="text-center font-semibold">
-            Ready to list on Tramona?
-          </div>
-          <Link
-            href="/host-onboarding"
-            className={buttonVariants({
-              variant: "greenPrimary",
-              size: "sm",
-            })}
-          >
-            Become a Host
-          </Link>
-        </div>
-      </section>
-    </>
-  );
-}
-
 function ListInAMinute() {
   return (
     <section className="mx-auto max-w-7xl space-y-8 px-4 sm:px-6 md:space-y-24 md:px-8 lg:px-10 xl:px-12">
@@ -252,6 +220,7 @@ function ListInAMinute() {
     </section>
   );
 }
+
 function WhatAreYouWaitingFor() {
   return (
     <section className="mx-8 space-y-8 md:mx-24 md:space-y-16">
@@ -269,41 +238,33 @@ function WhatAreYouWaitingFor() {
   );
 }
 
-export default function HostWelcome() {
+export async function getStaticProps() {
+  const requests = await getFeed({ maxNumEntries: 10 });
+
+  return {
+    props: { serializedRequests: SuperJSON.serialize(requests) },
+    revalidate: 60 * 5, // 5 minutes
+  };
+}
+
+export default function HostWelcome({
+  serializedRequests,
+}: InferGetStaticPropsType<typeof getStaticProps>) {
+  const requests = SuperJSON.deserialize<FeedRequestItem[]>(serializedRequests);
+
   return (
     <MainLayout className="mx-auto max-w-full">
-      <div className="relative overflow-x-hidden bg-white">
+      <div className="relative space-y-32 overflow-x-hidden pb-32">
         <Head>
           <title>Hosts | Tramona</title>
         </Head>
 
-        <ReadytoListOnTramona />
-
-        <hr className="mx-24 mb-12 mt-2 h-px border-0"></hr>
-
-        <IntroSection />
-
-        <hr className="mx-24 mb-12 mt-24 h-px border-0"></hr>
-
+        <IntroSection requests={requests} />
         <ListInAMinute />
-
-        <hr className="mx-24 mb-12 mt-24 h-px border-0"></hr>
-
         <HowItWorksHost />
-
-        <hr className="mx-24 mb-12 mt-24 h-px border-0"></hr>
-
         <DamageProtection />
-
-        <hr className="mx-24 mb-12 mt-24 h-px border-0"></hr>
-
-        <WhatAreYouWaitingFor />
-
-        <hr className="mx-24 mb-12 mt-24 h-px border-0"></hr>
-
         <FAQ />
-
-        <hr className="mx-24 mb-12 mt-24 h-px border-0"></hr>
+        <WhatAreYouWaitingFor />
       </div>
     </MainLayout>
   );

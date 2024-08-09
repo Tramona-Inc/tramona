@@ -33,7 +33,7 @@ import { getCity } from "@/server/google-maps";
 
 export const usersRouter = createTRPCRouter({
   getOnboardingStep: optionallyAuthedProcedure.query(async ({ ctx }) => {
-    if (!ctx.user) return undefined;
+    if (!ctx.user) return null;
     const res = await ctx.db.query.users.findFirst({
       where: eq(users.id, ctx.user.id),
       columns: {
@@ -123,7 +123,7 @@ export const usersRouter = createTRPCRouter({
         };
 
         // Create token
-        const token = jwt.sign(payload, env.NEXTAUTH_SECRET!, {
+        const token = jwt.sign(payload, env.NEXTAUTH_SECRET, {
           expiresIn: "24h",
         });
 
@@ -137,6 +137,7 @@ export const usersRouter = createTRPCRouter({
         });
       }
     }),
+
   insertPhoneWithEmail: publicProcedure
     .input(
       z.object({
@@ -150,6 +151,7 @@ export const usersRouter = createTRPCRouter({
         .set({ phoneNumber: input.phone })
         .where(eq(users.email, input.email));
     }),
+
   insertPhoneWithUserId: publicProcedure
     .input(
       z.object({
@@ -163,7 +165,9 @@ export const usersRouter = createTRPCRouter({
         .set({ phoneNumber: input.phone })
         .where(eq(users.id, input.userId));
     }),
-  isHost: protectedProcedure.query(async ({ ctx }) => {
+
+  isHost: optionallyAuthedProcedure.query(async ({ ctx }) => {
+    if (!ctx.user) return false;
     const res = await ctx.db.query.hostProfiles.findFirst({
       where: eq(hostProfiles.userId, ctx.user.id),
     });

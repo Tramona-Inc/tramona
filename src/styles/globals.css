@@ -31,7 +31,6 @@ body {
     --border: var(--zinc-200);
     --input: var(--zinc-300);
     --ring: var(--black);
-    --radius: 0.5rem;
     --primary-green: var(--primaryGreen-900);
     --primary-green-background: var(--primaryGreen-200);
     --primary-green-hover: var(--primaryGreen-100);

@@ -15,7 +15,7 @@ export default function HelpCenter() {
   const chatWithAdmin = useChatWithAdmin();
 
   return (
-    <DashboardLayout type="guest">
+    <DashboardLayout>
       <Head>
         <title>Help Center | Tramona</title>
       </Head>

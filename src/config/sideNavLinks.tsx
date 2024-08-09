@@ -9,7 +9,6 @@ import {
   HomeIcon,
   InboxIcon,
   LayoutDashboardIcon,
-  LinkIcon,
   MessageCircleIcon,
   Users2Icon,
   WrenchIcon,

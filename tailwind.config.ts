@@ -78,11 +78,6 @@ module.exports = {
       borderWidth: {
         custom: "2px",
       },
-      borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
-      },
       keyframes: {
         "accordion-down": {
           from: { height: "0" },
@@ -119,7 +114,8 @@ module.exports = {
         "marquee-vertical": "marquee-vertical var(--duration) linear infinite",
       },
       backgroundImage: {
-        'reserved-pattern': "repeating-linear-gradient(135deg, red, red 1px, transparent 1px, transparent 4px)",
+        "reserved-pattern":
+          "repeating-linear-gradient(135deg, red, red 1px, transparent 1px, transparent 4px)",
       },
     },
   },

@@ -31,9 +31,9 @@ const Step: React.FC<StepProps> = ({ number, title, description, isLast }) => (
 
 const HowItWorksHost: React.FC = () => {
   return (
-    <section className="relative bg-white py-4 px-4 md:px-2">
+    <section className="relative px-4 py-4 md:px-2">
       <div className="flex items-center justify-center">
-        <h1 className="text-3xl text-center font-bold md:text-5xl">
+        <h1 className="text-center text-3xl font-bold md:text-5xl">
           How does Tramona work?
         </h1>
       </div>

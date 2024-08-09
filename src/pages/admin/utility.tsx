@@ -4,7 +4,7 @@ import Head from "next/head";
 
 export default function IncomingRequests() {
   return (
-    <DashboardLayout type="admin">
+    <DashboardLayout>
       <Head>
         <title>Admin Utilities | Tramona</title>
       </Head>

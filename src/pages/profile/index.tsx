@@ -8,7 +8,7 @@ export default function Page() {
   useSession({ required: true });
 
   return (
-    <DashboardLayout type={"guest"}>
+    <DashboardLayout>
       <Head>
         <title>Profile | Tramona</title>
       </Head>

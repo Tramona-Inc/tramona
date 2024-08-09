@@ -7,22 +7,15 @@ import { useRouter } from "next/router";
 import { api } from "@/utils/api";
 import { useEffect } from "react";
 import { useIsMd, useIsLg } from "@/utils/utils";
-// import { useMediaQuery } from "@/components/_utils/useMediaQuery";
-import * as z from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import MessagesPopover from "@/components/messages/MessagesPop";
+import { usePathname } from "next/navigation";
 
 type DashboardLayoutProps = {
   children: React.ReactNode;
-  type: "admin" | "host" | "guest" | "unlogged";
 };
 
-export default function DashboardLayout({
-  children,
-  type,
-}: DashboardLayoutProps) {
-  const { data: session } = useSession();
+export default function DashboardLayout({ children }: DashboardLayoutProps) {
+  const { data: session, status } = useSession();
   const isMd = useIsMd();
 
   const router = useRouter();
@@ -33,7 +26,7 @@ export default function DashboardLayout({
   // const isMobile = useMediaQuery("(max-width: 684px)")
 
   useEffect(() => {
-    if (onboardingStep !== undefined && onboardingStep < 3) {
+    if (onboardingStep != null && onboardingStep < 3) {
       if (onboardingStep === 0) {
         void router.push("/auth/onboarding");
       } else if (onboardingStep === 1) {
@@ -44,22 +37,29 @@ export default function DashboardLayout({
     }
   }, [onboardingStep, router]);
 
+  const pathname = usePathname();
+
+  const navType =
+    status === "unauthenticated"
+      ? "unlogged"
+      : pathname.startsWith("/host")
+        ? "host"
+        : pathname.startsWith("/admin")
+          ? "admin"
+          : "guest";
+
   return (
     <>
-      <Header type={session ? "dashboard" : "marketing"} sidebarType={type} />
+      <Header />
       <div className="relative min-h-screen-minus-header lg:flex">
         {session && (
           <aside className="sticky top-header-height hidden h-screen-minus-header bg-zinc-100 lg:block">
-            <Sidebar type={type} />
+            <Sidebar type={navType} />
           </aside>
         )}
         <div className="min-w-0 lg:flex-1">
           <main className="relative min-h-screen-minus-header">{children}</main>
-          {session ? (
-            <MobileNav type={type} />
-          ) : (
-            <MobileNav type={"unlogged"} />
-          )}
+          {status !== "loading" && <MobileNav type={navType} />}
           {isLg && <MessagesPopover /> }
           {isMd && <Footer />}
         </div>

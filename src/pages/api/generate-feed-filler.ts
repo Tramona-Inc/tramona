@@ -134,8 +134,12 @@ export default async function handler() {
     if (randomDate.checkIn && randomDate.checkOut) {
       numNights = getNumNights(randomDate.checkIn, randomDate.checkOut);
     }
-    if (offer && randomDate.checkIn && randomDate.checkOut) {
-      // @ts-expect-error TODO !!!
+    if (
+      offer &&
+      randomDate.checkIn &&
+      randomDate.checkOut &&
+      offer.property.originalNightlyPrice
+    ) {
       await db.insert(fillerOffers).values({
         userName: username,
         userProfilePicUrl: picture,
@@ -165,8 +169,12 @@ export default async function handler() {
     if (randomDate.checkIn && randomDate.checkOut) {
       numNights = getNumNights(randomDate.checkIn, randomDate.checkOut);
     }
-    if (booking && randomDate.checkIn && randomDate.checkOut) {
-      // @ts-expect-error TODO !!!
+    if (
+      booking &&
+      randomDate.checkIn &&
+      randomDate.checkOut &&
+      booking.property.originalNightlyPrice
+    ) {
       await db.insert(fillerBookings).values({
         userName: username,
         userProfilePicUrl: picture,
