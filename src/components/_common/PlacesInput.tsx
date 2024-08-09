@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import PlacesPopover from "./PlacesPopover";
 import { LocateFixed } from "lucide-react";
 import { Button } from "../ui/button";
-import { MapModal } from "../MapModal";
+import { MapModal } from "./MapModal";
 import { FieldValues } from "react-hook-form";
 
 /**

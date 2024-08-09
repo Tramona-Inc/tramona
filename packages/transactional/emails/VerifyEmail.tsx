@@ -18,11 +18,9 @@ export default function VerifyEmailLink({
           <Text className="text-brand text-left">
             Please click on the following link to verify your email
           </Text>
-          <Text className="text-brand">
-            <i>
-              Please note that this link will expire in <strong>30 mins</strong>
-              .
-            </i>
+          <Text className="text-muted">
+            Please note that this link will expire in{" "}
+            <strong>30 minutes</strong>.
           </Text>
         </div>
         <CustomButton link={url} title="Verify Email" />

@@ -1,7 +1,7 @@
 import { Map, Marker, Circle } from "google-maps-react";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
-import { DialogClose, DialogFooter } from "./ui/dialog";
+import { DialogClose, DialogFooter } from "../ui/dialog";
 import { METERS_PER_MILE } from "@/utils/constants";
 import { useState } from "react";
 

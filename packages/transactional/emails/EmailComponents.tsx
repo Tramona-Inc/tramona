@@ -96,6 +96,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, title_preview }) => {
             extend: {
               colors: {
                 brand: "#000000",
+                muted: "#737373",
                 offwhite: "#fafbfb",
                 grey: "#4D4D4D",
                 lightgrey: "#F9F9F9",

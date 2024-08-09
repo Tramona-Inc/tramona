@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import React, { useState } from "react";
 
-import PinkStarIcon from "@/components/_icons/PinkStarIcon";
 import CopyToClipboardBtn from "@/components/_utils/CopyToClipboardBtn";
 import {
   Accordion,
@@ -325,9 +324,6 @@ function ExploreEarnings() {
     <section className="bg-slate-900">
       <div className="grid gap-6 md:gap-10 xl:grid-cols-2 xl:gap-16">
         <div className="relative space-y-6 xl:max-w-2xl">
-          <div className="absolute -top-20 sm:-top-16 lg:-top-20">
-            <PinkStarIcon />
-          </div>
           <h2 className="text-center text-4xl font-bold tracking-tight text-white sm:text-left sm:text-6xl">
             Explore how much you could earn
           </h2>

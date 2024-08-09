@@ -14,11 +14,8 @@ export default function FeedRequestCard({
   const isAdmin = session && session.user.role === "admin";
 
   const fmtdDateRange = formatDateRange(request.checkIn, request.checkOut);
-
   const numNights = getNumNights(request.checkIn, request.checkOut);
-  console.log({ numNights, maxTotalPrice: request.maxTotalPrice });
   const fmtdPrice = formatCurrency(request.maxTotalPrice / numNights);
-
   const userName = request.madeByGroup.owner.name ?? "";
   const userImage = request.madeByGroup.owner.image ?? "";
 
