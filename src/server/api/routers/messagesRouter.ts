@@ -490,7 +490,7 @@ export const messagesRouter = createTRPCRouter({
     })
   )
   .query(async ({input}) => {
-    const result = db.query.guestMessages.findFirst({
+    const result = await db.query.guestMessages.findFirst({
       where: eq(guestMessages.conversationId, input.conversationId),
       columns: {conversationId: true}
     })
