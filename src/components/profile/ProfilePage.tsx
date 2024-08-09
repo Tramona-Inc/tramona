@@ -64,11 +64,11 @@ export default function ProfilePage() {
                 <h2 className="text-xl font-bold lg:text-2xl">
                   {profileInfo?.name}
                 </h2>
-                {verificationStatus?.isIdentityVerified == "true" ? (
+                {verificationStatus?.isIdentityVerified === "true" ? (
                   <div className="flex flex-row items-center gap-x-1 text-center text-xs font-semibold tracking-tighter text-green-800">
                     <BadgeCheck size={22} /> Verified
                   </div>
-                ) : verificationStatus?.isIdentityVerified == "pending" ? (
+                ) : verificationStatus?.isIdentityVerified === "pending" ? (
                   <div className="flex flex-row items-center gap-x-1 text-xs font-semibold tracking-tighter text-yellow-600">
                     <Clock2Icon size={22} /> Pending
                   </div>
@@ -117,7 +117,7 @@ export default function ProfilePage() {
         </div>
       </section>
       {/* pop up if no verified */}
-      {verificationStatus?.isIdentityVerified == "false" && (
+      {verificationStatus?.isIdentityVerified === "false" && (
         <section className="flex flex-col justify-center gap-x-2 rounded-lg border border-red-200 p-4">
           <div className="flex flex-row gap-x-1 font-bold">
             <InfoIcon size={24} className="text-red-400" /> Verify your Identity

@@ -27,7 +27,7 @@ export default function MobileNav({
               ...guestMobileNavLinks,
               { href: "/admin", name: "Switch To Admin", icon: ArrowLeftRight },
             ]
-          : type == "unlogged"
+          : type === "unlogged"
             ? unloggedNavLinks
             : guestMobileNavLinks;
 
