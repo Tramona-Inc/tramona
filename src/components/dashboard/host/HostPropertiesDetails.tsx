@@ -364,12 +364,12 @@ export default function HostPropertiesDetails({
               <SingleLocationMap
                 lat={
                   editing
-                    ? coordinateData?.coordinates.location?.lat ?? 0
+                    ? (coordinateData?.coordinates.location?.lat ?? 0)
                     : property.latitude
                 }
                 lng={
                   editing
-                    ? coordinateData?.coordinates.location?.lng ?? 0
+                    ? (coordinateData?.coordinates.location?.lng ?? 0)
                     : property.longitude
                 }
               />
@@ -405,7 +405,7 @@ export default function HostPropertiesDetails({
           </div>
           <div className="text-muted-foreground">
             <p>
-              {capitalize(editing ? checkInType : property.checkInInfo ?? "")}
+              {capitalize(editing ? checkInType : (property.checkInInfo ?? ""))}
             </p>
             <div className="flex">
               <p>

@@ -15,7 +15,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Pencil, PlusIcon, CircleCheckBig } from "lucide-react";
+import { Pencil, PlusIcon } from "lucide-react";
 import HostProperties from "./HostProperties";
 import Link from "next/link";
 import {
@@ -24,7 +24,6 @@ import {
 } from "@/utils/store/host-onboarding";
 import { api } from "@/utils/api";
 import { type Property } from "@/server/db/schema/tables/properties";
-import { toast } from "@/components/ui/use-toast";
 
 export default function HostPropertiesLayout({
   children,
@@ -293,20 +292,6 @@ export function HostPropertyEditBtn({
     setCancellationPolicy(property.cancellationPolicy);
   };
 
-  const { mutateAsync: publishProperty } =
-    api.properties.publishProperty.useMutation({
-      onSuccess: () => {
-        toast({
-          title: "Property listed!",
-          description: "Your property was successfully listed",
-        });
-      },
-    });
-
-  const handlePublishProperty = () => {
-    void publishProperty({ id: property.id });
-  };
-
   return (
     <div className="fixed bottom-20 right-4 z-50 sm:static">
       {editing ? (
@@ -337,17 +322,6 @@ export function HostPropertyEditBtn({
             <Pencil size={20} />
             Enter edit mode
           </Button>
-          {property.propertyStatus === "Drafted" && (
-            <Button
-              variant="secondary"
-              className="rounded-full bg-white font-bold shadow-md sm:rounded-lg sm:border-2 sm:shadow-none"
-              onClick={handlePublishProperty}
-              type="button"
-            >
-              <CircleCheckBig size={20} />
-              Make it public
-            </Button>
-          )}
         </div>
       )}
     </div>

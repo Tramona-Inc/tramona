@@ -20,13 +20,6 @@ export default function SaveAndExit() {
       setProgress(0);
       void router.push("/host/properties");
     },
-    onError: () => {
-      toast({
-        title: "Can't save property",
-        description:
-          "Some essential information is missing from your property details",
-      });
-    },
   });
 
   function handleSaveAndExit() {
@@ -37,18 +30,11 @@ export default function SaveAndExit() {
       numBeds: listing.beds,
       numBedrooms: listing.bedrooms,
       numBathrooms: listing.bathrooms,
-      address:
-        listing.location.street +
-        ", " +
-        listing.location.city +
-        ", " +
-        listing.location.apt +
-        " " +
-        listing.location.state +
-        " " +
-        listing.location.zipcode +
-        ", " +
-        listing.location.country,
+      address: `${listing.location.street}${
+        listing.location.apt ? `, ${listing.location.apt}` : ""
+      }, ${listing.location.city}, ${listing.location.state} ${listing.location.zipcode}, ${
+        listing.location.country
+      }`,
       checkInInfo: listing.checkInType,
       checkInTime: listing.checkIn,
       checkOutTime: listing.checkOut,
