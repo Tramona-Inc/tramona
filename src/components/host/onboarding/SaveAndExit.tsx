@@ -20,6 +20,13 @@ export default function SaveAndExit() {
       setProgress(0);
       void router.push("/host/properties");
     },
+    onError: () => {
+      toast({
+        title: "Missing essential information",
+        description:
+          "Please add an address in Step 3 and click 'Next' before saving and exiting.",
+      });
+    },
   });
 
   function handleSaveAndExit() {
