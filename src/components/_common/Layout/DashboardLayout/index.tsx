@@ -1,12 +1,12 @@
 import MobileNav from "@/components/dashboard/MobileNav";
 import Sidebar from "@/components/dashboard/Sidebar";
 import { useSession } from "next-auth/react";
-import Header from "../../header/Header";
 import Footer from "../Footer";
 import { useIsMd } from "@/utils/utils";
 import { api } from "@/utils/api";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
+import { Header } from "../../header/Header";
 
 type DashboardLayoutProps = {
   children: React.ReactNode;

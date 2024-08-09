@@ -24,7 +24,7 @@ import {
 import { ArrowLeftRightIcon, DoorOpen, MenuIcon } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export default function Header() {
+export function Header() {
   return (
     <>
       <div className="contents lg:hidden">
