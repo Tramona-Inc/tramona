@@ -2,6 +2,8 @@ import axios from "axios";
 import { type ListingSite } from ".";
 import { formatDateYearMonthDay } from "../utils";
 import * as cheerio from "cheerio";
+import * as https from 'https';
+
 import { HttpsProxyAgent } from "https-proxy-agent";
 export const Airbnb: ListingSite<"Airbnb"> = {
   siteName: "Airbnb",
@@ -81,19 +83,42 @@ export const Airbnb: ListingSite<"Airbnb"> = {
 
         console.log("checkoutUrl:", checkoutUrl);
 
-        const proxyAgent = new HttpsProxyAgent(
-          "http://sasha14:!Matd4Qe4dUHBn8@us-ca.proxymesh.com:31280",
-        ); // Replace with your proxy URL
+        const proxyUrl = "http://sasha14:!Matd4Qe4dUHBn8@us-ca.proxymesh.com:31280";
+
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+        const httpsAgent = new https.Agent({
+          rejectUnauthorized: false // Be cautious with this option
+        });
+
+        const proxyAgent = new HttpsProxyAgent(proxyUrl);
+
+
+        // const proxyAgent = new HttpsProxyAgent({
+        //   host: 'us-ca.proxymesh.com',
+        //   port: '31280',
+        //   auth: 'sasha14:!Matd4Qe4dUHBn8',
+        //   protocol: 'http',
+        //   // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unsafe-member-access
+        //   secureOptions: require('constants').SSL_OP_NO_TLSv1 | require('constants').SSL_OP_NO_TLSv1_1
+        // });
 
         const response = await axios
           .get(checkoutUrl, {
-            headers: airbnbRequestHeaders,
-            httpAgent: proxyAgent,
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            },
             httpsAgent: proxyAgent,
+            proxy: false,
           })
           .catch((err) => {
-            console.error(err);
-            console.log("got here");
+            console.error('Error details:', {
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+              message: err.message,
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+              code: err.code,
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+              response: err.response ? err.response.data : null
+            });
             throw err;
           });
 
