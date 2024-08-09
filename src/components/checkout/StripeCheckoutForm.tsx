@@ -14,6 +14,7 @@ import type {
   StripeExpressCheckoutElementOptions,
 } from "@stripe/stripe-js";
 import { env } from "@/env";
+import { toast } from "@/components/ui/use-toast";
 
 export default function StripeCheckoutForm({
   clientSecret,
@@ -49,7 +50,14 @@ export default function StripeCheckoutForm({
         return_url: `${baseUrl}/my-trips/confirmation`,
       },
     });
-    setErrorMessage(error.message);
+    if (error) {
+      setErrorMessage(error.message);
+      toast({
+        title: "Payment Failed",
+        description: "Please correct your payment information then try again",
+        variant: "destructive",
+      });
+    }
   }
   const expressCheckoutOptions: StripeExpressCheckoutElementOptions = {
     buttonType: {

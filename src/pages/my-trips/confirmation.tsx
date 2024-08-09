@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { api } from "@/utils/api";
 import Spinner from "@/components/_common/Spinner";
 import SuccessfulBookingDialog from "@/components/my-trips/SuccessfulBookingDialog";
+import { toast } from "@/components/ui/use-toast";
 
 export default function TripDetailsPage() {
   const [open, setOpen] = useState(true);
@@ -40,6 +41,17 @@ export default function TripDetailsPage() {
       void fetchMyTrip();
     }
   }, [paymentIntent, fetchMyTrip]);
+
+  useEffect(() => {
+    if (trip && redirectStatus !== "succeeded") {
+      toast({
+        title: "Payment Failed",
+        description: "Please try again",
+      });
+
+      void router.push(`/offer-checkout/${trip.offerId}`);
+    }
+  }, [trip, redirectStatus, router]);
 
   return (
     <DashboardLayout>
