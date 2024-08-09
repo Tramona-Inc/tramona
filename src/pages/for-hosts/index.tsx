@@ -250,7 +250,10 @@ export async function getStaticProps() {
 export default function HostWelcome({
   serializedRequests,
 }: InferGetStaticPropsType<typeof getStaticProps>) {
-  const requests = SuperJSON.deserialize<FeedRequestItem[]>(serializedRequests);
+  const requests =
+    SuperJSON.deserialize<Awaited<ReturnType<typeof getFeed>>>(
+      serializedRequests,
+    );
 
   return (
     <MainLayout className="mx-auto max-w-full">
@@ -259,7 +262,7 @@ export default function HostWelcome({
           <title>Hosts | Tramona</title>
         </Head>
 
-        <IntroSection requests={requests} />
+        <IntroSection requests={requests.filter((r) => r.type === "request")} />
         <ListInAMinute />
         <HowItWorksHost />
         <DamageProtection />
