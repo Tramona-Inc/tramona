@@ -114,6 +114,7 @@
     "next": "^14.1.4",
     "next-auth": "^4.24.5",
     "next-seo": "^6.5.0",
+    "next-superjson-plugin": "^0.6.3",
     "nextjs-toploader": "^1.6.12",
     "ngrok": "5.0.0-beta.2",
     "node-fetch": "^3.3.2",

@@ -185,7 +185,7 @@ export default function MastHead() {
         <h2 className="text-center text-2xl font-extrabold lg:text-4xl">
           Why use Tramona?
         </h2>
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {whyUseTramonaCopy.map(({ icon: Icon, title, bullets }) => (
             <div key={title} className="rounded-2xl border p-4">
               <div className="inline-block rounded-lg bg-primaryGreen-background p-2 text-primaryGreen">

@@ -8,7 +8,7 @@ import { plural } from "@/utils/utils";
 import { ArrowLeftRight } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useCallback, useEffect } from "react";
-import { TramonaLogo } from "../_common/Header/TramonaLogo";
+import { TramonaLogo } from "../_common/header/TramonaLogo";
 import { Badge } from "../ui/badge";
 import { NavBarLink } from "./NavBarLink";
 

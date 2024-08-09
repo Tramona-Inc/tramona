@@ -20,17 +20,7 @@ import { sendText, sendWhatsApp } from "@/server/server-utils";
 import { formatDateRange } from "@/utils/utils";
 
 import { TRPCError } from "@trpc/server";
-import {
-  and,
-  desc,
-  eq,
-  isNotNull,
-  isNull,
-  lt,
-  notInArray,
-  or,
-  sql,
-} from "drizzle-orm";
+import { and, eq, isNotNull, isNull, notInArray, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import { requests } from "../../db/schema/tables/requests";
 import { requestsToProperties } from "../../db/schema/tables/requestsToProperties";
@@ -324,29 +314,29 @@ export const offersRouter = createTRPCRouter({
         .where(eq(offers.id, input.id));
     }),
 
-  getAllPublicOffers: publicProcedure.query(async ({ ctx }) => {
-    return (
-      await ctx.db.query.offers.findMany({
-        where: and(
-          isNull(offers.acceptedAt),
-          lt(offers.madePublicAt, new Date()),
-        ),
-        columns: { acceptedAt: false },
-        with: {
-          property: {
-            with: {
-              host: { columns: { name: true, email: true, image: true } },
-            },
-          },
-          request: { columns: { checkIn: true, checkOut: true } },
-        },
-        orderBy: desc(offers.madePublicAt),
-      })
-    ).map((offer) => ({
-      ...offer,
-      madePublicAt: offer.madePublicAt ?? new Date(), // will never be null, just fixes types
-    }));
-  }),
+  // getAllPublicOffers: publicProcedure.query(async ({ ctx }) => {
+  //   return (
+  //     await ctx.db.query.offers.findMany({
+  //       where: and(
+  //         isNull(offers.acceptedAt),
+  //         lt(offers.madePublicAt, new Date()),
+  //       ),
+  //       columns: { acceptedAt: false },
+  //       with: {
+  //         property: {
+  //           with: {
+  //             host: { columns: { name: true, email: true, image: true } },
+  //           },
+  //         },
+  //         request: { columns: { checkIn: true, checkOut: true } },
+  //       },
+  //       orderBy: desc(offers.madePublicAt),
+  //     })
+  //   ).map((offer) => ({
+  //     ...offer,
+  //     madePublicAt: offer.madePublicAt!,
+  //   }));
+  // }),
 
   // getAllOffers: publicProcedure.query(async ({ ctx }) => {
   //   return await ctx.db.query.offers.findMany({

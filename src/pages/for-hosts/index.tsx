@@ -1,11 +1,8 @@
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
-
 import { Button } from "@/components/ui/button";
-
 import MainLayout from "@/components/_common/Layout/MainLayout";
-import HowItWorksHost from "@/pages/how-it-works-host";
 import {
   Accordion,
   AccordionContent,
@@ -13,11 +10,10 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import RequestFeed from "@/components/activity-feed/RequestFeed";
-
 import { type FeedRequestItem } from "@/components/activity-feed/ActivityFeed";
 import { getFeed } from "@/server/api/routers/feedRouter";
-import SuperJSON from "superjson";
 import { type InferGetStaticPropsType } from "next";
+import HowItWorksHost from "@/components/landing-page/how-it-works-host";
 
 const DamageProtection = () => {
   const protectionMethods = [
@@ -116,7 +112,7 @@ const contents: Tabs[] = [
   },
 ];
 
-function IntroSection({ requests }: { requests: FeedRequestItem[] }) {
+function IntroSection({ requestFeed }: { requestFeed: FeedRequestItem[] }) {
   return (
     <section className="relative mx-auto flex max-w-7xl justify-center px-2">
       <div className="flex flex-col items-center space-y-8 lg:flex-row lg:space-x-10 xl:space-x-20">
@@ -132,7 +128,7 @@ function IntroSection({ requests }: { requests: FeedRequestItem[] }) {
           </p>
         </div>
         <div className="rounded-lg border px-2 py-2 shadow-xl">
-          <RequestFeed requests={requests} />
+          <RequestFeed requestFeed={requestFeed} />
         </div>
       </div>
     </section>
@@ -239,22 +235,18 @@ function WhatAreYouWaitingFor() {
 }
 
 export async function getStaticProps() {
-  const requests = await getFeed({ maxNumEntries: 10 });
-
+  const requestFeed = await getFeed({ maxNumEntries: 10 }).then((r) =>
+    r.filter((r) => r.type === "request"),
+  );
   return {
-    props: { serializedRequests: SuperJSON.serialize(requests) },
+    props: { requestFeed },
     revalidate: 60 * 5, // 5 minutes
   };
 }
 
 export default function HostWelcome({
-  serializedRequests,
+  requestFeed,
 }: InferGetStaticPropsType<typeof getStaticProps>) {
-  const requests =
-    SuperJSON.deserialize<Awaited<ReturnType<typeof getFeed>>>(
-      serializedRequests,
-    );
-
   return (
     <MainLayout className="mx-auto max-w-full">
       <div className="relative space-y-32 overflow-x-hidden pb-32">
@@ -262,7 +254,7 @@ export default function HostWelcome({
           <title>Hosts | Tramona</title>
         </Head>
 
-        <IntroSection requests={requests.filter((r) => r.type === "request")} />
+        <IntroSection requestFeed={requestFeed} />
         <ListInAMinute />
         <HowItWorksHost />
         <DamageProtection />

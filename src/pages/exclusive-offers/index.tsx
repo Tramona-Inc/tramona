@@ -38,7 +38,7 @@ export default function ExclusiveOffersPage() {
   return (
     <>
       <NextSeo
-        title="Feed"
+        title="Recent Deals | Tramona"
         description="Peek at who is getting great deals."
         canonical={`${baseUrl}/activity-feed`}
         openGraph={{
