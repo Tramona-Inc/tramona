@@ -22,7 +22,7 @@ import {
   hamburgerLinksMobile,
 } from "@/config/headerNavLinks";
 import { ArrowLeftRightIcon, DoorOpen, MenuIcon } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { SkeletonText } from "@/components/ui/skeleton";
 
 export function Header() {
   return (
@@ -105,7 +105,9 @@ function LargeHeader() {
       <div className="flex-1" />
 
       {status === "loading" ? null : hostBtn.isLoading ? (
-        <Skeleton className="h-9 w-32 rounded-md" />
+        <div className="px-4">
+          <SkeletonText className="w-24" />
+        </div>
       ) : (
         <Button asChild variant="ghost">
           <Link href={hostBtn.href}>{hostBtn.name}</Link>
@@ -177,7 +179,6 @@ function useHostBtn() {
 
   if (sessionStatus === "unauthenticated" || !isHost) {
     return {
-      isLoading: false,
       href: "/for-hosts",
       name: "Become a host",
       icon: DoorOpen,
@@ -186,7 +187,6 @@ function useHostBtn() {
 
   if (pathname.includes("/host")) {
     return {
-      isLoading: false,
       href: "/",
       name: "Switch to Traveler",
       icon: ArrowLeftRightIcon,
@@ -194,7 +194,6 @@ function useHostBtn() {
   }
 
   return {
-    isLoading: false,
     href: "/host",
     name: "Switch to Host",
     icon: ArrowLeftRightIcon,
