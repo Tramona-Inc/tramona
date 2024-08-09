@@ -68,6 +68,19 @@ export default function HelpCenter() {
               </p>
             </div>
             <div>
+              <h2 className="font-bold">Damage Resolution</h2>
+              <p>
+                If your property has been damaged, please complete this{" "}
+                <Link
+                  href="/my-trips/resolution-form"
+                  className="text-blue-600 underline underline-offset-2"
+                >
+                  form
+                </Link>{" "}
+                to report the issue. We will get back to you within 24 hours.
+              </p>
+            </div>
+            <div>
               <h2 className="font-bold">Emergencies</h2>
               <p>
                 If it is an emergency regarding safety, please call 911. If it
