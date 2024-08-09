@@ -49,7 +49,7 @@ const buttonVariants = cva(
         secondaryLight:
           "bg-[#F2F1EF] border border-[#D9D6D1] hover:bg-zinc-200 font-semibold",
         greenPrimaryOutline:
-          "border-2 border-[#004236] bg-[#D8E5E3] text-black",
+          "border-2 border-[#004236] bg-primaryGreen-background text-black",
 
         Airbnb:
           "bg-gradient-to-r from-[#E61F4F] to-[#D70666] text-white hover:opacity-90",
