@@ -431,7 +431,7 @@ export async function handleRequestSubmission(
       { tx },
     );
 
-    if (propertyIds.length > 1) {
+    if (propertyIds.length > 0) {
       await tx
         .insert(requestsToProperties)
         .values(propertyIds.map((propertyId) => ({ requestId, propertyId })));

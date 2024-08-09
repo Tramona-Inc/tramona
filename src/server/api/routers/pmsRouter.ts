@@ -144,7 +144,13 @@ export const pmsRouter = createTRPCRouter({
     }
 
     // Destructure the necessary properties from the user object
-    const { id, name, email, phoneNumber } = user;
+    const { id, firstName, lastName, email, phoneNumber } = user;
+    const name = `${firstName} ${lastName}`;
+
+    if (!id || !name || !email || !phoneNumber) {
+      throw new Error("User is missing required information");
+    };
+
     try {
       const response = await axios.post(
         "https://connect.hospitable.com/api/v1/customers",
@@ -173,8 +179,8 @@ export const pmsRouter = createTRPCRouter({
         "https://connect.hospitable.com/api/v1/auth-codes",
         {
           customer_id: id,
-          // redirect_url: "https://tramona.com/host",
-          redirect_url: "https://179c-2601-600-8e81-3180-4171-fe-a3a4-da1d.ngrok-free.app/host",
+          redirect_url: "https://tramona.com/host",
+          // redirect_url: "https://179c-2601-600-8e81-3180-4171-fe-a3a4-da1d.ngrok-free.app/host",
         },
         {
           headers: {
@@ -183,8 +189,6 @@ export const pmsRouter = createTRPCRouter({
         },
       );
 
-      console.log("Hospitable sync response:", response.data);
-      console.log("Hospitable auth code response:", authCodeResponse.data);
       return authCodeResponse.data;
     } catch (error) {
       console.error("Error syncing with Hospitable:", error);
