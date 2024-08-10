@@ -12,7 +12,6 @@ import Image from "next/image";
 import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
 
 const PoiMarkers = (props: { pois: Poi[] | [] }) => {
-  const [markerRef, marker] = useAdvancedMarkerRef();
   const [selectedMarker, setSelectedMarker] = useState<Poi | null>(null);
   const [infoWindowShownIndex, setInfoWindowShownIndex] = useState<
     number | null
@@ -64,7 +63,7 @@ const PoiMarkers = (props: { pois: Poi[] | [] }) => {
               <div className="flex items-center justify-center overscroll-x-none rounded-xl">
                 <div
                   onClick={() => void router.push(`/property/${poi.id}`)}
-                  className="ml-2 mr-1 flex max-w-72 cursor-pointer flex-col items-center justify-center gap-y-1 text-left text-sm  font-medium"
+                  className="ml-2 mr-1 flex max-w-72 cursor-pointer flex-col items-center justify-center gap-y-1 text-left text-sm font-medium"
                 >
                   <Image
                     src={poi.image}
@@ -74,7 +73,7 @@ const PoiMarkers = (props: { pois: Poi[] | [] }) => {
                     alt=""
                   />
                   {poi.key}
-                  <span className="text-center text-sm font-semibold ">
+                  <span className="text-center text-sm font-semibold">
                     {" "}
                     {formatCurrency(
                       poi.originalNightlyPrice * AVG_AIRBNB_MARKUP,
