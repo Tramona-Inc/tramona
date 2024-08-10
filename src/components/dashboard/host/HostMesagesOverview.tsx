@@ -68,7 +68,7 @@ export default function HostMessagesOverview({
           </Badge>
           <div className="flex-1" />
           <Button variant="ghost" asChild>
-            <Link href="/messages">
+            <Link href="/host/messages">
               See all
               <ArrowRightIcon />
             </Link>

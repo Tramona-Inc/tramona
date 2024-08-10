@@ -5,14 +5,9 @@ import {
   BadgeXIcon,
   Clock2Icon,
   Edit,
-  Ellipsis,
   Facebook,
   InfoIcon,
   Instagram,
-  Mail,
-  MessageCircle,
-  MessageCircleMore,
-  MessagesSquare,
   Twitter,
   Youtube,
 } from "lucide-react";
@@ -23,19 +18,12 @@ import IdentityModal from "../_utils/IdentityModal";
 import { VerificationProvider } from "../_utils/VerificationContext";
 import { Button } from "../ui/button";
 import EditProfileDialog from "./EditProfileDialog";
-import { useMemo, useState } from "react";
 
 export default function ProfilePage() {
   const { data: session } = useSession({ required: true });
 
-  const { data } = api.users.myReferralCode.useQuery();
   const { data: verificationStatus } =
     api.users.myVerificationStatus.useQuery();
-  const code =
-    session?.user.referralCodeUsed && data?.referralCode
-      ? ""
-      : data?.referralCode;
-  const url = `https://tramona.com/auth/signup?code=${code}`;
 
   const { data: profileInfo } = api.profile.getProfileInfo.useQuery();
 
@@ -43,14 +31,8 @@ export default function ProfilePage() {
 
   return (
     <div className="mx-auto min-h-screen-minus-header max-w-4xl space-y-3 pb-10">
-      {/* Profile Header */}
       <section className="rounded-lg border">
-        <div className="relative h-40 bg-teal-900 lg:h-52">
-          {/* <Button className="absolute bottom-4 right-4 h-12 w-12 rounded-full bg-primary/20 p-0 lg:w-auto lg:rounded-lg lg:px-3">
-            <Camera />
-            <p className="hidden lg:block">Edit Cover Photo</p>
-          </Button> */}
-        </div>
+        <div className="relative h-40 bg-teal-900 lg:h-52"></div>
         <div className="relative grid grid-cols-1 gap-4 p-5 lg:grid-cols-4 lg:gap-0 lg:p-4">
           <UserAvatar
             size="huge"
