@@ -1,8 +1,5 @@
 import { useEffect } from "react";
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
-import { DoubleArrowLeftIcon, TrackPreviousIcon } from "@radix-ui/react-icons";
-import { Button } from "@/components/ui/button";
-import { ArrowLeftIcon } from "lucide-react";
 
 declare global {
   interface Window {
