@@ -4,7 +4,7 @@ import axios from "axios";
 import ical from "node-ical";
 import { db } from "@/server/db";
 import { reservedDateRanges } from "@/server/db/schema/tables/reservedDateRanges";
-import { and, eq } from "drizzle-orm";
+import { and, eq, gte, lte } from "drizzle-orm";
 import { properties } from "@/server/db/schema/tables/properties";
 
 export async function syncCalendar({
@@ -132,7 +132,7 @@ export const calendarRouter = createTRPCRouter({
       return generateICSContent(reservedDates);
     }),
 
-  updateCalendar: publicProcedure
+    updateCalendar: publicProcedure
     .input(
       z.object({
         propertyId: z.number(),
@@ -145,26 +145,74 @@ export const calendarRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       const { propertyId, start, end, isAvailable, platformBookedOn } = input;
 
-      // Update local database
-      if (!isAvailable) {
-        await db.insert(reservedDateRanges).values({
-          propertyId,
-          start,
-          end,
-          platformBookedOn: platformBookedOn,
-        });
-      } else {
-        await db
-          .delete(reservedDateRanges)
-          .where(
-            and(
-              eq(reservedDateRanges.propertyId, propertyId),
-              eq(reservedDateRanges.start, start),
-              eq(reservedDateRanges.end, end),
-              eq(reservedDateRanges.platformBookedOn, platformBookedOn)
-            ),
-          );
-      }
+      await db.transaction(async (tx) => {
+        if (!isAvailable) {
+          // Find overlapping or adjacent ranges
+          const overlappingRanges = await tx
+            .select()
+            .from(reservedDateRanges)
+            .where(
+              and(
+                eq(reservedDateRanges.propertyId, propertyId),
+                eq(reservedDateRanges.platformBookedOn, platformBookedOn),
+                lte(reservedDateRanges.start, end),
+                gte(reservedDateRanges.end, start)
+              )
+            );
+
+          if (overlappingRanges.length > 0) {
+            // Merge overlapping ranges
+            const mergedStart = overlappingRanges.reduce(
+              (min, range) => (range.start < min ? range.start : min),
+              start
+            );
+            const mergedEnd = overlappingRanges.reduce(
+              (max, range) => (range.end > max ? range.end : max),
+              end
+            );
+
+            // Delete overlapping ranges
+            await tx
+              .delete(reservedDateRanges)
+              .where(
+                and(
+                  eq(reservedDateRanges.propertyId, propertyId),
+                  eq(reservedDateRanges.platformBookedOn, platformBookedOn),
+                  lte(reservedDateRanges.start, mergedEnd),
+                  gte(reservedDateRanges.end, mergedStart)
+                )
+              );
+
+            // Insert merged range
+            await tx.insert(reservedDateRanges).values({
+              propertyId,
+              start: mergedStart,
+              end: mergedEnd,
+              platformBookedOn,
+            });
+          } else {
+            // No overlapping ranges, insert new range
+            await tx.insert(reservedDateRanges).values({
+              propertyId,
+              start,
+              end,
+              platformBookedOn,
+            });
+          }
+        } else {
+          // Handling the case when making a date range available
+          await tx
+            .delete(reservedDateRanges)
+            .where(
+              and(
+                eq(reservedDateRanges.propertyId, propertyId),
+                eq(reservedDateRanges.platformBookedOn, platformBookedOn),
+                lte(reservedDateRanges.start, end),
+                gte(reservedDateRanges.end, start)
+              )
+            );
+        }
+      });
 
       const updatedReservedDates = await db
         .select({
@@ -177,7 +225,6 @@ export const calendarRouter = createTRPCRouter({
 
       const updatedICSContent = await generateICSContent(updatedReservedDates);
 
-      // Return the URL where the updated ICS file can be accessed
       return {
         icsUrl: `https://tramona.com/api/ics/${propertyId}`,
         icsContent: updatedICSContent,

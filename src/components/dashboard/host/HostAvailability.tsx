@@ -26,7 +26,7 @@ export default function HostAvailability({ property }: { property: Property }) {
     end: Date | null;
   }>({ start: null, end: null });
   const [pendingChanges, setPendingChanges] = useState<
-    { start: Date; end: Date }[]
+    { start: Date; end: Date; isBlocking: boolean }[]
   >([]);
 
   const { mutateAsync: syncCalendar } = api.calendar.syncCalendar.useMutation();
@@ -70,9 +70,9 @@ export default function HostAvailability({ property }: { property: Property }) {
   useEffect(() => {
     if (!editing) {
       setSelectedRange({ start: null, end: null });
+      setPendingChanges([]);
     }
   }, [editing]);
-
 
   const isDateReserved = (date: Date): ReservationInfo | undefined => {
     return reservedDateRanges?.find((reservedDate) => {
@@ -85,34 +85,42 @@ export default function HostAvailability({ property }: { property: Property }) {
   const handleDateClick = (date: Date) => {
     if (!editing) return;
 
-    setSelectedRange((prev) => {
-      if (!prev.start && !prev.end) {
-        // First click - set both start and end to the clicked date
-        return { start: date, end: date };
-      } else if (prev.start && prev.end) {
-        if (date < prev.start) {
-          // Clicked earlier than start - move start back
-          return { ...prev, start: date };
-        } else if (date > prev.end) {
-          // Clicked later than end - move end forward
-          return { ...prev, end: date };
-        } else if (
-          date.getTime() === prev.start.getTime() &&
-          date.getTime() === prev.end.getTime()
-        ) {
-          // Clicked on a single selected date - unselect
-          return { start: null, end: null };
+    const clickedReservation = isDateReserved(date);
+
+    if (
+      clickedReservation &&
+      clickedReservation.platformBookedOn === "tramona"
+    ) {
+      // If clicking on a Tramona-reserved date, select the entire range
+      setSelectedRange({
+        start: new Date(clickedReservation.start),
+        end: new Date(clickedReservation.end),
+      });
+    } else {
+      setSelectedRange((prev) => {
+        if (!prev.start && !prev.end) {
+          return { start: date, end: date };
+        } else if (prev.start && prev.end) {
+          if (date < prev.start) {
+            return { ...prev, start: date };
+          } else if (date > prev.end) {
+            return { ...prev, end: date };
+          } else if (
+            date.getTime() === prev.start.getTime() &&
+            date.getTime() === prev.end.getTime()
+          ) {
+            return { start: null, end: null };
+          } else {
+            return { start: date, end: date };
+          }
         } else {
-          // Clicked within the range - split the range
           return { start: date, end: date };
         }
-      } else {
-        // This shouldn't happen, but just in case
-        return { start: date, end: date };
-      }
-    });
+      });
+    }
   };
-  const handleRangeSubmit = () => {
+
+  const handleRangeSubmit = (isBlocking: boolean) => {
     if (!editing || !selectedRange.start || !selectedRange.end) return;
 
     setPendingChanges((prev) => [
@@ -120,23 +128,29 @@ export default function HostAvailability({ property }: { property: Property }) {
       {
         start: new Date(selectedRange.start!.setHours(0, 0, 0, 0)),
         end: new Date(selectedRange.end!.setHours(23, 59, 59, 999)),
+        isBlocking,
       },
     ]);
     setSelectedRange({ start: null, end: null });
   };
 
   const handleEditingDone = async () => {
-    for (const range of pendingChanges) {
-      await updateCalendar({
-        propertyId: property.id,
-        start: range.start.toISOString(),
-        end: range.end.toISOString(),
-        isAvailable: false, // Blocking the date range
-        platformBookedOn: "tramona",
-      });
+    try {
+      for (const range of pendingChanges) {
+        await updateCalendar({
+          propertyId: property.id,
+          start: range.start.toISOString(),
+          end: range.end.toISOString(),
+          isAvailable: !range.isBlocking,
+          platformBookedOn: "tramona",
+        });
+      }
+      setPendingChanges([]);
+      await refetch();
+    } catch (error) {
+      console.error("Error updating calendar:", error);
+      // Handle error (e.g., show an error message to the user)
     }
-    setPendingChanges([]);
-    await refetch();
   };
 
   const generateCalendarDays = (month: number): (number | null)[] => {
@@ -186,7 +200,14 @@ export default function HostAvailability({ property }: { property: Property }) {
             const isPendingBlock =
               date &&
               pendingChanges.some(
-                (range) => date >= range.start && date <= range.end,
+                (range) =>
+                  date >= range.start && date <= range.end && range.isBlocking,
+              );
+            const isPendingUnblock =
+              date &&
+              pendingChanges.some(
+                (range) =>
+                  date >= range.start && date <= range.end && !range.isBlocking,
               );
             const isSelected =
               date &&
@@ -194,19 +215,20 @@ export default function HostAvailability({ property }: { property: Property }) {
               (selectedRange.end
                 ? date >= selectedRange.start && date <= selectedRange.end
                 : date.getTime() === selectedRange.start.getTime());
-
             let reservationClass = "";
             if (reservedInfo) {
-              reservationClass =
-                reservedInfo.platformBookedOn === "tramona"
-                  ? "bg-reserved-pattern-2"
-                  : "bg-reserved-pattern";
+              if (
+                reservedInfo.platformBookedOn === "airbnb") {
+                reservationClass = "bg-reserved-pattern";
+              } else if (reservedInfo.platformBookedOn === "tramona") {
+                reservationClass = "bg-reserved-pattern-2";
+              }
             }
             return (
               <div
                 key={index}
                 onClick={() => date && handleDateClick(date)}
-                className={`flex h-12 flex-1 items-center justify-center font-semibold ${day && editing ? "cursor-pointer": ""} ${reservationClass} ${isPendingBlock ? "bg-yellow-200" : ""} ${isSelected ? "bg-blue-200" : ""} ${
+                className={`flex h-12 flex-1 items-center justify-center font-semibold ${day && editing ? "cursor-pointer" : ""} ${reservationClass} ${isPendingBlock ? "bg-yellow-200" : ""} ${isPendingUnblock ? "bg-green-200" : ""} ${isSelected ? "bg-blue-200" : ""} ${
                   day &&
                   monthDate.getFullYear() === currentDate.getFullYear() &&
                   monthDate.getMonth() === currentDate.getMonth() &&
@@ -289,12 +311,18 @@ export default function HostAvailability({ property }: { property: Property }) {
           </div>
           <div className="sm:hidden">{renderMonth(0)}</div>
           {editing && selectedRange.start && selectedRange.end && (
-            <div className="mt-4">
+            <div className="mt-4 flex space-x-4">
               <button
-                onClick={handleRangeSubmit}
+                onClick={() => handleRangeSubmit(true)}
                 className="rounded bg-blue-500 p-2 text-white hover:bg-blue-600"
               >
                 Block Selected Range
+              </button>
+              <button
+                onClick={() => handleRangeSubmit(false)}
+                className="rounded bg-green-500 p-2 text-white hover:bg-green-600"
+              >
+                Unblock Selected Range
               </button>
             </div>
           )}
@@ -318,7 +346,10 @@ export default function HostAvailability({ property }: { property: Property }) {
                   </span>
                 </TooltipTrigger>
               </div>
-              <TooltipContent className="" side="bottom">Dates blocked on Airbnb's calendar can only be unblocked on Airbnb</TooltipContent>
+              <TooltipContent className="" side="bottom">
+                Dates blocked on Airbnb's calendar can only be unblocked on
+                Airbnb
+              </TooltipContent>
             </Tooltip>
             <div className="flex items-center">
               <div className="bg-reserved-pattern-2 mr-2 h-6 w-6"></div>
