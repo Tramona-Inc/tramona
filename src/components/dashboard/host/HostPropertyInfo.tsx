@@ -2,7 +2,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { type Property } from "@/server/db/schema";
 import HostPropertiesCancellation from "./HostPropertiesCancellation";
 import HostPropertiesDetails from "./HostPropertiesDetails";
-import { AlertCircle, ChevronLeft, Edit2 } from "lucide-react";
+import { AlertCircle, ChevronLeft, Copy, Edit2 } from "lucide-react";
 import Link from "next/link";
 import HostAvailability from "./HostAvailability";
 import { useState } from "react";
@@ -43,6 +43,7 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
     syncCalendarMutation.mutate({
       iCalLink,
       propertyId: property.id,
+      platformBookedOn: "airbnb",
     });
   }
 
@@ -109,6 +110,25 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
             )}
           </div>
         )}
+        <div className="space-y-4">
+          <Input
+            id="tramonaICalLink"
+            type="url"
+            readOnly
+            value={`https://tramona.com/api/ics/${property.id}`}
+          />
+          <Button
+            onClick={() => {
+              navigator.clipboard.writeText(
+                `https://tramona.com/api/ics/${property.id}`,
+              );
+              // You might want to add a toast or some other notification here
+            }}
+            className="rounded-r bg-blue-500 p-2 text-white hover:bg-blue-600"
+          >
+            <Copy className="h-5 w-5" />
+          </Button>
+        </div>
 
         <h1 className="text-2xl font-bold">
           {property.name === "" ? "No property name provided" : property.name}
