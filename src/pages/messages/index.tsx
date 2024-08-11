@@ -93,7 +93,7 @@ export default function MessagePage() {
           Messages | Tramona
         </title>
       </Head>
-      <DashboardLayout type={session?.user.role ?? "guest"}>
+      <DashboardLayout>
         <MessageDisplay />
       </DashboardLayout>
     </>

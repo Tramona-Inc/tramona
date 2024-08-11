@@ -20,7 +20,7 @@ export default function HostOverview() {
     undefined,
     {
       enabled:
-        isStripeConnectInstanceReady && userRole == "host" ? true : false,
+        isStripeConnectInstanceReady && userRole === "host" ? true : false,
     },
   );
   // const { data: hostInfo } = api.host.getUserHostInfo.useQuery();

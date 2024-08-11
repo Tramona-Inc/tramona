@@ -14,10 +14,10 @@ const config = {
    *
    * @see https://github.com/vercel/next.js/issues/41980
    */
-  i18n: {
-    locales: ["en"],
-    defaultLocale: "en",
-  },
+  // i18n: {
+  //   locales: ["en"],
+  //   defaultLocale: "en",
+  // },
   rewrites: async () => [
     { source: "/privacy-policy", destination: "/html/privacy-policy.html" },
     { source: "/tos", destination: "/html/tos.html" },
@@ -33,6 +33,7 @@ const config = {
   },
   experimental: {
     scrollRestoration: true,
+    swcPlugins: [["next-superjson-plugin", {}]],
   },
 };
 

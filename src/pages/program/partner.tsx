@@ -1,8 +1,6 @@
 import MainLayout from "@/components/_common/Layout/MainLayout";
-import StarIcon from "@/components/_icons/StarIcon";
 import { Button } from "@/components/ui/button";
 import Head from "next/head";
-import Image from "next/image";
 import Link from "next/link";
 
 const steps = [
@@ -23,27 +21,13 @@ const steps = [
   },
 ];
 
-function Card({
-  id,
-  info,
-  displayStar,
-}: {
-  id: number;
-  info: string;
-  displayStar: boolean;
-}) {
+function Card({ id, info }: { id: number; info: string }) {
   return (
     <div className="infline-flex relative max-w-[500px] items-center justify-center space-y-5 rounded-xl border border-black p-10 max-sm:mt-10 max-sm:w-[350px]">
       <div className="inline-flex rounded-2xl bg-black px-4 py-1 font-bold uppercase text-white">
         Step {id}
       </div>
       <p className="text-xl font-bold">{info}</p>
-
-      {/* {displayStar && (
-        <div className="absolute -right-[56px] -top-[80px] z-20">
-          <StarIcon />
-        </div>
-      )} */}
     </div>
   );
 }
@@ -56,7 +40,6 @@ export default function Page() {
       </Head>
       <div className="bg-[#F2EBDC] py-20">
         <div className="container flex max-w-[1000px] flex-col items-center justify-between gap-10 lg:flex-row">
-          {/* Partner Program */}
           <div className="flex flex-col gap-4">
             <p className="font-bold">LET&apos;S EARN TOGETHER</p>
             <h2 className="text-4xl font-bold sm:text-6xl">Partner Program</h2>
@@ -67,14 +50,6 @@ export default function Page() {
               for 12 months by simply introducing new customers to Tramona
             </p>
           </div>
-
-          {/* Image */}
-          {/* <Image
-            src={"/assets/images/partner-program.png"}
-            height={301}
-            width={325}
-            alt="partner program"
-          /> */}
         </div>
       </div>
 
@@ -82,7 +57,7 @@ export default function Page() {
         <h2 className="text-center text-4xl font-bold">
           What you need to know
         </h2>
-        <div className="flex flex-col space-y-5 ">
+        <div className="flex flex-col space-y-5">
           {steps.map((step) => (
             <Card key={step.id} {...step} />
           ))}

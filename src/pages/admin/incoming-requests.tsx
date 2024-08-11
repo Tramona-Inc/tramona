@@ -40,7 +40,7 @@ export default function Page() {
   const { data: requests } = api.requests.getAll.useQuery();
 
   return (
-    <DashboardLayout type="admin">
+    <DashboardLayout>
       <Head>
         <title>Incoming Requests | Tramona</title>
       </Head>

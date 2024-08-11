@@ -4,7 +4,7 @@ import Head from "next/head";
 
 export default function propertyUpload() {
   return (
-    <DashboardLayout type="admin">
+    <DashboardLayout>
       <Head>
         <title>Admin Property Upload | Tramona</title>
       </Head>

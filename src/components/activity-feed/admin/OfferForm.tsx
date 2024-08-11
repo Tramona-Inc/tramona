@@ -14,18 +14,16 @@ import { Input } from "@/components/ui/input";
 import { getNumNights, getPropertyId } from "@/utils/utils";
 import { api } from "@/utils/api";
 import { errorToast } from "@/utils/toasts";
-import { type FeedItem } from "@/components/activity-feed/ActivityFeed";
+import { FeedOfferItem } from "@/components/activity-feed/ActivityFeed";
+import { optional, zodString, zodUrl } from "@/utils/zod-utils";
 
 const formSchema = z.object({
-  userName: z.string().min(1, "User name is required"),
-  userProfilePicUrl: z.union([
-    z.literal(""),
-    z.string().trim().url("Must be a valid URL"),
-  ]),
-  checkIn: z.string().min(1, "Start date is required"),
-  checkOut: z.string().min(1, "End date is required"),
-  propertyUrl: z.string().trim().url("Must be a valid URL"),
-  entryCreationTime: z.string().min(1, "Offer creation time is required"),
+  userName: zodString(),
+  userProfilePicUrl: optional(zodUrl()),
+  checkIn: zodString(),
+  checkOut: zodString(),
+  propertyUrl: zodUrl(),
+  entryCreationTime: zodString(),
   originalNightlyPrice: z
     .number()
     .min(0, "will use the propertys nightly price if set to 0"),
@@ -38,7 +36,7 @@ export default function CreateOfferForm({
   offer,
   afterSubmit,
 }: {
-  offer?: FeedItem & { type: "offer" };
+  offer?: FeedOfferItem;
   afterSubmit?: () => void;
 }) {
   const createFillerOffer = api.feed.createFillerOffer.useMutation();
@@ -92,11 +90,11 @@ export default function CreateOfferForm({
     console.log(formattedData);
     // send the data to backend
     if (offer) {
-      const fillerOfferId = await updateFillerOffer
+      await updateFillerOffer
         .mutateAsync({ id: offer.id, ...formattedData })
         .catch(() => errorToast());
     } else {
-      const fillerOfferId = await createFillerOffer
+      await createFillerOffer
         .mutateAsync(formattedData)
         .catch(() => errorToast());
     }

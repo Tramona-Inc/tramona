@@ -24,7 +24,8 @@ const buttonVariants = cva(
           "border border-primary bg-background text-primary hover:bg-zinc-200 focus-visible:bg-zinc-200",
         secondary:
           "bg-zinc-100 border border-zinc-300 text-secondary-foreground hover:bg-zinc-200",
-        ghost: "hover:bg-accent text-zinc-800",
+        ghost:
+          "hover:bg-accent text-zinc-600/90 hover:text-zinc-600 data-[state=open]:bg-accent",
         link: "text-primary underline-offset-4 hover:underline",
         emptyInput:
           "w-full bg-accent/70 text-zinc-500 px-3 hover:bg-accent border border-input outline-offset-0 focus-visible:outline-2 focus-visible:outline-ring disabled:opacity-50",
@@ -49,7 +50,7 @@ const buttonVariants = cva(
         secondaryLight:
           "bg-[#F2F1EF] border border-[#D9D6D1] hover:bg-zinc-200 font-semibold",
         greenPrimaryOutline:
-          "border-2 border-[#004236] bg-[#D8E5E3] text-black",
+          "border-2 border-[#004236] bg-primaryGreen-background text-black",
 
         Airbnb:
           "bg-gradient-to-r from-[#E61F4F] to-[#D70666] text-white hover:opacity-90",

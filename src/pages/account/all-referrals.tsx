@@ -23,7 +23,7 @@ export default function AllReferrals() {
   }
 
   return (
-    <DashboardLayout type="guest">
+    <DashboardLayout>
       <div className="mx-auto space-y-2 p-4">
         <Link href="/account/balance">
           <ChevronLeft />

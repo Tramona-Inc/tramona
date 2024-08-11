@@ -42,7 +42,7 @@ export default function TripDetailsPage() {
   }, [paymentIntent, fetchMyTrip]);
 
   return (
-    <DashboardLayout type="guest">
+    <DashboardLayout>
       <Head>
         <title>My Trips | Tramona</title>
       </Head>

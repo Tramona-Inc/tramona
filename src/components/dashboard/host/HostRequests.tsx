@@ -69,7 +69,7 @@ export default function HostRequests() {
       ) : (
         <SkeletonText>No requests found for {city}</SkeletonText>
       )}
-      {step == 0 && properties && selectedRequest && (
+      {step === 0 && properties && selectedRequest && (
         <HostRequestDialog
           propertyPrices={propertyPrices}
           setPropertyPrices={setPropertyPrices}
@@ -80,7 +80,7 @@ export default function HostRequests() {
           setStep={setStep}
         />
       )}
-      {step == 1 && properties && selectedRequest && (
+      {step === 1 && properties && selectedRequest && (
         <HostConfirmRequestDialog
           request={selectedRequest}
           properties={properties}
@@ -91,7 +91,7 @@ export default function HostRequests() {
           setPropertyPrices={setPropertyPrices}
         />
       )}
-      {step == 2 && selectedRequest && (
+      {step === 2 && selectedRequest && (
         <HostFinishRequestDialog
           request={selectedRequest}
           open={dialogOpen}
