@@ -53,7 +53,7 @@ export const Vrbo: ListingSite<"Vrbo"> = {
         const listingUrl = this.getListingUrl(params);
         return `${listingUrl}&pwaDialogNested=price-details`;
       },
-      getPrice(params) {
+      getPrice() {
         throw new Error("not implemented"); // TODO
       },
     };

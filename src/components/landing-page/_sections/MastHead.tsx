@@ -10,13 +10,7 @@ import CompletedRequestsSection from "./CompletedRequests";
 import Link from "next/link";
 import { whyUseTramonaCopy } from "./why-use-tramona-copy";
 import { CheckIcon } from "lucide-react";
-
-const scrollToTop = () => {
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth",
-  });
-};
+import { scrollToTop } from "@/utils/utils";
 
 export default function MastHead() {
   return (

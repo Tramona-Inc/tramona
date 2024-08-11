@@ -1,6 +1,11 @@
 import Image from "next/image";
 import { Button } from "../ui/button";
-
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   formatCurrency,
   formatDateRange,
@@ -9,6 +14,8 @@ import {
 } from "@/utils/utils";
 import { type RouterOutputs } from "@/utils/api";
 import { formatDistanceToNowStrict } from "date-fns";
+import { EllipsisIcon, FlagIcon } from "lucide-react";
+import Link from "next/link";
 
 export default function HostStaysCards({
   trips,
@@ -80,10 +87,32 @@ export default function HostStaysCards({
                   </span>
                 )}
               </p>
-              <div className="mr-4 hidden text-end md:block">
+              <div className="mr-4 hidden flex-col items-end gap-y-4 text-end md:flex">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="rounded-full"
+                    >
+                      <EllipsisIcon />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem>
+                      <Link
+                        href="/host/resolution-form"
+                        className="flex w-full flex-row justify-around gap-x-1"
+                      >
+                        Report Damage <FlagIcon height={16} />
+                      </Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
                 <Button variant="secondary">Message</Button>
               </div>
             </div>
+
             <Button variant="secondary" className="w-full md:hidden">
               Message
             </Button>
