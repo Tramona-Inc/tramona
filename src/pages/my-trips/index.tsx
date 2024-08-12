@@ -5,8 +5,10 @@ import UpcomingTrips from "@/components/my-trips/UpcomingTrips";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BriefcaseIcon, HistoryIcon } from "lucide-react";
 import { useMemo } from "react";
-import { api } from "@/utils/api";
+import { api, type RouterOutputs } from "@/utils/api";
 import Spinner from "@/components/_common/Spinner";
+
+export type TripCardDetails = RouterOutputs["trips"]["getMyTrips"][number];
 
 export default function MyTrips() {
   const { data: allTrips } = api.trips.getMyTrips.useQuery();
@@ -21,7 +23,7 @@ export default function MyTrips() {
   }, [allTrips]);
 
   return (
-    <DashboardLayout type="guest">
+    <DashboardLayout>
       <Head>
         <title>My Trips | Tramona</title>
       </Head>

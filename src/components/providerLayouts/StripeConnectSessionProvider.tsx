@@ -1,5 +1,3 @@
-"use client";
-
 import React, { type ReactElement, useEffect } from "react";
 
 import { useState } from "react";
@@ -27,7 +25,7 @@ const StripeConnectSessionProvider = ({
   const { data: stripeAccountIdNumber } = api.host.getStripeAccountId.useQuery(
     undefined,
     {
-      enabled: userRole == "host" ? true : false,
+      enabled: userRole === "host" ? true : false,
     },
   );
 

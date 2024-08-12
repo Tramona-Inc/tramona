@@ -10,20 +10,9 @@ export const env = createEnv({
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
-
-    NEXTAUTH_SECRET:
-      process.env.NODE_ENV === "production"
-        ? z.string()
-        : z.string().optional(),
+    NEXTAUTH_SECRET: z.string(),
     NEXTAUTH_URL: z.string().url(),
-
-    DATABASE_URL: z
-      .string()
-      .url()
-      .refine(
-        (str) => !str.includes("YOUR_POSTGRESQL_URL_HERE"),
-        "You forgot to change the default URL",
-      ),
+    DATABASE_URL: z.string().url(),
     SMTP_USER: z.string(),
     SMTP_PASSWORD: z.string(),
     SMTP_HOST: z.string(),
@@ -61,7 +50,6 @@ export const env = createEnv({
    * `NEXT_PUBLIC_`.
    */
   client: {
-    // NEXT_PUBLIC_CLIENTVAR: z.string(),
     NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string(),
     NEXT_PUBLIC_GOOGLE_PLACES_KEY: z.string(),
     NEXT_PUBLIC_SUPABASE_URL: z.string(),

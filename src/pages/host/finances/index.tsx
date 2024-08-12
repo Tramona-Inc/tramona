@@ -1,9 +1,6 @@
-"use client";
-
 import DashboadLayout from "@/components/_common/Layout/DashboardLayout";
 import PaymentHistory from "@/components/host/finances/payment-history/PaymentHistory";
 import FinancesSummary from "@/components/host/finances/summary/FinancesSummary";
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
@@ -43,7 +40,7 @@ export default function Page() {
   }, [hostInfo]);
 
   return (
-    <DashboadLayout type={"host"}>
+    <DashboadLayout>
       <Head>
         <title>Host Finances | Tramona</title>
       </Head>

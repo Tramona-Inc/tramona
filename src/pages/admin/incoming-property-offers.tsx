@@ -38,7 +38,7 @@ export default function Page() {
   });
 
   return (
-    <DashboardLayout type="admin">
+    <DashboardLayout>
       <Head>
         <title>Incoming property offers | Tramona</title>
       </Head>

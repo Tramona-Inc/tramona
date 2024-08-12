@@ -4,7 +4,7 @@ import Link from "next/link";
 
 const ReferAndEarn = () => {
   return (
-    <section className="bg-white md:px-2">
+    <section className="bg-white md:mx-12 md:px-2">
       <div className="flex flex-col rounded-3xl lg:flex-row">
         <div className="mb-4 w-full lg:mb-0 lg:mr-8 lg:w-1/2">
           <div className="h-48 w-full overflow-hidden md:rounded-lg lg:h-auto lg:rounded-none">
@@ -24,8 +24,8 @@ const ReferAndEarn = () => {
               Refer and earn
             </h2>
             <p className="mb-6 break-normal text-lg text-black md:text-lg lg:mb-4 lg:text-xl">
-              Know someone who is traveling? Refer them to Tramona, when they
-              book, you get $30 dollars.
+              Know someone who is traveling? Refer them to Tramona, then when
+              they book, you get $30 dollars.
             </p>
             <Link href="/program">
               <button className="rounded-lg border-2 border-black bg-white px-6 py-3 text-black hover:bg-[#e5e5e5]">

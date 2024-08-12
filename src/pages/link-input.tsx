@@ -10,14 +10,14 @@ import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 
 export default function Page() {
   return (
-    <DashboardLayout type="guest">
+    <DashboardLayout>
       <section className="relative bg-white pb-4">
         <div className="relative h-[500px] lg:h-[511px]">
           <div className="absolute inset-0">
             <Image
               src={linkInputBg}
               alt=""
-              layout="fill"
+              fill
               objectFit="cover"
               placeholder="blur"
               className="select-none"

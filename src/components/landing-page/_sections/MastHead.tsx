@@ -3,22 +3,19 @@ import priceComparison from "public/assets/images/pricecomparison.jpg";
 import { Button } from "@/components/ui/button";
 import UserAvatarMastHead from "@/components/_common/UserAvatarMasthead";
 import { Avatar } from "@/components/ui/avatar";
-import {
-  CircleDollarSign,
-  Handshake,
-  ShieldIcon,
-  TableProperties,
-} from "lucide-react";
 import CityRequestFormContainer from "../SearchBars/CityRequestFormContainer";
 import { TestimonialCarousel } from "./testimonials/TestimonialCarousel";
 import Image from "next/image";
 import CompletedRequestsSection from "./CompletedRequests";
 import Link from "next/link";
+import { whyUseTramonaCopy } from "./why-use-tramona-copy";
+import { CheckIcon } from "lucide-react";
+import { scrollToTop } from "@/utils/utils";
 
 export default function MastHead() {
   return (
     <section className="relative bg-white pb-32">
-      <div className="relative sm:mb-24 sm:h-[700px] lg:mb-0">
+      <div className="relative sm:mb-24 sm:h-[640px] lg:mb-0">
         <div className="absolute inset-0">
           <Image
             src={landingBg}
@@ -33,12 +30,10 @@ export default function MastHead() {
           <div className="flex flex-col justify-center">
             <div className="relative pt-10 text-center">
               <h1 className="mx-auto max-w-3xl text-balance text-3xl font-bold text-zinc-900 lg:text-5xl">
-                Book the same properties you see on Airbnb for less
+                Agree on a Price with Hosts Every Time
               </h1>
               <p className="mx-auto max-w-[38rem] pt-4 text-xs font-semibold text-zinc-900 lg:pt-4 lg:text-base">
-                With Airbnb hosts averaging 60% vacancy rates year-round,
-                Tramona matches you with hosts who are willing to meet your
-                price.
+                Traveling outside your budget, now within reach.
               </p>
               <div className="hidden items-center justify-center pt-4 lg:flex">
                 <div className="-ml-2">
@@ -70,11 +65,11 @@ export default function MastHead() {
                     size={"md"}
                     className="flex items-center justify-center border-2 border-[#EBF5F4] bg-teal-900 text-xs font-semibold text-white"
                   >
-                    +450
+                    +800
                   </Avatar>
                 </div>
                 <p className="ml-2 text-xs font-semibold text-[#7E7564]">
-                  Requests made in the last 2 months
+                  Requests made this month
                 </p>
               </div>
             </div>
@@ -157,7 +152,7 @@ export default function MastHead() {
       </div>
 
       <div className="flex justify-center">
-        <div className="mt-20 lg:grid lg:grid-cols-2 xl:gap-24">
+        <div className="mt-20 p-4 lg:grid lg:grid-cols-2 xl:gap-24">
           <div className="flex flex-col space-y-1 pb-6 text-left lg:mr-24 lg:flex lg:flex-col lg:justify-center lg:space-y-4">
             <h2 className="text-2xl font-extrabold lg:text-4xl">
               See completed requests
@@ -171,9 +166,7 @@ export default function MastHead() {
               </Button>
             </div>
           </div>
-          <div className="flex items-center justify-center">
-            <CompletedRequestsSection />
-          </div>
+          <CompletedRequestsSection />
           <div className="flex justify-center pt-8 lg:hidden">
             <Button asChild variant="greenPrimary" size="lg">
               <Link href="/exclusive-offers">View deals</Link>
@@ -182,82 +175,27 @@ export default function MastHead() {
         </div>
       </div>
 
-      <div className="mx-auto mt-20 max-w-7xl justify-center space-y-4 lg:mt-28 lg:space-y-8">
+      <div className="mx-auto mt-20 max-w-7xl justify-center space-y-4 p-4 lg:mt-28 lg:space-y-8">
         <h2 className="text-center text-2xl font-extrabold lg:text-4xl">
           Why use Tramona?
         </h2>
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-          <div className="flex flex-col items-start gap-3 rounded-lg p-4">
-            <div className="mb-4 flex items-center gap-2">
-              <div className="rounded-lg bg-[#D8E5E3] p-2">
-                <ShieldIcon className="h-6 w-6 text-teal-900" />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {whyUseTramonaCopy.map(({ icon: Icon, title, bullets }) => (
+            <div key={title} className="rounded-2xl border p-4">
+              <div className="inline-block rounded-lg bg-primaryGreen-background p-2 text-primaryGreen">
+                <Icon />
               </div>
-              <h3 className="text-lg font-bold">Safety</h3>
-            </div>
-            <p className="text-sm text-[#584F3E]">
-              Every host we work with{" "}
-              <strong className="font-extrabold text-black">
-                also lists on Airbnb
-              </strong>
-              . We give you the link to see the property before you book with
-              us.
-            </p>
-          </div>
-          <div className="flex flex-col items-start gap-3 rounded-lg p-4">
-            <div className="mb-4 flex items-center gap-2">
-              <div className="rounded-lg bg-[#D8E5E3] p-2">
-                <CircleDollarSign className="h-6 w-6 text-teal-900" />
+              <h3 className="text-lg font-bold">{title}</h3>
+              <div className="space-y-2 pt-4">
+                {bullets.map((bullet) => (
+                  <div key={bullet} className="flex gap-2 text-sm">
+                    <CheckIcon className="size-4 shrink-0 text-zinc-400" />
+                    <p className="text-zinc-600">{bullet}</p>
+                  </div>
+                ))}
               </div>
-              <h3 className="text-lg font-bold">Price Transparency</h3>
             </div>
-            <p className="text-sm text-[#584F3E]">
-              We have{" "}
-              <strong className="font-extrabold text-black">
-                $0 fees for travelers
-              </strong>{" "}
-              and show you the listing on Airbnb to encourage you to check
-              pricing on the same property.
-            </p>
-          </div>
-          <div className="flex flex-col items-start gap-3 rounded-lg p-4">
-            <div className="mb-4 flex items-center gap-2">
-              <div className="rounded-lg bg-[#D8E5E3] p-2">
-                <TableProperties className="h-6 w-6 text-teal-900" />
-              </div>
-              <h3 className="text-lg font-bold">Submitting a Request</h3>
-            </div>
-            <p className="text-sm text-[#584F3E]">
-              Send your travel details to all hosts in your destination city.
-              They&apos;ll respond by offering you{" "}
-              <strong className="font-extrabold text-black">
-                properties outside of your budget on Airbnb, in your budget on
-                Tramona
-              </strong>
-              .
-            </p>
-          </div>
-          <div className="flex flex-col items-start gap-3 rounded-lg p-4 lg:-mt-1">
-            <div className="mb-4 flex items-center gap-2">
-              <div className="rounded-lg bg-[#D8E5E3] p-2">
-                <Handshake className="h-6 w-6 text-teal-900" />
-              </div>
-              <h3 className="text-lg font-bold leading-tight">
-                Before you book, check Tramona
-              </h3>
-            </div>
-            <p className="text-sm text-[#584F3E]">
-              Tramona is{" "}
-              <strong className="font-extrabold text-black">
-                completely free to use
-              </strong>
-              , and we think you&apos;ll like it. Before you book, check Tramona
-              to see{" "}
-              <strong className="font-extrabold text-black">
-                which special deals hosts will offer you
-              </strong>
-              .
-            </p>
-          </div>
+          ))}
         </div>
       </div>
 
@@ -274,7 +212,12 @@ export default function MastHead() {
           <p className="mb-6 text-sm text-zinc-600">
             properties your matches will be coming from
           </p>
-          <Button variant="greenPrimary" size="lg" className="rounded-full">
+          <Button
+            onClick={scrollToTop}
+            variant="greenPrimary"
+            size="lg"
+            className="rounded-full"
+          >
             Submit a request
           </Button>
         </div>
@@ -292,8 +235,13 @@ export default function MastHead() {
           <p className="mb-6 text-sm text-zinc-600">
             increase in occupancy when using Tramona
           </p>
-          <Button variant="greenPrimary" size="lg" className="rounded-full">
-            List my place
+          <Button
+            asChild
+            variant="greenPrimary"
+            size="lg"
+            className="rounded-full"
+          >
+            <Link href="/for-hosts">List my place</Link>
           </Button>
         </div>
 

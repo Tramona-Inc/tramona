@@ -100,7 +100,7 @@ const YearlyDataChart = ({
       <div className="flex items-center justify-center">
         <p className="left-14 top-4 mb-1 mt-4 text-start text-2xl lg:absolute">
           <strong>
-            {monthlyData && monthlyData.length > 0
+            {monthlyData.length > 0
               ? formatCurrency(
                   monthlyData.reduce((sum, month) => sum + month.Earnings, 0),
                 )

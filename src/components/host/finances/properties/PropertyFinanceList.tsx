@@ -50,7 +50,7 @@ export default function PropertyFinanceList({
                     <Image
                       src={property.imageUrls[0]!}
                       alt="Property image"
-                      layout="fill"
+                      fill
                       objectFit="cover"
                     />
                   </div>
