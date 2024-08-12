@@ -12,9 +12,11 @@ import ContactInfoForm from "./ContactInfoForm";
 import type {
   StripePaymentElementOptions,
   StripeExpressCheckoutElementOptions,
+  StripeError,
 } from "@stripe/stripe-js";
 import { env } from "@/env";
 import { toast } from "@/components/ui/use-toast";
+import { descripeStripeDeclineCode } from "@/utils/stripe-client";
 
 export default function StripeCheckoutForm({
   clientSecret,
@@ -34,12 +36,17 @@ export default function StripeCheckoutForm({
   const stripe = useStripe();
 
   const elements = useElements();
-  const [errorMessage, setErrorMessage] = useState<string | undefined>(
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<undefined | StripeError>(
     undefined,
   );
+  const [errorMessageDescription, setErrorMessageDescription] = useState<
+    null | string
+  >(null);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setLoading(true);
     if (!stripe || !elements) {
       return;
     }
@@ -50,15 +57,27 @@ export default function StripeCheckoutForm({
         return_url: `${baseUrl}/my-trips/confirmation`,
       },
     });
-    if (error) {
-      setErrorMessage(error.message);
+
+    if (error.decline_code) {
+      const errorDescription = descripeStripeDeclineCode({
+        declineCode: error.decline_code,
+      });
+
       toast({
         title: "Payment Failed",
-        description: "Please correct your payment information then try again",
+        description: errorDescription,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Payment Failed",
+        description: error.message,
         variant: "destructive",
       });
     }
+    setLoading(false);
   }
+
   const expressCheckoutOptions: StripeExpressCheckoutElementOptions = {
     buttonType: {
       applePay: "buy",
@@ -105,7 +124,16 @@ export default function StripeCheckoutForm({
           className="w-full"
           disabled={!stripe}
         >
-          Confirm and Book
+          {loading ? (
+            <div className="flex h-full items-center justify-center space-x-2">
+              <span className="text-white">Loading</span>
+              <div className="h-1 w-1 animate-bounce rounded-full bg-white [animation-delay:-0.3s]"></div>
+              <div className="h-1 w-1 animate-bounce rounded-full bg-white [animation-delay:-0.15s]"></div>
+              <div className="h-1 w-1 animate-bounce rounded-full bg-white"></div>
+            </div>
+          ) : (
+            "Confirm and Book"
+          )}
         </Button>
       </form>
     </div>

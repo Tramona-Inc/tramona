@@ -49,7 +49,7 @@ export default function TripDetailsPage() {
         description: "Please try again",
       });
 
-      void router.push(`/offer-checkout/${trip.offerId}`);
+      void router.push(`/offer-checkout/${trip.trip.offerId}`);
     }
   }, [trip, redirectStatus, router]);
 
