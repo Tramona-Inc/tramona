@@ -70,9 +70,9 @@ VERSION:2.0
     const startDate = new Date(date.start);
     const endDate = new Date(date.end);
     const startDateString =
-      startDate.toISOString().split("T")[0]?.replace(/-/g, "") || "";
+      startDate.toISOString().split("T")[0]?.replace(/-/g, "") ?? "";
     const endDateString =
-      endDate.toISOString().split("T")[0]?.replace(/-/g, "") || "";
+      endDate.toISOString().split("T")[0]?.replace(/-/g, "") ?? "";
     icsContent += `BEGIN:VEVENT
 DTEND;VALUE=DATE:${endDateString}
 DTSTART;VALUE=DATE:${startDateString}
@@ -147,7 +147,6 @@ export const calendarRouter = createTRPCRouter({
 
       await db.transaction(async (tx) => {
         if (!isAvailable) {
-          // Find overlapping or adjacent ranges
           const overlappingRanges = await tx
             .select()
             .from(reservedDateRanges)
@@ -161,7 +160,6 @@ export const calendarRouter = createTRPCRouter({
             );
 
           if (overlappingRanges.length > 0) {
-            // Merge overlapping ranges
             const mergedStart = overlappingRanges.reduce(
               (min, range) => (range.start < min ? range.start : min),
               start
@@ -171,7 +169,6 @@ export const calendarRouter = createTRPCRouter({
               end
             );
 
-            // Delete overlapping ranges
             await tx
               .delete(reservedDateRanges)
               .where(
@@ -183,7 +180,7 @@ export const calendarRouter = createTRPCRouter({
                 )
               );
 
-            // Insert merged range
+            // insert merged range
             await tx.insert(reservedDateRanges).values({
               propertyId,
               start: mergedStart,
@@ -191,7 +188,7 @@ export const calendarRouter = createTRPCRouter({
               platformBookedOn,
             });
           } else {
-            // No overlapping ranges, insert new range
+            // if no overlapping ranges, insert new range
             await tx.insert(reservedDateRanges).values({
               propertyId,
               start,
@@ -200,7 +197,7 @@ export const calendarRouter = createTRPCRouter({
             });
           }
         } else {
-          // Handling the case when making a date range available
+          // unblocking date range
           await tx
             .delete(reservedDateRanges)
             .where(

@@ -18,8 +18,15 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
   const [isEditing, setIsEditing] = useState(false);
   const { toast } = useToast();
 
-  const syncCalendarMutation = api.calendar.syncCalendar.useMutation({
-    onSuccess: () => {
+  const { mutateAsync: syncCalendar, isLoading } = api.calendar.syncCalendar.useMutation();
+
+  const handleFormSubmit = async () => {
+    try {
+      await syncCalendar({
+        iCalLink,
+        propertyId: property.id,
+        platformBookedOn: "airbnb",
+      });
       setiCalLink("");
       setIsEditing(false);
       toast({
@@ -27,25 +34,16 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
         description: "Your iCal calendar has been successfully synced.",
         variant: "default",
       });
-    },
-    onError: (error) => {
+    } catch (error) {
       console.error("Error syncing calendar:", error);
       toast({
         title: "Sync Failed",
         description:
-          error.message || "An error occurred while syncing the calendar.",
+          error instanceof Error ? error.message : "An error occurred while syncing the calendar.",
         variant: "destructive",
       });
-    },
-  });
-
-  function handleFormSubmit() {
-    syncCalendarMutation.mutate({
-      iCalLink,
-      propertyId: property.id,
-      platformBookedOn: "airbnb",
-    });
-  }
+    }
+  };
 
   const handleEditToggle = () => {
     if (isEditing) {
@@ -54,31 +52,51 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
     setIsEditing(!isEditing);
   };
 
+  const handleCopyICalLink = async () => {
+    try {
+      await navigator.clipboard.writeText(
+        `https://tramona.com/api/ics/${property.id}`
+      );
+      toast({
+        title: "Copied!",
+        description: "The iCal link has been copied to your clipboard.",
+        variant: "default",
+      });
+    } catch (error) {
+      console.error("Failed to copy text: ", error);
+      toast({
+        title: "Copy Failed",
+        description: "Failed to copy the iCal link. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div key={property.id} className="space-y-4 p-4 sm:p-6">
       <Link href="/host/properties" className="xl:hidden">
         <ChevronLeft />
       </Link>
       <div>
-        {!property.iCalLink && (
-          <div className="mb-10 space-y-4">
-            <h1 className="text-4xl font-bold">Sync your iCal</h1>
-            <Label className="font-semibold">iCal URL</Label>
-            <Input
-              id="iCalLink"
-              type="url"
-              placeholder="https://example.com/calendar.ics"
-              value={iCalLink}
-              onChange={(e) => setiCalLink(e.target.value)}
-            />
-            <Button
-              onClick={handleFormSubmit}
-              disabled={syncCalendarMutation.isLoading}
-            >
-              {syncCalendarMutation.isLoading ? "Syncing..." : "Submit"}
-            </Button>
-          </div>
-        )}
+      {!property.iCalLink && (
+        <div className="mb-10 space-y-4">
+          <h1 className="text-4xl font-bold">Sync your iCal</h1>
+          <Label className="font-semibold">iCal URL</Label>
+          <Input
+            id="iCalLink"
+            type="url"
+            placeholder="https://example.com/calendar.ics"
+            value={iCalLink}
+            onChange={(e) => setiCalLink(e.target.value)}
+          />
+          <Button
+            onClick={() => void handleFormSubmit()}
+            disabled={isLoading}
+          >
+            {isLoading ? "Syncing..." : "Submit"}
+          </Button>
+        </div>
+      )}
         {property.iCalLink && (
           <div className="mb-10 space-y-4">
             <h1 className="text-4xl font-bold">Sync your iCal</h1>
@@ -100,14 +118,14 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
               {isEditing ? "Cancel" : <Edit2 className="h-4 w-4" />}
             </Button>
             {isEditing && (
-              <Button
-                onClick={handleFormSubmit}
-                className="mt-2"
-                disabled={syncCalendarMutation.isLoading}
-              >
-                {syncCalendarMutation.isLoading ? "Syncing..." : "Submit"}
-              </Button>
-            )}
+            <Button
+              onClick={() => void handleFormSubmit()}
+              className="mt-2"
+              disabled={isLoading}
+            >
+              {isLoading ? "Syncing..." : "Submit"}
+            </Button>
+          )}
           </div>
         )}
         <div className="space-y-4">
@@ -118,12 +136,7 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
             value={`https://tramona.com/api/ics/${property.id}`}
           />
           <Button
-            onClick={() => {
-              navigator.clipboard.writeText(
-                `https://tramona.com/api/ics/${property.id}`,
-              );
-              // You might want to add a toast or some other notification here
-            }}
+            onClick={handleCopyICalLink}
             className="rounded-r bg-blue-500 p-2 text-white hover:bg-blue-600"
           >
             <Copy className="h-5 w-5" />

@@ -141,7 +141,6 @@ export default function HostAvailability({ property }: { property: Property }) {
       setSelectedRange({ start: null, end: null });
     } catch (error) {
       console.error("Error updating calendar:", error);
-      // Handle error (e.g., show an error message to the user)
     }
   };
 
@@ -246,11 +245,7 @@ export default function HostAvailability({ property }: { property: Property }) {
       <div className="flex items-center justify-end space-x-2">
         {editing && selectedRange.start && selectedRange.end && (
           <>
-            <Button
-              onClick={() => handleRangeSubmit(true)}
-              variant="default"
-              
-            >
+            <Button onClick={() => handleRangeSubmit(true)} variant="default">
               Block Date Range
             </Button>
             <Button
@@ -275,7 +270,7 @@ export default function HostAvailability({ property }: { property: Property }) {
           editing={editing}
           setEditing={setEditing}
           property={property}
-          onSubmit={() => {}}
+          // onSubmit={() => {}}
         />
       </div>
       <div className="mx-auto max-w-4xl">
@@ -340,7 +335,7 @@ export default function HostAvailability({ property }: { property: Property }) {
                 </TooltipTrigger>
               </div>
               <TooltipContent className="" side="bottom">
-                Dates blocked on Airbnb's calendar can only be unblocked on
+                Dates blocked on Airbnb&apos;s calendar can only be unblocked on
                 Airbnb
               </TooltipContent>
             </Tooltip>
