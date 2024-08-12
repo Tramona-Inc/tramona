@@ -2,7 +2,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { type Property } from "@/server/db/schema";
 import HostPropertiesCancellation from "./HostPropertiesCancellation";
 import HostPropertiesDetails from "./HostPropertiesDetails";
-import { AlertCircle, ChevronLeft, Edit2, Info } from "lucide-react";
+import { AlertCircle, ChevronLeft, Edit2 } from "lucide-react";
 import Link from "next/link";
 import HostAvailability from "./HostAvailability";
 import { useState } from "react";
