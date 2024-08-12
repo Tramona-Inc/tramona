@@ -110,7 +110,11 @@ export const miscRouter = createTRPCRouter({
       ]);
 
       if (res.status === 404) return { status: "not found" } as const;
-      if (!res.ok) return { status: "failed to fetch" } as const;
+      if (!res.ok) {
+        console.log("status:", res.status);
+        console.log("\n\nwhole response:", res);
+        return { status: "failed to fetch" } as const;
+      }
 
       const html = await res.text();
       const $ = cheerio.load(html);
