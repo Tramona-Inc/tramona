@@ -148,12 +148,14 @@ export default function RequestCard({
             )}
           </div>
           <div className="space-y-1">
+            {type !== "host" && (
             <div className="flex items-start gap-1">
               <MapPinIcon className="shrink-0 text-primary" />
               <h2 className="text-base font-bold text-primary md:text-lg">
                 {request.location}
               </h2>
             </div>
+            )}
             <div>
               <p>Requested {fmtdPrice}/night</p>
               <p className="flex items-center gap-2">
@@ -186,9 +188,11 @@ export default function RequestCard({
           </div>
           <CardFooter>{children}</CardFooter>
         </div>
+        {type !== "host" && (
         <div className="hidden w-64 bg-zinc-100 lg:block">
           {lat && lng && <SingleLocationMap lat={lat} lng={lng} icon={true} />}
         </div>
+        )}
       </div>
     </Card>
   );
