@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/utils/api";
 import HostPropertiesRestrictions from "./HostPropertiesRestrictions";
+import HostICalHowToDialog from "./HostICalHowToDialog";
 
 export default function HostPropertyInfo({ property }: { property: Property }) {
   const [iCalLink, setiCalLink] = useState("");
@@ -61,8 +62,10 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
       <div>
         {!property.iCalLink && (
           <div className="mb-10 space-y-4">
-            <h1 className="text-4xl font-bold">Sync your iCal</h1>
-            <Label className="font-semibold">iCal URL</Label>
+            <div className="flex items-center space-x-2">
+              <h1 className="text-4xl font-bold">Sync your iCal</h1>
+              <HostICalHowToDialog />
+            </div>
             <Input
               id="iCalLink"
               type="url"
@@ -80,7 +83,11 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
         )}
         {property.iCalLink && (
           <div className="mb-10 space-y-4">
-            <h1 className="text-4xl font-bold">Sync your iCal</h1>
+            <div className="flex items-center space-x-2">
+              <h1 className="text-4xl font-bold">Sync your iCal</h1>
+              <HostICalHowToDialog />
+            </div>
+
             <Label className="font-semibold">iCal URL</Label>
             <Input
               id="iCalLink"
