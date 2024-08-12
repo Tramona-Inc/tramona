@@ -1,5 +1,11 @@
+import axios from "axios";
+import { HttpsProxyAgent } from "https-proxy-agent";
 import { requestSelectSchema } from "@/server/db/schema";
-import { createTRPCRouter, publicProcedure } from "../trpc";
+import {
+  createTRPCRouter,
+  publicProcedure,
+  roleRestrictedProcedure,
+} from "../trpc";
 import { env } from "@/env";
 import { format } from "date-fns";
 import { TRPCError } from "@trpc/server";
@@ -151,5 +157,19 @@ export const miscRouter = createTRPCRouter({
         status: "success",
         data: { title, description, imageUrl, location, price },
       } as const;
+    }),
+
+  proxyFetch: roleRestrictedProcedure(["admin"])
+    .input(z.object({ url: zodUrl() }))
+    .query(async ({ input: { url } }) => {
+      const res = await axios.get<string>(url, {
+        httpsAgent: new HttpsProxyAgent(env.OXYLABS_URL),
+        responseType: "text",
+      });
+
+      return {
+        status: res.status,
+        data: res.data,
+      };
     }),
 });
