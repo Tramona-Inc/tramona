@@ -93,6 +93,8 @@ export const Airbnb: ListingSite = {
 
         const match = jsonStr.match(priceRegex);
 
+        console.log({ match, jsonStr });
+
         if (!match?.[1]) throw new Error("Failed to extract price");
 
         // "amountMicros" are ten-thousands of cents (e.g. $100 <-> 100,000,000)
