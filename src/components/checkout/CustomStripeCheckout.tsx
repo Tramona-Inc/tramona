@@ -89,7 +89,6 @@ const CustomStripeCheckout = ({
       try {
         const response = await fetchClientSecret();
         if (!response) {
-          console.log("Not ready");
           return;
         }
         setPaymentIntentResponse(response); // Set PaymentIntentResponse directly within fetchData then we convert to options ]
@@ -155,16 +154,9 @@ const CustomStripeCheckout = ({
       }
     };
 
-    fetchData()
-      .then(() => {
-        console.log(
-          "we fetched client secret",
-          paymentIntentResponse?.client_secret,
-        );
-      })
-      .catch((error) => {
-        console.error("Error creating checkout session:", error);
-      });
+    fetchData().catch((error) => {
+      console.error("Error creating checkout session:", error);
+    });
   }, []); // For some reason, I am getting a rerender
 
   return (
