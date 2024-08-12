@@ -1,7 +1,7 @@
 import { cn } from "@/utils/utils";
 import React from "react";
-import Header from "../../Header";
-import Footer from "../DesktopFooter";
+import { Header } from "../header/Header";
+import Footer from "../Footer";
 
 type MainLayoutProps = {
   className?: string;

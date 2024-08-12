@@ -6,7 +6,7 @@ import {
   useApiIsLoaded,
 } from "@vis.gl/react-google-maps";
 import Spinner from "@/components/_common/Spinner";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { api } from "@/utils/api";
 import { useCitiesFilter } from "@/utils/store/cities-filter";
 import { debounce } from "lodash";

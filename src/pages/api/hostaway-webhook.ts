@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { type NextApiRequest, type NextApiResponse } from "next";
 
 // ! Necessary for stripe

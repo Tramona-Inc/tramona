@@ -7,7 +7,7 @@
 
 # testing
 /coverage
-
+/src/pages/hidden-test.tsx
 # database
 /prisma/db.sqlite
 /prisma/db.sqlite-journal

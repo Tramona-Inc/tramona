@@ -14,12 +14,10 @@ export default function FeedRequestCard({
   const isAdmin = session && session.user.role === "admin";
 
   const fmtdDateRange = formatDateRange(request.checkIn, request.checkOut);
-  const fmtdPrice = formatCurrency(
-    request.maxTotalPrice / getNumNights(request.checkIn, request.checkOut),
-  );
-
-  const userName = request?.madeByGroup?.owner?.name ?? "";
-  const userImage = request?.madeByGroup?.owner?.image ?? "";
+  const numNights = getNumNights(request.checkIn, request.checkOut);
+  const fmtdPrice = formatCurrency(request.maxTotalPrice / numNights);
+  const userName = request.madeByGroup.owner.name ?? "";
+  const userImage = request.madeByGroup.owner.image ?? "";
 
   return (
     <BaseCard item={request} userName={userName} userImage={userImage}>
@@ -28,7 +26,7 @@ export default function FeedRequestCard({
           <p>
             Made a request for{" "}
             <span className="font-bold">{request.location}</span> from{" "}
-            {fmtdDateRange} for {fmtdPrice} per night
+            {fmtdDateRange} for {fmtdPrice}/night
           </p>
         </div>
         {isAdmin && request.isFiller && (

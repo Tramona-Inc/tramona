@@ -7,7 +7,7 @@ import {
 } from "@/utils/utils";
 import StripeCheckoutForm from "./StripeCheckoutForm";
 import React, { useEffect, useState, useCallback, useMemo } from "react";
-import { usePathname } from "next/navigation";
+import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import { TAX_PERCENTAGE, SUPERHOG_FEE } from "@/utils/constants";
 import type { OfferWithDetails } from "../offers/OfferPage";
@@ -25,7 +25,7 @@ const CustomStripeCheckout = ({
 }) => {
   const { toast } = useToast();
   const stripePromise = useStripe();
-  const cancelUrl = usePathname();
+  const { pathname } = useRouter();
   const session = useSession({ required: true });
 
   const numNights = useMemo(
@@ -67,7 +67,7 @@ const CustomStripeCheckout = ({
         price: finalTotal,
         tramonaServiceFee: serviceFee,
         description: "From: " + formatDateRange(offer.checkIn, offer.checkOut),
-        cancelUrl: cancelUrl,
+        cancelUrl: pathname,
         images: property.imageUrls,
         // totalSavings: originalTotal - (total + tax), <-- check math on this
         totalSavings: originalTotal - finalTotal,

@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 /* eslint-disable @next/next/no-img-element */
 import { type NextRequest } from "next/server";
 import { ImageResponse } from "@vercel/og";
@@ -21,9 +20,6 @@ export default function handler(req: NextRequest) {
   const coverUrl = cover
     ? `${protocol}://${host}/_next/image?url=${encodeURIComponent(cover)}&w=1200&q=75`
     : "http://localhost:3000/_next/image?url=https%3A%2F%2Fa0.muscache.com%2Fim%2Fpictures%2Fprohost-api%2FHosting-1162477721754661798%2Foriginal%2F0c00ec02-540d-4d24-ba50-638ccd676340.jpeg%3Fim_w%3D720&w=3840&q=75";
-
-  console.log("coverUrl", coverUrl);
-  console.log("cover:", cover);
 
   return new ImageResponse(
     (

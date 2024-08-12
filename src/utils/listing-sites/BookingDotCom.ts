@@ -54,7 +54,7 @@ export const BookingDotCom: ListingSite<"Booking.com"> = {
         return `${listingUrl}#availability`;
       },
 
-      getPrice(params) {
+      getPrice() {
         throw new Error("not implemented"); // TODO
       },
     };

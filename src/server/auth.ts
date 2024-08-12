@@ -137,7 +137,7 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       authorize: async (credentials) => {
-        if (credentials == undefined) return Promise.resolve(null);
+        if (credentials === undefined) return Promise.resolve(null);
 
         let user = null;
 

@@ -1,13 +1,12 @@
 import MobileNav from "@/components/dashboard/MobileNav";
 import Sidebar from "@/components/dashboard/Sidebar";
 import { useSession } from "next-auth/react";
-import Header from "../../Header";
-import Footer from "../DesktopFooter";
+import Footer from "../Footer";
 import { useIsMd } from "@/utils/utils";
-import { useRouter } from "next/router";
 import { api } from "@/utils/api";
 import { useEffect } from "react";
-import { usePathname } from "next/navigation";
+import { useRouter } from "next/router";
+import { Header } from "../header/Header";
 
 type DashboardLayoutProps = {
   children: React.ReactNode;
@@ -33,7 +32,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     }
   }, [onboardingStep, router]);
 
-  const pathname = useRouter().pathname;
+  const { pathname } = useRouter();
 
   const navType =
     status === "unauthenticated"
