@@ -11,11 +11,9 @@ export type ListingSiteUrlParams = {
   numGuests: number;
 };
 
-export type OriginalListing<
-  TSiteName extends ListingSiteName = ListingSiteName,
-> = {
+export type OriginalListing = {
   readonly id: string;
-  readonly site: ListingSite<TSiteName>;
+  readonly site: ListingSite;
 
   getListingUrl(params: ListingSiteUrlParams): string;
   getReviewsUrl(params: ListingSiteUrlParams): string;
@@ -23,8 +21,8 @@ export type OriginalListing<
   getPrice(params: ListingSiteUrlParams): Promise<number>;
 };
 
-export type ListingSite<TSiteName extends ListingSiteName> = {
-  readonly siteName: TSiteName;
+export type ListingSite = {
+  readonly siteName: ListingSiteName;
   readonly baseUrl: string;
   readonly parseId: (url: string) => string | undefined;
   readonly parseUrlParams: (url: string) => {
@@ -32,14 +30,12 @@ export type ListingSite<TSiteName extends ListingSiteName> = {
     checkOut?: string;
     numGuests?: number;
   };
-  readonly createListing: (id: string) => OriginalListing<TSiteName>;
+  readonly createListing: (id: string) => OriginalListing;
 };
 
 const ALL_LISTING_SITES = [Airbnb, BookingDotCom, Vrbo] as const;
 
-function getSiteURLParser<TSiteName extends ListingSiteName>(
-  Site: ListingSite<TSiteName>,
-) {
+function getSiteURLParser(Site: ListingSite) {
   return zodUrl()
     .startsWith(Site.baseUrl)
     .transform(Site.parseId)
