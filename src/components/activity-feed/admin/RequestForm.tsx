@@ -94,7 +94,6 @@ export default function CreateRequestForm({
       checkIn: new Date(data.checkIn), // Convert string to Date
       checkOut: new Date(data.checkOut),
     };
-    console.log(formattedData);
     // send the data to backend
     if (request) {
       await updateFillerRequest
@@ -129,7 +128,6 @@ export default function CreateRequestForm({
       form.setValue("checkOut", checkOut);
     }
     if (locationAndPrices) {
-      console.log(locationAndPrices);
       const random = randomizeLocationAndPrice(locationAndPrices);
       if (random) {
         if (random.location) {

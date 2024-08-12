@@ -18,7 +18,6 @@ export default function TripDetailsPage() {
   const redirectStatus =
     (Array.isArray(redirect_status) ? redirect_status[0] : redirect_status) ??
     "requires_payment_method";
-  console.log("redirect Status", redirectStatus);
 
   const validRedirectStatuses = [
     "succeeded",

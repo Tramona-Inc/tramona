@@ -22,7 +22,7 @@ export function descripeStripeDeclineCode({
       return "The card was declined because the transaction requires authentication such as 3D Secure. Please try again and authenticate your card, or contact your card issuer for more information." as string;
 
     case "approve_with_id":
-      return "The payment can’t be authorized. Attempt the payment again. If it still can’t be processed, contact your card issuer.";
+      return "The payment can&apos;t be authorized. Attempt the payment again. If it still can&apos;t be processed, contact your card issuer.";
 
     case "call_issuer":
       return "The card was declined for an unknown reason. Please contact your card issuer for more information.";
@@ -49,7 +49,7 @@ export function descripeStripeDeclineCode({
       return "The card has expired. Please use another card.";
 
     case "fraudulent":
-      return "The payment was declined because Stripe suspects that it’s fraudulent. Please try again or use another payment method.";
+      return "The payment was declined because Stripe suspects that it&apos;s fraudulent. Please try again or use another payment method.";
 
     case "generic_decline":
       return "The card was declined for an unknown reason or Stripe Radar blocked the payment. Please contact your card issuer for more information.";
@@ -91,13 +91,13 @@ export function descripeStripeDeclineCode({
       return "The PIN entered is incorrect. Please try again using the correct PIN.";
 
     case "issuer_not_available":
-      return "The card issuer couldn’t be reached, so the payment couldn’t be authorized. Please try the payment again. If it still can’t be processed, contact your card issuer.";
+      return "The card issuer couldn&apos;t be reached, so the payment couldn&apos;t be authorized. Please try the payment again. If it still can&apos;t be processed, contact your card issuer.";
 
     case "lost_card":
       return "The payment was declined because the card is reported lost. Please use another card.";
 
     case "merchant_blacklist":
-      return "The payment was declined because it matches a value on the Stripe user's block list. Please try again with another payment method.";
+      return "The payment was declined because it matches a value on the Stripe user&apos;s block list. Please try again with another payment method.";
 
     case "new_account_information_available":
       return "The card, or account the card is connected to, is invalid. Please contact your card issuer for more information.";
@@ -106,7 +106,7 @@ export function descripeStripeDeclineCode({
       return "The card was declined for an unknown reason. Please contact your card issuer for more information.";
 
     case "not_permitted":
-      return "The payment isn’t permitted. Please contact your card issuer for more information.";
+      return "The payment isn&apos;t permitted. Please contact your card issuer for more information.";
 
     case "offline_pin_required":
       return "The card was declined because it requires a PIN. Please try again by inserting your card and entering the PIN.";
@@ -115,19 +115,19 @@ export function descripeStripeDeclineCode({
       return "The card was declined because it requires a PIN. If possible, try the transaction again by inserting your card and entering the PIN.";
 
     case "pickup_card":
-      return "The card can’t be used for this payment (it might be reported lost or stolen). Please contact your card issuer for more information.";
+      return "The card can&apos;t be used for this payment (it might be reported lost or stolen). Please contact your card issuer for more information.";
 
     case "pin_try_exceeded":
       return "The allowable number of PIN tries was exceeded. Please use another card or payment method.";
 
     case "processing_error":
-      return "An error occurred while processing the card. Please try the payment again. If it still can’t be processed, try again later.";
+      return "An error occurred while processing the card. Please try the payment again. If it still can&apos;t be processed, try again later.";
 
     case "reenter_transaction":
-      return "The payment couldn’t be processed by the issuer for an unknown reason. Please try the payment again.";
+      return "The payment couldn&apos;t be processed by the issuer for an unknown reason. Please try the payment again.";
 
     case "restricted_card":
-      return "The card can’t be used for this payment (it might be reported lost or stolen). Please contact your card issuer for more information.";
+      return "The card can&apos;t be used for this payment (it might be reported lost or stolen). Please contact your card issuer for more information.";
 
     case "revocation_of_all_authorizations":
       return "The card was declined for an unknown reason. Please contact your card issuer for more information.";

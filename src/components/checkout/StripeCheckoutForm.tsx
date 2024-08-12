@@ -12,7 +12,6 @@ import ContactInfoForm from "./ContactInfoForm";
 import type {
   StripePaymentElementOptions,
   StripeExpressCheckoutElementOptions,
-  StripeError,
 } from "@stripe/stripe-js";
 import { env } from "@/env";
 import { toast } from "@/components/ui/use-toast";
@@ -37,12 +36,6 @@ export default function StripeCheckoutForm({
 
   const elements = useElements();
   const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<undefined | StripeError>(
-    undefined,
-  );
-  const [errorMessageDescription, setErrorMessageDescription] = useState<
-    null | string
-  >(null);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
