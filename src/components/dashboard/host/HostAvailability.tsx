@@ -10,6 +10,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { daysOfWeek, months } from "@/utils/constants";
+import { Button } from "@/components/ui/button";
 
 type ReservationInfo = {
   start: string;
@@ -19,15 +20,13 @@ type ReservationInfo = {
 
 export default function HostAvailability({ property }: { property: Property }) {
   const [editing, setEditing] = useState(false);
-  const [currentDate, setCurrentDate] = useState<Date>(new Date()); // actual current date
-  const [calendarDate, setCalendarDate] = useState<Date>(new Date()); // date displayed on the calendar
+  const [currentDate, setCurrentDate] = useState<Date>(new Date());
+  const [calendarDate, setCalendarDate] = useState<Date>(new Date());
   const [selectedRange, setSelectedRange] = useState<{
     start: Date | null;
     end: Date | null;
   }>({ start: null, end: null });
-  const [pendingChanges, setPendingChanges] = useState<
-    { start: Date; end: Date; isBlocking: boolean }[]
-  >([]);
+  const [isRefetching, setIsRefetching] = useState(false);
 
   const { mutateAsync: syncCalendar } = api.calendar.syncCalendar.useMutation();
   const { mutateAsync: updateCalendar } =
@@ -39,29 +38,28 @@ export default function HostAvailability({ property }: { property: Property }) {
   } = api.calendar.getReservedDateRanges.useQuery({ propertyId: property.id });
 
   const fetchReservedDateRanges = useCallback(async () => {
+    setIsRefetching(true);
     try {
       if (!property.iCalLink) {
         console.log("No iCalLink for this property");
         return;
       }
-      // Refresh iCal data
       await syncCalendar({
         iCalLink: property.iCalLink,
         propertyId: property.id,
         platformBookedOn: "airbnb",
       });
       console.log("Refreshed iCal data");
-
-      // Refetch reserved date ranges
       await refetch();
     } catch (error) {
       console.error("Error fetching reserved dates:", error);
+    } finally {
+      setIsRefetching(false);
     }
   }, [property.iCalLink, property.id, syncCalendar, refetch]);
 
   useEffect(() => {
     const today = new Date();
-    console.log(today.toString());
     setCurrentDate(today);
     setCalendarDate(today);
     void fetchReservedDateRanges();
@@ -70,9 +68,12 @@ export default function HostAvailability({ property }: { property: Property }) {
   useEffect(() => {
     if (!editing) {
       setSelectedRange({ start: null, end: null });
-      setPendingChanges([]);
     }
   }, [editing]);
+
+  useEffect(() => {
+    console.log("Reserved date ranges:", reservedDateRanges);
+  }, [reservedDateRanges]);
 
   const isDateReserved = (date: Date): ReservationInfo | undefined => {
     return reservedDateRanges?.find((reservedDate) => {
@@ -91,7 +92,6 @@ export default function HostAvailability({ property }: { property: Property }) {
       clickedReservation &&
       clickedReservation.platformBookedOn === "tramona"
     ) {
-      // If clicking on a Tramona-reserved date, select the entire range
       setSelectedRange({
         start: new Date(clickedReservation.start),
         end: new Date(clickedReservation.end),
@@ -120,33 +120,25 @@ export default function HostAvailability({ property }: { property: Property }) {
     }
   };
 
-  const handleRangeSubmit = (isBlocking: boolean) => {
+  const handleRangeSubmit = async (isBlocking: boolean) => {
     if (!editing || !selectedRange.start || !selectedRange.end) return;
 
-    setPendingChanges((prev) => [
-      ...prev,
-      {
-        start: new Date(selectedRange.start!.setHours(0, 0, 0, 0)),
-        end: new Date(selectedRange.end!.setHours(23, 59, 59, 999)),
-        isBlocking,
-      },
-    ]);
-    setSelectedRange({ start: null, end: null });
-  };
-
-  const handleEditingDone = async () => {
     try {
-      for (const range of pendingChanges) {
-        await updateCalendar({
-          propertyId: property.id,
-          start: range.start.toISOString(),
-          end: range.end.toISOString(),
-          isAvailable: !range.isBlocking,
-          platformBookedOn: "tramona",
-        });
-      }
-      setPendingChanges([]);
+      const start = new Date(selectedRange.start);
+      start.setHours(0, 0, 0, 0);
+
+      const end = new Date(selectedRange.end);
+      end.setHours(23, 59, 59, 999);
+
+      await updateCalendar({
+        propertyId: property.id,
+        start: start.toISOString(),
+        end: end.toISOString(),
+        isAvailable: !isBlocking,
+        platformBookedOn: "tramona",
+      });
       await refetch();
+      setSelectedRange({ start: null, end: null });
     } catch (error) {
       console.error("Error updating calendar:", error);
       // Handle error (e.g., show an error message to the user)
@@ -176,7 +168,7 @@ export default function HostAvailability({ property }: { property: Property }) {
     );
     const monthDays = generateCalendarDays(monthDate.getMonth());
 
-    if (isLoading) {
+    if (isLoading || isRefetching) {
       return <Spinner />;
     }
 
@@ -197,38 +189,27 @@ export default function HostAvailability({ property }: { property: Property }) {
               : null;
             const reservedInfo = date ? isDateReserved(date) : null;
 
-            const isPendingBlock =
-              date &&
-              pendingChanges.some(
-                (range) =>
-                  date >= range.start && date <= range.end && range.isBlocking,
-              );
-            const isPendingUnblock =
-              date &&
-              pendingChanges.some(
-                (range) =>
-                  date >= range.start && date <= range.end && !range.isBlocking,
-              );
             const isSelected =
               date &&
               selectedRange.start &&
               (selectedRange.end
                 ? date >= selectedRange.start && date <= selectedRange.end
                 : date.getTime() === selectedRange.start.getTime());
+
             let reservationClass = "";
             if (reservedInfo) {
-              if (
-                reservedInfo.platformBookedOn === "airbnb") {
+              if (reservedInfo.platformBookedOn === "airbnb") {
                 reservationClass = "bg-reserved-pattern";
               } else if (reservedInfo.platformBookedOn === "tramona") {
                 reservationClass = "bg-reserved-pattern-2";
               }
             }
+
             return (
               <div
                 key={index}
                 onClick={() => date && handleDateClick(date)}
-                className={`flex h-12 flex-1 items-center justify-center font-semibold ${day && editing ? "cursor-pointer" : ""} ${reservationClass} ${isPendingBlock ? "bg-yellow-200" : ""} ${isPendingUnblock ? "bg-green-200" : ""} ${isSelected ? "bg-blue-200" : ""} ${
+                className={`flex h-12 flex-1 items-center justify-center font-semibold ${day && editing ? "cursor-pointer" : ""} ${reservationClass} ${isSelected ? "bg-blue-200" : ""} ${
                   day &&
                   monthDate.getFullYear() === currentDate.getFullYear() &&
                   monthDate.getMonth() === currentDate.getMonth() &&
@@ -262,12 +243,39 @@ export default function HostAvailability({ property }: { property: Property }) {
 
   return (
     <div className="mb-16 mt-6 space-y-10">
-      <div className="text-end">
+      <div className="flex items-center justify-end space-x-2">
+        {editing && selectedRange.start && selectedRange.end && (
+          <>
+            <Button
+              onClick={() => handleRangeSubmit(true)}
+              variant="default"
+              
+            >
+              Block Date Range
+            </Button>
+            <Button
+              onClick={() => handleRangeSubmit(false)}
+              variant="darkPrimary"
+            >
+              Unblock Date Range
+            </Button>
+          </>
+        )}
+        {!editing && (
+          <Button
+            onClick={() => void fetchReservedDateRanges()}
+            variant="outline"
+            disabled={isRefetching}
+          >
+            {isRefetching ? "Refreshing..." : "Refresh Calendar"}
+          </Button>
+        )}
+
         <HostPropertyEditBtn
           editing={editing}
           setEditing={setEditing}
           property={property}
-          onSubmit={handleEditingDone}
+          onSubmit={() => {}}
         />
       </div>
       <div className="mx-auto max-w-4xl">
@@ -310,22 +318,7 @@ export default function HostAvailability({ property }: { property: Property }) {
             {renderMonth(1)}
           </div>
           <div className="sm:hidden">{renderMonth(0)}</div>
-          {editing && selectedRange.start && selectedRange.end && (
-            <div className="mt-4 flex space-x-4">
-              <button
-                onClick={() => handleRangeSubmit(true)}
-                className="rounded bg-blue-500 p-2 text-white hover:bg-blue-600"
-              >
-                Block Selected Range
-              </button>
-              <button
-                onClick={() => handleRangeSubmit(false)}
-                className="rounded bg-green-500 p-2 text-white hover:bg-green-600"
-              >
-                Unblock Selected Range
-              </button>
-            </div>
-          )}
+
           <div className="mt-12 flex flex-col space-y-2 text-sm">
             <div className="flex items-center">
               <div className="mr-2 h-6 w-6 bg-zinc-50"></div>
