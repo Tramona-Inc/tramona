@@ -5,33 +5,34 @@ import { BookingDotCom } from "./BookingDotCom";
 import { Vrbo } from "./Vrbo";
 import { type ListingSiteName } from "@/server/db/schema";
 
-export type ListingSiteUrlParams = {
+export type ListingSiteUrlParams = Readonly<{
   checkIn?: string | Date;
   checkOut?: string | Date;
   numGuests: number;
-};
+}>;
 
-export type OriginalListing = {
-  readonly id: string;
-  readonly site: ListingSite;
+export type OriginalListing = Readonly<{
+  id: string;
+  site: ListingSite;
 
   getListingUrl(params: ListingSiteUrlParams): string;
   getReviewsUrl(params: ListingSiteUrlParams): string;
   getCheckoutUrl(params: ListingSiteUrlParams): string;
   getPrice(params: ListingSiteUrlParams): Promise<number>;
-};
+}>;
 
-export type ListingSite = {
-  readonly siteName: ListingSiteName;
-  readonly baseUrl: string;
-  readonly parseId: (url: string) => string | undefined;
-  readonly parseUrlParams: (url: string) => {
+export type ListingSite = Readonly<{
+  siteName: ListingSiteName;
+  baseUrl: string;
+
+  parseId(url: string): string | undefined;
+  parseUrlParams(url: string): {
     checkIn?: string;
     checkOut?: string;
     numGuests?: number;
   };
-  readonly createListing: (id: string) => OriginalListing;
-};
+  createListing(id: string): OriginalListing;
+}>;
 
 const ALL_LISTING_SITES = [Airbnb, BookingDotCom, Vrbo] as const;
 
