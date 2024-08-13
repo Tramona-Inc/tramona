@@ -87,7 +87,6 @@ export default function CreateOfferForm({
       checkIn: new Date(data.checkIn), // Convert string to Date
       checkOut: new Date(data.checkOut),
     };
-    console.log(formattedData);
     // send the data to backend
     if (offer) {
       await updateFillerOffer

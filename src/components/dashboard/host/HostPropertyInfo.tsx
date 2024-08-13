@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/utils/api";
 import HostPropertiesRestrictions from "./HostPropertiesRestrictions";
+import HostICalHowToDialog from "./HostICalHowToDialog";
 
 export default function HostPropertyInfo({ property }: { property: Property }) {
   const [iCalLink, setiCalLink] = useState("");
@@ -78,28 +79,34 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
         <ChevronLeft />
       </Link>
       <div>
-      {!property.iCalLink && (
-        <div className="mb-10 space-y-4">
-          <h1 className="text-4xl font-bold">Sync your iCal</h1>
-          <Label className="font-semibold">iCal URL</Label>
-          <Input
-            id="iCalLink"
-            type="url"
-            placeholder="https://example.com/calendar.ics"
-            value={iCalLink}
-            onChange={(e) => setiCalLink(e.target.value)}
-          />
-          <Button
-            onClick={() => void handleFormSubmit()}
-            disabled={isLoading}
-          >
-            {isLoading ? "Syncing..." : "Submit"}
-          </Button>
-        </div>
-      )}
+        {!property.iCalLink && (
+          <div className="mb-10 space-y-4">
+            <div className="flex items-center space-x-2">
+              <h1 className="text-4xl font-bold">Sync your iCal</h1>
+              <HostICalHowToDialog />
+            </div>
+            <Input
+              id="iCalLink"
+              type="url"
+              placeholder="https://example.com/calendar.ics"
+              value={iCalLink}
+              onChange={(e) => setiCalLink(e.target.value)}
+            />
+            <Button
+              onClick={handleFormSubmit}
+              disabled={syncCalendarMutation.isLoading}
+            >
+              {syncCalendarMutation.isLoading ? "Syncing..." : "Submit"}
+            </Button>
+          </div>
+        )}
         {property.iCalLink && (
           <div className="mb-10 space-y-4">
-            <h1 className="text-4xl font-bold">Sync your iCal</h1>
+            <div className="flex items-center space-x-2">
+              <h1 className="text-4xl font-bold">Sync your iCal</h1>
+              <HostICalHowToDialog />
+            </div>
+
             <Label className="font-semibold">iCal URL</Label>
             <Input
               id="iCalLink"
