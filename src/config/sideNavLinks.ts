@@ -49,15 +49,10 @@ export const hostMobileNavLinks = [
   { href: "/host/team", name: "Team", icon: Users2Icon },
 ];
 
-export const guestMobileNavLinks = [
+export const guestNavLinks = [
   { href: "/", name: "Home", icon: HomeIcon },
-  // { href: "/explore", name: "Explore", icon: Search },
   { href: "/requests", name: "Requests", icon: BadgePercent },
   { href: "/my-trips", name: "My Trips", icon: Briefcase },
-];
-
-export const guestNavLinks = [
-  ...guestMobileNavLinks,
   { href: "/messages", name: "Messages", icon: MessageCircleIcon },
 ];
 
