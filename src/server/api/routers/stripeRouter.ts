@@ -5,7 +5,11 @@ import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import Stripe from "stripe";
 import { z } from "zod";
+
 import { hostProfiles } from "@/server/db/schema";
+
+import { createPayHostTransfer } from "@/pages/api/stripe-utils";
+import stripeAutoTransfer from "@/pages/api/cron/stripe-transfer";
 
 export const config = {
   api: {
@@ -311,14 +315,14 @@ export const stripeRouter = createTRPCRouter({
         setup_future_usage: "off_session", // is both of and on session
         // In the latest version of the API, specifying the `automatic_payment_methods` parameter is optional because Stripe enables its functionality by default.
         automatic_payment_methods: { enabled: true },
-        ...(metadata.host_stripe_id
-          ? {
-              transfer_data: {
-                amount: metadata.price - metadata.tramonaServiceFee, // we need to change this too.
-                destination: metadata.host_stripe_id,
-              },
-            }
-          : {}),
+        // ...(metadata.host_stripe_id
+        //   ? {
+        //       transfer_data: {
+        //         amount: metadata.price - metadata.tramonaServiceFee, // we need to change this too.
+        //         destination: metadata.host_stripe_id,
+        //       },
+        //     }
+        //   : {}),
       };
 
       const response = await stripe.paymentIntents.create(options);
@@ -740,4 +744,35 @@ export const stripeRouter = createTRPCRouter({
 
     return result;
   }),
+
+  payHostByTransfer: protectedProcedure
+    .input(
+      z.object({
+        amount: z.number(),
+        destination: z.string(),
+        tripId: z.string(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      //we first need to make sure we have enought balance on the tramona account
+      await createPayHostTransfer({
+        amount: input.amount,
+        destination: input.destination,
+        tripId: input.tripId,
+      });
+      console.log("Payment test successful");
+    }),
+
+  stripeTopUp: protectedProcedure //this function is used for topping up for test transactions
+    .input(z.object({ amount: z.number() }))
+    .query(async ({ ctx, input }) => {
+      const topup = await stripe.topups.create({
+        amount: input.amount, //
+        currency: "usd",
+        description: "Top-up for week of May 31",
+        statement_descriptor: "Weekly top-up",
+      });
+      console.log("Top-up successful", topup);
+      return topup;
+    }),
 });
