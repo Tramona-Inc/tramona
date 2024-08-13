@@ -111,18 +111,21 @@ export const miscRouter = createTRPCRouter({
       if (!airbnbListingId) return { status: "failed to parse url" } as const;
 
       const [res, price] = await Promise.all([
-        fetch(url),
+        axios.get<string>(url, {
+          httpsAgent: new HttpsProxyAgent(env.OXYLABS_URL),
+          responseType: "text",
+        }),
         await Airbnb.createListing(airbnbListingId).getPrice(params),
       ]);
 
       if (res.status === 404) return { status: "not found" } as const;
-      if (!res.ok) {
+      if (res.status !== 200) {
         console.log("status:", res.status);
         console.log("\n\nwhole response:", res);
         return { status: "failed to fetch" } as const;
       }
 
-      const html = await res.text();
+      const html = res.data;
       const $ = cheerio.load(html);
       // title is swapped with description because the og:description is actually the property title,
       // and the og:title is more like a description
