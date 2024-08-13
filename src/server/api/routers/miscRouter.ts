@@ -112,7 +112,7 @@ export const miscRouter = createTRPCRouter({
 
       const [res, price] = await Promise.all([
         axios.get<string>(url, {
-          httpsAgent: new HttpsProxyAgent(env.OXYLABS_URL),
+          httpsAgent: new HttpsProxyAgent(env.PROXY_URL),
           responseType: "text",
         }),
         await Airbnb.createListing(airbnbListingId).getPrice(params),
