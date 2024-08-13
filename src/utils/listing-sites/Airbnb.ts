@@ -3,8 +3,7 @@ import { type ListingSite } from ".";
 import { formatDateYearMonthDay } from "../utils";
 import * as cheerio from "cheerio";
 
-import { HttpsProxyAgent } from "https-proxy-agent";
-import { env } from "@/env";
+import { proxyAgent, scrapeUrl } from "@/server/server-utils";
 
 export const Airbnb: ListingSite = {
   siteName: "Airbnb",
@@ -78,14 +77,7 @@ export const Airbnb: ListingSite = {
       async getPrice(params) {
         const checkoutUrl = this.getCheckoutUrl(params);
 
-        const $ = await axios
-          .get<string>(checkoutUrl, {
-            httpsAgent: new HttpsProxyAgent(env.PROXY_URL),
-            responseType: "text",
-          })
-          .then((res) => res.data)
-          .then(cheerio.load);
-
+        const $ = await scrapeUrl(checkoutUrl);
         const jsonStr = $("#data-deferred-state-0").text();
 
         const priceRegex =
