@@ -1,5 +1,11 @@
+import axios from "axios";
+import { HttpsProxyAgent } from "https-proxy-agent";
 import { requestSelectSchema } from "@/server/db/schema";
-import { createTRPCRouter, publicProcedure } from "../trpc";
+import {
+  createTRPCRouter,
+  publicProcedure,
+  roleRestrictedProcedure,
+} from "../trpc";
 import { env } from "@/env";
 import { format } from "date-fns";
 import { TRPCError } from "@trpc/server";
@@ -59,12 +65,12 @@ export const miscRouter = createTRPCRouter({
     .query(async ({ input }) => {
       const price = (await fetch(
         `https://${env.RAPIDAPI_HOST}/search-location?` +
-          new URLSearchParams({
-            location: input.location,
-            checkin: format(input.checkIn, "yyyy-MM-dd"),
-            checkout: format(input.checkOut, "yyyy-MM-dd"),
-            adults: input.numGuests.toString(),
-          }).toString(),
+        new URLSearchParams({
+          location: input.location,
+          checkin: format(input.checkIn, "yyyy-MM-dd"),
+          checkout: format(input.checkOut, "yyyy-MM-dd"),
+          adults: input.numGuests.toString(),
+        }).toString(),
         {
           method: "GET",
           headers: {
@@ -82,8 +88,8 @@ export const miscRouter = createTRPCRouter({
       const averageNightlyPrice =
         Array.isArray(price.results) && price.results.length > 0
           ? price.results.reduce((acc, listing) => {
-              return acc + listing.price.rate;
-            }, 0) / price.results.length
+            return acc + listing.price.rate;
+          }, 0) / price.results.length
           : 0;
 
       return averageNightlyPrice;
@@ -105,14 +111,21 @@ export const miscRouter = createTRPCRouter({
       if (!airbnbListingId) return { status: "failed to parse url" } as const;
 
       const [res, price] = await Promise.all([
-        fetch(url),
+        axios.get<string>(url, {
+          httpsAgent: new HttpsProxyAgent(env.PROXY_URL),
+          responseType: "text",
+        }),
         await Airbnb.createListing(airbnbListingId).getPrice(params),
       ]);
 
       if (res.status === 404) return { status: "not found" } as const;
-      if (!res.ok) return { status: "failed to fetch" } as const;
+      if (res.status !== 200) {
+        console.log("status:", res.status);
+        console.log("\n\nwhole response:", res);
+        return { status: "failed to fetch" } as const;
+      }
 
-      const html = await res.text();
+      const html = res.data;
       const $ = cheerio.load(html);
       // title is swapped with description because the og:description is actually the property title,
       // and the og:title is more like a description
@@ -147,5 +160,19 @@ export const miscRouter = createTRPCRouter({
         status: "success",
         data: { title, description, imageUrl, location, price },
       } as const;
+    }),
+
+  proxyFetch: roleRestrictedProcedure(["admin"])
+    .input(z.object({ url: zodUrl() }))
+    .query(async ({ input: { url } }) => {
+      const res = await axios.get<string>(url, {
+        httpsAgent: new HttpsProxyAgent(env.PROXY_URL),
+        responseType: "text",
+      });
+
+      return {
+        status: res.status,
+        data: res.data,
+      };
     }),
 });

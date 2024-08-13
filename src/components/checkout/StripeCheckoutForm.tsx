@@ -14,6 +14,8 @@ import type {
   StripeExpressCheckoutElementOptions,
 } from "@stripe/stripe-js";
 import { env } from "@/env";
+import { toast } from "@/components/ui/use-toast";
+import { descripeStripeDeclineCode } from "@/utils/stripe-client";
 
 export default function StripeCheckoutForm({
   clientSecret,
@@ -33,12 +35,11 @@ export default function StripeCheckoutForm({
   const stripe = useStripe();
 
   const elements = useElements();
-  const [errorMessage, setErrorMessage] = useState<string | undefined>(
-    undefined,
-  );
+  const [loading, setLoading] = useState(false);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setLoading(true);
     if (!stripe || !elements) {
       return;
     }
@@ -49,8 +50,27 @@ export default function StripeCheckoutForm({
         return_url: `${baseUrl}/my-trips/confirmation`,
       },
     });
-    setErrorMessage(error.message);
+
+    if (error.decline_code) {
+      const errorDescription = descripeStripeDeclineCode({
+        declineCode: error.decline_code,
+      });
+
+      toast({
+        title: "Payment Failed",
+        description: errorDescription,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Payment Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+    setLoading(false);
   }
+
   const expressCheckoutOptions: StripeExpressCheckoutElementOptions = {
     buttonType: {
       applePay: "buy",
@@ -97,7 +117,16 @@ export default function StripeCheckoutForm({
           className="w-full"
           disabled={!stripe}
         >
-          Confirm and Book
+          {loading ? (
+            <div className="flex h-full items-center justify-center space-x-2">
+              <span className="text-white">Loading</span>
+              <div className="h-1 w-1 animate-bounce rounded-full bg-white [animation-delay:-0.3s]"></div>
+              <div className="h-1 w-1 animate-bounce rounded-full bg-white [animation-delay:-0.15s]"></div>
+              <div className="h-1 w-1 animate-bounce rounded-full bg-white"></div>
+            </div>
+          ) : (
+            "Confirm and Book"
+          )}
         </Button>
       </form>
     </div>

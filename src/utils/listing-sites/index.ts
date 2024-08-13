@@ -5,41 +5,38 @@ import { BookingDotCom } from "./BookingDotCom";
 import { Vrbo } from "./Vrbo";
 import { type ListingSiteName } from "@/server/db/schema";
 
-export type ListingSiteUrlParams = {
+export type ListingSiteUrlParams = Readonly<{
   checkIn?: string | Date;
   checkOut?: string | Date;
   numGuests: number;
-};
+}>;
 
-export type OriginalListing<
-  TSiteName extends ListingSiteName = ListingSiteName,
-> = {
-  readonly id: string;
-  readonly site: ListingSite<TSiteName>;
+export type OriginalListing = Readonly<{
+  id: string;
+  site: ListingSite;
 
   getListingUrl(params: ListingSiteUrlParams): string;
   getReviewsUrl(params: ListingSiteUrlParams): string;
   getCheckoutUrl(params: ListingSiteUrlParams): string;
   getPrice(params: ListingSiteUrlParams): Promise<number>;
-};
+}>;
 
-export type ListingSite<TSiteName extends ListingSiteName> = {
-  readonly siteName: TSiteName;
-  readonly baseUrl: string;
-  readonly parseId: (url: string) => string | undefined;
-  readonly parseUrlParams: (url: string) => {
+export type ListingSite = Readonly<{
+  siteName: ListingSiteName;
+  baseUrl: string;
+
+  parseId(url: string): string | undefined;
+  parseUrlParams(url: string): {
     checkIn?: string;
     checkOut?: string;
     numGuests?: number;
   };
-  readonly createListing: (id: string) => OriginalListing<TSiteName>;
-};
+  createListing(id: string): OriginalListing;
+}>;
 
 const ALL_LISTING_SITES = [Airbnb, BookingDotCom, Vrbo] as const;
 
-function getSiteURLParser<TSiteName extends ListingSiteName>(
-  Site: ListingSite<TSiteName>,
-) {
+function getSiteURLParser(Site: ListingSite) {
   return zodUrl()
     .startsWith(Site.baseUrl)
     .transform(Site.parseId)

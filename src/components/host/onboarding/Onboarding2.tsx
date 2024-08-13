@@ -56,15 +56,10 @@ export default function Onboarding2({ editing = false }) {
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      propertyType: "Other",
-    },
   });
 
   async function handleFormSubmit() {
-    if (form.getValues("propertyType") !== "Other") {
-      setPropertyType(propertyType);
-    }
+    setPropertyType(form.getValues("propertyType"));
   }
 
   function handleError() {
@@ -109,7 +104,7 @@ export default function Onboarding2({ editing = false }) {
       {!editing && (
         <OnboardingFooter
           handleNext={form.handleSubmit(handleFormSubmit)}
-          isFormValid={propertyType !== "Other"}
+          isFormValid={true}
           isForm={true}
           handleError={handleError}
         />

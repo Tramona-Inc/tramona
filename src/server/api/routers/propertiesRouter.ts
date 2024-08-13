@@ -120,15 +120,6 @@ export const propertiesRouter = createTRPCRouter({
         .where(eq(properties.id, input.id));
     }),
 
-  publishProperty: roleRestrictedProcedure(["admin", "host"])
-    .input(propertySelectSchema.pick({ id: true }))
-    .mutation(async ({ ctx, input }) => {
-      await ctx.db
-        .update(properties)
-        .set({ propertyStatus: "Listed" })
-        .where(eq(properties.id, input.id));
-    }),
-
   delete: roleRestrictedProcedure(["admin", "host"])
     .input(propertySelectSchema.pick({ id: true }))
     .mutation(async ({ ctx, input }) => {
