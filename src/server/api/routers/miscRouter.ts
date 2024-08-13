@@ -65,12 +65,12 @@ export const miscRouter = createTRPCRouter({
     .query(async ({ input }) => {
       const price = (await fetch(
         `https://${env.RAPIDAPI_HOST}/search-location?` +
-          new URLSearchParams({
-            location: input.location,
-            checkin: format(input.checkIn, "yyyy-MM-dd"),
-            checkout: format(input.checkOut, "yyyy-MM-dd"),
-            adults: input.numGuests.toString(),
-          }).toString(),
+        new URLSearchParams({
+          location: input.location,
+          checkin: format(input.checkIn, "yyyy-MM-dd"),
+          checkout: format(input.checkOut, "yyyy-MM-dd"),
+          adults: input.numGuests.toString(),
+        }).toString(),
         {
           method: "GET",
           headers: {
@@ -88,8 +88,8 @@ export const miscRouter = createTRPCRouter({
       const averageNightlyPrice =
         Array.isArray(price.results) && price.results.length > 0
           ? price.results.reduce((acc, listing) => {
-              return acc + listing.price.rate;
-            }, 0) / price.results.length
+            return acc + listing.price.rate;
+          }, 0) / price.results.length
           : 0;
 
       return averageNightlyPrice;
@@ -163,7 +163,7 @@ export const miscRouter = createTRPCRouter({
     .input(z.object({ url: zodUrl() }))
     .query(async ({ input: { url } }) => {
       const res = await axios.get<string>(url, {
-        httpsAgent: new HttpsProxyAgent(env.OXYLABS_URL),
+        httpsAgent: new HttpsProxyAgent(env.PROXY_URL),
         responseType: "text",
       });
 

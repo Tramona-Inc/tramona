@@ -80,7 +80,7 @@ export const Airbnb: ListingSite = {
 
         const $ = await axios
           .get<string>(checkoutUrl, {
-            httpsAgent: new HttpsProxyAgent(env.OXYLABS_URL),
+            httpsAgent: new HttpsProxyAgent(env.PROXY_URL),
             responseType: "text",
           })
           .then((res) => res.data)
