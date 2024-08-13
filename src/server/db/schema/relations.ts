@@ -29,6 +29,7 @@ import { reviews } from "./tables/reviews";
 import { fillerBookings, fillerOffers } from "./tables/feedFiller";
 import { superhogErrors } from "./tables/superhogErrors";
 import { linkInputProperties } from "./tables/linkInputProperties";
+import { externalOffers } from "./tables/externalOffers";
 
 export const usersRelations = relations(users, ({ one, many }) => ({
   accounts: many(accounts),
@@ -116,6 +117,14 @@ export const requestsRelations = relations(requests, ({ one, many }) => ({
   linkInputProperty: one(linkInputProperties, {
     fields: [requests.linkInputPropertyId],
     references: [linkInputProperties.id],
+  }),
+  externalOffers: many(externalOffers),
+}));
+
+export const externalOffersRelations = relations(externalOffers, ({ one }) => ({
+  request: one(requests, {
+    fields: [externalOffers.requestId],
+    references: [requests.id],
   }),
 }));
 

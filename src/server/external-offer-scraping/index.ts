@@ -1,9 +1,11 @@
-import { NewOffer, Request } from "../db/schema";
+import { ExternalOffer, Request } from "../db/schema";
 import { airbnbOfferScraper } from "./airbnbOfferScraper";
 
-export type OfferScraper = (request: Request) => Promise<NewOffer[]>;
+export type ExternalOfferScraper = (
+  request: Request,
+) => Promise<ExternalOffer[]>;
 
-const offerScrapers: OfferScraper[] = [airbnbOfferScraper];
+const offerScrapers: ExternalOfferScraper[] = [airbnbOfferScraper];
 
 export async function scrapeOffers(request: Request) {
   const offers = await Promise.all(
