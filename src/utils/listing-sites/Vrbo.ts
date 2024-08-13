@@ -1,7 +1,7 @@
 import { type ListingSite } from ".";
 import { formatDateYearMonthDay } from "../utils";
 
-export const Vrbo: ListingSite<"Vrbo"> = {
+export const Vrbo: ListingSite = {
   siteName: "Vrbo",
   baseUrl: "https://www.vrbo.com",
 

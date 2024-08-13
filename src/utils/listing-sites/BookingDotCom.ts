@@ -1,7 +1,7 @@
 import { type ListingSite } from ".";
 import { formatDateYearMonthDay } from "../utils";
 
-export const BookingDotCom: ListingSite<"Booking.com"> = {
+export const BookingDotCom: ListingSite = {
   siteName: "Booking.com",
   baseUrl: "https://www.booking.com",
 
