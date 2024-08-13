@@ -9,6 +9,7 @@ import { z } from "zod";
 import { hostProfiles } from "@/server/db/schema";
 
 import { createPayHostTransfer } from "@/pages/api/stripe-utils";
+import stripeAutoTransfer from "@/pages/api/cron/stripe-transfer";
 
 export const config = {
   api: {
@@ -744,7 +745,7 @@ export const stripeRouter = createTRPCRouter({
     return result;
   }),
 
-  paymentTest: protectedProcedure
+  payHostByTransfer: protectedProcedure
     .input(
       z.object({
         amount: z.number(),
@@ -753,11 +754,25 @@ export const stripeRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input }) => {
+      //we first need to make sure we have enought balance on the tramona account
       await createPayHostTransfer({
         amount: input.amount,
         destination: input.destination,
         tripId: input.tripId,
       });
       console.log("Payment test successful");
+    }),
+
+  stripeTopUp: protectedProcedure //this function is used for topping up for test transactions
+    .input(z.object({ amount: z.number() }))
+    .query(async ({ ctx, input }) => {
+      const topup = await stripe.topups.create({
+        amount: input.amount, //
+        currency: "usd",
+        description: "Top-up for week of May 31",
+        statement_descriptor: "Weekly top-up",
+      });
+      console.log("Top-up successful", topup);
+      return topup;
     }),
 });
