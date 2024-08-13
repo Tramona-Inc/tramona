@@ -83,6 +83,11 @@ export const requests = pgTable(
 );
 export type Request = typeof requests.$inferSelect;
 export type NewRequest = typeof requests.$inferInsert;
+export type MinimalRequest = Pick<
+  Request,
+  "id" | "location" | "checkIn" | "checkOut" | "numGuests" | "maxTotalPrice"
+>;
+
 export const requestSelectSchema = createSelectSchema(requests);
 export const requestInsertSchema = createInsertSchema(requests, {
   latLngPoint: z.object({ x: z.number(), y: z.number() }),
