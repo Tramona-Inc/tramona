@@ -53,9 +53,6 @@ export const Vrbo: ListingSite = {
         const listingUrl = this.getListingUrl(params);
         return `${listingUrl}&pwaDialogNested=price-details`;
       },
-      getPrice() {
-        throw new Error("not implemented"); // TODO
-      },
     };
   },
 };

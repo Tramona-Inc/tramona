@@ -1,15 +1,14 @@
-import axios from "axios";
 import { requestSelectSchema } from "@/server/db/schema";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { env } from "@/env";
 import { format } from "date-fns";
 import { TRPCError } from "@trpc/server";
 import { zodUrl } from "@/utils/zod-utils";
-import * as cheerio from "cheerio";
 import { getCity, getCoordinates } from "@/server/google-maps";
 import { Airbnb } from "@/utils/listing-sites/Airbnb";
 import { z } from "zod";
-import { proxyAgent, scrapeUrl } from "@/server/server-utils";
+import { scrapeUrl } from "@/server/server-utils";
+import { scrapeAirbnbPrice } from "@/server/scrapePrice";
 
 type AirbnbListing = {
   id: string;
@@ -108,7 +107,7 @@ export const miscRouter = createTRPCRouter({
 
       const [$, price] = await Promise.all([
         scrapeUrl(url),
-        Airbnb.createListing(airbnbListingId).getPrice(params),
+        scrapeAirbnbPrice({ airbnbListingId, params }),
       ]);
 
       // title is swapped with description because the og:description is actually the property title,
