@@ -89,6 +89,7 @@ export default function HostConfirmRequestDialog({
   };
 
   const numNights = getNumNights(request.checkIn, request.checkOut);
+  console.log("selectedProperties2", selectedProperties);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -130,6 +131,7 @@ export default function HostConfirmRequestDialog({
         </div>
 
         <h4 className="text-dark text-lg font-bold">Review your offers</h4>
+
         <div className="space-y-4">
           {selectedProperties.map((property) => (
             <div
