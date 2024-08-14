@@ -11,7 +11,6 @@ import {
   referralCodes,
   referralEarnings,
   requests,
-  tripCancellations,
   trips,
   users,
 } from "@/server/db/schema";
@@ -120,7 +119,7 @@ export default async function webhook(
                     totalPriceAfterFees: paymentIntentSucceeded.amount,
                   })
                   .returning();
-                console.log("Created trip", currentTrip);
+
                 //superhog reservation
 
                 //creating a superhog reservation only if does not exist
@@ -329,8 +328,6 @@ export default async function webhook(
       case "charge.dispute.created":
         {
           const dispute = event.data.object;
-          console.log("Dispute created", dispute);
-          console.log("Dispute object", dispute.object);
           //find the trip by paymentItentId
           const paymentIntentId = dispute.payment_intent as string;
           await cancelTripByPaymentIntent({
