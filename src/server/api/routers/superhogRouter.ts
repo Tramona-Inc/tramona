@@ -4,8 +4,6 @@ import { env } from "@/env";
 import axios from "axios";
 import { db } from "@/server/db";
 import {
-  properties,
-  users,
   superhogRequests,
   trips,
   superhogErrors,
@@ -13,16 +11,9 @@ import {
 } from "@/server/db/schema";
 
 import { eq, isNotNull } from "drizzle-orm";
-import { TRPCError } from "@trpc/server";
-import { generateTimeStamp } from "@/utils/utils";
-import { v4 as uuidv4 } from "uuid";
-import type { Trip } from "@/server/db/schema/tables/trips";
 import { formatDateYearMonthDay } from "@/utils/utils";
-import { getCountryISO, getPostcode } from "@/server/google-maps";
+import { getCountryISO } from "@/server/google-maps";
 import { sendSlackMessage } from "@/server/slack";
-
-import { stripe } from "@/server/api/routers/stripeRouter";
-
 export interface ReservationInterface {
   id: number;
   checkIn: string;
@@ -38,19 +29,6 @@ export interface ReservationInterface {
   userId: string;
   propertyId: string;
 }
-
-// interface ResponseType {
-//   {
-//     metadata: {
-//         timeStamp: string,
-//         echoToken: string
-//     },
-//     verification: {
-//         verificationId: string,
-//         status: string
-//     }
-// }
-// }
 
 const config = {
   headers: {
@@ -89,166 +67,6 @@ type ResponseType = {
 //   listing_id: '27'
 // },
 //   //check to see if the reservation has already been created by checking the trips table since this will becalled on everyupdate
-
-export async function createSuperhogReservation({
-  paymentIntentId,
-  propertyId,
-  userId,
-  trip,
-}: {
-  paymentIntentId: string;
-  propertyId: number;
-  userId: string;
-  trip: Trip;
-}) {
-  //find the property using its id
-  const property = await db.query.properties.findFirst({
-    where: eq(properties.id, propertyId),
-  });
-
-  const user = await db.query.users.findFirst({
-    where: eq(users.id, userId),
-  });
-
-  if (property && user) {
-    const reservationObject = {
-      metadata: {
-        timeStamp: generateTimeStamp(),
-        echoToken: uuidv4(),
-      },
-      listing: {
-        listingId: propertyId.toString(), //this is the offer ID
-        listingName: property.name,
-        address: {
-          addressLine1: property.address,
-          addressLine2: "", //can be null
-          town: property.city,
-          countryIso: await getCountryISO({
-            lat: property.latitude,
-            lng: property.longitude,
-          }),
-          postcode: await getPostcode({
-            lat: property.latitude,
-            lng: property.longitude,
-          }),
-        },
-        petsAllowed: property.petsAllowed ? "true" : "false",
-      },
-      reservation: {
-        reservationId: trip.id.toString(),
-        checkIn: formatDateYearMonthDay(trip.checkIn), // 2024-08-24 format
-        checkOut: formatDateYearMonthDay(trip.checkOut),
-        channel: "Tramona",
-        creationDate: formatDateYearMonthDay(new Date()),
-      },
-      guest: {
-        firstName: user.firstName ?? user.name?.split(" ")[0],
-        lastName: user.lastName ?? user.name?.split(" ")[1],
-        email: user.email,
-        telephoneNumber: user.phoneNumber?.toString() ?? "+19496833881",
-      },
-    };
-
-    const { verification } = await axios
-      .post<unknown, ResponseType>(
-        "https://superhog-apim.azure-api.net/e-deposit-sandbox/verifications",
-        reservationObject,
-        config,
-      )
-      .then((res) => res.data)
-      .catch(async (error: AxiosError) => {
-        console.log(
-          `SUPERHOG REQUEST ERROR: axios error... ${error.response.data.detail}`,
-        );
-        sendSlackMessage(
-          [
-            `SUPERHOG REQUEST ERROR: axios error... ${error.response.data.detail}`,
-          ].join("\n"),
-        );
-        await db.insert(superhogErrors).values({
-          echoToken: reservationObject.metadata.echoToken,
-          error: error.response.data.detail,
-          userId: userId,
-          tripId: trip.id,
-          propertiesId: propertyId,
-          action: "create",
-        });
-        throw new Error(error.response.data.detail);
-      });
-
-    if (!verification) {
-      console.log("There was no verification");
-      sendSlackMessage(
-        [
-          `SUPERHOG REQUEST ERROR: The verification was not created because it was not found`,
-        ].join("\n"),
-      );
-      throw new TRPCError({ code: "NOT_FOUND" });
-    }
-    console.log(" Here is the verification", verification);
-    console.log(
-      "If nothihng shows up its the current superhog insert that is the issue ",
-    );
-    //now we can create the superhog_ request table
-    const currentSuperHogRequestId = await db
-      .insert(superhogRequests)
-      .values({
-        echoToken: reservationObject.metadata.echoToken,
-        propertyId: propertyId,
-        userId: userId,
-        superhogStatus: verification.status,
-        superhogVerificationId: verification.verificationId,
-        superhogReservationId: reservationObject.reservation.reservationId, //this is the trip id but not connected it doesnt matter what the value is tbh
-      })
-      .returning({ id: superhogRequests.id });
-
-    console.log("currentSuperHogRequestId ", currentSuperHogRequestId);
-    //update the trip with the superhog request id
-    const currentTripId = await db
-      .update(trips)
-      .set({
-        superhogRequestId: currentSuperHogRequestId[0]!.id,
-      })
-      .where(eq(trips.id, trip.id))
-      .returning({ id: trips.id });
-    console.log("currentTripId", currentTripId);
-    //record the action in the superhog action table
-    await db.insert(superhogActionOnTrips).values({
-      action: "create",
-      tripId: currentTripId[0]!.id,
-      superhogRequestId: currentSuperHogRequestId[0]!.id,
-    });
-
-    if (
-      verification.status === "Rejected" ||
-      verification.status === "Flagged"
-    ) {
-      sendSlackMessage(
-        [
-          `*SUPERHOG REQUEST*: The verification was created successfully but was denied with status of ${verification.status} for tripID ${trip.id} for ${user.name}`,
-        ].join("\n"),
-      );
-    } else {
-      console.log("Superhog was approved and just need to capture the payment");
-      //approved we can take the payment
-      const intent = await stripe.paymentIntents.capture(paymentIntentId); //will capture the authorized amount by default
-      // Update trips table
-      await db
-        .update(trips)
-        .set({ paymentCaptured: true })
-        .where(eq(trips.id, trip.id));
-      return intent;
-    }
-  }
-  //top level if statement
-  else {
-    sendSlackMessage(
-      [
-        `*SUPERHOG REQUEST ERROR*: The property with id ${propertyId} or the user with id ${userId} does not exist in the database`,
-      ].join("\n"),
-    );
-  }
-}
 
 //TRPC FUNCTIONS
 
@@ -475,7 +293,7 @@ export const superhogRouter = createTRPCRouter({
           )
           .then();
         const response = await axios.put(
-          "https://superhog-apim.azure-api.net/e-deposit-sandbox/verifications/cancel",
+          "https://superhog-apim.azure-api.net/e-deposit/verifications/cancel",
           input,
           config,
         );
