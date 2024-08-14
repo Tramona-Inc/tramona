@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/tooltip";
 import { daysOfWeek, months } from "@/utils/constants";
 import { Button } from "@/components/ui/button";
+import HostICalSync from "./HostICalSync";
 
 type ReservationInfo = {
   start: string;
@@ -79,7 +80,7 @@ export default function HostAvailability({ property }: { property: Property }) {
     return reservedDateRanges?.find((reservedDate) => {
       const start = new Date(reservedDate.start);
       const end = new Date(reservedDate.end);
-      return date >= start && date < end;
+      return date >= start && date <= end;
     });
   };
 
@@ -170,9 +171,12 @@ export default function HostAvailability({ property }: { property: Property }) {
     if (isLoading || isRefetching) {
       return <Spinner />;
     }
-
     return (
-      <div className="w-full sm:w-1/2">
+      <div
+        className={
+          property.iCalLink ? "w-full sm:w-1/2" : "w-full blur-sm sm:w-1/2"
+        }
+      >
         <div className="grid grid-cols-7 gap-2">
           {daysOfWeek.map((day) => (
             <div
@@ -245,18 +249,49 @@ export default function HostAvailability({ property }: { property: Property }) {
       <div className="flex items-center justify-end space-x-2">
         {editing && selectedRange.start && selectedRange.end && (
           <>
-            <Button onClick={() => handleRangeSubmit(true)} variant="default">
+            <Button onClick={() => handleRangeSubmit(true)} variant="secondary">
               Block Date Range
             </Button>
             <Button
               onClick={() => handleRangeSubmit(false)}
-              variant="darkPrimary"
+              variant="secondary"
             >
               Unblock Date Range
             </Button>
           </>
         )}
-        {!editing && (
+        {editing && !selectedRange.start && !selectedRange.end && (
+          <>
+            <Tooltip>
+              <TooltipTrigger>
+                <Button
+                  disabled
+                  variant="secondary"
+                >
+                  Block Date Range
+                </Button>
+              </TooltipTrigger>
+
+              <TooltipContent className="" side="bottom">
+                Select a range of dates to block
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger>
+                <Button
+                  disabled
+                  variant="secondary"
+                >
+                  Unblock Date Range
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent className="" side="bottom">
+                Select a range of dates to unblock
+              </TooltipContent>
+            </Tooltip>
+          </>
+        )}
+        {!editing && property.iCalLink && (
           <Button
             onClick={() => void fetchReservedDateRanges()}
             variant="outline"
@@ -265,16 +300,20 @@ export default function HostAvailability({ property }: { property: Property }) {
             {isRefetching ? "Refreshing..." : "Refresh Calendar"}
           </Button>
         )}
-
-        <HostPropertyEditBtn
-          editing={editing}
-          setEditing={setEditing}
-          property={property}
-          // onSubmit={() => {}}
-        />
+        <div className={property.iCalLink && editing ? "" : "hidden"}>
+          <HostICalSync property={property} />
+        </div>
+        {property.iCalLink && (
+          <HostPropertyEditBtn
+            editing={editing}
+            setEditing={setEditing}
+            property={property}
+            // onSubmit={() => {}}
+          />
+        )}
       </div>
       <div className="mx-auto max-w-4xl">
-        <div>
+        <div className="relative">
           <div className="mb-4 flex items-center justify-between">
             <div className="relative basis-full text-center sm:basis-1/2">
               <button
@@ -313,6 +352,16 @@ export default function HostAvailability({ property }: { property: Property }) {
             {renderMonth(1)}
           </div>
           <div className="sm:hidden">{renderMonth(0)}</div>
+
+          <div
+            className={
+              property.iCalLink
+                ? "hidden"
+                : "absolute inset-0 flex items-center justify-center"
+            }
+          >
+            <HostICalSync property={property} />
+          </div>
 
           <div className="mt-12 flex flex-col space-y-2 text-sm">
             <div className="flex items-center">
