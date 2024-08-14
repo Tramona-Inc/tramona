@@ -148,7 +148,6 @@ export async function createSuperhogReservation({
 
     const { verification } = await axios
       .post<unknown, ResponseType>(
-        //"https://superhog-apim.azure-api.net/e-deposit/verifications",
         "https://superhog-apim.azure-api.net/e-deposit/verifications",
         reservationObject,
         config,
@@ -160,6 +159,7 @@ export async function createSuperhogReservation({
             `SUPERHOG REQUEST ERROR: axios error... ${error.response.data.detail}`,
           ].join("\n"),
         );
+
         await db.insert(superhogErrors).values({
           echoToken: reservationObject.metadata.echoToken,
           error: error.response.data.detail,
@@ -168,6 +168,10 @@ export async function createSuperhogReservation({
           propertiesId: propertyId,
           action: "create",
         });
+        await db
+          .update(trips)
+          .set({ tripsStatus: "Needs attention" })
+          .where(eq(trips.id, trip.id));
         throw new Error(error.response.data.detail);
       });
 
