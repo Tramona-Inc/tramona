@@ -3,6 +3,8 @@ import {
   DialogContent,
   DialogHeader,
   DialogFooter,
+  DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { type HostDashboardRequest } from "@/components/requests/RequestCard";
@@ -93,11 +95,14 @@ export default function HostConfirmRequestDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTitle></DialogTitle>
       <DialogContent className="max-w-lg p-6">
         <DialogHeader>
           <h3 className="text-center text-lg font-bold">Respond</h3>
         </DialogHeader>
-
+        <DialogDescription>
+          Please confirm the properties you would like to offer.
+        </DialogDescription>
         <div className="rounded-md border bg-gray-50 p-4">
           <div className="mb-4 flex justify-between">
             <div className="flex flex-col items-start">

@@ -4,6 +4,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogFooter,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { type HostDashboardRequest } from "@/components/requests/RequestCard";
@@ -18,6 +19,7 @@ import Image from "next/image";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { AlertCircle } from "lucide-react";
+import { DialogTitle } from "@radix-ui/react-dialog";
 
 export default function HostRequestDialog({
   open,
@@ -66,12 +68,6 @@ export default function HostRequestDialog({
     console.log("got here");
   };
 
-  const handlePriceBlur = (id: number, price: string) => {
-    if (!price) {
-      setPropertyPrices((prev) => ({ ...prev, [id]: fmtdNightlyPrice }));
-    }
-  };
-
   const selectAllProperties = () => {
     const allPropertyIds = properties
       .filter((property) => property.cancellationPolicy)
@@ -115,10 +111,15 @@ export default function HostRequestDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTitle></DialogTitle>
       <DialogContent className="max-w-lg p-6">
         <DialogHeader>
           <h3 className="text-center text-lg font-bold">Respond</h3>
         </DialogHeader>
+        <DialogDescription>
+          Please select the properties you would like to offer and set the
+          price.
+        </DialogDescription>
         <div className="space-y-4">
           <div className="text-sm">
             Select the property you&apos;d like to offer.
@@ -247,14 +248,9 @@ export default function HostRequestDialog({
                               type="text"
                               prefix="$"
                               suffix="/night"
-                              value={
-                                propertyPrices[property.id] ?? fmtdNightlyPrice
-                              }
+                              value={propertyPrices[property.id]}
                               onChange={(e) =>
                                 handlePriceChange(property.id, e.target.value)
-                              }
-                              onBlur={(e) =>
-                                handlePriceBlur(property.id, e.target.value)
                               }
                             />
                           </div>

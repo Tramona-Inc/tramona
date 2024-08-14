@@ -452,6 +452,7 @@ export const propertiesRouter = createTRPCRouter({
             FROM ${properties} p
             JOIN ${requestsToProperties} rp ON p.id = rp.property_id
             WHERE p.host_id = ${ctx.user.id}
+            AND p.property_status = 'Listed'
           ),
           city_requests AS (
             SELECT
@@ -475,6 +476,7 @@ export const propertiesRouter = createTRPCRouter({
           JOIN ${properties} p ON p.city = cr.city AND p.host_id = ${ctx.user.id}
           JOIN ${groups} g ON r.made_by_group_id = g.id
           JOIN ${users} u ON g.owner_id = u.id
+          WHERE p.property_status = 'Listed'
           ORDER BY r.check_in, cr.city, r.id, p.id
         `);
 
