@@ -292,7 +292,7 @@ export const superhogRouter = createTRPCRouter({
             ),
           )
           .then();
-        const response = await axios.put(
+        await axios.put(
           "https://superhog-apim.azure-api.net/e-deposit/verifications/cancel",
           input,
           config,

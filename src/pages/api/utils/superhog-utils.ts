@@ -304,7 +304,7 @@ export async function cancelSuperhogReservation({
     await db.insert(superhogActionOnTrips).values({
       action: "delete",
       tripId: parseInt(currentSuperhogRequestId.superhogReservationId),
-      superhogRequestId: currentSuperhogRequestId?.id,
+      superhogRequestId: currentSuperhogRequestId.id,
     });
     //delete from the trips table
     await db
