@@ -12,6 +12,7 @@ import HostConfirmRequestDialog from "./HostConfirmRequestDialog";
 import HostFinishRequestDialog from "./HostFinishRequestDialog";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
+
 export default function HostRequests() {
   const [propertyPrices, setPropertyPrices] = useState<Record<number, string>>(
     {},

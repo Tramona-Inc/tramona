@@ -162,22 +162,6 @@ export const biddingRouter = createTRPCRouter({
         .values({ ...input, madeByGroupId: madeByGroupId })
         .returning({ id: bids.id });
     }),
-  update: protectedProcedure
-    .input(bidInsertSchema)
-    .mutation(async ({ ctx, input }) => {
-      const bid = await ctx.db.query.bids.findFirst({
-        where: eq(bids.id, input.id!),
-      });
-
-      if (!bid) {
-        throw new TRPCError({ code: "NOT_FOUND" });
-      }
-
-      await ctx.db
-        .update(bids)
-        .set({ updatedAt: new Date(), amount: input.amount })
-        .where(eq(bids.id, input.id!));
-    }),
 
   edit: protectedProcedure
     .input(
@@ -229,48 +213,6 @@ export const biddingRouter = createTRPCRouter({
       }
 
       await ctx.db.delete(bids).where(eq(bids.id, input.id));
-    }),
-
-  getByPropertyId: protectedProcedure
-    .input(z.number())
-    .query(async ({ ctx, input: propertyId }) => {
-      const propertyHostTeamId = await ctx.db.query.properties
-        .findFirst({
-          where: eq(properties.id, propertyId),
-          columns: { hostTeamId: true },
-        })
-        .then((res) => res?.hostTeamId);
-
-      if (!propertyHostTeamId) {
-        throw new TRPCError({ code: "NOT_FOUND" });
-      }
-
-      const userHostTeamIds = await ctx.db.query.hostTeamMembers
-        .findMany({
-          where: eq(hostTeamMembers.userId, ctx.user.id),
-        })
-        .then((res) => res.map((x) => x.hostTeamId));
-
-      if (!userHostTeamIds.includes(propertyHostTeamId)) {
-        throw new TRPCError({ code: "UNAUTHORIZED" });
-      }
-
-      return await ctx.db.query.bids.findMany({
-        where: and(eq(bids.propertyId, propertyId), eq(bids.status, "Pending")),
-        with: {
-          counters: {
-            orderBy: (counters, { desc }) => [desc(counters.createdAt)],
-            limit: 2,
-            columns: {
-              id: true,
-              counterAmount: true,
-              createdAt: true,
-              status: true,
-              userId: true,
-            },
-          },
-        },
-      });
     }),
 
   getAllPending: roleRestrictedProcedure(["admin"]).query(async () => {
@@ -341,29 +283,6 @@ export const biddingRouter = createTRPCRouter({
       where: eq(bids.status, "Accepted"),
       orderBy: desc(bids.createdAt),
     });
-  }),
-
-  getAllPropertyBids: optionallyAuthedProcedure.query(async ({ ctx }) => {
-    if (!ctx.user) return [];
-
-    const result = await ctx.db.query.bids.findMany({
-      where: exists(
-        ctx.db
-          .select()
-          .from(groupMembers)
-          .where(
-            and(
-              eq(groupMembers.groupId, bids.madeByGroupId),
-              eq(groupMembers.userId, ctx.user.id),
-            ),
-          ),
-      ),
-      columns: {
-        propertyId: true,
-      },
-    });
-
-    return result.map((res) => res.propertyId);
   }),
 
   getDatesFromBid: protectedProcedure

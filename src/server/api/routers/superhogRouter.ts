@@ -157,6 +157,9 @@ export async function createSuperhogReservation({
       )
       .then((res) => res.data)
       .catch(async (error: AxiosError) => {
+        console.log(
+          `SUPERHOG REQUEST ERROR: axios error... ${error.response.data.detail}`,
+        );
         sendSlackMessage(
           [
             `SUPERHOG REQUEST ERROR: axios error... ${error.response.data.detail}`,
@@ -174,6 +177,7 @@ export async function createSuperhogReservation({
       });
 
     if (!verification) {
+      console.log("There was no verification");
       sendSlackMessage(
         [
           `SUPERHOG REQUEST ERROR: The verification was not created because it was not found`,
@@ -181,7 +185,10 @@ export async function createSuperhogReservation({
       );
       throw new TRPCError({ code: "NOT_FOUND" });
     }
-
+    console.log(" Here is the verification", verification);
+    console.log(
+      "If nothihng shows up its the current superhog insert that is the issue ",
+    );
     //now we can create the superhog_ request table
     const currentSuperHogRequestId = await db
       .insert(superhogRequests)
@@ -195,6 +202,7 @@ export async function createSuperhogReservation({
       })
       .returning({ id: superhogRequests.id });
 
+    console.log("currentSuperHogRequestId ", currentSuperHogRequestId);
     //update the trip with the superhog request id
     const currentTripId = await db
       .update(trips)

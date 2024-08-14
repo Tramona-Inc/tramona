@@ -10,7 +10,7 @@ import {
 import { type Property } from "@/server/db/schema";
 import { api } from "@/utils/api";
 import { plural } from "@/utils/utils";
-import "leaflet/dist/leaflet.css";
+
 import {
   ArrowLeftIcon,
   ArrowLeftToLineIcon,

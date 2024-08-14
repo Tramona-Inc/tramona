@@ -24,7 +24,7 @@ import {
   BookCheckIcon,
 } from "lucide-react";
 import Image from "next/image";
-import "leaflet/dist/leaflet.css";
+
 import OfferPhotos from "./OfferPhotos";
 import AmenitiesComponent from "./CategorizedAmenities";
 import PropertyAmenities from "./PropertyAmenities";
