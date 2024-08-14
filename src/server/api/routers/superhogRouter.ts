@@ -142,8 +142,8 @@ export async function createSuperhogReservation({
         creationDate: formatDateYearMonthDay(new Date()),
       },
       guest: {
-        firstName: user.name?.split(" ")[0] ?? " ", //change to first name
-        lastName: user.name?.split(" ")[1] ?? " ", //change to last name
+        firstName: user.firstName ?? user.name?.split(" ")[0],
+        lastName: user.lastName ?? user.name?.split(" ")[1],
         email: user.email,
         telephoneNumber: user.phoneNumber?.toString() ?? "+19496833881",
       },
@@ -506,7 +506,7 @@ export const superhogRouter = createTRPCRouter({
 
     .mutation(async ({ input }) => {
       try {
-         await axios.put(
+        await axios.put(
           "https://superhog-apim.azure-api.net/e-deposit-sandbox/verifications",
           input,
           config,
