@@ -7,6 +7,7 @@ import { api } from "@/utils/api";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 import { Header } from "../header/Header";
+import MessagesPopover from "@/components/messages/chat-with-admin-popover/MessagesPopover";
 
 type DashboardLayoutProps = {
   children: React.ReactNode;
@@ -53,6 +54,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         <div className="min-w-0 lg:flex-1">
           <main className="relative min-h-screen-minus-header">{children}</main>
           {status !== "loading" && <MobileNav type={navType} />}
+          {isMd && <MessagesPopover />}
           {isMd && <Footer />}
         </div>
       </div>
