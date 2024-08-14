@@ -110,7 +110,7 @@ export const superhogRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { verification } = await axios
         .post<unknown, ResponseType>(
-          "https://superhog-apim.azure-api.net/e-deposit-sandbox/verifications",
+          "https://superhog-apim.azure-api.net/e-deposit/verifications",
           input,
           config,
         )
@@ -333,7 +333,7 @@ export const superhogRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       try {
         await axios.put(
-          "https://superhog-apim.azure-api.net/e-deposit-sandbox/verifications",
+          "https://superhog-apim.azure-api.net/e-deposit/verifications",
           input,
           config,
         );

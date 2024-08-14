@@ -148,7 +148,7 @@ export async function createSuperhogReservation({
 
     const { verification } = await axios
       .post<unknown, ResponseType>(
-        //"https://superhog-apim.azure-api.net/e-deposit-sandbox/verifications",
+        //"https://superhog-apim.azure-api.net/e-deposit/verifications",
         "https://superhog-apim.azure-api.net/e-deposit/verifications",
         reservationObject,
         config,
