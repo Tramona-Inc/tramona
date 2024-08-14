@@ -18,7 +18,6 @@ export type OriginalListing = Readonly<{
   getListingUrl(params: ListingSiteUrlParams): string;
   getReviewsUrl(params: ListingSiteUrlParams): string;
   getCheckoutUrl(params: ListingSiteUrlParams): string;
-  getPrice(params: ListingSiteUrlParams): Promise<number>;
 }>;
 
 export type ListingSite = Readonly<{

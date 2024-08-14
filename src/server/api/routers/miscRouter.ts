@@ -1,19 +1,14 @@
-import axios from "axios";
-import { HttpsProxyAgent } from "https-proxy-agent";
 import { requestSelectSchema } from "@/server/db/schema";
-import {
-  createTRPCRouter,
-  publicProcedure,
-  roleRestrictedProcedure,
-} from "../trpc";
+import { createTRPCRouter, publicProcedure } from "../trpc";
 import { env } from "@/env";
 import { format } from "date-fns";
 import { TRPCError } from "@trpc/server";
 import { zodUrl } from "@/utils/zod-utils";
-import * as cheerio from "cheerio";
 import { getCity, getCoordinates } from "@/server/google-maps";
 import { Airbnb } from "@/utils/listing-sites/Airbnb";
 import { z } from "zod";
+import { scrapeUrl } from "@/server/server-utils";
+import { scrapeAirbnbPrice } from "@/server/scrapePrice";
 
 type AirbnbListing = {
   id: string;
@@ -65,12 +60,12 @@ export const miscRouter = createTRPCRouter({
     .query(async ({ input }) => {
       const price = (await fetch(
         `https://${env.RAPIDAPI_HOST}/search-location?` +
-        new URLSearchParams({
-          location: input.location,
-          checkin: format(input.checkIn, "yyyy-MM-dd"),
-          checkout: format(input.checkOut, "yyyy-MM-dd"),
-          adults: input.numGuests.toString(),
-        }).toString(),
+          new URLSearchParams({
+            location: input.location,
+            checkin: format(input.checkIn, "yyyy-MM-dd"),
+            checkout: format(input.checkOut, "yyyy-MM-dd"),
+            adults: input.numGuests.toString(),
+          }).toString(),
         {
           method: "GET",
           headers: {
@@ -88,8 +83,8 @@ export const miscRouter = createTRPCRouter({
       const averageNightlyPrice =
         Array.isArray(price.results) && price.results.length > 0
           ? price.results.reduce((acc, listing) => {
-            return acc + listing.price.rate;
-          }, 0) / price.results.length
+              return acc + listing.price.rate;
+            }, 0) / price.results.length
           : 0;
 
       return averageNightlyPrice;
@@ -110,23 +105,11 @@ export const miscRouter = createTRPCRouter({
       const airbnbListingId = Airbnb.parseId(url);
       if (!airbnbListingId) return { status: "failed to parse url" } as const;
 
-      const [res, price] = await Promise.all([
-        axios.get<string>(url, {
-          httpsAgent: new HttpsProxyAgent(env.PROXY_URL),
-          responseType: "text",
-        }),
-        await Airbnb.createListing(airbnbListingId).getPrice(params),
+      const [$, price] = await Promise.all([
+        scrapeUrl(url),
+        scrapeAirbnbPrice({ airbnbListingId, params }),
       ]);
 
-      if (res.status === 404) return { status: "not found" } as const;
-      if (res.status !== 200) {
-        console.log("status:", res.status);
-        console.log("\n\nwhole response:", res);
-        return { status: "failed to fetch" } as const;
-      }
-
-      const html = res.data;
-      const $ = cheerio.load(html);
       // title is swapped with description because the og:description is actually the property title,
       // and the og:title is more like a description
       const title = $('meta[property="og:description"]').attr("content");
@@ -160,19 +143,5 @@ export const miscRouter = createTRPCRouter({
         status: "success",
         data: { title, description, imageUrl, location, price },
       } as const;
-    }),
-
-  proxyFetch: roleRestrictedProcedure(["admin"])
-    .input(z.object({ url: zodUrl() }))
-    .query(async ({ input: { url } }) => {
-      const res = await axios.get<string>(url, {
-        httpsAgent: new HttpsProxyAgent(env.PROXY_URL),
-        responseType: "text",
-      });
-
-      return {
-        status: res.status,
-        data: res.data,
-      };
     }),
 });

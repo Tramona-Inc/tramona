@@ -62,6 +62,14 @@ export function formatCurrency(cents: number, { round = false } = {}) {
 }
 
 /**
+ * does the inverse of `formatCurrency`
+ */
+export function parseCurrency(str: string) {
+  const dollars = parseFloat(str.replace(/[^0-9.-]+/g, ""));
+  return Math.round(dollars * 100);
+}
+
+/**
  * Examples:
  * ```js
  * capitalize("apple") => "Apple"

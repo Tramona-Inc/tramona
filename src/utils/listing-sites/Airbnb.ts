@@ -1,10 +1,5 @@
-import axios from "axios";
 import { type ListingSite } from ".";
 import { formatDateYearMonthDay } from "../utils";
-import * as cheerio from "cheerio";
-
-import { HttpsProxyAgent } from "https-proxy-agent";
-import { env } from "@/env";
 
 export const Airbnb: ListingSite = {
   siteName: "Airbnb",
@@ -73,32 +68,6 @@ export const Airbnb: ListingSite = {
         }
 
         return url.toString();
-      },
-
-      async getPrice(params) {
-        const checkoutUrl = this.getCheckoutUrl(params);
-
-        const $ = await axios
-          .get<string>(checkoutUrl, {
-            httpsAgent: new HttpsProxyAgent(env.PROXY_URL),
-            responseType: "text",
-          })
-          .then((res) => res.data)
-          .then(cheerio.load);
-
-        const jsonStr = $("#data-deferred-state-0").text();
-
-        const priceRegex =
-          /"priceBreakdown":.*"total":.*"total":.*"amountMicros":"(\d+)"/;
-
-        const match = jsonStr.match(priceRegex);
-
-        console.log({ match, jsonStr });
-
-        if (!match?.[1]) throw new Error("Failed to extract price");
-
-        // "amountMicros" are ten-thousands of cents (e.g. $100 <-> 100,000,000)
-        return Math.round(Number(match[1]) / 10000);
       },
     };
   },
