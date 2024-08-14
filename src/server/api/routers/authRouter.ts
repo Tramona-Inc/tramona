@@ -20,6 +20,7 @@ import { eq } from "drizzle-orm";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
+import { check } from "drizzle-orm/mysql-core";
 
 async function fetchEmailVerified(email: string) {
   return await db.query.users.findFirst({
@@ -178,6 +179,28 @@ export const authRouter = createTRPCRouter({
         });
       }
     }),
+
+  checkEmailVerification: publicProcedure
+    .input(
+      z.object({
+        email: zodEmail(),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      const user = await fetchEmailVerified(input.email);
+
+      if (!user) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "User with this email does not exist",
+        });
+      }
+
+      return {
+        emailVerified: user.emailVerified !== null,
+      };
+    }),
+    
   createUserHost: publicProcedure
     .input(
       z.object({
