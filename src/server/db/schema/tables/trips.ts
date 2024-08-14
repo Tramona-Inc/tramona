@@ -16,6 +16,14 @@ import { bids } from "./bids";
 import { properties } from "./properties";
 import { z } from "zod";
 
+export const tripsCancellation = pgTable("trip-cancellations", {
+  id: serial("id").primaryKey(),
+  reason: varchar("reason").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
 export const trips = pgTable(
   "trips",
   {
