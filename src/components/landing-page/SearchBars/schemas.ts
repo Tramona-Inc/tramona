@@ -8,13 +8,6 @@ import {
 } from "@/utils/zod-utils";
 import { z } from "zod";
 
-export const searchSchema = z.object({
-  location: optional(zodString()),
-  date: z.object({ from: z.date(), to: z.date() }),
-  numGuests: optional(zodInteger({ min: 1 })),
-  maxNightlyPriceUSD: optional(zodNumber({ min: 0 })),
-});
-
 export const cityRequestSchema = z.object({
   location: zodString(),
   date: z.object({ from: z.date(), to: z.date() }),
@@ -37,4 +30,3 @@ export const linkRequestSchema = z.object({
 
 export type CityRequestDefaultVals = z.input<typeof cityRequestSchema>;
 export type LinkRequestVals = z.infer<typeof linkRequestSchema>;
-export type SearchBarVals = z.infer<typeof searchSchema>;

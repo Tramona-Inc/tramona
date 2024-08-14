@@ -47,16 +47,6 @@ export function useLinkRequestForm({
       .fetch({ url, params: { checkIn, checkOut, numGuests } })
       .then(({ status, data }) => {
         switch (status) {
-          case "not found":
-            form.setError("url", {
-              message: "Please input a valid Airbnb URL and try again",
-            });
-            break;
-          case "failed to fetch":
-            form.setError("url", {
-              message: "Coudln't fetch the URL, please try again",
-            });
-            break;
           case "failed to scrape":
             form.setError("url", {
               message: "Couldn't extract property data, please try again",

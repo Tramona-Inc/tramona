@@ -4,10 +4,11 @@ import { env } from "@/env";
 import { format } from "date-fns";
 import { TRPCError } from "@trpc/server";
 import { zodUrl } from "@/utils/zod-utils";
-import * as cheerio from "cheerio";
 import { getCity, getCoordinates } from "@/server/google-maps";
 import { Airbnb } from "@/utils/listing-sites/Airbnb";
 import { z } from "zod";
+import { scrapeUrl } from "@/server/server-utils";
+import { scrapeAirbnbPrice } from "@/server/scrapePrice";
 
 type AirbnbListing = {
   id: string;
@@ -104,16 +105,11 @@ export const miscRouter = createTRPCRouter({
       const airbnbListingId = Airbnb.parseId(url);
       if (!airbnbListingId) return { status: "failed to parse url" } as const;
 
-      const [res, price] = await Promise.all([
-        fetch(url),
-        await Airbnb.createListing(airbnbListingId).getPrice(params),
+      const [$, price] = await Promise.all([
+        scrapeUrl(url),
+        scrapeAirbnbPrice({ airbnbListingId, params }),
       ]);
 
-      if (res.status === 404) return { status: "not found" } as const;
-      if (!res.ok) return { status: "failed to fetch" } as const;
-
-      const html = await res.text();
-      const $ = cheerio.load(html);
       // title is swapped with description because the og:description is actually the property title,
       // and the og:title is more like a description
       const title = $('meta[property="og:description"]').attr("content");

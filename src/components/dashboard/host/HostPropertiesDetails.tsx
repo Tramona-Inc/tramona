@@ -1,7 +1,14 @@
 import SingleLocationMap from "@/components/_common/GoogleMaps/SingleLocationMap";
 import { type Property } from "@/server/db/schema/tables/properties";
 import { capitalize } from "@/utils/utils";
-import { Dot, MapPin, PackageOpen, Trash2, Upload } from "lucide-react";
+import {
+  AlertCircle,
+  Dot,
+  MapPin,
+  PackageOpen,
+  Trash2,
+  Upload,
+} from "lucide-react";
 import Image from "next/image";
 import { HostPropertyEditBtn } from "./HostPropertiesLayout";
 import { convertTo12HourFormat, convertTo24HourFormat } from "@/utils/utils";
@@ -38,6 +45,12 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useRouter } from "next/router";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default function HostPropertiesDetails({
   property,
@@ -227,22 +240,40 @@ export default function HostPropertiesDetails({
                 List property
               </Button>
             )}
-            {property.propertyStatus === "Drafted" && isDraftValid() && (
-              <Button
-                variant="secondary"
-                onClick={() =>
-                  updateProperty({
-                    ...property,
-                    propertyStatus: "Listed",
-                    checkInTime: convertTo24HourFormat(checkIn),
-                    checkOutTime: convertTo24HourFormat(checkOut),
-                  })
-                }
-              >
-                <Upload />
-                List property
-              </Button>
-            )}
+            {property.propertyStatus === "Drafted" &&
+              (isDraftValid() ? (
+                <Button
+                  variant="secondary"
+                  onClick={() =>
+                    updateProperty({
+                      ...property,
+                      propertyStatus: "Listed",
+                      checkInTime: convertTo24HourFormat(checkIn),
+                      checkOutTime: convertTo24HourFormat(checkOut),
+                    })
+                  }
+                >
+                  <Upload />
+                  List property
+                </Button>
+              ) : (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button disabled>
+                        <Upload />
+                        List property
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent className="bg-red-600">
+                      <p className="text-sm">
+                        All fields with an alert icon must be completed before
+                        listing a property.
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              ))}
           </div>
         )}
         <div className="flex-1 text-end">
@@ -364,12 +395,12 @@ export default function HostPropertiesDetails({
               <SingleLocationMap
                 lat={
                   editing
-                    ? coordinateData?.coordinates.location?.lat ?? 0
+                    ? (coordinateData?.coordinates.location?.lat ?? 0)
                     : property.latitude
                 }
                 lng={
                   editing
-                    ? coordinateData?.coordinates.location?.lng ?? 0
+                    ? (coordinateData?.coordinates.location?.lng ?? 0)
                     : property.longitude
                 }
               />
@@ -405,7 +436,7 @@ export default function HostPropertiesDetails({
           </div>
           <div className="text-muted-foreground">
             <p>
-              {capitalize(editing ? checkInType : property.checkInInfo ?? "")}
+              {capitalize(editing ? checkInType : (property.checkInInfo ?? ""))}
             </p>
             <div className="flex">
               <p>
@@ -465,7 +496,12 @@ export default function HostPropertiesDetails({
         </section>
         <section className="space-y-2 py-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold">Photos</h2>
+            <div className="flex items-center gap-2 text-lg font-bold">
+              {property.imageUrls.length === 0 && (
+                <AlertCircle className="text-red-600" />
+              )}
+              Photos
+            </div>
             <Dialog>
               <DialogTrigger>
                 {editing && <a className="text-sm font-bold underline">Edit</a>}
@@ -535,7 +571,12 @@ export default function HostPropertiesDetails({
         </section>
         <section className="space-y-2 py-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold">Description</h2>
+            <div className="flex items-center gap-2 text-lg font-bold">
+              {(!property.name || !property.about) && (
+                <AlertCircle className="text-red-600" />
+              )}
+              Description
+            </div>
             <Dialog>
               <DialogTrigger>
                 {editing && <a className="text-sm font-bold underline">Edit</a>}

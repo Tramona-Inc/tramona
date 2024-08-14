@@ -1,7 +1,7 @@
 import { type ListingSite } from ".";
 import { formatDateYearMonthDay } from "../utils";
 
-export const Vrbo: ListingSite<"Vrbo"> = {
+export const Vrbo: ListingSite = {
   siteName: "Vrbo",
   baseUrl: "https://www.vrbo.com",
 
@@ -52,9 +52,6 @@ export const Vrbo: ListingSite<"Vrbo"> = {
       getCheckoutUrl(params) {
         const listingUrl = this.getListingUrl(params);
         return `${listingUrl}&pwaDialogNested=price-details`;
-      },
-      getPrice() {
-        throw new Error("not implemented"); // TODO
       },
     };
   },

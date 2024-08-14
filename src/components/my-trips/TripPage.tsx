@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
 import { formatCurrency, plural } from "@/utils/utils";
-import "leaflet/dist/leaflet.css";
+
 import SingleLocationMap from "../_common/GoogleMaps/SingleLocationMap";
 import { type RouterOutputs } from "@/utils/api";
 import { getCancellationPolicyDescription } from "@/config/getCancellationPolicyDescription";

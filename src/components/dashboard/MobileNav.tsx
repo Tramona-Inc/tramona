@@ -1,6 +1,6 @@
 import {
   adminNavLinks,
-  guestMobileNavLinks,
+  guestNavLinks,
   hostMobileNavLinks,
   unloggedNavLinks,
 } from "@/config/sideNavLinks";
@@ -24,12 +24,12 @@ export default function MobileNav({
         ? hostMobileNavLinks
         : isAdmin
           ? [
-              ...guestMobileNavLinks,
+              ...guestNavLinks,
               { href: "/admin", name: "Switch To Admin", icon: ArrowLeftRight },
             ]
           : type === "unlogged"
             ? unloggedNavLinks
-            : guestMobileNavLinks;
+            : guestNavLinks;
 
   return (
     <header

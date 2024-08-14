@@ -42,6 +42,8 @@ export const offers = pgTable(
 );
 
 export type Offer = typeof offers.$inferSelect;
+export type NewOffer = typeof offers.$inferInsert;
+
 export const offerSelectSchema = createSelectSchema(offers);
 export const offerInsertSchema = createInsertSchema(offers);
 

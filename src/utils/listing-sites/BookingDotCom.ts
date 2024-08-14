@@ -1,7 +1,7 @@
 import { type ListingSite } from ".";
 import { formatDateYearMonthDay } from "../utils";
 
-export const BookingDotCom: ListingSite<"Booking.com"> = {
+export const BookingDotCom: ListingSite = {
   siteName: "Booking.com",
   baseUrl: "https://www.booking.com",
 
@@ -52,10 +52,6 @@ export const BookingDotCom: ListingSite<"Booking.com"> = {
       getCheckoutUrl(params) {
         const listingUrl = this.getListingUrl(params);
         return `${listingUrl}#availability`;
-      },
-
-      getPrice() {
-        throw new Error("not implemented"); // TODO
       },
     };
   },

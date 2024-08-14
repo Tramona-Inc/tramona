@@ -34,6 +34,17 @@ import {
 } from "./db/schema";
 import { getCity, getCoordinates } from "./google-maps";
 import axios from "axios";
+import { HttpsProxyAgent } from "https-proxy-agent";
+import * as cheerio from "cheerio";
+
+export const proxyAgent = new HttpsProxyAgent(env.PROXY_URL);
+
+export async function scrapeUrl(url: string) {
+  return await axios
+    .get<string>(url, { httpsAgent: proxyAgent, responseType: "text" })
+    .then((res) => res.data)
+    .then(cheerio.load);
+}
 
 const transporter = nodemailler.createTransport({
   host: env.SMTP_HOST,

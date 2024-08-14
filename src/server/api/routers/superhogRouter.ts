@@ -142,8 +142,8 @@ export async function createSuperhogReservation({
         creationDate: formatDateYearMonthDay(new Date()),
       },
       guest: {
-        firstName: user.name?.split(" ")[0] ?? " ", //change to first name
-        lastName: user.name?.split(" ")[1] ?? " ", //change to last name
+        firstName: user.firstName ?? user.name?.split(" ")[0],
+        lastName: user.lastName ?? user.name?.split(" ")[1],
         email: user.email,
         telephoneNumber: user.phoneNumber?.toString() ?? "+19496833881",
       },
@@ -157,6 +157,9 @@ export async function createSuperhogReservation({
       )
       .then((res) => res.data)
       .catch(async (error: AxiosError) => {
+        console.log(
+          `SUPERHOG REQUEST ERROR: axios error... ${error.response.data.detail}`,
+        );
         sendSlackMessage(
           [
             `SUPERHOG REQUEST ERROR: axios error... ${error.response.data.detail}`,
@@ -174,6 +177,7 @@ export async function createSuperhogReservation({
       });
 
     if (!verification) {
+      console.log("There was no verification");
       sendSlackMessage(
         [
           `SUPERHOG REQUEST ERROR: The verification was not created because it was not found`,
@@ -181,7 +185,10 @@ export async function createSuperhogReservation({
       );
       throw new TRPCError({ code: "NOT_FOUND" });
     }
-
+    console.log(" Here is the verification", verification);
+    console.log(
+      "If nothihng shows up its the current superhog insert that is the issue ",
+    );
     //now we can create the superhog_ request table
     const currentSuperHogRequestId = await db
       .insert(superhogRequests)
@@ -195,6 +202,7 @@ export async function createSuperhogReservation({
       })
       .returning({ id: superhogRequests.id });
 
+    console.log("currentSuperHogRequestId ", currentSuperHogRequestId);
     //update the trip with the superhog request id
     const currentTripId = await db
       .update(trips)
@@ -506,7 +514,7 @@ export const superhogRouter = createTRPCRouter({
 
     .mutation(async ({ input }) => {
       try {
-         await axios.put(
+        await axios.put(
           "https://superhog-apim.azure-api.net/e-deposit-sandbox/verifications",
           input,
           config,
