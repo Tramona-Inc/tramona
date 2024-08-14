@@ -29,7 +29,7 @@ import { reviews } from "./tables/reviews";
 import { fillerBookings, fillerOffers } from "./tables/feedFiller";
 import { superhogErrors } from "./tables/superhogErrors";
 import { linkInputProperties } from "./tables/linkInputProperties";
-import { externalOffers } from "./tables/externalOffers";
+import { externalListings } from "./tables/externalListings";
 
 export const usersRelations = relations(users, ({ one, many }) => ({
   accounts: many(accounts),
@@ -118,15 +118,18 @@ export const requestsRelations = relations(requests, ({ one, many }) => ({
     fields: [requests.linkInputPropertyId],
     references: [linkInputProperties.id],
   }),
-  externalOffers: many(externalOffers),
+  externalListings: many(externalListings),
 }));
 
-export const externalOffersRelations = relations(externalOffers, ({ one }) => ({
-  request: one(requests, {
-    fields: [externalOffers.requestId],
-    references: [requests.id],
+export const externalListingsRelations = relations(
+  externalListings,
+  ({ one }) => ({
+    request: one(requests, {
+      fields: [externalListings.requestId],
+      references: [requests.id],
+    }),
   }),
-}));
+);
 
 export const bidsRelations = relations(bids, ({ one, many }) => ({
   madeByGroup: one(groups, {

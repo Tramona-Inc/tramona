@@ -2,7 +2,7 @@ import { integer, pgTable, serial, varchar } from "drizzle-orm/pg-core";
 import { listingSiteEnum } from "../common";
 import { requests } from "./requests";
 
-export const externalOffers = pgTable("external_offers", {
+export const externalListings = pgTable("external_listings", {
   id: serial("id").primaryKey(),
   requestId: integer("request_id")
     .notNull()
@@ -16,7 +16,7 @@ export const externalOffers = pgTable("external_offers", {
   imageUrl: varchar("image_url").notNull(),
 });
 
-export type ExternalOffer = Omit<
-  typeof externalOffers.$inferSelect,
+export type ExternalListing = Omit<
+  typeof externalListings.$inferSelect,
   "requestId" | "id"
 >;
