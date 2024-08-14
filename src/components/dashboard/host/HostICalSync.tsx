@@ -81,14 +81,16 @@ export default function HostICalSync({ property }: { property: Property }) {
     <div>
       <Dialog>
         <DialogTrigger className="">
-          <Button variant="secondary">
-            {property.iCalLink ? "Edit iCal Link" : "Sync your iCal"}
-          </Button>
+          {property.iCalLink && (
+            <Button variant="secondary">Edit iCal Link</Button>
+          )}
+
+          {!property.iCalLink && <Button size={"lg"}>Sync your iCal</Button>}
         </DialogTrigger>
         <DialogContent className="max-w-3xl p-8">
           <DialogHeader>
             <DialogTitle>
-              <h1 className="text-4xl font-bold mb-8">Sync your iCal</h1>
+              <h1 className="mb-8 text-4xl font-bold">Sync your iCal</h1>
             </DialogTitle>
           </DialogHeader>
           <div className="mb-10 space-y-2">
@@ -145,7 +147,7 @@ export default function HostICalSync({ property }: { property: Property }) {
           <div className="space-y-2">
             <div className="flex items-center space-x-2">
               <Label className="font-semibold">Tramona iCal URL</Label>
-              <HostICalHowToDialog type={"tramona"}/>
+              <HostICalHowToDialog type={"tramona"} />
             </div>
             <Input
               id="tramonaICalLink"
