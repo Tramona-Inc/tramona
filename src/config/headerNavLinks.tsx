@@ -23,7 +23,11 @@ export const hamburgerLinksDesktop = [
   { name: "24/7 Support", href: "/help-center", icon: BadgeHelp },
 ];
 
-export const hamburgerLinksMobile = [
-  { name: "How it works", href: "/how-it-works", icon: InfoIcon },
+export const unloggedHamburgerLinksMobile = [
   { name: "24/7 Support", href: "/help-center", icon: BadgeHelp },
+];
+
+export const hamburgerLinksMobile = [
+  ...headerLinks,
+  ...unloggedHamburgerLinksMobile,
 ];
