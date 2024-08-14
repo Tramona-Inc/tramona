@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { eq, and, sql } from "drizzle-orm";
 import { db } from "../../../server/db";
 import { hostProfiles, trips } from "../../../server/db/schema/index";
-import { createPayHostTransfer } from "../stripe-utils";
+import { createPayHostTransfer } from "../utils/stripe-utils";
 import { sendSlackMessage } from "../../../server/slack";
 // Your custom utility to create Stripe transfer
 

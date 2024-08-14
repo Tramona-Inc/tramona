@@ -7,6 +7,7 @@ import {
   serial,
   timestamp,
   varchar,
+  pgEnum,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { groups } from "./groups";
@@ -16,13 +17,10 @@ import { bids } from "./bids";
 import { properties } from "./properties";
 import { z } from "zod";
 
-export const tripsCancellation = pgTable("trip-cancellations", {
-  id: serial("id").primaryKey(),
-  reason: varchar("reason").notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-});
+const TRIP_STATUS = ["Booked", "Needs attention", "Cancelled"] as const;
+export type TripStatus = (typeof TRIP_STATUS)[number];
+
+export const tripStatusEnum = pgEnum("trip_status", TRIP_STATUS);
 
 export const trips = pgTable(
   "trips",
@@ -56,6 +54,7 @@ export const trips = pgTable(
     superhogRequestId: integer("superhog_request_id").references(
       () => superhogRequests.id,
     ),
+    tripsStatus: tripStatusEnum("trip_status").default("Booked"),
   },
   (t) => ({
     groupIdIdx: index().on(t.groupId),
@@ -77,3 +76,24 @@ export const tripInsertSchema = createInsertSchema(trips)
       z.object({ offerId: z.undefined(), bidId: z.number() }),
     ]),
   );
+
+export const tripCancellations = pgTable(
+  "trip-cancellations",
+  {
+    id: serial("id").primaryKey(),
+    reason: varchar("reason").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    tripId: integer("trips_id")
+      .notNull()
+      .references(() => trips.id, {
+        onDelete: "cascade",
+      }),
+  },
+  (t) => {
+    return {
+      tripIdIdx: index().on(t.tripId),
+    };
+  },
+);

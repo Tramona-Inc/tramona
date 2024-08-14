@@ -3,7 +3,6 @@ import {
   createConversationWithAdmin,
   fetchConversationWithAdmin,
 } from "@/server/api/routers/messagesRouter";
-import { createSuperhogReservation } from "@/server/api/routers/superhogRouter";
 import { stripe } from "@/server/api/routers/stripeRouter";
 import { db } from "@/server/db";
 import {
@@ -12,6 +11,7 @@ import {
   referralCodes,
   referralEarnings,
   requests,
+  tripCancellations,
   trips,
   users,
 } from "@/server/db/schema";
@@ -19,6 +19,8 @@ import { eq, sql } from "drizzle-orm";
 import { buffer } from "micro";
 import { type NextApiRequest, type NextApiResponse } from "next";
 import { superhogRequests } from "../../server/db/schema/tables/superhogRequests";
+import { cancelTripByPaymentIntent } from "@/pages/api/utils/trips-utils";
+import { createSuperhogReservation } from "@/pages/api/utils/superhog-utils";
 
 // ! Necessary for stripe
 export const config = {
@@ -323,6 +325,20 @@ export default async function webhook(
             console.log("Superhog reservation already exists");
           }
         }
+        break;
+      case "charge.dispute.created":
+        {
+          const dispute = event.data.object;
+          console.log("Dispute created", dispute);
+          console.log("Dispute object", dispute.object);
+          //find the trip by paymentItentId
+          const paymentIntentId = dispute.payment_intent as string;
+          await cancelTripByPaymentIntent({
+            paymentIntentId,
+            reason: `Dispute : ${dispute.reason}`,
+          });
+        }
+
         break;
       case "identity.verification_session.processing":
         {

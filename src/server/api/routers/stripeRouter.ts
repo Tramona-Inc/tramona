@@ -8,8 +8,7 @@ import { z } from "zod";
 
 import { hostProfiles } from "@/server/db/schema";
 
-import { createPayHostTransfer } from "@/pages/api/stripe-utils";
-import stripeAutoTransfer from "@/pages/api/cron/stripe-transfer";
+import { createPayHostTransfer } from "@/pages/api/utils/stripe-utils";
 
 export const config = {
   api: {

@@ -276,7 +276,6 @@ export function getPriceBreakdown({
     firstTotal: totalMinusStripe,
     finalTotal: finalTotal,
   };
-  console.log(priceBreakdown);
   return priceBreakdown;
 }
 

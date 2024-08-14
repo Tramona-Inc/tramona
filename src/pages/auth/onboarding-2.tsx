@@ -50,8 +50,8 @@ export default function FirstAndLastName() {
     if (session?.user.id && firstName && lastName) {
       await updateProfile({
         id: session.user.id,
-        firstName,
-        lastName,
+        firstName: firstName.replace(/[^a-zA-Z\s]/g, ""),
+        lastName: lastName.replace(/[^a-zA-Z\s]/g, ""),
         onboardingStep: 3,
       });
     }
