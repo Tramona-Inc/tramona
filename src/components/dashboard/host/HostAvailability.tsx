@@ -80,7 +80,7 @@ export default function HostAvailability({ property }: { property: Property }) {
     return reservedDateRanges?.find((reservedDate) => {
       const start = new Date(reservedDate.start);
       const end = new Date(reservedDate.end);
-      return date >= start && date <= end;
+      return date >= start && date < end;
     });
   };
 
@@ -89,36 +89,37 @@ export default function HostAvailability({ property }: { property: Property }) {
 
     const clickedReservation = isDateReserved(date);
 
-    if (
-      clickedReservation &&
-      clickedReservation.platformBookedOn === "tramona"
-    ) {
-      setSelectedRange({
-        start: new Date(clickedReservation.start),
-        end: new Date(clickedReservation.end),
-      });
-    } else {
-      setSelectedRange((prev) => {
-        if (!prev.start && !prev.end) {
-          return { start: date, end: date };
-        } else if (prev.start && prev.end) {
-          if (date < prev.start) {
-            return { ...prev, start: date };
-          } else if (date > prev.end) {
-            return { ...prev, end: date };
-          } else if (
-            date.getTime() === prev.start.getTime() &&
-            date.getTime() === prev.end.getTime()
-          ) {
-            return { start: null, end: null };
-          } else {
-            return { start: date, end: date };
-          }
+    setSelectedRange((prev) => {
+      if (prev.start && prev.end && date >= prev.start && date <= prev.end) {
+        return { start: null, end: null };
+      }
+
+      if (clickedReservation && clickedReservation.platformBookedOn === "tramona") {
+        const reservationStart = new Date(clickedReservation.start);
+        const reservationEnd = new Date(clickedReservation.end);
+        
+        if (prev.start?.getTime() === reservationStart.getTime() && 
+            prev.end?.getTime() === reservationEnd.getTime()) {
+          return { start: null, end: null };
+        }
+      
+        return { start: reservationStart, end: reservationEnd };
+      }
+
+      if (!prev.start && !prev.end) {
+        return { start: date, end: date };
+      } else if (prev.start && prev.end) {
+        if (date < prev.start) {
+          return { ...prev, start: date };
+        } else if (date > prev.end) {
+          return { ...prev, end: date };
         } else {
           return { start: date, end: date };
         }
-      });
-    }
+      } else {
+        return { start: date, end: date };
+      }
+    });
   };
 
   const handleRangeSubmit = async (isBlocking: boolean) => {
@@ -199,14 +200,14 @@ export default function HostAvailability({ property }: { property: Property }) {
                 ? date >= selectedRange.start && date <= selectedRange.end
                 : date.getTime() === selectedRange.start.getTime());
 
-            let reservationClass = "";
-            if (reservedInfo) {
-              if (reservedInfo.platformBookedOn === "airbnb") {
-                reservationClass = "bg-reserved-pattern";
-              } else if (reservedInfo.platformBookedOn === "tramona") {
-                reservationClass = "bg-reserved-pattern-2";
-              }
-            }
+                let reservationClass = "";
+                if (reservedInfo) {
+                  if (reservedInfo.platformBookedOn === "airbnb") {
+                    reservationClass = "bg-reserved-pattern";
+                  } else if (reservedInfo.platformBookedOn === "tramona" && reservationClass === "") {
+                    reservationClass = "bg-reserved-pattern-2";
+                  }
+                }
 
             return (
               <div
