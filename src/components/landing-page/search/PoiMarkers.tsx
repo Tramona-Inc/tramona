@@ -1,10 +1,5 @@
 import { useRouter } from "next/router";
-import {
-  useMap,
-  AdvancedMarker,
-  useAdvancedMarkerRef,
-  InfoWindow,
-} from "@vis.gl/react-google-maps";
+import { useMap, AdvancedMarker, InfoWindow } from "@vis.gl/react-google-maps";
 import { formatCurrency } from "@/utils/utils";
 import { type Poi } from "./SearchPropertiesMap";
 import { useCallback, useState } from "react";
@@ -12,7 +7,7 @@ import Image from "next/image";
 import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
 
 const PoiMarkers = (props: { pois: Poi[] | [] }) => {
-  const [selectedMarker, setSelectedMarker] = useState<Poi | null>(null);
+  const [_selectedMarker, setSelectedMarker] = useState<Poi | null>(null);
   const [infoWindowShownIndex, setInfoWindowShownIndex] = useState<
     number | null
   >(null);

@@ -2,15 +2,12 @@ import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import Spinner from "@/components/_common/Spinner";
 import PropertyPage from "@/components/property/PropertyPage";
 import { api, type RouterOutputs } from "@/utils/api";
-import Head from "next/head";
 import { useRouter } from "next/router";
-
 import { type GetServerSideProps } from "next";
 import { NextSeo } from "next-seo";
 import { db } from "@/server/db";
 import { properties } from "@/server/db/schema/tables/properties";
-import { and, eq } from "drizzle-orm";
-import { requests } from "@/server/db/schema";
+import { eq } from "drizzle-orm";
 
 export type PropertyWithDetails = RouterOutputs["properties"]["getById"];
 
@@ -21,7 +18,7 @@ type PageProps = {
   baseUrl: string;
 };
 
-export default function Property({
+export default function Page({
   serverPropertyName,
   serverFirstImage,
   serverPropertyId,
@@ -85,23 +82,16 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     : "https://6fb1-104-32-193-204.ngrok-free.app"; //change to your live dev server
 
   const propertyInfo = await db
-    .select({
-      name: properties.name,
-      images: properties.imageUrls,
-    })
+    .select({ name: properties.name, images: properties.imageUrls })
     .from(properties)
-    .where(
-      and(
-        eq(properties.propertyStatus, "Listed"),
-        eq(properties.id, serverPropertyId),
-      ),
-    );
+    .where(eq(properties.id, serverPropertyId))
+    .then((res) => res[0]!);
 
   return {
     props: {
       serverPropertyId: serverPropertyId.toString(),
-      serverPropertyName: propertyInfo[0]!.name ?? "",
-      serverFirstImage: propertyInfo[0]!.images[0] ?? "",
+      serverPropertyName: propertyInfo.name,
+      serverFirstImage: propertyInfo.images[0]!,
       baseUrl: baseUrl,
     },
   };

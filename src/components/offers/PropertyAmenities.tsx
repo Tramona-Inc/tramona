@@ -9,7 +9,7 @@ import {
   CookingPotIcon,
   EggFriedIcon,
 } from "lucide-react";
-import "leaflet/dist/leaflet.css";
+
 import { type FunctionComponent, type SVGProps } from "react";
 import {
   WifiIcon,
