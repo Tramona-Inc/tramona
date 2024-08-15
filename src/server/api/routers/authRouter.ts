@@ -274,7 +274,12 @@ export const authRouter = createTRPCRouter({
     )
     .mutation(async ({ input, ctx }) => {
       // check if user already exists
-
+      const existedGuestTempUser = await ctx.db.query.users.findFirst({
+        where: eq(users.sessionToken, input.sessionToken),
+      });
+      if (existedGuestTempUser) {
+        return
+      }
       // insert user to db
       const user = await ctx.db
         .insert(users)
