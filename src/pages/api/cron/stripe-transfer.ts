@@ -45,22 +45,24 @@ export default async function handler() {
         destination: hostAccount.stripeAccountId!,
         tripId: trip.id.toString(),
       });
-      sendSlackMessage(
-        [
+      await sendSlackMessage({
+        channel: "tramona-bot",
+        text: [
           `A host has been paid for booking ${trip.id} that has passed the 24-hour check-in window.`,
           `Host: ${hostAccount.userId} was paid a total of ${trip.offer!.totalPrice}`,
           `Just using this because i want to test the payout job`,
         ].join("\n"),
-      );
+      });
     }
   } catch (error) {
     console.error("Error scheduling transfer:", error);
-    sendSlackMessage(
-      [
+    await sendSlackMessage({
+      channel: "tramona-bot",
+      text: [
         `STRIPE HOST PAYOUT ERROR: `,
-        `A host has not been paid for bookingthat has passed the 24-hour check-in window.`,
+        `A host has not been paid for booking that has passed the 24-hour check-in window.`,
         `Please check the stripe logs for more information`,
       ].join("\n"),
-    );
+    });
   }
 }

@@ -449,13 +449,14 @@ export async function handleRequestSubmission(
   const fmtdNumGuests = plural(input.numGuests ?? 1, "guest");
 
   if (user.role !== "admin") {
-    sendSlackMessage(
-      [
+    await sendSlackMessage({
+      channel: "tramona-bot",
+      text: [
         `*${name} just made a request: ${input.location}*`,
         `requested ${fmtdPrice}/night · ${fmtdDateRange} · ${fmtdNumGuests}`,
         `<https://tramona.com/admin|Go to admin dashboard>`,
       ].join("\n"),
-    );
+    });
   }
 
   return transactionResults;
