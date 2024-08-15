@@ -197,6 +197,8 @@ export const offersRouter = createTRPCRouter({
           id: true,
           propertyId: true,
           requestId: true, //testing
+          hostPayout: true,
+          travelerOfferedPrice: true,
         },
         with: {
           request: {
@@ -264,6 +266,8 @@ export const offersRouter = createTRPCRouter({
           acceptedAt: true,
           id: true,
           tramonaFee: true,
+          hostPayout: true,
+          travelerOfferedPrice: true,
         },
         with: {
           request: {
@@ -399,6 +403,8 @@ export const offersRouter = createTRPCRouter({
         .object({
           propertyId: z.number(),
           totalPrice: z.number().min(1),
+          hostPayout: z.number(),
+          travelerOfferedPrice: z.number(),
         })
         .and(
           z.union([

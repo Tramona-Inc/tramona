@@ -16,7 +16,7 @@ export default async function handler() {
       with: {
         offer: {
           columns: {
-            totalPrice: true,
+            hostPayout: true,
           },
         },
         property: {
@@ -41,14 +41,14 @@ export default async function handler() {
         continue;
       }
       await createPayHostTransfer({
-        amount: trip.offer!.totalPrice,
+        amount: trip.offer!.hostPayout,
         destination: hostAccount.stripeAccountId!,
         tripId: trip.id.toString(),
       });
       sendSlackMessage(
         [
           `A host has been paid for booking ${trip.id} that has passed the 24-hour check-in window.`,
-          `Host: ${hostAccount.userId} was paid a total of ${trip.offer!.totalPrice}`,
+          `Host: ${hostAccount.userId} was paid a total of ${trip.offer!.hostPayout}`,
           `Just using this because i want to test the payout job`,
         ].join("\n"),
       );

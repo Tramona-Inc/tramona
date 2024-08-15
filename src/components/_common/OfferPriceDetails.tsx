@@ -7,13 +7,13 @@ import { type Offer } from "@/server/db/schema";
 export function OfferPriceDetails({
   offer,
 }: {
-  offer: Pick<Offer, "totalPrice" | "tramonaFee" | "checkIn" | "checkOut">;
+  offer: Pick<Offer, "totalPrice" | "tramonaFee" | "checkIn" | "checkOut" | "travelerOfferedPrice">;
 }) {
   const numberOfNights = getNumNights(offer.checkIn, offer.checkOut);
-  const nightlyPrice = offer.totalPrice / numberOfNights;
+  const nightlyPrice = offer.travelerOfferedPrice / numberOfNights;
 
   const { bookingCost, taxPaid, serviceFee, finalTotal } = getPriceBreakdown({
-    bookingCost: offer.totalPrice,
+    bookingCost: offer.travelerOfferedPrice,
     numNights: numberOfNights,
     superhogFee: SUPERHOG_FEE,
     tax: TAX_PERCENTAGE,
