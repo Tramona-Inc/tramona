@@ -77,7 +77,7 @@ export default function MessagesPopover() {
     ? (conversations[conversationId]?.messages ?? [])
     : [];
 
-  const sender = {
+  const concierge = {
     name: "Tramona Info",
     image:
       "https://lh3.googleusercontent.com/a/ACg8ocLm7RrPPFKJd_jo8vFOMMZc_nj-u30AgO5YCx6keJbu04P0cnE=s96-c",
@@ -88,10 +88,6 @@ export default function MessagesPopover() {
   });
 
   const handleOnSend = async (values: z.infer<typeof formSchema>) => {
-    // create conversation id if it doesnot exist
-    // TODO: handle guest (in session and not session)
-    // console.log(conversationId)
-
     if (!session) {
       const { tempUserId, conversationId } =
         await createOrRetrieveConversationFromGuest({
@@ -189,7 +185,7 @@ export default function MessagesPopover() {
           <div className="grid grid-rows-1">
             <div className="flex flex-col">
               <div className="flex h-[7rem] w-full flex-col items-center justify-start bg-[#1A1A1A] p-4 text-base font-bold text-white">
-                <UserAvatar image={session?.user.image ?? sender?.image} />
+                <UserAvatar image={session?.user.image ?? concierge?.image} />
                 <p className="pt-1 text-xs font-light text-muted-foreground antialiased">
                   Concierge
                 </p>
@@ -249,7 +245,7 @@ export default function MessagesPopover() {
               Concierge
             </p>
             <p className="flex-1 px-2 text-sm font-medium antialiased">
-              {sender?.name ?? "Tramona Info"}
+              {concierge.name}
             </p>
             <Button asChild className="absolute right-3 top-2 bg-inherit p-0">
               <Link href="/">

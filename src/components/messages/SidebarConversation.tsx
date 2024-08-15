@@ -20,8 +20,7 @@ export function SidebarConversation({
   const { participants, messages, id, name } = conversation;
 
   const displayParticipants = participants
-    .map((participant) => participant.name)
-    .filter(Boolean)
+    .map((participant) => participant.name ?? participant.id)
     .join(", ");
 
   const { data: session } = useSession();
