@@ -763,7 +763,7 @@ export const stripeRouter = createTRPCRouter({
 
   stripeTopUp: protectedProcedure //this function is used for topping up for test transactions
     .input(z.object({ amount: z.number() }))
-    .query(async ({ ctx, input }) => {
+    .query(async ({ input }) => {
       const topup = await stripe.topups.create({
         amount: input.amount, //
         currency: "usd",
