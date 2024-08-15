@@ -1,6 +1,7 @@
 import {
   integer,
   pgTable,
+  boolean,
   serial,
   pgEnum,
   varchar,
@@ -43,6 +44,7 @@ export const superhogRequests = pgTable("superhog_requests", {
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
+  isCancelled: boolean("is_cancelled").default(false).notNull(),
 
   // tripId: integer("trip_id")
   //   .notNull()

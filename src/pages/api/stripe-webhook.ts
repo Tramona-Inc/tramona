@@ -3,7 +3,6 @@ import {
   createConversationWithAdmin,
   fetchConversationWithAdmin,
 } from "@/server/api/routers/messagesRouter";
-import { createSuperhogReservation } from "@/server/api/routers/superhogRouter";
 import { stripe } from "@/server/api/routers/stripeRouter";
 import { db } from "@/server/db";
 import {
@@ -19,6 +18,8 @@ import { eq, sql } from "drizzle-orm";
 import { buffer } from "micro";
 import { type NextApiRequest, type NextApiResponse } from "next";
 import { superhogRequests } from "../../server/db/schema/tables/superhogRequests";
+import { cancelTripByPaymentIntent } from "@/pages/api/utils/trips-utils";
+import { createSuperhogReservation } from "@/pages/api/utils/superhog-utils";
 
 // ! Necessary for stripe
 export const config = {
@@ -51,11 +52,12 @@ export default async function webhook(
       return;
     }
 
-    console.log("event:", event);
+    //console.log("event:", event);
 
     // * You can add other event types to catch
     switch (event.type) {
       case "charge.succeeded": //use to be payment_intent.succeeded
+        console.log("charge.succeeded");
         const paymentIntentSucceeded = event.data.object;
         paymentIntentSucceeded.metadata.offer_id === undefined
           ? undefined
@@ -118,7 +120,7 @@ export default async function webhook(
                     totalPriceAfterFees: paymentIntentSucceeded.amount,
                   })
                   .returning();
-                console.log("Created trip", currentTrip);
+
                 //superhog reservation
 
                 //creating a superhog reservation only if does not exist
@@ -323,6 +325,18 @@ export default async function webhook(
             console.log("Superhog reservation already exists");
           }
         }
+        break;
+      case "charge.dispute.created":
+        {
+          const dispute = event.data.object;
+          //find the trip by paymentItentId
+          const paymentIntentId = dispute.payment_intent as string;
+          await cancelTripByPaymentIntent({
+            paymentIntentId,
+            reason: `Dispute : ${dispute.reason}`,
+          });
+        }
+
         break;
       case "identity.verification_session.processing":
         {

@@ -1,6 +1,6 @@
 // db/schema/tables/reservedDates.ts
 
-import { pgTable, integer, date, serial, index } from "drizzle-orm/pg-core";
+import { pgTable, integer, date, serial, index, text } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { properties } from "./properties";
 
@@ -13,6 +13,7 @@ export const reservedDateRanges = pgTable(
       .references(() => properties.id),
     start: date("start").notNull(),
     end: date("end").notNull(),
+    platformBookedOn: text("platform_booked_on").notNull(),
   },
   (t) => ({
     propertyIdIndex: index().on(t.propertyId),

@@ -8,8 +8,7 @@ import { z } from "zod";
 
 import { hostProfiles } from "@/server/db/schema";
 
-import { createPayHostTransfer } from "@/pages/api/stripe-utils";
-import stripeAutoTransfer from "@/pages/api/cron/stripe-transfer";
+import { createPayHostTransfer } from "@/pages/api/utils/stripe-utils";
 
 export const config = {
   api: {
@@ -60,7 +59,6 @@ export const stripeRouter = createTRPCRouter({
         phone_number: input.phoneNumber,
         host_stripe_id: input.hostStripeId ?? "",
       };
-      console.log("this is host stripe id inside of the metadata");
       console.log(metadata.host_stripe_id);
       const paymentIntentData: Stripe.Checkout.SessionCreateParams.PaymentIntentData =
         {
@@ -337,7 +335,7 @@ export const stripeRouter = createTRPCRouter({
       // will trigger the payment_intent.amount_capturable_updated
       await ctx.db
         .update(trips)
-        .set({ paymentCaptured: true })
+        .set({ paymentCaptured: new Date() })
         .where(eq(trips.paymentIntentId, input.paymentIntentId));
       return intent;
     }),

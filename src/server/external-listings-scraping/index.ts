@@ -1,3 +1,4 @@
+import { sortBy } from "lodash";
 import { db } from "../db";
 import {
   ExternalListing,
@@ -5,6 +6,7 @@ import {
   MinimalRequest,
 } from "../db/schema";
 import { scrapeAirbnbListings } from "./scrapeAirbnbListings";
+import { getNumNights } from "@/utils/utils";
 
 export type ExternalListingScraper = (
   request: MinimalRequest,
@@ -13,11 +15,19 @@ export type ExternalListingScraper = (
 const listingScrapers: ExternalListingScraper[] = [scrapeAirbnbListings];
 
 export async function scrapeListings(request: MinimalRequest) {
-  const scrapedListings = await Promise.all(
+  const numNights = getNumNights(request.checkIn, request.checkOut);
+  const requstedNightlyPrice = request.maxTotalPrice / numNights;
+
+  const listings = await Promise.all(
     listingScrapers.map((scrapeListings) => scrapeListings(request)),
-  ).then((r) => r.flat());
+  )
+    .then((r) => r.flat())
+    .then((listings) =>
+      sortBy(listings, (l) => Math.abs(l.nightlyPrice - requstedNightlyPrice)),
+    )
+    .then((listings) => listings.slice(0, 10));
 
   await db
     .insert(externalListings)
-    .values(scrapedListings.map((o) => ({ ...o, requestId: request.id })));
+    .values(listings.map((o) => ({ ...o, requestId: request.id })));
 }

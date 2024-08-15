@@ -20,6 +20,7 @@ import {
   headerLinks,
   hamburgerLinksDesktop,
   hamburgerLinksMobile,
+  unloggedHamburgerLinksMobile,
 } from "@/config/headerNavLinks";
 import { ArrowLeftRightIcon, DoorOpen, MenuIcon } from "lucide-react";
 import { SkeletonText } from "@/components/ui/skeleton";
@@ -149,7 +150,9 @@ function SmallHeader() {
       <HamburgerMenu
         links={[
           ...(hostBtn.isLoading ? [] : [hostBtn]),
-          ...hamburgerLinksMobile,
+          ...(status === "unauthenticated"
+            ? unloggedHamburgerLinksMobile
+            : hamburgerLinksMobile),
         ]}
       />
     </header>
