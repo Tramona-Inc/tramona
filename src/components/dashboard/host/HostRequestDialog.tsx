@@ -284,7 +284,7 @@ export default function HostRequestDialog({
                         {propertyPrices[property.id] && (
                           <div className="text-sm text-gray-600">
                             By offering this price, you will be paid $
-                            {parseInt(propertyPrices[property.id] ?? "0") *
+                            {parseInt(propertyPrices[property.id] ?? "0") * 0.975 * 
                               getNumNights(
                                 request.checkIn,
                                 request.checkOut,
