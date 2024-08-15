@@ -21,14 +21,16 @@ export default function ListMessagesWithAdmin() {
     tempToken = localStorage.getItem("tempToken") ?? "";
   }
   // console.log(tempToken)
-  const { data: conversationId } =
+  const {data: conversationIdAndTempUserId} =
     api.messages.getConversationsWithAdmin.useQuery({
-      userId: session?.user.id || "",
+      userId: session?.user.id,
+      sessionToken: tempToken,
     });
+  const {conversationId, tempUserId} = conversationIdAndTempUserId ?? {};
   // console.log(conversationId)
 
   const { fetchInitialMessages } = useMessage();
-    void fetchInitialMessages(conversationId ?? "");
+  void fetchInitialMessages(conversationId ?? "");
   const { conversations } = useMessage();
 
   const addMessageToConversation = useMessage(
@@ -62,7 +64,7 @@ export default function ListMessagesWithAdmin() {
 //   };
 
   useEffect(() => {
-    if(session){
+    
       const channel = supabase
         .channel(`${conversationId}`)
         .on(
@@ -85,7 +87,7 @@ export default function ListMessagesWithAdmin() {
         // console.log("unsubscibing from channel");
         void channel.unsubscribe();
       };
-    }
+    
     console.log("handling postgres change for logged in user");
     console.log(conversationId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -134,16 +136,14 @@ export default function ListMessagesWithAdmin() {
 
   return (
     <>
-      {session ? (
-        messages.length > 0 ? (
+      {messages.length > 0 ? (
           <div className="flex w-full flex-1 flex-col-reverse gap-1 overflow-y-scroll p-3">
             {messages.map((message, index) =>
-              "userId" in message && message.userId === session.user.id ? (
+              (message.userId === session?.user.id || message.userId === tempUserId) ? (
                 <>
                   <div className="m-1 flex flex-row-reverse p-1" key={index}>
                     <p className="h-max max-w-[15rem] rounded-l-xl rounded-tr-xl border-none bg-[#1A84E5] px-2 py-2 text-sm text-white antialiased">
                       {message.message}
-                      {/* <span className='text-xs pl-4 text-right'>{`${hours}:${minutes}`}</span> */}
                     </p>
                   </div>
                 </>
@@ -163,13 +163,7 @@ export default function ListMessagesWithAdmin() {
             </p>
           </div>
         )
-      ) : (
-        <div className="flex w-full flex-1">
-          <p className="m-auto flex items-center justify-center text-[#8B8B8B]">
-            How can we help you?
-          </p>
-        </div>
-      )}
+      }
     </>
   );
 }

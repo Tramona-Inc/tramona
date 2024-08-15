@@ -359,7 +359,7 @@ export const messagesRouter = createTRPCRouter({
           conversationId = await createConversationWithAdmin(tempUser.id);
         }
       } else {
-        throw new TRPCError({ code: "NOT_FOUND" });
+        throw new TRPCError({ code: "NOT_FOUND", message: "Guest Temporary User not found" });
       }
       return { tempUserId: tempUser?.id, conversationId: conversationId };
     }),
@@ -507,10 +507,39 @@ export const messagesRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input }) => {
-      const conversationId = await fetchConversationWithAdmin(input.userId);
-      if (conversationId) {
-        return conversationId;
+      let conversationId = null;
+      
+      conversationId = await fetchConversationWithAdmin(input.userId);
+
+      if (!conversationId) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "conversationId not found" });
       }
-      return null;
+      
+      return { conversationId: conversationId };
+    }),
+
+    getConversationsWithAdminForGuest: publicProcedure
+    .input(z.object({
+      sessionToken: z.string(),
+    }))
+    .query(async ({ input }) => {
+      let conversationId = null;
+      let tempUser = null;
+      
+        tempUser = await db.query.users.findFirst({
+          where: eq(users.sessionToken, input.sessionToken),
+        });
+        if (tempUser) {      
+          conversationId = await fetchConversationWithAdmin(tempUser.id);
+        } else {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Guest Temporary User not found" });
+        }
+      
+
+      if (!conversationId) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "conversationId not found" });
+      }
+      
+      return { conversationId: conversationId, tempUserId: tempUser?.id };
     }),
 });
