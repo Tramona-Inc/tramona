@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { eq, and, sql } from "drizzle-orm";
+import { eq, and, sql, isNull } from "drizzle-orm";
 import { db } from "../../../server/db";
 import { hostProfiles, trips } from "../../../server/db/schema/index";
 import { createPayHostTransfer } from "../utils/stripe-utils";
@@ -26,7 +26,7 @@ export default async function handler() {
         },
       },
       where: and(
-        eq(trips.hostPayed, false),
+        isNull(trips.hostPayed),
         sql`${trips.checkIn} <= ${sql`(${now}::timestamp - interval '24 hours')`}`,
       ),
     });

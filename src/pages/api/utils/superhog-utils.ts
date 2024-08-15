@@ -244,7 +244,7 @@ export async function createSuperhogReservation({
       // Update trips table
       await db
         .update(trips)
-        .set({ paymentCaptured: true })
+        .set({ paymentCaptured: new Date() })
         .where(eq(trips.id, trip.id));
       return intent;
     }

@@ -335,7 +335,7 @@ export const stripeRouter = createTRPCRouter({
       // will trigger the payment_intent.amount_capturable_updated
       await ctx.db
         .update(trips)
-        .set({ paymentCaptured: true })
+        .set({ paymentCaptured: new Date() })
         .where(eq(trips.paymentIntentId, input.paymentIntentId));
       return intent;
     }),

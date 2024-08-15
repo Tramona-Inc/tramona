@@ -44,7 +44,7 @@ export async function createPayHostTransfer({
     //update the trip to show that the host has been payed
     await db
       .update(trips)
-      .set({ hostPayed: true })
+      .set({ hostPayed: new Date() })
       .where(eq(trips.id, parseInt(tripId)));
     console.log("transfer created", transfer);
   }
