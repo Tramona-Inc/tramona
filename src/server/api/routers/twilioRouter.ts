@@ -222,7 +222,7 @@ export const twilioRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       const { message } = input;
 
-      sendSlackMessage(message);
+      await sendSlackMessage({ channel: "tramona-bot", text: message });
     }),
 
   verifyOTP: publicProcedure
