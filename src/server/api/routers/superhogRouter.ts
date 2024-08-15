@@ -125,20 +125,22 @@ export const superhogRouter = createTRPCRouter({
             tripId: parseInt(input.reservation.reservationId),
             action: "create",
           });
-          sendSlackMessage(
-            [
+          await sendSlackMessage({
+            channel: "superhog-bot",
+            text: [
               `SUPERHOG REQUEST ERROR: axios error... ${error.response.data.detail}`,
             ].join("\n"),
-          );
+          });
           throw new Error(error.response.data.detail);
         });
 
       if (!verification) {
-        sendSlackMessage(
-          [
+        await sendSlackMessage({
+          channel: "superhog-bot",
+          text: [
             `SUPERHOG REQUEST ERROR: there was no verification for ${input.metadata.echoToken}`,
           ].join("\n"),
-        );
+        });
         throw new Error("There was no verification");
       }
 
@@ -173,11 +175,12 @@ export const superhogRouter = createTRPCRouter({
           superhogRequestId: superhogRequestId[0]!.id,
         });
         //super temp for testing
-        sendSlackMessage(
-          [
+        await sendSlackMessage({
+          channel: "superhog-bot",
+          text: [
             `SUPERHOG REQUEST SUCCESS: TRIP ID  ${input.reservation.reservationId} was created successfully for property ${input.listing.listingName}`,
           ].join("\n"),
-        );
+        });
       } else {
         await db.insert(superhogErrors).values({
           echoToken: input.metadata.echoToken,
@@ -187,11 +190,12 @@ export const superhogRouter = createTRPCRouter({
           tripId: null,
           action: "create",
         });
-        sendSlackMessage(
-          [
+        await sendSlackMessage({
+          channel: "superhog-bot",
+          text: [
             `SUPERHOG REQUEST ERROR: TRIP ID  ${input.reservation.reservationId} does not exist for ${input.listing.listingName}`,
           ].join("\n"),
-        );
+        });
         throw new Error("The trip does not exist");
       }
     }),
@@ -218,8 +222,13 @@ export const superhogRouter = createTRPCRouter({
       },
     });
 
+    const nonCancelledAllSuperhogRequestWithTrips =
+      allSuperhogRequestWithTrips.filter(
+        (reservation) => reservation.superhogRequests!.isCancelled === false,
+      );
+
     const allReservations = await Promise.all(
-      allSuperhogRequestWithTrips.map(async (reservation) => {
+      nonCancelledAllSuperhogRequestWithTrips.map(async (reservation) => {
         const countryISO = await getCountryISO({
           lat: reservation.superhogRequests!.property.latitude,
           lng: reservation.superhogRequests!.property.longitude,
@@ -264,6 +273,11 @@ export const superhogRouter = createTRPCRouter({
     )
     .mutation(async ({ input }) => {
       try {
+        await axios.put(
+          "https://superhog-apim.azure-api.net/e-deposit/verifications/cancel",
+          input,
+          config,
+        );
         const currentSuperhogRequestId =
           await db.query.superhogRequests.findFirst({
             where: eq(
@@ -284,19 +298,16 @@ export const superhogRouter = createTRPCRouter({
           .where(eq(trips.superhogRequestId, currentSuperhogRequestId!.id));
         //delete from the superhog request table
         await db
-          .delete(superhogRequests)
+          .update(superhogRequests)
+          .set({
+            isCancelled: true,
+          })
           .where(
             eq(
               superhogRequests.superhogVerificationId,
               input.verification.verificationId,
             ),
-          )
-          .then();
-        await axios.put(
-          "https://superhog-apim.azure-api.net/e-deposit/verifications/cancel",
-          input,
-          config,
-        );
+          );
       } catch (error) {
         if (error instanceof Error) {
           const axiosError = error as AxiosError;
@@ -377,11 +388,12 @@ export const superhogRouter = createTRPCRouter({
       } catch (error) {
         if (error instanceof Error) {
           const axiosError = error as AxiosError;
-          sendSlackMessage(
-            [
+          await sendSlackMessage({
+            channel: "superhog-bot",
+            text: [
               `SUPERHOG REQUEST ERROR: axios error... ${axiosError.response.data.detail}`,
             ].join("\n"),
-          );
+          });
           await db.insert(superhogErrors).values({
             echoToken: input.metadata.echoToken,
             error: axiosError.message,

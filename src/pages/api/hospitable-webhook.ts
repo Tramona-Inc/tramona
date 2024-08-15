@@ -315,6 +315,7 @@ export default async function webhook(
             propertyId: propertyId,
             start: dateRange.start,
             end: dateRange.end,
+            platformBookedOn: "airbnb"
           });
         }
         break;
