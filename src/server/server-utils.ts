@@ -360,6 +360,17 @@ export async function getPropertiesForRequest(
           )
         )
       `;
+    } else if (coordinates.location) {
+      const radiusInMiles = 10;
+      const radiusInDegrees = radiusInMiles / 69.0;
+
+      propertyIsNearRequest = sql`
+        ST_DWithin(
+          properties.lat_lng_point,
+          ST_SetSRID(ST_MakePoint(${coordinates.location.lng}, ${coordinates.location.lat}), 4326),
+          ${radiusInDegrees}
+        )
+      `;
     }
   }
 
