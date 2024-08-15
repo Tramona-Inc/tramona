@@ -64,7 +64,7 @@ const RequestSubmittedDialog: React.FC<RequestSubmittedDialogProps> = ({
           </Link>
           .
         </p>
-        <hr className="my-4 bg-[#D9D6D1]" />
+        {/* <hr className="my-4 bg-[#D9D6D1]" />
         <h1 className="text-xl font-bold">Want $0 fees on this trip?</h1>
         <p>
           Add your friends so they can see the matches and stay informed with
@@ -76,7 +76,7 @@ const RequestSubmittedDialog: React.FC<RequestSubmittedDialogProps> = ({
             inviteLink={inviteLink}
             madeByGroupId={madeByGroupId}
           />
-        )}
+        )} */}
         <p className="mb-16 flex flex-row items-center rounded-lg bg-[#F1F5F5] p-4 text-sm text-black md:mb-2">
           <Sparkles className="mr-2" />
           Once everyone is added to the trip, Tramona removes all fees.
