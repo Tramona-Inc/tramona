@@ -52,11 +52,12 @@ export default async function webhook(
       return;
     }
 
-    console.log("event:", event);
+    //console.log("event:", event);
 
     // * You can add other event types to catch
     switch (event.type) {
       case "charge.succeeded": //use to be payment_intent.succeeded
+        console.log("charge.succeeded");
         const paymentIntentSucceeded = event.data.object;
         paymentIntentSucceeded.metadata.offer_id === undefined
           ? undefined
