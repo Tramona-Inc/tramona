@@ -249,6 +249,13 @@ export async function createSuperhogReservation({
         .update(trips)
         .set({ paymentCaptured: new Date() })
         .where(eq(trips.id, trip.id));
+
+      await sendSlackMessage({
+        channel: "superhog-bot",
+        text: [
+          `SUPERHOG REQUEST SUCCESS: TRIP ID  ${currentTripId[0]!.id} was created successfully for property ${property.name}`,
+        ].join("\n"),
+      });
       return intent;
     }
   }
@@ -328,7 +335,7 @@ export async function cancelSuperhogReservation({
     await sendSlackMessage({
       channel: "superhog-bot",
       text: [
-        `*SUPERHOG Delete*: The verification id ${verificationId} was successfully deleted`,
+        `*SUPERHOG Delete*: The verification id ${verificationId} from trip ${reservationId} was successfully deleted`,
       ].join("\n"),
     });
   } catch (error) {

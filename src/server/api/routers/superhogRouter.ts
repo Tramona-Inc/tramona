@@ -222,8 +222,13 @@ export const superhogRouter = createTRPCRouter({
       },
     });
 
+    const nonCancelledAllSuperhogRequestWithTrips =
+      allSuperhogRequestWithTrips.filter(
+        (reservation) => reservation.superhogRequests!.isCancelled === false,
+      );
+
     const allReservations = await Promise.all(
-      allSuperhogRequestWithTrips.map(async (reservation) => {
+      nonCancelledAllSuperhogRequestWithTrips.map(async (reservation) => {
         const countryISO = await getCountryISO({
           lat: reservation.superhogRequests!.property.latitude,
           lng: reservation.superhogRequests!.property.longitude,
@@ -268,6 +273,11 @@ export const superhogRouter = createTRPCRouter({
     )
     .mutation(async ({ input }) => {
       try {
+        await axios.put(
+          "https://superhog-apim.azure-api.net/e-deposit/verifications/cancel",
+          input,
+          config,
+        );
         const currentSuperhogRequestId =
           await db.query.superhogRequests.findFirst({
             where: eq(
@@ -288,19 +298,16 @@ export const superhogRouter = createTRPCRouter({
           .where(eq(trips.superhogRequestId, currentSuperhogRequestId!.id));
         //delete from the superhog request table
         await db
-          .delete(superhogRequests)
+          .update(superhogRequests)
+          .set({
+            isCancelled: true,
+          })
           .where(
             eq(
               superhogRequests.superhogVerificationId,
               input.verification.verificationId,
             ),
-          )
-          .then();
-        await axios.put(
-          "https://superhog-apim.azure-api.net/e-deposit/verifications/cancel",
-          input,
-          config,
-        );
+          );
       } catch (error) {
         if (error instanceof Error) {
           const axiosError = error as AxiosError;
