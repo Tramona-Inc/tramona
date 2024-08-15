@@ -62,9 +62,10 @@ export default function DateRangeInput({
         />
       </PopoverTrigger>
       <PopoverContent
-        className="w-auto rounded-3xl p-0 backdrop-blur-md"
+        className="z-0 w-auto rounded-3xl p-0 backdrop-blur-md"
         align="center"
         side="bottom"
+        avoidCollisions={false}
       >
         <div className="hidden lg:block">
           <Calendar
