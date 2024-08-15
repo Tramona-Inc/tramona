@@ -10,9 +10,6 @@ import {
 } from "@/types/supabase.message";
 import supabase from "@/utils/supabase-client";
 
-// export default function AdminMessages ({conversationId}:{
-//   conversationId: string | null
-// }) {
 let tempToken: string;
 export default function ListMessagesWithAdmin() {
   const { data: session } = useSession();
@@ -20,14 +17,13 @@ export default function ListMessagesWithAdmin() {
   if (!session && typeof window !== "undefined") {
     tempToken = localStorage.getItem("tempToken") ?? "";
   }
-  // console.log(tempToken)
+ 
   const {data: conversationIdAndTempUserId} =
     api.messages.getConversationsWithAdmin.useQuery({
       userId: session?.user.id,
       sessionToken: tempToken,
     });
   const {conversationId, tempUserId} = conversationIdAndTempUserId ?? {};
-  // console.log(conversationId)
 
   const { fetchInitialMessages } = useMessage();
   void fetchInitialMessages(conversationId ?? "");
@@ -88,8 +84,6 @@ export default function ListMessagesWithAdmin() {
         void channel.unsubscribe();
       };
     
-    console.log("handling postgres change for logged in user");
-    console.log(conversationId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [supabase, messages]);
 

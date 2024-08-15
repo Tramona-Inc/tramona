@@ -415,30 +415,16 @@ export const messagesRouter = createTRPCRouter({
         .where(inArray(messages.id, input.unreadMessageIds));
     }),
 
-  getConversationsWithAdmin: publicProcedure
+    getConversationsWithAdmin: publicProcedure
     .input(z.object({
-      userId: z.string(),
-    }))
-    .query(async ({ input }) => {
-      let conversationId = null;
-      
-      conversationId = await fetchConversationWithAdmin(input.userId);
-
-      if (!conversationId) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "conversationId not found" });
-      }
-      
-      return { conversationId: conversationId };
-    }),
-
-    getConversationsWithAdminForGuest: publicProcedure
-    .input(z.object({
-      sessionToken: z.string(),
-    }))
+      userId: z.string().optional(),
+      sessionToken: z.string().optional(),
+    })) 
     .query(async ({ input }) => {
       let conversationId = null;
       let tempUser = null;
       
+      if (!input.userId && input.sessionToken) {
         tempUser = await db.query.users.findFirst({
           where: eq(users.sessionToken, input.sessionToken),
         });
@@ -447,7 +433,11 @@ export const messagesRouter = createTRPCRouter({
         } else {
           throw new TRPCError({ code: "NOT_FOUND", message: "Guest Temporary User not found" });
         }
-      
+      } else if (input.userId) { // if both userId and sessionToken are provided, userId will be used
+        conversationId = await fetchConversationWithAdmin(input.userId);
+      } else if (!input.userId && !input.sessionToken) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "userId or sessionToken is required" });
+      } 
 
       if (!conversationId) {
         throw new TRPCError({ code: "NOT_FOUND", message: "conversationId not found" });
