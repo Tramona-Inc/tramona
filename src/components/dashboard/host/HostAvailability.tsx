@@ -16,7 +16,7 @@ import HostICalSync from "./HostICalSync";
 type ReservationInfo = {
   start: string;
   end: string;
-  platformBookedOn: 'airbnb' | 'tramona' | null;
+  platformBookedOn: 'airbnb' | 'tramona';
 };
 
 export default function HostAvailability({ property }: { property: Property }) {
