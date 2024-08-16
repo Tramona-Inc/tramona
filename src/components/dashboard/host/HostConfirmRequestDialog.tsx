@@ -98,6 +98,7 @@ export default function HostConfirmRequestDialog({
               getTravelerOfferedPrice({
                 propertyPrice: parseFloat(propertyPrices[property.id] ?? "0"),
                 travelerMarkup: 1.025,
+                numNights,
               }),
             ) * 100,
         });
