@@ -9,7 +9,6 @@ import { getFmtdFilters } from "@/utils/formatters";
 import {
   formatCurrency,
   formatDateRange,
-  formatInterval,
   getNumNights,
   plural,
 } from "@/utils/utils";
@@ -31,7 +30,7 @@ import WithdrawRequestDialog from "./WithdrawRequestDialog";
 import { Badge } from "../ui/badge";
 import UserAvatar from "../_common/UserAvatar";
 import { TravelerVerificationsDialog } from "./TravelerVerificationsDialog";
-import { getTime } from "date-fns";
+import { formatDistanceToNowStrict } from "date-fns";
 import { LinkInputPropertyCard } from "../_common/LinkInputPropertyCard";
 import SingleLocationMap from "../_common/GoogleMaps/SingleLocationMap";
 import { api } from "@/utils/api";
@@ -120,7 +119,9 @@ export default function RequestCard({
                 <TravelerVerificationsDialog request={request} />
                 <p>&middot;</p>
                 <p>
-                  {formatInterval(Date.now() - getTime(request.createdAt))} ago
+                  {formatDistanceToNowStrict(request.createdAt, {
+                    addSuffix: true,
+                  })}
                 </p>
               </>
             )}
@@ -149,12 +150,12 @@ export default function RequestCard({
           </div>
           <div className="space-y-1">
             {type !== "host" && (
-            <div className="flex items-start gap-1">
-              <MapPinIcon className="shrink-0 text-primary" />
-              <h2 className="text-base font-bold text-primary md:text-lg">
-                {request.location}
-              </h2>
-            </div>
+              <div className="flex items-start gap-1">
+                <MapPinIcon className="shrink-0 text-primary" />
+                <h2 className="text-base font-bold text-primary md:text-lg">
+                  {request.location}
+                </h2>
+              </div>
             )}
             <div>
               <p>Requested {fmtdPrice}/night</p>
@@ -189,9 +190,11 @@ export default function RequestCard({
           <CardFooter>{children}</CardFooter>
         </div>
         {type !== "host" && (
-        <div className="hidden w-64 bg-zinc-100 lg:block">
-          {lat && lng && <SingleLocationMap lat={lat} lng={lng} icon={true} />}
-        </div>
+          <div className="hidden w-64 bg-zinc-100 lg:block">
+            {lat && lng && (
+              <SingleLocationMap lat={lat} lng={lng} icon={true} />
+            )}
+          </div>
         )}
       </div>
     </Card>
