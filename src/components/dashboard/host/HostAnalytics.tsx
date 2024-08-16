@@ -11,11 +11,9 @@ import LastThirtyDaysChart from "@/components/host/finances/summary/LastThirtyDa
 
 export default function HostAnalytics({
   className,
-  isStripeConnectInstanceReady,
   stripeAccountIdNumber,
 }: {
   className?: string;
-  isStripeConnectInstanceReady: boolean;
   stripeAccountIdNumber: string | null | undefined;
 }) {
   const [totalRevenue, setTotalRevenue] = useState<number>(0);

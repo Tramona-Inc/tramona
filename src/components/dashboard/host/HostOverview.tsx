@@ -30,7 +30,6 @@ export default function HostOverview() {
       <div className="flex flex-col gap-4 lg:flex-row">
         <HostAnalytics
           className="contents lg:flex lg:flex-1"
-          isStripeConnectInstanceReady={isStripeConnectInstanceReady}
           stripeAccountIdNumber={stripeAccountIdNumber?.stripeAccountId}
         />
         <HostRequestsOverview className="contents lg:flex lg:flex-1" />

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { format, eachDayOfInterval, subDays, endOfToday } from "date-fns";
 import ChartComponent from "../ChartComponent";
 import { api } from "@/utils/api";
@@ -20,8 +20,8 @@ const LastThirtyDaysChart = ({
   hostStripeAccountId: string | null | undefined;
   setTotalRevenue: (totalRevenue: number) => void;
 }) => {
-  const endDate = endOfToday();
-  const startDate = subDays(endDate, 29);
+  const endDate = useMemo(() => endOfToday(), []);
+  const startDate = useMemo(() => subDays(endDate, 29), []);
   const [monthlyData, setMonthlyData] = useState(
     generateInitialDailyData(startDate, endDate),
   );
