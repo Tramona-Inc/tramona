@@ -10,6 +10,7 @@ import {
   MessageCircleIcon,
   Users2Icon,
   WrenchIcon,
+  MessagesSquare,
 } from "lucide-react";
 import { headerLinks } from "./headerNavLinks";
 
@@ -43,6 +44,7 @@ export const guestNavLinks = [
   { href: "/", name: "Home", icon: HomeIcon },
   { href: "/requests", name: "Requests", icon: BadgePercent },
   { href: "/my-trips", name: "My Trips", icon: Briefcase },
+  { href: "/chat-with-admin", name: "Concierge", icon: MessagesSquare },
   { href: "/messages", name: "Messages", icon: MessageCircleIcon },
 ];
 

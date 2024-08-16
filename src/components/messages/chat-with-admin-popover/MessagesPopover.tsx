@@ -23,11 +23,12 @@ import { nanoid } from "nanoid";
 import { errorToast } from "@/utils/toasts";
 import { useSession } from "next-auth/react";
 import ListMessagesWithAdmin from "./ListMessagesWithAdmin";
-
-let tempToken: string;
+import { useEffect, useState } from "react";
 
 export default function MessagesPopover() {
   const { data: session } = useSession();
+  const [conversationId, setConversationId] = useState<string>("");
+  const [tempToken, setTempToken] = useState<string>("");
 
   const { mutateAsync: createOrRetrieveConversation } =
     api.messages.createConversationWithAdmin.useMutation();
@@ -35,27 +36,52 @@ export default function MessagesPopover() {
     api.messages.createConversationWithAdminFromGuest.useMutation();
   const { mutateAsync: createTempUserForGuest } =
     api.auth.createTempUserForGuest.useMutation();
+  const {
+    data: conversationIdAndTempUserId,
+    refetch: refetchConversationIdAndTempUserId,
+  } = api.messages.getConversationsWithAdmin.useQuery({
+    userId: session?.user.id,
+    sessionToken: tempToken,
+  });
 
-  if (!session && typeof window !== "undefined") {
-    tempToken = localStorage.getItem("tempToken") ?? "";
-    if (!tempToken) {
-      tempToken = crypto.randomUUID();
+  useEffect(() => {
+    if (!session && typeof window !== "undefined") {
+      const storedToken = localStorage.getItem("tempToken") ?? "";
+      setTempToken(storedToken);
+      if (!storedToken) {
+        const uuid = crypto.randomUUID();
+        setTempToken(uuid);
+      }
+    }
+  }, [session]);
+
+  useEffect(() => {
+    if (tempToken && !session) {
       void createTempUserForGuest({
         email: "temp_user@gmail.com",
         isGuest: true,
         sessionToken: tempToken,
       });
       localStorage.setItem("tempToken", tempToken);
-      // it's not safe to save temp userId to local storage, so here we use tempToken as guest user identifier
     }
-  }
+  }, [tempToken, session, createTempUserForGuest]);
 
-  const { data: conversationIdAndTempUserId } =
-    api.messages.getConversationsWithAdmin.useQuery({
-      userId: session?.user.id,
-      sessionToken: tempToken,
-    });
-  const { conversationId, tempUserId } = conversationIdAndTempUserId ?? {};
+  useEffect(() => {
+    // Ensure having a valid user ID before making the call (the session is loaded or guest has tempToken)
+    if (session?.user.id ?? tempToken) {
+      const fetchData = () => {
+        try {
+          if (conversationIdAndTempUserId) {
+            setConversationId(conversationIdAndTempUserId.conversationId);
+          }
+        } catch (error) {
+          errorToast();
+        }
+      };
+
+      fetchData();
+    }
+  }, [conversationIdAndTempUserId, session?.user.id, tempToken]);
 
   const addMessageToConversation = useMessage(
     (state) => state.addMessageToConversation,
@@ -67,15 +93,15 @@ export default function MessagesPopover() {
     (state) => state.removeMessageFromConversation,
   );
 
-  const { conversations } = useMessage();
+  // const { conversations } = useMessage();
 
   const { fetchInitialMessages } = useMessage();
 
-  void fetchInitialMessages(conversationId ?? "");
+  void fetchInitialMessages(conversationId);
 
-  const messages = conversationId
-    ? (conversations[conversationId]?.messages ?? [])
-    : [];
+  // const messages = conversationId
+  //   ? (conversations[conversationId]?.messages ?? [])
+  //   : [];
 
   const concierge = {
     name: "Tramona Info",
@@ -163,7 +189,6 @@ export default function MessagesPopover() {
     }
     form.reset();
   };
-  //   console.log(messages)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

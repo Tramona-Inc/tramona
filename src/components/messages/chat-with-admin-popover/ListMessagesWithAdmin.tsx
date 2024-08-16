@@ -1,32 +1,50 @@
 import { api } from "@/utils/api";
-import {
-  type ChatMessageType,
-  useMessage,
-} from "@/utils/store/messages";
+import { type ChatMessageType, useMessage } from "@/utils/store/messages";
 import { useSession } from "next-auth/react";
-import { useEffect } from "react";
-import {
-  type MessageDbType,
-} from "@/types/supabase.message";
+import { useEffect, useState } from "react";
+import { type MessageDbType } from "@/types/supabase.message";
 import supabase from "@/utils/supabase-client";
+import { errorToast } from "@/utils/toasts";
 
-let tempToken: string;
 export default function ListMessagesWithAdmin() {
   const { data: session } = useSession();
+  const [conversationId, setConversationId] = useState<string>("");
+  const [tempToken, setTempToken] = useState<string>("");
+  const [tempUserId, setTempUserId] = useState<string>("");
+  const {
+    data: conversationIdAndTempUserId,
+    refetch: refetchConversationIdAndTempUserId,
+  } = api.messages.getConversationsWithAdmin.useQuery({
+    userId: session?.user.id,
+    sessionToken: tempToken,
+  });
 
-  if (!session && typeof window !== "undefined") {
-    tempToken = localStorage.getItem("tempToken") ?? "";
-  }
- 
-  const {data: conversationIdAndTempUserId} =
-    api.messages.getConversationsWithAdmin.useQuery({
-      userId: session?.user.id,
-      sessionToken: tempToken,
-    });
-  const {conversationId, tempUserId} = conversationIdAndTempUserId ?? {};
+  useEffect(() => {
+    if (!session && typeof window !== "undefined") {
+      setTempToken(localStorage.getItem("tempToken") ?? "");
+    }
+  }, [session]);
+
+  useEffect(() => {
+    // Ensure having a valid user ID before making the call (the session is loaded or guest has tempToken)
+    if (session?.user.id ?? tempToken) {
+      const fetchData = () => {
+        try {
+          if (conversationIdAndTempUserId) {
+            setConversationId(conversationIdAndTempUserId.conversationId);
+            setTempUserId(conversationIdAndTempUserId.tempUserId ?? "");
+          }
+        } catch (error) {
+          errorToast();
+        }
+      };
+
+      fetchData();
+    }
+  }, [conversationIdAndTempUserId, session?.user.id, tempToken]);
 
   const { fetchInitialMessages } = useMessage();
-  void fetchInitialMessages(conversationId ?? "");
+  void fetchInitialMessages(conversationId);
   const { conversations } = useMessage();
 
   const addMessageToConversation = useMessage(
@@ -40,55 +58,30 @@ export default function ListMessagesWithAdmin() {
     ? (conversations[conversationId]?.messages ?? [])
     : [];
 
-//   const handlePostgresChangeOnGuest = async (payload: {
-//     new: ChatMessageType;
-//   }) => {
-//     console.log("in AdminMessages->handlePostgresChangeOnGuest")
-//     if (!optimisticIds.includes(payload.new.id)) {
-//       const newMessage: ChatMessageType = {
-//         id: payload.new.id,
-//         conversationId: payload.new.conversation_id,
-//         userToken: payload.new.user_token ?? "",
-//         message: payload.new.message,
-//         isEdit: payload.new.is_edit,
-//         createdAt: payload.new.created_at,
-//         read: payload.new.read,
-//         // userId: "",
-//       };
-//       addMessageToAdminConversation(payload.new.conversation_id, newMessage);
-//     }
-//   };
-
   useEffect(() => {
-    
-      const channel = supabase
-        .channel(`${conversationId}`)
-        .on(
-          "postgres_changes",
-          {
-            event: "INSERT",
-            schema: "public",
-            table: "messages",
-          },
-          (payload: { new: MessageDbType }) => {
-            // console.log(payload)
-            void handlePostgresChange(payload);
-          },
-        )
-        .subscribe();
-  
-  
-      // console.log("going or no?");
-      return () => {
-        // console.log("unsubscibing from channel");
-        void channel.unsubscribe();
-      };
-    
+    const channel = supabase
+      .channel(`${conversationId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "messages",
+        },
+        (payload: { new: MessageDbType }) => {
+          void handlePostgresChange(payload);
+        },
+      )
+      .subscribe();
+
+    return () => {
+      void channel.unsubscribe();
+    };
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [supabase, messages]);
 
   const handlePostgresChange = async (payload: { new: MessageDbType }) => {
-    console.log("coming to handlePostgresChange");
     if (!optimisticIds.includes(payload.new.id)) {
       const newMessage: ChatMessageType = {
         id: payload.new.id,
@@ -104,60 +97,34 @@ export default function ListMessagesWithAdmin() {
     }
   };
 
-//   useEffect(() => {
-//     console.log("in AdminMessages", conversationId)
-//     if(!session){
-//       const channel = supabase
-//         .channel(`${conversationId}`)
-//         .on(
-//           "postgres_changes",
-//           {
-//             event: "INSERT",
-//             schema: "public",
-//             table: "guest_messages",
-//           },
-//           (payload: { new: ChatMessageType }) =>
-//             void handlePostgresChangeOnGuest(payload),
-//         )
-//         .subscribe();
-  
-//       return () => {
-//         void channel.unsubscribe();
-//       };
-//     }
-//     // eslint-disable-next-line react-hooks/exhaustive-deps
-//   }, [supabase, adminMessages]);
-
   return (
     <>
       {messages.length > 0 ? (
-          <div className="flex w-full flex-1 flex-col-reverse gap-1 overflow-y-scroll p-3">
-            {messages.map((message, index) =>
-              (message.userId === session?.user.id || message.userId === tempUserId) ? (
-                <>
-                  <div className="m-1 flex flex-row-reverse p-1" key={index}>
-                    <p className="h-max max-w-[15rem] rounded-l-xl rounded-tr-xl border-none bg-[#1A84E5] px-2 py-2 text-sm text-white antialiased">
-                      {message.message}
-                    </p>
-                  </div>
-                </>
-              ) : (
-                <div className="m-1 flex place-items-end p-1" key={index}>
-                  <p className="h-max max-w-[15rem] rounded-r-xl rounded-tl-xl border-none bg-[#2E2E2E] px-2 py-2 text-sm text-background text-white antialiased">
-                    {message.message}
-                  </p>
-                </div>
-              ),
-            )}
-          </div>
-        ) : (
-          <div className="flex w-full flex-1">
-            <p className="m-auto flex items-center justify-center text-[#8B8B8B]">
-              How can we help you?
-            </p>
-          </div>
-        )
-      }
+        <div className="flex w-full flex-1 flex-col-reverse gap-1 overflow-y-scroll p-3">
+          {messages.map((message) =>
+            message.userId === session?.user.id ||
+            message.userId === tempUserId ? (
+              <div className="m-1 flex flex-row-reverse p-1" key={message.id}>
+                <p className="h-max max-w-[15rem] rounded-l-xl rounded-tr-xl border-none bg-[#1A84E5] px-2 py-2 text-sm text-white antialiased">
+                  {message.message}
+                </p>
+              </div>
+            ) : (
+              <div className="m-1 flex place-items-end p-1" key={message.id}>
+                <p className="h-max max-w-[15rem] rounded-r-xl rounded-tl-xl border-none bg-[#2E2E2E] px-2 py-2 text-sm text-background text-white antialiased">
+                  {message.message}
+                </p>
+              </div>
+            ),
+          )}
+        </div>
+      ) : (
+        <div className="flex w-full flex-1">
+          <p className="m-auto flex items-center justify-center text-[#8B8B8B]">
+            How can we help you?
+          </p>
+        </div>
+      )}
     </>
   );
 }
