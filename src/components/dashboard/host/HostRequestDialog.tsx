@@ -21,6 +21,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { AlertCircle } from "lucide-react";
 import { DialogTitle } from "@radix-ui/react-dialog";
+import { HOST_MARKUP } from "@/utils/constants";
 
 export default function HostRequestDialog({
   open,
@@ -67,7 +68,7 @@ export default function HostRequestDialog({
   const priceRegex = /^\d+(\.\d{0,2})?$/;
 
   const handlePriceChange = (id: number, price: string) => {
-    const filteredValue = price.replace(/[^0-9.]/g, '');
+    const filteredValue = price.replace(/[^0-9.]/g, "");
     if (priceRegex.test(filteredValue)) {
       setPropertyPrices((prev) => ({ ...prev, [id]: price }));
     }
@@ -293,7 +294,7 @@ export default function HostRequestDialog({
                               propertyPrice: parseFloat(
                                 propertyPrices[property.id] ?? "0",
                               ),
-                              hostMarkup: 0.975,
+                              hostMarkup: HOST_MARKUP,
                               numNights: getNumNights(
                                 request.checkIn,
                                 request.checkOut,

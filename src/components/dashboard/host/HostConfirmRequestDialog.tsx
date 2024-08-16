@@ -17,6 +17,7 @@ import {
   getTravelerOfferedPrice,
   plural,
 } from "@/utils/utils";
+import { HOST_MARKUP, TRAVELER__MARKUP } from "@/utils/constants";
 import Image from "next/image";
 import { EllipsisIcon } from "lucide-react";
 import {
@@ -89,7 +90,7 @@ export default function HostConfirmRequestDialog({
             parseFloat(
               getHostPayout({
                 propertyPrice: parseFloat(propertyPrices[property.id] ?? "0"),
-                hostMarkup: 0.975,
+                hostMarkup: HOST_MARKUP,
                 numNights,
               }),
             ) * 100,
@@ -97,7 +98,7 @@ export default function HostConfirmRequestDialog({
             parseFloat(
               getTravelerOfferedPrice({
                 propertyPrice: parseFloat(propertyPrices[property.id] ?? "0"),
-                travelerMarkup: 1.025,
+                travelerMarkup: TRAVELER__MARKUP,
                 numNights,
               }),
             ) * 100,
@@ -257,7 +258,7 @@ export default function HostConfirmRequestDialog({
                         propertyPrice: parseFloat(
                           propertyPrices[property.id] ?? "0",
                         ),
-                        hostMarkup: 0.975,
+                        hostMarkup: HOST_MARKUP,
                         numNights: getNumNights(
                           request.checkIn,
                           request.checkOut,
