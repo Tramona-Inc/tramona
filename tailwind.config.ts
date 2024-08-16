@@ -11,7 +11,7 @@ module.exports = {
   prefix: "",
   theme: {
     fontFamily: {
-      magazine: ["Stint-Ultra-Condensed", "sans-serif"],
+      magazine: [ "FiraSansExtraCondensed-ExtraBold", "sans-serif"],
     },
     container: {
       center: true,
