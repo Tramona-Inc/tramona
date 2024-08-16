@@ -5,7 +5,7 @@ import {
   unloggedNavLinks,
 } from "@/config/sideNavLinks";
 
-import { ArrowLeftRight } from "lucide-react";
+import { ArrowLeftRight, MessagesSquare } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { NavBarLink } from "./NavBarLink";
 
@@ -17,19 +17,34 @@ export default function MobileNav({
   const { data: session } = useSession();
   const isAdmin = session && session.user.role === "admin";
 
-  const navLinks =
-    type === "admin"
-      ? adminNavLinks
-      : type === "host"
-        ? hostMobileNavLinks
-        : isAdmin
-          ? [
-              ...guestNavLinks,
-              { href: "/admin", name: "Switch To Admin", icon: ArrowLeftRight },
-            ]
-          : type === "unlogged"
-            ? unloggedNavLinks
-            : guestNavLinks;
+  let navLinks;
+
+  switch (type) {
+    case "admin":
+      navLinks = adminNavLinks;
+      break;
+    case "host":
+      navLinks = hostMobileNavLinks;
+      break;
+    case "unlogged":
+      navLinks = unloggedNavLinks;
+      break;
+    default:
+      navLinks = isAdmin
+        ? [
+            ...guestNavLinks,
+            { href: "/admin", name: "Switch To Admin", icon: ArrowLeftRight },
+          ]
+        : [
+            ...guestNavLinks,
+            {
+              href: "/chat-with-admin",
+              name: "Concierge",
+              icon: MessagesSquare,
+            },
+          ];
+      break;
+  }
 
   return (
     <header

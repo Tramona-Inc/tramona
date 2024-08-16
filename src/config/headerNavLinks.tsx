@@ -8,7 +8,6 @@ import {
 } from "lucide-react";
 
 export const headerLinks = [
-  { name: "Concierge", href: "/chat-with-admin", icon: MessagesSquare },
   { name: "How it works", href: "/how-it-works", icon: InfoIcon },
   // { name: "Link Input", href: "/link-input", icon: LinkIcon },
   { name: "Recent Deals", href: "/exclusive-offers", icon: HandshakeIcon },
