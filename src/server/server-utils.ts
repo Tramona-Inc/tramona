@@ -36,6 +36,7 @@ import { getCity, getCoordinates } from "./google-maps";
 import axios from "axios";
 import { HttpsProxyAgent } from "https-proxy-agent";
 import * as cheerio from "cheerio";
+import { sendSlackMessage } from "./slack";
 
 export const proxyAgent = new HttpsProxyAgent(env.PROXY_URL);
 
@@ -289,6 +290,13 @@ export async function addProperty({
 
   waitUntil(processRequests(insertedProperty!));
 
+  await sendSlackMessage({
+    channel: "host-bot",
+    text: [
+      `*New property added: ${property.name} in ${property.address}*' 
+    ' by ${property.hostName}Host Id:${property.hostId}`,
+    ].join("\n"),
+  });
   return insertedProperty!.id;
 }
 
