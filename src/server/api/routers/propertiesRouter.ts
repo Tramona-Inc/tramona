@@ -39,6 +39,7 @@ import {
   type Property,
 } from "./../../db/schema/tables/properties";
 import { addProperty } from "@/server/server-utils";
+import { sendSlackMessage } from "@/server/slack";
 
 export type HostRequestsPageData = {
   city: string;
