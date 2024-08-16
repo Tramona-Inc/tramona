@@ -420,10 +420,12 @@ export const messagesRouter = createTRPCRouter({
       userId: z.string().optional(),
       sessionToken: z.string().optional(),
     })) 
-    .query(async ({ input }) => {
+    .query(async ({ ctx, input }) => {
       let conversationId = null;
       let tempUser = null;
-      
+      if (ctx.session?.user.role === "admin" || ctx.session?.user.role === "host") {
+        return null
+      }
       if (!input.userId && input.sessionToken) {
         tempUser = await db.query.users.findFirst({
           where: eq(users.sessionToken, input.sessionToken),
@@ -436,7 +438,7 @@ export const messagesRouter = createTRPCRouter({
       } else if (input.userId) { // if both userId and sessionToken are provided, userId will be used
         conversationId = await fetchConversationWithAdmin(input.userId);
       } else if (!input.userId && !input.sessionToken) {
-        throw new TRPCError({ code: "BAD_REQUEST", message: "userId or sessionToken is required" });
+        return null; // when the page renders for the first time, the tRPC call will hit here
       } 
 
       if (!conversationId) {
