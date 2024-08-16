@@ -1,4 +1,3 @@
-import type { NextApiRequest, NextApiResponse } from "next";
 import { eq, and, sql, isNull } from "drizzle-orm";
 import { db } from "../../../server/db";
 import { hostProfiles, trips } from "../../../server/db/schema/index";
