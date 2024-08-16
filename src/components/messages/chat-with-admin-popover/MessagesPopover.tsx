@@ -262,7 +262,7 @@ export default function MessagesPopover() {
         </PopoverContent>
       </Popover>
 
-      <div className="grid h-screen-minus-header-n-footer w-screen grid-rows-1 border border-gray-800 bg-black p-0 sm:hidden md:grid md:h-screen-minus-header-n-footer lg:hidden">
+      <div className="grid h-screen-minus-header-n-footer w-screen grid-rows-1 border border-gray-800 bg-black p-0 sm:hidden md:grid md:h-screen-minus-header-n-footer">
         <div className="flex flex-col">
           <div className="flex h-[7rem] w-full flex-col items-center justify-start bg-[#1A1A1A] p-4 text-base font-bold text-white">
             <UserAvatar image={session?.user.image} />
@@ -272,11 +272,11 @@ export default function MessagesPopover() {
             <p className="flex-1 px-2 text-sm font-medium antialiased">
               {concierge.name}
             </p>
-            <Button asChild className="absolute right-3 top-2 bg-inherit p-0">
+            {/* <Button asChild className="absolute right-3 top-2 bg-inherit p-0">
               <Link href="/">
                 <X className="text-white" />
               </Link>
-            </Button>
+            </Button> */}
           </div>
           <ListMessagesWithAdmin />
         </div>

@@ -44,11 +44,11 @@ export const guestNavLinks = [
   { href: "/", name: "Home", icon: HomeIcon },
   { href: "/requests", name: "Requests", icon: BadgePercent },
   { href: "/my-trips", name: "My Trips", icon: Briefcase },
-  { href: "/chat-with-admin", name: "Concierge", icon: MessagesSquare },
   { href: "/messages", name: "Messages", icon: MessageCircleIcon },
 ];
 
 export const unloggedNavLinks = [
   { href: "/", name: "Home", icon: HomeIcon },
+  { href: "/chat-with-admin", name: "Concierge", icon: MessagesSquare },
   ...headerLinks,
 ];
