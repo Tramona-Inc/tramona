@@ -40,12 +40,12 @@ const CustomStripeCheckout = ({
   const { serviceFee, finalTotal } = useMemo(
     () =>
       getPriceBreakdown({
-        bookingCost: offer.totalPrice,
+        bookingCost: offer.travelerOfferedPrice,
         numNights,
         superhogFee: SUPERHOG_FEE,
         tax: TAX_PERCENTAGE,
       }),
-    [offer.totalPrice, numNights],
+    [offer.travelerOfferedPrice, numNights],
   );
 
   const [options, setOptions] = useState<StripeElementsOptions | undefined>(

@@ -12,9 +12,12 @@ import { type Property } from "@/server/db/schema/tables/properties";
 import {
   formatCurrency,
   formatDateRange,
+  getHostPayout,
   getNumNights,
+  getTravelerOfferedPrice,
   plural,
 } from "@/utils/utils";
+import { HOST_MARKUP, TRAVELER__MARKUP } from "@/utils/constants";
 import Image from "next/image";
 import { EllipsisIcon } from "lucide-react";
 import {
@@ -83,6 +86,22 @@ export default function HostConfirmRequestDialog({
           requestId: request.id,
           propertyId: property.id,
           totalPrice: parseInt(propertyPrices[property.id] ?? "0") * 100,
+          hostPayout:
+            parseFloat(
+              getHostPayout({
+                propertyPrice: parseFloat(propertyPrices[property.id] ?? "0"),
+                hostMarkup: HOST_MARKUP,
+                numNights,
+              }),
+            ) * 100,
+          travelerOfferedPrice:
+            parseFloat(
+              getTravelerOfferedPrice({
+                propertyPrice: parseFloat(propertyPrices[property.id] ?? "0"),
+                travelerMarkup: TRAVELER__MARKUP,
+                numNights,
+              }),
+            ) * 100,
         });
       }),
     );
@@ -235,7 +254,16 @@ export default function HostConfirmRequestDialog({
                     </div>
                     <div className="text-sm text-gray-600">
                       Total payout: $
-                      {parseInt(propertyPrices[property.id] ?? "0") * numNights}
+                      {getHostPayout({
+                        propertyPrice: parseFloat(
+                          propertyPrices[property.id] ?? "0",
+                        ),
+                        hostMarkup: HOST_MARKUP,
+                        numNights: getNumNights(
+                          request.checkIn,
+                          request.checkOut,
+                        ),
+                      })}
                     </div>
                   </div>
                 </div>

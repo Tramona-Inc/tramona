@@ -12,6 +12,7 @@ import { type Property } from "@/server/db/schema/tables/properties";
 import {
   formatCurrency,
   formatDateRange,
+  getHostPayout,
   getNumNights,
   plural,
 } from "@/utils/utils";
@@ -20,6 +21,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { AlertCircle } from "lucide-react";
 import { DialogTitle } from "@radix-ui/react-dialog";
+import { HOST_MARKUP } from "@/utils/constants";
 
 export default function HostRequestDialog({
   open,
@@ -63,9 +65,13 @@ export default function HostRequestDialog({
     });
   };
 
+  const priceRegex = /^\d+(\.\d{0,2})?$/;
+
   const handlePriceChange = (id: number, price: string) => {
-    setPropertyPrices((prev) => ({ ...prev, [id]: price }));
-    console.log("got here");
+    const filteredValue = price.replace(/[^0-9.]/g, "");
+    if (priceRegex.test(filteredValue)) {
+      setPropertyPrices((prev) => ({ ...prev, [id]: price }));
+    }
   };
 
   const selectAllProperties = () => {
@@ -263,7 +269,7 @@ export default function HostRequestDialog({
                           <div className="text-sm text-red-600">
                             This offer is unlikely to get accepted since it is{" "}
                             {Math.round(
-                              ((parseInt(propertyPrices[property.id] ?? "0") -
+                              ((parseFloat(propertyPrices[property.id] ?? "0") -
                                 request.maxTotalPrice /
                                   getNumNights(
                                     request.checkIn,
@@ -284,11 +290,16 @@ export default function HostRequestDialog({
                         {propertyPrices[property.id] && (
                           <div className="text-sm text-gray-600">
                             By offering this price, you will be paid $
-                            {parseInt(propertyPrices[property.id] ?? "0") *
-                              getNumNights(
+                            {getHostPayout({
+                              propertyPrice: parseFloat(
+                                propertyPrices[property.id] ?? "0",
+                              ),
+                              hostMarkup: HOST_MARKUP,
+                              numNights: getNumNights(
                                 request.checkIn,
                                 request.checkOut,
-                              )}{" "}
+                              ),
+                            })}{" "}
                             all-in
                           </div>
                         )}

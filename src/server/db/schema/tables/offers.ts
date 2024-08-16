@@ -32,6 +32,8 @@ export const offers = pgTable(
     tramonaFee: integer("tramona_fee").notNull().default(0), // in cents
     checkIn: date("check_in", { mode: "date" }).notNull(),
     checkOut: date("check_out", { mode: "date" }).notNull(),
+    hostPayout: integer("host_payout").notNull(), // in cents
+    travelerOfferedPrice: integer("traveler_offered_price").notNull(), // in cents
   },
   (t) => ({
     requestIdIdx: index().on(t.requestId),

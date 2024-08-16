@@ -1,4 +1,3 @@
-import type { NextApiRequest, NextApiResponse } from "next";
 import { eq, and, sql, isNull } from "drizzle-orm";
 import { db } from "../../../server/db";
 import { hostProfiles, trips } from "../../../server/db/schema/index";
@@ -16,7 +15,7 @@ export default async function handler() {
       with: {
         offer: {
           columns: {
-            totalPrice: true,
+            hostPayout: true,
           },
         },
         property: {
@@ -41,7 +40,7 @@ export default async function handler() {
         continue;
       }
       await createPayHostTransfer({
-        amount: trip.offer!.totalPrice,
+        amount: trip.offer!.hostPayout,
         destination: hostAccount.stripeAccountId!,
         tripId: trip.id.toString(),
       });
@@ -49,7 +48,7 @@ export default async function handler() {
         channel: "tramona-bot",
         text: [
           `A host has been paid for booking ${trip.id} that has passed the 24-hour check-in window.`,
-          `Host: ${hostAccount.userId} was paid a total of ${trip.offer!.totalPrice}`,
+          `Host: ${hostAccount.userId} was paid a total of ${trip.offer!.hostPayout}`,
           `Just using this because i want to test the payout job`,
         ].join("\n"),
       });
