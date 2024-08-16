@@ -16,6 +16,8 @@ import { zodNumber } from "@/utils/zod-utils";
 import ErrorMsg from "@/components/ui/ErrorMsg";
 import { api } from "@/utils/api";
 import { DollarSignIcon } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 
 export default function HostPropertiesRestrictions({
   property,
@@ -27,6 +29,7 @@ export default function HostPropertiesRestrictions({
   const formSchema = z.object({
     age: zodNumber({ min: 18 }),
     price: zodNumber({ min: 0 }).nullable(),
+    stripeVerRequired: z.enum(["yes", "no"]).transform((s) => s === "yes"),
   });
 
   type FormValues = z.infer<typeof formSchema>;
@@ -36,6 +39,7 @@ export default function HostPropertiesRestrictions({
     defaultValues: {
       age: property.ageRestriction ?? undefined,
       price: property.priceRestriction ?? undefined,
+      // stripeVerRequired: property.stripeVerRequired
     },
     mode: "onChange",
     reValidateMode: "onChange",
@@ -44,12 +48,13 @@ export default function HostPropertiesRestrictions({
   const { mutateAsync: updateProperty } = api.properties.update.useMutation();
 
   const onSubmit = async () => {
-    const { age, price } = form.getValues();
+    const { age, price, stripeVerRequired } = form.getValues();
     const newProperty = {
       ...property,
       ageRestriction: Number(age),
       priceRestriction: Number(price),
     };
+    console.log("stripe:", stripeVerRequired ? true : false);
     await updateProperty(newProperty);
   };
 
@@ -115,6 +120,40 @@ export default function HostPropertiesRestrictions({
                         type="number"
                         value={field.value?.toString() ?? ""}
                       />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div>
+                <h3 className="text-lg font-semibold">Stripe verification</h3>
+                <p className="text-muted-foreground">
+                  Do you want travelers to be verified by Stripe for this
+                  property?
+                </p>
+              </div>
+              <FormField
+                name="stripeVerRequired"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <RadioGroup
+                        defaultValue="no"
+                        onValueChange={field.onChange}
+                        disabled={!editing}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center space-x-1">
+                            <RadioGroupItem value="no" id="r1" />
+                            <Label htmlFor="r1">No</Label>
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            <RadioGroupItem value="yes" id="r2" />
+                            <Label htmlFor="r2">Yes</Label>
+                          </div>
+                        </div>
+                      </RadioGroup>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
