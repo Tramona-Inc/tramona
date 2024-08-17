@@ -72,7 +72,9 @@ export default function MessagesPopover() {
       const fetchData = () => {
         try {
           if (conversationIdAndTempUserId) {
-            setConversationId(conversationIdAndTempUserId.conversationId);
+            setConversationId(
+              conversationIdAndTempUserId.conversationId as string,
+            );
           }
         } catch (error) {
           errorToast();
@@ -104,9 +106,9 @@ export default function MessagesPopover() {
   //   : [];
 
   const concierge = {
-    name: "Tramona Info",
+    name: "Blake",
     image:
-      "https://lh3.googleusercontent.com/a/ACg8ocLm7RrPPFKJd_jo8vFOMMZc_nj-u30AgO5YCx6keJbu04P0cnE=s96-c",
+      "https://lh3.googleusercontent.com/a/ACg8ocJGoxiyA7Dh7_s4C1ftNnkpo4daonbAEClM6bDnZEUyTE-nMmw=s96-c",
   };
 
   const formSchema = z.object({
@@ -210,12 +212,12 @@ export default function MessagesPopover() {
           <div className="grid grid-rows-1">
             <div className="flex flex-col">
               <div className="flex h-[7rem] w-full flex-col items-center justify-start bg-[#1A1A1A] p-4 text-base font-bold text-white">
-                <UserAvatar image={session?.user.image ?? concierge?.image} />
-                <p className="pt-1 text-xs font-light text-muted-foreground antialiased">
-                  Concierge
+                <UserAvatar image={concierge.image} />
+                <p className="pt-1 text-xs font-light text-muted antialiased">
+                  Tramona Concierge
                 </p>
                 <p className="flex-1 px-2 text-sm font-medium antialiased">
-                  Tramona Info
+                  {concierge.name}
                 </p>
               </div>
               <PopoverClose>
@@ -265,9 +267,9 @@ export default function MessagesPopover() {
       <div className="grid h-screen-minus-header-n-footer w-screen grid-rows-1 border border-gray-800 bg-black p-0 sm:hidden md:grid md:h-screen-minus-header-n-footer">
         <div className="flex flex-col">
           <div className="flex h-[7rem] w-full flex-col items-center justify-start bg-[#1A1A1A] p-4 text-base font-bold text-white">
-            <UserAvatar image={session?.user.image} />
-            <p className="pt-1 text-xs font-light text-muted-foreground antialiased">
-              Concierge
+            <UserAvatar image={concierge.image} />
+            <p className="pt-1 text-xs font-light text-muted antialiased">
+              Tramona Concierge
             </p>
             <p className="flex-1 px-2 text-sm font-medium antialiased">
               {concierge.name}
