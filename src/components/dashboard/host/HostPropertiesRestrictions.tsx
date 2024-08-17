@@ -39,7 +39,7 @@ export default function HostPropertiesRestrictions({
     defaultValues: {
       age: property.ageRestriction ?? undefined,
       price: property.priceRestriction ?? undefined,
-      // stripeVerRequired: property.stripeVerRequired
+      stripeVerRequired: property.stripeVerRequired ?? undefined,
     },
     mode: "onChange",
     reValidateMode: "onChange",
@@ -47,14 +47,15 @@ export default function HostPropertiesRestrictions({
 
   const { mutateAsync: updateProperty } = api.properties.update.useMutation();
 
-  const onSubmit = async () => {
-    const { age, price, stripeVerRequired } = form.getValues();
+  const onSubmit = async (values: FormValues) => {
+    const { age, price, stripeVerRequired } = values;
     const newProperty = {
       ...property,
-      ageRestriction: Number(age),
-      priceRestriction: Number(price),
+      ageRestriction: age,
+      priceRestriction: price,
+      stripeVerRequired: stripeVerRequired,
     };
-    console.log("stripe:", stripeVerRequired ? true : false);
+    console.log("form values:", values);
     await updateProperty(newProperty);
   };
 
@@ -139,7 +140,7 @@ export default function HostPropertiesRestrictions({
                   <FormItem>
                     <FormControl>
                       <RadioGroup
-                        defaultValue="no"
+                        defaultValue={field.value ? "yes" : "no"}
                         onValueChange={field.onChange}
                         disabled={!editing}
                       >
