@@ -31,8 +31,10 @@ export default function ListMessagesWithAdmin() {
       const fetchData = () => {
         try {
           if (conversationIdAndTempUserId) {
-            setConversationId(conversationIdAndTempUserId.conversationId);
-            setTempUserId(conversationIdAndTempUserId.tempUserId ?? "");
+            setConversationId(
+              conversationIdAndTempUserId.conversationId as string,
+            );
+            setTempUserId(conversationIdAndTempUserId.tempUserId as string);
           }
         } catch (error) {
           errorToast();
@@ -99,6 +101,28 @@ export default function ListMessagesWithAdmin() {
 
   return (
     <>
+      <style>
+        {`
+        @media (min-width: 768px) {
+          /* Style the scrollbar itself (the part that moves) */
+          ::-webkit-scrollbar {
+            width: 12px; /* width of the entire scrollbar */
+          }
+
+          /* Style the track (part the scrollbar sits in) */
+          ::-webkit-scrollbar-track {
+            background: black; /* color of the track */
+          }
+
+          /* Style the handle (part of the scrollbar that indicates the scroll position) */
+          ::-webkit-scrollbar-thumb {
+            background-color: white; /* color of the thumb */
+            border-radius: 6px; /* roundness of the edges */
+            border: 3px solid black; /* Creates padding around the thumb */
+          }
+        }
+        `}
+      </style>
       {messages.length > 0 ? (
         <div className="flex w-full flex-1 flex-col-reverse gap-1 overflow-y-scroll p-3">
           {messages.map((message) =>
