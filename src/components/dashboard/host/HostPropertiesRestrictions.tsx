@@ -37,8 +37,8 @@ export default function HostPropertiesRestrictions({
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      age: property.ageRestriction ?? undefined,
-      price: property.priceRestriction ?? undefined,
+      age: property.ageRestriction ?? 18,
+      price: property.priceRestriction ?? 0,
       stripeVerRequired: property.stripeVerRequired ?? undefined,
     },
     mode: "onChange",
@@ -56,6 +56,7 @@ export default function HostPropertiesRestrictions({
       stripeVerRequired: stripeVerRequired,
     };
     console.log("form values:", values);
+    console.log("default values:", form.getValues());
     await updateProperty(newProperty);
   };
 
