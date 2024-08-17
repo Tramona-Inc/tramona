@@ -279,6 +279,34 @@ export function getPriceBreakdown({
   return priceBreakdown;
 }
 
+export function getHostPayout({
+  propertyPrice,
+  hostMarkup,
+  numNights,
+}: {
+  propertyPrice: number;
+  hostMarkup: number;
+  numNights: number;
+}) {
+  return (
+    Math.floor(propertyPrice * hostMarkup * numNights * 100) / 100
+  ).toFixed(2);
+}
+
+export function getTravelerOfferedPrice({
+  propertyPrice,
+  travelerMarkup,
+  numNights,
+}: {
+  propertyPrice: number;
+  travelerMarkup: number;
+  numNights: number;
+}) {
+  return (
+    Math.ceil(propertyPrice * travelerMarkup * numNights * 100) / 100
+  ).toFixed(2);
+}
+
 export function getPropertyId(url: string): number | null {
   const parsedUrl = new URL(url);
   const pathSegments = parsedUrl.pathname.split("/");
