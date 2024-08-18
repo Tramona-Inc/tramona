@@ -185,7 +185,7 @@ export function formatDateYearMonthDay(date: Date | string) {
 
 export function formatShortDate(date: Date | string) {
   if (typeof date === "string") return formatDateString(date, "M/d/yyyy");
-  return formatDate(removeTimezoneFromDate(date), "M/d/yyyy");
+  return formatDate(removeTimezoneFromDate(date), "M/d/yyyy"); //ex 8/20/2024
 }
 
 export function convertDateFormat(dateString: string) {
