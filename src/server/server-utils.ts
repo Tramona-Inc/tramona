@@ -13,6 +13,7 @@ import {
   gte,
   inArray,
   isNotNull,
+  isNull,
   lte,
   notExists,
   sql,
@@ -29,6 +30,7 @@ import {
   hostTeamInvites,
   hostTeamMembers,
   properties,
+  offers,
   requestsToProperties,
   users,
 } from "./db/schema";
@@ -37,7 +39,7 @@ import axios from "axios";
 import { HttpsProxyAgent } from "https-proxy-agent";
 import * as cheerio from "cheerio";
 import { sendSlackMessage } from "./slack";
-
+import { HOST_MARKUP, TRAVELER__MARKUP } from "@/utils/constants";
 export const proxyAgent = new HttpsProxyAgent(env.PROXY_URL);
 
 export async function scrapeUrl(url: string) {
@@ -294,7 +296,7 @@ export async function addProperty({
     channel: "host-bot",
     text: [
       `*New property added: ${property.name} in ${property.address}*' 
-    ' by ${property.hostName}Host Id:${property.hostId}`,
+    ' by ${property.hostName}`,
     ].join("\n"),
   });
   return insertedProperty!.id;
@@ -465,4 +467,25 @@ export async function getPropertyOriginalPrice(
     return totalPrice;
   }
   // code for other options
+}
+
+//update spread on every fetch to keep information updated
+export async function updateTravelerandHostMarkup({
+  offerTotalPrice,
+  offerId,
+}: {
+  offerTotalPrice: number;
+  offerId: number;
+}) {
+  console.log("offerTotalPrice", offerTotalPrice);
+  const travelerPrice = Math.ceil(offerTotalPrice * TRAVELER__MARKUP);
+  const hostPay = offerTotalPrice * HOST_MARKUP;
+  console.log("travelerPrice", travelerPrice);
+  await db
+    .update(offers)
+    .set({
+      travelerOfferedPrice: travelerPrice,
+      hostPayout: hostPay,
+    })
+    .where(and(eq(offers.id, offerId), isNull(offers.acceptedAt)));
 }

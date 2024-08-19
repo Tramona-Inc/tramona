@@ -7,18 +7,23 @@ import { type Offer } from "@/server/db/schema";
 export function OfferPriceDetails({
   offer,
 }: {
-  offer: Pick<Offer, "totalPrice" | "tramonaFee" | "checkIn" | "checkOut">;
+  offer: Pick<
+    Offer,
+    | "totalPrice"
+    | "tramonaFee"
+    | "checkIn"
+    | "checkOut"
+    | "travelerOfferedPrice"
+  >;
 }) {
   const numberOfNights = getNumNights(offer.checkIn, offer.checkOut);
-  const nightlyPrice = offer.totalPrice / numberOfNights;
-
+  const nightlyPrice = offer.travelerOfferedPrice / numberOfNights;
   const { bookingCost, taxPaid, serviceFee, finalTotal } = getPriceBreakdown({
-    bookingCost: offer.totalPrice,
+    bookingCost: offer.travelerOfferedPrice,
     numNights: numberOfNights,
     superhogFee: SUPERHOG_FEE,
     tax: TAX_PERCENTAGE,
   });
-
   const items = [
     {
       title: `${formatCurrency(nightlyPrice)} x ${plural(numberOfNights, "night")}`,
@@ -39,21 +44,27 @@ export function OfferPriceDetails({
   ];
 
   return (
-    <div className="space-y-4">
-      {items.map((item, index) => (
-        <div
-          className="flex items-center justify-between text-sm font-semibold"
-          key={index}
-        >
-          <p className="underline">{item.title}</p>
-          <p>{item.price}</p>
+    <>
+      <div className="hidden space-y-4 md:block">
+        {items.map((item, index) => (
+          <div
+            className="flex items-center justify-between text-sm font-semibold"
+            key={index}
+          >
+            <p className="underline">{item.title}</p>
+            <p>{item.price}</p>
+          </div>
+        ))}
+        <Separator className="" />
+        <div className="flex items-center justify-between pb-4 font-bold">
+          <p>Total (USD)</p>
+          <p>{formatCurrency(finalTotal)}</p>
         </div>
-      ))}
-      <Separator />
-      <div className="flex items-center justify-between pb-4 font-bold">
-        <p>Total (USD)</p>
-        <p>{formatCurrency(finalTotal)}</p>
       </div>
-    </div>
+      <div className="md:hidden">
+        <p className="text-base font-bold">{formatCurrency(finalTotal)}</p>
+        <p className="text-muted-foreground"> Total after taxes</p>
+      </div>
+    </>
   );
 }

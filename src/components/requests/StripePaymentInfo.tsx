@@ -37,12 +37,12 @@ const StripePaymentInfo = ({
   const tramonaServiceFee = offer.tramonaFee;
 
   const tax = useMemo(
-    () => (offer.totalPrice + offer.tramonaFee) * TAX_PERCENTAGE,
-    [offer.totalPrice, offer.tramonaFee],
+    () => (offer.travelerOfferedPrice + offer.tramonaFee) * TAX_PERCENTAGE,
+    [offer.travelerOfferedPrice, offer.tramonaFee],
   );
   const total = useMemo(
-    () => offer.totalPrice + offer.tramonaFee + tax,
-    [offer.totalPrice, offer.tramonaFee, tax],
+    () => offer.travelerOfferedPrice + offer.tramonaFee + tax,
+    [offer.travelerOfferedPrice, offer.tramonaFee, tax],
   );
 
   const [options, setOptions] = useState<StripeOptions | null>(null);
