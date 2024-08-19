@@ -3,17 +3,10 @@ import VerifyEmailLink from "packages/transactional/emails/VerifyEmail";
 import { env } from "@/env";
 import { CustomPgDrizzleAdapter } from "@/server/adapter";
 import { db } from "@/server/db";
-import {
-  ALL_HOST_TYPES,
-  hostProfiles,
-  hostTeams,
-  referralCodes,
-  users,
-  type User,
-} from "@/server/db/schema";
+import { referralCodes, users, type User } from "@/server/db/schema";
 import { addUserToGroups, sendEmail } from "@/server/server-utils";
 import { generateReferralCode } from "@/utils/utils";
-import { zodEmail, zodPassword, zodString } from "@/utils/zod-utils";
+import { zodEmail, zodPassword } from "@/utils/zod-utils";
 import { TRPCError } from "@trpc/server";
 import * as bycrypt from "bcrypt";
 import { eq } from "drizzle-orm";

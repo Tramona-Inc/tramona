@@ -296,7 +296,7 @@ export async function addProperty({
     channel: "host-bot",
     text: [
       `*New property added: ${property.name} in ${property.address}*' 
-    ' by ${property.hostName}Host Id:${property.hostId}`,
+    ' by ${property.hostName}`,
     ].join("\n"),
   });
   return insertedProperty!.id;
