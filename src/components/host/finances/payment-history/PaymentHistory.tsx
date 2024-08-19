@@ -22,21 +22,13 @@ function PaymentHistory({
           <CardHeader className="text-xl font-bold">
             Transferred funds
           </CardHeader>
-          {isStripeConnectInstanceReady ? (
-            <ConnectPayouts />
-          ) : (
-            <div>Loading</div>
-          )}
+          <ConnectPayouts />
         </Card>
         <Card className="lg:w-1/2">
           <CardHeader className="text-xl font-bold">
             Previous Transactions
           </CardHeader>
-          {isStripeConnectInstanceReady ? (
-            <ConnectPayments />
-          ) : (
-            <div>Loading</div>
-          )}
+          <ConnectPayments />
         </Card>
       </div>
       {/* <Card className="mt-2">
