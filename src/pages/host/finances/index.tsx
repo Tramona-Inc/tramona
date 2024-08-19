@@ -22,15 +22,6 @@ export default function Page() {
   const { data: hostInfo, isLoading: isHostInfoLoading } =
     api.host.getUserHostInfo.useQuery();
 
-  const { mutate: createStripeConnectAccount } =
-    api.stripe.createStripeConnectAccount.useMutation();
-
-  const handleCreateStripeConnectAccount = useCallback(() => {
-    if (!hostInfo?.stripeAccountId) {
-      createStripeConnectAccount();
-    }
-  }, [hostInfo?.stripeAccountId, createStripeConnectAccount]);
-
   const [hostStripeAccountId, setHostStripeAccountId] = useState<string | null>(
     null,
   );
@@ -41,7 +32,7 @@ export default function Page() {
   useEffect(() => {
     if (isStripeConnectInstanceReady === true) {
       setIsPageLoading(false);
-    } else if (isStripeConnectInstanceReady === false) {
+    } else {
       stripeStateChangeCount.current += 1;
       // stripe connect instance initializes to false
       if (stripeStateChangeCount.current >= 2) {
