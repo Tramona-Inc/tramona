@@ -1,5 +1,6 @@
 import { NewProperty, Review } from "../db/schema";
 import { exampleScraper } from "./example";
+import { cbIslandVacationsScraper } from "./hawaii-scraper";
 
 export type DirectSiteScraper = () => Promise<
   (NewProperty & {
@@ -12,4 +13,5 @@ export type DirectSiteScraper = () => Promise<
 export const directSiteScrapers: DirectSiteScraper[] = [
   // add more scrapers here
   exampleScraper,
+  cbIslandVacationsScraper,
 ];
