@@ -15,8 +15,10 @@ import {
   gte,
   inArray,
   isNotNull,
+  isNull,
   lte,
   notExists,
+  or,
   sql,
   SQLWrapper,
   type SQL,
@@ -25,6 +27,7 @@ import {
   type NewProperty,
   type Property,
   type User,
+  type Request,
   bookedDates,
   groupInvites,
   groupMembers,
@@ -432,8 +435,13 @@ export async function getPropertiesForRequest(
       isNotNull(properties.hostId),
       propertyIsNearRequest,
       propertyisAvailable,
-      //price restriction exists and is less than or equal to the nightly price
-      and(isNotNull(properties.priceRestriction), lte(properties.priceRestriction, req.maxTotalPrice / numberOfNights)),
+      or(
+        isNull(properties.priceRestriction), // Include properties with no price restriction
+        and(
+          isNotNull(properties.priceRestriction),
+          lte(properties.priceRestriction, (req.maxTotalPrice / numberOfNights) * 1.15)
+        )
+      )
     ),
     columns: { id: true, hostId: true },
   });
@@ -501,3 +509,18 @@ export async function getPropertyOriginalPrice(
   }
   // code for other options
 }
+
+export interface CityData {
+  city: string;
+  requests: {
+    request: Request;
+    properties: Property[];
+  }[];
+}
+
+export interface SeparatedData {
+  normal: CityData[];
+  outsidePriceRestriction: CityData[];
+}
+
+
