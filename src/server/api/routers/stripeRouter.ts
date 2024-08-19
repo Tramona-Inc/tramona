@@ -770,7 +770,6 @@ export const stripeRouter = createTRPCRouter({
         description: "Top-up for week of May 31",
         statement_descriptor: "Weekly top-up",
       });
-      console.log("Top-up successful", topup);
       return topup;
     }),
 });

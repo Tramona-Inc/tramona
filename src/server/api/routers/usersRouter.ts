@@ -30,6 +30,7 @@ import jwt from "jsonwebtoken";
 import { z } from "zod";
 import axios from "axios";
 import { getCity } from "@/server/google-maps";
+import { sendSlackMessage } from "@/server/slack";
 
 export const usersRouter = createTRPCRouter({
   getOnboardingStep: optionallyAuthedProcedure.query(async ({ ctx }) => {
@@ -215,6 +216,14 @@ export const usersRouter = createTRPCRouter({
         hostawayApiKey: input.hostawayApiKey,
         hostawayAccountId: input.hostawayAccountId,
         hostawayBearerToken: input.hostawayBearerToken,
+      });
+
+      await sendSlackMessage({
+        text: [
+          "*Host Profile Created:*",
+          `User ${ctx.user.name} has become a host`,
+        ].join("\n"),
+        channel: "host-bot",
       });
 
       interface PropertyType {
