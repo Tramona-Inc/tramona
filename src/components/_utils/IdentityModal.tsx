@@ -72,7 +72,7 @@ const IdentityModal = () => {
         variant="secondary"
         disabled={!stripe}
         onClick={handleClick}
-        className="font-semibold"
+        className="w-full font-semibold"
       >
         Confirm your identity
       </Button>

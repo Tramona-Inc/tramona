@@ -9,7 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { type RouterOutputs } from "@/utils/api";
+import { api, type RouterOutputs } from "@/utils/api";
 import { formatDateWeekMonthDay, plural } from "@/utils/utils";
 import { AspectRatio } from "../ui/aspect-ratio";
 import {
@@ -42,6 +42,9 @@ import {
 } from "./HouseRules";
 import { OfferPriceDetails } from "../_common/OfferPriceDetails";
 import { getCancellationPolicyDescription } from "@/config/getCancellationPolicyDescription";
+import { VerificationProvider } from "../_utils/VerificationContext";
+import IdentityModal from "../_utils/IdentityModal";
+import { useSession } from "next-auth/react";
 
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 
@@ -50,6 +53,9 @@ export default function OfferPage({
 }: {
   offer: OfferWithDetails;
 }) {
+  const { data: verificationStatus } =
+    api.users.myVerificationStatus.useQuery();
+  console.log("verification status:", verificationStatus?.isIdentityVerified);
   const isBooked = !!offer.acceptedAt;
 
   const aboutRef = useRef<HTMLDivElement>(null);
@@ -458,7 +464,12 @@ export default function OfferPage({
                 )}
                 <Button
                   asChild={!isBooked}
-                  variant="greenPrimary"
+                  variant={
+                    property.stripeVerRequired &&
+                    verificationStatus?.isIdentityVerified === "pending"
+                      ? "secondary"
+                      : "greenPrimary"
+                  }
                   size="lg"
                   className="w-full"
                   disabled={isBooked}
@@ -468,11 +479,22 @@ export default function OfferPage({
                       <BookCheckIcon className="size-5" />
                       Booked
                     </>
-                  ) : (
+                  ) : !property.stripeVerRequired ? (
                     <Link href={`/offer-checkout/${offer.id}`}>
                       Book now
                       <ArrowRightIcon className="size-5" />
                     </Link>
+                  ) : verificationStatus?.isIdentityVerified === "true" ? (
+                    <Link href={`/offer-checkout/${offer.id}`}>
+                      Book now
+                      <ArrowRightIcon className="size-5" />
+                    </Link>
+                  ) : verificationStatus?.isIdentityVerified === "pending" ? (
+                    <p>Verification pending</p>
+                  ) : (
+                    <VerificationProvider>
+                      <IdentityModal />
+                    </VerificationProvider>
                   )}
                 </Button>
                 <OfferPriceDetails offer={offer} />
