@@ -27,9 +27,9 @@ export default function HostPropertiesRestrictions({
   const [editing, setEditing] = useState(false);
 
   const formSchema = z.object({
-    age: zodNumber({ min: 18 }),
+    age: zodNumber({ min: 18 }).nullable(),
     price: zodNumber({ min: 0 }).nullable(),
-    stripeVerRequired: z.enum(["yes", "no"]).transform((s) => s === "yes"),
+    stripeVerRequired: z.string(),
   });
 
   type FormValues = z.infer<typeof formSchema>;
@@ -37,9 +37,9 @@ export default function HostPropertiesRestrictions({
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      age: property.ageRestriction ?? 18,
-      price: property.priceRestriction ?? 0,
-      stripeVerRequired: property.stripeVerRequired ?? undefined,
+      age: property.ageRestriction,
+      price: property.priceRestriction,
+      stripeVerRequired: property.stripeVerRequired ? "yes" : "no",
     },
     mode: "onChange",
     reValidateMode: "onChange",
@@ -53,7 +53,7 @@ export default function HostPropertiesRestrictions({
       ...property,
       ageRestriction: age,
       priceRestriction: price,
-      stripeVerRequired: stripeVerRequired,
+      stripeVerRequired: stripeVerRequired === "yes",
     };
     console.log("form values:", values);
     console.log("default values:", form.getValues());
@@ -74,6 +74,8 @@ export default function HostPropertiesRestrictions({
         <h2 className="text-xl font-bold">Property restrictions</h2>
         <Form {...form}>
           <ErrorMsg>{form.formState.errors.root?.message}</ErrorMsg>
+          {/* {JSON.stringify(form.formState.errors, null, 2)} to check for form */}
+          state errors
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <div className="grid grid-cols-1 items-center gap-4 rounded-xl bg-zinc-100 p-4 sm:grid-cols-2 sm:gap-6">
               <div>
@@ -94,6 +96,7 @@ export default function HostPropertiesRestrictions({
                         disabled={!editing}
                         type="number"
                         placeholder="Minimum booking age"
+                        value={field.value ?? ""}
                       />
                     </FormControl>
                     <FormMessage />
@@ -120,7 +123,7 @@ export default function HostPropertiesRestrictions({
                         placeholder="Minimum nightly price"
                         suffix="/night"
                         type="number"
-                        value={field.value?.toString() ?? ""}
+                        value={field.value ?? ""}
                       />
                     </FormControl>
                     <FormMessage />
@@ -141,7 +144,7 @@ export default function HostPropertiesRestrictions({
                   <FormItem>
                     <FormControl>
                       <RadioGroup
-                        defaultValue={field.value ? "yes" : "no"}
+                        defaultValue={field.value}
                         onValueChange={field.onChange}
                         disabled={!editing}
                       >
