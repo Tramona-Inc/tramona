@@ -463,9 +463,12 @@ export const stripeRouter = createTRPCRouter({
       where: eq(hostProfiles.userId, ctx.user.id),
     });
     if (!res?.stripeAccountId) {
-      const [firstName, ...rest] = ctx.user.name!.split(" ");
-      const lastName = rest.join(" ");
-      console.log("STripe account created before ");
+      const [firstNameFallback, ...rest] = ctx.user.name!.split(" ");
+      const lastNameFallback = rest.join(" ");
+
+      const firstName = ctx.user.firstName ?? firstNameFallback;
+      const lastName = ctx.user.lastName ?? lastNameFallback;
+
       const stripeAccount = await stripeWithSecretKey.accounts.create({
         country: "US", //change this to the user country later
         email: ctx.user.email,
