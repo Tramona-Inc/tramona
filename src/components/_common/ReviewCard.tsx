@@ -11,11 +11,7 @@ import {
 import { useRef, useState, useEffect } from "react";
 import { type Review } from "@/server/db/schema";
 
-export default function ReviewCard({
-  review,
-}: {
-  review: Omit<Review, "propertyId" | "id">;
-}) {
+export default function ReviewCard({ review }: { review: Review }) {
   const reviewRef = useRef<HTMLDivElement>(null);
   const [isOverflowing, setIsOverflowing] = useState(false);
 
