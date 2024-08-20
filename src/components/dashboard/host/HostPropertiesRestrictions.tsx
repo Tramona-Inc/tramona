@@ -16,6 +16,8 @@ import { zodNumber } from "@/utils/zod-utils";
 import ErrorMsg from "@/components/ui/ErrorMsg";
 import { api } from "@/utils/api";
 import { DollarSignIcon } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 
 export default function HostPropertiesRestrictions({
   property,
@@ -25,8 +27,9 @@ export default function HostPropertiesRestrictions({
   const [editing, setEditing] = useState(false);
 
   const formSchema = z.object({
-    age: zodNumber({ min: 18 }),
-    price: zodNumber({ min: 0 }).nullable(),
+    age: z.union([zodNumber(), z.literal("").transform(() => null)]).nullable(),
+    price: z.union([zodNumber({ min: 0 }), z.literal("").transform(() => 0)]),
+    stripeVerRequired: z.string(),
   });
 
   type FormValues = z.infer<typeof formSchema>;
@@ -34,8 +37,9 @@ export default function HostPropertiesRestrictions({
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      age: property.ageRestriction ?? undefined,
-      price: property.priceRestriction ?? undefined,
+      age: property.ageRestriction ?? null,
+      price: property.priceRestriction ? property.priceRestriction / 100 : 0,
+      stripeVerRequired: property.stripeVerRequired ? "yes" : "no",
     },
     mode: "onChange",
     reValidateMode: "onChange",
@@ -43,13 +47,17 @@ export default function HostPropertiesRestrictions({
 
   const { mutateAsync: updateProperty } = api.properties.update.useMutation();
 
-  const onSubmit = async () => {
-    const { age, price } = form.getValues();
+  const onSubmit = async (values: FormValues) => {
+    const { age, price, stripeVerRequired } = values;
     const newProperty = {
       ...property,
-      ageRestriction: Number(age),
-      priceRestriction: Number(price),
+      ageRestriction: age,
+      priceRestriction: price ? price * 100 : 0, //convert to cents
+      stripeVerRequired: stripeVerRequired === "yes",
     };
+    console.log("form values:", values);
+    console.log("default values:", form.getValues());
+    console.log("new priceRestriction", newProperty.priceRestriction);
     await updateProperty(newProperty);
   };
 
@@ -87,6 +95,7 @@ export default function HostPropertiesRestrictions({
                         disabled={!editing}
                         type="number"
                         placeholder="Minimum booking age"
+                        value={field.value ?? ""}
                       />
                     </FormControl>
                     <FormMessage />
@@ -113,8 +122,41 @@ export default function HostPropertiesRestrictions({
                         placeholder="Minimum nightly price"
                         suffix="/night"
                         type="number"
-                        value={field.value?.toString() ?? ""}
                       />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div>
+                <h3 className="text-lg font-semibold">Stripe verification</h3>
+                <p className="text-muted-foreground">
+                  Do you want travelers to be verified by Stripe for this
+                  property?
+                </p>
+              </div>
+              <FormField
+                name="stripeVerRequired"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <RadioGroup
+                        defaultValue={field.value}
+                        onValueChange={field.onChange}
+                        disabled={!editing}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center space-x-1">
+                            <RadioGroupItem value="no" id="r1" />
+                            <Label htmlFor="r1">No</Label>
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            <RadioGroupItem value="yes" id="r2" />
+                            <Label htmlFor="r2">Yes</Label>
+                          </div>
+                        </div>
+                      </RadioGroup>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
