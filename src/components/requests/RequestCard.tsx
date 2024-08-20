@@ -9,7 +9,6 @@ import { getFmtdFilters } from "@/utils/formatters";
 import {
   formatCurrency,
   formatDateRange,
-  formatInterval,
   getNumNights,
   plural,
 } from "@/utils/utils";
@@ -31,7 +30,7 @@ import WithdrawRequestDialog from "./WithdrawRequestDialog";
 import { Badge } from "../ui/badge";
 import UserAvatar from "../_common/UserAvatar";
 import { TravelerVerificationsDialog } from "./TravelerVerificationsDialog";
-import { getTime } from "date-fns";
+import { formatDistanceToNowStrict } from "date-fns";
 import { LinkInputPropertyCard } from "../_common/LinkInputPropertyCard";
 import SingleLocationMap from "../_common/GoogleMaps/SingleLocationMap";
 import { api } from "@/utils/api";
@@ -120,7 +119,9 @@ export default function RequestCard({
                 <TravelerVerificationsDialog request={request} />
                 <p>&middot;</p>
                 <p>
-                  {formatInterval(Date.now() - getTime(request.createdAt))} ago
+                  {formatDistanceToNowStrict(request.createdAt, {
+                    addSuffix: true,
+                  })}
                 </p>
               </>
             )}

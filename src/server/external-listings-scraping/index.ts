@@ -29,5 +29,5 @@ export async function scrapeListings(request: MinimalRequest) {
 
   await db
     .insert(externalListings)
-    .values(listings.map((o) => ({ ...o, requestId: request.id })));
+    .values(listings.map((l) => ({ ...l, requestId: request.id })));
 }

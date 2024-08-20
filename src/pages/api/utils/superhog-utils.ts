@@ -158,6 +158,7 @@ export async function createSuperhogReservation({
           channel: "superhog-bot",
           text: [
             `SUPERHOG REQUEST ERROR: axios error... ${error.response.data.detail}`,
+            `by User *:${user.name}* `,
           ].join("\n"),
         });
 

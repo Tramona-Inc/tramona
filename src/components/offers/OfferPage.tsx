@@ -10,7 +10,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { api, type RouterOutputs } from "@/utils/api";
-import { formatDateWeekMonthDay, plural } from "@/utils/utils";
+import { formatDateRange, formatDateWeekMonthDay, plural } from "@/utils/utils";
 import { AspectRatio } from "../ui/aspect-ratio";
 import {
   ImagesIcon,
@@ -44,7 +44,6 @@ import { OfferPriceDetails } from "../_common/OfferPriceDetails";
 import { getCancellationPolicyDescription } from "@/config/getCancellationPolicyDescription";
 import { VerificationProvider } from "../_utils/VerificationContext";
 import IdentityModal from "../_utils/IdentityModal";
-import { useSession } from "next-auth/react";
 
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 
@@ -184,7 +183,7 @@ export default function OfferPage({
             </h1>
             <div className="flex flex-col gap-4 sm:flex-row">
               <div className="flex-1">
-                <p className="gap flex flex-wrap items-center gap-x-1 pt-1 text-sm font-medium">
+                <p className="gap flex flex-wrap items-center gap-x-1 pt-1 text-sm font-medium capitalize">
                   {property.propertyType} in {property.city} ·{" "}
                   <StarIcon className="inline size-[1em] fill-primaryGreen stroke-primaryGreen" />{" "}
                   {property.avgRating}{" "}
@@ -430,7 +429,7 @@ export default function OfferPage({
           </div>
         </div>
 
-        <div className="hidden w-96 shrink-0 lg:block">
+        <div className="hidden shrink-0 md:block md:w-72 lg:w-96">
           <div className="sticky top-[calc(var(--header-height)+1rem)] space-y-4">
             <Card>
               <CardContent className="space-y-4">
@@ -531,6 +530,38 @@ export default function OfferPage({
             </div>
           </div>
         </div>
+        {/* Mobile price card */}
+        <Card className="fixed bottom-16 left-0 w-full md:hidden">
+          <CardContent className="flex flex-row items-center justify-between px-4 py-1 text-sm">
+            {request && (
+              <div className="flex flex-col">
+                <OfferPriceDetails offer={offer} />
+                <p className="font-semibold">
+                  {formatDateRange(offer.checkIn, offer.checkOut)}
+                </p>
+              </div>
+            )}
+            <Button
+              asChild={!isBooked}
+              variant="greenPrimary"
+              size="sm"
+              className="px-6 py-6"
+              disabled={isBooked}
+            >
+              {isBooked ? (
+                <>
+                  <BookCheckIcon className="size-4" />
+                  Booked
+                </>
+              ) : (
+                <Link href={`/offer-checkout/${offer.id}`}>
+                  Book now
+                  <ArrowRightIcon className="size-4" />
+                </Link>
+              )}
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
