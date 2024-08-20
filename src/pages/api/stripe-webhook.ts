@@ -133,7 +133,7 @@ export default async function webhook(
                   currentSuperhogReservation,
                 );
                 if (!currentSuperhogReservation) {
-                  void createSuperhogReservation({
+                  await createSuperhogReservation({
                     paymentIntentId:
                       paymentIntentSucceeded.payment_intent?.toString() ?? "",
                     propertyId: offer.propertyId,
