@@ -14,13 +14,14 @@ export default function NoStripeAccount() {
   }, [hostInfo?.stripeAccountId, createStripeConnectAccount]);
 
   return (
-    <div className="flex flex-col items-center max-w-2xl mx-auto text-center p-8 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-4">Connect Your Stripe Account</h2>
-      <p className="text-gray-600 mb-6">
-        To more seamlessly manage your finances, please connect your Stripe account.
+    <div className="mx-auto flex max-w-2xl flex-col items-center rounded-lg bg-white p-8 text-center shadow-md">
+      <h2 className="mb-4 text-2xl font-bold">Connect Your Stripe Account</h2>
+      <p className="mb-6 text-gray-600">
+        To more seamlessly manage your finances, please connect your Stripe
+        account.
       </p>
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+
+      <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-3">
         <BenefitCard
           title="Secure Payments"
           description="Receive payments safely and securely from travelers worldwide."
@@ -34,16 +35,14 @@ export default function NoStripeAccount() {
           description="Gain valuable analytics and reporting tools to track your earnings."
         />
       </div>
-      
-      <Button 
-        onClick={handleCreateStripeConnectAccount}
-        className=""
-      >
+
+      <Button onClick={handleCreateStripeConnectAccount} className="">
         Connect Stripe Account
       </Button>
-      
+
       <p className="mt-4 text-sm text-gray-500">
-        By connecting your account, you agree to Stripe's Terms of Service and Privacy Policy.
+        By connecting your account, you agree to Stripe&apos;s Terms of Service
+        and Privacy Policy.
       </p>
     </div>
   );
@@ -56,8 +55,8 @@ interface BenefitCardProps {
 
 function BenefitCard({ title, description }: BenefitCardProps) {
   return (
-    <div className="flex flex-col items-center p-4 bg-gray-50 rounded-lg">
-      <h3 className="text-lg font-semibold mt-2 mb-1">{title}</h3>
+    <div className="flex flex-col items-center rounded-lg bg-gray-50 p-4">
+      <h3 className="mb-1 mt-2 text-lg font-semibold">{title}</h3>
       <p className="text-sm text-gray-600">{description}</p>
     </div>
   );

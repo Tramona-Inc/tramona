@@ -19,7 +19,7 @@ import Spinner from "../_common/Spinner";
 import { useToast } from "../ui/use-toast";
 
 const CustomStripeCheckout = ({
-  offer: { property, request, ...offer },
+  offer: { property, ...offer },
 }: {
   offer: OfferWithDetails;
 }) => {

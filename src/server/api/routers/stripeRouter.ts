@@ -462,9 +462,13 @@ export const stripeRouter = createTRPCRouter({
       },
       where: eq(hostProfiles.userId, ctx.user.id),
     });
-    if (ctx.user.role === "host" && !res?.stripeAccountId) {
-      const [firstName, ...rest] = ctx.user.name!.split(" ");
-      const lastName = rest.join(" ");
+    if (!res?.stripeAccountId) {
+      const [firstNameFallback, ...rest] = ctx.user.name!.split(" ");
+      const lastNameFallback = rest.join(" ");
+
+      const firstName = ctx.user.firstName ?? firstNameFallback;
+      const lastName = ctx.user.lastName ?? lastNameFallback;
+
       const stripeAccount = await stripeWithSecretKey.accounts.create({
         country: "US", //change this to the user country later
         email: ctx.user.email,
@@ -505,10 +509,7 @@ export const stripeRouter = createTRPCRouter({
 
       return stripeAccount;
     } else {
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: "Stripe account already created",
-      });
+      throw new Error("Stripe account already created");
     }
   }),
 
@@ -568,12 +569,6 @@ export const stripeRouter = createTRPCRouter({
           // },
         },
       });
-      if (!accountSession) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Stripe account not found",
-        });
-      }
 
       return accountSession;
     }),
