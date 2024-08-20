@@ -128,6 +128,10 @@ export default async function webhook(
                   await db.query.trips.findFirst({
                     where: eq(trips.superhogRequestId, superhogRequests.id),
                   });
+                console.log(
+                  "currentSuperhogReservation does it exist? ",
+                  currentSuperhogReservation,
+                );
                 if (!currentSuperhogReservation) {
                   void createSuperhogReservation({
                     paymentIntentId:

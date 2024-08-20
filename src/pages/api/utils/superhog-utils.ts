@@ -91,6 +91,7 @@ export async function createSuperhogReservation({
   trip: Trip;
 }) {
   //find the property using its id
+  console.log("createSuperhogReservation was called");
   const property = await db.query.properties.findFirst({
     where: eq(properties.id, propertyId),
   });
