@@ -569,12 +569,6 @@ export const stripeRouter = createTRPCRouter({
           // },
         },
       });
-      if (!accountSession) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Stripe account not found",
-        });
-      }
 
       return accountSession;
     }),
