@@ -283,7 +283,7 @@ export function getPriceBreakdown({
   // should always cover the stripe fee + a little extra
   const stripeCoverFee = Math.ceil(totalMinusStripe * 0.04); //this 4 percent
   const serviceFee = superhogFeePaid + stripeCoverFee;
-  const finalTotal = totalMinusStripe + stripeCoverFee;
+  const finalTotal = Math.floor(totalMinusStripe + stripeCoverFee);
 
   const priceBreakdown = {
     bookingCost: bookingCost,

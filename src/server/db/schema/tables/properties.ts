@@ -116,6 +116,7 @@ export const propertyPMSEnum = pgEnum("property_pms", ALL_PROPERTY_PMS);
 
 export const listingPlatformEnum = pgEnum("listing_platform", [
   ...ALL_LISTING_SITE_NAMES,
+
   ...ALL_PROPERTY_PMS,
 ]);
 
