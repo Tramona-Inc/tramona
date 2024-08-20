@@ -1,4 +1,4 @@
-import { eq, and, sql, isNull } from "drizzle-orm";
+import { eq, and, sql, isNull, isNotNull } from "drizzle-orm";
 import { db } from "../../../server/db";
 import { hostProfiles, trips } from "../../../server/db/schema/index";
 import { createPayHostTransfer } from "@/utils/stripe-utils";
@@ -7,10 +7,10 @@ import { sendSlackMessage } from "../../../server/slack";
 
 export default async function handler() {
   //will run every hour
-  try {
-    const now = new Date().toISOString();
+  const now = new Date().toISOString();
 
-    // Fetch bookings that are scheduled for payout
+  // Fetch bookings that are scheduled for payout
+  try {
     const TripsAfter24HourCheckIn = await db.query.trips.findMany({
       with: {
         offer: {
@@ -26,6 +26,8 @@ export default async function handler() {
       },
       where: and(
         isNull(trips.hostPayed),
+        isNotNull(trips.paymentCaptured),
+        eq(trips.tripsStatus, "Booked"),
         sql`${trips.checkIn} <= ${sql`(${now}::timestamp - interval '24 hours')`}`,
       ),
     });
@@ -59,7 +61,7 @@ export default async function handler() {
       channel: "tramona-bot",
       text: [
         `STRIPE HOST PAYOUT ERROR: `,
-        `A host has not been paid for booking that has passed the 24-hour check-in window.`,
+        `A host has not been paid for booking booking that has passed the 24-hour check-in window.`,
         `Please check the stripe logs for more information`,
       ].join("\n"),
     });

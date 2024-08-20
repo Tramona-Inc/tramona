@@ -473,6 +473,7 @@ export default async function webhook(
 
         if (account.id) {
           const stripeAccount = await stripe.accounts.retrieve(account.id);
+          console.log("Stripe account updated", stripeAccount);
           await db
             .update(hostProfiles)
             .set({

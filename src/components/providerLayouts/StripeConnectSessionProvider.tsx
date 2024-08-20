@@ -57,7 +57,7 @@ const StripeConnectSessionProvider = ({
     api.stripe.createStripeAccountSession.useQuery(stripeAccountId!, {
       enabled: stripeAccountId && !isStripeConnectInstanceReady ? true : false,
       onSuccess: () => {
-        console.log("accountSession before return ");
+        console.log("accountSession before return");
         if (!accountSession) return;
         console.log(
           "accountSession after return ",
