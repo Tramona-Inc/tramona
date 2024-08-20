@@ -19,7 +19,7 @@ import { buffer } from "micro";
 import { type NextApiRequest, type NextApiResponse } from "next";
 import { superhogRequests } from "../../server/db/schema/tables/superhogRequests";
 import { cancelTripByPaymentIntent } from "@/pages/api/utils/trips-utils";
-import { createSuperhogReservation } from "@/pages/api/utils/superhog-utils";
+import { createSuperhogReservation } from "@/utils/superhog-utils";
 
 // ! Necessary for stripe
 export const config = {

@@ -147,6 +147,8 @@ export async function createSuperhogReservation({
       },
     };
 
+    console.log("reservationObject", reservationObject);
+
     const { verification } = await axios
       .post<unknown, ResponseType>(
         "https://superhog-apim.azure-api.net/e-deposit/verifications",
@@ -177,7 +179,7 @@ export async function createSuperhogReservation({
           .where(eq(trips.id, trip.id));
         throw new Error(error.response.data.detail);
       });
-
+    console.log("verification", verification);
     if (!verification) {
       console.log("There was no verification");
       await db.insert(superhogErrors).values({

@@ -1,7 +1,7 @@
 import { db } from "@/server/db";
 import { eq } from "drizzle-orm";
 import { trips, tripCancellations, superhogRequests } from "@/server/db/schema";
-import { cancelSuperhogReservation } from "./superhog-utils";
+import { cancelSuperhogReservation } from "../../../utils/superhog-utils";
 
 export async function cancelTripByPaymentIntent({
   paymentIntentId,
