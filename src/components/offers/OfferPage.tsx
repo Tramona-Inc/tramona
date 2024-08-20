@@ -113,8 +113,8 @@ export default function OfferPage({
           <p>Verification pending</p>
         ) : (
           <VerificationProvider>
-            <IdentityModal />
-            <p className="hidden text-center text-sm font-semibold text-red-500 sm:block">
+            <IdentityModal isPrimary={true} />
+            <p className="hidden text-center text-sm font-semibold text-red-500 md:block">
               This host requires you to go through Stripe verification before
               you book
             </p>
