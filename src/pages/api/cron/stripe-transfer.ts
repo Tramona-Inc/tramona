@@ -56,7 +56,7 @@ export default async function handler() {
       });
     }
   } catch (error) {
-    console.error("Error scheduling transfer:", error);
+    console.log("Error scheduling transfer:", error);
     await sendSlackMessage({
       channel: "tramona-bot",
       text: [
