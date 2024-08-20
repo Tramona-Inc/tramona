@@ -297,8 +297,8 @@ export async function addProperty({
   await sendSlackMessage({
     channel: "host-bot",
     text: [
-      `*New property added: ${property.name} in ${property.address}*' 
-    ' by ${userEmail}`,
+      `*New property added: ${property.name} in ${property.address}*
+     by ${userEmail}`,
     ].join("\n"),
   });
   return insertedProperty!.id;

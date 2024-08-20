@@ -22,7 +22,7 @@ const StripeConnectSessionProvider = ({
   const { data: stripeAccountIdNumber } = api.host.getStripeAccountId.useQuery(
     undefined,
     {
-      enabled: !!isHost ? true : false,
+      enabled: isHost?.becameHostAt ? true : false,
     },
   );
 
@@ -30,7 +30,8 @@ const StripeConnectSessionProvider = ({
 
   //this wets the stripeACCOUNTID number that will be used to create a session
   useEffect(() => {
-    if (!stripeAccountIdNumber) return;
+    if (!stripeAccountIdNumber?.stripeAccountId) return;
+
     setStripeAccountId(stripeAccountIdNumber.stripeAccountId);
     console.log("stripeAccoutneI after set");
     console.log(stripeAccountIdNumber.stripeAccountId);
