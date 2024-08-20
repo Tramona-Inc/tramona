@@ -18,8 +18,8 @@ import { eq, sql } from "drizzle-orm";
 import { buffer } from "micro";
 import { type NextApiRequest, type NextApiResponse } from "next";
 import { superhogRequests } from "../../server/db/schema/tables/superhogRequests";
-import { cancelTripByPaymentIntent } from "@/pages/api/utils/trips-utils";
-import { createSuperhogReservation } from "@/utils/superhog-utils";
+import { cancelTripByPaymentIntent } from "@/utils/webhook-functions/trips-utils";
+import { createSuperhogReservation } from "@/utils/webhook-functions/superhog-utils";
 
 // ! Necessary for stripe
 export const config = {
@@ -128,10 +128,7 @@ export default async function webhook(
                   await db.query.trips.findFirst({
                     where: eq(trips.superhogRequestId, superhogRequests.id),
                   });
-                console.log(
-                  "currentSuperhogReservation does it exist? ",
-                  currentSuperhogReservation,
-                );
+
                 if (!currentSuperhogReservation) {
                   await createSuperhogReservation({
                     paymentIntentId:
