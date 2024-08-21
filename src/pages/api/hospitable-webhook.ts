@@ -6,6 +6,12 @@ import {
 import axios from "axios";
 import { type NextApiRequest, type NextApiResponse } from "next";
 import { db } from "@/server/db";
+import { api } from "@/utils/api";
+
+
+const { mutateAsync: createHostProfile } =
+api.users.upsertHostProfile.useMutation();
+
 
 const airbnbPropertyTypes = [
   "house",
@@ -189,6 +195,7 @@ export default async function webhook(
     switch (webhookData.action) {
       case "channel.activated":
         console.log("channel created");
+        await createHostProfile();
         break;
       case "listing.created":
         const userId = webhookData.data.channel.customer.id;
@@ -329,3 +336,5 @@ export default async function webhook(
     res.status(405).end("Method Not Allowed");
   }
 }
+
+
