@@ -8,7 +8,7 @@ import { type ListingSiteName } from "@/server/db/schema";
 export type ListingSiteUrlParams = Readonly<{
   checkIn?: string | Date;
   checkOut?: string | Date;
-  numGuests: number;
+  numGuests?: number;
 }>;
 
 export type OriginalListing = Readonly<{

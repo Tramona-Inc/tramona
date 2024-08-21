@@ -1,4 +1,5 @@
 import {
+  Property,
   type CancellationPolicy,
   type PropertyRoomType,
   type PropertyType,
@@ -40,6 +41,8 @@ type HostOnboardingState = {
     petsAllowed: boolean;
     smokingAllowed: boolean;
     otherHouseRules: string | null | undefined;
+    originalListingId: string | null | undefined;
+    originalListingPlatform: Property["originalListingPlatform"] | undefined;
   };
   setIsEdit: (isEdit: boolean) => void;
   setMaxGuests: (maxGuests: number) => void;
@@ -68,6 +71,10 @@ type HostOnboardingState = {
   setPetsAllowed: (petsAllowed: boolean) => void;
   setSmokingAllowed: (smokingAllowed: boolean) => void;
   setOtherHouseRules: (otherHouseRules: string) => void;
+  setOriginalListingId: (originalListingId: string) => void;
+  setOriginalListingPlatform: (
+    originalListingPlatform: Property["originalListingPlatform"],
+  ) => void;
   resetSession: () => void;
 };
 
@@ -104,6 +111,8 @@ export const useHostOnboarding = create<HostOnboardingState>()(
         petsAllowed: false,
         smokingAllowed: false,
         otherHouseRules: "",
+        originalListingId: null,
+        originalListingPlatform: undefined,
       },
       setIsEdit: (isEdit: boolean) => {
         set((state) => ({ ...state, isEdit }));
@@ -331,6 +340,26 @@ export const useHostOnboarding = create<HostOnboardingState>()(
           listing: {
             ...state.listing,
             otherHouseRules,
+          },
+        }));
+      },
+      setOriginalListingId: (originalListingId: string) => {
+        set((state) => ({
+          ...state,
+          listing: {
+            ...state.listing,
+            originalListingId,
+          },
+        }));
+      },
+      setOriginalListingPlatform: (
+        originalListingPlatform: Property["originalListingPlatform"],
+      ) => {
+        set((state) => ({
+          ...state,
+          listing: {
+            ...state.listing,
+            originalListingPlatform,
           },
         }));
       },

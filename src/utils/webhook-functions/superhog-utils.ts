@@ -78,7 +78,7 @@ type ResponseType = {
     };
   };
 };
-
+3;
 export async function createSuperhogReservation({
   paymentIntentId,
   propertyId,
@@ -176,9 +176,7 @@ export async function createSuperhogReservation({
           .where(eq(trips.id, trip.id));
         throw new Error(error.response.data.detail);
       });
-
     if (!verification) {
-      console.log("There was no verification");
       await db.insert(superhogErrors).values({
         echoToken: reservationObject.metadata.echoToken,
         error: "NO RESPONSE FROM SUPERHOG",
@@ -195,7 +193,6 @@ export async function createSuperhogReservation({
       });
       throw new Error("Not found");
     }
-    console.log(" Here is the verification", verification);
 
     //now we can create the superhog_ request table
     const currentSuperHogRequestId = await db
@@ -209,8 +206,6 @@ export async function createSuperhogReservation({
         superhogReservationId: reservationObject.reservation.reservationId, //this is the trip id but not connected it doesnt matter what the value is tbh
       })
       .returning({ id: superhogRequests.id });
-
-    console.log("currentSuperHogRequestId ", currentSuperHogRequestId);
     //update the trip with the superhog request id
     const currentTripId = await db
       .update(trips)
@@ -219,7 +214,6 @@ export async function createSuperhogReservation({
       })
       .where(eq(trips.id, trip.id))
       .returning({ id: trips.id });
-    console.log("currentTripId", currentTripId);
     //record the action in the superhog action table
     await db.insert(superhogActionOnTrips).values({
       action: "create",
@@ -242,7 +236,6 @@ export async function createSuperhogReservation({
         ].join("\n"),
       });
     } else {
-      console.log("Superhog was approved and just need to capture the payment");
       //approved we can take the payment
       const intent = await stripe.paymentIntents.capture(paymentIntentId); //will capture the authorized amount by default
       // Update trips table

@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import NoStripeAccount from "@/components/host/finances/NoStripeAccount";
 import {
   ConnectAccountOnboarding,
@@ -14,7 +14,6 @@ import {
 } from "@stripe/react-connect-js";
 import useIsStripeConnectInstanceReady from "@/utils/store/stripe-connect";
 import Spinner from "@/components/_common/Spinner";
-import { stripe } from "@/server/api/routers/stripeRouter";
 
 export default function Page() {
   useSession({ required: true });
@@ -65,11 +64,7 @@ export default function Page() {
             }}
           />
         )}
-        {isPageLoading ? (
-          <div className="flex h-64 items-center justify-center">
-            <Spinner />
-          </div>
-        ) : isStripeConnectInstanceReady ? (
+        {isStripeConnectInstanceReady ? (
           <Tabs defaultValue="summary" className="space-y-10">
             <TabsList className="text-blue-200">
               <TabsTrigger
@@ -108,28 +103,22 @@ export default function Page() {
             <TabsContent value="Settings">
               <div className="flex justify-around">
                 {hostInfo?.stripeAccountId && hostInfo.chargesEnabled ? (
-                  isStripeConnectInstanceReady ? (
-                    <div className="relative my-3 flex w-full flex-row items-center justify-around gap-x-10">
-                      <ConnectAccountManagement
-                        collectionOptions={{
-                          fields: "eventually_due",
-                          futureRequirements: "include",
-                        }}
-                      />
-                    </div>
-                  ) : (
-                    <Spinner />
-                  )
+                  <div className="relative my-3 flex w-full flex-row items-center justify-around gap-x-10">
+                    <ConnectAccountManagement
+                      collectionOptions={{
+                        fields: "eventually_due",
+                        futureRequirements: "include",
+                      }}
+                    />
+                  </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center">
                     {!hostInfo?.stripeAccountId && <NoStripeAccount />}
-                    {isStripeConnectInstanceReady && (
-                      <ConnectAccountOnboarding
-                        onExit={() => {
-                          window.location.reload(); //default behavior we should change if ugly
-                        }}
-                      />
-                    )}
+                    <ConnectAccountOnboarding
+                      onExit={() => {
+                        window.location.reload(); //default behavior we should change if ugly
+                      }}
+                    />
                   </div>
                 )}
               </div>

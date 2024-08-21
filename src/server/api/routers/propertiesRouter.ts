@@ -13,6 +13,7 @@ import {
   propertySelectSchema,
   propertyUpdateSchema,
   type Request,
+  requestInsertSchema,
   requests,
   requestsToProperties,
   type User,
@@ -49,7 +50,7 @@ export type HostRequestsPageData = {
 };
 
 export const propertiesRouter = createTRPCRouter({
-  create: roleRestrictedProcedure(["admin", "host"])
+  create: protectedProcedure
     .input(
       propertyInsertSchema.omit({
         hostId: true,
@@ -60,7 +61,6 @@ export const propertiesRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const user = ctx.user.role === "admin" ? null : ctx.user;
       const hostTeamId = await db.query.hostProfiles
         .findFirst({
           where: eq(hostProfiles.userId, ctx.user.id),
@@ -69,13 +69,16 @@ export const propertiesRouter = createTRPCRouter({
         .then((res) => res?.curTeamId);
 
       if (!hostTeamId) {
-        //logic
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Host profile not found for user ${ctx.user.id}`,
+        });
       }
 
       const id = await addProperty({
         property: input,
-        userEmail: user?.email,
-        userId: user?.id,
+        userId: ctx.user.id,
+        userEmail: ctx.user.email,
         hostTeamId,
       });
       return id;
@@ -469,7 +472,7 @@ export const propertiesRouter = createTRPCRouter({
               hp.city
             FROM host_properties hp
             JOIN ${requests} r ON hp.request_id = r.id
-            WHERE r.check_in >= CURRENT_DATE 
+            WHERE r.check_in >= CURRENT_DATE
             GROUP BY hp.city, hp.request_id
           )
           SELECT
@@ -521,6 +524,7 @@ export const propertiesRouter = createTRPCRouter({
           hostProfilePic: row.host_profile_pic,
           hostawayListingId: row.hostaway_listing_id,
           hostName: row.host_name,
+          priceRestriction: row.price_restriction,
           // Add other property fields here
         } as unknown as Property;
 

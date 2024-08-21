@@ -5,6 +5,7 @@ import { type ReactElement } from "react";
 import { Twilio } from "twilio";
 import { db } from "./db";
 import { waitUntil } from "@vercel/functions";
+import { formatCurrency, getNumNights, plural } from "@/utils/utils";
 
 import {
   and,
@@ -16,6 +17,7 @@ import {
   isNull,
   lte,
   notExists,
+  or,
   sql,
   type SQL,
 } from "drizzle-orm";
@@ -23,6 +25,7 @@ import {
   type NewProperty,
   type Property,
   type User,
+  type Request,
   bookedDates,
   groupInvites,
   groupMembers,
@@ -40,6 +43,7 @@ import { HttpsProxyAgent } from "https-proxy-agent";
 import * as cheerio from "cheerio";
 import { sendSlackMessage } from "./slack";
 import { HOST_MARKUP, TRAVELER__MARKUP } from "@/utils/constants";
+
 export const proxyAgent = new HttpsProxyAgent(env.PROXY_URL);
 
 export async function scrapeUrl(url: string) {
@@ -297,8 +301,8 @@ export async function addProperty({
   await sendSlackMessage({
     channel: "host-bot",
     text: [
-      `*New property added: ${property.name} in ${property.address}*' 
-    ' by ${userEmail}`,
+      `*New property added: ${property.name} in ${property.address}*
+     by ${userEmail}`,
     ].join("\n"),
   });
   return insertedProperty!.id;
@@ -318,17 +322,68 @@ async function processRequests(
       location: request.location,
       checkIn: request.checkIn,
       checkOut: request.checkOut,
+      maxTotalPrice: request.maxTotalPrice,
       latLngPoint: request.latLngPoint,
       propertyLatLngPoint: insertedProperty.latLngPoint,
     });
 
-    if (matchingProperties.includes(insertedProperty.id)) {
+    const propertyIds = matchingProperties.map((property) => property.id);
+    await sendTextToHost(
+      matchingProperties,
+      request.checkIn,
+      request.checkOut,
+      request.maxTotalPrice,
+      request.location,
+    );
+
+    if (propertyIds.includes(insertedProperty.id)) {
       await db.insert(requestsToProperties).values({
         requestId: request.id,
         propertyId: insertedProperty.id,
       });
     }
   }
+}
+
+export async function sendTextToHost(
+  matchingProperties: { id: number; hostId: string | null }[],
+  checkIn: Date,
+  checkOut: Date,
+  maxTotalPrice: number,
+  location: string,
+) {
+  const uniqueHostIds = Array.from(
+    new Set(matchingProperties.map((property) => property.hostId)),
+  );
+  const numHostPropertiesPerRequest = matchingProperties.reduce(
+    (acc, property) => {
+      if (property.hostId) {
+        acc[property.hostId] = (acc[property.hostId] ?? 0) + 1;
+      }
+      return acc;
+    },
+    {} as Record<string, number>,
+  );
+
+  void uniqueHostIds.filter(Boolean).map(async (hostId) => {
+    const host = await db.query.users.findFirst({
+      where: eq(users.id, hostId),
+      columns: { name: true, email: true, phoneNumber: true },
+    });
+    if (host) {
+      const hostPhoneNumber = host.phoneNumber;
+
+      if (hostPhoneNumber) {
+        const numberOfNights = getNumNights(checkIn, checkOut);
+        // Send a text message to the host
+        await sendText({
+          to: hostPhoneNumber,
+          content: `Tramona: There is a request for ${formatCurrency(maxTotalPrice / numberOfNights)} per night for ${plural(numberOfNights, "night")} in ${location}. You have ${numHostPropertiesPerRequest[hostId]} eligible properties. Please click here to make a match. ${env.NEXTAUTH_URL}/host/requests`,
+        });
+        //TO DO SEND WHATSAPP MESSAGE
+      }
+    }
+  });
 }
 
 export async function getPropertiesForRequest(
@@ -339,6 +394,7 @@ export async function getPropertiesForRequest(
     location: string;
     checkIn: Date;
     checkOut: Date;
+    maxTotalPrice: number;
     id: number;
     latLngPoint?: { x: number; y: number } | null;
     propertyLatLngPoint?: Property["latLngPoint"];
@@ -398,16 +454,28 @@ export async function getPropertiesForRequest(
       ),
   );
 
+  const numberOfNights = getNumNights(req.checkIn, req.checkOut);
+
   const result = await tx.query.properties.findMany({
     where: and(
       isNotNull(properties.hostId),
       propertyIsNearRequest,
       propertyisAvailable,
+      or(
+        isNull(properties.priceRestriction), // Include properties with no price restriction
+        and(
+          isNotNull(properties.priceRestriction),
+          lte(
+            properties.priceRestriction,
+            (req.maxTotalPrice / numberOfNights) * 1.15,
+          ),
+        ),
+      ),
     ),
-    columns: { id: true, city: true, latitude: true, longitude: true },
+    columns: { id: true, hostId: true },
   });
 
-  return result.map((p) => p.id);
+  return result;
 }
 
 export async function getAdminId() {
@@ -469,6 +537,19 @@ export async function getPropertyOriginalPrice(
     return totalPrice;
   }
   // code for other options
+}
+
+export interface CityData {
+  city: string;
+  requests: {
+    request: Request;
+    properties: Property[];
+  }[];
+}
+
+export interface SeparatedData {
+  normal: CityData[];
+  outsidePriceRestriction: CityData[];
 }
 
 //update spread on every fetch to keep information updated

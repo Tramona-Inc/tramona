@@ -9,13 +9,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { type RouterOutputs } from "@/utils/api";
-import {
-  formatDateRange,
-  formatDateWeekMonthDay,
-  formatShortDate,
-  plural,
-} from "@/utils/utils";
+import { api, type RouterOutputs } from "@/utils/api";
+import { formatDateRange, formatDateWeekMonthDay, plural } from "@/utils/utils";
 import { AspectRatio } from "../ui/aspect-ratio";
 import {
   ImagesIcon,
@@ -47,6 +42,8 @@ import {
 } from "./HouseRules";
 import { OfferPriceDetails } from "../_common/OfferPriceDetails";
 import { getCancellationPolicyDescription } from "@/config/getCancellationPolicyDescription";
+import { VerificationProvider } from "../_utils/VerificationContext";
+import IdentityModal from "../_utils/IdentityModal";
 
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 
@@ -55,6 +52,9 @@ export default function OfferPage({
 }: {
   offer: OfferWithDetails;
 }) {
+  const { data: verificationStatus } =
+    api.users.myVerificationStatus.useQuery();
+  console.log("verification status:", verificationStatus?.isIdentityVerified);
   const isBooked = !!offer.acceptedAt;
 
   const aboutRef = useRef<HTMLDivElement>(null);
@@ -75,6 +75,55 @@ export default function OfferPage({
 
   const [selectedImageIdx, setSelectedImageIdx] = useState<number>(0);
   const firstImageUrl = property.imageUrls[0]!;
+
+  function BookNowBtn({
+    btnSize,
+  }: {
+    btnSize: "default" | "lg" | "sm" | "icon" | null | undefined;
+  }) {
+    return (
+      <Button
+        asChild={!isBooked}
+        variant={
+          property.stripeVerRequired &&
+          verificationStatus?.isIdentityVerified === "pending"
+            ? "secondary"
+            : "greenPrimary"
+        }
+        size={btnSize}
+        className="w-full"
+        disabled={isBooked}
+      >
+        {isBooked ? (
+          <>
+            <BookCheckIcon className="size-5" />
+            Booked
+          </>
+        ) : !property.stripeVerRequired ? (
+          <Link href={`/offer-checkout/${offer.id}`}>
+            Book now
+            <ArrowRightIcon className="size-5" />
+          </Link>
+        ) : verificationStatus?.isIdentityVerified === "true" ? (
+          <Link href={`/offer-checkout/${offer.id}`}>
+            Book now
+            <ArrowRightIcon className="size-5" />
+          </Link>
+        ) : verificationStatus?.isIdentityVerified === "pending" ? (
+          <p>Verification pending</p>
+        ) : (
+          <VerificationProvider>
+            <IdentityModal isPrimary={true} />
+            <p className="hidden text-center text-sm font-semibold text-red-500 md:block">
+              This host requires you to go through Stripe verification before
+              you book
+            </p>
+          </VerificationProvider>
+        )}
+      </Button>
+    );
+  }
+
   return (
     <div>
       <div className="relative mt-4 grid min-h-[400px] grid-cols-4 grid-rows-2 gap-2 overflow-hidden rounded-xl">
@@ -461,25 +510,7 @@ export default function OfferPage({
                     </div>
                   </div>
                 )}
-                <Button
-                  asChild={!isBooked}
-                  variant="greenPrimary"
-                  size="lg"
-                  className="w-full"
-                  disabled={isBooked}
-                >
-                  {isBooked ? (
-                    <>
-                      <BookCheckIcon className="size-5" />
-                      Booked
-                    </>
-                  ) : (
-                    <Link href={`/offer-checkout/${offer.id}`}>
-                      Book now
-                      <ArrowRightIcon className="size-5" />
-                    </Link>
-                  )}
-                </Button>
+                <BookNowBtn btnSize="lg" />
                 <OfferPriceDetails offer={offer} />
               </CardContent>
             </Card>
@@ -518,32 +549,21 @@ export default function OfferPage({
         <Card className="fixed bottom-16 left-0 w-full md:hidden">
           <CardContent className="flex flex-row items-center justify-between px-4 py-1 text-sm">
             {request && (
-              <div className="flex flex-col">
+              <div className="flex basis-1/2 flex-col">
                 <OfferPriceDetails offer={offer} />
                 <p className="font-semibold">
                   {formatDateRange(offer.checkIn, offer.checkOut)}
                 </p>
               </div>
             )}
-            <Button
-              asChild={!isBooked}
-              variant="greenPrimary"
-              size="sm"
-              className="px-6 py-6"
-              disabled={isBooked}
-            >
-              {isBooked ? (
-                <>
-                  <BookCheckIcon className="size-4" />
-                  Booked
-                </>
-              ) : (
-                <Link href={`/offer-checkout/${offer.id}`}>
-                  Book now
-                  <ArrowRightIcon className="size-4" />
-                </Link>
+            <div className="flex-1">
+              <BookNowBtn btnSize="sm" />
+              {verificationStatus?.isIdentityVerified === "false" && (
+                <p className="text-center text-xs font-semibold text-red-500">
+                  Host requires Stripe verification prior to booking
+                </p>
               )}
-            </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
