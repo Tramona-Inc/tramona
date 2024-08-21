@@ -13,6 +13,7 @@ import {
   propertySelectSchema,
   propertyUpdateSchema,
   type Request,
+  requestInsertSchema,
   requests,
   requestsToProperties,
   type User,
@@ -471,7 +472,7 @@ export const propertiesRouter = createTRPCRouter({
               hp.city
             FROM host_properties hp
             JOIN ${requests} r ON hp.request_id = r.id
-            WHERE r.check_in >= CURRENT_DATE 
+            WHERE r.check_in >= CURRENT_DATE
             GROUP BY hp.city, hp.request_id
           )
           SELECT
@@ -523,6 +524,7 @@ export const propertiesRouter = createTRPCRouter({
           hostProfilePic: row.host_profile_pic,
           hostawayListingId: row.hostaway_listing_id,
           hostName: row.host_name,
+          priceRestriction: row.price_restriction,
           // Add other property fields here
         } as unknown as Property;
 

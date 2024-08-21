@@ -1,4 +1,5 @@
-import { REFERRAL_CODE_LENGTH } from "@/server/db/schema";
+import { Property, REFERRAL_CODE_LENGTH } from "@/server/db/schema";
+import { CityData, SeparatedData } from "@/server/server-utils";
 import { useWindowSize } from "@uidotdev/usehooks";
 import { clsx, type ClassValue } from "clsx";
 import {
@@ -556,4 +557,71 @@ export function formatTime(time: string) {
 
 export function scrollToTop() {
   window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+export function separateByPriceRestriction(organizedData: CityData[]): SeparatedData {
+  const normal: CityData[] = [];
+  const outsidePriceRestriction: CityData[] = [];
+
+  organizedData.forEach((cityData) => {
+    const normalRequests: CityData["requests"] = [];
+    const outsideRequests: CityData["requests"] = [];
+
+    cityData.requests.forEach((requestData) => {
+      const normalProperties: Property[] = [];
+      const outsideProperties: Property[] = [];
+
+      requestData.properties.forEach((property) => {
+        const nightlyPrice =
+          requestData.request.maxTotalPrice /
+          getNumNights(
+            requestData.request.checkIn,
+            requestData.request.checkOut,
+          );
+        if (
+          property.priceRestriction == null ||
+          (property.priceRestriction * 100) <= nightlyPrice
+        ) {
+          if (property.city === "Seattle, WA, US") {
+            console.log(property.priceRestriction, nightlyPrice);
+          }
+          normalProperties.push(property);
+        } else {
+          if ((property.priceRestriction * 100) <= (nightlyPrice * 1.15)) {
+            outsideProperties.push(property);
+          }
+        }
+      });
+
+      if (normalProperties.length > 0) {
+        normalRequests.push({
+          ...requestData,
+          properties: normalProperties,
+        });
+      }
+
+      if (outsideProperties.length > 0) {
+        outsideRequests.push({
+          ...requestData,
+          properties: outsideProperties,
+        });
+      }
+    });
+
+    if (normalRequests.length > 0) {
+      normal.push({
+        city: cityData.city,
+        requests: normalRequests,
+      });
+    }
+
+    if (outsideRequests.length > 0) {
+      outsidePriceRestriction.push({
+        city: cityData.city,
+        requests: outsideRequests,
+      });
+    }
+  });
+
+  return { normal, outsidePriceRestriction };
 }
