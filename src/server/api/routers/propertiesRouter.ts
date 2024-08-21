@@ -76,7 +76,8 @@ export const propertiesRouter = createTRPCRouter({
 
       const id = await addProperty({
         property: input,
-        hostId: ctx.user.id,
+        userId: ctx.user.id,
+        userEmail: ctx.user.email,
         hostTeamId,
       });
       return id;
@@ -96,7 +97,7 @@ export const propertiesRouter = createTRPCRouter({
     ) // make hostid required
     .mutation(async ({ ctx, input }) => {
       const host = await ctx.db.query.users.findFirst({
-        columns: { name: true, role: true },
+        columns: { name: true, role: true, email: true },
         where: eq(users.id, input.hostId),
       });
 
@@ -107,7 +108,11 @@ export const propertiesRouter = createTRPCRouter({
         return { status: "user not a host" } as const;
       }
 
-      await addProperty({ property: input, hostId: input.hostId });
+      await addProperty({
+        property: input,
+        userId: input.hostId,
+        userEmail: host.email,
+      });
 
       return {
         status: "success",

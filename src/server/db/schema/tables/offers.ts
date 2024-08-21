@@ -29,7 +29,7 @@ export const offers = pgTable(
     acceptedAt: timestamp("accepted_at", { withTimezone: true }),
     paymentIntentId: varchar("payment_intent_id"),
     checkoutSessionId: varchar("checkout_session_id"),
-    tramonaFee: integer("tramona_fee").notNull().default(0), // in cents
+    tramonaFee: integer("tramona_fee").default(0), // in cents
     checkIn: date("check_in", { mode: "date" }).notNull(),
     checkOut: date("check_out", { mode: "date" }).notNull(),
     hostPayout: integer("host_payout").notNull(), // in cents

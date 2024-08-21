@@ -255,11 +255,13 @@ export async function getHostTeamOwnerId(hostTeamId: number) {
 }
 
 export async function addProperty({
-  hostId,
+  userId,
+  userEmail,
   hostTeamId,
   property,
 }: {
-  hostId?: string | null;
+  userId?: string;
+  userEmail?: string;
   hostTeamId?: number | null;
   property: Omit<NewProperty, "id" | "city" | "latitude" | "longitude"> & {
     latitude?: number;
@@ -284,7 +286,7 @@ export async function addProperty({
     .insert(properties)
     .values({
       ...property,
-      hostId,
+      hostId: userId,
       latitude: lat,
       longitude: lng,
       city: city,
@@ -298,8 +300,8 @@ export async function addProperty({
   await sendSlackMessage({
     channel: "host-bot",
     text: [
-      `*New property added: ${property.name} in ${property.address}*' 
-    ' by ${property.hostName}`,
+      `*New property added: ${property.name} in ${property.address}*
+     by ${userEmail}`,
     ].join("\n"),
   });
   return insertedProperty!.id;
