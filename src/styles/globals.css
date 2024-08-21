@@ -105,10 +105,9 @@ body {
   }
 }
 
-@import url("https://fonts.googleapis.com/css2?family=Stint+Ultra+Condensed&display=swap");
 @font-face {
-  font-family: "Stint-Ultra-Condensed";
-  src: url("../../public/fonts/StintUltraCondensed-Regular.ttf");
+  font-family: "FiraSansExtraCondensed-ExtraBold";
+  src: url("../../public/fonts/FiraSansExtraCondensed-ExtraBold.ttf");
 }
 
 .custom-tabs-trigger {

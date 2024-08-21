@@ -16,7 +16,6 @@ import { errorToast } from "@/utils/toasts";
 import { useToast } from "@/components/ui/use-toast";
 import { formatPhoneNumberWithParentheses } from "@/utils/formatters";
 import { PlusIcon } from "lucide-react";
-import { on } from "events";
 
 const formSchema = z.object({
   emergencyEmail: z.string().email(),

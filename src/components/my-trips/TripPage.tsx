@@ -13,7 +13,13 @@ import {
   MessageCircle,
 } from "lucide-react";
 import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
-import { formatCurrency, plural } from "@/utils/utils";
+import {
+  formatCurrency,
+  removeTimezoneFromDate,
+  formatDateStringWithDayName,
+  plural,
+  convertTo12HourFormat,
+} from "@/utils/utils";
 
 import SingleLocationMap from "../_common/GoogleMaps/SingleLocationMap";
 import { type RouterOutputs } from "@/utils/api";
@@ -127,10 +133,16 @@ export default function TripPage({
                     Check-in
                   </p>
                   <p className="text-lg font-bold">
-                    {dayjs(trip.checkIn).format("ddd, MMM D")}
+                    {formatDateStringWithDayName(
+                      removeTimezoneFromDate(trip.checkIn),
+                    )}
                   </p>
                   <p className="font-semibold">
-                    {dayjs(trip.checkIn).format("h:mm a")}
+                    {trip.property.checkInTime && (
+                      <p className="font-semibold">
+                        {convertTo12HourFormat(trip.property.checkInTime)}
+                      </p>
+                    )}
                   </p>
                 </div>
                 <ArrowRight />
@@ -139,11 +151,15 @@ export default function TripPage({
                     Check-out
                   </p>
                   <p className="text-lg font-bold">
-                    {dayjs(trip.checkOut).format("ddd, MMM D")}
+                    {formatDateStringWithDayName(
+                      removeTimezoneFromDate(trip.checkOut),
+                    )}
                   </p>
-                  <p className="font-semibold">
-                    {dayjs(trip.checkOut).format("h:mm a")}
-                  </p>
+                  {trip.property.checkOutTime && (
+                    <p className="font-semibold">
+                      {convertTo12HourFormat(trip.property.checkOutTime)}
+                    </p>
+                  )}
                 </div>
               </div>
 

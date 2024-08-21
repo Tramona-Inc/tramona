@@ -1,6 +1,6 @@
 import { integer, pgTable, serial, text, varchar } from "drizzle-orm/pg-core";
 import { properties } from "./properties";
-import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 export const reviews = pgTable("reviews", {
@@ -14,10 +14,8 @@ export const reviews = pgTable("reviews", {
   review: text("review").notNull(),
 });
 
-export type NewReview = typeof reviews.$inferInsert;
-export type Review = typeof reviews.$inferSelect;
+export type Review = Omit<typeof reviews.$inferSelect, "id" | "propertyId">;
 
-export const reviewsSelectSchema = createSelectSchema(reviews);
 export const reviewsInsertSchema = createInsertSchema(reviews, {
   profilePic: z.string().url(),
   rating: z.number().int().min(1).max(5),

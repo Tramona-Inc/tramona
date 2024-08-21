@@ -18,8 +18,8 @@ import { eq, sql } from "drizzle-orm";
 import { buffer } from "micro";
 import { type NextApiRequest, type NextApiResponse } from "next";
 import { superhogRequests } from "../../server/db/schema/tables/superhogRequests";
-import { cancelTripByPaymentIntent } from "@/pages/api/utils/trips-utils";
-import { createSuperhogReservation } from "@/pages/api/utils/superhog-utils";
+import { cancelTripByPaymentIntent } from "@/utils/webhook-functions/trips-utils";
+import { createSuperhogReservation } from "@/utils/webhook-functions/superhog-utils";
 
 // ! Necessary for stripe
 export const config = {
@@ -128,8 +128,9 @@ export default async function webhook(
                   await db.query.trips.findFirst({
                     where: eq(trips.superhogRequestId, superhogRequests.id),
                   });
+
                 if (!currentSuperhogReservation) {
-                  void createSuperhogReservation({
+                  await createSuperhogReservation({
                     paymentIntentId:
                       paymentIntentSucceeded.payment_intent?.toString() ?? "",
                     propertyId: offer.propertyId,
@@ -472,6 +473,7 @@ export default async function webhook(
 
         if (account.id) {
           const stripeAccount = await stripe.accounts.retrieve(account.id);
+          console.log("Stripe account updated", stripeAccount);
           await db
             .update(hostProfiles)
             .set({

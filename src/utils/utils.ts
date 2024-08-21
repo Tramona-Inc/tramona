@@ -159,11 +159,27 @@ export function formatDateString(
 
 // TODO: clean this all up (make it for strings only)
 
-function removeTimezoneFromDate(date: Date | string) {
+export function removeTimezoneFromDate(date: Date | string) {
   if (typeof date === "string") return date;
   return new Date(date).toISOString().split("Z")[0]!;
 }
 
+//converts date string to a formatted date string with day name
+//ex out put Mon, Aug 19
+export function formatDateStringWithDayName(dateStr: string): string {
+  // Convert the string to a Date object
+  const dateObj = new Date(dateStr);
+
+  // Define the format options
+  const options: Intl.DateTimeFormatOptions = {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  };
+
+  // Format the Date object to the desired string format
+  return dateObj.toLocaleDateString("en-US", options);
+}
 export function formatDateMonthDay(date: Date | string) {
   if (typeof date === "string") return formatDateString(date, "MMMM d");
   return formatDate(removeTimezoneFromDate(date), "MMMM d");
@@ -186,7 +202,7 @@ export function formatDateYearMonthDay(date: Date | string) {
 
 export function formatShortDate(date: Date | string) {
   if (typeof date === "string") return formatDateString(date, "M/d/yyyy");
-  return formatDate(removeTimezoneFromDate(date), "M/d/yyyy");
+  return formatDate(removeTimezoneFromDate(date), "M/d/yyyy"); //ex 8/20/2024
 }
 
 export function convertDateFormat(dateString: string) {
@@ -268,7 +284,7 @@ export function getPriceBreakdown({
   // should always cover the stripe fee + a little extra
   const stripeCoverFee = Math.ceil(totalMinusStripe * 0.04); //this 4 percent
   const serviceFee = superhogFeePaid + stripeCoverFee;
-  const finalTotal = totalMinusStripe + stripeCoverFee;
+  const finalTotal = Math.floor(totalMinusStripe + stripeCoverFee);
 
   const priceBreakdown = {
     bookingCost: bookingCost,
@@ -278,6 +294,34 @@ export function getPriceBreakdown({
     finalTotal: finalTotal,
   };
   return priceBreakdown;
+}
+
+export function getHostPayout({
+  propertyPrice,
+  hostMarkup,
+  numNights,
+}: {
+  propertyPrice: number;
+  hostMarkup: number;
+  numNights: number;
+}) {
+  return (
+    Math.floor(propertyPrice * hostMarkup * numNights * 100) / 100
+  ).toFixed(2);
+}
+
+export function getTravelerOfferedPrice({
+  propertyPrice,
+  travelerMarkup,
+  numNights,
+}: {
+  propertyPrice: number;
+  travelerMarkup: number;
+  numNights: number;
+}) {
+  return (
+    Math.ceil(propertyPrice * travelerMarkup * numNights * 100) / 100
+  ).toFixed(2);
 }
 
 export function getPropertyId(url: string): number | null {
