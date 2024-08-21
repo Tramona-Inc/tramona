@@ -5,9 +5,9 @@ import Head from "next/head";
 export default function Page() {
   function IntroSection() {
     return (
-      <section className="relative mx-auto flex max-w-7xl justify-center px-2">
+      <section className="mx-auto max-w-7xl justify-center">
         <div className="flex flex-col items-center space-y-8 lg:flex-row lg:space-x-10 xl:space-x-20">
-          <div className="max-w-xl space-y-5">
+          <div className="mt-10 max-w-xl space-y-5 lg:mt-0">
             <h2 className="text-center text-4xl font-bold tracking-tight text-primaryGreen md:text-6xl">
               Why list with us?
             </h2>
@@ -99,7 +99,7 @@ export default function Page() {
 
   return (
     <MainLayout>
-      <div className="relative space-y-32 overflow-x-hidden pb-32">
+      <div className="mx-auto space-y-32 px-4 pb-32">
         <Head>
           <title>Why list with us | Tramona</title>
         </Head>
