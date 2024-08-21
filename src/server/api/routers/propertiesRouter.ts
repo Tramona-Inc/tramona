@@ -49,7 +49,7 @@ export type HostRequestsPageData = {
 };
 
 export const propertiesRouter = createTRPCRouter({
-  create: roleRestrictedProcedure(["admin", "host"])
+  create: protectedProcedure
     .input(
       propertyInsertSchema.omit({
         hostId: true,
@@ -60,7 +60,6 @@ export const propertiesRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const hostId = ctx.user.role === "admin" ? null : ctx.user.id;
       const hostTeamId = await db.query.hostProfiles
         .findFirst({
           where: eq(hostProfiles.userId, ctx.user.id),
@@ -69,10 +68,17 @@ export const propertiesRouter = createTRPCRouter({
         .then((res) => res?.curTeamId);
 
       if (!hostTeamId) {
-        //logic
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Host profile not found for user ${ctx.user.id}`,
+        });
       }
 
-      const id = await addProperty({ property: input, hostId, hostTeamId });
+      const id = await addProperty({
+        property: input,
+        hostId: ctx.user.id,
+        hostTeamId,
+      });
       return id;
     }),
 

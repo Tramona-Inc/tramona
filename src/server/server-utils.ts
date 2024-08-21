@@ -271,7 +271,10 @@ export async function addProperty({
 
   if (!lat || !lng) {
     const { location } = await getCoordinates(property.address);
-    if (!location) throw new Error("Could not get coordinates for address");
+    if (!location)
+      throw new Error(
+        `Could not get coordinates for address: ${property.address}`,
+      );
     lat = location.lat;
     lng = location.lng;
   }
