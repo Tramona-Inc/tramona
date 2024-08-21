@@ -15,12 +15,10 @@ import {
   inArray,
   isNotNull,
   isNull,
-  isNull,
   lte,
   notExists,
   or,
   sql,
-  SQLWrapper,
   type SQL,
 } from "drizzle-orm";
 import {
@@ -45,8 +43,6 @@ import { HttpsProxyAgent } from "https-proxy-agent";
 import * as cheerio from "cheerio";
 import { sendSlackMessage } from "./slack";
 import { HOST_MARKUP, TRAVELER__MARKUP } from "@/utils/constants";
-export const proxyAgent = new HttpsProxyAgent(env.PROXY_URL);
-
 export async function scrapeUrl(url: string) {
   return await axios
     .get<string>(url, { httpsAgent: proxyAgent, responseType: "text" })
