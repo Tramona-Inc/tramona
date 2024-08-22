@@ -31,7 +31,7 @@ export function useLinkRequestForm({
     const data = await utils.misc.scrapeTest.fetch(url);
     if (data.statusCode === 500) {
       form.setError("url", {
-        message: "Failed to scrape",
+        message: data.body[0],
       });
       return;
     }
