@@ -146,7 +146,7 @@ export async function createSuperhogReservation({
       },
     };
 
-    const { verification } = await axios
+    const response = await axios
       .post<unknown, ResponseType>(
         "https://superhog-apim.azure-api.net/e-deposit/verifications",
         reservationObject,
@@ -174,9 +174,8 @@ export async function createSuperhogReservation({
           .update(trips)
           .set({ tripsStatus: "Needs attention" })
           .where(eq(trips.id, trip.id));
-        throw new Error(error.response.data.detail);
       });
-    if (!verification) {
+    if (!response?.verification) {
       await db.insert(superhogErrors).values({
         echoToken: reservationObject.metadata.echoToken,
         error: "NO RESPONSE FROM SUPERHOG",
@@ -201,8 +200,8 @@ export async function createSuperhogReservation({
         echoToken: reservationObject.metadata.echoToken,
         propertyId: propertyId,
         userId: userId,
-        superhogStatus: verification.status,
-        superhogVerificationId: verification.verificationId,
+        superhogStatus: response.verification.status,
+        superhogVerificationId: response.verification.verificationId,
         superhogReservationId: reservationObject.reservation.reservationId, //this is the trip id but not connected it doesnt matter what the value is tbh
       })
       .returning({ id: superhogRequests.id });
@@ -222,8 +221,8 @@ export async function createSuperhogReservation({
     });
 
     if (
-      verification.status === "Rejected" ||
-      verification.status === "Flagged"
+      response.verification.status === "Rejected" ||
+      response.verification.status === "Flagged"
     ) {
       await db
         .update(trips)
@@ -232,7 +231,7 @@ export async function createSuperhogReservation({
       await sendSlackMessage({
         channel: "superhog-bot",
         text: [
-          `*SUPERHOG REQUEST*: The verification was created successfully but was denied with status of ${verification.status} for tripID ${trip.id} for ${user.name}`,
+          `*SUPERHOG REQUEST*: The verification was created successfully but was denied with status of ${response.verification.status} for tripID ${trip.id} for ${user.name}`,
         ].join("\n"),
       });
     } else {
