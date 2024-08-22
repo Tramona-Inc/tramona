@@ -1,7 +1,10 @@
 import { NewProperty, Review } from "../db/schema";
 import { exampleScraper } from "./example";
 
-export type DirectSiteScraper = () => Promise<
+export type DirectSiteScraper = (options: {
+  checkIn?: Date;
+  checkOut?: Date;
+}) => Promise<
   (NewProperty & {
     originalListingUrl: string; // enforce that its non-null
     reservedDateRanges: { start: Date; end: Date }[];
