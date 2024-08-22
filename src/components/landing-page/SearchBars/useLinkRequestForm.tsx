@@ -28,7 +28,7 @@ export function useLinkRequestForm({
   const utils = api.useUtils();
 
   const onSubmit = form.handleSubmit(async ({ url }) => {
-    const data = await scrapeTest(url);
+    const data = await utils.misc.scrapeTest.fetch(url);
     if (data.statusCode === 500) {
       form.setError("url", {
         message: "Failed to scrape",
