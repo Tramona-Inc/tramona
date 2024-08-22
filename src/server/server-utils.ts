@@ -259,10 +259,12 @@ export async function addProperty({
   userEmail,
   hostTeamId,
   property,
+  isAdmin,
 }: {
   userId?: string;
   userEmail?: string;
   hostTeamId?: number | null;
+  isAdmin: boolean;
   property: Omit<NewProperty, "id" | "city" | "latitude" | "longitude"> & {
     latitude?: number;
     longitude?: number;
@@ -298,7 +300,7 @@ export async function addProperty({
     channel: "host-bot",
     text: [
       `*New property added: ${property.name} in ${property.address}*
-     by ${userEmail}`,
+     by ${isAdmin ? "an Tramona admin" : userEmail}`,
     ].join("\n"),
   });
   return insertedProperty!.id;

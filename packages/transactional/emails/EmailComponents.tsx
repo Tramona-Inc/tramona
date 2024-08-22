@@ -89,7 +89,7 @@ const main = {
 export const Layout: React.FC<LayoutProps> = ({ children, title_preview }) => {
   return (
     <Html>
-      <Preview className="text-brand">{title_preview}</Preview>
+      <Preview className="text-[#333333]">{title_preview}</Preview>
       <Tailwind
         config={{
           theme: {
@@ -607,20 +607,11 @@ export const EmailConfirmationCard: React.FC<EmailConfirmationCardProps> = ({
 export const BookingCard: React.FC<BookingCardProps> = ({
   checkIn,
   checkOut,
-  originalPrice,
-  tramonaPrice,
   description,
   property_image_link,
   isExpired,
   booking_link,
 }) => {
-  let discountPercentage = 0;
-  if (tramonaPrice) {
-    discountPercentage = originalPrice
-      ? Math.round(((originalPrice - tramonaPrice) / originalPrice) * 100)
-      : 0;
-  }
-
   return (
     <table
       style={{

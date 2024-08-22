@@ -47,19 +47,6 @@ export default function ReservationConfirmedEmail({
   tripDetailLink = "",
   numOfNights = 1,
 }: ReservationConfirmedEmailProps) {
-  const formatDate = (date: Date) =>
-    date.toLocaleDateString("en-US", {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-    });
-  const formatTime = (date: Date) =>
-    date.toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "numeric",
-      hour12: true,
-    });
-
   return (
     <Layout title_preview="Reservation Confirmed">
       <div className="border-b border-gray-300 bg-white p-6">
