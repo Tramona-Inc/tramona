@@ -5,7 +5,6 @@ import { api } from "@/utils/api";
 import { errorToast } from "@/utils/toasts";
 import { type LinkConfirmationProps } from "./LinkConfirmation";
 import { LINK_REQUEST_DISCOUNT_PERCENTAGE } from "@/utils/constants";
-import { scrapeTest } from "@/server/scrapePrice";
 
 export type LinkRequestData = Pick<
   LinkConfirmationProps,
@@ -16,11 +15,10 @@ export type LinkRequestData = Pick<
 
 export function useLinkRequestForm({
   afterSubmit,
-  // setData,
-  setCalendarData,
+  setData,
+
 }: {
-  // setData: (data?: LinkRequestData) => void;
-  setCalendarData: (data: string[]) => void;
+  setData: (data?: LinkRequestData) => void;
   afterSubmit?: () => void;
 }) {
   const form = useZodForm({ schema: linkRequestSchema, mode: "onChange" });
@@ -28,93 +26,84 @@ export function useLinkRequestForm({
   const utils = api.useUtils();
 
   const onSubmit = form.handleSubmit(async ({ url }) => {
-    const data = await utils.misc.scrapeTest.fetch(url);
-    if (data.statusCode === 500) {
+
+    const { checkIn, checkOut, numGuests } = Airbnb.parseUrlParams(url);
+
+    if (!checkIn || !checkOut) {
       form.setError("url", {
-        message: data.body[0],
+        message: "Please input check-in/out on Airbnb and try again",
       });
       return;
     }
-    setCalendarData(data.body);
-  }
-  );
-  //   const { checkIn, checkOut, numGuests } = Airbnb.parseUrlParams(url);
 
-  //   if (!checkIn || !checkOut) {
-  //     form.setError("url", {
-  //       message: "Please input check-in/out on Airbnb and try again",
-  //     });
-  //     return;
-  //   }
+    if (!numGuests) {
+      form.setError("url", {
+        message: "Please input number of guests on Airbnb and try again",
+      });
+      return;
+    }
 
-  //   if (!numGuests) {
-  //     form.setError("url", {
-  //       message: "Please input number of guests on Airbnb and try again",
-  //     });
-  //     return;
-  //   }
+    setData(undefined);
 
-  //   setData(undefined);
+    await utils.misc.scrapeAirbnbLink
+      .fetch({ url, params: { checkIn, checkOut, numGuests } })
+      .then(({ status, data }) => {
+        switch (status) {
+          case "failed to scrape":
+            form.setError("url", {
+              message: "Couldn't extract property data, please try again",
+            });
+            break;
+          case "failed to extract city":
+            form.setError("url", {
+              message: "Couldn't extract city name, please try again",
+            });
+            break;
+          case "failed to parse url":
+            form.setError("url", {
+              message:
+                "Please check that you pasted the full URL and try again",
+            });
+            break;
+          case "failed to parse title":
+            form.setError("url", {
+              message: "Couldn't parse title, please try again",
+            });
+            break;
+          case "success":
+            setData({
+              property: {
+                title: data.title,
+                description: data.description,
+                imageUrl: data.imageUrl,
+                url: url,
+                listingSite: "Airbnb",
+              },
+              request: {
+                location: data.location,
+                maxTotalPrice: Math.round(
+                  data.price * (1 - LINK_REQUEST_DISCOUNT_PERCENTAGE / 100),
+                ),
+                checkIn: new Date(checkIn),
+                checkOut: new Date(checkOut),
+                numGuests,
+              },
+              originalPrice: data.price,
+            });
 
-  //   await utils.misc.scrapeAirbnbLink
-  //     .fetch({ url, params: { checkIn, checkOut, numGuests } })
-  //     .then(({ status, data }) => {
-  //       switch (status) {
-  //         case "failed to scrape":
-  //           form.setError("url", {
-  //             message: "Couldn't extract property data, please try again",
-  //           });
-  //           break;
-  //         case "failed to extract city":
-  //           form.setError("url", {
-  //             message: "Couldn't extract city name, please try again",
-  //           });
-  //           break;
-  //         case "failed to parse url":
-  //           form.setError("url", {
-  //             message:
-  //               "Please check that you pasted the full URL and try again",
-  //           });
-  //           break;
-  //         case "failed to parse title":
-  //           form.setError("url", {
-  //             message: "Couldn't parse title, please try again",
-  //           });
-  //           break;
-  //         case "success":
-  //           setData({
-  //             property: {
-  //               title: data.title,
-  //               description: data.description,
-  //               imageUrl: data.imageUrl,
-  //               url: url,
-  //               listingSite: "Airbnb",
-  //             },
-  //             request: {
-  //               location: data.location,
-  //               maxTotalPrice: Math.round(
-  //                 data.price * (1 - LINK_REQUEST_DISCOUNT_PERCENTAGE / 100),
-  //               ),
-  //               checkIn: new Date(checkIn),
-  //               checkOut: new Date(checkOut),
-  //               numGuests,
-  //             },
-  //             originalPrice: data.price,
-  //           });
+            form.reset();
+            afterSubmit?.();
 
-  //           form.reset();
-  //           afterSubmit?.();
-
-  //           break;
-  //       }
-  //     })
-  //     .catch((e) => {
-  //       console.error(e);
-  //       errorToast();
-  //       form.reset();
-  //       setTimeout(() => form.setFocus("url"), 0); // idk why you have to do this but ya
-  //     });
-  // });
+            break;
+        }
+      })
+      .catch((e) => {
+        console.error(e);
+        errorToast();
+        form.reset();
+        setTimeout(() => form.setFocus("url"), 0); // idk why you have to do this but ya
+      });
+  });
 
   return {
     form,

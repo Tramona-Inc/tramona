@@ -8,7 +8,7 @@ import { getCity, getCoordinates } from "@/server/google-maps";
 import { Airbnb } from "@/utils/listing-sites/Airbnb";
 import { z } from "zod";
 import { scrapeUrl } from "@/server/server-utils";
-import { scrapeAirbnbPrice, scrapeTest } from "@/server/scrapePrice";
+import { scrapeAirbnbPrice } from "@/server/scrapePrice";
 
 type AirbnbListing = {
   id: string;
@@ -143,10 +143,5 @@ export const miscRouter = createTRPCRouter({
         status: "success",
         data: { title, description, imageUrl, location, price },
       } as const;
-    }),
-    scrapeTest: publicProcedure
-    .input(z.string())
-    .query(async ({ input }) => {
-      return scrapeTest(input);
     }),
 });
