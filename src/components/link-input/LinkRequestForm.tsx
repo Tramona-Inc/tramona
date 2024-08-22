@@ -13,15 +13,17 @@ import {
   type LinkRequestData,
   useLinkRequestForm,
 } from "../landing-page/SearchBars/useLinkRequestForm";
+import TestScraperConfirmation from "../landing-page/SearchBars/TestScraperConfirmation";
 
 export default function LinkRequestForm() {
   const [openLinkConfirmationDialog, setOpenLinkConfirmationDialog] =
     useState(false);
 
-  const [data, setData] = useState<LinkRequestData>();
+  // const [data, setData] = useState<LinkRequestData>();
+  const [calendarData, setCalendarData] = useState<string[]>([]);
 
   const { form, onSubmit } = useLinkRequestForm({
-    setData,
+    setCalendarData,
     afterSubmit() {
       setOpenLinkConfirmationDialog(true);
     },
@@ -32,6 +34,8 @@ export default function LinkRequestForm() {
       void onSubmit();
     }
   }, [form.formState.isValid, form.formState.isSubmitting, onSubmit]);
+
+  console.log(calendarData);
 
   return (
     <div>
@@ -68,7 +72,7 @@ export default function LinkRequestForm() {
           />
         </form>
       </Form>
-      {data && (
+      {/* {data && (
         <LinkConfirmation
           open={openLinkConfirmationDialog}
           setOpen={setOpenLinkConfirmationDialog}
@@ -76,7 +80,10 @@ export default function LinkRequestForm() {
           request={data.request}
           originalPrice={data.originalPrice}
         />
-      )}
+      )} */}
+      {calendarData.length > 0 && (
+        <TestScraperConfirmation open={openLinkConfirmationDialog} setOpen={setOpenLinkConfirmationDialog} availableDates={calendarData} />
+        )}
     </div>
   );
 }
