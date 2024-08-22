@@ -91,13 +91,13 @@ export default function OnboardingFooter({
             if (isFormValid) {
               handleNext && handleNext();
               setIsEdit(false);
-              setProgress(10);
+              setProgress(11);
             } else {
               handleError && handleError();
             }
           } else {
             setIsEdit(false);
-            setProgress(10);
+            setProgress(11);
           }
         } else {
           if (isForm) {
