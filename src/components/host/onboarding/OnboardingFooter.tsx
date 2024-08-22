@@ -3,6 +3,7 @@ import { Progress } from "@/components/ui/progress";
 import { toast } from "@/components/ui/use-toast";
 import { api } from "@/utils/api";
 import { useHostOnboarding } from "@/utils/store/host-onboarding";
+import { errorToast } from "@/utils/toasts";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
@@ -52,7 +53,7 @@ export default function OnboardingFooter({
   async function onPressNext() {
     setIsLoading(true);
     try {
-      if (progress === 10) {
+      if (progress === 11) {
         if (!isHost) {
           await createHostProfile();
         }
@@ -88,7 +89,9 @@ export default function OnboardingFooter({
           smokingAllowed: listing.smokingAllowed,
           otherHouseRules: listing.otherHouseRules ?? undefined,
           cancellationPolicy: listing.cancellationPolicy,
-        });
+          originalListingId: listing.originalListingId,
+          originalListingPlatform: listing.originalListingPlatform,
+        }).catch(() => errorToast());
       } else {
         if (isEdit) {
           if (isForm) {
@@ -146,9 +149,9 @@ export default function OnboardingFooter({
               <Button onClick={onPressNext} disabled={isLoading}>
                 {progress === 0
                   ? "Get Started"
-                  : progress === 9
+                  : progress === 10
                     ? "Review"
-                    : progress === 10
+                    : progress === 11
                       ? "Finish"
                       : "Next"}
               </Button>
