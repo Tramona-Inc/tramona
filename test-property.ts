@@ -2,6 +2,8 @@ import { NewProperty } from "@/server/db/schema";
 import {z} from "zod";
 import { promises as fs } from 'fs';
 import { PropertyType, ALL_PROPERTY_TYPES, propertyTypeEnum } from "@/server/db/schema/common";
+import { db } from "@/server/db";
+import { api } from "@/utils/api";
 
 const schema = z.object({
     data: z.object({
@@ -45,7 +47,11 @@ const schema = z.object({
     })
 })
 
-
+const { mutateAsync: createProperty } = api.properties.create.useMutation({
+    onSuccess: () => {
+        console.log("Property listed!");
+    },
+});
 type IntegrityArizonaInput = z.infer<typeof schema>;
 
 const convertPropertyType = (inputType: number): PropertyType => {
@@ -86,25 +92,14 @@ const res = await fs.readFile('admin-ajax.json', 'utf-8')
     // .then((data) => schema.parse(data)) // for fetching from the endpoint
     .then((data) => schema.parse(JSON.parse(data)))
     .then((validatedData) => mapToNewProperty(validatedData))
-    .then((properties) => console.log(properties[0]))
+    // select first two properties
+    .then((properties) => properties.slice(0, 2))
+    // .then((properties) => console.log(properties[0]))
+    // ADD TO DATABASE
+    .then((properties) => properties.map(async (property) => {
+        console.log(property);
+        await createProperty(property);
+    }))
     // .then((res) => console.log(res.data.property[0]))  //?.unit_amenities.amenity.map(a => a.amenity_name)
     // .then((res) => console.log(res.data.property.map((property) => property.id)))
-    // .then(parsedData => parsedData.data.property.map(property => ({
-    //     id: property.id,
-    //     name: property.name,
-    //     address: `${property.city}, ${property.state_name}`,
-    //     latitude: property.latitude,
-    //     longitude: property.longitude,
-    //     numBedrooms: property.bedrooms_number,
-    //     numBathrooms: property.bathrooms_number,
-    //     maxNumGuests: property.max_occupants,
-    //     amenities: property.unit_amenities.amenity.map(a => a.amenity_name),
-    //     imageUrls: property.gallery.image.map(img => img.image_path),
-    //     hostName: property.variable_agent,
-    //     hostProfilePic: property.default_thumbnail_path,
-    //     otherHouseRules: property.restriction_message ?? "",
-    //     city: property.city,
-    //     originalListingUrl: property.flyer_url,
-    //     priceRestriction: property.price,
-    //   })))
     //   .then(properties => console.log(properties));
