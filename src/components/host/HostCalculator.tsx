@@ -123,7 +123,7 @@ const HostCalculator = () => {
               min="0"
               max="100"
             />
-            <div className="flex justify-between space-x-2">
+            <div className="flex flex-col justify-between gap-2 sm:flex-row">
               <Button
                 onClick={() => setVacancy(70)}
                 className="flex-1 bg-gray-200 text-gray-800 hover:bg-gray-300"
@@ -146,19 +146,7 @@ const HostCalculator = () => {
           </div>
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700">
-              Cleaning Fee per Booking ($)
-            </label>
-            <Input
-              type="number"
-              value={cleaningFee || ""}
-              onChange={handleNumberInput(setCleaningFee)}
-              className="w-full"
-              min="0"
-            />
-          </div>
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              Average Price per Stay ($)
+              Average Price per Night ($)
             </label>
             <Input
               type="number"
@@ -169,7 +157,18 @@ const HostCalculator = () => {
             />
           </div>
         </div>
-
+        <div>
+          <label className="mb-1 block text-sm font-medium text-gray-700">
+            Cleaning Fee per Booking ($)
+          </label>
+          <Input
+            type="number"
+            value={cleaningFee || ""}
+            onChange={handleNumberInput(setCleaningFee)}
+            className="w-full"
+            min="0"
+          />
+        </div>
         <div className="rounded-md bg-gray-100 p-4">
           <h3 className="mb-2 text-lg font-semibold text-gray-800">
             Current Annual Earnings
@@ -183,7 +182,7 @@ const HostCalculator = () => {
           <h3 className="text-center text-xl font-semibold text-gray-800">
             Potential Extra Annual Earnings with Tramona
           </h3>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             {[
               {
                 title: "Conservative",

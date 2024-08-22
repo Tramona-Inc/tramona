@@ -15,9 +15,7 @@ export default function Page() {
               Tramona: A host&apos;s best friend
             </p>
           </div>
-          <div className="rounded-lg border px-2 py-2 shadow-xl">
-            <HostCalculator />
-          </div>
+          <HostCalculator />
         </div>
       </section>
     );
