@@ -48,6 +48,9 @@ export default function HostPropertiesLayout({
   const setOtherHouseRules = useHostOnboarding(
     (state) => state.setOtherHouseRules,
   );
+  const setOriginalListingId = useHostOnboarding(
+    (state) => state.setOriginalListingId,
+  );
 
   function setStatesDefault() {
     setPropertyType("Apartment"),
@@ -75,7 +78,8 @@ export default function HostPropertiesLayout({
       setDescription(""),
       setPetsAllowed(false),
       setSmokingAllowed(false),
-      setOtherHouseRules("");
+      setOtherHouseRules(""),
+      setOriginalListingId("");
   }
 
   const { data: properties } = api.properties.getHostProperties.useQuery();
