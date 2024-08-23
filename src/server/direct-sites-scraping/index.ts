@@ -48,8 +48,8 @@ export async function scrapeDirectListings(options: { checkIn: Date; checkOut: D
         await tx.delete(properties).where(eq(properties.originalListingPlatform, "CB Island Vacations"));
 
         // Insert new properties
-        // console.log('Inserting new listings into database');
-        // await tx.insert(properties).values(allListings);
+        console.log('Inserting new listings into database');
+        await tx.insert(properties).values(allListings);
       });
 
       console.log('Old CB Island Vacations properties deleted and new listings inserted successfully');

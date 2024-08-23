@@ -6,8 +6,8 @@ import querystring from "querystring";
 import { PropertyType } from "@/server/db/schema";
 import * as cheerio from "cheerio";
 
-const hawaiiPropertyTypes: { [key: string]: PropertyType } = {
-  // mappping scraped property types to our property types; I've only seen Condo, House, Villa, and Townhouse, but adjust these if we encounter more types
+const hawaiiPropertyTypes: Record<string, PropertyType> = {
+  // mapping scraped property types to our property types
   Condo: "Condominium",
   Apartment: "Apartment",
   House: "House",
@@ -77,6 +77,38 @@ const ResponseSchema = z.object({
   }),
 });
 
+interface PriceFilteredProperty {
+  eid: number;
+  name: string;
+  prices: {
+    eid: number;
+    p: number;
+    c: string;
+    n: string;
+    qp: {
+      rcav: {
+        begin: string;
+        end: string;
+        adult: string;
+        child: string;
+        IDs: {
+          [key: string]: string[];
+        };
+      };
+      eid: number;
+    };
+    do: null;
+    qo: null;
+    dn: null;
+    dd: null;
+    bt: number;
+    et: number;
+    b: string;
+    e: string;
+  }[];
+  type: string;
+}
+
 function mapPropertyType(scrapedType: string): PropertyType {
   const normalizedType = scrapedType.trim().toLowerCase();
   for (const [key, value] of Object.entries(hawaiiPropertyTypes)) {
@@ -104,66 +136,46 @@ function cleanAmenities(amenities: string[]): string[] {
 const fetchAllPropertyIds = async (): Promise<string[]> => {
   const solrUrl = "https://www.cbislandvacations.com/solr/";
   const rowsPerPage = 100;
-  let start = 0;
+  const start = 0;
   const uniqueIds = new Set<string>();
   let totalFound = 0;
-  let consecutiveDuplicates = 0;
-  const maxConsecutiveDuplicates = 5;
 
-  while (true) {
-    console.log(`Fetching property IDs: start=${start}, rows=${rowsPerPage}`);
+  console.log(`Fetching property IDs: start=${start}, rows=${rowsPerPage}`);
 
-    try {
-      const formData = querystring.stringify({
-        fq: "index_id:rci",
-        wt: "json",
-        q: "*:*",
-        fl: "id",
-        start: start.toString(),
-        rows: rowsPerPage.toString(),
-      });
+  try {
+    const formData = querystring.stringify({
+      fq: "index_id:rci",
+      wt: "json",
+      q: "*:*",
+      fl: "id",
+      start: start.toString(),
+      rows: rowsPerPage.toString(),
+    });
 
-      const response = await axios({
-        method: "POST",
-        url: solrUrl,
-        data: formData,
-      });
+    const response = await axios({
+      method: "POST",
+      url: solrUrl,
+      data: formData,
+    });
 
-      const validatedData = ResponseSchema.parse(response.data);
+    const validatedData = ResponseSchema.parse(response.data);
 
-      const initialSize = uniqueIds.size;
-      validatedData.response.docs.forEach((doc: any) => uniqueIds.add(doc.id));
-      // total num properties found
-      totalFound = validatedData.response.numFound;
+    const initialSize = uniqueIds.size;
+    validatedData.response.docs.forEach((doc: unknown) => {
+      const typedDoc = doc as { id?: string };
+      if (typedDoc.id) uniqueIds.add(typedDoc.id);
+    });
+    totalFound = validatedData.response.numFound;
 
-      const newUniqueCount = uniqueIds.size - initialSize;
-      console.log(
-        `Fetched ${validatedData.response.docs.length} IDs, ${newUniqueCount} new unique. Total unique: ${uniqueIds.size}/${totalFound}`,
-      );
-
-      // if encountering 5 duplicate properties in a row, stop fetching
-      if (newUniqueCount === 0) {
-        consecutiveDuplicates++;
-        if (consecutiveDuplicates >= maxConsecutiveDuplicates) {
-          console.log(
-            `No new unique IDs found in ${maxConsecutiveDuplicates} consecutive requests. Stopping.`,
-          );
-          break;
-        }
-      } else {
-        consecutiveDuplicates = 0;
-      }
-      // once all properties have been found, stop fetching
-      if (uniqueIds.size >= totalFound) {
-        break;
-      }
-
-      start += rowsPerPage;
-    } catch (error) {
-      console.error("Error fetching property IDs:", error);
-      break;
-    }
+    const newUniqueCount = uniqueIds.size - initialSize;
+    console.log(
+      `Fetched ${validatedData.response.docs.length} IDs, ${newUniqueCount} new unique. Total unique: ${uniqueIds.size}/${totalFound}`,
+    );
+  } catch (error) {
+    console.error("Error fetching property IDs:", error);
+    return [];
   }
+
   const allUniqueIds = Array.from(uniqueIds);
   console.log("All unique property IDs:", allUniqueIds);
   return allUniqueIds;
@@ -176,7 +188,7 @@ const fetchPropertyDetails = async (
   const solrUrl = "https://www.cbislandvacations.com/solr/";
 
   try {
-    let formData;
+    let formData: string | undefined;
     if (id) {
       formData = querystring.stringify({
         fq: "index_id:rci",
@@ -193,6 +205,11 @@ const fetchPropertyDetails = async (
       });
     }
 
+    if (!formData) {
+      console.error("Neither id nor eid provided to fetchPropertyDetails");
+      return null;
+    }
+
     const response = await axios({
       method: "POST",
       url: solrUrl,
@@ -200,27 +217,27 @@ const fetchPropertyDetails = async (
     });
 
     const validatedData = ResponseSchema.parse(response.data);
-    let mappedPropertyType;
-    let scrapedCityType;
+    let mappedPropertyType: PropertyType = "Other";
+    let scrapedCityType = "Other";
     if (validatedData.response.docs.length > 0) {
-      const propertyData = validatedData.response.docs[0] as any;
+      const propertyData = validatedData.response.docs[0] as Record<
+        string,
+        unknown
+      >;
       if (
         Array.isArray(propertyData.sm_nid$rc_core_term_type$name) &&
         propertyData.sm_nid$rc_core_term_type$name.length > 0
       ) {
-        const scrapedPropertyType =
-          propertyData.sm_nid$rc_core_term_type$name[0];
+        const scrapedPropertyType = propertyData
+          .sm_nid$rc_core_term_type$name[0] as string;
         mappedPropertyType = mapPropertyType(scrapedPropertyType);
-      } else {
-        mappedPropertyType = "Other";
       }
       if (
         Array.isArray(propertyData.sm_nid$rc_core_term_city_type$name) &&
         propertyData.sm_nid$rc_core_term_city_type$name.length > 0
       ) {
-        scrapedCityType = propertyData.sm_nid$rc_core_term_city_type$name[0];
-      } else {
-        scrapedCityType = "Other";
+        scrapedCityType = propertyData
+          .sm_nid$rc_core_term_city_type$name[0] as string;
       }
 
       return PropertySchema.parse({
@@ -229,11 +246,11 @@ const fetchPropertyDetails = async (
         sm_nid$rc_core_term_city_type$name: scrapedCityType,
       });
     } else {
-      console.log(`No data found for property ID: ${id}`);
+      console.log(`No data found for property ID: ${id ?? eid}`);
       return null;
     }
   } catch (error) {
-    console.error(`Error fetching details for property ${id}:`, error);
+    console.error(`Error fetching details for property ${id ?? eid}:`, error);
     return null;
   }
 };
@@ -246,12 +263,11 @@ function extractAddressFromDirectionsLink(html: string): string {
     const href = link.attr("href");
     if (href) {
       const match = href.match(/daddr=([^&\s]+)/);
-      if (match && match[1]) {
+      if (match?.[1]) {
         return decodeURIComponent(match[1].replace(/\+/g, " "));
       }
     }
   }
-
   return "";
 }
 
@@ -263,14 +279,14 @@ async function scrapePropertyPage(url: string): Promise<{
 }> {
   try {
     const response = await axios.get(url);
-    const $ = cheerio.load(response.data);
+    const $ = cheerio.load(response.data as string);
 
     const reviews: Review[] = [];
     $(".rc-core-item-review").each((_, element) => {
       const fullText = $(element).find("b").text().trim();
 
       const name: string =
-        fullText.match(/Reviewed on .*? by\s*(.*?)(?=,|\s*$)/)?.[1]?.trim() ||
+        fullText.match(/Reviewed on .*? by\s*(.*?)(?=,|\s*$)/)?.[1]?.trim() ??
         "Anonymous";
 
       const ratingStars = $(element).find(
@@ -278,12 +294,12 @@ async function scrapePropertyPage(url: string): Promise<{
       ).length;
 
       const reviewHtml =
-        $(element).find(".rc-core-review-comment p").html() || "";
+        $(element).find(".rc-core-review-comment p").html() ?? "";
       const reviewText = processReviewText(reviewHtml);
 
       reviews.push({
         name,
-        profilePic: "", // they don't have profile pics
+        profilePic: "",
         rating: ratingStars,
         review: reviewText || "No review text available",
       });
@@ -291,7 +307,6 @@ async function scrapePropertyPage(url: string): Promise<{
 
     const images: string[] = [];
 
-    // this is where the images are stored
     $("img.rsTmb").each((_, element) => {
       const src = $(element).attr("src");
       if (src) {
@@ -303,40 +318,47 @@ async function scrapePropertyPage(url: string): Promise<{
       $(".field.field-name-body").text().trim() || "No description available";
 
     const directionsLinkHtml =
-      $("a.vrweb-driving-directions").parent().html() || "";
+      $("a.vrweb-driving-directions").parent().html() ?? "";
     const address = extractAddressFromDirectionsLink(directionsLinkHtml);
 
-    return { reviews, images: images, description, address };
+    return { reviews, images, description, address };
   } catch (error) {
     console.error(`Error scraping property page ${url}:`, error);
     return { reviews: [], images: [], description: "", address: "" };
   }
 }
 
-// need to refine the formatting of the text still
 function processReviewText(text: string): string {
-  text = text.replace(/\\u003C/g, "<").replace(/\\u003E/g, ">");
+  const processedText = text.replace(/\\u003C/g, "<").replace(/\\u003E/g, ">");
 
-  const $ = cheerio.load(text);
-  // replacing <br> tags that I've been seeing
+  const $ = cheerio.load(processedText);
   $("br").replaceWith("\n");
 
-  let processedText = $.root().text();
-
-  processedText = processedText.trim().replace(/\n{3,}/g, "\n\n");
-
-  return processedText;
+  return $.root()
+    .text()
+    .trim()
+    .replace(/\n{3,}/g, "\n\n");
 }
 
-// function to fetch available properties when date range is specified
+function isPriceFilteredProperty(item: unknown): item is PriceFilteredProperty {
+  return (
+    typeof item === "object" &&
+    item !== null &&
+    "eid" in item &&
+    "name" in item &&
+    "prices" in item &&
+    "type" in item &&
+    Array.isArray((item as PriceFilteredProperty).prices)
+  );
+}
+
 const fetchAvailablePropertyEids = async (
   startDate: string,
   endDate: string,
-  // placeholders, can specify later
-  adults: number = 1,
-  children: number = 0,
-): Promise<any[]> => {
-  const apiUrl = "https://www.cbislandvacations.com/rcapi/item/avail/search";
+  adults = 1,
+  children = 0,
+): Promise<string[]> => {
+  const filteredPropertiesUrl = "https://www.cbislandvacations.com/rcapi/item/avail/search";
 
   const params = new URLSearchParams({
     "rcav[begin]": startDate,
@@ -347,7 +369,7 @@ const fetchAvailablePropertyEids = async (
     "rcav[flex_type]": "d",
   });
 
-  const url = `${apiUrl}?${params.toString()}`;
+  const url = `${filteredPropertiesUrl}?${params.toString()}`;
   console.log("Sending request to URL:", url);
 
   try {
@@ -356,12 +378,19 @@ const fetchAvailablePropertyEids = async (
 
     if (Array.isArray(response.data)) {
       console.log(`Found ${response.data.length} available properties`);
-      //   return response.data;
 
       const uniqueEids = new Set<string>();
 
-      // add types to property
-      response.data.forEach((property: any) => uniqueEids.add(property.eid));
+      response.data.forEach((item: unknown) => {
+        if (isPriceFilteredProperty(item)) {
+          uniqueEids.add(item.eid.toString());
+        } else {
+          console.error(
+            "Item doesn't match PriceFilteredProperty structure:",
+            item,
+          );
+        }
+      });
 
       const allUniqueEids = Array.from(uniqueEids);
       console.log("All unique property IDs:", allUniqueEids);
@@ -374,8 +403,8 @@ const fetchAvailablePropertyEids = async (
 };
 
 export const cbIslandVacationsScraper: DirectSiteScraper = async (options) => {
-  const startDate = options.checkIn?.toISOString().split("T")[0] || null;
-  const endDate = options.checkOut?.toISOString().split("T")[0] || null;
+  const startDate = options.checkIn?.toISOString().split("T")[0] ?? null;
+  const endDate = options.checkOut?.toISOString().split("T")[0] ?? null;
 
   if (startDate !== null && endDate !== null) {
     console.log(
@@ -390,15 +419,14 @@ export const cbIslandVacationsScraper: DirectSiteScraper = async (options) => {
       reviews: Review[];
     })[] = [];
 
-    for (const eid of propertyEids.slice(0,5)) {
+    for (const eid of propertyEids.slice(0, 5)) {
       console.log(`Fetching details for property: ${eid}`);
-      const propertyDetails = await fetchPropertyDetails(undefined, eid.toString());
+      const propertyDetails = await fetchPropertyDetails(undefined, eid);
 
       if (propertyDetails) {
         const processedAmenities = cleanAmenities(
           propertyDetails.sm_nid$rc_core_term_general_amenities$name,
         );
-        // Scrape additional details from the original listing URL
         const { reviews, images, description, address } =
           await scrapePropertyPage(propertyDetails.ss_nid$url);
         const newProperty: NewProperty & {
@@ -416,8 +444,8 @@ export const cbIslandVacationsScraper: DirectSiteScraper = async (options) => {
           latitude: propertyDetails.fs_nid$field_location$latitude,
           longitude: propertyDetails.fs_nid$field_location$longitude,
           city: propertyDetails.sm_nid$rc_core_term_city_type$name,
-          avgRating: propertyDetails.fs_rc_core_item_reviews_rating,
-          numRatings: propertyDetails.is_rc_core_item_reviews_count,
+          avgRating: propertyDetails.fs_rc_core_item_reviews_rating ?? 0,
+          numRatings: propertyDetails.is_rc_core_item_reviews_count ?? 0,
           imageUrls: [...images, propertyDetails.ss_vrweb_default_image],
           amenities: processedAmenities,
           otherAmenities: [],
@@ -425,7 +453,6 @@ export const cbIslandVacationsScraper: DirectSiteScraper = async (options) => {
           originalListingUrl: propertyDetails.ss_nid$url,
           reservedDateRanges: [],
           reviews: reviews,
-          //testing Adam as host, change later
           hostId: "af227f1b-74fd-4a50-ad34-3aa50187595c",
           originalListingPlatform: "CB Island Vacations",
           originalListingId: propertyDetails.id,
@@ -434,7 +461,6 @@ export const cbIslandVacationsScraper: DirectSiteScraper = async (options) => {
           checkInInfo:
             "You will be emailed detailed arrival instructions a few days prior to your check-in date. You will be going directly to the residence and the arrival instructions will include directions to the property as well as the door code to access the residence.",
         };
-        console.log('temp log', newProperty)
         availableProperties.push(newProperty);
       }
       console.log(
@@ -447,8 +473,7 @@ export const cbIslandVacationsScraper: DirectSiteScraper = async (options) => {
     return availableProperties;
   }
 
-  const baseUrl = "https://www.cbislandvacations.com/hawaii-vacation-rentals";
-
+  // If no date range is specified, fetch all properties
   const propertyIds = await fetchAllPropertyIds();
   console.log(`Total unique property IDs fetched: ${propertyIds.length}`);
 
@@ -458,21 +483,18 @@ export const cbIslandVacationsScraper: DirectSiteScraper = async (options) => {
     reviews: Review[];
   })[] = [];
 
-  // Limit the number of properties to 5
+  // for testing: limit the number of properties to 5
   const limitedPropertyIds = propertyIds.slice(0, 5);
 
   for (const id of limitedPropertyIds) {
-    // for (const id of propertyIds) {
     console.log(`Fetching details for property: ${id}`);
 
-    const propertyDetails = await fetchPropertyDetails(id, undefined);
-    // console.log('prop detailz', propertyDetails)
+    const propertyDetails = await fetchPropertyDetails(id);
 
     if (propertyDetails) {
       const processedAmenities = cleanAmenities(
         propertyDetails.sm_nid$rc_core_term_general_amenities$name,
       );
-      // Scrape additional details from the original listing URL
       const { reviews, images, description, address } =
         await scrapePropertyPage(propertyDetails.ss_nid$url);
       const newProperty: NewProperty & {
@@ -490,8 +512,8 @@ export const cbIslandVacationsScraper: DirectSiteScraper = async (options) => {
         latitude: propertyDetails.fs_nid$field_location$latitude,
         longitude: propertyDetails.fs_nid$field_location$longitude,
         city: propertyDetails.sm_nid$rc_core_term_city_type$name,
-        avgRating: propertyDetails.fs_rc_core_item_reviews_rating,
-        numRatings: propertyDetails.is_rc_core_item_reviews_count,
+        avgRating: propertyDetails.fs_rc_core_item_reviews_rating ?? 0,
+        numRatings: propertyDetails.is_rc_core_item_reviews_count ?? 0,
         imageUrls: [...images, propertyDetails.ss_vrweb_default_image],
         amenities: processedAmenities,
         otherAmenities: [],
@@ -499,7 +521,6 @@ export const cbIslandVacationsScraper: DirectSiteScraper = async (options) => {
         originalListingUrl: propertyDetails.ss_nid$url,
         reservedDateRanges: [],
         reviews: reviews,
-        //testing Adam as host, change later
         hostId: "af227f1b-74fd-4a50-ad34-3aa50187595c",
         originalListingPlatform: "CB Island Vacations",
         originalListingId: id,
@@ -516,7 +537,6 @@ export const cbIslandVacationsScraper: DirectSiteScraper = async (options) => {
     );
   }
 
-  const uniqueProperties = Array.from(allProperties.values());
-  console.log(`Total unique properties fetched: ${uniqueProperties.length}`);
-  return uniqueProperties;
+  console.log(`Total unique properties fetched: ${allProperties.length}`);
+  return allProperties;
 };
