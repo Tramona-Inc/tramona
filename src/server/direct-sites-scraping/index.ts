@@ -21,14 +21,14 @@ export const directSiteScrapers: DirectSiteScraper[] = [
   cbIslandVacationsScraper,
 ];
 
-export async function scrapeDirectListings() {
+export async function scrapeDirectListings(options: { checkIn: Date; checkOut: Date }) {
   console.log("Starting scrapeDirectListings function");
   try {
     const scrapedListings = await Promise.all(
       directSiteScrapers.map(async (scraper, index) => {
         console.log(`Starting scraper ${index + 1}`);
         try {
-          const results = await scraper();
+          const results = await scraper(options);
           console.log(`Scraper ${index + 1} completed, found ${results.length} listings`);
           return results;
         } catch (error) {
@@ -48,8 +48,8 @@ export async function scrapeDirectListings() {
         await tx.delete(properties).where(eq(properties.originalListingPlatform, "CB Island Vacations"));
 
         // Insert new properties
-        console.log('Inserting new listings into database');
-        await tx.insert(properties).values(allListings);
+        // console.log('Inserting new listings into database');
+        // await tx.insert(properties).values(allListings);
       });
 
       console.log('Old CB Island Vacations properties deleted and new listings inserted successfully');

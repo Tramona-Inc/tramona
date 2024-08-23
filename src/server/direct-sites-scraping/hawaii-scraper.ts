@@ -164,24 +164,34 @@ const fetchAllPropertyIds = async (): Promise<string[]> => {
       break;
     }
   }
-
   const allUniqueIds = Array.from(uniqueIds);
   console.log("All unique property IDs:", allUniqueIds);
   return allUniqueIds;
 };
 
 const fetchPropertyDetails = async (
-  id: string,
+  id?: string,
+  eid?: string,
 ): Promise<z.infer<typeof PropertySchema> | null> => {
   const solrUrl = "https://www.cbislandvacations.com/solr/";
 
   try {
-    const formData = querystring.stringify({
-      fq: "index_id:rci",
-      wt: "json",
-      q: `id:${id}`,
-      fl: "*",
-    });
+    let formData;
+    if (id) {
+      formData = querystring.stringify({
+        fq: "index_id:rci",
+        wt: "json",
+        q: `id:${id}`,
+        fl: "*",
+      });
+    } else if (eid) {
+      formData = querystring.stringify({
+        fq: "index_id:rci",
+        wt: "json",
+        q: `is_eid:${eid}`,
+        fl: "*",
+      });
+    }
 
     const response = await axios({
       method: "POST",
@@ -303,27 +313,26 @@ async function scrapePropertyPage(url: string): Promise<{
   }
 }
 
-// New function to process review text
+// need to refine the formatting of the text still
 function processReviewText(text: string): string {
-  // Decode Unicode-encoded HTML entities
   text = text.replace(/\\u003C/g, "<").replace(/\\u003E/g, ">");
 
   const $ = cheerio.load(text);
-  // Replace <br> and <br/> tags with newline characters
+  // replacing <br> tags that I've been seeing
   $("br").replaceWith("\n");
 
-  // Get the text content, which now includes our manual line breaks
   let processedText = $.root().text();
 
-  // Trim leading and trailing whitespace, but keep intentional line breaks
   processedText = processedText.trim().replace(/\n{3,}/g, "\n\n");
 
   return processedText;
 }
 
-const fetchAvailableProperties = async (
+// function to fetch available properties when date range is specified
+const fetchAvailablePropertyEids = async (
   startDate: string,
   endDate: string,
+  // placeholders, can specify later
   adults: number = 1,
   children: number = 0,
 ): Promise<any[]> => {
@@ -347,31 +356,96 @@ const fetchAvailableProperties = async (
 
     if (Array.isArray(response.data)) {
       console.log(`Found ${response.data.length} available properties`);
-      return [,'lololol', response.data];
-    } else {
-      console.log("Unexpected response structure:", response.data);
-      return [];
-    }
+      //   return response.data;
+
+      const uniqueEids = new Set<string>();
+
+      // add types to property
+      response.data.forEach((property: any) => uniqueEids.add(property.eid));
+
+      const allUniqueEids = Array.from(uniqueEids);
+      console.log("All unique property IDs:", allUniqueEids);
+      return allUniqueEids;
+    } else return [];
   } catch (error) {
     console.error("Error fetching available properties:", error);
-    if (axios.isAxiosError(error) && error.response) {
-      console.error("Response status:", error.response.status);
-      console.error("Response data:", error.response.data);
-    }
     return [];
   }
 };
 
-export const cbIslandVacationsScraper: DirectSiteScraper = async () => {
-  const startDate = "08/30/2024";
-  const endDate = "09/02/2024";
+export const cbIslandVacationsScraper: DirectSiteScraper = async (options) => {
+  const startDate = options.checkIn?.toISOString().split("T")[0] || null;
+  const endDate = options.checkOut?.toISOString().split("T")[0] || null;
 
-  console.log(`Fetching properties available from ${startDate} to ${endDate}`);
-  const availableProperties = await fetchAvailableProperties(
-    startDate,
-    endDate,
-  );
-  console.log(`Found ${availableProperties.length} available properties`);
+  if (startDate !== null && endDate !== null) {
+    console.log(
+      `Fetching properties available from ${startDate} to ${endDate}`,
+    );
+    const propertyEids = await fetchAvailablePropertyEids(startDate, endDate);
+    console.log(`Found ${propertyEids.length} available properties`);
+
+    const availableProperties: (NewProperty & {
+      originalListingUrl: string;
+      reservedDateRanges: { start: Date; end: Date }[];
+      reviews: Review[];
+    })[] = [];
+
+    for (const eid of propertyEids.slice(0,5)) {
+      console.log(`Fetching details for property: ${eid}`);
+      const propertyDetails = await fetchPropertyDetails(undefined, eid.toString());
+
+      if (propertyDetails) {
+        const processedAmenities = cleanAmenities(
+          propertyDetails.sm_nid$rc_core_term_general_amenities$name,
+        );
+        // Scrape additional details from the original listing URL
+        const { reviews, images, description, address } =
+          await scrapePropertyPage(propertyDetails.ss_nid$url);
+        const newProperty: NewProperty & {
+          originalListingUrl: string;
+          reservedDateRanges: { start: Date; end: Date }[];
+          reviews: Review[];
+        } = {
+          name: propertyDetails.ss_name,
+          address: address,
+          about: description,
+          propertyType: propertyDetails.propertyType,
+          maxNumGuests: propertyDetails.is_rc_core_lodging_product$occ_total,
+          numBeds: propertyDetails.fs_rc_core_lodging_product$beds,
+          numBedrooms: propertyDetails.fs_rc_core_lodging_product$beds,
+          latitude: propertyDetails.fs_nid$field_location$latitude,
+          longitude: propertyDetails.fs_nid$field_location$longitude,
+          city: propertyDetails.sm_nid$rc_core_term_city_type$name,
+          avgRating: propertyDetails.fs_rc_core_item_reviews_rating,
+          numRatings: propertyDetails.is_rc_core_item_reviews_count,
+          imageUrls: [...images, propertyDetails.ss_vrweb_default_image],
+          amenities: processedAmenities,
+          otherAmenities: [],
+          roomType: "Entire place",
+          originalListingUrl: propertyDetails.ss_nid$url,
+          reservedDateRanges: [],
+          reviews: reviews,
+          //testing Adam as host, change later
+          hostId: "af227f1b-74fd-4a50-ad34-3aa50187595c",
+          originalListingPlatform: "CB Island Vacations",
+          originalListingId: propertyDetails.id,
+          checkInTime: "4:00 PM",
+          checkOutTime: "10:00 AM",
+          checkInInfo:
+            "You will be emailed detailed arrival instructions a few days prior to your check-in date. You will be going directly to the residence and the arrival instructions will include directions to the property as well as the door code to access the residence.",
+        };
+        console.log('temp log', newProperty)
+        availableProperties.push(newProperty);
+      }
+      console.log(
+        `Fetched details for property ${eid}. Total unique: ${availableProperties.length}`,
+      );
+    }
+    console.log(
+      `Total available properties fetched: ${availableProperties.length}`,
+    );
+    return availableProperties;
+  }
 
   const baseUrl = "https://www.cbislandvacations.com/hawaii-vacation-rentals";
 
@@ -391,7 +465,7 @@ export const cbIslandVacationsScraper: DirectSiteScraper = async () => {
     // for (const id of propertyIds) {
     console.log(`Fetching details for property: ${id}`);
 
-    const propertyDetails = await fetchPropertyDetails(id);
+    const propertyDetails = await fetchPropertyDetails(id, undefined);
     // console.log('prop detailz', propertyDetails)
 
     if (propertyDetails) {

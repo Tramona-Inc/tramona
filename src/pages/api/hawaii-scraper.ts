@@ -5,7 +5,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method === 'GET') {
     try {
       console.log('API route: Starting scraping process');
-      const listings = await scrapeDirectListings();
+      // placeholder dates for now
+      const listings = await scrapeDirectListings({checkIn: new Date("9/8/2024"), checkOut: new Date("9/15/2024")});
       console.log('API route: Scraping process completed');
       res.status(200).json({ message: `Successfully scraped and inserted ${listings.length} listings.` });
     } catch (error) {
