@@ -6,8 +6,8 @@ import { properties } from "../db/schema";
 import { eq } from 'drizzle-orm'; // Make sure to import this if you're using Drizzle ORM
 
 export type DirectSiteScraper = (options: {
-  checkIn?: Date;
-  checkOut?: Date;
+  checkIn: Date;
+  checkOut: Date;
 }) => Promise<
   (NewProperty & {
     originalListingUrl: string;

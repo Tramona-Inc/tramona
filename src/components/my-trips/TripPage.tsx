@@ -162,6 +162,10 @@ export default function TripPage({
                   )}
                 </div>
               </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Address</p>
+                <p className="font-semibold">{trip.property.address}</p>
+              </div>
 
               <div className="h-[2px] rounded-full bg-zinc-200"></div>
 
