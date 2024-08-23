@@ -91,9 +91,7 @@ interface PriceFilteredProperty {
         end: string;
         adult: string;
         child: string;
-        IDs: {
-          [key: string]: string[];
-        };
+        IDs: Record<string, string[]>;
       };
       eid: number;
     };
@@ -133,53 +131,54 @@ function cleanAmenities(amenities: string[]): string[] {
     });
 }
 
-const fetchAllPropertyIds = async (): Promise<string[]> => {
-  const solrUrl = "https://www.cbislandvacations.com/solr/";
-  const rowsPerPage = 100;
-  const start = 0;
-  const uniqueIds = new Set<string>();
-  let totalFound = 0;
+// This code is relevant to fetching all properties from the site
+// const fetchAllPropertyIds = async (): Promise<string[]> => {
+//   const solrUrl = "https://www.cbislandvacations.com/solr/";
+//   const rowsPerPage = 100;
+//   const start = 0;
+//   const uniqueIds = new Set<string>();
+//   let totalFound = 0;
 
-  console.log(`Fetching property IDs: start=${start}, rows=${rowsPerPage}`);
+//   console.log(`Fetching property IDs: start=${start}, rows=${rowsPerPage}`);
 
-  try {
-    const formData = querystring.stringify({
-      fq: "index_id:rci",
-      wt: "json",
-      q: "*:*",
-      fl: "id",
-      start: start.toString(),
-      rows: rowsPerPage.toString(),
-    });
+//   try {
+//     const formData = querystring.stringify({
+//       fq: "index_id:rci",
+//       wt: "json",
+//       q: "*:*",
+//       fl: "id",
+//       start: start.toString(),
+//       rows: rowsPerPage.toString(),
+//     });
 
-    const response = await axios({
-      method: "POST",
-      url: solrUrl,
-      data: formData,
-    });
+//     const response = await axios({
+//       method: "POST",
+//       url: solrUrl,
+//       data: formData,
+//     });
 
-    const validatedData = ResponseSchema.parse(response.data);
+//     const validatedData = ResponseSchema.parse(response.data);
 
-    const initialSize = uniqueIds.size;
-    validatedData.response.docs.forEach((doc: unknown) => {
-      const typedDoc = doc as { id?: string };
-      if (typedDoc.id) uniqueIds.add(typedDoc.id);
-    });
-    totalFound = validatedData.response.numFound;
+//     const initialSize = uniqueIds.size;
+//     validatedData.response.docs.forEach((doc: unknown) => {
+//       const typedDoc = doc as { id?: string };
+//       if (typedDoc.id) uniqueIds.add(typedDoc.id);
+//     });
+//     totalFound = validatedData.response.numFound;
 
-    const newUniqueCount = uniqueIds.size - initialSize;
-    console.log(
-      `Fetched ${validatedData.response.docs.length} IDs, ${newUniqueCount} new unique. Total unique: ${uniqueIds.size}/${totalFound}`,
-    );
-  } catch (error) {
-    console.error("Error fetching property IDs:", error);
-    return [];
-  }
+//     const newUniqueCount = uniqueIds.size - initialSize;
+//     console.log(
+//       `Fetched ${validatedData.response.docs.length} IDs, ${newUniqueCount} new unique. Total unique: ${uniqueIds.size}/${totalFound}`,
+//     );
+//   } catch (error) {
+//     console.error("Error fetching property IDs:", error);
+//     return [];
+//   }
 
-  const allUniqueIds = Array.from(uniqueIds);
-  console.log("All unique property IDs:", allUniqueIds);
-  return allUniqueIds;
-};
+//   const allUniqueIds = Array.from(uniqueIds);
+//   console.log("All unique property IDs:", allUniqueIds);
+//   return allUniqueIds;
+// };
 
 const fetchPropertyDetails = async (
   id?: string,
@@ -358,7 +357,8 @@ const fetchAvailablePropertyEids = async (
   adults = 1,
   children = 0,
 ): Promise<string[]> => {
-  const filteredPropertiesUrl = "https://www.cbislandvacations.com/rcapi/item/avail/search";
+  const filteredPropertiesUrl =
+    "https://www.cbislandvacations.com/rcapi/item/avail/search";
 
   const params = new URLSearchParams({
     "rcav[begin]": startDate,
@@ -403,10 +403,10 @@ const fetchAvailablePropertyEids = async (
 };
 
 export const cbIslandVacationsScraper: DirectSiteScraper = async (options) => {
-  const startDate = options.checkIn?.toISOString().split("T")[0] ?? null;
-  const endDate = options.checkOut?.toISOString().split("T")[0] ?? null;
+  const startDate = options.checkIn.toISOString().split("T")[0];
+  const endDate = options.checkOut.toISOString().split("T")[0];
 
-  if (startDate !== null && endDate !== null) {
+  if (startDate && endDate) {
     console.log(
       `Fetching properties available from ${startDate} to ${endDate}`,
     );
@@ -470,73 +470,78 @@ export const cbIslandVacationsScraper: DirectSiteScraper = async (options) => {
     console.log(
       `Total available properties fetched: ${availableProperties.length}`,
     );
+    console.log(availableProperties);
     return availableProperties;
+  } else {
+    console.error("Check-in or check-out date is missing");
+    return [];
   }
 
+  // This code is relevant to fetching all properties from the site
   // If no date range is specified, fetch all properties
-  const propertyIds = await fetchAllPropertyIds();
-  console.log(`Total unique property IDs fetched: ${propertyIds.length}`);
+  //   const propertyIds = await fetchAllPropertyIds();
+  //   console.log(`Total unique property IDs fetched: ${propertyIds.length}`);
 
-  const allProperties: (NewProperty & {
-    originalListingUrl: string;
-    reservedDateRanges: { start: Date; end: Date }[];
-    reviews: Review[];
-  })[] = [];
+  //   const allProperties: (NewProperty & {
+  //     originalListingUrl: string;
+  //     reservedDateRanges: { start: Date; end: Date }[];
+  //     reviews: Review[];
+  //   })[] = [];
 
-  // for testing: limit the number of properties to 5
-  const limitedPropertyIds = propertyIds.slice(0, 5);
+  //   // for testing: limit the number of properties to 5
+  //   const limitedPropertyIds = propertyIds.slice(0, 5);
 
-  for (const id of limitedPropertyIds) {
-    console.log(`Fetching details for property: ${id}`);
+  //   for (const id of limitedPropertyIds) {
+  //     console.log(`Fetching details for property: ${id}`);
 
-    const propertyDetails = await fetchPropertyDetails(id);
+  //     const propertyDetails = await fetchPropertyDetails(id);
 
-    if (propertyDetails) {
-      const processedAmenities = cleanAmenities(
-        propertyDetails.sm_nid$rc_core_term_general_amenities$name,
-      );
-      const { reviews, images, description, address } =
-        await scrapePropertyPage(propertyDetails.ss_nid$url);
-      const newProperty: NewProperty & {
-        originalListingUrl: string;
-        reservedDateRanges: { start: Date; end: Date }[];
-        reviews: Review[];
-      } = {
-        name: propertyDetails.ss_name,
-        address: address,
-        about: description,
-        propertyType: propertyDetails.propertyType,
-        maxNumGuests: propertyDetails.is_rc_core_lodging_product$occ_total,
-        numBeds: propertyDetails.fs_rc_core_lodging_product$beds,
-        numBedrooms: propertyDetails.fs_rc_core_lodging_product$beds,
-        latitude: propertyDetails.fs_nid$field_location$latitude,
-        longitude: propertyDetails.fs_nid$field_location$longitude,
-        city: propertyDetails.sm_nid$rc_core_term_city_type$name,
-        avgRating: propertyDetails.fs_rc_core_item_reviews_rating ?? 0,
-        numRatings: propertyDetails.is_rc_core_item_reviews_count ?? 0,
-        imageUrls: [...images, propertyDetails.ss_vrweb_default_image],
-        amenities: processedAmenities,
-        otherAmenities: [],
-        roomType: "Entire place",
-        originalListingUrl: propertyDetails.ss_nid$url,
-        reservedDateRanges: [],
-        reviews: reviews,
-        hostId: "af227f1b-74fd-4a50-ad34-3aa50187595c",
-        originalListingPlatform: "CB Island Vacations",
-        originalListingId: id,
-        checkInTime: "4:00 PM",
-        checkOutTime: "10:00 AM",
-        checkInInfo:
-          "You will be emailed detailed arrival instructions a few days prior to your check-in date. You will be going directly to the residence and the arrival instructions will include directions to the property as well as the door code to access the residence.",
-      };
-      allProperties.push(newProperty);
-    }
+  //     if (propertyDetails) {
+  //       const processedAmenities = cleanAmenities(
+  //         propertyDetails.sm_nid$rc_core_term_general_amenities$name,
+  //       );
+  //       const { reviews, images, description, address } =
+  //         await scrapePropertyPage(propertyDetails.ss_nid$url);
+  //       const newProperty: NewProperty & {
+  //         originalListingUrl: string;
+  //         reservedDateRanges: { start: Date; end: Date }[];
+  //         reviews: Review[];
+  //       } = {
+  //         name: propertyDetails.ss_name,
+  //         address: address,
+  //         about: description,
+  //         propertyType: propertyDetails.propertyType,
+  //         maxNumGuests: propertyDetails.is_rc_core_lodging_product$occ_total,
+  //         numBeds: propertyDetails.fs_rc_core_lodging_product$beds,
+  //         numBedrooms: propertyDetails.fs_rc_core_lodging_product$beds,
+  //         latitude: propertyDetails.fs_nid$field_location$latitude,
+  //         longitude: propertyDetails.fs_nid$field_location$longitude,
+  //         city: propertyDetails.sm_nid$rc_core_term_city_type$name,
+  //         avgRating: propertyDetails.fs_rc_core_item_reviews_rating ?? 0,
+  //         numRatings: propertyDetails.is_rc_core_item_reviews_count ?? 0,
+  //         imageUrls: [...images, propertyDetails.ss_vrweb_default_image],
+  //         amenities: processedAmenities,
+  //         otherAmenities: [],
+  //         roomType: "Entire place",
+  //         originalListingUrl: propertyDetails.ss_nid$url,
+  //         reservedDateRanges: [],
+  //         reviews: reviews,
+  //         hostId: "af227f1b-74fd-4a50-ad34-3aa50187595c",
+  //         originalListingPlatform: "CB Island Vacations",
+  //         originalListingId: id,
+  //         checkInTime: "4:00 PM",
+  //         checkOutTime: "10:00 AM",
+  //         checkInInfo:
+  //           "You will be emailed detailed arrival instructions a few days prior to your check-in date. You will be going directly to the residence and the arrival instructions will include directions to the property as well as the door code to access the residence.",
+  //       };
+  //       allProperties.push(newProperty);
+  //     }
 
-    console.log(
-      `Fetched details for property ${id}. Total unique: ${allProperties.length}`,
-    );
-  }
+  //     console.log(
+  //       `Fetched details for property ${id}. Total unique: ${allProperties.length}`,
+  //     );
+  //   }
 
-  console.log(`Total unique properties fetched: ${allProperties.length}`);
-  return allProperties;
+  //   console.log(`Total unique properties fetched: ${allProperties.length}`);
+  //   return allProperties;
 };
