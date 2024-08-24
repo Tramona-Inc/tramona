@@ -4,209 +4,276 @@ import Link from "next/link";
 import { api } from "@/utils/api";
 import { type RouterOutputs } from "@/utils/api";
 import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
-import { formatDateRange, formatCurrency } from "@/utils/utils";
+import {
+  formatDateRange,
+  formatCurrency,
+  plural,
+  getNumNights,
+} from "@/utils/utils";
 import { InfoIcon, TrashIcon, ExternalLink, CirclePlus } from "lucide-react";
-import { Separator } from "../ui/separator";
 import { Skeleton } from "../ui/skeleton";
-import { useState } from "react";
-import ShareOfferDialog from "../_common/ShareLink/ShareOfferDialog";
+import React, { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import { useSession } from "next-auth/react";
-import React from "react";
+import { useRouter } from "next/router";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import SearchPropertiesMap from "../landing-page/search/SearchPropertiesMap";
+import { useCitiesFilter } from "@/utils/store/cities-filter";
+import { AdjustedPropertiesProvider } from "../landing-page/search/AdjustedPropertiesContext";
+
 
 import AddUnclaimedOffer from "./AddUnclaimedOffer";
+import UnclaimedOffersMap from "./UnclaimedOfferMap";
 export type UnMatchedOffers =
   RouterOutputs["offers"]["getAllUnmatchedOffers"][number];
 
 export default function UnclaimedOfferCard() {
-  const [showMore, setShowMore] = useState(false);
-  const [displayCount, setDisplayCount] = useState(8);
-  const { data: unMatchedOffers, isLoading } =
-    api.offers.getAllUnmatchedOffers.useQuery();
+  const router = useRouter();
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 24;
+  const {
+    data: unMatchedOffers,
+    isLoading: isLoadingOffers,
+  } = api.offers.getAllUnmatchedOffers.useQuery(undefined, {
+    staleTime: Infinity,
+    cacheTime: 0,
+  });
+
+  const propertyIds = useMemo(() => 
+    unMatchedOffers?.map(offer => offer.propertyId) ?? [], 
+    [unMatchedOffers]
+  );
+
+  const {
+    data: propertyDetails,
+    isLoading: isLoadingProperties,
+  } = api.properties.getPropertiesById.useQuery(propertyIds, {
+    enabled: propertyIds.length > 0,
+  });
+
+  const isLoading = isLoadingOffers || isLoadingProperties;
+
+  const mapMarkers = useMemo(() => 
+    propertyDetails?.map(property => ({
+      id: property.id.toString(),
+      location: { lat: property.latitude, lng: property.longitude },
+      propertyName: property.name,
+      price: property.originalNightlyPrice,
+      image: property.imageUrls[0] ?? "",
+    })) ?? [],
+    [propertyDetails]
+  );
   const { data: session } = useSession();
 
-  const handleShowMore = () => {
-    setDisplayCount((prevCount) => prevCount + 8);
+  const [isFilterUndefined, setIsFilterUndefined] = useState(true);
+  const fetchNextPageRef = useRef<(() => Promise<void>) | null>(null);
+
+  const setFunctionRef = useCallback((ref: (() => Promise<void>) | null) => {
+    console.log("setFunctionRef called with:", ref);
+    fetchNextPageRef.current = ref;
+    console.log("fetchNextPageRef updated:", fetchNextPageRef.current);
+  }, []);
+
+  const filters = useCitiesFilter((state) => state);
+
+  useEffect(() => {
+    setIsFilterUndefined(!filters.filter);
+  }, [filters.filter]);
+
+  const totalPages = useMemo(
+    () =>
+      unMatchedOffers ? Math.ceil(unMatchedOffers.length / itemsPerPage) : 0,
+    [unMatchedOffers, itemsPerPage],
+  );
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    router.push(`?page=${page}`, undefined, { shallow: true });
+  };
+
+  const paginatedOffers = useMemo(() => {
+    if (!unMatchedOffers) return [];
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return unMatchedOffers.slice(startIndex, endIndex);
+  }, [unMatchedOffers, currentPage, itemsPerPage]);
+
+  useEffect(() => {
+    const page = Number(router.query.page) || 1;
+    setCurrentPage(page);
+  }, [router.query.page]);
+
+  useEffect(() => {
+    console.log("Component re-rendered. Current state:");
+    console.log("isLoading:", isLoading);
+    console.log("All unmatched offers:", unMatchedOffers?.length ?? "Not loaded yet");
+    console.log("Paginated offers:", paginatedOffers.length);
+    console.log("Current page:", currentPage);
+    console.log("Total pages:", totalPages);
+
+    if (!isLoading && unMatchedOffers) {
+      const offerIds = new Set();
+      paginatedOffers.forEach((offer, index) => {
+        console.log(`Offer ${index + 1} ID:`, offer.id);
+        offerIds.add(offer.id);
+      });
+      console.log("Unique offer IDs:", offerIds.size);
+    }
+  }, [unMatchedOffers, paginatedOffers, currentPage, totalPages, isLoading]);
+
+
+  const renderPaginationItems = () => {
+    const items = [];
+    const maxVisiblePages = 5;
+
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        items.push(
+          <PaginationItem key={i}>
+            <PaginationLink
+              href={`?page=${i}`}
+              onClick={(e) => {
+                e.preventDefault();
+                handlePageChange(i);
+              }}
+              isActive={currentPage === i}
+            >
+              {i}
+            </PaginationLink>
+          </PaginationItem>,
+        );
+      }
+    } else {
+      // ... (rest of the pagination logic)
+    }
+
+    return items;
   };
 
   return (
-    <div className="w-5/6 space-y-2">
-      {!isLoading ? (
-        unMatchedOffers ? (
-          <div className="flex flex-col items-center justify-center">
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-              {unMatchedOffers.slice(0, displayCount).map((offer) => (
-                <div key={offer.property.id}>
-                  <UnMatchedPropertyCard offer={offer} />
+    <div className="flex max-w-7xl">
+      <div className="max-w-2/3 mx-auto px-4 sm:px-6 lg:px-8">
+        {!isLoading ? (
+          paginatedOffers.length > 0 ? (
+            <div className="flex flex-col items-center justify-center">
+              <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                {paginatedOffers.map((offer) => (
+                  <React.Fragment key={offer.id}>
+                    <UnMatchedPropertyCard offer={offer} />
+                  </React.Fragment>
+                ))}
+              </div>
+              {totalPages > 1 && (
+                <Pagination className="mt-8">
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        href={`?page=${Math.max(1, currentPage - 1)}`}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handlePageChange(Math.max(1, currentPage - 1));
+                        }}
+                        className={
+                          currentPage === 1
+                            ? "pointer-events-none opacity-50"
+                            : ""
+                        }
+                      />
+                    </PaginationItem>
+                    {renderPaginationItems()}
+                    <PaginationItem>
+                      <PaginationNext
+                        href={`?page=${Math.min(totalPages, currentPage + 1)}`}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handlePageChange(
+                            Math.min(totalPages, currentPage + 1),
+                          );
+                        }}
+                        className={
+                          currentPage === totalPages
+                            ? "pointer-events-none opacity-50"
+                            : ""
+                        }
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              )}
+              {session?.user.role === "admin" && (
+                <div className="mt-20 rounded-xl border-4 p-4">
+                  <AddUnclaimedOffer />
+                </div>
+              )}
+            </div>
+          ) : (
+            <div>Sorry, we currently don&apos;t have any unmatched offers.</div>
+          )
+        ) : (
+          <div className="flex items-center justify-center">
+            <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+              {[...Array(24)].map((_, index) => (
+                <div key={index} className="aspect-[4/5] w-full">
+                  <Skeleton className="h-full w-full rounded-xl" />
                 </div>
               ))}
             </div>
-            {session?.user.role === "admin" && (
-              <div className="mt-20 border-4 rounded-xl p-4">
-              <AddUnclaimedOffer />
-              </div>
-            )}
           </div>
-        ) : (
-          <div>Sorry, we currently don&apos;t have any unmatched offers.</div>
-        )
-      ) : (
-        <div className="flex items-center justify-center">
-          <div className="grid grid-cols-4 gap-6">
-            {[...Array(8)].map((_, index) => (
-              <div
-                key={index}
-                className="grid h-[505px] w-80 grid-cols-1 rounded-xl text-base"
-              >
-                <Skeleton className="h-80 w-full rounded-xl" />
-                <div className="mt-2 flex h-48 flex-col space-y-1">
-                  <Skeleton className="h-6 w-full" />
-                  <Skeleton className="h-6 w-3/4" />
-                  <Skeleton className="h-6 w-full" />
-                  <Skeleton className="h-6 w-1/2" />
-                  <Skeleton className="h-6 w-3/4" />
-                  <Skeleton className="mt-2 h-9 w-full" />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-      {unMatchedOffers && unMatchedOffers.length > displayCount && (
-        <div className="flex justify-center">
-          <Button
-            onClick={handleShowMore}
-            className="mt-8 h-14 w-40 rounded-full border-2 border-primaryGreen bg-transparent text-base font-bold text-primaryGreen hover:bg-inherit hover:opacity-80"
-          >
-            Show more
-          </Button>
-        </div>
-      )}
+        )}
+      </div>
+      <div className="w-[1000px] h-[1000px]">
+      {unMatchedOffers && <UnclaimedOffersMap unMatchedOffers={unMatchedOffers} />}
+      </div>
     </div>
   );
 }
 
 function UnMatchedPropertyCard({ offer }: { offer: UnMatchedOffers }) {
-  const { data: session } = useSession();
-  const { mutateAsync: deleteOffer } = api.offers.delete.useMutation();
-
-  const handleButtonClick = (
-    event: React.MouseEvent<HTMLDivElement | HTMLButtonElement>,
-  ) => {
-    event.stopPropagation();
-  };
-
-  const handleRemoveProperty = async (offerId: number) => {
-    await deleteOffer({ id: offerId });
-  };
-
   return (
-    <>
-      <div className="grid max-h-[505px] max-w-80 grid-cols-1 rounded-xl text-base">
-        <div className="relative flex h-80 flex-col items-center justify-center">
+    <Link href={`/public-offer/${offer.id}`}>
+      <div className="flex aspect-[4/5] w-full cursor-pointer flex-col overflow-hidden rounded-xl">
+        <div className="relative flex-grow">
           <Image
             src={offer.property.imageUrls[0] ?? ""}
             alt=""
-            width={150}
-            height={130}
-            className="flex h-full w-full items-center justify-center rounded-xl"
+            layout="fill"
+            objectFit="cover"
+            className="rounded-t-xl"
           />
-          <div className="absolute bottom-0 left-0 right-0 flex w-full items-center justify-center rounded-b-xl bg-blue-500 text-base text-[#FFFFFF]">
-            {!isNaN(
-              Math.floor(
-                ((offer.property.originalNightlyPrice! * AVG_AIRBNB_MARKUP -
-                  offer.property.originalNightlyPrice!) /
-                  (offer.property.originalNightlyPrice! * AVG_AIRBNB_MARKUP)) *
-                  100,
-              ),
-            )
-              ? Math.floor(
-                  ((offer.property.originalNightlyPrice! * AVG_AIRBNB_MARKUP -
-                    offer.property.originalNightlyPrice!) /
-                    (offer.property.originalNightlyPrice! *
-                      AVG_AIRBNB_MARKUP)) *
-                    100,
-                )
-              : 0}
-            % off
-          </div>
         </div>
-        <div className="mt-2 flex h-48 flex-col space-y-1">
+        <div className="flex flex-col space-y-1 bg-white p-4">
           <div className="line-clamp-1 overflow-ellipsis font-bold">
             {offer.property.name}
           </div>
-          <div className="flex items-center font-semibold">
+          <div className="flex items-center text-zinc-500">
             {formatDateRange(offer.checkIn, offer.checkOut)}
           </div>
           <div className="flex">
-            <div className="flex items-center font-semibold">
-              {offer.property.maxNumGuests} Guests ∙&nbsp;
+            <div className="flex items-center text-zinc-500">
+              {plural(offer.property.maxNumGuests, "Guest")}&nbsp;
             </div>
-            <div className="flex items-center font-semibold">
-              {offer.property.numBedrooms} Bedrooms ∙&nbsp;
-            </div>
-            <div className="flex items-center font-semibold">Beds ∙&nbsp;</div>
-            <div className="flex items-center font-semibold">Bath</div>
-          </div>
-          <div className="flex items-center font-bold">
-            Our price:&nbsp;
-            {formatCurrency(offer.property.originalNightlyPrice!)}
           </div>
           <div className="flex items-center text-center font-semibold">
-            Price on Airbnb:&nbsp;
+            <div className="mr-3">
+              {formatCurrency(offer.property.originalNightlyPrice!)}
+              &nbsp;night
+            </div>
             <div className="line-through">
+              airbnb price&nbsp;
               {formatCurrency(
                 offer.property.originalNightlyPrice! * AVG_AIRBNB_MARKUP,
               )}
             </div>
-            &nbsp;
-            <div className="flex items-center">
-              <Link
-                href={`/public-offer/${offer.id}`}
-                className="font-semibold text-primaryGreen underline underline-offset-4"
-              >
-                <ExternalLink size={18} />
-              </Link>
-            </div>
-          </div>
-          <div className="">
-            <Link href={`/public-offer/${offer.id}`}>
-              <Button
-                className="h-9 w-full bg-black font-semibold hover:opacity-80"
-                onClick={handleButtonClick}
-              >
-                Request to book
-              </Button>
-            </Link>
-          </div>
-
-          <div className="flex flex-row items-center">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="col-span-1 font-semibold"
-              onClick={handleButtonClick}
-            >
-              <div onClick={handleButtonClick}>
-                <ShareOfferDialog
-                  id={offer.id}
-                  isRequest={false}
-                  propertyName={offer.property.name}
-                />
-              </div>
-            </Button>
-            {session?.user.role === "admin" && (
-              <Button
-                size="icon"
-                variant="ghost"
-                className="text-red-600"
-                onClick={() => handleRemoveProperty(offer.id)}
-              >
-                <TrashIcon />
-              </Button>
-            )}
           </div>
         </div>
       </div>
-    </>
+    </Link>
   );
 }

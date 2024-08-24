@@ -7,7 +7,7 @@ export default function Page() {
   return (
     <MainLayout>
       <div className="mb-16 flex flex-col items-center justify-center gap-y-5">
-        <UnclaimedHeader />
+        {/* <UnclaimedHeader /> */}
         <UnclaimedOfferCards />
         <div className="my-4 flex flex-col items-center gap-y-3">
           <p>

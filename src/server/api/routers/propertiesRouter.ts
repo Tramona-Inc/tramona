@@ -28,6 +28,7 @@ import {
   eq,
   gt,
   gte,
+  inArray,
   lte,
   notExists,
   sql,
@@ -165,6 +166,24 @@ export const propertiesRouter = createTRPCRouter({
     return await ctx.db.query.properties.findMany({
       limit: 100,
       offset: 0,
+    });
+  }),
+  getPropertiesById: publicProcedure
+  .input(z.array(z.number()))
+  .query(async ({ ctx, input }) => {
+    if (input.length === 0) {
+      return [];
+    }
+    return await ctx.db.query.properties.findMany({
+      where: inArray(properties.id, input),
+      columns: {
+        id: true,
+        name: true,
+        latitude: true,
+        longitude: true,
+        imageUrls: true,
+        originalNightlyPrice: true,
+      },
     });
   }),
 
