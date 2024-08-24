@@ -1,16 +1,17 @@
 import { DirectSiteScraper } from ".";
-import { NewProperty } from "@/server/db/schema";
 import {z} from "zod";
 import { PropertyType, ALL_PROPERTY_TYPES, ListingSiteName } from "@/server/db/schema/common";
 import { proxyAgent } from "../server-utils";
 import axios from 'axios';
+import { NewProperty, type Review } from "@/server/db/schema";
+import { getNumNights } from "@/utils/utils";
 
 const propertySchema = z.object({
     data: z.object({
         available_properties: z.object({
             property: z.array(
                 z.object({
-                    id: z.number(), // link: https://integrityarizonavacationrentals.com/ + id
+                    id: z.number(),
                     name: z.string(),
                     short_description: z.string(), // may contain html
                     lodging_type_id: z.number(),
@@ -60,10 +61,36 @@ const convertPropertyType = (inputType: number): PropertyType => {
     }
 }
 
+const reviewSchema = z.object({
+  data: z.object({
+      comments: z.array(
+          z.object({
+              id: z.number(),
+              unit_id: z.number(), // property id on this website
+              creation_date: z.string(),
+              first_name: z.string(),
+              last_name: z.string(),
+              title: z.string(),
+              comments: z.string(),
+              points: z.number(),
+          })
+      )
+  })
+})
+type IntegrityArizonaReviewInput = z.infer<typeof reviewSchema>;
+
+const mapToReview = (validatedData: IntegrityArizonaReviewInput): Review[] => {
+  return validatedData.data.comments.map((comment) => ({
+          name: `${comment.first_name} ${comment.last_name}`,
+          profilePic: '',
+          review: comment.comments,
+          rating: comment.points,
+  }));
+}
 // Function to map validated data to NewProperty
-const mapToNewProperty = (validatedData: IntegrityArizonaPropertyInput): NewProperty[] => {
+const mapToNewProperty = (validatedData: IntegrityArizonaPropertyInput, checkIn: Date, checkOut: Date) => {
     return validatedData.data.available_properties.property.map((prop) => ({
-      originalPropertyId: prop.id,
+      originalListingId: prop.id.toString(),
       name: prop.name,
       about: prop.short_description, // may contain html
       propertyType: convertPropertyType(prop.lodging_type_id),
@@ -82,43 +109,52 @@ const mapToNewProperty = (validatedData: IntegrityArizonaPropertyInput): NewProp
       avgRating: prop.rating_average ?? 0,
       numRatings: prop.rating_count ?? 0,
       originalListingPlatform: "IntegrityArizona" as ListingSiteName,
+      reservedDateRanges: [{
+        start: checkIn, 
+        end: checkOut
+      }],
+      originalNightlyPrice: (prop.total/ getNumNights(checkIn, checkOut)) * 100, // convert to cents
     }));
   };
-// the json will either be in some endpoint, or in a script tag in the html of the page.
-//   For script tags:
-//     1. use scrapeUrl to fetch and parse html and get the script tag(s)
-//     2. use json.parse to get the json
-//     3. validate/parse the json with zod
-//   For the endpoint:
-//     1. use axois.get(url, { httpsAgent: proxyAgent }) to get the json directly
-//     2. validate/parse the json with zod
 
 export const arizonaScraper: DirectSiteScraper = async ({
   checkIn,
   checkOut,
-} = {}) => {
+}) => {
   if (!checkIn || !checkOut) {
     throw new Error("checkIn and checkOut are required for Arizona scraper");
   }
-  const monthStart = checkIn.getMonth() + 1;
-  const dayStart = checkIn.getDate();
-  const yearStart = checkIn.getFullYear();
-  const monthEnd = checkOut.getMonth() + 1;
-  const dayEnd = checkOut.getDate();
-  const yearEnd = checkOut.getFullYear();
+  // append 0 to month and day if less than 10
+  const monthStart = (checkIn.getMonth() + 1).toString().padStart(2, '0');
+  const dayStart = checkIn.getDate().toString().padStart(2, '0');
+  const yearStart = checkIn.getFullYear().toString();
+  const monthEnd = (checkOut.getMonth() + 1).toString().padStart(2, '0');
+  const dayEnd = checkOut.getDate().toString().padStart(2, '0');
+  const yearEnd = checkOut.getFullYear().toString();
 
-  // ext                   https://integrityarizonavacationrentals.com/wp-admin/admin-ajax.php?action=streamlinecore-api-request&params=%7B%22methodName%22:%22GetPropertyAvailabilityWithRatesWordPress%22,%22params%22:%7B%22sort_by%22:%22price%22,%22return_gallery%22:1,%22max_images_number%22:%225%22,%22use_room_type_logic%22:0,%22get_prices_starting_from%22:0,%22longterm_enabled%22:%220%22,%22additional_variables%22:1,%22extra_charges%22:1,%22use_amenities%22:%22yes%22,%22use_streamshare%22:0,%22startdate%22:%2208%2F29%2F2024%22,%22enddate%22:%2209%2F02%2F2024%22,%22amenities_filter%22:%22%22,%22page_number%22:1,%22page_results_number%22:40,%22use_bundled_fees_in_room_rate%22:1,%22square_feet%22:1,%22floor_name%22:1%7D%7D
   const url =`https://integrityarizonavacationrentals.com/wp-admin/admin-ajax.php?action=streamlinecore-api-request&params=%7B%22methodName%22:%22GetPropertyAvailabilityWithRatesWordPress%22,%22params%22:%7B%22sort_by%22:%22price%22,%22return_gallery%22:1,%22max_images_number%22:%225%22,%22use_room_type_logic%22:0,%22get_prices_starting_from%22:0,%22longterm_enabled%22:%220%22,%22additional_variables%22:1,%22extra_charges%22:1,%22use_amenities%22:%22yes%22,%22use_streamshare%22:0,%22startdate%22:%22${monthStart}%2F${dayStart}%2F${yearStart}%22,%22enddate%22:%22${monthEnd}%2F${dayEnd}%2F${yearEnd}%22,%22amenities_filter%22:%22%22,%22page_number%22:1,%22page_results_number%22:40,%22use_bundled_fees_in_room_rate%22:1,%22square_feet%22:1,%22floor_name%22:1%7D%7D`
-  const res = await axios.get(url, { httpsAgent: proxyAgent })
+  // console.log("scrapedUrl: ", url)
+  const properties = await axios.get(url, { httpsAgent: proxyAgent })
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    .then((response) => response.data)
     .then((data) => propertySchema.parse(data)) 
-    .then((validatedData) => mapToNewProperty(validatedData))
+    .then((validatedData) => mapToNewProperty(validatedData, checkIn, checkOut))
 
-  console.log(res)
-  // 1. fetch the top level search page/landing page with previews of all the properties,
-  //    filtered by checkIn and checkOut if provided
-  // 2. if its paginated, try to get the urls of each page, and then fetch them all
-  //    in parallel (Promise.all), otherwise fetch 1 page at a time
-  // 3. get an array of urls/ids of each property and fetch the pages (or json endpoints) in parallel
-  // 4. parse out and return the data 😃
-  return [];
+  // Fetch and append reviews for each property
+  const propertiesWithReviews = await Promise.all(properties.map(async (p) => {
+    const reviewUrl = `https://integrityarizonavacationrentals.com/wp-admin/admin-ajax.php?action=streamlinecore-api-request&params=%7B%22methodName%22:%22GetAllFeedback%22,%22params%22:%7B%22unit_id%22:${p.originalListingId},%22order_by%22:%22newest_first%22%7D%7D`;
+    const reviews = await axios.get(reviewUrl, { httpsAgent: proxyAgent })
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+      .then((response) => response.data)
+      .then((data) => reviewSchema.parse(data))
+      .then((validatedData) => mapToReview(validatedData));
+  
+    return {
+      ...p, 
+      reviews: reviews  
+    };
+  }));
+
+  // console.log(propertiesWithReviews[0])
+  return propertiesWithReviews;
 };
