@@ -44,7 +44,7 @@ const propertySchema = z.object({
                     rating_count: z.number().nullable(),
                     rating_average: z.number().nullable(),
                     vrbo_code: z.string().nullable().optional(),
-                    airbnb_code: z.string().nullable(),
+                    airbnb_code: z.string().nullable().optional(),
                 }),
             )
         })
