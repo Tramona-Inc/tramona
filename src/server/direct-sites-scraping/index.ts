@@ -7,6 +7,7 @@ export type DirectSiteScraper = (options: {
 }) => Promise<
   (NewProperty & {
     originalListingUrl: string; // enforce that its non-null
+    originalTotalPrice: number; // in cents
     reservedDateRanges: { start: Date; end: Date }[];
     reviews: Review[];
   })[]
