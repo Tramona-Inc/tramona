@@ -119,10 +119,7 @@ const mapToNewProperty = (validatedData: IntegrityArizonaPropertyInput, checkIn:
 export const arizonaScraper: DirectSiteScraper = async ({
   checkIn,
   checkOut,
-} = {}) => {
-  if (!checkIn || !checkOut) {
-    throw new Error("checkIn and checkOut are required for Arizona scraper");
-  }
+}) => {
   // append 0 to month and day if less than 10
   const monthStart = (checkIn.getMonth() + 1).toString().padStart(2, '0');
   const dayStart = checkIn.getDate().toString().padStart(2, '0');
