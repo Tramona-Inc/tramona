@@ -21,7 +21,6 @@ import {
 } from "@/server/server-utils";
 import { sendSlackMessage } from "@/server/slack";
 import { isIncoming } from "@/utils/formatters";
-import { formatCurrency, formatDateRange, plural } from "@/utils/utils";
 import { TRPCError } from "@trpc/server";
 import { and, eq, exists } from "drizzle-orm";
 import { z } from "zod";
@@ -30,7 +29,8 @@ import {
   linkInputProperties,
   linkInputPropertyInsertSchema,
 } from "@/server/db/schema/tables/linkInputProperties";
-import { getNumNights } from "@/utils/utils";
+import { formatCurrency, getNumNights, formatDateRange, plural } from "@/utils/utils";
+import { sendTextToHost } from "@/server/server-utils";
 
 const updateRequestInputSchema = z.object({
   requestId: z.number(),
@@ -420,21 +420,24 @@ export async function handleRequestSubmission(
       groupId: madeByGroupId,
     });
 
-    const { requestId } = await tx
+    const { requestId, totalPrice, checkIn, checkOut, location } = await tx
       .insert(requests)
       .values({ ...input, madeByGroupId })
-      .returning({ requestId: requests.id })
+      .returning({ requestId: requests.id, totalPrice: requests.maxTotalPrice, checkIn: requests.checkIn, checkOut: requests.checkOut, location: requests.location })
       .then((res) => res[0]!);
 
-    const propertyIds = await getPropertiesForRequest(
+    const properties = await getPropertiesForRequest(
       { ...input, id: requestId },
       { tx },
     );
 
-    if (propertyIds.length > 0) {
+    if (properties.length > 0) {
+
       await tx
         .insert(requestsToProperties)
-        .values(propertyIds.map((propertyId) => ({ requestId, propertyId })));
+        .values(properties.map((property) => ({ requestId, propertyId: property.id })));
+
+      await sendTextToHost(properties, checkIn, checkOut, totalPrice, location);
     }
 
     return { requestId, madeByGroupId };
@@ -449,13 +452,14 @@ export async function handleRequestSubmission(
   const fmtdNumGuests = plural(input.numGuests ?? 1, "guest");
 
   if (user.role !== "admin") {
-    sendSlackMessage(
-      [
+    await sendSlackMessage({
+      channel: "tramona-bot",
+      text: [
         `*${name} just made a request: ${input.location}*`,
         `requested ${fmtdPrice}/night · ${fmtdDateRange} · ${fmtdNumGuests}`,
         `<https://tramona.com/admin|Go to admin dashboard>`,
       ].join("\n"),
-    );
+    });
   }
 
   return transactionResults;

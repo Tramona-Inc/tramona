@@ -25,4 +25,4 @@ export * from "./tables/reviews";
 export * from "./tables/trips";
 export * from "./tables/feedFiller";
 export * from "./tables/linkInputProperties";
-export * from "./tables/externalOffers";
+export * from "./tables/externalListings";

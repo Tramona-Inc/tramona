@@ -12,20 +12,37 @@ import HostConfirmRequestDialog from "./HostConfirmRequestDialog";
 import HostFinishRequestDialog from "./HostFinishRequestDialog";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
+import { type SeparatedData } from "@/server/server-utils";
+import { separateByPriceRestriction } from "@/utils/utils";
+
 export default function HostRequests() {
   const [propertyPrices, setPropertyPrices] = useState<Record<number, string>>(
     {},
   );
   const [dialogOpen, setDialogOpen] = useState(false);
   const router = useRouter();
-  const { city } = router.query;
+  const { city, priceRestriction } = router.query;
+
   const [selectedRequest, setSelectedRequest] =
     useState<HostDashboardRequest | null>(null);
   const [properties, setProperties] = useState<Property[] | null>(null);
   const [step, setStep] = useState(0);
 
-  const { data: requestsWithProperties } =
-    api.properties.getHostPropertiesWithRequests.useQuery();
+  const [separatedData, setSeparatedData] = useState<SeparatedData | null>(
+    null,
+  );
+
+    api.properties.getHostPropertiesWithRequests.useQuery(undefined, {
+      onSuccess: (fetchedProperties) => {
+        const separatedProperties =
+          separateByPriceRestriction(fetchedProperties);
+        setSeparatedData(separatedProperties);
+      },
+    });
+
+  const requestsWithProperties = priceRestriction
+    ? separatedData?.outsidePriceRestriction
+    : separatedData?.normal;
 
   const cityData = requestsWithProperties?.find((p) => p.city === city);
 

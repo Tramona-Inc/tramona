@@ -11,7 +11,7 @@ module.exports = {
   prefix: "",
   theme: {
     fontFamily: {
-      magazine: ["Stint-Ultra-Condensed", "sans-serif"],
+      magazine: [ "FiraSansExtraCondensed-ExtraBold", "sans-serif"],
     },
     container: {
       center: true,
@@ -114,8 +114,8 @@ module.exports = {
         "marquee-vertical": "marquee-vertical var(--duration) linear infinite",
       },
       backgroundImage: {
-        "reserved-pattern":
-          "repeating-linear-gradient(135deg, red, red 1px, transparent 1px, transparent 4px)",
+        'reserved-pattern': "repeating-linear-gradient(135deg, red, red 1px, transparent 1px, transparent 4px)",
+        'reserved-pattern-2': "repeating-linear-gradient(135deg, hsl(var(--primary-green)), hsl(var(--primary-green)) 1px, transparent 1px, transparent 4px)",
       },
     },
   },

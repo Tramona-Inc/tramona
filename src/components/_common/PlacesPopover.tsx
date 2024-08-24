@@ -12,7 +12,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import useTimeout from "@/utils/useTimeout";
-import { cn } from "@/utils/utils";
+import { cn, useIsSm } from "@/utils/utils";
 import { Check, MapPinIcon } from "lucide-react";
 import usePlaceAutocomplete from "use-places-autocomplete";
 import { FormControl } from "../ui/form";
@@ -53,6 +53,8 @@ export default function PlacesPopover({
   // useEffect(() => ..., []) was offsetting the popover a lil, idk why this works
   useTimeout(() => setOpen(autoFocus), 0);
 
+  const isSm = useIsSm();
+
   return (
     <>
       {/* <Script
@@ -65,10 +67,12 @@ export default function PlacesPopover({
           <FormControl>{trigger({ value, disabled: !ready })}</FormControl>
         </PopoverTrigger>
         <PopoverContent
+          avoidCollisions={false}
           dontAnimate
-          align="start"
+          align={isSm ? "start" : "center"}
+          side="bottom"
           className={cn(
-            "rounded-lg border border-zinc-100 bg-white p-0 shadow-lg",
+            "z-0 rounded-lg border border-zinc-100 bg-white p-0 shadow-lg",
             className,
           )}
         >

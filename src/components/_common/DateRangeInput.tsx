@@ -9,6 +9,7 @@ import { type InputVariant } from "../ui/input";
 import { InputButton } from "../ui/input-button";
 import { type DateRange } from "react-day-picker";
 import { isSameDay } from "date-fns";
+import { useState } from "react";
 
 export default function DateRangeInput({
   className,
@@ -32,6 +33,8 @@ export default function DateRangeInput({
   value?: DateRange;
   onChange: (value?: DateRange) => void;
 }) {
+  const [open, setOpen] = useState(false);
+
   function dateIsDisabled(date: Date) {
     if (date < new Date() && disablePast) return true;
 
@@ -45,7 +48,7 @@ export default function DateRangeInput({
   }
 
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <InputButton
           withClearBtn
@@ -59,9 +62,10 @@ export default function DateRangeInput({
         />
       </PopoverTrigger>
       <PopoverContent
-        className="w-auto rounded-3xl p-0 backdrop-blur-md"
+        className="z-0 w-auto rounded-3xl p-0 backdrop-blur-md"
         align="center"
         side="bottom"
+        avoidCollisions={false}
       >
         <div className="hidden lg:block">
           <Calendar
@@ -72,6 +76,9 @@ export default function DateRangeInput({
                 e.to = e.from;
               }
               onChange(e);
+              if (e?.from !== e?.to) {
+                setOpen(false);
+              }
             }}
             disabled={dateIsDisabled}
             numberOfMonths={2}
@@ -87,6 +94,9 @@ export default function DateRangeInput({
                 e.to = e.from;
               }
               onChange(e);
+              if (e?.from !== e?.to) {
+                setOpen(false);
+              }
             }}
             disabled={dateIsDisabled}
             numberOfMonths={1}

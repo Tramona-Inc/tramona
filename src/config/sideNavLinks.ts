@@ -21,16 +21,6 @@ export const adminNavLinks = [
     icon: InboxIcon,
   },
   { href: "/admin/past-requests", name: "Past Requests", icon: HistoryIcon },
-  {
-    href: "/admin/incoming-property-offers",
-    name: "Incoming Property Offers",
-    icon: HomeIcon,
-  },
-  {
-    href: "/admin/past-property-offers",
-    name: "Past Property Offers",
-    icon: Briefcase,
-  },
   { href: "/admin/utility", name: "Utility", icon: WrenchIcon },
   { href: "/messages", name: "Messages", icon: MessageCircleIcon },
   { href: "/requests", name: "Switch To Guest", icon: ArrowLeftRight },

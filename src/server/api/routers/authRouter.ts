@@ -3,17 +3,10 @@ import VerifyEmailLink from "packages/transactional/emails/VerifyEmail";
 import { env } from "@/env";
 import { CustomPgDrizzleAdapter } from "@/server/adapter";
 import { db } from "@/server/db";
-import {
-  ALL_HOST_TYPES,
-  hostProfiles,
-  hostTeams,
-  referralCodes,
-  users,
-  type User,
-} from "@/server/db/schema";
+import { referralCodes, users, type User } from "@/server/db/schema";
 import { addUserToGroups, sendEmail } from "@/server/server-utils";
 import { generateReferralCode } from "@/utils/utils";
-import { zodEmail, zodPassword, zodString } from "@/utils/zod-utils";
+import { zodEmail, zodPassword } from "@/utils/zod-utils";
 import { TRPCError } from "@trpc/server";
 import * as bycrypt from "bcrypt";
 import { eq } from "drizzle-orm";
@@ -200,99 +193,7 @@ export const authRouter = createTRPCRouter({
         emailVerified: user.emailVerified !== null,
       };
     }),
-    
-  createUserHost: publicProcedure
-    .input(
-      z.object({
-        name: zodString({ minLen: 2 }),
-        email: zodEmail(),
-        password: zodPassword(),
-        referralCode: z.string().optional(),
-        conversationId: z.string(),
-        hostType: z.enum(ALL_HOST_TYPES),
-      }),
-    )
-    .mutation(async ({ input, ctx }) => {
-      const userQueriedWEmail = await fetchEmailVerified(input.email);
 
-      if (userQueriedWEmail?.emailVerified) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "User with this email already exists",
-        });
-      }
-
-      const hashedPassword: string = await bycrypt.hash(input.password, 10);
-
-      try {
-        let user: User | null;
-
-        // Users signed up but didn't verify email
-        if (userQueriedWEmail?.emailVerified === null) {
-          user = await updateExistingUserAuth(
-            // input.name,
-            input.email,
-            hashedPassword,
-            userQueriedWEmail.id,
-          );
-        } else {
-          // Initial sign up insert the user info
-          user = await insertUserAuth(
-            // input.name,
-            input.email,
-            hashedPassword,
-            true,
-          );
-
-          if (user) {
-            // Create referral code
-            await ctx.db.insert(referralCodes).values({
-              ownerId: user.id,
-              referralCode: generateReferralCode(),
-            });
-
-            // Link user account
-            await CustomPgDrizzleAdapter(ctx.db).linkAccount?.({
-              provider: "credentials",
-              providerAccountId: user.id,
-              userId: user.id,
-              type: "email",
-            });
-          }
-        }
-
-        if (user) {
-          // create new team for just the host
-          const teamId = await ctx.db
-            .insert(hostTeams)
-            .values({
-              ownerId: user.id,
-              name: `${user.name ?? user.username ?? user.email}`,
-            })
-            .returning()
-            .then((res) => res[0]!.id);
-
-          // Insert Host info
-          await ctx.db.insert(hostProfiles).values({
-            userId: user.id,
-            curTeamId: teamId,
-          });
-
-          // Send email verification token
-          await sendVerificationEmailWithConversation(
-            user,
-            input.conversationId,
-          );
-        }
-
-        return user;
-      } catch (error) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Something went wrong",
-        });
-      }
-    }),
   verifyEmailToken: publicProcedure
     .input(
       z.object({
@@ -476,22 +377,5 @@ export const authRouter = createTRPCRouter({
       return {
         message: "Password changed successfully",
       };
-    }),
-  verifyHostToken: publicProcedure
-    .input(
-      z.object({
-        token: z.string(),
-      }),
-    )
-    .mutation(async ({ input }) => {
-      try {
-        const payload = jwt.verify(input.token, env.NEXTAUTH_SECRET);
-        return payload;
-      } catch (error) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Invalid token or user does not exist",
-        });
-      }
     }),
 });

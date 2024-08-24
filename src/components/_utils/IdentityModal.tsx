@@ -6,7 +6,7 @@ import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
 import { useStripe } from "@/utils/stripe-client";
 
-const IdentityModal = () => {
+const IdentityModal = ({ isPrimary = false }: { isPrimary?: boolean }) => {
   const stripePromise = useStripe();
 
   const [stripe, setStripe] = useState<Stripe | null>(null);
@@ -69,10 +69,10 @@ const IdentityModal = () => {
     <VerificationProvider>
       <Button
         role="link"
-        variant="secondary"
+        variant={isPrimary ? "greenPrimary" : "secondary"}
         disabled={!stripe}
         onClick={handleClick}
-        className="font-semibold"
+        className="w-full font-semibold"
       >
         Confirm your identity
       </Button>

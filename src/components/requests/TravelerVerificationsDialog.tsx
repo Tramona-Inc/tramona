@@ -3,7 +3,7 @@ import { api } from "@/utils/api";
 import { type HostDashboardRequest } from "./RequestCard";
 import { getAge } from "@/utils/utils";
 import UserAvatar from "../_common/UserAvatar";
-import { BadgeCheck, BadgeX } from "lucide-react";
+import { BadgeCheck, BadgeX, CircleUserRound, Mail, Phone } from "lucide-react";
 
 export function TravelerVerificationsDialog({
   request,
@@ -34,39 +34,56 @@ export function TravelerVerificationsDialog({
   ];
 
   return (
-    <Dialog>
-      <DialogTrigger>
-        <p className="underline">{request.traveler.name}</p>
-      </DialogTrigger>
-      <DialogContent>
-        <div className="flex items-center gap-2">
-          <UserAvatar
-            size="sm"
-            name={request.traveler.name}
-            image={request.traveler.image}
-          />
-          <p className="text-lg font-bold">{request.traveler.name}</p>
-        </div>
-        {verifications.map((verification, index) => (
-          <div
-            key={index}
-            className="flex items-center justify-between font-semibold"
-          >
-            <p>{verification.name}</p>
-            {verification.verified ? (
-              <div className="flex gap-2 text-teal-800">
-                <BadgeCheck />
-                <p>Verified</p>
-              </div>
-            ) : (
-              <div className="flex gap-2 text-red-500">
-                <BadgeX />
-                <p>Not verified</p>
-              </div>
-            )}
+    <>
+      <Dialog>
+        <DialogTrigger>
+          <p className="underline">{request.traveler.name}</p>
+        </DialogTrigger>
+        <DialogContent>
+          <div className="flex items-center gap-2">
+            <UserAvatar
+              size="sm"
+              name={request.traveler.name}
+              image={request.traveler.image}
+            />
+            <p className="text-lg font-bold">{request.traveler.name}</p>
           </div>
-        ))}
-      </DialogContent>
-    </Dialog>
+          {verifications.map((verification, index) => (
+            <div
+              key={index}
+              className="flex items-center justify-between font-semibold"
+            >
+              <p>{verification.name}</p>
+              {verification.verified ? (
+                <div className="flex gap-2 text-teal-800">
+                  <BadgeCheck />
+                  <p>Verified</p>
+                </div>
+              ) : (
+                <div className="flex gap-2 text-red-500">
+                  <BadgeX />
+                  <p>Not verified</p>
+                </div>
+              )}
+            </div>
+          ))}
+        </DialogContent>
+      </Dialog>
+      <div>
+        {verificationList.emailVerified &&
+        verificationList.phoneNumber &&
+        verificationList.dateOfBirth ? (
+          <div className="flex gap-2 text-teal-800">
+            <BadgeCheck />
+            <p>Verified</p>
+          </div>
+        ) : (
+          <div className="flex gap-2 text-red-500">
+            <BadgeX />
+            <p>Not verified</p>
+          </div>
+        )}
+      </div>
+    </>
   );
 }

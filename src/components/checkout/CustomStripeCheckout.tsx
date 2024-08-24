@@ -19,7 +19,7 @@ import Spinner from "../_common/Spinner";
 import { useToast } from "../ui/use-toast";
 
 const CustomStripeCheckout = ({
-  offer: { property, request, ...offer },
+  offer: { property, ...offer },
 }: {
   offer: OfferWithDetails;
 }) => {
@@ -40,12 +40,12 @@ const CustomStripeCheckout = ({
   const { serviceFee, finalTotal } = useMemo(
     () =>
       getPriceBreakdown({
-        bookingCost: offer.totalPrice,
+        bookingCost: offer.travelerOfferedPrice,
         numNights,
         superhogFee: SUPERHOG_FEE,
         tax: TAX_PERCENTAGE,
       }),
-    [offer.totalPrice, numNights],
+    [offer.travelerOfferedPrice, numNights],
   );
 
   const [options, setOptions] = useState<StripeElementsOptions | undefined>(

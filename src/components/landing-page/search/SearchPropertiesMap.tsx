@@ -6,7 +6,7 @@ import {
   useApiIsLoaded,
 } from "@vis.gl/react-google-maps";
 import Spinner from "@/components/_common/Spinner";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { api } from "@/utils/api";
 import { useCitiesFilter } from "@/utils/store/cities-filter";
 import { debounce } from "lodash";
@@ -38,8 +38,6 @@ function SearchPropertiesMap({
 }) {
   //zustand
   const filters = useCitiesFilter((state) => state);
-  const setFilter = useCitiesFilter((state) => state.setFilter);
-  const setRadius = useCitiesFilter((state) => state.setRadius);
   const { adjustedProperties, setAdjustedProperties } = useAdjustedProperties();
 
   const { data: initialProperties } =
@@ -68,7 +66,7 @@ function SearchPropertiesMap({
   const [center, setCenter] = useState<google.maps.LatLngLiteral | null>(null);
   //this is so the map doesnt rerender whe nthe filter changes
 
-  const [cameraProps, setCameraProps] = useState<MapProps | null>({
+  const [cameraProps] = useState<MapProps | null>({
     mapId: "9c8e46d54d7a528b",
     id: "9c8e46d54d7a528b",
     reuseMaps: true,
@@ -78,7 +76,6 @@ function SearchPropertiesMap({
     fullscreenControl: true,
   });
 
-  const mapRef = useRef<google.maps.Map | null>(null);
   const map = useMap("9c8e46d54d7a528b");
   const apiIsLoaded = useApiIsLoaded();
 

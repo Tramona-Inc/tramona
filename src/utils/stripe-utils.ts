@@ -17,7 +17,6 @@ export async function createPayHostTransfer({
 }: CreatePayHostTransfer) {
   //we need to check to see if our balance is enought to pay the host, if not we need to top up the account
   const balance = await stripe.balance.retrieve();
-  console.log("balance object", balance);
   if (balance.instant_available && balance.instant_available.length > 0) {
     const availableBalance = balance.instant_available[0]!.amount;
 
@@ -44,7 +43,7 @@ export async function createPayHostTransfer({
     //update the trip to show that the host has been payed
     await db
       .update(trips)
-      .set({ hostPayed: true })
+      .set({ hostPayed: new Date() })
       .where(eq(trips.id, parseInt(tripId)));
     console.log("transfer created", transfer);
   }

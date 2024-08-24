@@ -1,4 +1,5 @@
 import { env } from "@/env";
+
 import {
   createTRPCRouter,
   protectedProcedure,
@@ -16,7 +17,11 @@ import {
   trips,
 } from "@/server/db/schema";
 import { getCity, getCoordinates } from "@/server/google-maps";
-import { sendText, sendWhatsApp } from "@/server/server-utils";
+import {
+  sendText,
+  sendWhatsApp,
+  updateTravelerandHostMarkup,
+} from "@/server/server-utils";
 import { formatDateRange } from "@/utils/utils";
 
 import { TRPCError } from "@trpc/server";
@@ -143,28 +148,41 @@ export const offersRouter = createTRPCRouter({
         });
       }
 
-      return await ctx.db.query.offers.findMany({
-        where: eq(offers.requestId, input.id),
-        with: {
-          request: {
-            with: {
-              madeByGroup: { with: { members: true } },
-            },
-            columns: { numGuests: true, location: true, id: true },
-          },
-          property: {
-            columns: {
-              latLngPoint: false,
-            },
-            with: {
-              host: {
-                columns: { id: true, name: true, email: true, image: true },
+      const offersByRequest = await ctx.db.query.offers
+        .findMany({
+          where: eq(offers.requestId, input.id),
+          with: {
+            request: {
+              with: {
+                madeByGroup: { with: { members: true } },
               },
-              reviews: true,
+              columns: { numGuests: true, location: true, id: true },
+            },
+            property: {
+              columns: {
+                latLngPoint: false,
+              },
+              with: {
+                host: {
+                  columns: { id: true, name: true, email: true, image: true },
+                },
+                reviews: true,
+              },
             },
           },
-        },
-      });
+        })
+        .then((res) =>
+          res.map((offer) => {
+            if (offer.acceptedAt !== null) return offer;
+            void updateTravelerandHostMarkup({
+              offerTotalPrice: offer.totalPrice,
+              offerId: offer.id,
+            });
+            return offer;
+          }),
+        );
+
+      return offersByRequest;
     }),
 
   getCoordinates: publicProcedure
@@ -197,6 +215,8 @@ export const offersRouter = createTRPCRouter({
           id: true,
           propertyId: true,
           requestId: true, //testing
+          hostPayout: true,
+          travelerOfferedPrice: true,
         },
         with: {
           request: {
@@ -264,6 +284,8 @@ export const offersRouter = createTRPCRouter({
           acceptedAt: true,
           id: true,
           tramonaFee: true,
+          hostPayout: true,
+          travelerOfferedPrice: true,
         },
         with: {
           request: {
@@ -399,6 +421,8 @@ export const offersRouter = createTRPCRouter({
         .object({
           propertyId: z.number(),
           totalPrice: z.number().min(1),
+          hostPayout: z.number(),
+          travelerOfferedPrice: z.number(),
         })
         .and(
           z.union([

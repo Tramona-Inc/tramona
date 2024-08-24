@@ -58,10 +58,11 @@ export default function Onboarding8({
     setError(true);
   }
 
+  const handleSubmit = form.handleSubmit(handleFormSubmit);
+
   useEffect(() => {
-    setHandleOnboarding &&
-      setHandleOnboarding(() => form.handleSubmit(handleFormSubmit));
-  }, [form, form.formState, handleFormSubmit, setHandleOnboarding]);
+    setHandleOnboarding?.(() => handleSubmit);
+  }, [handleSubmit, setHandleOnboarding]);
 
   return (
     <>
@@ -78,7 +79,7 @@ export default function Onboarding8({
               name="propertyName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-lg font-bold text-primary">
+                  <FormLabel className="text-lg font-bold text-foreground">
                     Create a title
                   </FormLabel>
                   <FormDescription>
@@ -96,7 +97,7 @@ export default function Onboarding8({
               name="about"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-lg font-bold text-primary">
+                  <FormLabel className="text-lg font-bold text-foreground">
                     Create your description
                   </FormLabel>
                   <FormDescription>

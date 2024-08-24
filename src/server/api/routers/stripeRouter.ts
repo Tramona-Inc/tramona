@@ -8,8 +8,7 @@ import { z } from "zod";
 
 import { hostProfiles } from "@/server/db/schema";
 
-import { createPayHostTransfer } from "@/pages/api/stripe-utils";
-import stripeAutoTransfer from "@/pages/api/cron/stripe-transfer";
+import { createPayHostTransfer } from "@/utils/stripe-utils";
 
 export const config = {
   api: {
@@ -60,7 +59,6 @@ export const stripeRouter = createTRPCRouter({
         phone_number: input.phoneNumber,
         host_stripe_id: input.hostStripeId ?? "",
       };
-      console.log("this is host stripe id inside of the metadata");
       console.log(metadata.host_stripe_id);
       const paymentIntentData: Stripe.Checkout.SessionCreateParams.PaymentIntentData =
         {
@@ -337,7 +335,7 @@ export const stripeRouter = createTRPCRouter({
       // will trigger the payment_intent.amount_capturable_updated
       await ctx.db
         .update(trips)
-        .set({ paymentCaptured: true })
+        .set({ paymentCaptured: new Date() })
         .where(eq(trips.paymentIntentId, input.paymentIntentId));
       return intent;
     }),
@@ -464,9 +462,13 @@ export const stripeRouter = createTRPCRouter({
       },
       where: eq(hostProfiles.userId, ctx.user.id),
     });
-    if (ctx.user.role === "host" && !res?.stripeAccountId) {
-      const [firstName, ...rest] = ctx.user.name!.split(" ");
-      const lastName = rest.join(" ");
+    if (!res?.stripeAccountId) {
+      const [firstNameFallback, ...rest] = ctx.user.name!.split(" ");
+      const lastNameFallback = rest.join(" ");
+
+      const firstName = ctx.user.firstName ?? firstNameFallback;
+      const lastName = ctx.user.lastName ?? lastNameFallback;
+
       const stripeAccount = await stripeWithSecretKey.accounts.create({
         country: "US", //change this to the user country later
         email: ctx.user.email,
@@ -507,10 +509,7 @@ export const stripeRouter = createTRPCRouter({
 
       return stripeAccount;
     } else {
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: "Stripe account already created",
-      });
+      throw new Error("Stripe account already created");
     }
   }),
 
@@ -570,12 +569,6 @@ export const stripeRouter = createTRPCRouter({
           // },
         },
       });
-      if (!accountSession) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Stripe account not found",
-        });
-      }
 
       return accountSession;
     }),
@@ -765,14 +758,13 @@ export const stripeRouter = createTRPCRouter({
 
   stripeTopUp: protectedProcedure //this function is used for topping up for test transactions
     .input(z.object({ amount: z.number() }))
-    .query(async ({ ctx, input }) => {
+    .query(async ({ input }) => {
       const topup = await stripe.topups.create({
         amount: input.amount, //
         currency: "usd",
         description: "Top-up for week of May 31",
         statement_descriptor: "Weekly top-up",
       });
-      console.log("Top-up successful", topup);
       return topup;
     }),
 });

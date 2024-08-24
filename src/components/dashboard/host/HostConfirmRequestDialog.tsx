@@ -3,6 +3,8 @@ import {
   DialogContent,
   DialogHeader,
   DialogFooter,
+  DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { type HostDashboardRequest } from "@/components/requests/RequestCard";
@@ -10,9 +12,12 @@ import { type Property } from "@/server/db/schema/tables/properties";
 import {
   formatCurrency,
   formatDateRange,
+  getHostPayout,
   getNumNights,
+  getTravelerOfferedPrice,
   plural,
 } from "@/utils/utils";
+import { HOST_MARKUP, TRAVELER__MARKUP } from "@/utils/constants";
 import Image from "next/image";
 import { EllipsisIcon } from "lucide-react";
 import {
@@ -81,6 +86,22 @@ export default function HostConfirmRequestDialog({
           requestId: request.id,
           propertyId: property.id,
           totalPrice: parseInt(propertyPrices[property.id] ?? "0") * 100,
+          hostPayout:
+            parseFloat(
+              getHostPayout({
+                propertyPrice: parseFloat(propertyPrices[property.id] ?? "0"),
+                hostMarkup: HOST_MARKUP,
+                numNights,
+              }),
+            ) * 100,
+          travelerOfferedPrice:
+            parseFloat(
+              getTravelerOfferedPrice({
+                propertyPrice: parseFloat(propertyPrices[property.id] ?? "0"),
+                travelerMarkup: TRAVELER__MARKUP,
+                numNights,
+              }),
+            ) * 100,
         });
       }),
     );
@@ -89,14 +110,18 @@ export default function HostConfirmRequestDialog({
   };
 
   const numNights = getNumNights(request.checkIn, request.checkOut);
+  console.log("selectedProperties2", selectedProperties);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTitle></DialogTitle>
       <DialogContent className="max-w-lg p-6">
         <DialogHeader>
           <h3 className="text-center text-lg font-bold">Respond</h3>
         </DialogHeader>
-
+        <DialogDescription>
+          Please confirm the properties you would like to offer.
+        </DialogDescription>
         <div className="rounded-md border bg-gray-50 p-4">
           <div className="mb-4 flex justify-between">
             <div className="flex flex-col items-start">
@@ -130,6 +155,7 @@ export default function HostConfirmRequestDialog({
         </div>
 
         <h4 className="text-dark text-lg font-bold">Review your offers</h4>
+
         <div className="space-y-4">
           {selectedProperties.map((property) => (
             <div
@@ -228,7 +254,16 @@ export default function HostConfirmRequestDialog({
                     </div>
                     <div className="text-sm text-gray-600">
                       Total payout: $
-                      {parseInt(propertyPrices[property.id] ?? "0") * numNights}
+                      {getHostPayout({
+                        propertyPrice: parseFloat(
+                          propertyPrices[property.id] ?? "0",
+                        ),
+                        hostMarkup: HOST_MARKUP,
+                        numNights: getNumNights(
+                          request.checkIn,
+                          request.checkOut,
+                        ),
+                      })}
                     </div>
                   </div>
                 </div>
