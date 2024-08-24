@@ -157,6 +157,12 @@ export const propertiesRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       return await ctx.db.query.properties.findFirst({
         where: eq(properties.id, input.id),
+        with: {
+          host: {
+            columns: { image: true, name: true, email: true, id: true },
+          },
+          reviews: true,
+        },
       });
     }),
   getAll: publicProcedure.query(async ({ ctx }) => {

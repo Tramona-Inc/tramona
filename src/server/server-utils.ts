@@ -562,7 +562,7 @@ export async function updateTravelerandHostMarkup({
 }) {
   console.log("offerTotalPrice", offerTotalPrice);
   const travelerPrice = Math.ceil(offerTotalPrice * TRAVELER__MARKUP);
-  const hostPay = offerTotalPrice * HOST_MARKUP;
+  const hostPay = Math.ceil(offerTotalPrice * HOST_MARKUP);
   console.log("travelerPrice", travelerPrice);
   await db
     .update(offers)
