@@ -230,6 +230,7 @@ export const usersRouter = createTRPCRouter({
       });
 
       await sendSlackMessage({
+        isProductionOnly: true,
         text: [
           "*Host Profile Created:*",
           `User ${ctx.user.name} has become a host`,

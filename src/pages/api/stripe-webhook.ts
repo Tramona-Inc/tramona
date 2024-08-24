@@ -21,7 +21,7 @@ import { type NextApiRequest, type NextApiResponse } from "next";
 import { superhogRequests } from "../../server/db/schema/tables/superhogRequests";
 import {
   cancelTripByPaymentIntent,
-  sendEmailAndWhatsup,
+  sendEmailAndWhatsupConfirmation,
 } from "@/utils/webhook-functions/trips-utils";
 import { createSuperhogReservation } from "@/utils/webhook-functions/superhog-utils";
 import { request } from "http";
@@ -156,7 +156,7 @@ export default async function webhook(
 
                 //send email and whatsup
                 console.log("Sending email and whatsup");
-                await sendEmailAndWhatsup({
+                await sendEmailAndWhatsupConfirmation({
                   trip: currentTrip[0]!,
                   user: user!,
                   offer: offer,
@@ -304,13 +304,16 @@ export default async function webhook(
         break;
       case "charge.dispute.created":
         {
+          console.log("dispute event", event.data.object);
+
           const dispute = event.data.object;
           //find the trip by paymentItentId
           const paymentIntentId = dispute.payment_intent as string;
           await cancelTripByPaymentIntent({
             paymentIntentId,
-            reason: `Dispute : ${dispute.reason}`,
+            reason: `Youdispute has been report : ${dispute.reason}`,
           });
+          //now we need to send an email cancelling the trip
         }
 
         break;

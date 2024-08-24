@@ -1,14 +1,23 @@
 import { db } from "@/server/db";
 import { eq } from "drizzle-orm";
-import { trips, tripCancellations, superhogRequests } from "@/server/db/schema";
+import {
+  trips,
+  tripCancellations,
+  superhogRequests,
+  groupMembers,
+  groups,
+  properties,
+} from "@/server/db/schema";
 import { cancelSuperhogReservation } from "./superhog-utils";
-import { getNumNights } from "../utils";
+import { formatDateRange, getNumNights } from "../utils";
 import type { User, Trip, Offer, Property } from "../../server/db/schema";
 import { getPriceBreakdown } from "../utils";
 import { TAX_PERCENTAGE, SUPERHOG_FEE } from "../constants";
 import { sendEmail } from "@/server/server-utils";
 import { formatDate } from "date-fns";
 import ReservationConfirmedEmail from "packages/transactional/emails/ReservationConfirmedEmail";
+import { stripeWithSecretKey } from "@/server/api/routers/stripeRouter";
+import BookingCancellationEmail from "packages/transactional/emails/BookingCancellationEmail";
 
 export async function cancelTripByPaymentIntent({
   paymentIntentId,
@@ -17,6 +26,9 @@ export async function cancelTripByPaymentIntent({
   paymentIntentId: string;
   reason: string;
 }) {
+  const paymentIntentObject =
+    await stripeWithSecretKey.paymentIntents.retrieve(paymentIntentId);
+
   const currentTrip = await db
     .update(trips)
     .set({
@@ -27,16 +39,16 @@ export async function cancelTripByPaymentIntent({
     .then((res) => res[0]);
 
   if (!currentTrip) {
-    console.log("TRIP NOT FOUND");
     return;
   }
   //add the reason in the cancellation table
-  console.log("ABOUT TO CREATE CANCELLATION");
-  await db.insert(tripCancellations).values({
-    reason,
-    tripId: currentTrip.id,
-  });
-  console.log("cancellation created");
+  await db
+    .insert(tripCancellations)
+    .values({
+      reason,
+      tripId: currentTrip.id,
+    })
+    .returning();
 
   if (currentTrip.superhogRequestId) {
     //find and cancel the superhog reservation
@@ -50,10 +62,59 @@ export async function cancelTripByPaymentIntent({
       verificationId: superhogVerificationId!.superhogVerificationId,
       reservationId: currentTrip.id.toString(),
     });
+
+    // ------send an email to the group --------
+    const requestGroupId = await db.query.groups.findFirst({
+      where: eq(groups.id, currentTrip.groupId),
+    });
+
+    console.log("Request Group Id: ", requestGroupId);
+    const requestGroup = await db.query.groupMembers.findMany({
+      where: eq(groupMembers.groupId, requestGroupId!.id),
+      with: {
+        user: {
+          columns: { email: true, firstName: true, name: true },
+        },
+      },
+    });
+    console.log("Request Group: ", requestGroup);
+    //get property name
+    console.log("Property: ", paymentIntentObject.metadata.property_id);
+    const property = await db.query.properties.findFirst({
+      columns: { name: true },
+      where: eq(
+        properties.id,
+        parseInt(paymentIntentObject.metadata.property_id!),
+      ),
+    });
+
+    console.log("Property: ", property!.name);
+    //send email to each member
+    for (const member of requestGroup) {
+      console.log("Sending Email to: ", member.user.email);
+      await sendEmail({
+        to: member.user.email,
+        subject: "Booking Cancelled - Tramona",
+        content: BookingCancellationEmail({
+          userName: member.user.firstName ?? member.user.name ?? "Traveler",
+          confirmationNumber: currentTrip.id.toString(),
+          dateRange: formatDateRange(
+            currentTrip.checkIn,
+            currentTrip.checkOut,
+          ).toString(),
+
+          property: property!.name,
+          reason: reason,
+          refund: currentTrip.totalPriceAfterFees!,
+        }),
+      });
+
+      console.log("Email Sent");
+    }
   }
 }
 
-export async function sendEmailAndWhatsup({
+export async function sendEmailAndWhatsupConfirmation({
   trip,
   user,
   offer,
@@ -102,6 +163,7 @@ export async function sendEmailAndWhatsup({
     }),
   });
   console.log("EMAIL SENT");
+
   // const twilioMutation = api.twilio.sendSMS.useMutation();
   // const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
 
@@ -116,6 +178,4 @@ export async function sendEmailAndWhatsup({
   //     msg: "Your Tramona booking is confirmed! Please see the My Trips page to access your trip information!",
   //   });
   // }
-
-  // console.log("PaymentIntent was successful!");
 }

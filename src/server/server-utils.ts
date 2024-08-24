@@ -297,6 +297,7 @@ export async function addProperty({
   waitUntil(processRequests(insertedProperty!));
 
   await sendSlackMessage({
+    isProductionOnly: true,
     channel: "host-bot",
     text: [
       `*New property added: ${property.name} in ${property.address}*
