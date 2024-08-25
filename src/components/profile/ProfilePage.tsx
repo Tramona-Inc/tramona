@@ -18,6 +18,7 @@ import IdentityModal from "../_utils/IdentityModal";
 import { VerificationProvider } from "../_utils/VerificationContext";
 import { Button } from "../ui/button";
 import EditProfileDialog from "./EditProfileDialog";
+import StripeVerificationCard from "../_common/StripeVerificationCard";
 
 export default function ProfilePage() {
   const { data: session } = useSession({ required: true });
@@ -100,19 +101,7 @@ export default function ProfilePage() {
       </section>
       {/* pop up if no verified */}
       {verificationStatus?.isIdentityVerified === "false" && (
-        <section className="flex flex-col justify-center gap-x-2 rounded-lg border border-red-200 p-4">
-          <div className="flex flex-row gap-x-1 font-bold">
-            <InfoIcon size={24} className="text-red-400" /> Verify your Identity
-          </div>
-          <p className="ml-2">
-            Hosts are more likely to accept your bid when they know who you are.
-          </p>
-          <div className="mt-3 flex w-1/4">
-            <VerificationProvider>
-              <IdentityModal />
-            </VerificationProvider>
-          </div>
-        </section>
+        <StripeVerificationCard />
       )}
 
       {/* About Me */}

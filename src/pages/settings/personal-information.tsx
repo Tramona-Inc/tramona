@@ -1,5 +1,8 @@
 import SettingsLayout from "@/components/_common/Layout/SettingsLayout";
 import Spinner from "@/components/_common/Spinner";
+import StripeVerificationCard from "@/components/_common/StripeVerificationCard";
+import IdentityModal from "@/components/_utils/IdentityModal";
+import { VerificationProvider } from "@/components/_utils/VerificationContext";
 import ChangePasswordForm from "@/components/settings/ChangePasswordForm";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,7 +25,7 @@ import { api } from "@/utils/api";
 import { zodString } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogTitle } from "@radix-ui/react-dialog";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, InfoIcon } from "lucide-react";
 import { type Session } from "next-auth";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
@@ -226,6 +229,9 @@ function PersonalInformationForm({
                 </DialogContent>
               </Dialog>
             </div>
+          )}
+          {verificationStatus?.isIdentityVerified === "false" && (
+            <StripeVerificationCard />
           )}
         </div>
       </div>
