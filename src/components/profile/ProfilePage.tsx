@@ -6,7 +6,6 @@ import {
   Clock2Icon,
   Edit,
   Facebook,
-  InfoIcon,
   Instagram,
   Twitter,
   Youtube,
@@ -14,8 +13,6 @@ import {
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import UserAvatar from "../_common/UserAvatar";
-import IdentityModal from "../_utils/IdentityModal";
-import { VerificationProvider } from "../_utils/VerificationContext";
 import { Button } from "../ui/button";
 import EditProfileDialog from "./EditProfileDialog";
 import StripeVerificationCard from "../_common/StripeVerificationCard";
