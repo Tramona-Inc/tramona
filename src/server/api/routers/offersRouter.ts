@@ -680,6 +680,8 @@ export const offersRouter = createTRPCRouter({
             id: true,
             maxNumGuests: true,
             numBedrooms: true,
+            avgRating: true,
+            numRatings: true,
           },
         },
       },

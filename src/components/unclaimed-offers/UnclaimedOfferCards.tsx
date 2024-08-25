@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { api } from "@/utils/api";
 import { type RouterOutputs } from "@/utils/api";
@@ -10,9 +10,22 @@ import {
   plural,
   getNumNights,
 } from "@/utils/utils";
-import { InfoIcon, TrashIcon, ExternalLink, CirclePlus } from "lucide-react";
+// import {
+//   InfoIcon,
+//   TrashIcon,
+//   ExternalLink,
+//   CirclePlus,
+//   Star,
+// } from "lucide-react";
+import { Star, ChevronLeft, ChevronRight } from "lucide-react";
 import { Skeleton } from "../ui/skeleton";
-import React, { useEffect, useState, useMemo, useCallback, useRef } from "react";
+import React, {
+  useEffect,
+  useState,
+  useMemo,
+  useCallback,
+  useRef,
+} from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import {
@@ -28,7 +41,6 @@ import SearchPropertiesMap from "../landing-page/search/SearchPropertiesMap";
 import { useCitiesFilter } from "@/utils/store/cities-filter";
 import { AdjustedPropertiesProvider } from "../landing-page/search/AdjustedPropertiesContext";
 
-
 import AddUnclaimedOffer from "./AddUnclaimedOffer";
 import UnclaimedOffersMap from "./UnclaimedOfferMap";
 export type UnMatchedOffers =
@@ -38,37 +50,34 @@ export default function UnclaimedOfferCard() {
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 24;
-  const {
-    data: unMatchedOffers,
-    isLoading: isLoadingOffers,
-  } = api.offers.getAllUnmatchedOffers.useQuery(undefined, {
-    staleTime: Infinity,
-    cacheTime: 0,
-  });
+  const { data: unMatchedOffers, isLoading: isLoadingOffers } =
+    api.offers.getAllUnmatchedOffers.useQuery(undefined, {
+      staleTime: Infinity,
+      cacheTime: 0,
+    });
 
-  const propertyIds = useMemo(() => 
-    unMatchedOffers?.map(offer => offer.propertyId) ?? [], 
-    [unMatchedOffers]
+  const propertyIds = useMemo(
+    () => unMatchedOffers?.map((offer) => offer.propertyId) ?? [],
+    [unMatchedOffers],
   );
 
-  const {
-    data: propertyDetails,
-    isLoading: isLoadingProperties,
-  } = api.properties.getPropertiesById.useQuery(propertyIds, {
-    enabled: propertyIds.length > 0,
-  });
+  const { data: propertyDetails, isLoading: isLoadingProperties } =
+    api.properties.getPropertiesById.useQuery(propertyIds, {
+      enabled: propertyIds.length > 0,
+    });
 
   const isLoading = isLoadingOffers || isLoadingProperties;
 
-  const mapMarkers = useMemo(() => 
-    propertyDetails?.map(property => ({
-      id: property.id.toString(),
-      location: { lat: property.latitude, lng: property.longitude },
-      propertyName: property.name,
-      price: property.originalNightlyPrice,
-      image: property.imageUrls[0] ?? "",
-    })) ?? [],
-    [propertyDetails]
+  const mapMarkers = useMemo(
+    () =>
+      propertyDetails?.map((property) => ({
+        id: property.id.toString(),
+        location: { lat: property.latitude, lng: property.longitude },
+        propertyName: property.name,
+        price: property.originalNightlyPrice,
+        image: property.imageUrls[0] ?? "",
+      })) ?? [],
+    [propertyDetails],
   );
   const { data: session } = useSession();
 
@@ -113,7 +122,10 @@ export default function UnclaimedOfferCard() {
   useEffect(() => {
     console.log("Component re-rendered. Current state:");
     console.log("isLoading:", isLoading);
-    console.log("All unmatched offers:", unMatchedOffers?.length ?? "Not loaded yet");
+    console.log(
+      "All unmatched offers:",
+      unMatchedOffers?.length ?? "Not loaded yet",
+    );
     console.log("Paginated offers:", paginatedOffers.length);
     console.log("Current page:", currentPage);
     console.log("Total pages:", totalPages);
@@ -127,7 +139,6 @@ export default function UnclaimedOfferCard() {
       console.log("Unique offer IDs:", offerIds.size);
     }
   }, [unMatchedOffers, paginatedOffers, currentPage, totalPages, isLoading]);
-
 
   const renderPaginationItems = () => {
     const items = [];
@@ -158,12 +169,12 @@ export default function UnclaimedOfferCard() {
   };
 
   return (
-    <div className="flex max-w-7xl">
-      <div className="max-w-2/3 mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="flex h-full w-full pt-24">
+      <div className="max-w-2/3 mr-auto h-full overflow-y-scroll px-6 scrollbar-hide">
         {!isLoading ? (
           paginatedOffers.length > 0 ? (
             <div className="flex flex-col items-center justify-center">
-              <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+              <div className="grid w-full gap-x-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
                 {paginatedOffers.map((offer) => (
                   <React.Fragment key={offer.id}>
                     <UnMatchedPropertyCard offer={offer} />
@@ -228,47 +239,121 @@ export default function UnclaimedOfferCard() {
           </div>
         )}
       </div>
-      <div className="w-[1000px] h-[1000px]">
-      {unMatchedOffers && <UnclaimedOffersMap unMatchedOffers={unMatchedOffers} />}
+      <div className="min-w-1/3 h-full w-full hidden lg:block">
+        {unMatchedOffers && (
+          <UnclaimedOffersMap unMatchedOffers={unMatchedOffers} />
+        )}
       </div>
     </div>
   );
 }
 
-function UnMatchedPropertyCard({ offer }: { offer: UnMatchedOffers }) {
+export function UnMatchedPropertyCard({ offer }) {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+
+  const nextImage = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (currentImageIndex < offer.property.imageUrls.length - 1) {
+      setCurrentImageIndex(prevIndex => prevIndex + 1);
+    }
+  };
+
+  const prevImage = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (currentImageIndex > 0) {
+      setCurrentImageIndex(prevIndex => prevIndex - 1);
+    }
+  };
+
   return (
-    <Link href={`/public-offer/${offer.id}`}>
-      <div className="flex aspect-[4/5] w-full cursor-pointer flex-col overflow-hidden rounded-xl">
-        <div className="relative flex-grow">
-          <Image
-            src={offer.property.imageUrls[0] ?? ""}
-            alt=""
-            layout="fill"
-            objectFit="cover"
-            className="rounded-t-xl"
-          />
+    <Link href={`/public-offer/${offer.id}`} className="block">
+      <div 
+        className="flex aspect-[3/4] w-full cursor-pointer flex-col overflow-hidden rounded-xl  relative"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        <div className="relative h-3/5 overflow-hidden">
+          <div 
+            className="flex h-full transition-transform duration-300 ease-in-out"
+            style={{ transform: `translateX(-${currentImageIndex * 100}%)` }}
+          >
+            {offer.property.imageUrls.map((imageUrl, index) => (
+              <div key={index} className="relative h-full w-full flex-shrink-0">
+                <Image
+                  src={imageUrl}
+                  alt={`Property image ${index + 1}`}
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  className="object-cover rounded-xl"
+                />
+              </div>
+            ))}
+          </div>
+          <div 
+            className={`absolute inset-0 transition-opacity duration-300 ${
+              isHovered ? 'opacity-100' : 'opacity-0'
+            }`}
+          >
+            {currentImageIndex > 0 && (
+              <Button
+                onClick={prevImage}
+                className="absolute left-2 top-1/2 -translate-y-1/2 bg-white bg-opacity-50 p-2 rounded-full transition-all duration-200 hover:bg-white hover:bg-opacity-80 z-10"
+              >
+                <ChevronLeft size={24} className="text-gray-800" />
+              </Button>
+            )}
+            {currentImageIndex < offer.property.imageUrls.length - 1 && (
+              <Button
+                onClick={nextImage}
+                className="absolute right-2 top-1/2 -translate-y-1/2 bg-white bg-opacity-50 p-2 rounded-full transition-all duration-200 hover:bg-white hover:bg-opacity-80 z-10"
+              >
+                <ChevronRight size={24} className="text-gray-800" />
+              </Button>
+            )}
+          </div>
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex space-x-1 z-10">
+            {offer.property.imageUrls.map((_, index) => (
+              <div
+                key={index}
+                className={`h-1.5 rounded-full transition-all duration-300 ${
+                  index === currentImageIndex ? 'bg-white w-2' : 'bg-white bg-opacity-50 w-1.5'
+                }`}
+              />
+            ))}
+          </div>
         </div>
-        <div className="flex flex-col space-y-1 bg-white p-4">
-          <div className="line-clamp-1 overflow-ellipsis font-bold">
-            {offer.property.name}
-          </div>
-          <div className="flex items-center text-zinc-500">
-            {formatDateRange(offer.checkIn, offer.checkOut)}
-          </div>
-          <div className="flex">
-            <div className="flex items-center text-zinc-500">
-              {plural(offer.property.maxNumGuests, "Guest")}&nbsp;
+        <div className="flex h-2/5 flex-col space-y-2 p-4">
+          <div className="space-y-1">
+            <div className="flex items-center justify-between">
+              <div className="min-w-0 flex-1">
+                <div className="line-clamp-1 overflow-hidden overflow-ellipsis font-bold">
+                  {offer.property.name}
+                </div>
+              </div>
+              <div className="ml-2 flex items-center whitespace-nowrap space-x-1">
+                <Star fill="gold" size={12} />
+                <div>{offer.property.avgRating?.toFixed(2) ?? "New"}</div>
+                <div>({offer.property.numRatings ?? ""})</div>
+              </div>
+            </div>
+            <div className="text-sm text-zinc-500">
+              {formatDateRange(offer.checkIn, offer.checkOut)}
+            </div>
+            <div className="text-sm text-zinc-500">
+              {plural(offer.property.maxNumGuests, "Guest")}
             </div>
           </div>
-          <div className="flex items-center text-center font-semibold">
-            <div className="mr-3">
-              {formatCurrency(offer.property.originalNightlyPrice!)}
+          <div className="flex items-center space-x-3 text-sm font-semibold">
+            <div>
+              {formatCurrency(offer.property.originalNightlyPrice)}
               &nbsp;night
             </div>
-            <div className="line-through">
-              airbnb price&nbsp;
-              {formatCurrency(
-                offer.property.originalNightlyPrice! * AVG_AIRBNB_MARKUP,
+            <div className="text-xs line-through text-zinc-500">
+              airbnb&nbsp;{formatCurrency(
+                offer.property.originalNightlyPrice * AVG_AIRBNB_MARKUP
               )}
             </div>
           </div>

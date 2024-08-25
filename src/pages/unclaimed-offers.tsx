@@ -6,10 +6,10 @@ import Link from "next/link";
 export default function Page() {
   return (
     <MainLayout>
-      <div className="mb-16 flex flex-col items-center justify-center gap-y-5">
+      <div className="w-auto h-screen-minus-header-n-footer mb-16 flex flex-col items-center justify-center gap-y-5">
         {/* <UnclaimedHeader /> */}
         <UnclaimedOfferCards />
-        <div className="my-4 flex flex-col items-center gap-y-3">
+        {/* <div className="my-4 flex flex-col items-center gap-y-3">
           <p>
             Dont see something you like? Make a request and get a match
             specifically tailored to your needs.
@@ -21,7 +21,7 @@ export default function Page() {
           >
             <Link href="/">Make a request </Link>
           </Button>
-        </div>
+        </div> */}
       </div>
     </MainLayout>
   );
