@@ -47,6 +47,7 @@ export default async function handler() {
         tripId: trip.id.toString(),
       });
       await sendSlackMessage({
+        isProductionOnly: true,
         channel: "tramona-bot",
         text: [
           `A host has been paid for booking ${trip.id} that has passed the 24-hour check-in window.`,
@@ -58,6 +59,7 @@ export default async function handler() {
   } catch (error) {
     console.log("Error scheduling transfer:", error);
     await sendSlackMessage({
+      isProductionOnly: true,
       channel: "tramona-bot",
       text: [
         `STRIPE HOST PAYOUT ERROR: `,
