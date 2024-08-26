@@ -8,7 +8,7 @@
 // import PaywallDialog from "@/common/components/paywall-dialog";
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import Spinner from "@/components/_common/Spinner";
-import OfferPage from "@/components/offers/OfferPage";
+import PropertyPage from "@/components/offers/PropertyPage";
 import { api } from "@/utils/api";
 
 import { useSession } from "next-auth/react";
@@ -37,7 +37,7 @@ export default function Listings() {
         <title>Listing Property | Tramona</title>
       </Head>
       <div className="px-4 pb-64 pt-16">
-        {offer ? <OfferPage offer={offer} /> : <Spinner />}
+        {offer ? <PropertyPage offer={offer} /> : <Spinner />}
       </div>
     </DashboardLayout>
   );

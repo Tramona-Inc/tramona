@@ -109,7 +109,7 @@ export const usersRouter = createTRPCRouter({
         .where(eq(users.id, input.id))
         .returning();
 
-      if (updatedUser[0] && updatedUser[0]?.onboardingStep == 3) {
+      if (updatedUser[0] && updatedUser[0]?.onboardingStep === 3) {
         await sendEmail({
           to: updatedUser[0].email,
           subject: "Welcome to Tramona",

@@ -55,7 +55,7 @@ export function OfferPriceDetails({
             <p>{item.price}</p>
           </div>
         ))}
-        <Separator className="" />
+        <Separator />
         <div className="flex items-center justify-between pb-4 font-bold">
           <p>Total (USD)</p>
           <p>{formatCurrency(finalTotal)}</p>

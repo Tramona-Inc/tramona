@@ -65,7 +65,7 @@ export default function Onboarding7({
       <div className="mb-5 flex w-full flex-grow flex-col items-center justify-center gap-5 max-lg:container">
         <div className="px-4 pb-32 pt-16">
           <div className="mx-auto max-w-3xl">
-            <h1 className="font-old my-3 text-3xl">
+            <h1 className="my-3 text-3xl font-bold">
               Add some photos of your property
             </h1>
             {error && (

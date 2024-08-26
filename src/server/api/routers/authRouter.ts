@@ -13,7 +13,6 @@ import { eq } from "drizzle-orm";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
-import WelcomeEmail from "packages/transactional/emails/WelcomeEmail";
 
 async function fetchEmailVerified(email: string) {
   return await db.query.users.findFirst({
