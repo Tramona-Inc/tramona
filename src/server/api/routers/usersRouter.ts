@@ -634,7 +634,7 @@ export const usersRouter = createTRPCRouter({
       }
 
       if (!user.password) {
-        return "incorrect credentials";
+        return "passwordless";
       }
 
       const isPasswordValid = await bcrypt.compare(password, user.password);
