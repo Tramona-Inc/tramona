@@ -31,6 +31,8 @@ import { z } from "zod";
 import axios from "axios";
 import { getCity } from "@/server/google-maps";
 import { sendSlackMessage } from "@/server/slack";
+import { sendEmail } from "@/server/server-utils";
+import WelcomeEmail from "packages/transactional/emails/WelcomeEmail";
 
 export const usersRouter = createTRPCRouter({
   getOnboardingStep: optionallyAuthedProcedure.query(async ({ ctx }) => {
@@ -107,6 +109,15 @@ export const usersRouter = createTRPCRouter({
         .where(eq(users.id, input.id))
         .returning();
 
+      if (updatedUser[0] && updatedUser[0]?.onboardingStep === 3) {
+        await sendEmail({
+          to: updatedUser[0].email,
+          subject: "Welcome to Tramona",
+          content: WelcomeEmail({
+            name: updatedUser[0].name ?? updatedUser[0].firstName ?? "Guest",
+          }),
+        });
+      }
       return updatedUser;
     }),
 
@@ -219,6 +230,7 @@ export const usersRouter = createTRPCRouter({
       });
 
       await sendSlackMessage({
+        isProductionOnly: true,
         text: [
           "*Host Profile Created:*",
           `User ${ctx.user.name} has become a host`,
