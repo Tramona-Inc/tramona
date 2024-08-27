@@ -18,17 +18,20 @@ import {
 } from "@/server/db/schema";
 import { getCity, getCoordinates } from "@/server/google-maps";
 import {
+  sendEmail,
   sendText,
   sendWhatsApp,
   updateTravelerandHostMarkup,
 } from "@/server/server-utils";
-import { formatDateRange } from "@/utils/utils";
+import { formatDateRange, getNumNights } from "@/utils/utils";
 
 import { TRPCError } from "@trpc/server";
 import { and, eq, isNotNull, isNull, notInArray, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import { requests } from "../../db/schema/tables/requests";
 import { requestsToProperties } from "../../db/schema/tables/requestsToProperties";
+import { db } from "@/server/db";
+import NewOfferReceivedEmail from "packages/transactional/emails/NewOfferReceivedEmail";
 
 export const offersRouter = createTRPCRouter({
   accept: protectedProcedure
@@ -457,7 +460,6 @@ export const offersRouter = createTRPCRouter({
       // ) {
       //   throw new TRPCError({ code: "UNAUTHORIZED" });
       // }
-
       if (input.requestId !== undefined) {
         const requestDetails = await ctx.db.query.requests.findFirst({
           where: eq(requests.id, input.requestId),
@@ -480,6 +482,49 @@ export const offersRouter = createTRPCRouter({
               eq(requestsToProperties.requestId, input.requestId),
             ),
           );
+
+        //find the property
+        const curProperty = await db.query.properties.findFirst({
+          where: eq(properties.id, input.propertyId),
+        });
+
+        //sending emails to everyone in the groug
+        //get everymember in the group
+        console.log("GETTING FOR GROUP", requestDetails.madeByGroupId);
+        const allGroupMembers = await db.query.groupMembers.findMany({
+          where: eq(groupMembers.groupId, requestDetails.madeByGroupId),
+          columns: { userId: true },
+          with: {
+            user: {
+              columns: { email: true, firstName: true, name: true },
+            },
+          },
+        });
+        console.log("ALL GROUP MEMBERS", allGroupMembers);
+        for (const member of allGroupMembers) {
+          console.log("MEMBER", member);
+          await sendEmail({
+            to: member.user.email,
+            subject: "New offer received",
+            content: NewOfferReceivedEmail({
+              userName:
+                member.user.firstName ?? member.user.name ?? "Tramona Traveler",
+              airbnbPrice: input.totalPrice * 1.25,
+              ourPrice: input.totalPrice,
+              property: curProperty!.name,
+              discountPercentage: 25,
+              nights: getNumNights(
+                requestDetails.checkIn,
+                requestDetails.checkOut,
+              ),
+              adults: curProperty!.maxNumGuests,
+              checkInDateTime: requestDetails.checkIn,
+              checkOutDateTime: requestDetails.checkOut,
+              imgUrl: curProperty!.imageUrls[0]!,
+              offerLink: `${env.NEXTAUTH_URL}/requests/${input.requestId}`,
+            }),
+          });
+        }
       } else {
         await ctx.db.insert(offers).values({
           ...input,

@@ -69,7 +69,7 @@ interface EmailConfirmationCardProps {
 
 export const TramonaLogo = () => {
   return (
-    <div className="text-brand flex items-center gap-2 bg-white text-lg font-bold">
+    <div className="flex items-center gap-2 bg-white text-lg font-bold text-black">
       <img
         src="https://www.tramona.com/assets/images/email-images/tramona_wbg.png"
         alt="Tramona Logo"
@@ -93,7 +93,8 @@ export const Layout: React.FC<LayoutProps> = ({ children, title_preview }) => {
           theme: {
             extend: {
               colors: {
-                brand: "#000000",
+                brand: "#333333",
+                primaryGreen: "#134E4A",
                 offwhite: "#fafbfb",
                 grey: "#4D4D4D",
                 lightgrey: "#F9F9F9",
@@ -109,10 +110,13 @@ export const Layout: React.FC<LayoutProps> = ({ children, title_preview }) => {
       >
         <Head />
         <Body
-          className="flex items-center justify-center font-sans text-base"
+          className="font-sans flex items-center justify-center text-base"
           style={main}
         >
-          <Container className="bg-white" style={{ backgroundColor: "white" }}>
+          <Container
+            className="text-brand bg-white"
+            style={{ backgroundColor: "white" }}
+          >
             {children}
           </Container>
         </Body>
@@ -131,7 +135,7 @@ export const Header: React.FC<HeaderProps> = ({ title }) => {
         <Hr className="h-px w-11/12 border-0 bg-gray-400" />
       </div>
       <Heading className="my-0 ml-6 mt-4 text-left text-lg leading-8">
-        <strong className="text-brand">{title}</strong>
+        <strong className="text-black">{title}</strong>
       </Heading>
     </>
   );
@@ -171,7 +175,7 @@ export const CustomButton: React.FC<ButtonProps> = ({ title, link }) => {
         href={link}
         target="_blank"
         rel="noopener noreferrer"
-        className="bg-brand mx-auto inline-block w-11/12 whitespace-nowrap rounded-full px-3 py-3 text-base font-semibold text-white"
+        className="mx-auto inline-block w-11/12 whitespace-nowrap rounded-full bg-primaryGreen px-3 py-3 text-base font-semibold text-white"
         style={{
           textDecoration: "none",
         }}
@@ -469,8 +473,9 @@ export const EmailConfirmationCard: React.FC<EmailConfirmationCardProps> = ({
       style={{
         width: "100%",
         border: "none",
+        borderRadius: "8px",
         padding: "0",
-        backgroundColor: "#f3f3f3",
+        backgroundColor: "#fbfbfb",
       }}
       cellPadding="0"
       cellSpacing="0"
@@ -514,6 +519,7 @@ export const EmailConfirmationCard: React.FC<EmailConfirmationCardProps> = ({
                     color: "#000000",
                     margin: "0",
                     paddingTop: "15px",
+                    textTransform: "capitalize",
                   }}
                 >
                   {placeName}
@@ -550,6 +556,7 @@ export const EmailConfirmationCard: React.FC<EmailConfirmationCardProps> = ({
                     margin: "0",
                     fontSize: "14px",
                     marginTop: "5px",
+                    textTransform: "capitalize",
                   }}
                 >
                   {address}
