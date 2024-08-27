@@ -273,12 +273,12 @@ export default function PropertyPage({ property }: { property: Property }) {
             </Dialog>
           </section>
         </div>
-        <div className="flex-1">
+        {/* <div className="flex-1">
           <BiddingForm
             propertyId={property.id}
             price={property.originalNightlyPrice ?? 0}
           />
-        </div>
+        </div> */}
       </div>
       <hr className="h-px border-0 bg-gray-300" />
       <section id="location" className="scroll-mt-36 space-y-1">

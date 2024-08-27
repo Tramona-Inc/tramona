@@ -116,6 +116,7 @@ export const propertyPMSEnum = pgEnum("property_pms", ALL_PROPERTY_PMS);
 
 export const listingPlatformEnum = pgEnum("listing_platform", [
   ...ALL_LISTING_SITE_NAMES,
+
   ...ALL_PROPERTY_PMS,
 ]);
 
@@ -271,7 +272,7 @@ export const properties = pgTable(
       .defaultNow(),
     isPrivate: boolean("is_private").notNull().default(false),
     ageRestriction: integer("age_restriction"),
-    priceRestriction: integer("price_restriction"),
+    priceRestriction: integer("price_restriction").default(0),
     stripeVerRequired: boolean("stripe_ver_required").default(false),
     propertyStatus: propertyStatusEnum("property_status").default("Listed"),
     airbnbBookUrl: varchar("airbnb_book_url"),

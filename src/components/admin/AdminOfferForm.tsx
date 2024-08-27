@@ -149,7 +149,7 @@ export default function AdminOfferForm({
             propertyName: offer.property.name,
             offeredPriceUSD: offer.totalPrice / 100,
             offeredNightlyPriceUSD: offeredNightlyPriceUSD,
-            tramonaFee: offer.tramonaFee,
+            // tramonaFee: offer.tramonaFee,
             originalNightlyPriceUSD: offer.property.originalNightlyPrice
               ? offer.property.originalNightlyPrice / 100
               : 0,
@@ -255,7 +255,7 @@ export default function AdminOfferForm({
         requestId: request ? request.id : offer.request?.id,
         propertyId: offer.property.id,
         totalPrice,
-        tramonaFee: data.tramonaFee * 100,
+        //tramonaFee: data.tramonaFee * 100,
       };
 
       await createReviewsMutation.mutateAsync({
@@ -288,10 +288,12 @@ export default function AdminOfferForm({
         requestId: request?.id,
         propertyId,
         totalPrice,
-        tramonaFee: data.tramonaFee * 100,
+        hostPayout: 0,
+        travelerOfferedPrice: 0,
         checkIn: request ? request.checkIn : new Date(checkInDate!),
         checkOut: request ? request.checkOut : new Date(checkOutDate!),
-        groupId: request?.madeByGroupId,
+        //tramonaFee: data.tramonaFee * 100,
+        // groupId: request?.madeByGroupId,
       };
 
       await createReviewsMutation.mutateAsync({

@@ -9,9 +9,7 @@ import {
   loadConnectAndInitialize,
   type StripeConnectInstance,
 } from "@stripe/connect-js/pure";
-import { useSession } from "next-auth/react";
 import useIsStripeConnectInstanceReady from "@/utils/store/stripe-connect";
-
 //we need to use zustand, so when the the instance for the provider is ready, we can use it in the children
 
 const StripeConnectSessionProvider = ({
@@ -19,13 +17,12 @@ const StripeConnectSessionProvider = ({
 }: {
   children: ReactElement;
 }) => {
-  const { data: session } = useSession();
-  const userRole = session?.user.role;
+  const { data: isHost } = api.host.getUserHostInfo.useQuery();
   //we can get the stripe account id from the host profile
   const { data: stripeAccountIdNumber } = api.host.getStripeAccountId.useQuery(
     undefined,
     {
-      enabled: userRole === "host" ? true : false,
+      enabled: isHost?.becameHostAt ? true : false,
     },
   );
 
@@ -33,7 +30,8 @@ const StripeConnectSessionProvider = ({
 
   //this wets the stripeACCOUNTID number that will be used to create a session
   useEffect(() => {
-    if (!stripeAccountIdNumber) return;
+    if (!stripeAccountIdNumber?.stripeAccountId) return;
+
     setStripeAccountId(stripeAccountIdNumber.stripeAccountId);
     console.log("stripeAccoutneI after set");
     console.log(stripeAccountIdNumber.stripeAccountId);
@@ -59,7 +57,7 @@ const StripeConnectSessionProvider = ({
     api.stripe.createStripeAccountSession.useQuery(stripeAccountId!, {
       enabled: stripeAccountId && !isStripeConnectInstanceReady ? true : false,
       onSuccess: () => {
-        console.log("accountSession before return ");
+        console.log("accountSession before return");
         if (!accountSession) return;
         console.log(
           "accountSession after return ",

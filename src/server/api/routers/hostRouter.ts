@@ -1,5 +1,6 @@
 import {
   createTRPCRouter,
+  optionallyAuthedProcedure,
   protectedProcedure,
   publicProcedure,
 } from "@/server/api/trpc";
@@ -8,52 +9,17 @@ import { hostProfiles, properties } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 
-export async function fetchIndividualHostInfo(userId: string) {
-  return await db.query.hostProfiles.findFirst({
-    columns: {
-      userId: true,
-      //type: true,
-      becameHostAt: true,
-      //profileUrl: true,
-      stripeAccountId: true,
-      chargesEnabled: true,
-    },
-    where: eq(hostProfiles.userId, userId),
-  });
-}
-
 export const hostRouter = createTRPCRouter({
-  getHostsInfo: protectedProcedure.query(async ({ ctx }) => {
-    const res = await ctx.db.query.hostProfiles.findMany({
+  getUserHostInfo: optionallyAuthedProcedure.query(async ({ ctx }) => {
+    if (!ctx.user) return null;
+    return await db.query.hostProfiles.findFirst({
       columns: {
-        userId: true,
-        //type: true,
         becameHostAt: true,
-        //profileUrl: true,
+        stripeAccountId: true,
+        chargesEnabled: true,
       },
-      with: {
-        hostUser: {
-          columns: {
-            name: true,
-            email: true,
-            phoneNumber: true,
-          },
-        },
-      },
-      orderBy: (user, { desc }) => [desc(user.becameHostAt)],
-      limit: 10,
+      where: eq(hostProfiles.userId, ctx.user.id),
     });
-
-    // Flatten the hostUser
-    return res.map((item) => ({
-      ...item,
-      name: item.hostUser.name,
-      email: item.hostUser.email,
-      phoneNumber: item.hostUser.phoneNumber,
-    }));
-  }),
-  getUserHostInfo: protectedProcedure.query(async ({ ctx }) => {
-    return fetchIndividualHostInfo(ctx.user.id);
   }),
 
   getAllHostProperties: protectedProcedure.query(async ({ ctx }) => {

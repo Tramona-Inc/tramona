@@ -49,7 +49,7 @@ export type HostRequestsPageData = {
 };
 
 export const propertiesRouter = createTRPCRouter({
-  create: roleRestrictedProcedure(["admin", "host"])
+  create: protectedProcedure
     .input(
       propertyInsertSchema.omit({
         hostId: true,
@@ -60,7 +60,6 @@ export const propertiesRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const hostId = ctx.user.role === "admin" ? null : ctx.user.id;
       const hostTeamId = await db.query.hostProfiles
         .findFirst({
           where: eq(hostProfiles.userId, ctx.user.id),
@@ -69,10 +68,19 @@ export const propertiesRouter = createTRPCRouter({
         .then((res) => res?.curTeamId);
 
       if (!hostTeamId) {
-        //logic
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Host profile not found for user ${ctx.user.id}`,
+        });
       }
 
-      const id = await addProperty({ property: input, hostId, hostTeamId });
+      const id = await addProperty({
+        isAdmin: ctx.user.role === "admin" ? true : false,
+        property: input,
+        userId: ctx.user.id,
+        userEmail: ctx.user.email,
+        hostTeamId,
+      });
       return id;
     }),
 
@@ -90,7 +98,7 @@ export const propertiesRouter = createTRPCRouter({
     ) // make hostid required
     .mutation(async ({ ctx, input }) => {
       const host = await ctx.db.query.users.findFirst({
-        columns: { name: true, role: true },
+        columns: { name: true, role: true, email: true },
         where: eq(users.id, input.hostId),
       });
 
@@ -101,7 +109,12 @@ export const propertiesRouter = createTRPCRouter({
         return { status: "user not a host" } as const;
       }
 
-      await addProperty({ property: input, hostId: input.hostId });
+      await addProperty({
+        property: input,
+        userId: input.hostId,
+        userEmail: host.email,
+        isAdmin: false,
+      });
 
       return {
         status: "success",
@@ -144,6 +157,12 @@ export const propertiesRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       return await ctx.db.query.properties.findFirst({
         where: eq(properties.id, input.id),
+        with: {
+          host: {
+            columns: { image: true, name: true, email: true, id: true },
+          },
+          reviews: true,
+        },
       });
     }),
   getAll: publicProcedure.query(async ({ ctx }) => {
@@ -460,7 +479,7 @@ export const propertiesRouter = createTRPCRouter({
               hp.city
             FROM host_properties hp
             JOIN ${requests} r ON hp.request_id = r.id
-            WHERE r.check_in >= CURRENT_DATE 
+            WHERE r.check_in >= CURRENT_DATE
             GROUP BY hp.city, hp.request_id
           )
           SELECT
@@ -512,6 +531,7 @@ export const propertiesRouter = createTRPCRouter({
           hostProfilePic: row.host_profile_pic,
           hostawayListingId: row.hostaway_listing_id,
           hostName: row.host_name,
+          priceRestriction: row.price_restriction,
           // Add other property fields here
         } as unknown as Property;
 

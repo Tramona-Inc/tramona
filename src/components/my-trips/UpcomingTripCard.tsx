@@ -1,17 +1,12 @@
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
 import { HelpCircleIcon, MessageCircle } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
-import { formatDateRange } from "@/utils/utils";
+import { formatDateRange, getDaysUntilTrip } from "@/utils/utils";
 import Image from "next/image";
 import UserAvatar from "../_common/UserAvatar";
 import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
 import { type TripCardDetails } from "@/pages/my-trips";
-
-// Plugin for relative time
-dayjs.extend(relativeTime);
 
 export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
   const chatWithAdmin = useChatWithAdmin();
@@ -34,7 +29,7 @@ export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
                     src={trip.property.imageUrls[0]!}
                   />
                   <Badge variant="lightGray" className="absolute left-2 top-3">
-                    Trip {dayjs(trip.checkIn).fromNow()}
+                    Trip in {getDaysUntilTrip(trip.checkIn)} days
                   </Badge>
                 </Link>
               </div>

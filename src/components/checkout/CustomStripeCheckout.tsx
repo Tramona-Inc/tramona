@@ -10,7 +10,7 @@ import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import { TAX_PERCENTAGE, SUPERHOG_FEE } from "@/utils/constants";
-import type { OfferWithDetails } from "../offers/OfferPage";
+import type { OfferWithDetails } from "../offers/PropertyPage";
 import type { Stripe } from "stripe";
 import { Elements } from "@stripe/react-stripe-js";
 import { type StripeElementsOptions } from "@stripe/stripe-js";
@@ -19,7 +19,7 @@ import Spinner from "../_common/Spinner";
 import { useToast } from "../ui/use-toast";
 
 const CustomStripeCheckout = ({
-  offer: { property, request, ...offer },
+  offer: { property, ...offer },
 }: {
   offer: OfferWithDetails;
 }) => {

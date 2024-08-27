@@ -14,7 +14,7 @@ export default function PasswordResetEmailLink({
         <div className="text-brand px-6 text-left text-base">
           {name && (
             <Text className="text-brand text-left text-4xl font-bold">
-              name ? `Hi ${name},`
+              Hi {name},
             </Text>
           )}
           <Text className="text-brand text-left">

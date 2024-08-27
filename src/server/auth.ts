@@ -33,6 +33,8 @@ declare module "next-auth" {
     user: Pick<
       TramonaUser,
       | "name"
+      | "firstName"
+      | "lastName"
       | "email"
       | "image"
       | "id"
@@ -57,6 +59,7 @@ declare module "next-auth" {
  * @see https://next-auth.js.org/configuration/options
  */
 export const authOptions: NextAuthOptions = {
+  debug: true,
   callbacks: {
     session: ({ session, token }) => {
       // return {...session, user}}
@@ -76,6 +79,8 @@ export const authOptions: NextAuthOptions = {
           isIdentityVerified: token.isIdentityVerified,
           isWhatsApp: token.isWhatsApp,
           dateOfBirth: token.dateOfBirth,
+          firstName: token.firstName,
+          lastName: token.lastName,
         },
       };
     },

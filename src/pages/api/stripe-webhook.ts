@@ -11,6 +11,7 @@ import {
   referralCodes,
   referralEarnings,
   requests,
+  properties,
   trips,
   users,
 } from "@/server/db/schema";
@@ -18,8 +19,12 @@ import { eq, sql } from "drizzle-orm";
 import { buffer } from "micro";
 import { type NextApiRequest, type NextApiResponse } from "next";
 import { superhogRequests } from "../../server/db/schema/tables/superhogRequests";
-import { cancelTripByPaymentIntent } from "@/pages/api/utils/trips-utils";
-import { createSuperhogReservation } from "@/pages/api/utils/superhog-utils";
+import {
+  cancelTripByPaymentIntent,
+  sendEmailAndWhatsupConfirmation,
+} from "@/utils/webhook-functions/trips-utils";
+import { createSuperhogReservation } from "@/utils/webhook-functions/superhog-utils";
+import { request } from "http";
 
 // ! Necessary for stripe
 export const config = {
@@ -104,7 +109,15 @@ export default async function webhook(
                 ),
               });
 
+              const currentProperty = await db.query.properties.findFirst({
+                where: eq(
+                  properties.id,
+                  parseInt(paymentIntentSucceeded.metadata.property_id!),
+                ),
+              });
+
               //create trip here
+
               if (offer?.request) {
                 const currentTrip = await db
                   .insert(trips)
@@ -128,8 +141,9 @@ export default async function webhook(
                   await db.query.trips.findFirst({
                     where: eq(trips.superhogRequestId, superhogRequests.id),
                   });
+
                 if (!currentSuperhogReservation) {
-                  void createSuperhogReservation({
+                  await createSuperhogReservation({
                     paymentIntentId:
                       paymentIntentSucceeded.payment_intent?.toString() ?? "",
                     propertyId: offer.propertyId,
@@ -139,6 +153,15 @@ export default async function webhook(
                 } else {
                   console.log("Superhog reservation already exists");
                 }
+
+                //send email and whatsup
+                console.log("Sending email and whatsup");
+                await sendEmailAndWhatsupConfirmation({
+                  trip: currentTrip[0]!,
+                  user: user!,
+                  offer: offer,
+                  property: currentProperty!,
+                });
               }
             }
           }
@@ -168,53 +191,6 @@ export default async function webhook(
         // const bid = await db.query.bids.findFirst({
         //   where: eq(bids.id, bidID),
         // });
-
-        //send BookingConfirmationEmail
-        //Send user confirmation email
-        //getting num of nights
-        // const checkInDate = request?.checkIn ?? new Date(); // Use current date as default
-        // const checkOutDate = request?.checkOut ?? new Date(); // Use current date as default
-        // const numOfNights = getNumNights(checkInDate, checkOutDate);
-        // const originalPrice = property?.originalNightlyPrice ?? 0 * numOfNights;
-        // const savings =
-        //   (property?.originalNightlyPrice ?? 0) - (offer?.totalPrice ?? 0);
-        // const tramonaServiceFee = getTramonaFeeTotal(savings);
-        // const offerIdString = await sendEmail({
-        //   to: user!.email,
-        //   subject: `Tramona Booking Confirmation ${property?.name}`,
-        //   content: BookingConfirmationEmail({
-        //     userName: user?.name ?? "",
-        //     placeName: property?.name ?? "",
-        //     hostName: property?.hostName ?? "",
-        //     hostImageUrl: "https://via.placeholder.com/150",
-        //     startDate: formatDate(request!.checkIn, "MM/dd/yyyy") ?? "",
-        //     endDate: formatDate(request!.checkOut, "MM/dd/yyyy") ?? "",
-        //     address: property!.address ?? "",
-        //     propertyImageLink: property!.imageUrls?.[0] ?? "",
-        //     tripDetailLink: `https://www.tramona.com/offers/${offers.id.name}`,
-        //     originalPrice: originalPrice,
-        //     tramonaPrice: offer?.totalPrice ?? 0,
-        //     offerLink: `https://www.tramona.com/offers/${offer?.id.toString()}`,
-        //     numOfNights: numOfNights,
-        //     tramonaServiceFee: tramonaServiceFee ?? 0,
-        //   }),
-        // });
-        // const twilioMutation = api.twilio.sendSMS.useMutation();
-        // const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
-
-        // if (user?.isWhatsApp) {
-        //   await twilioWhatsAppMutation.mutateAsync({
-        //     templateId: "HXb0989d91e9e67396e9a508519e19a46c",
-        //     to: paymentIntentSucceeded.metadata.phoneNumber!,
-        //   });
-        // } else {
-        //   await twilioMutation.mutateAsync({
-        //     to: paymentIntentSucceeded.metadata.phoneNumber!,
-        //     msg: "Your Tramona booking is confirmed! Please see the My Trips page to access your trip information!",
-        //   });
-        // }
-
-        // console.log("PaymentIntent was successful!");
 
         const referralCode = user?.referralCodeUsed;
 
@@ -315,7 +291,7 @@ export default async function webhook(
             where: eq(trips.superhogRequestId, superhogRequests.id),
           });
           if (!currentSuperhogReservation && trip) {
-            void createSuperhogReservation({
+            await createSuperhogReservation({
               paymentIntentId: chargeObject.payment_intent?.toString() ?? "",
               propertyId,
               userId,
@@ -328,13 +304,16 @@ export default async function webhook(
         break;
       case "charge.dispute.created":
         {
+          console.log("dispute event", event.data.object);
+
           const dispute = event.data.object;
           //find the trip by paymentItentId
           const paymentIntentId = dispute.payment_intent as string;
           await cancelTripByPaymentIntent({
             paymentIntentId,
-            reason: `Dispute : ${dispute.reason}`,
+            reason: `Youdispute has been report : ${dispute.reason}`,
           });
+          //now we need to send an email cancelling the trip
         }
 
         break;
@@ -472,6 +451,7 @@ export default async function webhook(
 
         if (account.id) {
           const stripeAccount = await stripe.accounts.retrieve(account.id);
+          console.log("Stripe account updated", stripeAccount);
           await db
             .update(hostProfiles)
             .set({

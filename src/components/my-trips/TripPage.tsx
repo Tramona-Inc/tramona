@@ -13,7 +13,14 @@ import {
   MessageCircle,
 } from "lucide-react";
 import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
-import { formatCurrency, plural } from "@/utils/utils";
+import {
+  formatCurrency,
+  removeTimezoneFromDate,
+  formatDateStringWithDayName,
+  plural,
+  convertTo12HourFormat,
+  getDaysUntilTrip,
+} from "@/utils/utils";
 
 import SingleLocationMap from "../_common/GoogleMaps/SingleLocationMap";
 import { type RouterOutputs } from "@/utils/api";
@@ -68,7 +75,7 @@ export default function TripPage({
                 The countdown to your trip begins
               </p>
               <p className="text-3xl font-bold">
-                {dayjs(trip.checkIn).fromNow(true)} to go
+                {getDaysUntilTrip(trip.checkIn)} days to go
               </p>
             </div>
           </div>
@@ -127,10 +134,16 @@ export default function TripPage({
                     Check-in
                   </p>
                   <p className="text-lg font-bold">
-                    {dayjs(trip.checkIn).format("ddd, MMM D")}
+                    {formatDateStringWithDayName(
+                      removeTimezoneFromDate(trip.checkIn),
+                    )}
                   </p>
                   <p className="font-semibold">
-                    {dayjs(trip.checkIn).format("h:mm a")}
+                    {trip.property.checkInTime && (
+                      <p className="font-semibold">
+                        {convertTo12HourFormat(trip.property.checkInTime)}
+                      </p>
+                    )}
                   </p>
                 </div>
                 <ArrowRight />
@@ -139,12 +152,20 @@ export default function TripPage({
                     Check-out
                   </p>
                   <p className="text-lg font-bold">
-                    {dayjs(trip.checkOut).format("ddd, MMM D")}
+                    {formatDateStringWithDayName(
+                      removeTimezoneFromDate(trip.checkOut),
+                    )}
                   </p>
-                  <p className="font-semibold">
-                    {dayjs(trip.checkOut).format("h:mm a")}
-                  </p>
+                  {trip.property.checkOutTime && (
+                    <p className="font-semibold">
+                      {convertTo12HourFormat(trip.property.checkOutTime)}
+                    </p>
+                  )}
                 </div>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Address</p>
+                <p className="font-semibold">{trip.property.address}</p>
               </div>
 
               <div className="h-[2px] rounded-full bg-zinc-200"></div>
