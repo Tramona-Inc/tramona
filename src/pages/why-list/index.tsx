@@ -9,7 +9,7 @@ export default function Page() {
         <div className="flex flex-col items-center space-y-8 lg:flex-row lg:space-x-10 xl:space-x-20">
           <div className="mt-10 max-w-xl space-y-5 lg:mt-0">
             <h2 className="text-center text-4xl font-bold tracking-tight text-primaryGreen md:text-6xl">
-              Why list with us?
+              For hosts?
             </h2>
             <p className="text-center text-4xl font-semibold tracking-tight md:text-6xl">
               Tramona: A host&apos;s best friend
@@ -99,7 +99,7 @@ export default function Page() {
     <MainLayout>
       <div className="mx-auto space-y-32 px-4 pb-32">
         <Head>
-          <title>Why list with us | Tramona</title>
+          <title>For hosts | Tramona</title>
         </Head>
 
         <IntroSection />
