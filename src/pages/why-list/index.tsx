@@ -1,6 +1,21 @@
-import MainLayout from "@/components/_common/Layout/MainLayout";
+import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import HostCalculator from "@/components/host/HostCalculator";
 import Head from "next/head";
+
+export default function Page() {
+  return (
+    <DashboardLayout>
+      <div className="mx-auto space-y-32 px-4 pb-32">
+        <Head>
+          <title>For Hosts | Tramona</title>
+        </Head>
+
+        <IntroSection />
+        <InfoSection />
+      </div>
+    </DashboardLayout>
+  );
+}
 
 function IntroSection() {
   return (
@@ -22,7 +37,7 @@ function IntroSection() {
 
 function InfoSection() {
   return (
-    <div className="mx-auto max-w-4xl justify-center leading-relaxed [&_h2]:pt-6 [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:tracking-tight [&_p]:pt-2 [&_p]:text-zinc-700 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:text-zinc-700">
+    <div className="mx-auto max-w-4xl justify-center leading-relaxed [&_h2]:pt-6 [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:tracking-tight [&_p]:pt-4 [&_p]:text-zinc-700 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:pt-4 [&_ul]:text-zinc-700">
       <h2>Tramona: A Host&apos;s Best Friend</h2>
 
       <p>
@@ -86,19 +101,5 @@ function InfoSection() {
 
       <h2 className="text-center">Tramona: Agree on a Price Every Time.</h2>
     </div>
-  );
-}
-export default function Page() {
-  return (
-    <MainLayout>
-      <div className="mx-auto space-y-32 px-4 pb-32">
-        <Head>
-          <title>For Hosts | Tramona</title>
-        </Head>
-
-        <IntroSection />
-        <InfoSection />
-      </div>
-    </MainLayout>
   );
 }
