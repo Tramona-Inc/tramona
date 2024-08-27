@@ -6,10 +6,12 @@ import { properties } from "../db/schema";
 import { eq, and } from 'drizzle-orm';
 import { PropertyType, ALL_PROPERTY_TYPES, ListingSiteName } from "@/server/db/schema/common";
 import { tr } from "date-fns/locale";
+import { getNumNights } from "@/utils/utils";
 
 export type DirectSiteScraper = (options: {
   checkIn: Date;
   checkOut: Date;
+  numOfOffersInEachScraper?: number;
 }) => Promise<
   ScrapedListing[]
 >;
@@ -76,20 +78,21 @@ export const scrapeDirectListings = async (options: {
                 .from(offers)
                 .where(and(
                   eq(offers.propertyId, tramonaPropertyId),
-                  eq(offers.checkIn, listing.reservedDateRanges[0]!.start),
-                  eq(offers.checkOut, listing.reservedDateRanges[0]!.end)
+                  eq(offers.checkIn, options.checkIn),
+                  eq(offers.checkOut, options.checkOut)
                 ))
               if(existingOffers[0]){
                 console.log("existingOffer, offerId: ", existingOffers[0]?.id);
               }
             if(!existingOffers[0]?.id){
+              const originalTotalPrice = listing.originalNightlyPrice ?? 0 * getNumNights(options.checkIn, options.checkOut);
               const newOffer: NewOffer = {
                 propertyId: tramonaPropertyId,
-                checkIn: listing.reservedDateRanges[0]!.start,// or use options.checkIn
-                checkOut: listing.reservedDateRanges[0]!.end,// or use options.checkOut
-                totalPrice: listing.originalTotalPrice,
-                hostPayout: listing.originalTotalPrice,
-                travelerOfferedPrice: listing.originalTotalPrice,
+                checkIn: options.checkIn,
+                checkOut: options.checkOut,
+                totalPrice: originalTotalPrice,
+                hostPayout: originalTotalPrice,
+                travelerOfferedPrice: originalTotalPrice,
               };
               const newOfferId = await trx.insert(offers).values(newOffer).returning({id: offers.id}) 
               console.log("newOfferIdReturned: ", newOfferId);
@@ -111,20 +114,21 @@ export const scrapeDirectListings = async (options: {
                 .from(offers)
                 .where(and(
                   eq(offers.propertyId, newPropertyId),
-                  eq(offers.checkIn, listing.reservedDateRanges[0]!.start),
-                  eq(offers.checkOut, listing.reservedDateRanges[0]!.end)
+                  eq(offers.checkIn, options.checkIn),
+                  eq(offers.checkOut, options.checkOut)
                 ))
             if(existingOffers[0]){
               console.log("existingOffer, offerId: ", existingOffers[0]?.id);
             }
             if(!existingOffers[0]?.id){
+              const originalTotalPrice = listing.originalNightlyPrice ?? 0 * getNumNights(options.checkIn, options.checkOut);
               const newOffer: NewOffer = {
                 propertyId: newPropertyId,
-                checkIn: listing.reservedDateRanges[0]!.start,// or use options.checkIn
-                checkOut: listing.reservedDateRanges[0]!.end,// or use options.checkOut
-                totalPrice: listing.originalTotalPrice,
-                hostPayout: listing.originalTotalPrice,
-                travelerOfferedPrice: listing.originalTotalPrice,
+                checkIn: options.checkIn,
+                checkOut: options.checkOut,
+                totalPrice: originalTotalPrice,
+                hostPayout: originalTotalPrice,
+                travelerOfferedPrice: originalTotalPrice,
               };
               const newOfferId = await trx.insert(offers).values(newOffer).returning({id: offers.id}) 
               console.log("newOfferIdReturned: ", newOfferId);
