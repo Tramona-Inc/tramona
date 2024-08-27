@@ -13,12 +13,11 @@ import {
   ConnectAccountManagement,
 } from "@stripe/react-connect-js";
 import useIsStripeConnectInstanceReady from "@/utils/store/stripe-connect";
-import Spinner from "@/components/_common/Spinner";
 
 export default function Page() {
   useSession({ required: true });
   const { isStripeConnectInstanceReady } = useIsStripeConnectInstanceReady();
-  const { data: hostInfo, isLoading: isHostInfoLoading } =
+  const { data: hostInfo } =
     api.host.getUserHostInfo.useQuery();
 
   const [hostStripeAccountId, setHostStripeAccountId] = useState<string | null>(

@@ -25,7 +25,6 @@ import {
   type NewProperty,
   type Property,
   type User,
-  type Request,
   bookedDates,
   groupInvites,
   groupMembers,
@@ -43,6 +42,7 @@ import { HttpsProxyAgent } from "https-proxy-agent";
 import * as cheerio from "cheerio";
 import { sendSlackMessage } from "./slack";
 import { HOST_MARKUP, TRAVELER__MARKUP } from "@/utils/constants";
+import { HostRequestsPageData } from "./api/routers/propertiesRouter";
 
 export const proxyAgent = new HttpsProxyAgent(env.PROXY_URL);
 
@@ -263,10 +263,12 @@ export async function addProperty({
   userEmail,
   hostTeamId,
   property,
+  isAdmin,
 }: {
   userId?: string;
   userEmail?: string;
   hostTeamId?: number | null;
+  isAdmin: boolean;
   property: Omit<NewProperty, "id" | "city" | "latitude" | "longitude"> & {
     latitude?: number;
     longitude?: number;
@@ -299,10 +301,11 @@ export async function addProperty({
   waitUntil(processRequests(insertedProperty!));
 
   await sendSlackMessage({
+    isProductionOnly: true,
     channel: "host-bot",
     text: [
       `*New property added: ${property.name} in ${property.address}*
-     by ${userEmail}`,
+     by ${isAdmin ? "an Tramona admin" : userEmail}`,
     ].join("\n"),
   });
   return insertedProperty!.id;
@@ -467,7 +470,7 @@ export async function getPropertiesForRequest(
           isNotNull(properties.priceRestriction),
           lte(
             properties.priceRestriction,
-            (req.maxTotalPrice / numberOfNights) * 1.15,
+            Math.round((req.maxTotalPrice / numberOfNights) * 1.15),
           ),
         ),
       ),
@@ -539,17 +542,9 @@ export async function getPropertyOriginalPrice(
   // code for other options
 }
 
-export interface CityData {
-  city: string;
-  requests: {
-    request: Request;
-    properties: Property[];
-  }[];
-}
-
 export interface SeparatedData {
-  normal: CityData[];
-  outsidePriceRestriction: CityData[];
+  normal: HostRequestsPageData[];
+  outsidePriceRestriction: HostRequestsPageData[];
 }
 
 //update spread on every fetch to keep information updated
@@ -562,7 +557,7 @@ export async function updateTravelerandHostMarkup({
 }) {
   console.log("offerTotalPrice", offerTotalPrice);
   const travelerPrice = Math.ceil(offerTotalPrice * TRAVELER__MARKUP);
-  const hostPay = offerTotalPrice * HOST_MARKUP;
+  const hostPay = Math.ceil(offerTotalPrice * HOST_MARKUP);
   console.log("travelerPrice", travelerPrice);
   await db
     .update(offers)

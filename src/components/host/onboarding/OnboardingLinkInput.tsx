@@ -8,6 +8,7 @@ import { zodUrl } from "@/utils/zod-utils";
 import { useZodForm } from "@/utils/useZodForm";
 import { Input } from "@/components/ui/input";
 import { getOriginalListing, parseListingUrl } from "@/utils/listing-sites";
+import { useState } from "react";
 
 // TODO: use zodListingUrl (adds other sites), store url in form state instead of listing id/site
 
@@ -18,6 +19,8 @@ const formSchema = z.object({
 });
 
 export default function OnboardingLinkInput({ editing = false }) {
+  const [error, setError] = useState(false);
+
   const originalListingId = useHostOnboarding(
     (state) => state.listing.originalListingId,
   );
@@ -38,8 +41,8 @@ export default function OnboardingLinkInput({ editing = false }) {
 
   const curUrl =
     getOriginalListing({
-      originalListingId,
-      originalListingSite: "Airbnb",
+      originalListingId: originalListingId ?? null,
+      originalListingPlatform: "Airbnb",
     })?.getListingUrl({}) ?? undefined;
 
   const form = useZodForm({
@@ -55,6 +58,10 @@ export default function OnboardingLinkInput({ editing = false }) {
     setOriginalListingPlatform(Site.siteName);
   });
 
+  const handleError = () => {
+    setError(!error);
+  };
+
   return (
     <>
       {!editing && <SaveAndExit />}
@@ -65,7 +72,11 @@ export default function OnboardingLinkInput({ editing = false }) {
           >
             Please enter the Airbnb link of your listing
           </h1>
-
+          {error && (
+            <p className="text-sm text-red-500">
+              Please fill out the required field
+            </p>
+          )}
           <Form {...form}>
             <FormField
               control={form.control}
@@ -90,6 +101,7 @@ export default function OnboardingLinkInput({ editing = false }) {
           handleNext={onSubmit}
           isFormValid={form.formState.isValid}
           isForm={true}
+          handleError={handleError}
         />
       )}
     </>

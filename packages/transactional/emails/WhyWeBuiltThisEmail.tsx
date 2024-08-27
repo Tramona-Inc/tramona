@@ -1,8 +1,9 @@
 /* eslint-disable @next/next/no-img-element */
-import { Text, Button } from "@react-email/components";
+
+import { Text } from "@react-email/components";
 import { Layout } from "./EmailComponents";
 
-export default function WelcomeEmail({ name }: { name: string }) {
+export default function WhyWeBuiltThisEmail() {
   return (
     <Layout title_preview="Welcome to Tramona">
       <div className="border-b border-gray-300 bg-white p-6 text-black">
@@ -24,46 +25,46 @@ export default function WelcomeEmail({ name }: { name: string }) {
           style={{ borderBottom: "2px solid #e0e0e0" }}
         ></div>
         <Text className="mb-4 text-center text-3xl font-bold">
-          Welcome to Tramona {name}!
+          Why Tramona?
         </Text>
         <Text className="mb-4 text-left">
-          Hello, my name is Blake Singleton, Co-founder and CEO of Tramona.
-          Thank you for helping us make traveling easier than ever before.
-        </Text>
-        <Text className="mb-4 text-left">
-          Tramona was started with one goal in mind—allowing people to travel
-          more for less, while cutting out fees in the process. (Did you know
-          some of the bigger platforms charge around 20% per booking?) Every
-          platform claims to give discounts, but after the fees, is it really a
-          discount?
+          Our mission is simple: to connect travelers with affordable options
+          and help hosts reduce their vacancy days. We recognized that travelers
+          often face high costs when booking accommodations, while hosts
+          struggle with empty rooms or properties. Tramona was designed to solve
+          both of these challenges.
         </Text>
         <Text className="mb-2 text-left text-xl font-bold">
-          What is Tramona?
+          A Win-Win for Everyone
         </Text>
-        <Text className="mb-4 text-left">
-          Tramona is a one-of-a-kind booking platform. Every time you book it
-          will be a truly unique booking deal you can’t find anywhere else, on
-          the same properties, you see everywhere else.
+        <Text className="mb-2 text-left">
+          For travelers, Tramona offers a range of affordable, comfortable
+          options tailored to fit your budget. You get to explore new places
+          without breaking the bank.
+          <br />
         </Text>
-        <Text className="mb-4 text-left">
-          We have already allowed travelers to save <b>$250,000+</b> booking the
-          same properties they find on other sites, on our site. Let&apos;s keep
-          growing this number.
+        <Text>
+          For hosts, Tramona ensures your property is occupied and generating
+          income, even during off-peak times. By filling these vacancies, you
+          can maximize your property&apos;s potential and avoid the hassle of
+          managing empty spaces.
         </Text>
         <Text className="mb-2 text-left text-xl font-bold">
-          How does it work?
+          Join Us on This Journey
         </Text>
-        <Text className="mb-8 text-left">
-          One of the biggest problems hosts face is vacancies due to market
-          saturation, and as more people become hosts every day, the problem is
-          worsening. This is where Tramona comes in. We allow travelers to
-          submit an offer or a request. The host gets to match it, maximizing
-          the dates booked hosts receive, while allowing travelers the chance to
-          travel at lower prices. This makes Tramona the best place to book the
-          best properties around the world.
+        <Text>
+          Whether you&apos;re here to explore new destinations or to welcome
+          guests into your home, we&apos;re here to support you every step of
+          the way. Together, we&apos;re making travel more affordable and
+          efficient for everyone.
         </Text>
-        <Text className="m-0 text-left">Thanks,</Text>
-        <Text className="m-0 text-left">Blake Singleton, CEO</Text>
+        <Text className="mt-2 text-left">
+          Thank you for being a part of the Tramona community!
+        </Text>
+        <Text>
+          Best regards, <br />
+          The Tramona Team
+        </Text>
         <Text className="mb-6 mt-0 text-left">
           Questions? Send them to us directly at{" "}
           <a href="mailto:info@tramona.com" className="text-black no-underline">

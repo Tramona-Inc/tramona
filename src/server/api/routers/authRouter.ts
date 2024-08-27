@@ -319,7 +319,7 @@ export const authRouter = createTRPCRouter({
       if (!user.password) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "User created with google auth",
+          message: "User created with Google auth",
         });
       }
 

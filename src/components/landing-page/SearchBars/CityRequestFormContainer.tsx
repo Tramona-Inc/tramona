@@ -13,8 +13,8 @@ export default function CityRequestFormContainer() {
 
   const handleCleanBnbClick = async () => {
     try {
-      const checkIn = "2024-08-29";
-      const checkOut = "2024-08-31";
+      const checkIn = "2024-10-28";
+      const checkOut = "2024-10-30";
       const res = await cleanBnb({ checkIn, checkOut });
       console.log(res);
     } catch (error) {

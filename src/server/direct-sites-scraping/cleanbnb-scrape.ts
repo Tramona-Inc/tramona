@@ -90,7 +90,7 @@ type ScrapedData = {
   numberOfRooms: number;
   amenityFeature: {
     name: string;
-  }[];
+  }[] | null;
   image: string[];
   containsPlace: {
     occupancy: {
@@ -99,23 +99,16 @@ type ScrapedData = {
   }
 };
 
-export const cleanbnbScraper: DirectSiteScraper = async ({
-  checkIn,
-  checkOut,
-} = {}) => {
-
-  const checkInDate = checkIn ? formatDate(checkIn) : null;
-  const checkOutDate = checkOut ? formatDate(checkOut) : null;
+export const cleanbnbScraper: DirectSiteScraper = async ({ checkIn, checkOut }) => {
+  const checkInDate = formatDate(checkIn);
+  const checkOutDate = formatDate(checkOut);
 
   console.log(checkInDate, checkOutDate);
-  let data;
   const res: NewProperty[] = [];
   const baseUrl = "https://www.cleanbnb.house/it/appartamenti"
-  if (!checkIn || !checkOut) {
-    data = await fetch(baseUrl);
-  } else {
-    data = await fetch(`${baseUrl}?from=${checkInDate}&to=${checkOutDate}`);
-  }
+
+  const data = await fetch(`${baseUrl}?from=${checkInDate}&to=${checkOutDate}`);
+
 
   const text = await data.text();
   const $ = cheerio.load(text);
@@ -172,9 +165,7 @@ export const cleanbnbScraper: DirectSiteScraper = async ({
 
             if (data.url) {
               let url = "https://www.cleanbnb.house" + data.url.split('?')[0];
-              if (checkIn && checkOut) {
-                url += `?from=${checkInDate}&to=${checkOutDate}`;
-              }
+              url += `?from=${checkInDate}&to=${checkOutDate}`;
 
               if (data.url.split('?')[0]?.startsWith("/")) {
                 const property: PropertyInfo = {
@@ -237,6 +228,10 @@ export const cleanbnbScraper: DirectSiteScraper = async ({
 
 
       const info = jsonLdData.filter(data => data.hasOwnProperty("@type") && data["@type"] === "VacationRental");
+      if (info[0] === undefined) {
+        console.log('No valid data found:', jsonLdData);
+        continue;
+      }
       const scrapedData = info[0] as unknown as ScrapedData;
 
       //const avgRating
@@ -358,7 +353,7 @@ export const cleanbnbScraper: DirectSiteScraper = async ({
       const numBedrooms = property.maxBedrooms;
       const numBathrooms = property.maxBathrooms;
       try {
-        if (scrapedData.amenityFeature.length > 0) {
+        if (scrapedData.amenityFeature && scrapedData.amenityFeature.length > 0) {
           amenities = await Promise.all(scrapedData.amenityFeature.map(async (amenity) => translateText(amenity.name)));
         } else {
           amenities = [];
@@ -369,9 +364,7 @@ export const cleanbnbScraper: DirectSiteScraper = async ({
       }
       const imageUrls = scrapedData.image;
       const originalListingUrl = property.url;
-      const originalNightlyPrice = (parseFloat(price) * getNumNights(checkIn, checkOut)) + priceService;
-
-
+      const originalNightlyPrice = (parseFloat(price) + (priceService/ getNumNights(checkIn, checkOut)));
 
       res.push({
         name,
@@ -394,40 +387,8 @@ export const cleanbnbScraper: DirectSiteScraper = async ({
         currency: 'EUR',
         cancellationPolicy: "Non-refundable",
       });
-      // Break the loop after the first iteration
     }
   }
-  // 1. fetch the top level search page/landing page with previews of all the properties,
-  //    filtered by checkIn and checkOut if provided
-  // 2. if its paginated, try to get the urls of each page, and then fetch them all
-  //    in parallel (Promise.all), otherwise fetch 1 page at a time
-  // 3. get an array of urls/ids of each property and fetch the pages (or json endpoints) in parallel
-  // 4. parse out and return the data 😃
   return res;
 };
-
-
-
-
-// fetch("https://www.cleanbnb.house/casa-fiorelli-luna-apartment-a-due-passi-da-assisi", {
-//   "headers": {
-//     "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
-//     "accept-language": "en-US,en;q=0.9",
-//     "cache-control": "max-age=0",
-//     "priority": "u=0, i",
-//     "sec-ch-ua": "\"Not)A;Brand\";v=\"99\", \"Google Chrome\";v=\"127\", \"Chromium\";v=\"127\"",
-//     "sec-ch-ua-mobile": "?0",
-//     "sec-ch-ua-platform": "\"macOS\"",
-//     "sec-fetch-dest": "document",
-//     "sec-fetch-mode": "navigate",
-//     "sec-fetch-site": "none",
-//     "sec-fetch-user": "?1",
-//     "upgrade-insecure-requests": "1",
-//     "cookie": "PHPSESSID=dfc95b98f54dc91c17c1897cf35660bd"
-//   },
-//   "referrerPolicy": "strict-origin-when-cross-origin",
-//   "body": null,
-//   "method": "GET"
-// });
-
 

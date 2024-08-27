@@ -1,5 +1,6 @@
 import SettingsLayout from "@/components/_common/Layout/SettingsLayout";
 import Spinner from "@/components/_common/Spinner";
+import StripeVerificationCard from "@/components/_common/StripeVerificationCard";
 import ChangePasswordForm from "@/components/settings/ChangePasswordForm";
 import { Button } from "@/components/ui/button";
 import {
@@ -49,10 +50,16 @@ function PersonalInformationForm({
 }: PersonalInformationFormProps) {
   const [isEditing, setIsEditing] = useState(false);
 
+  const { data: verificationStatus } =
+    api.users.myVerificationStatus.useQuery();
+  const isVerified = verificationStatus?.isIdentityVerified === "true";
+
   const formSchema = z.object({
     name: zodString(),
     email: zodString(),
-    username: zodString(),
+    username: z
+      .union([zodString(), z.literal("").transform(() => null)])
+      .nullable(),
     phoneNumber: zodString(),
     dateOfBirth: zodString(),
   });
@@ -84,7 +91,7 @@ function PersonalInformationForm({
   return (
     <SettingsLayout>
       <div className="mx-auto max-w-4xl lg:my-8">
-        <div className=" space-y-2 rounded-lg border bg-white p-4 lg:space-y-4">
+        <div className="space-y-2 rounded-lg border bg-white p-4 lg:space-y-4">
           <Link href="/settings" className="inline-block lg:hidden">
             <ChevronLeft />
           </Link>
@@ -121,7 +128,7 @@ function PersonalInformationForm({
                       {...field}
                       autoFocus
                       placeholder="Name"
-                      disabled={!isEditing}
+                      disabled={!isEditing || isVerified}
                     />
                   </FormControl>
                   <FormMessage />
@@ -160,6 +167,7 @@ function PersonalInformationForm({
                       {...field}
                       placeholder="Username"
                       disabled={!isEditing}
+                      value={field.value ?? ""}
                     />
                   </FormControl>
                   <FormMessage />
@@ -197,7 +205,7 @@ function PersonalInformationForm({
                     <Input
                       {...field}
                       placeholder="Date of Birth"
-                      disabled={!isEditing}
+                      disabled={!isEditing || isVerified}
                     />
                   </FormControl>
                   <FormMessage />
@@ -219,6 +227,9 @@ function PersonalInformationForm({
                 </DialogContent>
               </Dialog>
             </div>
+          )}
+          {verificationStatus?.isIdentityVerified === "false" && (
+            <StripeVerificationCard />
           )}
         </div>
       </div>

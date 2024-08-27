@@ -13,7 +13,6 @@ import {
   propertySelectSchema,
   propertyUpdateSchema,
   type Request,
-  requestInsertSchema,
   requests,
   requestsToProperties,
   type User,
@@ -76,6 +75,7 @@ export const propertiesRouter = createTRPCRouter({
       }
 
       const id = await addProperty({
+        isAdmin: ctx.user.role === "admin" ? true : false,
         property: input,
         userId: ctx.user.id,
         userEmail: ctx.user.email,
@@ -113,6 +113,7 @@ export const propertiesRouter = createTRPCRouter({
         property: input,
         userId: input.hostId,
         userEmail: host.email,
+        isAdmin: false,
       });
 
       return {
@@ -156,6 +157,12 @@ export const propertiesRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       return await ctx.db.query.properties.findFirst({
         where: eq(properties.id, input.id),
+        with: {
+          host: {
+            columns: { image: true, name: true, email: true, id: true },
+          },
+          reviews: true,
+        },
       });
     }),
   getAll: publicProcedure.query(async ({ ctx }) => {
