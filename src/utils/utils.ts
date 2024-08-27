@@ -11,6 +11,9 @@ import {
 } from "date-fns";
 import { type RefObject, useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import duration from "dayjs/plugin/duration";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -162,6 +165,21 @@ export function formatDateString(
 export function removeTimezoneFromDate(date: Date | string) {
   if (typeof date === "string") return date;
   return new Date(date).toISOString().split("Z")[0]!;
+}
+
+export function getDaysUntilTrip(checkIn: Date) {
+  dayjs.extend(relativeTime);
+  dayjs.extend(duration);
+
+  const now = dayjs();
+
+  const fmtdCheckIn = dayjs(checkIn).startOf("day");
+
+  const daysToGo = Math.ceil(
+    dayjs.duration(fmtdCheckIn.diff(now)).asDays() + 1,
+  );
+
+  return daysToGo;
 }
 
 //converts date string to a formatted date string with day name
