@@ -113,7 +113,7 @@ const mapToNewProperty = (validatedData: IntegrityArizonaPropertyInput, checkIn:
         start: checkIn, 
         end: checkOut
       }],
-      originalNightlyPrice: (prop.total/ getNumNights(checkIn, checkOut)) * 100, // convert to cents
+      originalNightlyPrice: (Math.round(prop.total/ getNumNights(checkIn, checkOut)) * 100), // convert to cents
     }));
   };
 
@@ -136,11 +136,12 @@ export const arizonaScraper: DirectSiteScraper = async ({
     .then((response) => response.data)
     .then((data) => propertySchema.parse(data)) 
     .then((validatedData) => mapToNewProperty(validatedData, checkIn, checkOut))
-
-  // Fetch and append reviews for each property
+    
+  // Fetch and append reviews for each property 
   const propertiesWithReviews = await Promise.all(properties.map(async (p) => {
-    const reviewUrl = `https://integrityarizonavacationrentals.com/wp-admin/admin-ajax.php?action=streamlinecore-api-request&params=%7B%22methodName%22:%22GetAllFeedback%22,%22params%22:%7B%22unit_id%22:${p.originalListingId},%22order_by%22:%22newest_first%22%7D%7D`;
-    const reviews = await axios.get(reviewUrl, { httpsAgent: proxyAgent })
+    const reviewUrl = `https://integrityarizonavacationrentals.com/wp-admin/admin-ajax.php?action=streamlinecore-api-request&params=%7B%22methodName%22:%22GetAllFeedback%22,%22params%22:%7B%22unit_id%22:${p.originalListingId},%22order_by%22:%22newest_first%22,%22show_booking_dates%22:1,%22madetype_id%22:2%7D%7D`;
+    console.log("reviewScrapedUrl: ", reviewUrl)
+    const reviews = await axios.get(reviewUrl, { timeout: 30000, httpsAgent: proxyAgent })
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       .then((response) => response.data)
       .then((data) => reviewSchema.parse(data))
