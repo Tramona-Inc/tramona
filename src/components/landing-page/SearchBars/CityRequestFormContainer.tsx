@@ -3,24 +3,11 @@ import RequestCityForm from "./RequestCityForm";
 import LinkRequestForm from "@/components/link-input/LinkRequestForm";
 import { Separator } from "@/components/ui/separator";
 import { useSession } from "next-auth/react";
-import { Button } from "@/components/ui/button";
-import { api } from "@/utils/api";
 
 export default function CityRequestFormContainer() {
   const { data: session } = useSession();
   const isAdmin = session?.user.role === "admin";
-  const { mutateAsync: cleanBnb } = api.misc.scrapeCleanbnbLink.useMutation();
 
-  const handleCleanBnbClick = async () => {
-    try {
-      const checkIn = "2024-10-28";
-      const checkOut = "2024-10-30";
-      const res = await cleanBnb({ checkIn, checkOut });
-      console.log(res);
-    } catch (error) {
-      console.error(error);
-    }
-  };
 
   return (
     <div className="space-y-3">
@@ -51,7 +38,6 @@ export default function CityRequestFormContainer() {
             the host.
           </p>
           <LinkRequestForm />
-          <Button onClick={handleCleanBnbClick}>Click me</Button>
         </>
       )}
     </div>
