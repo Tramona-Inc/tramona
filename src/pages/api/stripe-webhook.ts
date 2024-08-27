@@ -137,22 +137,27 @@ export default async function webhook(
                 //superhog reservation
 
                 //creating a superhog reservation only if does not exist
-                const currentSuperhogReservation =
-                  await db.query.trips.findFirst({
-                    where: eq(trips.superhogRequestId, superhogRequests.id),
-                  });
 
-                if (!currentSuperhogReservation) {
-                  await createSuperhogReservation({
-                    paymentIntentId:
-                      paymentIntentSucceeded.payment_intent?.toString() ?? "",
-                    propertyId: offer.propertyId,
-                    userId: user!.id,
-                    trip: currentTrip[0]!,
-                  }); //creating a superhog reservation
-                } else {
-                  console.log("Superhog reservation already exists");
-                }
+                //<<-------------uncomment once we get test keys----------------->>
+
+                // const currentSuperhogReservation =
+                //   await db.query.trips.findFirst({
+                //     where: eq(trips.superhogRequestId, superhogRequests.id),
+                //   });
+
+                // if (!currentSuperhogReservation) {
+                //   await createSuperhogReservation({
+                //     paymentIntentId:
+                //       paymentIntentSucceeded.payment_intent?.toString() ?? "",
+                //     propertyId: offer.propertyId,
+                //     userId: user!.id,
+                //     trip: currentTrip[0]!,
+                //   }); //creating a superhog reservation
+                // } else {
+                //   console.log("Superhog reservation already exists");
+                // }
+
+                //<<--------------------->>
 
                 //send email and whatsup
                 console.log("Sending email and whatsup");
