@@ -1,4 +1,5 @@
 import { NewProperty, Review } from "../db/schema";
+import { cleanbnbScraper } from "./cleanbnb-scrape";
 import { exampleScraper } from "./example";
 
 export type DirectSiteScraper = (options: {
@@ -14,5 +15,6 @@ export type DirectSiteScraper = (options: {
 
 export const directSiteScrapers: DirectSiteScraper[] = [
   // add more scrapers here
+  cleanbnbScraper,
   exampleScraper,
 ];

@@ -104,6 +104,10 @@ export const propertySafetyItemsEnum = pgEnum(
   ALL_PROPERTY_SAFETY_ITEMS,
 );
 
+export const ALL_CURRENCY = ["USD", "EUR"] as const;
+
+export const currencyEnum = pgEnum("currency", ALL_CURRENCY);
+
 export const propertyStatusEnum = pgEnum("property_status", [
   "Listed",
   "Drafted",
@@ -278,6 +282,7 @@ export const properties = pgTable(
     airbnbBookUrl: varchar("airbnb_book_url"),
     hostImageUrl: varchar("host_image_url"),
     pricingScreenUrl: varchar("pricing_screen_url"),
+    currency: currencyEnum("currency").notNull().default("USD"),
     // hostawayListingId: integer("hostaway_listing_id"),
     latLngPoint: geometry("lat_lng_point", {
       type: "point",
