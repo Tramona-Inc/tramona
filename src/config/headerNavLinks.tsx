@@ -12,7 +12,7 @@ export const headerLinks = [
   { name: "How it works", href: "/how-it-works", icon: InfoIcon },
   // { name: "Link Input", href: "/link-input", icon: LinkIcon },
   { name: "Recent Deals", href: "/exclusive-offers", icon: HandshakeIcon },
-  { name: "Why list with us", href: "/why-list", icon: Home },
+  { name: "For Hosts", href: "/why-list", icon: Home },
   // {
   //   name: "Unclaimed Offers",
   //   href: "/unclaimed-offers",
