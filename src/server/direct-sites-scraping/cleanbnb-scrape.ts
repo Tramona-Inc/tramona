@@ -99,6 +99,7 @@ type ScrapedData = {
   }
 };
 
+// @ts-expect-error temp
 export const cleanbnbScraper: DirectSiteScraper = async ({ checkIn, checkOut }) => {
   const checkInDate = formatDate(checkIn);
   const checkOutDate = formatDate(checkOut);
@@ -334,6 +335,7 @@ export const cleanbnbScraper: DirectSiteScraper = async ({ checkIn, checkOut }) 
 
       if (property === undefined) {
         if (info.length > 0) {
+          // @ts-expect-error temp
           console.log('GGGGGGGGGGGG; ', scrapedData.name, validData[i]?.url, validData[i]?.name);
         } else {
           console.log('Property not found:', info, validData[i]?.url, response);

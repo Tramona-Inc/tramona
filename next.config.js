@@ -9,8 +9,6 @@ import NextBundleAnalyzer from "@next/bundle-analyzer";
 const config = {
   reactStrictMode: true,
 
-  ignoreBuildErrors: true, // TEMP
-
   /**
    * If you are using `appDir` then you must comment the below `i18n` config out.
    *
