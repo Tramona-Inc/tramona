@@ -19,6 +19,7 @@ import {
   formatDateStringWithDayName,
   plural,
   convertTo12HourFormat,
+  getDaysUntilTrip,
 } from "@/utils/utils";
 
 import SingleLocationMap from "../_common/GoogleMaps/SingleLocationMap";
@@ -74,7 +75,7 @@ export default function TripPage({
                 The countdown to your trip begins
               </p>
               <p className="text-3xl font-bold">
-                {dayjs(trip.checkIn).fromNow(true)} to go
+                {getDaysUntilTrip(trip.checkIn)} days to go
               </p>
             </div>
           </div>
@@ -161,6 +162,10 @@ export default function TripPage({
                     </p>
                   )}
                 </div>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Address</p>
+                <p className="font-semibold">{trip.property.address}</p>
               </div>
 
               <div className="h-[2px] rounded-full bg-zinc-200"></div>

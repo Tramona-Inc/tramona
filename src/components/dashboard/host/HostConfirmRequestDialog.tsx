@@ -53,6 +53,7 @@ export default function HostConfirmRequestDialog({
     number | null
   >(null);
   const [editValue, setEditValue] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleEdit = (id: number) => {
     setSelectedPropertyToEdit(id);
@@ -79,6 +80,7 @@ export default function HostConfirmRequestDialog({
   );
 
   const handleSubmit = async () => {
+    setIsLoading(true);
     await Promise.all(
       // todo: make procedure accept array
       selectedProperties.map(async (property) => {
@@ -104,7 +106,7 @@ export default function HostConfirmRequestDialog({
             ) * 100,
         });
       }),
-    );
+    ).then(() => setIsLoading(false));
 
     setStep(2);
   };
@@ -276,7 +278,9 @@ export default function HostConfirmRequestDialog({
           <Button variant="secondary" onClick={() => setStep(0)}>
             Back
           </Button>
-          <Button onClick={handleSubmit}>Send Matches</Button>
+          <Button onClick={handleSubmit} disabled={isLoading}>
+            Send Matches
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

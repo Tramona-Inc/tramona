@@ -58,6 +58,7 @@ export default async function handler() {
       }
     } else {
       await sendSlackMessage({
+        isProductionOnly: true,
         channel: "tramona-bot",
         text: [`No Trips to pay out`].join("\n"),
       });
@@ -65,6 +66,7 @@ export default async function handler() {
   } catch (error) {
     console.log("Error scheduling transfer:", error);
     await sendSlackMessage({
+      isProductionOnly: true,
       channel: "tramona-bot",
       text: [
         `STRIPE HOST PAYOUT ERROR `,

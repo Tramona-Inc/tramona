@@ -3,12 +3,12 @@ import { zodUrl } from "../zod-utils";
 import { Airbnb } from "./Airbnb";
 import { BookingDotCom } from "./BookingDotCom";
 import { Vrbo } from "./Vrbo";
-import { type ListingSiteName } from "@/server/db/schema";
+import { Property, type ListingSiteName } from "@/server/db/schema";
 
 export type ListingSiteUrlParams = Readonly<{
   checkIn?: string | Date;
   checkOut?: string | Date;
-  numGuests: number;
+  numGuests?: number;
 }>;
 
 export type OriginalListing = Readonly<{
@@ -82,15 +82,22 @@ export function createListing({
   return Site.createListing(id);
 }
 
-export function getOriginalListing(property: {
-  originalListingId?: string | null;
-  originalListingSite?: ListingSiteName | null;
-}) {
-  if (!property.originalListingSite || !property.originalListingId) {
+export function getOriginalListing(
+  property: Pick<Property, "originalListingPlatform" | "originalListingId">,
+) {
+  if (
+    !property.originalListingPlatform ||
+    !property.originalListingId ||
+    !(
+      property.originalListingPlatform === "Airbnb" ||
+      property.originalListingPlatform === "Booking.com" ||
+      property.originalListingPlatform === "Vrbo"
+    )
+  ) {
     return null;
   }
   return createListing({
     id: property.originalListingId,
-    siteName: property.originalListingSite,
+    siteName: property.originalListingPlatform,
   });
 }

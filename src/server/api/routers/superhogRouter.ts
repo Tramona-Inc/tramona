@@ -126,6 +126,7 @@ export const superhogRouter = createTRPCRouter({
             action: "create",
           });
           await sendSlackMessage({
+            isProductionOnly: true,
             channel: "superhog-bot",
             text: [
               `SUPERHOG REQUEST ERROR: axios error... ${error.response.data.detail}`,
@@ -136,6 +137,7 @@ export const superhogRouter = createTRPCRouter({
 
       if (!verification) {
         await sendSlackMessage({
+          isProductionOnly: true,
           channel: "superhog-bot",
           text: [
             `SUPERHOG REQUEST ERROR: there was no verification for ${input.metadata.echoToken}`,
@@ -176,6 +178,7 @@ export const superhogRouter = createTRPCRouter({
         });
         //super temp for testing
         await sendSlackMessage({
+          isProductionOnly: true,
           channel: "superhog-bot",
           text: [
             `SUPERHOG REQUEST SUCCESS: TRIP ID  ${input.reservation.reservationId} was created successfully for property ${input.listing.listingName}`,
@@ -191,6 +194,7 @@ export const superhogRouter = createTRPCRouter({
           action: "create",
         });
         await sendSlackMessage({
+        isProductionOnly: true,
           channel: "superhog-bot",
           text: [
             `SUPERHOG REQUEST ERROR: TRIP ID  ${input.reservation.reservationId} does not exist for ${input.listing.listingName}`,
@@ -389,6 +393,7 @@ export const superhogRouter = createTRPCRouter({
         if (error instanceof Error) {
           const axiosError = error as AxiosError;
           await sendSlackMessage({
+            isProductionOnly: true,
             channel: "superhog-bot",
             text: [
               `SUPERHOG REQUEST ERROR: axios error... ${axiosError.response.data.detail}`,

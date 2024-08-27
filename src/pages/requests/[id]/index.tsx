@@ -1,6 +1,6 @@
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import Spinner from "@/components/_common/Spinner";
-import OfferPage from "@/components/offers/OfferPage";
+import PropertyPage, { OfferPage } from "@/components/offers/PropertyPage";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/utils/api";
@@ -9,7 +9,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import ShareButton from "@/components/_common/ShareLink/ShareButton";
-import { type OfferWithDetails } from "@/components/offers/OfferPage";
+import { type OfferWithDetails } from "@/components/offers/PropertyPage";
 
 import { NextSeo } from "next-seo";
 import { type GetServerSideProps } from "next";

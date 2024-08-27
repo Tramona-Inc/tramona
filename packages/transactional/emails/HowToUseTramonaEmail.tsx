@@ -1,8 +1,9 @@
 /* eslint-disable @next/next/no-img-element */
-import { Text, Button } from "@react-email/components";
+
+import { Text, Button, Html } from "@react-email/components";
 import { Layout } from "./EmailComponents";
 
-export default function WelcomeEmail({ name }: { name: string }) {
+export default function HowToUseTramonaEmail() {
   return (
     <Layout title_preview="Welcome to Tramona">
       <div className="border-b border-gray-300 bg-white p-6 text-black">
@@ -24,46 +25,73 @@ export default function WelcomeEmail({ name }: { name: string }) {
           style={{ borderBottom: "2px solid #e0e0e0" }}
         ></div>
         <Text className="mb-4 text-center text-3xl font-bold">
-          Welcome to Tramona {name}!
+          How to use Tramona
         </Text>
         <Text className="mb-4 text-left">
-          Hello, my name is Blake Singleton, Co-founder and CEO of Tramona.
-          Thank you for helping us make traveling easier than ever before.
-        </Text>
-        <Text className="mb-4 text-left">
-          Tramona was started with one goal in mind—allowing people to travel
-          more for less, while cutting out fees in the process. (Did you know
-          some of the bigger platforms charge around 20% per booking?) Every
-          platform claims to give discounts, but after the fees, is it really a
-          discount?
+          Welcome to Tramona! We&apos;re thrilled to have you on board. Whether
+          you&apos;re here to find your next travel destination or to host
+          travelers, we&apos;re here to make your experience smooth and
+          enjoyable.
         </Text>
         <Text className="mb-2 text-left text-xl font-bold">
-          What is Tramona?
+          Step 1: Make a Request
         </Text>
-        <Text className="mb-4 text-left">
-          Tramona is a one-of-a-kind booking platform. Every time you book it
-          will be a truly unique booking deal you can’t find anywhere else, on
-          the same properties, you see everywhere else.
-        </Text>
-        <Text className="mb-4 text-left">
-          We have already allowed travelers to save <b>$250,000+</b> booking the
-          same properties they find on other sites, on our site. Let&apos;s keep
-          growing this number.
-        </Text>
+        <Html className="mb-4 text-left">
+          <ul>
+            <li>
+              Log in to your Tramona account and navigate to the “Travel
+              Requests” section.
+            </li>
+            <li>
+              {" "}
+              Fill in your travel details, including your desired destination,
+              dates, and any specific preferences or requirements.
+            </li>
+            <li> Submit your request to start receiving potential matches. </li>
+          </ul>
+        </Html>
         <Text className="mb-2 text-left text-xl font-bold">
-          How does it work?
+          Step 2: Review Your Matches
         </Text>
-        <Text className="mb-8 text-left">
-          One of the biggest problems hosts face is vacancies due to market
-          saturation, and as more people become hosts every day, the problem is
-          worsening. This is where Tramona comes in. We allow travelers to
-          submit an offer or a request. The host gets to match it, maximizing
-          the dates booked hosts receive, while allowing travelers the chance to
-          travel at lower prices. This makes Tramona the best place to book the
-          best properties around the world.
+        <Html className="mb-4 text-left">
+          <ul>
+            <li>
+              Once your request is submitted, you&apos;ll start receiving offers
+              from various hosts.
+            </li>
+            <li>
+              {" "}
+              Review each host&apos;s profile carefully, including their
+              location, amenities, and reviews from previous travelers.
+            </li>
+            <li>
+              {" "}
+              Fill in your travel details, including your desired destination,
+              dates, and any specific preferences or requirements.
+            </li>
+            <li>
+              {" "}
+              If you find an offer that meets your needs, you can secure it by
+              making a payment, which will create a match.
+            </li>
+          </ul>
+        </Html>
+        <Text className="mb-2 text-left text-xl font-bold">
+          Step 3: Finalize Your Plans
         </Text>
-        <Text className="m-0 text-left">Thanks,</Text>
-        <Text className="m-0 text-left">Blake Singleton, CEO</Text>
+        <Html className="mb-4 text-left">
+          <ul>
+            <li>
+              Once you&apos;ve confirmed a match, feel free to reach out to the
+              host or Tramona support if you have any questions or need
+              assistance.
+            </li>
+            <li>
+              Don&apos;t forget to leave a review after your stay to help other
+              travelers in the community!
+            </li>
+          </ul>
+        </Html>
         <Text className="mb-6 mt-0 text-left">
           Questions? Send them to us directly at{" "}
           <a href="mailto:info@tramona.com" className="text-black no-underline">
