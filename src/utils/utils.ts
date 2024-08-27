@@ -412,9 +412,9 @@ export const useIsMd = () => useScreenWidth() >= 768;
 export const useIsLg = () => useScreenWidth() >= 1024;
 
 /**
- * screen width >= 1850 (same as tailwind `lg:`))
+ * screen width >= 1280 (same as tailwind `xl:`))
  */
-export const useIsXl = () => useScreenWidth() >= 1850;
+export const useIsXl = () => useScreenWidth() >= 1280;
 
 export function getFromAndTo(page: number, itemPerPage: number) {
   let from = page * itemPerPage;
@@ -559,7 +559,9 @@ export function scrollToTop() {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-export function separateByPriceRestriction(organizedData: CityData[]): SeparatedData {
+export function separateByPriceRestriction(
+  organizedData: CityData[],
+): SeparatedData {
   const normal: CityData[] = [];
   const outsidePriceRestriction: CityData[] = [];
 
@@ -580,14 +582,14 @@ export function separateByPriceRestriction(organizedData: CityData[]): Separated
           );
         if (
           property.priceRestriction == null ||
-          (property.priceRestriction * 100) <= nightlyPrice
+          property.priceRestriction * 100 <= nightlyPrice
         ) {
           if (property.city === "Seattle, WA, US") {
             console.log(property.priceRestriction, nightlyPrice);
           }
           normalProperties.push(property);
         } else {
-          if ((property.priceRestriction * 100) <= (nightlyPrice * 1.15)) {
+          if (property.priceRestriction * 100 <= nightlyPrice * 1.15) {
             outsideProperties.push(property);
           }
         }

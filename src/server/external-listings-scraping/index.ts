@@ -14,7 +14,12 @@ export type ExternalListingScraper = (
 
 const listingScrapers: ExternalListingScraper[] = [scrapeAirbnbListings];
 
-export async function scrapeListings(request: MinimalRequest) {
+/**
+ * Scrapes external listings for a request so travelers can see what kind of prices
+ * are already out there -- but they won't be booking these properties, hence the new
+ * ExternalListing type/table
+ */
+export async function scrapeExternalListings(request: MinimalRequest) {
   const numNights = getNumNights(request.checkIn, request.checkOut);
   const requstedNightlyPrice = request.maxTotalPrice / numNights;
 
