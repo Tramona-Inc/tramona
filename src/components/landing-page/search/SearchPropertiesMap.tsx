@@ -32,9 +32,13 @@ export type MapBoundary = {
 function SearchPropertiesMap({
   isFilterUndefined,
   setFunctionRef,
+  mapBoundaries,
+  setMapBoundaries
 }: {
   isFilterUndefined: boolean;
   setFunctionRef: (ref: any) => void;
+  mapBoundaries: MapBoundary | null;
+  setMapBoundaries: (boundaries: MapBoundary | null) => void;
 }) {
   //zustand
   const filters = useCitiesFilter((state) => state);
@@ -79,7 +83,7 @@ function SearchPropertiesMap({
   const map = useMap("9c8e46d54d7a528b");
   const apiIsLoaded = useApiIsLoaded();
 
-  const [mapBoundaries, setMapBoundaries] = useState<MapBoundary | null>(null);
+  // const [mapBoundaries, setMapBoundaries] = useState<MapBoundary | null>(null);
 
   //this is for when the user moves the camera
   const {
@@ -199,7 +203,8 @@ function SearchPropertiesMap({
 
   return (
     <div
-      className={`max-w-[700px] rounded-md border shadow-md md:mt-0 md:h-[720px] lg:h-[600px] xl:h-[800px] ${isFilterUndefined ? `h-[705px]` : `h-[705px]`}`}
+      // className={`max-w-[700px] rounded-md border shadow-md md:mt-0 md:h-[720px] lg:h-[600px] xl:h-[800px] ${isFilterUndefined ? `h-[705px]` : `h-[705px]`}`}
+      className="h-full w-full rounded-xl border shadow-md"
     >
       {isFilterUndefined ? (
         <div className="flex h-full items-center justify-center">

@@ -32,7 +32,9 @@ module.exports = {
         "screen-minus-header": "var(--screen-minus-header)",
         "header-height": "var(--header-height)",
         "footer-height": "var(--footer-height)",
+        "searchbar-height": "var(--searchbar-height)",
         "mobile-header-height": "var(--mobile-header-height)",
+        "screen-minus-header-n-footer-n-searchbar": "var(--screen-minus-header-n-footer-n-searchbar)",
       },
       colors: {
         gold: "#FACF26",
