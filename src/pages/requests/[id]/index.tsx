@@ -112,7 +112,7 @@ function Page({
                 </div>
                 {offers.map((offer) => (
                   <TabsContent key={offer.id} value={`${offer.id}`}>
-                    <OfferPage offer={offer} property={offer.property} />
+                    <OfferPage offer={offer} />
                   </TabsContent>
                 ))}
               </Tabs>

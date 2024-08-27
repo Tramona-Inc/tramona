@@ -1,6 +1,6 @@
 import DashboadLayout from "@/components/_common/Layout/DashboardLayout";
 import Spinner from "@/components/_common/Spinner";
-import PropertyPage from "@/components/offers/PropertyPage";
+import PropertyPage, { OfferPage } from "@/components/offers/PropertyPage";
 import { NextSeo } from "next-seo";
 import { type GetServerSideProps } from "next";
 import { useRouter } from "next/router";
@@ -65,7 +65,7 @@ const Page = ({ offer, firstImage, baseUrl }: PageProps) => {
         </div>
         <div className="mx-6 grid grid-cols-1 grid-rows-4 gap-x-6 gap-y-4 pb-32 lg:grid-cols-3">
           <div className="row-span-3 lg:col-span-2">
-            <PropertyPage offer={offer} />
+            <OfferPage offer={offer} />
           </div>
           {offer.property.latitude && offer.property.longitude && (
             <div className="row-span-1 lg:col-span-1 lg:row-span-3">

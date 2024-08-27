@@ -1,5 +1,5 @@
 import { Property, REFERRAL_CODE_LENGTH } from "@/server/db/schema";
-import { CityData, SeparatedData } from "@/server/server-utils";
+import { SeparatedData } from "@/server/server-utils";
 import { useWindowSize } from "@uidotdev/usehooks";
 import { clsx, type ClassValue } from "clsx";
 import {
@@ -14,6 +14,7 @@ import { twMerge } from "tailwind-merge";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import duration from "dayjs/plugin/duration";
+import { HostRequestsPageData } from "@/server/api/routers/propertiesRouter";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -578,14 +579,14 @@ export function scrollToTop() {
 }
 
 export function separateByPriceRestriction(
-  organizedData: CityData[],
+  organizedData: HostRequestsPageData[],
 ): SeparatedData {
-  const normal: CityData[] = [];
-  const outsidePriceRestriction: CityData[] = [];
+  const normal: HostRequestsPageData[] = [];
+  const outsidePriceRestriction: HostRequestsPageData[] = [];
 
   organizedData.forEach((cityData) => {
-    const normalRequests: CityData["requests"] = [];
-    const outsideRequests: CityData["requests"] = [];
+    const normalRequests: HostRequestsPageData["requests"] = [];
+    const outsideRequests: HostRequestsPageData["requests"] = [];
 
     cityData.requests.forEach((requestData) => {
       const normalProperties: Property[] = [];

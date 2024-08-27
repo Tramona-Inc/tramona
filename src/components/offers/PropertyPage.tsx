@@ -635,20 +635,14 @@ function OfferPageMobileBottomCard({
   );
 }
 
-export function OfferPage({
-  offer,
-  property,
-}: {
-  offer: OfferWithDetails;
-  property: PropertyPageData;
-}) {
+export function OfferPage({ offer }: { offer: OfferWithDetails }) {
   return (
     <PropertyPage
-      property={property}
+      property={offer.property}
       offer={offer}
-      sidebar={<OfferPageSidebar offer={offer} property={property} />}
+      sidebar={<OfferPageSidebar offer={offer} property={offer.property} />}
       mobileBottomCard={
-        <OfferPageMobileBottomCard offer={offer} property={property} />
+        <OfferPageMobileBottomCard offer={offer} property={offer.property} />
       }
     />
   );

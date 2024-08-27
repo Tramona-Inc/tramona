@@ -25,7 +25,6 @@ import {
   type NewProperty,
   type Property,
   type User,
-  type Request,
   bookedDates,
   groupInvites,
   groupMembers,
@@ -43,6 +42,7 @@ import { HttpsProxyAgent } from "https-proxy-agent";
 import * as cheerio from "cheerio";
 import { sendSlackMessage } from "./slack";
 import { HOST_MARKUP, TRAVELER__MARKUP } from "@/utils/constants";
+import { HostRequestsPageData } from "./api/routers/propertiesRouter";
 
 export const proxyAgent = new HttpsProxyAgent(env.PROXY_URL);
 
@@ -542,17 +542,9 @@ export async function getPropertyOriginalPrice(
   // code for other options
 }
 
-export interface CityData {
-  city: string;
-  requests: {
-    request: Request;
-    properties: Property[];
-  }[];
-}
-
 export interface SeparatedData {
-  normal: CityData[];
-  outsidePriceRestriction: CityData[];
+  normal: HostRequestsPageData[];
+  outsidePriceRestriction: HostRequestsPageData[];
 }
 
 //update spread on every fetch to keep information updated
