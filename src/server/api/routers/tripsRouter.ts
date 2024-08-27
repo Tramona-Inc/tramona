@@ -3,7 +3,7 @@ import { db } from "@/server/db";
 import { groupMembers, properties, trips } from "@/server/db/schema";
 
 import { TRPCError } from "@trpc/server";
-import { and, eq, exists } from "drizzle-orm";
+import { and, eq, exists, isNotNull, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
 
 export const tripsRouter = createTRPCRouter({
@@ -160,4 +160,28 @@ export const tripsRouter = createTRPCRouter({
         return { trip, coordinates };
       }
     }),
+  get24HourPostCheckInTrips: protectedProcedure.query(async () => {
+    console.log("RUNNING 24 HOUR CHECK IN TRIPS");
+    const now = new Date().toISOString();
+    return await db.query.trips.findMany({
+      with: {
+        offer: {
+          columns: {
+            hostPayout: true,
+          },
+        },
+        property: {
+          columns: {
+            hostId: true,
+          },
+        },
+      },
+      where: and(
+        isNull(trips.hostPayed),
+        isNotNull(trips.paymentCaptured),
+        eq(trips.tripsStatus, "Booked"),
+        sql`${trips.checkIn} <= ${sql`(${now}::timestamp - interval '24 hours')`}`,
+      ),
+    });
+  }),
 });

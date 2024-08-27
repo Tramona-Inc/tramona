@@ -453,6 +453,7 @@ export async function handleRequestSubmission(
 
   if (user.role !== "admin") {
     await sendSlackMessage({
+      isProductionOnly: true,
       channel: "tramona-bot",
       text: [
         `*${name} just made a request: ${input.location}*`,

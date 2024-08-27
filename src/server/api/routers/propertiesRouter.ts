@@ -13,7 +13,6 @@ import {
   propertySelectSchema,
   propertyUpdateSchema,
   type Request,
-  requestInsertSchema,
   requests,
   requestsToProperties,
   type User,
@@ -77,6 +76,7 @@ export const propertiesRouter = createTRPCRouter({
       }
 
       const id = await addProperty({
+        isAdmin: ctx.user.role === "admin" ? true : false,
         property: input,
         userId: ctx.user.id,
         userEmail: ctx.user.email,
@@ -114,6 +114,7 @@ export const propertiesRouter = createTRPCRouter({
         property: input,
         userId: input.hostId,
         userEmail: host.email,
+        isAdmin: false,
       });
 
       return {
