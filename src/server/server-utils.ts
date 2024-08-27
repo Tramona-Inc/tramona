@@ -470,7 +470,7 @@ export async function getPropertiesForRequest(
           isNotNull(properties.priceRestriction),
           lte(
             properties.priceRestriction,
-            (req.maxTotalPrice / numberOfNights) * 1.15,
+            Math.round((req.maxTotalPrice / numberOfNights) * 1.15),
           ),
         ),
       ),
