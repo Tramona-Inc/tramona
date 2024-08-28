@@ -99,57 +99,140 @@ type ScrapedData = {
   }
 };
 
+interface PropertyInfo {
+  url: string;
+  city: string;
+  address: string;
+  maxOccupancy: string;
+  maxBedrooms: number;
+  maxBathrooms: number;
+  name: string;
+}
+
+interface PropertyData {
+  url: string;
+  images: string[];
+  address: string;
+  city: string;
+  name: string;
+  description: string;
+  max_occupancy_str: string;
+  max_n_bedrooms_str: string;
+  max_n_bathrooms_str: string;
+}
+
+interface JsonLdData {
+  '@context': string;
+  '@type': string;
+}
+
+function extractPrice($: cheerio.CheerioAPI): string {
+  let price = '';
+  $('div.min-price').each((_, element) => {
+    const infoButton = $(element).find('a.infobutton');
+    const dataContent = infoButton.attr('data-content');
+
+    if (dataContent && dataContent === "Cancellazione non consentita") {
+      const priceText = $(element).find('div.avgTotPriceRow').text().trim();
+      price = priceText.replace('€', '').replace(',', '.').trim();
+      return false; // Exit the loop once we find the matching element
+    }
+  });
+  return price;
+};
+
+function extractCleaningFee($: cheerio.CheerioAPI): number {
+  let priceService = 0;
+  let foundMandatoryServicesRates = false;
+
+  $('script').each((_, script) => {
+    const scriptContent = $(script).html();
+
+    if (scriptContent && scriptContent.includes("var mandatory_services_rates")) {
+      foundMandatoryServicesRates = true;
+    }
+
+    if (foundMandatoryServicesRates && scriptContent && scriptContent.includes("mandatory_services_rates[")) {
+      try {
+        const regex = /mandatory_services_rates\[\d+\]\s*=\s*(\[.*?\]);/s;
+        const match = scriptContent.match(regex);
+
+        if (match?.[1]) {
+          const servicesData = JSON.parse(match[1]) as { price_service: number }[];
+          if (Array.isArray(servicesData) && servicesData.length > 0 && servicesData[0]) {
+            priceService = servicesData[0].price_service;
+          }
+        } else {
+          console.log('No match found or match[1] is undefined');
+        }
+      } catch (e) {
+        console.error("Error parsing price service data:", e);
+      }
+      return false; // Exit the loop once we find the matching script
+    }
+  });
+  return priceService;
+};
+
+function extractCheckInCheckOutTime($: cheerio.CheerioAPI): { checkInTime: string | null, checkOutTime: string | null } {
+  let checkInTime: string | null = null;
+  let checkOutTime: string | null = null;
+
+  // Find the check-in time
+  $('.checkInOutBadge:contains("Check-in:")').each((_, element) => {
+    const text = $(element).text().trim();
+    const match = text.match(/Check-in:\s*(\d{2}:\d{2})/);
+    if (match?.[1]) {
+      checkInTime = match[1];
+      return false; // Exit the loop once we find the check-in time
+    }
+  });
+
+  // Find the check-out time
+  $('.checkInOutBadge:contains("Check-out:")').each((_, element) => {
+    const text = $(element).text().trim();
+    const match = text.match(/Check-out:\s*(\d{2}:\d{2})/);
+    if (match?.[1]) {
+      checkOutTime = match[1];
+      return false; // Exit the loop once we find the check-out time
+    }
+  });
+
+  return { checkInTime, checkOutTime };
+}
+
+function extractTotalBeds($: cheerio.CheerioAPI): number {
+  let totalBeds = 0;
+  $('.apt-amenity').each((_, element) => {
+    const amenity = $(element).text().trim();
+    const bedMatches = amenity.match(/(\d+)\s*x\s*/i);
+
+    if (bedMatches) {
+      totalBeds += parseInt(bedMatches[1]!);
+    }
+    return false;
+  });
+  return totalBeds;
+}
+
 export const cleanbnbScraper: DirectSiteScraper = async ({ checkIn, checkOut }) => {
   const checkInDate = formatDate(checkIn);
   const checkOutDate = formatDate(checkOut);
 
-  console.log(checkInDate, checkOutDate);
   const res: NewProperty[] = [];
   const baseUrl = "https://www.cleanbnb.house/it/appartamenti"
 
-  const data = await fetch(`${baseUrl}?from=${checkInDate}&to=${checkOutDate}`);
+  const mainPageData = await fetch(`${baseUrl}?from=${checkInDate}&to=${checkOutDate}`);
 
 
-  const text = await data.text();
-  const $ = cheerio.load(text);
+  const mainPageText = await mainPageData.text();
+  const $ = cheerio.load(mainPageText);
 
-  // Extract script tags
   const scriptTags = $('script');
-
-  // Regex to extract URLs
-  // const urlRegex = /"url":\s*"([^"]+?)(?:\?from=.*?&to=.*?)?"/g;
-  // const urls: string[] = [];
-
-  interface PropertyInfo {
-    url: string;
-    city: string;
-    address: string;
-    maxOccupancy: string;
-    maxBedrooms: number;
-    maxBathrooms: number;
-    name: string;
-  }
-
-  interface PropertyData {
-    url: string;
-    images: string[];
-    address: string;
-    city: string;
-    name: string;
-    description: string;
-    max_occupancy_str: string;
-    max_n_bedrooms_str: string;
-    max_n_bathrooms_str: string;
-  }
-
-  interface JsonLdData {
-    '@context': string;
-    '@type': string;
-  }
-
 
   const properties: PropertyInfo[] = [];
 
+  // extract property URLs from script tags + additional data
   scriptTags.each((_, script) => {
     const scriptContent = $(script).html();
     if (scriptContent && scriptContent.includes('"url":')) {
@@ -183,7 +266,7 @@ export const cleanbnbScraper: DirectSiteScraper = async ({ checkIn, checkOut }) 
               }
             }
           } catch (innerError) {
-            console.error("Error processing individual URL:", data.url, "Error:", innerError);
+            console.error("Error processing individual URL:", mainPageData.url, "Error:", innerError);
           }
         }
       } catch (outerError) {
@@ -226,7 +309,7 @@ export const cleanbnbScraper: DirectSiteScraper = async ({ checkIn, checkOut }) 
         return null;
       }).get() as JsonLdData[];
 
-
+      // Grab the specific JSON-LD data object we need
       const info = jsonLdData.filter(data => data.hasOwnProperty("@type") && data["@type"] === "VacationRental");
       if (info[0] === undefined) {
         console.log('No valid data found:', jsonLdData);
@@ -237,91 +320,100 @@ export const cleanbnbScraper: DirectSiteScraper = async ({ checkIn, checkOut }) 
       //const avgRating
       //const numRatings
 
-      let price = '';
 
-      $response('div.min-price').each((_, element) => {
-        const infoButton = $(element).find('a.infobutton');
-        const dataContent = infoButton.attr('data-content');
+      // let price = '';
 
-        if (dataContent && dataContent === "Cancellazione non consentita") {
-          const priceText = $(element).find('div.avgTotPriceRow').text().trim();
-          price = priceText.replace('€', '').replace(',', '.').trim();
-          return false; // Exit the loop once we find the matching element
-        }
-      });
+      // $response('div.min-price').each((_, element) => {
+      //   const infoButton = $(element).find('a.infobutton');
+      //   const dataContent = infoButton.attr('data-content');
 
-      let priceService = 0;
-      let foundMandatoryServicesRates = false;
+      //   if (dataContent && dataContent === "Cancellazione non consentita") {
+      //     const priceText = $(element).find('div.avgTotPriceRow').text().trim();
+      //     price = priceText.replace('€', '').replace(',', '.').trim();
+      //     return false; // Exit the loop once we find the matching element
+      //   }
+      // });
 
-      $response('script').each((_, script) => {
-        const scriptContent = $(script).html();
+      // let priceService = 0;
+      // let foundMandatoryServicesRates = false;
 
-        if (scriptContent && scriptContent.includes("var mandatory_services_rates")) {
-          foundMandatoryServicesRates = true;
-        }
+      // $response('script').each((_, script) => {
+      //   const scriptContent = $(script).html();
 
-        if (foundMandatoryServicesRates && scriptContent && scriptContent.includes("mandatory_services_rates[")) {
-          try {
-            const regex = /mandatory_services_rates\[\d+\]\s*=\s*(\[.*?\]);/s;
-            const match = scriptContent.match(regex);
+      //   if (scriptContent && scriptContent.includes("var mandatory_services_rates")) {
+      //     foundMandatoryServicesRates = true;
+      //   }
 
-            if (match?.[1]) {
-              const servicesData = JSON.parse(match[1]) as { price_service: number }[];
-              if (Array.isArray(servicesData) && servicesData.length > 0 && servicesData[0]) {
-                priceService = servicesData[0].price_service;
-              }
-            } else {
-              console.log('No match found or match[1] is undefined');
-            }
-          } catch (e) {
-            console.error("Error parsing price service data:", e);
-          }
-          return false; // Exit the loop once we find the matching script
-        }
-      });
+      //   if (foundMandatoryServicesRates && scriptContent && scriptContent.includes("mandatory_services_rates[")) {
+      //     try {
+      //       const regex = /mandatory_services_rates\[\d+\]\s*=\s*(\[.*?\]);/s;
+      //       const match = scriptContent.match(regex);
 
-      let checkInTime: string | null = null;
-      let checkOutTime: string | null = null;
+      //       if (match?.[1]) {
+      //         const servicesData = JSON.parse(match[1]) as { price_service: number }[];
+      //         if (Array.isArray(servicesData) && servicesData.length > 0 && servicesData[0]) {
+      //           priceService = servicesData[0].price_service;
+      //         }
+      //       } else {
+      //         console.log('No match found or match[1] is undefined');
+      //       }
+      //     } catch (e) {
+      //       console.error("Error parsing price service data:", e);
+      //     }
+      //     return false; // Exit the loop once we find the matching script
+      //   }
+      // });
 
-      // Find the check-in time
-      $response('.checkInOutBadge:contains("Check-in:")').each((_, element) => {
-        const text = $(element).text().trim();
-        const match = text.match(/Check-in:\s*(\d{2}:\d{2})/);
-        if (match?.[1]) {
-          checkInTime = match[1];
-          return false; // Exit the loop once we find the check-in time
-        }
-      });
 
-      // Find the check-out time
-      $response('.checkInOutBadge:contains("Check-out:")').each((_, element) => {
-        const text = $(element).text().trim();
-        const match = text.match(/Check-out:\s*(\d{2}:\d{2})/);
-        if (match?.[1]) {
-          checkOutTime = match[1];
-          return false; // Exit the loop once we find the check-out time
-        }
-      });
+      // let checkInTime: string | null = null;
+      // let checkOutTime: string | null = null;
 
-      const typeProperty = $response('.apt-address span').text().trim();
-      const propertyType = mapPropertyType(await translateText(typeProperty));
-      let totalBeds = 0;
+      // // Find the check-in time
+      // $response('.checkInOutBadge:contains("Check-in:")').each((_, element) => {
+      //   const text = $(element).text().trim();
+      //   const match = text.match(/Check-in:\s*(\d{2}:\d{2})/);
+      //   if (match?.[1]) {
+      //     checkInTime = match[1];
+      //     return false; // Exit the loop once we find the check-in time
+      //   }
+      // });
 
-      $response('.apt-amenity').each((_, element) => {
-        const amenity = $(element).text().trim();
-        const bedMatches = amenity.match(/(\d+)\s*x\s*/i);
+      // // Find the check-out time
+      // $response('.checkInOutBadge:contains("Check-out:")').each((_, element) => {
+      //   const text = $(element).text().trim();
+      //   const match = text.match(/Check-out:\s*(\d{2}:\d{2})/);
+      //   if (match?.[1]) {
+      //     checkOutTime = match[1];
+      //     return false; // Exit the loop once we find the check-out time
+      //   }
+      // });
 
-        if (bedMatches) {
-          totalBeds += parseInt(bedMatches[1]!);
-          // bedMatches.forEach((match) => {
-          //     const [count] = match.split('x').map(part => parseInt(part.trim()));
-          //     if (!isNaN(count)) {
-          //         numBeds += count!;
-          //     }
-          // });
-        }
-        return false;
-      });
+      // let totalBeds = 0;
+
+      // $response('.apt-amenity').each((_, element) => {
+      //   const amenity = $(element).text().trim();
+      //   const bedMatches = amenity.match(/(\d+)\s*x\s*/i);
+
+      //   if (bedMatches) {
+      //     totalBeds += parseInt(bedMatches[1]!);
+      //     // bedMatches.forEach((match) => {
+      //     //     const [count] = match.split('x').map(part => parseInt(part.trim()));
+      //     //     if (!isNaN(count)) {
+      //     //         numBeds += count!;
+      //     //     }
+      //     // });
+      //   }
+      //   return false;
+      // });
+
+      const price = extractPrice($response);
+      const cleaningFee = extractCleaningFee($response);
+      const { checkInTime, checkOutTime } = extractCheckInCheckOutTime($response);
+      const extractedPropertyType = $response('.apt-address span').text().trim();
+      const propertyType = mapPropertyType(await translateText(extractedPropertyType));
+      const totalBeds = extractTotalBeds($response);
+
+      // This is not working rn - also only fixes a few cases so might not be worth it
       const normalizeString = (str: string) => {
         if (str) {
           return str.normalize('NFKC').replace(/\u00a0/g, ' ').trim();
@@ -334,8 +426,10 @@ export const cleanbnbScraper: DirectSiteScraper = async ({ checkIn, checkOut }) 
 
       if (property === undefined) {
         if (info.length > 0) {
+          // This is the case that isnt hit very frequently
           console.log('GGGGGGGGGGGG; ', scrapedData.name, validData[i]?.url, validData[i]?.name);
         } else {
+          // This hits a lot, might be due to the 429 errors.
           console.log('Property not found:', info, validData[i]?.url, response);
         }
         continue;
@@ -360,11 +454,10 @@ export const cleanbnbScraper: DirectSiteScraper = async ({ checkIn, checkOut }) 
         }
       } catch (error) {
         console.error('Error translating amenities:', error);
-        console.log(info);
       }
       const imageUrls = scrapedData.image;
       const originalListingUrl = property.url;
-      const originalNightlyPrice = (parseFloat(price) + (priceService/ getNumNights(checkIn, checkOut)));
+      const originalNightlyPrice = (parseFloat(price) + (cleaningFee / getNumNights(checkIn, checkOut)));
 
       res.push({
         name,
