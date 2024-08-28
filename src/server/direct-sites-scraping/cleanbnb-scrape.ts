@@ -77,7 +77,7 @@ function extractNumber(str: string): number {
   return match ? parseInt(match[0], 10) : 0;
 }
 
-type ScrapedData = {
+interface ScrapedData {
   name: string;
   description: string;
   url: string;
@@ -312,6 +312,7 @@ export const cleanbnbScraper: DirectSiteScraper = async ({ checkIn, checkOut }) 
       // Grab the specific JSON-LD data object we need
       const info = jsonLdData.filter(data => data.hasOwnProperty("@type") && data["@type"] === "VacationRental");
       if (info[0] === undefined) {
+        // This hits a lot, 429 errors
         console.log('No valid data found:', jsonLdData);
         continue;
       }
@@ -429,7 +430,6 @@ export const cleanbnbScraper: DirectSiteScraper = async ({ checkIn, checkOut }) 
           // This is the case that isnt hit very frequently
           console.log('GGGGGGGGGGGG; ', scrapedData.name, validData[i]?.url, validData[i]?.name);
         } else {
-          // This hits a lot, might be due to the 429 errors.
           console.log('Property not found:', info, validData[i]?.url, response);
         }
         continue;
