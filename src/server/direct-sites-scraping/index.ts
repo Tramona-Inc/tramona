@@ -16,15 +16,16 @@ export type DirectSiteScraper = (options: {
   ScrapedListing[]
 >;
 
-type ScrapedListing = 
+export type ScrapedListing = 
   (NewProperty & {
     originalListingUrl: string; // enforce that its non-null
     reviews: Review[];
+    scrapeUrl: string;
   });
 
 export const directSiteScrapers: DirectSiteScraper[] = [
   // add more scrapers here
-  cleanbnbScraper,
+  // cleanbnbScraper,
   arizonaScraper,
 ];
 
@@ -93,6 +94,9 @@ export const scrapeDirectListings = async (options: {
                 totalPrice: originalTotalPrice,
                 hostPayout: originalTotalPrice,
                 travelerOfferedPrice: originalTotalPrice,
+                scrapeUrl: listing.originalListingUrl,
+                isAvailableOnOriginalSite: true,
+                availabilityChedkedAt: new Date(),
               };
               const newOfferId = await trx.insert(offers).values(newOffer).returning({id: offers.id}) 
               console.log("newOfferIdReturned: ", newOfferId);
@@ -129,6 +133,9 @@ export const scrapeDirectListings = async (options: {
                 totalPrice: originalTotalPrice,
                 hostPayout: originalTotalPrice,
                 travelerOfferedPrice: originalTotalPrice,
+                scrapeUrl: listing.originalListingUrl,
+                isAvailableOnOriginalSite: true,
+                availabilityChedkedAt: new Date(),
               };
               const newOfferId = await trx.insert(offers).values(newOffer).returning({id: offers.id}) 
               console.log("newOfferIdReturned: ", newOfferId);
@@ -140,4 +147,18 @@ export const scrapeDirectListings = async (options: {
   }
 
   return listings;
+};
+
+// TODO update availability of properties, and original total price
+export const subsequentScrape = async (options: {
+  offerId: number;
+}) => {
+  await db.transaction(async (trx) => {
+    // TODO
+      const offerList = await trx.select({id: offers.id, })
+        .from(offers)
+        .where(eq(offers.id, options.offerId));
+  });
+      
+  return null
 };
