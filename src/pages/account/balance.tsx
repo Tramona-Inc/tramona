@@ -10,21 +10,16 @@ import { type RouterOutputs, api } from "@/utils/api";
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 
 export type ReferralTableData =
-  RouterOutputs["referralCodes"]["getReferralEarnings"];
+  RouterOutputs["referralCodes"]["getReferralCodeInfo"];
 
 export default function CashbackBalance() {
   useSession({ required: true });
 
-  const { data, isLoading } = api.referralCodes.getReferralEarnings.useQuery();
+  const { data: earnings, isLoading } =
+    api.referralCodes.getReferralCodeInfo.useQuery();
 
-  const cashbackBalance =
-    data?.reduce((prev, item) => {
-      if (item.earningStatus === "pending") {
-        return prev + item.cashbackEarned;
-      }
-
-      return prev;
-    }, 0) ?? 0;
+  const { data: allEarningTransactions } =
+    api.referralCodes.getAllEarningsByReferralCode.useQuery();
 
   return (
     <>
@@ -38,8 +33,16 @@ export default function CashbackBalance() {
               <Spinner />
             ) : (
               <div className="space-y-4">
-                <CashbackBalanceDetails balance={cashbackBalance} />
-                <ReferralTable data={data ?? []} columns={referralColumns} />
+                <CashbackBalanceDetails
+                  balance={earnings?.curBalance}
+                  totalBookingVolume={earnings?.totalBookingVolume}
+                />
+                {allEarningTransactions && (
+                  <ReferralTable
+                    columns={referralColumns}
+                    data={allEarningTransactions}
+                  />
+                )}
               </div>
             )}
           </div>

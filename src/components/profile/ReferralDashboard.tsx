@@ -24,7 +24,7 @@ export default function ReferralDashboard() {
   const [message, setMessage] = useState(
     typeof window === "undefined"
       ? ""
-      : localStorage.getItem("referralMessage") ?? defaultMessage,
+      : (localStorage.getItem("referralMessage") ?? defaultMessage),
   );
 
   const code =
@@ -32,8 +32,6 @@ export default function ReferralDashboard() {
   const url = `https://tramona.com/auth/signup?code=${code}`;
 
   const messageWithLink = `${message}\n\n${url}`;
-
-  const [isEditingMessage, setIsEditingMessage] = useState(false);
 
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -52,7 +50,7 @@ export default function ReferralDashboard() {
       <div className="space-y-2 border-b p-4 lg:border-0 lg:p-0">
         <h1 className="text-2xl font-bold lg:text-4xl">My Referrals</h1>
         <p className="text-sm lg:text-lg">
-          Earn 30% of what we make off everyone you refer
+          Earn $25 cash for each user&apos;s first booking!
         </p>
       </div>
       <div className="grid grid-cols-1 space-y-2 lg:grid-cols-3 lg:gap-4 lg:space-y-0">

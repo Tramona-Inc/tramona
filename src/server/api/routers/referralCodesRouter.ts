@@ -116,13 +116,42 @@ export const referralCodesRouter = createTRPCRouter({
       return !!code;
     }),
 
-  getReferralEarnings: protectedProcedure.query(async ({ ctx }) => {
+  getReferralCodeInfo: protectedProcedure.query(async ({ ctx }) => {
     const userReferralCode = await ctx.db.query.referralCodes.findFirst({
       where: eq(referralCodes.ownerId, ctx.user.id),
     });
 
     if (userReferralCode) {
-      const earnings = await ctx.db.query.referralEarnings.findMany({
+      // const earnings = await ctx.db.query.referralEarnings.findMany({
+      //   with: {
+      //     referee: {
+      //       columns: {
+      //         name: true,
+      //       },
+      //     },
+      //     offer: {
+      //       columns: {
+      //         totalPrice: true,
+      //       },
+      //     },
+      //   },
+      //   where: eq(referralEarnings.referralCode, userReferralCode.referralCode),
+      const earnings = await ctx.db.query.referralCodes.findFirst({
+        where: eq(referralCodes.referralCode, userReferralCode.referralCode),
+      });
+      return earnings;
+    }
+  }),
+
+  getAllEarningsByReferralCode: protectedProcedure.query(async ({ ctx }) => {
+    const userReferralCode = await ctx.db.query.referralCodes.findFirst({
+      where: eq(referralCodes.ownerId, ctx.user.id),
+    });
+    if (!userReferralCode?.referralCode) return [];
+
+    const allEarningTransactions = await ctx.db.query.referralEarnings.findMany(
+      {
+        where: eq(referralEarnings.referralCode, userReferralCode.referralCode),
         with: {
           referee: {
             columns: {
@@ -131,16 +160,15 @@ export const referralCodesRouter = createTRPCRouter({
           },
           offer: {
             columns: {
-              totalPrice: true,
+              travelerOfferedPrice: true,
             },
           },
         },
-        where: eq(referralEarnings.referralCode, userReferralCode.referralCode),
-      });
-
-      return earnings;
-    }
+      },
+    );
+    return allEarningTransactions;
   }),
+
   sendCashbackRequest: protectedProcedure
     .input(z.object({ transactions: referralCashbackSchema.array() }))
     .mutation(async ({ ctx, input }) => {

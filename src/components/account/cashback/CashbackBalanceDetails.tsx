@@ -9,19 +9,21 @@ import { formatCurrency } from "@/utils/utils";
 
 export default function CashbackBalanceDetails({
   balance,
+  totalBookingVolume,
 }: {
-  balance: number;
+  balance: number | undefined;
+  totalBookingVolume: number | undefined;
 }) {
   return (
     <div className="space-y-2">
       <h1 className="text-xl font-bold lg:text-2xl">Cash Back</h1>
       <div className="rounded-lg border p-4">
-        <div className="grid grid-cols-1 lg:grid-cols-2 ">
+        <div className="grid grid-cols-1 lg:grid-cols-3">
           <div className="lg:block">
             <div className="flex items-baseline justify-between lg:block">
               <h1 className="font-semibold">Current balance</h1>
-              <p className="text-2xl font-bold lg:text-3xl">
-                {formatCurrency(balance)}
+              <p className="pt-1 text-2xl font-bold lg:text-3xl">
+                {balance ? formatCurrency(balance) : "$0.00"}
               </p>
             </div>
 
@@ -45,6 +47,16 @@ export default function CashbackBalanceDetails({
                 </p>
               </DialogContent>
             </Dialog>
+          </div>
+          <div className="lg:block">
+            <div className="flex items-baseline justify-between lg:block">
+              <h1 className="font-semibold">Total Booking Volume</h1>
+              <p className="pt-1 text-2xl font-bold lg:text-3xl">
+                {totalBookingVolume
+                  ? formatCurrency(totalBookingVolume)
+                  : "$0.00"}
+              </p>
+            </div>
           </div>
           <div className="mt-4 lg:mt-0 lg:text-end">
             <Dialog>

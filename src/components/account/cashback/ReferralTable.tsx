@@ -24,7 +24,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import type { Referral } from "./referrals";
 import { toast } from "@/components/ui/use-toast";
 
 import { api } from "@/utils/api";
@@ -32,6 +31,7 @@ import { formatCurrency, formatDateMonthDayYear } from "@/utils/utils";
 import { Badge } from "@/components/ui/badge";
 import { referralStatuses } from "./data";
 import Link from "next/link";
+import type { RouterOutputs } from "@/utils/api";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -72,26 +72,22 @@ export function ReferralTable<TData, TValue>({
     getFacetedUniqueValues: getFacetedUniqueValues(),
   });
 
-  const { mutate, isLoading } =
-    api.referralCodes.sendCashbackRequest.useMutation({
-      onSuccess: () => {
-        toast({
-          title: "Cashback requested!",
-          description:
-            "We've received your request to redeem your cashback. We will get back to you in 1-2 days!",
-        });
-      },
-      onError: () => {
-        toast({
-          variant: "destructive",
-          title: "Something went wrong!",
-          description: "Oops! Something went wrong, please try again",
-        });
-      },
-    });
-
-  const { data: fetchedRefEarnings } =
-    api.referralCodes.getReferralEarnings.useQuery();
+  const { isLoading } = api.referralCodes.sendCashbackRequest.useMutation({
+    onSuccess: () => {
+      toast({
+        title: "Cashback requested!",
+        description:
+          "We've received your request to redeem your cashback. We will get back to you in 1-2 days!",
+      });
+    },
+    onError: () => {
+      toast({
+        variant: "destructive",
+        title: "Something went wrong!",
+        description: "Oops! Something went wrong, please try again",
+      });
+    },
+  });
 
   function badgeColor(status: string) {
     const referralStatus = referralStatuses.find(
@@ -105,13 +101,13 @@ export function ReferralTable<TData, TValue>({
     return <Badge variant={referralStatus.color}>{referralStatus.label}</Badge>;
   }
 
-  function handleRequestCashback() {
-    const allRows = table
-      .getRowModel()
-      .rows.map((row) => row.original) as Referral[];
+  // function handleRequestCashback() {
+  //   const allRows = table
+  //     .getRowModel()
+  //     .rows.map((row) => row.original) as ReferralTransaction[];
 
-    mutate({ transactions: allRows });
-  }
+  //   mutate({ transactions: allRows });
+  // }
 
   return (
     <>
@@ -133,7 +129,6 @@ export function ReferralTable<TData, TValue>({
             className="hidden font-bold lg:block"
             disabled={table.getRowModel().rows.length === 0}
             isLoading={isLoading}
-            onClick={handleRequestCashback}
             variant="secondary"
           >
             Request cashback
@@ -192,7 +187,7 @@ export function ReferralTable<TData, TValue>({
           </div>
         </div>
         {/* mobile version of the table */}
-        <div className="divide-y lg:hidden">
+        {/* <div className="divide-y lg:hidden">
           {fetchedRefEarnings?.length ? (
             fetchedRefEarnings.slice(0, 3).map((row) => (
               <div key={row.id} className="grid grid-cols-2 py-2">
@@ -213,14 +208,13 @@ export function ReferralTable<TData, TValue>({
               <p>No referrals yet.</p>
             </div>
           )}
-        </div>
+        </div> */}
 
         <div className="lg:hidden">
           <Button
             className="w-full font-bold"
             disabled={table.getRowModel().rows.length === 0}
             isLoading={isLoading}
-            onClick={handleRequestCashback}
             variant="secondary"
           >
             Request cashback

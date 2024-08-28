@@ -7,10 +7,12 @@ import {
   varchar,
   text,
   timestamp,
+  index,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { properties } from "./properties";
 import { users } from "./users";
+import { trips } from "./trips";
 
 export const superhogStatusEnum = pgEnum("superhog_status", [
   "Approved",
@@ -45,24 +47,61 @@ export const superhogRequests = pgTable("superhog_requests", {
     .defaultNow()
     .notNull(),
   isCancelled: boolean("is_cancelled").default(false).notNull(),
-
-  // tripId: integer("trip_id")
-  //   .notNull()
-  //   .references(() => trips.id, { onDelete: "cascade" }),
-  // nameOfVerifiedUser: varchar("name_of_verified_user", {
-  //   length: 100,
-  // }).references(() => users.name, { onDelete: "cascade" }), //we need to make non-nullable after we require it in signup
-  //propertyTown: varchar("property_town", { length: 100 }).notNull(),
-  //propertyAddress: varchar("property_address", { length: 100 }).notNull(),
-  //propertyCountryIso: varchar("property_country_iso", { length: 4 }).notNull(),
 });
+
+//superhog Error schema
+
+export const ALL_ACTIONS = ["create", "update", "delete"] as const;
+export const superhogErrorAction = pgEnum("superhog_error_action", ALL_ACTIONS);
+
+export const superhogErrors = pgTable("superhog_errors", {
+  id: serial("id").primaryKey(),
+  echoToken: text("echo_token"),
+  error: text("error"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  userId: text("user_id").references(() => users.id, { onDelete: "cascade" }),
+  tripId: integer("trip_id").references(() => trips.id, {
+    onDelete: "cascade",
+  }),
+  propertiesId: integer("properties_id").references(() => properties.id),
+  action: superhogErrorAction("action").default("create").notNull(),
+});
+
 //didnt set up relations up yet because we do not have the shema flow yet
 
+//superhog action on trips schema
+export const superhogActionOnTrips = pgTable(
+  "superhog_action_on_trips",
+  {
+    id: serial("id").primaryKey(),
+    tripId: integer("trip_id").references(() => trips.id, {
+      onDelete: "cascade",
+    }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    action: superhogErrorAction("action").default("create").notNull(),
+    superhogRequestId: integer("superhog_request_id").references(
+      () => superhogRequests.id,
+    ),
+  },
+  (t) => ({
+    tripIdIdx: index().on(t.tripId),
+    superhogRequestIdIdx: index().on(t.superhogRequestId),
+  }),
+);
+
 export type SuperhogRequests = typeof superhogRequests.$inferSelect;
+
 export const superhogRequestsSelectSchema =
   createSelectSchema(superhogRequests);
+
 export const superhogRequestsInsertSchema =
   createInsertSchema(superhogRequests);
 
 export const superhogRequestsFormSchema =
   superhogRequestsInsertSchema.partial();
+
+export type SuperhogErrors = typeof superhogErrors.$inferSelect;

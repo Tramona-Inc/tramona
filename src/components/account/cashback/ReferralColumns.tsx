@@ -5,13 +5,16 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 
 import { referralStatuses } from "./data";
-import type { Referral } from "./referrals";
 import { DataTableColumnHeader } from "./ReferralColumnHeaders";
 import { formatCurrency } from "@/utils/utils";
 import { formatDate } from "date-fns";
 import { Checkbox } from "@/components/ui/checkbox";
+import type { RouterOutputs } from "@/utils/api";
 
-export const referralColumns: ColumnDef<Referral>[] = [
+type ReferralTransaction =
+  RouterOutputs["referralCodes"]["getAllEarningsByReferralCode"][number];
+
+export const referralColumns: ColumnDef<ReferralTransaction>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -93,8 +96,8 @@ export const referralColumns: ColumnDef<Referral>[] = [
       <DataTableColumnHeader column={column} title="Amount" />
     ),
     cell: ({ row }) => {
-      const offer: { totalPrice: number } = row.getValue("offer");
-      return <div>{formatCurrency(offer.totalPrice)}</div>;
+      const offer: { travelerOfferedPrice: number } = row.getValue("offer");
+      return <div>{formatCurrency(offer.travelerOfferedPrice)}</div>;
     },
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id));

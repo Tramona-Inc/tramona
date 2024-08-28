@@ -21,13 +21,15 @@ import { bookedDates, properties } from "./tables/properties";
 import { requests } from "./tables/requests";
 import { requestsToProperties } from "./tables/requestsToProperties";
 import { reservedDateRanges } from "./tables/reservedDateRanges";
-import { superhogActionOnTrips } from "./tables/superhogActionsOnTrips";
-import { superhogRequests } from "./tables/superhogRequests";
+import {
+  superhogRequests,
+  superhogActionOnTrips,
+  superhogErrors,
+} from "./tables/superhogRequests";
 import { referralCodes, referralEarnings, users } from "./tables/users";
 import { trips, tripCancellations } from "./tables/trips";
 import { reviews } from "./tables/reviews";
 import { fillerBookings, fillerOffers } from "./tables/feedFiller";
-import { superhogErrors } from "./tables/superhogErrors";
 import { linkInputProperties } from "./tables/linkInputProperties";
 import { externalListings } from "./tables/externalListings";
 
