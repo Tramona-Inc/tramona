@@ -1,6 +1,6 @@
-import { NewOffer, NewProperty, offers, Review, reviews } from "../db/schema";
+import { NewOffer, NewProperty, Offer, offers, Review, reviews } from "../db/schema";
 import { cleanbnbScraper } from "./cleanbnb-scrape";
-import { arizonaScraper } from "./integrity-arizona";
+import { arizonaScraper, arizonaSubScraper } from "./integrity-arizona";
 import { db } from "../db";
 import { properties } from "../db/schema";
 import { eq, and } from 'drizzle-orm';
@@ -22,6 +22,21 @@ export type ScrapedListing =
     reviews: Review[];
     scrapeUrl: string;
   });
+
+export type SubsequentScraper = (options: {
+    originalListingId: string;
+    scrapeUrl: string;
+    checkIn: Date;
+    checkOut: Date;
+  }) => Promise<
+    SubScrapedResult
+  >;
+
+export type SubScrapedResult = ({
+    originalNightlyPrice?: number, // when the offer is avaible on the original site, also refresh the price
+    isAvailableOnOriginalSite: boolean, 
+    availabilityCheckedAt: Date,
+});
 
 export const directSiteScrapers: DirectSiteScraper[] = [
   // add more scrapers here
@@ -94,9 +109,9 @@ export const scrapeDirectListings = async (options: {
                 totalPrice: originalTotalPrice,
                 hostPayout: originalTotalPrice,
                 travelerOfferedPrice: originalTotalPrice,
-                scrapeUrl: listing.originalListingUrl,
+                scrapeUrl: listing.scrapeUrl,
                 isAvailableOnOriginalSite: true,
-                availabilityChedkedAt: new Date(),
+                availabilityCheckedAt: new Date(),
               };
               const newOfferId = await trx.insert(offers).values(newOffer).returning({id: offers.id}) 
               console.log("newOfferIdReturned: ", newOfferId);
@@ -133,9 +148,9 @@ export const scrapeDirectListings = async (options: {
                 totalPrice: originalTotalPrice,
                 hostPayout: originalTotalPrice,
                 travelerOfferedPrice: originalTotalPrice,
-                scrapeUrl: listing.originalListingUrl,
+                scrapeUrl: listing.scrapeUrl,
                 isAvailableOnOriginalSite: true,
-                availabilityChedkedAt: new Date(),
+                availabilityCheckedAt: new Date(),
               };
               const newOfferId = await trx.insert(offers).values(newOffer).returning({id: offers.id}) 
               console.log("newOfferIdReturned: ", newOfferId);
@@ -149,16 +164,49 @@ export const scrapeDirectListings = async (options: {
   return listings;
 };
 
-// TODO update availability of properties, and original total price
+// update availability of properties, and original nightly price
 export const subsequentScrape = async (options: {
-  offerId: number;
+  offerIds: number[];
 }) => {
+  const savedResult: SubScrapedResult[] = [];
   await db.transaction(async (trx) => {
-    // TODO
-      const offerList = await trx.select({id: offers.id, })
-        .from(offers)
-        .where(eq(offers.id, options.offerId));
-  });
+    for (const offerId of options.offerIds) {
+      const offer = await trx.query.offers.findFirst({
+        where: eq(offers.id, offerId),
+        with: {
+          property: true,
+        },
+      });
       
-  return null
+      if(!offer?.property.originalListingId || !offer.scrapeUrl) {continue;} // skip the non-scraped offers
+
+      switch(offer.property.originalListingPlatform){
+        case "IntegrityArizona":
+          const subScrapedResult = await arizonaSubScraper({
+            originalListingId: offer.property.originalListingId,
+            scrapeUrl: offer.scrapeUrl,
+            checkIn: offer.checkIn,
+            checkOut: offer.checkOut
+          });
+          if (subScrapedResult) {
+          const updateData: Partial<Offer> = {
+            isAvailableOnOriginalSite: subScrapedResult.isAvailableOnOriginalSite,
+            availabilityCheckedAt: subScrapedResult.availabilityCheckedAt,
+          };
+      
+          if (subScrapedResult.originalNightlyPrice) {
+            updateData.totalPrice = subScrapedResult.originalNightlyPrice * getNumNights(offer.checkIn, offer.checkOut);
+          }
+      
+          await trx.update(offers)
+            .set(updateData)
+            .where(eq(offers.id, offerId));
+          savedResult.push(subScrapedResult);
+        }
+        break;
+        // TODO add other scraping sites here
+      }
+    };
+  });
+  return savedResult;
 };

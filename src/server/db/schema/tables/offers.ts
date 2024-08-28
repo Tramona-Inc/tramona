@@ -37,7 +37,7 @@ export const offers = pgTable(
     travelerOfferedPrice: integer("traveler_offered_price").notNull(), // in cents
     scrapeUrl: varchar("scrape_url"),
     isAvailableOnOriginalSite: boolean("is_available_on_original_site"),
-    availabilityChedkedAt: timestamp("availability_checked_at"),
+    availabilityCheckedAt: timestamp("availability_checked_at"),
   },
   (t) => ({
     requestIdIdx: index().on(t.requestId),

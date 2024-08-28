@@ -1,6 +1,6 @@
 
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { subsequentScrape } from '../../server/direct-sites-scraping';
+import { SubScrapedResult, subsequentScrape } from '../../server/direct-sites-scraping';
 import { arizonaScraper } from "@/server/direct-sites-scraping/integrity-arizona";
 import axios from 'axios';
 import { proxyAgent } from "@/server/server-utils";
@@ -9,14 +9,24 @@ import { proxyAgent } from "@/server/server-utils";
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'GET') {
     try {
-      console.log('API route: Starting scraping process');
-      const today = new Date();
-      const twoDaysLater = new Date(today.getTime() + 2 * 24 * 60 * 60 * 1000);
-      const listings = await subsequentScrape({
-        offerId: 321
+      console.log('API route: Starting subsequent scraping process');
+      const subsequentScrapeResult = await subsequentScrape({
+        offerIds: [323, 324]
       });
-      console.log('API route: Scraping process completed');
-      res.status(200).json({ message: `Successfully updated ${listings} listings.` });
+      console.log("subsequentScrapeResult: ", subsequentScrapeResult);
+      if (subsequentScrapeResult.length > 0) {
+        res.status(200).json({ 
+          message: `Successfully updated ${subsequentScrapeResult.length} offers.`,
+          updatedrResult: subsequentScrapeResult.map(result => ({
+            availability: result.isAvailableOnOriginalSite,
+            updatedAt: result.availabilityCheckedAt.toISOString(),
+            originalNightlyPrice: result.originalNightlyPrice
+          }))
+        });
+      } else {
+        console.log('API route: No offers were processed');
+        res.status(200).json({ message: 'No offers were processed.' });
+      }
     } catch (error) {
       console.error('API route: Error during scraping process:', error);
       res.status(500).json({ error: 'An error occurred while scraping.' });

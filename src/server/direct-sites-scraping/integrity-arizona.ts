@@ -1,4 +1,4 @@
-import { DirectSiteScraper } from ".";
+import { DirectSiteScraper, SubsequentScraper } from ".";
 import {z} from "zod";
 import { PropertyType, ALL_PROPERTY_TYPES, ListingSiteName } from "@/server/db/schema/common";
 import { proxyAgent } from "../server-utils";
@@ -110,7 +110,7 @@ const mapToReview = (validatedData: IntegrityArizonaReviewInput): Review[] => {
   }));
 }
 // Function to map validated data to NewProperty
-const mapToNewProperty = (validatedData: IntegrityArizonaPropertyInput, checkIn: Date, checkOut: Date, url: string): ScrapedListing[]  => {
+const mapToScrapedListing = (validatedData: IntegrityArizonaPropertyInput, checkIn: Date, checkOut: Date, scrapeUrl: string): ScrapedListing[]  => {
     return validatedData.data.available_properties.property.map((prop) => ({
       originalListingId: prop.id.toString(),
       name: prop.name,
@@ -137,7 +137,7 @@ const mapToNewProperty = (validatedData: IntegrityArizonaPropertyInput, checkIn:
       }],
       originalNightlyPrice: (Math.round(prop.total/ getNumNights(checkIn, checkOut)) * 100), // convert to cents
       reviews: [],
-      scrapeUrl: url,
+      scrapeUrl: scrapeUrl,
     }));
   };
 
@@ -160,7 +160,7 @@ export const arizonaScraper: DirectSiteScraper = async ({
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     .then((response) => response.data)
     .then((data) => propertySchema.parse(data)) 
-    .then((validatedData) => mapToNewProperty(validatedData, checkIn, checkOut, url))
+    .then((validatedData) => mapToScrapedListing(validatedData, checkIn, checkOut, url))
   
   if (numOfOffersInEachScraper > 0){
     properties = properties.slice(0, numOfOffersInEachScraper);
@@ -184,3 +184,36 @@ export const arizonaScraper: DirectSiteScraper = async ({
   // console.log(propertiesWithReviews[0])
   return propertiesWithReviews;
 };
+
+export const arizonaSubScraper: SubsequentScraper = async ({
+  originalListingId,
+  scrapeUrl,
+  checkIn,
+  checkOut,
+}) => {
+  const matchingProperty = await axiosInstance.get(scrapeUrl)
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  .then((response) => response.data)
+  .then((data) => propertySchema.parse(data)) 
+  .then((validatedData) => {
+    const matchingProperty = validatedData.data.available_properties.property.find(
+      (prop) => prop.id === parseInt(originalListingId)
+    );
+    return matchingProperty;
+  })
+  
+  if (!matchingProperty) {
+    return {
+      isAvailableOnOriginalSite: false, 
+      availabilityCheckedAt: new Date(),
+    }
+  }
+  const originalNightlyPrice = (Math.round(matchingProperty.total/ getNumNights(checkIn, checkOut)) * 100); // convert to cents
+  
+  return {
+    originalNightlyPrice: originalNightlyPrice,
+    isAvailableOnOriginalSite: true, 
+    availabilityCheckedAt: new Date(),
+  }
+}
+
