@@ -140,22 +140,23 @@ export default async function webhook(
 
               //<<-------------uncomment once we get test keys----------------->>
 
-              // const currentSuperhogReservation =
-              //   await db.query.trips.findFirst({
-              //     where: eq(trips.superhogRequestId, superhogRequests.id),
-              //   });
+              const currentSuperhogReservation = await db.query.trips.findFirst(
+                {
+                  where: eq(trips.superhogRequestId, superhogRequests.id),
+                },
+              );
 
-              // if (!currentSuperhogReservation) {
-              //   await createSuperhogReservation({
-              //     paymentIntentId:
-              //       paymentIntentSucceeded.payment_intent?.toString() ?? "",
-              //     propertyId: offer.propertyId,
-              //     userId: user!.id,
-              //     trip: currentTrip[0]!,
-              //   }); //creating a superhog reservation
-              // } else {
-              //   console.log("Superhog reservation already exists");
-              // }
+              if (!currentSuperhogReservation) {
+                await createSuperhogReservation({
+                  paymentIntentId:
+                    paymentIntentSucceeded.payment_intent?.toString() ?? "",
+                  propertyId: offer.propertyId,
+                  userId: user!.id,
+                  trip: currentTrip[0]!,
+                }); //creating a superhog reservation
+              } else {
+                console.log("Superhog reservation already exists");
+              }
 
               //<<--------------------->>
 

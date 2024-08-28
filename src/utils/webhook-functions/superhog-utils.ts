@@ -90,6 +90,10 @@ export async function createSuperhogReservation({
   userId: string;
   trip: Trip;
 }) {
+  const superhogEndpoint =
+    env.NODE_ENV === "production"
+      ? "https://superhog-apim.azure-api.net/e-deposit/verifications"
+      : "https://superhog-apim.azure-api.net/e-deposit-sandbox/verifications";
   //find the property using its id
   const property = await db.query.properties.findFirst({
     where: eq(properties.id, propertyId),
@@ -147,13 +151,11 @@ export async function createSuperhogReservation({
     };
 
     const response = await axios
-      .post<unknown, ResponseType>(
-        "https://superhog-apim.azure-api.net/e-deposit/verifications",
-        reservationObject,
-        config,
-      )
+      .post<unknown, ResponseType>(superhogEndpoint, reservationObject, config)
       .then((res) => res.data)
       .catch(async (error: AxiosError) => {
+        console.log(error.response.data);
+        console.log(env.OCP_APIM_SUBSCRIPTION_KEY);
         await sendSlackMessage({
           isProductionOnly: true,
           channel: "superhog-bot",
