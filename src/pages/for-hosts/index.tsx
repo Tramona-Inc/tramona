@@ -2,7 +2,6 @@ import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import MainLayout from "@/components/_common/Layout/MainLayout";
 import {
   Accordion,
   AccordionContent,
@@ -14,6 +13,7 @@ import { type FeedRequestItem } from "@/components/activity-feed/ActivityFeed";
 import { getFeed } from "@/server/api/routers/feedRouter";
 import { type InferGetStaticPropsType } from "next";
 import HowItWorksHost from "@/components/landing-page/how-it-works-host";
+import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 
 const DamageProtection = () => {
   const protectionMethods = [
@@ -248,7 +248,7 @@ export default function HostWelcome({
   requestFeed,
 }: InferGetStaticPropsType<typeof getStaticProps>) {
   return (
-    <MainLayout className="mx-auto max-w-full">
+    <DashboardLayout>
       <div className="relative space-y-32 overflow-x-hidden pb-32">
         <Head>
           <title>Hosts | Tramona</title>
@@ -261,6 +261,6 @@ export default function HostWelcome({
         <FAQ />
         <WhatAreYouWaitingFor />
       </div>
-    </MainLayout>
+    </DashboardLayout>
   );
 }
