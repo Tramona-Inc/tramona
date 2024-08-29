@@ -23,22 +23,26 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { toast } from "@/components/ui/use-toast";
-
-import { api } from "@/utils/api";
 import { formatCurrency, formatDateMonthDayYear } from "@/utils/utils";
 import { Badge } from "@/components/ui/badge";
 import { referralStatuses } from "./data";
 import Link from "next/link";
-import type { RouterOutputs } from "@/utils/api";
+interface ReferralRowData {
+  id: string;
+  earningStatus: string;
+  createdAt: string; // Assuming this is an ISO date string
+  referee: {
+    name: string;
+  };
+  cashbackEarned: number;
+}
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
 }
 
-export function ReferralTable<TData, TValue>({
+export function ReferralTable<TData extends ReferralRowData, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
@@ -70,23 +74,6 @@ export function ReferralTable<TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
-  });
-
-  const { isLoading } = api.referralCodes.sendCashbackRequest.useMutation({
-    onSuccess: () => {
-      toast({
-        title: "Cashback requested!",
-        description:
-          "We've received your request to redeem your cashback. We will get back to you in 1-2 days!",
-      });
-    },
-    onError: () => {
-      toast({
-        variant: "destructive",
-        title: "Something went wrong!",
-        description: "Oops! Something went wrong, please try again",
-      });
-    },
   });
 
   function badgeColor(status: string) {
@@ -124,15 +111,6 @@ export function ReferralTable<TData, TValue>({
               See all
             </Link>
           </div>
-
-          <Button
-            className="hidden font-bold lg:block"
-            disabled={table.getRowModel().rows.length === 0}
-            isLoading={isLoading}
-            variant="secondary"
-          >
-            Request cashback
-          </Button>
         </div>
         <div className="hidden space-y-4 lg:col-span-full lg:block">
           <div className="border">
@@ -187,9 +165,9 @@ export function ReferralTable<TData, TValue>({
           </div>
         </div>
         {/* mobile version of the table */}
-        {/* <div className="divide-y lg:hidden">
-          {fetchedRefEarnings?.length ? (
-            fetchedRefEarnings.slice(0, 3).map((row) => (
+        <div className="mx-4 divide-y lg:hidden">
+          {data.length ? (
+            data.slice(0, 3).map((row: TData) => (
               <div key={row.id} className="grid grid-cols-2 py-2">
                 <div>
                   <div>{badgeColor(row.earningStatus)}</div>
@@ -208,17 +186,6 @@ export function ReferralTable<TData, TValue>({
               <p>No referrals yet.</p>
             </div>
           )}
-        </div> */}
-
-        <div className="lg:hidden">
-          <Button
-            className="w-full font-bold"
-            disabled={table.getRowModel().rows.length === 0}
-            isLoading={isLoading}
-            variant="secondary"
-          >
-            Request cashback
-          </Button>
         </div>
       </div>
     </>

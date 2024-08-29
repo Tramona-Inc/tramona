@@ -15,7 +15,7 @@ import {
   trips,
   users,
 } from "@/server/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { buffer } from "micro";
 import { type NextApiRequest, type NextApiResponse } from "next";
 import { superhogRequests } from "../../server/db/schema/tables/superhogRequests";
@@ -24,8 +24,10 @@ import {
   sendEmailAndWhatsupConfirmation,
 } from "@/utils/webhook-functions/trips-utils";
 import { createSuperhogReservation } from "@/utils/webhook-functions/superhog-utils";
-import { request } from "http";
-import { completeReferral } from "@/utils/webhook-functions/referral-utils";
+import {
+  completeReferral,
+  validateHostDiscountReferral,
+} from "@/utils/webhook-functions/referral-utils";
 
 // ! Necessary for stripe
 export const config = {
@@ -168,9 +170,15 @@ export default async function webhook(
                 offer: offer,
                 property: currentProperty!,
               });
-              //redeem the refferal code
+              //redeem the traveler and host refferal code
               if (user?.referralCodeUsed) {
                 await completeReferral({ user: user, offerId: offer.id });
+              }
+              //validate the host discount referral
+              if (currentProperty?.hostId) {
+                await validateHostDiscountReferral({
+                  hostUserId: currentProperty.hostId,
+                });
               }
             }
           }

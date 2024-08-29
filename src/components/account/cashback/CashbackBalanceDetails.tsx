@@ -1,3 +1,4 @@
+import NoStripeAccount from "@/components/host/finances/NoStripeAccount";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -40,11 +41,7 @@ export default function CashbackBalanceDetails({
                 <DialogHeader className="border-b pb-2 text-center font-bold">
                   Coming Soon!
                 </DialogHeader>
-                <p>
-                  If you need cash now, send a message through the help center
-                  and we can manually pay you. If not, we will have this feature
-                  up soon!
-                </p>
+                <NoStripeAccount />
               </DialogContent>
             </Dialog>
           </div>
@@ -69,14 +66,7 @@ export default function CashbackBalanceDetails({
                 </Button>
               </DialogTrigger>
               <DialogContent>
-                <DialogHeader className="border-b pb-2 text-center font-bold">
-                  Coming Soon!
-                </DialogHeader>
-                <p>
-                  If you need cash now, send a message through the help center
-                  and we can manually pay you. If not, we will have this feature
-                  up soon!
-                </p>
+                <NoStripeAccount />
               </DialogContent>
             </Dialog>
           </div>

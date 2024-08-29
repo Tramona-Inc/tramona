@@ -154,8 +154,6 @@ export async function createSuperhogReservation({
       .post<unknown, ResponseType>(superhogEndpoint, reservationObject, config)
       .then((res) => res.data)
       .catch(async (error: AxiosError) => {
-        console.log(error.response.data);
-        console.log(env.OCP_APIM_SUBSCRIPTION_KEY);
         await sendSlackMessage({
           isProductionOnly: true,
           channel: "superhog-bot",

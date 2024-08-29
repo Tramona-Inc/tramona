@@ -10,6 +10,7 @@ import {
   SocialLinks,
 } from "./EmailComponents";
 
+import { formatCurrency } from "@/utils/utils";
 interface ReservationConfirmedEmailProps {
   userName: string;
   address: string;
@@ -49,8 +50,8 @@ export default function ReservationConfirmedEmail({
 }: ReservationConfirmedEmailProps) {
   return (
     <Layout title_preview="Reservation Confirmed">
-      <div className="border-b border-gray-300 bg-white p-6">
-        <Text className="mb-4 text-3xl font-bold">
+      <div className="border-b border-gray-300 bg-white p-6 text-black">
+        <Text className="mb-4 text-3xl font-bold text-black">
           Your Booking is Confirmed
         </Text>
         <Text className="mb-4 text-left">
@@ -196,7 +197,7 @@ export default function ReservationConfirmedEmail({
             </Text>
           </div>
           <div style={{ textAlign: "right", float: "right" }}>
-            <Text className="text-sm">${tramonaPrice.toFixed(2)}</Text>
+            <Text className="text-sm">{formatCurrency(tramonaPrice)}</Text>
           </div>
           <div style={{ clear: "both" }}></div>
         </div>
@@ -207,7 +208,7 @@ export default function ReservationConfirmedEmail({
             </Text>
           </div>
           <div style={{ textAlign: "right", float: "right" }}>
-            <Text className="text-sm">${serviceFee.toFixed(2)}</Text>
+            <Text className="text-sm">{formatCurrency(serviceFee)}</Text>
           </div>
           <div style={{ clear: "both" }}></div>
         </div>
@@ -220,7 +221,9 @@ export default function ReservationConfirmedEmail({
             <Text className="text-lg font-bold">Total (USD)</Text>
           </div>
           <div style={{ textAlign: "right", float: "right" }}>
-            <Text className="text-lg font-bold">${totalPrice.toFixed(2)}</Text>
+            <Text className="text-lg font-bold">
+              {formatCurrency(totalPrice)}
+            </Text>
           </div>
           <div style={{ clear: "both" }}></div>
         </div>

@@ -31,7 +31,7 @@ import { z } from "zod";
 import axios from "axios";
 import { getCity } from "@/server/google-maps";
 import { sendSlackMessage } from "@/server/slack";
-import { sendEmail } from "@/server/server-utils";
+import { rewardHostReferral, sendEmail } from "@/server/server-utils";
 import WelcomeEmail from "packages/transactional/emails/WelcomeEmail";
 
 export const usersRouter = createTRPCRouter({
@@ -237,6 +237,21 @@ export const usersRouter = createTRPCRouter({
         ].join("\n"),
         channel: "host-bot",
       });
+
+      const curUser = await db.query.users.findFirst({
+        where: eq(users.id, ctx.user.id),
+      });
+      //referrals for host
+      console.log(
+        "calleing referral function here is the referral code used",
+        curUser,
+      );
+      if (curUser) {
+        await rewardHostReferral({
+          userId: curUser.id,
+          referralCodeUsed: curUser.referralCodeUsed,
+        });
+      }
 
       interface PropertyType {
         id: number;

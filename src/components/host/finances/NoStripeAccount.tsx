@@ -15,7 +15,9 @@ export default function NoStripeAccount() {
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col items-center rounded-lg bg-white p-8 text-center shadow-md">
-      <h2 className="mb-4 text-2xl font-bold">Connect Your Stripe Account</h2>
+      <h2 className="mb-4 text-2xl font-bold">
+        Connect Your Account to Stripe
+      </h2>
       <p className="mb-6 text-gray-600">
         To more seamlessly manage your finances, please connect your Stripe
         account.

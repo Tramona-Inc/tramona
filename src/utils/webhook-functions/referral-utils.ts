@@ -1,5 +1,9 @@
 import { db } from "@/server/db";
-import { referralEarnings, referralCodes } from "@/server/db/schema";
+import {
+  referralEarnings,
+  referralCodes,
+  hostReferralDiscounts,
+} from "@/server/db/schema";
 import { eq, and, isNull, sql } from "drizzle-orm";
 import type { User } from "@/server/db/schema/tables/users";
 import { REFERRAL_CASHBACK } from "../constants";
@@ -48,4 +52,27 @@ export async function completeReferral({
       curBalance: sql`${referralCodes.curBalance} + ${REFERRAL_CASHBACK}`,
     })
     .where(eq(referralCodes.referralCode, user.referralCodeUsed));
+}
+
+//complete host discount referral
+export async function validateHostDiscountReferral({
+  hostUserId,
+}: {
+  hostUserId: string;
+}) {
+  //we need to validate the the discount referral so the host that referrred the current hos tcan get the discount
+  const curHostReferralDiscount =
+    await db.query.hostReferralDiscounts.findFirst({
+      where: eq(hostReferralDiscounts.refereeUserId, hostUserId),
+    });
+  if (!curHostReferralDiscount) return;
+  //validate
+  await db
+    .update(hostReferralDiscounts)
+    .set({
+      validatedAt: new Date(),
+    })
+    .where(eq(hostReferralDiscounts.refereeUserId, hostUserId));
+
+  return;
 }

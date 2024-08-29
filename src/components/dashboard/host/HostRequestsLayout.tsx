@@ -17,6 +17,7 @@ import { type SeparatedData } from "@/server/server-utils";
 import { separateByPriceRestriction, plural } from "@/utils/utils";
 import { useRouter } from "next/router";
 import { HostRequestsPageData } from "@/server/api/routers/propertiesRouter";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function HostRequestsLayout({
   children,
@@ -29,6 +30,8 @@ export default function HostRequestsLayout({
   >("normal");
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
   const router = useRouter();
+
+  const { toast } = useToast();
 
   api.properties.getHostPropertiesWithRequests.useQuery(undefined, {
     onSuccess: (fetchedProperties) => {
