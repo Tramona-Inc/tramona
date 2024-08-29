@@ -332,13 +332,6 @@ async function processRequests(
 
     console.log('properties:', matchingProperties);
     const propertyIds = matchingProperties.map((property) => property.id);
-    await sendTextToHost(
-      matchingProperties,
-      request.checkIn,
-      request.checkOut,
-      request.maxTotalPrice,
-      request.location,
-    );
 
     if (propertyIds.includes(insertedProperty.id)) {
       await db.insert(requestsToProperties).values({
@@ -382,7 +375,7 @@ export async function sendTextToHost(
         // Send a text message to the host
         await sendText({
           to: hostPhoneNumber,
-          content: `Tramona: There is a request for ${formatCurrency(maxTotalPrice / numberOfNights)} per night for ${plural(numberOfNights, "night")} in ${location}. You have ${numHostPropertiesPerRequest[hostId]} eligible properties. Please click here to make a match. ${env.NEXTAUTH_URL}/host/requests`,
+          content: `Tramona: There is a request for ${formatCurrency(maxTotalPrice / numberOfNights)} per night for ${plural(numberOfNights, "night")} in ${location}. You have ${plural(numHostPropertiesPerRequest[hostId] ?? 0, "eligible property", "eligible properties")}. Please click here to make a match: ${env.NEXTAUTH_URL}/host/requests`,
         });
         //TO DO SEND WHATSAPP MESSAGE
       }
