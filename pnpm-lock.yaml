@@ -190,7 +190,7 @@ importers:
         version: 2.4.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@vercel/functions':
         specifier: ^1.0.2
-        version: 1.4.0(@aws-sdk/credential-provider-web-identity@3.621.0(@aws-sdk/client-sts@3.624.0))
+        version: 1.4.1(@aws-sdk/credential-provider-web-identity@3.621.0(@aws-sdk/client-sts@3.624.0))
       '@vercel/og':
         specifier: ^0.6.2
         version: 0.6.2
@@ -3193,8 +3193,8 @@ packages:
   '@ungap/structured-clone@1.2.0':
     resolution: {integrity: sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==}
 
-  '@vercel/functions@1.4.0':
-    resolution: {integrity: sha512-Ln6SpIkms1UJg306X2kbEMyG9ol+mjDr2xx389cvsBxgFyFMI9Bm+LYOG4N3TSik4FI59MECyyc4oz7AIAYmqQ==}
+  '@vercel/functions@1.4.1':
+    resolution: {integrity: sha512-987mKpoDCI18x2rDjrDbiuGOtxDMK/UhfhDZoN3A2SAt40BMaj8HEKwVqL6fOian5j/3RZcOuJnMOpatQGgpjw==}
     engines: {node: '>= 16'}
     peerDependencies:
       '@aws-sdk/credential-provider-web-identity': '*'
@@ -10483,7 +10483,7 @@ snapshots:
 
   '@ungap/structured-clone@1.2.0': {}
 
-  '@vercel/functions@1.4.0(@aws-sdk/credential-provider-web-identity@3.621.0(@aws-sdk/client-sts@3.624.0))':
+  '@vercel/functions@1.4.1(@aws-sdk/credential-provider-web-identity@3.621.0(@aws-sdk/client-sts@3.624.0))':
     optionalDependencies:
       '@aws-sdk/credential-provider-web-identity': 3.621.0(@aws-sdk/client-sts@3.624.0)
 
