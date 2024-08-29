@@ -29,8 +29,6 @@ export const hostProfiles = pgTable(
     becameHostAt: timestamp("became_host_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
-    stripeAccountId: varchar("stripeAccountId"),
-    chargesEnabled: boolean("charges_enabled").default(false),
     hostawayApiKey: varchar("hostaway_api_key"),
     hostawayAccountId: varchar("hostaway_account_id"),
     hostawayBearerToken: varchar("hostaway_bearer_token"),

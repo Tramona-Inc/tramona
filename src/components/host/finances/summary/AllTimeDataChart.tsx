@@ -19,10 +19,10 @@ const generateInitialYearlyData = (startYear: number, endYear: number) => {
 };
 
 const AllTimeDataChart = ({
-  hostStripeAccountId,
+  hostStripeConnectId,
   becameHostYear,
 }: {
-  hostStripeAccountId: string | null;
+  hostStripeConnectId: string | null;
   becameHostYear: number;
 }) => {
   const currentYear = new Date().getFullYear();
@@ -31,9 +31,9 @@ const AllTimeDataChart = ({
   >(generateInitialYearlyData(becameHostYear, currentYear));
 
   const { data: allPayments } = api.stripe.getAllTransactionPayments.useQuery(
-    hostStripeAccountId!,
+    hostStripeConnectId!,
     {
-      enabled: !!hostStripeAccountId,
+      enabled: !!hostStripeConnectId,
     },
   );
 

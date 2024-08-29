@@ -9,18 +9,18 @@ import BalanceSummary from "@/components/host/finances/BalanceSummary";
 
 export default function HostFinancesOverview({
   className,
-  stripeAccountIdNumber,
+  stripeConnectIdNumber,
   isStripeConnectInstanceReady,
 }: {
   className?: string;
-  stripeAccountIdNumber?: string | null | undefined;
+  stripeConnectIdNumber?: string | null | undefined;
   isStripeConnectInstanceReady: boolean;
 }) {
   const { data: accountBalance } =
     api.stripe.checkStripeConnectAccountBalance.useQuery(
-      stripeAccountIdNumber!,
+      stripeConnectIdNumber!,
       {
-        enabled: !!stripeAccountIdNumber,
+        enabled: !!stripeConnectIdNumber,
       },
     );
 
@@ -70,7 +70,7 @@ export default function HostFinancesOverview({
         <BalanceSummary
           balance={totalCurrentBalance}
           isStripeConnectInstanceReady={isStripeConnectInstanceReady}
-          stripeAccountIdNumber={stripeAccountIdNumber}
+          stripeConnectIdNumber={stripeConnectIdNumber}
         />
       </CardContent>
     </Card>

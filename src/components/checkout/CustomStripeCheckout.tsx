@@ -17,6 +17,7 @@ import { type StripeElementsOptions } from "@stripe/stripe-js";
 import Spinner from "../_common/Spinner";
 
 import { useToast } from "../ui/use-toast";
+import { Property } from "../../server/db/schema/tables/properties";
 
 const CustomStripeCheckout = ({
   offer: { property, ...offer },
@@ -54,6 +55,11 @@ const CustomStripeCheckout = ({
   const [paymentIntentResponse, setPaymentIntentResponse] =
     useState<Stripe.Response<Stripe.PaymentIntent> | null>(null);
   const [checkoutReady, setCheckoutReady] = useState(false);
+
+  const { data: propertyHostUserAccount } =
+    api.host.getHostUserAccount.useQuery(property.hostId!, {
+      enabled: !!property.hostId,
+    });
   const authorizePayment = api.stripe.authorizePayment.useMutation();
 
   const fetchClientSecret = useCallback(async () => {
@@ -73,7 +79,7 @@ const CustomStripeCheckout = ({
         totalSavings: originalTotal - finalTotal,
         phoneNumber: session.data.user.phoneNumber ?? "",
         userId: session.data.user.id,
-        hostStripeId: property.host?.hostProfile?.stripeAccountId ?? "",
+        hostStripeId: propertyHostUserAccount?.stripeConnectId ?? "",
       });
       return response;
     } catch (error) {
