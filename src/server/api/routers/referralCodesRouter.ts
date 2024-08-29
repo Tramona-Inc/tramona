@@ -160,6 +160,7 @@ export const referralCodesRouter = createTRPCRouter({
           referee: {
             columns: {
               name: true,
+              firstName: true,
             },
           },
           offer: {

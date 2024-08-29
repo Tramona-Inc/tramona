@@ -35,6 +35,12 @@ import { rewardHostReferral, sendEmail } from "@/server/server-utils";
 import WelcomeEmail from "packages/transactional/emails/WelcomeEmail";
 
 export const usersRouter = createTRPCRouter({
+  getUser: protectedProcedure.query(async ({ ctx }) => {
+    return await db.query.users.findFirst({
+      where: eq(users.id, ctx.user.id),
+    });
+  }),
+
   getOnboardingStep: optionallyAuthedProcedure.query(async ({ ctx }) => {
     if (!ctx.user) return null;
     const res = await ctx.db.query.users.findFirst({

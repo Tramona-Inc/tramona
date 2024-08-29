@@ -28,6 +28,7 @@ import {
   completeReferral,
   validateHostDiscountReferral,
 } from "@/utils/webhook-functions/referral-utils";
+import { Users } from "lucide-react";
 
 // ! Necessary for stripe
 export const config = {
@@ -441,11 +442,11 @@ export default async function webhook(
           const stripeAccount = await stripe.accounts.retrieve(account.id);
           console.log("Stripe account updated", stripeAccount);
           await db
-            .update(hostProfiles)
+            .update(users)
             .set({
               chargesEnabled: stripeAccount.payouts_enabled, // fix later or true
             })
-            .where(eq(hostProfiles.stripeAccountId, account.id));
+            .where(eq(users.stripeConnectId, account.id));
         }
         break;
 

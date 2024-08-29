@@ -3,7 +3,7 @@ import { TagIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowRightIcon } from "@radix-ui/react-icons";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { api } from "@/utils/api";
 import BalanceSummary from "@/components/host/finances/BalanceSummary";
 

@@ -17,8 +17,7 @@ import useIsStripeConnectInstanceReady from "@/utils/store/stripe-connect";
 export default function Page() {
   useSession({ required: true });
   const { isStripeConnectInstanceReady } = useIsStripeConnectInstanceReady();
-  const { data: hostInfo } =
-    api.host.getUserHostInfo.useQuery();
+  const { data: hostInfo } = api.host.getUserHostInfo.useQuery();
 
   const [hostStripeAccountId, setHostStripeAccountId] = useState<string | null>(
     null,

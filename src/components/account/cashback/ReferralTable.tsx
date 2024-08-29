@@ -28,13 +28,21 @@ import { Badge } from "@/components/ui/badge";
 import { referralStatuses } from "./data";
 import Link from "next/link";
 interface ReferralRowData {
-  id: string;
-  earningStatus: string;
-  createdAt: string; // Assuming this is an ISO date string
-  referee: {
-    name: string;
-  };
+  id: number;
+  createdAt: Date;
+  referralCode: string;
+  refereeId: string;
+  offerId: number;
+  earningStatus: "pending" | "paid" | "cancelled" | null;
   cashbackEarned: number;
+  hostFeesSaved: number | null;
+  referee: {
+    name: string | null;
+    firstName: string | null;
+  };
+  offer: {
+    travelerOfferedPrice: number;
+  };
 }
 
 interface DataTableProps<TData, TValue> {
@@ -170,11 +178,13 @@ export function ReferralTable<TData extends ReferralRowData, TValue>({
             data.slice(0, 3).map((row: TData) => (
               <div key={row.id} className="grid grid-cols-2 py-2">
                 <div>
-                  <div>{badgeColor(row.earningStatus)}</div>
+                  <div>{badgeColor(row.earningStatus!)}</div>
                   <h3 className="text-muted-foreground">
                     {formatDateMonthDayYear(row.createdAt)}
                   </h3>
-                  <p className="font-semibold">{row.referee.name}</p>
+                  <p className="font-semibold">
+                    {row.referee.name ?? row.referee.firstName}
+                  </p>
                 </div>
                 <div className="text-end text-xl font-bold">
                   {formatCurrency(row.cashbackEarned)}

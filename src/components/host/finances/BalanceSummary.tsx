@@ -5,7 +5,7 @@ import {
   ConnectAccountManagement,
   ConnectPayouts,
 } from "@stripe/react-connect-js";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import NoStripeAccount from "./NoStripeAccount";
 
 interface BalanceSummaryProps {

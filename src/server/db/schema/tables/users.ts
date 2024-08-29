@@ -67,6 +67,8 @@ export const users = pgTable(
     lastTextAt: timestamp("last_text_at", { withTimezone: true }).defaultNow(),
     isWhatsApp: boolean("is_whats_app").default(false).notNull(),
     stripeCustomerId: varchar("stripe_customer_id"),
+    stripeConnectId: varchar("stripe_connect_id"),
+    chargesEnabled: boolean("charges_enabled").default(false),
     setupIntentId: varchar("setup_intent_id"),
 
     // mode: "string" cuz nextauth doesnt serialize/deserialize dates

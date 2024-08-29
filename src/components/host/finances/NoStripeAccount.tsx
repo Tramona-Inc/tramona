@@ -1,18 +1,20 @@
 import { api } from "@/utils/api";
 import { Button } from "@/components/ui/button";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 
 export default function NoStripeAccount() {
   const { mutate: createStripeConnectAccount } =
     api.stripe.createStripeConnectAccount.useMutation();
-  const { data: hostInfo } = api.host.getUserHostInfo.useQuery();
+  const { data: user } = api.users.getUser.useQuery();
 
   const handleCreateStripeConnectAccount = useCallback(() => {
-    if (!hostInfo?.stripeAccountId) {
+    if (!user?.stripeConnectId) {
+      setIsLoading(true);
       createStripeConnectAccount();
     }
-  }, [hostInfo?.stripeAccountId, createStripeConnectAccount]);
+  }, [user?.stripeConnectId, createStripeConnectAccount]);
 
+  const [isLoading, setIsLoading] = useState(false);
   return (
     <div className="mx-auto flex max-w-2xl flex-col items-center rounded-lg bg-white p-8 text-center shadow-md">
       <h2 className="mb-4 text-2xl font-bold">
@@ -39,7 +41,16 @@ export default function NoStripeAccount() {
       </div>
 
       <Button onClick={handleCreateStripeConnectAccount} className="">
-        Connect Stripe Account
+        {isLoading ? (
+          <div className="flex h-full items-center justify-center space-x-2">
+            <span className="text-white">Connecting</span>
+            <div className="h-1 w-1 animate-bounce rounded-full bg-white [animation-delay:-0.3s]"></div>
+            <div className="h-1 w-1 animate-bounce rounded-full bg-white [animation-delay:-0.15s]"></div>
+            <div className="h-1 w-1 animate-bounce rounded-full bg-white"></div>
+          </div>
+        ) : (
+          <div> Connect Stripe Account </div>
+        )}
       </Button>
 
       <p className="mt-4 text-sm text-gray-500">
