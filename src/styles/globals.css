@@ -59,7 +59,7 @@ body {
 
   @media (min-width: 640px) {
     :root {
-      --searchbar-height: 52px;
+      --searchbar-height: 122px;
     }
   }
   /* We don't have dark mode yet, but we will use this if we want to add it */

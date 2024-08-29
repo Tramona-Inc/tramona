@@ -43,82 +43,58 @@ import {
   useAdjustedProperties,
 } from "../landing-page/search/AdjustedPropertiesContext";
 import AddUnclaimedOffer from "./AddUnclaimedOffer";
-import { MapBoundary } from "@/pages/unclaimed-offers";
+import { MapBoundary } from "../landing-page/search/SearchPropertiesMap";
+import { useLoading } from "./UnclaimedMapLoadingContext";
 export type UnMatchedOffers =
   RouterOutputs["offers"]["getAllUnmatchedOffers"][number];
 
 export default function UnclaimedOfferCards({
-  isFilterUndefined,
   setFunctionRef,
-  setIsFilterUndefined,
   mapBoundaries,
 }: {
-  isFilterUndefined: boolean;
   setFunctionRef: (ref: any) => void;
-  setIsFilterUndefined: (isFilterUndefined: boolean) => void;
   mapBoundaries: MapBoundary | null;
 }) {
   const { adjustedProperties, setAdjustedProperties } = useAdjustedProperties();
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 24;
-  const [isLoading, setIsLoading] = useState(false);
   const { data: session } = useSession();
-  const filters = useCitiesFilter((state) => state);
+  const { isLoading } = useLoading();
+  const [isDelayedLoading, setIsDelayedLoading] = useState(true);
+  const [showNoProperties, setShowNoProperties] = useState(false);
 
   useEffect(() => {
-    const isAnyFilterSet =
-      filters.filter ||
-      filters.guests > 0 ||
-      filters.beds > 0 ||
-      filters.bedrooms > 0 ||
-      filters.bathrooms > 0 ||
-      filters.houseRules.length > 0 ||
-      filters.roomType ||
-      filters.checkIn ||
-      filters.checkOut ||
-      filters.radius !== 50;
-
-    setIsFilterUndefined(!isAnyFilterSet);
-  }, [filters, setIsFilterUndefined]);
-
-  const {
-    data: fetchedAdjustedProperties,
-    fetchNextPage: fetchNextPageOfAdjustedProperties,
-    isLoading: isQueryLoading,
-  } = api.properties.getByBoundaryInfiniteScroll.useInfiniteQuery(
-    {
-      boundaries: mapBoundaries,
-      guests: filters.guests,
-      beds: filters.beds,
-      bedrooms: filters.bedrooms,
-      bathrooms: filters.bathrooms,
-      maxNightlyPrice: filters.maxNightlyPrice,
-      lat: filters.filter?.lat,
-      long: filters.filter?.long,
-      houseRules: filters.houseRules,
-      roomType: filters.roomType,
-      checkIn: filters.checkIn,
-      checkOut: filters.checkOut,
-      radius: filters.radius,
-    },
-    {
-      getNextPageParam: (lastPage) => lastPage.nextCursor,
-      refetchOnWindowFocus: false,
-      enabled: !isFilterUndefined && !!mapBoundaries,
-    },
-  );
-
-  useEffect(() => {
-    setIsLoading(isQueryLoading);
-  }, [isQueryLoading]);
-
-  useEffect(() => {
-    if (fetchedAdjustedProperties) {
-      setAdjustedProperties(fetchedAdjustedProperties);
-      setIsLoading(false);
+    let timer: NodeJS.Timeout;
+    if (isLoading) {
+      setIsDelayedLoading(true);
+      setShowNoProperties(false);
+      timer = setTimeout(() => {
+        setIsDelayedLoading(false);
+      }, 1000); // 1 second delay
+    } else {
+      timer = setTimeout(() => {
+        setIsDelayedLoading(false);
+      }, 1000); // Ensure minimum 1 second of skeleton even if loading finishes quickly
     }
-  }, [fetchedAdjustedProperties, setAdjustedProperties]);
+
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [isLoading]);
+
+  useEffect(() => {
+    if (
+      !isDelayedLoading &&
+      (!adjustedProperties ||
+        adjustedProperties.pages.length === 0 ||
+        adjustedProperties?.pages[0]?.data.length === 0)
+    ) {
+      setShowNoProperties(true);
+    } else {
+      setShowNoProperties(false);
+    }
+  }, [isDelayedLoading, adjustedProperties]);
 
   const allProperties = useMemo(() => {
     return adjustedProperties?.pages.flatMap((page) => page.data) || [];
@@ -143,6 +119,7 @@ export default function UnclaimedOfferCards({
   );
 
   useEffect(() => {
+    console.log('total pages woohoo', totalPages);
     const page = Number(router.query.page) || 1;
     setCurrentPage(page);
   }, [router.query.page]);
@@ -175,29 +152,44 @@ export default function UnclaimedOfferCards({
     return items;
   }, [totalPages, currentPage, handlePageChange]);
 
+
   return (
     <div className="h-full w-full flex-col">
-      <div className="flex h-screen-minus-header-n-footer w-full sm:h-screen-minus-header-n-footer">
+      <div className="flex h-screen-minus-header-n-footer w-full sm:h-screen-minus-header-n-footer-n-searchbar">
         <div className="mr-auto h-full w-full overflow-y-scroll px-6 scrollbar-hide">
-          <div className="flex flex-col items-center justify-center">
+          {isDelayedLoading ? (
             <div className="grid w-full grid-cols-1 gap-x-6 sm:grid-cols-2 md:grid-cols-3 md:gap-y-6 lg:gap-y-8 xl:gap-y-4 2xl:gap-y-0">
-              {isLoading
-                ? [...Array(24)].map((_, index) => (
-                    <PropertyCardSkeleton key={`skeleton-${index}`} />
-                  ))
-                : paginatedProperties.map((property, index) => (
-                    <div
-                      key={property.id}
-                      className="animate-fade-in"
-                      style={{ animationDelay: `${index * 50}ms` }}
-                    >
-                      <UnMatchedPropertyCard property={property} />
-                    </div>
-                  ))}
+              {Array(24).fill(null).map((_, index) => (
+                <div key={`skeleton-${index}`}>
+                  <PropertyCardSkeleton />
+                </div>
+              ))}
             </div>
-            {!isLoading && totalPages > 1 && (
-              <Pagination className="mb-4 mt-8">
-                <PaginationContent>
+          ) : showNoProperties ? (
+            <div className="flex h-full w-full items-center justify-center">
+              <div className="text-center">
+                <div className="text-lg font-bold">No properties found</div>
+                <div className="text-sm text-zinc-500 mt-2">
+                  Try adjusting your search filters or zooming out on the map
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center">
+              <div className="grid w-full grid-cols-1 gap-x-6 sm:grid-cols-2 md:grid-cols-3 md:gap-y-6 lg:gap-y-8 xl:gap-y-4 2xl:gap-y-0">
+                {paginatedProperties.map((property, index) => (
+                  <div
+                    key={property.id}
+                    className="animate-fade-in"
+                    style={{ animationDelay: `${index * 50}ms` }}
+                  >
+                    <UnMatchedPropertyCard property={property} />
+                  </div>
+                ))}
+              </div>
+              {totalPages > 1 && (
+                <Pagination className="mb-4 mt-8">
+                  <PaginationContent>
                   <PaginationItem>
                     <PaginationPrevious
                       href={`?page=${Math.max(1, currentPage - 1)}`}
@@ -227,20 +219,22 @@ export default function UnclaimedOfferCards({
                       }
                     />
                   </PaginationItem>
-                  \
-                </PaginationContent>
-              </Pagination>
-            )}
-            {!isLoading && session?.user.role === "admin" && (
-              <div className="mt-20 rounded-xl border-4 p-4">
-                <AddUnclaimedOffer />
-              </div>
-            )}
-          </div>
+                  </PaginationContent>
+                </Pagination>
+              )}
+            </div>
+          )}
+          {!isLoading && !isDelayedLoading && session?.user.role === "admin" && (
+            <div className="mt-20 rounded-xl border-4 p-4">
+              <AddUnclaimedOffer />
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
+
+
 }
 
 export function UnMatchedPropertyCard({ property }) {
@@ -333,7 +327,9 @@ export function UnMatchedPropertyCard({ property }) {
               <div className="ml-2 flex items-center space-x-1 whitespace-nowrap">
                 <Star fill="gold" size={12} />
                 <div>{property.avgRating?.toFixed(2) ?? "New"}</div>
-                <div>({property.numRatings ?? ""})</div>
+                <div>
+                  {property.numRatings > 0 ? `(${property.numRatings})` : ""}
+                </div>
               </div>
             </div>
             <div className="text-sm text-zinc-500">
@@ -364,8 +360,8 @@ export function UnMatchedPropertyCard({ property }) {
 
 export function PropertyCardSkeleton() {
   return (
-    <div className="relative flex aspect-[3/4] w-full cursor-pointer flex-col overflow-hidden rounded-xl">
-      <div className="relative h-[58%] overflow-hidden">
+    <div className="relative flex aspect-[3/4] w-full flex-col overflow-hidden rounded-xl">
+      <div className="relative h-[58%] overflow-hidden rounded-xl">
         <Skeleton className="h-full w-full" />
       </div>
       <div className="flex h-[42%] flex-col space-y-2 p-4">
@@ -381,24 +377,11 @@ export function PropertyCardSkeleton() {
             </div>
           </div>
           <Skeleton className="h-4 w-1/2" />
-          <Skeleton className="h-4 w-1/3" />
         </div>
-        <div className="mt-auto flex items-center space-x-3 text-sm font-semibold">
+        <div className="mt-auto flex items-center space-x-3">
           <Skeleton className="h-5 w-1/3" />
           <Skeleton className="h-4 w-1/3" />
         </div>
-      </div>
-    </div>
-  );
-}
-
-export function PropertyCardSkeletonGrid() {
-  return (
-    <div className="flex flex-col items-center justify-center">
-      <div className="grid w-full grid-cols-1 gap-x-6 sm:grid-cols-2 md:grid-cols-3 md:gap-y-6 lg:gap-y-8 xl:gap-y-4 2xl:gap-y-0">
-        {[...Array(24)].map((_, index) => (
-          <PropertyCardSkeleton key={index} />
-        ))}
       </div>
     </div>
   );
