@@ -10,7 +10,7 @@ export default function Page() {
     <MainLayout>
       <AdjustedPropertiesProvider>
         <div className="h-full w-full flex-col">
-          <div className="h-searchbar-height sticky top-header-height z-10 hidden justify-center sm:flex">
+          <div className="h-searchbar-height sticky top-header-height z-10 justify-center flex">
             <DynamicDesktopSearchBar />
           </div>
           <div className="h-full w-full">

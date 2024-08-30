@@ -65,6 +65,10 @@ export default function UnclaimedOfferCards({
   const [showNoProperties, setShowNoProperties] = useState(false);
 
   useEffect(() => {
+    handlePageChange(1);
+  }, [mapBoundaries]);
+
+  useEffect(() => {
     let timer: NodeJS.Timeout;
     if (isLoading) {
       setIsDelayedLoading(true);
@@ -107,8 +111,14 @@ export default function UnclaimedOfferCards({
   }, [allProperties, currentPage, itemsPerPage]);
 
   const totalPages = useMemo(() => {
-    return Math.ceil(allProperties.length / itemsPerPage);
+    return Math.max(1, Math.ceil(allProperties.length / itemsPerPage));
   }, [allProperties, itemsPerPage]);
+
+  useEffect(() => {
+    console.log("total pages:", totalPages);
+    console.log("all properties length:", allProperties.length);
+    console.log("adjustedProperties", adjustedProperties);
+  }, [totalPages, allProperties]);
 
   const handlePageChange = useCallback(
     (page: number) => {
@@ -119,7 +129,7 @@ export default function UnclaimedOfferCards({
   );
 
   useEffect(() => {
-    console.log('total pages woohoo', totalPages);
+    console.log("total pages woohoo", totalPages);
     const page = Number(router.query.page) || 1;
     setCurrentPage(page);
   }, [router.query.page]);
@@ -152,31 +162,32 @@ export default function UnclaimedOfferCards({
     return items;
   }, [totalPages, currentPage, handlePageChange]);
 
-
   return (
     <div className="h-full w-full flex-col">
-      <div className="flex h-screen-minus-header-n-footer w-full sm:h-screen-minus-header-n-footer-n-searchbar">
+      <div className="sm:h-screen-minus-header-n-footer-n-searchbar flex h-screen-minus-header-n-footer w-full">
         <div className="mr-auto h-full w-full overflow-y-scroll px-6 scrollbar-hide">
           {isDelayedLoading ? (
-            <div className="grid w-full grid-cols-1 gap-x-6 sm:grid-cols-2 md:grid-cols-3 md:gap-y-6 lg:gap-y-8 xl:gap-y-4 2xl:gap-y-0">
-              {Array(24).fill(null).map((_, index) => (
-                <div key={`skeleton-${index}`}>
-                  <PropertyCardSkeleton />
-                </div>
-              ))}
+            <div className="grid w-full grid-cols-1 gap-x-6 sm:grid-cols-2 lg:grid-cols-3 md:gap-y-6 lg:gap-y-8 xl:gap-y-4 2xl:gap-y-0">
+              {Array(24)
+                .fill(null)
+                .map((_, index) => (
+                  <div key={`skeleton-${index}`}>
+                    <PropertyCardSkeleton />
+                  </div>
+                ))}
             </div>
           ) : showNoProperties ? (
             <div className="flex h-full w-full items-center justify-center">
               <div className="text-center">
                 <div className="text-lg font-bold">No properties found</div>
-                <div className="text-sm text-zinc-500 mt-2">
+                <div className="mt-2 text-sm text-zinc-500">
                   Try adjusting your search filters or zooming out on the map
                 </div>
               </div>
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center">
-              <div className="grid w-full grid-cols-1 gap-x-6 sm:grid-cols-2 md:grid-cols-3 md:gap-y-6 lg:gap-y-8 xl:gap-y-4 2xl:gap-y-0">
+            <div className="flex h-full w-full flex-col">
+              <div className="grid w-full grid-cols-1 gap-x-6 sm:grid-cols-2 lg:grid-cols-3 md:gap-y-6 lg:gap-y-8 xl:gap-y-4 2xl:gap-y-0">
                 {paginatedProperties.map((property, index) => (
                   <div
                     key={property.id}
@@ -187,54 +198,58 @@ export default function UnclaimedOfferCards({
                   </div>
                 ))}
               </div>
-              {totalPages > 1 && (
-                <Pagination className="mb-4 mt-8">
-                  <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
-                      href={`?page=${Math.max(1, currentPage - 1)}`}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handlePageChange(Math.max(1, currentPage - 1));
-                      }}
-                      className={
-                        currentPage === 1
-                          ? "pointer-events-none opacity-50"
-                          : ""
-                      }
-                    />
-                  </PaginationItem>
-                  {renderPaginationItems()}
-                  <PaginationItem>
-                    <PaginationNext
-                      href={`?page=${Math.min(totalPages, currentPage + 1)}`}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handlePageChange(Math.min(totalPages, currentPage + 1));
-                      }}
-                      className={
-                        currentPage === totalPages
-                          ? "pointer-events-none opacity-50"
-                          : ""
-                      }
-                    />
-                  </PaginationItem>
-                  </PaginationContent>
-                </Pagination>
+              {totalPages >= 1 && (
+                <div className="mt-auto px-6 py-4">
+                  <Pagination>
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious
+                          href={`?page=${Math.max(1, currentPage - 1)}`}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handlePageChange(Math.max(1, currentPage - 1));
+                          }}
+                          className={
+                            currentPage === 1
+                              ? "pointer-events-none opacity-50"
+                              : ""
+                          }
+                        />
+                      </PaginationItem>
+                      {renderPaginationItems()}
+                      <PaginationItem>
+                        <PaginationNext
+                          href={`?page=${Math.min(totalPages, currentPage + 1)}`}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handlePageChange(
+                              Math.min(totalPages, currentPage + 1),
+                            );
+                          }}
+                          className={
+                            currentPage === totalPages
+                              ? "pointer-events-none opacity-50"
+                              : ""
+                          }
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                </div>
               )}
             </div>
           )}
-          {!isLoading && !isDelayedLoading && session?.user.role === "admin" && (
-            <div className="mt-20 rounded-xl border-4 p-4">
-              <AddUnclaimedOffer />
-            </div>
-          )}
+          {!isLoading &&
+            !isDelayedLoading &&
+            session?.user.role === "admin" && (
+              <div className="mt-20 rounded-xl border-4 p-4">
+                <AddUnclaimedOffer />
+              </div>
+            )}
         </div>
       </div>
     </div>
   );
-
-
 }
 
 export function UnMatchedPropertyCard({ property }) {
@@ -258,7 +273,7 @@ export function UnMatchedPropertyCard({ property }) {
   };
 
   return (
-    <Link href={`/public-offer/${property.id}`} className="block">
+    <Link href={`/property/${property.id}`} className="block">
       <div
         className="relative flex aspect-[3/4] w-full cursor-pointer flex-col overflow-hidden rounded-xl"
         onMouseEnter={() => setIsHovered(true)}
@@ -326,7 +341,7 @@ export function UnMatchedPropertyCard({ property }) {
               </div>
               <div className="ml-2 flex items-center space-x-1 whitespace-nowrap">
                 <Star fill="gold" size={12} />
-                <div>{property.avgRating?.toFixed(2) ?? "New"}</div>
+                <div>{property.avgRating ? property.avgRating.toFixed(2) : "New"}</div>
                 <div>
                   {property.numRatings > 0 ? `(${property.numRatings})` : ""}
                 </div>

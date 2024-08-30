@@ -6,7 +6,7 @@ import {
   useApiIsLoaded,
 } from "@vis.gl/react-google-maps";
 import Spinner from "@/components/_common/Spinner";
-import {  useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { api } from "@/utils/api";
 import { useCitiesFilter } from "@/utils/store/cities-filter";
 import { debounce } from "lodash";
@@ -43,7 +43,7 @@ function SearchPropertiesMap({
   const filters = useCitiesFilter((state) => state);
 
   const { setIsLoading } = useLoading();
-  
+
   const { adjustedProperties, setAdjustedProperties } = useAdjustedProperties();
 
   const [isFilterUndefined, setIsFilterUndefined] = useState(true);
@@ -111,17 +111,17 @@ function SearchPropertiesMap({
   } = api.properties.getByBoundaryInfiniteScroll.useInfiniteQuery(
     {
       boundaries: mapBoundaries,
-      guests: filters.guests,
-      beds: filters.beds,
-      bedrooms: filters.bedrooms,
-      bathrooms: filters.bathrooms,
-      maxNightlyPrice: filters.maxNightlyPrice,
+      // guests: filters.guests,
+      // beds: filters.beds,
+      // bedrooms: filters.bedrooms,
+      // bathrooms: filters.bathrooms,
+      // maxNightlyPrice: filters.maxNightlyPrice,
       lat: filters.filter?.lat,
       long: filters.filter?.long,
-      houseRules: filters.houseRules,
-      roomType: filters.roomType,
-      checkIn: filters.checkIn,
-      checkOut: filters.checkOut,
+      // houseRules: filters.houseRules,
+      // roomType: filters.roomType,
+      // checkIn: filters.checkIn,
+      // checkOut: filters.checkOut,
       radius: filters.radius,
     },
     {
@@ -225,12 +225,9 @@ function SearchPropertiesMap({
   }, 700);
 
   return (
-
-    <div
-      className="h-full w-full rounded-xl border shadow-md"
-    >
+    <div className="h-full w-full">
       {isFilterUndefined ? (
-        <div className="flex h-full items-center justify-center">
+        <div className="flex h-full w-full items-center justify-center rounded-xl border shadow-md">
           Search for a city...
         </div>
       ) : apiIsLoaded ? (
@@ -257,4 +254,3 @@ function SearchPropertiesMap({
 }
 
 export default SearchPropertiesMap;
-

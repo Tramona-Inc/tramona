@@ -206,6 +206,8 @@ export const propertiesRouter = createTRPCRouter({
         houseRules: z.array(z.string()).optional(),
         guests: z.number().optional(),
         maxNightlyPrice: z.number().optional(),
+        avgRating: z.number().optional(),
+        numRatings: z.number().optional(),
         lat: z.number().optional(),
         long: z.number().optional(),
         radius: z.number().optional(),
@@ -370,6 +372,8 @@ export const propertiesRouter = createTRPCRouter({
           numBedrooms: properties.numBedrooms,
           numBathrooms: properties.numBathrooms,
           numBeds: properties.numBeds,
+          avgRating: properties.avgRating,
+          numRatings: properties.numRatings,
           originalNightlyPrice: properties.originalNightlyPrice,
           lat: properties.latitude,
           long: properties.longitude,
@@ -388,7 +392,7 @@ export const propertiesRouter = createTRPCRouter({
         .from(properties)
         .where(
           and(
-            eq(properties.propertyStatus, "Listed"),
+            // eq(properties.propertyStatus, "Listed"),
             cursor ? gt(properties.id, cursor) : undefined,
             boundaries
               ? and(
@@ -443,7 +447,8 @@ export const propertiesRouter = createTRPCRouter({
                 AND booked_dates.date <= CURRENT_DATE + INTERVAL '20 days') < 14`,
           ),
         )
-        .limit(12)
+        // .limit(12)
+        .limit(100)
         .orderBy(asc(sql`id`), asc(sql`distance`));
 
       return {
