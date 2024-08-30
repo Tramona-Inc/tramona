@@ -332,7 +332,7 @@ async function processRequests(
       propertyLatLngPoint: insertedProperty.latLngPoint,
     });
 
-    console.log('properties:', matchingProperties);
+    console.log("properties:", matchingProperties);
     const propertyIds = matchingProperties.map((property) => property.id);
 
     if (propertyIds.includes(insertedProperty.id)) {
@@ -416,7 +416,12 @@ export async function getPropertiesForRequest(
   } else {
     const coordinates = await getCoordinates(req.location);
     if (coordinates.bounds) {
-      console.log("bounds", coordinates.bounds, req.location, req.maxTotalPrice);
+      console.log(
+        "bounds",
+        coordinates.bounds,
+        req.location,
+        req.maxTotalPrice,
+      );
       const { northeast, southwest } = coordinates.bounds;
       propertyIsNearRequest = sql`
         ST_Within(
@@ -565,7 +570,7 @@ export async function updateTravelerandHostMarkup({
     .where(and(eq(offers.id, offerId), isNull(offers.acceptedAt)));
 }
 
-export async function rewardHostReferral({
+export async function createHostReferral({
   userId,
   referralCodeUsed,
 }: {
