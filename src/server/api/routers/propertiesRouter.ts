@@ -240,6 +240,8 @@ export const propertiesRouter = createTRPCRouter({
           numBedrooms: properties.numBedrooms,
           numBathrooms: properties.numBathrooms,
           numBeds: properties.numBeds,
+          avgRating: properties.avgRating,
+          numRatings: properties.numRatings,
           originalNightlyPrice: properties.originalNightlyPrice,
           lat: properties.latitude,
           long: properties.longitude,

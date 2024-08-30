@@ -1,61 +1,36 @@
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { api } from "@/utils/api";
 import { type RouterOutputs } from "@/utils/api";
 import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
-import {
-  formatDateRange,
-  formatCurrency,
-  plural,
-  getNumNights,
-} from "@/utils/utils";
-// import {
-//   InfoIcon,
-//   TrashIcon,
-//   ExternalLink,
-//   CirclePlus,
-//   Star,
-// } from "lucide-react";
+import { formatCurrency, plural } from "@/utils/utils";
 import { Star, ChevronLeft, ChevronRight } from "lucide-react";
 import { Skeleton } from "../ui/skeleton";
-import React, {
-  useEffect,
-  useState,
-  useMemo,
-  useCallback,
-  useRef,
-} from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import {
   Pagination,
   PaginationContent,
-  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { useCitiesFilter } from "@/utils/store/cities-filter";
-import {
-  AdjustedPropertiesProvider,
-  useAdjustedProperties,
-} from "../landing-page/search/AdjustedPropertiesContext";
+import { useAdjustedProperties } from "../landing-page/search/AdjustedPropertiesContext";
 import AddUnclaimedOffer from "./AddUnclaimedOffer";
 import { MapBoundary } from "../landing-page/search/SearchPropertiesMap";
 import { useLoading } from "./UnclaimedMapLoadingContext";
-export type UnMatchedOffers =
-  RouterOutputs["offers"]["getAllUnmatchedOffers"][number];
+
+type Property =
+  RouterOutputs["properties"]["getAllInfiniteScroll"]["data"][number];
 
 export default function UnclaimedOfferCards({
-  setFunctionRef,
   mapBoundaries,
 }: {
-  setFunctionRef: (ref: any) => void;
   mapBoundaries: MapBoundary | null;
-}) {
-  const { adjustedProperties, setAdjustedProperties } = useAdjustedProperties();
+}): JSX.Element {
+  const { adjustedProperties } = useAdjustedProperties();
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 24;
@@ -65,34 +40,10 @@ export default function UnclaimedOfferCards({
   const [showNoProperties, setShowNoProperties] = useState(false);
 
   useEffect(() => {
-    handlePageChange(1);
-  }, [mapBoundaries]);
-
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (isLoading) {
-      setIsDelayedLoading(true);
-      setShowNoProperties(false);
-      timer = setTimeout(() => {
-        setIsDelayedLoading(false);
-      }, 1000); // 1 second delay
-    } else {
-      timer = setTimeout(() => {
-        setIsDelayedLoading(false);
-      }, 1000); // Ensure minimum 1 second of skeleton even if loading finishes quickly
-    }
-
-    return () => {
-      if (timer) clearTimeout(timer);
-    };
-  }, [isLoading]);
-
-  useEffect(() => {
     if (
       !isDelayedLoading &&
-      (!adjustedProperties ||
-        adjustedProperties.pages.length === 0 ||
-        adjustedProperties?.pages[0]?.data.length === 0)
+      (!adjustedProperties?.pages.length ||
+        !adjustedProperties.pages[0]?.data.length)
     ) {
       setShowNoProperties(true);
     } else {
@@ -101,7 +52,7 @@ export default function UnclaimedOfferCards({
   }, [isDelayedLoading, adjustedProperties]);
 
   const allProperties = useMemo(() => {
-    return adjustedProperties?.pages.flatMap((page) => page.data) || [];
+    return adjustedProperties?.pages.flatMap((page) => page.data) ?? [];
   }, [adjustedProperties]);
 
   const paginatedProperties = useMemo(() => {
@@ -112,24 +63,40 @@ export default function UnclaimedOfferCards({
 
   const totalPages = useMemo(() => {
     return Math.max(1, Math.ceil(allProperties.length / itemsPerPage));
-  }, [allProperties, itemsPerPage]);
-
-  useEffect(() => {
-    console.log("total pages:", totalPages);
-    console.log("all properties length:", allProperties.length);
-    console.log("adjustedProperties", adjustedProperties);
-  }, [totalPages, allProperties]);
+  }, [allProperties.length, itemsPerPage]);
 
   const handlePageChange = useCallback(
     (page: number) => {
       setCurrentPage(page);
-      router.push(`?page=${page}`, undefined, { shallow: true });
+      void router.push(`?page=${page}`, undefined, { shallow: true });
     },
     [router],
   );
 
   useEffect(() => {
-    console.log("total pages woohoo", totalPages);
+    let timer: NodeJS.Timeout;
+    if (isLoading) {
+      setIsDelayedLoading(true);
+      setShowNoProperties(false);
+      timer = setTimeout(() => {
+        setIsDelayedLoading(false);
+      }, 1000);
+    } else {
+      timer = setTimeout(() => {
+        setIsDelayedLoading(false);
+      }, 1000);
+    }
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [isLoading]);
+
+  useEffect(() => {
+    handlePageChange(1);
+  }, [mapBoundaries]);
+
+  useEffect(() => {
     const page = Number(router.query.page) || 1;
     setCurrentPage(page);
   }, [router.query.page]);
@@ -167,7 +134,7 @@ export default function UnclaimedOfferCards({
       <div className="sm:h-screen-minus-header-n-footer-n-searchbar flex h-screen-minus-header-n-footer w-full">
         <div className="mr-auto h-full w-full overflow-y-scroll px-6 scrollbar-hide">
           {isDelayedLoading ? (
-            <div className="grid w-full grid-cols-1 gap-x-6 sm:grid-cols-2 lg:grid-cols-3 md:gap-y-6 lg:gap-y-8 xl:gap-y-4 2xl:gap-y-0">
+            <div className="grid w-full grid-cols-1 gap-x-6 sm:grid-cols-2 md:gap-y-6 lg:grid-cols-3 lg:gap-y-8 xl:gap-y-4 2xl:gap-y-0">
               {Array(24)
                 .fill(null)
                 .map((_, index) => (
@@ -187,7 +154,7 @@ export default function UnclaimedOfferCards({
             </div>
           ) : (
             <div className="flex h-full w-full flex-col">
-              <div className="grid w-full grid-cols-1 gap-x-6 sm:grid-cols-2 lg:grid-cols-3 md:gap-y-6 lg:gap-y-8 xl:gap-y-4 2xl:gap-y-0">
+              <div className="grid w-full grid-cols-1 gap-x-6 sm:grid-cols-2 md:gap-y-6 lg:grid-cols-3 lg:gap-y-8 xl:gap-y-4 2xl:gap-y-0">
                 {paginatedProperties.map((property, index) => (
                   <div
                     key={property.id}
@@ -252,11 +219,15 @@ export default function UnclaimedOfferCards({
   );
 }
 
-export function UnMatchedPropertyCard({ property }) {
+function UnMatchedPropertyCard({
+  property,
+}: {
+  property: Property;
+}): JSX.Element {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
 
-  const nextImage = (e) => {
+  const nextImage = (e: React.MouseEvent): void => {
     e.preventDefault();
     e.stopPropagation();
     if (currentImageIndex < property.imageUrls.length - 1) {
@@ -264,7 +235,7 @@ export function UnMatchedPropertyCard({ property }) {
     }
   };
 
-  const prevImage = (e) => {
+  const prevImage = (e: React.MouseEvent): void => {
     e.preventDefault();
     e.stopPropagation();
     if (currentImageIndex > 0) {
@@ -341,15 +312,17 @@ export function UnMatchedPropertyCard({ property }) {
               </div>
               <div className="ml-2 flex items-center space-x-1 whitespace-nowrap">
                 <Star fill="gold" size={12} />
-                <div>{property.avgRating ? property.avgRating.toFixed(2) : "New"}</div>
+                <div>
+                  {property.avgRating ? property.avgRating.toFixed(2) : "New"}
+                </div>
                 <div>
                   {property.numRatings > 0 ? `(${property.numRatings})` : ""}
                 </div>
               </div>
             </div>
             {/* <div className="text-sm text-zinc-500"> */}
-              {/* {formatDateRange(offer.checkIn, offer.checkOut)} */}
-              {/* replace with check in check out'
+            {/* {formatDateRange(offer.checkIn, offer.checkOut)} */}
+            {/* replace with check in check out'
             </div> */}
             <div className="text-sm text-zinc-500">
               {plural(property.maxNumGuests, "Guest")}
@@ -357,14 +330,18 @@ export function UnMatchedPropertyCard({ property }) {
           </div>
           <div className="flex items-center space-x-3 text-sm font-semibold">
             <div>
-              {formatCurrency(property.originalNightlyPrice)}
+              {property.originalNightlyPrice
+                ? formatCurrency(property.originalNightlyPrice)
+                : "N/A"}
               &nbsp;night
             </div>
             <div className="text-xs text-zinc-500 line-through">
               airbnb&nbsp;
-              {formatCurrency(
-                property.originalNightlyPrice * AVG_AIRBNB_MARKUP,
-              )}
+              {property.originalNightlyPrice
+                ? formatCurrency(
+                    property.originalNightlyPrice * AVG_AIRBNB_MARKUP,
+                  )
+                : "N/A"}
             </div>
           </div>
         </div>
@@ -373,7 +350,7 @@ export function UnMatchedPropertyCard({ property }) {
   );
 }
 
-export function PropertyCardSkeleton() {
+function PropertyCardSkeleton(): JSX.Element {
   return (
     <div className="relative flex aspect-[3/4] w-full flex-col overflow-hidden rounded-xl">
       <div className="relative h-[58%] overflow-hidden rounded-xl">

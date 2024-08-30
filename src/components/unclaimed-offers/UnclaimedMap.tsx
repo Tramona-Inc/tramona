@@ -24,7 +24,6 @@ export default function TestComponent() {
           className={`h-full w-full max-w-7xl px-6 md:w-2/3 ${showMap ? 'hidden' : 'h-full w-full'}`}
         >
           <UnclaimedOfferCards
-            setFunctionRef={setFunctionRef}
             mapBoundaries={mapBoundaries}
           />
           <div className="fixed bottom-10 left-1/2 -translate-x-1/2 transform md:hidden rounded-full">

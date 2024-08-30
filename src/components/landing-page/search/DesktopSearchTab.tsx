@@ -27,22 +27,26 @@ export function DesktopSearchTab() {
     "Japan",
     "China",
     "South Korea",
-    // Add more locations as needed
+    // need to change these locations
   ];
 
   const [selectedLocation, setSelectedLocation] = useState(locations[0]);
 
-  const handleLocationClick = (location: string) => {
+  const handleLocationClick = async (location: string) => {
     setSelectedLocation(location);
     form.setValue("location", location);
 
     // avoids type error by passing a synthetic event
     const syntheticEvent = {
-      preventDefault: () => {},
       target: form.getValues(),
     } as React.BaseSyntheticEvent;
 
-    onSubmit(syntheticEvent);
+    try {
+      await onSubmit(syntheticEvent);
+    } catch (error) {
+      console.error("Error selecting location:", error);
+    }
+
   };
 
   return (

@@ -35,7 +35,7 @@ function SearchPropertiesMap({
   mapBoundaries,
   setMapBoundaries,
 }: {
-  setFunctionRef: (ref: any) => void;
+  setFunctionRef: (ref: () => Promise<void>) => void;
   mapBoundaries: MapBoundary | null;
   setMapBoundaries: (boundaries: MapBoundary) => void;
 }) {
@@ -49,15 +49,15 @@ function SearchPropertiesMap({
   const [isFilterUndefined, setIsFilterUndefined] = useState(true);
   useEffect(() => {
     const isAnyFilterSet =
-      filters.filter ||
+      filters.filter != null ||
       filters.guests > 0 ||
       filters.beds > 0 ||
       filters.bedrooms > 0 ||
       filters.bathrooms > 0 ||
       filters.houseRules.length > 0 ||
-      filters.roomType ||
-      filters.checkIn ||
-      filters.checkOut ||
+      filters.roomType != null ||
+      filters.checkIn != null ||
+      filters.checkOut != null ||
       filters.radius !== 50;
 
     setIsFilterUndefined(!isAnyFilterSet);
