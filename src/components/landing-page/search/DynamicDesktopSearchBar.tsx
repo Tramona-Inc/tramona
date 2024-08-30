@@ -34,7 +34,7 @@ const DynamicDesktopSearchBar = React.memo(() => {
   }, [controlNavbar, isScrolling]);
 
   return (
-    <div className="w-full sticky top-0 h-28 flex justify-center items-end shrink-0 z-20 bg-white mb-2">
+    <div className="sticky top-0 z-20 flex h-24 w-full shrink-0 items-center justify-center bg-white">
       <Card className="w-full flex-shrink-0">
         <CardContent>
           <DesktopSearchTab />
@@ -47,4 +47,3 @@ const DynamicDesktopSearchBar = React.memo(() => {
 DynamicDesktopSearchBar.displayName = "DynamicDesktopSearchBar";
 
 export default DynamicDesktopSearchBar;
-

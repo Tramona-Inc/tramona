@@ -21,7 +21,7 @@ const LastThirtyDaysChart = ({
   setTotalRevenue: (totalRevenue: number) => void;
 }) => {
   const endDate = useMemo(() => endOfToday(), []);
-  const startDate = useMemo(() => subDays(endDate, 29), []);
+  const startDate = useMemo(() => subDays(endDate, 29), [endDate]);
   const [monthlyData, setMonthlyData] = useState(
     generateInitialDailyData(startDate, endDate),
   );

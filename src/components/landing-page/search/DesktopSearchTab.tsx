@@ -46,13 +46,12 @@ export function DesktopSearchTab() {
     } catch (error) {
       console.error("Error selecting location:", error);
     }
-
   };
 
   return (
     <Form {...form}>
       <form onSubmit={onSubmit} className="w-full">
-        <div className="mb-4 flex items-center justify-between overflow-x-scroll scrollbar-hide">
+        <div className="mb-1 flex items-center justify-between overflow-x-scroll scrollbar-hide">
           {locations.map((location) => (
             <Button
               variant={"ghost"}

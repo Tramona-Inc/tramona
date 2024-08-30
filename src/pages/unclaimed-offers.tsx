@@ -5,12 +5,11 @@ import TestComponent from "@/components/unclaimed-offers/UnclaimedMap";
 import React from "react";
 
 export default function Page() {
-
   return (
     <MainLayout>
       <AdjustedPropertiesProvider>
         <div className="h-full w-full flex-col">
-          <div className="h-searchbar-height sticky top-header-height z-10 justify-center flex">
+          <div className="sticky top-header-height z-10 flex h-searchbar-height justify-center">
             <DynamicDesktopSearchBar />
           </div>
           <div className="h-full w-full">

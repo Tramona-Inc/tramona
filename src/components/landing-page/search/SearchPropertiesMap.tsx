@@ -14,6 +14,11 @@ import { debounce } from "lodash";
 import PoiMarkers from "./PoiMarkers";
 import { useAdjustedProperties } from "./AdjustedPropertiesContext";
 import { useLoading } from "@/components/unclaimed-offers/UnclaimedMapLoadingContext";
+import type { RouterOutputs } from "@/utils/api";
+import type { InfiniteQueryObserverResult } from "@tanstack/react-query";
+
+export type fetchNextPageOfAdjustedPropertiesType =
+  RouterOutputs["properties"]["getByBoundaryInfiniteScroll"];
 
 export type Poi = {
   key: string;
@@ -35,7 +40,11 @@ function SearchPropertiesMap({
   mapBoundaries,
   setMapBoundaries,
 }: {
-  setFunctionRef: (ref: () => Promise<void>) => void;
+  setFunctionRef: (
+    ref: () => Promise<
+      InfiniteQueryObserverResult<fetchNextPageOfAdjustedPropertiesType>
+    >,
+  ) => void;
   mapBoundaries: MapBoundary | null;
   setMapBoundaries: (boundaries: MapBoundary) => void;
 }) {

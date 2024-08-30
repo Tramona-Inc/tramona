@@ -11,7 +11,6 @@ import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import { TAX_PERCENTAGE, SUPERHOG_FEE } from "@/utils/constants";
 import type { OfferWithDetails } from "../offers/PropertyPage";
-import type { Stripe } from "stripe";
 import { Elements } from "@stripe/react-stripe-js";
 import { type StripeElementsOptions } from "@stripe/stripe-js";
 import Spinner from "../_common/Spinner";

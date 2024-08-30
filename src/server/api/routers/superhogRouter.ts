@@ -281,7 +281,7 @@ export const superhogRouter = createTRPCRouter({
           ? "https://superhog-apim.azure-api.net/e-deposit/verifications/cancel"
           : "https://superhog-apim.azure-api.net/e-deposit-sandbox/verifications/cancel";
       try {
-        const res = await axios.put(superhogEndpoint, input, config);
+        await axios.put(superhogEndpoint, input, config);
         const currentSuperhogRequestId =
           await db.query.superhogRequests.findFirst({
             where: eq(

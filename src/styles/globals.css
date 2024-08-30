@@ -42,7 +42,10 @@ body {
     --screen-minus-header-n-footer: calc(
       100vh - var(--header-height) - var(--footer-height)
     );
-    --screen-minus-header-n-footer-n-searchbar: calc(100vh - var(--header-height) - var(--footer-height) - var(--searchbar-height));
+    --screen-minus-header-n-footer-n-searchbar: calc(
+      100vh - var(--header-height) - var(--footer-height) -
+        var(--searchbar-height)
+    );
   }
 
   @media (min-width: 640px) {
@@ -59,7 +62,7 @@ body {
 
   @media (min-width: 640px) {
     :root {
-      --searchbar-height: 122px;
+      --searchbar-height: 90px;
     }
   }
   /* We don't have dark mode yet, but we will use this if we want to add it */
@@ -141,6 +144,6 @@ body {
 }
 
 .animate-fade-in {
-  animation: fadeIn .5s ease-out forwards;
+  animation: fadeIn 0.5s ease-out forwards;
   opacity: 0;
 }
