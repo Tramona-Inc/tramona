@@ -41,7 +41,7 @@ const PoiMarkers = (props: { pois: Poi[] | [] }) => {
             clickable={true}
           >
             <div className="flex flex-col items-center justify-center">
-              <div className="z-40 rounded-xl bg-zinc-700 p-2 text-white">
+              <div className="z-40 rounded-xl bg-primaryGreen p-2 text-white">
                 {formatCurrency(
                   poi.originalNightlyPrice * AVG_AIRBNB_MARKUP,
                 ).trim()}
