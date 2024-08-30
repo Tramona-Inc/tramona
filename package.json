@@ -84,6 +84,7 @@
     "@vis.gl/react-google-maps": "^1.0.0",
     "aws-sdk": "^2.1569.0",
     "axios": "^1.6.7",
+    "axios-retry": "^4.5.0",
     "bcrypt": "^5.1.1",
     "cheerio": "1.0.0",
     "chrome-aws-lambda": "^6",
@@ -156,7 +157,7 @@
     "uuid": "^9.0.1",
     "vaul": "^0.9.0",
     "zod": "^3.22.4",
-    "zustand": "^4.5.4"
+    "zustand": "^4.5.1"
   },
   "devDependencies": {
     "@total-typescript/ts-reset": "^0.5.1",
