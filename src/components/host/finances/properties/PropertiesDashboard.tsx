@@ -8,11 +8,11 @@
 //   RouterOutputs["host"]["getAllHostProperties"][number];
 
 // export default function PropertiesDashboard({
-//   hostStripeAccountId,
+//   hostStripeConnectId,
 //   isStripeConnectInstanceReady,
 //   becameHostAt,
 // }: {
-//   hostStripeAccountId: string | null;
+//   hostStripeConnectId: string | null;
 //   isStripeConnectInstanceReady: boolean;
 //   becameHostAt: Date | undefined;
 // }) {

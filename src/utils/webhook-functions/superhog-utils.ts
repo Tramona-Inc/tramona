@@ -90,6 +90,10 @@ export async function createSuperhogReservation({
   userId: string;
   trip: Trip;
 }) {
+  const superhogEndpoint =
+    env.NODE_ENV === "production"
+      ? "https://superhog-apim.azure-api.net/e-deposit/verifications"
+      : "https://superhog-apim.azure-api.net/e-deposit-sandbox/verifications";
   //find the property using its id
   const property = await db.query.properties.findFirst({
     where: eq(properties.id, propertyId),
@@ -145,24 +149,12 @@ export async function createSuperhogReservation({
         telephoneNumber: user.phoneNumber?.toString() ?? "+19496833881",
       },
     };
+    console.log("THis is the reservationObject", reservationObject);
 
     const response = await axios
-      .post<unknown, ResponseType>(
-        "https://superhog-apim.azure-api.net/e-deposit/verifications",
-        reservationObject,
-        config,
-      )
+      .post<unknown, ResponseType>(superhogEndpoint, reservationObject, config)
       .then((res) => res.data)
       .catch(async (error: AxiosError) => {
-        await sendSlackMessage({
-          isProductionOnly: true,
-          channel: "superhog-bot",
-          text: [
-            `SUPERHOG REQUEST ERROR: axios error... ${error.response.data.detail}`,
-            `by User *:${user.name}* `,
-          ].join("\n"),
-        });
-
         await db.insert(superhogErrors).values({
           echoToken: reservationObject.metadata.echoToken,
           error: error.response.data.detail,
@@ -175,6 +167,15 @@ export async function createSuperhogReservation({
           .update(trips)
           .set({ tripsStatus: "Needs attention" })
           .where(eq(trips.id, trip.id));
+
+        await sendSlackMessage({
+          isProductionOnly: true,
+          channel: "superhog-bot",
+          text: [
+            `SUPERHOG REQUEST ERROR: axios error... ${error.response.data.detail}`,
+            `by User *:${user.name}* `,
+          ].join("\n"),
+        });
       });
     if (!response?.verification) {
       await db.insert(superhogErrors).values({

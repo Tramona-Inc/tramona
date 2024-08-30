@@ -453,16 +453,16 @@ export const stripeRouter = createTRPCRouter({
       };
     }),
 
-  //stripe connect account
+  //stripe connect account (outdated)
   createStripeConnectAccount: protectedProcedure.mutation(async ({ ctx }) => {
-    const res = await ctx.db.query.hostProfiles.findFirst({
+    const res = await ctx.db.query.users.findFirst({
       columns: {
-        stripeAccountId: true,
+        stripeConnectId: true,
         chargesEnabled: true,
       },
-      where: eq(hostProfiles.userId, ctx.user.id),
+      where: eq(users.id, ctx.user.id),
     });
-    if (!res?.stripeAccountId) {
+    if (!res?.stripeConnectId) {
       const [firstNameFallback, ...rest] = ctx.user.name!.split(" ");
       const lastNameFallback = rest.join(" ");
 
@@ -503,9 +503,9 @@ export const stripeRouter = createTRPCRouter({
         },
       });
       await ctx.db
-        .update(hostProfiles)
-        .set({ stripeAccountId: stripeAccount.id })
-        .where(eq(hostProfiles.userId, ctx.user.id));
+        .update(users)
+        .set({ stripeConnectId: stripeAccount.id })
+        .where(eq(users.id, ctx.user.id));
 
       return stripeAccount;
     } else {

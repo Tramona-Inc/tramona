@@ -35,6 +35,8 @@ import {
   offers,
   requestsToProperties,
   users,
+  hostReferralDiscounts,
+  referralCodes,
 } from "./db/schema";
 import { getCity, getCoordinates } from "./google-maps";
 import axios from "axios";
@@ -561,4 +563,35 @@ export async function updateTravelerandHostMarkup({
       hostPayout: hostPay,
     })
     .where(and(eq(offers.id, offerId), isNull(offers.acceptedAt)));
+}
+
+export async function rewardHostReferral({
+  userId,
+  referralCodeUsed,
+}: {
+  userId: string;
+  referralCodeUsed: string | null;
+}) {
+  console.log("this is the referral code ysed  ", referralCodeUsed);
+  if (referralCodeUsed) {
+    const isReferralUsed = await db.query.hostReferralDiscounts.findFirst({
+      where: eq(hostReferralDiscounts.refereeUserId, userId),
+    });
+    console.log("about to return ", isReferralUsed);
+    if (isReferralUsed) return;
+    //find owner of the referral code
+    const referrer = await db.query.referralCodes.findFirst({
+      where: eq(referralCodes.referralCode, referralCodeUsed),
+      columns: { ownerId: true },
+    });
+    //create host referral discount row
+    if (referrer) {
+      await db.insert(hostReferralDiscounts).values({
+        referralCode: referralCodeUsed,
+        ownerId: referrer.ownerId,
+        refereeUserId: userId,
+      });
+    }
+    //send an email or notification to the referrer
+  }
 }

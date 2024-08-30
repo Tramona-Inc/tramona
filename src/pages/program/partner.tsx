@@ -45,7 +45,7 @@ export default function Page() {
             <h2 className="text-4xl font-bold sm:text-6xl">Partner Program</h2>
             <p className="mb-6 text-2xl font-bold sm:text-2xl">
               <span className="inline-block bg-yellow-200 shadow-sm">
-                Earn 30% commission of revenue{" "}
+                Earn $25 cash for each user&apos;s first booking!
               </span>{" "}
               for 12 months by simply introducing new customers to Tramona
             </p>
