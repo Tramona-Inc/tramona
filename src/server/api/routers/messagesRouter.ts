@@ -197,6 +197,8 @@ export async function addTwoUserToConversation(
     ];
 
     await db.insert(conversationParticipants).values(participantValues);
+
+    return createdConversationId;
   }
 }
 
@@ -319,7 +321,11 @@ export const messagesRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input }) => {
-      await addTwoUserToConversation(input.user1Id, input.user2Id);
+      const conversationId = await addTwoUserToConversation(
+        input.user1Id,
+        input.user2Id,
+      );
+      return conversationId;
     }),
 
   getParticipantsPhoneNumbers: protectedProcedure

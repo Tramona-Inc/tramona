@@ -11,6 +11,8 @@ import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
 import CustomStripeCheckout from "./CustomStripeCheckout";
 import { OfferPriceDetails } from "../_common/OfferPriceDetails";
 import { getCancellationPolicyDescription } from "@/config/getCancellationPolicyDescription";
+import { api } from "@/utils/api";
+import { useSession } from "next-auth/react";
 
 export default function Checkout({
   offer: { property, request, ...offer },
@@ -18,8 +20,15 @@ export default function Checkout({
   offer: OfferWithDetails;
 }) {
   const router = useRouter();
-  const chatWithAdmin = useChatWithAdmin();
   const isMobile = !useIsSm();
+  const session = useSession();
+
+  const { mutateAsync: chatWithHost } =
+    api.messages.addTwoUsersToConversation.useMutation({
+      onSuccess: (conversationId) => {
+        void router.push(`/messages?conversationId=${conversationId}`);
+      },
+    });
 
   const handleBackClick = (
     event: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
@@ -174,7 +183,12 @@ export default function Checkout({
         Questions?{" "}
         <span className="text-teal-900 underline">
           <button
-            onClick={() => chatWithAdmin()}
+            onClick={async () => {
+              await chatWithHost({
+                user1Id: session.data?.user.id ?? "",
+                user2Id: property.hostId ?? "",
+              });
+            }}
             className="text-blue-600 underline underline-offset-2"
           >
             Chat with host
