@@ -35,6 +35,8 @@ import {
   offers,
   requestsToProperties,
   users,
+  hostReferralDiscounts,
+  referralCodes,
 } from "./db/schema";
 import { getCity, getCoordinates } from "./google-maps";
 import axios from "axios";
@@ -330,14 +332,8 @@ async function processRequests(
       propertyLatLngPoint: insertedProperty.latLngPoint,
     });
 
+    console.log("properties:", matchingProperties);
     const propertyIds = matchingProperties.map((property) => property.id);
-    await sendTextToHost(
-      matchingProperties,
-      request.checkIn,
-      request.checkOut,
-      request.maxTotalPrice,
-      request.location,
-    );
 
     if (propertyIds.includes(insertedProperty.id)) {
       await db.insert(requestsToProperties).values({
@@ -381,7 +377,7 @@ export async function sendTextToHost(
         // Send a text message to the host
         await sendText({
           to: hostPhoneNumber,
-          content: `Tramona: There is a request for ${formatCurrency(maxTotalPrice / numberOfNights)} per night for ${plural(numberOfNights, "night")} in ${location}. You have ${numHostPropertiesPerRequest[hostId]} eligible properties. Please click here to make a match. ${env.NEXTAUTH_URL}/host/requests`,
+          content: `Tramona: There is a request for ${formatCurrency(maxTotalPrice / numberOfNights)} per night for ${plural(numberOfNights, "night")} in ${location}. You have ${plural(numHostPropertiesPerRequest[hostId] ?? 0, "eligible property", "eligible properties")}. Please click here to make a match: ${env.NEXTAUTH_URL}/host/requests`,
         });
         //TO DO SEND WHATSAPP MESSAGE
       }
@@ -420,6 +416,12 @@ export async function getPropertiesForRequest(
   } else {
     const coordinates = await getCoordinates(req.location);
     if (coordinates.bounds) {
+      console.log(
+        "bounds",
+        coordinates.bounds,
+        req.location,
+        req.maxTotalPrice,
+      );
       const { northeast, southwest } = coordinates.bounds;
       propertyIsNearRequest = sql`
         ST_Within(
@@ -568,6 +570,36 @@ export async function updateTravelerandHostMarkup({
     .where(and(eq(offers.id, offerId), isNull(offers.acceptedAt)));
 }
 
+export async function rewardHostReferral({
+  userId,
+  referralCodeUsed,
+}: {
+  userId: string;
+  referralCodeUsed: string | null;
+}) {
+  console.log("this is the referral code ysed  ", referralCodeUsed);
+  if (referralCodeUsed) {
+    const isReferralUsed = await db.query.hostReferralDiscounts.findFirst({
+      where: eq(hostReferralDiscounts.refereeUserId, userId),
+    });
+    console.log("about to return ", isReferralUsed);
+    if (isReferralUsed) return;
+    //find owner of the referral code
+    const referrer = await db.query.referralCodes.findFirst({
+      where: eq(referralCodes.referralCode, referralCodeUsed),
+      columns: { ownerId: true },
+    });
+    //create host referral discount row
+    if (referrer) {
+      await db.insert(hostReferralDiscounts).values({
+        referralCode: referralCodeUsed,
+        ownerId: referrer.ownerId,
+        refereeUserId: userId,
+      });
+    }
+    //send an email or notification to the referrer
+  }
+}
 
 function getRandomNormalDistribution(mean: number, stdDev: number): number {
   let u = 0,
@@ -583,7 +615,9 @@ function stripTimeFromDate(date: Date): Date {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 }
 
-export function createNormalDistributionDates(numRanges: number): { checkIn: Date, checkOut: Date }[] {
+export function createNormalDistributionDates(
+  numRanges: number,
+): { checkIn: Date; checkOut: Date }[] {
   const dateRanges = [];
 
   for (let i = 0; i < numRanges; i++) {
@@ -592,14 +626,14 @@ export function createNormalDistributionDates(numRanges: number): { checkIn: Dat
       today.getTime() + Math.random() * 90 * 24 * 60 * 60 * 1000,
     ); // Random date within next 90 days
     const startDate = stripTimeFromDate(new Date(futureDate));
-    
+
     // Generate end date using a normal distribution with mean = 3 days and stdDev = 1 day
     let endDateOffset = getRandomNormalDistribution(3, 1);
     // Ensure endDateOffset is at least 1 day
     endDateOffset = Math.max(1, endDateOffset);
 
     const endDate = stripTimeFromDate(
-      new Date(startDate.getTime() + endDateOffset * 24 * 60 * 60 * 1000)
+      new Date(startDate.getTime() + endDateOffset * 24 * 60 * 60 * 1000),
     );
 
     dateRanges.push({

@@ -8,10 +8,10 @@ import YearlyDataChart from "./YearlyDataChart";
 
 const SummaryChart = ({
   becameHostAt,
-  hostStripeAccountId,
+  hostStripeConnectId,
 }: {
   becameHostAt: Date | undefined;
-  hostStripeAccountId: string | null;
+  hostStripeConnectId: string | null;
 }) => {
   const becameHostYear = becameHostAt
     ? new Date(becameHostAt).getFullYear()
@@ -48,17 +48,17 @@ const SummaryChart = ({
           </TabsList>
         </div>
         <TabsContent value="month" className="h-full w-full">
-          <MonthlyDataChart hostStripeAccountId={hostStripeAccountId} />
+          <MonthlyDataChart hostStripeConnectId={hostStripeConnectId} />
         </TabsContent>
         <TabsContent value="year" className="h-full w-full">
           <YearlyDataChart
-            hostStripeAccountId={hostStripeAccountId}
+            hostStripeConnectId={hostStripeConnectId}
             becameHostYear={becameHostYear}
           />
         </TabsContent>
         <TabsContent value="allTime" className="h-full w-full flex-col">
           <AllTimeDataChart
-            hostStripeAccountId={hostStripeAccountId}
+            hostStripeConnectId={hostStripeConnectId}
             becameHostYear={becameHostYear}
           />
         </TabsContent>

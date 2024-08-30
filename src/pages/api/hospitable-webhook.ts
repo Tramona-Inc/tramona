@@ -205,11 +205,9 @@ interface ListingCreatedWebhook {
 interface ChannelActivatedWebhook {
   action: "channel.activated";
   data: {
-    channel: {
-      customer: {
-        id: string;
-        name: string;
-      };
+    customer: {
+      id: string;
+      name: string;
     };
   };
 }
@@ -243,7 +241,7 @@ export default async function webhook(
     switch (webhookData.action) {
       case "channel.activated":
         console.log("channel created");
-        await insertHost(webhookData.data.channel.customer.id);
+        await insertHost(webhookData.data.customer.id);
         break;
       case "listing.created":
         const userId = webhookData.data.channel.customer.id;
@@ -269,7 +267,7 @@ export default async function webhook(
           .split("T")[0];
 
         const secondEndDate = new Date(now);
-        secondEndDate.setDate(now.getDate() + 540);
+        secondEndDate.setDate(now.getDate() + 539);
         const secondEndDateString = secondEndDate.toISOString().split("T")[0];
 
         //have to send 2 batches because hospitable only allows 365 days at a time, but it allows up to 540 days in the future

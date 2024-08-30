@@ -4,7 +4,7 @@ import { sessions } from "./tables/auth/sessions";
 import { bids } from "./tables/bids";
 import { counters } from "./tables/counters";
 import { groupInvites, groupMembers, groups } from "./tables/groups";
-import { hostProfiles } from "./tables/hostProfiles";
+import { hostProfiles, hostReferralDiscounts } from "./tables/hostProfiles";
 import {
   hostTeamInvites,
   hostTeamMembers,
@@ -21,13 +21,15 @@ import { bookedDates, properties } from "./tables/properties";
 import { requests } from "./tables/requests";
 import { requestsToProperties } from "./tables/requestsToProperties";
 import { reservedDateRanges } from "./tables/reservedDateRanges";
-import { superhogActionOnTrips } from "./tables/superhogActionsOnTrips";
-import { superhogRequests } from "./tables/superhogRequests";
+import {
+  superhogRequests,
+  superhogActionOnTrips,
+  superhogErrors,
+} from "./tables/superhogRequests";
 import { referralCodes, referralEarnings, users } from "./tables/users";
 import { trips, tripCancellations } from "./tables/trips";
 import { reviews } from "./tables/reviews";
 import { fillerBookings, fillerOffers } from "./tables/feedFiller";
-import { superhogErrors } from "./tables/superhogErrors";
 import { linkInputProperties } from "./tables/linkInputProperties";
 import { externalListings } from "./tables/externalListings";
 
@@ -48,6 +50,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   superhogRequests: many(superhogRequests),
   emergencyContacts: many(emergencyContacts),
   superHogErrors: many(superhogErrors),
+  hostReferralDiscounts: many(hostReferralDiscounts),
 }));
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -64,12 +67,16 @@ export const sessionsRelations = relations(sessions, ({ one }) => ({
   }),
 }));
 
-export const referralCodesRelations = relations(referralCodes, ({ one }) => ({
-  owner: one(users, {
-    fields: [referralCodes.ownerId],
-    references: [users.id],
+export const referralCodesRelations = relations(
+  referralCodes,
+  ({ one, many }) => ({
+    owner: one(users, {
+      fields: [referralCodes.ownerId],
+      references: [users.id],
+    }),
+    hostReferralDiscounts: many(hostReferralDiscounts),
   }),
-}));
+);
 
 export const hostProfilesRelations = relations(hostProfiles, ({ one }) => ({
   hostUser: one(users, {
@@ -189,6 +196,28 @@ export const earningsRelations = relations(referralEarnings, ({ one }) => ({
     references: [offers.id],
   }),
 }));
+
+export const hostReferralDiscountsRelations = relations(
+  hostReferralDiscounts,
+  ({ one }) => ({
+    owner: one(users, {
+      fields: [hostReferralDiscounts.ownerId],
+      references: [users.id],
+    }),
+    referee: one(users, {
+      fields: [hostReferralDiscounts.refereeUserId],
+      references: [users.id],
+    }),
+    referralCodes: one(referralCodes, {
+      fields: [hostReferralDiscounts.referralCode],
+      references: [referralCodes.referralCode],
+    }),
+    tripId: one(trips, {
+      fields: [hostReferralDiscounts.tripId],
+      references: [trips.id],
+    }),
+  }),
+);
 
 export const conversationsRelations = relations(conversations, ({ many }) => ({
   messages: many(messages),
@@ -359,6 +388,7 @@ export const tripsRelations = relations(trips, ({ one, many }) => ({
   superhogErrors: many(superhogErrors),
   superhogActions: many(superhogActionOnTrips),
   tripCancellations: many(tripCancellations),
+  hostReferralDiscounts: many(hostReferralDiscounts),
 }));
 
 export const tripsCancellationRelations = relations(

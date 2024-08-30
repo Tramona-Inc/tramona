@@ -624,11 +624,12 @@ function OfferPageMobileBottomCard({
         )}
         <div className="flex-1">
           <BookNowBtn btnSize="sm" offer={offer} property={property} />
-          {verificationStatus?.isIdentityVerified === "false" && (
-            <p className="text-center text-xs font-semibold text-red-500">
-              Host requires Stripe verification prior to booking
-            </p>
-          )}
+          {verificationStatus?.isIdentityVerified === "false" &&
+            property.stripeVerRequired === true && (
+              <p className="text-center text-xs font-semibold text-red-500">
+                Host requires Stripe verification prior to booking
+              </p>
+            )}
         </div>
       </CardContent>
     </Card>
