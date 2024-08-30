@@ -90,7 +90,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "cmdk": "^0.2.1",
-    "core-js": "3.38.0",
+    "core-js": "3.38.1",
     "date-fns": "^3.6.0",
     "dayjs": "^1.11.10",
     "drizzle-orm": "^0.33.0",
