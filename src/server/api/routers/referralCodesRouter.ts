@@ -1,4 +1,3 @@
-import RequestCashback from "packages/transactional/emails/RequestCashback";
 import {
   createTRPCRouter,
   protectedProcedure,
@@ -12,7 +11,7 @@ import {
 } from "@/server/db/schema";
 import { sendEmail } from "@/server/server-utils";
 import { TRPCError } from "@trpc/server";
-import { and, eq, isNotNull, isNull, sql } from "drizzle-orm";
+import { and, eq, isNotNull, sql } from "drizzle-orm";
 import { z } from "zod";
 
 export const referralCodesRouter = createTRPCRouter({

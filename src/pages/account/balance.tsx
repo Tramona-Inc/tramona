@@ -10,7 +10,6 @@ import { type RouterOutputs, api } from "@/utils/api";
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import { ConnectNotificationBanner } from "@stripe/react-connect-js";
 import useIsStripeConnectInstanceReady from "@/utils/store/stripe-connect";
-import { useEffect, useRef } from "react";
 
 export type ReferralTableData =
   RouterOutputs["referralCodes"]["getReferralCodeInfo"];

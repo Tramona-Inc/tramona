@@ -5,16 +5,7 @@ import {
 } from "@/server/api/routers/messagesRouter";
 import { stripe } from "@/server/api/routers/stripeRouter";
 import { db } from "@/server/db";
-import {
-  hostProfiles,
-  offers,
-  referralCodes,
-  referralEarnings,
-  requests,
-  properties,
-  trips,
-  users,
-} from "@/server/db/schema";
+import { offers, requests, properties, trips, users } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
 import { buffer } from "micro";
 import { type NextApiRequest, type NextApiResponse } from "next";
@@ -28,7 +19,6 @@ import {
   completeReferral,
   validateHostDiscountReferral,
 } from "@/utils/webhook-functions/referral-utils";
-import { Users } from "lucide-react";
 
 // ! Necessary for stripe
 export const config = {

@@ -17,8 +17,6 @@ import { type StripeElementsOptions } from "@stripe/stripe-js";
 import Spinner from "../_common/Spinner";
 
 import { useToast } from "../ui/use-toast";
-import { Property } from "../../server/db/schema/tables/properties";
-
 const CustomStripeCheckout = ({
   offer: { property, ...offer },
 }: {
@@ -52,8 +50,6 @@ const CustomStripeCheckout = ({
   const [options, setOptions] = useState<StripeElementsOptions | undefined>(
     undefined,
   );
-  const [paymentIntentResponse, setPaymentIntentResponse] =
-    useState<Stripe.Response<Stripe.PaymentIntent> | null>(null);
   const [checkoutReady, setCheckoutReady] = useState(false);
 
   const { data: propertyHostUserAccount } =
@@ -97,7 +93,7 @@ const CustomStripeCheckout = ({
         if (!response) {
           return;
         }
-        setPaymentIntentResponse(response); // Set PaymentIntentResponse directly within fetchData then we convert to options ]
+
         setOptions({
           clientSecret: response.client_secret!, //#004236 #f4f4f5
           appearance: {
@@ -169,7 +165,7 @@ const CustomStripeCheckout = ({
     <div className="w-full">
       {checkoutReady && options?.clientSecret ? (
         <Elements stripe={stripePromise} options={options}>
-          <StripeCheckoutForm clientSecret={options.clientSecret} />
+          <StripeCheckoutForm />
         </Elements>
       ) : (
         <div className="h-48">
