@@ -29,7 +29,7 @@ export default function UnclaimedMap() {
     <LoadingProvider>
       <div className="flex h-screen-minus-header-n-footer w-full sm:h-screen-minus-header-n-footer-n-searchbar">
         <div
-          className={`mt-3 h-full w-full max-w-7xl px-6 md:w-2/3 ${showMap ? "hidden" : "h-full w-full"}`}
+          className={`my-3 h-full w-full max-w-7xl px-2 md:w-2/3 ${showMap ? "hidden" : "h-full w-full"}`}
         >
           <UnclaimedOfferCards mapBoundaries={mapBoundaries} />
           <div className="fixed bottom-10 left-1/2 -translate-x-1/2 transform rounded-full md:hidden">
@@ -39,7 +39,7 @@ export default function UnclaimedMap() {
           </div>
         </div>
         <div
-          className={`h-full md:flex md:w-1/3 md:flex-grow ${showMap ? "flex h-full w-full md:hidden" : "hidden"}`}
+          className={`mx-1 h-full md:flex md:w-1/3 md:flex-grow ${showMap ? "flex h-full w-full md:hidden" : "hidden"}`}
         >
           <SearchPropertiesMap
             setFunctionRef={setFunctionRef}
