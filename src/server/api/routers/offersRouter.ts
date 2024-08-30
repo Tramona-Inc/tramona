@@ -764,6 +764,6 @@ export const offersRouter = createTRPCRouter({
             numOfOffersInEachScraper: numOfOffersPerDateRange / numOfScrapers,
           }),
         ),
-      );
+      ).then((res) => res.flat());
     }),
 });
