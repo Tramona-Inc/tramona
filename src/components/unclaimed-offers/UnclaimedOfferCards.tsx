@@ -103,27 +103,22 @@ export default function UnclaimedOfferCards({
 
   const renderPaginationItems = useCallback(() => {
     const items = [];
-    const maxVisiblePages = 5;
 
-    if (totalPages <= maxVisiblePages) {
-      for (let i = 1; i <= totalPages; i++) {
-        items.push(
-          <PaginationItem key={i}>
-            <PaginationLink
-              href={`?page=${i}`}
-              onClick={(e) => {
-                e.preventDefault();
-                handlePageChange(i);
-              }}
-              isActive={currentPage === i}
-            >
-              {i}
-            </PaginationLink>
-          </PaginationItem>,
-        );
-      }
-    } else {
-      // Add logic for when there are more pages than maxVisiblePages
+    for (let i = 1; i <= totalPages; i++) {
+      items.push(
+        <PaginationItem key={i}>
+          <PaginationLink
+            href={`?page=${i}`}
+            onClick={(e) => {
+              e.preventDefault();
+              handlePageChange(i);
+            }}
+            isActive={currentPage === i}
+          >
+            {i}
+          </PaginationLink>
+        </PaginationItem>
+      );
     }
 
     return items;
