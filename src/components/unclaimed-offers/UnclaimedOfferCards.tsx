@@ -347,10 +347,10 @@ export function UnMatchedPropertyCard({ property }) {
                 </div>
               </div>
             </div>
-            <div className="text-sm text-zinc-500">
-              {/* {formatDateRange(offer.checkIn, offer.checkOut)} */} 'replace
-              with check in check out'
-            </div>
+            {/* <div className="text-sm text-zinc-500"> */}
+              {/* {formatDateRange(offer.checkIn, offer.checkOut)} */}
+              {/* replace with check in check out'
+            </div> */}
             <div className="text-sm text-zinc-500">
               {plural(property.maxNumGuests, "Guest")}
             </div>
