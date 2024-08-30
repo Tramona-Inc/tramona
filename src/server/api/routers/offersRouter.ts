@@ -15,6 +15,7 @@ import {
   referralCodes,
   requestSelectSchema,
   trips,
+  users,
 } from "@/server/db/schema";
 import { getCity, getCoordinates } from "@/server/google-maps";
 import {
@@ -248,7 +249,7 @@ export const offersRouter = createTRPCRouter({
                 with: {
                   hostProfile: {
                     columns: {
-                      stripeAccountId: true,
+                      userId: true,
                     },
                   },
                 },

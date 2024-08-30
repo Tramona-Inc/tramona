@@ -3,7 +3,7 @@ import { api } from "@/utils/api";
 import { type HostDashboardRequest } from "./RequestCard";
 import { getAge } from "@/utils/utils";
 import UserAvatar from "../_common/UserAvatar";
-import { BadgeCheck, BadgeX, CircleUserRound, Mail, Phone } from "lucide-react";
+import { BadgeCheck, BadgeX } from "lucide-react";
 
 export function TravelerVerificationsDialog({
   request,

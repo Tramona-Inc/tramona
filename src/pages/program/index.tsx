@@ -195,7 +195,7 @@ function ProgramTiers() {
               <div className="space-y-3">
                 <h3 className="text-2xl font-bold md:text-3xl">Partner</h3>
                 <p className="sm:text-2xl">
-                  Earn 30% of what we make off everyone you refer
+                  Earn $25 cash for each user&apos;s first booking!
                 </p>
               </div>
 
@@ -374,8 +374,8 @@ function FAQ() {
             <AccordionItem value="1">
               <AccordionTrigger>How are payouts made?</AccordionTrigger>
               <AccordionContent>
-                We&apos;ll send you a check or a direct deposit to your bank
-                account.
+                You can use the cash for future trips, or we&apos;ll deposit it
+                directly into your bank account.
               </AccordionContent>
             </AccordionItem>
 

@@ -11,10 +11,10 @@ import LastThirtyDaysChart from "@/components/host/finances/summary/LastThirtyDa
 
 export default function HostAnalytics({
   className,
-  stripeAccountIdNumber,
+  stripeConnectIdNumber,
 }: {
   className?: string;
-  stripeAccountIdNumber: string | null | undefined;
+  stripeConnectIdNumber: string | null | undefined;
 }) {
   const [totalRevenue, setTotalRevenue] = useState<number>(0);
 
@@ -36,7 +36,7 @@ export default function HostAnalytics({
       </CardHeader>
       <div className="relative flex border-t">
         <LastThirtyDaysChart
-          hostStripeAccountId={stripeAccountIdNumber}
+          hostStripeConnectId={stripeConnectIdNumber}
           setTotalRevenue={setTotalRevenue}
         />
       </div>

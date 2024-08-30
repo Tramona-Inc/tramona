@@ -1,6 +1,6 @@
 import { eq, and, sql, isNull, isNotNull } from "drizzle-orm";
 import { db } from "../../../server/db";
-import { hostProfiles, trips } from "../../../server/db/schema/index";
+import { users, trips } from "../../../server/db/schema/index";
 import { createPayHostTransfer } from "@/utils/stripe-utils";
 import { sendSlackMessage } from "../../../server/slack";
 // Your custom utility to create Stripe transfer
@@ -35,8 +35,8 @@ export default async function handler() {
     // Process each booking and create a transfer made an array in case host has multiple trips within 24 hours
     if (TripsAfter24HourCheckIn.length >= 1) {
       for (const trip of TripsAfter24HourCheckIn) {
-        const hostAccount = await db.query.hostProfiles.findFirst({
-          where: eq(hostProfiles.userId, trip.property.hostId!),
+        const hostAccount = await db.query.users.findFirst({
+          where: eq(users.id, trip.property.hostId!),
         });
         if (!hostAccount) {
           console.log("SKIIPPPPEEDD");
@@ -44,14 +44,14 @@ export default async function handler() {
         }
         await createPayHostTransfer({
           amount: trip.offer!.hostPayout,
-          destination: hostAccount.stripeAccountId!,
+          destination: hostAccount.stripeConnectId!,
           tripId: trip.id.toString(),
         });
         await sendSlackMessage({
           channel: "tramona-bot",
           text: [
             `A host has been paid for booking ${trip.id} that has passed the 24-hour check-in window.`,
-            `Host: ${hostAccount.userId} was paid a total of ${trip.offer!.hostPayout}`,
+            `Host: ${hostAccount.firstName} was paid a total of ${trip.offer!.hostPayout}`,
             `Just using this because i want to test the payout job`,
           ].join("\n"),
         });

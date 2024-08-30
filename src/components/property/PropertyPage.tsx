@@ -22,7 +22,6 @@ import {
 import Image from "next/image";
 import OfferPhotos from "../offers/OfferPhotos";
 import { AspectRatio } from "../ui/aspect-ratio";
-import BiddingForm from "./BiddingForm";
 import PropertyAmenities from "../offers/PropertyAmenities";
 import AmenitiesComponent from "../offers/CategorizedAmenities";
 import SingleLocationMap from "@/components/_common/GoogleMaps/SingleLocationMap";

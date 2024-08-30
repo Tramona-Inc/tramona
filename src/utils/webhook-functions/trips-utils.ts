@@ -108,8 +108,6 @@ export async function cancelTripByPaymentIntent({
           refund: currentTrip.totalPriceAfterFees!,
         }),
       });
-
-      console.log("Email Sent");
     }
   }
 }
@@ -162,7 +160,6 @@ export async function sendEmailAndWhatsupConfirmation({
       adults: property.maxNumGuests,
     }),
   });
-  console.log("EMAIL SENT");
 
   // const twilioMutation = api.twilio.sendSMS.useMutation();
   // const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
