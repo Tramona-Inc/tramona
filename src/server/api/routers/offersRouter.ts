@@ -32,6 +32,8 @@ import { requests } from "../../db/schema/tables/requests";
 import { requestsToProperties } from "../../db/schema/tables/requestsToProperties";
 import { db } from "@/server/db";
 import NewOfferReceivedEmail from "packages/transactional/emails/NewOfferReceivedEmail";
+import { directSiteScrapers, scrapeDirectListings, ScrapedListing, subsequentScrape } from '@/server/direct-sites-scraping';
+import { createNormalDistributionDates } from '@/server/server-utils'
 
 export const offersRouter = createTRPCRouter({
   accept: protectedProcedure
@@ -730,5 +732,30 @@ export const offersRouter = createTRPCRouter({
       },
     });
     return unMatchedOffers;
+  }),
+
+  scrapeUnclaimedOffers: publicProcedure.input(
+    z.object({
+      numOfOffers: z.number().min(1).max(50),
+      })
+    ).mutation(async ({ ctx, input }) => {
+      // numOfOffers = numOfOffersPerDateRange * numOfDateRanges 
+      const numOfOffersPerDateRange = 6;
+      const numOfScrapers = directSiteScrapers.length;
+      const numOfDateRanges = Math.ceil(input.numOfOffers / numOfOffersPerDateRange); // at least 1
+      const dateRanges = createNormalDistributionDates(numOfDateRanges);
+      const allListings: ScrapedListing[] = [];
+      for (const dateRange of dateRanges) {
+        await scrapeDirectListings({
+          checkIn: dateRange.checkIn,
+          checkOut: dateRange.checkOut,
+          numOfOffersInEachScraper: numOfOffersPerDateRange / numOfScrapers,
+        }).then((listings) => {
+          allListings.push(...listings); 
+        }).catch((error) => {
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Error scraping listings. "+error });
+        });
+      }
+    return allListings;
   }),
 });

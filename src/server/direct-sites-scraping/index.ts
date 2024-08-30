@@ -24,7 +24,7 @@ export type ScrapedListing =
   });
 
 export type SubsequentScraper = (options: {
-    originalListingId: string;
+    originalListingId: string; // all input params are from offers and properties table
     scrapeUrl: string;
     checkIn: Date;
     checkOut: Date;
@@ -57,6 +57,7 @@ const filterNewPropertyFields = (listing: ScrapedListing): NewProperty => {
 export const scrapeDirectListings = async (options: {
   checkIn: Date;
   checkOut: Date;
+  numOfOffersInEachScraper?: number;
 }) => {
   const allListings = await Promise.all(
     directSiteScrapers.map((scraper) => scraper(options)),
