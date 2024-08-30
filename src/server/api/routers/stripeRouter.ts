@@ -24,6 +24,27 @@ export const stripeWithSecretKey = new Stripe(env.STRIPE_SECRET_KEY, {
 // change the apiVersion
 
 export const stripeRouter = createTRPCRouter({
+  createStripeCustomer: protectedProcedure
+    .input(
+      z.object({
+        email: z.string(),
+        name: z.string().optional(),
+        firstName: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const customer = await stripeWithSecretKey.customers.create({
+        email: input.email,
+        name: input.name ?? input.firstName ?? ctx.user.id,
+      });
+      await ctx.db
+        .update(users)
+        .set({
+          stripeCustomerId: customer.id,
+        })
+        .where(eq(users.id, ctx.user.id));
+    }),
+
   createCheckoutSession: protectedProcedure
     .input(
       z.object({
@@ -286,7 +307,32 @@ export const stripeRouter = createTRPCRouter({
       //we need the host Stripe account id to put in webhook
       //get hostID from the property
       // Object that can be access through webhook and client
+      //check if a customer id exists
+      let stripeCustomerId = await ctx.db.query.users
+        .findFirst({
+          columns: {
+            stripeCustomerId: true,
+          },
+          where: eq(users.id, ctx.user.id),
+        })
+        .then((res) => res?.stripeCustomerId);
+      if (!stripeCustomerId) {
+        const customer = await stripeWithSecretKey.customers.create({
+          email: ctx.user.email,
+          name: ctx.user.name ?? ctx.user.id,
+        });
+        await ctx.db
+          .update(users)
+          .set({
+            stripeCustomerId: customer.id,
+          })
+          .where(eq(users.id, ctx.user.id));
+
+        stripeCustomerId = customer.id;
+      }
+
       const metadata = {
+        user_email: ctx.user.email,
         user_id: ctx.user.id,
         offer_id: input.offerId,
         property_id: input.propertyId,
@@ -297,6 +343,7 @@ export const stripeRouter = createTRPCRouter({
         confirmed_at: currentDate.toISOString(),
         phone_number: input.phoneNumber,
         host_stripe_id: input.hostStripeId ?? "",
+        stripe_customer_id: stripeCustomerId,
       };
 
       const options: Stripe.PaymentIntentCreateParams = {

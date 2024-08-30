@@ -56,7 +56,6 @@ const CustomStripeCheckout = ({
       enabled: !!property.hostId,
     });
   const authorizePayment = api.stripe.authorizePayment.useMutation();
-
   const fetchClientSecret = useCallback(async () => {
     if (!session.data?.user) return;
     try {
