@@ -570,7 +570,7 @@ export async function updateTravelerandHostMarkup({
     .where(and(eq(offers.id, offerId), isNull(offers.acceptedAt)));
 }
 
-export async function rewardHostReferral({
+export async function createHostReferral({
   userId,
   referralCodeUsed,
 }: {
