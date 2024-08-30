@@ -117,7 +117,7 @@ export default function UnclaimedOfferCards({
           >
             {i}
           </PaginationLink>
-        </PaginationItem>
+        </PaginationItem>,
       );
     }
 
@@ -126,7 +126,7 @@ export default function UnclaimedOfferCards({
 
   return (
     <div className="h-full w-full flex-col">
-      <div className="sm:h-screen-minus-header-n-footer-n-searchbar flex h-screen-minus-header-n-footer w-full">
+      <div className="flex h-screen-minus-header-n-footer w-full sm:h-screen-minus-header-n-footer-n-searchbar">
         <div className="mr-auto h-full w-full overflow-y-scroll px-6 scrollbar-hide">
           {isDelayedLoading ? (
             <div className="grid w-full grid-cols-1 gap-x-6 sm:grid-cols-2 md:gap-y-6 lg:grid-cols-3 lg:gap-y-8 xl:gap-y-4 2xl:gap-y-0">

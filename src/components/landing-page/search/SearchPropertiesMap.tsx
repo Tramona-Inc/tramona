@@ -243,7 +243,7 @@ function SearchPropertiesMap({
         center && (
           <Map
             {...cameraProps}
-            defaultZoom={10}
+            defaultZoom={6}
             defaultCenter={center}
             onCameraChanged={handleCameraChanged}
             disableDefaultUI={true}

@@ -13,7 +13,7 @@ type FetchNextPageRefFunction = () => Promise<
   InfiniteQueryObserverResult<fetchNextPageOfAdjustedPropertiesType>
 >;
 
-export default function TestComponent() {
+export default function UnclaimedMap() {
   const fetchNextPageRef = useRef<FetchNextPageRefFunction | null>(null);
 
   const setFunctionRef = useCallback((ref: FetchNextPageRefFunction) => {
@@ -29,7 +29,7 @@ export default function TestComponent() {
     <LoadingProvider>
       <div className="flex h-screen-minus-header-n-footer w-full sm:h-screen-minus-header-n-footer-n-searchbar">
         <div
-          className={`h-full w-full max-w-7xl px-6 md:w-2/3 ${showMap ? "hidden" : "h-full w-full"}`}
+          className={`mt-3 h-full w-full max-w-7xl px-6 md:w-2/3 ${showMap ? "hidden" : "h-full w-full"}`}
         >
           <UnclaimedOfferCards mapBoundaries={mapBoundaries} />
           <div className="fixed bottom-10 left-1/2 -translate-x-1/2 transform rounded-full md:hidden">

@@ -1,6 +1,7 @@
 import {
   BadgeHelp,
   BadgeInfo,
+  BadgePercentIcon,
   HandshakeIcon,
   Home,
   InfoIcon,
@@ -12,11 +13,11 @@ export const headerLinks = [
   // { name: "Link Input", href: "/link-input", icon: LinkIcon },
   { name: "Recent Deals", href: "/exclusive-offers", icon: HandshakeIcon },
   { name: "For Hosts", href: "/why-list", icon: Home },
-  // {
-  //   name: "Unclaimed Offers",
-  //   href: "/unclaimed-offers",
-  //   icon: BadgePercentIcon,
-  // },
+  {
+    name: "Unclaimed Offers",
+    href: "/unclaimed-offers",
+    icon: BadgePercentIcon,
+  },
 ];
 
 export const hamburgerLinksDesktop = [

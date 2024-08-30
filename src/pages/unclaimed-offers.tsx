@@ -1,7 +1,7 @@
 import MainLayout from "@/components/_common/Layout/MainLayout";
 import { AdjustedPropertiesProvider } from "@/components/landing-page/search/AdjustedPropertiesContext";
 import DynamicDesktopSearchBar from "@/components/landing-page/search/DynamicDesktopSearchBar";
-import TestComponent from "@/components/unclaimed-offers/UnclaimedMap";
+import UnclaimedMap from "@/components/unclaimed-offers/UnclaimedMap";
 import React from "react";
 
 export default function Page() {
@@ -13,7 +13,7 @@ export default function Page() {
             <DynamicDesktopSearchBar />
           </div>
           <div className="h-full w-full">
-            <TestComponent />
+            <UnclaimedMap />
           </div>
         </div>
       </AdjustedPropertiesProvider>
