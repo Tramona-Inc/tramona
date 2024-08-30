@@ -81,81 +81,80 @@ export const scrapeDirectListings = async (options: {
               .where(eq(properties.originalListingId, existingOriginalPropertyId))
               .returning({ id: properties.id });
 
-          const tramonaPropertyId = tramonaProperty[0]?.id;
-          if (tramonaPropertyId) {
-            if(listing.reviews.length > 0){
-              await trx.delete(reviews).where(eq(reviews.propertyId, tramonaPropertyId));
-              await trx.insert(reviews).values(listing.reviews.map((review) => ({
-                ...review,
-                propertyId: tramonaPropertyId,
-              })));
+          const tramonaPropertyId = tramonaProperty[0]!.id;
+
+          if(listing.reviews.length > 0){
+            await trx.delete(reviews).where(eq(reviews.propertyId, tramonaPropertyId));
+            await trx.insert(reviews).values(listing.reviews.map((review) => ({
+              ...review,
+              propertyId: tramonaPropertyId,
+            })));
+          }
+
+          const existingOffers = await trx.select({id: offers.id})
+              .from(offers)
+              .where(and(
+                eq(offers.propertyId, tramonaPropertyId),
+                eq(offers.checkIn, options.checkIn),
+                eq(offers.checkOut, options.checkOut)
+              ))
+            if(existingOffers[0]){
+              console.log("existingOffer, offerId: ", existingOffers[0]?.id);
             }
 
-            const existingOffers = await trx.select({id: offers.id})
-                .from(offers)
-                .where(and(
-                  eq(offers.propertyId, tramonaPropertyId),
-                  eq(offers.checkIn, options.checkIn),
-                  eq(offers.checkOut, options.checkOut)
-                ))
-              if(existingOffers[0]){
-                console.log("existingOffer, offerId: ", existingOffers[0]?.id);
-              }
-            if(!existingOffers[0]?.id){
-              const originalTotalPrice = listing.originalNightlyPrice ?? 0 * getNumNights(options.checkIn, options.checkOut);
-              const newOffer: NewOffer = {
-                propertyId: tramonaPropertyId,
-                checkIn: options.checkIn,
-                checkOut: options.checkOut,
-                totalPrice: originalTotalPrice,
-                hostPayout: originalTotalPrice,
-                travelerOfferedPrice: originalTotalPrice,
-                scrapeUrl: listing.scrapeUrl,
-                isAvailableOnOriginalSite: true,
-                availabilityCheckedAt: new Date(),
-              };
-              const newOfferId = await trx.insert(offers).values(newOffer).returning({id: offers.id}) 
-              console.log("newOfferIdReturned: ", newOfferId);
-            }
+          if(!existingOffers[0]?.id){
+            const originalTotalPrice = listing.originalNightlyPrice ?? 0 * getNumNights(options.checkIn, options.checkOut);
+            const newOffer: NewOffer = {
+              propertyId: tramonaPropertyId,
+              checkIn: options.checkIn,
+              checkOut: options.checkOut,
+              totalPrice: originalTotalPrice,
+              hostPayout: originalTotalPrice,
+              travelerOfferedPrice: originalTotalPrice,
+              scrapeUrl: listing.scrapeUrl,
+              isAvailableOnOriginalSite: true,
+              availabilityCheckedAt: new Date(),
+            };
+            const newOfferId = await trx.insert(offers).values(newOffer).returning({id: offers.id}) 
+            console.log("newOfferIdReturned: ", newOfferId);
           }
         } else {
           const tramonaProperty = await trx.insert(properties).values(newPropertyListing).returning({id: properties.id});
           
-          const newPropertyId = tramonaProperty[0]?.id;
-          if(newPropertyId){
-            if(listing.reviews.length > 0){
-              await trx.insert(reviews).values(listing.reviews.map((review) => ({
-                ...review,
-                propertyId: newPropertyId,
-              })));
-            }
+          const newPropertyId = tramonaProperty[0]!.id;
 
-            const existingOffers = await trx.select({id: offers.id})
-                .from(offers)
-                .where(and(
-                  eq(offers.propertyId, newPropertyId),
-                  eq(offers.checkIn, options.checkIn),
-                  eq(offers.checkOut, options.checkOut)
-                ))
-            if(existingOffers[0]){
-              console.log("existingOffer, offerId: ", existingOffers[0]?.id);
-            }
-            if(!existingOffers[0]?.id){
-              const originalTotalPrice = listing.originalNightlyPrice ?? 0 * getNumNights(options.checkIn, options.checkOut);
-              const newOffer: NewOffer = {
-                propertyId: newPropertyId,
-                checkIn: options.checkIn,
-                checkOut: options.checkOut,
-                totalPrice: originalTotalPrice,
-                hostPayout: originalTotalPrice,
-                travelerOfferedPrice: originalTotalPrice,
-                scrapeUrl: listing.scrapeUrl,
-                isAvailableOnOriginalSite: true,
-                availabilityCheckedAt: new Date(),
-              };
-              const newOfferId = await trx.insert(offers).values(newOffer).returning({id: offers.id}) 
-              console.log("newOfferIdReturned: ", newOfferId);
-            }
+          if(listing.reviews.length > 0){
+            await trx.insert(reviews).values(listing.reviews.map((review) => ({
+              ...review,
+              propertyId: newPropertyId,
+            })));
+          }
+
+          const existingOffers = await trx.select({id: offers.id})
+              .from(offers)
+              .where(and(
+                eq(offers.propertyId, newPropertyId),
+                eq(offers.checkIn, options.checkIn),
+                eq(offers.checkOut, options.checkOut)
+              ))
+          if(existingOffers[0]){
+            console.log("existingOffer, offerId: ", existingOffers[0]?.id);
+          }
+          if(!existingOffers[0]?.id){
+            const originalTotalPrice = listing.originalNightlyPrice ?? 0 * getNumNights(options.checkIn, options.checkOut);
+            const newOffer: NewOffer = {
+              propertyId: newPropertyId,
+              checkIn: options.checkIn,
+              checkOut: options.checkOut,
+              totalPrice: originalTotalPrice,
+              hostPayout: originalTotalPrice,
+              travelerOfferedPrice: originalTotalPrice,
+              scrapeUrl: listing.scrapeUrl,
+              isAvailableOnOriginalSite: true,
+              availabilityCheckedAt: new Date(),
+            };
+            const newOfferId = await trx.insert(offers).values(newOffer).returning({id: offers.id}) 
+            console.log("newOfferIdReturned: ", newOfferId);
           }
         }
       }

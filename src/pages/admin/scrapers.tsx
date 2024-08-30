@@ -6,7 +6,7 @@ export default function IncomingRequests() {
   return (
     <DashboardLayout>
       <Head>
-        <title>Unclaimed Offers Scrapers| Tramona</title>
+        <title>Unclaimed Offers Scrapers | Tramona</title>
       </Head>
       <div className="px-4 pb-64 pt-16">
         <div className="mx-auto max-w-5xl">
