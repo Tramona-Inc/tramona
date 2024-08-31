@@ -31,10 +31,16 @@ import { z } from "zod";
 import axios from "axios";
 import { getCity } from "@/server/google-maps";
 import { sendSlackMessage } from "@/server/slack";
-import { sendEmail } from "@/server/server-utils";
+import { createHostReferral, sendEmail } from "@/server/server-utils";
 import WelcomeEmail from "packages/transactional/emails/WelcomeEmail";
 
 export const usersRouter = createTRPCRouter({
+  getUser: protectedProcedure.query(async ({ ctx }) => {
+    return await db.query.users.findFirst({
+      where: eq(users.id, ctx.user.id),
+    });
+  }),
+
   getOnboardingStep: optionallyAuthedProcedure.query(async ({ ctx }) => {
     if (!ctx.user) return null;
     const res = await ctx.db.query.users.findFirst({
@@ -237,6 +243,22 @@ export const usersRouter = createTRPCRouter({
         ].join("\n"),
         channel: "host-bot",
       });
+
+      const curUser = await db.query.users.findFirst({
+        where: eq(users.id, ctx.user.id),
+      });
+      //referrals for host
+      console.log(
+        "calleing referral function here is the referral code used",
+        curUser,
+      );
+      if (curUser) {
+        //creates the discount but doenst validate or resolve it
+        await createHostReferral({
+          userId: curUser.id,
+          referralCodeUsed: curUser.referralCodeUsed,
+        });
+      }
 
       interface PropertyType {
         id: number;

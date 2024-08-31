@@ -84,6 +84,7 @@
     "@vis.gl/react-google-maps": "^1.0.0",
     "aws-sdk": "^2.1569.0",
     "axios": "^1.6.7",
+    "axios-retry": "^4.5.0",
     "bcrypt": "^5.1.1",
     "cheerio": "1.0.0",
     "chrome-aws-lambda": "^6",

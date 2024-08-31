@@ -1,14 +1,14 @@
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import { referralStatuses } from "@/components/account/cashback/data";
 import { Badge } from "@/components/ui/badge";
-import { api } from "@/utils/api";
 import { formatCurrency, formatDateMonthDayYear } from "@/utils/utils";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
+import { api } from "@/utils/api";
 
 export default function AllReferrals() {
   const { data: fetchedRefEarnings } =
-    api.referralCodes.getReferralEarnings.useQuery();
+    api.referralCodes.getAllEarningsByReferralCode.useQuery();
 
   function badgeColor(status: string) {
     const referralStatus = referralStatuses.find(
@@ -36,7 +36,7 @@ export default function AllReferrals() {
             fetchedRefEarnings.map((row) => (
               <div key={row.id} className="grid grid-cols-2 py-2">
                 <div>
-                  <div>{badgeColor(row.earningStatus)}</div>
+                  <div>{badgeColor(row.earningStatus!)}</div>
                   <h3 className="text-muted-foreground">
                     {formatDateMonthDayYear(row.createdAt)}
                   </h3>

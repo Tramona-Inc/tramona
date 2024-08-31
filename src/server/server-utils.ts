@@ -35,6 +35,8 @@ import {
   offers,
   requestsToProperties,
   users,
+  hostReferralDiscounts,
+  referralCodes,
 } from "./db/schema";
 import { getCity, getCoordinates } from "./google-maps";
 import axios from "axios";
@@ -330,6 +332,7 @@ async function processRequests(
       propertyLatLngPoint: insertedProperty.latLngPoint,
     });
 
+    console.log("properties:", matchingProperties);
     const propertyIds = matchingProperties.map((property) => property.id);
 
     if (propertyIds.includes(insertedProperty.id)) {
@@ -413,6 +416,12 @@ export async function getPropertiesForRequest(
   } else {
     const coordinates = await getCoordinates(req.location);
     if (coordinates.bounds) {
+      console.log(
+        "bounds",
+        coordinates.bounds,
+        req.location,
+        req.maxTotalPrice,
+      );
       const { northeast, southwest } = coordinates.bounds;
       propertyIsNearRequest = sql`
         ST_Within(
@@ -559,4 +568,79 @@ export async function updateTravelerandHostMarkup({
       hostPayout: hostPay,
     })
     .where(and(eq(offers.id, offerId), isNull(offers.acceptedAt)));
+}
+
+export async function createHostReferral({
+  userId,
+  referralCodeUsed,
+}: {
+  userId: string;
+  referralCodeUsed: string | null;
+}) {
+  console.log("this is the referral code ysed  ", referralCodeUsed);
+  if (referralCodeUsed) {
+    const isReferralUsed = await db.query.hostReferralDiscounts.findFirst({
+      where: eq(hostReferralDiscounts.refereeUserId, userId),
+    });
+    console.log("about to return ", isReferralUsed);
+    if (isReferralUsed) return;
+    //find owner of the referral code
+    const referrer = await db.query.referralCodes.findFirst({
+      where: eq(referralCodes.referralCode, referralCodeUsed),
+      columns: { ownerId: true },
+    });
+    //create host referral discount row
+    if (referrer) {
+      await db.insert(hostReferralDiscounts).values({
+        referralCode: referralCodeUsed,
+        ownerId: referrer.ownerId,
+        refereeUserId: userId,
+      });
+    }
+    //send an email or notification to the referrer
+  }
+}
+
+function getRandomNormalDistribution(mean: number, stdDev: number): number {
+  let u = 0,
+    v = 0;
+  while (u === 0) u = Math.random(); // Converting [0,1) to (0,1)
+  while (v === 0) v = Math.random();
+  let num = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+  num = num * stdDev + mean; // Scale to the desired mean and standard deviation
+  return Math.round(num); // Round to nearest integer
+}
+
+function stripTimeFromDate(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+export function createNormalDistributionDates(
+  numRanges: number,
+): { checkIn: Date; checkOut: Date }[] {
+  const dateRanges = [];
+
+  for (let i = 0; i < numRanges; i++) {
+    const today = new Date();
+    const futureDate = new Date(
+      today.getTime() + Math.random() * 90 * 24 * 60 * 60 * 1000,
+    ); // Random date within next 90 days
+    const startDate = stripTimeFromDate(new Date(futureDate));
+
+    // Generate end date using a normal distribution with mean = 3 days and stdDev = 1 day
+    let endDateOffset = getRandomNormalDistribution(3, 1);
+    // Ensure endDateOffset is at least 1 day
+    endDateOffset = Math.max(1, endDateOffset);
+
+    const endDate = stripTimeFromDate(
+      new Date(startDate.getTime() + endDateOffset * 24 * 60 * 60 * 1000),
+    );
+
+    dateRanges.push({
+      checkIn: startDate,
+      checkOut: endDate,
+    });
+  }
+
+  return dateRanges;
 }
