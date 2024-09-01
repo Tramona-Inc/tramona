@@ -18,8 +18,9 @@ export default function Checkout({
   offer: OfferWithDetails;
 }) {
   const router = useRouter();
-  const chatWithAdmin = useChatWithAdmin();
   const isMobile = !useIsSm();
+
+  const chatWithAdmin = useChatWithAdmin();
 
   const handleBackClick = (
     event: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
