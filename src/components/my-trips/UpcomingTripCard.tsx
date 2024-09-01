@@ -5,11 +5,15 @@ import { Button } from "../ui/button";
 import { formatDateRange, getDaysUntilTrip } from "@/utils/utils";
 import Image from "next/image";
 import UserAvatar from "../_common/UserAvatar";
-import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
+import { useChatWithHost } from "@/utils/useChatWithHost";
 import { type TripCardDetails } from "@/pages/my-trips";
+import { api } from "@/utils/api";
 
 export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
-  const chatWithAdmin = useChatWithAdmin();
+  const chatWithHost = useChatWithHost();
+
+  const { data } = api.properties.getById.useQuery({ id: trip.propertyId });
+  const hostId = data?.hostId;
 
   return (
     <div className="w-full">
@@ -76,7 +80,10 @@ export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
           <div className="h-[2px] rounded-full bg-gray-200"></div>
 
           <div className="flex flex-col justify-center gap-2 px-4 sm:flex-row lg:gap-4">
-            <Button variant="secondary" onClick={() => chatWithAdmin()}>
+            <Button
+              variant="secondary"
+              onClick={() => chatWithHost({ hostId: hostId ?? "" })}
+            >
               <MessageCircle className="size-4" />
               Message your host
             </Button>

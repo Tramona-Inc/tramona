@@ -83,6 +83,48 @@ export async function fetchConversationWithAdmin(userId: string) {
   return conversationWithAdmin?.conversation.id ?? null;
 }
 
+export async function fetchConversationWithHost(
+  userId: string,
+  hostId: string,
+) {
+  const result = await db.query.users.findFirst({
+    where: eq(users.id, userId),
+    with: {
+      conversations: {
+        with: {
+          conversation: {
+            with: {
+              participants: {
+                with: {
+                  user: {
+                    columns: {
+                      id: true,
+                      name: true,
+                      image: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  // Check if conversation contains two participants
+  // and check if admin id is in there
+  const conversationWithHost = result?.conversations.find(
+    (conv) =>
+      conv.conversation.participants.length === 2 &&
+      conv.conversation.participants.some(
+        (participant) => participant.user.id === hostId,
+      ),
+  );
+
+  return conversationWithHost?.conversation.id ?? null;
+}
+
 export async function fetchConversationWithOffer(
   userId: string,
   offerId: string,
@@ -143,6 +185,26 @@ export async function createConversationWithAdmin(userId: string) {
     const participantValues = [
       { conversationId: createdConversationId, userId: userId },
       { conversationId: createdConversationId, userId: ADMIN_ID },
+    ];
+
+    await db.insert(conversationParticipants).values(participantValues);
+
+    return createdConversationId;
+  }
+}
+
+export async function createConversationWithHost(
+  userId: string,
+  hostId: string,
+) {
+  // Generate conversation and get id
+  const createdConversationId = await generateConversation();
+
+  if (createdConversationId !== undefined) {
+    // Insert participants for the user and admin
+    const participantValues = [
+      { conversationId: createdConversationId, userId: userId },
+      { conversationId: createdConversationId, userId: hostId },
     ];
 
     await db.insert(conversationParticipants).values(participantValues);
@@ -261,6 +323,21 @@ export const messagesRouter = createTRPCRouter({
 
     return conversationId;
   }),
+
+  createConversationWithHost: protectedProcedure
+    .input(z.object({ hostId: zodString() }))
+    .mutation(async ({ ctx, input }) => {
+      const conversationId = await fetchConversationWithHost(
+        ctx.user.id,
+        input.hostId,
+      );
+
+      if (!conversationId) {
+        return await createConversationWithHost(ctx.user.id, input.hostId);
+      }
+
+      return conversationId;
+    }),
 
   createConversationWithOffer: protectedProcedure
     .input(
