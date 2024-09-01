@@ -36,14 +36,12 @@ export default function FirstAndLastName() {
     resolver: zodResolver(formSchema),
   });
 
-  const { refetch: refetchName } = api.users.getMyVerifications.useQuery(
-    undefined,
-    { enabled: false },
-  );
+  const { refetch: refetchVerifications } =
+    api.users.getMyVerifications.useQuery(undefined, { enabled: false });
 
   const { mutateAsync: updateProfile } = api.users.updateProfile.useMutation({
     onSuccess: () => {
-      void refetchName();
+      void refetchVerifications();
       void router.push("/auth/onboarding-3");
     },
   });

@@ -67,13 +67,11 @@ export default function Onboarding() {
   const { mutateAsync: mutateInsertPhone } =
     api.users.insertPhoneWithUserId.useMutation();
 
-  const { refetch: refetchPhoneNumber } = api.users.getMyVerifications.useQuery(
-    undefined,
-    { enabled: false },
-  );
+  const { refetch: refetchVerifications } =
+    api.users.getMyVerifications.useQuery(undefined, { enabled: false });
   const { mutateAsync: updateProfile } = api.users.updateProfile.useMutation({
     onSuccess: () => {
-      void refetchPhoneNumber();
+      void refetchVerifications();
     },
   });
 
