@@ -754,6 +754,20 @@ export const usersRouter = createTRPCRouter({
       return verifications;
     }),
 
+  getMyVerifications: protectedProcedure.query(async ({ ctx }) => {
+    const verifications = ctx.db.query.users.findFirst({
+      where: eq(users.id, ctx.user.id),
+      columns: {
+        dateOfBirth: true,
+        phoneNumber: true,
+        firstName: true,
+        lastName: true,
+      },
+    });
+
+    return verifications;
+  }),
+
   addEmergencyContacts: protectedProcedure
     .input(
       z.object({
