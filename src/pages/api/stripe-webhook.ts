@@ -19,6 +19,7 @@ import {
   completeReferral,
   validateHostDiscountReferral,
 } from "@/utils/webhook-functions/referral-utils";
+import { createSetupIntent } from "@/utils/webhook-functions/stripe-utils";
 
 // ! Necessary for stripe
 export const config = {
@@ -109,6 +110,13 @@ export default async function webhook(
               ),
             });
 
+            //<------- Setup Intent for future charge ---->
+            await createSetupIntent({
+              customerId: user!.stripeCustomerId!,
+              paymentMethodId: paymentIntentSucceeded.payment_method!,
+              userId: user!.id,
+            });
+
             //create trip here
 
             if (offer?.request) {
@@ -129,9 +137,7 @@ export default async function webhook(
 
               //superhog reservation
 
-              //creating a superhog reservation only if does not exist
-
-              //<<-------------uncomment once we get test keys----------------->>
+              //<___creating a superhog reservation only if does not exist__>
 
               const currentSuperhogReservation = await db.query.trips.findFirst(
                 {
