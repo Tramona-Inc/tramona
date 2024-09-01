@@ -5,17 +5,8 @@ import {
 } from "@/server/api/routers/messagesRouter";
 import { stripe } from "@/server/api/routers/stripeRouter";
 import { db } from "@/server/db";
-import {
-  hostProfiles,
-  offers,
-  referralCodes,
-  referralEarnings,
-  requests,
-  properties,
-  trips,
-  users,
-} from "@/server/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { offers, requests, properties, trips, users } from "@/server/db/schema";
+import { eq } from "drizzle-orm";
 import { buffer } from "micro";
 import { type NextApiRequest, type NextApiResponse } from "next";
 import { superhogRequests } from "../../server/db/schema/tables/superhogRequests";
@@ -24,7 +15,10 @@ import {
   sendEmailAndWhatsupConfirmation,
 } from "@/utils/webhook-functions/trips-utils";
 import { createSuperhogReservation } from "@/utils/webhook-functions/superhog-utils";
-import { request } from "http";
+import {
+  completeReferral,
+  validateHostDiscountReferral,
+} from "@/utils/webhook-functions/referral-utils";
 
 // ! Necessary for stripe
 export const config = {
@@ -72,107 +66,127 @@ export default async function webhook(
           where: eq(users.id, paymentIntentSucceeded.metadata.user_id!),
         });
 
-        if (!paymentIntentSucceeded.metadata.bid_id) {
-          const confirmedAt = paymentIntentSucceeded.metadata.confirmed_at;
+        const confirmedAt = paymentIntentSucceeded.metadata.confirmed_at;
 
-          // Check if confirmed_at exists and is a valid date string
-          if (confirmedAt && Date.parse(confirmedAt)) {
-            const confirmedDate = new Date(confirmedAt);
+        // Check if confirmed_at exists and is a valid date string
+        if (confirmedAt && Date.parse(confirmedAt)) {
+          const confirmedDate = new Date(confirmedAt);
 
+          await db
+            .update(offers)
+            .set({
+              acceptedAt: confirmedDate,
+              paymentIntentId: paymentIntentSucceeded.id,
+            })
+            .where(
+              eq(
+                offers.id,
+                parseInt(paymentIntentSucceeded.metadata.offer_id!),
+              ),
+            );
+
+          const requestId = paymentIntentSucceeded.metadata.request_id;
+
+          if (requestId && !isNaN(parseInt(requestId))) {
             await db
-              .update(offers)
-              .set({
-                acceptedAt: confirmedDate,
-                paymentIntentId: paymentIntentSucceeded.id,
-              })
-              .where(
-                eq(
-                  offers.id,
-                  parseInt(paymentIntentSucceeded.metadata.offer_id!),
-                ),
+              .update(requests)
+              .set({ resolvedAt: confirmedDate })
+              .where(eq(requests.id, parseInt(requestId)));
+
+            //lets test with out the propertyID
+            const offer = await db.query.offers.findFirst({
+              with: { request: true },
+              where: eq(
+                offers.id,
+                parseInt(paymentIntentSucceeded.metadata.offer_id!),
+              ),
+            });
+
+            const currentProperty = await db.query.properties.findFirst({
+              where: eq(
+                properties.id,
+                parseInt(paymentIntentSucceeded.metadata.property_id!),
+              ),
+            });
+
+            //create trip here
+
+            if (offer?.request) {
+              const currentTrip = await db
+                .insert(trips)
+                .values({
+                  checkIn: offer.checkIn,
+                  checkOut: offer.checkOut,
+                  numGuests: offer.request.numGuests,
+                  groupId: offer.request.madeByGroupId,
+                  propertyId: offer.propertyId,
+                  offerId: offer.id,
+                  paymentIntentId:
+                    paymentIntentSucceeded.payment_intent?.toString() ?? "",
+                  totalPriceAfterFees: paymentIntentSucceeded.amount,
+                })
+                .returning();
+
+              //superhog reservation
+
+              //creating a superhog reservation only if does not exist
+
+              //<<-------------uncomment once we get test keys----------------->>
+
+              const currentSuperhogReservation = await db.query.trips.findFirst(
+                {
+                  where: eq(trips.superhogRequestId, superhogRequests.id),
+                },
               );
 
-            const requestId = paymentIntentSucceeded.metadata.request_id;
-
-            if (requestId && !isNaN(parseInt(requestId))) {
-              await db
-                .update(requests)
-                .set({ resolvedAt: confirmedDate })
-                .where(eq(requests.id, parseInt(requestId)));
-
-              //lets test with out the propertyID
-              const offer = await db.query.offers.findFirst({
-                with: { request: true },
-                where: eq(
-                  offers.id,
-                  parseInt(paymentIntentSucceeded.metadata.offer_id!),
-                ),
-              });
-
-              const currentProperty = await db.query.properties.findFirst({
-                where: eq(
-                  properties.id,
-                  parseInt(paymentIntentSucceeded.metadata.property_id!),
-                ),
-              });
-
-              //create trip here
-
-              if (offer?.request) {
-                const currentTrip = await db
-                  .insert(trips)
-                  .values({
-                    checkIn: offer.checkIn,
-                    checkOut: offer.checkOut,
-                    numGuests: offer.request.numGuests,
-                    groupId: offer.request.madeByGroupId,
-                    propertyId: offer.propertyId,
-                    offerId: offer.id,
-                    paymentIntentId:
-                      paymentIntentSucceeded.payment_intent?.toString() ?? "",
-                    totalPriceAfterFees: paymentIntentSucceeded.amount,
-                  })
-                  .returning();
-
-                //superhog reservation
-
-                //creating a superhog reservation only if does not exist
-
-                //<<-------------uncomment once we get test keys----------------->>
-
-                // const currentSuperhogReservation =
-                //   await db.query.trips.findFirst({
-                //     where: eq(trips.superhogRequestId, superhogRequests.id),
-                //   });
-
-                // if (!currentSuperhogReservation) {
-                //   await createSuperhogReservation({
-                //     paymentIntentId:
-                //       paymentIntentSucceeded.payment_intent?.toString() ?? "",
-                //     propertyId: offer.propertyId,
-                //     userId: user!.id,
-                //     trip: currentTrip[0]!,
-                //   }); //creating a superhog reservation
-                // } else {
-                //   console.log("Superhog reservation already exists");
-                // }
-
-                //<<--------------------->>
-
-                //send email and whatsup
-                console.log("Sending email and whatsup");
-                await sendEmailAndWhatsupConfirmation({
+              if (!currentSuperhogReservation) {
+                await createSuperhogReservation({
+                  paymentIntentId:
+                    paymentIntentSucceeded.payment_intent?.toString() ?? "",
+                  propertyId: offer.propertyId,
+                  userId: user!.id,
                   trip: currentTrip[0]!,
-                  user: user!,
-                  offer: offer,
-                  property: currentProperty!,
+                }); //creating a superhog reservation
+              } else {
+                console.log("Superhog reservation already exists");
+              }
+
+              //<<--------------------->>
+
+              //send email and whatsup (whatsup is not implemented yet)
+              console.log("Sending email and whatsup");
+              await sendEmailAndWhatsupConfirmation({
+                trip: currentTrip[0]!,
+                user: user!,
+                offer: offer,
+                property: currentProperty!,
+              });
+              //redeem the traveler and host refferal code
+              if (user?.referralCodeUsed) {
+                await completeReferral({ user: user, offerId: offer.id });
+              }
+              //validate the host discount referral
+              if (currentProperty?.hostId) {
+                await validateHostDiscountReferral({
+                  hostUserId: currentProperty.hostId,
                 });
               }
             }
           }
-        } else {
-          // Handle case where confirmed_at is missing or invalid
-          console.error("Confirmed_at is missing or invalid.");
+        }
+
+        // ! For now will add user to admin
+        if (paymentIntentSucceeded.metadata.user_id) {
+          const conversationId = await fetchConversationWithAdmin(
+            paymentIntentSucceeded.metadata.user_id,
+          );
+
+          // Create conversation with admin if it doesn't exist
+          if (!conversationId) {
+            await createConversationWithAdmin(
+              paymentIntentSucceeded.metadata.user_id,
+            );
+          }
         }
 
         // const propertyID = parseInt(
@@ -196,52 +210,12 @@ export default async function webhook(
         // const bid = await db.query.bids.findFirst({
         //   where: eq(bids.id, bidID),
         // });
-
-        const referralCode = user?.referralCodeUsed;
-
-        if (referralCode) {
-          const offerId = parseInt(paymentIntentSucceeded.metadata.listing_id!);
-          const refereeId = paymentIntentSucceeded.metadata.user_id!;
-
-          const tramonaFee =
-            parseInt(paymentIntentSucceeded.metadata.total_savings!) * 0.2;
-          const cashbackMultiplier =
-            user.referralTier === "Ambassador" ? 0.5 : 0.3;
-          const cashbackEarned = tramonaFee * cashbackMultiplier;
-
-          await db
-            .insert(referralEarnings)
-            .values({ offerId, cashbackEarned, refereeId, referralCode });
-
-          await db
-            .update(referralCodes)
-            .set({
-              totalBookingVolume: sql`${referralCodes.totalBookingVolume} + ${cashbackEarned}`,
-              numBookingsUsingCode: sql`${referralCodes.numBookingsUsingCode} + ${1}`,
-            })
-            .where(eq(referralCodes.referralCode, referralCode));
-        }
-
         // TODO
         // Add two two users to conversation
         // void addTwoUserToConversation(
         //   paymentIntentSucceeded.metadata.user_id!,
         //   paymentIntentSucceeded.metadata.host_id!,
         // );
-
-        // ! For now will add user to admin
-        if (paymentIntentSucceeded.metadata.user_id) {
-          const conversationId = await fetchConversationWithAdmin(
-            paymentIntentSucceeded.metadata.user_id,
-          );
-
-          // Create conversation with admin if it doesn't exist
-          if (!conversationId) {
-            await createConversationWithAdmin(
-              paymentIntentSucceeded.metadata.user_id,
-            );
-          }
-        }
 
         break;
 
@@ -458,11 +432,11 @@ export default async function webhook(
           const stripeAccount = await stripe.accounts.retrieve(account.id);
           console.log("Stripe account updated", stripeAccount);
           await db
-            .update(hostProfiles)
+            .update(users)
             .set({
               chargesEnabled: stripeAccount.payouts_enabled, // fix later or true
             })
-            .where(eq(hostProfiles.stripeAccountId, account.id));
+            .where(eq(users.stripeConnectId, account.id));
         }
         break;
 

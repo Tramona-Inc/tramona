@@ -1,4 +1,4 @@
-import React, { type ReactElement, useEffect } from "react";
+import { type ReactElement, useEffect } from "react";
 
 import { useState } from "react";
 import { api } from "@/utils/api";
@@ -17,25 +17,18 @@ const StripeConnectSessionProvider = ({
 }: {
   children: ReactElement;
 }) => {
-  const { data: isHost } = api.host.getUserHostInfo.useQuery();
-  //we can get the stripe account id from the host profile
-  const { data: stripeAccountIdNumber } = api.host.getStripeAccountId.useQuery(
-    undefined,
-    {
-      enabled: isHost?.becameHostAt ? true : false,
-    },
-  );
+  const { data: user } = api.users.getUser.useQuery();
 
-  const [stripeAccountId, setStripeAccountId] = useState<string | null>(null);
+  const [stripeConnectId, setStripeConnectId] = useState<string | null>(null);
 
-  //this wets the stripeACCOUNTID number that will be used to create a session
+  //this wets the stripeConnectId number that will be used to create a session
   useEffect(() => {
-    if (!stripeAccountIdNumber?.stripeAccountId) return;
+    if (!user?.stripeConnectId) return;
 
-    setStripeAccountId(stripeAccountIdNumber.stripeAccountId);
-    console.log("stripeAccoutneI after set");
-    console.log(stripeAccountIdNumber.stripeAccountId);
-  }, [stripeAccountIdNumber]);
+    setStripeConnectId(user.stripeConnectId);
+    console.log("stripeConnect after set");
+    console.log(user.stripeConnectId);
+  }, [user]);
 
   //we need to set the client secret as 1 time only
   const [stripeConnectInstance, setStripeConnectInstance] =
@@ -54,8 +47,8 @@ const StripeConnectSessionProvider = ({
   }, [stripeConnectInstance, setStripeConnectInstanceReady]);
 
   const { data: accountSession } =
-    api.stripe.createStripeAccountSession.useQuery(stripeAccountId!, {
-      enabled: stripeAccountId && !isStripeConnectInstanceReady ? true : false,
+    api.stripe.createStripeAccountSession.useQuery(stripeConnectId!, {
+      enabled: stripeConnectId && !isStripeConnectInstanceReady ? true : false,
       onSuccess: () => {
         console.log("accountSession before return");
         if (!accountSession) return;

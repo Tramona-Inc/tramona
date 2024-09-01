@@ -27,6 +27,11 @@ const navs = [
     description: "Manually verify Superhog status for users",
     href: "/admin/superhog",
   },
+  {
+    title: "Unclaimed Offers Scrapers",
+    description: "Trigger the scraping for unclaimed offers page",
+    href: "/admin/scrapers",
+  },
 ];
 
 export default function AdminRequestsTabs() {

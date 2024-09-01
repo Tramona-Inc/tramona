@@ -1,169 +1,375 @@
 import Image from "next/image";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { api } from "@/utils/api";
 import { type RouterOutputs } from "@/utils/api";
 import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
-import { formatDateRange, formatCurrency } from "@/utils/utils";
-import { InfoIcon, TrashIcon } from "lucide-react";
-import { Separator } from "../ui/separator";
+import { formatCurrency, plural } from "@/utils/utils";
+import { Star, ChevronLeft, ChevronRight } from "lucide-react";
 import { Skeleton } from "../ui/skeleton";
-import { useState } from "react";
-import ShareOfferDialog from "../_common/ShareLink/ShareOfferDialog";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useSession } from "next-auth/react";
-import React from "react";
-
+import { useRouter } from "next/router";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import { useAdjustedProperties } from "../landing-page/search/AdjustedPropertiesContext";
 import AddUnclaimedOffer from "./AddUnclaimedOffer";
-export type UnMatchedOffers =
-  RouterOutputs["offers"]["getAllUnmatchedOffers"][number];
+import { MapBoundary } from "../landing-page/search/SearchPropertiesMap";
+import { useLoading } from "./UnclaimedMapLoadingContext";
 
-export default function UnclaimedOfferCard() {
-  const [showMore, setShowMore] = useState(false);
-  const { data: unMatchedOffers, isLoading } =
-    api.offers.getAllUnmatchedOffers.useQuery();
+type Property =
+  RouterOutputs["properties"]["getAllInfiniteScroll"]["data"][number];
+
+export default function UnclaimedOfferCards({
+  mapBoundaries,
+}: {
+  mapBoundaries: MapBoundary | null;
+}): JSX.Element {
+  const { adjustedProperties } = useAdjustedProperties();
+  const router = useRouter();
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 24;
   const { data: session } = useSession();
+  const { isLoading } = useLoading();
+  const [isDelayedLoading, setIsDelayedLoading] = useState(true);
+  const [showNoProperties, setShowNoProperties] = useState(false);
+
+  useEffect(() => {
+    if (
+      !isDelayedLoading &&
+      (!adjustedProperties?.pages.length ||
+        !adjustedProperties.pages[0]?.data.length)
+    ) {
+      setShowNoProperties(true);
+    } else {
+      setShowNoProperties(false);
+    }
+  }, [isDelayedLoading, adjustedProperties]);
+
+  const allProperties = useMemo(() => {
+    return adjustedProperties?.pages.flatMap((page) => page.data) ?? [];
+  }, [adjustedProperties]);
+
+  const paginatedProperties = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return allProperties.slice(startIndex, endIndex);
+  }, [allProperties, currentPage, itemsPerPage]);
+
+  const totalPages = useMemo(() => {
+    return Math.max(1, Math.ceil(allProperties.length / itemsPerPage));
+  }, [allProperties.length, itemsPerPage]);
+
+  const handlePageChange = useCallback(
+    (page: number) => {
+      setCurrentPage(page);
+      void router.push(`?page=${page}`, undefined, { shallow: true });
+    },
+    [router],
+  );
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (isLoading) {
+      setIsDelayedLoading(true);
+      setShowNoProperties(false);
+      timer = setTimeout(() => {
+        setIsDelayedLoading(false);
+      }, 1000);
+    } else {
+      timer = setTimeout(() => {
+        setIsDelayedLoading(false);
+      }, 1000);
+    }
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [isLoading]);
+
+  useEffect(() => {
+    handlePageChange(1);
+  }, [mapBoundaries]);
+
+  useEffect(() => {
+    const page = Number(router.query.page) || 1;
+    setCurrentPage(page);
+  }, [router.query.page]);
+
+  const renderPaginationItems = useCallback(() => {
+    const items = [];
+
+    for (let i = 1; i <= totalPages; i++) {
+      items.push(
+        <PaginationItem key={i}>
+          <PaginationLink
+            href={`?page=${i}`}
+            onClick={(e) => {
+              e.preventDefault();
+              handlePageChange(i);
+            }}
+            isActive={currentPage === i}
+          >
+            {i}
+          </PaginationLink>
+        </PaginationItem>,
+      );
+    }
+
+    return items;
+  }, [totalPages, currentPage, handlePageChange]);
+
   return (
-    <div className="w-5/6 space-y-2">
-      <div className="flex flex-col gap-y-1">
-        <h2 className="text-3xl font-semibold">Amazing deals happening now!</h2>
-        <div className="flex flex-row items-center justify-between">
-          <div className="mb-10 flex flex-row items-center gap-x-1 text-teal-700">
-            <InfoIcon size={18} strokeWidth={2.4} />
-            <Link href="/how-it-works" className="underline underline-offset-2">
-              How it works
-            </Link>
-          </div>
-          {session && session.user.role === "admin" && <AddUnclaimedOffer />}
-        </div>
-        <div className="relative">
-          <div className="sticky top-0 grid grid-cols-10 gap-x-2 bg-white text-center font-bold">
-            <div className="col-span-2 text-left font-bold">Listing</div>
-            <div className="col-span-1">Airbnb Price</div>
-            <div className="col-span-1">Tramona Price</div>
-            <div className="col-span-1">Dates</div>
-            <div className="col-span-1">Guests</div>
-            <div className="col-span-1">Beds</div>
-          </div>
-          <Separator className="bg-black" />
-        </div>
-      </div>
-      {!isLoading ? (
-        unMatchedOffers ? (
-          unMatchedOffers.map((offer) => (
-            <div key={offer.property.id}>
-              <UnMatchedPropertyCard offer={offer} />
+    <div className="h-full w-full flex-col">
+      <div className="flex h-screen-minus-header-n-footer w-full sm:h-screen-minus-header-n-footer-n-searchbar">
+        <div className="mr-auto h-full w-full overflow-y-scroll px-6 scrollbar-hide">
+          {isDelayedLoading ? (
+            <div className="grid w-full grid-cols-1 gap-x-6 sm:grid-cols-2 md:gap-y-6 lg:grid-cols-3 lg:gap-y-8 xl:gap-y-4 2xl:gap-y-0">
+              {Array(24)
+                .fill(null)
+                .map((_, index) => (
+                  <div key={`skeleton-${index}`}>
+                    <PropertyCardSkeleton />
+                  </div>
+                ))}
             </div>
-          ))
-        ) : (
-          <div>Sorry, we currently don&apos;t have any unmatched offers.</div>
-        )
-      ) : (
-        <div className="flex-1 px-6 text-sm">
-          <div className="flex flex-row gap-x-4 ">
-            <Skeleton className="h-20 w-32 rounded-lg" />
-            <Skeleton className="h-20 w-11/12 rounded-lg" />
-          </div>
+          ) : showNoProperties ? (
+            <div className="flex h-full w-full items-center justify-center">
+              <div className="text-center">
+                <div className="text-lg font-bold">No properties found</div>
+                <div className="mt-2 text-sm text-zinc-500">
+                  Try adjusting your search filters or zooming out on the map
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="flex h-full w-full flex-col">
+              <div className="grid w-full grid-cols-1 gap-x-6 sm:grid-cols-2 md:gap-y-6 lg:grid-cols-3 lg:gap-y-8 xl:gap-y-4 2xl:gap-y-0">
+                {paginatedProperties.map((property, index) => (
+                  <div
+                    key={property.id}
+                    className="animate-fade-in"
+                    style={{ animationDelay: `${index * 50}ms` }}
+                  >
+                    <UnMatchedPropertyCard property={property} />
+                  </div>
+                ))}
+              </div>
+              {totalPages >= 1 && (
+                <div className="mt-auto px-6 py-4">
+                  <Pagination>
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious
+                          href={`?page=${Math.max(1, currentPage - 1)}`}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handlePageChange(Math.max(1, currentPage - 1));
+                          }}
+                          className={
+                            currentPage === 1
+                              ? "pointer-events-none opacity-50"
+                              : ""
+                          }
+                        />
+                      </PaginationItem>
+                      {renderPaginationItems()}
+                      <PaginationItem>
+                        <PaginationNext
+                          href={`?page=${Math.min(totalPages, currentPage + 1)}`}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handlePageChange(
+                              Math.min(totalPages, currentPage + 1),
+                            );
+                          }}
+                          className={
+                            currentPage === totalPages
+                              ? "pointer-events-none opacity-50"
+                              : ""
+                          }
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                </div>
+              )}
+            </div>
+          )}
+          {!isLoading &&
+            !isDelayedLoading &&
+            session?.user.role === "admin" && (
+              <div className="mt-20 rounded-xl border-4 p-4">
+                <AddUnclaimedOffer />
+              </div>
+            )}
         </div>
-      )}
-      <div className="flex justify-center">
-        <Button
-          variant="secondary"
-          size="lg"
-          onClick={() => setShowMore(!showMore)}
-        >
-          {showMore ? "Show Less" : "Show More"}
-        </Button>
       </div>
     </div>
   );
 }
 
-function UnMatchedPropertyCard({ offer }: { offer: UnMatchedOffers }) {
-  const { data: session } = useSession();
-  const { mutateAsync: deleteOffer } = api.offers.delete.useMutation();
+function UnMatchedPropertyCard({
+  property,
+}: {
+  property: Property;
+}): JSX.Element {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
 
-  const handleButtonClick = (
-    event: React.MouseEvent<HTMLDivElement | HTMLButtonElement>,
-  ) => {
-    event.stopPropagation();
+  const nextImage = (e: React.MouseEvent): void => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (currentImageIndex < property.imageUrls.length - 1) {
+      setCurrentImageIndex((prevIndex) => prevIndex + 1);
+    }
   };
 
-  const handleRemoveProperty = async (offerId: number) => {
-    await deleteOffer({ id: offerId });
+  const prevImage = (e: React.MouseEvent): void => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (currentImageIndex > 0) {
+      setCurrentImageIndex((prevIndex) => prevIndex - 1);
+    }
   };
 
   return (
-    <>
-      <div className="grid grid-cols-10 items-center gap-x-2 rounded-xl border text-center">
-        <Image
-          src={offer.property.imageUrls[0] ?? ""}
-          alt=""
-          width={150}
-          height={130}
-          className=" col-span-1 h-24 rounded-l-xl"
-        />
-        <div className="ellipsis col-span-1 flex max-h-24 items-center justify-center px-1 font-bold">
-          {offer.property.name}
-        </div>
-        <div className="col-span-1 flex items-center justify-center text-center font-semibold">
-          {formatCurrency(
-            offer.property.originalNightlyPrice! * AVG_AIRBNB_MARKUP,
-          )}
-        </div>
-        <div className="col-span-1 flex items-center justify-center font-semibold">
-          {formatCurrency(offer.property.originalNightlyPrice!)}
-        </div>
-        <div className="col-span-1 flex items-center justify-center font-semibold">
-          {formatDateRange(offer.checkIn, offer.checkOut)}
-        </div>
-        <div className="col-span-1 flex items-center justify-center font-semibold">
-          {offer.property.maxNumGuests}
-        </div>
-        <div className="col-span-1 flex items-center justify-center font-semibold">
-          {offer.property.numBedrooms}
-        </div>
-        <div className="col-span-1 flex items-center justify-center">
-          <Link
-            href={`/public-offer/${offer.id}`}
-            className="font-semibold text-teal-800 underline underline-offset-4"
+    <Link href={`/property/${property.id}`} className="block">
+      <div
+        className="relative flex aspect-[3/4] w-full cursor-pointer flex-col overflow-hidden rounded-xl"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        <div className="relative h-[58%] overflow-hidden">
+          <div
+            className="flex h-full transition-transform duration-300 ease-in-out"
+            style={{ transform: `translateX(-${currentImageIndex * 100}%)` }}
           >
-            Property Info
-          </Link>
-        </div>
-        <Button
-          variant="greenPrimary"
-          className="col-span-1 ml-2 px-20 font-semibold"
-          onClick={handleButtonClick}
-        >
-          Book
-        </Button>
-        <div className="flex flex-row gap-x-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="col-span-1  ml-12 font-semibold"
-            onClick={handleButtonClick}
+            {property.imageUrls.map((imageUrl, index) => (
+              <div key={index} className="relative h-full w-full flex-shrink-0">
+                <Image
+                  src={imageUrl}
+                  alt={`Property image ${index + 1}`}
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  className="rounded-xl object-cover"
+                />
+              </div>
+            ))}
+          </div>
+          <div
+            className={`absolute inset-0 transition-opacity duration-300 ${
+              isHovered ? "opacity-100" : "opacity-0"
+            }`}
           >
-            <div onClick={handleButtonClick}>
-              <ShareOfferDialog
-                id={offer.id}
-                isRequest={false}
-                propertyName={offer.property.name}
+            {currentImageIndex > 0 && (
+              <Button
+                onClick={prevImage}
+                className="absolute left-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white bg-opacity-50 p-2 transition-all duration-200 hover:bg-white hover:bg-opacity-80"
+              >
+                <ChevronLeft size={24} className="text-gray-800" />
+              </Button>
+            )}
+            {currentImageIndex < property.imageUrls.length - 1 && (
+              <Button
+                onClick={nextImage}
+                className="absolute right-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white bg-opacity-50 p-2 transition-all duration-200 hover:bg-white hover:bg-opacity-80"
+              >
+                <ChevronRight size={24} className="text-gray-800" />
+              </Button>
+            )}
+          </div>
+          <div className="absolute bottom-2 left-1/2 z-10 flex -translate-x-1/2 space-x-1">
+            {property.imageUrls.map((_, index) => (
+              <div
+                key={index}
+                className={`h-1.5 rounded-full transition-all duration-300 ${
+                  index === currentImageIndex
+                    ? "w-2 bg-white"
+                    : "w-1.5 bg-white bg-opacity-50"
+                }`}
               />
+            ))}
+          </div>
+        </div>
+        <div className="flex h-[42%] flex-col space-y-2 p-4">
+          <div className="space-y-1">
+            <div className="flex items-center justify-between">
+              <div className="min-w-0 flex-1">
+                <div className="line-clamp-1 overflow-hidden overflow-ellipsis font-bold">
+                  {property.name}
+                </div>
+              </div>
+              <div className="ml-2 flex items-center space-x-1 whitespace-nowrap">
+                <Star fill="gold" size={12} />
+                <div>
+                  {property.avgRating ? property.avgRating.toFixed(2) : "New"}
+                </div>
+                <div>
+                  {property.numRatings > 0 ? `(${property.numRatings})` : ""}
+                </div>
+              </div>
             </div>
-          </Button>
-          {session?.user.role === "admin" && (
-            <Button
-              size="icon"
-              variant="ghost"
-              className="text-red-600"
-              onClick={() => handleRemoveProperty(offer.id)}
-            >
-              <TrashIcon />
-            </Button>
-          )}
+            {/* <div className="text-sm text-zinc-500"> */}
+            {/* {formatDateRange(offer.checkIn, offer.checkOut)} */}
+            {/* replace with check in check out'
+            </div> */}
+            <div className="text-sm text-zinc-500">
+              {plural(property.maxNumGuests, "Guest")}
+            </div>
+          </div>
+          <div className="flex items-center space-x-3 text-sm font-semibold">
+            <div>
+              {property.originalNightlyPrice
+                ? formatCurrency(property.originalNightlyPrice)
+                : "N/A"}
+              &nbsp;night
+            </div>
+            <div className="text-xs text-zinc-500 line-through">
+              airbnb&nbsp;
+              {property.originalNightlyPrice
+                ? formatCurrency(
+                    property.originalNightlyPrice * AVG_AIRBNB_MARKUP,
+                  )
+                : "N/A"}
+            </div>
+          </div>
         </div>
       </div>
-    </>
+    </Link>
+  );
+}
+
+function PropertyCardSkeleton(): JSX.Element {
+  return (
+    <div className="relative flex aspect-[3/4] w-full flex-col overflow-hidden rounded-xl">
+      <div className="relative h-[58%] overflow-hidden rounded-xl">
+        <Skeleton className="h-full w-full" />
+      </div>
+      <div className="flex h-[42%] flex-col space-y-2 p-4">
+        <div className="space-y-1">
+          <div className="flex items-center justify-between">
+            <div className="min-w-0 flex-1">
+              <Skeleton className="h-6 w-3/4" />
+            </div>
+            <div className="ml-2 flex items-center space-x-1 whitespace-nowrap">
+              <Skeleton className="h-4 w-4 rounded-full" />
+              <Skeleton className="h-4 w-8" />
+              <Skeleton className="h-4 w-8" />
+            </div>
+          </div>
+          <Skeleton className="h-4 w-1/2" />
+        </div>
+        <div className="mt-auto flex items-center space-x-3">
+          <Skeleton className="h-5 w-1/3" />
+          <Skeleton className="h-4 w-1/3" />
+        </div>
+      </div>
+    </div>
   );
 }

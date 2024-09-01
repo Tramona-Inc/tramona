@@ -1,28 +1,22 @@
 import MainLayout from "@/components/_common/Layout/MainLayout";
-import { Button } from "@/components/ui/button";
-import UnclaimedHeader from "@/components/unclaimed-offers/UnclaimedHeader";
-import UnclaimedOfferCards from "@/components/unclaimed-offers/UnclaimedOfferCards";
-import Link from "next/link";
+import { AdjustedPropertiesProvider } from "@/components/landing-page/search/AdjustedPropertiesContext";
+import DynamicDesktopSearchBar from "@/components/landing-page/search/DynamicDesktopSearchBar";
+import UnclaimedMap from "@/components/unclaimed-offers/UnclaimedMap";
+import React from "react";
+
 export default function Page() {
   return (
     <MainLayout>
-      <div className="mb-16 flex flex-col items-center justify-center gap-y-5">
-        <UnclaimedHeader />
-        <UnclaimedOfferCards />
-        <div className="my-4 flex flex-col items-center gap-y-3">
-          <p>
-            Dont see something you like? Make a request and get a match
-            specifically tailored to your needs.
-          </p>
-          <Button
-            variant="outline"
-            size="lg"
-            className="border-teal-900 py-7 text-teal-900"
-          >
-            <Link href="/">Make a request </Link>
-          </Button>
+      <AdjustedPropertiesProvider>
+        <div className="h-full w-full flex-col">
+          <div className="sticky top-header-height z-10 flex h-searchbar-height justify-center">
+            <DynamicDesktopSearchBar />
+          </div>
+          <div className="h-full w-full">
+            <UnclaimedMap />
+          </div>
         </div>
-      </div>
+      </AdjustedPropertiesProvider>
     </MainLayout>
   );
 }
