@@ -99,7 +99,7 @@ export default function PropertyPage({
 
   return (
     <div>
-      <div className="relative mt-4 grid min-h-[400px] grid-cols-4 grid-rows-2 gap-2 overflow-hidden rounded-xl">
+      <div className="relative grid h-[480px] grid-cols-4 grid-rows-2 gap-2 overflow-hidden rounded-xl">
         <Dialog>
           <DialogTrigger
             key={0}
