@@ -8,24 +8,23 @@ import Spinner from "@/components/_common/Spinner";
 
 import { type RouterOutputs, api } from "@/utils/api";
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
+import { ConnectNotificationBanner } from "@stripe/react-connect-js";
+import useIsStripeConnectInstanceReady from "@/utils/store/stripe-connect";
 
 export type ReferralTableData =
-  RouterOutputs["referralCodes"]["getReferralEarnings"];
+  RouterOutputs["referralCodes"]["getReferralCodeInfo"];
 
 export default function CashbackBalance() {
   useSession({ required: true });
 
-  const { data, isLoading } = api.referralCodes.getReferralEarnings.useQuery();
+  const { data: earnings, isLoading } =
+    api.referralCodes.getReferralCodeInfo.useQuery();
 
-  const cashbackBalance =
-    data?.reduce((prev, item) => {
-      if (item.earningStatus === "pending") {
-        return prev + item.cashbackEarned;
-      }
+  const { data: allEarningTransactions } =
+    api.referralCodes.getAllEarningsByReferralCode.useQuery();
 
-      return prev;
-    }, 0) ?? 0;
-
+  const { isStripeConnectInstanceReady } = useIsStripeConnectInstanceReady();
+  console.log(" here is the code object", allEarningTransactions);
   return (
     <>
       <Head>
@@ -33,13 +32,29 @@ export default function CashbackBalance() {
       </Head>
       <DashboardLayout>
         <div className="mx-auto flex min-h-screen-minus-header-n-footer max-w-4xl flex-col">
+          {isStripeConnectInstanceReady && (
+            <ConnectNotificationBanner
+              collectionOptions={{
+                fields: "eventually_due",
+                futureRequirements: "include",
+              }}
+            />
+          )}
           <div className="mt-6 grid grid-cols-1 px-4 lg:mt-16 lg:px-0">
             {isLoading ? (
               <Spinner />
             ) : (
               <div className="space-y-4">
-                <CashbackBalanceDetails balance={cashbackBalance} />
-                <ReferralTable data={data ?? []} columns={referralColumns} />
+                <CashbackBalanceDetails
+                  balance={earnings?.curBalance}
+                  totalBookingVolume={earnings?.totalBookingVolume}
+                />
+                {allEarningTransactions && (
+                  <ReferralTable
+                    columns={referralColumns}
+                    data={allEarningTransactions}
+                  />
+                )}
               </div>
             )}
           </div>

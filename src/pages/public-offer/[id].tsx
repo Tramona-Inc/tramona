@@ -1,6 +1,6 @@
 import DashboadLayout from "@/components/_common/Layout/DashboardLayout";
 import Spinner from "@/components/_common/Spinner";
-import OfferPage from "@/components/offers/OfferPage";
+import PropertyPage, { OfferPage } from "@/components/offers/PropertyPage";
 import { NextSeo } from "next-seo";
 import { type GetServerSideProps } from "next";
 import { useRouter } from "next/router";
@@ -9,10 +9,10 @@ import SingleLocationMap from "@/components/_common/GoogleMaps/SingleLocationMap
 import { db } from "@/server/db";
 import { offers } from "@/server/db/schema/tables/offers";
 import { and, eq } from "drizzle-orm";
-import { type OfferWithDetails } from "@/components/offers/OfferPage";
+import { type OfferWithDetails } from "@/components/offers/PropertyPage";
 
 type PageProps = {
-  offer: OfferWithDetails; // Replace with a more specific type if you have one
+  offer: OfferWithDetails;
   offerId: number;
   firstImage: string;
   baseUrl: string;

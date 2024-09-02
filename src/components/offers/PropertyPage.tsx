@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import UserAvatar from "@/components/_common/UserAvatar";
-import { Button } from "@/components/ui/button";
+import { Button, ButtonProps } from "@/components/ui/button";
 import ReviewCard from "@/components/_common/ReviewCard";
 import {
   Dialog,
@@ -44,19 +44,40 @@ import { OfferPriceDetails } from "../_common/OfferPriceDetails";
 import { getCancellationPolicyDescription } from "@/config/getCancellationPolicyDescription";
 import { VerificationProvider } from "../_utils/VerificationContext";
 import IdentityModal from "../_utils/IdentityModal";
+import { InferQueryModel } from "@/server/db";
+import { Property } from "@/server/db/schema";
 
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 
-export default function OfferPage({
-  offer: { property, request, ...offer },
-}: {
-  offer: OfferWithDetails;
-}) {
-  const { data: verificationStatus } =
-    api.users.myVerificationStatus.useQuery();
-  console.log("verification status:", verificationStatus?.isIdentityVerified);
-  const isBooked = !!offer.acceptedAt;
+export type PropertyPageData = InferQueryModel<
+  "properties",
+  {
+    latLngPoint: false;
+  },
+  {
+    host: {
+      columns: {
+        id: true;
+        name: true;
+        email: true;
+        image: true;
+      };
+    };
+    reviews: true;
+  }
+>;
 
+export default function PropertyPage({
+  property,
+  offer,
+  sidebar,
+  mobileBottomCard,
+}: {
+  property: PropertyPageData;
+  offer?: OfferWithDetails;
+  sidebar?: React.ReactNode;
+  mobileBottomCard?: React.ReactNode;
+}) {
   const aboutRef = useRef<HTMLDivElement>(null);
   const [isOverflowing, setIsOverflowing] = useState(false);
 
@@ -75,54 +96,6 @@ export default function OfferPage({
 
   const [selectedImageIdx, setSelectedImageIdx] = useState<number>(0);
   const firstImageUrl = property.imageUrls[0]!;
-
-  function BookNowBtn({
-    btnSize,
-  }: {
-    btnSize: "default" | "lg" | "sm" | "icon" | null | undefined;
-  }) {
-    return (
-      <Button
-        asChild={!isBooked}
-        variant={
-          property.stripeVerRequired &&
-          verificationStatus?.isIdentityVerified === "pending"
-            ? "secondary"
-            : "greenPrimary"
-        }
-        size={btnSize}
-        className="w-full"
-        disabled={isBooked}
-      >
-        {isBooked ? (
-          <>
-            <BookCheckIcon className="size-5" />
-            Booked
-          </>
-        ) : !property.stripeVerRequired ? (
-          <Link href={`/offer-checkout/${offer.id}`}>
-            Book now
-            <ArrowRightIcon className="size-5" />
-          </Link>
-        ) : verificationStatus?.isIdentityVerified === "true" ? (
-          <Link href={`/offer-checkout/${offer.id}`}>
-            Book now
-            <ArrowRightIcon className="size-5" />
-          </Link>
-        ) : verificationStatus?.isIdentityVerified === "pending" ? (
-          <p>Verification pending</p>
-        ) : (
-          <VerificationProvider>
-            <IdentityModal isPrimary={true} />
-            <p className="hidden text-center text-sm font-semibold text-red-500 md:block">
-              This host requires you to go through Stripe verification before
-              you book
-            </p>
-          </VerificationProvider>
-        )}
-      </Button>
-    );
-  }
 
   return (
     <div>
@@ -249,12 +222,12 @@ export default function OfferPage({
                   )}
                 </p>
               </div>
-              {originalListing && (
+              {originalListing && offer && (
                 <div className="self-end">
                   <PropertyCompareBtn
                     checkIn={offer.checkIn}
                     checkOut={offer.checkOut}
-                    numGuests={request?.numGuests ?? 1}
+                    numGuests={offer.request?.numGuests ?? 1}
                     originalListing={originalListing}
                   />
                 </div>
@@ -378,16 +351,15 @@ export default function OfferPage({
                 <ReviewCard key={review.id} review={review} />
               ))}
             </div>
-            {originalListing && (
+            {originalListing && offer && (
               <Link
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 font-semibold text-teal-700 underline underline-offset-2"
                 href={originalListing.getReviewsUrl({
-                  // TODO
                   checkIn: offer.checkIn,
                   checkOut: offer.checkOut,
-                  numGuests: request?.numGuests ?? 1,
+                  numGuests: offer.request?.numGuests ?? 1,
                 })}
               >
                 See all reviews
@@ -469,104 +441,210 @@ export default function OfferPage({
             </p>
           </section>
 
-          <div className="flex justify-end">
-            <ShareOfferDialog
-              id={offer.id}
-              isRequest={false}
-              propertyName={property.name}
-            />
-          </div>
+          {offer && (
+            <div className="flex justify-end">
+              <ShareOfferDialog
+                id={offer.id}
+                isRequest={false}
+                propertyName={property.name}
+              />
+            </div>
+          )}
         </div>
 
-        <div className="hidden shrink-0 md:block md:w-72 lg:w-96">
-          <div className="sticky top-[calc(var(--header-height)+1rem)] space-y-4">
-            <Card>
-              <CardContent className="space-y-4">
-                {request && (
-                  <div className="grid grid-cols-2 rounded-lg border *:px-4 *:py-2">
-                    <div className="border-r">
-                      <p className="text-xs font-bold uppercase text-muted-foreground">
-                        Check-in
-                      </p>
-                      <p className="font-bold">
-                        {formatDateWeekMonthDay(offer.checkIn)}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold uppercase text-muted-foreground">
-                        Check-out
-                      </p>
-                      <p className="font-bold">
-                        {formatDateWeekMonthDay(offer.checkOut)}
-                      </p>
-                    </div>
-                    <div className="col-span-full border-t">
-                      <p className="text-xs font-bold uppercase text-muted-foreground">
-                        Guests
-                      </p>
-                      <p className="font-bold">
-                        {plural(request.numGuests, "guest")}
-                      </p>
-                    </div>
-                  </div>
-                )}
-                <BookNowBtn btnSize="lg" />
-                <OfferPriceDetails offer={offer} />
-              </CardContent>
-            </Card>
-            <div className="flex gap-2 rounded-xl border border-orange-300 bg-orange-50 p-3 text-orange-800">
-              <FlameIcon className="size-7 shrink-0" />
-              <div>
-                <p className="text-sm font-bold">Tramona exclusive deal</p>
-                <p className="text-xs">
-                  This is an exclusive offer created just for you &ndash; you
-                  will not be able to find this price anywhere else
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-2 rounded-xl border border-blue-300 bg-blue-50 p-3 text-blue-800">
-              <InfoIcon className="size-7 shrink-0" />
-              <div>
-                <p className="text-sm font-bold">Important Notes</p>
-                <p className="text-xs">
-                  These dates could get booked on other platforms for full
-                  price. If they do, your match will be automatically withdrawn.
-                  <br />
-                  <br />
-                  After 24 hours, this match will become available for the
-                  public to book.
-                  <br />
-                  <br />
-                  <b>
-                    We encourage you to book within 24 hours for best results.
-                  </b>
-                </p>
-              </div>
+        {sidebar && (
+          <div className="hidden shrink-0 md:block md:w-72 lg:w-96">
+            <div className="sticky top-[calc(var(--header-height)+1rem)]">
+              {sidebar}
             </div>
           </div>
-        </div>
-        {/* Mobile price card */}
-        <Card className="fixed bottom-16 left-0 w-full md:hidden">
-          <CardContent className="flex flex-row items-center justify-between px-4 py-1 text-sm">
-            {request && (
-              <div className="flex basis-1/2 flex-col">
-                <OfferPriceDetails offer={offer} />
-                <p className="font-semibold">
-                  {formatDateRange(offer.checkIn, offer.checkOut)}
-                </p>
-              </div>
-            )}
-            <div className="flex-1">
-              <BookNowBtn btnSize="sm" />
-              {verificationStatus?.isIdentityVerified === "false" && (
-                <p className="text-center text-xs font-semibold text-red-500">
-                  Host requires Stripe verification prior to booking
-                </p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+        )}
+
+        {mobileBottomCard && (
+          <div className="fixed inset-x-0 bottom-16 md:hidden">
+            {mobileBottomCard}
+          </div>
+        )}
       </div>
     </div>
+  );
+}
+
+function BookNowBtn({
+  btnSize,
+  offer,
+  property,
+}: {
+  btnSize: ButtonProps["size"];
+  offer: OfferWithDetails;
+  property: Pick<Property, "stripeVerRequired">;
+}) {
+  const { data: verificationStatus } =
+    api.users.myVerificationStatus.useQuery();
+  const isBooked = !!offer.acceptedAt;
+
+  return (
+    <Button
+      asChild={!isBooked}
+      variant={
+        property.stripeVerRequired &&
+        verificationStatus?.isIdentityVerified === "pending"
+          ? "secondary"
+          : "greenPrimary"
+      }
+      size={btnSize}
+      className="w-full"
+      disabled={isBooked}
+    >
+      {isBooked ? (
+        <>
+          <BookCheckIcon className="size-5" />
+          Booked
+        </>
+      ) : !property.stripeVerRequired ? (
+        <Link href={`/offer-checkout/${offer.id}`}>
+          Book now
+          <ArrowRightIcon className="size-5" />
+        </Link>
+      ) : verificationStatus?.isIdentityVerified === "true" ? (
+        <Link href={`/offer-checkout/${offer.id}`}>
+          Book now
+          <ArrowRightIcon className="size-5" />
+        </Link>
+      ) : verificationStatus?.isIdentityVerified === "pending" ? (
+        <p>Verification pending</p>
+      ) : (
+        <VerificationProvider>
+          <IdentityModal isPrimary={true} />
+          <p className="hidden text-center text-sm font-semibold text-red-500 md:block">
+            This host requires you to go through Stripe verification before you
+            book
+          </p>
+        </VerificationProvider>
+      )}
+    </Button>
+  );
+}
+
+function OfferPageSidebar({
+  offer,
+  property,
+}: {
+  offer: OfferWithDetails;
+  property: Pick<Property, "stripeVerRequired">;
+}) {
+  return (
+    <div className="space-y-4">
+      <Card>
+        <CardContent className="space-y-4">
+          {offer.request && (
+            <div className="grid grid-cols-2 rounded-lg border *:px-4 *:py-2">
+              <div className="border-r">
+                <p className="text-xs font-bold uppercase text-muted-foreground">
+                  Check-in
+                </p>
+                <p className="font-bold">
+                  {formatDateWeekMonthDay(offer.checkIn)}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs font-bold uppercase text-muted-foreground">
+                  Check-out
+                </p>
+                <p className="font-bold">
+                  {formatDateWeekMonthDay(offer.checkOut)}
+                </p>
+              </div>
+              <div className="col-span-full border-t">
+                <p className="text-xs font-bold uppercase text-muted-foreground">
+                  Guests
+                </p>
+                <p className="font-bold">
+                  {plural(offer.request.numGuests, "guest")}
+                </p>
+              </div>
+            </div>
+          )}
+          <BookNowBtn btnSize="lg" offer={offer} property={property} />
+          <OfferPriceDetails offer={offer} />
+        </CardContent>
+      </Card>
+
+      <div className="flex gap-2 rounded-xl border border-orange-300 bg-orange-50 p-3 text-orange-800">
+        <FlameIcon className="size-7 shrink-0" />
+        <div>
+          <p className="text-sm font-bold">Tramona exclusive deal</p>
+          <p className="text-xs">
+            This is an exclusive offer created just for you &ndash; you will not
+            be able to find this price anywhere else
+          </p>
+        </div>
+      </div>
+      <div className="flex gap-2 rounded-xl border border-blue-300 bg-blue-50 p-3 text-blue-800">
+        <InfoIcon className="size-7 shrink-0" />
+        <div>
+          <p className="text-sm font-bold">Important Notes</p>
+          <p className="text-xs">
+            These dates could get booked on other platforms for full price. If
+            they do, your match will be automatically withdrawn.
+            <br />
+            <br />
+            After 24 hours, this match will become available for the public to
+            book.
+            <br />
+            <br />
+            <b>We encourage you to book within 24 hours for best results.</b>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function OfferPageMobileBottomCard({
+  offer,
+  property,
+}: {
+  offer: OfferWithDetails;
+  property: Pick<Property, "stripeVerRequired">;
+}) {
+  const { data: verificationStatus } =
+    api.users.myVerificationStatus.useQuery();
+
+  return (
+    <Card className="fixed bottom-16 left-0 w-full md:hidden">
+      <CardContent className="flex flex-row items-center justify-between px-4 py-1 text-sm">
+        {offer.request && (
+          <div className="flex basis-1/2 flex-col">
+            <OfferPriceDetails offer={offer} />
+            <p className="font-semibold">
+              {formatDateRange(offer.checkIn, offer.checkOut)}
+            </p>
+          </div>
+        )}
+        <div className="flex-1">
+          <BookNowBtn btnSize="sm" offer={offer} property={property} />
+          {verificationStatus?.isIdentityVerified === "false" &&
+            property.stripeVerRequired === true && (
+              <p className="text-center text-xs font-semibold text-red-500">
+                Host requires Stripe verification prior to booking
+              </p>
+            )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function OfferPage({ offer }: { offer: OfferWithDetails }) {
+  return (
+    <PropertyPage
+      property={offer.property}
+      offer={offer}
+      sidebar={<OfferPageSidebar offer={offer} property={offer.property} />}
+      mobileBottomCard={
+        <OfferPageMobileBottomCard offer={offer} property={offer.property} />
+      }
+    />
   );
 }

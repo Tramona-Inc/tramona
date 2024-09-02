@@ -13,6 +13,12 @@ import { debounce } from "lodash";
 
 import PoiMarkers from "./PoiMarkers";
 import { useAdjustedProperties } from "./AdjustedPropertiesContext";
+import { useLoading } from "@/components/unclaimed-offers/UnclaimedMapLoadingContext";
+import type { RouterOutputs } from "@/utils/api";
+import type { InfiniteQueryObserverResult } from "@tanstack/react-query";
+
+export type fetchNextPageOfAdjustedPropertiesType =
+  RouterOutputs["properties"]["getByBoundaryInfiniteScroll"];
 
 export type Poi = {
   key: string;
@@ -30,15 +36,41 @@ export type MapBoundary = {
 };
 
 function SearchPropertiesMap({
-  isFilterUndefined,
   setFunctionRef,
+  mapBoundaries,
+  setMapBoundaries,
 }: {
-  isFilterUndefined: boolean;
-  setFunctionRef: (ref: any) => void;
+  setFunctionRef: (
+    ref: () => Promise<
+      InfiniteQueryObserverResult<fetchNextPageOfAdjustedPropertiesType>
+    >,
+  ) => void;
+  mapBoundaries: MapBoundary | null;
+  setMapBoundaries: (boundaries: MapBoundary) => void;
 }) {
   //zustand
   const filters = useCitiesFilter((state) => state);
+
+  const { setIsLoading } = useLoading();
+
   const { adjustedProperties, setAdjustedProperties } = useAdjustedProperties();
+
+  const [isFilterUndefined, setIsFilterUndefined] = useState(true);
+  useEffect(() => {
+    const isAnyFilterSet =
+      filters.filter != null ||
+      filters.guests > 0 ||
+      filters.beds > 0 ||
+      filters.bedrooms > 0 ||
+      filters.bathrooms > 0 ||
+      filters.houseRules.length > 0 ||
+      filters.roomType != null ||
+      filters.checkIn != null ||
+      filters.checkOut != null ||
+      filters.radius !== 50;
+
+    setIsFilterUndefined(!isAnyFilterSet);
+  }, [filters, setIsFilterUndefined]);
 
   const { data: initialProperties } =
     api.properties.getAllInfiniteScroll.useInfiniteQuery(
@@ -79,26 +111,26 @@ function SearchPropertiesMap({
   const map = useMap("9c8e46d54d7a528b");
   const apiIsLoaded = useApiIsLoaded();
 
-  const [mapBoundaries, setMapBoundaries] = useState<MapBoundary | null>(null);
-
   //this is for when the user moves the camera
   const {
     data: fetchedAdjustedProperties,
     fetchNextPage: fetchNextPageOfAdjustedProperties,
+    isLoading,
+    isFetching,
   } = api.properties.getByBoundaryInfiniteScroll.useInfiniteQuery(
     {
       boundaries: mapBoundaries,
-      guests: filters.guests,
-      beds: filters.beds,
-      bedrooms: filters.bedrooms,
-      bathrooms: filters.bathrooms,
-      maxNightlyPrice: filters.maxNightlyPrice,
+      // guests: filters.guests,
+      // beds: filters.beds,
+      // bedrooms: filters.bedrooms,
+      // bathrooms: filters.bathrooms,
+      // maxNightlyPrice: filters.maxNightlyPrice,
       lat: filters.filter?.lat,
       long: filters.filter?.long,
-      houseRules: filters.houseRules,
-      roomType: filters.roomType,
-      checkIn: filters.checkIn,
-      checkOut: filters.checkOut,
+      // houseRules: filters.houseRules,
+      // roomType: filters.roomType,
+      // checkIn: filters.checkIn,
+      // checkOut: filters.checkOut,
       radius: filters.radius,
     },
     {
@@ -108,6 +140,10 @@ function SearchPropertiesMap({
   );
   //when the user presses search
   //saving search as the new location
+
+  useEffect(() => {
+    setIsLoading(isLoading || isFetching);
+  }, [isLoading, isFetching, setIsLoading]);
 
   useEffect(() => {
     if (fetchedAdjustedProperties) {
@@ -198,18 +234,16 @@ function SearchPropertiesMap({
   }, 700);
 
   return (
-    <div
-      className={`max-w-[700px] rounded-md border shadow-md md:mt-0 md:h-[720px] lg:h-[600px] xl:h-[800px] ${isFilterUndefined ? `h-[705px]` : `h-[705px]`}`}
-    >
+    <div className="h-full w-full">
       {isFilterUndefined ? (
-        <div className="flex h-full items-center justify-center">
+        <div className="flex h-full w-full items-center justify-center rounded-xl border shadow-md">
           Search for a city...
         </div>
       ) : apiIsLoaded ? (
         center && (
           <Map
             {...cameraProps}
-            defaultZoom={10}
+            defaultZoom={6}
             defaultCenter={center}
             onCameraChanged={handleCameraChanged}
             disableDefaultUI={true}

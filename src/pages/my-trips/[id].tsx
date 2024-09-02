@@ -2,7 +2,6 @@ import Head from "next/head";
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import TripPage from "@/components/my-trips/TripPage";
 import { useRouter } from "next/router";
-import { useState, useEffect } from "react";
 import { api } from "@/utils/api";
 import Spinner from "@/components/_common/Spinner";
 

@@ -15,20 +15,31 @@ import {
   referralCodes,
   requestSelectSchema,
   trips,
+  users,
 } from "@/server/db/schema";
 import { getCity, getCoordinates } from "@/server/google-maps";
 import {
+  sendEmail,
   sendText,
   sendWhatsApp,
   updateTravelerandHostMarkup,
 } from "@/server/server-utils";
-import { formatDateRange } from "@/utils/utils";
+import { formatDateRange, getNumNights } from "@/utils/utils";
 
 import { TRPCError } from "@trpc/server";
 import { and, eq, isNotNull, isNull, notInArray, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import { requests } from "../../db/schema/tables/requests";
 import { requestsToProperties } from "../../db/schema/tables/requestsToProperties";
+import { db } from "@/server/db";
+import NewOfferReceivedEmail from "packages/transactional/emails/NewOfferReceivedEmail";
+import {
+  directSiteScrapers,
+  scrapeDirectListings,
+  ScrapedListing,
+  subsequentScrape,
+} from "@/server/direct-sites-scraping";
+import { createNormalDistributionDates } from "@/server/server-utils";
 
 export const offersRouter = createTRPCRouter({
   accept: protectedProcedure
@@ -245,7 +256,7 @@ export const offersRouter = createTRPCRouter({
                 with: {
                   hostProfile: {
                     columns: {
-                      stripeAccountId: true,
+                      userId: true,
                     },
                   },
                 },
@@ -457,7 +468,6 @@ export const offersRouter = createTRPCRouter({
       // ) {
       //   throw new TRPCError({ code: "UNAUTHORIZED" });
       // }
-
       if (input.requestId !== undefined) {
         const requestDetails = await ctx.db.query.requests.findFirst({
           where: eq(requests.id, input.requestId),
@@ -480,6 +490,49 @@ export const offersRouter = createTRPCRouter({
               eq(requestsToProperties.requestId, input.requestId),
             ),
           );
+
+        //find the property
+        const curProperty = await db.query.properties.findFirst({
+          where: eq(properties.id, input.propertyId),
+        });
+
+        //sending emails to everyone in the groug
+        //get everymember in the group
+        console.log("GETTING FOR GROUP", requestDetails.madeByGroupId);
+        const allGroupMembers = await db.query.groupMembers.findMany({
+          where: eq(groupMembers.groupId, requestDetails.madeByGroupId),
+          columns: { userId: true },
+          with: {
+            user: {
+              columns: { email: true, firstName: true, name: true },
+            },
+          },
+        });
+        console.log("ALL GROUP MEMBERS", allGroupMembers);
+        for (const member of allGroupMembers) {
+          console.log("MEMBER", member);
+          await sendEmail({
+            to: member.user.email,
+            subject: "New offer received",
+            content: NewOfferReceivedEmail({
+              userName:
+                member.user.firstName ?? member.user.name ?? "Tramona Traveler",
+              airbnbPrice: input.totalPrice * 1.25,
+              ourPrice: input.totalPrice,
+              property: curProperty!.name,
+              discountPercentage: 25,
+              nights: getNumNights(
+                requestDetails.checkIn,
+                requestDetails.checkOut,
+              ),
+              adults: curProperty!.maxNumGuests,
+              checkInDateTime: requestDetails.checkIn,
+              checkOutDateTime: requestDetails.checkOut,
+              imgUrl: curProperty!.imageUrls[0]!,
+              offerLink: `${env.NEXTAUTH_URL}/requests/${input.requestId}`,
+            }),
+          });
+        }
       } else {
         await ctx.db.insert(offers).values({
           ...input,
@@ -680,10 +733,37 @@ export const offersRouter = createTRPCRouter({
             id: true,
             maxNumGuests: true,
             numBedrooms: true,
+            avgRating: true,
+            numRatings: true,
           },
         },
       },
     });
     return unMatchedOffers;
   }),
+
+  scrapeUnclaimedOffers: publicProcedure
+    .input(
+      z.object({
+        numOfOffers: z.number().min(1).max(50),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      // numOfOffers = numOfOffersPerDateRange * numOfDateRanges
+      const numOfOffersPerDateRange = 6;
+      const numOfScrapers = directSiteScrapers.length;
+      const numOfDateRanges = Math.ceil(
+        input.numOfOffers / numOfOffersPerDateRange,
+      ); // at least 1
+      const dateRanges = createNormalDistributionDates(numOfDateRanges);
+      return await Promise.all(
+        dateRanges.map((dateRange) =>
+          scrapeDirectListings({
+            checkIn: dateRange.checkIn,
+            checkOut: dateRange.checkOut,
+            numOfOffersInEachScraper: numOfOffersPerDateRange / numOfScrapers,
+          }),
+        ),
+      ).then((res) => res.flat());
+    }),
 });

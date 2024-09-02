@@ -1,5 +1,5 @@
 import { Form, FormField, FormItem } from "@/components/ui/form";
-import { ALL_CANCELLATION_POLICIES } from "@/server/db/schema";
+import { CANCELLATION_POLICIES } from "@/server/db/schema";
 import { useHostOnboarding } from "@/utils/store/host-onboarding";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -12,7 +12,7 @@ import CancellationCardSelect from "@/components/_common/CancellationCardSelect"
 import { getCancellationPolicyDescription } from "@/config/getCancellationPolicyDescription";
 
 const formSchema = z.object({
-  cancellationPolicy: z.enum(ALL_CANCELLATION_POLICIES),
+  cancellationPolicy: z.enum(CANCELLATION_POLICIES),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -61,7 +61,7 @@ export default function Onboarding10({ editing = false }) {
             render={() => (
               <FormItem>
                 <div className="mx-auto max-w-lg space-y-4">
-                  {ALL_CANCELLATION_POLICIES.map((policy) => (
+                  {CANCELLATION_POLICIES.map((policy) => (
                     <CancellationCardSelect
                       key={policy}
                       policy={policy}

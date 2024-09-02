@@ -47,9 +47,11 @@ export default function SignIn() {
             path: ["email"],
           });
           break;
-        case "incorrect credentials":
+        case "passwordless":
           ctx.addIssue({
-            message: "Incorrect credentials, please try again",
+            message:
+              // TODO: edit this if/when we add other auth providers
+              "Password not linked to this account, try Google sign-in",
             code: "custom",
             path: ["password"],
           });
@@ -185,7 +187,7 @@ export default function SignIn() {
               >
                 <Icons iconName={provider.name} />
                 <span className="col-span-3 text-lg font-extrabold tracking-tight">
-                  Sign up with {provider.name}
+                  Sign in with {provider.name}
                 </span>
               </Button>
             ))}

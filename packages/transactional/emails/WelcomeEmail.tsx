@@ -5,7 +5,7 @@ import { Layout } from "./EmailComponents";
 export default function WelcomeEmail({ name }: { name: string }) {
   return (
     <Layout title_preview="Welcome to Tramona">
-      <div className="border-b border-gray-300 bg-white p-6">
+      <div className="border-b border-gray-300 bg-white p-6 text-black">
         <div className="mb-4" style={{ display: "inline-block" }}>
           <img
             src="https://www.tramona.com/assets/images/email-images/tramona_wbg.png"
@@ -24,7 +24,7 @@ export default function WelcomeEmail({ name }: { name: string }) {
           style={{ borderBottom: "2px solid #e0e0e0" }}
         ></div>
         <Text className="mb-4 text-center text-3xl font-bold">
-          Welcome to Tramona, {name}!
+          Welcome to Tramona {name}!
         </Text>
         <Text className="mb-4 text-left">
           Hello, my name is Blake Singleton, Co-founder and CEO of Tramona.
@@ -62,84 +62,6 @@ export default function WelcomeEmail({ name }: { name: string }) {
           travel at lower prices. This makes Tramona the best place to book the
           best properties around the world.
         </Text>
-        <table className="mx-auto mb-8 w-full border-collapse text-center">
-          <tbody>
-            <tr>
-              <td className="w-1/2 p-2">
-                <div className="rounded-lg bg-gray-100 p-3">
-                  {/* <span style={{ display: 'inline-block', verticalAlign: 'middle', fontSize: 'xx-large' }}>
-                    <MapPin />
-                  </span> */}
-                  <span
-                    style={{
-                      display: "inline-block",
-                      verticalAlign: "middle",
-                      marginLeft: "8px",
-                    }}
-                  >
-                    Send a request
-                  </span>
-                </div>
-              </td>
-              <td className="w-1/2 p-2">
-                <div className="rounded-lg bg-gray-100 p-3">
-                  {/* <span style={{ display: 'inline-block', verticalAlign: 'middle', fontSize: 'xx-large' }}>
-                    <CircleDollarSign />
-                  </span> */}
-                  <span
-                    style={{
-                      display: "inline-block",
-                      verticalAlign: "middle",
-                      marginLeft: "8px",
-                    }}
-                  >
-                    Submit an offer
-                  </span>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td className="w-1/2 p-2">
-                <div className="rounded-lg bg-gray-100 p-3">
-                  {/* <span style={{ display: 'inline-block', verticalAlign: 'middle', fontSize: 'xx-large' }}>
-                    <Users />
-                  </span> */}
-                  <span
-                    style={{
-                      display: "inline-block",
-                      verticalAlign: "middle",
-                      marginLeft: "8px",
-                    }}
-                  >
-                    Referral program
-                  </span>
-                </div>
-              </td>
-              <td className="w-1/2 p-2">
-                <div className="rounded-lg bg-gray-100 p-3">
-                  {/* <span style={{ display: 'inline-block', verticalAlign: 'middle', fontSize: 'xx-large' }}>
-                    <SquarePlay />
-                  </span> */}
-                  <span
-                    style={{
-                      display: "inline-block",
-                      verticalAlign: "middle",
-                      marginLeft: "8px",
-                    }}
-                  >
-                    Video tutorial
-                  </span>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <Button
-          href="https://www.tramona.com/"
-          className="mx-auto mb-6 w-11/12 rounded-md bg-green-900 px-6 py-3 text-center text-lg text-white"
-        >
-          Start Traveling
-        </Button>
         <Text className="m-0 text-left">Thanks,</Text>
         <Text className="m-0 text-left">Blake Singleton, CEO</Text>
         <Text className="mb-6 mt-0 text-left">

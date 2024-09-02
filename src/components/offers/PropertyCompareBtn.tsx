@@ -37,7 +37,7 @@ export function PropertyCompareBtn({
   return (
     <Dialog>
       <DialogTrigger>
-        <Button variant={originalListing.site.siteName}>
+        <Button variant="secondary">
           Compare to {originalListing.site.siteName}
         </Button>
       </DialogTrigger>
@@ -57,7 +57,7 @@ export function PropertyCompareBtn({
               <ExternalLinkIcon className="size-4" />
             </Link>
           </Button>
-          <Button asChild variant={originalListing.site.siteName}>
+          <Button asChild>
             <Link target="_blank" rel="noopener noreferrer" href={checkoutUrl}>
               See pricing on {originalListing.site.siteName}
               <ExternalLinkIcon className="size-4" />

@@ -16,6 +16,7 @@ export type LinkRequestData = Pick<
 export function useLinkRequestForm({
   afterSubmit,
   setData,
+
 }: {
   setData: (data?: LinkRequestData) => void;
   afterSubmit?: () => void;
@@ -25,6 +26,7 @@ export function useLinkRequestForm({
   const utils = api.useUtils();
 
   const onSubmit = form.handleSubmit(async ({ url }) => {
+
     const { checkIn, checkOut, numGuests } = Airbnb.parseUrlParams(url);
 
     if (!checkIn || !checkOut) {

@@ -13,7 +13,6 @@ import {
   propertySelectSchema,
   propertyUpdateSchema,
   type Request,
-  requestInsertSchema,
   requests,
   requestsToProperties,
   type User,
@@ -28,6 +27,7 @@ import {
   eq,
   gt,
   gte,
+  inArray,
   lte,
   notExists,
   sql,
@@ -76,6 +76,7 @@ export const propertiesRouter = createTRPCRouter({
       }
 
       const id = await addProperty({
+        isAdmin: ctx.user.role === "admin" ? true : false,
         property: input,
         userId: ctx.user.id,
         userEmail: ctx.user.email,
@@ -113,6 +114,7 @@ export const propertiesRouter = createTRPCRouter({
         property: input,
         userId: input.hostId,
         userEmail: host.email,
+        isAdmin: false,
       });
 
       return {
@@ -156,6 +158,12 @@ export const propertiesRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       return await ctx.db.query.properties.findFirst({
         where: eq(properties.id, input.id),
+        with: {
+          host: {
+            columns: { image: true, name: true, email: true, id: true },
+          },
+          reviews: true,
+        },
       });
     }),
   getAll: publicProcedure.query(async ({ ctx }) => {
@@ -180,6 +188,8 @@ export const propertiesRouter = createTRPCRouter({
         houseRules: z.array(z.string()).optional(),
         guests: z.number().optional(),
         maxNightlyPrice: z.number().optional(),
+        avgRating: z.number().optional(),
+        numRatings: z.number().optional(),
         lat: z.number().optional(),
         long: z.number().optional(),
         radius: z.number().optional(),
@@ -212,6 +222,8 @@ export const propertiesRouter = createTRPCRouter({
           numBedrooms: properties.numBedrooms,
           numBathrooms: properties.numBathrooms,
           numBeds: properties.numBeds,
+          avgRating: properties.avgRating,
+          numRatings: properties.numRatings,
           originalNightlyPrice: properties.originalNightlyPrice,
           lat: properties.latitude,
           long: properties.longitude,
@@ -344,6 +356,8 @@ export const propertiesRouter = createTRPCRouter({
           numBedrooms: properties.numBedrooms,
           numBathrooms: properties.numBathrooms,
           numBeds: properties.numBeds,
+          avgRating: properties.avgRating,
+          numRatings: properties.numRatings,
           originalNightlyPrice: properties.originalNightlyPrice,
           lat: properties.latitude,
           long: properties.longitude,
@@ -362,7 +376,7 @@ export const propertiesRouter = createTRPCRouter({
         .from(properties)
         .where(
           and(
-            eq(properties.propertyStatus, "Listed"),
+            // eq(properties.propertyStatus, "Listed"),
             cursor ? gt(properties.id, cursor) : undefined,
             boundaries
               ? and(
@@ -417,7 +431,8 @@ export const propertiesRouter = createTRPCRouter({
                 AND booked_dates.date <= CURRENT_DATE + INTERVAL '20 days') < 14`,
           ),
         )
-        .limit(12)
+        // .limit(12)
+        .limit(100)
         .orderBy(asc(sql`id`), asc(sql`distance`));
 
       return {

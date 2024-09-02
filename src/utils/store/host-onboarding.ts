@@ -1,6 +1,6 @@
 import {
+  CancellationPolicyWithInternals,
   Property,
-  type CancellationPolicy,
   type PropertyRoomType,
   type PropertyType,
 } from "@/server/db/schema";
@@ -22,7 +22,7 @@ type HostOnboardingState = {
   isEdit: boolean;
   listing: {
     propertyType: PropertyType;
-    cancellationPolicy: CancellationPolicy | null;
+    cancellationPolicy: CancellationPolicyWithInternals | null;
     spaceType: PropertyRoomType;
     maxGuests: number;
     bedrooms: number;
@@ -51,7 +51,7 @@ type HostOnboardingState = {
   setBathrooms: (bathrooms: number) => void;
   setPropertyType: (property: PropertyType) => void;
   setCancellationPolicy: (
-    cancellationPolicy: CancellationPolicy | null,
+    cancellationPolicy: CancellationPolicyWithInternals | null,
   ) => void;
   setSpaceType: (property: PropertyRoomType) => void;
   setLocation: (location: LocationType) => void;
@@ -166,7 +166,7 @@ export const useHostOnboarding = create<HostOnboardingState>()(
         }));
       },
       setCancellationPolicy: (
-        cancellationPolicy: CancellationPolicy | null,
+        cancellationPolicy: CancellationPolicyWithInternals | null,
       ) => {
         set((state) => ({
           ...state,

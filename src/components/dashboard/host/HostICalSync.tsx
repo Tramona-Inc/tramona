@@ -96,7 +96,7 @@ export default function HostICalSync({ property }: { property: Property }) {
           <div className="mb-10 space-y-2">
             <div className="flex items-center space-x-2">
               <Label className="font-semibold">Airbnb iCal URL</Label>
-              <HostICalHowToDialog type={"airbnb"} />
+              <HostICalHowToDialog />
             </div>
             {property.iCalLink && (
               <>
@@ -147,7 +147,7 @@ export default function HostICalSync({ property }: { property: Property }) {
           <div className="space-y-2">
             <div className="flex items-center space-x-2">
               <Label className="font-semibold">Tramona iCal URL</Label>
-              <HostICalHowToDialog type={"tramona"} />
+              <HostICalHowToDialog />
             </div>
             <Input
               id="tramonaICalLink"

@@ -18,6 +18,10 @@
     },
     {
       "path": "/api/cron/stripe-transfer",
+      "schedule": "0 */12 * * *"
+    },
+    {
+      "path": "/api/cron/scheduledEmailPostOnboard",
       "schedule": "0 * * * *"
     }
   ]

@@ -1,6 +1,6 @@
 import { eq, and, sql, isNull, isNotNull } from "drizzle-orm";
 import { db } from "../../../server/db";
-import { hostProfiles, trips } from "../../../server/db/schema/index";
+import { users, trips } from "../../../server/db/schema/index";
 import { createPayHostTransfer } from "@/utils/stripe-utils";
 import { sendSlackMessage } from "../../../server/slack";
 // Your custom utility to create Stripe transfer
@@ -33,34 +33,43 @@ export default async function handler() {
     });
 
     // Process each booking and create a transfer made an array in case host has multiple trips within 24 hours
-    for (const trip of TripsAfter24HourCheckIn) {
-      const hostAccount = await db.query.hostProfiles.findFirst({
-        where: eq(hostProfiles.userId, trip.property.hostId!),
-      });
-      if (!hostAccount) {
-        console.log("SKIIPPPPEEDD");
-        continue;
+    if (TripsAfter24HourCheckIn.length >= 1) {
+      for (const trip of TripsAfter24HourCheckIn) {
+        const hostAccount = await db.query.users.findFirst({
+          where: eq(users.id, trip.property.hostId!),
+        });
+        if (!hostAccount) {
+          console.log("SKIIPPPPEEDD");
+          continue;
+        }
+        await createPayHostTransfer({
+          amount: trip.offer!.hostPayout,
+          destination: hostAccount.stripeConnectId!,
+          tripId: trip.id.toString(),
+        });
+        await sendSlackMessage({
+          channel: "tramona-bot",
+          text: [
+            `A host has been paid for booking ${trip.id} that has passed the 24-hour check-in window.`,
+            `Host: ${hostAccount.firstName} was paid a total of ${trip.offer!.hostPayout}`,
+            `Just using this because i want to test the payout job`,
+          ].join("\n"),
+        });
       }
-      await createPayHostTransfer({
-        amount: trip.offer!.hostPayout,
-        destination: hostAccount.stripeAccountId!,
-        tripId: trip.id.toString(),
-      });
+    } else {
       await sendSlackMessage({
+        isProductionOnly: true,
         channel: "tramona-bot",
-        text: [
-          `A host has been paid for booking ${trip.id} that has passed the 24-hour check-in window.`,
-          `Host: ${hostAccount.userId} was paid a total of ${trip.offer!.hostPayout}`,
-          `Just using this because i want to test the payout job`,
-        ].join("\n"),
+        text: [`No Trips to pay out`].join("\n"),
       });
     }
   } catch (error) {
     console.log("Error scheduling transfer:", error);
     await sendSlackMessage({
+      isProductionOnly: true,
       channel: "tramona-bot",
       text: [
-        `STRIPE HOST PAYOUT ERROR: `,
+        `STRIPE HOST PAYOUT ERROR `,
         `A host has not been paid for booking booking that has passed the 24-hour check-in window.`,
         `Please check the stripe logs for more information`,
       ].join("\n"),

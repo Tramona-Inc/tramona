@@ -108,12 +108,12 @@ export const superhogRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const superhogEndpoint =
+        env.NODE_ENV === "production"
+          ? "https://superhog-apim.azure-api.net/e-deposit/verifications"
+          : "https://superhog-apim.azure-api.net/e-deposit-sandbox/verifications";
       const { verification } = await axios
-        .post<unknown, ResponseType>(
-          "https://superhog-apim.azure-api.net/e-deposit/verifications",
-          input,
-          config,
-        )
+        .post<unknown, ResponseType>(superhogEndpoint, input, config)
         .then((res) => res.data)
         .catch(async (error: AxiosError) => {
           //there were errors
@@ -126,6 +126,7 @@ export const superhogRouter = createTRPCRouter({
             action: "create",
           });
           await sendSlackMessage({
+            isProductionOnly: true,
             channel: "superhog-bot",
             text: [
               `SUPERHOG REQUEST ERROR: axios error... ${error.response.data.detail}`,
@@ -136,6 +137,7 @@ export const superhogRouter = createTRPCRouter({
 
       if (!verification) {
         await sendSlackMessage({
+          isProductionOnly: true,
           channel: "superhog-bot",
           text: [
             `SUPERHOG REQUEST ERROR: there was no verification for ${input.metadata.echoToken}`,
@@ -176,6 +178,7 @@ export const superhogRouter = createTRPCRouter({
         });
         //super temp for testing
         await sendSlackMessage({
+          isProductionOnly: true,
           channel: "superhog-bot",
           text: [
             `SUPERHOG REQUEST SUCCESS: TRIP ID  ${input.reservation.reservationId} was created successfully for property ${input.listing.listingName}`,
@@ -191,6 +194,7 @@ export const superhogRouter = createTRPCRouter({
           action: "create",
         });
         await sendSlackMessage({
+          isProductionOnly: true,
           channel: "superhog-bot",
           text: [
             `SUPERHOG REQUEST ERROR: TRIP ID  ${input.reservation.reservationId} does not exist for ${input.listing.listingName}`,
@@ -272,12 +276,12 @@ export const superhogRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input }) => {
+      const superhogEndpoint =
+        env.NODE_ENV === "production"
+          ? "https://superhog-apim.azure-api.net/e-deposit/verifications/cancel"
+          : "https://superhog-apim.azure-api.net/e-deposit-sandbox/verifications/cancel";
       try {
-        await axios.put(
-          "https://superhog-apim.azure-api.net/e-deposit/verifications/cancel",
-          input,
-          config,
-        );
+        await axios.put(superhogEndpoint, input, config);
         const currentSuperhogRequestId =
           await db.query.superhogRequests.findFirst({
             where: eq(
@@ -342,12 +346,12 @@ export const superhogRouter = createTRPCRouter({
     )
 
     .mutation(async ({ input }) => {
+      const superhogEndpoint =
+        env.NODE_ENV === "production"
+          ? "https://superhog-apim.azure-api.net/e-deposit/verifications"
+          : "https://superhog-apim.azure-api.net/e-deposit-sandbox/verifications";
       try {
-        await axios.put(
-          "https://superhog-apim.azure-api.net/e-deposit/verifications",
-          input,
-          config,
-        );
+        await axios.put(superhogEndpoint, input, config);
 
         //find the id of the superhog request
         const superhogRequestId = await db.query.superhogRequests.findFirst({
@@ -389,6 +393,7 @@ export const superhogRouter = createTRPCRouter({
         if (error instanceof Error) {
           const axiosError = error as AxiosError;
           await sendSlackMessage({
+            isProductionOnly: true,
             channel: "superhog-bot",
             text: [
               `SUPERHOG REQUEST ERROR: axios error... ${axiosError.response.data.detail}`,

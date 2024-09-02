@@ -22,7 +22,6 @@ import {
 import Image from "next/image";
 import OfferPhotos from "../offers/OfferPhotos";
 import { AspectRatio } from "../ui/aspect-ratio";
-import BiddingForm from "./BiddingForm";
 import PropertyAmenities from "../offers/PropertyAmenities";
 import AmenitiesComponent from "../offers/CategorizedAmenities";
 import SingleLocationMap from "@/components/_common/GoogleMaps/SingleLocationMap";
@@ -273,12 +272,12 @@ export default function PropertyPage({ property }: { property: Property }) {
             </Dialog>
           </section>
         </div>
-        <div className="flex-1">
+        {/* <div className="flex-1">
           <BiddingForm
             propertyId={property.id}
             price={property.originalNightlyPrice ?? 0}
           />
-        </div>
+        </div> */}
       </div>
       <hr className="h-px border-0 bg-gray-300" />
       <section id="location" className="scroll-mt-36 space-y-1">

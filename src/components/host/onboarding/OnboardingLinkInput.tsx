@@ -41,8 +41,8 @@ export default function OnboardingLinkInput({ editing = false }) {
 
   const curUrl =
     getOriginalListing({
-      originalListingId,
-      originalListingSite: "Airbnb",
+      originalListingId: originalListingId ?? null,
+      originalListingPlatform: "Airbnb",
     })?.getListingUrl({}) ?? undefined;
 
   const form = useZodForm({

@@ -1,4 +1,9 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  AnonymousAvatar,
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/ui/avatar";
 import Stars from "@/components/_common/Stars";
 import { ChevronRight } from "lucide-react";
 import {
@@ -24,15 +29,19 @@ export default function ReviewCard({ review }: { review: Review }) {
 
   return (
     <div className="flex flex-col gap-4 sm:flex-row">
-      <Avatar className="h-10 w-10">
-        <AvatarImage src={review.profilePic} alt={review.name} />
-        <AvatarFallback>
-          {review.name
-            .split(" ")
-            .map((n) => n[0])
-            .join("")}
-        </AvatarFallback>
-      </Avatar>
+      {review.profilePic ? (
+        <Avatar className="h-10 w-10">
+          <AvatarImage src={review.profilePic} alt={review.name} />
+          <AvatarFallback>
+            {review.name
+              .split(" ")
+              .map((n) => n[0])
+              .join("")}
+          </AvatarFallback>
+        </Avatar>
+      ) : (
+        <AnonymousAvatar className="h-10 w-10" />
+      )}
       <div>
         <p className="font-bold">{review.name}</p>
         <div className="flex">

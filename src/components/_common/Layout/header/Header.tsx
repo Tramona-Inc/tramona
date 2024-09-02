@@ -92,8 +92,8 @@ function LargeHeader() {
             render={({ selected }) => (
               <span
                 className={cn(
-                  "rounded-md px-2 py-3 text-sm font-semibold text-muted-foreground hover:text-zinc-700 xl:text-base",
-                  selected && "text-zinc-700 underline underline-offset-2",
+                  "rounded-md px-2 py-3 text-sm font-bold text-zinc-600 hover:text-foreground xl:text-base",
+                  selected && "text-foreground underline underline-offset-2",
                 )}
               >
                 {link.name}

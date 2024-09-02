@@ -1,9 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { formatCurrency } from "@/utils/utils";
+import { Badge } from "../ui/badge";
 
-const HostCalculator = () => {
+export default function HostCalculator() {
   const [vacancyRate, setVacancyRate] = useState(50);
   const [cleaningFee, setCleaningFee] = useState(50);
   const [averagePrice, setAveragePrice] = useState(100);
@@ -65,54 +73,24 @@ const HostCalculator = () => {
       if (value === "" || value === "0") {
         setValue(0);
       } else {
-        setValue(Number(value));
+        setValue(Math.min(Math.max(Number(value), 0), 100));
       }
     };
 
-  const EstimateCard = ({
-    title,
-    value,
-    reduction,
-    isMostLikely,
-  }: {
-    title: string;
-    value: number;
-    reduction: number;
-    isMostLikely: boolean;
-  }) => (
-    <div className="relative pt-6">
-      {isMostLikely && (
-        <div className="absolute left-0 right-0 top-0 rounded-t-md bg-blue-500 py-1 text-center text-sm font-semibold text-white">
-          Most likely
-        </div>
-      )}
-      <Card className="h-full rounded-md border border-gray-200 bg-white p-4">
-        <CardTitle className="mb-2 text-lg font-semibold text-gray-800">
-          {title}
-        </CardTitle>
-        <p className="text-2xl font-bold text-green-600">+${value}</p>
-        <p className="text-sm text-gray-600">-{reduction}% Vacancy</p>
-      </Card>
-    </div>
-  );
-
   return (
-    <Card className="mx-auto w-full max-w-xl overflow-hidden rounded-lg bg-white shadow-lg">
-      <CardHeader className="bg-gray-800 px-6 py-2 text-white">
-        <CardTitle className="text-xl font-bold">
-          Host Earnings Calculator
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6 p-6">
-        <h2 className="text-center text-2xl font-semibold text-gray-800">
+    <Card className="mx-auto w-full max-w-xl overflow-hidden rounded-lg bg-white shadow-lg @container">
+      <CardHeader>
+        <CardTitle>
           How much more could you be making with your short-term rental?
-        </h2>
-        <p className="text-center italic text-gray-600">
+        </CardTitle>
+        <CardDescription>
           We turn your empty dates into extra money!
-        </p>
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
         <div className="space-y-4 pt-4">
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
+            <label className="mb-1 block text-sm font-medium text-zinc-700">
               Vacancy Rate (%)
             </label>
             <Input
@@ -123,63 +101,60 @@ const HostCalculator = () => {
               min="0"
               max="100"
             />
-            <div className="flex flex-col justify-between gap-2 sm:flex-row">
-              <Button
-                onClick={() => setVacancy(70)}
-                className="flex-1 bg-gray-200 text-gray-800 hover:bg-gray-300"
-              >
+            <div className="flex flex-col gap-2 *:flex-1 @sm:flex-row">
+              <Button onClick={() => setVacancy(70)} variant="secondary">
                 High (70%)
               </Button>
-              <Button
-                onClick={() => setVacancy(50)}
-                className="flex-1 bg-gray-200 text-gray-800 hover:bg-gray-300"
-              >
+              <Button onClick={() => setVacancy(50)} variant="secondary">
                 Medium (50%)
               </Button>
-              <Button
-                onClick={() => setVacancy(25)}
-                className="flex-1 bg-gray-200 text-gray-800 hover:bg-gray-300"
-              >
+              <Button onClick={() => setVacancy(25)} variant="secondary">
                 Low (25%)
               </Button>
             </div>
           </div>
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              Average Price per Night ($)
-            </label>
-            <Input
-              type="number"
-              value={averagePrice || ""}
-              onChange={handleNumberInput(setAveragePrice)}
-              className="w-full"
-              min="0"
-            />
+          <div className="flex flex-col gap-2 *:flex-1 @sm:flex-row">
+            <div>
+              <label className="mb-1 block text-sm font-medium text-zinc-700">
+                Average Price per Night
+              </label>
+              <Input
+                prefix="$"
+                type="number"
+                inputMode="decimal"
+                value={averagePrice || ""}
+                onChange={handleNumberInput(setAveragePrice)}
+                className="w-full"
+                min="0"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-zinc-700">
+                Cleaning Fee per Booking
+              </label>
+              <Input
+                prefix="$"
+                type="number"
+                inputMode="decimal"
+                value={cleaningFee || ""}
+                onChange={handleNumberInput(setCleaningFee)}
+                className="w-full"
+                min="0"
+              />
+            </div>
           </div>
         </div>
-        <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">
-            Cleaning Fee per Booking ($)
-          </label>
-          <Input
-            type="number"
-            value={cleaningFee || ""}
-            onChange={handleNumberInput(setCleaningFee)}
-            className="w-full"
-            min="0"
-          />
-        </div>
-        <div className="rounded-md bg-gray-100 p-4">
-          <h3 className="mb-2 text-lg font-semibold text-gray-800">
+        <div className="rounded-md bg-zinc-100 p-4">
+          <h3 className="font-semibold text-zinc-500">
             Current Annual Earnings
           </h3>
-          <p className="text-3xl font-bold text-gray-900">
-            ${earnings.current}
+          <p className="text-3xl font-bold text-zinc-900">
+            {formatCurrency(earnings.current * 100)}
           </p>
         </div>
 
         <div className="space-y-4">
-          <h3 className="text-center text-xl font-semibold text-gray-800">
+          <h3 className="text-center text-xl font-semibold text-zinc-800">
             Potential Extra Annual Earnings with Tramona
           </h3>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -195,7 +170,7 @@ const HostCalculator = () => {
                 reduction: 20,
               },
               {
-                title: "Optimistic",
+                title: "Best case",
                 value: earnings.tramona.optimistic,
                 reduction: 30,
               },
@@ -215,6 +190,31 @@ const HostCalculator = () => {
       </CardContent>
     </Card>
   );
-};
+}
 
-export default HostCalculator;
+const EstimateCard = ({
+  title,
+  value,
+  reduction,
+  isMostLikely,
+}: {
+  title: string;
+  value: number;
+  reduction: number;
+  isMostLikely: boolean;
+}) => (
+  <div className="relative pt-6">
+    {isMostLikely && (
+      <div className="absolute left-0 right-0 top-0 rounded-t-md bg-primaryGreen py-1 text-center text-sm font-semibold text-white">
+        Most likely
+      </div>
+    )}
+    <div className="flex flex-col items-center rounded-lg border p-4">
+      <p className="text-sm font-semibold">{title}</p>
+      <p className="text-2xl font-bold text-green-600">
+        +{formatCurrency(value * 100)}
+      </p>
+      <Badge>-{reduction}% vacancy</Badge>
+    </div>
+  </div>
+);
