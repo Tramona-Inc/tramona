@@ -51,13 +51,6 @@ const buttonVariants = cva(
           "bg-[#F2F1EF] border border-[#D9D6D1] hover:bg-zinc-200 font-semibold",
         greenPrimaryOutline:
           "border-2 border-[#004236] bg-primaryGreen-background text-black",
-
-        Airbnb:
-          "bg-gradient-to-r from-[#E61F4F] to-[#D70666] text-white hover:opacity-90",
-
-        "Booking.com": "bg-[#013B94] text-white hover:opacity-90",
-
-        Vrbo: "bg-[#191E3B] text-white hover:opacity-90",
       },
     },
     defaultVariants: {
