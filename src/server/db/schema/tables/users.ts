@@ -67,6 +67,8 @@ export const users = pgTable(
     lastTextAt: timestamp("last_text_at", { withTimezone: true }).defaultNow(),
     isWhatsApp: boolean("is_whats_app").default(false).notNull(),
     stripeCustomerId: varchar("stripe_customer_id"),
+    stripeConnectId: varchar("stripe_connect_id"),
+    chargesEnabled: boolean("charges_enabled").default(false),
     setupIntentId: varchar("setup_intent_id"),
 
     // mode: "string" cuz nextauth doesnt serialize/deserialize dates
@@ -115,6 +117,10 @@ export const referralCodes = pgTable(
     numBookingsUsingCode: integer("num_bookings_using_code")
       .notNull()
       .default(0),
+    numHostSignUpsUsingCode: integer("num_host_sign_ups_using_code")
+      .notNull()
+      .default(0),
+    curBalance: integer("cur_balance").notNull().default(0),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -137,13 +143,12 @@ export const referralEarnings = pgTable(
     offerId: integer("offer_id")
       .notNull()
       .references(() => offers.id, { onDelete: "cascade" }),
-    earningStatus: earningStatusEnum("earning_status")
-      .notNull()
-      .default("pending"),
+    earningStatus: earningStatusEnum("earning_status").default("pending"),
     cashbackEarned: integer("cashback_earned").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
+    hostFeesSaved: integer("host_fees_saved"),
   },
   (t) => ({
     referralCodeIdx: index().on(t.referralCode),

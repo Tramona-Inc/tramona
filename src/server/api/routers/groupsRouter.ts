@@ -201,11 +201,15 @@ export const groupsRouter = createTRPCRouter({
 
   getGroupOwner: protectedProcedure
     .input(z.number())
-    .mutation(async ({ input: groupId, ctx }) => {
+    .query(async ({ input: groupId, ctx }) => {
       return await ctx.db.query.groups
         .findFirst({
           columns: {},
-          with: { owner: { columns: { phoneNumber: true, isWhatsApp: true } } },
+          with: {
+            owner: {
+              columns: { id: true, phoneNumber: true, isWhatsApp: true },
+            },
+          },
           where: eq(groups.id, groupId),
         })
         .then((res) => res?.owner);

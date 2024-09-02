@@ -1,12 +1,57 @@
-import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  roleRestrictedProcedure,
+} from "@/server/api/trpc";
 import { db } from "@/server/db";
-import { groupMembers, properties, trips } from "@/server/db/schema";
+import {
+  groupMembers,
+  properties,
+  trips,
+  tripDamages,
+} from "@/server/db/schema";
 
 import { TRPCError } from "@trpc/server";
 import { and, eq, exists, isNotNull, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
 
 export const tripsRouter = createTRPCRouter({
+  getAllPreviousTripsWithDetails: roleRestrictedProcedure(["admin"]).query(
+    async () => {
+      return await db.query.trips.findMany({
+        with: {
+          property: {
+            columns: {
+              id: true,
+              name: true,
+              city: true,
+            },
+            with: { host: { columns: { name: true } } },
+          },
+          offer: {
+            columns: {
+              paymentIntentId: true,
+              checkIn: true,
+              checkOut: true,
+            },
+          },
+          group: {
+            with: {
+              owner: {
+                columns: {
+                  name: true,
+                  id: true,
+                  stripeCustomerId: true,
+                  setupIntentId: true,
+                },
+              },
+            },
+          },
+        },
+      });
+    },
+  ),
+
   getMyTrips: protectedProcedure.query(async ({ ctx }) => {
     return await db.query.trips.findMany({
       where: and(
@@ -183,5 +228,9 @@ export const tripsRouter = createTRPCRouter({
         sql`${trips.checkIn} <= ${sql`(${now}::timestamp - interval '24 hours')`}`,
       ),
     });
+  }),
+  getAllTripDamages: roleRestrictedProcedure(["admin"]).query(async () => {
+    const allTrips = await db.query.tripDamages.findMany({});
+    return allTrips.length > 0 ? allTrips : [];
   }),
 });

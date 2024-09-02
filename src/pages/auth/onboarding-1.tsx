@@ -35,12 +35,12 @@ export default function DateOfBirth() {
     defaultValues: { dob: "" },
   });
 
-  const { refetch: refetchOnboardingStep } =
-    api.users.getOnboardingStep.useQuery(undefined, { enabled: false });
+  const { refetch: refetchVerifications } =
+    api.users.getMyVerifications.useQuery(undefined, { enabled: false });
 
   const { mutateAsync: updateProfile } = api.users.updateProfile.useMutation({
     onSuccess: () => {
-      void refetchOnboardingStep();
+      void refetchVerifications();
       void router.push("/auth/onboarding-2");
     },
   });

@@ -84,6 +84,48 @@ export async function fetchConversationWithAdmin(userId: string) {
   return conversationWithAdmin?.conversation.id ?? null;
 }
 
+export async function fetchConversationWithHost(
+  userId: string,
+  hostId: string,
+) {
+  const result = await db.query.users.findFirst({
+    where: eq(users.id, userId),
+    with: {
+      conversations: {
+        with: {
+          conversation: {
+            with: {
+              participants: {
+                with: {
+                  user: {
+                    columns: {
+                      id: true,
+                      name: true,
+                      image: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  // Check if conversation contains two participants
+  // and check if admin id is in there
+  const conversationWithHost = result?.conversations.find(
+    (conv) =>
+      conv.conversation.participants.length === 2 &&
+      conv.conversation.participants.some(
+        (participant) => participant.user.id === hostId,
+      ),
+  );
+
+  return conversationWithHost?.conversation.id ?? null;
+}
+
 export async function fetchConversationWithOffer(
   userId: string,
   offerId: string,
@@ -152,6 +194,26 @@ export async function createConversationWithAdmin(userId: string) {
   }
 }
 
+export async function createConversationWithHost(
+  userId: string,
+  hostId: string,
+) {
+  // Generate conversation and get id
+  const createdConversationId = await generateConversation();
+
+  if (createdConversationId !== undefined) {
+    // Insert participants for the user and admin
+    const participantValues = [
+      { conversationId: createdConversationId, userId: userId },
+      { conversationId: createdConversationId, userId: hostId },
+    ];
+
+    await db.insert(conversationParticipants).values(participantValues);
+
+    return createdConversationId;
+  }
+}
+
 export async function createConversationWithOffer(
   userId: string,
   offerUserId: string,
@@ -198,6 +260,8 @@ export async function addTwoUserToConversation(
     ];
 
     await db.insert(conversationParticipants).values(participantValues);
+
+    return createdConversationId;
   }
 }
 
@@ -261,24 +325,44 @@ export const messagesRouter = createTRPCRouter({
     return conversationId;
   }),
 
-  // for guest only
-  createConversationWithAdminFromGuest: publicProcedure.input(
-    z.object({
-      sessionToken: z.string(),
+  createConversationWithHost: protectedProcedure
+    .input(z.object({ hostId: zodString() }))
+    .mutation(async ({ ctx, input }) => {
+      const conversationId = await fetchConversationWithHost(
+        ctx.user.id,
+        input.hostId,
+      );
+
+      if (!conversationId) {
+        return await createConversationWithHost(ctx.user.id, input.hostId);
+      }
+
+      return conversationId;
     }),
-  ).mutation(async ({ ctx, input }) => {
+
+  // for guest only
+  createConversationWithAdminFromGuest: publicProcedure
+    .input(
+      z.object({
+        sessionToken: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
       const tempUser = await db.query.users.findFirst({
         where: eq(users.sessionToken, input.sessionToken),
       });
       let conversationId = null;
-      if (tempUser) {      
+      if (tempUser) {
         conversationId = await fetchConversationWithAdmin(tempUser.id);
         // Create conversation with admin if it doesn't exist
         if (!conversationId) {
           conversationId = await createConversationWithAdmin(tempUser.id);
         }
       } else {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Guest Temporary User not found" });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Guest Temporary User not found",
+        });
       }
       return { tempUserId: tempUser?.id, conversationId: conversationId };
     }),
@@ -342,7 +426,11 @@ export const messagesRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input }) => {
-      await addTwoUserToConversation(input.user1Id, input.user2Id);
+      const conversationId = await addTwoUserToConversation(
+        input.user1Id,
+        input.user2Id,
+      );
+      return conversationId;
     }),
 
   getParticipantsPhoneNumbers: protectedProcedure
@@ -415,36 +503,48 @@ export const messagesRouter = createTRPCRouter({
         .where(inArray(messages.id, input.unreadMessageIds));
     }),
 
-    getConversationsWithAdmin: publicProcedure
-    .input(z.object({
-      userId: z.string().optional(),
-      sessionToken: z.string().optional(),
-    })) 
+  getConversationsWithAdmin: publicProcedure
+    .input(
+      z.object({
+        userId: z.string().optional(),
+        sessionToken: z.string().optional(),
+      }),
+    )
     .query(async ({ ctx, input }) => {
       let conversationId = null;
       let tempUser = null;
-      if (ctx.session?.user.role === "admin" || ctx.session?.user.role === "host") {
-        return null
+      if (
+        ctx.session?.user.role === "admin" ||
+        ctx.session?.user.role === "host"
+      ) {
+        return null;
       }
       if (!input.userId && input.sessionToken) {
         tempUser = await db.query.users.findFirst({
           where: eq(users.sessionToken, input.sessionToken),
         });
-        if (tempUser) {      
+        if (tempUser) {
           conversationId = await fetchConversationWithAdmin(tempUser.id);
         } else {
-          throw new TRPCError({ code: "NOT_FOUND", message: "Guest Temporary User not found" });
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Guest Temporary User not found",
+          });
         }
-      } else if (input.userId) { // if both userId and sessionToken are provided, userId will be used
+      } else if (input.userId) {
+        // if both userId and sessionToken are provided, userId will be used
         conversationId = await fetchConversationWithAdmin(input.userId);
       } else if (!input.userId && !input.sessionToken) {
         return null; // when the page renders for the first time, the tRPC call will hit here
-      } 
+      }
 
       if (!conversationId) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "conversationId not found" });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "conversationId not found",
+        });
       }
-      
+
       return { conversationId: conversationId, tempUserId: tempUser?.id };
     }),
 });

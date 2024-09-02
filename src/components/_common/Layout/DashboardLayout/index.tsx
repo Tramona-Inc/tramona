@@ -19,19 +19,17 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const router = useRouter();
 
-  const { data: onboardingStep } = api.users.getOnboardingStep.useQuery();
+  const { data: verifications } = api.users.getMyVerifications.useQuery();
 
   useEffect(() => {
-    if (onboardingStep != null && onboardingStep < 3) {
-      if (onboardingStep === 0) {
-        void router.push("/auth/onboarding");
-      } else if (onboardingStep === 1) {
-        void router.push("/auth/onboarding-1");
-      } else if (onboardingStep === 2) {
-        void router.push("/auth/onboarding-2");
-      }
+    if (verifications?.phoneNumber === null) {
+      void router.push("/auth/onboarding");
+    } else if (verifications?.dateOfBirth === null) {
+      void router.push("/auth/onboarding-1");
+    } else if (verifications?.firstName === null) {
+      void router.push("/auth/onboarding-2");
     }
-  }, [onboardingStep, router]);
+  }, [verifications, router]);
 
   const { pathname } = useRouter();
 

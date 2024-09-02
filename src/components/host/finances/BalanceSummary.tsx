@@ -5,19 +5,19 @@ import {
   ConnectAccountManagement,
   ConnectPayouts,
 } from "@stripe/react-connect-js";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import NoStripeAccount from "./NoStripeAccount";
 
 interface BalanceSummaryProps {
   balance: number | null;
   isStripeConnectInstanceReady: boolean;
-  stripeAccountIdNumber: null | string | undefined;
+  stripeConnectIdNumber: null | string | undefined;
 }
 
 const BalanceSummary: React.FC<BalanceSummaryProps> = ({
   balance,
   isStripeConnectInstanceReady,
-  stripeAccountIdNumber,
+  stripeConnectIdNumber,
 }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isManageDialogOpen, setIsManageDialogOpen] = useState(false);
@@ -46,7 +46,7 @@ const BalanceSummary: React.FC<BalanceSummaryProps> = ({
               <h1 className="my-3text-center text-2xl font-bold"> Transfer </h1>
               {isStripeConnectInstanceReady ? (
                 <ConnectPayouts />
-              ) : stripeAccountIdNumber ? (
+              ) : stripeConnectIdNumber ? (
                 <div className="h-96">
                   {" "}
                   Not ready <Spinner />{" "}
@@ -79,7 +79,7 @@ const BalanceSummary: React.FC<BalanceSummaryProps> = ({
                   futureRequirements: "include",
                 }}
               />
-            ) : stripeAccountIdNumber ? (
+            ) : stripeConnectIdNumber ? (
               <div className="h-96">
                 Not ready <Spinner />{" "}
               </div>

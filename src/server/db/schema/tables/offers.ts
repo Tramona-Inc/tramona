@@ -6,6 +6,7 @@ import {
   serial,
   timestamp,
   varchar,
+  boolean,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { properties } from "./properties";
@@ -34,6 +35,9 @@ export const offers = pgTable(
     checkOut: date("check_out", { mode: "date" }).notNull(),
     hostPayout: integer("host_payout").notNull(), // in cents
     travelerOfferedPrice: integer("traveler_offered_price").notNull(), // in cents
+    scrapeUrl: varchar("scrape_url"),
+    isAvailableOnOriginalSite: boolean("is_available_on_original_site"),
+    availabilityCheckedAt: timestamp("availability_checked_at"),
   },
   (t) => ({
     requestIdIdx: index().on(t.requestId),
