@@ -18,6 +18,7 @@ import { formatDate } from "date-fns";
 import ReservationConfirmedEmail from "packages/transactional/emails/ReservationConfirmedEmail";
 import { stripeWithSecretKey } from "@/server/api/routers/stripeRouter";
 import BookingCancellationEmail from "packages/transactional/emails/BookingCancellationEmail";
+import { sendSlackMessage } from "@/server/slack";
 
 export async function cancelTripByPaymentIntent({
   paymentIntentId,
@@ -175,4 +176,31 @@ export async function sendEmailAndWhatsupConfirmation({
   //     msg: "Your Tramona booking is confirmed! Please see the My Trips page to access your trip information!",
   //   });
   // }
+}
+
+export async function captureTripPaymentWithoutSuperhog({
+  paymentIntentId,
+  propertyId,
+  trip,
+}: {
+  paymentIntentId: string;
+  propertyId: number;
+  trip: Trip;
+}) {
+  const intent =
+    await stripeWithSecretKey.paymentIntents.capture(paymentIntentId); //will capture the authorized amount by default
+  // Update trips table
+  await db
+    .update(trips)
+    .set({ paymentCaptured: new Date() })
+    .where(eq(trips.id, trip.id));
+
+  await sendSlackMessage({
+    isProductionOnly: true,
+    channel: "tramona-bot",
+    text: [
+      `Direct Booking Trip success: TRIP ID  ${trip.id} was created successfully for property ${propertyId}`,
+    ].join("\n"),
+  });
+  return intent;
 }

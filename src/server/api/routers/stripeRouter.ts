@@ -285,6 +285,7 @@ export const stripeRouter = createTRPCRouter({
   authorizePayment: protectedProcedure // this is how will now creat a checkout session using a custom flow
     .input(
       z.object({
+        isDirectListing: z.boolean().default(false),
         offerId: z.number(),
         propertyId: z.number(),
         requestId: z.number().nullable(),
@@ -330,6 +331,7 @@ export const stripeRouter = createTRPCRouter({
       }
 
       const metadata = {
+        is_direct_listing: input.isDirectListing.toString(),
         is_charged_with_setup_intent: "false",
         user_email: ctx.user.email,
         user_id: ctx.user.id,
