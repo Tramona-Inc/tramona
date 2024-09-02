@@ -16,6 +16,7 @@ export type DirectSiteScraper = (options: {
   checkIn: Date;
   checkOut: Date;
   numOfOffersInEachScraper?: number;
+  requestPrice?: number; // when the scraper is used by user request page
 }) => Promise<ScrapedListing[]>;
 
 export type ScrapedListing = NewProperty & {
@@ -56,11 +57,14 @@ export const scrapeDirectListings = async (options: {
   checkIn: Date;
   checkOut: Date;
   numOfOffersInEachScraper?: number;
+  requestPrice?: number;
 }) => {
+  console.log("scrapeDirectListings: ", options);
   const allListings = await Promise.all(
     directSiteScrapers.map((scraper) => scraper(options)),
   );
   const listings = allListings.flat();
+  console.log("listings: ", listings);
   if (listings.length > 0) {
     await db.transaction(async (trx) => {
       // for each listing, insert the property and reviews OR update them if they already exist

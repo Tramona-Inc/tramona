@@ -22,6 +22,8 @@ export function useCityRequestForm({
   const { status } = useSession();
   const router = useRouter();
   const { mutateAsync: createRequests } = api.requests.create.useMutation();
+  const { mutateAsync: scrapeOffers } =
+    api.offers.scrapeOfferForRequest.useMutation();
 
   const onSubmit = form.handleSubmit(async (data) => {
     const { date: _date, maxNightlyPriceUSD, ...restData } = data;
@@ -45,13 +47,18 @@ export function useCityRequestForm({
         });
       });
     } else {
-      await createRequests(newRequest)
-        .then(({ madeByGroupId }) => {
-          form.reset();
-          afterSubmit?.();
-          setMadeByGroupId?.(madeByGroupId);
-        })
-        .catch(() => errorToast());
+      try {
+        const { requestId, madeByGroupId } = await createRequests(newRequest);
+        form.reset();
+        afterSubmit?.();
+        setMadeByGroupId?.(madeByGroupId);
+        // scrape offers only for request in AZ, USA. this is a temp solution and need to be revamped
+        if (newRequest.location.endsWith("AZ, USA")) {
+          await scrapeOffers({ requestId: requestId, numOfOffers: 10 });
+        }
+      } catch (error) {
+        errorToast();
+      }
     }
   });
 
