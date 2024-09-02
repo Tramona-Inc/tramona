@@ -59,10 +59,19 @@ export default async function webhook(
       case "charge.succeeded": //use to be payment_intent.succeeded
         console.log(event.data.object);
         const paymentIntentSucceeded = event.data.object;
+        const isChargedWithSetupIntent =
+          paymentIntentSucceeded.metadata.is_charged_with_setup_intent ===
+          "true"
+            ? true
+            : false;
         paymentIntentSucceeded.metadata.offer_id === undefined
           ? undefined
           : parseInt(paymentIntentSucceeded.metadata.offer_id);
 
+        if (isChargedWithSetupIntent) return;
+        console.log(
+          "This is a setup intent charge, we do not need to do anything here",
+        );
         const user = await db.query.users.findFirst({
           where: eq(users.id, paymentIntentSucceeded.metadata.user_id!),
         });
@@ -249,6 +258,12 @@ export default async function webhook(
         {
           const chargeObject = event.data.object;
           //addingt the paymentIntentId to the trips table
+
+          const isChargedBySetupIntent =
+            chargeObject.metadata.is_charged_with_setup_intent === "true"
+              ? true
+              : false;
+          if (isChargedBySetupIntent) return;
           await db
             .update(trips)
             .set({

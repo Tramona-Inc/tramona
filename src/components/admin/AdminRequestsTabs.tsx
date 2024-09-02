@@ -27,6 +27,11 @@ const navs = [
     description: "Manually verify Superhog status for users",
     href: "/admin/superhog",
   },
+  {
+    title: "Add Additional Charge for Past Trips",
+    description: "Charge travelers for damages or other expenses post-trip",
+    href: "/admin/additional-charge",
+  },
 ];
 
 export default function AdminRequestsTabs() {

@@ -27,7 +27,7 @@ import {
   superhogErrors,
 } from "./tables/superhogRequests";
 import { referralCodes, referralEarnings, users } from "./tables/users";
-import { trips, tripCancellations } from "./tables/trips";
+import { trips, tripCancellations, tripDamages } from "./tables/trips";
 import { reviews } from "./tables/reviews";
 import { fillerBookings, fillerOffers } from "./tables/feedFiller";
 import { linkInputProperties } from "./tables/linkInputProperties";
@@ -105,6 +105,7 @@ export const propertiesRelations = relations(properties, ({ one, many }) => ({
   superhogRequests: many(superhogRequests),
   reviews: many(reviews),
   superhogErrors: many(superhogErrors),
+  tripDamages: many(tripDamages),
 }));
 
 export const bookedDatesRelations = relations(bookedDates, ({ one }) => ({
@@ -388,6 +389,7 @@ export const tripsRelations = relations(trips, ({ one, many }) => ({
   superhogErrors: many(superhogErrors),
   superhogActions: many(superhogActionOnTrips),
   tripCancellations: many(tripCancellations),
+  tripDamages: many(tripDamages),
   hostReferralDiscounts: many(hostReferralDiscounts),
 }));
 
@@ -421,6 +423,17 @@ export const fillerOffersRelations = relations(fillerOffers, ({ one }) => ({
 export const fillerBookingsRelations = relations(fillerBookings, ({ one }) => ({
   property: one(properties, {
     fields: [fillerBookings.propertyId],
+    references: [properties.id],
+  }),
+}));
+
+export const tripDamagesRelations = relations(tripDamages, ({ one }) => ({
+  trip: one(trips, {
+    fields: [tripDamages.tripId],
+    references: [trips.id],
+  }),
+  property: one(properties, {
+    fields: [tripDamages.propertyId],
     references: [properties.id],
   }),
 }));

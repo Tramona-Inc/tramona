@@ -98,9 +98,9 @@ export const tripCancellations = pgTable(
 );
 
 export const tripDamages = pgTable("trip-damages", {
+  id: serial("id").primaryKey(),
   tripId: integer("trips_id")
     .notNull()
-    .primaryKey()
     .references(() => trips.id, {
       onDelete: "cascade",
     }),
@@ -109,7 +109,7 @@ export const tripDamages = pgTable("trip-damages", {
     .notNull()
     .defaultNow(),
   paymentCompleteAt: timestamp("payment_complete_at", { withTimezone: true }),
-  reason: varchar("reason").notNull(),
+  description: varchar("description").notNull(),
   propertyId: integer("property_id").references(() => properties.id, {
     onDelete: "cascade",
   }),
