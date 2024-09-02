@@ -12,6 +12,7 @@ import { type NextApiRequest, type NextApiResponse } from "next";
 import { superhogRequests } from "../../server/db/schema/tables/superhogRequests";
 import {
   cancelTripByPaymentIntent,
+  captureTripPaymentWithoutSuperhog,
   sendEmailAndWhatsupConfirmation,
 } from "@/utils/webhook-functions/trips-utils";
 import { createSuperhogReservation } from "@/utils/webhook-functions/superhog-utils";
@@ -59,9 +60,14 @@ export default async function webhook(
       case "charge.succeeded": //use to be payment_intent.succeeded
         console.log(event.data.object);
         const paymentIntentSucceeded = event.data.object;
-        const isChargedWithSetupIntent =
+        const isChargedWithSetupIntent = //check if this charge was from damages or setup intent to skip the rest of the code
           paymentIntentSucceeded.metadata.is_charged_with_setup_intent ===
           "true"
+            ? true
+            : false;
+
+        const isDirectListingCharge = //check if we are using direct listing price model to skip superhog
+          paymentIntentSucceeded.metadata.is_direct_listing === "true"
             ? true
             : false;
         paymentIntentSucceeded.metadata.offer_id === undefined
@@ -154,7 +160,7 @@ export default async function webhook(
                 },
               );
 
-              if (!currentSuperhogReservation) {
+              if (!currentSuperhogReservation && !isDirectListingCharge) {
                 await createSuperhogReservation({
                   paymentIntentId:
                     paymentIntentSucceeded.payment_intent?.toString() ?? "",
@@ -163,9 +169,17 @@ export default async function webhook(
                   trip: currentTrip[0]!,
                 }); //creating a superhog reservation
               } else {
-                console.log("Superhog reservation already exists");
+                if (isDirectListingCharge) {
+                  await captureTripPaymentWithoutSuperhog({
+                    paymentIntentId:
+                      paymentIntentSucceeded.payment_intent?.toString() ?? "",
+                    propertyId: offer.propertyId,
+                    trip: currentTrip[0]!,
+                  });
+                } else {
+                  console.log("Superhog reservation already exists");
+                }
               }
-
               //<<--------------------->>
 
               //send email and whatsup (whatsup is not implemented yet)
