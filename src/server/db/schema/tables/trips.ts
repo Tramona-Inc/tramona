@@ -96,3 +96,21 @@ export const tripCancellations = pgTable(
     };
   },
 );
+
+export const tripDamages = pgTable("trip-damages", {
+  id: serial("id").primaryKey(),
+  tripId: integer("trips_id")
+    .notNull()
+    .references(() => trips.id, {
+      onDelete: "cascade",
+    }),
+  amount: integer("amount").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  paymentCompleteAt: timestamp("payment_complete_at", { withTimezone: true }),
+  description: varchar("description").notNull(),
+  propertyId: integer("property_id").references(() => properties.id, {
+    onDelete: "cascade",
+  }),
+});
