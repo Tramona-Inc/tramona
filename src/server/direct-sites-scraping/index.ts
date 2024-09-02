@@ -17,7 +17,8 @@ export type DirectSiteScraper = (options: {
   checkIn: Date;
   checkOut: Date;
   numOfOffersInEachScraper?: number;
-  requestPrice?: number; // when the scraper is used by user request page
+  requestPrice?: number; // when the scraper is used by traveler request page
+  requestId?: number; // when the scraper is used by traveler request page
 }) => Promise<ScrapedListing[]>;
 
 export type ScrapedListing = NewProperty & {
@@ -59,13 +60,12 @@ export const scrapeDirectListings = async (options: {
   checkOut: Date;
   numOfOffersInEachScraper?: number;
   requestPrice?: number;
+  requestId?: number;
 }) => {
-  console.log("scrapeDirectListings: ", options);
   const allListings = await Promise.all(
     directSiteScrapers.map((scraper) => scraper(options)),
   );
   const listings = allListings.flat();
-  console.log("listings: ", listings);
   if (listings.length > 0) {
     await db.transaction(async (trx) => {
       // for each listing, insert the property and reviews OR update them if they already exist
@@ -130,6 +130,7 @@ export const scrapeDirectListings = async (options: {
                 scrapeUrl: listing.scrapeUrl,
                 isAvailableOnOriginalSite: true,
                 availabilityCheckedAt: new Date(),
+                ...(options.requestId && { requestId: options.requestId }),
               };
               const newOfferId = await trx
                 .insert(offers)
@@ -182,6 +183,7 @@ export const scrapeDirectListings = async (options: {
                 scrapeUrl: listing.scrapeUrl,
                 isAvailableOnOriginalSite: true,
                 availabilityCheckedAt: new Date(),
+                ...(options.requestId && { requestId: options.requestId }),
               };
               const newOfferId = await trx
                 .insert(offers)

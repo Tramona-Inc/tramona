@@ -171,13 +171,6 @@ export const arizonaScraper: DirectSiteScraper = async ({
   numOfOffersInEachScraper = 2,
   requestPrice,
 }) => {
-  console.log(
-    "arizonaScraper: ",
-    checkIn,
-    checkOut,
-    numOfOffersInEachScraper,
-    requestPrice,
-  );
   // append 0 to month and day if less than 10
   const monthStart = (checkIn.getMonth() + 1).toString().padStart(2, "0");
   const dayStart = checkIn.getDate().toString().padStart(2, "0");
@@ -187,7 +180,7 @@ export const arizonaScraper: DirectSiteScraper = async ({
   const yearEnd = checkOut.getFullYear().toString();
 
   const url = `https://integrityarizonavacationrentals.com/wp-admin/admin-ajax.php?action=streamlinecore-api-request&params=%7B%22methodName%22:%22GetPropertyAvailabilityWithRatesWordPress%22,%22params%22:%7B%22sort_by%22:%22price%22,%22return_gallery%22:1,%22max_images_number%22:%225%22,%22use_room_type_logic%22:0,%22get_prices_starting_from%22:0,%22longterm_enabled%22:%220%22,%22additional_variables%22:1,%22extra_charges%22:1,%22use_amenities%22:%22yes%22,%22use_streamshare%22:0,%22startdate%22:%22${monthStart}%2F${dayStart}%2F${yearStart}%22,%22enddate%22:%22${monthEnd}%2F${dayEnd}%2F${yearEnd}%22,%22amenities_filter%22:%22%22,%22page_number%22:1,%22page_results_number%22:40,%22use_bundled_fees_in_room_rate%22:1,%22square_feet%22:1,%22floor_name%22:1%7D%7D`;
-  // console.log("scrapedUrl: ", url)
+  // console.log("scrapedUrl: ", url);
   let properties = await axiosInstance
     .get<string>(url)
     .then((response) => response.data)
@@ -196,13 +189,14 @@ export const arizonaScraper: DirectSiteScraper = async ({
       mapToScrapedListing(validatedData, checkIn, checkOut, url),
     )
     .catch((error) => {
+      console.error("Error scraping Arizona: ", error);
       return [];
     });
 
   if (requestPrice) {
     properties = properties.filter((p) => {
       const price = p.originalNightlyPrice!;
-      return price >= requestPrice * 0.9 && price <= requestPrice * 1.1;
+      return price >= requestPrice * 0.8 && price <= requestPrice * 1.1;
     });
   }
   if (numOfOffersInEachScraper > 0) {
@@ -226,7 +220,7 @@ export const arizonaScraper: DirectSiteScraper = async ({
     }),
   );
 
-  console.log(propertiesWithReviews[0]);
+  // console.log(propertiesWithReviews[0]);
   return propertiesWithReviews;
 };
 
