@@ -19,6 +19,7 @@ import {
   completeReferral,
   validateHostDiscountReferral,
 } from "@/utils/webhook-functions/referral-utils";
+import { createSetupIntent } from "@/utils/webhook-functions/stripe-utils";
 
 // ! Necessary for stripe
 export const config = {
@@ -56,12 +57,21 @@ export default async function webhook(
     // * You can add other event types to catch
     switch (event.type) {
       case "charge.succeeded": //use to be payment_intent.succeeded
-        console.log("charge.succeeded");
+        console.log(event.data.object);
         const paymentIntentSucceeded = event.data.object;
+        const isChargedWithSetupIntent =
+          paymentIntentSucceeded.metadata.is_charged_with_setup_intent ===
+          "true"
+            ? true
+            : false;
         paymentIntentSucceeded.metadata.offer_id === undefined
           ? undefined
           : parseInt(paymentIntentSucceeded.metadata.offer_id);
 
+        if (isChargedWithSetupIntent) return;
+        console.log(
+          "This is a setup intent charge, we do not need to do anything here",
+        );
         const user = await db.query.users.findFirst({
           where: eq(users.id, paymentIntentSucceeded.metadata.user_id!),
         });
@@ -109,6 +119,13 @@ export default async function webhook(
               ),
             });
 
+            //<------- Setup Intent for future charge ---->
+            await createSetupIntent({
+              customerId: user!.stripeCustomerId!,
+              paymentMethodId: paymentIntentSucceeded.payment_method!,
+              userId: user!.id,
+            });
+
             //create trip here
 
             if (offer?.request) {
@@ -129,9 +146,7 @@ export default async function webhook(
 
               //superhog reservation
 
-              //creating a superhog reservation only if does not exist
-
-              //<<-------------uncomment once we get test keys----------------->>
+              //<___creating a superhog reservation only if does not exist__>
 
               const currentSuperhogReservation = await db.query.trips.findFirst(
                 {
@@ -243,6 +258,12 @@ export default async function webhook(
         {
           const chargeObject = event.data.object;
           //addingt the paymentIntentId to the trips table
+
+          const isChargedBySetupIntent =
+            chargeObject.metadata.is_charged_with_setup_intent === "true"
+              ? true
+              : false;
+          if (isChargedBySetupIntent) return;
           await db
             .update(trips)
             .set({
