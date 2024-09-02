@@ -7,13 +7,11 @@ import { db } from "@/server/db";
 import {
   groupMembers,
   groups,
-  properties,
   requestInsertSchema,
   requestSelectSchema,
   requestUpdatedInfo,
   requests,
   requestsToProperties,
-  reviews,
   users,
 } from "@/server/db/schema";
 import {
@@ -38,8 +36,6 @@ import {
   plural,
 } from "@/utils/utils";
 import { sendTextToHost } from "@/server/server-utils";
-import { scrapeAirbnbListings } from "@/server/external-listings-scraping/airbnb";
-import { waitUntil } from "@vercel/functions";
 
 const updateRequestInputSchema = z.object({
   requestId: z.number(),
@@ -456,34 +452,34 @@ export async function handleRequestSubmission(
       );
     }
 
-    waitUntil(
-      scrapeAirbnbListings({
-        request: input,
-        limit: 10,
-      })
-        .then(async (airbnbListings) => {
-          const airbnbPropertyIds = await tx
-            .insert(properties)
-            .values(airbnbListings.map((l) => l.property))
-            .returning({ id: properties.id })
-            .then((res) => res.map((r) => r.id));
+    // waitUntil(
+    //   scrapeAirbnbListings({
+    //     request: input,
+    //     limit: 10,
+    //   })
+    //     .then(async (airbnbListings) => {
+    //       const airbnbPropertyIds = await tx
+    //         .insert(properties)
+    //         .values(airbnbListings.map((l) => l.property))
+    //         .returning({ id: properties.id })
+    //         .then((res) => res.map((r) => r.id));
 
-          const flattenedReviews = airbnbListings
-            .map(({ reviews }, i) =>
-              reviews.map((r) => ({ ...r, propertyId: airbnbPropertyIds[i]! })),
-            )
-            .flat();
+    //       const flattenedReviews = airbnbListings
+    //         .map(({ reviews }, i) =>
+    //           reviews.map((r) => ({ ...r, propertyId: airbnbPropertyIds[i]! })),
+    //         )
+    //         .flat();
 
-          await tx.insert(reviews).values(flattenedReviews);
-        })
-        .catch((e) => {
-          // fail silently -- we dont want to crash the request submission
-          // TODO: handle this better using a dead letter queue or something
-          console.error(
-            `Error scraping Airbnb listings for request #${requestId}: ${e}`,
-          );
-        }),
-    );
+    //       await tx.insert(reviews).values(flattenedReviews);
+    //     })
+    //     .catch((e) => {
+    //       // fail silently -- we dont want to crash the request submission
+    //       // TODO: handle this better using a dead letter queue or something
+    //       console.error(
+    //         `Error scraping Airbnb listings for request #${requestId}: ${e}`,
+    //       );
+    //     }),
+    // );
 
     return { requestId, madeByGroupId };
   });
