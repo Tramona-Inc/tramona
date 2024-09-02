@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
 import { useHostOnboarding } from "@/utils/store/host-onboarding";
-import { ALL_CANCELLATION_POLICIES } from "@/server/db/schema";
+import { CANCELLATION_POLICIES } from "@/server/db/schema";
 
 export default function Summary1() {
   const [isEditing, setIsEditing] = useState(false);
@@ -41,7 +41,7 @@ export default function Summary1() {
             <Button variant="outline">Edit your cancellation policy</Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-60">
-            {ALL_CANCELLATION_POLICIES.map((policy) => (
+            {CANCELLATION_POLICIES.map((policy) => (
               <DropdownMenuItem
                 key={policy}
                 onClick={() => setCancellationPolicy(policy)}

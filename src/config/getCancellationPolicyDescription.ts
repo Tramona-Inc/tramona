@@ -1,7 +1,7 @@
-import { type CancellationPolicy } from "@/server/db/schema";
+import { type CancellationPolicyWithInternals } from "@/server/db/schema";
 
 export function getCancellationPolicyDescription(
-  policy: CancellationPolicy,
+  policy: CancellationPolicyWithInternals,
 ): string {
   switch (policy) {
     case "Flexible":
@@ -41,6 +41,9 @@ During Stay: If they cancel less than 60 days before check-in, they will not rec
       return `First Month: Guests must cancel at least 30 days before check-in to get a full refund of the first month.
 Partial Refund: If they cancel less than 30 days before check-in, they get a 50% refund of the first month.
 After Check-In: If they cancel during their stay, the next 30 days are non-refundable.`;
+
+    case "Vacasa":
+      return "For new trips, you can cancel within 24 hours of booking and receive a full refund. If you cancel 30 or more days before check-in, you can receive a refund of any rental payments you’ve made, minus the booking fee and associated taxes. The 24-hour refund option doesn't apply if you book your stay the day before check-in. Reservations cannot be cancelled for a full refund on the day of check-in.";
 
     case "Non-refundable":
       return "No refund is provided after booking.";

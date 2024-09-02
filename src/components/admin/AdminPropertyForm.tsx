@@ -1,5 +1,5 @@
 import {
-  ALL_CANCELLATION_POLICIES,
+  CANCELLATION_POLICIES,
   ALL_PROPERTY_ROOM_TYPES,
 } from "@/server/db/schema";
 import { zodInteger, zodString } from "@/utils/zod-utils";
@@ -70,7 +70,7 @@ const formSchema = z.object({
 
   otherHouseRules: z.string().max(1000).optional(),
 
-  cancellationPolicy: z.enum(ALL_CANCELLATION_POLICIES),
+  cancellationPolicy: z.enum(CANCELLATION_POLICIES),
 });
 
 type FormSchema = z.infer<typeof formSchema>;
@@ -443,7 +443,7 @@ export default function AdminPropertyForm() {
               <FormControl>
                 <Select {...field}>
                   <SelectContent>
-                    {ALL_CANCELLATION_POLICIES.map((policy) => (
+                    {CANCELLATION_POLICIES.map((policy) => (
                       <SelectItem key={policy} value={policy}>
                         {policy}
                       </SelectItem>

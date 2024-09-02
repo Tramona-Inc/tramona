@@ -508,6 +508,7 @@ export const cleanbnbScraper: DirectSiteScraper = async ({
       parseFloat(price) + cleaningFee / getNumNights(checkIn, checkOut);
 
     res.push({
+      scrapeUrl: url,
       name,
       about,
       address,
