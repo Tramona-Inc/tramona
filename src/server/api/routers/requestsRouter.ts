@@ -7,11 +7,13 @@ import { db } from "@/server/db";
 import {
   groupMembers,
   groups,
+  properties,
   requestInsertSchema,
   requestSelectSchema,
   requestUpdatedInfo,
   requests,
   requestsToProperties,
+  reviews,
   users,
 } from "@/server/db/schema";
 import {
@@ -29,8 +31,15 @@ import {
   linkInputProperties,
   linkInputPropertyInsertSchema,
 } from "@/server/db/schema/tables/linkInputProperties";
-import { formatCurrency, getNumNights, formatDateRange, plural } from "@/utils/utils";
+import {
+  formatCurrency,
+  getNumNights,
+  formatDateRange,
+  plural,
+} from "@/utils/utils";
 import { sendTextToHost } from "@/server/server-utils";
+import { scrapeAirbnbListings } from "@/server/external-listings-scraping/airbnb";
+import { waitUntil } from "@vercel/functions";
 
 const updateRequestInputSchema = z.object({
   requestId: z.number(),
@@ -163,9 +172,7 @@ export const requestsRouter = createTRPCRouter({
     .mutation(async ({ ctx, input: { property, request } }) => {
       const { requestId, madeByGroupId } = await handleRequestSubmission(
         request,
-        {
-          user: ctx.user,
-        },
+        { user: ctx.user },
       );
 
       const linkInputPropertyId = await db
@@ -415,30 +422,68 @@ export async function handleRequestSubmission(
       .values({ ownerId: user.id })
       .returning()
       .then((res) => res[0]!.id);
+
     await tx.insert(groupMembers).values({
       userId: user.id,
       groupId: madeByGroupId,
     });
 
-    const { requestId, totalPrice, checkIn, checkOut, location } = await tx
+    const requestId = await tx
       .insert(requests)
       .values({ ...input, madeByGroupId })
-      .returning({ requestId: requests.id, totalPrice: requests.maxTotalPrice, checkIn: requests.checkIn, checkOut: requests.checkOut, location: requests.location })
-      .then((res) => res[0]!);
+      .returning()
+      .then((res) => res[0]!.id);
 
-    const properties = await getPropertiesForRequest(
+    const eligibleProperties = await getPropertiesForRequest(
       { ...input, id: requestId },
       { tx },
     );
 
-    if (properties.length > 0) {
+    if (eligibleProperties.length > 0) {
+      await tx.insert(requestsToProperties).values(
+        eligibleProperties.map((property) => ({
+          requestId,
+          propertyId: property.id,
+        })),
+      );
 
-      await tx
-        .insert(requestsToProperties)
-        .values(properties.map((property) => ({ requestId, propertyId: property.id })));
-
-      await sendTextToHost(properties, checkIn, checkOut, totalPrice, location);
+      await sendTextToHost(
+        eligibleProperties,
+        input.checkIn,
+        input.checkOut,
+        input.maxTotalPrice,
+        input.location,
+      );
     }
+
+    waitUntil(
+      scrapeAirbnbListings({
+        request: input,
+        limit: 10,
+      })
+        .then(async (airbnbListings) => {
+          const airbnbPropertyIds = await tx
+            .insert(properties)
+            .values(airbnbListings.map((l) => l.property))
+            .returning({ id: properties.id })
+            .then((res) => res.map((r) => r.id));
+
+          const flattenedReviews = airbnbListings
+            .map(({ reviews }, i) =>
+              reviews.map((r) => ({ ...r, propertyId: airbnbPropertyIds[i]! })),
+            )
+            .flat();
+
+          await tx.insert(reviews).values(flattenedReviews);
+        })
+        .catch((e) => {
+          // fail silently -- we dont want to crash the request submission
+          // TODO: handle this better using a dead letter queue or something
+          console.error(
+            `Error scraping Airbnb listings for request #${requestId}: ${e}`,
+          );
+        }),
+    );
 
     return { requestId, madeByGroupId };
   });
