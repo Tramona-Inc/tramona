@@ -56,11 +56,11 @@ const CustomStripeCheckout = ({
       enabled: !!property.hostId,
     });
   const authorizePayment = api.stripe.authorizePayment.useMutation();
-
   const fetchClientSecret = useCallback(async () => {
     if (!session.data?.user) return;
     try {
       const response = await authorizePayment.mutateAsync({
+        isDirectListing: false,
         offerId: offer.id,
         propertyId: property.id,
         requestId: offer.requestId ?? null,

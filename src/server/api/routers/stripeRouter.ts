@@ -1,12 +1,10 @@
 import { env } from "@/env";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
-import { trips, users } from "@/server/db/schema";
+import { trips, tripDamages, users } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import Stripe from "stripe";
 import { z } from "zod";
-
-import { hostProfiles } from "@/server/db/schema";
 
 import { createPayHostTransfer } from "@/utils/stripe-utils";
 
@@ -24,6 +22,27 @@ export const stripeWithSecretKey = new Stripe(env.STRIPE_SECRET_KEY, {
 // change the apiVersion
 
 export const stripeRouter = createTRPCRouter({
+  createStripeCustomer: protectedProcedure
+    .input(
+      z.object({
+        email: z.string(),
+        name: z.string().optional(),
+        firstName: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const customer = await stripeWithSecretKey.customers.create({
+        email: input.email,
+        name: input.name ?? input.firstName ?? ctx.user.id,
+      });
+      await ctx.db
+        .update(users)
+        .set({
+          stripeCustomerId: customer.id,
+        })
+        .where(eq(users.id, ctx.user.id));
+    }),
+
   createCheckoutSession: protectedProcedure
     .input(
       z.object({
@@ -266,6 +285,7 @@ export const stripeRouter = createTRPCRouter({
   authorizePayment: protectedProcedure // this is how will now creat a checkout session using a custom flow
     .input(
       z.object({
+        isDirectListing: z.boolean().default(false),
         offerId: z.number(),
         propertyId: z.number(),
         requestId: z.number().nullable(),
@@ -286,7 +306,34 @@ export const stripeRouter = createTRPCRouter({
       //we need the host Stripe account id to put in webhook
       //get hostID from the property
       // Object that can be access through webhook and client
+      //check if a customer id exists
+      let stripeCustomerId = await ctx.db.query.users
+        .findFirst({
+          columns: {
+            stripeCustomerId: true,
+          },
+          where: eq(users.id, ctx.user.id),
+        })
+        .then((res) => res?.stripeCustomerId);
+      if (!stripeCustomerId) {
+        const customer = await stripeWithSecretKey.customers.create({
+          email: ctx.user.email,
+          name: ctx.user.name ?? ctx.user.id,
+        });
+        await ctx.db
+          .update(users)
+          .set({
+            stripeCustomerId: customer.id,
+          })
+          .where(eq(users.id, ctx.user.id));
+
+        stripeCustomerId = customer.id;
+      }
+
       const metadata = {
+        is_direct_listing: input.isDirectListing.toString(),
+        is_charged_with_setup_intent: "false",
+        user_email: ctx.user.email,
         user_id: ctx.user.id,
         offer_id: input.offerId,
         property_id: input.propertyId,
@@ -297,6 +344,7 @@ export const stripeRouter = createTRPCRouter({
         confirmed_at: currentDate.toISOString(),
         phone_number: input.phoneNumber,
         host_stripe_id: input.hostStripeId ?? "",
+        stripe_customer_id: stripeCustomerId,
       };
 
       const options: Stripe.PaymentIntentCreateParams = {
@@ -766,5 +814,75 @@ export const stripeRouter = createTRPCRouter({
         statement_descriptor: "Weekly top-up",
       });
       return topup;
+    }),
+  chargeForDamagesOrMisc: protectedProcedure
+    .input(
+      z.object({
+        tripId: z.number(),
+        amount: z.number(),
+        customerId: z.string(),
+        setupIntentId: z.string(),
+        description: z.string(),
+        currency: z.string().optional(),
+        propertyId: z.number(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        //retreit the setupIntent objext to get the payment method
+        const setupIntentObject = await stripe.setupIntents.retrieve(
+          input.setupIntentId,
+        );
+        const paymentMethodId = setupIntentObject.payment_method as string;
+
+        const paymentIntent = await stripeWithSecretKey.paymentIntents.create({
+          amount: input.amount,
+          customer: input.customerId,
+          payment_method: paymentMethodId,
+          confirm: true, // Tries to confirm immediately
+          description: input.description,
+          currency: input.currency ?? "usd",
+          metadata: {
+            is_charged_with_setup_intent: "true",
+            customer_id: input.customerId,
+            trip_id: input.tripId,
+            description: input.description,
+            property_id: input.propertyId,
+          },
+          automatic_payment_methods: {
+            enabled: true,
+            allow_redirects: "never",
+          },
+        });
+
+        // Check the status of the PaymentIntent
+        if (paymentIntent.status === "succeeded") {
+          // we need to insert it into the database
+          //creates the damage record as well
+          await ctx.db.insert(tripDamages).values({
+            tripId: input.tripId,
+            amount: input.amount,
+            description: input.description,
+            propertyId: input.propertyId,
+            paymentCompleteAt: new Date(),
+            createdAt: new Date(),
+          });
+          console.log("Charge successful:", paymentIntent);
+          return paymentIntent; // Payment was completed successfully
+        } else if (
+          paymentIntent.status === "requires_action" ||
+          paymentIntent.status === "requires_confirmation"
+        ) {
+          console.log("Additional action required for:", paymentIntent);
+          // You need to handle the additional action on the client side
+          return paymentIntent;
+        } else {
+          console.error("PaymentIntent status:", paymentIntent.status);
+          throw new Error("Failed to complete the charge.");
+        }
+      } catch (error) {
+        console.error("Charge error:", error);
+        throw error;
+      }
     }),
 });

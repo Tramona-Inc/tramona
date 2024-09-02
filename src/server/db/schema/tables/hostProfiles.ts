@@ -54,7 +54,9 @@ export const hostReferralDiscounts = pgTable(
     ownerId: text("owner_id").references(() => users.id, {
       onDelete: "cascade",
     }),
-    refereeUserId: text("referee_user_id").references(() => users.id),
+    refereeUserId: text("referee_user_id").references(() => users.id, {
+      onDelete: "cascade",
+    }),
     discountAmount: integer("discount").notNull().default(0),
     discountPercentage: real("discount_percentage").notNull().default(0.025),
     createdAt: timestamp("created_at", { withTimezone: true })
