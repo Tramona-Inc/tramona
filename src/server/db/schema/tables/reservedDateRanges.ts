@@ -20,7 +20,7 @@ export const reservedDateRanges = pgTable(
     id: serial("id").primaryKey(),
     propertyId: integer("property_id")
       .notNull()
-      .references(() => properties.id),
+      .references(() => properties.id, { onDelete: "cascade" }),
     start: date("start").notNull(),
     end: date("end").notNull(),
     platformBookedOn: platformBookedOnEnum("platform_booked_on").notNull(),
