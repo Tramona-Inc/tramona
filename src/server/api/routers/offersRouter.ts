@@ -714,6 +714,41 @@ export const offersRouter = createTRPCRouter({
         ),
       ).then((res) => res.flat());
     }),
+
+  scrapeOfferForRequest: protectedProcedure
+    .input(
+      z.object({
+        requestId: z.number(),
+        numOfOffers: z.number().min(1).max(50),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const numOfScrapers = directSiteScrapers.length;
+      const request = await ctx.db.query.requests.findFirst({
+        where: eq(requests.id, input.requestId),
+        columns: { checkIn: true, checkOut: true, maxTotalPrice: true },
+      });
+      if (!request) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Request not found",
+        });
+      }
+      return await scrapeDirectListings({
+        checkIn: request.checkIn,
+        checkOut: request.checkOut,
+        numOfOffersInEachScraper: input.numOfOffers / numOfScrapers,
+        requestPrice:
+          request.maxTotalPrice /
+          getNumNights(request.checkIn, request.checkOut),
+        requestId: input.requestId,
+      }).catch((error) => {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Error scraping listings. " + error,
+        });
+      });
+    }),
 });
 
 export async function getOfferPageData(offerId: number) {

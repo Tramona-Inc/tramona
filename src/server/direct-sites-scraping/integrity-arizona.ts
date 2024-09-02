@@ -143,13 +143,6 @@ export const arizonaScraper: DirectSiteScraper = async ({
   numOfOffersInEachScraper = 2,
   requestPrice,
 }) => {
-  console.log(
-    "arizonaScraper: ",
-    checkIn,
-    checkOut,
-    numOfOffersInEachScraper,
-    requestPrice,
-  );
   // append 0 to month and day if less than 10
   const monthStart = (checkIn.getMonth() + 1).toString().padStart(2, "0");
   const dayStart = checkIn.getDate().toString().padStart(2, "0");
@@ -168,13 +161,14 @@ export const arizonaScraper: DirectSiteScraper = async ({
       mapToScrapedListing(validatedData, checkIn, checkOut, url),
     )
     .catch((error) => {
+      console.error("Error scraping Arizona: ", error);
       return [];
     });
 
   if (requestPrice) {
     properties = properties.filter((p) => {
       const price = p.originalNightlyPrice!;
-      return price >= requestPrice * 0.9 && price <= requestPrice * 1.1;
+      return price >= requestPrice * 0.8 && price <= requestPrice * 1.1;
     });
   }
   if (numOfOffersInEachScraper > 0) {
@@ -198,7 +192,7 @@ export const arizonaScraper: DirectSiteScraper = async ({
     }),
   );
 
-  console.log(propertiesWithReviews[0]);
+  // console.log(propertiesWithReviews[0]);
   return propertiesWithReviews;
 };
 
