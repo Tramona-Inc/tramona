@@ -12,16 +12,19 @@ import {
   getNumNights,
   plural,
 } from "@/utils/utils";
-import { type RouterOutputs } from "@/utils/api";
+import { api, type RouterOutputs } from "@/utils/api";
 import { formatDistanceToNowStrict } from "date-fns";
 import { EllipsisIcon, FlagIcon } from "lucide-react";
 import Link from "next/link";
+import { useChatWithHost } from "@/utils/useChatWithHost";
 
 export default function HostStaysCards({
   trips,
 }: {
   trips?: RouterOutputs["trips"]["getHostTrips"];
 }) {
+  const chatWithHost = useChatWithHost();
+
   if (!trips) return null;
   if (trips.length === 0)
     return (
@@ -35,6 +38,8 @@ export default function HostStaysCards({
       {trips.map((trip) => {
         const numNights = getNumNights(trip.checkIn, trip.checkOut);
         const totalPrice = trip.offer?.totalPrice ?? null;
+        const { data } = api.groups.getGroupOwner.useQuery(trip.groupId);
+        const travelerId = data?.id;
 
         return (
           <>
@@ -109,11 +114,20 @@ export default function HostStaysCards({
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-                <Button variant="secondary">Message</Button>
+                <Button
+                  variant="secondary"
+                  onClick={() => chatWithHost({ hostId: travelerId ?? "" })}
+                >
+                  Message
+                </Button>
               </div>
             </div>
 
-            <Button variant="secondary" className="w-full md:hidden">
+            <Button
+              variant="secondary"
+              className="w-full md:hidden"
+              onClick={() => chatWithHost({ hostId: travelerId ?? "" })}
+            >
               Message
             </Button>
           </>

@@ -32,6 +32,11 @@ const navs = [
     description: "Charge travelers for damages or other expenses post-trip",
     href: "/admin/additional-charge",
   },
+  {
+    title: "Unclaimed Offers Scrapers",
+    description: "Trigger the scraping for unclaimed offers page",
+    href: "/admin/scrapers",
+  },
 ];
 
 export default function AdminRequestsTabs() {
