@@ -8,17 +8,15 @@ export default function CityRequestFormContainer() {
   const { data: session } = useSession();
   const isAdmin = session?.user.role === "admin";
 
-
   return (
     <div className="space-y-3">
       <p className="text-sm font-semibold text-muted-foreground lg:block">
-        Send a request to every host in&nbsp;
-        <br className="sm:hidden" />
+        Send a request to every host in{" "}
         <span className="font-bold text-teal-900">
           <Typewriter
             component={"span"}
             options={{
-              strings: ["LOS ANGELES", "PARIS", "MIAMI", "ANY CITY"],
+              strings: ["SEATTLE", "PARIS", "MIAMI", "ANY CITY"],
               autoStart: true,
               loop: true,
             }}
