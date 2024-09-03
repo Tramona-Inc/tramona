@@ -147,18 +147,15 @@ export default function Page() {
           <Button
             type="submit"
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            className="text-md h-[62px] w-[294px] rounded-full bg-[#004236] text-[24px] font-semibold text-white"
+            size="xl"
           >
             Enter Link
           </Button>
         </div>
 
-        {/* How it works */}
         <h2 className="mt-28 text-center text-[40px] font-bold lg:text-4xl">
           What people are saying
         </h2>
-
-        {/* testimonial carousel */}
         <div className="mx-4 mt-20 flex justify-center space-y-4 lg:mx-0 lg:mt-16 lg:space-y-8">
           <TestimonialCarousel />
         </div>

@@ -6,6 +6,7 @@ import { getNumNights } from "@/utils/utils";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { cityRequestSchema } from "./schemas";
+import SuperJSON from "superjson";
 
 export function useCityRequestForm({
   afterSubmit,
@@ -21,7 +22,7 @@ export function useCityRequestForm({
 
   const { status } = useSession();
   const router = useRouter();
-  const { mutateAsync: createRequests } = api.requests.create.useMutation();
+  const { mutateAsync: createRequest } = api.requests.create.useMutation();
 
   const onSubmit = form.handleSubmit(async (data) => {
     const { date: _date, maxNightlyPriceUSD, ...restData } = data;
@@ -37,7 +38,7 @@ export function useCityRequestForm({
     };
 
     if (status === "unauthenticated") {
-      localStorage.setItem("unsentRequests", JSON.stringify(newRequest));
+      localStorage.setItem("unsentRequest", SuperJSON.stringify(newRequest));
       void router.push("/auth/signin").then(() => {
         toast({
           title: `Request saved: ${newRequest.location}`,
@@ -45,7 +46,7 @@ export function useCityRequestForm({
         });
       });
     } else {
-      await createRequests(newRequest)
+      await createRequest(newRequest)
         .then(({ madeByGroupId }) => {
           form.reset();
           afterSubmit?.();
