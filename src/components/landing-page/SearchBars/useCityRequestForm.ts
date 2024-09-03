@@ -7,6 +7,48 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { cityRequestSchema } from "./schemas";
 
+const haversineDistance = (
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number,
+) => {
+  const toRadians = (degrees: number) => degrees * (Math.PI / 180);
+
+  const R = 6371; // Radius of the Earth in kilometers
+  const dLat = toRadians(lat2 - lat1);
+  const dLon = toRadians(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRadians(lat1)) *
+      Math.cos(toRadians(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c; // Distance in kilometers
+};
+
+const isInIntegrityArizonaOperatingArea = (
+  lat: number,
+  lng: number,
+  radius: number,
+) => {
+  const locations = [
+    { name: "Flagstaff, AZ", lat: 35.1983, lng: -111.6513 },
+    { name: "Lake Havasu, AZ", lat: 34.4839, lng: -114.3225 },
+    { name: "Parker Strip, AZ", lat: 34.2983, lng: -114.1439 },
+  ];
+
+  for (const location of locations) {
+    const distance = haversineDistance(lat, lng, location.lat, location.lng);
+    if (distance <= radius) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
 export function useCityRequestForm({
   afterSubmit,
   setMadeByGroupId,
@@ -52,8 +94,14 @@ export function useCityRequestForm({
         form.reset();
         afterSubmit?.();
         setMadeByGroupId?.(madeByGroupId);
-        // scrape offers only for request in AZ, USA. this is a temp solution and need to be revamped
-        if (newRequest.location.endsWith("AZ, USA")) {
+        // scrape offers only for request in the area where IntegrityArizona has properties
+        if (
+          isInIntegrityArizonaOperatingArea(
+            newRequest.latLng.lat,
+            newRequest.latLng.lng,
+            100, // search radius: 100 km
+          )
+        ) {
           await scrapeOffers({ requestId: requestId, numOfOffers: 10 });
         }
       } catch (error) {
