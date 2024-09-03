@@ -36,7 +36,7 @@ export function PropertyCompareBtn({
 
   return (
     <Dialog>
-      <DialogTrigger>
+      <DialogTrigger asChild>
         <Button variant="secondary">
           Compare to {originalListing.site.siteName}
         </Button>

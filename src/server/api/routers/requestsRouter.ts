@@ -62,7 +62,32 @@ export const requestsRouter = createTRPCRouter({
             ),
         ),
         with: {
-          offers: { columns: { id: true } },
+          offers: {
+            columns: {
+              id: true,
+              travelerOfferedPrice: true,
+              createdAt: true,
+              checkIn: true,
+              checkOut: true,
+            },
+            with: {
+              property: {
+                columns: {
+                  id: true,
+                  imageUrls: true,
+                  name: true,
+                  numBedrooms: true,
+                  numBathrooms: true,
+                  originalNightlyPrice: true,
+                  hostName: true,
+                  hostProfilePic: true,
+                },
+                with: {
+                  host: { columns: { name: true, email: true, image: true } },
+                },
+              },
+            },
+          },
           linkInputProperty: true,
           madeByGroup: {
             with: {
@@ -80,16 +105,11 @@ export const requestsRouter = createTRPCRouter({
       })
       // extract offer count & sort
       .then((requests) =>
-        requests
-          .map(({ offers, ...request }) => ({
-            ...request,
-            numOffers: offers.length,
-          }))
-          .sort(
-            (a, b) =>
-              b.numOffers - a.numOffers ||
-              b.createdAt.getTime() - a.createdAt.getTime(),
-          ),
+        requests.sort(
+          (a, b) =>
+            b.offers.length - a.offers.length ||
+            b.createdAt.getTime() - a.createdAt.getTime(),
+        ),
       );
 
     return {
@@ -125,16 +145,11 @@ export const requestsRouter = createTRPCRouter({
       })
       // 1. extract offer count & sort
       .then((requests) =>
-        requests
-          .map(({ offers, ...request }) => ({
-            ...request,
-            numOffers: offers.length,
-          }))
-          .sort(
-            (a, b) =>
-              b.numOffers - a.numOffers ||
-              b.createdAt.getTime() - a.createdAt.getTime(),
-          ),
+        requests.sort(
+          (a, b) =>
+            b.offers.length - a.offers.length ||
+            b.createdAt.getTime() - a.createdAt.getTime(),
+        ),
       )
       .then((res) => {
         return {

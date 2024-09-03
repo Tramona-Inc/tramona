@@ -1,8 +1,6 @@
 import { getRequestStatus } from "@/utils/formatters";
-import { plural } from "@/utils/utils";
-import Link from "next/link";
 import { Button } from "../ui/button";
-import { ArrowRightIcon, UserPlusIcon } from "lucide-react";
+import { UserPlusIcon } from "lucide-react";
 import { type GuestDashboardRequest } from "./RequestCard";
 import GroupDetailsDialog from "./group-details-dialog/GroupDetailsDialog";
 import { useSession } from "next-auth/react";
@@ -35,14 +33,7 @@ export function RequestCardAction({
         )
       );
     case "accepted":
-      return (
-        <Button asChild className="pr-3">
-          <Link href={`/requests/${request.id}`}>
-            View {plural(request.numOffers, "offer")}
-            <ArrowRightIcon />
-          </Link>
-        </Button>
-      );
+      return null;
     case "rejected":
       return null;
     case "booked":
