@@ -1,6 +1,6 @@
 import { ListingSiteUrlParams } from "@/utils/listing-sites";
 import { Airbnb } from "@/utils/listing-sites/Airbnb";
-import { scrapeUrl } from "./server-utils";
+import { urlScrape } from "./server-utils";
 
 // TODO: add support for other listing sites
 export async function scrapeAirbnbPrice({
@@ -13,7 +13,7 @@ export async function scrapeAirbnbPrice({
   const checkoutUrl =
     Airbnb.createListing(airbnbListingId).getCheckoutUrl(params);
 
-  const $ = await scrapeUrl(checkoutUrl);
+  const $ = await urlScrape(checkoutUrl);
   const jsonStr = $("#data-deferred-state-0").text();
 
   const priceRegex =

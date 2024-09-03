@@ -1,36 +1,35 @@
-import { NewOffer, NewProperty, Offer, offers, Review, reviews } from "../db/schema";
-import { cleanbnbScraper } from "./cleanbnb-scrape";
+import {
+  NewOffer,
+  NewProperty,
+  Offer,
+  offers,
+  NewReview,
+  reviews,
+} from "../db/schema";
 import { arizonaScraper, arizonaSubScraper } from "./integrity-arizona";
 import { db } from "../db";
 import { properties } from "../db/schema";
-import { eq, and } from 'drizzle-orm';
-import { PropertyType, ALL_PROPERTY_TYPES, ListingSiteName } from "@/server/db/schema/common";
-import { tr } from "date-fns/locale";
+import { eq, and } from "drizzle-orm";
 import { getNumNights } from "@/utils/utils";
 
 export type DirectSiteScraper = (options: {
   checkIn: Date;
   checkOut: Date;
   numOfOffersInEachScraper?: number;
-}) => Promise<
-  ScrapedListing[]
->;
+}) => Promise<ScrapedListing[]>;
 
-export type ScrapedListing =
-  (NewProperty & {
-    originalListingUrl: string; // enforce that its non-null
-    reviews: Review[];
-    scrapeUrl: string;
-  });
+export type ScrapedListing = NewProperty & {
+  originalListingUrl: string; // enforce that its non-null
+  reviews: NewReview[];
+  scrapeUrl: string;
+};
 
 export type SubsequentScraper = (options: {
-    originalListingId: string; // all input params are from offers and properties table
-    scrapeUrl: string;
-    checkIn: Date;
-    checkOut: Date;
-  }) => Promise<
-    SubScrapedResult
-  >;
+  originalListingId: string; // all input params are from offers and properties table
+  scrapeUrl: string;
+  checkIn: Date;
+  checkOut: Date;
+}) => Promise<SubScrapedResult>;
 
 export type SubScrapedResult = ({
     originalNightlyPrice?: number, // when the offer is avaible on the original site, also refresh the price
@@ -44,12 +43,11 @@ export const directSiteScrapers: DirectSiteScraper[] = [
   arizonaScraper,
 ];
 
-
 // Helper function to filter out fields not in NewProperty
 const filterNewPropertyFields = (listing: ScrapedListing): NewProperty => {
-  const newPropertyKeys = Object.keys(properties).filter(key => key !== 'id');
+  const newPropertyKeys = Object.keys(properties).filter((key) => key !== "id");
   return Object.fromEntries(
-    Object.entries(listing).filter(([key]) => newPropertyKeys.includes(key))
+    Object.entries(listing).filter(([key]) => newPropertyKeys.includes(key)),
   ) as NewProperty;
 };
 
@@ -68,42 +66,56 @@ export const scrapeDirectListings = async (options: {
       // for each listing, insert the property and reviews OR update them if they already exist
       // then create offers if the offers don't exist
       for (const listing of listings) {
-        if(!listing.originalListingId) {continue;}
-        const existingOriginalPropertyIdList = await trx.select({id: properties.originalListingId})
+        if (!listing.originalListingId) {
+          continue;
+        }
+        const existingOriginalPropertyIdList = await trx
+          .select({ id: properties.originalListingId })
           .from(properties)
           .where(eq(properties.originalListingId, listing.originalListingId));
-        const existingOriginalPropertyId = existingOriginalPropertyIdList[0]?.id;
+        const existingOriginalPropertyId =
+          existingOriginalPropertyIdList[0]?.id;
 
         const newPropertyListing = filterNewPropertyFields(listing);
         if (existingOriginalPropertyId) {
-            const tramonaProperty = await trx.update(properties)
-              .set({ ...newPropertyListing }) // Only keeps fields that are defined in the NewProperty schema
-              .where(eq(properties.originalListingId, existingOriginalPropertyId))
-              .returning({ id: properties.id });
+          const tramonaProperty = await trx
+            .update(properties)
+            .set({ ...newPropertyListing }) // Only keeps fields that are defined in the NewProperty schema
+            .where(eq(properties.originalListingId, existingOriginalPropertyId))
+            .returning({ id: properties.id });
 
           const tramonaPropertyId = tramonaProperty[0]!.id;
 
-          if(listing.reviews.length > 0){
-            await trx.delete(reviews).where(eq(reviews.propertyId, tramonaPropertyId));
-            await trx.insert(reviews).values(listing.reviews.map((review) => ({
-              ...review,
-              propertyId: tramonaPropertyId,
-            })));
+          if (listing.reviews.length > 0) {
+            await trx
+              .delete(reviews)
+              .where(eq(reviews.propertyId, tramonaPropertyId));
+            await trx.insert(reviews).values(
+              listing.reviews.map((review) => ({
+                ...review,
+                propertyId: tramonaPropertyId,
+              })),
+            );
           }
 
-          const existingOffers = await trx.select({id: offers.id})
-              .from(offers)
-              .where(and(
+          const existingOffers = await trx
+            .select({ id: offers.id })
+            .from(offers)
+            .where(
+              and(
                 eq(offers.propertyId, tramonaPropertyId),
                 eq(offers.checkIn, options.checkIn),
-                eq(offers.checkOut, options.checkOut)
-              ))
-            if(existingOffers[0]){
-              console.log("existingOffer, offerId: ", existingOffers[0]?.id);
-            }
+                eq(offers.checkOut, options.checkOut),
+              ),
+            );
+          if (existingOffers[0]) {
+            console.log("existingOffer, offerId: ", existingOffers[0]?.id);
+          }
 
-          if(!existingOffers[0]?.id){
-            const originalTotalPrice = listing.originalNightlyPrice ?? 0 * getNumNights(options.checkIn, options.checkOut);
+          if (!existingOffers[0]?.id) {
+            const originalTotalPrice =
+              listing.originalNightlyPrice ??
+              0 * getNumNights(options.checkIn, options.checkOut);
             const newOffer: NewOffer = {
               propertyId: tramonaPropertyId,
               checkIn: options.checkIn,
@@ -123,25 +135,32 @@ export const scrapeDirectListings = async (options: {
 
           const newPropertyId = tramonaProperty[0]!.id;
 
-          if(listing.reviews.length > 0){
-            await trx.insert(reviews).values(listing.reviews.map((review) => ({
-              ...review,
-              propertyId: newPropertyId,
-            })));
+          if (listing.reviews.length > 0) {
+            await trx.insert(reviews).values(
+              listing.reviews.map((review) => ({
+                ...review,
+                propertyId: newPropertyId,
+              })),
+            );
           }
 
-          const existingOffers = await trx.select({id: offers.id})
-              .from(offers)
-              .where(and(
+          const existingOffers = await trx
+            .select({ id: offers.id })
+            .from(offers)
+            .where(
+              and(
                 eq(offers.propertyId, newPropertyId),
                 eq(offers.checkIn, options.checkIn),
-                eq(offers.checkOut, options.checkOut)
-              ))
-          if(existingOffers[0]){
+                eq(offers.checkOut, options.checkOut),
+              ),
+            );
+          if (existingOffers[0]) {
             console.log("existingOffer, offerId: ", existingOffers[0]?.id);
           }
-          if(!existingOffers[0]?.id){
-            const originalTotalPrice = listing.originalNightlyPrice ?? 0 * getNumNights(options.checkIn, options.checkOut);
+          if (!existingOffers[0]?.id) {
+            const originalTotalPrice =
+              listing.originalNightlyPrice ??
+              0 * getNumNights(options.checkIn, options.checkOut);
             const newOffer: NewOffer = {
               propertyId: newPropertyId,
               checkIn: options.checkIn,
@@ -165,9 +184,7 @@ export const scrapeDirectListings = async (options: {
 };
 
 // update availability of properties, and original nightly price
-export const subsequentScrape = async (options: {
-  offerIds: number[];
-}) => {
+export const subsequentScrape = async (options: { offerIds: number[] }) => {
   const savedResult: SubScrapedResult[] = [];
   await db.transaction(async (trx) => {
     for (const offerId of options.offerIds) {
@@ -180,13 +197,13 @@ export const subsequentScrape = async (options: {
 
       if(!offer?.property.originalListingId || !offer.scrapeUrl) {continue;} // skip the non-scraped offers
 
-      switch(offer.property.originalListingPlatform){
+      switch (offer.property.originalListingPlatform) {
         case "IntegrityArizona":
           const subScrapedResult = await arizonaSubScraper({
             originalListingId: offer.property.originalListingId,
             scrapeUrl: offer.scrapeUrl,
             checkIn: offer.checkIn,
-            checkOut: offer.checkOut
+            checkOut: offer.checkOut,
           });
           if (subScrapedResult) {
           const updateData: Partial<Offer> = {
@@ -206,7 +223,7 @@ export const subsequentScrape = async (options: {
         break;
         // TODO add other scraping sites here
       }
-    };
+    }
   });
   return savedResult;
 };

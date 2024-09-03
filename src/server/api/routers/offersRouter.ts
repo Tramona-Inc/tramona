@@ -15,7 +15,6 @@ import {
   referralCodes,
   requestSelectSchema,
   trips,
-  users,
 } from "@/server/db/schema";
 import { getCity, getCoordinates } from "@/server/google-maps";
 import {
@@ -36,8 +35,6 @@ import NewOfferReceivedEmail from "packages/transactional/emails/NewOfferReceive
 import {
   directSiteScrapers,
   scrapeDirectListings,
-  ScrapedListing,
-  subsequentScrape,
 } from "@/server/direct-sites-scraping";
 import { createNormalDistributionDates } from "@/server/server-utils";
 
@@ -214,57 +211,8 @@ export const offersRouter = createTRPCRouter({
   getByIdWithDetails: protectedProcedure
     .input(offerSelectSchema.pick({ id: true }))
     .query(async ({ ctx, input }) => {
-      const offer = await ctx.db.query.offers.findFirst({
-        where: eq(offers.id, input.id),
-        columns: {
-          checkIn: true,
-          checkOut: true,
-          createdAt: true,
-          totalPrice: true,
-          acceptedAt: true,
-          tramonaFee: true,
-          id: true,
-          propertyId: true,
-          requestId: true, //testing
-          hostPayout: true,
-          travelerOfferedPrice: true,
-        },
-        with: {
-          request: {
-            with: {
-              madeByGroup: { with: { members: true } },
-            },
-            columns: {
-              numGuests: true,
-              location: true,
-              id: true,
-            },
-          },
-          property: {
-            columns: {
-              latLngPoint: false,
-            },
-            with: {
-              reviews: true,
-              host: {
-                columns: {
-                  id: true,
-                  name: true,
-                  email: true,
-                  image: true,
-                },
-                with: {
-                  hostProfile: {
-                    columns: {
-                      userId: true,
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      });
+      const offer = await getOfferPageData(input.id);
+
       if (!offer) {
         throw new TRPCError({ code: "BAD_REQUEST" });
       }
@@ -748,7 +696,7 @@ export const offersRouter = createTRPCRouter({
         numOfOffers: z.number().min(1).max(50),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ input }) => {
       // numOfOffers = numOfOffersPerDateRange * numOfDateRanges
       const numOfOffersPerDateRange = 6;
       const numOfScrapers = directSiteScrapers.length;
@@ -767,3 +715,57 @@ export const offersRouter = createTRPCRouter({
       ).then((res) => res.flat());
     }),
 });
+
+export async function getOfferPageData(offerId: number) {
+  return await db.query.offers.findFirst({
+    where: eq(offers.id, offerId),
+    columns: {
+      checkIn: true,
+      checkOut: true,
+      createdAt: true,
+      totalPrice: true,
+      acceptedAt: true,
+      tramonaFee: true,
+      id: true,
+      propertyId: true,
+      requestId: true,
+      hostPayout: true,
+      travelerOfferedPrice: true,
+    },
+    with: {
+      request: {
+        with: {
+          madeByGroup: { with: { members: true } },
+        },
+        columns: {
+          numGuests: true,
+          location: true,
+          id: true,
+        },
+      },
+      property: {
+        columns: {
+          latLngPoint: false,
+        },
+        with: {
+          reviews: true,
+          host: {
+            columns: {
+              id: true,
+              name: true,
+              email: true,
+              image: true,
+            },
+            with: {
+              hostProfile: {
+                columns: {
+                  userId: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+}

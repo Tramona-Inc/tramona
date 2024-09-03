@@ -31,7 +31,6 @@ import { trips, tripCancellations, tripDamages } from "./tables/trips";
 import { reviews } from "./tables/reviews";
 import { fillerBookings, fillerOffers } from "./tables/feedFiller";
 import { linkInputProperties } from "./tables/linkInputProperties";
-import { externalListings } from "./tables/externalListings";
 
 export const usersRelations = relations(users, ({ one, many }) => ({
   accounts: many(accounts),
@@ -126,18 +125,7 @@ export const requestsRelations = relations(requests, ({ one, many }) => ({
     fields: [requests.linkInputPropertyId],
     references: [linkInputProperties.id],
   }),
-  externalListings: many(externalListings),
 }));
-
-export const externalListingsRelations = relations(
-  externalListings,
-  ({ one }) => ({
-    request: one(requests, {
-      fields: [externalListings.requestId],
-      references: [requests.id],
-    }),
-  }),
-);
 
 export const bidsRelations = relations(bids, ({ one, many }) => ({
   madeByGroup: one(groups, {

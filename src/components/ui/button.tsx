@@ -13,6 +13,7 @@ const buttonVariants = cva(
         default: "h-10 px-4 py-2",
         sm: "h-9 rounded-md px-3",
         lg: "h-11 rounded-md px-8 text-base",
+        xl: "h-16 rounded-full px-16 text-xl",
         icon: "h-10 w-10",
       },
       variant: {
@@ -46,18 +47,11 @@ const buttonVariants = cva(
           "rounded-full border-2 flex items-center justify-center hover:border-black transition-all duration-200",
         underline: "hover:bg-accent text-zinc-800 underline",
         greenPrimary:
-          "bg-teal-900 hover:bg-teal-950 text-white disabled:bg-zinc-400 disabled:text-secondary-foreground",
+          "bg-primaryGreen hover:opacity-90 text-white disabled:bg-zinc-400 disabled:text-secondary-foreground",
         secondaryLight:
           "bg-[#F2F1EF] border border-[#D9D6D1] hover:bg-zinc-200 font-semibold",
         greenPrimaryOutline:
           "border-2 border-[#004236] bg-primaryGreen-background text-black",
-
-        Airbnb:
-          "bg-gradient-to-r from-[#E61F4F] to-[#D70666] text-white hover:opacity-90",
-
-        "Booking.com": "bg-[#013B94] text-white hover:opacity-90",
-
-        Vrbo: "bg-[#191E3B] text-white hover:opacity-90",
       },
     },
     defaultVariants: {

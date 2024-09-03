@@ -6,7 +6,7 @@ import { Twilio } from "twilio";
 import { db } from "./db";
 import { waitUntil } from "@vercel/functions";
 import { formatCurrency, getNumNights, plural } from "@/utils/utils";
-
+import axiosRetry from "axios-retry";
 import {
   and,
   between,
@@ -45,6 +45,24 @@ import * as cheerio from "cheerio";
 import { sendSlackMessage } from "./slack";
 import { HOST_MARKUP, TRAVELER__MARKUP } from "@/utils/constants";
 import { HostRequestsPageData } from "./api/routers/propertiesRouter";
+
+export const axiosWithRetry = axios.create();
+
+axiosRetry(axiosWithRetry, {
+  retries: 3,
+
+  retryDelay: (retryCount) =>
+    retryCount * 1000 /* Wait 1s, 2s, 3s between retries*/,
+
+  retryCondition: (error) => {
+    // Retry on knowing errors and any 5xx errors
+    return (
+      error.code === "EPROTO" ||
+      error.code === "ERR_BAD_RESPONSE" ||
+      (error.response?.status !== undefined && error.response.status >= 500)
+    );
+  },
+});
 
 export const proxyAgent = new HttpsProxyAgent(env.PROXY_URL);
 
@@ -364,25 +382,27 @@ export async function sendTextToHost(
     {} as Record<string, number>,
   );
 
-  void uniqueHostIds.filter(Boolean).map(async (hostId) => {
-    const host = await db.query.users.findFirst({
-      where: eq(users.id, hostId),
-      columns: { name: true, email: true, phoneNumber: true },
-    });
-    if (host) {
-      const hostPhoneNumber = host.phoneNumber;
+  waitUntil(
+    Promise.all(
+      uniqueHostIds.filter(Boolean).map(async (hostId) => {
+        const host = await db.query.users.findFirst({
+          where: eq(users.id, hostId),
+          columns: { name: true, email: true, phoneNumber: true },
+        });
 
-      if (hostPhoneNumber) {
+        if (!host?.phoneNumber) return;
+
         const numberOfNights = getNumNights(checkIn, checkOut);
-        // Send a text message to the host
+
         await sendText({
-          to: hostPhoneNumber,
+          to: host.phoneNumber,
           content: `Tramona: There is a request for ${formatCurrency(maxTotalPrice / numberOfNights)} per night for ${plural(numberOfNights, "night")} in ${location}. You have ${plural(numHostPropertiesPerRequest[hostId] ?? 0, "eligible property", "eligible properties")}. Please click here to make a match: ${env.NEXTAUTH_URL}/host/requests`,
         });
-        //TO DO SEND WHATSAPP MESSAGE
-      }
-    }
-  });
+
+        //TODO SEND WHATSAPP MESSAGE
+      }),
+    ),
+  );
 }
 
 export async function getPropertiesForRequest(

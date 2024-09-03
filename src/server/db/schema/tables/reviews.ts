@@ -9,12 +9,13 @@ export const reviews = pgTable("reviews", {
     .notNull()
     .references(() => properties.id, { onDelete: "cascade" }),
   name: varchar("name", { length: 255 }).notNull(),
-  profilePic: varchar("profile_pic").notNull(),
+  profilePic: varchar("profile_pic"),
   rating: integer("rating").notNull(),
   review: text("review").notNull(),
 });
 
 export type Review = Omit<typeof reviews.$inferSelect, "id" | "propertyId">;
+export type NewReview = Omit<typeof reviews.$inferInsert, "id" | "propertyId">;
 
 export const reviewsInsertSchema = createInsertSchema(reviews, {
   profilePic: z.string().url(),

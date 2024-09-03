@@ -24,7 +24,7 @@ import { ALL_PROPERTY_AMENITIES } from "./propertyAmenities";
 import { users } from "./users";
 import { ALL_LISTING_SITE_NAMES, propertyTypeEnum } from "../common";
 
-export const ALL_CANCELLATION_POLICIES = [
+export const CANCELLATION_POLICIES = [
   "Flexible",
   "Moderate",
   "Firm",
@@ -35,7 +35,18 @@ export const ALL_CANCELLATION_POLICIES = [
   "Non-refundable",
 ] as const;
 
-export type CancellationPolicy = (typeof ALL_CANCELLATION_POLICIES)[number];
+export type CancellationPolicy = (typeof CANCELLATION_POLICIES)[number];
+
+// cancellation policies that are internal to Tramona (can't be set by host)
+const INTERNAL_CANCELLATION_POLICIES = ["Vacasa"] as const;
+
+const ALL_CANCELLATION_POLICIES = [
+  ...CANCELLATION_POLICIES,
+  ...INTERNAL_CANCELLATION_POLICIES,
+] as const;
+
+export type CancellationPolicyWithInternals =
+  (typeof ALL_CANCELLATION_POLICIES)[number];
 
 export const cancellationPolicyEnum = pgEnum(
   "cancellation_policy",
@@ -179,6 +190,8 @@ export const ALL_BED_TYPES = [
   "Hammock",
   "Small Double Bed",
   "California King Bed",
+  "Double Sofa Bed",
+  "Sofa Bed",
 ] as const;
 
 export type BedType = (typeof ALL_BED_TYPES)[number];
@@ -191,7 +204,7 @@ export const roomsWithBedsSchema = z.array(
         count: z.number().int().positive(),
         type: z.enum(ALL_BED_TYPES, {
           errorMap: (_, ctx) => ({
-            message: `Unsupported bed type "${ctx.data}"`,
+            message: `Unsupported bed type '${ctx.data}'`,
           }),
         }),
       }),
@@ -206,10 +219,8 @@ export const properties = pgTable(
   {
     id: serial("id").primaryKey(),
     hostId: text("host_id").references(() => users.id, { onDelete: "cascade" }),
-    hostTeamId: integer("host_team_id"), //.references(() => hostTeams.id, { onDelete: "cascade" }),
-
-    // null = only on Tramona
-    originalListingPlatform: listingPlatformEnum("original_listing_platform"),
+    hostTeamId: integer("host_team_id"), // TODO: migrate fully away from hostId
+    originalListingPlatform: listingPlatformEnum("original_listing_platform"), // null = only on Tramona
     originalListingId: varchar("original_listing_id"),
 
     roomsWithBeds: jsonb("rooms_with_beds").$type<RoomWithBeds[]>(),
@@ -260,7 +271,7 @@ export const properties = pgTable(
     petsAllowed: boolean("pets_allowed"),
     smokingAllowed: boolean("smoking_allowed"),
 
-    otherHouseRules: varchar("other_house_rules", { length: 1000 }),
+    otherHouseRules: text("other_house_rules"),
 
     avgRating: doublePrecision("avg_rating").notNull().default(0),
     numRatings: integer("num_ratings").notNull().default(0),

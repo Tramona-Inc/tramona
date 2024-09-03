@@ -10,7 +10,12 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { api, type RouterOutputs } from "@/utils/api";
-import { formatDateRange, formatDateWeekMonthDay, plural } from "@/utils/utils";
+import {
+  formatDateRange,
+  formatDateWeekMonthDay,
+  getOfferDiscountPercentage,
+  plural,
+} from "@/utils/utils";
 import { AspectRatio } from "../ui/aspect-ratio";
 import {
   ImagesIcon,
@@ -97,9 +102,11 @@ export default function PropertyPage({
   const [selectedImageIdx, setSelectedImageIdx] = useState<number>(0);
   const firstImageUrl = property.imageUrls[0]!;
 
+  const discountPercentage = offer ? getOfferDiscountPercentage(offer) : null;
+
   return (
     <div>
-      <div className="relative mt-4 grid min-h-[400px] grid-cols-4 grid-rows-2 gap-2 overflow-hidden rounded-xl">
+      <div className="relative grid h-[480px] grid-cols-4 grid-rows-2 gap-2 overflow-hidden rounded-xl">
         <Dialog>
           <DialogTrigger
             key={0}
@@ -196,6 +203,14 @@ export default function PropertyPage({
           </div>
         )}
       </div>
+
+      <div className="h-2" />
+
+      {discountPercentage && (
+        <div className="rounded-xl bg-primaryGreen py-4 text-center text-2xl font-semibold text-white">
+          {discountPercentage}% off
+        </div>
+      )}
 
       <div className="relative flex gap-8 pt-4">
         <div className="min-w-0 flex-1 space-y-4">

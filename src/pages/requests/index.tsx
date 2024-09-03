@@ -1,6 +1,6 @@
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useMaybeSendUnsentRequests } from "@/utils/useMaybeSendUnsentRequests";
+import { useSendUnsentRequest } from "@/utils/useSendUnsentRequests";
 import { HistoryIcon, MapPinIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import ActiveRequestsTab from "../../components/requests/CityRequestsTab";
@@ -32,7 +32,7 @@ function RequestsTabs() {
 
 export default function Page() {
   useSession({ required: true });
-  useMaybeSendUnsentRequests();
+  useSendUnsentRequest();
   const isProduction = process.env.NODE_ENV === "production";
   const baseUrl = isProduction
     ? "https://www.tramona.com"
@@ -40,13 +40,13 @@ export default function Page() {
   return (
     <>
       <NextSeo
-        title="Requests"
+        title="Requests | Tramona"
         description="Check out your Tramona requests."
         canonical={`${baseUrl}/requests`}
         openGraph={{
           url: `${baseUrl}/requests`,
           type: "website",
-          title: "Requests",
+          title: "Requests | Tramona",
           description: "Check out your Tramona requests.",
           images: [
             {
@@ -62,7 +62,7 @@ export default function Page() {
       />
       <DashboardLayout>
         <div className="min-h-screen-minus-header px-4 pb-footer-height pt-5">
-          <div className="mx-auto max-w-5xl">
+          <div className="mx-auto max-w-6xl">
             <div className="flex items-center">
               <h1 className="flex-1 py-4 text-2xl font-bold tracking-tight text-black lg:text-4xl">
                 Requests

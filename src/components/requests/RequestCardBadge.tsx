@@ -10,7 +10,7 @@ export default function RequestCardBadge({
   request: {
     createdAt: Date;
     resolvedAt: Date | null;
-    numOffers: number;
+    offers: unknown[];
   };
   size?: "md" | "lg";
 }) {
@@ -34,7 +34,7 @@ export default function RequestCardBadge({
     case "accepted":
       return (
         <Badge size={size} variant="green">
-          {plural(request.numOffers, "offer")}
+          {plural(request.offers.length, "offer")}
         </Badge>
       );
     case "rejected":
