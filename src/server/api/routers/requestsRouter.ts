@@ -25,10 +25,7 @@ import { TRPCError } from "@trpc/server";
 import { and, eq, exists } from "drizzle-orm";
 import { z } from "zod";
 import type { Session } from "next-auth";
-import {
-  linkInputProperties,
-  linkInputPropertyInsertSchema,
-} from "@/server/db/schema/tables/linkInputProperties";
+import { linkInputProperties } from "@/server/db/schema/tables/linkInputProperties";
 import {
   formatCurrency,
   getNumNights,
@@ -36,6 +33,7 @@ import {
   plural,
 } from "@/utils/utils";
 import { sendTextToHost } from "@/server/server-utils";
+import { newLinkRequestSchema } from "@/utils/useSendUnsentRequests";
 
 const updateRequestInputSchema = z.object({
   requestId: z.number(),
@@ -62,7 +60,32 @@ export const requestsRouter = createTRPCRouter({
             ),
         ),
         with: {
-          offers: { columns: { id: true } },
+          offers: {
+            columns: {
+              id: true,
+              travelerOfferedPrice: true,
+              createdAt: true,
+              checkIn: true,
+              checkOut: true,
+            },
+            with: {
+              property: {
+                columns: {
+                  id: true,
+                  imageUrls: true,
+                  name: true,
+                  numBedrooms: true,
+                  numBathrooms: true,
+                  originalNightlyPrice: true,
+                  hostName: true,
+                  hostProfilePic: true,
+                },
+                with: {
+                  host: { columns: { name: true, email: true, image: true } },
+                },
+              },
+            },
+          },
           linkInputProperty: true,
           madeByGroup: {
             with: {
@@ -80,16 +103,11 @@ export const requestsRouter = createTRPCRouter({
       })
       // extract offer count & sort
       .then((requests) =>
-        requests
-          .map(({ offers, ...request }) => ({
-            ...request,
-            numOffers: offers.length,
-          }))
-          .sort(
-            (a, b) =>
-              b.numOffers - a.numOffers ||
-              b.createdAt.getTime() - a.createdAt.getTime(),
-          ),
+        requests.sort(
+          (a, b) =>
+            b.offers.length - a.offers.length ||
+            b.createdAt.getTime() - a.createdAt.getTime(),
+        ),
       );
 
     return {
@@ -125,16 +143,11 @@ export const requestsRouter = createTRPCRouter({
       })
       // 1. extract offer count & sort
       .then((requests) =>
-        requests
-          .map(({ offers, ...request }) => ({
-            ...request,
-            numOffers: offers.length,
-          }))
-          .sort(
-            (a, b) =>
-              b.numOffers - a.numOffers ||
-              b.createdAt.getTime() - a.createdAt.getTime(),
-          ),
+        requests.sort(
+          (a, b) =>
+            b.offers.length - a.offers.length ||
+            b.createdAt.getTime() - a.createdAt.getTime(),
+        ),
       )
       .then((res) => {
         return {
@@ -156,15 +169,7 @@ export const requestsRouter = createTRPCRouter({
     }),
 
   createRequestWithLink: protectedProcedure
-    .input(
-      z.object({
-        request: requestInsertSchema.omit({
-          madeByGroupId: true,
-          latLngPoint: true,
-        }),
-        property: linkInputPropertyInsertSchema,
-      }),
-    )
+    .input(newLinkRequestSchema)
     .mutation(async ({ ctx, input: { property, request } }) => {
       const { requestId, madeByGroupId } = await handleRequestSubmission(
         request,

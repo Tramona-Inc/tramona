@@ -676,3 +676,31 @@ export function containsHTML(str: string) {
 
   return tags.filter((tag) => str.includes(tag)).length >= 2;
 }
+
+export function mulberry32(seed: number) {
+  let t = seed + 0x6d2b79f5;
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+}
+
+// falls back to a random discount between 8% and 12% if the original nightly price is not available
+export function getOfferDiscountPercentage(offer: {
+  createdAt: Date;
+  travelerOfferedPrice: number;
+  checkIn: Date;
+  checkOut: Date;
+  property: { originalNightlyPrice: number | null };
+}) {
+  const numNights = getNumNights(offer.checkIn, offer.checkOut);
+  const offerNightlyPrice = offer.travelerOfferedPrice / numNights;
+
+  if (offer.property.originalNightlyPrice !== null) {
+    return getDiscountPercentage(
+      offer.property.originalNightlyPrice,
+      offerNightlyPrice,
+    );
+  }
+
+  return Math.round(8 + 4 * mulberry32(offer.createdAt.getTime())); // random number between 8 and 12, deterministic based on offer creation time
+}
