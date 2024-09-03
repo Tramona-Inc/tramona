@@ -16,7 +16,7 @@ export type DirectSiteScraper = (options: {
   ScrapedListing[]
 >;
 
-export type ScrapedListing = 
+export type ScrapedListing =
   (NewProperty & {
     originalListingUrl: string; // enforce that its non-null
     reviews: Review[];
@@ -34,7 +34,7 @@ export type SubsequentScraper = (options: {
 
 export type SubScrapedResult = ({
     originalNightlyPrice?: number, // when the offer is avaible on the original site, also refresh the price
-    isAvailableOnOriginalSite: boolean, 
+    isAvailableOnOriginalSite: boolean,
     availabilityCheckedAt: Date,
 });
 
@@ -115,12 +115,12 @@ export const scrapeDirectListings = async (options: {
               isAvailableOnOriginalSite: true,
               availabilityCheckedAt: new Date(),
             };
-            const newOfferId = await trx.insert(offers).values(newOffer).returning({id: offers.id}) 
+            const newOfferId = await trx.insert(offers).values(newOffer).returning({id: offers.id})
             console.log("newOfferIdReturned: ", newOfferId);
           }
         } else {
           const tramonaProperty = await trx.insert(properties).values(newPropertyListing).returning({id: properties.id});
-          
+
           const newPropertyId = tramonaProperty[0]!.id;
 
           if(listing.reviews.length > 0){
@@ -153,7 +153,7 @@ export const scrapeDirectListings = async (options: {
               isAvailableOnOriginalSite: true,
               availabilityCheckedAt: new Date(),
             };
-            const newOfferId = await trx.insert(offers).values(newOffer).returning({id: offers.id}) 
+            const newOfferId = await trx.insert(offers).values(newOffer).returning({id: offers.id})
             console.log("newOfferIdReturned: ", newOfferId);
           }
         }
@@ -177,7 +177,7 @@ export const subsequentScrape = async (options: {
           property: true,
         },
       });
-      
+
       if(!offer?.property.originalListingId || !offer.scrapeUrl) {continue;} // skip the non-scraped offers
 
       switch(offer.property.originalListingPlatform){
@@ -193,11 +193,11 @@ export const subsequentScrape = async (options: {
             isAvailableOnOriginalSite: subScrapedResult.isAvailableOnOriginalSite,
             availabilityCheckedAt: subScrapedResult.availabilityCheckedAt,
           };
-      
+
           if (subScrapedResult.originalNightlyPrice) {
             updateData.totalPrice = subScrapedResult.originalNightlyPrice * getNumNights(offer.checkIn, offer.checkOut);
           }
-      
+
           await trx.update(offers)
             .set(updateData)
             .where(eq(offers.id, offerId));

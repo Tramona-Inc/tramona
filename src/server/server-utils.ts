@@ -48,7 +48,7 @@ import { HostRequestsPageData } from "./api/routers/propertiesRouter";
 
 export const proxyAgent = new HttpsProxyAgent(env.PROXY_URL);
 
-export async function scrapeUrl(url: string) {
+export async function urlScrape(url: string) {
   return await axios
     .get<string>(url, { httpsAgent: proxyAgent, responseType: "text" })
     .then((res) => res.data)
