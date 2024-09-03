@@ -738,7 +738,7 @@ export const offersRouter = createTRPCRouter({
         checkIn: request.checkIn,
         checkOut: request.checkOut,
         numOfOffersInEachScraper: input.numOfOffers / numOfScrapers,
-        requestPrice:
+        requestNightlyPrice:
           request.maxTotalPrice /
           getNumNights(request.checkIn, request.checkOut),
         requestId: input.requestId,

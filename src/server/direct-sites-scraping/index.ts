@@ -17,7 +17,7 @@ export type DirectSiteScraper = (options: {
   checkIn: Date;
   checkOut: Date;
   numOfOffersInEachScraper?: number;
-  requestPrice?: number; // when the scraper is used by traveler request page
+  requestNightlyPrice?: number; // when the scraper is used by traveler request page
   requestId?: number; // when the scraper is used by traveler request page
 }) => Promise<ScrapedListing[]>;
 
@@ -59,7 +59,7 @@ export const scrapeDirectListings = async (options: {
   checkIn: Date;
   checkOut: Date;
   numOfOffersInEachScraper?: number;
-  requestPrice?: number;
+  requestNightlyPrice?: number;
   requestId?: number;
 }) => {
   const allListings = await Promise.all(
@@ -120,9 +120,16 @@ export const scrapeDirectListings = async (options: {
             console.log("existingOffer, offerId: ", existingOffers[0]?.id);
           }
           if (!existingOffers[0]?.id) {
+            if (!listing.originalNightlyPrice) {
+              console.log(
+                "originalNightlyPrice is not available for this listing: ",
+                listing.originalListingUrl,
+              );
+              continue;
+            }
             const originalTotalPrice =
-              listing.originalNightlyPrice ??
-              0 * getNumNights(options.checkIn, options.checkOut);
+              listing.originalNightlyPrice *
+              getNumNights(options.checkIn, options.checkOut);
             const newOffer: NewOffer = {
               propertyId: tramonaPropertyId,
               checkIn: options.checkIn,
@@ -175,9 +182,16 @@ export const scrapeDirectListings = async (options: {
             console.log("existingOffer, offerId: ", existingOffers[0]?.id);
           }
           if (!existingOffers[0]?.id) {
+            if (!listing.originalNightlyPrice) {
+              console.log(
+                "originalNightlyPrice is not available for this listing: ",
+                listing.originalListingUrl,
+              );
+              continue;
+            }
             const originalTotalPrice =
-              listing.originalNightlyPrice ??
-              0 * getNumNights(options.checkIn, options.checkOut);
+              listing.originalNightlyPrice *
+              getNumNights(options.checkIn, options.checkOut);
             const newOffer: NewOffer = {
               propertyId: newPropertyId,
               checkIn: options.checkIn,

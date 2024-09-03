@@ -141,7 +141,7 @@ export const arizonaScraper: DirectSiteScraper = async ({
   checkIn,
   checkOut,
   numOfOffersInEachScraper = 2,
-  requestPrice,
+  requestNightlyPrice,
 }) => {
   // append 0 to month and day if less than 10
   const monthStart = (checkIn.getMonth() + 1).toString().padStart(2, "0");
@@ -165,10 +165,12 @@ export const arizonaScraper: DirectSiteScraper = async ({
       return [];
     });
 
-  if (requestPrice) {
+  if (requestNightlyPrice) {
     properties = properties.filter((p) => {
       const price = p.originalNightlyPrice!;
-      return price >= requestPrice * 0.8 && price <= requestPrice * 1.1;
+      return (
+        price >= requestNightlyPrice * 0.8 && price <= requestNightlyPrice * 1.1
+      );
     });
   }
   if (numOfOffersInEachScraper > 0) {
