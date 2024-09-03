@@ -9,8 +9,9 @@ import {
 import { arizonaScraper, arizonaSubScraper } from "./integrity-arizona";
 import { db } from "../db";
 import { properties } from "../db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, ne, or, isNotNull } from "drizzle-orm";
 import { getNumNights } from "@/utils/utils";
+import { isNull } from "lodash";
 
 export type DirectSiteScraper = (options: {
   checkIn: Date;
@@ -110,6 +111,9 @@ export const scrapeDirectListings = async (options: {
                 eq(offers.propertyId, tramonaPropertyId),
                 eq(offers.checkIn, options.checkIn),
                 eq(offers.checkOut, options.checkOut),
+                options.requestId
+                  ? eq(offers.requestId, options.requestId)
+                  : undefined,
               ),
             );
           if (existingOffers[0]) {
@@ -162,6 +166,9 @@ export const scrapeDirectListings = async (options: {
                 eq(offers.propertyId, newPropertyId),
                 eq(offers.checkIn, options.checkIn),
                 eq(offers.checkOut, options.checkOut),
+                options.requestId
+                  ? eq(offers.requestId, options.requestId)
+                  : undefined,
               ),
             );
           if (existingOffers[0]) {
