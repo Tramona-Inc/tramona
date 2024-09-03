@@ -340,7 +340,7 @@ const mapToScrapedListing = (
   return {
     originalListingId: prop.is_eid.toString(),
     name: prop.ss_name,
-    about: description, // Adjust if needed
+    about: description,
     propertyType: mapPropertyType(prop.sm_nid$rc_core_term_type$name[0] ?? ""),
     address: address,
     city: prop.sm_nid$rc_core_term_city_type$name[0] ?? "",
@@ -357,7 +357,7 @@ const mapToScrapedListing = (
     avgRating: prop.fs_rc_core_item_reviews_rating ?? 0,
     numRatings: prop.is_rc_core_item_reviews_count ?? 0,
     originalListingPlatform: "CB Island Vacations" as ListingSiteName,
-    originalNightlyPrice: originalNightlyPrice, // You'll need to implement this calculation
+    originalNightlyPrice: originalNightlyPrice,
     reviews: reviews,
     scrapeUrl: scrapeUrl,
   };

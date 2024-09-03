@@ -66,12 +66,7 @@ export const scrapeDirectListings = async (options: {
     directSiteScrapers.map((scraper) => scraper(options)),
   );
 
-
   const listings = allListings.flat();
-  listings.forEach((listing) => {
-    console.log("reviews", listing.reviews);
-  });
-
 
   if (listings.length > 0) {
     await db.transaction(async (trx) => {
