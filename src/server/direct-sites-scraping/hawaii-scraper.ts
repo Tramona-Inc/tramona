@@ -1,10 +1,16 @@
-import { DirectSiteScraper } from "@/server/direct-sites-scraping";
-import { NewProperty, Review } from "@/server/db/schema";
+import {
+  DirectSiteScraper,
+  SubsequentScraper,
+  ScrapedListing,
+} from "@/server/direct-sites-scraping";
+import { Review } from "@/server/db/schema";
 import axios from "axios";
 import { z } from "zod";
 import querystring from "querystring";
 import { PropertyType } from "@/server/db/schema";
 import * as cheerio from "cheerio";
+import { ListingSiteName } from "@/server/db/schema/common";
+import { getNumNights } from "@/utils/utils";
 
 const hawaiiPropertyTypes: Record<string, PropertyType> = {
   // mapping scraped property types to our property types
@@ -65,17 +71,28 @@ const PropertySchema = z.object({
   is_rc_core_lodging_product$occ_total: z.number(),
   ss_vrweb_default_image: z.string(),
   propertyType: z.custom<PropertyType>(),
-  sm_nid$rc_core_term_city_type$name: z.string(), // city
+  sm_nid$rc_core_term_city_type$name: z.array(z.string()), // city
   sm_nid$rc_core_term_general_amenities$name: z.array(z.string()),
+  sm_nid$rc_core_term_type$name: z.array(z.string()),
+  is_eid: z.number(),
 });
 
-const ResponseSchema = z.object({
-  response: z.object({
-    numFound: z.number(),
-    start: z.number(),
-    docs: z.array(z.unknown()),
-  }),
-});
+type PropertyDocument = {
+  is_eid: number | number[];
+  ss_name: string;
+  fs_nid$field_location$latitude: number;
+  fs_nid$field_location$longitude: number;
+  ss_nid$url: string;
+  is_rc_core_item_reviews_count?: number;
+  fs_rc_core_item_reviews_rating?: number;
+  fs_rc_core_lodging_product$baths: number;
+  fs_rc_core_lodging_product$beds: number;
+  is_rc_core_lodging_product$occ_total: number;
+  ss_vrweb_default_image: string;
+  sm_nid$rc_core_term_city_type$name: string[];
+  sm_nid$rc_core_term_general_amenities$name: string[];
+  sm_nid$rc_core_term_type$name: string[];
+};
 
 interface PriceFilteredProperty {
   eid: number;
@@ -130,129 +147,6 @@ function cleanAmenities(amenities: string[]): string[] {
       return capitalizedWords.join(" ");
     });
 }
-
-// This code is relevant to fetching all properties from the site
-// const fetchAllPropertyIds = async (): Promise<string[]> => {
-//   const solrUrl = "https://www.cbislandvacations.com/solr/";
-//   const rowsPerPage = 100;
-//   const start = 0;
-//   const uniqueIds = new Set<string>();
-//   let totalFound = 0;
-
-//   console.log(`Fetching property IDs: start=${start}, rows=${rowsPerPage}`);
-
-//   try {
-//     const formData = querystring.stringify({
-//       fq: "index_id:rci",
-//       wt: "json",
-//       q: "*:*",
-//       fl: "id",
-//       start: start.toString(),
-//       rows: rowsPerPage.toString(),
-//     });
-
-//     const response = await axios({
-//       method: "POST",
-//       url: solrUrl,
-//       data: formData,
-//     });
-
-//     const validatedData = ResponseSchema.parse(response.data);
-
-//     const initialSize = uniqueIds.size;
-//     validatedData.response.docs.forEach((doc: unknown) => {
-//       const typedDoc = doc as { id?: string };
-//       if (typedDoc.id) uniqueIds.add(typedDoc.id);
-//     });
-//     totalFound = validatedData.response.numFound;
-
-//     const newUniqueCount = uniqueIds.size - initialSize;
-//     console.log(
-//       `Fetched ${validatedData.response.docs.length} IDs, ${newUniqueCount} new unique. Total unique: ${uniqueIds.size}/${totalFound}`,
-//     );
-//   } catch (error) {
-//     console.error("Error fetching property IDs:", error);
-//     return [];
-//   }
-
-//   const allUniqueIds = Array.from(uniqueIds);
-//   console.log("All unique property IDs:", allUniqueIds);
-//   return allUniqueIds;
-// };
-
-const fetchPropertyDetails = async (
-  id?: string,
-  eid?: string,
-): Promise<z.infer<typeof PropertySchema> | null> => {
-  const solrUrl = "https://www.cbislandvacations.com/solr/";
-
-  try {
-    let formData: string | undefined;
-    if (id) {
-      formData = querystring.stringify({
-        fq: "index_id:rci",
-        wt: "json",
-        q: `id:${id}`,
-        fl: "*",
-      });
-    } else if (eid) {
-      formData = querystring.stringify({
-        fq: "index_id:rci",
-        wt: "json",
-        q: `is_eid:${eid}`,
-        fl: "*",
-      });
-    }
-
-    if (!formData) {
-      console.error("Neither id nor eid provided to fetchPropertyDetails");
-      return null;
-    }
-
-    const response = await axios({
-      method: "POST",
-      url: solrUrl,
-      data: formData,
-    });
-
-    const validatedData = ResponseSchema.parse(response.data);
-    let mappedPropertyType: PropertyType = "Other";
-    let scrapedCityType = "Other";
-    if (validatedData.response.docs.length > 0) {
-      const propertyData = validatedData.response.docs[0] as Record<
-        string,
-        unknown
-      >;
-      if (
-        Array.isArray(propertyData.sm_nid$rc_core_term_type$name) &&
-        propertyData.sm_nid$rc_core_term_type$name.length > 0
-      ) {
-        const scrapedPropertyType = propertyData
-          .sm_nid$rc_core_term_type$name[0] as string;
-        mappedPropertyType = mapPropertyType(scrapedPropertyType);
-      }
-      if (
-        Array.isArray(propertyData.sm_nid$rc_core_term_city_type$name) &&
-        propertyData.sm_nid$rc_core_term_city_type$name.length > 0
-      ) {
-        scrapedCityType = propertyData
-          .sm_nid$rc_core_term_city_type$name[0] as string;
-      }
-
-      return PropertySchema.parse({
-        ...propertyData,
-        propertyType: mappedPropertyType,
-        sm_nid$rc_core_term_city_type$name: scrapedCityType,
-      });
-    } else {
-      console.log(`No data found for property ID: ${id ?? eid}`);
-      return null;
-    }
-  } catch (error) {
-    console.error(`Error fetching details for property ${id ?? eid}:`, error);
-    return null;
-  }
-};
 
 function extractAddressFromDirectionsLink(html: string): string {
   const $ = cheerio.load(html);
@@ -351,9 +245,37 @@ function isPriceFilteredProperty(item: unknown): item is PriceFilteredProperty {
   );
 }
 
+async function scrapeFinalPrice(
+  eid: string,
+  checkIn: Date,
+  checkOut: Date,
+): Promise<number> {
+  const startDate = checkIn.toISOString().split("T")[0];
+  const endDate = checkOut.toISOString().split("T")[0];
+  const url = `https://www.cbislandvacations.com/rescms/item/${eid}/buy?rcav%5Bbegin%5D=${encodeURIComponent(startDate ?? "")}&rcav%5Bend%5D=${encodeURIComponent(endDate ?? "")}&rcav%5Badult%5D=1&rcav%5Bchild%5D=0&eid=${eid}`;
+
+  try {
+    const response = await axios.get(url);
+    const $ = cheerio.load(response.data as string);
+
+    const totalPriceElement = $("tr.total td.amount b");
+    if (totalPriceElement.length > 0) {
+      const priceText = totalPriceElement.text().trim();
+      const price = parseFloat(priceText.replace("$", "").replace(",", ""));
+      return price * 100; // Convert to cents
+    } else {
+      console.error(`Failed to find total price element for property ${eid}`);
+      return 0;
+    }
+  } catch (error) {
+    console.error(`Error scraping final price for property ${eid}:`, error);
+    return 0;
+  }
+}
+
 const fetchAvailablePropertyEids = async (
-  startDate: string,
-  endDate: string,
+  startDate: Date,
+  endDate: Date,
   adults = 1,
   children = 0,
 ): Promise<string[]> => {
@@ -361,8 +283,8 @@ const fetchAvailablePropertyEids = async (
     "https://www.cbislandvacations.com/rcapi/item/avail/search";
 
   const params = new URLSearchParams({
-    "rcav[begin]": startDate,
-    "rcav[end]": endDate,
+    "rcav[begin]": startDate.toISOString().split("T")[0] ?? "",
+    "rcav[end]": endDate.toISOString().split("T")[0] ?? "",
     "rcav[adult]": adults.toString(),
     "rcav[child]": children.toString(),
     "rcav[flex]": "",
@@ -402,146 +324,183 @@ const fetchAvailablePropertyEids = async (
   }
 };
 
-export const cbIslandVacationsScraper: DirectSiteScraper = async (options) => {
-  const startDate = options.checkIn.toISOString().split("T")[0];
-  const endDate = options.checkOut.toISOString().split("T")[0];
+type CBIslandVacationsPropertyInput = z.infer<typeof PropertySchema>;
 
-  if (startDate && endDate) {
-    console.log(
-      `Fetching properties available from ${startDate} to ${endDate}`,
-    );
-    const propertyEids = await fetchAvailablePropertyEids(startDate, endDate);
-    console.log(`Found ${propertyEids.length} available properties`);
+const mapToScrapedListing = (
+  prop: CBIslandVacationsPropertyInput,
+  checkIn: Date,
+  checkOut: Date,
+  scrapeUrl: string,
+  reviews: Review[],
+  address: string,
+  images: string[],
+  description: string,
+  originalNightlyPrice: number,
+): ScrapedListing => {
+  return {
+    originalListingId: prop.is_eid.toString(),
+    name: prop.ss_name,
+    about: description, // Adjust if needed
+    propertyType: mapPropertyType(prop.sm_nid$rc_core_term_type$name[0] ?? ""),
+    address: address,
+    city: prop.sm_nid$rc_core_term_city_type$name[0] ?? "",
+    latitude: prop.fs_nid$field_location$latitude,
+    longitude: prop.fs_nid$field_location$longitude,
+    maxNumGuests: prop.is_rc_core_lodging_product$occ_total,
+    numBeds: prop.fs_rc_core_lodging_product$beds,
+    numBedrooms: prop.fs_rc_core_lodging_product$beds,
+    numBathrooms: prop.fs_rc_core_lodging_product$baths,
+    amenities: cleanAmenities(prop.sm_nid$rc_core_term_general_amenities$name),
+    otherAmenities: [],
+    imageUrls: images,
+    originalListingUrl: prop.ss_nid$url,
+    avgRating: prop.fs_rc_core_item_reviews_rating ?? 0,
+    numRatings: prop.is_rc_core_item_reviews_count ?? 0,
+    originalListingPlatform: "CB Island Vacations" as ListingSiteName,
+    originalNightlyPrice: originalNightlyPrice, // You'll need to implement this calculation
+    reviews: reviews,
+    scrapeUrl: scrapeUrl,
+  };
+};
 
-    const availableProperties: (NewProperty & {
-      originalListingUrl: string;
-      reservedDateRanges: { start: Date; end: Date }[];
-      reviews: Review[];
-    })[] = [];
+export const cbIslandVacationsScraper: DirectSiteScraper = async ({
+  checkIn,
+  checkOut,
+  numOfOffersInEachScraper = 5,
+}) => {
+  const propertyEids = await fetchAvailablePropertyEids(checkIn, checkOut);
+  console.log(`Found ${propertyEids.length} available properties`);
 
-    for (const eid of propertyEids.slice(0, 5)) {
-      console.log(`Fetching details for property: ${eid}`);
-      const propertyDetails = await fetchPropertyDetails(undefined, eid);
+  const availableProperties: ScrapedListing[] = [];
 
-      if (propertyDetails) {
-        const processedAmenities = cleanAmenities(
-          propertyDetails.sm_nid$rc_core_term_general_amenities$name,
+  for (const eid of propertyEids.slice(0, numOfOffersInEachScraper)) {
+    console.log(`Fetching details for property: ${eid}`);
+    const solrUrl = "https://www.cbislandvacations.com/solr/";
+    const formData = querystring.stringify({
+      fq: "index_id:rci",
+      wt: "json",
+      q: `is_eid:${eid}`,
+      fl: "*",
+    });
+
+    const scrapeUrl = `${solrUrl}?${formData}`;
+    console.log("Complete URL:", scrapeUrl);
+
+    try {
+      const response = await axios<{ response: { docs: PropertyDocument[] } }>({
+        method: "POST",
+        url: solrUrl,
+        data: formData,
+      });
+
+      const propertyData = response.data.response.docs.find((doc: PropertyDocument) => {
+        if (!doc.is_eid) return false;
+
+        const docEid = String(doc.is_eid).trim();
+        const searchEid = String(eid).trim();
+
+        if (docEid.toLowerCase() === searchEid.toLowerCase()) return true;
+
+        if (docEid.toLowerCase().includes(searchEid.toLowerCase())) return true;
+
+        if (Array.isArray(doc.is_eid)) {
+          return doc.is_eid.some(
+            (id: number) =>
+              String(id).trim().toLowerCase() === searchEid.toLowerCase() ||
+              String(id).trim().toLowerCase().includes(searchEid.toLowerCase()),
+          );
+        }
+
+        return false;
+      });
+
+      if (!propertyData) {
+        console.error(`No property found with eid: ${eid}`);
+        console.log(
+          "Available eids:",
+          response.data.response.docs.map((doc: PropertyDocument) => doc.is_eid),
         );
-        const { reviews, images, description, address } =
-          await scrapePropertyPage(propertyDetails.ss_nid$url);
-        const newProperty: NewProperty & {
-          originalListingUrl: string;
-          reservedDateRanges: { start: Date; end: Date }[];
-          reviews: Review[];
-        } = {
-          name: propertyDetails.ss_name,
-          address: address,
-          about: description,
-          propertyType: propertyDetails.propertyType,
-          maxNumGuests: propertyDetails.is_rc_core_lodging_product$occ_total,
-          numBeds: propertyDetails.fs_rc_core_lodging_product$beds,
-          numBedrooms: propertyDetails.fs_rc_core_lodging_product$beds,
-          latitude: propertyDetails.fs_nid$field_location$latitude,
-          longitude: propertyDetails.fs_nid$field_location$longitude,
-          city: propertyDetails.sm_nid$rc_core_term_city_type$name,
-          avgRating: propertyDetails.fs_rc_core_item_reviews_rating ?? 0,
-          numRatings: propertyDetails.is_rc_core_item_reviews_count ?? 0,
-          imageUrls: [...images, propertyDetails.ss_vrweb_default_image],
-          amenities: processedAmenities,
-          otherAmenities: [],
-          roomType: "Entire place",
-          originalListingUrl: propertyDetails.ss_nid$url,
-          reservedDateRanges: [],
-          reviews: reviews,
-          hostId: "af227f1b-74fd-4a50-ad34-3aa50187595c",
-          originalListingPlatform: "CB Island Vacations",
-          originalListingId: propertyDetails.id,
-          checkInTime: "4:00 PM",
-          checkOutTime: "10:00 AM",
-          checkInInfo:
-            "You will be emailed detailed arrival instructions a few days prior to your check-in date. You will be going directly to the residence and the arrival instructions will include directions to the property as well as the door code to access the residence.",
-        };
-        availableProperties.push(newProperty);
+        continue;
       }
+
+      const validatedData = PropertySchema.parse(propertyData);
+
+      const { reviews, address, description, images } =
+        await scrapePropertyPage(validatedData.ss_nid$url);
+
+      const totalPrice = await scrapeFinalPrice(eid, checkIn, checkOut);
+      const originalNightlyPrice = Math.round(
+        totalPrice / getNumNights(checkIn, checkOut),
+      );
+
+      const scrapedListing = mapToScrapedListing(
+        validatedData,
+        checkIn,
+        checkOut,
+        scrapeUrl,
+        reviews,
+        address,
+        images,
+        description,
+        originalNightlyPrice,
+      );
+      availableProperties.push(scrapedListing);
+
       console.log(
         `Fetched details for property ${eid}. Total unique: ${availableProperties.length}`,
       );
+    } catch (error) {
+      console.error(`Error fetching property ${eid}:`, error);
     }
-    console.log(
-      `Total available properties fetched: ${availableProperties.length}`,
-    );
-    console.log(availableProperties);
-    return availableProperties;
-  } else {
-    console.error("Check-in or check-out date is missing");
-    return [];
   }
 
-  // This code is relevant to fetching all properties from the site
-  // If no date range is specified, fetch all properties
-  //   const propertyIds = await fetchAllPropertyIds();
-  //   console.log(`Total unique property IDs fetched: ${propertyIds.length}`);
+  console.log(
+    `Total available properties fetched: ${availableProperties.length}`,
+  );
+  return availableProperties;
+};
 
-  //   const allProperties: (NewProperty & {
-  //     originalListingUrl: string;
-  //     reservedDateRanges: { start: Date; end: Date }[];
-  //     reviews: Review[];
-  //   })[] = [];
+export const cbIslandVacationsSubScraper: SubsequentScraper = async ({
+  originalListingId,
+  scrapeUrl,
+  checkIn,
+  checkOut,
+}) => {
+  try {
+    const availablePropertyIds = await fetchAvailablePropertyEids(
+      checkIn,
+      checkOut,
+    );
 
-  //   // for testing: limit the number of properties to 5
-  //   const limitedPropertyIds = propertyIds.slice(0, 5);
+    const isAvailable = availablePropertyIds.includes(originalListingId);
 
-  //   for (const id of limitedPropertyIds) {
-  //     console.log(`Fetching details for property: ${id}`);
+    let originalNightlyPrice = 0;
+    if (!isAvailable) {
+      return {
+        isAvailableOnOriginalSite: false,
+        availabilityCheckedAt: new Date(),
+      };
+    }
 
-  //     const propertyDetails = await fetchPropertyDetails(id);
+    const totalPrice = await scrapeFinalPrice(
+      originalListingId,
+      checkIn,
+      checkOut,
+    );
+    originalNightlyPrice = Math.round(
+      totalPrice / getNumNights(checkIn, checkOut),
+    );
 
-  //     if (propertyDetails) {
-  //       const processedAmenities = cleanAmenities(
-  //         propertyDetails.sm_nid$rc_core_term_general_amenities$name,
-  //       );
-  //       const { reviews, images, description, address } =
-  //         await scrapePropertyPage(propertyDetails.ss_nid$url);
-  //       const newProperty: NewProperty & {
-  //         originalListingUrl: string;
-  //         reservedDateRanges: { start: Date; end: Date }[];
-  //         reviews: Review[];
-  //       } = {
-  //         name: propertyDetails.ss_name,
-  //         address: address,
-  //         about: description,
-  //         propertyType: propertyDetails.propertyType,
-  //         maxNumGuests: propertyDetails.is_rc_core_lodging_product$occ_total,
-  //         numBeds: propertyDetails.fs_rc_core_lodging_product$beds,
-  //         numBedrooms: propertyDetails.fs_rc_core_lodging_product$beds,
-  //         latitude: propertyDetails.fs_nid$field_location$latitude,
-  //         longitude: propertyDetails.fs_nid$field_location$longitude,
-  //         city: propertyDetails.sm_nid$rc_core_term_city_type$name,
-  //         avgRating: propertyDetails.fs_rc_core_item_reviews_rating ?? 0,
-  //         numRatings: propertyDetails.is_rc_core_item_reviews_count ?? 0,
-  //         imageUrls: [...images, propertyDetails.ss_vrweb_default_image],
-  //         amenities: processedAmenities,
-  //         otherAmenities: [],
-  //         roomType: "Entire place",
-  //         originalListingUrl: propertyDetails.ss_nid$url,
-  //         reservedDateRanges: [],
-  //         reviews: reviews,
-  //         hostId: "af227f1b-74fd-4a50-ad34-3aa50187595c",
-  //         originalListingPlatform: "CB Island Vacations",
-  //         originalListingId: id,
-  //         checkInTime: "4:00 PM",
-  //         checkOutTime: "10:00 AM",
-  //         checkInInfo:
-  //           "You will be emailed detailed arrival instructions a few days prior to your check-in date. You will be going directly to the residence and the arrival instructions will include directions to the property as well as the door code to access the residence.",
-  //       };
-  //       allProperties.push(newProperty);
-  //     }
-
-  //     console.log(
-  //       `Fetched details for property ${id}. Total unique: ${allProperties.length}`,
-  //     );
-  //   }
-
-  //   console.log(`Total unique properties fetched: ${allProperties.length}`);
-  //   return allProperties;
+    return {
+      originalNightlyPrice,
+      isAvailableOnOriginalSite: isAvailable,
+      availabilityCheckedAt: new Date(),
+    };
+  } catch (error) {
+    console.error("Error in cbIslandVacationsSubScraper");
+    return {
+      isAvailableOnOriginalSite: false,
+      availabilityCheckedAt: new Date(),
+    };
+  }
 };
