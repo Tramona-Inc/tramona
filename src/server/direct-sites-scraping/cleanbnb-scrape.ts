@@ -307,12 +307,15 @@ export const cleanbnbScraper: DirectSiteScraper = async ({
   checkIn,
   checkOut,
   numOfOffersInEachScraper,
+  numGuests,
 }) => {
   const checkInDate = formatDate(checkIn);
   const checkOutDate = formatDate(checkOut);
 
   const res: Awaited<ReturnType<DirectSiteScraper>> = [];
-  const baseUrl = "https://www.cleanbnb.house/it/appartamenti";
+  const baseUrl = numGuests
+  ? `https://www.cleanbnb.house/it/appartamenti?guests_rooms=${encodeURIComponent(`${numGuests},0;`)}`
+  : "https://www.cleanbnb.house/it/appartamenti";
 
   const properties = await getAllProperties(baseUrl, checkInDate, checkOutDate);
 

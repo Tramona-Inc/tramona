@@ -16,6 +16,7 @@ export type DirectSiteScraper = (options: {
   checkIn: Date;
   checkOut: Date;
   numOfOffersInEachScraper?: number;
+  numGuests?: number;
 }) => Promise<ScrapedListing[]>;
 
 export type ScrapedListing = NewProperty & {

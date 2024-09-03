@@ -38,7 +38,6 @@ export default function RequestCityForm() {
     setMadeByGroupId,
   });
 
-  const {mutateAsync: cleanbnbScraper} = api.misc.scrapeCleanbnbLink.useMutation();
 
   const inviteLinkQuery = api.groups.generateInviteLink.useQuery(
     { groupId: madeByGroupId! },
@@ -53,14 +52,6 @@ export default function RequestCityForm() {
 
   const { latLng, radius } = form.watch();
 
-  const handleClick = async () => {
-    await cleanbnbScraper({
-      checkIn: "10-03-2024",
-      checkOut: "10-06-2024",
-    }).then((data) => {
-      console.log("data: ", data);
-    });
-  };
 
   return (
     <Form {...form}>
@@ -166,9 +157,6 @@ export default function RequestCityForm() {
         madeByGroupId={madeByGroupId}
         location={form.getValues("location")}
       />
-      <Button onClick={handleClick}>
-        Click Me
-      </Button>
     </Form>
   );
 }
