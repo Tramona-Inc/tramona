@@ -199,7 +199,7 @@ importers:
         version: 0.6.2
       '@vis.gl/react-google-maps':
         specifier: ^1.0.0
-        version: 1.1.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 1.1.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       aws-sdk:
         specifier: ^2.1569.0
         version: 2.1672.0
@@ -3211,8 +3211,8 @@ packages:
     resolution: {integrity: sha512-OTe0KE37F5Y2eTys6eMnfopC+P4qr2ooXUTFyFPTplYSPwowmFk/HLD1FXtbKLjqsIH0SgekcJWad+C5uX4nkg==}
     engines: {node: '>=16'}
 
-  '@vis.gl/react-google-maps@1.1.0':
-    resolution: {integrity: sha512-MxDIhCfPRzTQY1c6sS0GFg8Ukl40o13fkIKEaCN0cR1BIrV4LPo+EuCov9WElbe0bOo8MApx5qAbqBKOmLQyKg==}
+  '@vis.gl/react-google-maps@1.1.1':
+    resolution: {integrity: sha512-1iKLZVMINd1AIQ65QzpsooflgeM9s/K/D6iLgqz5NA6KEc0YSEBuMuGfsK+FubCqu/Y+KtEGrq8CzP0OFFVfQg==}
     peerDependencies:
       react: '>=16.8.0'
       react-dom: '>=16.8.0'
@@ -10517,7 +10517,7 @@ snapshots:
       satori: 0.10.9
       yoga-wasm-web: 0.3.3
 
-  '@vis.gl/react-google-maps@1.1.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@vis.gl/react-google-maps@1.1.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@types/google.maps': 3.55.12
       fast-deep-equal: 3.1.3
