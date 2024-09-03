@@ -306,6 +306,7 @@ const getAllProperties = async (baseUrl: string, checkInDate: string, checkOutDa
 export const cleanbnbScraper: DirectSiteScraper = async ({
   checkIn,
   checkOut,
+  numOfOffersInEachScraper,
 }) => {
   const checkInDate = formatDate(checkIn);
   const checkOutDate = formatDate(checkOut);
@@ -450,7 +451,7 @@ export const cleanbnbScraper: DirectSiteScraper = async ({
       scrapeUrl: baseUrl,
     });
   }
-  return res;
+  return numOfOffersInEachScraper ? res.splice(0, numOfOffersInEachScraper) : res;
 };
 
 export const cleanbnbSubScraper: SubsequentScraper = async ({
