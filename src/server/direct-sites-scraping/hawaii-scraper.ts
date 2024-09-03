@@ -328,8 +328,6 @@ type CBIslandVacationsPropertyInput = z.infer<typeof PropertySchema>;
 
 const mapToScrapedListing = (
   prop: CBIslandVacationsPropertyInput,
-  checkIn: Date,
-  checkOut: Date,
   scrapeUrl: string,
   reviews: Review[],
   address: string,
@@ -435,8 +433,6 @@ export const cbIslandVacationsScraper: DirectSiteScraper = async ({
 
       const scrapedListing = mapToScrapedListing(
         validatedData,
-        checkIn,
-        checkOut,
         scrapeUrl,
         reviews,
         address,

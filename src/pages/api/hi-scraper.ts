@@ -13,6 +13,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const today = new Date();
       const twoDaysLater = new Date(today.getTime() + 2 * 24 * 60 * 60 * 1000);
       const fourDaysLater = new Date(twoDaysLater.getTime() + 2 * 24 * 60 * 60 * 1000);
+      const sixDaysLater = new Date(fourDaysLater.getTime() + 2 * 24 * 60 * 60 * 1000);
+      const eightDaysLater = new Date(sixDaysLater.getTime() + 2 * 24 * 60 * 60 * 1000);
       // test proxy
       // const rr = await axios.get("https://randomuser.me/api/", { httpsAgent: proxyAgent })
       // // eslint-disable-next-line @typescript-eslint/no-unsafe-return
@@ -21,7 +23,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // res.status(200).json({ message: `Successfully, data: ` });
       const listings = await scrapeDirectListings({
         checkIn: twoDaysLater,
-        checkOut: fourDaysLater,
+        checkOut: eightDaysLater,
       });
       console.log('API route: Scraping process completed');
       res.status(200).json({ message: `Successfully scraped and inserted ${listings.length} listings.` });
