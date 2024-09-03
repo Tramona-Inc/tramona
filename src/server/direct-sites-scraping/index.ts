@@ -102,41 +102,40 @@ export const scrapeDirectListings = async (options: {
             );
           }
 
-            const existingOffers = await trx
-              .select({ id: offers.id })
-              .from(offers)
-              .where(
-                and(
-                  eq(offers.propertyId, tramonaPropertyId),
-                  eq(offers.checkIn, options.checkIn),
-                  eq(offers.checkOut, options.checkOut),
-                ),
-              );
-            if (existingOffers[0]) {
-              console.log("existingOffer, offerId: ", existingOffers[0]?.id);
-            }
-            if (!existingOffers[0]?.id) {
-              const originalTotalPrice =
-                listing.originalNightlyPrice ??
-                0 * getNumNights(options.checkIn, options.checkOut);
-              const newOffer: NewOffer = {
-                propertyId: tramonaPropertyId,
-                checkIn: options.checkIn,
-                checkOut: options.checkOut,
-                totalPrice: originalTotalPrice,
-                hostPayout: originalTotalPrice,
-                travelerOfferedPrice: originalTotalPrice,
-                scrapeUrl: listing.scrapeUrl,
-                isAvailableOnOriginalSite: true,
-                availabilityCheckedAt: new Date(),
-                ...(options.requestId && { requestId: options.requestId }),
-              };
-              const newOfferId = await trx
-                .insert(offers)
-                .values(newOffer)
-                .returning({ id: offers.id });
-              console.log("newOfferIdReturned: ", newOfferId);
-            }
+          const existingOffers = await trx
+            .select({ id: offers.id })
+            .from(offers)
+            .where(
+              and(
+                eq(offers.propertyId, tramonaPropertyId),
+                eq(offers.checkIn, options.checkIn),
+                eq(offers.checkOut, options.checkOut),
+              ),
+            );
+          if (existingOffers[0]) {
+            console.log("existingOffer, offerId: ", existingOffers[0]?.id);
+          }
+          if (!existingOffers[0]?.id) {
+            const originalTotalPrice =
+              listing.originalNightlyPrice ??
+              0 * getNumNights(options.checkIn, options.checkOut);
+            const newOffer: NewOffer = {
+              propertyId: tramonaPropertyId,
+              checkIn: options.checkIn,
+              checkOut: options.checkOut,
+              totalPrice: originalTotalPrice,
+              hostPayout: originalTotalPrice,
+              travelerOfferedPrice: originalTotalPrice,
+              scrapeUrl: listing.scrapeUrl,
+              isAvailableOnOriginalSite: true,
+              availabilityCheckedAt: new Date(),
+              ...(options.requestId && { requestId: options.requestId }),
+            };
+            const newOfferId = await trx
+              .insert(offers)
+              .values(newOffer)
+              .returning({ id: offers.id });
+            console.log("newOfferIdReturned: ", newOfferId);
           }
         } else {
           const tramonaProperty = await trx
@@ -155,41 +154,40 @@ export const scrapeDirectListings = async (options: {
             );
           }
 
-            const existingOffers = await trx
-              .select({ id: offers.id })
-              .from(offers)
-              .where(
-                and(
-                  eq(offers.propertyId, newPropertyId),
-                  eq(offers.checkIn, options.checkIn),
-                  eq(offers.checkOut, options.checkOut),
-                ),
-              );
-            if (existingOffers[0]) {
-              console.log("existingOffer, offerId: ", existingOffers[0]?.id);
-            }
-            if (!existingOffers[0]?.id) {
-              const originalTotalPrice =
-                listing.originalNightlyPrice ??
-                0 * getNumNights(options.checkIn, options.checkOut);
-              const newOffer: NewOffer = {
-                propertyId: newPropertyId,
-                checkIn: options.checkIn,
-                checkOut: options.checkOut,
-                totalPrice: originalTotalPrice,
-                hostPayout: originalTotalPrice,
-                travelerOfferedPrice: originalTotalPrice,
-                scrapeUrl: listing.scrapeUrl,
-                isAvailableOnOriginalSite: true,
-                availabilityCheckedAt: new Date(),
-                ...(options.requestId && { requestId: options.requestId }),
-              };
-              const newOfferId = await trx
-                .insert(offers)
-                .values(newOffer)
-                .returning({ id: offers.id });
-              console.log("newOfferIdReturned: ", newOfferId);
-            }
+          const existingOffers = await trx
+            .select({ id: offers.id })
+            .from(offers)
+            .where(
+              and(
+                eq(offers.propertyId, newPropertyId),
+                eq(offers.checkIn, options.checkIn),
+                eq(offers.checkOut, options.checkOut),
+              ),
+            );
+          if (existingOffers[0]) {
+            console.log("existingOffer, offerId: ", existingOffers[0]?.id);
+          }
+          if (!existingOffers[0]?.id) {
+            const originalTotalPrice =
+              listing.originalNightlyPrice ??
+              0 * getNumNights(options.checkIn, options.checkOut);
+            const newOffer: NewOffer = {
+              propertyId: newPropertyId,
+              checkIn: options.checkIn,
+              checkOut: options.checkOut,
+              totalPrice: originalTotalPrice,
+              hostPayout: originalTotalPrice,
+              travelerOfferedPrice: originalTotalPrice,
+              scrapeUrl: listing.scrapeUrl,
+              isAvailableOnOriginalSite: true,
+              availabilityCheckedAt: new Date(),
+              ...(options.requestId && { requestId: options.requestId }),
+            };
+            const newOfferId = await trx
+              .insert(offers)
+              .values(newOffer)
+              .returning({ id: offers.id });
+            console.log("newOfferIdReturned: ", newOfferId);
           }
         }
       }
