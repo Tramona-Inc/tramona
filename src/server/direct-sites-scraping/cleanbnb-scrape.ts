@@ -3,7 +3,7 @@ import { DirectSiteScraper, SubsequentScraper } from ".";
 import * as cheerio from "cheerio";
 import { v2 } from "@google-cloud/translate";
 import { env } from "@/env";
-import { PropertyType } from "../db/schema";
+import { ListingSiteName, PropertyType } from "../db/schema";
 import { urlScrape } from "../server-utils";
 
 const { Translate } = v2;
@@ -452,6 +452,7 @@ export const cleanbnbScraper: DirectSiteScraper = async ({
       cancellationPolicy: "Non-refundable",
       reviews: [],
       scrapeUrl: baseUrl,
+      originalListingPlatform: "Cleanbnb" as ListingSiteName,
     });
   }
   return numOfOffersInEachScraper ? res.splice(0, numOfOffersInEachScraper) : res;

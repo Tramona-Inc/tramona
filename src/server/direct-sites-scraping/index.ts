@@ -11,6 +11,7 @@ import { db } from "../db";
 import { properties } from "../db/schema";
 import { eq, and } from "drizzle-orm";
 import { getNumNights } from "@/utils/utils";
+import { cleanbnbSubScraper } from "./cleanbnb-scrape";
 
 export type DirectSiteScraper = (options: {
   checkIn: Date;
@@ -223,6 +224,29 @@ export const subsequentScrape = async (options: { offerIds: number[] }) => {
         }
         break;
         // TODO add other scraping sites here
+        case "Cleanbnb":
+          const cleanbnbSubResult = await cleanbnbSubScraper({
+            originalListingId: offer.property.originalListingId,
+            scrapeUrl: offer.scrapeUrl,
+            checkIn: offer.checkIn,
+            checkOut: offer.checkOut,
+          });
+          if (cleanbnbSubResult) {
+            const updateData: Partial<Offer> = {
+              isAvailableOnOriginalSite: cleanbnbSubResult.isAvailableOnOriginalSite,
+              availabilityCheckedAt: cleanbnbSubResult.availabilityCheckedAt,
+            };
+
+            if (cleanbnbSubResult.originalNightlyPrice) {
+              updateData.totalPrice = cleanbnbSubResult.originalNightlyPrice * getNumNights(offer.checkIn, offer.checkOut);
+            }
+
+            await trx.update(offers)
+              .set(updateData)
+              .where(eq(offers.id, offerId));
+            savedResult.push(cleanbnbSubResult);
+          }
+          break;
       }
     }
   });
