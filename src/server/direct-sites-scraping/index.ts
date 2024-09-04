@@ -17,6 +17,8 @@ import { getNumNights } from "@/utils/utils";
 import { check } from "drizzle-orm/mysql-core";
 
 export type DirectSiteScraper = (options: {
+  location: string;
+  numGuests: number;
   checkIn: Date;
   checkOut: Date;
   numOfOffersInEachScraper?: number;
@@ -59,6 +61,8 @@ const filterNewPropertyFields = (listing: ScrapedListing): NewProperty => {
 
 // handle the scraped properties and reviews
 export const scrapeDirectListings = async (options: {
+  location: string;
+  numGuests: number;
   checkIn: Date;
   checkOut: Date;
   numOfOffersInEachScraper?: number;
