@@ -31,18 +31,62 @@ const EvolvePropertySchema = z.object({
   description: z.string(),
 });
 
-const mapPropertyType = (scrapedType: string): PropertyType => {
-  const typeMap: Record<string, PropertyType> = {
-    House: "House",
-    Condo: "Condominium",
-    Cabin: "Cabin",
-    Townhome: "Townhouse",
-    Apartment: "Apartment" || "Studio",
-    Cottage: "Cottage",
-    Villa: "Villa",
-  };
-  return typeMap[scrapedType] || "Other";
+const evolvePropertyTypes: Record<string, PropertyType> = {
+  // mapping scraped property types to our property types
+  Condo: "Condominium",
+  Apartment: "Apartment",
+  House: "House",
+  Villa: "Villa",
+  Cottage: "Cottage",
+  Townhome: "Townhouse",
+  Studio: "Apartment",
+  Cabin: "Cabin",
+  Bungalow: "Bungalow",
+  Chalet: "Chalet",
+  Lodge: "Nature lodge",
+  Resort: "Hotel",
+  Hotel: "Hotel",
+  Boat: "Boat",
+  RV: "Camper/RV",
+  Tent: "Tent",
+  Camper: "Camper/RV",
+  Treehouse: "Treehouse",
+  "Tiny house": "Tiny House",
+  Guesthouse: "Guesthouse",
+  "Farm stay": "Farm Stay",
+  Barn: "Barn",
+  Castle: "Castle",
+  Dorm: "Dorm",
+  Hostel: "Hostel",
+  Loft: "Loft",
+  Yurt: "Yurt",
+  Tipi: "Tipi",
+  Cave: "Cave",
+  Island: "Island",
+  Houseboat: "Houseboat",
+  Train: "Train",
+  Plane: "Plane",
+  Igloo: "Igloo",
+  Lighthouse: "Lighthouse",
+  "Earth house": "Earth House",
+  "Dome house": "Dome House",
+  Windmill: "Windmill",
+  Container: "Shipping Container",
+  Riad: "Riad",
+  Trullo: "Trullo",
+  "Bed & breakfast": "Bed & Breakfast",
+  "Guest suite": "Guest Suite",
 };
+
+function mapPropertyType(scrapedType: string): PropertyType {
+  const normalizedType = scrapedType.trim().toLowerCase();
+  for (const [key, value] of Object.entries(evolvePropertyTypes)) {
+    if (normalizedType.includes(key.toLowerCase())) {
+      return value;
+    }
+  }
+  return "Other";
+}
 
 // Define the EvolveProperty interface
 interface EvolveProperty {
@@ -247,7 +291,7 @@ const fetchSearchResults = async (
     const properties = searchResponse.hits.map((hit) => ({
       id: hit.objectID,
       name: hit.Headline,
-      propertyType: hit["Property Type"],
+      propertyType: mapPropertyType(hit["Property Type"]),
       averagePerNight:
         hit[`LOS_PriceAverages.${startDate}.${numNights}`] / numNights,
       averageRating: hit["Average Rating"],
@@ -291,9 +335,11 @@ const fetchPropertyDetails = async (
     const detailInfo = $(".Detail-Overview_resultDetailInfo__5LqyW")
       .text()
       .trim();
-    const [maxNumGuests, numBedrooms, numBathrooms] = detailInfo
-      .match(/\d+/g)
-      ?.map(Number) ?? [10, 20, 30];
+
+    const detailMatch = detailInfo.match(/Sleeps (\d+).*?(\d+) BR.*?(\d+) BA/);
+    const [maxNumGuests, numBedrooms, numBathrooms] = detailMatch
+      ? detailMatch.slice(1).map(Number)
+      : [0, 0, 0]; // Default values if the pattern doesn't match
 
     const imageUrls = $(".Image-Gallery_clickablePhoto__SRbpl")
       .map((_, el) => $(el).attr("src"))
