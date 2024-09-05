@@ -392,12 +392,17 @@ const fetchPropertyDetails = async (
 };
 
 export const evolveVacationRentalScraper: DirectSiteScraper = async ({
-  location,
   numGuests,
   checkIn,
   checkOut,
   numOfOffersInEachScraper = 5,
+  location,
+
+
 }) => {
+  if (!location) {
+    throw new Error("Location must be provided for Evolve scraper");
+  }
   const searchResults = await fetchSearchResults(
     location,
     numGuests,

@@ -4,6 +4,7 @@ import { scrapeDirectListings } from '../../server/direct-sites-scraping';
 import { arizonaScraper } from "@/server/direct-sites-scraping/integrity-arizona";
 import axios from 'axios';
 import { proxyAgent } from "@/server/server-utils";
+import { evolveVacationRentalScraper } from '@/server/direct-sites-scraping/evolve-scraper';
 
 // This is a testing API route that scrapes listings from the Integrity Arizona website
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -25,8 +26,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         location: 'Berkeley, CA',
         numGuests: 2,
         checkIn: new Date("2024-09-05T19:56:53.132Z"),
-        checkOut: new Date("2024-09-14T19:56:53.132Z"
-        ),
+        checkOut: new Date("2024-09-14T19:56:53.132Z"),
+        numOfOffersInEachScraper: 5,
+        requestNightlyPrice: 100,
+        scrapersToExecute: ["evolveVacationRentalScraper"],
       });
       console.log('API route: Scraping process completed');
       res.status(200).json({ message: `Successfully scraped and inserted ${listings.length} listings.` });
