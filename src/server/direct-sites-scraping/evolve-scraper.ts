@@ -150,50 +150,39 @@ const propertySchema = z.object({
   }),
 });
 
+
 type EvolvePropertyInput = z.infer<typeof propertySchema>;
 
 const mapToScrapedListing = (
-  validatedData: EvolvePropertyInput,
-  checkIn: Date,
-  checkOut: Date,
-  scrapeUrl: string,
-): ScrapedListing[] => {
-  return validatedData.data.available_properties.property.map((prop) => ({
-    originalListingId: prop.id.toString(),
-    name: prop.name,
-    about: prop.short_description, // may contain html
-    propertyType: convertPropertyType(prop.lodging_type_id),
-    address:
-      prop.location_area_name + ", " + prop.city + ", " + prop.state_name,
-    city: prop.city,
-    latitude: prop.latitude,
-    longitude: prop.longitude,
-    maxNumGuests: prop.max_occupants,
-    numBeds: prop.bedrooms_number, // not provided, but required in NewProperty
-    numBedrooms: prop.bedrooms_number,
-    numBathrooms: prop.bathrooms_number,
-    amenities: prop.unit_amenities.amenity.map(
-      (am: { amenity_name: string }) => am.amenity_name,
-    ), // convert object to list
+    validatedData: EvolvePropertyInput,
+    checkIn: Date,
+    checkOut: Date,
+    scrapeUrl: string,
+  ): ScrapedListing[] => {
+  return {
+    originalListingId: prop.is_eid.toString(),
+    name: prop.ss_name,
+    about: description,
+    propertyType: mapPropertyType(prop.sm_nid$rc_core_term_type$name[0] ?? ""),
+    address: address,
+    city: prop.sm_nid$rc_core_term_city_type$name[0] ?? "",
+    latitude: prop.fs_nid$field_location$latitude,
+    longitude: prop.fs_nid$field_location$longitude,
+    maxNumGuests: prop.is_rc_core_lodging_product$occ_total,
+    numBeds: prop.fs_rc_core_lodging_product$beds,
+    numBedrooms: prop.fs_rc_core_lodging_product$beds,
+    numBathrooms: prop.fs_rc_core_lodging_product$baths,
+    amenities: cleanAmenities(prop.sm_nid$rc_core_term_general_amenities$name),
     otherAmenities: [],
-    imageUrls: prop.gallery.image
-      .map((img: { image_path: string }) => img.image_path)
-      .slice(1), // remove first image with watermark
-    originalListingUrl: `https://integrityarizonavacationrentals.com/${prop.id}`,
-    avgRating: prop.rating_average ?? 0,
-    numRatings: prop.rating_count ?? 0,
+    imageUrls: images,
+    originalListingUrl: prop.ss_nid$url,
+    avgRating: prop.fs_rc_core_item_reviews_rating ?? 0,
+    numRatings: prop.is_rc_core_item_reviews_count ?? 0,
     originalListingPlatform: "Evolve" as ListingSiteName,
-    reservedDateRanges: [
-      {
-        start: checkIn,
-        end: checkOut,
-      },
-    ],
-    originalNightlyPrice:
-      Math.round(prop.total / getNumNights(checkIn, checkOut)) * 100, // convert to cents
-    reviews: [],
+    originalNightlyPrice: originalNightlyPrice,
+    reviews: reviews,
     scrapeUrl: scrapeUrl,
-  }));
+  };
 };
 
 const fetchSearchResults = async (
