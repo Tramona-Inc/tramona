@@ -1,3 +1,7 @@
+import { db } from "../db";
+import { exampleScraper } from "./example";
+import { cbIslandVacationsScraper, cbIslandVacationsSubScraper } from "./hawaii-scraper";
+import { properties } from "../db/schema";
 import {
   NewOffer,
   NewProperty,
@@ -7,8 +11,6 @@ import {
   reviews,
 } from "../db/schema";
 import { arizonaScraper, arizonaSubScraper } from "./integrity-arizona";
-import { db } from "../db";
-import { properties } from "../db/schema";
 import { eq, and } from "drizzle-orm";
 import { getNumNights } from "@/utils/utils";
 
@@ -40,7 +42,8 @@ export type SubScrapedResult = {
 export const directSiteScrapers: DirectSiteScraper[] = [
   // add more scrapers here
   // cleanbnbScraper,
-  arizonaScraper,
+  // arizonaScraper,
+  cbIslandVacationsScraper,
 ];
 
 // Helper function to filter out fields not in NewProperty
@@ -60,7 +63,9 @@ export const scrapeDirectListings = async (options: {
   const allListings = await Promise.all(
     directSiteScrapers.map((scraper) => scraper(options)),
   );
+
   const listings = allListings.flat();
+
   if (listings.length > 0) {
     await db.transaction(async (trx) => {
       // for each listing, insert the property and reviews OR update them if they already exist
@@ -108,9 +113,6 @@ export const scrapeDirectListings = async (options: {
                 eq(offers.checkOut, options.checkOut),
               ),
             );
-          if (existingOffers[0]) {
-            console.log("existingOffer, offerId: ", existingOffers[0]?.id);
-          }
 
           if (!existingOffers[0]?.id) {
             const originalTotalPrice =
@@ -131,7 +133,6 @@ export const scrapeDirectListings = async (options: {
               .insert(offers)
               .values(newOffer)
               .returning({ id: offers.id });
-            console.log("newOfferIdReturned: ", newOfferId);
           }
         } else {
           const tramonaProperty = await trx
@@ -160,9 +161,7 @@ export const scrapeDirectListings = async (options: {
                 eq(offers.checkOut, options.checkOut),
               ),
             );
-          if (existingOffers[0]) {
-            console.log("existingOffer, offerId: ", existingOffers[0]?.id);
-          }
+
           if (!existingOffers[0]?.id) {
             const originalTotalPrice =
               listing.originalNightlyPrice ??
@@ -182,13 +181,11 @@ export const scrapeDirectListings = async (options: {
               .insert(offers)
               .values(newOffer)
               .returning({ id: offers.id });
-            console.log("newOfferIdReturned: ", newOfferId);
           }
         }
       }
     });
   }
-
   return listings;
 };
 
@@ -237,6 +234,33 @@ export const subsequentScrape = async (options: { offerIds: number[] }) => {
           }
           break;
         // TODO add other scraping sites here
+        case "CB Island Vacations":
+          const subScrapedResultCBIsland = await cbIslandVacationsSubScraper({
+            originalListingId: offer.property.originalListingId,
+            scrapeUrl: offer.scrapeUrl,
+            checkIn: offer.checkIn,
+            checkOut: offer.checkOut,
+          });
+          if (subScrapedResultCBIsland) {
+            const updateData: Partial<Offer> = {
+              isAvailableOnOriginalSite:
+                subScrapedResultCBIsland.isAvailableOnOriginalSite,
+              availabilityCheckedAt: subScrapedResultCBIsland.availabilityCheckedAt,
+            };
+
+            if (subScrapedResultCBIsland.originalNightlyPrice) {
+              updateData.totalPrice =
+                subScrapedResultCBIsland.originalNightlyPrice *
+                getNumNights(offer.checkIn, offer.checkOut);
+            }
+
+            await trx
+              .update(offers)
+              .set(updateData)
+              .where(eq(offers.id, offerId));
+            savedResult.push(subScrapedResultCBIsland);
+          }
+          break;
       }
     }
   });
