@@ -13,7 +13,6 @@ import {
 import { arizonaScraper, arizonaSubScraper } from "./integrity-arizona";
 import { eq, and } from "drizzle-orm";
 import { getNumNights } from "@/utils/utils";
-import { check } from "drizzle-orm/mysql-core";
 
 export type DirectSiteScraper = (options: {
   checkIn: Date;
@@ -61,7 +60,6 @@ export const scrapeDirectListings = async (options: {
   checkOut: Date;
   numOfOffersInEachScraper?: number;
 }) => {
-  console.log("Scraping direct listings", options);
   const allListings = await Promise.all(
     directSiteScrapers.map((scraper) => scraper(options)),
   );
@@ -115,9 +113,6 @@ export const scrapeDirectListings = async (options: {
                 eq(offers.checkOut, options.checkOut),
               ),
             );
-          if (existingOffers[0]) {
-            console.log("existingOffer, offerId: ", existingOffers[0]?.id);
-          }
 
           if (!existingOffers[0]?.id) {
             const originalTotalPrice =
@@ -138,7 +133,6 @@ export const scrapeDirectListings = async (options: {
               .insert(offers)
               .values(newOffer)
               .returning({ id: offers.id });
-            console.log("newOfferIdReturned: ", newOfferId);
           }
         } else {
           const tramonaProperty = await trx
@@ -167,9 +161,7 @@ export const scrapeDirectListings = async (options: {
                 eq(offers.checkOut, options.checkOut),
               ),
             );
-          if (existingOffers[0]) {
-            console.log("existingOffer, offerId: ", existingOffers[0]?.id);
-          }
+
           if (!existingOffers[0]?.id) {
             const originalTotalPrice =
               listing.originalNightlyPrice ??
@@ -189,7 +181,6 @@ export const scrapeDirectListings = async (options: {
               .insert(offers)
               .values(newOffer)
               .returning({ id: offers.id });
-            console.log("newOfferIdReturned: ", newOfferId);
           }
         }
       }
