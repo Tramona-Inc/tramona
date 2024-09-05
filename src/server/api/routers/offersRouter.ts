@@ -728,7 +728,6 @@ export const offersRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const numOfScrapers = directSiteScrapers.length;
       const request = await ctx.db.query.requests.findFirst({
         where: eq(requests.id, input.requestId),
         columns: { checkIn: true, checkOut: true, maxTotalPrice: true },
