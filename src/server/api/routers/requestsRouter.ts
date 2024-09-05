@@ -25,10 +25,7 @@ import { TRPCError } from "@trpc/server";
 import { and, eq, exists } from "drizzle-orm";
 import { z } from "zod";
 import type { Session } from "next-auth";
-import {
-  linkInputProperties,
-  linkInputPropertyInsertSchema,
-} from "@/server/db/schema/tables/linkInputProperties";
+import { linkInputProperties } from "@/server/db/schema/tables/linkInputProperties";
 import {
   formatCurrency,
   getNumNights,
@@ -36,6 +33,7 @@ import {
   plural,
 } from "@/utils/utils";
 import { sendTextToHost } from "@/server/server-utils";
+import { newLinkRequestSchema } from "@/utils/useSendUnsentRequests";
 
 const updateRequestInputSchema = z.object({
   requestId: z.number(),
@@ -171,15 +169,7 @@ export const requestsRouter = createTRPCRouter({
     }),
 
   createRequestWithLink: protectedProcedure
-    .input(
-      z.object({
-        request: requestInsertSchema.omit({
-          madeByGroupId: true,
-          latLngPoint: true,
-        }),
-        property: linkInputPropertyInsertSchema,
-      }),
-    )
+    .input(newLinkRequestSchema)
     .mutation(async ({ ctx, input: { property, request } }) => {
       const { requestId, madeByGroupId } = await handleRequestSubmission(
         request,

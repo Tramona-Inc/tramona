@@ -6,6 +6,7 @@ import { getNumNights } from "@/utils/utils";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { cityRequestSchema } from "./schemas";
+import SuperJSON from "superjson";
 
 const haversineDistance = (
   lat1: number,
@@ -66,6 +67,7 @@ export function useCityRequestForm({
   const { mutateAsync: scrapeOffers } =
     api.offers.scrapeOfferForRequest.useMutation();
 
+
   const onSubmit = form.handleSubmit(async (data) => {
     const { date: _date, maxNightlyPriceUSD, ...restData } = data;
     const checkIn = data.date.from;
@@ -80,7 +82,7 @@ export function useCityRequestForm({
     };
 
     if (status === "unauthenticated") {
-      localStorage.setItem("unsentRequests", JSON.stringify(newRequest));
+      localStorage.setItem("unsentRequest", SuperJSON.stringify(newRequest));
       void router.push("/auth/signin").then(() => {
         toast({
           title: `Request saved: ${newRequest.location}`,
@@ -110,6 +112,7 @@ export function useCityRequestForm({
       } catch (error) {
         errorToast();
       }
+
     }
   });
 

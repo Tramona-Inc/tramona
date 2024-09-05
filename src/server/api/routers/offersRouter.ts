@@ -444,6 +444,31 @@ export const offersRouter = createTRPCRouter({
           where: eq(properties.id, input.propertyId),
         });
 
+        const request = await db.query.requests.findFirst({
+          where: eq(requests.id, input.requestId),
+          columns: { id: true, location: true, checkIn: true, checkOut: true, maxTotalPrice: true },
+        });
+
+        const traveler =  await db.query.requests
+        .findFirst({
+          where: eq(requests.id, input.requestId),
+          with: {
+            madeByGroup: {
+              with: {
+                owner: {
+                  columns: { id: true, phoneNumber: true, isWhatsApp: true},
+                }
+              }
+            },
+          },
+        })
+        .then((res) => res?.madeByGroup.owner);
+
+
+        traveler && request && await sendText({
+          to: traveler.phoneNumber!,
+          content: `Tramona: You have 1 match for your request for ${request.location} from ${formatDateRange(request.checkIn, request.checkOut)} for ${request.maxTotalPrice/getNumNights(request.checkIn, request.checkOut)}. Please tap below to view your offer: ${env.NEXTAUTH_URL}/requests/${request.id}`,
+        });
         //sending emails to everyone in the groug
         //get everymember in the group
         console.log("GETTING FOR GROUP", requestDetails.madeByGroupId);
@@ -459,27 +484,29 @@ export const offersRouter = createTRPCRouter({
         console.log("ALL GROUP MEMBERS", allGroupMembers);
         for (const member of allGroupMembers) {
           console.log("MEMBER", member);
-          await sendEmail({
-            to: member.user.email,
-            subject: "New offer received",
-            content: NewOfferReceivedEmail({
-              userName:
-                member.user.firstName ?? member.user.name ?? "Tramona Traveler",
-              airbnbPrice: input.totalPrice * 1.25,
-              ourPrice: input.totalPrice,
-              property: curProperty!.name,
-              discountPercentage: 25,
-              nights: getNumNights(
-                requestDetails.checkIn,
-                requestDetails.checkOut,
-              ),
-              adults: curProperty!.maxNumGuests,
-              checkInDateTime: requestDetails.checkIn,
-              checkOutDateTime: requestDetails.checkOut,
-              imgUrl: curProperty!.imageUrls[0]!,
-              offerLink: `${env.NEXTAUTH_URL}/requests/${input.requestId}`,
-            }),
-          });
+
+
+          // await sendEmail({
+          //   to: member.user.email,
+          //   subject: "New offer received",
+          //   content: NewOfferReceivedEmail({
+          //     userName:
+          //       member.user.firstName ?? member.user.name ?? "Tramona Traveler",
+          //     airbnbPrice: input.totalPrice * 1.25,
+          //     ourPrice: input.totalPrice,
+          //     property: curProperty!.name,
+          //     discountPercentage: 25,
+          //     nights: getNumNights(
+          //       requestDetails.checkIn,
+          //       requestDetails.checkOut,
+          //     ),
+          //     adults: curProperty!.maxNumGuests,
+          //     checkInDateTime: requestDetails.checkIn,
+          //     checkOutDateTime: requestDetails.checkOut,
+          //     imgUrl: curProperty!.imageUrls[0]!,
+          //     offerLink: `${env.NEXTAUTH_URL}/requests/${input.requestId}`,
+          //   }),
+          // });
         }
       } else {
         await ctx.db.insert(offers).values({

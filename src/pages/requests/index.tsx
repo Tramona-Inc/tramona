@@ -1,6 +1,6 @@
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useMaybeSendUnsentRequests } from "@/utils/useMaybeSendUnsentRequests";
+import { useSendUnsentRequest } from "@/utils/useSendUnsentRequests";
 import { HistoryIcon, MapPinIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import ActiveRequestsTab from "../../components/requests/CityRequestsTab";
@@ -32,7 +32,7 @@ function RequestsTabs() {
 
 export default function Page() {
   useSession({ required: true });
-  useMaybeSendUnsentRequests();
+  useSendUnsentRequest();
   const isProduction = process.env.NODE_ENV === "production";
   const baseUrl = isProduction
     ? "https://www.tramona.com"
