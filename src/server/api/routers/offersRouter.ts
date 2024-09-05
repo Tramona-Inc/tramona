@@ -737,9 +737,50 @@ export const offersRouter = createTRPCRouter({
             checkIn: dateRange.checkIn,
             checkOut: dateRange.checkOut,
             numOfOffersInEachScraper: numOfOffersPerDateRange / numOfScrapers,
+            scrapersToExecute: directSiteScrapers.map((s) => s.name), // execute all scrapers
           }),
         ),
       ).then((res) => res.flat());
+    }),
+
+  scrapeOfferForRequest: protectedProcedure
+    .input(
+      z.object({
+        requestId: z.number(),
+        numOfOffers: z.number().min(1).max(50),
+        scrapersToExecute: z
+          .array(z.string())
+          .default(directSiteScrapers.map((s) => s.name)), // execute all scrapers by default
+        location: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const request = await ctx.db.query.requests.findFirst({
+        where: eq(requests.id, input.requestId),
+        columns: { checkIn: true, checkOut: true, maxTotalPrice: true },
+      });
+      if (!request) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Request not found",
+        });
+      }
+      return await scrapeDirectListings({
+        checkIn: request.checkIn,
+        checkOut: request.checkOut,
+        numOfOffersInEachScraper: input.numOfOffers,
+        requestNightlyPrice:
+          request.maxTotalPrice /
+          getNumNights(request.checkIn, request.checkOut),
+        requestId: input.requestId,
+        scrapersToExecute: input.scrapersToExecute,
+        location: input.location,
+      }).catch((error) => {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Error scraping listings. " + error,
+        });
+      });
     }),
 });
 
