@@ -2,6 +2,7 @@ import { db } from "../db";
 import { exampleScraper } from "./example";
 // import { cbIslandVacationsScraper, cbIslandVacationsSubScraper } from "./hawaii-scraper";
 import { evolveVacationRentalScraper, evolveVacationRentalSubScraper } from "./evolve-scraper";
+import { cbIslandVacationsScraper, cbIslandVacationsSubScraper } from "./hawaii-scraper";
 import { properties } from "../db/schema";
 import {
   NewOffer,
@@ -12,16 +13,20 @@ import {
   reviews,
 } from "../db/schema";
 import { arizonaScraper, arizonaSubScraper } from "./integrity-arizona";
-import { eq, and } from "drizzle-orm";
+import { eq, and, ne, or, isNotNull } from "drizzle-orm";
+
 import { getNumNights } from "@/utils/utils";
-import { check } from "drizzle-orm/mysql-core";
+import { isNull } from "lodash";
 
 export type DirectSiteScraper = (options: {
-  location: string;
   numGuests: number;
   checkIn: Date;
   checkOut: Date;
   numOfOffersInEachScraper?: number;
+  requestNightlyPrice?: number; // when the scraper is used by traveler request page
+  requestId?: number; // when the scraper is used by traveler request page
+  scrapersToExecute: string[];
+  location?: string;
 }) => Promise<ScrapedListing[]>;
 
 export type ScrapedListing = NewProperty & {
@@ -43,12 +48,21 @@ export type SubScrapedResult = {
   availabilityCheckedAt: Date;
 };
 
-export const directSiteScrapers: DirectSiteScraper[] = [
+export type NamedDirectSiteScraper = {
+  name: string;
+  scraper: DirectSiteScraper;
+};
+
+export const directSiteScrapers: NamedDirectSiteScraper[] = [
   // add more scrapers here
   // cleanbnbScraper,
   // arizonaScraper,
   // cbIslandVacationsScraper,
-  evolveVacationRentalScraper
+  { name: 'evolveVacationRentalScraper', scraper: evolveVacationRentalScraper },
+  // { name: 'cleanbnbScraper', scraper: cleanbnbScraper },
+  // { name: "arizonaScraper", scraper: arizonaScraper },
+    // {name: "cbIslandVacationsScraper", scraper: cbIslandVacationsScraper },
+
 ];
 
 // Helper function to filter out fields not in NewProperty
@@ -61,15 +75,20 @@ const filterNewPropertyFields = (listing: ScrapedListing): NewProperty => {
 
 // handle the scraped properties and reviews
 export const scrapeDirectListings = async (options: {
-  location: string;
   numGuests: number;
   checkIn: Date;
   checkOut: Date;
   numOfOffersInEachScraper?: number;
+  requestNightlyPrice?: number;
+  requestId?: number;
+  scrapersToExecute: string[];
+  location?: string;
 }) => {
-  console.log("Scraping direct listings", options);
+  const selectedScrapers = directSiteScrapers.filter((s) =>
+    options.scrapersToExecute.includes(s.name),
+  );
   const allListings = await Promise.all(
-    directSiteScrapers.map((scraper) => scraper(options)),
+    selectedScrapers.map((s) => s.scraper(options)),
   );
 
   const listings = allListings.flat();
@@ -119,6 +138,9 @@ export const scrapeDirectListings = async (options: {
                 eq(offers.propertyId, tramonaPropertyId),
                 eq(offers.checkIn, options.checkIn),
                 eq(offers.checkOut, options.checkOut),
+                options.requestId
+                  ? eq(offers.requestId, options.requestId)
+                  : undefined,
               ),
             );
           if (existingOffers[0]) {
@@ -126,9 +148,16 @@ export const scrapeDirectListings = async (options: {
           }
 
           if (!existingOffers[0]?.id) {
+            if (!listing.originalNightlyPrice) {
+              console.log(
+                "originalNightlyPrice is not available for this listing: ",
+                listing.originalListingUrl,
+              );
+              continue;
+            }
             const originalTotalPrice =
-              listing.originalNightlyPrice ??
-              0 * getNumNights(options.checkIn, options.checkOut);
+              listing.originalNightlyPrice *
+              getNumNights(options.checkIn, options.checkOut);
             const newOffer: NewOffer = {
               propertyId: tramonaPropertyId,
               checkIn: options.checkIn,
@@ -139,12 +168,12 @@ export const scrapeDirectListings = async (options: {
               scrapeUrl: listing.scrapeUrl,
               isAvailableOnOriginalSite: true,
               availabilityCheckedAt: new Date(),
+              ...(options.requestId && { requestId: options.requestId }),
             };
             const newOfferId = await trx
               .insert(offers)
               .values(newOffer)
               .returning({ id: offers.id });
-            console.log("newOfferIdReturned: ", newOfferId);
           }
         } else {
           const tramonaProperty = await trx
@@ -171,15 +200,23 @@ export const scrapeDirectListings = async (options: {
                 eq(offers.propertyId, newPropertyId),
                 eq(offers.checkIn, options.checkIn),
                 eq(offers.checkOut, options.checkOut),
+                options.requestId
+                  ? eq(offers.requestId, options.requestId)
+                  : undefined,
               ),
             );
-          if (existingOffers[0]) {
-            console.log("existingOffer, offerId: ", existingOffers[0]?.id);
-          }
+
           if (!existingOffers[0]?.id) {
+            if (!listing.originalNightlyPrice) {
+              console.log(
+                "originalNightlyPrice is not available for this listing: ",
+                listing.originalListingUrl,
+              );
+              continue;
+            }
             const originalTotalPrice =
-              listing.originalNightlyPrice ??
-              0 * getNumNights(options.checkIn, options.checkOut);
+              listing.originalNightlyPrice *
+              getNumNights(options.checkIn, options.checkOut);
             const newOffer: NewOffer = {
               propertyId: newPropertyId,
               checkIn: options.checkIn,
@@ -190,12 +227,12 @@ export const scrapeDirectListings = async (options: {
               scrapeUrl: listing.scrapeUrl,
               isAvailableOnOriginalSite: true,
               availabilityCheckedAt: new Date(),
+              ...(options.requestId && { requestId: options.requestId }),
             };
             const newOfferId = await trx
               .insert(offers)
               .values(newOffer)
               .returning({ id: offers.id });
-            console.log("newOfferIdReturned: ", newOfferId);
           }
         }
       }

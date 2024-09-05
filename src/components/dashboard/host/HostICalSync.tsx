@@ -40,11 +40,9 @@ export default function HostICalSync({ property }: { property: Property }) {
     } catch (error) {
       console.error("Error syncing calendar:", error);
       toast({
-        title: "Sync Failed",
+        title: "No calendar data found",
         description:
-          error instanceof Error
-            ? error.message
-            : "An error occurred while syncing the calendar.",
+          "Please make sure the iCal URL is correct and try again.",
         variant: "destructive",
       });
     }
