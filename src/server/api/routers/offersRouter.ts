@@ -710,6 +710,7 @@ export const offersRouter = createTRPCRouter({
             checkIn: dateRange.checkIn,
             checkOut: dateRange.checkOut,
             numOfOffersInEachScraper: numOfOffersPerDateRange / numOfScrapers,
+            scrapersToExecute: directSiteScrapers.map((s) => s.name), // execute all scrapers
           }),
         ),
       ).then((res) => res.flat());
@@ -720,6 +721,10 @@ export const offersRouter = createTRPCRouter({
       z.object({
         requestId: z.number(),
         numOfOffers: z.number().min(1).max(50),
+        scrapersToExecute: z
+          .array(z.string())
+          .default(directSiteScrapers.map((s) => s.name)), // execute all scrapers by default
+        location: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -737,11 +742,13 @@ export const offersRouter = createTRPCRouter({
       return await scrapeDirectListings({
         checkIn: request.checkIn,
         checkOut: request.checkOut,
-        numOfOffersInEachScraper: input.numOfOffers / numOfScrapers,
+        numOfOffersInEachScraper: input.numOfOffers,
         requestNightlyPrice:
           request.maxTotalPrice /
           getNumNights(request.checkIn, request.checkOut),
         requestId: input.requestId,
+        scrapersToExecute: input.scrapersToExecute,
+        location: input.location,
       }).catch((error) => {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",

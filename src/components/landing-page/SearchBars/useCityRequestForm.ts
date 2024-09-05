@@ -34,19 +34,18 @@ const isInIntegrityArizonaOperatingArea = (
   radius: number,
 ) => {
   const locations = [
-    { name: "Flagstaff, AZ", lat: 35.1983, lng: -111.6513 },
-    { name: "Lake Havasu, AZ", lat: 34.4839, lng: -114.3225 },
-    { name: "Parker Strip, AZ", lat: 34.2983, lng: -114.1439 },
+    { name: "Lake Havasu", lat: 34.4839, lng: -114.3225 },
+    { name: "Parker Strip", lat: 34.2983, lng: -114.1439 },
   ];
 
   for (const location of locations) {
     const distance = haversineDistance(lat, lng, location.lat, location.lng);
     if (distance <= radius) {
-      return true;
+      return { isInArea: true, location: location.name };
     }
   }
 
-  return false;
+  return { isInArea: false, location: "dummy" };
 };
 
 export function useCityRequestForm({
@@ -95,14 +94,18 @@ export function useCityRequestForm({
         afterSubmit?.();
         setMadeByGroupId?.(madeByGroupId);
         // scrape offers only for request in the area where IntegrityArizona has properties
-        if (
-          isInIntegrityArizonaOperatingArea(
-            newRequest.latLng.lat,
-            newRequest.latLng.lng,
-            100, // search radius: 100 km
-          )
-        ) {
-          await scrapeOffers({ requestId: requestId, numOfOffers: 10 });
+        const { isInArea, location } = isInIntegrityArizonaOperatingArea(
+          newRequest.latLng.lat,
+          newRequest.latLng.lng,
+          25, // search radius: 25 km
+        );
+        if (isInArea) {
+          await scrapeOffers({
+            requestId: requestId,
+            numOfOffers: 10,
+            scrapersToExecute: ["arizonaScraper"],
+            location: location,
+          });
         }
       } catch (error) {
         errorToast();

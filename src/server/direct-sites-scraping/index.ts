@@ -19,6 +19,8 @@ export type DirectSiteScraper = (options: {
   numOfOffersInEachScraper?: number;
   requestNightlyPrice?: number; // when the scraper is used by traveler request page
   requestId?: number; // when the scraper is used by traveler request page
+  scrapersToExecute: string[];
+  location?: string;
 }) => Promise<ScrapedListing[]>;
 
 export type ScrapedListing = NewProperty & {
@@ -40,10 +42,15 @@ export type SubScrapedResult = {
   availabilityCheckedAt: Date;
 };
 
-export const directSiteScrapers: DirectSiteScraper[] = [
+export type NamedDirectSiteScraper = {
+  name: string;
+  scraper: DirectSiteScraper;
+};
+
+export const directSiteScrapers: NamedDirectSiteScraper[] = [
   // add more scrapers here
-  // cleanbnbScraper,
-  arizonaScraper,
+  // { name: 'cleanbnbScraper', scraper: cleanbnbScraper },
+  { name: "arizonaScraper", scraper: arizonaScraper },
 ];
 
 // Helper function to filter out fields not in NewProperty
@@ -61,9 +68,14 @@ export const scrapeDirectListings = async (options: {
   numOfOffersInEachScraper?: number;
   requestNightlyPrice?: number;
   requestId?: number;
+  scrapersToExecute: string[];
+  location?: string;
 }) => {
+  const selectedScrapers = directSiteScrapers.filter((s) =>
+    options.scrapersToExecute.includes(s.name),
+  );
   const allListings = await Promise.all(
-    directSiteScrapers.map((scraper) => scraper(options)),
+    selectedScrapers.map((s) => s.scraper(options)),
   );
   const listings = allListings.flat();
   if (listings.length > 0) {
