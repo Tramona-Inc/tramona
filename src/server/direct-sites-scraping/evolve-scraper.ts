@@ -150,15 +150,14 @@ const propertySchema = z.object({
   }),
 });
 
-
 type EvolvePropertyInput = z.infer<typeof propertySchema>;
 
 const mapToScrapedListing = (
-    validatedData: EvolvePropertyInput,
-    checkIn: Date,
-    checkOut: Date,
-    scrapeUrl: string,
-  ): ScrapedListing[] => {
+  validatedData: EvolvePropertyInput,
+  checkIn: Date,
+  checkOut: Date,
+  scrapeUrl: string,
+): ScrapedListing[] => {
   return {
     originalListingId: prop.is_eid.toString(),
     name: prop.ss_name,
@@ -325,10 +324,10 @@ const fetchPropertyDetails = async (
       .text()
       .trim();
 
-    const detailMatch = detailInfo.match(/Sleeps (\d+).*?(\d+) BR.*?(\d+) BA/);
-    const [maxNumGuests, numBedrooms, numBathrooms] = detailMatch
-      ? detailMatch.slice(1).map(Number)
-      : [0, 0, 0]; // Default values if the pattern doesn't match
+    const detailMatch = detailInfo.match(/Sleeps (\d+).*?(\d+) BR.*?(\d+) BA/) ?? [0, 0, 0];
+    const [maxNumGuests, numBedrooms, numBathrooms] = detailMatch.slice(1).map(Number);
+
+    const numBeds = $(".Sleeping-Arrangements_bedroom___Bj1r").length;
 
     const imageUrls = $(".Image-Gallery_clickablePhoto__SRbpl")
       .map((_, el) => $(el).attr("src"))
@@ -355,22 +354,22 @@ const fetchPropertyDetails = async (
     const latitude = parseFloat($("#detailMap").attr("data-lat") || "0");
     const longitude = parseFloat($("#detailMap").attr("data-lng") || "0");
 
-    const checkInTime = $(".Detail-Overview_checkInTime__Y5Lp3").text().trim();
-    const checkOutTime = $(".Detail-Overview_checkOutTime__3XqMR")
-      .text()
-      .trim();
+    // const checkInTime = $(".Detail-Overview_checkInTime__Y5Lp3").text().trim();
+    // const checkOutTime = $(".Detail-Overview_checkOutTime__3XqMR")
+    //   .text()
+    //   .trim();
 
     const scrapedListing: ScrapedListing = {
       originalListingId: propertyId,
       name,
       about,
-      propertyType,
+      propertyType: mapPropertyType(propertyType),
       address,
       city,
       latitude,
       longitude,
       maxNumGuests,
-      numBeds: numBedrooms, // Assuming one bed per bedroom
+      numBeds,
       numBedrooms,
       numBathrooms,
       amenities,
@@ -380,35 +379,9 @@ const fetchPropertyDetails = async (
       avgRating,
       numRatings,
       originalListingPlatform: "Evolve" as ListingSiteName,
-      reservedDateRanges: [{ start: checkIn, end: checkOut }],
       originalNightlyPrice: originalNightlyPrice * 100, // Convert back to cents
       reviews: [], // You may want to implement a separate function to fetch reviews
       scrapeUrl: url,
-      checkInTime,
-      checkOutTime,
-      hostId: "", // Not available in the provided HTML
-      hostTeamId: 0, // Not available in the provided HTML
-      roomsWithBeds: [], // Not available in the provided HTML
-      roomType: "Entire place", // Assuming Evolve only lists entire places
-      hostName: "", // Not available in the provided HTML
-      hostProfilePic: "", // Not available in the provided HTML
-      hostNumReviews: 0, // Not available in the provided HTML
-      hostRating: 0, // Not available in the provided HTML
-      checkInInfo: "", // Not available in the provided HTML
-      areaDescription: $(".Location-Details_content__ZOCD0").text().trim(),
-      mapScreenshot: "", // Not available in the provided HTML
-      // cancellationPolicy: $('.CancellationPolicy_description__63gc5').text().trim(),
-      createdAt: new Date(),
-      isPrivate: false,
-      ageRestriction: 0, // Not available in the provided HTML
-      priceRestriction: 0, // Not available in the provided HTML
-      stripeVerRequired: false,
-      propertyStatus: "Listed",
-      airbnbBookUrl: "", // Not available in the provided HTML
-      hostImageUrl: "", // Not available in the provided HTML
-      pricingScreenUrl: "", // Not available in the provided HTML
-      currency: "USD",
-      iCalLink: "", // Not available in the provided HTML
     };
     console.log(`FETCHED details for property ${propertyId}:`, scrapedListing);
     return scrapedListing;
@@ -425,16 +398,6 @@ export const evolveVacationRentalScraper: DirectSiteScraper = async ({
   checkOut,
   numOfOffersInEachScraper = 5,
 }) => {
-  // const searchUrl = `https://evolve.com/vacation-rentals/search?query=Manhattan-Beach--CA--USA&adults=2&children=1&startDate=${checkIn.toISOString().split('T')[0]}&endDate=${checkOut.toISOString().split('T')[0]}`;
-  const searchUrl =
-    "https://evolve.com/vacation-rentals/search?query=Manhattan-Beach--CA--USA&adults=2&startDate=20240905&endDate=20240914";
-
-  // const propertyIds = await fetchSearchResults(searchUrl);
-
-  // fetchSearchResults(location, numGuests, checkIn, checkOut)
-  //   .then(properties => console.log('Final result:', properties))
-  //   .catch(error => console.error('Error:', error));
-
   const searchResults = await fetchSearchResults(
     location,
     numGuests,
@@ -450,19 +413,6 @@ export const evolveVacationRentalScraper: DirectSiteScraper = async ({
   );
   console.log("YOOO scrapedListings:", scrapedListings);
 
-  // if (propertyIds.length === 0) {
-  //   console.warn('No property IDs found in search results');
-  //   return [];
-  // }
-
-  // const properties = await Promise.all(
-  //   propertyIds.slice(0, numOfOffersInEachScraper).map(id => fetchPropertyDetails(id, checkIn, checkOut))
-  // );
-
-  // const validProperties = properties.filter((prop): prop is EvolveProperty => prop !== null);
-  // console.log(`Successfully fetched details for ${validProperties.length} properties`);
-
-  // return validProperties.map(prop => mapToScrapedListing(prop, searchUrl));
   return [];
 };
 
