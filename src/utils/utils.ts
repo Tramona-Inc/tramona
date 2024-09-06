@@ -15,7 +15,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import duration from "dayjs/plugin/duration";
 import { HostRequestsPageData } from "@/server/api/routers/propertiesRouter";
-import { DirectListingMarkup } from "@/utils/constants";
+import { DIRECTLISTINGMARKUP } from "@/utils/constants";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -292,10 +292,10 @@ export function getDirectListingPriceBreakdown({
 }: {
   bookingCost: number;
 }) {
-  console.log("this is the booking cost", bookingCost);
-  const stripeFee = 0.029 * bookingCost + 30; // Stripe fee calculation
-  const serviceFee = stripeFee * DirectListingMarkup; // Add 1.5% extra fee
-  const finalTotal = bookingCost + serviceFee;
+  const justMarkupCost = bookingCost * DIRECTLISTINGMARKUP - bookingCost; // first get markup cost excluding booking 12.94
+  const stripeFee = 0.029 * (bookingCost + justMarkupCost) + 30; // Stripe fee calculation after markup
+  const serviceFee = stripeFee + justMarkupCost;
+  const finalTotal = Math.floor(bookingCost + serviceFee);
   return {
     bookingCost,
     finalTotal,

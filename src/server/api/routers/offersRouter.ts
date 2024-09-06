@@ -181,7 +181,7 @@ export const offersRouter = createTRPCRouter({
         })
         .then((res) =>
           res.map((offer) => {
-            if (offer.acceptedAt !== null) return offer;
+            if (offer.acceptedAt !== null || offer.scrapeUrl) return offer;
             void updateTravelerandHostMarkup({
               offerTotalPrice: offer.totalPrice,
               offerId: offer.id,
