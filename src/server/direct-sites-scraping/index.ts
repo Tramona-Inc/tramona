@@ -15,9 +15,7 @@ import {
 } from "../db/schema";
 import { arizonaScraper, arizonaSubScraper } from "./integrity-arizona";
 import { eq, and, ne, or, isNotNull } from "drizzle-orm";
-
 import { getNumNights } from "@/utils/utils";
-import { isNull } from "lodash";
 
 export type DirectSiteScraper = (options: {
   checkIn: Date;

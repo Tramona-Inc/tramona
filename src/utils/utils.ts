@@ -15,6 +15,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import duration from "dayjs/plugin/duration";
 import { HostRequestsPageData } from "@/server/api/routers/propertiesRouter";
+import { DIRECTLISTINGMARKUP } from "@/utils/constants";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -286,7 +287,24 @@ export function getNumNights(from: Date | string, to: Date | string) {
   );
 }
 
-export function getPriceBreakdown({
+export function getDirectListingPriceBreakdown({
+  bookingCost,
+}: {
+  bookingCost: number;
+}) {
+  const justMarkupCost = bookingCost * DIRECTLISTINGMARKUP - bookingCost; // first get markup cost excluding booking 12.94
+  const stripeFee = 0.029 * (bookingCost + justMarkupCost) + 30; // Stripe fee calculation after markup
+  const serviceFee = stripeFee + justMarkupCost;
+  const finalTotal = Math.floor(bookingCost + serviceFee);
+  return {
+    bookingCost,
+    finalTotal,
+    taxPaid: 0,
+    serviceFee,
+  };
+}
+
+export function getTramonaPriceBreakdown({
   bookingCost,
   numNights,
   superhogFee,
