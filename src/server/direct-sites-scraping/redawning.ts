@@ -1,12 +1,18 @@
 // curl 'https://api.redawning.com/v1/propertycollections/1503/listings' \
 //   -H 'x-api-key: ehMtnGSw4i7dFqngWo8M15cWaqzKPM4V2jeU3zty'
-import { scrapeUrl } from "@/server/server-utils";
-import { DirectSiteScraper, SubsequentScraper } from ".";
+import { scrapeUrl, scrapeUrlLikeHuman } from "@/server/server-utils";
+import { DirectSiteScraper, ScrapedListing, SubsequentScraper } from ".";
 import { z } from "zod";
 import axios from "axios";
 import { axiosWithRetry } from "@/server/server-utils";
 import { formatDateYearMonthDay, getNumNights } from "@/utils/utils";
 import { get } from "lodash";
+import {
+  PropertyType,
+  ALL_PROPERTY_TYPES,
+  ListingSiteName,
+} from "@/server/db/schema/common";
+import { prop } from "node_modules/cheerio/dist/esm/api/attributes";
 
 const taxoDataSchema = z.array(
   z.object({
@@ -59,6 +65,23 @@ const priceQuoteSchema = z.object({
   fee_details: z.array(z.unknown()),
 });
 
+const propertyTypeMapping: Record<string, PropertyType> = {
+  Home: "House",
+  Condo: "Condominium",
+  Townhouse: "Townhouse",
+  Other: "Other",
+};
+
+const mapPropertyType = (originalType: string): PropertyType => {
+  console.log("originalType: ", originalType);
+  if (propertyTypeMapping[originalType]) {
+    return propertyTypeMapping[originalType];
+  } else {
+    console.error("Unknown property type: ", originalType);
+    return "Other";
+  }
+};
+
 function convertToEpochAt7AM(date: Date): number {
   // Create a new Date object with the same year, month, and day at 7 AM UTC
   const year = date.getUTCFullYear();
@@ -71,6 +94,162 @@ function convertToEpochAt7AM(date: Date): number {
   // Return the UNIX epoch time in seconds
   return Math.floor(dateAt7AMUTC.getTime() / 1000);
 }
+
+function ensureHttps(url: string): string {
+  if (url.startsWith("http:")) {
+    return url.replace("http:", "https:");
+  }
+  return url; // Return the original URL if it's already 'https:'
+}
+
+function extractAmenities(htmlString: string): string[] {
+  // Decode any escaped characters (e.g., `\/` to `/`)
+  const decodedHtml = htmlString.replace(/\\\//g, "/");
+
+  // Use a regular expression to capture the text inside <li> tags
+  const amenitiesList = [...decodedHtml.matchAll(/<li.*?>(.*?)<\/li>/g)];
+  // Map over the matches and extract the content inside <li> tags
+  const amenities = amenitiesList
+    .map((match) => {
+      if (match[1]) {
+        return match[1] // Extract the content inside <li> tags
+          .replace(/<.*?>/g, "") // Remove any remaining HTML tags (like <i> or <span>)
+          .trim();
+      }
+      return ""; // Return an empty string if match[1] is undefined
+    })
+    .filter(Boolean); // Filter out any empty strings
+
+  return amenities;
+}
+
+export const mapTaxodataToScrapedListing = async (
+  taxodata: typeof taxoDataSchema._type,
+  checkIn: Date,
+  checkOut: Date,
+): Promise<ScrapedListing[]> => {
+  const scrapedListings = await Promise.all(
+    taxodata.map(async (property) => {
+      // scrape the property page
+      const safeUrl = ensureHttps(property.url);
+      const $ = await scrapeUrlLikeHuman(safeUrl);
+      let propertyDetails = {};
+
+      // Scrape the "Sleeps 12" from the HTML
+      const propDetails = $(".qb-prop-details").text();
+      const sleepsMatch = propDetails.match(/Sleeps\s(\d+)/);
+      const maxNumGuests = sleepsMatch
+        ? sleepsMatch[1]
+          ? parseInt(sleepsMatch[1])
+          : 0
+        : 0;
+      const locationMatch = propDetails.match(/([A-Za-z\s]+,\s[A-Z]{2})/);
+      const city = locationMatch
+        ? locationMatch[1]
+          ? locationMatch[1].trim()
+          : ""
+        : "";
+      const typeElement = $(".property-quick-info li .fas.fa-home").parent(); // Navigate to the parent element of the <i> tag (the <span> containing "Home")
+      let originalType = "";
+      // Check if there is a span with the class "quick-info-value details-label" (e.g. "Home")
+      const homeLabel = typeElement
+        .find(".quick-info-value.details-label")
+        .text()
+        .trim();
+      // Check if there is an additional <span> after "1,100 Sq. Ft." ("Condo" in the next span)
+      const additionalLabel = typeElement
+        .find("span:not(.details-label)")
+        .last()
+        .text()
+        .trim();
+
+      if (additionalLabel) {
+        originalType = additionalLabel;
+      } else if (homeLabel) {
+        originalType = homeLabel;
+      }
+
+      let imageUrls: string[] = [];
+      const imageElements = $("input.pswpImages");
+      imageElements.each((index, element) => {
+        if (imageUrls.length < 10) {
+          // Limit the number of images to 10
+          const imageUrl = $(element).attr("value");
+          if (imageUrl) {
+            imageUrls.push(imageUrl); // Add the URL to the array
+          }
+        }
+      });
+      const metaDescription = $('meta[property="og:description"]').attr(
+        "content",
+      );
+      const description = metaDescription ? metaDescription : "";
+
+      const scriptContent = $("script")
+        .toArray()
+        .find((script) => $(script).html()!.includes("show_all_amenities"));
+
+      let amenities: string[] = [];
+      if (scriptContent) {
+        const scriptText = $(scriptContent).html();
+        const amenitiesMatch = scriptText?.match(
+          /"show_all_amenities":"(.*?)","/,
+        );
+        if (amenitiesMatch?.[1]) {
+          const showAllAmenities = amenitiesMatch[1];
+          // Decode HTML entities and parse the amenities
+          const decodeHtmlEntities = (str: string) => {
+            return str
+              .replace(/\\u003C/g, "<")
+              .replace(/\\u0022/g, '"')
+              .replace(/\\u003E/g, ">")
+              .replace(/\\u002F/g, "/");
+          };
+          const decodedAmenities = decodeHtmlEntities(showAllAmenities);
+          // Use regex to extract the text between <li> and </li> tags
+          amenities = extractAmenities(decodedAmenities);
+        } else {
+          console.error("No amenities found");
+        }
+      }
+      return {
+        originalListingId: property.pid.toString(),
+        name: property.title,
+        about: description,
+        propertyType: mapPropertyType(originalType),
+        address: city, // cannot find detailed address in the website
+        city: city,
+        latitude: parseFloat(property.latitude),
+        longitude: parseFloat(property.longitude),
+        maxNumGuests: maxNumGuests,
+        numBeds: property.bedrooms,
+        numBedrooms: property.bedrooms,
+        numBathrooms: property.bathrooms,
+        amenities: amenities,
+        otherAmenities: [],
+        imageUrls: imageUrls,
+        originalListingUrl: safeUrl,
+        avgRating: 0, // cannot find rating in the website
+        numRatings: 0, // cannot find rating in the website
+        originalListingPlatform: "RedAwning" as ListingSiteName,
+        reservedDateRanges: [
+          {
+            start: checkIn,
+            end: checkOut,
+          },
+        ],
+        originalNightlyPrice:
+          property.totalPrice && getNumNights(checkIn, checkOut) > 0
+            ? Math.round(property.totalPrice / getNumNights(checkIn, checkOut))
+            : 0,
+        reviews: [], // looks like there are no reviews in this website
+        scrapeUrl: safeUrl,
+      };
+    }),
+  );
+  return scrapedListings;
+};
+
 interface ScraperParams {
   checkIn: Date;
   checkOut: Date;
@@ -130,12 +309,6 @@ export const redawningScraper = async ({
             const formattedTotalPrice = Math.ceil(totalPrice * 100); // to cents
             return { ...quote, totalPrice: formattedTotalPrice };
           });
-        // console.log(
-        //   "pid: ",
-        //   property.pid,
-        //   "total price: ",
-        //   priceQuote.totalPrice,
-        // );
         property.totalPrice = priceQuote.totalPrice;
       }),
     );
@@ -143,5 +316,10 @@ export const redawningScraper = async ({
     console.error("No available properties found");
   }
   //   console.log(response);
-  return taxodata;
+  const listings = await mapTaxodataToScrapedListing(
+    taxodata,
+    checkIn,
+    checkOut,
+  );
+  return listings;
 };
