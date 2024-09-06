@@ -219,6 +219,23 @@ const fetchSearchResults = async (
   }
 };
 
+const ReviewDataSchema = z.object({
+  listing: z.string(),
+  rating: z.string(),
+  ratingReporting: z.string(),
+  reviewResponse: z.string(),
+  createdAt: z.string(),
+  reviewDetail: z.string(),
+  reviewSource: z.string(),
+  reviewedBy: z.string(),
+  reviewSummary: z.string(),
+  travelDate: z.string(),
+  status: z.string(),
+  createdDt: z.string(),
+});
+
+type ReviewData = z.infer<typeof ReviewDataSchema>;
+
 const fetchPropertyDetails = async (
   propertyId: string,
   name: string,
@@ -235,9 +252,54 @@ const fetchPropertyDetails = async (
 ): Promise<ScrapedListing | null> => {
   try {
     const url = `https://evolve.com/vacation-rentals${urlLocationParam}/${propertyId}?adults=${numGuests}&startDate=${checkIn.toISOString().split("T")[0]}&endDate=${checkOut.toISOString().split("T")[0]}`;
-    const response = await axios.get(url);
+    
+    const headers = {
+      "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+      "accept-language": "en-US,en;q=0.9",
+      "cache-control": "max-age=0",
+      "sec-ch-ua": "\"Chromium\";v=\"128\", \"Not;A=Brand\";v=\"24\", \"Google Chrome\";v=\"128\"",
+      "sec-ch-ua-mobile": "?0",
+      "sec-ch-ua-platform": "\"macOS\"",
+      "sec-fetch-dest": "document",
+      "sec-fetch-mode": "navigate",
+      "sec-fetch-site": "none",
+      "sec-fetch-user": "?1",
+      "upgrade-insecure-requests": "1",
+    };
+
+    
+    const response = await axios.get(url, { headers });
 
     const $ = cheerio.load(response.data as string);
+
+    const scriptContent = $('script:contains("listingReviews")').html();
+    if (!scriptContent) {
+      throw new Error("Could not find script containing review data");
+    }
+    const jsonMatch = scriptContent.match(/({.*"buildId":.*})\s*$/);
+    if (!jsonMatch?.[1]) {
+      throw new Error("Could not extract JSON data from script");
+    }
+
+    const parsedData = JSON.parse(jsonMatch[1]) as { props?: { pageProps?: { listingReviews?: unknown[] } } };
+    const listingReviews = parsedData.props?.pageProps?.listingReviews ?? [];
+
+    const validatedReviews = listingReviews
+      .map(review => ReviewDataSchema.safeParse(review))
+      .filter((result): result is z.SafeParseSuccess<ReviewData> => result.success)
+      .map(result => result.data);
+
+    console.log(`Total reviews extracted: ${validatedReviews.length}`);
+
+    const formattedReviews: Review[] = validatedReviews.map((review) => ({
+      name: review.reviewedBy,
+      profilePic: "",
+      rating: parseInt(review.rating),
+      review: review.reviewDetail
+        .replace(/\u003cbr\u003e/g, '\n')
+        .replace(/\*This review was originally posted on Vrbo/g, '')
+        .trim(),
+    }));
 
     const about = $(".Description_descriptionContent__dG7mv").text().trim();
     const propertyType = $(".Detail-Overview_resultType__UrnDo")
@@ -268,54 +330,6 @@ const fetchPropertyDetails = async (
         .text()
         .trim(),
     );
-
-    const reviews: Review[] = [];
-
-    const extractReviews = async (pageUrl: string) => {
-      const pageResponse = await axios.get(pageUrl);
-      const $page = cheerio.load(pageResponse.data as string);
-
-      $page(".Reviews_reviews____7L2 .Reviews_reviewsList__CRE1S li").each(
-        (index, element) => {
-          const $review = $page(element);
-          const rating = parseInt(
-            $review.find(".reviewRateListing").text().split("/")[0],
-          );
-          const content = $review
-            .find(".Reviews_reviewBody__im_Zk p")
-            .first()
-            .text()
-            .trim();
-          const author = $review.find("footer h5").text().trim();
-
-          reviews.push({
-            name: author,
-            profilePic: "",
-            rating,
-            review: content,
-          });
-        },
-      );
-
-      // Check for next page
-      const nextPageLink = $page(
-        ".Pagination_pages__vlg_W li:last-child a",
-      ).attr("href");
-      if (
-        nextPageLink &&
-        !nextPageLink.includes(
-          "page=" +
-            $page(
-              ".Pagination_pages__vlg_W li.Pagination_active__3ntIl",
-            ).text(),
-        )
-      ) {
-        await extractReviews(new URL(nextPageLink, url).href);
-      }
-    };
-    await extractReviews(url);
-
-    console.log(`Total reviews extracted: ${reviews.length}`);
 
     const quoteUrl = "https://evolve.com/api/quotes";
     const quoteData = {
@@ -392,7 +406,7 @@ const fetchPropertyDetails = async (
       numRatings: propertyDetails.reviewCount ?? 0,
       originalListingPlatform: "Evolve" as ListingSiteName,
       originalNightlyPrice: propertyDetails.price,
-      reviews,
+      reviews: formattedReviews,
       scrapeUrl: url,
     };
   } catch (error) {
@@ -566,4 +580,3 @@ export const evolveVacationRentalSubScraper: SubsequentScraper = async ({
   }
 };
 
-// refine reviews, address
