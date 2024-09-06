@@ -14,9 +14,7 @@ import {
 } from "../db/schema";
 import { arizonaScraper, arizonaSubScraper } from "./integrity-arizona";
 import { eq, and, ne, or, isNotNull } from "drizzle-orm";
-
 import { getNumNights } from "@/utils/utils";
-import { isNull } from "lodash";
 
 export type DirectSiteScraper = (options: {
   numGuests: number;
@@ -297,7 +295,8 @@ export const subsequentScrape = async (options: { offerIds: number[] }) => {
             const updateData: Partial<Offer> = {
               isAvailableOnOriginalSite:
                 subScrapedResultCBIsland.isAvailableOnOriginalSite,
-              availabilityCheckedAt: subScrapedResultCBIsland.availabilityCheckedAt,
+              availabilityCheckedAt:
+                subScrapedResultCBIsland.availabilityCheckedAt,
             };
 
             if (subScrapedResultCBIsland.originalNightlyPrice) {
