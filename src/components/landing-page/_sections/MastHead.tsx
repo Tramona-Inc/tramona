@@ -90,8 +90,8 @@ export default function MastHead() {
 
       <div className="mt-20 space-y-4 lg:mt-24 lg:space-y-12">
         <h2 className="text-center text-2xl font-extrabold lg:text-4xl">
-          <span className="text-teal-900">How?</span> Negotiation, No fees. No
-          markups.
+          <span className="text-teal-900">How?</span> Negotiation, 50% less
+          fees. No markups.
         </h2>
         <div className="flex justify-center">
           <div className="grid gap-8 lg:grid-cols-2 lg:gap-32">
