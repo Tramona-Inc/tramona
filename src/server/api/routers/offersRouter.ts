@@ -446,29 +446,36 @@ export const offersRouter = createTRPCRouter({
 
         const request = await db.query.requests.findFirst({
           where: eq(requests.id, input.requestId),
-          columns: { id: true, location: true, checkIn: true, checkOut: true, maxTotalPrice: true },
-        });
-
-        const traveler =  await db.query.requests
-        .findFirst({
-          where: eq(requests.id, input.requestId),
-          with: {
-            madeByGroup: {
-              with: {
-                owner: {
-                  columns: { id: true, phoneNumber: true, isWhatsApp: true},
-                }
-              }
-            },
+          columns: {
+            id: true,
+            location: true,
+            checkIn: true,
+            checkOut: true,
+            maxTotalPrice: true,
           },
-        })
-        .then((res) => res?.madeByGroup.owner);
-
-
-        traveler && request && await sendText({
-          to: traveler.phoneNumber!,
-          content: `Tramona: You have 1 match for your request for ${request.location} from ${formatDateRange(request.checkIn, request.checkOut)} for ${request.maxTotalPrice/getNumNights(request.checkIn, request.checkOut)}. Please tap below to view your offer: ${env.NEXTAUTH_URL}/requests/${request.id}`,
         });
+
+        const traveler = await db.query.requests
+          .findFirst({
+            where: eq(requests.id, input.requestId),
+            with: {
+              madeByGroup: {
+                with: {
+                  owner: {
+                    columns: { id: true, phoneNumber: true, isWhatsApp: true },
+                  },
+                },
+              },
+            },
+          })
+          .then((res) => res?.madeByGroup.owner);
+
+        traveler &&
+          request &&
+          (await sendText({
+            to: traveler.phoneNumber!,
+            content: `Tramona: You have 1 match for your request for ${request.location} from ${formatDateRange(request.checkIn, request.checkOut)} for ${request.maxTotalPrice / getNumNights(request.checkIn, request.checkOut)}. Please tap below to view your offer: ${env.NEXTAUTH_URL}/requests/${request.id}`,
+          }));
         //sending emails to everyone in the groug
         //get everymember in the group
         console.log("GETTING FOR GROUP", requestDetails.madeByGroupId);
@@ -484,7 +491,6 @@ export const offersRouter = createTRPCRouter({
         console.log("ALL GROUP MEMBERS", allGroupMembers);
         for (const member of allGroupMembers) {
           console.log("MEMBER", member);
-
 
           // await sendEmail({
           //   to: member.user.email,
@@ -799,6 +805,8 @@ export async function getOfferPageData(offerId: number) {
       requestId: true,
       hostPayout: true,
       travelerOfferedPrice: true,
+      scrapeUrl: true,
+      isAvailableOnOriginalSite: true,
     },
     with: {
       request: {

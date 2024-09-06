@@ -11,7 +11,7 @@ import {
 import { cancelSuperhogReservation } from "./superhog-utils";
 import { formatDateRange, getNumNights } from "../utils";
 import type { User, Trip, Offer, Property } from "../../server/db/schema";
-import { getPriceBreakdown } from "../utils";
+import { getTramonaPriceBreakdown } from "../utils";
 import { TAX_PERCENTAGE, SUPERHOG_FEE } from "../constants";
 import { sendEmail } from "@/server/server-utils";
 import { formatDate } from "date-fns";
@@ -128,7 +128,7 @@ export async function sendEmailAndWhatsupConfirmation({
   console.log("SENDING EMAIL");
   const numOfNights = getNumNights(trip.checkIn, trip.checkOut);
 
-  const { serviceFee } = getPriceBreakdown({
+  const { serviceFee } = getTramonaPriceBreakdown({
     bookingCost: offer.travelerOfferedPrice,
     numNights: numOfNights,
     superhogFee: SUPERHOG_FEE,
