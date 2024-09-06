@@ -289,8 +289,6 @@ const fetchPropertyDetails = async (
       .filter((result): result is z.SafeParseSuccess<ReviewData> => result.success)
       .map(result => result.data);
 
-    console.log(`Total reviews extracted: ${validatedReviews.length}`);
-
     const formattedReviews: Review[] = validatedReviews.map((review) => ({
       name: review.reviewedBy,
       profilePic: "",
@@ -530,7 +528,6 @@ export const evolveVacationRentalScraper: DirectSiteScraper = async ({
         ),
     )
   ).filter((property): property is ScrapedListing => property !== null);
-  console.log("almost there!", availableProperties);
   return availableProperties
 };
 
