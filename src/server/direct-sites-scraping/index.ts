@@ -1,6 +1,9 @@
 import { db } from "../db";
 import { exampleScraper } from "./example";
-import { cbIslandVacationsScraper, cbIslandVacationsSubScraper } from "./hawaii-scraper";
+import {
+  cbIslandVacationsScraper,
+  cbIslandVacationsSubScraper,
+} from "./hawaii-scraper";
 import { properties } from "../db/schema";
 import {
   NewOffer,
@@ -11,8 +14,6 @@ import {
   reviews,
 } from "../db/schema";
 import { arizonaScraper, arizonaSubScraper } from "./integrity-arizona";
-import { db } from "../db";
-import { properties } from "../db/schema";
 import { eq, and, ne, or, isNotNull } from "drizzle-orm";
 
 import { getNumNights } from "@/utils/utils";
@@ -56,8 +57,7 @@ export const directSiteScrapers: NamedDirectSiteScraper[] = [
   // add more scrapers here
   // { name: 'cleanbnbScraper', scraper: cleanbnbScraper },
   { name: "arizonaScraper", scraper: arizonaScraper },
-    // {name: "cbIslandVacationsScraper", scraper: cbIslandVacationsScraper },
-
+  // {name: "cbIslandVacationsScraper", scraper: cbIslandVacationsScraper },
 ];
 
 // Helper function to filter out fields not in NewProperty
@@ -291,7 +291,8 @@ export const subsequentScrape = async (options: { offerIds: number[] }) => {
             const updateData: Partial<Offer> = {
               isAvailableOnOriginalSite:
                 subScrapedResultCBIsland.isAvailableOnOriginalSite,
-              availabilityCheckedAt: subScrapedResultCBIsland.availabilityCheckedAt,
+              availabilityCheckedAt:
+                subScrapedResultCBIsland.availabilityCheckedAt,
             };
 
             if (subScrapedResultCBIsland.originalNightlyPrice) {
