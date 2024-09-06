@@ -9,10 +9,8 @@ import {
 import { Review, PropertyType } from "@/server/db/schema";
 import { ListingSiteName } from "@/server/db/schema/common";
 import { getNumNights } from "@/utils/utils";
-import puppeteer from "puppeteer";
 import { algoliasearch, SearchResponse } from "algoliasearch";
-// import algoliasearch from 'algoliasearch/lite';
-import { getCoordinates } from "@/server/google-maps";
+import { getCity, getCoordinates } from "@/server/google-maps";
 
 const EvolvePropertySchema = z.object({
   id: z.string(),
@@ -32,7 +30,6 @@ const EvolvePropertySchema = z.object({
 });
 
 const evolvePropertyTypes: Record<string, PropertyType> = {
-  // mapping scraped property types to our property types
   Condo: "Condominium",
   Apartment: "Apartment",
   House: "House",
@@ -78,6 +75,12 @@ const evolvePropertyTypes: Record<string, PropertyType> = {
   "Guest suite": "Guest Suite",
 };
 
+type QuoteResponse = {
+  price?: {
+    total?: number;
+  };
+};
+
 function mapPropertyType(scrapedType: string): PropertyType {
   const normalizedType = scrapedType.trim().toLowerCase();
   for (const [key, value] of Object.entries(evolvePropertyTypes)) {
@@ -88,129 +91,59 @@ function mapPropertyType(scrapedType: string): PropertyType {
   return "Other";
 }
 
-// Define the EvolveProperty interface
-interface EvolveProperty {
-  id: string;
-  name: string;
-  propertyType: string;
-  averagePerNight: number;
-  averageRating: number;
-  numberOfReviews: number;
-  images: Array<{ URL: string; SortOrder: number; Caption: string }>;
-  bedrooms: number;
-  bathrooms: number;
-  maxOccupancy: number;
-  latitude?: number;
-  longitude?: number;
-}
-
-const propertySchema = z.object({
-  data: z.object({
-    available_properties: z.object({
-      property: z.array(
-        z.object({
-          id: z.number(),
-          name: z.string(),
-          short_description: z.string(), // may contain html
-          lodging_type_id: z.number(),
-          neighborhood_name: z.string().nullable(),
-          city: z.string(),
-          state_name: z.string(),
-          location_area_name: z.string(),
-          latitude: z.number(),
-          longitude: z.number(),
-          bedrooms_number: z.number(),
-          bathrooms_number: z.number(),
-          max_occupants: z.number(),
-          unit_amenities: z.object({
-            amenity: z.array(
-              z.object({
-                amenity_name: z.string(),
-              }),
-            ),
-          }),
-          gallery: z.object({
-            image: z.array(
-              z.object({
-                image_path: z.string(), // first image has watermark
-              }),
-            ),
-          }),
-          price: z.number(),
-          taxes: z.number().nullable(),
-          fees: z.number(),
-          total: z.number(),
-          rating_count: z.number().nullable(),
-          rating_average: z.number().nullable(),
-          vrbo_code: z.string().nullable().optional(),
-          airbnb_code: z.string().nullable().optional(),
-        }),
-      ),
-    }),
+const EvolveSearchResultSchema = z.object({
+  objectID: z.string(),
+  Headline: z.string(),
+  Bathrooms: z.number(),
+  Bedrooms: z.number(),
+  "Total Beds": z.number(),
+  "Max Occupancy": z.number(),
+  _geoloc: z.object({
+    lat: z.number(),
+    lng: z.number(),
   }),
 });
 
-type EvolvePropertyInput = z.infer<typeof propertySchema>;
-
-const mapToScrapedListing = (
-  validatedData: EvolvePropertyInput,
-  checkIn: Date,
-  checkOut: Date,
-  scrapeUrl: string,
-): ScrapedListing[] => {
-  return {
-    originalListingId: prop.is_eid.toString(),
-    name: prop.ss_name,
-    about: description,
-    propertyType: mapPropertyType(prop.sm_nid$rc_core_term_type$name[0] ?? ""),
-    address: address,
-    city: prop.sm_nid$rc_core_term_city_type$name[0] ?? "",
-    latitude: prop.fs_nid$field_location$latitude,
-    longitude: prop.fs_nid$field_location$longitude,
-    maxNumGuests: prop.is_rc_core_lodging_product$occ_total,
-    numBeds: prop.fs_rc_core_lodging_product$beds,
-    numBedrooms: prop.fs_rc_core_lodging_product$beds,
-    numBathrooms: prop.fs_rc_core_lodging_product$baths,
-    amenities: cleanAmenities(prop.sm_nid$rc_core_term_general_amenities$name),
-    otherAmenities: [],
-    imageUrls: images,
-    originalListingUrl: prop.ss_nid$url,
-    avgRating: prop.fs_rc_core_item_reviews_rating ?? 0,
-    numRatings: prop.is_rc_core_item_reviews_count ?? 0,
-    originalListingPlatform: "Evolve" as ListingSiteName,
-    originalNightlyPrice: originalNightlyPrice,
-    reviews: reviews,
-    scrapeUrl: scrapeUrl,
-  };
-};
+type EvolveSearchResult = z.infer<typeof EvolveSearchResultSchema>;
 
 const fetchSearchResults = async (
-  location: string,
+  lat: number,
+  lng: number,
   numGuests: number,
   checkIn: Date,
   checkOut: Date,
-): Promise<EvolveProperty[]> => {
+  scrapeUrl?: string,
+): Promise<EvolveSearchResult[]> => {
   const client = algoliasearch(
     "2U6AXFDIV3",
     "bb822d4fb11ce6c3a7356f182a0d5c90",
   );
 
-  if (!checkIn || !checkOut) {
-    throw new Error("Check-in and check-out dates must be provided");
-  }
+  let searchLat = lat;
+  let searchLng = lng;
+  let searchNumGuests = numGuests;
 
-  const geocodingResult = await getCoordinates(location);
-  if (!geocodingResult || !geocodingResult.location) {
-    throw new Error("Unable to geocode the provided location");
-  }
+  if (scrapeUrl) {
+    const url = new URL(scrapeUrl);
+    const urlParts = url.pathname.split("/").filter((part) => part);
+    const [country, state, city] = urlParts.slice(-3);
 
-  const { lat, lng } = geocodingResult.location;
+    const geocodingResult = await getCoordinates(
+      `${city}, ${state}, ${country}`,
+    );
+    if (geocodingResult.location) {
+      searchLat = geocodingResult.location.lat;
+      searchLng = geocodingResult.location.lng;
+    }
+
+    const searchGuests = url.searchParams.get("adults");
+    if (searchGuests) {
+      searchNumGuests = parseInt(searchGuests, 10);
+    }
+  }
 
   const startDate = checkIn.toISOString().split("T")[0]?.replace(/-/g, "");
-  const endDate = checkOut.toISOString().split("T")[0]?.replace(/-/g, "");
-  const numNights = Math.ceil(
-    (checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24),
-  );
+  const numNights = getNumNights(checkIn, checkOut);
 
   const availabilityFilters = [];
   const minStayFilters = [];
@@ -234,9 +167,9 @@ const fetchSearchResults = async (
       {
         indexName: "prod_EvolveListings",
         params: {
-          aroundLatLng: `${lat}, ${lng}`,
+          aroundLatLng: `${searchLat}, ${searchLng}`,
           aroundPrecision: 8000,
-          aroundRadius: 48280, // Approx. 30 miles
+          aroundRadius: 48280, // about 30 miles
           filters,
           attributesToRetrieve: ["*", "-amenities"],
           clickAnalytics: true,
@@ -257,7 +190,7 @@ const fetchSearchResults = async (
           getRankingInfo: true,
           maxValuesPerFacet: 300,
           numericFilters: [
-            `Max Occupancy>=${numGuests}`,
+            `Max Occupancy>=${searchNumGuests}`,
             "Max Occupancy<=99",
             // `LOS_PriceAverages.${startDate}.${numNights}:>0`,
           ],
@@ -269,30 +202,17 @@ const fetchSearchResults = async (
       },
     ]);
 
-    const searchResponse = results[0];
-    console.log(`Found ${searchResponse.hits.length} results for ${location}`);
-    console.log(
-      "Property IDs:",
-      searchResponse.hits.map((hit) => [hit.objectID, hit.Headline]),
-    );
-
-    const properties = searchResponse.hits.map((hit) => ({
-      id: hit.objectID,
-      name: hit.Headline,
-      propertyType: mapPropertyType(hit["Property Type"]),
-      averagePerNight:
-        hit[`LOS_PriceAverages.${startDate}.${numNights}`] / numNights,
-      averageRating: hit["Average Rating"],
-      numberOfReviews: hit["Number of Reviews"],
-      images: hit.images,
-      bedrooms: hit.Bedrooms,
-      bathrooms: hit.Bathrooms,
-      maxOccupancy: hit["Max Occupancy"],
-      latitude: hit._geoloc?.lat,
-      longitude: hit._geoloc?.lng,
-    }));
-
-    return properties;
+    const searchResponse = results[0] as SearchResponse<EvolveSearchResult>;
+    return searchResponse.hits
+      .map((hit) => {
+        try {
+          return EvolveSearchResultSchema.parse(hit);
+        } catch (error) {
+          console.error("Error parsing hit:", hit, error);
+          return null;
+        }
+      })
+      .filter((result): result is EvolveSearchResult => result !== null);
   } catch (error) {
     console.error("Error querying Algolia:", error);
     return [];
@@ -301,15 +221,24 @@ const fetchSearchResults = async (
 
 const fetchPropertyDetails = async (
   propertyId: string,
+  name: string,
+  numBathrooms: number,
+  numBedrooms: number,
+  numBeds: number,
+  maxNumGuests: number,
   checkIn: Date,
   checkOut: Date,
-): Promise<ScrapedListing> => {
+  numGuests: number,
+  urlLocationParam: string,
+  latitude: number,
+  longitude: number,
+): Promise<ScrapedListing | null> => {
   try {
-    const url = `https://evolve.com/vacation-rentals/us/ca/alameda/${propertyId}?adults=2&startDate=${checkIn.toISOString().split("T")[0]}&endDate=${checkOut.toISOString().split("T")[0]}`;
+    const url = `https://evolve.com/vacation-rentals${urlLocationParam}/${propertyId}?adults=${numGuests}&startDate=${checkIn.toISOString().split("T")[0]}&endDate=${checkOut.toISOString().split("T")[0]}`;
     const response = await axios.get(url);
-    const $ = cheerio.load(response.data);
 
-    const name = $("h1").text().trim();
+    const $ = cheerio.load(response.data as string);
+
     const about = $(".Description_descriptionContent__dG7mv").text().trim();
     const propertyType = $(".Detail-Overview_resultType__UrnDo")
       .text()
@@ -320,74 +249,204 @@ const fetchPropertyDetails = async (
       .trim();
     const city = address.split(",")[0]?.trim() ?? "";
 
-    const detailInfo = $(".Detail-Overview_resultDetailInfo__5LqyW")
-      .text()
-      .trim();
-
-    const detailMatch = detailInfo.match(/Sleeps (\d+).*?(\d+) BR.*?(\d+) BA/) ?? [0, 0, 0];
-    const [maxNumGuests, numBedrooms, numBathrooms] = detailMatch.slice(1).map(Number);
-
-    const numBeds = $(".Sleeping-Arrangements_bedroom___Bj1r").length;
-
     const imageUrls = $(".Image-Gallery_clickablePhoto__SRbpl")
       .map((_, el) => $(el).attr("src"))
       .get();
 
+    const reviewsSection = $(".Reviews_reviews____7L2");
     const avgRating = parseFloat(
-      $(".RatingAndReview_main__JiB84 span").first().text().trim(),
+      reviewsSection
+        .find(".Reviews_reviewOverview__YVVcG span")
+        .first()
+        .text()
+        .trim(),
     );
     const numRatings = parseInt(
-      $(".RatingAndReview_reviews__GlplL").text().trim(),
+      reviewsSection
+        .find(".Reviews_reviewOverview__YVVcG span")
+        .last()
+        .text()
+        .trim(),
     );
 
-    const originalNightlyPrice =
-      parseInt(
-        $(".TotalPrice_price__LgGhz")
-          .text()
-          .replace(/[^0-9]/g, ""),
-      ) / 100; // Convert cents to dollars
+    const reviews: Review[] = [];
+
+    const extractReviews = async (pageUrl: string) => {
+      const pageResponse = await axios.get(pageUrl);
+      const $page = cheerio.load(pageResponse.data as string);
+
+      $page(".Reviews_reviews____7L2 .Reviews_reviewsList__CRE1S li").each(
+        (index, element) => {
+          const $review = $page(element);
+          const rating = parseInt(
+            $review.find(".reviewRateListing").text().split("/")[0],
+          );
+          const content = $review
+            .find(".Reviews_reviewBody__im_Zk p")
+            .first()
+            .text()
+            .trim();
+          const author = $review.find("footer h5").text().trim();
+
+          reviews.push({
+            name: author,
+            profilePic: "",
+            rating,
+            review: content,
+          });
+        },
+      );
+
+      // Check for next page
+      const nextPageLink = $page(
+        ".Pagination_pages__vlg_W li:last-child a",
+      ).attr("href");
+      if (
+        nextPageLink &&
+        !nextPageLink.includes(
+          "page=" +
+            $page(
+              ".Pagination_pages__vlg_W li.Pagination_active__3ntIl",
+            ).text(),
+        )
+      ) {
+        await extractReviews(new URL(nextPageLink, url).href);
+      }
+    };
+    await extractReviews(url);
+
+    console.log(`Total reviews extracted: ${reviews.length}`);
+
+    const quoteUrl = "https://evolve.com/api/quotes";
+    const quoteData = {
+      reservation: {
+        numberOfAdults: numGuests,
+        numberOfChildren: 0,
+        numberOfPets: 0,
+        internalListingID: propertyId,
+        checkInDate: checkIn.toISOString().split("T")[0],
+        checkOutDate: checkOut.toISOString().split("T")[0],
+      },
+      optionalLineItems: [],
+      distributor: {
+        listingChannel: "Website",
+        clickId: "Default",
+        deviceType: "Desktop",
+        market: "en_us",
+        sessionid: "",
+        channel: "Website",
+      },
+    };
+
+    const quoteResponse = await axios.post<QuoteResponse>(quoteUrl, quoteData, {
+      headers: {
+        accept: "*/*",
+        "accept-language": "en-US,en;q=0.9",
+        "content-type": "application/json",
+        Referer: url,
+      },
+    });
+    const totalPrice = quoteResponse.data.price?.total ?? 0;
+    const numNights = getNumNights(checkIn, checkOut);
+    const originalNightlyPrice = Math.round((totalPrice / numNights) * 100); // convert to cents
 
     const amenities = $(".Amenities_amenity___Avpr")
       .map((_, el) => $(el).text().trim())
       .get();
 
-    const latitude = parseFloat($("#detailMap").attr("data-lat") || "0");
-    const longitude = parseFloat($("#detailMap").attr("data-lng") || "0");
-
-    // const checkInTime = $(".Detail-Overview_checkInTime__Y5Lp3").text().trim();
-    // const checkOutTime = $(".Detail-Overview_checkOutTime__3XqMR")
-    //   .text()
-    //   .trim();
-
-    const scrapedListing: ScrapedListing = {
-      originalListingId: propertyId,
+    const propertyDetails = EvolvePropertySchema.parse({
+      id: propertyId,
       name,
-      about,
-      propertyType: mapPropertyType(propertyType),
-      address,
-      city,
+      bedrooms: numBedrooms,
+      bathrooms: numBathrooms,
+      maxOccupancy: maxNumGuests,
+      propertyType,
+      amenities,
+      imageUrls,
       latitude,
       longitude,
-      maxNumGuests,
+      averageRating: avgRating,
+      reviewCount: numRatings,
+      price: originalNightlyPrice,
+      description: about,
+    });
+
+    return {
+      originalListingId: propertyDetails.id,
+      name: propertyDetails.name,
+      about: propertyDetails.description,
+      propertyType: mapPropertyType(propertyDetails.propertyType),
+      address,
+      city,
+      latitude: propertyDetails.latitude,
+      longitude: propertyDetails.longitude,
+      maxNumGuests: propertyDetails.maxOccupancy,
       numBeds,
-      numBedrooms,
-      numBathrooms,
-      amenities,
+      numBedrooms: propertyDetails.bedrooms,
+      numBathrooms: propertyDetails.bathrooms,
+      amenities: propertyDetails.amenities,
       otherAmenities: [],
-      imageUrls,
+      imageUrls: propertyDetails.imageUrls,
       originalListingUrl: url,
-      avgRating,
-      numRatings,
+      avgRating: propertyDetails.averageRating ?? 0,
+      numRatings: propertyDetails.reviewCount ?? 0,
       originalListingPlatform: "Evolve" as ListingSiteName,
-      originalNightlyPrice: originalNightlyPrice * 100, // Convert back to cents
-      reviews: [], // You may want to implement a separate function to fetch reviews
+      originalNightlyPrice: propertyDetails.price,
+      reviews,
       scrapeUrl: url,
     };
-    console.log(`FETCHED details for property ${propertyId}:`, scrapedListing);
-    return scrapedListing;
   } catch (error) {
-    console.error(`Error fetching details for property ${propertyId}:`, error);
-    throw error;
+    console.error(`Error fetching details for property ${propertyId}:`);
+  }
+  console.error("Error fetching property details");
+  return null;
+};
+
+const refetchPrice = async (
+  propertyId: string,
+  checkIn: Date,
+  checkOut: Date,
+  scrapeUrl: string,
+): Promise<number> => {
+  try {
+    const url = new URL(scrapeUrl);
+    const numberOfAdults = parseInt(url.searchParams.get('adults') ?? '0', 10);
+
+    const quoteUrl = "https://evolve.com/api/quotes";
+    const quoteData = {
+      reservation: {
+        numberOfAdults,
+        numberOfChildren: 0,
+        numberOfPets: 0,
+        internalListingID: propertyId,
+        checkInDate: checkIn.toISOString().split("T")[0],
+        checkOutDate: checkOut.toISOString().split("T")[0],
+      },
+      optionalLineItems: [],
+      distributor: {
+        listingChannel: "Website",
+        clickId: "Default",
+        deviceType: "Desktop",
+        market: "en_us",
+        sessionid: "",
+        channel: "Website",
+      },
+    };
+
+    const quoteResponse = await axios.post<QuoteResponse>(quoteUrl, quoteData, {
+      headers: {
+        accept: "*/*",
+        "accept-language": "en-US,en;q=0.9",
+        "content-type": "application/json",
+        Referer: scrapeUrl,
+      },
+    });
+    const totalPrice = quoteResponse.data.price?.total ?? 0;
+    const numNights = getNumNights(checkIn, checkOut);
+    const originalNightlyPrice = Math.round((totalPrice / numNights) * 100); // convert to cents
+    return originalNightlyPrice;
+  } catch {
+    throw new Error("Error refetching price");
   }
 };
 
@@ -397,28 +456,68 @@ export const evolveVacationRentalScraper: DirectSiteScraper = async ({
   checkOut,
   numOfOffersInEachScraper = 5,
   location,
-
-
 }) => {
   if (!location) {
     throw new Error("Location must be provided for Evolve scraper");
   }
+  const geocodingResult = await getCoordinates(location);
+  if (!geocodingResult.location) {
+    throw new Error("Unable to geocode the provided location");
+  }
+
+  const { lat, lng } = geocodingResult.location;
+
+  const formattedLocation = await getCity({ lat, lng });
+
+  const locationParts = formattedLocation.split(", ");
+  const city = locationParts[0];
+  const state = locationParts.length > 2 ? locationParts[1] : "";
+  const country = locationParts[locationParts.length - 1];
+
+  const formattedCountry = country?.toLowerCase().replace(/\s+/g, "-");
+  const formattedState = state?.toLowerCase().replace(/\s+/g, "-");
+  const formattedCity = city?.toLowerCase().replace(/\s+/g, "-");
+  // console.log(`Reverse geocoded location: ${city}, ${state}, ${country}`);
+
+  let urlLocationParam = `/${formattedCountry}`;
+  if (state) {
+    urlLocationParam += `/${formattedState}`;
+  }
+  urlLocationParam += `/${formattedCity}`;
+  console.log("URL:", urlLocationParam);
+
   const searchResults = await fetchSearchResults(
-    location,
+    lat,
+    lng,
     numGuests,
     checkIn,
     checkOut,
   );
-  const propertyIds = searchResults
-    .slice(0, numOfOffersInEachScraper)
-    .map((result) => result.id);
 
-  const scrapedListings = await Promise.all(
-    propertyIds.map((id) => fetchPropertyDetails(id, checkIn, checkOut)),
-  );
-  console.log("YOOO scrapedListings:", scrapedListings);
-
-  return [];
+  const availableProperties: ScrapedListing[] = (
+    await Promise.all(
+      searchResults
+        .slice(0, numOfOffersInEachScraper)
+        .map((result) =>
+          fetchPropertyDetails(
+            result.objectID,
+            result.Headline,
+            result.Bathrooms,
+            result.Bedrooms,
+            result["Total Beds"],
+            result["Max Occupancy"],
+            checkIn,
+            checkOut,
+            numGuests,
+            urlLocationParam,
+            result._geoloc.lat,
+            result._geoloc.lng,
+          ),
+        ),
+    )
+  ).filter((property): property is ScrapedListing => property !== null);
+  console.log("almost there!", availableProperties);
+  return availableProperties
 };
 
 export const evolveVacationRentalSubScraper: SubsequentScraper = async ({
@@ -428,21 +527,29 @@ export const evolveVacationRentalSubScraper: SubsequentScraper = async ({
   checkOut,
 }) => {
   try {
-    const property = await fetchPropertyDetails(
-      originalListingId,
+    const availablePropertyIds = await fetchSearchResults(
+      0,
+      0,
+      0,
       checkIn,
       checkOut,
+      scrapeUrl,
+    );
+    const isAvailable = availablePropertyIds.some(
+      (prop) => prop.objectID === originalListingId,
     );
 
-    if (!property) {
+    if (!isAvailable) {
       return {
         isAvailableOnOriginalSite: false,
         availabilityCheckedAt: new Date(),
       };
     }
-
-    const originalNightlyPrice = Math.round(
-      property.price / getNumNights(checkIn, checkOut),
+    const originalNightlyPrice = await refetchPrice(
+      originalListingId,
+      checkIn,
+      checkOut,
+      scrapeUrl,
     );
 
     return {
@@ -451,10 +558,12 @@ export const evolveVacationRentalSubScraper: SubsequentScraper = async ({
       availabilityCheckedAt: new Date(),
     };
   } catch (error) {
-    // console.error("Error in evolveVacationRentalSubScraper", error);
+    console.error("Error in evolveVacationRentalSubScraper");
     return {
       isAvailableOnOriginalSite: false,
       availabilityCheckedAt: new Date(),
     };
   }
 };
+
+// refine reviews, address

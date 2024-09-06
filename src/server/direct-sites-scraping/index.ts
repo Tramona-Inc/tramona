@@ -313,6 +313,34 @@ export const subsequentScrape = async (options: { offerIds: number[] }) => {
             savedResult.push(subScrapedResultCBIsland);
           }
           break;
+
+          case "Evolve":
+          const subScrapedResultEvolve = await evolveVacationRentalSubScraper({
+            originalListingId: offer.property.originalListingId,
+            scrapeUrl: offer.scrapeUrl,
+            checkIn: offer.checkIn,
+            checkOut: offer.checkOut,
+          });
+          if (subScrapedResultEvolve) {
+            const updateData: Partial<Offer> = {
+              isAvailableOnOriginalSite:
+                subScrapedResultEvolve.isAvailableOnOriginalSite,
+              availabilityCheckedAt: subScrapedResultEvolve.availabilityCheckedAt,
+            };
+
+            if (subScrapedResultEvolve.originalNightlyPrice) {
+              updateData.totalPrice =
+                subScrapedResultEvolve.originalNightlyPrice *
+                getNumNights(offer.checkIn, offer.checkOut);
+            }
+
+            await trx
+              .update(offers)
+              .set(updateData)
+              .where(eq(offers.id, offerId));
+            savedResult.push(subScrapedResultEvolve);
+          }
+          break;
       }
     }
   });

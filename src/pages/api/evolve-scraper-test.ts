@@ -25,9 +25,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const listings = await scrapeDirectListings({
         location: 'Berkeley, CA',
         numGuests: 2,
-        checkIn: new Date("2024-09-05T19:56:53.132Z"),
-        checkOut: new Date("2024-09-14T19:56:53.132Z"),
-        numOfOffersInEachScraper: 5,
+        checkIn: new Date("2024-09-20T19:56:53.132Z"),
+        checkOut: new Date("2024-09-25T19:56:53.132Z"),
+        numOfOffersInEachScraper: 20,
         requestNightlyPrice: 100,
         scrapersToExecute: ["evolveVacationRentalScraper"],
       });
