@@ -396,12 +396,12 @@ export default function HostPropertiesDetails({
                 lat={
                   editing
                     ? (coordinateData?.coordinates.location?.lat ?? 0)
-                    : property.latitude
+                    : property.latLngPoint.x
                 }
                 lng={
                   editing
                     ? (coordinateData?.coordinates.location?.lng ?? 0)
-                    : property.longitude
+                    : property.latLngPoint.y
                 }
               />
             </div>

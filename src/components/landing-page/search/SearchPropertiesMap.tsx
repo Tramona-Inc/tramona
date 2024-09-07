@@ -188,8 +188,8 @@ function SearchPropertiesMap({
         page.data.map((property) => ({
           key: property.name,
           location: {
-            lat: property.lat,
-            lng: property.long,
+            lat: property.latLngPoint.x,
+            lng: property.latLngPoint.y,
           },
           originalNightlyPrice: property.originalNightlyPrice,
           id: `${property.id}`,
@@ -201,8 +201,8 @@ function SearchPropertiesMap({
         page.data.map((property) => ({
           key: property.name,
           location: {
-            lat: property.lat,
-            lng: property.long,
+            lat: property.latLngPoint.x,
+            lng: property.latLngPoint.y,
           },
           originalNightlyPrice: property.originalNightlyPrice,
           id: `${property.id}`,
