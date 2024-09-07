@@ -12,7 +12,15 @@ export default async function handler(
       // create two date objects: start date on 10/23/2024 and end date on 10/26/2024
       const checkIn = new Date("2024-10-23");
       const checkOut = new Date("2024-10-26");
-      const result = await redawningScraper({ checkIn, checkOut });
+      // const url = `https://www.redawning.com/search/properties?ptype=country&platitude=38.7945952&plongitude=-106.5348379&pcountry=US&pname=United%20States&sleepsmax=1TO100&dates=${convertToEpochAt7AM(checkIn)}TO${convertToEpochAt7AM(checkOut)}`;
+      const result = await redawningScraper({
+        checkIn,
+        checkOut,
+        location: "United%20States",
+        longitude: -106.5348379,
+        latitude: 38.7945952,
+        scrapersToExecute: ["redawningScraper"],
+      });
       console.log("API route: Scraping process completed");
       res
         .status(200)
