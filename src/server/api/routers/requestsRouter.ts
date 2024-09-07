@@ -34,6 +34,8 @@ import {
 } from "@/utils/utils";
 import { sendTextToHost } from "@/server/server-utils";
 import { newLinkRequestSchema } from "@/utils/useSendUnsentRequests";
+import { waitUntil } from "@vercel/functions";
+import { scrapeDirectListings } from "@/server/direct-sites-scraping";
 
 const updateRequestInputSchema = z.object({
   requestId: z.number(),
@@ -406,7 +408,7 @@ export const requestsRouter = createTRPCRouter({
 //Reusable functions
 const modifiedRequestSchema = requestInsertSchema.omit({
   madeByGroupId: true,
-  latLngPoint: true,
+  // latLngPoint: true,
 });
 
 // Infer the type from the modified schema
@@ -457,6 +459,21 @@ export async function handleRequestSubmission(
       );
     }
 
+    waitUntil(
+      scrapeDirectListings({
+        checkIn: input.checkIn,
+        checkOut: input.checkOut,
+        numOfOffersInEachScraper: 10,
+        requestNightlyPrice:
+          input.maxTotalPrice / getNumNights(input.checkIn, input.checkOut),
+        requestId: requestId,
+        location: input.location,
+        latitude: input.latLngPoint?.x,
+        longitude: input.latLngPoint?.y,
+      }).catch((error) => {
+        console.error("Error scraping listings: " + error);
+      }),
+    );
     // waitUntil(
     //   scrapeAirbnbListings({
     //     request: input,
