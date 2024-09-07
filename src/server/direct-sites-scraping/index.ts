@@ -14,6 +14,7 @@ import {
   reviews,
 } from "../db/schema";
 import { arizonaScraper, arizonaSubScraper } from "./integrity-arizona";
+import { redawningScraper } from "./redawning";
 import { eq, and, ne, or, isNotNull } from "drizzle-orm";
 import { getNumNights } from "@/utils/utils";
 
@@ -25,6 +26,8 @@ export type DirectSiteScraper = (options: {
   requestId?: number; // when the scraper is used by traveler request page
   scrapersToExecute: string[];
   location?: string;
+  latitude?: number;
+  longitude?: number;
 }) => Promise<ScrapedListing[]>;
 
 export type ScrapedListing = NewProperty & {
@@ -56,6 +59,7 @@ export const directSiteScrapers: NamedDirectSiteScraper[] = [
   // { name: 'cleanbnbScraper', scraper: cleanbnbScraper },
   { name: "arizonaScraper", scraper: arizonaScraper },
   // {name: "cbIslandVacationsScraper", scraper: cbIslandVacationsScraper },
+  { name: "redawningScraper", scraper: redawningScraper },
 ];
 
 // Helper function to filter out fields not in NewProperty
