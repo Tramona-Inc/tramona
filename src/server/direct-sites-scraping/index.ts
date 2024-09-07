@@ -11,12 +11,9 @@ import {
   reviews,
 } from "../db/schema";
 import { arizonaScraper, arizonaSubScraper } from "./integrity-arizona";
-import { db } from "../db";
-import { properties } from "../db/schema";
 import { eq, and, ne, or, isNotNull } from "drizzle-orm";
 
 import { getNumNights } from "@/utils/utils";
-import { isNull } from "lodash";
 
 export type DirectSiteScraper = (options: {
   checkIn: Date;

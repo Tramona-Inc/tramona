@@ -22,7 +22,7 @@ import {
 import { sendSlackMessage } from "@/server/slack";
 import { isIncoming } from "@/utils/formatters";
 import { TRPCError } from "@trpc/server";
-import { and, eq, exists } from "drizzle-orm";
+import { and, eq, exists, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { Session } from "next-auth";
 import { linkInputProperties } from "@/server/db/schema/tables/linkInputProperties";
@@ -34,6 +34,8 @@ import {
 } from "@/utils/utils";
 import { sendTextToHost } from "@/server/server-utils";
 import { newLinkRequestSchema } from "@/utils/useSendUnsentRequests";
+import { getCoordinates } from "@/server/google-maps";
+import { haversineDistance } from "@/components/landing-page/SearchBars/useCityRequestForm";
 
 const updateRequestInputSchema = z.object({
   requestId: z.number(),
@@ -161,8 +163,12 @@ export const requestsRouter = createTRPCRouter({
     .input(
       requestInsertSchema.omit({
         madeByGroupId: true,
-        latLngPoint: true,
-      }),
+        // latLngPoint: true,
+      }).extend({
+        lat: z.number().optional(),
+        lng: z.number().optional(),
+        radius: z.number().optional(),
+      })
     )
     .mutation(async ({ ctx, input }) => {
       return await handleRequestSubmission(input, { user: ctx.user });
@@ -406,7 +412,11 @@ export const requestsRouter = createTRPCRouter({
 //Reusable functions
 const modifiedRequestSchema = requestInsertSchema.omit({
   madeByGroupId: true,
-  latLngPoint: true,
+  // latLngPoint: true,
+}).extend({
+  lat: z.number().optional(),
+  lng: z.number().optional(),
+  radius: z.number().optional(),
 });
 
 // Infer the type from the modified schema
@@ -429,64 +439,102 @@ export async function handleRequestSubmission(
       groupId: madeByGroupId,
     });
 
-    const requestId = await tx
-      .insert(requests)
-      .values({ ...input, madeByGroupId })
-      .returning()
-      .then((res) => res[0]!.id);
-
-    const eligibleProperties = await getPropertiesForRequest(
-      { ...input, id: requestId },
-      { tx },
-    );
-
-    if (eligibleProperties.length > 0) {
-      await tx.insert(requestsToProperties).values(
-        eligibleProperties.map((property) => ({
-          requestId,
-          propertyId: property.id,
-        })),
-      );
-
-      await sendTextToHost(
-        eligibleProperties,
-        input.checkIn,
-        input.checkOut,
-        input.maxTotalPrice,
-        input.location,
-      );
+    let lat = input.lat;
+    let lng = input.lng;
+    let radius = input.radius;
+    if (lat === undefined || lng === undefined || radius === undefined) {
+      const coordinates = await getCoordinates(input.location);
+      if (coordinates.location) {
+        lat = coordinates.location.lat;
+        lng = coordinates.location.lng;
+        if (coordinates.bounds) {
+          radius = haversineDistance(coordinates.bounds.northeast.lat, coordinates.bounds.northeast.lng, coordinates.bounds.southwest.lat, coordinates.bounds.southwest.lng) / 2;
+        } else {
+          radius = 10;
+        }
+      }
+    }
+    let latLngPoint = null;
+    if (lat && lng) {
+      latLngPoint = sql`ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)`;
     }
 
-    // waitUntil(
-    //   scrapeAirbnbListings({
-    //     request: input,
-    //     limit: 10,
-    //   })
-    //     .then(async (airbnbListings) => {
-    //       const airbnbPropertyIds = await tx
-    //         .insert(properties)
-    //         .values(airbnbListings.map((l) => l.property))
-    //         .returning({ id: properties.id })
-    //         .then((res) => res.map((r) => r.id));
+    if (radius && latLngPoint) {
+      const requestId = await tx
+        .insert(requests)
+        .values({ ...input, madeByGroupId, latLngPoint, radius })
+        .returning()
+        .then((res) => res[0]!.id);
 
-    //       const flattenedReviews = airbnbListings
-    //         .map(({ reviews }, i) =>
-    //           reviews.map((r) => ({ ...r, propertyId: airbnbPropertyIds[i]! })),
-    //         )
-    //         .flat();
+      //TO DO - figure out if i need to get coordinates here or elsewhere
 
-    //       await tx.insert(reviews).values(flattenedReviews);
-    //     })
-    //     .catch((e) => {
-    //       // fail silently -- we dont want to crash the request submission
-    //       // TODO: handle this better using a dead letter queue or something
-    //       console.error(
-    //         `Error scraping Airbnb listings for request #${requestId}: ${e}`,
-    //       );
-    //     }),
-    // );
+      // if (input.lat === undefined || input.lng === null || input.radius === null) {
+      //   const coordinates = await getCoordinates(input.location);
+      //   if (coordinates.location) {
 
-    return { requestId, madeByGroupId };
+      //   }
+      // }
+
+
+      const eligibleProperties = await getPropertiesForRequest(
+        { ...input, id: requestId, latLngPoint, radius },
+        { tx },
+      );
+
+
+      if (eligibleProperties.length > 0) {
+        await tx.insert(requestsToProperties).values(
+          eligibleProperties.map((property) => ({
+            requestId,
+            propertyId: property.id,
+          })),
+        );
+
+        await sendTextToHost(
+          eligibleProperties,
+          input.checkIn,
+          input.checkOut,
+          input.maxTotalPrice,
+          input.location,
+        );
+      }
+
+      // waitUntil(
+      //   scrapeAirbnbListings({
+      //     request: input,
+      //     limit: 10,
+      //   })
+      //     .then(async (airbnbListings) => {
+      //       const airbnbPropertyIds = await tx
+      //         .insert(properties)
+      //         .values(airbnbListings.map((l) => l.property))
+      //         .returning({ id: properties.id })
+      //         .then((res) => res.map((r) => r.id));
+
+      //       const flattenedReviews = airbnbListings
+      //         .map(({ reviews }, i) =>
+      //           reviews.map((r) => ({ ...r, propertyId: airbnbPropertyIds[i]! })),
+      //         )
+      //         .flat();
+
+      //       await tx.insert(reviews).values(flattenedReviews);
+      //     })
+      //     .catch((e) => {
+      //       // fail silently -- we dont want to crash the request submission
+      //       // TODO: handle this better using a dead letter queue or something
+      //       console.error(
+      //         `Error scraping Airbnb listings for request #${requestId}: ${e}`,
+      //       );
+      //     }),
+      // );
+
+      return { requestId, madeByGroupId };
+    } else {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Failed to get coordinates for the location",
+      });
+    }
   });
 
   // Messaging based on user preferences or environment

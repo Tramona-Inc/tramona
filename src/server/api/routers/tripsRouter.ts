@@ -8,7 +8,6 @@ import {
   groupMembers,
   properties,
   trips,
-  tripDamages,
 } from "@/server/db/schema";
 
 import { TRPCError } from "@trpc/server";

@@ -8,7 +8,7 @@ import { useRouter } from "next/router";
 import { cityRequestSchema } from "./schemas";
 import SuperJSON from "superjson";
 
-const haversineDistance = (
+export const haversineDistance = (
   lat1: number,
   lon1: number,
   lat2: number,
@@ -16,7 +16,7 @@ const haversineDistance = (
 ) => {
   const toRadians = (degrees: number) => degrees * (Math.PI / 180);
 
-  const R = 6371; // Radius of the Earth in kilometers
+  const R = 3958.8; // Radius of the Earth in kilometers
   const dLat = toRadians(lat2 - lat1);
   const dLon = toRadians(lon2 - lon1);
   const a =
@@ -69,6 +69,7 @@ export function useCityRequestForm({
 
 
   const onSubmit = form.handleSubmit(async (data) => {
+    console.log('the data', data);
     const { date: _date, maxNightlyPriceUSD, ...restData } = data;
     const checkIn = data.date.from;
     const checkOut = data.date.to;

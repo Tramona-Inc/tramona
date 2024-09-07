@@ -64,14 +64,14 @@ export const requests = pgTable(
       .notNull()
       .defaultNow(),
     resolvedAt: timestamp("resolved_at", { withTimezone: true }),
-    lat: doublePrecision("lat"),
-    lng: doublePrecision("lng"),
-    radius: doublePrecision("radius"),
+    // lat: doublePrecision("lat").notNull(),
+    // lng: doublePrecision("lng").notNull(),
+    radius: doublePrecision("radius").notNull(),
     latLngPoint: geometry("lat_lng_point", {
       type: "point",
       mode: "xy",
       srid: 4326,
-    }),
+    }).notNull(),
   },
   (t) => ({
     madeByGroupidIdx: index().on(t.madeByGroupId),
@@ -90,7 +90,7 @@ export type MinimalRequest = Pick<
 
 export const requestSelectSchema = createSelectSchema(requests);
 export const requestInsertSchema = createInsertSchema(requests, {
-  latLngPoint: z.object({ x: z.number(), y: z.number() }),
+  // latLngPoint: z.object({ x: z.number(), y: z.number() }),
   amenities: z.array(z.enum(ALL_REQUESTABLE_AMENITIES)),
 });
 

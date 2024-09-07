@@ -167,9 +167,7 @@ export const offersRouter = createTRPCRouter({
               columns: { numGuests: true, location: true, id: true },
             },
             property: {
-              columns: {
-                latLngPoint: false,
-              },
+              columns: {},
               with: {
                 host: {
                   columns: { id: true, name: true, email: true, image: true },
@@ -812,9 +810,7 @@ export async function getOfferPageData(offerId: number) {
         },
       },
       property: {
-        columns: {
-          latLngPoint: false,
-        },
+        columns: {},
         with: {
           reviews: true,
           host: {

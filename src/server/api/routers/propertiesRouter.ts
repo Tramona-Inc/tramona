@@ -27,7 +27,6 @@ import {
   eq,
   gt,
   gte,
-  inArray,
   lte,
   notExists,
   sql,
@@ -40,6 +39,7 @@ import {
   type Property,
 } from "./../../db/schema/tables/properties";
 import { addProperty } from "@/server/server-utils";
+import { latLngEquals } from "@vis.gl/react-google-maps";
 
 export type HostRequestsPageData = {
   city: string;
@@ -55,8 +55,8 @@ export const propertiesRouter = createTRPCRouter({
       propertyInsertSchema.omit({
         hostId: true,
         city: true,
-        latitude: true,
-        longitude: true,
+        // latitude: true,
+        // longitude: true,
         latLngPoint: true,
       }),
     )
@@ -91,8 +91,8 @@ export const propertiesRouter = createTRPCRouter({
       propertyInsertSchema
         .omit({
           city: true,
-          latitude: true,
-          longitude: true,
+          // latitude: true,
+          // longitude: true,
           latLngPoint: true,
         })
         .extend({ hostId: z.string() }),
@@ -124,7 +124,7 @@ export const propertiesRouter = createTRPCRouter({
     }),
 
   update: roleRestrictedProcedure(["admin", "host"])
-    .input(propertyUpdateSchema.omit({ hostId: true, latLngPoint: true }))
+    .input(propertyUpdateSchema.omit({ hostId: true }))
     .mutation(async ({ ctx, input }) => {
       // TODO: auth
 
@@ -190,8 +190,12 @@ export const propertiesRouter = createTRPCRouter({
         maxNightlyPrice: z.number().optional(),
         avgRating: z.number().optional(),
         numRatings: z.number().optional(),
-        lat: z.number().optional(),
-        long: z.number().optional(),
+        // lat: z.number().optional(),
+        // long: z.number().optional(),
+        latLngPoint: z.object({
+          lat: z.number(),
+          lng: z.number(),
+        }).optional(),
         radius: z.number().optional(),
         checkIn: z.date().optional(),
         checkOut: z.date().optional(),
@@ -204,8 +208,8 @@ export const propertiesRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const { cursor } = input;
 
-      const lat = input.lat ?? 0;
-      const long = input.long ?? 0;
+      const lat = input.latLngPoint?.lat ?? 0;
+      const lng = input.latLngPoint?.lng ?? 0;
       const radius = input.radius;
 
       const northeastLat = input.northeastLat ?? 0;
@@ -225,11 +229,12 @@ export const propertiesRouter = createTRPCRouter({
           avgRating: properties.avgRating,
           numRatings: properties.numRatings,
           originalNightlyPrice: properties.originalNightlyPrice,
-          lat: properties.latitude,
-          long: properties.longitude,
+          latLngPoint: properties.latLngPoint,
+          // lat: properties.latitude,
+          // long: properties.longitude,
           distance: sql`
             6371 * ACOS(
-              SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})
+              SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(lng * Math.PI) / 180})
             ) AS distance`,
           vacancyCount: sql`
             (SELECT COUNT(booked_dates.property_id)
@@ -244,8 +249,8 @@ export const propertiesRouter = createTRPCRouter({
           and(
             eq(properties.propertyStatus, "Listed"),
             cursor ? gt(properties.id, cursor) : undefined, // Use property ID as cursor
-            input.lat &&
-              input.long &&
+            input.latLngPoint?.lat &&
+              input.latLngPoint.lng &&
               !northeastLat &&
               !northeastLng &&
               !southwestLat &&
@@ -344,7 +349,7 @@ export const propertiesRouter = createTRPCRouter({
       const { cursor, boundaries } = input;
 
       const lat = input.lat ?? 0;
-      const long = input.long ?? 0;
+      const lng = input.long ?? 0;
       const radius = input.radius;
 
       const data = await ctx.db
@@ -359,11 +364,12 @@ export const propertiesRouter = createTRPCRouter({
           avgRating: properties.avgRating,
           numRatings: properties.numRatings,
           originalNightlyPrice: properties.originalNightlyPrice,
-          lat: properties.latitude,
-          long: properties.longitude,
+          latLngPoint: properties.latLngPoint,
+          // lat: properties.latitude,
+          // long: properties.longitude,
           distance: sql`
             6371 * ACOS(
-              SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})
+              SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(lng * Math.PI) / 180})
             ) AS distance`,
           vacancyCount: sql`
             (SELECT COUNT(booked_dates.property_id)
@@ -387,7 +393,7 @@ export const propertiesRouter = createTRPCRouter({
                 )
               : sql`TRUE`,
             input.lat && input.long && !boundaries
-              ? sql`6371 * acos(SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})) <= ${radius}`
+              ? sql`6371 * acos(SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(lng * Math.PI) / 180})) <= ${radius}`
               : sql`TRUE`,
             input.roomType
               ? eq(properties.roomType, input.roomType)
