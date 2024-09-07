@@ -250,19 +250,21 @@ export const mapTaxodataToScrapedListing = async (
   return scrapedListings;
 };
 
-interface ScraperParams {
-  checkIn: Date;
-  checkOut: Date;
-  numOfOffersInEachScraper?: number;
-}
-// currently just scrape UnclaimedOffers
-export const redawningScraper = async ({
-  // :DirectSiteScraper
+// interface ScraperParams {
+//   checkIn: Date;
+//   checkOut: Date;
+//   numOfOffersInEachScraper?: number;
+// }
+// currently just scrape per request
+export const redawningScraper: DirectSiteScraper = async ({
   checkIn,
   checkOut,
   numOfOffersInEachScraper = 5,
-}: ScraperParams) => {
-  const url = `https://www.redawning.com/search/properties?ptype=country&platitude=38.7945952&plongitude=-106.5348379&pcountry=US&pname=United%20States&sleepsmax=1TO100&dates=${convertToEpochAt7AM(checkIn)}TO${convertToEpochAt7AM(checkOut)}`;
+  location,
+  latitude,
+  longitude,
+}) => {
+  const url = `https://www.redawning.com/search/properties?ptype=country&platitude=${latitude}&plongitude=${longitude}&pcountry=US&pname=${location}&sleepsmax=1TO100&dates=${convertToEpochAt7AM(checkIn)}TO${convertToEpochAt7AM(checkOut)}`;
   console.log("scrapedRedawningUrl: ", url);
   const $ = await scrapeUrl(url);
   let taxodata = [];
