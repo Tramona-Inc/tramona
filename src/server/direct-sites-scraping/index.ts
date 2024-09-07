@@ -14,6 +14,7 @@ import {
   reviews,
 } from "../db/schema";
 import { arizonaScraper, arizonaSubScraper } from "./integrity-arizona";
+import { redawningScraper } from "./redawning";
 
 import { getCoordinates } from "../google-maps";
 import { eq, and, sql } from "drizzle-orm";
