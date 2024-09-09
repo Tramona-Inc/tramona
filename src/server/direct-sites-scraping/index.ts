@@ -4,6 +4,7 @@ import {
   cbIslandVacationsScraper,
   cbIslandVacationsSubScraper,
 } from "./hawaii-scraper";
+import { casamundoScraper } from "./casamundo-scraper";
 import { properties } from "../db/schema";
 import {
   NewOffer,
@@ -54,8 +55,9 @@ export type NamedDirectSiteScraper = {
 export const directSiteScrapers: NamedDirectSiteScraper[] = [
   // add more scrapers here
   // { name: 'cleanbnbScraper', scraper: cleanbnbScraper },
-  { name: "arizonaScraper", scraper: arizonaScraper },
+  // { name: "arizonaScraper", scraper: arizonaScraper },
   // {name: "cbIslandVacationsScraper", scraper: cbIslandVacationsScraper },
+  { name: "casamundoScraper", scraper: casamundoScraper },
 ];
 
 // Helper function to filter out fields not in NewProperty
