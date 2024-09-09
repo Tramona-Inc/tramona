@@ -13,6 +13,8 @@ import {
   ListingSiteName,
 } from "@/server/db/schema/common";
 import { prop } from "node_modules/cheerio/dist/esm/api/attributes";
+import { Code } from "lucide-react";
+import { Message } from "twilio/lib/twiml/MessagingResponse";
 
 const taxoDataSchema = z.array(
   z.object({
@@ -63,6 +65,11 @@ const priceQuoteSchema = z.object({
     }),
   ),
   fee_details: z.array(z.unknown()),
+});
+
+const priceQuoteSchemaError = z.object({
+  Code: z.string(),
+  Message: z.string(),
 });
 
 const propertyTypeMapping: Record<string, PropertyType> = {
@@ -324,4 +331,60 @@ export const redawningScraper: DirectSiteScraper = async ({
     checkOut,
   );
   return listings;
+};
+
+export const redawningSubScraper: SubsequentScraper = async ({
+  originalListingId,
+  scrapeUrl,
+  checkIn,
+  checkOut,
+}) => {
+  const priceQuoteUrl = `https://api.redawning.com/v1/listings/${originalListingId}/quote?checkin=${formatDateYearMonthDay(checkIn)}&checkout=${formatDateYearMonthDay(checkOut)}&numadults=1&numchild=0&travelinsurance=false`;
+  try {
+    const priceQuote = await axiosWithRetry
+      .get<string>(priceQuoteUrl, {
+        headers: {
+          "x-api-key": "ehMtnGSw4i7dFqngWo8M15cWaqzKPM4V2jeU3zty",
+        },
+      })
+      .then((response) => response.data)
+      .then((data) => {
+        try {
+          return priceQuoteSchema.parse(data);
+        } catch (e) {
+          const error = priceQuoteSchemaError.safeParse(data);
+          if (error.success) {
+            throw new Error(
+              `API Error: ${error.data.Code} - ${error.data.Message}`,
+            );
+          } else {
+            throw new Error("Unknown API response format");
+          }
+        }
+      })
+      .then((quote) => {
+        const totalPrice = quote.payment_schedule.reduce(
+          (acc, curr) => acc + curr.amount,
+          0,
+        );
+        const formattedTotalPrice = Math.ceil(totalPrice * 100); // to cents
+        return { ...quote, totalPrice: formattedTotalPrice };
+      });
+    const originalNightlyPrice = priceQuote.totalPrice
+      ? Math.round(priceQuote.totalPrice / getNumNights(checkIn, checkOut))
+      : undefined;
+    return {
+      originalNightlyPrice: originalNightlyPrice,
+      isAvailableOnOriginalSite: priceQuote.status === "success",
+      availabilityCheckedAt: new Date(),
+    };
+  } catch (error) {
+    console.error(
+      "This listing is already booked for days you have selected, or unavailable for other reasons.",
+    );
+    return {
+      isAvailableOnOriginalSite: false,
+      availabilityCheckedAt: new Date(),
+    };
+  }
 };
