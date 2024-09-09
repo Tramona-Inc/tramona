@@ -91,19 +91,7 @@ const pickScrapersByLocation = (
   lng: number,
   radius: number,
 ): { scrapersList: string[]; formattedLocation: string | null } => {
-  const arizonaBounds = {
-    north: 37.0,
-    south: 31.3322,
-    east: -109.0452,
-    west: -114.8183,
-  };
 
-  const isWithinArizona =
-    lat >= arizonaBounds.south &&
-    lat <= arizonaBounds.north &&
-    lng >= arizonaBounds.west &&
-    lng <= arizonaBounds.east;
-  if (isWithinArizona) {
     const azScraperLocations = [
       { name: "Lake Havasu", lat: 34.4839, lng: -114.3225 },
       { name: "Parker Strip", lat: 34.2983, lng: -114.1439 },
@@ -118,7 +106,7 @@ const pickScrapersByLocation = (
         };
       }
     }
-  }
+  
   // add if statements for other locations here
 
   return { scrapersList: [], formattedLocation: null };
