@@ -29,6 +29,7 @@ export default function MessagesPopover() {
   const { data: session } = useSession();
   const [conversationId, setConversationId] = useState<string>("");
   const [tempToken, setTempToken] = useState<string>("");
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const { mutateAsync: createOrRetrieveConversation } =
     api.messages.createConversationWithAdmin.useMutation();
@@ -39,10 +40,15 @@ export default function MessagesPopover() {
   const {
     data: conversationIdAndTempUserId,
     refetch: refetchConversationIdAndTempUserId,
-  } = api.messages.getConversationsWithAdmin.useQuery({
-    userId: session?.user.id,
-    sessionToken: tempToken,
-  });
+  } = api.messages.getConversationsWithAdmin.useQuery(
+    {
+      userId: session?.user.id,
+      sessionToken: tempToken,
+    },
+    {
+      enabled: Boolean(session?.user.id ?? tempToken),
+    },
+  );
 
   useEffect(() => {
     if (!session && typeof window !== "undefined") {
@@ -59,7 +65,7 @@ export default function MessagesPopover() {
     if (tempToken && !session) {
       void createTempUserForGuest({
         email: "temp_user@gmail.com",
-        isGuest: true,
+        isBurner: true,
         sessionToken: tempToken,
       });
       localStorage.setItem("tempToken", tempToken);
@@ -72,9 +78,7 @@ export default function MessagesPopover() {
       const fetchData = () => {
         try {
           if (conversationIdAndTempUserId) {
-            setConversationId(
-              conversationIdAndTempUserId.conversationId as string,
-            );
+            setConversationId(conversationIdAndTempUserId.conversationId);
           }
         } catch (error) {
           errorToast();
@@ -198,7 +202,7 @@ export default function MessagesPopover() {
 
   return (
     <>
-      <Popover>
+      <Popover onOpenChange={setIsPopoverOpen}>
         <PopoverTrigger asChild>
           {session?.user.role !== "host" && session?.user.role !== "admin" ? (
             <Button className="w-18 h-18 bottom-4 right-4 z-50 m-4 hidden rounded-full border p-4 lg:fixed lg:block">

@@ -90,7 +90,7 @@ export const users = pgTable(
     about: text("about"),
     // destinations: varchar("destinations").array(),
     onboardingStep: integer("onboarding_step").notNull().default(0),
-    isGuest: boolean("is_guest").default(false),
+    isBurner: boolean("is_burner").default(false),
     sessionToken: text("session_token").unique(),
   },
   (t) => ({

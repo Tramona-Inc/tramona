@@ -171,104 +171,12 @@ export const authRouter = createTRPCRouter({
         });
       }
     }),
-  createUserHost: publicProcedure
-    .input(
-      z.object({
-        name: zodString({ minLen: 2 }),
-        email: zodEmail(),
-        password: zodPassword(),
-        referralCode: z.string().optional(),
-        conversationId: z.string(),
-        hostType: z.enum(ALL_HOST_TYPES),
-      }),
-    )
-    .mutation(async ({ input, ctx }) => {
-      const userQueriedWEmail = await fetchEmailVerified(input.email);
-
-      if (userQueriedWEmail?.emailVerified) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "User with this email already exists",
-        });
-      }
-
-      const hashedPassword: string = await bycrypt.hash(input.password, 10);
-
-      try {
-        let user: User | null;
-
-        // Users signed up but didn't verify email
-        if (userQueriedWEmail?.emailVerified === null) {
-          user = await updateExistingUserAuth(
-            // input.name,
-            input.email,
-            hashedPassword,
-            userQueriedWEmail.id,
-          );
-        } else {
-          // Initial sign up insert the user info
-          user = await insertUserAuth(
-            // input.name,
-            input.email,
-            hashedPassword,
-            true,
-          );
-
-          if (user) {
-            // Create referral code
-            await ctx.db.insert(referralCodes).values({
-              ownerId: user.id,
-              referralCode: generateReferralCode(),
-            });
-
-            // Link user account
-            await CustomPgDrizzleAdapter(ctx.db).linkAccount?.({
-              provider: "credentials",
-              providerAccountId: user.id,
-              userId: user.id,
-              type: "email",
-            });
-          }
-        }
-
-        if (user) {
-          // create new team for just the host
-          const teamId = await ctx.db
-            .insert(hostTeams)
-            .values({
-              ownerId: user.id,
-              name: `${user.name ?? user.username ?? user.email}`,
-            })
-            .returning()
-            .then((res) => res[0]!.id);
-
-          // Insert Host info
-          await ctx.db.insert(hostProfiles).values({
-            userId: user.id,
-            curTeamId: teamId,
-          });
-
-          // Send email verification token
-          await sendVerificationEmailWithConversation(
-            user,
-            input.conversationId,
-          );
-        }
-
-        return user;
-      } catch (error) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Something went wrong",
-        });
-      }
-    }),
 
   createTempUserForGuest: publicProcedure
     .input(
       z.object({
         email: zodEmail(),
-        isGuest: z.boolean(),
+        isBurner: z.boolean(),
         sessionToken: z.string(),
       }),
     )
@@ -278,7 +186,7 @@ export const authRouter = createTRPCRouter({
         where: eq(users.sessionToken, input.sessionToken),
       });
       if (existedGuestTempUser) {
-        return
+        return;
       }
       // insert user to db
       const user = await ctx.db
@@ -286,7 +194,7 @@ export const authRouter = createTRPCRouter({
         .values({
           id: crypto.randomUUID(),
           email: input.email,
-          isGuest: input.isGuest,
+          isBurner: input.isBurner,
           sessionToken: input.sessionToken,
         })
         .returning()

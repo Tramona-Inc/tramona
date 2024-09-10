@@ -510,17 +510,14 @@ export const messagesRouter = createTRPCRouter({
         sessionToken: z.string().optional(),
       }),
     )
-    .query(async ({ input }) => {
-    getConversationsWithAdmin: publicProcedure
-    .input(z.object({
-      userId: z.string().optional(),
-      sessionToken: z.string().optional(),
-    })) 
     .query(async ({ ctx, input }) => {
       let conversationId = null;
       let tempUser = null;
-      if (ctx.session?.user.role === "admin" || ctx.session?.user.role === "host") {
-        return null
+      if (
+        ctx.session?.user.role === "admin" ||
+        ctx.session?.user.role === "host"
+      ) {
+        return null;
       }
       if (!input.userId && input.sessionToken) {
         tempUser = await db.query.users.findFirst({
@@ -529,25 +526,27 @@ export const messagesRouter = createTRPCRouter({
         if (tempUser) {
           conversationId = await fetchConversationWithAdmin(tempUser.id);
         } else {
-          throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "Guest Temporary User not found",
-          });
+          return null;
+          // throw new TRPCError({
+          //   code: "NOT_FOUND",
+          //   message: "Guest Temporary User not found",
+          // });
         }
       } else if (input.userId) {
         // if both userId and sessionToken are provided, userId will be used
         conversationId = await fetchConversationWithAdmin(input.userId);
       } else if (!input.userId && !input.sessionToken) {
         return null; // when the page renders for the first time, the tRPC call will hit here
-      } 
-
-      if (!conversationId) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "conversationId not found",
-        });
       }
 
-      return { conversationId: conversationId, tempUserId: tempUser?.id };
+      if (!conversationId) {
+        return null;
+        // throw new TRPCError({
+        //   code: "NOT_FOUND",
+        //   message: "conversationId not found",
+        // });
+      }
+
+      return { conversationId: conversationId ?? "", tempUserId: tempUser?.id };
     }),
 });

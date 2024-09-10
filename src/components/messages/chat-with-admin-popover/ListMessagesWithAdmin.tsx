@@ -14,10 +14,15 @@ export default function ListMessagesWithAdmin() {
   const {
     data: conversationIdAndTempUserId,
     refetch: refetchConversationIdAndTempUserId,
-  } = api.messages.getConversationsWithAdmin.useQuery({
-    userId: session?.user.id,
-    sessionToken: tempToken,
-  });
+  } = api.messages.getConversationsWithAdmin.useQuery(
+    {
+      userId: session?.user.id,
+      sessionToken: tempToken,
+    },
+    {
+      enabled: Boolean(session?.user.id ?? tempToken),
+    },
+  );
 
   useEffect(() => {
     if (!session && typeof window !== "undefined") {
@@ -31,10 +36,8 @@ export default function ListMessagesWithAdmin() {
       const fetchData = () => {
         try {
           if (conversationIdAndTempUserId) {
-            setConversationId(
-              conversationIdAndTempUserId.conversationId as string,
-            );
-            setTempUserId(conversationIdAndTempUserId.tempUserId as string);
+            setConversationId(conversationIdAndTempUserId.conversationId);
+            setTempUserId(conversationIdAndTempUserId.tempUserId ?? "");
           }
         } catch (error) {
           errorToast();
@@ -88,7 +91,7 @@ export default function ListMessagesWithAdmin() {
       const newMessage: ChatMessageType = {
         id: payload.new.id,
         conversationId: payload.new.conversation_id,
-        userId: payload.new.user_id ?? "",
+        userId: payload.new.user_id,
         message: payload.new.message,
         isEdit: payload.new.is_edit,
         createdAt: payload.new.created_at,
