@@ -15,7 +15,6 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import duration from "dayjs/plugin/duration";
 import { HostRequestsPageData } from "@/server/api/routers/propertiesRouter";
-import { DIRECTLISTINGMARKUP } from "@/utils/constants";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -292,9 +291,8 @@ export function getDirectListingPriceBreakdown({
 }: {
   bookingCost: number;
 }) {
-  const justMarkupCost = bookingCost * DIRECTLISTINGMARKUP - bookingCost; // first get markup cost excluding booking 12.94
-  const stripeFee = 0.029 * (bookingCost + justMarkupCost) + 30; // Stripe fee calculation after markup
-  const serviceFee = stripeFee + justMarkupCost;
+  const stripeFee = 0.029 * bookingCost + 30; // Stripe fee calculation after markup (markup occured when offer was inserted)
+  const serviceFee = stripeFee;
   const finalTotal = Math.floor(bookingCost + serviceFee);
   return {
     bookingCost,
@@ -708,17 +706,29 @@ export function getOfferDiscountPercentage(offer: {
   travelerOfferedPrice: number;
   checkIn: Date;
   checkOut: Date;
-  property: { originalNightlyPrice: number | null };
+  property?: { originalNightlyPrice?: number | null };
+  randomDirectListingDiscount?: number | null;
+  datePriceFromAirbnb: number | null;
 }) {
   const numNights = getNumNights(offer.checkIn, offer.checkOut);
   const offerNightlyPrice = offer.travelerOfferedPrice / numNights;
+  //check to see if scraped property and the randomDirectListingDiscount is not null
+  if (offer.randomDirectListingDiscount) {
+    return offer.randomDirectListingDiscount;
+  }
+  //check the if the offer is by a real host and is listed on airbnb
+  if (offer.datePriceFromAirbnb) {
+    return getDiscountPercentage(offer.datePriceFromAirbnb, offerNightlyPrice);
+  }
 
-  if (offer.property.originalNightlyPrice !== null) {
+  if (offer.property?.originalNightlyPrice) {
     return getDiscountPercentage(
       offer.property.originalNightlyPrice,
       offerNightlyPrice,
     );
-  }
+  } else return Math.round(8 + 4 * mulberry32(offer.createdAt.getTime())); // random number between 8 and 12, deterministic based on offer creation time
+}
 
-  return Math.round(8 + 4 * mulberry32(offer.createdAt.getTime())); // random number between 8 and 12, deterministic based on offer creation time
+export function createRandomMarkupEightToFourteenPercent() {
+  return Math.floor(Math.random() * 7 + 8);
 }

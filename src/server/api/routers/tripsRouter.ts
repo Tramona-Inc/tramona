@@ -4,12 +4,7 @@ import {
   roleRestrictedProcedure,
 } from "@/server/api/trpc";
 import { db } from "@/server/db";
-import {
-  groupMembers,
-  properties,
-  trips,
-  tripDamages,
-} from "@/server/db/schema";
+import { groupMembers, properties, trips } from "@/server/db/schema";
 
 import { TRPCError } from "@trpc/server";
 import { and, eq, exists, isNotNull, isNull, sql } from "drizzle-orm";

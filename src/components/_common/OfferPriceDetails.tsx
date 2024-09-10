@@ -25,7 +25,7 @@ export function OfferPriceDetails({
   const nightlyPrice = offer.travelerOfferedPrice / numberOfNights;
   const { bookingCost, taxPaid, serviceFee, finalTotal } = offer.scrapeUrl
     ? getDirectListingPriceBreakdown({
-        bookingCost: offer.totalPrice,
+        bookingCost: offer.travelerOfferedPrice,
       })
     : getTramonaPriceBreakdown({
         bookingCost: offer.travelerOfferedPrice,

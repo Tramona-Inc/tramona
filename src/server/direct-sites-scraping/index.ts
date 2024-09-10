@@ -16,7 +16,11 @@ import {
 } from "../db/schema";
 import { arizonaScraper, arizonaSubScraper } from "./integrity-arizona";
 import { eq, and, ne, or, isNotNull } from "drizzle-orm";
-import { getNumNights } from "@/utils/utils";
+import {
+  createRandomMarkupEightToFourteenPercent,
+  getNumNights,
+} from "@/utils/utils";
+import { DIRECTLISTINGMARKUP } from "@/utils/constants";
 
 export type DirectSiteScraper = (options: {
   checkIn: Date;
@@ -158,10 +162,14 @@ export const scrapeDirectListings = async (options: {
               checkOut: options.checkOut,
               totalPrice: originalTotalPrice,
               hostPayout: originalTotalPrice,
-              travelerOfferedPrice: originalTotalPrice,
+              travelerOfferedPrice: Math.ceil(
+                originalTotalPrice * DIRECTLISTINGMARKUP,
+              ),
               scrapeUrl: listing.scrapeUrl,
               isAvailableOnOriginalSite: true,
               availabilityCheckedAt: new Date(),
+              randomDirectListingDiscount:
+                createRandomMarkupEightToFourteenPercent(),
               ...(options.requestId && { requestId: options.requestId }),
             };
             const newOfferId = await trx
