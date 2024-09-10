@@ -1,7 +1,6 @@
 import {
   BadgeHelp,
   BadgeInfo,
-  BadgePercentIcon,
   HandshakeIcon,
   Home,
   InfoIcon,

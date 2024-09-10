@@ -37,6 +37,7 @@ import {
   scrapeDirectListings,
 } from "@/server/direct-sites-scraping";
 import { createNormalDistributionDates } from "@/server/server-utils";
+import { scrapeAirbnbPrice } from "@/server/scrapePrice";
 
 export const offersRouter = createTRPCRouter({
   accept: protectedProcedure
@@ -419,15 +420,46 @@ export const offersRouter = createTRPCRouter({
       if (input.requestId !== undefined) {
         const requestDetails = await ctx.db.query.requests.findFirst({
           where: eq(requests.id, input.requestId),
-          columns: { checkIn: true, checkOut: true, madeByGroupId: true },
+          columns: {
+            checkIn: true,
+            checkOut: true,
+            madeByGroupId: true,
+            numGuests: true,
+          },
         });
 
         if (!requestDetails) throw new TRPCError({ code: "BAD_REQUEST" });
+
+        const curProperty = await db.query.properties.findFirst({
+          where: eq(properties.id, input.propertyId),
+          columns: {
+            name: true,
+            imageUrls: true,
+            originalListingId: true,
+            maxNumGuests: true,
+          },
+        });
+
+        const scrapeParams = {
+          checkIn: requestDetails.checkIn,
+          checkOut: requestDetails.checkOut,
+          numGuests: requestDetails.numGuests,
+        };
+        const datePriceFromAirbnb = curProperty?.originalListingId
+          ? await scrapeAirbnbPrice({
+              airbnbListingId: curProperty.originalListingId,
+              params: scrapeParams,
+            }).then((res) => {
+              if (!res) throw new Error("Error scraping airbnb price");
+              return res;
+            })
+          : null;
 
         await ctx.db.insert(offers).values({
           ...input,
           checkIn: requestDetails.checkIn,
           checkOut: requestDetails.checkOut,
+          datePriceFromAirbnb: datePriceFromAirbnb,
         });
 
         await ctx.db
@@ -440,9 +472,6 @@ export const offersRouter = createTRPCRouter({
           );
 
         //find the property
-        const curProperty = await db.query.properties.findFirst({
-          where: eq(properties.id, input.propertyId),
-        });
 
         const request = await db.query.requests.findFirst({
           where: eq(requests.id, input.requestId),
@@ -807,6 +836,8 @@ export async function getOfferPageData(offerId: number) {
       travelerOfferedPrice: true,
       scrapeUrl: true,
       isAvailableOnOriginalSite: true,
+      randomDirectListingDiscount: true,
+      datePriceFromAirbnb: true,
     },
     with: {
       request: {

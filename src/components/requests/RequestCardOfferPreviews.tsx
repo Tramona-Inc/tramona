@@ -10,8 +10,6 @@ import {
   getOfferDiscountPercentage,
   getTravelerOfferedPrice,
 } from "@/utils/utils";
-import { getDiscountPercentage } from "@/utils/utils";
-import { mulberry32 } from "@/utils/utils";
 import { ExternalLinkIcon } from "lucide-react";
 import { sortBy } from "lodash";
 
