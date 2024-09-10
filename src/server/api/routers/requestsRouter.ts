@@ -413,7 +413,7 @@ const modifiedRequestSchema = requestInsertSchema.omit({
 });
 
 // Infer the type from the modified schema
-type RequestInput = z.infer<typeof modifiedRequestSchema>;
+export type RequestInput = z.infer<typeof modifiedRequestSchema>;
 
 export async function handleRequestSubmission(
   input: RequestInput,

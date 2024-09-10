@@ -56,9 +56,7 @@ export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 
 export type PropertyPageData = InferQueryModel<
   "properties",
-  {
-    latLngPoint: false;
-  },
+  undefined,
   {
     host: {
       columns: {
@@ -335,21 +333,19 @@ export default function PropertyPage({
             </Dialog>
           </section>
 
-          {property.latitude && property.longitude && (
-            <section>
-              <h2 className="subheading border-t pb-2 pt-4">
-                Where you&apos;ll be
-              </h2>
-              <div className="relative mt-4 h-[400px]">
-                <div className="absolute inset-0 z-0 overflow-hidden rounded-xl border">
-                  <SingleLocationMap
-                    lat={property.latitude}
-                    lng={property.longitude}
-                  />
-                </div>
+          <section>
+            <h2 className="subheading border-t pb-2 pt-4">
+              Where you&apos;ll be
+            </h2>
+            <div className="relative mt-4 h-[400px]">
+              <div className="absolute inset-0 z-0 overflow-hidden rounded-xl border">
+                <SingleLocationMap
+                  lat={property.latLngPoint.x}
+                  lng={property.latLngPoint.y}
+                />
               </div>
-            </section>
-          )}
+            </div>
+          </section>
 
           <section>
             <div className="flex items-start justify-between border-t pb-2 pt-4">
@@ -445,16 +441,18 @@ export default function PropertyPage({
             )}
           </section>
 
-          <section>
-            <h2 className="subheading border-t pb-2 pt-4">
-              Check-in information
-            </h2>
-            <p>
-              {property.checkInInfo === "self"
-                ? "Self check-in"
-                : property.checkInInfo}
-            </p>
-          </section>
+          {property.checkInInfo !== null && (
+            <section>
+              <h2 className="subheading border-t pb-2 pt-4">
+                Check-in information
+              </h2>
+              <p>
+                {property.checkInInfo === "self"
+                  ? "Self check-in"
+                  : property.checkInInfo}
+              </p>
+            </section>
+          )}
 
           {offer && (
             <div className="flex justify-end">
@@ -492,7 +490,7 @@ function BookNowBtn({
 }: {
   btnSize: ButtonProps["size"];
   offer: OfferWithDetails;
-  property: Pick<Property, "stripeVerRequired">;
+  property: Pick<Property, "stripeVerRequired" | "airbnbUrl" | "bookOnAirbnb">;
 }) {
   const { data: verificationStatus } =
     api.users.myVerificationStatus.useQuery();
@@ -516,12 +514,13 @@ function BookNowBtn({
           <BookCheckIcon className="size-5" />
           Booked
         </>
-      ) : !property.stripeVerRequired ? (
-        <Link href={`/offer-checkout/${offer.id}`}>
-          Book now
-          <ArrowRightIcon className="size-5" />
+      ) : property.bookOnAirbnb ? (
+        <Link href={property.airbnbUrl!}>
+          Book on Airbnb
+          <ExternalLinkIcon className="size-5" />
         </Link>
-      ) : verificationStatus?.isIdentityVerified === "true" ? (
+      ) : !property.stripeVerRequired ||
+        verificationStatus?.isIdentityVerified === "true" ? (
         <Link href={`/offer-checkout/${offer.id}`}>
           Book now
           <ArrowRightIcon className="size-5" />
@@ -546,7 +545,7 @@ function OfferPageSidebar({
   property,
 }: {
   offer: OfferWithDetails;
-  property: Pick<Property, "stripeVerRequired">;
+  property: Pick<Property, "stripeVerRequired" | "airbnbUrl" | "bookOnAirbnb">;
 }) {
   return (
     <div className="space-y-4">
@@ -621,7 +620,7 @@ function OfferPageMobileBottomCard({
   property,
 }: {
   offer: OfferWithDetails;
-  property: Pick<Property, "stripeVerRequired">;
+  property: Pick<Property, "stripeVerRequired" | "airbnbUrl" | "bookOnAirbnb">;
 }) {
   const { data: verificationStatus } =
     api.users.myVerificationStatus.useQuery();
