@@ -851,9 +851,6 @@ export async function getOfferPageData(offerId: number) {
         },
       },
       property: {
-        columns: {
-          latLngPoint: false,
-        },
         with: {
           reviews: true,
           host: {
