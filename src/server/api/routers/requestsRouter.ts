@@ -34,6 +34,7 @@ import {
 } from "@/utils/utils";
 import { sendTextToHost } from "@/server/server-utils";
 import { newLinkRequestSchema } from "@/utils/useSendUnsentRequests";
+import { random } from "lodash";
 
 const updateRequestInputSchema = z.object({
   requestId: z.number(),
@@ -67,6 +68,7 @@ export const requestsRouter = createTRPCRouter({
               createdAt: true,
               checkIn: true,
               checkOut: true,
+              randomDirectListingDiscount: true,
             },
             with: {
               property: {
