@@ -837,6 +837,7 @@ export async function getOfferPageData(offerId: number) {
       scrapeUrl: true,
       isAvailableOnOriginalSite: true,
       randomDirectListingDiscount: true,
+      datePriceFromAirbnb: true,
     },
     with: {
       request: {
