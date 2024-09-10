@@ -39,6 +39,7 @@ import { getCoordinates } from "@/server/google-maps";
 import { scrapeDirectListings } from "@/server/direct-sites-scraping";
 import { waitUntil } from "@vercel/functions";
 import { scrapeAirbnbListingsForRequest } from "@/server/scrapeAirbnbListingsForRequest";
+import { random } from "lodash";
 
 const updateRequestInputSchema = z.object({
   requestId: z.number(),
