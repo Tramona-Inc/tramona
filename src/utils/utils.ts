@@ -15,8 +15,6 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import duration from "dayjs/plugin/duration";
 import { HostRequestsPageData } from "@/server/api/routers/propertiesRouter";
-import { DIRECTLISTINGMARKUP } from "@/utils/constants";
-import { random } from "lodash";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -709,13 +707,13 @@ export function getOfferDiscountPercentage(offer: {
   checkIn: Date;
   checkOut: Date;
   property?: { originalNightlyPrice?: number | null };
-  randomDirectListingDiscount: number | null;
-  datePriceFromAirbnb?: number | null;
+  randomDirectListingDiscount?: number | null;
+  datePriceFromAirbnb: number | null;
 }) {
   const numNights = getNumNights(offer.checkIn, offer.checkOut);
   const offerNightlyPrice = offer.travelerOfferedPrice / numNights;
   //check to see if scraped property and the randomDirectListingDiscount is not null
-  if (offer.randomDirectListingDiscount !== null) {
+  if (offer.randomDirectListingDiscount) {
     return offer.randomDirectListingDiscount;
   }
   //check the if the offer is by a real host and is listed on airbnb
@@ -728,9 +726,7 @@ export function getOfferDiscountPercentage(offer: {
       offer.property.originalNightlyPrice,
       offerNightlyPrice,
     );
-  }
-
-  return Math.round(8 + 4 * mulberry32(offer.createdAt.getTime())); // random number between 8 and 12, deterministic based on offer creation time
+  } else return Math.round(8 + 4 * mulberry32(offer.createdAt.getTime())); // random number between 8 and 12, deterministic based on offer creation time
 }
 
 export function createRandomMarkupEightToFourteenPercent() {

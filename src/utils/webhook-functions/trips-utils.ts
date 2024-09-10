@@ -13,7 +13,6 @@ import {
   formatDateRange,
   getDirectListingPriceBreakdown,
   getNumNights,
-  getTravelerOfferedPrice,
 } from "../utils";
 import type { User, Trip, Offer, Property } from "../../server/db/schema";
 import { getTramonaPriceBreakdown } from "../utils";

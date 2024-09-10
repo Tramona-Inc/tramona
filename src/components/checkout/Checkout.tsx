@@ -15,8 +15,6 @@ import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
 import CustomStripeCheckout from "./CustomStripeCheckout";
 import { OfferPriceDetails } from "../_common/OfferPriceDetails";
 import { getCancellationPolicyDescription } from "@/config/getCancellationPolicyDescription";
-import { create } from "zustand";
-import { random } from "lodash";
 
 export default function Checkout({
   offer: { property, request, ...offer },
@@ -83,9 +81,6 @@ export default function Checkout({
   }
 
   function CheckoutSummary() {
-    const nightlyPrice =
-      offer.totalPrice / getNumNights(offer.checkIn, offer.checkOut);
-
     return (
       <div>
         <div className="md:rounded-t-xl md:border md:border-b-0 md:p-3">

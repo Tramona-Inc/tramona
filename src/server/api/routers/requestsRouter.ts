@@ -69,6 +69,7 @@ export const requestsRouter = createTRPCRouter({
               checkIn: true,
               checkOut: true,
               randomDirectListingDiscount: true,
+              datePriceFromAirbnb: true,
             },
             with: {
               property: {
