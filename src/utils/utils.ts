@@ -708,8 +708,9 @@ export function getOfferDiscountPercentage(offer: {
   travelerOfferedPrice: number;
   checkIn: Date;
   checkOut: Date;
-  property: { originalNightlyPrice: number | null };
+  property?: { originalNightlyPrice?: number | null };
   randomDirectListingDiscount: number | null;
+  datePriceFromAirbnb?: number | null;
 }) {
   const numNights = getNumNights(offer.checkIn, offer.checkOut);
   const offerNightlyPrice = offer.travelerOfferedPrice / numNights;
@@ -717,8 +718,12 @@ export function getOfferDiscountPercentage(offer: {
   if (offer.randomDirectListingDiscount !== null) {
     return offer.randomDirectListingDiscount;
   }
+  //check the if the offer is by a real host and is listed on airbnb
+  if (offer.datePriceFromAirbnb) {
+    return getDiscountPercentage(offer.datePriceFromAirbnb, offerNightlyPrice);
+  }
 
-  if (offer.property.originalNightlyPrice !== null) {
+  if (offer.property?.originalNightlyPrice) {
     return getDiscountPercentage(
       offer.property.originalNightlyPrice,
       offerNightlyPrice,

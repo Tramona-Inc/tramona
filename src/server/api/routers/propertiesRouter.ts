@@ -40,7 +40,6 @@ import {
   type Property,
 } from "./../../db/schema/tables/properties";
 import { addProperty } from "@/server/server-utils";
-import { getDiscountPercentage } from "@/utils/utils";
 
 export type HostRequestsPageData = {
   city: string;
