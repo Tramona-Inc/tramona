@@ -29,6 +29,7 @@ import {
 import { api } from "@/utils/api";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function HostConfirmRequestDialog({
   open,
@@ -49,6 +50,7 @@ export default function HostConfirmRequestDialog({
   propertyPrices: Record<number, string>;
   setStep: (step: number) => void;
 }) {
+  const { toast } = useToast();
   const [selectedPropertyToEdit, setSelectedPropertyToEdit] = useState<
     number | null
   >(null);
@@ -84,31 +86,48 @@ export default function HostConfirmRequestDialog({
     await Promise.all(
       // todo: make procedure accept array
       selectedProperties.map(async (property) => {
-        await createOffersMutation.mutateAsync({
-          requestId: request.id,
-          propertyId: property.id,
-          totalPrice: parseInt(propertyPrices[property.id] ?? "0") * 100,
-          hostPayout:
-            parseFloat(
-              getHostPayout({
-                propertyPrice: parseFloat(propertyPrices[property.id] ?? "0"),
-                hostMarkup: HOST_MARKUP,
-                numNights,
-              }),
-            ) * 100,
-          travelerOfferedPrice:
-            parseFloat(
-              getTravelerOfferedPrice({
-                propertyPrice: parseFloat(propertyPrices[property.id] ?? "0"),
-                travelerMarkup: TRAVELER__MARKUP,
-                numNights,
-              }),
-            ) * 100,
-        });
+        await createOffersMutation
+          .mutateAsync({
+            requestId: request.id,
+            propertyId: property.id,
+            totalPrice: parseInt(propertyPrices[property.id] ?? "0") * 100,
+            hostPayout:
+              parseFloat(
+                getHostPayout({
+                  propertyPrice: parseFloat(propertyPrices[property.id] ?? "0"),
+                  hostMarkup: HOST_MARKUP,
+                  numNights,
+                }),
+              ) * 100,
+            travelerOfferedPrice:
+              parseFloat(
+                getTravelerOfferedPrice({
+                  propertyPrice: parseFloat(propertyPrices[property.id] ?? "0"),
+                  travelerMarkup: TRAVELER__MARKUP,
+                  numNights,
+                }),
+              ) * 100,
+          })
+          .then(() => setStep(2))
+          .catch((error) => {
+            console.log("Error", error);
+            if (error instanceof Error) {
+              toast({
+                title: "Error",
+                description: error.message,
+                variant: "destructive",
+              });
+            }
+          });
       }),
-    ).then(() => setIsLoading(false));
-
-    setStep(2);
+    )
+      .then(() => {
+        setIsLoading(false);
+      })
+      .catch(() => {
+        setIsLoading(false);
+        setStep(1);
+      });
   };
 
   const numNights = getNumNights(request.checkIn, request.checkOut);
