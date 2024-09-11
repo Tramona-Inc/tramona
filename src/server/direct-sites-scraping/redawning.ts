@@ -76,6 +76,7 @@ const propertyTypeMapping: Record<string, PropertyType> = {
   Home: "House",
   Condo: "Condominium",
   Townhouse: "Townhouse",
+  Suite: "Guest Suite",
   Other: "Other",
 };
 
@@ -228,6 +229,10 @@ export const mapTaxodataToScrapedListing = async (
         city: city,
         latitude: parseFloat(property.latitude),
         longitude: parseFloat(property.longitude),
+        latLngPoint: {
+          x: parseFloat(property.longitude),
+          y: parseFloat(property.latitude),
+        },
         maxNumGuests: maxNumGuests,
         numBeds: property.bedrooms,
         numBedrooms: property.bedrooms,
@@ -271,6 +276,9 @@ export const redawningScraper: DirectSiteScraper = async ({
   latitude,
   longitude,
 }) => {
+  if (location) {
+    location = location.replace(" ", "%20");
+  }
   const url = `https://www.redawning.com/search/properties?ptype=country&platitude=${latitude}&plongitude=${longitude}&pcountry=US&pname=${location}&sleepsmax=1TO100&dates=${convertToEpochAt7AM(checkIn)}TO${convertToEpochAt7AM(checkOut)}`;
   console.log("scrapedRedawningUrl: ", url);
   const $ = await scrapeUrl(url);
@@ -301,6 +309,7 @@ export const redawningScraper: DirectSiteScraper = async ({
             headers: {
               "x-api-key": "ehMtnGSw4i7dFqngWo8M15cWaqzKPM4V2jeU3zty",
             },
+            timeout: 30000,
           })
           .then((response) => response.data)
           .then((data) => priceQuoteSchema.parse(data))
