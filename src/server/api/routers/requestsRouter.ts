@@ -32,14 +32,12 @@ import {
   formatDateRange,
   plural,
 } from "@/utils/utils";
-import { sendTextToHost } from "@/server/server-utils";
+import { sendTextToHost, haversineDistance } from "@/server/server-utils";
 import { newLinkRequestSchema } from "@/utils/useSendUnsentRequests";
 import { getCoordinates } from "@/server/google-maps";
-import { haversineDistance } from "@/components/landing-page/SearchBars/useCityRequestForm";
 import { waitUntil } from "@vercel/functions";
 import { scrapeDirectListings } from "@/server/direct-sites-scraping";
 import { random } from "lodash";
-
 
 const updateRequestInputSchema = z.object({
   requestId: z.number(),
@@ -167,14 +165,16 @@ export const requestsRouter = createTRPCRouter({
 
   create: protectedProcedure
     .input(
-      requestInsertSchema.omit({
-        madeByGroupId: true,
-        latLngPoint: true,
-      }).extend({
-        lat: z.number().optional(),
-        lng: z.number().optional(),
-        radius: z.number().optional(),
-      })
+      requestInsertSchema
+        .omit({
+          madeByGroupId: true,
+          latLngPoint: true,
+        })
+        .extend({
+          lat: z.number().optional(),
+          lng: z.number().optional(),
+          radius: z.number().optional(),
+        }),
     )
     .mutation(async ({ ctx, input }) => {
       return await handleRequestSubmission(input, { user: ctx.user });
@@ -416,14 +416,16 @@ export const requestsRouter = createTRPCRouter({
 });
 
 //Reusable functions
-const modifiedRequestSchema = requestInsertSchema.omit({
-  madeByGroupId: true,
-  latLngPoint: true,
-}).extend({
-  lat: z.number().optional(),
-  lng: z.number().optional(),
-  radius: z.number().optional(),
-});
+const modifiedRequestSchema = requestInsertSchema
+  .omit({
+    madeByGroupId: true,
+    latLngPoint: true,
+  })
+  .extend({
+    lat: z.number().optional(),
+    lng: z.number().optional(),
+    radius: z.number().optional(),
+  });
 
 // Infer the type from the modified schema
 type RequestInput = z.infer<typeof modifiedRequestSchema>;
@@ -454,7 +456,13 @@ export async function handleRequestSubmission(
         lat = coordinates.location.lat;
         lng = coordinates.location.lng;
         if (coordinates.bounds) {
-          radius = haversineDistance(coordinates.bounds.northeast.lat, coordinates.bounds.northeast.lng, coordinates.bounds.southwest.lat, coordinates.bounds.southwest.lng) / 2;
+          radius =
+            haversineDistance(
+              coordinates.bounds.northeast.lat,
+              coordinates.bounds.northeast.lng,
+              coordinates.bounds.southwest.lat,
+              coordinates.bounds.southwest.lng,
+            ) / 2;
         } else {
           radius = 10;
         }
@@ -469,7 +477,7 @@ export async function handleRequestSubmission(
       const request = await tx
         .insert(requests)
         .values({ ...input, madeByGroupId, latLngPoint, radius })
-        .returning({latLngPoint: requests.latLngPoint, id: requests.id})
+        .returning({ latLngPoint: requests.latLngPoint, id: requests.id })
         .then((res) => res[0]!);
 
       //TO DO - figure out if i need to get coordinates here or elsewhere
@@ -481,27 +489,26 @@ export async function handleRequestSubmission(
       //   }
       // }
 
-
       const eligibleProperties = await getPropertiesForRequest(
         { ...input, id: request.id, latLngPoint: request.latLngPoint, radius },
         { tx },
       );
-      
-    waitUntil(
-      scrapeDirectListings({
-        checkIn: input.checkIn,
-        checkOut: input.checkOut,
-        numOfOffersInEachScraper: 10,
-        requestNightlyPrice:
-          input.maxTotalPrice / getNumNights(input.checkIn, input.checkOut),
-        requestId: requestId,
-        location: input.location,
-        latitude: input.latLngPoint?.x,
-        longitude: input.latLngPoint?.y,
-      }).catch((error) => {
-        console.error("Error scraping listings: " + error);
-      }),
-    );
+
+      waitUntil(
+        scrapeDirectListings({
+          checkIn: input.checkIn,
+          checkOut: input.checkOut,
+          numOfOffersInEachScraper: 10,
+          requestNightlyPrice:
+            input.maxTotalPrice / getNumNights(input.checkIn, input.checkOut),
+          requestId: request.id,
+          location: input.location,
+          latitude: lat,
+          longitude: lng,
+        }).catch((error) => {
+          console.error("Error scraping listings: " + error);
+        }),
+      );
 
       if (eligibleProperties.length > 0) {
         await tx.insert(requestsToProperties).values(

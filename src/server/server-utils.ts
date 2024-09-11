@@ -293,7 +293,7 @@ export async function addProperty({
   hostTeamId?: number | null;
   isAdmin: boolean;
   property: Omit<NewProperty, "id" | "city" | "latLngPoint"> & {
-    latLngPoint?: { x: number, y: number };
+    latLngPoint?: { x: number; y: number };
   };
 }) {
   let lat = property.latLngPoint?.y;
@@ -348,30 +348,30 @@ export async function addProperty({
 //     console.log("request: ", request);
 //   }
 
-  // for (const request of allRequests) {
-  //   const matchingProperties = await getPropertiesForRequest({
-  //     id: request.id,
-  //     // lat: request.lat,
-  //     // lng: request.lng,
-  //     radius: request.radius,
-  //     location: request.location,
-  //     checkIn: request.checkIn,
-  //     checkOut: request.checkOut,
-  //     maxTotalPrice: request.maxTotalPrice,
-  //     latLngPoint: request.latLngPoint,
-  //     // propertyLatLngPoint: insertedProperty.latLngPoint,
-  //   });
+// for (const request of allRequests) {
+//   const matchingProperties = await getPropertiesForRequest({
+//     id: request.id,
+//     // lat: request.lat,
+//     // lng: request.lng,
+//     radius: request.radius,
+//     location: request.location,
+//     checkIn: request.checkIn,
+//     checkOut: request.checkOut,
+//     maxTotalPrice: request.maxTotalPrice,
+//     latLngPoint: request.latLngPoint,
+//     // propertyLatLngPoint: insertedProperty.latLngPoint,
+//   });
 
-  // console.log("properties:", allRequestsForProperty);
-  // const propertyIds = request.map((property) => property.id);
+// console.log("properties:", allRequestsForProperty);
+// const propertyIds = request.map((property) => property.id);
 
-  // if (propertyIds.includes(insertedProperty.id)) {
-  //   await db.insert(requestsToProperties).values({
-  //     requestId: request.id,
-  //     propertyId: insertedProperty.id,
-  //   });
-  // }
-  //}
+// if (propertyIds.includes(insertedProperty.id)) {
+//   await db.insert(requestsToProperties).values({
+//     requestId: request.id,
+//     propertyId: insertedProperty.id,
+//   });
+// }
+//}
 // }
 
 export async function sendTextToHost(
@@ -430,8 +430,10 @@ export async function getRequestsForProperties(
 ) {
   const requestIsNearProperties: SQL[] = [];
   // let priceRestrictionsSQL: SQL[] | undefined[] = [sql`FALSE`];
-  const propertyToRequestMap: { property: Property; request: Request & { traveler: Pick<User, "name" | "image"> } }[] = [];
-
+  const propertyToRequestMap: {
+    property: Property;
+    request: Request & { traveler: Pick<User, "name" | "image"> };
+  }[] = [];
 
   for (const property of properties) {
     const requestIsNearProperty = sql`
@@ -453,24 +455,21 @@ export async function getRequestsForProperties(
     requestIsNearProperties.push(requestIsNearProperty);
 
     const requestsForProperty = await tx.query.requests.findMany({
-      where: and(
-        requestIsNearProperty,
-        gte(requests.checkIn, new Date())
-      ),
+      where: and(requestIsNearProperty, gte(requests.checkIn, new Date())),
       with: {
-        madeByGroup:
-          { with: { owner: { columns: { image: true, name: true } } } }
+        madeByGroup: {
+          with: { owner: { columns: { image: true, name: true } } },
+        },
       },
     });
     //columns: { id: true, checkIn: true, checkOut: true, maxTotalPrice: true, location: true },
-
 
     // Store the matched requests along with the property
     for (const request of requestsForProperty) {
       const traveler = {
         name: request.madeByGroup.owner.name,
         image: request.madeByGroup.owner.image,
-      }
+      };
       propertyToRequestMap.push({
         property,
         request: {
@@ -517,7 +516,6 @@ export async function getRequestsForProperties(
 //     // priceRestrictionsSQL.push(priceRestrictionSQL);
 //   }
 
-
 //   const result = await tx.query.requests.findMany({
 //     where: and(
 //       or(...requestIsNearProperties),  //or requestIsNearProperties
@@ -543,7 +541,6 @@ export async function getRequestsForProperties(
 
 //   return result;
 // }
-
 
 export async function getPropertiesForRequest(
   req: {
@@ -804,4 +801,25 @@ export function createNormalDistributionDates(
   }
 
   return dateRanges;
+}
+
+export function haversineDistance(
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number,
+) {
+  const toRadians = (degrees: number) => degrees * (Math.PI / 180);
+
+  const R = 3958.8; // Radius of the Earth in kilometers
+  const dLat = toRadians(lat2 - lat1);
+  const dLon = toRadians(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRadians(lat1)) *
+      Math.cos(toRadians(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c; // Distance in kilometers
 }

@@ -214,13 +214,11 @@ export const offersRouter = createTRPCRouter({
       if (!offer) {
         throw new TRPCError({ code: "BAD_REQUEST" });
       }
-      console.log("OFFER", offer);
       const propertyForOffer = await getPropertyForOffer(offer.propertyId);
       if (!propertyForOffer) {
         throw new TRPCError({ code: "BAD_REQUEST" });
       }
       offer.property = propertyForOffer;
-
 
       if (offer.request) {
         const memberIds = offer.request.madeByGroup.members.map(
