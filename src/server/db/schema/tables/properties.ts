@@ -243,8 +243,8 @@ export const properties = pgTable(
     hostRating: doublePrecision("host_rating"),
 
     address: varchar("address", { length: 1000 }).notNull(),
-    // latitude: doublePrecision("latitude").notNull(),
-    // longitude: doublePrecision("longitude").notNull(),
+    latitude: doublePrecision("latitude").notNull(),
+    longitude: doublePrecision("longitude").notNull(),
     city: varchar("city", { length: 255 }).notNull(),
 
     originalListingUrl: varchar("url"),
