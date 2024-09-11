@@ -20,6 +20,7 @@ const badgeVariants = cva(
         solidRed: "bg-red-600 text-white",
         skeleton: "bg-accent animate-pulse",
         primaryGreen: "bg-teal-900 hover:bg-teal-950 text-white",
+        white: "bg-white text-black",
       },
       size: {
         sm: "text-xs px-1.5 h-5 gap-0.5 font-medium",

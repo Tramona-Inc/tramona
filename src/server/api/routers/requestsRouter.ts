@@ -34,7 +34,8 @@ import {
 } from "@/utils/utils";
 import { sendTextToHost } from "@/server/server-utils";
 import { newLinkRequestSchema } from "@/utils/useSendUnsentRequests";
-import { random } from "lodash";
+import { waitUntil } from "@vercel/functions";
+import { scrapeAirbnbListingsForRequest } from "@/server/scrapeAirbnbListingsForRequest";
 
 const updateRequestInputSchema = z.object({
   requestId: z.number(),
@@ -82,6 +83,7 @@ export const requestsRouter = createTRPCRouter({
                   originalNightlyPrice: true,
                   hostName: true,
                   hostProfilePic: true,
+                  bookOnAirbnb: true,
                 },
                 with: {
                   host: { columns: { name: true, email: true, image: true } },
@@ -460,34 +462,7 @@ export async function handleRequestSubmission(
       );
     }
 
-    // waitUntil(
-    //   scrapeAirbnbListings({
-    //     request: input,
-    //     limit: 10,
-    //   })
-    //     .then(async (airbnbListings) => {
-    //       const airbnbPropertyIds = await tx
-    //         .insert(properties)
-    //         .values(airbnbListings.map((l) => l.property))
-    //         .returning({ id: properties.id })
-    //         .then((res) => res.map((r) => r.id));
-
-    //       const flattenedReviews = airbnbListings
-    //         .map(({ reviews }, i) =>
-    //           reviews.map((r) => ({ ...r, propertyId: airbnbPropertyIds[i]! })),
-    //         )
-    //         .flat();
-
-    //       await tx.insert(reviews).values(flattenedReviews);
-    //     })
-    //     .catch((e) => {
-    //       // fail silently -- we dont want to crash the request submission
-    //       // TODO: handle this better using a dead letter queue or something
-    //       console.error(
-    //         `Error scraping Airbnb listings for request #${requestId}: ${e}`,
-    //       );
-    //     }),
-    // );
+    waitUntil(scrapeAirbnbListingsForRequest(input, { tx, requestId }));
 
     return { requestId, madeByGroupId };
   });
