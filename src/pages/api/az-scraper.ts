@@ -21,6 +21,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const listings = await scrapeDirectListings({
         checkIn: today,
         checkOut: twoDaysLater,
+        scrapersToExecute: ['arizonaScraper'],
       });
       console.log('API route: Scraping process completed');
       res.status(200).json({ message: `Successfully scraped and inserted ${listings.length} listings.` });

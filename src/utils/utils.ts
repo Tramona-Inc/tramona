@@ -15,6 +15,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import duration from "dayjs/plugin/duration";
 import { HostRequestsPageData } from "@/server/api/routers/propertiesRouter";
+import * as cheerio from "cheerio";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -205,8 +206,8 @@ export function formatDateMonthDay(date: Date | string) {
 }
 
 export function formatDateWeekMonthDay(date: Date | string) {
-  if (typeof date === "string") return formatDateString(date, "EEE, MMMM d");
-  return formatDate(removeTimezoneFromDate(date), "EEE, MMMM d");
+  if (typeof date === "string") return formatDateString(date, "EEE, MMM d");
+  return formatDate(removeTimezoneFromDate(date), "EEE, MMM d");
 }
 
 export function formatDateMonthDayYear(date: Date | string) {
@@ -731,4 +732,25 @@ export function getOfferDiscountPercentage(offer: {
 
 export function createRandomMarkupEightToFourteenPercent() {
   return Math.floor(Math.random() * 7 + 8);
+}
+
+export function parseHTML(str: string) {
+  const ret = cheerio
+    .load(
+      str
+        .replaceAll("<br />", "\n")
+        .replaceAll("<br/>", "\n")
+        .replaceAll("<br>", "\n"),
+    )(":root")
+    .prop("innerText");
+
+  if (ret === null) throw new Error("Failed to parse HTML");
+  return ret;
+}
+
+export async function getRedirectedUrl(url: string) {
+  return await fetch(url, {
+    method: "HEAD",
+    redirect: "follow",
+  }).then((r) => r.url);
 }
