@@ -35,7 +35,7 @@ export type DirectSiteScraper = (options: {
   longitude?: number;
 }) => Promise<ScrapedListing[]>;
 
-export type ScrapedListing = Omit<NewProperty, "latLngPoint"> & {
+export type ScrapedListing = NewProperty & {
   originalListingUrl: string; // enforce that its non-null
   reviews: NewReview[];
   scrapeUrl: string;
@@ -139,20 +139,6 @@ export const scrapeDirectListings = async (options: {
         }
       }
     } else {
-      // THIS IS A TEMPORARY FIX before we have coordinates for each request.
-      // Once the latLngPoint works, delete this block and test new request in "Lake Havasu" or "Parker Strip"
-      // const formattedLocation = options.location?.split(",")[0]?.trim();
-      // if (
-      //   formattedLocation === "Lake Havasu" ||
-      //   formattedLocation === "Parker Strip"
-      // ) {
-      //   selectedScrapers = directSiteScrapers.filter(
-      //     (s) => s.name === "arizonaScraper",
-      //   );
-      //   console.log("selectedScrapers", selectedScrapers);
-      //   scraperOptions.location = formattedLocation;
-      // }
-      // TEMPORARY FIX ENDS
       console.error(
         "Latitude and longitude are required for triggering location-based scraping",
       );
@@ -189,15 +175,21 @@ export const scrapeDirectListings = async (options: {
         const existingOriginalPropertyId =
           existingOriginalPropertyIdList[0]?.id;
 
-        const { location } = await getCoordinates(listing.address);
-        if (!location) throw new Error("Could not get coordinates for address");
-        const latLngPoint = sql`ST_SetSRID(ST_MakePoint(${location.lng}, ${location.lat}), 4326)`;
+        let formattedlatLngPoint = null;
+        if (listing.latLngPoint.x && listing.latLngPoint.y) {
+          formattedlatLngPoint = sql`ST_SetSRID(ST_MakePoint(${listing.latLngPoint.x}, ${listing.latLngPoint.y}), 4326)`;
+        } else {
+          const { location } = await getCoordinates(listing.address);
+          if (!location)
+            throw new Error("Could not get coordinates for address");
+          formattedlatLngPoint = sql`ST_SetSRID(ST_MakePoint(${location.lng}, ${location.lat}), 4326)`;
+        }
 
         const newPropertyListing = filterNewPropertyFields(listing);
         if (existingOriginalPropertyId) {
           const tramonaProperty = await trx
             .update(properties)
-            .set({ ...newPropertyListing, latLngPoint }) // Only keeps fields that are defined in the NewProperty schema
+            .set({ ...newPropertyListing, latLngPoint: formattedlatLngPoint }) // Only keeps fields that are defined in the NewProperty schema
             .where(eq(properties.originalListingId, existingOriginalPropertyId))
             .returning({ id: properties.id });
 
@@ -267,7 +259,10 @@ export const scrapeDirectListings = async (options: {
         } else {
           const tramonaProperty = await trx
             .insert(properties)
-            .values({ ...newPropertyListing, latLngPoint })
+            .values({
+              ...newPropertyListing,
+              latLngPoint: formattedlatLngPoint,
+            })
             .returning({ id: properties.id });
 
           const newPropertyId = tramonaProperty[0]!.id;
