@@ -36,6 +36,8 @@ import { sendTextToHost } from "@/server/server-utils";
 import { newLinkRequestSchema } from "@/utils/useSendUnsentRequests";
 import { waitUntil } from "@vercel/functions";
 import { scrapeDirectListings } from "@/server/direct-sites-scraping";
+import { random } from "lodash";
+
 
 const updateRequestInputSchema = z.object({
   requestId: z.number(),
@@ -69,6 +71,8 @@ export const requestsRouter = createTRPCRouter({
               createdAt: true,
               checkIn: true,
               checkOut: true,
+              randomDirectListingDiscount: true,
+              datePriceFromAirbnb: true,
             },
             with: {
               property: {

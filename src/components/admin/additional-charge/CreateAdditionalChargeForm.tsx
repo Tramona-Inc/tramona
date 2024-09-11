@@ -14,13 +14,7 @@ import { Input } from "@/components/ui/input";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { api } from "@/utils/api";
-import {
-  optional,
-  zodInteger,
-  zodNumber,
-  zodString,
-  zodUrl,
-} from "@/utils/zod-utils";
+import { zodInteger } from "@/utils/zod-utils";
 const formSchema = z.object({
   tripId: zodInteger({ min: 1 }),
   propertyId: zodInteger({ min: 1 }),
