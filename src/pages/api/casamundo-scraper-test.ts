@@ -26,7 +26,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         numOfOffersInEachScraper: 5,
         requestNightlyPrice: 100,
         requestId: undefined,
-        scrapersToExecute: ["casamundoScraper"],
         location: "Los Angeles, CA",
       });
       console.log('API route: Scraping process completed');

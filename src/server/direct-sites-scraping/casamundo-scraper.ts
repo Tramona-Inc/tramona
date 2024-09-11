@@ -338,6 +338,7 @@ async function fetchPropertyDetails(
         .find((group) => group.name === "amenities")
         ?.list.map((item) => item.label) || [];
     const imageUrls = data.images.map((img) => img.large) || [];
+
     const countBeds = (rooms: any[]): number => {
       return rooms
         .filter(room => room.roomType.toLowerCase().includes('bedroom'))
@@ -348,6 +349,11 @@ async function fetchPropertyDetails(
           }, 0);
         }, 0);
     };
+    const latLngPoint = data.geoLocation ? {
+      type: "point",
+      coordinates: [data.geoLocation.lat, data.geoLocation.lon], // Note: lat first for xy mode
+      srid: 4326
+    } : null;
 
     return {
       originalListingId: offerId,
@@ -357,8 +363,7 @@ async function fetchPropertyDetails(
       propertyType: data.type,
       address: data.locationShorted || "",
       city: data.locationShorted || "",
-      latitude: data.geoLocation?.lat || 0,
-      longitude: data.geoLocation?.lon || 0,
+      latLngPoint,
       maxNumGuests: data.persons || 0,
       numBeds: countBeds(data.rooms || []),
       numBedrooms: data.bedrooms || 0,
@@ -424,7 +429,6 @@ export const casamundoScraper: DirectSiteScraper = async ({
   numOfOffersInEachScraper = 5,
   requestNightlyPrice,
   requestId,
-  scrapersToExecute,
   location,
 }) => {
   if (!location) {
