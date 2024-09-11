@@ -22,6 +22,7 @@ import { useCityRequestForm } from "./useCityRequestForm";
 import { CityRequestFiltersDialog } from "./CityRequestFiltersDialog";
 import { api } from "@/utils/api";
 import RequestSubmittedDialog from "@/components/landing-page/SearchBars/DesktopRequestComponents/RequestSubmittedDialog";
+import RequestWaitlistDialog from "./DesktopRequestComponents/RequestWaitlistDialog";
 
 export default function RequestCityForm() {
   const [requestSubmittedDialogOpen, setRequestSubmittedDialogOpen] =
@@ -148,13 +149,18 @@ export default function RequestCityForm() {
         </Button>
       </form>
 
-      <RequestSubmittedDialog
+      <RequestWaitlistDialog
+        open={requestSubmittedDialogOpen}
+        setOpen={setRequestSubmittedDialogOpen}
+      />
+
+      {/* <RequestSubmittedDialog
         open={requestSubmittedDialogOpen}
         setOpen={setRequestSubmittedDialogOpen}
         showConfetti={showConfetti}
         madeByGroupId={madeByGroupId}
         location={form.getValues("location")}
-      />
+      /> */}
     </Form>
   );
 }

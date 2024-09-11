@@ -64,8 +64,8 @@ export const requests = pgTable(
       .notNull()
       .defaultNow(),
     resolvedAt: timestamp("resolved_at", { withTimezone: true }),
-    lat: doublePrecision("lat"),
-    lng: doublePrecision("lng"),
+    // lat: doublePrecision("lat"),
+    // lng: doublePrecision("lng"),
     radius: doublePrecision("radius"),
     latLngPoint: geometry("lat_lng_point", {
       type: "point",

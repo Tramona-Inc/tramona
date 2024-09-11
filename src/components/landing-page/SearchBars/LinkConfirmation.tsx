@@ -27,6 +27,7 @@ import {
   getNumNights,
   plural,
 } from "@/utils/utils";
+import RequestWaitlistDialog from "./DesktopRequestComponents/RequestWaitlistDialog";
 
 export interface LinkConfirmationProps {
   open: boolean;
@@ -145,12 +146,17 @@ const LinkConfirmation: React.FC<LinkConfirmationProps> = ({
         </DialogContent>
       </Dialog>
 
-      <RequestSubmittedDialog
+      <RequestWaitlistDialog
+        open={requestSubmittedDialogOpen}
+        setOpen={setRequestSubmittedDialogOpen}
+      />
+
+      {/* <RequestSubmittedDialog
         open={requestSubmittedDialogOpen}
         setOpen={setRequestSubmittedDialogOpen}
         showConfetti={showConfetti}
         madeByGroupId={madeByGroupId}
-      />
+      /> */}
     </div>
   );
 };
