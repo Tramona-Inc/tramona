@@ -163,7 +163,7 @@ export const requestsRouter = createTRPCRouter({
     .input(
       requestInsertSchema.omit({
         madeByGroupId: true,
-        // latLngPoint: true,
+        latLngPoint: true,
       }).extend({
         lat: z.number().optional(),
         lng: z.number().optional(),
@@ -412,7 +412,7 @@ export const requestsRouter = createTRPCRouter({
 //Reusable functions
 const modifiedRequestSchema = requestInsertSchema.omit({
   madeByGroupId: true,
-  // latLngPoint: true,
+  latLngPoint: true,
 }).extend({
   lat: z.number().optional(),
   lng: z.number().optional(),
@@ -460,11 +460,11 @@ export async function handleRequestSubmission(
     }
 
     if (radius && latLngPoint) {
-      const requestId = await tx
+      const request = await tx
         .insert(requests)
         .values({ ...input, madeByGroupId, latLngPoint, radius })
-        .returning()
-        .then((res) => res[0]!.id);
+        .returning({latLngPoint: requests.latLngPoint, id: requests.id})
+        .then((res) => res[0]!);
 
       //TO DO - figure out if i need to get coordinates here or elsewhere
 
@@ -477,7 +477,7 @@ export async function handleRequestSubmission(
 
 
       const eligibleProperties = await getPropertiesForRequest(
-        { ...input, id: requestId, latLngPoint, radius },
+        { ...input, id: request.id, latLngPoint: request.latLngPoint, radius },
         { tx },
       );
 
@@ -485,7 +485,7 @@ export async function handleRequestSubmission(
       if (eligibleProperties.length > 0) {
         await tx.insert(requestsToProperties).values(
           eligibleProperties.map((property) => ({
-            requestId,
+            requestId: request.id,
             propertyId: property.id,
           })),
         );
@@ -528,7 +528,7 @@ export async function handleRequestSubmission(
       //     }),
       // );
 
-      return { requestId, madeByGroupId };
+      return { requestId: request.id, madeByGroupId };
     } else {
       throw new TRPCError({
         code: "BAD_REQUEST",

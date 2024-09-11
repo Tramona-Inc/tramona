@@ -90,7 +90,7 @@ export type MinimalRequest = Pick<
 
 export const requestSelectSchema = createSelectSchema(requests);
 export const requestInsertSchema = createInsertSchema(requests, {
-  // latLngPoint: z.object({ x: z.number(), y: z.number() }),
+  latLngPoint: z.object({ x: z.number(), y: z.number() }),
   amenities: z.array(z.enum(ALL_REQUESTABLE_AMENITIES)),
 });
 

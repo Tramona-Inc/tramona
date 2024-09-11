@@ -276,7 +276,7 @@ export const properties = pgTable(
     avgRating: doublePrecision("avg_rating").notNull().default(0),
     numRatings: integer("num_ratings").notNull().default(0),
     airbnbUrl: varchar("airbnb_url"),
-    airbnbMessageUrl: varchar("airbnb_message_url"),
+    // airbnbMessageUrl: varchar("airbnb_message_url"),
     originalNightlyPrice: integer("original_nightly_price"), // in cents
     areaDescription: text("area_description"),
     mapScreenshot: text("map_screenshot"),
@@ -290,7 +290,7 @@ export const properties = pgTable(
     priceRestriction: integer("price_restriction").default(0),
     stripeVerRequired: boolean("stripe_ver_required").default(false),
     propertyStatus: propertyStatusEnum("property_status").default("Listed"),
-    airbnbBookUrl: varchar("airbnb_book_url"),
+    // airbnbBookUrl: varchar("airbnb_book_url"),
     hostImageUrl: varchar("host_image_url"),
     pricingScreenUrl: varchar("pricing_screen_url"),
     currency: currencyEnum("currency").notNull().default("USD"),

@@ -80,8 +80,8 @@ function SearchPropertiesMap({
         bedrooms: filters.bedrooms,
         bathrooms: filters.bathrooms,
         maxNightlyPrice: filters.maxNightlyPrice,
-        lat: filters.filter?.lat,
-        long: filters.filter?.long,
+        // lat: filters.filter?.lat,
+        // long: filters.filter?.long,
         houseRules: filters.houseRules,
         roomType: filters.roomType,
         checkIn: filters.checkIn,
@@ -188,8 +188,8 @@ function SearchPropertiesMap({
         page.data.map((property) => ({
           key: property.name,
           location: {
-            lat: property.latLngPoint.x,
-            lng: property.latLngPoint.y,
+            lat: property.latLngPoint.y,
+            lng: property.latLngPoint.x,
           },
           originalNightlyPrice: property.originalNightlyPrice,
           id: `${property.id}`,
@@ -201,8 +201,8 @@ function SearchPropertiesMap({
         page.data.map((property) => ({
           key: property.name,
           location: {
-            lat: property.latLngPoint.x,
-            lng: property.latLngPoint.y,
+            lat: property.latLngPoint.y,
+            lng: property.latLngPoint.x,
           },
           originalNightlyPrice: property.originalNightlyPrice,
           id: `${property.id}`,

@@ -57,7 +57,7 @@ export default function PropertyFinanceList({
                   <div>
                     <p className="text-sm font-medium">{property.name}</p>
                     <p className="text-xs text-gray-500">
-                      <City lat={property.latLngPoint.x} lng={property.latLngPoint.y} />
+                      <City lat={property.latLngPoint.y} lng={property.latLngPoint.x} />
                     </p>
                   </div>
                 </div>

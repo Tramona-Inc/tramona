@@ -69,7 +69,6 @@ export function useCityRequestForm({
 
 
   const onSubmit = form.handleSubmit(async (data) => {
-    console.log('the data', data);
     const { date: _date, maxNightlyPriceUSD, ...restData } = data;
     const checkIn = data.date.from;
     const checkOut = data.date.to;

@@ -11,9 +11,10 @@ import {
   reviews,
 } from "../db/schema";
 import { arizonaScraper, arizonaSubScraper } from "./integrity-arizona";
-import { eq, and, ne, or, isNotNull } from "drizzle-orm";
+import { eq, and, ne, or, isNotNull, sql } from "drizzle-orm";
 
 import { getNumNights } from "@/utils/utils";
+import { getCoordinates } from "../google-maps";
 
 export type DirectSiteScraper = (options: {
   checkIn: Date;
@@ -25,7 +26,7 @@ export type DirectSiteScraper = (options: {
   location?: string;
 }) => Promise<ScrapedListing[]>;
 
-export type ScrapedListing = NewProperty & {
+export type ScrapedListing = Omit<NewProperty, 'latLngPoint'> & {
   originalListingUrl: string; // enforce that its non-null
   reviews: NewReview[];
   scrapeUrl: string;
@@ -61,8 +62,8 @@ export const directSiteScrapers: NamedDirectSiteScraper[] = [
 const filterNewPropertyFields = (listing: ScrapedListing): NewProperty => {
   const newPropertyKeys = Object.keys(properties).filter((key) => key !== "id");
   return Object.fromEntries(
-    Object.entries(listing).filter(([key]) => newPropertyKeys.includes(key)),
-  ) as NewProperty;
+    Object.entries(listing).filter(([key]) => newPropertyKeys.includes(key))
+  ) as unknown as NewProperty;
 };
 
 // handle the scraped properties and reviews
@@ -99,11 +100,15 @@ export const scrapeDirectListings = async (options: {
         const existingOriginalPropertyId =
           existingOriginalPropertyIdList[0]?.id;
 
+        const { location } = await getCoordinates(listing.address);
+        if (!location) throw new Error("Could not get coordinates for address");
+        const latLngPoint = sql`ST_SetSRID(ST_MakePoint(${location.lng}, ${location.lat}), 4326)`;
+
         const newPropertyListing = filterNewPropertyFields(listing);
         if (existingOriginalPropertyId) {
           const tramonaProperty = await trx
             .update(properties)
-            .set({ ...newPropertyListing }) // Only keeps fields that are defined in the NewProperty schema
+            .set({ ...newPropertyListing, latLngPoint }) // Only keeps fields that are defined in the NewProperty schema
             .where(eq(properties.originalListingId, existingOriginalPropertyId))
             .returning({ id: properties.id });
 
@@ -169,7 +174,7 @@ export const scrapeDirectListings = async (options: {
         } else {
           const tramonaProperty = await trx
             .insert(properties)
-            .values(newPropertyListing)
+            .values({...newPropertyListing, latLngPoint})
             .returning({ id: properties.id });
 
           const newPropertyId = tramonaProperty[0]!.id;

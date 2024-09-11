@@ -38,6 +38,7 @@ import {
   hostReferralDiscounts,
   referralCodes,
   requests,
+  propertyStatusEnum,
 } from "./db/schema";
 import { getCity, getCoordinates } from "./google-maps";
 import axios from "axios";
@@ -46,6 +47,7 @@ import * as cheerio from "cheerio";
 import { sendSlackMessage } from "./slack";
 import { HOST_MARKUP, TRAVELER__MARKUP } from "@/utils/constants";
 import { HostRequestsPageData } from "./api/routers/propertiesRouter";
+import { property } from "lodash";
 
 export const axiosWithRetry = axios.create();
 
@@ -290,13 +292,12 @@ export async function addProperty({
   userEmail?: string;
   hostTeamId?: number | null;
   isAdmin: boolean;
-  property: Omit<NewProperty, "id" | "city" | "latitude" | "longitude"> & {
-    latitude?: number;
-    longitude?: number;
+  property: Omit<NewProperty, "id" | "city" | "latLngPoint"> & {
+    latLngPoint?: { x: number, y: number };
   };
 }) {
-  let lat = property.latitude;
-  let lng = property.longitude;
+  let lat = property.latLngPoint?.y;
+  let lng = property.latLngPoint?.x;
 
   if (!lat || !lng) {
     const { location } = await getCoordinates(property.address);
@@ -317,9 +318,9 @@ export async function addProperty({
       latLngPoint: sql`ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)`,
       hostTeamId,
     })
-    .returning({ id: properties.id, latLngPoint: properties.latLngPoint, priceRestriction: properties.priceRestriction });
+    .returning({ id: properties.id });
 
-  waitUntil(processRequests(insertedProperty!));
+  // waitUntil(processRequests(insertedProperty!));
 
   await sendSlackMessage({
     isProductionOnly: true,
@@ -332,42 +333,46 @@ export async function addProperty({
   return insertedProperty!.id;
 }
 
-async function processRequests(
-  insertedProperty: Pick<Property, "id" | "latLngPoint" | "priceRestriction">,
-) {
+// async function processRequests(
+//   insertedProperty: Pick<Property, "id" | "latLngPoint" | "priceRestriction">,
+// ) {
 
-  const allRequestsForProperty = await getRequestsForProperty({
-    id: insertedProperty.id,
-    latLngPoint: insertedProperty.latLngPoint,
-    priceRestriction: insertedProperty.priceRestriction,
-  });
-  const allRequests = await db.query.requests.findMany({});
+//   const allRequestsForProperty = await getRequestsForPropert({
+//     id: insertedProperty.id,
+//     latLngPoint: insertedProperty.latLngPoint,
+//     priceRestriction: insertedProperty.priceRestriction,
+//   });
+//   // const allRequests = await db.query.requests.findMany({});
+//   console.log("allRequestsForProperty: ");
+//   for (const request of allRequestsForProperty) {
+//     console.log("request: ", request);
+//   }
 
-  for (const request of allRequests) {
-    const matchingProperties = await getPropertiesForRequest({
-      id: request.id,
-      // lat: request.lat,
-      // lng: request.lng,
-      radius: request.radius,
-      location: request.location,
-      checkIn: request.checkIn,
-      checkOut: request.checkOut,
-      maxTotalPrice: request.maxTotalPrice,
-      latLngPoint: request.latLngPoint,
-      // propertyLatLngPoint: insertedProperty.latLngPoint,
-    });
+  // for (const request of allRequests) {
+  //   const matchingProperties = await getPropertiesForRequest({
+  //     id: request.id,
+  //     // lat: request.lat,
+  //     // lng: request.lng,
+  //     radius: request.radius,
+  //     location: request.location,
+  //     checkIn: request.checkIn,
+  //     checkOut: request.checkOut,
+  //     maxTotalPrice: request.maxTotalPrice,
+  //     latLngPoint: request.latLngPoint,
+  //     // propertyLatLngPoint: insertedProperty.latLngPoint,
+  //   });
 
-    console.log("properties:", matchingProperties);
-    const propertyIds = matchingProperties.map((property) => property.id);
+  // console.log("properties:", allRequestsForProperty);
+  // const propertyIds = request.map((property) => property.id);
 
-    if (propertyIds.includes(insertedProperty.id)) {
-      await db.insert(requestsToProperties).values({
-        requestId: request.id,
-        propertyId: insertedProperty.id,
-      });
-    }
-  }
-}
+  // if (propertyIds.includes(insertedProperty.id)) {
+  //   await db.insert(requestsToProperties).values({
+  //     requestId: request.id,
+  //     propertyId: insertedProperty.id,
+  //   });
+  // }
+  //}
+// }
 
 export async function sendTextToHost(
   matchingProperties: { id: number; hostId: string | null }[],
@@ -412,64 +417,132 @@ export async function sendTextToHost(
   );
 }
 
-export async function getRequestsForProperty(
-  property: {
-    id: number;
-    latLngPoint: { x: number; y: number };
-    priceRestriction: number;
-  },
+export async function getRequestsForProperties(
+  properties: Property[],
+  //{
+  // id: number;
+  // propertyStaus: string;
+  // latLngPoint: { x: number; y: number };
+  // priceRestriction: number | null;
+  //}
+  //[],
   { tx = db } = {},
 ) {
-  let requestIsNearProperty: SQL | undefined = sql`FALSE`;
+  const requestIsNearProperties: SQL[] = [];
+  // let priceRestrictionsSQL: SQL[] | undefined[] = [sql`FALSE`];
+  const propertyToRequestMap: { property: Property; request: Request & { traveler: Pick<User, "name" | "image"> } }[] = [];
 
-  requestIsNearProperty = sql`
+
+  for (const property of properties) {
+    const requestIsNearProperty = sql`
       ST_DWithin(
-        requests.lat_lng_point,
-        ${property.latLngPoint},
-        requests.radius / 69.0
+        ST_Transform(requests.lat_lng_point, 3857),
+        ST_Transform(ST_SetSRID(ST_MakePoint(${property.latLngPoint.x}, ${property.latLngPoint.y}), 4326), 3857),
+        requests.radius * 1609.34
       )
     `;
+    //  const numberOfNights = sql`DATE_PART('day', requests.check_out::timestamp - requests.check_in::timestamp)`;
 
-  const requestIsWithinDateRange = gte(requests.checkIn, new Date());
+    //   const priceRestrictionSQL = sql`
+    //     ${property.priceRestriction} IS NULL OR
+    //     (
+    //       requests.max_total_price IS NOT NULL AND
+    //       ${property.priceRestriction} >= (requests.max_total_price / DATE_PART('day', requests.check_out::timestamp - requests.check_in::timestamp)) * 1.15
+    //     )
+    // `;
+    requestIsNearProperties.push(requestIsNearProperty);
 
-  // const numberOfNights = getNumNights(requests.checkIn, requests.checkOut);
+    const requestsForProperty = await tx.query.requests.findMany({
+      where: and(
+        requestIsNearProperty,
+        gte(requests.checkIn, new Date())
+      ),
+      with: {
+        madeByGroup:
+          { with: { owner: { columns: { image: true, name: true } } } }
+      },
+    });
+    //columns: { id: true, checkIn: true, checkOut: true, maxTotalPrice: true, location: true },
 
 
- const numberOfNights = sql`DATE_PART('day', requests.checkOut::timestamp - requests.checkIn::timestamp)`;
-
-  const priceRestrictionSQL = sql`
-  (
-    ${property.priceRestriction} IS NULL OR
-    (
-      requests.maxTotalPrice IS NOT NULL AND
-      (${property.priceRestriction} >= (requests.maxTotalPrice / ${numberOfNights}) * 1.15)
-    )
-  )
-`;
-
-
-  const result = await tx.query.requests.findMany({
-    where: and(
-      requestIsNearProperty,
-      requestIsWithinDateRange,
-      priceRestrictionSQL,
-      // or(
-      //   isNull(requests.maxTotalPrice), // Include requests with no max price restriction
-      //   and(
-      //     isNotNull(requests.maxTotalPrice),
-      //     lte(
-      //       requests.maxTotalPrice,
-      //       Math.round(property.priceRestriction * 1.15)
-      //     )
-      //   )
-      // )
-
-    ),
-    columns: { id: true, latLngPoint: true, checkIn: true, checkOut: true },
-  });
-
-  return result;
+    // Store the matched requests along with the property
+    for (const request of requestsForProperty) {
+      const traveler = {
+        name: request.madeByGroup.owner.name,
+        image: request.madeByGroup.owner.image,
+      }
+      propertyToRequestMap.push({
+        property,
+        request: {
+          ...request,
+          traveler, // Include traveler info
+        },
+      });
+    }
+    // priceRestrictionsSQL.push(priceRestrictionSQL);
+  }
+  return propertyToRequestMap;
 }
+
+// export async function getRequestsForProperties(
+//   properties: {
+//     id: number;
+//     propertyStaus: string;
+//     latLngPoint: { x: number; y: number };
+//     priceRestriction: number | null;
+//   }[],
+//   { tx = db } = {},
+// ) {
+//   const requestIsNearProperties: SQL[] = [];
+//   // let priceRestrictionsSQL: SQL[] | undefined[] = [sql`FALSE`];
+
+//   for (const property of properties) {
+//   const requestIsNearProperty = sql`
+//       ST_DWithin(
+//         ST_Transform(requests.lat_lng_point, 3857),
+//         ST_Transform(ST_SetSRID(ST_MakePoint(${property.latLngPoint.x}, ${property.latLngPoint.y}), 4326), 3857),
+//         requests.radius * 1609.34
+//       )
+//     `;
+// //  const numberOfNights = sql`DATE_PART('day', requests.check_out::timestamp - requests.check_in::timestamp)`;
+
+// //   const priceRestrictionSQL = sql`
+// //     ${property.priceRestriction} IS NULL OR
+// //     (
+// //       requests.max_total_price IS NOT NULL AND
+// //       ${property.priceRestriction} >= (requests.max_total_price / DATE_PART('day', requests.check_out::timestamp - requests.check_in::timestamp)) * 1.15
+// //     )
+// // `;
+//     requestIsNearProperties.push(requestIsNearProperty);
+//     // priceRestrictionsSQL.push(priceRestrictionSQL);
+//   }
+
+
+//   const result = await tx.query.requests.findMany({
+//     where: and(
+//       or(...requestIsNearProperties),  //or requestIsNearProperties
+//       gte(requests.checkIn, new Date()),
+//       //TO DO: FIX ERROR WITH price restrictionSQL
+//       // priceRestrictionSQL,
+
+//       // or(
+//       //   isNull(property.priceRestriction), // Include requests with no max price restriction
+//       //   and(
+//       //     isNotNull(property.priceRestriction),
+//       //     gte(
+//       //       property.priceRestriction,
+//       //       )
+//       //     )
+//       //   )
+//       // )
+
+//     ),
+//     //columns: { id: true, checkIn: true, checkOut: true, maxTotalPrice: true, location: true },
+
+//   });
+
+//   return result;
+// }
 
 
 export async function getPropertiesForRequest(
@@ -492,12 +565,12 @@ export async function getPropertiesForRequest(
   //WAITING FOR MAP PIN TO MERGE IN TO TEST THIS
   // if (req.lat != null && req.lng != null && req.radius != null) {
   // Convert radius from miles to degrees (approximate)
-  const radiusInDegrees = req.radius / 69;
+  const radiusInDegrees = req.radius * 1609.34;
 
   propertyIsNearRequest = sql`
     ST_DWithin(
-      properties.lat_lng_point,
-      ${req.latLngPoint},
+      ST_Transform(properties.lat_lng_point, 3857),
+      ST_Transform(ST_SetSRID(ST_MakePoint(${req.latLngPoint.x}, ${req.latLngPoint.y}), 4326), 3857),
       ${radiusInDegrees}
     )
   `;

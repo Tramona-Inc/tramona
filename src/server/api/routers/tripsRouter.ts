@@ -131,13 +131,11 @@ export const tripsRouter = createTRPCRouter({
         with: {
           property: {
             columns: {
-              latLngPoint: false,
+              latLngPoint: true,
               id: true,
               imageUrls: true,
               city: true,
               name: true,
-              latitude: true,
-              longitude: true,
               checkInInfo: true,
               address: true,
               cancellationPolicy: true,
@@ -157,8 +155,8 @@ export const tripsRouter = createTRPCRouter({
 
       const coordinates = {
         location: {
-          lat: trip.property.latitude,
-          lng: trip.property.longitude,
+          lat: trip.property.latLngPoint.y,
+          lng: trip.property.latLngPoint.x,
         },
       };
       return { trip, coordinates };
@@ -172,12 +170,12 @@ export const tripsRouter = createTRPCRouter({
           property: {
             columns: {
               id: true,
-              latLngPoint: false,
+              latLngPoint: true,
               imageUrls: true,
               city: true,
               name: true,
-              latitude: true,
-              longitude: true,
+              // latitude: true,
+              // longitude: true,
               checkInInfo: true,
               address: true,
               cancellationPolicy: true,
@@ -197,8 +195,8 @@ export const tripsRouter = createTRPCRouter({
       } else {
         const coordinates = {
           location: {
-            lat: trip.property.latitude,
-            lng: trip.property.longitude,
+            lat: trip.property.latLngPoint.y,
+            lng: trip.property.latLngPoint.x,
           },
         };
         return { trip, coordinates };

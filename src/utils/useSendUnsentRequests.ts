@@ -10,7 +10,8 @@ import SuperJSON from "superjson";
 export const newLinkRequestSchema = z.object({
   request: requestInsertSchema.omit({
     madeByGroupId: true,
-    // latLngPoint: true,
+    latLngPoint: true,
+    radius: true,
   }),
   property: linkInputPropertyInsertSchema,
 });

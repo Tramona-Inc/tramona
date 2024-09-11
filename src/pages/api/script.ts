@@ -1,35 +1,48 @@
 import { db } from "@/server/db";
-import { eq, isNull, or } from "drizzle-orm";
+import { eq, like, sql } from "drizzle-orm";
 import { requests } from "@/server/db/schema/tables/requests";
 import { getCoordinates } from "@/server/google-maps";
-import { haversineDistance } from "@/components/landing-page/SearchBars/useCityRequestForm";
+import { properties } from "@/server/db/schema";
 
-const script = async() => {
-  const allRequests = await db.query.requests.findMany({
-    where:
-      or(isNull(requests.lat), isNull(requests.lng), isNull(requests.radius)),
-  });
-  for (const req of allRequests) {
-    const coordinates = await getCoordinates(req.location);
-    if (coordinates.location) {
-      let radius;
-      if (coordinates.bounds) {
-        radius = haversineDistance(coordinates.bounds.northeast.lat, coordinates.bounds.northeast.lng, coordinates.bounds.southwest.lat, coordinates.bounds.southwest.lng) / 2;
-      } else {
-        radius = 10;
+const script = async () => {
+  try {
+    const allProperties = await db.query.properties.findMany();
+
+    for (const prop of allProperties) {
+      const { location } = await getCoordinates(prop.address);
+
+      if (!location) {
+        console.log(`Couldn't find coordinates for ${prop.address}`);
+        continue;
       }
-      await db.update(requests)
-        .set(
-          {
-            lat: coordinates.location.lat,
-            lng: coordinates.location.lng,
-            radius,
-          },
-        ).
-        where(eq(requests.id, req.id));
-    }
-  }
 
+      await db.update(properties).set({
+        latLngPoint: sql`ST_SetSRID(ST_MakePoint(${location.lng}, ${location.lat}), 4326)`,
+      }).where(
+        eq(properties.id, prop.id)
+      );
+    }
+  } catch (error) {
+    console.error('Error:', error);
+  } finally {
+    process.exit(0);
+  }
 };
+
+const getRequests = async () => {
+  try {
+    const allRequests = await db.query.requests.findMany({
+      where: like(requests.location, '%WA%'),
+    });
+
+    for (const prop of allRequests) {
+      console.log(prop);
+    }
+  } catch (error) {
+    console.error('Error:', error);
+  } finally {
+    process.exit(0);
+  }
+}
 
 await script();

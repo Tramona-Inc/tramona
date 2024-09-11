@@ -38,8 +38,9 @@ import {
   properties,
   type Property,
 } from "./../../db/schema/tables/properties";
-import { addProperty } from "@/server/server-utils";
+import { addProperty, getRequestsForProperties } from "@/server/server-utils";
 import { latLngEquals } from "@vis.gl/react-google-maps";
+import { getCoordinates } from "@/server/google-maps";
 
 export type HostRequestsPageData = {
   city: string;
@@ -124,9 +125,19 @@ export const propertiesRouter = createTRPCRouter({
     }),
 
   update: roleRestrictedProcedure(["admin", "host"])
-    .input(propertyUpdateSchema.omit({ hostId: true }))
+    .input(propertyUpdateSchema.omit({ hostId: true, latLngPoint: true }))
     .mutation(async ({ ctx, input }) => {
       // TODO: auth
+      if (input.address) {
+        const { location } = await getCoordinates(input.address);
+        if (!location) throw new Error("Could not get coordinates for address");
+        const latLngPoint = sql`ST_SetSRID(ST_MakePoint(${location.lng}, ${location.lat}), 4326)`;
+        await ctx.db
+          .update(properties)
+          .set({ latLngPoint })
+          .where(eq(properties.id, input.id));
+      }
+
 
       await ctx.db
         .update(properties)
@@ -255,7 +266,7 @@ export const propertiesRouter = createTRPCRouter({
               !northeastLng &&
               !southwestLat &&
               !southwestLng
-              ? sql`6371 * acos(SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})) <= ${radius}`
+              ? sql`6371 * acos(SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(lng * Math.PI) / 180})) <= ${radius}`
               : sql`TRUE`,
             input.roomType
               ? eq(properties.roomType, input.roomType)
@@ -386,11 +397,11 @@ export const propertiesRouter = createTRPCRouter({
             cursor ? gt(properties.id, cursor) : undefined,
             boundaries
               ? and(
-                  lte(properties.latitude, boundaries.north),
-                  gte(properties.latitude, boundaries.south),
-                  lte(properties.longitude, boundaries.east),
-                  gte(properties.longitude, boundaries.west),
-                )
+                lte(properties.latLngPoint.x, boundaries.north),
+                gte(properties.latLngPoint.x, boundaries.south),
+                lte(properties.latLngPoint.y, boundaries.east),
+                gte(properties.latLngPoint.y, boundaries.west),
+              )
               : sql`TRUE`,
             input.lat && input.long && !boundaries
               ? sql`6371 * acos(SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(lng * Math.PI) / 180})) <= ${radius}`
@@ -476,7 +487,68 @@ export const propertiesRouter = createTRPCRouter({
     }),
   getHostPropertiesWithRequests: roleRestrictedProcedure(["host"]).query(
     async ({ ctx }) => {
-      // TODO: USE DRIZZLE
+      // TODO: USE DRIZZLE relational query, then use groupby in js
+      const hostProperties = await db.query.properties.findMany({
+        where: and(eq(properties.hostId, ctx.user.id), eq(properties.propertyStatus, "Listed")),
+        
+        // columns: {
+        //   id: true,
+        //   propertyStatus: true,
+        //   latLngPoint: true,
+        //   priceRestriction: true,
+        //   city: true,
+        // },
+      });
+
+
+      const hostRequests = await getRequestsForProperties(hostProperties);
+
+      const groupedByCity: HostRequestsPageData[] = [];
+
+      const findOrCreateCityGroup = (city: string) => {
+        let cityGroup = groupedByCity.find(group => group.city === city);
+        if (!cityGroup) {
+          cityGroup = { city, requests: [] };
+          groupedByCity.push(cityGroup);
+        }
+        return cityGroup;
+      };
+
+      const requestsMap = new Map<number, { request: Request & { traveler: Pick<User, "name" | "image"> }, properties: Property[] }>();
+
+      // Iterate over the hostRequests and gather all properties for each request
+      for (const { property, request } of hostRequests) {
+        // Check if this request already exists in the map
+        if (!requestsMap.has(request.id)) {
+          // If not, create a new entry with an empty properties array
+          requestsMap.set(request.id, {
+            request,
+            properties: []
+          });
+        }
+
+        // Add the property to the request
+        requestsMap.get(request.id)!.properties.push(property);
+      }
+      for (const requestWithProperties of requestsMap.values()) {
+        const { request, properties } = requestWithProperties;
+        const cityGroup = findOrCreateCityGroup(properties[0].city); // Assuming all properties for a request belong to the same city
+
+        // Add the request with all associated properties to the city group
+        cityGroup.requests.push({
+          request,
+          properties
+        });
+      }
+
+      for (const cityGroup of groupedByCity) {
+        for (const requestGroup of cityGroup.requests) {
+          console.log(requestGroup.properties);
+        }
+      }
+      return groupedByCity;
+
+
       const rawData = await ctx.db.execute(sql`
           WITH host_properties AS (
             SELECT
@@ -529,8 +601,8 @@ export const propertiesRouter = createTRPCRouter({
           numBeds: row.num_beds,
           numBedrooms: row.num_bedrooms,
           numBathrooms: row.num_bathrooms,
-          latitude: row.latitude,
-          longitude: row.longitude,
+          // latitude: row.latitude,
+          // longitude: row.longitude,
           checkInTime: row.check_in_time,
           checkOutTime: row.check_out_time,
           amenities: row.amenities,
@@ -566,13 +638,14 @@ export const propertiesRouter = createTRPCRouter({
           airbnbLink: row.airbnb_link,
           createdAt: row.created_at,
           resolvedAt: row.resolved_at,
-          lat: row.lat,
-          lng: row.lng,
+          // lat: row.lat,
+          // lng: row.lng,
           latLngPoint: row.lat_lng_point,
           radius: row.radius,
           amenities: row.amenities,
           linkInputPropertyId: row.link_input_property_id,
           traveler: { name: row.user_name, image: row.image },
+          numOfOffers: row.num_of_offers,
         } as HostRequestsPageData["requests"][number]["request"];
 
         const city = row.property_city as string;
