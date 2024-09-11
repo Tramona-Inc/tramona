@@ -10,14 +10,12 @@ import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import { TAX_PERCENTAGE, SUPERHOG_FEE } from "@/utils/constants";
-import type { OfferWithDetails } from "../offers/OfferPage";
-import type { Stripe } from "stripe";
+import type { OfferWithDetails } from "../offers/PropertyPage";
 import { Elements } from "@stripe/react-stripe-js";
 import { type StripeElementsOptions } from "@stripe/stripe-js";
 import Spinner from "../_common/Spinner";
 
 import { useToast } from "../ui/use-toast";
-
 const CustomStripeCheckout = ({
   offer: { property, ...offer },
 }: {
@@ -51,15 +49,18 @@ const CustomStripeCheckout = ({
   const [options, setOptions] = useState<StripeElementsOptions | undefined>(
     undefined,
   );
-  const [paymentIntentResponse, setPaymentIntentResponse] =
-    useState<Stripe.Response<Stripe.PaymentIntent> | null>(null);
   const [checkoutReady, setCheckoutReady] = useState(false);
-  const authorizePayment = api.stripe.authorizePayment.useMutation();
 
+  const { data: propertyHostUserAccount } =
+    api.host.getHostUserAccount.useQuery(property.hostId!, {
+      enabled: !!property.hostId,
+    });
+  const authorizePayment = api.stripe.authorizePayment.useMutation();
   const fetchClientSecret = useCallback(async () => {
     if (!session.data?.user) return;
     try {
       const response = await authorizePayment.mutateAsync({
+        isDirectListing: false,
         offerId: offer.id,
         propertyId: property.id,
         requestId: offer.requestId ?? null,
@@ -73,7 +74,7 @@ const CustomStripeCheckout = ({
         totalSavings: originalTotal - finalTotal,
         phoneNumber: session.data.user.phoneNumber ?? "",
         userId: session.data.user.id,
-        hostStripeId: property.host?.hostProfile?.stripeAccountId ?? "",
+        hostStripeId: propertyHostUserAccount?.stripeConnectId ?? "",
       });
       return response;
     } catch (error) {
@@ -91,7 +92,7 @@ const CustomStripeCheckout = ({
         if (!response) {
           return;
         }
-        setPaymentIntentResponse(response); // Set PaymentIntentResponse directly within fetchData then we convert to options ]
+
         setOptions({
           clientSecret: response.client_secret!, //#004236 #f4f4f5
           appearance: {
@@ -163,7 +164,7 @@ const CustomStripeCheckout = ({
     <div className="w-full">
       {checkoutReady && options?.clientSecret ? (
         <Elements stripe={stripePromise} options={options}>
-          <StripeCheckoutForm clientSecret={options.clientSecret} />
+          <StripeCheckoutForm />
         </Elements>
       ) : (
         <div className="h-48">

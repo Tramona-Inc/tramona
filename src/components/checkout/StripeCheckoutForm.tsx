@@ -17,11 +17,7 @@ import { env } from "@/env";
 import { toast } from "@/components/ui/use-toast";
 import { descripeStripeDeclineCode } from "@/utils/stripe-client";
 
-export default function StripeCheckoutForm({
-  clientSecret,
-}: {
-  clientSecret: string;
-}) {
+export default function StripeCheckoutForm() {
   const isProduction = process.env.NODE_ENV === "production";
   const baseUrl = isProduction
     ? "https://www.tramona.com"

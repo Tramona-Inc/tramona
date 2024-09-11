@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
-  ALL_CANCELLATION_POLICIES,
+  CANCELLATION_POLICIES,
   ALL_PROPERTY_TYPES,
   type Request,
 } from "@/server/db/schema";
@@ -83,11 +83,11 @@ const formSchema = z.object({
   checkInInfo: optional(zodString()),
   checkInTime: optional(zodTime),
   checkOutTime: optional(zodTime),
-  cancellationPolicy: z.enum(ALL_CANCELLATION_POLICIES),
+  cancellationPolicy: z.enum(CANCELLATION_POLICIES),
   imageUrls: z.object({ value: zodUrl() }).array(),
   reviews: z
     .object({
-      profilePic: zodUrl(),
+      profilePic: zodUrl().optional(),
       name: zodString(),
       review: zodString({ maxLen: Infinity }),
       rating: zodInteger({ min: 1, max: 5 }),
@@ -157,7 +157,10 @@ export default function AdminOfferForm({
             checkInTime: offer.property.checkInTime ?? undefined,
             checkOutTime: offer.property.checkOutTime ?? undefined,
             imageUrls: offer.property.imageUrls.map((url) => ({ value: url })),
-            reviews: offer.property.reviews,
+            reviews: offer.property.reviews.map((r) => ({
+              ...r,
+              profilePic: r.profilePic ?? undefined,
+            })),
             roomsWithBeds: offer.property.roomsWithBeds
               ? stringifyRoomsWithBeds(offer.property.roomsWithBeds)
               : undefined,

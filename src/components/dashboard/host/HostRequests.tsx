@@ -12,21 +12,52 @@ import HostConfirmRequestDialog from "./HostConfirmRequestDialog";
 import HostFinishRequestDialog from "./HostFinishRequestDialog";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
+import { type SeparatedData } from "@/server/server-utils";
+import { separateByPriceRestriction } from "@/utils/utils";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function HostRequests() {
+  const { toast } = useToast();
   const [propertyPrices, setPropertyPrices] = useState<Record<number, string>>(
     {},
   );
   const [dialogOpen, setDialogOpen] = useState(false);
   const router = useRouter();
-  const { city } = router.query;
+  const { city, priceRestriction } = router.query;
+
   const [selectedRequest, setSelectedRequest] =
     useState<HostDashboardRequest | null>(null);
   const [properties, setProperties] = useState<Property[] | null>(null);
   const [step, setStep] = useState(0);
 
-  const { data: requestsWithProperties } =
-    api.properties.getHostPropertiesWithRequests.useQuery();
+  const [separatedData, setSeparatedData] = useState<SeparatedData | null>(
+    null,
+  );
+  const { data: unusedReferralDiscounts } =
+    api.referralCodes.getAllUnusedHostReferralDiscounts.useQuery(undefined, {
+      onSuccess: () => {
+        if (unusedReferralDiscounts && unusedReferralDiscounts.length > 0) {
+          toast({
+            title: "Congratulations! 🎉 ",
+            description:
+              "Your referral code has been validated, so your next booking will be completely free of service fees. Enjoy the savings!",
+            variant: "default",
+            duration: 10000,
+          });
+        }
+      },
+    });
+
+  api.properties.getHostPropertiesWithRequests.useQuery(undefined, {
+    onSuccess: (fetchedProperties) => {
+      const separatedProperties = separateByPriceRestriction(fetchedProperties);
+      setSeparatedData(separatedProperties);
+    },
+  });
+
+  const requestsWithProperties = priceRestriction
+    ? separatedData?.outsidePriceRestriction
+    : separatedData?.normal;
 
   const cityData = requestsWithProperties?.find((p) => p.city === city);
 

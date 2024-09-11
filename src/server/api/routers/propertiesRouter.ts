@@ -27,6 +27,7 @@ import {
   eq,
   gt,
   gte,
+  inArray,
   lte,
   notExists,
   sql,
@@ -49,7 +50,7 @@ export type HostRequestsPageData = {
 };
 
 export const propertiesRouter = createTRPCRouter({
-  create: roleRestrictedProcedure(["admin", "host"])
+  create: protectedProcedure
     .input(
       propertyInsertSchema.omit({
         hostId: true,
@@ -60,7 +61,6 @@ export const propertiesRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const user = ctx.user.role === "admin" ? null : ctx.user;
       const hostTeamId = await db.query.hostProfiles
         .findFirst({
           where: eq(hostProfiles.userId, ctx.user.id),
@@ -69,13 +69,17 @@ export const propertiesRouter = createTRPCRouter({
         .then((res) => res?.curTeamId);
 
       if (!hostTeamId) {
-        //logic
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Host profile not found for user ${ctx.user.id}`,
+        });
       }
 
       const id = await addProperty({
+        isAdmin: ctx.user.role === "admin" ? true : false,
         property: input,
-        userEmail: user?.email,
-        userId: user?.id,
+        userId: ctx.user.id,
+        userEmail: ctx.user.email,
         hostTeamId,
       });
       return id;
@@ -110,6 +114,7 @@ export const propertiesRouter = createTRPCRouter({
         property: input,
         userId: input.hostId,
         userEmail: host.email,
+        isAdmin: false,
       });
 
       return {
@@ -153,6 +158,12 @@ export const propertiesRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       return await ctx.db.query.properties.findFirst({
         where: eq(properties.id, input.id),
+        with: {
+          host: {
+            columns: { image: true, name: true, email: true, id: true },
+          },
+          reviews: true,
+        },
       });
     }),
   getAll: publicProcedure.query(async ({ ctx }) => {
@@ -177,6 +188,8 @@ export const propertiesRouter = createTRPCRouter({
         houseRules: z.array(z.string()).optional(),
         guests: z.number().optional(),
         maxNightlyPrice: z.number().optional(),
+        avgRating: z.number().optional(),
+        numRatings: z.number().optional(),
         lat: z.number().optional(),
         long: z.number().optional(),
         radius: z.number().optional(),
@@ -209,6 +222,8 @@ export const propertiesRouter = createTRPCRouter({
           numBedrooms: properties.numBedrooms,
           numBathrooms: properties.numBathrooms,
           numBeds: properties.numBeds,
+          avgRating: properties.avgRating,
+          numRatings: properties.numRatings,
           originalNightlyPrice: properties.originalNightlyPrice,
           lat: properties.latitude,
           long: properties.longitude,
@@ -341,6 +356,8 @@ export const propertiesRouter = createTRPCRouter({
           numBedrooms: properties.numBedrooms,
           numBathrooms: properties.numBathrooms,
           numBeds: properties.numBeds,
+          avgRating: properties.avgRating,
+          numRatings: properties.numRatings,
           originalNightlyPrice: properties.originalNightlyPrice,
           lat: properties.latitude,
           long: properties.longitude,
@@ -359,7 +376,7 @@ export const propertiesRouter = createTRPCRouter({
         .from(properties)
         .where(
           and(
-            eq(properties.propertyStatus, "Listed"),
+            // eq(properties.propertyStatus, "Listed"),
             cursor ? gt(properties.id, cursor) : undefined,
             boundaries
               ? and(
@@ -414,7 +431,8 @@ export const propertiesRouter = createTRPCRouter({
                 AND booked_dates.date <= CURRENT_DATE + INTERVAL '20 days') < 14`,
           ),
         )
-        .limit(12)
+        // .limit(12)
+        .limit(100)
         .orderBy(asc(sql`id`), asc(sql`distance`));
 
       return {
@@ -469,7 +487,7 @@ export const propertiesRouter = createTRPCRouter({
               hp.city
             FROM host_properties hp
             JOIN ${requests} r ON hp.request_id = r.id
-            WHERE r.check_in >= CURRENT_DATE 
+            WHERE r.check_in >= CURRENT_DATE
             GROUP BY hp.city, hp.request_id
           )
           SELECT
@@ -521,6 +539,7 @@ export const propertiesRouter = createTRPCRouter({
           hostProfilePic: row.host_profile_pic,
           hostawayListingId: row.hostaway_listing_id,
           hostName: row.host_name,
+          priceRestriction: row.price_restriction,
           // Add other property fields here
         } as unknown as Property;
 

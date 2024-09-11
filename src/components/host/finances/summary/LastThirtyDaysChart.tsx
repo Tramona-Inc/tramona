@@ -14,14 +14,14 @@ const generateInitialDailyData = (start: Date, end: Date) => {
 };
 
 const LastThirtyDaysChart = ({
-  hostStripeAccountId,
+  hostStripeConnectId,
   setTotalRevenue,
 }: {
-  hostStripeAccountId: string | null | undefined;
+  hostStripeConnectId: string | null | undefined;
   setTotalRevenue: (totalRevenue: number) => void;
 }) => {
   const endDate = useMemo(() => endOfToday(), []);
-  const startDate = useMemo(() => subDays(endDate, 29), []);
+  const startDate = useMemo(() => subDays(endDate, 29), [endDate]);
   const [monthlyData, setMonthlyData] = useState(
     generateInitialDailyData(startDate, endDate),
   );
@@ -29,12 +29,12 @@ const LastThirtyDaysChart = ({
   const { data: allPayments } =
     api.stripe.getAllTransactionPaymentsWithinInterval.useQuery(
       {
-        stripeAccountId: hostStripeAccountId!,
+        stripeAccountId: hostStripeConnectId!,
         startDate: Math.floor(startDate.getTime() / 1000),
         endDate: Math.floor(endDate.getTime() / 1000),
       },
       {
-        enabled: !!hostStripeAccountId,
+        enabled: !!hostStripeConnectId,
       },
     );
 
@@ -87,7 +87,7 @@ const LastThirtyDaysChart = ({
   return (
     <div className="flex h-full w-full flex-col items-center justify-center">
       <ChartComponent
-        data={hostStripeAccountId ? monthlyData : emptyData}
+        data={hostStripeConnectId ? monthlyData : emptyData}
         dataKey="Earnings"
         xAxisDataKey="date"
         hideYAxis={!!emptyData}

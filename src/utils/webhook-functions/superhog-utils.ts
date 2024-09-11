@@ -90,6 +90,10 @@ export async function createSuperhogReservation({
   userId: string;
   trip: Trip;
 }) {
+  const superhogEndpoint =
+    env.NODE_ENV === "production"
+      ? "https://superhog-apim.azure-api.net/e-deposit/verifications"
+      : "https://superhog-apim.azure-api.net/e-deposit-sandbox/verifications";
   //find the property using its id
   const property = await db.query.properties.findFirst({
     where: eq(properties.id, propertyId),
@@ -145,23 +149,12 @@ export async function createSuperhogReservation({
         telephoneNumber: user.phoneNumber?.toString() ?? "+19496833881",
       },
     };
+    console.log("THis is the reservationObject", reservationObject);
 
-    const { verification } = await axios
-      .post<unknown, ResponseType>(
-        "https://superhog-apim.azure-api.net/e-deposit/verifications",
-        reservationObject,
-        config,
-      )
+    const response = await axios
+      .post<unknown, ResponseType>(superhogEndpoint, reservationObject, config)
       .then((res) => res.data)
       .catch(async (error: AxiosError) => {
-        await sendSlackMessage({
-          channel: "superhog-bot",
-          text: [
-            `SUPERHOG REQUEST ERROR: axios error... ${error.response.data.detail}`,
-            `by User *:${user.name}* `,
-          ].join("\n"),
-        });
-
         await db.insert(superhogErrors).values({
           echoToken: reservationObject.metadata.echoToken,
           error: error.response.data.detail,
@@ -174,9 +167,17 @@ export async function createSuperhogReservation({
           .update(trips)
           .set({ tripsStatus: "Needs attention" })
           .where(eq(trips.id, trip.id));
-        throw new Error(error.response.data.detail);
+
+        await sendSlackMessage({
+          isProductionOnly: true,
+          channel: "superhog-bot",
+          text: [
+            `SUPERHOG REQUEST ERROR: axios error... ${error.response.data.detail}`,
+            `by User *:${user.name}* `,
+          ].join("\n"),
+        });
       });
-    if (!verification) {
+    if (!response?.verification) {
       await db.insert(superhogErrors).values({
         echoToken: reservationObject.metadata.echoToken,
         error: "NO RESPONSE FROM SUPERHOG",
@@ -186,6 +187,7 @@ export async function createSuperhogReservation({
         action: "create",
       });
       await sendSlackMessage({
+        isProductionOnly: true,
         channel: "superhog-bot",
         text: [
           `SUPERHOG REQUEST ERROR: The verification was not created because it was not found`,
@@ -201,8 +203,8 @@ export async function createSuperhogReservation({
         echoToken: reservationObject.metadata.echoToken,
         propertyId: propertyId,
         userId: userId,
-        superhogStatus: verification.status,
-        superhogVerificationId: verification.verificationId,
+        superhogStatus: response.verification.status,
+        superhogVerificationId: response.verification.verificationId,
         superhogReservationId: reservationObject.reservation.reservationId, //this is the trip id but not connected it doesnt matter what the value is tbh
       })
       .returning({ id: superhogRequests.id });
@@ -222,17 +224,18 @@ export async function createSuperhogReservation({
     });
 
     if (
-      verification.status === "Rejected" ||
-      verification.status === "Flagged"
+      response.verification.status === "Rejected" ||
+      response.verification.status === "Flagged"
     ) {
       await db
         .update(trips)
         .set({ tripsStatus: "Needs attention" })
         .where(eq(trips.id, trip.id));
       await sendSlackMessage({
+        isProductionOnly: true,
         channel: "superhog-bot",
         text: [
-          `*SUPERHOG REQUEST*: The verification was created successfully but was denied with status of ${verification.status} for tripID ${trip.id} for ${user.name}`,
+          `*SUPERHOG REQUEST*: The verification was created successfully but was denied with status of ${response.verification.status} for tripID ${trip.id} for ${user.name}`,
         ].join("\n"),
       });
     } else {
@@ -245,6 +248,7 @@ export async function createSuperhogReservation({
         .where(eq(trips.id, trip.id));
 
       await sendSlackMessage({
+        isProductionOnly: true,
         channel: "superhog-bot",
         text: [
           `SUPERHOG REQUEST SUCCESS: TRIP ID  ${currentTripId[0]!.id} was created successfully for property ${property.name}`,
@@ -264,6 +268,7 @@ export async function createSuperhogReservation({
       action: "create",
     });
     await sendSlackMessage({
+      isProductionOnly: true,
       channel: "superhog-bot",
       text: [
         `*SUPERHOG REQUEST ERROR*: The property with id ${propertyId} or the user with id ${userId} does not exist in the database`,
@@ -302,6 +307,7 @@ export async function cancelSuperhogReservation({
     });
     if (!currentSuperhogRequestId) {
       await sendSlackMessage({
+        isProductionOnly: true,
         channel: "superhog-bot",
         text: [
           `*SUPERHOG Delete ERROR*: The verification id ${verificationId} does not exist in the database`,
@@ -327,6 +333,7 @@ export async function cancelSuperhogReservation({
       .set({ isCancelled: true })
       .where(eq(superhogRequests.superhogVerificationId, verificationId));
     await sendSlackMessage({
+      isProductionOnly: true,
       channel: "superhog-bot",
       text: [
         `*SUPERHOG Delete*: The verification id ${verificationId} from trip ${reservationId} was successfully deleted`,

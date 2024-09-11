@@ -78,7 +78,7 @@ export default function Onboarding11() {
                 {listing.location.apt && <p>{listing.location.apt}</p>}
                 <p>
                   {listing.location.city}, {listing.location.state}{" "}
-                  {listing.location.zipcode}
+                  {listing.location.zipcode},
                 </p>
                 <p>{listing.location.country}</p>
               </div>

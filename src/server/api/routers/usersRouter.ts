@@ -31,8 +31,16 @@ import { z } from "zod";
 import axios from "axios";
 import { getCity } from "@/server/google-maps";
 import { sendSlackMessage } from "@/server/slack";
+import { createHostReferral, sendEmail } from "@/server/server-utils";
+import WelcomeEmail from "packages/transactional/emails/WelcomeEmail";
 
 export const usersRouter = createTRPCRouter({
+  getUser: protectedProcedure.query(async ({ ctx }) => {
+    return await db.query.users.findFirst({
+      where: eq(users.id, ctx.user.id),
+    });
+  }),
+
   getOnboardingStep: optionallyAuthedProcedure.query(async ({ ctx }) => {
     if (!ctx.user) return null;
     const res = await ctx.db.query.users.findFirst({
@@ -107,6 +115,15 @@ export const usersRouter = createTRPCRouter({
         .where(eq(users.id, input.id))
         .returning();
 
+      if (updatedUser[0] && updatedUser[0]?.onboardingStep === 3) {
+        await sendEmail({
+          to: updatedUser[0].email,
+          subject: "Welcome to Tramona",
+          content: WelcomeEmail({
+            name: updatedUser[0].name ?? updatedUser[0].firstName ?? "Guest",
+          }),
+        });
+      }
       return updatedUser;
     }),
 
@@ -219,12 +236,29 @@ export const usersRouter = createTRPCRouter({
       });
 
       await sendSlackMessage({
+        isProductionOnly: true,
         text: [
           "*Host Profile Created:*",
           `User ${ctx.user.name} has become a host`,
         ].join("\n"),
         channel: "host-bot",
       });
+
+      const curUser = await db.query.users.findFirst({
+        where: eq(users.id, ctx.user.id),
+      });
+      //referrals for host
+      console.log(
+        "calleing referral function here is the referral code used",
+        curUser,
+      );
+      if (curUser) {
+        //creates the discount but doenst validate or resolve it
+        await createHostReferral({
+          userId: curUser.id,
+          referralCodeUsed: curUser.referralCodeUsed,
+        });
+      }
 
       interface PropertyType {
         id: number;
@@ -634,7 +668,7 @@ export const usersRouter = createTRPCRouter({
       }
 
       if (!user.password) {
-        return "incorrect credentials";
+        return "passwordless";
       }
 
       const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -719,6 +753,20 @@ export const usersRouter = createTRPCRouter({
 
       return verifications;
     }),
+
+  getMyVerifications: protectedProcedure.query(async ({ ctx }) => {
+    const verifications = ctx.db.query.users.findFirst({
+      where: eq(users.id, ctx.user.id),
+      columns: {
+        dateOfBirth: true,
+        phoneNumber: true,
+        firstName: true,
+        lastName: true,
+      },
+    });
+
+    return verifications;
+  }),
 
   addEmergencyContacts: protectedProcedure
     .input(

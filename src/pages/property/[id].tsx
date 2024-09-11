@@ -1,6 +1,5 @@
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import Spinner from "@/components/_common/Spinner";
-import PropertyPage from "@/components/property/PropertyPage";
 import { api, type RouterOutputs } from "@/utils/api";
 import { useRouter } from "next/router";
 import { type GetServerSideProps } from "next";
@@ -8,6 +7,7 @@ import { NextSeo } from "next-seo";
 import { db } from "@/server/db";
 import { properties } from "@/server/db/schema/tables/properties";
 import { eq } from "drizzle-orm";
+import PropertyPage from "@/components/offers/PropertyPage";
 
 export type PropertyWithDetails = RouterOutputs["properties"]["getById"];
 

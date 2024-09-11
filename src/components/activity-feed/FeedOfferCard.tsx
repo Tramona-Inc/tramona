@@ -98,6 +98,8 @@ export default function FeedOfferCard({ offer }: { offer: FeedOfferItem }) {
                       className="basis-1/2 pl-2 md:basis-1/3 md:pl-4"
                     >
                       <Link
+                        target="_blank"
+                        rel="noopener noreferrer"
                         href={`/property/${offer.property.id}`}
                         className="relative block aspect-[4/3] overflow-clip rounded-xl"
                       >

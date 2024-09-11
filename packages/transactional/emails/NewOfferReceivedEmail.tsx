@@ -13,6 +13,8 @@ interface NewOfferEmailProps {
   adults: number;
   checkInDateTime: Date;
   checkOutDateTime: Date;
+  imgUrl: string;
+  offerLink: string;
 }
 
 export default function NewOfferEmail({
@@ -23,8 +25,10 @@ export default function NewOfferEmail({
   discountPercentage = 21,
   nights = 5,
   adults = 2,
+  imgUrl = "",
   checkInDateTime = new Date("2024-04-25T16:00:00"),
   checkOutDateTime = new Date("2024-04-30T12:00:00"),
+  offerLink = "tramona.com",
 }: NewOfferEmailProps) {
   const formatDate = (date: Date) =>
     date.toLocaleDateString("en-US", {
@@ -45,17 +49,13 @@ export default function NewOfferEmail({
         <Text className="mb-4 text-3xl font-bold">New offer received</Text>
         <Text className="mb-4 text-left">
           Hello, {userName}. You just received an offer.{" "}
-          <a href="#" className="text-black underline">
+          <a href={offerLink} className="text-black underline">
             Click here
           </a>{" "}
           to check it out!
         </Text>
         <div className="mb-8">
-          <img
-            src="https://via.placeholder.com/600x300?text=Property+Image+Here&bg=cccccc"
-            alt="Property"
-            className="w-full rounded-lg"
-          />
+          <img src={imgUrl} alt="Property" className="w-full rounded-lg" />
         </div>
         <Text className="mb-4 text-2xl font-bold">{property}</Text>
         <div style={{ width: "100%", marginBottom: "24px" }}>
@@ -200,8 +200,8 @@ export default function NewOfferEmail({
           </div>
         </div>
         <Button
-          href="https://www.tramona.com/requests"
           className="mx-auto mb-6 w-11/12 rounded-md bg-green-900 px-6 py-3 text-center text-lg text-white"
+          href={offerLink}
         >
           View offer
         </Button>

@@ -1,5 +1,6 @@
 import {
-  type CancellationPolicy,
+  CancellationPolicyWithInternals,
+  Property,
   type PropertyRoomType,
   type PropertyType,
 } from "@/server/db/schema";
@@ -21,7 +22,7 @@ type HostOnboardingState = {
   isEdit: boolean;
   listing: {
     propertyType: PropertyType;
-    cancellationPolicy: CancellationPolicy | null;
+    cancellationPolicy: CancellationPolicyWithInternals | null;
     spaceType: PropertyRoomType;
     maxGuests: number;
     bedrooms: number;
@@ -40,6 +41,8 @@ type HostOnboardingState = {
     petsAllowed: boolean;
     smokingAllowed: boolean;
     otherHouseRules: string | null | undefined;
+    originalListingId: string | null | undefined;
+    originalListingPlatform: Property["originalListingPlatform"] | undefined;
   };
   setIsEdit: (isEdit: boolean) => void;
   setMaxGuests: (maxGuests: number) => void;
@@ -48,7 +51,7 @@ type HostOnboardingState = {
   setBathrooms: (bathrooms: number) => void;
   setPropertyType: (property: PropertyType) => void;
   setCancellationPolicy: (
-    cancellationPolicy: CancellationPolicy | null,
+    cancellationPolicy: CancellationPolicyWithInternals | null,
   ) => void;
   setSpaceType: (property: PropertyRoomType) => void;
   setLocation: (location: LocationType) => void;
@@ -68,6 +71,10 @@ type HostOnboardingState = {
   setPetsAllowed: (petsAllowed: boolean) => void;
   setSmokingAllowed: (smokingAllowed: boolean) => void;
   setOtherHouseRules: (otherHouseRules: string) => void;
+  setOriginalListingId: (originalListingId: string) => void;
+  setOriginalListingPlatform: (
+    originalListingPlatform: Property["originalListingPlatform"],
+  ) => void;
   resetSession: () => void;
 };
 
@@ -104,6 +111,8 @@ export const useHostOnboarding = create<HostOnboardingState>()(
         petsAllowed: false,
         smokingAllowed: false,
         otherHouseRules: "",
+        originalListingId: null,
+        originalListingPlatform: undefined,
       },
       setIsEdit: (isEdit: boolean) => {
         set((state) => ({ ...state, isEdit }));
@@ -157,7 +166,7 @@ export const useHostOnboarding = create<HostOnboardingState>()(
         }));
       },
       setCancellationPolicy: (
-        cancellationPolicy: CancellationPolicy | null,
+        cancellationPolicy: CancellationPolicyWithInternals | null,
       ) => {
         set((state) => ({
           ...state,
@@ -331,6 +340,26 @@ export const useHostOnboarding = create<HostOnboardingState>()(
           listing: {
             ...state.listing,
             otherHouseRules,
+          },
+        }));
+      },
+      setOriginalListingId: (originalListingId: string) => {
+        set((state) => ({
+          ...state,
+          listing: {
+            ...state.listing,
+            originalListingId,
+          },
+        }));
+      },
+      setOriginalListingPlatform: (
+        originalListingPlatform: Property["originalListingPlatform"],
+      ) => {
+        set((state) => ({
+          ...state,
+          listing: {
+            ...state.listing,
+            originalListingPlatform,
           },
         }));
       },

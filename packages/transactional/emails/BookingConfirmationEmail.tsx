@@ -13,7 +13,7 @@ import {
 import { Text, Section, Hr, Row, Column } from "@react-email/components";
 
 interface BookingConfirmationEmailProps {
-  userName: string;
+  name: string;
   placeName: string;
   hostName: string;
   hostImageUrl: string;
@@ -30,11 +30,11 @@ interface BookingConfirmationEmailProps {
 }
 
 export default function BookingConfirmationEmail({
-  userName = "User",
+  name = "User",
   placeName = "Tropical getaway in Mexico",
   startDate = "Nov 6",
   endDate = "Nov 11, 2024",
-  address = "101 Street Planet Earth",
+  address = "101 street planet earth",
   propertyImageLink = "https://via.placeholder.com/600x300",
   tripDetailLink = "https://www.tramona.com/",
   originalPrice = 1000,
@@ -47,8 +47,8 @@ export default function BookingConfirmationEmail({
     <Layout title_preview="Booking confirmation/Payment received">
       <Header title="Booking confirmation/Payment received" />
       <Text className="text-brand px-6 text-left text-base">
-        Hello, {userName}. Your booking to {placeName} has been confirmed.
-        Congrats and enjoy!
+        Hello, {name}. Your booking to {placeName} has been confirmed. Congrats
+        and enjoy!
       </Text>
       <Section
         className="flex justify-center px-6 pb-6"
@@ -68,7 +68,7 @@ export default function BookingConfirmationEmail({
         className="flex flex-col items-center justify-center px-6 pb-6 pt-6"
         style={{ width: "100%" }}
       >
-        <Row className="">
+        {/* <Row className="">
           <Column>
             <Text className="whitespace-no-wrap text-xs">Original Price</Text>
           </Column>
@@ -81,7 +81,7 @@ export default function BookingConfirmationEmail({
           <Column className="text-right" style={{ paddingLeft: "150px" }}>
             {formatCurrency(originalPrice)}
           </Column>
-        </Row>
+        </Row> */}
         <Row className="">
           <Column>
             <Text className="whitespace-no-wrap text-xs">

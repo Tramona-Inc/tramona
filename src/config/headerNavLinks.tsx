@@ -1,15 +1,19 @@
 import {
   BadgeHelp,
   BadgeInfo,
+  BadgePercentIcon,
   HandshakeIcon,
+  Home,
   InfoIcon,
+  LinkIcon,
   MessageCircleQuestion,
 } from "lucide-react";
 
 export const headerLinks = [
+  { name: "Link Input", href: "/link-input", icon: LinkIcon },
   { name: "How it works", href: "/how-it-works", icon: InfoIcon },
-  // { name: "Link Input", href: "/link-input", icon: LinkIcon },
   { name: "Recent Deals", href: "/exclusive-offers", icon: HandshakeIcon },
+  { name: "For Hosts", href: "/why-list", icon: Home },
   // {
   //   name: "Unclaimed Offers",
   //   href: "/unclaimed-offers",

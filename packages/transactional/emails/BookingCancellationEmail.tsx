@@ -5,7 +5,7 @@ import { Layout } from "./EmailComponents";
 interface BookingCancellationEmailProps {
   userName: string;
   confirmationNumber: string;
-  dates: { from: string; to: string };
+  dateRange: string;
   property: string;
   reason: string;
   refund: number;
@@ -13,7 +13,7 @@ interface BookingCancellationEmailProps {
 
 export default function BookingCancellationEmail({
   userName = "User",
-  dates = { from: "06-01-2024", to: "06-02-2024" },
+  dateRange = "",
   property = "Property",
   reason = "Reason",
 }: BookingCancellationEmailProps) {
@@ -38,13 +38,12 @@ export default function BookingCancellationEmail({
           style={{ borderBottom: "2px solid #e0e0e0" }}
         ></div>
         <Text className="mb-8 text-left text-3xl">
-          Your booking at {property} for {dates.from} to {dates.to} has been
-          canceled
+          Your booking at {property} for {dateRange} has been canceled
         </Text>
         <Text className="mb-4 text-left">Hi {userName},</Text>
         <Text className="mb-4 text-left">
-          Your booking for {property} for the dates of {dates.from} to{" "}
-          {dates.to} has been canceled for {reason}.
+          Your booking for {property} for the dates of {dateRange} has been
+          canceled for {reason}.
         </Text>
         <Text className="mb-4 text-left">
           (info if there will be a refund or not, depending on cancellation

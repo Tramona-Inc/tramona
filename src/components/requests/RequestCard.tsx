@@ -5,7 +5,7 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { type RouterOutputs } from "@/utils/api";
-import { getFmtdFilters } from "@/utils/formatters";
+import { getRequestStatus } from "@/utils/formatters";
 import {
   formatCurrency,
   formatDateRange,
@@ -34,6 +34,7 @@ import { formatDistanceToNowStrict } from "date-fns";
 import { LinkInputPropertyCard } from "../_common/LinkInputPropertyCard";
 import SingleLocationMap from "../_common/GoogleMaps/SingleLocationMap";
 import { api } from "@/utils/api";
+import { RequestCardOfferPreviews } from "./RequestCardOfferPreviews";
 
 export type GuestDashboardRequest = RouterOutputs["requests"]["getMyRequests"][
   | "activeRequests"
@@ -67,11 +68,6 @@ export default function RequestCard({
   const fmtdDateRange = formatDateRange(request.checkIn, request.checkOut);
   const fmtdNumGuests = plural(request.numGuests, "guest");
 
-  const fmtdFilters = getFmtdFilters(request, {
-    withoutNote: true,
-    excludeDefaults: true,
-  });
-
   const showAvatars =
     (request.numGuests > 1 && type !== "host") || type === "admin";
 
@@ -100,7 +96,7 @@ export default function RequestCard({
         onOpenChange={setOpen}
       />
       <div className="flex">
-        <div className="flex-1 space-y-4 p-4 pt-2">
+        <div className="flex-1 space-y-4 overflow-hidden p-4 pt-2">
           <div className="flex items-center gap-2">
             {type !== "host" && <RequestCardBadge request={request} />}
             {type === "guest" && request.linkInputProperty && (
@@ -158,7 +154,10 @@ export default function RequestCard({
               </div>
             )}
             <div>
-              <p>Requested {fmtdPrice}/night</p>
+              <p>
+                Requested <span className="font-semibold">{fmtdPrice}</span>
+                /night
+              </p>
               <p className="flex items-center gap-2">
                 <span className="flex items-center gap-1">
                   <CalendarIcon className="size-4" />
@@ -171,8 +170,17 @@ export default function RequestCard({
                 </span>
               </p>
             </div>
-            {fmtdFilters && <p>{fmtdFilters}</p>}
             <div className="flex flex-wrap gap-1">
+              {request.minNumBeds && request.minNumBeds > 1 && (
+                <Badge>{request.minNumBeds}+ beds</Badge>
+              )}
+              {request.minNumBedrooms && request.minNumBedrooms > 1 && (
+                <Badge>{request.minNumBedrooms}+ bedrooms</Badge>
+              )}
+              {request.minNumBathrooms && request.minNumBathrooms > 1 && (
+                <Badge>{request.minNumBathrooms}+ bathrooms</Badge>
+              )}
+              {request.propertyType && <Badge>{request.propertyType}</Badge>}
               {request.amenities.map((amenity) => (
                 <Badge key={amenity}>{amenity}</Badge>
               ))}
@@ -187,10 +195,13 @@ export default function RequestCard({
               <LinkInputPropertyCard property={request.linkInputProperty} />
             )}
           </div>
-          <CardFooter>{children}</CardFooter>
+          {type === "guest" && getRequestStatus(request) === "accepted" && (
+            <RequestCardOfferPreviews request={request} />
+          )}
+          <CardFooter className="empty:hidden">{children}</CardFooter>
         </div>
         {type !== "host" && (
-          <div className="hidden w-64 bg-zinc-100 lg:block">
+          <div className="hidden w-64 shrink-0 bg-zinc-100 lg:block">
             {lat && lng && (
               <SingleLocationMap lat={lat} lng={lng} icon={true} />
             )}

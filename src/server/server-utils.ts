@@ -5,7 +5,8 @@ import { type ReactElement } from "react";
 import { Twilio } from "twilio";
 import { db } from "./db";
 import { waitUntil } from "@vercel/functions";
-
+import { formatCurrency, getNumNights, plural } from "@/utils/utils";
+import axiosRetry from "axios-retry";
 import {
   and,
   between,
@@ -16,6 +17,7 @@ import {
   isNull,
   lte,
   notExists,
+  or,
   sql,
   type SQL,
 } from "drizzle-orm";
@@ -33,6 +35,8 @@ import {
   offers,
   requestsToProperties,
   users,
+  hostReferralDiscounts,
+  referralCodes,
 } from "./db/schema";
 import { getCity, getCoordinates } from "./google-maps";
 import axios from "axios";
@@ -40,6 +44,26 @@ import { HttpsProxyAgent } from "https-proxy-agent";
 import * as cheerio from "cheerio";
 import { sendSlackMessage } from "./slack";
 import { HOST_MARKUP, TRAVELER__MARKUP } from "@/utils/constants";
+import { HostRequestsPageData } from "./api/routers/propertiesRouter";
+
+export const axiosWithRetry = axios.create();
+
+axiosRetry(axiosWithRetry, {
+  retries: 3,
+
+  retryDelay: (retryCount) =>
+    retryCount * 1000 /* Wait 1s, 2s, 3s between retries*/,
+
+  retryCondition: (error) => {
+    // Retry on knowing errors and any 5xx errors
+    return (
+      error.code === "EPROTO" ||
+      error.code === "ERR_BAD_RESPONSE" ||
+      (error.response?.status !== undefined && error.response.status >= 500)
+    );
+  },
+});
+
 export const proxyAgent = new HttpsProxyAgent(env.PROXY_URL);
 
 export async function scrapeUrl(url: string) {
@@ -259,10 +283,12 @@ export async function addProperty({
   userEmail,
   hostTeamId,
   property,
+  isAdmin,
 }: {
   userId?: string;
   userEmail?: string;
   hostTeamId?: number | null;
+  isAdmin: boolean;
   property: Omit<NewProperty, "id" | "city" | "latitude" | "longitude"> & {
     latitude?: number;
     longitude?: number;
@@ -295,10 +321,11 @@ export async function addProperty({
   waitUntil(processRequests(insertedProperty!));
 
   await sendSlackMessage({
+    isProductionOnly: true,
     channel: "host-bot",
     text: [
       `*New property added: ${property.name} in ${property.address}*
-     by ${userEmail}`,
+     by ${isAdmin ? "an Tramona admin" : userEmail}`,
     ].join("\n"),
   });
   return insertedProperty!.id;
@@ -318,17 +345,64 @@ async function processRequests(
       location: request.location,
       checkIn: request.checkIn,
       checkOut: request.checkOut,
+      maxTotalPrice: request.maxTotalPrice,
       latLngPoint: request.latLngPoint,
       propertyLatLngPoint: insertedProperty.latLngPoint,
     });
 
-    if (matchingProperties.includes(insertedProperty.id)) {
+    console.log("properties:", matchingProperties);
+    const propertyIds = matchingProperties.map((property) => property.id);
+
+    if (propertyIds.includes(insertedProperty.id)) {
       await db.insert(requestsToProperties).values({
         requestId: request.id,
         propertyId: insertedProperty.id,
       });
     }
   }
+}
+
+export async function sendTextToHost(
+  matchingProperties: { id: number; hostId: string | null }[],
+  checkIn: Date,
+  checkOut: Date,
+  maxTotalPrice: number,
+  location: string,
+) {
+  const uniqueHostIds = Array.from(
+    new Set(matchingProperties.map((property) => property.hostId)),
+  );
+  const numHostPropertiesPerRequest = matchingProperties.reduce(
+    (acc, property) => {
+      if (property.hostId) {
+        acc[property.hostId] = (acc[property.hostId] ?? 0) + 1;
+      }
+      return acc;
+    },
+    {} as Record<string, number>,
+  );
+
+  waitUntil(
+    Promise.all(
+      uniqueHostIds.filter(Boolean).map(async (hostId) => {
+        const host = await db.query.users.findFirst({
+          where: eq(users.id, hostId),
+          columns: { name: true, email: true, phoneNumber: true },
+        });
+
+        if (!host?.phoneNumber) return;
+
+        const numberOfNights = getNumNights(checkIn, checkOut);
+
+        await sendText({
+          to: host.phoneNumber,
+          content: `Tramona: There is a request for ${formatCurrency(maxTotalPrice / numberOfNights)} per night for ${plural(numberOfNights, "night")} in ${location}. You have ${plural(numHostPropertiesPerRequest[hostId] ?? 0, "eligible property", "eligible properties")}. Please click here to make a match: ${env.NEXTAUTH_URL}/host/requests`,
+        });
+
+        //TODO SEND WHATSAPP MESSAGE
+      }),
+    ),
+  );
 }
 
 export async function getPropertiesForRequest(
@@ -339,6 +413,7 @@ export async function getPropertiesForRequest(
     location: string;
     checkIn: Date;
     checkOut: Date;
+    maxTotalPrice: number;
     id: number;
     latLngPoint?: { x: number; y: number } | null;
     propertyLatLngPoint?: Property["latLngPoint"];
@@ -361,6 +436,12 @@ export async function getPropertiesForRequest(
   } else {
     const coordinates = await getCoordinates(req.location);
     if (coordinates.bounds) {
+      console.log(
+        "bounds",
+        coordinates.bounds,
+        req.location,
+        req.maxTotalPrice,
+      );
       const { northeast, southwest } = coordinates.bounds;
       propertyIsNearRequest = sql`
         ST_Within(
@@ -398,16 +479,28 @@ export async function getPropertiesForRequest(
       ),
   );
 
+  const numberOfNights = getNumNights(req.checkIn, req.checkOut);
+
   const result = await tx.query.properties.findMany({
     where: and(
       isNotNull(properties.hostId),
       propertyIsNearRequest,
       propertyisAvailable,
+      or(
+        isNull(properties.priceRestriction), // Include properties with no price restriction
+        and(
+          isNotNull(properties.priceRestriction),
+          lte(
+            properties.priceRestriction,
+            Math.round((req.maxTotalPrice / numberOfNights) * 1.15),
+          ),
+        ),
+      ),
     ),
-    columns: { id: true, city: true, latitude: true, longitude: true },
+    columns: { id: true, hostId: true },
   });
 
-  return result.map((p) => p.id);
+  return result;
 }
 
 export async function getAdminId() {
@@ -471,6 +564,11 @@ export async function getPropertyOriginalPrice(
   // code for other options
 }
 
+export interface SeparatedData {
+  normal: HostRequestsPageData[];
+  outsidePriceRestriction: HostRequestsPageData[];
+}
+
 //update spread on every fetch to keep information updated
 export async function updateTravelerandHostMarkup({
   offerTotalPrice,
@@ -481,7 +579,7 @@ export async function updateTravelerandHostMarkup({
 }) {
   console.log("offerTotalPrice", offerTotalPrice);
   const travelerPrice = Math.ceil(offerTotalPrice * TRAVELER__MARKUP);
-  const hostPay = offerTotalPrice * HOST_MARKUP;
+  const hostPay = Math.ceil(offerTotalPrice * HOST_MARKUP);
   console.log("travelerPrice", travelerPrice);
   await db
     .update(offers)
@@ -490,4 +588,79 @@ export async function updateTravelerandHostMarkup({
       hostPayout: hostPay,
     })
     .where(and(eq(offers.id, offerId), isNull(offers.acceptedAt)));
+}
+
+export async function createHostReferral({
+  userId,
+  referralCodeUsed,
+}: {
+  userId: string;
+  referralCodeUsed: string | null;
+}) {
+  console.log("this is the referral code ysed  ", referralCodeUsed);
+  if (referralCodeUsed) {
+    const isReferralUsed = await db.query.hostReferralDiscounts.findFirst({
+      where: eq(hostReferralDiscounts.refereeUserId, userId),
+    });
+    console.log("about to return ", isReferralUsed);
+    if (isReferralUsed) return;
+    //find owner of the referral code
+    const referrer = await db.query.referralCodes.findFirst({
+      where: eq(referralCodes.referralCode, referralCodeUsed),
+      columns: { ownerId: true },
+    });
+    //create host referral discount row
+    if (referrer) {
+      await db.insert(hostReferralDiscounts).values({
+        referralCode: referralCodeUsed,
+        ownerId: referrer.ownerId,
+        refereeUserId: userId,
+      });
+    }
+    //send an email or notification to the referrer
+  }
+}
+
+function getRandomNormalDistribution(mean: number, stdDev: number): number {
+  let u = 0,
+    v = 0;
+  while (u === 0) u = Math.random(); // Converting [0,1) to (0,1)
+  while (v === 0) v = Math.random();
+  let num = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+  num = num * stdDev + mean; // Scale to the desired mean and standard deviation
+  return Math.round(num); // Round to nearest integer
+}
+
+function stripTimeFromDate(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+export function createNormalDistributionDates(
+  numRanges: number,
+): { checkIn: Date; checkOut: Date }[] {
+  const dateRanges = [];
+
+  for (let i = 0; i < numRanges; i++) {
+    const today = new Date();
+    const futureDate = new Date(
+      today.getTime() + Math.random() * 90 * 24 * 60 * 60 * 1000,
+    ); // Random date within next 90 days
+    const startDate = stripTimeFromDate(new Date(futureDate));
+
+    // Generate end date using a normal distribution with mean = 3 days and stdDev = 1 day
+    let endDateOffset = getRandomNormalDistribution(3, 1);
+    // Ensure endDateOffset is at least 1 day
+    endDateOffset = Math.max(1, endDateOffset);
+
+    const endDate = stripTimeFromDate(
+      new Date(startDate.getTime() + endDateOffset * 24 * 60 * 60 * 1000),
+    );
+
+    dateRanges.push({
+      checkIn: startDate,
+      checkOut: endDate,
+    });
+  }
+
+  return dateRanges;
 }

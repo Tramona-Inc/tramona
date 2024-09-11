@@ -21,16 +21,19 @@ import {
 } from "@/server/server-utils";
 import { sendSlackMessage } from "@/server/slack";
 import { isIncoming } from "@/utils/formatters";
-import { formatCurrency, formatDateRange, plural } from "@/utils/utils";
 import { TRPCError } from "@trpc/server";
 import { and, eq, exists } from "drizzle-orm";
 import { z } from "zod";
 import type { Session } from "next-auth";
+import { linkInputProperties } from "@/server/db/schema/tables/linkInputProperties";
 import {
-  linkInputProperties,
-  linkInputPropertyInsertSchema,
-} from "@/server/db/schema/tables/linkInputProperties";
-import { getNumNights } from "@/utils/utils";
+  formatCurrency,
+  getNumNights,
+  formatDateRange,
+  plural,
+} from "@/utils/utils";
+import { sendTextToHost } from "@/server/server-utils";
+import { newLinkRequestSchema } from "@/utils/useSendUnsentRequests";
 
 const updateRequestInputSchema = z.object({
   requestId: z.number(),
@@ -57,7 +60,32 @@ export const requestsRouter = createTRPCRouter({
             ),
         ),
         with: {
-          offers: { columns: { id: true } },
+          offers: {
+            columns: {
+              id: true,
+              travelerOfferedPrice: true,
+              createdAt: true,
+              checkIn: true,
+              checkOut: true,
+            },
+            with: {
+              property: {
+                columns: {
+                  id: true,
+                  imageUrls: true,
+                  name: true,
+                  numBedrooms: true,
+                  numBathrooms: true,
+                  originalNightlyPrice: true,
+                  hostName: true,
+                  hostProfilePic: true,
+                },
+                with: {
+                  host: { columns: { name: true, email: true, image: true } },
+                },
+              },
+            },
+          },
           linkInputProperty: true,
           madeByGroup: {
             with: {
@@ -75,16 +103,11 @@ export const requestsRouter = createTRPCRouter({
       })
       // extract offer count & sort
       .then((requests) =>
-        requests
-          .map(({ offers, ...request }) => ({
-            ...request,
-            numOffers: offers.length,
-          }))
-          .sort(
-            (a, b) =>
-              b.numOffers - a.numOffers ||
-              b.createdAt.getTime() - a.createdAt.getTime(),
-          ),
+        requests.sort(
+          (a, b) =>
+            b.offers.length - a.offers.length ||
+            b.createdAt.getTime() - a.createdAt.getTime(),
+        ),
       );
 
     return {
@@ -120,16 +143,11 @@ export const requestsRouter = createTRPCRouter({
       })
       // 1. extract offer count & sort
       .then((requests) =>
-        requests
-          .map(({ offers, ...request }) => ({
-            ...request,
-            numOffers: offers.length,
-          }))
-          .sort(
-            (a, b) =>
-              b.numOffers - a.numOffers ||
-              b.createdAt.getTime() - a.createdAt.getTime(),
-          ),
+        requests.sort(
+          (a, b) =>
+            b.offers.length - a.offers.length ||
+            b.createdAt.getTime() - a.createdAt.getTime(),
+        ),
       )
       .then((res) => {
         return {
@@ -151,21 +169,11 @@ export const requestsRouter = createTRPCRouter({
     }),
 
   createRequestWithLink: protectedProcedure
-    .input(
-      z.object({
-        request: requestInsertSchema.omit({
-          madeByGroupId: true,
-          latLngPoint: true,
-        }),
-        property: linkInputPropertyInsertSchema,
-      }),
-    )
+    .input(newLinkRequestSchema)
     .mutation(async ({ ctx, input: { property, request } }) => {
       const { requestId, madeByGroupId } = await handleRequestSubmission(
         request,
-        {
-          user: ctx.user,
-        },
+        { user: ctx.user },
       );
 
       const linkInputPropertyId = await db
@@ -415,27 +423,68 @@ export async function handleRequestSubmission(
       .values({ ownerId: user.id })
       .returning()
       .then((res) => res[0]!.id);
+
     await tx.insert(groupMembers).values({
       userId: user.id,
       groupId: madeByGroupId,
     });
 
-    const { requestId } = await tx
+    const requestId = await tx
       .insert(requests)
       .values({ ...input, madeByGroupId })
-      .returning({ requestId: requests.id })
-      .then((res) => res[0]!);
+      .returning()
+      .then((res) => res[0]!.id);
 
-    const propertyIds = await getPropertiesForRequest(
+    const eligibleProperties = await getPropertiesForRequest(
       { ...input, id: requestId },
       { tx },
     );
 
-    if (propertyIds.length > 0) {
-      await tx
-        .insert(requestsToProperties)
-        .values(propertyIds.map((propertyId) => ({ requestId, propertyId })));
+    if (eligibleProperties.length > 0) {
+      await tx.insert(requestsToProperties).values(
+        eligibleProperties.map((property) => ({
+          requestId,
+          propertyId: property.id,
+        })),
+      );
+
+      await sendTextToHost(
+        eligibleProperties,
+        input.checkIn,
+        input.checkOut,
+        input.maxTotalPrice,
+        input.location,
+      );
     }
+
+    // waitUntil(
+    //   scrapeAirbnbListings({
+    //     request: input,
+    //     limit: 10,
+    //   })
+    //     .then(async (airbnbListings) => {
+    //       const airbnbPropertyIds = await tx
+    //         .insert(properties)
+    //         .values(airbnbListings.map((l) => l.property))
+    //         .returning({ id: properties.id })
+    //         .then((res) => res.map((r) => r.id));
+
+    //       const flattenedReviews = airbnbListings
+    //         .map(({ reviews }, i) =>
+    //           reviews.map((r) => ({ ...r, propertyId: airbnbPropertyIds[i]! })),
+    //         )
+    //         .flat();
+
+    //       await tx.insert(reviews).values(flattenedReviews);
+    //     })
+    //     .catch((e) => {
+    //       // fail silently -- we dont want to crash the request submission
+    //       // TODO: handle this better using a dead letter queue or something
+    //       console.error(
+    //         `Error scraping Airbnb listings for request #${requestId}: ${e}`,
+    //       );
+    //     }),
+    // );
 
     return { requestId, madeByGroupId };
   });
@@ -450,6 +499,7 @@ export async function handleRequestSubmission(
 
   if (user.role !== "admin") {
     await sendSlackMessage({
+      isProductionOnly: true,
       channel: "tramona-bot",
       text: [
         `*${name} just made a request: ${input.location}*`,

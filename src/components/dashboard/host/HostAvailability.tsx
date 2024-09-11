@@ -247,7 +247,7 @@ export default function HostAvailability({ property }: { property: Property }) {
 
   return (
     <div className="mb-16 mt-6 space-y-10">
-      <div className="flex items-center justify-end space-x-2">
+      <div className="flex items-center justify-center sm:justify-end space-x-2">
         {editing && selectedRange.start && selectedRange.end && (
           <>
             <Button onClick={() => handleRangeSubmit(true)} variant="secondary">
@@ -301,7 +301,7 @@ export default function HostAvailability({ property }: { property: Property }) {
             {isRefetching ? "Refreshing..." : "Refresh Calendar"}
           </Button>
         )}
-        <div className={property.iCalLink && editing ? "" : "hidden"}>
+        <div className={property.iCalLink && editing ? "hidden sm:block" : "hidden"}>
           <HostICalSync property={property} />
         </div>
         {property.iCalLink && (

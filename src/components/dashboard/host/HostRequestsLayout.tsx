@@ -8,30 +8,63 @@ import {
 } from "@/components/ui/empty-state";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SkeletonText } from "@/components/ui/skeleton";
-import { type Property } from "@/server/db/schema/tables/properties";
-import { type Request } from "@/server/db/schema/tables/requests";
 import { api } from "@/utils/api";
-import { plural } from "@/utils/utils";
 import { range } from "lodash";
-import { HandshakeIcon } from "lucide-react";
+import { HandshakeIcon, MapPinIcon } from "lucide-react";
 import Link from "next/link";
-
-import { MapPinIcon } from "lucide-react";
-
-interface CityData {
-  city: string;
-  requests: {
-    request: Request;
-    properties: Property[];
-  }[];
-}
+import { useEffect, useState } from "react";
+import { type SeparatedData } from "@/server/server-utils";
+import { separateByPriceRestriction, plural } from "@/utils/utils";
+import { useRouter } from "next/router";
+import { HostRequestsPageData } from "@/server/api/routers/propertiesRouter";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function HostRequestsLayout({
   children,
 }: React.PropsWithChildren) {
-  const { data: properties } =
-    api.properties.getHostPropertiesWithRequests.useQuery();
-  // const citiesTotal = properties ? properties.length : 0;
+  const [separatedData, setSeparatedData] = useState<SeparatedData | null>(
+    null,
+  );
+  const [selectedOption, setSelectedOption] = useState<
+    "normal" | "outsidePriceRestriction"
+  >("normal");
+  const [selectedCity, setSelectedCity] = useState<string | null>(null);
+  const router = useRouter();
+
+  const { toast } = useToast();
+
+  api.properties.getHostPropertiesWithRequests.useQuery(undefined, {
+    onSuccess: (fetchedProperties) => {
+      const separatedProperties = separateByPriceRestriction(fetchedProperties);
+      setSeparatedData(separatedProperties);
+
+      const firstCity = separatedProperties[selectedOption][0]?.city ?? null;
+      if (firstCity) {
+        setSelectedCity(firstCity);
+        void router.push(
+          selectedOption === "normal"
+            ? `/host/requests/${firstCity}`
+            : `/host/requests/${firstCity}?priceRestriction=true`,
+        );
+      }
+    },
+  });
+
+  useEffect(() => {
+    if (separatedData) {
+      const firstCity = separatedData[selectedOption][0]?.city ?? null;
+      if (firstCity) {
+        setSelectedCity(firstCity);
+        void router.push(
+          selectedOption === "normal"
+            ? `/host/requests/${firstCity}`
+            : `/host/requests/${firstCity}?priceRestriction=true`,
+        );
+      }
+    }
+  }, [selectedOption, separatedData]);
+
+  const displayedData = separatedData ? separatedData[selectedOption] : [];
 
   return (
     <div className="flex">
@@ -39,17 +72,45 @@ export default function HostRequestsLayout({
         <ScrollArea>
           <div className="pb-4">
             <h1 className="text-3xl font-bold">Requests</h1>
-            {/* <div className="flex flex-row gap-2 mt-4">
-            <Button variant={"secondaryLight"} className="rounded-full">
-              Cities {citiesTotal}
-            </Button>
-          </div> */}
+            <div className="mt-4 flex flex-row gap-2">
+              <Button
+                variant={
+                  selectedOption === "normal"
+                    ? "greenPrimary"
+                    : "secondaryLight"
+                }
+                className="rounded-full"
+                onClick={() => setSelectedOption("normal")}
+              >
+                Normal
+              </Button>
+              {separatedData?.outsidePriceRestriction &&
+                separatedData.outsidePriceRestriction.length > 0 && (
+                  <Button
+                    variant={
+                      selectedOption === "outsidePriceRestriction"
+                        ? "greenPrimary"
+                        : "secondaryLight"
+                    }
+                    className="rounded-full"
+                    onClick={() => setSelectedOption("outsidePriceRestriction")}
+                  >
+                    Outside Price Restriction
+                  </Button>
+                )}
+            </div>
           </div>
           <div className="pt-4">
-            {properties ? (
-              properties.length > 0 ? (
-                properties.map((cityData) => (
-                  <SidebarCity key={cityData.city} cityData={cityData} />
+            {displayedData ? (
+              displayedData.length > 0 ? (
+                displayedData.map((cityData) => (
+                  <SidebarCity
+                    key={cityData.city}
+                    cityData={cityData}
+                    selectedOption={selectedOption}
+                    selectedCity={selectedCity}
+                    setSelectedCity={setSelectedCity}
+                  />
                 ))
               ) : (
                 <EmptyState
@@ -90,11 +151,31 @@ export default function HostRequestsLayout({
   );
 }
 
-function SidebarCity({ cityData }: { cityData: CityData }) {
-  const href = `/host/requests/${cityData.city}`;
+function SidebarCity({
+  cityData,
+  selectedOption,
+  selectedCity,
+  setSelectedCity,
+}: {
+  cityData: HostRequestsPageData;
+  selectedOption: "normal" | "outsidePriceRestriction";
+  selectedCity: string | null;
+  setSelectedCity: (city: string) => void;
+}) {
+  const href =
+    selectedOption === "normal"
+      ? `/host/requests/${cityData.city}`
+      : `/host/requests/${cityData.city}?priceRestriction=true`;
+
+  const isSelected = selectedCity === cityData.city;
   return (
     <Link href={href} className="mb-4 block">
-      <div className="flex items-center gap-2 rounded-lg p-4 hover:bg-muted">
+      <div
+        className={`flex items-center gap-2 rounded-lg p-4 hover:bg-muted ${
+          isSelected ? "bg-muted" : ""
+        }`}
+        onClick={() => setSelectedCity(cityData.city)}
+      >
         <MapPinIcon className="h-8 w-8 text-gray-600" />
         <div className="flex-1">
           <h3 className="font-semibold">{cityData.city}</h3>

@@ -5,23 +5,23 @@ import AccountBalanceCard from "@/components/host/finances/summary/AccountBalanc
 import { useEffect, useState } from "react";
 import { Separator } from "@/components/ui/separator";
 export default function FinanceSummary({
-  hostStripeAccountId,
+  hostStripeConnectId,
   isStripeConnectInstanceReady,
   becameHostAt,
 }: {
-  hostStripeAccountId: string | null;
+  hostStripeConnectId: string | null;
   isStripeConnectInstanceReady: boolean;
   becameHostAt: Date | undefined;
 }) {
   const { data: accountBalance } =
-    api.stripe.checkStripeConnectAccountBalance.useQuery(hostStripeAccountId!, {
-      enabled: !!hostStripeAccountId,
+    api.stripe.checkStripeConnectAccountBalance.useQuery(hostStripeConnectId!, {
+      enabled: !!hostStripeConnectId,
     });
 
   const { data: externalBanks } = api.stripe.getConnectedExternalBank.useQuery(
-    hostStripeAccountId!,
+    hostStripeConnectId!,
     {
-      enabled: !!hostStripeAccountId,
+      enabled: !!hostStripeConnectId,
     },
   );
 
@@ -49,12 +49,12 @@ export default function FinanceSummary({
       <div className="flex flex-col-reverse gap-x-5 gap-y-3 lg:flex-row">
         <SummaryChart
           becameHostAt={becameHostAt}
-          hostStripeAccountId={hostStripeAccountId}
+          hostStripeConnectId={hostStripeConnectId}
         />
         <Separator className="h-[2px] lg:hidden" />
         <div className="flex w-full flex-col gap-y-3">
           <BalanceSummary
-            stripeAccountIdNumber={hostStripeAccountId}
+            stripeConnectIdNumber={hostStripeConnectId}
             balance={totalCurrentBalance}
             isStripeConnectInstanceReady={isStripeConnectInstanceReady}
           />

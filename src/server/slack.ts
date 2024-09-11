@@ -11,14 +11,19 @@ const channelIdMap = {
   "host-bot": "C07H794S24U",
 };
 
+const isProduction = process.env.NODE_ENV === "production";
+
 export async function sendSlackMessage({
   channel = "tramona-bot",
   text,
+  isProductionOnly = false,
 }: {
   channel?: Channel;
   text: string;
+  isProductionOnly?: boolean;
 }) {
   await slack.conversations.join({ channel: channelIdMap[channel] });
+  if (isProductionOnly && !isProduction) return;
   await slack.chat.postMessage({
     text: text,
     channel: channel,

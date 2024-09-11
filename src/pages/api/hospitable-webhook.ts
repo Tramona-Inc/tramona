@@ -1,16 +1,65 @@
 import {
+  hostProfiles,
+  hostTeamMembers,
+  hostTeams,
   properties,
   reservedDateRanges,
+  users,
   type PropertyType,
 } from "@/server/db/schema";
 import axios from "axios";
 import { type NextApiRequest, type NextApiResponse } from "next";
 import { db } from "@/server/db";
-import { api } from "@/utils/api";
+import { eq } from "drizzle-orm";
+import { sendSlackMessage } from "@/server/slack";
 
+export async function insertHost(id: string) {
+  // Insert Host info
+  const user = await db.query.users.findFirst({
+    where: eq(users.id, id),
+  });
 
-const { mutateAsync: createHostProfile } =
-api.users.upsertHostProfile.useMutation();
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  const existingHostProfile = await db.query.hostProfiles.findFirst({
+    where: eq(hostProfiles.userId, user.id),
+  });
+
+  if (existingHostProfile) {
+    return existingHostProfile;
+  }
+
+  const teamId = await db
+    .insert(hostTeams)
+    .values({
+      ownerId: user.id,
+      name: `${user.name ?? user.username ?? user.email}`,
+    })
+    .returning()
+    .then((res) => res[0]!.id);
+
+  // Insert Host info
+
+  await db.insert(hostTeamMembers).values({
+    hostTeamId: teamId,
+    userId: user.id,
+  });
+
+  await db.insert(hostProfiles).values({
+    userId: user.id,
+    curTeamId: teamId,
+  });
+
+  await sendSlackMessage({
+    text: [
+      "*Host Profile Created:*",
+      `User ${user.name} has become a host`,
+    ].join("\n"),
+    channel: "host-bot",
+  });
+}
 
 
 const airbnbPropertyTypes = [
@@ -156,11 +205,9 @@ interface ListingCreatedWebhook {
 interface ChannelActivatedWebhook {
   action: "channel.activated";
   data: {
-    channel: {
-      customer: {
-        id: string;
-        name: string;
-      };
+    customer: {
+      id: string;
+      name: string;
     };
   };
 }
@@ -190,12 +237,11 @@ export default async function webhook(
 ) {
   if (req.method === "POST") {
     console.log("got webhook");
-
     const webhookData = req.body as HospitableWebhook;
     switch (webhookData.action) {
       case "channel.activated":
         console.log("channel created");
-        await createHostProfile();
+        await insertHost(webhookData.data.customer.id);
         break;
       case "listing.created":
         const userId = webhookData.data.channel.customer.id;
@@ -221,7 +267,7 @@ export default async function webhook(
           .split("T")[0];
 
         const secondEndDate = new Date(now);
-        secondEndDate.setDate(now.getDate() + 540);
+        secondEndDate.setDate(now.getDate() + 539);
         const secondEndDateString = secondEndDate.toISOString().split("T")[0];
 
         //have to send 2 batches because hospitable only allows 365 days at a time, but it allows up to 540 days in the future
