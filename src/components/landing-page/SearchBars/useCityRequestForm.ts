@@ -29,26 +29,6 @@ export const haversineDistance = (
   return R * c; // Distance in kilometers
 };
 
-const isInIntegrityArizonaOperatingArea = (
-  lat: number,
-  lng: number,
-  radius: number,
-) => {
-  const locations = [
-    { name: "Lake Havasu", lat: 34.4839, lng: -114.3225 },
-    { name: "Parker Strip", lat: 34.2983, lng: -114.1439 },
-  ];
-
-  for (const location of locations) {
-    const distance = haversineDistance(lat, lng, location.lat, location.lng);
-    if (distance <= radius) {
-      return { isInArea: true, location: location.name };
-    }
-  }
-
-  return { isInArea: false, location: "dummy" };
-};
-
 export function useCityRequestForm({
   afterSubmit,
   setMadeByGroupId,
@@ -64,9 +44,6 @@ export function useCityRequestForm({
   const { status } = useSession();
   const router = useRouter();
   const { mutateAsync: createRequests } = api.requests.create.useMutation();
-  const { mutateAsync: scrapeOffers } =
-    api.offers.scrapeOfferForRequest.useMutation();
-
 
   const onSubmit = form.handleSubmit(async (data) => {
     const { date: _date, maxNightlyPriceUSD, ...restData } = data;
@@ -91,28 +68,14 @@ export function useCityRequestForm({
       });
     } else {
       try {
+        console.log("newRequest", newRequest);
         const { requestId, madeByGroupId } = await createRequests(newRequest);
         form.reset();
         afterSubmit?.();
         setMadeByGroupId?.(madeByGroupId);
-        // scrape offers only for request in the area where IntegrityArizona has properties
-        const { isInArea, location } = isInIntegrityArizonaOperatingArea(
-          newRequest.latLng.lat,
-          newRequest.latLng.lng,
-          25, // search radius: 25 km
-        );
-        if (isInArea) {
-          await scrapeOffers({
-            requestId: requestId,
-            numOfOffers: 10,
-            scrapersToExecute: ["arizonaScraper"],
-            location: location,
-          });
-        }
       } catch (error) {
         errorToast();
       }
-
     }
   });
 

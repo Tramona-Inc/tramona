@@ -36,7 +36,10 @@ import { sendTextToHost } from "@/server/server-utils";
 import { newLinkRequestSchema } from "@/utils/useSendUnsentRequests";
 import { getCoordinates } from "@/server/google-maps";
 import { haversineDistance } from "@/components/landing-page/SearchBars/useCityRequestForm";
+import { waitUntil } from "@vercel/functions";
+import { scrapeDirectListings } from "@/server/direct-sites-scraping";
 import { random } from "lodash";
+
 
 const updateRequestInputSchema = z.object({
   requestId: z.number(),
@@ -483,7 +486,22 @@ export async function handleRequestSubmission(
         { ...input, id: request.id, latLngPoint: request.latLngPoint, radius },
         { tx },
       );
-
+      
+    waitUntil(
+      scrapeDirectListings({
+        checkIn: input.checkIn,
+        checkOut: input.checkOut,
+        numOfOffersInEachScraper: 10,
+        requestNightlyPrice:
+          input.maxTotalPrice / getNumNights(input.checkIn, input.checkOut),
+        requestId: requestId,
+        location: input.location,
+        latitude: input.latLngPoint?.x,
+        longitude: input.latLngPoint?.y,
+      }).catch((error) => {
+        console.error("Error scraping listings: " + error);
+      }),
+    );
 
       if (eligibleProperties.length > 0) {
         await tx.insert(requestsToProperties).values(
