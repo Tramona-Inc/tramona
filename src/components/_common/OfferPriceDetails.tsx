@@ -1,9 +1,13 @@
 import { Separator } from "../ui/separator";
-import { formatCurrency, getNumNights, getPriceBreakdown } from "@/utils/utils";
+import {
+  formatCurrency,
+  getNumNights,
+  getTramonaPriceBreakdown,
+  getDirectListingPriceBreakdown,
+} from "@/utils/utils";
 import { plural } from "@/utils/utils";
 import { TAX_PERCENTAGE, SUPERHOG_FEE } from "@/utils/constants";
 import { type Offer } from "@/server/db/schema";
-
 export function OfferPriceDetails({
   offer,
 }: {
@@ -14,16 +18,21 @@ export function OfferPriceDetails({
     | "checkIn"
     | "checkOut"
     | "travelerOfferedPrice"
+    | "scrapeUrl"
   >;
 }) {
   const numberOfNights = getNumNights(offer.checkIn, offer.checkOut);
   const nightlyPrice = offer.travelerOfferedPrice / numberOfNights;
-  const { bookingCost, taxPaid, serviceFee, finalTotal } = getPriceBreakdown({
-    bookingCost: offer.travelerOfferedPrice,
-    numNights: numberOfNights,
-    superhogFee: SUPERHOG_FEE,
-    tax: TAX_PERCENTAGE,
-  });
+  const { bookingCost, taxPaid, serviceFee, finalTotal } = offer.scrapeUrl
+    ? getDirectListingPriceBreakdown({
+        bookingCost: offer.travelerOfferedPrice,
+      })
+    : getTramonaPriceBreakdown({
+        bookingCost: offer.travelerOfferedPrice,
+        numNights: numberOfNights,
+        superhogFee: SUPERHOG_FEE,
+        tax: TAX_PERCENTAGE,
+      });
   const items = [
     {
       title: `${formatCurrency(nightlyPrice)} x ${plural(numberOfNights, "night")}`,
@@ -39,7 +48,7 @@ export function OfferPriceDetails({
     },
     {
       title: "Taxes",
-      price: `${formatCurrency(taxPaid)}`,
+      price: `${taxPaid === 0 ? "included" : formatCurrency(taxPaid)}`,
     },
   ];
 

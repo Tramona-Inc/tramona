@@ -37,6 +37,7 @@ import {
   scrapeDirectListings,
 } from "@/server/direct-sites-scraping";
 import { createNormalDistributionDates } from "@/server/server-utils";
+import { scrapeAirbnbPrice } from "@/server/scrapePrice";
 
 export const offersRouter = createTRPCRouter({
   accept: protectedProcedure
@@ -179,7 +180,7 @@ export const offersRouter = createTRPCRouter({
         })
         .then((res) =>
           res.map((offer) => {
-            if (offer.acceptedAt !== null) return offer;
+            if (offer.acceptedAt !== null || offer.scrapeUrl) return offer;
             void updateTravelerandHostMarkup({
               offerTotalPrice: offer.totalPrice,
               offerId: offer.id,
@@ -417,15 +418,46 @@ export const offersRouter = createTRPCRouter({
       if (input.requestId !== undefined) {
         const requestDetails = await ctx.db.query.requests.findFirst({
           where: eq(requests.id, input.requestId),
-          columns: { checkIn: true, checkOut: true, madeByGroupId: true },
+          columns: {
+            checkIn: true,
+            checkOut: true,
+            madeByGroupId: true,
+            numGuests: true,
+          },
         });
 
         if (!requestDetails) throw new TRPCError({ code: "BAD_REQUEST" });
+
+        const curProperty = await db.query.properties.findFirst({
+          where: eq(properties.id, input.propertyId),
+          columns: {
+            name: true,
+            imageUrls: true,
+            originalListingId: true,
+            maxNumGuests: true,
+          },
+        });
+
+        const scrapeParams = {
+          checkIn: requestDetails.checkIn,
+          checkOut: requestDetails.checkOut,
+          numGuests: requestDetails.numGuests,
+        };
+        const datePriceFromAirbnb = curProperty?.originalListingId
+          ? await scrapeAirbnbPrice({
+              airbnbListingId: curProperty.originalListingId,
+              params: scrapeParams,
+            }).then((res) => {
+              if (!res) throw new Error("Error scraping airbnb price");
+              return res;
+            })
+          : null;
 
         await ctx.db.insert(offers).values({
           ...input,
           checkIn: requestDetails.checkIn,
           checkOut: requestDetails.checkOut,
+          datePriceFromAirbnb: datePriceFromAirbnb,
         });
 
         await ctx.db
@@ -438,35 +470,39 @@ export const offersRouter = createTRPCRouter({
           );
 
         //find the property
-        const curProperty = await db.query.properties.findFirst({
-          where: eq(properties.id, input.propertyId),
-        });
 
         const request = await db.query.requests.findFirst({
           where: eq(requests.id, input.requestId),
-          columns: { id: true, location: true, checkIn: true, checkOut: true, maxTotalPrice: true },
-        });
-
-        const traveler =  await db.query.requests
-        .findFirst({
-          where: eq(requests.id, input.requestId),
-          with: {
-            madeByGroup: {
-              with: {
-                owner: {
-                  columns: { id: true, phoneNumber: true, isWhatsApp: true},
-                }
-              }
-            },
+          columns: {
+            id: true,
+            location: true,
+            checkIn: true,
+            checkOut: true,
+            maxTotalPrice: true,
           },
-        })
-        .then((res) => res?.madeByGroup.owner);
-
-
-        traveler && request && await sendText({
-          to: traveler.phoneNumber!,
-          content: `Tramona: You have 1 match for your request for ${request.location} from ${formatDateRange(request.checkIn, request.checkOut)} for ${request.maxTotalPrice/getNumNights(request.checkIn, request.checkOut)}. Please tap below to view your offer: ${env.NEXTAUTH_URL}/requests/${request.id}`,
         });
+
+        const traveler = await db.query.requests
+          .findFirst({
+            where: eq(requests.id, input.requestId),
+            with: {
+              madeByGroup: {
+                with: {
+                  owner: {
+                    columns: { id: true, phoneNumber: true, isWhatsApp: true },
+                  },
+                },
+              },
+            },
+          })
+          .then((res) => res?.madeByGroup.owner);
+
+        traveler &&
+          request &&
+          (await sendText({
+            to: traveler.phoneNumber!,
+            content: `Tramona: You have 1 match for your request for ${request.location} from ${formatDateRange(request.checkIn, request.checkOut)} for ${request.maxTotalPrice / getNumNights(request.checkIn, request.checkOut)}. Please tap below to view your offer: ${env.NEXTAUTH_URL}/requests/${request.id}`,
+          }));
         //sending emails to everyone in the groug
         //get everymember in the group
         console.log("GETTING FOR GROUP", requestDetails.madeByGroupId);
@@ -482,7 +518,6 @@ export const offersRouter = createTRPCRouter({
         console.log("ALL GROUP MEMBERS", allGroupMembers);
         for (const member of allGroupMembers) {
           console.log("MEMBER", member);
-
 
           // await sendEmail({
           //   to: member.user.email,
@@ -797,6 +832,10 @@ export async function getOfferPageData(offerId: number) {
       requestId: true,
       hostPayout: true,
       travelerOfferedPrice: true,
+      scrapeUrl: true,
+      isAvailableOnOriginalSite: true,
+      randomDirectListingDiscount: true,
+      datePriceFromAirbnb: true,
     },
     with: {
       request: {

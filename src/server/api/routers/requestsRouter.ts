@@ -36,6 +36,7 @@ import { sendTextToHost } from "@/server/server-utils";
 import { newLinkRequestSchema } from "@/utils/useSendUnsentRequests";
 import { getCoordinates } from "@/server/google-maps";
 import { haversineDistance } from "@/components/landing-page/SearchBars/useCityRequestForm";
+import { random } from "lodash";
 
 const updateRequestInputSchema = z.object({
   requestId: z.number(),
@@ -69,6 +70,8 @@ export const requestsRouter = createTRPCRouter({
               createdAt: true,
               checkIn: true,
               checkOut: true,
+              randomDirectListingDiscount: true,
+              datePriceFromAirbnb: true,
             },
             with: {
               property: {

@@ -1,6 +1,9 @@
 import { db } from "../db";
 import { exampleScraper } from "./example";
-import { cbIslandVacationsScraper, cbIslandVacationsSubScraper } from "./hawaii-scraper";
+import {
+  cbIslandVacationsScraper,
+  cbIslandVacationsSubScraper,
+} from "./hawaii-scraper";
 import { properties } from "../db/schema";
 import {
   NewOffer,
@@ -11,10 +14,14 @@ import {
   reviews,
 } from "../db/schema";
 import { arizonaScraper, arizonaSubScraper } from "./integrity-arizona";
-import { eq, and, ne, or, isNotNull, sql } from "drizzle-orm";
 
-import { getNumNights } from "@/utils/utils";
 import { getCoordinates } from "../google-maps";
+import { eq, and, sql } from "drizzle-orm";
+import {
+  createRandomMarkupEightToFourteenPercent,
+  getNumNights,
+} from "@/utils/utils";
+import { DIRECTLISTINGMARKUP } from "@/utils/constants";
 
 export type DirectSiteScraper = (options: {
   checkIn: Date;
@@ -54,8 +61,7 @@ export const directSiteScrapers: NamedDirectSiteScraper[] = [
   // add more scrapers here
   // { name: 'cleanbnbScraper', scraper: cleanbnbScraper },
   { name: "arizonaScraper", scraper: arizonaScraper },
-    // {name: "cbIslandVacationsScraper", scraper: cbIslandVacationsScraper },
-
+  // {name: "cbIslandVacationsScraper", scraper: cbIslandVacationsScraper },
 ];
 
 // Helper function to filter out fields not in NewProperty
@@ -160,10 +166,14 @@ export const scrapeDirectListings = async (options: {
               checkOut: options.checkOut,
               totalPrice: originalTotalPrice,
               hostPayout: originalTotalPrice,
-              travelerOfferedPrice: originalTotalPrice,
+              travelerOfferedPrice: Math.ceil(
+                originalTotalPrice * DIRECTLISTINGMARKUP,
+              ),
               scrapeUrl: listing.scrapeUrl,
               isAvailableOnOriginalSite: true,
               availabilityCheckedAt: new Date(),
+              randomDirectListingDiscount:
+                createRandomMarkupEightToFourteenPercent(),
               ...(options.requestId && { requestId: options.requestId }),
             };
             const newOfferId = await trx
@@ -293,7 +303,8 @@ export const subsequentScrape = async (options: { offerIds: number[] }) => {
             const updateData: Partial<Offer> = {
               isAvailableOnOriginalSite:
                 subScrapedResultCBIsland.isAvailableOnOriginalSite,
-              availabilityCheckedAt: subScrapedResultCBIsland.availabilityCheckedAt,
+              availabilityCheckedAt:
+                subScrapedResultCBIsland.availabilityCheckedAt,
             };
 
             if (subScrapedResultCBIsland.originalNightlyPrice) {
