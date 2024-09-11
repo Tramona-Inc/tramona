@@ -214,8 +214,9 @@ export const superhogRouter = createTRPCRouter({
               columns: {
                 address: true,
                 city: true,
-                latitude: true,
-                longitude: true,
+                latLngPoint: true,
+                // latitude: true,
+                // longitude: true,
               },
             },
             user: {
@@ -234,8 +235,8 @@ export const superhogRouter = createTRPCRouter({
     const allReservations = await Promise.all(
       nonCancelledAllSuperhogRequestWithTrips.map(async (reservation) => {
         const countryISO = await getCountryISO({
-          lat: reservation.superhogRequests!.property.latitude,
-          lng: reservation.superhogRequests!.property.longitude,
+          lat: reservation.superhogRequests!.property.latLngPoint.y,
+          lng: reservation.superhogRequests!.property.latLngPoint.x,
         });
         return {
           id: reservation.id,

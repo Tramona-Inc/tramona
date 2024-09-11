@@ -95,7 +95,7 @@ export const miscRouter = createTRPCRouter({
     .input(z.object({ checkIn: z.string().optional(), checkOut: z.string().optional() }))
     .mutation(async ({input}) => {
       if (input.checkIn && input.checkOut) {
-        const res = await cleanbnbScraper({ checkIn: new Date(input.checkIn), checkOut: new Date(input.checkOut) });
+        const res = await cleanbnbScraper({ checkIn: new Date(input.checkIn), checkOut: new Date(input.checkOut), scrapersToExecute: ["cleanbnbScraper"] });
         return res;
       }
     }),

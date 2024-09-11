@@ -34,8 +34,7 @@ export const hostRouter = createTRPCRouter({
         name: true,
         hostId: true,
         imageUrls: true,
-        latitude: true,
-        longitude: true,
+        latLngPoint: true,
       },
       where: eq(properties.hostId, ctx.user.id),
     });

@@ -10,7 +10,7 @@ import {
 import axios from "axios";
 import { type NextApiRequest, type NextApiResponse } from "next";
 import { db } from "@/server/db";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { sendSlackMessage } from "@/server/slack";
 
 export async function insertHost(id: string) {
@@ -325,6 +325,9 @@ export default async function webhook(
 
         // Insert data into the reservedDates table
 
+        const latLngPoint = sql`ST_SetSRID(ST_MakePoint(${webhookData.data.address.longitude}, ${webhookData.data.address.latitude}), 4326)`;
+
+
         const propertyObject = {
           hostId: userId,
           propertyType: convertAirbnbPropertyType(
@@ -335,8 +338,9 @@ export default async function webhook(
           numBeds: webhookData.data.capacity.beds,
           numBedrooms: webhookData.data.capacity.bedrooms,
           numBathrooms: webhookData.data.capacity.bathrooms,
-          latitude: webhookData.data.address.latitude,
-          longitude: webhookData.data.address.longitude,
+          // latitude: webhookData.data.address.latitude,
+          // longitude: webhookData.data.address.longitude,
+          latLngPoint: latLngPoint,
           city: webhookData.data.address.city,
           hostName: webhookData.data.channel.customer.name,
           name: webhookData.data.public_name,

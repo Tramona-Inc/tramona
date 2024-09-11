@@ -58,6 +58,7 @@ export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 export type PropertyPageData = InferQueryModel<
   "properties",
   undefined,
+  undefined,
   {
     host: {
       columns: {
@@ -335,6 +336,7 @@ export default function PropertyPage({
             </Dialog>
           </section>
 
+          {/* {property.latitude && property.longitude && ( */}
           <section>
             <h2 className="subheading border-t pb-2 pt-4">
               Where you&apos;ll be
@@ -342,12 +344,13 @@ export default function PropertyPage({
             <div className="relative mt-4 h-[400px]">
               <div className="absolute inset-0 z-0 overflow-hidden rounded-xl border">
                 <SingleLocationMap
-                  lat={property.latLngPoint.x}
-                  lng={property.latLngPoint.y}
+                  lat={property.latLngPoint.y}
+                  lng={property.latLngPoint.x}
                 />
               </div>
             </div>
           </section>
+          {/* )} */}
 
           <section>
             <div className="flex items-start justify-between border-t pb-2 pt-4">
