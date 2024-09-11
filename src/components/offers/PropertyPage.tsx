@@ -56,7 +56,7 @@ export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 
 export type PropertyPageData = InferQueryModel<
   "properties",
-  object,
+  undefined,
   {
     host: {
       columns: {
