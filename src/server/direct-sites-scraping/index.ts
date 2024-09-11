@@ -65,7 +65,7 @@ export const directSiteScrapers: NamedDirectSiteScraper[] = [
   // { name: 'cleanbnbScraper', scraper: cleanbnbScraper },
   { name: "arizonaScraper", scraper: arizonaScraper },
   // {name: "cbIslandVacationsScraper", scraper: cbIslandVacationsScraper },
-  { name: "redawningScraper", scraper: redawningScraper },
+  // { name: "redawningScraper", scraper: redawningScraper },
 ];
 
 // Helper function to filter out fields not in NewProperty
