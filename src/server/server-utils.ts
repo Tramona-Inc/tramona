@@ -315,7 +315,7 @@ export async function addProperty({
       // latitude: lat,
       // longitude: lng,
       city: city,
-      latLngPoint: createLatLngGISPoint(lat, lng),
+      latLngPoint: createLatLngGISPoint({ lat, lng }),
       hostTeamId,
     })
     .returning({ id: properties.id });
@@ -803,10 +803,10 @@ export function createNormalDistributionDates(
   return dateRanges;
 }
 
-export function createLatLngGISPoint(
-  lat: number,
-  lng: number,
-) {
+export function createLatLngGISPoint({
+  lat,
+  lng,
+}: { lat: number; lng: number }) {
   const latLngPoint = sql`ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)`;
   return latLngPoint;
 }

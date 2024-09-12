@@ -177,12 +177,12 @@ export const scrapeDirectListings = async (options: {
 
         let formattedlatLngPoint = null;
         if (listing.latLngPoint?.x && listing.latLngPoint.y) {
-          formattedlatLngPoint = createLatLngGISPoint(listing.latLngPoint.y, listing.latLngPoint.x);
+          formattedlatLngPoint = createLatLngGISPoint({ lat: listing.latLngPoint.y, lng: listing.latLngPoint.x });
         } else {
           const { location } = await getCoordinates(listing.address);
           if (!location)
             throw new Error("Could not get coordinates for address");
-          formattedlatLngPoint = createLatLngGISPoint(location.lat, location.lng);
+          formattedlatLngPoint = createLatLngGISPoint({ lat: location.lat, lng: location.lng });
         }
 
         const newPropertyListing = filterNewPropertyFields(listing);

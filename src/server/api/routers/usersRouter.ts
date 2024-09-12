@@ -521,7 +521,7 @@ export const usersRouter = createTRPCRouter({
               numBeds: property.bedsNumber,
               numBedrooms: property.bedroomsNumber,
               numBathrooms: property.bathroomsNumber,
-              latLngPoint: createLatLngGISPoint(property.lat, property.lng),
+              latLngPoint: createLatLngGISPoint({ lat: property.lat, lng: property.lng }),
               city: await getCity({ lat: property.lat, lng: property.lng }),
               hostName: property.contactName,
               originalListingId: property.id.toString(),

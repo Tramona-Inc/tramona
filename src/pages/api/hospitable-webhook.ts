@@ -325,7 +325,7 @@ export default async function webhook(
         }
 
         // Insert data into the reservedDates table
-        const latLngPoint: SQL = createLatLngGISPoint(webhookData.data.address.latitude, webhookData.data.address.longitude);
+        const latLngPoint = createLatLngGISPoint({ lat: webhookData.data.address.latitude, lng: webhookData.data.address.longitude });
 
         const propertyObject = {
           hostId: userId,

@@ -39,7 +39,6 @@ import {
   type Property,
 } from "./../../db/schema/tables/properties";
 import { addProperty, createLatLngGISPoint, getRequestsForProperties } from "@/server/server-utils";
-import { latLngEquals } from "@vis.gl/react-google-maps";
 import { getCoordinates } from "@/server/google-maps";
 
 export type HostRequestsPageData = {
@@ -131,7 +130,7 @@ export const propertiesRouter = createTRPCRouter({
       if (input.address) {
         const { location } = await getCoordinates(input.address);
         if (!location) throw new Error("Could not get coordinates for address");
-        const latLngPoint = createLatLngGISPoint(location.lat, location.lng);
+        const latLngPoint = createLatLngGISPoint({ lat: location.lat, lng: location.lng });
         await ctx.db
           .update(properties)
           .set({ latLngPoint })

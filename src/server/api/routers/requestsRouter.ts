@@ -471,7 +471,7 @@ export async function handleRequestSubmission(
     }
     let latLngPoint = null;
     if (lat && lng) {
-      latLngPoint = createLatLngGISPoint(lat, lng);
+      latLngPoint = createLatLngGISPoint({ lat, lng });
     }
 
     if (radius && latLngPoint) {
