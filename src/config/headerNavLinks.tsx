@@ -6,6 +6,7 @@ import {
   InfoIcon,
   LinkIcon,
   MessageCircleQuestion,
+  MessagesSquare,
 } from "lucide-react";
 
 export const headerLinks = [

@@ -8,6 +8,7 @@ import { z } from "zod";
 import { conversations, messages } from "./../../db/schema/tables/messages";
 import { protectedProcedure } from "./../trpc";
 import { sendSlackMessage } from "@/server/slack";
+import { TRPCError } from "@trpc/server";
 
 const isProduction = process.env.NODE_ENV === "production";
 const baseUrl = isProduction
@@ -358,7 +359,34 @@ export const messagesRouter = createTRPCRouter({
       return conversationId;
     }),
 
-  createOrFetchConversationWithOffer: protectedProcedure
+  // for guest only
+  createConversationWithAdminFromGuest: publicProcedure
+    .input(
+      z.object({
+        sessionToken: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const tempUser = await db.query.users.findFirst({
+        where: eq(users.sessionToken, input.sessionToken),
+      });
+      let conversationId = null;
+      if (tempUser) {
+        conversationId = await fetchConversationWithAdmin(tempUser.id);
+        // Create conversation with admin if it doesn't exist
+        if (!conversationId) {
+          conversationId = await createConversationWithAdmin(tempUser.id);
+        }
+      } else {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Guest Temporary User not found",
+        });
+      }
+      return { tempUserId: tempUser?.id, conversationId: conversationId };
+    }),
+
+  createConversationWithOffer: protectedProcedure
     .input(
       z.object({
         offerId: z.string(),
@@ -537,5 +565,52 @@ export const messagesRouter = createTRPCRouter({
           `<${baseUrl}/messages?conversationId=${input.conversationId}|Click here to respond>`,
         ].join("\n"),
       });
+    }),
+
+  getConversationsWithAdmin: publicProcedure
+    .input(
+      z.object({
+        userId: z.string().optional(),
+        sessionToken: z.string().optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      let conversationId = null;
+      let tempUser = null;
+      if (
+        ctx.session?.user.role === "admin" ||
+        ctx.session?.user.role === "host"
+      ) {
+        return null;
+      }
+      if (!input.userId && input.sessionToken) {
+        tempUser = await db.query.users.findFirst({
+          where: eq(users.sessionToken, input.sessionToken),
+        });
+        if (tempUser) {
+          conversationId = await fetchConversationWithAdmin(tempUser.id);
+        } else {
+          return null;
+          // throw new TRPCError({
+          //   code: "NOT_FOUND",
+          //   message: "Guest Temporary User not found",
+          // });
+        }
+      } else if (input.userId) {
+        // if both userId and sessionToken are provided, userId will be used
+        conversationId = await fetchConversationWithAdmin(input.userId);
+      } else if (!input.userId && !input.sessionToken) {
+        return null; // when the page renders for the first time, the tRPC call will hit here
+      }
+
+      if (!conversationId) {
+        return null;
+        // throw new TRPCError({
+        //   code: "NOT_FOUND",
+        //   message: "conversationId not found",
+        // });
+      }
+
+      return { conversationId: conversationId ?? "", tempUserId: tempUser?.id };
     }),
 });

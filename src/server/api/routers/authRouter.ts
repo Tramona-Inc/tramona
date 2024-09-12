@@ -171,6 +171,36 @@ export const authRouter = createTRPCRouter({
         });
       }
     }),
+
+  createTempUserForGuest: publicProcedure
+    .input(
+      z.object({
+        email: zodEmail(),
+        isBurner: z.boolean(),
+        sessionToken: z.string(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      // check if user already exists
+      const existedGuestTempUser = await ctx.db.query.users.findFirst({
+        where: eq(users.sessionToken, input.sessionToken),
+      });
+      if (existedGuestTempUser) {
+        return;
+      }
+      // insert user to db
+      const user = await ctx.db
+        .insert(users)
+        .values({
+          id: crypto.randomUUID(),
+          email: input.email,
+          isBurner: input.isBurner,
+          sessionToken: input.sessionToken,
+        })
+        .returning()
+        .then((res) => res[0] ?? null);
+    }),
+
   verifyEmailToken: publicProcedure
     .input(
       z.object({
