@@ -3,12 +3,13 @@ import { WebClient } from "@slack/web-api";
 
 const slack = new WebClient(env.SLACK_TOKEN);
 
-type Channel = "superhog-bot" | "tramona-bot" | "host-bot";
+type Channel = "superhog-bot" | "tramona-bot" | "host-bot" | "admin-messaging";
 
 const channelIdMap = {
   "superhog-bot": "C07HT5B0FKJ",
   "tramona-bot": "C06MW57TU6N",
   "host-bot": "C07H794S24U",
+  "admin-messaging": "C07LZRBCUBX",
 };
 
 const isProduction = process.env.NODE_ENV === "production";

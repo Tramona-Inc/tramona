@@ -11,7 +11,7 @@ module.exports = {
   prefix: "",
   theme: {
     fontFamily: {
-      magazine: [ "FiraSansExtraCondensed-ExtraBold", "sans-serif"],
+      magazine: ["FiraSansExtraCondensed-ExtraBold", "sans-serif"],
     },
     container: {
       center: true,
@@ -34,7 +34,8 @@ module.exports = {
         "footer-height": "var(--footer-height)",
         "searchbar-height": "var(--searchbar-height)",
         "mobile-header-height": "var(--mobile-header-height)",
-        "screen-minus-header-n-footer-n-searchbar": "var(--screen-minus-header-n-footer-n-searchbar)",
+        "screen-minus-header-n-footer-n-searchbar":
+          "var(--screen-minus-header-n-footer-n-searchbar)",
       },
       colors: {
         gold: "#FACF26",
@@ -116,8 +117,10 @@ module.exports = {
         "marquee-vertical": "marquee-vertical var(--duration) linear infinite",
       },
       backgroundImage: {
-        'reserved-pattern': "repeating-linear-gradient(135deg, red, red 1px, transparent 1px, transparent 4px)",
-        'reserved-pattern-2': "repeating-linear-gradient(135deg, hsl(var(--primary-green)), hsl(var(--primary-green)) 1px, transparent 1px, transparent 4px)",
+        "reserved-pattern":
+          "repeating-linear-gradient(135deg, red, red 1px, transparent 1px, transparent 4px)",
+        "reserved-pattern-2":
+          "repeating-linear-gradient(135deg, hsl(var(--primary-green)), hsl(var(--primary-green)) 1px, transparent 1px, transparent 4px)",
       },
     },
   },

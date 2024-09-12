@@ -1,6 +1,6 @@
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
-import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
+import { useChatWithAdmin } from "@/utils/messaging/useChatWithAdmin";
 import {
   BugIcon,
   ChevronRight,
