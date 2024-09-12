@@ -460,7 +460,7 @@ export const cleanbnbScraper: DirectSiteScraper = async ({
       const imageUrls = scrapedData.image;
       const originalListingUrl = property.url;
       const originalNightlyPrice =
-        ((parseFloat(price) + cleaningFee) / getNumNights(checkIn, checkOut)) * 100;
+        parseFloat(((parseFloat(price) + cleaningFee) / getNumNights(checkIn, checkOut)).toFixed(2)) * 100;
 
 
       res.push({
@@ -481,8 +481,8 @@ export const cleanbnbScraper: DirectSiteScraper = async ({
         checkInTime,
         checkOutTime,
         latLngPoint: {
-          x: latitude,
-          y: longitude,
+          lat: latitude,
+          lng: longitude,
         },
         currency: "EUR",
         cancellationPolicy: "Non-refundable",

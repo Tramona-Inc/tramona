@@ -38,7 +38,7 @@ export type ScrapedListing = Omit<NewProperty, 'latLngPoint'> & {
   originalListingUrl: string; // enforce that it's non-null
   reviews: NewReview[];
   scrapeUrl: string;
-  latLngPoint?: { x: number; y: number }; // make latLngPoint optional
+  latLngPoint?: { lat: number; lng: number }; // make latLngPoint optional
 };
 
 export type SubsequentScraper = (options: {
@@ -132,8 +132,8 @@ export const scrapeDirectListings = async (options: {
           existingOriginalPropertyIdList[0]?.id;
 
         let formattedlatLngPoint = null;
-        if (listing.latLngPoint?.x && listing.latLngPoint.y) {
-          formattedlatLngPoint = createLatLngGISPoint({ lat: listing.latLngPoint.y, lng: listing.latLngPoint.x });
+        if (listing.latLngPoint?.lat && listing.latLngPoint.lng) {
+          formattedlatLngPoint = createLatLngGISPoint({ lat: listing.latLngPoint.lat, lng: listing.latLngPoint.lng });
         } else {
           const { location } = await getCoordinates(listing.address);
           if (!location)

@@ -111,8 +111,8 @@ const mapToScrapedListing = (
     // latitude: prop.latitude,
     // longitude: prop.longitude,
     latLngPoint: {
-      x: prop.longitude,
-      y: prop.latitude,
+      lng: prop.longitude,
+      lat: prop.latitude,
     },
     maxNumGuests: prop.max_occupants,
     numBeds: prop.bedrooms_number, // not provided, but required in NewProperty

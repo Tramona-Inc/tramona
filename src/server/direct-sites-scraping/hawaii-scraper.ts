@@ -343,8 +343,8 @@ const mapToScrapedListing = (
     address: address,
     city: prop.sm_nid$rc_core_term_city_type$name[0] ?? "",
     latLngPoint: {
-      y: prop.fs_nid$field_location$latitude,
-      x: prop.fs_nid$field_location$longitude,
+      lat: prop.fs_nid$field_location$latitude,
+      lng: prop.fs_nid$field_location$longitude,
     },
     // latitude: prop.fs_nid$field_location$latitude,
     // longitude: prop.fs_nid$field_location$longitude,
