@@ -258,7 +258,6 @@ const getAllProperties = async (baseUrl: string, checkInDate: string, checkOutDa
         const id = idMatch ? idMatch[1] : '';
         const jsonRegex = /{[^{}]*}/g;
 
-        console.log("id:", id);
         let match;
         while ((match = jsonRegex.exec(scriptContent)) !== null) {
           try {
@@ -458,6 +457,7 @@ export const cleanbnbScraper: DirectSiteScraper = async ({
       originalListingPlatform: "Cleanbnb" as ListingSiteName,
     });
   }
+  console.log("res: ", res[0]);
   return numOfOffersInEachScraper ? res.splice(0, numOfOffersInEachScraper) : res;
 };
 
