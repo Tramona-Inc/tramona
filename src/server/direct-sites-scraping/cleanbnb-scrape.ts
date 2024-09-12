@@ -312,8 +312,6 @@ export const cleanbnbScraper: DirectSiteScraper = async ({
   const checkInDate = formatDate(checkIn);
   const checkOutDate = formatDate(checkOut);
 
-  console.log('hit');
-
   const res: Awaited<ReturnType<DirectSiteScraper>> = [];
   const baseUrl = numGuests
     ? `https://www.cleanbnb.house/it/appartamenti?guests_rooms=${encodeURIComponent(`${numGuests},0;`)}`

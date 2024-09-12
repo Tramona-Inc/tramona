@@ -113,11 +113,9 @@ export const scrapeDirectListings = async (options: {
   longitude?: number;
 }) => {
 
-  console.log('hit scrapeDirectListings');
   // Create a new options object excluding `scrapersToExecute`
   const { scrapersToExecute, ...scraperOptions } = options;
 
-  console.log(scrapersToExecute);
   let selectedScrapers: NamedDirectSiteScraper[] = [];
   if (scrapersToExecute && scrapersToExecute.length > 0) {
     selectedScrapers = directSiteScrapers.filter((s) =>

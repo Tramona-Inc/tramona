@@ -149,8 +149,6 @@ export const arizonaScraper: DirectSiteScraper = async ({
   requestNightlyPrice,
   location,
 }) => {
-
-  console.log('hit');
   // append 0 to month and day if less than 10
   const monthStart = (checkIn.getMonth() + 1).toString().padStart(2, "0");
   const dayStart = checkIn.getDate().toString().padStart(2, "0");
