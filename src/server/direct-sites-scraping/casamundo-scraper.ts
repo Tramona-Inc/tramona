@@ -10,7 +10,6 @@ import { PropertyType } from "@/server/db/schema/common";
 import { ListingSiteName } from "@/server/db/schema/common";
 import { getNumNights } from "@/utils/utils";
 import { getCoordinates } from "../google-maps";
-import cheerio from "cheerio";
 
 const offerSchema = z.object({
   id: z.string(),
@@ -43,29 +42,23 @@ async function getLocationId(location: string): Promise<string> {
   try {
     const response = await axios.get(`${autocompleteUrl}?${params.toString()}`);
     const suggestions = response.data.suggestions;
-    console.log("Casamundo location suggestions:", suggestions);
 
     if (suggestions.length > 0) {
-      // Split the input location into parts
       const locationParts = location
         .toLowerCase()
         .split(",")
         .map((part) => part.trim());
 
-      // Function to score a suggestion based on how well it matches the input
       const scoreMatch = (suggestion) => {
         const fullTitle = suggestion.fullTitle.toLowerCase();
         const trail = suggestion.trail.toLowerCase();
         let score = 0;
 
-        // Exact match for full title gets highest score
         if (fullTitle === locationParts[0]) {
           score += 100;
         } else if (fullTitle.includes(locationParts[0])) {
           score += 50;
         }
-
-        // Check if all parts of the input location are present in either the fullTitle or trail
         if (
           locationParts.every(
             (part) => fullTitle.includes(part) || trail.includes(part),
@@ -73,14 +66,11 @@ async function getLocationId(location: string): Promise<string> {
         ) {
           score += 25;
         }
-
-        // Penalize for additional words in the title (to prefer general over specific)
         score -= fullTitle.split(" ").length;
 
         return score;
       };
 
-      // Find the suggestion with the highest score
       const bestMatch = suggestions.reduce(
         (best, current) => {
           const currentScore = scoreMatch(current);
@@ -92,12 +82,9 @@ async function getLocationId(location: string): Promise<string> {
       ).suggestion;
 
       if (bestMatch) {
-        console.log("Found best match:", bestMatch);
         return bestMatch.id;
       }
 
-      // If no best match, use the first suggestion
-      console.log("Using first suggestion:", suggestions[0]);
       return suggestions[0].id;
     } else {
       throw new Error("No location found");
@@ -113,6 +100,7 @@ async function getOfferIds(
   checkIn: Date,
   checkOut: Date,
   numOffers: number,
+  numGuests?: number,
 ): Promise<CasamundoOffer[]> {
   const url = `https://www.casamundo.com/search/${locationId}`;
 
@@ -131,18 +119,13 @@ async function getOfferIds(
 
   const params = new URLSearchParams({
     fieldTreeId: "SearchDetailsFields.SERP",
-    adults: "2",
+    adults: numGuests.toString(),
     arrival: checkIn.toISOString().split("T")[0],
     duration: getNumNights(checkIn, checkOut).toString(),
     _format: "json",
   });
 
-  // Make the initial GET request to fetch the offer IDs
   try {
-    console.log(
-      "Making initial GET request to:",
-      `${url}?${params.toString()}`,
-    );
     const response = await axios.get(`${url}?${params.toString()}`, {
       headers,
     });
@@ -150,13 +133,25 @@ async function getOfferIds(
     const offers = response.data.offers;
 
     const parsedOffers = offers.map((offer: any) => offerSchema.parse(offer));
-    // console.log("done parsing offers", parsedOffers);
+
     return parsedOffers;
-    // Process the parsed offers and return the results
+
   } catch (error) {
     console.error("Error fetching offer IDs:", error);
     throw error;
   }
+}
+
+function getDatesArray(startDate: Date, endDate: Date): string[] {
+  const dates: string[] = [];
+  let currentDate = new Date(startDate);
+
+  while (currentDate <= endDate) {
+    dates.push(currentDate.toISOString().split("T")[0] ?? "");
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+
+  return dates;
 }
 
 async function checkAvailability(
@@ -164,134 +159,183 @@ async function checkAvailability(
   checkIn: Date,
   checkOut: Date,
 ): Promise<boolean> {
-  const months = new Set();
-  let currentDate = new Date(checkIn);
-  while (currentDate <= checkOut) {
-    months.add(
-      `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, "0")}`,
-    );
-    currentDate.setDate(currentDate.getDate() + 1);
-  }
+  const url = `https://www.casamundo.com/api/v2/calendar/${offerId}`;
 
-  for (const month of months) {
-    const [year, monthNum] = month.split("-");
-    const url = `https://www.casamundo.com/api/v2/calendar/${offerId}?year=${year}&month=${monthNum}`;
+  let currentYear = checkIn.getFullYear();
+  let currentMonth = checkIn.getMonth() + 1;
 
-    try {
+  try {
+    let days: { [key: string]: number } = {};
+
+    while (
+      currentYear < checkOut.getFullYear() ||
+      (currentYear === checkOut.getFullYear() &&
+        currentMonth <= checkOut.getMonth() + 1)
+    ) {
       const response = await axios.get(url, {
+        params: {
+          year: currentYear,
+          month: currentMonth,
+        },
         headers: {
           accept: "application/json",
           "accept-language": "en-US,en;q=0.9",
         },
       });
 
-      const { days } = response.data.content;
+      Object.assign(days, response.data.content.days);
 
-      currentDate = new Date(checkIn);
-      while (currentDate <= checkOut) {
-        const dateString = currentDate.toISOString().split("T")[0];
-        if (days[dateString] !== 2) {
-          return false; // Not available for this date
-        }
-        currentDate.setDate(currentDate.getDate() + 1);
+      currentMonth++;
+      if (currentMonth > 12) {
+        currentMonth = 1;
+        currentYear++;
       }
-    } catch (error) {
-      console.error(
-        `Error fetching availability for ${offerId} in ${month}:`,
-        error,
-      );
-      return false; // Assume not available if there's an error
     }
+
+    const stayDates = getDatesArray(checkIn, checkOut);
+
+    for (const date of stayDates) {
+      if (!days.hasOwnProperty(date) || days[date] !== 2) {
+        return false;
+      }
+    }
+    return true;
+  } catch (error) {
+    console.error(`Error checking availability for ${offerId}:`, error);
+    return false;
   }
-
-  return true; // Available for all dates
-}
-
-interface PriceDetails {
-  totalPrice: number;
-  pricePerNight: number;
-  currency: string;
 }
 
 interface PriceExtractionParams {
   offerId: string;
-  adults: number;
-  arrival: string; // Format: YYYY-MM-DD
+  numGuests: number;
+  checkIn: Date;
   duration: number;
-  location: string;
-  pCon: string;
-  persons: number;
-  searchId: string;
 }
 
-const fetchPropertyPrice = async (params: PriceExtractionParams): Promise<number> => {
-  const baseUrl = 'https://www.casamundo.com/rental/';
+const enhancedPriceFetcher = async (
+  params: PriceExtractionParams,
+): Promise<{ price: number; currency: string; id: string }> => {
+  const url = `https://www.casamundo.com/booking/checkout/priceDetails/${params.offerId}`;
+
   const queryParams = new URLSearchParams({
-    adults: params.adults.toString(),
-    arrival: params.arrival,
-    bounds: '37.94885,122.68652;37.56613,122.18733',
-    clickId: 'FG11BDNL0S5DVDRS',
-    dp: '0',
+    sT: "withDates",
+    adults: params.numGuests.toString(),
+    children: "0",
+    pets: "0",
+    arrival: params.checkIn.toISOString().split("T")[0],
     duration: params.duration.toString(),
-    id: params.offerId,
-    location: params.location,
-    pCon: params.pCon,
-    persons: params.persons.toString(),
-    pricetype: 'perNight',
-    prodName: 'JM',
-    prodSource: 'Search',
-    sT: 'withDates',
-    screen: 'search',
-    searchId: params.searchId
+    pricetype: "perNight",
+    isExtrasTouched: "0",
+    action: "pageOpen",
+    pageType: "details",
+    isCachedPaymentMethods: "true",
   });
 
-  const url = `${baseUrl}${params.offerId}?${queryParams.toString()}`;
+  const headers = {
+    accept: "*/*",
+    "accept-language": "en-US,en;q=0.9",
+    "sec-ch-ua":
+      '"Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"',
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": '"macOS"',
+    "sec-fetch-dest": "empty",
+    "sec-fetch-mode": "cors",
+    "sec-fetch-site": "same-origin",
+  };
 
-  try {
-    const response = await axios.get(url);
-    const $ = cheerio.load(response.data);
-    
-    const priceElement = $('strong.wsnw');
-    if (priceElement.length) {
-      const priceText = priceElement.text().trim();
-      // Remove $ sign and convert to number
-      const price = parseFloat(priceText.replace('$', '').replace(',', ''));
-      return price;
-    } else {
-      console.log('Price element not found');
-      return 0;
+  const maxRetries = 3;
+  const retryDelay = 2000; // 2 seconds
+
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const response = await axios.post(
+        `${url}?${queryParams.toString()}`,
+        null,
+        { headers },
+      );
+      const data = response.data;
+
+      if (
+        !data.hasErrors &&
+        data.content.priceDetails &&
+        data.content.priceDetails.isAvailable
+      ) {
+        return {
+          price: data.content.priceDetails.travelPrice.raw,
+          currency: data.content.priceDetails.currency,
+          id: params.offerId,
+        };
+      }
+
+      if (data.hasErrors && data.errorMessage === "price_not_available") {
+        if (attempt < maxRetries - 1) {
+          await new Promise((resolve) => setTimeout(resolve, retryDelay));
+          continue;
+        }
+      }
+      return {
+        price: -1,
+        currency: "N/A",
+        id: params.offerId,
+      };
+    } catch (error) {
+      if (attempt < maxRetries - 1) {
+        console.error(
+          `Error fetching price, retrying... (Attempt ${attempt + 1}/${maxRetries})`,
+        );
+        await new Promise((resolve) => setTimeout(resolve, retryDelay));
+      } else {
+        console.error(
+          "Error fetching price from API after max retries:",
+          error,
+        );
+        return {
+          price: -1,
+          currency: "N/A",
+          id: params.offerId,
+        };
+      }
     }
-  } catch (error) {
-    console.error('Error fetching or parsing the page:', error);
-    return 0;
   }
+
+  return {
+    price: -1,
+    currency: "N/A",
+    id: params.offerId,
+  };
 };
 
-const fetchReviews = async (offerId: string): Promise<{
+const fetchReviews = async (
+  offerId: string,
+): Promise<{
   avgRating: number;
   numRatings: number;
   reviews: Review[];
 }> => {
   try {
-    const response = await axios.get(`https://www.casamundo.com/reviews/list/${offerId}?scale=5&bcEnabled=false&googleReviews=false`, {
-      headers: {
-        'accept': '*/*',
-        'accept-language': 'en-US,en;q=0.9',
-        'sec-ch-ua': '"Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"',
-        'sec-ch-ua-mobile': '?0',
-        'sec-fetch-dest': 'empty',
-        'sec-fetch-mode': 'cors',
-        'sec-fetch-site': 'same-origin',
-        'Referrer-Policy': 'no-referrer-when-downgrade'
-      }
-    });
-    console.log('Reviews response:', JSON.stringify(response.data, null, 2));
+    const response = await axios.get(
+      `https://www.casamundo.com/reviews/list/${offerId}?scale=5&bcEnabled=false&googleReviews=false`,
+      {
+        headers: {
+          accept: "*/*",
+          "accept-language": "en-US,en;q=0.9",
+          "sec-ch-ua":
+            '"Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"',
+          "sec-ch-ua-mobile": "?0",
+          "sec-fetch-dest": "empty",
+          "sec-fetch-mode": "cors",
+          "sec-fetch-site": "same-origin",
+          "Referrer-Policy": "no-referrer-when-downgrade",
+        },
+      },
+    );
 
     const data = response.data;
     const avgRating = data.average.value || 0;
     const numRatings = data.average.count || 0;
     const reviews: Review[] = data.list
-      .filter((review: any) => review.text) // Only include reviews with text
+      .filter((review: any) => review.text)
       .map((review: any) => ({
         name: review.nickname,
         profilePic: "",
@@ -301,11 +345,10 @@ const fetchReviews = async (offerId: string): Promise<{
 
     return { avgRating, numRatings, reviews };
   } catch (error) {
-    console.error('Error fetching reviews:', error);
+    console.error("Error fetching reviews:", error);
     return { avgRating: 0, numRatings: 0, reviews: [] };
   }
 };
-
 
 async function fetchPropertyDetails(
   offerId: string,
@@ -313,13 +356,14 @@ async function fetchPropertyDetails(
   checkOut: string,
   adults: number,
   location: string,
+  price: { price: number; currency: string; id: string },
 ): Promise<ScrapedListing> {
   const url = `https://www.casamundo.com/rental/offer/${offerId}`;
 
   const params = new URLSearchParams({
     adults: adults.toString(),
     arrival: checkIn,
-    duration: "5",
+    duration: getNumNights(new Date(checkIn), new Date(checkOut)).toString(),
     location: location,
     persons: adults.toString(),
     pricetype: "perNight",
@@ -347,7 +391,7 @@ async function fetchPropertyDetails(
       headers,
     });
     const data = response.data;
-    // console.log('Raw API response:', JSON.stringify(data, null, 2));
+
     const amenities =
       data.infoGroups
         .find((group) => group.name === "amenities")
@@ -370,7 +414,6 @@ async function fetchPropertyDetails(
 
     const { avgRating, numRatings, reviews } = await fetchReviews(offerId);
 
-
     const latLngPoint = {
       x: data.geoLocation.lon as number,
       y: data.geoLocation.lat as number,
@@ -378,17 +421,17 @@ async function fetchPropertyDetails(
 
     return {
       originalListingId: offerId,
-      name: data.generalTitle || "",
-      about: data.description?.unit?.content || "",
+      name: data.generalTitle ?? "",
+      about: data.description?.unit?.content ?? "",
       // propertyType: mapPropertyType(data.type),
       propertyType: data.type,
-      address: data.locationShorted || "",
-      city: data.locationShorted || "",
+      address: data.locationShorted ?? "",
+      city: data.locationShorted ?? "",
       latLngPoint,
-      maxNumGuests: data.persons || 0,
-      numBeds: countBeds(data.rooms || []),
-      numBedrooms: data.bedrooms || 0,
-      numBathrooms: data.bathrooms || 0,
+      maxNumGuests: data.persons ?? 0,
+      numBeds: countBeds(data.rooms ?? []),
+      numBedrooms: data.bedrooms ?? 0,
+      numBathrooms: data.bathrooms ?? 0,
       amenities,
       otherAmenities: [],
       imageUrls,
@@ -396,7 +439,7 @@ async function fetchPropertyDetails(
       avgRating,
       numRatings,
       originalListingPlatform: "Casamundo" as ListingSiteName,
-      originalNightlyPrice: 0, // Not available in the provided response
+      originalNightlyPrice: price.price, // in Euros at the moment
       reviews: reviews,
       scrapeUrl: url,
     };
@@ -412,28 +455,39 @@ async function scrapeProperty(
   checkIn: Date,
   checkOut: Date,
   numOffers: number,
+  numGuests?: number,
 ): Promise<ScrapedListing> {
   try {
-    // const url = `https://www.casamundo.com/rental/${offerId}`;
-
-    // make request to their calendar API to see if the property is actually available, 0, 1, or 2
+    if (!numGuests) {
+      throw new Error(
+        "Number of guests must be provided for Casamundo scraper",
+      );
+    }
 
     const isAvailable = await checkAvailability(offerId, checkIn, checkOut);
-    console.log("isAvailable", isAvailable, "ID:", offerId);
+
     if (!isAvailable) {
-      console.log("Property not available for the specified dates");
       return {} as ScrapedListing;
     }
 
-    const price = await fetchPropertyPrice(offerId)
-    // console.log("price", price);
+    const price = await enhancedPriceFetcher({
+      offerId,
+      numGuests,
+      checkIn: checkIn,
+      duration: getNumNights(checkIn, checkOut),
+    });
+
+    if (!price || price.price === -1) {
+      return {} as ScrapedListing;
+    }
 
     const propertyDetails = await fetchPropertyDetails(
       offerId,
       checkIn.toISOString().split("T")[0] ?? "",
       checkOut.toISOString().split("T")[0] ?? "",
-      2,
+      numGuests,
       locationId,
+      price,
     );
 
     return propertyDetails as ScrapedListing;
@@ -462,8 +516,9 @@ export const casamundoScraper: DirectSiteScraper = async ({
       checkIn,
       checkOut,
       numOfOffersInEachScraper,
+      numGuests,
     );
-    console.log("offerIds and locations", offerIds);
+
     const scrapedListings: ScrapedListing[] = [];
 
     for (const offer of offerIds) {
@@ -477,13 +532,14 @@ export const casamundoScraper: DirectSiteScraper = async ({
         checkIn,
         checkOut,
         numOfOffersInEachScraper,
+        numGuests,
       );
-      console.log("propertyWithDetails", propertyWithDetails);
+
       if (Object.keys(propertyWithDetails).length > 0) {
         scrapedListings.push(propertyWithDetails);
       }
     }
-
+    console.log("scrapedListings!!", scrapedListings);
     return scrapedListings;
   } catch (error) {
     console.error("Error scraping Casamundo:", error);
@@ -506,4 +562,5 @@ export const casamundoSubScraper: SubsequentScraper = async ({
   };
 };
 
-// Get price (maybe just scrape html), reviews, other stuff, may just scrape html with cheerio
+
+// scrapeUrl (subscraper stuff should refresh availability and price), convert price to USD, format text to not have html tags, map property types if necessary, type errors
