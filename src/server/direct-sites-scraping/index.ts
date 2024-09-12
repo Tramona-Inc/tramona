@@ -14,8 +14,15 @@ import {
   reviews,
 } from "../db/schema";
 import { arizonaScraper, arizonaSubScraper } from "./integrity-arizona";
-import { eq, and, ne, or, isNotNull } from "drizzle-orm";
-import { getNumNights } from "@/utils/utils";
+
+import { getCoordinates } from "../google-maps";
+import { eq, and, sql } from "drizzle-orm";
+import {
+  createRandomMarkupEightToFourteenPercent,
+  getNumNights,
+} from "@/utils/utils";
+import { DIRECTLISTINGMARKUP } from "@/utils/constants";
+import { haversineDistance } from "@/server/server-utils";
 
 export type DirectSiteScraper = (options: {
   checkIn: Date;
@@ -23,7 +30,6 @@ export type DirectSiteScraper = (options: {
   numOfOffersInEachScraper?: number;
   requestNightlyPrice?: number; // when the scraper is used by traveler request page
   requestId?: number; // when the scraper is used by traveler request page
-  scrapersToExecute: string[];
   location?: string;
 }) => Promise<ScrapedListing[]>;
 
@@ -63,7 +69,7 @@ const filterNewPropertyFields = (listing: ScrapedListing): NewProperty => {
   const newPropertyKeys = Object.keys(properties).filter((key) => key !== "id");
   return Object.fromEntries(
     Object.entries(listing).filter(([key]) => newPropertyKeys.includes(key)),
-  ) as NewProperty;
+  ) as unknown as NewProperty;
 };
 
 // handle the scraped properties and reviews
@@ -73,17 +79,20 @@ export const scrapeDirectListings = async (options: {
   numOfOffersInEachScraper?: number;
   requestNightlyPrice?: number;
   requestId?: number;
-  scrapersToExecute: string[];
   location?: string;
+  latitude?: number;
+  longitude?: number;
 }) => {
-  const selectedScrapers = directSiteScrapers.filter((s) =>
-    options.scrapersToExecute.includes(s.name),
-  );
   const allListings = await Promise.all(
-    selectedScrapers.map((s) => s.scraper(options)),
+    directSiteScrapers.map((s) => s.scraper(options)),
   );
 
-  const listings = allListings.flat();
+  const listings = allListings
+    .flat()
+    .sort(
+      (a, b) => (a.originalNightlyPrice ?? 0) - (b.originalNightlyPrice ?? 0),
+    )
+    .slice(0, 10); // if the number of listings is less than 10, slice will return the whole array
 
   if (listings.length > 0) {
     await db.transaction(async (trx) => {
@@ -100,11 +109,21 @@ export const scrapeDirectListings = async (options: {
         const existingOriginalPropertyId =
           existingOriginalPropertyIdList[0]?.id;
 
+        let formattedlatLngPoint = null;
+        if (listing.latLngPoint.x && listing.latLngPoint.y) {
+          formattedlatLngPoint = sql`ST_SetSRID(ST_MakePoint(${listing.latLngPoint.x}, ${listing.latLngPoint.y}), 4326)`;
+        } else {
+          const { location } = await getCoordinates(listing.address);
+          if (!location)
+            throw new Error("Could not get coordinates for address");
+          formattedlatLngPoint = sql`ST_SetSRID(ST_MakePoint(${location.lng}, ${location.lat}), 4326)`;
+        }
+
         const newPropertyListing = filterNewPropertyFields(listing);
         if (existingOriginalPropertyId) {
           const tramonaProperty = await trx
             .update(properties)
-            .set({ ...newPropertyListing }) // Only keeps fields that are defined in the NewProperty schema
+            .set({ ...newPropertyListing, latLngPoint: formattedlatLngPoint }) // Only keeps fields that are defined in the NewProperty schema
             .where(eq(properties.originalListingId, existingOriginalPropertyId))
             .returning({ id: properties.id });
 
@@ -156,10 +175,14 @@ export const scrapeDirectListings = async (options: {
               checkOut: options.checkOut,
               totalPrice: originalTotalPrice,
               hostPayout: originalTotalPrice,
-              travelerOfferedPrice: originalTotalPrice,
+              travelerOfferedPrice: Math.ceil(
+                originalTotalPrice * DIRECTLISTINGMARKUP,
+              ),
               scrapeUrl: listing.scrapeUrl,
               isAvailableOnOriginalSite: true,
               availabilityCheckedAt: new Date(),
+              randomDirectListingDiscount:
+                createRandomMarkupEightToFourteenPercent(),
               ...(options.requestId && { requestId: options.requestId }),
             };
             const newOfferId = await trx
@@ -170,7 +193,10 @@ export const scrapeDirectListings = async (options: {
         } else {
           const tramonaProperty = await trx
             .insert(properties)
-            .values(newPropertyListing)
+            .values({
+              ...newPropertyListing,
+              latLngPoint: formattedlatLngPoint,
+            })
             .returning({ id: properties.id });
 
           const newPropertyId = tramonaProperty[0]!.id;

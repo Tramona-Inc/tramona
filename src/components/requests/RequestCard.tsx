@@ -75,7 +75,7 @@ export default function RequestCard({
 
   useEffect(() => {
     const fetchCoordinates = async () => {
-      if (!request.location || request.lat !== null || request.lng !== null)
+      if (!request.location)  // || req.lat !== null || req.lng !== null
         return;
       const { coordinates } = await utils.offers.getCoordinates.fetch({
         location: request.location,

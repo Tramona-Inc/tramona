@@ -79,8 +79,8 @@ const AmenityItem: React.FC<AmenityItemProps> = ({ name }) => {
   const IconComponent = amenityIcons[name];
   if (!IconComponent) return null;
   return (
-    <div className="flex items-center space-x-2 py-2 lg:py-4">
-      <IconComponent className="h-7 w-7 rounded-full bg-[#EEEEEE] p-1" />
+    <div className="flex items-center gap-2">
+      <IconComponent className="size-8 rounded-full bg-accent p-1.5" />
       <span>{name}</span>
     </div>
   );

@@ -12,17 +12,16 @@ export async function scrapeAirbnbPrice({
 }) {
   const checkoutUrl =
     Airbnb.createListing(airbnbListingId).getCheckoutUrl(params);
+
   const $ = await scrapeUrl(checkoutUrl);
   const jsonStr = $("#data-deferred-state-0").text();
+
   const priceRegex =
     /"priceBreakdown":.*"total":.*"total":.*"amountMicros":"(\d+)"/;
 
   const match = jsonStr.match(priceRegex);
 
-  if (!match?.[1])
-    throw new Error(
-      "Unable to retrieve the Airbnb price. The property may have already been booked, or the minimum stay requirements may not be met:",
-    );
+  if (!match?.[1]) throw new Error("Failed to extract price");
 
   // "amountMicros" are ten-thousands of cents (e.g. $100 <-> 100,000,000)
   return Math.round(Number(match[1]) / 10000);

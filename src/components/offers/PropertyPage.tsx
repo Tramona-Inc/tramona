@@ -51,14 +51,14 @@ import { VerificationProvider } from "../_utils/VerificationContext";
 import IdentityModal from "../_utils/IdentityModal";
 import { InferQueryModel } from "@/server/db";
 import { Property } from "@/server/db/schema";
+import { Airbnb } from "@/utils/listing-sites/Airbnb";
 
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 
 export type PropertyPageData = InferQueryModel<
   "properties",
-  {
-    latLngPoint: false;
-  },
+  undefined,
+  undefined,
   {
     host: {
       columns: {
@@ -96,6 +96,8 @@ export default function PropertyPage({
   const hostName = property.host?.name ?? property.hostName;
 
   const originalListing = getOriginalListing(property);
+
+  console.log(property.originalListingPlatform, property.originalListingId);
 
   const renderSeeMoreButton = property.imageUrls.length > 5;
 
@@ -237,7 +239,7 @@ export default function PropertyPage({
                   )}
                 </p>
               </div>
-              {originalListing && offer && (
+              {originalListing && offer && !property.bookOnAirbnb && (
                 <div className="self-end">
                   <PropertyCompareBtn
                     checkIn={offer.checkIn}
@@ -314,10 +316,9 @@ export default function PropertyPage({
             </section>
           )}
 
-          <section>
+          <section className="space-y-4">
             <h2 className="subheading border-t pb-2 pt-4">Amenitites</h2>
             <PropertyAmenities amenities={property.amenities} />
-
             <Dialog>
               <DialogTrigger asChild>
                 <Button variant="secondary" className="w-full sm:w-auto">
@@ -335,21 +336,19 @@ export default function PropertyPage({
             </Dialog>
           </section>
 
-          {property.latitude && property.longitude && (
-            <section>
-              <h2 className="subheading border-t pb-2 pt-4">
-                Where you&apos;ll be
-              </h2>
-              <div className="relative mt-4 h-[400px]">
-                <div className="absolute inset-0 z-0 overflow-hidden rounded-xl border">
-                  <SingleLocationMap
-                    lat={property.latitude}
-                    lng={property.longitude}
-                  />
-                </div>
+          <section>
+            <h2 className="subheading border-t pb-2 pt-4">
+              Where you&apos;ll be
+            </h2>
+            <div className="relative mt-4 h-[400px]">
+              <div className="absolute inset-0 z-0 overflow-hidden rounded-xl border">
+                <SingleLocationMap
+                  lat={property.latLngPoint.x}
+                  lng={property.latLngPoint.y}
+                />
               </div>
-            </section>
-          )}
+            </div>
+          </section>
 
           <section>
             <div className="flex items-start justify-between border-t pb-2 pt-4">
@@ -445,16 +444,18 @@ export default function PropertyPage({
             )}
           </section>
 
-          <section>
-            <h2 className="subheading border-t pb-2 pt-4">
-              Check-in information
-            </h2>
-            <p>
-              {property.checkInInfo === "self"
-                ? "Self check-in"
-                : property.checkInInfo}
-            </p>
-          </section>
+          {property.checkInInfo !== null && (
+            <section>
+              <h2 className="subheading border-t pb-2 pt-4">
+                Check-in information
+              </h2>
+              <p>
+                {property.checkInInfo === "self"
+                  ? "Self check-in"
+                  : property.checkInInfo}
+              </p>
+            </section>
+          )}
 
           {offer && (
             <div className="flex justify-end">
@@ -492,11 +493,22 @@ function BookNowBtn({
 }: {
   btnSize: ButtonProps["size"];
   offer: OfferWithDetails;
-  property: Pick<Property, "stripeVerRequired">;
+  property: Pick<
+    Property,
+    "stripeVerRequired" | "originalListingId" | "bookOnAirbnb"
+  >;
 }) {
   const { data: verificationStatus } =
     api.users.myVerificationStatus.useQuery();
   const isBooked = !!offer.acceptedAt;
+
+  const airbnbCheckoutUrl = Airbnb.createListing(
+    property.originalListingId!,
+  ).getCheckoutUrl({
+    checkIn: offer.checkIn,
+    checkOut: offer.checkOut,
+    numGuests: offer.request?.numGuests ?? 1,
+  });
 
   return (
     <Button
@@ -516,12 +528,17 @@ function BookNowBtn({
           <BookCheckIcon className="size-5" />
           Booked
         </>
-      ) : !property.stripeVerRequired ? (
-        <Link href={`/offer-checkout/${offer.id}`}>
-          Book now
-          <ArrowRightIcon className="size-5" />
+      ) : property.bookOnAirbnb ? (
+        <Link
+          href={airbnbCheckoutUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Book on Airbnb
+          <ExternalLinkIcon className="size-5" />
         </Link>
-      ) : verificationStatus?.isIdentityVerified === "true" ? (
+      ) : !property.stripeVerRequired ||
+        verificationStatus?.isIdentityVerified === "true" ? (
         <Link href={`/offer-checkout/${offer.id}`}>
           Book now
           <ArrowRightIcon className="size-5" />
@@ -546,7 +563,10 @@ function OfferPageSidebar({
   property,
 }: {
   offer: OfferWithDetails;
-  property: Pick<Property, "stripeVerRequired">;
+  property: Pick<
+    Property,
+    "stripeVerRequired" | "originalListingId" | "bookOnAirbnb"
+  >;
 }) {
   return (
     <div className="space-y-4">
@@ -581,20 +601,25 @@ function OfferPageSidebar({
             </div>
           )}
           <BookNowBtn btnSize="lg" offer={offer} property={property} />
-          <OfferPriceDetails offer={offer} />
+          <OfferPriceDetails
+            offer={offer}
+            bookOnAirbnb={property.bookOnAirbnb}
+          />
         </CardContent>
       </Card>
 
-      <div className="flex gap-2 rounded-xl border border-orange-300 bg-orange-50 p-3 text-orange-800">
-        <FlameIcon className="size-7 shrink-0" />
-        <div>
-          <p className="text-sm font-bold">Tramona exclusive deal</p>
-          <p className="text-xs">
-            This is an exclusive offer created just for you &ndash; you will not
-            be able to find this price anywhere else
-          </p>
+      {!property.bookOnAirbnb && (
+        <div className="flex gap-2 rounded-xl border border-orange-300 bg-orange-50 p-3 text-orange-800">
+          <FlameIcon className="size-7 shrink-0" />
+          <div>
+            <p className="text-sm font-bold">Tramona exclusive deal</p>
+            <p className="text-xs">
+              This is an exclusive offer created just for you &ndash; you will
+              not be able to find this price anywhere else
+            </p>
+          </div>
         </div>
-      </div>
+      )}
       <div className="flex gap-2 rounded-xl border border-blue-300 bg-blue-50 p-3 text-blue-800">
         <InfoIcon className="size-7 shrink-0" />
         <div>
@@ -621,7 +646,10 @@ function OfferPageMobileBottomCard({
   property,
 }: {
   offer: OfferWithDetails;
-  property: Pick<Property, "stripeVerRequired">;
+  property: Pick<
+    Property,
+    "stripeVerRequired" | "originalListingId" | "bookOnAirbnb"
+  >;
 }) {
   const { data: verificationStatus } =
     api.users.myVerificationStatus.useQuery();
