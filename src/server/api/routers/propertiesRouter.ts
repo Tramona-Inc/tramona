@@ -44,7 +44,6 @@ import {
   getRequestsForProperties,
 } from "@/server/server-utils";
 import { getCoordinates } from "@/server/google-maps";
-import { getDiscountPercentage } from "@/utils/utils";
 
 export type HostRequestsPageData = {
   city: string;
