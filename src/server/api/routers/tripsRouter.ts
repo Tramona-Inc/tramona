@@ -4,7 +4,11 @@ import {
   roleRestrictedProcedure,
 } from "@/server/api/trpc";
 import { db } from "@/server/db";
-import { groupMembers, properties, trips } from "@/server/db/schema";
+import {
+  groupMembers,
+  properties,
+  trips,
+} from "@/server/db/schema";
 
 import { TRPCError } from "@trpc/server";
 import { and, eq, exists, isNotNull, isNull, sql } from "drizzle-orm";
@@ -127,13 +131,11 @@ export const tripsRouter = createTRPCRouter({
         with: {
           property: {
             columns: {
-              latLngPoint: false,
+              latLngPoint: true,
               id: true,
               imageUrls: true,
               city: true,
               name: true,
-              latitude: true,
-              longitude: true,
               checkInInfo: true,
               address: true,
               cancellationPolicy: true,
@@ -153,8 +155,8 @@ export const tripsRouter = createTRPCRouter({
 
       const coordinates = {
         location: {
-          lat: trip.property.latitude,
-          lng: trip.property.longitude,
+          lat: trip.property.latLngPoint.y,
+          lng: trip.property.latLngPoint.x,
         },
       };
       return { trip, coordinates };
@@ -168,12 +170,12 @@ export const tripsRouter = createTRPCRouter({
           property: {
             columns: {
               id: true,
-              latLngPoint: false,
+              latLngPoint: true,
               imageUrls: true,
               city: true,
               name: true,
-              latitude: true,
-              longitude: true,
+              // latitude: true,
+              // longitude: true,
               checkInInfo: true,
               address: true,
               cancellationPolicy: true,
@@ -193,8 +195,8 @@ export const tripsRouter = createTRPCRouter({
       } else {
         const coordinates = {
           location: {
-            lat: trip.property.latitude,
-            lng: trip.property.longitude,
+            lat: trip.property.latLngPoint.y,
+            lng: trip.property.latLngPoint.x,
           },
         };
         return { trip, coordinates };
