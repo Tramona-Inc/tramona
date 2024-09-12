@@ -11,6 +11,7 @@ import { PropertyType } from "@/server/db/schema";
 import * as cheerio from "cheerio";
 import { ListingSiteName } from "@/server/db/schema/common";
 import { getNumNights } from "@/utils/utils";
+import { getCoordinates } from "../google-maps";
 
 const hawaiiPropertyTypes: Record<string, PropertyType> = {
   // mapping scraped property types to our property types
@@ -123,6 +124,23 @@ interface PriceFilteredProperty {
   }[];
   type: string;
 }
+
+const HAWAII_BOUNDS = {
+  north: 22.2337,
+  south: 18.8605,
+  west: -160.2471,
+  east: -154.7931
+};
+
+function isWithinHawaii(lat: number, lng: number): boolean {
+  return (
+    lat >= HAWAII_BOUNDS.south &&
+    lat <= HAWAII_BOUNDS.north &&
+    lng >= HAWAII_BOUNDS.west &&
+    lng <= HAWAII_BOUNDS.east
+  );
+}
+
 
 function mapPropertyType(scrapedType: string): PropertyType {
   const normalizedType = scrapedType.trim().toLowerCase();
@@ -335,6 +353,12 @@ const mapToScrapedListing = (
   description: string,
   originalNightlyPrice: number,
 ): ScrapedListing => {
+
+  const latLngPoint = {
+    x: prop.fs_nid$field_location$longitude,
+    y: prop.fs_nid$field_location$latitude,
+  };
+
   return {
     originalListingId: prop.is_eid.toString(),
     name: prop.ss_name,
@@ -344,6 +368,7 @@ const mapToScrapedListing = (
     city: prop.sm_nid$rc_core_term_city_type$name[0] ?? "",
     // latitude: prop.fs_nid$field_location$latitude,
     // longitude: prop.fs_nid$field_location$longitude,
+    latLngPoint,
     maxNumGuests: prop.is_rc_core_lodging_product$occ_total,
     numBeds: prop.fs_rc_core_lodging_product$beds,
     numBedrooms: prop.fs_rc_core_lodging_product$beds,
@@ -365,7 +390,24 @@ export const cbIslandVacationsScraper: DirectSiteScraper = async ({
   checkIn,
   checkOut,
   numOfOffersInEachScraper = 5,
+  requestNightlyPrice,
+  requestId,
+  location,
 }) => {
+  if (location) {
+    const coordinates = await getCoordinates(location);
+    if (coordinates.location) {
+      const { lat, lng } = coordinates.location;
+      if (!isWithinHawaii(lat, lng)) {
+        console.log("Location is outside of Hawaii. Returning no properties.");
+        return [];
+      }
+    } else {
+      console.log("Could not get coordinates for the provided location.");
+      return [];
+    }
+  }
+
   const propertyEids = await fetchAvailablePropertyEids(checkIn, checkOut);
   console.log(`Found ${propertyEids.length} available properties`);
 

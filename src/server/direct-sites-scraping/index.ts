@@ -60,8 +60,8 @@ export type NamedDirectSiteScraper = {
 export const directSiteScrapers: NamedDirectSiteScraper[] = [
   // add more scrapers here
   // { name: 'cleanbnbScraper', scraper: cleanbnbScraper },
-  { name: "arizonaScraper", scraper: arizonaScraper },
-  // {name: "cbIslandVacationsScraper", scraper: cbIslandVacationsScraper },
+  // { name: "arizonaScraper", scraper: arizonaScraper },
+  {name: "cbIslandVacationsScraper", scraper: cbIslandVacationsScraper },
 ];
 
 // Helper function to filter out fields not in NewProperty
