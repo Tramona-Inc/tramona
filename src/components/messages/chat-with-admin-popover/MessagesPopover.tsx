@@ -8,7 +8,6 @@ import { Button } from "../../ui/button";
 import UserAvatar from "../../_common/UserAvatar";
 import { Form, FormControl, FormField, FormItem } from "../../ui/form";
 import { type ChatMessageType, useMessage } from "@/utils/store/messages";
-import Link from "next/link";
 
 import { Input } from "../../ui/input";
 import { MessageCircleMore, ArrowUp, X } from "lucide-react";
@@ -25,7 +24,7 @@ import { useSession } from "next-auth/react";
 import ListMessagesWithAdmin from "./ListMessagesWithAdmin";
 import { useEffect, useState } from "react";
 
-export default function MessagesPopover() {
+export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
   const { data: session } = useSession();
   const [conversationId, setConversationId] = useState<string>("");
   const [tempToken, setTempToken] = useState<string>("");
@@ -99,15 +98,9 @@ export default function MessagesPopover() {
     (state) => state.removeMessageFromConversation,
   );
 
-  // const { conversations } = useMessage();
-
   const { fetchInitialMessages } = useMessage();
 
   void fetchInitialMessages(conversationId);
-
-  // const messages = conversationId
-  //   ? (conversations[conversationId]?.messages ?? [])
-  //   : [];
 
   const concierge = {
     name: "Blake",
@@ -150,7 +143,6 @@ export default function MessagesPopover() {
       const { error } = await supabase
         .from("messages")
         .insert(newMessageToDb)
-        // .select("*, user(email, name, image)")
         .select("*")
         .single();
 
@@ -200,75 +192,9 @@ export default function MessagesPopover() {
     resolver: zodResolver(formSchema),
   });
 
-  return (
-    <>
-      <Popover onOpenChange={setIsPopoverOpen}>
-        <PopoverTrigger asChild>
-          {session?.user.role !== "host" && session?.user.role !== "admin" ? (
-            <Button className="w-18 h-18 bottom-4 right-4 z-50 m-4 hidden rounded-full border p-4 lg:fixed lg:block">
-              <MessageCircleMore />
-            </Button>
-          ) : (
-            <></>
-          )}
-        </PopoverTrigger>
-        <PopoverContent className="mx-8 grid h-[35rem] w-[21rem] grid-rows-1 rounded-xl border border-gray-800 bg-black p-0">
-          <div className="grid grid-rows-1">
-            <div className="flex flex-col">
-              <div className="flex h-[7rem] w-full flex-col items-center justify-start bg-[#1A1A1A] p-4 text-base font-bold text-white">
-                <UserAvatar image={concierge.image} />
-                <p className="pt-1 text-xs font-light text-muted antialiased">
-                  Tramona Concierge
-                </p>
-                <p className="flex-1 px-2 text-sm font-medium antialiased">
-                  {concierge.name}
-                </p>
-              </div>
-              <PopoverClose>
-                <X className="fixed left-12 top-4 text-white" />
-              </PopoverClose>
-
-              <ListMessagesWithAdmin />
-            </div>
-            <div className="mx-4 my-2 flex h-max flex-row items-center gap-2 rounded-full border border-gray-500 p-1">
-              <Form {...form}>
-                <form
-                  onSubmit={form.handleSubmit(handleOnSend)}
-                  className="flex w-full flex-row"
-                >
-                  <FormField
-                    control={form.control}
-                    name="message"
-                    render={({ field }) => {
-                      return (
-                        <FormItem className="flex-1">
-                          <FormControl>
-                            <Input
-                              placeholder="Type your question here..."
-                              className="flex w-full rounded-xl border-0 bg-transparent text-sm text-white"
-                              {...field}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      );
-                    }}
-                  />
-
-                  <Button
-                    className="rounded-full bg-[#0D4273] px-2"
-                    size="icon"
-                    type="submit"
-                  >
-                    <ArrowUp className="text-xs antialiased" />
-                  </Button>
-                </form>
-              </Form>
-            </div>
-          </div>
-        </PopoverContent>
-      </Popover>
-
-      <div className="grid h-screen-minus-header-n-footer w-screen grid-rows-1 border border-gray-800 bg-black p-0 sm:hidden md:grid md:h-screen-minus-header-n-footer">
+  function ChatboxContent({ isPopover }: { isPopover?: boolean }) {
+    return (
+      <div className="grid grid-rows-1">
         <div className="flex flex-col">
           <div className="flex h-[7rem] w-full flex-col items-center justify-start bg-[#1A1A1A] p-4 text-base font-bold text-white">
             <UserAvatar image={concierge.image} />
@@ -278,12 +204,13 @@ export default function MessagesPopover() {
             <p className="flex-1 px-2 text-sm font-medium antialiased">
               {concierge.name}
             </p>
-            {/* <Button asChild className="absolute right-3 top-2 bg-inherit p-0">
-              <Link href="/">
-                <X className="text-white" />
-              </Link>
-            </Button> */}
           </div>
+          {isPopover && (
+            <PopoverClose>
+              <X className="fixed left-5 top-4 text-white" />
+            </PopoverClose>
+          )}
+
           <ListMessagesWithAdmin />
         </div>
         <div className="mx-4 my-2 flex h-max flex-row items-center gap-2 rounded-full border border-gray-500 p-1">
@@ -309,6 +236,7 @@ export default function MessagesPopover() {
                   );
                 }}
               />
+
               <Button
                 className="rounded-full bg-[#0D4273] px-2"
                 size="icon"
@@ -320,6 +248,32 @@ export default function MessagesPopover() {
           </Form>
         </div>
       </div>
+    );
+  }
+
+  return (
+    <>
+      {!isMobile ? (
+        <Popover onOpenChange={setIsPopoverOpen}>
+          <PopoverTrigger asChild>
+            {session?.user.role !== "host" && session?.user.role !== "admin" ? (
+              <Button className="w-18 h-18 bottom-4 right-4 z-50 m-4 hidden rounded-full border p-4 lg:fixed lg:block">
+                <MessageCircleMore />
+              </Button>
+            ) : (
+              <></>
+            )}
+          </PopoverTrigger>
+          <PopoverContent
+            side="top"
+            className="mr-5 grid h-[35rem] w-[21rem] grid-rows-1 rounded-xl border border-gray-800 bg-black p-0"
+          >
+            <ChatboxContent isPopover={true} />
+          </PopoverContent>
+        </Popover>
+      ) : (
+        <ChatboxContent />
+      )}
     </>
   );
 }

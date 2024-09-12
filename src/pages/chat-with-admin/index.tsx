@@ -13,7 +13,7 @@ export default function AdminMessagesPage() {
 
   return (
     <DashboardLayout>
-      <MessagesPopover />
+      <MessagesPopover isMobile={true} />
     </DashboardLayout>
   );
 }
