@@ -5,8 +5,13 @@ import { useEffect, useState } from "react";
 import { type MessageDbType } from "@/types/supabase.message";
 import supabase from "@/utils/supabase-client";
 import { errorToast } from "@/utils/toasts";
+import { cn } from "@/utils/utils";
 
-export default function ListMessagesWithAdmin() {
+export default function ListMessagesWithAdmin({
+  isPopover,
+}: {
+  isPopover?: boolean;
+}) {
   const { data: session } = useSession();
   const [conversationId, setConversationId] = useState<string>("");
   const [tempToken, setTempToken] = useState<string>("");
@@ -127,7 +132,12 @@ export default function ListMessagesWithAdmin() {
         `}
       </style>
       {messages.length > 0 ? (
-        <div className="flex w-full flex-1 flex-col-reverse gap-1 overflow-y-scroll p-3">
+        <div
+          className={cn(
+            "flex w-full flex-1 flex-col-reverse gap-1 overflow-auto p-3",
+            isPopover ? "h-[20rem]" : "h-[30rem]",
+          )}
+        >
           {messages.map((message) =>
             message.userId === session?.user.id ||
             message.userId === tempUserId ? (

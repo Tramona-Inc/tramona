@@ -23,6 +23,7 @@ import { errorToast } from "@/utils/toasts";
 import { useSession } from "next-auth/react";
 import ListMessagesWithAdmin from "./ListMessagesWithAdmin";
 import { useEffect, useState } from "react";
+import { cn } from "@/utils/utils";
 
 export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
   const { data: session } = useSession();
@@ -194,9 +195,9 @@ export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
 
   function ChatboxContent({ isPopover }: { isPopover?: boolean }) {
     return (
-      <div className="grid grid-rows-1">
-        <div className="flex flex-col">
-          <div className="flex h-[7rem] w-full flex-col items-center justify-start bg-[#1A1A1A] p-4 text-base font-bold text-white">
+      <div>
+        <div className={cn(!isPopover && "h-[38rem]")}>
+          <div className="flex w-full flex-col items-center justify-start bg-[#1A1A1A] p-4 text-base font-bold text-white">
             <UserAvatar image={concierge.image} />
             <p className="pt-1 text-xs font-light text-muted antialiased">
               Tramona Concierge
@@ -210,8 +211,7 @@ export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
               <X className="fixed left-5 top-4 text-white" />
             </PopoverClose>
           )}
-
-          <ListMessagesWithAdmin />
+          <ListMessagesWithAdmin isPopover={isPopover} />
         </div>
         <div className="mx-4 my-2 flex h-max flex-row items-center gap-2 rounded-full border border-gray-500 p-1">
           <Form {...form}>
