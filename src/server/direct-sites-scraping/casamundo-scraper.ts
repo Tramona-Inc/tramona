@@ -290,6 +290,46 @@ async function fetchPropertyPrice(
   }
 }
 
+const fetchReviews = async (offerId: string): Promise<{
+  avgRating: number;
+  numRatings: number;
+  reviews: Review[];
+}> => {
+  try {
+    const response = await axios.get(`https://www.casamundo.com/reviews/list/${offerId}?scale=5&bcEnabled=false&googleReviews=false`, {
+      headers: {
+        'accept': '*/*',
+        'accept-language': 'en-US,en;q=0.9',
+        'sec-ch-ua': '"Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"',
+        'sec-ch-ua-mobile': '?0',
+        'sec-fetch-dest': 'empty',
+        'sec-fetch-mode': 'cors',
+        'sec-fetch-site': 'same-origin',
+        'Referrer-Policy': 'no-referrer-when-downgrade'
+      }
+    });
+    console.log('Reviews response:', JSON.stringify(response.data, null, 2));
+
+    const data = response.data;
+    const avgRating = data.average.value || 0;
+    const numRatings = data.average.count || 0;
+    const reviews: Review[] = data.list
+      .filter((review: any) => review.text) // Only include reviews with text
+      .map((review: any) => ({
+        name: review.nickname,
+        profilePic: "",
+        rating: review.rating.value,
+        review: review.text,
+      }));
+
+    return { avgRating, numRatings, reviews };
+  } catch (error) {
+    console.error('Error fetching reviews:', error);
+    return { avgRating: 0, numRatings: 0, reviews: [] };
+  }
+};
+
+
 async function fetchPropertyDetails(
   offerId: string,
   checkIn: string,
@@ -299,7 +339,6 @@ async function fetchPropertyDetails(
   clickId: string,
 ): Promise<ScrapedListing> {
   const url = `https://www.casamundo.com/rental/offer/${offerId}`;
-
 
   const params = new URLSearchParams({
     adults: adults.toString(),
@@ -341,19 +380,25 @@ async function fetchPropertyDetails(
 
     const countBeds = (rooms: any[]): number => {
       return rooms
-        .filter(room => room.roomType.toLowerCase().includes('bedroom'))
+        .filter((room) => room.roomType.toLowerCase().includes("bedroom"))
         .reduce((total, room) => {
-          return total + room.beds.reduce((bedCount, bedDescription) => {
-            const count = parseInt(bedDescription.split(' ')[0]) || 1;
-            return bedCount + count;
-          }, 0);
+          return (
+            total +
+            room.beds.reduce((bedCount, bedDescription) => {
+              const count = parseInt(bedDescription.split(" ")[0]) || 1;
+              return bedCount + count;
+            }, 0)
+          );
         }, 0);
     };
-    const latLngPoint = data.geoLocation ? {
-      type: "point",
-      coordinates: [data.geoLocation.lat, data.geoLocation.lon], // Note: lat first for xy mode
-      srid: 4326
-    } : null;
+
+    const { avgRating, numRatings, reviews } = await fetchReviews(offerId);
+
+
+    const latLngPoint = {
+      x: data.geoLocation.lat as number,
+      y: data.geoLocation.lon as number,
+    };
 
     return {
       originalListingId: offerId,
@@ -363,7 +408,9 @@ async function fetchPropertyDetails(
       propertyType: data.type,
       address: data.locationShorted || "",
       city: data.locationShorted || "",
-      latLngPoint,
+      // latLngPoint,
+      latitude: data.geoLocation.lat,
+      longitude: data.geoLocation.lon,
       maxNumGuests: data.persons || 0,
       numBeds: countBeds(data.rooms || []),
       numBedrooms: data.bedrooms || 0,
@@ -372,11 +419,11 @@ async function fetchPropertyDetails(
       otherAmenities: [],
       imageUrls,
       originalListingUrl: url,
-      avgRating: 0, // Not available in the provided response
-      numRatings: 0, // Not available in the provided response
+      avgRating: avgRating, // Not available in the provided response
+      numRatings: numRatings, // Not available in the provided response
       originalListingPlatform: "Casamundo" as ListingSiteName,
       originalNightlyPrice: 0, // Not available in the provided response
-      reviews: [],
+      reviews: reviews,
       scrapeUrl: url,
     };
   } catch (error) {
@@ -445,9 +492,9 @@ export const casamundoScraper: DirectSiteScraper = async ({
     console.log("offerIds and locations", offerIds);
     const scrapedListings: ScrapedListing[] = [];
 
-    for (const offer of offerIds.slice(0, 3)) {
+    for (const offer of offerIds) {
       // for (const offer of offerIds) {
-      if (scrapedListings.length >= numOfOffersInEachScraper) {
+      if (scrapedListings.length >= numOfOffersInEachScraper * 5) {
         break;
       }
       const propertyWithDetails = await scrapeProperty(
