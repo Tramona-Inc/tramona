@@ -12,12 +12,8 @@ export async function scrapeAirbnbPrice({
 }) {
   const checkoutUrl =
     Airbnb.createListing(airbnbListingId).getCheckoutUrl(params);
-<<<<<<< HEAD
 
   const $ = await urlScrape(checkoutUrl);
-=======
-  const $ = await scrapeUrl(checkoutUrl);
->>>>>>> 60ba571de67667b2eff52a06716fe39e53485adf
   const jsonStr = $("#data-deferred-state-0").text();
   const priceRegex =
     /"priceBreakdown":.*"total":.*"total":.*"amountMicros":"(\d+)"/;

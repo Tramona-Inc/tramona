@@ -342,6 +342,10 @@ const mapToScrapedListing = (
     propertyType: mapPropertyType(prop.sm_nid$rc_core_term_type$name[0] ?? ""),
     address: address,
     city: prop.sm_nid$rc_core_term_city_type$name[0] ?? "",
+    latLngPoint: {
+      y: prop.fs_nid$field_location$latitude,
+      x: prop.fs_nid$field_location$longitude,
+    },
     // latitude: prop.fs_nid$field_location$latitude,
     // longitude: prop.fs_nid$field_location$longitude,
     maxNumGuests: prop.is_rc_core_lodging_product$occ_total,

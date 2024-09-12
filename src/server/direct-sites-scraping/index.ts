@@ -35,9 +35,10 @@ export type DirectSiteScraper = (options: {
 }) => Promise<ScrapedListing[]>;
 
 export type ScrapedListing = Omit<NewProperty, 'latLngPoint'> & {
-  originalListingUrl: string; // enforce that its non-null
+  originalListingUrl: string; // enforce that it's non-null
   reviews: NewReview[];
   scrapeUrl: string;
+  latLngPoint?: { x: number; y: number }; // make latLngPoint optional
 };
 
 export type SubsequentScraper = (options: {
@@ -111,9 +112,12 @@ export const scrapeDirectListings = async (options: {
   latitude?: number;
   longitude?: number;
 }) => {
+
+  console.log('hit scrapeDirectListings');
   // Create a new options object excluding `scrapersToExecute`
   const { scrapersToExecute, ...scraperOptions } = options;
 
+  console.log(scrapersToExecute);
   let selectedScrapers: NamedDirectSiteScraper[] = [];
   if (scrapersToExecute && scrapersToExecute.length > 0) {
     selectedScrapers = directSiteScrapers.filter((s) =>
@@ -174,14 +178,14 @@ export const scrapeDirectListings = async (options: {
           existingOriginalPropertyIdList[0]?.id;
 
         let formattedlatLngPoint = null;
-        // if (listing.latLngPoint?.x && listing.latLngPoint.y) {
-        //   formattedlatLngPoint = sql`ST_SetSRID(ST_MakePoint(${listing.latLngPoint.x}, ${listing.latLngPoint.y}), 4326)`;
-        // } else {
-        const { location } = await getCoordinates(listing.address);
-        if (!location)
-          throw new Error("Could not get coordinates for address");
-        formattedlatLngPoint = sql`ST_SetSRID(ST_MakePoint(${location.lng}, ${location.lat}), 4326)`;
-        //}
+        if (listing.latLngPoint?.x && listing.latLngPoint.y) {
+          formattedlatLngPoint = sql`ST_SetSRID(ST_MakePoint(${listing.latLngPoint.x}, ${listing.latLngPoint.y}), 4326)`;
+        } else {
+          const { location } = await getCoordinates(listing.address);
+          if (!location)
+            throw new Error("Could not get coordinates for address");
+          formattedlatLngPoint = sql`ST_SetSRID(ST_MakePoint(${location.lng}, ${location.lat}), 4326)`;
+        }
 
         const newPropertyListing = filterNewPropertyFields(listing);
         if (existingOriginalPropertyId) {

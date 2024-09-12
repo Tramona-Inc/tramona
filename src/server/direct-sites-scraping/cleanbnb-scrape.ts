@@ -312,6 +312,8 @@ export const cleanbnbScraper: DirectSiteScraper = async ({
   const checkInDate = formatDate(checkIn);
   const checkOutDate = formatDate(checkOut);
 
+  console.log('hit');
+
   const res: Awaited<ReturnType<DirectSiteScraper>> = [];
   const baseUrl = numGuests
     ? `https://www.cleanbnb.house/it/appartamenti?guests_rooms=${encodeURIComponent(`${numGuests},0;`)}`
@@ -404,8 +406,8 @@ export const cleanbnbScraper: DirectSiteScraper = async ({
     const about = await translateText(scrapedData.description);
     const address = property.address;
     const city = property.city;
-    // const latitude = scrapedData.latitude;
-    // const longitude = scrapedData.longitude;
+    const latitude = scrapedData.latitude;
+    const longitude = scrapedData.longitude;
     const maxNumGuests = scrapedData.containsPlace.occupancy.value;
     const originalListingId = property.id;
     const numBeds = totalBeds;
@@ -447,6 +449,10 @@ export const cleanbnbScraper: DirectSiteScraper = async ({
       propertyType,
       checkInTime,
       checkOutTime,
+      latLngPoint: {
+        x: longitude,
+        y: latitude,
+      },
       currency: "EUR",
       cancellationPolicy: "Non-refundable",
       reviews: [],
