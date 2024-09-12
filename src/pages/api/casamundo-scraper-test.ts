@@ -23,7 +23,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         // checkOut: twoDaysLater,
         checkIn: new Date("2024-09-20T19:56:53.132Z"),
         checkOut: new Date("2024-09-25T19:56:53.132Z"),
-        numOfOffersInEachScraper: 5,
+        numOfOffersInEachScraper: 10,
         requestNightlyPrice: 100,
         requestId: undefined,
         location: "Los Angeles, CA",

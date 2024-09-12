@@ -311,6 +311,14 @@ const fetchPrice = async (
       );
       const data = response.data;
 
+      if (!data.hasErrors) {
+        return {
+          price: data.content.priceDetails.travelPrice.raw,
+          currency: data.content.priceDetails.currency,
+          id: params.offerId,
+        };
+      }
+
       if (data.hasErrors && data.errorMessage === "price_not_available") {
         if (attempt < maxRetries - 1) {
           await new Promise((resolve) => setTimeout(resolve, retryDelay));
@@ -324,15 +332,8 @@ const fetchPrice = async (
       };
     } catch (error) {
       if (attempt < maxRetries - 1) {
-        console.error(
-          `Error fetching price, retrying... (Attempt ${attempt + 1}/${maxRetries})`,
-        );
         await new Promise((resolve) => setTimeout(resolve, retryDelay));
       } else {
-        console.error(
-          "Error fetching price from API after max retries:",
-          error,
-        );
         return {
           price: -1,
           currency: "N/A",
@@ -341,7 +342,6 @@ const fetchPrice = async (
       }
     }
   }
-
   return {
     price: -1,
     currency: "N/A",
@@ -539,9 +539,8 @@ async function fetchPropertyDetails(
       avgRating,
       numRatings,
       originalListingPlatform: "Casamundo" as ListingSiteName,
-      originalNightlyPrice: parseFloat(
-        (price.price / getNumNights(checkIn, checkOut)).toFixed(2),
-      ),
+      originalNightlyPrice:
+        Math.ceil(price.price / getNumNights(checkIn, checkOut)) * 100,
       reviews: reviews,
       scrapeUrl: `${url}?${params.toString()}`,
     };
@@ -640,7 +639,7 @@ export const casamundoScraper: DirectSiteScraper = async ({
         scrapedListings.push(propertyWithDetails);
       }
     }
-    console.log("scrapedListings!!", scrapedListings);
+    // console.log("scrapedListings!!", scrapedListings);
     return scrapedListings;
   } catch (error) {
     console.error("Error scraping Casamundo:", error);
@@ -682,7 +681,7 @@ export const casamundoSubScraper: SubsequentScraper = async ({
     return {
       isAvailableOnOriginalSite: true,
       availabilityCheckedAt: new Date(),
-      originalNightlyPrice: parseFloat((price.price / numNights).toFixed(2)),
+      originalNightlyPrice: Math.ceil(price.price / numNights) * 100,
     };
   } catch (error) {
     console.error("Error in casamundoSubScraper");
