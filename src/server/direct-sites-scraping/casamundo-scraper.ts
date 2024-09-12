@@ -541,8 +541,7 @@ async function fetchPropertyDetails(
       avgRating,
       numRatings,
       originalListingPlatform: "Casamundo" as ListingSiteName,
-      originalNightlyPrice:
-        parseFloat((price.price / numNights).toFixed(2)) * 100,
+      originalNightlyPrice: Math.round((price.price / numNights) * 100),
       reviews: reviews,
       scrapeUrl: `${url}?${params.toString()}`,
     };
@@ -683,7 +682,7 @@ export const casamundoSubScraper: SubsequentScraper = async ({
     return {
       isAvailableOnOriginalSite: true,
       availabilityCheckedAt: new Date(),
-      originalNightlyPrice: parseFloat((price.price / numNights).toFixed(2)) * 100,
+      originalNightlyPrice: Math.round((price.price / numNights) * 100),
     };
   } catch (error) {
     console.error("Error in casamundoSubScraper");
