@@ -195,7 +195,7 @@ export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
 
   function ChatboxContent({ isPopover }: { isPopover?: boolean }) {
     return (
-      <div>
+      <div className={cn("bg-black", !isPopover && "pb-4")}>
         <div className={cn(!isPopover && "h-[38rem]")}>
           <div className="flex w-full flex-col items-center justify-start bg-[#1A1A1A] p-4 text-base font-bold text-white">
             <UserAvatar image={concierge.image} />
