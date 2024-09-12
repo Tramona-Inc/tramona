@@ -4,6 +4,7 @@ import * as cheerio from "cheerio";
 import { v2 } from "@google-cloud/translate";
 import { env } from "@/env";
 import { PropertyType } from "../db/schema";
+import { sql } from "drizzle-orm";
 
 const { Translate } = v2;
 
@@ -483,8 +484,8 @@ export const cleanbnbScraper: DirectSiteScraper = async ({
     const about = await translateText(scrapedData.description);
     const address = property.address;
     const city = property.city;
-    const latitude = scrapedData.latitude;
-    const longitude = scrapedData.longitude;
+    // const latitude = scrapedData.latitude;
+    // const longitude = scrapedData.longitude;
     const maxNumGuests = scrapedData.containsPlace.occupancy.value;
     const numBeds = totalBeds;
     const numBedrooms = property.maxBedrooms;
@@ -507,14 +508,13 @@ export const cleanbnbScraper: DirectSiteScraper = async ({
     const originalNightlyPrice =
       parseFloat(price) + cleaningFee / getNumNights(checkIn, checkOut);
 
+
     res.push({
       scrapeUrl: url,
       name,
       about,
       address,
       city,
-      latitude,
-      longitude,
       maxNumGuests,
       numBeds,
       numBedrooms,

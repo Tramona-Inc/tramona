@@ -8,6 +8,10 @@ export const HOST_MARKUP = 0.975;
 export const DIRECTLISTINGMARKUP = 1.015; // 1.5% markup for direct listings
 export const REFERRAL_CASHBACK = 2500 as number;
 
+export const airbnbHeaders = {
+  "x-airbnb-api-key": "d306zoyjsyarp7ifhu67rjxn52tv0t20",
+};
+
 // generic constants
 export const EARTH_RADIUS_MILES = 3959;
 export const METERS_PER_MILE = 1609.34;

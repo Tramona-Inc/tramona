@@ -202,11 +202,12 @@ export const roomsWithBedsSchema = z.array(
     beds: z.array(
       z.object({
         count: z.number().int().positive(),
-        type: z.enum(ALL_BED_TYPES, {
-          errorMap: (_, ctx) => ({
-            message: `Unsupported bed type '${ctx.data}'`,
-          }),
-        }),
+        // type: z.enum(ALL_BED_TYPES, {
+        //   errorMap: (_, ctx) => ({
+        //     message: `Unsupported bed type '${ctx.data}'`,
+        //   }),
+        // }),
+        type: z.string(),
       }),
     ),
   }),
@@ -243,8 +244,10 @@ export const properties = pgTable(
     hostRating: doublePrecision("host_rating"),
 
     address: varchar("address", { length: 1000 }).notNull(),
-    latitude: doublePrecision("latitude").notNull(),
-    longitude: doublePrecision("longitude").notNull(),
+    // latitude: doublePrecision("latitude").notNull(),
+    // longitude: doublePrecision("longitude").notNull(),
+    // latitude: doublePrecision("latitude").notNull(),
+    // longitude: doublePrecision("longitude").notNull(),
     city: varchar("city", { length: 255 }).notNull(),
     originalListingUrl: varchar("url"),
     checkInInfo: varchar("check_in_info"),
@@ -294,8 +297,12 @@ export const properties = pgTable(
       type: "point",
       mode: "xy",
       srid: 4326,
-    }),
+    })
+      .notNull()
+      .$type<{ x: number; y: number }>(),
     iCalLink: text("ical_link"),
+
+    bookOnAirbnb: boolean("book_on_airbnb").notNull().default(false),
   },
   (t) => ({
     spatialIndex: index("spacial_index").using("gist", t.latLngPoint),
@@ -337,3 +344,7 @@ export const bookedDates = pgTable(
     propertyidIdx: index().on(t.propertyId),
   }),
 );
+
+// - added neals stuff to db
+// - did sasha already update drizzle schema and usages of latitude and longitude?
+// - I did and got Offset is outside the bounds of the DataView for the map

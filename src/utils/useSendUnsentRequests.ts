@@ -11,6 +11,7 @@ export const newLinkRequestSchema = z.object({
   request: requestInsertSchema.omit({
     madeByGroupId: true,
     latLngPoint: true,
+    radius: true,
   }),
   property: linkInputPropertyInsertSchema,
 });

@@ -19,7 +19,7 @@ import {
   userUpdateSchema,
   users,
 } from "@/server/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 
 import { env } from "@/env";
 import { db } from "@/server/db";
@@ -521,8 +521,7 @@ export const usersRouter = createTRPCRouter({
               numBeds: property.bedsNumber,
               numBedrooms: property.bedroomsNumber,
               numBathrooms: property.bathroomsNumber,
-              latitude: property.lat,
-              longitude: property.lng,
+              latLngPoint: sql`ST_SetSRID(ST_MakePoint(${property.lng}, ${property.lat}), 4326)`,
               city: await getCity({ lat: property.lat, lng: property.lng }),
               hostName: property.contactName,
               originalListingId: property.id.toString(),

@@ -14,12 +14,15 @@ import {
   reviews,
 } from "../db/schema";
 import { arizonaScraper, arizonaSubScraper } from "./integrity-arizona";
-import { eq, and, ne, or, isNotNull } from "drizzle-orm";
+
+import { getCoordinates } from "../google-maps";
+import { eq, and, sql } from "drizzle-orm";
 import {
   createRandomMarkupEightToFourteenPercent,
   getNumNights,
 } from "@/utils/utils";
 import { DIRECTLISTINGMARKUP } from "@/utils/constants";
+import { haversineDistance } from "@/server/server-utils";
 
 export type DirectSiteScraper = (options: {
   checkIn: Date;
@@ -66,66 +69,7 @@ const filterNewPropertyFields = (listing: ScrapedListing): NewProperty => {
   const newPropertyKeys = Object.keys(properties).filter((key) => key !== "id");
   return Object.fromEntries(
     Object.entries(listing).filter(([key]) => newPropertyKeys.includes(key)),
-  ) as NewProperty;
-};
-
-const haversineDistance = (
-  lat1: number,
-  lon1: number,
-  lat2: number,
-  lon2: number,
-) => {
-  const toRadians = (degrees: number) => degrees * (Math.PI / 180);
-
-  const R = 3958.8; // Radius of the Earth in miles
-  const dLat = toRadians(lat2 - lat1);
-  const dLon = toRadians(lon2 - lon1);
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(toRadians(lat1)) *
-      Math.cos(toRadians(lat2)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c; // Distance in miles
-};
-
-const pickScrapersByLocation = (
-  lat: number,
-  lng: number,
-  radius: number,
-): { scrapersList: string[]; formattedLocation: string | null } => {
-  const arizonaBounds = {
-    north: 37.0,
-    south: 31.3322,
-    east: -109.0452,
-    west: -114.8183,
-  };
-
-  const isWithinArizona =
-    lat >= arizonaBounds.south &&
-    lat <= arizonaBounds.north &&
-    lng >= arizonaBounds.west &&
-    lng <= arizonaBounds.east;
-  if (isWithinArizona) {
-    const azScraperLocations = [
-      { name: "Lake Havasu", lat: 34.4839, lng: -114.3225 },
-      { name: "Parker Strip", lat: 34.2983, lng: -114.1439 },
-    ];
-
-    for (const location of azScraperLocations) {
-      const distance = haversineDistance(lat, lng, location.lat, location.lng);
-      if (distance <= radius) {
-        return {
-          scrapersList: ["arizonaScraper"],
-          formattedLocation: location.name,
-        };
-      }
-    }
-  }
-  // add if statements for other locations here
-
-  return { scrapersList: [], formattedLocation: null };
+  ) as unknown as NewProperty;
 };
 
 // handle the scraped properties and reviews
@@ -135,67 +79,20 @@ export const scrapeDirectListings = async (options: {
   numOfOffersInEachScraper?: number;
   requestNightlyPrice?: number;
   requestId?: number;
-  scrapersToExecute?: string[];
   location?: string;
   latitude?: number;
   longitude?: number;
 }) => {
-  // Create a new options object excluding `scrapersToExecute`
-  const { scrapersToExecute, ...scraperOptions } = options;
-
-  let selectedScrapers: NamedDirectSiteScraper[] = [];
-  if (scrapersToExecute && scrapersToExecute.length > 0) {
-    selectedScrapers = directSiteScrapers.filter((s) =>
-      scrapersToExecute.includes(s.name),
-    );
-  } else {
-    // use specific scrapers based on request location
-    console.log("options.latitude: ", options.latitude);
-    if (options.latitude && options.longitude) {
-      const { scrapersList, formattedLocation } = pickScrapersByLocation(
-        options.latitude,
-        options.longitude,
-        25, // search radius: 25 miles
-      );
-      if (scrapersList.length > 0) {
-        // selectedScrapers is a subset of directSiteScrapers that its name appeared in scrapersList
-        selectedScrapers = directSiteScrapers.filter((scraper) =>
-          scrapersList.includes(scraper.name),
-        );
-        if (formattedLocation) {
-          scraperOptions.location = formattedLocation;
-        }
-      }
-    } else {
-      // THIS IS A TEMPORARY FIX before we have coordinates for each request.
-      // Once the latLngPoint works, delete this block and test new request in "Lake Havasu" or "Parker Strip"
-      const formattedLocation = options.location?.split(",")[0]?.trim();
-      if (
-        formattedLocation === "Lake Havasu" ||
-        formattedLocation === "Parker Strip"
-      ) {
-        selectedScrapers = directSiteScrapers.filter(
-          (s) => s.name === "arizonaScraper",
-        );
-        console.log("selectedScrapers", selectedScrapers);
-        scraperOptions.location = formattedLocation;
-      }
-      // TEMPORARY FIX ENDS
-      console.error(
-        "Latitude and longitude are required for triggering location-based scraping",
-      );
-    }
-    // use default scrapers if no specific scrapers are provided or request location doesn't match any scraper
-    if (selectedScrapers.length === 0) {
-      // TODO: add default scrapers here
-      return;
-    }
-  }
   const allListings = await Promise.all(
-    selectedScrapers.map((s) => s.scraper(scraperOptions)),
+    directSiteScrapers.map((s) => s.scraper(options)),
   );
 
-  const listings = allListings.flat();
+  const listings = allListings
+    .flat()
+    .sort(
+      (a, b) => (a.originalNightlyPrice ?? 0) - (b.originalNightlyPrice ?? 0),
+    )
+    .slice(0, 10); // if the number of listings is less than 10, slice will return the whole array
 
   if (listings.length > 0) {
     await db.transaction(async (trx) => {
@@ -212,11 +109,21 @@ export const scrapeDirectListings = async (options: {
         const existingOriginalPropertyId =
           existingOriginalPropertyIdList[0]?.id;
 
+        let formattedlatLngPoint = null;
+        if (listing.latLngPoint.x && listing.latLngPoint.y) {
+          formattedlatLngPoint = sql`ST_SetSRID(ST_MakePoint(${listing.latLngPoint.x}, ${listing.latLngPoint.y}), 4326)`;
+        } else {
+          const { location } = await getCoordinates(listing.address);
+          if (!location)
+            throw new Error("Could not get coordinates for address");
+          formattedlatLngPoint = sql`ST_SetSRID(ST_MakePoint(${location.lng}, ${location.lat}), 4326)`;
+        }
+
         const newPropertyListing = filterNewPropertyFields(listing);
         if (existingOriginalPropertyId) {
           const tramonaProperty = await trx
             .update(properties)
-            .set({ ...newPropertyListing }) // Only keeps fields that are defined in the NewProperty schema
+            .set({ ...newPropertyListing, latLngPoint: formattedlatLngPoint }) // Only keeps fields that are defined in the NewProperty schema
             .where(eq(properties.originalListingId, existingOriginalPropertyId))
             .returning({ id: properties.id });
 
@@ -286,7 +193,10 @@ export const scrapeDirectListings = async (options: {
         } else {
           const tramonaProperty = await trx
             .insert(properties)
-            .values(newPropertyListing)
+            .values({
+              ...newPropertyListing,
+              latLngPoint: formattedlatLngPoint,
+            })
             .returning({ id: properties.id });
 
           const newPropertyId = tramonaProperty[0]!.id;

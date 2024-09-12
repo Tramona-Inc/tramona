@@ -9,6 +9,7 @@ import { type Review } from "@/server/db/schema";
 import { getNumNights } from "@/utils/utils";
 import { ScrapedListing } from "@/server/direct-sites-scraping";
 import { axiosWithRetry } from "@/server/server-utils";
+import { sql } from "drizzle-orm";
 
 const propertySchema = z.object({
   data: z.object({
@@ -107,8 +108,12 @@ const mapToScrapedListing = (
     address:
       prop.location_area_name + ", " + prop.city + ", " + prop.state_name,
     city: prop.city,
-    latitude: prop.latitude,
-    longitude: prop.longitude,
+    // latitude: prop.latitude,
+    // longitude: prop.longitude,
+    latLngPoint: {
+      x: prop.longitude,
+      y: prop.latitude,
+    },
     maxNumGuests: prop.max_occupants,
     numBeds: prop.bedrooms_number, // not provided, but required in NewProperty
     numBedrooms: prop.bedrooms_number,
@@ -154,7 +159,8 @@ export const arizonaScraper: DirectSiteScraper = async ({
 
   let locationCode = "";
   if (location) {
-    switch (location) {
+    const formattedLocation = location.split(",")[0];
+    switch (formattedLocation) {
       case "Parker Strip":
         locationCode = "20690";
         break;
@@ -163,6 +169,7 @@ export const arizonaScraper: DirectSiteScraper = async ({
         break;
       default:
         console.error("Location is not recognized: ", location);
+        return [];
     }
   }
   const locationParam = location

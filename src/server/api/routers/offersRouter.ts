@@ -168,9 +168,7 @@ export const offersRouter = createTRPCRouter({
               columns: { numGuests: true, location: true, id: true },
             },
             property: {
-              columns: {
-                latLngPoint: false,
-              },
+              columns: {},
               with: {
                 host: {
                   columns: { id: true, name: true, email: true, image: true },
@@ -213,10 +211,14 @@ export const offersRouter = createTRPCRouter({
     .input(offerSelectSchema.pick({ id: true }))
     .query(async ({ ctx, input }) => {
       const offer = await getOfferPageData(input.id);
-
       if (!offer) {
         throw new TRPCError({ code: "BAD_REQUEST" });
       }
+      const propertyForOffer = await getPropertyForOffer(offer.propertyId);
+      if (!propertyForOffer) {
+        throw new TRPCError({ code: "BAD_REQUEST" });
+      }
+      offer.property = propertyForOffer;
 
       if (offer.request) {
         const memberIds = offer.request.madeByGroup.members.map(
@@ -819,6 +821,30 @@ export const offersRouter = createTRPCRouter({
     }),
 });
 
+export async function getPropertyForOffer(propertyId: number) {
+  return await db.query.properties.findFirst({
+    where: eq(properties.id, propertyId),
+    with: {
+      reviews: true,
+      host: {
+        columns: {
+          id: true,
+          name: true,
+          email: true,
+          image: true,
+        },
+        with: {
+          hostProfile: {
+            columns: {
+              userId: true,
+            },
+          },
+        },
+      },
+    },
+  });
+}
+
 export async function getOfferPageData(offerId: number) {
   return await db.query.offers.findFirst({
     where: eq(offers.id, offerId),
@@ -848,29 +874,6 @@ export async function getOfferPageData(offerId: number) {
           numGuests: true,
           location: true,
           id: true,
-        },
-      },
-      property: {
-        columns: {
-          latLngPoint: false,
-        },
-        with: {
-          reviews: true,
-          host: {
-            columns: {
-              id: true,
-              name: true,
-              email: true,
-              image: true,
-            },
-            with: {
-              hostProfile: {
-                columns: {
-                  userId: true,
-                },
-              },
-            },
-          },
         },
       },
     },
