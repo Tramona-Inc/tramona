@@ -35,8 +35,6 @@ export default function ChatInput({
     (state) => state.addMessageToConversation,
   );
 
-  const utils = api.useUtils();
-
   const setOptimisticIds = useMessage((state) => state.setOptimisticIds);
 
   const setConversationToTop = useConversation(
@@ -49,7 +47,8 @@ export default function ChatInput({
 
   const { mutateAsync: updateProfile } = api.users.updateProfile.useMutation();
   const { mutateAsync: sendSMS } = api.twilio.sendSMS.useMutation();
-
+  const { mutateAsync: sendSlackToAdmin } =
+    api.messages.sendAdminSlackMessage.useMutation();
   const { data: participantPhoneNumbers } =
     api.messages.getParticipantsPhoneNumbers.useQuery({ conversationId });
 
@@ -90,6 +89,12 @@ export default function ChatInput({
         .select("*, user(email, name, image)")
         // .select("*")
         .single();
+      // // Perform the async operation outside the set function
+      await sendSlackToAdmin({
+        message: newMessage.message,
+        conversationId,
+        senderId: newMessage.userId,
+      });
 
       if (error) {
         removeMessageFromConversation(conversationId, newMessage.id);

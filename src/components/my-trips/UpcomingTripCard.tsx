@@ -5,13 +5,11 @@ import { Button } from "../ui/button";
 import { formatDateRange, getDaysUntilTrip } from "@/utils/utils";
 import Image from "next/image";
 import UserAvatar from "../_common/UserAvatar";
-import { useChatWithHost } from "@/utils/useChatWithHost";
 import { type TripCardDetails } from "@/pages/my-trips";
 import { api } from "@/utils/api";
+import ChatOfferButton from "../offers/ChatOfferButton";
 
 export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
-  const chatWithHost = useChatWithHost();
-
   const { data } = api.properties.getById.useQuery({ id: trip.propertyId });
   const hostId = data?.hostId;
 
@@ -80,13 +78,11 @@ export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
           <div className="h-[2px] rounded-full bg-gray-200"></div>
 
           <div className="flex flex-col justify-center gap-2 px-4 sm:flex-row lg:gap-4">
-            <Button
-              variant="secondary"
-              onClick={() => chatWithHost({ hostId: hostId ?? "" })}
-            >
-              <MessageCircle className="size-4" />
-              Message your host
-            </Button>
+            <ChatOfferButton
+              offerId={trip.offerId!.toString()}
+              offerHostId={hostId ?? null}
+              offerPropertyName={trip.property.name}
+            />
             <Button asChild variant="secondary">
               <Link href="/faq">
                 <HelpCircleIcon />
