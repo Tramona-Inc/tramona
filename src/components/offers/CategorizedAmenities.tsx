@@ -231,7 +231,7 @@ const AmenitiesComponent: React.FC<{ propertyAmenities: string[] }> = ({
   const categorizedAmenities = categorizeAmenities(propertyAmenities);
 
   return (
-    <div>
+    <div className="divide-y">
       {Object.entries(categorizedAmenities).map(([category, amenities]) => {
         const categoryDetails = categories[
           category as keyof typeof categories
@@ -239,17 +239,14 @@ const AmenitiesComponent: React.FC<{ propertyAmenities: string[] }> = ({
 
         return (
           amenities.length > 0 && (
-            <div key={category}>
-              <h3 className="inline-flex items-center justify-center pb-4 pt-10 text-black">
+            <div key={category} className="pb-4 pt-6">
+              <h3 className="inline-flex items-center justify-center text-black">
                 {React.createElement(categoryDetails.icon)}
                 <p className="text-md ml-2 font-semibold">{category}</p>
               </h3>
               <div className="flex flex-col gap-2">
                 {amenities.map((amenity) => (
-                  <div
-                    key={amenity}
-                    className="flex items-center gap-2 border-b border-gray-300 pb-2"
-                  >
+                  <div key={amenity} className="flex items-center gap-2 pb-2">
                     <span>{amenity}</span>
                   </div>
                 ))}

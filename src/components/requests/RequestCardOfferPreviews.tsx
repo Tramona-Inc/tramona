@@ -8,10 +8,10 @@ import {
   formatCurrency,
   getNumNights,
   getOfferDiscountPercentage,
-  getTravelerOfferedPrice,
 } from "@/utils/utils";
 import { ExternalLinkIcon } from "lucide-react";
 import { sortBy } from "lodash";
+import { Badge } from "../ui/badge";
 
 export function RequestCardOfferPreviews({
   request,
@@ -54,8 +54,11 @@ export function RequestCardOfferPreviews({
                     {property.numBedrooms} bed · {property.numBathrooms} bath
                   </p>
                 </div>
-                <div className="absolute left-1 top-1 rounded-full bg-white px-2 py-0.5 text-sm font-bold text-foreground shadow">
-                  {discountPercentage}% off
+                <div className="absolute left-1 top-1 flex gap-1">
+                  <Badge variant="white">{discountPercentage}% off</Badge>
+                  {offer.property.bookOnAirbnb && (
+                    <Badge variant="white">Airbnb</Badge>
+                  )}
                 </div>
                 <div className="absolute right-1 top-1 flex -translate-y-2 items-center gap-1 rounded-full bg-black/40 px-3 py-1.5 text-xs font-medium text-white/80 opacity-0 backdrop-blur transition-all duration-200 group-hover:translate-y-0 group-hover:opacity-100">
                   View offer <ExternalLinkIcon className="h-3.5 w-3.5" />
