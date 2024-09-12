@@ -35,9 +35,9 @@ import {
 import { sendTextToHost, haversineDistance } from "@/server/server-utils";
 import { newLinkRequestSchema } from "@/utils/useSendUnsentRequests";
 import { getCoordinates } from "@/server/google-maps";
-import { waitUntil } from "@vercel/functions";
 import { scrapeDirectListings } from "@/server/direct-sites-scraping";
-import { random } from "lodash";
+import { waitUntil } from "@vercel/functions";
+import { scrapeAirbnbListingsForRequest } from "@/server/scrapeAirbnbListingsForRequest";
 
 const updateRequestInputSchema = z.object({
   requestId: z.number(),
@@ -85,6 +85,7 @@ export const requestsRouter = createTRPCRouter({
                   originalNightlyPrice: true,
                   hostName: true,
                   hostProfilePic: true,
+                  bookOnAirbnb: true,
                 },
                 with: {
                   host: { columns: { name: true, email: true, image: true } },
@@ -428,7 +429,7 @@ const modifiedRequestSchema = requestInsertSchema
   });
 
 // Infer the type from the modified schema
-type RequestInput = z.infer<typeof modifiedRequestSchema>;
+export type RequestInput = z.infer<typeof modifiedRequestSchema>;
 
 export async function handleRequestSubmission(
   input: RequestInput,
@@ -527,34 +528,9 @@ export async function handleRequestSubmission(
         );
       }
 
-      // waitUntil(
-      //   scrapeAirbnbListings({
-      //     request: input,
-      //     limit: 10,
-      //   })
-      //     .then(async (airbnbListings) => {
-      //       const airbnbPropertyIds = await tx
-      //         .insert(properties)
-      //         .values(airbnbListings.map((l) => l.property))
-      //         .returning({ id: properties.id })
-      //         .then((res) => res.map((r) => r.id));
-
-      //       const flattenedReviews = airbnbListings
-      //         .map(({ reviews }, i) =>
-      //           reviews.map((r) => ({ ...r, propertyId: airbnbPropertyIds[i]! })),
-      //         )
-      //         .flat();
-
-      //       await tx.insert(reviews).values(flattenedReviews);
-      //     })
-      //     .catch((e) => {
-      //       // fail silently -- we dont want to crash the request submission
-      //       // TODO: handle this better using a dead letter queue or something
-      //       console.error(
-      //         `Error scraping Airbnb listings for request #${requestId}: ${e}`,
-      //       );
-      //     }),
-      // );
+      waitUntil(
+        scrapeAirbnbListingsForRequest(input, { tx, requestId: request.id }),
+      );
 
       return { requestId: request.id, madeByGroupId };
     } else {
@@ -565,7 +541,7 @@ export async function handleRequestSubmission(
     }
   });
 
-  // Messaging based on user preferences or environment
+  // Messaging based on user preferences or environment.
   const name = user.name ?? user.email;
   const pricePerNight =
     input.maxTotalPrice / getNumNights(input.checkIn, input.checkOut);
