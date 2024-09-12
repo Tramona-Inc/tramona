@@ -210,15 +210,18 @@ export const offersRouter = createTRPCRouter({
   getByIdWithDetails: protectedProcedure
     .input(offerSelectSchema.pick({ id: true }))
     .query(async ({ ctx, input }) => {
-      const offer = await getOfferPageData(input.id);
-      if (!offer) {
+      const offerWithoutProperty = await getOfferPageData(input.id);
+      if (!offerWithoutProperty) {
         throw new TRPCError({ code: "BAD_REQUEST" });
       }
-      const propertyForOffer = await getPropertyForOffer(offer.propertyId);
+      const propertyForOffer = await getPropertyForOffer(
+        offerWithoutProperty.propertyId,
+      );
+      console.log("This is the property objext", propertyForOffer);
       if (!propertyForOffer) {
         throw new TRPCError({ code: "BAD_REQUEST" });
       }
-      offer.property = propertyForOffer;
+      const offer = { ...offerWithoutProperty, property: propertyForOffer };
 
       if (offer.request) {
         const memberIds = offer.request.madeByGroup.members.map(
@@ -822,6 +825,7 @@ export const offersRouter = createTRPCRouter({
 });
 
 export async function getPropertyForOffer(propertyId: number) {
+  console.log("this function is called");
   return await db.query.properties.findFirst({
     where: eq(properties.id, propertyId),
     with: {

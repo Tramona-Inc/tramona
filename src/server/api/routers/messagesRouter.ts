@@ -386,7 +386,7 @@ export const messagesRouter = createTRPCRouter({
       return { tempUserId: tempUser?.id, conversationId: conversationId };
     }),
 
-  createConversationWithOffer: protectedProcedure
+  createOrFetchConversationWithOffer: protectedProcedure
     .input(
       z.object({
         offerId: z.string(),

@@ -53,24 +53,12 @@ import { type InferQueryModel } from "@/server/db";
 import { Property } from "@/server/db/schema";
 import ChatOfferButton from "./ChatOfferButton";
 import { Airbnb } from "@/utils/listing-sites/Airbnb";
+import { properties } from "../../server/db/schema/tables/properties";
 
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
+type PropertyFromOffer = OfferWithDetails["property"];
 
-export type PropertyPageData = InferQueryModel<
-  "properties",
-  { hostTeamId: false },
-  {
-    host: {
-      columns: {
-        id: true;
-        name: true;
-        email: true;
-        image: true;
-      };
-    };
-    reviews: true;
-  }
->;
+export type PropertyPageData = PropertyFromOffer;
 
 export default function PropertyPage({
   property,
@@ -93,7 +81,7 @@ export default function PropertyPage({
     }
   }, []);
 
-  const hostName = property.host?.name ?? property.hostName;
+  const hostName = property.host?.name ?? "Tramona";
 
   const originalListing = getOriginalListing(property);
 
@@ -350,8 +338,8 @@ export default function PropertyPage({
             <div className="relative mt-4 h-[400px]">
               <div className="absolute inset-0 z-0 overflow-hidden rounded-xl border">
                 <SingleLocationMap
-                  lat={property.latLngPoint.x}
-                  lng={property.latLngPoint.y}
+                  lng={property.latLngPoint.x}
+                  lat={property.latLngPoint.y}
                 />
               </div>
             </div>
