@@ -507,6 +507,7 @@ export async function handleRequestSubmission(
           location: input.location,
           latitude: lat,
           longitude: lng,
+          numGuests: input.numGuests,
         }).catch((error) => {
           console.error("Error scraping listings: " + error);
         }),

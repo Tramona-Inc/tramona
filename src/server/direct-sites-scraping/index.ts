@@ -110,17 +110,37 @@ export const scrapeDirectListings = async (options: {
   location?: string;
   latitude?: number;
   longitude?: number;
+  numGuests?: number;
 }) => {
+  const { requestNightlyPrice } = options;
+
+  if (!requestNightlyPrice) {
+    throw new Error("requestNightlyPrice is required");
+  }
+
+
+  const minPrice = requestNightlyPrice * 0.8;
+  const maxPrice = requestNightlyPrice * 1.1;
+
   const allListings = await Promise.all(
     directSiteScrapers.map((s) => s.scraper(options)),
   );
 
   const listings = allListings
     .flat()
-    .sort(
-      (a, b) => (a.originalNightlyPrice ?? 0) - (b.originalNightlyPrice ?? 0),
+    .filter(
+      (listing) =>
+        listing.originalNightlyPrice !== null &&
+        listing.originalNightlyPrice !== undefined &&
+        listing.originalNightlyPrice >= minPrice &&
+        listing.originalNightlyPrice <= maxPrice
     )
-    .slice(0, 10); // if the number of listings is less than 10, slice will return the whole array
+    .sort((a, b) => {
+      const aDiff = Math.abs((a.originalNightlyPrice ?? 0) - requestNightlyPrice);
+      const bDiff = Math.abs((b.originalNightlyPrice ?? 0) - requestNightlyPrice);
+      return aDiff - bDiff;
+    })
+    .slice(0, 10); // Grab up to 10 listings
 
   if (listings.length > 0) {
     await db.transaction(async (trx) => {

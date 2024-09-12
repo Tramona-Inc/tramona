@@ -23,6 +23,19 @@ async function translateText(
   }
 }
 
+const locationGroupMap: Record<string, number> = {
+  "Milan, Italy": 2,
+  "Bologna, Italy": 6,
+  "Venice, Italy": 12,
+  "Florence, Italy": 4,
+  "Naples, Italy": 29,
+  "Turin, Italy": 5,
+  "Rome, Italy": 1,
+  "Verona, Italy": 7,
+  "Genoa, Italy": 41,
+  "Palermo, Italy": 14,
+}
+
 const propertyTypeMapping: Record<string, PropertyType> = {
   Apartment: "Apartment",
   Studio: "Apartment",
@@ -40,38 +53,6 @@ const propertyTypeMapping: Record<string, PropertyType> = {
 const mapPropertyType = (type: string): PropertyType => {
   return propertyTypeMapping[type] ?? "Apartment";
 };
-
-// async function fetchWithRetry(
-//   url: string,
-//   retries = 3,
-//   delayMs = 2000,
-// ): Promise<{ text: string; url: string } | null> {
-//   for (let attempt = 1; attempt <= retries; attempt++) {
-//     try {
-//       const response = await fetch(url);
-//       if (response.ok) {
-//         const text = await response.text();
-//         return { text, url };
-//       } else if (attempt < retries) {
-//         await delay(delayMs); // Wait before retrying
-//       } else {
-//         console.error(`HTTP error! Status: ${response.status}`, url);
-//         return null;
-//       }
-//     } catch (e) {
-//       console.error(`Error fetching URL: ${url} on attempt ${attempt}`, e);
-//       if (attempt === retries) {
-//         return null; // Stop after max retries
-//       }
-//       await delay(delayMs); // Wait before retrying
-//     }
-//   }
-//   return null;
-// }
-
-// function delay(ms: number) {
-//   return new Promise((resolve) => setTimeout(resolve, ms));
-// }
 
 const formatDate = (date: Date) => {
   const year = date.getFullYear();
@@ -242,7 +223,7 @@ function extractTotalBeds($: cheerio.CheerioAPI): number {
 }
 
 const getAllProperties = async (baseUrl: string, checkInDate: string, checkOutDate: string) => {
-  const $ = await urlScrape(`${baseUrl}?from=${checkInDate}&to=${checkOutDate}`);
+  const $ = await urlScrape(`${baseUrl}`);
 
   const scriptTags = $("script");
 
@@ -302,19 +283,70 @@ const getAllProperties = async (baseUrl: string, checkInDate: string, checkOutDa
   return properties;
 }
 
+function extractCityAndCountry(fullAddress: string) {
+  if (!fullAddress.includes("Italy")) {
+    return null;
+  }
+  // Split the address by commas
+  const parts = fullAddress.split(',');
+
+  if (parts.length === 1) {
+    return fullAddress; // return original if no commas found
+  }
+
+  // Assuming the second part is the city and the last part is the country
+  const city = parts.length > 1 ? parts[parts.length - 2]?.trim() : '';
+  const country = parts[parts.length - 1]?.includes('Italy') ? 'Italy' : '';
+
+  // Return in the format "City, Italy"
+  if (city && country) {
+    return `${city}, ${country}`;
+  }
+
+  return fullAddress; // return original if no valid city/country found
+}
+
 export const cleanbnbScraper: DirectSiteScraper = async ({
   checkIn,
   checkOut,
   numOfOffersInEachScraper,
   numGuests,
+  location,
 }) => {
+
   const checkInDate = formatDate(checkIn);
   const checkOutDate = formatDate(checkOut);
+  let locationGroup = 0;
 
   const res: Awaited<ReturnType<DirectSiteScraper>> = [];
-  const baseUrl = numGuests
-    ? `https://www.cleanbnb.house/it/appartamenti?guests_rooms=${encodeURIComponent(`${numGuests},0;`)}`
-    : "https://www.cleanbnb.house/it/appartamenti";
+  if (location) {
+    const place = extractCityAndCountry(location);
+    if (!place) {
+      console.log("No properties found on cleanbnb for location: ", location);
+      return res;
+    }
+    locationGroup = locationGroupMap[place] ?? 0;
+  }
+
+  let baseUrl = 'https://www.cleanbnb.house/it/appartamenti';
+  const params = [];
+
+  if (locationGroup > 0) {
+    params.push(`omnibar=group%3B${locationGroup}`);
+  }
+
+  if (numGuests) {
+    params.push(`guests_rooms=${encodeURIComponent(`${numGuests},0;`)}`);
+  }
+
+  if (checkInDate && checkOutDate) {
+    params.push(`from=${checkInDate}&to=${checkOutDate}`);
+  }
+
+  // Join all the parameters with `&` and append to baseUrl
+  if (params.length > 0) {
+    baseUrl += `?${params.join('&')}`;
+  }
 
   const properties = await getAllProperties(baseUrl, checkInDate, checkOutDate);
 
@@ -325,139 +357,143 @@ export const cleanbnbScraper: DirectSiteScraper = async ({
   const validData = fetchedData.filter((data) => data.status === "fulfilled").map((data) => data.value);
 
   // Process the fetched data
-  for (const $ of validData) {
+  try {
 
-    const jsonLdScripts = $('script[type="application/ld+json"]');
+    for (const $ of validData) {
 
-    // Process each script tag
-    const jsonLdData = jsonLdScripts
-      .map((_, script) => {
-        const scriptContent = $(script).html()?.trim(); // Extract script content and trim whitespace
-        if (scriptContent) {
-          try {
-            // Parse JSON content
-            return JSON.parse(scriptContent);
-          } catch (e) {
-            console.error("Error parsing JSON from script content:", e);
-            return null;
+      const jsonLdScripts = $('script[type="application/ld+json"]');
+
+      // Process each script tag
+      const jsonLdData = jsonLdScripts
+        .map((_, script) => {
+          const scriptContent = $(script).html()?.trim(); // Extract script content and trim whitespace
+          if (scriptContent) {
+            try {
+              // Parse JSON content
+              return JSON.parse(scriptContent);
+            } catch (e) {
+              console.error("Error parsing JSON from script content:", e);
+              return null;
+            }
           }
-        }
-        return null;
-      })
-      .get() as JsonLdData[];
+          return null;
+        })
+        .get() as JsonLdData[];
 
-    // Grab the specific JSON-LD data object we need
-    const info = jsonLdData.filter(
-      (data) =>
-        data.hasOwnProperty("@type") && data["@type"] === "VacationRental",
-    );
-    if (info[0] === undefined) {
-      // This hits a lot, 429 errors
-      continue;
-    }
-    const scrapedData = info[0] as unknown as ScrapedData;
-
-    const price = extractPrice($);
-    const cleaningFee = extractCleaningFee($);
-    const { checkInTime, checkOutTime } = extractCheckInCheckOutTime($);
-    const extractedPropertyType = $(".apt-address span").text().trim();
-    const propertyType = mapPropertyType(
-      await translateText(extractedPropertyType),
-    );
-    const totalBeds = extractTotalBeds($);
-
-    // This is not working rn - also only fixes a few cases so might not be worth it
-    const normalizeString = (str: string) => {
-      if (str) {
-        return str
-          .normalize("NFKC")
-          .replace(/\u00a0/g, " ")
-          .trim();
+      // Grab the specific JSON-LD data object we need
+      const info = jsonLdData.filter(
+        (data) =>
+          data.hasOwnProperty("@type") && data["@type"] === "VacationRental",
+      );
+      if (info[0] === undefined) {
+        // This hits a lot, 429 errors
+        continue;
       }
-    };
+      const scrapedData = info[0] as unknown as ScrapedData;
 
-    const property = properties.filter(
-      (property) => property.url.split("?")[0] === scrapedData.url,
-    )[0]
-      ? properties.filter(
+      const price = extractPrice($);
+      const cleaningFee = extractCleaningFee($);
+      const { checkInTime, checkOutTime } = extractCheckInCheckOutTime($);
+      const extractedPropertyType = $(".apt-address span").text().trim();
+      const propertyType = mapPropertyType(
+        await translateText(extractedPropertyType),
+      );
+      const totalBeds = extractTotalBeds($);
+
+      // This is not working rn - also only fixes a few cases so might not be worth it
+      const normalizeString = (str: string) => {
+        if (str) {
+          return str
+            .normalize("NFKC")
+            .replace(/\u00a0/g, " ")
+            .trim();
+        }
+      };
+
+      const property = properties.filter(
         (property) => property.url.split("?")[0] === scrapedData.url,
       )[0]
-      : properties.filter(
-        (property) =>
-          normalizeString(property.name) ===
-          normalizeString(scrapedData.name),
-      )[0];
+        ? properties.filter(
+          (property) => property.url.split("?")[0] === scrapedData.url,
+        )[0]
+        : properties.filter(
+          (property) =>
+            normalizeString(property.name) ===
+            normalizeString(scrapedData.name),
+        )[0];
 
-    if (property === undefined) {
-      if (info.length > 0) {
-        // This is the case that isnt hit very frequently
-        console.log("GGGGGGGGGGGG; ", scrapedData.name);
-      } else {
-        console.log("Property not found:", info);
+      if (property === undefined) {
+        if (info.length > 0) {
+          // This is the case that isnt hit very frequently
+          console.log("GGGGGGGGGGGG; ", scrapedData.name);
+        } else {
+          console.log("Property not found:", info);
+        }
+        continue;
       }
-      continue;
-    }
-    let amenities;
+      let amenities;
 
-    const name = await translateText(scrapedData.name);
-    const about = await translateText(scrapedData.description);
-    const address = property.address;
-    const city = property.city;
-    const latitude = scrapedData.latitude;
-    const longitude = scrapedData.longitude;
-    const maxNumGuests = scrapedData.containsPlace.occupancy.value;
-    const originalListingId = property.id;
-    const numBeds = totalBeds;
-    const numBedrooms = property.maxBedrooms;
-    const numBathrooms = property.maxBathrooms;
-    try {
-      if (scrapedData.amenityFeature && scrapedData.amenityFeature.length > 0) {
-        amenities = await Promise.all(
-          scrapedData.amenityFeature.map(async (amenity) =>
-            translateText(amenity.name),
-          ),
-        );
-      } else {
-        amenities = [];
+      const name = await translateText(scrapedData.name);
+      const about = await translateText(scrapedData.description);
+      const address = property.address;
+      const city = property.city;
+      const latitude = scrapedData.latitude;
+      const longitude = scrapedData.longitude;
+      const maxNumGuests = scrapedData.containsPlace.occupancy.value;
+      const originalListingId = property.id;
+      const numBeds = totalBeds;
+      const numBedrooms = property.maxBedrooms;
+      const numBathrooms = property.maxBathrooms;
+      try {
+        if (scrapedData.amenityFeature && scrapedData.amenityFeature.length > 0) {
+          amenities = await Promise.all(
+            scrapedData.amenityFeature.map(async (amenity) =>
+              translateText(amenity.name),
+            ),
+          );
+        } else {
+          amenities = [];
+        }
+      } catch (error) {
+        console.error("Error translating amenities:", error);
       }
-    } catch (error) {
-      console.error("Error translating amenities:", error);
+      const imageUrls = scrapedData.image;
+      const originalListingUrl = property.url;
+      const originalNightlyPrice =
+        ((parseFloat(price) + cleaningFee) / getNumNights(checkIn, checkOut)) * 100;
+
+
+      res.push({
+        name,
+        about,
+        address,
+        city,
+        maxNumGuests,
+        numBeds,
+        numBedrooms,
+        numBathrooms,
+        amenities,
+        imageUrls,
+        originalListingUrl,
+        originalNightlyPrice,
+        originalListingId,
+        propertyType,
+        checkInTime,
+        checkOutTime,
+        latLngPoint: {
+          x: latitude,
+          y: longitude,
+        },
+        currency: "EUR",
+        cancellationPolicy: "Non-refundable",
+        reviews: [],
+        scrapeUrl: baseUrl,
+        originalListingPlatform: "Cleanbnb" as ListingSiteName,
+      });
     }
-    const imageUrls = scrapedData.image;
-    const originalListingUrl = property.url;
-    const originalNightlyPrice =
-      parseFloat(price) + cleaningFee / getNumNights(checkIn, checkOut);
-
-
-    res.push({
-      name,
-      about,
-      address,
-      city,
-      maxNumGuests,
-      numBeds,
-      numBedrooms,
-      numBathrooms,
-      amenities,
-      imageUrls,
-      originalListingUrl,
-      originalNightlyPrice,
-      originalListingId,
-      propertyType,
-      checkInTime,
-      checkOutTime,
-      latLngPoint: {
-        x: longitude,
-        y: latitude,
-      },
-      currency: "EUR",
-      cancellationPolicy: "Non-refundable",
-      reviews: [],
-      scrapeUrl: baseUrl,
-      originalListingPlatform: "Cleanbnb" as ListingSiteName,
-    });
+  } catch (error) {
+    console.error("Error processing scraped data:", error);
   }
-  console.log("res: ", res[0]);
   return numOfOffersInEachScraper ? res.splice(0, numOfOffersInEachScraper) : res;
 };
 
