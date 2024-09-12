@@ -21,7 +21,7 @@ import {
   getNumNights,
 } from "@/utils/utils";
 import { DIRECTLISTINGMARKUP } from "@/utils/constants";
-import { haversineDistance } from "@/server/server-utils";
+import { createLatLngGISPoint, haversineDistance } from "@/server/server-utils";
 import { cleanbnbScraper, cleanbnbSubScraper } from "./cleanbnb-scrape";
 
 export type DirectSiteScraper = (options: {
@@ -177,12 +177,12 @@ export const scrapeDirectListings = async (options: {
 
         let formattedlatLngPoint = null;
         if (listing.latLngPoint?.x && listing.latLngPoint.y) {
-          formattedlatLngPoint = sql`ST_SetSRID(ST_MakePoint(${listing.latLngPoint.x}, ${listing.latLngPoint.y}), 4326)`;
+          formattedlatLngPoint = createLatLngGISPoint(listing.latLngPoint.y, listing.latLngPoint.x);
         } else {
           const { location } = await getCoordinates(listing.address);
           if (!location)
             throw new Error("Could not get coordinates for address");
-          formattedlatLngPoint = sql`ST_SetSRID(ST_MakePoint(${location.lng}, ${location.lat}), 4326)`;
+          formattedlatLngPoint = createLatLngGISPoint(location.lat, location.lng);
         }
 
         const newPropertyListing = filterNewPropertyFields(listing);

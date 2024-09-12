@@ -12,6 +12,7 @@ import { type NextApiRequest, type NextApiResponse } from "next";
 import { db } from "@/server/db";
 import { eq, sql } from "drizzle-orm";
 import { sendSlackMessage } from "@/server/slack";
+import { createLatLngGISPoint } from "@/server/server-utils";
 
 export async function insertHost(id: string) {
   // Insert Host info
@@ -324,9 +325,7 @@ export default async function webhook(
         }
 
         // Insert data into the reservedDates table
-
-        const latLngPoint = sql`ST_SetSRID(ST_MakePoint(${webhookData.data.address.longitude}, ${webhookData.data.address.latitude}), 4326)`;
-
+        const latLngPoint: SQL = createLatLngGISPoint(webhookData.data.address.latitude, webhookData.data.address.longitude);
 
         const propertyObject = {
           hostId: userId,

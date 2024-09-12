@@ -18,6 +18,7 @@ import {
   sendText,
   sendWhatsApp,
   getPropertiesForRequest,
+  createLatLngGISPoint,
 } from "@/server/server-utils";
 import { sendSlackMessage } from "@/server/slack";
 import { isIncoming } from "@/utils/formatters";
@@ -470,7 +471,7 @@ export async function handleRequestSubmission(
     }
     let latLngPoint = null;
     if (lat && lng) {
-      latLngPoint = sql`ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)`;
+      latLngPoint = createLatLngGISPoint(lat, lng);
     }
 
     if (radius && latLngPoint) {

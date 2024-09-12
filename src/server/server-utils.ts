@@ -47,7 +47,7 @@ import * as cheerio from "cheerio";
 import { sendSlackMessage } from "./slack";
 import { HOST_MARKUP, TRAVELER__MARKUP } from "@/utils/constants";
 import { HostRequestsPageData } from "./api/routers/propertiesRouter";
-import { property } from "lodash";
+import { create, property } from "lodash";
 
 export const axiosWithRetry = axios.create();
 
@@ -315,7 +315,7 @@ export async function addProperty({
       // latitude: lat,
       // longitude: lng,
       city: city,
-      latLngPoint: sql`ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)`,
+      latLngPoint: createLatLngGISPoint(lat, lng),
       hostTeamId,
     })
     .returning({ id: properties.id });
@@ -803,6 +803,15 @@ export function createNormalDistributionDates(
   return dateRanges;
 }
 
+export function createLatLngGISPoint(
+  lat: number,
+  lng: number,
+) {
+  const latLngPoint = sql`ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)`;
+  return latLngPoint;
+}
+
+
 export function haversineDistance(
   lat1: number,
   lon1: number,
@@ -817,9 +826,9 @@ export function haversineDistance(
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(toRadians(lat1)) *
-      Math.cos(toRadians(lat2)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+    Math.cos(toRadians(lat2)) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c; // Distance in kilometers
 }
