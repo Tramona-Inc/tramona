@@ -11,7 +11,7 @@ import {
 } from "@/utils/utils";
 import { type OfferWithDetails } from "../offers/PropertyPage";
 import { formatDateMonthDay, plural } from "@/utils/utils";
-import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
+import { useChatWithAdmin } from "@/utils/messaging/useChatWithAdmin";
 import CustomStripeCheckout from "./CustomStripeCheckout";
 import { OfferPriceDetails } from "../_common/OfferPriceDetails";
 import { getCancellationPolicyDescription } from "@/config/getCancellationPolicyDescription";

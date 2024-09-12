@@ -7,19 +7,14 @@ import {
 } from "@/utils/utils";
 import { plural } from "@/utils/utils";
 import { TAX_PERCENTAGE, SUPERHOG_FEE } from "@/utils/constants";
-import { type Offer } from "@/server/db/schema";
+import type { OfferWithDetails } from "@/components/offers/PropertyPage";
+
 export function OfferPriceDetails({
   offer,
+  bookOnAirbnb,
 }: {
-  offer: Pick<
-    Offer,
-    | "totalPrice"
-    | "tramonaFee"
-    | "checkIn"
-    | "checkOut"
-    | "travelerOfferedPrice"
-    | "scrapeUrl"
-  >;
+  offer: OfferWithDetails;
+  bookOnAirbnb?: boolean;
 }) {
   const numberOfNights = getNumNights(offer.checkIn, offer.checkOut);
   const nightlyPrice = offer.travelerOfferedPrice / numberOfNights;

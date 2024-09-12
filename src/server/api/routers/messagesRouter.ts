@@ -7,7 +7,13 @@ import { and, eq, inArray, ne } from "drizzle-orm";
 import { z } from "zod";
 import { conversations, messages } from "./../../db/schema/tables/messages";
 import { protectedProcedure } from "./../trpc";
+import { sendSlackMessage } from "@/server/slack";
 import { TRPCError } from "@trpc/server";
+
+const isProduction = process.env.NODE_ENV === "production";
+const baseUrl = isProduction
+  ? "https://www.tramona.com"
+  : "http://localhost:3000";
 
 const ADMIN_ID = env.TRAMONA_ADMIN_USER_ID;
 
@@ -46,6 +52,7 @@ export async function fetchUsersConversations(userId: string) {
 }
 
 export async function fetchConversationWithAdmin(userId: string) {
+  console.log("calling fetch converasation with admin");
   const result = await db.query.users.findFirst({
     where: eq(users.id, userId),
     with: {
@@ -158,11 +165,13 @@ export async function fetchConversationWithOffer(
     },
   });
 
-  const offerExists = result?.conversations.some(
+  const offerExists = result?.conversations.find(
     (convo) => convo.conversation.offerId === offerId,
   );
 
-  return offerExists;
+  const conversationId = offerExists?.conversationId;
+
+  return conversationId;
 }
 
 async function generateConversation(
@@ -214,29 +223,39 @@ export async function createConversationWithHost(
   }
 }
 
-export async function createConversationWithOffer(
+export async function createConversationWithOfferHelper(
   userId: string,
-  offerUserId: string,
+  offerHostOrAllAdmins: string,
   propertyName: string,
   offerId: string,
 ) {
+  console.log(
+    "called Create conversation here is the host/admin id",
+    offerHostOrAllAdmins,
+  );
   // Generate conversation and get id
   const createdConversationId = await generateConversation(
     propertyName,
     offerId,
   );
+  console.log("here is the generated Conversation", createdConversationId);
 
   if (createdConversationId !== undefined) {
-    // Insert participants for the user and admin
-    const participantValues = [
+    // Check if offerHostOrAllAdmins is a string or an array of strings
+    const participantValues: { conversationId: string; userId: string }[] = [
       { conversationId: createdConversationId, userId: userId },
-      { conversationId: createdConversationId, userId: offerUserId },
+      {
+        conversationId: createdConversationId,
+        userId: offerHostOrAllAdmins,
+      },
     ];
 
+    // Insert participants for the user and admin
+    console.log(participantValues);
     await db.insert(conversationParticipants).values(participantValues);
-
-    return createdConversationId;
   }
+
+  return createdConversationId;
 }
 
 async function addUserToConversation(userId: string, conversationId: string) {
@@ -367,31 +386,36 @@ export const messagesRouter = createTRPCRouter({
       return { tempUserId: tempUser?.id, conversationId: conversationId };
     }),
 
-  createConversationWithOffer: protectedProcedure
+  createOrFetchConversationWithOffer: protectedProcedure
     .input(
       z.object({
         offerId: z.string(),
-        offerUserId: z.string(),
+        offerHostId: z.union([z.string(), z.null()]),
         offerPropertyName: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const conversationExist = await fetchConversationWithOffer(
+      const conversationExistId = await fetchConversationWithOffer(
         ctx.user.id,
         input.offerId,
       );
+      console.log(conversationExistId, "converation exist");
+
+      //determine if the conversation will be with the host or the admin
+      const offerHostOrAllAdmins = input.offerHostId
+        ? input.offerHostId
+        : ADMIN_ID;
 
       // Create conversation with host if it doesn't exist
-      if (!conversationExist) {
-        return await createConversationWithOffer(
+      if (!conversationExistId) {
+        return await createConversationWithOfferHelper(
           ctx.user.id,
-          input.offerUserId === ""
-            ? env.TRAMONA_ADMIN_USER_ID
-            : input.offerUserId,
+          offerHostOrAllAdmins,
           input.offerPropertyName,
           input.offerId,
         );
       }
+      return conversationExistId;
     }),
 
   addUserToConversation: publicProcedure
@@ -501,6 +525,46 @@ export const messagesRouter = createTRPCRouter({
         .update(messages)
         .set({ read: true })
         .where(inArray(messages.id, input.unreadMessageIds));
+    }),
+  sendAdminSlackMessage: protectedProcedure
+    .input(
+      z.object({
+        message: z.string(),
+        conversationId: z.string(),
+        senderId: z.string(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      //find the receiver of the message
+      const receiver = await db.query.conversationParticipants
+        .findFirst({
+          where: and(
+            eq(conversationParticipants.conversationId, input.conversationId),
+            ne(conversationParticipants.userId, input.senderId),
+          ),
+          with: {
+            user: {
+              columns: {
+                id: true,
+                email: true,
+                role: true,
+              },
+            },
+          },
+        })
+        .then((res) => res?.user);
+      //check to see if the receipt is the admin
+      if (receiver?.role !== "admin") return;
+      //if admin then send slack from the to and from
+      await sendSlackMessage({
+        channel: "admin-messaging",
+        isProductionOnly: false,
+        text: [
+          `*${receiver.email} sent a message to admin*`,
+          `${input.message}`,
+          `<${baseUrl}/messages?conversationId=${input.conversationId}|Click here to respond>`,
+        ].join("\n"),
+      });
     }),
 
   getConversationsWithAdmin: publicProcedure
