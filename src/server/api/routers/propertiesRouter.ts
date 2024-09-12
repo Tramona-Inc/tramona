@@ -41,7 +41,6 @@ import {
 import { addProperty, getRequestsForProperties } from "@/server/server-utils";
 import { latLngEquals } from "@vis.gl/react-google-maps";
 import { getCoordinates } from "@/server/google-maps";
-import { getDiscountPercentage } from "@/utils/utils";
 
 export type HostRequestsPageData = {
   city: string;
