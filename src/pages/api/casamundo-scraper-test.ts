@@ -26,11 +26,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         numOfOffersInEachScraper: 5,
         requestNightlyPrice: 100,
         requestId: undefined,
-        scrapersToExecute: ["casamundoScraper"],
         location: "Los Angeles, CA",
-        latitude: 34.052235,
-        longitude: -118.243683,
-
+        numGuests: 2,
       });
       console.log('API route: Scraping process completed');
       res.status(200).json({ message: `Successfully scraped and inserted ${listings.length} listings.` });

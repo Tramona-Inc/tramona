@@ -32,6 +32,7 @@ export type DirectSiteScraper = (options: {
   requestNightlyPrice?: number; // when the scraper is used by traveler request page
   requestId?: number; // when the scraper is used by traveler request page
   location?: string;
+  numGuests?: number;
 }) => Promise<ScrapedListing[]>;
 
 export type ScrapedListing = NewProperty & {
@@ -107,8 +108,8 @@ export const scrapeDirectListings = async (options: {
   numOfOffersInEachScraper?: number;
   requestNightlyPrice?: number;
   requestId?: number;
-  scrapersToExecute?: string[];
   location?: string;
+  numGuests?: number;
   latitude?: number;
   longitude?: number;
 }) => {
