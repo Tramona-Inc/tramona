@@ -6,15 +6,7 @@ import { z } from "zod";
 import axios from "axios";
 import { axiosWithRetry } from "@/server/server-utils";
 import { formatDateYearMonthDay, getNumNights } from "@/utils/utils";
-import { get } from "lodash";
-import {
-  PropertyType,
-  ALL_PROPERTY_TYPES,
-  ListingSiteName,
-} from "@/server/db/schema/common";
-import { prop } from "node_modules/cheerio/dist/esm/api/attributes";
-import { Code } from "lucide-react";
-import { Message } from "twilio/lib/twiml/MessagingResponse";
+import { PropertyType, ListingSiteName } from "@/server/db/schema/common";
 
 const taxoDataSchema = z.array(
   z.object({
@@ -77,6 +69,7 @@ const propertyTypeMapping: Record<string, PropertyType> = {
   Condo: "Condominium",
   Townhouse: "Townhouse",
   Suite: "Guest Suite",
+  Apts: "Apartment",
   Other: "Other",
 };
 
@@ -227,8 +220,6 @@ export const mapTaxodataToScrapedListing = async (
           propertyType: mapPropertyType(originalType),
           address: city, // cannot find detailed address in the website
           city: city,
-          latitude: parseFloat(property.latitude),
-          longitude: parseFloat(property.longitude),
           latLngPoint: {
             x: parseFloat(property.longitude),
             y: parseFloat(property.latitude),
@@ -273,6 +264,7 @@ export const redawningScraper: DirectSiteScraper = async ({
   checkIn,
   checkOut,
   numOfOffersInEachScraper,
+  requestNightlyPrice,
   location,
   latitude,
   longitude,
@@ -296,7 +288,7 @@ export const redawningScraper: DirectSiteScraper = async ({
     const taxoDataJsonString = scriptText!.substring(dataStart, dataEnd);
     const taxoDataJson = JSON.parse(taxoDataJsonString);
     const taxoDataOg = taxoDataSchema.parse(taxoDataJson);
-    taxodata.push(...taxoDataOg.slice(0, numOfOffersInEachScraper));
+    taxodata.push(...taxoDataOg);
   }
   const numOfNights = getNumNights(checkIn, checkOut);
   if (taxodata.length > 0) {
@@ -345,8 +337,32 @@ export const redawningScraper: DirectSiteScraper = async ({
     console.error("No available properties found");
   }
 
+  // dynamically expand the price range when fewer than 2 properties meet the criteria
+  let upperPercentage = 100;
+  let validListings;
+  do {
+    const lowerPrice = requestNightlyPrice! * numOfNights * 0.8;
+    const upperPrice =
+      requestNightlyPrice! * numOfNights * (upperPercentage / 100);
+
+    validListings = taxodata.filter((property) => {
+      return (
+        property.totalPrice &&
+        property.totalPrice >= lowerPrice &&
+        property.totalPrice <= upperPrice
+      );
+    });
+
+    if (validListings.length < 2 && upperPercentage <= 160) {
+      // Stop increasing if the upper limit reaches 160% of requestNightlyPrice
+      upperPercentage += 20;
+    }
+  } while (validListings.length < 2 && upperPercentage <= 160);
+
+  validListings = validListings.slice(0, numOfOffersInEachScraper);
+
   const listings = await mapTaxodataToScrapedListing(
-    taxodata,
+    validListings,
     checkIn,
     checkOut,
   );
