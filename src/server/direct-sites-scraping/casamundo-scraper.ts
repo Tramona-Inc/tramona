@@ -6,10 +6,9 @@ import {
 import { Review } from "@/server/db/schema";
 import axios from "axios";
 import { z } from "zod";
-import { PropertyType } from "@/server/db/schema/common";
+import { ALL_PROPERTY_TYPES, PropertyType } from "@/server/db/schema/common";
 import { ListingSiteName } from "@/server/db/schema/common";
 import { getNumNights } from "@/utils/utils";
-import { getCoordinates } from "../google-maps";
 
 const offerSchema = z.object({
   id: z.string(),
@@ -22,14 +21,15 @@ const offerSchema = z.object({
 type CasamundoOffer = z.infer<typeof offerSchema>;
 
 const mapPropertyType = (type: string): PropertyType => {
-  switch (type.toLowerCase()) {
-    case "house":
-      return "House";
-    case "accommodation":
-      return "Other";
-    default:
-      return "Other";
-  }
+  const normalizedType = type
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+  
+  if (ALL_PROPERTY_TYPES.includes(normalizedType as PropertyType)) {
+    return normalizedType as PropertyType;
+  } 
+  return "Other";
 };
 
 async function getLocationId(location: string): Promise<string> {
@@ -135,7 +135,6 @@ async function getOfferIds(
     const parsedOffers = offers.map((offer: any) => offerSchema.parse(offer));
 
     return parsedOffers;
-
   } catch (error) {
     console.error("Error fetching offer IDs:", error);
     throw error;
@@ -224,8 +223,10 @@ const enhancedPriceFetcher = async (
     children: "0",
     pets: "0",
     arrival: params.checkIn.toISOString().split("T")[0],
+    c: "USD",
     duration: params.duration.toString(),
     pricetype: "perNight",
+    country: "US",
     isExtrasTouched: "0",
     action: "pageOpen",
     pageType: "details",
@@ -245,7 +246,7 @@ const enhancedPriceFetcher = async (
   };
 
   const maxRetries = 3;
-  const retryDelay = 2000; // 2 seconds
+  const retryDelay = 2000;
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
@@ -396,7 +397,7 @@ async function fetchPropertyDetails(
       data.infoGroups
         .find((group) => group.name === "amenities")
         ?.list.map((item) => item.label) || [];
-    const imageUrls = data.images.map((img) => img.large) || [];
+    const imageUrls = data.images.map((img) => img.medium) || [];
 
     const countBeds = (rooms: any[]): number => {
       return rooms
@@ -423,8 +424,7 @@ async function fetchPropertyDetails(
       originalListingId: offerId,
       name: data.generalTitle ?? "",
       about: data.description?.unit?.content ?? "",
-      // propertyType: mapPropertyType(data.type),
-      propertyType: data.type,
+      propertyType: mapPropertyType(data.type),
       address: data.locationShorted ?? "",
       city: data.locationShorted ?? "",
       latLngPoint,
@@ -435,13 +435,13 @@ async function fetchPropertyDetails(
       amenities,
       otherAmenities: [],
       imageUrls,
-      originalListingUrl: url,
+      originalListingUrl: `https://www.casamundo.com/rental/${offerId}`,
       avgRating,
       numRatings,
       originalListingPlatform: "Casamundo" as ListingSiteName,
-      originalNightlyPrice: price.price, // in Euros at the moment
+      originalNightlyPrice: parseFloat((price.price / getNumNights(checkIn, checkOut)).toFixed(2)),
       reviews: reviews,
-      scrapeUrl: url,
+      scrapeUrl: `${url}?${params.toString()}`,
     };
   } catch (error) {
     console.error("Error fetching property details:", error);
@@ -522,7 +522,6 @@ export const casamundoScraper: DirectSiteScraper = async ({
     const scrapedListings: ScrapedListing[] = [];
 
     for (const offer of offerIds) {
-      // for (const offer of offerIds) {
       if (scrapedListings.length >= numOfOffersInEachScraper) {
         break;
       }
@@ -553,14 +552,43 @@ export const casamundoSubScraper: SubsequentScraper = async ({
   checkIn,
   checkOut,
 }) => {
-  // Implementation for subsequent scraping
-  // This would be similar to the main scraper, but focusing on a single listing
-  // You'll need to implement this based on how Casamundo's API handles individual property requests
-  return {
-    isAvailableOnOriginalSite: false,
-    availabilityCheckedAt: new Date(),
-  };
+  const url = new URL(scrapeUrl);
+  const numGuests = parseInt(url.searchParams.get('adults') ?? '', 10);
+  const numNights = getNumNights(checkIn, checkOut);
+
+  try {
+    const isAvailable = await checkAvailability(
+      originalListingId,
+      checkIn,
+      checkOut,
+    );
+
+    const price = await enhancedPriceFetcher({
+      offerId: originalListingId,
+      numGuests,
+      checkIn: checkIn,
+      duration: numNights,
+    });
+
+    if (!isAvailable || price.price === -1) {
+      return {
+        isAvailableOnOriginalSite: false,
+        availabilityCheckedAt: new Date(),
+      };
+    }
+
+    return {
+      isAvailableOnOriginalSite: true,
+      availabilityCheckedAt: new Date(),
+      originalNightlyPrice: parseFloat((price.price / numNights).toFixed(2)),
+    };
+  } catch (error) {
+    console.error("Error in casamundoSubScraper");
+    return {
+      isAvailableOnOriginalSite: false,
+      availabilityCheckedAt: new Date(),
+    };
+  }
 };
 
-
-// scrapeUrl (subscraper stuff should refresh availability and price), convert price to USD, format text to not have html tags, map property types if necessary, type errors
+// format text to not have html tags, type errors

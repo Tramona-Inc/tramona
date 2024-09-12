@@ -4,7 +4,7 @@ import {
   cbIslandVacationsScraper,
   cbIslandVacationsSubScraper,
 } from "./hawaii-scraper";
-import { casamundoScraper } from "./casamundo-scraper";
+import { casamundoScraper, casamundoSubScraper } from "./casamundo-scraper";
 import { properties } from "../db/schema";
 import {
   NewOffer,
@@ -334,6 +334,35 @@ export const subsequentScrape = async (options: { offerIds: number[] }) => {
               .set(updateData)
               .where(eq(offers.id, offerId));
             savedResult.push(subScrapedResultCBIsland);
+          }
+          break;
+
+        case "Casamundo":
+          const subScrapedResultCasamundo = await casamundoSubScraper({
+            originalListingId: offer.property.originalListingId,
+            scrapeUrl: offer.scrapeUrl,
+            checkIn: offer.checkIn,
+            checkOut: offer.checkOut,
+          });
+          if (subScrapedResultCasamundo) {
+            const updateData: Partial<Offer> = {
+              isAvailableOnOriginalSite:
+                subScrapedResultCasamundo.isAvailableOnOriginalSite,
+              availabilityCheckedAt:
+                subScrapedResultCasamundo.availabilityCheckedAt,
+            };
+
+            if (subScrapedResultCasamundo.originalNightlyPrice) {
+              updateData.totalPrice =
+                subScrapedResultCasamundo.originalNightlyPrice *
+                getNumNights(offer.checkIn, offer.checkOut);
+            }
+
+            await trx
+              .update(offers)
+              .set(updateData)
+              .where(eq(offers.id, offerId));
+            savedResult.push(subScrapedResultCasamundo);
           }
           break;
       }
