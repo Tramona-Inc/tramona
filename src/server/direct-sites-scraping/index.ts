@@ -75,32 +75,6 @@ const filterNewPropertyFields = (listing: ScrapedListing): NewProperty => {
   ) as unknown as NewProperty;
 };
 
-const pickScrapersByLocation = (
-  lat: number,
-  lng: number,
-  radius: number,
-): { scrapersList: string[]; formattedLocation: string | null } => {
-  const azScraperLocations = [
-    { name: "Lake Havasu", lat: 34.4839, lng: -114.3225 },
-    { name: "Parker Strip", lat: 34.2983, lng: -114.1439 },
-  ];
-
-  for (const location of azScraperLocations) {
-    const distance = haversineDistance(lat, lng, location.lat, location.lng);
-    if (distance <= radius) {
-      return {
-        scrapersList: ["arizonaScraper"],
-        formattedLocation: location.name,
-      };
-    }
-  }
-
-  // add if statements for other locations here
-
-  // TODO: default scrapersList
-  return { scrapersList: [], formattedLocation: null };
-};
-
 // handle the scraped properties and reviews
 export const scrapeDirectListings = async (options: {
   checkIn: Date;
