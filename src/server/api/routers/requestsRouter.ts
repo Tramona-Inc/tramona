@@ -541,7 +541,7 @@ export async function handleRequestSubmission(
     }
   });
 
-  // Messaging based on user preferences or environment
+  // Messaging based on user preferences or environment.
   const name = user.name ?? user.email;
   const pricePerNight =
     input.maxTotalPrice / getNumNights(input.checkIn, input.checkOut);
