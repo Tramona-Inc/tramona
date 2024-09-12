@@ -51,6 +51,7 @@ import { VerificationProvider } from "../_utils/VerificationContext";
 import IdentityModal from "../_utils/IdentityModal";
 import { InferQueryModel } from "@/server/db";
 import { Property } from "@/server/db/schema";
+import ChatOfferButton from "./ChatOfferButton";
 
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 
@@ -250,8 +251,8 @@ export default function PropertyPage({
             </div>
           </section>
 
-          <section className="border-t pt-4">
-            <div className="flex items-center gap-2">
+          <section className="flex-justify-between mx-1 flex w-full border-t pt-4">
+            <div className="flex w-5/6 items-center gap-2">
               <UserAvatar
                 name={hostName}
                 email={property.host?.email}
@@ -262,6 +263,13 @@ export default function PropertyPage({
                 <p className="text-lg font-medium">{hostName}</p>
               </div>
             </div>
+            {offer && (
+              <ChatOfferButton
+                offerId={offer.id.toString()}
+                offerHostId={offer.property.hostId ?? null}
+                offerPropertyName={offer.property.name}
+              />
+            )}
           </section>
 
           <section>

@@ -5,7 +5,7 @@ import { Button } from "../ui/button";
 import { formatDateRange, getDaysUntilTrip } from "@/utils/utils";
 import Image from "next/image";
 import UserAvatar from "../_common/UserAvatar";
-import { useChatWithHost } from "@/utils/useChatWithHost";
+import { useChatWithHost } from "@/utils/messaging/useChatWithHost";
 import { type TripCardDetails } from "@/pages/my-trips";
 import { api } from "@/utils/api";
 
