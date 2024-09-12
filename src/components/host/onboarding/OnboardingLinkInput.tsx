@@ -39,6 +39,8 @@ export default function OnboardingLinkInput({ editing = false }) {
     (state) => state.setOriginalListingPlatform,
   );
 
+  const setAirbnbUrl = useHostOnboarding((state) => state.setAirbnbUrl);
+
   const curUrl =
     getOriginalListing({
       originalListingId: originalListingId ?? null,
@@ -53,9 +55,11 @@ export default function OnboardingLinkInput({ editing = false }) {
   });
 
   const onSubmit = form.handleSubmit(async ({ url }) => {
+    console.log(url);
     const { Site, listingId } = parseListingUrl(url); // site will always be airbnb for now
     setOriginalListingId(listingId);
     setOriginalListingPlatform(Site.siteName);
+    setAirbnbUrl(url);
   });
 
   const handleError = () => {

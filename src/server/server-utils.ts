@@ -37,6 +37,8 @@ import {
   users,
   hostReferralDiscounts,
   referralCodes,
+  requests,
+  propertyStatusEnum,
 } from "./db/schema";
 import { getCity, getCoordinates } from "./google-maps";
 import axios from "axios";
@@ -45,6 +47,7 @@ import * as cheerio from "cheerio";
 import { sendSlackMessage } from "./slack";
 import { HOST_MARKUP, TRAVELER__MARKUP } from "@/utils/constants";
 import { HostRequestsPageData } from "./api/routers/propertiesRouter";
+import { property } from "lodash";
 
 export const axiosWithRetry = axios.create();
 
@@ -289,13 +292,12 @@ export async function addProperty({
   userEmail?: string;
   hostTeamId?: number | null;
   isAdmin: boolean;
-  property: Omit<NewProperty, "id" | "city" | "latitude" | "longitude"> & {
-    latitude?: number;
-    longitude?: number;
+  property: Omit<NewProperty, "id" | "city" | "latLngPoint"> & {
+    latLngPoint?: { x: number; y: number };
   };
 }) {
-  let lat = property.latitude;
-  let lng = property.longitude;
+  let lat = property.latLngPoint?.y;
+  let lng = property.latLngPoint?.x;
 
   if (!lat || !lng) {
     const { location } = await getCoordinates(property.address);
@@ -310,15 +312,15 @@ export async function addProperty({
     .values({
       ...property,
       hostId: userId,
-      latitude: lat,
-      longitude: lng,
+      // latitude: lat,
+      // longitude: lng,
       city: city,
       latLngPoint: sql`ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)`,
       hostTeamId,
     })
-    .returning({ id: properties.id, latLngPoint: properties.latLngPoint });
+    .returning({ id: properties.id });
 
-  waitUntil(processRequests(insertedProperty!));
+  // waitUntil(processRequests(insertedProperty!));
 
   await sendSlackMessage({
     isProductionOnly: true,
@@ -331,36 +333,46 @@ export async function addProperty({
   return insertedProperty!.id;
 }
 
-async function processRequests(
-  insertedProperty: Pick<Property, "id" | "latLngPoint">,
-) {
-  const allRequests = await db.query.requests.findMany({});
+// async function processRequests(
+//   insertedProperty: Pick<Property, "id" | "latLngPoint" | "priceRestriction">,
+// ) {
 
-  for (const request of allRequests) {
-    const matchingProperties = await getPropertiesForRequest({
-      id: request.id,
-      lat: request.lat,
-      lng: request.lng,
-      radius: request.radius,
-      location: request.location,
-      checkIn: request.checkIn,
-      checkOut: request.checkOut,
-      maxTotalPrice: request.maxTotalPrice,
-      latLngPoint: request.latLngPoint,
-      propertyLatLngPoint: insertedProperty.latLngPoint,
-    });
+//   const allRequestsForProperty = await getRequestsForPropert({
+//     id: insertedProperty.id,
+//     latLngPoint: insertedProperty.latLngPoint,
+//     priceRestriction: insertedProperty.priceRestriction,
+//   });
+//   // const allRequests = await db.query.requests.findMany({});
+//   console.log("allRequestsForProperty: ");
+//   for (const request of allRequestsForProperty) {
+//     console.log("request: ", request);
+//   }
 
-    console.log("properties:", matchingProperties);
-    const propertyIds = matchingProperties.map((property) => property.id);
+// for (const request of allRequests) {
+//   const matchingProperties = await getPropertiesForRequest({
+//     id: request.id,
+//     // lat: request.lat,
+//     // lng: request.lng,
+//     radius: request.radius,
+//     location: request.location,
+//     checkIn: request.checkIn,
+//     checkOut: request.checkOut,
+//     maxTotalPrice: request.maxTotalPrice,
+//     latLngPoint: request.latLngPoint,
+//     // propertyLatLngPoint: insertedProperty.latLngPoint,
+//   });
 
-    if (propertyIds.includes(insertedProperty.id)) {
-      await db.insert(requestsToProperties).values({
-        requestId: request.id,
-        propertyId: insertedProperty.id,
-      });
-    }
-  }
-}
+// console.log("properties:", allRequestsForProperty);
+// const propertyIds = request.map((property) => property.id);
+
+// if (propertyIds.includes(insertedProperty.id)) {
+//   await db.insert(requestsToProperties).values({
+//     requestId: request.id,
+//     propertyId: insertedProperty.id,
+//   });
+// }
+//}
+// }
 
 export async function sendTextToHost(
   matchingProperties: { id: number; hostId: string | null }[],
@@ -405,67 +417,193 @@ export async function sendTextToHost(
   );
 }
 
+export async function getRequestsForProperties(
+  properties: Property[],
+  //{
+  // id: number;
+  // propertyStaus: string;
+  // latLngPoint: { x: number; y: number };
+  // priceRestriction: number | null;
+  //}
+  //[],
+  { tx = db } = {},
+) {
+  const requestIsNearProperties: SQL[] = [];
+  // let priceRestrictionsSQL: SQL[] | undefined[] = [sql`FALSE`];
+  const propertyToRequestMap: {
+    property: Property;
+    request: Request & { traveler: Pick<User, "name" | "image"> };
+  }[] = [];
+
+  for (const property of properties) {
+    const requestIsNearProperty = sql`
+      ST_DWithin(
+        ST_Transform(requests.lat_lng_point, 3857),
+        ST_Transform(ST_SetSRID(ST_MakePoint(${property.latLngPoint.x}, ${property.latLngPoint.y}), 4326), 3857),
+        requests.radius * 1609.34
+      )
+    `;
+    //  const numberOfNights = sql`DATE_PART('day', requests.check_out::timestamp - requests.check_in::timestamp)`;
+
+    //   const priceRestrictionSQL = sql`
+    //     ${property.priceRestriction} IS NULL OR
+    //     (
+    //       requests.max_total_price IS NOT NULL AND
+    //       ${property.priceRestriction} >= (requests.max_total_price / DATE_PART('day', requests.check_out::timestamp - requests.check_in::timestamp)) * 1.15
+    //     )
+    // `;
+    requestIsNearProperties.push(requestIsNearProperty);
+
+    const requestsForProperty = await tx.query.requests.findMany({
+      where: and(requestIsNearProperty, gte(requests.checkIn, new Date())),
+      with: {
+        madeByGroup: {
+          with: { owner: { columns: { image: true, name: true } } },
+        },
+      },
+    });
+    //columns: { id: true, checkIn: true, checkOut: true, maxTotalPrice: true, location: true },
+
+    // Store the matched requests along with the property
+    for (const request of requestsForProperty) {
+      const traveler = {
+        name: request.madeByGroup.owner.name,
+        image: request.madeByGroup.owner.image,
+      };
+      propertyToRequestMap.push({
+        property,
+        request: {
+          ...request,
+          traveler, // Include traveler info
+        },
+      });
+    }
+    // priceRestrictionsSQL.push(priceRestrictionSQL);
+  }
+  return propertyToRequestMap;
+}
+
+// export async function getRequestsForProperties(
+//   properties: {
+//     id: number;
+//     propertyStaus: string;
+//     latLngPoint: { x: number; y: number };
+//     priceRestriction: number | null;
+//   }[],
+//   { tx = db } = {},
+// ) {
+//   const requestIsNearProperties: SQL[] = [];
+//   // let priceRestrictionsSQL: SQL[] | undefined[] = [sql`FALSE`];
+
+//   for (const property of properties) {
+//   const requestIsNearProperty = sql`
+//       ST_DWithin(
+//         ST_Transform(requests.lat_lng_point, 3857),
+//         ST_Transform(ST_SetSRID(ST_MakePoint(${property.latLngPoint.x}, ${property.latLngPoint.y}), 4326), 3857),
+//         requests.radius * 1609.34
+//       )
+//     `;
+// //  const numberOfNights = sql`DATE_PART('day', requests.check_out::timestamp - requests.check_in::timestamp)`;
+
+// //   const priceRestrictionSQL = sql`
+// //     ${property.priceRestriction} IS NULL OR
+// //     (
+// //       requests.max_total_price IS NOT NULL AND
+// //       ${property.priceRestriction} >= (requests.max_total_price / DATE_PART('day', requests.check_out::timestamp - requests.check_in::timestamp)) * 1.15
+// //     )
+// // `;
+//     requestIsNearProperties.push(requestIsNearProperty);
+//     // priceRestrictionsSQL.push(priceRestrictionSQL);
+//   }
+
+//   const result = await tx.query.requests.findMany({
+//     where: and(
+//       or(...requestIsNearProperties),  //or requestIsNearProperties
+//       gte(requests.checkIn, new Date()),
+//       //TO DO: FIX ERROR WITH price restrictionSQL
+//       // priceRestrictionSQL,
+
+//       // or(
+//       //   isNull(property.priceRestriction), // Include requests with no max price restriction
+//       //   and(
+//       //     isNotNull(property.priceRestriction),
+//       //     gte(
+//       //       property.priceRestriction,
+//       //       )
+//       //     )
+//       //   )
+//       // )
+
+//     ),
+//     //columns: { id: true, checkIn: true, checkOut: true, maxTotalPrice: true, location: true },
+
+//   });
+
+//   return result;
+// }
+
 export async function getPropertiesForRequest(
   req: {
-    lat?: number | null;
-    lng?: number | null;
-    radius?: number | null;
+    // lat: number;
+    // lng: number;
+    radius: number;
     location: string;
     checkIn: Date;
     checkOut: Date;
     maxTotalPrice: number;
     id: number;
-    latLngPoint?: { x: number; y: number } | null;
-    propertyLatLngPoint?: Property["latLngPoint"];
+    latLngPoint: { x: number; y: number };
+    // propertyLatLngPoint?: Property["latLngPoint"];
   },
   { tx = db } = {},
 ) {
   let propertyIsNearRequest: SQL | undefined = sql`FALSE`;
 
   //WAITING FOR MAP PIN TO MERGE IN TO TEST THIS
-  if (req.lat != null && req.lng != null && req.radius != null) {
-    // Convert radius from miles to degrees (approximate)
-    const radiusDegrees = req.radius / 69;
+  // if (req.lat != null && req.lng != null && req.radius != null) {
+  // Convert radius from miles to degrees (approximate)
+  const radiusInDegrees = req.radius * 1609.34;
 
-    propertyIsNearRequest = and(
-      gte(properties.latitude, req.lat - radiusDegrees),
-      lte(properties.latitude, req.lat + radiusDegrees),
-      gte(properties.longitude, req.lng - radiusDegrees),
-      lte(properties.longitude, req.lng + radiusDegrees),
-    );
-  } else {
-    const coordinates = await getCoordinates(req.location);
-    if (coordinates.bounds) {
-      console.log(
-        "bounds",
-        coordinates.bounds,
-        req.location,
-        req.maxTotalPrice,
-      );
-      const { northeast, southwest } = coordinates.bounds;
-      propertyIsNearRequest = sql`
-        ST_Within(
-          properties.lat_lng_point,
-          ST_MakeEnvelope(
-            ${southwest.lng}, ${southwest.lat},
-            ${northeast.lng}, ${northeast.lat},
-            4326
-          )
-        )
-      `;
-    } else if (coordinates.location) {
-      const radiusInMiles = 10;
-      const radiusInDegrees = radiusInMiles / 69.0;
+  propertyIsNearRequest = sql`
+    ST_DWithin(
+      ST_Transform(properties.lat_lng_point, 3857),
+      ST_Transform(ST_SetSRID(ST_MakePoint(${req.latLngPoint.x}, ${req.latLngPoint.y}), 4326), 3857),
+      ${radiusInDegrees}
+    )
+  `;
+  // } else {
+  //   const coordinates = await getCoordinates(req.location);
+  //   if (coordinates.bounds) {
+  //     console.log(
+  //       "bounds",
+  //       coordinates.bounds,
+  //       req.location,
+  //       req.maxTotalPrice,
+  //     );
+  //     const { northeast, southwest } = coordinates.bounds;
+  //     propertyIsNearRequest = sql`
+  //       ST_Within(
+  //         properties.lat_lng_point,
+  //         ST_MakeEnvelope(
+  //           ${southwest.lng}, ${southwest.lat},
+  //           ${northeast.lng}, ${northeast.lat},
+  //           4326
+  //         )
+  //       )
+  //     `;
+  //   } else if (coordinates.location) {
+  //     const radiusInMiles = 10;
+  //     const radiusInDegrees = radiusInMiles / 69.0;
 
-      propertyIsNearRequest = sql`
-        ST_DWithin(
-          properties.lat_lng_point,
-          ST_SetSRID(ST_MakePoint(${coordinates.location.lng}, ${coordinates.location.lat}), 4326),
-          ${radiusInDegrees}
-        )
-      `;
-    }
-  }
+  //     propertyIsNearRequest = sql`
+  //       ST_DWithin(
+  //         properties.lat_lng_point,
+  //         ST_SetSRID(ST_MakePoint(${coordinates.location.lng}, ${coordinates.location.lat}), 4326),
+  //         ${radiusInDegrees}
+  //       )
+  //     `;
+  //   }
+  // }
 
   const propertyisAvailable = notExists(
     tx
@@ -663,4 +801,25 @@ export function createNormalDistributionDates(
   }
 
   return dateRanges;
+}
+
+export function haversineDistance(
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number,
+) {
+  const toRadians = (degrees: number) => degrees * (Math.PI / 180);
+
+  const R = 3958.8; // Radius of the Earth in kilometers
+  const dLat = toRadians(lat2 - lat1);
+  const dLon = toRadians(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRadians(lat1)) *
+      Math.cos(toRadians(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c; // Distance in kilometers
 }

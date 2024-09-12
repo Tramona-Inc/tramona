@@ -1,3 +1,9 @@
+import { db } from "../db";
+import {
+  cbIslandVacationsScraper,
+  cbIslandVacationsSubScraper,
+} from "./hawaii-scraper";
+import { properties } from "../db/schema";
 import {
   NewOffer,
   NewProperty,
@@ -7,20 +13,28 @@ import {
   reviews,
 } from "../db/schema";
 import { arizonaScraper, arizonaSubScraper } from "./integrity-arizona";
-import { db } from "../db";
-import { properties } from "../db/schema";
-import { eq, and } from "drizzle-orm";
-import { getNumNights } from "@/utils/utils";
-import { cleanbnbSubScraper } from "./cleanbnb-scrape";
+
+import { getCoordinates } from "../google-maps";
+import { eq, and, sql } from "drizzle-orm";
+import {
+  createRandomMarkupEightToFourteenPercent,
+  getNumNights,
+} from "@/utils/utils";
+import { DIRECTLISTINGMARKUP } from "@/utils/constants";
+import { haversineDistance } from "@/server/server-utils";
+import { cleanbnbScraper, cleanbnbSubScraper } from "./cleanbnb-scrape";
 
 export type DirectSiteScraper = (options: {
   checkIn: Date;
   checkOut: Date;
   numOfOffersInEachScraper?: number;
+  requestNightlyPrice?: number; // when the scraper is used by traveler request page
+  requestId?: number; // when the scraper is used by traveler request page
+  location?: string;
   numGuests?: number;
 }) => Promise<ScrapedListing[]>;
 
-export type ScrapedListing = NewProperty & {
+export type ScrapedListing = Omit<NewProperty, 'latLngPoint'> & {
   originalListingUrl: string; // enforce that its non-null
   reviews: NewReview[];
   scrapeUrl: string;
@@ -34,15 +48,21 @@ export type SubsequentScraper = (options: {
 }) => Promise<SubScrapedResult>;
 
 export type SubScrapedResult = ({
-    originalNightlyPrice?: number, // when the offer is avaible on the original site, also refresh the price
-    isAvailableOnOriginalSite: boolean,
-    availabilityCheckedAt: Date,
+  originalNightlyPrice?: number, // when the offer is avaible on the original site, also refresh the price
+  isAvailableOnOriginalSite: boolean,
+  availabilityCheckedAt: Date,
 });
 
-export const directSiteScrapers: DirectSiteScraper[] = [
+export type NamedDirectSiteScraper = {
+  name: string;
+  scraper: DirectSiteScraper;
+};
+
+export const directSiteScrapers: NamedDirectSiteScraper[] = [
   // add more scrapers here
-  // cleanbnbScraper,
-  arizonaScraper,
+  { name: 'cleanbnbScraper', scraper: cleanbnbScraper },
+  { name: "arizonaScraper", scraper: arizonaScraper },
+  { name: "cbIslandVacationsScraper", scraper: cbIslandVacationsScraper },
 ];
 
 // Helper function to filter out fields not in NewProperty
@@ -50,7 +70,33 @@ const filterNewPropertyFields = (listing: ScrapedListing): NewProperty => {
   const newPropertyKeys = Object.keys(properties).filter((key) => key !== "id");
   return Object.fromEntries(
     Object.entries(listing).filter(([key]) => newPropertyKeys.includes(key)),
-  ) as NewProperty;
+  ) as unknown as NewProperty;
+};
+
+const pickScrapersByLocation = (
+  lat: number,
+  lng: number,
+  radius: number,
+): { scrapersList: string[]; formattedLocation: string | null } => {
+  const azScraperLocations = [
+    { name: "Lake Havasu", lat: 34.4839, lng: -114.3225 },
+    { name: "Parker Strip", lat: 34.2983, lng: -114.1439 },
+  ];
+
+  for (const location of azScraperLocations) {
+    const distance = haversineDistance(lat, lng, location.lat, location.lng);
+    if (distance <= radius) {
+      return {
+        scrapersList: ["arizonaScraper"],
+        formattedLocation: location.name,
+      };
+    }
+  }
+
+  // add if statements for other locations here
+
+  // TODO: default scrapersList
+  return { scrapersList: [], formattedLocation: null };
 };
 
 // handle the scraped properties and reviews
@@ -58,11 +104,60 @@ export const scrapeDirectListings = async (options: {
   checkIn: Date;
   checkOut: Date;
   numOfOffersInEachScraper?: number;
+  requestNightlyPrice?: number;
+  requestId?: number;
+  scrapersToExecute?: string[];
+  location?: string;
+  latitude?: number;
+  longitude?: number;
 }) => {
+  // Create a new options object excluding `scrapersToExecute`
+  const { scrapersToExecute, ...scraperOptions } = options;
+
+  let selectedScrapers: NamedDirectSiteScraper[] = [];
+  if (scrapersToExecute && scrapersToExecute.length > 0) {
+    selectedScrapers = directSiteScrapers.filter((s) =>
+      scrapersToExecute.includes(s.name),
+    );
+  } else {
+    // use specific scrapers based on request location
+    if (options.latitude && options.longitude) {
+      const { scrapersList, formattedLocation } = pickScrapersByLocation(
+        options.latitude,
+        options.longitude,
+        25, // search radius: 25 miles
+      );
+      if (scrapersList.length > 0) {
+        // selectedScrapers is a subset of directSiteScrapers that its name appeared in scrapersList
+        selectedScrapers = directSiteScrapers.filter((scraper) =>
+          scrapersList.includes(scraper.name),
+        );
+        if (formattedLocation) {
+          scraperOptions.location = formattedLocation;
+        }
+      }
+    } else {
+      console.error(
+        "Latitude and longitude are required for triggering location-based scraping",
+      );
+    }
+    // use default scrapers if no specific scrapers are provided or request location doesn't match any scraper
+    if (selectedScrapers.length === 0) {
+      // TODO: add default scrapers here
+      return;
+    }
+  }
   const allListings = await Promise.all(
-    directSiteScrapers.map((scraper) => scraper(options)),
+    selectedScrapers.map((s) => s.scraper(scraperOptions)),
   );
-  const listings = allListings.flat();
+
+  const listings = allListings
+    .flat()
+    .sort(
+      (a, b) => (a.originalNightlyPrice ?? 0) - (b.originalNightlyPrice ?? 0),
+    )
+    .slice(0, 10); // if the number of listings is less than 10, slice will return the whole array
+
   if (listings.length > 0) {
     await db.transaction(async (trx) => {
       // for each listing, insert the property and reviews OR update them if they already exist
@@ -78,11 +173,21 @@ export const scrapeDirectListings = async (options: {
         const existingOriginalPropertyId =
           existingOriginalPropertyIdList[0]?.id;
 
+        let formattedlatLngPoint = null;
+        // if (listing.latLngPoint?.x && listing.latLngPoint.y) {
+        //   formattedlatLngPoint = sql`ST_SetSRID(ST_MakePoint(${listing.latLngPoint.x}, ${listing.latLngPoint.y}), 4326)`;
+        // } else {
+        const { location } = await getCoordinates(listing.address);
+        if (!location)
+          throw new Error("Could not get coordinates for address");
+        formattedlatLngPoint = sql`ST_SetSRID(ST_MakePoint(${location.lng}, ${location.lat}), 4326)`;
+        //}
+
         const newPropertyListing = filterNewPropertyFields(listing);
         if (existingOriginalPropertyId) {
           const tramonaProperty = await trx
             .update(properties)
-            .set({ ...newPropertyListing }) // Only keeps fields that are defined in the NewProperty schema
+            .set({ ...newPropertyListing, latLngPoint: formattedlatLngPoint }) // Only keeps fields that are defined in the NewProperty schema
             .where(eq(properties.originalListingId, existingOriginalPropertyId))
             .returning({ id: properties.id });
 
@@ -108,6 +213,9 @@ export const scrapeDirectListings = async (options: {
                 eq(offers.propertyId, tramonaPropertyId),
                 eq(offers.checkIn, options.checkIn),
                 eq(offers.checkOut, options.checkOut),
+                options.requestId
+                  ? eq(offers.requestId, options.requestId)
+                  : undefined,
               ),
             );
           if (existingOffers[0]) {
@@ -115,25 +223,45 @@ export const scrapeDirectListings = async (options: {
           }
 
           if (!existingOffers[0]?.id) {
+            if (!listing.originalNightlyPrice) {
+              console.log(
+                "originalNightlyPrice is not available for this listing: ",
+                listing.originalListingUrl,
+              );
+              continue;
+            }
             const originalTotalPrice =
-              listing.originalNightlyPrice ??
-              0 * getNumNights(options.checkIn, options.checkOut);
+              listing.originalNightlyPrice *
+              getNumNights(options.checkIn, options.checkOut);
             const newOffer: NewOffer = {
               propertyId: tramonaPropertyId,
               checkIn: options.checkIn,
               checkOut: options.checkOut,
               totalPrice: originalTotalPrice,
               hostPayout: originalTotalPrice,
-              travelerOfferedPrice: originalTotalPrice,
+              travelerOfferedPrice: Math.ceil(
+                originalTotalPrice * DIRECTLISTINGMARKUP,
+              ),
               scrapeUrl: listing.scrapeUrl,
               isAvailableOnOriginalSite: true,
               availabilityCheckedAt: new Date(),
+              randomDirectListingDiscount:
+                createRandomMarkupEightToFourteenPercent(),
+              ...(options.requestId && { requestId: options.requestId }),
             };
-            const newOfferId = await trx.insert(offers).values(newOffer).returning({id: offers.id})
-            console.log("newOfferIdReturned: ", newOfferId);
+            const newOfferId = await trx
+              .insert(offers)
+              .values(newOffer)
+              .returning({ id: offers.id });
           }
         } else {
-          const tramonaProperty = await trx.insert(properties).values(newPropertyListing).returning({id: properties.id});
+          const tramonaProperty = await trx
+            .insert(properties)
+            .values({
+              ...newPropertyListing,
+              latLngPoint: formattedlatLngPoint,
+            })
+            .returning({ id: properties.id });
 
           const newPropertyId = tramonaProperty[0]!.id;
 
@@ -154,15 +282,23 @@ export const scrapeDirectListings = async (options: {
                 eq(offers.propertyId, newPropertyId),
                 eq(offers.checkIn, options.checkIn),
                 eq(offers.checkOut, options.checkOut),
+                options.requestId
+                  ? eq(offers.requestId, options.requestId)
+                  : undefined,
               ),
             );
-          if (existingOffers[0]) {
-            console.log("existingOffer, offerId: ", existingOffers[0]?.id);
-          }
+
           if (!existingOffers[0]?.id) {
+            if (!listing.originalNightlyPrice) {
+              console.log(
+                "originalNightlyPrice is not available for this listing: ",
+                listing.originalListingUrl,
+              );
+              continue;
+            }
             const originalTotalPrice =
-              listing.originalNightlyPrice ??
-              0 * getNumNights(options.checkIn, options.checkOut);
+              listing.originalNightlyPrice *
+              getNumNights(options.checkIn, options.checkOut);
             const newOffer: NewOffer = {
               propertyId: newPropertyId,
               checkIn: options.checkIn,
@@ -173,15 +309,17 @@ export const scrapeDirectListings = async (options: {
               scrapeUrl: listing.scrapeUrl,
               isAvailableOnOriginalSite: true,
               availabilityCheckedAt: new Date(),
+              ...(options.requestId && { requestId: options.requestId }),
             };
-            const newOfferId = await trx.insert(offers).values(newOffer).returning({id: offers.id})
-            console.log("newOfferIdReturned: ", newOfferId);
+            const newOfferId = await trx
+              .insert(offers)
+              .values(newOffer)
+              .returning({ id: offers.id });
           }
         }
       }
     });
   }
-
   return listings;
 };
 
@@ -197,7 +335,7 @@ export const subsequentScrape = async (options: { offerIds: number[] }) => {
         },
       });
 
-      if(!offer?.property.originalListingId || !offer.scrapeUrl) {continue;} // skip the non-scraped offers
+      if (!offer?.property.originalListingId || !offer.scrapeUrl) { continue; } // skip the non-scraped offers
 
       switch (offer.property.originalListingPlatform) {
         case "IntegrityArizona":
@@ -207,22 +345,21 @@ export const subsequentScrape = async (options: { offerIds: number[] }) => {
             checkIn: offer.checkIn,
             checkOut: offer.checkOut,
           });
-          if (subScrapedResult) {
-          const updateData: Partial<Offer> = {
+          const updateIntegrityArizonaData: Partial<Offer> = {
             isAvailableOnOriginalSite: subScrapedResult.isAvailableOnOriginalSite,
             availabilityCheckedAt: subScrapedResult.availabilityCheckedAt,
           };
 
           if (subScrapedResult.originalNightlyPrice) {
-            updateData.totalPrice = subScrapedResult.originalNightlyPrice * getNumNights(offer.checkIn, offer.checkOut);
+            updateIntegrityArizonaData.totalPrice = subScrapedResult.originalNightlyPrice * getNumNights(offer.checkIn, offer.checkOut);
           }
 
           await trx.update(offers)
-            .set(updateData)
+            .set(updateIntegrityArizonaData)
             .where(eq(offers.id, offerId));
           savedResult.push(subScrapedResult);
-        }
-        break;
+
+          break;
         // TODO add other scraping sites here
         case "Cleanbnb":
           const cleanbnbSubResult = await cleanbnbSubScraper({
@@ -231,21 +368,48 @@ export const subsequentScrape = async (options: { offerIds: number[] }) => {
             checkIn: offer.checkIn,
             checkOut: offer.checkOut,
           });
-          if (cleanbnbSubResult) {
-            const updateData: Partial<Offer> = {
-              isAvailableOnOriginalSite: cleanbnbSubResult.isAvailableOnOriginalSite,
-              availabilityCheckedAt: cleanbnbSubResult.availabilityCheckedAt,
-            };
+          const updateCleanbnbData: Partial<Offer> = {
+            isAvailableOnOriginalSite: cleanbnbSubResult.isAvailableOnOriginalSite,
+            availabilityCheckedAt: cleanbnbSubResult.availabilityCheckedAt,
+          };
 
-            if (cleanbnbSubResult.originalNightlyPrice) {
-              updateData.totalPrice = cleanbnbSubResult.originalNightlyPrice * getNumNights(offer.checkIn, offer.checkOut);
-            }
-
-            await trx.update(offers)
-              .set(updateData)
-              .where(eq(offers.id, offerId));
-            savedResult.push(cleanbnbSubResult);
+          if (cleanbnbSubResult.originalNightlyPrice) {
+            updateCleanbnbData.totalPrice = cleanbnbSubResult.originalNightlyPrice * getNumNights(offer.checkIn, offer.checkOut);
           }
+
+          await trx.update(offers)
+            .set(updateCleanbnbData)
+            .where(eq(offers.id, offerId));
+          savedResult.push(cleanbnbSubResult);
+
+          break;
+        // TODO add other scraping sites here
+        case "CB Island Vacations":
+          const subScrapedResultCBIsland = await cbIslandVacationsSubScraper({
+            originalListingId: offer.property.originalListingId,
+            scrapeUrl: offer.scrapeUrl,
+            checkIn: offer.checkIn,
+            checkOut: offer.checkOut,
+          });
+          const updateCBIslandVacationsData: Partial<Offer> = {
+            isAvailableOnOriginalSite:
+              subScrapedResultCBIsland.isAvailableOnOriginalSite,
+            availabilityCheckedAt:
+              subScrapedResultCBIsland.availabilityCheckedAt,
+          };
+
+          if (subScrapedResultCBIsland.originalNightlyPrice) {
+            updateCBIslandVacationsData.totalPrice =
+              subScrapedResultCBIsland.originalNightlyPrice *
+              getNumNights(offer.checkIn, offer.checkOut);
+          }
+
+          await trx
+            .update(offers)
+            .set(updateCBIslandVacationsData)
+            .where(eq(offers.id, offerId));
+          savedResult.push(subScrapedResultCBIsland);
+
           break;
       }
     }

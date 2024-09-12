@@ -272,7 +272,7 @@ const getAllProperties = async (baseUrl: string, checkInDate: string, checkOutDa
 
               if (data.url.split("?")[0]?.startsWith("/")) {
                 const property: PropertyInfo = {
-                  id: id  ?? "",
+                  id: id ?? "",
                   url: url,
                   city: data.city || "",
                   address: data.address || "",
@@ -314,8 +314,8 @@ export const cleanbnbScraper: DirectSiteScraper = async ({
 
   const res: Awaited<ReturnType<DirectSiteScraper>> = [];
   const baseUrl = numGuests
-  ? `https://www.cleanbnb.house/it/appartamenti?guests_rooms=${encodeURIComponent(`${numGuests},0;`)}`
-  : "https://www.cleanbnb.house/it/appartamenti";
+    ? `https://www.cleanbnb.house/it/appartamenti?guests_rooms=${encodeURIComponent(`${numGuests},0;`)}`
+    : "https://www.cleanbnb.house/it/appartamenti";
 
   const properties = await getAllProperties(baseUrl, checkInDate, checkOutDate);
 
@@ -404,8 +404,8 @@ export const cleanbnbScraper: DirectSiteScraper = async ({
     const about = await translateText(scrapedData.description);
     const address = property.address;
     const city = property.city;
-    const latitude = scrapedData.latitude;
-    const longitude = scrapedData.longitude;
+    // const latitude = scrapedData.latitude;
+    // const longitude = scrapedData.longitude;
     const maxNumGuests = scrapedData.containsPlace.occupancy.value;
     const originalListingId = property.id;
     const numBeds = totalBeds;
@@ -429,13 +429,12 @@ export const cleanbnbScraper: DirectSiteScraper = async ({
     const originalNightlyPrice =
       parseFloat(price) + cleaningFee / getNumNights(checkIn, checkOut);
 
+
     res.push({
       name,
       about,
       address,
       city,
-      latitude,
-      longitude,
       maxNumGuests,
       numBeds,
       numBedrooms,

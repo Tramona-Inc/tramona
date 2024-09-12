@@ -43,6 +43,7 @@ type HostOnboardingState = {
     otherHouseRules: string | null | undefined;
     originalListingId: string | null | undefined;
     originalListingPlatform: Property["originalListingPlatform"] | undefined;
+    airbnbUrl: string;
   };
   setIsEdit: (isEdit: boolean) => void;
   setMaxGuests: (maxGuests: number) => void;
@@ -75,6 +76,7 @@ type HostOnboardingState = {
   setOriginalListingPlatform: (
     originalListingPlatform: Property["originalListingPlatform"],
   ) => void;
+  setAirbnbUrl: (airbnbUrl: string) => void;
   resetSession: () => void;
 };
 
@@ -113,6 +115,7 @@ export const useHostOnboarding = create<HostOnboardingState>()(
         otherHouseRules: "",
         originalListingId: null,
         originalListingPlatform: undefined,
+        airbnbUrl: "",
       },
       setIsEdit: (isEdit: boolean) => {
         set((state) => ({ ...state, isEdit }));
@@ -360,6 +363,15 @@ export const useHostOnboarding = create<HostOnboardingState>()(
           listing: {
             ...state.listing,
             originalListingPlatform,
+          },
+        }));
+      },
+      setAirbnbUrl: (airbnbUrl: string) => {
+        set((state) => ({
+          ...state,
+          listing: {
+            ...state.listing,
+            airbnbUrl,
           },
         }));
       },

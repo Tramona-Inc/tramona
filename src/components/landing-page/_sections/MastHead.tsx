@@ -69,7 +69,7 @@ export default function MastHead() {
                   </Avatar>
                 </div>
                 <p className="ml-2 text-xs font-semibold text-[#7E7564]">
-                  Requests made this month
+                  Properties booked this month
                 </p>
               </div>
             </div>
@@ -87,11 +87,16 @@ export default function MastHead() {
       <div className="mx-0 mt-8 flex max-w-full justify-center space-y-4 px-4 lg:mx-4 lg:mt-16 lg:flex lg:space-y-8">
         <TestimonialCarousel />
       </div>
+      <div className="mx-auto my-40 w-5/6 max-w-7xl text-center text-2xl font-semibold tracking-tight lg:my-48 lg:text-4xl">
+        When hosts have no one staying at their property, they would rather make
+        something over nothing. With Tramona, your request goes out to every
+        host with a vacancy, so you get the best deal, every time.
+      </div>
 
-      <div className="mt-20 space-y-4 lg:mt-24 lg:space-y-12">
+      <div className="mt-20 space-y-4 lg:space-y-12">
         <h2 className="text-center text-2xl font-extrabold lg:text-4xl">
-          <span className="text-teal-900">How?</span> Negotiation, No fees. No
-          markups.
+          <span className="text-teal-900">How?</span> Negotiation, 50% less
+          fees. No markups.
         </h2>
         <div className="flex justify-center">
           <div className="grid gap-8 lg:grid-cols-2 lg:gap-32">

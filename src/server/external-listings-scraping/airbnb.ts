@@ -4,7 +4,7 @@ import { z } from "zod";
 import { containsHTML, getNumNights, parseCurrency } from "@/utils/utils";
 import { aiJson } from "@/server/aiJson";
 import { propertyInsertSchema, reviewsInsertSchema } from "@/server/db/schema";
-import { getCity } from "@/server/google-maps";
+import { getCity, getCoordinates } from "@/server/google-maps";
 import { sortBy } from "lodash";
 
 export const scrapeAirbnbListings = async ({
@@ -222,8 +222,10 @@ export const airbnbScraperSchema = z.object({
       hostNumReviews: true,
       hostRating: true,
 
-      latitude: true,
-      longitude: true,
+      // latLngPoint: true,
+
+      // latitude: true,
+      // longitude: true,
 
       checkInInfo: true,
       checkInTime: true,
@@ -290,9 +292,12 @@ export async function scrapeAirbnbListing(id: string) {
     schema: airbnbScraperSchema,
   });
 
+  const { location } = await getCoordinates(scrapedProperty.address);
+    if (!location) throw new Error("Could not get coordinates for address");
+
   const city = await getCity({
-    lat: scrapedProperty.latitude,
-    lng: scrapedProperty.longitude,
+    lat: location.lat,
+    lng: location.lng,
   });
 
   const property = {

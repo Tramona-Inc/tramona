@@ -19,8 +19,8 @@ function MobileSimilarProperties({ location, city }: SimilarProperties) {
   const { data: properties, isFetching } =
     api.properties.getAllInfiniteScroll.useInfiniteQuery(
       {
-        lat: coordinates?.coordinates.location?.lat,
-        long: coordinates?.coordinates.location?.lng,
+        // lat: coordinates?.coordinates.location?.lat,
+        // long: coordinates?.coordinates.location?.lng,
         radius: 25,
       },
       { refetchOnWindowFocus: false },
