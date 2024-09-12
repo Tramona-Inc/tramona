@@ -4,11 +4,12 @@ import {
   ScrapedListing,
 } from "@/server/direct-sites-scraping";
 import { Review } from "@/server/db/schema";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import { z } from "zod";
 import { ALL_PROPERTY_TYPES, PropertyType } from "@/server/db/schema/common";
 import { ListingSiteName } from "@/server/db/schema/common";
 import { getNumNights } from "@/utils/utils";
+import { parseHTML } from "@/utils/utils";
 
 const offerSchema = z.object({
   id: z.string(),
@@ -22,15 +23,52 @@ type CasamundoOffer = z.infer<typeof offerSchema>;
 
 const mapPropertyType = (type: string): PropertyType => {
   const normalizedType = type
-    .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(' ');
-  
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+
   if (ALL_PROPERTY_TYPES.includes(normalizedType as PropertyType)) {
     return normalizedType as PropertyType;
-  } 
+  }
   return "Other";
 };
+
+interface Suggestion {
+  id: string;
+  fullTitle: string;
+  trail: string;
+}
+
+interface AutocompleteResponse {
+  suggestions: Suggestion[];
+}
+
+interface ScoredSuggestion {
+  suggestion: Suggestion | null;
+  score: number;
+}
+
+function scoreMatch(suggestion: Suggestion, locationParts: string[]): number {
+  const fullTitle = suggestion.fullTitle.toLowerCase();
+  const trail = suggestion.trail.toLowerCase();
+  let score = 0;
+
+  if (fullTitle === locationParts[0]) {
+    score += 100;
+  } else if (fullTitle.includes(locationParts[0])) {
+    score += 50;
+  }
+  if (
+    locationParts.every(
+      (part) => fullTitle.includes(part) || trail.includes(part),
+    )
+  ) {
+    score += 25;
+  }
+  score -= fullTitle.split(" ").length;
+
+  return score;
+}
 
 async function getLocationId(location: string): Promise<string> {
   const autocompleteUrl = "https://www.casamundo.com/api/v2/autocomplete";
@@ -40,7 +78,9 @@ async function getLocationId(location: string): Promise<string> {
   });
 
   try {
-    const response = await axios.get(`${autocompleteUrl}?${params.toString()}`);
+    const response: AxiosResponse<AutocompleteResponse> = await axios.get(
+      `${autocompleteUrl}?${params.toString()}`,
+    );
     const suggestions = response.data.suggestions;
 
     if (suggestions.length > 0) {
@@ -49,31 +89,9 @@ async function getLocationId(location: string): Promise<string> {
         .split(",")
         .map((part) => part.trim());
 
-      const scoreMatch = (suggestion) => {
-        const fullTitle = suggestion.fullTitle.toLowerCase();
-        const trail = suggestion.trail.toLowerCase();
-        let score = 0;
-
-        if (fullTitle === locationParts[0]) {
-          score += 100;
-        } else if (fullTitle.includes(locationParts[0])) {
-          score += 50;
-        }
-        if (
-          locationParts.every(
-            (part) => fullTitle.includes(part) || trail.includes(part),
-          )
-        ) {
-          score += 25;
-        }
-        score -= fullTitle.split(" ").length;
-
-        return score;
-      };
-
-      const bestMatch = suggestions.reduce(
+      const bestMatch = suggestions.reduce<ScoredSuggestion>(
         (best, current) => {
-          const currentScore = scoreMatch(current);
+          const currentScore = scoreMatch(current, locationParts);
           return currentScore > best.score
             ? { suggestion: current, score: currentScore }
             : best;
@@ -94,6 +112,9 @@ async function getLocationId(location: string): Promise<string> {
     throw error;
   }
 }
+interface OfferResponse {
+  offers: Array<unknown>;
+}
 
 async function getOfferIds(
   locationId: string,
@@ -104,7 +125,7 @@ async function getOfferIds(
 ): Promise<CasamundoOffer[]> {
   const url = `https://www.casamundo.com/search/${locationId}`;
 
-  const headers = {
+  const headers: Record<string, string> = {
     accept: "*/*",
     "accept-language": "en-US,en;q=0.9",
     "content-type": "application/json",
@@ -119,20 +140,25 @@ async function getOfferIds(
 
   const params = new URLSearchParams({
     fieldTreeId: "SearchDetailsFields.SERP",
-    adults: numGuests.toString(),
+    adults: numGuests?.toString() ?? "1",
     arrival: checkIn.toISOString().split("T")[0],
     duration: getNumNights(checkIn, checkOut).toString(),
     _format: "json",
   });
 
   try {
-    const response = await axios.get(`${url}?${params.toString()}`, {
-      headers,
-    });
+    const response: AxiosResponse<OfferResponse> = await axios.get(
+      `${url}?${params.toString()}`,
+      {
+        headers,
+      },
+    );
 
     const offers = response.data.offers;
 
-    const parsedOffers = offers.map((offer: any) => offerSchema.parse(offer));
+    const parsedOffers = offers.map((offer: unknown) =>
+      offerSchema.parse(offer),
+    );
 
     return parsedOffers;
   } catch (error) {
@@ -143,7 +169,7 @@ async function getOfferIds(
 
 function getDatesArray(startDate: Date, endDate: Date): string[] {
   const dates: string[] = [];
-  let currentDate = new Date(startDate);
+  const currentDate = new Date(startDate);
 
   while (currentDate <= endDate) {
     dates.push(currentDate.toISOString().split("T")[0] ?? "");
@@ -153,6 +179,12 @@ function getDatesArray(startDate: Date, endDate: Date): string[] {
   return dates;
 }
 
+interface CalendarResponse {
+  content: {
+    days: Record<string, number>;
+  };
+}
+
 async function checkAvailability(
   offerId: string,
   checkIn: Date,
@@ -160,18 +192,18 @@ async function checkAvailability(
 ): Promise<boolean> {
   const url = `https://www.casamundo.com/api/v2/calendar/${offerId}`;
 
-  let currentYear = checkIn.getFullYear();
-  let currentMonth = checkIn.getMonth() + 1;
+  let currentYear: number = checkIn.getFullYear();
+  let currentMonth: number = checkIn.getMonth() + 1;
 
   try {
-    let days: { [key: string]: number } = {};
+    const days: Record<string, number> = {};
 
     while (
       currentYear < checkOut.getFullYear() ||
       (currentYear === checkOut.getFullYear() &&
         currentMonth <= checkOut.getMonth() + 1)
     ) {
-      const response = await axios.get(url, {
+      const response: AxiosResponse<CalendarResponse> = await axios.get(url, {
         params: {
           year: currentYear,
           month: currentMonth,
@@ -191,7 +223,7 @@ async function checkAvailability(
       }
     }
 
-    const stayDates = getDatesArray(checkIn, checkOut);
+    const stayDates: string[] = getDatesArray(checkIn, checkOut);
 
     for (const date of stayDates) {
       if (!days.hasOwnProperty(date) || days[date] !== 2) {
@@ -212,9 +244,31 @@ interface PriceExtractionParams {
   duration: number;
 }
 
-const enhancedPriceFetcher = async (
+interface PriceDetails {
+  travelPrice: {
+    raw: number;
+  };
+  currency: string;
+  isAvailable: boolean;
+}
+
+interface ApiResponse {
+  hasErrors: boolean;
+  errorMessage?: string;
+  content: {
+    priceDetails: PriceDetails;
+  };
+}
+
+interface PriceResult {
+  price: number;
+  currency: string;
+  id: string;
+}
+
+const fetchPrice = async (
   params: PriceExtractionParams,
-): Promise<{ price: number; currency: string; id: string }> => {
+): Promise<PriceResult> => {
   const url = `https://www.casamundo.com/booking/checkout/priceDetails/${params.offerId}`;
 
   const queryParams = new URLSearchParams({
@@ -250,24 +304,12 @@ const enhancedPriceFetcher = async (
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      const response = await axios.post(
+      const response: AxiosResponse<ApiResponse> = await axios.post(
         `${url}?${queryParams.toString()}`,
         null,
         { headers },
       );
       const data = response.data;
-
-      if (
-        !data.hasErrors &&
-        data.content.priceDetails &&
-        data.content.priceDetails.isAvailable
-      ) {
-        return {
-          price: data.content.priceDetails.travelPrice.raw,
-          currency: data.content.priceDetails.currency,
-          id: params.offerId,
-        };
-      }
 
       if (data.hasErrors && data.errorMessage === "price_not_available") {
         if (attempt < maxRetries - 1) {
@@ -307,6 +349,20 @@ const enhancedPriceFetcher = async (
   };
 };
 
+interface ReviewResponse {
+  average: {
+    value: number;
+    count: number;
+  };
+  list: Array<{
+    text?: string;
+    nickname: string;
+    rating: {
+      value: number;
+    };
+  }>;
+}
+
 const fetchReviews = async (
   offerId: string,
 ): Promise<{
@@ -315,7 +371,7 @@ const fetchReviews = async (
   reviews: Review[];
 }> => {
   try {
-    const response = await axios.get(
+    const response = await axios.get<ReviewResponse>(
       `https://www.casamundo.com/reviews/list/${offerId}?scale=5&bcEnabled=false&googleReviews=false`,
       {
         headers: {
@@ -332,12 +388,14 @@ const fetchReviews = async (
       },
     );
 
-    const data = response.data;
-    const avgRating = data.average.value || 0;
-    const numRatings = data.average.count || 0;
+    const data: ReviewResponse = response.data;
+    const avgRating: number = data.average.value || 0;
+    const numRatings: number = data.average.count || 0;
     const reviews: Review[] = data.list
-      .filter((review: any) => review.text)
-      .map((review: any) => ({
+      .filter((review): review is typeof review & { text: string } =>
+        Boolean(review.text),
+      )
+      .map((review) => ({
         name: review.nickname,
         profilePic: "",
         rating: review.rating.value,
@@ -387,49 +445,91 @@ async function fetchPropertyDetails(
     "Referrer-Policy": "no-referrer-when-downgrade",
   };
 
-  try {
-    const response = await axios.get(`${url}?${params.toString()}`, {
-      headers,
-    });
-    const data = response.data;
+  interface AmenityGroup {
+    name: string;
+    list: Array<{ label: string }>;
+  }
 
-    const amenities =
+  interface PropertyImage {
+    medium: string;
+  }
+
+  interface Room {
+    roomType: string;
+    beds: string[];
+  }
+
+  interface PropertyData {
+    infoGroups: AmenityGroup[];
+    images: PropertyImage[];
+    rooms: Room[];
+    generalTitle?: string;
+    description?: {
+      unit?: {
+        content?: string;
+      };
+    };
+    type: string;
+    locationShorted?: string;
+    geoLocation: {
+      lon: number;
+      lat: number;
+    };
+    persons?: number;
+    bedrooms?: number;
+    bathrooms?: number;
+  }
+
+  try {
+    const response = await axios.get<PropertyData>(
+      `${url}?${params.toString()}`,
+      {
+        headers,
+      },
+    );
+    const data: PropertyData = response.data;
+
+    const amenities: string[] =
       data.infoGroups
         .find((group) => group.name === "amenities")
-        ?.list.map((item) => item.label) || [];
-    const imageUrls = data.images.map((img) => img.medium) || [];
+        ?.list.map((item) => item.label) ?? [];
 
-    const countBeds = (rooms: any[]): number => {
+    const imageUrls: string[] = data.images.map((img) => img.medium);
+
+    const countBeds = (rooms: Room[]): number => {
       return rooms
         .filter((room) => room.roomType.toLowerCase().includes("bedroom"))
         .reduce((total, room) => {
           return (
             total +
             room.beds.reduce((bedCount, bedDescription) => {
-              const count = parseInt(bedDescription.split(" ")[0]) || 1;
+              const bedNumber = bedDescription.split(" ")[0] ?? "";
+              const count = parseInt(bedNumber) || 1;
               return bedCount + count;
             }, 0)
           );
         }, 0);
     };
 
+    const aboutSection = data.description?.unit?.content ?? "";
+
     const { avgRating, numRatings, reviews } = await fetchReviews(offerId);
 
     const latLngPoint = {
-      x: data.geoLocation.lon as number,
-      y: data.geoLocation.lat as number,
+      x: data.geoLocation.lon,
+      y: data.geoLocation.lat,
     };
 
     return {
       originalListingId: offerId,
       name: data.generalTitle ?? "",
-      about: data.description?.unit?.content ?? "",
+      about: parseHTML(aboutSection),
       propertyType: mapPropertyType(data.type),
       address: data.locationShorted ?? "",
       city: data.locationShorted ?? "",
       latLngPoint,
       maxNumGuests: data.persons ?? 0,
-      numBeds: countBeds(data.rooms ?? []),
+      numBeds: countBeds(data.rooms),
       numBedrooms: data.bedrooms ?? 0,
       numBathrooms: data.bathrooms ?? 0,
       amenities,
@@ -439,7 +539,9 @@ async function fetchPropertyDetails(
       avgRating,
       numRatings,
       originalListingPlatform: "Casamundo" as ListingSiteName,
-      originalNightlyPrice: parseFloat((price.price / getNumNights(checkIn, checkOut)).toFixed(2)),
+      originalNightlyPrice: parseFloat(
+        (price.price / getNumNights(checkIn, checkOut)).toFixed(2),
+      ),
       reviews: reviews,
       scrapeUrl: `${url}?${params.toString()}`,
     };
@@ -470,14 +572,14 @@ async function scrapeProperty(
       return {} as ScrapedListing;
     }
 
-    const price = await enhancedPriceFetcher({
+    const price = await fetchPrice({
       offerId,
       numGuests,
       checkIn: checkIn,
       duration: getNumNights(checkIn, checkOut),
     });
 
-    if (!price || price.price === -1) {
+    if (price.price === -1) {
       return {} as ScrapedListing;
     }
 
@@ -490,7 +592,7 @@ async function scrapeProperty(
       price,
     );
 
-    return propertyDetails as ScrapedListing;
+    return propertyDetails;
   } catch (error) {
     console.error("Error fetching property details:", error);
     throw error;
@@ -553,7 +655,7 @@ export const casamundoSubScraper: SubsequentScraper = async ({
   checkOut,
 }) => {
   const url = new URL(scrapeUrl);
-  const numGuests = parseInt(url.searchParams.get('adults') ?? '', 10);
+  const numGuests = parseInt(url.searchParams.get("adults") ?? "", 10);
   const numNights = getNumNights(checkIn, checkOut);
 
   try {
@@ -563,7 +665,7 @@ export const casamundoSubScraper: SubsequentScraper = async ({
       checkOut,
     );
 
-    const price = await enhancedPriceFetcher({
+    const price = await fetchPrice({
       offerId: originalListingId,
       numGuests,
       checkIn: checkIn,
@@ -591,4 +693,4 @@ export const casamundoSubScraper: SubsequentScraper = async ({
   }
 };
 
-// format text to not have html tags, type errors
+// cancellation policy, what are we doing with requestNightlyPrice and requestId
