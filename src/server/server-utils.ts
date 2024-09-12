@@ -98,6 +98,7 @@ export async function scrapeUrlLikeHuman(url: string) {
       headers: {
         "User-Agent": getRandomUserAgent(),
       },
+      timeout: 10000,
     })
     .then((res) => res.data)
     .then(cheerio.load);

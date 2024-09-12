@@ -81,7 +81,6 @@ const propertyTypeMapping: Record<string, PropertyType> = {
 };
 
 const mapPropertyType = (originalType: string): PropertyType => {
-  console.log("originalType: ", originalType);
   if (propertyTypeMapping[originalType]) {
     return propertyTypeMapping[originalType];
   } else {
@@ -138,148 +137,150 @@ export const mapTaxodataToScrapedListing = async (
 ): Promise<ScrapedListing[]> => {
   const scrapedListings = await Promise.all(
     taxodata.map(async (property) => {
-      // scrape the property page
-      const safeUrl = ensureHttps(property.url);
-      const $ = await scrapeUrlLikeHuman(safeUrl);
-      let propertyDetails = {};
+      try {
+        // scrape the property page
+        const safeUrl = ensureHttps(property.url);
+        const $ = await scrapeUrlLikeHuman(safeUrl);
+        let propertyDetails = {};
 
-      // Scrape the "Sleeps 12" from the HTML
-      const propDetails = $(".qb-prop-details").text();
-      const sleepsMatch = propDetails.match(/Sleeps\s(\d+)/);
-      const maxNumGuests = sleepsMatch
-        ? sleepsMatch[1]
-          ? parseInt(sleepsMatch[1])
-          : 0
-        : 0;
-      const locationMatch = propDetails.match(/([A-Za-z\s]+,\s[A-Z]{2})/);
-      const city = locationMatch
-        ? locationMatch[1]
-          ? locationMatch[1].trim()
-          : ""
-        : "";
-      const typeElement = $(".property-quick-info li .fas.fa-home").parent(); // Navigate to the parent element of the <i> tag (the <span> containing "Home")
-      let originalType = "";
-      // Check if there is a span with the class "quick-info-value details-label" (e.g. "Home")
-      const homeLabel = typeElement
-        .find(".quick-info-value.details-label")
-        .text()
-        .trim();
-      // Check if there is an additional <span> after "1,100 Sq. Ft." ("Condo" in the next span)
-      const additionalLabel = typeElement
-        .find("span:not(.details-label)")
-        .last()
-        .text()
-        .trim();
+        // Scrape the "Sleeps 12" from the HTML
+        const propDetails = $(".qb-prop-details").text();
+        const sleepsMatch = propDetails.match(/Sleeps\s(\d+)/);
+        const maxNumGuests = sleepsMatch
+          ? sleepsMatch[1]
+            ? parseInt(sleepsMatch[1])
+            : 0
+          : 0;
+        const locationMatch = propDetails.match(/([A-Za-z\s]+,\s[A-Z]{2})/);
+        const city = locationMatch
+          ? locationMatch[1]
+            ? locationMatch[1].trim()
+            : ""
+          : "";
+        const typeElement = $(".property-quick-info li .fas.fa-home").parent(); // Navigate to the parent element of the <i> tag (the <span> containing "Home")
+        let originalType = "";
+        // Check if there is a span with the class "quick-info-value details-label" (e.g. "Home")
+        const homeLabel = typeElement
+          .find(".quick-info-value.details-label")
+          .text()
+          .trim();
+        // Check if there is an additional <span> after "1,100 Sq. Ft." ("Condo" in the next span)
+        const additionalLabel = typeElement
+          .find("span:not(.details-label)")
+          .last()
+          .text()
+          .trim();
 
-      if (additionalLabel) {
-        originalType = additionalLabel;
-      } else if (homeLabel) {
-        originalType = homeLabel;
-      }
+        if (additionalLabel) {
+          originalType = additionalLabel;
+        } else if (homeLabel) {
+          originalType = homeLabel;
+        }
 
-      let imageUrls: string[] = [];
-      const imageElements = $("input.pswpImages");
-      imageElements.each((index, element) => {
-        if (imageUrls.length < 10) {
-          // Limit the number of images to 10
-          const imageUrl = $(element).attr("value");
-          if (imageUrl) {
-            imageUrls.push(imageUrl); // Add the URL to the array
+        let imageUrls: string[] = [];
+        const imageElements = $("input.pswpImages");
+        imageElements.each((index, element) => {
+          if (imageUrls.length < 10) {
+            // Limit the number of images to 10
+            const imageUrl = $(element).attr("value");
+            if (imageUrl) {
+              imageUrls.push(imageUrl); // Add the URL to the array
+            }
+          }
+        });
+        const metaDescription = $('meta[property="og:description"]').attr(
+          "content",
+        );
+        const description = metaDescription ? metaDescription : "";
+
+        const scriptContent = $("script")
+          .toArray()
+          .find((script) => $(script).html()!.includes("show_all_amenities"));
+
+        let amenities: string[] = [];
+        if (scriptContent) {
+          const scriptText = $(scriptContent).html();
+          const amenitiesMatch = scriptText?.match(
+            /"show_all_amenities":"(.*?)","/,
+          );
+          if (amenitiesMatch?.[1]) {
+            const showAllAmenities = amenitiesMatch[1];
+            // Decode HTML entities and parse the amenities
+            const decodeHtmlEntities = (str: string) => {
+              return str
+                .replace(/\\u003C/g, "<")
+                .replace(/\\u0022/g, '"')
+                .replace(/\\u003E/g, ">")
+                .replace(/\\u002F/g, "/");
+            };
+            const decodedAmenities = decodeHtmlEntities(showAllAmenities);
+            // Use regex to extract the text between <li> and </li> tags
+            amenities = extractAmenities(decodedAmenities);
+          } else {
+            console.error("No amenities found");
           }
         }
-      });
-      const metaDescription = $('meta[property="og:description"]').attr(
-        "content",
-      );
-      const description = metaDescription ? metaDescription : "";
-
-      const scriptContent = $("script")
-        .toArray()
-        .find((script) => $(script).html()!.includes("show_all_amenities"));
-
-      let amenities: string[] = [];
-      if (scriptContent) {
-        const scriptText = $(scriptContent).html();
-        const amenitiesMatch = scriptText?.match(
-          /"show_all_amenities":"(.*?)","/,
-        );
-        if (amenitiesMatch?.[1]) {
-          const showAllAmenities = amenitiesMatch[1];
-          // Decode HTML entities and parse the amenities
-          const decodeHtmlEntities = (str: string) => {
-            return str
-              .replace(/\\u003C/g, "<")
-              .replace(/\\u0022/g, '"')
-              .replace(/\\u003E/g, ">")
-              .replace(/\\u002F/g, "/");
-          };
-          const decodedAmenities = decodeHtmlEntities(showAllAmenities);
-          // Use regex to extract the text between <li> and </li> tags
-          amenities = extractAmenities(decodedAmenities);
-        } else {
-          console.error("No amenities found");
-        }
-      }
-      return {
-        originalListingId: property.pid.toString(),
-        name: property.title,
-        about: description,
-        propertyType: mapPropertyType(originalType),
-        address: city, // cannot find detailed address in the website
-        city: city,
-        latitude: parseFloat(property.latitude),
-        longitude: parseFloat(property.longitude),
-        latLngPoint: {
-          x: parseFloat(property.longitude),
-          y: parseFloat(property.latitude),
-        },
-        maxNumGuests: maxNumGuests,
-        numBeds: property.bedrooms,
-        numBedrooms: property.bedrooms,
-        numBathrooms: property.bathrooms,
-        amenities: amenities,
-        otherAmenities: [],
-        imageUrls: imageUrls,
-        originalListingUrl: safeUrl,
-        avgRating: 0, // cannot find rating in the website
-        numRatings: 0, // cannot find rating in the website
-        originalListingPlatform: "RedAwning" as ListingSiteName,
-        reservedDateRanges: [
-          {
-            start: checkIn,
-            end: checkOut,
+        return {
+          originalListingId: property.pid.toString(),
+          name: property.title,
+          about: description,
+          propertyType: mapPropertyType(originalType),
+          address: city, // cannot find detailed address in the website
+          city: city,
+          latitude: parseFloat(property.latitude),
+          longitude: parseFloat(property.longitude),
+          latLngPoint: {
+            x: parseFloat(property.longitude),
+            y: parseFloat(property.latitude),
           },
-        ],
-        originalNightlyPrice:
-          property.totalPrice && getNumNights(checkIn, checkOut) > 0
-            ? Math.round(property.totalPrice / getNumNights(checkIn, checkOut))
-            : 0,
-        reviews: [], // looks like there are no reviews in this website
-        scrapeUrl: safeUrl,
-      };
+          maxNumGuests: maxNumGuests,
+          numBeds: property.bedrooms,
+          numBedrooms: property.bedrooms,
+          numBathrooms: property.bathrooms,
+          amenities: amenities,
+          otherAmenities: [],
+          imageUrls: imageUrls,
+          originalListingUrl: safeUrl,
+          avgRating: 0, // cannot find rating in the website
+          numRatings: 0, // cannot find rating in the website
+          originalListingPlatform: "RedAwning" as ListingSiteName,
+          reservedDateRanges: [
+            {
+              start: checkIn,
+              end: checkOut,
+            },
+          ],
+          originalNightlyPrice:
+            property.totalPrice && getNumNights(checkIn, checkOut) > 0
+              ? Math.round(
+                  property.totalPrice / getNumNights(checkIn, checkOut),
+                )
+              : 0,
+          reviews: [], // looks like there are no reviews in this website
+          scrapeUrl: safeUrl,
+        };
+      } catch (error) {
+        console.error("Error scraping property:", property.pid, error);
+        // Return null for this iteration, skipping this property
+        return null;
+      }
     }),
   );
-  return scrapedListings;
+  return scrapedListings.filter((listing) => listing !== null);
 };
 
-// interface ScraperParams {
-//   checkIn: Date;
-//   checkOut: Date;
-//   numOfOffersInEachScraper?: number;
-// }
-// currently just scrape per request
 export const redawningScraper: DirectSiteScraper = async ({
   checkIn,
   checkOut,
-  numOfOffersInEachScraper = 5,
+  numOfOffersInEachScraper,
   location,
   latitude,
   longitude,
 }) => {
   if (location) {
-    location = location.replace(" ", "%20");
+    location = location.split(",")[0]!.replace(" ", "%20");
   }
-  const url = `https://www.redawning.com/search/properties?ptype=country&platitude=${latitude}&plongitude=${longitude}&pcountry=US&pname=${location}&sleepsmax=1TO100&dates=${convertToEpochAt7AM(checkIn)}TO${convertToEpochAt7AM(checkOut)}`;
+  const url = `https://www.redawning.com/search/properties?ptype=locality&platitude=${latitude}&plongitude=${longitude}&pcountry=US&pname=${location}&sleepsmax=1TO100&dates=${convertToEpochAt7AM(checkIn)}TO${convertToEpochAt7AM(checkOut)}`;
   console.log("scrapedRedawningUrl: ", url);
   const $ = await scrapeUrl(url);
   let taxodata = [];
@@ -299,41 +300,51 @@ export const redawningScraper: DirectSiteScraper = async ({
   }
   const numOfNights = getNumNights(checkIn, checkOut);
   if (taxodata.length > 0) {
-    await Promise.all(
+    const processedTaxoData = await Promise.all(
       taxodata.map(async (property) => {
-        const propertyUrl = property.url;
-        const propertyId = property.pid;
-        const priceQuoteUrl = `https://api.redawning.com/v1/listings/${propertyId}/quote?checkin=${formatDateYearMonthDay(checkIn)}&checkout=${formatDateYearMonthDay(checkOut)}&numadults=1&numchild=0&travelinsurance=false`;
-        const priceQuote = await axiosWithRetry
-          .get<string>(priceQuoteUrl, {
-            headers: {
-              "x-api-key": "ehMtnGSw4i7dFqngWo8M15cWaqzKPM4V2jeU3zty",
-            },
-            timeout: 30000,
-          })
-          .then((response) => response.data)
-          .then((data) => priceQuoteSchema.parse(data))
-          .then((quote) => {
-            if (numOfNights < quote.min_stay) {
-              console.log(
-                `Property ${propertyId} requires a minimum stay of ${quote.min_stay} nights. Your stay is ${numOfNights} nights.`,
+        try {
+          // const propertyUrl = property.url;
+          const propertyId = property.pid;
+          const priceQuoteUrl = `https://api.redawning.com/v1/listings/${propertyId}/quote?checkin=${formatDateYearMonthDay(checkIn)}&checkout=${formatDateYearMonthDay(checkOut)}&numadults=1&numchild=0&travelinsurance=false`;
+          const priceQuote = await axiosWithRetry
+            .get<string>(priceQuoteUrl, {
+              headers: {
+                "x-api-key": "ehMtnGSw4i7dFqngWo8M15cWaqzKPM4V2jeU3zty",
+              },
+              timeout: 10000,
+            })
+            .then((response) => response.data)
+            .then((data) => priceQuoteSchema.parse(data))
+            .then((quote) => {
+              if (numOfNights < quote.min_stay) {
+                console.log(
+                  `Property ${propertyId} requires a minimum stay of ${quote.min_stay} nights. Your stay is ${numOfNights} nights.`,
+                );
+                return { ...quote, totalPrice: null };
+              }
+              const totalPrice = quote.payment_schedule.reduce(
+                (acc, curr) => acc + curr.amount,
+                0,
               );
-              return { ...quote, totalPrice: null };
-            }
-            const totalPrice = quote.payment_schedule.reduce(
-              (acc, curr) => acc + curr.amount,
-              0,
-            );
-            const formattedTotalPrice = Math.ceil(totalPrice * 100); // to cents
-            return { ...quote, totalPrice: formattedTotalPrice };
-          });
-        property.totalPrice = priceQuote.totalPrice;
+              const formattedTotalPrice = Math.ceil(totalPrice * 100); // to cents
+              return { ...quote, totalPrice: formattedTotalPrice };
+            });
+          property.totalPrice = priceQuote.totalPrice;
+          return property;
+        } catch (error) {
+          console.error(
+            `Failed to fetch price for property ${property.pid}:`,
+            error,
+          );
+          return null;
+        }
       }),
     );
+    taxodata = processedTaxoData.filter((property) => property !== null);
   } else {
     console.error("No available properties found");
   }
-  //   console.log(response);
+
   const listings = await mapTaxodataToScrapedListing(
     taxodata,
     checkIn,
