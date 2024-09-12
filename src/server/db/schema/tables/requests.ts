@@ -71,7 +71,9 @@ export const requests = pgTable(
       type: "point",
       mode: "xy",
       srid: 4326,
-    }).notNull(),
+    })
+      .notNull()
+      .$type<{ x: number; y: number }>(),
   },
   (t) => ({
     madeByGroupidIdx: index().on(t.madeByGroupId),

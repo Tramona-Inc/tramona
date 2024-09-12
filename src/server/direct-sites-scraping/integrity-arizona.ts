@@ -160,7 +160,8 @@ export const arizonaScraper: DirectSiteScraper = async ({
 
   let locationCode = "";
   if (location) {
-    switch (location) {
+    const formattedLocation = location.split(",")[0];
+    switch (formattedLocation) {
       case "Parker Strip":
         locationCode = "20690";
         break;
@@ -169,6 +170,7 @@ export const arizonaScraper: DirectSiteScraper = async ({
         break;
       default:
         console.error("Location is not recognized: ", location);
+        return [];
     }
   }
   const locationParam = location
