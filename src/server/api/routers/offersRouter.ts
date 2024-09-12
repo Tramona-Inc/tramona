@@ -217,7 +217,7 @@ export const offersRouter = createTRPCRouter({
       const propertyForOffer = await getPropertyForOffer(
         offerWithoutProperty.propertyId,
       );
-      console.log("This is the property objext", propertyForOffer);
+
       if (!propertyForOffer) {
         throw new TRPCError({ code: "BAD_REQUEST" });
       }
@@ -512,7 +512,7 @@ export const offersRouter = createTRPCRouter({
           }));
         //sending emails to everyone in the groug
         //get everymember in the group
-        console.log("GETTING FOR GROUP", requestDetails.madeByGroupId);
+
         const allGroupMembers = await db.query.groupMembers.findMany({
           where: eq(groupMembers.groupId, requestDetails.madeByGroupId),
           columns: { userId: true },
@@ -522,10 +522,8 @@ export const offersRouter = createTRPCRouter({
             },
           },
         });
-        console.log("ALL GROUP MEMBERS", allGroupMembers);
-        for (const member of allGroupMembers) {
-          console.log("MEMBER", member);
 
+        for (const member of allGroupMembers) {
           // await sendEmail({
           //   to: member.user.email,
           //   subject: "New offer received",
@@ -825,7 +823,6 @@ export const offersRouter = createTRPCRouter({
 });
 
 export async function getPropertyForOffer(propertyId: number) {
-  console.log("this function is called");
   return await db.query.properties.findFirst({
     where: eq(properties.id, propertyId),
     with: {
