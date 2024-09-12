@@ -246,6 +246,8 @@ export const properties = pgTable(
     address: varchar("address", { length: 1000 }).notNull(),
     // latitude: doublePrecision("latitude").notNull(),
     // longitude: doublePrecision("longitude").notNull(),
+    // latitude: doublePrecision("latitude").notNull(),
+    // longitude: doublePrecision("longitude").notNull(),
     city: varchar("city", { length: 255 }).notNull(),
     originalListingUrl: varchar("url"),
     checkInInfo: varchar("check_in_info"),

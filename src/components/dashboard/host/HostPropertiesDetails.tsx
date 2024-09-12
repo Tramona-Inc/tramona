@@ -51,6 +51,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { sql } from "drizzle-orm";
 
 export default function HostPropertiesDetails({
   property,
@@ -107,8 +108,6 @@ export default function HostPropertiesDetails({
       numBeds: beds,
       numBathrooms: bathrooms,
       address: address,
-      latitude: coordinateData?.coordinates.location?.lat,
-      longitude: coordinateData?.coordinates.location?.lng,
       checkInInfo: checkInType,
       checkInTime: convertTo24HourFormat(checkIn),
       checkOutTime: convertTo24HourFormat(checkOut),
@@ -396,12 +395,12 @@ export default function HostPropertiesDetails({
                 lat={
                   editing
                     ? (coordinateData?.coordinates.location?.lat ?? 0)
-                    : property.latitude
+                    : property.latLngPoint.y
                 }
                 lng={
                   editing
                     ? (coordinateData?.coordinates.location?.lng ?? 0)
-                    : property.longitude
+                    : property.latLngPoint.x
                 }
               />
             </div>
