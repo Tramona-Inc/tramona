@@ -24,8 +24,8 @@ export default function ChatOfferButton({
         })
       }
     >
-      {offerHostId ? "Send message to host" : "Send message"}
       <MessageCirclePlusIcon />
+      {offerHostId ? "Send message to host" : "Send message"}
     </Button>
   );
 }

@@ -5,7 +5,7 @@ import { useRouter } from "next/router";
 export function useChatWithOffer() {
   const router = useRouter();
   const { mutateAsync: useChatWithOffer } =
-    api.messages.createConversationWithOffer.useMutation({
+    api.messages.createOrFetchConversationWithOffer.useMutation({
       onSuccess: (conversationId) => {
         void router.push(`/messages?conversationId=${conversationId}`);
       },

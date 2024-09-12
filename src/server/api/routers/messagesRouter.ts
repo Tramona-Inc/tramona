@@ -222,7 +222,7 @@ export async function createConversationWithHost(
   }
 }
 
-export async function createConversationWithOffer(
+export async function createConversationWithOfferHelper(
   userId: string,
   offerHostOrAllAdmins: string,
   propertyName: string,
@@ -358,7 +358,7 @@ export const messagesRouter = createTRPCRouter({
       return conversationId;
     }),
 
-  createConversationWithOffer: protectedProcedure
+  createOrFetchConversationWithOffer: protectedProcedure
     .input(
       z.object({
         offerId: z.string(),
@@ -380,7 +380,7 @@ export const messagesRouter = createTRPCRouter({
 
       // Create conversation with host if it doesn't exist
       if (!conversationExistId) {
-        return await createConversationWithOffer(
+        return await createConversationWithOfferHelper(
           ctx.user.id,
           offerHostOrAllAdmins,
           input.offerPropertyName,
