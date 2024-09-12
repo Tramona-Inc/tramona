@@ -494,7 +494,7 @@ async function fetchPropertyDetails(
         .find((group) => group.name === "amenities")
         ?.list.map((item) => item.label) ?? [];
 
-    const imageUrls: string[] = data.images.map((img) => img.medium);
+    const imageUrls: string[] = data.images.map((img) => `https:${img.medium}`);
 
     const countBeds = (rooms: Room[]): number => {
       return rooms
