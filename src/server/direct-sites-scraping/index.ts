@@ -105,49 +105,12 @@ export const scrapeDirectListings = async (options: {
   numOfOffersInEachScraper?: number;
   requestNightlyPrice?: number;
   requestId?: number;
-  scrapersToExecute?: string[];
   location?: string;
   latitude?: number;
   longitude?: number;
 }) => {
-  // Create a new options object excluding `scrapersToExecute`
-  const { scrapersToExecute, ...scraperOptions } = options;
-
-  let selectedScrapers: NamedDirectSiteScraper[] = [];
-  if (scrapersToExecute && scrapersToExecute.length > 0) {
-    selectedScrapers = directSiteScrapers.filter((s) =>
-      scrapersToExecute.includes(s.name),
-    );
-  } else {
-    // use specific scrapers based on request location
-    if (options.latitude && options.longitude) {
-      const { scrapersList, formattedLocation } = pickScrapersByLocation(
-        options.latitude,
-        options.longitude,
-        25, // search radius: 25 miles
-      );
-      if (scrapersList.length > 0) {
-        // selectedScrapers is a subset of directSiteScrapers that its name appeared in scrapersList
-        selectedScrapers = directSiteScrapers.filter((scraper) =>
-          scrapersList.includes(scraper.name),
-        );
-        if (formattedLocation) {
-          scraperOptions.location = formattedLocation;
-        }
-      }
-    } else {
-      console.error(
-        "Latitude and longitude are required for triggering location-based scraping",
-      );
-    }
-    // use default scrapers if no specific scrapers are provided or request location doesn't match any scraper
-    if (selectedScrapers.length === 0) {
-      // TODO: add default scrapers here
-      return;
-    }
-  }
   const allListings = await Promise.all(
-    selectedScrapers.map((s) => s.scraper(scraperOptions)),
+    directSiteScrapers.map((s) => s.scraper(options)),
   );
 
   const listings = allListings
