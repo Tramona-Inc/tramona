@@ -251,7 +251,7 @@ export const mapTaxodataToScrapedListing = async (
           scrapeUrl: safeUrl,
         };
       } catch (error) {
-        console.error("Error scraping property:", property.pid, error);
+        console.error("Error scraping property:", property.pid);
         // Return null for this iteration, skipping this property
         return null;
       }
