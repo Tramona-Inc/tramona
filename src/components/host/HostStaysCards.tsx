@@ -16,7 +16,7 @@ import { api, type RouterOutputs } from "@/utils/api";
 import { formatDistanceToNowStrict } from "date-fns";
 import { EllipsisIcon, FlagIcon } from "lucide-react";
 import Link from "next/link";
-import { useChatWithHost } from "@/utils/useChatWithHost";
+import { useChatWithHost } from "@/utils/messaging/useChatWithHost";
 
 export default function HostStaysCards({
   trips,

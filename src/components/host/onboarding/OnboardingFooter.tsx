@@ -84,6 +84,7 @@ export default function OnboardingFooter({
           cancellationPolicy: listing.cancellationPolicy,
           originalListingId: listing.originalListingId,
           originalListingPlatform: listing.originalListingPlatform,
+          airbnbUrl: listing.airbnbUrl,
         }).catch(() => errorToast());
       } else {
         if (isEdit) {

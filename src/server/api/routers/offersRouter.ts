@@ -37,6 +37,7 @@ import {
   scrapeDirectListings,
 } from "@/server/direct-sites-scraping";
 import { createNormalDistributionDates } from "@/server/server-utils";
+import { scrapeAirbnbPrice } from "@/server/scrapePrice";
 
 export const offersRouter = createTRPCRouter({
   accept: protectedProcedure
@@ -167,9 +168,7 @@ export const offersRouter = createTRPCRouter({
               columns: { numGuests: true, location: true, id: true },
             },
             property: {
-              columns: {
-                latLngPoint: false,
-              },
+              columns: {},
               with: {
                 host: {
                   columns: { id: true, name: true, email: true, image: true },
@@ -211,11 +210,18 @@ export const offersRouter = createTRPCRouter({
   getByIdWithDetails: protectedProcedure
     .input(offerSelectSchema.pick({ id: true }))
     .query(async ({ ctx, input }) => {
-      const offer = await getOfferPageData(input.id);
-
-      if (!offer) {
+      const offerWithoutProperty = await getOfferPageData(input.id);
+      if (!offerWithoutProperty) {
         throw new TRPCError({ code: "BAD_REQUEST" });
       }
+      const propertyForOffer = await getPropertyForOffer(
+        offerWithoutProperty.propertyId,
+      );
+
+      if (!propertyForOffer) {
+        throw new TRPCError({ code: "BAD_REQUEST" });
+      }
+      const offer = { ...offerWithoutProperty, property: propertyForOffer };
 
       if (offer.request) {
         const memberIds = offer.request.madeByGroup.members.map(
@@ -419,15 +425,46 @@ export const offersRouter = createTRPCRouter({
       if (input.requestId !== undefined) {
         const requestDetails = await ctx.db.query.requests.findFirst({
           where: eq(requests.id, input.requestId),
-          columns: { checkIn: true, checkOut: true, madeByGroupId: true },
+          columns: {
+            checkIn: true,
+            checkOut: true,
+            madeByGroupId: true,
+            numGuests: true,
+          },
         });
 
         if (!requestDetails) throw new TRPCError({ code: "BAD_REQUEST" });
+
+        const curProperty = await db.query.properties.findFirst({
+          where: eq(properties.id, input.propertyId),
+          columns: {
+            name: true,
+            imageUrls: true,
+            originalListingId: true,
+            maxNumGuests: true,
+          },
+        });
+
+        const scrapeParams = {
+          checkIn: requestDetails.checkIn,
+          checkOut: requestDetails.checkOut,
+          numGuests: requestDetails.numGuests,
+        };
+        const datePriceFromAirbnb = curProperty?.originalListingId
+          ? await scrapeAirbnbPrice({
+              airbnbListingId: curProperty.originalListingId,
+              params: scrapeParams,
+            }).then((res) => {
+              if (!res) throw new Error("Error scraping airbnb price");
+              return res;
+            })
+          : null;
 
         await ctx.db.insert(offers).values({
           ...input,
           checkIn: requestDetails.checkIn,
           checkOut: requestDetails.checkOut,
+          datePriceFromAirbnb: datePriceFromAirbnb,
         });
 
         await ctx.db
@@ -440,9 +477,6 @@ export const offersRouter = createTRPCRouter({
           );
 
         //find the property
-        const curProperty = await db.query.properties.findFirst({
-          where: eq(properties.id, input.propertyId),
-        });
 
         const request = await db.query.requests.findFirst({
           where: eq(requests.id, input.requestId),
@@ -478,7 +512,7 @@ export const offersRouter = createTRPCRouter({
           }));
         //sending emails to everyone in the groug
         //get everymember in the group
-        console.log("GETTING FOR GROUP", requestDetails.madeByGroupId);
+
         const allGroupMembers = await db.query.groupMembers.findMany({
           where: eq(groupMembers.groupId, requestDetails.madeByGroupId),
           columns: { userId: true },
@@ -488,10 +522,8 @@ export const offersRouter = createTRPCRouter({
             },
           },
         });
-        console.log("ALL GROUP MEMBERS", allGroupMembers);
-        for (const member of allGroupMembers) {
-          console.log("MEMBER", member);
 
+        for (const member of allGroupMembers) {
           // await sendEmail({
           //   to: member.user.email,
           //   subject: "New offer received",
@@ -743,7 +775,7 @@ export const offersRouter = createTRPCRouter({
             checkIn: dateRange.checkIn,
             checkOut: dateRange.checkOut,
             numOfOffersInEachScraper: numOfOffersPerDateRange / numOfScrapers,
-            scrapersToExecute: directSiteScrapers.map((s) => s.name), // execute all scrapers
+            //numGuests make sure to add this
           }),
         ),
       ).then((res) => res.flat());
@@ -754,16 +786,16 @@ export const offersRouter = createTRPCRouter({
       z.object({
         requestId: z.number(),
         numOfOffers: z.number().min(1).max(50),
-        scrapersToExecute: z
-          .array(z.string())
-          .default(directSiteScrapers.map((s) => s.name)), // execute all scrapers by default
+        // scrapersToExecute: z
+        //   .array(z.string())
+        //   .default(directSiteScrapers.map((s) => s.name)), // execute all scrapers by default
         location: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       const request = await ctx.db.query.requests.findFirst({
         where: eq(requests.id, input.requestId),
-        columns: { checkIn: true, checkOut: true, maxTotalPrice: true },
+        columns: { checkIn: true, checkOut: true, maxTotalPrice: true, numGuests: true },
       });
       if (!request) {
         throw new TRPCError({
@@ -779,8 +811,8 @@ export const offersRouter = createTRPCRouter({
           request.maxTotalPrice /
           getNumNights(request.checkIn, request.checkOut),
         requestId: input.requestId,
-        scrapersToExecute: input.scrapersToExecute,
         location: input.location,
+        numGuests: request.numGuests,
       }).catch((error) => {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -789,6 +821,30 @@ export const offersRouter = createTRPCRouter({
       });
     }),
 });
+
+export async function getPropertyForOffer(propertyId: number) {
+  return await db.query.properties.findFirst({
+    where: eq(properties.id, propertyId),
+    with: {
+      reviews: true,
+      host: {
+        columns: {
+          id: true,
+          name: true,
+          email: true,
+          image: true,
+        },
+        with: {
+          hostProfile: {
+            columns: {
+              userId: true,
+            },
+          },
+        },
+      },
+    },
+  });
+}
 
 export async function getOfferPageData(offerId: number) {
   return await db.query.offers.findFirst({
@@ -807,6 +863,8 @@ export async function getOfferPageData(offerId: number) {
       travelerOfferedPrice: true,
       scrapeUrl: true,
       isAvailableOnOriginalSite: true,
+      randomDirectListingDiscount: true,
+      datePriceFromAirbnb: true,
     },
     with: {
       request: {
@@ -817,29 +875,6 @@ export async function getOfferPageData(offerId: number) {
           numGuests: true,
           location: true,
           id: true,
-        },
-      },
-      property: {
-        columns: {
-          latLngPoint: false,
-        },
-        with: {
-          reviews: true,
-          host: {
-            columns: {
-              id: true,
-              name: true,
-              email: true,
-              image: true,
-            },
-            with: {
-              hostProfile: {
-                columns: {
-                  userId: true,
-                },
-              },
-            },
-          },
         },
       },
     },

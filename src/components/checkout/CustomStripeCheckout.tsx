@@ -32,7 +32,11 @@ const CustomStripeCheckout = ({
     [offer.checkIn, offer.checkOut],
   );
   const originalTotal = useMemo(
-    () => property.originalNightlyPrice! * numNights,
+    () =>
+      offer.randomDirectListingDiscount
+        ? (offer.randomDirectListingDiscount / 100 + 1) *
+          offer.travelerOfferedPrice
+        : property.originalNightlyPrice! * numNights,
     [property.originalNightlyPrice, numNights],
   );
 
@@ -40,7 +44,7 @@ const CustomStripeCheckout = ({
     if (offer.scrapeUrl) {
       console.log("Direct Listing");
       return getDirectListingPriceBreakdown({
-        bookingCost: offer.totalPrice,
+        bookingCost: offer.travelerOfferedPrice,
       });
     } else {
       console.log("not a direct Listing");
@@ -51,12 +55,7 @@ const CustomStripeCheckout = ({
         tax: TAX_PERCENTAGE,
       });
     }
-  }, [
-    offer.scrapeUrl,
-    offer.totalPrice,
-    offer.travelerOfferedPrice,
-    numNights,
-  ]);
+  }, [offer.scrapeUrl, offer.travelerOfferedPrice, numNights]);
 
   const [options, setOptions] = useState<StripeElementsOptions | undefined>(
     undefined,

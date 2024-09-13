@@ -10,8 +10,9 @@ import {
 import axios from "axios";
 import { type NextApiRequest, type NextApiResponse } from "next";
 import { db } from "@/server/db";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { sendSlackMessage } from "@/server/slack";
+import { createLatLngGISPoint } from "@/server/server-utils";
 
 export async function insertHost(id: string) {
   // Insert Host info
@@ -324,6 +325,7 @@ export default async function webhook(
         }
 
         // Insert data into the reservedDates table
+        const latLngPoint = createLatLngGISPoint({ lat: webhookData.data.address.latitude, lng: webhookData.data.address.longitude });
 
         const propertyObject = {
           hostId: userId,
@@ -335,8 +337,9 @@ export default async function webhook(
           numBeds: webhookData.data.capacity.beds,
           numBedrooms: webhookData.data.capacity.bedrooms,
           numBathrooms: webhookData.data.capacity.bathrooms,
-          latitude: webhookData.data.address.latitude,
-          longitude: webhookData.data.address.longitude,
+          // latitude: webhookData.data.address.latitude,
+          // longitude: webhookData.data.address.longitude,
+          latLngPoint: latLngPoint,
           city: webhookData.data.address.city,
           hostName: webhookData.data.channel.customer.name,
           name: webhookData.data.public_name,

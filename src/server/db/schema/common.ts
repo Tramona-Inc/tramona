@@ -74,6 +74,8 @@ export const ALL_LISTING_SITE_NAMES = [
   "CB Island Vacations",
   "IntegrityArizona",
   "Evolve",
+  "Cleanbnb",
+  "Casamundo",
 ] as const;
 
 export type ListingSiteName = (typeof ALL_LISTING_SITE_NAMES)[number];
