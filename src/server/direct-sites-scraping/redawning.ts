@@ -134,7 +134,6 @@ export const mapTaxodataToScrapedListing = async (
         // scrape the property page
         const safeUrl = ensureHttps(property.url);
         const $ = await scrapeUrlLikeHuman(safeUrl);
-        let propertyDetails = {};
 
         // Scrape the "Sleeps 12" from the HTML
         const propDetails = $(".qb-prop-details").text();
@@ -251,7 +250,13 @@ export const mapTaxodataToScrapedListing = async (
           scrapeUrl: safeUrl,
         };
       } catch (error) {
-        console.error("Error scraping property:", property.pid);
+        console.error(
+          "Error scraping RedAwning property: ",
+          property.pid,
+          ", so this property has been skipped. ",
+          "Error detail: ",
+          error,
+        );
         // Return null for this iteration, skipping this property
         return null;
       }
@@ -281,14 +286,20 @@ export const redawningScraper: DirectSiteScraper = async ({
   const scriptContent = $("script")
     .toArray()
     .find((script) => $(script).html()!.includes("var taxodata"));
-  if (scriptContent) {
-    const scriptText = $(scriptContent).html();
-    const dataStart = scriptText!.indexOf("[{");
-    const dataEnd = scriptText!.lastIndexOf("}]") + 2;
-    const taxoDataJsonString = scriptText!.substring(dataStart, dataEnd);
-    const taxoDataJson = JSON.parse(taxoDataJsonString);
-    const taxoDataOg = taxoDataSchema.parse(taxoDataJson);
-    taxodata.push(...taxoDataOg.slice(0, 25)); // numOfOffersInEachScraper = 25
+  try {
+    if (scriptContent) {
+      const scriptText = $(scriptContent).html();
+      const dataStart = scriptText!.indexOf("[{");
+      const dataEnd = scriptText!.lastIndexOf("}]") + 2;
+      const taxoDataJsonString = scriptText!.substring(dataStart, dataEnd);
+      const taxoDataJson = JSON.parse(taxoDataJsonString);
+      const taxoDataOg = taxoDataSchema.parse(taxoDataJson);
+      taxodata.push(...taxoDataOg.slice(0, 25)); // numOfOffersInEachScraper = 25
+    }
+  } catch (error) {
+    // hit here when the scraper found nothing on the RedAwning website
+    // console.error("Error parsing RedAwning data: ", error);
+    return [];
   }
   const numOfNights = getNumNights(checkIn, checkOut);
   if (taxodata.length === 0) {
