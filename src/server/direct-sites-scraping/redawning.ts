@@ -1,10 +1,12 @@
 // curl 'https://api.redawning.com/v1/propertycollections/1503/listings' \
 //   -H 'x-api-key: ehMtnGSw4i7dFqngWo8M15cWaqzKPM4V2jeU3zty'
 import { scrapeUrlLikeHuman } from "@/server/server-utils";
+import { scrapeUrlLikeHuman } from "@/server/server-utils";
 import { DirectSiteScraper, ScrapedListing, SubsequentScraper } from ".";
 import { z } from "zod";
 import axios from "axios";
 import { axiosWithRetry } from "@/server/server-utils";
+import { formatDateYearMonthDay, getNumNights, parseHTML } from "@/utils/utils";
 import { formatDateYearMonthDay, getNumNights, parseHTML } from "@/utils/utils";
 import { PropertyType, ListingSiteName } from "@/server/db/schema/common";
 
