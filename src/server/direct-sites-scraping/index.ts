@@ -84,7 +84,6 @@ export const scrapeDirectListings = async (options: {
   requestNightlyPrice?: number;
   requestId?: number;
   location?: string;
-  numGuests?: number;
   latitude?: number;
   longitude?: number;
   numGuests?: number;
