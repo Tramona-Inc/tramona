@@ -109,9 +109,9 @@ type EvolveSearchResult = z.infer<typeof EvolveSearchResultSchema>;
 const fetchSearchResults = async (
   lat: number,
   lng: number,
-  numGuests: number,
   checkIn: Date,
   checkOut: Date,
+  numGuests?: number,
   scrapeUrl?: string,
 ): Promise<EvolveSearchResult[]> => {
   const client = algoliasearch(
@@ -245,21 +245,23 @@ const fetchPropertyDetails = async (
   maxNumGuests: number,
   checkIn: Date,
   checkOut: Date,
-  numGuests: number,
   urlLocationParam: string,
   latitude: number,
   longitude: number,
+  numGuests?: number,
 ): Promise<ScrapedListing | null> => {
   try {
     const url = `https://evolve.com/vacation-rentals${urlLocationParam}/${propertyId}?adults=${numGuests}&startDate=${checkIn.toISOString().split("T")[0]}&endDate=${checkOut.toISOString().split("T")[0]}`;
-    
+
     const headers = {
-      "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+      accept:
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
       "accept-language": "en-US,en;q=0.9",
       "cache-control": "max-age=0",
-      "sec-ch-ua": "\"Chromium\";v=\"128\", \"Not;A=Brand\";v=\"24\", \"Google Chrome\";v=\"128\"",
+      "sec-ch-ua":
+        '"Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"',
       "sec-ch-ua-mobile": "?0",
-      "sec-ch-ua-platform": "\"macOS\"",
+      "sec-ch-ua-platform": '"macOS"',
       "sec-fetch-dest": "document",
       "sec-fetch-mode": "navigate",
       "sec-fetch-site": "none",
@@ -267,7 +269,6 @@ const fetchPropertyDetails = async (
       "upgrade-insecure-requests": "1",
     };
 
-    
     const response = await axios.get(url, { headers });
 
     const $ = cheerio.load(response.data as string);
@@ -281,21 +282,25 @@ const fetchPropertyDetails = async (
       throw new Error("Could not extract JSON data from script");
     }
 
-    const parsedData = JSON.parse(jsonMatch[1]) as { props?: { pageProps?: { listingReviews?: unknown[] } } };
+    const parsedData = JSON.parse(jsonMatch[1]) as {
+      props?: { pageProps?: { listingReviews?: unknown[] } };
+    };
     const listingReviews = parsedData.props?.pageProps?.listingReviews ?? [];
 
     const validatedReviews = listingReviews
-      .map(review => ReviewDataSchema.safeParse(review))
-      .filter((result): result is z.SafeParseSuccess<ReviewData> => result.success)
-      .map(result => result.data);
+      .map((review) => ReviewDataSchema.safeParse(review))
+      .filter(
+        (result): result is z.SafeParseSuccess<ReviewData> => result.success,
+      )
+      .map((result) => result.data);
 
     const formattedReviews: Review[] = validatedReviews.map((review) => ({
       name: review.reviewedBy,
       profilePic: "",
       rating: parseInt(review.rating),
       review: review.reviewDetail
-        .replace(/\u003cbr\u003e/g, '\n')
-        .replace(/\*This review was originally posted on Vrbo/g, '')
+        .replace(/\u003cbr\u003e/g, "\n")
+        .replace(/\*This review was originally posted on Vrbo/g, "")
         .trim(),
     }));
 
@@ -390,8 +395,10 @@ const fetchPropertyDetails = async (
       propertyType: mapPropertyType(propertyDetails.propertyType),
       address,
       city,
-      latitude: propertyDetails.latitude,
-      longitude: propertyDetails.longitude,
+      latLngPoint: {
+        lat: propertyDetails.latitude,
+        lng: propertyDetails.longitude,
+      },
       maxNumGuests: propertyDetails.maxOccupancy,
       numBeds,
       numBedrooms: propertyDetails.bedrooms,
@@ -422,7 +429,7 @@ const refetchPrice = async (
 ): Promise<number> => {
   try {
     const url = new URL(scrapeUrl);
-    const numberOfAdults = parseInt(url.searchParams.get('adults') ?? '0', 10);
+    const numberOfAdults = parseInt(url.searchParams.get("adults") ?? "0", 10);
 
     const quoteUrl = "https://evolve.com/api/quotes";
     const quoteData = {
@@ -501,9 +508,9 @@ export const evolveVacationRentalScraper: DirectSiteScraper = async ({
   const searchResults = await fetchSearchResults(
     lat,
     lng,
-    numGuests,
     checkIn,
     checkOut,
+    numGuests,
   );
 
   const availableProperties: ScrapedListing[] = (
@@ -520,15 +527,15 @@ export const evolveVacationRentalScraper: DirectSiteScraper = async ({
             result["Max Occupancy"],
             checkIn,
             checkOut,
-            numGuests,
             urlLocationParam,
             result._geoloc.lat,
             result._geoloc.lng,
+            numGuests,
           ),
         ),
     )
   ).filter((property): property is ScrapedListing => property !== null);
-  return availableProperties
+  return availableProperties;
 };
 
 export const evolveVacationRentalSubScraper: SubsequentScraper = async ({
@@ -541,11 +548,12 @@ export const evolveVacationRentalSubScraper: SubsequentScraper = async ({
     const availablePropertyIds = await fetchSearchResults(
       0,
       0,
-      0,
       checkIn,
       checkOut,
+      0,
       scrapeUrl,
     );
+
     const isAvailable = availablePropertyIds.some(
       (prop) => prop.objectID === originalListingId,
     );
@@ -576,4 +584,3 @@ export const evolveVacationRentalSubScraper: SubsequentScraper = async ({
     };
   }
 };
-
