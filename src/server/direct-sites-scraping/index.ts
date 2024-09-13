@@ -33,7 +33,6 @@ import { cleanbnbScraper, cleanbnbSubScraper } from "./cleanbnb-scrape";
 export type DirectSiteScraper = (options: {
   checkIn: Date;
   checkOut: Date;
-  numOfOffersInEachScraper?: number;
   requestNightlyPrice?: number; // when the scraper is used by traveler request page
   requestId?: number; // when the scraper is used by traveler request page
   location?: string;
@@ -89,7 +88,6 @@ const filterNewPropertyFields = (listing: ScrapedListing): NewProperty => {
 export const scrapeDirectListings = async (options: {
   checkIn: Date;
   checkOut: Date;
-  numOfOffersInEachScraper?: number;
   requestNightlyPrice?: number;
   requestId?: number;
   location?: string;
@@ -109,6 +107,9 @@ export const scrapeDirectListings = async (options: {
   const allListings = await Promise.all(
     directSiteScrapers.map((s) => s.scraper(options)),
   );
+
+  console.log('DONE');
+  console.log(allListings[0]);
 
   const listings = allListings
     .flat()
