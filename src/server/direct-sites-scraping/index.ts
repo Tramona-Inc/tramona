@@ -104,14 +104,6 @@ export const scrapeDirectListings = async (options: {
 
   const flatListings = allListings.flat();
 
-  flatListings.forEach((listing) => {
-    console.log(
-      "platform: ",
-      listing.originalListingPlatform,
-      "originalNightlyPrice: ",
-      listing.originalNightlyPrice,
-    );
-  });
   // dynamically expand the price range to find at least 1 listing between 50% - 170% of the requested price
   let upperPercentage = 110;
   let lowerPercentage = 80;
@@ -119,7 +111,7 @@ export const scrapeDirectListings = async (options: {
   do {
     const lowerPrice = requestNightlyPrice * (lowerPercentage / 100);
     const upperPrice = requestNightlyPrice * (upperPercentage / 100);
-    console.log("lowerPrice: ", lowerPrice, "upperPrice: ", upperPrice);
+
     fairListings = flatListings.filter((listing) => {
       return (
         listing.originalNightlyPrice !== null &&
@@ -143,16 +135,6 @@ export const scrapeDirectListings = async (options: {
     lowerPercentage >= 50
   );
 
-  console.log("fairListings: ", fairListings.length);
-  fairListings.forEach((listing) => {
-    console.log(
-      "platform: ",
-      listing.originalListingPlatform,
-      "originalNightlyPrice: ",
-      listing.originalNightlyPrice,
-    );
-  });
-
   const listings = fairListings
     .sort((a, b) => {
       const aDiff = Math.abs(
@@ -165,15 +147,15 @@ export const scrapeDirectListings = async (options: {
     })
     .slice(0, 10); // Grab up to 10 listings
 
-  console.log("listings: ", listings.length);
-  listings.forEach((listing) => {
-    console.log(
-      "platform: ",
-      listing.originalListingPlatform,
-      "originalNightlyPrice: ",
-      listing.originalNightlyPrice,
-    );
-  });
+  // console.log("listings: ", listings.length);
+  // listings.forEach((listing) => {
+  //   console.log(
+  //     "platform: ",
+  //     listing.originalListingPlatform,
+  //     "originalNightlyPrice: ",
+  //     listing.originalNightlyPrice,
+  //   );
+  // });
 
   if (listings.length > 0) {
     await db.transaction(async (trx) => {
