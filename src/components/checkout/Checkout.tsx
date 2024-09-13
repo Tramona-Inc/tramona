@@ -4,11 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { Separator } from "../ui/separator";
 import { Avatar, AvatarImage } from "../ui/avatar";
-import {
-  getOfferDiscountPercentage,
-  getNumNights,
-  useIsSm,
-} from "@/utils/utils";
+import { getOfferDiscountPercentage, useIsSm } from "@/utils/utils";
 import { type OfferWithDetails } from "../offers/PropertyPage";
 import { formatDateMonthDay, plural } from "@/utils/utils";
 import { useChatWithAdmin } from "@/utils/messaging/useChatWithAdmin";
