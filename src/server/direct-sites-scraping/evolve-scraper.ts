@@ -524,10 +524,6 @@ export const evolveVacationRentalScraper: DirectSiteScraper = async ({
 
   const availableProperties: ScrapedListing[] = [];
   for (const result of searchResults) {
-    if (availableProperties.length >= numOfOffersInEachScraper) {
-      break;
-    }
-
     const property = await fetchPropertyDetails(
       result.objectID,
       result.Headline,
