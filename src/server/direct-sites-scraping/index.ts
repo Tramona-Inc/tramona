@@ -67,7 +67,7 @@ export const directSiteScrapers: NamedDirectSiteScraper[] = [
   // add more scrapers here
   { name: "cleanbnbScraper", scraper: cleanbnbScraper },
   { name: "arizonaScraper", scraper: arizonaScraper },
-  { name: "cbIslandVacationsScraper", scraper: cbIslandVacationsScraper },
+  // { name: "cbIslandVacationsScraper", scraper: cbIslandVacationsScraper },
   { name: "redawningScraper", scraper: redawningScraper },
   { name: "casamundoScraper", scraper: casamundoScraper },
 ];
@@ -92,28 +92,68 @@ export const scrapeDirectListings = async (options: {
   longitude?: number;
   numGuests?: number;
 }) => {
-  const { requestNightlyPrice } = options;
+  const { requestNightlyPrice } = options; // in cents
 
   if (!requestNightlyPrice) {
     throw new Error("requestNightlyPrice is required");
   }
 
-  const minPrice = requestNightlyPrice * 0.8;
-  const maxPrice = requestNightlyPrice * 1.1;
-
   const allListings = await Promise.all(
     directSiteScrapers.map((s) => s.scraper(options)),
   );
 
-  const listings = allListings
-    .flat()
-    .filter(
-      (listing) =>
+  const flatListings = allListings.flat();
+
+  flatListings.forEach((listing) => {
+    console.log(
+      "platform: ",
+      listing.originalListingPlatform,
+      "originalNightlyPrice: ",
+      listing.originalNightlyPrice,
+    );
+  });
+  // dynamically expand the price range to find at least 1 listing between 50% - 170% of the requested price
+  let upperPercentage = 110;
+  let lowerPercentage = 80;
+  let fairListings;
+  do {
+    const lowerPrice = requestNightlyPrice * (lowerPercentage / 100);
+    const upperPrice = requestNightlyPrice * (upperPercentage / 100);
+    console.log("lowerPrice: ", lowerPrice, "upperPrice: ", upperPrice);
+    fairListings = flatListings.filter((listing) => {
+      return (
         listing.originalNightlyPrice !== null &&
         listing.originalNightlyPrice !== undefined &&
-        listing.originalNightlyPrice >= minPrice &&
-        listing.originalNightlyPrice <= maxPrice,
-    )
+        listing.originalNightlyPrice >= lowerPrice &&
+        listing.originalNightlyPrice <= upperPrice
+      );
+    });
+
+    if (
+      fairListings.length < 1 &&
+      upperPercentage <= 170 &&
+      lowerPercentage >= 50
+    ) {
+      upperPercentage += 20;
+      lowerPercentage -= 10;
+    }
+  } while (
+    fairListings.length < 1 &&
+    upperPercentage <= 170 &&
+    lowerPercentage >= 50
+  );
+
+  console.log("fairListings: ", fairListings.length);
+  fairListings.forEach((listing) => {
+    console.log(
+      "platform: ",
+      listing.originalListingPlatform,
+      "originalNightlyPrice: ",
+      listing.originalNightlyPrice,
+    );
+  });
+
+  const listings = fairListings
     .sort((a, b) => {
       const aDiff = Math.abs(
         (a.originalNightlyPrice ?? 0) - requestNightlyPrice,
@@ -124,6 +164,16 @@ export const scrapeDirectListings = async (options: {
       return aDiff - bDiff;
     })
     .slice(0, 10); // Grab up to 10 listings
+
+  console.log("listings: ", listings.length);
+  listings.forEach((listing) => {
+    console.log(
+      "platform: ",
+      listing.originalListingPlatform,
+      "originalNightlyPrice: ",
+      listing.originalNightlyPrice,
+    );
+  });
 
   if (listings.length > 0) {
     await db.transaction(async (trx) => {

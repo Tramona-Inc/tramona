@@ -1,11 +1,11 @@
 // curl 'https://api.redawning.com/v1/propertycollections/1503/listings' \
 //   -H 'x-api-key: ehMtnGSw4i7dFqngWo8M15cWaqzKPM4V2jeU3zty'
-import { scrapeUrl, scrapeUrlLikeHuman } from "@/server/server-utils";
+import { scrapeUrlLikeHuman } from "@/server/server-utils";
 import { DirectSiteScraper, ScrapedListing, SubsequentScraper } from ".";
 import { z } from "zod";
 import axios from "axios";
 import { axiosWithRetry } from "@/server/server-utils";
-import { formatDateYearMonthDay, getNumNights } from "@/utils/utils";
+import { formatDateYearMonthDay, getNumNights, parseHTML } from "@/utils/utils";
 import { PropertyType, ListingSiteName } from "@/server/db/schema/common";
 
 const taxoDataSchema = z.array(
@@ -216,13 +216,13 @@ export const mapTaxodataToScrapedListing = async (
         return {
           originalListingId: property.pid.toString(),
           name: property.title,
-          about: description,
+          about: parseHTML(description),
           propertyType: mapPropertyType(originalType),
           address: city, // cannot find detailed address in the website
           city: city,
           latLngPoint: {
-            x: parseFloat(property.longitude),
-            y: parseFloat(property.latitude),
+            lng: parseFloat(property.longitude),
+            lat: parseFloat(property.latitude),
           },
           maxNumGuests: maxNumGuests,
           numBeds: property.bedrooms,
@@ -274,7 +274,7 @@ export const redawningScraper: DirectSiteScraper = async ({
   }
   const url = `https://www.redawning.com/search/properties?ptype=locality&platitude=${latitude}&plongitude=${longitude}&pcountry=US&pname=${location}&sleepsmax=1TO100&dates=${convertToEpochAt7AM(checkIn)}TO${convertToEpochAt7AM(checkOut)}`;
   console.log("scrapedRedawningUrl: ", url);
-  const $ = await scrapeUrl(url);
+  const $ = await scrapeUrlLikeHuman(url);
   let taxodata = [];
 
   // Find the script containing 'taxodata' and parse its contents
@@ -288,7 +288,7 @@ export const redawningScraper: DirectSiteScraper = async ({
     const taxoDataJsonString = scriptText!.substring(dataStart, dataEnd);
     const taxoDataJson = JSON.parse(taxoDataJsonString);
     const taxoDataOg = taxoDataSchema.parse(taxoDataJson);
-    taxodata.push(...taxoDataOg);
+    taxodata.push(...taxoDataOg.slice(0, 25)); // numOfOffersInEachScraper = 25
   }
   const numOfNights = getNumNights(checkIn, checkOut);
   if (taxodata.length > 0) {
@@ -337,32 +337,8 @@ export const redawningScraper: DirectSiteScraper = async ({
     console.error("No available properties found");
   }
 
-  // dynamically expand the price range when fewer than 2 properties meet the criteria
-  let upperPercentage = 100;
-  let validListings;
-  do {
-    const lowerPrice = requestNightlyPrice! * numOfNights * 0.8;
-    const upperPrice =
-      requestNightlyPrice! * numOfNights * (upperPercentage / 100);
-
-    validListings = taxodata.filter((property) => {
-      return (
-        property.totalPrice &&
-        property.totalPrice >= lowerPrice &&
-        property.totalPrice <= upperPrice
-      );
-    });
-
-    if (validListings.length < 2 && upperPercentage <= 160) {
-      // Stop increasing if the upper limit reaches 160% of requestNightlyPrice
-      upperPercentage += 20;
-    }
-  } while (validListings.length < 2 && upperPercentage <= 160);
-
-  validListings = validListings.slice(0, numOfOffersInEachScraper);
-
   const listings = await mapTaxodataToScrapedListing(
-    validListings,
+    taxodata,
     checkIn,
     checkOut,
   );
