@@ -1,6 +1,10 @@
 import { type ListingSite } from ".";
 import { formatDateYearMonthDay } from "../utils";
 
+interface ExpandUrlResponse {
+  expandedUrl: string;
+}
+
 export const Airbnb: ListingSite = {
   siteName: "Airbnb",
   baseUrl: "https://www.airbnb.com",
@@ -20,6 +24,19 @@ export const Airbnb: ListingSite = {
       checkOut: urlObj.searchParams.get("check_out") ?? undefined,
       numGuests: numGuestsStr ? parseInt(numGuestsStr) : undefined,
     };
+  },
+
+  async expandUrl(url) {
+    try {
+      const response = await fetch(
+        `/api/lib/expandAirbnbUrl?url=${encodeURIComponent(url)}`,
+      );
+      const data = (await response.json()) as ExpandUrlResponse;
+      const expandedUrl: string = data.expandedUrl;
+      return expandedUrl;
+    } catch (error) {
+      console.error(error);
+    }
   },
 
   createListing(id) {
