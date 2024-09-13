@@ -3,6 +3,7 @@ import { offers, properties, reviews } from "@/server/db/schema";
 import { scrapeAirbnbListings } from "@/server/external-listings-scraping/airbnb";
 import { HOST_MARKUP, TRAVELER__MARKUP } from "@/utils/constants";
 import { RequestInput } from "./api/routers/requestsRouter";
+import { getNumNights } from "@/utils/utils";
 
 export async function scrapeAirbnbListingsForRequest(
   request: RequestInput,
@@ -49,7 +50,7 @@ export async function scrapeAirbnbListingsForRequest(
   await tx.insert(offers).values(
     airbnbListings.map((l, i) => ({
       requestId,
-      totalPrice: Math.round(l.nightlyPrice),
+      totalPrice: Math.round(l.nightlyPrice * getNumNights(request.checkIn, request.checkOut)),
       travelerOfferedPrice: Math.round(l.nightlyPrice * TRAVELER__MARKUP),
       hostPayout: Math.round(l.nightlyPrice * HOST_MARKUP),
       checkIn: request.checkIn,

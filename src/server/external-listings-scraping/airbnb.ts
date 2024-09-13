@@ -62,13 +62,10 @@ export const scrapeAirbnbListings = async ({
           bookOnAirbnb: true,
         };
 
-        console.log(completeProperty);
-        const totalPrice = nightlyPrice * numNights;
-
         return {
           property: completeProperty,
           reviews,
-          totalPrice,
+          nightlyPrice,
         };
       },
     ),
