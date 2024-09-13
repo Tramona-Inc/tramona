@@ -291,6 +291,9 @@ export const redawningScraper: DirectSiteScraper = async ({
     taxodata.push(...taxoDataOg.slice(0, 25)); // numOfOffersInEachScraper = 25
   }
   const numOfNights = getNumNights(checkIn, checkOut);
+  if (taxodata.length === 0) {
+    return [];
+  }
   if (taxodata.length > 0) {
     const processedTaxoData = await Promise.all(
       taxodata.map(async (property) => {
