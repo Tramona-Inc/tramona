@@ -396,7 +396,7 @@ const fetchReviews = async (
         Boolean(review.text),
       )
       .map((review) => ({
-        name: review.nickname,
+        name: review.nickname ?? "Anonymous",
         profilePic: "",
         rating: review.rating.value,
         review: review.text,
