@@ -71,10 +71,10 @@ export const directSiteScrapers: NamedDirectSiteScraper[] = [
   // arizonaScraper,
   // cbIslandVacationsScraper,
   { name: "evolveVacationRentalScraper", scraper: evolveVacationRentalScraper },
-  { name: "cleanbnbScraper", scraper: cleanbnbScraper },
-  { name: "arizonaScraper", scraper: arizonaScraper },
-  { name: "cbIslandVacationsScraper", scraper: cbIslandVacationsScraper },
-  { name: "casamundoScraper", scraper: casamundoScraper },
+  // { name: "cleanbnbScraper", scraper: cleanbnbScraper },
+  // { name: "arizonaScraper", scraper: arizonaScraper },
+  // { name: "cbIslandVacationsScraper", scraper: cbIslandVacationsScraper },
+  // { name: "casamundoScraper", scraper: casamundoScraper },
 ];
 
 // Helper function to filter out fields not in NewProperty

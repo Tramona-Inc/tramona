@@ -113,6 +113,7 @@ const fetchSearchResults = async (
   checkOut: Date,
   numGuests?: number,
   scrapeUrl?: string,
+  requestNightlyPrice?: number
 ): Promise<EvolveSearchResult[]> => {
   const client = algoliasearch(
     "2U6AXFDIV3",
@@ -162,6 +163,18 @@ const fetchSearchResults = async (
 
   const filters = [...availabilityFilters, ...minStayFilters].join(" AND ");
 
+  // let numericFilters = [
+  //   `Max Occupancy>=${searchNumGuests}`,
+  //   "Max Occupancy<=99",
+  // ];
+
+  // if (requestNightlyPrice) {
+  //   const minPrice = Math.round(requestNightlyPrice * 0.8); // assuming requestNightlyPrice is in dollars
+  //   const maxPrice = Math.round(requestNightlyPrice * 1.1);
+  //   numericFilters.push(`LOS_PriceAverages.${startDate}.${numNights}>=${minPrice}`);
+  //   numericFilters.push(`LOS_PriceAverages.${startDate}.${numNights}<=${maxPrice}`);
+  // }
+
   try {
     const { results } = await client.search([
       {
@@ -177,7 +190,8 @@ const fetchSearchResults = async (
             "amenities.Amenities",
             "amenities.Accessibility",
             "amenities.Area Activities",
-            `LOS_PriceAverages.${startDate}.${numNights}`,
+            "minLOS_PriceAverages",
+            "maxLOS_PriceAverages",
             "Max Occupancy",
             "Bedrooms",
             "Total Beds",
@@ -189,11 +203,7 @@ const fetchSearchResults = async (
           ],
           getRankingInfo: true,
           maxValuesPerFacet: 300,
-          numericFilters: [
-            `Max Occupancy>=${searchNumGuests}`,
-            "Max Occupancy<=99",
-            // `LOS_PriceAverages.${startDate}.${numNights}:>0`,
-          ],
+          // numericFilters,
           page: 0,
           hitsPerPage: 24,
           analytics: true,
@@ -270,7 +280,6 @@ const fetchPropertyDetails = async (
     };
 
     const response = await axios.get(url, { headers });
-
     const $ = cheerio.load(response.data as string);
 
     const scriptContent = $('script:contains("listingReviews")').html();
@@ -295,7 +304,7 @@ const fetchPropertyDetails = async (
       .map((result) => result.data);
 
     const formattedReviews: Review[] = validatedReviews.map((review) => ({
-      name: review.reviewedBy,
+      name: review.reviewedBy ?? "Anonymous",
       profilePic: "",
       rating: parseInt(review.rating),
       review: review.reviewDetail
@@ -415,10 +424,8 @@ const fetchPropertyDetails = async (
       scrapeUrl: url,
     };
   } catch (error) {
-    console.error(`Error fetching details for property ${propertyId}:`);
+    return null;
   }
-  console.error("Error fetching property details");
-  return null;
 };
 
 const refetchPrice = async (
@@ -475,6 +482,7 @@ export const evolveVacationRentalScraper: DirectSiteScraper = async ({
   checkOut,
   numOfOffersInEachScraper = 5,
   location,
+  requestNightlyPrice
 }) => {
   if (!location) {
     throw new Error("Location must be provided for Evolve scraper");
@@ -503,7 +511,6 @@ export const evolveVacationRentalScraper: DirectSiteScraper = async ({
     urlLocationParam += `/${formattedState}`;
   }
   urlLocationParam += `/${formattedCity}`;
-  console.log("URL:", urlLocationParam);
 
   const searchResults = await fetchSearchResults(
     lat,
@@ -511,30 +518,34 @@ export const evolveVacationRentalScraper: DirectSiteScraper = async ({
     checkIn,
     checkOut,
     numGuests,
+    undefined,
+    requestNightlyPrice,
   );
 
-  const availableProperties: ScrapedListing[] = (
-    await Promise.all(
-      searchResults
-        .slice(0, numOfOffersInEachScraper)
-        .map((result) =>
-          fetchPropertyDetails(
-            result.objectID,
-            result.Headline,
-            result.Bathrooms,
-            result.Bedrooms,
-            result["Total Beds"],
-            result["Max Occupancy"],
-            checkIn,
-            checkOut,
-            urlLocationParam,
-            result._geoloc.lat,
-            result._geoloc.lng,
-            numGuests,
-          ),
-        ),
-    )
-  ).filter((property): property is ScrapedListing => property !== null);
+  const availableProperties: ScrapedListing[] = [];
+  for (const result of searchResults) {
+    if (availableProperties.length >= numOfOffersInEachScraper) {
+      break;
+    }
+
+    const property = await fetchPropertyDetails(
+      result.objectID,
+      result.Headline,
+      result.Bathrooms,
+      result.Bedrooms,
+      result["Total Beds"],
+      result["Max Occupancy"],
+      checkIn,
+      checkOut,
+      urlLocationParam,
+      result._geoloc.lat,
+      result._geoloc.lng,
+      numGuests,
+    );
+    if (property) {
+      availableProperties.push(property);
+    }
+  }
   return availableProperties;
 };
 
