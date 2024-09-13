@@ -464,12 +464,8 @@ export const cbIslandVacationsScraper: DirectSiteScraper = async ({
 
   const availableProperties: ScrapedListing[] = [];
 
-  const numToScrape = numOfOffersInEachScraper ?? 10;
-
   for (const eid of propertyEids) {
-    if (availableProperties.length >= numToScrape) {
-      break;
-    }
+
     const solrUrl = "https://www.cbislandvacations.com/solr/";
     const formData = querystring.stringify({
       fq: "index_id:rci",
