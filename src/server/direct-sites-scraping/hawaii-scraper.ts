@@ -129,7 +129,7 @@ const HAWAII_BOUNDS = {
   north: 22.2337,
   south: 18.8605,
   west: -160.2471,
-  east: -154.7931
+  east: -154.7931,
 };
 
 function isWithinHawaii(lat: number, lng: number): boolean {
@@ -140,7 +140,6 @@ function isWithinHawaii(lat: number, lng: number): boolean {
     lng <= HAWAII_BOUNDS.east
   );
 }
-
 
 function mapPropertyType(scrapedType: string): PropertyType {
   const normalizedType = scrapedType.trim().toLowerCase();
@@ -263,61 +262,114 @@ function isPriceFilteredProperty(item: unknown): item is PriceFilteredProperty {
   );
 }
 
+function extractTotalFromContent(content: string): number {
+  const $ = cheerio.load(content);
+  const totalElement = $("tr.total td.amount b");
+
+  if (totalElement.length > 0) {
+    const totalText = totalElement.text().trim();
+    const totalPrice = parseFloat(totalText.replace(/[$,]/g, ""));
+
+    if (!isNaN(totalPrice)) {
+      return totalPrice * 100; // Convert to cents
+    } else {
+      console.error(`Failed to parse price from text: ${totalText}`);
+    }
+  } else {
+    console.error("Total price element not found in the content");
+  }
+
+  throw new Error("Failed to extract total price");
+}
+
 async function scrapeFinalPrice(
   eid: string,
   checkIn: Date,
   checkOut: Date,
+  numGuests?: number,
+  scrapeUrl?: string,
 ): Promise<number> {
+  let numGuestsToUse = numGuests ?? 1;
+  if (scrapeUrl) {
+    const url = new URL(scrapeUrl);
+    const searchParams = url.searchParams;
+    numGuestsToUse = parseInt(searchParams.get("rcav[adult]") ?? "1");
+  }
+
   const startDate = checkIn.toISOString().split("T")[0];
   const endDate = checkOut.toISOString().split("T")[0];
-  const url = `https://www.cbislandvacations.com/rescms/item/${eid}/buy?rcav%5Bbegin%5D=${encodeURIComponent(startDate ?? "")}&rcav%5Bend%5D=${encodeURIComponent(endDate ?? "")}&rcav%5Badult%5D=1&rcav%5Bchild%5D=0&eid=${eid}`;
+
+  const url = `https://www.cbislandvacations.com/rescms/ajax/item/pricing/quote`;
+
+  const params = new URLSearchParams({
+    "rcav[begin]": startDate,
+    "rcav[end]": endDate,
+    "rcav[adult]": numGuestsToUse.toString(),
+    "rcav[child]": "0",
+    "rcav[eid]": eid,
+    eid: eid,
+    buy_text: "Book Now",
+  });
 
   try {
-    const response = await axios.get(url);
-    const $ = cheerio.load(response.data as string);
-
-    const totalPriceElement = $("tr.total td.amount b");
-    if (totalPriceElement.length > 0) {
-      const priceText = totalPriceElement.text().trim();
-      const price = parseFloat(priceText.replace("$", "").replace(",", ""));
-      return price * 100; // Convert to cents
+    const response = await axios.get(`${url}?${params.toString()}`, {
+      headers: {
+        accept: "application/json, text/javascript, */*; q=0.01",
+        "accept-language": "en-US,en;q=0.9",
+        "sec-ch-ua":
+          '"Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"',
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": '"macOS"',
+        "x-requested-with": "XMLHttpRequest",
+        Referer:
+          "https://www.cbislandvacations.com/hawaii-vacation-rentals/palms-wailea-206",
+        "Referrer-Policy": "strict-origin-when-cross-origin",
+      },
+    });
+    if (response.data && response.data.status === 1 && response.data.content) {
+      return extractTotalFromContent(response.data.content);
     } else {
-      console.error(`Failed to find total price element for property ${eid}`);
-      return 0;
+      console.error("Unexpected API response format:", response.data);
+      return -1;
     }
   } catch (error) {
-    console.error(`Error scraping final price for property ${eid}:`, error);
-    return 0;
+    console.error(`Error fetching price for property ${eid}:`, error);
+    return -1;
   }
 }
 
 const fetchAvailablePropertyEids = async (
   startDate: Date,
   endDate: Date,
-  adults = 1,
-  children = 0,
+  numGuests?: number,
+  scrapeUrl?: string,
 ): Promise<string[]> => {
+  let numGuestsToUse = numGuests ?? 1;
+
+  if (scrapeUrl) {
+    const url = new URL(scrapeUrl);
+    const searchParams = url.searchParams;
+    numGuestsToUse = parseInt(searchParams.get("rcav[adult]") ?? "1");
+  }
+
   const filteredPropertiesUrl =
     "https://www.cbislandvacations.com/rcapi/item/avail/search";
 
   const params = new URLSearchParams({
     "rcav[begin]": startDate.toISOString().split("T")[0] ?? "",
     "rcav[end]": endDate.toISOString().split("T")[0] ?? "",
-    "rcav[adult]": adults.toString(),
-    "rcav[child]": children.toString(),
+    "rcav[adult]": numGuestsToUse.toString(),
+    "rcav[child]": "0",
     "rcav[flex]": "",
     "rcav[flex_type]": "d",
   });
 
   const url = `${filteredPropertiesUrl}?${params.toString()}`;
-  console.log("Sending request to URL:", url);
 
   try {
     const response = await axios.get(url);
-    console.log("Response status:", response.status);
 
     if (Array.isArray(response.data)) {
-      console.log(`Found ${response.data.length} available properties`);
 
       const uniqueEids = new Set<string>();
 
@@ -333,7 +385,6 @@ const fetchAvailablePropertyEids = async (
       });
 
       const allUniqueEids = Array.from(uniqueEids);
-      console.log("All unique property IDs:", allUniqueEids);
       return allUniqueEids;
     } else return [];
   } catch (error) {
@@ -353,7 +404,6 @@ const mapToScrapedListing = (
   description: string,
   originalNightlyPrice: number,
 ): ScrapedListing => {
-
   const latLngPoint = {
     x: prop.fs_nid$field_location$longitude,
     y: prop.fs_nid$field_location$latitude,
@@ -366,8 +416,6 @@ const mapToScrapedListing = (
     propertyType: mapPropertyType(prop.sm_nid$rc_core_term_type$name[0] ?? ""),
     address: address,
     city: prop.sm_nid$rc_core_term_city_type$name[0] ?? "",
-    // latitude: prop.fs_nid$field_location$latitude,
-    // longitude: prop.fs_nid$field_location$longitude,
     latLngPoint,
     maxNumGuests: prop.is_rc_core_lodging_product$occ_total,
     numBeds: prop.fs_rc_core_lodging_product$beds,
@@ -389,10 +437,11 @@ const mapToScrapedListing = (
 export const cbIslandVacationsScraper: DirectSiteScraper = async ({
   checkIn,
   checkOut,
-  numOfOffersInEachScraper = 5,
+  numOfOffersInEachScraper,
   requestNightlyPrice,
   requestId,
   location,
+  numGuests,
 }) => {
   if (location) {
     const coordinates = await getCoordinates(location);
@@ -408,13 +457,20 @@ export const cbIslandVacationsScraper: DirectSiteScraper = async ({
     }
   }
 
-  const propertyEids = await fetchAvailablePropertyEids(checkIn, checkOut);
-  console.log(`Found ${propertyEids.length} available properties`);
+  const propertyEids = await fetchAvailablePropertyEids(
+    checkIn,
+    checkOut,
+    numGuests,
+  );
 
   const availableProperties: ScrapedListing[] = [];
 
-  for (const eid of propertyEids.slice(0, numOfOffersInEachScraper)) {
-    console.log(`Fetching details for property: ${eid}`);
+  const numToScrape = numOfOffersInEachScraper ?? 10;
+
+  for (const eid of propertyEids) {
+    if (availableProperties.length >= numToScrape) {
+      break;
+    }
     const solrUrl = "https://www.cbislandvacations.com/solr/";
     const formData = querystring.stringify({
       fq: "index_id:rci",
@@ -423,8 +479,19 @@ export const cbIslandVacationsScraper: DirectSiteScraper = async ({
       fl: "*",
     });
 
-    const scrapeUrl = `${solrUrl}?${formData}`;
-    console.log("Complete URL:", scrapeUrl);
+    const filteredPropertiesUrl =
+      "https://www.cbislandvacations.com/rcapi/item/avail/search";
+
+    const params = new URLSearchParams({
+      "rcav[begin]": checkIn.toISOString().split("T")[0] ?? "",
+      "rcav[end]": checkOut.toISOString().split("T")[0] ?? "",
+      "rcav[adult]": numGuests?.toString() ?? "1",
+      "rcav[child]": "0",
+      "rcav[flex]": "",
+      "rcav[flex_type]": "d",
+    });
+
+    const scrapeUrl = `${filteredPropertiesUrl}?${params.toString()}`;
 
     try {
       const response = await axios<{ response: { docs: PropertyDocument[] } }>({
@@ -433,32 +500,40 @@ export const cbIslandVacationsScraper: DirectSiteScraper = async ({
         data: formData,
       });
 
-      const propertyData = response.data.response.docs.find((doc: PropertyDocument) => {
-        if (!doc.is_eid) return false;
+      const propertyData = response.data.response.docs.find(
+        (doc: PropertyDocument) => {
+          if (!doc.is_eid) return false;
 
-        const docEid = String(doc.is_eid).trim();
-        const searchEid = String(eid).trim();
+          const docEid = String(doc.is_eid).trim();
+          const searchEid = String(eid).trim();
 
-        if (docEid.toLowerCase() === searchEid.toLowerCase()) return true;
+          if (docEid.toLowerCase() === searchEid.toLowerCase()) return true;
 
-        if (docEid.toLowerCase().includes(searchEid.toLowerCase())) return true;
+          if (docEid.toLowerCase().includes(searchEid.toLowerCase()))
+            return true;
 
-        if (Array.isArray(doc.is_eid)) {
-          return doc.is_eid.some(
-            (id: number) =>
-              String(id).trim().toLowerCase() === searchEid.toLowerCase() ||
-              String(id).trim().toLowerCase().includes(searchEid.toLowerCase()),
-          );
-        }
+          if (Array.isArray(doc.is_eid)) {
+            return doc.is_eid.some(
+              (id: number) =>
+                String(id).trim().toLowerCase() === searchEid.toLowerCase() ||
+                String(id)
+                  .trim()
+                  .toLowerCase()
+                  .includes(searchEid.toLowerCase()),
+            );
+          }
 
-        return false;
-      });
+          return false;
+        },
+      );
 
       if (!propertyData) {
         console.error(`No property found with eid: ${eid}`);
         console.log(
           "Available eids:",
-          response.data.response.docs.map((doc: PropertyDocument) => doc.is_eid),
+          response.data.response.docs.map(
+            (doc: PropertyDocument) => doc.is_eid,
+          ),
         );
         continue;
       }
@@ -469,6 +544,12 @@ export const cbIslandVacationsScraper: DirectSiteScraper = async ({
         await scrapePropertyPage(validatedData.ss_nid$url);
 
       const totalPrice = await scrapeFinalPrice(eid, checkIn, checkOut);
+
+      if (totalPrice < 0) {
+        console.error(`Failed to fetch price for property ${eid}`);
+        continue;
+      }
+
       const originalNightlyPrice = Math.round(
         totalPrice / getNumNights(checkIn, checkOut),
       );
@@ -483,18 +564,11 @@ export const cbIslandVacationsScraper: DirectSiteScraper = async ({
         originalNightlyPrice,
       );
       availableProperties.push(scrapedListing);
-
-      console.log(
-        `Fetched details for property ${eid}. Total unique: ${availableProperties.length}`,
-      );
     } catch (error) {
       console.error(`Error fetching property ${eid}:`, error);
     }
   }
 
-  console.log(
-    `Total available properties fetched: ${availableProperties.length}`,
-  );
   return availableProperties;
 };
 
@@ -508,6 +582,8 @@ export const cbIslandVacationsSubScraper: SubsequentScraper = async ({
     const availablePropertyIds = await fetchAvailablePropertyEids(
       checkIn,
       checkOut,
+      0,
+      scrapeUrl,
     );
 
     const isAvailable = availablePropertyIds.includes(originalListingId);
@@ -524,6 +600,8 @@ export const cbIslandVacationsSubScraper: SubsequentScraper = async ({
       originalListingId,
       checkIn,
       checkOut,
+      0,
+      scrapeUrl,
     );
     originalNightlyPrice = Math.round(
       totalPrice / getNumNights(checkIn, checkOut),
