@@ -309,7 +309,6 @@ function extractCityAndCountry(fullAddress: string) {
 export const cleanbnbScraper: DirectSiteScraper = async ({
   checkIn,
   checkOut,
-  numOfOffersInEachScraper,
   numGuests,
   location,
 }) => {
@@ -494,7 +493,7 @@ export const cleanbnbScraper: DirectSiteScraper = async ({
   } catch (error) {
     console.error("Error processing scraped data:", error);
   }
-  return numOfOffersInEachScraper ? res.splice(0, numOfOffersInEachScraper) : res;
+  return res;
 };
 
 export const cleanbnbSubScraper: SubsequentScraper = async ({

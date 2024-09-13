@@ -28,14 +28,13 @@ import { cleanbnbScraper, cleanbnbSubScraper } from "./cleanbnb-scrape";
 export type DirectSiteScraper = (options: {
   checkIn: Date;
   checkOut: Date;
-  numOfOffersInEachScraper?: number;
   requestNightlyPrice?: number; // when the scraper is used by traveler request page
   requestId?: number; // when the scraper is used by traveler request page
   location?: string;
   numGuests?: number;
 }) => Promise<ScrapedListing[]>;
 
-export type ScrapedListing = Omit<NewProperty, 'latLngPoint'> & {
+export type ScrapedListing = Omit<NewProperty, "latLngPoint"> & {
   originalListingUrl: string; // enforce that it's non-null
   reviews: NewReview[];
   scrapeUrl: string;
@@ -49,11 +48,11 @@ export type SubsequentScraper = (options: {
   checkOut: Date;
 }) => Promise<SubScrapedResult>;
 
-export type SubScrapedResult = ({
-  originalNightlyPrice?: number, // when the offer is avaible on the original site, also refresh the price
-  isAvailableOnOriginalSite: boolean,
-  availabilityCheckedAt: Date,
-});
+export type SubScrapedResult = {
+  originalNightlyPrice?: number; // when the offer is avaible on the original site, also refresh the price
+  isAvailableOnOriginalSite: boolean;
+  availabilityCheckedAt: Date;
+};
 
 export type NamedDirectSiteScraper = {
   name: string;
@@ -62,9 +61,9 @@ export type NamedDirectSiteScraper = {
 
 export const directSiteScrapers: NamedDirectSiteScraper[] = [
   // add more scrapers here
-  { name: 'cleanbnbScraper', scraper: cleanbnbScraper },
+  { name: "cleanbnbScraper", scraper: cleanbnbScraper },
   { name: "arizonaScraper", scraper: arizonaScraper },
-  {name: "cbIslandVacationsScraper", scraper: cbIslandVacationsScraper },
+  { name: "cbIslandVacationsScraper", scraper: cbIslandVacationsScraper },
   { name: "casamundoScraper", scraper: casamundoScraper },
 ];
 
@@ -80,7 +79,6 @@ const filterNewPropertyFields = (listing: ScrapedListing): NewProperty => {
 export const scrapeDirectListings = async (options: {
   checkIn: Date;
   checkOut: Date;
-  numOfOffersInEachScraper?: number;
   requestNightlyPrice?: number;
   requestId?: number;
   location?: string;
@@ -94,13 +92,15 @@ export const scrapeDirectListings = async (options: {
     throw new Error("requestNightlyPrice is required");
   }
 
-
   const minPrice = requestNightlyPrice * 0.8;
   const maxPrice = requestNightlyPrice * 1.1;
 
   const allListings = await Promise.all(
     directSiteScrapers.map((s) => s.scraper(options)),
   );
+
+  console.log("DONE");
+  console.log(allListings[0]);
 
   const listings = allListings
     .flat()
@@ -109,11 +109,15 @@ export const scrapeDirectListings = async (options: {
         listing.originalNightlyPrice !== null &&
         listing.originalNightlyPrice !== undefined &&
         listing.originalNightlyPrice >= minPrice &&
-        listing.originalNightlyPrice <= maxPrice
+        listing.originalNightlyPrice <= maxPrice,
     )
     .sort((a, b) => {
-      const aDiff = Math.abs((a.originalNightlyPrice ?? 0) - requestNightlyPrice);
-      const bDiff = Math.abs((b.originalNightlyPrice ?? 0) - requestNightlyPrice);
+      const aDiff = Math.abs(
+        (a.originalNightlyPrice ?? 0) - requestNightlyPrice,
+      );
+      const bDiff = Math.abs(
+        (b.originalNightlyPrice ?? 0) - requestNightlyPrice,
+      );
       return aDiff - bDiff;
     })
     .slice(0, 10); // Grab up to 10 listings
@@ -135,12 +139,18 @@ export const scrapeDirectListings = async (options: {
 
         let formattedlatLngPoint = null;
         if (listing.latLngPoint?.lat && listing.latLngPoint.lng) {
-          formattedlatLngPoint = createLatLngGISPoint({ lat: listing.latLngPoint.lat, lng: listing.latLngPoint.lng });
+          formattedlatLngPoint = createLatLngGISPoint({
+            lat: listing.latLngPoint.lat,
+            lng: listing.latLngPoint.lng,
+          });
         } else {
           const { location } = await getCoordinates(listing.address);
           if (!location)
             throw new Error("Could not get coordinates for address");
-          formattedlatLngPoint = createLatLngGISPoint({ lat: location.lat, lng: location.lng });
+          formattedlatLngPoint = createLatLngGISPoint({
+            lat: location.lat,
+            lng: location.lng,
+          });
         }
 
         const newPropertyListing = filterNewPropertyFields(listing);
@@ -269,6 +279,8 @@ export const scrapeDirectListings = async (options: {
               scrapeUrl: listing.scrapeUrl,
               isAvailableOnOriginalSite: true,
               availabilityCheckedAt: new Date(),
+              randomDirectListingDiscount:
+                createRandomMarkupEightToFourteenPercent(),
               ...(options.requestId && { requestId: options.requestId }),
             };
             const newOfferId = await trx
@@ -295,7 +307,9 @@ export const subsequentScrape = async (options: { offerIds: number[] }) => {
         },
       });
 
-      if (!offer?.property.originalListingId || !offer.scrapeUrl) { continue; } // skip the non-scraped offers
+      if (!offer?.property.originalListingId || !offer.scrapeUrl) {
+        continue;
+      } // skip the non-scraped offers
 
       switch (offer.property.originalListingPlatform) {
         case "IntegrityArizona":
@@ -306,15 +320,19 @@ export const subsequentScrape = async (options: { offerIds: number[] }) => {
             checkOut: offer.checkOut,
           });
           const updateIntegrityArizonaData: Partial<Offer> = {
-            isAvailableOnOriginalSite: subScrapedResult.isAvailableOnOriginalSite,
+            isAvailableOnOriginalSite:
+              subScrapedResult.isAvailableOnOriginalSite,
             availabilityCheckedAt: subScrapedResult.availabilityCheckedAt,
           };
 
           if (subScrapedResult.originalNightlyPrice) {
-            updateIntegrityArizonaData.totalPrice = subScrapedResult.originalNightlyPrice * getNumNights(offer.checkIn, offer.checkOut);
+            updateIntegrityArizonaData.totalPrice =
+              subScrapedResult.originalNightlyPrice *
+              getNumNights(offer.checkIn, offer.checkOut);
           }
 
-          await trx.update(offers)
+          await trx
+            .update(offers)
             .set(updateIntegrityArizonaData)
             .where(eq(offers.id, offerId));
           savedResult.push(subScrapedResult);
@@ -329,15 +347,19 @@ export const subsequentScrape = async (options: { offerIds: number[] }) => {
             checkOut: offer.checkOut,
           });
           const updateCleanbnbData: Partial<Offer> = {
-            isAvailableOnOriginalSite: cleanbnbSubResult.isAvailableOnOriginalSite,
+            isAvailableOnOriginalSite:
+              cleanbnbSubResult.isAvailableOnOriginalSite,
             availabilityCheckedAt: cleanbnbSubResult.availabilityCheckedAt,
           };
 
           if (cleanbnbSubResult.originalNightlyPrice) {
-            updateCleanbnbData.totalPrice = cleanbnbSubResult.originalNightlyPrice * getNumNights(offer.checkIn, offer.checkOut);
+            updateCleanbnbData.totalPrice =
+              cleanbnbSubResult.originalNightlyPrice *
+              getNumNights(offer.checkIn, offer.checkOut);
           }
 
-          await trx.update(offers)
+          await trx
+            .update(offers)
             .set(updateCleanbnbData)
             .where(eq(offers.id, offerId));
           savedResult.push(cleanbnbSubResult);
@@ -379,24 +401,24 @@ export const subsequentScrape = async (options: { offerIds: number[] }) => {
             checkIn: offer.checkIn,
             checkOut: offer.checkOut,
           });
-            const updateData: Partial<Offer> = {
-              isAvailableOnOriginalSite:
-                subScrapedResultCasamundo.isAvailableOnOriginalSite,
-              availabilityCheckedAt:
-                subScrapedResultCasamundo.availabilityCheckedAt,
-            };
+          const updateData: Partial<Offer> = {
+            isAvailableOnOriginalSite:
+              subScrapedResultCasamundo.isAvailableOnOriginalSite,
+            availabilityCheckedAt:
+              subScrapedResultCasamundo.availabilityCheckedAt,
+          };
 
-            if (subScrapedResultCasamundo.originalNightlyPrice) {
-              updateData.totalPrice =
-                subScrapedResultCasamundo.originalNightlyPrice *
-                getNumNights(offer.checkIn, offer.checkOut);
-            }
+          if (subScrapedResultCasamundo.originalNightlyPrice) {
+            updateData.totalPrice =
+              subScrapedResultCasamundo.originalNightlyPrice *
+              getNumNights(offer.checkIn, offer.checkOut);
+          }
 
-            await trx
-              .update(offers)
-              .set(updateData)
-              .where(eq(offers.id, offerId));
-            savedResult.push(subScrapedResultCasamundo);
+          await trx
+            .update(offers)
+            .set(updateData)
+            .where(eq(offers.id, offerId));
+          savedResult.push(subScrapedResultCasamundo);
           break;
       }
     }

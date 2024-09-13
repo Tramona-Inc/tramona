@@ -5,6 +5,7 @@ import { api } from "@/utils/api";
 import { errorToast } from "@/utils/toasts";
 import { type LinkConfirmationProps } from "./LinkConfirmation";
 import { LINK_REQUEST_DISCOUNT_PERCENTAGE } from "@/utils/constants";
+import { table } from "console";
 
 export type LinkRequestData = Pick<
   LinkConfirmationProps,
@@ -16,7 +17,6 @@ export type LinkRequestData = Pick<
 export function useLinkRequestForm({
   afterSubmit,
   setData,
-
 }: {
   setData: (data?: LinkRequestData) => void;
   afterSubmit?: () => void;
@@ -24,11 +24,22 @@ export function useLinkRequestForm({
   const form = useZodForm({ schema: linkRequestSchema, mode: "onChange" });
 
   const utils = api.useUtils();
-
+  //https://www.airbnb.com/slink/6z0VwdPd
   const onSubmit = form.handleSubmit(async ({ url }) => {
+    //expand url if it came from the mobile application
+    if (url.startsWith("https://www.airbnb.com/slink")) {
+      const expandedRes = await Airbnb.expandUrl(url);
+      if (!expandedRes) {
+        form.setError("url", {
+          message: "Please input a valid Airbnb Link",
+        });
+        return;
+      } else {
+        url = expandedRes;
+      }
+    }
 
     const { checkIn, checkOut, numGuests } = Airbnb.parseUrlParams(url);
-
     if (!checkIn || !checkOut) {
       form.setError("url", {
         message: "Please input check-in/out on Airbnb and try again",
