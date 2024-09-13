@@ -19,6 +19,7 @@ export const scrapeAirbnbListings = async ({
     //   "airbnb-serp-page-data.json",
     //   JSON.stringify(unparsedData, null, 2),
     // );
+    // console.log('Raw page data:', JSON.stringify(unparsedData, null, 2));
     return serpPageSchema.parse(unparsedData);
   });
 
@@ -33,6 +34,8 @@ export const scrapeAirbnbListings = async ({
     .flatMap((data) => data.staysSearch.results.searchResults)
     .map((searchResult) => transformSearchResult({ searchResult, numNights }))
     .filter(Boolean);
+
+    // console.log('All listings:', allListings);
 
   const filteredListings = sortBy(allListings, (l) => {
     if (!("maxTotalPrice" in request)) return 0; // no sorting
@@ -175,12 +178,16 @@ function transformSearchResult({
   numNights: number;
 }) {
   {
+    console.log(`Raw pricing data for ${listing.id}:`, JSON.stringify(pricingQuote, null, 2));
+
     const discountedPriceStr =
       pricingQuote.structuredStayDisplayPrice.primaryLine.discountedPrice;
 
+      console.log(`Discounted price for ${listing.id}:`, discountedPriceStr);
     const nightlyPrice = discountedPriceStr
       ? Math.round(parseCurrency(discountedPriceStr) / numNights)
       : undefined;
+      console.log(`Nightly price for ${listing.id}:`, nightlyPrice);
 
     const originalPriceStr =
       pricingQuote.structuredStayDisplayPrice.primaryLine.originalPrice;
