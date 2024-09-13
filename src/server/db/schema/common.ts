@@ -73,6 +73,7 @@ export const ALL_LISTING_SITE_NAMES = [
   "Vrbo",
   "CB Island Vacations",
   "IntegrityArizona",
+  "Cleanbnb",
   "Casamundo",
 ] as const;
 

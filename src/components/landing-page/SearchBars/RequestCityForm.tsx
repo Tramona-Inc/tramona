@@ -38,6 +38,7 @@ export default function RequestCityForm() {
     setMadeByGroupId,
   });
 
+
   const inviteLinkQuery = api.groups.generateInviteLink.useQuery(
     { groupId: madeByGroupId! },
     { enabled: madeByGroupId !== undefined },
@@ -50,6 +51,7 @@ export default function RequestCityForm() {
   }, [inviteLinkQuery.data]);
 
   const { latLng, radius } = form.watch();
+
 
   return (
     <Form {...form}>

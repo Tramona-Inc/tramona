@@ -31,7 +31,7 @@ import { z } from "zod";
 import axios from "axios";
 import { getCity } from "@/server/google-maps";
 import { sendSlackMessage } from "@/server/slack";
-import { createHostReferral, sendEmail } from "@/server/server-utils";
+import { createHostReferral, createLatLngGISPoint, sendEmail } from "@/server/server-utils";
 import WelcomeEmail from "packages/transactional/emails/WelcomeEmail";
 
 export const usersRouter = createTRPCRouter({
@@ -521,7 +521,7 @@ export const usersRouter = createTRPCRouter({
               numBeds: property.bedsNumber,
               numBedrooms: property.bedroomsNumber,
               numBathrooms: property.bathroomsNumber,
-              latLngPoint: sql`ST_SetSRID(ST_MakePoint(${property.lng}, ${property.lat}), 4326)`,
+              latLngPoint: createLatLngGISPoint({ lat: property.lat, lng: property.lng }),
               city: await getCity({ lat: property.lat, lng: property.lng }),
               hostName: property.contactName,
               originalListingId: property.id.toString(),

@@ -111,8 +111,8 @@ const mapToScrapedListing = (
     // latitude: prop.latitude,
     // longitude: prop.longitude,
     latLngPoint: {
-      x: prop.longitude,
-      y: prop.latitude,
+      lng: prop.longitude,
+      lat: prop.latitude,
     },
     maxNumGuests: prop.max_occupants,
     numBeds: prop.bedrooms_number, // not provided, but required in NewProperty
@@ -149,6 +149,7 @@ export const arizonaScraper: DirectSiteScraper = async ({
   requestNightlyPrice,
   location,
 }) => {
+
   // append 0 to month and day if less than 10
   const monthStart = (checkIn.getMonth() + 1).toString().padStart(2, "0");
   const dayStart = checkIn.getDate().toString().padStart(2, "0");
