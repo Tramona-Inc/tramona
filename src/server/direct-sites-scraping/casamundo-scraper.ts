@@ -516,8 +516,8 @@ async function fetchPropertyDetails(
     const { avgRating, numRatings, reviews } = await fetchReviews(offerId);
 
     const latLngPoint = {
-      x: data.geoLocation.lon,
-      y: data.geoLocation.lat,
+      lng: data.geoLocation.lon,
+      lat: data.geoLocation.lat,
     };
 
     const numNights = getNumNights(new Date(checkIn), new Date(checkOut));

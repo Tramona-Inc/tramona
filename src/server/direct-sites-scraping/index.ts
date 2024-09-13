@@ -62,9 +62,9 @@ export type NamedDirectSiteScraper = {
 
 export const directSiteScrapers: NamedDirectSiteScraper[] = [
   // add more scrapers here
-  // { name: 'cleanbnbScraper', scraper: cleanbnbScraper },
-  // { name: "arizonaScraper", scraper: arizonaScraper },
-  // {name: "cbIslandVacationsScraper", scraper: cbIslandVacationsScraper },
+  { name: 'cleanbnbScraper', scraper: cleanbnbScraper },
+  { name: "arizonaScraper", scraper: arizonaScraper },
+  {name: "cbIslandVacationsScraper", scraper: cbIslandVacationsScraper },
   { name: "casamundoScraper", scraper: casamundoScraper },
 ];
 
@@ -84,7 +84,6 @@ export const scrapeDirectListings = async (options: {
   requestNightlyPrice?: number;
   requestId?: number;
   location?: string;
-  numGuests?: number;
   latitude?: number;
   longitude?: number;
   numGuests?: number;
@@ -380,7 +379,6 @@ export const subsequentScrape = async (options: { offerIds: number[] }) => {
             checkIn: offer.checkIn,
             checkOut: offer.checkOut,
           });
-          if (subScrapedResultCasamundo) {
             const updateData: Partial<Offer> = {
               isAvailableOnOriginalSite:
                 subScrapedResultCasamundo.isAvailableOnOriginalSite,
@@ -399,7 +397,6 @@ export const subsequentScrape = async (options: { offerIds: number[] }) => {
               .set(updateData)
               .where(eq(offers.id, offerId));
             savedResult.push(subScrapedResultCasamundo);
-          }
           break;
       }
     }
