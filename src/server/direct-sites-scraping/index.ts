@@ -40,7 +40,7 @@ export type DirectSiteScraper = (options: {
   numGuests?: number;
 }) => Promise<ScrapedListing[]>;
 
-export type ScrapedListing = Omit<NewProperty, "latLngPoint"> & {
+export type ScrapedListing = Omit<NewProperty, 'latLngPoint'> & {
   originalListingUrl: string; // enforce that it's non-null
   reviews: NewReview[];
   scrapeUrl: string;
@@ -54,11 +54,11 @@ export type SubsequentScraper = (options: {
   checkOut: Date;
 }) => Promise<SubScrapedResult>;
 
-export type SubScrapedResult = {
-  originalNightlyPrice?: number; // when the offer is avaible on the original site, also refresh the price
-  isAvailableOnOriginalSite: boolean;
-  availabilityCheckedAt: Date;
-};
+export type SubScrapedResult = ({
+  originalNightlyPrice?: number, // when the offer is avaible on the original site, also refresh the price
+  isAvailableOnOriginalSite: boolean,
+  availabilityCheckedAt: Date,
+});
 
 export type NamedDirectSiteScraper = {
   name: string;
@@ -117,7 +117,7 @@ export const scrapeDirectListings = async (options: {
         listing.originalNightlyPrice !== null &&
         listing.originalNightlyPrice !== undefined &&
         listing.originalNightlyPrice >= minPrice &&
-        listing.originalNightlyPrice <= maxPrice,
+        listing.originalNightlyPrice <= maxPrice
     )
     .sort((a, b) => {
       const aDiff = Math.abs(
