@@ -4,6 +4,7 @@ import {
   cbIslandVacationsScraper,
   cbIslandVacationsSubScraper,
 } from "./hawaii-scraper";
+import { casamundoScraper, casamundoSubScraper } from "./casamundo-scraper";
 import { properties } from "../db/schema";
 import {
   NewOffer,
@@ -31,6 +32,7 @@ export type DirectSiteScraper = (options: {
   requestNightlyPrice?: number; // when the scraper is used by traveler request page
   requestId?: number; // when the scraper is used by traveler request page
   location?: string;
+  numGuests?: number;
 }) => Promise<ScrapedListing[]>;
 
 export type ScrapedListing = NewProperty & {
@@ -60,8 +62,9 @@ export type NamedDirectSiteScraper = {
 export const directSiteScrapers: NamedDirectSiteScraper[] = [
   // add more scrapers here
   // { name: 'cleanbnbScraper', scraper: cleanbnbScraper },
-  { name: "arizonaScraper", scraper: arizonaScraper },
+  // { name: "arizonaScraper", scraper: arizonaScraper },
   // {name: "cbIslandVacationsScraper", scraper: cbIslandVacationsScraper },
+  { name: "casamundoScraper", scraper: casamundoScraper },
 ];
 
 // Helper function to filter out fields not in NewProperty
@@ -80,6 +83,7 @@ export const scrapeDirectListings = async (options: {
   requestNightlyPrice?: number;
   requestId?: number;
   location?: string;
+  numGuests?: number;
   latitude?: number;
   longitude?: number;
 }) => {
@@ -330,6 +334,35 @@ export const subsequentScrape = async (options: { offerIds: number[] }) => {
               .set(updateData)
               .where(eq(offers.id, offerId));
             savedResult.push(subScrapedResultCBIsland);
+          }
+          break;
+
+        case "Casamundo":
+          const subScrapedResultCasamundo = await casamundoSubScraper({
+            originalListingId: offer.property.originalListingId,
+            scrapeUrl: offer.scrapeUrl,
+            checkIn: offer.checkIn,
+            checkOut: offer.checkOut,
+          });
+          if (subScrapedResultCasamundo) {
+            const updateData: Partial<Offer> = {
+              isAvailableOnOriginalSite:
+                subScrapedResultCasamundo.isAvailableOnOriginalSite,
+              availabilityCheckedAt:
+                subScrapedResultCasamundo.availabilityCheckedAt,
+            };
+
+            if (subScrapedResultCasamundo.originalNightlyPrice) {
+              updateData.totalPrice =
+                subScrapedResultCasamundo.originalNightlyPrice *
+                getNumNights(offer.checkIn, offer.checkOut);
+            }
+
+            await trx
+              .update(offers)
+              .set(updateData)
+              .where(eq(offers.id, offerId));
+            savedResult.push(subScrapedResultCasamundo);
           }
           break;
       }
