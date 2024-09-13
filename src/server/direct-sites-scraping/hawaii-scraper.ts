@@ -436,7 +436,6 @@ const mapToScrapedListing = (
 export const cbIslandVacationsScraper: DirectSiteScraper = async ({
   checkIn,
   checkOut,
-  numOfOffersInEachScraper,
   requestNightlyPrice,
   requestId,
   location,
@@ -465,7 +464,6 @@ export const cbIslandVacationsScraper: DirectSiteScraper = async ({
   const availableProperties: ScrapedListing[] = [];
 
   for (const eid of propertyEids) {
-
     const solrUrl = "https://www.cbislandvacations.com/solr/";
     const formData = querystring.stringify({
       fq: "index_id:rci",
