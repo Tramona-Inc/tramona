@@ -25,6 +25,7 @@ export async function scrapeExternalListings(request: MinimalRequest) {
       const filtered = listings.filter(
         (l) => l.totalPrice >= requstedNightlyPrice * (1 - MAX_DISCOUNT),
       );
+      
       return sortBy(filtered, (p) => p.totalPrice);
     })
     .then((listings) => listings.slice(0, 10));
