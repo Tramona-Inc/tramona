@@ -38,8 +38,7 @@ import {
   properties,
   type Property,
 } from "./../../db/schema/tables/properties";
-import { addProperty, getRequestsForProperties } from "@/server/server-utils";
-import { latLngEquals } from "@vis.gl/react-google-maps";
+import { addProperty, createLatLngGISPoint, getRequestsForProperties } from "@/server/server-utils";
 import { getCoordinates } from "@/server/google-maps";
 
 export type HostRequestsPageData = {
@@ -131,7 +130,7 @@ export const propertiesRouter = createTRPCRouter({
       if (input.address) {
         const { location } = await getCoordinates(input.address);
         if (!location) throw new Error("Could not get coordinates for address");
-        const latLngPoint = sql`ST_SetSRID(ST_MakePoint(${location.lng}, ${location.lat}), 4326)`;
+        const latLngPoint = createLatLngGISPoint({ lat: location.lat, lng: location.lng });
         await ctx.db
           .update(properties)
           .set({ latLngPoint })
@@ -490,7 +489,7 @@ export const propertiesRouter = createTRPCRouter({
       // TODO: USE DRIZZLE relational query, then use groupby in js
       const hostProperties = await db.query.properties.findMany({
         where: and(eq(properties.hostId, ctx.user.id), eq(properties.propertyStatus, "Listed")),
-        
+
         // columns: {
         //   id: true,
         //   propertyStatus: true,

@@ -1,5 +1,5 @@
+import { urlScrape } from "../server-utils";
 import { MinimalRequest, NewProperty } from "../db/schema";
-import { scrapeUrl } from "../server-utils";
 import { z } from "zod";
 import { getNumNights, parseCurrency } from "@/utils/utils";
 import { sortBy } from "lodash";
@@ -121,7 +121,7 @@ async function scrapePage(url: string) {
     ]),
   });
 
-  const ret = await scrapeUrl(url)
+  const ret = await urlScrape(url)
     .then(($) => $("#data-deferred-state-0").text())
     .then((jsonStr) => JSON.parse(jsonStr))
     .then((unparsedData) => pageDataSchema.parse(unparsedData))

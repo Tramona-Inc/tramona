@@ -404,10 +404,6 @@ const mapToScrapedListing = (
   description: string,
   originalNightlyPrice: number,
 ): ScrapedListing => {
-  const latLngPoint = {
-    x: prop.fs_nid$field_location$longitude,
-    y: prop.fs_nid$field_location$latitude,
-  };
 
   return {
     originalListingId: prop.is_eid.toString(),
@@ -416,7 +412,10 @@ const mapToScrapedListing = (
     propertyType: mapPropertyType(prop.sm_nid$rc_core_term_type$name[0] ?? ""),
     address: address,
     city: prop.sm_nid$rc_core_term_city_type$name[0] ?? "",
-    latLngPoint,
+    latLngPoint: {
+      lat: prop.fs_nid$field_location$latitude,
+      lng: prop.fs_nid$field_location$longitude,
+    },
     maxNumGuests: prop.is_rc_core_lodging_product$occ_total,
     numBeds: prop.fs_rc_core_lodging_product$beds,
     numBedrooms: prop.fs_rc_core_lodging_product$beds,
