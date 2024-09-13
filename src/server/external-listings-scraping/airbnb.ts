@@ -178,22 +178,18 @@ function transformSearchResult({
   numNights: number;
 }) {
   {
-    console.log(`Raw pricing data for ${listing.id}:`, JSON.stringify(pricingQuote, null, 2));
-
     const discountedPriceStr =
       pricingQuote.structuredStayDisplayPrice.primaryLine.discountedPrice;
 
-      console.log(`Discounted price for ${listing.id}:`, discountedPriceStr);
     const nightlyPrice = discountedPriceStr
-      ? Math.round(parseCurrency(discountedPriceStr) / numNights)
+      ? Math.round(parseCurrency(discountedPriceStr))
       : undefined;
-      console.log(`Nightly price for ${listing.id}:`, nightlyPrice);
 
     const originalPriceStr =
       pricingQuote.structuredStayDisplayPrice.primaryLine.originalPrice;
 
     const originalNightlyPrice = originalPriceStr
-      ? Math.round(parseCurrency(originalPriceStr) / numNights)
+      ? Math.round(parseCurrency(originalPriceStr))
       : undefined;
 
     if (nightlyPrice === undefined || originalNightlyPrice === undefined) {
