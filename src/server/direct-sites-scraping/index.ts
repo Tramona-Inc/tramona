@@ -29,7 +29,6 @@ import { cleanbnbScraper, cleanbnbSubScraper } from "./cleanbnb-scrape";
 export type DirectSiteScraper = (options: {
   checkIn: Date;
   checkOut: Date;
-  numOfOffersInEachScraper?: number;
   requestNightlyPrice?: number; // when the scraper is used by traveler request page
   requestId?: number; // when the scraper is used by traveler request page
   location?: string;
@@ -84,7 +83,6 @@ const filterNewPropertyFields = (listing: ScrapedListing): NewProperty => {
 export const scrapeDirectListings = async (options: {
   checkIn: Date;
   checkOut: Date;
-  numOfOffersInEachScraper?: number;
   requestNightlyPrice?: number;
   requestId?: number;
   location?: string;

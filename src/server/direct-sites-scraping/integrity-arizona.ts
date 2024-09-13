@@ -145,7 +145,6 @@ const mapToScrapedListing = (
 export const arizonaScraper: DirectSiteScraper = async ({
   checkIn,
   checkOut,
-  numOfOffersInEachScraper = 2,
   requestNightlyPrice,
   location,
 }) => {
@@ -201,9 +200,7 @@ export const arizonaScraper: DirectSiteScraper = async ({
       );
     });
   }
-  if (numOfOffersInEachScraper > 0) {
-    properties = properties.slice(0, numOfOffersInEachScraper);
-  }
+
   // Fetch and append reviews for each property
   const propertiesWithReviews = await Promise.all(
     properties.map(async (p) => {

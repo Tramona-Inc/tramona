@@ -120,7 +120,6 @@ async function getOfferIds(
   locationId: string,
   checkIn: Date,
   checkOut: Date,
-  numOffers: number,
   numGuests?: number,
 ): Promise<CasamundoOffer[]> {
   const url = `https://www.casamundo.com/search/${locationId}`;
@@ -556,7 +555,6 @@ async function scrapeProperty(
   locationId: string,
   checkIn: Date,
   checkOut: Date,
-  numOffers: number,
   numGuests?: number,
 ): Promise<ScrapedListing> {
   try {
@@ -602,7 +600,6 @@ async function scrapeProperty(
 export const casamundoScraper: DirectSiteScraper = async ({
   checkIn,
   checkOut,
-  numOfOffersInEachScraper = 5,
   requestNightlyPrice,
   requestId,
   location,
@@ -617,22 +614,18 @@ export const casamundoScraper: DirectSiteScraper = async ({
       locationId,
       checkIn,
       checkOut,
-      numOfOffersInEachScraper,
       numGuests,
     );
 
     const scrapedListings: ScrapedListing[] = [];
 
     for (const offer of offerIds) {
-      if (scrapedListings.length >= numOfOffersInEachScraper) {
-        break;
-      }
+
       const propertyWithDetails = await scrapeProperty(
         offer.id,
         locationId,
         checkIn,
         checkOut,
-        numOfOffersInEachScraper,
         numGuests,
       );
 
