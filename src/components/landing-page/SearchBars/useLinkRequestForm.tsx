@@ -28,14 +28,18 @@ export function useLinkRequestForm({
   const onSubmit = form.handleSubmit(async ({ url }) => {
     //expand url if it came from the mobile application
     if (url.startsWith("https://www.airbnb.com/slink")) {
-      const expandedRes = await Airbnb.expandUrl(url);
-      if (!expandedRes) {
-        form.setError("url", {
-          message: "Please input a valid Airbnb Link",
-        });
-        return;
+      if (Airbnb.expandUrl) {
+        const expandedRes = await Airbnb.expandUrl(url);
+        if (!expandedRes) {
+          form.setError("url", {
+            message: "Please input a valid Airbnb Link",
+          });
+          return;
+        } else {
+          url = expandedRes;
+        }
       } else {
-        url = expandedRes;
+        throw new Error("Airbnb.expandUrl is not available");
       }
     }
 

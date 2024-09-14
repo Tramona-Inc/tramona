@@ -25,6 +25,7 @@ import {
   type NewProperty,
   type Property,
   type User,
+  type Request,
   bookedDates,
   groupInvites,
   groupMembers,
@@ -47,7 +48,6 @@ import * as cheerio from "cheerio";
 import { sendSlackMessage } from "./slack";
 import { HOST_MARKUP, TRAVELER__MARKUP } from "@/utils/constants";
 import { HostRequestsPageData } from "./api/routers/propertiesRouter";
-import { create, property } from "lodash";
 
 export const axiosWithRetry = axios.create();
 
@@ -105,6 +105,13 @@ export async function scrapeUrlLikeHuman(url: string) {
     .catch((error) => {
       throw new Error(`scrapeUrlLikeHuman function was declined: ${error}`);
     });
+}
+
+export async function scrapeUrl(url: string) {
+  return await axios
+    .get<string>(url, { httpsAgent: proxyAgent, responseType: "text" })
+    .then((res) => res.data)
+    .then(cheerio.load);
 }
 
 const transporter = nodemailler.createTransport({
