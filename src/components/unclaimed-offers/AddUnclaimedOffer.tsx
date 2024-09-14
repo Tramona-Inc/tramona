@@ -1,7 +1,7 @@
 import { Dialog } from "@/components/ui/dialog";
 import { DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { PlusIcon } from "lucide-react";
-import AdminOfferForm from "../admin/AdminOfferForm";
+//import AdminOfferForm from "../admin/AdminOfferForm";
 import { useState } from "react";
 
 export default function AddUnclaimedOffer() {
@@ -14,7 +14,7 @@ export default function AddUnclaimedOffer() {
         <PlusIcon />
       </DialogTrigger>
       <DialogContent>
-        <AdminOfferForm afterSubmit={() => setIsOpen(!isOpen)} />
+        {/* <AdminOfferForm afterSubmit={() => setIsOpen(!isOpen)} /> */}
       </DialogContent>
     </Dialog>
   );

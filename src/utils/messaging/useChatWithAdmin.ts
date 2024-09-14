@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import { api } from "./api";
+import { api } from "../api";
 
 export function useChatWithAdmin() {
   const router = useRouter();

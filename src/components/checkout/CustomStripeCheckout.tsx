@@ -2,8 +2,9 @@ import { api } from "@/utils/api";
 import { useStripe } from "@/utils/stripe-client";
 import {
   formatDateRange,
+  getDirectListingPriceBreakdown,
   getNumNights,
-  getPriceBreakdown,
+  getTramonaPriceBreakdown,
 } from "@/utils/utils";
 import StripeCheckoutForm from "./StripeCheckoutForm";
 import React, { useEffect, useState, useCallback, useMemo } from "react";
@@ -31,20 +32,30 @@ const CustomStripeCheckout = ({
     [offer.checkIn, offer.checkOut],
   );
   const originalTotal = useMemo(
-    () => property.originalNightlyPrice! * numNights,
+    () =>
+      offer.randomDirectListingDiscount
+        ? (offer.randomDirectListingDiscount / 100 + 1) *
+          offer.travelerOfferedPrice
+        : property.originalNightlyPrice! * numNights,
     [property.originalNightlyPrice, numNights],
   );
 
-  const { serviceFee, finalTotal } = useMemo(
-    () =>
-      getPriceBreakdown({
+  const { serviceFee, finalTotal } = useMemo(() => {
+    if (offer.scrapeUrl) {
+      console.log("Direct Listing");
+      return getDirectListingPriceBreakdown({
+        bookingCost: offer.travelerOfferedPrice,
+      });
+    } else {
+      console.log("not a direct Listing");
+      return getTramonaPriceBreakdown({
         bookingCost: offer.travelerOfferedPrice,
         numNights,
         superhogFee: SUPERHOG_FEE,
         tax: TAX_PERCENTAGE,
-      }),
-    [offer.travelerOfferedPrice, numNights],
-  );
+      });
+    }
+  }, [offer.scrapeUrl, offer.travelerOfferedPrice, numNights]);
 
   const [options, setOptions] = useState<StripeElementsOptions | undefined>(
     undefined,
@@ -60,7 +71,7 @@ const CustomStripeCheckout = ({
     if (!session.data?.user) return;
     try {
       const response = await authorizePayment.mutateAsync({
-        isDirectListing: false,
+        isDirectListing: offer.scrapeUrl !== null ? true : false,
         offerId: offer.id,
         propertyId: property.id,
         requestId: offer.requestId ?? null,

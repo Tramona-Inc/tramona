@@ -27,7 +27,6 @@ import {
   eq,
   gt,
   gte,
-  inArray,
   lte,
   notExists,
   sql,
@@ -39,7 +38,12 @@ import {
   properties,
   type Property,
 } from "./../../db/schema/tables/properties";
-import { addProperty } from "@/server/server-utils";
+import {
+  addProperty,
+  createLatLngGISPoint,
+  getRequestsForProperties,
+} from "@/server/server-utils";
+import { getCoordinates } from "@/server/google-maps";
 
 export type HostRequestsPageData = {
   city: string;
@@ -55,8 +59,8 @@ export const propertiesRouter = createTRPCRouter({
       propertyInsertSchema.omit({
         hostId: true,
         city: true,
-        latitude: true,
-        longitude: true,
+        // latitude: true,
+        // longitude: true,
         latLngPoint: true,
       }),
     )
@@ -91,8 +95,8 @@ export const propertiesRouter = createTRPCRouter({
       propertyInsertSchema
         .omit({
           city: true,
-          latitude: true,
-          longitude: true,
+          // latitude: true,
+          // longitude: true,
           latLngPoint: true,
         })
         .extend({ hostId: z.string() }),
@@ -127,6 +131,18 @@ export const propertiesRouter = createTRPCRouter({
     .input(propertyUpdateSchema.omit({ hostId: true, latLngPoint: true }))
     .mutation(async ({ ctx, input }) => {
       // TODO: auth
+      if (input.address) {
+        const { location } = await getCoordinates(input.address);
+        if (!location) throw new Error("Could not get coordinates for address");
+        const latLngPoint = createLatLngGISPoint({
+          lat: location.lat,
+          lng: location.lng,
+        });
+        await ctx.db
+          .update(properties)
+          .set({ latLngPoint })
+          .where(eq(properties.id, input.id));
+      }
 
       await ctx.db
         .update(properties)
@@ -156,15 +172,22 @@ export const propertiesRouter = createTRPCRouter({
   getById: publicProcedure
     .input(propertySelectSchema.pick({ id: true }))
     .query(async ({ ctx, input }) => {
-      return await ctx.db.query.properties.findFirst({
+      const property = await ctx.db.query.properties.findFirst({
         where: eq(properties.id, input.id),
         with: {
           host: {
             columns: { image: true, name: true, email: true, id: true },
+            with: {
+              hostProfile: {
+                columns: { curTeamId: true },
+              },
+            },
           },
           reviews: true,
         },
       });
+      if (!property) throw new Error("no property");
+      return property;
     }),
   getAll: publicProcedure.query(async ({ ctx }) => {
     return await ctx.db.query.properties.findMany();
@@ -190,8 +213,14 @@ export const propertiesRouter = createTRPCRouter({
         maxNightlyPrice: z.number().optional(),
         avgRating: z.number().optional(),
         numRatings: z.number().optional(),
-        lat: z.number().optional(),
-        long: z.number().optional(),
+        // lat: z.number().optional(),
+        // long: z.number().optional(),
+        latLngPoint: z
+          .object({
+            lat: z.number(),
+            lng: z.number(),
+          })
+          .optional(),
         radius: z.number().optional(),
         checkIn: z.date().optional(),
         checkOut: z.date().optional(),
@@ -204,8 +233,8 @@ export const propertiesRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const { cursor } = input;
 
-      const lat = input.lat ?? 0;
-      const long = input.long ?? 0;
+      const lat = input.latLngPoint?.lat ?? 0;
+      const lng = input.latLngPoint?.lng ?? 0;
       const radius = input.radius;
 
       const northeastLat = input.northeastLat ?? 0;
@@ -225,11 +254,12 @@ export const propertiesRouter = createTRPCRouter({
           avgRating: properties.avgRating,
           numRatings: properties.numRatings,
           originalNightlyPrice: properties.originalNightlyPrice,
-          lat: properties.latitude,
-          long: properties.longitude,
+          latLngPoint: properties.latLngPoint,
+          // lat: properties.latitude,
+          // long: properties.longitude,
           distance: sql`
             6371 * ACOS(
-              SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})
+              SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(lng * Math.PI) / 180})
             ) AS distance`,
           vacancyCount: sql`
             (SELECT COUNT(booked_dates.property_id)
@@ -244,13 +274,13 @@ export const propertiesRouter = createTRPCRouter({
           and(
             eq(properties.propertyStatus, "Listed"),
             cursor ? gt(properties.id, cursor) : undefined, // Use property ID as cursor
-            input.lat &&
-              input.long &&
+            input.latLngPoint?.lat &&
+              input.latLngPoint.lng &&
               !northeastLat &&
               !northeastLng &&
               !southwestLat &&
               !southwestLng
-              ? sql`6371 * acos(SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})) <= ${radius}`
+              ? sql`6371 * acos(SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(lng * Math.PI) / 180})) <= ${radius}`
               : sql`TRUE`,
             input.roomType
               ? eq(properties.roomType, input.roomType)
@@ -344,7 +374,7 @@ export const propertiesRouter = createTRPCRouter({
       const { cursor, boundaries } = input;
 
       const lat = input.lat ?? 0;
-      const long = input.long ?? 0;
+      const lng = input.long ?? 0;
       const radius = input.radius;
 
       const data = await ctx.db
@@ -359,11 +389,12 @@ export const propertiesRouter = createTRPCRouter({
           avgRating: properties.avgRating,
           numRatings: properties.numRatings,
           originalNightlyPrice: properties.originalNightlyPrice,
-          lat: properties.latitude,
-          long: properties.longitude,
+          latLngPoint: properties.latLngPoint,
+          // lat: properties.latitude,
+          // long: properties.longitude,
           distance: sql`
             6371 * ACOS(
-              SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})
+              SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(lng * Math.PI) / 180})
             ) AS distance`,
           vacancyCount: sql`
             (SELECT COUNT(booked_dates.property_id)
@@ -380,14 +411,14 @@ export const propertiesRouter = createTRPCRouter({
             cursor ? gt(properties.id, cursor) : undefined,
             boundaries
               ? and(
-                  lte(properties.latitude, boundaries.north),
-                  gte(properties.latitude, boundaries.south),
-                  lte(properties.longitude, boundaries.east),
-                  gte(properties.longitude, boundaries.west),
+                  lte(sql`ST_Y(${properties.latLngPoint})`, boundaries.north),
+                  gte(sql`ST_Y(${properties.latLngPoint})`, boundaries.south),
+                  lte(sql`ST_X(${properties.latLngPoint})`, boundaries.east),
+                  gte(sql`ST_X(${properties.latLngPoint})`, boundaries.west),
                 )
               : sql`TRUE`,
             input.lat && input.long && !boundaries
-              ? sql`6371 * acos(SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})) <= ${radius}`
+              ? sql`6371 * acos(SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(lng * Math.PI) / 180})) <= ${radius}`
               : sql`TRUE`,
             input.roomType
               ? eq(properties.roomType, input.roomType)
@@ -470,129 +501,200 @@ export const propertiesRouter = createTRPCRouter({
     }),
   getHostPropertiesWithRequests: roleRestrictedProcedure(["host"]).query(
     async ({ ctx }) => {
-      // TODO: USE DRIZZLE
-      const rawData = await ctx.db.execute(sql`
-          WITH host_properties AS (
-            SELECT
-              p.*,
-              rp.request_id
-            FROM ${properties} p
-            JOIN ${requestsToProperties} rp ON p.id = rp.property_id
-            WHERE p.host_id = ${ctx.user.id}
-            AND p.property_status = 'Listed'
-          ),
-          city_requests AS (
-            SELECT
-              hp.request_id,
-              hp.city
-            FROM host_properties hp
-            JOIN ${requests} r ON hp.request_id = r.id
-            WHERE r.check_in >= CURRENT_DATE
-            GROUP BY hp.city, hp.request_id
-          )
-          SELECT
-            cr.city AS property_city,
-            cr.request_id,
-            p.id AS property_id,
-            p.*,
-            r.*,
-            u.name AS user_name,
-            u.image
-          FROM city_requests cr
-          JOIN ${requests} r ON cr.request_id = r.id
-          JOIN ${properties} p ON p.city = cr.city AND p.host_id = ${ctx.user.id}
-          JOIN ${groups} g ON r.made_by_group_id = g.id
-          JOIN ${users} u ON g.owner_id = u.id
-          WHERE p.property_status = 'Listed'
-          ORDER BY r.check_in, cr.city, r.id, p.id
-        `);
+      // TODO: USE DRIZZLE relational query, then use groupby in js
+      const hostProperties = await db.query.properties.findMany({
+        where: and(
+          eq(properties.hostId, ctx.user.id),
+          eq(properties.propertyStatus, "Listed"),
+        ),
 
-      const organizedData: HostRequestsPageData[] = [];
-      const cityMap = new Map<string, HostRequestsPageData>();
+        // columns: {
+        //   id: true,
+        //   propertyStatus: true,
+        //   latLngPoint: true,
+        //   priceRestriction: true,
+        //   city: true,
+        // },
+      });
 
-      for (const row of rawData) {
-        const property = {
-          id: row.property_id,
-          hostId: row.host_id,
-          hostTeamId: row.host_team_id,
-          propertyType: row.property_type,
-          address: row.address,
-          city: row.property_city,
-          roomType: row.room_type,
-          maxNumGuests: row.max_num_guests,
-          numBeds: row.num_beds,
-          numBedrooms: row.num_bedrooms,
-          numBathrooms: row.num_bathrooms,
-          latitude: row.latitude,
-          longitude: row.longitude,
-          checkInTime: row.check_in_time,
-          checkOutTime: row.check_out_time,
-          amenities: row.amenities,
-          imageUrls: row.image_url,
-          name: row.name,
-          about: row.about,
-          avgRating: row.avg_rating,
-          numRatings: row.num_ratings,
-          cancellationPolicy: row.cancellation_policy,
-          createdAt: row.created_at,
-          isPrivate: row.is_private,
-          hostProfilePic: row.host_profile_pic,
-          hostawayListingId: row.hostaway_listing_id,
-          hostName: row.host_name,
-          priceRestriction: row.price_restriction,
-          // Add other property fields here
-        } as unknown as Property;
+      const hostRequests = await getRequestsForProperties(hostProperties);
 
-        const request = {
-          id: row.request_id,
-          madeByGroupId: row.made_by_group_id,
-          requestGroupId: row.request_group_id,
-          maxTotalPrice: row.max_total_price,
-          location: row.location,
-          checkIn: row.check_in,
-          checkOut: row.check_out,
-          numGuests: row.num_guests,
-          minNumBeds: row.min_num_beds,
-          minNumBedrooms: row.min_num_bedrooms,
-          minNumBathrooms: row.min_num_bathrooms,
-          propertyType: row.property_type,
-          note: row.note,
-          airbnbLink: row.airbnb_link,
-          createdAt: row.created_at,
-          resolvedAt: row.resolved_at,
-          lat: row.lat,
-          lng: row.lng,
-          latLngPoint: row.lat_lng_point,
-          radius: row.radius,
-          amenities: row.amenities,
-          linkInputPropertyId: row.link_input_property_id,
-          traveler: { name: row.user_name, image: row.image },
-        } as HostRequestsPageData["requests"][number]["request"];
+      const groupedByCity: HostRequestsPageData[] = [];
 
-        const city = row.property_city as string;
+      const findOrCreateCityGroup = (city: string) => {
+        let cityGroup = groupedByCity.find((group) => group.city === city);
+        if (!cityGroup) {
+          cityGroup = { city, requests: [] };
+          groupedByCity.push(cityGroup);
+        }
+        return cityGroup;
+      };
 
-        if (!cityMap.has(city)) {
-          const newCityData: HostRequestsPageData = { city, requests: [] };
-          cityMap.set(city, newCityData);
-          organizedData.push(newCityData);
+      const requestsMap = new Map<
+        number,
+        {
+          request: Request & { traveler: Pick<User, "name" | "image"> };
+          properties: Property[];
+        }
+      >();
+
+      // Iterate over the hostRequests and gather all properties for each request
+      for (const { property, request } of hostRequests) {
+        // Check if this request already exists in the map
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        if (!requestsMap.has(request.id)) {
+          // If not, create a new entry with an empty properties array
+          requestsMap.set(request.id, {
+            request,
+            properties: [],
+          });
         }
 
-        const cityData = cityMap.get(city)!;
-        let requestData = cityData.requests.find(
-          (r) => r.request.id === request.id,
-        );
+        // Add the property to the request
+        requestsMap.get(request.id)!.properties.push(property);
+      }
+      for (const requestWithProperties of requestsMap.values()) {
+        const { request, properties } = requestWithProperties;
 
-        if (!requestData) {
-          requestData = { request, properties: [] };
-          cityData.requests.push(requestData);
-        }
-
-        // Check if the property is not already in the properties array
-        if (!requestData.properties.some((p) => p.id === property.id)) {
-          requestData.properties.push(property);
+        for (const property of properties) {
+          const cityGroup = findOrCreateCityGroup(property.city);
+          cityGroup.requests.push({
+            request,
+            properties,
+          });
         }
       }
-      return organizedData;
+
+      for (const cityGroup of groupedByCity) {
+        for (const requestGroup of cityGroup.requests) {
+          console.log(requestGroup.properties);
+        }
+      }
+      return groupedByCity;
+
+      // const rawData = await ctx.db.execute(sql`
+      //     WITH host_properties AS (
+      //       SELECT
+      //         p.*,
+      //         rp.request_id
+      //       FROM ${properties} p
+      //       JOIN ${requestsToProperties} rp ON p.id = rp.property_id
+      //       WHERE p.host_id = ${ctx.user.id}
+      //       AND p.property_status = 'Listed'
+      //     ),
+      //     city_requests AS (
+      //       SELECT
+      //         hp.request_id,
+      //         hp.city
+      //       FROM host_properties hp
+      //       JOIN ${requests} r ON hp.request_id = r.id
+      //       WHERE r.check_in >= CURRENT_DATE
+      //       GROUP BY hp.city, hp.request_id
+      //     )
+      //     SELECT
+      //       cr.city AS property_city,
+      //       cr.request_id,
+      //       p.id AS property_id,
+      //       p.*,
+      //       r.*,
+      //       u.name AS user_name,
+      //       u.image
+      //     FROM city_requests cr
+      //     JOIN ${requests} r ON cr.request_id = r.id
+      //     JOIN ${properties} p ON p.city = cr.city AND p.host_id = ${ctx.user.id}
+      //     JOIN ${groups} g ON r.made_by_group_id = g.id
+      //     JOIN ${users} u ON g.owner_id = u.id
+      //     WHERE p.property_status = 'Listed'
+      //     ORDER BY r.check_in, cr.city, r.id, p.id
+      //   `);
+
+      // const organizedData: HostRequestsPageData[] = [];
+      // const cityMap = new Map<string, HostRequestsPageData>();
+
+      // for (const row of rawData) {
+      //   const property = {
+      //     id: row.property_id,
+      //     hostId: row.host_id,
+      //     hostTeamId: row.host_team_id,
+      //     propertyType: row.property_type,
+      //     address: row.address,
+      //     city: row.property_city,
+      //     roomType: row.room_type,
+      //     maxNumGuests: row.max_num_guests,
+      //     numBeds: row.num_beds,
+      //     numBedrooms: row.num_bedrooms,
+      //     numBathrooms: row.num_bathrooms,
+      //     // latitude: row.latitude,
+      //     // longitude: row.longitude,
+      //     checkInTime: row.check_in_time,
+      //     checkOutTime: row.check_out_time,
+      //     amenities: row.amenities,
+      //     imageUrls: row.image_url,
+      //     name: row.name,
+      //     about: row.about,
+      //     avgRating: row.avg_rating,
+      //     numRatings: row.num_ratings,
+      //     cancellationPolicy: row.cancellation_policy,
+      //     createdAt: row.created_at,
+      //     isPrivate: row.is_private,
+      //     hostProfilePic: row.host_profile_pic,
+      //     hostawayListingId: row.hostaway_listing_id,
+      //     hostName: row.host_name,
+      //     priceRestriction: row.price_restriction,
+      //     // Add other property fields here
+      //   } as unknown as Property;
+
+      //   const request = {
+      //     id: row.request_id,
+      //     madeByGroupId: row.made_by_group_id,
+      //     requestGroupId: row.request_group_id,
+      //     maxTotalPrice: row.max_total_price,
+      //     location: row.location,
+      //     checkIn: row.check_in,
+      //     checkOut: row.check_out,
+      //     numGuests: row.num_guests,
+      //     minNumBeds: row.min_num_beds,
+      //     minNumBedrooms: row.min_num_bedrooms,
+      //     minNumBathrooms: row.min_num_bathrooms,
+      //     propertyType: row.property_type,
+      //     note: row.note,
+      //     airbnbLink: row.airbnb_link,
+      //     createdAt: row.created_at,
+      //     resolvedAt: row.resolved_at,
+      //     // lat: row.lat,
+      //     // lng: row.lng,
+      //     latLngPoint: row.lat_lng_point,
+      //     radius: row.radius,
+      //     amenities: row.amenities,
+      //     linkInputPropertyId: row.link_input_property_id,
+      //     traveler: { name: row.user_name, image: row.image },
+      //     numOfOffers: row.num_of_offers,
+      //   } as HostRequestsPageData["requests"][number]["request"];
+
+      //   const city = row.property_city as string;
+
+      //   if (!cityMap.has(city)) {
+      //     const newCityData: HostRequestsPageData = { city, requests: [] };
+      //     cityMap.set(city, newCityData);
+      //     organizedData.push(newCityData);
+      //   }
+
+      //   const cityData = cityMap.get(city)!;
+      //   let requestData = cityData.requests.find(
+      //     (r) => r.request.id === request.id,
+      //   );
+
+      //   if (!requestData) {
+      //     requestData = { request, properties: [] };
+      //     cityData.requests.push(requestData);
+      //   }
+
+      //   // Check if the property is not already in the properties array
+      //   if (!requestData.properties.some((p) => p.id === property.id)) {
+      //     requestData.properties.push(property);
+      //   }
+      // }
+      // return organizedData;
     },
   ),
   // hostInsertOnboardingProperty: roleRestrictedProcedure(["host"])

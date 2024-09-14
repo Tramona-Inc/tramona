@@ -18,11 +18,12 @@ import {
   sendText,
   sendWhatsApp,
   getPropertiesForRequest,
+  createLatLngGISPoint,
 } from "@/server/server-utils";
 import { sendSlackMessage } from "@/server/slack";
 import { isIncoming } from "@/utils/formatters";
 import { TRPCError } from "@trpc/server";
-import { and, eq, exists } from "drizzle-orm";
+import { and, eq, exists, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { Session } from "next-auth";
 import { linkInputProperties } from "@/server/db/schema/tables/linkInputProperties";
@@ -32,8 +33,12 @@ import {
   formatDateRange,
   plural,
 } from "@/utils/utils";
-import { sendTextToHost } from "@/server/server-utils";
+import { sendTextToHost, haversineDistance } from "@/server/server-utils";
 import { newLinkRequestSchema } from "@/utils/useSendUnsentRequests";
+import { getCoordinates } from "@/server/google-maps";
+import { scrapeDirectListings } from "@/server/direct-sites-scraping";
+import { waitUntil } from "@vercel/functions";
+import { scrapeAirbnbListingsForRequest } from "@/server/scrapeAirbnbListingsForRequest";
 
 const updateRequestInputSchema = z.object({
   requestId: z.number(),
@@ -67,6 +72,8 @@ export const requestsRouter = createTRPCRouter({
               createdAt: true,
               checkIn: true,
               checkOut: true,
+              randomDirectListingDiscount: true,
+              datePriceFromAirbnb: true,
             },
             with: {
               property: {
@@ -79,6 +86,7 @@ export const requestsRouter = createTRPCRouter({
                   originalNightlyPrice: true,
                   hostName: true,
                   hostProfilePic: true,
+                  bookOnAirbnb: true,
                 },
                 with: {
                   host: { columns: { name: true, email: true, image: true } },
@@ -159,10 +167,16 @@ export const requestsRouter = createTRPCRouter({
 
   create: protectedProcedure
     .input(
-      requestInsertSchema.omit({
-        madeByGroupId: true,
-        latLngPoint: true,
-      }),
+      requestInsertSchema
+        .omit({
+          madeByGroupId: true,
+          latLngPoint: true,
+        })
+        .extend({
+          lat: z.number().optional(),
+          lng: z.number().optional(),
+          radius: z.number().optional(),
+        }),
     )
     .mutation(async ({ ctx, input }) => {
       return await handleRequestSubmission(input, { user: ctx.user });
@@ -404,13 +418,19 @@ export const requestsRouter = createTRPCRouter({
 });
 
 //Reusable functions
-const modifiedRequestSchema = requestInsertSchema.omit({
-  madeByGroupId: true,
-  latLngPoint: true,
-});
+const modifiedRequestSchema = requestInsertSchema
+  .omit({
+    madeByGroupId: true,
+    latLngPoint: true,
+  })
+  .extend({
+    lat: z.number().optional(),
+    lng: z.number().optional(),
+    radius: z.number().optional(),
+  });
 
 // Infer the type from the modified schema
-type RequestInput = z.infer<typeof modifiedRequestSchema>;
+export type RequestInput = z.infer<typeof modifiedRequestSchema>;
 
 export async function handleRequestSubmission(
   input: RequestInput,
@@ -429,67 +449,100 @@ export async function handleRequestSubmission(
       groupId: madeByGroupId,
     });
 
-    const requestId = await tx
-      .insert(requests)
-      .values({ ...input, madeByGroupId })
-      .returning()
-      .then((res) => res[0]!.id);
-
-    const eligibleProperties = await getPropertiesForRequest(
-      { ...input, id: requestId },
-      { tx },
-    );
-
-    if (eligibleProperties.length > 0) {
-      await tx.insert(requestsToProperties).values(
-        eligibleProperties.map((property) => ({
-          requestId,
-          propertyId: property.id,
-        })),
-      );
-
-      await sendTextToHost(
-        eligibleProperties,
-        input.checkIn,
-        input.checkOut,
-        input.maxTotalPrice,
-        input.location,
-      );
+    let lat = input.lat;
+    let lng = input.lng;
+    let radius = input.radius;
+    if (lat === undefined || lng === undefined || radius === undefined) {
+      const coordinates = await getCoordinates(input.location);
+      if (coordinates.location) {
+        lat = coordinates.location.lat;
+        lng = coordinates.location.lng;
+        if (coordinates.bounds) {
+          radius =
+            haversineDistance(
+              coordinates.bounds.northeast.lat,
+              coordinates.bounds.northeast.lng,
+              coordinates.bounds.southwest.lat,
+              coordinates.bounds.southwest.lng,
+            ) / 2;
+        } else {
+          radius = 10;
+        }
+      }
+    }
+    let latLngPoint = null;
+    if (lat && lng) {
+      latLngPoint = createLatLngGISPoint({ lat, lng });
     }
 
-    // waitUntil(
-    //   scrapeAirbnbListings({
-    //     request: input,
-    //     limit: 10,
-    //   })
-    //     .then(async (airbnbListings) => {
-    //       const airbnbPropertyIds = await tx
-    //         .insert(properties)
-    //         .values(airbnbListings.map((l) => l.property))
-    //         .returning({ id: properties.id })
-    //         .then((res) => res.map((r) => r.id));
+    if (radius && latLngPoint) {
+      const request = await tx
+        .insert(requests)
+        .values({ ...input, madeByGroupId, latLngPoint, radius })
+        .returning({ latLngPoint: requests.latLngPoint, id: requests.id })
+        .then((res) => res[0]!);
 
-    //       const flattenedReviews = airbnbListings
-    //         .map(({ reviews }, i) =>
-    //           reviews.map((r) => ({ ...r, propertyId: airbnbPropertyIds[i]! })),
-    //         )
-    //         .flat();
+      //TO DO - figure out if i need to get coordinates here or elsewhere
 
-    //       await tx.insert(reviews).values(flattenedReviews);
-    //     })
-    //     .catch((e) => {
-    //       // fail silently -- we dont want to crash the request submission
-    //       // TODO: handle this better using a dead letter queue or something
-    //       console.error(
-    //         `Error scraping Airbnb listings for request #${requestId}: ${e}`,
-    //       );
-    //     }),
-    // );
+      // if (input.lat === undefined || input.lng === null || input.radius === null) {
+      //   const coordinates = await getCoordinates(input.location);
+      //   if (coordinates.location) {
 
-    return { requestId, madeByGroupId };
+      //   }
+      // }
+
+      const eligibleProperties = await getPropertiesForRequest(
+        { ...input, id: request.id, latLngPoint: request.latLngPoint, radius },
+        { tx },
+      );
+
+      waitUntil(
+        scrapeDirectListings({
+          checkIn: input.checkIn,
+          checkOut: input.checkOut,
+          requestNightlyPrice:
+            input.maxTotalPrice / getNumNights(input.checkIn, input.checkOut),
+          requestId: request.id,
+          location: input.location,
+          latitude: lat,
+          longitude: lng,
+          numGuests: input.numGuests,
+        }).catch((error) => {
+          console.error("Error scraping listings: " + error);
+        }),
+      );
+
+      if (eligibleProperties.length > 0) {
+        await tx.insert(requestsToProperties).values(
+          eligibleProperties.map((property) => ({
+            requestId: request.id,
+            propertyId: property.id,
+          })),
+        );
+
+        await sendTextToHost(
+          eligibleProperties,
+          input.checkIn,
+          input.checkOut,
+          input.maxTotalPrice,
+          input.location,
+        );
+      }
+
+      waitUntil(
+        scrapeAirbnbListingsForRequest(input, { tx, requestId: request.id }),
+      );
+
+      return { requestId: request.id, madeByGroupId };
+    } else {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Failed to get coordinates for the location",
+      });
+    }
   });
 
-  // Messaging based on user preferences or environment
+  // Messaging based on user preferences or environment.
   const name = user.name ?? user.email;
   const pricePerNight =
     input.maxTotalPrice / getNumNights(input.checkIn, input.checkOut);

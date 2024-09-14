@@ -22,7 +22,7 @@ export function useCityRequestForm({
 
   const { status } = useSession();
   const router = useRouter();
-  const { mutateAsync: createRequest } = api.requests.create.useMutation();
+  const { mutateAsync: createRequests } = api.requests.create.useMutation();
 
   const onSubmit = form.handleSubmit(async (data) => {
     const { date: _date, maxNightlyPriceUSD, ...restData } = data;
@@ -46,13 +46,15 @@ export function useCityRequestForm({
         });
       });
     } else {
-      await createRequest(newRequest)
-        .then(({ madeByGroupId }) => {
-          form.reset();
-          afterSubmit?.();
-          setMadeByGroupId?.(madeByGroupId);
-        })
-        .catch(() => errorToast());
+      try {
+        console.log("newRequest", newRequest);
+        const { requestId, madeByGroupId } = await createRequests(newRequest);
+        form.reset();
+        afterSubmit?.();
+        setMadeByGroupId?.(madeByGroupId);
+      } catch (error) {
+        errorToast();
+      }
     }
   });
 

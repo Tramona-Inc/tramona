@@ -24,7 +24,7 @@ import {
 import SingleLocationMap from "../_common/GoogleMaps/SingleLocationMap";
 import { api, type RouterOutputs } from "@/utils/api";
 import { getCancellationPolicyDescription } from "@/config/getCancellationPolicyDescription";
-import { useChatWithHost } from "@/utils/useChatWithHost";
+import { useChatWithHost } from "@/utils/messaging/useChatWithHost";
 export type TripWithDetails = RouterOutputs["trips"]["getMyTripsPageDetails"];
 export type TripWithDetailsConfirmation =
   RouterOutputs["trips"]["getMyTripsPageDetailsByPaymentIntentId"];

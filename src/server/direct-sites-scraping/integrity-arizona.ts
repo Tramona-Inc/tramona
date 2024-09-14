@@ -6,7 +6,7 @@ import {
   ListingSiteName,
 } from "@/server/db/schema/common";
 import { type Review } from "@/server/db/schema";
-import { getNumNights } from "@/utils/utils";
+import { getNumNights, parseHTML } from "@/utils/utils";
 import { ScrapedListing } from "@/server/direct-sites-scraping";
 import { axiosWithRetry } from "@/server/server-utils";
 
@@ -102,13 +102,17 @@ const mapToScrapedListing = (
   return validatedData.data.available_properties.property.map((prop) => ({
     originalListingId: prop.id.toString(),
     name: prop.name,
-    about: prop.short_description, // may contain html
+    about: parseHTML(prop.short_description), // may contain html
     propertyType: convertPropertyType(prop.lodging_type_id),
     address:
       prop.location_area_name + ", " + prop.city + ", " + prop.state_name,
     city: prop.city,
-    latitude: prop.latitude,
-    longitude: prop.longitude,
+    // latitude: prop.latitude,
+    // longitude: prop.longitude,
+    latLngPoint: {
+      lng: prop.longitude,
+      lat: prop.latitude,
+    },
     maxNumGuests: prop.max_occupants,
     numBeds: prop.bedrooms_number, // not provided, but required in NewProperty
     numBedrooms: prop.bedrooms_number,
@@ -140,7 +144,8 @@ const mapToScrapedListing = (
 export const arizonaScraper: DirectSiteScraper = async ({
   checkIn,
   checkOut,
-  numOfOffersInEachScraper = 2,
+  requestNightlyPrice,
+  location,
 }) => {
   // append 0 to month and day if less than 10
   const monthStart = (checkIn.getMonth() + 1).toString().padStart(2, "0");
@@ -150,7 +155,29 @@ export const arizonaScraper: DirectSiteScraper = async ({
   const dayEnd = checkOut.getDate().toString().padStart(2, "0");
   const yearEnd = checkOut.getFullYear().toString();
 
-  const url = `https://integrityarizonavacationrentals.com/wp-admin/admin-ajax.php?action=streamlinecore-api-request&params=%7B%22methodName%22:%22GetPropertyAvailabilityWithRatesWordPress%22,%22params%22:%7B%22sort_by%22:%22price%22,%22return_gallery%22:1,%22max_images_number%22:%225%22,%22use_room_type_logic%22:0,%22get_prices_starting_from%22:0,%22longterm_enabled%22:%220%22,%22additional_variables%22:1,%22extra_charges%22:1,%22use_amenities%22:%22yes%22,%22use_streamshare%22:0,%22startdate%22:%22${monthStart}%2F${dayStart}%2F${yearStart}%22,%22enddate%22:%22${monthEnd}%2F${dayEnd}%2F${yearEnd}%22,%22amenities_filter%22:%22%22,%22page_number%22:1,%22page_results_number%22:40,%22use_bundled_fees_in_room_rate%22:1,%22square_feet%22:1,%22floor_name%22:1%7D%7D`;
+  let locationCode = "";
+  if (location) {
+    const formattedLocation = location.split(",")[0];
+    switch (formattedLocation) {
+      case "Parker Strip":
+        locationCode = "20690";
+        break;
+      case "Lake Havasu":
+        locationCode = "20691";
+        break;
+      default:
+        console.error(
+          "AZ scraper: Location is not recognized: ",
+          location,
+          " ; returning empty array",
+        );
+        return [];
+    }
+  }
+  const locationParam = location
+    ? `%22location_area_id%22:${locationCode},`
+    : "";
+  const url = `https://integrityarizonavacationrentals.com/wp-admin/admin-ajax.php?action=streamlinecore-api-request&params=%7B%22methodName%22:%22GetPropertyAvailabilityWithRatesWordPress%22,%22params%22:%7B%22sort_by%22:%22price%22,%22return_gallery%22:1,%22max_images_number%22:%225%22,%22use_room_type_logic%22:0,%22get_prices_starting_from%22:0,%22longterm_enabled%22:%220%22,%22additional_variables%22:1,%22extra_charges%22:1,%22use_amenities%22:%22yes%22,%22use_streamshare%22:0,%22startdate%22:%22${monthStart}%2F${dayStart}%2F${yearStart}%22,%22enddate%22:%22${monthEnd}%2F${dayEnd}%2F${yearEnd}%22,${locationParam}%22amenities_filter%22:%22%22,%22page_number%22:1,%22page_results_number%22:40,%22use_bundled_fees_in_room_rate%22:1,%22square_feet%22:1,%22floor_name%22:1%7D%7D`;
   // console.log("scrapedUrl: ", url)
   let properties = await axiosWithRetry
     .get<string>(url)
@@ -158,11 +185,21 @@ export const arizonaScraper: DirectSiteScraper = async ({
     .then((data) => propertySchema.parse(data))
     .then((validatedData) =>
       mapToScrapedListing(validatedData, checkIn, checkOut, url),
-    );
+    )
+    .catch((error) => {
+      console.error("Error scraping Arizona: ", error);
+      return [];
+    });
 
-  if (numOfOffersInEachScraper > 0) {
-    properties = properties.slice(0, numOfOffersInEachScraper);
+  if (requestNightlyPrice) {
+    properties = properties.filter((p) => {
+      const price = p.originalNightlyPrice!;
+      return (
+        price >= requestNightlyPrice * 0.8 && price <= requestNightlyPrice * 1.1
+      );
+    });
   }
+
   // Fetch and append reviews for each property
   const propertiesWithReviews = await Promise.all(
     properties.map(async (p) => {
@@ -181,7 +218,7 @@ export const arizonaScraper: DirectSiteScraper = async ({
     }),
   );
 
-  // console.log(propertiesWithReviews[0])
+  // console.log(propertiesWithReviews[0]);
   return propertiesWithReviews;
 };
 

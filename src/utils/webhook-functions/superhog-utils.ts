@@ -122,12 +122,12 @@ export async function createSuperhogReservation({
           addressLine2: "", //can be null
           town: property.city,
           countryIso: await getCountryISO({
-            lat: property.latitude,
-            lng: property.longitude,
+            lat: property.latLngPoint.y,
+            lng: property.latLngPoint.x,
           }),
           postcode: await getPostcode({
-            lat: property.latitude,
-            lng: property.longitude,
+            lat: property.latLngPoint.y,
+            lng: property.latLngPoint.x,
           }),
         },
         petsAllowed: property.petsAllowed ? "true" : "false",
