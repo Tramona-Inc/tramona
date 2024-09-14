@@ -18,7 +18,6 @@ import {
 } from "@/server/db/schema";
 import { getCity, getCoordinates } from "@/server/google-maps";
 import {
-  sendEmail,
   sendText,
   sendWhatsApp,
   updateTravelerandHostMarkup,
@@ -215,16 +214,11 @@ export const offersRouter = createTRPCRouter({
     .input(offerSelectSchema.pick({ id: true }))
     .query(async ({ ctx, input }) => {
       const offerWithoutProperty = await getOfferPageData(input.id);
-      if (!offerWithoutProperty) {
-        throw new TRPCError({ code: "BAD_REQUEST" });
-      }
+
       const propertyForOffer = await getPropertyForOffer(
         offerWithoutProperty.propertyId,
       );
 
-      if (!propertyForOffer) {
-        throw new TRPCError({ code: "BAD_REQUEST" });
-      }
       const offer = { ...offerWithoutProperty, property: propertyForOffer };
 
       if (offer.request) {

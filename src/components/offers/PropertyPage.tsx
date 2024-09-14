@@ -49,7 +49,6 @@ import { OfferPriceDetails } from "../_common/OfferPriceDetails";
 import { getCancellationPolicyDescription } from "@/config/getCancellationPolicyDescription";
 import { VerificationProvider } from "../_utils/VerificationContext";
 import IdentityModal from "../_utils/IdentityModal";
-import { type InferQueryModel } from "@/server/db";
 import { Property } from "@/server/db/schema";
 import ChatOfferButton from "./ChatOfferButton";
 import { Airbnb } from "@/utils/listing-sites/Airbnb";
@@ -79,7 +78,7 @@ export default function PropertyPage({
     }
   }, []);
 
-  const hostName = property?.host?.name ?? "Tramona";
+  const hostName = property.host?.name ?? "Tramona";
 
   const originalListing = getOriginalListing(property);
 
