@@ -67,8 +67,8 @@ export const directSiteScrapers: NamedDirectSiteScraper[] = [
   { name: "cleanbnbScraper", scraper: cleanbnbScraper },
   { name: "arizonaScraper", scraper: arizonaScraper },
   // { name: "cbIslandVacationsScraper", scraper: cbIslandVacationsScraper },
-  // { name: "cbIslandVacationsScraper", scraper: cbIslandVacationsScraper },
   { name: "redawningScraper", scraper: redawningScraper },
+
   { name: "casamundoScraper", scraper: casamundoScraper },
 ];
 
@@ -313,6 +313,8 @@ export const scrapeDirectListings = async (options: {
               scrapeUrl: listing.scrapeUrl,
               isAvailableOnOriginalSite: true,
               availabilityCheckedAt: new Date(),
+              randomDirectListingDiscount:
+                createRandomMarkupEightToFourteenPercent(),
               ...(options.requestId && { requestId: options.requestId }),
             };
             const newOfferId = await trx
