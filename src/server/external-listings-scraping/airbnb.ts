@@ -69,7 +69,7 @@ export const scrapeAirbnbListings = async ({
         };
       },
     ),
-  ).then((r) => r.filter((r) => r.status === "fulfilled").map((r) => r.value));
+  ).then((r) => r.filter((r) => r.status === "fulfilled").map((r) => r.value)); // filter out failed scrapes
 };
 
 function getSerpUrl({
@@ -174,29 +174,27 @@ function transformSearchResult({
   searchResult: SearchResult;
   numNights: number;
 }) {
-  {
-    const discountedPriceStr =
-      pricingQuote.structuredStayDisplayPrice.primaryLine.discountedPrice;
+  const discountedPriceStr =
+    pricingQuote.structuredStayDisplayPrice.primaryLine.discountedPrice;
 
-    const nightlyPrice = discountedPriceStr
-      ? Math.round(parseCurrency(discountedPriceStr) / numNights)
-      : undefined;
+  if (!discountedPriceStr) return undefined;
 
-    const originalPriceStr =
-      pricingQuote.structuredStayDisplayPrice.primaryLine.originalPrice;
+  const nightlyPrice = Math.round(
+    parseCurrency(discountedPriceStr) / numNights,
+  );
 
-    const originalNightlyPrice = originalPriceStr
-      ? Math.round(parseCurrency(originalPriceStr) / numNights)
-      : undefined;
+  const originalPriceStr =
+    pricingQuote.structuredStayDisplayPrice.primaryLine.originalPrice;
 
-    if (nightlyPrice === undefined || originalNightlyPrice === undefined) {
-      return undefined;
-    }
+  if (!originalPriceStr) return undefined;
 
-    return {
-      nightlyPrice,
-      originalNightlyPrice,
-      originalListingId: listing.id,
-    };
-  }
+  const originalNightlyPrice = Math.round(
+    parseCurrency(originalPriceStr) / numNights,
+  );
+
+  return {
+    nightlyPrice,
+    originalNightlyPrice,
+    originalListingId: listing.id,
+  };
 }
