@@ -71,9 +71,7 @@ export const directSiteScrapers: NamedDirectSiteScraper[] = [
   { name: "evolveVacationRentalScraper", scraper: evolveVacationRentalScraper },
   { name: "cleanbnbScraper", scraper: cleanbnbScraper },
   { name: "arizonaScraper", scraper: arizonaScraper },
-  { name: "cbIslandVacationsScraper", scraper: cbIslandVacationsScraper },
-  { name: "cleanbnbScraper", scraper: cleanbnbScraper },
-  { name: "arizonaScraper", scraper: arizonaScraper },
+  // {  name: "cbIslandVacationsScraper", scraper: cbIslandVacationsScraper },
   { name: "redawningScraper", scraper: redawningScraper },
   { name: "casamundoScraper", scraper: casamundoScraper },
 ];
@@ -156,6 +154,7 @@ export const scrapeDirectListings = async (options: {
     await db.transaction(async (trx) => {
       // for each listing, insert the property and reviews OR update them if they already exist
       // then create offers if the offers don't exist
+      let becomeVisibleAtNumber = Date.now(); // will increment by 5 minutes for each offer
       for (const listing of listings) {
         if (!listing.originalListingId) {
           continue;
@@ -245,6 +244,7 @@ export const scrapeDirectListings = async (options: {
               scrapeUrl: listing.scrapeUrl,
               isAvailableOnOriginalSite: true,
               availabilityCheckedAt: new Date(),
+              becomeVisibleAt: new Date(becomeVisibleAtNumber + 5 * 60 * 1000),
               randomDirectListingDiscount:
                 createRandomMarkupEightToFourteenPercent(),
               ...(options.requestId && { requestId: options.requestId }),
@@ -311,6 +311,7 @@ export const scrapeDirectListings = async (options: {
               availabilityCheckedAt: new Date(),
               randomDirectListingDiscount:
                 createRandomMarkupEightToFourteenPercent(),
+              becomeVisibleAt: new Date(becomeVisibleAtNumber + 5 * 60 * 1000),
               ...(options.requestId && { requestId: options.requestId }),
             };
             const newOfferId = await trx

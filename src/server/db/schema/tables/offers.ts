@@ -42,6 +42,9 @@ export const offers = pgTable(
     availabilityCheckedAt: timestamp("availability_checked_at", {
       withTimezone: true,
     }),
+    becomeVisibleAt: timestamp("become_visible_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
   },
   (t) => ({
     requestIdIdx: index().on(t.requestId),
