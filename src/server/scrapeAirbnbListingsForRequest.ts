@@ -1,8 +1,8 @@
 import { db } from "@/server/db";
 import { offers, properties, reviews } from "@/server/db/schema";
 import { scrapeAirbnbListings } from "@/server/external-listings-scraping/airbnb";
-import { HOST_MARKUP, TRAVELER__MARKUP } from "@/utils/constants";
 import { RequestInput } from "./api/routers/requestsRouter";
+import { getNumNights } from "@/utils/utils";
 
 export async function scrapeAirbnbListingsForRequest(
   request: RequestInput,
@@ -46,15 +46,20 @@ export async function scrapeAirbnbListingsForRequest(
     await tx.insert(reviews).values(flattenedReviews);
   }
 
+  const numNights = getNumNights(request.checkIn, request.checkOut);
+
   await tx.insert(offers).values(
-    airbnbListings.map((l, i) => ({
-      requestId,
-      totalPrice: Math.round(l.nightlyPrice),
-      travelerOfferedPrice: Math.round(l.nightlyPrice * TRAVELER__MARKUP),
-      hostPayout: Math.round(l.nightlyPrice * HOST_MARKUP),
-      checkIn: request.checkIn,
-      checkOut: request.checkOut,
-      propertyId: airbnbPropertyIds[i]!,
-    })),
+    airbnbListings.map((l, i) => {
+      const totalPrice = Math.round(l.nightlyPrice * numNights);
+      return {
+        requestId,
+        totalPrice: totalPrice,
+        travelerOfferedPrice: totalPrice,
+        hostPayout: totalPrice,
+        checkIn: request.checkIn,
+        checkOut: request.checkOut,
+        propertyId: airbnbPropertyIds[i]!,
+      };
+    }),
   );
 }
