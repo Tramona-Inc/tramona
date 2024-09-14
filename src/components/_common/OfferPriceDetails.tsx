@@ -35,15 +35,17 @@ export function OfferPriceDetails({
     },
     {
       title: "Cleaning fee",
-      price: "Included",
+      price: bookOnAirbnb ? "Airbnb fee" : "Included",
     },
     {
       title: "Tramona service fee",
-      price: `${formatCurrency(serviceFee)}`,
+      price: bookOnAirbnb ? "$0.00" : `${formatCurrency(serviceFee)}`,
     },
     {
       title: "Taxes",
-      price: `${taxPaid === 0 ? "included" : formatCurrency(taxPaid)}`,
+      price: bookOnAirbnb
+        ? "Airbnb fee"
+        : `${taxPaid === 0 ? "included" : formatCurrency(taxPaid)}`,
     },
   ];
 
@@ -62,7 +64,11 @@ export function OfferPriceDetails({
         <Separator />
         <div className="flex items-center justify-between pb-4 font-bold">
           <p>Total (USD)</p>
-          <p>{formatCurrency(finalTotal)}</p>
+          {bookOnAirbnb ? (
+            <p>{formatCurrency(offer.travelerOfferedPrice)} + airbnb fees</p>
+          ) : (
+            <p>{formatCurrency(finalTotal)}</p>
+          )}
         </div>
       </div>
       <div className="md:hidden">

@@ -55,10 +55,13 @@ export function RequestCardOfferPreviews({
                   </p>
                 </div>
                 <div className="absolute left-1 top-1 flex gap-1">
-                  <Badge variant="white">{discountPercentage}% off Airbnb price</Badge>
-                  {/* {offer.property.bookOnAirbnb && (
-                    <Badge variant="white">Airbnb</Badge>
-                  )} */}
+                  {offer.property.bookOnAirbnb ? (
+                    <Badge variant="white">{discountPercentage}% off</Badge>
+                  ) : (
+                    <Badge variant="white">
+                      {discountPercentage}% off Airbnb price
+                    </Badge>
+                  )}
                 </div>
                 <div className="absolute right-1 top-1 flex -translate-y-2 items-center gap-1 rounded-full bg-black/40 px-3 py-1.5 text-xs font-medium text-white/80 opacity-0 backdrop-blur transition-all duration-200 group-hover:translate-y-0 group-hover:opacity-100">
                   View offer <ExternalLinkIcon className="h-3.5 w-3.5" />

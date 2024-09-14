@@ -496,22 +496,22 @@ export async function handleRequestSubmission(
         { tx },
       );
 
-      waitUntil(
-        scrapeDirectListings({
-          checkIn: input.checkIn,
-          checkOut: input.checkOut,
-          numOfOffersInEachScraper: 10,
-          requestNightlyPrice:
-            input.maxTotalPrice / getNumNights(input.checkIn, input.checkOut),
-          requestId: request.id,
-          location: input.location,
-          latitude: lat,
-          longitude: lng,
-          numGuests: input.numGuests,
-        }).catch((error) => {
-          console.error("Error scraping listings: " + error);
-        }),
-      );
+      // waitUntil(
+      //   scrapeDirectListings({
+      //     checkIn: input.checkIn,
+      //     checkOut: input.checkOut,
+      //     numOfOffersInEachScraper: 10,
+      //     requestNightlyPrice:
+      //       input.maxTotalPrice / getNumNights(input.checkIn, input.checkOut),
+      //     requestId: request.id,
+      //     location: input.location,
+      //     latitude: lat,
+      //     longitude: lng,
+      //     numGuests: input.numGuests,
+      //   }).catch((error) => {
+      //     console.error("Error scraping listings: " + error);
+      //   }),
+      // );
 
       if (eligibleProperties.length > 0) {
         await tx.insert(requestsToProperties).values(

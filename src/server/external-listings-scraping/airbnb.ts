@@ -175,6 +175,7 @@ function transformSearchResult({
   numNights: number;
 }) {
   {
+    console.log(`${listing.id} searchResult`, pricingQuote);
     const discountedPriceStr =
       pricingQuote.structuredStayDisplayPrice.primaryLine.discountedPrice;
 

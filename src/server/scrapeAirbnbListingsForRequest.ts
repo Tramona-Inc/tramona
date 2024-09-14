@@ -9,10 +9,12 @@ export async function scrapeAirbnbListingsForRequest(
   request: RequestInput,
   { tx = db, requestId }: { tx?: typeof db; requestId: number },
 ) {
+  console.log('hello hello!')
   const airbnbListings = await scrapeAirbnbListings({
     request,
     limit: 10,
   });
+  console.log('hello hello')
 
   // await writeFile(
   //   "./airbnbListings.json",
@@ -46,13 +48,15 @@ export async function scrapeAirbnbListingsForRequest(
   if (flattenedReviews.length > 0) {
     await tx.insert(reviews).values(flattenedReviews);
   }
+ 
+  const numNights = getNumNights(request.checkIn, request.checkOut);
 
   await tx.insert(offers).values(
     airbnbListings.map((l, i) => ({
       requestId,
-      totalPrice: Math.round(l.nightlyPrice * getNumNights(request.checkIn, request.checkOut)),
-      travelerOfferedPrice: Math.round(l.nightlyPrice * TRAVELER__MARKUP),
-      hostPayout: Math.round(l.nightlyPrice * HOST_MARKUP),
+      totalPrice: Math.round(l.nightlyPrice * numNights),
+      travelerOfferedPrice: Math.round(l.nightlyPrice * numNights),
+      hostPayout: Math.round(l.nightlyPrice * numNights),
       checkIn: request.checkIn,
       checkOut: request.checkOut,
       propertyId: airbnbPropertyIds[i]!,
