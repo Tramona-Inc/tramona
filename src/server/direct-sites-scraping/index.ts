@@ -1,5 +1,4 @@
 import { db } from "../db";
-import { exampleScraper } from "./example";
 import {
   evolveVacationRentalScraper,
   evolveVacationRentalSubScraper,
@@ -22,13 +21,13 @@ import { arizonaScraper, arizonaSubScraper } from "./integrity-arizona";
 import { redawningScraper } from "./redawning";
 
 import { getCoordinates } from "../google-maps";
-import { eq, and, sql } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import {
   createRandomMarkupEightToFourteenPercent,
   getNumNights,
 } from "@/utils/utils";
 import { DIRECTLISTINGMARKUP } from "@/utils/constants";
-import { createLatLngGISPoint, haversineDistance } from "@/server/server-utils";
+import { createLatLngGISPoint } from "@/server/server-utils";
 import { cleanbnbScraper, cleanbnbSubScraper } from "./cleanbnb-scrape";
 
 export type DirectSiteScraper = (options: {
@@ -69,9 +68,6 @@ export type NamedDirectSiteScraper = {
 
 export const directSiteScrapers: NamedDirectSiteScraper[] = [
   // add more scrapers here
-  // cleanbnbScraper,
-  // arizonaScraper,
-  // cbIslandVacationsScraper,
   { name: "evolveVacationRentalScraper", scraper: evolveVacationRentalScraper },
   { name: "cleanbnbScraper", scraper: cleanbnbScraper },
   { name: "arizonaScraper", scraper: arizonaScraper },
@@ -79,7 +75,6 @@ export const directSiteScrapers: NamedDirectSiteScraper[] = [
   { name: "cleanbnbScraper", scraper: cleanbnbScraper },
   { name: "arizonaScraper", scraper: arizonaScraper },
   { name: "redawningScraper", scraper: redawningScraper },
-
   { name: "casamundoScraper", scraper: casamundoScraper },
 ];
 
@@ -156,16 +151,6 @@ export const scrapeDirectListings = async (options: {
       return aDiff - bDiff;
     })
     .slice(0, 10); // Grab up to 10 listings
-
-  // console.log("listings: ", listings.length);
-  // listings.forEach((listing) => {
-  //   console.log(
-  //     "platform: ",
-  //     listing.originalListingPlatform,
-  //     "originalNightlyPrice: ",
-  //     listing.originalNightlyPrice,
-  //   );
-  // });
 
   if (listings.length > 0) {
     await db.transaction(async (trx) => {

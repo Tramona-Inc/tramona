@@ -9,7 +9,6 @@ import { type Review } from "@/server/db/schema";
 import { getNumNights, parseHTML } from "@/utils/utils";
 import { ScrapedListing } from "@/server/direct-sites-scraping";
 import { axiosWithRetry } from "@/server/server-utils";
-import { sql } from "drizzle-orm";
 
 const propertySchema = z.object({
   data: z.object({

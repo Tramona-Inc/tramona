@@ -480,7 +480,6 @@ export const evolveVacationRentalScraper: DirectSiteScraper = async ({
   numGuests,
   checkIn,
   checkOut,
-  numOfOffersInEachScraper = 5,
   location,
   requestNightlyPrice
 }) => {
