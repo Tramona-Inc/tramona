@@ -49,6 +49,8 @@ export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
       enabled: Boolean(session?.user.id ?? tempToken),
     },
   );
+  const { mutateAsync: sendChatboxSlackMessage } =
+    api.messages.sendChatboxSlackMessage.useMutation();
 
   useEffect(() => {
     if (!session && typeof window !== "undefined") {
@@ -151,6 +153,11 @@ export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
         removeMessageFromConversation(conversationId ?? "", newMessage.id);
         errorToast();
       }
+      await sendChatboxSlackMessage({
+        message: newMessage.message,
+        conversationId: conversationId ?? "",
+        senderId: newMessage.userId,
+      });
     } else {
       const conversationId = await createOrRetrieveConversation();
       const newMessage: ChatMessageType = {
@@ -185,6 +192,11 @@ export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
         removeMessageFromConversation(conversationId ?? "", newMessage.id);
         errorToast();
       }
+      await sendChatboxSlackMessage({
+        message: newMessage.message,
+        conversationId: conversationId ?? "",
+        senderId: newMessage.userId,
+      });
     }
     form.reset();
   };
