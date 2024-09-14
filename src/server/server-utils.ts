@@ -25,6 +25,7 @@ import {
   type NewProperty,
   type Property,
   type User,
+  type Request,
   bookedDates,
   groupInvites,
   groupMembers,
@@ -47,7 +48,6 @@ import * as cheerio from "cheerio";
 import { sendSlackMessage } from "./slack";
 import { HOST_MARKUP, TRAVELER__MARKUP } from "@/utils/constants";
 import { HostRequestsPageData } from "./api/routers/propertiesRouter";
-import { create, property } from "lodash";
 
 export const axiosWithRetry = axios.create();
 
@@ -484,6 +484,7 @@ export async function getRequestsForProperties(
     //     )
     // `;
     requestIsNearProperties.push(requestIsNearProperty);
+
 
     const requestsForProperty = await tx.query.requests.findMany({
       where: and(requestIsNearProperty, gte(requests.checkIn, new Date())),

@@ -86,7 +86,6 @@ export const requestsRouter = createTRPCRouter({
                   originalNightlyPrice: true,
                   hostName: true,
                   hostProfilePic: true,
-                  bookOnAirbnb: true,
                 },
                 with: {
                   host: { columns: { name: true, email: true, image: true } },
@@ -500,7 +499,6 @@ export async function handleRequestSubmission(
         scrapeDirectListings({
           checkIn: input.checkIn,
           checkOut: input.checkOut,
-          numOfOffersInEachScraper: 10,
           requestNightlyPrice:
             input.maxTotalPrice / getNumNights(input.checkIn, input.checkOut),
           requestId: request.id,
