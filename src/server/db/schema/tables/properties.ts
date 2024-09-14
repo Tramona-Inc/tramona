@@ -301,6 +301,7 @@ export const properties = pgTable(
       .notNull()
       .$type<{ x: number; y: number }>(),
     iCalLink: text("ical_link"),
+    bookOnAirbnb: boolean("book_on_airbnb").notNull().default(false),
   },
   (t) => ({
     spatialIndex: index("spacial_index").using("gist", t.latLngPoint),

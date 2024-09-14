@@ -5,7 +5,14 @@ import { NextSeo } from "next-seo";
 import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import { getOfferPageData } from "@/server/api/routers/offersRouter";
+import {
+  getOfferPageData,
+  getPropertyForOffer,
+} from "@/server/api/routers/offersRouter";
+import { OfferWithProperty } from "../../components/requests/[id]/OfferCard/index";
+import type { RouterOutputs } from "@/utils/api";
+
+export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 
 const Page = ({
   offer,
@@ -57,7 +64,7 @@ const Page = ({
           </Link>
         </div>
         <div className="p-4 pb-64">
-          <OfferPage offer={offer} />
+          {offer.request && <OfferPage offer={offer} />}
         </div>
       </div>
     </DashboadLayout>
@@ -74,9 +81,18 @@ export const getServerSideProps = async (
     ? "https://www.tramona.com"
     : "https://6fb1-104-32-193-204.ngrok-free.app/"; //change to your live server
 
-  const offer = await getOfferPageData(offerId);
+  const offerWithoutProperty = await getOfferPageData(offerId);
+  const propertyForOffer = await getPropertyForOffer(
+    offerWithoutProperty.propertyId,
+  );
 
-  if (!offer) return { notFound: true };
+  const offer: OfferWithDetails = {
+    ...offerWithoutProperty,
+    property: propertyForOffer,
+  };
+
+  console.log(typeof offer);
+  console.log(typeof offer);
 
   return {
     props: {

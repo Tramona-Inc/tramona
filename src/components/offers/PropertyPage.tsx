@@ -53,12 +53,10 @@ import { type InferQueryModel } from "@/server/db";
 import { Property } from "@/server/db/schema";
 import ChatOfferButton from "./ChatOfferButton";
 import { Airbnb } from "@/utils/listing-sites/Airbnb";
-import { properties } from "../../server/db/schema/tables/properties";
 
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
-type PropertyFromOffer = OfferWithDetails["property"];
-
-export type PropertyPageData = PropertyFromOffer;
+export type PropertyPageData = OfferWithDetails["property"];
+//export type PropertyPageData = RouterOutputs["properties"]["getById"];
 
 export default function PropertyPage({
   property,
@@ -81,7 +79,7 @@ export default function PropertyPage({
     }
   }, []);
 
-  const hostName = property.host?.name ?? "Tramona";
+  const hostName = property?.host?.name ?? "Tramona";
 
   const originalListing = getOriginalListing(property);
 
