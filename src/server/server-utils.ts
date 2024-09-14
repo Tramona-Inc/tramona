@@ -107,6 +107,13 @@ export async function scrapeUrlLikeHuman(url: string) {
     });
 }
 
+export async function scrapeUrl(url: string) {
+  return await axios
+    .get<string>(url, { httpsAgent: proxyAgent, responseType: "text" })
+    .then((res) => res.data)
+    .then(cheerio.load);
+}
+
 const transporter = nodemailler.createTransport({
   host: env.SMTP_HOST,
   port: env.SMTP_PORT,
@@ -484,7 +491,6 @@ export async function getRequestsForProperties(
     //     )
     // `;
     requestIsNearProperties.push(requestIsNearProperty);
-
 
     const requestsForProperty = await tx.query.requests.findMany({
       where: and(requestIsNearProperty, gte(requests.checkIn, new Date())),

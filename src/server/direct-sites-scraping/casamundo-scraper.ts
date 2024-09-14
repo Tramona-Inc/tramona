@@ -103,7 +103,7 @@ async function getLocationId(location: string): Promise<string> {
         return bestMatch.id;
       }
 
-      return suggestions[0]!.id;
+      return suggestions[0].id;
     } else {
       throw new Error("No location found");
     }
