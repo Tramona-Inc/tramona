@@ -172,7 +172,7 @@ export const propertiesRouter = createTRPCRouter({
   getById: publicProcedure
     .input(propertySelectSchema.pick({ id: true }))
     .query(async ({ ctx, input }) => {
-      return await ctx.db.query.properties.findFirst({
+      const property = await ctx.db.query.properties.findFirst({
         where: eq(properties.id, input.id),
         with: {
           host: {
@@ -182,11 +182,12 @@ export const propertiesRouter = createTRPCRouter({
                 columns: { curTeamId: true },
               },
             },
-            
           },
           reviews: true,
         },
       });
+      if (!property) throw new Error("no property");
+      return property;
     }),
   getAll: publicProcedure.query(async ({ ctx }) => {
     return await ctx.db.query.properties.findMany();
@@ -410,11 +411,11 @@ export const propertiesRouter = createTRPCRouter({
             cursor ? gt(properties.id, cursor) : undefined,
             boundaries
               ? and(
-                lte(sql`ST_Y(${properties.latLngPoint})`, boundaries.north),
-                gte(sql`ST_Y(${properties.latLngPoint})`, boundaries.south),
-                lte(sql`ST_X(${properties.latLngPoint})`, boundaries.east),
-                gte(sql`ST_X(${properties.latLngPoint})`, boundaries.west),
-              )
+                  lte(sql`ST_Y(${properties.latLngPoint})`, boundaries.north),
+                  gte(sql`ST_Y(${properties.latLngPoint})`, boundaries.south),
+                  lte(sql`ST_X(${properties.latLngPoint})`, boundaries.east),
+                  gte(sql`ST_X(${properties.latLngPoint})`, boundaries.west),
+                )
               : sql`TRUE`,
             input.lat && input.long && !boundaries
               ? sql`6371 * acos(SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(lng * Math.PI) / 180})) <= ${radius}`

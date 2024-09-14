@@ -174,8 +174,8 @@ export const offersRouter = createTRPCRouter({
                   with: {
                     hostProfile: {
                       columns: { userId: true },
-                    }
-                  }
+                    },
+                  },
                 },
                 reviews: true,
               },
@@ -798,7 +798,12 @@ export const offersRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const request = await ctx.db.query.requests.findFirst({
         where: eq(requests.id, input.requestId),
-        columns: { checkIn: true, checkOut: true, maxTotalPrice: true, numGuests: true },
+        columns: {
+          checkIn: true,
+          checkOut: true,
+          maxTotalPrice: true,
+          numGuests: true,
+        },
       });
       if (!request) {
         throw new TRPCError({
@@ -825,7 +830,7 @@ export const offersRouter = createTRPCRouter({
 });
 
 export async function getPropertyForOffer(propertyId: number) {
-  return await db.query.properties.findFirst({
+  const property = await db.query.properties.findFirst({
     where: eq(properties.id, propertyId),
     with: {
       reviews: true,
@@ -846,19 +851,21 @@ export async function getPropertyForOffer(propertyId: number) {
       },
     },
   });
+  if (!property) throw new Error("No Property was found");
+  return property;
 }
 
 export async function getOfferPageData(offerId: number) {
-  return await db.query.offers.findFirst({
+  const offer = await db.query.offers.findFirst({
     where: eq(offers.id, offerId),
     columns: {
+      id: true,
       checkIn: true,
       checkOut: true,
       createdAt: true,
       totalPrice: true,
       acceptedAt: true,
       tramonaFee: true,
-      id: true,
       propertyId: true,
       requestId: true,
       hostPayout: true,
@@ -881,4 +888,6 @@ export async function getOfferPageData(offerId: number) {
       },
     },
   });
+  if (!offer) throw new Error("No offer found");
+  return offer;
 }
