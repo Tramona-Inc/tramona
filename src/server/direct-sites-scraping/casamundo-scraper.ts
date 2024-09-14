@@ -55,7 +55,7 @@ function scoreMatch(suggestion: Suggestion, locationParts: string[]): number {
 
   if (fullTitle === locationParts[0]) {
     score += 100;
-  } else if (fullTitle.includes(locationParts[0])) {
+  } else if (fullTitle.includes(locationParts[0]!)) {
     score += 50;
   }
   if (
@@ -83,7 +83,7 @@ async function getLocationId(location: string): Promise<string> {
     );
     const suggestions = response.data.suggestions;
 
-    if (suggestions.length > 0) {
+    if (suggestions.length > 0 && suggestions[0]) {
       const locationParts = location
         .toLowerCase()
         .split(",")
@@ -140,7 +140,7 @@ async function getOfferIds(
   const params = new URLSearchParams({
     fieldTreeId: "SearchDetailsFields.SERP",
     adults: numGuests?.toString() ?? "1",
-    arrival: checkIn.toISOString().split("T")[0],
+    arrival: checkIn.toISOString().split("T")[0] ?? "",
     duration: getNumNights(checkIn, checkOut).toString(),
     _format: "json",
   });
@@ -275,7 +275,7 @@ const fetchPrice = async (
     adults: params.numGuests.toString(),
     children: "0",
     pets: "0",
-    arrival: params.checkIn.toISOString().split("T")[0],
+    arrival: params.checkIn.toISOString().split("T")[0] ?? "",
     c: "USD",
     duration: params.duration.toString(),
     pricetype: "perNight",
@@ -620,7 +620,6 @@ export const casamundoScraper: DirectSiteScraper = async ({
     const scrapedListings: ScrapedListing[] = [];
 
     for (const offer of offerIds) {
-
       const propertyWithDetails = await scrapeProperty(
         offer.id,
         locationId,

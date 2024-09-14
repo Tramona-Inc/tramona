@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { type Request } from "@/server/db/schema";
 import { useState } from "react";
-import AdminOfferForm from "./AdminOfferForm";
+//import AdminOfferForm from "./AdminOfferForm";
 import { type OfferWithProperty } from "../requests/[id]/OfferCard";
 
 export default function AdminOfferDialog({
@@ -31,11 +31,11 @@ export default function AdminOfferDialog({
             Create a property and give it a total price
           </DialogDescription>
         </DialogHeader>
-        <AdminOfferForm
-          afterSubmit={() => setIsOpen(false)}
+        {/* <AdminOfferForm */}
+        {/* afterSubmit={() => setIsOpen(false)}
           request={request}
           offer={offer}
-        />
+        /> */}
       </DialogContent>
     </Dialog>
   );

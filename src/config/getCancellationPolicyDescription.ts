@@ -1,5 +1,7 @@
 import { type CancellationPolicyWithInternals } from "@/server/db/schema";
 
+// note that whitespace matters in template literals, make sure not to indent newlines, or else the spaces will be included in the string
+
 export function getCancellationPolicyDescription(
   policy: CancellationPolicyWithInternals,
 ): string {

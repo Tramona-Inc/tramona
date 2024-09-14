@@ -18,7 +18,6 @@ import {
 } from "@/server/db/schema";
 import { getCity, getCoordinates } from "@/server/google-maps";
 import {
-  sendEmail,
   sendText,
   sendWhatsApp,
   updateTravelerandHostMarkup,
@@ -168,10 +167,14 @@ export const offersRouter = createTRPCRouter({
               columns: { numGuests: true, location: true, id: true },
             },
             property: {
-              columns: {},
               with: {
                 host: {
                   columns: { id: true, name: true, email: true, image: true },
+                  with: {
+                    hostProfile: {
+                      columns: { userId: true },
+                    },
+                  },
                 },
                 reviews: true,
               },
@@ -211,16 +214,11 @@ export const offersRouter = createTRPCRouter({
     .input(offerSelectSchema.pick({ id: true }))
     .query(async ({ ctx, input }) => {
       const offerWithoutProperty = await getOfferPageData(input.id);
-      if (!offerWithoutProperty) {
-        throw new TRPCError({ code: "BAD_REQUEST" });
-      }
+
       const propertyForOffer = await getPropertyForOffer(
         offerWithoutProperty.propertyId,
       );
 
-      if (!propertyForOffer) {
-        throw new TRPCError({ code: "BAD_REQUEST" });
-      }
       const offer = { ...offerWithoutProperty, property: propertyForOffer };
 
       if (offer.request) {
@@ -774,7 +772,6 @@ export const offersRouter = createTRPCRouter({
           scrapeDirectListings({
             checkIn: dateRange.checkIn,
             checkOut: dateRange.checkOut,
-            numOfOffersInEachScraper: numOfOffersPerDateRange / numOfScrapers,
             //numGuests make sure to add this
           }),
         ),
@@ -795,7 +792,12 @@ export const offersRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const request = await ctx.db.query.requests.findFirst({
         where: eq(requests.id, input.requestId),
-        columns: { checkIn: true, checkOut: true, maxTotalPrice: true, numGuests: true },
+        columns: {
+          checkIn: true,
+          checkOut: true,
+          maxTotalPrice: true,
+          numGuests: true,
+        },
       });
       if (!request) {
         throw new TRPCError({
@@ -806,7 +808,6 @@ export const offersRouter = createTRPCRouter({
       return await scrapeDirectListings({
         checkIn: request.checkIn,
         checkOut: request.checkOut,
-        numOfOffersInEachScraper: input.numOfOffers,
         requestNightlyPrice:
           request.maxTotalPrice /
           getNumNights(request.checkIn, request.checkOut),
@@ -823,7 +824,7 @@ export const offersRouter = createTRPCRouter({
 });
 
 export async function getPropertyForOffer(propertyId: number) {
-  return await db.query.properties.findFirst({
+  const property = await db.query.properties.findFirst({
     where: eq(properties.id, propertyId),
     with: {
       reviews: true,
@@ -844,19 +845,21 @@ export async function getPropertyForOffer(propertyId: number) {
       },
     },
   });
+  if (!property) throw new Error("No Property was found");
+  return property;
 }
 
 export async function getOfferPageData(offerId: number) {
-  return await db.query.offers.findFirst({
+  const offer = await db.query.offers.findFirst({
     where: eq(offers.id, offerId),
     columns: {
+      id: true,
       checkIn: true,
       checkOut: true,
       createdAt: true,
       totalPrice: true,
       acceptedAt: true,
       tramonaFee: true,
-      id: true,
       propertyId: true,
       requestId: true,
       hostPayout: true,
@@ -879,4 +882,6 @@ export async function getOfferPageData(offerId: number) {
       },
     },
   });
+  if (!offer) throw new Error("No offer found");
+  return offer;
 }

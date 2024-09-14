@@ -6,20 +6,20 @@ import { properties } from "@/server/db/schema";
 
 const script = async () => {
   try {
-    const allProperties = await db.query.properties.findMany();
+    const allRequests = await db.query.requests.findMany();
 
-    for (const prop of allProperties) {
-      const { location } = await getCoordinates(prop.address);
+    for (const req of allRequests) {
+      const { location } = await getCoordinates(req.location);
 
       if (!location) {
-        console.log(`Couldn't find coordinates for ${prop.address}`);
+        console.log(`Couldn't find coordinates for ${req.location}`);
         continue;
       }
 
-      await db.update(properties).set({
+      await db.update(requests).set({
         latLngPoint: sql`ST_SetSRID(ST_MakePoint(${location.lng}, ${location.lat}), 4326)`,
       }).where(
-        eq(properties.id, prop.id)
+        eq(requests.id, req.id)
       );
     }
   } catch (error) {

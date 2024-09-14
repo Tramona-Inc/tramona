@@ -49,16 +49,13 @@ import { OfferPriceDetails } from "../_common/OfferPriceDetails";
 import { getCancellationPolicyDescription } from "@/config/getCancellationPolicyDescription";
 import { VerificationProvider } from "../_utils/VerificationContext";
 import IdentityModal from "../_utils/IdentityModal";
-import { type InferQueryModel } from "@/server/db";
 import { Property } from "@/server/db/schema";
 import ChatOfferButton from "./ChatOfferButton";
 import { Airbnb } from "@/utils/listing-sites/Airbnb";
-import { properties } from "../../server/db/schema/tables/properties";
 
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
-type PropertyFromOffer = OfferWithDetails["property"];
-
-export type PropertyPageData = PropertyFromOffer;
+export type PropertyPageData = OfferWithDetails["property"];
+//export type PropertyPageData = RouterOutputs["properties"]["getById"];
 
 export default function PropertyPage({
   property,
@@ -81,7 +78,7 @@ export default function PropertyPage({
     }
   }, []);
 
-  const hostName = property.host?.name ?? "Tramona";
+  const hostName = property.host?.name ?? property.hostName ?? "Tramona";
 
   const originalListing = getOriginalListing(property);
 
@@ -92,7 +89,16 @@ export default function PropertyPage({
   const [selectedImageIdx, setSelectedImageIdx] = useState<number>(0);
   const firstImageUrl = property.imageUrls[0]!;
 
-  const discountPercentage = offer ? getOfferDiscountPercentage(offer) : null;
+  const discountPercentage = offer
+    ? getOfferDiscountPercentage({
+        createdAt: offer.createdAt,
+        travelerOfferedPrice: offer.totalPrice,
+        checkIn: offer.checkIn,
+        checkOut: offer.checkOut,
+        randomDirectListingDiscount: offer.randomDirectListingDiscount,
+        datePriceFromAirbnb: offer.datePriceFromAirbnb,
+      })
+    : null;
 
   return (
     <div>
