@@ -86,6 +86,7 @@ export const requestsRouter = createTRPCRouter({
                   originalNightlyPrice: true,
                   hostName: true,
                   hostProfilePic: true,
+                  bookOnAirbnb: true,
                 },
                 with: {
                   host: { columns: { name: true, email: true, image: true } },
