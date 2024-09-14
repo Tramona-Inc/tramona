@@ -168,10 +168,14 @@ export const offersRouter = createTRPCRouter({
               columns: { numGuests: true, location: true, id: true },
             },
             property: {
-              columns: {},
               with: {
                 host: {
                   columns: { id: true, name: true, email: true, image: true },
+                  with: {
+                    hostProfile: {
+                      columns: { userId: true },
+                    }
+                  }
                 },
                 reviews: true,
               },
@@ -774,7 +778,6 @@ export const offersRouter = createTRPCRouter({
           scrapeDirectListings({
             checkIn: dateRange.checkIn,
             checkOut: dateRange.checkOut,
-            numOfOffersInEachScraper: numOfOffersPerDateRange / numOfScrapers,
             //numGuests make sure to add this
           }),
         ),
@@ -806,7 +809,6 @@ export const offersRouter = createTRPCRouter({
       return await scrapeDirectListings({
         checkIn: request.checkIn,
         checkOut: request.checkOut,
-        numOfOffersInEachScraper: input.numOfOffers,
         requestNightlyPrice:
           request.maxTotalPrice /
           getNumNights(request.checkIn, request.checkOut),

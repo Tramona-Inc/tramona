@@ -177,6 +177,12 @@ export const propertiesRouter = createTRPCRouter({
         with: {
           host: {
             columns: { image: true, name: true, email: true, id: true },
+            with: {
+              hostProfile: {
+                columns: { curTeamId: true },
+              },
+            },
+            
           },
           reviews: true,
         },
