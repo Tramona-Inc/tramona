@@ -140,7 +140,7 @@ async function getOfferIds(
   const params = new URLSearchParams({
     fieldTreeId: "SearchDetailsFields.SERP",
     adults: numGuests?.toString() ?? "1",
-    arrival: checkIn.toISOString().split("T")[0],
+    arrival: checkIn.toISOString().split("T")[0] ?? '',
     duration: getNumNights(checkIn, checkOut).toString(),
     _format: "json",
   });
@@ -275,7 +275,7 @@ const fetchPrice = async (
     adults: params.numGuests.toString(),
     children: "0",
     pets: "0",
-    arrival: params.checkIn.toISOString().split("T")[0],
+    arrival: params.checkIn.toISOString().split("T")[0] ?? '',
     c: "USD",
     duration: params.duration.toString(),
     pricetype: "perNight",
