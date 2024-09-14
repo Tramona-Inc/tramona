@@ -55,7 +55,7 @@ function scoreMatch(suggestion: Suggestion, locationParts: string[]): number {
 
   if (fullTitle === locationParts[0]) {
     score += 100;
-  } else if (fullTitle.includes(locationParts[0])) {
+  } else if (fullTitle.includes(locationParts[0]!)) {
     score += 50;
   }
   if (
@@ -83,7 +83,7 @@ async function getLocationId(location: string): Promise<string> {
     );
     const suggestions = response.data.suggestions;
 
-    if (suggestions.length > 0) {
+    if (suggestions.length > 0 && suggestions[0]) {
       const locationParts = location
         .toLowerCase()
         .split(",")
