@@ -25,6 +25,7 @@ import {
   type NewProperty,
   type Property,
   type User,
+  type Request,
   bookedDates,
   groupInvites,
   groupMembers,
@@ -47,7 +48,6 @@ import * as cheerio from "cheerio";
 import { sendSlackMessage } from "./slack";
 import { HOST_MARKUP, TRAVELER__MARKUP } from "@/utils/constants";
 import { HostRequestsPageData } from "./api/routers/propertiesRouter";
-import { create, property } from "lodash";
 
 export const axiosWithRetry = axios.create();
 
@@ -70,6 +70,44 @@ axiosRetry(axiosWithRetry, {
 export const proxyAgent = new HttpsProxyAgent(env.PROXY_URL);
 
 export async function urlScrape(url: string) {
+  return await axios
+    .get<string>(url, { httpsAgent: proxyAgent, responseType: "text" })
+    .then((res) => res.data)
+    .then(cheerio.load);
+}
+
+// List of user agents to rotate
+const userAgents = [
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36",
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Safari/605.1.15",
+  "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko",
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36",
+  "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:88.0) Gecko/20100101 Firefox/88.0",
+];
+
+// Function to get a random user agent
+function getRandomUserAgent() {
+  return userAgents[Math.floor(Math.random() * userAgents.length)];
+}
+
+export async function scrapeUrlLikeHuman(url: string) {
+  return await axios
+    .get<string>(url, {
+      httpsAgent: proxyAgent,
+      responseType: "text",
+      headers: {
+        "User-Agent": getRandomUserAgent(),
+      },
+      timeout: 10000,
+    })
+    .then((res) => res.data)
+    .then(cheerio.load)
+    .catch((error) => {
+      throw new Error(`scrapeUrlLikeHuman function was declined: ${error}`);
+    });
+}
+
+export async function scrapeUrl(url: string) {
   return await axios
     .get<string>(url, { httpsAgent: proxyAgent, responseType: "text" })
     .then((res) => res.data)
@@ -806,11 +844,13 @@ export function createNormalDistributionDates(
 export function createLatLngGISPoint({
   lat,
   lng,
-}: { lat: number; lng: number }) {
+}: {
+  lat: number;
+  lng: number;
+}) {
   const latLngPoint = sql`ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)`;
   return latLngPoint;
 }
-
 
 export function haversineDistance(
   lat1: number,
@@ -826,9 +866,9 @@ export function haversineDistance(
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(toRadians(lat1)) *
-    Math.cos(toRadians(lat2)) *
-    Math.sin(dLon / 2) *
-    Math.sin(dLon / 2);
+      Math.cos(toRadians(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c; // Distance in kilometers
 }

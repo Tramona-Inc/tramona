@@ -9,6 +9,7 @@ import { conversations, messages } from "./../../db/schema/tables/messages";
 import { protectedProcedure } from "./../trpc";
 import { sendSlackMessage } from "@/server/slack";
 import { TRPCError } from "@trpc/server";
+import { columns } from "@/components/admin/view-recent-host/table/columns";
 
 const isProduction = process.env.NODE_ENV === "production";
 const baseUrl = isProduction
@@ -561,6 +562,58 @@ export const messagesRouter = createTRPCRouter({
         isProductionOnly: false,
         text: [
           `*${receiver.email} sent a message to admin*`,
+          `${input.message}`,
+          `<${baseUrl}/messages?conversationId=${input.conversationId}|Click here to respond>`,
+        ].join("\n"),
+      });
+    }),
+
+  sendChatboxSlackMessage: publicProcedure
+    .input(
+      z.object({
+        message: z.string(),
+        conversationId: z.string(),
+        senderId: z.string(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      //find the receiver of the message
+      const receiver = await db.query.conversationParticipants
+        .findFirst({
+          where: and(
+            eq(conversationParticipants.conversationId, input.conversationId),
+            ne(conversationParticipants.userId, input.senderId),
+          ),
+          with: {
+            user: {
+              columns: {
+                id: true,
+                email: true,
+                role: true,
+              },
+            },
+          },
+        })
+        .then((res) => res?.user);
+
+      const sender = await db.query.users.findFirst({
+        where: eq(users.id, input.senderId),
+      });
+
+      function getSenderName() {
+        if (sender) {
+          if (sender.firstName === null || sender.lastName === null) {
+            return "logged out user";
+          } else {
+            return sender.firstName + " " + sender.lastName;
+          }
+        }
+      }
+      await sendSlackMessage({
+        channel: "chatbox",
+        isProductionOnly: false,
+        text: [
+          `*${receiver?.email} received a message from ${getSenderName()}*`,
           `${input.message}`,
           `<${baseUrl}/messages?conversationId=${input.conversationId}|Click here to respond>`,
         ].join("\n"),

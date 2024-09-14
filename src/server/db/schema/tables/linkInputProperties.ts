@@ -1,8 +1,6 @@
 import { pgTable, serial, varchar } from "drizzle-orm/pg-core";
 import { listingSiteEnum } from "../common";
 import { createInsertSchema } from "drizzle-zod";
-import { z } from "zod";
-import { requestInsertSchema } from "./requests";
 
 export const linkInputProperties = pgTable("link_input_properties", {
   id: serial("id").primaryKey(),

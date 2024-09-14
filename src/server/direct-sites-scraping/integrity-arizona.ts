@@ -6,10 +6,9 @@ import {
   ListingSiteName,
 } from "@/server/db/schema/common";
 import { type Review } from "@/server/db/schema";
-import { getNumNights } from "@/utils/utils";
+import { getNumNights, parseHTML } from "@/utils/utils";
 import { ScrapedListing } from "@/server/direct-sites-scraping";
 import { axiosWithRetry } from "@/server/server-utils";
-import { sql } from "drizzle-orm";
 
 const propertySchema = z.object({
   data: z.object({
@@ -103,7 +102,7 @@ const mapToScrapedListing = (
   return validatedData.data.available_properties.property.map((prop) => ({
     originalListingId: prop.id.toString(),
     name: prop.name,
-    about: prop.short_description, // may contain html
+    about: parseHTML(prop.short_description), // may contain html
     propertyType: convertPropertyType(prop.lodging_type_id),
     address:
       prop.location_area_name + ", " + prop.city + ", " + prop.state_name,
@@ -145,11 +144,9 @@ const mapToScrapedListing = (
 export const arizonaScraper: DirectSiteScraper = async ({
   checkIn,
   checkOut,
-  numOfOffersInEachScraper = 2,
   requestNightlyPrice,
   location,
 }) => {
-
   // append 0 to month and day if less than 10
   const monthStart = (checkIn.getMonth() + 1).toString().padStart(2, "0");
   const dayStart = checkIn.getDate().toString().padStart(2, "0");
@@ -169,7 +166,11 @@ export const arizonaScraper: DirectSiteScraper = async ({
         locationCode = "20691";
         break;
       default:
-        console.error("Location is not recognized: ", location);
+        console.error(
+          "AZ scraper: Location is not recognized: ",
+          location,
+          " ; returning empty array",
+        );
         return [];
     }
   }
@@ -198,9 +199,7 @@ export const arizonaScraper: DirectSiteScraper = async ({
       );
     });
   }
-  if (numOfOffersInEachScraper > 0) {
-    properties = properties.slice(0, numOfOffersInEachScraper);
-  }
+
   // Fetch and append reviews for each property
   const propertiesWithReviews = await Promise.all(
     properties.map(async (p) => {
