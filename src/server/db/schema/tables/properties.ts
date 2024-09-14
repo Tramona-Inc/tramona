@@ -202,11 +202,12 @@ export const roomsWithBedsSchema = z.array(
     beds: z.array(
       z.object({
         count: z.number().int().positive(),
-        type: z.enum(ALL_BED_TYPES, {
-          errorMap: (_, ctx) => ({
-            message: `Unsupported bed type '${ctx.data}'`,
-          }),
-        }),
+        // type: z.enum(ALL_BED_TYPES, {
+        //   errorMap: (_, ctx) => ({
+        //     message: `Unsupported bed type '${ctx.data}'`,
+        //   }),
+        // }),
+        type: z.string(),
       }),
     ),
   }),
@@ -243,12 +244,12 @@ export const properties = pgTable(
     hostRating: doublePrecision("host_rating"),
 
     address: varchar("address", { length: 1000 }).notNull(),
-    latitude: doublePrecision("latitude").notNull(),
-    longitude: doublePrecision("longitude").notNull(),
+    // latitude: doublePrecision("latitude").notNull(),
+    // longitude: doublePrecision("longitude").notNull(),
+    // latitude: doublePrecision("latitude").notNull(),
+    // longitude: doublePrecision("longitude").notNull(),
     city: varchar("city", { length: 255 }).notNull(),
-
     originalListingUrl: varchar("url"),
-
     checkInInfo: varchar("check_in_info"),
     checkInTime: time("check_in_time"),
     checkOutTime: time("check_out_time"),
@@ -276,12 +277,10 @@ export const properties = pgTable(
     avgRating: doublePrecision("avg_rating").notNull().default(0),
     numRatings: integer("num_ratings").notNull().default(0),
     airbnbUrl: varchar("airbnb_url"),
-    airbnbMessageUrl: varchar("airbnb_message_url"),
     originalNightlyPrice: integer("original_nightly_price"), // in cents
     areaDescription: text("area_description"),
     mapScreenshot: text("map_screenshot"),
     cancellationPolicy: cancellationPolicyEnum("cancellation_policy"),
-
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -290,7 +289,6 @@ export const properties = pgTable(
     priceRestriction: integer("price_restriction").default(0),
     stripeVerRequired: boolean("stripe_ver_required").default(false),
     propertyStatus: propertyStatusEnum("property_status").default("Listed"),
-    airbnbBookUrl: varchar("airbnb_book_url"),
     hostImageUrl: varchar("host_image_url"),
     pricingScreenUrl: varchar("pricing_screen_url"),
     currency: currencyEnum("currency").notNull().default("USD"),
@@ -299,7 +297,9 @@ export const properties = pgTable(
       type: "point",
       mode: "xy",
       srid: 4326,
-    }),
+    })
+      .notNull()
+      .$type<{ x: number; y: number }>(),
     iCalLink: text("ical_link"),
   },
   (t) => ({
@@ -342,3 +342,7 @@ export const bookedDates = pgTable(
     propertyidIdx: index().on(t.propertyId),
   }),
 );
+
+// - added neals stuff to db
+// - did sasha already update drizzle schema and usages of latitude and longitude?
+// - I did and got Offset is outside the bounds of the DataView for the map

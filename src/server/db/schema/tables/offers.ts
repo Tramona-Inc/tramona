@@ -35,6 +35,8 @@ export const offers = pgTable(
     checkOut: date("check_out", { mode: "date" }).notNull(),
     hostPayout: integer("host_payout").notNull(), // in cents
     travelerOfferedPrice: integer("traveler_offered_price").notNull(), // in cents
+    datePriceFromAirbnb: integer("date_price_from_airbnb"), // If host uploaded property, we will scrape the price for the offer if they gave us the link for property creation
+    randomDirectListingDiscount: integer("random_direct_listing_discount"),
     scrapeUrl: varchar("scrape_url"),
     isAvailableOnOriginalSite: boolean("is_available_on_original_site"),
     availabilityCheckedAt: timestamp("availability_checked_at", {

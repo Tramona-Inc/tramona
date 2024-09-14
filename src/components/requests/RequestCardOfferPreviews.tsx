@@ -8,12 +8,10 @@ import {
   formatCurrency,
   getNumNights,
   getOfferDiscountPercentage,
-  getTravelerOfferedPrice,
 } from "@/utils/utils";
-import { getDiscountPercentage } from "@/utils/utils";
-import { mulberry32 } from "@/utils/utils";
 import { ExternalLinkIcon } from "lucide-react";
 import { sortBy } from "lodash";
+import { Badge } from "../ui/badge";
 
 export function RequestCardOfferPreviews({
   request,
@@ -56,36 +54,46 @@ export function RequestCardOfferPreviews({
                     {property.numBedrooms} bed · {property.numBathrooms} bath
                   </p>
                 </div>
-                <div className="absolute left-1 top-1 rounded-full bg-white px-2 py-0.5 text-sm font-bold text-foreground shadow">
-                  {discountPercentage}% off
+                <div className="absolute left-1 top-1 flex gap-1">
+                  <Badge variant="white">{discountPercentage}% off Airbnb price</Badge>
+                  {/* {offer.property.bookOnAirbnb && (
+                    <Badge variant="white">Airbnb</Badge>
+                  )} */}
                 </div>
                 <div className="absolute right-1 top-1 flex -translate-y-2 items-center gap-1 rounded-full bg-black/40 px-3 py-1.5 text-xs font-medium text-white/80 opacity-0 backdrop-blur transition-all duration-200 group-hover:translate-y-0 group-hover:opacity-100">
                   View offer <ExternalLinkIcon className="h-3.5 w-3.5" />
                 </div>
               </div>
-              <div className="flex items-center gap-2 overflow-hidden p-1">
-                <div className="shrink-0">
-                  <UserAvatar
-                    name={host?.name ?? property.hostName}
-                    image={host?.image ?? property.hostProfilePic}
-                  />
-                </div>
-                <div>
-                  <p className="line-clamp-1 text-xs text-muted-foreground">
-                    {host?.name ?? property.hostName} offered ·{" "}
-                    {formatDistanceToNowStrict(offer.createdAt, {
-                      addSuffix: true,
-                    })}
-                  </p>
-                  <div className="flex items-end justify-between gap-1">
-                    <p className="line-clamp-1 font-bold">
-                      <span className="text-lg/none text-foreground">
-                        {formatCurrency(offerNightlyPrice)}
-                      </span>
-                      /night
+              <div className="text-xs font-semibold">
+                <div className="flex items-center gap-2 overflow-hidden p-1">
+                  <div className="shrink-0">
+                    <UserAvatar
+                      name={host?.name ?? property.hostName}
+                      image={host?.image ?? property.hostProfilePic}
+                    />
+                  </div>
+                  <div>
+                    <p className="line-clamp-1 text-xs text-muted-foreground">
+                      {host?.name ?? property.hostName} offered ·{" "}
+                      {formatDistanceToNowStrict(offer.createdAt, {
+                        addSuffix: true,
+                      })}
                     </p>
+                    <div className="flex items-end justify-between gap-1">
+                      <p className="line-clamp-1 font-bold">
+                        <span className="text-lg/none text-foreground">
+                          {formatCurrency(offerNightlyPrice)}
+                        </span>
+                        /night
+                      </p>
+                    </div>
                   </div>
                 </div>
+                {offer.property.bookOnAirbnb ? (
+                  <div>Booking through Airbnb</div>
+                ) : (
+                  <div>Booking through Tramona</div>
+                )}
               </div>
             </Link>
           );

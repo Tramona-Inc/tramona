@@ -1,8 +1,5 @@
 import { env } from "@/env";
-import {
-  createConversationWithAdmin,
-  fetchConversationWithAdmin,
-} from "@/server/api/routers/messagesRouter";
+import { createConversationWithOfferAfterBooking } from "@/utils/webhook-functions/message-utils";
 import { stripe } from "@/server/api/routers/stripeRouter";
 import { db } from "@/server/db";
 import { offers, requests, properties, trips, users } from "@/server/db/schema";
@@ -200,21 +197,16 @@ export default async function webhook(
                   hostUserId: currentProperty.hostId,
                 });
               }
+              if (paymentIntentSucceeded.metadata.user_id) {
+                const conversationId =
+                  await createConversationWithOfferAfterBooking({
+                    offerId: offer.id.toString(),
+                    offerHostId: currentProperty!.hostId,
+                    offerPropertyName: currentProperty!.name,
+                    travelerId: paymentIntentSucceeded.metadata.user_id,
+                  });
+              }
             }
-          }
-        }
-
-        // ! For now will add user to admin
-        if (paymentIntentSucceeded.metadata.user_id) {
-          const conversationId = await fetchConversationWithAdmin(
-            paymentIntentSucceeded.metadata.user_id,
-          );
-
-          // Create conversation with admin if it doesn't exist
-          if (!conversationId) {
-            await createConversationWithAdmin(
-              paymentIntentSucceeded.metadata.user_id,
-            );
           }
         }
 

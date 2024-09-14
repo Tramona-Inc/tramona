@@ -15,6 +15,8 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import duration from "dayjs/plugin/duration";
 import { HostRequestsPageData } from "@/server/api/routers/propertiesRouter";
+import * as cheerio from "cheerio";
+import type { ListingSiteName } from "@/server/db/schema/common";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -205,8 +207,8 @@ export function formatDateMonthDay(date: Date | string) {
 }
 
 export function formatDateWeekMonthDay(date: Date | string) {
-  if (typeof date === "string") return formatDateString(date, "EEE, MMMM d");
-  return formatDate(removeTimezoneFromDate(date), "EEE, MMMM d");
+  if (typeof date === "string") return formatDateString(date, "EEE, MMM d");
+  return formatDate(removeTimezoneFromDate(date), "EEE, MMM d");
 }
 
 export function formatDateMonthDayYear(date: Date | string) {
@@ -286,7 +288,23 @@ export function getNumNights(from: Date | string, to: Date | string) {
   );
 }
 
-export function getPriceBreakdown({
+export function getDirectListingPriceBreakdown({
+  bookingCost,
+}: {
+  bookingCost: number;
+}) {
+  const stripeFee = 0.029 * bookingCost + 30; // Stripe fee calculation after markup (markup occured when offer was inserted)
+  const serviceFee = stripeFee;
+  const finalTotal = Math.floor(bookingCost + serviceFee);
+  return {
+    bookingCost,
+    finalTotal,
+    taxPaid: 0,
+    serviceFee,
+  };
+}
+
+export function getTramonaPriceBreakdown({
   bookingCost,
   numNights,
   superhogFee,
@@ -690,17 +708,48 @@ export function getOfferDiscountPercentage(offer: {
   travelerOfferedPrice: number;
   checkIn: Date;
   checkOut: Date;
-  property: { originalNightlyPrice: number | null };
+  scrapeUrl?: number | null;
+  datePriceFromAirbnb: number | null;
+  randomDirectListingDiscount?: number | null;
 }) {
   const numNights = getNumNights(offer.checkIn, offer.checkOut);
   const offerNightlyPrice = offer.travelerOfferedPrice / numNights;
-
-  if (offer.property.originalNightlyPrice !== null) {
-    return getDiscountPercentage(
-      offer.property.originalNightlyPrice,
-      offerNightlyPrice,
-    );
+  //1.)check to see if scraped property(directListing) and the randomDirectListingDiscount is not null
+  if (offer.randomDirectListingDiscount) {
+    return offer.randomDirectListingDiscount;
   }
 
-  return Math.round(8 + 4 * mulberry32(offer.createdAt.getTime())); // random number between 8 and 12, deterministic based on offer creation time
+  //2.) check if the property is going to be booked directly on airbnb TODO
+
+  //3.) check the if the offer is by a real host and is listed on airbnb
+  if (offer.datePriceFromAirbnb) {
+    return getDiscountPercentage(offer.datePriceFromAirbnb, offerNightlyPrice);
+  }
+  //4.)for other cases random number
+  else return Math.round(8 + 4 * mulberry32(offer.createdAt.getTime())); // random number between 8 and 12, deterministic based on offer creation time
+}
+
+export function createRandomMarkupEightToFourteenPercent() {
+  return Math.floor(Math.random() * 7 + 8);
+}
+
+export function parseHTML(str: string) {
+  const ret = cheerio
+    .load(
+      str
+        .replaceAll("<br />", "\n")
+        .replaceAll("<br/>", "\n")
+        .replaceAll("<br>", "\n"),
+    )(":root")
+    .prop("innerText");
+
+  if (ret === null) throw new Error("Failed to parse HTML");
+  return ret;
+}
+
+export async function getRedirectedUrl(url: string) {
+  return await fetch(url, {
+    method: "HEAD",
+    redirect: "follow",
+  }).then((r) => r.url);
 }

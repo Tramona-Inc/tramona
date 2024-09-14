@@ -63,7 +63,7 @@ export default function HostCalculator() {
   const getMostLikelyEstimate = () => {
     if (vacancyRate >= 0 && vacancyRate <= 40) return "conservative";
     if (vacancyRate > 40 && vacancyRate <= 58) return "moderate";
-    return "optimistic";
+    return "best case";
   };
 
   const handleNumberInput =

@@ -7,7 +7,7 @@ import { zodUrl } from "@/utils/zod-utils";
 import { getCity, getCoordinates } from "@/server/google-maps";
 import { Airbnb } from "@/utils/listing-sites/Airbnb";
 import { z } from "zod";
-import { scrapeUrl } from "@/server/server-utils";
+import { urlScrape } from "@/server/server-utils";
 import { scrapeAirbnbPrice } from "@/server/scrapePrice";
 import { cleanbnbScraper } from "@/server/direct-sites-scraping/cleanbnb-scrape";
 
@@ -91,14 +91,6 @@ export const miscRouter = createTRPCRouter({
       return averageNightlyPrice;
     }),
 
-  scrapeCleanbnbLink: publicProcedure
-    .input(z.object({ checkIn: z.string().optional(), checkOut: z.string().optional() }))
-    .mutation(async ({input}) => {
-      if (input.checkIn && input.checkOut) {
-        const res = await cleanbnbScraper({ checkIn: new Date(input.checkIn), checkOut: new Date(input.checkOut) });
-        return res;
-      }
-    }),
 
   scrapeAirbnbLink: publicProcedure
     .input(
@@ -116,7 +108,7 @@ export const miscRouter = createTRPCRouter({
       if (!airbnbListingId) return { status: "failed to parse url" } as const;
 
       const [$, price] = await Promise.all([
-        scrapeUrl(url),
+        urlScrape(url),
         scrapeAirbnbPrice({ airbnbListingId, params }),
       ]);
 

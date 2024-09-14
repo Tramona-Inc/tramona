@@ -4,10 +4,10 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { Separator } from "../ui/separator";
 import { Avatar, AvatarImage } from "../ui/avatar";
-import { getDiscountPercentage, getNumNights, useIsSm } from "@/utils/utils";
+import { getOfferDiscountPercentage, useIsSm } from "@/utils/utils";
 import { type OfferWithDetails } from "../offers/PropertyPage";
 import { formatDateMonthDay, plural } from "@/utils/utils";
-import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
+import { useChatWithAdmin } from "@/utils/messaging/useChatWithAdmin";
 import CustomStripeCheckout from "./CustomStripeCheckout";
 import { OfferPriceDetails } from "../_common/OfferPriceDetails";
 import { getCancellationPolicyDescription } from "@/config/getCancellationPolicyDescription";
@@ -77,9 +77,6 @@ export default function Checkout({
   }
 
   function CheckoutSummary() {
-    const nightlyPrice =
-      offer.totalPrice / getNumNights(offer.checkIn, offer.checkOut);
-
     return (
       <div>
         <div className="md:rounded-t-xl md:border md:border-b-0 md:p-3">
@@ -124,11 +121,16 @@ export default function Checkout({
         </div>
         <div className="rounded-md bg-teal-900 md:rounded-b-xl md:rounded-t-none">
           <h2 className="py-1 text-center text-lg font-semibold text-white md:py-2">
-            {property.originalNightlyPrice
-              ? getDiscountPercentage(
-                  property.originalNightlyPrice,
-                  nightlyPrice,
-                )
+            {(property.airbnbUrl ?? offer.scrapeUrl)
+              ? getOfferDiscountPercentage({
+                  createdAt: offer.createdAt,
+                  travelerOfferedPrice: offer.totalPrice,
+                  checkIn: offer.checkIn,
+                  checkOut: offer.checkOut,
+                  randomDirectListingDiscount:
+                    offer.randomDirectListingDiscount,
+                  datePriceFromAirbnb: offer.datePriceFromAirbnb,
+                })
               : 0}
             % Off
           </h2>
