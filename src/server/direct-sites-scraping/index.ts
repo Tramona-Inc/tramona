@@ -150,12 +150,24 @@ export const scrapeDirectListings = async (options: {
     })
     .slice(0, 10); // Grab up to 10 listings
 
+  // For testing purposes (may be reused heavliy atm)
+  console.log("listings: ", listings.length);
+  listings.forEach((listing) => {
+    console.log(
+      "platform: ",
+      listing.originalListingPlatform,
+      "originalNightlyPrice: ",
+      listing.originalNightlyPrice,
+    );
+  });
+
   if (listings.length > 0) {
     await db.transaction(async (trx) => {
       // for each listing, insert the property and reviews OR update them if they already exist
       // then create offers if the offers don't exist
       let becomeVisibleAtNumber = Date.now(); // will increment by 5 minutes for each offer
       for (const listing of listings) {
+        becomeVisibleAtNumber += 5 * 60 * 1000; // Increment by 5 minutes when processing each listing
         if (!listing.originalListingId) {
           continue;
         }
@@ -244,7 +256,7 @@ export const scrapeDirectListings = async (options: {
               scrapeUrl: listing.scrapeUrl,
               isAvailableOnOriginalSite: true,
               availabilityCheckedAt: new Date(),
-              becomeVisibleAt: new Date(becomeVisibleAtNumber + 5 * 60 * 1000),
+              becomeVisibleAt: new Date(becomeVisibleAtNumber),
               randomDirectListingDiscount:
                 createRandomMarkupEightToFourteenPercent(),
               ...(options.requestId && { requestId: options.requestId }),
@@ -311,7 +323,7 @@ export const scrapeDirectListings = async (options: {
               availabilityCheckedAt: new Date(),
               randomDirectListingDiscount:
                 createRandomMarkupEightToFourteenPercent(),
-              becomeVisibleAt: new Date(becomeVisibleAtNumber + 5 * 60 * 1000),
+              becomeVisibleAt: new Date(becomeVisibleAtNumber),
               ...(options.requestId && { requestId: options.requestId }),
             };
             const newOfferId = await trx
