@@ -1,4 +1,9 @@
 import { db } from "../db";
+import { exampleScraper } from "./example";
+import {
+  evolveVacationRentalScraper,
+  evolveVacationRentalSubScraper,
+} from "./evolve-scraper";
 import {
   cbIslandVacationsScraper,
   cbIslandVacationsSubScraper,
@@ -64,9 +69,15 @@ export type NamedDirectSiteScraper = {
 
 export const directSiteScrapers: NamedDirectSiteScraper[] = [
   // add more scrapers here
+  // cleanbnbScraper,
+  // arizonaScraper,
+  // cbIslandVacationsScraper,
+  { name: "evolveVacationRentalScraper", scraper: evolveVacationRentalScraper },
   { name: "cleanbnbScraper", scraper: cleanbnbScraper },
   { name: "arizonaScraper", scraper: arizonaScraper },
-  // { name: "cbIslandVacationsScraper", scraper: cbIslandVacationsScraper },
+  { name: "cbIslandVacationsScraper", scraper: cbIslandVacationsScraper },
+  { name: "cleanbnbScraper", scraper: cleanbnbScraper },
+  { name: "arizonaScraper", scraper: arizonaScraper },
   { name: "redawningScraper", scraper: redawningScraper },
 
   { name: "casamundoScraper", scraper: casamundoScraper },
@@ -453,6 +464,35 @@ export const subsequentScrape = async (options: { offerIds: number[] }) => {
             .set(updateData)
             .where(eq(offers.id, offerId));
           savedResult.push(subScrapedResultCasamundo);
+          break;
+
+        case "Evolve":
+          const subScrapedResultEvolve = await evolveVacationRentalSubScraper({
+            originalListingId: offer.property.originalListingId,
+            scrapeUrl: offer.scrapeUrl,
+            checkIn: offer.checkIn,
+            checkOut: offer.checkOut,
+          });
+          if (subScrapedResultEvolve) {
+            const updateData: Partial<Offer> = {
+              isAvailableOnOriginalSite:
+                subScrapedResultEvolve.isAvailableOnOriginalSite,
+              availabilityCheckedAt:
+                subScrapedResultEvolve.availabilityCheckedAt,
+            };
+
+            if (subScrapedResultEvolve.originalNightlyPrice) {
+              updateData.totalPrice =
+                subScrapedResultEvolve.originalNightlyPrice *
+                getNumNights(offer.checkIn, offer.checkOut);
+            }
+
+            await trx
+              .update(offers)
+              .set(updateData)
+              .where(eq(offers.id, offerId));
+            savedResult.push(subScrapedResultEvolve);
+          }
           break;
       }
     }

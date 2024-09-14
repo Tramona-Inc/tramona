@@ -73,6 +73,7 @@ export const ALL_LISTING_SITE_NAMES = [
   "Vrbo",
   "CB Island Vacations",
   "IntegrityArizona",
+  "Evolve",
   "Cleanbnb",
   "Casamundo",
   "RedAwning",
