@@ -76,6 +76,7 @@ export const ALL_LISTING_SITE_NAMES = [
   "Evolve",
   "Cleanbnb",
   "Casamundo",
+  "RedAwning",
 ] as const;
 
 export type ListingSiteName = (typeof ALL_LISTING_SITE_NAMES)[number];

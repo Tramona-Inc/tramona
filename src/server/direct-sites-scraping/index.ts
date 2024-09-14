@@ -19,6 +19,7 @@ import {
   reviews,
 } from "../db/schema";
 import { arizonaScraper, arizonaSubScraper } from "./integrity-arizona";
+import { redawningScraper } from "./redawning";
 
 import { getCoordinates } from "../google-maps";
 import { eq, and, sql } from "drizzle-orm";
@@ -36,10 +37,12 @@ export type DirectSiteScraper = (options: {
   requestNightlyPrice?: number; // when the scraper is used by traveler request page
   requestId?: number; // when the scraper is used by traveler request page
   location?: string;
+  latitude?: number;
+  longitude?: number;
   numGuests?: number;
 }) => Promise<ScrapedListing[]>;
 
-export type ScrapedListing = Omit<NewProperty, 'latLngPoint'> & {
+export type ScrapedListing = Omit<NewProperty, "latLngPoint"> & {
   originalListingUrl: string; // enforce that it's non-null
   reviews: NewReview[];
   scrapeUrl: string;
@@ -53,11 +56,11 @@ export type SubsequentScraper = (options: {
   checkOut: Date;
 }) => Promise<SubScrapedResult>;
 
-export type SubScrapedResult = ({
-  originalNightlyPrice?: number, // when the offer is avaible on the original site, also refresh the price
-  isAvailableOnOriginalSite: boolean,
-  availabilityCheckedAt: Date,
-});
+export type SubScrapedResult = {
+  originalNightlyPrice?: number; // when the offer is avaible on the original site, also refresh the price
+  isAvailableOnOriginalSite: boolean;
+  availabilityCheckedAt: Date;
+};
 
 export type NamedDirectSiteScraper = {
   name: string;
@@ -73,6 +76,10 @@ export const directSiteScrapers: NamedDirectSiteScraper[] = [
   { name: "cleanbnbScraper", scraper: cleanbnbScraper },
   { name: "arizonaScraper", scraper: arizonaScraper },
   { name: "cbIslandVacationsScraper", scraper: cbIslandVacationsScraper },
+  { name: "cleanbnbScraper", scraper: cleanbnbScraper },
+  { name: "arizonaScraper", scraper: arizonaScraper },
+  { name: "redawningScraper", scraper: redawningScraper },
+
   { name: "casamundoScraper", scraper: casamundoScraper },
 ];
 
@@ -95,31 +102,50 @@ export const scrapeDirectListings = async (options: {
   longitude?: number;
   numGuests?: number;
 }) => {
-  const { requestNightlyPrice } = options;
+  const { requestNightlyPrice } = options; // in cents
 
   if (!requestNightlyPrice) {
     throw new Error("requestNightlyPrice is required");
   }
 
-  const minPrice = requestNightlyPrice * 0.8;
-  const maxPrice = requestNightlyPrice * 1.1;
-
   const allListings = await Promise.all(
     directSiteScrapers.map((s) => s.scraper(options)),
   );
 
-  console.log('DONE');
-  console.log(allListings[0]);
+  const flatListings = allListings.flat();
 
-  const listings = allListings
-    .flat()
-    .filter(
-      (listing) =>
+  // dynamically expand the price range to find at least 1 listing between 50% - 170% of the requested price
+  let upperPercentage = 110;
+  let lowerPercentage = 80;
+  let fairListings;
+  do {
+    const lowerPrice = requestNightlyPrice * (lowerPercentage / 100);
+    const upperPrice = requestNightlyPrice * (upperPercentage / 100);
+
+    fairListings = flatListings.filter((listing) => {
+      return (
         listing.originalNightlyPrice !== null &&
         listing.originalNightlyPrice !== undefined &&
-        listing.originalNightlyPrice >= minPrice &&
-        listing.originalNightlyPrice <= maxPrice
-    )
+        listing.originalNightlyPrice >= lowerPrice &&
+        listing.originalNightlyPrice <= upperPrice
+      );
+    });
+
+    if (
+      fairListings.length < 1 &&
+      upperPercentage <= 170 &&
+      lowerPercentage >= 50
+    ) {
+      upperPercentage += 20;
+      lowerPercentage -= 10;
+    }
+  } while (
+    fairListings.length < 1 &&
+    upperPercentage <= 170 &&
+    lowerPercentage >= 50
+  );
+
+  const listings = fairListings
     .sort((a, b) => {
       const aDiff = Math.abs(
         (a.originalNightlyPrice ?? 0) - requestNightlyPrice,
@@ -130,6 +156,16 @@ export const scrapeDirectListings = async (options: {
       return aDiff - bDiff;
     })
     .slice(0, 10); // Grab up to 10 listings
+
+  // console.log("listings: ", listings.length);
+  // listings.forEach((listing) => {
+  //   console.log(
+  //     "platform: ",
+  //     listing.originalListingPlatform,
+  //     "originalNightlyPrice: ",
+  //     listing.originalNightlyPrice,
+  //   );
+  // });
 
   if (listings.length > 0) {
     await db.transaction(async (trx) => {
@@ -288,6 +324,8 @@ export const scrapeDirectListings = async (options: {
               scrapeUrl: listing.scrapeUrl,
               isAvailableOnOriginalSite: true,
               availabilityCheckedAt: new Date(),
+              randomDirectListingDiscount:
+                createRandomMarkupEightToFourteenPercent(),
               ...(options.requestId && { requestId: options.requestId }),
             };
             const newOfferId = await trx
