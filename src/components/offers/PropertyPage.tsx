@@ -78,7 +78,7 @@ export default function PropertyPage({
     }
   }, []);
 
-  const hostName = property.host?.name ?? "Tramona";
+  const hostName = property.host?.name ?? property.hostName ?? "Tramona";
 
   const originalListing = getOriginalListing(property);
 
