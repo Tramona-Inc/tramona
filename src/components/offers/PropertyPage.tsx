@@ -92,7 +92,16 @@ export default function PropertyPage({
   const [selectedImageIdx, setSelectedImageIdx] = useState<number>(0);
   const firstImageUrl = property.imageUrls[0]!;
 
-  const discountPercentage = offer ? getOfferDiscountPercentage(offer) : null;
+  const discountPercentage = offer
+    ? getOfferDiscountPercentage({
+        createdAt: offer.createdAt,
+        travelerOfferedPrice: offer.totalPrice,
+        checkIn: offer.checkIn,
+        checkOut: offer.checkOut,
+        randomDirectListingDiscount: offer.randomDirectListingDiscount,
+        datePriceFromAirbnb: offer.datePriceFromAirbnb,
+      })
+    : null;
 
   return (
     <div>

@@ -16,6 +16,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import duration from "dayjs/plugin/duration";
 import { HostRequestsPageData } from "@/server/api/routers/propertiesRouter";
 import * as cheerio from "cheerio";
+import type { ListingSiteName } from "@/server/db/schema/common";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -707,27 +708,25 @@ export function getOfferDiscountPercentage(offer: {
   travelerOfferedPrice: number;
   checkIn: Date;
   checkOut: Date;
-  property?: { originalNightlyPrice?: number | null };
-  randomDirectListingDiscount?: number | null;
+  scrapeUrl?: number | null;
   datePriceFromAirbnb: number | null;
+  randomDirectListingDiscount?: number | null;
 }) {
   const numNights = getNumNights(offer.checkIn, offer.checkOut);
   const offerNightlyPrice = offer.travelerOfferedPrice / numNights;
-  //check to see if scraped property and the randomDirectListingDiscount is not null
+  //1.)check to see if scraped property(directListing) and the randomDirectListingDiscount is not null
   if (offer.randomDirectListingDiscount) {
     return offer.randomDirectListingDiscount;
   }
-  //check the if the offer is by a real host and is listed on airbnb
+
+  //2.) check if the property is going to be booked directly on airbnb TODO
+
+  //3.) check the if the offer is by a real host and is listed on airbnb
   if (offer.datePriceFromAirbnb) {
     return getDiscountPercentage(offer.datePriceFromAirbnb, offerNightlyPrice);
   }
-
-  if (offer.property?.originalNightlyPrice) {
-    return getDiscountPercentage(
-      offer.property.originalNightlyPrice,
-      offerNightlyPrice,
-    );
-  } else return Math.round(8 + 4 * mulberry32(offer.createdAt.getTime())); // random number between 8 and 12, deterministic based on offer creation time
+  //4.)for other cases random number
+  else return Math.round(8 + 4 * mulberry32(offer.createdAt.getTime())); // random number between 8 and 12, deterministic based on offer creation time
 }
 
 export function createRandomMarkupEightToFourteenPercent() {

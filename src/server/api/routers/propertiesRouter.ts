@@ -38,7 +38,11 @@ import {
   properties,
   type Property,
 } from "./../../db/schema/tables/properties";
-import { addProperty, createLatLngGISPoint, getRequestsForProperties } from "@/server/server-utils";
+import {
+  addProperty,
+  createLatLngGISPoint,
+  getRequestsForProperties,
+} from "@/server/server-utils";
 import { getCoordinates } from "@/server/google-maps";
 
 export type HostRequestsPageData = {
@@ -130,13 +134,15 @@ export const propertiesRouter = createTRPCRouter({
       if (input.address) {
         const { location } = await getCoordinates(input.address);
         if (!location) throw new Error("Could not get coordinates for address");
-        const latLngPoint = createLatLngGISPoint({ lat: location.lat, lng: location.lng });
+        const latLngPoint = createLatLngGISPoint({
+          lat: location.lat,
+          lng: location.lng,
+        });
         await ctx.db
           .update(properties)
           .set({ latLngPoint })
           .where(eq(properties.id, input.id));
       }
-
 
       await ctx.db
         .update(properties)
@@ -202,10 +208,12 @@ export const propertiesRouter = createTRPCRouter({
         numRatings: z.number().optional(),
         // lat: z.number().optional(),
         // long: z.number().optional(),
-        latLngPoint: z.object({
-          lat: z.number(),
-          lng: z.number(),
-        }).optional(),
+        latLngPoint: z
+          .object({
+            lat: z.number(),
+            lng: z.number(),
+          })
+          .optional(),
         radius: z.number().optional(),
         checkIn: z.date().optional(),
         checkOut: z.date().optional(),
@@ -396,11 +404,11 @@ export const propertiesRouter = createTRPCRouter({
             cursor ? gt(properties.id, cursor) : undefined,
             boundaries
               ? and(
-                lte(properties.latLngPoint.x, boundaries.north),
-                gte(properties.latLngPoint.x, boundaries.south),
-                lte(properties.latLngPoint.y, boundaries.east),
-                gte(properties.latLngPoint.y, boundaries.west),
-              )
+                  lte(properties.latLngPoint.x, boundaries.north),
+                  gte(properties.latLngPoint.x, boundaries.south),
+                  lte(properties.latLngPoint.y, boundaries.east),
+                  gte(properties.latLngPoint.y, boundaries.west),
+                )
               : sql`TRUE`,
             input.lat && input.long && !boundaries
               ? sql`6371 * acos(SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(lng * Math.PI) / 180})) <= ${radius}`
@@ -488,7 +496,10 @@ export const propertiesRouter = createTRPCRouter({
     async ({ ctx }) => {
       // TODO: USE DRIZZLE relational query, then use groupby in js
       const hostProperties = await db.query.properties.findMany({
-        where: and(eq(properties.hostId, ctx.user.id), eq(properties.propertyStatus, "Listed")),
+        where: and(
+          eq(properties.hostId, ctx.user.id),
+          eq(properties.propertyStatus, "Listed"),
+        ),
 
         // columns: {
         //   id: true,
@@ -499,13 +510,12 @@ export const propertiesRouter = createTRPCRouter({
         // },
       });
 
-
       const hostRequests = await getRequestsForProperties(hostProperties);
 
       const groupedByCity: HostRequestsPageData[] = [];
 
       const findOrCreateCityGroup = (city: string) => {
-        let cityGroup = groupedByCity.find(group => group.city === city);
+        let cityGroup = groupedByCity.find((group) => group.city === city);
         if (!cityGroup) {
           cityGroup = { city, requests: [] };
           groupedByCity.push(cityGroup);
@@ -513,7 +523,13 @@ export const propertiesRouter = createTRPCRouter({
         return cityGroup;
       };
 
-      const requestsMap = new Map<number, { request: Request & { traveler: Pick<User, "name" | "image"> }, properties: Property[] }>();
+      const requestsMap = new Map<
+        number,
+        {
+          request: Request & { traveler: Pick<User, "name" | "image"> };
+          properties: Property[];
+        }
+      >();
 
       // Iterate over the hostRequests and gather all properties for each request
       for (const { property, request } of hostRequests) {
@@ -522,7 +538,7 @@ export const propertiesRouter = createTRPCRouter({
           // If not, create a new entry with an empty properties array
           requestsMap.set(request.id, {
             request,
-            properties: []
+            properties: [],
           });
         }
 
@@ -536,7 +552,7 @@ export const propertiesRouter = createTRPCRouter({
         // Add the request with all associated properties to the city group
         cityGroup.requests.push({
           request,
-          properties
+          properties,
         });
       }
 
@@ -546,7 +562,6 @@ export const propertiesRouter = createTRPCRouter({
         }
       }
       return groupedByCity;
-
 
       const rawData = await ctx.db.execute(sql`
           WITH host_properties AS (
