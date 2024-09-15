@@ -70,6 +70,7 @@ const propertyTypeMapping: Record<string, PropertyType> = {
   Townhouse: "Townhouse",
   Suite: "Guest Suite",
   Apts: "Apartment",
+  "Hotel Room": "Hotel",
   Other: "Other",
 };
 
@@ -77,7 +78,7 @@ const mapPropertyType = (originalType: string): PropertyType => {
   if (propertyTypeMapping[originalType]) {
     return propertyTypeMapping[originalType];
   } else {
-    console.error("Unknown property type: ", originalType);
+    console.error("RedAwning scraper - Unknown property type: ", originalType);
     return "Other";
   }
 };
@@ -251,11 +252,11 @@ export const mapTaxodataToScrapedListing = async (
         };
       } catch (error) {
         console.error(
-          "Error scraping RedAwning property: ",
+          "Skip RedAwning property: ",
           property.pid,
-          ", so this property has been skipped. ",
-          "Error detail: ",
-          error,
+          ", as the scraping attempt on this property was unsuccessful.. ",
+          // "Error detail: ",
+          // error,
         );
         // Return null for this iteration, skipping this property
         return null;
@@ -278,89 +279,88 @@ export const redawningScraper: DirectSiteScraper = async ({
   }
   const url = `https://www.redawning.com/search/properties?ptype=locality&platitude=${latitude}&plongitude=${longitude}&pcountry=US&pname=${location}&sleepsmax=1TO100&dates=${convertToEpochAt7AM(checkIn)}TO${convertToEpochAt7AM(checkOut)}`;
   console.log("scrapedRedawningUrl: ", url);
-  const $ = await scrapeUrlLikeHuman(url);
-  let taxodata = [];
-
-  // Find the script containing 'taxodata' and parse its contents
-  const scriptContent = $("script")
-    .toArray()
-    .find((script) => $(script).html()!.includes("var taxodata"));
   try {
-    if (scriptContent) {
-      const scriptText = $(scriptContent).html();
-      const dataStart = scriptText!.indexOf("[{");
-      const dataEnd = scriptText!.lastIndexOf("}]") + 2;
-      const taxoDataJsonString = scriptText!.substring(dataStart, dataEnd);
-      const taxoDataJson = JSON.parse(taxoDataJsonString);
-      const taxoDataOg = taxoDataSchema.parse(taxoDataJson);
-      taxodata.push(...taxoDataOg.slice(0, 25)); // numOfOffersInEachScraper = 25
+    const $ = await scrapeUrlLikeHuman(url);
+    let taxodata = [];
+
+    // Find the script containing 'taxodata' and parse its contents
+    const scriptContent = $("script")
+      .toArray()
+      .find((script) => $(script).html()!.includes("var taxodata"));
+    try {
+      if (scriptContent) {
+        const scriptText = $(scriptContent).html();
+        const dataStart = scriptText!.indexOf("[{");
+        const dataEnd = scriptText!.lastIndexOf("}]") + 2;
+        const taxoDataJsonString = scriptText!.substring(dataStart, dataEnd);
+        const taxoDataJson = JSON.parse(taxoDataJsonString);
+        const taxoDataOg = taxoDataSchema.parse(taxoDataJson);
+        taxodata.push(...taxoDataOg.slice(0, 25)); // numOfOffersInEachScraper = 25
+      }
+    } catch (error) {
+      // hit here when the scraper found nothing on the RedAwning website
+      // console.error("Error parsing RedAwning data: ", error);
+      return [];
     }
-  } catch (error) {
-    // hit here when the scraper found nothing on the RedAwning website
-    console.error("Error parsing RedAwning data: ", error);
-    return [];
-  }
-  const numOfNights = getNumNights(checkIn, checkOut);
-  if (taxodata.length === 0) {
-    return [];
-  }
-  if (taxodata.length > 0) {
-    const processedTaxoData = await Promise.all(
-      taxodata.map(async (property) => {
-        try {
-          // const propertyUrl = property.url;
-          const propertyId = property.pid;
-          const priceQuoteUrl = `https://api.redawning.com/v1/listings/${propertyId}/quote?checkin=${formatDateYearMonthDay(checkIn)}&checkout=${formatDateYearMonthDay(checkOut)}&numadults=1&numchild=0&travelinsurance=false`;
-          const priceQuote = await axiosWithRetry
-            .get<string>(priceQuoteUrl, {
-              headers: {
-                "x-api-key": "ehMtnGSw4i7dFqngWo8M15cWaqzKPM4V2jeU3zty",
-              },
-              timeout: 10000,
-            })
-            .then((response) => response.data)
-            .then((data) => priceQuoteSchema.parse(data))
-            .then((quote) => {
-              if (numOfNights < quote.min_stay) {
-                console.log(
-                  `Property ${propertyId} requires a minimum stay of ${quote.min_stay} nights. Your stay is ${numOfNights} nights.`,
+    const numOfNights = getNumNights(checkIn, checkOut);
+    if (taxodata.length === 0) {
+      return [];
+    }
+    if (taxodata.length > 0) {
+      const processedTaxoData = await Promise.all(
+        taxodata.map(async (property) => {
+          try {
+            // const propertyUrl = property.url;
+            const propertyId = property.pid;
+            const priceQuoteUrl = `https://api.redawning.com/v1/listings/${propertyId}/quote?checkin=${formatDateYearMonthDay(checkIn)}&checkout=${formatDateYearMonthDay(checkOut)}&numadults=1&numchild=0&travelinsurance=false`;
+            const priceQuote = await axiosWithRetry
+              .get<string>(priceQuoteUrl, {
+                headers: {
+                  "x-api-key": "ehMtnGSw4i7dFqngWo8M15cWaqzKPM4V2jeU3zty",
+                },
+                timeout: 10000,
+              })
+              .then((response) => response.data)
+              .then((data) => priceQuoteSchema.parse(data))
+              .then((quote) => {
+                if (numOfNights < quote.min_stay) {
+                  console.log(
+                    `Property ${propertyId} requires a minimum stay of ${quote.min_stay} nights. Your stay is ${numOfNights} nights.`,
+                  );
+                  return { ...quote, totalPrice: null };
+                }
+                const totalPrice = quote.payment_schedule.reduce(
+                  (acc, curr) => acc + curr.amount,
+                  0,
                 );
-                return { ...quote, totalPrice: null };
-              }
-              const totalPrice = quote.payment_schedule.reduce(
-                (acc, curr) => acc + curr.amount,
-                0,
-              );
-              const formattedTotalPrice = Math.ceil(totalPrice * 100); // to cents
-              return { ...quote, totalPrice: formattedTotalPrice };
-            });
-          property.totalPrice = priceQuote.totalPrice;
-          return property;
-        } catch (error) {
-          console.error(
-            `Failed to fetch price for property ${property.pid}:`,
-            error,
-          );
-          return null;
-        }
-      }),
-    );
-    taxodata = processedTaxoData.filter((property) => property !== null);
-  } else {
-    console.error("No available properties found, redawning");
-  }
+                const formattedTotalPrice = Math.ceil(totalPrice * 100); // to cents
+                return { ...quote, totalPrice: formattedTotalPrice };
+              });
+            property.totalPrice = priceQuote.totalPrice;
+            return property;
+          } catch (error) {
+            console.error(
+              `Failed to fetch price for property ${property.pid}:`,
+              error,
+            );
+            return null;
+          }
+        }),
+      );
+      taxodata = processedTaxoData.filter((property) => property !== null);
+    } else {
+      console.error("RedAwning scraper: No available properties found");
+    }
 
-  console.log("got here in redawnig")
-  try {
     const listings = await mapTaxodataToScrapedListing(
       taxodata,
       checkIn,
       checkOut,
     );
-    console.log('finished redawning');
+    console.log("finished redawning");
     return listings;
   } catch (error) {
-    console.error("Error mapping RedAwning data: ", error);
+    console.error("Error scraping RedAwning: ", error);
     return [];
   }
 };
