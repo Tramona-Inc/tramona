@@ -302,8 +302,8 @@ async function scrapeFinalPrice(
   const url = `https://www.cbislandvacations.com/rescms/ajax/item/pricing/quote`;
 
   const params = new URLSearchParams({
-    "rcav[begin]": startDate,
-    "rcav[end]": endDate,
+    "rcav[begin]": startDate || "",
+    "rcav[end]": endDate || "",
     "rcav[adult]": numGuestsToUse.toString(),
     "rcav[child]": "0",
     "rcav[eid]": eid,
