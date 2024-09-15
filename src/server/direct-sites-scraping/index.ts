@@ -72,8 +72,6 @@ export const directSiteScrapers: NamedDirectSiteScraper[] = [
   { name: "cleanbnbScraper", scraper: cleanbnbScraper },
   { name: "arizonaScraper", scraper: arizonaScraper },
   { name: "cbIslandVacationsScraper", scraper: cbIslandVacationsScraper },
-  { name: "cleanbnbScraper", scraper: cleanbnbScraper },
-  { name: "arizonaScraper", scraper: arizonaScraper },
   { name: "redawningScraper", scraper: redawningScraper },
   { name: "casamundoScraper", scraper: casamundoScraper },
 ];

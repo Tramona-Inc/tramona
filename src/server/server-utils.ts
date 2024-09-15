@@ -103,7 +103,7 @@ export async function scrapeUrlLikeHuman(url: string) {
     .then((res) => res.data)
     .then(cheerio.load)
     .catch((error) => {
-      throw new Error(`scrapeUrlLikeHuman function was declined: ${error}`);
+      console.error(`The scraping was declined on: ${url}`);
     });
 }
 
