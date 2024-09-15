@@ -633,6 +633,7 @@ export const casamundoScraper: DirectSiteScraper = async ({
       }
     }
     // console.log("scrapedListings!!", scrapedListings);
+    console.log("done with casamundo scraper");
     return scrapedListings;
   } catch (error) {
     console.error("Error scraping Casamundo:", error);

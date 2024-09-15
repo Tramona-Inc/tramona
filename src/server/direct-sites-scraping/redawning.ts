@@ -297,7 +297,7 @@ export const redawningScraper: DirectSiteScraper = async ({
     }
   } catch (error) {
     // hit here when the scraper found nothing on the RedAwning website
-    // console.error("Error parsing RedAwning data: ", error);
+    console.error("Error parsing RedAwning data: ", error);
     return [];
   }
   const numOfNights = getNumNights(checkIn, checkOut);
@@ -347,15 +347,22 @@ export const redawningScraper: DirectSiteScraper = async ({
     );
     taxodata = processedTaxoData.filter((property) => property !== null);
   } else {
-    console.error("No available properties found");
+    console.error("No available properties found, redawning");
   }
 
-  const listings = await mapTaxodataToScrapedListing(
-    taxodata,
-    checkIn,
-    checkOut,
-  );
-  return listings;
+  console.log("got here in redawnig")
+  try {
+    const listings = await mapTaxodataToScrapedListing(
+      taxodata,
+      checkIn,
+      checkOut,
+    );
+    console.log('finished redawning');
+    return listings;
+  } catch (error) {
+    console.error("Error mapping RedAwning data: ", error);
+    return [];
+  }
 };
 
 export const redawningSubScraper: SubsequentScraper = async ({

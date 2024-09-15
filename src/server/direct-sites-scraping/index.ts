@@ -108,6 +108,10 @@ export const scrapeDirectListings = async (options: {
   );
 
   const flatListings = allListings.flat();
+  console.log("DONE SCRAPING, flatListings.length: ", flatListings.length);
+  for (const listing of flatListings) {
+    console.log("listing: ", listing.originalListingUrl, listing.originalNightlyPrice);
+  }
 
   // dynamically expand the price range to find at least 1 listing between 50% - 170% of the requested price
   let upperPercentage = 110;

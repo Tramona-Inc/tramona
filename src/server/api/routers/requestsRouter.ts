@@ -437,6 +437,7 @@ export async function handleRequestSubmission(
   { user }: { user: Session["user"] },
 ) {
   // Begin a transaction
+  console.log(user);
   const transactionResults = await db.transaction(async (tx) => {
     const madeByGroupId = await tx
       .insert(groups)
