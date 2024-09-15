@@ -201,25 +201,30 @@ export const arizonaScraper: DirectSiteScraper = async ({
   }
 
   // Fetch and append reviews for each property
-  const propertiesWithReviews = await Promise.all(
-    properties.map(async (p) => {
-      const reviewUrl = `https://integrityarizonavacationrentals.com/wp-admin/admin-ajax.php?action=streamlinecore-api-request&params=%7B%22methodName%22:%22GetAllFeedback%22,%22params%22:%7B%22unit_id%22:${p.originalListingId},%22order_by%22:%22newest_first%22,%22show_booking_dates%22:1,%22madetype_id%22:2%7D%7D`;
-      // console.log("reviewScrapedUrl: ", reviewUrl)
-      const reviews = await axiosWithRetry
-        .get<string>(reviewUrl, { timeout: 30000 })
-        .then((response) => response.data)
-        .then((data) => reviewSchema.parse(data))
-        .then((validatedData) => mapToReview(validatedData));
+  try {
+    const propertiesWithReviews = await Promise.all(
+      properties.map(async (p) => {
+        const reviewUrl = `https://integrityarizonavacationrentals.com/wp-admin/admin-ajax.php?action=streamlinecore-api-request&params=%7B%22methodName%22:%22GetAllFeedback%22,%22params%22:%7B%22unit_id%22:${p.originalListingId},%22order_by%22:%22newest_first%22,%22show_booking_dates%22:1,%22madetype_id%22:2%7D%7D`;
+        // console.log("reviewScrapedUrl: ", reviewUrl)
+        const reviews = await axiosWithRetry
+          .get<string>(reviewUrl, { timeout: 30000 })
+          .then((response) => response.data)
+          .then((data) => reviewSchema.parse(data))
+          .then((validatedData) => mapToReview(validatedData));
 
-      return {
-        ...p,
-        reviews: reviews,
-      };
-    }),
-  );
+        return {
+          ...p,
+          reviews: reviews,
+        };
+      }),
+    );
 
-  // console.log(propertiesWithReviews[0]);
-  return propertiesWithReviews;
+    // console.log(propertiesWithReviews[0]);
+    return propertiesWithReviews;
+  } catch (error) {
+    console.error("Error fetching reviews for Arizona: ", error);
+    return [];
+  }
 };
 
 export const arizonaSubScraper: SubsequentScraper = async ({
