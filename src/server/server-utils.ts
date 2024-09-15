@@ -101,10 +101,7 @@ export async function scrapeUrlLikeHuman(url: string) {
       timeout: 10000,
     })
     .then((res) => res.data)
-    .then(cheerio.load)
-    .catch((error) => {
-      console.error(`The scraping was declined on: ${url}`);
-    });
+    .then(cheerio.load);
 }
 
 export async function scrapeUrl(url: string) {
