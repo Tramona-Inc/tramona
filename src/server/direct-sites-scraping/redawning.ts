@@ -340,8 +340,7 @@ export const redawningScraper: DirectSiteScraper = async ({
             return property;
           } catch (error) {
             console.error(
-              `Failed to fetch price for property ${property.pid}:`,
-              error,
+              `Skip RedAwning property: ${property.pid}, as failed to fetch price`,
             );
             return null;
           }
