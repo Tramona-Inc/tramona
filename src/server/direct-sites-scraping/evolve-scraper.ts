@@ -541,6 +541,7 @@ export const evolveVacationRentalScraper: DirectSiteScraper = async ({
       availableProperties.push(property);
     }
   }
+  console.log('evolve done');
   return availableProperties;
 };
 

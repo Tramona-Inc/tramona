@@ -355,6 +355,7 @@ export const redawningScraper: DirectSiteScraper = async ({
     checkIn,
     checkOut,
   );
+  console.log('redawning done');
   return listings;
 };
 

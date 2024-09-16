@@ -108,367 +108,342 @@ export const scrapeDirectListings = async (options: {
   );
 
   const flatListings = allListings.flat();
+  for (const listing of flatListings) {
+    console.log("listing: ", listing.originalListingUrl, listing.originalListingPlatform);
+  }
 
-  // dynamically expand the price range to find at least 1 listing between 50% - 170% of the requested price
-  let upperPercentage = 110;
-  let lowerPercentage = 80;
-  let fairListings;
-  do {
-    const lowerPrice = requestNightlyPrice * (lowerPercentage / 100);
-    const upperPrice = requestNightlyPrice * (upperPercentage / 100);
+    // dynamically expand the price range to find at least 1 listing between 50% - 170% of the requested price
+    let upperPercentage = 110;
+    let lowerPercentage = 80;
+    let fairListings;
+    do {
+      const lowerPrice = requestNightlyPrice * (lowerPercentage / 100);
+      const upperPrice = requestNightlyPrice * (upperPercentage / 100);
 
-    fairListings = flatListings.filter((listing) => {
-      return (
-        listing.originalNightlyPrice !== null &&
-        listing.originalNightlyPrice !== undefined &&
-        listing.originalNightlyPrice >= lowerPrice &&
-        listing.originalNightlyPrice <= upperPrice
-      );
-    });
+      fairListings = flatListings.filter((listing) => {
+        return (
+          listing.originalNightlyPrice !== null &&
+          listing.originalNightlyPrice !== undefined &&
+          listing.originalNightlyPrice >= lowerPrice &&
+          listing.originalNightlyPrice <= upperPrice
+        );
+      });
 
-    if (
+      if (
+        fairListings.length < 1 &&
+        upperPercentage <= 170 &&
+        lowerPercentage >= 50
+      ) {
+        upperPercentage += 20;
+        lowerPercentage -= 10;
+      }
+    } while (
       fairListings.length < 1 &&
       upperPercentage <= 170 &&
       lowerPercentage >= 50
-    ) {
-      upperPercentage += 20;
-      lowerPercentage -= 10;
-    }
-  } while (
-    fairListings.length < 1 &&
-    upperPercentage <= 170 &&
-    lowerPercentage >= 50
-  );
+    );
 
-  const listings = fairListings
-    .sort((a, b) => {
-      const aDiff = Math.abs(
-        (a.originalNightlyPrice ?? 0) - requestNightlyPrice,
-      );
-      const bDiff = Math.abs(
-        (b.originalNightlyPrice ?? 0) - requestNightlyPrice,
-      );
-      return aDiff - bDiff;
-    })
-    .slice(0, 10); // Grab up to 10 listings
+    const listings = fairListings
+      .sort((a, b) => {
+        const aDiff = Math.abs(
+          (a.originalNightlyPrice ?? 0) - requestNightlyPrice,
+        );
+        const bDiff = Math.abs(
+          (b.originalNightlyPrice ?? 0) - requestNightlyPrice,
+        );
+        return aDiff - bDiff;
+      })
+      .slice(0, 10); // Grab up to 10 listings
 
-  if (listings.length > 0) {
-    await db.transaction(async (trx) => {
-      // for each listing, insert the property and reviews OR update them if they already exist
-      // then create offers if the offers don't exist
-      for (const listing of listings) {
-        if (!listing.originalListingId) {
-          continue;
-        }
-        const existingOriginalPropertyIdList = await trx
-          .select({ id: properties.originalListingId })
-          .from(properties)
-          .where(eq(properties.originalListingId, listing.originalListingId));
-        const existingOriginalPropertyId =
-          existingOriginalPropertyIdList[0]?.id;
+    if (listings.length > 0) {
+      await db.transaction(async (trx) => {
+        // for each listing, insert the property and reviews OR update them if they already exist
+        // then create offers if the offers don't exist
+        for (const listing of listings) {
+          if (!listing.originalListingId) {
+            continue;
+          }
+          const existingOriginalPropertyIdList = await trx
+            .select({ id: properties.originalListingId })
+            .from(properties)
+            .where(eq(properties.originalListingId, listing.originalListingId));
+          const existingOriginalPropertyId =
+            existingOriginalPropertyIdList[0]?.id;
 
-        let formattedlatLngPoint = null;
-        if (listing.latLngPoint?.lat && listing.latLngPoint.lng) {
-          formattedlatLngPoint = createLatLngGISPoint({
-            lat: listing.latLngPoint.lat,
-            lng: listing.latLngPoint.lng,
-          });
-        } else {
-          const { location } = await getCoordinates(listing.address);
-          if (!location)
-            throw new Error("Could not get coordinates for address");
-          formattedlatLngPoint = createLatLngGISPoint({
-            lat: location.lat,
-            lng: location.lng,
-          });
-        }
+          let formattedlatLngPoint = null;
+          if (listing.latLngPoint?.lat && listing.latLngPoint.lng) {
+            formattedlatLngPoint = createLatLngGISPoint({
+              lat: listing.latLngPoint.lat,
+              lng: listing.latLngPoint.lng,
+            });
+          } else {
+            const { location } = await getCoordinates(listing.address);
+            if (!location)
+              throw new Error("Could not get coordinates for address");
+            formattedlatLngPoint = createLatLngGISPoint({
+              lat: location.lat,
+              lng: location.lng,
+            });
+          }
 
-        const newPropertyListing = filterNewPropertyFields(listing);
-        if (existingOriginalPropertyId) {
-          const tramonaProperty = await trx
-            .update(properties)
-            .set({ ...newPropertyListing, latLngPoint: formattedlatLngPoint }) // Only keeps fields that are defined in the NewProperty schema
-            .where(eq(properties.originalListingId, existingOriginalPropertyId))
-            .returning({ id: properties.id });
+          const newPropertyListing = filterNewPropertyFields(listing);
+          if (existingOriginalPropertyId) {
+            const tramonaProperty = await trx
+              .update(properties)
+              .set({ ...newPropertyListing, latLngPoint: formattedlatLngPoint }) // Only keeps fields that are defined in the NewProperty schema
+              .where(eq(properties.originalListingId, existingOriginalPropertyId))
+              .returning({ id: properties.id });
 
-          const tramonaPropertyId = tramonaProperty[0]!.id;
+            const tramonaPropertyId = tramonaProperty[0]!.id;
 
-          if (listing.reviews.length > 0) {
-            await trx
-              .delete(reviews)
-              .where(eq(reviews.propertyId, tramonaPropertyId));
-            await trx.insert(reviews).values(
-              listing.reviews.map((review) => ({
-                ...review,
+            if (listing.reviews.length > 0) {
+              await trx
+                .delete(reviews)
+                .where(eq(reviews.propertyId, tramonaPropertyId));
+              await trx.insert(reviews).values(
+                listing.reviews.map((review) => ({
+                  ...review,
+                  propertyId: tramonaPropertyId,
+                })),
+              );
+            }
+
+            const existingOffers = await trx
+              .select({ id: offers.id })
+              .from(offers)
+              .where(
+                and(
+                  eq(offers.propertyId, tramonaPropertyId),
+                  eq(offers.checkIn, options.checkIn),
+                  eq(offers.checkOut, options.checkOut),
+                  options.requestId
+                    ? eq(offers.requestId, options.requestId)
+                    : undefined,
+                ),
+              );
+            if (existingOffers[0]) {
+              console.log("existingOffer, offerId: ", existingOffers[0]?.id);
+            }
+
+            if (!existingOffers[0]?.id) {
+              if (!listing.originalNightlyPrice) {
+                console.log(
+                  "originalNightlyPrice is not available for this listing: ",
+                  listing.originalListingUrl,
+                );
+                continue;
+              }
+              const originalTotalPrice =
+                listing.originalNightlyPrice *
+                getNumNights(options.checkIn, options.checkOut);
+              const newOffer: NewOffer = {
                 propertyId: tramonaPropertyId,
-              })),
-            );
-          }
-
-          const existingOffers = await trx
-            .select({ id: offers.id })
-            .from(offers)
-            .where(
-              and(
-                eq(offers.propertyId, tramonaPropertyId),
-                eq(offers.checkIn, options.checkIn),
-                eq(offers.checkOut, options.checkOut),
-                options.requestId
-                  ? eq(offers.requestId, options.requestId)
-                  : undefined,
-              ),
-            );
-          if (existingOffers[0]) {
-            console.log("existingOffer, offerId: ", existingOffers[0]?.id);
-          }
-
-          if (!existingOffers[0]?.id) {
-            if (!listing.originalNightlyPrice) {
-              console.log(
-                "originalNightlyPrice is not available for this listing: ",
-                listing.originalListingUrl,
-              );
-              continue;
+                checkIn: options.checkIn,
+                checkOut: options.checkOut,
+                totalPrice: originalTotalPrice,
+                hostPayout: originalTotalPrice,
+                travelerOfferedPrice: Math.ceil(
+                  originalTotalPrice * DIRECTLISTINGMARKUP,
+                ),
+                scrapeUrl: listing.scrapeUrl,
+                isAvailableOnOriginalSite: true,
+                availabilityCheckedAt: new Date(),
+                randomDirectListingDiscount:
+                  createRandomMarkupEightToFourteenPercent(),
+                ...(options.requestId && { requestId: options.requestId }),
+              };
+              const newOfferId = await trx
+                .insert(offers)
+                .values(newOffer)
+                .returning({ id: offers.id });
             }
-            const originalTotalPrice =
-              listing.originalNightlyPrice *
-              getNumNights(options.checkIn, options.checkOut);
-            const newOffer: NewOffer = {
-              propertyId: tramonaPropertyId,
-              checkIn: options.checkIn,
-              checkOut: options.checkOut,
-              totalPrice: originalTotalPrice,
-              hostPayout: originalTotalPrice,
-              travelerOfferedPrice: Math.ceil(
-                originalTotalPrice * DIRECTLISTINGMARKUP,
-              ),
-              scrapeUrl: listing.scrapeUrl,
-              isAvailableOnOriginalSite: true,
-              availabilityCheckedAt: new Date(),
-              randomDirectListingDiscount:
-                createRandomMarkupEightToFourteenPercent(),
-              ...(options.requestId && { requestId: options.requestId }),
-            };
-            const newOfferId = await trx
-              .insert(offers)
-              .values(newOffer)
-              .returning({ id: offers.id });
-          }
-        } else {
-          const tramonaProperty = await trx
-            .insert(properties)
-            .values({
-              ...newPropertyListing,
-              latLngPoint: formattedlatLngPoint,
-            })
-            .returning({ id: properties.id });
+          } else {
+            const tramonaProperty = await trx
+              .insert(properties)
+              .values({
+                ...newPropertyListing,
+                latLngPoint: formattedlatLngPoint,
+              })
+              .returning({ id: properties.id });
 
-          const newPropertyId = tramonaProperty[0]!.id;
+            const newPropertyId = tramonaProperty[0]!.id;
 
-          if (listing.reviews.length > 0) {
-            await trx.insert(reviews).values(
-              listing.reviews.map((review) => ({
-                ...review,
+            if (listing.reviews.length > 0) {
+              await trx.insert(reviews).values(
+                listing.reviews.map((review) => ({
+                  ...review,
+                  propertyId: newPropertyId,
+                })),
+              );
+            }
+
+            const existingOffers = await trx
+              .select({ id: offers.id })
+              .from(offers)
+              .where(
+                and(
+                  eq(offers.propertyId, newPropertyId),
+                  eq(offers.checkIn, options.checkIn),
+                  eq(offers.checkOut, options.checkOut),
+                  options.requestId
+                    ? eq(offers.requestId, options.requestId)
+                    : undefined,
+                ),
+              );
+
+            if (!existingOffers[0]?.id) {
+              if (!listing.originalNightlyPrice) {
+                console.log(
+                  "originalNightlyPrice is not available for this listing: ",
+                  listing.originalListingUrl,
+                );
+                continue;
+              }
+              const originalTotalPrice =
+                listing.originalNightlyPrice *
+                getNumNights(options.checkIn, options.checkOut);
+              const newOffer: NewOffer = {
                 propertyId: newPropertyId,
-              })),
-            );
-          }
-
-          const existingOffers = await trx
-            .select({ id: offers.id })
-            .from(offers)
-            .where(
-              and(
-                eq(offers.propertyId, newPropertyId),
-                eq(offers.checkIn, options.checkIn),
-                eq(offers.checkOut, options.checkOut),
-                options.requestId
-                  ? eq(offers.requestId, options.requestId)
-                  : undefined,
-              ),
-            );
-
-          if (!existingOffers[0]?.id) {
-            if (!listing.originalNightlyPrice) {
-              console.log(
-                "originalNightlyPrice is not available for this listing: ",
-                listing.originalListingUrl,
-              );
-              continue;
+                checkIn: options.checkIn,
+                checkOut: options.checkOut,
+                totalPrice: originalTotalPrice,
+                hostPayout: originalTotalPrice,
+                travelerOfferedPrice: originalTotalPrice,
+                scrapeUrl: listing.scrapeUrl,
+                isAvailableOnOriginalSite: true,
+                availabilityCheckedAt: new Date(),
+                randomDirectListingDiscount:
+                  createRandomMarkupEightToFourteenPercent(),
+                ...(options.requestId && { requestId: options.requestId }),
+              };
+              const newOfferId = await trx
+                .insert(offers)
+                .values(newOffer)
+                .returning({ id: offers.id });
             }
-            const originalTotalPrice =
-              listing.originalNightlyPrice *
-              getNumNights(options.checkIn, options.checkOut);
-            const newOffer: NewOffer = {
-              propertyId: newPropertyId,
-              checkIn: options.checkIn,
-              checkOut: options.checkOut,
-              totalPrice: originalTotalPrice,
-              hostPayout: originalTotalPrice,
-              travelerOfferedPrice: originalTotalPrice,
-              scrapeUrl: listing.scrapeUrl,
-              isAvailableOnOriginalSite: true,
-              availabilityCheckedAt: new Date(),
-              randomDirectListingDiscount:
-                createRandomMarkupEightToFourteenPercent(),
-              ...(options.requestId && { requestId: options.requestId }),
-            };
-            const newOfferId = await trx
-              .insert(offers)
-              .values(newOffer)
-              .returning({ id: offers.id });
           }
         }
-      }
-    });
-  }
-  return listings;
-};
-
-// update availability of properties, and original nightly price
-export const subsequentScrape = async (options: { offerIds: number[] }) => {
-  const savedResult: SubScrapedResult[] = [];
-  await db.transaction(async (trx) => {
-    for (const offerId of options.offerIds) {
-      const offer = await trx.query.offers.findFirst({
-        where: eq(offers.id, offerId),
-        with: {
-          property: true,
-        },
       });
+    }
+    return listings;
+  };
 
-      if (!offer?.property.originalListingId || !offer.scrapeUrl) {
-        continue;
-      } // skip the non-scraped offers
+  // update availability of properties, and original nightly price
+  export const subsequentScrape = async (options: { offerIds: number[] }) => {
+    const savedResult: SubScrapedResult[] = [];
+    await db.transaction(async (trx) => {
+      for (const offerId of options.offerIds) {
+        const offer = await trx.query.offers.findFirst({
+          where: eq(offers.id, offerId),
+          with: {
+            property: true,
+          },
+        });
 
-      switch (offer.property.originalListingPlatform) {
-        case "IntegrityArizona":
-          const subScrapedResult = await arizonaSubScraper({
-            originalListingId: offer.property.originalListingId,
-            scrapeUrl: offer.scrapeUrl,
-            checkIn: offer.checkIn,
-            checkOut: offer.checkOut,
-          });
-          const updateIntegrityArizonaData: Partial<Offer> = {
-            isAvailableOnOriginalSite:
-              subScrapedResult.isAvailableOnOriginalSite,
-            availabilityCheckedAt: subScrapedResult.availabilityCheckedAt,
-          };
+        if (!offer?.property.originalListingId || !offer.scrapeUrl) {
+          continue;
+        } // skip the non-scraped offers
 
-          if (subScrapedResult.originalNightlyPrice) {
-            updateIntegrityArizonaData.totalPrice =
-              subScrapedResult.originalNightlyPrice *
-              getNumNights(offer.checkIn, offer.checkOut);
-          }
+        switch (offer.property.originalListingPlatform) {
+          case "IntegrityArizona":
+            const subScrapedResult = await arizonaSubScraper({
+              originalListingId: offer.property.originalListingId,
+              scrapeUrl: offer.scrapeUrl,
+              checkIn: offer.checkIn,
+              checkOut: offer.checkOut,
+            });
+            const updateIntegrityArizonaData: Partial<Offer> = {
+              isAvailableOnOriginalSite:
+                subScrapedResult.isAvailableOnOriginalSite,
+              availabilityCheckedAt: subScrapedResult.availabilityCheckedAt,
+            };
 
-          await trx
-            .update(offers)
-            .set(updateIntegrityArizonaData)
-            .where(eq(offers.id, offerId));
-          savedResult.push(subScrapedResult);
+            if (subScrapedResult.originalNightlyPrice) {
+              updateIntegrityArizonaData.totalPrice =
+                subScrapedResult.originalNightlyPrice *
+                getNumNights(offer.checkIn, offer.checkOut);
+            }
 
-          break;
-        // TODO add other scraping sites here
-        case "Cleanbnb":
-          const cleanbnbSubResult = await cleanbnbSubScraper({
-            originalListingId: offer.property.originalListingId,
-            scrapeUrl: offer.scrapeUrl,
-            checkIn: offer.checkIn,
-            checkOut: offer.checkOut,
-          });
-          const updateCleanbnbData: Partial<Offer> = {
-            isAvailableOnOriginalSite:
-              cleanbnbSubResult.isAvailableOnOriginalSite,
-            availabilityCheckedAt: cleanbnbSubResult.availabilityCheckedAt,
-          };
+            await trx
+              .update(offers)
+              .set(updateIntegrityArizonaData)
+              .where(eq(offers.id, offerId));
+            savedResult.push(subScrapedResult);
 
-          if (cleanbnbSubResult.originalNightlyPrice) {
-            updateCleanbnbData.totalPrice =
-              cleanbnbSubResult.originalNightlyPrice *
-              getNumNights(offer.checkIn, offer.checkOut);
-          }
+            break;
+          // TODO add other scraping sites here
+          case "Cleanbnb":
+            const cleanbnbSubResult = await cleanbnbSubScraper({
+              originalListingId: offer.property.originalListingId,
+              scrapeUrl: offer.scrapeUrl,
+              checkIn: offer.checkIn,
+              checkOut: offer.checkOut,
+            });
+            const updateCleanbnbData: Partial<Offer> = {
+              isAvailableOnOriginalSite:
+                cleanbnbSubResult.isAvailableOnOriginalSite,
+              availabilityCheckedAt: cleanbnbSubResult.availabilityCheckedAt,
+            };
 
-          await trx
-            .update(offers)
-            .set(updateCleanbnbData)
-            .where(eq(offers.id, offerId));
-          savedResult.push(cleanbnbSubResult);
+            if (cleanbnbSubResult.originalNightlyPrice) {
+              updateCleanbnbData.totalPrice =
+                cleanbnbSubResult.originalNightlyPrice *
+                getNumNights(offer.checkIn, offer.checkOut);
+            }
 
-          break;
-        // TODO add other scraping sites here
-        case "CB Island Vacations":
-          const subScrapedResultCBIsland = await cbIslandVacationsSubScraper({
-            originalListingId: offer.property.originalListingId,
-            scrapeUrl: offer.scrapeUrl,
-            checkIn: offer.checkIn,
-            checkOut: offer.checkOut,
-          });
-          const updateCBIslandVacationsData: Partial<Offer> = {
-            isAvailableOnOriginalSite:
-              subScrapedResultCBIsland.isAvailableOnOriginalSite,
-            availabilityCheckedAt:
-              subScrapedResultCBIsland.availabilityCheckedAt,
-          };
+            await trx
+              .update(offers)
+              .set(updateCleanbnbData)
+              .where(eq(offers.id, offerId));
+            savedResult.push(cleanbnbSubResult);
 
-          if (subScrapedResultCBIsland.originalNightlyPrice) {
-            updateCBIslandVacationsData.totalPrice =
-              subScrapedResultCBIsland.originalNightlyPrice *
-              getNumNights(offer.checkIn, offer.checkOut);
-          }
+            break;
+          // TODO add other scraping sites here
+          case "CB Island Vacations":
+            const subScrapedResultCBIsland = await cbIslandVacationsSubScraper({
+              originalListingId: offer.property.originalListingId,
+              scrapeUrl: offer.scrapeUrl,
+              checkIn: offer.checkIn,
+              checkOut: offer.checkOut,
+            });
+            const updateCBIslandVacationsData: Partial<Offer> = {
+              isAvailableOnOriginalSite:
+                subScrapedResultCBIsland.isAvailableOnOriginalSite,
+              availabilityCheckedAt:
+                subScrapedResultCBIsland.availabilityCheckedAt,
+            };
 
-          await trx
-            .update(offers)
-            .set(updateCBIslandVacationsData)
-            .where(eq(offers.id, offerId));
-          savedResult.push(subScrapedResultCBIsland);
+            if (subScrapedResultCBIsland.originalNightlyPrice) {
+              updateCBIslandVacationsData.totalPrice =
+                subScrapedResultCBIsland.originalNightlyPrice *
+                getNumNights(offer.checkIn, offer.checkOut);
+            }
 
-          break;
+            await trx
+              .update(offers)
+              .set(updateCBIslandVacationsData)
+              .where(eq(offers.id, offerId));
+            savedResult.push(subScrapedResultCBIsland);
 
-        case "Casamundo":
-          const subScrapedResultCasamundo = await casamundoSubScraper({
-            originalListingId: offer.property.originalListingId,
-            scrapeUrl: offer.scrapeUrl,
-            checkIn: offer.checkIn,
-            checkOut: offer.checkOut,
-          });
-          const updateData: Partial<Offer> = {
-            isAvailableOnOriginalSite:
-              subScrapedResultCasamundo.isAvailableOnOriginalSite,
-            availabilityCheckedAt:
-              subScrapedResultCasamundo.availabilityCheckedAt,
-          };
+            break;
 
-          if (subScrapedResultCasamundo.originalNightlyPrice) {
-            updateData.totalPrice =
-              subScrapedResultCasamundo.originalNightlyPrice *
-              getNumNights(offer.checkIn, offer.checkOut);
-          }
-
-          await trx
-            .update(offers)
-            .set(updateData)
-            .where(eq(offers.id, offerId));
-          savedResult.push(subScrapedResultCasamundo);
-          break;
-
-        case "Evolve":
-          const subScrapedResultEvolve = await evolveVacationRentalSubScraper({
-            originalListingId: offer.property.originalListingId,
-            scrapeUrl: offer.scrapeUrl,
-            checkIn: offer.checkIn,
-            checkOut: offer.checkOut,
-          });
-          if (subScrapedResultEvolve) {
+          case "Casamundo":
+            const subScrapedResultCasamundo = await casamundoSubScraper({
+              originalListingId: offer.property.originalListingId,
+              scrapeUrl: offer.scrapeUrl,
+              checkIn: offer.checkIn,
+              checkOut: offer.checkOut,
+            });
             const updateData: Partial<Offer> = {
               isAvailableOnOriginalSite:
-                subScrapedResultEvolve.isAvailableOnOriginalSite,
+                subScrapedResultCasamundo.isAvailableOnOriginalSite,
               availabilityCheckedAt:
-                subScrapedResultEvolve.availabilityCheckedAt,
+                subScrapedResultCasamundo.availabilityCheckedAt,
             };
 
-            if (subScrapedResultEvolve.originalNightlyPrice) {
+            if (subScrapedResultCasamundo.originalNightlyPrice) {
               updateData.totalPrice =
-                subScrapedResultEvolve.originalNightlyPrice *
+                subScrapedResultCasamundo.originalNightlyPrice *
                 getNumNights(offer.checkIn, offer.checkOut);
             }
 
@@ -476,11 +451,39 @@ export const subsequentScrape = async (options: { offerIds: number[] }) => {
               .update(offers)
               .set(updateData)
               .where(eq(offers.id, offerId));
-            savedResult.push(subScrapedResultEvolve);
-          }
-          break;
+            savedResult.push(subScrapedResultCasamundo);
+            break;
+
+          case "Evolve":
+            const subScrapedResultEvolve = await evolveVacationRentalSubScraper({
+              originalListingId: offer.property.originalListingId,
+              scrapeUrl: offer.scrapeUrl,
+              checkIn: offer.checkIn,
+              checkOut: offer.checkOut,
+            });
+            if (subScrapedResultEvolve) {
+              const updateData: Partial<Offer> = {
+                isAvailableOnOriginalSite:
+                  subScrapedResultEvolve.isAvailableOnOriginalSite,
+                availabilityCheckedAt:
+                  subScrapedResultEvolve.availabilityCheckedAt,
+              };
+
+              if (subScrapedResultEvolve.originalNightlyPrice) {
+                updateData.totalPrice =
+                  subScrapedResultEvolve.originalNightlyPrice *
+                  getNumNights(offer.checkIn, offer.checkOut);
+              }
+
+              await trx
+                .update(offers)
+                .set(updateData)
+                .where(eq(offers.id, offerId));
+              savedResult.push(subScrapedResultEvolve);
+            }
+            break;
+        }
       }
-    }
-  });
-  return savedResult;
-};
+    });
+    return savedResult;
+  };
