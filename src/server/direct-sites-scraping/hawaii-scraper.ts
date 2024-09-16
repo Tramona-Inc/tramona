@@ -302,8 +302,8 @@ async function scrapeFinalPrice(
   const url = `https://www.cbislandvacations.com/rescms/ajax/item/pricing/quote`;
 
   const params = new URLSearchParams({
-    "rcav[begin]": startDate,
-    "rcav[end]": endDate,
+    "rcav[begin]": startDate ?? "",
+    "rcav[end]": endDate ?? "",
     "rcav[adult]": numGuestsToUse.toString(),
     "rcav[child]": "0",
     "rcav[eid]": eid,
@@ -326,7 +326,9 @@ async function scrapeFinalPrice(
         "Referrer-Policy": "strict-origin-when-cross-origin",
       },
     });
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if (response.data && response.data.status === 1 && response.data.content) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
       return extractTotalFromContent(response.data.content);
     } else {
       console.error("Unexpected API response format:", response.data);

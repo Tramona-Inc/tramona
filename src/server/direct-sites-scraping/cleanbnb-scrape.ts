@@ -491,7 +491,7 @@ export const cleanbnbScraper: DirectSiteScraper = async ({
       });
     }
   } catch (error) {
-    console.error("Error processing scraped data:", error);
+    console.error("Error processing scraped data cleanbnb:", error);
   }
   return res;
 };
