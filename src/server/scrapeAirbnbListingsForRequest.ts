@@ -8,10 +8,13 @@ export async function scrapeAirbnbListingsForRequest(
   request: RequestInput,
   { tx = db, requestId }: { tx?: typeof db; requestId: number },
 ) {
+  console.log('running scrapeAirbnbListingsForRequest');
   const airbnbListings = await scrapeAirbnbListings({
     request,
     limit: 10,
   });
+
+  console.log("airbnbListings", airbnbListings);
 
   // await writeFile(
   //   "./airbnbListings.json",
