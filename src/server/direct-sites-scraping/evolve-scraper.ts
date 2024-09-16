@@ -541,7 +541,7 @@ export const evolveVacationRentalScraper: DirectSiteScraper = async ({
       availableProperties.push(property);
     }
   }
-  console.log('evolve scraper works');
+  console.log('evolve done');
   return availableProperties;
 };
 
