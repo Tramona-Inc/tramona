@@ -14,7 +14,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     res.status(200).json({ message: "Task executed with 5-second intervals" });
   } catch (error) {
-    console.error("Error executing task:", error);
+    console.error("Error executing task2:", error);
     res.status(500).json({ error: "Task execution failed" });
   }
 }
