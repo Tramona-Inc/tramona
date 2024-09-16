@@ -41,7 +41,7 @@ import { waitUntil } from "@vercel/functions";
 import { scrapeAirbnbListingsForRequest } from "@/server/scrapeAirbnbListingsForRequest";
 import PQueue from "p-queue";
 
-const queue = new PQueue({ concurrency: 2 });
+const queue = new PQueue({ concurrency: 1 });
 
 const updateRequestInputSchema = z.object({
   requestId: z.number(),
