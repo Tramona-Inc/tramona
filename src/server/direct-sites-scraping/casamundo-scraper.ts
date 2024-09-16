@@ -617,24 +617,43 @@ export const casamundoScraper: DirectSiteScraper = async ({
       numGuests,
     );
 
-    const scrapedListings: ScrapedListing[] = [];
+    // const scrapedListings: ScrapedListing[] = [];
 
-    for (const offer of offerIds) {
-      const propertyWithDetails = await scrapeProperty(
-        offer.id,
-        locationId,
-        checkIn,
-        checkOut,
-        numGuests,
-      );
+    // for (const offer of offerIds) {
+    //   const propertyWithDetails = await scrapeProperty(
+    //     offer.id,
+    //     locationId,
+    //     checkIn,
+    //     checkOut,
+    //     numGuests,
+    //   );
 
-      if (Object.keys(propertyWithDetails).length > 0) {
-        scrapedListings.push(propertyWithDetails);
-      }
-    }
+    //   if (Object.keys(propertyWithDetails).length > 0) {
+    //     scrapedListings.push(propertyWithDetails);
+    //   }
+    // }
+
+    const listings = await Promise.all(
+      offerIds.map(async (offer) => {
+        const propertyWithDetails = await scrapeProperty(
+          offer.id,
+          locationId,
+          checkIn,
+          checkOut,
+          numGuests,
+        );
+
+        // Return property details if they exist, otherwise return null
+        return Object.keys(propertyWithDetails).length > 0 ? propertyWithDetails : null;
+      })
+    );
+
+    // Filter out any null values (i.e., offers with no details)
+    const validScrapedListings:ScrapedListing[] = listings.filter((listing) => listing !== null);
+
     // console.log("scrapedListings!!", scrapedListings);
     console.log("done with casamundo scraper");
-    return scrapedListings;
+    return validScrapedListings;
   } catch (error) {
     console.error("Error scraping Casamundo:", error);
     return [];

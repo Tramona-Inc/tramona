@@ -521,26 +521,45 @@ export const evolveVacationRentalScraper: DirectSiteScraper = async ({
     requestNightlyPrice,
   );
 
-  const availableProperties: ScrapedListing[] = [];
-  for (const result of searchResults) {
-    const property = await fetchPropertyDetails(
-      result.objectID,
-      result.Headline,
-      result.Bathrooms,
-      result.Bedrooms,
-      result["Total Beds"],
-      result["Max Occupancy"],
-      checkIn,
-      checkOut,
-      urlLocationParam,
-      result._geoloc.lat,
-      result._geoloc.lng,
-      numGuests,
-    );
-    if (property) {
-      availableProperties.push(property);
-    }
-  }
+  // const availableProperties: ScrapedListing[] = [];
+  // for (const result of searchResults) {
+  //   const property = await fetchPropertyDetails(
+  //     result.objectID,
+  //     result.Headline,
+  //     result.Bathrooms,
+  //     result.Bedrooms,
+  //     result["Total Beds"],
+  //     result["Max Occupancy"],
+  //     checkIn,
+  //     checkOut,
+  //     urlLocationParam,
+  //     result._geoloc.lat,
+  //     result._geoloc.lng,
+  //     numGuests,
+  //   );
+  //   if (property) {
+  //     availableProperties.push(property);
+  //   }
+  // }
+  const properties = await Promise.all(
+    searchResults.map((result) =>
+      fetchPropertyDetails(
+        result.objectID,
+        result.Headline,
+        result.Bathrooms,
+        result.Bedrooms,
+        result["Total Beds"],
+        result["Max Occupancy"],
+        checkIn,
+        checkOut,
+        urlLocationParam,
+        result._geoloc.lat,
+        result._geoloc.lng,
+        numGuests,
+      ),
+    ),
+  );
+  const availableProperties: ScrapedListing[] = properties.filter((property) => property !== null);
   console.log('evolve done');
   return availableProperties;
 };
