@@ -1,4 +1,6 @@
 import { type CancellationPolicyWithInternals } from "@/server/db/schema";
+import dayjs from 'dayjs';
+
 
 // note that whitespace matters in template literals, make sure not to indent newlines, or else the spaces will be included in the string
 
@@ -56,8 +58,42 @@ After Check-In: If they cancel during their stay, the next 30 days are non-refun
       reservations will be provided. However, if we cannot rent the unit then no refund will be
       returned for cancellations made within 60 days of the scheduled stay. There are no
       refunds for late cancellations or early checkouts.`;
-      
+
     case "Non-refundable":
       return "No refund is provided after booking.";
+  }
+}
+
+export function getFreeCancellationUntil(date: Date, policy:CancellationPolicyWithInternals) {
+  const formattedDate = dayjs(date); // Convert Date object to dayjs object
+
+  switch (policy) {
+    case "Flexible":
+      return formattedDate.subtract(1, "day").format("MMM Do");
+
+    case "Firm":
+      return formattedDate.subtract(30, "day").format("MMM Do");
+
+    case "Moderate":
+      return formattedDate.subtract(14, "day").format("MMM Do");
+
+    case "Strict":
+      return formattedDate.subtract(14, "day").format("MMM Do");
+
+    case "Super Strict 30 Days":
+      return formattedDate.subtract(30, "day").format("MMM Do");
+
+    case "Super Strict 60 Days":
+      return formattedDate.subtract(60, "day").format("MMM Do");
+
+    case "Long Term":
+      return formattedDate.subtract(30, "day").format("MMM Do");
+
+    case "Vacasa":
+      return formattedDate.subtract(1, "day").format("MMM Do");
+
+    case "CB Island Vacations":
+      return formattedDate.subtract(60, "day").format("MMM Do");
+
   }
 }
