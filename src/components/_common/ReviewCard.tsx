@@ -16,7 +16,7 @@ import {
 import { useRef, useState, useEffect } from "react";
 import { type Review } from "@/server/db/schema";
 
-export default function ReviewCard({ review }: { review: Review }) {
+export default function ReviewCard({ review, backupReview }: { review: Review, backupReview: string }) {
   const reviewRef = useRef<HTMLDivElement>(null);
   const [isOverflowing, setIsOverflowing] = useState(false);
 
@@ -40,7 +40,16 @@ export default function ReviewCard({ review }: { review: Review }) {
           </AvatarFallback>
         </Avatar>
       ) : (
-        <AnonymousAvatar className="h-10 w-10" />
+        // <AnonymousAvatar className="h-10 w-10" />
+        <Avatar className="h-10 w-10">
+          <AvatarImage src={backupReview} alt={review.name} />
+          <AvatarFallback>
+            {review.name
+              .split(" ")
+              .map((n) => n[0])
+              .join("")}
+          </AvatarFallback>
+        </Avatar>
       )}
       <div>
         <p className="font-bold">{review.name}</p>
