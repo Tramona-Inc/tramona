@@ -119,36 +119,36 @@ const EvolveSearchResultSchema = z.object({
 
 type EvolveSearchResult = z.infer<typeof EvolveSearchResultSchema>;
 
-function formatCancellationPolicy(cancelPolicy: QuoteResponse['cancelPolicy']): string {
-  const formatDate = (dateString: string, timeString: string) => {
-    const date = new Date(`${dateString}T${timeString}`);
-    return `${date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} at ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
-  };
+// function formatCancellationPolicy(cancelPolicy: QuoteResponse['cancelPolicy']): string {
+//   const formatDate = (dateString: string, timeString: string) => {
+//     const date = new Date(`${dateString}T${timeString}`);
+//     return `${date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} at ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
+//   };
 
-  const cashRefundPolicy = cancelPolicy.find(policy => policy.refundType === 'Cash' && policy.refundPercent > 0);
-  const noRefundPolicy = cancelPolicy.find(policy => policy.refundPercent === 0);
+//   const cashRefundPolicy = cancelPolicy.find(policy => policy.refundType === 'Cash' && policy.refundPercent > 0);
+//   const noRefundPolicy = cancelPolicy.find(policy => policy.refundPercent === 0);
 
-  if (!cashRefundPolicy) {
-    return "Non-refundable";
-  }
+//   if (!cashRefundPolicy) {
+//     return "Non-refundable";
+//   }
 
-  let policyString = "";
+//   let policyString = "";
 
-  if (cashRefundPolicy.gracePeriod && cashRefundPolicy.gracePeriodHours) {
-    policyString += `This booking is eligible for a ${cashRefundPolicy.refundPercent}% refund within ${cashRefundPolicy.gracePeriodHours} hours after booking.\n`;
-  } else {
-    const formattedDate = formatDate(cashRefundPolicy.refundDate, cashRefundPolicy.refundTime);
-    policyString += `This booking is eligible for a ${cashRefundPolicy.refundPercent}% refund until ${formattedDate}.`;
-  }
+//   if (cashRefundPolicy.gracePeriod && cashRefundPolicy.gracePeriodHours) {
+//     policyString += `This booking is eligible for a ${cashRefundPolicy.refundPercent}% refund within ${cashRefundPolicy.gracePeriodHours} hours after booking.\n`;
+//   } else {
+//     const formattedDate = formatDate(cashRefundPolicy.refundDate, cashRefundPolicy.refundTime);
+//     policyString += `This booking is eligible for a ${cashRefundPolicy.refundPercent}% refund until ${formattedDate}.`;
+//   }
 
-  if (noRefundPolicy) {
-    policyString += `After that, your trip will no longer be eligible for a refund.\n`;
-  }
+//   if (noRefundPolicy) {
+//     policyString += `After that, your trip will no longer be eligible for a refund.\n`;
+//   }
 
-  policyString += "Note: Cancellation policy times are in the listing's time zone.";
+//   policyString += "Note: Cancellation policy times are in the listing's time zone.";
 
-  return policyString;
-}
+//   return policyString;
+// }
 
 const fetchSearchResults = async (
   lat: number,
@@ -422,8 +422,8 @@ const fetchPropertyDetails = async (
     const numNights = getNumNights(checkIn, checkOut);
     const originalNightlyPrice = Math.round((totalPrice / numNights) * 100); // convert to cents
 
-    const formattedCancellationPolicy = formatCancellationPolicy(validatedQuoteResponse.cancelPolicy);
-    console.log(propertyId, formattedCancellationPolicy);
+    // const formattedCancellationPolicy = formatCancellationPolicy(validatedQuoteResponse.cancelPolicy);
+    // console.log(propertyId, formattedCancellationPolicy);
 
     const amenities = $(".Amenities_amenity___Avpr")
       .map((_, el) => $(el).text().trim())
@@ -469,6 +469,7 @@ const fetchPropertyDetails = async (
       numRatings: propertyDetails.reviewCount ?? 0,
       originalListingPlatform: "Evolve" as ListingSiteName,
       originalNightlyPrice: propertyDetails.price,
+      cancellationPolicy: "Evolve",
       reviews: formattedReviews,
       scrapeUrl: url,
     };

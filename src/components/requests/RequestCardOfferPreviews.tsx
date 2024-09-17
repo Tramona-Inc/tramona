@@ -68,13 +68,13 @@ export function RequestCardOfferPreviews({
                 <div className="flex items-center gap-2 overflow-hidden p-1">
                   <div className="shrink-0">
                     <UserAvatar
-                      name={host?.name ?? property.hostName}
-                      image={host?.image ?? property.hostProfilePic}
+                      name={host?.name ?? property.hostName ?? "Tramona"}
+                      image={host?.image ?? property.hostProfilePic ?? "/assets/images/tramona.svg"}
                     />
                   </div>
                   <div>
                     <p className="line-clamp-1 text-xs text-muted-foreground">
-                      {host?.name ?? property.hostName} offered ·{" "}
+                      {host?.name ?? property.hostName ?? "Tramona"} offered ·{" "}
                       {formatDistanceToNowStrict(offer.createdAt, {
                         addSuffix: true,
                       })}
