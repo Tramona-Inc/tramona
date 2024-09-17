@@ -38,7 +38,7 @@ export const CANCELLATION_POLICIES = [
 export type CancellationPolicy = (typeof CANCELLATION_POLICIES)[number];
 
 // cancellation policies that are internal to Tramona (can't be set by host)
-const INTERNAL_CANCELLATION_POLICIES = ["Vacasa"] as const;
+const INTERNAL_CANCELLATION_POLICIES = ["Vacasa", "CB Island Vacations"] as const;
 
 const ALL_CANCELLATION_POLICIES = [
   ...CANCELLATION_POLICIES,
