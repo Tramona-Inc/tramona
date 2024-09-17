@@ -39,9 +39,6 @@ import { getCoordinates } from "@/server/google-maps";
 import { scrapeDirectListings } from "@/server/direct-sites-scraping";
 import { waitUntil } from "@vercel/functions";
 import { scrapeAirbnbListingsForRequest } from "@/server/scrapeAirbnbListingsForRequest";
-import PQueue from "p-queue";
-
-const queue = new PQueue({ concurrency: 1 });
 
 const updateRequestInputSchema = z.object({
   requestId: z.number(),
@@ -507,21 +504,19 @@ export async function handleRequestSubmission(
     );
 
     waitUntil(
-      queue.add(() =>
-        scrapeDirectListings({
-          checkIn: input.checkIn,
-          checkOut: input.checkOut,
-          requestNightlyPrice:
-            input.maxTotalPrice / getNumNights(input.checkIn, input.checkOut),
-          requestId: request.id,
-          location: input.location,
-          latitude: lat,
-          longitude: lng,
-          numGuests: input.numGuests,
-        }).catch((error) => {
-          console.error("Error scraping listings: " + error);
-        }),
-      ),
+      scrapeDirectListings({
+        checkIn: input.checkIn,
+        checkOut: input.checkOut,
+        requestNightlyPrice:
+          input.maxTotalPrice / getNumNights(input.checkIn, input.checkOut),
+        requestId: request.id,
+        location: input.location,
+        latitude: lat,
+        longitude: lng,
+        numGuests: input.numGuests,
+      }).catch((error) => {
+        console.error("Error scraping listings: " + error);
+      }),
     );
 
     if (eligibleProperties.length > 0) {
@@ -542,9 +537,7 @@ export async function handleRequestSubmission(
     }
 
     waitUntil(
-      queue.add(() =>
-        scrapeAirbnbListingsForRequest(input, { tx, requestId: request.id }),
-      ),
+      scrapeAirbnbListingsForRequest(input, { tx, requestId: request.id }),
     );
 
     return { requestId: request.id, madeByGroupId };
