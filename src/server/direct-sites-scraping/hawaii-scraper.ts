@@ -430,6 +430,7 @@ const mapToScrapedListing = (
     numRatings: prop.is_rc_core_item_reviews_count ?? 0,
     originalListingPlatform: "CB Island Vacations" as ListingSiteName,
     originalNightlyPrice: originalNightlyPrice,
+    cancellationPolicy: "CB Island Vacations",
     reviews: reviews,
     scrapeUrl: scrapeUrl,
   };
