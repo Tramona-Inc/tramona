@@ -20,6 +20,7 @@ import {
   sendWhatsApp,
   getPropertiesForRequest,
   createLatLngGISPoint,
+  sendScheduledText,
 } from "@/server/server-utils";
 import { sendSlackMessage } from "@/server/slack";
 import { isIncoming } from "@/utils/formatters";
@@ -503,8 +504,8 @@ export async function handleRequestSubmission(
       );
 
       waitUntil(
-        queue.add(() =>
-          scrapeDirectListings({
+        queue.add(() => {
+          return scrapeDirectListings({
             checkIn: input.checkIn,
             checkOut: input.checkOut,
             requestNightlyPrice:
@@ -514,10 +515,34 @@ export async function handleRequestSubmission(
             latitude: lat,
             longitude: lng,
             numGuests: input.numGuests,
-          }).catch((error) => {
-            console.error("Error scraping listings: " + error);
-          }),
-        ),
+          })
+            .then(async (listings) => {
+              if (listings.length > 0) {
+                const travelerPhone = user.phoneNumber;
+                if (travelerPhone) {
+                  const currentTime = new Date();
+                  const twentyFiveMinutesFromNow = new Date(
+                    currentTime.getTime() + 25 * 60000,
+                  );
+                  const fiftyFiveMinutesFromNow = new Date(
+                    currentTime.getTime() + 55 * 60000,
+                  );
+                  const numOfMatches = listings.length;
+                  void sendScheduledText({
+                    to: travelerPhone,
+                    content: `You have ${numOfMatches <= 10 ? numOfMatches : "more than 10"} matches for your request in ${input.location}, visit Tramona.com to view`,
+                    sendAt:
+                      numOfMatches <= 5
+                        ? twentyFiveMinutesFromNow
+                        : fiftyFiveMinutesFromNow,
+                  });
+                }
+              }
+            })
+            .catch((error) => {
+              console.error("Error scraping listings: " + error);
+            });
+        }),
       );
 
       if (eligibleProperties.length > 0) {
