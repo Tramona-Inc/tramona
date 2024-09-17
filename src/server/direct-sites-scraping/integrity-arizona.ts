@@ -138,6 +138,7 @@ const mapToScrapedListing = (
       Math.round(prop.total / getNumNights(checkIn, checkOut)) * 100, // convert to cents
     reviews: [],
     scrapeUrl: scrapeUrl,
+    cancellationPolicy: "Integrity Arizona",
   }));
 };
 
