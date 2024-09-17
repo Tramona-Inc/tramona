@@ -59,12 +59,19 @@ After Check-In: If they cancel during their stay, the next 30 days are non-refun
       returned for cancellations made within 60 days of the scheduled stay. There are no
       refunds for late cancellations or early checkouts.`;
 
+
+    case "Evolve":
+      return `Full Refund: Guests can get a full refund if they cancel within 48 hours of booking and at least 14 days before check-in. The 48-hour refund option doesn't apply if you book your stay the day before check-in. Reservations cannot be cancelled for a full refund on the day of check-in.`;
+
+    case "Casamundo":
+      return "Hello World"
+
     case "Non-refundable":
       return "No refund is provided after booking.";
   }
 }
 
-export function getFreeCancellationUntil(date: Date, policy:CancellationPolicyWithInternals) {
+export function getFreeCancellationUntil(date: Date, policy: CancellationPolicyWithInternals) {
   const formattedDate = dayjs(date); // Convert Date object to dayjs object
 
   switch (policy) {
