@@ -478,7 +478,23 @@ export default function PropertyPage({
               />
             </div>
           )}
+<section>
+  <h2 className="subheading border-t pb-2 pt-4">We're here for you</h2>
+  <div className="z-20 max-w-2xl text-zinc-700">
+    <p className="text-sm pb-2">
+      Visit our <Link href="/help-center" className="text-blue-600 underline">Help Center</Link> to find answers to frequently asked questions. If you have any more questions, our Customer Support team will be happy to help you.
+    </p>
+  </div>
+  <div className="flex">
+    <Link href="/help-center">
+      <Button>
+        Need Support?
+      </Button>
+    </Link>
+  </div>
+</section>
         </div>
+
 
         {sidebar && (
           <div className="hidden shrink-0 md:block md:w-72 lg:w-96">
