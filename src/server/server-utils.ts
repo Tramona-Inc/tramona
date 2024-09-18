@@ -869,3 +869,49 @@ export function haversineDistance(
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c; // Distance in kilometers
 }
+
+export async function checkRequestsWithoutOffers() {
+  const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+  const requestsWithoutOffers = await db.query.requests.findMany({
+    where: and(
+      lte(requests.createdAt, twentyFourHoursAgo),
+      eq(requests.notifiedNoOffers, false),
+      notExists(
+        db
+          .select()
+          .from(offers)
+          .where(eq(offers.requestId, requests.id))
+      )
+    ),
+    with: {
+      madeByGroup: {
+        with: {
+          owner: {
+            columns: {
+              phoneNumber: true
+            }
+          }
+        }
+      }
+    }
+  });
+
+  for (const request of requestsWithoutOffers) {
+    const travelerPhoneNumber = request.madeByGroup.owner.phoneNumber;
+    
+    if (travelerPhoneNumber) {
+      await sendText({
+        to: travelerPhoneNumber,
+        content: `Tramona: Your request for ${request.location} for ${request.maxTotalPrice} didn't yield any offers in the last 24 hours. Consider submitting a new request with a different price range or a broader location to increase your chances of finding a match.`
+      });
+    }
+
+    await db
+      .update(requests)
+      .set({ notifiedNoOffers: true })
+      .where(eq(requests.id, request.id));
+  }
+
+  return requestsWithoutOffers.length; // return whatever
+}
