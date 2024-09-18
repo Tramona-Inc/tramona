@@ -196,7 +196,7 @@ importers:
         version: 1.4.1(@aws-sdk/credential-provider-web-identity@3.649.0(@aws-sdk/client-sts@3.651.1))
       '@vercel/og':
         specifier: ^0.6.2
-        version: 0.6.2
+        version: 0.6.3
       '@vis.gl/react-google-maps':
         specifier: ^1.0.0
         version: 1.2.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -3241,8 +3241,8 @@ packages:
       '@aws-sdk/credential-provider-web-identity':
         optional: true
 
-  '@vercel/og@0.6.2':
-    resolution: {integrity: sha512-OTe0KE37F5Y2eTys6eMnfopC+P4qr2ooXUTFyFPTplYSPwowmFk/HLD1FXtbKLjqsIH0SgekcJWad+C5uX4nkg==}
+  '@vercel/og@0.6.3':
+    resolution: {integrity: sha512-aoCrC9FqkeA+WEEb9CwSmjD0rGlFeNqbUsI41JPmKWR9Hx6FFn86tvH96O5HZMF6VAXTGHxa3nPH3BokROpdgA==}
     engines: {node: '>=16'}
 
   '@vis.gl/react-google-maps@1.2.0':
@@ -10586,7 +10586,7 @@ snapshots:
     optionalDependencies:
       '@aws-sdk/credential-provider-web-identity': 3.649.0(@aws-sdk/client-sts@3.651.1)
 
-  '@vercel/og@0.6.2':
+  '@vercel/og@0.6.3':
     dependencies:
       '@resvg/resvg-wasm': 2.4.0
       satori: 0.10.9
