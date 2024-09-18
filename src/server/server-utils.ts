@@ -903,7 +903,7 @@ export async function checkRequestsWithoutOffers() {
     if (travelerPhoneNumber) {
       await sendText({
         to: travelerPhoneNumber,
-        content: `Your request for ${request.location} for ${request.maxTotalPrice} didn't yield any offers in the last 24 hours. Consider submitting a new request with a different price range or a broader location to increase your chances of finding a match.`
+        content: `Tramona: Your request for ${request.location} for ${request.maxTotalPrice} didn't yield any offers in the last 24 hours. Consider submitting a new request with a different price range or a broader location to increase your chances of finding a match.`
       });
     }
 
