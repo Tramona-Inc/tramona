@@ -56,6 +56,7 @@ import { Property } from "@/server/db/schema";
 import ChatOfferButton from "./ChatOfferButton";
 import { Airbnb } from "@/utils/listing-sites/Airbnb";
 import { createUserNameAndPic } from "../activity-feed/admin/generationHelper";
+import { CreditCard } from "lucide-react";
 
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 export type PropertyPageData = OfferWithDetails["property"];
@@ -673,8 +674,8 @@ function OfferPageSidebar({
             bookOnAirbnb={property.bookOnAirbnb}
           />
 
-          {property.cancellationPolicy &&
-            property.cancellationPolicy !== "Non-refundable" && (
+          {/* {property.cancellationPolicy &&
+            property.cancellationPolicy !== "Non-refundable" && ( */}
               <div className="flex flex-row border-t pt-4 gap-2 justify-between">
                 <div className="flex flex-col">
                   <div className="font-bold">Book with confidence</div>
@@ -693,8 +694,9 @@ function OfferPageSidebar({
                   </a>
                 </div>
                 {/* TO DO: CREDIT CARD ICON */}
+                <CreditCard className="w-12 h-12 text-bg-zinc-200"/>
               </div>
-            )}
+            {/* )} */}
         </CardContent>
       </Card>
 
