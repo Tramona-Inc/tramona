@@ -674,9 +674,9 @@ function OfferPageSidebar({
             bookOnAirbnb={property.bookOnAirbnb}
           />
 
-          {/* {property.cancellationPolicy &&
-            property.cancellationPolicy !== "Non-refundable" && ( */}
-              <div className="flex flex-row border-t pt-4 gap-2 justify-between">
+          {property.cancellationPolicy &&
+            property.cancellationPolicy !== "Non-refundable" && (
+              <div className="flex flex-row justify-between gap-2 border-t pt-4">
                 <div className="flex flex-col">
                   <div className="font-bold">Book with confidence</div>
                   <div>
@@ -694,9 +694,9 @@ function OfferPageSidebar({
                   </a>
                 </div>
                 {/* TO DO: CREDIT CARD ICON */}
-                <CreditCard className="w-12 h-12 text-bg-zinc-200"/>
+                <CreditCard className="h-12 w-12 text-[#004236]" />
               </div>
-            {/* )} */}
+            )}
         </CardContent>
       </Card>
 
@@ -734,7 +734,9 @@ function OfferPageSidebar({
           <DialogHeader>
             <DialogTitle>Cancellation Policy</DialogTitle>
           </DialogHeader>
-          <p>{getCancellationPolicyDescription(property.cancellationPolicy!)}</p>
+          <p>
+            {getCancellationPolicyDescription(property.cancellationPolicy!)}
+          </p>
         </DialogContent>
       </Dialog>
     </div>
