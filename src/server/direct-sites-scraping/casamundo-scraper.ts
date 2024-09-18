@@ -251,11 +251,29 @@ interface PriceDetails {
   isAvailable: boolean;
 }
 
+const CancellationDataFrameSchema = z.object({
+  date: z.string(),
+  text: z.string(),
+  percentage: z.number(),
+  type: z.string(),
+});
+
+const CancellationDetailsSchema = z.object({
+  dataFrames: z.array(CancellationDataFrameSchema),
+});
+
+type CancellationDetails = z.infer<typeof CancellationDetailsSchema>;
+
+interface BookingDetails {
+  cancellationDetails: CancellationDetails;
+}
+
 interface ApiResponse {
   hasErrors: boolean;
   errorMessage?: string;
   content: {
     priceDetails: PriceDetails;
+    bookingDetails: BookingDetails;
   };
 }
 
@@ -263,6 +281,39 @@ interface PriceResult {
   price: number;
   currency: string;
   id: string;
+  cancellationPolicy: string;
+}
+
+function formatCancellationPolicy(
+  cancellationDetails: CancellationDetails,
+): string {
+  if (
+    !cancellationDetails.dataFrames ||
+    cancellationDetails.dataFrames.length === 0
+  ) {
+    return "Cancellation policy information is not available.";
+  }
+
+  let policyString = "Cancellation Policy:\n\n";
+
+  cancellationDetails.dataFrames.forEach((frame, index) => {
+    if (frame.type !== "checkin") {
+      policyString += `- ${frame.date}: `;
+      if (frame.percentage === 100) {
+        policyString += `**${frame.text}**`;
+      } else if (frame.percentage > 0) {
+        policyString += `**${frame.percentage}% refund**`;
+      } else {
+        policyString += "**No refund**";
+      }
+      policyString += "\n";
+    }
+  });
+
+  policyString +=
+    "\n**Note:** Cancellation policy times are in the listing's time zone.";
+
+  return policyString;
 }
 
 const fetchPrice = async (
@@ -310,11 +361,18 @@ const fetchPrice = async (
       );
       const data = response.data;
 
+      const cancellationDetails = CancellationDetailsSchema.parse(
+        data.content.bookingDetails.cancellationDetails,
+      );
+      const formattedCancellationPolicy =
+        formatCancellationPolicy(cancellationDetails);
+
       if (!data.hasErrors) {
         return {
           price: data.content.priceDetails.travelPrice.raw,
           currency: data.content.priceDetails.currency,
           id: params.offerId,
+          cancellationPolicy: formattedCancellationPolicy,
         };
       }
 
@@ -328,6 +386,7 @@ const fetchPrice = async (
         price: -1,
         currency: "N/A",
         id: params.offerId,
+        cancellationPolicy: "N/A",
       };
     } catch (error) {
       if (attempt < maxRetries - 1) {
@@ -337,6 +396,7 @@ const fetchPrice = async (
           price: -1,
           currency: "N/A",
           id: params.offerId,
+          cancellationPolicy: "N/A",
         };
       }
     }
@@ -345,6 +405,7 @@ const fetchPrice = async (
     price: -1,
     currency: "N/A",
     id: params.offerId,
+    cancellationPolicy: "N/A",
   };
 };
 
@@ -414,7 +475,7 @@ async function fetchPropertyDetails(
   checkOut: string,
   adults: number,
   location: string,
-  price: { price: number; currency: string; id: string },
+  price: { price: number; currency: string; id: string, cancellationPolicy: string },
 ): Promise<ScrapedListing> {
   const url = `https://www.casamundo.com/rental/offer/${offerId}`;
 
@@ -521,6 +582,7 @@ async function fetchPropertyDetails(
 
     const numNights = getNumNights(new Date(checkIn), new Date(checkOut));
 
+    console.log("Cancellation policy for", offerId, "is", price.cancellationPolicy);
     return {
       originalListingId: offerId,
       name: data.generalTitle ?? "",
@@ -541,6 +603,8 @@ async function fetchPropertyDetails(
       numRatings,
       originalListingPlatform: "Casamundo" as ListingSiteName,
       originalNightlyPrice: Math.round((price.price / numNights) * 100),
+      // cancellationPolicy: price.cancellationPolicy, Uncomment this when enum type is changed to allow any string
+      cancellationPolicy: "Casamundo",
       reviews: reviews,
       scrapeUrl: `${url}?${params.toString()}`,
     };
@@ -644,14 +708,17 @@ export const casamundoScraper: DirectSiteScraper = async ({
         );
 
         // Return property details if they exist, otherwise return null
-        return Object.keys(propertyWithDetails).length > 0 ? propertyWithDetails : null;
-      })
+        return Object.keys(propertyWithDetails).length > 0
+          ? propertyWithDetails
+          : null;
+      }),
     );
 
     // Filter out any null values (i.e., offers with no details)
-    const validScrapedListings:ScrapedListing[] = listings.filter((listing) => listing !== null);
+    const validScrapedListings: ScrapedListing[] = listings.filter(
+      (listing) => listing !== null,
+    );
 
-    // console.log("scrapedListings!!", scrapedListings);
     console.log("done with casamundo scraper");
     return validScrapedListings;
   } catch (error) {

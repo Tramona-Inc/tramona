@@ -52,6 +52,8 @@ import IdentityModal from "../_utils/IdentityModal";
 import { Property } from "@/server/db/schema";
 import ChatOfferButton from "./ChatOfferButton";
 import { Airbnb } from "@/utils/listing-sites/Airbnb";
+import { createUserNameAndPic } from "../activity-feed/admin/generationHelper";
+
 
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 export type PropertyPageData = OfferWithDetails["property"];
@@ -70,12 +72,21 @@ export default function PropertyPage({
 }) {
   const aboutRef = useRef<HTMLDivElement>(null);
   const [isOverflowing, setIsOverflowing] = useState(false);
+  const [reviewBackupImages, setReviewBackupImages] = useState<string[]>([]);
 
   useEffect(() => {
     const aboutElement = aboutRef.current;
     if (aboutElement) {
       setIsOverflowing(aboutElement.scrollHeight > aboutElement.clientHeight);
     }
+    async function createReviewBackupImages() {
+
+    const backup = await createUserNameAndPic(property.reviews.length).then((users) =>
+      users.map((user) => user.picture),
+    );
+    setReviewBackupImages(backup);
+  }
+  void createReviewBackupImages();
   }, []);
 
   const hostName = property.host?.name ?? property.hostName ?? "Tramona";
@@ -251,7 +262,7 @@ export default function PropertyPage({
               <UserAvatar
                 name={hostName}
                 email={property.host?.email}
-                image={property.host?.image}
+                image={"/assets/images/tramona.svg"}
               />
               <div className="-space-y-1">
                 <p className="text-sm text-muted-foreground">Hosted by</p>
@@ -362,8 +373,8 @@ export default function PropertyPage({
               </div>
             </div>
             <div className="grid gap-4">
-              {property.reviews.map((review) => (
-                <ReviewCard key={review.id} review={review} />
+              {property.reviews.map((review, id) => (
+                reviewBackupImages[id] && <ReviewCard key={review.id} review={review} backupReview={reviewBackupImages[id]}/>
               ))}
             </div>
             {originalListing && offer && (

@@ -30,10 +30,10 @@ export default function MastHead() {
           <div className="flex flex-col justify-center">
             <div className="relative pt-10 text-center">
               <h1 className="mx-auto max-w-3xl text-balance text-3xl font-bold text-zinc-900 lg:text-5xl">
-                Agree on a Price with Hosts Every Time
+                Name your own price for Airbnbs
               </h1>
               <p className="mx-auto max-w-[38rem] pt-4 text-xs font-semibold text-zinc-900 lg:pt-4 lg:text-base">
-                Traveling outside your budget, now within reach.
+                Agree on a price with hosts every time
               </p>
               <div className="hidden items-center justify-center pt-4 lg:flex">
                 <div className="-ml-2">
@@ -83,6 +83,10 @@ export default function MastHead() {
       </div>
 
       <div className="h-24 lg:h-60"></div>
+
+      <p className="text-balance p-4 text-center font-semibold">
+        Try it before you book, and see what hosts will offer you!
+      </p>
 
       <div className="mx-0 mt-8 flex max-w-full justify-center space-y-4 px-4 lg:mx-4 lg:mt-16 lg:flex lg:space-y-8">
         <TestimonialCarousel />
