@@ -10,7 +10,8 @@ import { Review, PropertyType } from "@/server/db/schema";
 import { ListingSiteName } from "@/server/db/schema/common";
 import { getNumNights } from "@/utils/utils";
 import { algoliasearch, SearchResponse } from "algoliasearch";
-import { getCity, getCoordinates } from "@/server/google-maps";
+import { getCity, getCoordinates, getCountryISO } from "@/server/google-maps";
+import { format } from "path";
 
 const EvolvePropertySchema = z.object({
   id: z.string(),
@@ -25,6 +26,7 @@ const EvolvePropertySchema = z.object({
   longitude: z.number(),
   averageRating: z.number().optional(),
   reviewCount: z.number().optional(),
+  areaDescription: z.string().optional(),
   price: z.number(),
   description: z.string(),
 });
@@ -336,8 +338,45 @@ const fetchPropertyDetails = async (
     }
 
     const parsedData = JSON.parse(jsonMatch[1]) as {
-      props?: { pageProps?: { listingReviews?: unknown[] } };
+      props?: { pageProps?: { listingReviews?: unknown[], listing?: {units?: unknown[]} } };
     };
+
+    const listingUnits = parsedData.props?.pageProps?.listing?.units || [];
+
+    const categories = [
+      "Inside Amenities",
+      "Outdoor Amenities",
+      "Community Amenities",
+      "Property Amenities",
+      "Kitchen Equipment",
+    ];
+
+    const categorizedAmenities: { [key: string]: string[] } = {};
+    categories.forEach(category => {
+      categorizedAmenities[category] = [];
+    });
+    const uncategorizedAmenities: string[] = [];
+
+    listingUnits.forEach((unit: any) => {
+      (unit.amenities || []).forEach((amenity: any) => {
+        const matchedCategory = categories.find(cat => 
+          amenity.category.toLowerCase() === cat.toLowerCase()
+        );
+        
+        if (matchedCategory) {
+          if (!categorizedAmenities[matchedCategory]?.includes(amenity.name)) {
+            categorizedAmenities[matchedCategory]?.push(amenity.name);
+          }
+        } else {
+          if (!uncategorizedAmenities.includes(amenity.name)) {
+            uncategorizedAmenities.push(amenity.name);
+          }
+        }
+      });
+    });
+
+    const allAmenities = Object.values(categorizedAmenities).flat();
+
     const listingReviews = parsedData.props?.pageProps?.listingReviews ?? [];
 
     const validatedReviews = listingReviews
@@ -387,6 +426,12 @@ const fetchPropertyDetails = async (
         .trim(),
     );
 
+    const locationDetails: string[] = [];
+    const locationSection = $('h2.section-subtitle:contains("Location Details")').next('div');
+    locationSection.find('p').each((_, element) => {
+      locationDetails.push($(element).text().trim());
+    });
+
     const quoteUrl = "https://evolve.com/api/quotes";
     const quoteData = {
       reservation: {
@@ -416,18 +461,15 @@ const fetchPropertyDetails = async (
         Referer: url,
       },
     });
-    const validatedQuoteResponse = QuoteResponseSchema.parse(quoteResponse.data);
 
-    const totalPrice = quoteResponse.data.price?.total ?? 0;
+    const totalPrice = quoteResponse.data.price?.total;
     const numNights = getNumNights(checkIn, checkOut);
     const originalNightlyPrice = Math.round((totalPrice / numNights) * 100); // convert to cents
-
+    if (propertyId === "379255") {
+    console.log('originalNightlyPrice', originalNightlyPrice);
+    }
     // const formattedCancellationPolicy = formatCancellationPolicy(validatedQuoteResponse.cancelPolicy);
     // console.log(propertyId, formattedCancellationPolicy);
-
-    const amenities = $(".Amenities_amenity___Avpr")
-      .map((_, el) => $(el).text().trim())
-      .get();
 
     const propertyDetails = EvolvePropertySchema.parse({
       id: propertyId,
@@ -436,12 +478,13 @@ const fetchPropertyDetails = async (
       bathrooms: numBathrooms,
       maxOccupancy: maxNumGuests,
       propertyType,
-      amenities,
+      amenities: allAmenities,
       imageUrls,
       latitude,
       longitude,
       averageRating: avgRating,
       reviewCount: numRatings,
+      areaDescription: locationDetails.join("\n"),
       price: originalNightlyPrice,
       description: about,
     });
@@ -470,6 +513,7 @@ const fetchPropertyDetails = async (
       originalListingPlatform: "Evolve" as ListingSiteName,
       originalNightlyPrice: propertyDetails.price,
       cancellationPolicy: "Evolve",
+      areaDescription: propertyDetails.areaDescription,
       reviews: formattedReviews,
       scrapeUrl: url,
     };
@@ -543,23 +587,41 @@ export const evolveVacationRentalScraper: DirectSiteScraper = async ({
 
   const { lat, lng } = geocodingResult.location;
 
-  const formattedLocation = await getCity({ lat, lng });
+  let formattedLocation = await getCity({ lat, lng });
+
+  if (formattedLocation === "[Unknown location]") {
+    formattedLocation = await getCountryISO({ lat, lng }) ?? "[Unknown location]";
+  }
+  if (formattedLocation === "[Unknown location]") {
+    throw new Error("Unable to determine location");
+  }
 
   const locationParts = formattedLocation.split(", ");
-  const city = locationParts[0];
-  const state = locationParts.length > 2 ? locationParts[1] : "";
-  const country = locationParts[locationParts.length - 1];
+  let city, state, country;
+
+  if (locationParts.length === 3) {
+    [city, state, country] = locationParts;
+  } else if (locationParts.length === 2) {
+    [city, country] = locationParts;
+    state = "";
+  } else if (locationParts.length === 1) {
+    [state, country] = [location, locationParts[0]];
+  } else {
+    console.error("Unexpected location format");
+    return [];
+  }
 
   const formattedCountry = country?.toLowerCase().replace(/\s+/g, "-");
   const formattedState = state?.toLowerCase().replace(/\s+/g, "-");
   const formattedCity = city?.toLowerCase().replace(/\s+/g, "-");
-  // console.log(`Reverse geocoded location: ${city}, ${state}, ${country}`);
 
   let urlLocationParam = `/${formattedCountry}`;
   if (state) {
     urlLocationParam += `/${formattedState}`;
   }
+  if (city) {
   urlLocationParam += `/${formattedCity}`;
+  }
 
   const searchResults = await fetchSearchResults(
     lat,
@@ -571,26 +633,6 @@ export const evolveVacationRentalScraper: DirectSiteScraper = async ({
     requestNightlyPrice,
   );
 
-  // const availableProperties: ScrapedListing[] = [];
-  // for (const result of searchResults) {
-  //   const property = await fetchPropertyDetails(
-  //     result.objectID,
-  //     result.Headline,
-  //     result.Bathrooms,
-  //     result.Bedrooms,
-  //     result["Total Beds"],
-  //     result["Max Occupancy"],
-  //     checkIn,
-  //     checkOut,
-  //     urlLocationParam,
-  //     result._geoloc.lat,
-  //     result._geoloc.lng,
-  //     numGuests,
-  //   );
-  //   if (property) {
-  //     availableProperties.push(property);
-  //   }
-  // }
   const properties = await Promise.all(
     searchResults.map((result) =>
       fetchPropertyDetails(
@@ -610,6 +652,7 @@ export const evolveVacationRentalScraper: DirectSiteScraper = async ({
     ),
   );
   const availableProperties: ScrapedListing[] = properties.filter((property) => property !== null);
+  console.log('avail props', availableProperties);
   console.log('evolve done');
   return availableProperties;
 };
