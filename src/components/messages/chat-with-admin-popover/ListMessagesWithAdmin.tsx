@@ -1,66 +1,24 @@
-import { api } from "@/utils/api";
 import { type ChatMessageType, useMessage } from "@/utils/store/messages";
 import { useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { type MessageDbType } from "@/types/supabase.message";
 import supabase from "@/utils/supabase-client";
-import { errorToast } from "@/utils/toasts";
 import { cn } from "@/utils/utils";
 
 export default function ListMessagesWithAdmin({
   isPopover,
+  conversationId,
+  tempUserId,
 }: {
   isPopover?: boolean;
+  conversationId: string;
+  tempUserId: string;
 }) {
   const { data: session } = useSession();
-  const [conversationId, setConversationId] = useState<string>("");
-  const [tempToken, setTempToken] = useState<string>("");
-  const [tempUserId, setTempUserId] = useState<string>("");
-  const {
-    data: conversationIdAndTempUserId,
-    refetch: refetchConversationIdAndTempUserId,
-  } = api.messages.getConversationsWithAdmin.useQuery(
-    {
-      userId: session?.user.id,
-      sessionToken: tempToken,
-    },
-    {
-      enabled: Boolean(session?.user.id ?? tempToken),
-    },
-  );
-
-  useEffect(() => {
-    if (!session && typeof window !== "undefined") {
-      setTempToken(localStorage.getItem("tempToken") ?? "");
-    }
-  }, [session]);
-
-  useEffect(() => {
-    // Ensure having a valid user ID before making the call (the session is loaded or guest has tempToken)
-    if (session?.user.id ?? tempToken) {
-      const fetchData = () => {
-        try {
-          if (conversationIdAndTempUserId) {
-            setConversationId(conversationIdAndTempUserId.conversationId);
-            setTempUserId(conversationIdAndTempUserId.tempUserId ?? "");
-          }
-        } catch (error) {
-          errorToast();
-        }
-      };
-
-      fetchData();
-    }
-  }, [conversationIdAndTempUserId, session?.user.id, tempToken]);
-
-  const { fetchInitialMessages } = useMessage();
-  void fetchInitialMessages(conversationId);
-  const { conversations } = useMessage();
-
+  const { fetchInitialMessages, conversations } = useMessage();
   const addMessageToConversation = useMessage(
     (state) => state.addMessageToConversation,
   );
-
   const optimisticIds = useMessage((state) => state.optimisticIds);
   // const setOptimisticIds = useMessage((state) => state.setOptimisticIds);
 
@@ -69,8 +27,17 @@ export default function ListMessagesWithAdmin({
     : [];
 
   useEffect(() => {
+    const fetchData = async () => {
+      if (conversationId) {
+        await fetchInitialMessages(conversationId);
+      }
+    };
+    void fetchData();
+  }, [conversationId, fetchInitialMessages]);
+
+  useEffect(() => {
     const channel = supabase
-      .channel(`${conversationId}`)
+      .channel(conversationId)
       .on(
         "postgres_changes",
         {

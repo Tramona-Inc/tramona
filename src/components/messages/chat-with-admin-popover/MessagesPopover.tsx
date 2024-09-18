@@ -37,18 +37,16 @@ export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
     api.messages.createConversationWithAdminFromGuest.useMutation();
   const { mutateAsync: createTempUserForGuest } =
     api.auth.createTempUserForGuest.useMutation();
-  const {
-    data: conversationIdAndTempUserId,
-    refetch: refetchConversationIdAndTempUserId,
-  } = api.messages.getConversationsWithAdmin.useQuery(
-    {
-      userId: session?.user.id,
-      sessionToken: tempToken,
-    },
-    {
-      enabled: Boolean(session?.user.id ?? tempToken),
-    },
-  );
+  const { data: conversationIdAndTempUserId } =
+    api.messages.getConversationsWithAdmin.useQuery(
+      {
+        userId: session?.user.id,
+        sessionToken: tempToken,
+      },
+      {
+        enabled: Boolean(session?.user.id ?? tempToken),
+      },
+    );
   const { mutateAsync: sendChatboxSlackMessage } =
     api.messages.sendChatboxSlackMessage.useMutation();
 
@@ -105,10 +103,6 @@ export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
     (state) => state.removeMessageFromConversation,
   );
 
-  const { fetchInitialMessages } = useMessage();
-
-  void fetchInitialMessages(conversationId);
-
   const concierge = {
     name: "Blake",
     image:
@@ -120,6 +114,7 @@ export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
   });
 
   const handleOnSend = async (values: z.infer<typeof formSchema>) => {
+    form.reset();
     if (!session) {
       const { tempUserId, conversationId } =
         await createOrRetrieveConversationFromGuest({
@@ -202,7 +197,6 @@ export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
         senderId: newMessage.userId,
       });
     }
-    form.reset();
   };
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -227,7 +221,11 @@ export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
               <X className="fixed left-5 top-4 text-white" />
             </PopoverClose>
           )}
-          <ListMessagesWithAdmin isPopover={isPopover} />
+          <ListMessagesWithAdmin
+            isPopover={isPopover}
+            conversationId={conversationId}
+            tempUserId={conversationIdAndTempUserId?.tempUserId ?? ""}
+          />
         </div>
         <div className="mx-4 my-2 flex h-max flex-row items-center gap-2 rounded-full border border-gray-500 p-1">
           <Form {...form}>
