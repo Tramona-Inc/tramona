@@ -15,7 +15,6 @@ export * from "./tables/messages";
 export * from "./tables/offers";
 export * from "./tables/properties";
 export * from "./tables/requests";
-export * from "./tables/requestsToProperties";
 export * from "./tables/reservedDateRanges";
 export * from "./tables/superhogRequests";
 export * from "./tables/users";
@@ -23,3 +22,4 @@ export * from "./tables/reviews";
 export * from "./tables/trips";
 export * from "./tables/feedFiller";
 export * from "./tables/linkInputProperties";
+export * from "./tables/rejectedRequests"

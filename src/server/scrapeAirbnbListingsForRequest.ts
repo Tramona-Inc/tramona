@@ -14,7 +14,7 @@ export async function scrapeAirbnbListingsForRequest(
     limit: 10,
   });
 
-  console.log("airbnbListings", airbnbListings);
+  // console.log("airbnbListings", airbnbListings);
 
   // await writeFile(
   //   "./airbnbListings.json",

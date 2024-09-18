@@ -28,7 +28,6 @@ import { TRPCError } from "@trpc/server";
 import { and, eq, isNotNull, isNull, notInArray, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import { requests } from "../../db/schema/tables/requests";
-import { requestsToProperties } from "../../db/schema/tables/requestsToProperties";
 import { db } from "@/server/db";
 import NewOfferReceivedEmail from "packages/transactional/emails/NewOfferReceivedEmail";
 import {
@@ -464,15 +463,6 @@ export const offersRouter = createTRPCRouter({
           checkOut: requestDetails.checkOut,
           datePriceFromAirbnb: datePriceFromAirbnb,
         });
-
-        await ctx.db
-          .delete(requestsToProperties)
-          .where(
-            and(
-              eq(requestsToProperties.propertyId, input.propertyId),
-              eq(requestsToProperties.requestId, input.requestId),
-            ),
-          );
 
         //find the property
 

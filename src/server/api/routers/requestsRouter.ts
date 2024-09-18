@@ -11,9 +11,9 @@ import {
   requestSelectSchema,
   requestUpdatedInfo,
   requests,
-  requestsToProperties,
   users,
   offers,
+  rejectedRequests,
 } from "@/server/db/schema";
 import {
   sendText,
@@ -328,49 +328,6 @@ export const requestsRouter = createTRPCRouter({
       }
     }),
 
-  getByPropertyId: protectedProcedure
-    .input(z.number())
-    .query(async ({ input: propertyId }) => {
-      // const hostId = await db.query.properties
-      //   .findFirst({
-      //     columns: { hostId: true },
-      //     where: eq(properties.id, propertyId),
-      //   })
-      //   .then((res) => res?.hostId);
-
-      // if (hostId != ctx.user.id) {
-      //   throw new TRPCError({ code: "UNAUTHORIZED" });
-      // }
-
-      return await db.query.requestsToProperties
-        .findMany({
-          where: eq(requestsToProperties.propertyId, propertyId),
-          with: {
-            request: {
-              with: {
-                madeByGroup: {
-                  with: {
-                    members: {
-                      with: {
-                        user: {
-                          columns: {
-                            name: true,
-                            email: true,
-                            image: true,
-                            id: true,
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        })
-        .then((res) => res.map((r) => r.request));
-    }),
-
   // todo - change this when updaterequestinfo is not one to one anymore
   getUpdatedRequestInfo: protectedProcedure
     .input(
@@ -414,9 +371,10 @@ export const requestsRouter = createTRPCRouter({
   rejectRequest: protectedProcedure
     .input(z.object({ requestId: z.number() }))
     .mutation(async ({ ctx, input }) => {
-      await ctx.db
-        .delete(requestsToProperties)
-        .where(eq(requestsToProperties.requestId, input.requestId));
+      await ctx.db.insert(rejectedRequests).values({
+        requestId: input.requestId,
+        userId: ctx.user.id,
+      })
     }),
 });
 
@@ -505,15 +463,6 @@ export async function handleRequestSubmission(
       { ...input, id: request.id, latLngPoint: request.latLngPoint, radius },
       { tx },
     );
-
-    if (eligibleProperties.length > 0) {
-      await tx.insert(requestsToProperties).values(
-        eligibleProperties.map((property) => ({
-          requestId: request.id,
-          propertyId: property.id,
-        })),
-      );
-    }
 
     waitUntil(
       scrapeDirectListings({

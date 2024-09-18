@@ -11,11 +11,13 @@ import {
   and,
   between,
   eq,
+  exists,
   gte,
   inArray,
   isNotNull,
   isNull,
   lte,
+  not,
   notExists,
   or,
   sql,
@@ -34,12 +36,12 @@ import {
   hostTeamMembers,
   properties,
   offers,
-  requestsToProperties,
   users,
   hostReferralDiscounts,
   referralCodes,
   requests,
   propertyStatusEnum,
+  rejectedRequests,
 } from "./db/schema";
 import { getCity, getCoordinates } from "./google-maps";
 import axios from "axios";
@@ -48,6 +50,7 @@ import * as cheerio from "cheerio";
 import { sendSlackMessage } from "./slack";
 import { HOST_MARKUP, TRAVELER__MARKUP } from "@/utils/constants";
 import { HostRequestsPageData } from "./api/routers/propertiesRouter";
+import { Session } from "next-auth";
 
 export const axiosWithRetry = axios.create();
 
@@ -388,47 +391,6 @@ export async function addProperty({
   return insertedProperty!.id;
 }
 
-// async function processRequests(
-//   insertedProperty: Pick<Property, "id" | "latLngPoint" | "priceRestriction">,
-// ) {
-
-//   const allRequestsForProperty = await getRequestsForPropert({
-//     id: insertedProperty.id,
-//     latLngPoint: insertedProperty.latLngPoint,
-//     priceRestriction: insertedProperty.priceRestriction,
-//   });
-//   // const allRequests = await db.query.requests.findMany({});
-//   console.log("allRequestsForProperty: ");
-//   for (const request of allRequestsForProperty) {
-//     console.log("request: ", request);
-//   }
-
-// for (const request of allRequests) {
-//   const matchingProperties = await getPropertiesForRequest({
-//     id: request.id,
-//     // lat: request.lat,
-//     // lng: request.lng,
-//     radius: request.radius,
-//     location: request.location,
-//     checkIn: request.checkIn,
-//     checkOut: request.checkOut,
-//     maxTotalPrice: request.maxTotalPrice,
-//     latLngPoint: request.latLngPoint,
-//     // propertyLatLngPoint: insertedProperty.latLngPoint,
-//   });
-
-// console.log("properties:", allRequestsForProperty);
-// const propertyIds = request.map((property) => property.id);
-
-// if (propertyIds.includes(insertedProperty.id)) {
-//   await db.insert(requestsToProperties).values({
-//     requestId: request.id,
-//     propertyId: insertedProperty.id,
-//   });
-// }
-//}
-// }
-
 export async function sendTextToHost(
   matchingProperties: { id: number; hostId: string | null }[],
   checkIn: Date,
@@ -473,7 +435,8 @@ export async function sendTextToHost(
 }
 
 export async function getRequestsForProperties(
-  properties: Property[],
+  hostProperties: Property[],
+  { user } : { user: Session["user"] },
   //{
   // id: number;
   // propertyStaus: string;
@@ -490,7 +453,7 @@ export async function getRequestsForProperties(
     request: Request & { traveler: Pick<User, "name" | "image"> };
   }[] = [];
 
-  for (const property of properties) {
+  for (const property of hostProperties) {
     const requestIsNearProperty = sql`
       ST_DWithin(
         ST_Transform(requests.lat_lng_point, 3857),
@@ -510,14 +473,37 @@ export async function getRequestsForProperties(
     requestIsNearProperties.push(requestIsNearProperty);
 
     const requestsForProperty = await tx.query.requests.findMany({
-      where: and(requestIsNearProperty, gte(requests.checkIn, new Date())),
+      where: and(requestIsNearProperty, gte(requests.checkIn, new Date()),
+        notExists(
+          db
+            .select()
+            .from(offers)
+            .where(and(eq(offers.requestId, requests.id), exists(
+              db.select()
+                .from(properties)
+                .where(and(eq(properties.id, offers.propertyId), eq(properties.hostTeamId, property.hostTeamId!)))
+            )
+
+            )
+            ),
+        ),
+        notExists(
+          db.select()
+          .from(rejectedRequests)
+          .where(
+            and(
+              eq(rejectedRequests.requestId, requests.id),
+              eq(rejectedRequests.userId, user.id),
+            )
+          )
+        )
+      ),
       with: {
         madeByGroup: {
           with: { owner: { columns: { image: true, name: true } } },
         },
       },
     });
-    //columns: { id: true, checkIn: true, checkOut: true, maxTotalPrice: true, location: true },
 
     // Store the matched requests along with the property
     for (const request of requestsForProperty) {
@@ -537,65 +523,6 @@ export async function getRequestsForProperties(
   }
   return propertyToRequestMap;
 }
-
-// export async function getRequestsForProperties(
-//   properties: {
-//     id: number;
-//     propertyStaus: string;
-//     latLngPoint: { x: number; y: number };
-//     priceRestriction: number | null;
-//   }[],
-//   { tx = db } = {},
-// ) {
-//   const requestIsNearProperties: SQL[] = [];
-//   // let priceRestrictionsSQL: SQL[] | undefined[] = [sql`FALSE`];
-
-//   for (const property of properties) {
-//   const requestIsNearProperty = sql`
-//       ST_DWithin(
-//         ST_Transform(requests.lat_lng_point, 3857),
-//         ST_Transform(ST_SetSRID(ST_MakePoint(${property.latLngPoint.x}, ${property.latLngPoint.y}), 4326), 3857),
-//         requests.radius * 1609.34
-//       )
-//     `;
-// //  const numberOfNights = sql`DATE_PART('day', requests.check_out::timestamp - requests.check_in::timestamp)`;
-
-// //   const priceRestrictionSQL = sql`
-// //     ${property.priceRestriction} IS NULL OR
-// //     (
-// //       requests.max_total_price IS NOT NULL AND
-// //       ${property.priceRestriction} >= (requests.max_total_price / DATE_PART('day', requests.check_out::timestamp - requests.check_in::timestamp)) * 1.15
-// //     )
-// // `;
-//     requestIsNearProperties.push(requestIsNearProperty);
-//     // priceRestrictionsSQL.push(priceRestrictionSQL);
-//   }
-
-//   const result = await tx.query.requests.findMany({
-//     where: and(
-//       or(...requestIsNearProperties),  //or requestIsNearProperties
-//       gte(requests.checkIn, new Date()),
-//       //TO DO: FIX ERROR WITH price restrictionSQL
-//       // priceRestrictionSQL,
-
-//       // or(
-//       //   isNull(property.priceRestriction), // Include requests with no max price restriction
-//       //   and(
-//       //     isNotNull(property.priceRestriction),
-//       //     gte(
-//       //       property.priceRestriction,
-//       //       )
-//       //     )
-//       //   )
-//       // )
-
-//     ),
-//     //columns: { id: true, checkIn: true, checkOut: true, maxTotalPrice: true, location: true },
-
-//   });
-
-//   return result;
-// }
 
 export async function getPropertiesForRequest(
   req: {
@@ -883,9 +810,9 @@ export function haversineDistance(
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(toRadians(lat1)) *
-      Math.cos(toRadians(lat2)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+    Math.cos(toRadians(lat2)) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c; // Distance in kilometers
 }
@@ -919,7 +846,7 @@ export async function checkRequestsWithoutOffers() {
 
   for (const request of requestsWithoutOffers) {
     const travelerPhoneNumber = request.madeByGroup.owner.phoneNumber;
-    
+
     if (travelerPhoneNumber) {
       await sendText({
         to: travelerPhoneNumber,
