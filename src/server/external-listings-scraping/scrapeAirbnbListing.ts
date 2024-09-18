@@ -8,8 +8,7 @@ import {
 } from "@/server/db/schema";
 import { airbnbHeaders } from "@/utils/constants";
 import { getCity } from "../google-maps";
-import { writeFile } from "fs/promises";
-import { axiosWithRetry } from "../server-utils";
+import { axiosWithRetry, proxyAgent } from "../server-utils";
 
 export function encodeAirbnbId(id: string) {
   return Buffer.from(`StayListing:${id}`).toString("base64");
@@ -27,19 +26,19 @@ export async function scrapeAirbnbListing(id: string) {
       listingDataUrl,
       reviewsUrl, // 10 best reviews
     ].map((url) =>
-      // axiosWithRetry
-      //   .get<string>(url, {
-      //     headers: airbnbHeaders,
-      //   })
-      //   .then((r) => r.data),
-      fetch(url, {
-        headers: airbnbHeaders,
-      }).then((r) => r.text()),
+      axiosWithRetry
+        .get<string>(url, {
+          headers: airbnbHeaders,
+          httpsAgent: proxyAgent,
+          responseType: "text",
+        })
+        .then((r) => r.data)
+        .catch((e) => {
+          console.error(`Error fetching ${url}:`, e);
+          throw e;
+        }),
     ),
   )) as [string, string];
-
-  // await writeFile(`./listingData.json`, listingData);
-  // await writeFile(`./reviewsData.json`, reviewsData);
 
   const name = /"listingTitle":"([^"]+?)"/.exec(listingData)?.[1];
   if (!name) throw new Error(`Airbnb id ${id}: Failed to find name`);
