@@ -11,6 +11,7 @@ import {
   text,
   timestamp,
   varchar,
+  boolean
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { groups } from "./groups";
@@ -74,6 +75,7 @@ export const requests = pgTable(
     })
       .notNull()
       .$type<{ x: number; y: number }>(),
+    notifiedNoOffers: boolean("notified_no_offers").notNull().default(false),
   },
   (t) => ({
     madeByGroupidIdx: index().on(t.madeByGroupId),

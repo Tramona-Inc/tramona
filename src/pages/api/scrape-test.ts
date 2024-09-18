@@ -23,7 +23,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         checkOut: new Date("2024-10-22"),
         requestNightlyPrice: 200,
         numGuests: 2,
-        location: "Los Angleles"
+        location: "Waikiki"
 
       });
       console.log('API route: Scraping process completed');

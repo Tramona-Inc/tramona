@@ -52,7 +52,7 @@ export function RemoveFromGroupDialog({
         </DialogHeader>
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
+            <Button variant="secondary">Cancel</Button>
           </DialogClose>
           <Button
             onClick={() => removeGroupMember()}

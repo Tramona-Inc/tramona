@@ -41,9 +41,6 @@ import { getCoordinates } from "@/server/google-maps";
 import { scrapeDirectListings } from "@/server/direct-sites-scraping";
 import { waitUntil } from "@vercel/functions";
 import { scrapeAirbnbListingsForRequest } from "@/server/scrapeAirbnbListingsForRequest";
-import PQueue from "p-queue";
-
-const queue = new PQueue({ concurrency: 1 });
 
 const updateRequestInputSchema = z.object({
   requestId: z.number(),
@@ -482,25 +479,39 @@ export async function handleRequestSubmission(
       latLngPoint = createLatLngGISPoint({ lat, lng });
     }
 
-    if (radius && latLngPoint) {
-      const request = await tx
-        .insert(requests)
-        .values({ ...input, madeByGroupId, latLngPoint, radius })
-        .returning({ latLngPoint: requests.latLngPoint, id: requests.id })
-        .then((res) => res[0]!);
+    if (!radius || !latLngPoint) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Failed to get coordinates for the location",
+      });
+    }
 
-      //TO DO - figure out if i need to get coordinates here or elsewhere
+    const request = await tx
+      .insert(requests)
+      .values({ ...input, madeByGroupId, latLngPoint, radius })
+      .returning({ latLngPoint: requests.latLngPoint, id: requests.id })
+      .then((res) => res[0]!);
 
-      // if (input.lat === undefined || input.lng === null || input.radius === null) {
-      //   const coordinates = await getCoordinates(input.location);
-      //   if (coordinates.location) {
+    //TO DO - figure out if i need to get coordinates here or elsewhere
 
-      //   }
-      // }
+    // if (input.lat === undefined || input.lng === null || input.radius === null) {
+    //   const coordinates = await getCoordinates(input.location);
+    //   if (coordinates.location) {
 
-      const eligibleProperties = await getPropertiesForRequest(
-        { ...input, id: request.id, latLngPoint: request.latLngPoint, radius },
-        { tx },
+    //   }
+    // }
+
+    const eligibleProperties = await getPropertiesForRequest(
+      { ...input, id: request.id, latLngPoint: request.latLngPoint, radius },
+      { tx },
+    );
+
+    if (eligibleProperties.length > 0) {
+      await tx.insert(requestsToProperties).values(
+        eligibleProperties.map((property) => ({
+          requestId: request.id,
+          propertyId: property.id,
+        })),
       );
 
       waitUntil(
@@ -543,38 +554,22 @@ export async function handleRequestSubmission(
               console.error("Error scraping listings: " + error);
             });
         }),
+
+      await sendTextToHost(
+        eligibleProperties,
+        input.checkIn,
+        input.checkOut,
+        input.maxTotalPrice,
+        input.location,
+
       );
-
-      if (eligibleProperties.length > 0) {
-        await tx.insert(requestsToProperties).values(
-          eligibleProperties.map((property) => ({
-            requestId: request.id,
-            propertyId: property.id,
-          })),
-        );
-
-        await sendTextToHost(
-          eligibleProperties,
-          input.checkIn,
-          input.checkOut,
-          input.maxTotalPrice,
-          input.location,
-        );
-      }
-
-      waitUntil(
-        queue.add(() =>
-          scrapeAirbnbListingsForRequest(input, { tx, requestId: request.id }),
-        ),
-      );
-
-      return { requestId: request.id, madeByGroupId };
-    } else {
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: "Failed to get coordinates for the location",
-      });
     }
+
+    waitUntil(
+      scrapeAirbnbListingsForRequest(input, { tx, requestId: request.id }),
+    );
+
+    return { requestId: request.id, madeByGroupId };
   });
 
   // Messaging based on user preferences or environment.

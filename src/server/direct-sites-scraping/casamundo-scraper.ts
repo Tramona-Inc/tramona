@@ -361,8 +361,6 @@ const fetchPrice = async (
       );
       const data = response.data;
 
-      console.log("data", data.content.bookingDetails.cancellationDetails);
-
       const cancellationDetails = CancellationDetailsSchema.parse(
         data.content.bookingDetails.cancellationDetails,
       );
@@ -721,7 +719,6 @@ export const casamundoScraper: DirectSiteScraper = async ({
       (listing) => listing !== null,
     );
 
-    // console.log("scrapedListings!!", scrapedListings);
     console.log("done with casamundo scraper");
     return validScrapedListings;
   } catch (error) {

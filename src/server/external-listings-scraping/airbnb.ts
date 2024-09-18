@@ -46,30 +46,38 @@ export const scrapeAirbnbListings = async ({
     (l) => l.nightlyPrice / l.originalNightlyPrice, // sort by discount
   );
 
-  return await Promise.allSettled(
+  return await Promise.all(
     sortedListings.map(
       async ({ originalListingId, nightlyPrice, originalNightlyPrice }) => {
-        const { property, reviews } =
-          await scrapeAirbnbListing(originalListingId);
+        try {
+          const { property, reviews } =
+            await scrapeAirbnbListing(originalListingId);
 
-        const completeProperty: NewProperty = {
-          ...property,
-          originalNightlyPrice,
-          originalListingId,
-          originalListingPlatform: "Airbnb",
-          originalListingUrl: `https://www.airbnb.com/rooms/${originalListingId}`,
-          airbnbUrl: `https://www.airbnb.com/rooms/${originalListingId}`,
-          bookOnAirbnb: true,
-        };
+          const completeProperty: NewProperty = {
+            ...property,
+            originalNightlyPrice,
+            originalListingId,
+            originalListingPlatform: "Airbnb",
+            originalListingUrl: `https://www.airbnb.com/rooms/${originalListingId}`,
+            airbnbUrl: `https://www.airbnb.com/rooms/${originalListingId}`,
+            bookOnAirbnb: true,
+          };
 
-        return {
-          property: completeProperty,
-          reviews,
-          nightlyPrice,
-        };
+          return {
+            property: completeProperty,
+            reviews,
+            nightlyPrice,
+          };
+        } catch (e) {
+          console.error(
+            `Error scraping Airbnb listing ${originalListingId}:`,
+            e,
+          );
+          return undefined;
+        }
       },
     ),
-  ).then((r) => r.filter((r) => r.status === "fulfilled").map((r) => r.value)); // filter out failed scrapes
+  ).then((r) => r.filter(Boolean)); // filter out failed scrapes
 };
 
 function getSerpUrl({
