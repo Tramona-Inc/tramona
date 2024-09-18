@@ -228,6 +228,26 @@ export async function sendText({
   return response;
 }
 
+export async function sendScheduledText({
+  to,
+  content,
+  sendAt,
+}: {
+  to: string;
+  content: string;
+  sendAt: Date;
+}) {
+  const response = await twilio.messages.create({
+    body: content,
+    from: env.TWILIO_FROM,
+    to,
+    sendAt,
+    messagingServiceSid: "MG7f313e1063abc277e6503fd9c9f3ef07",
+    scheduleType: "fixed",
+  });
+  return response;
+}
+
 export async function sendWhatsApp({
   templateId,
   to,

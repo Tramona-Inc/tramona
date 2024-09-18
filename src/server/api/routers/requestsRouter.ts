@@ -13,17 +13,19 @@ import {
   requests,
   requestsToProperties,
   users,
+  offers,
 } from "@/server/db/schema";
 import {
   sendText,
   sendWhatsApp,
   getPropertiesForRequest,
   createLatLngGISPoint,
+  sendScheduledText,
 } from "@/server/server-utils";
 import { sendSlackMessage } from "@/server/slack";
 import { isIncoming } from "@/utils/formatters";
 import { TRPCError } from "@trpc/server";
-import { and, eq, exists, sql } from "drizzle-orm";
+import { and, eq, exists, sql, lt } from "drizzle-orm";
 import { z } from "zod";
 import type { Session } from "next-auth";
 import { linkInputProperties } from "@/server/db/schema/tables/linkInputProperties";
@@ -75,6 +77,7 @@ export const requestsRouter = createTRPCRouter({
               randomDirectListingDiscount: true,
               datePriceFromAirbnb: true,
             },
+            where: lt(offers.becomeVisibleAt, new Date()),
             with: {
               property: {
                 columns: {
@@ -503,22 +506,6 @@ export async function handleRequestSubmission(
       { tx },
     );
 
-    waitUntil(
-      scrapeDirectListings({
-        checkIn: input.checkIn,
-        checkOut: input.checkOut,
-        requestNightlyPrice:
-          input.maxTotalPrice / getNumNights(input.checkIn, input.checkOut),
-        requestId: request.id,
-        location: input.location,
-        latitude: lat,
-        longitude: lng,
-        numGuests: input.numGuests,
-      }).catch((error) => {
-        console.error("Error scraping listings: " + error);
-      }),
-    );
-
     if (eligibleProperties.length > 0) {
       await tx.insert(requestsToProperties).values(
         eligibleProperties.map((property) => ({
@@ -527,12 +514,54 @@ export async function handleRequestSubmission(
         })),
       );
 
+      waitUntil(
+        queue.add(() => {
+          return scrapeDirectListings({
+            checkIn: input.checkIn,
+            checkOut: input.checkOut,
+            requestNightlyPrice:
+              input.maxTotalPrice / getNumNights(input.checkIn, input.checkOut),
+            requestId: request.id,
+            location: input.location,
+            latitude: lat,
+            longitude: lng,
+            numGuests: input.numGuests,
+          })
+            .then(async (listings) => {
+              if (listings.length > 0) {
+                const travelerPhone = user.phoneNumber;
+                if (travelerPhone) {
+                  const currentTime = new Date();
+                  const twentyFiveMinutesFromNow = new Date(
+                    currentTime.getTime() + 25 * 60000,
+                  );
+                  const fiftyFiveMinutesFromNow = new Date(
+                    currentTime.getTime() + 55 * 60000,
+                  );
+                  const numOfMatches = listings.length;
+                  void sendScheduledText({
+                    to: travelerPhone,
+                    content: `Tramona: You have ${numOfMatches <= 10 ? numOfMatches : "more than 10"} matches for your request in ${input.location}, visit Tramona.com to view`,
+                    sendAt:
+                      numOfMatches <= 5
+                        ? twentyFiveMinutesFromNow
+                        : fiftyFiveMinutesFromNow,
+                  });
+                }
+              }
+            })
+            .catch((error) => {
+              console.error("Error scraping listings: " + error);
+            });
+        }),
+
       await sendTextToHost(
         eligibleProperties,
         input.checkIn,
         input.checkOut,
         input.maxTotalPrice,
         input.location,
+
       );
     }
 
