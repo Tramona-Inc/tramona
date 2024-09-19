@@ -29,6 +29,7 @@ import {
 import { DIRECTLISTINGMARKUP } from "@/utils/constants";
 import { createLatLngGISPoint } from "@/server/server-utils";
 import { cleanbnbScraper, cleanbnbSubScraper } from "./cleanbnb-scrape";
+import { airbnbScraper } from "../external-listings-scraping/airbnbScraper";
 
 export type DirectSiteScraper = (options: {
   checkIn: Date;
@@ -46,6 +47,7 @@ export type ScrapedListing = Omit<NewProperty, "latLngPoint"> & {
   reviews: NewReview[];
   scrapeUrl: string;
   latLngPoint?: { lat: number; lng: number }; // make latLngPoint optional
+  nightlyPrice?: number; // airbnb scraper has nightlyPrice as real price and originalNightlyPrice as the price before discount
 };
 
 export type SubsequentScraper = (options: {
@@ -68,12 +70,13 @@ export type NamedDirectSiteScraper = {
 
 export const directSiteScrapers: NamedDirectSiteScraper[] = [
   // add more scrapers here
-  { name: "evolveVacationRentalScraper", scraper: evolveVacationRentalScraper },
+  // { name: "evolveVacationRentalScraper", scraper: evolveVacationRentalScraper },
   // { name: "cleanbnbScraper", scraper: cleanbnbScraper },
   // { name: "arizonaScraper", scraper: arizonaScraper },
   // { name: "cbIslandVacationsScraper", scraper: cbIslandVacationsScraper },
   // { name: "redawningScraper", scraper: redawningScraper },
   // { name: "casamundoScraper", scraper: casamundoScraper },
+  { name: "airbnbScraper", scraper: airbnbScraper },
 ];
 
 // Helper function to filter out fields not in NewProperty
@@ -176,6 +179,7 @@ export const scrapeDirectListings = async (options: {
       // then create offers if the offers don't exist
       let becomeVisibleAtNumber = Date.now(); // will increment by 5 minutes for each offer
       for (const listing of listings) {
+        const isAirbnbListing = listing.originalListingPlatform === "Airbnb";
         becomeVisibleAtNumber += 5 * 60 * 1000; // Increment by 5 minutes when processing each listing
         if (!listing.originalListingId) {
           continue;
@@ -250,8 +254,12 @@ export const scrapeDirectListings = async (options: {
               );
               continue;
             }
+            const realNightlyPrice =
+              isAirbnbListing && listing.nightlyPrice
+                ? listing.nightlyPrice
+                : listing.originalNightlyPrice;
             const originalTotalPrice =
-              listing.originalNightlyPrice *
+              realNightlyPrice *
               getNumNights(options.checkIn, options.checkOut);
             const newOffer: NewOffer = {
               propertyId: tramonaPropertyId,
@@ -317,8 +325,12 @@ export const scrapeDirectListings = async (options: {
               );
               continue;
             }
+            const realNightlyPrice =
+              isAirbnbListing && listing.nightlyPrice
+                ? listing.nightlyPrice
+                : listing.originalNightlyPrice;
             const originalTotalPrice =
-              listing.originalNightlyPrice *
+              realNightlyPrice *
               getNumNights(options.checkIn, options.checkOut);
             const newOffer: NewOffer = {
               propertyId: newPropertyId,
