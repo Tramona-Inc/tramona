@@ -11,8 +11,10 @@ import {
   Users2Icon,
   WrenchIcon,
   MessagesSquare,
+  LinkIcon,
 } from "lucide-react";
 import { headerLinks } from "./headerNavLinks";
+import { Link1Icon } from "@radix-ui/react-icons";
 
 export const adminNavLinks = [
   { href: "/admin", name: "Dashboard", icon: LayoutDashboardIcon },
@@ -50,5 +52,6 @@ export const guestNavLinks = [
 export const unloggedNavLinks = [
   { href: "/", name: "Home", icon: HomeIcon },
   { href: "/chat-with-admin", name: "Concierge", icon: MessagesSquare },
-  ...headerLinks,
+  { href: "/link-input", name: "Link Input", icon: LinkIcon },
+  // ...headerLinks,
 ];
