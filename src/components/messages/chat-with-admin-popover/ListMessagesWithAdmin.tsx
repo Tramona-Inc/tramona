@@ -102,7 +102,7 @@ export default function ListMessagesWithAdmin({
         <div
           className={cn(
             "flex w-full flex-1 flex-col-reverse gap-1 overflow-auto p-3",
-            isPopover ? "h-[20rem]" : "h-[30rem]",
+            "h-[20rem]",
           )}
         >
           {messages.map((message) =>

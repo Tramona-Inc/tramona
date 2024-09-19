@@ -191,9 +191,9 @@ export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
 
   function ChatboxContent({ isPopover }: { isPopover?: boolean }) {
     return (
-      <div className={cn("bg-black", !isPopover && "pb-4")}>
-        <div className={cn(!isPopover && "h-[38rem]")}>
-          <div className="flex w-full flex-col items-center justify-start bg-[#1A1A1A] p-4 text-base font-bold text-white">
+      <div>
+        <div className="flex flex-col">
+          <div className="flex h-[7rem] w-full flex-col items-center justify-start bg-[#1A1A1A] p-4 text-base font-bold text-white">
             <UserAvatar image={concierge.image} />
             <p className="pt-1 text-xs font-light text-muted antialiased">
               Tramona Concierge
@@ -202,13 +202,10 @@ export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
               {concierge.name}
             </p>
           </div>
-          {isPopover && (
-            <PopoverClose>
-              <X className="fixed left-5 top-4 text-white" />
-            </PopoverClose>
-          )}
+          <PopoverClose>
+            <X className="fixed left-5 top-4 text-white" />
+          </PopoverClose>
           <ListMessagesWithAdmin
-            isPopover={isPopover}
             conversationId={conversationId}
             tempUserId={conversationIdAndTempUserId?.tempUserId ?? ""}
           />
@@ -252,28 +249,74 @@ export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
   }
 
   return (
-    <>
-      {!isMobile ? (
-        <Popover open={open} onOpenChange={setOpen}>
-          <PopoverTrigger asChild>
-            {session?.user.role !== "host" && session?.user.role !== "admin" ? (
-              <Button className="w-18 h-18 bottom-4 right-4 z-50 m-4 hidden rounded-full border p-4 lg:fixed lg:block">
-                <MessageCircleMore />
-              </Button>
-            ) : (
-              <></>
-            )}
-          </PopoverTrigger>
-          <PopoverContent
-            side="top"
-            className="mr-5 grid h-[35rem] w-[21rem] grid-rows-1 rounded-xl border border-gray-800 bg-black p-0"
-          >
-            <ChatboxContent isPopover={true} />
-          </PopoverContent>
-        </Popover>
-      ) : (
-        <ChatboxContent />
-      )}
-    </>
+    <div className="fixed bottom-10 right-4 z-50">
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button className="w-18 h-18 m-4 rounded-full border p-4">
+            <MessageCircleMore />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="mx-8 grid h-[35rem] w-[21rem] grid-rows-1 rounded-xl border border-gray-800 bg-black p-0">
+          <div className="flex flex-col">
+            <div className="flex h-[7rem] w-full flex-col items-center justify-start bg-[#1A1A1A] p-4 text-base font-bold text-white">
+              <UserAvatar image={session?.user.image} />
+              <p className="pt-1 text-xs font-light text-muted-foreground antialiased">
+                Tramona Host
+              </p>
+              <p className="flex-1 px-2 text-sm font-medium antialiased">
+                Hostname
+              </p>
+              <PopoverClose>
+                <X className="fixed left-12 top-4 text-white" />
+              </PopoverClose>
+            </div>
+            {/* {!session ?? 
+              <AdminMessages conversationId={conversationId} />
+
+            } */}
+            {/* <AdminMessages conversationId={conversationId ?? ""} /> */}
+            <ListMessagesWithAdmin
+              conversationId={conversationId}
+              tempUserId={conversationIdAndTempUserId?.tempUserId ?? ""}
+            />
+          </div>
+          <div className="mx-4 my-2 flex h-max flex-row items-center gap-2 rounded-full border border-gray-500 p-1">
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(handleOnSend)}
+                className="flex w-full flex-row"
+              >
+                <FormField
+                  control={form.control}
+                  name="message"
+                  render={({ field }) => {
+                    return (
+                      <FormItem className="flex-1">
+                        <FormControl>
+                          <Input
+                            placeholder="Type a message..."
+                            className="flex w-full rounded-xl border-0 bg-transparent text-sm text-white"
+                            {...field}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    );
+                  }}
+                />
+                {/* <Smile className='text-gray-500 text-xs font-light antialiased w-5 h-5'/>
+                <Mic className='text-gray-500 text-xs font-light antialiased w-5 h-5' /> */}
+                <Button
+                  className="rounded-full bg-[#0D4273] px-2"
+                  size="icon"
+                  type="submit"
+                >
+                  <ArrowUp className="text-xs antialiased" />
+                </Button>
+              </form>
+            </Form>
+          </div>
+        </PopoverContent>
+      </Popover>
+    </div>
   );
 }
