@@ -179,7 +179,6 @@ export const scrapeDirectListings = async (options: {
       // then create offers if the offers don't exist
       let becomeVisibleAtNumber = Date.now(); // will increment by 5 minutes for each offer
       for (const listing of listings) {
-        const isAirbnbListing = listing.originalListingPlatform === "Airbnb";
         becomeVisibleAtNumber += 5 * 60 * 1000; // Increment by 5 minutes when processing each listing
         if (!listing.originalListingId) {
           continue;
@@ -255,9 +254,7 @@ export const scrapeDirectListings = async (options: {
               continue;
             }
             const realNightlyPrice =
-              isAirbnbListing && listing.nightlyPrice
-                ? listing.nightlyPrice
-                : listing.originalNightlyPrice;
+              listing.nightlyPrice ?? listing.originalNightlyPrice;
             const originalTotalPrice =
               realNightlyPrice *
               getNumNights(options.checkIn, options.checkOut);
@@ -326,9 +323,7 @@ export const scrapeDirectListings = async (options: {
               continue;
             }
             const realNightlyPrice =
-              isAirbnbListing && listing.nightlyPrice
-                ? listing.nightlyPrice
-                : listing.originalNightlyPrice;
+              listing.nightlyPrice ?? listing.originalNightlyPrice;
             const originalTotalPrice =
               realNightlyPrice *
               getNumNights(options.checkIn, options.checkOut);
