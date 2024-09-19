@@ -52,46 +52,32 @@ export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
 
   useEffect(() => {
     if (!session && typeof window !== "undefined") {
-      const storedToken = localStorage.getItem("tempToken") ?? "";
+      const storedToken =
+        localStorage.getItem("tempToken") ?? crypto.randomUUID();
       setTempToken(storedToken);
-      if (!storedToken) {
-        const uuid = crypto.randomUUID();
-        setTempToken(uuid);
-      }
-    }
-  }, [session]);
+      localStorage.setItem("tempToken", storedToken);
 
-  useEffect(() => {
-    if (tempToken && !session) {
-      const tempUserExists = localStorage.getItem("tempUserCreated");
-      if (!tempUserExists) {
+      if (!localStorage.getItem("tempUserCreated")) {
         void createTempUserForGuest({
           email: "temp_user@gmail.com",
           isBurner: true,
-          sessionToken: tempToken,
+          sessionToken: storedToken,
         }).then(() => {
           localStorage.setItem("tempUserCreated", "true");
         });
       }
     }
-  }, [tempToken, session, createTempUserForGuest]);
+  }, [createTempUserForGuest, session]);
 
   useEffect(() => {
-    // Ensure having a valid user ID before making the call (the session is loaded or guest has tempToken)
-    if (session?.user.id ?? tempToken) {
-      const fetchData = () => {
-        try {
-          if (conversationIdAndTempUserId) {
-            setConversationId(conversationIdAndTempUserId.conversationId);
-          }
-        } catch (error) {
-          errorToast();
-        }
-      };
-
-      fetchData();
+    if (conversationIdAndTempUserId?.conversationId) {
+      console.log(
+        "conversationId: ",
+        conversationIdAndTempUserId.conversationId,
+      );
+      setConversationId(conversationIdAndTempUserId.conversationId);
     }
-  }, [conversationIdAndTempUserId, session?.user.id, tempToken]);
+  }, [conversationIdAndTempUserId]);
 
   const addMessageToConversation = useMessage(
     (state) => state.addMessageToConversation,
@@ -152,11 +138,11 @@ export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
         removeMessageFromConversation(conversationId ?? "", newMessage.id);
         errorToast();
       }
-      await sendChatboxSlackMessage({
-        message: newMessage.message,
-        conversationId: conversationId ?? "",
-        senderId: newMessage.userId,
-      });
+      // await sendChatboxSlackMessage({
+      //   message: newMessage.message,
+      //   conversationId: conversationId ?? "",
+      //   senderId: newMessage.userId,
+      // });
     } else {
       const conversationId = await createOrRetrieveConversation();
       const newMessage: ChatMessageType = {
@@ -191,11 +177,11 @@ export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
         removeMessageFromConversation(conversationId ?? "", newMessage.id);
         errorToast();
       }
-      await sendChatboxSlackMessage({
-        message: newMessage.message,
-        conversationId: conversationId ?? "",
-        senderId: newMessage.userId,
-      });
+      // await sendChatboxSlackMessage({
+      //   message: newMessage.message,
+      //   conversationId: conversationId ?? "",
+      //   senderId: newMessage.userId,
+      // });
     }
   };
 
