@@ -56,10 +56,10 @@ const ALL_CANCELLATION_POLICIES = [
 export type CancellationPolicyWithInternals =
   (typeof ALL_CANCELLATION_POLICIES)[number];
 
-export const cancellationPolicyEnum = pgEnum(
-  "cancellation_policy",
-  ALL_CANCELLATION_POLICIES,
-);
+// export const cancellationPolicyEnum = pgEnum(
+//   "cancellation_policy",
+//   ALL_CANCELLATION_POLICIES,
+// );
 
 export const ALL_PROPERTY_ROOM_TYPES_WITHOUT_OTHER = [
   "Entire place",
@@ -288,7 +288,7 @@ export const properties = pgTable(
     originalNightlyPrice: integer("original_nightly_price"), // in cents
     areaDescription: text("area_description"),
     mapScreenshot: text("map_screenshot"),
-    cancellationPolicy: cancellationPolicyEnum("cancellation_policy"),
+    cancellationPolicy: text("cancellation_policy"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
