@@ -11,7 +11,6 @@ import { ListingSiteName } from "@/server/db/schema/common";
 import { getNumNights } from "@/utils/utils";
 import { algoliasearch, SearchResponse } from "algoliasearch";
 import { getCity, getCoordinates, getCountryISO } from "@/server/google-maps";
-import { format } from "path";
 
 const EvolvePropertySchema = z.object({
   id: z.string(),
@@ -163,7 +162,7 @@ const fetchSearchResults = async (
   checkOut: Date,
   numGuests?: number,
   scrapeUrl?: string,
-  requestNightlyPrice?: number,
+  _requestNightlyPrice?: number,
 ): Promise<EvolveSearchResult[]> => {
   const client = algoliasearch(
     "2U6AXFDIV3",
@@ -193,7 +192,7 @@ const fetchSearchResults = async (
     }
   }
 
-  const startDate = checkIn.toISOString().split("T")[0]?.replace(/-/g, "");
+  // const startDate = checkIn.toISOString().split("T")[0]?.replace(/-/g, "");
   const numNights = getNumNights(checkIn, checkOut);
 
   const availabilityFilters = [];
@@ -350,31 +349,53 @@ const fetchPropertyDetails = async (
       };
     };
 
-    const listingUnits = parsedData.props?.pageProps?.listing?.units || [];
-
+    interface ListingUnit {
+      amenities?: Amenity[];
+    }
+    
+    interface Amenity {
+      category: string;
+      name: string;
+    }
+    
+    interface ParsedData {
+      props?: {
+        pageProps?: {
+          listing?: {
+            units?: ListingUnit[];
+          };
+        };
+      };
+    }
+    
+    const listingUnits = (parsedData as ParsedData).props?.pageProps?.listing?.units ?? [];
+    
     const categories = [
       "Inside Amenities",
       "Outdoor Amenities",
       "Community Amenities",
       "Property Amenities",
       "Kitchen Equipment",
-    ];
-
-    const categorizedAmenities: { [key: string]: string[] } = {};
-    categories.forEach((category) => {
-      categorizedAmenities[category] = [];
-    });
+    ] as const;
+    
+    type CategoryType = typeof categories[number];
+    
+    const categorizedAmenities: Record<CategoryType, string[]> = categories.reduce((acc, category) => {
+      acc[category] = [];
+      return acc;
+    }, {} as Record<CategoryType, string[]>);
+    
     const uncategorizedAmenities: string[] = [];
-
-    listingUnits.forEach((unit: any) => {
-      (unit.amenities || []).forEach((amenity: any) => {
+    
+    listingUnits.forEach((unit: ListingUnit) => {
+      (unit.amenities ?? []).forEach((amenity: Amenity) => {
         const matchedCategory = categories.find(
-          (cat) => amenity.category.toLowerCase() === cat.toLowerCase(),
+          (cat) => amenity.category.toLowerCase() === cat.toLowerCase()
         );
-
+    
         if (matchedCategory) {
-          if (!categorizedAmenities[matchedCategory]?.includes(amenity.name)) {
-            categorizedAmenities[matchedCategory]?.push(amenity.name);
+          if (!categorizedAmenities[matchedCategory].includes(amenity.name)) {
+            categorizedAmenities[matchedCategory].push(amenity.name);
           }
         } else {
           if (!uncategorizedAmenities.includes(amenity.name)) {
@@ -383,7 +404,7 @@ const fetchPropertyDetails = async (
         }
       });
     });
-
+    
     const allAmenities = Object.values(categorizedAmenities).flat();
 
     const listingReviews = parsedData.props?.pageProps?.listingReviews ?? [];
@@ -396,7 +417,7 @@ const fetchPropertyDetails = async (
       .map((result) => result.data);
 
     const formattedReviews: Review[] = validatedReviews.map((review) => ({
-      name: review.reviewedBy ?? "Anonymous",
+      name: review.reviewedBy,
       profilePic: "",
       rating: parseInt(review.rating),
       review: review.reviewDetail
@@ -510,7 +531,7 @@ const fetchPropertyDetails = async (
       },
     });
 
-    const totalPrice = quoteResponse.data.price?.total;
+    const totalPrice = quoteResponse.data.price.total;
     const numNights = getNumNights(checkIn, checkOut);
     const originalNightlyPrice = Math.round((totalPrice / numNights) * 100); // convert to cents
 
@@ -615,7 +636,7 @@ const refetchPrice = async (
         Referer: scrapeUrl,
       },
     });
-    const totalPrice = quoteResponse.data.price?.total ?? 0;
+    const totalPrice = quoteResponse.data.price.total;
     const numNights = getNumNights(checkIn, checkOut);
     const originalNightlyPrice = Math.round((totalPrice / numNights) * 100); // convert to cents
     return originalNightlyPrice;
