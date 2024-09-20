@@ -3,9 +3,7 @@ import dayjs from "dayjs";
 
 // note that whitespace matters in template literals, make sure not to indent newlines, or else the spaces will be included in the string
 
-export function getCancellationPolicyDescription(
-  policy: CancellationPolicyWithInternals,
-) {
+export function getCancellationPolicyDescription(policy: string) {
   switch (policy) {
     case "Flexible":
       return `Full Refund: Guests can get a full refund if they cancel at least 24 hours before check-in.
@@ -69,10 +67,7 @@ After Check-In: If they cancel during their stay, the next 30 days are non-refun
   }
 }
 
-export function getFreeCancellationUntil(
-  date: Date,
-  policy: CancellationPolicyWithInternals,
-) {
+export function getFreeCancellationUntil(date: Date, policy: string) {
   const formattedDate = dayjs(date); // Convert Date object to dayjs object
 
   switch (policy) {
