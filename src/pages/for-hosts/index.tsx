@@ -13,7 +13,7 @@ import { type FeedRequestItem } from "@/components/activity-feed/ActivityFeed";
 import { getFeed } from "@/server/api/routers/feedRouter";
 import { type InferGetStaticPropsType } from "next";
 import HowItWorksHost from "@/components/landing-page/how-it-works-host";
-import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
+// import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import TramonaIcon from "@/components/_icons/TramonaIcon";
 import { useIsMd } from "@/utils/utils";
 import Footer from "@/components/_common/Layout/Footer";
@@ -297,7 +297,6 @@ export default function HostWelcome({
 }: InferGetStaticPropsType<typeof getStaticProps>) {
   const isMd = useIsMd();
   return (
-    // <DashboardLayout>
     <div>
       <div className="relative space-y-32 overflow-x-hidden pb-32">
         <Head>
@@ -320,6 +319,5 @@ export default function HostWelcome({
       </div>
       {isMd && <Footer />}
     </div>
-    // {/* </DashboardLayout> */}
   );
 }
