@@ -54,7 +54,6 @@ import ChatOfferButton from "./ChatOfferButton";
 import { Airbnb } from "@/utils/listing-sites/Airbnb";
 import { createUserNameAndPic } from "../activity-feed/admin/generationHelper";
 
-
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 export type PropertyPageData = OfferWithDetails["property"];
 //export type PropertyPageData = RouterOutputs["properties"]["getById"];
@@ -80,13 +79,12 @@ export default function PropertyPage({
       setIsOverflowing(aboutElement.scrollHeight > aboutElement.clientHeight);
     }
     async function createReviewBackupImages() {
-
-    const backup = await createUserNameAndPic(property.reviews.length).then((users) =>
-      users.map((user) => user.picture),
-    );
-    setReviewBackupImages(backup);
-  }
-  void createReviewBackupImages();
+      const backup = await createUserNameAndPic(property.reviews.length).then(
+        (users) => users.map((user) => user.picture),
+      );
+      setReviewBackupImages(backup);
+    }
+    void createReviewBackupImages();
   }, []);
 
   const hostName = property.host?.name ?? property.hostName ?? "Tramona";
@@ -365,7 +363,9 @@ export default function PropertyPage({
           <section>
             <div className="flex items-start justify-between border-t pb-2 pt-4">
               <div>
-                <h2 className="subheading">Guest Reviews</h2>
+                <h2 id="reviews" className="subheading">
+                  Guest Reviews
+                </h2>
                 <div className="flex items-center gap-2 pb-4">
                   <StarIcon className="inline size-[1em] fill-primaryGreen stroke-primaryGreen" />{" "}
                   {property.avgRating} · {plural(property.numRatings, "review")}
@@ -373,9 +373,16 @@ export default function PropertyPage({
               </div>
             </div>
             <div className="grid gap-4">
-              {property.reviews.map((review, id) => (
-                reviewBackupImages[id] && <ReviewCard key={review.id} review={review} backupReview={reviewBackupImages[id]}/>
-              ))}
+              {property.reviews.map(
+                (review, id) =>
+                  reviewBackupImages[id] && (
+                    <ReviewCard
+                      key={review.id}
+                      review={review}
+                      backupReview={reviewBackupImages[id]}
+                    />
+                  ),
+              )}
             </div>
             {originalListing && offer && (
               <Link
