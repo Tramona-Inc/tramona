@@ -58,14 +58,13 @@ export const airbnbScraper: DirectSiteScraper = async ({
 
   return await Promise.all(
     sortedListings.map(
-      async ({ originalListingId, nightlyPrice, originalNightlyPrice }) => {
+      async ({ originalListingId }) => {
         try {
-          const { property, reviews } =
+          const { property, reviews, nightlyPrice } =
             await scrapeAirbnbListing(originalListingId);
 
           const completeProperty: NewProperty = {
             ...property,
-            originalNightlyPrice,
             originalListingId,
             originalListingPlatform: "Airbnb",
             originalListingUrl: `https://www.airbnb.com/rooms/${originalListingId}`,
