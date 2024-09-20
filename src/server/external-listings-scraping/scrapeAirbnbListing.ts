@@ -1,8 +1,9 @@
 import { z } from "zod";
-import { parseHTML } from "@/utils/utils";
+import { parseCurrency, parseHTML } from "@/utils/utils";
 import {
   ALL_PROPERTY_ROOM_TYPES,
   ALL_PROPERTY_TYPES,
+  CancellationPolicy,
   NewProperty,
   NewReview,
 } from "@/server/db/schema";
@@ -210,6 +211,40 @@ export async function scrapeAirbnbListing(id: string) {
           .join("\n")
       : null;
 
+  // "localized_cancellation_policy_name"
+  const cancellationPolicyStr =
+    /"localized_cancellation_policy_name":"(.+?)"/.exec(listingData)?.[1];
+  if (!cancellationPolicyStr)
+    throw new Error(`Airbnb id ${id}: Failed to find cancellation policy`);
+
+  const cancellationPolicy: CancellationPolicy = z
+    .enum([
+      "Flexible",
+      "Moderate",
+      "Firm",
+      "Strict",
+      "Super Strict 30 Days",
+      "Super Strict 60 Days",
+      "Long Term",
+      "Non-refundable",
+    ])
+    .catch("Non-refundable")
+    .parse(cancellationPolicyStr);
+
+  const nightlyPriceStr = /"discountedPrice":"(.+?)"/.exec(listingData)?.[1];
+  if (!nightlyPriceStr)
+    throw new Error(`Airbnb id ${id}: Failed to find discounted price`);
+
+  const nightlyPrice = parseCurrency(nightlyPriceStr);
+
+  const originalNightlyPriceStr = /"originalPrice":"(.+?)"/.exec(
+    listingData,
+  )?.[1];
+  if (!originalNightlyPriceStr)
+    throw new Error(`Airbnb id ${id}: Failed to find original price`);
+
+  const originalNightlyPrice = parseCurrency(originalNightlyPriceStr);
+
   const city = await getCity({ lat: latitude, lng: longitude });
 
   const property: NewProperty = {
@@ -236,6 +271,8 @@ export async function scrapeAirbnbListing(id: string) {
     petsAllowed,
     smokingAllowed,
     otherHouseRules,
+    cancellationPolicy,
+    originalNightlyPrice,
     city,
     address: city, // cant get exact address from airbnb before booking so we go with the city
   };
@@ -274,5 +311,5 @@ export async function scrapeAirbnbListing(id: string) {
       profilePic: review.reviewer.userProfilePicture.baseUrl,
     }));
 
-  return { property, reviews };
+  return { property, reviews, nightlyPrice };
 }

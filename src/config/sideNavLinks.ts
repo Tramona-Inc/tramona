@@ -13,8 +13,6 @@ import {
   MessagesSquare,
   LinkIcon,
 } from "lucide-react";
-import { headerLinks } from "./headerNavLinks";
-import { Link1Icon } from "@radix-ui/react-icons";
 
 export const adminNavLinks = [
   { href: "/admin", name: "Dashboard", icon: LayoutDashboardIcon },
@@ -30,6 +28,11 @@ export const adminNavLinks = [
 ];
 
 export const hostMobileNavLinks = [
+  {
+    href: "/host",
+    name: "Dashboard",
+    icon: LayoutDashboardIcon,
+  },
   {
     href: "/host/requests",
     name: "Requests",
