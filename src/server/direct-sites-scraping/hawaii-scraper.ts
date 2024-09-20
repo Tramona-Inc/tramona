@@ -76,13 +76,13 @@ const PropertySchema = z.object({
   sm_nid$rc_core_term_general_amenities$name: z.array(z.string()),
   sm_nid$rc_core_term_type$name: z.array(z.string()),
   is_eid: z.number(),
-  sm_nid$rc_core_term_bed_and_bathroom$name: z.array(z.string()),
-  sm_nid$rc_core_term_community$name: z.array(z.string()),
-  sm_nid$rc_core_term_entertainment$name: z.array(z.string()),
-  sm_nid$rc_core_term_general$name: z.array(z.string()),
-  sm_nid$rc_core_term_kitchen$name: z.array(z.string()),
-  sm_nid$rc_core_term_outdoors$name: z.array(z.string()),
-  sm_nid$rc_core_term_views$name: z.array(z.string()),
+  sm_nid$rc_core_term_bed_and_bathroom$name: z.array(z.string()).optional(),
+  sm_nid$rc_core_term_community$name: z.array(z.string()).optional(),
+  sm_nid$rc_core_term_entertainment$name: z.array(z.string()).optional(),
+  sm_nid$rc_core_term_general$name: z.array(z.string()).optional(),
+  sm_nid$rc_core_term_kitchen$name: z.array(z.string()).optional(),
+  sm_nid$rc_core_term_outdoors$name: z.array(z.string()).optional(),
+  sm_nid$rc_core_term_views$name: z.array(z.string()).optional(),
 });
 
 type PropertyDocument = {

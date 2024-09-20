@@ -47,36 +47,30 @@ export const scrapeAirbnbListings = async ({
   );
 
   return await Promise.all(
-    sortedListings.map(
-      async ({ originalListingId, nightlyPrice, originalNightlyPrice }) => {
-        try {
-          const { property, reviews } =
-            await scrapeAirbnbListing(originalListingId);
+    sortedListings.map(async ({ originalListingId }) => {
+      try {
+        const { property, reviews, nightlyPrice } =
+          await scrapeAirbnbListing(originalListingId);
 
-          const completeProperty: NewProperty = {
-            ...property,
-            originalNightlyPrice,
-            originalListingId,
-            originalListingPlatform: "Airbnb",
-            originalListingUrl: `https://www.airbnb.com/rooms/${originalListingId}`,
-            airbnbUrl: `https://www.airbnb.com/rooms/${originalListingId}`,
-            bookOnAirbnb: true,
-          };
+        const completeProperty: NewProperty = {
+          ...property,
+          originalListingId,
+          originalListingPlatform: "Airbnb",
+          originalListingUrl: `https://www.airbnb.com/rooms/${originalListingId}`,
+          airbnbUrl: `https://www.airbnb.com/rooms/${originalListingId}`,
+          bookOnAirbnb: true,
+        };
 
-          return {
-            property: completeProperty,
-            reviews,
-            nightlyPrice,
-          };
-        } catch (e) {
-          console.error(
-            `Error scraping Airbnb listing ${originalListingId}:`,
-            e,
-          );
-          return undefined;
-        }
-      },
-    ),
+        return {
+          property: completeProperty,
+          reviews,
+          nightlyPrice,
+        };
+      } catch (e) {
+        console.error(`Error scraping Airbnb listing ${originalListingId}:`, e);
+        return undefined;
+      }
+    }),
   ).then((r) => r.filter(Boolean)); // filter out failed scrapes
 };
 

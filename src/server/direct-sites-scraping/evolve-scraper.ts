@@ -11,7 +11,6 @@ import { ListingSiteName } from "@/server/db/schema/common";
 import { getNumNights } from "@/utils/utils";
 import { algoliasearch, SearchResponse } from "algoliasearch";
 import { getCity, getCoordinates, getCountryISO } from "@/server/google-maps";
-import { format } from "path";
 
 const EvolvePropertySchema = z.object({
   id: z.string(),
@@ -29,6 +28,10 @@ const EvolvePropertySchema = z.object({
   areaDescription: z.string().optional(),
   price: z.number(),
   description: z.string(),
+  otherHouseRules: z.string().optional(),
+  checkInInfo: z.string().optional(),
+  checkInTime: z.string().optional(),
+  checkOutTime: z.string().optional(),
 });
 
 const evolvePropertyTypes: Record<string, PropertyType> = {
@@ -90,7 +93,7 @@ const QuoteResponseSchema = z.object({
       disclaimerDescription: z.string(),
       gracePeriod: z.boolean().optional(),
       gracePeriodHours: z.string().optional(),
-    })
+    }),
   ),
 });
 
@@ -159,7 +162,7 @@ const fetchSearchResults = async (
   checkOut: Date,
   numGuests?: number,
   scrapeUrl?: string,
-  requestNightlyPrice?: number
+  _requestNightlyPrice?: number,
 ): Promise<EvolveSearchResult[]> => {
   const client = algoliasearch(
     "2U6AXFDIV3",
@@ -189,7 +192,7 @@ const fetchSearchResults = async (
     }
   }
 
-  const startDate = checkIn.toISOString().split("T")[0]?.replace(/-/g, "");
+  // const startDate = checkIn.toISOString().split("T")[0]?.replace(/-/g, "");
   const numNights = getNumNights(checkIn, checkOut);
 
   const availabilityFilters = [];
@@ -338,34 +341,61 @@ const fetchPropertyDetails = async (
     }
 
     const parsedData = JSON.parse(jsonMatch[1]) as {
-      props?: { pageProps?: { listingReviews?: unknown[], listing?: {units?: unknown[]} } };
+      props?: {
+        pageProps?: {
+          listingReviews?: unknown[];
+          listing?: { units?: unknown[] };
+        };
+      };
     };
 
-    const listingUnits = parsedData.props?.pageProps?.listing?.units || [];
-
+    interface ListingUnit {
+      amenities?: Amenity[];
+    }
+    
+    interface Amenity {
+      category: string;
+      name: string;
+    }
+    
+    interface ParsedData {
+      props?: {
+        pageProps?: {
+          listing?: {
+            units?: ListingUnit[];
+          };
+        };
+      };
+    }
+    
+    const listingUnits = (parsedData as ParsedData).props?.pageProps?.listing?.units ?? [];
+    
     const categories = [
       "Inside Amenities",
       "Outdoor Amenities",
       "Community Amenities",
       "Property Amenities",
       "Kitchen Equipment",
-    ];
-
-    const categorizedAmenities: { [key: string]: string[] } = {};
-    categories.forEach(category => {
-      categorizedAmenities[category] = [];
-    });
+    ] as const;
+    
+    type CategoryType = typeof categories[number];
+    
+    const categorizedAmenities: Record<CategoryType, string[]> = categories.reduce((acc, category) => {
+      acc[category] = [];
+      return acc;
+    }, {} as Record<CategoryType, string[]>);
+    
     const uncategorizedAmenities: string[] = [];
-
-    listingUnits.forEach((unit: any) => {
-      (unit.amenities || []).forEach((amenity: any) => {
-        const matchedCategory = categories.find(cat => 
-          amenity.category.toLowerCase() === cat.toLowerCase()
+    
+    listingUnits.forEach((unit: ListingUnit) => {
+      (unit.amenities ?? []).forEach((amenity: Amenity) => {
+        const matchedCategory = categories.find(
+          (cat) => amenity.category.toLowerCase() === cat.toLowerCase()
         );
-        
+    
         if (matchedCategory) {
-          if (!categorizedAmenities[matchedCategory]?.includes(amenity.name)) {
-            categorizedAmenities[matchedCategory]?.push(amenity.name);
+          if (!categorizedAmenities[matchedCategory].includes(amenity.name)) {
+            categorizedAmenities[matchedCategory].push(amenity.name);
           }
         } else {
           if (!uncategorizedAmenities.includes(amenity.name)) {
@@ -374,7 +404,7 @@ const fetchPropertyDetails = async (
         }
       });
     });
-
+    
     const allAmenities = Object.values(categorizedAmenities).flat();
 
     const listingReviews = parsedData.props?.pageProps?.listingReviews ?? [];
@@ -387,7 +417,7 @@ const fetchPropertyDetails = async (
       .map((result) => result.data);
 
     const formattedReviews: Review[] = validatedReviews.map((review) => ({
-      name: review.reviewedBy ?? "Anonymous",
+      name: review.reviewedBy,
       profilePic: "",
       rating: parseInt(review.rating),
       review: review.reviewDetail
@@ -427,10 +457,49 @@ const fetchPropertyDetails = async (
     );
 
     const locationDetails: string[] = [];
-    const locationSection = $('h2.section-subtitle:contains("Location Details")').next('div');
-    locationSection.find('p').each((_, element) => {
+    const locationSection = $(
+      'h2.section-subtitle:contains("Location Details")',
+    ).next("div");
+    locationSection.find("p").each((_, element) => {
       locationDetails.push($(element).text().trim());
     });
+
+    const extractRules = (content: string) => {
+      const checkInInstructionsMatch =
+        content.match(/(CHECK-IN INSTRUCTIONS:[\s\S]*?)(?=HOUSE RULES:|$)/i) ??
+        [];
+      const houseRulesMatch =
+        content.match(/HOUSE RULES:([\s\S]*?)(?=INTERNET INSTRUCTIONS:|$)/i) ??
+        [];
+      const checkInMatch = content.match(/"Check-in Time"\s*:\s*"([^"]+)"/) ?? [];
+      const checkOutMatch = content.match(/"Check-out Time"\s*:\s*"([^"]+)"/) ?? [];
+
+      const otherHouseRules =
+        houseRulesMatch[1]
+          ?.split("\n")
+          .map((line) => line.trim())
+          .filter((line) => line)
+          .join("\n")
+          .replace(/\\n/g, "\n")
+          .trim() ?? "";
+
+      const checkInTime = checkInMatch[1] ?? undefined;
+      const checkOutTime = checkOutMatch[1] ?? undefined;
+
+      const checkInInfo =
+        checkInInstructionsMatch[1]
+          ?.split("\n")
+          .map((line) => line.trim())
+          .filter((line) => line)
+          .join("\n")
+          .replace(/\\n/g, "\n")
+          .trim() ?? undefined;
+
+      return { otherHouseRules, checkInTime, checkOutTime, checkInInfo };
+    };
+
+    const { otherHouseRules, checkInTime, checkOutTime, checkInInfo } =
+      extractRules(scriptContent);
 
     const quoteUrl = "https://evolve.com/api/quotes";
     const quoteData = {
@@ -462,12 +531,10 @@ const fetchPropertyDetails = async (
       },
     });
 
-    const totalPrice = quoteResponse.data.price?.total;
+    const totalPrice = quoteResponse.data.price.total;
     const numNights = getNumNights(checkIn, checkOut);
     const originalNightlyPrice = Math.round((totalPrice / numNights) * 100); // convert to cents
-    if (propertyId === "379255") {
-    console.log('originalNightlyPrice', originalNightlyPrice);
-    }
+
     // const formattedCancellationPolicy = formatCancellationPolicy(validatedQuoteResponse.cancelPolicy);
     // console.log(propertyId, formattedCancellationPolicy);
 
@@ -487,6 +554,10 @@ const fetchPropertyDetails = async (
       areaDescription: locationDetails.join("\n"),
       price: originalNightlyPrice,
       description: about,
+      otherHouseRules,
+      checkInTime,
+      checkOutTime,
+      checkInInfo,
     });
 
     return {
@@ -514,6 +585,10 @@ const fetchPropertyDetails = async (
       originalNightlyPrice: propertyDetails.price,
       cancellationPolicy: "Evolve",
       areaDescription: propertyDetails.areaDescription,
+      otherHouseRules: propertyDetails.otherHouseRules,
+      checkInInfo: propertyDetails.checkInInfo,
+      checkInTime: propertyDetails.checkInTime,
+      checkOutTime: propertyDetails.checkOutTime,
       reviews: formattedReviews,
       scrapeUrl: url,
     };
@@ -561,7 +636,7 @@ const refetchPrice = async (
         Referer: scrapeUrl,
       },
     });
-    const totalPrice = quoteResponse.data.price?.total ?? 0;
+    const totalPrice = quoteResponse.data.price.total;
     const numNights = getNumNights(checkIn, checkOut);
     const originalNightlyPrice = Math.round((totalPrice / numNights) * 100); // convert to cents
     return originalNightlyPrice;
@@ -575,7 +650,7 @@ export const evolveVacationRentalScraper: DirectSiteScraper = async ({
   checkIn,
   checkOut,
   location,
-  requestNightlyPrice
+  requestNightlyPrice,
 }) => {
   if (!location) {
     throw new Error("Location must be provided for Evolve scraper");
@@ -590,7 +665,8 @@ export const evolveVacationRentalScraper: DirectSiteScraper = async ({
   let formattedLocation = await getCity({ lat, lng });
 
   if (formattedLocation === "[Unknown location]") {
-    formattedLocation = await getCountryISO({ lat, lng }) ?? "[Unknown location]";
+    formattedLocation =
+      (await getCountryISO({ lat, lng })) ?? "[Unknown location]";
   }
   if (formattedLocation === "[Unknown location]") {
     throw new Error("Unable to determine location");
@@ -620,7 +696,7 @@ export const evolveVacationRentalScraper: DirectSiteScraper = async ({
     urlLocationParam += `/${formattedState}`;
   }
   if (city) {
-  urlLocationParam += `/${formattedCity}`;
+    urlLocationParam += `/${formattedCity}`;
   }
 
   const searchResults = await fetchSearchResults(
@@ -651,9 +727,10 @@ export const evolveVacationRentalScraper: DirectSiteScraper = async ({
       ),
     ),
   );
-  const availableProperties: ScrapedListing[] = properties.filter((property) => property !== null);
-  console.log('avail props', availableProperties);
-  console.log('evolve done');
+  const availableProperties: ScrapedListing[] = properties.filter(
+    (property) => property !== null,
+  );
+  console.log("evolve done");
   return availableProperties;
 };
 
