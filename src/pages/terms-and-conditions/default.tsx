@@ -1,26 +1,27 @@
-import { GetStaticProps } from 'next';
-import fs from 'fs';
-import path from 'path';
+// src/pages/terms-and-conditions/default.tsx
+import { useEffect, useState } from 'react';
 
-export const getStaticProps: GetStaticProps = async () => {
-  const baseFilePath = path.join(process.cwd(), 'public', 'html', 'tos.html');
-  let baseHtmlContent = fs.readFileSync(baseFilePath, 'utf8');
+export default function DefaultTermsPage() {
+  const [content, setContent] = useState('');
 
-  return {
-    props: {
-      content: baseHtmlContent,
-    }
-  };
-};
+  useEffect(() => {
+    const fetchContent = async () => {
+      try {
+        const response = await fetch('/api/terms-and-conditions/default');
+        const text = await response.text();
+        setContent(text);
+      } catch (error) {
+        console.error('Failed to fetch terms:', error);
+        setContent('<p>Failed to load terms. Please try again later.</p>');
+      }
+    };
 
-interface TermsPageProps {
-  content: string;
-}
+    void fetchContent();
+  }, []);
 
-export default function DefaultTermsPage({ content }: TermsPageProps) {
   return (
     <div className="container mx-auto py-8">
-      <div dangerouslySetInnerHTML={{ __html: content }} />
+      <iframe srcDoc={content} style={{ width: '100%', height: '100vh', border: 'none' }} />
     </div>
   );
 }

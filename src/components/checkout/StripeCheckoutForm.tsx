@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   useStripe,
   useElements,
@@ -133,7 +133,7 @@ export default function StripeCheckoutForm({
           type="submit"
           variant="greenPrimary"
           className="w-full"
-          disabled={!stripe}
+          disabled={!stripe || !termsAccepted}
         >
           {loading ? (
             <div className="flex h-full items-center justify-center space-x-2">

@@ -1,7 +1,7 @@
+// src/pages/terms-and-conditions/[encodedPlatform].tsx
 import { GetStaticPaths, GetStaticProps } from 'next';
+import { useEffect, useState } from 'react';
 import crypto from 'crypto';
-import fs from 'fs';
-import path from 'path';
 
 const platforms = [
   "CB Island Vacations",
@@ -30,44 +30,34 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   const encodedPlatform = params?.encodedPlatform as string;
-  const platform = platforms.find(p => encodeTermsLink(p) === encodedPlatform) ?? 'default';
-
-  const baseFilePath = path.join(process.cwd(), 'public', 'html', 'tos.html');
-  let baseHtmlContent = fs.readFileSync(baseFilePath, 'utf8');
-
-  const platformFilePath = path.join(process.cwd(), 'public', 'html', `${platform.toLowerCase().replace(/\s+/g, '-')}-tos.html`);
-  let platformHtmlContent = '';
-
-  try {
-    platformHtmlContent = fs.readFileSync(platformFilePath, 'utf8');
-  } catch (error) {
-    console.warn(`No specific terms file found for ${platform}. Using default content.`);
-    platformHtmlContent = '<p>No additional terms for this platform.</p>';
-  }
-
-  const combinedContent = baseHtmlContent.replace('</body>', `
-    <h2>Additional Terms for ${platform}</h2>
-    ${platformHtmlContent}
-    </body>
-  `);
-
-  return {
-    props: {
-      content: combinedContent,
-      platform
-    }
-  };
+  return { props: { encodedPlatform } };
 };
 
 interface TermsPageProps {
-  content: string;
-  platform: string;
+  encodedPlatform: string;
 }
 
-export default function TermsPage({ content, platform }: TermsPageProps) {
+export default function TermsPage({ encodedPlatform }: TermsPageProps) {
+  const [content, setContent] = useState('');
+
+  useEffect(() => {
+    const fetchContent = async () => {
+      try {
+        const response = await fetch(`/api/terms-and-conditions/${encodedPlatform}`);
+        const text = await response.text();
+        setContent(text);
+      } catch (error) {
+        console.error('Failed to fetch terms:', error);
+        setContent('<p>Failed to load terms. Please try again later.</p>');
+      }
+    };
+
+    void fetchContent();
+  }, [encodedPlatform]);
+
   return (
     <div className="container mx-auto py-8">
-      <div dangerouslySetInnerHTML={{ __html: content }} />
+      <iframe srcDoc={content} style={{ width: '100%', height: '100vh', border: 'none' }} />
     </div>
   );
 }
