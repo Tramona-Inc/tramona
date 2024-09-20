@@ -39,6 +39,7 @@ export default function HostConfirmRequestDialog({
   setPropertyPrices,
   propertyPrices,
   setStep,
+  selectedProperties,
 }: {
   open: boolean;
   setOpen: (open: boolean) => void;
@@ -49,6 +50,7 @@ export default function HostConfirmRequestDialog({
   >;
   propertyPrices: Record<number, string>;
   setStep: (step: number) => void;
+  selectedProperties: number[];
 }) {
   const { toast } = useToast();
   const [selectedPropertyToEdit, setSelectedPropertyToEdit] = useState<
@@ -77,7 +79,11 @@ export default function HostConfirmRequestDialog({
     });
   };
 
-  const selectedProperties = properties.filter((property) =>
+  const filteredProperties = properties.filter((property) =>
+    selectedProperties.includes(property.id),
+  );
+
+  const filteredSelectedProperties = filteredProperties.filter((property) =>
     propertyPrices.hasOwnProperty(property.id),
   );
 
@@ -85,7 +91,7 @@ export default function HostConfirmRequestDialog({
     setIsLoading(true);
     await Promise.all(
       // todo: make procedure accept array
-      selectedProperties.map(async (property) => {
+      filteredSelectedProperties.map(async (property) => {
         await createOffersMutation
           .mutateAsync({
             requestId: request.id,
@@ -131,7 +137,7 @@ export default function HostConfirmRequestDialog({
   };
 
   const numNights = getNumNights(request.checkIn, request.checkOut);
-  console.log("selectedProperties2", selectedProperties);
+  // console.log("filteredSelectedProperties2", filteredSelectedProperties);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -178,7 +184,7 @@ export default function HostConfirmRequestDialog({
         <h4 className="text-dark text-lg font-bold">Review your offers</h4>
 
         <div className="space-y-4">
-          {selectedProperties.map((property) => (
+          {filteredSelectedProperties.map((property) => (
             <div
               key={property.id}
               className="flex flex-col rounded-md border bg-white p-4"

@@ -19,11 +19,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // .then((data) => console.log(data));
       // res.status(200).json({ message: `Successfully, data: ` });
       const listings = await scrapeDirectListings({
-        checkIn: new Date("2024-10-19"),
-        checkOut: new Date("2024-10-22"),
-        requestNightlyPrice: 200,
+        checkIn: new Date("2024-10-15"),
+        checkOut: new Date("2024-10-24"),
+        requestNightlyPrice: 400,
         numGuests: 2,
-        location: "Los Angleles"
+        location: "Hawaii",
 
       });
       console.log('API route: Scraping process completed');

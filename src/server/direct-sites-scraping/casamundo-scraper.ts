@@ -294,24 +294,31 @@ function formatCancellationPolicy(
     return "Cancellation policy information is not available.";
   }
 
+  if (
+    cancellationDetails.dataFrames.length === 2 &&
+    cancellationDetails.dataFrames[0]?.text === "No refund" &&
+    cancellationDetails.dataFrames[0]?.percentage === 0
+  ) {
+    return "Cancellation Policy:\n\n- Non-refundable";
+  }
+
   let policyString = "Cancellation Policy:\n\n";
 
-  cancellationDetails.dataFrames.forEach((frame, index) => {
+  cancellationDetails.dataFrames.forEach((frame) => {
     if (frame.type !== "checkin") {
       policyString += `- ${frame.date}: `;
-      if (frame.percentage === 100) {
-        policyString += `**${frame.text}**`;
+      if (frame.percentage === 100 && !frame.text.includes("minus")) {
+        policyString += "Full refund";
+      } else if (frame.percentage === 100 && frame.text.includes("minus")) {
+        policyString += frame.text;
       } else if (frame.percentage > 0) {
-        policyString += `**${frame.percentage}% refund**`;
+        policyString += `${frame.percentage}% refund`;
       } else {
-        policyString += "**No refund**";
+        policyString += "No refund";
       }
       policyString += "\n";
     }
   });
-
-  policyString +=
-    "\n**Note:** Cancellation policy times are in the listing's time zone.";
 
   return policyString;
 }
@@ -361,11 +368,10 @@ const fetchPrice = async (
       );
       const data = response.data;
 
-      console.log("data", data.content.bookingDetails.cancellationDetails);
-
       const cancellationDetails = CancellationDetailsSchema.parse(
         data.content.bookingDetails.cancellationDetails,
       );
+
       const formattedCancellationPolicy =
         formatCancellationPolicy(cancellationDetails);
 
@@ -477,7 +483,12 @@ async function fetchPropertyDetails(
   checkOut: string,
   adults: number,
   location: string,
-  price: { price: number; currency: string; id: string, cancellationPolicy: string },
+  price: {
+    price: number;
+    currency: string;
+    id: string;
+    cancellationPolicy: string;
+  },
 ): Promise<ScrapedListing> {
   const url = `https://www.casamundo.com/rental/offer/${offerId}`;
 
@@ -509,7 +520,7 @@ async function fetchPropertyDetails(
 
   interface AmenityGroup {
     name: string;
-    list: Array<{ label: string }>;
+    list: Array<{ label: string; icon: string }>;
   }
 
   interface PropertyImage {
@@ -538,8 +549,15 @@ async function fetchPropertyDetails(
       lat: number;
     };
     persons?: number;
+    petFriendly?: boolean;
     bedrooms?: number;
     bathrooms?: number;
+    checkInCheckOutTime?: {
+      checkInTimeFrom: string;
+      checkOutTimeTo: string;
+      message: string | null;
+      reloadOnArrivalChange: boolean;
+    };
   }
 
   try {
@@ -551,10 +569,17 @@ async function fetchPropertyDetails(
     );
     const data: PropertyData = response.data;
 
-    const amenities: string[] =
-      data.infoGroups
-        .find((group) => group.name === "amenities")
-        ?.list.map((item) => item.label) ?? [];
+    let smokingAllowed = true;
+    const amenities: string[] = [];
+
+    data.infoGroups.forEach((group) => {
+      group.list.forEach((item) => {
+        amenities.push(item.label);
+        if (item.icon === "smoking_not_allowed") {
+          smokingAllowed = false;
+        }
+      });
+    });
 
     const imageUrls: string[] = data.images.map((img) => `https:${img.medium}`);
 
@@ -584,7 +609,6 @@ async function fetchPropertyDetails(
 
     const numNights = getNumNights(new Date(checkIn), new Date(checkOut));
 
-    console.log("Cancellation policy for", offerId, "is", price.cancellationPolicy);
     return {
       originalListingId: offerId,
       name: data.generalTitle ?? "",
@@ -603,8 +627,12 @@ async function fetchPropertyDetails(
       originalListingUrl: `https://www.casamundo.com/rental/${offerId}`,
       avgRating,
       numRatings,
+      checkInTime: data.checkInCheckOutTime?.checkInTimeFrom ?? "",
+      checkOutTime: data.checkInCheckOutTime?.checkOutTimeTo ?? "",
       originalListingPlatform: "Casamundo" as ListingSiteName,
       originalNightlyPrice: Math.round((price.price / numNights) * 100),
+      petsAllowed: data.petFriendly ?? false,
+      smokingAllowed,
       // cancellationPolicy: price.cancellationPolicy, Uncomment this when enum type is changed to allow any string
       cancellationPolicy: "Casamundo",
       reviews: reviews,
@@ -720,8 +748,8 @@ export const casamundoScraper: DirectSiteScraper = async ({
     const validScrapedListings: ScrapedListing[] = listings.filter(
       (listing) => listing !== null,
     );
+    // console.log('validScrapedListings', validScrapedListings);
 
-    // console.log("scrapedListings!!", scrapedListings);
     console.log("done with casamundo scraper");
     return validScrapedListings;
   } catch (error) {
@@ -774,5 +802,3 @@ export const casamundoSubScraper: SubsequentScraper = async ({
     };
   }
 };
-
-// cancellation policy, what are we doing with requestNightlyPrice and requestId

@@ -127,7 +127,7 @@ importers:
         version: 8.1.3
       '@slack/web-api':
         specifier: ^7.0.2
-        version: 7.4.0
+        version: 7.5.0
       '@stripe/connect-js':
         specifier: 3.3.12
         version: 3.3.12
@@ -196,10 +196,10 @@ importers:
         version: 1.4.1(@aws-sdk/credential-provider-web-identity@3.649.0(@aws-sdk/client-sts@3.651.1))
       '@vercel/og':
         specifier: ^0.6.2
-        version: 0.6.2
+        version: 0.6.3
       '@vis.gl/react-google-maps':
         specifier: ^1.0.0
-        version: 1.1.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 1.2.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       algoliasearch:
         specifier: ^5.2.5
         version: 5.4.3
@@ -367,7 +367,7 @@ importers:
         version: 5.3.0(react@18.3.1)
       react-phone-number-input:
         specifier: ^3.3.9
-        version: 3.4.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 3.4.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-share:
         specifier: ^5.1.0
         version: 5.1.0(react@18.3.1)
@@ -424,7 +424,7 @@ importers:
         version: 9.0.1
       vaul:
         specifier: ^0.9.0
-        version: 0.9.3(@types/react-dom@18.3.0)(@types/react@18.3.7)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 0.9.4(@types/react-dom@18.3.0)(@types/react@18.3.7)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       zod:
         specifier: ^3.22.4
         version: 3.23.8
@@ -2547,12 +2547,12 @@ packages:
     resolution: {integrity: sha512-Wz7QYfPAlG/DR+DfABddUZeNgoeY7d1J39OCR2jR+v7VBsB8ezulDK5szTnDDPDwLH5IWhLvXIHlCFZV7MSKgA==}
     engines: {node: '>= 18', npm: '>= 8.6.0'}
 
-  '@slack/types@2.13.1':
-    resolution: {integrity: sha512-YVtJCVtDcjOPKsvOedIThb7YmKNCcSoZN0mUSQqD2fc2ZyI59gOLCF4rYGfw/0C0agzFxAmb7hV5tbMGrgK0Tg==}
+  '@slack/types@2.14.0':
+    resolution: {integrity: sha512-n0EGm7ENQRxlXbgKSrQZL69grzg1gHLAVd+GlRVQJ1NSORo0FrApR7wql/gaKdu2n4TO83Sq/AmeUOqD60aXUA==}
     engines: {node: '>= 12.13.0', npm: '>= 6.12.0'}
 
-  '@slack/web-api@7.4.0':
-    resolution: {integrity: sha512-U+0pui9VcddRt3yTSkLAArVB6G8EyOb0g+/vL1E6u8k46IYc1H4UKDuULF734A2ynVyxYKHIXK8OHilX6YhwjQ==}
+  '@slack/web-api@7.5.0':
+    resolution: {integrity: sha512-e1aRwbdnTVz0uQownF8UoyrQFdSs3uXtkPYWCpcb3fW3KuTEGvmEtVzAvj9gqNSlgpWj0o6is7AdptQCELd/rQ==}
     engines: {node: '>= 18', npm: '>= 8.6.0'}
 
   '@smithy/abort-controller@3.1.4':
@@ -3241,12 +3241,12 @@ packages:
       '@aws-sdk/credential-provider-web-identity':
         optional: true
 
-  '@vercel/og@0.6.2':
-    resolution: {integrity: sha512-OTe0KE37F5Y2eTys6eMnfopC+P4qr2ooXUTFyFPTplYSPwowmFk/HLD1FXtbKLjqsIH0SgekcJWad+C5uX4nkg==}
+  '@vercel/og@0.6.3':
+    resolution: {integrity: sha512-aoCrC9FqkeA+WEEb9CwSmjD0rGlFeNqbUsI41JPmKWR9Hx6FFn86tvH96O5HZMF6VAXTGHxa3nPH3BokROpdgA==}
     engines: {node: '>=16'}
 
-  '@vis.gl/react-google-maps@1.1.3':
-    resolution: {integrity: sha512-jsjj5OpL5AyQDSfzBHU+r5UGAuZxv/7mw9gM2dP4EhqRXkXBpwDKKlml47/4l0m1WL4fSEXLzv85Mrh1VhPiFA==}
+  '@vis.gl/react-google-maps@1.2.0':
+    resolution: {integrity: sha512-gKVE1Jb+FT+F8RGzFrsgB4GWbRq/vLJm2U5nMHiLJmRyaO6HcSfZJue8mUEDJCShsXE0ASphcoJxTQNrBhbFJg==}
     peerDependencies:
       react: '>=16.8.0'
       react-dom: '>=16.8.0'
@@ -6209,8 +6209,8 @@ packages:
   react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
 
-  react-phone-number-input@3.4.6:
-    resolution: {integrity: sha512-OivU8++WnB7yzMFEvPTf8zc06fYyoCuA3jtcW1p9pLWzi6BH7FRjwVHz0OyFDhw2ED8o/9NP4pilcdOwgEzTXQ==}
+  react-phone-number-input@3.4.7:
+    resolution: {integrity: sha512-IscLYIE6sbKiNOzNkOYsoVZcJYXOcOndd9aUYZ+mrJI6qeUozNJ/ingk6aG6L6l7GuEM0n5q0aYXJHsvonhZWQ==}
     peerDependencies:
       react: '>=16.8'
       react-dom: '>=16.8'
@@ -6999,8 +6999,8 @@ packages:
     resolution: {integrity: sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==}
     engines: {node: '>= 0.8'}
 
-  vaul@0.9.3:
-    resolution: {integrity: sha512-VNWuzw37fw6DWptl9PMUc9PH5NJpGqpetcxDMRiH/GzH2inJAEMwo/uZqaONlGseeOG8xDtrrp3nYoiZhyabpw==}
+  vaul@0.9.4:
+    resolution: {integrity: sha512-pcyIy1nEk6798ReNQpbVH/T/dYnoJ3bwyq7jmSp134s+bSvpWoSWQthm3/jfsQRvHNYIEK4ZKbkHUJ3YfLfw1w==}
     peerDependencies:
       react: ^16.8 || ^17.0 || ^18.0
       react-dom: ^16.8 || ^17.0 || ^18.0
@@ -9730,12 +9730,12 @@ snapshots:
     dependencies:
       '@types/node': 20.16.5
 
-  '@slack/types@2.13.1': {}
+  '@slack/types@2.14.0': {}
 
-  '@slack/web-api@7.4.0':
+  '@slack/web-api@7.5.0':
     dependencies:
       '@slack/logger': 4.0.0
-      '@slack/types': 2.13.1
+      '@slack/types': 2.14.0
       '@types/node': 20.16.5
       '@types/retry': 0.12.0
       axios: 1.7.7
@@ -10586,13 +10586,13 @@ snapshots:
     optionalDependencies:
       '@aws-sdk/credential-provider-web-identity': 3.649.0(@aws-sdk/client-sts@3.651.1)
 
-  '@vercel/og@0.6.2':
+  '@vercel/og@0.6.3':
     dependencies:
       '@resvg/resvg-wasm': 2.4.0
       satori: 0.10.9
       yoga-wasm-web: 0.3.3
 
-  '@vis.gl/react-google-maps@1.1.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@vis.gl/react-google-maps@1.2.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@types/google.maps': 3.58.0
       fast-deep-equal: 3.1.3
@@ -13877,7 +13877,7 @@ snapshots:
 
   react-is@16.13.1: {}
 
-  react-phone-number-input@3.4.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  react-phone-number-input@3.4.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       classnames: 2.5.1
       country-flag-icons: 1.5.13
@@ -14903,7 +14903,7 @@ snapshots:
 
   vary@1.1.2: {}
 
-  vaul@0.9.3(@types/react-dom@18.3.0)(@types/react@18.3.7)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  vaul@0.9.4(@types/react-dom@18.3.0)(@types/react@18.3.7)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       '@radix-ui/react-dialog': 1.1.1(@types/react-dom@18.3.0)(@types/react@18.3.7)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react: 18.3.1

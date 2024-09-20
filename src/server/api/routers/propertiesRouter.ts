@@ -13,8 +13,6 @@ import {
   propertySelectSchema,
   propertyUpdateSchema,
   type Request,
-  requests,
-  requestsToProperties,
   type User,
   users,
 } from "@/server/db/schema";
@@ -517,7 +515,7 @@ export const propertiesRouter = createTRPCRouter({
         // },
       });
 
-      const hostRequests = await getRequestsForProperties(hostProperties);
+      const hostRequests = await getRequestsForProperties(hostProperties, {user: ctx.user});
 
       const groupedByCity: HostRequestsPageData[] = [];
 
@@ -558,143 +556,26 @@ export const propertiesRouter = createTRPCRouter({
 
         for (const property of properties) {
           const cityGroup = findOrCreateCityGroup(property.city);
-          cityGroup.requests.push({
-            request,
-            properties,
-          });
+
+          // Find if the request already exists in the city's group to avoid duplicates
+          const existingRequest = cityGroup.requests.find(
+            (item) => item.request.id === request.id
+          );
+
+          if (existingRequest) {
+            // If the request already exists, just add the new property to it
+            existingRequest.properties.push(property);
+          } else {
+            // If the request doesn't exist, create a new entry with the property
+            cityGroup.requests.push({
+              request,
+              properties: [property], // Initialize with the current property
+            });
+          }
         }
       }
 
-      for (const cityGroup of groupedByCity) {
-        for (const requestGroup of cityGroup.requests) {
-          console.log(requestGroup.properties);
-        }
-      }
       return groupedByCity;
-
-      // const rawData = await ctx.db.execute(sql`
-      //     WITH host_properties AS (
-      //       SELECT
-      //         p.*,
-      //         rp.request_id
-      //       FROM ${properties} p
-      //       JOIN ${requestsToProperties} rp ON p.id = rp.property_id
-      //       WHERE p.host_id = ${ctx.user.id}
-      //       AND p.property_status = 'Listed'
-      //     ),
-      //     city_requests AS (
-      //       SELECT
-      //         hp.request_id,
-      //         hp.city
-      //       FROM host_properties hp
-      //       JOIN ${requests} r ON hp.request_id = r.id
-      //       WHERE r.check_in >= CURRENT_DATE
-      //       GROUP BY hp.city, hp.request_id
-      //     )
-      //     SELECT
-      //       cr.city AS property_city,
-      //       cr.request_id,
-      //       p.id AS property_id,
-      //       p.*,
-      //       r.*,
-      //       u.name AS user_name,
-      //       u.image
-      //     FROM city_requests cr
-      //     JOIN ${requests} r ON cr.request_id = r.id
-      //     JOIN ${properties} p ON p.city = cr.city AND p.host_id = ${ctx.user.id}
-      //     JOIN ${groups} g ON r.made_by_group_id = g.id
-      //     JOIN ${users} u ON g.owner_id = u.id
-      //     WHERE p.property_status = 'Listed'
-      //     ORDER BY r.check_in, cr.city, r.id, p.id
-      //   `);
-
-      // const organizedData: HostRequestsPageData[] = [];
-      // const cityMap = new Map<string, HostRequestsPageData>();
-
-      // for (const row of rawData) {
-      //   const property = {
-      //     id: row.property_id,
-      //     hostId: row.host_id,
-      //     hostTeamId: row.host_team_id,
-      //     propertyType: row.property_type,
-      //     address: row.address,
-      //     city: row.property_city,
-      //     roomType: row.room_type,
-      //     maxNumGuests: row.max_num_guests,
-      //     numBeds: row.num_beds,
-      //     numBedrooms: row.num_bedrooms,
-      //     numBathrooms: row.num_bathrooms,
-      //     // latitude: row.latitude,
-      //     // longitude: row.longitude,
-      //     checkInTime: row.check_in_time,
-      //     checkOutTime: row.check_out_time,
-      //     amenities: row.amenities,
-      //     imageUrls: row.image_url,
-      //     name: row.name,
-      //     about: row.about,
-      //     avgRating: row.avg_rating,
-      //     numRatings: row.num_ratings,
-      //     cancellationPolicy: row.cancellation_policy,
-      //     createdAt: row.created_at,
-      //     isPrivate: row.is_private,
-      //     hostProfilePic: row.host_profile_pic,
-      //     hostawayListingId: row.hostaway_listing_id,
-      //     hostName: row.host_name,
-      //     priceRestriction: row.price_restriction,
-      //     // Add other property fields here
-      //   } as unknown as Property;
-
-      //   const request = {
-      //     id: row.request_id,
-      //     madeByGroupId: row.made_by_group_id,
-      //     requestGroupId: row.request_group_id,
-      //     maxTotalPrice: row.max_total_price,
-      //     location: row.location,
-      //     checkIn: row.check_in,
-      //     checkOut: row.check_out,
-      //     numGuests: row.num_guests,
-      //     minNumBeds: row.min_num_beds,
-      //     minNumBedrooms: row.min_num_bedrooms,
-      //     minNumBathrooms: row.min_num_bathrooms,
-      //     propertyType: row.property_type,
-      //     note: row.note,
-      //     airbnbLink: row.airbnb_link,
-      //     createdAt: row.created_at,
-      //     resolvedAt: row.resolved_at,
-      //     // lat: row.lat,
-      //     // lng: row.lng,
-      //     latLngPoint: row.lat_lng_point,
-      //     radius: row.radius,
-      //     amenities: row.amenities,
-      //     linkInputPropertyId: row.link_input_property_id,
-      //     traveler: { name: row.user_name, image: row.image },
-      //     numOfOffers: row.num_of_offers,
-      //   } as HostRequestsPageData["requests"][number]["request"];
-
-      //   const city = row.property_city as string;
-
-      //   if (!cityMap.has(city)) {
-      //     const newCityData: HostRequestsPageData = { city, requests: [] };
-      //     cityMap.set(city, newCityData);
-      //     organizedData.push(newCityData);
-      //   }
-
-      //   const cityData = cityMap.get(city)!;
-      //   let requestData = cityData.requests.find(
-      //     (r) => r.request.id === request.id,
-      //   );
-
-      //   if (!requestData) {
-      //     requestData = { request, properties: [] };
-      //     cityData.requests.push(requestData);
-      //   }
-
-      //   // Check if the property is not already in the properties array
-      //   if (!requestData.properties.some((p) => p.id === property.id)) {
-      //     requestData.properties.push(property);
-      //   }
-      // }
-      // return organizedData;
     },
   ),
   // hostInsertOnboardingProperty: roleRestrictedProcedure(["host"])
