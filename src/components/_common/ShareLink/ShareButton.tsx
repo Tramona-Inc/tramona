@@ -21,6 +21,7 @@ export default function ShareButton({
           id={id}
           isRequest={isRequest}
           propertyName={propertyName}
+          showShare={true}
         />
       </div>
     </>
