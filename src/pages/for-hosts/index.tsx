@@ -15,7 +15,6 @@ import { type InferGetStaticPropsType } from "next";
 import HowItWorksHost from "@/components/landing-page/how-it-works-host";
 // import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import TramonaIcon from "@/components/_icons/TramonaIcon";
-import { useIsMd } from "@/utils/utils";
 import Footer from "@/components/_common/Layout/Footer";
 
 const DamageProtection = () => {
@@ -295,7 +294,6 @@ export async function getStaticProps() {
 export default function HostWelcome({
   requestFeed,
 }: InferGetStaticPropsType<typeof getStaticProps>) {
-  const isMd = useIsMd();
   return (
     <div>
       <div className="relative space-y-32 overflow-x-hidden pb-32">
@@ -317,7 +315,9 @@ export default function HostWelcome({
         <FAQ />
         <WhatAreYouWaitingFor />
       </div>
-      {isMd && <Footer />}
+      <div className="hidden md:block">
+        <Footer />
+      </div>
     </div>
   );
 }
