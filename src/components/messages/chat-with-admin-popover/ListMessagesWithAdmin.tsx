@@ -6,11 +6,11 @@ import supabase from "@/utils/supabase-client";
 import { cn } from "@/utils/utils";
 
 export default function ListMessagesWithAdmin({
-  isPopover,
+  isMobile,
   conversationId,
   tempUserId,
 }: {
-  isPopover?: boolean;
+  isMobile?: boolean;
   conversationId: string;
   tempUserId: string;
 }) {
@@ -75,34 +75,12 @@ export default function ListMessagesWithAdmin({
   };
 
   return (
-    <>
-      <style>
-        {`
-        @media (min-width: 768px) {
-          /* Style the scrollbar itself (the part that moves) */
-          ::-webkit-scrollbar {
-            width: 12px; /* width of the entire scrollbar */
-          }
-
-          /* Style the track (part the scrollbar sits in) */
-          ::-webkit-scrollbar-track {
-            background: black; /* color of the track */
-          }
-
-          /* Style the handle (part of the scrollbar that indicates the scroll position) */
-          ::-webkit-scrollbar-thumb {
-            background-color: white; /* color of the thumb */
-            border-radius: 6px; /* roundness of the edges */
-            border: 3px solid black; /* Creates padding around the thumb */
-          }
-        }
-        `}
-      </style>
+    <div>
       {messages.length > 0 ? (
         <div
           className={cn(
             "flex w-full flex-1 flex-col-reverse gap-1 overflow-auto p-3",
-            isPopover ? "h-[20rem]" : "h-[30rem]",
+            isMobile ? "h-[31rem]" : "h-96",
           )}
         >
           {messages.map((message) =>
@@ -129,6 +107,6 @@ export default function ListMessagesWithAdmin({
           </p>
         </div>
       )}
-    </>
+    </div>
   );
 }

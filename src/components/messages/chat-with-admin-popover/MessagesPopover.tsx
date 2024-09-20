@@ -23,7 +23,6 @@ import { errorToast } from "@/utils/toasts";
 import { useSession } from "next-auth/react";
 import ListMessagesWithAdmin from "./ListMessagesWithAdmin";
 import { useEffect, useState } from "react";
-import { cn } from "@/utils/utils";
 
 export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
   const { data: session } = useSession();
@@ -203,70 +202,8 @@ export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
     resolver: zodResolver(formSchema),
   });
 
-  function ChatboxContent({ isPopover }: { isPopover?: boolean }) {
-    return (
-      <div className={cn("bg-black", !isPopover && "pb-4")}>
-        <div className={cn(!isPopover && "h-[38rem]")}>
-          <div className="flex w-full flex-col items-center justify-start bg-[#1A1A1A] p-4 text-base font-bold text-white">
-            <UserAvatar image={concierge.image} />
-            <p className="pt-1 text-xs font-light text-muted antialiased">
-              Tramona Concierge
-            </p>
-            <p className="flex-1 px-2 text-sm font-medium antialiased">
-              {concierge.name}
-            </p>
-          </div>
-          {isPopover && (
-            <PopoverClose>
-              <X className="fixed left-5 top-4 text-white" />
-            </PopoverClose>
-          )}
-          <ListMessagesWithAdmin
-            isPopover={isPopover}
-            conversationId={conversationId}
-            tempUserId={conversationIdAndTempUserId?.tempUserId ?? ""}
-          />
-        </div>
-        <div className="mx-4 my-2 flex h-max flex-row items-center gap-2 rounded-full border border-gray-500 p-1">
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(handleOnSend)}
-              className="flex w-full flex-row"
-            >
-              <FormField
-                control={form.control}
-                name="message"
-                render={({ field }) => {
-                  return (
-                    <FormItem className="flex-1">
-                      <FormControl>
-                        <Input
-                          placeholder="Type your question here..."
-                          className="flex w-full rounded-xl border-0 bg-transparent text-sm text-white"
-                          {...field}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  );
-                }}
-              />
-
-              <Button
-                className="rounded-full bg-[#0D4273] px-2"
-                size="icon"
-                type="submit"
-              >
-                <ArrowUp className="text-xs antialiased" />
-              </Button>
-            </form>
-          </Form>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <>
+    <div>
       {!isMobile ? (
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
@@ -280,14 +217,111 @@ export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
           </PopoverTrigger>
           <PopoverContent
             side="top"
-            className="mr-5 grid h-[35rem] w-[21rem] grid-rows-1 rounded-xl border border-gray-800 bg-black p-0"
+            className="mr-7 rounded-xl border bg-black p-0"
           >
-            <ChatboxContent isPopover={true} />
+            <div className="relative bg-zinc-800 py-4 text-center text-xs text-white">
+              <div className="absolute left-4">
+                <PopoverClose>
+                  <X />
+                </PopoverClose>
+              </div>
+
+              <div className="flex items-center justify-center">
+                <UserAvatar image={concierge.image} />
+              </div>
+              <p>Tramona Concierge</p>
+              <p>{concierge.name}</p>
+            </div>
+            <div>
+              <ListMessagesWithAdmin
+                conversationId={conversationId}
+                tempUserId={conversationIdAndTempUserId?.tempUserId ?? ""}
+              />
+            </div>
+            <div className="p-2">
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(handleOnSend)}>
+                  <div className="flex justify-between rounded-full border p-2">
+                    <FormField
+                      control={form.control}
+                      name="message"
+                      render={({ field }) => {
+                        return (
+                          <FormItem>
+                            <FormControl>
+                              <Input
+                                placeholder="Type your question here..."
+                                className="border-none bg-transparent text-white"
+                                {...field}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        );
+                      }}
+                    />
+                    <Button
+                      size="icon"
+                      type="submit"
+                      className="rounded-full bg-blue-800"
+                    >
+                      <ArrowUp />
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </div>
           </PopoverContent>
         </Popover>
       ) : (
-        <ChatboxContent />
+        <div className="bg-black">
+          <div className="relative bg-zinc-800 py-4 text-center text-xs text-white">
+            <div className="flex items-center justify-center">
+              <UserAvatar image={concierge.image} />
+            </div>
+            <p>Tramona Concierge</p>
+            <p>{concierge.name}</p>
+          </div>
+          <div>
+            <ListMessagesWithAdmin
+              isMobile={isMobile}
+              conversationId={conversationId}
+              tempUserId={conversationIdAndTempUserId?.tempUserId ?? ""}
+            />
+          </div>
+          <div className="p-2">
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(handleOnSend)}>
+                <div className="flex justify-between rounded-full border p-2">
+                  <FormField
+                    control={form.control}
+                    name="message"
+                    render={({ field }) => {
+                      return (
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              placeholder="Type your question here..."
+                              className="border-none bg-transparent text-white"
+                              {...field}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      );
+                    }}
+                  />
+                  <Button
+                    size="icon"
+                    type="submit"
+                    className="rounded-full bg-blue-800"
+                  >
+                    <ArrowUp />
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </div>
+        </div>
       )}
-    </>
+    </div>
   );
 }
