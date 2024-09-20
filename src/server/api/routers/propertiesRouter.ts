@@ -46,7 +46,9 @@ import { getCoordinates } from "@/server/google-maps";
 export type HostRequestsPageData = {
   city: string;
   requests: {
-    request: Request & { traveler: Pick<User, "name" | "image"> };
+    request: Request & {
+      traveler: Pick<User, "firstName" | "lastName" | "name" | "image">;
+    };
     properties: Property[];
   }[];
 };
@@ -515,7 +517,9 @@ export const propertiesRouter = createTRPCRouter({
         // },
       });
 
-      const hostRequests = await getRequestsForProperties(hostProperties, {user: ctx.user});
+      const hostRequests = await getRequestsForProperties(hostProperties, {
+        user: ctx.user,
+      });
 
       const groupedByCity: HostRequestsPageData[] = [];
 
@@ -531,7 +535,9 @@ export const propertiesRouter = createTRPCRouter({
       const requestsMap = new Map<
         number,
         {
-          request: Request & { traveler: Pick<User, "name" | "image"> };
+          request: Request & {
+            traveler: Pick<User, "firstName" | "lastName" | "name" | "image">;
+          };
           properties: Property[];
         }
       >();
@@ -559,7 +565,7 @@ export const propertiesRouter = createTRPCRouter({
 
           // Find if the request already exists in the city's group to avoid duplicates
           const existingRequest = cityGroup.requests.find(
-            (item) => item.request.id === request.id
+            (item) => item.request.id === request.id,
           );
 
           if (existingRequest) {
