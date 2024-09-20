@@ -29,7 +29,7 @@ import {
 import { DIRECTLISTINGMARKUP } from "@/utils/constants";
 import { createLatLngGISPoint, sendText } from "@/server/server-utils";
 import { cleanbnbScraper, cleanbnbSubScraper } from "./cleanbnb-scrape";
-import { columns } from "@/components/admin/view-recent-host/table/columns";
+import { airbnbScraper } from "../external-listings-scraping/airbnbScraper";
 
 export type DirectSiteScraper = (options: {
   checkIn: Date;
@@ -47,6 +47,7 @@ export type ScrapedListing = Omit<NewProperty, "latLngPoint"> & {
   reviews: NewReview[];
   scrapeUrl: string;
   latLngPoint?: { lat: number; lng: number }; // make latLngPoint optional
+  nightlyPrice?: number; // airbnb scraper has nightlyPrice as real price and originalNightlyPrice as the price before discount
 };
 
 export type SubsequentScraper = (options: {
@@ -75,6 +76,7 @@ export const directSiteScrapers: NamedDirectSiteScraper[] = [
   { name: "cbIslandVacationsScraper", scraper: cbIslandVacationsScraper },
   { name: "redawningScraper", scraper: redawningScraper },
   { name: "casamundoScraper", scraper: casamundoScraper },
+  { name: "airbnbScraper", scraper: airbnbScraper },
 ];
 
 // Helper function to filter out fields not in NewProperty
@@ -106,7 +108,7 @@ export const scrapeDirectListings = async (options: {
     directSiteScrapers.map((s) => s.scraper(options)),
   );
 
-  const userPhoneFromRequest = await db.query.requests.
+  const userFromRequest = await db.query.requests.
     findFirst({
       where: eq(requests.id, options.requestId!),
       with: {
@@ -117,21 +119,21 @@ export const scrapeDirectListings = async (options: {
                 phoneNumber: true,
               },
             },
-            }
           }
-
         }
-      });
+
+      }
+    }).then((res) => res?.madeByGroup.owner);
 
 
 
   const flatListings = allListings.flat();
   console.log("DONE SCRAPING, flatListings.length: ", flatListings.length);
-  if (flatListings.length === 0 && userPhoneFromRequest?.madeByGroup.owner.phoneNumber) {
+  if (flatListings.length === 0 && userFromRequest) {
     await sendText({
-      to: userPhoneFromRequest?.madeByGroup.owner.phoneNumber,
-      content: `Tramona: We’re not live in ${location} just yet, but we’re working on it! We’ll send you an email as soon as we launch there. In the meantime, check out the best deals available on Airbnb for ${location}.
-Are you a host in ${location}? Sign up here to help us launch in this city as soon as possible!”`,
+      to: userFromRequest.phoneNumber!,
+      content: `Tramona: We’re not live in ${options.location} just yet, but we’re working on it! We’ll send you an email as soon as we launch there. In the meantime, check out the best deals available on Airbnb for ${options.location}.
+Are you a host in ${options.location}? Sign up here to help us launch in this city as soon as possible!”`,
     });
   }
   for (const listing of flatListings) {
@@ -277,8 +279,10 @@ Are you a host in ${location}? Sign up here to help us launch in this city as so
               );
               continue;
             }
+            const realNightlyPrice =
+              listing.nightlyPrice ?? listing.originalNightlyPrice;
             const originalTotalPrice =
-              listing.originalNightlyPrice *
+              realNightlyPrice *
               getNumNights(options.checkIn, options.checkOut);
             const newOffer: NewOffer = {
               propertyId: tramonaPropertyId,
@@ -344,8 +348,10 @@ Are you a host in ${location}? Sign up here to help us launch in this city as so
               );
               continue;
             }
+            const realNightlyPrice =
+              listing.nightlyPrice ?? listing.originalNightlyPrice;
             const originalTotalPrice =
-              listing.originalNightlyPrice *
+              realNightlyPrice *
               getNumNights(options.checkIn, options.checkOut);
             const newOffer: NewOffer = {
               propertyId: newPropertyId,

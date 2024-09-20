@@ -40,7 +40,6 @@ import { newLinkRequestSchema } from "@/utils/useSendUnsentRequests";
 import { getCoordinates } from "@/server/google-maps";
 import { scrapeDirectListings } from "@/server/direct-sites-scraping";
 import { waitUntil } from "@vercel/functions";
-import { scrapeAirbnbListingsForRequest } from "@/server/scrapeAirbnbListingsForRequest";
 
 const updateRequestInputSchema = z.object({
   requestId: z.number(),
@@ -374,7 +373,7 @@ export const requestsRouter = createTRPCRouter({
       await ctx.db.insert(rejectedRequests).values({
         requestId: input.requestId,
         userId: ctx.user.id,
-      })
+      });
     }),
 });
 
@@ -459,49 +458,51 @@ export async function handleRequestSubmission(
     //   }
     // }
 
+    if (user.role === "admin") {
+      waitUntil(
+        scrapeDirectListings({
+          checkIn: input.checkIn,
+          checkOut: input.checkOut,
+          requestNightlyPrice:
+            input.maxTotalPrice / getNumNights(input.checkIn, input.checkOut),
+          requestId: request.id,
+          location: input.location,
+          latitude: lat,
+          longitude: lng,
+          numGuests: input.numGuests,
+        })
+          .then(async (listings) => {
+            if (listings.length > 0) {
+              const travelerPhone = user.phoneNumber;
+              if (travelerPhone) {
+                const currentTime = new Date();
+                const twentyFiveMinutesFromNow = new Date(
+                  currentTime.getTime() + 25 * 60000,
+                );
+                const fiftyFiveMinutesFromNow = new Date(
+                  currentTime.getTime() + 55 * 60000,
+                );
+                const numOfMatches = listings.length;
+                void sendScheduledText({
+                  to: travelerPhone,
+                  content: `Tramona: You have ${numOfMatches <= 10 ? numOfMatches : "more than 10"} matches for your request in ${input.location}, visit Tramona.com to view`,
+                  sendAt:
+                    numOfMatches <= 5
+                      ? twentyFiveMinutesFromNow
+                      : fiftyFiveMinutesFromNow,
+                });
+              }
+            }
+          })
+          .catch((error) => {
+            console.error("Error scraping listings: " + error);
+          }),
+      );
+    }
+
     const eligibleProperties = await getPropertiesForRequest(
       { ...input, id: request.id, latLngPoint: request.latLngPoint, radius },
       { tx },
-    );
-
-    waitUntil(
-      scrapeDirectListings({
-        checkIn: input.checkIn,
-        checkOut: input.checkOut,
-        requestNightlyPrice:
-          input.maxTotalPrice / getNumNights(input.checkIn, input.checkOut),
-        requestId: request.id,
-        location: input.location,
-        latitude: lat,
-        longitude: lng,
-        numGuests: input.numGuests,
-      })
-        .then(async (listings) => {
-          if (listings.length > 0) {
-            const travelerPhone = user.phoneNumber;
-            if (travelerPhone) {
-              const currentTime = new Date();
-              const twentyFiveMinutesFromNow = new Date(
-                currentTime.getTime() + 25 * 60000,
-              );
-              const fiftyFiveMinutesFromNow = new Date(
-                currentTime.getTime() + 55 * 60000,
-              );
-              const numOfMatches = listings.length;
-              void sendScheduledText({
-                to: travelerPhone,
-                content: `Tramona: You have ${numOfMatches <= 10 ? numOfMatches : "more than 10"} matches for your request in ${input.location}, visit Tramona.com to view`,
-                sendAt:
-                  numOfMatches <= 5
-                    ? twentyFiveMinutesFromNow
-                    : fiftyFiveMinutesFromNow,
-              });
-            }
-          }
-        })
-        .catch((error) => {
-          console.error("Error scraping listings: " + error);
-        }),
     );
 
     await sendTextToHost(
@@ -510,10 +511,6 @@ export async function handleRequestSubmission(
       input.checkOut,
       input.maxTotalPrice,
       input.location,
-    );
-
-    waitUntil(
-      scrapeAirbnbListingsForRequest(input, { tx, requestId: request.id }),
     );
 
     return { requestId: request.id, madeByGroupId };
