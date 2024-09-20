@@ -162,9 +162,6 @@ const encodeTermsLink = (platform: string) => {
 };
 
 const termsLinks = {
-  Airbnb: encodeTermsLink("Airbnb"),
-  Vrbo: encodeTermsLink("Vrbo"),
-  "Booking.com": encodeTermsLink("Booking.com"),
   "CB Island Vacations": encodeTermsLink("CB Island Vacations"),
   IntegrityArizona: encodeTermsLink("IntegrityArizona"),
   Evolve: encodeTermsLink("Evolve"),

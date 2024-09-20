@@ -3,25 +3,22 @@ import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
 
-const platformSpecificTerms = {
-  "Airbnb": "Additional terms specific to Airbnb listings...",
-  "Vrbo": "Additional terms specific to Vrbo listings...",
-  "Booking.com": "Additional terms specific to Booking.com listings...",
-  "CB Island Vacations": "Additional terms specific to CB Island Vacations listings...",
-  "IntegrityArizona": "Additional terms specific to IntegrityArizona listings...",
-  "Evolve": "Additional terms specific to Evolve listings...",
-  "Cleanbnb": "Additional terms specific to Cleanbnb listings...",
-  "Casamundo": "Additional terms specific to Casamundo listings...",
-  "RedAwning": "Additional terms specific to RedAwning listings...",
-  "default": "Additional terms for Tramona listings...",
-};
+const platforms = [
+  "CB Island Vacations",
+  "IntegrityArizona",
+  "Evolve",
+  "Cleanbnb",
+  "Casamundo",
+  "RedAwning",
+  "default"
+];
 
 const encodeTermsLink = (platform: string) => {
   return crypto.createHash('sha256').update(platform).digest('hex');
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const paths = Object.keys(platformSpecificTerms).map(platform => ({
+  const paths = platforms.map(platform => ({
     params: { encodedPlatform: encodeTermsLink(platform) }
   }));
 
@@ -33,25 +30,30 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   const encodedPlatform = params?.encodedPlatform as string;
-  const platform = Object.keys(platformSpecificTerms).find(p => encodeTermsLink(p) === encodedPlatform) || 'default';
-  const additionalTerms = platformSpecificTerms[platform as keyof typeof platformSpecificTerms];
+  const platform = platforms.find(p => encodeTermsLink(p) === encodedPlatform) ?? 'default';
 
-  // Read the static HTML file
-  const filePath = path.join(process.cwd(), 'public', 'html', 'tos.html');
-  let htmlContent = fs.readFileSync(filePath, 'utf8');
+  const baseFilePath = path.join(process.cwd(), 'public', 'html', 'tos.html');
+  let baseHtmlContent = fs.readFileSync(baseFilePath, 'utf8');
 
-  const platformSpecificSection = `
-    <section>
-      <h2>Additional Terms for ${platform}</h2>
-      <p>${additionalTerms}</p>
-    </section>
-  `;
+  const platformFilePath = path.join(process.cwd(), 'public', 'html', `${platform.toLowerCase().replace(/\s+/g, '-')}-tos.html`);
+  let platformHtmlContent = '';
 
-  htmlContent = htmlContent.replace('</body>', `${platformSpecificSection}</body>`);
+  try {
+    platformHtmlContent = fs.readFileSync(platformFilePath, 'utf8');
+  } catch (error) {
+    console.warn(`No specific terms file found for ${platform}. Using default content.`);
+    platformHtmlContent = '<p>No additional terms for this platform.</p>';
+  }
+
+  const combinedContent = baseHtmlContent.replace('</body>', `
+    <h2>Additional Terms for ${platform}</h2>
+    ${platformHtmlContent}
+    </body>
+  `);
 
   return {
     props: {
-      content: htmlContent,
+      content: combinedContent,
       platform
     }
   };
@@ -65,8 +67,6 @@ interface TermsPageProps {
 export default function TermsPage({ content, platform }: TermsPageProps) {
   return (
     <div className="container mx-auto py-8">
-      {/* <h1 className="text-2xl font-bold mb-4">Terms and Conditions</h1>
-      <h2 className="text-xl font-semibold mb-2">{platform}</h2> */}
       <div dangerouslySetInnerHTML={{ __html: content }} />
     </div>
   );
