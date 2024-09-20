@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   useStripe,
   useElements,
@@ -16,8 +16,16 @@ import type {
 import { env } from "@/env";
 import { toast } from "@/components/ui/use-toast";
 import { descripeStripeDeclineCode } from "@/utils/stripe-client";
+import { Checkbox } from "../ui/checkbox";
+import { Label } from "../ui/label";
+import Link from "next/link";
+import crypto from "crypto";
 
-export default function StripeCheckoutForm() {
+export default function StripeCheckoutForm({
+  originalListingPlatform,
+}: {
+  originalListingPlatform: string | null;
+}) {
   const isProduction = process.env.NODE_ENV === "production";
   const baseUrl = isProduction
     ? "https://www.tramona.com"
@@ -32,9 +40,19 @@ export default function StripeCheckoutForm() {
 
   const elements = useElements();
   const [loading, setLoading] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!termsAccepted) {
+      toast({
+        title: "Terms and Conditions",
+        description:
+          "Please accept the Terms and Conditions to proceed with booking.",
+        variant: "destructive",
+      });
+      return;
+    }
     setLoading(true);
     if (!stripe || !elements) {
       return;
@@ -106,7 +124,11 @@ export default function StripeCheckoutForm() {
         </div>
         <Separator className="my-2 w-full" />
         <ContactInfoForm />
-        <TermsAndSubmit />
+        <TermsAndSubmit
+          termsAccepted={termsAccepted}
+          setTermsAccepted={setTermsAccepted}
+          originalListingPlatform={originalListingPlatform}
+        />
         <Button
           type="submit"
           variant="greenPrimary"
@@ -129,7 +151,44 @@ export default function StripeCheckoutForm() {
   );
 }
 
-function TermsAndSubmit() {
+interface TermsAndSubmitProps {
+  termsAccepted: boolean;
+  setTermsAccepted: React.Dispatch<React.SetStateAction<boolean>>;
+  originalListingPlatform: string | null;
+}
+
+const encodeTermsLink = (platform: string) => {
+  return crypto.createHash("sha256").update(platform).digest("hex");
+};
+
+const termsLinks = {
+  Airbnb: encodeTermsLink("Airbnb"),
+  Vrbo: encodeTermsLink("Vrbo"),
+  "Booking.com": encodeTermsLink("Booking.com"),
+  "CB Island Vacations": encodeTermsLink("CB Island Vacations"),
+  IntegrityArizona: encodeTermsLink("IntegrityArizona"),
+  Evolve: encodeTermsLink("Evolve"),
+  Cleanbnb: encodeTermsLink("Cleanbnb"),
+  Casamundo: encodeTermsLink("Casamundo"),
+  RedAwning: encodeTermsLink("RedAwning"),
+};
+function TermsAndSubmit({
+  termsAccepted,
+  setTermsAccepted,
+  originalListingPlatform,
+}: TermsAndSubmitProps) {
+  const handleCheckboxChange = (checked: boolean) => {
+    setTermsAccepted(checked);
+  };
+
+  const getTermsLink = () => {
+    const encodedLink =
+      termsLinks[originalListingPlatform as keyof typeof termsLinks];
+    return encodedLink
+      ? `/terms-and-conditions/${encodedLink}`
+      : "/terms-and-conditions/default";
+  };
+
   return (
     <div className="">
       <div className="mb-8 space-y-4 text-muted-foreground">
@@ -137,6 +196,27 @@ function TermsAndSubmit() {
           On behalf of Tramona we ask that you please follow the house rules and
           treat the house as if it were your own
         </p>
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="terms"
+            checked={termsAccepted}
+            onCheckedChange={handleCheckboxChange}
+          />
+          <Label
+            htmlFor="terms"
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          >
+            I agree to the{" "}
+            <Link
+              href={getTermsLink()}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary underline"
+            >
+              Terms and Conditions
+            </Link>
+          </Label>
+        </div>
         <p className="px-2 text-xs md:px-0">
           By selecting the button, I agree to the booking terms. I also agree to
           the Terms of Service, Payment Terms of Service and I acknowledge the

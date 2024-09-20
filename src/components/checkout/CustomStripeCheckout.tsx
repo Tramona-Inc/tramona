@@ -175,7 +175,7 @@ const CustomStripeCheckout = ({
     <div className="w-full">
       {checkoutReady && options?.clientSecret ? (
         <Elements stripe={stripePromise} options={options}>
-          <StripeCheckoutForm />
+          <StripeCheckoutForm originalListingPlatform={property.originalListingPlatform} />
         </Elements>
       ) : (
         <div className="h-48">
