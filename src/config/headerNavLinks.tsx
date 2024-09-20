@@ -29,6 +29,9 @@ export const hamburgerLinksDesktop = [
 
 export const unloggedHamburgerLinksMobile = [
   { name: "24/7 Support", href: "/help-center", icon: BadgeHelp },
+  { name: "How it Works", href: "/how-it-works", icon: InfoIcon },
+  { name: "For Hosts", href: "/why-list", icon: Home },
+  { name: "Recent Deals", href: "/exclusive-offers", icon: HandshakeIcon },
 ];
 
 export const hamburgerLinksMobile = [

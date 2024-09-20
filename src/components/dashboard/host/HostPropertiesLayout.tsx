@@ -14,7 +14,10 @@ import {
   useHostOnboarding,
 } from "@/utils/store/host-onboarding";
 import { api } from "@/utils/api";
-import { type Property } from "@/server/db/schema/tables/properties";
+import {
+  CancellationPolicyWithInternals,
+  type Property,
+} from "@/server/db/schema/tables/properties";
 
 export default function HostPropertiesLayout({
   children,
@@ -252,7 +255,9 @@ export function HostPropertyEditBtn({
     setSmokingAllowed(property.smokingAllowed ?? false);
     setOtherHouseRules(property.otherHouseRules ?? "");
     setEditing(!editing);
-    setCancellationPolicy(property.cancellationPolicy);
+    setCancellationPolicy(
+      property.cancellationPolicy as CancellationPolicyWithInternals | null,
+    );
   };
 
   return (
