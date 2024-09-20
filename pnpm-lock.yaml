@@ -129,11 +129,11 @@ importers:
         specifier: ^7.0.2
         version: 7.5.0
       '@stripe/connect-js':
-        specifier: 3.3.12
-        version: 3.3.12
+        specifier: 3.3.13
+        version: 3.3.13
       '@stripe/react-connect-js':
         specifier: 3.3.13
-        version: 3.3.13(@stripe/connect-js@3.3.12)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 3.3.13(@stripe/connect-js@3.3.13)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@stripe/react-stripe-js':
         specifier: ^2.4.0
         version: 2.8.0(@stripe/stripe-js@2.4.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -2761,8 +2761,8 @@ packages:
   '@socket.io/component-emitter@3.1.2':
     resolution: {integrity: sha512-9BCxFwvbGg/RsZK9tjXd8s4UcwR0MWeFQ1XEKIQVVvAGJyINdrqKMcTRyLoK8Rse1GjzLV9cwjWV1olXRWEXVA==}
 
-  '@stripe/connect-js@3.3.12':
-    resolution: {integrity: sha512-hXbgvGq9Lb6BYgsb8lcbjL76Yqsxr0yAj6T9ZFTfUK0O4otI5GSEWum9do9rf/E5OfYy6fR1FG/77Jve2w1o6Q==}
+  '@stripe/connect-js@3.3.13':
+    resolution: {integrity: sha512-WSSZngnrEqQ2yFPbc5xN0S2fgZDATI0h0uqGbW2mzTuo5HSOGcFvf240UCNnVpmxVY92mIycMq5tpYncsx6/xQ==}
 
   '@stripe/react-connect-js@3.3.13':
     resolution: {integrity: sha512-kMxYjeQUcl/ixu/mSeX5QGIr/MuP+YxFSEBdb8j6w+tbK82tmcjyFDgoQTQwVXNqUV6jI66Kks3XcfpPRfeiJA==}
@@ -10082,11 +10082,11 @@ snapshots:
 
   '@socket.io/component-emitter@3.1.2': {}
 
-  '@stripe/connect-js@3.3.12': {}
+  '@stripe/connect-js@3.3.13': {}
 
-  '@stripe/react-connect-js@3.3.13(@stripe/connect-js@3.3.12)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@stripe/react-connect-js@3.3.13(@stripe/connect-js@3.3.13)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
-      '@stripe/connect-js': 3.3.12
+      '@stripe/connect-js': 3.3.13
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 

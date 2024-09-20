@@ -59,7 +59,7 @@
     "@react-google-maps/api": "^2.19.3",
     "@sendgrid/mail": "^8.1.0",
     "@slack/web-api": "^7.0.2",
-    "@stripe/connect-js": "3.3.12",
+    "@stripe/connect-js": "3.3.13",
     "@stripe/react-connect-js": "3.3.13",
     "@stripe/react-stripe-js": "^2.4.0",
     "@stripe/stripe-js": "^2.4.0",
