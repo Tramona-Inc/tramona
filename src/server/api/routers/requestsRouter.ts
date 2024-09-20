@@ -40,7 +40,6 @@ import { newLinkRequestSchema } from "@/utils/useSendUnsentRequests";
 import { getCoordinates } from "@/server/google-maps";
 import { scrapeDirectListings } from "@/server/direct-sites-scraping";
 import { waitUntil } from "@vercel/functions";
-import { scrapeAirbnbListingsForRequest } from "@/server/scrapeAirbnbListingsForRequest";
 
 const updateRequestInputSchema = z.object({
   requestId: z.number(),
@@ -374,7 +373,7 @@ export const requestsRouter = createTRPCRouter({
       await ctx.db.insert(rejectedRequests).values({
         requestId: input.requestId,
         userId: ctx.user.id,
-      })
+      });
     }),
 });
 
@@ -510,10 +509,6 @@ export async function handleRequestSubmission(
       input.checkOut,
       input.maxTotalPrice,
       input.location,
-    );
-
-    waitUntil(
-      scrapeAirbnbListingsForRequest(input, { tx, requestId: request.id }),
     );
 
     return { requestId: request.id, madeByGroupId };

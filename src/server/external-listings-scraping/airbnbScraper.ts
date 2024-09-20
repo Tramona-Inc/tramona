@@ -1,32 +1,42 @@
-import { urlScrape } from "../server-utils";
-import { MinimalRequest, NewProperty } from "../db/schema";
+import { DirectSiteScraper } from "../direct-sites-scraping";
+import { urlScrape } from "@/server/server-utils";
+import { MinimalRequest, NewProperty } from "@/server/db/schema";
 import { z } from "zod";
 import { getNumNights, parseCurrency } from "@/utils/utils";
 import { sortBy } from "lodash";
 import { scrapeAirbnbListing } from "./scrapeAirbnbListing";
 
-export const scrapeAirbnbListings = async ({
-  request,
-  limit,
-}: {
-  request: MinimalRequest | { checkIn: Date; checkOut: Date };
-  limit?: number;
+export const airbnbScraper: DirectSiteScraper = async ({
+  checkIn,
+  checkOut,
+  requestNightlyPrice,
+  numGuests,
+  location,
+  latitude,
+  longitude,
 }) => {
-  const serpUrl = getSerpUrl({ request });
+  const limit = 100; // in case too many results, could be removed later
+  if (!location || !numGuests) {
+    throw new Error("Missing required fields");
+  }
+  const serpUrl = getSerpUrl({
+    checkIn,
+    checkOut,
+    location,
+    numGuests,
+  });
 
   const pageData = await scrapePage(serpUrl).then(async (unparsedData) => {
-    // await writeFile(
-    //   "airbnb-serp-page-data.json",
-    //   JSON.stringify(unparsedData, null, 2),
-    // );
     return serpPageSchema.parse(unparsedData);
   });
 
   const cursors = pageData.staysSearch.results.paginationInfo.pageCursors;
-  const pageUrls = cursors.map((cursor) => getSerpUrl({ request, cursor }));
+  const pageUrls = cursors.map((cursor) =>
+    getSerpUrl({ checkIn, checkOut, location, numGuests, cursor }),
+  );
   const pages = await Promise.all(pageUrls.map(scrapePage));
 
-  const numNights = getNumNights(request.checkIn, request.checkOut);
+  const numNights = getNumNights(checkIn, checkOut);
 
   const allListings = pages
     .map((page) => serpPageSchema.parse(page))
@@ -35,9 +45,9 @@ export const scrapeAirbnbListings = async ({
     .filter(Boolean);
 
   const filteredListings = sortBy(allListings, (l) => {
-    if (!("maxTotalPrice" in request)) return 0; // no sorting
-    const diff = Math.abs(l.nightlyPrice - request.maxTotalPrice);
-    const multiplier = l.nightlyPrice < request.maxTotalPrice ? 2 : 1; // $100 cheaper = $50 more expensive
+    if (!requestNightlyPrice) return 0; // no sorting
+    const diff = Math.abs(l.nightlyPrice - requestNightlyPrice);
+    const multiplier = l.nightlyPrice < requestNightlyPrice ? 2 : 1; // $100 cheaper = $50 more expensive
     return diff * multiplier;
   }).slice(0, limit);
 
@@ -48,14 +58,13 @@ export const scrapeAirbnbListings = async ({
 
   return await Promise.all(
     sortedListings.map(
-      async ({ originalListingId, nightlyPrice, originalNightlyPrice }) => {
+      async ({ originalListingId }) => {
         try {
-          const { property, reviews } =
+          const { property, reviews, nightlyPrice } =
             await scrapeAirbnbListing(originalListingId);
 
           const completeProperty: NewProperty = {
             ...property,
-            originalNightlyPrice,
             originalListingId,
             originalListingPlatform: "Airbnb",
             originalListingUrl: `https://www.airbnb.com/rooms/${originalListingId}`,
@@ -64,9 +73,15 @@ export const scrapeAirbnbListings = async ({
           };
 
           return {
-            property: completeProperty,
+            ...completeProperty,
             reviews,
             nightlyPrice,
+            scrapeUrl: serpUrl,
+            originalListingUrl: completeProperty.originalListingUrl!,
+            latLngPoint: {
+              lng: completeProperty.latLngPoint.x,
+              lat: completeProperty.latLngPoint.y,
+            },
           };
         } catch (e) {
           console.error(
@@ -81,16 +96,20 @@ export const scrapeAirbnbListings = async ({
 };
 
 function getSerpUrl({
-  request,
-  priceRange,
+  checkIn,
+  checkOut,
+  location,
+  numGuests,
   cursor,
 }: {
-  request: MinimalRequest | { checkIn: Date; checkOut: Date };
-  priceRange?: { minUSD: number; maxUSD: number };
+  checkIn: Date;
+  checkOut: Date;
+  location: string;
+  numGuests: number;
   cursor?: string;
 }) {
-  const checkInStr = request.checkIn.toISOString().split("T")[0]!;
-  const checkOutStr = request.checkOut.toISOString().split("T")[0]!;
+  const checkInStr = checkIn.toISOString().split("T")[0]!;
+  const checkOutStr = checkOut.toISOString().split("T")[0]!;
 
   const url = new URL(`https://www.airbnb.com/s`);
 
@@ -98,19 +117,9 @@ function getSerpUrl({
   url.searchParams.set("checkin", checkInStr);
   url.searchParams.set("checkout", checkOutStr);
 
-  if ("location" in request) {
-    url.searchParams.set("query", request.location);
-  }
+  url.searchParams.set("query", location);
 
-  if ("numGuests" in request) {
-    url.searchParams.set("adults", request.numGuests.toString());
-  }
-
-  if (priceRange) {
-    url.searchParams.set("price_min", priceRange.minUSD.toString());
-    url.searchParams.set("price_max", priceRange.maxUSD.toString());
-  }
-
+  url.searchParams.set("adults", numGuests.toString());
   if (cursor) {
     url.searchParams.set("cursor", cursor);
   }
