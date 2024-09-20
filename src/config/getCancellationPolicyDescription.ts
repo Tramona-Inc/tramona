@@ -64,6 +64,8 @@ After Check-In: If they cancel during their stay, the next 30 days are non-refun
 
     case "Non-refundable":
       return "No refund is provided after booking.";
+    default:
+      return ""; //so that it doesnt return undefined
   }
 }
 
