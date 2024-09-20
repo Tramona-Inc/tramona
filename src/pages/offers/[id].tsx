@@ -36,7 +36,7 @@ export default function Listings() {
       <Head>
         <title>Offer | Tramona</title>
       </Head>
-      <div className="p-4 pb-32">
+      <div className="p-4 pb-64">
         <div className="mx-auto max-w-7xl">
           {offer ? <OfferPage offer={offer} /> : <Spinner />}
         </div>
