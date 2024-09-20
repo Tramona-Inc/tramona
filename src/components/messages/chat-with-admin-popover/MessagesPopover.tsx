@@ -273,7 +273,7 @@ export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
           </PopoverContent>
         </Popover>
       ) : (
-        <div className="bg-black">
+        <div className="h-screen-minus-header-n-footer bg-black">
           <div className="relative bg-zinc-800 py-4 text-center text-xs text-white">
             <div className="flex items-center justify-center">
               <UserAvatar image={concierge.image} />

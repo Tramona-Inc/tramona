@@ -101,10 +101,13 @@ export default function ListMessagesWithAdmin({
           )}
         </div>
       ) : (
-        <div className="flex w-full flex-1">
-          <p className="m-auto flex items-center justify-center text-[#8B8B8B]">
-            How can we help you?
-          </p>
+        <div
+          className={cn(
+            "flex flex-col items-center justify-center",
+            isMobile ? "h-[31rem]" : "h-96",
+          )}
+        >
+          <p className="text-muted-foreground">How can we help you?</p>
         </div>
       )}
     </div>
