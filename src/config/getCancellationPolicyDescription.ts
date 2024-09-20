@@ -5,7 +5,7 @@ import dayjs from "dayjs";
 
 export function getCancellationPolicyDescription(
   policy: CancellationPolicyWithInternals,
-): string {
+) {
   switch (policy) {
     case "Flexible":
       return `Full Refund: Guests can get a full refund if they cancel at least 24 hours before check-in.
