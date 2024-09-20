@@ -108,31 +108,32 @@ export const scrapeDirectListings = async (options: {
     directSiteScrapers.map((s) => s.scraper(options)),
   );
 
-  const userPhoneFromRequest = await db.query.requests.findFirst({
-    where: eq(requests.id, options.requestId!),
-    with: {
-      madeByGroup: {
-        with: {
-          owner: {
-            columns: {
-              phoneNumber: true,
+  const userFromRequest = await db.query.requests.
+    findFirst({
+      where: eq(requests.id, options.requestId!),
+      with: {
+        madeByGroup: {
+          with: {
+            owner: {
+              columns: {
+                phoneNumber: true,
+              },
             },
-          },
-        },
-      },
-    },
-  });
+          }
+        }
+
+      }
+    }).then((res) => res?.madeByGroup.owner);
+
+
 
   const flatListings = allListings.flat();
   console.log("DONE SCRAPING, flatListings.length: ", flatListings.length);
-  if (
-    flatListings.length === 0 &&
-    userPhoneFromRequest?.madeByGroup.owner.phoneNumber
-  ) {
+  if (flatListings.length === 0 && userFromRequest) {
     await sendText({
-      to: userPhoneFromRequest?.madeByGroup.owner.phoneNumber,
-      content: `Tramona: We’re not live in ${location} just yet, but we’re working on it! We’ll send you an email as soon as we launch there. In the meantime, check out the best deals available on Airbnb for ${location}.
-Are you a host in ${location}? Sign up here to help us launch in this city as soon as possible!”`,
+      to: userFromRequest.phoneNumber!,
+      content: `Tramona: We’re not live in ${options.location} just yet, but we’re working on it! We’ll send you an email as soon as we launch there. In the meantime, check out the best deals available on Airbnb for ${options.location}.
+Are you a host in ${options.location}? Sign up here to help us launch in this city as soon as possible!”`,
     });
   }
   for (const listing of flatListings) {
