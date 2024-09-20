@@ -49,9 +49,6 @@ After Check-In: If they cancel during their stay, the next 30 days are non-refun
     case "Evolve":
       return `Full Refund: Guests can get a full refund if they cancel within 48 hours of booking and at least 14 days before check-in. The 48-hour refund option doesn't apply if you book your stay the day before check-in. Reservations cannot be cancelled for a full refund on the day of check-in.`;
 
-    case "Casamundo":
-      return "Hello World";
-
     case "Integrity Arizona":
       return "Bookings canceled at least 30 days before the start of the stay will receive a full refund, 14 days before the start of the stay will receive a 50% refund.";
 

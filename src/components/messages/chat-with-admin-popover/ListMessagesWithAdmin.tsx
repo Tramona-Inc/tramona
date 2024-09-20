@@ -1,66 +1,24 @@
-import { api } from "@/utils/api";
 import { type ChatMessageType, useMessage } from "@/utils/store/messages";
 import { useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { type MessageDbType } from "@/types/supabase.message";
 import supabase from "@/utils/supabase-client";
-import { errorToast } from "@/utils/toasts";
 import { cn } from "@/utils/utils";
 
 export default function ListMessagesWithAdmin({
-  isPopover,
+  isMobile,
+  conversationId,
+  tempUserId,
 }: {
-  isPopover?: boolean;
+  isMobile?: boolean;
+  conversationId: string;
+  tempUserId: string;
 }) {
   const { data: session } = useSession();
-  const [conversationId, setConversationId] = useState<string>("");
-  const [tempToken, setTempToken] = useState<string>("");
-  const [tempUserId, setTempUserId] = useState<string>("");
-  const {
-    data: conversationIdAndTempUserId,
-    refetch: refetchConversationIdAndTempUserId,
-  } = api.messages.getConversationsWithAdmin.useQuery(
-    {
-      userId: session?.user.id,
-      sessionToken: tempToken,
-    },
-    {
-      enabled: Boolean(session?.user.id ?? tempToken),
-    },
-  );
-
-  useEffect(() => {
-    if (!session && typeof window !== "undefined") {
-      setTempToken(localStorage.getItem("tempToken") ?? "");
-    }
-  }, [session]);
-
-  useEffect(() => {
-    // Ensure having a valid user ID before making the call (the session is loaded or guest has tempToken)
-    if (session?.user.id ?? tempToken) {
-      const fetchData = () => {
-        try {
-          if (conversationIdAndTempUserId) {
-            setConversationId(conversationIdAndTempUserId.conversationId);
-            setTempUserId(conversationIdAndTempUserId.tempUserId ?? "");
-          }
-        } catch (error) {
-          errorToast();
-        }
-      };
-
-      fetchData();
-    }
-  }, [conversationIdAndTempUserId, session?.user.id, tempToken]);
-
-  const { fetchInitialMessages } = useMessage();
-  void fetchInitialMessages(conversationId);
-  const { conversations } = useMessage();
-
+  const { fetchInitialMessages, conversations } = useMessage();
   const addMessageToConversation = useMessage(
     (state) => state.addMessageToConversation,
   );
-
   const optimisticIds = useMessage((state) => state.optimisticIds);
   // const setOptimisticIds = useMessage((state) => state.setOptimisticIds);
 
@@ -69,8 +27,17 @@ export default function ListMessagesWithAdmin({
     : [];
 
   useEffect(() => {
+    const fetchData = async () => {
+      if (conversationId) {
+        await fetchInitialMessages(conversationId);
+      }
+    };
+    void fetchData();
+  }, [conversationId, fetchInitialMessages]);
+
+  useEffect(() => {
     const channel = supabase
-      .channel(`${conversationId}`)
+      .channel(conversationId)
       .on(
         "postgres_changes",
         {
@@ -108,34 +75,12 @@ export default function ListMessagesWithAdmin({
   };
 
   return (
-    <>
-      <style>
-        {`
-        @media (min-width: 768px) {
-          /* Style the scrollbar itself (the part that moves) */
-          ::-webkit-scrollbar {
-            width: 12px; /* width of the entire scrollbar */
-          }
-
-          /* Style the track (part the scrollbar sits in) */
-          ::-webkit-scrollbar-track {
-            background: black; /* color of the track */
-          }
-
-          /* Style the handle (part of the scrollbar that indicates the scroll position) */
-          ::-webkit-scrollbar-thumb {
-            background-color: white; /* color of the thumb */
-            border-radius: 6px; /* roundness of the edges */
-            border: 3px solid black; /* Creates padding around the thumb */
-          }
-        }
-        `}
-      </style>
+    <div>
       {messages.length > 0 ? (
         <div
           className={cn(
             "flex w-full flex-1 flex-col-reverse gap-1 overflow-auto p-3",
-            isPopover ? "h-[20rem]" : "h-[30rem]",
+            isMobile ? "h-[31rem]" : "h-96",
           )}
         >
           {messages.map((message) =>
@@ -156,12 +101,15 @@ export default function ListMessagesWithAdmin({
           )}
         </div>
       ) : (
-        <div className="flex w-full flex-1">
-          <p className="m-auto flex items-center justify-center text-[#8B8B8B]">
-            How can we help you?
-          </p>
+        <div
+          className={cn(
+            "flex flex-col items-center justify-center",
+            isMobile ? "h-[31rem]" : "h-96",
+          )}
+        >
+          <p className="text-muted-foreground">How can we help you?</p>
         </div>
       )}
-    </>
+    </div>
   );
 }

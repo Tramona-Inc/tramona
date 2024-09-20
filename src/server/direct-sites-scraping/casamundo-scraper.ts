@@ -633,8 +633,7 @@ async function fetchPropertyDetails(
       originalNightlyPrice: Math.round((price.price / numNights) * 100),
       petsAllowed: data.petFriendly ?? false,
       smokingAllowed,
-      // cancellationPolicy: price.cancellationPolicy, Uncomment this when enum type is changed to allow any string
-      cancellationPolicy: "Casamundo",
+      cancellationPolicy: price.cancellationPolicy,
       reviews: reviews,
       scrapeUrl: `${url}?${params.toString()}`,
     };

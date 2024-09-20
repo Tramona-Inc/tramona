@@ -29,6 +29,7 @@ import {
 import { DIRECTLISTINGMARKUP } from "@/utils/constants";
 import { createLatLngGISPoint, sendText } from "@/server/server-utils";
 import { cleanbnbScraper, cleanbnbSubScraper } from "./cleanbnb-scrape";
+import { airbnbScraper } from "../external-listings-scraping/airbnbScraper";
 import { columns } from "@/components/admin/view-recent-host/table/columns";
 
 export type DirectSiteScraper = (options: {
@@ -47,6 +48,7 @@ export type ScrapedListing = Omit<NewProperty, "latLngPoint"> & {
   reviews: NewReview[];
   scrapeUrl: string;
   latLngPoint?: { lat: number; lng: number }; // make latLngPoint optional
+  nightlyPrice?: number; // airbnb scraper has nightlyPrice as real price and originalNightlyPrice as the price before discount
 };
 
 export type SubsequentScraper = (options: {
@@ -75,6 +77,7 @@ export const directSiteScrapers: NamedDirectSiteScraper[] = [
   { name: "cbIslandVacationsScraper", scraper: cbIslandVacationsScraper },
   { name: "redawningScraper", scraper: redawningScraper },
   { name: "casamundoScraper", scraper: casamundoScraper },
+  { name: "airbnbScraper", scraper: airbnbScraper },
 ];
 
 // Helper function to filter out fields not in NewProperty
@@ -117,11 +120,11 @@ export const scrapeDirectListings = async (options: {
                 phoneNumber: true,
               },
             },
-            }
           }
-
         }
-      }).then((res) => res?.madeByGroup.owner);
+
+      }
+    }).then((res) => res?.madeByGroup.owner);
 
 
 
@@ -277,8 +280,10 @@ Are you a host in ${options.location}? Sign up here to help us launch in this ci
               );
               continue;
             }
+            const realNightlyPrice =
+              listing.nightlyPrice ?? listing.originalNightlyPrice;
             const originalTotalPrice =
-              listing.originalNightlyPrice *
+              realNightlyPrice *
               getNumNights(options.checkIn, options.checkOut);
             const newOffer: NewOffer = {
               propertyId: tramonaPropertyId,
@@ -344,8 +349,10 @@ Are you a host in ${options.location}? Sign up here to help us launch in this ci
               );
               continue;
             }
+            const realNightlyPrice =
+              listing.nightlyPrice ?? listing.originalNightlyPrice;
             const originalTotalPrice =
-              listing.originalNightlyPrice *
+              realNightlyPrice *
               getNumNights(options.checkIn, options.checkOut);
             const newOffer: NewOffer = {
               propertyId: newPropertyId,
