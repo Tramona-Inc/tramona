@@ -18,18 +18,6 @@ const encodeTermsLink = (platform: string) => {
   return crypto.createHash('sha256').update(platform).digest('hex');
 };
 
-// Add this function to log encoded URLs
-const logEncodedUrls = () => {
-  console.log("Encoded URLs for each platform:");
-  platforms.forEach(platform => {
-    const encodedUrl = encodeTermsLink(platform);
-    console.log(`${platform}: /terms/${encodedUrl}`);
-  });
-};
-
-// Call the logging function
-logEncodedUrls();
-
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   const { encodedPlatform } = req.query;
   const platform = platforms.find(p => encodeTermsLink(p) === encodedPlatform) ?? 'default';
