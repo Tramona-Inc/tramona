@@ -55,7 +55,10 @@ export function RequestCardOfferPreviews({
                   </p>
                 </div>
                 <div className="absolute left-1 top-1 flex gap-1">
-                  <Badge variant="white">{discountPercentage}% off Airbnb price</Badge>
+                  <Badge variant="white">
+                    {discountPercentage}% off{" "}
+                    {offer.property.bookOnAirbnb ? "" : "Airbnb price"}
+                  </Badge>
                   {/* {offer.property.bookOnAirbnb && (
                     <Badge variant="white">Airbnb</Badge>
                   )} */}
@@ -69,7 +72,11 @@ export function RequestCardOfferPreviews({
                   <div className="shrink-0">
                     <UserAvatar
                       name={host?.name ?? property.hostName ?? "Tramona"}
-                      image={host?.image ?? property.hostProfilePic ?? "/assets/images/tramona.svg"}
+                      image={
+                        host?.image ??
+                        property.hostProfilePic ??
+                        "/assets/images/tramona.svg"
+                      }
                     />
                   </div>
                   <div>

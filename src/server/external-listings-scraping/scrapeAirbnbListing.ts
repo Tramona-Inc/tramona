@@ -108,12 +108,12 @@ export async function scrapeAirbnbListing(id: string) {
     throw new Error(`Airbnb id ${id}: Failed to find num ratings`);
   const numRatings = parseInt(numRatingsStr);
 
-  const hostName = /"title":"Hosted by (.+?)"/.exec(listingData)?.[1];
-  if (!hostName) throw new Error(`Airbnb id ${id}: Failed to find host name`);
+  // const hostName = /"title":"Hosted by (.+?)"/.exec(listingData)?.[1];
+  // if (!hostName) throw new Error(`Airbnb id ${id}: Failed to find host name`);
 
-  const hostProfilePic = /"profilePictureUrl":"(.+?)"/.exec(listingData)?.[1];
-  if (!hostProfilePic)
-    throw new Error(`Airbnb id ${id}: Failed to find host profile pic`);
+  // const hostProfilePic = /"profilePictureUrl":"(.+?)"/.exec(listingData)?.[1];
+  // if (!hostProfilePic)
+  //   throw new Error(`Airbnb id ${id}: Failed to find host profile pic`);
 
   const hostNumReviewsStr = /"ratingCount":"?(\d+)/.exec(listingData)?.[1];
   if (!hostNumReviewsStr)
@@ -261,8 +261,6 @@ export async function scrapeAirbnbListing(id: string) {
     numBedrooms,
     numBathrooms,
     maxNumGuests,
-    hostName,
-    hostProfilePic,
     hostNumReviews,
     hostRating,
     latLngPoint: { x: latitude, y: longitude },

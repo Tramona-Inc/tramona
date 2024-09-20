@@ -10,8 +10,8 @@ export default function Page() {
           Check your email
         </h1>
         <p className="text-muted-foreground">
-          Account successfully created! Please check your email for a secure
-          login link.
+          Account successfully created! Please check your email on this device
+          for a secure login link.
         </p>
         <Button asChild>
           <a href="https://mail.google.com" target="_blank" rel="noreferrer">
