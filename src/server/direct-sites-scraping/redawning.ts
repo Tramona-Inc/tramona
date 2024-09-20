@@ -7,6 +7,7 @@ import axios from "axios";
 import { axiosWithRetry } from "@/server/server-utils";
 import { formatDateYearMonthDay, getNumNights, parseHTML } from "@/utils/utils";
 import { PropertyType, ListingSiteName } from "@/server/db/schema/common";
+import { CancellationPolicyWithInternals } from "../db/schema/tables/properties";
 
 const taxoDataSchema = z.array(
   z.object({
@@ -24,6 +25,7 @@ const taxoDataSchema = z.array(
     list: z.string(),
     position: z.number(),
     totalPrice: z.number().nullable().optional(),
+    cancellationPolicy: z.string().nullable().optional(),
   }),
 );
 
@@ -57,6 +59,12 @@ const priceQuoteSchema = z.object({
     }),
   ),
   fee_details: z.array(z.unknown()),
+});
+
+const cancellationPolicySchema = z.object({
+  deposit_percentage: z.number(),
+  balance_due_days: z.number(),
+  offset_days: z.number(), // number of days before arrival to apply policy
 });
 
 const priceQuoteSchemaError = z.object({
@@ -249,6 +257,8 @@ export const mapTaxodataToScrapedListing = async (
               : 0,
           reviews: [], // looks like there are no reviews in this website
           scrapeUrl: safeUrl,
+          cancellationPolicy:
+            property.cancellationPolicy as CancellationPolicyWithInternals,
         };
       } catch (error) {
         console.error(
@@ -337,10 +347,30 @@ export const redawningScraper: DirectSiteScraper = async ({
                 return { ...quote, totalPrice: formattedTotalPrice };
               });
             property.totalPrice = priceQuote.totalPrice;
+
+            const cancellationPolicyUrl = `https://www.redawning.com/cancellation-policy-details?nid=${propertyId}&arrival_date=${formatDateYearMonthDay(checkIn)}`;
+            const dayOffsetForFullRefund = await axiosWithRetry
+              .get<string>(cancellationPolicyUrl, {
+                timeout: 10000,
+              })
+              .then((response) => response.data)
+              .then((data) => cancellationPolicySchema.parse(data))
+              .then((c) => {
+                return c.offset_days;
+              });
+            // all the RedAwning properties I've checked so far have a full refund deadline of either 7 or 14 days
+            if (dayOffsetForFullRefund <= 7) {
+              property.cancellationPolicy = "RedAwning 7 Days";
+            } else if (dayOffsetForFullRefund <= 14) {
+              property.cancellationPolicy = "RedAwning 14 Days";
+            } else {
+              property.cancellationPolicy = "Non-refundable";
+            }
+
             return property;
           } catch (error) {
             console.error(
-              `Skip RedAwning property: ${property.pid}, as failed to fetch price`,
+              `Skip RedAwning property: ${property.pid}, as failed to fetch price or cancellation policy.`,
             );
             return null;
           }

@@ -11,19 +11,21 @@ import {
   requestSelectSchema,
   requestUpdatedInfo,
   requests,
-  requestsToProperties,
   users,
+  offers,
+  rejectedRequests,
 } from "@/server/db/schema";
 import {
   sendText,
   sendWhatsApp,
   getPropertiesForRequest,
   createLatLngGISPoint,
+  sendScheduledText,
 } from "@/server/server-utils";
 import { sendSlackMessage } from "@/server/slack";
 import { isIncoming } from "@/utils/formatters";
 import { TRPCError } from "@trpc/server";
-import { and, eq, exists, sql } from "drizzle-orm";
+import { and, eq, exists, sql, lt } from "drizzle-orm";
 import { z } from "zod";
 import type { Session } from "next-auth";
 import { linkInputProperties } from "@/server/db/schema/tables/linkInputProperties";
@@ -38,7 +40,6 @@ import { newLinkRequestSchema } from "@/utils/useSendUnsentRequests";
 import { getCoordinates } from "@/server/google-maps";
 import { scrapeDirectListings } from "@/server/direct-sites-scraping";
 import { waitUntil } from "@vercel/functions";
-import { scrapeAirbnbListingsForRequest } from "@/server/scrapeAirbnbListingsForRequest";
 
 const updateRequestInputSchema = z.object({
   requestId: z.number(),
@@ -75,6 +76,7 @@ export const requestsRouter = createTRPCRouter({
               randomDirectListingDiscount: true,
               datePriceFromAirbnb: true,
             },
+            where: lt(offers.becomeVisibleAt, new Date()),
             with: {
               property: {
                 columns: {
@@ -325,49 +327,6 @@ export const requestsRouter = createTRPCRouter({
       }
     }),
 
-  getByPropertyId: protectedProcedure
-    .input(z.number())
-    .query(async ({ input: propertyId }) => {
-      // const hostId = await db.query.properties
-      //   .findFirst({
-      //     columns: { hostId: true },
-      //     where: eq(properties.id, propertyId),
-      //   })
-      //   .then((res) => res?.hostId);
-
-      // if (hostId != ctx.user.id) {
-      //   throw new TRPCError({ code: "UNAUTHORIZED" });
-      // }
-
-      return await db.query.requestsToProperties
-        .findMany({
-          where: eq(requestsToProperties.propertyId, propertyId),
-          with: {
-            request: {
-              with: {
-                madeByGroup: {
-                  with: {
-                    members: {
-                      with: {
-                        user: {
-                          columns: {
-                            name: true,
-                            email: true,
-                            image: true,
-                            id: true,
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        })
-        .then((res) => res.map((r) => r.request));
-    }),
-
   // todo - change this when updaterequestinfo is not one to one anymore
   getUpdatedRequestInfo: protectedProcedure
     .input(
@@ -411,9 +370,10 @@ export const requestsRouter = createTRPCRouter({
   rejectRequest: protectedProcedure
     .input(z.object({ requestId: z.number() }))
     .mutation(async ({ ctx, input }) => {
-      await ctx.db
-        .delete(requestsToProperties)
-        .where(eq(requestsToProperties.requestId, input.requestId));
+      await ctx.db.insert(rejectedRequests).values({
+        requestId: input.requestId,
+        userId: ctx.user.id,
+      });
     }),
 });
 
@@ -498,46 +458,59 @@ export async function handleRequestSubmission(
     //   }
     // }
 
+    if (user.role === "admin") {
+      waitUntil(
+        scrapeDirectListings({
+          checkIn: input.checkIn,
+          checkOut: input.checkOut,
+          requestNightlyPrice:
+            input.maxTotalPrice / getNumNights(input.checkIn, input.checkOut),
+          requestId: request.id,
+          location: input.location,
+          latitude: lat,
+          longitude: lng,
+          numGuests: input.numGuests,
+        })
+          .then(async (listings) => {
+            if (listings.length > 0) {
+              const travelerPhone = user.phoneNumber;
+              if (travelerPhone) {
+                const currentTime = new Date();
+                const twentyFiveMinutesFromNow = new Date(
+                  currentTime.getTime() + 25 * 60000,
+                );
+                const fiftyFiveMinutesFromNow = new Date(
+                  currentTime.getTime() + 55 * 60000,
+                );
+                const numOfMatches = listings.length;
+                void sendScheduledText({
+                  to: travelerPhone,
+                  content: `Tramona: You have ${numOfMatches <= 10 ? numOfMatches : "more than 10"} matches for your request in ${input.location}, visit Tramona.com to view`,
+                  sendAt:
+                    numOfMatches <= 5
+                      ? twentyFiveMinutesFromNow
+                      : fiftyFiveMinutesFromNow,
+                });
+              }
+            }
+          })
+          .catch((error) => {
+            console.error("Error scraping listings: " + error);
+          }),
+      );
+    }
+
     const eligibleProperties = await getPropertiesForRequest(
       { ...input, id: request.id, latLngPoint: request.latLngPoint, radius },
       { tx },
     );
 
-    waitUntil(
-      scrapeDirectListings({
-        checkIn: input.checkIn,
-        checkOut: input.checkOut,
-        requestNightlyPrice:
-          input.maxTotalPrice / getNumNights(input.checkIn, input.checkOut),
-        requestId: request.id,
-        location: input.location,
-        latitude: lat,
-        longitude: lng,
-        numGuests: input.numGuests,
-      }).catch((error) => {
-        console.error("Error scraping listings: " + error);
-      }),
-    );
-
-    if (eligibleProperties.length > 0) {
-      await tx.insert(requestsToProperties).values(
-        eligibleProperties.map((property) => ({
-          requestId: request.id,
-          propertyId: property.id,
-        })),
-      );
-
-      await sendTextToHost(
-        eligibleProperties,
-        input.checkIn,
-        input.checkOut,
-        input.maxTotalPrice,
-        input.location,
-      );
-    }
-
-    waitUntil(
-      scrapeAirbnbListingsForRequest(input, { tx, requestId: request.id }),
+    await sendTextToHost(
+      eligibleProperties,
+      input.checkIn,
+      input.checkOut,
+      input.maxTotalPrice,
+      input.location,
     );
 
     return { requestId: request.id, madeByGroupId };

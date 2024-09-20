@@ -23,7 +23,7 @@ import { eq } from "drizzle-orm";
 
 import { env } from "@/env";
 import { db } from "@/server/db";
-import { generateReferralCode } from "@/utils/utils";
+import { censorEmail, generateReferralCode } from "@/utils/utils";
 import { zodString } from "@/utils/zod-utils";
 import { TRPCError } from "@trpc/server";
 import jwt from "jsonwebtoken";
@@ -757,7 +757,10 @@ export const usersRouter = createTRPCRouter({
 
       if (!verifications) throw new TRPCError({ code: "NOT_FOUND" });
 
-      return verifications;
+      return {
+        ...verifications,
+        email: censorEmail(verifications.email),
+      };
     }),
 
   getMyVerifications: protectedProcedure.query(async ({ ctx }) => {

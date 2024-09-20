@@ -41,15 +41,17 @@ export const twilioRouter = createTRPCRouter({
       z.object({
         msg: z.string(),
         to: z.string(),
+        sendAt: z.date().optional(),
       }),
     )
     .mutation(async ({ input }) => {
-      const { msg, to } = input;
+      const { msg, to, sendAt } = input;
 
       const response = await twilio.messages.create({
         body: msg,
         from: env.TWILIO_FROM,
         to,
+        sendAt, // ISO 8601
       });
 
       return response;

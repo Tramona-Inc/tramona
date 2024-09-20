@@ -379,7 +379,9 @@ export default function PropertyPage({
           <section>
             <div className="flex items-start justify-between border-t pb-2 pt-4">
               <div>
-                <h2 className="subheading">Guest Reviews</h2>
+                <h2 id="reviews" className="subheading">
+                  Guest Reviews
+                </h2>
                 <div className="flex items-center gap-2 pb-4">
                   <StarIcon className="inline size-[1em] fill-primaryGreen stroke-primaryGreen" />{" "}
                   {property.avgRating} · {plural(property.numRatings, "review")}

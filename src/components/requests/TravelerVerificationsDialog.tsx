@@ -25,7 +25,7 @@ export function TravelerVerificationsDialog({
     },
     {
       name: verificationList.email,
-      verified: verificationList.emailVerified,
+      verified: true,
     },
     {
       name: verificationList.phoneNumber,

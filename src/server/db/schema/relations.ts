@@ -19,7 +19,6 @@ import { emergencyContacts } from "./tables/emergencyContacts";
 import { offers } from "./tables/offers";
 import { bookedDates, properties } from "./tables/properties";
 import { requests } from "./tables/requests";
-import { requestsToProperties } from "./tables/requestsToProperties";
 import { reservedDateRanges } from "./tables/reservedDateRanges";
 import {
   superhogRequests,
@@ -31,6 +30,7 @@ import { trips, tripCancellations, tripDamages } from "./tables/trips";
 import { reviews } from "./tables/reviews";
 import { fillerBookings, fillerOffers } from "./tables/feedFiller";
 import { linkInputProperties } from "./tables/linkInputProperties";
+import { rejectedRequests } from "./tables/rejectedRequests";
 
 export const usersRelations = relations(users, ({ one, many }) => ({
   accounts: many(accounts),
@@ -50,6 +50,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   emergencyContacts: many(emergencyContacts),
   superHogErrors: many(superhogErrors),
   hostReferralDiscounts: many(hostReferralDiscounts),
+  rejectedRequests: many(rejectedRequests),
 }));
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -98,7 +99,6 @@ export const propertiesRelations = relations(properties, ({ one, many }) => ({
     references: [hostTeams.id],
   }),
   offers: many(offers),
-  requestsToProperties: many(requestsToProperties),
   bids: many(bids),
   bookedDates: many(bookedDates),
   superhogRequests: many(superhogRequests),
@@ -120,7 +120,7 @@ export const requestsRelations = relations(requests, ({ one, many }) => ({
     references: [groups.id],
   }),
   offers: many(offers),
-  requestsToProperties: many(requestsToProperties),
+  rejectedRequests: many(rejectedRequests),
   linkInputProperty: one(linkInputProperties, {
     fields: [requests.linkInputPropertyId],
     references: [linkInputProperties.id],
@@ -150,19 +150,16 @@ export const countersRelations = relations(counters, ({ one }) => ({
   }),
 }));
 
-export const requestsToPropertiesRelations = relations(
-  requestsToProperties,
-  ({ one }) => ({
-    request: one(requests, {
-      fields: [requestsToProperties.requestId],
-      references: [requests.id],
-    }),
-    property: one(properties, {
-      fields: [requestsToProperties.propertyId],
-      references: [properties.id],
-    }),
+export const rejectedRequestsRelations = relations(rejectedRequests, ({ one }) => ({
+  request: one(requests, {
+    fields: [rejectedRequests.requestId],
+    references: [requests.id],
   }),
-);
+  user: one(users, {
+    fields: [rejectedRequests.userId],
+    references: [users.id],
+  }),
+}));
 
 export const offersRelations = relations(offers, ({ one }) => ({
   property: one(properties, {

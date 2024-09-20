@@ -33,6 +33,9 @@ export default function HostRequests() {
   const [separatedData, setSeparatedData] = useState<SeparatedData | null>(
     null,
   );
+
+  const [selectedProperties, setSelectedProperties] = useState<number[]>([]);
+
   const { data: unusedReferralDiscounts } =
     api.referralCodes.getAllUnusedHostReferralDiscounts.useQuery(undefined, {
       onSuccess: () => {
@@ -76,8 +79,7 @@ export default function HostRequests() {
             <div key={requestData.request.id} className="mb-4">
               <RequestCard request={requestData.request} type="host">
                 <Button
-                  variant="darkOutline"
-                  className="mt-2"
+                  variant="secondary"
                   onClick={() => {
                     rejectRequest({ requestId: requestData.request.id });
                   }}
@@ -85,7 +87,6 @@ export default function HostRequests() {
                   Reject
                 </Button>
                 <Button
-                  className="mt-2"
                   onClick={() => {
                     setDialogOpen(true);
                     setSelectedRequest(requestData.request);
@@ -110,6 +111,8 @@ export default function HostRequests() {
           properties={properties}
           request={selectedRequest}
           setStep={setStep}
+          setSelectedProperties={setSelectedProperties}
+          selectedProperties={selectedProperties}
         />
       )}
       {step === 1 && properties && selectedRequest && (
@@ -121,6 +124,7 @@ export default function HostRequests() {
           open={dialogOpen}
           setOpen={setDialogOpen}
           setPropertyPrices={setPropertyPrices}
+          selectedProperties={selectedProperties}
         />
       )}
       {step === 2 && selectedRequest && (

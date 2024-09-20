@@ -16,7 +16,6 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import duration from "dayjs/plugin/duration";
 import { HostRequestsPageData } from "@/server/api/routers/propertiesRouter";
 import * as cheerio from "cheerio";
-import type { ListingSiteName } from "@/server/db/schema/common";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -752,4 +751,11 @@ export async function getRedirectedUrl(url: string) {
     method: "HEAD",
     redirect: "follow",
   }).then((r) => r.url);
+}
+
+export function censorEmail(email: string) {
+  return email
+    .split("@")
+    .map((part) => part[0] + "*".repeat(part.length - 1))
+    .join("@");
 }

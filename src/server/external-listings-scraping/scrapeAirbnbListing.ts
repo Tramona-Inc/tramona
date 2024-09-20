@@ -1,8 +1,13 @@
 import { z } from "zod";
-import { parseHTML } from "@/utils/utils";
+import {
+  formatDateYearMonthDay,
+  parseCurrency,
+  parseHTML,
+} from "@/utils/utils";
 import {
   ALL_PROPERTY_ROOM_TYPES,
   ALL_PROPERTY_TYPES,
+  CancellationPolicy,
   NewProperty,
   NewReview,
 } from "@/server/db/schema";
@@ -14,10 +19,20 @@ export function encodeAirbnbId(id: string) {
   return Buffer.from(`StayListing:${id}`).toString("base64");
 }
 
-export async function scrapeAirbnbListing(id: string) {
+export async function scrapeAirbnbListing(
+  id: string,
+  {
+    checkIn,
+    checkOut,
+    numGuests,
+  }: { checkIn: Date; checkOut: Date; numGuests: number },
+) {
   const encodedId = encodeAirbnbId(id);
 
-  const listingDataUrl = `https://www.airbnb.com/api/v3/StaysPdpSections/160265f6bdbacc2084cdf7de8641926c5ee141c3a2967dca0407ee47cec2a7d1?operationName=StaysPdpSections&locale=en&currency=USD&variables={"id":"${encodedId}","pdpSectionsRequest":{"layouts":["SIDEBAR","SINGLE_COLUMN"]}}&extensions={"persistedQuery":{"version":1,"sha256Hash":"160265f6bdbacc2084cdf7de8641926c5ee141c3a2967dca0407ee47cec2a7d1"}}`;
+  const checkInStr = formatDateYearMonthDay(checkIn);
+  const checkOutStr = formatDateYearMonthDay(checkOut);
+
+  const listingDataUrl = `https://www.airbnb.com/api/v3/StaysPdpSections/160265f6bdbacc2084cdf7de8641926c5ee141c3a2967dca0407ee47cec2a7d1?operationName=StaysPdpSections&locale=en&currency=USD&variables={"id":"${encodedId}","pdpSectionsRequest":{"checkIn":"${checkInStr}","checkOut":"${checkOutStr}","adults":"${numGuests}","layouts":["SIDEBAR","SINGLE_COLUMN"]}}&extensions={"persistedQuery":{"version":1,"sha256Hash":"160265f6bdbacc2084cdf7de8641926c5ee141c3a2967dca0407ee47cec2a7d1"}}`;
 
   const reviewsUrl = `https://www.airbnb.com/api/v3/StaysPdpReviewsQuery/dec1c8061483e78373602047450322fd474e79ba9afa8d3dbbc27f504030f91d?operationName=StaysPdpReviewsQuery&locale=en&currency=USD&variables={"id":"${encodedId}","pdpReviewsRequest":{"fieldSelector":"for_p3_translation_only","forPreview":false,"limit":10,"offset":"0","showingTranslationButton":false,"first":10,"sortingPreference":"RATING_DESC"}}&extensions={"persistedQuery":{"version":1,"sha256Hash":"dec1c8061483e78373602047450322fd474e79ba9afa8d3dbbc27f504030f91d"}}`;
 
@@ -39,6 +54,8 @@ export async function scrapeAirbnbListing(id: string) {
         }),
     ),
   )) as [string, string];
+
+  // await writeFile(`${id}.json`, listingData);
 
   const name = /"listingTitle":"([^"]+?)"/.exec(listingData)?.[1];
   if (!name) throw new Error(`Airbnb id ${id}: Failed to find name`);
@@ -107,12 +124,12 @@ export async function scrapeAirbnbListing(id: string) {
     throw new Error(`Airbnb id ${id}: Failed to find num ratings`);
   const numRatings = parseInt(numRatingsStr);
 
-  const hostName = /"title":"Hosted by (.+?)"/.exec(listingData)?.[1];
-  if (!hostName) throw new Error(`Airbnb id ${id}: Failed to find host name`);
+  // const hostName = /"title":"Hosted by (.+?)"/.exec(listingData)?.[1];
+  // if (!hostName) throw new Error(`Airbnb id ${id}: Failed to find host name`);
 
-  const hostProfilePic = /"profilePictureUrl":"(.+?)"/.exec(listingData)?.[1];
-  if (!hostProfilePic)
-    throw new Error(`Airbnb id ${id}: Failed to find host profile pic`);
+  // const hostProfilePic = /"profilePictureUrl":"(.+?)"/.exec(listingData)?.[1];
+  // if (!hostProfilePic)
+  //   throw new Error(`Airbnb id ${id}: Failed to find host profile pic`);
 
   const hostNumReviewsStr = /"ratingCount":"?(\d+)/.exec(listingData)?.[1];
   if (!hostNumReviewsStr)
@@ -210,6 +227,44 @@ export async function scrapeAirbnbListing(id: string) {
           .join("\n")
       : null;
 
+  // "localized_cancellation_policy_name"
+  const cancellationPolicyStr =
+    /"localized_cancellation_policy_name":"(.+?)"/.exec(listingData)?.[1];
+  if (!cancellationPolicyStr)
+    throw new Error(`Airbnb id ${id}: Failed to find cancellation policy`);
+
+  const cancellationPolicy: CancellationPolicy = z
+    .enum([
+      "Flexible",
+      "Moderate",
+      "Firm",
+      "Strict",
+      "Super Strict 30 Days",
+      "Super Strict 60 Days",
+      "Long Term",
+      "Non-refundable",
+    ])
+    .catch("Non-refundable")
+    .parse(cancellationPolicyStr);
+
+  const nightlyPriceStr = /"discountedPrice":"(.+?)"/.exec(listingData)?.[1];
+  if (!nightlyPriceStr)
+    throw new Error(`Airbnb id ${id}: Failed to find discounted price`);
+
+  console.log("nightlyPriceStr", nightlyPriceStr);
+
+  const nightlyPrice = parseCurrency(nightlyPriceStr);
+
+  const originalNightlyPriceStr = /"originalPrice":"(.+?)"/.exec(
+    listingData,
+  )?.[1];
+  if (!originalNightlyPriceStr)
+    throw new Error(`Airbnb id ${id}: Failed to find original price`);
+
+  console.log("originalNightlyPriceStr", originalNightlyPriceStr);
+
+  const originalNightlyPrice = parseCurrency(originalNightlyPriceStr);
+
   const city = await getCity({ lat: latitude, lng: longitude });
 
   const property: NewProperty = {
@@ -226,8 +281,6 @@ export async function scrapeAirbnbListing(id: string) {
     numBedrooms,
     numBathrooms,
     maxNumGuests,
-    hostName,
-    hostProfilePic,
     hostNumReviews,
     hostRating,
     latLngPoint: { x: latitude, y: longitude },
@@ -236,6 +289,8 @@ export async function scrapeAirbnbListing(id: string) {
     petsAllowed,
     smokingAllowed,
     otherHouseRules,
+    cancellationPolicy,
+    originalNightlyPrice,
     city,
     address: city, // cant get exact address from airbnb before booking so we go with the city
   };
@@ -274,5 +329,5 @@ export async function scrapeAirbnbListing(id: string) {
       profilePic: review.reviewer.userProfilePicture.baseUrl,
     }));
 
-  return { property, reviews };
+  return { property, reviews, nightlyPrice };
 }
