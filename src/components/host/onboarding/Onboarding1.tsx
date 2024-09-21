@@ -45,6 +45,7 @@ export default function Onboarding1({
 }) {
   const router = useRouter();
   const [showModal, setShowModal] = useState(false);
+  const [showHospitablePopup, setShowHospitablePopup] = useState(false);
   const [eventScheduled, setEventScheduled] = useState(false);
   const [dialogType, setDialogType] = useState<
     "assistedListing" | "syncPMS" | null
@@ -73,7 +74,11 @@ export default function Onboarding1({
       text: "Connect with your Airbnb account. This is the easiest & preferred way",
       recommended: true,
       onClick: async () => {
-        await createHospitableCustomer();
+        try {
+          setShowHospitablePopup(true);
+        } catch (error) {
+          console.error("An error occurred:", error);
+        }
       },
     },
     {
@@ -128,7 +133,7 @@ export default function Onboarding1({
     api.pms.getHospitableCustomer.useQuery();
 
   const handleSubmit = form.handleSubmit(async ({ pms, accountId, apiKey }) => {
-    const { bearerToken } = await generateBearerToken({ accountId, apiKey });
+    const { bearerToken } = await generateBearerToken({ accountId, apiKey }); //hostaway
     console.log(bearerToken);
 
     await createHostProfile({
@@ -297,6 +302,41 @@ export default function Onboarding1({
               </div>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+      <Dialog open={showHospitablePopup} onOpenChange={setShowHospitablePopup}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Connect with Airbnb</DialogTitle>
+          </DialogHeader>
+          <div className="">
+            <p>
+              <strong>Please Read:</strong>
+            </p>
+            <p className="pb-6">
+              This next step will connect with your Airbnb account. The property
+              sync process must be completed in one session.{" "}
+              <strong>
+                If you navigate away, press back, or close this window before
+                finishing, the sync will be interrupted.
+              </strong>{" "}
+              In this case, please send us a message and we will be in touch
+              shortly to reset your host account.
+            </p>
+            <div className="flex justify-end">
+              <Button
+                onClick={async () => {
+                  try {
+                    await createHospitableCustomer();
+                  } catch (error) {
+                    console.error("An error occurred:", error);
+                  }
+                }}
+              >
+                Connect with Airbnb
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </>
