@@ -30,6 +30,7 @@ export type ListingSite = Readonly<{
     checkOut?: string;
     numGuests?: number;
   };
+  expandUrl?(url: string): Promise<string | undefined>;
   createListing(id: string): OriginalListing;
 }>;
 

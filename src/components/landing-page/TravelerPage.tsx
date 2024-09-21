@@ -5,10 +5,10 @@ import {
 import Head from "next/head";
 import MastHead from "./_sections/MastHead";
 import Banner from "./Banner";
-import { useMaybeSendUnsentRequests } from "@/utils/useMaybeSendUnsentRequests";
+import { useSendUnsentRequest } from "@/utils/useSendUnsentRequests";
 
 export default function TravelerPage() {
-  useMaybeSendUnsentRequests();
+  useSendUnsentRequest();
 
   return (
     <VerificationProvider>

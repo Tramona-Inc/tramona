@@ -4,14 +4,16 @@ import {
   HandshakeIcon,
   Home,
   InfoIcon,
+  LinkIcon,
   MessageCircleQuestion,
+  MessagesSquare,
 } from "lucide-react";
 
 export const headerLinks = [
+  { name: "Link Input", href: "/link-input", icon: LinkIcon },
   { name: "How it works", href: "/how-it-works", icon: InfoIcon },
-  // { name: "Link Input", href: "/link-input", icon: LinkIcon },
   { name: "Recent Deals", href: "/exclusive-offers", icon: HandshakeIcon },
-  { name: "Why list with us", href: "/why-list", icon: Home },
+  { name: "For Hosts", href: "/why-list", icon: Home },
   // {
   //   name: "Unclaimed Offers",
   //   href: "/unclaimed-offers",
@@ -27,6 +29,9 @@ export const hamburgerLinksDesktop = [
 
 export const unloggedHamburgerLinksMobile = [
   { name: "24/7 Support", href: "/help-center", icon: BadgeHelp },
+  { name: "How it Works", href: "/how-it-works", icon: InfoIcon },
+  { name: "For Hosts", href: "/why-list", icon: Home },
+  { name: "Recent Deals", href: "/exclusive-offers", icon: HandshakeIcon },
 ];
 
 export const hamburgerLinksMobile = [

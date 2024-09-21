@@ -89,13 +89,14 @@ const main = {
 export const Layout: React.FC<LayoutProps> = ({ children, title_preview }) => {
   return (
     <Html>
-      <Preview className="text-brand">{title_preview}</Preview>
+      <Preview className="text-[#333333]">{title_preview}</Preview>
       <Tailwind
         config={{
           theme: {
             extend: {
               colors: {
-                brand: "#000000",
+                brand: "#333333",
+                primaryGreen: "#134E4A",
                 muted: "#737373",
                 offwhite: "#fafbfb",
                 grey: "#4D4D4D",
@@ -112,7 +113,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, title_preview }) => {
       >
         <Head />
         <Body
-          className="font-sans flex items-center justify-center text-base"
+          className="font-sans flex items-center justify-center text-base text-black"
           style={main}
         >
           <Container className="bg-white" style={{ backgroundColor: "white" }}>
@@ -174,7 +175,7 @@ export const CustomButton: React.FC<ButtonProps> = ({ title, link }) => {
         href={link}
         target="_blank"
         rel="noopener noreferrer"
-        className="bg-brand mx-auto inline-block w-11/12 whitespace-nowrap rounded-full px-3 py-3 text-base font-semibold text-white"
+        className="mx-auto inline-block w-11/12 whitespace-nowrap rounded-full bg-primaryGreen px-3 py-3 text-base font-semibold text-white"
         style={{
           textDecoration: "none",
         }}
@@ -606,20 +607,11 @@ export const EmailConfirmationCard: React.FC<EmailConfirmationCardProps> = ({
 export const BookingCard: React.FC<BookingCardProps> = ({
   checkIn,
   checkOut,
-  originalPrice,
-  tramonaPrice,
   description,
   property_image_link,
   isExpired,
   booking_link,
 }) => {
-  let discountPercentage = 0;
-  if (tramonaPrice) {
-    discountPercentage = originalPrice
-      ? Math.round(((originalPrice - tramonaPrice) / originalPrice) * 100)
-      : 0;
-  }
-
   return (
     <table
       style={{

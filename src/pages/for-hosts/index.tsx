@@ -2,7 +2,6 @@ import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import MainLayout from "@/components/_common/Layout/MainLayout";
 import {
   Accordion,
   AccordionContent,
@@ -14,6 +13,9 @@ import { type FeedRequestItem } from "@/components/activity-feed/ActivityFeed";
 import { getFeed } from "@/server/api/routers/feedRouter";
 import { type InferGetStaticPropsType } from "next";
 import HowItWorksHost from "@/components/landing-page/how-it-works-host";
+// import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
+import TramonaIcon from "@/components/_icons/TramonaIcon";
+import Footer from "@/components/_common/Layout/Footer";
 
 const DamageProtection = () => {
   const protectionMethods = [
@@ -234,6 +236,51 @@ function WhatAreYouWaitingFor() {
   );
 }
 
+function StickyTopBar() {
+  return (
+    <div className="fixed left-0 right-0 top-0 z-50 bg-white px-4 py-3 shadow-md">
+      <div className="mx-auto flex max-w-7xl items-center justify-between">
+        <Link href="/">
+          <span className="text-7xl">
+            <TramonaIcon />
+          </span>
+        </Link>
+        <div className="flex items-center space-x-6">
+          <span className="text-xl font-medium">Ready to List?</span>
+          <Link href="/host-onboarding">
+            <Button className="bg-primaryGreen px-6 py-3 text-lg font-semibold text-white">
+              Tramona Setup
+            </Button>
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MobileStickyBar() {
+  return (
+    <div className="fixed inset-x-0 z-50">
+      <div className="fixed left-0 right-0 top-0 bg-white p-4 shadow-md">
+        <div className="mx-auto flex max-w-7xl items-center">
+          <Link href="/">
+            <span className="text-5xl">
+              <TramonaIcon />
+            </span>
+          </Link>
+        </div>
+      </div>
+
+      <div className="fixed bottom-0 left-0 right-0 bg-white p-4 shadow-md">
+        <Link href="/host-onboarding" className="block">
+          <Button className="w-full bg-primaryGreen py-3 text-lg font-semibold text-white">
+            Tramona Setup
+          </Button>
+        </Link>
+      </div>
+    </div>
+  );
+}
 export async function getStaticProps() {
   const requestFeed = await getFeed({ maxNumEntries: 10 }).then((r) =>
     r.filter((r) => r.type === "request"),
@@ -248,11 +295,18 @@ export default function HostWelcome({
   requestFeed,
 }: InferGetStaticPropsType<typeof getStaticProps>) {
   return (
-    <MainLayout className="mx-auto max-w-full">
+    <div>
       <div className="relative space-y-32 overflow-x-hidden pb-32">
         <Head>
           <title>Hosts | Tramona</title>
         </Head>
+        <div className="md:hidden">
+          <MobileStickyBar />
+        </div>
+
+        <div className="hidden md:block">
+          <StickyTopBar />
+        </div>
 
         <IntroSection requestFeed={requestFeed} />
         <ListInAMinute />
@@ -261,6 +315,9 @@ export default function HostWelcome({
         <FAQ />
         <WhatAreYouWaitingFor />
       </div>
-    </MainLayout>
+      <div className="hidden md:block">
+        <Footer />
+      </div>
+    </div>
   );
 }

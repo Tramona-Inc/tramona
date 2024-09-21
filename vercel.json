@@ -6,7 +6,7 @@
     },
     {
       "path": "/api/cleanup",
-      "schedule": "0 0 * * *"
+      "schedule": "*/5 * * * *"
     },
     {
       "path": "/api/trpc/properties.getAllInfiniteScroll?batch=1&input=%7B\"0\"%3A%7B\"json\"%3A%7B\"cursor\"%3Anull%7D%2C\"meta\"%3A%7B\"values\"%3A%7B\"cursor\"%3A%5B\"undefined\"%5D%7D%7D%7D%7D",
@@ -18,7 +18,19 @@
     },
     {
       "path": "/api/cron/stripe-transfer",
+      "schedule": "0 */12 * * *"
+    },
+    {
+      "path": "/api/cron/scheduledEmailPostOnboard",
       "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/task",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/cron/check-requests-without-offers",
+      "schedule": "* * * * *"
     }
   ]
 }

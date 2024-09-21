@@ -1,6 +1,6 @@
 import {
+  CancellationPolicyWithInternals,
   Property,
-  type CancellationPolicy,
   type PropertyRoomType,
   type PropertyType,
 } from "@/server/db/schema";
@@ -22,7 +22,7 @@ type HostOnboardingState = {
   isEdit: boolean;
   listing: {
     propertyType: PropertyType;
-    cancellationPolicy: CancellationPolicy | null;
+    cancellationPolicy: CancellationPolicyWithInternals | null;
     spaceType: PropertyRoomType;
     maxGuests: number;
     bedrooms: number;
@@ -43,6 +43,7 @@ type HostOnboardingState = {
     otherHouseRules: string | null | undefined;
     originalListingId: string | null | undefined;
     originalListingPlatform: Property["originalListingPlatform"] | undefined;
+    airbnbUrl: string;
   };
   setIsEdit: (isEdit: boolean) => void;
   setMaxGuests: (maxGuests: number) => void;
@@ -51,7 +52,7 @@ type HostOnboardingState = {
   setBathrooms: (bathrooms: number) => void;
   setPropertyType: (property: PropertyType) => void;
   setCancellationPolicy: (
-    cancellationPolicy: CancellationPolicy | null,
+    cancellationPolicy: CancellationPolicyWithInternals | null,
   ) => void;
   setSpaceType: (property: PropertyRoomType) => void;
   setLocation: (location: LocationType) => void;
@@ -75,6 +76,7 @@ type HostOnboardingState = {
   setOriginalListingPlatform: (
     originalListingPlatform: Property["originalListingPlatform"],
   ) => void;
+  setAirbnbUrl: (airbnbUrl: string) => void;
   resetSession: () => void;
 };
 
@@ -113,6 +115,7 @@ export const useHostOnboarding = create<HostOnboardingState>()(
         otherHouseRules: "",
         originalListingId: null,
         originalListingPlatform: undefined,
+        airbnbUrl: "",
       },
       setIsEdit: (isEdit: boolean) => {
         set((state) => ({ ...state, isEdit }));
@@ -166,7 +169,7 @@ export const useHostOnboarding = create<HostOnboardingState>()(
         }));
       },
       setCancellationPolicy: (
-        cancellationPolicy: CancellationPolicy | null,
+        cancellationPolicy: CancellationPolicyWithInternals | null,
       ) => {
         set((state) => ({
           ...state,
@@ -360,6 +363,15 @@ export const useHostOnboarding = create<HostOnboardingState>()(
           listing: {
             ...state.listing,
             originalListingPlatform,
+          },
+        }));
+      },
+      setAirbnbUrl: (airbnbUrl: string) => {
+        set((state) => ({
+          ...state,
+          listing: {
+            ...state.listing,
+            airbnbUrl,
           },
         }));
       },

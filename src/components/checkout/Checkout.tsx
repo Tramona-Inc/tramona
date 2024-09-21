@@ -4,22 +4,19 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { Separator } from "../ui/separator";
 import { Avatar, AvatarImage } from "../ui/avatar";
-import { getDiscountPercentage, getNumNights, useIsSm } from "@/utils/utils";
+import { getOfferDiscountPercentage, useIsSm } from "@/utils/utils";
 import { type OfferWithDetails } from "../offers/PropertyPage";
 import { formatDateMonthDay, plural } from "@/utils/utils";
-import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
+import { useChatWithAdmin } from "@/utils/messaging/useChatWithAdmin";
 import CustomStripeCheckout from "./CustomStripeCheckout";
 import { OfferPriceDetails } from "../_common/OfferPriceDetails";
 import { getCancellationPolicyDescription } from "@/config/getCancellationPolicyDescription";
 
-export default function Checkout({
-  offer: { property, request, ...offer },
-}: {
-  offer: OfferWithDetails;
-}) {
+export default function Checkout({ offer }: { offer: OfferWithDetails }) {
   const router = useRouter();
-  const chatWithAdmin = useChatWithAdmin();
   const isMobile = !useIsSm();
+
+  const chatWithAdmin = useChatWithAdmin();
 
   const handleBackClick = (
     event: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
@@ -54,7 +51,7 @@ export default function Checkout({
           <div className="text-sm">
             <p>Guests</p>
             <p className="font-bold">
-              {request && plural(request.numGuests, "guest")}
+              {offer.request && plural(offer.request.numGuests, "guest")}
             </p>
           </div>
         </div>
@@ -63,22 +60,19 @@ export default function Checkout({
   }
 
   function CancellationPolicy() {
-    if (property.cancellationPolicy === null) return null;
+    if (offer.property.cancellationPolicy === null) return null;
 
     return (
       <div className="space-y-2">
         <h3 className="text-lg font-semibold">Cancellation Policy</h3>
         <p className="text-sm font-semibold leading-5 text-muted-foreground">
-          {getCancellationPolicyDescription(property.cancellationPolicy)}
+          {getCancellationPolicyDescription(offer.property.cancellationPolicy)}
         </p>
       </div>
     );
   }
 
   function CheckoutSummary() {
-    const nightlyPrice =
-      offer.totalPrice / getNumNights(offer.checkIn, offer.checkOut);
-
     return (
       <div>
         <div className="md:rounded-t-xl md:border md:border-b-0 md:p-3">
@@ -89,20 +83,20 @@ export default function Checkout({
             <div className="flex items-center gap-2">
               <div className="overflow-hidden rounded-xl">
                 <Image
-                  src={property.imageUrls[0]!}
+                  src={offer.property.imageUrls[0]!}
                   width={100}
                   height={100}
                   alt=""
                 />
               </div>
               <div className="space-y-1">
-                <h3 className="text-sm font-bold">{property.name}</h3>
-                <p className="text-xs">{property.propertyType}</p>
+                <h3 className="text-sm font-bold">{offer.property.name}</h3>
+                <p className="text-xs">{offer.property.propertyType}</p>
                 <div className="flex items-center gap-1">
                   <Star size={10} />
                   <p className="text-xs">
-                    {property.avgRating} (
-                    {plural(property.numRatings, "review")})
+                    {offer.property.avgRating} (
+                    {plural(offer.property.numRatings, "review")})
                   </p>
                 </div>
               </div>
@@ -123,11 +117,16 @@ export default function Checkout({
         </div>
         <div className="rounded-md bg-teal-900 md:rounded-b-xl md:rounded-t-none">
           <h2 className="py-1 text-center text-lg font-semibold text-white md:py-2">
-            {property.originalNightlyPrice
-              ? getDiscountPercentage(
-                  property.originalNightlyPrice,
-                  nightlyPrice,
-                )
+            {(offer.property.airbnbUrl ?? offer.scrapeUrl)
+              ? getOfferDiscountPercentage({
+                  createdAt: offer.createdAt,
+                  travelerOfferedPrice: offer.totalPrice,
+                  checkIn: offer.checkIn,
+                  checkOut: offer.checkOut,
+                  randomDirectListingDiscount:
+                    offer.randomDirectListingDiscount,
+                  datePriceFromAirbnb: offer.datePriceFromAirbnb,
+                })
               : 0}
             % Off
           </h2>
@@ -199,9 +198,7 @@ export default function Checkout({
           <Separator className="my-4" />
           <CancellationPolicy />
           <Separator className="my-4" />
-          {!isMobile && (
-            <CustomStripeCheckout offer={{ property, request, ...offer }} />
-          )}
+          {!isMobile && <CustomStripeCheckout offer={offer} />}
         </div>
         <div className="md:hidden">
           <BestPriceCard />
@@ -212,9 +209,7 @@ export default function Checkout({
           <Separator className="my-6" />
           <CancellationPolicy />
           <Separator className="my-6" />
-          {isMobile && (
-            <CustomStripeCheckout offer={{ property, request, ...offer }} />
-          )}
+          {isMobile && <CustomStripeCheckout offer={offer} />}
           <Separator className="my-6" />
           <CustomerReview />
           <div className="mt-4">

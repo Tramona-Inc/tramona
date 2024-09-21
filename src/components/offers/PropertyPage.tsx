@@ -10,7 +10,12 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { api, type RouterOutputs } from "@/utils/api";
-import { formatDateRange, formatDateWeekMonthDay, plural } from "@/utils/utils";
+import {
+  formatDateRange,
+  formatDateWeekMonthDay,
+  getOfferDiscountPercentage,
+  plural,
+} from "@/utils/utils";
 import { AspectRatio } from "../ui/aspect-ratio";
 import {
   ImagesIcon,
@@ -41,31 +46,22 @@ import {
   SmokingRule,
 } from "./HouseRules";
 import { OfferPriceDetails } from "../_common/OfferPriceDetails";
-import { getCancellationPolicyDescription } from "@/config/getCancellationPolicyDescription";
+import {
+  getCancellationPolicyDescription,
+  getFreeCancellationUntil,
+} from "@/config/getCancellationPolicyDescription";
 import { VerificationProvider } from "../_utils/VerificationContext";
 import IdentityModal from "../_utils/IdentityModal";
-import { InferQueryModel } from "@/server/db";
 import { Property } from "@/server/db/schema";
+import ChatOfferButton from "./ChatOfferButton";
+import { Airbnb } from "@/utils/listing-sites/Airbnb";
+import { createUserNameAndPic } from "../activity-feed/admin/generationHelper";
+import { CreditCard } from "lucide-react";
+import ReasonsToBook from "./ReasonsToBook";
 
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
-
-export type PropertyPageData = InferQueryModel<
-  "properties",
-  {
-    latLngPoint: false;
-  },
-  {
-    host: {
-      columns: {
-        id: true;
-        name: true;
-        email: true;
-        image: true;
-      };
-    };
-    reviews: true;
-  }
->;
+export type PropertyPageData = OfferWithDetails["property"];
+//export type PropertyPageData = RouterOutputs["properties"]["getById"];
 
 export default function PropertyPage({
   property,
@@ -80,26 +76,47 @@ export default function PropertyPage({
 }) {
   const aboutRef = useRef<HTMLDivElement>(null);
   const [isOverflowing, setIsOverflowing] = useState(false);
+  const [reviewBackupImages, setReviewBackupImages] = useState<string[]>([]);
 
   useEffect(() => {
     const aboutElement = aboutRef.current;
     if (aboutElement) {
       setIsOverflowing(aboutElement.scrollHeight > aboutElement.clientHeight);
     }
+    async function createReviewBackupImages() {
+      const backup = await createUserNameAndPic(property.reviews.length).then(
+        (users) => users.map((user) => user.picture),
+      );
+      setReviewBackupImages(backup);
+    }
+    void createReviewBackupImages();
   }, []);
 
-  const hostName = property.host?.name ?? property.hostName;
+  const hostName = property.host?.name ?? property.hostName ?? "Tramona";
 
   const originalListing = getOriginalListing(property);
+
+  console.log(property.originalListingPlatform, property.originalListingId);
 
   const renderSeeMoreButton = property.imageUrls.length > 5;
 
   const [selectedImageIdx, setSelectedImageIdx] = useState<number>(0);
   const firstImageUrl = property.imageUrls[0]!;
 
+  const discountPercentage = offer
+    ? getOfferDiscountPercentage({
+        createdAt: offer.createdAt,
+        travelerOfferedPrice: offer.totalPrice,
+        checkIn: offer.checkIn,
+        checkOut: offer.checkOut,
+        randomDirectListingDiscount: offer.randomDirectListingDiscount,
+        datePriceFromAirbnb: offer.datePriceFromAirbnb,
+      })
+    : null;
+
   return (
     <div>
-      <div className="relative mt-4 grid min-h-[400px] grid-cols-4 grid-rows-2 gap-2 overflow-hidden rounded-xl">
+      <div className="relative grid h-[480px] grid-cols-4 grid-rows-2 gap-2 overflow-hidden rounded-xl">
         <Dialog>
           <DialogTrigger
             key={0}
@@ -197,12 +214,32 @@ export default function PropertyPage({
         )}
       </div>
 
-      <div className="relative flex gap-8 pt-4">
+      <div className="h-2" />
+
+      {discountPercentage && (
+        <div className="rounded-xl bg-primaryGreen py-4 text-center text-2xl font-semibold text-white">
+          {discountPercentage}% off
+        </div>
+      )}
+
+      <div className="relative flex gap-8 pb-32 pt-4">
         <div className="min-w-0 flex-1 space-y-4">
           <section>
-            <h1 className="flex-1 text-3xl font-semibold sm:text-4xl">
-              {property.name}
-            </h1>
+            <div className="flex">
+              <h1 className="flex-1 text-3xl font-semibold sm:text-4xl">
+                {property.name}
+              </h1>
+              {offer && (
+                <div className="flex justify-end">
+                  <ShareOfferDialog
+                    id={offer.id}
+                    isRequest={false}
+                    propertyName={property.name}
+                    showShare={false}
+                  />
+                </div>
+              )}
+            </div>
             <div className="flex flex-col gap-4 sm:flex-row">
               <div className="flex-1">
                 <p className="gap flex flex-wrap items-center gap-x-1 pt-1 text-sm font-medium capitalize">
@@ -222,7 +259,7 @@ export default function PropertyPage({
                   )}
                 </p>
               </div>
-              {originalListing && offer && (
+              {originalListing && offer && !property.bookOnAirbnb && (
                 <div className="self-end">
                   <PropertyCompareBtn
                     checkIn={offer.checkIn}
@@ -235,18 +272,25 @@ export default function PropertyPage({
             </div>
           </section>
 
-          <section className="border-t pt-4">
-            <div className="flex items-center gap-2">
+          <section className="flex-justify-between mx-1 flex w-full border-t pt-4">
+            <div className="flex w-5/6 items-center gap-2">
               <UserAvatar
                 name={hostName}
                 email={property.host?.email}
-                image={property.host?.image}
+                image={"/assets/images/tramona.svg"}
               />
               <div className="-space-y-1">
                 <p className="text-sm text-muted-foreground">Hosted by</p>
                 <p className="text-lg font-medium">{hostName}</p>
               </div>
             </div>
+            {offer && (
+              <ChatOfferButton
+                offerId={offer.id.toString()}
+                offerHostId={offer.property.hostId ?? null}
+                offerPropertyName={offer.property.name}
+              />
+            )}
           </section>
 
           <section>
@@ -299,10 +343,9 @@ export default function PropertyPage({
             </section>
           )}
 
-          <section>
+          <section className="space-y-4">
             <h2 className="subheading border-t pb-2 pt-4">Amenitites</h2>
             <PropertyAmenities amenities={property.amenities} />
-
             <Dialog>
               <DialogTrigger asChild>
                 <Button variant="secondary" className="w-full sm:w-auto">
@@ -319,27 +362,30 @@ export default function PropertyPage({
               </DialogContent>
             </Dialog>
           </section>
+          <section className="border-t pb-2 pt-4">
+            <ReasonsToBook />
+          </section>
 
-          {property.latitude && property.longitude && (
-            <section>
-              <h2 className="subheading border-t pb-2 pt-4">
-                Where you&apos;ll be
-              </h2>
-              <div className="relative mt-4 h-[400px]">
-                <div className="absolute inset-0 z-0 overflow-hidden rounded-xl border">
-                  <SingleLocationMap
-                    lat={property.latitude}
-                    lng={property.longitude}
-                  />
-                </div>
+          <section>
+            <h2 className="subheading border-t pb-2 pt-4">
+              Where you&apos;ll be
+            </h2>
+            <div className="relative mt-4 h-[400px]">
+              <div className="absolute inset-0 z-0 overflow-hidden rounded-xl border">
+                <SingleLocationMap
+                  lng={property.latLngPoint.x}
+                  lat={property.latLngPoint.y}
+                />
               </div>
-            </section>
-          )}
+            </div>
+          </section>
 
           <section>
             <div className="flex items-start justify-between border-t pb-2 pt-4">
               <div>
-                <h2 className="subheading">Guest Reviews</h2>
+                <h2 id="reviews" className="subheading">
+                  Guest Reviews
+                </h2>
                 <div className="flex items-center gap-2 pb-4">
                   <StarIcon className="inline size-[1em] fill-primaryGreen stroke-primaryGreen" />{" "}
                   {property.avgRating} · {plural(property.numRatings, "review")}
@@ -347,9 +393,16 @@ export default function PropertyPage({
               </div>
             </div>
             <div className="grid gap-4">
-              {property.reviews.map((review) => (
-                <ReviewCard key={review.id} review={review} />
-              ))}
+              {property.reviews.map(
+                (review, id) =>
+                  reviewBackupImages[id] && (
+                    <ReviewCard
+                      key={review.id}
+                      review={review}
+                      backupReview={reviewBackupImages[id]}
+                    />
+                  ),
+              )}
             </div>
             {originalListing && offer && (
               <Link
@@ -400,56 +453,77 @@ export default function PropertyPage({
             </section>
           )}
 
-          <section>
-            <h2 className="subheading border-t pb-2 pt-4">House rules</h2>
-            <div className="overflow-x-auto">
-              <div className="flex gap-4">
-                {property.checkInTime !== null && (
-                  <CheckInTimeRule checkInTime={property.checkInTime} />
-                )}
-                {property.checkOutTime !== null && (
-                  <CheckOutTimeRule checkOutTime={property.checkOutTime} />
-                )}
-                {property.petsAllowed !== null && (
-                  <PetsRule petsAllowed={property.petsAllowed} />
-                )}
-                {property.smokingAllowed !== null && (
-                  <SmokingRule smokingAllowed={property.smokingAllowed} />
-                )}
-              </div>
-            </div>
-            {property.cancellationPolicy !== null && (
-              <>
-                <h3 className="pb-2 pt-4 font-bold">Cancellation Policy</h3>
-                <p>
-                  {getCancellationPolicyDescription(
-                    property.cancellationPolicy,
+          {(property.checkInTime ??
+            property.checkOutTime ??
+            property.petsAllowed ??
+            property.smokingAllowed ??
+            property.cancellationPolicy) && (
+            <section>
+              <h2 className="subheading border-t pb-2 pt-4">House rules</h2>
+              <div className="overflow-x-auto">
+                <div className="flex gap-4">
+                  {property.checkInTime !== null && (
+                    <CheckInTimeRule checkInTime={property.checkInTime} />
                   )}
-                </p>
-              </>
-            )}
-          </section>
+                  {property.checkOutTime !== null && (
+                    <CheckOutTimeRule checkOutTime={property.checkOutTime} />
+                  )}
+                  {property.petsAllowed !== null && (
+                    <PetsRule petsAllowed={property.petsAllowed} />
+                  )}
+                  {property.smokingAllowed !== null && (
+                    <SmokingRule smokingAllowed={property.smokingAllowed} />
+                  )}
+                </div>
+              </div>
+              {property.cancellationPolicy !== null && (
+                <>
+                  <h3 className="pb-2 pt-4 font-bold">Cancellation Policy</h3>
+                  <p>
+                    {getCancellationPolicyDescription(
+                      property.cancellationPolicy,
+                    )}
+                  </p>
+                </>
+              )}
+            </section>
+          )}
 
+          {property.checkInInfo !== null && (
+            <section>
+              <h2 className="subheading border-t pb-2 pt-4">
+                Check-in information
+              </h2>
+              <p>
+                {property.checkInInfo === "self"
+                  ? "Self check-in"
+                  : property.checkInInfo}
+              </p>
+            </section>
+          )}
           <section>
             <h2 className="subheading border-t pb-2 pt-4">
-              Check-in information
+              {`We're here for you`}
             </h2>
-            <p>
-              {property.checkInInfo === "self"
-                ? "Self check-in"
-                : property.checkInInfo}
-            </p>
-          </section>
-
-          {offer && (
-            <div className="flex justify-end">
-              <ShareOfferDialog
-                id={offer.id}
-                isRequest={false}
-                propertyName={property.name}
-              />
+            <div className="z-20 max-w-2xl text-zinc-700">
+              <p className="pb-4 text-sm">
+                Visit our{" "}
+                <Link href="/help-center" className="text-blue-600 underline">
+                  Help Center
+                </Link>{" "}
+                to find answers to frequently asked questions. If you have any
+                more questions, our Customer Support team will be happy to help
+                you.
+              </p>
             </div>
-          )}
+            <div className="flex w-full">
+              <Link href="/help-center" className="w-full">
+                <Button variant="darkOutline" className="w-full">
+                  Need Support?
+                </Button>
+              </Link>
+            </div>
+          </section>
         </div>
 
         {sidebar && (
@@ -466,6 +540,18 @@ export default function PropertyPage({
           </div>
         )}
       </div>
+      <div className="flex flex-col text-center">
+        <h2 className="subheading w-full pb-4 pt-4 text-center">
+          {`Haven't found the right vacation home yet?`}
+        </h2>
+        <div className="inline-block">
+          <Link href="/requests">
+            <Button variant="darkOutline" className="text-md">
+              Submit another request
+            </Button>
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }
@@ -477,11 +563,22 @@ function BookNowBtn({
 }: {
   btnSize: ButtonProps["size"];
   offer: OfferWithDetails;
-  property: Pick<Property, "stripeVerRequired">;
+  property: Pick<
+    Property,
+    "stripeVerRequired" | "originalListingId" | "bookOnAirbnb"
+  >;
 }) {
   const { data: verificationStatus } =
     api.users.myVerificationStatus.useQuery();
   const isBooked = !!offer.acceptedAt;
+
+  const airbnbCheckoutUrl = Airbnb.createListing(
+    property.originalListingId!,
+  ).getCheckoutUrl({
+    checkIn: offer.checkIn,
+    checkOut: offer.checkOut,
+    numGuests: offer.request?.numGuests ?? 1,
+  });
 
   return (
     <Button
@@ -501,12 +598,17 @@ function BookNowBtn({
           <BookCheckIcon className="size-5" />
           Booked
         </>
-      ) : !property.stripeVerRequired ? (
-        <Link href={`/offer-checkout/${offer.id}`}>
-          Book now
-          <ArrowRightIcon className="size-5" />
+      ) : property.bookOnAirbnb ? (
+        <Link
+          href={airbnbCheckoutUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Book on Airbnb
+          <ExternalLinkIcon className="size-5" />
         </Link>
-      ) : verificationStatus?.isIdentityVerified === "true" ? (
+      ) : !property.stripeVerRequired ||
+        verificationStatus?.isIdentityVerified === "true" ? (
         <Link href={`/offer-checkout/${offer.id}`}>
           Book now
           <ArrowRightIcon className="size-5" />
@@ -531,8 +633,15 @@ function OfferPageSidebar({
   property,
 }: {
   offer: OfferWithDetails;
-  property: Pick<Property, "stripeVerRequired">;
+  property: Pick<
+    Property,
+    | "stripeVerRequired"
+    | "originalListingId"
+    | "bookOnAirbnb"
+    | "cancellationPolicy"
+  >;
 }) {
+  const [open, setOpen] = useState(false);
   return (
     <div className="space-y-4">
       <Card>
@@ -566,20 +675,54 @@ function OfferPageSidebar({
             </div>
           )}
           <BookNowBtn btnSize="lg" offer={offer} property={property} />
-          <OfferPriceDetails offer={offer} />
+          {!offer.acceptedAt && (
+            <p className="text-center text-xs text-zinc-500">
+              You won&apos;t be charged yet
+            </p>
+          )}
+          <OfferPriceDetails
+            offer={offer}
+            bookOnAirbnb={property.bookOnAirbnb}
+          />
+
+          {property.cancellationPolicy &&
+            property.cancellationPolicy !== "Non-refundable" && (
+              <div className="flex flex-row justify-between gap-2 border-t pt-4">
+                <div className="flex flex-col">
+                  <div className="font-bold">Book with confidence</div>
+                  <div>
+                    Free cancellation until{" "}
+                    {getFreeCancellationUntil(
+                      offer.checkIn,
+                      property.cancellationPolicy,
+                    )}
+                  </div>
+                  <a
+                    onClick={() => setOpen(true)}
+                    className="cursor-pointer text-sm text-blue-600 hover:underline"
+                  >
+                    See Details
+                  </a>
+                </div>
+                {/* TO DO: CREDIT CARD ICON */}
+                <CreditCard className="h-12 w-12 text-[#004236]" />
+              </div>
+            )}
         </CardContent>
       </Card>
 
-      <div className="flex gap-2 rounded-xl border border-orange-300 bg-orange-50 p-3 text-orange-800">
-        <FlameIcon className="size-7 shrink-0" />
-        <div>
-          <p className="text-sm font-bold">Tramona exclusive deal</p>
-          <p className="text-xs">
-            This is an exclusive offer created just for you &ndash; you will not
-            be able to find this price anywhere else
-          </p>
+      {!property.bookOnAirbnb && (
+        <div className="flex gap-2 rounded-xl border border-orange-300 bg-orange-50 p-3 text-orange-800">
+          <FlameIcon className="size-7 shrink-0" />
+          <div>
+            <p className="text-sm font-bold">Tramona exclusive deal</p>
+            <p className="text-xs">
+              This is an exclusive offer created just for you &ndash; you will
+              not be able to find this price anywhere else
+            </p>
+          </div>
         </div>
-      </div>
+      )}
       <div className="flex gap-2 rounded-xl border border-blue-300 bg-blue-50 p-3 text-blue-800">
         <InfoIcon className="size-7 shrink-0" />
         <div>
@@ -597,6 +740,16 @@ function OfferPageSidebar({
           </p>
         </div>
       </div>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Cancellation Policy</DialogTitle>
+          </DialogHeader>
+          <p>
+            {getCancellationPolicyDescription(property.cancellationPolicy!)}
+          </p>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -606,7 +759,10 @@ function OfferPageMobileBottomCard({
   property,
 }: {
   offer: OfferWithDetails;
-  property: Pick<Property, "stripeVerRequired">;
+  property: Pick<
+    Property,
+    "stripeVerRequired" | "originalListingId" | "bookOnAirbnb"
+  >;
 }) {
   const { data: verificationStatus } =
     api.users.myVerificationStatus.useQuery();
@@ -624,31 +780,26 @@ function OfferPageMobileBottomCard({
         )}
         <div className="flex-1">
           <BookNowBtn btnSize="sm" offer={offer} property={property} />
-          {verificationStatus?.isIdentityVerified === "false" && (
-            <p className="text-center text-xs font-semibold text-red-500">
-              Host requires Stripe verification prior to booking
-            </p>
-          )}
+          {verificationStatus?.isIdentityVerified === "false" &&
+            property.stripeVerRequired === true && (
+              <p className="text-center text-xs font-semibold text-red-500">
+                Host requires Stripe verification prior to booking
+              </p>
+            )}
         </div>
       </CardContent>
     </Card>
   );
 }
 
-export function OfferPage({
-  offer,
-  property,
-}: {
-  offer: OfferWithDetails;
-  property: PropertyPageData;
-}) {
+export function OfferPage({ offer }: { offer: OfferWithDetails }) {
   return (
     <PropertyPage
-      property={property}
+      property={offer.property}
       offer={offer}
-      sidebar={<OfferPageSidebar offer={offer} property={property} />}
+      sidebar={<OfferPageSidebar offer={offer} property={offer.property} />}
       mobileBottomCard={
-        <OfferPageMobileBottomCard offer={offer} property={property} />
+        <OfferPageMobileBottomCard offer={offer} property={offer.property} />
       }
     />
   );

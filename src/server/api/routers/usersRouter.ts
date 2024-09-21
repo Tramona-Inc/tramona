@@ -23,7 +23,11 @@ import { eq } from "drizzle-orm";
 
 import { env } from "@/env";
 import { db } from "@/server/db";
-import { generateReferralCode } from "@/utils/utils";
+import {
+  censorEmail,
+  censorPhoneNumber,
+  generateReferralCode,
+} from "@/utils/utils";
 import { zodString } from "@/utils/zod-utils";
 import { TRPCError } from "@trpc/server";
 import jwt from "jsonwebtoken";
@@ -31,8 +35,21 @@ import { z } from "zod";
 import axios from "axios";
 import { getCity } from "@/server/google-maps";
 import { sendSlackMessage } from "@/server/slack";
+import {
+  createHostReferral,
+  createLatLngGISPoint,
+  sendEmail,
+} from "@/server/server-utils";
+import WelcomeEmail from "packages/transactional/emails/WelcomeEmail";
+import createNextApiHandler from "../../../pages/api/trpc/[trpc]";
 
 export const usersRouter = createTRPCRouter({
+  getUser: protectedProcedure.query(async ({ ctx }) => {
+    return await db.query.users.findFirst({
+      where: eq(users.id, ctx.user.id),
+    });
+  }),
+
   getOnboardingStep: optionallyAuthedProcedure.query(async ({ ctx }) => {
     if (!ctx.user) return null;
     const res = await ctx.db.query.users.findFirst({
@@ -107,6 +124,15 @@ export const usersRouter = createTRPCRouter({
         .where(eq(users.id, input.id))
         .returning();
 
+      if (updatedUser[0] && updatedUser[0]?.onboardingStep === 3) {
+        await sendEmail({
+          to: updatedUser[0].email,
+          subject: "Welcome to Tramona",
+          content: WelcomeEmail({
+            name: updatedUser[0].name ?? updatedUser[0].firstName ?? "Guest",
+          }),
+        });
+      }
       return updatedUser;
     }),
 
@@ -219,12 +245,29 @@ export const usersRouter = createTRPCRouter({
       });
 
       await sendSlackMessage({
+        isProductionOnly: true,
         text: [
           "*Host Profile Created:*",
           `User ${ctx.user.name} has become a host`,
         ].join("\n"),
         channel: "host-bot",
       });
+
+      const curUser = await db.query.users.findFirst({
+        where: eq(users.id, ctx.user.id),
+      });
+      //referrals for host
+      console.log(
+        "calleing referral function here is the referral code used",
+        curUser,
+      );
+      if (curUser) {
+        //creates the discount but doenst validate or resolve it
+        await createHostReferral({
+          userId: curUser.id,
+          referralCodeUsed: curUser.referralCodeUsed,
+        });
+      }
 
       interface PropertyType {
         id: number;
@@ -487,8 +530,10 @@ export const usersRouter = createTRPCRouter({
               numBeds: property.bedsNumber,
               numBedrooms: property.bedroomsNumber,
               numBathrooms: property.bathroomsNumber,
-              latitude: property.lat,
-              longitude: property.lng,
+              latLngPoint: createLatLngGISPoint({
+                lat: property.lat,
+                lng: property.lng,
+              }),
               city: await getCity({ lat: property.lat, lng: property.lng }),
               hostName: property.contactName,
               originalListingId: property.id.toString(),
@@ -634,7 +679,7 @@ export const usersRouter = createTRPCRouter({
       }
 
       if (!user.password) {
-        return "incorrect credentials";
+        return "passwordless";
       }
 
       const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -717,8 +762,26 @@ export const usersRouter = createTRPCRouter({
 
       if (!verifications) throw new TRPCError({ code: "NOT_FOUND" });
 
-      return verifications;
+      return {
+        ...verifications,
+        email: censorEmail(verifications.email),
+        phoneNumber: censorPhoneNumber(verifications.phoneNumber!),
+      };
     }),
+
+  getMyVerifications: protectedProcedure.query(async ({ ctx }) => {
+    const verifications = ctx.db.query.users.findFirst({
+      where: eq(users.id, ctx.user.id),
+      columns: {
+        dateOfBirth: true,
+        phoneNumber: true,
+        firstName: true,
+        lastName: true,
+      },
+    });
+
+    return verifications;
+  }),
 
   addEmergencyContacts: protectedProcedure
     .input(

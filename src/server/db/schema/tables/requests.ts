@@ -11,6 +11,7 @@ import {
   text,
   timestamp,
   varchar,
+  boolean
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { groups } from "./groups";
@@ -64,14 +65,17 @@ export const requests = pgTable(
       .notNull()
       .defaultNow(),
     resolvedAt: timestamp("resolved_at", { withTimezone: true }),
-    lat: doublePrecision("lat"),
-    lng: doublePrecision("lng"),
-    radius: doublePrecision("radius"),
+    // lat: doublePrecision("lat").notNull(),
+    // lng: doublePrecision("lng").notNull(),
+    radius: doublePrecision("radius").notNull(),
     latLngPoint: geometry("lat_lng_point", {
       type: "point",
       mode: "xy",
       srid: 4326,
-    }),
+    })
+      .notNull()
+      .$type<{ x: number; y: number }>(),
+    notifiedNoOffers: boolean("notified_no_offers").notNull().default(false),
   },
   (t) => ({
     madeByGroupidIdx: index().on(t.madeByGroupId),

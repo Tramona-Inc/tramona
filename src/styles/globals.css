@@ -42,6 +42,10 @@ body {
     --screen-minus-header-n-footer: calc(
       100vh - var(--header-height) - var(--footer-height)
     );
+    --screen-minus-header-n-footer-n-searchbar: calc(
+      100vh - var(--header-height) - var(--footer-height) -
+        var(--searchbar-height)
+    );
   }
 
   @media (min-width: 640px) {
@@ -56,6 +60,11 @@ body {
     }
   }
 
+  @media (min-width: 640px) {
+    :root {
+      --searchbar-height: 90px;
+    }
+  }
   /* We don't have dark mode yet, but we will use this if we want to add it */
 
   /* .dark {
@@ -89,7 +98,7 @@ body {
     @apply bg-zinc-50 text-foreground;
   }
   :root {
-    @apply selection:bg-teal-700 selection:text-white;
+    @apply scroll-smooth selection:bg-teal-700 selection:text-white;
   }
 }
 
@@ -121,4 +130,20 @@ body {
   text-overflow: ellipsis;
   -webkit-line-clamp: 3; /* Number of lines to show before truncating */
   line-clamp: 3;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+  opacity: 0;
 }

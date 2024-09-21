@@ -4,7 +4,7 @@ import { create } from "zustand";
 import supabase from "../supabase-client";
 import { errorToast } from "../toasts";
 
-export type ChatMessageType = MessageType & { userId: string}; // make userId non-null
+export type ChatMessageType = MessageType & { userId: string }; // make userId non-null
 
 type ConversationsState = Record<
   string,
@@ -53,26 +53,25 @@ export const useMessage = create<MessageState>((set, get) => ({
     conversationId: string,
     newMessage: ChatMessageType,
   ) => {
+    // Optimistically update the state
     set((state) => {
       const updatedConversations: ConversationsState = {
         ...state.conversations,
       };
 
-      // Check if the conversation exists in the state
       if (updatedConversations[conversationId]) {
-        // Add the new message to the existing conversation
         updatedConversations[conversationId] = {
           messages: [
             newMessage,
-            ...(updatedConversations[conversationId]?.messages ?? []),
+            ...updatedConversations[conversationId].messages,
           ],
-          page: updatedConversations[conversationId]?.page ?? 1, // Set a default value for page
+          page: updatedConversations[conversationId]?.page ?? 1,
           hasMore: updatedConversations[conversationId]?.hasMore ?? false,
           alreadyFetched:
             updatedConversations[conversationId]?.alreadyFetched ?? true,
         };
       }
-      // Ensure TypeScript understands that this is a ChatMessageType[]
+
       const updatedState: MessageState = {
         ...state,
         conversations: updatedConversations,

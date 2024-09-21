@@ -14,8 +14,10 @@ import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { type SeparatedData } from "@/server/server-utils";
 import { separateByPriceRestriction } from "@/utils/utils";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function HostRequests() {
+  const { toast } = useToast();
   const [propertyPrices, setPropertyPrices] = useState<Record<number, string>>(
     {},
   );
@@ -32,13 +34,29 @@ export default function HostRequests() {
     null,
   );
 
-    api.properties.getHostPropertiesWithRequests.useQuery(undefined, {
-      onSuccess: (fetchedProperties) => {
-        const separatedProperties =
-          separateByPriceRestriction(fetchedProperties);
-        setSeparatedData(separatedProperties);
+  const [selectedProperties, setSelectedProperties] = useState<number[]>([]);
+
+  const { data: unusedReferralDiscounts } =
+    api.referralCodes.getAllUnusedHostReferralDiscounts.useQuery(undefined, {
+      onSuccess: () => {
+        if (unusedReferralDiscounts && unusedReferralDiscounts.length > 0) {
+          toast({
+            title: "Congratulations! 🎉 ",
+            description:
+              "Your referral code has been validated, so your next booking will be completely free of service fees. Enjoy the savings!",
+            variant: "default",
+            duration: 10000,
+          });
+        }
       },
     });
+
+  api.properties.getHostPropertiesWithRequests.useQuery(undefined, {
+    onSuccess: (fetchedProperties) => {
+      const separatedProperties = separateByPriceRestriction(fetchedProperties);
+      setSeparatedData(separatedProperties);
+    },
+  });
 
   const requestsWithProperties = priceRestriction
     ? separatedData?.outsidePriceRestriction
@@ -61,8 +79,7 @@ export default function HostRequests() {
             <div key={requestData.request.id} className="mb-4">
               <RequestCard request={requestData.request} type="host">
                 <Button
-                  variant="darkOutline"
-                  className="mt-2"
+                  variant="secondary"
                   onClick={() => {
                     rejectRequest({ requestId: requestData.request.id });
                   }}
@@ -70,7 +87,6 @@ export default function HostRequests() {
                   Reject
                 </Button>
                 <Button
-                  className="mt-2"
                   onClick={() => {
                     setDialogOpen(true);
                     setSelectedRequest(requestData.request);
@@ -95,6 +111,8 @@ export default function HostRequests() {
           properties={properties}
           request={selectedRequest}
           setStep={setStep}
+          setSelectedProperties={setSelectedProperties}
+          selectedProperties={selectedProperties}
         />
       )}
       {step === 1 && properties && selectedRequest && (
@@ -106,6 +124,7 @@ export default function HostRequests() {
           open={dialogOpen}
           setOpen={setDialogOpen}
           setPropertyPrices={setPropertyPrices}
+          selectedProperties={selectedProperties}
         />
       )}
       {step === 2 && selectedRequest && (

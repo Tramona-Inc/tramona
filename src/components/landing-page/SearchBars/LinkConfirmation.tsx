@@ -27,6 +27,11 @@ import {
   getNumNights,
   plural,
 } from "@/utils/utils";
+import RequestWaitlistDialog from "./DesktopRequestComponents/RequestWaitlistDialog";
+import { useRouter } from "next/router";
+import { toast } from "@/components/ui/use-toast";
+import { useSession } from "next-auth/react";
+import SuperJSON from "superjson";
 
 export interface LinkConfirmationProps {
   open: boolean;
@@ -54,18 +59,34 @@ const LinkConfirmation: React.FC<LinkConfirmationProps> = ({
   const { mutateAsync: createRequestWithLink, isLoading } =
     api.requests.createRequestWithLink.useMutation();
 
+  const router = useRouter();
+  const { status } = useSession();
+
   async function submitRequest() {
-    await createRequestWithLink({ property, request })
-      .then(({ madeByGroupId }) => {
-        setMadeByGroupId(madeByGroupId);
-        setOpen(false);
-        setRequestSubmittedDialogOpen(true);
-        setShowConfetti(true);
-      })
-      .catch((e) => {
-        console.error(e);
-        errorToast();
+    if (status === "unauthenticated") {
+      localStorage.setItem(
+        "unsentLinkRequest",
+        SuperJSON.stringify({ property, request }),
+      );
+      void router.push("/auth/signin").then(() => {
+        toast({
+          title: `Request and link saved: ${request.location}`,
+          description: "It will be sent after you sign in",
+        });
       });
+    } else {
+      await createRequestWithLink({ property, request })
+        .then(({ madeByGroupId }) => {
+          setMadeByGroupId(madeByGroupId);
+          setOpen(false);
+          setRequestSubmittedDialogOpen(true);
+          setShowConfetti(true);
+        })
+        .catch((e) => {
+          console.error(e);
+          errorToast();
+        });
+    }
   }
   const fmtdDateRange = formatDateRange(request.checkIn, request.checkOut, {
     withWeekday: true,
@@ -145,12 +166,17 @@ const LinkConfirmation: React.FC<LinkConfirmationProps> = ({
         </DialogContent>
       </Dialog>
 
-      <RequestSubmittedDialog
+      <RequestWaitlistDialog
+        open={requestSubmittedDialogOpen}
+        setOpen={setRequestSubmittedDialogOpen}
+      />
+
+      {/* <RequestSubmittedDialog
         open={requestSubmittedDialogOpen}
         setOpen={setRequestSubmittedDialogOpen}
         showConfetti={showConfetti}
         madeByGroupId={madeByGroupId}
-      />
+      /> */}
     </div>
   );
 };

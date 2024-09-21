@@ -3,7 +3,7 @@ import { api } from "@/utils/api";
 import { type HostDashboardRequest } from "./RequestCard";
 import { getAge } from "@/utils/utils";
 import UserAvatar from "../_common/UserAvatar";
-import { BadgeCheck, BadgeX, CircleUserRound, Mail, Phone } from "lucide-react";
+import { BadgeCheck, BadgeX } from "lucide-react";
 
 export function TravelerVerificationsDialog({
   request,
@@ -25,7 +25,7 @@ export function TravelerVerificationsDialog({
     },
     {
       name: verificationList.email,
-      verified: verificationList.emailVerified,
+      verified: true,
     },
     {
       name: verificationList.phoneNumber,
@@ -33,11 +33,17 @@ export function TravelerVerificationsDialog({
     },
   ];
 
+  const travelerLastInitial = request.traveler.lastName
+    ? request.traveler.lastName[0]
+    : "";
+
   return (
     <>
       <Dialog>
         <DialogTrigger>
-          <p className="underline">{request.traveler.name}</p>
+          <p className="underline underline-offset-2">
+            {request.traveler.firstName + " " + travelerLastInitial}
+          </p>
         </DialogTrigger>
         <DialogContent>
           <div className="flex items-center gap-2">
@@ -46,7 +52,9 @@ export function TravelerVerificationsDialog({
               name={request.traveler.name}
               image={request.traveler.image}
             />
-            <p className="text-lg font-bold">{request.traveler.name}</p>
+            <p className="text-lg font-bold">
+              {request.traveler.firstName + " " + travelerLastInitial}
+            </p>
           </div>
           {verifications.map((verification, index) => (
             <div
@@ -69,17 +77,18 @@ export function TravelerVerificationsDialog({
           ))}
         </DialogContent>
       </Dialog>
-      <div>
+      <div className="flex flex-row items-center">
+        <p className="mr-2">&middot;</p>
         {verificationList.emailVerified &&
         verificationList.phoneNumber &&
         verificationList.dateOfBirth ? (
-          <div className="flex gap-2 text-teal-800">
-            <BadgeCheck />
+          <div className="flex items-center gap-1 text-teal-800">
+            <BadgeCheck size={16} />
             <p>Verified</p>
           </div>
         ) : (
-          <div className="flex gap-2 text-red-500">
-            <BadgeX />
+          <div className="flex items-center gap-1 text-red-500">
+            <BadgeX size={16} />
             <p>Not verified</p>
           </div>
         )}

@@ -12,18 +12,19 @@ import {
   ChevronRight,
   MessageCircle,
 } from "lucide-react";
-import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
 import {
   formatCurrency,
   removeTimezoneFromDate,
   formatDateStringWithDayName,
   plural,
   convertTo12HourFormat,
+  getDaysUntilTrip,
 } from "@/utils/utils";
 
 import SingleLocationMap from "../_common/GoogleMaps/SingleLocationMap";
-import { type RouterOutputs } from "@/utils/api";
+import { api, type RouterOutputs } from "@/utils/api";
 import { getCancellationPolicyDescription } from "@/config/getCancellationPolicyDescription";
+import { useChatWithHost } from "@/utils/messaging/useChatWithHost";
 export type TripWithDetails = RouterOutputs["trips"]["getMyTripsPageDetails"];
 export type TripWithDetailsConfirmation =
   RouterOutputs["trips"]["getMyTripsPageDetailsByPaymentIntentId"];
@@ -37,11 +38,13 @@ export default function TripPage({
   tripData: TripWithDetails | TripWithDetailsConfirmation;
   isConfirmation?: boolean;
 }) {
-  const chatWithAdmin = useChatWithAdmin();
+  const chatWithHost = useChatWithHost();
 
   const { trip, coordinates } = tripData;
 
   const tripDuration = dayjs(trip.checkOut).diff(trip.checkIn, "day");
+  const { data } = api.properties.getById.useQuery({ id: trip.propertyId });
+  const hostId = data?.hostId;
 
   return (
     <div className="col-span-10 flex flex-col gap-5 p-4 py-10 2xl:col-span-11">
@@ -74,7 +77,7 @@ export default function TripPage({
                 The countdown to your trip begins
               </p>
               <p className="text-3xl font-bold">
-                {dayjs(trip.checkIn).fromNow(true)} to go
+                {getDaysUntilTrip(trip.checkIn)} days to go
               </p>
             </div>
           </div>
@@ -105,7 +108,7 @@ export default function TripPage({
                   variant="secondary"
                   size="sm"
                   className="w-[160px] text-xs lg:w-[200px] lg:text-sm"
-                  onClick={() => chatWithAdmin()}
+                  onClick={() => chatWithHost({ hostId: hostId ?? "" })}
                 >
                   <MessageCircle className="w-4 lg:w-5" /> Message your host
                 </Button>

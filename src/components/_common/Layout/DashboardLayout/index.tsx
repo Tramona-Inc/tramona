@@ -7,6 +7,7 @@ import { api } from "@/utils/api";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 import { Header } from "../header/Header";
+import MessagesPopover from "@/components/messages/chat-with-admin-popover/MessagesPopover";
 
 type DashboardLayoutProps = {
   children: React.ReactNode;
@@ -18,19 +19,17 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const router = useRouter();
 
-  const { data: onboardingStep } = api.users.getOnboardingStep.useQuery();
+  const { data: verifications } = api.users.getMyVerifications.useQuery();
 
   useEffect(() => {
-    if (onboardingStep != null && onboardingStep < 3) {
-      if (onboardingStep === 0) {
-        void router.push("/auth/onboarding");
-      } else if (onboardingStep === 1) {
-        void router.push("/auth/onboarding-1");
-      } else if (onboardingStep === 2) {
-        void router.push("/auth/onboarding-2");
-      }
+    if (verifications?.phoneNumber === null) {
+      void router.push("/auth/onboarding");
+    } else if (verifications?.dateOfBirth === null) {
+      void router.push("/auth/onboarding-1");
+    } else if (verifications?.firstName === null) {
+      void router.push("/auth/onboarding-2");
     }
-  }, [onboardingStep, router]);
+  }, [verifications, router]);
 
   const { pathname } = useRouter();
 
@@ -55,6 +54,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         <div className="min-w-0 lg:flex-1">
           <main className="relative min-h-screen-minus-header">{children}</main>
           {status !== "loading" && <MobileNav type={navType} />}
+          <div className="hidden md:contents">
+            <MessagesPopover isMobile={false} />
+          </div>
           {isMd && <Footer />}
         </div>
       </div>

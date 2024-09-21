@@ -7,6 +7,14 @@ import { and, eq, inArray, ne } from "drizzle-orm";
 import { z } from "zod";
 import { conversations, messages } from "./../../db/schema/tables/messages";
 import { protectedProcedure } from "./../trpc";
+import { sendSlackMessage } from "@/server/slack";
+import { TRPCError } from "@trpc/server";
+import { columns } from "@/components/admin/view-recent-host/table/columns";
+
+const isProduction = process.env.NODE_ENV === "production";
+const baseUrl = isProduction
+  ? "https://www.tramona.com"
+  : "http://localhost:3000";
 
 const ADMIN_ID = env.TRAMONA_ADMIN_USER_ID;
 
@@ -45,6 +53,7 @@ export async function fetchUsersConversations(userId: string) {
 }
 
 export async function fetchConversationWithAdmin(userId: string) {
+  console.log("calling fetch converasation with admin");
   const result = await db.query.users.findFirst({
     where: eq(users.id, userId),
     with: {
@@ -83,6 +92,48 @@ export async function fetchConversationWithAdmin(userId: string) {
   return conversationWithAdmin?.conversation.id ?? null;
 }
 
+export async function fetchConversationWithHost(
+  userId: string,
+  hostId: string,
+) {
+  const result = await db.query.users.findFirst({
+    where: eq(users.id, userId),
+    with: {
+      conversations: {
+        with: {
+          conversation: {
+            with: {
+              participants: {
+                with: {
+                  user: {
+                    columns: {
+                      id: true,
+                      name: true,
+                      image: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  // Check if conversation contains two participants
+  // and check if admin id is in there
+  const conversationWithHost = result?.conversations.find(
+    (conv) =>
+      conv.conversation.participants.length === 2 &&
+      conv.conversation.participants.some(
+        (participant) => participant.user.id === hostId,
+      ),
+  );
+
+  return conversationWithHost?.conversation.id ?? null;
+}
+
 export async function fetchConversationWithOffer(
   userId: string,
   offerId: string,
@@ -115,11 +166,13 @@ export async function fetchConversationWithOffer(
     },
   });
 
-  const offerExists = result?.conversations.some(
+  const offerExists = result?.conversations.find(
     (convo) => convo.conversation.offerId === offerId,
   );
 
-  return offerExists;
+  const conversationId = offerExists?.conversationId;
+
+  return conversationId;
 }
 
 async function generateConversation(
@@ -151,29 +204,59 @@ export async function createConversationWithAdmin(userId: string) {
   }
 }
 
-export async function createConversationWithOffer(
+export async function createConversationWithHost(
   userId: string,
-  offerUserId: string,
-  propertyName: string,
-  offerId: string,
+  hostId: string,
 ) {
   // Generate conversation and get id
-  const createdConversationId = await generateConversation(
-    propertyName,
-    offerId,
-  );
+  const createdConversationId = await generateConversation();
 
   if (createdConversationId !== undefined) {
     // Insert participants for the user and admin
     const participantValues = [
       { conversationId: createdConversationId, userId: userId },
-      { conversationId: createdConversationId, userId: offerUserId },
+      { conversationId: createdConversationId, userId: hostId },
     ];
 
     await db.insert(conversationParticipants).values(participantValues);
 
     return createdConversationId;
   }
+}
+
+export async function createConversationWithOfferHelper(
+  userId: string,
+  offerHostOrAllAdmins: string,
+  propertyName: string,
+  offerId: string,
+) {
+  console.log(
+    "called Create conversation here is the host/admin id",
+    offerHostOrAllAdmins,
+  );
+  // Generate conversation and get id
+  const createdConversationId = await generateConversation(
+    propertyName,
+    offerId,
+  );
+  console.log("here is the generated Conversation", createdConversationId);
+
+  if (createdConversationId !== undefined) {
+    // Check if offerHostOrAllAdmins is a string or an array of strings
+    const participantValues: { conversationId: string; userId: string }[] = [
+      { conversationId: createdConversationId, userId: userId },
+      {
+        conversationId: createdConversationId,
+        userId: offerHostOrAllAdmins,
+      },
+    ];
+
+    // Insert participants for the user and admin
+    console.log(participantValues);
+    await db.insert(conversationParticipants).values(participantValues);
+  }
+
+  return createdConversationId;
 }
 
 async function addUserToConversation(userId: string, conversationId: string) {
@@ -197,6 +280,8 @@ export async function addTwoUserToConversation(
     ];
 
     await db.insert(conversationParticipants).values(participantValues);
+
+    return createdConversationId;
   }
 }
 
@@ -260,31 +345,78 @@ export const messagesRouter = createTRPCRouter({
     return conversationId;
   }),
 
-  createConversationWithOffer: protectedProcedure
+  createConversationWithHost: protectedProcedure
+    .input(z.object({ hostId: zodString() }))
+    .mutation(async ({ ctx, input }) => {
+      const conversationId = await fetchConversationWithHost(
+        ctx.user.id,
+        input.hostId,
+      );
+
+      if (!conversationId) {
+        return await createConversationWithHost(ctx.user.id, input.hostId);
+      }
+
+      return conversationId;
+    }),
+
+  // for guest only
+  createConversationWithAdminFromGuest: publicProcedure
+    .input(
+      z.object({
+        sessionToken: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const tempUser = await db.query.users.findFirst({
+        where: eq(users.sessionToken, input.sessionToken),
+      });
+      let conversationId = null;
+      if (tempUser) {
+        conversationId = await fetchConversationWithAdmin(tempUser.id);
+        // Create conversation with admin if it doesn't exist
+        if (!conversationId) {
+          conversationId = await createConversationWithAdmin(tempUser.id);
+        }
+      } else {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Guest Temporary User not found",
+        });
+      }
+      return { tempUserId: tempUser?.id, conversationId: conversationId };
+    }),
+
+  createOrFetchConversationWithOffer: protectedProcedure
     .input(
       z.object({
         offerId: z.string(),
-        offerUserId: z.string(),
+        offerHostId: z.union([z.string(), z.null()]),
         offerPropertyName: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const conversationExist = await fetchConversationWithOffer(
+      const conversationExistId = await fetchConversationWithOffer(
         ctx.user.id,
         input.offerId,
       );
+      console.log(conversationExistId, "converation exist");
+
+      //determine if the conversation will be with the host or the admin
+      const offerHostOrAllAdmins = input.offerHostId
+        ? input.offerHostId
+        : ADMIN_ID;
 
       // Create conversation with host if it doesn't exist
-      if (!conversationExist) {
-        return await createConversationWithOffer(
+      if (!conversationExistId) {
+        return await createConversationWithOfferHelper(
           ctx.user.id,
-          input.offerUserId === ""
-            ? env.TRAMONA_ADMIN_USER_ID
-            : input.offerUserId,
+          offerHostOrAllAdmins,
           input.offerPropertyName,
           input.offerId,
         );
       }
+      return conversationExistId;
     }),
 
   addUserToConversation: publicProcedure
@@ -319,7 +451,11 @@ export const messagesRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input }) => {
-      await addTwoUserToConversation(input.user1Id, input.user2Id);
+      const conversationId = await addTwoUserToConversation(
+        input.user1Id,
+        input.user2Id,
+      );
+      return conversationId;
     }),
 
   getParticipantsPhoneNumbers: protectedProcedure
@@ -390,5 +526,144 @@ export const messagesRouter = createTRPCRouter({
         .update(messages)
         .set({ read: true })
         .where(inArray(messages.id, input.unreadMessageIds));
+    }),
+  sendAdminSlackMessage: protectedProcedure
+    .input(
+      z.object({
+        message: z.string(),
+        conversationId: z.string(),
+        senderId: z.string(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      //find the receiver of the message
+      const receiver = await db.query.conversationParticipants
+        .findFirst({
+          where: and(
+            eq(conversationParticipants.conversationId, input.conversationId),
+            ne(conversationParticipants.userId, input.senderId),
+          ),
+          with: {
+            user: {
+              columns: {
+                id: true,
+                email: true,
+                role: true,
+              },
+            },
+          },
+        })
+        .then((res) => res?.user);
+      //check to see if the receipt is the admin
+      if (receiver?.role !== "admin") return;
+      //if admin then send slack from the to and from
+      await sendSlackMessage({
+        channel: "admin-messaging",
+        isProductionOnly: false,
+        text: [
+          `*${receiver.email} sent a message to admin*`,
+          `${input.message}`,
+          `<${baseUrl}/messages?conversationId=${input.conversationId}|Click here to respond>`,
+        ].join("\n"),
+      });
+    }),
+
+  sendChatboxSlackMessage: publicProcedure
+    .input(
+      z.object({
+        message: z.string(),
+        conversationId: z.string(),
+        senderId: z.string(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      //find the receiver of the message
+      const receiver = await db.query.conversationParticipants
+        .findFirst({
+          where: and(
+            eq(conversationParticipants.conversationId, input.conversationId),
+            ne(conversationParticipants.userId, input.senderId),
+          ),
+          with: {
+            user: {
+              columns: {
+                id: true,
+                email: true,
+                role: true,
+              },
+            },
+          },
+        })
+        .then((res) => res?.user);
+
+      const sender = await db.query.users.findFirst({
+        where: eq(users.id, input.senderId),
+      });
+
+      function getSenderName() {
+        if (sender) {
+          if (sender.firstName === null || sender.lastName === null) {
+            return "logged out user";
+          } else {
+            return sender.firstName + " " + sender.lastName;
+          }
+        }
+      }
+      await sendSlackMessage({
+        channel: "chatbox",
+        isProductionOnly: false,
+        text: [
+          `*${receiver?.email} received a message from ${getSenderName()}*`,
+          `${input.message}`,
+          `<${baseUrl}/messages?conversationId=${input.conversationId}|Click here to respond>`,
+        ].join("\n"),
+      });
+    }),
+
+  getConversationsWithAdmin: publicProcedure
+    .input(
+      z.object({
+        userId: z.string().optional(),
+        sessionToken: z.string().optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      let conversationId = null;
+      let tempUser = null;
+      if (
+        ctx.session?.user.role === "admin" ||
+        ctx.session?.user.role === "host"
+      ) {
+        return null;
+      }
+      if (!input.userId && input.sessionToken) {
+        tempUser = await db.query.users.findFirst({
+          where: eq(users.sessionToken, input.sessionToken),
+        });
+        if (tempUser) {
+          conversationId = await fetchConversationWithAdmin(tempUser.id);
+        } else {
+          return null;
+          // throw new TRPCError({
+          //   code: "NOT_FOUND",
+          //   message: "Guest Temporary User not found",
+          // });
+        }
+      } else if (input.userId) {
+        // if both userId and sessionToken are provided, userId will be used
+        conversationId = await fetchConversationWithAdmin(input.userId);
+      } else if (!input.userId && !input.sessionToken) {
+        return null; // when the page renders for the first time, the tRPC call will hit here
+      }
+
+      if (!conversationId) {
+        return null;
+        // throw new TRPCError({
+        //   code: "NOT_FOUND",
+        //   message: "conversationId not found",
+        // });
+      }
+
+      return { conversationId: conversationId ?? "", tempUserId: tempUser?.id };
     }),
 });

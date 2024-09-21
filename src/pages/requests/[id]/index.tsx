@@ -1,6 +1,6 @@
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import Spinner from "@/components/_common/Spinner";
-import PropertyPage, { OfferPage } from "@/components/offers/PropertyPage";
+import { OfferPage } from "@/components/offers/PropertyPage";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/utils/api";
@@ -112,7 +112,7 @@ function Page({
                 </div>
                 {offers.map((offer) => (
                   <TabsContent key={offer.id} value={`${offer.id}`}>
-                    <OfferPage offer={offer} property={offer.property} />
+                    <OfferPage offer={offer} />
                   </TabsContent>
                 ))}
               </Tabs>
@@ -136,11 +136,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const firstPropertyOfRequest = await db.query.offers.findFirst({
     where: and(eq(offers.requestId, serverRequestId)),
     with: {
-      property: {
-        columns: {
-          latLngPoint: false,
-        },
-      },
+      property: {},
     },
   });
 

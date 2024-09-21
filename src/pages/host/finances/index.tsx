@@ -13,38 +13,34 @@ import {
   ConnectAccountManagement,
 } from "@stripe/react-connect-js";
 import useIsStripeConnectInstanceReady from "@/utils/store/stripe-connect";
-import Spinner from "@/components/_common/Spinner";
 
 export default function Page() {
   useSession({ required: true });
   const { isStripeConnectInstanceReady } = useIsStripeConnectInstanceReady();
-  const { data: hostInfo, isLoading: isHostInfoLoading } =
-    api.host.getUserHostInfo.useQuery();
+  const { data: hostInfo } = api.host.getUserHostInfo.useQuery();
+  const { data: user } = api.users.getUser.useQuery();
 
-  const [hostStripeAccountId, setHostStripeAccountId] = useState<string | null>(
+  const [hostStripeConnectId, sethostStripeConnectId] = useState<string | null>(
     null,
   );
 
   const stripeStateChangeCount = useRef(0);
-  const [isPageLoading, setIsPageLoading] = useState(true);
 
   useEffect(() => {
     if (isStripeConnectInstanceReady === true) {
-      setIsPageLoading(false);
     } else {
       stripeStateChangeCount.current += 1;
       // stripe connect instance initializes to false
       if (stripeStateChangeCount.current >= 2) {
-        setIsPageLoading(false);
       }
     }
   }, [isStripeConnectInstanceReady]);
 
   useEffect(() => {
-    if (hostInfo?.stripeAccountId) {
-      setHostStripeAccountId(hostInfo.stripeAccountId);
+    if (user?.stripeConnectId) {
+      sethostStripeConnectId(user.stripeConnectId);
     }
-  }, [hostInfo]);
+  }, [user]);
 
   return (
     <DashboadLayout>
@@ -89,20 +85,17 @@ export default function Page() {
 
             <TabsContent value="summary">
               <FinancesSummary
-                hostStripeAccountId={hostStripeAccountId}
+                hostStripeConnectId={hostStripeConnectId}
                 isStripeConnectInstanceReady={isStripeConnectInstanceReady}
                 becameHostAt={hostInfo?.becameHostAt}
               />
             </TabsContent>
             <TabsContent value="paymentHistory">
-              <PaymentHistory
-                hostStripeAccountId={hostStripeAccountId}
-                isStripeConnectInstanceReady={isStripeConnectInstanceReady}
-              />
+              <PaymentHistory />
             </TabsContent>
             <TabsContent value="Settings">
               <div className="flex justify-around">
-                {hostInfo?.stripeAccountId && hostInfo.chargesEnabled ? (
+                {user?.stripeConnectId && user.chargesEnabled ? (
                   <div className="relative my-3 flex w-full flex-row items-center justify-around gap-x-10">
                     <ConnectAccountManagement
                       collectionOptions={{
@@ -113,7 +106,7 @@ export default function Page() {
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center">
-                    {!hostInfo?.stripeAccountId && <NoStripeAccount />}
+                    {!user?.stripeConnectId && <NoStripeAccount />}
                     <ConnectAccountOnboarding
                       onExit={() => {
                         window.location.reload(); //default behavior we should change if ugly

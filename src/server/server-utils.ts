@@ -6,16 +6,18 @@ import { Twilio } from "twilio";
 import { db } from "./db";
 import { waitUntil } from "@vercel/functions";
 import { formatCurrency, getNumNights, plural } from "@/utils/utils";
-
+import axiosRetry from "axios-retry";
 import {
   and,
   between,
   eq,
+  exists,
   gte,
   inArray,
   isNotNull,
   isNull,
   lte,
+  not,
   notExists,
   or,
   sql,
@@ -34,8 +36,12 @@ import {
   hostTeamMembers,
   properties,
   offers,
-  requestsToProperties,
   users,
+  hostReferralDiscounts,
+  referralCodes,
+  requests,
+  propertyStatusEnum,
+  rejectedRequests,
 } from "./db/schema";
 import { getCity, getCoordinates } from "./google-maps";
 import axios from "axios";
@@ -43,8 +49,63 @@ import { HttpsProxyAgent } from "https-proxy-agent";
 import * as cheerio from "cheerio";
 import { sendSlackMessage } from "./slack";
 import { HOST_MARKUP, TRAVELER__MARKUP } from "@/utils/constants";
+import { HostRequestsPageData } from "./api/routers/propertiesRouter";
+import { Session } from "next-auth";
+
+export const axiosWithRetry = axios.create();
+
+axiosRetry(axiosWithRetry, {
+  retries: 3,
+
+  retryDelay: (retryCount) =>
+    retryCount * 1000 /* Wait 1s, 2s, 3s between retries*/,
+
+  retryCondition: (error) => {
+    // Retry on knowing errors and any 5xx errors
+    return (
+      error.code === "EPROTO" ||
+      error.code === "ERR_BAD_RESPONSE" ||
+      (error.response?.status !== undefined && error.response.status >= 500)
+    );
+  },
+});
 
 export const proxyAgent = new HttpsProxyAgent(env.PROXY_URL);
+
+export async function urlScrape(url: string) {
+  return await axios
+    .get<string>(url, { httpsAgent: proxyAgent, responseType: "text" })
+    .then((res) => res.data)
+    .then(cheerio.load);
+}
+
+// List of user agents to rotate
+const userAgents = [
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36",
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Safari/605.1.15",
+  "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko",
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36",
+  "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:88.0) Gecko/20100101 Firefox/88.0",
+];
+
+// Function to get a random user agent
+function getRandomUserAgent() {
+  return userAgents[Math.floor(Math.random() * userAgents.length)];
+}
+
+export async function scrapeUrlLikeHuman(url: string) {
+  return await axios
+    .get<string>(url, {
+      httpsAgent: proxyAgent,
+      responseType: "text",
+      headers: {
+        "User-Agent": getRandomUserAgent(),
+      },
+      timeout: 10000,
+    })
+    .then((res) => res.data)
+    .then(cheerio.load);
+}
 
 export async function scrapeUrl(url: string) {
   return await axios
@@ -170,6 +231,26 @@ export async function sendText({
   return response;
 }
 
+export async function sendScheduledText({
+  to,
+  content,
+  sendAt,
+}: {
+  to: string;
+  content: string;
+  sendAt: Date;
+}) {
+  const response = await twilio.messages.create({
+    body: content,
+    from: env.TWILIO_FROM,
+    to,
+    sendAt,
+    messagingServiceSid: "MG7f313e1063abc277e6503fd9c9f3ef07",
+    scheduleType: "fixed",
+  });
+  return response;
+}
+
 export async function sendWhatsApp({
   templateId,
   to,
@@ -263,17 +344,18 @@ export async function addProperty({
   userEmail,
   hostTeamId,
   property,
+  isAdmin,
 }: {
   userId?: string;
   userEmail?: string;
   hostTeamId?: number | null;
-  property: Omit<NewProperty, "id" | "city" | "latitude" | "longitude"> & {
-    latitude?: number;
-    longitude?: number;
+  isAdmin: boolean;
+  property: Omit<NewProperty, "id" | "city" | "latLngPoint"> & {
+    latLngPoint?: { x: number; y: number };
   };
 }) {
-  let lat = property.latitude;
-  let lng = property.longitude;
+  let lat = property.latLngPoint?.y;
+  let lng = property.latLngPoint?.x;
 
   if (!lat || !lng) {
     const { location } = await getCoordinates(property.address);
@@ -288,61 +370,25 @@ export async function addProperty({
     .values({
       ...property,
       hostId: userId,
-      latitude: lat,
-      longitude: lng,
+      // latitude: lat,
+      // longitude: lng,
       city: city,
-      latLngPoint: sql`ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)`,
+      latLngPoint: createLatLngGISPoint({ lat, lng }),
       hostTeamId,
     })
-    .returning({ id: properties.id, latLngPoint: properties.latLngPoint });
+    .returning({ id: properties.id });
 
-  waitUntil(processRequests(insertedProperty!));
+  // waitUntil(processRequests(insertedProperty!));
 
   await sendSlackMessage({
+    isProductionOnly: true,
     channel: "host-bot",
     text: [
       `*New property added: ${property.name} in ${property.address}*
-     by ${userEmail}`,
+     by ${isAdmin ? "an Tramona admin" : userEmail}`,
     ].join("\n"),
   });
   return insertedProperty!.id;
-}
-
-async function processRequests(
-  insertedProperty: Pick<Property, "id" | "latLngPoint">,
-) {
-  const allRequests = await db.query.requests.findMany({});
-
-  for (const request of allRequests) {
-    const matchingProperties = await getPropertiesForRequest({
-      id: request.id,
-      lat: request.lat,
-      lng: request.lng,
-      radius: request.radius,
-      location: request.location,
-      checkIn: request.checkIn,
-      checkOut: request.checkOut,
-      maxTotalPrice: request.maxTotalPrice,
-      latLngPoint: request.latLngPoint,
-      propertyLatLngPoint: insertedProperty.latLngPoint,
-    });
-
-    const propertyIds = matchingProperties.map((property) => property.id);
-    await sendTextToHost(
-      matchingProperties,
-      request.checkIn,
-      request.checkOut,
-      request.maxTotalPrice,
-      request.location,
-    );
-
-    if (propertyIds.includes(insertedProperty.id)) {
-      await db.insert(requestsToProperties).values({
-        requestId: request.id,
-        propertyId: insertedProperty.id,
-      });
-    }
-  }
 }
 
 export async function sendTextToHost(
@@ -365,82 +411,205 @@ export async function sendTextToHost(
     {} as Record<string, number>,
   );
 
-  void uniqueHostIds.filter(Boolean).map(async (hostId) => {
-    const host = await db.query.users.findFirst({
-      where: eq(users.id, hostId),
-      columns: { name: true, email: true, phoneNumber: true },
-    });
-    if (host) {
-      const hostPhoneNumber = host.phoneNumber;
-
-      if (hostPhoneNumber) {
-        const numberOfNights = getNumNights(checkIn, checkOut);
-        // Send a text message to the host
-        await sendText({
-          to: hostPhoneNumber,
-          content: `Tramona: There is a request for ${formatCurrency(maxTotalPrice / numberOfNights)} per night for ${plural(numberOfNights, "night")} in ${location}. You have ${numHostPropertiesPerRequest[hostId]} eligible properties. Please click here to make a match. ${env.NEXTAUTH_URL}/host/requests`,
+  waitUntil(
+    Promise.all(
+      uniqueHostIds.filter(Boolean).map(async (hostId) => {
+        const host = await db.query.users.findFirst({
+          where: eq(users.id, hostId),
+          columns: { name: true, email: true, phoneNumber: true },
         });
-        //TO DO SEND WHATSAPP MESSAGE
-      }
+
+        if (!host?.phoneNumber) return;
+
+        const numberOfNights = getNumNights(checkIn, checkOut);
+
+        await sendText({
+          to: host.phoneNumber,
+          content: `Tramona: There is a request for ${formatCurrency(maxTotalPrice / numberOfNights)} per night for ${plural(numberOfNights, "night")} in ${location}. You have ${plural(numHostPropertiesPerRequest[hostId] ?? 0, "eligible property", "eligible properties")}. Please click here to make a match: ${env.NEXTAUTH_URL}/host/requests`,
+        });
+
+        //TODO SEND WHATSAPP MESSAGE
+      }),
+    ),
+  );
+}
+
+export async function getRequestsForProperties(
+  hostProperties: Property[],
+  { user }: { user: Session["user"] },
+  //{
+  // id: number;
+  // propertyStaus: string;
+  // latLngPoint: { x: number; y: number };
+  // priceRestriction: number | null;
+  //}
+  //[],
+  { tx = db } = {},
+) {
+  const requestIsNearProperties: SQL[] = [];
+  // let priceRestrictionsSQL: SQL[] | undefined[] = [sql`FALSE`];
+  const propertyToRequestMap: {
+    property: Property;
+    request: Request & {
+      traveler: Pick<User, "firstName" | "lastName" | "name" | "image">;
+    };
+  }[] = [];
+
+  for (const property of hostProperties) {
+    const requestIsNearProperty = sql`
+      ST_DWithin(
+        ST_Transform(requests.lat_lng_point, 3857),
+        ST_Transform(ST_SetSRID(ST_MakePoint(${property.latLngPoint.x}, ${property.latLngPoint.y}), 4326), 3857),
+        requests.radius * 1609.34
+      )
+    `;
+    //  const numberOfNights = sql`DATE_PART('day', requests.check_out::timestamp - requests.check_in::timestamp)`;
+
+    //   const priceRestrictionSQL = sql`
+    //     ${property.priceRestriction} IS NULL OR
+    //     (
+    //       requests.max_total_price IS NOT NULL AND
+    //       ${property.priceRestriction} >= (requests.max_total_price / DATE_PART('day', requests.check_out::timestamp - requests.check_in::timestamp)) * 1.15
+    //     )
+    // `;
+    requestIsNearProperties.push(requestIsNearProperty);
+
+    const requestsForProperty = await tx.query.requests.findMany({
+      where: and(
+        requestIsNearProperty,
+        gte(requests.checkIn, new Date()),
+        notExists(
+          db
+            .select()
+            .from(offers)
+            .where(
+              and(
+                eq(offers.requestId, requests.id),
+                exists(
+                  db
+                    .select()
+                    .from(properties)
+                    .where(
+                      and(
+                        eq(properties.id, offers.propertyId),
+                        eq(properties.hostTeamId, property.hostTeamId!),
+                      ),
+                    ),
+                ),
+              ),
+            ),
+        ),
+        notExists(
+          db
+            .select()
+            .from(rejectedRequests)
+            .where(
+              and(
+                eq(rejectedRequests.requestId, requests.id),
+                eq(rejectedRequests.userId, user.id),
+              ),
+            ),
+        ),
+      ),
+      with: {
+        madeByGroup: {
+          with: {
+            owner: {
+              columns: {
+                image: true,
+                name: true,
+                firstName: true,
+                lastName: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // Store the matched requests along with the property
+    for (const request of requestsForProperty) {
+      const traveler = {
+        name: request.madeByGroup.owner.name,
+        image: request.madeByGroup.owner.image,
+        firstName: request.madeByGroup.owner.firstName,
+        lastName: request.madeByGroup.owner.lastName,
+      };
+      propertyToRequestMap.push({
+        property,
+        request: {
+          ...request,
+          traveler, // Include traveler info
+        },
+      });
     }
-  });
+    // priceRestrictionsSQL.push(priceRestrictionSQL);
+  }
+  return propertyToRequestMap;
 }
 
 export async function getPropertiesForRequest(
   req: {
-    lat?: number | null;
-    lng?: number | null;
-    radius?: number | null;
+    // lat: number;
+    // lng: number;
+    radius: number;
     location: string;
     checkIn: Date;
     checkOut: Date;
     maxTotalPrice: number;
     id: number;
-    latLngPoint?: { x: number; y: number } | null;
-    propertyLatLngPoint?: Property["latLngPoint"];
+    latLngPoint: { x: number; y: number };
+    // propertyLatLngPoint?: Property["latLngPoint"];
   },
   { tx = db } = {},
 ) {
   let propertyIsNearRequest: SQL | undefined = sql`FALSE`;
 
   //WAITING FOR MAP PIN TO MERGE IN TO TEST THIS
-  if (req.lat != null && req.lng != null && req.radius != null) {
-    // Convert radius from miles to degrees (approximate)
-    const radiusDegrees = req.radius / 69;
+  // if (req.lat != null && req.lng != null && req.radius != null) {
+  // Convert radius from miles to degrees (approximate)
+  const radiusInDegrees = req.radius * 1609.34;
 
-    propertyIsNearRequest = and(
-      gte(properties.latitude, req.lat - radiusDegrees),
-      lte(properties.latitude, req.lat + radiusDegrees),
-      gte(properties.longitude, req.lng - radiusDegrees),
-      lte(properties.longitude, req.lng + radiusDegrees),
-    );
-  } else {
-    const coordinates = await getCoordinates(req.location);
-    if (coordinates.bounds) {
-      const { northeast, southwest } = coordinates.bounds;
-      propertyIsNearRequest = sql`
-        ST_Within(
-          properties.lat_lng_point,
-          ST_MakeEnvelope(
-            ${southwest.lng}, ${southwest.lat},
-            ${northeast.lng}, ${northeast.lat},
-            4326
-          )
-        )
-      `;
-    } else if (coordinates.location) {
-      const radiusInMiles = 10;
-      const radiusInDegrees = radiusInMiles / 69.0;
+  propertyIsNearRequest = sql`
+    ST_DWithin(
+      ST_Transform(properties.lat_lng_point, 3857),
+      ST_Transform(ST_SetSRID(ST_MakePoint(${req.latLngPoint.x}, ${req.latLngPoint.y}), 4326), 3857),
+      ${radiusInDegrees}
+    )
+  `;
+  // } else {
+  //   const coordinates = await getCoordinates(req.location);
+  //   if (coordinates.bounds) {
+  //     console.log(
+  //       "bounds",
+  //       coordinates.bounds,
+  //       req.location,
+  //       req.maxTotalPrice,
+  //     );
+  //     const { northeast, southwest } = coordinates.bounds;
+  //     propertyIsNearRequest = sql`
+  //       ST_Within(
+  //         properties.lat_lng_point,
+  //         ST_MakeEnvelope(
+  //           ${southwest.lng}, ${southwest.lat},
+  //           ${northeast.lng}, ${northeast.lat},
+  //           4326
+  //         )
+  //       )
+  //     `;
+  //   } else if (coordinates.location) {
+  //     const radiusInMiles = 10;
+  //     const radiusInDegrees = radiusInMiles / 69.0;
 
-      propertyIsNearRequest = sql`
-        ST_DWithin(
-          properties.lat_lng_point,
-          ST_SetSRID(ST_MakePoint(${coordinates.location.lng}, ${coordinates.location.lat}), 4326),
-          ${radiusInDegrees}
-        )
-      `;
-    }
-  }
+  //     propertyIsNearRequest = sql`
+  //       ST_DWithin(
+  //         properties.lat_lng_point,
+  //         ST_SetSRID(ST_MakePoint(${coordinates.location.lng}, ${coordinates.location.lat}), 4326),
+  //         ${radiusInDegrees}
+  //       )
+  //     `;
+  //   }
+  // }
 
   const propertyisAvailable = notExists(
     tx
@@ -467,7 +636,7 @@ export async function getPropertiesForRequest(
           isNotNull(properties.priceRestriction),
           lte(
             properties.priceRestriction,
-            (req.maxTotalPrice / numberOfNights) * 1.15,
+            Math.round((req.maxTotalPrice / numberOfNights) * 1.15),
           ),
         ),
       ),
@@ -539,17 +708,9 @@ export async function getPropertyOriginalPrice(
   // code for other options
 }
 
-export interface CityData {
-  city: string;
-  requests: {
-    request: Request;
-    properties: Property[];
-  }[];
-}
-
 export interface SeparatedData {
-  normal: CityData[];
-  outsidePriceRestriction: CityData[];
+  normal: HostRequestsPageData[];
+  outsidePriceRestriction: HostRequestsPageData[];
 }
 
 //update spread on every fetch to keep information updated
@@ -571,4 +732,154 @@ export async function updateTravelerandHostMarkup({
       hostPayout: hostPay,
     })
     .where(and(eq(offers.id, offerId), isNull(offers.acceptedAt)));
+}
+
+export async function createHostReferral({
+  userId,
+  referralCodeUsed,
+}: {
+  userId: string;
+  referralCodeUsed: string | null;
+}) {
+  console.log("this is the referral code ysed  ", referralCodeUsed);
+  if (referralCodeUsed) {
+    const isReferralUsed = await db.query.hostReferralDiscounts.findFirst({
+      where: eq(hostReferralDiscounts.refereeUserId, userId),
+    });
+    console.log("about to return ", isReferralUsed);
+    if (isReferralUsed) return;
+    //find owner of the referral code
+    const referrer = await db.query.referralCodes.findFirst({
+      where: eq(referralCodes.referralCode, referralCodeUsed),
+      columns: { ownerId: true },
+    });
+    //create host referral discount row
+    if (referrer) {
+      await db.insert(hostReferralDiscounts).values({
+        referralCode: referralCodeUsed,
+        ownerId: referrer.ownerId,
+        refereeUserId: userId,
+      });
+    }
+    //send an email or notification to the referrer
+  }
+}
+
+function getRandomNormalDistribution(mean: number, stdDev: number): number {
+  let u = 0,
+    v = 0;
+  while (u === 0) u = Math.random(); // Converting [0,1) to (0,1)
+  while (v === 0) v = Math.random();
+  let num = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+  num = num * stdDev + mean; // Scale to the desired mean and standard deviation
+  return Math.round(num); // Round to nearest integer
+}
+
+function stripTimeFromDate(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+export function createNormalDistributionDates(
+  numRanges: number,
+): { checkIn: Date; checkOut: Date }[] {
+  const dateRanges = [];
+
+  for (let i = 0; i < numRanges; i++) {
+    const today = new Date();
+    const futureDate = new Date(
+      today.getTime() + Math.random() * 90 * 24 * 60 * 60 * 1000,
+    ); // Random date within next 90 days
+    const startDate = stripTimeFromDate(new Date(futureDate));
+
+    // Generate end date using a normal distribution with mean = 3 days and stdDev = 1 day
+    let endDateOffset = getRandomNormalDistribution(3, 1);
+    // Ensure endDateOffset is at least 1 day
+    endDateOffset = Math.max(1, endDateOffset);
+
+    const endDate = stripTimeFromDate(
+      new Date(startDate.getTime() + endDateOffset * 24 * 60 * 60 * 1000),
+    );
+
+    dateRanges.push({
+      checkIn: startDate,
+      checkOut: endDate,
+    });
+  }
+
+  return dateRanges;
+}
+
+export function createLatLngGISPoint({
+  lat,
+  lng,
+}: {
+  lat: number;
+  lng: number;
+}) {
+  const latLngPoint = sql`ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)`;
+  return latLngPoint;
+}
+
+export function haversineDistance(
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number,
+) {
+  const toRadians = (degrees: number) => degrees * (Math.PI / 180);
+
+  const R = 3958.8; // Radius of the Earth in kilometers
+  const dLat = toRadians(lat2 - lat1);
+  const dLon = toRadians(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRadians(lat1)) *
+      Math.cos(toRadians(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c; // Distance in kilometers
+}
+
+export async function checkRequestsWithoutOffers() {
+  const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+  const requestsWithoutOffers = await db.query.requests.findMany({
+    where: and(
+      lte(requests.createdAt, twentyFourHoursAgo),
+      eq(requests.notifiedNoOffers, false),
+      notExists(
+        db.select().from(offers).where(eq(offers.requestId, requests.id)),
+      ),
+    ),
+    with: {
+      madeByGroup: {
+        with: {
+          owner: {
+            columns: {
+              phoneNumber: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  for (const request of requestsWithoutOffers) {
+    const travelerPhoneNumber = request.madeByGroup.owner.phoneNumber;
+
+    if (travelerPhoneNumber) {
+      await sendText({
+        to: travelerPhoneNumber,
+        content: `Tramona: Your request for ${request.location} for ${request.maxTotalPrice} didn't yield any offers in the last 24 hours. Consider submitting a new request with a different price range or a broader location to increase your chances of finding a match.`,
+      });
+    }
+
+    await db
+      .update(requests)
+      .set({ notifiedNoOffers: true })
+      .where(eq(requests.id, request.id));
+  }
+
+  return requestsWithoutOffers.length; // return whatever
 }

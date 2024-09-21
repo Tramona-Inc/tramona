@@ -133,6 +133,31 @@ export const pmsRouter = createTRPCRouter({
     }
   }),
 
+  deleteHospitableCustomer: protectedProcedure.mutation(async ({ ctx }) => {
+    const user = await ctx.db.query.users.findFirst({
+      where: eq(users.id, ctx.user.id),
+    });
+    if (!user) {
+      throw new Error("User not found");
+    }
+    const { id } = user;
+
+    try {
+      await axios.delete(
+        `https://connect.hospitable.com/api/v1/customers/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
+          },
+        },
+      );
+    } catch (error) {
+      console.error("Error deleting Hospitable customer:", error);
+      throw new Error("Failed to delete Hospitable customer");
+    }
+  }
+  ),
+
   createHospitableCustomer: protectedProcedure.mutation(async ({ ctx }) => {
     const user = await ctx.db.query.users.findFirst({
       where: eq(users.id, ctx.user.id),
@@ -188,6 +213,20 @@ export const pmsRouter = createTRPCRouter({
           },
         },
       );
+
+      // try {
+      //   await axios.delete(
+      //     `https://connect.hospitable.com/api/v1/customers/${id}`,
+      //     {
+      //       headers: {
+      //         Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
+      //       },
+      //     },
+      //   );
+      // } catch (error) {
+      //   console.error("Error deleting Hospitable customer:", error);
+      //   throw new Error("Failed to delete Hospitable customer");
+      // }
 
       return authCodeResponse.data;
     } catch (error) {

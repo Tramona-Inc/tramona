@@ -1,20 +1,17 @@
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
 import { HelpCircleIcon, MessageCircle } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
-import { formatDateRange } from "@/utils/utils";
+import { formatDateRange, getDaysUntilTrip } from "@/utils/utils";
 import Image from "next/image";
 import UserAvatar from "../_common/UserAvatar";
-import { useChatWithAdmin } from "@/utils/useChatWithAdmin";
 import { type TripCardDetails } from "@/pages/my-trips";
-
-// Plugin for relative time
-dayjs.extend(relativeTime);
+import { api } from "@/utils/api";
+import ChatOfferButton from "../offers/ChatOfferButton";
 
 export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
-  const chatWithAdmin = useChatWithAdmin();
+  const { data } = api.properties.getById.useQuery({ id: trip.propertyId });
+  const hostId = data?.hostId;
 
   return (
     <div className="w-full">
@@ -34,7 +31,7 @@ export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
                     src={trip.property.imageUrls[0]!}
                   />
                   <Badge variant="lightGray" className="absolute left-2 top-3">
-                    Trip {dayjs(trip.checkIn).fromNow()}
+                    Trip in {getDaysUntilTrip(trip.checkIn)} days
                   </Badge>
                 </Link>
               </div>
@@ -81,10 +78,11 @@ export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
           <div className="h-[2px] rounded-full bg-gray-200"></div>
 
           <div className="flex flex-col justify-center gap-2 px-4 sm:flex-row lg:gap-4">
-            <Button variant="secondary" onClick={() => chatWithAdmin()}>
-              <MessageCircle className="size-4" />
-              Message your host
-            </Button>
+            <ChatOfferButton
+              offerId={trip.offerId!.toString()}
+              offerHostId={hostId ?? null}
+              offerPropertyName={trip.property.name}
+            />
             <Button asChild variant="secondary">
               <Link href="/faq">
                 <HelpCircleIcon />

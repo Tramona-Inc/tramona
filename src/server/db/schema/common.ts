@@ -71,6 +71,12 @@ export const ALL_LISTING_SITE_NAMES = [
   "Airbnb",
   "Booking.com",
   "Vrbo",
+  "CB Island Vacations",
+  "IntegrityArizona",
+  "Evolve",
+  "Cleanbnb",
+  "Casamundo",
+  "RedAwning",
 ] as const;
 
 export type ListingSiteName = (typeof ALL_LISTING_SITE_NAMES)[number];

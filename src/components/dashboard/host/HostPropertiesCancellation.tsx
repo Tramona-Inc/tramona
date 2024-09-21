@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { HostPropertyEditBtn } from "./HostPropertiesLayout";
-import { ALL_CANCELLATION_POLICIES, type Property } from "@/server/db/schema";
+import { CANCELLATION_POLICIES, type Property } from "@/server/db/schema";
 import { Form, FormField, FormItem } from "@/components/ui/form";
 import { z } from "zod";
 import { api } from "@/utils/api";
@@ -19,7 +19,7 @@ export default function HostPropertiesCancellation({
 
   const form = useZodForm({
     schema: z.object({
-      policy: z.enum(ALL_CANCELLATION_POLICIES),
+      policy: z.enum(CANCELLATION_POLICIES),
     }),
   });
 
@@ -49,7 +49,7 @@ export default function HostPropertiesCancellation({
               render={() => (
                 <FormItem>
                   <div className="space-y-4 pt-4">
-                    {ALL_CANCELLATION_POLICIES.map((policy) => (
+                    {CANCELLATION_POLICIES.map((policy) => (
                       <CancellationCardSelect
                         key={policy}
                         policy={policy}

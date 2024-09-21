@@ -11,26 +11,35 @@ import {
   requestSelectSchema,
   requestUpdatedInfo,
   requests,
-  requestsToProperties,
   users,
+  offers,
+  rejectedRequests,
 } from "@/server/db/schema";
 import {
   sendText,
   sendWhatsApp,
   getPropertiesForRequest,
+  createLatLngGISPoint,
+  sendScheduledText,
 } from "@/server/server-utils";
 import { sendSlackMessage } from "@/server/slack";
 import { isIncoming } from "@/utils/formatters";
 import { TRPCError } from "@trpc/server";
-import { and, eq, exists } from "drizzle-orm";
+import { and, eq, exists, sql, lt } from "drizzle-orm";
 import { z } from "zod";
 import type { Session } from "next-auth";
+import { linkInputProperties } from "@/server/db/schema/tables/linkInputProperties";
 import {
-  linkInputProperties,
-  linkInputPropertyInsertSchema,
-} from "@/server/db/schema/tables/linkInputProperties";
-import { formatCurrency, getNumNights, formatDateRange, plural } from "@/utils/utils";
-import { sendTextToHost } from "@/server/server-utils";
+  formatCurrency,
+  getNumNights,
+  formatDateRange,
+  plural,
+} from "@/utils/utils";
+import { sendTextToHost, haversineDistance } from "@/server/server-utils";
+import { newLinkRequestSchema } from "@/utils/useSendUnsentRequests";
+import { getCoordinates } from "@/server/google-maps";
+import { scrapeDirectListings } from "@/server/direct-sites-scraping";
+import { waitUntil } from "@vercel/functions";
 
 const updateRequestInputSchema = z.object({
   requestId: z.number(),
@@ -57,7 +66,36 @@ export const requestsRouter = createTRPCRouter({
             ),
         ),
         with: {
-          offers: { columns: { id: true } },
+          offers: {
+            columns: {
+              id: true,
+              travelerOfferedPrice: true,
+              createdAt: true,
+              checkIn: true,
+              checkOut: true,
+              randomDirectListingDiscount: true,
+              datePriceFromAirbnb: true,
+            },
+            where: lt(offers.becomeVisibleAt, new Date()),
+            with: {
+              property: {
+                columns: {
+                  id: true,
+                  imageUrls: true,
+                  name: true,
+                  numBedrooms: true,
+                  numBathrooms: true,
+                  originalNightlyPrice: true,
+                  hostName: true,
+                  hostProfilePic: true,
+                  bookOnAirbnb: true,
+                },
+                with: {
+                  host: { columns: { name: true, email: true, image: true } },
+                },
+              },
+            },
+          },
           linkInputProperty: true,
           madeByGroup: {
             with: {
@@ -75,16 +113,11 @@ export const requestsRouter = createTRPCRouter({
       })
       // extract offer count & sort
       .then((requests) =>
-        requests
-          .map(({ offers, ...request }) => ({
-            ...request,
-            numOffers: offers.length,
-          }))
-          .sort(
-            (a, b) =>
-              b.numOffers - a.numOffers ||
-              b.createdAt.getTime() - a.createdAt.getTime(),
-          ),
+        requests.sort(
+          (a, b) =>
+            b.offers.length - a.offers.length ||
+            b.createdAt.getTime() - a.createdAt.getTime(),
+        ),
       );
 
     return {
@@ -120,16 +153,11 @@ export const requestsRouter = createTRPCRouter({
       })
       // 1. extract offer count & sort
       .then((requests) =>
-        requests
-          .map(({ offers, ...request }) => ({
-            ...request,
-            numOffers: offers.length,
-          }))
-          .sort(
-            (a, b) =>
-              b.numOffers - a.numOffers ||
-              b.createdAt.getTime() - a.createdAt.getTime(),
-          ),
+        requests.sort(
+          (a, b) =>
+            b.offers.length - a.offers.length ||
+            b.createdAt.getTime() - a.createdAt.getTime(),
+        ),
       )
       .then((res) => {
         return {
@@ -141,31 +169,27 @@ export const requestsRouter = createTRPCRouter({
 
   create: protectedProcedure
     .input(
-      requestInsertSchema.omit({
-        madeByGroupId: true,
-        latLngPoint: true,
-      }),
+      requestInsertSchema
+        .omit({
+          madeByGroupId: true,
+          latLngPoint: true,
+        })
+        .extend({
+          lat: z.number().optional(),
+          lng: z.number().optional(),
+          radius: z.number().optional(),
+        }),
     )
     .mutation(async ({ ctx, input }) => {
       return await handleRequestSubmission(input, { user: ctx.user });
     }),
 
   createRequestWithLink: protectedProcedure
-    .input(
-      z.object({
-        request: requestInsertSchema.omit({
-          madeByGroupId: true,
-          latLngPoint: true,
-        }),
-        property: linkInputPropertyInsertSchema,
-      }),
-    )
+    .input(newLinkRequestSchema)
     .mutation(async ({ ctx, input: { property, request } }) => {
       const { requestId, madeByGroupId } = await handleRequestSubmission(
         request,
-        {
-          user: ctx.user,
-        },
+        { user: ctx.user },
       );
 
       const linkInputPropertyId = await db
@@ -303,49 +327,6 @@ export const requestsRouter = createTRPCRouter({
       }
     }),
 
-  getByPropertyId: protectedProcedure
-    .input(z.number())
-    .query(async ({ input: propertyId }) => {
-      // const hostId = await db.query.properties
-      //   .findFirst({
-      //     columns: { hostId: true },
-      //     where: eq(properties.id, propertyId),
-      //   })
-      //   .then((res) => res?.hostId);
-
-      // if (hostId != ctx.user.id) {
-      //   throw new TRPCError({ code: "UNAUTHORIZED" });
-      // }
-
-      return await db.query.requestsToProperties
-        .findMany({
-          where: eq(requestsToProperties.propertyId, propertyId),
-          with: {
-            request: {
-              with: {
-                madeByGroup: {
-                  with: {
-                    members: {
-                      with: {
-                        user: {
-                          columns: {
-                            name: true,
-                            email: true,
-                            image: true,
-                            id: true,
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        })
-        .then((res) => res.map((r) => r.request));
-    }),
-
   // todo - change this when updaterequestinfo is not one to one anymore
   getUpdatedRequestInfo: protectedProcedure
     .input(
@@ -389,61 +370,153 @@ export const requestsRouter = createTRPCRouter({
   rejectRequest: protectedProcedure
     .input(z.object({ requestId: z.number() }))
     .mutation(async ({ ctx, input }) => {
-      await ctx.db
-        .delete(requestsToProperties)
-        .where(eq(requestsToProperties.requestId, input.requestId));
+      await ctx.db.insert(rejectedRequests).values({
+        requestId: input.requestId,
+        userId: ctx.user.id,
+      });
     }),
 });
 
 //Reusable functions
-const modifiedRequestSchema = requestInsertSchema.omit({
-  madeByGroupId: true,
-  latLngPoint: true,
-});
+const modifiedRequestSchema = requestInsertSchema
+  .omit({
+    madeByGroupId: true,
+    latLngPoint: true,
+  })
+  .extend({
+    lat: z.number().optional(),
+    lng: z.number().optional(),
+    radius: z.number().optional(),
+  });
 
 // Infer the type from the modified schema
-type RequestInput = z.infer<typeof modifiedRequestSchema>;
+export type RequestInput = z.infer<typeof modifiedRequestSchema>;
 
 export async function handleRequestSubmission(
   input: RequestInput,
   { user }: { user: Session["user"] },
 ) {
   // Begin a transaction
+  console.log(user);
   const transactionResults = await db.transaction(async (tx) => {
     const madeByGroupId = await tx
       .insert(groups)
       .values({ ownerId: user.id })
       .returning()
       .then((res) => res[0]!.id);
+
     await tx.insert(groupMembers).values({
       userId: user.id,
       groupId: madeByGroupId,
     });
 
-    const { requestId, totalPrice, checkIn, checkOut, location } = await tx
+    let lat = input.lat;
+    let lng = input.lng;
+    let radius = input.radius;
+    if (lat === undefined || lng === undefined || radius === undefined) {
+      const coordinates = await getCoordinates(input.location);
+      if (coordinates.location) {
+        lat = coordinates.location.lat;
+        lng = coordinates.location.lng;
+        if (coordinates.bounds) {
+          radius =
+            haversineDistance(
+              coordinates.bounds.northeast.lat,
+              coordinates.bounds.northeast.lng,
+              coordinates.bounds.southwest.lat,
+              coordinates.bounds.southwest.lng,
+            ) / 2;
+        } else {
+          radius = 10;
+        }
+      }
+    }
+    let latLngPoint = null;
+    if (lat && lng) {
+      latLngPoint = createLatLngGISPoint({ lat, lng });
+    }
+
+    if (!radius || !latLngPoint) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Failed to get coordinates for the location",
+      });
+    }
+
+    const request = await tx
       .insert(requests)
-      .values({ ...input, madeByGroupId })
-      .returning({ requestId: requests.id, totalPrice: requests.maxTotalPrice, checkIn: requests.checkIn, checkOut: requests.checkOut, location: requests.location })
+      .values({ ...input, madeByGroupId, latLngPoint, radius })
+      .returning({ latLngPoint: requests.latLngPoint, id: requests.id })
       .then((res) => res[0]!);
 
-    const properties = await getPropertiesForRequest(
-      { ...input, id: requestId },
+    //TO DO - figure out if i need to get coordinates here or elsewhere
+
+    // if (input.lat === undefined || input.lng === null || input.radius === null) {
+    //   const coordinates = await getCoordinates(input.location);
+    //   if (coordinates.location) {
+
+    //   }
+    // }
+
+    if (user.role === "admin") {
+      waitUntil(
+        scrapeDirectListings({
+          checkIn: input.checkIn,
+          checkOut: input.checkOut,
+          requestNightlyPrice:
+            input.maxTotalPrice / getNumNights(input.checkIn, input.checkOut),
+          requestId: request.id,
+          location: input.location,
+          latitude: lat,
+          longitude: lng,
+          numGuests: input.numGuests,
+        })
+          .then(async (listings) => {
+            if (listings.length > 0) {
+              const travelerPhone = user.phoneNumber;
+              if (travelerPhone) {
+                const currentTime = new Date();
+                const twentyFiveMinutesFromNow = new Date(
+                  currentTime.getTime() + 25 * 60000,
+                );
+                const fiftyFiveMinutesFromNow = new Date(
+                  currentTime.getTime() + 55 * 60000,
+                );
+                const numOfMatches = listings.length;
+                void sendScheduledText({
+                  to: travelerPhone,
+                  content: `Tramona: You have ${numOfMatches <= 10 ? numOfMatches : "more than 10"} matches for your request in ${input.location}, visit Tramona.com to view`,
+                  sendAt:
+                    numOfMatches <= 5
+                      ? twentyFiveMinutesFromNow
+                      : fiftyFiveMinutesFromNow,
+                });
+              }
+            }
+          })
+          .catch((error) => {
+            console.error("Error scraping listings: " + error);
+          }),
+      );
+    }
+
+    const eligibleProperties = await getPropertiesForRequest(
+      { ...input, id: request.id, latLngPoint: request.latLngPoint, radius },
       { tx },
     );
 
-    if (properties.length > 0) {
+    await sendTextToHost(
+      eligibleProperties,
+      input.checkIn,
+      input.checkOut,
+      input.maxTotalPrice,
+      input.location,
+    );
 
-      await tx
-        .insert(requestsToProperties)
-        .values(properties.map((property) => ({ requestId, propertyId: property.id })));
-
-      await sendTextToHost(properties, checkIn, checkOut, totalPrice, location);
-    }
-
-    return { requestId, madeByGroupId };
+    return { requestId: request.id, madeByGroupId };
   });
 
-  // Messaging based on user preferences or environment
+  // Messaging based on user preferences or environment.
   const name = user.name ?? user.email;
   const pricePerNight =
     input.maxTotalPrice / getNumNights(input.checkIn, input.checkOut);
@@ -453,6 +526,7 @@ export async function handleRequestSubmission(
 
   if (user.role !== "admin") {
     await sendSlackMessage({
+      isProductionOnly: true,
       channel: "tramona-bot",
       text: [
         `*${name} just made a request: ${input.location}*`,

@@ -1,24 +1,24 @@
 import DashboadLayout from "@/components/_common/Layout/DashboardLayout";
 import Spinner from "@/components/_common/Spinner";
-import PropertyPage from "@/components/offers/PropertyPage";
+import { OfferPage } from "@/components/offers/PropertyPage";
 import { NextSeo } from "next-seo";
-import { type GetServerSideProps } from "next";
+import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import SingleLocationMap from "@/components/_common/GoogleMaps/SingleLocationMap";
-import { db } from "@/server/db";
-import { offers } from "@/server/db/schema/tables/offers";
-import { and, eq } from "drizzle-orm";
-import { type OfferWithDetails } from "@/components/offers/PropertyPage";
+import {
+  getOfferPageData,
+  getPropertyForOffer,
+} from "@/server/api/routers/offersRouter";
+import { OfferWithProperty } from "../../components/requests/[id]/OfferCard/index";
+import type { RouterOutputs } from "@/utils/api";
 
-type PageProps = {
-  offer: OfferWithDetails;
-  offerId: number;
-  firstImage: string;
-  baseUrl: string;
-};
+export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 
-const Page = ({ offer, firstImage, baseUrl }: PageProps) => {
+const Page = ({
+  offer,
+  firstImage,
+  baseUrl,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const router = useRouter();
   if (router.isFallback) {
     return <Spinner />;
@@ -63,25 +63,17 @@ const Page = ({ offer, firstImage, baseUrl }: PageProps) => {
             &larr; Back to all offers
           </Link>
         </div>
-        <div className="mx-6 grid grid-cols-1 grid-rows-4 gap-x-6 gap-y-4 pb-32 lg:grid-cols-3">
-          <div className="row-span-3 lg:col-span-2">
-            <PropertyPage offer={offer} />
-          </div>
-          {offer.property.latitude && offer.property.longitude && (
-            <div className="row-span-1 lg:col-span-1 lg:row-span-3">
-              <SingleLocationMap
-                lat={offer.property.latitude}
-                lng={offer.property.longitude}
-              />
-            </div>
-          )}
+        <div className="p-4 pb-64">
+          {offer.request && <OfferPage offer={offer} />}
         </div>
       </div>
     </DashboadLayout>
   );
 };
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
+export const getServerSideProps = async (
+  context: GetServerSidePropsContext,
+) => {
   const offerId = parseInt(context.query.id as string);
 
   const isProduction = process.env.NODE_ENV === "production";
@@ -89,58 +81,24 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     ? "https://www.tramona.com"
     : "https://6fb1-104-32-193-204.ngrok-free.app/"; //change to your live server
 
-  const offer = await db.query.offers.findFirst({
-    where: and(eq(offers.id, offerId)),
-    columns: {
-      createdAt: true,
-      totalPrice: true,
-      acceptedAt: true,
-      tramonaFee: true,
-      checkIn: true,
-      checkOut: true,
-      id: true,
-    },
-    with: {
-      request: {
-        columns: { numGuests: true, location: true, id: true },
-      },
-      property: {
-        with: {
-          host: {
-            columns: { id: true, name: true, email: true, image: true },
-          },
-        },
-      },
-    },
-  });
+  const offerWithoutProperty = await getOfferPageData(offerId);
+  const propertyForOffer = await getPropertyForOffer(
+    offerWithoutProperty.propertyId,
+  );
 
-  if (!offer) {
-    return {
-      notFound: true,
-    };
-  }
-
-  const firstImage = offer.property.imageUrls[0] ?? "";
-
-  // Convert Date objects to strings
-  const serializedOffer = {
-    ...offer,
-    createdAt: offer.createdAt.toISOString(),
-    acceptedAt: offer.acceptedAt ? offer.acceptedAt.toISOString() : null,
-    checkIn: offer.checkIn.toISOString(),
-    checkOut: offer.checkOut.toISOString(),
-    request: offer.request,
-    property: {
-      ...offer.property,
-      createdAt: offer.property.createdAt.toISOString(),
-    },
+  const offer: OfferWithDetails = {
+    ...offerWithoutProperty,
+    property: propertyForOffer,
   };
+
+  console.log(typeof offer);
+  console.log(typeof offer);
 
   return {
     props: {
-      offer: serializedOffer,
+      offer,
       offerId,
-      firstImage,
+      firstImage: offer.property.imageUrls[0]!,
       baseUrl,
     },
   };

@@ -27,6 +27,7 @@ export default function OfferCard({
   checkOut: Date;
   requestId: number;
 }>) {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const hostName = property.host?.name ?? property.hostName;
 
   const numNights = getNumNights(checkIn, checkOut);

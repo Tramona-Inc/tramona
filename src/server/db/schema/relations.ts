@@ -4,7 +4,7 @@ import { sessions } from "./tables/auth/sessions";
 import { bids } from "./tables/bids";
 import { counters } from "./tables/counters";
 import { groupInvites, groupMembers, groups } from "./tables/groups";
-import { hostProfiles } from "./tables/hostProfiles";
+import { hostProfiles, hostReferralDiscounts } from "./tables/hostProfiles";
 import {
   hostTeamInvites,
   hostTeamMembers,
@@ -19,17 +19,18 @@ import { emergencyContacts } from "./tables/emergencyContacts";
 import { offers } from "./tables/offers";
 import { bookedDates, properties } from "./tables/properties";
 import { requests } from "./tables/requests";
-import { requestsToProperties } from "./tables/requestsToProperties";
 import { reservedDateRanges } from "./tables/reservedDateRanges";
-import { superhogActionOnTrips } from "./tables/superhogActionsOnTrips";
-import { superhogRequests } from "./tables/superhogRequests";
+import {
+  superhogRequests,
+  superhogActionOnTrips,
+  superhogErrors,
+} from "./tables/superhogRequests";
 import { referralCodes, referralEarnings, users } from "./tables/users";
-import { trips, tripCancellations } from "./tables/trips";
+import { trips, tripCancellations, tripDamages } from "./tables/trips";
 import { reviews } from "./tables/reviews";
 import { fillerBookings, fillerOffers } from "./tables/feedFiller";
-import { superhogErrors } from "./tables/superhogErrors";
 import { linkInputProperties } from "./tables/linkInputProperties";
-import { externalListings } from "./tables/externalListings";
+import { rejectedRequests } from "./tables/rejectedRequests";
 
 export const usersRelations = relations(users, ({ one, many }) => ({
   accounts: many(accounts),
@@ -48,6 +49,8 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   superhogRequests: many(superhogRequests),
   emergencyContacts: many(emergencyContacts),
   superHogErrors: many(superhogErrors),
+  hostReferralDiscounts: many(hostReferralDiscounts),
+  rejectedRequests: many(rejectedRequests),
 }));
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -64,12 +67,16 @@ export const sessionsRelations = relations(sessions, ({ one }) => ({
   }),
 }));
 
-export const referralCodesRelations = relations(referralCodes, ({ one }) => ({
-  owner: one(users, {
-    fields: [referralCodes.ownerId],
-    references: [users.id],
+export const referralCodesRelations = relations(
+  referralCodes,
+  ({ one, many }) => ({
+    owner: one(users, {
+      fields: [referralCodes.ownerId],
+      references: [users.id],
+    }),
+    hostReferralDiscounts: many(hostReferralDiscounts),
   }),
-}));
+);
 
 export const hostProfilesRelations = relations(hostProfiles, ({ one }) => ({
   hostUser: one(users, {
@@ -92,12 +99,12 @@ export const propertiesRelations = relations(properties, ({ one, many }) => ({
     references: [hostTeams.id],
   }),
   offers: many(offers),
-  requestsToProperties: many(requestsToProperties),
   bids: many(bids),
   bookedDates: many(bookedDates),
   superhogRequests: many(superhogRequests),
   reviews: many(reviews),
   superhogErrors: many(superhogErrors),
+  tripDamages: many(tripDamages),
 }));
 
 export const bookedDatesRelations = relations(bookedDates, ({ one }) => ({
@@ -113,23 +120,12 @@ export const requestsRelations = relations(requests, ({ one, many }) => ({
     references: [groups.id],
   }),
   offers: many(offers),
-  requestsToProperties: many(requestsToProperties),
+  rejectedRequests: many(rejectedRequests),
   linkInputProperty: one(linkInputProperties, {
     fields: [requests.linkInputPropertyId],
     references: [linkInputProperties.id],
   }),
-  externalListings: many(externalListings),
 }));
-
-export const externalListingsRelations = relations(
-  externalListings,
-  ({ one }) => ({
-    request: one(requests, {
-      fields: [externalListings.requestId],
-      references: [requests.id],
-    }),
-  }),
-);
 
 export const bidsRelations = relations(bids, ({ one, many }) => ({
   madeByGroup: one(groups, {
@@ -154,19 +150,16 @@ export const countersRelations = relations(counters, ({ one }) => ({
   }),
 }));
 
-export const requestsToPropertiesRelations = relations(
-  requestsToProperties,
-  ({ one }) => ({
-    request: one(requests, {
-      fields: [requestsToProperties.requestId],
-      references: [requests.id],
-    }),
-    property: one(properties, {
-      fields: [requestsToProperties.propertyId],
-      references: [properties.id],
-    }),
+export const rejectedRequestsRelations = relations(rejectedRequests, ({ one }) => ({
+  request: one(requests, {
+    fields: [rejectedRequests.requestId],
+    references: [requests.id],
   }),
-);
+  user: one(users, {
+    fields: [rejectedRequests.userId],
+    references: [users.id],
+  }),
+}));
 
 export const offersRelations = relations(offers, ({ one }) => ({
   property: one(properties, {
@@ -189,6 +182,28 @@ export const earningsRelations = relations(referralEarnings, ({ one }) => ({
     references: [offers.id],
   }),
 }));
+
+export const hostReferralDiscountsRelations = relations(
+  hostReferralDiscounts,
+  ({ one }) => ({
+    owner: one(users, {
+      fields: [hostReferralDiscounts.ownerId],
+      references: [users.id],
+    }),
+    referee: one(users, {
+      fields: [hostReferralDiscounts.refereeUserId],
+      references: [users.id],
+    }),
+    referralCodes: one(referralCodes, {
+      fields: [hostReferralDiscounts.referralCode],
+      references: [referralCodes.referralCode],
+    }),
+    tripId: one(trips, {
+      fields: [hostReferralDiscounts.tripId],
+      references: [trips.id],
+    }),
+  }),
+);
 
 export const conversationsRelations = relations(conversations, ({ many }) => ({
   messages: many(messages),
@@ -359,6 +374,8 @@ export const tripsRelations = relations(trips, ({ one, many }) => ({
   superhogErrors: many(superhogErrors),
   superhogActions: many(superhogActionOnTrips),
   tripCancellations: many(tripCancellations),
+  tripDamages: many(tripDamages),
+  hostReferralDiscounts: many(hostReferralDiscounts),
 }));
 
 export const tripsCancellationRelations = relations(
@@ -391,6 +408,17 @@ export const fillerOffersRelations = relations(fillerOffers, ({ one }) => ({
 export const fillerBookingsRelations = relations(fillerBookings, ({ one }) => ({
   property: one(properties, {
     fields: [fillerBookings.propertyId],
+    references: [properties.id],
+  }),
+}));
+
+export const tripDamagesRelations = relations(tripDamages, ({ one }) => ({
+  trip: one(trips, {
+    fields: [tripDamages.tripId],
+    references: [trips.id],
+  }),
+  property: one(properties, {
+    fields: [tripDamages.propertyId],
     references: [properties.id],
   }),
 }));

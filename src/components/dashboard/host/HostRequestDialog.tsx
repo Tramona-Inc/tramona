@@ -31,6 +31,8 @@ export default function HostRequestDialog({
   setPropertyPrices,
   propertyPrices,
   setStep,
+  setSelectedProperties,
+  selectedProperties,
 }: {
   open: boolean;
   setOpen: (open: boolean) => void;
@@ -39,13 +41,15 @@ export default function HostRequestDialog({
   setPropertyPrices: Dispatch<React.SetStateAction<Record<number, string>>>;
   propertyPrices: Record<number, string>;
   setStep: (step: number) => void;
+  setSelectedProperties: Dispatch<React.SetStateAction<number[]>>;
+  selectedProperties: number[];
 }) {
-  const allPropertyIds = properties
-    .filter((property) => property.cancellationPolicy)
-    .map((property) => property.id);
+  // const allPropertyIds = properties
+  //   .filter((property) => property.cancellationPolicy)
+  //   .map((property) => property.id);
 
-  const [selectedProperties, setSelectedProperties] =
-    useState<number[]>(allPropertyIds);
+  // const [selectedProperties, setSelectedProperties] =
+  //   useState<number[]>(allPropertyIds);
 
   const togglePropertySelection = (id: number) => {
     setSelectedProperties((prev) => {
@@ -90,7 +94,7 @@ export default function HostRequestDialog({
     request.maxTotalPrice / getNumNights(request.checkIn, request.checkOut),
   ).replace("$", "");
 
-  console.log("selectedProperties1", selectedProperties);
+  // console.log("selectedProperties1", selectedProperties);
 
   useEffect(() => {
     const initialSelectedProperties = properties
@@ -176,7 +180,7 @@ export default function HostRequestDialog({
               Available properties
             </h4>
             <button className="text-primary" onClick={selectAllProperties}>
-              {selectedProperties.length === allPropertyIds.length
+              {selectedProperties.length === properties.length
                 ? "Deselect all"
                 : "Select all"}
             </button>

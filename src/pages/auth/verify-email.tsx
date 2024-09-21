@@ -23,7 +23,6 @@
 //   );
 // }
 
-
 import { useEffect, useState } from "react";
 import MainLayout from "@/components/_common/Layout/MainLayout";
 import { Button } from "@/components/ui/button";
@@ -33,13 +32,12 @@ import { api } from "@/utils/api";
 
 export default function Page() {
   const router = useRouter();
-  const {email} = router.query;
+  const { email } = router.query;
   const [verified, setVerified] = useState(false);
-
 
   const { data: getVerification } = api.auth.checkEmailVerification.useQuery(
     { email: email as string },
-    { enabled: !!email }
+    { enabled: !!email },
   );
 
   useEffect(() => {
@@ -61,7 +59,8 @@ export default function Page() {
           Check your email
         </h1>
         <p className="text-muted-foreground">
-          Account successfully created! Please check your email for a secure login link.
+          Account successfully created! Please check your email for a secure
+          login link.
         </p>
         <Button asChild>
           <a href="https://mail.google.com" target="_blank" rel="noreferrer">
@@ -69,9 +68,7 @@ export default function Page() {
           </a>
         </Button>
         {verified && (
-          <p className="text-green-500">
-            Email verified! Redirecting...
-          </p>
+          <p className="text-green-500">Email verified! Redirecting...</p>
         )}
       </div>
     </MainLayout>

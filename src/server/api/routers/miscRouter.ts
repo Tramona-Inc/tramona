@@ -7,8 +7,9 @@ import { zodUrl } from "@/utils/zod-utils";
 import { getCity, getCoordinates } from "@/server/google-maps";
 import { Airbnb } from "@/utils/listing-sites/Airbnb";
 import { z } from "zod";
-import { scrapeUrl } from "@/server/server-utils";
+import { urlScrape } from "@/server/server-utils";
 import { scrapeAirbnbPrice } from "@/server/scrapePrice";
+import { cleanbnbScraper } from "@/server/direct-sites-scraping/cleanbnb-scrape";
 
 type AirbnbListing = {
   id: string;
@@ -60,12 +61,12 @@ export const miscRouter = createTRPCRouter({
     .query(async ({ input }) => {
       const price = (await fetch(
         `https://${env.RAPIDAPI_HOST}/search-location?` +
-          new URLSearchParams({
-            location: input.location,
-            checkin: format(input.checkIn, "yyyy-MM-dd"),
-            checkout: format(input.checkOut, "yyyy-MM-dd"),
-            adults: input.numGuests.toString(),
-          }).toString(),
+        new URLSearchParams({
+          location: input.location,
+          checkin: format(input.checkIn, "yyyy-MM-dd"),
+          checkout: format(input.checkOut, "yyyy-MM-dd"),
+          adults: input.numGuests.toString(),
+        }).toString(),
         {
           method: "GET",
           headers: {
@@ -83,12 +84,13 @@ export const miscRouter = createTRPCRouter({
       const averageNightlyPrice =
         Array.isArray(price.results) && price.results.length > 0
           ? price.results.reduce((acc, listing) => {
-              return acc + listing.price.rate;
-            }, 0) / price.results.length
+            return acc + listing.price.rate;
+          }, 0) / price.results.length
           : 0;
 
       return averageNightlyPrice;
     }),
+
 
   scrapeAirbnbLink: publicProcedure
     .input(
@@ -106,7 +108,7 @@ export const miscRouter = createTRPCRouter({
       if (!airbnbListingId) return { status: "failed to parse url" } as const;
 
       const [$, price] = await Promise.all([
-        scrapeUrl(url),
+        urlScrape(url),
         scrapeAirbnbPrice({ airbnbListingId, params }),
       ]);
 

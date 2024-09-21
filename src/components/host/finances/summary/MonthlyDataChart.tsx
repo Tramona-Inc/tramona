@@ -27,9 +27,9 @@ const generateInitialDailyData = (year: number, month: number) => {
 };
 
 const MonthlyDataChart = ({
-  hostStripeAccountId,
+  hostStripeConnectId,
 }: {
-  hostStripeAccountId: string | null;
+  hostStripeConnectId: string | null;
 }) => {
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth() + 1;
@@ -41,12 +41,12 @@ const MonthlyDataChart = ({
   const { data: allPayments } =
     api.stripe.getAllTransactionPaymentsWithinInterval.useQuery(
       {
-        stripeAccountId: hostStripeAccountId!,
+        stripeAccountId: hostStripeConnectId!,
         startDate: new Date(currentYear, selectedMonth - 1, 1).getTime() / 1000,
         endDate: new Date(currentYear, selectedMonth, 0).getTime() / 1000,
       },
       {
-        enabled: !!hostStripeAccountId,
+        enabled: !!hostStripeConnectId,
       },
     );
 

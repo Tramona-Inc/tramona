@@ -23,9 +23,10 @@ export const cityRequestSchema = z.object({
 });
 
 export const linkRequestSchema = z.object({
-  url: zodUrl().startsWith("https://www.airbnb.com/rooms", {
-    message: "URL must start with 'https://www.airbnb.com/rooms'",
-  }),
+  url: zodUrl()
+  // .startsWith("https://www.airbnb.com/rooms", {
+  //   message: "URL must start with 'https://www.airbnb.com/rooms'",
+  // }),
 });
 
 export type CityRequestDefaultVals = z.input<typeof cityRequestSchema>;

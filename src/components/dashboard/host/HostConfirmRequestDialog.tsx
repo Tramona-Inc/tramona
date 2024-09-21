@@ -29,6 +29,7 @@ import {
 import { api } from "@/utils/api";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function HostConfirmRequestDialog({
   open,
@@ -38,6 +39,7 @@ export default function HostConfirmRequestDialog({
   setPropertyPrices,
   propertyPrices,
   setStep,
+  selectedProperties,
 }: {
   open: boolean;
   setOpen: (open: boolean) => void;
@@ -48,11 +50,14 @@ export default function HostConfirmRequestDialog({
   >;
   propertyPrices: Record<number, string>;
   setStep: (step: number) => void;
+  selectedProperties: number[];
 }) {
+  const { toast } = useToast();
   const [selectedPropertyToEdit, setSelectedPropertyToEdit] = useState<
     number | null
   >(null);
   const [editValue, setEditValue] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleEdit = (id: number) => {
     setSelectedPropertyToEdit(id);
@@ -74,43 +79,65 @@ export default function HostConfirmRequestDialog({
     });
   };
 
-  const selectedProperties = properties.filter((property) =>
+  const filteredProperties = properties.filter((property) =>
+    selectedProperties.includes(property.id),
+  );
+
+  const filteredSelectedProperties = filteredProperties.filter((property) =>
     propertyPrices.hasOwnProperty(property.id),
   );
 
   const handleSubmit = async () => {
+    setIsLoading(true);
     await Promise.all(
       // todo: make procedure accept array
-      selectedProperties.map(async (property) => {
-        await createOffersMutation.mutateAsync({
-          requestId: request.id,
-          propertyId: property.id,
-          totalPrice: parseInt(propertyPrices[property.id] ?? "0") * 100,
-          hostPayout:
-            parseFloat(
-              getHostPayout({
-                propertyPrice: parseFloat(propertyPrices[property.id] ?? "0"),
-                hostMarkup: HOST_MARKUP,
-                numNights,
-              }),
-            ) * 100,
-          travelerOfferedPrice:
-            parseFloat(
-              getTravelerOfferedPrice({
-                propertyPrice: parseFloat(propertyPrices[property.id] ?? "0"),
-                travelerMarkup: TRAVELER__MARKUP,
-                numNights,
-              }),
-            ) * 100,
-        });
+      filteredSelectedProperties.map(async (property) => {
+        await createOffersMutation
+          .mutateAsync({
+            requestId: request.id,
+            propertyId: property.id,
+            totalPrice: parseInt(propertyPrices[property.id] ?? "0") * 100,
+            hostPayout:
+              parseFloat(
+                getHostPayout({
+                  propertyPrice: parseFloat(propertyPrices[property.id] ?? "0"),
+                  hostMarkup: HOST_MARKUP,
+                  numNights,
+                }),
+              ) * 100,
+            travelerOfferedPrice:
+              parseFloat(
+                getTravelerOfferedPrice({
+                  propertyPrice: parseFloat(propertyPrices[property.id] ?? "0"),
+                  travelerMarkup: TRAVELER__MARKUP,
+                  numNights,
+                }),
+              ) * 100,
+          })
+          .then(() => setStep(2))
+          .catch((error) => {
+            console.log("Error", error);
+            if (error instanceof Error) {
+              toast({
+                title: "Error",
+                description: error.message,
+                variant: "destructive",
+              });
+            }
+          });
       }),
-    );
-
-    setStep(2);
+    )
+      .then(() => {
+        setIsLoading(false);
+      })
+      .catch(() => {
+        setIsLoading(false);
+        setStep(1);
+      });
   };
 
   const numNights = getNumNights(request.checkIn, request.checkOut);
-  console.log("selectedProperties2", selectedProperties);
+  // console.log("filteredSelectedProperties2", filteredSelectedProperties);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -157,7 +184,7 @@ export default function HostConfirmRequestDialog({
         <h4 className="text-dark text-lg font-bold">Review your offers</h4>
 
         <div className="space-y-4">
-          {selectedProperties.map((property) => (
+          {filteredSelectedProperties.map((property) => (
             <div
               key={property.id}
               className="flex flex-col rounded-md border bg-white p-4"
@@ -276,7 +303,9 @@ export default function HostConfirmRequestDialog({
           <Button variant="secondary" onClick={() => setStep(0)}>
             Back
           </Button>
-          <Button onClick={handleSubmit}>Send Matches</Button>
+          <Button onClick={handleSubmit} disabled={isLoading}>
+            Send Matches
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -25,8 +25,8 @@ function SimiliarProperties({ location, city }: SimilarProperties) {
     isFetchingNextPage,
   } = api.properties.getAllInfiniteScroll.useInfiniteQuery(
     {
-      lat: coordinates?.coordinates.location?.lat ?? 0,
-      long: coordinates?.coordinates.location?.lng ?? 0,
+      // lat: coordinates?.coordinates.location?.lat ?? 0,
+      // long: coordinates?.coordinates.location?.lng ?? 0,
       radius: 25,
     },
     { refetchOnWindowFocus: false },

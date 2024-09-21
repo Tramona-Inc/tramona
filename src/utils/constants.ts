@@ -5,6 +5,12 @@ export const AVG_AIRBNB_MARKUP = 1.13868 as number;
 export const LINK_REQUEST_DISCOUNT_PERCENTAGE = 15 as number;
 export const TRAVELER__MARKUP = 1.025;
 export const HOST_MARKUP = 0.975;
+export const DIRECTLISTINGMARKUP = 1.015; // 1.5% markup for direct listings
+export const REFERRAL_CASHBACK = 2500 as number;
+
+export const airbnbHeaders = {
+  "x-airbnb-api-key": "d306zoyjsyarp7ifhu67rjxn52tv0t20",
+};
 
 // generic constants
 export const EARTH_RADIUS_MILES = 3959;

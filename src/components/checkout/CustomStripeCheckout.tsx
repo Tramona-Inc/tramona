@@ -2,8 +2,9 @@ import { api } from "@/utils/api";
 import { useStripe } from "@/utils/stripe-client";
 import {
   formatDateRange,
+  getDirectListingPriceBreakdown,
   getNumNights,
-  getPriceBreakdown,
+  getTramonaPriceBreakdown,
 } from "@/utils/utils";
 import StripeCheckoutForm from "./StripeCheckoutForm";
 import React, { useEffect, useState, useCallback, useMemo } from "react";
@@ -11,13 +12,11 @@ import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import { TAX_PERCENTAGE, SUPERHOG_FEE } from "@/utils/constants";
 import type { OfferWithDetails } from "../offers/PropertyPage";
-import type { Stripe } from "stripe";
 import { Elements } from "@stripe/react-stripe-js";
 import { type StripeElementsOptions } from "@stripe/stripe-js";
 import Spinner from "../_common/Spinner";
 
 import { useToast } from "../ui/use-toast";
-
 const CustomStripeCheckout = ({
   offer: { property, ...offer },
 }: {
@@ -33,33 +32,46 @@ const CustomStripeCheckout = ({
     [offer.checkIn, offer.checkOut],
   );
   const originalTotal = useMemo(
-    () => property.originalNightlyPrice! * numNights,
+    () =>
+      offer.randomDirectListingDiscount
+        ? (offer.randomDirectListingDiscount / 100 + 1) *
+          offer.travelerOfferedPrice
+        : property.originalNightlyPrice! * numNights,
     [property.originalNightlyPrice, numNights],
   );
 
-  const { serviceFee, finalTotal } = useMemo(
-    () =>
-      getPriceBreakdown({
+  const { serviceFee, finalTotal } = useMemo(() => {
+    if (offer.scrapeUrl) {
+      console.log("Direct Listing");
+      return getDirectListingPriceBreakdown({
+        bookingCost: offer.travelerOfferedPrice,
+      });
+    } else {
+      console.log("not a direct Listing");
+      return getTramonaPriceBreakdown({
         bookingCost: offer.travelerOfferedPrice,
         numNights,
         superhogFee: SUPERHOG_FEE,
         tax: TAX_PERCENTAGE,
-      }),
-    [offer.travelerOfferedPrice, numNights],
-  );
+      });
+    }
+  }, [offer.scrapeUrl, offer.travelerOfferedPrice, numNights]);
 
   const [options, setOptions] = useState<StripeElementsOptions | undefined>(
     undefined,
   );
-  const [paymentIntentResponse, setPaymentIntentResponse] =
-    useState<Stripe.Response<Stripe.PaymentIntent> | null>(null);
   const [checkoutReady, setCheckoutReady] = useState(false);
-  const authorizePayment = api.stripe.authorizePayment.useMutation();
 
+  const { data: propertyHostUserAccount } =
+    api.host.getHostUserAccount.useQuery(property.hostId!, {
+      enabled: !!property.hostId,
+    });
+  const authorizePayment = api.stripe.authorizePayment.useMutation();
   const fetchClientSecret = useCallback(async () => {
     if (!session.data?.user) return;
     try {
       const response = await authorizePayment.mutateAsync({
+        isDirectListing: offer.scrapeUrl !== null ? true : false,
         offerId: offer.id,
         propertyId: property.id,
         requestId: offer.requestId ?? null,
@@ -73,7 +85,7 @@ const CustomStripeCheckout = ({
         totalSavings: originalTotal - finalTotal,
         phoneNumber: session.data.user.phoneNumber ?? "",
         userId: session.data.user.id,
-        hostStripeId: property.host?.hostProfile?.stripeAccountId ?? "",
+        hostStripeId: propertyHostUserAccount?.stripeConnectId ?? "",
       });
       return response;
     } catch (error) {
@@ -91,7 +103,7 @@ const CustomStripeCheckout = ({
         if (!response) {
           return;
         }
-        setPaymentIntentResponse(response); // Set PaymentIntentResponse directly within fetchData then we convert to options ]
+
         setOptions({
           clientSecret: response.client_secret!, //#004236 #f4f4f5
           appearance: {
@@ -163,7 +175,7 @@ const CustomStripeCheckout = ({
     <div className="w-full">
       {checkoutReady && options?.clientSecret ? (
         <Elements stripe={stripePromise} options={options}>
-          <StripeCheckoutForm clientSecret={options.clientSecret} />
+          <StripeCheckoutForm originalListingPlatform={property.originalListingPlatform} />
         </Elements>
       ) : (
         <div className="h-48">

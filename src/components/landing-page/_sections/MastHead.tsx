@@ -30,10 +30,10 @@ export default function MastHead() {
           <div className="flex flex-col justify-center">
             <div className="relative pt-10 text-center">
               <h1 className="mx-auto max-w-3xl text-balance text-3xl font-bold text-zinc-900 lg:text-5xl">
-                Agree on a Price with Hosts Every Time
+                Name your own price for Airbnbs
               </h1>
               <p className="mx-auto max-w-[38rem] pt-4 text-xs font-semibold text-zinc-900 lg:pt-4 lg:text-base">
-                Traveling outside your budget, now within reach.
+                Agree on a price with hosts every time
               </p>
               <div className="hidden items-center justify-center pt-4 lg:flex">
                 <div className="-ml-2">
@@ -69,7 +69,7 @@ export default function MastHead() {
                   </Avatar>
                 </div>
                 <p className="ml-2 text-xs font-semibold text-[#7E7564]">
-                  Requests made this month
+                  Properties booked this month
                 </p>
               </div>
             </div>
@@ -84,14 +84,23 @@ export default function MastHead() {
 
       <div className="h-24 lg:h-60"></div>
 
+      <p className="text-balance p-4 text-center font-semibold">
+        Try it before you book, and see what hosts will offer you!
+      </p>
+
       <div className="mx-0 mt-8 flex max-w-full justify-center space-y-4 px-4 lg:mx-4 lg:mt-16 lg:flex lg:space-y-8">
         <TestimonialCarousel />
       </div>
+      <div className="mx-auto my-40 w-5/6 max-w-7xl text-center text-2xl font-semibold tracking-tight lg:my-48 lg:text-4xl">
+        When hosts have no one staying at their property, they would rather make
+        something over nothing. With Tramona, your request goes out to every
+        host with a vacancy, so you get the best deal, every time.
+      </div>
 
-      <div className="mt-20 space-y-4 lg:mt-24 lg:space-y-12">
+      <div className="mt-20 space-y-4 lg:space-y-12">
         <h2 className="text-center text-2xl font-extrabold lg:text-4xl">
-          <span className="text-teal-900">How?</span> Negotiation, No fees. No
-          markups.
+          <span className="text-teal-900">How?</span> Negotiation, 50% less
+          fees. No markups.
         </h2>
         <div className="flex justify-center">
           <div className="grid gap-8 lg:grid-cols-2 lg:gap-32">

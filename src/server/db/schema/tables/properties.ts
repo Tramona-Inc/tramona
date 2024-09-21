@@ -24,7 +24,7 @@ import { ALL_PROPERTY_AMENITIES } from "./propertyAmenities";
 import { users } from "./users";
 import { ALL_LISTING_SITE_NAMES, propertyTypeEnum } from "../common";
 
-export const ALL_CANCELLATION_POLICIES = [
+export const CANCELLATION_POLICIES = [
   "Flexible",
   "Moderate",
   "Firm",
@@ -35,12 +35,31 @@ export const ALL_CANCELLATION_POLICIES = [
   "Non-refundable",
 ] as const;
 
-export type CancellationPolicy = (typeof ALL_CANCELLATION_POLICIES)[number];
+export type CancellationPolicy = (typeof CANCELLATION_POLICIES)[number];
 
-export const cancellationPolicyEnum = pgEnum(
-  "cancellation_policy",
-  ALL_CANCELLATION_POLICIES,
-);
+// cancellation policies that are internal to Tramona (can't be set by host)
+const INTERNAL_CANCELLATION_POLICIES = [
+  "Vacasa",
+  "CB Island Vacations",
+  "Evolve",
+  "Casamundo",
+  "Integrity Arizona",
+  "RedAwning 7 Days",
+  "RedAwning 14 Days",
+] as const;
+
+const ALL_CANCELLATION_POLICIES = [
+  ...CANCELLATION_POLICIES,
+  ...INTERNAL_CANCELLATION_POLICIES,
+] as const;
+
+export type CancellationPolicyWithInternals =
+  (typeof ALL_CANCELLATION_POLICIES)[number];
+
+// export const cancellationPolicyEnum = pgEnum(
+//   "cancellation_policy",
+//   ALL_CANCELLATION_POLICIES,
+// );
 
 export const ALL_PROPERTY_ROOM_TYPES_WITHOUT_OTHER = [
   "Entire place",
@@ -103,6 +122,10 @@ export const propertySafetyItemsEnum = pgEnum(
   "property_safety_items",
   ALL_PROPERTY_SAFETY_ITEMS,
 );
+
+export const ALL_CURRENCY = ["USD", "EUR"] as const;
+
+export const currencyEnum = pgEnum("currency", ALL_CURRENCY);
 
 export const propertyStatusEnum = pgEnum("property_status", [
   "Listed",
@@ -175,6 +198,8 @@ export const ALL_BED_TYPES = [
   "Hammock",
   "Small Double Bed",
   "California King Bed",
+  "Double Sofa Bed",
+  "Sofa Bed",
 ] as const;
 
 export type BedType = (typeof ALL_BED_TYPES)[number];
@@ -185,11 +210,12 @@ export const roomsWithBedsSchema = z.array(
     beds: z.array(
       z.object({
         count: z.number().int().positive(),
-        type: z.enum(ALL_BED_TYPES, {
-          errorMap: (_, ctx) => ({
-            message: `Unsupported bed type "${ctx.data}"`,
-          }),
-        }),
+        // type: z.enum(ALL_BED_TYPES, {
+        //   errorMap: (_, ctx) => ({
+        //     message: `Unsupported bed type '${ctx.data}'`,
+        //   }),
+        // }),
+        type: z.string(),
       }),
     ),
   }),
@@ -202,10 +228,8 @@ export const properties = pgTable(
   {
     id: serial("id").primaryKey(),
     hostId: text("host_id").references(() => users.id, { onDelete: "cascade" }),
-    hostTeamId: integer("host_team_id"), //.references(() => hostTeams.id, { onDelete: "cascade" }),
-
-    // null = only on Tramona
-    originalListingPlatform: listingPlatformEnum("original_listing_platform"),
+    hostTeamId: integer("host_team_id"), // TODO: migrate fully away from hostId
+    originalListingPlatform: listingPlatformEnum("original_listing_platform"), // null = only on Tramona
     originalListingId: varchar("original_listing_id"),
 
     roomsWithBeds: jsonb("rooms_with_beds").$type<RoomWithBeds[]>(),
@@ -228,12 +252,12 @@ export const properties = pgTable(
     hostRating: doublePrecision("host_rating"),
 
     address: varchar("address", { length: 1000 }).notNull(),
-    latitude: doublePrecision("latitude").notNull(),
-    longitude: doublePrecision("longitude").notNull(),
+    // latitude: doublePrecision("latitude").notNull(),
+    // longitude: doublePrecision("longitude").notNull(),
+    // latitude: doublePrecision("latitude").notNull(),
+    // longitude: doublePrecision("longitude").notNull(),
     city: varchar("city", { length: 255 }).notNull(),
-
     originalListingUrl: varchar("url"),
-
     checkInInfo: varchar("check_in_info"),
     checkInTime: time("check_in_time"),
     checkOutTime: time("check_out_time"),
@@ -256,17 +280,15 @@ export const properties = pgTable(
     petsAllowed: boolean("pets_allowed"),
     smokingAllowed: boolean("smoking_allowed"),
 
-    otherHouseRules: varchar("other_house_rules", { length: 1000 }),
+    otherHouseRules: text("other_house_rules"),
 
     avgRating: doublePrecision("avg_rating").notNull().default(0),
     numRatings: integer("num_ratings").notNull().default(0),
     airbnbUrl: varchar("airbnb_url"),
-    airbnbMessageUrl: varchar("airbnb_message_url"),
     originalNightlyPrice: integer("original_nightly_price"), // in cents
     areaDescription: text("area_description"),
     mapScreenshot: text("map_screenshot"),
-    cancellationPolicy: cancellationPolicyEnum("cancellation_policy"),
-
+    cancellationPolicy: text("cancellation_policy"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -275,16 +297,19 @@ export const properties = pgTable(
     priceRestriction: integer("price_restriction").default(0),
     stripeVerRequired: boolean("stripe_ver_required").default(false),
     propertyStatus: propertyStatusEnum("property_status").default("Listed"),
-    airbnbBookUrl: varchar("airbnb_book_url"),
     hostImageUrl: varchar("host_image_url"),
     pricingScreenUrl: varchar("pricing_screen_url"),
+    currency: currencyEnum("currency").notNull().default("USD"),
     // hostawayListingId: integer("hostaway_listing_id"),
     latLngPoint: geometry("lat_lng_point", {
       type: "point",
       mode: "xy",
       srid: 4326,
-    }),
+    })
+      .notNull()
+      .$type<{ x: number; y: number }>(),
     iCalLink: text("ical_link"),
+    bookOnAirbnb: boolean("book_on_airbnb").notNull().default(false),
   },
   (t) => ({
     spatialIndex: index("spacial_index").using("gist", t.latLngPoint),
@@ -326,3 +351,7 @@ export const bookedDates = pgTable(
     propertyidIdx: index().on(t.propertyId),
   }),
 );
+
+// - added neals stuff to db
+// - did sasha already update drizzle schema and usages of latitude and longitude?
+// - I did and got Offset is outside the bounds of the DataView for the map

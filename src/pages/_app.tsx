@@ -28,7 +28,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
   return (
     // <HydrationOverlay>
     <TooltipProvider delayDuration={50} disableHoverableContent>
-      <NextTopLoader color="#003546" />
+      <NextTopLoader showSpinner={false} color="#003546" />
       <DefaultSeo {...SEO} />
       <APIProvider
         apiKey={env.NEXT_PUBLIC_GOOGLE_PLACES_KEY}

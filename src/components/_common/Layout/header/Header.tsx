@@ -28,6 +28,10 @@ import { SkeletonText } from "@/components/ui/skeleton";
 export function Header() {
   return (
     <>
+      <div className="text-balance bg-primaryGreen px-4 py-2 text-center text-sm font-medium text-white">
+        Site under maintenance. For now, please sign up and make a request, and
+        we will be live on Friday!
+      </div>
       <div className="contents lg:hidden">
         <SmallHeader />
       </div>
@@ -92,8 +96,8 @@ function LargeHeader() {
             render={({ selected }) => (
               <span
                 className={cn(
-                  "rounded-md px-2 py-3 text-sm font-semibold text-muted-foreground hover:text-zinc-700 xl:text-base",
-                  selected && "text-zinc-700 underline underline-offset-2",
+                  "rounded-md px-2 py-3 text-sm font-bold text-zinc-600 hover:text-foreground xl:text-base",
+                  selected && "text-foreground underline underline-offset-2",
                 )}
               >
                 {link.name}
