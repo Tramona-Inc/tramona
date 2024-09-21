@@ -13,7 +13,7 @@ import { eq } from "drizzle-orm";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
-import { check } from "drizzle-orm/mysql-core";
+import { waitUntil } from "@vercel/functions";
 
 async function fetchEmailVerified(email: string) {
   return await db.query.users.findFirst({
@@ -36,7 +36,7 @@ async function updateExistingUserAuth(
     })
     .where(eq(users.id, userQueriedId))
     .returning()
-    .then((res) => res[0] ?? null);
+    .then((res) => res[0]!);
 }
 
 async function insertUserAuth(
@@ -55,7 +55,7 @@ async function insertUserAuth(
       role: makeHost ? "host" : "guest",
     })
     .returning()
-    .then((res) => res[0] ?? null);
+    .then((res) => res[0]!);
 }
 
 async function sendVerificationEmail(user: User) {
@@ -115,62 +115,52 @@ export const authRouter = createTRPCRouter({
       const userQueriedWEmail = await fetchEmailVerified(input.email);
 
       if (userQueriedWEmail?.emailVerified) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "User with this email already exists",
-        });
+        return {
+          status: "email taken",
+        } as const;
       }
 
       const hashedPassword: string = await bycrypt.hash(input.password, 10);
 
-      try {
-        let user: User | null;
+      let user: User;
 
-        // Users signed up but didn't verify email
-        if (userQueriedWEmail?.emailVerified === null) {
-          user = await updateExistingUserAuth(
-            // input.name,
-            input.email,
-            hashedPassword,
-            userQueriedWEmail.id,
-          );
-        } else {
-          // Initial sign up insert the user info
-          user = await insertUserAuth(input.email, hashedPassword);
+      // Users signed up but didn't verify email
+      if (userQueriedWEmail?.emailVerified === null) {
+        user = await updateExistingUserAuth(
+          // input.name,
+          input.email,
+          hashedPassword,
+          userQueriedWEmail.id,
+        );
+      } else {
+        // Initial sign up insert the user info
+        user = await insertUserAuth(input.email, hashedPassword);
 
-          if (user) {
-            await Promise.all([
-              // Create referral code
-              ctx.db.insert(referralCodes).values({
-                ownerId: user.id,
-                referralCode: generateReferralCode(),
-              }),
+        await Promise.all([
+          // Create referral code
+          ctx.db.insert(referralCodes).values({
+            ownerId: user.id,
+            referralCode: generateReferralCode(),
+          }),
 
-              // Link user account
-              CustomPgDrizzleAdapter(ctx.db).linkAccount?.({
-                provider: "credentials",
-                providerAccountId: user.id,
-                userId: user.id,
-                type: "email",
-              }),
+          // Link user account
+          CustomPgDrizzleAdapter(ctx.db).linkAccount?.({
+            provider: "credentials",
+            providerAccountId: user.id,
+            userId: user.id,
+            type: "email",
+          }),
 
-              // add user to groups they were invited to
-              addUserToGroups(user),
-            ]);
-          }
-        }
-
-        if (user) {
-          await sendVerificationEmail(user);
-        }
-
-        return user;
-      } catch (error) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Something went wrong",
-        });
+          // add user to groups they were invited to
+          addUserToGroups(user),
+        ]);
       }
+
+      waitUntil(sendVerificationEmail(user));
+
+      return {
+        status: "success",
+      } as const;
     }),
 
   checkEmailVerification: publicProcedure
@@ -179,7 +169,7 @@ export const authRouter = createTRPCRouter({
         email: zodEmail(),
       }),
     )
-    .query(async ({ input, ctx }) => {
+    .query(async ({ input }) => {
       const user = await fetchEmailVerified(input.email);
 
       if (!user) {

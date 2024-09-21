@@ -57,12 +57,16 @@ export default function SignUp() {
 
   async function handleSubmit(newUser: FormSchema) {
     await createUser(newUser)
-      .then(() =>
-        router.push({
+      .then(async ({ status }) => {
+        if (status === "email taken") {
+          form.setError("email", { message: "Email already taken" });
+          return;
+        }
+        await router.push({
           pathname: "/auth/verify-email",
           query: { email: newUser.email },
-        }),
-      )
+        });
+      })
       .catch(() => errorToast("Couldn't sign up, please try again"));
   }
 

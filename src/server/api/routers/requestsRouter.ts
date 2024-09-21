@@ -25,7 +25,7 @@ import {
 import { sendSlackMessage } from "@/server/slack";
 import { isIncoming } from "@/utils/formatters";
 import { TRPCError } from "@trpc/server";
-import { and, eq, exists, sql, lt } from "drizzle-orm";
+import { and, eq, exists, lt } from "drizzle-orm";
 import { z } from "zod";
 import type { Session } from "next-auth";
 import { linkInputProperties } from "@/server/db/schema/tables/linkInputProperties";

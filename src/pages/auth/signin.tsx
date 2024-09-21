@@ -99,6 +99,8 @@ export default function SignIn() {
     if (query.error) {
       if (query.error === "SessionRequired") {
         toast({ title: "Please log in to continue" });
+      } else if (query.error === "OAuthCallback") {
+        errorToast("Couldn't log in, try using email/password");
       } else {
         errorToast("Couldn't log in, please try again");
       }

@@ -41,10 +41,10 @@ import {
   sendEmail,
 } from "@/server/server-utils";
 import WelcomeEmail from "packages/transactional/emails/WelcomeEmail";
-import createNextApiHandler from "../../../pages/api/trpc/[trpc]";
 
 export const usersRouter = createTRPCRouter({
-  getUser: protectedProcedure.query(async ({ ctx }) => {
+  getUser: optionallyAuthedProcedure.query(async ({ ctx }) => {
+    if (!ctx.user) return null;
     return await db.query.users.findFirst({
       where: eq(users.id, ctx.user.id),
     });
@@ -797,6 +797,7 @@ export const usersRouter = createTRPCRouter({
         emergencyPhone: input.emergencyPhone,
       });
     }),
+
   deleteEmergencyContact: protectedProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ ctx, input }) => {
@@ -804,6 +805,7 @@ export const usersRouter = createTRPCRouter({
         .delete(emergencyContacts)
         .where(eq(emergencyContacts.id, input.id));
     }),
+
   getEmergencyContacts: protectedProcedure.query(async ({ ctx }) => {
     return await ctx.db.query.emergencyContacts.findMany({
       where: eq(emergencyContacts.userId, ctx.user.id),
