@@ -46,17 +46,13 @@ import {
   SmokingRule,
 } from "./HouseRules";
 import { OfferPriceDetails } from "../_common/OfferPriceDetails";
-import {
-  getCancellationPolicyDescription,
-  getFreeCancellationUntil,
-} from "@/config/getCancellationPolicyDescription";
+import { getCancellationPolicyDescription } from "@/config/getCancellationPolicyDescription";
 import { VerificationProvider } from "../_utils/VerificationContext";
 import IdentityModal from "../_utils/IdentityModal";
 import { Property } from "@/server/db/schema";
 import ChatOfferButton from "./ChatOfferButton";
 import { Airbnb } from "@/utils/listing-sites/Airbnb";
 import { createUserNameAndPic } from "../activity-feed/admin/generationHelper";
-import { CreditCard } from "lucide-react";
 import ReasonsToBook from "./ReasonsToBook";
 
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
@@ -222,24 +218,12 @@ export default function PropertyPage({
         </div>
       )}
 
-      <div className="relative flex gap-8 pb-32 pt-4">
+      <div className="relative flex gap-8 pt-4">
         <div className="min-w-0 flex-1 space-y-4">
           <section>
-            <div className="flex">
-              <h1 className="flex-1 text-3xl font-semibold sm:text-4xl">
-                {property.name}
-              </h1>
-              {offer && (
-                <div className="flex justify-end">
-                  <ShareOfferDialog
-                    id={offer.id}
-                    isRequest={false}
-                    propertyName={property.name}
-                    showShare={false}
-                  />
-                </div>
-              )}
-            </div>
+            <h1 className="flex-1 text-3xl font-semibold sm:text-4xl">
+              {property.name}
+            </h1>
             <div className="flex flex-col gap-4 sm:flex-row">
               <div className="flex-1">
                 <p className="gap flex flex-wrap items-center gap-x-1 pt-1 text-sm font-medium capitalize">
@@ -453,41 +437,35 @@ export default function PropertyPage({
             </section>
           )}
 
-          {(property.checkInTime ??
-            property.checkOutTime ??
-            property.petsAllowed ??
-            property.smokingAllowed ??
-            property.cancellationPolicy) && (
-            <section>
-              <h2 className="subheading border-t pb-2 pt-4">House rules</h2>
-              <div className="overflow-x-auto">
-                <div className="flex gap-4">
-                  {property.checkInTime !== null && (
-                    <CheckInTimeRule checkInTime={property.checkInTime} />
-                  )}
-                  {property.checkOutTime !== null && (
-                    <CheckOutTimeRule checkOutTime={property.checkOutTime} />
-                  )}
-                  {property.petsAllowed !== null && (
-                    <PetsRule petsAllowed={property.petsAllowed} />
-                  )}
-                  {property.smokingAllowed !== null && (
-                    <SmokingRule smokingAllowed={property.smokingAllowed} />
-                  )}
-                </div>
+          <section>
+            <h2 className="subheading border-t pb-2 pt-4">House rules</h2>
+            <div className="overflow-x-auto">
+              <div className="flex gap-4">
+                {property.checkInTime !== null && (
+                  <CheckInTimeRule checkInTime={property.checkInTime} />
+                )}
+                {property.checkOutTime !== null && (
+                  <CheckOutTimeRule checkOutTime={property.checkOutTime} />
+                )}
+                {property.petsAllowed !== null && (
+                  <PetsRule petsAllowed={property.petsAllowed} />
+                )}
+                {property.smokingAllowed !== null && (
+                  <SmokingRule smokingAllowed={property.smokingAllowed} />
+                )}
               </div>
-              {property.cancellationPolicy !== null && (
-                <>
-                  <h3 className="pb-2 pt-4 font-bold">Cancellation Policy</h3>
-                  <p>
-                    {getCancellationPolicyDescription(
-                      property.cancellationPolicy,
-                    )}
-                  </p>
-                </>
-              )}
-            </section>
-          )}
+            </div>
+            {property.cancellationPolicy !== null && (
+              <>
+                <h3 className="pb-2 pt-4 font-bold">Cancellation Policy</h3>
+                <p>
+                  {getCancellationPolicyDescription(
+                    property.cancellationPolicy,
+                  )}
+                </p>
+              </>
+            )}
+          </section>
 
           {property.checkInInfo !== null && (
             <section>
@@ -501,29 +479,16 @@ export default function PropertyPage({
               </p>
             </section>
           )}
-          <section>
-            <h2 className="subheading border-t pb-2 pt-4">
-              {`We're here for you`}
-            </h2>
-            <div className="z-20 max-w-2xl text-zinc-700">
-              <p className="pb-4 text-sm">
-                Visit our{" "}
-                <Link href="/help-center" className="text-blue-600 underline">
-                  Help Center
-                </Link>{" "}
-                to find answers to frequently asked questions. If you have any
-                more questions, our Customer Support team will be happy to help
-                you.
-              </p>
+
+          {offer && (
+            <div className="flex justify-end">
+              <ShareOfferDialog
+                id={offer.id}
+                isRequest={false}
+                propertyName={property.name}
+              />
             </div>
-            <div className="flex w-full">
-              <Link href="/help-center" className="w-full">
-                <Button variant="darkOutline" className="w-full">
-                  Need Support?
-                </Button>
-              </Link>
-            </div>
-          </section>
+          )}
         </div>
 
         {sidebar && (
@@ -539,18 +504,6 @@ export default function PropertyPage({
             {mobileBottomCard}
           </div>
         )}
-      </div>
-      <div className="flex flex-col text-center">
-        <h2 className="subheading w-full pb-4 pt-4 text-center">
-          {`Haven't found the right vacation home yet?`}
-        </h2>
-        <div className="inline-block">
-          <Link href="/requests">
-            <Button variant="darkOutline" className="text-md">
-              Submit another request
-            </Button>
-          </Link>
-        </div>
       </div>
     </div>
   );
@@ -635,13 +588,9 @@ function OfferPageSidebar({
   offer: OfferWithDetails;
   property: Pick<
     Property,
-    | "stripeVerRequired"
-    | "originalListingId"
-    | "bookOnAirbnb"
-    | "cancellationPolicy"
+    "stripeVerRequired" | "originalListingId" | "bookOnAirbnb"
   >;
 }) {
-  const [open, setOpen] = useState(false);
   return (
     <div className="space-y-4">
       <Card>
@@ -684,30 +633,6 @@ function OfferPageSidebar({
             offer={offer}
             bookOnAirbnb={property.bookOnAirbnb}
           />
-
-          {property.cancellationPolicy &&
-            property.cancellationPolicy !== "Non-refundable" && (
-              <div className="flex flex-row justify-between gap-2 border-t pt-4">
-                <div className="flex flex-col">
-                  <div className="font-bold">Book with confidence</div>
-                  <div>
-                    Free cancellation until{" "}
-                    {getFreeCancellationUntil(
-                      offer.checkIn,
-                      property.cancellationPolicy,
-                    )}
-                  </div>
-                  <a
-                    onClick={() => setOpen(true)}
-                    className="cursor-pointer text-sm text-blue-600 hover:underline"
-                  >
-                    See Details
-                  </a>
-                </div>
-                {/* TO DO: CREDIT CARD ICON */}
-                <CreditCard className="h-12 w-12 text-[#004236]" />
-              </div>
-            )}
         </CardContent>
       </Card>
 
@@ -740,16 +665,6 @@ function OfferPageSidebar({
           </p>
         </div>
       </div>
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Cancellation Policy</DialogTitle>
-          </DialogHeader>
-          <p>
-            {getCancellationPolicyDescription(property.cancellationPolicy!)}
-          </p>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

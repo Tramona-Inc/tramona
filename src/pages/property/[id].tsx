@@ -63,7 +63,7 @@ export default function Page({
         }}
       />
       <DashboardLayout>
-        <div className="px-4 pt-6">
+        <div className="px-4 pb-64 pt-6">
           <div className="mx-auto max-w-5xl">
             {property ? <PropertyPage property={property} /> : <Spinner />}
           </div>
