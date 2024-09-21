@@ -132,8 +132,8 @@ importers:
         specifier: 3.3.13
         version: 3.3.13
       '@stripe/react-connect-js':
-        specifier: 3.3.13
-        version: 3.3.13(@stripe/connect-js@3.3.13)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 3.3.14
+        version: 3.3.14(@stripe/connect-js@3.3.13)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@stripe/react-stripe-js':
         specifier: ^2.4.0
         version: 2.8.0(@stripe/stripe-js@2.4.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -2764,10 +2764,10 @@ packages:
   '@stripe/connect-js@3.3.13':
     resolution: {integrity: sha512-WSSZngnrEqQ2yFPbc5xN0S2fgZDATI0h0uqGbW2mzTuo5HSOGcFvf240UCNnVpmxVY92mIycMq5tpYncsx6/xQ==}
 
-  '@stripe/react-connect-js@3.3.13':
-    resolution: {integrity: sha512-kMxYjeQUcl/ixu/mSeX5QGIr/MuP+YxFSEBdb8j6w+tbK82tmcjyFDgoQTQwVXNqUV6jI66Kks3XcfpPRfeiJA==}
+  '@stripe/react-connect-js@3.3.14':
+    resolution: {integrity: sha512-xJ/fFvmRsfEzJZhKzvoMxIAsrm+8bDQdkXC+10Q6+rpBGh1+dpHBWb6VivqHKzxoI/YX0nhBq4QTMEBRRVDV/A==}
     peerDependencies:
-      '@stripe/connect-js': '>=3.3.11'
+      '@stripe/connect-js': '>=3.3.13'
       react: '>=16.8.0'
       react-dom: '>=16.8.0'
 
@@ -10084,7 +10084,7 @@ snapshots:
 
   '@stripe/connect-js@3.3.13': {}
 
-  '@stripe/react-connect-js@3.3.13(@stripe/connect-js@3.3.13)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@stripe/react-connect-js@3.3.14(@stripe/connect-js@3.3.13)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@stripe/connect-js': 3.3.13
       react: 18.3.1
