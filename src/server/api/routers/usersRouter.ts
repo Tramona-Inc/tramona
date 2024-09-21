@@ -23,7 +23,11 @@ import { eq } from "drizzle-orm";
 
 import { env } from "@/env";
 import { db } from "@/server/db";
-import { censorEmail, generateReferralCode } from "@/utils/utils";
+import {
+  censorEmail,
+  censorPhoneNumber,
+  generateReferralCode,
+} from "@/utils/utils";
 import { zodString } from "@/utils/zod-utils";
 import { TRPCError } from "@trpc/server";
 import jwt from "jsonwebtoken";
@@ -37,6 +41,7 @@ import {
   sendEmail,
 } from "@/server/server-utils";
 import WelcomeEmail from "packages/transactional/emails/WelcomeEmail";
+import createNextApiHandler from "../../../pages/api/trpc/[trpc]";
 
 export const usersRouter = createTRPCRouter({
   getUser: protectedProcedure.query(async ({ ctx }) => {
@@ -760,6 +765,7 @@ export const usersRouter = createTRPCRouter({
       return {
         ...verifications,
         email: censorEmail(verifications.email),
+        phoneNumber: censorPhoneNumber(verifications.phoneNumber!),
       };
     }),
 

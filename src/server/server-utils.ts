@@ -436,7 +436,7 @@ export async function sendTextToHost(
 
 export async function getRequestsForProperties(
   hostProperties: Property[],
-  { user } : { user: Session["user"] },
+  { user }: { user: Session["user"] },
   //{
   // id: number;
   // propertyStaus: string;
@@ -450,7 +450,9 @@ export async function getRequestsForProperties(
   // let priceRestrictionsSQL: SQL[] | undefined[] = [sql`FALSE`];
   const propertyToRequestMap: {
     property: Property;
-    request: Request & { traveler: Pick<User, "name" | "image"> };
+    request: Request & {
+      traveler: Pick<User, "firstName" | "lastName" | "name" | "image">;
+    };
   }[] = [];
 
   for (const property of hostProperties) {
@@ -473,34 +475,54 @@ export async function getRequestsForProperties(
     requestIsNearProperties.push(requestIsNearProperty);
 
     const requestsForProperty = await tx.query.requests.findMany({
-      where: and(requestIsNearProperty, gte(requests.checkIn, new Date()),
+      where: and(
+        requestIsNearProperty,
+        gte(requests.checkIn, new Date()),
         notExists(
           db
             .select()
             .from(offers)
-            .where(and(eq(offers.requestId, requests.id), exists(
-              db.select()
-                .from(properties)
-                .where(and(eq(properties.id, offers.propertyId), eq(properties.hostTeamId, property.hostTeamId!)))
-            )
-
-            )
+            .where(
+              and(
+                eq(offers.requestId, requests.id),
+                exists(
+                  db
+                    .select()
+                    .from(properties)
+                    .where(
+                      and(
+                        eq(properties.id, offers.propertyId),
+                        eq(properties.hostTeamId, property.hostTeamId!),
+                      ),
+                    ),
+                ),
+              ),
             ),
         ),
         notExists(
-          db.select()
-          .from(rejectedRequests)
-          .where(
-            and(
-              eq(rejectedRequests.requestId, requests.id),
-              eq(rejectedRequests.userId, user.id),
-            )
-          )
-        )
+          db
+            .select()
+            .from(rejectedRequests)
+            .where(
+              and(
+                eq(rejectedRequests.requestId, requests.id),
+                eq(rejectedRequests.userId, user.id),
+              ),
+            ),
+        ),
       ),
       with: {
         madeByGroup: {
-          with: { owner: { columns: { image: true, name: true } } },
+          with: {
+            owner: {
+              columns: {
+                image: true,
+                name: true,
+                firstName: true,
+                lastName: true,
+              },
+            },
+          },
         },
       },
     });
@@ -510,6 +532,8 @@ export async function getRequestsForProperties(
       const traveler = {
         name: request.madeByGroup.owner.name,
         image: request.madeByGroup.owner.image,
+        firstName: request.madeByGroup.owner.firstName,
+        lastName: request.madeByGroup.owner.lastName,
       };
       propertyToRequestMap.push({
         property,
@@ -810,9 +834,9 @@ export function haversineDistance(
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(toRadians(lat1)) *
-    Math.cos(toRadians(lat2)) *
-    Math.sin(dLon / 2) *
-    Math.sin(dLon / 2);
+      Math.cos(toRadians(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c; // Distance in kilometers
 }
@@ -825,23 +849,20 @@ export async function checkRequestsWithoutOffers() {
       lte(requests.createdAt, twentyFourHoursAgo),
       eq(requests.notifiedNoOffers, false),
       notExists(
-        db
-          .select()
-          .from(offers)
-          .where(eq(offers.requestId, requests.id))
-      )
+        db.select().from(offers).where(eq(offers.requestId, requests.id)),
+      ),
     ),
     with: {
       madeByGroup: {
         with: {
           owner: {
             columns: {
-              phoneNumber: true
-            }
-          }
-        }
-      }
-    }
+              phoneNumber: true,
+            },
+          },
+        },
+      },
+    },
   });
 
   for (const request of requestsWithoutOffers) {
@@ -850,7 +871,7 @@ export async function checkRequestsWithoutOffers() {
     if (travelerPhoneNumber) {
       await sendText({
         to: travelerPhoneNumber,
-        content: `Tramona: Your request for ${request.location} for ${request.maxTotalPrice} didn't yield any offers in the last 24 hours. Consider submitting a new request with a different price range or a broader location to increase your chances of finding a match.`
+        content: `Tramona: Your request for ${request.location} for ${request.maxTotalPrice} didn't yield any offers in the last 24 hours. Consider submitting a new request with a different price range or a broader location to increase your chances of finding a match.`,
       });
     }
 
