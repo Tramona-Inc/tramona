@@ -26,8 +26,7 @@ export default function VerifyEmail() {
       }
 
       void router.push({
-        pathname: "/auth/signin",
-        query: { isVerified: true },
+        pathname: "/auth/verify-email-success",
       });
     },
   });
