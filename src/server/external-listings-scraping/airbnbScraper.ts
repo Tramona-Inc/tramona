@@ -1,6 +1,6 @@
 import { DirectSiteScraper } from "../direct-sites-scraping";
 import { urlScrape } from "@/server/server-utils";
-import { MinimalRequest, NewProperty } from "@/server/db/schema";
+import { NewProperty } from "@/server/db/schema";
 import { z } from "zod";
 import { getNumNights, parseCurrency } from "@/utils/utils";
 import { sortBy } from "lodash";
@@ -57,41 +57,38 @@ export const airbnbScraper: DirectSiteScraper = async ({
   );
 
   return await Promise.all(
-    sortedListings.map(
-      async ({ originalListingId }) => {
-        try {
-          const { property, reviews, nightlyPrice } =
-            await scrapeAirbnbListing(originalListingId);
+    sortedListings.map(async ({ originalListingId }) => {
+      try {
+        const { property, reviews, nightlyPrice } = await scrapeAirbnbListing(
+          originalListingId,
+          { checkIn, checkOut, numGuests },
+        );
 
-          const completeProperty: NewProperty = {
-            ...property,
-            originalListingId,
-            originalListingPlatform: "Airbnb",
-            originalListingUrl: `https://www.airbnb.com/rooms/${originalListingId}`,
-            airbnbUrl: `https://www.airbnb.com/rooms/${originalListingId}`,
-            bookOnAirbnb: true,
-          };
+        const completeProperty: NewProperty = {
+          ...property,
+          originalListingId,
+          originalListingPlatform: "Airbnb",
+          originalListingUrl: `https://www.airbnb.com/rooms/${originalListingId}`,
+          airbnbUrl: `https://www.airbnb.com/rooms/${originalListingId}`,
+          bookOnAirbnb: true,
+        };
 
-          return {
-            ...completeProperty,
-            reviews,
-            nightlyPrice,
-            scrapeUrl: serpUrl,
-            originalListingUrl: completeProperty.originalListingUrl!,
-            latLngPoint: {
-              lng: completeProperty.latLngPoint.x,
-              lat: completeProperty.latLngPoint.y,
-            },
-          };
-        } catch (e) {
-          console.error(
-            `Error scraping Airbnb listing ${originalListingId}:`,
-            e,
-          );
-          return undefined;
-        }
-      },
-    ),
+        return {
+          ...completeProperty,
+          reviews,
+          nightlyPrice,
+          scrapeUrl: serpUrl,
+          originalListingUrl: completeProperty.originalListingUrl!,
+          latLngPoint: {
+            lng: completeProperty.latLngPoint.x,
+            lat: completeProperty.latLngPoint.y,
+          },
+        };
+      } catch (e) {
+        console.error(`Error scraping Airbnb listing ${originalListingId}:`, e);
+        return undefined;
+      }
+    }),
   ).then((r) => r.filter(Boolean)); // filter out failed scrapes
 };
 

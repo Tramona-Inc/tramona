@@ -24,6 +24,8 @@ import { useSession } from "next-auth/react";
 import ListMessagesWithAdmin from "./ListMessagesWithAdmin";
 import { useEffect, useState } from "react";
 
+import { type MessageDbType } from "@/types/supabase.message";
+
 export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
   const { data: session } = useSession();
   const [conversationId, setConversationId] = useState<string>("");
@@ -48,6 +50,14 @@ export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
     );
   const { mutateAsync: sendChatboxSlackMessage } =
     api.messages.sendChatboxSlackMessage.useMutation();
+  const { fetchInitialMessages, conversations } = useMessage();
+  // const setOptimisticIds = useMessage((state) => state.setOptimisticIds);
+
+  const messages = conversationId
+    ? (conversations[conversationId]?.messages ?? [])
+    : [];
+
+  const optimisticIds = useMessage((state) => state.optimisticIds);
 
   useEffect(() => {
     if (!session && typeof window !== "undefined") {
@@ -91,6 +101,54 @@ export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
       fetchData();
     }
   }, [conversationIdAndTempUserId, session?.user.id, tempToken]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (conversationId) {
+        await fetchInitialMessages(conversationId);
+      }
+    };
+    void fetchData();
+  }, [conversationId, fetchInitialMessages]);
+
+  useEffect(() => {
+    const channel = supabase
+      .channel(conversationId)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "messages",
+        },
+        (payload: { new: MessageDbType }) => {
+          void handlePostgresChange(payload);
+        },
+      )
+      .subscribe();
+
+    return () => {
+      void channel.unsubscribe();
+    };
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [supabase, messages]);
+
+  const handlePostgresChange = async (payload: { new: MessageDbType }) => {
+    if (!optimisticIds.includes(payload.new.id)) {
+      const newMessage: ChatMessageType = {
+        id: payload.new.id,
+        conversationId: payload.new.conversation_id,
+        userId: payload.new.user_id,
+        message: payload.new.message,
+        isEdit: payload.new.is_edit,
+        createdAt: payload.new.created_at,
+        read: payload.new.read,
+      };
+      addMessageToConversation(payload.new.conversation_id, newMessage);
+      // setOptimisticIds(newMessage.id)
+    }
+  };
 
   const addMessageToConversation = useMessage(
     (state) => state.addMessageToConversation,
@@ -234,6 +292,7 @@ export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
             </div>
             <div>
               <ListMessagesWithAdmin
+                messages={messages}
                 conversationId={conversationId}
                 tempUserId={conversationIdAndTempUserId?.tempUserId ?? ""}
               />
@@ -283,6 +342,7 @@ export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
           </div>
           <div>
             <ListMessagesWithAdmin
+              messages={messages}
               isMobile={isMobile}
               conversationId={conversationId}
               tempUserId={conversationIdAndTempUserId?.tempUserId ?? ""}

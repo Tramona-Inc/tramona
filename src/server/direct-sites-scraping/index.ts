@@ -30,7 +30,6 @@ import { DIRECTLISTINGMARKUP } from "@/utils/constants";
 import { createLatLngGISPoint, sendText } from "@/server/server-utils";
 import { cleanbnbScraper, cleanbnbSubScraper } from "./cleanbnb-scrape";
 import { airbnbScraper } from "../external-listings-scraping/airbnbScraper";
-import { columns } from "@/components/admin/view-recent-host/table/columns";
 
 export type DirectSiteScraper = (options: {
   checkIn: Date;
