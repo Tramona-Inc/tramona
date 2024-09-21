@@ -53,6 +53,7 @@ import { Property } from "@/server/db/schema";
 import ChatOfferButton from "./ChatOfferButton";
 import { Airbnb } from "@/utils/listing-sites/Airbnb";
 import { createUserNameAndPic } from "../activity-feed/admin/generationHelper";
+import ReasonsToBook from "./ReasonsToBook";
 
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 export type PropertyPageData = OfferWithDetails["property"];
@@ -345,6 +346,9 @@ export default function PropertyPage({
               </DialogContent>
             </Dialog>
           </section>
+          <section className="border-t pb-2 pt-4">
+            <ReasonsToBook />
+          </section>
 
           <section>
             <h2 className="subheading border-t pb-2 pt-4">
@@ -620,6 +624,11 @@ function OfferPageSidebar({
             </div>
           )}
           <BookNowBtn btnSize="lg" offer={offer} property={property} />
+          {!offer.acceptedAt && (
+            <p className="text-center text-xs text-zinc-500">
+              You won&apos;t be charged yet
+            </p>
+          )}
           <OfferPriceDetails
             offer={offer}
             bookOnAirbnb={property.bookOnAirbnb}

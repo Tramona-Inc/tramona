@@ -754,8 +754,29 @@ export async function getRedirectedUrl(url: string) {
 }
 
 export function censorEmail(email: string) {
-  return email
-    .split("@")
-    .map((part) => part[0] + "*".repeat(part.length - 1))
-    .join("@");
+  const [name, domain] = email.split("@");
+
+  if (!domain) {
+    return "Invalid email format";
+  }
+
+  const censoredName = name![0] + "*".repeat(name!.length - 1);
+
+  return censoredName + "@" + domain;
+}
+
+export function censorPhoneNumber(phoneNumber: string) {
+  // Regex to match the area code
+  const regex = /^(\+\d{1,3})(\d{3})\d{7}$/;
+
+  if (regex.test(phoneNumber)) {
+    // Replace the parts of the number that are not in the area code
+    return phoneNumber.replace(/(^\+\d{1,3})(\d{3})(\d{7})$/, "$1$2*** - ****");
+  }
+
+  return "Invalid phone number format";
+}
+
+export function censorTravelerFullName(name: string) {
+  return name;
 }
