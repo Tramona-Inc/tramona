@@ -458,47 +458,45 @@ export async function handleRequestSubmission(
     //   }
     // }
 
-    if (user.role === "admin") {
-      waitUntil(
-        scrapeDirectListings({
-          checkIn: input.checkIn,
-          checkOut: input.checkOut,
-          requestNightlyPrice:
-            input.maxTotalPrice / getNumNights(input.checkIn, input.checkOut),
-          requestId: request.id,
-          location: input.location,
-          latitude: lat,
-          longitude: lng,
-          numGuests: input.numGuests,
-        })
-          .then(async (listings) => {
-            if (listings.length > 0) {
-              const travelerPhone = user.phoneNumber;
-              if (travelerPhone) {
-                const currentTime = new Date();
-                const twentyFiveMinutesFromNow = new Date(
-                  currentTime.getTime() + 25 * 60000,
-                );
-                const fiftyFiveMinutesFromNow = new Date(
-                  currentTime.getTime() + 55 * 60000,
-                );
-                const numOfMatches = listings.length;
-                void sendScheduledText({
-                  to: travelerPhone,
-                  content: `Tramona: You have ${numOfMatches <= 10 ? numOfMatches : "more than 10"} matches for your request in ${input.location}, visit Tramona.com to view`,
-                  sendAt:
-                    numOfMatches <= 5
-                      ? twentyFiveMinutesFromNow
-                      : fiftyFiveMinutesFromNow,
-                });
-              }
+    waitUntil(
+      scrapeDirectListings({
+        checkIn: input.checkIn,
+        checkOut: input.checkOut,
+        requestNightlyPrice:
+          input.maxTotalPrice / getNumNights(input.checkIn, input.checkOut),
+        requestId: request.id,
+        location: input.location,
+        latitude: lat,
+        longitude: lng,
+        numGuests: input.numGuests,
+      })
+        .then(async (listings) => {
+          if (listings.length > 0) {
+            const travelerPhone = user.phoneNumber;
+            if (travelerPhone) {
+              const currentTime = new Date();
+              const twentyFiveMinutesFromNow = new Date(
+                currentTime.getTime() + 25 * 60000,
+              );
+              const fiftyFiveMinutesFromNow = new Date(
+                currentTime.getTime() + 55 * 60000,
+              );
+              const numOfMatches = listings.length;
+              void sendScheduledText({
+                to: travelerPhone,
+                content: `Tramona: You have ${numOfMatches <= 10 ? numOfMatches : "more than 10"} matches for your request in ${input.location}, visit Tramona.com to view`,
+                sendAt:
+                  numOfMatches <= 5
+                    ? twentyFiveMinutesFromNow
+                    : fiftyFiveMinutesFromNow,
+              });
             }
-          })
-          .catch((error) => {
-            console.error("Error scraping listings: " + error);
-          }),
-      );
-    }
+          }
+        })
+        .catch((error) => {
+          console.error("Error scraping listings: " + error);
+        }),
+    );
 
     const eligibleProperties = await getPropertiesForRequest(
       { ...input, id: request.id, latLngPoint: request.latLngPoint, radius },
