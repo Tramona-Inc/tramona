@@ -36,5 +36,5 @@ export const unloggedHamburgerLinksMobile = [
 
 export const hamburgerLinksMobile = [
   ...headerLinks,
-  ...unloggedHamburgerLinksMobile,
+  { name: "24/7 Support", href: "/help-center", icon: BadgeHelp },
 ];
