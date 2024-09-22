@@ -44,7 +44,7 @@ export default function ProfilePage() {
                 <h2 className="text-xl font-bold lg:text-2xl">
                   {profileInfo?.name}
                 </h2>
-                {verificationStatus?.isIdentityVerified === "true" ? (
+                {true || verificationStatus?.isIdentityVerified === "true" ? ( // TODO: cleanup and display stripe verification somewhere else
                   <div className="flex flex-row items-center gap-x-1 text-center text-xs font-semibold tracking-tighter text-green-800">
                     <BadgeCheck size={22} /> Verified
                   </div>
