@@ -746,13 +746,6 @@ export function parseHTML(str: string) {
   return ret;
 }
 
-export async function getRedirectedUrl(url: string) {
-  return await fetch(url, {
-    method: "HEAD",
-    redirect: "follow",
-  }).then((r) => r.url);
-}
-
 export function censorEmail(email: string) {
   const [name, domain] = email.split("@");
 
