@@ -36,6 +36,7 @@ import {
 } from "@/server/direct-sites-scraping";
 import { createNormalDistributionDates } from "@/server/server-utils";
 import { scrapeAirbnbPrice } from "@/server/scrapePrice";
+import { TRPCClientError } from "@trpc/client";
 
 export const offersRouter = createTRPCRouter({
   accept: protectedProcedure
@@ -419,6 +420,7 @@ export const offersRouter = createTRPCRouter({
       // ) {
       //   throw new TRPCError({ code: "UNAUTHORIZED" });
       // }
+      console.log(input);
       if (input.requestId !== undefined) {
         const requestDetails = await ctx.db.query.requests.findFirst({
           where: eq(requests.id, input.requestId),
@@ -441,6 +443,7 @@ export const offersRouter = createTRPCRouter({
             maxNumGuests: true,
           },
         });
+        console.log(curProperty);
 
         const scrapeParams = {
           checkIn: requestDetails.checkIn,
@@ -452,11 +455,13 @@ export const offersRouter = createTRPCRouter({
               airbnbListingId: curProperty.originalListingId,
               params: scrapeParams,
             }).then((res) => {
-              if (!res) throw new Error("Error scraping airbnb price");
+              if (!res) {
+                throw new TRPCClientError("Error scraping airbnb price");
+              }
               return res;
             })
           : null;
-
+        console.log(datePriceFromAirbnb);
         await ctx.db.insert(offers).values({
           ...input,
           checkIn: requestDetails.checkIn,
