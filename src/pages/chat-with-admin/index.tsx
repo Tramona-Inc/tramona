@@ -2,14 +2,17 @@ import MessagesPopover from "@/components/messages/chat-with-admin-popover/Messa
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import { useIsLg } from "@/utils/utils";
 import { useRouter } from "next/router";
+import { useEffect } from "react";
 
 export default function AdminMessagesPage() {
   const isLg = useIsLg();
   const router = useRouter();
-  if (isLg) {
-    // push to home page and use desktop chat-with-admin popover
-    void router.push("/");
-  }
+  useEffect(() => {
+    if (isLg) {
+      // push to home page and use desktop chat-with-admin popover
+      void router.push("/");
+    }
+  }, [isLg, router]);
 
   return (
     <DashboardLayout>

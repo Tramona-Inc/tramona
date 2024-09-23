@@ -232,24 +232,8 @@ export const twilioRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       await createService();
 
-      const { to, code } = input;
-
-      const { sid } = service;
-
-      try {
-        const verificationCheck = await twilio.verify.v2
-          .services(sid)
-          .verificationChecks.create({
-            to,
-            code,
-          });
-
-        return verificationCheck;
-      } catch (error) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "User with this email already exists",
-        });
-      }
+      return await twilio.verify.v2
+        .services(service.sid)
+        .verificationChecks.create(input);
     }),
 });

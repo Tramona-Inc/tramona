@@ -764,8 +764,8 @@ export const usersRouter = createTRPCRouter({
 
       return {
         ...verifications,
-        email: censorEmail(verifications.email),
-        phoneNumber: censorPhoneNumber(verifications.phoneNumber!),
+        censoredEmail: censorEmail(verifications.email),
+        censoredPhoneNumber: censorPhoneNumber(verifications.phoneNumber!),
       };
     }),
 

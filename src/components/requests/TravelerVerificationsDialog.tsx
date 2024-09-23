@@ -21,15 +21,15 @@ export function TravelerVerificationsDialog({
       name:
         verificationList.dateOfBirth &&
         `Age: ${getAge(verificationList.dateOfBirth)}`,
-      verified: verificationList.dateOfBirth,
+      verified: verificationList.dateOfBirth !== null,
     },
     {
-      name: verificationList.email,
+      name: verificationList.censoredEmail,
       verified: true,
     },
     {
-      name: verificationList.phoneNumber,
-      verified: verificationList.phoneNumber,
+      name: verificationList.censoredPhoneNumber,
+      verified: verificationList.censoredPhoneNumber,
     },
   ];
 
@@ -80,7 +80,7 @@ export function TravelerVerificationsDialog({
       <div className="flex flex-row items-center">
         <p className="mr-2">&middot;</p>
         {verificationList.emailVerified &&
-        verificationList.phoneNumber &&
+        verificationList.censoredPhoneNumber &&
         verificationList.dateOfBirth ? (
           <div className="flex items-center gap-1 text-teal-800">
             <BadgeCheck size={16} />
