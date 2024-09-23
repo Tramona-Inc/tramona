@@ -2,6 +2,8 @@ import { scrapeDirectListings } from "@/server/direct-sites-scraping";
 import { getNumNights } from "@/utils/utils";
 import { db } from "@/server/db";
 import { sendScheduledText } from "@/server/server-utils";
+import { offers } from "@/server/db/schema/tables/offers";
+import { eq } from "drizzle-orm";
 
 const requests_ = await db.query.requests
   .findMany({
@@ -24,6 +26,7 @@ console.log(requests_);
 
 for (const request of requests_) {
   console.log(`Scraping listings for request ${request.id}`);
+  await db.delete(offers).where(eq(offers.requestId, request.id));
 
   await scrapeDirectListings({
     checkIn: request.checkIn,
