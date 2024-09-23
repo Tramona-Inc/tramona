@@ -175,6 +175,7 @@ const roomTypeMapping = {
 interface ListingCreatedWebhook {
   action: "listing.created";
   data: {
+    platform_id: string;
     id: string;
     public_name: string;
     property_type: AirbnbPropertyType;
@@ -246,7 +247,6 @@ export default async function webhook(
         break;
       case "listing.created":
         const userId = webhookData.data.channel.customer.id;
-        console.log(webhookData.data);
         const imageResponse = await axios.get<ImageResponse>(
           `https://connect.hospitable.com/api/v1/customers/${userId}/listings/${webhookData.data.id}/images`,
           {
@@ -355,7 +355,7 @@ export default async function webhook(
             webhookData.data.address.country_code,
           imageUrls: images,
           originalListingPlatform: "Hospitable" as const,
-          originalListingId: webhookData.data.id,
+          originalListingId: webhookData.data.platform_id,
           //amenities: webhookData.data.amenities,
           //cancellationPolicy: webhookData.data.cancellation_policy,
           //ratings: webhookData.data.ratings,
