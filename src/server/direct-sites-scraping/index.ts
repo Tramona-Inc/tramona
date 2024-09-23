@@ -137,8 +137,8 @@ export const scrapeDirectListings = async (options: {
   if (flatListings.length === 0 && userFromRequest) {
     await sendText({
       to: userFromRequest.phoneNumber!,
-      content: `Tramona: We’re not live in ${options.location} just yet, but we’re working on it! We’ll send you an email as soon as we launch there. In the meantime, check out the best deals available on Airbnb for ${options.location}.
-Are you a host in ${options.location}? Sign up here to help us launch in this city as soon as possible!”`,
+      content: `Tramona: We’re not live in ${options.location} just yet, but we’re working on it! We’ll send you an email as soon as we launch there.
+Are you a host in ${options.location}? Sign up here tramona.com/host-onboarding”`,
     });
   }
   for (const listing of flatListings) {
