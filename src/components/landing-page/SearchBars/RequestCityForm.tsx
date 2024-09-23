@@ -22,7 +22,6 @@ import { useCityRequestForm } from "./useCityRequestForm";
 import { CityRequestFiltersDialog } from "./CityRequestFiltersDialog";
 import { api } from "@/utils/api";
 import RequestSubmittedDialog from "@/components/landing-page/SearchBars/DesktopRequestComponents/RequestSubmittedDialog";
-import RequestWaitlistDialog from "./DesktopRequestComponents/RequestWaitlistDialog";
 
 export default function RequestCityForm() {
   const [requestSubmittedDialogOpen, setRequestSubmittedDialogOpen] =
@@ -39,7 +38,6 @@ export default function RequestCityForm() {
     setMadeByGroupId,
   });
 
-
   const inviteLinkQuery = api.groups.generateInviteLink.useQuery(
     { groupId: madeByGroupId! },
     { enabled: madeByGroupId !== undefined },
@@ -52,7 +50,6 @@ export default function RequestCityForm() {
   }, [inviteLinkQuery.data]);
 
   const { latLng, radius } = form.watch();
-
 
   return (
     <Form {...form}>
@@ -151,18 +148,13 @@ export default function RequestCityForm() {
         </Button>
       </form>
 
-      <RequestWaitlistDialog
-        open={requestSubmittedDialogOpen}
-        setOpen={setRequestSubmittedDialogOpen}
-      />
-
-      {/* <RequestSubmittedDialog
+      <RequestSubmittedDialog
         open={requestSubmittedDialogOpen}
         setOpen={setRequestSubmittedDialogOpen}
         showConfetti={showConfetti}
         madeByGroupId={madeByGroupId}
         location={form.getValues("location")}
-      /> */}
+      />
     </Form>
   );
 }

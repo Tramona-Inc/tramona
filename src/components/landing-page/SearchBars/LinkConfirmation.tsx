@@ -165,18 +165,18 @@ const LinkConfirmation: React.FC<LinkConfirmationProps> = ({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
+      {/* 
       <RequestWaitlistDialog
         open={requestSubmittedDialogOpen}
         setOpen={setRequestSubmittedDialogOpen}
-      />
+      /> */}
 
-      {/* <RequestSubmittedDialog
+      <RequestSubmittedDialog
         open={requestSubmittedDialogOpen}
         setOpen={setRequestSubmittedDialogOpen}
         showConfetti={showConfetti}
         madeByGroupId={madeByGroupId}
-      /> */}
+      />
     </div>
   );
 };

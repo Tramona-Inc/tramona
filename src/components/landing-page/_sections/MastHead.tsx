@@ -85,7 +85,7 @@ export default function MastHead() {
       <div className="h-24 lg:h-60"></div>
 
       <p className="text-balance p-4 text-center font-semibold">
-        Try it before you book, and see what hosts will offer you!
+        Try it before you book. See what hosts will offer you!
       </p>
 
       <div className="mx-0 mt-8 flex max-w-full justify-center space-y-4 px-4 lg:mx-4 lg:mt-16 lg:flex lg:space-y-8">
