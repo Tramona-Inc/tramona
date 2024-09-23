@@ -246,6 +246,7 @@ export default async function webhook(
         break;
       case "listing.created":
         const userId = webhookData.data.channel.customer.id;
+        console.log(webhookData.data);
         const imageResponse = await axios.get<ImageResponse>(
           `https://connect.hospitable.com/api/v1/customers/${userId}/listings/${webhookData.data.id}/images`,
           {
