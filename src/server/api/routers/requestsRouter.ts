@@ -484,7 +484,7 @@ export async function handleRequestSubmission(
               const numOfMatches = listings.length;
               void sendScheduledText({
                 to: travelerPhone,
-                content: `Tramona: You have ${numOfMatches <= 10 ? numOfMatches : "more than 10"} matches for your request in ${input.location}, visit Tramona.com to view`,
+                content: `Tramona: You have ${numOfMatches <= 10 ? numOfMatches : "more than 10"} matches for your request in ${input.location}! Check them out at tramona.com/requests`,
                 sendAt:
                   numOfMatches <= 5
                     ? twentyFiveMinutesFromNow
