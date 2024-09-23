@@ -21,19 +21,22 @@ const config = {
   rewrites: async () => [
     { source: "/privacy-policy", destination: "/html/privacy-policy.html" },
     { source: "/tos", destination: "/html/tos.html" },
-    { source: "/casamundo-tos", destination: "/html/Casamundo-tos.html" },
+    { source: "/casamundo-tos", destination: "/html/casamundo-tos.html" },
     {
       source: "/cb-island-vacations-tos",
-      destination: "/html/CB-Island-Vacations-tos.html",
+      destination: "/html/cB-island-vacations-tos.html",
     },
-    { source: "/cleanbnb-tos", destination: "/html/Cleanbnb-tos.html" },
-    { source: "/evolve-tos", destination: "/html/Evolve-tos.html" },
+    { source: "/cleanbnb-tos", destination: "/html/cleanbnb-tos.html" },
+    { source: "/evolve-tos", destination: "/html/evolve-tos.html" },
     {
       source: "/integrityarizona-tos",
-      destination: "/html/IntegrityArizona-tos.html",
+      destination: "/html/integrityarizona-tos.html",
     },
-    { source: "/privacy-policy", destination: "/html/privacy-policy.html" },
-    { source: "/redawning-tos", destination: "/html/RedAwning-tos.html" },
+    {
+      source: "/evolve-tos",
+      destination: "/html/evolve-tos.html",
+    },
+    { source: "/redawning-tos", destination: "/html/redawning-tos.html" },
   ],
   images: {
     remotePatterns: [
