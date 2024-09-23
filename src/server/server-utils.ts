@@ -40,7 +40,6 @@ import {
   hostReferralDiscounts,
   referralCodes,
   requests,
-  propertyStatusEnum,
   rejectedRequests,
 } from "./db/schema";
 import { getCity, getCoordinates } from "./google-maps";
@@ -52,7 +51,11 @@ import { HOST_MARKUP, TRAVELER__MARKUP } from "@/utils/constants";
 import { HostRequestsPageData } from "./api/routers/propertiesRouter";
 import { Session } from "next-auth";
 
-export const axiosWithRetry = axios.create();
+export const proxyAgent = new HttpsProxyAgent(env.PROXY_URL);
+
+export const axiosWithRetry = axios.create({
+  httpsAgent: proxyAgent,
+});
 
 axiosRetry(axiosWithRetry, {
   retries: 3,
@@ -69,8 +72,6 @@ axiosRetry(axiosWithRetry, {
     );
   },
 });
-
-export const proxyAgent = new HttpsProxyAgent(env.PROXY_URL);
 
 export async function urlScrape(url: string) {
   return await axios

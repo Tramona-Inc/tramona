@@ -1,0 +1,442 @@
+Scraping listings for request 1248, deleting 0 offers
+Scraped 0 listings for request 1248
+Scraping listings for request 166, deleting 0 offers
+Scraped 0 listings for request 166
+Scraping listings for request 168, deleting 0 offers
+Scraped 0 listings for request 168
+Scraping listings for request 425, deleting 0 offers
+Error scraping listings for request 425: Error: Required parameter \"params['to']\" missing.
+Scraping listings for request 99, deleting 0 offers
+Error scraping listings for request 99: Error: Required parameter \"params['to']\" missing.
+Scraping listings for request 431, deleting 0 offers
+Error scraping listings for request 431: AxiosError: Request failed with status code 522
+Scraping listings for request 435, deleting 0 offers
+Scraped 0 listings for request 435
+Scraping listings for request 1249, deleting 0 offers
+Error scraping listings for request 1249: PostgresError: invalid input syntax for type time: \"\
+"Scraping listings for request 314, deleting 0 offers
+Scraped 0 listings for request 314
+Scraping listings for request 451, deleting 2 offers"[]
+
+---------------------------
+
+Scraping listings for request 1248, deleting 0 offers
+No listings found for request 1248
+Scraping listings for request 1249, deleting 0 offers
+Error scraping listings for request 1249: Error: C0FAFDF401000000:error:0A000119:SSL routines:ssl3_get_record:decryption failed or bad record mac:../deps/openssl/openssl/ssl/record/ssl3_record.c:623:
+
+
+
+Scraping listings for request 610, deleting 0 offers
+Scraped 2 listings for request 610
+
+
+Scraping listings for request 415, deleting 0 offers
+Scraped 7 listings for request 415
+
+
+Scraping listings for request 416, deleting 6 offers
+Error scraping listings for request 416: Error: aborted
+
+
+Scraping listings for request 1250, deleting 0 offers
+Error scraping listings for request 1250: PostgresError: invalid input syntax for type time: ""
+
+
+Scraping listings for request 526, deleting 0 offers
+Error scraping listings for request 526: AxiosError: Request failed with status code 407
+
+
+Scraping listings for request 539, deleting 0 offers
+Error scraping listings for request 539: AxiosError: Request failed with status code 407
+
+
+Scraping listings for request 508, deleting 1 offers
+Error scraping listings for request 508: AxiosError: Request failed with status code 407
+
+
+Scraping listings for request 298, deleting 2 offers
+Error scraping listings for request 298: AxiosError: Request failed with status code 407
+
+
+Scraping listings for request 712, deleting 0 offers
+Error scraping listings for request 712: AxiosError: Request failed with status code 407
+
+
+Scraping listings for request 708, deleting 0 offers
+Error scraping listings for request 708: AxiosError: Request failed with status code 407
+
+
+Scraping listings for request 1251, deleting 0 offers
+Error scraping listings for request 1251: AxiosError: Request failed with status code 407
+
+
+Scraping listings for request 902, deleting 0 offers
+Error scraping listings for request 902: AxiosError: Request failed with status code 407
+
+
+Scraping listings for request 903, deleting 0 offers
+
+---------------------
+
+
+Scraping listings for request 1248
+Deleting 0 offers for request 1248
+Error scraping listings for request 1248: Request failed with status code 407
+
+AxiosError: Request failed with status code 407
+    at settle (file:///Users/ben/dev/tramona/node_modules/.pnpm/axios@1.7.7/node_modules/axios/lib/core/settle.js:19:12)
+    at IncomingMessage.handleStreamEnd (file:///Users/ben/dev/tramona/node_modules/.pnpm/axios@1.7.7/node_modules/axios/lib/adapters/http.js:599:11)
+    at IncomingMessage.emit (node:events:526:35)
+    at endReadableNT (node:internal/streams/readable:1359:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+    at Axios.request (file:///Users/ben/dev/tramona/node_modules/.pnpm/axios@1.7.7/node_modules/axios/lib/core/Axios.js:45:41)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async urlScrape (webpack-internal:///(api)/./src/server/server-utils.ts:81:12)
+    at async scrapePage (webpack-internal:///(api)/./src/server/external-listings-scraping/airbnbScraper.ts:114:17)
+    at async Object.airbnbScraper [as scraper] (webpack-internal:///(api)/./src/server/external-listings-scraping/airbnbScraper.ts:30:22)
+    at async Promise.all (index 6)
+    at async scrapeDirectListings (webpack-internal:///(api)/./src/server/direct-sites-scraping/index.ts:81:25)
+    at async script (webpack-internal:///(api)/./src/pages/api/script.ts:71:9)
+    at async K (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/pages-api.runtime.dev.js:21:2871)
+    at async U.render (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/pages-api.runtime.dev.js:21:3955)
+    at async DevServer.runApi (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/next-server.js:598:9)
+    at async NextNodeServer.handleCatchallRenderRequest (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/next-server.js:269:37)
+    at async DevServer.handleRequestImpl (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:813:17)
+    at async /Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/dev/next-dev-server.js:339:20
+    at async Span.traceAsyncFn (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/trace/trace.js:154:20)
+
+Scraping listings for request 1249
+Deleting 0 offers for request 1249
+Error scraping listings for request 1249: Request failed with status code 407
+
+AxiosError: Request failed with status code 407
+    at settle (file:///Users/ben/dev/tramona/node_modules/.pnpm/axios@1.7.7/node_modules/axios/lib/core/settle.js:19:12)
+    at IncomingMessage.handleStreamEnd (file:///Users/ben/dev/tramona/node_modules/.pnpm/axios@1.7.7/node_modules/axios/lib/adapters/http.js:599:11)
+    at IncomingMessage.emit (node:events:526:35)
+    at endReadableNT (node:internal/streams/readable:1359:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+    at Axios.request (file:///Users/ben/dev/tramona/node_modules/.pnpm/axios@1.7.7/node_modules/axios/lib/core/Axios.js:45:41)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async urlScrape (webpack-internal:///(api)/./src/server/server-utils.ts:81:12)
+    at async scrapePage (webpack-internal:///(api)/./src/server/external-listings-scraping/airbnbScraper.ts:114:17)
+    at async Object.airbnbScraper [as scraper] (webpack-internal:///(api)/./src/server/external-listings-scraping/airbnbScraper.ts:30:22)
+    at async Promise.all (index 6)
+    at async scrapeDirectListings (webpack-internal:///(api)/./src/server/direct-sites-scraping/index.ts:81:25)
+    at async script (webpack-internal:///(api)/./src/pages/api/script.ts:71:9)
+    at async K (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/pages-api.runtime.dev.js:21:2871)
+    at async U.render (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/pages-api.runtime.dev.js:21:3955)
+    at async DevServer.runApi (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/next-server.js:598:9)
+    at async NextNodeServer.handleCatchallRenderRequest (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/next-server.js:269:37)
+    at async DevServer.handleRequestImpl (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:813:17)
+    at async /Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/dev/next-dev-server.js:339:20
+    at async Span.traceAsyncFn (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/trace/trace.js:154:20)
+Skipping request 610 because it's already been processed
+Skipping request 415 because it's already been processed
+Skipping request 416 because it's already been processed
+
+Scraping listings for request 1250
+Deleting 0 offers for request 1250
+Error scraping listings for request 1250: Request failed with status code 407
+
+AxiosError: Request failed with status code 407
+    at settle (file:///Users/ben/dev/tramona/node_modules/.pnpm/axios@1.7.7/node_modules/axios/lib/core/settle.js:19:12)
+    at IncomingMessage.handleStreamEnd (file:///Users/ben/dev/tramona/node_modules/.pnpm/axios@1.7.7/node_modules/axios/lib/adapters/http.js:599:11)
+    at IncomingMessage.emit (node:events:526:35)
+    at endReadableNT (node:internal/streams/readable:1359:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+    at Axios.request (file:///Users/ben/dev/tramona/node_modules/.pnpm/axios@1.7.7/node_modules/axios/lib/core/Axios.js:45:41)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async urlScrape (webpack-internal:///(api)/./src/server/server-utils.ts:81:12)
+    at async scrapePage (webpack-internal:///(api)/./src/server/external-listings-scraping/airbnbScraper.ts:114:17)
+    at async Object.airbnbScraper [as scraper] (webpack-internal:///(api)/./src/server/external-listings-scraping/airbnbScraper.ts:30:22)
+    at async Promise.all (index 6)
+    at async scrapeDirectListings (webpack-internal:///(api)/./src/server/direct-sites-scraping/index.ts:81:25)
+    at async script (webpack-internal:///(api)/./src/pages/api/script.ts:71:9)
+    at async K (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/pages-api.runtime.dev.js:21:2871)
+    at async U.render (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/pages-api.runtime.dev.js:21:3955)
+    at async DevServer.runApi (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/next-server.js:598:9)
+    at async NextNodeServer.handleCatchallRenderRequest (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/next-server.js:269:37)
+    at async DevServer.handleRequestImpl (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:813:17)
+    at async /Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/dev/next-dev-server.js:339:20
+    at async Span.traceAsyncFn (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/trace/trace.js:154:20)
+
+Scraping listings for request 526
+Deleting 0 offers for request 526
+Error scraping listings for request 526: Request failed with status code 407
+
+AxiosError: Request failed with status code 407
+    at settle (file:///Users/ben/dev/tramona/node_modules/.pnpm/axios@1.7.7/node_modules/axios/lib/core/settle.js:19:12)
+    at IncomingMessage.handleStreamEnd (file:///Users/ben/dev/tramona/node_modules/.pnpm/axios@1.7.7/node_modules/axios/lib/adapters/http.js:599:11)
+    at IncomingMessage.emit (node:events:526:35)
+    at endReadableNT (node:internal/streams/readable:1359:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+    at Axios.request (file:///Users/ben/dev/tramona/node_modules/.pnpm/axios@1.7.7/node_modules/axios/lib/core/Axios.js:45:41)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async urlScrape (webpack-internal:///(api)/./src/server/server-utils.ts:81:12)
+    at async scrapePage (webpack-internal:///(api)/./src/server/external-listings-scraping/airbnbScraper.ts:114:17)
+    at async Object.airbnbScraper [as scraper] (webpack-internal:///(api)/./src/server/external-listings-scraping/airbnbScraper.ts:30:22)
+    at async Promise.all (index 6)
+    at async scrapeDirectListings (webpack-internal:///(api)/./src/server/direct-sites-scraping/index.ts:81:25)
+    at async script (webpack-internal:///(api)/./src/pages/api/script.ts:71:9)
+    at async K (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/pages-api.runtime.dev.js:21:2871)
+    at async U.render (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/pages-api.runtime.dev.js:21:3955)
+    at async DevServer.runApi (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/next-server.js:598:9)
+    at async NextNodeServer.handleCatchallRenderRequest (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/next-server.js:269:37)
+    at async DevServer.handleRequestImpl (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:813:17)
+    at async /Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/dev/next-dev-server.js:339:20
+    at async Span.traceAsyncFn (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/trace/trace.js:154:20)
+
+Scraping listings for request 539
+Deleting 0 offers for request 539
+Error scraping listings for request 539: Request failed with status code 407
+
+AxiosError: Request failed with status code 407
+    at settle (file:///Users/ben/dev/tramona/node_modules/.pnpm/axios@1.7.7/node_modules/axios/lib/core/settle.js:19:12)
+    at IncomingMessage.handleStreamEnd (file:///Users/ben/dev/tramona/node_modules/.pnpm/axios@1.7.7/node_modules/axios/lib/adapters/http.js:599:11)
+    at IncomingMessage.emit (node:events:526:35)
+    at endReadableNT (node:internal/streams/readable:1359:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+    at Axios.request (file:///Users/ben/dev/tramona/node_modules/.pnpm/axios@1.7.7/node_modules/axios/lib/core/Axios.js:45:41)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async urlScrape (webpack-internal:///(api)/./src/server/server-utils.ts:81:12)
+    at async scrapePage (webpack-internal:///(api)/./src/server/external-listings-scraping/airbnbScraper.ts:114:17)
+    at async Object.airbnbScraper [as scraper] (webpack-internal:///(api)/./src/server/external-listings-scraping/airbnbScraper.ts:30:22)
+    at async Promise.all (index 6)
+    at async scrapeDirectListings (webpack-internal:///(api)/./src/server/direct-sites-scraping/index.ts:81:25)
+    at async script (webpack-internal:///(api)/./src/pages/api/script.ts:71:9)
+    at async K (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/pages-api.runtime.dev.js:21:2871)
+    at async U.render (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/pages-api.runtime.dev.js:21:3955)
+    at async DevServer.runApi (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/next-server.js:598:9)
+    at async NextNodeServer.handleCatchallRenderRequest (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/next-server.js:269:37)
+    at async DevServer.handleRequestImpl (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:813:17)
+    at async /Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/dev/next-dev-server.js:339:20
+    at async Span.traceAsyncFn (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/trace/trace.js:154:20)
+
+Scraping listings for request 508
+Deleting 0 offers for request 508
+Error scraping listings for request 508: Request failed with status code 407
+
+AxiosError: Request failed with status code 407
+    at settle (file:///Users/ben/dev/tramona/node_modules/.pnpm/axios@1.7.7/node_modules/axios/lib/core/settle.js:19:12)
+    at IncomingMessage.handleStreamEnd (file:///Users/ben/dev/tramona/node_modules/.pnpm/axios@1.7.7/node_modules/axios/lib/adapters/http.js:599:11)
+    at IncomingMessage.emit (node:events:526:35)
+    at endReadableNT (node:internal/streams/readable:1359:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+    at Axios.request (file:///Users/ben/dev/tramona/node_modules/.pnpm/axios@1.7.7/node_modules/axios/lib/core/Axios.js:45:41)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async urlScrape (webpack-internal:///(api)/./src/server/server-utils.ts:81:12)
+    at async getAllProperties (webpack-internal:///(api)/./src/server/direct-sites-scraping/cleanbnb-scrape.ts:148:15)
+    at async Object.cleanbnbScraper [as scraper] (webpack-internal:///(api)/./src/server/direct-sites-scraping/cleanbnb-scrape.ts:242:24)
+    at async Promise.all (index 1)
+    at async scrapeDirectListings (webpack-internal:///(api)/./src/server/direct-sites-scraping/index.ts:81:25)
+    at async script (webpack-internal:///(api)/./src/pages/api/script.ts:71:9)
+    at async K (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/pages-api.runtime.dev.js:21:2871)
+    at async U.render (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/pages-api.runtime.dev.js:21:3955)
+    at async DevServer.runApi (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/next-server.js:598:9)
+    at async NextNodeServer.handleCatchallRenderRequest (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/next-server.js:269:37)
+    at async DevServer.handleRequestImpl (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:813:17)
+    at async /Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/dev/next-dev-server.js:339:20
+    at async Span.traceAsyncFn (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/trace/trace.js:154:20)
+
+Scraping listings for request 298
+Deleting 0 offers for request 298
+Error scraping listings for request 298: Request failed with status code 407
+
+AxiosError: Request failed with status code 407
+    at settle (file:///Users/ben/dev/tramona/node_modules/.pnpm/axios@1.7.7/node_modules/axios/lib/core/settle.js:19:12)
+    at IncomingMessage.handleStreamEnd (file:///Users/ben/dev/tramona/node_modules/.pnpm/axios@1.7.7/node_modules/axios/lib/adapters/http.js:599:11)
+    at IncomingMessage.emit (node:events:526:35)
+    at endReadableNT (node:internal/streams/readable:1359:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+    at Axios.request (file:///Users/ben/dev/tramona/node_modules/.pnpm/axios@1.7.7/node_modules/axios/lib/core/Axios.js:45:41)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async urlScrape (webpack-internal:///(api)/./src/server/server-utils.ts:81:12)
+    at async scrapePage (webpack-internal:///(api)/./src/server/external-listings-scraping/airbnbScraper.ts:114:17)
+    at async Object.airbnbScraper [as scraper] (webpack-internal:///(api)/./src/server/external-listings-scraping/airbnbScraper.ts:30:22)
+    at async Promise.all (index 6)
+    at async scrapeDirectListings (webpack-internal:///(api)/./src/server/direct-sites-scraping/index.ts:81:25)
+    at async script (webpack-internal:///(api)/./src/pages/api/script.ts:71:9)
+    at async K (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/pages-api.runtime.dev.js:21:2871)
+    at async U.render (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/pages-api.runtime.dev.js:21:3955)
+    at async DevServer.runApi (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/next-server.js:598:9)
+    at async NextNodeServer.handleCatchallRenderRequest (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/next-server.js:269:37)
+    at async DevServer.handleRequestImpl (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:813:17)
+    at async /Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/dev/next-dev-server.js:339:20
+    at async Span.traceAsyncFn (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/trace/trace.js:154:20)
+
+Scraping listings for request 712
+Deleting 0 offers for request 712
+Error scraping listings for request 712: Request failed with status code 407
+
+AxiosError: Request failed with status code 407
+    at settle (file:///Users/ben/dev/tramona/node_modules/.pnpm/axios@1.7.7/node_modules/axios/lib/core/settle.js:19:12)
+    at IncomingMessage.handleStreamEnd (file:///Users/ben/dev/tramona/node_modules/.pnpm/axios@1.7.7/node_modules/axios/lib/adapters/http.js:599:11)
+    at IncomingMessage.emit (node:events:526:35)
+    at endReadableNT (node:internal/streams/readable:1359:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+    at Axios.request (file:///Users/ben/dev/tramona/node_modules/.pnpm/axios@1.7.7/node_modules/axios/lib/core/Axios.js:45:41)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async urlScrape (webpack-internal:///(api)/./src/server/server-utils.ts:81:12)
+    at async scrapePage (webpack-internal:///(api)/./src/server/external-listings-scraping/airbnbScraper.ts:114:17)
+    at async Object.airbnbScraper [as scraper] (webpack-internal:///(api)/./src/server/external-listings-scraping/airbnbScraper.ts:30:22)
+    at async Promise.all (index 6)
+    at async scrapeDirectListings (webpack-internal:///(api)/./src/server/direct-sites-scraping/index.ts:81:25)
+    at async script (webpack-internal:///(api)/./src/pages/api/script.ts:71:9)
+    at async K (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/pages-api.runtime.dev.js:21:2871)
+    at async U.render (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/pages-api.runtime.dev.js:21:3955)
+    at async DevServer.runApi (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/next-server.js:598:9)
+    at async NextNodeServer.handleCatchallRenderRequest (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/next-server.js:269:37)
+    at async DevServer.handleRequestImpl (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:813:17)
+    at async /Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/dev/next-dev-server.js:339:20
+    at async Span.traceAsyncFn (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/trace/trace.js:154:20)
+
+Scraping listings for request 708
+Deleting 0 offers for request 708
+Error scraping listings for request 708: Request failed with status code 407
+
+AxiosError: Request failed with status code 407
+    at settle (file:///Users/ben/dev/tramona/node_modules/.pnpm/axios@1.7.7/node_modules/axios/lib/core/settle.js:19:12)
+    at IncomingMessage.handleStreamEnd (file:///Users/ben/dev/tramona/node_modules/.pnpm/axios@1.7.7/node_modules/axios/lib/adapters/http.js:599:11)
+    at IncomingMessage.emit (node:events:526:35)
+    at endReadableNT (node:internal/streams/readable:1359:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+    at Axios.request (file:///Users/ben/dev/tramona/node_modules/.pnpm/axios@1.7.7/node_modules/axios/lib/core/Axios.js:45:41)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async urlScrape (webpack-internal:///(api)/./src/server/server-utils.ts:81:12)
+    at async scrapePage (webpack-internal:///(api)/./src/server/external-listings-scraping/airbnbScraper.ts:114:17)
+    at async Object.airbnbScraper [as scraper] (webpack-internal:///(api)/./src/server/external-listings-scraping/airbnbScraper.ts:30:22)
+    at async Promise.all (index 6)
+    at async scrapeDirectListings (webpack-internal:///(api)/./src/server/direct-sites-scraping/index.ts:81:25)
+    at async script (webpack-internal:///(api)/./src/pages/api/script.ts:71:9)
+    at async K (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/pages-api.runtime.dev.js:21:2871)
+    at async U.render (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/pages-api.runtime.dev.js:21:3955)
+    at async DevServer.runApi (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/next-server.js:598:9)
+    at async NextNodeServer.handleCatchallRenderRequest (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/next-server.js:269:37)
+    at async DevServer.handleRequestImpl (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:813:17)
+    at async /Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/dev/next-dev-server.js:339:20
+    at async Span.traceAsyncFn (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/trace/trace.js:154:20)
+
+Scraping listings for request 1251
+Deleting 0 offers for request 1251
+
+-----------------------------------
+
+
+Scraping listings for request 1248
+Deleting 0 offers for request 1248
+Error scraping listings for request 1248: Required parameter "params['to']" missing.
+
+Error: Required parameter "params['to']" missing.
+    at Function.create (/Users/ben/dev/tramona/node_modules/.pnpm/twilio@4.23.0/node_modules/twilio/lib/rest/api/v2010/account/message.js:225:19)
+    at sendText (webpack-internal:///(api)/./src/server/server-utils.ts:182:44)
+    at scrapeDirectListings (webpack-internal:///(api)/./src/server/direct-sites-scraping/index.ts:95:78)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async script (webpack-internal:///(api)/./src/pages/api/script.ts:71:9)
+    at async K (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/pages-api.runtime.dev.js:21:2871)
+    at async U.render (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/pages-api.runtime.dev.js:21:3955)
+    at async DevServer.runApi (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/next-server.js:598:9)
+    at async NextNodeServer.handleCatchallRenderRequest (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/next-server.js:269:37)
+    at async DevServer.handleRequestImpl (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:813:17)
+    at async /Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/dev/next-dev-server.js:339:20
+    at async Span.traceAsyncFn (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/trace/trace.js:154:20)
+    at async DevServer.handleRequest (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/dev/next-dev-server.js:336:24)
+    at async invokeRender (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:173:21)
+    at async handleRequest (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:350:24)
+
+Scraping listings for request 1249
+Deleting 0 offers for request 1249
+Error scraping listings for request 1249: Permission to send an SMS has not been enabled for the region indicated by the 'To' number: +43676551XXXX
+
+Error: Permission to send an SMS has not been enabled for the region indicated by the 'To' number: +43676551XXXX
+    at success (/Users/ben/dev/tramona/node_modules/.pnpm/twilio@4.23.0/node_modules/twilio/lib/base/Version.js:79:23)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async sendText (webpack-internal:///(api)/./src/server/server-utils.ts:182:22)
+    at async scrapeDirectListings (webpack-internal:///(api)/./src/server/direct-sites-scraping/index.ts:95:9)
+    at async script (webpack-internal:///(api)/./src/pages/api/script.ts:71:9)
+    at async K (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/pages-api.runtime.dev.js:21:2871)
+    at async U.render (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/pages-api.runtime.dev.js:21:3955)
+    at async DevServer.runApi (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/next-server.js:598:9)
+    at async NextNodeServer.handleCatchallRenderRequest (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/next-server.js:269:37)
+    at async DevServer.handleRequestImpl (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:813:17)
+    at async /Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/dev/next-dev-server.js:339:20
+    at async Span.traceAsyncFn (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/trace/trace.js:154:20)
+    at async DevServer.handleRequest (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/dev/next-dev-server.js:336:24)
+    at async invokeRender (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:173:21)
+    at async handleRequest (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:350:24)
+Skipping request 610 because it's already been processed
+Skipping request 415 because it's already been processed
+Skipping request 416 because it's already been processed
+
+Scraping listings for request 1250
+Deleting 0 offers for request 1250
+Error scraping listings for request 1250: Permission to send an SMS has not been enabled for the region indicated by the 'To' number: +43676551XXXX
+
+Error: Permission to send an SMS has not been enabled for the region indicated by the 'To' number: +43676551XXXX
+    at success (/Users/ben/dev/tramona/node_modules/.pnpm/twilio@4.23.0/node_modules/twilio/lib/base/Version.js:79:23)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async sendText (webpack-internal:///(api)/./src/server/server-utils.ts:182:22)
+    at async scrapeDirectListings (webpack-internal:///(api)/./src/server/direct-sites-scraping/index.ts:95:9)
+    at async script (webpack-internal:///(api)/./src/pages/api/script.ts:71:9)
+    at async K (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/pages-api.runtime.dev.js:21:2871)
+    at async U.render (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/pages-api.runtime.dev.js:21:3955)
+    at async DevServer.runApi (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/next-server.js:598:9)
+    at async NextNodeServer.handleCatchallRenderRequest (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/next-server.js:269:37)
+    at async DevServer.handleRequestImpl (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:813:17)
+    at async /Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/dev/next-dev-server.js:339:20
+    at async Span.traceAsyncFn (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/trace/trace.js:154:20)
+    at async DevServer.handleRequest (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/dev/next-dev-server.js:336:24)
+    at async invokeRender (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:173:21)
+    at async handleRequest (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:350:24)
+
+Scraping listings for request 526
+Deleting 0 offers for request 526
+No listings found for request 526
+
+Scraping listings for request 539
+Deleting 0 offers for request 539
+No listings found for request 539
+
+Scraping listings for request 508
+Deleting 0 offers for request 508
+No listings found for request 508
+
+Scraping listings for request 298
+Deleting 0 offers for request 298
+No listings found for request 298
+
+Scraping listings for request 712
+Deleting 0 offers for request 712
+No listings found for request 712
+
+Scraping listings for request 708
+Deleting 0 offers for request 708
+No listings found for request 708
+
+Scraping listings for request 1251
+Deleting 0 offers for request 1251
+Error scraping listings for request 1251: Permission to send an SMS has not been enabled for the region indicated by the 'To' number: +91960037XXXX
+
+Error: Permission to send an SMS has not been enabled for the region indicated by the 'To' number: +91960037XXXX
+    at success (/Users/ben/dev/tramona/node_modules/.pnpm/twilio@4.23.0/node_modules/twilio/lib/base/Version.js:79:23)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async sendText (webpack-internal:///(api)/./src/server/server-utils.ts:182:22)
+    at async scrapeDirectListings (webpack-internal:///(api)/./src/server/direct-sites-scraping/index.ts:95:9)
+    at async script (webpack-internal:///(api)/./src/pages/api/script.ts:71:9)
+    at async K (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/pages-api.runtime.dev.js:21:2871)
+    at async U.render (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/pages-api.runtime.dev.js:21:3955)
+    at async DevServer.runApi (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/next-server.js:598:9)
+    at async NextNodeServer.handleCatchallRenderRequest (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/next-server.js:269:37)
+    at async DevServer.handleRequestImpl (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:813:17)
+    at async /Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/dev/next-dev-server.js:339:20
+    at async Span.traceAsyncFn (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/trace/trace.js:154:20)
+    at async DevServer.handleRequest (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/dev/next-dev-server.js:336:24)
+    at async invokeRender (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:173:21)
+    at async handleRequest (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/lib/router-server.js:350:24)
+
+Scraping listings for request 902
+Deleting 0 offers for request 902
+No listings found for request 902
+
+Scraping listings for request 903
+Deleting 0 offers for request 903

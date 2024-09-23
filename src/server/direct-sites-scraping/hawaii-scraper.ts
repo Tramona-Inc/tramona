@@ -12,6 +12,7 @@ import * as cheerio from "cheerio";
 import { ListingSiteName } from "@/server/db/schema/common";
 import { getNumNights } from "@/utils/utils";
 import { getCoordinates } from "../google-maps";
+import { proxyAgent } from "../server-utils";
 
 const hawaiiPropertyTypes: Record<string, PropertyType> = {
   // mapping scraped property types to our property types
@@ -221,7 +222,7 @@ async function scrapePropertyPage(url: string): Promise<{
   address: string;
 }> {
   try {
-    const response = await axios.get(url);
+    const response = await axios.get(url, { httpsAgent: proxyAgent });
     const $ = cheerio.load(response.data as string);
 
     const reviews: Review[] = [];
@@ -347,6 +348,7 @@ async function scrapeFinalPrice(
 
   try {
     const response = await axios.get(`${url}?${params.toString()}`, {
+      httpsAgent: proxyAgent,
       headers: {
         accept: "application/json, text/javascript, */*; q=0.01",
         "accept-language": "en-US,en;q=0.9",
@@ -403,7 +405,7 @@ const fetchAvailablePropertyEids = async (
   const url = `${filteredPropertiesUrl}?${params.toString()}`;
 
   try {
-    const response = await axios.get(url);
+    const response = await axios.get(url, { httpsAgent: proxyAgent });
 
     if (Array.isArray(response.data)) {
       const uniqueEids = new Set<string>();

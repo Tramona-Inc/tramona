@@ -10,6 +10,7 @@ import { ALL_PROPERTY_TYPES, PropertyType } from "@/server/db/schema/common";
 import { ListingSiteName } from "@/server/db/schema/common";
 import { getNumNights } from "@/utils/utils";
 import { parseHTML } from "@/utils/utils";
+import { proxyAgent } from "../server-utils";
 
 const offerSchema = z.object({
   id: z.string(),
@@ -80,6 +81,7 @@ async function getLocationId(location: string): Promise<string> {
   try {
     const response: AxiosResponse<AutocompleteResponse> = await axios.get(
       `${autocompleteUrl}?${params.toString()}`,
+      { httpsAgent: proxyAgent },
     );
     const suggestions = response.data.suggestions;
 
@@ -150,6 +152,7 @@ async function getOfferIds(
       `${url}?${params.toString()}`,
       {
         headers,
+        httpsAgent: proxyAgent,
       },
     );
 
@@ -207,6 +210,7 @@ async function checkAvailability(
           year: currentYear,
           month: currentMonth,
         },
+        httpsAgent: proxyAgent,
         headers: {
           accept: "application/json",
           "accept-language": "en-US,en;q=0.9",
@@ -364,7 +368,7 @@ const fetchPrice = async (
       const response: AxiosResponse<ApiResponse> = await axios.post(
         `${url}?${queryParams.toString()}`,
         null,
-        { headers },
+        { headers, httpsAgent: proxyAgent },
       );
       const data = response.data;
 
@@ -442,6 +446,7 @@ const fetchReviews = async (
     const response = await axios.get<ReviewResponse>(
       `https://www.casamundo.com/reviews/list/${offerId}?scale=5&bcEnabled=false&googleReviews=false`,
       {
+        httpsAgent: proxyAgent,
         headers: {
           accept: "*/*",
           "accept-language": "en-US,en;q=0.9",
@@ -564,6 +569,7 @@ async function fetchPropertyDetails(
     const response = await axios.get<PropertyData>(
       `${url}?${params.toString()}`,
       {
+        httpsAgent: proxyAgent,
         headers,
       },
     );

@@ -30,6 +30,7 @@ import { DIRECTLISTINGMARKUP } from "@/utils/constants";
 import { createLatLngGISPoint, sendText } from "@/server/server-utils";
 import { cleanbnbScraper, cleanbnbSubScraper } from "./cleanbnb-scrape";
 import { airbnbScraper } from "../external-listings-scraping/airbnbScraper";
+import { log } from "@/pages/api/script";
 
 export type DirectSiteScraper = (options: {
   checkIn: Date;
@@ -76,7 +77,7 @@ export const directSiteScrapers: NamedDirectSiteScraper[] = [
   { name: "cbIslandVacationsScraper", scraper: cbIslandVacationsScraper },
   { name: "redawningScraper", scraper: redawningScraper },
   { name: "casamundoScraper", scraper: casamundoScraper },
-  { name: "airbnbScraper", scraper: airbnbScraper },
+  // { name: "airbnbScraper", scraper: airbnbScraper },
 ];
 
 // Helper function to filter out fields not in NewProperty
@@ -104,12 +105,19 @@ export const scrapeDirectListings = async (options: {
     throw new Error("requestNightlyPrice is required");
   }
 
-  const allListings = await Promise.all(
-    directSiteScrapers.map((s) => s.scraper(options)),
-  );
+  const flatListings = await Promise.all(
+    directSiteScrapers.map((s) =>
+      s.scraper(options).catch((e) => {
+        log(`error in scraper: ${s.name}, ${e}`);
+        return [];
+      }),
+    ),
+  ).then((r) => r.flat());
 
-  const userFromRequest = await db.query.requests.
-    findFirst({
+  // todo: handle if all the scrapers error (dont send out text)
+
+  const userFromRequest = await db.query.requests
+    .findFirst({
       where: eq(requests.id, options.requestId!),
       with: {
         madeByGroup: {
@@ -119,15 +127,12 @@ export const scrapeDirectListings = async (options: {
                 phoneNumber: true,
               },
             },
-          }
-        }
+          },
+        },
+      },
+    })
+    .then((res) => res?.madeByGroup.owner);
 
-      }
-    }).then((res) => res?.madeByGroup.owner);
-
-
-
-  const flatListings = allListings.flat();
   console.log("DONE SCRAPING, flatListings.length: ", flatListings.length);
   if (flatListings.length === 0 && userFromRequest) {
     await sendText({

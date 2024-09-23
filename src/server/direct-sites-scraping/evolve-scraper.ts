@@ -11,6 +11,7 @@ import { ListingSiteName } from "@/server/db/schema/common";
 import { getNumNights } from "@/utils/utils";
 import { algoliasearch, SearchResponse } from "algoliasearch";
 import { getCity, getCoordinates, getCountryISO } from "@/server/google-maps";
+import { proxyAgent } from "../server-utils";
 
 const EvolvePropertySchema = z.object({
   id: z.string(),
@@ -328,7 +329,7 @@ const fetchPropertyDetails = async (
       "upgrade-insecure-requests": "1",
     };
 
-    const response = await axios.get(url, { headers });
+    const response = await axios.get(url, { headers, httpsAgent: proxyAgent });
     const $ = cheerio.load(response.data as string);
 
     const scriptContent = $('script:contains("listingReviews")').html();
@@ -352,12 +353,12 @@ const fetchPropertyDetails = async (
     interface ListingUnit {
       amenities?: Amenity[];
     }
-    
+
     interface Amenity {
       category: string;
       name: string;
     }
-    
+
     interface ParsedData {
       props?: {
         pageProps?: {
@@ -367,9 +368,10 @@ const fetchPropertyDetails = async (
         };
       };
     }
-    
-    const listingUnits = (parsedData as ParsedData).props?.pageProps?.listing?.units ?? [];
-    
+
+    const listingUnits =
+      (parsedData as ParsedData).props?.pageProps?.listing?.units ?? [];
+
     const categories = [
       "Inside Amenities",
       "Outdoor Amenities",
@@ -377,22 +379,26 @@ const fetchPropertyDetails = async (
       "Property Amenities",
       "Kitchen Equipment",
     ] as const;
-    
-    type CategoryType = typeof categories[number];
-    
-    const categorizedAmenities: Record<CategoryType, string[]> = categories.reduce((acc, category) => {
-      acc[category] = [];
-      return acc;
-    }, {} as Record<CategoryType, string[]>);
-    
+
+    type CategoryType = (typeof categories)[number];
+
+    const categorizedAmenities: Record<CategoryType, string[]> =
+      categories.reduce(
+        (acc, category) => {
+          acc[category] = [];
+          return acc;
+        },
+        {} as Record<CategoryType, string[]>,
+      );
+
     const uncategorizedAmenities: string[] = [];
-    
+
     listingUnits.forEach((unit: ListingUnit) => {
       (unit.amenities ?? []).forEach((amenity: Amenity) => {
         const matchedCategory = categories.find(
-          (cat) => amenity.category.toLowerCase() === cat.toLowerCase()
+          (cat) => amenity.category.toLowerCase() === cat.toLowerCase(),
         );
-    
+
         if (matchedCategory) {
           if (!categorizedAmenities[matchedCategory].includes(amenity.name)) {
             categorizedAmenities[matchedCategory].push(amenity.name);
@@ -404,7 +410,7 @@ const fetchPropertyDetails = async (
         }
       });
     });
-    
+
     const allAmenities = Object.values(categorizedAmenities).flat();
 
     const listingReviews = parsedData.props?.pageProps?.listingReviews ?? [];
@@ -471,8 +477,10 @@ const fetchPropertyDetails = async (
       const houseRulesMatch =
         content.match(/HOUSE RULES:([\s\S]*?)(?=INTERNET INSTRUCTIONS:|$)/i) ??
         [];
-      const checkInMatch = content.match(/"Check-in Time"\s*:\s*"([^"]+)"/) ?? [];
-      const checkOutMatch = content.match(/"Check-out Time"\s*:\s*"([^"]+)"/) ?? [];
+      const checkInMatch =
+        content.match(/"Check-in Time"\s*:\s*"([^"]+)"/) ?? [];
+      const checkOutMatch =
+        content.match(/"Check-out Time"\s*:\s*"([^"]+)"/) ?? [];
 
       const otherHouseRules =
         houseRulesMatch[1]
@@ -529,6 +537,7 @@ const fetchPropertyDetails = async (
         "content-type": "application/json",
         Referer: url,
       },
+      httpsAgent: proxyAgent,
     });
 
     const totalPrice = quoteResponse.data.price.total;
@@ -629,6 +638,7 @@ const refetchPrice = async (
     };
 
     const quoteResponse = await axios.post<QuoteResponse>(quoteUrl, quoteData, {
+      httpsAgent: proxyAgent,
       headers: {
         accept: "*/*",
         "accept-language": "en-US,en;q=0.9",
