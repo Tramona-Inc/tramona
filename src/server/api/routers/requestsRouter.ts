@@ -524,6 +524,7 @@ export async function handleRequestSubmission(
         propertyDetails.autoOfferDiscountTiers
       ) {
         try {
+          console.log('aboutta scrape price of airbnb thing')
           const airbnbTotalPrice = await scrapeAirbnbPrice({
             airbnbListingId: propertyDetails.originalListingId,
             params: {
@@ -552,8 +553,11 @@ export async function handleRequestSubmission(
           const applicableDiscount = propertyDetails.autoOfferDiscountTiers.find(
             tier => daysUntilCheckIn >= tier.days
           );
+
+          console.log("applicable discount", applicableDiscount);
   
           if (applicableDiscount && percentOff <= applicableDiscount.percentOff) {
+            console.log("percent off is less than or equal to applicable discount");
             await tx.insert(offers).values({
               requestId: request.id,
               propertyId: property.id,

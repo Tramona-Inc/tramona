@@ -2466,3 +2466,225 @@ PostgresError: null value in column "num_bedrooms" of relation "properties" viol
     at readableAddChunk (node:internal/streams/readable:297:9)
     at Readable.push (node:internal/streams/readable:234:10)
     at TCP.onStreamRead (node:internal/stream_base_commons:190:23)
+Starting evolveVacationRentalScraper for request 907
+Starting cleanbnbScraper for request 907
+Starting arizonaScraper for request 907
+Starting cbIslandVacationsScraper for request 907
+Starting redawningScraper for request 907
+Starting casamundoScraper for request 907
+url: https://www.redawning.com/search/properties?ptype=locality&platitude=34.0549076&plongitude=-118.242643&pcountry=US&pname=Los Angeles, CA, USA&sleepsmax=1TO100&dates=1731481200TO1731740400
+2 scrapers errored for request 907: evolveVacationRentalScraper errored:
+
+AxiosError: Request failed with status code 407
+    at settle (file:///Users/adamkim/tramona/node_modules/.pnpm/axios@1.7.2/node_modules/axios/lib/core/settle.js:19:12)
+    at IncomingMessage.handleStreamEnd (file:///Users/adamkim/tramona/node_modules/.pnpm/axios@1.7.2/node_modules/axios/lib/adapters/http.js:589:11)
+    at IncomingMessage.emit (node:events:526:35)
+    at endReadableNT (node:internal/streams/readable:1589:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+    at Axios.request (file:///Users/adamkim/tramona/node_modules/.pnpm/axios@1.7.2/node_modules/axios/lib/core/Axios.js:45:41)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async scrapeUrlLikeHuman (webpack-internal:///(api)/./src/server/server-utils.ts:99:12)
+    at async Object.redawningScraper [as scraper] (webpack-internal:///(api)/./src/server/direct-sites-scraping/redawning.ts:241:15)
+    at async Promise.allSettled (index 4)
+    at async scrapeDirectListings (webpack-internal:///(api)/./src/server/direct-sites-scraping/index.ts:74:28)
+
+cleanbnbScraper errored:
+
+AxiosError: Request failed with status code 407
+    at settle (file:///Users/adamkim/tramona/node_modules/.pnpm/axios@1.7.2/node_modules/axios/lib/core/settle.js:19:12)
+    at IncomingMessage.handleStreamEnd (file:///Users/adamkim/tramona/node_modules/.pnpm/axios@1.7.2/node_modules/axios/lib/adapters/http.js:589:11)
+    at IncomingMessage.emit (node:events:526:35)
+    at endReadableNT (node:internal/streams/readable:1589:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+    at Axios.request (file:///Users/adamkim/tramona/node_modules/.pnpm/axios@1.7.2/node_modules/axios/lib/core/Axios.js:45:41)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async getLocationId (webpack-internal:///(api)/./src/server/direct-sites-scraping/casamundo-scraper.ts:55:22)
+    at async Object.casamundoScraper [as scraper] (webpack-internal:///(api)/./src/server/direct-sites-scraping/casamundo-scraper.ts:426:24)
+    at async Promise.allSettled (index 5)
+    at async scrapeDirectListings (webpack-internal:///(api)/./src/server/direct-sites-scraping/index.ts:74:28)
+Scraped 0 listings for request 907, deleting 0 old offers
+Starting evolveVacationRentalScraper for request 908
+Starting cleanbnbScraper for request 908
+Starting arizonaScraper for request 908
+Starting cbIslandVacationsScraper for request 908
+Starting redawningScraper for request 908
+Starting casamundoScraper for request 908
+url: https://www.redawning.com/search/properties?ptype=locality&platitude=34.0549076&plongitude=-118.242643&pcountry=US&pname=Los Angeles, CA, USA&sleepsmax=1TO100&dates=1728802800TO1729062000
+2 scrapers errored for request 908: evolveVacationRentalScraper errored:
+
+AxiosError: Request failed with status code 407
+    at settle (file:///Users/adamkim/tramona/node_modules/.pnpm/axios@1.7.2/node_modules/axios/lib/core/settle.js:19:12)
+    at IncomingMessage.handleStreamEnd (file:///Users/adamkim/tramona/node_modules/.pnpm/axios@1.7.2/node_modules/axios/lib/adapters/http.js:589:11)
+    at IncomingMessage.emit (node:events:526:35)
+    at endReadableNT (node:internal/streams/readable:1589:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+    at Axios.request (file:///Users/adamkim/tramona/node_modules/.pnpm/axios@1.7.2/node_modules/axios/lib/core/Axios.js:45:41)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async scrapeUrlLikeHuman (webpack-internal:///(api)/./src/server/server-utils.ts:99:12)
+    at async Object.redawningScraper [as scraper] (webpack-internal:///(api)/./src/server/direct-sites-scraping/redawning.ts:241:15)
+    at async Promise.allSettled (index 4)
+    at async scrapeDirectListings (webpack-internal:///(api)/./src/server/direct-sites-scraping/index.ts:74:28)
+
+cleanbnbScraper errored:
+
+AxiosError: Request failed with status code 407
+    at settle (file:///Users/adamkim/tramona/node_modules/.pnpm/axios@1.7.2/node_modules/axios/lib/core/settle.js:19:12)
+    at IncomingMessage.handleStreamEnd (file:///Users/adamkim/tramona/node_modules/.pnpm/axios@1.7.2/node_modules/axios/lib/adapters/http.js:589:11)
+    at IncomingMessage.emit (node:events:526:35)
+    at endReadableNT (node:internal/streams/readable:1589:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+    at Axios.request (file:///Users/adamkim/tramona/node_modules/.pnpm/axios@1.7.2/node_modules/axios/lib/core/Axios.js:45:41)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async getLocationId (webpack-internal:///(api)/./src/server/direct-sites-scraping/casamundo-scraper.ts:55:22)
+    at async Object.casamundoScraper [as scraper] (webpack-internal:///(api)/./src/server/direct-sites-scraping/casamundo-scraper.ts:426:24)
+    at async Promise.allSettled (index 5)
+    at async scrapeDirectListings (webpack-internal:///(api)/./src/server/direct-sites-scraping/index.ts:74:28)
+Scraped 0 listings for request 908, deleting 0 old offers
+Starting evolveVacationRentalScraper for request 909
+Starting cleanbnbScraper for request 909
+Starting arizonaScraper for request 909
+Starting cbIslandVacationsScraper for request 909
+Starting redawningScraper for request 909
+Starting casamundoScraper for request 909
+url: https://www.redawning.com/search/properties?ptype=locality&platitude=34.0549076&plongitude=-118.242643&pcountry=US&pname=Los Angeles, CA, USA&sleepsmax=1TO100&dates=1731481200TO1731740400
+2 scrapers errored for request 909: evolveVacationRentalScraper errored:
+
+AxiosError: Request failed with status code 407
+    at settle (file:///Users/adamkim/tramona/node_modules/.pnpm/axios@1.7.2/node_modules/axios/lib/core/settle.js:19:12)
+    at IncomingMessage.handleStreamEnd (file:///Users/adamkim/tramona/node_modules/.pnpm/axios@1.7.2/node_modules/axios/lib/adapters/http.js:589:11)
+    at IncomingMessage.emit (node:events:526:35)
+    at endReadableNT (node:internal/streams/readable:1589:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+    at Axios.request (file:///Users/adamkim/tramona/node_modules/.pnpm/axios@1.7.2/node_modules/axios/lib/core/Axios.js:45:41)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async scrapeUrlLikeHuman (webpack-internal:///(api)/./src/server/server-utils.ts:99:12)
+    at async Object.redawningScraper [as scraper] (webpack-internal:///(api)/./src/server/direct-sites-scraping/redawning.ts:241:15)
+    at async Promise.allSettled (index 4)
+    at async scrapeDirectListings (webpack-internal:///(api)/./src/server/direct-sites-scraping/index.ts:74:28)
+
+cleanbnbScraper errored:
+
+AxiosError: Request failed with status code 407
+    at settle (file:///Users/adamkim/tramona/node_modules/.pnpm/axios@1.7.2/node_modules/axios/lib/core/settle.js:19:12)
+    at IncomingMessage.handleStreamEnd (file:///Users/adamkim/tramona/node_modules/.pnpm/axios@1.7.2/node_modules/axios/lib/adapters/http.js:589:11)
+    at IncomingMessage.emit (node:events:526:35)
+    at endReadableNT (node:internal/streams/readable:1589:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+    at Axios.request (file:///Users/adamkim/tramona/node_modules/.pnpm/axios@1.7.2/node_modules/axios/lib/core/Axios.js:45:41)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async getLocationId (webpack-internal:///(api)/./src/server/direct-sites-scraping/casamundo-scraper.ts:55:22)
+    at async Object.casamundoScraper [as scraper] (webpack-internal:///(api)/./src/server/direct-sites-scraping/casamundo-scraper.ts:426:24)
+    at async Promise.allSettled (index 5)
+    at async scrapeDirectListings (webpack-internal:///(api)/./src/server/direct-sites-scraping/index.ts:74:28)
+Scraped 0 listings for request 909, deleting 0 old offers
+Starting evolveVacationRentalScraper for request 910
+Starting cleanbnbScraper for request 910
+Starting arizonaScraper for request 910
+Starting cbIslandVacationsScraper for request 910
+Starting redawningScraper for request 910
+Starting casamundoScraper for request 910
+url: https://www.redawning.com/search/properties?ptype=locality&platitude=34.0549076&plongitude=-118.242643&pcountry=US&pname=Los Angeles, CA, USA&sleepsmax=1TO100&dates=1731481200TO1731740400
+2 scrapers errored for request 910: evolveVacationRentalScraper errored:
+
+AxiosError: Request failed with status code 407
+    at settle (file:///Users/adamkim/tramona/node_modules/.pnpm/axios@1.7.2/node_modules/axios/lib/core/settle.js:19:12)
+    at IncomingMessage.handleStreamEnd (file:///Users/adamkim/tramona/node_modules/.pnpm/axios@1.7.2/node_modules/axios/lib/adapters/http.js:589:11)
+    at IncomingMessage.emit (node:events:526:35)
+    at endReadableNT (node:internal/streams/readable:1589:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+    at Axios.request (file:///Users/adamkim/tramona/node_modules/.pnpm/axios@1.7.2/node_modules/axios/lib/core/Axios.js:45:41)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async scrapeUrlLikeHuman (webpack-internal:///(api)/./src/server/server-utils.ts:99:12)
+    at async Object.redawningScraper [as scraper] (webpack-internal:///(api)/./src/server/direct-sites-scraping/redawning.ts:241:15)
+    at async Promise.allSettled (index 4)
+    at async scrapeDirectListings (webpack-internal:///(api)/./src/server/direct-sites-scraping/index.ts:74:28)
+
+cleanbnbScraper errored:
+
+AxiosError: Request failed with status code 407
+    at settle (file:///Users/adamkim/tramona/node_modules/.pnpm/axios@1.7.2/node_modules/axios/lib/core/settle.js:19:12)
+    at IncomingMessage.handleStreamEnd (file:///Users/adamkim/tramona/node_modules/.pnpm/axios@1.7.2/node_modules/axios/lib/adapters/http.js:589:11)
+    at IncomingMessage.emit (node:events:526:35)
+    at endReadableNT (node:internal/streams/readable:1589:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+    at Axios.request (file:///Users/adamkim/tramona/node_modules/.pnpm/axios@1.7.2/node_modules/axios/lib/core/Axios.js:45:41)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async getLocationId (webpack-internal:///(api)/./src/server/direct-sites-scraping/casamundo-scraper.ts:55:22)
+    at async Object.casamundoScraper [as scraper] (webpack-internal:///(api)/./src/server/direct-sites-scraping/casamundo-scraper.ts:426:24)
+    at async Promise.allSettled (index 5)
+    at async scrapeDirectListings (webpack-internal:///(api)/./src/server/direct-sites-scraping/index.ts:74:28)
+Scraped 0 listings for request 910, deleting 0 old offers
+Starting evolveVacationRentalScraper for request 911
+Starting cleanbnbScraper for request 911
+Starting arizonaScraper for request 911
+Starting cbIslandVacationsScraper for request 911
+Starting redawningScraper for request 911
+Starting casamundoScraper for request 911
+url: https://www.redawning.com/search/properties?ptype=locality&platitude=34.0549076&plongitude=-118.242643&pcountry=US&pname=Los Angeles, CA, USA&sleepsmax=1TO100&dates=1731481200TO1731740400
+All scrapers completed successfully for request 911
+Scraped 87 listings for request 911, deleting 1 old offers
+Starting evolveVacationRentalScraper for request 912
+Starting cleanbnbScraper for request 912
+Starting arizonaScraper for request 912
+Starting cbIslandVacationsScraper for request 912
+Starting redawningScraper for request 912
+Starting casamundoScraper for request 912
+url: https://www.redawning.com/search/properties?ptype=locality&platitude=34.0549076&plongitude=-118.242643&pcountry=US&pname=Los Angeles, CA, USA&sleepsmax=1TO100&dates=1731481200TO1731740400
+1 scrapers errored for request 912: evolveVacationRentalScraper errored:
+
+Error: write EPROTO 409C95E001000000:error:0A000119:SSL routines:ssl3_get_record:decryption failed or bad record mac:../deps/openssl/openssl/ssl/record/ssl3_record.c:623:
+
+    at AxiosError.from (file:///Users/adamkim/tramona/node_modules/.pnpm/axios@1.7.2/node_modules/axios/lib/core/AxiosError.js:89:14)
+    at RedirectableRequest.handleRequestError (file:///Users/adamkim/tramona/node_modules/.pnpm/axios@1.7.2/node_modules/axios/lib/adapters/http.js:610:25)
+    at RedirectableRequest.emit (node:events:514:28)
+    at eventHandlers.<computed> (/Users/adamkim/tramona/node_modules/.pnpm/follow-redirects@1.15.6/node_modules/follow-redirects/index.js:38:24)
+    at ClientRequest.emit (node:events:514:28)
+    at TLSSocket.socketErrorListener (node:_http_client:495:9)
+    at TLSSocket.emit (node:events:514:28)
+    at emitErrorNT (node:internal/streams/destroy:151:8)
+    at emitErrorCloseNT (node:internal/streams/destroy:116:3)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+    at Axios.request (file:///Users/adamkim/tramona/node_modules/.pnpm/axios@1.7.2/node_modules/axios/lib/core/Axios.js:45:41)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async fetchPropertyDetails (webpack-internal:///(api)/./src/server/direct-sites-scraping/casamundo-scraper.ts:345:22)
+    at async scrapeProperty (webpack-internal:///(api)/./src/server/direct-sites-scraping/casamundo-scraper.ts:419:29)
+    at async eval (webpack-internal:///(api)/./src/server/direct-sites-scraping/casamundo-scraper.ts:442:37)
+    at async Promise.all (index 57)
+    at async Object.casamundoScraper [as scraper] (webpack-internal:///(api)/./src/server/direct-sites-scraping/casamundo-scraper.ts:441:22)
+    at async Promise.allSettled (index 5)
+    at async scrapeDirectListings (webpack-internal:///(api)/./src/server/direct-sites-scraping/index.ts:74:28)
+Scraped 32 listings for request 912, deleting 1 old offers
+Starting evolveVacationRentalScraper for request 913
+Starting cleanbnbScraper for request 913
+Starting arizonaScraper for request 913
+Starting cbIslandVacationsScraper for request 913
+Starting redawningScraper for request 913
+Starting casamundoScraper for request 913
+url: https://www.redawning.com/search/properties?ptype=locality&platitude=34.0549076&plongitude=-118.242643&pcountry=US&pname=Los Angeles, CA, USA&sleepsmax=1TO100&dates=1728802800TO1729062000
+1 scrapers errored for request 913: evolveVacationRentalScraper errored:
+
+AxiosError: Request failed with status code 403
+    at settle (file:///Users/adamkim/tramona/node_modules/.pnpm/axios@1.7.2/node_modules/axios/lib/core/settle.js:19:12)
+    at BrotliDecompress.handleStreamEnd (file:///Users/adamkim/tramona/node_modules/.pnpm/axios@1.7.2/node_modules/axios/lib/adapters/http.js:589:11)
+    at BrotliDecompress.emit (node:events:526:35)
+    at endReadableNT (node:internal/streams/readable:1589:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+    at Axios.request (file:///Users/adamkim/tramona/node_modules/.pnpm/axios@1.7.2/node_modules/axios/lib/core/Axios.js:45:41)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async scrapeUrlLikeHuman (webpack-internal:///(api)/./src/server/server-utils.ts:99:12)
+    at async eval (webpack-internal:///(api)/./src/server/direct-sites-scraping/redawning.ts:131:19)
+    at async Promise.all (index 9)
+    at async mapTaxodataToScrapedListing (webpack-internal:///(api)/./src/server/direct-sites-scraping/redawning.ts:128:12)
+    at async Object.redawningScraper [as scraper] (webpack-internal:///(api)/./src/server/direct-sites-scraping/redawning.ts:307:22)
+    at async Promise.allSettled (index 4)
+    at async scrapeDirectListings (webpack-internal:///(api)/./src/server/direct-sites-scraping/index.ts:74:28)
+Scraped 65 listings for request 913, deleting 0 old offers
+Starting evolveVacationRentalScraper for request 914
+Starting cleanbnbScraper for request 914
+Starting arizonaScraper for request 914
+Starting cbIslandVacationsScraper for request 914
+Starting redawningScraper for request 914
+Starting casamundoScraper for request 914
+url: https://www.redawning.com/search/properties?ptype=locality&platitude=34.0549076&plongitude=-118.242643&pcountry=US&pname=Los Angeles, CA, USA&sleepsmax=1TO100&dates=1731481200TO1731740400
+All scrapers completed successfully for request 914
+Scraped 85 listings for request 914, deleting 1 old offers
