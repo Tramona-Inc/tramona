@@ -2620,3 +2620,40 @@ Error: C0FAFDF401000000:error:0A000119:SSL routines:ssl3_get_record:decryption f
     at async U.render (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/pages-api.runtime.dev.js:21:3955)
     at async DevServer.runApi (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/next-server.js:598:9)
 Scraped 18 listings for request 1403, deleting 0 old offers
+Starting evolveVacationRentalScraper for request 206
+Starting cleanbnbScraper for request 206
+Starting arizonaScraper for request 206
+Starting cbIslandVacationsScraper for request 206
+Starting redawningScraper for request 206
+Starting casamundoScraper for request 206
+url: https://www.redawning.com/search/properties?ptype=locality&platitude=33.5427189&plongitude=-117.7853568&pcountry=US&pname=Laguna Beach, CA, USA&sleepsmax=1TO100&dates=1728025200TO1728111600
+2 scrapers errored for request 206: evolveVacationRentalScraper errored:
+
+AxiosError: Request failed with status code 407
+    at settle (file:///Users/nealuehara/Desktop/code/tramona/node_modules/.pnpm/axios@1.7.7/node_modules/axios/lib/core/settle.js:19:12)
+    at IncomingMessage.handleStreamEnd (file:///Users/nealuehara/Desktop/code/tramona/node_modules/.pnpm/axios@1.7.7/node_modules/axios/lib/adapters/http.js:599:11)
+    at IncomingMessage.emit (node:events:532:35)
+    at endReadableNT (node:internal/streams/readable:1696:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+    at Axios.request (file:///Users/nealuehara/Desktop/code/tramona/node_modules/.pnpm/axios@1.7.7/node_modules/axios/lib/core/Axios.js:45:41)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async scrapeUrlLikeHuman (webpack-internal:///(api)/./src/server/server-utils.ts:99:12)
+    at async Object.redawningScraper [as scraper] (webpack-internal:///(api)/./src/server/direct-sites-scraping/redawning.ts:241:15)
+    at async Promise.allSettled (index 4)
+    at async scrapeDirectListings (webpack-internal:///(api)/./src/server/direct-sites-scraping/index.ts:74:28)
+
+cleanbnbScraper errored:
+
+AxiosError: Request failed with status code 407
+    at settle (file:///Users/nealuehara/Desktop/code/tramona/node_modules/.pnpm/axios@1.7.7/node_modules/axios/lib/core/settle.js:19:12)
+    at IncomingMessage.handleStreamEnd (file:///Users/nealuehara/Desktop/code/tramona/node_modules/.pnpm/axios@1.7.7/node_modules/axios/lib/adapters/http.js:599:11)
+    at IncomingMessage.emit (node:events:532:35)
+    at endReadableNT (node:internal/streams/readable:1696:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+    at Axios.request (file:///Users/nealuehara/Desktop/code/tramona/node_modules/.pnpm/axios@1.7.7/node_modules/axios/lib/core/Axios.js:45:41)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async getLocationId (webpack-internal:///(api)/./src/server/direct-sites-scraping/casamundo-scraper.ts:55:22)
+    at async Object.casamundoScraper [as scraper] (webpack-internal:///(api)/./src/server/direct-sites-scraping/casamundo-scraper.ts:426:24)
+    at async Promise.allSettled (index 5)
+    at async scrapeDirectListings (webpack-internal:///(api)/./src/server/direct-sites-scraping/index.ts:74:28)
+Scraped 0 listings for request 206, deleting 0 old offers

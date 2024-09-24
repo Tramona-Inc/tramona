@@ -7,6 +7,7 @@ import { db } from "@/server/db";
 import { groupMembers, properties, trips } from "@/server/db/schema";
 
 import { TRPCError } from "@trpc/server";
+import { group } from "console";
 import { and, eq, exists, isNotNull, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
 
@@ -21,7 +22,7 @@ export const tripsRouter = createTRPCRouter({
               name: true,
               city: true,
             },
-            with: { host: { columns: { name: true } } },
+            with: { host: { columns: { name: true, profileUrl: true } } },
           },
           offer: {
             columns: {
