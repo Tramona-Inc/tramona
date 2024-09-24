@@ -1,4 +1,12 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
+import {
+  useForm,
+  useFieldArray,
+  FieldArrayWithId,
+  UseFormWatch,
+} from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { type Property } from "@/server/db/schema";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
@@ -20,21 +28,24 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { X } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
 
-type DiscountTier = {
-  days: number;
-  percentOff: number;
-};
-
+// Constants
 const MAX_TIERS = 10;
 const MIN_TIERS = 1;
 const MIN_DISCOUNT = 1;
 const MAX_DISCOUNT = 80;
 const HIGH_DISCOUNT_THRESHOLD = 50;
 
-const DEFAULT_TIERS: DiscountTier[] = [
+const DEFAULT_TIERS = [
   { days: 90, percentOff: 5 },
   { days: 60, percentOff: 10 },
   { days: 30, percentOff: 15 },
@@ -43,29 +54,81 @@ const DEFAULT_TIERS: DiscountTier[] = [
   { days: 7, percentOff: 30 },
 ];
 
+// Schemas
+const discountTierSchema = z.object({
+  days: z.number().min(0, "Days must be 0 or greater"),
+  percentOff: z.number().min(MIN_DISCOUNT).max(MAX_DISCOUNT),
+});
+
+const formSchema = z.object({
+    autoOfferEnabled: z.boolean(),
+    autoOfferDiscountTiers: z.array(discountTierSchema)
+      .min(MIN_TIERS)
+      .max(MAX_TIERS)
+      .refine(
+        (tiers) => {
+          const days = tiers.map((tier) => tier.days);
+          return new Set(days).size === days.length;
+        },
+        {
+          message: "Each 'days' value must be unique",
+          path: ["autoOfferDiscountTiers"],
+        }
+      ),
+  });
+type FormSchema = z.infer<typeof formSchema>;
+
+// Updated helper functions
+const orderTiers = (
+  tiers: FormSchema["autoOfferDiscountTiers"],
+): FormSchema["autoOfferDiscountTiers"] => {
+  return [...tiers].sort((a, b) => b.days - a.days);
+};
+
+const hasHighDiscount = (
+  tiers: FormSchema["autoOfferDiscountTiers"],
+): boolean => {
+  return tiers.some((tier) => tier.percentOff >= HIGH_DISCOUNT_THRESHOLD);
+};
+
+// Component
 export default function HostAutoOffer({ property }: { property: Property }) {
-  const [autoOfferEnabled, setAutoOfferEnabled] = useState(
-    property.autoOfferEnabled ?? false,
-  );
-  const [discountTiers, setDiscountTiers] = useState<DiscountTier[]>(
-    property.autoOfferDiscountTiers ?? DEFAULT_TIERS,
-  );
   const [showHighDiscountAlert, setShowHighDiscountAlert] = useState(false);
   const [showResetAlert, setShowResetAlert] = useState(false);
   const [showEnableConfirmation, setShowEnableConfirmation] = useState(false);
-  const [resetKey, setResetKey] = useState(0);
+  const [isSaving, setIsSaving] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
+  const originalValuesRef = useRef<FormSchema>({
+    autoOfferEnabled: property.autoOfferEnabled ?? false,
+    autoOfferDiscountTiers: property.autoOfferDiscountTiers ?? DEFAULT_TIERS,
+  });
+
+  const form = useForm<FormSchema>({
+    resolver: zodResolver(formSchema),
+    defaultValues: originalValuesRef.current,
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "autoOfferDiscountTiers",
+  });
+
   const updateAutoOfferMutation = api.properties.updateAutoOffer.useMutation({
-    onSuccess: () => {
+    onMutate: () => {
+      setIsSaving(true);
+    },
+    onSuccess: (_, variables) => {
       toast({
         title: "Settings saved",
         description: "Auto-offer settings have been successfully updated.",
         duration: 3000,
       });
+      originalValuesRef.current = variables;
       setHasUnsavedChanges(false);
     },
     onError: (error) => {
+      console.error("Error saving settings:", error);
       toast({
         title: "Error saving settings",
         description: `There was a problem saving your settings. Please try again.`,
@@ -73,195 +136,311 @@ export default function HostAutoOffer({ property }: { property: Property }) {
         duration: 5000,
       });
     },
+    onSettled: () => {
+      setIsSaving(false);
+    },
   });
 
-  useEffect(() => {
-    setHasUnsavedChanges(true);
-  }, [discountTiers]);
+  const checkForChanges = useCallback((currentValues: FormSchema) => {
+    const original = originalValuesRef.current;
 
-  const orderTiers = (tiers: DiscountTier[]): DiscountTier[] => {
-    return [...tiers].sort((a, b) => b.days - a.days);
-  };
-
-  const handleSave = () => {
-    const orderedTiers = orderTiers(discountTiers);
-    const hasHighDiscount = orderedTiers.some(
-      (tier) => tier.percentOff >= HIGH_DISCOUNT_THRESHOLD,
-    );
-    if (hasHighDiscount) {
-      setShowHighDiscountAlert(true);
-    } else {
-      saveSettings(orderedTiers);
+    if (currentValues.autoOfferEnabled !== original.autoOfferEnabled) {
+      return true;
     }
-  };
 
-  const saveSettings = (tiers: DiscountTier[]) => {
-    updateAutoOfferMutation.mutate({
-      id: property.id,
-      autoOfferEnabled,
-      autoOfferDiscountTiers: tiers,
+    if (
+      currentValues.autoOfferDiscountTiers.length !==
+      original.autoOfferDiscountTiers.length
+    ) {
+      return true;
+    }
+
+    for (let i = 0; i < currentValues.autoOfferDiscountTiers.length; i++) {
+      if (
+        currentValues.autoOfferDiscountTiers[i]?.days !==
+          original.autoOfferDiscountTiers[i]?.days ||
+        currentValues.autoOfferDiscountTiers[i]?.percentOff !==
+          original.autoOfferDiscountTiers[i]?.percentOff
+      ) {
+        return true;
+      }
+    }
+
+    return false;
+  }, []);
+
+  useEffect(() => {
+    const subscription = form.watch((value) => {
+      const currentValues = form.getValues();
+      const isChanged = checkForChanges(currentValues);
+      setHasUnsavedChanges(isChanged);
     });
-    setDiscountTiers(tiers);
-    setHasUnsavedChanges(false);
-  };
+    return () => subscription.unsubscribe();
+  }, [form, checkForChanges]);
 
-  const handleDiscountChange = useCallback(
-    (index: number, field: keyof DiscountTier, value: string) => {
-      setDiscountTiers((prevTiers) => {
-        const newTiers = [...prevTiers];
-        if (field === "percentOff") {
-          const numValue = parseInt(value, 10);
-          newTiers[index].percentOff = isNaN(numValue)
-            ? 0
-            : Math.max(MIN_DISCOUNT, Math.min(MAX_DISCOUNT, numValue));
-        } else if (field === "days") {
-          const numValue = parseInt(value, 10);
-          newTiers[index].days = isNaN(numValue) ? 0 : Math.max(0, numValue);
+  const handleAddTier = useCallback(() => {
+    if (fields.length < MAX_TIERS) {
+      append({ days: 0, percentOff: MIN_DISCOUNT });
+      const currentValues = form.getValues();
+      setHasUnsavedChanges(checkForChanges(currentValues));
+    }
+  }, [fields.length, append, form, checkForChanges]);
+
+  const handleSuccessfulSubmit = useCallback((data: FormSchema) => {
+    originalValuesRef.current = data;
+    setHasUnsavedChanges(false);
+  }, []);
+
+  const handleSubmit = useCallback(
+    async (data: FormSchema) => {
+      if (isSaving) return;
+
+      const orderedTiers = orderTiers(data.autoOfferDiscountTiers);
+      const uniqueDays = new Set(orderedTiers.map((tier) => tier.days));
+      if (uniqueDays.size !== orderedTiers.length) {
+        toast({
+          title: "Error saving settings",
+          description: "Cannot assign different discounts to the same time period.",
+          variant: "destructive",
+          duration: 5000,
+        });
+        return;
+      }
+      if (hasHighDiscount(orderedTiers)) {
+        setShowHighDiscountAlert(true);
+      } else {
+        try {
+          await updateAutoOfferMutation.mutateAsync({
+            id: property.id,
+            autoOfferEnabled: data.autoOfferEnabled,
+            autoOfferDiscountTiers: orderedTiers,
+          });
+          handleSuccessfulSubmit(data);
+        } catch (error) {
+          console.error("Error submitting form:", error);
         }
-        return newTiers;
-      });
+      }
     },
-    [],
+    [property.id, updateAutoOfferMutation, isSaving, handleSuccessfulSubmit],
   );
 
-  const addTier = () => {
-    if (discountTiers.length < MAX_TIERS) {
-      setDiscountTiers([
-        ...discountTiers,
-        { days: 0, percentOff: MIN_DISCOUNT },
-      ]);
-    }
-  };
-
-  const removeTier = (index: number) => {
-    if (discountTiers.length > MIN_TIERS) {
-      setDiscountTiers(discountTiers.filter((_, i) => i !== index));
-    }
-  };
-
-  const resetToDefault = () => {
-    setDiscountTiers([...DEFAULT_TIERS]);
-    setShowResetAlert(false);
-    setResetKey((prevKey) => prevKey + 1);
-    setHasUnsavedChanges(true);
-  };
-
-  const handleAutoOfferToggle = (checked: boolean) => {
-    if (checked) {
-      setShowEnableConfirmation(true);
-    } else {
-      setAutoOfferEnabled(false);
-      saveSettings(discountTiers);
-    }
-  };
-
-  const confirmEnableAutoOffer = () => {
-    setAutoOfferEnabled(true);
-    setShowEnableConfirmation(false);
-    saveSettings(discountTiers);
-  };
-
-  const handleCancel = () => {
-    setDiscountTiers(property.autoOfferDiscountTiers);
+  const handleCancel = useCallback(() => {
+    form.reset(originalValuesRef.current);
     setHasUnsavedChanges(false);
-  };
+  }, [form]);
 
+  const handleResetToDefault = useCallback(() => {
+    setShowResetAlert(true);
+  }, []);
+
+  const handleConfirmReset = useCallback(() => {
+    const defaultValues = {
+      autoOfferEnabled: property.autoOfferEnabled ?? false,
+      autoOfferDiscountTiers: DEFAULT_TIERS,
+    };
+    form.reset(defaultValues);
+    const isChanged = checkForChanges(defaultValues);
+    setHasUnsavedChanges(isChanged);
+    setShowResetAlert(false);
+  }, [form, property.autoOfferEnabled, checkForChanges]);
+
+  const handleCancelReset = useCallback(() => {
+    setShowResetAlert(false);
+  }, []);
+
+  const handleAutoOfferToggle = useCallback(
+    (checked: boolean) => {
+      if (checked) {
+        setShowEnableConfirmation(true);
+      } else {
+        form.setValue("autoOfferEnabled", false);
+        form.handleSubmit(handleSubmit)();
+      }
+    },
+    [form, handleSubmit],
+  );
+
+  const handleConfirmEnableAutoOffer = useCallback(() => {
+    form.setValue("autoOfferEnabled", true);
+    setShowEnableConfirmation(false);
+    form.handleSubmit(handleSubmit)();
+  }, [form, handleSubmit]);
+
+  // Render helpers
+  const renderDiscountTierFields = useCallback(
+    (
+      fields: FieldArrayWithId<FormSchema, "autoOfferDiscountTiers", "id">[],
+      remove: (index: number) => void,
+    ) =>
+      fields.map((field, index) => (
+        <div key={field.id} className="my-2 flex items-center space-x-2">
+          <FormField
+            control={form.control}
+            name={`autoOfferDiscountTiers.${index}.days`}
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <Input
+                    {...field}
+                    type="number"
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value, 10);
+                      field.onChange(value);
+                      const currentValues = form.getValues();
+                      setHasUnsavedChanges(checkForChanges(currentValues));
+                    }}
+                    className="w-20"
+                    min="0"
+                    disabled={isSaving}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <span>days before check-in:</span>
+          <FormField
+            control={form.control}
+            name={`autoOfferDiscountTiers.${index}.percentOff`}
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <Input
+                    {...field}
+                    type="number"
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value, 10);
+                      field.onChange(value);
+                      const currentValues = form.getValues();
+                      setHasUnsavedChanges(checkForChanges(currentValues));
+                    }}
+                    className="w-20"
+                    min={MIN_DISCOUNT}
+                    max={MAX_DISCOUNT}
+                    step="1"
+                    disabled={isSaving}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <span>% off</span>
+          {fields.length > MIN_TIERS && (
+            <Button
+              type="button"
+              onClick={() => {
+                remove(index);
+                const currentValues = form.getValues();
+                setHasUnsavedChanges(checkForChanges(currentValues));
+              }}
+              variant="ghost"
+              className="hover:bg-transparent"
+              disabled={isSaving}
+            >
+              <X />
+            </Button>
+          )}
+        </div>
+      )),
+    [form, checkForChanges, isSaving],
+  );
+
+  // Render
   return (
     <div className="my-6 space-y-4">
       <div className="flex items-center space-x-4">
-        <h2 className="text-lg font-semibold">Auto-Offer Settings</h2>
+        <h2 className="text-lg font-semibold">Auto-Offer</h2>
         <Switch
           className="data-[state=checked]:bg-primaryGreen"
-          checked={autoOfferEnabled}
+          checked={form.watch("autoOfferEnabled")}
           onCheckedChange={handleAutoOfferToggle}
+          disabled={isSaving}
         />
       </div>
-      {autoOfferEnabled && (
-        <>
-          <p className="text-sm text-muted-foreground">
-            Automatically send offers to guests with discount tiers based on how
-            near an upcoming vacancy is. As vacant dates approach, offering a
-            greater discount might be able to fill those dates more quickly.{" "}
-            <br />
-            <br />
-            (Discounts are based off of this property's rate on Airbnb.)
-          </p>
-          <Accordion type="single" collapsible className="w-full">
-            <AccordionItem value="discount-tiers">
-              <AccordionTrigger>Discount Tiers</AccordionTrigger>
-              <AccordionContent>
-                {discountTiers.map((tier, index) => (
-                  <div
-                    key={`${resetKey}-${index}`}
-                    className="my-2 flex items-center space-x-2"
-                  >
-                    <Input
-                      type="number"
-                      value={tier.days}
-                      onChange={(e) =>
-                        handleDiscountChange(index, "days", e.target.value)
-                      }
-                      className="w-20"
-                      min="0"
-                    />
-                    <span>days before check-in:</span>
-                    <Input
-                      type="number"
-                      value={tier.percentOff}
-                      onChange={(e) =>
-                        handleDiscountChange(
-                          index,
-                          "percentOff",
-                          e.target.value,
-                        )
-                      }
-                      className="w-20"
-                      min={MIN_DISCOUNT}
-                      max={MAX_DISCOUNT}
-                      step="1"
-                    />
-                    <span>% off</span>
-                    {discountTiers.length > MIN_TIERS && (
-                      <Button
-                        onClick={() => removeTier(index)}
-                        variant="ghost"
-                        className="hover:bg-transparent"
-                      >
-                        <X />
-                      </Button>
-                    )}
-                  </div>
-                ))}
-                {discountTiers.length < MAX_TIERS && (
-                  <Button
-                    onClick={addTier}
-                    className="mt-2"
-                    variant={"outline"}
-                  >
-                    Add Tier
-                  </Button>
+      {form.watch("autoOfferEnabled") && (
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="space-y-4"
+          >
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="discount-tiers">
+                <AccordionTrigger disabled={isSaving}>
+                  Discount Tiers
+                </AccordionTrigger>
+                <AccordionContent>
+                  {renderDiscountTierFields(fields, remove)}
+                  {fields.length < MAX_TIERS && (
+                    <Button
+                      type="button"
+                      onClick={handleAddTier}
+                      className="mt-2"
+                      variant="outline"
+                      disabled={isSaving}
+                    >
+                      Add Tier
+                    </Button>
+                  )}
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+            <div className="flex justify-between">
+            <div className="flex space-x-2">
+              <Button type="submit" disabled={!hasUnsavedChanges || isSaving}>
+                {isSaving ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save"
                 )}
-                <div className="flex mt-8 space-x-2">
-                  <Button onClick={handleSave}>Save</Button>
-                  <Button
-                    onClick={handleCancel}
-                    variant="outline"
-                    disabled={!hasUnsavedChanges}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={() => setShowResetAlert(true)}
-                    variant="outline"
-                  >
-                    Reset to Default
-                  </Button>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        </>
+              </Button>
+              <Button
+                type="button"
+                onClick={handleCancel}
+                variant="outline"
+                disabled={!hasUnsavedChanges || isSaving}
+              >
+                Cancel
+              </Button>
+              
+            </div>
+            <div>
+            <Button
+                type="button"
+                onClick={handleResetToDefault}
+                variant="outline"
+                disabled={isSaving}
+              >
+                Reset to Default
+              </Button>
+              </div>
+            </div>
+          </form>
+        </Form>
       )}
+
+      <AlertDialog open={showResetAlert} onOpenChange={setShowResetAlert}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reset to Default Settings</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to reset to the default settings? This will
+              remove any custom tiers you've set up.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleCancelReset}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmReset}>
+              Confirm Reset
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog
         open={showHighDiscountAlert}
@@ -280,32 +459,12 @@ export default function HostAutoOffer({ property }: { property: Property }) {
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => {
+              onClick={async () => {
                 setShowHighDiscountAlert(false);
-                saveSettings(orderTiers(discountTiers));
+                await form.handleSubmit(handleSubmit)();
               }}
             >
               Confirm
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <AlertDialog open={showResetAlert} onOpenChange={setShowResetAlert}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Reset to Default Settings</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to reset to the default settings? This will
-              remove any custom tiers you've set up.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setShowResetAlert(false)}>
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction onClick={resetToDefault}>
-              Confirm Reset
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -329,7 +488,7 @@ export default function HostAutoOffer({ property }: { property: Property }) {
             <AlertDialogCancel onClick={() => setShowEnableConfirmation(false)}>
               Cancel
             </AlertDialogCancel>
-            <AlertDialogAction onClick={confirmEnableAutoOffer}>
+            <AlertDialogAction onClick={handleConfirmEnableAutoOffer}>
               Enable Auto-Offer
             </AlertDialogAction>
           </AlertDialogFooter>
