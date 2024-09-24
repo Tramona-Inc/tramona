@@ -27,9 +27,10 @@ import {
   getNumNights,
 } from "@/utils/utils";
 import { DIRECTLISTINGMARKUP } from "@/utils/constants";
-import { createLatLngGISPoint } from "@/server/server-utils";
+import { createLatLngGISPoint, sendScheduledText } from "@/server/server-utils";
 import { cleanbnbScraper, cleanbnbSubScraper } from "./cleanbnb-scrape";
 import { log } from "@/pages/api/script";
+import { env } from "@/env";
 
 type ScraperOptions = {
   location: string;
@@ -165,47 +166,125 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
   //   }
 
   // dynamically expand the price range to find at least 1 listing between 50% - 170% of the requested price
-  let upperPercentage = 110;
-  let lowerPercentage = 80;
-  let fairListings;
-  do {
-    const lowerPrice = requestNightlyPrice * (lowerPercentage / 100);
-    const upperPrice = requestNightlyPrice * (upperPercentage / 100);
+  // let upperPercentage = 110;
+  // let lowerPercentage = 80;
+  // let fairListings;
+  // do {
+  //   const lowerPrice = requestNightlyPrice * (lowerPercentage / 100);
+  //   const upperPrice = requestNightlyPrice * (upperPercentage / 100);
 
-    fairListings = flatListings.filter((listing) => {
-      return (
-        listing.originalNightlyPrice !== null &&
-        listing.originalNightlyPrice !== undefined &&
-        listing.originalNightlyPrice >= lowerPrice &&
-        listing.originalNightlyPrice <= upperPrice
-      );
-    });
+  //   fairListings = flatListings.filter((listing) => {
+  //     return (
+  //       listing.originalNightlyPrice !== null &&
+  //       listing.originalNightlyPrice !== undefined &&
+  //       listing.originalNightlyPrice >= lowerPrice &&
+  //       listing.originalNightlyPrice <= upperPrice
+  //     );
+  //   });
 
-    if (
-      fairListings.length < 1 &&
-      upperPercentage <= 170 &&
-      lowerPercentage >= 50
-    ) {
-      upperPercentage += 20;
-      lowerPercentage -= 10;
+  //   if (
+  //     fairListings.length < 1 &&
+  //     upperPercentage <= 170 &&
+  //     lowerPercentage >= 50
+  //   ) {
+  //     upperPercentage += 20;
+  //     lowerPercentage -= 10;
+  //   }
+  // } while (
+  //   fairListings.length < 1 &&
+  //   upperPercentage <= 170 &&
+  //   lowerPercentage >= 50
+  // );
+
+  // const listings = fairListings
+  //   .sort((a, b) => {
+  //     const aDiff = Math.abs(
+  //       (a.originalNightlyPrice ?? 0) - requestNightlyPrice,
+  //     );
+  //     const bDiff = Math.abs(
+  //       (b.originalNightlyPrice ?? 0) - requestNightlyPrice,
+  //     );
+  //     return aDiff - bDiff;
+  //   })
+  //   .slice(0, 10); // Grab up to 10 listings
+
+
+  let listings = [] as ScrapedListing[];
+  let fairListings = [];
+
+  // 1. Define the ranges for matching categories
+  const closeRangeLower = 0.80;  // 0-20% below request
+  const closeRangeUpper = 1.20;  // 0-20% above request
+
+  const midRangeLower = 0.50;    // 20-50% below request
+  const midRangeUpper = 1.50;    // 20-50% above request
+
+  fairListings = flatListings.filter((listing) => {
+    return listing.originalNightlyPrice !== null &&
+      listing.originalNightlyPrice !== undefined;
+  });
+
+  // fairListings = fairListings.sort((a, b) => {
+  //   const aDiff = Math.abs((a.originalNightlyPrice ?? 0) - requestNightlyPrice);
+  //   const bDiff = Math.abs((b.originalNightlyPrice ?? 0) - requestNightlyPrice);
+  //   return aDiff - bDiff;
+  // });
+
+  const closeMatches = fairListings.filter((listing) => {
+    const priceRatio = listing.originalNightlyPrice! / requestNightlyPrice;
+    return priceRatio >= closeRangeLower && priceRatio <= closeRangeUpper;
+  });
+
+  const midMatches = fairListings.filter((listing) => {
+    const priceRatio = listing.originalNightlyPrice! / requestNightlyPrice;
+    return priceRatio >= midRangeLower && priceRatio <= midRangeUpper;
+  });
+
+  const wideMatches = fairListings.filter((listing) => {
+    const priceRatio = listing.originalNightlyPrice! / requestNightlyPrice;
+    return priceRatio > midRangeUpper || priceRatio < midRangeLower;
+  });
+
+  if (closeMatches.length === 0 && midMatches.length === 0 && wideMatches.length === 0) {
+    // Case 1: No properties in the area
+    if (userFromRequest) {
+      void sendScheduledText({
+        to: userFromRequest.phoneNumber!,
+        content: `Tramona: Your request for ${options.location} for ${options.requestNightlyPrice} didn't yield any offers in the last 24 hours.
+        Consider submitting a new request with a different price range or a broader location to increase your chances of finding a match`,
+        sendAt: new Date(new Date().getTime() + 24 * 60 * 60 * 1000), // 24 hours from now
+      });
     }
-  } while (
-    fairListings.length < 1 &&
-    upperPercentage <= 170 &&
-    lowerPercentage >= 50
-  );
-
-  const listings = fairListings
-    .sort((a, b) => {
-      const aDiff = Math.abs(
-        (a.originalNightlyPrice ?? 0) - requestNightlyPrice,
-      );
-      const bDiff = Math.abs(
-        (b.originalNightlyPrice ?? 0) - requestNightlyPrice,
-      );
-      return aDiff - bDiff;
-    })
-    .slice(0, 10); // Grab up to 10 listings
+  } else if (closeMatches.length === 0 && midMatches.length === 0) {
+    // Case 2: No matches within the price range (all matches are 50% + outside)
+    if (userFromRequest) {
+      void sendScheduledText({
+        to: userFromRequest.phoneNumber!,
+        content: `Tramona: Thank you for submitting your request! \n Unfortunately, no hosts have submitted a match for your price.
+        But don’t worry—our team is actively searching for options that fit your needs. \n Is your budget flexible? We do have hosts with options in ${options.location}.
+        Adjust your request if you’d like to explore other possibilities. Thank you for choosing Tramona!`,
+        sendAt: new Date(new Date().getTime() + 24 * 60 * 60 * 1000), // 24 hours from now
+      });
+    }
+  } else if (closeMatches.length > 0 && closeMatches.length <= 3) {
+    // Case 3: 1-3 matches within 0-20%, but more in 20-50%
+    listings = closeMatches.concat(midMatches).slice(0, 10);
+  } else if (closeMatches.length === 0 && midMatches.length > 0) {
+    // Case 4: No close matches, but some in 20-50%
+    if (userFromRequest) {
+      void sendScheduledText({
+        to: userFromRequest.phoneNumber!,
+        content: `Tramona: Thank you for submitting your request, please see matches here: ${env.NEXTAUTH_URL}/requests! \n Unfortunately, no hosts have submitted a match for your price.
+        But don’t worry—our team is actively searching for options that fit your needs. \n In case your budget is flexible, some hosts send matches slightly out of your budget take a look here: ${env.NEXTAUTH_URL}/requests.
+        We’ll notify you as soon as we find the perfect stay. \n In the meantime, feel free to adjust your request if you’d like to explore other possibilities. Thank you for choosing Tramona!`,
+        sendAt: new Date(new Date().getTime() + 24 * 60 * 60 * 1000), // 24 hours from now
+      });
+    }
+    listings = midMatches.slice(0, 10); // Send 20-50% matches
+  } else if (closeMatches.length > 3) {
+    // Case 5: 4 or more close matches (0-20%)
+    listings = closeMatches.slice(0, 10); // Send 0-20% matches
+  }
 
   if (listings.length > 0) {
     await db.transaction(async (trx) => {
