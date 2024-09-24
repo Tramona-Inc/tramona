@@ -15,7 +15,8 @@ import {
 } from "@/utils/utils";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-
+import AvatarDropdown from "@/components/_common/Layout/header/AvatarDropdown";
+import RequestGroupAvatars from "@/components/requests/RequestGroupAvatars";
 // Define an enum for trip statuses
 enum TripStatus {
   Booked = "Booked",
@@ -41,6 +42,10 @@ export default function TripCard({ trip }: { trip: Trip }) {
     <Card className="my-6 h-auto w-full max-w-sm whitespace-nowrap border-2">
       <CardHeader>
         <CardTitle className="flex justify-between">
+          {/* <RequestGroupAvatars
+            request={trip.offer?.request.}
+            isAdminDashboard="admin"
+          /> */}
           {trip.group.owner.name}
           <Badge variant={statusColor}>{tripStatus}</Badge>
         </CardTitle>
