@@ -76,6 +76,7 @@ const propertyTypeMapping: Record<string, PropertyType> = {
   Suite: "Guest Suite",
   Apts: "Apartment",
   "Hotel Room": "Hotel",
+  Bungalow: "Bungalow",
   Other: "Other",
 };
 
