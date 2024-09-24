@@ -18,6 +18,7 @@ import {
   validateHostDiscountReferral,
 } from "@/utils/webhook-functions/referral-utils";
 import { createSetupIntent } from "@/utils/webhook-functions/stripe-utils";
+import { columns } from "../../components/admin/view-recent-host/table/columns";
 
 // ! Necessary for stripe
 export const config = {
@@ -108,12 +109,15 @@ export default async function webhook(
 
             //lets test with out the propertyID
             const offer = await db.query.offers.findFirst({
-              with: { request: true },
+              with: {
+                request: { columns: { latLngPoint: false } },
+              },
               where: eq(
                 offers.id,
                 parseInt(paymentIntentSucceeded.metadata.offer_id!),
               ),
             });
+            console.log(offer);
 
             const currentProperty = await db.query.properties.findFirst({
               where: eq(
@@ -123,6 +127,7 @@ export default async function webhook(
             });
 
             //<------- Setup Intent for future charge ---->
+
             await createSetupIntent({
               customerId: user!.stripeCustomerId!,
               paymentMethodId: paymentIntentSucceeded.payment_method!,

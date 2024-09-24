@@ -61,12 +61,12 @@ export const miscRouter = createTRPCRouter({
     .query(async ({ input }) => {
       const price = (await fetch(
         `https://${env.RAPIDAPI_HOST}/search-location?` +
-        new URLSearchParams({
-          location: input.location,
-          checkin: format(input.checkIn, "yyyy-MM-dd"),
-          checkout: format(input.checkOut, "yyyy-MM-dd"),
-          adults: input.numGuests.toString(),
-        }).toString(),
+          new URLSearchParams({
+            location: input.location,
+            checkin: format(input.checkIn, "yyyy-MM-dd"),
+            checkout: format(input.checkOut, "yyyy-MM-dd"),
+            adults: input.numGuests.toString(),
+          }).toString(),
         {
           method: "GET",
           headers: {
@@ -84,13 +84,12 @@ export const miscRouter = createTRPCRouter({
       const averageNightlyPrice =
         Array.isArray(price.results) && price.results.length > 0
           ? price.results.reduce((acc, listing) => {
-            return acc + listing.price.rate;
-          }, 0) / price.results.length
+              return acc + listing.price.rate;
+            }, 0) / price.results.length
           : 0;
 
       return averageNightlyPrice;
     }),
-
 
   scrapeAirbnbLink: publicProcedure
     .input(
@@ -119,7 +118,6 @@ export const miscRouter = createTRPCRouter({
       const imageUrl = $('meta[property="og:image"]').attr("content");
 
       const pageTitle = $("title").text();
-
       if (!title || !description || !imageUrl || !pageTitle) {
         return { status: "failed to scrape" } as const;
       }
@@ -140,7 +138,7 @@ export const miscRouter = createTRPCRouter({
       if (!location) {
         return { status: "failed to extract city" } as const;
       }
-
+      console.log(title, description, imageUrl, location, price);
       return {
         status: "success",
         data: { title, description, imageUrl, location, price },
