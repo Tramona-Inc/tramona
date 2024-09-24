@@ -530,13 +530,17 @@ export async function handleRequestSubmission(
               numGuests: input.numGuests,
             },
           });
+          console.log('in da requests router and just scraped price', airbnbTotalPrice)
 
           const airbnbNightlyPrice = airbnbTotalPrice / numNights;
+          console.log('airbnb nightly price', airbnbNightlyPrice)
+          console.log('requested nightly price', requestedNightlyPrice)
           const percentOff =
             ((airbnbNightlyPrice - requestedNightlyPrice) /
               airbnbNightlyPrice) *
             100;
 
+          console.log('percent off', percentOff)
           if (percentOff <= (propertyDetails.autoOfferMaxPercentOff ?? 5)) {
             await tx.insert(offers).values({
               requestId: request.id,
@@ -549,7 +553,7 @@ export async function handleRequestSubmission(
                     hostMarkup: HOST_MARKUP,
                     numNights,
                   }),
-                ) * 100,
+                ),
               travelerOfferedPrice:
                 parseFloat(
                   getTravelerOfferedPrice({
@@ -557,7 +561,7 @@ export async function handleRequestSubmission(
                     travelerMarkup: TRAVELER__MARKUP,
                     numNights,
                   }),
-                ) * 100,
+                ),
               checkIn: input.checkIn,
               checkOut: input.checkOut,
             });
