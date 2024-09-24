@@ -89,7 +89,7 @@ export function RequestCardOfferPreviews({
                     <div className="flex items-end justify-between gap-1">
                       <p className="line-clamp-1 font-bold">
                         <span className="text-lg/none text-foreground">
-                          {formatCurrency(offerNightlyPrice)}
+                          {formatCurrency(offerNightlyPrice).split(".")[0]}
                         </span>
                         /night
                       </p>

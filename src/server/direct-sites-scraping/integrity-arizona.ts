@@ -5,7 +5,7 @@ import {
   ALL_PROPERTY_TYPES,
   ListingSiteName,
 } from "@/server/db/schema/common";
-import { type Review } from "@/server/db/schema";
+import { NewReview, type Review } from "@/server/db/schema";
 import { getNumNights, parseHTML } from "@/utils/utils";
 import { ScrapedListing } from "@/server/direct-sites-scraping";
 import { axiosWithRetry } from "@/server/server-utils";
@@ -84,14 +84,16 @@ const reviewSchema = z.object({
 });
 type IntegrityArizonaReviewInput = z.infer<typeof reviewSchema>;
 
-const mapToReview = (validatedData: IntegrityArizonaReviewInput): Review[] => {
+const mapToReview = (
+  validatedData: IntegrityArizonaReviewInput,
+): NewReview[] => {
   return validatedData.data.comments.map((comment) => ({
     name: `${comment.first_name} ${comment.last_name}`,
-    profilePic: "",
     review: comment.comments,
     rating: comment.points,
   }));
 };
+
 // Function to map validated data to NewProperty
 const mapToScrapedListing = (
   validatedData: IntegrityArizonaPropertyInput,
@@ -157,24 +159,22 @@ export const arizonaScraper: DirectSiteScraper = async ({
   const yearEnd = checkOut.getFullYear().toString();
 
   let locationCode = "";
-  if (location) {
-    const formattedLocation = location.split(",")[0];
-    switch (formattedLocation) {
-      case "Parker Strip":
-        locationCode = "20690";
-        break;
-      case "Lake Havasu":
-        locationCode = "20691";
-        break;
-      default:
-        console.error(
-          "AZ scraper: Location is not recognized: ",
-          location,
-          " ; returning empty array",
-        );
-        return [];
-    }
+
+  const formattedLocation = location.split(",")[0];
+  switch (formattedLocation) {
+    case "Parker Strip":
+      locationCode = "20690";
+      break;
+    case "Lake Havasu":
+      locationCode = "20691";
+      break;
+    default:
+      console.log(
+        `AZ scraper: Location is not recognized, returning empty array: ${location}`,
+      );
+      return [];
   }
+
   const locationParam = location
     ? `%22location_area_id%22:${locationCode},`
     : "";
@@ -186,11 +186,7 @@ export const arizonaScraper: DirectSiteScraper = async ({
     .then((data) => propertySchema.parse(data))
     .then((validatedData) =>
       mapToScrapedListing(validatedData, checkIn, checkOut, url),
-    )
-    .catch((error) => {
-      console.error("Error scraping Arizona: ", error);
-      return [];
-    });
+    );
 
   if (requestNightlyPrice) {
     properties = properties.filter((p) => {
@@ -202,30 +198,26 @@ export const arizonaScraper: DirectSiteScraper = async ({
   }
 
   // Fetch and append reviews for each property
-  try {
-    const propertiesWithReviews = await Promise.all(
-      properties.map(async (p) => {
-        const reviewUrl = `https://integrityarizonavacationrentals.com/wp-admin/admin-ajax.php?action=streamlinecore-api-request&params=%7B%22methodName%22:%22GetAllFeedback%22,%22params%22:%7B%22unit_id%22:${p.originalListingId},%22order_by%22:%22newest_first%22,%22show_booking_dates%22:1,%22madetype_id%22:2%7D%7D`;
-        // console.log("reviewScrapedUrl: ", reviewUrl)
-        const reviews = await axiosWithRetry
-          .get<string>(reviewUrl, { timeout: 30000 })
-          .then((response) => response.data)
-          .then((data) => reviewSchema.parse(data))
-          .then((validatedData) => mapToReview(validatedData));
 
-        return {
-          ...p,
-          reviews: reviews,
-        };
-      }),
-    );
+  const propertiesWithReviews = await Promise.all(
+    properties.map(async (p) => {
+      const reviewUrl = `https://integrityarizonavacationrentals.com/wp-admin/admin-ajax.php?action=streamlinecore-api-request&params=%7B%22methodName%22:%22GetAllFeedback%22,%22params%22:%7B%22unit_id%22:${p.originalListingId},%22order_by%22:%22newest_first%22,%22show_booking_dates%22:1,%22madetype_id%22:2%7D%7D`;
+      // console.log("reviewScrapedUrl: ", reviewUrl)
+      const reviews = await axiosWithRetry
+        .get<string>(reviewUrl, { timeout: 30000 })
+        .then((response) => response.data)
+        .then((data) => reviewSchema.parse(data))
+        .then((validatedData) => mapToReview(validatedData));
 
-    // console.log(propertiesWithReviews[0]);
-    return propertiesWithReviews;
-  } catch (error) {
-    console.error("Error fetching reviews for Arizona: ", error);
-    return [];
-  }
+      return {
+        ...p,
+        reviews: reviews,
+      };
+    }),
+  );
+
+  // console.log(propertiesWithReviews[0]);
+  return propertiesWithReviews;
 };
 
 export const arizonaSubScraper: SubsequentScraper = async ({

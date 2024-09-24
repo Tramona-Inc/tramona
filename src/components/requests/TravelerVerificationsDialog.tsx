@@ -79,19 +79,21 @@ export function TravelerVerificationsDialog({
       </Dialog>
       <div className="flex flex-row items-center">
         <p className="mr-2">&middot;</p>
-        {verificationList.emailVerified &&
+        {
+          /*verificationList.emailVerified &&
         verificationList.censoredPhoneNumber &&
-        verificationList.dateOfBirth ? (
-          <div className="flex items-center gap-1 text-teal-800">
-            <BadgeCheck size={16} />
-            <p>Verified</p>
-          </div>
-        ) : (
-          <div className="flex items-center gap-1 text-red-500">
-            <BadgeX size={16} />
-            <p>Not verified</p>
-          </div>
-        )}
+        verificationList.dateOfBirth*/ true ? (
+            <div className="flex items-center gap-1 text-teal-800">
+              <BadgeCheck size={16} />
+              <p>Verified</p>
+            </div>
+          ) : (
+            <div className="flex items-center gap-1 text-red-500">
+              <BadgeX size={16} />
+              <p>Not verified</p>
+            </div>
+          )
+        }
       </div>
     </>
   );

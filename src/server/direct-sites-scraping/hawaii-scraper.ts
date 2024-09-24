@@ -73,9 +73,9 @@ const PropertySchema = z.object({
   is_rc_core_lodging_product$occ_total: z.number(),
   ss_vrweb_default_image: z.string(),
   propertyType: z.custom<PropertyType>(),
-  sm_nid$rc_core_term_city_type$name: z.array(z.string()), // city
+  sm_nid$rc_core_term_city_type$name: z.array(z.string()).nonempty(), // city
   sm_nid$rc_core_term_general_amenities$name: z.array(z.string()),
-  sm_nid$rc_core_term_type$name: z.array(z.string()),
+  sm_nid$rc_core_term_type$name: z.array(z.string()).optional(),
   is_eid: z.number(),
   sm_nid$rc_core_term_bed_and_bathroom$name: z.array(z.string()).optional(),
   sm_nid$rc_core_term_community$name: z.array(z.string()).optional(),
@@ -149,7 +149,10 @@ function isWithinHawaii(lat: number, lng: number): boolean {
   );
 }
 
-function mapPropertyType(scrapedType: string): PropertyType {
+function mapPropertyType(scrapedType: string | undefined): PropertyType {
+  if (!scrapedType) {
+    return "Other";
+  }
   const normalizedType = scrapedType.trim().toLowerCase();
   for (const [key, value] of Object.entries(hawaiiPropertyTypes)) {
     if (normalizedType.includes(key.toLowerCase())) {
@@ -221,55 +224,50 @@ async function scrapePropertyPage(url: string): Promise<{
   description: string;
   address: string;
 }> {
-  try {
-    const response = await axios.get(url, { httpsAgent: proxyAgent });
-    const $ = cheerio.load(response.data as string);
+  const response = await axios.get(url, { httpsAgent: proxyAgent });
+  const $ = cheerio.load(response.data as string);
 
-    const reviews: Review[] = [];
-    $(".rc-core-item-review").each((_, element) => {
-      const fullText = $(element).find("b").text().trim();
+  const reviews: Review[] = [];
+  $(".rc-core-item-review").each((_, element) => {
+    const fullText = $(element).find("b").text().trim();
 
-      const name: string =
-        fullText.match(/Reviewed on .*? by\s*(.*?)(?=,|\s*$)/)?.[1]?.trim() ??
-        "Anonymous";
+    const name: string =
+      fullText.match(/Reviewed on .*? by\s*(.*?)(?=,|\s*$)/)?.[1]?.trim() ??
+      "Anonymous";
 
-      const ratingStars = $(element).find(
-        ".rc-core-review-scores > div:first-child .rc-item-rating-stars .on",
-      ).length;
+    const ratingStars = $(element).find(
+      ".rc-core-review-scores > div:first-child .rc-item-rating-stars .on",
+    ).length;
 
-      const reviewHtml =
-        $(element).find(".rc-core-review-comment p").html() ?? "";
-      const reviewText = processReviewText(reviewHtml);
+    const reviewHtml =
+      $(element).find(".rc-core-review-comment p").html() ?? "";
+    const reviewText = processReviewText(reviewHtml);
 
-      reviews.push({
-        name,
-        profilePic: "",
-        rating: ratingStars,
-        review: reviewText || "No review text available",
-      });
+    reviews.push({
+      name,
+      profilePic: "",
+      rating: ratingStars,
+      review: reviewText || "No review text available",
     });
+  });
 
-    const images: string[] = [];
+  const images: string[] = [];
 
-    $("img.rsTmb").each((_, element) => {
-      const src = $(element).attr("src");
-      if (src) {
-        images.push(src);
-      }
-    });
+  $("img.rsTmb").each((_, element) => {
+    const src = $(element).attr("src");
+    if (src) {
+      images.push(src);
+    }
+  });
 
-    const description =
-      $(".field.field-name-body").text().trim() || "No description available";
+  const description =
+    $(".field.field-name-body").text().trim() || "No description available";
 
-    const directionsLinkHtml =
-      $("a.vrweb-driving-directions").parent().html() ?? "";
-    const address = extractAddressFromDirectionsLink(directionsLinkHtml);
+  const directionsLinkHtml =
+    $("a.vrweb-driving-directions").parent().html() ?? "";
+  const address = extractAddressFromDirectionsLink(directionsLinkHtml);
 
-    return { reviews, images, description, address };
-  } catch (error) {
-    console.error(`Error scraping property page ${url}:`, error);
-    return { reviews: [], images: [], description: "", address: "" };
-  }
+  return { reviews, images, description, address };
 }
 
 function processReviewText(text: string): string {
@@ -346,32 +344,27 @@ async function scrapeFinalPrice(
     buy_text: "Book Now",
   });
 
-  try {
-    const response = await axios.get(`${url}?${params.toString()}`, {
-      httpsAgent: proxyAgent,
-      headers: {
-        accept: "application/json, text/javascript, */*; q=0.01",
-        "accept-language": "en-US,en;q=0.9",
-        "sec-ch-ua":
-          '"Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"',
-        "sec-ch-ua-mobile": "?0",
-        "sec-ch-ua-platform": '"macOS"',
-        "x-requested-with": "XMLHttpRequest",
-        Referer:
-          "https://www.cbislandvacations.com/hawaii-vacation-rentals/palms-wailea-206",
-        "Referrer-Policy": "strict-origin-when-cross-origin",
-      },
-    });
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    if (response.data && response.data.status === 1 && response.data.content) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
-      return extractTotalFromContent(response.data.content);
-    } else {
-      console.error("Unexpected API response format:", response.data);
-      return -1;
-    }
-  } catch (error) {
-    console.error(`Error fetching price for property ${eid}:`, error);
+  const response = await axios.get(`${url}?${params.toString()}`, {
+    httpsAgent: proxyAgent,
+    headers: {
+      accept: "application/json, text/javascript, */*; q=0.01",
+      "accept-language": "en-US,en;q=0.9",
+      "sec-ch-ua":
+        '"Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"',
+      "sec-ch-ua-mobile": "?0",
+      "sec-ch-ua-platform": '"macOS"',
+      "x-requested-with": "XMLHttpRequest",
+      Referer:
+        "https://www.cbislandvacations.com/hawaii-vacation-rentals/palms-wailea-206",
+      "Referrer-Policy": "strict-origin-when-cross-origin",
+    },
+  });
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  if (response.data && response.data.status === 1 && response.data.content) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+    return extractTotalFromContent(response.data.content);
+  } else {
+    console.error("Unexpected API response format:", response.data);
     return -1;
   }
 }
@@ -404,30 +397,29 @@ const fetchAvailablePropertyEids = async (
 
   const url = `${filteredPropertiesUrl}?${params.toString()}`;
 
-  try {
-    const response = await axios.get(url, { httpsAgent: proxyAgent });
+  const response = await axios.get(url, { httpsAgent: proxyAgent });
 
-    if (Array.isArray(response.data)) {
-      const uniqueEids = new Set<string>();
-
-      response.data.forEach((item: unknown) => {
-        if (isPriceFilteredProperty(item)) {
-          uniqueEids.add(item.eid.toString());
-        } else {
-          console.error(
-            "Item doesn't match PriceFilteredProperty structure:",
-            item,
-          );
-        }
-      });
-
-      const allUniqueEids = Array.from(uniqueEids);
-      return allUniqueEids;
-    } else return [];
-  } catch (error) {
-    console.error("Error fetching available properties:", error);
-    return [];
+  if (!Array.isArray(response.data)) {
+    throw new Error(
+      "Unexpected response format: expected array, got " + typeof response.data,
+    );
   }
+
+  const uniqueEids = new Set<string>();
+
+  response.data.forEach((item: unknown) => {
+    if (isPriceFilteredProperty(item)) {
+      uniqueEids.add(item.eid.toString());
+    } else {
+      console.error(
+        "Item doesn't match PriceFilteredProperty structure:",
+        item,
+      );
+    }
+  });
+
+  const allUniqueEids = Array.from(uniqueEids);
+  return allUniqueEids;
 };
 
 type CBIslandVacationsPropertyInput = z.infer<typeof PropertySchema>;
@@ -508,9 +500,9 @@ const mapToScrapedListing = (
     day(s). You will find basic starter supplies. Additional supplies are the guest's
     responsibility unless other arrangements are made.
     Thank you for choosing to stay with us!`,
-    propertyType: mapPropertyType(prop.sm_nid$rc_core_term_type$name[0] ?? ""),
+    propertyType: mapPropertyType(prop.sm_nid$rc_core_term_type$name?.[0]),
     address: address,
-    city: prop.sm_nid$rc_core_term_city_type$name[0] ?? "",
+    city: prop.sm_nid$rc_core_term_city_type$name[0],
     latLngPoint: {
       lat: prop.fs_nid$field_location$latitude,
       lng: prop.fs_nid$field_location$longitude,
@@ -565,18 +557,15 @@ export const cbIslandVacationsScraper: DirectSiteScraper = async ({
   location,
   numGuests,
 }) => {
-  if (location) {
-    const coordinates = await getCoordinates(location);
-    if (coordinates.location) {
-      const { lat, lng } = coordinates.location;
-      if (!isWithinHawaii(lat, lng)) {
-        console.log("Location is outside of Hawaii. Returning no properties.");
-        return [];
-      }
-    } else {
-      console.log("Could not get coordinates for the provided location.");
-      return [];
-    }
+  const coordinates = await getCoordinates(location);
+  if (!coordinates.location) {
+    throw new Error(`Could not get coordinates for the location: ${location}`);
+  }
+
+  const { lat, lng } = coordinates.location;
+  if (!isWithinHawaii(lat, lng)) {
+    console.log("Location is outside of Hawaii. Returning no properties.");
+    return [];
   }
 
   const propertyEids = await fetchAvailablePropertyEids(

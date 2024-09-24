@@ -42,18 +42,10 @@ export default function DeleteRequestDialog({
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button
-            onClick={() => setIsOpen(false)}
-            variant="outline"
-            className="rounded-full"
-          >
+          <Button onClick={() => setIsOpen(false)} variant="secondary">
             Cancel
           </Button>
-          <Button
-            onClick={() => deleteRequest()}
-            disabled={mutation.isLoading}
-            className="rounded-full"
-          >
+          <Button onClick={() => deleteRequest()} disabled={mutation.isLoading}>
             Delete
           </Button>
         </DialogFooter>

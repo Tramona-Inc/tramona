@@ -8,12 +8,21 @@ import {
   trips,
   superhogErrors,
   superhogActionOnTrips,
+  properties,
 } from "@/server/db/schema";
 
 import { eq, isNotNull } from "drizzle-orm";
 import { formatDateYearMonthDay } from "@/utils/utils";
 import { getCountryISO } from "@/server/google-maps";
 import { sendSlackMessage } from "@/server/slack";
+import type { Trip, SuperhogRequests, Property } from "@/server/db/schema";
+type SuperhogRequestWithoutProperty = Trip & {
+  superhogRequests: SuperhogRequests;
+};
+
+export type SuperhogRequestWithProperty = SuperhogRequestWithoutProperty & {
+  property?: Property; // Replace PropertyType with the actual type of the property
+};
 export interface ReservationInterface {
   id: number;
   checkIn: string;
@@ -214,14 +223,9 @@ export const superhogRouter = createTRPCRouter({
               columns: {
                 address: true,
                 city: true,
-                latLngPoint: true,
-                // latitude: true,
-                // longitude: true,
               },
             },
-            user: {
-              columns: { name: true, firstName: true, lastName: true },
-            },
+            user: {},
           },
         },
       },
@@ -234,10 +238,19 @@ export const superhogRouter = createTRPCRouter({
 
     const allReservations = await Promise.all(
       nonCancelledAllSuperhogRequestWithTrips.map(async (reservation) => {
-        const countryISO = await getCountryISO({
-          lat: reservation.superhogRequests!.property.latLngPoint.y,
-          lng: reservation.superhogRequests!.property.latLngPoint.x,
+        //sepeate query to get latlng
+        const latLngPoint = await db.query.properties.findFirst({
+          where: eq(properties.id, reservation.propertyId),
+          columns: {
+            latLngPoint: true,
+          },
         });
+
+        const countryISO = await getCountryISO({
+          lat: latLngPoint!.latLngPoint.y,
+          lng: latLngPoint!.latLngPoint.x,
+        });
+
         return {
           id: reservation.id,
           checkIn: formatDateYearMonthDay(reservation.checkIn).toString(),

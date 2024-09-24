@@ -21,27 +21,33 @@ import { arizonaScraper, arizonaSubScraper } from "./integrity-arizona";
 import { redawningScraper } from "./redawning";
 
 import { getCoordinates } from "../google-maps";
-import { eq, and } from "drizzle-orm";
+import { eq, and, inArray } from "drizzle-orm";
 import {
   createRandomMarkupEightToFourteenPercent,
+  formatCurrency,
   getNumNights,
 } from "@/utils/utils";
 import { DIRECTLISTINGMARKUP } from "@/utils/constants";
-import { createLatLngGISPoint, sendText } from "@/server/server-utils";
+import { createLatLngGISPoint, sendScheduledText } from "@/server/server-utils";
 import { cleanbnbScraper, cleanbnbSubScraper } from "./cleanbnb-scrape";
-import { airbnbScraper } from "../external-listings-scraping/airbnbScraper";
 import { log } from "@/pages/api/script";
+import { env } from "@/env";
+import { addHours } from "date-fns";
 
-export type DirectSiteScraper = (options: {
+type ScraperOptions = {
+  location: string;
   checkIn: Date;
   checkOut: Date;
-  requestNightlyPrice?: number; // when the scraper is used by traveler request page
+  requestNightlyPrice: number; // when the scraper is used by traveler request page
   requestId?: number; // when the scraper is used by traveler request page
-  location?: string;
   latitude?: number;
   longitude?: number;
   numGuests?: number;
-}) => Promise<ScrapedListing[]>;
+};
+
+export type DirectSiteScraper = (
+  options: ScraperOptions,
+) => Promise<ScrapedListing[]>;
 
 export type ScrapedListing = Omit<NewProperty, "latLngPoint"> & {
   originalListingUrl: string; // enforce that it's non-null
@@ -64,12 +70,7 @@ export type SubScrapedResult = {
   availabilityCheckedAt: Date;
 };
 
-export type NamedDirectSiteScraper = {
-  name: string;
-  scraper: DirectSiteScraper;
-};
-
-export const directSiteScrapers: NamedDirectSiteScraper[] = [
+export const directSiteScrapers = [
   // add more scrapers here
   { name: "evolveVacationRentalScraper", scraper: evolveVacationRentalScraper },
   { name: "cleanbnbScraper", scraper: cleanbnbScraper },
@@ -78,7 +79,7 @@ export const directSiteScrapers: NamedDirectSiteScraper[] = [
   { name: "redawningScraper", scraper: redawningScraper },
   { name: "casamundoScraper", scraper: casamundoScraper },
   // { name: "airbnbScraper", scraper: airbnbScraper },
-];
+] as const;
 
 // Helper function to filter out fields not in NewProperty
 const filterNewPropertyFields = (listing: ScrapedListing): NewProperty => {
@@ -89,32 +90,50 @@ const filterNewPropertyFields = (listing: ScrapedListing): NewProperty => {
 };
 
 // handle the scraped properties and reviews
-export const scrapeDirectListings = async (options: {
-  checkIn: Date;
-  checkOut: Date;
-  requestNightlyPrice?: number;
-  requestId?: number;
-  location?: string;
-  latitude?: number;
-  longitude?: number;
-  numGuests?: number;
-}) => {
+export const scrapeDirectListings = async (options: ScraperOptions) => {
   const { requestNightlyPrice } = options; // in cents
 
-  if (!requestNightlyPrice) {
-    throw new Error("requestNightlyPrice is required");
+  const scraperResults = await Promise.allSettled(
+    directSiteScrapers.map((s) => {
+      log(`Starting ${s.name} for request ${options.requestId}`);
+      return s.scraper(options);
+    }),
+  );
+
+  const rejectedResults = scraperResults.filter(
+    (r): r is PromiseRejectedResult => r.status === "rejected",
+  );
+
+  const errorsWithScraperNames = rejectedResults.map(({ reason }, i) => {
+    const scraper = directSiteScrapers[i];
+    return `${scraper?.name} errored:\n\n${reason instanceof Error ? reason.stack : reason}`;
+  });
+
+  if (errorsWithScraperNames.length > 0) {
+    log(
+      `${rejectedResults.length} scrapers errored for request ${options.requestId}: ${errorsWithScraperNames.join("\n\n")}`,
+    );
+  } else {
+    log(`All scrapers completed successfully for request ${options.requestId}`);
   }
 
-  const flatListings = await Promise.all(
-    directSiteScrapers.map((s) =>
-      s.scraper(options).catch((e) => {
-        log(`error in scraper: ${s.name}, ${e}`);
-        return [];
-      }),
-    ),
-  ).then((r) => r.flat());
+  if (rejectedResults.length === directSiteScrapers.length) {
+    throw new Error("All scrapers errored");
+  }
+
+  const flatListings = scraperResults.flatMap((r) =>
+    r.status === "fulfilled" ? r.value : [],
+  );
 
   // todo: handle if all the scrapers error (dont send out text)
+  for (const listing of flatListings) {
+    console.log(
+      "Listing: ",
+      listing.originalListingUrl,
+      listing.originalNightlyPrice,
+      listing.originalListingPlatform,
+    );
+  }
 
   const userFromRequest = await db.query.requests
     .findFirst({
@@ -133,76 +152,145 @@ export const scrapeDirectListings = async (options: {
     })
     .then((res) => res?.madeByGroup.owner);
 
-  console.log("DONE SCRAPING, flatListings.length: ", flatListings.length);
-  if (flatListings.length === 0 && userFromRequest) {
-    await sendText({
-      to: userFromRequest.phoneNumber!,
-      content: `Tramona: We’re not live in ${options.location} just yet, but we’re working on it! We’ll send you an email as soon as we launch there.
-Are you a host in ${options.location}? Sign up here tramona.com/host-onboarding”`,
-    });
-  }
-  for (const listing of flatListings) {
-    console.log(
-      "listing: ",
-      listing.originalListingUrl,
-      listing.originalNightlyPrice,
-      listing.originalListingPlatform,
-    );
-  }
+  const scrapedOffers = await db.query.offers.findMany({
+    where: and(eq(offers.requestId, options.requestId!)),
+    with: { property: { columns: { originalListingPlatform: true } } },
+  });
 
-  // dynamically expand the price range to find at least 1 listing between 50% - 170% of the requested price
-  let upperPercentage = 110;
-  let lowerPercentage = 80;
-  let fairListings;
-  do {
-    const lowerPrice = requestNightlyPrice * (lowerPercentage / 100);
-    const upperPrice = requestNightlyPrice * (upperPercentage / 100);
+  const scrapedOfferIds = scrapedOffers
+    .filter((o) => o.property.originalListingPlatform !== null)
+    .map((o) => o.id);
 
-    fairListings = flatListings.filter((listing) => {
-      return (
-        listing.originalNightlyPrice !== null &&
-        listing.originalNightlyPrice !== undefined &&
-        listing.originalNightlyPrice >= lowerPrice &&
-        listing.originalNightlyPrice <= upperPrice
-      );
-    });
-
-    if (
-      fairListings.length < 1 &&
-      upperPercentage <= 170 &&
-      lowerPercentage >= 50
-    ) {
-      upperPercentage += 20;
-      lowerPercentage -= 10;
-    }
-  } while (
-    fairListings.length < 1 &&
-    upperPercentage <= 170 &&
-    lowerPercentage >= 50
+  log(
+    `Scraped ${flatListings.length} listings for request ${options.requestId}, deleting ${scrapedOfferIds.length} old offers`,
   );
 
-  const listings = fairListings
-    .sort((a, b) => {
-      const aDiff = Math.abs(
-        (a.originalNightlyPrice ?? 0) - requestNightlyPrice,
-      );
-      const bDiff = Math.abs(
-        (b.originalNightlyPrice ?? 0) - requestNightlyPrice,
-      );
-      return aDiff - bDiff;
-    })
-    .slice(0, 10); // Grab up to 10 listings
+  await db.delete(offers).where(inArray(offers.id, scrapedOfferIds));
 
-  // For testing purposes (may be reused heavliy atm)
-  console.log("listings: ", listings.length);
-  listings.forEach((listing) => {
-    console.log(
-      "platform: ",
-      listing.originalListingPlatform,
-      "originalNightlyPrice: ",
-      listing.originalNightlyPrice,
+  //   if (flatListings.length === 0 && userFromRequest) {
+  //     await sendText({
+  //       to: userFromRequest.phoneNumber!,
+  //       content: `Tramona: We’re not live in ${options.location} just yet, but we’re working on it! We’ll send you an email as soon as we launch there.
+  // Are you a host in ${options.location}? Sign up here tramona.com/host-onboarding`,
+  //     });
+  //   }
+
+  // dynamically expand the price range to find at least 1 listing between 50% - 170% of the requested price
+  // let upperPercentage = 110;
+  // let lowerPercentage = 80;
+  // let fairListings;
+  // do {
+  //   const lowerPrice = requestNightlyPrice * (lowerPercentage / 100);
+  //   const upperPrice = requestNightlyPrice * (upperPercentage / 100);
+
+  //   fairListings = flatListings.filter((listing) => {
+  //     return (
+  //       listing.originalNightlyPrice !== null &&
+  //       listing.originalNightlyPrice !== undefined &&
+  //       listing.originalNightlyPrice >= lowerPrice &&
+  //       listing.originalNightlyPrice <= upperPrice
+  //     );
+  //   });
+
+  //   if (
+  //     fairListings.length < 1 &&
+  //     upperPercentage <= 170 &&
+  //     lowerPercentage >= 50
+  //   ) {
+  //     upperPercentage += 20;
+  //     lowerPercentage -= 10;
+  //   }
+  // } while (
+  //   fairListings.length < 1 &&
+  //   upperPercentage <= 170 &&
+  //   lowerPercentage >= 50
+  // );
+
+  // const listings = fairListings
+  //   .sort((a, b) => {
+  //     const aDiff = Math.abs(
+  //       (a.originalNightlyPrice ?? 0) - requestNightlyPrice,
+  //     );
+  //     const bDiff = Math.abs(
+  //       (b.originalNightlyPrice ?? 0) - requestNightlyPrice,
+  //     );
+  //     return aDiff - bDiff;
+  //   })
+  //   .slice(0, 10); // Grab up to 10 listings
+
+  let listings = [] as ScrapedListing[];
+
+  const fairListings = flatListings.filter((listing) => {
+    return (
+      listing.originalNightlyPrice !== null &&
+      listing.originalNightlyPrice !== undefined
     );
   });
+
+  // fairListings = fairListings.sort((a, b) => {
+  //   const aDiff = Math.abs((a.originalNightlyPrice ?? 0) - requestNightlyPrice);
+  //   const bDiff = Math.abs((b.originalNightlyPrice ?? 0) - requestNightlyPrice);
+  //   return aDiff - bDiff;
+  // });
+
+  function getCloseness(listing: ScrapedListing) {
+    const discountPercentage = Math.abs(
+      1 - listing.originalNightlyPrice! / requestNightlyPrice,
+    );
+
+    if (discountPercentage <= 0.2) return "close";
+    if (discountPercentage <= 0.5) return "mid";
+    return "wide";
+  }
+
+  const closeMatches = fairListings.filter((l) => getCloseness(l) === "close");
+  const midMatches = fairListings.filter((l) => getCloseness(l) === "mid");
+  const wideMatches = fairListings.filter((l) => getCloseness(l) === "wide");
+
+  if (
+    closeMatches.length === 0 &&
+    midMatches.length === 0 &&
+    wideMatches.length === 0
+  ) {
+    // Case 1: No properties in the area
+    if (userFromRequest) {
+      void sendScheduledText({
+        to: userFromRequest.phoneNumber!,
+        content: `Tramona: Your request for ${options.location} for ${formatCurrency(options.requestNightlyPrice)}/night didn't yield any offers in the last 24 hours.
+        Consider submitting a new request with a different price range or a broader location to increase your chances of finding a match`,
+        sendAt: addHours(new Date(), 24),
+      });
+    }
+  } else if (closeMatches.length === 0 && midMatches.length === 0) {
+    // Case 2: No matches within the price range (all matches are 50% + outside)
+    if (userFromRequest) {
+      void sendScheduledText({
+        to: userFromRequest.phoneNumber!,
+        content: `Tramona: Thank you for submitting your request! \n Unfortunately, no hosts have submitted a match for your price.
+        But don’t worry—our team is actively searching for options that fit your needs. \n Is your budget flexible? We do have hosts with options in ${options.location}.
+        Adjust your request if you’d like to explore other possibilities. Thank you for choosing Tramona!`,
+        sendAt: addHours(new Date(), 24),
+      });
+    }
+  } else if (closeMatches.length > 0 && closeMatches.length <= 3) {
+    // Case 3: 1-3 matches within 0-20%, but more in 20-50%
+    listings = closeMatches.concat(midMatches).slice(0, 10);
+  } else if (closeMatches.length === 0 && midMatches.length > 0) {
+    // Case 4: No close matches, but some in 20-50%
+    if (userFromRequest) {
+      void sendScheduledText({
+        to: userFromRequest.phoneNumber!,
+        content: `Tramona: Thank you for submitting your request! \n Unfortunately, no hosts have submitted a match for your price.
+        But don’t worry—our team is actively searching for options that fit your needs. \n In case your budget is flexible, some hosts sent matches slightly out of your budget take a look here: ${env.NEXTAUTH_URL}/requests.
+        We’ll notify you as soon as we find the perfect stay. \n In the meantime, feel free to adjust your request if you’d like to explore other possibilities. Thank you for choosing Tramona!`,
+        sendAt: addHours(new Date(), 24),
+      });
+    }
+    listings = midMatches.slice(0, 10); // Send 20-50% matches
+  } else if (closeMatches.length > 3) {
+    // Case 5: 4 or more close matches (0-20%)
+    listings = closeMatches.slice(0, 10); // Send 0-20% matches
+  }
 
   if (listings.length > 0) {
     await db.transaction(async (trx) => {
@@ -222,7 +310,7 @@ Are you a host in ${options.location}? Sign up here tramona.com/host-onboarding�
           existingOriginalPropertyIdList[0]?.id;
 
         let formattedlatLngPoint = null;
-        if (listing.latLngPoint?.lat && listing.latLngPoint.lng) {
+        if (listing.latLngPoint) {
           formattedlatLngPoint = createLatLngGISPoint({
             lat: listing.latLngPoint.lat,
             lng: listing.latLngPoint.lng,
@@ -306,7 +394,8 @@ Are you a host in ${options.location}? Sign up here tramona.com/host-onboarding�
                 createRandomMarkupEightToFourteenPercent(),
               ...(options.requestId && { requestId: options.requestId }),
             };
-            const newOfferId = await trx
+
+            await trx
               .insert(offers)
               .values(newOffer)
               .returning({ id: offers.id });
@@ -393,7 +482,9 @@ export const subsequentScrape = async (options: { offerIds: number[] }) => {
       const offer = await trx.query.offers.findFirst({
         where: eq(offers.id, offerId),
         with: {
-          property: true,
+          property: {
+            columns: { originalListingId: true, originalListingPlatform: true },
+          },
         },
       });
 
