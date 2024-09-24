@@ -215,7 +215,7 @@ export default async function webhook(
               }
               // ------ Send Slack When trip is booked ------
               await sendSlackMessage({
-                isProductionOnly: false,
+                isProductionOnly: true,
                 channel: "tramona-bot",
                 text: [
                   `*${user?.email} just booked a trip: ${currentProperty?.name}*`,
