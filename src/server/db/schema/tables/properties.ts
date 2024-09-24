@@ -257,7 +257,7 @@ export const properties = pgTable(
     // latitude: doublePrecision("latitude").notNull(),
     // longitude: doublePrecision("longitude").notNull(),
     city: varchar("city", { length: 255 }).notNull(),
-    originalListingUrl: varchar("url"),
+    originalListingUrl: varchar("original_listing_url"),
     checkInInfo: varchar("check_in_info"),
     checkInTime: time("check_in_time"),
     checkOutTime: time("check_out_time"),

@@ -698,7 +698,11 @@ export function getOfferDiscountPercentage(offer: {
 
   //3.) check the if the offer is by a real host and is listed on airbnb
   if (offer.datePriceFromAirbnb) {
-    return getDiscountPercentage(offer.datePriceFromAirbnb, offerNightlyPrice);
+    console.log(offer.datePriceFromAirbnb, offer.travelerOfferedPrice);
+    return getDiscountPercentage(
+      offer.datePriceFromAirbnb,
+      offer.travelerOfferedPrice,
+    );
   }
   //4.)for other cases random number
   else return Math.round(8 + 4 * mulberry32(offer.createdAt.getTime())); // random number between 8 and 12, deterministic based on offer creation time

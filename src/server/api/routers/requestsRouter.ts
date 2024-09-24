@@ -91,6 +91,7 @@ export const requestsRouter = createTRPCRouter({
                   numBedrooms: true,
                   numBathrooms: true,
                   originalNightlyPrice: true,
+                  originalListingUrl: true,
                   hostName: true,
                   hostProfilePic: true,
                   bookOnAirbnb: true,

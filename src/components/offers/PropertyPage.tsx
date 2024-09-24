@@ -261,7 +261,11 @@ export default function PropertyPage({
               <UserAvatar
                 name={hostName}
                 email={property.host?.email}
-                image={"/assets/images/tramona.svg"}
+                image={
+                  property.host?.image ??
+                  property.hostProfilePic ??
+                  "/assets/images/tramona.svg"
+                }
               />
               <div className="-space-y-1">
                 <p className="text-sm text-muted-foreground">Hosted by</p>
