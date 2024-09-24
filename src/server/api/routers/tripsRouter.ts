@@ -125,38 +125,39 @@ export const tripsRouter = createTRPCRouter({
     .query(async ({ input }) => {
       const trip = await db.query.trips.findFirst({
         where: eq(trips.id, input.tripId),
+      });
+
+      const propertyForTrip = await db.query.properties.findFirst({
+        where: eq(properties.id, trip!.propertyId),
+        columns: {
+          latLngPoint: true,
+          id: true,
+          imageUrls: true,
+          city: true,
+          name: true,
+          checkInInfo: true,
+          address: true,
+          cancellationPolicy: true,
+          checkInTime: true,
+          checkOutTime: true,
+        },
         with: {
-          property: {
-            columns: {
-              latLngPoint: true,
-              id: true,
-              imageUrls: true,
-              city: true,
-              name: true,
-              checkInInfo: true,
-              address: true,
-              cancellationPolicy: true,
-              checkInTime: true,
-              checkOutTime: true,
-            },
-            with: {
-              host: {
-                columns: { name: true, email: true, image: true, id: true },
-              },
-            },
+          host: {
+            columns: { name: true, email: true, image: true, id: true },
           },
         },
       });
+      if (!trip || !propertyForTrip) throw new TRPCError({ code: "NOT_FOUND" });
 
-      if (!trip) throw new TRPCError({ code: "NOT_FOUND" });
+      const fullTrip = { ...trip, property: propertyForTrip };
 
       const coordinates = {
         location: {
-          lat: trip.property.latLngPoint.y,
-          lng: trip.property.latLngPoint.x,
+          lat: fullTrip.property.latLngPoint.y,
+          lng: fullTrip.property.latLngPoint.x,
         },
       };
-      return { trip, coordinates };
+      return { trip: fullTrip, coordinates };
     }),
   getMyTripsPageDetailsByPaymentIntentId: protectedProcedure
     .input(z.object({ paymentIntentId: z.string() }))

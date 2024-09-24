@@ -16,6 +16,7 @@ interface RequestSubmittedDialogProps {
   showConfetti: boolean;
   madeByGroupId: number | undefined;
   location?: string;
+  isRequestsPage?: boolean;
 }
 
 const RequestSubmittedDialog: React.FC<RequestSubmittedDialogProps> = ({
@@ -24,6 +25,7 @@ const RequestSubmittedDialog: React.FC<RequestSubmittedDialogProps> = ({
   showConfetti,
   madeByGroupId,
   location,
+  isRequestsPage = false,
 }) => {
   // Watch the specific data entry for the current tab
   // Now we can directly access location or use a fallback
@@ -88,11 +90,13 @@ const RequestSubmittedDialog: React.FC<RequestSubmittedDialogProps> = ({
           <DialogClose asChild>
             <Button variant="secondary">Done</Button>
           </DialogClose>
-          <Button asChild>
-            <Link href="/requests">
-              View all requests <ArrowRightIcon />
-            </Link>
-          </Button>
+          {!isRequestsPage && (
+            <Button asChild>
+              <Link href="/requests">
+                View all requests <ArrowRightIcon />
+              </Link>
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
