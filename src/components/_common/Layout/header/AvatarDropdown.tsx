@@ -8,6 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  BadgeHelpIcon,
   HandCoinsIcon,
   LogOutIcon,
   SettingsIcon,
@@ -92,6 +93,12 @@ export default function AvatarDropdown({
             <Link href="/profile">
               <User2Icon />
               Profile
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/help-center">
+              <BadgeHelpIcon />
+              24/7 Support
             </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
