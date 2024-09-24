@@ -127,7 +127,12 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
 
   // todo: handle if all the scrapers error (dont send out text)
   for (const listing of flatListings) {
-    console.log("Listing: ", listing.originalListingUrl, listing.originalNightlyPrice, listing.originalListingPlatform);
+    console.log(
+      "Listing: ",
+      listing.originalListingUrl,
+      listing.originalNightlyPrice,
+      listing.originalListingPlatform,
+    );
   }
 
   const userFromRequest = await db.query.requests
@@ -229,8 +234,9 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
   // });
 
   function getCloseness(listing: ScrapedListing) {
-    const discountPercentage =
-      Math.abs(1 - listing.originalNightlyPrice! / requestNightlyPrice);
+    const discountPercentage = Math.abs(
+      1 - listing.originalNightlyPrice! / requestNightlyPrice,
+    );
 
     if (discountPercentage <= 0.2) return "close";
     if (discountPercentage <= 0.5) return "mid";
@@ -274,7 +280,7 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
     if (userFromRequest) {
       void sendScheduledText({
         to: userFromRequest.phoneNumber!,
-        content: `Tramona: Thank you for submitting your request, please see matches here: ${env.NEXTAUTH_URL}/requests! \n Unfortunately, no hosts have submitted a match for your price.
+        content: `Tramona: Thank you for submitting your request! \n Unfortunately, no hosts have submitted a match for your price.
         But don’t worry—our team is actively searching for options that fit your needs. \n In case your budget is flexible, some hosts sent matches slightly out of your budget take a look here: ${env.NEXTAUTH_URL}/requests.
         We’ll notify you as soon as we find the perfect stay. \n In the meantime, feel free to adjust your request if you’d like to explore other possibilities. Thank you for choosing Tramona!`,
         sendAt: addHours(new Date(), 24),
