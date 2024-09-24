@@ -310,6 +310,8 @@ export const properties = pgTable(
       .$type<{ x: number; y: number }>(),
     iCalLink: text("ical_link"),
     bookOnAirbnb: boolean("book_on_airbnb").notNull().default(false),
+    autoOfferEnabled: boolean("auto_offer_enabled").notNull().default(false),
+    autoOfferMaxPercentOff: doublePrecision("auto_offer_max_percent_off").default(0),
   },
   (t) => ({
     spatialIndex: index("spacial_index").using("gist", t.latLngPoint),

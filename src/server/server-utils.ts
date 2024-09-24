@@ -642,7 +642,13 @@ export async function getPropertiesForRequest(
         ),
       ),
     ),
-    columns: { id: true, hostId: true },
+    columns: {
+      id: true,
+      hostId: true,
+      autoOfferEnabled: true,
+      autoOfferMaxPercentOff: true,
+      originalListingId: true,
+    },
   });
 
   return result;

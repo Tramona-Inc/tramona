@@ -14,6 +14,7 @@ import {
   users,
   offers,
   rejectedRequests,
+  properties,
 } from "@/server/db/schema";
 import {
   sendText,
@@ -34,12 +35,16 @@ import {
   getNumNights,
   formatDateRange,
   plural,
+  getHostPayout,
+  getTravelerOfferedPrice,
 } from "@/utils/utils";
 import { sendTextToHost, haversineDistance } from "@/server/server-utils";
 import { newLinkRequestSchema } from "@/utils/useSendUnsentRequests";
 import { getCoordinates } from "@/server/google-maps";
 import { scrapeDirectListings } from "@/server/direct-sites-scraping";
 import { waitUntil } from "@vercel/functions";
+import { scrapeAirbnbPrice } from "@/server/scrapePrice";
+import { HOST_MARKUP, TRAVELER__MARKUP } from "@/utils/constants";
 
 const updateRequestInputSchema = z.object({
   requestId: z.number(),
@@ -503,8 +508,74 @@ export async function handleRequestSubmission(
       { tx },
     );
 
+    const numNights = getNumNights(input.checkIn, input.checkOut);
+    const requestedNightlyPrice = input.maxTotalPrice / numNights;
+
+    for (const property of eligibleProperties) {
+      const propertyDetails = await tx.query.properties.findFirst({
+        where: eq(properties.id, property.id),
+      });
+
+      if (
+        propertyDetails?.autoOfferEnabled &&
+        propertyDetails.originalListingId
+      ) {
+        try {
+          const airbnbTotalPrice = await scrapeAirbnbPrice({
+            airbnbListingId: propertyDetails.originalListingId,
+            params: {
+              checkIn: input.checkIn,
+              checkOut: input.checkOut,
+              numGuests: input.numGuests,
+            },
+          });
+
+          const airbnbNightlyPrice = airbnbTotalPrice / numNights;
+          const percentOff =
+            ((airbnbNightlyPrice - requestedNightlyPrice) /
+              airbnbNightlyPrice) *
+            100;
+
+          if (percentOff <= (propertyDetails.autoOfferMaxPercentOff ?? 5)) {
+            await tx.insert(offers).values({
+              requestId: request.id,
+              propertyId: property.id,
+              totalPrice: input.maxTotalPrice,
+              hostPayout:
+                parseFloat(
+                  getHostPayout({
+                    propertyPrice: requestedNightlyPrice,
+                    hostMarkup: HOST_MARKUP,
+                    numNights,
+                  }),
+                ) * 100,
+              travelerOfferedPrice:
+                parseFloat(
+                  getTravelerOfferedPrice({
+                    propertyPrice: requestedNightlyPrice,
+                    travelerMarkup: TRAVELER__MARKUP,
+                    numNights,
+                  }),
+                ) * 100,
+              checkIn: input.checkIn,
+              checkOut: input.checkOut,
+            });
+          }
+        } catch (error) {
+          console.error(
+            `Error processing auto-offer for property ${property.id}:`,
+            error,
+          );
+        }
+      }
+    }
+
+    const propertiesWithoutAutoOffers = eligibleProperties.filter(
+      (property) => !property.autoOfferEnabled,
+    );
+
     await sendTextToHost(
-      eligibleProperties,
+      propertiesWithoutAutoOffers,
       input.checkIn,
       input.checkOut,
       input.maxTotalPrice,

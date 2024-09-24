@@ -626,4 +626,19 @@ export const propertiesRouter = createTRPCRouter({
 
       return { count };
     }),
+
+    updateAutoOffer: protectedProcedure
+    .input(z.object({
+      id: z.number(),
+      autoOfferEnabled: z.boolean(),
+      autoOfferMaxPercentOff: z.number().min(0).max(100),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db.update(properties)
+        .set({
+          autoOfferEnabled: input.autoOfferEnabled,
+          autoOfferMaxPercentOff: input.autoOfferMaxPercentOff,
+        })
+        .where(eq(properties.id, input.id));
+    }),
 });
