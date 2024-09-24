@@ -3,13 +3,13 @@
 import { scrapeUrlLikeHuman } from "@/server/server-utils";
 import { DirectSiteScraper, ScrapedListing, SubsequentScraper } from ".";
 import { z } from "zod";
-import axios from "axios";
 import { axiosWithRetry } from "@/server/server-utils";
 import { formatDateYearMonthDay, getNumNights, parseHTML } from "@/utils/utils";
 import { PropertyType, ListingSiteName } from "@/server/db/schema/common";
 import { CancellationPolicyWithInternals } from "../db/schema/tables/properties";
 import { log } from "@/pages/api/script";
-import { getCoordinates } from "../google-maps";
+import { googleMaps } from "../google-maps";
+import { env } from "@/env";
 
 const taxoDataSchema = z.array(
   z.object({
@@ -67,11 +67,6 @@ const cancellationPolicySchema = z.object({
   deposit_percentage: z.number(),
   balance_due_days: z.number(),
   offset_days: z.number(), // number of days before arrival to apply policy
-});
-
-const priceQuoteSchemaError = z.object({
-  Code: z.string(),
-  Message: z.string(),
 });
 
 const propertyTypeMapping: Record<string, PropertyType> = {
@@ -272,13 +267,39 @@ export const redawningScraper: DirectSiteScraper = async ({
   latitude,
   longitude,
 }) => {
-  location = location.split(",")[0]!.replace(" ", "%20");
-  const coordinates = await getCoordinates(location).then((r) => r.location);
-  if (!coordinates) {
-    throw new Error("Failed to get coordinates for location: " + location);
+  const result = await googleMaps
+    .geocode({
+      params: { address: location, key: env.GOOGLE_MAPS_KEY },
+    })
+    .then((res) => res.data.results[0]);
+
+  if (!result) {
+    throw new Error(`Failed to geocode location: ${location}`);
   }
 
-  const url = `https://www.redawning.com/search/properties?ptype=locality&platitude=${coordinates.lat}&plongitude=${coordinates.lng}&pcountry=US&pname=${location}&sleepsmax=1TO100&dates=${convertToEpochAt7AM(checkIn)}TO${convertToEpochAt7AM(checkOut)}`;
+  const lat = result.geometry.location.lat;
+  const lng = result.geometry.location.lng;
+
+  const ptype = result.types.find(
+    (type) =>
+      !["political", "point_of_interest", "establishment"].includes(type),
+  );
+
+  if (!ptype) {
+    throw new Error(
+      `Failed to find a valid property type for location: ${location}`,
+    );
+  }
+
+  const pcountry = result.address_components.find((c) =>
+    c.types.includes("country"),
+  )?.short_name;
+
+  if (!pcountry) {
+    throw new Error(`Failed to find a valid country for location: ${location}`);
+  }
+
+  const url = `https://www.redawning.com/search/properties?ptype=${ptype}&platitude=${lat}&plongitude=${lng}&pcountry=${pcountry}&pname=${location}&sleepsmax=1TO100&dates=${convertToEpochAt7AM(checkIn)}TO${convertToEpochAt7AM(checkOut)}`;
 
   log(`url: ${url}`);
 
@@ -290,11 +311,13 @@ export const redawningScraper: DirectSiteScraper = async ({
     .find((script) => $(script).html()!.includes("var taxodata"))!;
 
   const scriptText = $(scriptContent).html();
+  if (scriptText === 'var taxodata = "";') {
+    return [];
+  }
+
   const dataStart = scriptText!.indexOf("[{");
   const dataEnd = scriptText!.lastIndexOf("}]") + 2;
   const taxoDataJsonString = scriptText!.substring(dataStart, dataEnd);
-
-  log(`scriptText: ${scriptText}`);
 
   let taxodata = taxoDataSchema
     .parse(JSON.parse(taxoDataJsonString))
@@ -374,7 +397,7 @@ export const redawningScraper: DirectSiteScraper = async ({
     checkIn,
     checkOut,
   );
-  console.log("finished redawning");
+
   return listings;
 };
 
