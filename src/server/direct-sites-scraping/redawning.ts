@@ -8,6 +8,8 @@ import { axiosWithRetry } from "@/server/server-utils";
 import { formatDateYearMonthDay, getNumNights, parseHTML } from "@/utils/utils";
 import { PropertyType, ListingSiteName } from "@/server/db/schema/common";
 import { CancellationPolicyWithInternals } from "../db/schema/tables/properties";
+import { log } from "@/pages/api/script";
+import { getCoordinates } from "../google-maps";
 
 const taxoDataSchema = z.array(
   z.object({
@@ -133,147 +135,132 @@ function extractAmenities(htmlString: string): string[] {
 }
 
 export const mapTaxodataToScrapedListing = async (
-  taxodata: typeof taxoDataSchema._type,
+  taxodata: z.infer<typeof taxoDataSchema>,
   checkIn: Date,
   checkOut: Date,
 ): Promise<ScrapedListing[]> => {
-  const scrapedListings = await Promise.all(
+  return await Promise.all(
     taxodata.map(async (property) => {
-      try {
-        // scrape the property page
-        const safeUrl = ensureHttps(property.url);
-        const $ = await scrapeUrlLikeHuman(safeUrl);
+      // scrape the property page
+      const safeUrl = ensureHttps(property.url);
+      const $ = await scrapeUrlLikeHuman(safeUrl);
 
-        // Scrape the "Sleeps 12" from the HTML
-        const propDetails = $(".qb-prop-details").text();
-        const sleepsMatch = propDetails.match(/Sleeps\s(\d+)/);
-        const maxNumGuests = sleepsMatch
-          ? sleepsMatch[1]
-            ? parseInt(sleepsMatch[1])
-            : 0
-          : 0;
-        const locationMatch = propDetails.match(/([A-Za-z\s]+,\s[A-Z]{2})/);
-        const city = locationMatch
-          ? locationMatch[1]
-            ? locationMatch[1].trim()
-            : ""
-          : "";
-        const typeElement = $(".property-quick-info li .fas.fa-home").parent(); // Navigate to the parent element of the <i> tag (the <span> containing "Home")
-        let originalType = "";
-        // Check if there is a span with the class "quick-info-value details-label" (e.g. "Home")
-        const homeLabel = typeElement
-          .find(".quick-info-value.details-label")
-          .text()
-          .trim();
-        // Check if there is an additional <span> after "1,100 Sq. Ft." ("Condo" in the next span)
-        const additionalLabel = typeElement
-          .find("span:not(.details-label)")
-          .last()
-          .text()
-          .trim();
+      // Scrape the "Sleeps 12" from the HTML
+      const propDetails = $(".qb-prop-details").text();
+      const sleepsMatch = propDetails.match(/Sleeps\s(\d+)/);
+      const maxNumGuests = sleepsMatch
+        ? sleepsMatch[1]
+          ? parseInt(sleepsMatch[1])
+          : 0
+        : 0;
+      const locationMatch = propDetails.match(/([A-Za-z\s]+,\s[A-Z]{2})/);
+      const city = locationMatch
+        ? locationMatch[1]
+          ? locationMatch[1].trim()
+          : ""
+        : "";
+      const typeElement = $(".property-quick-info li .fas.fa-home").parent(); // Navigate to the parent element of the <i> tag (the <span> containing "Home")
+      let originalType = "";
+      // Check if there is a span with the class "quick-info-value details-label" (e.g. "Home")
+      const homeLabel = typeElement
+        .find(".quick-info-value.details-label")
+        .text()
+        .trim();
+      // Check if there is an additional <span> after "1,100 Sq. Ft." ("Condo" in the next span)
+      const additionalLabel = typeElement
+        .find("span:not(.details-label)")
+        .last()
+        .text()
+        .trim();
 
-        if (additionalLabel) {
-          originalType = additionalLabel;
-        } else if (homeLabel) {
-          originalType = homeLabel;
-        }
-
-        let imageUrls: string[] = [];
-        const imageElements = $("input.pswpImages");
-        imageElements.each((index, element) => {
-          if (imageUrls.length < 10) {
-            // Limit the number of images to 10
-            const imageUrl = $(element).attr("value");
-            if (imageUrl) {
-              imageUrls.push(imageUrl); // Add the URL to the array
-            }
-          }
-        });
-        const metaDescription = $('meta[property="og:description"]').attr(
-          "content",
-        );
-        const description = metaDescription ? metaDescription : "";
-
-        const scriptContent = $("script")
-          .toArray()
-          .find((script) => $(script).html()!.includes("show_all_amenities"));
-
-        let amenities: string[] = [];
-        if (scriptContent) {
-          const scriptText = $(scriptContent).html();
-          const amenitiesMatch = scriptText?.match(
-            /"show_all_amenities":"(.*?)","/,
-          );
-          if (amenitiesMatch?.[1]) {
-            const showAllAmenities = amenitiesMatch[1];
-            // Decode HTML entities and parse the amenities
-            const decodeHtmlEntities = (str: string) => {
-              return str
-                .replace(/\\u003C/g, "<")
-                .replace(/\\u0022/g, '"')
-                .replace(/\\u003E/g, ">")
-                .replace(/\\u002F/g, "/");
-            };
-            const decodedAmenities = decodeHtmlEntities(showAllAmenities);
-            // Use regex to extract the text between <li> and </li> tags
-            amenities = extractAmenities(decodedAmenities);
-          } else {
-            console.error("No amenities found");
-          }
-        }
-        return {
-          originalListingId: property.pid.toString(),
-          name: property.title,
-          about: parseHTML(description),
-          propertyType: mapPropertyType(originalType),
-          address: city, // cannot find detailed address in the website
-          city: city,
-          latLngPoint: {
-            lng: parseFloat(property.longitude),
-            lat: parseFloat(property.latitude),
-          },
-          maxNumGuests: maxNumGuests,
-          numBeds: property.bedrooms,
-          numBedrooms: property.bedrooms,
-          numBathrooms: property.bathrooms,
-          amenities: amenities,
-          otherAmenities: [],
-          imageUrls: imageUrls,
-          originalListingUrl: safeUrl,
-          avgRating: 0, // cannot find rating in the website
-          numRatings: 0, // cannot find rating in the website
-          originalListingPlatform: "RedAwning" as ListingSiteName,
-          reservedDateRanges: [
-            {
-              start: checkIn,
-              end: checkOut,
-            },
-          ],
-          originalNightlyPrice:
-            property.totalPrice && getNumNights(checkIn, checkOut) > 0
-              ? Math.round(
-                  property.totalPrice / getNumNights(checkIn, checkOut),
-                )
-              : 0,
-          reviews: [], // looks like there are no reviews in this website
-          scrapeUrl: safeUrl,
-          cancellationPolicy:
-            property.cancellationPolicy as CancellationPolicyWithInternals,
-        };
-      } catch (error) {
-        console.error(
-          "Skip RedAwning property: ",
-          property.pid,
-          ", as the scraping attempt on this property was unsuccessful.. ",
-          // "Error detail: ",
-          // error,
-        );
-        // Return null for this iteration, skipping this property
-        return null;
+      if (additionalLabel) {
+        originalType = additionalLabel;
+      } else if (homeLabel) {
+        originalType = homeLabel;
       }
+
+      const imageUrls: string[] = [];
+      const imageElements = $("input.pswpImages");
+      imageElements.each((index, element) => {
+        if (imageUrls.length < 10) {
+          // Limit the number of images to 10
+          const imageUrl = $(element).attr("value");
+          if (imageUrl) {
+            imageUrls.push(imageUrl); // Add the URL to the array
+          }
+        }
+      });
+      const metaDescription = $('meta[property="og:description"]').attr(
+        "content",
+      );
+      const description = metaDescription ? metaDescription : "";
+
+      const scriptContent = $("script")
+        .toArray()
+        .find((script) => $(script).html()!.includes("show_all_amenities"));
+
+      let amenities: string[] = [];
+      if (scriptContent) {
+        const scriptText = $(scriptContent).html();
+        const amenitiesMatch = scriptText?.match(
+          /"show_all_amenities":"(.*?)","/,
+        );
+        if (amenitiesMatch?.[1]) {
+          const showAllAmenities = amenitiesMatch[1];
+          // Decode HTML entities and parse the amenities
+          const decodeHtmlEntities = (str: string) => {
+            return str
+              .replace(/\\u003C/g, "<")
+              .replace(/\\u0022/g, '"')
+              .replace(/\\u003E/g, ">")
+              .replace(/\\u002F/g, "/");
+          };
+          const decodedAmenities = decodeHtmlEntities(showAllAmenities);
+          // Use regex to extract the text between <li> and </li> tags
+          amenities = extractAmenities(decodedAmenities);
+        } else {
+          console.error("No amenities found");
+        }
+      }
+      return {
+        originalListingId: property.pid.toString(),
+        name: property.title,
+        about: parseHTML(description),
+        propertyType: mapPropertyType(originalType),
+        address: city, // cannot find detailed address in the website
+        city: city,
+        latLngPoint: {
+          lng: parseFloat(property.longitude),
+          lat: parseFloat(property.latitude),
+        },
+        maxNumGuests: maxNumGuests,
+        numBeds: property.bedrooms,
+        numBedrooms: property.bedrooms,
+        numBathrooms: property.bathrooms,
+        amenities: amenities,
+        otherAmenities: [],
+        imageUrls: imageUrls,
+        originalListingUrl: safeUrl,
+        avgRating: 0, // cannot find rating in the website
+        numRatings: 0, // cannot find rating in the website
+        originalListingPlatform: "RedAwning" as ListingSiteName,
+        reservedDateRanges: [
+          {
+            start: checkIn,
+            end: checkOut,
+          },
+        ],
+        originalNightlyPrice:
+          property.totalPrice && getNumNights(checkIn, checkOut) > 0
+            ? Math.round(property.totalPrice / getNumNights(checkIn, checkOut))
+            : 0,
+        reviews: [], // looks like there are no reviews in this website
+        scrapeUrl: safeUrl,
+        cancellationPolicy:
+          property.cancellationPolicy as CancellationPolicyWithInternals,
+      };
     }),
   );
-  return scrapedListings.filter((listing) => listing !== null);
 };
 
 export const redawningScraper: DirectSiteScraper = async ({
@@ -284,114 +271,110 @@ export const redawningScraper: DirectSiteScraper = async ({
   latitude,
   longitude,
 }) => {
-  if (location) {
-    location = location.split(",")[0]!.replace(" ", "%20");
+  location = location.split(",")[0]!.replace(" ", "%20");
+  const coordinates = await getCoordinates(location).then((r) => r.location);
+  if (!coordinates) {
+    throw new Error("Failed to get coordinates for location: " + location);
   }
-  const url = `https://www.redawning.com/search/properties?ptype=locality&platitude=${latitude}&plongitude=${longitude}&pcountry=US&pname=${location}&sleepsmax=1TO100&dates=${convertToEpochAt7AM(checkIn)}TO${convertToEpochAt7AM(checkOut)}`;
-  console.log("scrapedRedawningUrl: ", url);
-  try {
-    const $ = await scrapeUrlLikeHuman(url);
-    let taxodata = [];
 
-    // Find the script containing 'taxodata' and parse its contents
-    const scriptContent = $("script")
-      .toArray()
-      .find((script) => $(script).html()!.includes("var taxodata"));
-    try {
-      if (scriptContent) {
-        const scriptText = $(scriptContent).html();
-        const dataStart = scriptText!.indexOf("[{");
-        const dataEnd = scriptText!.lastIndexOf("}]") + 2;
-        const taxoDataJsonString = scriptText!.substring(dataStart, dataEnd);
-        const taxoDataJson = JSON.parse(taxoDataJsonString);
-        const taxoDataOg = taxoDataSchema.parse(taxoDataJson);
-        taxodata.push(...taxoDataOg.slice(0, 25)); // numOfOffersInEachScraper = 25
-      }
-    } catch (error) {
-      // hit here when the scraper found nothing on the RedAwning website
-      // console.error("Error parsing RedAwning data: ", error);
-      return [];
-    }
-    const numOfNights = getNumNights(checkIn, checkOut);
-    if (taxodata.length === 0) {
-      return [];
-    }
-    if (taxodata.length > 0) {
-      const processedTaxoData = await Promise.all(
-        taxodata.map(async (property) => {
-          try {
-            // const propertyUrl = property.url;
-            const propertyId = property.pid;
-            const priceQuoteUrl = `https://api.redawning.com/v1/listings/${propertyId}/quote?checkin=${formatDateYearMonthDay(checkIn)}&checkout=${formatDateYearMonthDay(checkOut)}&numadults=1&numchild=0&travelinsurance=false`;
-            const priceQuote = await axiosWithRetry
-              .get<string>(priceQuoteUrl, {
-                headers: {
-                  "x-api-key": "ehMtnGSw4i7dFqngWo8M15cWaqzKPM4V2jeU3zty",
-                },
-                timeout: 10000,
-              })
-              .then((response) => response.data)
-              .then((data) => priceQuoteSchema.parse(data))
-              .then((quote) => {
-                if (numOfNights < quote.min_stay) {
-                  console.log(
-                    `Property ${propertyId} requires a minimum stay of ${quote.min_stay} nights. Your stay is ${numOfNights} nights.`,
-                  );
-                  return { ...quote, totalPrice: null };
-                }
-                const totalPrice = quote.payment_schedule.reduce(
-                  (acc, curr) => acc + curr.amount,
-                  0,
-                );
-                const formattedTotalPrice = Math.ceil(totalPrice * 100); // to cents
-                return { ...quote, totalPrice: formattedTotalPrice };
-              });
-            property.totalPrice = priceQuote.totalPrice;
+  const url = `https://www.redawning.com/search/properties?ptype=locality&platitude=${coordinates.lat}&plongitude=${coordinates.lng}&pcountry=US&pname=${location}&sleepsmax=1TO100&dates=${convertToEpochAt7AM(checkIn)}TO${convertToEpochAt7AM(checkOut)}`;
 
-            const cancellationPolicyUrl = `https://www.redawning.com/cancellation-policy-details?nid=${propertyId}&arrival_date=${formatDateYearMonthDay(checkIn)}`;
-            const dayOffsetForFullRefund = await axiosWithRetry
-              .get<string>(cancellationPolicyUrl, {
-                timeout: 10000,
-              })
-              .then((response) => response.data)
-              .then((data) => cancellationPolicySchema.parse(data))
-              .then((c) => {
-                return c.offset_days;
-              });
-            // all the RedAwning properties I've checked so far have a full refund deadline of either 7 or 14 days
-            if (dayOffsetForFullRefund <= 7) {
-              property.cancellationPolicy = "RedAwning 7 Days";
-            } else if (dayOffsetForFullRefund <= 14) {
-              property.cancellationPolicy = "RedAwning 14 Days";
-            } else {
-              property.cancellationPolicy = "Non-refundable";
-            }
+  log(`url: ${url}`);
 
-            return property;
-          } catch (error) {
-            console.error(
-              `Skip RedAwning property: ${property.pid}, as failed to fetch price or cancellation policy.`,
-            );
-            return null;
-          }
-        }),
-      );
-      taxodata = processedTaxoData.filter((property) => property !== null);
-    } else {
-      console.error("RedAwning scraper: No available properties found");
-    }
+  const $ = await scrapeUrlLikeHuman(url);
 
-    const listings = await mapTaxodataToScrapedListing(
-      taxodata,
-      checkIn,
-      checkOut,
-    );
-    console.log("finished redawning");
-    return listings;
-  } catch (error) {
-    console.error("Error scraping RedAwning: ", error);
+  // Find the script containing 'taxodata' and parse its contents
+  const scriptContent = $("script")
+    .toArray()
+    .find((script) => $(script).html()!.includes("var taxodata"))!;
+
+  const scriptText = $(scriptContent).html();
+  const dataStart = scriptText!.indexOf("[{");
+  const dataEnd = scriptText!.lastIndexOf("}]") + 2;
+  const taxoDataJsonString = scriptText!.substring(dataStart, dataEnd);
+
+  log(`scriptText: ${scriptText}`);
+
+  let taxodata = taxoDataSchema
+    .parse(JSON.parse(taxoDataJsonString))
+    .slice(0, 25);
+
+  const numOfNights = getNumNights(checkIn, checkOut);
+  if (taxodata.length === 0) {
     return [];
   }
+  if (taxodata.length > 0) {
+    const processedTaxoData = await Promise.all(
+      taxodata.map(async (property) => {
+        try {
+          // const propertyUrl = property.url;
+          const propertyId = property.pid;
+          const priceQuoteUrl = `https://api.redawning.com/v1/listings/${propertyId}/quote?checkin=${formatDateYearMonthDay(checkIn)}&checkout=${formatDateYearMonthDay(checkOut)}&numadults=1&numchild=0&travelinsurance=false`;
+          const priceQuote = await axiosWithRetry
+            .get<string>(priceQuoteUrl, {
+              headers: {
+                "x-api-key": "ehMtnGSw4i7dFqngWo8M15cWaqzKPM4V2jeU3zty",
+              },
+              timeout: 10000,
+            })
+            .then((response) => response.data)
+            .then((data) => priceQuoteSchema.parse(data))
+            .then((quote) => {
+              if (numOfNights < quote.min_stay) {
+                console.log(
+                  `Property ${propertyId} requires a minimum stay of ${quote.min_stay} nights. Your stay is ${numOfNights} nights.`,
+                );
+                return { ...quote, totalPrice: null };
+              }
+              const totalPrice = quote.payment_schedule.reduce(
+                (acc, curr) => acc + curr.amount,
+                0,
+              );
+              const formattedTotalPrice = Math.ceil(totalPrice * 100); // to cents
+              return { ...quote, totalPrice: formattedTotalPrice };
+            });
+          property.totalPrice = priceQuote.totalPrice;
+
+          const cancellationPolicyUrl = `https://www.redawning.com/cancellation-policy-details?nid=${propertyId}&arrival_date=${formatDateYearMonthDay(checkIn)}`;
+          const dayOffsetForFullRefund = await axiosWithRetry
+            .get<string>(cancellationPolicyUrl, {
+              timeout: 10000,
+            })
+            .then((response) => response.data)
+            .then((data) => cancellationPolicySchema.parse(data))
+            .then((c) => {
+              return c.offset_days;
+            });
+          // all the RedAwning properties I've checked so far have a full refund deadline of either 7 or 14 days
+          if (dayOffsetForFullRefund <= 7) {
+            property.cancellationPolicy = "RedAwning 7 Days";
+          } else if (dayOffsetForFullRefund <= 14) {
+            property.cancellationPolicy = "RedAwning 14 Days";
+          } else {
+            property.cancellationPolicy = "Non-refundable";
+          }
+
+          return property;
+        } catch (error) {
+          console.error(
+            `Skip RedAwning property: ${property.pid}, as failed to fetch price or cancellation policy.`,
+          );
+          return null;
+        }
+      }),
+    );
+    taxodata = processedTaxoData.filter((property) => property !== null);
+  } else {
+    console.error("RedAwning scraper: No available properties found");
+  }
+
+  const listings = await mapTaxodataToScrapedListing(
+    taxodata,
+    checkIn,
+    checkOut,
+  );
+  console.log("finished redawning");
+  return listings;
 };
 
 export const redawningSubScraper: SubsequentScraper = async ({
@@ -409,20 +392,7 @@ export const redawningSubScraper: SubsequentScraper = async ({
         },
       })
       .then((response) => response.data)
-      .then((data) => {
-        try {
-          return priceQuoteSchema.parse(data);
-        } catch (e) {
-          const error = priceQuoteSchemaError.safeParse(data);
-          if (error.success) {
-            throw new Error(
-              `API Error: ${error.data.Code} - ${error.data.Message}`,
-            );
-          } else {
-            throw new Error("Unknown API response format");
-          }
-        }
-      })
+      .then((data) => priceQuoteSchema.parse(data))
       .then((quote) => {
         const totalPrice = quote.payment_schedule.reduce(
           (acc, curr) => acc + curr.amount,
@@ -434,6 +404,7 @@ export const redawningSubScraper: SubsequentScraper = async ({
     const originalNightlyPrice = priceQuote.totalPrice
       ? Math.round(priceQuote.totalPrice / getNumNights(checkIn, checkOut))
       : undefined;
+
     return {
       originalNightlyPrice: originalNightlyPrice,
       isAvailableOnOriginalSite: priceQuote.status === "success",

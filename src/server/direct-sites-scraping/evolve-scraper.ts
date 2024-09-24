@@ -225,58 +225,44 @@ const fetchSearchResults = async (
   //   numericFilters.push(`LOS_PriceAverages.${startDate}.${numNights}<=${maxPrice}`);
   // }
 
-  try {
-    const { results } = await client.search([
-      {
-        indexName: "prod_EvolveListings",
-        params: {
-          aroundLatLng: `${searchLat}, ${searchLng}`,
-          aroundPrecision: 8000,
-          aroundRadius: 48280, // about 30 miles
-          filters,
-          attributesToRetrieve: ["*", "-amenities"],
-          clickAnalytics: true,
-          facets: [
-            "amenities.Amenities",
-            "amenities.Accessibility",
-            "amenities.Area Activities",
-            "minLOS_PriceAverages",
-            "maxLOS_PriceAverages",
-            "Max Occupancy",
-            "Bedrooms",
-            "Total Beds",
-            "Bathrooms",
-            "Average Per Night",
-            "Property Type",
-            "amenities.Location",
-            "amenities.View",
-          ],
-          getRankingInfo: true,
-          maxValuesPerFacet: 300,
-          // numericFilters,
-          page: 0,
-          hitsPerPage: 24,
-          analytics: true,
-          ruleContexts: ["isDatedSearch"],
-        },
+  const { results } = await client.search([
+    {
+      indexName: "prod_EvolveListings",
+      params: {
+        aroundLatLng: `${searchLat}, ${searchLng}`,
+        aroundPrecision: 8000,
+        aroundRadius: 48280, // about 30 miles
+        filters,
+        attributesToRetrieve: ["*", "-amenities"],
+        clickAnalytics: true,
+        facets: [
+          "amenities.Amenities",
+          "amenities.Accessibility",
+          "amenities.Area Activities",
+          "minLOS_PriceAverages",
+          "maxLOS_PriceAverages",
+          "Max Occupancy",
+          "Bedrooms",
+          "Total Beds",
+          "Bathrooms",
+          "Average Per Night",
+          "Property Type",
+          "amenities.Location",
+          "amenities.View",
+        ],
+        getRankingInfo: true,
+        maxValuesPerFacet: 300,
+        // numericFilters,
+        page: 0,
+        hitsPerPage: 24,
+        analytics: true,
+        ruleContexts: ["isDatedSearch"],
       },
-    ]);
+    },
+  ]);
 
-    const searchResponse = results[0] as SearchResponse<EvolveSearchResult>;
-    return searchResponse.hits
-      .map((hit) => {
-        try {
-          return EvolveSearchResultSchema.parse(hit);
-        } catch (error) {
-          console.error("Error parsing hit:", hit, error);
-          return null;
-        }
-      })
-      .filter((result): result is EvolveSearchResult => result !== null);
-  } catch (error) {
-    console.error("Error querying Algolia:", error);
-    return [];
-  }
+  const searchResponse = results[0] as SearchResponse<EvolveSearchResult>;
+  return searchResponse.hits.map((hit) => EvolveSearchResultSchema.parse(hit));
 };
 
 const ReviewDataSchema = z.object({
@@ -693,8 +679,7 @@ export const evolveVacationRentalScraper: DirectSiteScraper = async ({
   } else if (locationParts.length === 1) {
     [state, country] = [location, locationParts[0]];
   } else {
-    console.error("Unexpected location format");
-    return [];
+    throw new Error("Unexpected location format");
   }
 
   const formattedCountry = country?.toLowerCase().replace(/\s+/g, "-");
@@ -740,7 +725,7 @@ export const evolveVacationRentalScraper: DirectSiteScraper = async ({
   const availableProperties: ScrapedListing[] = properties.filter(
     (property) => property !== null,
   );
-  console.log("evolve done");
+
   return availableProperties;
 };
 
