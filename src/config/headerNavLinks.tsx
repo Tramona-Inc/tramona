@@ -38,3 +38,7 @@ export const hamburgerLinksMobile = [
   ...headerLinks,
   { name: "24/7 Support", href: "/help-center", icon: BadgeHelp },
 ];
+
+export const mobileheaderLinksForHost = [
+  { name: "24/7 Support", href: "/help-center", icon: BadgeHelp },
+];
