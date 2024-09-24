@@ -21,11 +21,16 @@ import {
   hamburgerLinksDesktop,
   hamburgerLinksMobile,
   unloggedHamburgerLinksMobile,
+  mobileheaderLinksForHost,
 } from "@/config/headerNavLinks";
 import { ArrowLeftRightIcon, DoorOpen, MenuIcon } from "lucide-react";
 import { SkeletonText } from "@/components/ui/skeleton";
 
 export function Header() {
+  const { pathname } = useRouter();
+
+  const isHost = pathname.includes("/host") ? true : false;
+
   return (
     <>
       <div className="text-balance bg-primaryGreen px-4 py-2 text-center text-sm font-medium text-white">
@@ -33,10 +38,10 @@ export function Header() {
         off all stays during our launch!
       </div>
       <div className="contents lg:hidden">
-        <SmallHeader />
+        <SmallHeader isHost={isHost} />
       </div>
       <div className="container hidden lg:contents">
-        <LargeHeader />
+        <LargeHeader isHost={isHost} />
       </div>
     </>
   );
@@ -79,7 +84,7 @@ function HamburgerMenu({
   );
 }
 
-function LargeHeader() {
+function LargeHeader({ isHost }: { isHost: boolean }) {
   const { status, data: session } = useSession();
 
   const hostBtn = useHostBtn();
@@ -89,22 +94,23 @@ function LargeHeader() {
       <TramonaLogo />
 
       <div className="flex translate-y-0.5 items-center pl-2">
-        {headerLinks.map((link) => (
-          <NavLink
-            key={link.href}
-            href={link.href}
-            render={({ selected }) => (
-              <span
-                className={cn(
-                  "rounded-md px-2 py-3 text-sm font-bold text-zinc-600 hover:text-foreground xl:text-base",
-                  selected && "text-foreground underline underline-offset-2",
-                )}
-              >
-                {link.name}
-              </span>
-            )}
-          />
-        ))}
+        {!isHost &&
+          headerLinks.map((link) => (
+            <NavLink
+              key={link.href}
+              href={link.href}
+              render={({ selected }) => (
+                <span
+                  className={cn(
+                    "rounded-md px-2 py-3 text-sm font-bold text-zinc-600 hover:text-foreground xl:text-base",
+                    selected && "text-foreground underline underline-offset-2",
+                  )}
+                >
+                  {link.name}
+                </span>
+              )}
+            />
+          ))}
       </div>
 
       <div className="flex-1" />
@@ -135,15 +141,50 @@ function LargeHeader() {
   );
 }
 
-function SmallHeader() {
+function SmallHeader({ isHost }: { isHost: boolean }) {
   const { status, data: session } = useSession();
   const hostBtn = useHostBtn();
 
   return (
     <header className="sticky top-0 z-50 flex h-header-height items-center gap-2 border-b bg-white px-2 pl-4 text-sm sm:text-base">
       <TramonaLogo />
+      <div className="flex translate-y-0.5 items-center pl-2">
+        {isHost &&
+          mobileheaderLinksForHost.map((link) => (
+            <NavLink
+              key={link.href}
+              href={link.href}
+              render={({ selected }) => (
+                <span
+                  className={cn(
+                    "rounded-md px-2 py-3 text-sm font-bold text-zinc-600 hover:text-foreground xl:text-base",
+                    selected && "text-foreground underline underline-offset-2",
+                  )}
+                >
+                  {link.name}
+                </span>
+              )}
+            />
+          ))}
+      </div>
 
       <div className="flex-1" />
+      {!isHost || status === "loading" ? null : hostBtn.isLoading ? (
+        <div className="px-4">
+          <SkeletonText className="w-24" />
+        </div>
+      ) : (
+        <Button
+          asChild
+          size="sm"
+          variant="ghost"
+          className={cn(
+            hostBtn.href !== "/for-hosts" && "rounded-full px-2 tracking-tight",
+          )}
+        >
+          <Link href={hostBtn.href}>{hostBtn.name}</Link>
+        </Button>
+      )}
 
       {status === "authenticated" && (
         <AvatarDropdown session={session} size="sm" />
@@ -151,14 +192,16 @@ function SmallHeader() {
 
       {status === "unauthenticated" && <LogInSignUp />}
 
-      <HamburgerMenu
-        links={[
-          ...(hostBtn.isLoading ? [] : [hostBtn]),
-          ...(status === "unauthenticated"
-            ? unloggedHamburgerLinksMobile
-            : hamburgerLinksMobile),
-        ]}
-      />
+      {!isHost && (
+        <HamburgerMenu
+          links={[
+            ...(hostBtn.isLoading ? [] : [hostBtn]),
+            ...(status === "unauthenticated"
+              ? unloggedHamburgerLinksMobile
+              : hamburgerLinksMobile),
+          ]}
+        />
+      )}
     </header>
   );
 }
