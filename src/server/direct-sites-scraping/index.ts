@@ -21,27 +21,30 @@ import { arizonaScraper, arizonaSubScraper } from "./integrity-arizona";
 import { redawningScraper } from "./redawning";
 
 import { getCoordinates } from "../google-maps";
-import { eq, and } from "drizzle-orm";
+import { eq, and, inArray } from "drizzle-orm";
 import {
   createRandomMarkupEightToFourteenPercent,
   getNumNights,
 } from "@/utils/utils";
 import { DIRECTLISTINGMARKUP } from "@/utils/constants";
-import { createLatLngGISPoint, sendText } from "@/server/server-utils";
+import { createLatLngGISPoint } from "@/server/server-utils";
 import { cleanbnbScraper, cleanbnbSubScraper } from "./cleanbnb-scrape";
-import { airbnbScraper } from "../external-listings-scraping/airbnbScraper";
 import { log } from "@/pages/api/script";
 
-export type DirectSiteScraper = (options: {
+type ScraperOptions = {
+  location: string;
   checkIn: Date;
   checkOut: Date;
-  requestNightlyPrice?: number; // when the scraper is used by traveler request page
+  requestNightlyPrice: number; // when the scraper is used by traveler request page
   requestId?: number; // when the scraper is used by traveler request page
-  location?: string;
   latitude?: number;
   longitude?: number;
   numGuests?: number;
-}) => Promise<ScrapedListing[]>;
+};
+
+export type DirectSiteScraper = (
+  options: ScraperOptions,
+) => Promise<ScrapedListing[]>;
 
 export type ScrapedListing = Omit<NewProperty, "latLngPoint"> & {
   originalListingUrl: string; // enforce that it's non-null
@@ -64,12 +67,7 @@ export type SubScrapedResult = {
   availabilityCheckedAt: Date;
 };
 
-export type NamedDirectSiteScraper = {
-  name: string;
-  scraper: DirectSiteScraper;
-};
-
-export const directSiteScrapers: NamedDirectSiteScraper[] = [
+export const directSiteScrapers = [
   // add more scrapers here
   { name: "evolveVacationRentalScraper", scraper: evolveVacationRentalScraper },
   { name: "cleanbnbScraper", scraper: cleanbnbScraper },
@@ -78,7 +76,7 @@ export const directSiteScrapers: NamedDirectSiteScraper[] = [
   { name: "redawningScraper", scraper: redawningScraper },
   { name: "casamundoScraper", scraper: casamundoScraper },
   // { name: "airbnbScraper", scraper: airbnbScraper },
-];
+] as const;
 
 // Helper function to filter out fields not in NewProperty
 const filterNewPropertyFields = (listing: ScrapedListing): NewProperty => {
@@ -89,30 +87,40 @@ const filterNewPropertyFields = (listing: ScrapedListing): NewProperty => {
 };
 
 // handle the scraped properties and reviews
-export const scrapeDirectListings = async (options: {
-  checkIn: Date;
-  checkOut: Date;
-  requestNightlyPrice?: number;
-  requestId?: number;
-  location?: string;
-  latitude?: number;
-  longitude?: number;
-  numGuests?: number;
-}) => {
+export const scrapeDirectListings = async (options: ScraperOptions) => {
   const { requestNightlyPrice } = options; // in cents
 
-  if (!requestNightlyPrice) {
-    throw new Error("requestNightlyPrice is required");
+  const scraperResults = await Promise.allSettled(
+    directSiteScrapers.map((s) => {
+      log(`Starting ${s.name} for request ${options.requestId}`);
+      return s.scraper(options);
+    }),
+  );
+
+  const rejectedResults = scraperResults.filter(
+    (r): r is PromiseRejectedResult => r.status === "rejected",
+  );
+
+  const errorsWithScraperNames = rejectedResults.map(({ reason }, i) => {
+    const scraper = directSiteScrapers[i];
+    return `${scraper?.name} errored:\n\n${reason instanceof Error ? reason.stack : reason}`;
+  });
+
+  if (errorsWithScraperNames.length > 0) {
+    log(
+      `${rejectedResults.length} scrapers errored for request ${options.requestId}: ${errorsWithScraperNames.join("\n\n")}`,
+    );
+  } else {
+    log(`All scrapers completed successfully for request ${options.requestId}`);
   }
 
-  const flatListings = await Promise.all(
-    directSiteScrapers.map((s) =>
-      s.scraper(options).catch((e) => {
-        log(`error in scraper: ${s.name}, ${e}`);
-        return [];
-      }),
-    ),
-  ).then((r) => r.flat());
+  if (rejectedResults.length === directSiteScrapers.length) {
+    throw new Error("All scrapers errored");
+  }
+
+  const flatListings = scraperResults.flatMap((r) =>
+    r.status === "fulfilled" ? r.value : [],
+  );
 
   // todo: handle if all the scrapers error (dont send out text)
 
@@ -133,22 +141,28 @@ export const scrapeDirectListings = async (options: {
     })
     .then((res) => res?.madeByGroup.owner);
 
-  console.log("DONE SCRAPING, flatListings.length: ", flatListings.length);
-  if (flatListings.length === 0 && userFromRequest) {
-    await sendText({
-      to: userFromRequest.phoneNumber!,
-      content: `Tramona: We’re not live in ${options.location} just yet, but we’re working on it! We’ll send you an email as soon as we launch there.
-Are you a host in ${options.location}? Sign up here tramona.com/host-onboarding”`,
-    });
-  }
-  for (const listing of flatListings) {
-    console.log(
-      "listing: ",
-      listing.originalListingUrl,
-      listing.originalNightlyPrice,
-      listing.originalListingPlatform,
-    );
-  }
+  const scrapedOffers = await db.query.offers.findMany({
+    where: and(eq(offers.requestId, options.requestId!)),
+    with: { property: { columns: { originalListingPlatform: true } } },
+  });
+
+  const scrapedOfferIds = scrapedOffers
+    .filter((o) => o.property.originalListingPlatform !== null)
+    .map((o) => o.id);
+
+  log(
+    `Scraped ${flatListings.length} listings for request ${options.requestId}, deleting ${scrapedOfferIds.length} old offers`,
+  );
+
+  await db.delete(offers).where(inArray(offers.id, scrapedOfferIds));
+
+  //   if (flatListings.length === 0 && userFromRequest) {
+  //     await sendText({
+  //       to: userFromRequest.phoneNumber!,
+  //       content: `Tramona: We’re not live in ${options.location} just yet, but we’re working on it! We’ll send you an email as soon as we launch there.
+  // Are you a host in ${options.location}? Sign up here tramona.com/host-onboarding`,
+  //     });
+  //   }
 
   // dynamically expand the price range to find at least 1 listing between 50% - 170% of the requested price
   let upperPercentage = 110;
@@ -193,17 +207,6 @@ Are you a host in ${options.location}? Sign up here tramona.com/host-onboarding�
     })
     .slice(0, 10); // Grab up to 10 listings
 
-  // For testing purposes (may be reused heavliy atm)
-  console.log("listings: ", listings.length);
-  listings.forEach((listing) => {
-    console.log(
-      "platform: ",
-      listing.originalListingPlatform,
-      "originalNightlyPrice: ",
-      listing.originalNightlyPrice,
-    );
-  });
-
   if (listings.length > 0) {
     await db.transaction(async (trx) => {
       // for each listing, insert the property and reviews OR update them if they already exist
@@ -222,7 +225,7 @@ Are you a host in ${options.location}? Sign up here tramona.com/host-onboarding�
           existingOriginalPropertyIdList[0]?.id;
 
         let formattedlatLngPoint = null;
-        if (listing.latLngPoint?.lat && listing.latLngPoint.lng) {
+        if (listing.latLngPoint) {
           formattedlatLngPoint = createLatLngGISPoint({
             lat: listing.latLngPoint.lat,
             lng: listing.latLngPoint.lng,
@@ -306,7 +309,8 @@ Are you a host in ${options.location}? Sign up here tramona.com/host-onboarding�
                 createRandomMarkupEightToFourteenPercent(),
               ...(options.requestId && { requestId: options.requestId }),
             };
-            const newOfferId = await trx
+
+            await trx
               .insert(offers)
               .values(newOffer)
               .returning({ id: offers.id });
@@ -393,7 +397,9 @@ export const subsequentScrape = async (options: { offerIds: number[] }) => {
       const offer = await trx.query.offers.findFirst({
         where: eq(offers.id, offerId),
         with: {
-          property: true,
+          property: {
+            columns: { originalListingId: true, originalListingPlatform: true },
+          },
         },
       });
 
