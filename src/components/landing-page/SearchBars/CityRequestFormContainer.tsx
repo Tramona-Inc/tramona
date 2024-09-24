@@ -4,7 +4,11 @@ import LinkRequestForm from "@/components/link-input/LinkRequestForm";
 import { Separator } from "@/components/ui/separator";
 import { useSession } from "next-auth/react";
 
-export default function CityRequestFormContainer() {
+export default function CityRequestFormContainer({
+  isRequestsPage = false,
+}: {
+  isRequestsPage?: boolean;
+}) {
   return (
     <div className="space-y-3">
       <p className="text-sm font-semibold text-muted-foreground lg:block">
@@ -20,7 +24,7 @@ export default function CityRequestFormContainer() {
           />
         </span>
       </p>
-      <RequestCityForm />
+      <RequestCityForm isRequestsPage={isRequestsPage} />
       <div className="flex items-center gap-x-4 text-zinc-400">
         <Separator className="flex-1 bg-zinc-400" />
         <p>or</p>
