@@ -78,7 +78,6 @@ const formSchema = z.object({
   amenities: z.string().transform((s) => s.split("\n").map((s) => s.trim())),
   about: zodString({ maxLen: Infinity }),
   originalListingUrl: optional(zodListingUrl),
-  tramonaFee: zodNumber({ min: 0 }),
   checkInInfo: optional(zodString()),
   checkInTime: optional(zodTime),
   checkOutTime: optional(zodTime),
@@ -290,13 +289,12 @@ export default function AdminOfferForm({
         propertyId,
         totalPrice,
         hostPayout: 0,
-        travelerOfferedPrice: 0,
+        travelerOfferedPrice: totalPrice,
         checkIn: request ? request.checkIn : new Date(checkInDate!),
         checkOut: request ? request.checkOut : new Date(checkOutDate!),
         //tramonaFee: data.tramonaFee * 100,
         // groupId: request?.madeByGroupId,
       };
-      console.log(newOffer);
 
       await createReviewsMutation.mutateAsync({
         reviews: propertyData.reviews,
@@ -470,20 +468,6 @@ export default function AdminOfferForm({
                   prefix="$"
                   suffix="/night"
                 />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="tramonaFee"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Tramona Fee</FormLabel>
-              <FormControl>
-                <Input {...field} inputMode="decimal" prefix="$" />
               </FormControl>
               <FormMessage />
             </FormItem>

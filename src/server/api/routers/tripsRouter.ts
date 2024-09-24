@@ -4,11 +4,7 @@ import {
   roleRestrictedProcedure,
 } from "@/server/api/trpc";
 import { db } from "@/server/db";
-import {
-  groupMembers,
-  properties,
-  trips,
-} from "@/server/db/schema";
+import { groupMembers, properties, trips } from "@/server/db/schema";
 
 import { TRPCError } from "@trpc/server";
 import { and, eq, exists, isNotNull, isNull, sql } from "drizzle-orm";
@@ -170,12 +166,10 @@ export const tripsRouter = createTRPCRouter({
           property: {
             columns: {
               id: true,
-              latLngPoint: true,
+              latLngPoint: false,
               imageUrls: true,
               city: true,
               name: true,
-              // latitude: true,
-              // longitude: true,
               checkInInfo: true,
               address: true,
               cancellationPolicy: true,
@@ -190,13 +184,17 @@ export const tripsRouter = createTRPCRouter({
           },
         },
       });
+      const propertyLatLngPoint = await db.query.properties.findFirst({
+        where: eq(properties.id, trip!.propertyId),
+        columns: { latLngPoint: true },
+      });
       if (!trip) {
         throw new Error("Trip not found");
       } else {
         const coordinates = {
           location: {
-            lat: trip.property.latLngPoint.y,
-            lng: trip.property.latLngPoint.x,
+            lat: propertyLatLngPoint!.latLngPoint.y,
+            lng: propertyLatLngPoint!.latLngPoint.x,
           },
         };
         return { trip, coordinates };

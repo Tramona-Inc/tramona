@@ -176,8 +176,11 @@ function SmallHeader({ isHost }: { isHost: boolean }) {
       ) : (
         <Button
           asChild
+          size="sm"
           variant="ghost"
-          className={cn(hostBtn.href !== "/for-hosts" && "rounded-full")}
+          className={cn(
+            hostBtn.href !== "/for-hosts" && "rounded-full px-2 tracking-tight",
+          )}
         >
           <Link href={hostBtn.href}>{hostBtn.name}</Link>
         </Button>
