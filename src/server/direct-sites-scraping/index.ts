@@ -24,6 +24,7 @@ import { getCoordinates } from "../google-maps";
 import { eq, and, inArray } from "drizzle-orm";
 import {
   createRandomMarkupEightToFourteenPercent,
+  formatCurrency,
   getNumNights,
 } from "@/utils/utils";
 import { DIRECTLISTINGMARKUP } from "@/utils/constants";
@@ -31,6 +32,7 @@ import { createLatLngGISPoint, sendScheduledText } from "@/server/server-utils";
 import { cleanbnbScraper, cleanbnbSubScraper } from "./cleanbnb-scrape";
 import { log } from "@/pages/api/script";
 import { env } from "@/env";
+import { addHours } from "date-fns";
 
 type ScraperOptions = {
   location: string;
@@ -208,20 +210,13 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
   //   })
   //   .slice(0, 10); // Grab up to 10 listings
 
-
   let listings = [] as ScrapedListing[];
-  let fairListings = [];
 
-  // 1. Define the ranges for matching categories
-  const closeRangeLower = 0.80;  // 0-20% below request
-  const closeRangeUpper = 1.20;  // 0-20% above request
-
-  const midRangeLower = 0.50;    // 20-50% below request
-  const midRangeUpper = 1.50;    // 20-50% above request
-
-  fairListings = flatListings.filter((listing) => {
-    return listing.originalNightlyPrice !== null &&
-      listing.originalNightlyPrice !== undefined;
+  const fairListings = flatListings.filter((listing) => {
+    return (
+      listing.originalNightlyPrice !== null &&
+      listing.originalNightlyPrice !== undefined
+    );
   });
 
   // fairListings = fairListings.sort((a, b) => {
@@ -230,29 +225,31 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
   //   return aDiff - bDiff;
   // });
 
-  const closeMatches = fairListings.filter((listing) => {
-    const priceRatio = listing.originalNightlyPrice! / requestNightlyPrice;
-    return priceRatio >= closeRangeLower && priceRatio <= closeRangeUpper;
-  });
+  function getCloseness(listing: ScrapedListing) {
+    const discountPercentage =
+      1 - listing.originalNightlyPrice! / requestNightlyPrice;
 
-  const midMatches = fairListings.filter((listing) => {
-    const priceRatio = listing.originalNightlyPrice! / requestNightlyPrice;
-    return priceRatio >= midRangeLower && priceRatio <= midRangeUpper;
-  });
+    if (discountPercentage <= 0.2) return "close";
+    if (discountPercentage <= 0.5) return "mid";
+    return "wide";
+  }
 
-  const wideMatches = fairListings.filter((listing) => {
-    const priceRatio = listing.originalNightlyPrice! / requestNightlyPrice;
-    return priceRatio > midRangeUpper || priceRatio < midRangeLower;
-  });
+  const closeMatches = fairListings.filter((l) => getCloseness(l) === "close");
+  const midMatches = fairListings.filter((l) => getCloseness(l) === "mid");
+  const wideMatches = fairListings.filter((l) => getCloseness(l) === "wide");
 
-  if (closeMatches.length === 0 && midMatches.length === 0 && wideMatches.length === 0) {
+  if (
+    closeMatches.length === 0 &&
+    midMatches.length === 0 &&
+    wideMatches.length === 0
+  ) {
     // Case 1: No properties in the area
     if (userFromRequest) {
       void sendScheduledText({
         to: userFromRequest.phoneNumber!,
-        content: `Tramona: Your request for ${options.location} for ${options.requestNightlyPrice} didn't yield any offers in the last 24 hours.
+        content: `Tramona: Your request for ${options.location} for ${formatCurrency(options.requestNightlyPrice)}/night didn't yield any offers in the last 24 hours.
         Consider submitting a new request with a different price range or a broader location to increase your chances of finding a match`,
-        sendAt: new Date(new Date().getTime() + 24 * 60 * 60 * 1000), // 24 hours from now
+        sendAt: addHours(new Date(), 24),
       });
     }
   } else if (closeMatches.length === 0 && midMatches.length === 0) {
@@ -263,7 +260,7 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
         content: `Tramona: Thank you for submitting your request! \n Unfortunately, no hosts have submitted a match for your price.
         But don’t worry—our team is actively searching for options that fit your needs. \n Is your budget flexible? We do have hosts with options in ${options.location}.
         Adjust your request if you’d like to explore other possibilities. Thank you for choosing Tramona!`,
-        sendAt: new Date(new Date().getTime() + 24 * 60 * 60 * 1000), // 24 hours from now
+        sendAt: addHours(new Date(), 24),
       });
     }
   } else if (closeMatches.length > 0 && closeMatches.length <= 3) {
@@ -277,7 +274,7 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
         content: `Tramona: Thank you for submitting your request, please see matches here: ${env.NEXTAUTH_URL}/requests! \n Unfortunately, no hosts have submitted a match for your price.
         But don’t worry—our team is actively searching for options that fit your needs. \n In case your budget is flexible, some hosts send matches slightly out of your budget take a look here: ${env.NEXTAUTH_URL}/requests.
         We’ll notify you as soon as we find the perfect stay. \n In the meantime, feel free to adjust your request if you’d like to explore other possibilities. Thank you for choosing Tramona!`,
-        sendAt: new Date(new Date().getTime() + 24 * 60 * 60 * 1000), // 24 hours from now
+        sendAt: addHours(new Date(), 24),
       });
     }
     listings = midMatches.slice(0, 10); // Send 20-50% matches

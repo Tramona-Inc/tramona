@@ -2466,3 +2466,157 @@ PostgresError: null value in column "num_bedrooms" of relation "properties" viol
     at readableAddChunk (node:internal/streams/readable:297:9)
     at Readable.push (node:internal/streams/readable:234:10)
     at TCP.onStreamRead (node:internal/stream_base_commons:190:23)
+[
+  {
+    "id": 1401,
+    "location": "Cairo, Egypt",
+    "numOffers": 0,
+    "requestMadeAt": "5 minutes"
+  },
+  {
+    "id": 1402,
+    "location": "San Francisco, CA, USA",
+    "numOffers": 0,
+    "requestMadeAt": "5 minutes"
+  },
+  {
+    "id": 1403,
+    "location": "Beverly Hills, CA, USA",
+    "numOffers": 0,
+    "requestMadeAt": "2 minutes"
+  }
+]
+
+Scraping listings for request 1401
+Starting evolveVacationRentalScraper for request 1401
+Starting cleanbnbScraper for request 1401
+Starting arizonaScraper for request 1401
+Starting cbIslandVacationsScraper for request 1401
+Starting redawningScraper for request 1401
+Starting casamundoScraper for request 1401
+url: https://www.redawning.com/search/properties?ptype=locality&platitude=30.0444196&plongitude=31.2357116&pcountry=US&pname=Cairo&sleepsmax=1TO100&dates=1729062000TO1729234800
+
+Scraping listings for request 1402
+Starting evolveVacationRentalScraper for request 1402
+Starting cleanbnbScraper for request 1402
+Starting arizonaScraper for request 1402
+Starting cbIslandVacationsScraper for request 1402
+Starting redawningScraper for request 1402
+Starting casamundoScraper for request 1402
+url: https://www.redawning.com/search/properties?ptype=locality&platitude=37.7749295&plongitude=-122.4194155&pcountry=US&pname=San%20Francisco&sleepsmax=1TO100&dates=1729666800TO1729839600
+scriptText: var taxodata = "";
+2 scrapers errored for request 1401: evolveVacationRentalScraper errored:
+
+SyntaxError: Unexpected token v in JSON at position 0
+    at JSON.parse (<anonymous>)
+    at Object.redawningScraper [as scraper] (webpack-internal:///(api)/./src/server/direct-sites-scraping/redawning.ts:233:46)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Promise.allSettled (index 4)
+    at async scrapeDirectListings (webpack-internal:///(api)/./src/server/direct-sites-scraping/index.ts:78:28)
+    at async eval (webpack-internal:///(api)/./src/pages/api/script.ts:137:9)
+    at async Promise.all (index 0)
+    at async script (webpack-internal:///(api)/./src/pages/api/script.ts:127:5)
+    at async K (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/pages-api.runtime.dev.js:21:2871)
+    at async U.render (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/pages-api.runtime.dev.js:21:3955)
+    at async DevServer.runApi (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/next-server.js:598:9)
+    at async NextNodeServer.handleCatchallRenderRequest (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/next-server.js:269:37)
+    at async DevServer.handleRequestImpl (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:813:17)
+    at async /Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/dev/next-dev-server.js:339:20
+    at async Span.traceAsyncFn (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/trace/trace.js:154:20)
+
+cleanbnbScraper errored:
+
+Error: write EPROTO C0FAFDF401000000:error:0A000119:SSL routines:ssl3_get_record:decryption failed or bad record mac:../deps/openssl/openssl/ssl/record/ssl3_record.c:623:
+
+    at AxiosError.from (file:///Users/ben/dev/tramona/node_modules/.pnpm/axios@1.7.7/node_modules/axios/lib/core/AxiosError.js:92:14)
+    at RedirectableRequest.handleRequestError (file:///Users/ben/dev/tramona/node_modules/.pnpm/axios@1.7.7/node_modules/axios/lib/adapters/http.js:620:25)
+    at RedirectableRequest.emit (node:events:514:28)
+    at eventHandlers.<computed> (/Users/ben/dev/tramona/node_modules/.pnpm/follow-redirects@1.15.9/node_modules/follow-redirects/index.js:49:24)
+    at ClientRequest.emit (node:events:514:28)
+    at TLSSocket.socketErrorListener (node:_http_client:501:9)
+    at TLSSocket.emit (node:events:514:28)
+    at emitErrorNT (node:internal/streams/destroy:151:8)
+    at emitErrorCloseNT (node:internal/streams/destroy:116:3)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+    at Axios.request (file:///Users/ben/dev/tramona/node_modules/.pnpm/axios@1.7.7/node_modules/axios/lib/core/Axios.js:45:41)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async checkAvailability (webpack-internal:///(api)/./src/server/direct-sites-scraping/casamundo-scraper.ts:120:26)
+    at async scrapeProperty (webpack-internal:///(api)/./src/server/direct-sites-scraping/casamundo-scraper.ts:406:25)
+    at async eval (webpack-internal:///(api)/./src/server/direct-sites-scraping/casamundo-scraper.ts:442:37)
+    at async Promise.all (index 12)
+    at async Object.casamundoScraper [as scraper] (webpack-internal:///(api)/./src/server/direct-sites-scraping/casamundo-scraper.ts:441:22)
+    at async Promise.allSettled (index 5)
+    at async scrapeDirectListings (webpack-internal:///(api)/./src/server/direct-sites-scraping/index.ts:78:28)
+    at async eval (webpack-internal:///(api)/./src/pages/api/script.ts:137:9)
+    at async Promise.all (index 0)
+    at async script (webpack-internal:///(api)/./src/pages/api/script.ts:127:5)
+    at async K (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/pages-api.runtime.dev.js:21:2871)
+    at async U.render (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/pages-api.runtime.dev.js:21:3955)
+    at async DevServer.runApi (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/next-server.js:598:9)
+Scraped 0 listings for request 1401, deleting 0 old offers
+No listings found for request 1401
+
+Scraping listings for request 1403
+Starting evolveVacationRentalScraper for request 1403
+Starting cleanbnbScraper for request 1403
+Starting arizonaScraper for request 1403
+Starting cbIslandVacationsScraper for request 1403
+Starting redawningScraper for request 1403
+Starting casamundoScraper for request 1403
+url: https://www.redawning.com/search/properties?ptype=locality&platitude=34.0736204&plongitude=-118.4003563&pcountry=US&pname=Beverly%20Hills&sleepsmax=1TO100&dates=1729062000TO1729234800
+scriptText: var taxodata = [{"pid":275263,"title":"Ground Floor in Venice Near The Beach-Sleeps 8","price":"$230 to $578\/night","bathrooms":2,"bedrooms":3,"urlimage":"https:\/\/assets06.redawning.com\/sites\/default\/files\/styles\/thumbnail\/public\/rental_property\/275263\/21db3a7fe196aed90cee4ea1e617c79d.jpeg?itok=CClggfzS","url":"http:\/\/www.redawning.com\/rental-property\/ground-floor-venice-near-beach-sleeps-8-los-angeles","region":"Los Angeles","content":"This listing is for the 1st Floor of \u0022Dream Home\u0022 --...","latitude":"34.002300","longitude":"-118.468400","list":"Property Search","position":1},{"pid":275340,"title":"2nd Story Masterpiece in Venice Beach-Sleeps 10","price":"$315 to $840\/night","bathrooms":2,"bedrooms":4,"urlimage":"https:\/\/assets06.redawning.com\/sites\/default\/files\/styles\/thumbnail\/public\/rental_property\/275340\/3ca1c78deb454ad95299b819de4d462f.jpeg?itok=6rXUsf4O","url":"http:\/\/www.redawning.com\/rental-property\/2nd-story-masterpiece-venice-beach-sleeps-10-los-angeles","region":"Los Angeles","content":"Combining modern and traditional elements, the 2nd...","latitude":"34.002300","longitude":"-118.468400","list":"Property Search","position":2},{"pid":495719,"title":"Covello | 3 BR w\/ backyard | North Hollywood","price":"$121 to $459\/night","bathrooms":3,"bedrooms":3,"urlimage":"https:\/\/assets06.redawning.com\/sites\/default\/files\/styles\/thumbnail\/public\/rental_property\/495719\/3bf7a673cc8dc9ba9bc0ed19415cc162.jpeg?itok=g-t2paDd","url":"http:\/\/www.redawning.com\/rental-property\/covello-3-br-w-backyard-north-hollywood-los-angeles","region":"Los Angeles","content":"Stunning design, and a peaceful neighborhood. Look no...","latitude":"34.208200","longitude":"-118.403400","list":"Property Search","position":3}];
+                   
+1 scrapers errored for request 1402: evolveVacationRentalScraper errored:
+
+AxiosError: Request failed with status code 522
+    at settle (file:///Users/ben/dev/tramona/node_modules/.pnpm/axios@1.7.7/node_modules/axios/lib/core/settle.js:19:12)
+    at IncomingMessage.handleStreamEnd (file:///Users/ben/dev/tramona/node_modules/.pnpm/axios@1.7.7/node_modules/axios/lib/adapters/http.js:599:11)
+    at IncomingMessage.emit (node:events:526:35)
+    at endReadableNT (node:internal/streams/readable:1359:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+    at Axios.request (file:///Users/ben/dev/tramona/node_modules/.pnpm/axios@1.7.7/node_modules/axios/lib/core/Axios.js:45:41)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async scrapeUrlLikeHuman (webpack-internal:///(api)/./src/server/server-utils.ts:99:12)
+    at async Object.redawningScraper [as scraper] (webpack-internal:///(api)/./src/server/direct-sites-scraping/redawning.ts:225:15)
+    at async Promise.allSettled (index 4)
+    at async scrapeDirectListings (webpack-internal:///(api)/./src/server/direct-sites-scraping/index.ts:78:28)
+    at async eval (webpack-internal:///(api)/./src/pages/api/script.ts:137:9)
+    at async Promise.all (index 1)
+    at async script (webpack-internal:///(api)/./src/pages/api/script.ts:127:5)
+    at async K (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/pages-api.runtime.dev.js:21:2871)
+    at async U.render (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/pages-api.runtime.dev.js:21:3955)
+    at async DevServer.runApi (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/next-server.js:598:9)
+    at async NextNodeServer.handleCatchallRenderRequest (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/next-server.js:269:37)
+    at async DevServer.handleRequestImpl (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/base-server.js:813:17)
+    at async /Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/dev/next-dev-server.js:339:20
+Scraped 23 listings for request 1402, deleting 0 old offers
+No listings found for request 1402
+1 scrapers errored for request 1403: evolveVacationRentalScraper errored:
+
+Error: C0FAFDF401000000:error:0A000119:SSL routines:ssl3_get_record:decryption failed or bad record mac:../deps/openssl/openssl/ssl/record/ssl3_record.c:623:
+
+    at AxiosError.from (file:///Users/ben/dev/tramona/node_modules/.pnpm/axios@1.7.7/node_modules/axios/lib/core/AxiosError.js:92:14)
+    at RedirectableRequest.handleRequestError (file:///Users/ben/dev/tramona/node_modules/.pnpm/axios@1.7.7/node_modules/axios/lib/adapters/http.js:620:25)
+    at RedirectableRequest.emit (node:events:514:28)
+    at eventHandlers.<computed> (/Users/ben/dev/tramona/node_modules/.pnpm/follow-redirects@1.15.9/node_modules/follow-redirects/index.js:49:24)
+    at ClientRequest.emit (node:events:514:28)
+    at TLSSocket.socketErrorListener (node:_http_client:501:9)
+    at TLSSocket.emit (node:events:514:28)
+    at TLSSocket._emitTLSError (node:_tls_wrap:923:10)
+    at TLSWrap.onerror (node:_tls_wrap:440:11)
+    at Axios.request (file:///Users/ben/dev/tramona/node_modules/.pnpm/axios@1.7.7/node_modules/axios/lib/core/Axios.js:45:41)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async scrapeUrlLikeHuman (webpack-internal:///(api)/./src/server/server-utils.ts:99:12)
+    at async eval (webpack-internal:///(api)/./src/server/direct-sites-scraping/redawning.ts:133:19)
+    at async Promise.all (index 2)
+    at async mapTaxodataToScrapedListing (webpack-internal:///(api)/./src/server/direct-sites-scraping/redawning.ts:130:12)
+    at async Object.redawningScraper [as scraper] (webpack-internal:///(api)/./src/server/direct-sites-scraping/redawning.ts:289:22)
+    at async Promise.allSettled (index 4)
+    at async scrapeDirectListings (webpack-internal:///(api)/./src/server/direct-sites-scraping/index.ts:78:28)
+    at async eval (webpack-internal:///(api)/./src/pages/api/script.ts:137:9)
+    at async Promise.all (index 2)
+    at async script (webpack-internal:///(api)/./src/pages/api/script.ts:127:5)
+    at async K (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/pages-api.runtime.dev.js:21:2871)
+    at async U.render (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/pages-api.runtime.dev.js:21:3955)
+    at async DevServer.runApi (/Users/ben/dev/tramona/node_modules/.pnpm/next@14.2.11_@babel+core@7.24.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/server/next-server.js:598:9)
+Scraped 18 listings for request 1403, deleting 0 old offers
