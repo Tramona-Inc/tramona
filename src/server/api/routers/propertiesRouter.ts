@@ -33,6 +33,7 @@ import { z } from "zod";
 import {
   ALL_PROPERTY_ROOM_TYPES,
   bookedDates,
+  discountTierSchema,
   properties,
   type Property,
 } from "./../../db/schema/tables/properties";
@@ -631,13 +632,13 @@ export const propertiesRouter = createTRPCRouter({
     .input(z.object({
       id: z.number(),
       autoOfferEnabled: z.boolean(),
-      autoOfferMaxPercentOff: z.number().min(0).max(100),
+      autoOfferDiscountTiers: z.array(discountTierSchema),
     }))
     .mutation(async ({ ctx, input }) => {
       await ctx.db.update(properties)
         .set({
           autoOfferEnabled: input.autoOfferEnabled,
-          autoOfferMaxPercentOff: input.autoOfferMaxPercentOff,
+          autoOfferDiscountTiers: input.autoOfferDiscountTiers,
         })
         .where(eq(properties.id, input.id));
     }),

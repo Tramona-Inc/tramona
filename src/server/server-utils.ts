@@ -646,7 +646,7 @@ export async function getPropertiesForRequest(
       id: true,
       hostId: true,
       autoOfferEnabled: true,
-      autoOfferMaxPercentOff: true,
+      autoOfferDiscountTiers: true,
       originalListingId: true,
     },
   });

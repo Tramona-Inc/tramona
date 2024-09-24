@@ -45,6 +45,7 @@ import { scrapeDirectListings } from "@/server/direct-sites-scraping";
 import { waitUntil } from "@vercel/functions";
 import { scrapeAirbnbPrice } from "@/server/scrapePrice";
 import { HOST_MARKUP, TRAVELER__MARKUP } from "@/utils/constants";
+import { differenceInDays } from "date-fns";
 
 const updateRequestInputSchema = z.object({
   requestId: z.number(),
@@ -508,18 +509,19 @@ export async function handleRequestSubmission(
       { ...input, id: request.id, latLngPoint: request.latLngPoint, radius },
       { tx },
     );
-
+  
     const numNights = getNumNights(input.checkIn, input.checkOut);
     const requestedNightlyPrice = input.maxTotalPrice / numNights;
-
+  
     for (const property of eligibleProperties) {
       const propertyDetails = await tx.query.properties.findFirst({
         where: eq(properties.id, property.id),
       });
-
+  
       if (
         propertyDetails?.autoOfferEnabled &&
-        propertyDetails.originalListingId
+        propertyDetails.originalListingId &&
+        propertyDetails.autoOfferDiscountTiers
       ) {
         try {
           const airbnbTotalPrice = await scrapeAirbnbPrice({
@@ -530,38 +532,44 @@ export async function handleRequestSubmission(
               numGuests: input.numGuests,
             },
           });
-          console.log('in da requests router and just scraped price', airbnbTotalPrice)
-
+          console.log(
+            "in da requests router and just scraped price",
+            airbnbTotalPrice,
+          );
+  
           const airbnbNightlyPrice = airbnbTotalPrice / numNights;
-          console.log('airbnb nightly price', airbnbNightlyPrice)
-          console.log('requested nightly price', requestedNightlyPrice)
+          console.log("airbnb nightly price", airbnbNightlyPrice);
+          console.log("requested nightly price", requestedNightlyPrice);
           const percentOff =
             ((airbnbNightlyPrice - requestedNightlyPrice) /
               airbnbNightlyPrice) *
             100;
-
-          console.log('percent off', percentOff)
-          if (percentOff <= (propertyDetails.autoOfferMaxPercentOff ?? 5)) {
+  
+          console.log("percent off", percentOff);
+  
+          const daysUntilCheckIn = differenceInDays(input.checkIn, new Date());
+  
+          const applicableDiscount = propertyDetails.autoOfferDiscountTiers.find(
+            tier => daysUntilCheckIn >= tier.days
+          );
+  
+          if (applicableDiscount && percentOff <= applicableDiscount.percentOff) {
             await tx.insert(offers).values({
               requestId: request.id,
               propertyId: property.id,
               totalPrice: input.maxTotalPrice,
-              hostPayout:
-                parseFloat(
-                  getHostPayout({
-                    propertyPrice: requestedNightlyPrice,
-                    hostMarkup: HOST_MARKUP,
-                    numNights,
-                  }),
-                ),
-              travelerOfferedPrice:
-                parseFloat(
-                  getTravelerOfferedPrice({
-                    propertyPrice: requestedNightlyPrice,
-                    travelerMarkup: TRAVELER__MARKUP,
-                    numNights,
-                  }),
-                ),
+              hostPayout: getHostPayout({
+                propertyPrice: requestedNightlyPrice,
+                hostMarkup: HOST_MARKUP,
+                numNights,
+              }),
+  
+              travelerOfferedPrice: getTravelerOfferedPrice({
+                propertyPrice: requestedNightlyPrice,
+                travelerMarkup: TRAVELER__MARKUP,
+                numNights,
+              }),
+  
               checkIn: input.checkIn,
               checkOut: input.checkOut,
             });
@@ -569,7 +577,7 @@ export async function handleRequestSubmission(
         } catch (error) {
           console.error(
             `Error processing auto-offer for property ${property.id}:`,
-            error,
+            error
           );
         }
       }
