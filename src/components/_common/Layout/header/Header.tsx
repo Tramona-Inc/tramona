@@ -21,7 +21,6 @@ import {
   hamburgerLinksDesktop,
   hamburgerLinksMobile,
   unloggedHamburgerLinksMobile,
-  mobileheaderLinksForHost,
 } from "@/config/headerNavLinks";
 import { ArrowLeftRightIcon, DoorOpen, MenuIcon } from "lucide-react";
 import { SkeletonText } from "@/components/ui/skeleton";
@@ -114,6 +113,20 @@ function LargeHeader({ isHost }: { isHost: boolean }) {
       </div>
 
       <div className="flex-1" />
+      <NavLink
+        href="/help-center"
+        render={({ selected }) => (
+          <Button
+            variant="ghost"
+            className={cn(
+              "rounded-full hover:text-foreground",
+              selected && "text-foreground underline underline-offset-2",
+            )}
+          >
+            24/7 Support
+          </Button>
+        )}
+      />
 
       {status === "loading" ? null : hostBtn.isLoading ? (
         <div className="px-4">
@@ -148,27 +161,25 @@ function SmallHeader({ isHost }: { isHost: boolean }) {
   return (
     <header className="sticky top-0 z-50 flex h-header-height items-center gap-2 border-b bg-white px-2 pl-4 text-sm sm:text-base">
       <TramonaLogo />
-      <div className="flex translate-y-0.5 items-center pl-2">
-        {isHost &&
-          mobileheaderLinksForHost.map((link) => (
-            <NavLink
-              key={link.href}
-              href={link.href}
-              render={({ selected }) => (
-                <span
-                  className={cn(
-                    "rounded-md px-2 py-3 text-sm font-bold text-zinc-600 hover:text-foreground xl:text-base",
-                    selected && "text-foreground underline underline-offset-2",
-                  )}
-                >
-                  {link.name}
-                </span>
-              )}
-            />
-          ))}
-      </div>
+      <div className="flex translate-y-0.5 items-center pl-2"></div>
 
       <div className="flex-1" />
+      <NavLink
+        href="/help-center"
+        render={({ selected }) => (
+          <Button
+            variant="ghost"
+            size="sm"
+            className={cn(
+              "rounded-full px-2 py-3 text-sm tracking-tight hover:text-foreground",
+              selected && "text-foreground underline underline-offset-2",
+            )}
+          >
+            24/7 Support
+          </Button>
+        )}
+      />
+
       {!isHost || status === "loading" ? null : hostBtn.isLoading ? (
         <div className="px-4">
           <SkeletonText className="w-24" />
