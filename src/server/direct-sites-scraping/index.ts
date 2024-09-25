@@ -212,13 +212,13 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
     midMatches.length === 0 &&
     wideMatches.length === 0
   ) {
-    // Case 1: No properties in the area
+    console.log("Case 1: No properties in the area");
     if (userFromRequest) {
-      void sendText({
+      await sendText({
         to: userFromRequest.phoneNumber!,
         content: `Tramona: We’re not live in ${options.location} just yet, but we’re actively working on it! We’ll send you an email as soon as we launch there.\n\nIn the meantime, if you’re flexible with your travel plans, feel free to submit a request for a different location and discover the great deals our hosts can offer you.\n\nThank you for your interest in Tramona!`,
       });
-      // void sendScheduledText({
+      // await sendScheduledText({
       //   to: userFromRequest.phoneNumber!,
       //   content: `Tramona: Your request for ${options.location} for ${formatCurrency(options.requestNightlyPrice)}/night didn't yield any offers in the last 24 hours.
       //   Consider submitting a new request with a different price range or a broader location to increase your chances of finding a match`,
@@ -226,21 +226,23 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
       // });
     }
   } else if (closeMatches.length === 0 && midMatches.length === 0) {
-    // Case 2: No matches within the price range (all matches are 50% + outside)
+    console.log(
+      "Case 2: No matches within the price range (all matches are 50% + outside)",
+    );
     if (userFromRequest) {
-      void sendScheduledText({
+      await sendScheduledText({
         to: userFromRequest.phoneNumber!,
         content: `Tramona: Thank you for submitting your request!\n\nUnfortunately, no hosts have submitted a match for your price. But don’t worry—our team is actively searching for options that fit your needs.\n\nIs your budget flexible? We do have hosts with options in ${options.location}. Adjust your request if you’d like to explore other possibilities.\n\nThank you for choosing Tramona!`,
         sendAt: addHours(new Date(), 24),
       });
     }
   } else if (closeMatches.length > 0 && closeMatches.length <= 3) {
-    // Case 3: 1-3 matches within 0-20%, but more in 20-50%
+    console.log("Case 3: 1-3 matches within 0-20%, but more in 20-50%");
     listings = closeMatches.concat(midMatches).slice(0, 10);
   } else if (closeMatches.length === 0 && midMatches.length > 0) {
-    // Case 4: No close matches, but some in 20-50%
+    console.log("Case 4: No close matches, but some in 20-50%");
     if (userFromRequest) {
-      void sendScheduledText({
+      await sendScheduledText({
         to: userFromRequest.phoneNumber!,
         content: `Tramona: Thank you for submitting your request!\n\nUnfortunately, no hosts have submitted a match for your price. But don’t worry—our team is actively searching for options that fit your needs.\n\nIn case your budget is flexible, some hosts sent matches slightly out of your budget take a look here: ${env.NEXTAUTH_URL}/requests. We’ll notify you as soon as we find the perfect stay.\n\nIn the meantime, feel free to adjust your request if you’d like to explore other possibilities. Thank you for choosing Tramona!`,
         sendAt: addHours(new Date(), 24),
@@ -248,7 +250,7 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
     }
     listings = midMatches.slice(0, 10); // Send 20-50% matches
   } else if (closeMatches.length > 3) {
-    // Case 5: 4 or more close matches (0-20%)
+    console.log("Case 5: 4 or more close matches (0-20%)");
     listings = closeMatches.slice(0, 10); // Send 0-20% matches
   }
 
