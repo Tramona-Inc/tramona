@@ -5,7 +5,11 @@ import { DirectSiteScraper, ScrapedListing, SubsequentScraper } from ".";
 import { z } from "zod";
 import { axiosWithRetry } from "@/server/server-utils";
 import { formatDateYearMonthDay, getNumNights, parseHTML } from "@/utils/utils";
-import { PropertyType, ListingSiteName } from "@/server/db/schema/common";
+import {
+  PropertyType,
+  ListingSiteName,
+  ALL_PROPERTY_TYPES,
+} from "@/server/db/schema/common";
 import { CancellationPolicyWithInternals } from "../db/schema/tables/properties";
 import { log } from "@/pages/api/script";
 import { googleMaps } from "../google-maps";
@@ -70,17 +74,16 @@ const cancellationPolicySchema = z.object({
 });
 
 const propertyTypeMapping: Record<string, PropertyType> = {
-  Home: "House",
   Condo: "Condominium",
-  Townhouse: "Townhouse",
   Suite: "Guest Suite",
   Apts: "Apartment",
   "Hotel Room": "Hotel",
-  Bungalow: "Bungalow",
-  Other: "Other",
 };
 
 const mapPropertyType = (originalType: string): PropertyType => {
+  if (ALL_PROPERTY_TYPES.includes(originalType)) {
+    return originalType as PropertyType;
+  }
   if (propertyTypeMapping[originalType]) {
     return propertyTypeMapping[originalType];
   } else {
@@ -288,7 +291,7 @@ export const redawningScraper: DirectSiteScraper = async ({
 
   if (!ptype) {
     throw new Error(
-      `Failed to find a valid property type for location: ${location}`,
+      `Failed to find a valid property type for location "${location}"`,
     );
   }
 
@@ -297,7 +300,9 @@ export const redawningScraper: DirectSiteScraper = async ({
   )?.short_name;
 
   if (!pcountry) {
-    throw new Error(`Failed to find a valid country for location: ${location}`);
+    throw new Error(
+      `Failed to find a valid country for location "${location}"`,
+    );
   }
 
   const url = `https://www.redawning.com/search/properties?ptype=${ptype}&platitude=${lat}&plongitude=${lng}&pcountry=${pcountry}&pname=${location}&sleepsmax=1TO100&dates=${convertToEpochAt7AM(checkIn)}TO${convertToEpochAt7AM(checkOut)}`;
