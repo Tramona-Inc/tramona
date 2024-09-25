@@ -78,10 +78,10 @@ interface ScrapedData {
   longitude: number;
   numberOfRooms: number;
   amenityFeature:
-    | {
-        name: string;
-      }[]
-    | null;
+  | {
+    name: string;
+  }[]
+  | null;
   image: string[];
   containsPlace: {
     occupancy: {
@@ -394,13 +394,13 @@ export const cleanbnbScraper: DirectSiteScraper = async ({
       (property) => property.url.split("?")[0] === scrapedData.url,
     )[0]
       ? properties.filter(
-          (property) => property.url.split("?")[0] === scrapedData.url,
-        )[0]
+        (property) => property.url.split("?")[0] === scrapedData.url,
+      )[0]
       : properties.filter(
-          (property) =>
-            normalizeString(property.name) ===
-            normalizeString(scrapedData.name),
-        )[0];
+        (property) =>
+          normalizeString(property.name) ===
+          normalizeString(scrapedData.name),
+      )[0];
 
     if (property === undefined) {
       if (info.length > 0) {
@@ -433,11 +433,9 @@ export const cleanbnbScraper: DirectSiteScraper = async ({
     const imageUrls = scrapedData.image;
     const originalListingUrl = property.url;
     const originalNightlyPrice =
-      parseFloat(
-        (
-          (parseFloat(price) + cleaningFee) /
-          getNumNights(checkIn, checkOut)
-        ).toFixed(2),
+      Math.round(
+        parseFloat(price) + (cleaningFee /
+          getNumNights(checkIn, checkOut))
       ) * 100;
 
     res.push({

@@ -56,7 +56,7 @@ export async function insertHost(id: string) {
   await sendSlackMessage({
     text: [
       "*Host Profile Created:*",
-      `User ${user.name} has become a host`,
+      `User ${user.firstName} ${user.lastName} has become a host`,
     ].join("\n"),
     channel: "host-bot",
   });

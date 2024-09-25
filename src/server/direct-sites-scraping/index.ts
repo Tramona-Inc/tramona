@@ -39,7 +39,7 @@ import { log } from "@/pages/api/script";
 import { env } from "@/env";
 import { addHours } from "date-fns";
 import { z, ZodError } from "zod";
-import { formatZodError } from "@/utils/zod-utils";
+import { formatZodError } from "../../utils/zod-utils";
 
 type ScraperOptions = {
   location: string;
@@ -209,9 +209,7 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
     if (userFromRequest) {
       void sendText({
         to: userFromRequest.phoneNumber!,
-        content: `Tramona: We’re not live in ${options.location} just yet, but we’re actively working on it! We’ll send you an email as soon as we launch there. In the meantime,
-        if you’re flexible with your travel plans, feel free to submit a request for a different location and discover the great deals our hosts can offer you.
-        Thank you for your interest in Tramona!`,
+        content: `Tramona: We’re not live in ${options.location} just yet, but we’re actively working on it! We’ll send you an email as soon as we launch there.\n\nIn the meantime, if you’re flexible with your travel plans, feel free to submit a request for a different location and discover the great deals our hosts can offer you.\n\nThank you for your interest in Tramona!`,
       });
       // void sendScheduledText({
       //   to: userFromRequest.phoneNumber!,
@@ -225,9 +223,7 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
     if (userFromRequest) {
       void sendScheduledText({
         to: userFromRequest.phoneNumber!,
-        content: `Tramona: Thank you for submitting your request! \n Unfortunately, no hosts have submitted a match for your price.
-        But don’t worry—our team is actively searching for options that fit your needs. \n Is your budget flexible? We do have hosts with options in ${options.location}.
-        Adjust your request if you’d like to explore other possibilities. Thank you for choosing Tramona!`,
+        content: `Tramona: Thank you for submitting your request!\n\nUnfortunately, no hosts have submitted a match for your price. But don’t worry—our team is actively searching for options that fit your needs.\n\nIs your budget flexible? We do have hosts with options in ${options.location}. Adjust your request if you’d like to explore other possibilities.\n\nThank you for choosing Tramona!`,
         sendAt: addHours(new Date(), 24),
       });
     }
@@ -239,9 +235,7 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
     if (userFromRequest) {
       void sendScheduledText({
         to: userFromRequest.phoneNumber!,
-        content: `Tramona: Thank you for submitting your request! \n Unfortunately, no hosts have submitted a match for your price.
-        But don’t worry—our team is actively searching for options that fit your needs. \n In case your budget is flexible, some hosts sent matches slightly out of your budget take a look here: ${env.NEXTAUTH_URL}/requests.
-        We’ll notify you as soon as we find the perfect stay. \n In the meantime, feel free to adjust your request if you’d like to explore other possibilities. Thank you for choosing Tramona!`,
+        content: `Tramona: Thank you for submitting your request!\n\nUnfortunately, no hosts have submitted a match for your price. But don’t worry—our team is actively searching for options that fit your needs.\n\nIn case your budget is flexible, some hosts sent matches slightly out of your budget take a look here: ${env.NEXTAUTH_URL}/requests. We’ll notify you as soon as we find the perfect stay.\n\nIn the meantime, feel free to adjust your request if you’d like to explore other possibilities. Thank you for choosing Tramona!`,
         sendAt: addHours(new Date(), 24),
       });
     }
