@@ -19,69 +19,6 @@ import Footer from "@/components/_common/Layout/Footer";
 import { TestimonialCarousel } from "@/components/landing-page/_sections/testimonials/TestimonialCarousel";
 import { Check } from "lucide-react";
 
-const DamageProtection = () => {
-  const protectionMethods = [
-    {
-      id: 0,
-      description: "Our own screening",
-    },
-    {
-      id: 1,
-      description: "Another screening with a 3rd party",
-    },
-    {
-      id: 2,
-      description: "An optional in depth, multi-hour screening with Stripe",
-    },
-  ];
-  return (
-    <section className="space-y-10 px-4 py-10 md:px-6 lg:px-8">
-      <h1 className="text-center text-3xl font-bold md:text-5xl">
-        Tramona Cover
-      </h1>
-      <h2 className="text-center text-2xl font-semibold md:text-4xl">
-        Listing on Tramona is Safe and Effective
-      </h2>
-      <div className="mx-auto flex max-w-5xl flex-col items-start">
-        <div className="flex-1 space-y-6 p-6 text-center md:mr-8 md:text-left">
-          <h2 className="text-xl font-bold text-gray-900 md:text-2xl">
-            Guest Identity Verification
-          </h2>
-          <h3 className="text-lg font-semibold text-gray-900 md:text-xl">
-            Tramona vets travelers in 3 ways so you are safe and protected when
-            a guest checks in
-          </h3>
-          {protectionMethods.map((method) => (
-            <div key={method.id}>
-              <p className="text-sm text-gray-700 md:text-base">
-                {method.id + 1}.&nbsp;{method.description}
-              </p>
-            </div>
-          ))}
-        </div>
-        <div className="flex-1 space-y-6 p-6 text-center md:mr-8 md:text-left">
-          <h2 className="text-xl font-bold text-gray-900 md:text-2xl">
-            Property Protection
-          </h2>
-          <p className="text-sm text-gray-700 md:text-base">
-            Tramona offers $50,000 in protection for each booking. This will
-            move up to 1M in the coming months
-          </p>
-        </div>
-        <div className="flex-1 space-y-6 p-6 text-center md:mr-8 md:text-left">
-          <h2 className="text-xl font-bold text-gray-900 md:text-2xl">
-            24 Hour Safety Line
-          </h2>
-          <p className="text-sm text-gray-700 md:text-base">
-            If you ever feel unsafe, our app provides one-tap access to
-            specially-trained safety agents, day or night.
-          </p>
-        </div>
-      </div>
-    </section>
-  );
-};
-
 type Tabs = {
   id: number;
   title: string;
@@ -93,26 +30,20 @@ const contents: Tabs[] = [
   {
     id: 0,
     title: "Directly with Airbnb",
-    info: "Instantly sign up with Airbnb Via our partner hospitable. This will redirect you to Airbnb and allow an effortless onboarding",
-    image: "/assets/images/host-welcome/1.avif",
+    info: "Instantly sign up with Airbnb Via our partner hospitable. This will redirect you to Airbnb and allow an effortless onboarding.",
+    image: "/assets/images/host-welcome/1.jpeg",
   },
   {
     id: 1,
     title: "Sign up Manually",
-    info: "Manually onboard yourself, you can also just enter a link in this section and most information we need will come instantly over",
-    image: "/assets/images/host-welcome/2.jpg",
+    info: "Manually onboard yourself, you can also just enter a link in this section and most information we need will come instantly over.",
+    image: "/assets/images/host-welcome/2.png",
   },
   {
     id: 2,
-    title: "Sign up with PMS",
-    info: "Use a PMS? As of now we are partnered with Hostaway. More coming soon!",
-    image: "/assets/images/host-welcome/3.avif",
-  },
-  {
-    id: 3,
     title: "We sign you up",
     info: "Have any questions? Schedule a call and we will help onboard you and answer all questions in the meantime.",
-    image: "/assets/images/host-welcome/4.avif",
+    image: "/assets/images/host-welcome/3.png",
   },
 ];
 
@@ -189,31 +120,25 @@ function FAQ() {
 
 function ListInAMinute() {
   return (
-    <section className="mx-auto max-w-7xl space-y-8 px-4 sm:px-6 md:space-y-24 md:px-8 lg:px-10 xl:px-12">
+    <section className="mx-auto max-w-7xl space-y-8 px-4 sm:px-6 md:space-y-20 md:px-8 lg:px-10 xl:px-12">
       <h1 className="text-center text-3xl font-bold md:text-4xl lg:text-5xl">
         List in less than 1 minute with our effortless sign up flow
       </h1>
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 xl:gap-8">
+      <div className="flex flex-col gap-6 lg:flex-row">
         {contents.map((content) => (
-          <div
-            key={content.id}
-            className="rounded-xl bg-zinc-50 p-4 text-center sm:p-6"
-          >
-            <div className="mx-auto h-24 w-24 sm:h-28 sm:w-28 md:h-32 md:w-32 lg:h-36 lg:w-36">
+          <div key={content.id} className="flex basis-1/3 items-center gap-2">
+            <div className="relative h-32 w-5/12 overflow-clip rounded-xl lg:h-full">
               <Image
                 src={content.image}
+                objectFit="cover"
+                layout="fill"
                 alt=""
-                layout="responsive"
-                width={150}
-                height={150}
               />
             </div>
-            <h2 className="h-10 text-xl font-bold sm:text-2xl md:h-14 md:text-3xl lg:h-24">
-              {content.title}
-            </h2>
-            <p className="text-sm text-muted-foreground sm:text-base">
-              {content.info}
-            </p>
+            <div className="flex-1 space-y-2">
+              <h2 className="font-bold">{content.title}</h2>
+              <p className="text-sm">{content.info}</p>
+            </div>
           </div>
         ))}
       </div>
@@ -271,7 +196,7 @@ function TailorYourBookingProcess() {
   );
 }
 
-function ListingOnTramona() {
+function DamageProtection() {
   const items = [
     {
       title: "Guest Identity Verification",
@@ -348,6 +273,19 @@ function WhatAreYouWaitingFor() {
             Become a Host
           </Button>
         </Link>
+      </div>
+    </section>
+  );
+}
+
+function SendUsAnEmail() {
+  return (
+    <section className="mx-auto max-w-7xl">
+      <div className="mx-4 space-y-6 text-center">
+        <h2 className="text-3xl font-bold lg:text-4xl">
+          Questions? Send us an email and we will get right back to you
+        </h2>
+        <p className="text-2xl font-semibold lg:text-3xl">info@tramona.com</p>
       </div>
     </section>
   );
@@ -430,12 +368,11 @@ export default function HostWelcome({
         <TestimonialCarousel />
         <Questions />
         <TailorYourBookingProcess />
-        <ListingOnTramona />
-        <ListInAMinute />
-
         <DamageProtection />
+        <ListInAMinute />
         <FAQ />
         <WhatAreYouWaitingFor />
+        <SendUsAnEmail />
       </div>
       <div className="hidden md:block">
         <Footer />
