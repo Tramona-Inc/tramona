@@ -474,31 +474,9 @@ export async function handleRequestSubmission(
         latitude: lat,
         longitude: lng,
         numGuests: input.numGuests,
-      })
-        .then(async (listings) => {
-          if (listings.length > 0) {
-            const travelerPhone = user.phoneNumber;
-            if (!travelerPhone) {
-              console.log(
-                `No phone number for request ${request.id} made by user ${user.email}, skipping texts`,
-              );
-              return;
-            }
-
-            const numOfMatches = listings.length;
-            void sendScheduledText({
-              to: travelerPhone,
-              content: `Tramona: You have ${numOfMatches <= 10 ? numOfMatches : "more than 10"} matches for your request in ${input.location}! Check them out at tramona.com/requests`,
-              sendAt:
-                numOfMatches <= 5
-                  ? addMinutes(new Date(), 25)
-                  : addMinutes(new Date(), 55),
-            });
-          }
-        })
-        .catch((error) => {
-          console.error("Error scraping listings: " + error);
-        }),
+      }).catch((error) => {
+        console.error("Error scraping listings: " + error);
+      }),
     );
 
     const eligibleProperties = await getPropertiesForRequest(
