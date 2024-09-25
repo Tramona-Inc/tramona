@@ -1,6 +1,5 @@
 import { db } from "@/server/db";
 import { and, isNull, gt, notInArray } from "drizzle-orm";
-import { appendFileSync } from "fs";
 import { requests } from "@/server/db/schema";
 import { NextApiResponse } from "next";
 import { addHours, formatDistanceToNow } from "date-fns";
@@ -15,12 +14,13 @@ const processedRequestIds = [
 ];
 
 export function log(str: unknown) {
-  appendFileSync(
-    "script.log",
-    typeof str === "string" ? str : JSON.stringify(str, null, 2),
-  );
+  // appendFileSync(
+  //   "script.log",
+  //   typeof str === "string" ? str : JSON.stringify(str, null, 2),
+  // );
+  // appendFileSync("script.log", "\n");
 
-  appendFileSync("script.log", "\n");
+  console.log(str);
 }
 
 export default async function script(_: any, res: NextApiResponse) {
@@ -56,7 +56,7 @@ export default async function script(_: any, res: NextApiResponse) {
 
   await Promise.all(
     requests_.map(async (request) =>
-      fetch("/api/scrape", {
+      fetch("http://localhost:3000/api/scrape", {
         method: "POST",
         body: JSON.stringify({ requestId: request.id }),
       }),

@@ -34,6 +34,8 @@ export default async function handler(
     return res.status(404).json({ error: "Request not found" });
   }
 
+  console.log(`Scraping listings for request ${request.id}`);
+
   await scrapeDirectListings({
     checkIn: request.checkIn,
     checkOut: request.checkOut,
