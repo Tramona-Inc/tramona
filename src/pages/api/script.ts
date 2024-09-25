@@ -1,5 +1,5 @@
 import { db } from "@/server/db";
-import { and, isNull, gt, notInArray } from "drizzle-orm";
+import { and, isNull, gt, notInArray, asc } from "drizzle-orm";
 import { requests } from "@/server/db/schema";
 import { NextApiResponse } from "next";
 import { addHours, formatDistanceToNow } from "date-fns";
@@ -18,6 +18,8 @@ const processedRequestIds = [
   837, 854, 863, 1259, 1260, 1281,
   //
   1292, 880,
+  //
+  780, 786, 795, 796, 799, 809, 813, 818, 819, 828,
 ];
 
 export function log(str: unknown) {
@@ -39,6 +41,7 @@ export default async function script(_: any, res: NextApiResponse) {
         gt(requests.createdAt, new Date(Date.now() - 1000 * 60 * 60 * 24 * 14)),
         notInArray(requests.id, processedRequestIds),
       ),
+      orderBy: asc(requests.createdAt),
       with: {
         offers: true,
         madeByGroup: { with: { owner: true } },
@@ -46,10 +49,12 @@ export default async function script(_: any, res: NextApiResponse) {
     })
     .then((res) =>
       res
-        .filter((r) =>
-          r.offers.every((o) => o.createdAt < addHours(new Date(), -72)),
+        .filter(
+          (r) =>
+            r.madeByGroup.owner.email === "sinsunny133@gmail.com" &&
+            r.offers.every((o) => o.createdAt < addHours(new Date(), -72)),
         )
-        .slice(0, 5),
+        .slice(0, 10),
     );
 
   log(
@@ -69,12 +74,12 @@ export default async function script(_: any, res: NextApiResponse) {
 
   console.log(requests_.map((r) => r.id));
 
-  // await Promise.all(
-  //   requests_.map(async (request) =>
-  //     axios.post("https://tramona.com/api/scrape", {
-  //       requestId: request.id,
-  //     }),
-  //   ),
-  // );
+  await Promise.all(
+    requests_.map(async (request) =>
+      axios.post("https://tramona.com/api/scrape", {
+        requestId: request.id,
+      }),
+    ),
+  );
   res.status(200).json({ success: true });
 }
