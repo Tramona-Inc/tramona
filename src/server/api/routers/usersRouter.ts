@@ -248,7 +248,7 @@ export const usersRouter = createTRPCRouter({
         isProductionOnly: true,
         text: [
           "*Host Profile Created:*",
-          `User ${ctx.user.name} has become a host`,
+          `User ${ctx.user.firstName} ${ctx.user.lastName} has become a host`,
         ].join("\n"),
         channel: "host-bot",
       });
