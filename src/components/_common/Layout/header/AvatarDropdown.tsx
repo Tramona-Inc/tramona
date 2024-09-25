@@ -95,12 +95,6 @@ export default function AvatarDropdown({
               Profile
             </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href="/help-center">
-              <BadgeHelpIcon />
-              24/7 Support
-            </Link>
-          </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
             red

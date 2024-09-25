@@ -27,10 +27,6 @@
     {
       "path": "/api/task",
       "schedule": "* * * * *"
-    },
-    {
-      "path": "/api/cron/check-requests-without-offers",
-      "schedule": "* * * * *"
     }
   ]
 }

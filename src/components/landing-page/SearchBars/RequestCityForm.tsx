@@ -23,7 +23,11 @@ import { CityRequestFiltersDialog } from "./CityRequestFiltersDialog";
 import { api } from "@/utils/api";
 import RequestSubmittedDialog from "@/components/landing-page/SearchBars/DesktopRequestComponents/RequestSubmittedDialog";
 
-export default function RequestCityForm() {
+export default function RequestCityForm({
+  isRequestsPage = false,
+}: {
+  isRequestsPage?: boolean;
+}) {
   const [requestSubmittedDialogOpen, setRequestSubmittedDialogOpen] =
     useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -154,6 +158,7 @@ export default function RequestCityForm() {
         showConfetti={showConfetti}
         madeByGroupId={madeByGroupId}
         location={form.getValues("location")}
+        isRequestsPage={isRequestsPage}
       />
     </Form>
   );

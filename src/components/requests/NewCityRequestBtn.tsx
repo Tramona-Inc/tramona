@@ -21,7 +21,7 @@ export function NewCityRequestBtn() {
         <DialogHeader className="border-b pb-2 font-bold">
           Request a deal
         </DialogHeader>
-        <CityRequestFormContainer />
+        <CityRequestFormContainer isRequestsPage />
       </DialogContent>
     </Dialog>
   );
