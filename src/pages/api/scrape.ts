@@ -1,12 +1,10 @@
 import { scrapeDirectListings } from "@/server/direct-sites-scraping";
 import { getNumNights } from "@/utils/utils";
-import { sendScheduledText } from "@/server/server-utils";
 import { requests } from "@/server/db/schema";
 import { NextApiResponse } from "next";
 import { db } from "@/server/db";
 import { eq } from "drizzle-orm";
 import { NextApiRequest } from "next";
-import { addMinutes } from "date-fns";
 
 export default async function handler(
   req: NextApiRequest,
@@ -51,23 +49,22 @@ export default async function handler(
       requestId: request.id,
       location: request.location,
       numGuests: request.numGuests,
-    })
-      .catch((err) => {
-        if (err instanceof Error) {
-          console.error(
-            `Error scraping listings for request ${request.id}:\n\n${err.stack}`,
-          );
-        } else {
-          console.error(
-            `Error scraping listings for request ${request.id}: ${err}`,
-          );
-        }
-        return res.status(500).json({ error: "Error scraping listings" });
-      });
+    }).catch((err) => {
+      if (err instanceof Error) {
+        console.error(
+          `Error scraping listings for request ${request.id}:\n\n${err.stack}`,
+        );
+      } else {
+        console.error(
+          `Error scraping listings for request ${request.id}: ${err}`,
+        );
+      }
+      return res.status(500).json({ error: "Error scraping listings" });
+    });
   } catch (err) {
-    console.error(
-      `Error scraping listings for request ${requestId}:\n\n${err}`,
-    );
+    console.error(err);
     return res.status(500).json({ error: "Error scraping listings" });
   }
+
+  return res.status(200).json({ message: "Scraped listings" });
 }
