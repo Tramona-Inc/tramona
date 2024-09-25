@@ -4,11 +4,7 @@ import { useSession } from "next-auth/react";
 import Head from "next/head";
 import { useEffect, useState } from "react";
 import NoStripeAccount from "@/components/host/finances/NoStripeAccount";
-import {
-  ConnectAccountOnboarding,
-  ConnectNotificationBanner,
-  ConnectAccountManagement,
-} from "@stripe/react-connect-js";
+import { ConnectNotificationBanner } from "@stripe/react-connect-js";
 import useIsStripeConnectInstanceReady from "@/utils/store/stripe-connect";
 import { useRouter } from "next/router";
 import StripeConnectCurrentlyDueBeforePayouts from "@/components/host/finances/StripeConnectCurrentlyDueBeforePayout";
