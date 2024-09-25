@@ -20,6 +20,8 @@ const processedRequestIds = [
   1292, 880,
   //
   780, 786, 795, 796, 799, 809, 813, 818, 819, 828,
+  //
+  1379, 1388,
 ];
 
 export function log(str: unknown) {
@@ -49,10 +51,9 @@ export default async function script(_: any, res: NextApiResponse) {
     })
     .then((res) =>
       res
-        .filter(
-          (r) =>
-            r.madeByGroup.owner.email === "sinsunny133@gmail.com" &&
-            r.offers.every((o) => o.createdAt < addHours(new Date(), -72)),
+        .filter((r) =>
+          // r.madeByGroup.owner.email === "sinsunny133@gmail.com" &&
+          r.offers.every((o) => o.createdAt < addHours(new Date(), -72)),
         )
         .slice(0, 10),
     );
