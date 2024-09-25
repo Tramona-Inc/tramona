@@ -168,10 +168,6 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
     .filter((o) => o.property.originalListingPlatform !== null)
     .map((o) => o.id);
 
-  log(
-    `Scraped ${flatListings.length} listings for request ${options.requestId}, deleting ${scrapedOfferIds.length} old offers`,
-  );
-
   await db.delete(offers).where(inArray(offers.id, scrapedOfferIds));
 
   let listings = [] as ScrapedListing[];
@@ -182,12 +178,6 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
       listing.originalNightlyPrice !== undefined
     );
   });
-
-  // fairListings = fairListings.sort((a, b) => {
-  //   const aDiff = Math.abs((a.originalNightlyPrice ?? 0) - requestNightlyPrice);
-  //   const bDiff = Math.abs((b.originalNightlyPrice ?? 0) - requestNightlyPrice);
-  //   return aDiff - bDiff;
-  // });
 
   function getCloseness(listing: ScrapedListing) {
     const discountPercentage = Math.abs(
@@ -222,6 +212,10 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
       return aDiff - bDiff;
     });
   const wideMatches = fairListings.filter((l) => getCloseness(l) === "wide");
+
+  console.log("closeMatches: ", closeMatches.length);
+  console.log("midMatches: ", midMatches.length);
+  console.log("wideMatches: ", wideMatches.length);
 
   if (
     closeMatches.length === 0 &&
