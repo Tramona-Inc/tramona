@@ -639,7 +639,6 @@ async function scrapeProperty(
 
   if (price.price === -1) throw new Error("Price is not available");
 
-  console.log('got to here');
   const propertyDetails = await fetchPropertyDetails(
     offerId,
     checkIn.toISOString().split("T")[0] ?? "",
@@ -648,7 +647,6 @@ async function scrapeProperty(
     locationId,
     price,
   );
-  console.log('how about here');
   return propertyDetails;
 }
 
@@ -667,7 +665,6 @@ export const casamundoScraper: DirectSiteScraper = async ({
   const locationId = await getLocationId(location);
   const offerIds = await getOfferIds(locationId, checkIn, checkOut, numGuests);
 
-  console.log('got initial info');
 
   // const scrapedListings: ScrapedListing[] = [];
 
