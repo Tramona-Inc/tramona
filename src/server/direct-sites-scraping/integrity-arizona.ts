@@ -9,6 +9,7 @@ import { NewReview, type Review } from "@/server/db/schema";
 import { getNumNights, parseHTML } from "@/utils/utils";
 import { ScrapedListing } from "@/server/direct-sites-scraping";
 import { axiosWithRetry } from "@/server/server-utils";
+import axios from "axios";
 
 const propertySchema = z.object({
   data: z.object({
@@ -180,7 +181,7 @@ export const arizonaScraper: DirectSiteScraper = async ({
     : "";
   const url = `https://integrityarizonavacationrentals.com/wp-admin/admin-ajax.php?action=streamlinecore-api-request&params=%7B%22methodName%22:%22GetPropertyAvailabilityWithRatesWordPress%22,%22params%22:%7B%22sort_by%22:%22price%22,%22return_gallery%22:1,%22max_images_number%22:%225%22,%22use_room_type_logic%22:0,%22get_prices_starting_from%22:0,%22longterm_enabled%22:%220%22,%22additional_variables%22:1,%22extra_charges%22:1,%22use_amenities%22:%22yes%22,%22use_streamshare%22:0,%22startdate%22:%22${monthStart}%2F${dayStart}%2F${yearStart}%22,%22enddate%22:%22${monthEnd}%2F${dayEnd}%2F${yearEnd}%22,${locationParam}%22amenities_filter%22:%22%22,%22page_number%22:1,%22page_results_number%22:40,%22use_bundled_fees_in_room_rate%22:1,%22square_feet%22:1,%22floor_name%22:1%7D%7D`;
   // console.log("scrapedUrl: ", url)
-  let properties = await axiosWithRetry
+  let properties = await axios
     .get<string>(url)
     .then((response) => response.data)
     .then((data) => propertySchema.parse(data))
@@ -203,7 +204,7 @@ export const arizonaScraper: DirectSiteScraper = async ({
     properties.map(async (p) => {
       const reviewUrl = `https://integrityarizonavacationrentals.com/wp-admin/admin-ajax.php?action=streamlinecore-api-request&params=%7B%22methodName%22:%22GetAllFeedback%22,%22params%22:%7B%22unit_id%22:${p.originalListingId},%22order_by%22:%22newest_first%22,%22show_booking_dates%22:1,%22madetype_id%22:2%7D%7D`;
       // console.log("reviewScrapedUrl: ", reviewUrl)
-      const reviews = await axiosWithRetry
+      const reviews = await axios
         .get<string>(reviewUrl, { timeout: 30000 })
         .then((response) => response.data)
         .then((data) => reviewSchema.parse(data))
@@ -226,7 +227,7 @@ export const arizonaSubScraper: SubsequentScraper = async ({
   checkIn,
   checkOut,
 }) => {
-  const matchingProperty = await axiosWithRetry
+  const matchingProperty = await axios
     .get<string>(scrapeUrl)
     .then((response) => response.data)
     .then((data) => propertySchema.parse(data))
