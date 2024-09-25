@@ -19,6 +19,8 @@ import {
 } from "@/utils/webhook-functions/referral-utils";
 import { createSetupIntent } from "@/utils/webhook-functions/stripe-utils";
 import { columns } from "../../components/admin/view-recent-host/table/columns";
+import { sendSlackMessage } from "@/server/slack";
+import { formatDateMonthDay } from "@/utils/utils";
 
 // ! Necessary for stripe
 export const config = {
@@ -211,6 +213,17 @@ export default async function webhook(
                     travelerId: paymentIntentSucceeded.metadata.user_id,
                   });
               }
+              // ------ Send Slack When trip is booked ------
+              await sendSlackMessage({
+                isProductionOnly: true,
+                channel: "tramona-bot",
+                text: [
+                  `*${user?.email} just booked a trip: ${currentProperty?.name}*`,
+                  `*${currentProperty?.city}*`,
+                  `through ${isDirectListingCharge ? "a different platform (direct listing)" : "Tramona"} · ${formatDateMonthDay(offer.checkIn)}-${formatDateMonthDay(offer.checkOut)}`,
+                  `<https://tramona.com/admin|Go to admin dashboard>`,
+                ].join("\n"),
+              });
             }
           }
         }

@@ -12,10 +12,16 @@ import {
   WrenchIcon,
   MessagesSquare,
   LinkIcon,
+  BriefcaseIcon,
 } from "lucide-react";
 
 export const adminNavLinks = [
   { href: "/admin", name: "Dashboard", icon: LayoutDashboardIcon },
+  {
+    href: "/admin/trips/all-trips",
+    name: "All Trips",
+    icon: BriefcaseIcon,
+  },
   {
     href: "/admin/incoming-requests",
     name: "Incoming Requests",

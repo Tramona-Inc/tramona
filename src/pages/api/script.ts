@@ -1,12 +1,9 @@
-import { scrapeDirectListings } from "@/server/direct-sites-scraping";
-import { getNumNights, sleep } from "@/utils/utils";
 import { db } from "@/server/db";
-import { sendScheduledText } from "@/server/server-utils";
 import { and, isNull, gt, notInArray } from "drizzle-orm";
-import { appendFileSync } from "fs";
 import { requests } from "@/server/db/schema";
 import { NextApiResponse } from "next";
-import { formatDistanceToNow } from "date-fns";
+import { addHours, formatDistanceToNow } from "date-fns";
+import axios from "axios";
 
 const processedRequestIds = [
   1248, 1249, 1250, 1251, 1291, 1300, 902, 1307, 1308, 903, 1311, 1312, 741,
@@ -14,16 +11,17 @@ const processedRequestIds = [
   745, 752, 760, 763, 767, 768, 770, 771, 775, 776, 777, 783, 784, 787, 788,
   789, 790, 1317, 746, 1318, 803, 810, 811, 812, 814, 815, 816, 817, 820, 826,
   812, 827, 829, 830, 839, 830, 840, 859, 860, 864, 865, 798, 800, 801, 860,
-  802, 804, 805, 823,
+  802, 804, 805, 823, 415, 416, 610, 1325,
 ];
 
 export function log(str: unknown) {
-  appendFileSync(
-    "script.log",
-    typeof str === "string" ? str : JSON.stringify(str, null, 2),
-  );
+  // appendFileSync(
+  //   "script.log",
+  //   typeof str === "string" ? str : JSON.stringify(str, null, 2),
+  // );
+  // appendFileSync("script.log", "\n");
 
-  appendFileSync("script.log", "\n");
+  console.log(str);
 }
 
 export default async function script(_: any, res: NextApiResponse) {
@@ -41,7 +39,11 @@ export default async function script(_: any, res: NextApiResponse) {
       },
     })
     .then((res) =>
-      res.filter((r) => r.madeByGroup.owner.email === "bentomlin101@gmail.com"),
+      res.filter(
+        (r) =>
+          r.madeByGroup.owner.email === "bentomlin101@gmail.com" &&
+          r.offers.every((o) => o.createdAt < addHours(new Date(), -24)),
+      ),
     );
 
   log(
@@ -54,73 +56,11 @@ export default async function script(_: any, res: NextApiResponse) {
   );
 
   await Promise.all(
-    requests_.map(async (request, i) => {
-      await sleep(i * 4000);
-      if (
-        ["+14257657768", "+16124694886"].includes(
-          request.madeByGroup.owner.phoneNumber ?? "",
-        )
-      ) {
-        log(
-          `Skipping request ${request.id} because it's already been processed`,
-        );
-        return;
-      }
-
-      log(`\nScraping listings for request ${request.id}`);
-
-      await scrapeDirectListings({
-        checkIn: request.checkIn,
-        checkOut: request.checkOut,
-        requestNightlyPrice:
-          request.maxTotalPrice /
-          getNumNights(request.checkIn, request.checkOut),
+    requests_.map(async (request) =>
+      axios.post("http://localhost:3000/api/scrape", {
         requestId: request.id,
-        location: request.location,
-        numGuests: request.numGuests,
-      })
-        .then(async (listings) => {
-          if (listings.length === 0) {
-            log(`No listings found for request ${request.id}`);
-            return;
-          }
-
-          const travelerPhone = request.madeByGroup.owner.phoneNumber;
-          if (!travelerPhone) {
-            log(
-              `No phone number for request ${request.id} made by user ${request.madeByGroup.owner.email}, skipping texts`,
-            );
-            return;
-          }
-
-          const currentTime = new Date();
-          const twentyFiveMinutesFromNow = new Date(
-            currentTime.getTime() + 25 * 60000,
-          );
-          const fiftyFiveMinutesFromNow = new Date(
-            currentTime.getTime() + 55 * 60000,
-          );
-          const numOfMatches = listings.length;
-          void sendScheduledText({
-            to: travelerPhone,
-            content: `Tramona: You have ${numOfMatches <= 10 ? numOfMatches : "more than 10"} matches for your request in ${request.location}! Check them out at tramona.com/requests`,
-            sendAt:
-              numOfMatches <= 5
-                ? twentyFiveMinutesFromNow
-                : fiftyFiveMinutesFromNow,
-          });
-        })
-        .catch((err) => {
-          if (err instanceof Error) {
-            log(
-              `Error scraping listings for request ${request.id}:\n\n${err.stack}`,
-            );
-          } else {
-            log(`Error scraping listings for request ${request.id}: ${err}`);
-          }
-        });
-    }),
+      }),
+    ),
   );
-
   res.status(200).json({ success: true });
 }

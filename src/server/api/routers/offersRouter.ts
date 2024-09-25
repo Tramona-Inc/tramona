@@ -757,7 +757,7 @@ export const offersRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       // numOfOffers = numOfOffersPerDateRange * numOfDateRanges
       const numOfOffersPerDateRange = 6;
-      const numOfScrapers = directSiteScrapers.length;
+
       const numOfDateRanges = Math.ceil(
         input.numOfOffers / numOfOffersPerDateRange,
       ); // at least 1
@@ -767,7 +767,8 @@ export const offersRouter = createTRPCRouter({
           scrapeDirectListings({
             checkIn: dateRange.checkIn,
             checkOut: dateRange.checkOut,
-            //numGuests make sure to add this
+            location: "San Francisco", // TODO TEMP AAAAAAAAAAAAAAAAAAAAA YEAH 😃
+            requestNightlyPrice: 100, // TODO TEMP
           }),
         ),
       ).then((res) => res.flat());

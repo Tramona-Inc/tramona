@@ -5,7 +5,11 @@ import { DirectSiteScraper, ScrapedListing, SubsequentScraper } from ".";
 import { z } from "zod";
 import { axiosWithRetry } from "@/server/server-utils";
 import { formatDateYearMonthDay, getNumNights, parseHTML } from "@/utils/utils";
-import { PropertyType, ListingSiteName } from "@/server/db/schema/common";
+import {
+  PropertyType,
+  ListingSiteName,
+  ALL_PROPERTY_TYPES,
+} from "@/server/db/schema/common";
 import { CancellationPolicyWithInternals } from "../db/schema/tables/properties";
 import { log } from "@/pages/api/script";
 import { googleMaps } from "../google-maps";
@@ -70,16 +74,16 @@ const cancellationPolicySchema = z.object({
 });
 
 const propertyTypeMapping: Record<string, PropertyType> = {
-  Home: "House",
   Condo: "Condominium",
-  Townhouse: "Townhouse",
   Suite: "Guest Suite",
   Apts: "Apartment",
   "Hotel Room": "Hotel",
-  Other: "Other",
 };
 
 const mapPropertyType = (originalType: string): PropertyType => {
+  if (ALL_PROPERTY_TYPES.includes(originalType)) {
+    return originalType as PropertyType;
+  }
   if (propertyTypeMapping[originalType]) {
     return propertyTypeMapping[originalType];
   } else {
@@ -149,11 +153,12 @@ export const mapTaxodataToScrapedListing = async (
           : 0
         : 0;
       const locationMatch = propDetails.match(/([A-Za-z\s]+,\s[A-Z]{2})/);
-      const city = locationMatch
-        ? locationMatch[1]
-          ? locationMatch[1].trim()
-          : ""
-        : "";
+      const city = locationMatch?.[1]?.trim();
+
+      if (!city) {
+        throw new Error(`Failed to find city for property: ${property.pid}`);
+      }
+
       const typeElement = $(".property-quick-info li .fas.fa-home").parent(); // Navigate to the parent element of the <i> tag (the <span> containing "Home")
       let originalType = "";
       // Check if there is a span with the class "quick-info-value details-label" (e.g. "Home")
@@ -286,7 +291,7 @@ export const redawningScraper: DirectSiteScraper = async ({
 
   if (!ptype) {
     throw new Error(
-      `Failed to find a valid property type for location: ${location}`,
+      `Failed to find a valid property type for location "${location}"`,
     );
   }
 
@@ -295,7 +300,9 @@ export const redawningScraper: DirectSiteScraper = async ({
   )?.short_name;
 
   if (!pcountry) {
-    throw new Error(`Failed to find a valid country for location: ${location}`);
+    throw new Error(
+      `Failed to find a valid country for location "${location}" `,
+    );
   }
 
   const url = `https://www.redawning.com/search/properties?ptype=${ptype}&platitude=${lat}&plongitude=${lng}&pcountry=${pcountry}&pname=${location}&sleepsmax=1TO100&dates=${convertToEpochAt7AM(checkIn)}TO${convertToEpochAt7AM(checkOut)}`;

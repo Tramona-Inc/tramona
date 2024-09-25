@@ -6,7 +6,7 @@ import {
   SubsequentScraper,
   ScrapedListing,
 } from "@/server/direct-sites-scraping";
-import { Review, PropertyType } from "@/server/db/schema";
+import { PropertyType, NewReview } from "@/server/db/schema";
 import { ListingSiteName } from "@/server/db/schema/common";
 import { getNumNights } from "@/utils/utils";
 import { algoliasearch, SearchResponse } from "algoliasearch";
@@ -408,9 +408,8 @@ const fetchPropertyDetails = async (
       )
       .map((result) => result.data);
 
-    const formattedReviews: Review[] = validatedReviews.map((review) => ({
+    const formattedReviews: NewReview[] = validatedReviews.map((review) => ({
       name: review.reviewedBy,
-      profilePic: "",
       rating: parseInt(review.rating),
       review: review.reviewDetail
         .replace(/\u003cbr\u003e/g, "\n")

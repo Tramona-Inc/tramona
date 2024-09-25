@@ -3,7 +3,7 @@ import {
   SubsequentScraper,
   ScrapedListing,
 } from "@/server/direct-sites-scraping";
-import { Review } from "@/server/db/schema";
+import { NewReview } from "@/server/db/schema";
 import axios, { AxiosResponse } from "axios";
 import { z } from "zod";
 import { ALL_PROPERTY_TYPES, PropertyType } from "@/server/db/schema/common";
@@ -391,55 +391,58 @@ const fetchPrice = async (
   };
 };
 
-interface ReviewResponse {
-  average: {
-    value: number;
-    count: number;
-  };
-  list: Array<{
-    text?: string;
-    nickname?: string;
-    rating: {
-      value: number;
-    };
-  }>;
-}
+const reviewResponseSchema = z.object({
+  average: z.object({
+    value: z.number().optional(),
+    count: z.number().optional(),
+  }).optional(),
+  list: z.array(
+    z.object({
+      text: z.string().nullable().optional(),
+      nickname: z.string().optional(),
+      rating: z.object({
+        value: z.number(),
+      }),
+    }),
+  ),
+});
 
 const fetchReviews = async (
   offerId: string,
 ): Promise<{
   avgRating: number;
   numRatings: number;
-  reviews: Review[];
+  reviews: NewReview[];
 }> => {
-  const response = await axios.get<ReviewResponse>(
-    `https://www.casamundo.com/reviews/list/${offerId}?scale=5&bcEnabled=false&googleReviews=false`,
-    {
-      httpsAgent: proxyAgent,
-      headers: {
-        accept: "*/*",
-        "accept-language": "en-US,en;q=0.9",
-        "sec-ch-ua":
-          '"Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"',
-        "sec-ch-ua-mobile": "?0",
-        "sec-fetch-dest": "empty",
-        "sec-fetch-mode": "cors",
-        "sec-fetch-site": "same-origin",
-        "Referrer-Policy": "no-referrer-when-downgrade",
+  const data = await axios
+    .get(
+      `https://www.casamundo.com/reviews/list/${offerId}?scale=5&bcEnabled=false&googleReviews=false`,
+      {
+        httpsAgent: proxyAgent,
+        headers: {
+          accept: "*/*",
+          "accept-language": "en-US,en;q=0.9",
+          "sec-ch-ua":
+            '"Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"',
+          "sec-ch-ua-mobile": "?0",
+          "sec-fetch-dest": "empty",
+          "sec-fetch-mode": "cors",
+          "sec-fetch-site": "same-origin",
+          "Referrer-Policy": "no-referrer-when-downgrade",
+        },
       },
-    },
-  );
+    )
+    .then((res) => res.data as unknown)
+    .then((res) => reviewResponseSchema.parse(res));
 
-  const data: ReviewResponse = response.data;
-  const avgRating: number = data.average.value || 0;
-  const numRatings: number = data.average.count || 0;
-  const reviews: Review[] = data.list
+  const avgRating: number = data.average?.value ?? 0;
+  const numRatings: number = data.average?.count ?? 0;
+  const reviews: NewReview[] = data.list
     .filter((review): review is typeof review & { text: string } =>
       Boolean(review.text),
     )
     .map((review) => ({
       name: review.nickname ?? "Anonymous",
-      profilePic: "",
       rating: review.rating.value,
       review: review.text,
     }));
@@ -495,7 +498,7 @@ async function fetchPropertyDetails(
         list: z.array(
           z.object({
             label: z.string(),
-            icon: z.string(),
+            icon: z.string().optional(),
           }),
         ),
       }),
@@ -525,7 +528,7 @@ async function fetchPropertyDetails(
     }),
     persons: z.number(),
     petFriendly: z.boolean().optional(),
-    bedrooms: z.number(),
+    bedrooms: z.number().nullable(),
     bathrooms: z.number().optional(),
     checkInCheckOutTime: z
       .object({
@@ -537,16 +540,13 @@ async function fetchPropertyDetails(
       .optional(),
   });
 
-  type PropertyData = z.infer<typeof propertyDataSchema>;
-
-  const response = await axios.get<PropertyData>(
-    `${url}?${params.toString()}`,
-    {
+  const data = await axios
+    .get(`${url}?${params.toString()}`, {
       httpsAgent: proxyAgent,
       headers,
-    },
-  );
-  const data: PropertyData = response.data;
+    })
+    .then((res) => res.data as unknown)
+    .then((res) => propertyDataSchema.parse(res));
 
   let smokingAllowed = true;
   const amenities: string[] = [];
@@ -554,7 +554,7 @@ async function fetchPropertyDetails(
   data.infoGroups.forEach((group) => {
     group.list.forEach((item) => {
       amenities.push(item.label);
-      if (item.icon === "smoking_not_allowed") {
+      if (item.icon && item.icon === "smoking_not_allowed") {
         smokingAllowed = false;
       }
     });
@@ -596,7 +596,7 @@ async function fetchPropertyDetails(
     latLngPoint,
     maxNumGuests: data.persons,
     numBeds,
-    numBedrooms: data.bedrooms,
+    numBedrooms: data.bedrooms ?? 1,
     numBathrooms: data.bathrooms,
     amenities,
     otherAmenities: [],

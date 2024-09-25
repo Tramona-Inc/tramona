@@ -75,7 +75,8 @@ export default function RequestCard({
 
   useEffect(() => {
     const fetchCoordinates = async () => {
-      if (!request.location)  // || req.lat !== null || req.lng !== null
+      if (!request.location)
+        // || req.lat !== null || req.lng !== null
         return;
       const { coordinates } = await utils.offers.getCoordinates.fetch({
         location: request.location,
@@ -90,6 +91,7 @@ export default function RequestCard({
 
   return (
     <Card className="overflow-hidden p-0">
+      {/* {request.id} */}
       <WithdrawRequestDialog
         requestId={request.id}
         open={open}
