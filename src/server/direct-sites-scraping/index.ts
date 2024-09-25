@@ -29,16 +29,19 @@ import { getCoordinates } from "../google-maps";
 import { eq, and, inArray } from "drizzle-orm";
 import {
   createRandomMarkupEightToFourteenPercent,
-  formatCurrency,
   getNumNights,
 } from "@/utils/utils";
 import { DIRECTLISTINGMARKUP } from "@/utils/constants";
-import { createLatLngGISPoint, sendScheduledText, sendText } from "@/server/server-utils";
+import {
+  createLatLngGISPoint,
+  sendScheduledText,
+  sendText,
+} from "@/server/server-utils";
 import { cleanbnbScraper, cleanbnbSubScraper } from "./cleanbnb-scrape";
 import { log } from "@/pages/api/script";
 import { env } from "@/env";
 import { addHours } from "date-fns";
-import { z, ZodError } from "zod";
+import { z } from "zod";
 import { formatZodError } from "../../utils/zod-utils";
 
 type ScraperOptions = {
