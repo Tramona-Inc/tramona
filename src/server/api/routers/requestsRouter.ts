@@ -40,6 +40,7 @@ import { newLinkRequestSchema } from "@/utils/useSendUnsentRequests";
 import { getCoordinates } from "@/server/google-maps";
 import { scrapeDirectListings } from "@/server/direct-sites-scraping";
 import { waitUntil } from "@vercel/functions";
+import { addMinutes } from "date-fns";
 
 const updateRequestInputSchema = z.object({
   requestId: z.number(),
@@ -474,29 +475,27 @@ export async function handleRequestSubmission(
         longitude: lng,
         numGuests: input.numGuests,
       })
-        // .then(async (listings) => {
-        //   if (listings.length > 0) {
-        //     const travelerPhone = user.phoneNumber;
-        //     if (travelerPhone) {
-        //       const currentTime = new Date();
-        //       const twentyFiveMinutesFromNow = new Date(
-        //         currentTime.getTime() + 25 * 60000,
-        //       );
-        //       const fiftyFiveMinutesFromNow = new Date(
-        //         currentTime.getTime() + 55 * 60000,
-        //       );
-        //       const numOfMatches = listings.length;
-        //       void sendScheduledText({
-        //         to: travelerPhone,
-        //         content: `Tramona: You have ${numOfMatches <= 10 ? numOfMatches : "more than 10"} matches for your request in ${input.location}! Check them out at tramona.com/requests`,
-        //         sendAt:
-        //           numOfMatches <= 5
-        //             ? twentyFiveMinutesFromNow
-        //             : fiftyFiveMinutesFromNow,
-        //       });
-        //     }
-        //   }
-        // })
+        .then(async (listings) => {
+          if (listings.length > 0) {
+            const travelerPhone = user.phoneNumber;
+            if (!travelerPhone) {
+              console.log(
+                `No phone number for request ${request.id} made by user ${user.email}, skipping texts`,
+              );
+              return;
+            }
+
+            const numOfMatches = listings.length;
+            void sendScheduledText({
+              to: travelerPhone,
+              content: `Tramona: You have ${numOfMatches <= 10 ? numOfMatches : "more than 10"} matches for your request in ${input.location}! Check them out at tramona.com/requests`,
+              sendAt:
+                numOfMatches <= 5
+                  ? addMinutes(new Date(), 25)
+                  : addMinutes(new Date(), 55),
+            });
+          }
+        })
         .catch((error) => {
           console.error("Error scraping listings: " + error);
         }),
