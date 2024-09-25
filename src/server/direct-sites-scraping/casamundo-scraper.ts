@@ -10,7 +10,7 @@ import { ALL_PROPERTY_TYPES, PropertyType } from "@/server/db/schema/common";
 import { ListingSiteName } from "@/server/db/schema/common";
 import { getNumNights } from "@/utils/utils";
 import { parseHTML } from "@/utils/utils";
-import { proxyAgent } from "../server-utils";
+import { axiosWithRetry, proxyAgent } from "../server-utils";
 
 const offerSchema = z.object({
   id: z.string(),
@@ -78,9 +78,9 @@ async function getLocationId(location: string): Promise<string> {
     limit: "10",
   });
 
-  const response: AxiosResponse<AutocompleteResponse> = await axios.get(
+  const response: AxiosResponse<AutocompleteResponse> = await axiosWithRetry.get(
     `${autocompleteUrl}?${params.toString()}`,
-    { httpsAgent: proxyAgent },
+    // { httpsAgent: proxyAgent },
   );
   const suggestions = response.data.suggestions;
 
@@ -142,9 +142,9 @@ async function getOfferIds(
     _format: "json",
   });
 
-  const response: AxiosResponse<OfferResponse> = await axios.get(
+  const response: AxiosResponse<OfferResponse> = await axiosWithRetry.get(
     `${url}?${params.toString()}`,
-    { headers, httpsAgent: proxyAgent },
+    // { headers, httpsAgent: proxyAgent },
   );
 
   return response.data.offers.map((offer) => offerSchema.parse(offer));
@@ -185,12 +185,12 @@ async function checkAvailability(
     (currentYear === checkOut.getFullYear() &&
       currentMonth <= checkOut.getMonth() + 1)
   ) {
-    const response: AxiosResponse<CalendarResponse> = await axios.get(url, {
+    const response: AxiosResponse<CalendarResponse> = await axiosWithRetry.get(url, {
       params: {
         year: currentYear,
         month: currentMonth,
       },
-      httpsAgent: proxyAgent,
+      // httpsAgent: proxyAgent,
       headers: {
         accept: "application/json",
         "accept-language": "en-US,en;q=0.9",
@@ -335,10 +335,10 @@ const fetchPrice = async (
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      const response: AxiosResponse<ApiResponse> = await axios.post(
+      const response: AxiosResponse<ApiResponse> = await axiosWithRetry.post(
         `${url}?${queryParams.toString()}`,
         null,
-        { headers, httpsAgent: proxyAgent },
+        // { headers, httpsAgent: proxyAgent },
       );
       const data = response.data;
 
@@ -414,11 +414,11 @@ const fetchReviews = async (
   numRatings: number;
   reviews: NewReview[];
 }> => {
-  const data = await axios
+  const data = await axiosWithRetry
     .get(
       `https://www.casamundo.com/reviews/list/${offerId}?scale=5&bcEnabled=false&googleReviews=false`,
       {
-        httpsAgent: proxyAgent,
+        // httpsAgent: proxyAgent,
         headers: {
           accept: "*/*",
           "accept-language": "en-US,en;q=0.9",
@@ -537,12 +537,12 @@ async function fetchPropertyDetails(
         message: z.string().nullable(),
         reloadOnArrivalChange: z.boolean(),
       })
-      .optional(),
+      .nullish(),
   });
 
-  const data = await axios
+  const data = await axiosWithRetry
     .get(`${url}?${params.toString()}`, {
-      httpsAgent: proxyAgent,
+      // httpsAgent: proxyAgent,
       headers,
     })
     .then((res) => res.data as unknown)
@@ -644,6 +644,7 @@ async function scrapeProperty(
     return {} as ScrapedListing;
   }
 
+  console.log('got to here');
   const propertyDetails = await fetchPropertyDetails(
     offerId,
     checkIn.toISOString().split("T")[0] ?? "",
@@ -652,7 +653,7 @@ async function scrapeProperty(
     locationId,
     price,
   );
-
+  console.log('how about here');
   return propertyDetails;
 }
 
@@ -670,6 +671,8 @@ export const casamundoScraper: DirectSiteScraper = async ({
 
   const locationId = await getLocationId(location);
   const offerIds = await getOfferIds(locationId, checkIn, checkOut, numGuests);
+
+  console.log('got initial info');
 
   // const scrapedListings: ScrapedListing[] = [];
 
@@ -703,6 +706,8 @@ export const casamundoScraper: DirectSiteScraper = async ({
         : null;
     }),
   );
+
+  console.log('finished casamundo scraper');
 
   // Filter out any null values (i.e., offers with no details)
   const validScrapedListings: ScrapedListing[] = listings.filter(
