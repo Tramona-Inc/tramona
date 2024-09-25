@@ -33,35 +33,35 @@ const HowItWorksHost: React.FC = () => {
     <section className="relative px-4 py-4 md:px-2">
       <div className="flex items-center justify-center">
         <h1 className="text-center text-3xl font-bold md:text-5xl">
-          How does Tramona work?
+          How Tramona fills your vacancies
         </h1>
       </div>
-      <div className="mt-24 flex justify-center">
+      <div className="mt-16 flex justify-center">
         <div className="flex h-full flex-col justify-between">
           <Step
             number={1}
-            title="Specify travel plans"
-            description="Tell us your destination, dates, and budget."
+            title="Travelers Come to Tramona"
+            description="They enter their budget, preferred travel dates, number of travelers, and desired destination."
           />
           <Step
             number={2}
-            title="That request goes out"
-            description="Your request gets sent to every host with a vacant property your requested city."
+            title="Requests Are Sent Out"
+            description="Their request is automatically sent to all hosts on Tramona who match the travelers' criteria."
           />
           <Step
             number={3}
-            title="Host response"
-            description="Hosts may accept, deny, or counter your request. If it is a match, you will get a text and it will show up in your requests tab."
+            title="Hosts Respond"
+            description="As a host, you can accept, decline, or counteroffer with a better deal for any available nights."
           />
           <Step
             number={4}
-            title="Choose a match you like"
-            description="Choose between all the matches hosts have sent. Get ready to travel!"
+            title="Travelers Book"
+            description="Travelers review their matches and choose the best option to book their stay."
           />
           <Step
             number={5}
-            title="Book and enjoy!"
-            description="Book and enjoy!"
+            title="One Less Vacancy"
+            description="You've successfully filled a vacancy and earned income from an empty night."
             isLast={true}
           />
         </div>

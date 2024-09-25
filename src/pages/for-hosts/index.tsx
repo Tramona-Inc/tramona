@@ -16,6 +16,8 @@ import HowItWorksHost from "@/components/landing-page/how-it-works-host";
 // import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import TramonaIcon from "@/components/_icons/TramonaIcon";
 import Footer from "@/components/_common/Layout/Footer";
+import { TestimonialCarousel } from "@/components/landing-page/_sections/testimonials/TestimonialCarousel";
+import { Check } from "lucide-react";
 
 const DamageProtection = () => {
   const protectionMethods = [
@@ -219,6 +221,121 @@ function ListInAMinute() {
   );
 }
 
+function Questions() {
+  return (
+    <section className="space-y-6 text-balance text-center lg:px-44">
+      <h1 className="text-3xl font-bold lg:text-5xl">Questions?</h1>
+      <p className="font-semibold lg:text-3xl">
+        Please look through our host FAQ video library. We specifically made it
+        to answer any and all questions a host might have.
+      </p>
+      <Button size="lg">Host FAQ Library</Button>
+    </section>
+  );
+}
+
+function TailorYourBookingProcess() {
+  const cards = [
+    {
+      title: "Send matches manually",
+      description: "Manually respond to requests through our host dashboard",
+      image: "/assets/images/host-welcome/handshake.jpeg",
+    },
+    {
+      title: "Send matches automatically",
+      description:
+        "Set custom parameters for your vacant dates, and let Tramona automatically match you with suitable travelers.",
+      image: "/assets/images/host-welcome/cloud.png",
+    },
+  ];
+
+  return (
+    <section className="mx-4 max-w-7xl lg:mx-auto">
+      <h1 className="text-center text-3xl font-bold lg:text-5xl">
+        Tailor your booking process
+      </h1>
+      <div className="mt-12 flex flex-col gap-6 md:flex-row md:justify-center md:gap-10 md:px-20">
+        {cards.map((card, index) => (
+          <div key={index} className="basis-1/3 space-y-2">
+            <div className="relative h-56 w-full overflow-clip rounded-xl">
+              <Image src={card.image} alt="" layout="fill" objectFit="cover" />
+            </div>
+            <div>
+              <h2 className="font-semibold lg:text-2xl">{card.title}</h2>
+              <p>{card.description}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function ListingOnTramona() {
+  const items = [
+    {
+      title: "Guest Identity Verification",
+      description:
+        "Tramona vets travelers in 3 ways so you are safe and protected when a guest checks in",
+      bullets: {
+        1: "Our own screening",
+        2: "Another screening with a 3rd party",
+        3: "An optional in depth, multi-hour screening with Stripe",
+      },
+    },
+    {
+      title: "Property Protection",
+      description:
+        "Tramona offers $50,000 in protection for each booking. This will move up to 1M in the coming months",
+    },
+    {
+      title: "24 Hour Safety Line",
+      description:
+        "If you ever feel unsafe, our app provides one-tap access to specially-trained safety agents, day or night.",
+    },
+  ];
+
+  return (
+    <section className="mx-auto max-w-7xl">
+      <div className="mx-4 flex flex-col gap-6 lg:flex-row lg:gap-12">
+        <div className="relative h-64 overflow-clip rounded-lg lg:h-auto lg:w-1/3">
+          <Image
+            src="/assets/images/host-welcome/safe.jpeg"
+            alt=""
+            objectFit="cover"
+            layout="fill"
+          />
+        </div>
+        <div className="flex-1 space-y-10">
+          <h1 className="text-3xl font-bold lg:text-4xl">
+            Listing on Tramona is Safe and Effective
+          </h1>
+          <div className="space-y-4">
+            {items.map((item, index) => (
+              <div className="flex gap-4" key={index}>
+                <div className="text-primaryGreen">
+                  <Check size={30} />
+                </div>
+                <div className="space-y-2">
+                  <h2 className="text-xl font-bold">{item.title}</h2>
+                  <p className="font-semibold">{item.description}</p>
+                  {index === 0 && (
+                    <ol className="list-inside list-decimal text-sm">
+                      <li>{item.bullets?.[1]}</li>
+                      <li>{item.bullets?.[2]}</li>
+                      <li>{item.bullets?.[3]}</li>
+                    </ol>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function WhatAreYouWaitingFor() {
   return (
     <section className="mx-8 space-y-8 md:mx-24 md:space-y-16">
@@ -309,8 +426,13 @@ export default function HostWelcome({
         </div>
 
         <IntroSection requestFeed={requestFeed} />
-        <ListInAMinute />
         <HowItWorksHost />
+        <TestimonialCarousel />
+        <Questions />
+        <TailorYourBookingProcess />
+        <ListingOnTramona />
+        <ListInAMinute />
+
         <DamageProtection />
         <FAQ />
         <WhatAreYouWaitingFor />
