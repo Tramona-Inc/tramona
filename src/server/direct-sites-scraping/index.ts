@@ -132,9 +132,7 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
     if (r.status === "rejected") {
       console.error(
         `Error in ${directSiteScrapers[i]!.name}:\n`,
-        r.reason instanceof ZodError
-          ? formatZodError(r.reason) + r.reason.stack?.slice(1)
-          : r.reason,
+        r.reason instanceof Error ? r.reason.toString() : r.reason,
       );
     }
   });

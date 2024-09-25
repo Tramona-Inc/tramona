@@ -4,7 +4,7 @@ import { googleMaps } from "@/server/google-maps";
 await googleMaps
   .geocode({
     params: {
-      address: "city of pleasanton library",
+      address: "Ireland",
       key: env.GOOGLE_MAPS_KEY,
     },
   })

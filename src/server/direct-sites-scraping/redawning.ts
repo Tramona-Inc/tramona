@@ -301,7 +301,7 @@ export const redawningScraper: DirectSiteScraper = async ({
 
   if (!pcountry) {
     throw new Error(
-      `Failed to find a valid country for location "${location}"`,
+      `Failed to find a valid country for location "${location}" `,
     );
   }
 
