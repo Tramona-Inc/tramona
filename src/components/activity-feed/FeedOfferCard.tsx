@@ -69,7 +69,13 @@ export default function FeedOfferCard({ offer }: { offer: FeedOfferItem }) {
                 <p>
                   <span className="text-muted-foreground">Airbnb Price: </span>
                   <span className="line-through">
-                    {offer.isFiller ? formatCurrency(offer.property.originalNightlyPrice) : formatCurrency((offer.totalPrice / numOfNights) / (1 - offer.randomDirectListingDiscount / 100))}
+                    {offer.isFiller
+                      ? formatCurrency(offer.property.originalNightlyPrice)
+                      : formatCurrency(
+                          offer.totalPrice /
+                            numOfNights /
+                            (1 - offer.randomDirectListingDiscount! / 100),
+                        )}
                   </span>
                 </p>
               )}
@@ -83,7 +89,7 @@ export default function FeedOfferCard({ offer }: { offer: FeedOfferItem }) {
           <div className="relative">
             <Carousel
               setApi={setCarouselApi}
-              className={cn("w-full mb-10")}
+              className={cn("mb-10 w-full")}
               opts={{
                 align: "start",
                 loop: true,
