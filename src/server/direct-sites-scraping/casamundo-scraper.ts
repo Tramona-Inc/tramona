@@ -212,7 +212,7 @@ async function checkAvailability(
 
 interface PriceExtractionParams {
   offerId: string;
-  numGuests: number;
+  numGuests?: number;
   checkIn: Date;
   duration: number;
 }
@@ -261,10 +261,7 @@ interface PriceResult {
 function formatCancellationPolicy(
   cancellationDetails: CancellationDetails,
 ): string {
-  if (
-    !cancellationDetails.dataFrames ||
-    cancellationDetails.dataFrames.length === 0
-  ) {
+  if (cancellationDetails.dataFrames.length === 0) {
     return "Cancellation policy information is not available.";
   }
 
@@ -304,7 +301,7 @@ const fetchPrice = async (
 
   const queryParams = new URLSearchParams({
     sT: "withDates",
-    adults: params.numGuests.toString(),
+    adults: params.numGuests?.toString() ?? "1",
     children: "0",
     pets: "0",
     arrival: params.checkIn.toISOString().split("T")[0] ?? "",
@@ -358,7 +355,7 @@ const fetchPrice = async (
         };
       }
 
-      if (data.hasErrors && data.errorMessage === "price_not_available") {
+      if (data.errorMessage === "price_not_available") {
         if (attempt < maxRetries - 1) {
           await new Promise((resolve) => setTimeout(resolve, retryDelay));
           continue;
@@ -392,10 +389,12 @@ const fetchPrice = async (
 };
 
 const reviewResponseSchema = z.object({
-  average: z.object({
-    value: z.number().optional(),
-    count: z.number().optional(),
-  }).optional(),
+  average: z
+    .object({
+      value: z.number().optional(),
+      count: z.number().optional(),
+    })
+    .optional(),
   list: z.array(
     z.object({
       text: z.string().nullable().optional(),
@@ -622,16 +621,14 @@ async function scrapeProperty(
   checkIn: Date,
   checkOut: Date,
   numGuests?: number,
-): Promise<ScrapedListing> {
+) {
   if (!numGuests) {
     throw new Error("Number of guests must be provided for Casamundo scraper");
   }
 
   const isAvailable = await checkAvailability(offerId, checkIn, checkOut);
 
-  if (!isAvailable) {
-    return {} as ScrapedListing;
-  }
+  if (!isAvailable) throw new Error("Property is not available");
 
   const price = await fetchPrice({
     offerId,
@@ -640,9 +637,7 @@ async function scrapeProperty(
     duration: getNumNights(checkIn, checkOut),
   });
 
-  if (price.price === -1) {
-    return {} as ScrapedListing;
-  }
+  if (price.price === -1) throw new Error("Price is not available");
 
   const propertyDetails = await fetchPropertyDetails(
     offerId,
@@ -687,28 +682,18 @@ export const casamundoScraper: DirectSiteScraper = async ({
   //   }
   // }
 
-  const listings = await Promise.all(
-    offerIds.map(async (offer) => {
-      const propertyWithDetails = await scrapeProperty(
-        offer.id,
-        locationId,
-        checkIn,
-        checkOut,
-        numGuests,
-      );
-
-      // Return property details if they exist, otherwise return null
-      return Object.keys(propertyWithDetails).length > 0
-        ? propertyWithDetails
-        : null;
-    }),
+  return await Promise.allSettled(
+    offerIds.map((offer) =>
+      scrapeProperty(offer.id, locationId, checkIn, checkOut, numGuests),
+    ),
+  ).then((results) =>
+    results
+      .filter((result) => {
+        if (result.status === "rejected") console.error(result.reason);
+        return result.status === "fulfilled";
+      })
+      .map((result) => result.value),
   );
-
-  // Filter out any null values (i.e., offers with no details)
-  const validScrapedListings: ScrapedListing[] = listings.filter(
-    (listing) => listing !== null,
-  );
-  return validScrapedListings;
 };
 
 export const casamundoSubScraper: SubsequentScraper = async ({
