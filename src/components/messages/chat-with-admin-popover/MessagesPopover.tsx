@@ -265,13 +265,9 @@ export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
       {!isMobile ? (
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
-            {session?.user.role !== "host" && session?.user.role !== "admin" ? (
-              <Button className="w-18 h-18 bottom-4 right-4 z-50 m-4 hidden rounded-full border p-4 lg:fixed lg:block">
-                <MessageCircleMore />
-              </Button>
-            ) : (
-              <></>
-            )}
+            <Button className="w-18 h-18 bottom-4 right-4 z-50 m-4 hidden rounded-full border p-4 lg:fixed lg:block">
+              <MessageCircleMore />
+            </Button>
           </PopoverTrigger>
           <PopoverContent
             side="top"
