@@ -39,7 +39,7 @@ import { log } from "@/pages/api/script";
 import { env } from "@/env";
 import { addHours } from "date-fns";
 import { z, ZodError } from "zod";
-import { formatZodError } from "@/utils/zod-utils";
+import { formatZodError } from "../../utils/zod-utils";
 
 type ScraperOptions = {
   location: string;

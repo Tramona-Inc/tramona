@@ -393,12 +393,12 @@ const fetchPrice = async (
 
 const reviewResponseSchema = z.object({
   average: z.object({
-    value: z.number(),
-    count: z.number(),
-  }),
+    value: z.number().optional(),
+    count: z.number().optional(),
+  }).optional(),
   list: z.array(
     z.object({
-      text: z.string().optional(),
+      text: z.string().nullable().optional(),
       nickname: z.string().optional(),
       rating: z.object({
         value: z.number(),
@@ -435,8 +435,8 @@ const fetchReviews = async (
     .then((res) => res.data as unknown)
     .then((res) => reviewResponseSchema.parse(res));
 
-  const avgRating: number = data.average.value || 0;
-  const numRatings: number = data.average.count || 0;
+  const avgRating: number = data.average?.value ?? 0;
+  const numRatings: number = data.average?.count ?? 0;
   const reviews: NewReview[] = data.list
     .filter((review): review is typeof review & { text: string } =>
       Boolean(review.text),
@@ -498,7 +498,7 @@ async function fetchPropertyDetails(
         list: z.array(
           z.object({
             label: z.string(),
-            icon: z.string(),
+            icon: z.string().optional(),
           }),
         ),
       }),
@@ -528,7 +528,7 @@ async function fetchPropertyDetails(
     }),
     persons: z.number(),
     petFriendly: z.boolean().optional(),
-    bedrooms: z.number(),
+    bedrooms: z.number().nullable(),
     bathrooms: z.number().optional(),
     checkInCheckOutTime: z
       .object({
@@ -554,7 +554,7 @@ async function fetchPropertyDetails(
   data.infoGroups.forEach((group) => {
     group.list.forEach((item) => {
       amenities.push(item.label);
-      if (item.icon === "smoking_not_allowed") {
+      if (item.icon && item.icon === "smoking_not_allowed") {
         smokingAllowed = false;
       }
     });
@@ -596,7 +596,7 @@ async function fetchPropertyDetails(
     latLngPoint,
     maxNumGuests: data.persons,
     numBeds,
-    numBedrooms: data.bedrooms,
+    numBedrooms: data.bedrooms ?? 1,
     numBathrooms: data.bathrooms,
     amenities,
     otherAmenities: [],
