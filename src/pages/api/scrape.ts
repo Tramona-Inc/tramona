@@ -52,32 +52,6 @@ export default async function handler(
       location: request.location,
       numGuests: request.numGuests,
     })
-      .then(async (listings) => {
-        if (listings.length === 0) {
-          console.log(`No listings found for request ${request.id}`);
-          return;
-        }
-
-        const travelerPhone = request.madeByGroup.owner.phoneNumber;
-        if (!travelerPhone) {
-          console.log(
-            `No phone number for request ${request.id} made by user ${request.madeByGroup.owner.email}, skipping texts`,
-          );
-          return;
-        }
-
-        const numMatches = listings.length;
-        void sendScheduledText({
-          to: travelerPhone,
-          content: `Tramona: You have ${numMatches <= 10 ? numMatches : "more than 10"} matches for your request in ${request.location}! Check them out at tramona.com/requests`,
-          sendAt:
-            numMatches <= 5
-              ? addMinutes(new Date(), 25)
-              : addMinutes(new Date(), 55),
-        });
-
-        return res.status(200).json({ success: true });
-      })
       .catch((err) => {
         if (err instanceof Error) {
           console.error(
