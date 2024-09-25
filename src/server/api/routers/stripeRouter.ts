@@ -546,8 +546,8 @@ export const stripeRouter = createTRPCRouter({
         },
         individual: {
           email: ctx.user.email,
-          first_name: firstName,
-          last_name: lastName,
+          // first_name: firstName,
+          // last_name: lastName,
         },
       });
       await ctx.db
@@ -560,6 +560,20 @@ export const stripeRouter = createTRPCRouter({
       throw new Error("Stripe account already created");
     }
   }),
+
+  retrieveStripeConnectAccount: protectedProcedure
+    .input(z.string())
+    .query(async ({ ctx, input }) => {
+      const account = await stripeWithSecretKey.accounts.retrieve(input);
+      console.log(account);
+      console.log(account.requirements);
+      if (account.payouts_enabled && account.charges_enabled) {
+        // The account is fully set up to accept charges and receive payouts.
+      } else {
+        // The account still has pending requirements.
+      }
+      return account;
+    }),
 
   //we need this to create embedded connet account
   createStripeAccountSession: protectedProcedure

@@ -1,11 +1,8 @@
 import DashboadLayout from "@/components/_common/Layout/DashboardLayout";
-import PaymentHistory from "@/components/host/finances/payment-history/PaymentHistory";
-import FinancesSummary from "@/components/host/finances/summary/FinancesSummary";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import NoStripeAccount from "@/components/host/finances/NoStripeAccount";
 import {
   ConnectAccountOnboarding,
@@ -13,34 +10,44 @@ import {
   ConnectAccountManagement,
 } from "@stripe/react-connect-js";
 import useIsStripeConnectInstanceReady from "@/utils/store/stripe-connect";
+import { useRouter } from "next/router";
+import StripeConnectCurrentlyDueBeforePayouts from "@/components/host/finances/StripeConnectCurrentlyDueBeforePayout";
 
 export default function Page() {
   useSession({ required: true });
+  const router = useRouter();
+
   const { isStripeConnectInstanceReady } = useIsStripeConnectInstanceReady();
-  const { data: hostInfo } = api.host.getUserHostInfo.useQuery();
   const { data: user } = api.users.getUser.useQuery();
 
-  const [hostStripeConnectId, sethostStripeConnectId] = useState<string | null>(
-    null,
-  );
+  const [hostStripeConnectId, sethostStripeConnectId] = useState<string>("");
 
-  const stripeStateChangeCount = useRef(0);
-
-  useEffect(() => {
-    if (isStripeConnectInstanceReady === true) {
-    } else {
-      stripeStateChangeCount.current += 1;
-      // stripe connect instance initializes to false
-      if (stripeStateChangeCount.current >= 2) {
-      }
-    }
-  }, [isStripeConnectInstanceReady]);
+  const { data: stripeAccount, isLoading: stripeLoading } =
+    api.stripe.retrieveStripeConnectAccount.useQuery(hostStripeConnectId, {
+      enabled: hostStripeConnectId !== "",
+    });
 
   useEffect(() => {
     if (user?.stripeConnectId) {
       sethostStripeConnectId(user.stripeConnectId);
     }
   }, [user]);
+
+  useEffect(() => {
+    // Ensure router navigation happens after checking stripeAccount data
+    if (
+      isStripeConnectInstanceReady &&
+      stripeAccount?.requirements?.currently_due &&
+      stripeAccount.requirements.currently_due.length <= 1
+    ) {
+      void router.push(`/host/finances/${hostStripeConnectId.slice(5)}`); // Safely push to router
+    }
+  }, [
+    isStripeConnectInstanceReady,
+    stripeAccount,
+    hostStripeConnectId,
+    router,
+  ]);
 
   return (
     <DashboadLayout>
@@ -60,63 +67,15 @@ export default function Page() {
             }}
           />
         )}
-        {isStripeConnectInstanceReady ? (
-          <Tabs defaultValue="summary" className="space-y-10">
-            <TabsList className="text-blue-200">
-              <TabsTrigger
-                className="data-[state=active]:border-primaryGreen data-[state=active]:text-primaryGreen data-[state=inactive]:text-zinc-400"
-                value="summary"
-              >
-                Summary
-              </TabsTrigger>
-              <TabsTrigger
-                value="paymentHistory"
-                className="text-primaryGreen data-[state=active]:border-primaryGreen data-[state=inactive]:text-zinc-400"
-              >
-                Payment History
-              </TabsTrigger>
-              <TabsTrigger
-                value="Settings"
-                className="text-primaryGreen data-[state=active]:border-primaryGreen data-[state=inactive]:text-zinc-400"
-              >
-                Settings
-              </TabsTrigger>
-            </TabsList>
 
-            <TabsContent value="summary">
-              <FinancesSummary
-                hostStripeConnectId={hostStripeConnectId}
-                isStripeConnectInstanceReady={isStripeConnectInstanceReady}
-                becameHostAt={hostInfo?.becameHostAt}
-              />
-            </TabsContent>
-            <TabsContent value="paymentHistory">
-              <PaymentHistory />
-            </TabsContent>
-            <TabsContent value="Settings">
-              <div className="flex justify-around">
-                {user?.stripeConnectId && user.chargesEnabled ? (
-                  <div className="relative my-3 flex w-full flex-row items-center justify-around gap-x-10">
-                    <ConnectAccountManagement
-                      collectionOptions={{
-                        fields: "eventually_due",
-                        futureRequirements: "include",
-                      }}
-                    />
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center">
-                    {!user?.stripeConnectId && <NoStripeAccount />}
-                    <ConnectAccountOnboarding
-                      onExit={() => {
-                        window.location.reload(); //default behavior we should change if ugly
-                      }}
-                    />
-                  </div>
-                )}
-              </div>
-            </TabsContent>
-          </Tabs>
+        {isStripeConnectInstanceReady ? (
+          stripeLoading ? (
+            <div>Loading Stripe account details...</div>
+          ) : stripeAccount!.requirements!.currently_due!.length > 1 ? (
+            <StripeConnectCurrentlyDueBeforePayouts />
+          ) : (
+            <div>Redirecting...</div>
+          )
         ) : (
           <NoStripeAccount />
         )}
