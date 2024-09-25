@@ -33,7 +33,7 @@ import {
   getNumNights,
 } from "@/utils/utils";
 import { DIRECTLISTINGMARKUP } from "@/utils/constants";
-import { createLatLngGISPoint, sendScheduledText } from "@/server/server-utils";
+import { createLatLngGISPoint, sendScheduledText, sendText } from "@/server/server-utils";
 import { cleanbnbScraper, cleanbnbSubScraper } from "./cleanbnb-scrape";
 import { log } from "@/pages/api/script";
 import { env } from "@/env";
@@ -209,12 +209,18 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
   ) {
     // Case 1: No properties in the area
     if (userFromRequest) {
-      void sendScheduledText({
+      void sendText({
         to: userFromRequest.phoneNumber!,
-        content: `Tramona: Your request for ${options.location} for ${formatCurrency(options.requestNightlyPrice)}/night didn't yield any offers in the last 24 hours.
-        Consider submitting a new request with a different price range or a broader location to increase your chances of finding a match`,
-        sendAt: addHours(new Date(), 24),
+        content: `Tramona: We’re not live in ${options.location} just yet, but we’re actively working on it! We’ll send you an email as soon as we launch there. In the meantime,
+        if you’re flexible with your travel plans, feel free to submit a request for a different location and discover the great deals our hosts can offer you.
+        Thank you for your interest in Tramona!`,
       });
+      // void sendScheduledText({
+      //   to: userFromRequest.phoneNumber!,
+      //   content: `Tramona: Your request for ${options.location} for ${formatCurrency(options.requestNightlyPrice)}/night didn't yield any offers in the last 24 hours.
+      //   Consider submitting a new request with a different price range or a broader location to increase your chances of finding a match`,
+      //   sendAt: addHours(new Date(), 24),
+      // });
     }
   } else if (closeMatches.length === 0 && midMatches.length === 0) {
     // Case 2: No matches within the price range (all matches are 50% + outside)
