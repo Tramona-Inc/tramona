@@ -8,7 +8,7 @@ import axios, { AxiosResponse } from "axios";
 import { z } from "zod";
 import { ALL_PROPERTY_TYPES, PropertyType } from "@/server/db/schema/common";
 import { ListingSiteName } from "@/server/db/schema/common";
-import { getNumNights } from "@/utils/utils";
+import { getNumNights, logAndFilterSettledResults } from "@/utils/utils";
 import { parseHTML } from "@/utils/utils";
 import { axiosWithRetry, proxyAgent } from "../server-utils";
 
@@ -665,7 +665,6 @@ export const casamundoScraper: DirectSiteScraper = async ({
   const locationId = await getLocationId(location);
   const offerIds = await getOfferIds(locationId, checkIn, checkOut, numGuests);
 
-
   // const scrapedListings: ScrapedListing[] = [];
 
   // for (const offer of offerIds) {
@@ -686,14 +685,7 @@ export const casamundoScraper: DirectSiteScraper = async ({
     offerIds.map((offer) =>
       scrapeProperty(offer.id, locationId, checkIn, checkOut, numGuests),
     ),
-  ).then((results) =>
-    results
-      .filter((result) => {
-        if (result.status === "rejected") console.error(result.reason);
-        return result.status === "fulfilled";
-      })
-      .map((result) => result.value),
-  );
+  ).then(logAndFilterSettledResults);
 };
 
 export const casamundoSubScraper: SubsequentScraper = async ({
