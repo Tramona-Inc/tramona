@@ -23,28 +23,6 @@ export default function Page() {
   const { data: hostInfo } = api.host.getUserHostInfo.useQuery();
   const { data: user } = api.users.getUser.useQuery();
 
-  //   const [hostStripeConnectId, sethostStripeConnectId] = useState<string | null>(
-  //     null,
-  //   );
-
-  //   const stripeStateChangeCount = useRef(0);
-
-  //   useEffect(() => {
-  //     if (isStripeConnectInstanceReady === true) {
-  //     } else {
-  //       stripeStateChangeCount.current += 1;
-  //       // stripe connect instance initializes to false
-  //       if (stripeStateChangeCount.current >= 2) {
-  //       }
-  //     }
-  //   }, [isStripeConnectInstanceReady]);
-
-  //   useEffect(() => {
-  //     if (user?.stripeConnectId) {
-  //       sethostStripeConnectId(user.stripeConnectId);
-  //     }
-  //   }, [user]);
-
   return (
     <DashboadLayout>
       <Head>

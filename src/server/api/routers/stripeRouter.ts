@@ -563,15 +563,8 @@ export const stripeRouter = createTRPCRouter({
 
   retrieveStripeConnectAccount: protectedProcedure
     .input(z.string())
-    .query(async ({ ctx, input }) => {
+    .query(async ({ input }) => {
       const account = await stripeWithSecretKey.accounts.retrieve(input);
-      console.log(account);
-      console.log(account.requirements);
-      if (account.payouts_enabled && account.charges_enabled) {
-        // The account is fully set up to accept charges and receive payouts.
-      } else {
-        // The account still has pending requirements.
-      }
       return account;
     }),
 
