@@ -38,7 +38,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-// Constants
 const MAX_TIERS = 10;
 const MIN_TIERS = 1;
 const MIN_DISCOUNT = 1;
@@ -54,7 +53,6 @@ const DEFAULT_TIERS = [
   { days: 7, percentOff: 30 },
 ];
 
-// Schemas
 const discountTierSchema = z.object({
   days: z.number().min(0, "Days must be 0 or greater"),
   percentOff: z.number().min(MIN_DISCOUNT).max(MAX_DISCOUNT),
@@ -78,7 +76,6 @@ const formSchema = z.object({
   });
 type FormSchema = z.infer<typeof formSchema>;
 
-// Updated helper functions
 const orderTiers = (
   tiers: FormSchema["autoOfferDiscountTiers"],
 ): FormSchema["autoOfferDiscountTiers"] => {
@@ -91,7 +88,6 @@ const hasHighDiscount = (
   return tiers.some((tier) => tier.percentOff >= HIGH_DISCOUNT_THRESHOLD);
 };
 
-// Component
 export default function HostAutoOffer({ property }: { property: Property }) {
   const [showHighDiscountAlert, setShowHighDiscountAlert] = useState(false);
   const [showResetAlert, setShowResetAlert] = useState(false);
@@ -266,7 +262,6 @@ export default function HostAutoOffer({ property }: { property: Property }) {
     form.handleSubmit(handleSubmit)();
   }, [form, handleSubmit]);
 
-  // Render helpers
   const renderDiscountTierFields = useCallback(
     (
       fields: FieldArrayWithId<FormSchema, "autoOfferDiscountTiers", "id">[],
@@ -346,7 +341,6 @@ export default function HostAutoOffer({ property }: { property: Property }) {
     [form, checkForChanges, isSaving],
   );
 
-  // Render
   return (
     <div className="my-6 space-y-4">
       <div className="flex items-center space-x-4">
