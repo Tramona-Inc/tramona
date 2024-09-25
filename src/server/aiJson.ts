@@ -2,6 +2,7 @@ import { env } from "@/env";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { zodToJsonSchema } from "zod-to-json-schema";
 import { z } from "zod";
+import { formatZodError } from "@/utils/zod-utils";
 
 const genAI = new GoogleGenerativeAI(env.GEMINI_KEY);
 
@@ -59,14 +60,7 @@ export async function aiJson<T>({
       return res.data;
     }
 
-    issues = JSON.stringify(
-      res.error.issues.map((issue) => ({
-        path: issue.path.join("."),
-        message: issue.message,
-      })),
-      null,
-      2,
-    );
+    issues = formatZodError(res.error);
   }
 
   throw new Error(`Failed after ${retries} retries`);

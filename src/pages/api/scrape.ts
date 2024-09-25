@@ -12,7 +12,10 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
-  const { requestId: requestIdStr } = req.body as { requestId: string };
+  console.log("Scrape request received");
+  const { requestId: requestIdStr } = req.body as {
+    requestId: string;
+  };
   if (!requestIdStr) {
     return res.status(400).json({ error: "Missing requestId parameter" });
   }
@@ -69,7 +72,7 @@ export default async function handler(
             : addMinutes(new Date(), 55),
       });
 
-      return res.status(200);
+      return res.status(200).json({ success: true });
     })
     .catch((err) => {
       if (err instanceof Error) {
@@ -81,6 +84,6 @@ export default async function handler(
           `Error scraping listings for request ${request.id}: ${err}`,
         );
       }
-      return res.status(500);
+      return res.status(500).json({ error: "Error scraping listings" });
     });
 }

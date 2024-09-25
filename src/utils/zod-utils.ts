@@ -135,3 +135,14 @@ export const zodTime = z
     /^(?:(?:[01]\d|2[0-3]):([0-5]\d))|(?:(0?[1-9]|1[0-2]):([0-5]\d)\s?(?:AM|PM))$/i,
     "Invalid time format",
   );
+
+export function formatZodError(error: z.ZodError<unknown>) {
+  return JSON.stringify(
+    error.issues.map((issue) => ({
+      path: issue.path.join("."),
+      message: issue.message,
+    })),
+    null,
+    2,
+  );
+}

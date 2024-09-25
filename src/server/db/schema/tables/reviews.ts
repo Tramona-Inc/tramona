@@ -2,6 +2,7 @@ import { integer, pgTable, serial, text, varchar } from "drizzle-orm/pg-core";
 import { properties } from "./properties";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { zodUrl } from "@/utils/zod-utils";
 
 export const reviews = pgTable("reviews", {
   id: serial("id").primaryKey(),
@@ -18,7 +19,7 @@ export type Review = Omit<typeof reviews.$inferSelect, "id" | "propertyId">;
 export type NewReview = Omit<typeof reviews.$inferInsert, "id" | "propertyId">;
 
 export const reviewsInsertSchema = createInsertSchema(reviews, {
-  profilePic: z.string().url(),
+  profilePic: zodUrl().optional(),
   rating: z.number().int().min(1).max(5),
 });
 

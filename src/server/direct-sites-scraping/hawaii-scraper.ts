@@ -3,7 +3,7 @@ import {
   SubsequentScraper,
   ScrapedListing,
 } from "@/server/direct-sites-scraping";
-import { Review } from "@/server/db/schema";
+import { NewReview } from "@/server/db/schema";
 import axios from "axios";
 import { z } from "zod";
 import querystring from "querystring";
@@ -219,7 +219,7 @@ function extractAddressFromDirectionsLink(html: string): string {
 }
 
 async function scrapePropertyPage(url: string): Promise<{
-  reviews: Review[];
+  reviews: NewReview[];
   images: string[];
   description: string;
   address: string;
@@ -227,7 +227,7 @@ async function scrapePropertyPage(url: string): Promise<{
   const response = await axios.get(url, { httpsAgent: proxyAgent });
   const $ = cheerio.load(response.data as string);
 
-  const reviews: Review[] = [];
+  const reviews: NewReview[] = [];
   $(".rc-core-item-review").each((_, element) => {
     const fullText = $(element).find("b").text().trim();
 
@@ -245,7 +245,6 @@ async function scrapePropertyPage(url: string): Promise<{
 
     reviews.push({
       name,
-      profilePic: "",
       rating: ratingStars,
       review: reviewText || "No review text available",
     });
@@ -427,7 +426,7 @@ type CBIslandVacationsPropertyInput = z.infer<typeof PropertySchema>;
 const mapToScrapedListing = (
   prop: CBIslandVacationsPropertyInput,
   scrapeUrl: string,
-  reviews: Review[],
+  reviews: NewReview[],
   address: string,
   images: string[],
   description: string,

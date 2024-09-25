@@ -3,6 +3,7 @@ import { and, isNull, gt, notInArray } from "drizzle-orm";
 import { requests } from "@/server/db/schema";
 import { NextApiResponse } from "next";
 import { addHours, formatDistanceToNow } from "date-fns";
+import axios from "axios";
 
 const processedRequestIds = [
   1248, 1249, 1250, 1251, 1291, 1300, 902, 1307, 1308, 903, 1311, 1312, 741,
@@ -56,12 +57,10 @@ export default async function script(_: any, res: NextApiResponse) {
 
   await Promise.all(
     requests_.map(async (request) =>
-      fetch("http://localhost:3000/api/scrape", {
-        method: "POST",
-        body: JSON.stringify({ requestId: request.id }),
+      axios.post("http://localhost:3000/api/scrape", {
+        requestId: request.id,
       }),
     ),
   );
-
   res.status(200).json({ success: true });
 }

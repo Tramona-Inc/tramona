@@ -150,11 +150,12 @@ export const mapTaxodataToScrapedListing = async (
           : 0
         : 0;
       const locationMatch = propDetails.match(/([A-Za-z\s]+,\s[A-Z]{2})/);
-      const city = locationMatch
-        ? locationMatch[1]
-          ? locationMatch[1].trim()
-          : ""
-        : "";
+      const city = locationMatch?.[1]?.trim();
+
+      if (!city) {
+        throw new Error(`Failed to find city for property: ${property.pid}`);
+      }
+
       const typeElement = $(".property-quick-info li .fas.fa-home").parent(); // Navigate to the parent element of the <i> tag (the <span> containing "Home")
       let originalType = "";
       // Check if there is a span with the class "quick-info-value details-label" (e.g. "Home")
