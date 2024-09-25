@@ -29,16 +29,19 @@ import { getCoordinates } from "../google-maps";
 import { eq, and, inArray } from "drizzle-orm";
 import {
   createRandomMarkupEightToFourteenPercent,
-  formatCurrency,
   getNumNights,
 } from "@/utils/utils";
 import { DIRECTLISTINGMARKUP } from "@/utils/constants";
-import { createLatLngGISPoint, sendScheduledText, sendText } from "@/server/server-utils";
+import {
+  createLatLngGISPoint,
+  sendScheduledText,
+  sendText,
+} from "@/server/server-utils";
 import { cleanbnbScraper, cleanbnbSubScraper } from "./cleanbnb-scrape";
 import { log } from "@/pages/api/script";
 import { env } from "@/env";
-import { addHours } from "date-fns";
-import { z, ZodError } from "zod";
+import { addHours, addMinutes } from "date-fns";
+import { z } from "zod";
 import { formatZodError } from "../../utils/zod-utils";
 
 type ScraperOptions = {
@@ -196,8 +199,16 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
     return "wide";
   }
 
-  const closeMatches = fairListings.filter((l) => getCloseness(l) === "close");
-  const midMatches = fairListings.filter((l) => getCloseness(l) === "mid");
+  const closeMatches = fairListings.filter((l) => getCloseness(l) === "close").sort((a, b) => {
+    const aDiff = Math.abs((a.originalNightlyPrice ?? 0) - requestNightlyPrice);
+    const bDiff = Math.abs((b.originalNightlyPrice ?? 0) - requestNightlyPrice);
+    return aDiff - bDiff;
+  });
+  const midMatches = fairListings.filter((l) => getCloseness(l) === "mid").sort((a, b) => {
+    const aDiff = Math.abs((a.originalNightlyPrice ?? 0) - requestNightlyPrice);
+    const bDiff = Math.abs((b.originalNightlyPrice ?? 0) - requestNightlyPrice);
+    return aDiff - bDiff;
+  });
   const wideMatches = fairListings.filter((l) => getCloseness(l) === "wide");
 
   if (
@@ -228,8 +239,19 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
       });
     }
   } else if (closeMatches.length > 0 && closeMatches.length <= 3) {
-    // Case 3: 1-3 matches within 0-20%, but more in 20-50%
     listings = closeMatches.concat(midMatches).slice(0, 10);
+    const numMatches = listings.length;
+    if (userFromRequest) {
+      void sendScheduledText({
+        to: userFromRequest.phoneNumber!,
+        content: `Tramona: You have ${numMatches <= 10 ? numMatches : "more than 10"} matches for your request in ${options.location}! Some are close to your requested price, but most are outside of it.\n\nWe’re actively working to get you more matches that align with your budget. For now, check them out at tramona.com/requests, and if you’re flexible, consider submitting a different price to see even more options!`,
+        sendAt:
+          numMatches <= 5
+            ? addMinutes(new Date(), 25)
+            : addMinutes(new Date(), 55),
+      });
+    }
+    // Case 3: 1-3 matches within 0-20%, but more in 20-50%
   } else if (closeMatches.length === 0 && midMatches.length > 0) {
     // Case 4: No close matches, but some in 20-50%
     if (userFromRequest) {
@@ -241,8 +263,19 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
     }
     listings = midMatches.slice(0, 10); // Send 20-50% matches
   } else if (closeMatches.length > 3) {
-    // Case 5: 4 or more close matches (0-20%)
     listings = closeMatches.slice(0, 10); // Send 0-20% matches
+    const numMatches = listings.length;
+    if (userFromRequest) {
+      void sendScheduledText({
+        to: userFromRequest.phoneNumber!,
+        content: `Tramona: You have ${numMatches <= 10 ? numMatches : "more than 10"} matches for your request in ${options.location}! Please see them at tramona.com/requests`,
+        sendAt:
+          numMatches <= 5
+            ? addMinutes(new Date(), 25)
+            : addMinutes(new Date(), 55),
+      });
+    }
+    // Case 5: 4 or more close matches (0-20%)
   }
 
   if (listings.length > 0) {

@@ -1,5 +1,5 @@
 import { db } from "@/server/db";
-import { and, isNull, gt, notInArray } from "drizzle-orm";
+import { and, isNull, gt, notInArray, asc } from "drizzle-orm";
 import { requests } from "@/server/db/schema";
 import { NextApiResponse } from "next";
 import { addHours, formatDistanceToNow } from "date-fns";
@@ -11,7 +11,17 @@ const processedRequestIds = [
   745, 752, 760, 763, 767, 768, 770, 771, 775, 776, 777, 783, 784, 787, 788,
   789, 790, 1317, 746, 1318, 803, 810, 811, 812, 814, 815, 816, 817, 820, 826,
   812, 827, 829, 830, 839, 830, 840, 859, 860, 864, 865, 798, 800, 801, 860,
-  802, 804, 805, 823, 415, 416, 610, 1325,
+  802, 804, 805, 823, 415, 416, 610,
+  //
+  1325, 1345, 1352, 824, 825,
+  //
+  837, 854, 863, 1259, 1260, 1281,
+  //
+  1292, 880,
+  //
+  780, 786, 795, 796, 799, 809, 813, 818, 819, 828,
+  //
+  1379, 1388,
 ];
 
 export function log(str: unknown) {
@@ -33,31 +43,41 @@ export default async function script(_: any, res: NextApiResponse) {
         gt(requests.createdAt, new Date(Date.now() - 1000 * 60 * 60 * 24 * 14)),
         notInArray(requests.id, processedRequestIds),
       ),
+      orderBy: asc(requests.createdAt),
       with: {
         offers: true,
         madeByGroup: { with: { owner: true } },
       },
     })
     .then((res) =>
-      res.filter(
-        (r) =>
-          r.madeByGroup.owner.email === "bentomlin101@gmail.com" &&
-          r.offers.every((o) => o.createdAt < addHours(new Date(), -24)),
-      ),
+      res
+        .filter((r) =>
+          // r.madeByGroup.owner.email === "sinsunny133@gmail.com" &&
+          r.offers.every((o) => o.createdAt < addHours(new Date(), -72)),
+        )
+        .slice(0, 10),
     );
 
   log(
     requests_.map((r) => ({
       id: r.id,
       location: r.location,
+      checkIn: r.checkIn,
+      checkOut: r.checkOut,
+      numGuests: r.numGuests,
+      maxTotalPrice: r.maxTotalPrice,
       numOffers: r.offers.length,
       requestMadeAt: formatDistanceToNow(r.createdAt),
+      user: r.madeByGroup.owner.email,
+      phoneNumber: r.madeByGroup.owner.phoneNumber,
     })),
   );
 
+  console.log(requests_.map((r) => r.id));
+
   await Promise.all(
     requests_.map(async (request) =>
-      axios.post("http://localhost:3000/api/scrape", {
+      axios.post("https://tramona.com/api/scrape", {
         requestId: request.id,
       }),
     ),

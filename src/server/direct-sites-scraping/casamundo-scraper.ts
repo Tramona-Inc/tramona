@@ -8,7 +8,7 @@ import axios, { AxiosResponse } from "axios";
 import { z } from "zod";
 import { ALL_PROPERTY_TYPES, PropertyType } from "@/server/db/schema/common";
 import { ListingSiteName } from "@/server/db/schema/common";
-import { getNumNights } from "@/utils/utils";
+import { getNumNights, logAndFilterSettledResults } from "@/utils/utils";
 import { parseHTML } from "@/utils/utils";
 import { axiosWithRetry, proxyAgent } from "../server-utils";
 
@@ -78,10 +78,11 @@ async function getLocationId(location: string): Promise<string> {
     limit: "10",
   });
 
-  const response: AxiosResponse<AutocompleteResponse> = await axiosWithRetry.get(
-    `${autocompleteUrl}?${params.toString()}`,
-    // { httpsAgent: proxyAgent },
-  );
+  const response: AxiosResponse<AutocompleteResponse> =
+    await axiosWithRetry.get(
+      `${autocompleteUrl}?${params.toString()}`,
+      // { httpsAgent: proxyAgent },
+    );
   const suggestions = response.data.suggestions;
 
   if (suggestions.length > 0 && suggestions[0]) {
@@ -185,17 +186,20 @@ async function checkAvailability(
     (currentYear === checkOut.getFullYear() &&
       currentMonth <= checkOut.getMonth() + 1)
   ) {
-    const response: AxiosResponse<CalendarResponse> = await axiosWithRetry.get(url, {
-      params: {
-        year: currentYear,
-        month: currentMonth,
+    const response: AxiosResponse<CalendarResponse> = await axiosWithRetry.get(
+      url,
+      {
+        params: {
+          year: currentYear,
+          month: currentMonth,
+        },
+        // httpsAgent: proxyAgent,
+        headers: {
+          accept: "application/json",
+          "accept-language": "en-US,en;q=0.9",
+        },
       },
-      // httpsAgent: proxyAgent,
-      headers: {
-        accept: "application/json",
-        "accept-language": "en-US,en;q=0.9",
-      },
-    });
+    );
 
     Object.assign(days, response.data.content.days);
 
@@ -665,7 +669,6 @@ export const casamundoScraper: DirectSiteScraper = async ({
   const locationId = await getLocationId(location);
   const offerIds = await getOfferIds(locationId, checkIn, checkOut, numGuests);
 
-
   // const scrapedListings: ScrapedListing[] = [];
 
   // for (const offer of offerIds) {
@@ -686,14 +689,7 @@ export const casamundoScraper: DirectSiteScraper = async ({
     offerIds.map((offer) =>
       scrapeProperty(offer.id, locationId, checkIn, checkOut, numGuests),
     ),
-  ).then((results) =>
-    results
-      .filter((result) => {
-        if (result.status === "rejected") console.error(result.reason);
-        return result.status === "fulfilled";
-      })
-      .map((result) => result.value),
-  );
+  ).then(logAndFilterSettledResults);
 };
 
 export const casamundoSubScraper: SubsequentScraper = async ({
