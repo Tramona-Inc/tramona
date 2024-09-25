@@ -74,6 +74,7 @@ const cancellationPolicySchema = z.object({
 });
 
 const propertyTypeMapping: Record<string, PropertyType> = {
+  Home: "House",
   Condo: "Condominium",
   Suite: "Guest Suite",
   Apts: "Apartment",
