@@ -594,14 +594,14 @@ export function separateByPriceRestriction(
           );
         if (
           property.priceRestriction == null ||
-          property.priceRestriction * 100 <= nightlyPrice
+          property.priceRestriction <= nightlyPrice
         ) {
           if (property.city === "Seattle, WA, US") {
             console.log(property.priceRestriction, nightlyPrice);
           }
           normalProperties.push(property);
         } else {
-          if (property.priceRestriction * 100 <= nightlyPrice * 1.15) {
+          if (property.priceRestriction >= nightlyPrice * 1.15) {
             outsideProperties.push(property);
           }
         }
