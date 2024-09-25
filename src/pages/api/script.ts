@@ -11,7 +11,13 @@ const processedRequestIds = [
   745, 752, 760, 763, 767, 768, 770, 771, 775, 776, 777, 783, 784, 787, 788,
   789, 790, 1317, 746, 1318, 803, 810, 811, 812, 814, 815, 816, 817, 820, 826,
   812, 827, 829, 830, 839, 830, 840, 859, 860, 864, 865, 798, 800, 801, 860,
-  802, 804, 805, 823, 415, 416, 610, 1325,
+  802, 804, 805, 823, 415, 416, 610,
+  //
+  1325, 1345, 1352, 824, 825,
+  //
+  837, 854, 863, 1259, 1260, 1281,
+  //
+  1292, 880,
 ];
 
 export function log(str: unknown) {
@@ -39,28 +45,36 @@ export default async function script(_: any, res: NextApiResponse) {
       },
     })
     .then((res) =>
-      res.filter(
-        (r) =>
-          r.madeByGroup.owner.email === "bentomlin101@gmail.com" &&
-          r.offers.every((o) => o.createdAt < addHours(new Date(), -24)),
-      ),
+      res
+        .filter((r) =>
+          r.offers.every((o) => o.createdAt < addHours(new Date(), -72)),
+        )
+        .slice(0, 5),
     );
 
   log(
     requests_.map((r) => ({
       id: r.id,
       location: r.location,
+      checkIn: r.checkIn,
+      checkOut: r.checkOut,
+      numGuests: r.numGuests,
+      maxTotalPrice: r.maxTotalPrice,
       numOffers: r.offers.length,
       requestMadeAt: formatDistanceToNow(r.createdAt),
+      user: r.madeByGroup.owner.email,
+      phoneNumber: r.madeByGroup.owner.phoneNumber,
     })),
   );
 
-  await Promise.all(
-    requests_.map(async (request) =>
-      axios.post("http://localhost:3000/api/scrape", {
-        requestId: request.id,
-      }),
-    ),
-  );
+  console.log(requests_.map((r) => r.id));
+
+  // await Promise.all(
+  //   requests_.map(async (request) =>
+  //     axios.post("https://tramona.com/api/scrape", {
+  //       requestId: request.id,
+  //     }),
+  //   ),
+  // );
   res.status(200).json({ success: true });
 }
