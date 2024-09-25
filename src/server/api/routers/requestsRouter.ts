@@ -76,7 +76,10 @@ export const requestsRouter = createTRPCRouter({
               randomDirectListingDiscount: true,
               datePriceFromAirbnb: true,
             },
-            where: lt(offers.becomeVisibleAt, new Date()),
+            where:
+              ctx.user.role === "admin"
+                ? undefined // show all offers for admins
+                : lt(offers.becomeVisibleAt, new Date()),
             with: {
               property: {
                 columns: {
