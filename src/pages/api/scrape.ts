@@ -53,11 +53,6 @@ export default async function handler(
     numGuests: request.numGuests,
   })
     .then(async (listings) => {
-      if (listings.length === 0) {
-        console.log(`No listings found for request ${request.id}`);
-        return;
-      }
-
       const travelerPhone = request.madeByGroup.owner.phoneNumber;
       if (!travelerPhone) {
         console.log(
@@ -90,4 +85,6 @@ export default async function handler(
       }
       return res.status(500).json({ error: "Error scraping listings" });
     });
+
+  return res.status(200).json({ success: true });
 }

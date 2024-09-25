@@ -18,6 +18,8 @@ const processedRequestIds = [
   837, 854, 863, 1259, 1260, 1281,
   //
   1292, 880,
+  //
+  1293, 1319, 1321, 881, 887, 891, 892, 893, 895, 896,
 ];
 
 export function log(str: unknown) {
@@ -49,7 +51,7 @@ export default async function script(_: any, res: NextApiResponse) {
         .filter((r) =>
           r.offers.every((o) => o.createdAt < addHours(new Date(), -72)),
         )
-        .slice(0, 5),
+        .slice(0, 10),
     );
 
   log(

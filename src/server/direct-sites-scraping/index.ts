@@ -203,6 +203,10 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
   const midMatches = fairListings.filter((l) => getCloseness(l) === "mid");
   const wideMatches = fairListings.filter((l) => getCloseness(l) === "wide");
 
+  console.log("closeMatches: ", closeMatches.length);
+  console.log("midMatches: ", midMatches.length);
+  console.log("wideMatches: ", wideMatches.length);
+
   if (
     closeMatches.length === 0 &&
     midMatches.length === 0 &&
