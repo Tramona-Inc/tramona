@@ -156,7 +156,7 @@ export const authRouter = createTRPCRouter({
         ]);
       }
 
-      waitUntil(sendVerificationEmail(user));
+      await sendVerificationEmail(user);
 
       return {
         status: "success",
