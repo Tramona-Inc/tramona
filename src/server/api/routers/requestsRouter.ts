@@ -40,6 +40,7 @@ import { newLinkRequestSchema } from "@/utils/useSendUnsentRequests";
 import { getCoordinates } from "@/server/google-maps";
 import { scrapeDirectListings } from "@/server/direct-sites-scraping";
 import { waitUntil } from "@vercel/functions";
+import { addMinutes } from "date-fns";
 
 const updateRequestInputSchema = z.object({
   requestId: z.number(),
@@ -473,10 +474,9 @@ export async function handleRequestSubmission(
         latitude: lat,
         longitude: lng,
         numGuests: input.numGuests,
-      })
-        .catch((error) => {
-          console.error("Error scraping listings: " + error);
-        }),
+      }).catch((error) => {
+        console.error("Error scraping listings: " + error);
+      }),
     );
 
     const eligibleProperties = await getPropertiesForRequest(
