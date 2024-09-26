@@ -70,6 +70,7 @@ export async function getFeed({ maxNumEntries = 30 } = {}) {
         createdAt: true,
         checkIn: true,
         checkOut: true,
+        randomDirectListingDiscount: true,
       },
       with: {
         property: {
@@ -244,6 +245,7 @@ export async function getFeed({ maxNumEntries = 30 } = {}) {
             },
           },
         },
+        randomDirectListingDiscount: 0,
         uniqueId: `fo-${item.id}`,
         type: "offer" as const,
         isFiller: true,

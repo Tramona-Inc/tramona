@@ -8,9 +8,9 @@ import axios, { AxiosResponse } from "axios";
 import { z } from "zod";
 import { ALL_PROPERTY_TYPES, PropertyType } from "@/server/db/schema/common";
 import { ListingSiteName } from "@/server/db/schema/common";
-import { getNumNights } from "@/utils/utils";
+import { getNumNights, logAndFilterSettledResults } from "@/utils/utils";
 import { parseHTML } from "@/utils/utils";
-import { proxyAgent } from "../server-utils";
+import { axiosWithRetry, proxyAgent } from "../server-utils";
 
 const offerSchema = z.object({
   id: z.string(),
@@ -78,10 +78,11 @@ async function getLocationId(location: string): Promise<string> {
     limit: "10",
   });
 
-  const response: AxiosResponse<AutocompleteResponse> = await axios.get(
-    `${autocompleteUrl}?${params.toString()}`,
-    { httpsAgent: proxyAgent },
-  );
+  const response: AxiosResponse<AutocompleteResponse> =
+    await axiosWithRetry.get(
+      `${autocompleteUrl}?${params.toString()}`,
+      // { httpsAgent: proxyAgent },
+    );
   const suggestions = response.data.suggestions;
 
   if (suggestions.length > 0 && suggestions[0]) {
@@ -142,9 +143,9 @@ async function getOfferIds(
     _format: "json",
   });
 
-  const response: AxiosResponse<OfferResponse> = await axios.get(
+  const response: AxiosResponse<OfferResponse> = await axiosWithRetry.get(
     `${url}?${params.toString()}`,
-    { headers, httpsAgent: proxyAgent },
+    // { headers, httpsAgent: proxyAgent },
   );
 
   return response.data.offers.map((offer) => offerSchema.parse(offer));
@@ -185,17 +186,20 @@ async function checkAvailability(
     (currentYear === checkOut.getFullYear() &&
       currentMonth <= checkOut.getMonth() + 1)
   ) {
-    const response: AxiosResponse<CalendarResponse> = await axios.get(url, {
-      params: {
-        year: currentYear,
-        month: currentMonth,
+    const response: AxiosResponse<CalendarResponse> = await axiosWithRetry.get(
+      url,
+      {
+        params: {
+          year: currentYear,
+          month: currentMonth,
+        },
+        // httpsAgent: proxyAgent,
+        headers: {
+          accept: "application/json",
+          "accept-language": "en-US,en;q=0.9",
+        },
       },
-      httpsAgent: proxyAgent,
-      headers: {
-        accept: "application/json",
-        "accept-language": "en-US,en;q=0.9",
-      },
-    });
+    );
 
     Object.assign(days, response.data.content.days);
 
@@ -212,7 +216,7 @@ async function checkAvailability(
 
 interface PriceExtractionParams {
   offerId: string;
-  numGuests: number;
+  numGuests?: number;
   checkIn: Date;
   duration: number;
 }
@@ -261,10 +265,7 @@ interface PriceResult {
 function formatCancellationPolicy(
   cancellationDetails: CancellationDetails,
 ): string {
-  if (
-    !cancellationDetails.dataFrames ||
-    cancellationDetails.dataFrames.length === 0
-  ) {
+  if (cancellationDetails.dataFrames.length === 0) {
     return "Cancellation policy information is not available.";
   }
 
@@ -304,7 +305,7 @@ const fetchPrice = async (
 
   const queryParams = new URLSearchParams({
     sT: "withDates",
-    adults: params.numGuests.toString(),
+    adults: params.numGuests?.toString() ?? "1",
     children: "0",
     pets: "0",
     arrival: params.checkIn.toISOString().split("T")[0] ?? "",
@@ -335,10 +336,10 @@ const fetchPrice = async (
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      const response: AxiosResponse<ApiResponse> = await axios.post(
+      const response: AxiosResponse<ApiResponse> = await axiosWithRetry.post(
         `${url}?${queryParams.toString()}`,
         null,
-        { headers, httpsAgent: proxyAgent },
+        // { headers, httpsAgent: proxyAgent },
       );
       const data = response.data;
 
@@ -358,7 +359,7 @@ const fetchPrice = async (
         };
       }
 
-      if (data.hasErrors && data.errorMessage === "price_not_available") {
+      if (data.errorMessage === "price_not_available") {
         if (attempt < maxRetries - 1) {
           await new Promise((resolve) => setTimeout(resolve, retryDelay));
           continue;
@@ -392,13 +393,15 @@ const fetchPrice = async (
 };
 
 const reviewResponseSchema = z.object({
-  average: z.object({
-    value: z.number(),
-    count: z.number(),
-  }),
+  average: z
+    .object({
+      value: z.number().optional(),
+      count: z.number().optional(),
+    })
+    .optional(),
   list: z.array(
     z.object({
-      text: z.string().optional(),
+      text: z.string().nullable().optional(),
       nickname: z.string().optional(),
       rating: z.object({
         value: z.number(),
@@ -414,11 +417,11 @@ const fetchReviews = async (
   numRatings: number;
   reviews: NewReview[];
 }> => {
-  const data = await axios
+  const data = await axiosWithRetry
     .get(
       `https://www.casamundo.com/reviews/list/${offerId}?scale=5&bcEnabled=false&googleReviews=false`,
       {
-        httpsAgent: proxyAgent,
+        // httpsAgent: proxyAgent,
         headers: {
           accept: "*/*",
           "accept-language": "en-US,en;q=0.9",
@@ -435,8 +438,8 @@ const fetchReviews = async (
     .then((res) => res.data as unknown)
     .then((res) => reviewResponseSchema.parse(res));
 
-  const avgRating: number = data.average.value || 0;
-  const numRatings: number = data.average.count || 0;
+  const avgRating: number = data.average?.value ?? 0;
+  const numRatings: number = data.average?.count ?? 0;
   const reviews: NewReview[] = data.list
     .filter((review): review is typeof review & { text: string } =>
       Boolean(review.text),
@@ -498,7 +501,7 @@ async function fetchPropertyDetails(
         list: z.array(
           z.object({
             label: z.string(),
-            icon: z.string(),
+            icon: z.string().optional(),
           }),
         ),
       }),
@@ -528,7 +531,7 @@ async function fetchPropertyDetails(
     }),
     persons: z.number(),
     petFriendly: z.boolean().optional(),
-    bedrooms: z.number(),
+    bedrooms: z.number().nullable(),
     bathrooms: z.number().optional(),
     checkInCheckOutTime: z
       .object({
@@ -537,12 +540,12 @@ async function fetchPropertyDetails(
         message: z.string().nullable(),
         reloadOnArrivalChange: z.boolean(),
       })
-      .optional(),
+      .nullish(),
   });
 
-  const data = await axios
+  const data = await axiosWithRetry
     .get(`${url}?${params.toString()}`, {
-      httpsAgent: proxyAgent,
+      // httpsAgent: proxyAgent,
       headers,
     })
     .then((res) => res.data as unknown)
@@ -554,7 +557,7 @@ async function fetchPropertyDetails(
   data.infoGroups.forEach((group) => {
     group.list.forEach((item) => {
       amenities.push(item.label);
-      if (item.icon === "smoking_not_allowed") {
+      if (item.icon && item.icon === "smoking_not_allowed") {
         smokingAllowed = false;
       }
     });
@@ -596,7 +599,7 @@ async function fetchPropertyDetails(
     latLngPoint,
     maxNumGuests: data.persons,
     numBeds,
-    numBedrooms: data.bedrooms,
+    numBedrooms: data.bedrooms ?? 1,
     numBathrooms: data.bathrooms,
     amenities,
     otherAmenities: [],
@@ -622,16 +625,14 @@ async function scrapeProperty(
   checkIn: Date,
   checkOut: Date,
   numGuests?: number,
-): Promise<ScrapedListing> {
+) {
   if (!numGuests) {
     throw new Error("Number of guests must be provided for Casamundo scraper");
   }
 
   const isAvailable = await checkAvailability(offerId, checkIn, checkOut);
 
-  if (!isAvailable) {
-    return {} as ScrapedListing;
-  }
+  if (!isAvailable) throw new Error("Property is not available");
 
   const price = await fetchPrice({
     offerId,
@@ -640,9 +641,7 @@ async function scrapeProperty(
     duration: getNumNights(checkIn, checkOut),
   });
 
-  if (price.price === -1) {
-    return {} as ScrapedListing;
-  }
+  if (price.price === -1) throw new Error("Price is not available");
 
   const propertyDetails = await fetchPropertyDetails(
     offerId,
@@ -652,7 +651,6 @@ async function scrapeProperty(
     locationId,
     price,
   );
-
   return propertyDetails;
 }
 
@@ -687,28 +685,11 @@ export const casamundoScraper: DirectSiteScraper = async ({
   //   }
   // }
 
-  const listings = await Promise.all(
-    offerIds.map(async (offer) => {
-      const propertyWithDetails = await scrapeProperty(
-        offer.id,
-        locationId,
-        checkIn,
-        checkOut,
-        numGuests,
-      );
-
-      // Return property details if they exist, otherwise return null
-      return Object.keys(propertyWithDetails).length > 0
-        ? propertyWithDetails
-        : null;
-    }),
-  );
-
-  // Filter out any null values (i.e., offers with no details)
-  const validScrapedListings: ScrapedListing[] = listings.filter(
-    (listing) => listing !== null,
-  );
-  return validScrapedListings;
+  return await Promise.allSettled(
+    offerIds.map((offer) =>
+      scrapeProperty(offer.id, locationId, checkIn, checkOut, numGuests),
+    ),
+  ).then(logAndFilterSettledResults);
 };
 
 export const casamundoSubScraper: SubsequentScraper = async ({

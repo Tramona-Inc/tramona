@@ -8,7 +8,7 @@ import {
 } from "@/server/direct-sites-scraping";
 import { PropertyType, NewReview } from "@/server/db/schema";
 import { ListingSiteName } from "@/server/db/schema/common";
-import { getNumNights } from "@/utils/utils";
+import { getNumNights, logAndFilterSettledResults } from "@/utils/utils";
 import { algoliasearch, SearchResponse } from "algoliasearch";
 import { getCity, getCoordinates, getCountryISO } from "@/server/google-maps";
 import { proxyAgent } from "../server-utils";
@@ -295,300 +295,295 @@ const fetchPropertyDetails = async (
   latitude: number,
   longitude: number,
   numGuests?: number,
-): Promise<ScrapedListing | null> => {
-  try {
-    const url = `https://evolve.com/vacation-rentals${urlLocationParam}/${propertyId}?adults=${numGuests}&startDate=${checkIn.toISOString().split("T")[0]}&endDate=${checkOut.toISOString().split("T")[0]}`;
+): Promise<ScrapedListing> => {
+  const url = `https://evolve.com/vacation-rentals${urlLocationParam}/${propertyId}?adults=${numGuests}&startDate=${checkIn.toISOString().split("T")[0]}&endDate=${checkOut.toISOString().split("T")[0]}`;
 
-    const headers = {
-      accept:
-        "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
-      "accept-language": "en-US,en;q=0.9",
-      "cache-control": "max-age=0",
-      "sec-ch-ua":
-        '"Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"',
-      "sec-ch-ua-mobile": "?0",
-      "sec-ch-ua-platform": '"macOS"',
-      "sec-fetch-dest": "document",
-      "sec-fetch-mode": "navigate",
-      "sec-fetch-site": "none",
-      "sec-fetch-user": "?1",
-      "upgrade-insecure-requests": "1",
+  const headers = {
+    accept:
+      "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+    "accept-language": "en-US,en;q=0.9",
+    "cache-control": "max-age=0",
+    "sec-ch-ua":
+      '"Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"',
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": '"macOS"',
+    "sec-fetch-dest": "document",
+    "sec-fetch-mode": "navigate",
+    "sec-fetch-site": "none",
+    "sec-fetch-user": "?1",
+    "upgrade-insecure-requests": "1",
+  };
+
+  const response = await axios.get(url, { headers, httpsAgent: proxyAgent });
+  const $ = cheerio.load(response.data as string);
+
+  const scriptContent = $('script:contains("listingReviews")').html();
+  if (!scriptContent) {
+    throw new Error("Could not find script containing review data");
+  }
+  const jsonMatch = scriptContent.match(/({.*"buildId":.*})\s*$/);
+  if (!jsonMatch?.[1]) {
+    throw new Error("Could not extract JSON data from script");
+  }
+
+  const parsedData = JSON.parse(jsonMatch[1]) as {
+    props?: {
+      pageProps?: {
+        listingReviews?: unknown[];
+        listing?: { units?: unknown[] };
+      };
     };
+  };
 
-    const response = await axios.get(url, { headers, httpsAgent: proxyAgent });
-    const $ = cheerio.load(response.data as string);
+  interface ListingUnit {
+    amenities?: Amenity[];
+  }
 
-    const scriptContent = $('script:contains("listingReviews")').html();
-    if (!scriptContent) {
-      throw new Error("Could not find script containing review data");
-    }
-    const jsonMatch = scriptContent.match(/({.*"buildId":.*})\s*$/);
-    if (!jsonMatch?.[1]) {
-      throw new Error("Could not extract JSON data from script");
-    }
+  interface Amenity {
+    category: string;
+    name: string;
+  }
 
-    const parsedData = JSON.parse(jsonMatch[1]) as {
-      props?: {
-        pageProps?: {
-          listingReviews?: unknown[];
-          listing?: { units?: unknown[] };
+  interface ParsedData {
+    props?: {
+      pageProps?: {
+        listing?: {
+          units?: ListingUnit[];
         };
       };
     };
+  }
 
-    interface ListingUnit {
-      amenities?: Amenity[];
-    }
+  const listingUnits =
+    (parsedData as ParsedData).props?.pageProps?.listing?.units ?? [];
 
-    interface Amenity {
-      category: string;
-      name: string;
-    }
+  const categories = [
+    "Inside Amenities",
+    "Outdoor Amenities",
+    "Community Amenities",
+    "Property Amenities",
+    "Kitchen Equipment",
+  ] as const;
 
-    interface ParsedData {
-      props?: {
-        pageProps?: {
-          listing?: {
-            units?: ListingUnit[];
-          };
-        };
-      };
-    }
+  type CategoryType = (typeof categories)[number];
 
-    const listingUnits =
-      (parsedData as ParsedData).props?.pageProps?.listing?.units ?? [];
+  const categorizedAmenities: Record<CategoryType, string[]> =
+    categories.reduce(
+      (acc, category) => {
+        acc[category] = [];
+        return acc;
+      },
+      {} as Record<CategoryType, string[]>,
+    );
 
-    const categories = [
-      "Inside Amenities",
-      "Outdoor Amenities",
-      "Community Amenities",
-      "Property Amenities",
-      "Kitchen Equipment",
-    ] as const;
+  const uncategorizedAmenities: string[] = [];
 
-    type CategoryType = (typeof categories)[number];
-
-    const categorizedAmenities: Record<CategoryType, string[]> =
-      categories.reduce(
-        (acc, category) => {
-          acc[category] = [];
-          return acc;
-        },
-        {} as Record<CategoryType, string[]>,
+  listingUnits.forEach((unit: ListingUnit) => {
+    (unit.amenities ?? []).forEach((amenity: Amenity) => {
+      const matchedCategory = categories.find(
+        (cat) => amenity.category.toLowerCase() === cat.toLowerCase(),
       );
 
-    const uncategorizedAmenities: string[] = [];
-
-    listingUnits.forEach((unit: ListingUnit) => {
-      (unit.amenities ?? []).forEach((amenity: Amenity) => {
-        const matchedCategory = categories.find(
-          (cat) => amenity.category.toLowerCase() === cat.toLowerCase(),
-        );
-
-        if (matchedCategory) {
-          if (!categorizedAmenities[matchedCategory].includes(amenity.name)) {
-            categorizedAmenities[matchedCategory].push(amenity.name);
-          }
-        } else {
-          if (!uncategorizedAmenities.includes(amenity.name)) {
-            uncategorizedAmenities.push(amenity.name);
-          }
+      if (matchedCategory) {
+        if (!categorizedAmenities[matchedCategory].includes(amenity.name)) {
+          categorizedAmenities[matchedCategory].push(amenity.name);
         }
-      });
+      } else {
+        if (!uncategorizedAmenities.includes(amenity.name)) {
+          uncategorizedAmenities.push(amenity.name);
+        }
+      }
     });
+  });
 
-    const allAmenities = Object.values(categorizedAmenities).flat();
+  const allAmenities = Object.values(categorizedAmenities).flat();
 
-    const listingReviews = parsedData.props?.pageProps?.listingReviews ?? [];
+  const listingReviews = parsedData.props?.pageProps?.listingReviews ?? [];
 
-    const validatedReviews = listingReviews
-      .map((review) => ReviewDataSchema.safeParse(review))
-      .filter(
-        (result): result is z.SafeParseSuccess<ReviewData> => result.success,
-      )
-      .map((result) => result.data);
+  const validatedReviews = listingReviews
+    .map((review) => ReviewDataSchema.safeParse(review))
+    .filter(
+      (result): result is z.SafeParseSuccess<ReviewData> => result.success,
+    )
+    .map((result) => result.data);
 
-    const formattedReviews: NewReview[] = validatedReviews.map((review) => ({
-      name: review.reviewedBy,
-      rating: parseInt(review.rating),
-      review: review.reviewDetail
-        .replace(/\u003cbr\u003e/g, "\n")
-        .replace(/\*This review was originally posted on Vrbo/g, "")
-        .trim(),
-    }));
+  const formattedReviews: NewReview[] = validatedReviews.map((review) => ({
+    name: review.reviewedBy,
+    rating: parseInt(review.rating),
+    review: review.reviewDetail
+      .replace(/\u003cbr\u003e/g, "\n")
+      .replace(/\*This review was originally posted on Vrbo/g, "")
+      .trim(),
+  }));
 
-    const about = $(".Description_descriptionContent__dG7mv").text().trim();
-    const propertyType = $(".Detail-Overview_resultType__UrnDo")
+  const about = $(".Description_descriptionContent__dG7mv").text().trim();
+  const propertyType = $(".Detail-Overview_resultType__UrnDo")
+    .text()
+    .trim() as PropertyType;
+  const address = $(".Detail-Overview_resultLocation__3SNLW span")
+    .last()
+    .text()
+    .trim();
+  const city = address.split(",")[0]?.trim() ?? "";
+
+  const imageUrls = $(".Image-Gallery_clickablePhoto__SRbpl")
+    .map((_, el) => $(el).attr("src"))
+    .get();
+
+  const reviewsSection = $(".Reviews_reviews____7L2");
+  const avgRating = parseFloat(
+    reviewsSection
+      .find(".Reviews_reviewOverview__YVVcG span")
+      .first()
       .text()
-      .trim() as PropertyType;
-    const address = $(".Detail-Overview_resultLocation__3SNLW span")
+      .trim(),
+  );
+  const numRatings = parseInt(
+    reviewsSection
+      .find(".Reviews_reviewOverview__YVVcG span")
       .last()
       .text()
-      .trim();
-    const city = address.split(",")[0]?.trim() ?? "";
+      .trim(),
+  );
 
-    const imageUrls = $(".Image-Gallery_clickablePhoto__SRbpl")
-      .map((_, el) => $(el).attr("src"))
-      .get();
+  const locationDetails: string[] = [];
+  const locationSection = $(
+    'h2.section-subtitle:contains("Location Details")',
+  ).next("div");
+  locationSection.find("p").each((_, element) => {
+    locationDetails.push($(element).text().trim());
+  });
 
-    const reviewsSection = $(".Reviews_reviews____7L2");
-    const avgRating = parseFloat(
-      reviewsSection
-        .find(".Reviews_reviewOverview__YVVcG span")
-        .first()
-        .text()
-        .trim(),
-    );
-    const numRatings = parseInt(
-      reviewsSection
-        .find(".Reviews_reviewOverview__YVVcG span")
-        .last()
-        .text()
-        .trim(),
-    );
+  const extractRules = (content: string) => {
+    const checkInInstructionsMatch =
+      content.match(/(CHECK-IN INSTRUCTIONS:[\s\S]*?)(?=HOUSE RULES:|$)/i) ??
+      [];
+    const houseRulesMatch =
+      content.match(/HOUSE RULES:([\s\S]*?)(?=INTERNET INSTRUCTIONS:|$)/i) ??
+      [];
+    const checkInMatch = content.match(/"Check-in Time"\s*:\s*"([^"]+)"/) ?? [];
+    const checkOutMatch =
+      content.match(/"Check-out Time"\s*:\s*"([^"]+)"/) ?? [];
 
-    const locationDetails: string[] = [];
-    const locationSection = $(
-      'h2.section-subtitle:contains("Location Details")',
-    ).next("div");
-    locationSection.find("p").each((_, element) => {
-      locationDetails.push($(element).text().trim());
-    });
+    const otherHouseRules =
+      houseRulesMatch[1]
+        ?.split("\n")
+        .map((line) => line.trim())
+        .filter((line) => line)
+        .join("\n")
+        .replace(/\\n/g, "\n")
+        .trim() ?? "";
 
-    const extractRules = (content: string) => {
-      const checkInInstructionsMatch =
-        content.match(/(CHECK-IN INSTRUCTIONS:[\s\S]*?)(?=HOUSE RULES:|$)/i) ??
-        [];
-      const houseRulesMatch =
-        content.match(/HOUSE RULES:([\s\S]*?)(?=INTERNET INSTRUCTIONS:|$)/i) ??
-        [];
-      const checkInMatch =
-        content.match(/"Check-in Time"\s*:\s*"([^"]+)"/) ?? [];
-      const checkOutMatch =
-        content.match(/"Check-out Time"\s*:\s*"([^"]+)"/) ?? [];
+    const checkInTime = checkInMatch[1] ?? undefined;
+    const checkOutTime = checkOutMatch[1] ?? undefined;
 
-      const otherHouseRules =
-        houseRulesMatch[1]
-          ?.split("\n")
-          .map((line) => line.trim())
-          .filter((line) => line)
-          .join("\n")
-          .replace(/\\n/g, "\n")
-          .trim() ?? "";
+    const checkInInfo =
+      checkInInstructionsMatch[1]
+        ?.split("\n")
+        .map((line) => line.trim())
+        .filter((line) => line)
+        .join("\n")
+        .replace(/\\n/g, "\n")
+        .trim() ?? undefined;
 
-      const checkInTime = checkInMatch[1] ?? undefined;
-      const checkOutTime = checkOutMatch[1] ?? undefined;
+    return { otherHouseRules, checkInTime, checkOutTime, checkInInfo };
+  };
 
-      const checkInInfo =
-        checkInInstructionsMatch[1]
-          ?.split("\n")
-          .map((line) => line.trim())
-          .filter((line) => line)
-          .join("\n")
-          .replace(/\\n/g, "\n")
-          .trim() ?? undefined;
+  const { otherHouseRules, checkInTime, checkOutTime, checkInInfo } =
+    extractRules(scriptContent);
 
-      return { otherHouseRules, checkInTime, checkOutTime, checkInInfo };
-    };
+  const quoteUrl = "https://evolve.com/api/quotes";
+  const quoteData = {
+    reservation: {
+      numberOfAdults: numGuests,
+      numberOfChildren: 0,
+      numberOfPets: 0,
+      internalListingID: propertyId,
+      checkInDate: checkIn.toISOString().split("T")[0],
+      checkOutDate: checkOut.toISOString().split("T")[0],
+    },
+    optionalLineItems: [],
+    distributor: {
+      listingChannel: "Website",
+      clickId: "Default",
+      deviceType: "Desktop",
+      market: "en_us",
+      sessionid: "",
+      channel: "Website",
+    },
+  };
 
-    const { otherHouseRules, checkInTime, checkOutTime, checkInInfo } =
-      extractRules(scriptContent);
+  const quoteResponse = await axios.post<QuoteResponse>(quoteUrl, quoteData, {
+    headers: {
+      accept: "*/*",
+      "accept-language": "en-US,en;q=0.9",
+      "content-type": "application/json",
+      Referer: url,
+    },
+    httpsAgent: proxyAgent,
+  });
 
-    const quoteUrl = "https://evolve.com/api/quotes";
-    const quoteData = {
-      reservation: {
-        numberOfAdults: numGuests,
-        numberOfChildren: 0,
-        numberOfPets: 0,
-        internalListingID: propertyId,
-        checkInDate: checkIn.toISOString().split("T")[0],
-        checkOutDate: checkOut.toISOString().split("T")[0],
-      },
-      optionalLineItems: [],
-      distributor: {
-        listingChannel: "Website",
-        clickId: "Default",
-        deviceType: "Desktop",
-        market: "en_us",
-        sessionid: "",
-        channel: "Website",
-      },
-    };
+  const totalPrice = quoteResponse.data.price.total;
+  const numNights = getNumNights(checkIn, checkOut);
+  const originalNightlyPrice = Math.round((totalPrice / numNights) * 100); // convert to cents
 
-    const quoteResponse = await axios.post<QuoteResponse>(quoteUrl, quoteData, {
-      headers: {
-        accept: "*/*",
-        "accept-language": "en-US,en;q=0.9",
-        "content-type": "application/json",
-        Referer: url,
-      },
-      httpsAgent: proxyAgent,
-    });
+  // const formattedCancellationPolicy = formatCancellationPolicy(validatedQuoteResponse.cancelPolicy);
+  // console.log(propertyId, formattedCancellationPolicy);
 
-    const totalPrice = quoteResponse.data.price.total;
-    const numNights = getNumNights(checkIn, checkOut);
-    const originalNightlyPrice = Math.round((totalPrice / numNights) * 100); // convert to cents
+  const propertyDetails = EvolvePropertySchema.parse({
+    id: propertyId,
+    name,
+    bedrooms: numBedrooms,
+    bathrooms: numBathrooms,
+    maxOccupancy: maxNumGuests,
+    propertyType,
+    amenities: allAmenities,
+    imageUrls,
+    latitude,
+    longitude,
+    averageRating: avgRating,
+    reviewCount: numRatings,
+    areaDescription: locationDetails.join("\n"),
+    price: originalNightlyPrice,
+    description: about,
+    otherHouseRules,
+    checkInTime,
+    checkOutTime,
+    checkInInfo,
+  });
 
-    // const formattedCancellationPolicy = formatCancellationPolicy(validatedQuoteResponse.cancelPolicy);
-    // console.log(propertyId, formattedCancellationPolicy);
-
-    const propertyDetails = EvolvePropertySchema.parse({
-      id: propertyId,
-      name,
-      bedrooms: numBedrooms,
-      bathrooms: numBathrooms,
-      maxOccupancy: maxNumGuests,
-      propertyType,
-      amenities: allAmenities,
-      imageUrls,
-      latitude,
-      longitude,
-      averageRating: avgRating,
-      reviewCount: numRatings,
-      areaDescription: locationDetails.join("\n"),
-      price: originalNightlyPrice,
-      description: about,
-      otherHouseRules,
-      checkInTime,
-      checkOutTime,
-      checkInInfo,
-    });
-
-    return {
-      originalListingId: propertyDetails.id,
-      name: propertyDetails.name,
-      about: propertyDetails.description,
-      propertyType: mapPropertyType(propertyDetails.propertyType),
-      address,
-      city,
-      latLngPoint: {
-        lat: propertyDetails.latitude,
-        lng: propertyDetails.longitude,
-      },
-      maxNumGuests: propertyDetails.maxOccupancy,
-      numBeds,
-      numBedrooms: propertyDetails.bedrooms,
-      numBathrooms: propertyDetails.bathrooms,
-      amenities: propertyDetails.amenities,
-      otherAmenities: [],
-      imageUrls: propertyDetails.imageUrls,
-      originalListingUrl: url,
-      avgRating: propertyDetails.averageRating ?? 0,
-      numRatings: propertyDetails.reviewCount ?? 0,
-      originalListingPlatform: "Evolve" as ListingSiteName,
-      originalNightlyPrice: propertyDetails.price,
-      cancellationPolicy: "Evolve",
-      areaDescription: propertyDetails.areaDescription,
-      otherHouseRules: propertyDetails.otherHouseRules,
-      checkInInfo: propertyDetails.checkInInfo,
-      checkInTime: propertyDetails.checkInTime,
-      checkOutTime: propertyDetails.checkOutTime,
-      reviews: formattedReviews,
-      scrapeUrl: url,
-    };
-  } catch (error) {
-    return null;
-  }
+  return {
+    originalListingId: propertyDetails.id,
+    name: propertyDetails.name,
+    about: propertyDetails.description,
+    propertyType: mapPropertyType(propertyDetails.propertyType),
+    address,
+    city,
+    latLngPoint: {
+      lat: propertyDetails.latitude,
+      lng: propertyDetails.longitude,
+    },
+    maxNumGuests: propertyDetails.maxOccupancy,
+    numBeds,
+    numBedrooms: propertyDetails.bedrooms,
+    numBathrooms: propertyDetails.bathrooms,
+    amenities: propertyDetails.amenities,
+    otherAmenities: [],
+    imageUrls: propertyDetails.imageUrls,
+    originalListingUrl: url,
+    avgRating: propertyDetails.averageRating ?? 0,
+    numRatings: propertyDetails.reviewCount ?? 0,
+    originalListingPlatform: "Evolve" as ListingSiteName,
+    originalNightlyPrice: propertyDetails.price,
+    cancellationPolicy: "Evolve",
+    areaDescription: propertyDetails.areaDescription,
+    otherHouseRules: propertyDetails.otherHouseRules,
+    checkInInfo: propertyDetails.checkInInfo,
+    checkInTime: propertyDetails.checkInTime,
+    checkOutTime: propertyDetails.checkOutTime,
+    reviews: formattedReviews,
+    scrapeUrl: url,
+  };
 };
 
 const refetchPrice = async (
@@ -703,7 +698,7 @@ export const evolveVacationRentalScraper: DirectSiteScraper = async ({
     requestNightlyPrice,
   );
 
-  const properties = await Promise.all(
+  return await Promise.allSettled(
     searchResults.map((result) =>
       fetchPropertyDetails(
         result.objectID,
@@ -720,12 +715,7 @@ export const evolveVacationRentalScraper: DirectSiteScraper = async ({
         numGuests,
       ),
     ),
-  );
-  const availableProperties: ScrapedListing[] = properties.filter(
-    (property) => property !== null,
-  );
-
-  return availableProperties;
+  ).then(logAndFilterSettledResults);
 };
 
 export const evolveVacationRentalSubScraper: SubsequentScraper = async ({

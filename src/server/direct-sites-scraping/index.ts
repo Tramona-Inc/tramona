@@ -29,17 +29,20 @@ import { getCoordinates } from "../google-maps";
 import { eq, and, inArray } from "drizzle-orm";
 import {
   createRandomMarkupEightToFourteenPercent,
-  formatCurrency,
   getNumNights,
 } from "@/utils/utils";
 import { DIRECTLISTINGMARKUP } from "@/utils/constants";
-import { createLatLngGISPoint, sendScheduledText, sendText } from "@/server/server-utils";
+import {
+  createLatLngGISPoint,
+  sendScheduledText,
+  sendText,
+} from "@/server/server-utils";
 import { cleanbnbScraper, cleanbnbSubScraper } from "./cleanbnb-scrape";
 import { log } from "@/pages/api/script";
 import { env } from "@/env";
-import { addHours } from "date-fns";
-import { z, ZodError } from "zod";
-import { formatZodError } from "@/utils/zod-utils";
+import { addHours, addMinutes } from "date-fns";
+import { z } from "zod";
+import { formatZodError } from "../../utils/zod-utils";
 
 type ScraperOptions = {
   location: string;
@@ -196,8 +199,16 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
     return "wide";
   }
 
-  const closeMatches = fairListings.filter((l) => getCloseness(l) === "close");
-  const midMatches = fairListings.filter((l) => getCloseness(l) === "mid");
+  const closeMatches = fairListings.filter((l) => getCloseness(l) === "close").sort((a, b) => {
+    const aDiff = Math.abs((a.originalNightlyPrice ?? 0) - requestNightlyPrice);
+    const bDiff = Math.abs((b.originalNightlyPrice ?? 0) - requestNightlyPrice);
+    return aDiff - bDiff;
+  });
+  const midMatches = fairListings.filter((l) => getCloseness(l) === "mid").sort((a, b) => {
+    const aDiff = Math.abs((a.originalNightlyPrice ?? 0) - requestNightlyPrice);
+    const bDiff = Math.abs((b.originalNightlyPrice ?? 0) - requestNightlyPrice);
+    return aDiff - bDiff;
+  });
   const wideMatches = fairListings.filter((l) => getCloseness(l) === "wide");
 
   if (
@@ -209,9 +220,7 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
     if (userFromRequest) {
       void sendText({
         to: userFromRequest.phoneNumber!,
-        content: `Tramona: We’re not live in ${options.location} just yet, but we’re actively working on it! We’ll send you an email as soon as we launch there. In the meantime,
-        if you’re flexible with your travel plans, feel free to submit a request for a different location and discover the great deals our hosts can offer you.
-        Thank you for your interest in Tramona!`,
+        content: `Tramona: We’re not live in ${options.location} just yet, but we’re actively working on it! We’ll send you an email as soon as we launch there.\n\nIn the meantime, if you’re flexible with your travel plans, feel free to submit a request for a different location and discover the great deals our hosts can offer you.\n\nThank you for your interest in Tramona!`,
       });
       // void sendScheduledText({
       //   to: userFromRequest.phoneNumber!,
@@ -225,30 +234,48 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
     if (userFromRequest) {
       void sendScheduledText({
         to: userFromRequest.phoneNumber!,
-        content: `Tramona: Thank you for submitting your request! \n Unfortunately, no hosts have submitted a match for your price.
-        But don’t worry—our team is actively searching for options that fit your needs. \n Is your budget flexible? We do have hosts with options in ${options.location}.
-        Adjust your request if you’d like to explore other possibilities. Thank you for choosing Tramona!`,
+        content: `Tramona: Thank you for submitting your request!\n\nUnfortunately, no hosts have submitted a match for your price. But don’t worry—our team is actively searching for options that fit your needs.\n\nIs your budget flexible? We do have hosts with options in ${options.location}. Adjust your request if you’d like to explore other possibilities.\n\nThank you for choosing Tramona!`,
         sendAt: addHours(new Date(), 24),
       });
     }
   } else if (closeMatches.length > 0 && closeMatches.length <= 3) {
-    // Case 3: 1-3 matches within 0-20%, but more in 20-50%
     listings = closeMatches.concat(midMatches).slice(0, 10);
+    const numMatches = listings.length;
+    if (userFromRequest) {
+      void sendScheduledText({
+        to: userFromRequest.phoneNumber!,
+        content: `Tramona: You have ${numMatches <= 10 ? numMatches : "more than 10"} matches for your request in ${options.location}! Some are close to your requested price, but most are outside of it.\n\nWe’re actively working to get you more matches that align with your budget. For now, check them out at tramona.com/requests, and if you’re flexible, consider submitting a different price to see even more options!`,
+        sendAt:
+          numMatches <= 5
+            ? addMinutes(new Date(), 25)
+            : addMinutes(new Date(), 55),
+      });
+    }
+    // Case 3: 1-3 matches within 0-20%, but more in 20-50%
   } else if (closeMatches.length === 0 && midMatches.length > 0) {
     // Case 4: No close matches, but some in 20-50%
     if (userFromRequest) {
       void sendScheduledText({
         to: userFromRequest.phoneNumber!,
-        content: `Tramona: Thank you for submitting your request! \n Unfortunately, no hosts have submitted a match for your price.
-        But don’t worry—our team is actively searching for options that fit your needs. \n In case your budget is flexible, some hosts sent matches slightly out of your budget take a look here: ${env.NEXTAUTH_URL}/requests.
-        We’ll notify you as soon as we find the perfect stay. \n In the meantime, feel free to adjust your request if you’d like to explore other possibilities. Thank you for choosing Tramona!`,
+        content: `Tramona: Thank you for submitting your request!\n\nUnfortunately, no hosts have submitted a match for your price. But don’t worry—our team is actively searching for options that fit your needs.\n\nIn case your budget is flexible, some hosts sent matches slightly out of your budget take a look here: ${env.NEXTAUTH_URL}/requests. We’ll notify you as soon as we find the perfect stay.\n\nIn the meantime, feel free to adjust your request if you’d like to explore other possibilities. Thank you for choosing Tramona!`,
         sendAt: addHours(new Date(), 24),
       });
     }
     listings = midMatches.slice(0, 10); // Send 20-50% matches
   } else if (closeMatches.length > 3) {
-    // Case 5: 4 or more close matches (0-20%)
     listings = closeMatches.slice(0, 10); // Send 0-20% matches
+    const numMatches = listings.length;
+    if (userFromRequest) {
+      void sendScheduledText({
+        to: userFromRequest.phoneNumber!,
+        content: `Tramona: You have ${numMatches <= 10 ? numMatches : "more than 10"} matches for your request in ${options.location}! Please see them at tramona.com/requests`,
+        sendAt:
+          numMatches <= 5
+            ? addMinutes(new Date(), 25)
+            : addMinutes(new Date(), 55),
+      });
+    }
+    // Case 5: 4 or more close matches (0-20%)
   }
 
   if (listings.length > 0) {

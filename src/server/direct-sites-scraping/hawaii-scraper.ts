@@ -134,10 +134,10 @@ interface PriceFilteredProperty {
 }
 
 const HAWAII_BOUNDS = {
-  north: 22.2337,
-  south: 18.8605,
-  west: -160.2471,
-  east: -154.7931,
+  north: 22.5337,
+  south: 18.6605,
+  west: -160.7471,
+  east: -154.585,
 };
 
 function isWithinHawaii(lat: number, lng: number): boolean {
@@ -516,7 +516,7 @@ const mapToScrapedListing = (
     3 days prior to arrival, please call or email us and we will resend these instructions.
     Check-Out / Departure Instructions:
     Checkout time will be stated in your arrival instructions email unless late checkout has
-    been booked. 
+    been booked.
     1) Remove all garbage to outside dumpster or trash can.
     2) Load and run dishwasher.
     3) Keep beds turned down that have been slept in.
