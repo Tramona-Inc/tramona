@@ -14,6 +14,7 @@ import { CancellationPolicyWithInternals } from "../db/schema/tables/properties"
 import { log } from "@/pages/api/script";
 import { googleMaps } from "../google-maps";
 import { env } from "@/env";
+import axios from "axios";
 
 const taxoDataSchema = z.array(
   z.object({
@@ -74,6 +75,7 @@ const cancellationPolicySchema = z.object({
 });
 
 const propertyTypeMapping: Record<string, PropertyType> = {
+  Home: "House",
   Condo: "Condominium",
   Suite: "Guest Suite",
   Apts: "Apartment",
@@ -340,7 +342,7 @@ export const redawningScraper: DirectSiteScraper = async ({
           // const propertyUrl = property.url;
           const propertyId = property.pid;
           const priceQuoteUrl = `https://api.redawning.com/v1/listings/${propertyId}/quote?checkin=${formatDateYearMonthDay(checkIn)}&checkout=${formatDateYearMonthDay(checkOut)}&numadults=1&numchild=0&travelinsurance=false`;
-          const priceQuote = await axiosWithRetry
+          const priceQuote = await axios
             .get<string>(priceQuoteUrl, {
               headers: {
                 "x-api-key": "ehMtnGSw4i7dFqngWo8M15cWaqzKPM4V2jeU3zty",
@@ -366,7 +368,7 @@ export const redawningScraper: DirectSiteScraper = async ({
           property.totalPrice = priceQuote.totalPrice;
 
           const cancellationPolicyUrl = `https://www.redawning.com/cancellation-policy-details?nid=${propertyId}&arrival_date=${formatDateYearMonthDay(checkIn)}`;
-          const dayOffsetForFullRefund = await axiosWithRetry
+          const dayOffsetForFullRefund = await axios
             .get<string>(cancellationPolicyUrl, {
               timeout: 10000,
             })
@@ -415,7 +417,7 @@ export const redawningSubScraper: SubsequentScraper = async ({
 }) => {
   const priceQuoteUrl = `https://api.redawning.com/v1/listings/${originalListingId}/quote?checkin=${formatDateYearMonthDay(checkIn)}&checkout=${formatDateYearMonthDay(checkOut)}&numadults=1&numchild=0&travelinsurance=false`;
   try {
-    const priceQuote = await axiosWithRetry
+    const priceQuote = await axios
       .get<string>(priceQuoteUrl, {
         headers: {
           "x-api-key": "ehMtnGSw4i7dFqngWo8M15cWaqzKPM4V2jeU3zty",

@@ -7,6 +7,7 @@ import {
   roleRestrictedProcedure,
 } from "@/server/api/trpc";
 import {
+  Property,
   groupMembers,
   offerSelectSchema,
   offerUpdateSchema,
@@ -25,7 +26,7 @@ import {
 import { formatDateRange, getNumNights } from "@/utils/utils";
 
 import { TRPCError } from "@trpc/server";
-import { and, eq, isNotNull, isNull, notInArray, or, sql } from "drizzle-orm";
+import { and, eq, inArray, isNotNull, isNull, notInArray, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import { requests } from "../../db/schema/tables/requests";
 import { db } from "@/server/db";
@@ -141,7 +142,7 @@ export const offersRouter = createTRPCRouter({
       });
     }),
 
-  getByRequestIdWithProperty: publicProcedure
+    getByRequestIdWithProperty: publicProcedure
     .input(requestSelectSchema.pick({ id: true }))
     .query(async ({ ctx, input }) => {
       const request = await ctx.db.query.requests.findFirst({
@@ -166,33 +167,45 @@ export const offersRouter = createTRPCRouter({
               },
               columns: { numGuests: true, location: true, id: true },
             },
-            property: {
-              with: {
-                host: {
-                  columns: { id: true, name: true, email: true, image: true },
-                  with: {
-                    hostProfile: {
-                      columns: { userId: true },
-                    },
-                  },
-                },
-                reviews: true,
-              },
-            },
           },
         })
-        .then((res) =>
-          res.map((offer) => {
-            if (offer.acceptedAt !== null || offer.scrapeUrl) return offer;
-            void updateTravelerandHostMarkup({
-              offerTotalPrice: offer.totalPrice,
-              offerId: offer.id,
-            });
-            return offer;
-          }),
-        );
+      const propertiesByRequest = await ctx.db.query.properties
+        .findMany({
+          where: inArray(properties.id, offersByRequest.map((offer) => offer.propertyId)),
+          with: {
+            host: {
+              columns: { id: true, name: true, email: true, image: true },
+              with: {
+                hostProfile: {
+                  columns: { userId: true },
+                },
+              },
+            },
+            reviews: true,
+          },
+        });
 
-      return offersByRequest;
+      const propertiesMap: Record<number, Property> = propertiesByRequest.reduce((acc: Record<number, Property>, property: Property) => {
+        acc[property.id] = property;
+        return acc;
+      }, {});
+
+      // Merge offers with their corresponding property
+      const offersByRequestWithProperties = offersByRequest.map(offer => ({
+        ...offer,
+        property: propertiesMap[offer.propertyId]!, // Match property by propertyId
+      }));
+
+      offersByRequestWithProperties.map((offer) => {
+        if (offer.acceptedAt !== null || offer.scrapeUrl) return offer;
+        void updateTravelerandHostMarkup({
+          offerTotalPrice: offer.totalPrice,
+          offerId: offer.id,
+        });
+        return offer;
+      });
+
+      return offersByRequestWithProperties;
     }),
 
   getCoordinates: publicProcedure

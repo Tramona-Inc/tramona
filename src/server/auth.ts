@@ -45,6 +45,7 @@ declare module "next-auth" {
       | "phoneNumber"
       | "createdAt"
       | "stripeCustomerId"
+      | "stripeConnectId"
       | "setupIntentId"
       | "isIdentityVerified"
       | "isWhatsApp"

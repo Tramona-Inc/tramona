@@ -58,7 +58,7 @@ export default function FeedOfferCard({ offer }: { offer: FeedOfferItem }) {
         <div className="w-full space-y-2">
           <div className="flex w-full items-start justify-between">
             <div>
-              <p className="mb-5">Recieved a match</p>
+              <p className="mb-5">Received a match</p>
               <p className="font-bold">
                 Tramona Price:{" "}
                 <span className="text-teal-900">
@@ -69,7 +69,13 @@ export default function FeedOfferCard({ offer }: { offer: FeedOfferItem }) {
                 <p>
                   <span className="text-muted-foreground">Airbnb Price: </span>
                   <span className="line-through">
-                    {formatCurrency(offer.property.originalNightlyPrice)}
+                    {offer.isFiller
+                      ? formatCurrency(offer.property.originalNightlyPrice)
+                      : formatCurrency(
+                          offer.totalPrice /
+                            numOfNights /
+                            (1 - offer.randomDirectListingDiscount! / 100),
+                        )}
                   </span>
                 </p>
               )}
@@ -83,7 +89,7 @@ export default function FeedOfferCard({ offer }: { offer: FeedOfferItem }) {
           <div className="relative">
             <Carousel
               setApi={setCarouselApi}
-              className={cn("w-full", discount > 0 ? "mb-10" : "mb-0")}
+              className={cn("mb-10 w-full")}
               opts={{
                 align: "start",
                 loop: true,
@@ -127,9 +133,14 @@ export default function FeedOfferCard({ offer }: { offer: FeedOfferItem }) {
           </div>
         </div>
       </div>
-      {discount > 0 && (
+      {offer.isFiller && discount > 0 && (
         <div className="absolute bottom-0 left-0 right-0 overflow-hidden rounded-b-lg bg-teal-900 px-4 py-2 text-center font-bold text-white">
           {`${discount}% off`}
+        </div>
+      )}
+      {!offer.isFiller && offer.randomDirectListingDiscount && (
+        <div className="absolute bottom-0 left-0 right-0 overflow-hidden rounded-b-lg bg-teal-900 px-4 py-2 text-center font-bold text-white">
+          {`${offer.randomDirectListingDiscount}% off`}
         </div>
       )}
     </BaseCard>

@@ -16,12 +16,12 @@ export default function ListMessagesWithAdmin({
   const { data: session } = useSession();
 
   return (
-    <div>
+    <>
       {messages.length > 0 ? (
         <div
           className={cn(
             "flex w-full flex-1 flex-col-reverse gap-1 overflow-auto p-3",
-            isMobile ? "h-[31rem]" : "h-96",
+            !isMobile && "h-96",
           )}
         >
           {messages.map((message) =>
@@ -45,12 +45,12 @@ export default function ListMessagesWithAdmin({
         <div
           className={cn(
             "flex flex-col items-center justify-center",
-            isMobile ? "h-[31rem]" : "h-96",
+            !isMobile && "h-96",
           )}
         >
           <p className="text-muted-foreground">How can we help you?</p>
         </div>
       )}
-    </div>
+    </>
   );
 }

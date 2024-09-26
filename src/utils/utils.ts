@@ -749,3 +749,14 @@ export function censorPhoneNumber(phoneNumber: string) {
 export function censorTravelerFullName(name: string) {
   return name;
 }
+
+export function logAndFilterSettledResults<T>(
+  results: PromiseSettledResult<T>[],
+) {
+  return results
+    .filter((r) => {
+      if (r.status === "rejected") console.error(r.reason);
+      return r.status === "fulfilled";
+    })
+    .map((r) => r.value);
+}
