@@ -3,7 +3,6 @@ import {
   useForm,
   useFieldArray,
   FieldArrayWithId,
-  UseFormWatch,
 } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -96,7 +95,7 @@ export default function HostAutoOffer({ property }: { property: Property }) {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   const originalValuesRef = useRef<FormSchema>({
-    autoOfferEnabled: property.autoOfferEnabled ?? false,
+    autoOfferEnabled: property.autoOfferEnabled,
     autoOfferDiscountTiers: property.autoOfferDiscountTiers ?? DEFAULT_TIERS,
   });
 
@@ -166,7 +165,7 @@ export default function HostAutoOffer({ property }: { property: Property }) {
   }, []);
 
   useEffect(() => {
-    const subscription = form.watch((value) => {
+    const subscription = form.watch(() => {
       const currentValues = form.getValues();
       const isChanged = checkForChanges(currentValues);
       setHasUnsavedChanges(isChanged);
@@ -231,7 +230,7 @@ export default function HostAutoOffer({ property }: { property: Property }) {
 
   const handleConfirmReset = useCallback(() => {
     const defaultValues = {
-      autoOfferEnabled: property.autoOfferEnabled ?? false,
+      autoOfferEnabled: property.autoOfferEnabled,
       autoOfferDiscountTiers: DEFAULT_TIERS,
     };
     form.reset(defaultValues);
@@ -250,7 +249,7 @@ export default function HostAutoOffer({ property }: { property: Property }) {
         setShowEnableConfirmation(true);
       } else {
         form.setValue("autoOfferEnabled", false);
-        form.handleSubmit(handleSubmit)();
+        void form.handleSubmit(handleSubmit)();
       }
     },
     [form, handleSubmit],
@@ -259,7 +258,7 @@ export default function HostAutoOffer({ property }: { property: Property }) {
   const handleConfirmEnableAutoOffer = useCallback(() => {
     form.setValue("autoOfferEnabled", true);
     setShowEnableConfirmation(false);
-    form.handleSubmit(handleSubmit)();
+    void form.handleSubmit(handleSubmit)();
   }, [form, handleSubmit]);
 
   const renderDiscountTierFields = useCallback(
@@ -421,8 +420,8 @@ export default function HostAutoOffer({ property }: { property: Property }) {
           <AlertDialogHeader>
             <AlertDialogTitle>Reset to Default Settings</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to reset to the default settings? This will
-              remove any custom tiers you've set up.
+              ${`Are you sure you want to reset to the default settings? This will
+              remove any custom tiers you've set up.`}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -472,10 +471,10 @@ export default function HostAutoOffer({ property }: { property: Property }) {
           <AlertDialogHeader>
             <AlertDialogTitle>Enable Auto-Offer</AlertDialogTitle>
             <AlertDialogDescription>
-              Enabling auto-offer will automatically create offers based on your
+            ${`Enabling auto-offer will automatically create offers based on your
               settings. You can turn it off at any time, but it won't affect
               offers already extended to travelers. Do you want to enable this
-              feature?
+              feature?`}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

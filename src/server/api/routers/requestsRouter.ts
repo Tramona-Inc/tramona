@@ -524,6 +524,7 @@ export async function handleRequestSubmission(
       if (
         propertyDetails?.autoOfferEnabled &&
         propertyDetails.originalListingId &&
+        propertyDetails.originalListingPlatform === "Airbnb" &&
         propertyDetails.autoOfferDiscountTiers
       ) {
         try {
