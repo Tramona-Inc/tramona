@@ -180,6 +180,7 @@ interface ListingCreatedWebhook {
     public_name: string;
     property_type: AirbnbPropertyType;
     room_type: keyof typeof roomTypeMapping;
+    house_rules: string;
     capacity: {
       max: number;
       beds: number;
@@ -207,6 +208,10 @@ interface ListingCreatedWebhook {
 interface ChannelActivatedWebhook {
   action: "channel.activated";
   data: {
+    name: string;
+    picture: string;
+    location: string;
+    description: string;
     customer: {
       id: string;
       name: string;
@@ -244,6 +249,13 @@ export default async function webhook(
       case "channel.activated":
         console.log("channel created");
         await insertHost(webhookData.data.customer.id);
+        await db.update(users).set({
+          image: webhookData.data.picture,
+          location: webhookData.data.location,
+        }).where(eq(users.id, webhookData.data.customer.id));
+        await db.update(hostProfiles).set({
+          about: webhookData.data.description,
+        }).where(eq(hostProfiles.userId, webhookData.data.customer.id));
         break;
       case "listing.created":
         const userId = webhookData.data.channel.customer.id;
@@ -340,6 +352,7 @@ export default async function webhook(
           numBathrooms: webhookData.data.capacity.bathrooms,
           // latitude: webhookData.data.address.latitude,
           // longitude: webhookData.data.address.longitude,
+          otherHouseRules: webhookData.data.house_rules,
           latLngPoint: latLngPoint,
           city: webhookData.data.address.city,
           hostName: webhookData.data.channel.customer.name,
