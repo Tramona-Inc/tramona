@@ -1,9 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
-import {
-  useForm,
-  useFieldArray,
-  FieldArrayWithId,
-} from "react-hook-form";
+import { useForm, useFieldArray, FieldArrayWithId } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { type Property } from "@/server/db/schema";
@@ -58,21 +54,22 @@ const discountTierSchema = z.object({
 });
 
 const formSchema = z.object({
-    autoOfferEnabled: z.boolean(),
-    autoOfferDiscountTiers: z.array(discountTierSchema)
-      .min(MIN_TIERS)
-      .max(MAX_TIERS)
-      .refine(
-        (tiers) => {
-          const days = tiers.map((tier) => tier.days);
-          return new Set(days).size === days.length;
-        },
-        {
-          message: "Each 'days' value must be unique",
-          path: ["autoOfferDiscountTiers"],
-        }
-      ),
-  });
+  autoOfferEnabled: z.boolean(),
+  autoOfferDiscountTiers: z
+    .array(discountTierSchema)
+    .min(MIN_TIERS)
+    .max(MAX_TIERS)
+    .refine(
+      (tiers) => {
+        const days = tiers.map((tier) => tier.days);
+        return new Set(days).size === days.length;
+      },
+      {
+        message: "Each 'days' value must be unique",
+        path: ["autoOfferDiscountTiers"],
+      },
+    ),
+});
 type FormSchema = z.infer<typeof formSchema>;
 
 const orderTiers = (
@@ -195,7 +192,8 @@ export default function HostAutoOffer({ property }: { property: Property }) {
       if (uniqueDays.size !== orderedTiers.length) {
         toast({
           title: "Error saving settings",
-          description: "Cannot assign different discounts to the same time period.",
+          description:
+            "Cannot assign different discounts to the same time period.",
           variant: "destructive",
           duration: 5000,
         });
@@ -379,36 +377,35 @@ export default function HostAutoOffer({ property }: { property: Property }) {
               </AccordionItem>
             </Accordion>
             <div className="flex justify-between">
-            <div className="flex space-x-2">
-              <Button type="submit" disabled={!hasUnsavedChanges || isSaving}>
-                {isSaving ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  "Save"
-                )}
-              </Button>
-              <Button
-                type="button"
-                onClick={handleCancel}
-                variant="outline"
-                disabled={!hasUnsavedChanges || isSaving}
-              >
-                Cancel
-              </Button>
-              
-            </div>
-            <div>
-            <Button
-                type="button"
-                onClick={handleResetToDefault}
-                variant="outline"
-                disabled={isSaving}
-              >
-                Reset to Default
-              </Button>
+              <div className="flex space-x-2">
+                <Button type="submit" disabled={!hasUnsavedChanges || isSaving}>
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    "Save"
+                  )}
+                </Button>
+                <Button
+                  type="button"
+                  onClick={handleCancel}
+                  variant="outline"
+                  disabled={!hasUnsavedChanges || isSaving}
+                >
+                  Cancel
+                </Button>
+              </div>
+              <div>
+                <Button
+                  type="button"
+                  onClick={handleResetToDefault}
+                  variant="outline"
+                  disabled={isSaving}
+                >
+                  Reset to Default
+                </Button>
               </div>
             </div>
           </form>
@@ -420,7 +417,7 @@ export default function HostAutoOffer({ property }: { property: Property }) {
           <AlertDialogHeader>
             <AlertDialogTitle>Reset to Default Settings</AlertDialogTitle>
             <AlertDialogDescription>
-              ${`Are you sure you want to reset to the default settings? This will
+              {`Are you sure you want to reset to the default settings? This will
               remove any custom tiers you've set up.`}
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -471,7 +468,7 @@ export default function HostAutoOffer({ property }: { property: Property }) {
           <AlertDialogHeader>
             <AlertDialogTitle>Enable Auto-Offer</AlertDialogTitle>
             <AlertDialogDescription>
-            ${`Enabling auto-offer will automatically create offers based on your
+              {`Enabling auto-offer will automatically create offers based on your
               settings. You can turn it off at any time, but it won't affect
               offers already extended to travelers. Do you want to enable this
               feature?`}
