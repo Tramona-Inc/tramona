@@ -90,18 +90,6 @@ export const hostTeamsRouter = createTRPCRouter({
       return { status: "added user", inviteeName: invitee.name } as const;
     }),
 
-  inviteUserById: protectedProcedure
-    .input(z.object({ userId: z.string(), hostTeamId: z.number() }))
-    .mutation(async ({ input, ctx }) => {
-      const hostTeamOwnerId = await getHostTeamOwnerId(input.hostTeamId);
-
-      if (ctx.user.id !== hostTeamOwnerId) {
-        throw new TRPCError({ code: "UNAUTHORIZED" });
-      }
-
-      await ctx.db.insert(hostTeamMembers).values(input);
-    }),
-
   leaveHostTeam: protectedProcedure
     .input(z.number())
     .mutation(async ({ input: hostTeamId, ctx }) => {
@@ -154,42 +142,6 @@ export const hostTeamsRouter = createTRPCRouter({
             eq(hostTeamMembers.hostTeamId, input.hostTeamId),
           ),
         );
-    }),
-
-  getMyFriends: protectedProcedure.query(async ({ ctx }) => {
-    return await ctx.db.query.hostTeamMembers
-      .findMany({
-        where: eq(hostTeamMembers.userId, ctx.user.id),
-        with: {
-          hostTeam: {
-            with: {
-              members: {
-                with: {
-                  user: { columns: { name: true, email: true, image: true } },
-                },
-              },
-            },
-          },
-        },
-      })
-      .then((res) =>
-        res
-          .map((member) => member.hostTeam.members)
-          .flat(1)
-          .map((member) => member.user),
-      );
-  }),
-
-  getHostTeamOwner: protectedProcedure
-    .input(z.object({ hostTeamId: z.number() }))
-    .query(async ({ input, ctx }) => {
-      return await ctx.db.query.hostTeams
-        .findFirst({
-          columns: {},
-          with: { owner: { columns: { phoneNumber: true, isWhatsApp: true } } },
-          where: eq(hostTeams.id, input.hostTeamId),
-        })
-        .then((res) => res?.owner);
     }),
 
   getMyHostTeams: protectedProcedure.query(async ({ ctx }) => {
@@ -269,21 +221,6 @@ export const hostTeamsRouter = createTRPCRouter({
 
       return hostTeam;
     }),
-
-  getCurTeamOwnerId: protectedProcedure.query(async ({ ctx }) => {
-    return await ctx.db.query.users
-      .findFirst({
-        where: eq(users.id, ctx.user.id),
-        columns: {},
-        with: {
-          hostProfile: {
-            columns: {},
-            with: { curTeam: { columns: { id: true } } },
-          },
-        },
-      })
-      .then((res) => res?.hostProfile?.curTeam.id);
-  }),
 
   getCurTeamMembers: protectedProcedure.query(async ({ ctx }) => {
     const members = await ctx.db.query.users
