@@ -339,6 +339,7 @@ export const propertyInsertSchema = createInsertSchema(properties, {
   checkInTime: zodTime,
   checkOutTime: zodTime,
   roomsWithBeds: roomsWithBedsSchema,
+  autoOfferDiscountTiers: z.array(discountTierSchema),
 });
 
 // make everything except id optional
