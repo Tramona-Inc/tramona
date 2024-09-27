@@ -98,21 +98,17 @@ export default function HostConfirmRequestDialog({
             propertyId: property.id,
             totalPrice: parseInt(propertyPrices[property.id] ?? "0") * 100,
             hostPayout:
-              parseFloat(
-                getHostPayout({
-                  propertyPrice: parseFloat(propertyPrices[property.id] ?? "0"),
-                  hostMarkup: HOST_MARKUP,
-                  numNights,
-                }),
-              ) * 100,
+              getHostPayout({
+                propertyPrice: parseFloat(propertyPrices[property.id] ?? "0"),
+                hostMarkup: HOST_MARKUP,
+                numNights,
+              }) * 100,
             travelerOfferedPrice:
-              parseFloat(
-                getTravelerOfferedPrice({
-                  propertyPrice: parseFloat(propertyPrices[property.id] ?? "0"),
-                  travelerMarkup: TRAVELER__MARKUP,
-                  numNights,
-                }),
-              ) * 100,
+              getTravelerOfferedPrice({
+                propertyPrice: parseFloat(propertyPrices[property.id] ?? "0"),
+                travelerMarkup: TRAVELER__MARKUP,
+                numNights,
+              }) * 100,
           })
           .then(() => setStep(2))
           .catch((error) => {

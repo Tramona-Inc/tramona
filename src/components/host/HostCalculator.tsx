@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -24,40 +24,60 @@ export default function HostCalculator() {
     },
   });
 
-  const calculateEarnings = (
-    customVacancyRate: number,
-    customAveragePrice: number,
-  ): number => {
-    const daysPerYear = 365;
-    const occupiedDays = daysPerYear * (1 - customVacancyRate / 100);
-    return occupiedDays * (customAveragePrice - cleaningFee);
+  const [error, setError] = useState("");
+  const formatNumber = (num: number) => {
+    return new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 }).format(
+      num,
+    );
   };
 
-  const calculateAllEarnings = () => {
-    const current = calculateEarnings(vacancyRate, averagePrice);
+  const calculateEarnings = useCallback(
+    (
+      customVacancyRate: number,
+      customAveragePrice: number,
+      customCleaningFee: number,
+    ): number => {
+      // useCallback
+      const daysPerYear = 365;
+      const occupiedDays = daysPerYear * (1 - customVacancyRate / 100);
+      const earningsPerStay = Math.max(
+        0,
+        customAveragePrice - customCleaningFee,
+      );
+      return occupiedDays * earningsPerStay;
+    },
+    [],
+  );
 
-    const calculateExtraEarnings = (vacancyReduction: number): number => {
+  const calculateAllEarnings = useCallback(() => {
+    // useCallback
+    const current = calculateEarnings(vacancyRate, averagePrice, cleaningFee);
+    const calculateExtraEarnings = (vacancyReduction: number) => {
       const newVacancyRate = Math.max(0, vacancyRate - vacancyReduction);
-      const newEarnings = calculateEarnings(newVacancyRate, averagePrice);
-      return newEarnings - current;
+      const newEarnings = calculateEarnings(
+        newVacancyRate,
+        averagePrice,
+        cleaningFee,
+      );
+      return Math.max(0, newEarnings - current); // Adds protection for negative values
     };
-
     setEarnings({
-      current: parseFloat(current.toFixed(2)),
+      current: current,
       tramona: {
-        conservative: parseFloat(calculateExtraEarnings(10).toFixed(2)),
-        moderate: parseFloat(calculateExtraEarnings(20).toFixed(2)),
-        optimistic: parseFloat(calculateExtraEarnings(30).toFixed(2)),
+        conservative: calculateExtraEarnings(10),
+        moderate: calculateExtraEarnings(20),
+        optimistic: calculateExtraEarnings(30),
       },
     });
-  };
+  }, [vacancyRate, cleaningFee, averagePrice, calculateEarnings]);
 
   useEffect(() => {
     calculateAllEarnings();
-  }, [vacancyRate, cleaningFee, averagePrice]);
+  }, [calculateAllEarnings]);
 
   const setVacancy = (rate: number) => {
     setVacancyRate(rate);
+    setError(""); // Clears error on valid input
   };
 
   const getMostLikelyEstimate = () => {
@@ -66,16 +86,21 @@ export default function HostCalculator() {
     return "best case";
   };
 
-  const handleNumberInput =
-    (setValue: (value: number) => void) =>
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value;
-      if (value === "" || value === "0") {
-        setValue(0);
-      } else {
-        setValue(Math.min(Math.max(Number(value), 0), 100));
-      }
-    };
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    setValue: (value: number) => void,
+    min = 0,
+    max = Infinity,
+  ) => {
+    // Generalized input handler with error handling
+    const value = e.target.value === "" ? "" : Number(e.target.value);
+    if (value === "" || (value >= min && value <= max)) {
+      setValue(value === "" ? 0 : value);
+      setError("");
+    } else {
+      setError(`Please enter a value between ${min} and ${max}`);
+    }
+  };
 
   return (
     <Card className="mx-auto w-full max-w-xl overflow-hidden rounded-lg bg-white shadow-lg @container">
@@ -96,11 +121,17 @@ export default function HostCalculator() {
             <Input
               type="number"
               value={vacancyRate || ""}
-              onChange={handleNumberInput(setVacancyRate)}
+              onChange={(e) => handleInputChange(e, setVacancyRate, 0, 100)} // Handles input and error
+              aria-describedby={error ? "vacancyError" : undefined}
               className="mb-2 w-full"
               min="0"
               max="100"
             />
+            {error && (
+              <span id="vacancyError" className="text-red-500">
+                {error}
+              </span>
+            )}
             <div className="flex flex-col gap-2 *:flex-1 @sm:flex-row">
               <Button onClick={() => setVacancy(70)} variant="secondary">
                 High (70%)
@@ -123,7 +154,7 @@ export default function HostCalculator() {
                 type="number"
                 inputMode="decimal"
                 value={averagePrice || ""}
-                onChange={handleNumberInput(setAveragePrice)}
+                onChange={(e) => handleInputChange(e, setAveragePrice)} // Handles input and error
                 className="w-full"
                 min="0"
               />
@@ -137,7 +168,7 @@ export default function HostCalculator() {
                 type="number"
                 inputMode="decimal"
                 value={cleaningFee || ""}
-                onChange={handleNumberInput(setCleaningFee)}
+                onChange={(e) => handleInputChange(e, setCleaningFee)} // Handles input and error
                 className="w-full"
                 min="0"
               />
@@ -149,7 +180,7 @@ export default function HostCalculator() {
             Current Annual Earnings
           </h3>
           <p className="text-3xl font-bold text-zinc-900">
-            {formatCurrency(earnings.current * 100)}
+            {formatNumber(earnings.current * 100)}
           </p>
         </div>
 
