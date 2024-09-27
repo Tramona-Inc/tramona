@@ -95,7 +95,7 @@ export default function HostCalculator() {
     // Generalized input handler with error handling
     const value = e.target.value === "" ? "" : Number(e.target.value);
     if (value === "" || (value >= min && value <= max)) {
-      setValue(value);
+      setValue(value === "" ? 0 : value);
       setError("");
     } else {
       setError(`Please enter a value between ${min} and ${max}`);
