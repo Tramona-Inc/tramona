@@ -840,9 +840,12 @@ export async function getPropertyForOffer(propertyId: number) {
       host: {
         columns: {
           id: true,
-          name: true,
+          firstName: true,
+          lastName: true,
           email: true,
           image: true,
+          about: true,
+          location: true,
         },
         with: {
           hostProfile: {

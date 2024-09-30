@@ -48,7 +48,7 @@ export type HostRequestsPageData = {
   city: string;
   requests: {
     request: Request & {
-      traveler: Pick<User, "firstName" | "lastName" | "name" | "image">;
+      traveler: Pick<User, "firstName" | "lastName" | "name" | "image" | "location" | "about">;
     };
     properties: Property[];
   }[];
@@ -537,7 +537,7 @@ export const propertiesRouter = createTRPCRouter({
         number,
         {
           request: Request & {
-            traveler: Pick<User, "firstName" | "lastName" | "name" | "image">;
+            traveler: Pick<User, "firstName" | "lastName" | "name" | "image" | "location" | "about">;
           };
           properties: Property[];
         }
