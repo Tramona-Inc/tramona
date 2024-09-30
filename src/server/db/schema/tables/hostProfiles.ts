@@ -26,7 +26,6 @@ export const hostProfiles = pgTable(
       .references(() => users.id, { onDelete: "cascade" }),
     // type: hostTypeEnum("type").notNull().default("other"),
     // profileUrl: varchar("profile_url", { length: 1000 }),
-    about: text("about"),
     becameHostAt: timestamp("became_host_at", { withTimezone: true })
       .notNull()
       .defaultNow(),

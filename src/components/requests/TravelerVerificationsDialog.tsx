@@ -46,15 +46,20 @@ export function TravelerVerificationsDialog({
           </p>
         </DialogTrigger>
         <DialogContent>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-4">
             <UserAvatar
-              size="sm"
+              size="lg"
               name={request.traveler.name}
               image={request.traveler.image}
             />
-            <p className="text-lg font-bold">
-              {request.traveler.firstName + " " + travelerLastInitial}
-            </p>
+            <div className="flex-col">
+              <p className="text-lg font-bold">
+                {request.traveler.firstName + " " + travelerLastInitial}
+              </p>
+              <p className="text-muted-foreground">
+                Located in {request.traveler.location}
+              </p>
+            </div>
           </div>
           {verifications.map((verification, index) => (
             <div
@@ -75,6 +80,12 @@ export function TravelerVerificationsDialog({
               )}
             </div>
           ))}
+          {request.traveler.about && (
+            <div className="mt-4">
+              <p className="font-semibold">About</p>
+              <p>{request.traveler.about}</p>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
       <div className="flex flex-row items-center">

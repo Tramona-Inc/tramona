@@ -252,10 +252,8 @@ export default async function webhook(
         await db.update(users).set({
           image: webhookData.data.picture,
           location: webhookData.data.location,
-        }).where(eq(users.id, webhookData.data.customer.id));
-        await db.update(hostProfiles).set({
           about: webhookData.data.description,
-        }).where(eq(hostProfiles.userId, webhookData.data.customer.id));
+        }).where(eq(users.id, webhookData.data.customer.id));
         break;
       case "listing.created":
         const userId = webhookData.data.channel.customer.id;
