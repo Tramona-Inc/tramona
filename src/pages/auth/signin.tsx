@@ -27,6 +27,7 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useInviteStore } from "@/utils/store/inviteLink";
 import { authProviders } from "@/config/authProviders";
+import { useCohostInviteStore } from "@/utils/store/cohostInvite";
 
 export default function SignIn() {
   const utils = api.useUtils();
@@ -74,6 +75,9 @@ export default function SignIn() {
 
   const { query } = useRouter();
   const [inviteLinkId] = useInviteStore((state) => [state.inviteLinkId]);
+  // const [cohostInviteId, setCohostInviteId, resetCohostInviteId] = useCohostInviteStore(
+  //   (state) => [state.cohostInviteId, state.setCohostInviteId, state.resetCohostInviteId]
+  // );
   const { mutate: inviteUser } = api.groups.inviteCurUserToGroup.useMutation();
 
   const handleSubmit = async ({
@@ -91,7 +95,10 @@ export default function SignIn() {
     }).then(() => {
       if (inviteLinkId) {
         void inviteUser({ inviteLinkId });
-      }
+      } 
+      // else if (cohostInviteId) {
+      //   void router.push(`/onboarding/cohost?inviteId=${cohostInviteId}`);
+      // }
     });
   };
 

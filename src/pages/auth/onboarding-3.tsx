@@ -5,6 +5,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { useToast } from "@/components/ui/use-toast";
+import { useCohostInviteStore } from "@/utils/store/cohostInvite";
 
 export default function Referral() {
   const [open, setOpen] = useState(true);
@@ -12,10 +13,19 @@ export default function Referral() {
   //Once the dialog box is closed, I want the url to redirect to the home page.
   const { toast } = useToast();
   const router = useRouter();
+  const [cohostInviteId] = useCohostInviteStore((state) => [
+    state.cohostInviteId,
+  ]);
+
   useEffect(() => {
     if (!open) {
       try {
-        void router.push("/");
+        if (cohostInviteId) {
+          // void router.push(`/onboarding/cohost?inviteId=${cohostInviteId}`);
+          void router.push(`/cohost-invite/${cohostInviteId}`);
+        } else {
+          void router.push("/");
+        }
       } catch (error: any) {
         toast({
           title: "Error",

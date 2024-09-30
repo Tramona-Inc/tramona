@@ -10,13 +10,30 @@ import { useSession } from "next-auth/react";
 import Head from "next/head";
 import { useState } from "react";
 import { Pencil, X, SendHorizonal } from "lucide-react";
+import { toast } from "@/components/ui/use-toast";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function Page() {
   const [isEditing, setIsEditing] = useState(false);
   const { data: session } = useSession({ required: true });
   const { data: hostProfile } = api.users.getMyHostProfile.useQuery();
   const { data: hostTeams } = api.hostTeams.getMyHostTeams.useQuery();
-  const { data: curTeamMembers, refetch: refetchMembers } = api.hostTeams.getCurTeamMembers.useQuery();
+  const { data: curTeamMembers, refetch: refetchMembers } =
+    api.hostTeams.getCurTeamMembers.useQuery();
   const { data: pendingInvites, refetch: refetchInvites } =
     api.hostTeams.getCurTeamPendingInvites.useQuery();
 
@@ -29,12 +46,39 @@ export default function Page() {
     api.hostTeams.removeHostTeamMember.useMutation();
 
   const handleResendInvite = async (email: string) => {
-    await resendInviteMutation.mutateAsync({ email, hostTeamId: curTeam!.id });
+    const res = await resendInviteMutation.mutateAsync({
+      email,
+      hostTeamId: curTeam!.id,
+    });
+    switch (res.status) {
+      case "invite resent":
+        toast({
+          title: `Emailed an invite to ${email}`,
+          description: "The invite will expire in 24 hours",
+        });
+        break;
+
+      case "cooldown":
+        toast({
+          title: `Invite failed`,
+          description: "Please wait a few minutes before resending the invite",
+          variant: "destructive",
+        });
+        break;
+    }
     refetchInvites();
   };
 
   const handleCancelInvite = async (email: string) => {
-    await cancelInviteMutation.mutateAsync({ email, hostTeamId: curTeam!.id });
+    const res = await cancelInviteMutation.mutateAsync({ email, hostTeamId: curTeam!.id });
+    switch (res.status) {
+      case "invite canceled":
+        toast({
+          title: "Invite canceled",
+          description: `Canceled invite to ${email}`,
+        });
+        break;
+    }
     refetchInvites();
   };
 
@@ -57,12 +101,22 @@ export default function Page() {
         <div className="mx-auto max-w-xl space-y-4">
           <div className="flex items-center">
             <h1 className="text-3xl font-bold">Manage team</h1>
-            <Button onClick={() => setIsEditing(!isEditing)} className="bg-transparent">
-              {isEditing ? <X className="text-primaryGreen"/> : <Pencil className="text-primaryGreen"/>}
+            <Button
+              onClick={() => setIsEditing(!isEditing)}
+              className="bg-transparent"
+            >
+              {isEditing ? (
+                <X className="text-primaryGreen" />
+              ) : (
+                <Pencil className="text-primaryGreen" />
+              )}
             </Button>
           </div>
           {curTeam ? (
-            <HostTeamInviteForm hostTeamId={curTeam.id} setIsEditing={setIsEditing}/>
+            <HostTeamInviteForm
+              hostTeamId={curTeam.id}
+              setIsEditing={setIsEditing}
+            />
           ) : (
             <Spinner />
           )}
@@ -83,7 +137,6 @@ export default function Page() {
                 <PendingInvite
                   key={invite.inviteeEmail}
                   email={invite.inviteeEmail}
-                  // createdAt={invite.createdAt}
                   isEditing={isEditing}
                   onResend={() => handleResendInvite(invite.inviteeEmail)}
                   onCancel={() => handleCancelInvite(invite.inviteeEmail)}
@@ -143,17 +196,17 @@ function TeamMember({
 
 function PendingInvite({
   email,
-  // createdAt,
   isEditing,
   onResend,
   onCancel,
 }: {
   email: string;
-  // createdAt: Date;
   isEditing: boolean;
   onResend: () => void;
   onCancel: () => void;
 }) {
+  const [showCancelConfirmation, setShowCancelConfirmation] = useState(false);
+
   return (
     <div className="flex items-center gap-4 py-2">
       <UserAvatar name={email} email={email} />
@@ -170,14 +223,62 @@ function PendingInvite({
       )}
       {isEditing && (
         <div className="space-x-2">
-          <Button variant="ghost" size="sm" onClick={onResend} className="hover:bg-transparent">
-            <SendHorizonal className="text-primaryGreen"/>
-          </Button>
-          <Button variant="ghost" size="sm" onClick={onCancel} className="hover:bg-transparent">
-            <X className="text-primaryGreen"/>
-          </Button>
+          <Tooltip>
+            <TooltipTrigger>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onResend}
+                className="hover:bg-transparent"
+              >
+                <SendHorizonal className="text-primaryGreen" />
+              </Button>
+            </TooltipTrigger>
+
+            <TooltipContent className="" side="bottom">
+              Resend invite
+            </TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowCancelConfirmation(true)}
+                className="hover:bg-transparent"
+              >
+                <X className="text-primaryGreen" />
+              </Button>
+            </TooltipTrigger>
+
+            <TooltipContent className="" side="bottom">
+              Cancel invite
+            </TooltipContent>
+          </Tooltip>
         </div>
       )}
+
+      <AlertDialog
+        open={showCancelConfirmation}
+        onOpenChange={setShowCancelConfirmation}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel Invite</AlertDialogTitle>
+            <AlertDialogDescription>
+              {`Are you sure you want to cancel the team invite to ${email}?`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowCancelConfirmation(false)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={onCancel}>
+              Cancel Invite
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

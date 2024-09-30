@@ -34,15 +34,15 @@ export function HostTeamInviteForm({ hostTeamId, setIsEditing }: { hostTeamId: n
         form.reset();
         setIsEditing(false);
         break;
-      // case "added user":
-      //   toast({
-      //     title: `Successfully added ${res.inviteeName ?? "member"} to the team`,
-      //   });
-      //   form.reset();
-      //   break;
+
       case "already in team":
         form.setError("email", { message: "User is already in the team" });
         break;
+
+      case "already invited":
+        form.setError("email", { message: "User is already invited" });
+        break;
+        
     }
   });
 
