@@ -452,7 +452,7 @@ export async function getRequestsForProperties(
   const propertyToRequestMap: {
     property: Property;
     request: Request & {
-      traveler: Pick<User, "firstName" | "lastName" | "name" | "image">;
+      traveler: Pick<User, "firstName" | "lastName" | "name" | "image" | "location" | "about">;
     };
   }[] = [];
 
@@ -521,6 +521,8 @@ export async function getRequestsForProperties(
                 name: true,
                 firstName: true,
                 lastName: true,
+                location: true,
+                about: true,
               },
             },
           },
@@ -535,6 +537,8 @@ export async function getRequestsForProperties(
         image: request.madeByGroup.owner.image,
         firstName: request.madeByGroup.owner.firstName,
         lastName: request.madeByGroup.owner.lastName,
+        location: request.madeByGroup.owner.location,
+        about: request.madeByGroup.owner.about,
       };
       propertyToRequestMap.push({
         property,
