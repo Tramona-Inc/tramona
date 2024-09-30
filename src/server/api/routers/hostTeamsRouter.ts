@@ -7,8 +7,8 @@ import {
 } from "@/server/db/schema";
 import { getHostTeamOwnerId, sendEmail } from "@/server/server-utils";
 import { TRPCError } from "@trpc/server";
-import { add } from "date-fns";
-import { and, eq } from "drizzle-orm";
+import { add, subMinutes } from "date-fns";
+import { and, eq, gt } from "drizzle-orm";
 import { z } from "zod";
 import {
   createTRPCRouter,
@@ -40,54 +40,162 @@ export const hostTeamsRouter = createTRPCRouter({
         columns: { id: true, name: true, email: true },
       });
 
-      if (!invitee) {
-        await ctx.db
-          .insert(hostTeamInvites)
-          .values({
-            expiresAt: add(new Date(), { hours: 24 }),
-            hostTeamId: input.hostTeamId,
-            inviteeEmail: input.email,
+      if (invitee) {
+        const userInTeam = await ctx.db.query.hostTeamMembers
+          .findFirst({
+            where: and(
+              eq(hostTeamMembers.hostTeamId, input.hostTeamId),
+              eq(hostTeamMembers.userId, invitee.id),
+            ),
           })
+          .then((res) => !!res);
 
-          // instead of making a new invite, just extend the expiration date of the existing one
-          .onConflictDoUpdate({
-            target: [hostTeamInvites.hostTeamId, hostTeamInvites.inviteeEmail],
-            set: {
-              expiresAt: add(new Date(), { hours: 24 }),
-            },
-          });
+        if (userInTeam) {
+          return { status: "already in team" } as const;
+        }
+      }
 
-        await sendEmail({
-          to: input.email,
-          subject: `You've been invited to ${hostTeam.name} on Tramona`,
-          content: HostTeamInviteEmail({
-            email: ctx.user.email,
-            name: ctx.user.name,
-          }),
+      await ctx.db
+        .insert(hostTeamInvites)
+        .values({
+          expiresAt: add(new Date(), { hours: 24 }),
+          hostTeamId: input.hostTeamId,
+          inviteeEmail: input.email,
+        })
+
+        // instead of making a new invite, just extend the expiration date of the existing one
+        .onConflictDoUpdate({
+          target: [hostTeamInvites.hostTeamId, hostTeamInvites.inviteeEmail],
+          set: {
+            expiresAt: add(new Date(), { hours: 24 }),
+          },
         });
 
-        return { status: "sent invite" } as const;
-      }
-
-      const userInTeam = await ctx.db.query.hostTeamMembers
-        .findFirst({
-          where: and(
-            eq(hostTeamMembers.hostTeamId, input.hostTeamId),
-            eq(hostTeamMembers.userId, invitee.id),
-          ),
-        })
-        .then((res) => !!res);
-
-      if (userInTeam) {
-        return { status: "already in team" } as const;
-      }
-
-      await ctx.db.insert(hostTeamMembers).values({
-        hostTeamId: input.hostTeamId,
-        userId: invitee.id,
+      await sendEmail({
+        to: input.email,
+        subject: `You've been invited to ${hostTeam.name}'s host team on Tramona`,
+        content: HostTeamInviteEmail({
+          email: ctx.user.email,
+          name: ctx.user.name,
+        }),
       });
 
-      return { status: "added user", inviteeName: invitee.name } as const;
+      return { status: "sent invite" } as const;
+      // }Wha
+
+      // await ctx.db.insert(hostTeamMembers).values({
+      //   hostTeamId: input.hostTeamId,
+      //   userId: invitee.id,
+      // });
+
+      // return { status: "added user", inviteeName: invitee.name } as const;
+    }),
+
+  inviteUserById: protectedProcedure
+    .input(z.object({ userId: z.string(), hostTeamId: z.number() }))
+    .mutation(async ({ input, ctx }) => {
+      const hostTeamOwnerId = await getHostTeamOwnerId(input.hostTeamId);
+
+      if (ctx.user.id !== hostTeamOwnerId) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+      }
+
+      await ctx.db.insert(hostTeamMembers).values(input);
+    }),
+
+  resendInvite: protectedProcedure
+    .input(z.object({ email: z.string(), hostTeamId: z.number() }))
+    .mutation(async ({ input, ctx }) => {
+      const hostTeam = await ctx.db.query.hostTeams.findFirst({
+        where: eq(hostTeams.id, input.hostTeamId),
+        columns: { name: true },
+        with: { owner: { columns: { id: true } } },
+      });
+
+      if (!hostTeam) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
+      if (ctx.user.id !== hostTeam.owner.id) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+      }
+
+      const existingInvite = await ctx.db.query.hostTeamInvites.findFirst({
+        where: and(
+          eq(hostTeamInvites.hostTeamId, input.hostTeamId),
+          eq(hostTeamInvites.inviteeEmail, input.email),
+        ),
+        columns: { expiresAt: true },
+      });
+
+      if (!existingInvite) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Invite not found" });
+      }
+
+      const cooldownPeriod = subMinutes(new Date(), 10); // 10 min cooldown
+      if (existingInvite.expiresAt > cooldownPeriod) {
+        throw new TRPCError({
+          code: "TOO_MANY_REQUESTS",
+          message: "Please wait before resending the invite",
+        });
+      }
+
+      await ctx.db
+        .update(hostTeamInvites)
+        .set({
+          expiresAt: add(new Date(), { hours: 24 }),
+        })
+        .where(
+          and(
+            eq(hostTeamInvites.hostTeamId, input.hostTeamId),
+            eq(hostTeamInvites.inviteeEmail, input.email),
+          ),
+        );
+
+      await sendEmail({
+        to: input.email,
+        subject: `Reminder: You've been invited to ${hostTeam.name}'s host team on Tramona`,
+        content: HostTeamInviteEmail({
+          email: ctx.user.email,
+          name: ctx.user.name,
+        }),
+      });
+
+      return { status: "invite resent" } as const;
+    }),
+
+  cancelInvite: protectedProcedure
+    .input(z.object({ email: z.string(), hostTeamId: z.number() }))
+    .mutation(async ({ input, ctx }) => {
+      const hostTeam = await ctx.db.query.hostTeams.findFirst({
+        where: eq(hostTeams.id, input.hostTeamId),
+        columns: { name: true },
+        with: { owner: { columns: { id: true } } },
+      });
+
+      if (!hostTeam) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
+      if (ctx.user.id !== hostTeam.owner.id) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+      }
+
+      const result = await ctx.db
+        .delete(hostTeamInvites)
+        .where(
+          and(
+            eq(hostTeamInvites.hostTeamId, input.hostTeamId),
+            eq(hostTeamInvites.inviteeEmail, input.email),
+          ),
+        )
+        .returning({ inviteeEmail: hostTeamInvites.inviteeEmail });
+
+      if (result.length === 0) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Invite not found" });
+      }
+
+      return { status: "invite cancelled" } as const;
     }),
 
   leaveHostTeam: protectedProcedure
@@ -142,6 +250,42 @@ export const hostTeamsRouter = createTRPCRouter({
             eq(hostTeamMembers.hostTeamId, input.hostTeamId),
           ),
         );
+    }),
+
+  getMyFriends: protectedProcedure.query(async ({ ctx }) => {
+    return await ctx.db.query.hostTeamMembers
+      .findMany({
+        where: eq(hostTeamMembers.userId, ctx.user.id),
+        with: {
+          hostTeam: {
+            with: {
+              members: {
+                with: {
+                  user: { columns: { name: true, email: true, image: true } },
+                },
+              },
+            },
+          },
+        },
+      })
+      .then((res) =>
+        res
+          .map((member) => member.hostTeam.members)
+          .flat(1)
+          .map((member) => member.user),
+      );
+  }),
+
+  getHostTeamOwner: protectedProcedure
+    .input(z.object({ hostTeamId: z.number() }))
+    .query(async ({ input, ctx }) => {
+      return await ctx.db.query.hostTeams
+        .findFirst({
+          columns: {},
+          with: { owner: { columns: { phoneNumber: true, isWhatsApp: true } } },
+          where: eq(hostTeams.id, input.hostTeamId),
+        })
+        .then((res) => res?.owner);
     }),
 
   getMyHostTeams: protectedProcedure.query(async ({ ctx }) => {
@@ -222,6 +366,21 @@ export const hostTeamsRouter = createTRPCRouter({
       return hostTeam;
     }),
 
+  getCurTeamOwnerId: protectedProcedure.query(async ({ ctx }) => {
+    return await ctx.db.query.users
+      .findFirst({
+        where: eq(users.id, ctx.user.id),
+        columns: {},
+        with: {
+          hostProfile: {
+            columns: {},
+            with: { curTeam: { columns: { id: true } } },
+          },
+        },
+      })
+      .then((res) => res?.hostProfile?.curTeam.id);
+  }),
+
   getCurTeamMembers: protectedProcedure.query(async ({ ctx }) => {
     const members = await ctx.db.query.users
       .findFirst({
@@ -260,5 +419,31 @@ export const hostTeamsRouter = createTRPCRouter({
     }
 
     return members;
+  }),
+
+  getCurTeamPendingInvites: protectedProcedure.query(async ({ ctx }) => {
+    const curTeamId = await ctx.db.query.hostProfiles
+      .findFirst({
+        where: eq(hostProfiles.userId, ctx.user.id),
+        columns: { curTeamId: true },
+      })
+      .then((res) => res?.curTeamId);
+
+    if (!curTeamId) {
+      throw new TRPCError({ code: "NOT_FOUND" });
+    }
+
+    const pendingInvites = await ctx.db.query.hostTeamInvites.findMany({
+      where: and(
+        eq(hostTeamInvites.hostTeamId, curTeamId),
+        gt(hostTeamInvites.expiresAt, new Date()),
+      ),
+      columns: {
+        inviteeEmail: true,
+        expiresAt: true,
+      },
+    });
+
+    return pendingInvites;
   }),
 });
