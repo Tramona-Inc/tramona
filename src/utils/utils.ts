@@ -342,9 +342,7 @@ export function getHostPayout({
   hostMarkup: number;
   numNights: number;
 }) {
-  return (
-    Math.floor(propertyPrice * hostMarkup * numNights * 100) / 100
-  ).toFixed(2);
+  return Math.floor(propertyPrice * hostMarkup * numNights);
 }
 
 export function getTravelerOfferedPrice({
@@ -356,9 +354,7 @@ export function getTravelerOfferedPrice({
   travelerMarkup: number;
   numNights: number;
 }) {
-  return (
-    Math.ceil(propertyPrice * travelerMarkup * numNights * 100) / 100
-  ).toFixed(2);
+  return Math.ceil(propertyPrice * travelerMarkup * numNights);
 }
 
 export function getPropertyId(url: string): number | null {

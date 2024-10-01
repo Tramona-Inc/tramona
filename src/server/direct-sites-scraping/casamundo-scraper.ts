@@ -78,11 +78,10 @@ async function getLocationId(location: string): Promise<string> {
     limit: "10",
   });
 
-  const response: AxiosResponse<AutocompleteResponse> =
-    await axiosWithRetry.get(
-      `${autocompleteUrl}?${params.toString()}`,
-      // { httpsAgent: proxyAgent },
-    );
+  const response: AxiosResponse<AutocompleteResponse> = await axios.get(
+    `${autocompleteUrl}?${params.toString()}`,
+    // { httpsAgent: proxyAgent },
+  );
   const suggestions = response.data.suggestions;
 
   if (suggestions.length > 0 && suggestions[0]) {
@@ -143,7 +142,7 @@ async function getOfferIds(
     _format: "json",
   });
 
-  const response: AxiosResponse<OfferResponse> = await axiosWithRetry.get(
+  const response: AxiosResponse<OfferResponse> = await axios.get(
     `${url}?${params.toString()}`,
     // { headers, httpsAgent: proxyAgent },
   );
@@ -186,20 +185,17 @@ async function checkAvailability(
     (currentYear === checkOut.getFullYear() &&
       currentMonth <= checkOut.getMonth() + 1)
   ) {
-    const response: AxiosResponse<CalendarResponse> = await axiosWithRetry.get(
-      url,
-      {
-        params: {
-          year: currentYear,
-          month: currentMonth,
-        },
-        // httpsAgent: proxyAgent,
-        headers: {
-          accept: "application/json",
-          "accept-language": "en-US,en;q=0.9",
-        },
+    const response: AxiosResponse<CalendarResponse> = await axios.get(url, {
+      params: {
+        year: currentYear,
+        month: currentMonth,
       },
-    );
+      // httpsAgent: proxyAgent,
+      headers: {
+        accept: "application/json",
+        "accept-language": "en-US,en;q=0.9",
+      },
+    });
 
     Object.assign(days, response.data.content.days);
 
@@ -336,7 +332,7 @@ const fetchPrice = async (
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      const response: AxiosResponse<ApiResponse> = await axiosWithRetry.post(
+      const response: AxiosResponse<ApiResponse> = await axios.post(
         `${url}?${queryParams.toString()}`,
         null,
         // { headers, httpsAgent: proxyAgent },
@@ -417,7 +413,7 @@ const fetchReviews = async (
   numRatings: number;
   reviews: NewReview[];
 }> => {
-  const data = await axiosWithRetry
+  const data = await axios
     .get(
       `https://www.casamundo.com/reviews/list/${offerId}?scale=5&bcEnabled=false&googleReviews=false`,
       {
@@ -543,7 +539,7 @@ async function fetchPropertyDetails(
       .nullish(),
   });
 
-  const data = await axiosWithRetry
+  const data = await axios
     .get(`${url}?${params.toString()}`, {
       // httpsAgent: proxyAgent,
       headers,

@@ -6,6 +6,7 @@ import { AlertCircle, ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import HostAvailability from "./HostAvailability";
 import HostPropertiesRestrictions from "./HostPropertiesRestrictions";
+import HostAutoOffer from "./HostAutoOffer";
 
 export default function HostPropertyInfo({ property }: { property: Property }) {
   return (
@@ -55,6 +56,12 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
               />
             )}
           </TabsTrigger>
+          <TabsTrigger
+            value="auto-offer"
+            className="data-[state=active]:border-b-teal-900 data-[state=active]:font-bold data-[state=active]:text-teal-900"
+          >
+            Auto-offer
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="details">
           <HostPropertiesDetails property={property} />
@@ -70,6 +77,9 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
         </TabsContent>
         <TabsContent value="cancellation">
           <HostPropertiesCancellation property={property} />
+        </TabsContent>
+        <TabsContent value="auto-offer">
+          <HostAutoOffer property={property} />
         </TabsContent>
       </Tabs>
     </div>

@@ -223,6 +223,14 @@ export const roomsWithBedsSchema = z.array(
 
 export type RoomWithBeds = z.infer<typeof roomsWithBedsSchema.element>;
 
+export const discountTierSchema = z.object({
+  days: z.number().int().nonnegative(),
+  percentOff: z.number().int().min(0).max(100)
+});
+
+export type DiscountTier = z.infer<typeof discountTierSchema>;
+
+
 export const properties = pgTable(
   "properties",
   {
@@ -310,6 +318,8 @@ export const properties = pgTable(
       .$type<{ x: number; y: number }>(),
     iCalLink: text("ical_link"),
     bookOnAirbnb: boolean("book_on_airbnb").notNull().default(false),
+    autoOfferEnabled: boolean("auto_offer_enabled").notNull().default(false),
+    autoOfferDiscountTiers: jsonb("auto_offer_discount_tiers").$type<DiscountTier[]>(),
   },
   (t) => ({
     spatialIndex: index("spacial_index").using("gist", t.latLngPoint),
@@ -329,6 +339,7 @@ export const propertyInsertSchema = createInsertSchema(properties, {
   checkInTime: zodTime,
   checkOutTime: zodTime,
   roomsWithBeds: roomsWithBedsSchema,
+  autoOfferDiscountTiers: z.array(discountTierSchema),
 });
 
 // make everything except id optional
