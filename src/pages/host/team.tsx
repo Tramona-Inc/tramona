@@ -9,7 +9,7 @@ import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
 import { useState } from "react";
-import { Pencil, X, SendHorizonal } from "lucide-react";
+import { Pencil, X, SendHorizonal, Ellipsis } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import {
   Tooltip,
@@ -26,6 +26,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 export default function Page() {
   const [isEditing, setIsEditing] = useState(false);
@@ -186,9 +187,24 @@ function TeamMember({
       </div>
       {children}
       {isEditing && !isYou && !isOwner && (
-        <Button variant="destructive" size="sm" onClick={onRemove}>
-          Remove
+
+        <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="sm" className="hover:bg-transparent">
+          <Ellipsis />
         </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent side="bottom" align="center">
+          <DropdownMenuItem>
+            {/* <EditIcon /> */}
+            Edit
+          </DropdownMenuItem>
+          <DropdownMenuItem red onClick={onRemove}>
+            {/* <EyeOffIcon /> */}
+            Unlist
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
       )}
     </div>
   );

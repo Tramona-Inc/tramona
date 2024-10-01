@@ -70,23 +70,21 @@ export const hostTeamsRouter = createTRPCRouter({
 
       const id = crypto.randomUUID();
 
-      await ctx.db
-        .insert(hostTeamInvites)
-        .values({
-          id,
-          expiresAt: add(new Date(), { hours: 24 }),
-          hostTeamId: input.hostTeamId,
-          inviteeEmail: input.email,
-          lastSentAt: now,
-        })
+      await ctx.db.insert(hostTeamInvites).values({
+        id,
+        expiresAt: add(new Date(), { hours: 24 }),
+        hostTeamId: input.hostTeamId,
+        inviteeEmail: input.email,
+        lastSentAt: now,
+      });
 
-        // instead of making a new invite, just extend the expiration date of the existing one
-        // .onConflictDoUpdate({
-        //   target: [hostTeamInvites.hostTeamId, hostTeamInvites.inviteeEmail],
-        //   set: {
-        //     expiresAt: add(new Date(), { hours: 24 }),
-        //   },
-        // });
+      // instead of making a new invite, just extend the expiration date of the existing one
+      // .onConflictDoUpdate({
+      //   target: [hostTeamInvites.hostTeamId, hostTeamInvites.inviteeEmail],
+      //   set: {
+      //     expiresAt: add(new Date(), { hours: 24 }),
+      //   },
+      // });
 
       await sendEmail({
         to: input.email,
@@ -568,5 +566,65 @@ export const hostTeamsRouter = createTRPCRouter({
         hostTeamId: invite.hostTeam.id,
         hostTeamName: invite.hostTeam.name,
       };
+    }),
+
+  joinHostTeam: protectedProcedure
+    .input(z.object({ cohostInviteId: z.string() }))
+    .mutation(async ({ input, ctx }) => {
+      const invite = await ctx.db.query.hostTeamInvites.findFirst({
+        where: and(
+          eq(hostTeamInvites.id, input.cohostInviteId),
+          eq(hostTeamInvites.inviteeEmail, ctx.user.email),
+        ),
+        with: {
+          hostTeam: {
+            columns: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      });
+
+      if (!invite) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Invite not found or not intended for this user",
+        });
+      }
+
+      if (invite.expiresAt < new Date()) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Invite has expired",
+        });
+      }
+
+      const existingMember = await ctx.db.query.hostTeamMembers.findFirst({
+        where: and(
+          eq(hostTeamMembers.hostTeamId, invite.hostTeam.id),
+          eq(hostTeamMembers.userId, ctx.user.id),
+        ),
+      });
+
+      if (existingMember) {
+        return { status: "already in team" } as const;
+      }
+
+      await ctx.db.insert(hostTeamMembers).values({
+        hostTeamId: invite.hostTeam.id,
+        userId: ctx.user.id,
+      });
+
+      // delete invite
+      await ctx.db
+        .delete(hostTeamInvites)
+        .where(eq(hostTeamInvites.id, input.cohostInviteId));
+
+      return {
+        status: "joined team",
+        hostTeamId: invite.hostTeam.id,
+        hostTeamName: invite.hostTeam.name,
+      } as const;
     }),
 });
