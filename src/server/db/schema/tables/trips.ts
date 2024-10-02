@@ -89,6 +89,7 @@ export const tripCancellations = pgTable(
       .references(() => trips.id, {
         onDelete: "cascade",
       }),
+    amountRefunded: integer("amount_refunded").notNull().default(0),
   },
   (t) => {
     return {

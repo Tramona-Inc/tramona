@@ -1,4 +1,4 @@
-import { HelpCircleIcon, MessageCircle } from "lucide-react";
+import { HelpCircleIcon, MapPinIcon, MessageCircle } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -8,16 +8,17 @@ import UserAvatar from "../_common/UserAvatar";
 import { type TripCardDetails } from "@/pages/my-trips";
 import { api } from "@/utils/api";
 import ChatOfferButton from "../offers/ChatOfferButton";
+import SingleLocationMap from "@/components/_common/GoogleMaps/SingleLocationMap";
+import TripCancelDialog from "./TripCancelDialog";
 
 export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
   const { data } = api.properties.getById.useQuery({ id: trip.propertyId });
   const hostId = data?.hostId;
-
   return (
     <div className="w-full">
       <div className="flex flex-col overflow-clip rounded-xl border shadow-md lg:flex-row">
         <div className="flex w-full flex-col gap-4 p-4 pt-12 lg:pt-4">
-          <div className="flex w-full flex-col justify-between gap-3 lg:flex-row lg:gap-6">
+          <div className="flex w-full flex-col justify-start gap-3 lg:flex-row lg:gap-6">
             <div className="flex flex-col gap-4 lg:gap-0">
               <div className="flex justify-center sm:justify-start">
                 <Link
@@ -38,7 +39,6 @@ export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
               <div className="mt-4 flex gap-2">
                 <UserAvatar
                   name={trip.property.host?.name}
-                  // image={trip.property.host?.image}
                   image={
                     trip.property.host?.image ??
                     "/assets/images/tramona-logo.jpeg"
@@ -57,11 +57,17 @@ export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
               </div>
             </div>
             <div className="mt-4 flex flex-col gap-4">
-              <h2 className="text-xl font-bold lg:text-2xl">
+              <Link
+                href={`/my-trips/${trip.id}`}
+                className="text-xl font-bold lg:text-2xl"
+              >
                 {trip.property.name}
-              </h2>
+              </Link>
 
-              <p>{trip.property.address}</p>
+              <p className="flex flex-row items-center gap-x-1">
+                <MapPinIcon size={18} />
+                {trip.property.address}
+              </p>
 
               <div className="">
                 <p>{formatDateRange(trip.checkIn, trip.checkOut)}</p>
@@ -89,6 +95,12 @@ export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
                 Help
               </Link>
             </Button>
+            <TripCancelDialog
+              tripId={trip.id}
+              tripCancellation={trip.property.cancellationPolicy!}
+              checkIn={trip.checkIn}
+              checkOut={trip.checkOut}
+            />
           </div>
         </div>
       </div>

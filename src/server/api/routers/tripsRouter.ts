@@ -230,4 +230,13 @@ export const tripsRouter = createTRPCRouter({
     const allTrips = await db.query.tripDamages.findMany({});
     return allTrips.length > 0 ? allTrips : [];
   }),
+
+  getTripCancelationPolicyByTripId: protectedProcedure
+    .input(z.number())
+    .query(async ({ input }) => {
+      const trip = await db.query.trips.findFirst({
+        where: eq(trips.id, input),
+      });
+      return trip;
+    }),
 });

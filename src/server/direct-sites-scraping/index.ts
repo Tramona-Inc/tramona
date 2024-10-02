@@ -265,7 +265,7 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
     if (userFromRequest) {
       await sendScheduledText({
         to: userFromRequest.phoneNumber!,
-        content: `Tramona: Thank you for submitting your request!\n\nUnfortunately, no hosts have submitted a match for your price. But don’t worry—our team is actively searching for options that fit your needs.\n\nIn case your budget is flexible, some hosts sent matches slightly out of your budget take a look here: ${env.NEXTAUTH_URL}/requests. We’ll notify you as soon as we find the perfect stay.\n\nIn the meantime, feel free to adjust your request if you’d like to explore other possibilities. Thank you for choosing Tramona!`,
+        content: `Tramona: Thank you for submitting your request!\n\nUnfortunately, no hosts have submitted a match for your price. But don&pos;t worry—our team is actively searching for options that fit your needs.\n\nIn case your budget is flexible, some hosts sent matches slightly out of your budget take a look here: ${env.NEXTAUTH_URL}/requests. We’ll notify you as soon as we find the perfect stay.\n\nIn the meantime, feel free to adjust your request if you’d like to explore other possibilities. Thank you for choosing Tramona!`,
         sendAt: addHours(new Date(), 24),
       });
     }
