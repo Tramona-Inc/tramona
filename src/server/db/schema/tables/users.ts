@@ -21,6 +21,8 @@ import { zodString } from "@/utils/zod-utils";
 export const REFERRAL_CODE_LENGTH = 7;
 export const ALL_ROLES = ["guest", "host", "admin"] as const;
 export const roleEnum = pgEnum("role", ALL_ROLES);
+export const COHOST_ROLES = ["strict", "medium", "loose"] as const;
+export const coHostRoleEnum = pgEnum("coHostRole", COHOST_ROLES);
 export const referralTierEnum = pgEnum("referral_tier", [
   "Partner",
   "Ambassador",
@@ -60,6 +62,7 @@ export const users = pgTable(
       length: REFERRAL_CODE_LENGTH,
     }),
     role: roleEnum("role").notNull().default("guest"),
+    coHostRole: coHostRoleEnum("coHostRole").default("strict"),
     referralTier: referralTierEnum("referral_tier")
       .notNull()
       .default("Partner"),
