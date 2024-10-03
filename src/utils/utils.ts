@@ -760,3 +760,11 @@ export function logAndFilterSettledResults<T>(
     })
     .map((r) => r.value);
 }
+
+export function removeTax(total: number, taxRate: number): number {
+  if (taxRate < 0 || taxRate >= 1) {
+    throw new Error("Tax rate must be between 0 and 1");
+  }
+  const amountWithoutTax = Math.round(total / (1 + taxRate));
+  return amountWithoutTax;
+}

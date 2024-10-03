@@ -19,8 +19,9 @@ import { TRPCError } from "@trpc/server";
 import { and, eq, exists, isNotNull, isNull, ne, sql } from "drizzle-orm";
 import { z } from "zod";
 import BookingCancellationEmail from "packages/transactional/emails/BookingCancellationEmail";
-import { formatDateRange } from "@/utils/utils";
+import { formatDateRange, getNumNights, removeTax } from "@/utils/utils";
 import { refundTripWithStripe } from "@/utils/stripe-utils";
+import { TAX_PERCENTAGE } from "@/utils/constants";
 
 export const tripsRouter = createTRPCRouter({
   getAllPreviousTripsWithDetails: roleRestrictedProcedure(["admin"]).query(
@@ -354,11 +355,41 @@ export const tripsRouter = createTRPCRouter({
       const amountWithoutProcessingFees = Math.round(
         Math.round((currentTrip.totalPriceAfterFees - 3) / 1.029),
       );
+
+      const amountWithoutSuperhogOrTax = input.refundAmount
+        ? input.refundAmount
+        : amountWithoutProcessingFees;
+
+      //------add the taxes we took and the superhog fees if not scraped property----
+      //1. offer with trips
+      const curTrip = await db.query.trips.findFirst({
+        where: eq(trips.id, input.tripId),
+        with: {
+          offer: {
+            columns: {
+              madePublicAt: false,
+              becomeVisibleAt: false,
+            },
+          },
+        },
+      });
+
+      // determine if it is a scraped property
+      let amount;
+      if (curTrip?.offer?.scrapeUrl) {
+        amount = amountWithoutSuperhogOrTax;
+      } else {
+        //dont refund the tax or superhog
+        const numOfNights = getNumNights(curTrip!.checkIn, curTrip!.checkOut);
+        amount =
+          removeTax(amountWithoutSuperhogOrTax, TAX_PERCENTAGE) -
+          numOfNights * 300;
+      }
+      console.log(amount);
+
       await refundTripWithStripe({
         paymentIntentId: currentTrip.paymentIntentId!,
-        amount: input.refundAmount
-          ? input.refundAmount
-          : amountWithoutProcessingFees,
+        amount: amount,
         metadata: {
           tripId: currentTrip.id,
           propertyId: currentTrip.propertyId,

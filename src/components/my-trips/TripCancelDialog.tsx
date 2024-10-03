@@ -4,6 +4,8 @@ import { TicketXIcon } from "lucide-react";
 import { checkCancellation } from "@/utils/cancellationLogic";
 import InvalidTripCancellation from "./cancellationsCard/InvalidTripCancellation";
 import TripCancellationOrPartialRefund from "./cancellationsCard/TripCancellationOrPartialRefund";
+import { useState } from "react";
+
 export default function TripCancelDialog({
   tripId,
   tripCancellation,
@@ -23,6 +25,8 @@ export default function TripCancelDialog({
   checkOutTime: string;
   totalPriceAfterFees: number;
 }) {
+  const [isOpen, setIsOpen] = useState(false);
+
   const { canCancel, partialRefund, partialRefundPercentage, description } =
     checkCancellation({
       cancellationPolicy: tripCancellation,
@@ -35,7 +39,7 @@ export default function TripCancelDialog({
 
   //if the trip is scraped or cannot cancell make it request cancellation.
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger>
         <Button variant="secondary">
           <TicketXIcon className="" />

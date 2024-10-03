@@ -26,7 +26,16 @@ import {
 import { formatDateRange, getNumNights } from "@/utils/utils";
 
 import { TRPCError } from "@trpc/server";
-import { and, eq, inArray, isNotNull, isNull, notInArray, or, sql } from "drizzle-orm";
+import {
+  and,
+  eq,
+  inArray,
+  isNotNull,
+  isNull,
+  notInArray,
+  or,
+  sql,
+} from "drizzle-orm";
 import { z } from "zod";
 import { requests } from "../../db/schema/tables/requests";
 import { db } from "@/server/db";
@@ -142,7 +151,7 @@ export const offersRouter = createTRPCRouter({
       });
     }),
 
-    getByRequestIdWithProperty: publicProcedure
+  getByRequestIdWithProperty: publicProcedure
     .input(requestSelectSchema.pick({ id: true }))
     .query(async ({ ctx, input }) => {
       const request = await ctx.db.query.requests.findFirst({
@@ -157,41 +166,46 @@ export const offersRouter = createTRPCRouter({
         });
       }
 
-      const offersByRequest = await ctx.db.query.offers
-        .findMany({
-          where: eq(offers.requestId, input.id),
-          with: {
-            request: {
-              with: {
-                madeByGroup: { with: { members: true } },
+      const offersByRequest = await ctx.db.query.offers.findMany({
+        where: eq(offers.requestId, input.id),
+        with: {
+          request: {
+            with: {
+              madeByGroup: { with: { members: true } },
+            },
+            columns: { numGuests: true, location: true, id: true },
+          },
+        },
+      });
+      const propertiesByRequest = await ctx.db.query.properties.findMany({
+        where: inArray(
+          properties.id,
+          offersByRequest.map((offer) => offer.propertyId),
+        ),
+        with: {
+          host: {
+            columns: { id: true, name: true, email: true, image: true },
+            with: {
+              hostProfile: {
+                columns: { userId: true },
               },
-              columns: { numGuests: true, location: true, id: true },
             },
           },
-        })
-      const propertiesByRequest = await ctx.db.query.properties
-        .findMany({
-          where: inArray(properties.id, offersByRequest.map((offer) => offer.propertyId)),
-          with: {
-            host: {
-              columns: { id: true, name: true, email: true, image: true },
-              with: {
-                hostProfile: {
-                  columns: { userId: true },
-                },
-              },
-            },
-            reviews: true,
-          },
-        });
+          reviews: true,
+        },
+      });
 
-      const propertiesMap: Record<number, Property> = propertiesByRequest.reduce((acc: Record<number, Property>, property: Property) => {
-        acc[property.id] = property;
-        return acc;
-      }, {});
+      const propertiesMap: Record<number, Property> =
+        propertiesByRequest.reduce(
+          (acc: Record<number, Property>, property: Property) => {
+            acc[property.id] = property;
+            return acc;
+          },
+          {},
+        );
 
       // Merge offers with their corresponding property
-      const offersByRequestWithProperties = offersByRequest.map(offer => ({
+      const offersByRequestWithProperties = offersByRequest.map((offer) => ({
         ...offer,
         property: propertiesMap[offer.propertyId]!, // Match property by propertyId
       }));
@@ -829,6 +843,22 @@ export const offersRouter = createTRPCRouter({
           message: "Error scraping listings. " + error,
         });
       });
+    }),
+
+  isOfferScrapedByTripId: protectedProcedure
+    .input(z.number())
+    .query(async ({ input }) => {
+      const curTrip = await db.query.trips.findFirst({
+        where: eq(trips.id, input),
+        with: {
+          offer: {
+            columns: {
+              scrapeUrl: true,
+            },
+          },
+        },
+      });
+      return curTrip?.offer?.scrapeUrl !== null;
     }),
 });
 
