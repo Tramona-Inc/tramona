@@ -7,21 +7,31 @@ import TripCancellationOrPartialRefund from "./cancellationsCard/TripCancellatio
 export default function TripCancelDialog({
   tripId,
   tripCancellation,
-  checkIn,
-  checkOut,
+  checkInDate,
+  checkOutDate,
+  bookingDate,
+  checkInTime,
+  checkOutTime,
+  totalPriceAfterFees,
 }: {
   tripId: number;
   tripCancellation: string;
-  checkIn: Date;
-  checkOut: Date;
+  checkInDate: Date;
+  checkOutDate: Date;
+  bookingDate: Date;
+  checkInTime: string;
+  checkOutTime: string;
+  totalPriceAfterFees: number;
 }) {
-  const { canCancel, partialRefund, numOfRefundableNights } = checkCancellation(
-    {
+  const { canCancel, partialRefund, partialRefundPercentage, description } =
+    checkCancellation({
       cancellationPolicy: tripCancellation,
-      checkIn,
-      checkOut,
-    },
-  );
+      checkInDate,
+      checkOutDate,
+      checkInTime,
+      checkOutTime,
+      bookingDate: bookingDate,
+    });
 
   //if the trip is scraped or cannot cancell make it request cancellation.
   return (
@@ -35,8 +45,14 @@ export default function TripCancelDialog({
       <DialogContent>
         {/* Tramona's property or is valid */}
         {/* partial refund */}
+
         {canCancel || partialRefund ? (
-          <TripCancellationOrPartialRefund tripId={tripId} />
+          <TripCancellationOrPartialRefund
+            tripId={tripId}
+            partialRefundPercentage={partialRefundPercentage}
+            description={description}
+            totalPriceAfterFees={totalPriceAfterFees}
+          />
         ) : (
           <InvalidTripCancellation
             tripId={tripId}

@@ -18,7 +18,7 @@ export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
     <div className="w-full">
       <div className="flex flex-col overflow-clip rounded-xl border shadow-md lg:flex-row">
         <div className="flex w-full flex-col gap-4 p-4 pt-12 lg:pt-4">
-          <div className="flex w-full flex-col justify-start gap-3 lg:flex-row lg:gap-6">
+          <div className="flex w-full flex-col justify-start gap-3 lg:flex-row lg:gap-x-6">
             <div className="flex flex-col gap-4 lg:gap-0">
               <div className="flex justify-center sm:justify-start">
                 <Link
@@ -79,6 +79,18 @@ export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
                 </Link>
               </div>
             </div>
+            <Badge
+              variant={
+                trip.tripsStatus === "Booked"
+                  ? "green"
+                  : trip.tripsStatus === "Needs attention"
+                    ? "yellow"
+                    : "red"
+              }
+              className="ml-auto"
+            >
+              {trip.tripsStatus}
+            </Badge>
           </div>
 
           <div className="h-[2px] rounded-full bg-gray-200"></div>
@@ -95,12 +107,18 @@ export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
                 Help
               </Link>
             </Button>
-            <TripCancelDialog
-              tripId={trip.id}
-              tripCancellation={trip.property.cancellationPolicy!}
-              checkIn={trip.checkIn}
-              checkOut={trip.checkOut}
-            />
+            {trip.tripsStatus !== "Cancelled" && (
+              <TripCancelDialog
+                tripId={trip.id}
+                tripCancellation={trip.property.cancellationPolicy!}
+                bookingDate={trip.createdAt}
+                checkInDate={trip.checkIn}
+                checkOutDate={trip.checkOut}
+                checkInTime={trip.property.checkInTime}
+                checkOutTime={trip.property.checkOutTime}
+                totalPriceAfterFees={trip.totalPriceAfterFees}
+              />
+            )}
           </div>
         </div>
       </div>

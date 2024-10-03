@@ -15,27 +15,56 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { formatDateRange, getDaysUntilTrip } from "@/utils/utils";
 import UserAvatar from "@/components/_common/UserAvatar";
 import { MapPinIcon } from "lucide-react";
-
+import { useToast } from "@/components/ui/use-toast";
+import { Separator } from "@/components/ui/separator";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 const formSchema = z.object({
   tripId: z.number(),
-  reason: z.string(),
+  reason: z.string().min(4, "Reason must be 5 characters or longer"),
   cancelledAt: z.date(),
+  refundAmount: z.number().optional(),
 });
 
 export default function TripCancellationOrPartialRefund({
   tripId,
+  partialRefundPercentage,
+  description,
+  totalPriceAfterFees,
 }: {
   tripId: number;
+  partialRefundPercentage: number;
+  description?: string;
+  totalPriceAfterFees: number;
 }) {
   const { data } = api.trips.getMyTripsPageDetails.useQuery({ tripId });
-  // check to see if the property is elgible for full refund or partial refund
 
+  const { toast } = useToast();
+
+  const { mutateAsync: cancelTrip, isLoading: isSubmitting } =
+    api.trips.cancelTripById.useMutation({
+      onSuccess: () => {
+        toast({
+          title: "Cancellation Successful",
+          description:
+            "Your trip cancellation has been processed. Please refer to your email for further information regarding your refund.",
+          variant: "default",
+        });
+      },
+    });
+  // check to see if the property is elgible for full refund or partial refund
+  const amountWithoutProcessingFees = Math.round(
+    Math.round((totalPriceAfterFees - 3) / 1.029),
+  );
+  console.log(partialRefundPercentage);
+  const totalRefundAmount =
+    partialRefundPercentage !== 1
+      ? amountWithoutProcessingFees * partialRefundPercentage
+      : amountWithoutProcessingFees;
   //form logic
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -43,10 +72,20 @@ export default function TripCancellationOrPartialRefund({
       tripId: tripId,
       reason: "",
       cancelledAt: new Date(),
+      refundAmount: totalRefundAmount,
     },
   });
+
+  async function onSubmit(data: z.infer<typeof formSchema>) {
+    await cancelTrip({
+      tripId: data.tripId,
+      reason: data.reason,
+      refundAmount: totalRefundAmount,
+    });
+    return;
+  }
   return (
-    <div className="flex flex-col gap-y-8">
+    <div className="flex flex-col gap-y-5">
       <h1 className="text-center text-2xl font-bold"> Cancel Your Trip </h1>
       {data && (
         <div className="w-full">
@@ -125,28 +164,77 @@ export default function TripCancellationOrPartialRefund({
           </div>
         </div>
       )}
+
+      {/* <___________PARTIAL REFUNDS_________> */}
+      <div>{partialRefundPercentage !== 1 && <div>{description}</div>}</div>
+      {/* <___________REFUND Breakdown_________> */}
+      <Card className="text-sm">
+        <CardHeader>
+          <h2 className="text-center font-semibold">Refund Breakdown</h2>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-row justify-between">
+            <p>Original Trip Cost </p>{" "}
+            <p>${(totalPriceAfterFees / 100).toFixed(2)}</p>
+          </div>
+          <div className="flex flex-row justify-between">
+            <p>Processing Fee </p>{" "}
+            <p>
+              $
+              {(
+                (totalPriceAfterFees - amountWithoutProcessingFees) /
+                100
+              ).toFixed(2)}
+            </p>
+          </div>
+          {partialRefundPercentage !== 1 && (
+            <div className="flex flex-row justify-between">
+              <p>Cancellation Policy </p>{" "}
+              <p>{partialRefundPercentage * 100}% Refund</p>
+            </div>
+          )}
+
+          <Separator className="my-2" />
+          <div className="font-semi flex flex-row justify-between">
+            <p>Total Refund Amount </p>{" "}
+            <p>${(totalRefundAmount / 100).toFixed(2)}</p>
+          </div>
+        </CardContent>
+      </Card>
       <Form {...form}>
-        <form className="flex flex-col gap-y-2">
+        <form
+          className="flex flex-col gap-y-2"
+          onSubmit={form.handleSubmit(onSubmit)}
+        >
           <FormLabel className="font-semibold text-black">
-            Reason for Cancellation (Optional)
+            Reason for Cancellation
           </FormLabel>
           <FormField
             control={form.control}
             name="reason"
             render={({ field }) => (
-              <FormControl>
-                <Textarea
-                  {...field}
-                  placeholder="Briefly explain why you need to cancel (optional)"
-                />
-              </FormControl>
+              <FormItem>
+                <FormControl>
+                  <Textarea
+                    {...field}
+                    placeholder="Briefly explain why you need to cancel"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
             )}
           />
+          <FormMessage />
           <FormDescription>
             Please note: This action cannot be undone.{" "}
           </FormDescription>
-          <Button type="submit" variant="destructive" className="self-end">
-            Cancel Trip
+          <Button
+            type="submit"
+            variant="destructive"
+            className="self-end"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Cancelling ..." : "Cancel Trip"}
           </Button>
         </form>
       </Form>

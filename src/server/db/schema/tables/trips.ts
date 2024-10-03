@@ -41,7 +41,7 @@ export const trips = pgTable(
     checkIn: date("check_in", { mode: "date" }).notNull(),
     checkOut: date("check_out", { mode: "date" }).notNull(),
     numGuests: integer("num_guests").notNull(),
-    totalPriceAfterFees: integer("total_price_after_fees").default(0), // in cents
+    totalPriceAfterFees: integer("total_price_after_fees").default(0).notNull(), // in cents
 
     paymentIntentId: varchar("payment_intent_id"),
     checkoutSessionId: varchar("checkout_session_id"),
