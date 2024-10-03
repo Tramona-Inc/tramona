@@ -120,7 +120,11 @@ function Questions() {
         Please look through our host FAQ video library. We specifically made it
         to answer any and all questions a host might have.
       </p>
-      <Button size="lg">Host FAQ Library</Button>
+      <div>
+        <Link href="/faq">
+          <Button size="lg">FAQ Page</Button>
+        </Link>
+      </div>
     </section>
   );
 }
