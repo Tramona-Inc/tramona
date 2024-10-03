@@ -26,7 +26,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function Page() {
   const [isEditing, setIsEditing] = useState(false);
@@ -71,7 +76,10 @@ export default function Page() {
   };
 
   const handleCancelInvite = async (email: string) => {
-    const res = await cancelInviteMutation.mutateAsync({ email, hostTeamId: curTeam!.id });
+    const res = await cancelInviteMutation.mutateAsync({
+      email,
+      hostTeamId: curTeam!.id,
+    });
     switch (res.status) {
       case "invite canceled":
         toast({
@@ -164,6 +172,8 @@ function TeamMember({
   isEditing: boolean;
   onRemove: () => void;
 }>) {
+  const [showRemoveConfirmation, setShowRemoveConfirmation] = useState(false);
+
   return (
     <div className="flex items-center gap-4 py-2">
       <UserAvatar
@@ -187,25 +197,42 @@ function TeamMember({
       </div>
       {children}
       {isEditing && !isYou && !isOwner && (
-
         <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className="hover:bg-transparent">
-          <Ellipsis />
-        </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent side="bottom" align="center">
-          <DropdownMenuItem>
-            {/* <EditIcon /> */}
-            Edit
-          </DropdownMenuItem>
-          <DropdownMenuItem red onClick={onRemove}>
-            {/* <EyeOffIcon /> */}
-            Unlist
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="sm" className="hover:bg-transparent">
+              <Ellipsis />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent side="bottom" align="center">
+            <DropdownMenuItem>Change role</DropdownMenuItem>
+            <DropdownMenuItem red onClick={() => setShowRemoveConfirmation(true)}>
+              Remove
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       )}
+
+      <AlertDialog
+        open={showRemoveConfirmation}
+        onOpenChange={setShowRemoveConfirmation}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Team Member</AlertDialogTitle>
+            <AlertDialogDescription>
+              {`Are you sure you want to remove this member?`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowRemoveConfirmation(false)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={onRemove}>
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
