@@ -21,7 +21,6 @@ export default function Referral() {
     if (!open) {
       try {
         if (cohostInviteId) {
-          // void router.push(`/onboarding/cohost?inviteId=${cohostInviteId}`);
           void router.push(`/cohost-invite/${cohostInviteId}`);
         } else {
           void router.push("/");

@@ -1,14 +1,18 @@
 import {
+  conversationParticipants,
+  conversations,
   hostProfiles,
   hostTeamInvites,
   hostTeamMembers,
   hostTeams,
+  messages,
   users,
 } from "@/server/db/schema";
+import { db } from "@/server/db";
 import { getHostTeamOwnerId, sendEmail } from "@/server/server-utils";
 import { TRPCError } from "@trpc/server";
 import { add, subMinutes } from "date-fns";
-import { and, eq, gt } from "drizzle-orm";
+import { and, eq, gt, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import {
   createTRPCRouter,
@@ -16,6 +20,136 @@ import {
   roleRestrictedProcedure,
 } from "../trpc";
 import HostTeamInviteEmail from "packages/transactional/emails/HostTeamInviteEmail";
+
+export async function handlePendingInviteMessages(email: string) {
+  const pendingInvites = await db.query.hostTeamInvites.findMany({
+    where: eq(hostTeamInvites.inviteeEmail, email),
+    with: {
+      hostTeam: {
+        columns: { name: true },
+        with: { owner: { columns: { id: true } } },
+      },
+    },
+  });
+
+  for (const invite of pendingInvites) {
+    const conversationId = await createOrGetConversation(
+      email,
+      invite.hostTeam.owner.id,
+    );
+    if (conversationId) {
+      await sendInviteMessage(
+        conversationId,
+        invite.hostTeam.name,
+        false,
+        invite.hostTeam.owner.id,
+      );
+    }
+  }
+}
+
+async function createOrGetConversation(inviteeEmail: string, hostId: string) {
+  const inviteeUser = await db.query.users.findFirst({
+    where: eq(users.email, inviteeEmail),
+    columns: { id: true },
+  });
+
+  if (inviteeUser) {
+    const existingConversation = await db.query.conversations.findFirst({
+      where: eq(
+        conversations.id,
+        db
+          .select({ conversationId: conversationParticipants.conversationId })
+          .from(conversationParticipants)
+          .where(
+            or(
+              eq(conversationParticipants.userId, inviteeUser.id),
+              eq(conversationParticipants.userId, hostId)
+            )
+          )
+          .groupBy(conversationParticipants.conversationId)
+          .having(sql`count(*) = 2`)
+          .limit(1)
+      ),
+      with: {
+        participants: true,
+      },
+    });
+
+    if (existingConversation) {
+      return existingConversation.id;
+    }
+
+    const newConversation = await db
+      .insert(conversations)
+      .values({})
+      .returning({ id: conversations.id });
+
+    if (!newConversation[0]) {
+      throw new Error("Failed to create new conversation");
+    }
+
+    await db.insert(conversationParticipants).values([
+      { conversationId: newConversation[0].id, userId: inviteeUser.id },
+      { conversationId: newConversation[0].id, userId: hostId },
+    ]);
+
+    return newConversation[0].id;
+  }
+
+  return null;
+}
+
+async function sendInviteMessage(
+  conversationId: string | null,
+  hostTeamName: string,
+  isResend: boolean,
+  hostId: string,
+) {
+  if (!conversationId) return;
+
+  const messageContent = isResend
+    ? `You have been re-invited to join ${hostTeamName}'s host team. Please check your email for the invitation link.`
+    : `You have been invited to join ${hostTeamName}'s host team. Please check your email for the invitation link.`;
+
+  await db.insert(messages).values({
+    conversationId,
+    message: messageContent,
+    userId: hostId,
+  });
+}
+
+async function sendAcceptMessage(
+  conversationId: string | null,
+  hostTeamName: string,
+  userId: string
+) {
+  if (!conversationId) return;
+
+  const messageContent = `Invitation to join ${hostTeamName}'s host team accepted.`;
+
+  await db.insert(messages).values({
+    conversationId,
+    message: messageContent,
+    userId: userId,
+  });
+}
+
+async function sendDeclineMessage(
+  conversationId: string | null,
+  hostTeamName: string,
+  userId: string
+) {
+  if (!conversationId) return;
+
+  const messageContent = `Invitation to join ${hostTeamName}'s host team declined.`;
+
+  await db.insert(messages).values({
+    conversationId,
+    message: messageContent,
+    userId: userId,
+  });
+}
 
 export const hostTeamsRouter = createTRPCRouter({
   inviteUserByEmail: protectedProcedure
@@ -85,6 +219,17 @@ export const hostTeamsRouter = createTRPCRouter({
       //     expiresAt: add(new Date(), { hours: 24 }),
       //   },
       // });
+
+      const conversationId = await createOrGetConversation(
+        input.email,
+        ctx.user.id,
+      );
+      await sendInviteMessage(
+        conversationId,
+        hostTeam.name,
+        false,
+        ctx.user.id,
+      );
 
       await sendEmail({
         to: input.email,
@@ -218,6 +363,12 @@ export const hostTeamsRouter = createTRPCRouter({
             eq(hostTeamInvites.inviteeEmail, input.email),
           ),
         );
+
+      const conversationId = await createOrGetConversation(
+        input.email,
+        ctx.user.id,
+      );
+      await sendInviteMessage(conversationId, hostTeam.name, true, ctx.user.id);
 
       await sendEmail({
         to: input.email,
@@ -582,6 +733,13 @@ export const hostTeamsRouter = createTRPCRouter({
               id: true,
               name: true,
             },
+            with: {
+              owner: {
+                columns: {
+                  id: true,
+                },
+              },
+            },
           },
         },
       });
@@ -621,10 +779,69 @@ export const hostTeamsRouter = createTRPCRouter({
         .delete(hostTeamInvites)
         .where(eq(hostTeamInvites.id, input.cohostInviteId));
 
+      const conversationId = await createOrGetConversation(
+        ctx.user.email,
+        invite.hostTeam.owner.id,
+      );
+      await sendAcceptMessage(
+        conversationId,
+        invite.hostTeam.name,
+        ctx.user.id,
+      );
+
       return {
         status: "joined team",
         hostTeamId: invite.hostTeam.id,
         hostTeamName: invite.hostTeam.name,
       } as const;
+    }),
+
+  declineHostTeamInvite: protectedProcedure
+    .input(z.object({ cohostInviteId: z.string() }))
+    .mutation(async ({ input, ctx }) => {
+      const invite = await ctx.db.query.hostTeamInvites.findFirst({
+        where: and(
+          eq(hostTeamInvites.id, input.cohostInviteId),
+          eq(hostTeamInvites.inviteeEmail, ctx.user.email),
+        ),
+        with: {
+          hostTeam: {
+            columns: {
+              id: true,
+              name: true,
+            },
+            with: {
+              owner: {
+                columns: {
+                  id: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (!invite) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Invite not found or not intended for this user",
+        });
+      }
+
+      await ctx.db
+        .delete(hostTeamInvites)
+        .where(eq(hostTeamInvites.id, input.cohostInviteId));
+
+      const conversationId = await createOrGetConversation(
+        ctx.user.email,
+        invite.hostTeam.owner.id,
+      );
+      await sendDeclineMessage(
+        conversationId,
+        invite.hostTeam.name,
+        ctx.user.id,
+      );
+
+      return { status: "invite declined" } as const;
     }),
 });

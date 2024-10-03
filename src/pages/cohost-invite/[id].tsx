@@ -8,12 +8,15 @@ import { toast } from "@/components/ui/use-toast";
 
 export default function CohostInvite() {
   const router = useRouter();
-  const setCohostInviteId = useCohostInviteStore((state) => state.setCohostInviteId);
+  const setCohostInviteId = useCohostInviteStore(
+    (state) => state.setCohostInviteId,
+  );
   const cohostInviteId = router.query.id as string;
 
   const { data: session, status } = useSession();
 
-  const { mutate: validateCohostInvite } = api.hostTeams.validateCohostInvite.useMutation();
+  const { mutate: validateCohostInvite } =
+    api.hostTeams.validateCohostInvite.useMutation();
 
   useEffect(() => {
     if (cohostInviteId) {
@@ -22,27 +25,32 @@ export default function CohostInvite() {
   }, [cohostInviteId, setCohostInviteId]);
 
   useEffect(() => {
-    if (status === 'authenticated' && cohostInviteId) {
-      validateCohostInvite(
-        { cohostInviteId },
-        {
-          onSuccess: () => {
-            // Invite is valid, redirect to cohost onboarding or referral page
-            void router.push('/cohost-onboarding');  // Adjust this path as needed
+    if (status === "authenticated" && cohostInviteId) {
+      const timer = setTimeout(() => {
+        validateCohostInvite(
+          { cohostInviteId },
+          {
+            onSuccess: () => {
+              void router.push("/cohost-onboarding");
+            },
+            onError: (error) => {
+              toast({
+                title: "Invalid or expired invite",
+                description: error.message,
+                variant: "destructive",
+              });
+              void router.push("/");
+            },
           },
-          onError: (error) => {
-            toast({ 
-              title: "Invalid or expired invite", 
-              description: error.message,
-              variant: "destructive"
-            });
-            void router.push('/dashboard');
-          },
-        }
+        );
+      }, 1000);
+
+      return () => clearTimeout(timer);
+    } else if (status === "unauthenticated") {
+      const currentUrl = `/cohost-invite/${cohostInviteId}`;
+      void router.push(
+        `/auth/signin?callbackUrl=${encodeURIComponent(currentUrl)}`,
       );
-    } else if (status === 'unauthenticated') {
-      // If user is not authenticated, redirect to sign in page
-      void router.push(`/auth/signin?callbackUrl=${encodeURIComponent(`/cohost-invite/${cohostInviteId}`)}`);
     }
   }, [status, cohostInviteId, validateCohostInvite, router]);
 
@@ -69,7 +77,9 @@ export default function CohostInvite() {
         }}
       />
       <div className="grid h-screen place-items-center">
-        <h1 className="text-lg text-muted-foreground">Processing cohost invitation...</h1>
+        <h1 className="text-lg text-muted-foreground">
+          Processing cohost invitation...
+        </h1>
       </div>
     </div>
   );

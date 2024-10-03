@@ -23,7 +23,7 @@ export default function HostTeamInviteEmail({
         <div className="text-brand px-6 text-left text-base">
           <Text className="text-brand text-left">
             Hello, {name ?? email} invited you to their host team on Tramona!
-            Sign up at <Link href={inviteUrl}>{`${inviteUrl}`}</Link> with this email to be
+            Sign up or login at <Link href={inviteUrl}>{`${inviteUrl}`}</Link> with this email to be
             added to the team.
           </Text>
         </div>
