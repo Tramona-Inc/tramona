@@ -72,7 +72,7 @@ export default function Page() {
         });
         break;
     }
-    refetchInvites();
+    await refetchInvites();
   };
 
   const handleCancelInvite = async (email: string) => {
@@ -88,7 +88,7 @@ export default function Page() {
         });
         break;
     }
-    refetchInvites();
+    await refetchInvites();
   };
 
   const handleRemoveMember = async (userId: string) => {
@@ -96,7 +96,7 @@ export default function Page() {
       memberId: userId,
       hostTeamId: curTeam!.id,
     });
-    refetchMembers();
+    await refetchMembers();
   };
 
   if (!session) return null;
@@ -255,9 +255,6 @@ function PendingInvite({
       <UserAvatar name={email} email={email} />
       <div className="flex-1 -space-y-1 font-medium">
         <div>{email}</div>
-        <p className="text-sm text-muted-foreground">
-          {/* Invited on {createdAt.toLocaleDateString()} */}
-        </p>
       </div>
       {!isEditing && (
         <Badge variant="secondary" size="sm">

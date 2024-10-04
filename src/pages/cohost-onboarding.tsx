@@ -6,17 +6,15 @@ export default function CohostOnboarding() {
   const progress = useCohostOnboarding((state) => state.progress);
   const setProgress = useCohostOnboarding((state) => state.setProgress);
 
-  function onPressNext() {
-    setProgress(progress + 1);
-  }
+  // function onPressNext() {
+  //   setProgress(progress + 1);
+  // }
 
   return (
     <OnboardingLayout>
       {progress === 0 && <CohostOnboarding1 />}
       {/* {progress === 8 && <Onboarding9 onPressNext={onPressNext}/>}
-      {progress === 9 && <Onboarding10 />}
-      {progress === 10 && <OnboardingLinkInput />}
-      {progress === 11 && <Onboarding11 />} */} */}
+      {progress === 11 && <Onboarding11 />} */}
     </OnboardingLayout>
   );
 }

@@ -14,7 +14,7 @@ export default function CohostInviteAcceptance() {
   const [hostTeamId, setHostTeamId] = useState<number | null>(null);
   const [hostTeamName, setHostTeamName] = useState<string | null>(null);
 
-  const { data: userProfile, isLoading: isLoadingProfile } = api.users.getUser.useQuery();
+  const { isLoading: isLoadingProfile } = api.users.getUser.useQuery();
 
   const { mutate: validateCohostInvite } = api.hostTeams.validateCohostInvite.useMutation({
     onSuccess: (data) => {

@@ -13,7 +13,7 @@ export default function CohostInvite() {
   );
   const cohostInviteId = router.query.id as string;
 
-  const { data: session, status } = useSession();
+  const { status } = useSession();
 
   const { mutate: validateCohostInvite } =
     api.hostTeams.validateCohostInvite.useMutation();
