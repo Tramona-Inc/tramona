@@ -31,7 +31,7 @@ import { reviews } from "./tables/reviews";
 import { fillerBookings, fillerOffers } from "./tables/feedFiller";
 import { linkInputProperties } from "./tables/linkInputProperties";
 import { rejectedRequests } from "./tables/rejectedRequests";
-import { tripPayments, refundedPayments } from "./tables/payments";
+import { tripCheckouts, refundedPayments } from "./tables/payments";
 
 export const usersRelations = relations(users, ({ one, many }) => ({
   accounts: many(accounts),
@@ -390,7 +390,7 @@ export const tripsRelations = relations(trips, ({ one, many }) => ({
   superhogActions: many(superhogActionOnTrips),
   tripCancellations: many(tripCancellations),
   tripDamages: many(tripDamages),
-  tripPayments: many(tripPayments),
+  tripCheckouts: many(tripCheckouts),
   hostReferralDiscounts: many(hostReferralDiscounts),
 }));
 
@@ -403,9 +403,9 @@ export const tripsCancellationRelations = relations(
     }),
   }),
 );
-export const tripPaymentsRelations = relations(tripPayments, ({ one }) => ({
+export const tripCheckoutsRelations = relations(tripCheckouts, ({ one }) => ({
   trips: one(trips, {
-    fields: [tripPayments.tripId],
+    fields: [tripCheckouts.id],
     references: [trips.id],
   }),
 }));

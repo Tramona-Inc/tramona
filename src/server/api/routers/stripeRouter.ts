@@ -291,7 +291,6 @@ export const stripeRouter = createTRPCRouter({
         requestId: z.number().nullable(),
         name: z.string(),
         price: z.number(), // Total price included tramona fee
-        tramonaServiceFee: z.number(),
         description: z.string(),
         cancelUrl: z.string(),
         images: z.array(z.string().url()),
@@ -299,6 +298,11 @@ export const stripeRouter = createTRPCRouter({
         phoneNumber: z.string(),
         totalSavings: z.number(),
         hostStripeId: z.string().nullable(),
+        travelerOfferedPriceBeforeFees: z.number(),
+        taxesPaid: z.number(),
+        taxesPercentage: z.number(),
+        stripeTransactionFee: z.number(),
+        superhogPaid: z.number(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -339,12 +343,16 @@ export const stripeRouter = createTRPCRouter({
         property_id: input.propertyId,
         request_id: input.requestId,
         price: input.price, // Total price included tramona fee
-        tramonaServiceFee: input.tramonaServiceFee,
         total_savings: input.totalSavings,
         confirmed_at: currentDate.toISOString(),
         phone_number: input.phoneNumber,
         host_stripe_id: input.hostStripeId ?? "",
         stripe_customer_id: stripeCustomerId,
+        traveler_offered_price_BeforeFees: input.travelerOfferedPriceBeforeFees,
+        taxes_paid: input.taxesPaid,
+        tax_percentage: input.taxesPercentage,
+        stripe_transaction_fee: input.stripeTransactionFee,
+        superhog_paid: input.superhogPaid,
       };
 
       const options: Stripe.PaymentIntentCreateParams = {

@@ -2,7 +2,14 @@ import { env } from "@/env";
 import { createConversationWithOfferAfterBooking } from "@/utils/webhook-functions/message-utils";
 import { stripe } from "@/server/api/routers/stripeRouter";
 import { db } from "@/server/db";
-import { offers, requests, properties, trips, users } from "@/server/db/schema";
+import {
+  offers,
+  requests,
+  properties,
+  trips,
+  tripCheckouts,
+  users,
+} from "@/server/db/schema";
 import { eq } from "drizzle-orm";
 import { buffer } from "micro";
 import { type NextApiRequest, type NextApiResponse } from "next";
@@ -18,7 +25,6 @@ import {
   validateHostDiscountReferral,
 } from "@/utils/webhook-functions/referral-utils";
 import { createSetupIntent } from "@/utils/webhook-functions/stripe-utils";
-import { columns } from "../../components/admin/view-recent-host/table/columns";
 import { sendSlackMessage } from "@/server/slack";
 import { formatDateMonthDay } from "@/utils/utils";
 
@@ -152,8 +158,41 @@ export default async function webhook(
                     paymentIntentSucceeded.payment_intent?.toString() ?? "",
                   totalPriceAfterFees: paymentIntentSucceeded.amount,
                 })
-                .returning();
+                .returning()
+                .then((res) => res[0]!);
 
+              //<-------- create tripPayment here --------->
+              const currentTripPayment = await db
+                .insert(tripCheckouts)
+                .values({
+                  totalTripAmount: paymentIntentSucceeded.amount,
+                  travelerOfferedPriceBeforeFees: parseInt(
+                    paymentIntentSucceeded.metadata
+                      .travelerOfferedPriceBeforeFees!,
+                  ),
+                  taxesPaid: parseInt(
+                    paymentIntentSucceeded.metadata.taxes_paid!,
+                  ),
+                  taxPercentage: paymentIntentSucceeded.metadata.taxPercentage!,
+                  superhogPaid: parseInt(
+                    paymentIntentSucceeded.metadata.superhogPaid!,
+                  ),
+                  stripeTransactionFee: parseInt(
+                    paymentIntentSucceeded.metadata.stripeTransactionFee!,
+                  ),
+                  paymentIntentId:
+                    paymentIntentSucceeded.payment_intent?.toString() ?? "",
+                })
+                .returning()
+                .then((res) => res[0]!);
+
+              await db
+                .update(trips)
+                .set({
+                  tripCheckouts: currentTripPayment.id,
+                })
+                .where(eq(trips.id, currentTrip.id));
+              console.log(currentTrip);
               //superhog reservation
 
               //<___creating a superhog reservation only if does not exist__>
@@ -170,7 +209,7 @@ export default async function webhook(
                     paymentIntentSucceeded.payment_intent?.toString() ?? "",
                   propertyId: offer.propertyId,
                   userId: user!.id,
-                  trip: currentTrip[0]!,
+                  trip: currentTrip,
                 }); //creating a superhog reservation
               } else {
                 if (isDirectListingCharge) {
@@ -178,7 +217,7 @@ export default async function webhook(
                     paymentIntentId:
                       paymentIntentSucceeded.payment_intent?.toString() ?? "",
                     propertyId: offer.propertyId,
-                    trip: currentTrip[0]!,
+                    trip: currentTrip,
                   });
                 } else {
                   console.log("Superhog reservation already exists");
@@ -189,7 +228,7 @@ export default async function webhook(
               //send email and whatsup (whatsup is not implemented yet)
               console.log("Sending email and whatsup");
               await sendEmailAndWhatsupConfirmation({
-                trip: currentTrip[0]!,
+                trip: currentTrip,
                 user: user!,
                 offer: offer,
                 property: currentProperty!,

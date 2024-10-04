@@ -17,6 +17,7 @@ import { type StripeElementsOptions } from "@stripe/stripe-js";
 import Spinner from "../_common/Spinner";
 
 import { useToast } from "../ui/use-toast";
+import { getTravelerOfferedPrice } from "../../utils/utils";
 const CustomStripeCheckout = ({
   offer: { property, ...offer },
 }: {
@@ -77,7 +78,6 @@ const CustomStripeCheckout = ({
         requestId: offer.requestId ?? null,
         name: property.name,
         price: finalTotal,
-        tramonaServiceFee: serviceFee,
         description: "From: " + formatDateRange(offer.checkIn, offer.checkOut),
         cancelUrl: pathname,
         images: property.imageUrls,
@@ -86,6 +86,11 @@ const CustomStripeCheckout = ({
         phoneNumber: session.data.user.phoneNumber ?? "",
         userId: session.data.user.id,
         hostStripeId: propertyHostUserAccount?.stripeConnectId ?? "",
+        travelerOfferedPriceBeforeFees: offer.travelerOfferedPrice,
+        superhogPaid: 0,
+        taxesPaid: 0,
+        taxesPercentage: 0,
+        stripeTransactionFee: 0,
       });
       return response;
     } catch (error) {
@@ -175,7 +180,9 @@ const CustomStripeCheckout = ({
     <div className="w-full">
       {checkoutReady && options?.clientSecret ? (
         <Elements stripe={stripePromise} options={options}>
-          <StripeCheckoutForm originalListingPlatform={property.originalListingPlatform} />
+          <StripeCheckoutForm
+            originalListingPlatform={property.originalListingPlatform}
+          />
         </Elements>
       ) : (
         <div className="h-48">

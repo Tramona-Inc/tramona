@@ -15,6 +15,7 @@ import { superhogRequests } from "./superhogRequests";
 import { bids } from "./bids";
 import { properties } from "./properties";
 import { z } from "zod";
+import { tripCheckouts } from "./payments";
 
 const TRIP_STATUS = ["Booked", "Needs attention", "Cancelled"] as const;
 export type TripStatus = (typeof TRIP_STATUS)[number];
@@ -54,6 +55,10 @@ export const trips = pgTable(
       () => superhogRequests.id,
     ),
     tripsStatus: tripStatusEnum("trip_status").default("Booked"),
+    tripCheckouts: integer("tripCheckoutId").references(
+      () => tripCheckouts.id,
+      { onDelete: "cascade" },
+    ),
   },
   (t) => ({
     groupIdIdx: index().on(t.groupId),
