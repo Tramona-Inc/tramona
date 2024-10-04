@@ -27,7 +27,6 @@ import {
 import { createSetupIntent } from "@/utils/webhook-functions/stripe-utils";
 import { sendSlackMessage } from "@/server/slack";
 import { formatDateMonthDay } from "@/utils/utils";
-
 // ! Necessary for stripe
 export const config = {
   api: {
@@ -125,7 +124,6 @@ export default async function webhook(
                 parseInt(paymentIntentSucceeded.metadata.offer_id!),
               ),
             });
-            console.log(offer);
 
             const currentProperty = await db.query.properties.findFirst({
               where: eq(
@@ -162,26 +160,36 @@ export default async function webhook(
                 .then((res) => res[0]!);
 
               //<-------- create tripPayment here --------->
+              console.log(
+                "about to make tripPayment",
+                paymentIntentSucceeded.metadata.total_savings!,
+                parseInt(paymentIntentSucceeded.metadata.total_savings!),
+              );
               const currentTripPayment = await db
                 .insert(tripCheckouts)
                 .values({
                   totalTripAmount: paymentIntentSucceeded.amount,
                   travelerOfferedPriceBeforeFees: parseInt(
                     paymentIntentSucceeded.metadata
-                      .travelerOfferedPriceBeforeFees!,
+                      .traveler_offered_price_before_fees!,
                   ),
                   taxesPaid: parseInt(
                     paymentIntentSucceeded.metadata.taxes_paid!,
                   ),
-                  taxPercentage: paymentIntentSucceeded.metadata.taxPercentage!,
+                  taxPercentage: parseFloat(
+                    paymentIntentSucceeded.metadata.tax_percentage!,
+                  ),
                   superhogPaid: parseInt(
-                    paymentIntentSucceeded.metadata.superhogPaid!,
+                    paymentIntentSucceeded.metadata.superhog_paid!,
                   ),
                   stripeTransactionFee: parseInt(
-                    paymentIntentSucceeded.metadata.stripeTransactionFee!,
+                    paymentIntentSucceeded.metadata.stripe_transaction_fee!,
                   ),
                   paymentIntentId:
                     paymentIntentSucceeded.payment_intent?.toString() ?? "",
+                  totalSavings: parseInt(
+                    paymentIntentSucceeded.metadata.total_savings!,
+                  ),
                 })
                 .returning()
                 .then((res) => res[0]!);
@@ -189,11 +197,9 @@ export default async function webhook(
               await db
                 .update(trips)
                 .set({
-                  tripCheckouts: currentTripPayment.id,
+                  tripCheckoutId: currentTripPayment.id,
                 })
                 .where(eq(trips.id, currentTrip.id));
-              console.log(currentTrip);
-              //superhog reservation
 
               //<___creating a superhog reservation only if does not exist__>
 
@@ -266,103 +272,86 @@ export default async function webhook(
             }
           }
         }
-
-        // const propertyID = parseInt(
-        //   paymentIntentSucceeded.metadata.property_id!,
-        //   10,
-        // );
-        // const requestID = parseInt(
-        //   paymentIntentSucceeded.metadata.request_id!,
-        // );
-        // const property = await ({
-        //   where: eq(properties.id, propertyID),
-        // });
-        // const request = await db.query.requests.findFirst({
-        //   where: eq(requests.id, requestID),
-        // });
-        // const offer = await db.query.offers.findFirst({
-        //   where: eq(offers.requestId, requestID),
-        // });
-
-        // const bidID = parseInt(paymentIntentSucceeded.metadata.bid_id!);
-        // const bid = await db.query.bids.findFirst({
-        //   where: eq(bids.id, bidID),
-        // });
-        // TODO
-        // Add two two users to conversation
-        // void addTwoUserToConversation(
-        //   paymentIntentSucceeded.metadata.user_id!,
-        //   paymentIntentSucceeded.metadata.host_id!,
-        // );
-
         break;
 
       case "checkout.session.completed":
         const checkoutSessionCompleted = event.data.object;
 
-        // * Make sure to check listing_id isnt' null
-        if (checkoutSessionCompleted.metadata) {
-          const listing_id = parseInt(
-            checkoutSessionCompleted.metadata.listing_id!,
-          );
+        // // * Make sure to check listing_id isnt' null
+        // if (checkoutSessionCompleted.metadata) {
+        //   const listing_id = parseInt(
+        //     checkoutSessionCompleted.metadata.listing_id!,
+        //   );
 
-          await db
-            .update(trips)
-            .set({
-              checkoutSessionId: checkoutSessionCompleted.id,
-            })
-            .where(eq(offers.id, listing_id));
-        } else {
-          // console.error("Metadata or listing_id is null or undefined");
-        }
+        //   await db
+        //     .update(tripCheckouts)
+        //     .set({
+        //       checkoutSessionId: checkoutSessionCompleted.id,
+        //     })
+        //     .where(eq(offers.id, listing_id));
+        // } else {
+        //   // console.error("Metadata or listing_id is null or undefined");
+        // }
 
         break;
       case "charge.updated":
         {
           const chargeObject = event.data.object;
-          //addingt the paymentIntentId to the trips table
+          // console.log("this is the chargeObject", chargeObject);
+          // //addingt the paymentIntentId to the trips table
 
-          const isChargedBySetupIntent =
-            chargeObject.metadata.is_charged_with_setup_intent === "true"
-              ? true
-              : false;
-          if (isChargedBySetupIntent) return;
-          await db
-            .update(trips)
-            .set({
-              paymentIntentId: chargeObject.payment_intent?.toString(),
-              checkoutSessionId: chargeObject.metadata.checkout_session_id,
-              totalPriceAfterFees: chargeObject.amount,
-            })
-            .where(
-              eq(trips.offerId, parseInt(chargeObject.metadata.listing_id!)),
-            ); // setting the paymentIntentId in the trips table
+          // const isChargedBySetupIntent =
+          //   chargeObject.metadata.is_charged_with_setup_intent === "true"
+          //     ? true
+          //     : false;
+          // if (isChargedBySetupIntent) return;
+          // const curTripWithCheckout = await db
+          //   .update(trips)
+          //   .set({
+          //     paymentIntentId: chargeObject.payment_intent?.toString(),
 
-          //get the new trips
-          const trip = await db.query.trips.findFirst({
-            where: eq(
-              trips.offerId,
-              parseInt(chargeObject.metadata.listing_id!),
-            ),
-          });
-          //extract metadata from the charge object
-          const propertyId = parseInt(chargeObject.metadata.property_id!);
-          const userId = chargeObject.metadata.user_id!;
+          //     totalPriceAfterFees: chargeObject.amount,
+          //   })
+          //   .where(
+          //     eq(trips.offerId, parseInt(chargeObject.metadata.listing_id!)),
+          //   )
+          //   .returning()
+          //   .then((res) => res[0]!); // setting the paymentIntentId in the trips table
 
-          //creating a superhog reservation only if does not exist
-          const currentSuperhogReservation = await db.query.trips.findFirst({
-            where: eq(trips.superhogRequestId, superhogRequests.id),
-          });
-          if (!currentSuperhogReservation && trip) {
-            await createSuperhogReservation({
-              paymentIntentId: chargeObject.payment_intent?.toString() ?? "",
-              propertyId,
-              userId,
-              trip,
-            }); //creating a superhog reservation
-          } else {
-            console.log("Superhog reservation already exists");
-          }
+          // //update tripCheckouts table
+          // await db
+          //   .update(tripCheckouts)
+          //   .set({
+          //     checkoutSessionId: chargeObject.metadata.checkout_session_id,
+          //     paymentIntentId: chargeObject.payment_intent?.toString(),
+          //   })
+          //   .where(eq(tripCheckouts.id, curTripWithCheckout.tripCheckoutId!));
+
+          // //get the new trips
+          // const trip = await db.query.trips.findFirst({
+          //   where: eq(
+          //     trips.offerId,
+          //     parseInt(chargeObject.metadata.listing_id!),
+          //   ),
+          // });
+          // //extract metadata from the charge object
+          // const propertyId = parseInt(chargeObject.metadata.property_id!);
+          // const userId = chargeObject.metadata.user_id!;
+
+          // //creating a superhog reservation only if does not exist
+          // const currentSuperhogReservation = await db.query.trips.findFirst({
+          //   where: eq(trips.superhogRequestId, superhogRequests.id),
+          // });
+          // if (!currentSuperhogReservation && trip) {
+          //   await createSuperhogReservation({
+          //     paymentIntentId: chargeObject.payment_intent?.toString() ?? "",
+          //     propertyId,
+          //     userId,
+          //     trip,
+          //   }); //creating a superhog reservation
+          // } else {
+          //   console.log("Superhog reservation already exists");
+          // }
         }
         break;
       case "charge.dispute.created":

@@ -7,8 +7,8 @@ import {
   timestamp,
   varchar,
   pgEnum,
+  doublePrecision,
   primaryKey,
-  decimal,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { groups } from "./groups";
@@ -26,10 +26,12 @@ export const tripCheckouts = pgTable("trip_checkouts", {
     "traveler_offered_price_before_fees",
   ).notNull(),
   paymentIntentId: varchar("payment_intent_id").notNull().default(""),
+  checkoutSessionId: varchar("checkout_session_id"),
   taxesPaid: integer("taxes_paid").notNull().default(0),
-  taxPercentage: decimal("tax_percentage", { precision: 3, scale: 1 }), //will save as percentage ex. 2.9  = 2.9%
+  taxPercentage: doublePrecision("tax_percentage"), //will save as percentage ex. 2.9  = 2.9%
   superhogPaid: integer("superhog_paid").notNull().default(0),
   stripeTransactionFee: integer("stripe_transaction_fee").notNull().default(0),
+  totalSavings: integer("total_savings").default(0).notNull(),
 });
 
 export type TripCheckouts = typeof tripCheckouts.$inferSelect;
@@ -42,7 +44,7 @@ export const refundedPayments = pgTable("refunded_payments", {
   id: serial("id").primaryKey().notNull(),
   tripId: integer("trip_id").references(() => trips.id),
   amountRefunded: integer("amount_refunded").notNull(),
-  reason: varchar("reason").default(""),
+  description: varchar("description").default(""),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),

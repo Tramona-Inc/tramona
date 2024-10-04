@@ -1,5 +1,5 @@
 import { db } from "@/server/db";
-import { trips } from "@/server/db/schema/tables/trips";
+import { trips, refundedPayments } from "@/server/db/schema";
 import { stripe, stripeWithSecretKey } from "@/server/api/routers/stripeRouter";
 import { eq } from "drizzle-orm";
 import type { Stripe } from "stripe";
@@ -72,6 +72,13 @@ export async function refundTripWithStripe({
     reason: "requested_by_customer", // Optional: Reason for the refund
     metadata: metadata,
   });
+
+  const refundedPayment = await db.insert(refundedPayments).values({
+    tripId: metadata.tripId,
+    amountRefunded: amount,
+    description: metadata.description,
+  });
+  console.log(refundedPayment);
   console.log(refund);
   return;
 }

@@ -45,7 +45,6 @@ export const trips = pgTable(
     totalPriceAfterFees: integer("total_price_after_fees").default(0).notNull(), // in cents
 
     paymentIntentId: varchar("payment_intent_id"),
-    checkoutSessionId: varchar("checkout_session_id"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -55,7 +54,7 @@ export const trips = pgTable(
       () => superhogRequests.id,
     ),
     tripsStatus: tripStatusEnum("trip_status").default("Booked"),
-    tripCheckouts: integer("tripCheckoutId").references(
+    tripCheckoutId: integer("tripCheckoutId").references(
       () => tripCheckouts.id,
       { onDelete: "cascade" },
     ),

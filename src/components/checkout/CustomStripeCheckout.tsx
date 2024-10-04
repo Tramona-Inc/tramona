@@ -81,8 +81,7 @@ const CustomStripeCheckout = ({
         description: "From: " + formatDateRange(offer.checkIn, offer.checkOut),
         cancelUrl: pathname,
         images: property.imageUrls,
-        // totalSavings: originalTotal - (total + tax), <-- check math on this
-        totalSavings: originalTotal - finalTotal,
+        totalSavings: Math.abs(originalTotal - finalTotal),
         phoneNumber: session.data.user.phoneNumber ?? "",
         userId: session.data.user.id,
         hostStripeId: propertyHostUserAccount?.stripeConnectId ?? "",

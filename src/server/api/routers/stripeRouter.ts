@@ -348,7 +348,8 @@ export const stripeRouter = createTRPCRouter({
         phone_number: input.phoneNumber,
         host_stripe_id: input.hostStripeId ?? "",
         stripe_customer_id: stripeCustomerId,
-        traveler_offered_price_BeforeFees: input.travelerOfferedPriceBeforeFees,
+        traveler_offered_price_before_fees:
+          input.travelerOfferedPriceBeforeFees,
         taxes_paid: input.taxesPaid,
         tax_percentage: input.taxesPercentage,
         stripe_transaction_fee: input.stripeTransactionFee,
