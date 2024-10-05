@@ -51,7 +51,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { sql } from "drizzle-orm";
 
 export default function HostPropertiesDetails({
   property,
@@ -178,6 +177,8 @@ export default function HostPropertiesDetails({
     setEditing(false);
   }, [propertyId]);
 
+  const { data: user } = api.users.getUser.useQuery();
+
   return (
     <div className="my-6">
       <div className="flex items-center justify-between">
@@ -281,6 +282,7 @@ export default function HostPropertiesDetails({
             setEditing={setEditing}
             onSubmit={handleFormSubmit}
             property={property}
+            disabled={user?.coHostRole !== "loose"}
           />
         </div>
       </div>

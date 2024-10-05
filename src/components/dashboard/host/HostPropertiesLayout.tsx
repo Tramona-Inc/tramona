@@ -205,11 +205,13 @@ export function HostPropertyEditBtn({
   setEditing,
   onSubmit,
   property,
+  disabled,
 }: {
   editing: boolean;
   setEditing: (editing: boolean) => void;
   onSubmit?: () => void;
   property: Property;
+  disabled?: boolean;
 }) {
   const setPropertyType = useHostOnboarding((state) => state.setPropertyType);
   const setMaxGuests = useHostOnboarding((state) => state.setMaxGuests);
@@ -312,6 +314,7 @@ export function HostPropertyEditBtn({
             className="rounded-full bg-white font-bold shadow-md sm:rounded-lg sm:border-2 sm:shadow-none"
             onClick={handleEditClick}
             type="button"
+            disabled={disabled}
           >
             <Pencil size={20} />
             Enter edit mode
