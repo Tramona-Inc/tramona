@@ -18,6 +18,13 @@ import {
   CancellationPolicyWithInternals,
   type Property,
 } from "@/server/db/schema/tables/properties";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function HostPropertiesLayout({
   children,
@@ -86,25 +93,34 @@ export default function HostPropertiesLayout({
   }
 
   const { data: properties } = api.properties.getHostProperties.useQuery();
+  const { data: user } = api.users.getUser.useQuery();
+  const { data: mainHostProperties } =
+    api.properties.getMainHostProperties.useQuery({
+      mainHostId: user?.mainHostId ?? "",
+    });
 
-  const listedProperties = properties?.filter(
-    (property) => property.propertyStatus === "Listed",
-  );
-  const archivedProperties = properties?.filter(
-    (property) => property.propertyStatus === "Archived",
-  );
-  const draftedProperties = properties?.filter(
-    (property) => property.propertyStatus === "Drafted",
-  );
+  const listedProperties = user?.mainHostId
+    ? mainHostProperties?.filter(
+        (property) => property.propertyStatus === "Listed",
+      )
+    : properties?.filter((property) => property.propertyStatus === "Listed");
+  const archivedProperties = user?.mainHostId
+    ? mainHostProperties?.filter(
+        (property) => property.propertyStatus === "Archived",
+      )
+    : properties?.filter((property) => property.propertyStatus === "Archived");
+  const draftedProperties = user?.mainHostId
+    ? mainHostProperties?.filter(
+        (property) => property.propertyStatus === "Drafted",
+      )
+    : properties?.filter((property) => property.propertyStatus === "Drafted");
 
   return (
     <div className="flex">
       <div className="sticky top-20 h-screen-minus-header-n-footer w-full overflow-auto border-r px-4 py-8 xl:w-96">
         <ScrollArea>
           <h1 className="text-3xl font-bold">Properties</h1>
-          {/* <p className="text-muted-foreground">24% currently vacant</p> */}
-          <div className="my-4">
-            {/* <NewPropertyBtn open={open} setOpen={setOpen} /> */}
+          <div className="my-4 flex gap-4">
             <Link href="/host-onboarding">
               <Button
                 variant="secondaryLight"
@@ -117,6 +133,16 @@ export default function HostPropertiesLayout({
                 New Listing
               </Button>
             </Link>
+            {/* for when user is cohosting for multiple hosts */}
+            {/* <Select>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a host" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="host-1">host 1</SelectItem>
+                <SelectItem value="host-2">host 2</SelectItem>
+              </SelectContent>
+            </Select> */}
           </div>
           <Accordion type="multiple" className="w-full">
             <AccordionItem value="listed">

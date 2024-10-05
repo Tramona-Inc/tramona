@@ -48,7 +48,10 @@ export type HostRequestsPageData = {
   city: string;
   requests: {
     request: Request & {
-      traveler: Pick<User, "firstName" | "lastName" | "name" | "image" | "location" | "about">;
+      traveler: Pick<
+        User,
+        "firstName" | "lastName" | "name" | "image" | "location" | "about"
+      >;
     };
     properties: Property[];
   }[];
@@ -500,6 +503,13 @@ export const propertiesRouter = createTRPCRouter({
         limit: input?.limit,
       });
     }),
+  getMainHostProperties: roleRestrictedProcedure(["host"])
+    .input(z.object({ mainHostId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      return await ctx.db.query.properties.findMany({
+        where: eq(properties.hostId, input.mainHostId),
+      });
+    }),
   getHostPropertiesWithRequests: roleRestrictedProcedure(["host"]).query(
     async ({ ctx }) => {
       // TODO: USE DRIZZLE relational query, then use groupby in js
@@ -537,7 +547,10 @@ export const propertiesRouter = createTRPCRouter({
         number,
         {
           request: Request & {
-            traveler: Pick<User, "firstName" | "lastName" | "name" | "image" | "location" | "about">;
+            traveler: Pick<
+              User,
+              "firstName" | "lastName" | "name" | "image" | "location" | "about"
+            >;
           };
           properties: Property[];
         }
@@ -628,14 +641,17 @@ export const propertiesRouter = createTRPCRouter({
       return { count };
     }),
 
-    updateAutoOffer: protectedProcedure
-    .input(z.object({
-      id: z.number(),
-      autoOfferEnabled: z.boolean(),
-      autoOfferDiscountTiers: z.array(discountTierSchema),
-    }))
+  updateAutoOffer: protectedProcedure
+    .input(
+      z.object({
+        id: z.number(),
+        autoOfferEnabled: z.boolean(),
+        autoOfferDiscountTiers: z.array(discountTierSchema),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
-      await ctx.db.update(properties)
+      await ctx.db
+        .update(properties)
         .set({
           autoOfferEnabled: input.autoOfferEnabled,
           autoOfferDiscountTiers: input.autoOfferDiscountTiers,
