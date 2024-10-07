@@ -30,7 +30,7 @@ import {
   CheckIcon,
 } from "lucide-react";
 import Image from "next/image";
-
+import React from "react";
 import OfferPhotos from "./OfferPhotos";
 import AmenitiesComponent from "./CategorizedAmenities";
 import PropertyAmenities from "./PropertyAmenities";
@@ -106,7 +106,7 @@ export default function PropertyPage({
   const discountPercentage = offer
     ? getOfferDiscountPercentage({
         createdAt: offer.createdAt,
-        travelerOfferedPrice: offer.totalPrice,
+        travelerOfferedPriceBeforeFees: offer.totalPrice,
         checkIn: offer.checkIn,
         checkOut: offer.checkOut,
         randomDirectListingDiscount: offer.randomDirectListingDiscount,
@@ -252,7 +252,7 @@ export default function PropertyPage({
                   <PropertyCompareBtn
                     checkIn={offer.checkIn}
                     checkOut={offer.checkOut}
-                    numGuests={offer.request?.numGuests ?? 1}
+                    numGuests={property.maxNumGuests ?? 1}
                     originalListing={originalListing}
                   />
                 </div>
@@ -313,7 +313,7 @@ export default function PropertyPage({
             <h2 className="subheading border-t pb-2 pt-4">
               About this property
             </h2>
-            <div className="z-20 max-w-2xl text-zinc-700">
+            <div className="z-20 px-1 text-zinc-700">
               <div ref={aboutRef} className="line-clamp-5 break-words">
                 {property.about}
               </div>
@@ -473,13 +473,13 @@ export default function PropertyPage({
             <h2 className="subheading border-t pb-2 pt-4">House rules</h2>
             <div className="overflow-x-auto">
               <div className="flex gap-4">
-                {property.checkInTime !== null && (
+                {property.checkInTime && (
                   <CheckInTimeRule checkInTime={property.checkInTime} />
                 )}
-                {property.checkOutTime !== null && (
+                {property.checkOutTime && (
                   <CheckOutTimeRule checkOutTime={property.checkOutTime} />
                 )}
-                {property.petsAllowed !== null && (
+                {property.petsAllowed && (
                   <PetsRule petsAllowed={property.petsAllowed} />
                 )}
                 {property.smokingAllowed !== null && (
@@ -488,14 +488,14 @@ export default function PropertyPage({
               </div>
             </div>
             {property.cancellationPolicy !== null && (
-              <>
+              <div>
                 <h3 className="pb-2 pt-4 font-bold">Cancellation Policy</h3>
                 <p>
                   {getCancellationPolicyDescription(
                     property.cancellationPolicy,
                   )}
                 </p>
-              </>
+              </div>
             )}
           </section>
 

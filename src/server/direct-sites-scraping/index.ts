@@ -377,7 +377,7 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
               checkOut: options.checkOut,
               totalPrice: originalTotalPrice,
               hostPayout: originalTotalPrice,
-              travelerOfferedPrice: Math.ceil(
+              travelerOfferedPriceBeforeFees: Math.ceil(
                 originalTotalPrice * DIRECTLISTINGMARKUP,
               ),
               scrapeUrl: listing.scrapeUrl,
@@ -449,7 +449,7 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
               checkOut: options.checkOut,
               totalPrice: originalTotalPrice,
               hostPayout: originalTotalPrice,
-              travelerOfferedPrice: originalTotalPrice,
+              travelerOfferedPriceBeforeFees: originalTotalPrice,
               scrapeUrl: listing.scrapeUrl,
               isAvailableOnOriginalSite: true,
               availabilityCheckedAt: new Date(),

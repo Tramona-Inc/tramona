@@ -103,7 +103,7 @@ export default function HostConfirmRequestDialog({
                 hostMarkup: HOST_MARKUP,
                 numNights,
               }) * 100,
-            travelerOfferedPrice:
+            travelerOfferedPriceBeforeFees:
               getTravelerOfferedPrice({
                 propertyPrice: parseFloat(propertyPrices[property.id] ?? "0"),
                 travelerMarkup: TRAVELER__MARKUP,

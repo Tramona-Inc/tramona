@@ -15,6 +15,7 @@ import {
   properties,
   referralCodes,
   requestSelectSchema,
+  tripCheckouts,
   trips,
 } from "@/server/db/schema";
 import { getCity, getCoordinates } from "@/server/google-maps";
@@ -47,6 +48,7 @@ import {
 import { createNormalDistributionDates } from "@/server/server-utils";
 import { scrapeAirbnbPrice } from "@/server/scrapePrice";
 import { TRPCClientError } from "@trpc/client";
+import { breakdownPayment } from "@/utils/payment-utils/paymentBreakdown";
 
 export const offersRouter = createTRPCRouter({
   accept: protectedProcedure
@@ -275,7 +277,7 @@ export const offersRouter = createTRPCRouter({
           id: true,
           tramonaFee: true,
           hostPayout: true,
-          travelerOfferedPrice: true,
+          travelerOfferedPriceBeforeFees: true,
         },
         with: {
           request: {
@@ -412,7 +414,7 @@ export const offersRouter = createTRPCRouter({
           propertyId: z.number(),
           totalPrice: z.number().min(1),
           hostPayout: z.number(),
-          travelerOfferedPrice: z.number(),
+          travelerOfferedPriceBeforeFees: z.number(),
         })
         .and(
           z.union([
@@ -448,6 +450,17 @@ export const offersRouter = createTRPCRouter({
       //   throw new TRPCError({ code: "UNAUTHORIZED" });
       // }
       console.log(input);
+      const curProperty = await db.query.properties.findFirst({
+        where: eq(properties.id, input.propertyId),
+        columns: {
+          name: true,
+          imageUrls: true,
+          originalListingId: true,
+          maxNumGuests: true,
+        },
+      });
+      console.log(curProperty);
+
       if (input.requestId !== undefined) {
         const requestDetails = await ctx.db.query.requests.findFirst({
           where: eq(requests.id, input.requestId),
@@ -460,17 +473,6 @@ export const offersRouter = createTRPCRouter({
         });
 
         if (!requestDetails) throw new TRPCError({ code: "BAD_REQUEST" });
-
-        const curProperty = await db.query.properties.findFirst({
-          where: eq(properties.id, input.propertyId),
-          columns: {
-            name: true,
-            imageUrls: true,
-            originalListingId: true,
-            maxNumGuests: true,
-          },
-        });
-        console.log(curProperty);
 
         const scrapeParams = {
           checkIn: requestDetails.checkIn,
@@ -489,11 +491,39 @@ export const offersRouter = createTRPCRouter({
             })
           : null;
         console.log(datePriceFromAirbnb);
+        // ------- Create trips checkout first ----
+
+        // function to help break down the price of the offer
+        const brokeDownPayment = breakdownPayment({
+          checkIn: requestDetails.checkIn,
+          checkOut: requestDetails.checkOut,
+          travelerOfferedPriceBeforeFees: input.travelerOfferedPriceBeforeFees,
+          isScrapedPropery: false,
+          originalPrice: datePriceFromAirbnb,
+        });
+        const tripCheckout = await db
+          .insert(tripCheckouts)
+          .values({
+            totalTripAmount: brokeDownPayment.totalTripAmount,
+            travelerOfferedPriceBeforeFees:
+              input.travelerOfferedPriceBeforeFees,
+            paymentIntentId: "",
+            taxesPaid: brokeDownPayment.taxesPaid,
+            taxPercentage: brokeDownPayment.taxPercentage,
+            superhogPaid: brokeDownPayment.superhogPaid,
+            stripeTransactionFee: brokeDownPayment.stripeTransactionFee,
+            checkoutSessionId: "",
+            totalSavings: brokeDownPayment.totalSavings,
+          })
+          .returning({ id: tripCheckouts.id })
+          .then((res) => res[0]!);
+
         await ctx.db.insert(offers).values({
           ...input,
           checkIn: requestDetails.checkIn,
           checkOut: requestDetails.checkOut,
           datePriceFromAirbnb: datePriceFromAirbnb,
+          tripCheckoutId: tripCheckout.id,
         });
 
         //find the property
@@ -567,10 +597,35 @@ export const offersRouter = createTRPCRouter({
           // });
         }
       } else {
+        const brokeDownPayment = breakdownPayment({
+          checkIn: input.checkIn,
+          checkOut: input.checkOut,
+          travelerOfferedPriceBeforeFees: input.travelerOfferedPriceBeforeFees,
+          isScrapedPropery: false,
+        });
+
+        const tripCheckout = await db
+          .insert(tripCheckouts)
+          .values({
+            totalTripAmount: brokeDownPayment.totalTripAmount,
+            travelerOfferedPriceBeforeFees:
+              input.travelerOfferedPriceBeforeFees,
+            paymentIntentId: "",
+            taxesPaid: brokeDownPayment.taxesPaid,
+            taxPercentage: brokeDownPayment.taxPercentage,
+            superhogPaid: brokeDownPayment.superhogPaid,
+            stripeTransactionFee: brokeDownPayment.stripeTransactionFee,
+            checkoutSessionId: "",
+            totalSavings: brokeDownPayment.totalSavings,
+          })
+          .returning({ id: tripCheckouts.id })
+          .then((res) => res[0]!);
+
         await ctx.db.insert(offers).values({
           ...input,
           checkIn: input.checkIn,
           checkOut: input.checkOut,
+          tripCheckoutId: tripCheckout.id,
         });
       }
     }),
@@ -905,7 +960,7 @@ export async function getOfferPageData(offerId: number) {
       propertyId: true,
       requestId: true,
       hostPayout: true,
-      travelerOfferedPrice: true,
+      travelerOfferedPriceBeforeFees: true,
       scrapeUrl: true,
       isAvailableOnOriginalSite: true,
       randomDirectListingDiscount: true,

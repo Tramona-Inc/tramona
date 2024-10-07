@@ -15,6 +15,7 @@ import {
   offers,
   rejectedRequests,
   properties,
+  tripCheckouts,
 } from "@/server/db/schema";
 import {
   sendText,
@@ -47,6 +48,7 @@ import { scrapeAirbnbPrice } from "@/server/scrapePrice";
 import { HOST_MARKUP, TRAVELER__MARKUP } from "@/utils/constants";
 import { differenceInDays } from "date-fns";
 import { addMinutes } from "date-fns";
+import { breakdownPayment } from "@/utils/payment-utils/paymentBreakdown";
 
 const updateRequestInputSchema = z.object({
   requestId: z.number(),
@@ -76,7 +78,7 @@ export const requestsRouter = createTRPCRouter({
           offers: {
             columns: {
               id: true,
-              travelerOfferedPrice: true,
+              travelerOfferedPriceBeforeFees: true,
               createdAt: true,
               checkIn: true,
               checkOut: true,
@@ -489,15 +491,15 @@ export async function handleRequestSubmission(
       { ...input, id: request.id, latLngPoint: request.latLngPoint, radius },
       { tx },
     );
-  
+
     const numNights = getNumNights(input.checkIn, input.checkOut);
     const requestedNightlyPrice = input.maxTotalPrice / numNights;
-  
+
     for (const property of eligibleProperties) {
       const propertyDetails = await tx.query.properties.findFirst({
         where: eq(properties.id, property.id),
       });
-  
+
       if (
         propertyDetails?.autoOfferEnabled &&
         propertyDetails.originalListingId &&
@@ -505,7 +507,7 @@ export async function handleRequestSubmission(
         propertyDetails.autoOfferDiscountTiers
       ) {
         try {
-          console.log('aboutta scrape price of airbnb thing')
+          console.log("aboutta scrape price of airbnb thing");
           const airbnbTotalPrice = await scrapeAirbnbPrice({
             airbnbListingId: propertyDetails.originalListingId,
             params: {
@@ -518,7 +520,7 @@ export async function handleRequestSubmission(
             "in da requests router and just scraped price",
             airbnbTotalPrice,
           );
-  
+
           const airbnbNightlyPrice = airbnbTotalPrice / numNights;
           console.log("airbnb nightly price", airbnbNightlyPrice);
           console.log("requested nightly price", requestedNightlyPrice);
@@ -526,35 +528,66 @@ export async function handleRequestSubmission(
             ((airbnbNightlyPrice - requestedNightlyPrice) /
               airbnbNightlyPrice) *
             100;
-  
+
           console.log("percent off", percentOff);
-  
+
           const daysUntilCheckIn = differenceInDays(input.checkIn, new Date());
-  
-          const applicableDiscount = propertyDetails.autoOfferDiscountTiers.find(
-            tier => daysUntilCheckIn >= tier.days
-          );
+
+          const applicableDiscount =
+            propertyDetails.autoOfferDiscountTiers.find(
+              (tier) => daysUntilCheckIn >= tier.days,
+            );
 
           console.log("applicable discount", applicableDiscount);
-  
-          if (applicableDiscount && percentOff <= applicableDiscount.percentOff) {
-            console.log("percent off is less than or equal to applicable discount");
+
+          if (
+            applicableDiscount &&
+            percentOff <= applicableDiscount.percentOff
+          ) {
+            console.log(
+              "percent off is less than or equal to applicable discount",
+            );
+
+            //create trip checkout First
+            const travelerOfferedPriceBeforeFees = getTravelerOfferedPrice({
+              propertyPrice: requestedNightlyPrice,
+              travelerMarkup: TRAVELER__MARKUP,
+              numNights,
+            });
+
+            const brokeDownPayment = breakdownPayment({
+              numOfNights: numNights,
+              travelerOfferedPriceBeforeFees: travelerOfferedPriceBeforeFees,
+              isScrapedPropery: false,
+            });
+
+            const tripCheckout = await tx
+              .insert(tripCheckouts)
+              .values({
+                totalTripAmount: brokeDownPayment.totalTripAmount,
+                travelerOfferedPriceBeforeFees,
+                paymentIntentId: "",
+                taxesPaid: brokeDownPayment.taxesPaid,
+                taxPercentage: brokeDownPayment.taxPercentage,
+                superhogPaid: brokeDownPayment.superhogPaid,
+                stripeTransactionFee: brokeDownPayment.stripeTransactionFee,
+                checkoutSessionId: "",
+                totalSavings: brokeDownPayment.totalSavings,
+              })
+              .returning({ id: tripCheckouts.id })
+              .then((res) => res[0]!);
+
             await tx.insert(offers).values({
               requestId: request.id,
               propertyId: property.id,
+              tripCheckoutId: tripCheckout.id,
               totalPrice: input.maxTotalPrice,
               hostPayout: getHostPayout({
                 propertyPrice: requestedNightlyPrice,
                 hostMarkup: HOST_MARKUP,
                 numNights,
               }),
-  
-              travelerOfferedPrice: getTravelerOfferedPrice({
-                propertyPrice: requestedNightlyPrice,
-                travelerMarkup: TRAVELER__MARKUP,
-                numNights,
-              }),
-  
+              travelerOfferedPriceBeforeFees,
               checkIn: input.checkIn,
               checkOut: input.checkOut,
             });
@@ -562,7 +595,7 @@ export async function handleRequestSubmission(
         } catch (error) {
           console.error(
             `Error processing auto-offer for property ${property.id}:`,
-            error
+            error,
           );
         }
       }

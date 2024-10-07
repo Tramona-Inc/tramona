@@ -289,7 +289,7 @@ export default function AdminOfferForm({
         propertyId,
         totalPrice,
         hostPayout: 0,
-        travelerOfferedPrice: totalPrice,
+        travelerOfferedPriceBeforeFees: totalPrice,
         checkIn: request ? request.checkIn : new Date(checkInDate!),
         checkOut: request ? request.checkOut : new Date(checkOutDate!),
         //tramonaFee: data.tramonaFee * 100,

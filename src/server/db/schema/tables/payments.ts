@@ -1,23 +1,13 @@
 import {
-  date,
-  index,
   integer,
   pgTable,
   serial,
   timestamp,
   varchar,
-  pgEnum,
   doublePrecision,
-  primaryKey,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
-import { groups } from "./groups";
-import { offers } from "./offers";
-import { superhogRequests } from "./superhogRequests";
 import { trips } from "./trips";
-import { properties } from "./properties";
-import { z } from "zod";
-import { time } from "console";
 
 export const tripCheckouts = pgTable("trip_checkouts", {
   id: serial("id").primaryKey().notNull(),

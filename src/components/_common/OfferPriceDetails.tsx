@@ -8,6 +8,7 @@ import {
 import { plural } from "@/utils/utils";
 import { TAX_PERCENTAGE, SUPERHOG_FEE } from "@/utils/constants";
 import type { OfferWithDetails } from "@/components/offers/PropertyPage";
+import React from "react";
 
 export function OfferPriceDetails({
   offer,
@@ -17,13 +18,13 @@ export function OfferPriceDetails({
   bookOnAirbnb?: boolean;
 }) {
   const numberOfNights = getNumNights(offer.checkIn, offer.checkOut);
-  const nightlyPrice = offer.travelerOfferedPrice / numberOfNights;
+  const nightlyPrice = offer.travelerOfferedPriceBeforeFees / numberOfNights;
   const { bookingCost, taxPaid, serviceFee, finalTotal } = offer.scrapeUrl
     ? getDirectListingPriceBreakdown({
-        bookingCost: offer.travelerOfferedPrice,
+        bookingCost: offer.travelerOfferedPriceBeforeFees,
       })
     : getTramonaPriceBreakdown({
-        bookingCost: offer.travelerOfferedPrice,
+        bookingCost: offer.travelerOfferedPriceBeforeFees,
         numNights: numberOfNights,
         superhogFee: SUPERHOG_FEE,
         tax: TAX_PERCENTAGE,

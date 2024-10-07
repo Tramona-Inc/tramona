@@ -11,7 +11,7 @@ import { useChatWithAdmin } from "@/utils/messaging/useChatWithAdmin";
 import CustomStripeCheckout from "./CustomStripeCheckout";
 import { OfferPriceDetails } from "../_common/OfferPriceDetails";
 import { getCancellationPolicyDescription } from "@/config/getCancellationPolicyDescription";
-
+import React from "react";
 export default function Checkout({ offer }: { offer: OfferWithDetails }) {
   const router = useRouter();
   const isMobile = !useIsSm();
@@ -120,7 +120,7 @@ export default function Checkout({ offer }: { offer: OfferWithDetails }) {
             {(offer.property.airbnbUrl ?? offer.scrapeUrl)
               ? getOfferDiscountPercentage({
                   createdAt: offer.createdAt,
-                  travelerOfferedPrice: offer.totalPrice,
+                  travelerOfferedPriceBeforeFees: offer.totalPrice,
                   checkIn: offer.checkIn,
                   checkOut: offer.checkOut,
                   randomDirectListingDiscount:

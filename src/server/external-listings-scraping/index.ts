@@ -44,7 +44,7 @@ export async function scrapeExternalListings(request: MinimalRequest) {
       checkIn: request.checkIn,
       checkOut: request.checkOut,
       hostPayout: totalPrice * HOST_MARKUP,
-      travelerOfferedPrice: totalPrice * TRAVELER__MARKUP,
+      travelerOfferedPriceBeforeFees: totalPrice * TRAVELER__MARKUP,
     })),
   );
 }

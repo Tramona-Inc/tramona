@@ -7,6 +7,7 @@ import {
   groupMembers,
   groups,
   properties,
+  tripCheckouts,
 } from "@/server/db/schema";
 import { cancelSuperhogReservation } from "./superhog-utils";
 import {
@@ -40,7 +41,15 @@ export async function cancelTripByPaymentIntent({
       tripsStatus: "Cancelled",
     })
     .where(eq(trips.paymentIntentId, paymentIntentId))
-    .returning()
+    .returning({
+      id: trips.id,
+      superhogRequestId: trips.superhogRequestId,
+      groupId: trips.groupId,
+      checkIn: trips.checkIn,
+      checkOut: trips.checkOut,
+      totalPriceAfterFees: trips.totalPriceAfterFees,
+      tripCheckout: tripCheckouts,
+    })
     .then((res) => res[0]);
 
   if (!currentTrip) {
@@ -110,7 +119,7 @@ export async function cancelTripByPaymentIntent({
 
           property: property!.name,
           reason: reason,
-          refund: currentTrip.totalPriceAfterFees!,
+          refund: currentTrip.totalPriceAfterFees,
         }),
       });
     }
@@ -134,10 +143,10 @@ export async function sendEmailAndWhatsupConfirmation({
 
   const { serviceFee } = offer.scrapeUrl
     ? getDirectListingPriceBreakdown({
-        bookingCost: offer.travelerOfferedPrice,
+        bookingCost: offer.travelerOfferedPriceBeforeFees,
       })
     : getTramonaPriceBreakdown({
-        bookingCost: offer.travelerOfferedPrice,
+        bookingCost: offer.travelerOfferedPriceBeforeFees,
         numNights: numOfNights,
         superhogFee: SUPERHOG_FEE,
         tax: TAX_PERCENTAGE,
@@ -162,8 +171,8 @@ export async function sendEmailAndWhatsupConfirmation({
       address: property.address,
       propertyImageLink: property.imageUrls[0] ?? property.imageUrls[1] ?? "",
       tripDetailLink: `https://www.tramona.com/offers/${trip.id}`,
-      tramonaPrice: offer.travelerOfferedPrice,
-      totalPrice: trip.totalPriceAfterFees!,
+      tramonaPrice: offer.travelerOfferedPriceBeforeFees,
+      totalPrice: trip.totalPriceAfterFees,
       numOfNights: numOfNights,
       serviceFee: serviceFee,
       adults: property.maxNumGuests,

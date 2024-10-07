@@ -11,6 +11,7 @@ import {
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { properties } from "./properties";
 import { requests } from "./requests";
+import { tripCheckouts } from "./payments";
 
 export const offers = pgTable(
   "offers",
@@ -34,7 +35,9 @@ export const offers = pgTable(
     checkIn: date("check_in", { mode: "date" }).notNull(),
     checkOut: date("check_out", { mode: "date" }).notNull(),
     hostPayout: integer("host_payout").notNull(), // in cents
-    travelerOfferedPrice: integer("traveler_offered_price").notNull(), // in cents
+    travelerOfferedPriceBeforeFees: integer(
+      "traveler_offered_price_before_fees",
+    ).notNull(), // in cents
     datePriceFromAirbnb: integer("date_price_from_airbnb"), // If host uploaded property, we will scrape the price for the offer if they gave us the link for property creation
     randomDirectListingDiscount: integer("random_direct_listing_discount"),
     scrapeUrl: varchar("scrape_url"),
@@ -45,12 +48,16 @@ export const offers = pgTable(
     becomeVisibleAt: timestamp("become_visible_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
+    tripCheckoutId: integer("tripCheckoutId")
+      .notNull()
+      .references(() => tripCheckouts.id, { onDelete: "cascade" }),
   },
   (t) => ({
     requestIdIdx: index().on(t.requestId),
     propertyIdIdx: index().on(t.propertyId),
     madePublicAtIndex: index().on(t.madePublicAt),
     acceptedAtIndex: index().on(t.acceptedAt),
+    tripCheckoutIdx: index().on(t.tripCheckoutId),
   }),
 );
 

@@ -36,7 +36,7 @@ const CustomStripeCheckout = ({
     () =>
       offer.randomDirectListingDiscount
         ? (offer.randomDirectListingDiscount / 100 + 1) *
-          offer.travelerOfferedPrice
+          offer.travelerOfferedPriceBeforeFees
         : property.originalNightlyPrice! * numNights,
     [property.originalNightlyPrice, numNights],
   );
@@ -45,18 +45,18 @@ const CustomStripeCheckout = ({
     if (offer.scrapeUrl) {
       console.log("Direct Listing");
       return getDirectListingPriceBreakdown({
-        bookingCost: offer.travelerOfferedPrice,
+        bookingCost: offer.travelerOfferedPriceBeforeFees,
       });
     } else {
       console.log("not a direct Listing");
       return getTramonaPriceBreakdown({
-        bookingCost: offer.travelerOfferedPrice,
+        bookingCost: offer.travelerOfferedPriceBeforeFees,
         numNights,
         superhogFee: SUPERHOG_FEE,
         tax: TAX_PERCENTAGE,
       });
     }
-  }, [offer.scrapeUrl, offer.travelerOfferedPrice, numNights]);
+  }, [offer.scrapeUrl, offer.travelerOfferedPriceBeforeFees, numNights]);
 
   const [options, setOptions] = useState<StripeElementsOptions | undefined>(
     undefined,
@@ -85,7 +85,7 @@ const CustomStripeCheckout = ({
         phoneNumber: session.data.user.phoneNumber ?? "",
         userId: session.data.user.id,
         hostStripeId: propertyHostUserAccount?.stripeConnectId ?? "",
-        travelerOfferedPriceBeforeFees: offer.travelerOfferedPrice,
+        travelerOfferedPriceBeforeFees: offer.travelerOfferedPriceBeforeFees,
         superhogPaid: 0,
         taxesPaid: 0,
         taxesPercentage: 0,

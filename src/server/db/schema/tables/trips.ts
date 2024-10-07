@@ -56,7 +56,7 @@ export const trips = pgTable(
     tripsStatus: tripStatusEnum("trip_status").default("Booked"),
     tripCheckoutId: integer("tripCheckoutId").references(
       () => tripCheckouts.id,
-      { onDelete: "cascade" },
+      { onDelete: "set null" },
     ),
   },
   (t) => ({
@@ -64,6 +64,7 @@ export const trips = pgTable(
     offerIdIdx: index().on(t.offerId),
     bidIdIdx: index().on(t.bidId),
     propertyIdIdx: index().on(t.propertyId),
+    tripCheckoutIdx: index().on(t.tripCheckoutId),
   }),
 );
 
