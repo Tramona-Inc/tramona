@@ -48,7 +48,10 @@ export type HostRequestsPageData = {
   city: string;
   requests: {
     request: Request & {
-      traveler: Pick<User, "firstName" | "lastName" | "name" | "image" | "location" | "about">;
+      traveler: Pick<
+        User,
+        "firstName" | "lastName" | "name" | "image" | "location" | "about"
+      >;
     };
     properties: Property[];
   }[];
@@ -177,7 +180,15 @@ export const propertiesRouter = createTRPCRouter({
         where: eq(properties.id, input.id),
         with: {
           host: {
-            columns: { image: true, name: true, email: true, id: true },
+            columns: {
+              image: true,
+              firstName: true,
+              lastName: true,
+              email: true,
+              id: true,
+              about: true,
+              location: true,
+            },
             with: {
               hostProfile: {
                 columns: { curTeamId: true },
@@ -264,15 +275,15 @@ export const propertiesRouter = createTRPCRouter({
             COS(${(lat * Math.PI) / 180}) * COS(radians(ST_Y(${properties.latLngPoint}))) * 
             COS(radians(ST_X(${properties.latLngPoint})) - ${(lng * Math.PI) / 180})
           ) AS distance`,
-        vacancyCount: sql`
+          vacancyCount: sql`
           (SELECT COUNT(booked_dates.property_id)
           FROM booked_dates
           WHERE booked_dates.property_id = properties.id
             AND booked_dates.date >= CURRENT_DATE
             AND booked_dates.date <= CURRENT_DATE + INTERVAL '30 days') AS vacancyCount
         `,
-      })
-      .from(properties)
+        })
+        .from(properties)
         .where(
           and(
             eq(properties.propertyStatus, "Listed"),
@@ -380,9 +391,9 @@ export const propertiesRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const { cursor, boundaries } = input;
 
-      const lat = input.lat ?? 0;
-      const lng = input.long ?? 0;
-      const radius = input.radius;
+      const lat = input.latLngPoint?.lat ?? 0;
+      const lng = input.latLngPoint?.lng ?? 0;
+      const radius = input.radius ?? 0; //just tried to fix a type error
 
       const data = await ctx.db
         .select({
@@ -546,7 +557,10 @@ export const propertiesRouter = createTRPCRouter({
         number,
         {
           request: Request & {
-            traveler: Pick<User, "firstName" | "lastName" | "name" | "image" | "location" | "about">;
+            traveler: Pick<
+              User,
+              "firstName" | "lastName" | "name" | "image" | "location" | "about"
+            >;
           };
           properties: Property[];
         }
@@ -637,14 +651,17 @@ export const propertiesRouter = createTRPCRouter({
       return { count };
     }),
 
-    updateAutoOffer: protectedProcedure
-    .input(z.object({
-      id: z.number(),
-      autoOfferEnabled: z.boolean(),
-      autoOfferDiscountTiers: z.array(discountTierSchema),
-    }))
+  updateAutoOffer: protectedProcedure
+    .input(
+      z.object({
+        id: z.number(),
+        autoOfferEnabled: z.boolean(),
+        autoOfferDiscountTiers: z.array(discountTierSchema),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
-      await ctx.db.update(properties)
+      await ctx.db
+        .update(properties)
         .set({
           autoOfferEnabled: input.autoOfferEnabled,
           autoOfferDiscountTiers: input.autoOfferDiscountTiers,

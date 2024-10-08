@@ -169,7 +169,7 @@ export async function createSuperhogReservation({
           .where(eq(trips.id, trip.id));
 
         await sendSlackMessage({
-          isProductionOnly: true,
+          isProductionOnly: false,
           channel: "superhog-bot",
           text: [
             `SUPERHOG REQUEST ERROR: axios error... ${error.response.data.detail}`,
@@ -297,11 +297,13 @@ export async function cancelSuperhogReservation({
         reservationId,
       },
     };
-    await axios.put(
-      "https://superhog-apim.azure-api.net/e-deposit/verifications/cancel",
-      reqObject,
-      config,
-    );
+
+    const superhogEndpoint =
+      env.NODE_ENV === "production"
+        ? "https://superhog-apim.azure-api.net/e-deposit/verifications/cancel"
+        : "https://superhog-apim.azure-api.net/e-deposit-sandbox/verifications/cancel";
+
+    await axios.put(superhogEndpoint, reqObject, config);
     const currentSuperhogRequestId = await db.query.superhogRequests.findFirst({
       where: eq(superhogRequests.superhogVerificationId, verificationId),
     });
@@ -323,10 +325,10 @@ export async function cancelSuperhogReservation({
       superhogRequestId: currentSuperhogRequestId.id,
     });
     //delete from the trips table
-    await db
-      .update(trips)
-      .set({ superhogRequestId: null })
-      .where(eq(trips.superhogRequestId, currentSuperhogRequestId.id));
+    // await db
+    //   .update(trips)
+    //   .set({ superhogRequestId: null })
+    //   .where(eq(trips.superhogRequestId, currentSuperhogRequestId.id));
     //delete from the superhog request table
     await db
       .update(superhogRequests)

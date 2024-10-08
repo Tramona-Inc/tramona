@@ -225,11 +225,10 @@ export type RoomWithBeds = z.infer<typeof roomsWithBedsSchema.element>;
 
 export const discountTierSchema = z.object({
   days: z.number().int().nonnegative(),
-  percentOff: z.number().int().min(0).max(100)
+  percentOff: z.number().int().min(0).max(100),
 });
 
 export type DiscountTier = z.infer<typeof discountTierSchema>;
-
 
 export const properties = pgTable(
   "properties",
@@ -267,8 +266,8 @@ export const properties = pgTable(
     city: varchar("city", { length: 255 }).notNull(),
     originalListingUrl: varchar("original_listing_url"),
     checkInInfo: varchar("check_in_info"),
-    checkInTime: time("check_in_time"),
-    checkOutTime: time("check_out_time"),
+    checkInTime: time("check_in_time").notNull().default("15:00:00"),
+    checkOutTime: time("check_out_time").notNull().default("10:00:00"),
 
     // amenities: propertyAmenitiesEnum("amenities").array().notNull(),
     amenities: varchar("amenities")
@@ -319,7 +318,9 @@ export const properties = pgTable(
     iCalLink: text("ical_link"),
     bookOnAirbnb: boolean("book_on_airbnb").notNull().default(false),
     autoOfferEnabled: boolean("auto_offer_enabled").notNull().default(false),
-    autoOfferDiscountTiers: jsonb("auto_offer_discount_tiers").$type<DiscountTier[]>(),
+    autoOfferDiscountTiers: jsonb("auto_offer_discount_tiers").$type<
+      DiscountTier[]
+    >(),
   },
   (t) => ({
     spatialIndex: index("spacial_index").using("gist", t.latLngPoint),
