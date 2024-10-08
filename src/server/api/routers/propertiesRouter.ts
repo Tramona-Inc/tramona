@@ -267,15 +267,15 @@ export const propertiesRouter = createTRPCRouter({
             COS(${(lat * Math.PI) / 180}) * COS(radians(ST_Y(${properties.latLngPoint}))) * 
             COS(radians(ST_X(${properties.latLngPoint})) - ${(lng * Math.PI) / 180})
           ) AS distance`,
-        vacancyCount: sql`
+          vacancyCount: sql`
           (SELECT COUNT(booked_dates.property_id)
           FROM booked_dates
           WHERE booked_dates.property_id = properties.id
             AND booked_dates.date >= CURRENT_DATE
             AND booked_dates.date <= CURRENT_DATE + INTERVAL '30 days') AS vacancyCount
         `,
-      })
-      .from(properties)
+        })
+        .from(properties)
         .where(
           and(
             eq(properties.propertyStatus, "Listed"),
@@ -522,9 +522,16 @@ export const propertiesRouter = createTRPCRouter({
   getHostPropertiesWithRequests: roleRestrictedProcedure(["host"]).query(
     async ({ ctx }) => {
       // TODO: USE DRIZZLE relational query, then use groupby in js
+      const user = await ctx.db.query.users.findFirst({
+        where: eq(users.id, ctx.user.id),
+      });
+
       const hostProperties = await db.query.properties.findMany({
         where: and(
-          eq(properties.hostId, ctx.user.id),
+          eq(
+            properties.hostId,
+            user?.mainHostId ? user.mainHostId : ctx.user.id,
+          ),
           eq(properties.propertyStatus, "Listed"),
         ),
 
