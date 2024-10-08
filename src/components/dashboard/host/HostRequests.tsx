@@ -84,7 +84,9 @@ export default function HostRequests() {
                   onClick={() => {
                     rejectRequest({ requestId: requestData.request.id });
                   }}
-                  disabled={user?.coHostRole === "strict"}
+                  disabled={
+                    user?.mainHostId !== null && user?.coHostRole === "strict"
+                  }
                 >
                   Reject
                 </Button>
@@ -94,7 +96,9 @@ export default function HostRequests() {
                     setSelectedRequest(requestData.request);
                     setProperties(requestData.properties);
                   }}
-                  disabled={user?.coHostRole === "strict"}
+                  disabled={
+                    user?.mainHostId !== null && user?.coHostRole === "strict"
+                  }
                 >
                   Make an offer
                 </Button>
