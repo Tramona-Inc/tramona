@@ -65,6 +65,7 @@ export default function HostRequests() {
   const cityData = requestsWithProperties?.find((p) => p.city === city);
 
   const { mutate: rejectRequest } = api.requests.rejectRequest.useMutation();
+  const { data: user } = api.users.getUser.useQuery();
 
   return (
     <div className="p-4">
@@ -83,6 +84,7 @@ export default function HostRequests() {
                   onClick={() => {
                     rejectRequest({ requestId: requestData.request.id });
                   }}
+                  disabled={user?.coHostRole === "strict"}
                 >
                   Reject
                 </Button>
@@ -92,6 +94,7 @@ export default function HostRequests() {
                     setSelectedRequest(requestData.request);
                     setProperties(requestData.properties);
                   }}
+                  disabled={user?.coHostRole === "strict"}
                 >
                   Make an offer
                 </Button>
