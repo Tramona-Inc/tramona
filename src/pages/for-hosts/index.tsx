@@ -58,7 +58,7 @@ function IntroSection({ requestFeed }: { requestFeed: FeedRequestItem[] }) {
             100% free to use, sign up and let the requests start rolling in
           </p>
         </div>
-        <div className="rounded-lg border px-2 py-2 shadow-xl">
+        <div className="h-[450px] rounded-lg border px-2 py-2 shadow-xl">
           <RequestFeed requestFeed={requestFeed} />
         </div>
       </div>
