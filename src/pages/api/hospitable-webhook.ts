@@ -10,9 +10,12 @@ import {
 import axios from "axios";
 import { type NextApiRequest, type NextApiResponse } from "next";
 import { db } from "@/server/db";
-import { eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { sendSlackMessage } from "@/server/slack";
 import { createLatLngGISPoint } from "@/server/server-utils";
+import { getCity } from "@/server/google-maps";
+import { calculateTotalTax } from "@/utils/taxData";
+
 
 export async function insertHost(id: string) {
   // Insert Host info
@@ -338,6 +341,21 @@ export default async function webhook(
         // Insert data into the reservedDates table
         const latLngPoint = createLatLngGISPoint({ lat: webhookData.data.address.latitude, lng: webhookData.data.address.longitude });
 
+        const { city, stateCode, country } = await getCity({
+          lat: webhookData.data.address.latitude,
+          lng: webhookData.data.address.longitude,
+        });
+
+        const taxInfo = calculateTotalTax(country, stateCode, city);
+
+        if (!taxInfo) {
+          await sendSlackMessage({
+            text: `Host created a listing in ${city}, ${stateCode}, ${country} but we don't have tax info for that location`,
+            channel: "host-bot",
+          });
+        }
+
+
         const propertyObject = {
           hostId: userId,
           propertyType: convertAirbnbPropertyType(
@@ -367,10 +385,13 @@ export default async function webhook(
           imageUrls: images,
           originalListingPlatform: "Hospitable" as const,
           originalListingId: webhookData.data.platform_id,
+
           //amenities: webhookData.data.amenities,
           //cancellationPolicy: webhookData.data.cancellation_policy,
           //ratings: webhookData.data.ratings,
         };
+
+
 
         const propertyId = await db
           .insert(properties)

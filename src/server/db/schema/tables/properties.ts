@@ -270,6 +270,7 @@ export const properties = pgTable(
     checkInTime: time("check_in_time"),
     checkOutTime: time("check_out_time"),
 
+
     // amenities: propertyAmenitiesEnum("amenities").array().notNull(),
     amenities: varchar("amenities")
       .array()

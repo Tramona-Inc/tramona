@@ -50,7 +50,7 @@ export type HostRequestsPageData = {
     request: Request & {
       traveler: Pick<User, "firstName" | "lastName" | "name" | "image" | "location" | "about">;
     };
-    properties: Property[];
+    properties: (Property & {taxAvailable: boolean})[];
   }[];
 };
 
@@ -539,7 +539,7 @@ export const propertiesRouter = createTRPCRouter({
           request: Request & {
             traveler: Pick<User, "firstName" | "lastName" | "name" | "image" | "location" | "about">;
           };
-          properties: Property[];
+          properties: (Property & {taxAvailable: boolean})[];
         }
       >();
 
@@ -551,7 +551,7 @@ export const propertiesRouter = createTRPCRouter({
           // If not, create a new entry with an empty properties array
           requestsMap.set(request.id, {
             request,
-            properties: [],
+            properties: [] as (Property & {taxAvailable: boolean})[],
           });
         }
 
@@ -561,7 +561,7 @@ export const propertiesRouter = createTRPCRouter({
       for (const requestWithProperties of requestsMap.values()) {
         const { request, properties } = requestWithProperties;
 
-        for (const property of properties) {
+        for (const property of properties as unknown as (Property & {taxAvailable: boolean})[]) {
           const cityGroup = findOrCreateCityGroup(property.city);
 
           // Find if the request already exists in the city's group to avoid duplicates

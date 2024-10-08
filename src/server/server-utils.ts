@@ -17,7 +17,6 @@ import {
   isNotNull,
   isNull,
   lte,
-  not,
   notExists,
   or,
   sql,
@@ -50,6 +49,7 @@ import { sendSlackMessage } from "./slack";
 import { HOST_MARKUP, TRAVELER__MARKUP } from "@/utils/constants";
 import { HostRequestsPageData } from "./api/routers/propertiesRouter";
 import { Session } from "next-auth";
+import { calculateTotalTax } from "@/utils/taxData";
 
 export const proxyAgent = new HttpsProxyAgent(env.PROXY_URL);
 
@@ -364,19 +364,19 @@ export async function addProperty({
     lat = location.lat;
     lng = location.lng;
   }
-  const city = await getCity({ lat, lng });
+  const locInfo = await getCity({ lat, lng });
+
+  const propertyValues = {
+    ...property,
+    hostId: userId,
+    city: locInfo.city,
+    latLngPoint: createLatLngGISPoint({ lat, lng }),
+    hostTeamId,
+  };
 
   const [insertedProperty] = await db
     .insert(properties)
-    .values({
-      ...property,
-      hostId: userId,
-      // latitude: lat,
-      // longitude: lng,
-      city: city,
-      latLngPoint: createLatLngGISPoint({ lat, lng }),
-      hostTeamId,
-    })
+    .values(propertyValues)
     .returning({ id: properties.id });
 
   // waitUntil(processRequests(insertedProperty!));
@@ -450,7 +450,7 @@ export async function getRequestsForProperties(
   const requestIsNearProperties: SQL[] = [];
   // let priceRestrictionsSQL: SQL[] | undefined[] = [sql`FALSE`];
   const propertyToRequestMap: {
-    property: Property;
+    property: Property & { taxAvailable: boolean };
     request: Request & {
       traveler: Pick<User, "firstName" | "lastName" | "name" | "image" | "location" | "about">;
     };
@@ -474,6 +474,15 @@ export async function getRequestsForProperties(
     //     )
     // `;
     requestIsNearProperties.push(requestIsNearProperty);
+
+
+    const { city, stateCode, country } = await getCity({
+      lat: property.latLngPoint.y,
+      lng: property.latLngPoint.x,
+    });
+
+    const taxInfo = calculateTotalTax(country, stateCode, city);
+    console.log("taxInfo", taxInfo, city);
 
     const requestsForProperty = await tx.query.requests.findMany({
       where: and(
@@ -541,7 +550,10 @@ export async function getRequestsForProperties(
         about: request.madeByGroup.owner.about,
       };
       propertyToRequestMap.push({
-        property,
+        property: {
+          ...property,
+          taxAvailable: taxInfo !== null,
+        },
         request: {
           ...request,
           traveler, // Include traveler info
@@ -845,9 +857,9 @@ export function haversineDistance(
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(toRadians(lat1)) *
-      Math.cos(toRadians(lat2)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+    Math.cos(toRadians(lat2)) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c; // Distance in kilometers
 }
