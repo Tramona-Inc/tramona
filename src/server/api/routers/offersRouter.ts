@@ -49,6 +49,16 @@ import { createNormalDistributionDates } from "@/server/server-utils";
 import { scrapeAirbnbPrice } from "@/server/scrapePrice";
 import { TRPCClientError } from "@trpc/client";
 import { breakdownPayment } from "@/utils/payment-utils/paymentBreakdown";
+
+type PropertyWithHost = Property & {
+  host: {
+    id: string;
+    name: string | null;
+    email: string;
+    image: string | null;
+    hostProfile: { userId: string } | null;
+  } | null;
+};
 export const offersRouter = createTRPCRouter({
   accept: protectedProcedure
     .input(offerSelectSchema.pick({ id: true }))
@@ -195,13 +205,16 @@ export const offersRouter = createTRPCRouter({
         },
       });
 
-      const propertiesMap: Record<number, Property> =
+      const propertiesMap: Record<number, PropertyWithHost> =
         propertiesByRequest.reduce(
-          (acc: Record<number, Property>, property: Property) => {
+          (
+            acc: Record<number, PropertyWithHost>,
+            property: PropertyWithHost,
+          ) => {
             acc[property.id] = property;
             return acc;
           },
-          {},
+          {} as Record<number, PropertyWithHost>,
         );
 
       // Merge offers with their corresponding property

@@ -78,7 +78,7 @@ const formSchema = z.object({
   amenities: z.string().transform((s) => s.split("\n").map((s) => s.trim())),
   about: zodString({ maxLen: Infinity }),
   originalListingUrl: optional(zodListingUrl),
-  checkInInfo: optional(zodString()),
+  checkInInfo: zodString(),
   checkInTime: optional(zodTime),
   checkOutTime: optional(zodTime),
   cancellationPolicy: z.enum(CANCELLATION_POLICIES),
@@ -149,9 +149,9 @@ export default function AdminOfferForm({
             originalNightlyPriceUSD: offer.property.originalNightlyPrice
               ? offer.property.originalNightlyPrice / 100
               : 0,
-            checkInInfo: offer.property.checkInInfo ?? undefined,
-            checkInTime: offer.property.checkInTime ?? undefined,
-            checkOutTime: offer.property.checkOutTime ?? undefined,
+            checkInInfo: offer.property.checkInInfo!,
+            checkInTime: offer.property.checkInTime,
+            checkOutTime: offer.property.checkOutTime,
             imageUrls: offer.property.imageUrls.map((url) => ({ value: url })),
             reviews: [],
             roomsWithBeds: offer.property.roomsWithBeds

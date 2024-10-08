@@ -1,23 +1,16 @@
 import { api } from "@/utils/api";
 import { useStripe } from "@/utils/stripe-client";
-import {
-  formatDateRange,
-  getDirectListingPriceBreakdown,
-  getNumNights,
-  getTramonaPriceBreakdown,
-} from "@/utils/utils";
+import { formatDateRange, getNumNights } from "@/utils/utils";
 import StripeCheckoutForm from "./StripeCheckoutForm";
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
-import { TAX_PERCENTAGE, SUPERHOG_FEE } from "@/utils/constants";
 import type { OfferWithDetails } from "../offers/PropertyPage";
 import { Elements } from "@stripe/react-stripe-js";
 import { type StripeElementsOptions } from "@stripe/stripe-js";
 import Spinner from "../_common/Spinner";
 
 import { useToast } from "../ui/use-toast";
-import { getTravelerOfferedPrice } from "../../utils/utils";
 const CustomStripeCheckout = ({
   offer: { property, ...offer },
 }: {
@@ -41,23 +34,6 @@ const CustomStripeCheckout = ({
     [property.originalNightlyPrice, numNights],
   );
 
-  const { serviceFee, finalTotal } = useMemo(() => {
-    if (offer.scrapeUrl) {
-      console.log("Direct Listing");
-      return getDirectListingPriceBreakdown({
-        bookingCost: offer.travelerOfferedPriceBeforeFees,
-      });
-    } else {
-      console.log("not a direct Listing");
-      return getTramonaPriceBreakdown({
-        bookingCost: offer.travelerOfferedPriceBeforeFees,
-        numNights,
-        superhogFee: SUPERHOG_FEE,
-        tax: TAX_PERCENTAGE,
-      });
-    }
-  }, [offer.scrapeUrl, offer.travelerOfferedPriceBeforeFees, numNights]);
-
   const [options, setOptions] = useState<StripeElementsOptions | undefined>(
     undefined,
   );
@@ -77,11 +53,13 @@ const CustomStripeCheckout = ({
         propertyId: property.id,
         requestId: offer.requestId ?? null,
         name: property.name,
-        price: finalTotal,
+        price: offer.tripCheckout.totalTripAmount,
         description: "From: " + formatDateRange(offer.checkIn, offer.checkOut),
         cancelUrl: pathname,
         images: property.imageUrls,
-        totalSavings: Math.abs(originalTotal - finalTotal),
+        totalSavings: Math.abs(
+          originalTotal - offer.tripCheckout.totalTripAmount,
+        ),
         phoneNumber: session.data.user.phoneNumber ?? "",
         userId: session.data.user.id,
         hostStripeId: propertyHostUserAccount?.stripeConnectId ?? "",

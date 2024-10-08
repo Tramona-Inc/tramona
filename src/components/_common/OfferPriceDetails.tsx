@@ -1,10 +1,5 @@
 import { Separator } from "../ui/separator";
-import {
-  formatCurrency,
-  getNumNights,
-  getTramonaPriceBreakdown,
-  getDirectListingPriceBreakdown,
-} from "@/utils/utils";
+import { formatCurrency, getNumNights } from "@/utils/utils";
 import { plural } from "@/utils/utils";
 import type { OfferWithDetails } from "@/components/offers/PropertyPage";
 import React from "react";
