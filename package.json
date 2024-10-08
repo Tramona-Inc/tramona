@@ -96,6 +96,7 @@
     "core-js": "3.38.1",
     "date-fns": "^3.6.0",
     "dayjs": "^1.11.10",
+    "dotenv": "^16.4.5",
     "drizzle-orm": "^0.33.0",
     "drizzle-pagination": "^1.0.10",
     "drizzle-zod": "^0.5.1",
@@ -185,8 +186,9 @@
     "prettier": "^3.2.4",
     "prettier-plugin-tailwindcss": "^0.6.0",
     "tailwindcss": "^3.4.1",
+    "ts-node": "^10.9.2",
     "tsconfig-paths-webpack-plugin": "^4.1.0",
-    "typescript": "^5.4.3"
+    "typescript": "^5.6.2"
   },
   "ct3aMetadata": {
     "initVersion": "7.25.1"
