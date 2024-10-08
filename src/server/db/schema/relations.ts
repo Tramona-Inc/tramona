@@ -174,6 +174,10 @@ export const offersRelations = relations(offers, ({ one }) => ({
     fields: [offers.requestId],
     references: [requests.id],
   }),
+  tripCheckout: one(tripCheckouts, {
+    fields: [offers.tripCheckoutId],
+    references: [tripCheckouts.id],
+  }),
 }));
 
 export const earningsRelations = relations(referralEarnings, ({ one }) => ({
@@ -385,12 +389,15 @@ export const tripsRelations = relations(trips, ({ one, many }) => ({
     fields: [trips.superhogRequestId],
     references: [superhogRequests.id],
   }),
+  tripCheckout: one(tripCheckouts, {
+    fields: [trips.tripCheckoutId],
+    references: [tripCheckouts.id],
+  }),
   refundedPayments: many(refundedPayments),
   superhogErrors: many(superhogErrors),
   superhogActions: many(superhogActionOnTrips),
   tripCancellations: many(tripCancellations),
   tripDamages: many(tripDamages),
-  tripCheckouts: many(tripCheckouts),
   hostReferralDiscounts: many(hostReferralDiscounts),
 }));
 
@@ -403,11 +410,9 @@ export const tripsCancellationRelations = relations(
     }),
   }),
 );
-export const tripCheckoutsRelations = relations(tripCheckouts, ({ one }) => ({
-  trips: one(trips, {
-    fields: [tripCheckouts.id],
-    references: [trips.id],
-  }),
+export const tripCheckoutsRelations = relations(tripCheckouts, ({ many }) => ({
+  offers: many(offers),
+  trips: many(trips),
 }));
 
 export const emergencyContactsRelations = relations(

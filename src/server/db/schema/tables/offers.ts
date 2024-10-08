@@ -29,9 +29,6 @@ export const offers = pgTable(
       .defaultNow(),
     madePublicAt: timestamp("made_public_at", { withTimezone: true }),
     acceptedAt: timestamp("accepted_at", { withTimezone: true }),
-    paymentIntentId: varchar("payment_intent_id"),
-    checkoutSessionId: varchar("checkout_session_id"),
-    tramonaFee: integer("tramona_fee").default(0), // in cents
     checkIn: date("check_in", { mode: "date" }).notNull(),
     checkOut: date("check_out", { mode: "date" }).notNull(),
     hostPayout: integer("host_payout").notNull(), // in cents
@@ -48,7 +45,7 @@ export const offers = pgTable(
     becomeVisibleAt: timestamp("become_visible_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
-    tripCheckoutId: integer("tripCheckoutId")
+    tripCheckoutId: integer("trip_checkout_id")
       .notNull()
       .references(() => tripCheckouts.id, { onDelete: "cascade" }),
   },

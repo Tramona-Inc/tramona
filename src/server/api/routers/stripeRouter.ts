@@ -300,9 +300,9 @@ export const stripeRouter = createTRPCRouter({
         hostStripeId: z.string().nullable(),
         travelerOfferedPriceBeforeFees: z.number(),
         taxesPaid: z.number(),
-        taxesPercentage: z.number(),
+        taxesPercentage: z.number().nullable(),
         stripeTransactionFee: z.number(),
-        superhogPaid: z.number(),
+        superhogFee: z.number(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -353,7 +353,7 @@ export const stripeRouter = createTRPCRouter({
         taxes_paid: input.taxesPaid,
         tax_percentage: input.taxesPercentage,
         stripe_transaction_fee: input.stripeTransactionFee,
-        superhog_paid: input.superhogPaid,
+        superhog_paid: input.superhogFee,
       };
 
       const options: Stripe.PaymentIntentCreateParams = {

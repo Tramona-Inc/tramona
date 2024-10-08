@@ -139,6 +139,9 @@ export const tripsRouter = createTRPCRouter({
     .query(async ({ input }) => {
       const trip = await db.query.trips.findFirst({
         where: eq(trips.id, input.tripId),
+        with: {
+          tripCheckout: true,
+        },
       });
 
       const propertyForTrip = await db.query.properties.findFirst({
@@ -179,6 +182,7 @@ export const tripsRouter = createTRPCRouter({
       const trip = await db.query.trips.findFirst({
         where: eq(trips.paymentIntentId, input.paymentIntentId),
         with: {
+          tripCheckout: true,
           property: {
             columns: {
               id: true,

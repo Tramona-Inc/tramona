@@ -1,6 +1,7 @@
 import { TAX_PERCENTAGE } from "../constants";
 import { SUPERHOG_FEE } from "@/utils/constants";
 import { getNumNights } from "../utils";
+import { TripCheckout } from "../../server/db/schema/tables/payments";
 
 export function breakdownPayment({
   checkIn,
@@ -27,27 +28,34 @@ export function breakdownPayment({
     throw new Error("Either checkIn/checkOut or numOfNights must be provided.");
   }
 
-  const superhogPaid = numOfNights * SUPERHOG_FEE * 100;
-  const taxesPaid = Math.round(
-    travelerOfferedPriceBeforeFees + superhogPaid * TAX_PERCENTAGE,
-  );
-
-  const stripeTransactionFee = Math.ceil(
-    (travelerOfferedPriceBeforeFees + superhogPaid + taxesPaid) * 0.0029 + 30,
-  );
-
   // ---- if scrape property different structure(excludes superhog and taxes)
   let totalTripAmount;
+  let superhogFee = 0;
+  let taxesPaid = 0;
+  let stripeTransactionFee; // scraped = travelerOfferedPrice 2. direct listing = travelerOfferedPrice + tax + superhog
 
   if (isScrapedPropery) {
+    stripeTransactionFee = Math.ceil(
+      travelerOfferedPriceBeforeFees * 0.029 + 30,
+    );
+
     const scrapePropertyTotalPrice =
       travelerOfferedPriceBeforeFees + stripeTransactionFee;
 
     totalTripAmount = scrapePropertyTotalPrice;
   } else {
+    // --------- OUR PROPERTY ------------
+    superhogFee = numOfNights * SUPERHOG_FEE * 100;
+    taxesPaid = Math.round(
+      (travelerOfferedPriceBeforeFees + superhogFee) * TAX_PERCENTAGE,
+    );
+
+    stripeTransactionFee = Math.ceil(
+      (travelerOfferedPriceBeforeFees + superhogFee + taxesPaid) * 0.029 + 30,
+    );
     const totalTripAmountForOurProperty =
       travelerOfferedPriceBeforeFees +
-      superhogPaid +
+      superhogFee +
       taxesPaid +
       stripeTransactionFee;
 
@@ -65,10 +73,20 @@ export function breakdownPayment({
     totalTripAmount,
     paymentIntentId: "",
     taxesPaid,
-    taxPercentage: TAX_PERCENTAGE,
-    superhogPaid,
+    taxPercentage: isScrapedPropery ? 0 : TAX_PERCENTAGE,
+    superhogFee,
     stripeTransactionFee,
     checkoutSessionId: "",
     totalSavings,
   };
 }
+
+export const getServiceFee = ({
+  tripCheckout,
+}: {
+  tripCheckout: TripCheckout;
+}) => {
+  const serviceFee =
+    tripCheckout.superhogFee + tripCheckout.stripeTransactionFee;
+  return serviceFee;
+};

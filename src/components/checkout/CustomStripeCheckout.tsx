@@ -86,10 +86,10 @@ const CustomStripeCheckout = ({
         userId: session.data.user.id,
         hostStripeId: propertyHostUserAccount?.stripeConnectId ?? "",
         travelerOfferedPriceBeforeFees: offer.travelerOfferedPriceBeforeFees,
-        superhogPaid: 0,
-        taxesPaid: 0,
-        taxesPercentage: 0,
-        stripeTransactionFee: 0,
+        superhogFee: offer.tripCheckout.superhogFee,
+        taxesPaid: offer.tripCheckout.taxesPaid,
+        taxesPercentage: offer.tripCheckout.taxPercentage,
+        stripeTransactionFee: offer.tripCheckout.stripeTransactionFee,
       });
       return response;
     } catch (error) {

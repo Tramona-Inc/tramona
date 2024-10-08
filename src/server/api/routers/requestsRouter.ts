@@ -569,7 +569,7 @@ export async function handleRequestSubmission(
                 paymentIntentId: "",
                 taxesPaid: brokeDownPayment.taxesPaid,
                 taxPercentage: brokeDownPayment.taxPercentage,
-                superhogPaid: brokeDownPayment.superhogPaid,
+                superhogFee: brokeDownPayment.superhogFee,
                 stripeTransactionFee: brokeDownPayment.stripeTransactionFee,
                 checkoutSessionId: "",
                 totalSavings: brokeDownPayment.totalSavings,

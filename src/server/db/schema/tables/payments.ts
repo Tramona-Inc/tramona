@@ -19,12 +19,13 @@ export const tripCheckouts = pgTable("trip_checkouts", {
   checkoutSessionId: varchar("checkout_session_id"),
   taxesPaid: integer("taxes_paid").notNull().default(0),
   taxPercentage: doublePrecision("tax_percentage"), //will save as percentage ex. 2.9  = 2.9%
-  superhogPaid: integer("superhog_paid").notNull().default(0),
+  superhogFee: integer("superhog_fee").notNull().default(0),
   stripeTransactionFee: integer("stripe_transaction_fee").notNull().default(0),
   totalSavings: integer("total_savings").default(0).notNull(),
+  securityDeposit: integer("security_deposit").default(0).notNull(),
 });
 
-export type TripCheckouts = typeof tripCheckouts.$inferSelect;
+export type TripCheckout = typeof tripCheckouts.$inferSelect;
 
 // enforce mutual exclusion of offerId and bidId -- note that this is
 // not reflected in the types but you can use non-null assertions to work around it

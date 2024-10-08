@@ -18,6 +18,7 @@ import {
   cancelTripByPaymentIntent,
   captureTripPaymentWithoutSuperhog,
   sendEmailAndWhatsupConfirmation,
+  TripWCheckout,
 } from "@/utils/webhook-functions/trips-utils";
 import { createSuperhogReservation } from "@/utils/webhook-functions/superhog-utils";
 import {
@@ -97,7 +98,6 @@ export default async function webhook(
             .update(offers)
             .set({
               acceptedAt: confirmedDate,
-              paymentIntentId: paymentIntentSucceeded.id,
             })
             .where(
               eq(
@@ -155,19 +155,16 @@ export default async function webhook(
                   paymentIntentId:
                     paymentIntentSucceeded.payment_intent?.toString() ?? "",
                   totalPriceAfterFees: paymentIntentSucceeded.amount,
+                  tripCheckoutId: offer.tripCheckoutId,
                 })
                 .returning()
                 .then((res) => res[0]!);
 
-              //<-------- create tripPayment here --------->
-              console.log(
-                "about to make tripPayment",
-                paymentIntentSucceeded.metadata.total_savings!,
-                parseInt(paymentIntentSucceeded.metadata.total_savings!),
-              );
+              //<-------- update tripPayment here --------->
+
               const currentTripPayment = await db
-                .insert(tripCheckouts)
-                .values({
+                .update(tripCheckouts)
+                .set({
                   totalTripAmount: paymentIntentSucceeded.amount,
                   travelerOfferedPriceBeforeFees: parseInt(
                     paymentIntentSucceeded.metadata
@@ -179,7 +176,7 @@ export default async function webhook(
                   taxPercentage: parseFloat(
                     paymentIntentSucceeded.metadata.tax_percentage!,
                   ),
-                  superhogPaid: parseInt(
+                  superhogFee: parseInt(
                     paymentIntentSucceeded.metadata.superhog_paid!,
                   ),
                   stripeTransactionFee: parseInt(
@@ -191,15 +188,14 @@ export default async function webhook(
                     paymentIntentSucceeded.metadata.total_savings!,
                   ),
                 })
+                .where(eq(tripCheckouts.id, offer.tripCheckoutId))
                 .returning()
                 .then((res) => res[0]!);
 
-              await db
-                .update(trips)
-                .set({
-                  tripCheckoutId: currentTripPayment.id,
-                })
-                .where(eq(trips.id, currentTrip.id));
+              const currentTripWCheckout: TripWCheckout = {
+                ...currentTrip,
+                tripCheckout: { ...currentTripPayment },
+              };
 
               //<___creating a superhog reservation only if does not exist__>
 
@@ -234,7 +230,7 @@ export default async function webhook(
               //send email and whatsup (whatsup is not implemented yet)
               console.log("Sending email and whatsup");
               await sendEmailAndWhatsupConfirmation({
-                trip: currentTrip,
+                trip: currentTripWCheckout,
                 user: user!,
                 offer: offer,
                 property: currentProperty!,

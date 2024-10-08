@@ -106,7 +106,8 @@ export default function PropertyPage({
   const discountPercentage = offer
     ? getOfferDiscountPercentage({
         createdAt: offer.createdAt,
-        travelerOfferedPriceBeforeFees: offer.totalPrice,
+        travelerOfferedPriceBeforeFees:
+          offer.tripCheckout.travelerOfferedPriceBeforeFees,
         checkIn: offer.checkIn,
         checkOut: offer.checkOut,
         randomDirectListingDiscount: offer.randomDirectListingDiscount,

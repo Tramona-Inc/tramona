@@ -49,14 +49,14 @@ import { createNormalDistributionDates } from "@/server/server-utils";
 import { scrapeAirbnbPrice } from "@/server/scrapePrice";
 import { TRPCClientError } from "@trpc/client";
 import { breakdownPayment } from "@/utils/payment-utils/paymentBreakdown";
-
+import { columns } from "../../../components/admin/view-recent-host/table/columns";
 export const offersRouter = createTRPCRouter({
   accept: protectedProcedure
     .input(offerSelectSchema.pick({ id: true }))
     .mutation(async ({ ctx, input }) => {
       const offer = await ctx.db.query.offers.findFirst({
         where: eq(offers.id, input.id),
-        columns: { totalPrice: true, propertyId: true, paymentIntentId: true },
+        columns: { totalPrice: true, propertyId: true },
         with: {
           request: {
             columns: {
@@ -95,8 +95,7 @@ export const offersRouter = createTRPCRouter({
               checkOut: offer.request.checkOut,
               numGuests: offer.request.numGuests,
               groupId: offer.request.madeByGroup.id,
-              propertyId: offer.propertyId,
-              paymentIntentId: offer.paymentIntentId, //testing maybe this will get populatated first
+              propertyId: offer.propertyId, //testing maybe this will get populatated first
             }),
 
           // mark the offer as accepted
@@ -275,7 +274,6 @@ export const offersRouter = createTRPCRouter({
           totalPrice: true,
           acceptedAt: true,
           id: true,
-          tramonaFee: true,
           hostPayout: true,
           travelerOfferedPriceBeforeFees: true,
         },
@@ -398,15 +396,6 @@ export const offersRouter = createTRPCRouter({
   // });
   // }),
 
-  getStripePaymentIntentAndCheckoutSessionId: publicProcedure
-    .input(offerSelectSchema.pick({ id: true }))
-    .query(async ({ ctx, input }) => {
-      return await ctx.db.query.offers.findFirst({
-        where: eq(offers.id, input.id),
-        columns: { paymentIntentId: true, checkoutSessionId: true },
-      });
-    }),
-
   create: protectedProcedure
     .input(
       z
@@ -510,7 +499,7 @@ export const offersRouter = createTRPCRouter({
             paymentIntentId: "",
             taxesPaid: brokeDownPayment.taxesPaid,
             taxPercentage: brokeDownPayment.taxPercentage,
-            superhogPaid: brokeDownPayment.superhogPaid,
+            superhogFee: brokeDownPayment.superhogFee,
             stripeTransactionFee: brokeDownPayment.stripeTransactionFee,
             checkoutSessionId: "",
             totalSavings: brokeDownPayment.totalSavings,
@@ -613,7 +602,7 @@ export const offersRouter = createTRPCRouter({
             paymentIntentId: "",
             taxesPaid: brokeDownPayment.taxesPaid,
             taxPercentage: brokeDownPayment.taxPercentage,
-            superhogPaid: brokeDownPayment.superhogPaid,
+            superhogFee: brokeDownPayment.superhogFee,
             stripeTransactionFee: brokeDownPayment.stripeTransactionFee,
             checkoutSessionId: "",
             totalSavings: brokeDownPayment.totalSavings,
@@ -956,7 +945,6 @@ export async function getOfferPageData(offerId: number) {
       createdAt: true,
       totalPrice: true,
       acceptedAt: true,
-      tramonaFee: true,
       propertyId: true,
       requestId: true,
       hostPayout: true,
@@ -965,8 +953,10 @@ export async function getOfferPageData(offerId: number) {
       isAvailableOnOriginalSite: true,
       randomDirectListingDiscount: true,
       datePriceFromAirbnb: true,
+      tripCheckoutId: true,
     },
     with: {
+      tripCheckout: true,
       request: {
         with: {
           madeByGroup: { with: { members: true } },

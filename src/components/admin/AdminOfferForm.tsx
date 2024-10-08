@@ -146,7 +146,6 @@ export default function AdminOfferForm({
             propertyName: offer.property.name,
             offeredPriceUSD: offer.totalPrice / 100,
             offeredNightlyPriceUSD: offeredNightlyPriceUSD,
-            // tramonaFee: offer.tramonaFee,
             originalNightlyPriceUSD: offer.property.originalNightlyPrice
               ? offer.property.originalNightlyPrice / 100
               : 0,
@@ -154,10 +153,7 @@ export default function AdminOfferForm({
             checkInTime: offer.property.checkInTime ?? undefined,
             checkOutTime: offer.property.checkOutTime ?? undefined,
             imageUrls: offer.property.imageUrls.map((url) => ({ value: url })),
-            reviews: offer.property.reviews.map((r) => ({
-              ...r,
-              profilePic: r.profilePic ?? undefined,
-            })),
+            reviews: [],
             roomsWithBeds: offer.property.roomsWithBeds
               ? stringifyRoomsWithBeds(offer.property.roomsWithBeds)
               : undefined,
@@ -255,8 +251,8 @@ export default function AdminOfferForm({
         requestId: request ? request.id : offer.request?.id,
         propertyId: offer.property.id,
         totalPrice,
-        //tramonaFee: data.tramonaFee * 100,
       };
+      ``;
 
       await createReviewsMutation.mutateAsync({
         reviews: propertyData.reviews,
@@ -292,7 +288,6 @@ export default function AdminOfferForm({
         travelerOfferedPriceBeforeFees: totalPrice,
         checkIn: request ? request.checkIn : new Date(checkInDate!),
         checkOut: request ? request.checkOut : new Date(checkOutDate!),
-        //tramonaFee: data.tramonaFee * 100,
         // groupId: request?.madeByGroupId,
       };
 
