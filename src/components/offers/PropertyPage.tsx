@@ -57,7 +57,7 @@ import { createUserNameAndPic } from "../activity-feed/admin/generationHelper";
 import ReasonsToBook from "./ReasonsToBook";
 
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
-export type PropertyPageData = OfferWithDetails["property"];
+export type PropertyPageData = RouterOutputs["properties"]["getById"];
 //export type PropertyPageData = RouterOutputs["properties"]["getById"];
 
 export default function PropertyPage({

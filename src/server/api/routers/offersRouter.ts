@@ -472,6 +472,7 @@ export const offersRouter = createTRPCRouter({
             numGuests: true,
           },
         });
+        console.log(requestDetails);
 
         if (!requestDetails) throw new TRPCError({ code: "BAD_REQUEST" });
 

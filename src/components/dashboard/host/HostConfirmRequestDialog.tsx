@@ -96,7 +96,8 @@ export default function HostConfirmRequestDialog({
           .mutateAsync({
             requestId: request.id,
             propertyId: property.id,
-            totalPrice: parseInt(propertyPrices[property.id] ?? "0") * 100,
+            totalPrice:
+              parseInt(propertyPrices[property.id] ?? "0") * 100 * numNights,
             hostPayout:
               getHostPayout({
                 propertyPrice: parseFloat(propertyPrices[property.id] ?? "0"),
