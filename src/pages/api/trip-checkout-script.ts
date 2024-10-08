@@ -1,13 +1,12 @@
 import { db } from "@/server/db";
 import { tripCheckouts, trips, offers, Offer } from "@/server/db/schema";
 import { isNull, eq, and } from "drizzle-orm";
-import { NextApiResponse } from "next";
 import { breakdownPayment } from "@/utils/payment-utils/paymentBreakdown";
 
 // create a script that will allow me to populate the tripscheckout for each offer
 
 console.log("hi");
-export default async function populateTripCheckout(res: NextApiResponse) {
+export default async function populateTripCheckout() {
   const allOffersWithoutCheckout = await db.query.offers.findMany({
     where: isNull(offers.tripCheckoutId),
   });

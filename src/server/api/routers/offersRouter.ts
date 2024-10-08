@@ -19,11 +19,7 @@ import {
   trips,
 } from "@/server/db/schema";
 import { getCity, getCoordinates } from "@/server/google-maps";
-import {
-  sendText,
-  sendWhatsApp,
-  updateTravelerandHostMarkup,
-} from "@/server/server-utils";
+import { sendText, sendWhatsApp } from "@/server/server-utils";
 import { formatDateRange, getNumNights } from "@/utils/utils";
 
 import { TRPCError } from "@trpc/server";
@@ -49,16 +45,8 @@ import { createNormalDistributionDates } from "@/server/server-utils";
 import { scrapeAirbnbPrice } from "@/server/scrapePrice";
 import { TRPCClientError } from "@trpc/client";
 import { breakdownPayment } from "@/utils/payment-utils/paymentBreakdown";
+import { type Review } from "../../db/schema/tables/reviews";
 
-type PropertyWithHost = Property & {
-  host: {
-    id: string;
-    name: string | null;
-    email: string;
-    image: string | null;
-    hostProfile: { userId: string } | null;
-  } | null;
-};
 export const offersRouter = createTRPCRouter({
   accept: protectedProcedure
     .input(offerSelectSchema.pick({ id: true }))
@@ -179,6 +167,7 @@ export const offersRouter = createTRPCRouter({
       const offersByRequest = await ctx.db.query.offers.findMany({
         where: eq(offers.requestId, input.id),
         with: {
+          tripCheckout: true,
           request: {
             with: {
               madeByGroup: { with: { members: true } },
@@ -194,7 +183,16 @@ export const offersRouter = createTRPCRouter({
         ),
         with: {
           host: {
-            columns: { id: true, name: true, email: true, image: true },
+            columns: {
+              id: true,
+              name: true,
+              email: true,
+              image: true,
+              firstName: true,
+              lastName: true,
+              about: true,
+              location: true,
+            },
             with: {
               hostProfile: {
                 columns: { userId: true },
@@ -205,17 +203,16 @@ export const offersRouter = createTRPCRouter({
         },
       });
 
-      const propertiesMap: Record<number, PropertyWithHost> =
-        propertiesByRequest.reduce(
-          (
-            acc: Record<number, PropertyWithHost>,
-            property: PropertyWithHost,
-          ) => {
-            acc[property.id] = property;
-            return acc;
-          },
-          {} as Record<number, PropertyWithHost>,
-        );
+      const propertiesMap: Record<
+        number,
+        (typeof propertiesByRequest)[number]
+      > = propertiesByRequest.reduce(
+        (acc, property) => {
+          acc[property.id] = property;
+          return acc;
+        },
+        {} as Record<number, (typeof propertiesByRequest)[number]>,
+      );
 
       // Merge offers with their corresponding property
       const offersByRequestWithProperties = offersByRequest.map((offer) => ({
@@ -225,10 +222,10 @@ export const offersRouter = createTRPCRouter({
 
       offersByRequestWithProperties.map((offer) => {
         if (offer.acceptedAt !== null || offer.scrapeUrl) return offer;
-        void updateTravelerandHostMarkup({
-          offerTotalPrice: offer.totalPrice,
-          offerId: offer.id,
-        });
+        // void updateTravelerandHostMarkup({
+        //   offerTotalPrice: offer.totalPrice,
+        //   offerId: offer.id,
+        // });
         return offer;
       });
 
