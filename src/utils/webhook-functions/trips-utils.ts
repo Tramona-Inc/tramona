@@ -7,14 +7,22 @@ import {
   groupMembers,
   groups,
   properties,
+  tripCheckouts,
 } from "@/server/db/schema";
+
 import { cancelSuperhogReservation } from "./superhog-utils";
 import {
   formatDateRange,
   getDirectListingPriceBreakdown,
   getNumNights,
 } from "../utils";
-import type { User, Trip, Offer, Property } from "../../server/db/schema";
+import type {
+  User,
+  Trip,
+  Offer,
+  Property,
+  TripCheckout,
+} from "../../server/db/schema";
 import { getTramonaPriceBreakdown } from "../utils";
 import { TAX_PERCENTAGE, SUPERHOG_FEE } from "../constants";
 import { sendEmail } from "@/server/server-utils";
@@ -23,6 +31,9 @@ import ReservationConfirmedEmail from "packages/transactional/emails/Reservation
 import { stripeWithSecretKey } from "@/server/api/routers/stripeRouter";
 import BookingCancellationEmail from "packages/transactional/emails/BookingCancellationEmail";
 import { sendSlackMessage } from "@/server/slack";
+import { getServiceFee } from "../payment-utils/paymentBreakdown";
+
+export type TripWCheckout = Trip & { tripCheckout: TripCheckout };
 
 export async function cancelTripByPaymentIntent({
   paymentIntentId,
@@ -40,7 +51,15 @@ export async function cancelTripByPaymentIntent({
       tripsStatus: "Cancelled",
     })
     .where(eq(trips.paymentIntentId, paymentIntentId))
-    .returning()
+    .returning({
+      id: trips.id,
+      superhogRequestId: trips.superhogRequestId,
+      groupId: trips.groupId,
+      checkIn: trips.checkIn,
+      checkOut: trips.checkOut,
+      totalPriceAfterFees: trips.totalPriceAfterFees,
+      tripCheckout: tripCheckouts,
+    })
     .then((res) => res[0]);
 
   if (!currentTrip) {
@@ -110,7 +129,7 @@ export async function cancelTripByPaymentIntent({
 
           property: property!.name,
           reason: reason,
-          refund: currentTrip.totalPriceAfterFees!,
+          refund: currentTrip.totalPriceAfterFees,
         }),
       });
     }
@@ -123,7 +142,7 @@ export async function sendEmailAndWhatsupConfirmation({
   offer,
   property,
 }: {
-  trip: Trip;
+  trip: TripWCheckout;
   user: User;
   offer: Offer;
   property: Property;
@@ -132,16 +151,7 @@ export async function sendEmailAndWhatsupConfirmation({
   console.log("SENDING EMAIL");
   const numOfNights = getNumNights(trip.checkIn, trip.checkOut);
 
-  const { serviceFee } = offer.scrapeUrl
-    ? getDirectListingPriceBreakdown({
-        bookingCost: offer.travelerOfferedPrice,
-      })
-    : getTramonaPriceBreakdown({
-        bookingCost: offer.travelerOfferedPrice,
-        numNights: numOfNights,
-        superhogFee: SUPERHOG_FEE,
-        tax: TAX_PERCENTAGE,
-      });
+  const serviceFee = getServiceFee({ tripCheckout: trip.tripCheckout });
   //send BookingConfirmationEmail
 
   const checkInDate = trip.checkIn.toString();
@@ -157,13 +167,13 @@ export async function sendEmailAndWhatsupConfirmation({
       //hostImageUrl: property.hostImageUrl ?? "",
       checkInDate: formatDate(checkInDate, "MM/dd/yyyy"),
       checkOutDate: formatDate(checkOutDate, "MM/dd/yyyy"),
-      checkInTime: property.checkInTime ?? "12.00 PM",
-      checkOutTime: property.checkOutTime ?? "12.00 PM",
+      checkInTime: property.checkInTime,
+      checkOutTime: property.checkOutTime,
       address: property.address,
       propertyImageLink: property.imageUrls[0] ?? property.imageUrls[1] ?? "",
       tripDetailLink: `https://www.tramona.com/offers/${trip.id}`,
-      tramonaPrice: offer.travelerOfferedPrice,
-      totalPrice: trip.totalPriceAfterFees!,
+      tramonaPrice: offer.travelerOfferedPriceBeforeFees,
+      totalPrice: trip.tripCheckout.totalTripAmount,
       numOfNights: numOfNights,
       serviceFee: serviceFee,
       adults: property.maxNumGuests,

@@ -452,7 +452,10 @@ export async function getRequestsForProperties(
   const propertyToRequestMap: {
     property: Property & { taxAvailable: boolean };
     request: Request & {
-      traveler: Pick<User, "firstName" | "lastName" | "name" | "image" | "location" | "about">;
+      traveler: Pick<
+        User,
+        "firstName" | "lastName" | "name" | "image" | "location" | "about"
+      >;
     };
   }[] = [];
 
@@ -751,7 +754,7 @@ export async function updateTravelerandHostMarkup({
   await db
     .update(offers)
     .set({
-      travelerOfferedPrice: travelerPrice,
+      travelerOfferedPriceBeforeFees: travelerPrice,
       hostPayout: hostPay,
     })
     .where(and(eq(offers.id, offerId), isNull(offers.acceptedAt)));

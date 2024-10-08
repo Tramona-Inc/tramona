@@ -48,7 +48,10 @@ export type HostRequestsPageData = {
   city: string;
   requests: {
     request: Request & {
-      traveler: Pick<User, "firstName" | "lastName" | "name" | "image" | "location" | "about">;
+      traveler: Pick<
+        User,
+        "firstName" | "lastName" | "name" | "image" | "location" | "about"
+      >;
     };
     properties: (Property & {taxAvailable: boolean})[];
   }[];
@@ -177,7 +180,15 @@ export const propertiesRouter = createTRPCRouter({
         where: eq(properties.id, input.id),
         with: {
           host: {
-            columns: { image: true, name: true, email: true, id: true },
+            columns: {
+              image: true,
+              firstName: true,
+              lastName: true,
+              email: true,
+              id: true,
+              about: true,
+              location: true,
+            },
             with: {
               hostProfile: {
                 columns: { curTeamId: true },
@@ -259,16 +270,18 @@ export const propertiesRouter = createTRPCRouter({
           // lat: properties.latitude,
           // long: properties.longitude,
           distance: sql`
-            6371 * ACOS(
-              SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(lng * Math.PI) / 180})
-            ) AS distance`,
+          6371 * ACOS(
+            SIN(${(lat * Math.PI) / 180}) * SIN(radians(ST_Y(${properties.latLngPoint}))) + 
+            COS(${(lat * Math.PI) / 180}) * COS(radians(ST_Y(${properties.latLngPoint}))) * 
+            COS(radians(ST_X(${properties.latLngPoint})) - ${(lng * Math.PI) / 180})
+          ) AS distance`,
           vacancyCount: sql`
-            (SELECT COUNT(booked_dates.property_id)
-            FROM booked_dates
-            WHERE booked_dates.property_id = properties.id
-              AND booked_dates.date >= CURRENT_DATE
-              AND booked_dates.date <= CURRENT_DATE + INTERVAL '30 days') AS vacancyCount
-          `,
+          (SELECT COUNT(booked_dates.property_id)
+          FROM booked_dates
+          WHERE booked_dates.property_id = properties.id
+            AND booked_dates.date >= CURRENT_DATE
+            AND booked_dates.date <= CURRENT_DATE + INTERVAL '30 days') AS vacancyCount
+        `,
         })
         .from(properties)
         .where(
@@ -364,8 +377,12 @@ export const propertiesRouter = createTRPCRouter({
         houseRules: z.array(z.string()).optional(),
         guests: z.number().optional(),
         maxNightlyPrice: z.number().optional(),
-        lat: z.number().optional(),
-        long: z.number().optional(),
+        latLngPoint: z
+          .object({
+            lat: z.number(),
+            lng: z.number(),
+          })
+          .optional(),
         radius: z.number().optional(),
         checkIn: z.date().optional(),
         checkOut: z.date().optional(),
@@ -374,9 +391,9 @@ export const propertiesRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const { cursor, boundaries } = input;
 
-      const lat = input.lat ?? 0;
-      const lng = input.long ?? 0;
-      const radius = input.radius;
+      const lat = input.latLngPoint?.lat ?? 0;
+      const lng = input.latLngPoint?.lng ?? 0;
+      const radius = input.radius ?? 0; //just tried to fix a type error
 
       const data = await ctx.db
         .select({
@@ -395,7 +412,9 @@ export const propertiesRouter = createTRPCRouter({
           // long: properties.longitude,
           distance: sql`
             6371 * ACOS(
-              SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(lng * Math.PI) / 180})
+              SIN(${(lat * Math.PI) / 180}) * SIN(radians(ST_Y(${properties.latLngPoint}))) + 
+              COS(${(lat * Math.PI) / 180}) * COS(radians(ST_Y(${properties.latLngPoint}))) * 
+              COS(radians(ST_X(${properties.latLngPoint})) - ${(lng * Math.PI) / 180})
             ) AS distance`,
           vacancyCount: sql`
             (SELECT COUNT(booked_dates.property_id)
@@ -408,18 +427,19 @@ export const propertiesRouter = createTRPCRouter({
         .from(properties)
         .where(
           and(
-            // eq(properties.propertyStatus, "Listed"),
             cursor ? gt(properties.id, cursor) : undefined,
             boundaries
-              ? and(
-                  lte(sql`ST_Y(${properties.latLngPoint})`, boundaries.north),
-                  gte(sql`ST_Y(${properties.latLngPoint})`, boundaries.south),
-                  lte(sql`ST_X(${properties.latLngPoint})`, boundaries.east),
-                  gte(sql`ST_X(${properties.latLngPoint})`, boundaries.west),
-                )
+              ? sql`
+                ST_Y(${properties.latLngPoint}) BETWEEN ${boundaries.south} AND ${boundaries.north}
+                AND ST_X(${properties.latLngPoint}) BETWEEN ${boundaries.west} AND ${boundaries.east}
+              `
               : sql`TRUE`,
-            input.lat && input.long && !boundaries
-              ? sql`6371 * acos(SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(lng * Math.PI) / 180})) <= ${radius}`
+            input.latLngPoint?.lat && input.latLngPoint.lng && !boundaries
+              ? sql`ST_DWithin(
+                  ${properties.latLngPoint}::geography,
+                  ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)::geography,
+                  ${radius * 1000}
+                )`
               : sql`TRUE`,
             input.roomType
               ? eq(properties.roomType, input.roomType)
@@ -537,7 +557,10 @@ export const propertiesRouter = createTRPCRouter({
         number,
         {
           request: Request & {
-            traveler: Pick<User, "firstName" | "lastName" | "name" | "image" | "location" | "about">;
+            traveler: Pick<
+              User,
+              "firstName" | "lastName" | "name" | "image" | "location" | "about"
+            >;
           };
           properties: (Property & {taxAvailable: boolean})[];
         }
@@ -628,14 +651,17 @@ export const propertiesRouter = createTRPCRouter({
       return { count };
     }),
 
-    updateAutoOffer: protectedProcedure
-    .input(z.object({
-      id: z.number(),
-      autoOfferEnabled: z.boolean(),
-      autoOfferDiscountTiers: z.array(discountTierSchema),
-    }))
+  updateAutoOffer: protectedProcedure
+    .input(
+      z.object({
+        id: z.number(),
+        autoOfferEnabled: z.boolean(),
+        autoOfferDiscountTiers: z.array(discountTierSchema),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
-      await ctx.db.update(properties)
+      await ctx.db
+        .update(properties)
         .set({
           autoOfferEnabled: input.autoOfferEnabled,
           autoOfferDiscountTiers: input.autoOfferDiscountTiers,
