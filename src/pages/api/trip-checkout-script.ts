@@ -4,20 +4,12 @@ import { isNull, eq, and } from "drizzle-orm";
 import { NextApiResponse } from "next";
 import { breakdownPayment } from "@/utils/payment-utils/paymentBreakdown";
 
-// import dotenv from 'dotenv'
-// dotenv.config({ path: '../../.env' })
-
 // create a script that will allow me to populate the tripscheckout for each offer
-
-type CustomOffer = Offer & {
-  property: { originalListingUrl: string | null };
-};
 
 console.log("hi");
 export default async function populateTripCheckout(res: NextApiResponse) {
   const allOffersWithoutCheckout = await db.query.offers.findMany({
     where: isNull(offers.tripCheckoutId),
-    with: { property: { columns: { originalListingUrl: true } } },
   });
   console.log(allOffersWithoutCheckout);
 
@@ -28,7 +20,7 @@ export default async function populateTripCheckout(res: NextApiResponse) {
   );
 }
 
-async function createTripCheckout(curOffer: CustomOffer) {
+async function createTripCheckout(curOffer: Offer) {
   //for each offer
   const brokeDownPayment = breakdownPayment({
     checkIn: curOffer.checkIn,
