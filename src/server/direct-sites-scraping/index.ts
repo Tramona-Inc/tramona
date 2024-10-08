@@ -13,6 +13,7 @@ import {
   propertyInsertSchema,
   requests,
   reviewsInsertSchema,
+  tripCheckouts,
 } from "../db/schema";
 import {
   NewOffer,
@@ -30,6 +31,7 @@ import { eq, and, inArray } from "drizzle-orm";
 import {
   createRandomMarkupEightToFourteenPercent,
   getNumNights,
+  getTravelerOfferedPrice,
 } from "@/utils/utils";
 import { DIRECTLISTINGMARKUP } from "@/utils/constants";
 import {
@@ -38,11 +40,12 @@ import {
   sendText,
 } from "@/server/server-utils";
 import { cleanbnbScraper, cleanbnbSubScraper } from "./cleanbnb-scrape";
-import { log } from "@/pages/api/script";
+//import { log } from "@/pages/api/script";
 import { env } from "@/env";
 import { addHours, addMinutes } from "date-fns";
 import { z } from "zod";
 import { formatZodError } from "../../utils/zod-utils";
+import { breakdownPayment } from "@/utils/payment-utils/paymentBreakdown";
 
 type ScraperOptions = {
   location: string;
@@ -116,7 +119,7 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
 
   const scraperResults = await Promise.allSettled(
     directSiteScrapers.map((s) => {
-      log(`Starting ${s.name} for request ${options.requestId}`);
+      //log(`Starting ${s.name} for request ${options.requestId}`);
       return s.scraper(options).then((res) => {
         try {
           return scrapedListingSchema.array().parse(res);
@@ -371,15 +374,43 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
             const originalTotalPrice =
               realNightlyPrice *
               getNumNights(options.checkIn, options.checkOut);
+
+            // ----- create checkout and offer
+            const travelerOfferedPriceBeforeFees = getTravelerOfferedPrice({
+              propertyPrice: originalTotalPrice,
+              travelerMarkup: DIRECTLISTINGMARKUP,
+              numNights: getNumNights(options.checkIn, options.checkOut),
+            });
+
+            const brokeDownPayment = breakdownPayment({
+              numOfNights: getNumNights(options.checkIn, options.checkOut),
+              travelerOfferedPriceBeforeFees,
+              isScrapedPropery: true,
+            });
+
+            const tripCheckout = await db
+              .insert(tripCheckouts)
+              .values({
+                totalTripAmount: brokeDownPayment.totalTripAmount,
+                travelerOfferedPriceBeforeFees,
+                paymentIntentId: "",
+                taxesPaid: brokeDownPayment.taxesPaid,
+                taxPercentage: brokeDownPayment.taxPercentage,
+                superhogFee: brokeDownPayment.superhogFee,
+                stripeTransactionFee: brokeDownPayment.stripeTransactionFee,
+                checkoutSessionId: "",
+                totalSavings: brokeDownPayment.totalSavings,
+              })
+              .returning({ id: tripCheckouts.id })
+              .then((res) => res[0]!);
+
             const newOffer: NewOffer = {
               propertyId: tramonaPropertyId,
               checkIn: options.checkIn,
               checkOut: options.checkOut,
               totalPrice: originalTotalPrice,
               hostPayout: originalTotalPrice,
-              travelerOfferedPriceBeforeFees: Math.ceil(
-                originalTotalPrice * DIRECTLISTINGMARKUP,
-              ),
+              travelerOfferedPriceBeforeFees,
               scrapeUrl: listing.scrapeUrl,
               isAvailableOnOriginalSite: true,
               availabilityCheckedAt: new Date(),
@@ -387,6 +418,7 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
               randomDirectListingDiscount:
                 createRandomMarkupEightToFourteenPercent(),
               ...(options.requestId && { requestId: options.requestId }),
+              tripCheckoutId: tripCheckout.id,
             };
 
             await trx
@@ -443,13 +475,41 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
               realNightlyPrice *
               getNumNights(options.checkIn, options.checkOut);
 
+            const travelerOfferedPriceBeforeFees = getTravelerOfferedPrice({
+              propertyPrice: originalTotalPrice,
+              travelerMarkup: DIRECTLISTINGMARKUP,
+              numNights: getNumNights(options.checkIn, options.checkOut),
+            });
+
+            const brokeDownPayment = breakdownPayment({
+              numOfNights: getNumNights(options.checkIn, options.checkOut),
+              travelerOfferedPriceBeforeFees,
+              isScrapedPropery: true,
+            });
+
+            const tripCheckout = await db
+              .insert(tripCheckouts)
+              .values({
+                totalTripAmount: brokeDownPayment.totalTripAmount,
+                travelerOfferedPriceBeforeFees,
+                paymentIntentId: "",
+                taxesPaid: brokeDownPayment.taxesPaid,
+                taxPercentage: brokeDownPayment.taxPercentage,
+                superhogFee: brokeDownPayment.superhogFee,
+                stripeTransactionFee: brokeDownPayment.stripeTransactionFee,
+                checkoutSessionId: "",
+                totalSavings: brokeDownPayment.totalSavings,
+              })
+              .returning({ id: tripCheckouts.id })
+              .then((res) => res[0]!);
+
             await trx.insert(offers).values({
               propertyId,
               checkIn: options.checkIn,
               checkOut: options.checkOut,
               totalPrice: originalTotalPrice,
               hostPayout: originalTotalPrice,
-              travelerOfferedPriceBeforeFees: originalTotalPrice,
+              travelerOfferedPriceBeforeFees,
               scrapeUrl: listing.scrapeUrl,
               isAvailableOnOriginalSite: true,
               availabilityCheckedAt: new Date(),
@@ -457,6 +517,7 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
                 createRandomMarkupEightToFourteenPercent(),
               becomeVisibleAt: new Date(becomeVisibleAtNumber),
               ...(options.requestId && { requestId: options.requestId }),
+              tripCheckoutId: tripCheckout.id,
             });
           }
         }

@@ -38,7 +38,6 @@ export const tripsRouter = createTRPCRouter({
           },
           offer: {
             columns: {
-              paymentIntentId: true,
               checkIn: true,
               checkOut: true,
             },
@@ -91,7 +90,6 @@ export const tripsRouter = createTRPCRouter({
         },
         offer: {
           columns: {
-            paymentIntentId: true,
             checkIn: true,
             checkOut: true,
           },

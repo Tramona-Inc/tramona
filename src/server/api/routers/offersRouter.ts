@@ -49,7 +49,6 @@ import { createNormalDistributionDates } from "@/server/server-utils";
 import { scrapeAirbnbPrice } from "@/server/scrapePrice";
 import { TRPCClientError } from "@trpc/client";
 import { breakdownPayment } from "@/utils/payment-utils/paymentBreakdown";
-import { columns } from "../../../components/admin/view-recent-host/table/columns";
 export const offersRouter = createTRPCRouter({
   accept: protectedProcedure
     .input(offerSelectSchema.pick({ id: true }))
