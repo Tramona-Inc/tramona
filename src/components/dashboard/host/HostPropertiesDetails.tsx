@@ -282,7 +282,7 @@ export default function HostPropertiesDetails({
             setEditing={setEditing}
             onSubmit={handleFormSubmit}
             property={property}
-            disabled={user?.coHostRole !== "loose"}
+            disabled={user?.mainHostId !== null && user?.coHostRole !== "loose"}
           />
         </div>
       </div>
