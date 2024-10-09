@@ -27,6 +27,7 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useInviteStore } from "@/utils/store/inviteLink";
 import { authProviders } from "@/config/authProviders";
+import { useCohostInviteStore } from "@/utils/store/cohostInvite";
 
 export default function SignIn() {
   const utils = api.useUtils();
@@ -72,8 +73,10 @@ export default function SignIn() {
     reValidateMode: "onSubmit",
   });
 
-  const { query } = useRouter();
+  const router = useRouter();
+  // const router = useRouter();
   const [inviteLinkId] = useInviteStore((state) => [state.inviteLinkId]);
+  const cohostInviteId = useCohostInviteStore((state) => state.cohostInviteId);
   const { mutate: inviteUser } = api.groups.inviteCurUserToGroup.useMutation();
 
   const handleSubmit = async ({
@@ -82,37 +85,40 @@ export default function SignIn() {
   }: z.infer<typeof formSchema>) => {
     // Relies on middleware to redirect to dashbaord
     // onboarding checks if user has a phone number else go to dashboard
-    const from = query.from as string | undefined;
+    const callbackUrl = router.query.callbackUrl as string || router.query.from as string || `${window.location.origin}`;
 
     await signIn("credentials", {
       email: email,
       password: password,
-      callbackUrl: from ?? `${window.location.origin}`,
+      callbackUrl,
     }).then(() => {
       if (inviteLinkId) {
         void inviteUser({ inviteLinkId });
+      }
+      if (cohostInviteId) {
+        void router.push(`/cohost-invite/${cohostInviteId}`);
       }
     });
   };
 
   useEffect(() => {
-    if (query.error) {
-      if (query.error === "SessionRequired") {
+    if (router.query.error) {
+      if (router.query.error === "SessionRequired") {
         toast({ title: "Please log in to continue" });
-      } else if (query.error === "OAuthCallback") {
+      } else if (router.query.error === "OAuthCallback") {
         errorToast("Couldn't log in, try using email/password");
       } else {
         errorToast("Couldn't log in, please try again");
       }
     }
 
-    if (query.isVerified) {
+    if (router.query.isVerified) {
       toast({
         title: "Account successfully verified!",
         description: "Please re-enter your credentials to log in.",
       });
     }
-  }, [query.error, query.isVerified]);
+  }, [router.query.error, router.query.isVerified]);
 
   return (
     <MainLayout>
