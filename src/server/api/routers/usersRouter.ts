@@ -41,7 +41,6 @@ import {
   sendEmail,
 } from "@/server/server-utils";
 import WelcomeEmail from "packages/transactional/emails/WelcomeEmail";
-import { counties, states } from "@/server/db/schema/tables/taxes";
 
 export const usersRouter = createTRPCRouter({
   getUser: optionallyAuthedProcedure.query(async ({ ctx }) => {
@@ -522,7 +521,10 @@ export const usersRouter = createTRPCRouter({
           const propertyObjects = await Promise.all(
             listings.map(async (property) => {
               // Get location information
-              const locInfo = await getCity({ lat: property.lat, lng: property.lng });
+              const locInfo = await getCity({
+                lat: property.lat,
+                lng: property.lng,
+              });
 
               // Construct property object
               return {
@@ -552,14 +554,16 @@ export const usersRouter = createTRPCRouter({
                 avgRating: property.starRating ?? 0,
                 hostTeamId: teamId,
                 imageUrls: property.listingImages,
-                amenities: property.listingAmenities.map((amenity) => amenity.amenityName),
-                cancellationPolicy: propertyInsertSchema.shape.cancellationPolicy
-                  .catch(null)
-                  .parse(property.cancellationPolicy),
+                amenities: property.listingAmenities.map(
+                  (amenity) => amenity.amenityName,
+                ),
+                cancellationPolicy:
+                  propertyInsertSchema.shape.cancellationPolicy
+                    .catch(null)
+                    .parse(property.cancellationPolicy),
               };
-            })
+            }),
           );
-
 
           // Now pass the resolved array of objects to the .values() method
           const insertedProperties = await ctx.db

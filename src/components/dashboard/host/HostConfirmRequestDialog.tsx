@@ -44,7 +44,7 @@ export default function HostConfirmRequestDialog({
   open: boolean;
   setOpen: (open: boolean) => void;
   request: HostDashboardRequest;
-  properties: (Property & {taxAvailable: boolean})[];
+  properties: (Property & { taxAvailable: boolean })[];
   setPropertyPrices: React.Dispatch<
     React.SetStateAction<Record<number, string>>
   >;
@@ -59,7 +59,6 @@ export default function HostConfirmRequestDialog({
   const [editValue, setEditValue] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const slackMutation = api.twilio.sendSlack.useMutation();
-
 
   const handleEdit = (id: number) => {
     setSelectedPropertyToEdit(id);
@@ -94,12 +93,12 @@ export default function HostConfirmRequestDialog({
   const handleSubmit = async () => {
     setIsLoading(true);
     const propertiesWithNoTax = filteredSelectedProperties
-    .filter((property) => !property.taxAvailable)
-    .map((property) => property.city); // List cities of properties without tax
+      .filter((property) => !property.taxAvailable)
+      .map((property) => property.city); // List cities of properties without tax
 
-  const propertiesWithTax = filteredSelectedProperties.filter(
-    (property) => property.taxAvailable
-  );
+    const propertiesWithTax = filteredSelectedProperties.filter(
+      (property) => property.taxAvailable,
+    );
 
     await Promise.all(
       // todo: make procedure accept array
@@ -135,34 +134,39 @@ export default function HostConfirmRequestDialog({
           });
       }),
     )
-    .then(async() => {
-      setIsLoading(false);
+      .then(async () => {
+        setIsLoading(false);
 
-      if (propertiesWithNoTax.length === 0) {
-        // All properties had tax set up, proceed to step 2
-        setStep(2);
-      } else {
-        // Some properties did not have tax set up, show popup
-        toast({
-          title: "Error Creating Offers",
-          description: `We do not currently have taxes set up for these locations: ${propertiesWithNoTax.join(
-            ", "
-          )}`,
-          variant: "destructive",
-        });
-        //send slack
-        await slackMutation.mutateAsync({
-          message: `Tramona: A host tried to create an offer without tax for the following locations: ${propertiesWithNoTax.join(
-            ", "
-          )}.`,
-        });
-        setStep(1); // Reset the step to 1 if some properties failed
-      }
-    })
-    .catch(() => {
-      setIsLoading(false);
-      setStep(1);
-    });
+        if (propertiesWithNoTax.length === 0) {
+          // All properties had tax set up, proceed to step 2
+          setStep(2);
+        } else {
+          // Some properties did not have tax set up, show popup
+          toast({
+            title: "Error Creating Offers",
+            description: [
+              `We do not currently have taxes set up for these locations:`,
+              `${propertiesWithNoTax.join(", ")}`,
+              `A request for this location tax to be configured has been sent. Keep an eye on your offer details for updates! `,
+            ].join("\n"),
+
+            variant: "destructive",
+          });
+          //send slack
+          await slackMutation.mutateAsync({
+            isProductionOnly: false,
+            message: [
+              `Tramona: A host tried to create an offer without tax for the following locations: ${propertiesWithNoTax.join(", ")}.`,
+              `Property Ids: ${properties.map((p) => p.id).join(", ")}`,
+            ].join("\n"),
+          });
+          setStep(1); // Reset the step to 1 if some properties failed
+        }
+      })
+      .catch(() => {
+        setIsLoading(false);
+        setStep(1);
+      });
   };
 
   const numNights = getNumNights(request.checkIn, request.checkOut);
