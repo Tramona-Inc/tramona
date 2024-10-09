@@ -269,6 +269,7 @@ export const properties = pgTable(
     checkInTime: time("check_in_time").notNull().default("15:00:00"),
     checkOutTime: time("check_out_time").notNull().default("10:00:00"),
 
+
     // amenities: propertyAmenitiesEnum("amenities").array().notNull(),
     amenities: varchar("amenities")
       .array()

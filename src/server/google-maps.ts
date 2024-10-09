@@ -36,9 +36,17 @@ export async function getCity({ lat, lng }: { lat: number; lng: number }) {
     })
     .then((res) => res.data.results[0]?.address_components);
 
-  if (!addressComponents) return "[Unknown location]";
+  if (!addressComponents) {
+    return {
+      city: "[Unknown]",
+      county: "[Unknown]",
+      stateName: "[Unknown]",
+      stateCode: "[Unknown]",
+      country: "[Unknown]",
+    };
+  }
 
-  const country = addressComponents.find((component) =>
+  const countryComponent = addressComponents.find((component) =>
     component.types.includes("country"),
   );
 
@@ -50,9 +58,13 @@ export async function getCity({ lat, lng }: { lat: number; lng: number }) {
       component.types.includes("administrative_area_level_3"),
   );
 
-  const state = addressComponents.find((component) =>
+  const stateComponent = addressComponents.find((component) =>
     component.types.includes("administrative_area_level_1"),
-  )?.short_name;
+  );
+
+  const countyComponent = addressComponents.find((component) =>
+    component.types.includes("administrative_area_level_2"),
+  )?.long_name;
 
   let city = cityComponent?.long_name;
 
@@ -69,15 +81,75 @@ export async function getCity({ lat, lng }: { lat: number; lng: number }) {
     }
   }
 
-  if (!country || !city) return "[Unknown location]";
-
-  if (country.short_name === "US") {
-    if (state) return `${city}, ${state}, ${country.short_name}`;
-    return `${city}, ${country.short_name}`;
-  }
-
-  return `${city}, ${country.long_name || country.short_name}`;
+  return {
+    city: city ?? "[Unknown]",
+    county: countyComponent ?? "[Unknown]",
+    stateName: stateComponent?.long_name ?? "[Unknown]", // State name
+    stateCode: stateComponent?.short_name ?? "[Unknown]", // State code (abbreviation)
+    country: (countryComponent?.short_name ?? countryComponent?.long_name) ?? "[Unknown]",
+  };
 }
+
+
+
+// export async function getCity({ lat, lng }: { lat: number; lng: number }) {
+//   const addressComponents = await googleMaps
+//     .reverseGeocode({
+//       params: {
+//         latlng: { lat, lng },
+//         key: env.GOOGLE_MAPS_KEY,
+//       },
+//     })
+//     .then((res) => res.data.results[0]?.address_components);
+
+//   if (!addressComponents) return "[Unknown location]";
+
+//   const country = addressComponents.find((component) =>
+//     component.types.includes("country"),
+//   );
+
+//   const cityComponent = addressComponents.find(
+//     (component) =>
+//       component.types.includes("locality") ||
+//       component.types.includes("sublocality") ||
+//       component.types.includes("neighborhood") ||
+//       component.types.includes("administrative_area_level_3"),
+//   );
+
+//   const state = addressComponents.find((component) =>
+//     component.types.includes("administrative_area_level_1"),
+//   )?.short_name;
+
+//   const county = addressComponents.find((component) =>
+//     component.types.includes("administrative_area_level_2"),
+//   )?.long_name;
+
+//   let city = cityComponent?.long_name;
+
+//   // Map specific neighborhoods to their parent cities
+//   if (cityComponent?.types.includes("neighborhood")) {
+//     const parentLocality = addressComponents.find(
+//       (component) =>
+//         component.types.includes("locality") ||
+//         component.types.includes("sublocality") ||
+//         component.types.includes("administrative_area_level_3"),
+//     );
+//     if (parentLocality) {
+//       city = parentLocality.long_name;
+//     }
+//   }
+
+//   if (!country || !city) return "[Unknown location]";
+
+//  let location = `${city}, ${state ?? ''}, ${country.short_name || ''}`;
+
+//   // Include county if available and country is US
+//   if (country.short_name === "US" && county) {
+//     location = `${city}, ${county}, ${state || ''}, ${country.short_name}`;
+//   }
+
+//   return location.trim();
+// }
 
 export async function getCountryISO({
   lat,
