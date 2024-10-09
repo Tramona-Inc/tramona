@@ -35,6 +35,17 @@ export const requestableAmenitiesEnum = pgEnum(
   "requestable_amenities",
   ALL_REQUESTABLE_AMENITIES,
 );
+export const ALL_REQUEST_MESSAGE_CASES = [
+  "No matches within price range",
+  "Some close matches",
+  "No close matches",
+  "Many close matches",
+] as const;
+export type RequestMessageCase = (typeof ALL_REQUEST_MESSAGE_CASES)[number];
+export const requestMessageCasesEnum = pgEnum(
+  "request_message_cases",
+  ALL_REQUEST_MESSAGE_CASES,
+);
 
 export const requests = pgTable(
   "requests",
@@ -76,6 +87,8 @@ export const requests = pgTable(
       .notNull()
       .$type<{ x: number; y: number }>(),
     notifiedNoOffers: boolean("notified_no_offers").notNull().default(false),
+    messageCase: requestMessageCasesEnum("message_case"),
+    messageSent: timestamp("message_sent", { withTimezone: true }),
   },
   (t) => ({
     madeByGroupidIdx: index().on(t.madeByGroupId),

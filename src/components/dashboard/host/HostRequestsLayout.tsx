@@ -22,47 +22,32 @@ import { useToast } from "@/components/ui/use-toast";
 export default function HostRequestsLayout({
   children,
 }: React.PropsWithChildren) {
-  const [separatedData, setSeparatedData] = useState<SeparatedData | null>(
-    null,
-  );
+  const [separatedData, setSeparatedData] = useState<SeparatedData | null>(null);
   const [selectedOption, setSelectedOption] = useState<
     "normal" | "outsidePriceRestriction"
   >("normal");
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
+  const [isDataLoading, setIsDataLoading] = useState(true); // New state to track data loading
   const router = useRouter();
 
   const { toast } = useToast();
 
-  api.properties.getHostPropertiesWithRequests.useQuery(undefined, {
-    onSuccess: (fetchedProperties) => {
-      const separatedProperties = separateByPriceRestriction(fetchedProperties);
-      setSeparatedData(separatedProperties);
-
-      const firstCity = separatedProperties[selectedOption][0]?.city ?? null;
-      if (firstCity) {
-        setSelectedCity(firstCity);
-        void router.push(
-          selectedOption === "normal"
-            ? `/host/requests/${firstCity}`
-            : `/host/requests/${firstCity}?priceRestriction=true`,
-        );
-      }
-    },
-  });
+  const { data: fetchedProperties, isLoading } = api.properties.getHostPropertiesWithRequests.useQuery(
+    undefined,
+    {
+      onSuccess: (fetchedProperties) => {
+        const separatedProperties = separateByPriceRestriction(fetchedProperties);
+        setSeparatedData(separatedProperties);
+        setIsDataLoading(false); // Set loading state to false when data is fetched
+      },
+    }
+  );
 
   useEffect(() => {
-    if (separatedData) {
-      const firstCity = separatedData[selectedOption][0]?.city ?? null;
-      if (firstCity) {
-        setSelectedCity(firstCity);
-        void router.push(
-          selectedOption === "normal"
-            ? `/host/requests/${firstCity}`
-            : `/host/requests/${firstCity}?priceRestriction=true`,
-        );
-      }
+    if (isLoading) {
+      setIsDataLoading(true); // If API starts loading again, mark the data loading as true
     }
-  }, [selectedOption, separatedData]);
+  }, [isLoading]);
 
   const displayedData = separatedData ? separatedData[selectedOption] : [];
 
@@ -101,35 +86,36 @@ export default function HostRequestsLayout({
             </div>
           </div>
           <div className="pt-4">
-            {displayedData ? (
-              displayedData.length > 0 ? (
-                displayedData.map((cityData) => (
-                  <SidebarCity
-                    key={cityData.city}
-                    cityData={cityData}
-                    selectedOption={selectedOption}
-                    selectedCity={selectedCity}
-                    setSelectedCity={setSelectedCity}
-                  />
-                ))
-              ) : (
-                <EmptyState
-                  icon={HandshakeIcon}
-                  className="h-[calc(100vh-280px)]"
-                >
-                  <EmptyStateTitle>No requests yet</EmptyStateTitle>
-                  <EmptyStateDescription>
-                    Properties with requests will show up here
-                  </EmptyStateDescription>
-                  <EmptyStateFooter>
-                    <Button asChild variant="outline">
-                      <Link href="/host/properties">View all properties</Link>
-                    </Button>
-                  </EmptyStateFooter>
-                </EmptyState>
-              )
-            ) : (
+            {isDataLoading ? (
+              // Show skeletons while loading
               range(10).map((i) => <SidebarPropertySkeleton key={i} />)
+            ) : displayedData.length > 0 ? (
+              // Show the list of cities if data is available
+              displayedData.map((cityData) => (
+                <SidebarCity
+                  key={cityData.city}
+                  cityData={cityData}
+                  selectedOption={selectedOption}
+                  selectedCity={selectedCity}
+                  setSelectedCity={setSelectedCity}
+                />
+              ))
+            ) : (
+              // Show the empty state only when not loading and no data is available
+              <EmptyState
+                icon={HandshakeIcon}
+                className="h-[calc(100vh-280px)]"
+              >
+                <EmptyStateTitle>No requests yet</EmptyStateTitle>
+                <EmptyStateDescription>
+                  Properties with requests will show up here
+                </EmptyStateDescription>
+                <EmptyStateFooter>
+                  <Button asChild variant="outline">
+                    <Link href="/host/properties">View all properties</Link>
+                  </Button>
+                </EmptyStateFooter>
+              </EmptyState>
             )}
           </div>
         </ScrollArea>
