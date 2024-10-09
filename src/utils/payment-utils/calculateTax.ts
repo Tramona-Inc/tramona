@@ -1,9 +1,10 @@
-import { calculateTotalTax } from "@/utils/taxData";
+import { calculateTotalTax } from "@/utils/payment-utils/taxData";
 import { sumBy } from "lodash";
 import { getCity } from "@/server/google-maps";
 import { TAX_PERCENTAGE } from "../constants";
+
 export async function getTax({ lat, lng }: { lat: number; lng: number }) {
-  const usAddressRegex = /(.+),\s*([A-Z]{2})\s*\d{5},\s*(USA)/;
+  //const usAddressRegex = /(.+),\s*([A-Z]{2})\s*\d{5},\s*(USA)/;
 
   // Match the address against the regex
   //const match = location.match(usAddressRegex);
@@ -26,6 +27,7 @@ export async function getTax({ lat, lng }: { lat: number; lng: number }) {
       calculateTotalTax(country, stateCode, city),
       (tax) => tax.taxRate,
     );
+
     console.log(totalTaxRate);
     if (totalTaxRate <= 0) {
       totalTaxRate = TAX_PERCENTAGE;

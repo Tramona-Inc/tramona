@@ -14,8 +14,7 @@ import { eq } from "drizzle-orm";
 import { sendSlackMessage } from "@/server/slack";
 import { createLatLngGISPoint } from "@/server/server-utils";
 import { getCity } from "@/server/google-maps";
-import { calculateTotalTax } from "@/utils/taxData";
-
+import { calculateTotalTax } from "@/utils/payment-utils/taxData";
 
 export async function insertHost(id: string) {
   // Insert Host info
@@ -64,7 +63,6 @@ export async function insertHost(id: string) {
     channel: "host-bot",
   });
 }
-
 
 const airbnbPropertyTypes = [
   "house",
@@ -252,11 +250,14 @@ export default async function webhook(
       case "channel.activated":
         console.log("channel created");
         await insertHost(webhookData.data.customer.id);
-        await db.update(users).set({
-          image: webhookData.data.picture,
-          location: webhookData.data.location,
-          about: webhookData.data.description,
-        }).where(eq(users.id, webhookData.data.customer.id));
+        await db
+          .update(users)
+          .set({
+            image: webhookData.data.picture,
+            location: webhookData.data.location,
+            about: webhookData.data.description,
+          })
+          .where(eq(users.id, webhookData.data.customer.id));
         break;
       case "listing.created":
         const userId = webhookData.data.channel.customer.id;
@@ -339,7 +340,10 @@ export default async function webhook(
         }
 
         // Insert data into the reservedDates table
-        const latLngPoint = createLatLngGISPoint({ lat: webhookData.data.address.latitude, lng: webhookData.data.address.longitude });
+        const latLngPoint = createLatLngGISPoint({
+          lat: webhookData.data.address.latitude,
+          lng: webhookData.data.address.longitude,
+        });
 
         const { city, stateCode, country } = await getCity({
           lat: webhookData.data.address.latitude,
@@ -354,7 +358,6 @@ export default async function webhook(
             channel: "host-bot",
           });
         }
-
 
         const propertyObject = {
           hostId: userId,
@@ -391,8 +394,6 @@ export default async function webhook(
           //ratings: webhookData.data.ratings,
         };
 
-
-
         const propertyId = await db
           .insert(properties)
           .values(propertyObject)
@@ -404,7 +405,7 @@ export default async function webhook(
             propertyId: propertyId,
             start: dateRange.start,
             end: dateRange.end,
-            platformBookedOn: "airbnb"
+            platformBookedOn: "airbnb",
           });
         }
         break;
@@ -418,5 +419,3 @@ export default async function webhook(
     res.status(405).end("Method Not Allowed");
   }
 }
-
-

@@ -1,3 +1,6 @@
+import { db } from "@/server/db";
+import { tripCheckouts } from "@/server/db/schema";
+
 type CityTaxRates = Record<string, Record<string, number>>; // Maps city names to taxes
 
 type StateTaxRates = {
@@ -9,19 +12,21 @@ type CountryTaxRates = Record<string, StateTaxRates | null>; // States can be nu
 
 type TaxRates = Record<string, CountryTaxRates | null>;
 
+//if tax rate array is null then it wont show
+
 export const taxRates: TaxRates = {
   US: {
     CA: {
       cities: {
         "San Diego": {
-          "San Diego Transit Occupancy Tax": 10.5,
+          "San Diego Transit Occupancy Tax": 0.105,
         },
         // Add more cities as needed
       },
     },
     TX: {
       stateRate: {
-        "Texas State Hotel Occupancy Tax": 6.0,
+        "Texas State Hotel Occupancy Tax": 60,
       },
       cities: {
         Austin: {
@@ -32,12 +37,12 @@ export const taxRates: TaxRates = {
     },
     // Add more states as needed
   },
-  "Puerto Rico": {
-    stateRate: {
-      "Puerto Rico Room Tax": 7.0,
-      // comments: "the listing price, including any cleaning fees, for reservations of 89 nights or shorter.",
-    },
-  },
+  // "Puerto Rico": {
+  //   stateRate: {
+  //     "Puerto Rico Room Tax": 7.0,
+  //     // comments: "the listing price, including any cleaning fees, for reservations of 89 nights or shorter.",
+  //   },
+  // },
   // Add more countries if necessary
 };
 
@@ -55,7 +60,7 @@ export function calculateTotalTax(
   if (!countryData) return [];
 
   if (country === "Puerto Rico") {
-    return [{ taxName: "Puerto Rico Room Tax", taxRate: 7.0 }];
+    return [{ taxName: "Puerto Rico Room Tax", taxRate: 0.07 }];
   }
 
   const stateData = countryData[stateCode];
