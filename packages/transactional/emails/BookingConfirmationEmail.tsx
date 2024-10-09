@@ -37,7 +37,6 @@ export default function BookingConfirmationEmail({
   address = "101 street planet earth",
   propertyImageLink = "https://via.placeholder.com/600x300",
   tripDetailLink = "https://www.tramona.com/",
-  originalPrice = 1000,
   tramonaPrice = 500,
   offerLink = "http://tramona/offers{offer.id}",
   numOfNights = 3,

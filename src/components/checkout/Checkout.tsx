@@ -11,7 +11,7 @@ import { useChatWithAdmin } from "@/utils/messaging/useChatWithAdmin";
 import CustomStripeCheckout from "./CustomStripeCheckout";
 import { OfferPriceDetails } from "../_common/OfferPriceDetails";
 import { getCancellationPolicyDescription } from "@/config/getCancellationPolicyDescription";
-
+import React from "react";
 export default function Checkout({ offer }: { offer: OfferWithDetails }) {
   const router = useRouter();
   const isMobile = !useIsSm();
@@ -73,6 +73,16 @@ export default function Checkout({ offer }: { offer: OfferWithDetails }) {
   }
 
   function CheckoutSummary() {
+    const offerDiscountPercentage = getOfferDiscountPercentage({
+      createdAt: offer.createdAt,
+      travelerOfferedPriceBeforeFees:
+        offer.tripCheckout.travelerOfferedPriceBeforeFees,
+      checkIn: offer.checkIn,
+      checkOut: offer.checkOut,
+      randomDirectListingDiscount: offer.randomDirectListingDiscount,
+      datePriceFromAirbnb: offer.datePriceFromAirbnb,
+    });
+    console.log(offerDiscountPercentage);
     return (
       <div>
         <div className="md:rounded-t-xl md:border md:border-b-0 md:p-3">
@@ -116,20 +126,14 @@ export default function Checkout({ offer }: { offer: OfferWithDetails }) {
           <OfferPriceDetails offer={offer} />
         </div>
         <div className="rounded-md bg-teal-900 md:rounded-b-xl md:rounded-t-none">
-          <h2 className="py-1 text-center text-lg font-semibold text-white md:py-2">
-            {(offer.property.airbnbUrl ?? offer.scrapeUrl)
-              ? getOfferDiscountPercentage({
-                  createdAt: offer.createdAt,
-                  travelerOfferedPrice: offer.totalPrice,
-                  checkIn: offer.checkIn,
-                  checkOut: offer.checkOut,
-                  randomDirectListingDiscount:
-                    offer.randomDirectListingDiscount,
-                  datePriceFromAirbnb: offer.datePriceFromAirbnb,
-                })
-              : 0}
-            % Off
-          </h2>
+          {((offer.datePriceFromAirbnb && offerDiscountPercentage > 0) ??
+          offer.randomDirectListingDiscount !== null) ? (
+            <h2 className="py-1 text-center text-lg font-semibold text-white md:py-2">
+              {offerDiscountPercentage}% Off
+            </h2>
+          ) : (
+            <Separator />
+          )}
         </div>
       </div>
     );

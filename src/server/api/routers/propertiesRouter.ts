@@ -180,7 +180,15 @@ export const propertiesRouter = createTRPCRouter({
         where: eq(properties.id, input.id),
         with: {
           host: {
-            columns: { image: true, name: true, email: true, id: true },
+            columns: {
+              image: true,
+              firstName: true,
+              lastName: true,
+              email: true,
+              id: true,
+              about: true,
+              location: true,
+            },
             with: {
               hostProfile: {
                 columns: { curTeamId: true },
@@ -383,9 +391,9 @@ export const propertiesRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const { cursor, boundaries } = input;
 
-      const lat = input.lat ?? 0;
-      const lng = input.long ?? 0;
-      const radius = input.radius;
+      const lat = input.latLngPoint?.lat ?? 0;
+      const lng = input.latLngPoint?.lng ?? 0;
+      const radius = input.radius ?? 0; //just tried to fix a type error
 
       const data = await ctx.db
         .select({
