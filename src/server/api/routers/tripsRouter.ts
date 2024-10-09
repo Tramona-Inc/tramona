@@ -4,7 +4,7 @@ import {
   roleRestrictedProcedure,
 } from "@/server/api/trpc";
 import { db } from "@/server/db";
-import { groupMembers, properties, trips } from "@/server/db/schema";
+import { groupMembers, properties, trips, users } from "@/server/db/schema";
 
 import { TRPCError } from "@trpc/server";
 import { group } from "console";
@@ -87,9 +87,21 @@ export const tripsRouter = createTRPCRouter({
   }),
 
   getHostTrips: protectedProcedure.query(async ({ ctx }) => {
+    const user = await ctx.db.query.users.findFirst({
+      where: eq(users.id, ctx.user.id),
+    });
+
     return await db.query.trips.findMany({
       where: exists(
-        db.select().from(properties).where(eq(properties.hostId, ctx.user.id)),
+        db
+          .select()
+          .from(properties)
+          .where(
+            eq(
+              properties.hostId,
+              user?.mainHostId ? user.mainHostId : ctx.user.id,
+            ),
+          ),
       ),
       with: {
         property: {
