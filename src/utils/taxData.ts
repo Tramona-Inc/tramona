@@ -9,25 +9,24 @@ type CountryTaxRates = Record<string, StateTaxRates | null>; // States can be nu
 
 type TaxRates = Record<string, CountryTaxRates | null>;
 
-
 export const taxRates: TaxRates = {
-  "US": {
-    "CA": {
+  US: {
+    CA: {
       cities: {
-        'San Diego': {
+        "San Diego": {
           "San Diego Transit Occupancy Tax": 10.5,
-        }
+        },
         // Add more cities as needed
       },
     },
-    "TX": {
+    TX: {
       stateRate: {
-       "Texas State Hotel Occupancy Tax": 6.0,
+        "Texas State Hotel Occupancy Tax": 6.0,
       },
       cities: {
         Austin: {
           "Austin Hotel Occupancy Tax": 11.0,
-        }
+        },
         // Add more cities as needed
       },
     },
@@ -42,8 +41,6 @@ export const taxRates: TaxRates = {
   // Add more countries if necessary
 };
 
-
-
 type TaxDetail = {
   taxName: string;
   taxRate: number;
@@ -51,8 +48,8 @@ type TaxDetail = {
 
 export function calculateTotalTax(
   country: string,
-  state: string,
-  city?: string
+  stateCode: string,
+  city?: string,
 ): TaxDetail[] {
   const countryData = taxRates[country];
   if (!countryData) return [];
@@ -61,10 +58,13 @@ export function calculateTotalTax(
     return [{ taxName: "Puerto Rico Room Tax", taxRate: 7.0 }];
   }
 
-  const stateData = countryData[state];
+  const stateData = countryData[stateCode];
   if (!stateData) return [];
 
-  if (stateData.hasOwnProperty('cities') && !stateData.cities?.hasOwnProperty(city!)) {
+  if (
+    stateData.hasOwnProperty("cities") &&
+    !stateData.cities?.hasOwnProperty(city!)
+  ) {
     return [];
   }
 
