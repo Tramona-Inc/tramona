@@ -1,22 +1,16 @@
 import { api } from "@/utils/api";
 import { useStripe } from "@/utils/stripe-client";
-import {
-  formatDateRange,
-  getDirectListingPriceBreakdown,
-  getNumNights,
-  getTramonaPriceBreakdown,
-} from "@/utils/utils";
+import { formatDateRange, getNumNights } from "@/utils/utils";
 import StripeCheckoutForm from "./StripeCheckoutForm";
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
-import { TAX_PERCENTAGE, SUPERHOG_FEE } from "@/utils/constants";
 import type { OfferWithDetails } from "../offers/PropertyPage";
 import { Elements } from "@stripe/react-stripe-js";
 import { type StripeElementsOptions } from "@stripe/stripe-js";
 import Spinner from "../_common/Spinner";
-
 import { useToast } from "../ui/use-toast";
+
 const CustomStripeCheckout = ({
   offer: { property, ...offer },
 }: {
@@ -31,31 +25,15 @@ const CustomStripeCheckout = ({
     () => getNumNights(offer.checkIn, offer.checkOut),
     [offer.checkIn, offer.checkOut],
   );
+
   const originalTotal = useMemo(
     () =>
       offer.randomDirectListingDiscount
         ? (offer.randomDirectListingDiscount / 100 + 1) *
-          offer.travelerOfferedPrice
+          offer.travelerOfferedPriceBeforeFees
         : property.originalNightlyPrice! * numNights,
     [property.originalNightlyPrice, numNights],
   );
-
-  const { serviceFee, finalTotal } = useMemo(() => {
-    if (offer.scrapeUrl) {
-      console.log("Direct Listing");
-      return getDirectListingPriceBreakdown({
-        bookingCost: offer.travelerOfferedPrice,
-      });
-    } else {
-      console.log("not a direct Listing");
-      return getTramonaPriceBreakdown({
-        bookingCost: offer.travelerOfferedPrice,
-        numNights,
-        superhogFee: SUPERHOG_FEE,
-        tax: TAX_PERCENTAGE,
-      });
-    }
-  }, [offer.scrapeUrl, offer.travelerOfferedPrice, numNights]);
 
   const [options, setOptions] = useState<StripeElementsOptions | undefined>(
     undefined,
@@ -76,16 +54,21 @@ const CustomStripeCheckout = ({
         propertyId: property.id,
         requestId: offer.requestId ?? null,
         name: property.name,
-        price: finalTotal,
-        tramonaServiceFee: serviceFee,
+        price: offer.tripCheckout.totalTripAmount,
         description: "From: " + formatDateRange(offer.checkIn, offer.checkOut),
         cancelUrl: pathname,
         images: property.imageUrls,
-        // totalSavings: originalTotal - (total + tax), <-- check math on this
-        totalSavings: originalTotal - finalTotal,
+        totalSavings: Math.abs(
+          originalTotal - offer.tripCheckout.totalTripAmount,
+        ),
         phoneNumber: session.data.user.phoneNumber ?? "",
         userId: session.data.user.id,
         hostStripeId: propertyHostUserAccount?.stripeConnectId ?? "",
+        travelerOfferedPriceBeforeFees: offer.travelerOfferedPriceBeforeFees,
+        superhogFee: offer.tripCheckout.superhogFee,
+        taxesPaid: offer.tripCheckout.taxesPaid,
+        taxesPercentage: offer.tripCheckout.taxPercentage,
+        stripeTransactionFee: offer.tripCheckout.stripeTransactionFee,
       });
       return response;
     } catch (error) {
@@ -175,7 +158,9 @@ const CustomStripeCheckout = ({
     <div className="w-full">
       {checkoutReady && options?.clientSecret ? (
         <Elements stripe={stripePromise} options={options}>
-          <StripeCheckoutForm originalListingPlatform={property.originalListingPlatform} />
+          <StripeCheckoutForm
+            originalListingPlatform={property.originalListingPlatform}
+          />
         </Elements>
       ) : (
         <div className="h-48">

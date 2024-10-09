@@ -8,20 +8,18 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SkeletonText } from "@/components/ui/skeleton";
 import { api } from "@/utils/api";
-import { type HostTeam, type HostProfile } from "@/server/db/schema";
 import { PlusCircleIcon } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import UserAvatar from "../../UserAvatar";
 
 export default function HostTeamsDropdownItems({
-  hostProfile,
-  hostTeams,
   setChtDialogOpen,
 }: {
-  hostProfile: HostProfile | undefined;
-  hostTeams: HostTeam[] | undefined;
   setChtDialogOpen: (o: boolean) => void;
 }) {
+  const { data: hostProfile } = api.users.getMyHostProfile.useQuery();
+  const { data: hostTeams } = api.hostTeams.getMyHostTeams.useQuery(); //removed host teams for now
+
   const setCurHostTeam = api.hostTeams.setCurHostTeam.useMutation();
 
   const curTeam =

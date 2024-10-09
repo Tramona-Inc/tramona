@@ -13,7 +13,7 @@ import { zodEmail } from "@/utils/zod-utils";
 import { toast } from "../../ui/use-toast";
 import { useZodForm } from "@/utils/useZodForm";
 
-export function HostTeamInviteForm({ hostTeamId }: { hostTeamId: number }) {
+export function HostTeamInviteForm({ hostTeamId, setIsEditing }: { hostTeamId: number, setIsEditing: (isEditing: boolean) => void }) {
   const { mutateAsync: inviteUserByEmail } =
     api.hostTeams.inviteUserByEmail.useMutation();
 
@@ -32,16 +32,17 @@ export function HostTeamInviteForm({ hostTeamId }: { hostTeamId: number }) {
           description: "The invite will expire in 24 hours",
         });
         form.reset();
+        setIsEditing(false);
         break;
-      case "added user":
-        toast({
-          title: `Successfully added ${res.inviteeName ?? "member"} to the team`,
-        });
-        form.reset();
-        break;
+
       case "already in team":
         form.setError("email", { message: "User is already in the team" });
         break;
+
+      case "already invited":
+        form.setError("email", { message: "User is already invited" });
+        break;
+        
     }
   });
 

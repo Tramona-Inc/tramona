@@ -15,22 +15,27 @@ import {
   properties,
   referralCodes,
   requestSelectSchema,
+  tripCheckouts,
   trips,
 } from "@/server/db/schema";
 import { getCity, getCoordinates } from "@/server/google-maps";
-import {
-  sendText,
-  sendWhatsApp,
-  updateTravelerandHostMarkup,
-} from "@/server/server-utils";
+import { sendText, sendWhatsApp } from "@/server/server-utils";
 import { formatDateRange, getNumNights } from "@/utils/utils";
 
 import { TRPCError } from "@trpc/server";
-import { and, eq, inArray, isNotNull, isNull, notInArray, or, sql } from "drizzle-orm";
+import {
+  and,
+  eq,
+  inArray,
+  isNotNull,
+  isNull,
+  notInArray,
+  or,
+  sql,
+} from "drizzle-orm";
 import { z } from "zod";
 import { requests } from "../../db/schema/tables/requests";
 import { db } from "@/server/db";
-import NewOfferReceivedEmail from "packages/transactional/emails/NewOfferReceivedEmail";
 import {
   directSiteScrapers,
   scrapeDirectListings,
@@ -38,6 +43,7 @@ import {
 import { createNormalDistributionDates } from "@/server/server-utils";
 import { scrapeAirbnbPrice } from "@/server/scrapePrice";
 import { TRPCClientError } from "@trpc/client";
+import { breakdownPayment } from "@/utils/payment-utils/paymentBreakdown";
 
 export const offersRouter = createTRPCRouter({
   accept: protectedProcedure
@@ -45,7 +51,7 @@ export const offersRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const offer = await ctx.db.query.offers.findFirst({
         where: eq(offers.id, input.id),
-        columns: { totalPrice: true, propertyId: true, paymentIntentId: true },
+        columns: { totalPrice: true, propertyId: true },
         with: {
           request: {
             columns: {
@@ -84,8 +90,7 @@ export const offersRouter = createTRPCRouter({
               checkOut: offer.request.checkOut,
               numGuests: offer.request.numGuests,
               groupId: offer.request.madeByGroup.id,
-              propertyId: offer.propertyId,
-              paymentIntentId: offer.paymentIntentId, //testing maybe this will get populatated first
+              propertyId: offer.propertyId, //testing maybe this will get populatated first
             }),
 
           // mark the offer as accepted
@@ -142,7 +147,7 @@ export const offersRouter = createTRPCRouter({
       });
     }),
 
-    getByRequestIdWithProperty: publicProcedure
+  getByRequestIdWithProperty: publicProcedure
     .input(requestSelectSchema.pick({ id: true }))
     .query(async ({ ctx, input }) => {
       const request = await ctx.db.query.requests.findFirst({
@@ -157,51 +162,68 @@ export const offersRouter = createTRPCRouter({
         });
       }
 
-      const offersByRequest = await ctx.db.query.offers
-        .findMany({
-          where: eq(offers.requestId, input.id),
-          with: {
-            request: {
-              with: {
-                madeByGroup: { with: { members: true } },
+      const offersByRequest = await ctx.db.query.offers.findMany({
+        where: eq(offers.requestId, input.id),
+        with: {
+          tripCheckout: true,
+          request: {
+            with: {
+              madeByGroup: { with: { members: true } },
+            },
+            columns: { numGuests: true, location: true, id: true },
+          },
+        },
+      });
+      const propertiesByRequest = await ctx.db.query.properties.findMany({
+        where: inArray(
+          properties.id,
+          offersByRequest.map((offer) => offer.propertyId),
+        ),
+        with: {
+          host: {
+            columns: {
+              id: true,
+              name: true,
+              email: true,
+              image: true,
+              firstName: true,
+              lastName: true,
+              about: true,
+              location: true,
+            },
+            with: {
+              hostProfile: {
+                columns: { userId: true },
               },
-              columns: { numGuests: true, location: true, id: true },
             },
           },
-        })
-      const propertiesByRequest = await ctx.db.query.properties
-        .findMany({
-          where: inArray(properties.id, offersByRequest.map((offer) => offer.propertyId)),
-          with: {
-            host: {
-              columns: { id: true, name: true, email: true, image: true },
-              with: {
-                hostProfile: {
-                  columns: { userId: true },
-                },
-              },
-            },
-            reviews: true,
-          },
-        });
+          reviews: true,
+        },
+      });
 
-      const propertiesMap: Record<number, Property> = propertiesByRequest.reduce((acc: Record<number, Property>, property: Property) => {
-        acc[property.id] = property;
-        return acc;
-      }, {});
+      const propertiesMap: Record<
+        number,
+        (typeof propertiesByRequest)[number]
+      > = propertiesByRequest.reduce(
+        (acc, property) => {
+          acc[property.id] = property;
+          return acc;
+        },
+        {} as Record<number, (typeof propertiesByRequest)[number]>,
+      );
 
       // Merge offers with their corresponding property
-      const offersByRequestWithProperties = offersByRequest.map(offer => ({
+      const offersByRequestWithProperties = offersByRequest.map((offer) => ({
         ...offer,
         property: propertiesMap[offer.propertyId]!, // Match property by propertyId
       }));
 
       offersByRequestWithProperties.map((offer) => {
         if (offer.acceptedAt !== null || offer.scrapeUrl) return offer;
-        void updateTravelerandHostMarkup({
-          offerTotalPrice: offer.totalPrice,
-          offerId: offer.id,
-        });
+        // void updateTravelerandHostMarkup({
+        //   offerTotalPrice: offer.totalPrice,
+        //   offerId: offer.id,
+        // });
         return offer;
       });
 
@@ -259,9 +281,8 @@ export const offersRouter = createTRPCRouter({
           totalPrice: true,
           acceptedAt: true,
           id: true,
-          tramonaFee: true,
           hostPayout: true,
-          travelerOfferedPrice: true,
+          travelerOfferedPriceBeforeFees: true,
         },
         with: {
           request: {
@@ -382,15 +403,6 @@ export const offersRouter = createTRPCRouter({
   // });
   // }),
 
-  getStripePaymentIntentAndCheckoutSessionId: publicProcedure
-    .input(offerSelectSchema.pick({ id: true }))
-    .query(async ({ ctx, input }) => {
-      return await ctx.db.query.offers.findFirst({
-        where: eq(offers.id, input.id),
-        columns: { paymentIntentId: true, checkoutSessionId: true },
-      });
-    }),
-
   create: protectedProcedure
     .input(
       z
@@ -398,7 +410,7 @@ export const offersRouter = createTRPCRouter({
           propertyId: z.number(),
           totalPrice: z.number().min(1),
           hostPayout: z.number(),
-          travelerOfferedPrice: z.number(),
+          travelerOfferedPriceBeforeFees: z.number(),
         })
         .and(
           z.union([
@@ -434,6 +446,19 @@ export const offersRouter = createTRPCRouter({
       //   throw new TRPCError({ code: "UNAUTHORIZED" });
       // }
       console.log(input);
+      const curProperty = await db.query.properties.findFirst({
+        where: eq(properties.id, input.propertyId),
+        columns: {
+          name: true,
+          imageUrls: true,
+          originalListingId: true,
+          maxNumGuests: true,
+          address: true,
+          latLngPoint: true,
+        },
+      });
+      console.log(curProperty);
+
       if (input.requestId !== undefined) {
         const requestDetails = await ctx.db.query.requests.findFirst({
           where: eq(requests.id, input.requestId),
@@ -444,19 +469,9 @@ export const offersRouter = createTRPCRouter({
             numGuests: true,
           },
         });
+        console.log(requestDetails);
 
         if (!requestDetails) throw new TRPCError({ code: "BAD_REQUEST" });
-
-        const curProperty = await db.query.properties.findFirst({
-          where: eq(properties.id, input.propertyId),
-          columns: {
-            name: true,
-            imageUrls: true,
-            originalListingId: true,
-            maxNumGuests: true,
-          },
-        });
-        console.log(curProperty);
 
         const scrapeParams = {
           checkIn: requestDetails.checkIn,
@@ -475,14 +490,42 @@ export const offersRouter = createTRPCRouter({
             })
           : null;
         console.log(datePriceFromAirbnb);
+        // ------- Create trips checkout first ----
+
+        // function to help break down the price of the offer
+        const brokeDownPayment = await breakdownPayment({
+          checkIn: requestDetails.checkIn,
+          checkOut: requestDetails.checkOut,
+          travelerOfferedPriceBeforeFees: input.travelerOfferedPriceBeforeFees,
+          isScrapedPropery: false,
+          originalPrice: datePriceFromAirbnb,
+          lat: curProperty!.latLngPoint.y,
+          lng: curProperty!.latLngPoint.x,
+        });
+        const tripCheckout = await db
+          .insert(tripCheckouts)
+          .values({
+            totalTripAmount: brokeDownPayment.totalTripAmount,
+            travelerOfferedPriceBeforeFees:
+              input.travelerOfferedPriceBeforeFees,
+            paymentIntentId: "",
+            taxesPaid: brokeDownPayment.taxesPaid,
+            taxPercentage: brokeDownPayment.taxPercentage,
+            superhogFee: brokeDownPayment.superhogFee,
+            stripeTransactionFee: brokeDownPayment.stripeTransactionFee,
+            checkoutSessionId: "",
+            totalSavings: brokeDownPayment.totalSavings,
+          })
+          .returning({ id: tripCheckouts.id })
+          .then((res) => res[0]!);
+
         await ctx.db.insert(offers).values({
           ...input,
           checkIn: requestDetails.checkIn,
           checkOut: requestDetails.checkOut,
           datePriceFromAirbnb: datePriceFromAirbnb,
+          tripCheckoutId: tripCheckout.id,
         });
-
-        //find the property
 
         const request = await db.query.requests.findFirst({
           where: eq(requests.id, input.requestId),
@@ -553,10 +596,37 @@ export const offersRouter = createTRPCRouter({
           // });
         }
       } else {
+        const brokeDownPayment = await breakdownPayment({
+          checkIn: input.checkIn,
+          checkOut: input.checkOut,
+          travelerOfferedPriceBeforeFees: input.travelerOfferedPriceBeforeFees,
+          isScrapedPropery: false,
+          lat: curProperty!.latLngPoint.y,
+          lng: curProperty!.latLngPoint.x,
+        });
+
+        const tripCheckout = await db
+          .insert(tripCheckouts)
+          .values({
+            totalTripAmount: brokeDownPayment.totalTripAmount,
+            travelerOfferedPriceBeforeFees:
+              input.travelerOfferedPriceBeforeFees,
+            paymentIntentId: "",
+            taxesPaid: brokeDownPayment.taxesPaid,
+            taxPercentage: brokeDownPayment.taxPercentage,
+            superhogFee: brokeDownPayment.superhogFee,
+            stripeTransactionFee: brokeDownPayment.stripeTransactionFee,
+            checkoutSessionId: "",
+            totalSavings: brokeDownPayment.totalSavings,
+          })
+          .returning({ id: tripCheckouts.id })
+          .then((res) => res[0]!);
+
         await ctx.db.insert(offers).values({
           ...input,
           checkIn: input.checkIn,
           checkOut: input.checkOut,
+          tripCheckoutId: tripCheckout.id,
         });
       }
     }),
@@ -688,8 +758,9 @@ export const offersRouter = createTRPCRouter({
         const fmtdDateRange = formatDateRange(offer.checkIn, offer.checkOut);
         const url = `${env.NEXTAUTH_URL}/requests`;
 
-        const location = await getCoordinates(property.address).then((res) =>
-          res.location ? getCity(res.location) : "[Unknown location]",
+        const location = await getCoordinates(property.address).then(
+          async (res) =>
+            res.location ? await getCity(res.location) : "[Unknown location]",
         );
 
         if (member.phoneNumber) {
@@ -715,7 +786,7 @@ export const offersRouter = createTRPCRouter({
           } else {
             void sendText({
               to: member.phoneNumber,
-              content: `Tramona: Hello, your ${property.name} in ${location} offer from ${fmtdDateRange} has expired. ${memberHasOtherOffers ? `Please tap below view your other offers: ${url}` : ""}`,
+              content: `Tramona: Hello, your ${property.name} in ${request?.location} offer from ${fmtdDateRange} has expired. ${memberHasOtherOffers ? `Please tap below view your other offers: ${url}` : ""}`,
             });
           }
         }
@@ -830,6 +901,22 @@ export const offersRouter = createTRPCRouter({
         });
       });
     }),
+
+  isOfferScrapedByTripId: protectedProcedure
+    .input(z.number())
+    .query(async ({ input }) => {
+      const curTrip = await db.query.trips.findFirst({
+        where: eq(trips.id, input),
+        with: {
+          offer: {
+            columns: {
+              scrapeUrl: true,
+            },
+          },
+        },
+      });
+      return curTrip?.offer?.scrapeUrl !== null;
+    }),
 });
 
 export async function getPropertyForOffer(propertyId: number) {
@@ -871,17 +958,18 @@ export async function getOfferPageData(offerId: number) {
       createdAt: true,
       totalPrice: true,
       acceptedAt: true,
-      tramonaFee: true,
       propertyId: true,
       requestId: true,
       hostPayout: true,
-      travelerOfferedPrice: true,
+      travelerOfferedPriceBeforeFees: true,
       scrapeUrl: true,
       isAvailableOnOriginalSite: true,
       randomDirectListingDiscount: true,
       datePriceFromAirbnb: true,
+      tripCheckoutId: true,
     },
     with: {
+      tripCheckout: true,
       request: {
         with: {
           madeByGroup: { with: { members: true } },
