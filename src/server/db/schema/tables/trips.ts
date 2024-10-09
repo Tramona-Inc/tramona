@@ -15,6 +15,7 @@ import { superhogRequests } from "./superhogRequests";
 import { bids } from "./bids";
 import { properties } from "./properties";
 import { z } from "zod";
+import { tripCheckouts } from "./payments";
 
 const TRIP_STATUS = ["Booked", "Needs attention", "Cancelled"] as const;
 export type TripStatus = (typeof TRIP_STATUS)[number];
@@ -41,10 +42,9 @@ export const trips = pgTable(
     checkIn: date("check_in", { mode: "date" }).notNull(),
     checkOut: date("check_out", { mode: "date" }).notNull(),
     numGuests: integer("num_guests").notNull(),
-    totalPriceAfterFees: integer("total_price_after_fees").default(0), // in cents
+    totalPriceAfterFees: integer("total_price_after_fees").default(0).notNull(), // in cents
 
     paymentIntentId: varchar("payment_intent_id"),
-    checkoutSessionId: varchar("checkout_session_id"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -54,12 +54,17 @@ export const trips = pgTable(
       () => superhogRequests.id,
     ),
     tripsStatus: tripStatusEnum("trip_status").default("Booked"),
+    tripCheckoutId: integer("tripCheckoutId").references(
+      () => tripCheckouts.id,
+      { onDelete: "set null" },
+    ),
   },
   (t) => ({
     groupIdIdx: index().on(t.groupId),
     offerIdIdx: index().on(t.offerId),
     bidIdIdx: index().on(t.bidId),
     propertyIdIdx: index().on(t.propertyId),
+    tripCheckoutIdx: index().on(t.tripCheckoutId),
   }),
 );
 
@@ -89,6 +94,7 @@ export const tripCancellations = pgTable(
       .references(() => trips.id, {
         onDelete: "cascade",
       }),
+    amountRefunded: integer("amount_refunded").notNull().default(0),
   },
   (t) => {
     return {

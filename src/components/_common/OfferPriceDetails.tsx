@@ -1,13 +1,9 @@
 import { Separator } from "../ui/separator";
-import {
-  formatCurrency,
-  getNumNights,
-  getTramonaPriceBreakdown,
-  getDirectListingPriceBreakdown,
-} from "@/utils/utils";
+import { formatCurrency, getNumNights } from "@/utils/utils";
 import { plural } from "@/utils/utils";
-import { TAX_PERCENTAGE, SUPERHOG_FEE } from "@/utils/constants";
 import type { OfferWithDetails } from "@/components/offers/PropertyPage";
+import React from "react";
+import { getServiceFee } from "@/utils/payment-utils/paymentBreakdown";
 
 export function OfferPriceDetails({
   offer,
@@ -17,21 +13,21 @@ export function OfferPriceDetails({
   bookOnAirbnb?: boolean;
 }) {
   const numberOfNights = getNumNights(offer.checkIn, offer.checkOut);
-  const nightlyPrice = offer.travelerOfferedPrice / numberOfNights;
-  const { bookingCost, taxPaid, serviceFee, finalTotal } = offer.scrapeUrl
-    ? getDirectListingPriceBreakdown({
-        bookingCost: offer.travelerOfferedPrice,
-      })
-    : getTramonaPriceBreakdown({
-        bookingCost: offer.travelerOfferedPrice,
-        numNights: numberOfNights,
-        superhogFee: SUPERHOG_FEE,
-        tax: TAX_PERCENTAGE,
-      });
+  const nightlyPrice = offer.travelerOfferedPriceBeforeFees / numberOfNights;
+  // const { bookingCost, taxPaid, serviceFee, finalTotal } = offer.scrapeUrl
+  //   ? getDirectListingPriceBreakdown({
+  //       bookingCost: offer.travelerOfferedPriceBeforeFees,
+  //     })
+  //   : getTramonaPriceBreakdown({
+  //       bookingCost: offer.travelerOfferedPriceBeforeFees,
+  //       numNights: numberOfNights,
+  //       superhogFee: SUPERHOG_FEE,
+  //       tax: TAX_PERCENTAGE,
+  //     });
   const items = [
     {
       title: `${formatCurrency(nightlyPrice)} x ${plural(numberOfNights, "night")}`,
-      price: `${formatCurrency(bookingCost)}`,
+      price: `${formatCurrency(offer.tripCheckout.travelerOfferedPriceBeforeFees / numberOfNights)}`,
     },
     {
       title: "Cleaning fee",
@@ -39,11 +35,11 @@ export function OfferPriceDetails({
     },
     {
       title: "Tramona service fee",
-      price: `${formatCurrency(serviceFee)}`,
+      price: `${formatCurrency(getServiceFee({ tripCheckout: offer.tripCheckout }))}`,
     },
     {
       title: "Taxes",
-      price: `${taxPaid === 0 ? "included" : formatCurrency(taxPaid)}`,
+      price: `${offer.tripCheckout.taxesPaid === 0 ? "included" : formatCurrency(offer.tripCheckout.taxesPaid)}`,
     },
   ];
 
@@ -62,11 +58,13 @@ export function OfferPriceDetails({
         <Separator />
         <div className="flex items-center justify-between pb-4 font-bold">
           <p>Total (USD)</p>
-          <p>{formatCurrency(finalTotal)}</p>
+          <p>{formatCurrency(offer.tripCheckout.totalTripAmount)}</p>
         </div>
       </div>
       <div className="md:hidden">
-        <p className="text-base font-bold">{formatCurrency(finalTotal)}</p>
+        <p className="text-base font-bold">
+          {formatCurrency(offer.tripCheckout.totalTripAmount)}
+        </p>
         <p className="text-muted-foreground"> Total after taxes</p>
       </div>
     </>

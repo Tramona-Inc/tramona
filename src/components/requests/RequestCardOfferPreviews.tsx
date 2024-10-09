@@ -28,7 +28,8 @@ export function RequestCardOfferPreviews({
           const { host } = property;
 
           const numNights = getNumNights(offer.checkIn, offer.checkOut);
-          const offerNightlyPrice = offer.travelerOfferedPrice / numNights;
+          const offerNightlyPrice =
+            offer.travelerOfferedPriceBeforeFees / numNights;
           const discountPercentage = getOfferDiscountPercentage(offer);
 
           return (

@@ -11,7 +11,7 @@ import {
   ALL_PROPERTY_TYPES,
 } from "@/server/db/schema/common";
 import { CancellationPolicyWithInternals } from "../db/schema/tables/properties";
-import { log } from "@/pages/api/script";
+//import { log } from "@/pages/api/script";
 import { googleMaps } from "../google-maps";
 import { env } from "@/env";
 import axios from "axios";
@@ -309,7 +309,7 @@ export const redawningScraper: DirectSiteScraper = async ({
 
   const url = `https://www.redawning.com/search/properties?ptype=${ptype}&platitude=${lat}&plongitude=${lng}&pcountry=${pcountry}&pname=${location}&sleepsmax=1TO100&dates=${convertToEpochAt7AM(checkIn)}TO${convertToEpochAt7AM(checkOut)}`;
 
-  log(`url: ${url}`);
+  //log(`url: ${url}`);
 
   const $ = await scrapeUrlLikeHuman(url);
 

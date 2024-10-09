@@ -78,7 +78,7 @@ const formSchema = z.object({
   amenities: z.string().transform((s) => s.split("\n").map((s) => s.trim())),
   about: zodString({ maxLen: Infinity }),
   originalListingUrl: optional(zodListingUrl),
-  checkInInfo: optional(zodString()),
+  checkInInfo: zodString(),
   checkInTime: optional(zodTime),
   checkOutTime: optional(zodTime),
   cancellationPolicy: z.enum(CANCELLATION_POLICIES),
@@ -146,18 +146,14 @@ export default function AdminOfferForm({
             propertyName: offer.property.name,
             offeredPriceUSD: offer.totalPrice / 100,
             offeredNightlyPriceUSD: offeredNightlyPriceUSD,
-            // tramonaFee: offer.tramonaFee,
             originalNightlyPriceUSD: offer.property.originalNightlyPrice
               ? offer.property.originalNightlyPrice / 100
               : 0,
-            checkInInfo: offer.property.checkInInfo ?? undefined,
-            checkInTime: offer.property.checkInTime ?? undefined,
-            checkOutTime: offer.property.checkOutTime ?? undefined,
+            checkInInfo: offer.property.checkInInfo!,
+            checkInTime: offer.property.checkInTime,
+            checkOutTime: offer.property.checkOutTime,
             imageUrls: offer.property.imageUrls.map((url) => ({ value: url })),
-            reviews: offer.property.reviews.map((r) => ({
-              ...r,
-              profilePic: r.profilePic ?? undefined,
-            })),
+            reviews: [],
             roomsWithBeds: offer.property.roomsWithBeds
               ? stringifyRoomsWithBeds(offer.property.roomsWithBeds)
               : undefined,
@@ -255,8 +251,8 @@ export default function AdminOfferForm({
         requestId: request ? request.id : offer.request?.id,
         propertyId: offer.property.id,
         totalPrice,
-        //tramonaFee: data.tramonaFee * 100,
       };
+      ``;
 
       await createReviewsMutation.mutateAsync({
         reviews: propertyData.reviews,
@@ -289,10 +285,9 @@ export default function AdminOfferForm({
         propertyId,
         totalPrice,
         hostPayout: 0,
-        travelerOfferedPrice: totalPrice,
+        travelerOfferedPriceBeforeFees: totalPrice,
         checkIn: request ? request.checkIn : new Date(checkInDate!),
         checkOut: request ? request.checkOut : new Date(checkOutDate!),
-        //tramonaFee: data.tramonaFee * 100,
         // groupId: request?.madeByGroupId,
       };
 
