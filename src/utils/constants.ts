@@ -199,3 +199,21 @@ export const hostAccordionItems = [
       "Yes, Tramona supports co-hosting. You can add property managers or team members as co-hosts to help with everything they typically do.",
   },
 ];
+
+export const whyListAccordionItems = [
+  {
+    question: "Does Tramona help with Taxes?",
+    answer:
+      "Yes! You have full control over pricing. If a traveler submits a request, you can respond with an offer that fits your availability and pricing preferences.",
+  },
+  {
+    question: "How and when do I get paid?",
+    answer:
+      "Yes, Tramona supports co-hosting. You can add a co-host to help manage bookings, respond to traveler inquiries, and coordinate check-ins. They’ll have access to the necessary tools without needing full access to your account.",
+  },
+  {
+    question: "How much protection does Tramona offer?",
+    answer:
+      "Tramona helps you optimize occupancy and revenue by offering more flexibility. Just like how Priceline allowed hotels to offload unbooked rooms without lowering rates across the board, Tramona allows you to keep your listings at full price on other platforms while accepting offers for lower rates only when you choose. We also take lower fees than platforms like Airbnb and VRBO, meaning you can earn more while giving travelers better deals.",
+  },
+];
