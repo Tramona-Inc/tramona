@@ -80,7 +80,7 @@ async function getLocationId(location: string): Promise<string> {
 
   const response: AxiosResponse<AutocompleteResponse> = await axios.get(
     `${autocompleteUrl}?${params.toString()}`,
-    // { httpsAgent: proxyAgent },
+    { httpsAgent: proxyAgent },
   );
   const suggestions = response.data.suggestions;
 
@@ -119,35 +119,64 @@ async function getOfferIds(
   checkOut: Date,
   numGuests?: number,
 ): Promise<CasamundoOffer[]> {
-  const url = `https://www.casamundo.com/search/${locationId}`;
+  let allOffers: CasamundoOffer[] = [];
+  let page = 1;
+  const seenIds = new Set<string>();
 
-  const headers: Record<string, string> = {
-    accept: "*/*",
-    "accept-language": "en-US,en;q=0.9",
-    "content-type": "application/json",
-    "sec-ch-ua":
-      '"Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"',
-    "sec-ch-ua-mobile": "?0",
-    "sec-ch-ua-platform": '"macOS"',
-    "sec-fetch-dest": "empty",
-    "sec-fetch-mode": "cors",
-    "sec-fetch-site": "same-origin",
-  };
+  while (true) {
+    const url = `https://www.casamundo.com/search/${locationId}`;
+    const headers: Record<string, string> = {
+      accept: "*/*",
+      "accept-language": "en-US,en;q=0.9",
+      "content-type": "application/json",
+      "sec-ch-ua":
+        '"Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"',
+      "sec-ch-ua-mobile": "?0",
+      "sec-ch-ua-platform": '"macOS"',
+      "sec-fetch-dest": "empty",
+      "sec-fetch-mode": "cors",
+      "sec-fetch-site": "same-origin",
+    };
 
-  const params = new URLSearchParams({
-    fieldTreeId: "SearchDetailsFields.SERP",
-    adults: numGuests?.toString() ?? "1",
-    arrival: checkIn.toISOString().split("T")[0] ?? "",
-    duration: getNumNights(checkIn, checkOut).toString(),
-    _format: "json",
-  });
+    const params = new URLSearchParams({
+      fieldTreeId: "SearchDetailsFields.SERP",
+      adults: numGuests?.toString() ?? "1",
+      // removed date details
+      // arrival: checkIn.toISOString().split("T")[0] ?? "",
+      // duration: getNumNights(checkIn, checkOut).toString(),
+      page: page.toString(),
+      _format: "json",
+    });
 
-  const response: AxiosResponse<OfferResponse> = await axios.get(
-    `${url}?${params.toString()}`,
-    // { headers, httpsAgent: proxyAgent },
-  );
+    try {
+      const response: AxiosResponse<OfferResponse> = await axios.get(
+        `${url}?${params.toString()}`,
+        { headers, httpsAgent: proxyAgent },
+      );
 
-  return response.data.offers.map((offer) => offerSchema.parse(offer));
+      const newOffers = response.data.offers
+        .map((offer) => offerSchema.parse(offer))
+        .filter((offer) => !seenIds.has(offer.id));
+
+      newOffers.forEach((offer) => seenIds.add(offer.id));
+      allOffers = allOffers.concat(newOffers);
+
+      console.log(
+        `Page ${page}: Retrieved ${newOffers.length} unique offers. Total: ${allOffers.length}`,
+      );
+
+      if (newOffers.length === 0) {
+        break;
+      }
+
+      page++;
+    } catch (error) {
+      console.error(`Error fetching page ${page}:`, error);
+      break;
+    }
+  }
+  console.log(`Total unique offers: ${allOffers.length}`);
+  return allOffers;
 }
 
 function getDatesArray(startDate: Date, endDate: Date): string[] {
@@ -190,7 +219,7 @@ async function checkAvailability(
         year: currentYear,
         month: currentMonth,
       },
-      // httpsAgent: proxyAgent,
+      httpsAgent: proxyAgent,
       headers: {
         accept: "application/json",
         "accept-language": "en-US,en;q=0.9",
@@ -335,7 +364,7 @@ const fetchPrice = async (
       const response: AxiosResponse<ApiResponse> = await axios.post(
         `${url}?${queryParams.toString()}`,
         null,
-        // { headers, httpsAgent: proxyAgent },
+        { headers, httpsAgent: proxyAgent },
       );
       const data = response.data;
 
@@ -417,7 +446,7 @@ const fetchReviews = async (
     .get(
       `https://www.casamundo.com/reviews/list/${offerId}?scale=5&bcEnabled=false&googleReviews=false`,
       {
-        // httpsAgent: proxyAgent,
+        httpsAgent: proxyAgent,
         headers: {
           accept: "*/*",
           "accept-language": "en-US,en;q=0.9",
@@ -541,7 +570,7 @@ async function fetchPropertyDetails(
 
   const data = await axios
     .get(`${url}?${params.toString()}`, {
-      // httpsAgent: proxyAgent,
+      httpsAgent: proxyAgent,
       headers,
     })
     .then((res) => res.data as unknown)

@@ -95,11 +95,11 @@ export type SubScrapedResult = {
 
 export const directSiteScrapers = [
   // add more scrapers here
-  { name: "evolveVacationRentalScraper", scraper: evolveVacationRentalScraper },
-  { name: "cleanbnbScraper", scraper: cleanbnbScraper },
-  { name: "arizonaScraper", scraper: arizonaScraper },
-  { name: "cbIslandVacationsScraper", scraper: cbIslandVacationsScraper },
-  { name: "redawningScraper", scraper: redawningScraper },
+  // { name: "evolveVacationRentalScraper", scraper: evolveVacationRentalScraper },
+  // { name: "cleanbnbScraper", scraper: cleanbnbScraper },
+  // { name: "arizonaScraper", scraper: arizonaScraper },
+  // { name: "cbIslandVacationsScraper", scraper: cbIslandVacationsScraper },
+  // { name: "redawningScraper", scraper: redawningScraper },
   { name: "casamundoScraper", scraper: casamundoScraper },
   // { name: "airbnbScraper", scraper: airbnbScraper },
 ] as const;
