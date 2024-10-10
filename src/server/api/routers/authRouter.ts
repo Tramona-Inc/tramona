@@ -14,6 +14,7 @@ import jwt from "jsonwebtoken";
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { waitUntil } from "@vercel/functions";
+import { handlePendingInviteMessages } from "./hostTeamsRouter";
 
 async function fetchEmailVerified(email: string) {
   return await db.query.users.findFirst({
@@ -155,6 +156,7 @@ export const authRouter = createTRPCRouter({
           addUserToGroups(user),
         ]);
       }
+      waitUntil(handlePendingInviteMessages(input.email));
 
       waitUntil(sendVerificationEmail(user));
 

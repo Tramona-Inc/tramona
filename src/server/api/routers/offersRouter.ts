@@ -36,7 +36,6 @@ import {
 import { z } from "zod";
 import { requests } from "../../db/schema/tables/requests";
 import { db } from "@/server/db";
-import NewOfferReceivedEmail from "packages/transactional/emails/NewOfferReceivedEmail";
 import {
   directSiteScrapers,
   scrapeDirectListings,
@@ -45,7 +44,6 @@ import { createNormalDistributionDates } from "@/server/server-utils";
 import { scrapeAirbnbPrice } from "@/server/scrapePrice";
 import { TRPCClientError } from "@trpc/client";
 import { breakdownPayment } from "@/utils/payment-utils/paymentBreakdown";
-import { type Review } from "../../db/schema/tables/reviews";
 
 export const offersRouter = createTRPCRouter({
   accept: protectedProcedure
@@ -455,6 +453,8 @@ export const offersRouter = createTRPCRouter({
           imageUrls: true,
           originalListingId: true,
           maxNumGuests: true,
+          address: true,
+          latLngPoint: true,
         },
       });
       console.log(curProperty);
@@ -493,12 +493,14 @@ export const offersRouter = createTRPCRouter({
         // ------- Create trips checkout first ----
 
         // function to help break down the price of the offer
-        const brokeDownPayment = breakdownPayment({
+        const brokeDownPayment = await breakdownPayment({
           checkIn: requestDetails.checkIn,
           checkOut: requestDetails.checkOut,
           travelerOfferedPriceBeforeFees: input.travelerOfferedPriceBeforeFees,
           isScrapedPropery: false,
           originalPrice: datePriceFromAirbnb,
+          lat: curProperty!.latLngPoint.y,
+          lng: curProperty!.latLngPoint.x,
         });
         const tripCheckout = await db
           .insert(tripCheckouts)
@@ -524,8 +526,6 @@ export const offersRouter = createTRPCRouter({
           datePriceFromAirbnb: datePriceFromAirbnb,
           tripCheckoutId: tripCheckout.id,
         });
-
-        //find the property
 
         const request = await db.query.requests.findFirst({
           where: eq(requests.id, input.requestId),
@@ -596,11 +596,13 @@ export const offersRouter = createTRPCRouter({
           // });
         }
       } else {
-        const brokeDownPayment = breakdownPayment({
+        const brokeDownPayment = await breakdownPayment({
           checkIn: input.checkIn,
           checkOut: input.checkOut,
           travelerOfferedPriceBeforeFees: input.travelerOfferedPriceBeforeFees,
           isScrapedPropery: false,
+          lat: curProperty!.latLngPoint.y,
+          lng: curProperty!.latLngPoint.x,
         });
 
         const tripCheckout = await db
@@ -756,8 +758,9 @@ export const offersRouter = createTRPCRouter({
         const fmtdDateRange = formatDateRange(offer.checkIn, offer.checkOut);
         const url = `${env.NEXTAUTH_URL}/requests`;
 
-        const location = await getCoordinates(property.address).then((res) =>
-          res.location ? getCity(res.location) : "[Unknown location]",
+        const location = await getCoordinates(property.address).then(
+          async (res) =>
+            res.location ? await getCity(res.location) : "[Unknown location]",
         );
 
         if (member.phoneNumber) {
@@ -783,7 +786,7 @@ export const offersRouter = createTRPCRouter({
           } else {
             void sendText({
               to: member.phoneNumber,
-              content: `Tramona: Hello, your ${property.name} in ${location} offer from ${fmtdDateRange} has expired. ${memberHasOtherOffers ? `Please tap below view your other offers: ${url}` : ""}`,
+              content: `Tramona: Hello, your ${property.name} in ${request?.location} offer from ${fmtdDateRange} has expired. ${memberHasOtherOffers ? `Please tap below view your other offers: ${url}` : ""}`,
             });
           }
         }

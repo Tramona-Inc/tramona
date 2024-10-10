@@ -43,11 +43,13 @@ export const hostTeamMembers = pgTable(
 export const hostTeamInvites = pgTable(
   "host_team_invites",
   {
+    id: text("id").notNull().primaryKey(),
     hostTeamId: integer("host_team_id")
       .notNull()
       .references(() => hostTeams.id, { onDelete: "cascade" }),
     inviteeEmail: text("invitee_email").notNull(),
     expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    lastSentAt: timestamp("last_sent_at", { withTimezone: true }).notNull(),
   },
   (t) => ({
     compoundKey: primaryKey({ columns: [t.hostTeamId, t.inviteeEmail] }),
