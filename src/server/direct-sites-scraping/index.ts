@@ -305,7 +305,7 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
           .where(eq(properties.originalListingId, listing.originalListingId));
         const existingOriginalPropertyId =
           existingOriginalPropertyIdList[0]?.id;
-
+        const { location } = await getCoordinates(listing.address);
         let formattedlatLngPoint = null;
         if (listing.latLngPoint) {
           formattedlatLngPoint = createLatLngGISPoint({
@@ -313,7 +313,6 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
             lng: listing.latLngPoint.lng,
           });
         } else {
-          const { location } = await getCoordinates(listing.address);
           if (!location)
             throw new Error("Could not get coordinates for address");
           formattedlatLngPoint = createLatLngGISPoint({
@@ -382,10 +381,14 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
               numNights: getNumNights(options.checkIn, options.checkOut),
             });
 
-            const brokeDownPayment = breakdownPayment({
+            const { location } = await getCoordinates(listing.address);
+
+            const brokeDownPayment = await breakdownPayment({
               numOfNights: getNumNights(options.checkIn, options.checkOut),
               travelerOfferedPriceBeforeFees,
               isScrapedPropery: true,
+              lat: listing.latLngPoint?.lat ?? location!.lat,
+              lng: listing.latLngPoint?.lng ?? location!.lng,
             });
 
             const tripCheckout = await db
@@ -481,10 +484,12 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
               numNights: getNumNights(options.checkIn, options.checkOut),
             });
 
-            const brokeDownPayment = breakdownPayment({
+            const brokeDownPayment = await breakdownPayment({
               numOfNights: getNumNights(options.checkIn, options.checkOut),
               travelerOfferedPriceBeforeFees,
               isScrapedPropery: true,
+              lat: listing.latLngPoint?.lat ?? location!.lat,
+              lng: listing.latLngPoint?.lng ?? location!.lng,
             });
 
             const tripCheckout = await db

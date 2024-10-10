@@ -9,8 +9,8 @@ import type { OfferWithDetails } from "../offers/PropertyPage";
 import { Elements } from "@stripe/react-stripe-js";
 import { type StripeElementsOptions } from "@stripe/stripe-js";
 import Spinner from "../_common/Spinner";
-
 import { useToast } from "../ui/use-toast";
+
 const CustomStripeCheckout = ({
   offer: { property, ...offer },
 }: {
@@ -25,6 +25,7 @@ const CustomStripeCheckout = ({
     () => getNumNights(offer.checkIn, offer.checkOut),
     [offer.checkIn, offer.checkOut],
   );
+
   const originalTotal = useMemo(
     () =>
       offer.randomDirectListingDiscount

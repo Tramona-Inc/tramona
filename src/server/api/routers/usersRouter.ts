@@ -519,40 +519,50 @@ export const usersRouter = createTRPCRouter({
 
         try {
           const propertyObjects = await Promise.all(
-            listings.map(async (property) => ({
-              hostId: ctx.user.id,
-              propertyType: z
-                .enum(ALL_PROPERTY_TYPES)
-                .catch("Other")
-                .parse(propertyTypeMap[property.propertyTypeId]),
-              roomType: roomTypeMapping[property.roomType],
-              maxNumGuests: property.personCapacity,
-              numBeds: property.bedsNumber,
-              numBedrooms: property.bedroomsNumber,
-              numBathrooms: property.bathroomsNumber,
-              latLngPoint: createLatLngGISPoint({
+            listings.map(async (property) => {
+              // Get location information
+              const locInfo = await getCity({
                 lat: property.lat,
                 lng: property.lng,
-              }),
-              city: await getCity({ lat: property.lat, lng: property.lng }),
-              hostName: property.contactName,
-              originalListingId: property.id.toString(),
-              checkInTime: convertToTimeString(property.checkInTimeStart),
-              checkOutTime: convertToTimeString(property.checkOutTime),
-              name: property.name,
-              about: property.description,
-              originalListingPlatform: "Hostaway" as const,
-              address: property.address,
-              avgRating: property.starRating ?? 0,
-              hostTeamId: teamId,
-              imageUrls: property.listingImages,
-              amenities: property.listingAmenities.map(
-                (amenity) => amenity.amenityName,
-              ), // Keep amenities as an array
-              cancellationPolicy: propertyInsertSchema.shape.cancellationPolicy
-                .catch(null)
-                .parse(property.cancellationPolicy),
-            })),
+              });
+
+              // Construct property object
+              return {
+                hostId: ctx.user.id,
+                propertyType: z
+                  .enum(ALL_PROPERTY_TYPES)
+                  .catch("Other")
+                  .parse(propertyTypeMap[property.propertyTypeId]),
+                roomType: roomTypeMapping[property.roomType],
+                maxNumGuests: property.personCapacity,
+                numBeds: property.bedsNumber,
+                numBedrooms: property.bedroomsNumber,
+                numBathrooms: property.bathroomsNumber,
+                latLngPoint: createLatLngGISPoint({
+                  lat: property.lat,
+                  lng: property.lng,
+                }),
+                city: locInfo.city,
+                hostName: property.contactName,
+                originalListingId: property.id.toString(),
+                checkInTime: convertToTimeString(property.checkInTimeStart),
+                checkOutTime: convertToTimeString(property.checkOutTime),
+                name: property.name,
+                about: property.description,
+                originalListingPlatform: "Hostaway" as const,
+                address: property.address,
+                avgRating: property.starRating ?? 0,
+                hostTeamId: teamId,
+                imageUrls: property.listingImages,
+                amenities: property.listingAmenities.map(
+                  (amenity) => amenity.amenityName,
+                ),
+                cancellationPolicy:
+                  propertyInsertSchema.shape.cancellationPolicy
+                    .catch(null)
+                    .parse(property.cancellationPolicy),
+              };
+            }),
           );
 
           // Now pass the resolved array of objects to the .values() method

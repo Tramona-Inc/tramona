@@ -49,6 +49,7 @@ export default function TripDetailsPage() {
 
   async function onSubmit(data: z.infer<typeof formSchema>) {
     await slackMutation.mutateAsync({
+      isProductionOnly: false,
       message: [
         `*${session.data?.user.email} requested a trip refund`,
         `for ${tripId} with the message of`,

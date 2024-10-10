@@ -9,7 +9,6 @@ import { Airbnb } from "@/utils/listing-sites/Airbnb";
 import { z } from "zod";
 import { urlScrape } from "@/server/server-utils";
 import { scrapeAirbnbPrice } from "@/server/scrapePrice";
-import { cleanbnbScraper } from "@/server/direct-sites-scraping/cleanbnb-scrape";
 
 type AirbnbListing = {
   id: string;
@@ -133,7 +132,9 @@ export const miscRouter = createTRPCRouter({
 
       const coords = await getCoordinates(cityName).then((res) => res.location);
 
-      const location = coords && (await getCity(coords).catch(() => undefined));
+      const locationParts = coords && (await getCity(coords).catch(() => undefined));
+
+      const location = `${locationParts?.city}, ${locationParts?.stateCode}, ${locationParts?.country}`;
 
       if (!location) {
         return { status: "failed to extract city" } as const;
