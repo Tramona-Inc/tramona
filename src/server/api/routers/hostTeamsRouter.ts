@@ -64,12 +64,12 @@ async function createOrGetConversation(inviteeEmail: string, hostId: string) {
           .where(
             or(
               eq(conversationParticipants.userId, inviteeUser.id),
-              eq(conversationParticipants.userId, hostId)
-            )
+              eq(conversationParticipants.userId, hostId),
+            ),
           )
           .groupBy(conversationParticipants.conversationId)
           .having(sql`count(*) = 2`)
-          .limit(1)
+          .limit(1),
       ),
       with: {
         participants: true,
@@ -122,7 +122,7 @@ async function sendInviteMessage(
 async function sendAcceptMessage(
   conversationId: string | null,
   hostTeamName: string,
-  userId: string
+  userId: string,
 ) {
   if (!conversationId) return;
 
@@ -138,7 +138,7 @@ async function sendAcceptMessage(
 async function sendDeclineMessage(
   conversationId: string | null,
   hostTeamName: string,
-  userId: string
+  userId: string,
 ) {
   if (!conversationId) return;
 
@@ -621,6 +621,8 @@ export const hostTeamsRouter = createTRPCRouter({
                           email: true,
                           image: true,
                           id: true,
+                          coHostRole: true,
+                          mainHostId: true,
                         },
                       },
                     },
@@ -843,5 +845,18 @@ export const hostTeamsRouter = createTRPCRouter({
       );
 
       return { status: "invite declined" } as const;
+    }),
+  updateCohostRole: protectedProcedure
+    .input(
+      z.object({
+        userId: z.string(),
+        coHostRole: z.enum(["strict", "medium", "loose"]),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db
+        .update(users)
+        .set({ coHostRole: input.coHostRole })
+        .where(eq(users.id, input.userId));
     }),
 });

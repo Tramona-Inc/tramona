@@ -30,6 +30,10 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuPortal,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
@@ -50,6 +54,8 @@ export default function Page() {
   const cancelInviteMutation = api.hostTeams.cancelInvite.useMutation();
   const removeTeamMemberMutation =
     api.hostTeams.removeHostTeamMember.useMutation();
+  const { mutateAsync: updateRole } =
+    api.hostTeams.updateCohostRole.useMutation();
 
   const handleResendInvite = async (email: string) => {
     const res = await resendInviteMutation.mutateAsync({
@@ -101,6 +107,13 @@ export default function Page() {
 
   if (!session) return null;
 
+  const handleUpdateRole = async (userId: string, coHostRole: string) => {
+    await updateRole({
+      userId: userId,
+      coHostRole: coHostRole as "strict" | "medium" | "loose",
+    });
+  };
+
   return (
     <DashboardLayout>
       <Head>
@@ -138,6 +151,7 @@ export default function Page() {
                   isOwner={member.id === curTeam?.ownerId}
                   isEditing={isEditing}
                   onRemove={() => handleRemoveMember(member.id)}
+                  onUpdate={(role) => handleUpdateRole(member.id, role)}
                 />
               ))
             : null}
@@ -165,14 +179,19 @@ function TeamMember({
   children,
   isEditing,
   onRemove,
+  onUpdate,
 }: React.PropsWithChildren<{
-  member: Pick<User, "name" | "email" | "image">;
+  member: Pick<User, "name" | "email" | "image" | "coHostRole" | "mainHostId">;
   isYou: boolean;
   isOwner: boolean;
   isEditing: boolean;
   onRemove: () => void;
+  onUpdate: (role: string) => Promise<void>;
 }>) {
   const [showRemoveConfirmation, setShowRemoveConfirmation] = useState(false);
+  const [permission, setPermission] = useState(member.coHostRole);
+
+  const permissions = ["strict", "medium", "loose"];
 
   return (
     <div className="flex items-center gap-4 py-2">
@@ -183,7 +202,7 @@ function TeamMember({
       />
       <div className="flex-1 -space-y-1 font-medium">
         <div>
-          {member.name ?? member.email}{" "}
+          {member.name ?? member.email} {member.mainHostId && `(${permission})`}
           {isYou && <span className="text-muted-foreground">(You)</span>}{" "}
           {isOwner && (
             <Badge variant="secondary" size="sm">
@@ -204,8 +223,31 @@ function TeamMember({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent side="bottom" align="center">
-            <DropdownMenuItem>Change role</DropdownMenuItem>
-            <DropdownMenuItem red onClick={() => setShowRemoveConfirmation(true)}>
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>Change role</DropdownMenuSubTrigger>
+              <DropdownMenuPortal>
+                <DropdownMenuSubContent>
+                  {permissions.map((permission, index) => (
+                    <DropdownMenuItem
+                      key={index}
+                      onClick={async () => {
+                        setPermission(
+                          permission as "strict" | "medium" | "loose",
+                        );
+                        await onUpdate(permission);
+                      }}
+                    >
+                      {permission}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuSubContent>
+              </DropdownMenuPortal>
+            </DropdownMenuSub>
+
+            <DropdownMenuItem
+              red
+              onClick={() => setShowRemoveConfirmation(true)}
+            >
               Remove
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -227,9 +269,7 @@ function TeamMember({
             <AlertDialogCancel onClick={() => setShowRemoveConfirmation(false)}>
               Cancel
             </AlertDialogCancel>
-            <AlertDialogAction onClick={onRemove}>
-              Remove
-            </AlertDialogAction>
+            <AlertDialogAction onClick={onRemove}>Remove</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
