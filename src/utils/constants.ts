@@ -231,16 +231,16 @@ export const whyListAccordionItems = [
   {
     question: "Does Tramona help with Taxes?",
     answer:
-      "Yes! You have full control over pricing. If a traveler submits a request, you can respond with an offer that fits your availability and pricing preferences.",
+      "Yes, Tramona handles all the same taxes other sites like Airbnb and VRBO do.",
   },
   {
     question: "How and when do I get paid?",
     answer:
-      "Yes, Tramona supports co-hosting. You can add a co-host to help manage bookings, respond to traveler inquiries, and coordinate check-ins. They’ll have access to the necessary tools without needing full access to your account.",
+      "Tramona collets the full amount from the traveler at the time of the booking, and pays the host 24 hours after check in. All payment are securely handled via Stripe.",
   },
   {
     question: "How much protection does Tramona offer?",
     answer:
-      "Tramona helps you optimize occupancy and revenue by offering more flexibility. Just like how Priceline allowed hotels to offload unbooked rooms without lowering rates across the board, Tramona allows you to keep your listings at full price on other platforms while accepting offers for lower rates only when you choose. We also take lower fees than platforms like Airbnb and VRBO, meaning you can earn more while giving travelers better deals.",
+      "Tramona offers $50,000 of protection per booking. You also have the opportunity to add a security deposit.",
   },
 ];
