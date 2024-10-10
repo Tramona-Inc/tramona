@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import React from "react";
-import { Text } from "@react-email/components";
+import { Section, Text } from "@react-email/components";
 import {
   BottomHr,
   CustomButton,
@@ -17,123 +17,54 @@ interface ReservationConfirmedEmailProps {
 }
 
 export default function ReferAHostEmail({
-  referrerFirstAndLastName = " A Tramona User",
-  referralCode = "",
+  referrerFirstAndLastName = "A Tramona User",
+  referralCode = "asdfasdfasdf",
 }: ReservationConfirmedEmailProps) {
   return (
     <Layout title_preview="Reservation Confirmed">
       <div className="border-b border-gray-300 bg-white p-6 text-black">
         <Text className="mb-4 text-3xl font-bold text-black">
-          {`${referrerFirstAndLastName} invited you to Tramona, sign up with to earn!`}
+          {`${referrerFirstAndLastName} invited you to host on Tramona!`}
         </Text>
         <Text className="mb-4 text-left">
-          Hello, You have been invited to join Tramona
-          <span className="text-black-600 underline">asdfasdf</span> has been
-          confirmed. Congrats and enjoy!
+          Hi there,
+          <br />
+          {`${referrerFirstAndLastName}`} thought you&apos;d be a great addition
+          to the Tramona host community! Sign up using their unique referral
+          code and enjoy these awesome benefits:
+          <ul className="ml-6 list-disc">
+            <li> **Zero fees** on your first booking</li>
+            <li> **$25 off** your next trip booked on Tramona</li>
+          </ul>
         </Text>
-        <table
-          className="mb-8"
-          style={{ width: "100%", borderCollapse: "collapse" }}
-        >
-          <tr>
-            <td style={{ padding: 0 }}>
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                <tr>
-                  <td
-                    style={{
-                      padding: 0,
-                      background:
-                        "https://www.tramona.com/assets/images/old-landing-bg.jpg",
-                      backgroundSize: "cover",
-                      borderRadius: "8px",
-                    }}
-                  >
-                    <a
-                      href="https://www.tramona.com"
-                      style={{ borderRadius: "8px 8px 0 0", display: "block" }}
-                    >
-                      <img
-                        src="https://www.tramona.com/assets/images/old-landing-bg.jpg"
-                        alt="Place Image"
-                        style={{
-                          width: "100%",
-                          borderRadius: "8px 8px 0 0",
-                          display: "block",
-                          border: "none",
-                        }}
-                      />
-                    </a>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-        </table>
-        <Text className="mb-4 text-2xl font-bold">dfsdfasdf</Text>
-        <div style={{ display: "table", width: "100%", marginBottom: "16px" }}>
-          <div
-            style={{
-              display: "table-cell",
-              verticalAlign: "middle",
-              width: "10%",
-              paddingRight: "8px",
-            }}
-          >
-            {/* <img
-              src={hostImageUrl}
-              alt="Host"
-              className="h-10 w-10 rounded-full"
-            /> */}
-          </div>
-          <div
-            style={{
-              display: "table-cell",
-              verticalAlign: "middle",
-              width: "20%",
-            }}
-          >
-            <Text className="m-0 text-left text-sm">Hosted by</Text>
-          </div>
-          <div
-            style={{
-              display: "table-cell",
-              verticalAlign: "middle",
-              textAlign: "right",
-              width: "70%",
-            }}
-          >
-            <a
-              href="#"
-              className="rounded-md bg-gray-200 px-4 py-2 text-black"
-              style={{ textDecoration: "none", marginRight: "8px" }}
+
+        <Section className="my-4 text-center">
+          <div className="bg-lightgrey mx-auto inline-block w-11/12 py-3">
+            <Text className="text-brand mt-2 text-base">
+              *To claim your rewards:* Enter this code when you sign up.
+            </Text>
+            <div
+              className="rounded-lg bg-white px-6 py-4"
+              style={{
+                border: "1px solid #DADADA",
+                display: "inline-block",
+                margin: "10px auto",
+              }}
             >
-              Message your host
-            </a>
-          </div>
-        </div>
-        <div
-          className="mx-auto my-4 w-full"
-          style={{ borderBottom: "2px solid #e0e0e0" }}
-        ></div>
-        <div>
-          <div style={{ textAlign: "left", float: "left" }}>
-            <Text className="m-0 text-xl font-bold">Your Trip</Text>
-          </div>
-          <div style={{ textAlign: "right", float: "right" }}>
-            <Text
-              className="p-2 text-sm text-green-600"
-              style={{ border: "1px solid #F2F1EF", borderRadius: "20px" }}
-            >
-              Booking confirmed
+              <Text className="text-brand text-4xl font-bold tracking-wider">
+                {referralCode}
+              </Text>
+            </div>
+            <Text className="text-brand text-base">
+              Ready to start hosting and earning?
             </Text>
           </div>
-          <div style={{ clear: "both" }}></div>
-        </div>
-        <CustomButton link="https://www.tramona.com" title="Start Now!" />
+        </Section>
+
+        <CustomButton link="https://www.tramona.com" title="Sign Up Now!" />
       </div>
       <Text className="text-brand px-6 text-left text-base">
-        If there are any questions, send us an email at info@tramona.com or send
-        the host a message directly.
+        Questions? Feel free to reach out to us at info@tramona.com
       </Text>
       <BottomHr />
       <SocialLinks />
