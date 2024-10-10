@@ -27,7 +27,7 @@ export default function HostRequests() {
 
   const [selectedRequest, setSelectedRequest] =
     useState<HostDashboardRequest | null>(null);
-  const [properties, setProperties] = useState<Property[] | null>(null);
+  const [properties, setProperties] = useState<(Property & {taxAvailable: boolean})[] | null>(null);
   const [step, setStep] = useState(0);
 
   const [separatedData, setSeparatedData] = useState<SeparatedData | null>(

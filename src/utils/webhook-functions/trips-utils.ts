@@ -11,11 +11,7 @@ import {
 } from "@/server/db/schema";
 
 import { cancelSuperhogReservation } from "./superhog-utils";
-import {
-  formatDateRange,
-  getDirectListingPriceBreakdown,
-  getNumNights,
-} from "../utils";
+import { formatDateRange, getNumNights } from "../utils";
 import type {
   User,
   Trip,
@@ -23,8 +19,6 @@ import type {
   Property,
   TripCheckout,
 } from "../../server/db/schema";
-import { getTramonaPriceBreakdown } from "../utils";
-import { TAX_PERCENTAGE, SUPERHOG_FEE } from "../constants";
 import { sendEmail } from "@/server/server-utils";
 import { formatDate } from "date-fns";
 import ReservationConfirmedEmail from "packages/transactional/emails/ReservationConfirmedEmail";

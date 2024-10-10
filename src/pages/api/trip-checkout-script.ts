@@ -1,5 +1,11 @@
 import { db } from "@/server/db";
-import { tripCheckouts, trips, offers, Offer } from "@/server/db/schema";
+import {
+  tripCheckouts,
+  trips,
+  offers,
+  Offer,
+  properties,
+} from "@/server/db/schema";
 import { isNull, eq, and } from "drizzle-orm";
 import { breakdownPayment } from "@/utils/payment-utils/paymentBreakdown";
 
@@ -20,13 +26,21 @@ export default async function populateTripCheckout() {
 }
 
 async function createTripCheckout(curOffer: Offer) {
+  //find property of the offer
+
+  const curProperty = await db.query.properties.findFirst({
+    where: eq(properties.id, curOffer.propertyId),
+  });
+  console.log(curProperty?.latLngPoint.x);
   //for each offer
-  const brokeDownPayment = breakdownPayment({
+  const brokeDownPayment = await breakdownPayment({
     checkIn: curOffer.checkIn,
     checkOut: curOffer.checkOut,
     travelerOfferedPriceBeforeFees: curOffer.travelerOfferedPriceBeforeFees,
     isScrapedPropery: curOffer.scrapeUrl ? true : false,
     originalPrice: curOffer.datePriceFromAirbnb,
+    lat: curProperty!.latLngPoint.y,
+    lng: curProperty!.latLngPoint.x,
   });
 
   const insertedTripCheckout = await db

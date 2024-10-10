@@ -555,10 +555,12 @@ export async function handleRequestSubmission(
               numNights,
             });
 
-            const brokeDownPayment = breakdownPayment({
+            const brokeDownPayment = await breakdownPayment({
               numOfNights: numNights,
               travelerOfferedPriceBeforeFees: travelerOfferedPriceBeforeFees,
               isScrapedPropery: false,
+              lat: propertyDetails.latLngPoint.y,
+              lng: propertyDetails.latLngPoint.x,
             });
 
             const tripCheckout = await tx
