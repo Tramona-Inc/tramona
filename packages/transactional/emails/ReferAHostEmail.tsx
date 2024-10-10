@@ -10,7 +10,6 @@ import {
   SocialLinks,
 } from "./EmailComponents";
 
-import { formatCurrency } from "@/utils/utils";
 interface ReservationConfirmedEmailProps {
   referrerFirstAndLastName: string;
   referralCode: string;
