@@ -36,6 +36,10 @@ export function generateReferralCode() {
   return randomString;
 }
 
+export function generatePhoneNumberOTP() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
 export async function sleep(ms: number) {
   return new Promise((res) => setTimeout(res, ms));
 }
