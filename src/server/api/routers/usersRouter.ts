@@ -752,8 +752,10 @@ export const usersRouter = createTRPCRouter({
       };
     }),
 
-  getMyVerifications: protectedProcedure.query(async ({ ctx }) => {
-    const verifications = ctx.db.query.users.findFirst({
+  getMyVerifications: optionallyAuthedProcedure.query(async ({ ctx }) => {
+    if (!ctx.user) return null;
+
+    const verifications = await ctx.db.query.users.findFirst({
       where: eq(users.id, ctx.user.id),
       columns: {
         dateOfBirth: true,
@@ -762,6 +764,8 @@ export const usersRouter = createTRPCRouter({
         lastName: true,
       },
     });
+
+    if (!verifications) throw new TRPCError({ code: "NOT_FOUND" });
 
     return verifications;
   }),
