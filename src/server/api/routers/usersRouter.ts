@@ -50,6 +50,14 @@ export const usersRouter = createTRPCRouter({
     });
   }),
 
+  getOtherUser: optionallyAuthedProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input }) => {
+      return await ctx.db.query.users.findFirst({
+        where: eq(users.id, input.id),
+      });
+    }),
+
   getOnboardingStep: optionallyAuthedProcedure.query(async ({ ctx }) => {
     if (!ctx.user) return null;
     const res = await ctx.db.query.users.findFirst({

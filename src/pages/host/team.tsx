@@ -56,6 +56,10 @@ export default function Page() {
     api.hostTeams.removeHostTeamMember.useMutation();
   const { mutateAsync: updateRole } =
     api.hostTeams.updateCohostRole.useMutation();
+  const { data: user } = api.users.getUser.useQuery();
+  const { data: host } = api.users.getOtherUser.useQuery({
+    id: user?.mainHostId ?? "",
+  });
 
   const handleResendInvite = async (email: string) => {
     const res = await resendInviteMutation.mutateAsync({
@@ -140,7 +144,10 @@ export default function Page() {
               setIsEditing={setIsEditing}
             />
           ) : (
-            <Spinner />
+            // <Spinner />
+            <p>
+              You are co-hosting for {host?.name} ({host?.email})
+            </p>
           )}
           {curTeamMembers
             ? curTeamMembers.map((member) => (
