@@ -5,26 +5,11 @@ import {
   publicProcedure,
 } from "@/server/api/trpc";
 import { sendSlackMessage } from "@/server/slack";
-import { zodString } from "@/utils/zod-utils";
-import { MailService } from "@sendgrid/mail";
-import { TRPCError } from "@trpc/server";
 import { Twilio } from "twilio";
-import {
-  type ServiceInstance,
-  type ServiceListInstanceCreateOptions,
-} from "twilio/lib/rest/verify/v2/service";
+import { type ServiceInstance } from "twilio/lib/rest/verify/v2/service";
 import { z } from "zod";
 
 const twilio = new Twilio(env.TWILIO_ACCOUNT_SID, env.TWILIO_AUTH_TOKEN);
-
-const sgMail = new MailService();
-
-sgMail.setApiKey(env.SENDGRID_API_KEY);
-
-const verificationServiceConfig: ServiceListInstanceCreateOptions = {
-  friendlyName: "Tramona",
-  codeLength: 6,
-};
 
 let service: ServiceInstance; // singleton
 
@@ -32,7 +17,10 @@ const createService = async () => {
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (service !== undefined) return;
 
-  service = await twilio.verify.v2.services.create(verificationServiceConfig);
+  service = await twilio.verify.v2.services.create({
+    friendlyName: "Tramona",
+    codeLength: 6,
+  });
 };
 
 export const twilioRouter = createTRPCRouter({
@@ -177,46 +165,15 @@ export const twilioRouter = createTRPCRouter({
       return response;
     }),
 
-  sendEmail: protectedProcedure
-    .input(
-      z.object({
-        to: zodString().email(),
-        subject: z.string(),
-        text: z.string(),
-        html: z.string(),
-      }),
-    )
-    .mutation(async ({ input }) => {
-      const { to, subject, text, html } = input;
-
-      const response = await sgMail.send({
-        to,
-        from: env.SENDGRID_FROM,
-        subject,
-        text,
-        html,
-      });
-
-      return response;
-    }),
-
   sendOTP: publicProcedure
     .input(z.object({ to: z.string() }))
     .mutation(async ({ input }) => {
       await createService();
-
       const { to } = input;
 
-      const { sid } = service;
-
-      const verification = await twilio.verify.v2
-        .services(sid)
-        .verifications.create({
-          to,
-          channel: "sms",
-        });
-
-      return verification;
+      await twilio.verify.v2
+        .services(service.sid)
+        .verifications.create({ to, channel: "sms" });
     }),
 
   sendSlack: protectedProcedure
@@ -231,9 +188,10 @@ export const twilioRouter = createTRPCRouter({
     .input(z.object({ to: z.string(), code: z.string() }))
     .mutation(async ({ input }) => {
       await createService();
+      const { to, code } = input;
 
       return await twilio.verify.v2
         .services(service.sid)
-        .verificationChecks.create(input);
+        .verificationChecks.create({ to, code });
     }),
 });

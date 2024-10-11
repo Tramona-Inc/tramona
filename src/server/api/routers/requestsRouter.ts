@@ -489,15 +489,15 @@ export async function handleRequestSubmission(
       { ...input, id: request.id, latLngPoint: request.latLngPoint, radius },
       { tx },
     );
-  
+
     const numNights = getNumNights(input.checkIn, input.checkOut);
     const requestedNightlyPrice = input.maxTotalPrice / numNights;
-  
+
     for (const property of eligibleProperties) {
       const propertyDetails = await tx.query.properties.findFirst({
         where: eq(properties.id, property.id),
       });
-  
+
       if (
         propertyDetails?.autoOfferEnabled &&
         propertyDetails.originalListingId &&
@@ -505,7 +505,7 @@ export async function handleRequestSubmission(
         propertyDetails.autoOfferDiscountTiers
       ) {
         try {
-          console.log('aboutta scrape price of airbnb thing')
+          console.log("aboutta scrape price of airbnb thing");
           const airbnbTotalPrice = await scrapeAirbnbPrice({
             airbnbListingId: propertyDetails.originalListingId,
             params: {
@@ -518,7 +518,7 @@ export async function handleRequestSubmission(
             "in da requests router and just scraped price",
             airbnbTotalPrice,
           );
-  
+
           const airbnbNightlyPrice = airbnbTotalPrice / numNights;
           console.log("airbnb nightly price", airbnbNightlyPrice);
           console.log("requested nightly price", requestedNightlyPrice);
@@ -526,19 +526,25 @@ export async function handleRequestSubmission(
             ((airbnbNightlyPrice - requestedNightlyPrice) /
               airbnbNightlyPrice) *
             100;
-  
+
           console.log("percent off", percentOff);
-  
+
           const daysUntilCheckIn = differenceInDays(input.checkIn, new Date());
-  
-          const applicableDiscount = propertyDetails.autoOfferDiscountTiers.find(
-            tier => daysUntilCheckIn >= tier.days
-          );
+
+          const applicableDiscount =
+            propertyDetails.autoOfferDiscountTiers.find(
+              (tier) => daysUntilCheckIn >= tier.days,
+            );
 
           console.log("applicable discount", applicableDiscount);
-  
-          if (applicableDiscount && percentOff <= applicableDiscount.percentOff) {
-            console.log("percent off is less than or equal to applicable discount");
+
+          if (
+            applicableDiscount &&
+            percentOff <= applicableDiscount.percentOff
+          ) {
+            console.log(
+              "percent off is less than or equal to applicable discount",
+            );
             await tx.insert(offers).values({
               requestId: request.id,
               propertyId: property.id,
@@ -548,13 +554,13 @@ export async function handleRequestSubmission(
                 hostMarkup: HOST_MARKUP,
                 numNights,
               }),
-  
+
               travelerOfferedPrice: getTravelerOfferedPrice({
                 propertyPrice: requestedNightlyPrice,
                 travelerMarkup: TRAVELER__MARKUP,
                 numNights,
               }),
-  
+
               checkIn: input.checkIn,
               checkOut: input.checkOut,
             });
@@ -562,7 +568,7 @@ export async function handleRequestSubmission(
         } catch (error) {
           console.error(
             `Error processing auto-offer for property ${property.id}:`,
-            error
+            error,
           );
         }
       }

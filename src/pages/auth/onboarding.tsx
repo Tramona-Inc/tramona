@@ -27,6 +27,7 @@ import { type Country, isValidPhoneNumber } from "react-phone-number-input";
 import { z } from "zod";
 import { zodString } from "@/utils/zod-utils";
 import { Icons } from "@/components/_icons/icons";
+import { useUpdateUser } from "@/utils/utils";
 // feel free to refactor this lol
 
 export default function Onboarding() {
@@ -64,43 +65,29 @@ export default function Onboarding() {
   const { mutateAsync: mutateVerifyOTP } = api.twilio.verifyOTP.useMutation();
   const { mutateAsync: phoneNumberIsTaken } =
     api.users.phoneNumberIsTaken.useMutation();
-  const { mutateAsync: mutateInsertPhone } =
-    api.users.insertPhoneWithUserId.useMutation();
 
   const { refetch: refetchVerifications } =
     api.users.getMyVerifications.useQuery(undefined, { enabled: false });
-  const { mutateAsync: updateProfile } = api.users.updateProfile.useMutation({
-    onSuccess: () => {
-      void refetchVerifications();
-    },
-  });
 
-  const { update } = useSession();
+  const { updateUser } = useUpdateUser();
 
   async function onPhoneSubmit({ phoneNumber }: FormValues) {
     if (!country) {
       form.setError("phoneNumber", { message: "Invalid phone number" });
       return;
     }
-    // i feel like i remember this being mentioned in a meeting but idk
-    // so uncomment it out if you want
 
-    // if (country !== "US") {
-    //   form.setError("phoneNumber", {
-    //     message: "We only accept US phone numbers for now",
-    //   });
-    //   return;
-    // }
-    if (country !== "US") {
-      if (session?.user.id) {
-        await updateProfile({
-          id: session.user.id,
-          isWhatsApp: true,
-        });
-      }
+    if (!session?.user.id) {
+      errorToast(
+        "Please login to continue, or try again if you're logged in already",
+      );
+      return;
     }
 
-    if (await phoneNumberIsTaken({ phoneNumber })) {
+    if (country !== "US") await updateUser({ isWhatsApp: true });
+
+    const phoneNumberTaken = await phoneNumberIsTaken({ phoneNumber });
+    if (phoneNumberTaken) {
       form.setError("phoneNumber", {
         message: "Phone number already in use, please try again",
       });
@@ -110,48 +97,28 @@ export default function Onboarding() {
   }
 
   useEffect(() => {
-    const verifyCode = async () => {
-      if (code.length === 6 && phoneNumber) {
-        // Verify Code
-        const verifyOTPResponse = await mutateVerifyOTP({
-          to: phoneNumber,
-          code: code,
-        });
+    if (code.length < 6 || !phoneNumber || !session?.user.id) return;
 
-        const { status } = verifyOTPResponse; // pending | approved | canceled
-
-        if (status !== "approved") {
-          errorToast("Incorrect code, please try again");
-          return;
-        } else {
-          // insert phone with email
-          if (session?.user.id) {
-            void mutateInsertPhone({
-              userId: session.user.id,
-              phone: phoneNumber,
-            });
-            await updateProfile({
-              id: session.user.id,
-              onboardingStep: 1,
-            });
-
-            toast({
-              title: "Successfully verified phone!",
-              description: "Your phone has been added to your account.",
-            });
-
-            void update();
-
-            void router.push({
-              pathname: "/auth/onboarding-1",
-            });
-          }
-        }
+    void mutateVerifyOTP({ to: phoneNumber, code }).then(async ({ status }) => {
+      if (status !== "approved") {
+        errorToast("Incorrect code, please try again");
+        return;
       }
-    };
 
-    void verifyCode(); // Call the asynchronous function here
-  }, [code]);
+      await updateUser({ onboardingStep: 1, phoneNumber });
+      void refetchVerifications();
+
+      toast({
+        title: "Successfully verified phone!",
+        description: "Your phone has been added to your account.",
+      });
+
+      void router.push({
+        pathname: "/auth/onboarding-1",
+      });
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [code, phoneNumber, session?.user.id]);
 
   return (
     <MainLayout className="flex flex-col justify-center gap-5 p-4">
