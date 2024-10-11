@@ -106,7 +106,7 @@ export default function HostStaysCards({
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem>
                       <Link
-                        href="/host/resolution-form"
+                        href="/host/report/resolution-form"
                         className="flex w-full flex-row justify-around gap-x-1"
                       >
                         Report Damage <FlagIcon height={16} />

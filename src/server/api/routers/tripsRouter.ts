@@ -403,4 +403,29 @@ export const tripsRouter = createTRPCRouter({
       });
       return;
     }),
+  getMyTripsPaymentHistory: protectedProcedure.query(async ({ ctx }) => {
+    const allPayments = await db.query.trips.findMany({
+      where: exists(
+        db
+          .select()
+          .from(groupMembers)
+          .where(
+            and(
+              eq(groupMembers.groupId, trips.groupId),
+              eq(groupMembers.userId, ctx.user.id),
+            ),
+          ),
+      ),
+      with: {
+        tripCheckout: true,
+        property: {
+          columns: {
+            name: true,
+            city: true,
+          },
+        },
+      },
+    });
+    return allPayments;
+  }),
 });
