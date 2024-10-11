@@ -776,6 +776,20 @@ export const hostTeamsRouter = createTRPCRouter({
         userId: ctx.user.id,
       });
 
+      const teamMembers = await ctx.db.query.hostTeamMembers.findMany({
+        where: eq(hostTeamMembers.hostTeamId, invite.hostTeam.id),
+      });
+
+      const mainHost = teamMembers.filter(
+        (teamMember) => teamMember.userId !== ctx.user.id,
+      );
+
+      // add main host id to mainHostId column in users table for cohost
+      await ctx.db
+        .update(users)
+        .set({ mainHostId: mainHost[0]?.userId })
+        .where(eq(users.id, ctx.user.id));
+
       // delete invite
       await ctx.db
         .delete(hostTeamInvites)
