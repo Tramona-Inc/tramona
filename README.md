@@ -7,7 +7,6 @@ We're using the [T3 stack](https://create.t3.gg/) with Drizzle, SST, and shadcn/
 - [Drizzle](https://orm.drizzle.team)
 - [Tailwind CSS](https://tailwindcss.com)
 - [tRPC](https://trpc.io)
-- [SST](https://sst.dev)
 - [shadcn/ui](https://ui.shadcn.com)
 
 ## Development setup
@@ -20,8 +19,8 @@ We're using the [T3 stack](https://create.t3.gg/) with Drizzle, SST, and shadcn/
 
 The idea behind shadcn is that you copy paste their components as a starting point, then customize them to your needs. All the components copy-pasted from shadcn are in the [components/ui](/src/components/ui/) folder. To get started:
 
-1. Read the [introduction page](https://ui.shadcn.com/docs) and the [theming page](https://ui.shadcn.com/docs/theming). Then look at our [globals.css](/src/styles/globals.css) file. **Use these semantic colors whenever possible.**
-2. Skim throught the shadcn/ui docs to see all of the components shadcn offers, and **use them as much as possible too**.
+1. Read the [introduction page](https://ui.shadcn.com/docs) and the [theming page](https://ui.shadcn.com/docs/theming). Then look at our [globals.css](/src/styles/globals.css) file. Use these semantic colors whenever possible.
+2. Skim throught the shadcn/ui docs to see all of the components shadcn offers, and use them as much as possible too.
 3. Use either our code or the examples in the shadcn docs as reference.
 
 ## Other
