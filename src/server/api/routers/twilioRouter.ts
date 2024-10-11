@@ -177,11 +177,15 @@ export const twilioRouter = createTRPCRouter({
     }),
 
   sendSlack: protectedProcedure
-    .input(z.object({ message: z.string() }))
+    .input(z.object({ message: z.string(), isProductionOnly: z.boolean() }))
     .mutation(async ({ input }) => {
       const { message } = input;
 
-      await sendSlackMessage({ channel: "tramona-bot", text: message });
+      await sendSlackMessage({
+        channel: "tramona-bot",
+        text: message,
+        isProductionOnly: input.isProductionOnly,
+      });
     }),
 
   verifyOTP: publicProcedure

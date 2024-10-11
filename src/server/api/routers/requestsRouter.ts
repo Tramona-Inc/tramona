@@ -15,6 +15,7 @@ import {
   offers,
   rejectedRequests,
   properties,
+  tripCheckouts,
 } from "@/server/db/schema";
 import {
   sendText,
@@ -47,6 +48,7 @@ import { scrapeAirbnbPrice } from "@/server/scrapePrice";
 import { HOST_MARKUP, TRAVELER__MARKUP } from "@/utils/constants";
 import { differenceInDays } from "date-fns";
 import { addMinutes } from "date-fns";
+import { breakdownPayment } from "@/utils/payment-utils/paymentBreakdown";
 
 const updateRequestInputSchema = z.object({
   requestId: z.number(),
@@ -76,7 +78,7 @@ export const requestsRouter = createTRPCRouter({
           offers: {
             columns: {
               id: true,
-              travelerOfferedPrice: true,
+              travelerOfferedPriceBeforeFees: true,
               createdAt: true,
               checkIn: true,
               checkOut: true,
@@ -548,19 +550,14 @@ export async function handleRequestSubmission(
             await tx.insert(offers).values({
               requestId: request.id,
               propertyId: property.id,
+              tripCheckoutId: tripCheckout.id,
               totalPrice: input.maxTotalPrice,
               hostPayout: getHostPayout({
                 propertyPrice: requestedNightlyPrice,
                 hostMarkup: HOST_MARKUP,
                 numNights,
               }),
-
-              travelerOfferedPrice: getTravelerOfferedPrice({
-                propertyPrice: requestedNightlyPrice,
-                travelerMarkup: TRAVELER__MARKUP,
-                numNights,
-              }),
-
+              travelerOfferedPriceBeforeFees,
               checkIn: input.checkIn,
               checkOut: input.checkOut,
             });

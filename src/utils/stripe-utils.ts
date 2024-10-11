@@ -1,7 +1,8 @@
 import { db } from "@/server/db";
-import { trips } from "@/server/db/schema/tables/trips";
-import { stripe } from "@/server/api/routers/stripeRouter";
+import { trips, refundedPayments } from "@/server/db/schema";
+import { stripe, stripeWithSecretKey } from "@/server/api/routers/stripeRouter";
 import { eq } from "drizzle-orm";
+import type { Stripe } from "stripe";
 
 //for functions that require alot code to be written after a stripe event
 interface CreatePayHostTransfer {
@@ -47,4 +48,37 @@ export async function createPayHostTransfer({
       .where(eq(trips.id, parseInt(tripId)));
     console.log("transfer created", transfer);
   }
+}
+
+export async function refundTripWithStripe({
+  paymentIntentId,
+  amount,
+  metadata,
+}: {
+  paymentIntentId: string;
+  amount: number;
+  metadata: {
+    tripId: number;
+    propertyId: number;
+    groupId: number;
+    cancellationRefund: number;
+    cancellationId: number;
+    description: string;
+  };
+}) {
+  const refund = await stripeWithSecretKey.refunds.create({
+    payment_intent: paymentIntentId, // Or use charge: 'ch_123XYZ...'
+    amount: amount,
+    reason: "requested_by_customer", // Optional: Reason for the refund
+    metadata: metadata,
+  });
+
+  const refundedPayment = await db.insert(refundedPayments).values({
+    tripId: metadata.tripId,
+    amountRefunded: amount,
+    description: metadata.description,
+  });
+  console.log(refundedPayment);
+  console.log(refund);
+  return;
 }

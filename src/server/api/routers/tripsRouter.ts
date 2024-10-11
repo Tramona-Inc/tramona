@@ -4,12 +4,24 @@ import {
   roleRestrictedProcedure,
 } from "@/server/api/trpc";
 import { db } from "@/server/db";
-import { groupMembers, properties, trips } from "@/server/db/schema";
+import {
+  groupMembers,
+  properties,
+  superhogRequests,
+  groups,
+  trips,
+  tripCancellations,
+} from "@/server/db/schema";
+import { cancelSuperhogReservation } from "@/utils/webhook-functions/superhog-utils";
+import { sendEmail } from "@/server/server-utils";
 
 import { TRPCError } from "@trpc/server";
-import { group } from "console";
-import { and, eq, exists, isNotNull, isNull, sql } from "drizzle-orm";
+import { and, eq, exists, isNotNull, isNull, ne, sql } from "drizzle-orm";
 import { z } from "zod";
+import BookingCancellationEmail from "packages/transactional/emails/BookingCancellationEmail";
+import { formatDateRange, getNumNights, removeTax } from "@/utils/utils";
+import { refundTripWithStripe } from "@/utils/stripe-utils";
+import { TAX_PERCENTAGE } from "@/utils/constants";
 
 export const tripsRouter = createTRPCRouter({
   getAllPreviousTripsWithDetails: roleRestrictedProcedure(["admin"]).query(
@@ -26,7 +38,6 @@ export const tripsRouter = createTRPCRouter({
           },
           offer: {
             columns: {
-              paymentIntentId: true,
               checkIn: true,
               checkOut: true,
             },
@@ -72,12 +83,13 @@ export const tripsRouter = createTRPCRouter({
             address: true,
             city: true,
             cancellationPolicy: true,
+            checkInTime: true,
+            checkOutTime: true,
           },
           with: { host: { columns: { name: true, image: true } } },
         },
         offer: {
           columns: {
-            paymentIntentId: true,
             checkIn: true,
             checkOut: true,
           },
@@ -125,6 +137,9 @@ export const tripsRouter = createTRPCRouter({
     .query(async ({ input }) => {
       const trip = await db.query.trips.findFirst({
         where: eq(trips.id, input.tripId),
+        with: {
+          tripCheckout: true,
+        },
       });
 
       const propertyForTrip = await db.query.properties.findFirst({
@@ -165,6 +180,7 @@ export const tripsRouter = createTRPCRouter({
       const trip = await db.query.trips.findFirst({
         where: eq(trips.paymentIntentId, input.paymentIntentId),
         with: {
+          tripCheckout: true,
           property: {
             columns: {
               id: true,
@@ -230,4 +246,161 @@ export const tripsRouter = createTRPCRouter({
     const allTrips = await db.query.tripDamages.findMany({});
     return allTrips.length > 0 ? allTrips : [];
   }),
+
+  getTripCancelationPolicyByTripId: protectedProcedure
+    .input(z.number())
+    .query(async ({ input }) => {
+      const trip = await db.query.trips.findFirst({
+        where: eq(trips.id, input),
+      });
+      return trip;
+    }),
+
+  cancelTripById: protectedProcedure
+    .input(
+      z.object({
+        tripId: z.number(),
+        reason: z.string(),
+        refundAmount: z.number().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      //1.cancel superhog.. skip request with null or rejected
+      const curSuperhogRequest = await db.query.superhogRequests.findFirst({
+        where: and(
+          eq(superhogRequests.superhogReservationId, input.tripId.toString()),
+          and(ne(superhogRequests.superhogStatus, "Rejected")),
+          isNotNull(superhogRequests.superhogStatus),
+        ),
+        columns: {
+          superhogVerificationId: true,
+          superhogReservationId: true,
+          isCancelled: true,
+        },
+      });
+      //--- only update if superhog exist, has not been cancelled and is approved or pending --
+      if (curSuperhogRequest && curSuperhogRequest.isCancelled === false)
+        await cancelSuperhogReservation({
+          verificationId: curSuperhogRequest.superhogVerificationId,
+          reservationId: curSuperhogRequest.superhogReservationId,
+        });
+
+      //2.update trip status
+      const currentTrip = await db
+        .update(trips)
+        .set({
+          tripsStatus: "Cancelled",
+        })
+        .where(eq(trips.id, input.tripId))
+        .returning()
+        .then((res) => res[0]!);
+
+      //3.add the reason
+      const currentCancellations = await db
+        .insert(tripCancellations)
+        .values({
+          tripId: input.tripId,
+          reason: input.reason,
+        })
+        .returning()
+        .then((res) => res[0]!);
+
+      //4. send email
+      // ------send an email to the group --------
+      const requestGroupId = await db.query.groups.findFirst({
+        where: eq(groups.id, currentTrip.groupId),
+      });
+
+      const requestGroup = await db.query.groupMembers.findMany({
+        where: eq(groupMembers.groupId, requestGroupId!.id),
+        with: {
+          user: {
+            columns: { email: true, firstName: true, name: true },
+          },
+        },
+      });
+      //get property name
+      const property = await db.query.properties.findFirst({
+        columns: { name: true },
+        where: eq(properties.id, currentTrip.propertyId),
+      });
+
+      //send email to each member
+      for (const member of requestGroup) {
+        console.log("Sending Email to: ", member.user.email);
+        await sendEmail({
+          to: member.user.email,
+          subject: "Booking Cancelled - Tramona",
+          content: BookingCancellationEmail({
+            userName: member.user.firstName ?? member.user.name ?? "Traveler",
+            confirmationNumber: currentTrip.id.toString(),
+            dateRange: formatDateRange(
+              currentTrip.checkIn,
+              currentTrip.checkOut,
+            ).toString(),
+
+            property: property!.name,
+            reason: currentCancellations.reason,
+            refund: currentTrip.totalPriceAfterFees,
+
+            //partial refund
+            //partialRefund: true
+            //partialRefundDateRange: formatDateRange(
+            //   currentTrip.checkIn,
+            //   currentTrip.checkOut,
+            // ).toString(),
+          }),
+        });
+      }
+      //------------- 5. Issue refund  ----------
+      //$220.15
+      const amountWithoutProcessingFees = Math.round(
+        Math.round((currentTrip.totalPriceAfterFees - 3) / 1.029),
+      );
+
+      const amountWithoutSuperhogOrTax = input.refundAmount
+        ? input.refundAmount
+        : amountWithoutProcessingFees;
+
+      //------add the taxes we took and the superhog fees if not scraped property----
+      //1. offer with trips
+      const curTrip = await db.query.trips.findFirst({
+        where: eq(trips.id, input.tripId),
+        with: {
+          offer: {
+            columns: {
+              madePublicAt: false,
+              becomeVisibleAt: false,
+            },
+          },
+        },
+      });
+
+      // determine if it is a scraped property
+      let amount;
+      if (curTrip?.offer?.scrapeUrl) {
+        amount = amountWithoutSuperhogOrTax;
+      } else {
+        //dont refund the tax or superhog
+        const numOfNights = getNumNights(curTrip!.checkIn, curTrip!.checkOut);
+        amount =
+          removeTax(amountWithoutSuperhogOrTax, TAX_PERCENTAGE) -
+          numOfNights * 300;
+      }
+      console.log(amount);
+
+      await refundTripWithStripe({
+        paymentIntentId: currentTrip.paymentIntentId!,
+        amount: amount,
+        metadata: {
+          tripId: currentTrip.id,
+          propertyId: currentTrip.propertyId,
+          groupId: currentTrip.groupId,
+          cancellationRefund: currentCancellations.amountRefunded,
+          cancellationId: currentCancellations.id,
+          description: currentCancellations.reason,
+        },
+      });
+      return;
+    }),
 });

@@ -8,7 +8,7 @@ export default function RequestFeed({
   requestFeed: FeedRequestItem[];
 }) {
   return (
-    <Marquee pauseOnHover vertical className="h-[450px] [--duration:500s]">
+    <Marquee vertical className="h-full [--duration:100s]">
       {requestFeed.map((request, index) => (
         <FeedRequestCard key={index} request={request} />
       ))}

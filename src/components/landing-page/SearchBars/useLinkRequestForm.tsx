@@ -5,7 +5,6 @@ import { api } from "@/utils/api";
 import { errorToast } from "@/utils/toasts";
 import { type LinkConfirmationProps } from "./LinkConfirmation";
 import { LINK_REQUEST_DISCOUNT_PERCENTAGE } from "@/utils/constants";
-import { table } from "console";
 
 export type LinkRequestData = Pick<
   LinkConfirmationProps,

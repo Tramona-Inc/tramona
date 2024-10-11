@@ -9,6 +9,8 @@ interface BookingCancellationEmailProps {
   property: string;
   reason: string;
   refund: number;
+  partialRefund?: boolean;
+  partialRefundDateRange?: string;
 }
 
 export default function BookingCancellationEmail({
@@ -16,6 +18,9 @@ export default function BookingCancellationEmail({
   dateRange = "",
   property = "Property",
   reason = "Reason",
+  refund = 0,
+  partialRefund = false,
+  partialRefundDateRange = "",
 }: BookingCancellationEmailProps) {
   return (
     <Layout title_preview="Booking Modification">
@@ -45,10 +50,9 @@ export default function BookingCancellationEmail({
           Your booking for {property} for the dates of {dateRange} has been
           canceled for {reason}.
         </Text>
-        <Text className="mb-4 text-left">
-          (info if there will be a refund or not, depending on cancellation
-          policy, display refund amount if there is)
-        </Text>
+        {refund && (
+          <Text className="mb-4 text-left">{`${partialRefund ? `You are eligible for a partial refund of $${refund} for the dates of ${partialRefundDateRange}` : `You are eligible for a full refund of $${refund}.`} The refund will be processed to your original payment method within 5-10 business days. You'll receive a separate email notification once the refund has been issued.`}</Text>
+        )}
         <Text className="mb-4 text-left">
           If you believe this is an error please immediately contact our support
           team and we will assist you.

@@ -78,10 +78,10 @@ interface ScrapedData {
   longitude: number;
   numberOfRooms: number;
   amenityFeature:
-  | {
-    name: string;
-  }[]
-  | null;
+    | {
+        name: string;
+      }[]
+    | null;
   image: string[];
   containsPlace: {
     occupancy: {
@@ -176,8 +176,8 @@ function extractCleaningFee($: cheerio.CheerioAPI): number {
 }
 
 function extractCheckInCheckOutTime($: cheerio.CheerioAPI): {
-  checkInTime: string | null;
-  checkOutTime: string | null;
+  checkInTime: string;
+  checkOutTime: string;
 } {
   let checkInTime: string | null = null;
   let checkOutTime: string | null = null;
@@ -201,7 +201,13 @@ function extractCheckInCheckOutTime($: cheerio.CheerioAPI): {
       return false; // Exit the loop once we find the check-out time
     }
   });
-
+  //make sure it doesn't return null
+  if (!checkInTime) {
+    checkInTime = "15:00:00";
+  }
+  if (!checkOutTime) {
+    checkOutTime = "10:00:00";
+  }
   return { checkInTime, checkOutTime };
 }
 
@@ -394,13 +400,13 @@ export const cleanbnbScraper: DirectSiteScraper = async ({
       (property) => property.url.split("?")[0] === scrapedData.url,
     )[0]
       ? properties.filter(
-        (property) => property.url.split("?")[0] === scrapedData.url,
-      )[0]
+          (property) => property.url.split("?")[0] === scrapedData.url,
+        )[0]
       : properties.filter(
-        (property) =>
-          normalizeString(property.name) ===
-          normalizeString(scrapedData.name),
-      )[0];
+          (property) =>
+            normalizeString(property.name) ===
+            normalizeString(scrapedData.name),
+        )[0];
 
     if (property === undefined) {
       if (info.length > 0) {
@@ -434,8 +440,7 @@ export const cleanbnbScraper: DirectSiteScraper = async ({
     const originalListingUrl = property.url;
     const originalNightlyPrice =
       Math.round(
-        parseFloat(price) + (cleaningFee /
-          getNumNights(checkIn, checkOut))
+        parseFloat(price) + cleaningFee / getNumNights(checkIn, checkOut),
       ) * 100;
 
     res.push({
