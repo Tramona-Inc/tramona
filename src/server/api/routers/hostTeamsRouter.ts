@@ -462,6 +462,11 @@ export const hostTeamsRouter = createTRPCRouter({
       }
 
       await ctx.db
+        .update(users)
+        .set({ mainHostId: null })
+        .where(eq(users.id, input.memberId));
+
+      await ctx.db
         .delete(hostTeamMembers)
         .where(
           and(
