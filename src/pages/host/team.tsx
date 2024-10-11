@@ -145,9 +145,16 @@ export default function Page() {
             />
           ) : (
             // <Spinner />
-            <p>
-              You are co-hosting for {host?.name} ({host?.email})
-            </p>
+            <div>
+              <p>
+                You are co-hosting for{" "}
+                <span className="font-bold">{host?.name}</span> ({host?.email})
+              </p>
+              <p>
+                Restriction:{" "}
+                <span className="font-bold">{user?.coHostRole}</span>
+              </p>
+            </div>
           )}
           {curTeamMembers
             ? curTeamMembers.map((member) => (
