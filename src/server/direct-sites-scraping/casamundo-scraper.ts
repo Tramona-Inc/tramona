@@ -427,7 +427,7 @@ const reviewResponseSchema = z.object({
   list: z.array(
     z.object({
       text: z.string().nullable().optional(),
-      nickname: z.string().optional(),
+      nickname: z.string().nullable().optional(),
       rating: z.object({
         value: z.number(),
       }),
@@ -471,7 +471,7 @@ const fetchReviews = async (
     )
     .map((review) => ({
       name: review.nickname ?? "Anonymous",
-      rating: review.rating.value,
+      rating: Math.round(review.rating.value),
       review: review.text,
     }));
 
@@ -484,19 +484,19 @@ async function fetchPropertyDetails(
   checkOut: string,
   adults: number,
   location: string,
-  price: {
-    price: number;
-    currency: string;
-    id: string;
-    cancellationPolicy: string;
-  },
+  // price: {
+  //   price: number;
+  //   currency: string;
+  //   id: string;
+  //   cancellationPolicy: string;
+  // },
 ): Promise<ScrapedListing> {
   const url = `https://www.casamundo.com/rental/offer/${offerId}`;
 
   const params = new URLSearchParams({
     adults: adults.toString(),
-    arrival: checkIn,
-    duration: getNumNights(new Date(checkIn), new Date(checkOut)).toString(),
+    // arrival: checkIn,
+    // duration: getNumNights(new Date(checkIn), new Date(checkOut)).toString(),
     location: location,
     persons: adults.toString(),
     pricetype: "perNight",
@@ -635,10 +635,10 @@ async function fetchPropertyDetails(
     checkInTime: data.checkInCheckOutTime?.checkInTimeFrom,
     checkOutTime: data.checkInCheckOutTime?.checkOutTimeTo,
     originalListingPlatform: "Casamundo" as ListingSiteName,
-    originalNightlyPrice: Math.round((price.price / numNights) * 100),
+    // originalNightlyPrice: Math.round((price.price / numNights) * 100),
     petsAllowed: data.petFriendly ?? false,
     smokingAllowed,
-    cancellationPolicy: price.cancellationPolicy,
+    // cancellationPolicy: price.cancellationPolicy,
     reviews: reviews,
     scrapeUrl: `${url}?${params.toString()}`,
   };
@@ -655,18 +655,18 @@ async function scrapeProperty(
     throw new Error("Number of guests must be provided for Casamundo scraper");
   }
 
-  const isAvailable = await checkAvailability(offerId, checkIn, checkOut);
+  // const isAvailable = await checkAvailability(offerId, checkIn, checkOut);
 
-  if (!isAvailable) throw new Error("Property is not available");
+  // if (!isAvailable) throw new Error("Property is not available");
 
-  const price = await fetchPrice({
-    offerId,
-    numGuests,
-    checkIn: checkIn,
-    duration: getNumNights(checkIn, checkOut),
-  });
+  // const price = await fetchPrice({
+  //   offerId,
+  //   numGuests,
+  //   checkIn: checkIn,
+  //   duration: getNumNights(checkIn, checkOut),
+  // });
 
-  if (price.price === -1) throw new Error("Price is not available");
+  // if (price.price === -1) throw new Error("Price is not available");
 
   const propertyDetails = await fetchPropertyDetails(
     offerId,
@@ -674,7 +674,7 @@ async function scrapeProperty(
     checkOut.toISOString().split("T")[0] ?? "",
     numGuests,
     locationId,
-    price,
+    // price,
   );
   return propertyDetails;
 }
@@ -710,11 +710,15 @@ export const casamundoScraper: DirectSiteScraper = async ({
   //   }
   // }
 
-  return await Promise.allSettled(
+  const scrapedListings = await Promise.allSettled(
     offerIds.map((offer) =>
       scrapeProperty(offer.id, locationId, checkIn, checkOut, numGuests),
     ),
   ).then(logAndFilterSettledResults);
+
+  console.log(scrapedListings);
+
+  return scrapedListings;
 };
 
 export const casamundoSubScraper: SubsequentScraper = async ({
@@ -751,5 +755,6 @@ export const casamundoSubScraper: SubsequentScraper = async ({
     isAvailableOnOriginalSite: true,
     availabilityCheckedAt: new Date(),
     originalNightlyPrice: Math.round((price.price / numNights) * 100),
+    cancellationPolicy: price.cancellationPolicy,
   };
 };
