@@ -1,8 +1,16 @@
 import SupportEmail from "packages/transactional/emails/SupportEmail";
-import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
+import ReferAHostEmail from "packages/transactional/emails/ReferAHostEmail";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "@/server/api/trpc";
 import { sendEmail } from "@/server/server-utils";
 import { zodEmail, zodString } from "@/utils/zod-utils";
 import { z } from "zod";
+import { referralCodes, users } from "@/server/db/schema";
+import { db } from "@/server/db";
+import { eq } from "drizzle-orm";
 
 export const emailRouter = createTRPCRouter({
   sendSupportEmail: publicProcedure
@@ -23,5 +31,32 @@ export const emailRouter = createTRPCRouter({
           message: input.message,
         }),
       });
+    }),
+
+  sendListOfHostReferralEmails: protectedProcedure
+    .input(z.object({ emailList: z.string().email().array() }))
+    .mutation(async ({ ctx, input }) => {
+      const referrer = await db.query.users.findFirst({
+        where: eq(users.id, ctx.user.id),
+      });
+      const userFirstAndLastName =
+        referrer!.firstName + " " + referrer!.lastName;
+
+      const referralCode = await db.query.referralCodes.findFirst({
+        where: eq(referralCodes.ownerId, ctx.user.id),
+      });
+
+      console.log(referralCode);
+
+      for (const email of input.emailList) {
+        await sendEmail({
+          to: email,
+          subject: `${userFirstAndLastName} invited you to join Tramona`,
+          content: ReferAHostEmail({
+            referrerFirstAndLastName: userFirstAndLastName,
+            referralCode: referralCode!.referralCode,
+          }),
+        });
+      }
     }),
 });

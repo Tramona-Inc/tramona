@@ -652,39 +652,33 @@ export const evolveVacationRentalScraper: DirectSiteScraper = async ({
 
   const { lat, lng } = geocodingResult.location;
 
-  let formattedLocation = await getCity({ lat, lng });
+  const cityInfo = await getCity({ lat, lng });
 
-  if (formattedLocation === "[Unknown location]") {
-    formattedLocation =
-      (await getCountryISO({ lat, lng })) ?? "[Unknown location]";
-  }
-  if (formattedLocation === "[Unknown location]") {
-    throw new Error("Unable to determine location");
-  }
-
-  const locationParts = formattedLocation.split(", ");
-  let city, state, country;
-
-  if (locationParts.length === 3) {
-    [city, state, country] = locationParts;
-  } else if (locationParts.length === 2) {
-    [city, country] = locationParts;
-    state = "";
-  } else if (locationParts.length === 1) {
-    [state, country] = [location, locationParts[0]];
-  } else {
-    throw new Error("Unexpected location format");
+  if (cityInfo.city === "[Unknown]" && cityInfo.country === "[Unknown]") {
+    const countryISO = await getCountryISO({ lat, lng });
+    if (!countryISO) {
+      throw new Error("Unable to determine location");
+    }
+    cityInfo.country = countryISO;
   }
 
-  const formattedCountry = country?.toLowerCase().replace(/\s+/g, "-");
+  const city = cityInfo.city !== "[Unknown]" ? cityInfo.city : undefined;
+  let state = cityInfo.stateCode !== "[Unknown]" ? cityInfo.stateCode : undefined;
+  let country = cityInfo.country;
+
+  if (city === undefined && state === undefined) {
+    [state, country] = [location, country];
+  }
+
+  const formattedCountry = country.toLowerCase().replace(/\s+/g, "-");
   const formattedState = state?.toLowerCase().replace(/\s+/g, "-");
   const formattedCity = city?.toLowerCase().replace(/\s+/g, "-");
 
   let urlLocationParam = `/${formattedCountry}`;
-  if (state) {
+  if (formattedState) {
     urlLocationParam += `/${formattedState}`;
   }
-  if (city) {
+  if (formattedCity) {
     urlLocationParam += `/${formattedCity}`;
   }
 
