@@ -24,7 +24,7 @@ import { Card, CardFooter } from "../ui/card";
 import RequestGroupAvatars from "./RequestGroupAvatars";
 import RequestCardBadge from "./RequestCardBadge";
 import { Button } from "../ui/button";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import WithdrawRequestDialog from "./WithdrawRequestDialog";
 
 import { Badge } from "../ui/badge";
@@ -59,8 +59,6 @@ export default function RequestCard({
   children?: React.ReactNode;
 }) {
   const utils = api.useUtils();
-  const [lat, setLat] = useState<number | null>(null);
-  const [lng, setLng] = useState<number | null>(null);
 
   const pricePerNight =
     request.maxTotalPrice / getNumNights(request.checkIn, request.checkOut);
@@ -72,22 +70,6 @@ export default function RequestCard({
     (request.numGuests > 1 && type !== "host") || type === "admin";
 
   const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    const fetchCoordinates = async () => {
-      if (!request.location)
-        // || req.lat !== null || req.lng !== null
-        return;
-      const { coordinates } = await utils.offers.getCoordinates.fetch({
-        location: request.location,
-      });
-      const { lat, lng } = coordinates.location!;
-      setLat(lat);
-      setLng(lng);
-    };
-
-    void fetchCoordinates();
-  }, []);
 
   return (
     <Card className="overflow-hidden p-0">
@@ -204,9 +186,11 @@ export default function RequestCard({
         </div>
         {type !== "host" && (
           <div className="hidden w-64 shrink-0 bg-zinc-100 lg:block">
-            {lat && lng && (
-              <SingleLocationMap lat={lat} lng={lng} icon={true} />
-            )}
+            <SingleLocationMap
+              lat={request.latLngPoint.y}
+              lng={request.latLngPoint.x}
+              icon={true}
+            />
           </div>
         )}
       </div>
