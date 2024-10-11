@@ -4,7 +4,14 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "@/server/api/trpc";
+import { db } from "@/server/db";
+import { phoneNumberOTPs } from "@/server/db/schema/tables/auth/phoneNumberOTPs";
+import { sendText } from "@/server/server-utils";
 import { sendSlackMessage } from "@/server/slack";
+import { generatePhoneNumberOTP } from "@/utils/utils";
+import { TRPCError } from "@trpc/server";
+import { subMinutes } from "date-fns";
+import { eq } from "drizzle-orm";
 import { Twilio } from "twilio";
 import { type ServiceInstance } from "twilio/lib/rest/verify/v2/service";
 import { z } from "zod";
@@ -166,14 +173,19 @@ export const twilioRouter = createTRPCRouter({
     }),
 
   sendOTP: publicProcedure
-    .input(z.object({ to: z.string() }))
+    .input(z.object({ phoneNumber: z.string() }))
     .mutation(async ({ input }) => {
-      await createService();
-      const { to } = input;
+      const code = generatePhoneNumberOTP();
 
-      await twilio.verify.v2
-        .services(service.sid)
-        .verifications.create({ to, channel: "sms" });
+      await db.insert(phoneNumberOTPs).values({
+        phoneNumber: input.phoneNumber,
+        code,
+      });
+
+      await sendText({
+        to: input.phoneNumber,
+        content: `Tramona: Your verification code is ${code}`,
+      });
     }),
 
   sendSlack: protectedProcedure
@@ -189,13 +201,41 @@ export const twilioRouter = createTRPCRouter({
     }),
 
   verifyOTP: publicProcedure
-    .input(z.object({ to: z.string(), code: z.string() }))
+    .input(z.object({ phoneNumber: z.string(), code: z.string() }))
     .mutation(async ({ input }) => {
       await createService();
-      const { to, code } = input;
+      const { phoneNumber, code } = input;
 
-      return await twilio.verify.v2
-        .services(service.sid)
-        .verificationChecks.create({ to, code });
+      const otps = await db.query.phoneNumberOTPs.findMany({
+        where: eq(phoneNumberOTPs.phoneNumber, phoneNumber),
+      });
+
+      if (otps.length === 0) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: `No OTPs found for phone number ${phoneNumber}`,
+        });
+      }
+
+      const otp = otps.find((otp) => otp.code === code);
+
+      if (!otp) {
+        return { status: "wrong code" } as const;
+      }
+
+      if (otp.usedAt) {
+        return { status: "already used" } as const;
+      }
+
+      if (otp.createdAt < subMinutes(new Date(), 5)) {
+        return { status: "code expired" } as const;
+      }
+
+      await db
+        .update(phoneNumberOTPs)
+        .set({ usedAt: new Date() })
+        .where(eq(phoneNumberOTPs.id, otp.id));
+
+      return { status: "approved" } as const;
     }),
 });
