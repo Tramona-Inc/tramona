@@ -96,9 +96,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         onClick={async (event) => {
           setLoading(true);
-          if (onClick) {
-            await Promise.resolve(onClick(event));
-          }
+          if (onClick) await Promise.resolve(onClick(event));
           setLoading(false);
         }}
         {...props}

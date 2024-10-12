@@ -35,7 +35,7 @@ export default function Page({
   );
 
   const metaTitle = serverPropertyName
-    ? serverPropertyName
+    ? `${serverPropertyName} | Tramona`
     : "Check out this property on Tramona.";
 
   const metaDescription = "Check out this property! | Tramona";
