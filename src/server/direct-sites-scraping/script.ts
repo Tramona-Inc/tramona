@@ -7,6 +7,7 @@ import { db } from "../db";
 import { getCoordinates } from "../google-maps";
 import { createLatLngGISPoint } from "../server-utils";
 import { ScrapedListing } from ".";
+import { evolveVacationRentalScraper } from "./evolve-scraper";
 
 
 const filterNewPropertyFields = (listing: ScrapedListing): NewProperty => {
@@ -38,7 +39,8 @@ type ScraperOptions = {
 };
 
 export const handler = async (options: ScraperOptions) => {
-  const scraperResults = await casamundoScraper(options)
+  console.log("options", options);
+  const scraperResults = await evolveVacationRentalScraper(options)
     .then((results) => {
       try {
         return scrapedListingSchema.array().parse(results);
@@ -49,6 +51,7 @@ export const handler = async (options: ScraperOptions) => {
         throw error;
       }
     });
+  return scraperResults;
 
   for (const result of scraperResults) {
     if (!result.originalListingId) {
@@ -117,3 +120,14 @@ export const handler = async (options: ScraperOptions) => {
     }
   }
 }
+
+const res = await handler({
+  location: "North Carolina",
+  checkIn: new Date("2025-05-21"),
+  checkOut: new Date("2025-05-24"),
+  requestNightlyPrice: 400,
+  numGuests: 2,
+});
+
+console.log(res.length);
+process.exit(0);

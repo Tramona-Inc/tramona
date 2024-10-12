@@ -194,6 +194,8 @@ const fetchSearchResults = async (
   }
 
   // const startDate = checkIn.toISOString().split("T")[0]?.replace(/-/g, "");
+
+  //commenting out for now
   const numNights = getNumNights(checkIn, checkOut);
 
   const availabilityFilters = [];
@@ -213,6 +215,8 @@ const fetchSearchResults = async (
 
   const filters = [...availabilityFilters, ...minStayFilters].join(" AND ");
 
+  //to here
+
   // let numericFilters = [
   //   `Max Occupancy>=${searchNumGuests}`,
   //   "Max Occupancy<=99",
@@ -225,44 +229,60 @@ const fetchSearchResults = async (
   //   numericFilters.push(`LOS_PriceAverages.${startDate}.${numNights}<=${maxPrice}`);
   // }
 
-  const { results } = await client.search([
-    {
-      indexName: "prod_EvolveListings",
-      params: {
-        aroundLatLng: `${searchLat}, ${searchLng}`,
-        aroundPrecision: 8000,
-        aroundRadius: 48280, // about 30 miles
-        filters,
-        attributesToRetrieve: ["*", "-amenities"],
-        clickAnalytics: true,
-        facets: [
-          "amenities.Amenities",
-          "amenities.Accessibility",
-          "amenities.Area Activities",
-          "minLOS_PriceAverages",
-          "maxLOS_PriceAverages",
-          "Max Occupancy",
-          "Bedrooms",
-          "Total Beds",
-          "Bathrooms",
-          "Average Per Night",
-          "Property Type",
-          "amenities.Location",
-          "amenities.View",
-        ],
-        getRankingInfo: true,
-        maxValuesPerFacet: 300,
-        // numericFilters,
-        page: 0,
-        hitsPerPage: 24,
-        analytics: true,
-        ruleContexts: ["isDatedSearch"],
-      },
-    },
-  ]);
+  let page = 0;
+  const allResults: EvolveSearchResult[] = [];
 
-  const searchResponse = results[0] as SearchResponse<EvolveSearchResult>;
-  return searchResponse.hits.map((hit) => EvolveSearchResultSchema.parse(hit));
+  while (true) {
+
+    const { results } = await client.search([
+      {
+        indexName: "prod_EvolveListings",
+        params: {
+          aroundLatLng: `${searchLat}, ${searchLng}`,
+          aroundPrecision: 8000,
+          aroundRadius: 48280, // about 30 miles
+          filters,
+          attributesToRetrieve: ["*", "-amenities"],
+          clickAnalytics: true,
+          facets: [
+            "amenities.Amenities",
+            "amenities.Accessibility",
+            "amenities.Area Activities",
+            "minLOS_PriceAverages",
+            "maxLOS_PriceAverages",
+            "Max Occupancy",
+            "Bedrooms",
+            "Total Beds",
+            "Bathrooms",
+            "Average Per Night",
+            "Property Type",
+            "amenities.Location",
+            "amenities.View",
+          ],
+          getRankingInfo: true,
+          maxValuesPerFacet: 300,
+          // numericFilters,
+          page: page,
+          hitsPerPage: 24,
+          analytics: true,
+          ruleContexts: ["isDatedSearch"],
+        },
+      },
+    ]);
+    if (!results || results.length === 0) {
+      console.log("No more results available. Ending pagination.");
+      break;
+    }
+    const searchResponse = results[0] as SearchResponse<EvolveSearchResult>;
+    allResults.push(...searchResponse.hits);
+
+    console.log("page", page, results);
+
+    page++; // Move to the next page
+  }
+
+  // const searchResponse = allResults[0] as SearchResponse<EvolveSearchResult>;
+  return allResults.map((hit) => EvolveSearchResultSchema.parse(hit));
 };
 
 const ReviewDataSchema = z.object({
@@ -297,6 +317,7 @@ const fetchPropertyDetails = async (
   numGuests?: number,
 ): Promise<ScrapedListing> => {
   const url = `https://evolve.com/vacation-rentals${urlLocationParam}/${propertyId}?adults=${numGuests}&startDate=${checkIn.toISOString().split("T")[0]}&endDate=${checkOut.toISOString().split("T")[0]}`;
+  // const url = `https://evolve.com/vacation-rentals${urlLocationParam}/${propertyId}`;
 
   const headers = {
     accept:
@@ -312,9 +333,12 @@ const fetchPropertyDetails = async (
     "sec-fetch-site": "none",
     "sec-fetch-user": "?1",
     "upgrade-insecure-requests": "1",
+    "accept-encoding": "gzip, deflate" // Remove 'br' to avoid Brotli
   };
 
+  console.log("fetching url", url);
   const response = await axios.get(url, { headers, httpsAgent: proxyAgent });
+  console.log('got response');
   const $ = cheerio.load(response.data as string);
 
   const scriptContent = $('script:contains("listingReviews")').html();
@@ -524,6 +548,7 @@ const fetchPropertyDetails = async (
   });
 
   const totalPrice = quoteResponse.data.price.total;
+  console.log("totalPrice", totalPrice);
   const numNights = getNumNights(checkIn, checkOut);
   const originalNightlyPrice = Math.round((totalPrice / numNights) * 100); // convert to cents
 
@@ -652,39 +677,33 @@ export const evolveVacationRentalScraper: DirectSiteScraper = async ({
 
   const { lat, lng } = geocodingResult.location;
 
-  let formattedLocation = await getCity({ lat, lng });
+  const cityInfo = await getCity({ lat, lng });
 
-  if (formattedLocation === "[Unknown location]") {
-    formattedLocation =
-      (await getCountryISO({ lat, lng })) ?? "[Unknown location]";
-  }
-  if (formattedLocation === "[Unknown location]") {
-    throw new Error("Unable to determine location");
-  }
-
-  const locationParts = formattedLocation.split(", ");
-  let city, state, country;
-
-  if (locationParts.length === 3) {
-    [city, state, country] = locationParts;
-  } else if (locationParts.length === 2) {
-    [city, country] = locationParts;
-    state = "";
-  } else if (locationParts.length === 1) {
-    [state, country] = [location, locationParts[0]];
-  } else {
-    throw new Error("Unexpected location format");
+  if (cityInfo.city === "[Unknown]" && cityInfo.country === "[Unknown]") {
+    const countryISO = await getCountryISO({ lat, lng });
+    if (!countryISO) {
+      throw new Error("Unable to determine location");
+    }
+    cityInfo.country = countryISO;
   }
 
-  const formattedCountry = country?.toLowerCase().replace(/\s+/g, "-");
+  const city = cityInfo.city !== "[Unknown]" ? cityInfo.city : undefined;
+  let state = cityInfo.stateCode !== "[Unknown]" ? cityInfo.stateCode : undefined;
+  let country = cityInfo.country;
+
+  if (city === undefined && state === undefined) {
+    [state, country] = [location, country];
+  }
+
+  const formattedCountry = country.toLowerCase().replace(/\s+/g, "-");
   const formattedState = state?.toLowerCase().replace(/\s+/g, "-");
   const formattedCity = city?.toLowerCase().replace(/\s+/g, "-");
 
   let urlLocationParam = `/${formattedCountry}`;
-  if (state) {
+  if (formattedState) {
     urlLocationParam += `/${formattedState}`;
   }
-  if (city) {
+  if (formattedCity) {
     urlLocationParam += `/${formattedCity}`;
   }
 
@@ -697,6 +716,9 @@ export const evolveVacationRentalScraper: DirectSiteScraper = async ({
     undefined,
     requestNightlyPrice,
   );
+
+  console.log("searchResults", searchResults);
+
 
   return await Promise.allSettled(
     searchResults.map((result) =>
@@ -733,7 +755,6 @@ export const evolveVacationRentalSubScraper: SubsequentScraper = async ({
       0,
       scrapeUrl,
     );
-
     const isAvailable = availablePropertyIds.some(
       (prop) => prop.objectID === originalListingId,
     );

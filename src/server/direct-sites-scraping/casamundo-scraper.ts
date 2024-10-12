@@ -115,9 +115,9 @@ interface OfferResponse {
 
 async function getOfferIds(
   locationId: string,
-  checkIn: Date,
-  checkOut: Date,
-  numGuests?: number,
+  // checkIn: Date,
+  // checkOut: Date,
+  // numGuests?: number,
 ): Promise<CasamundoOffer[]> {
   let allOffers: CasamundoOffer[] = [];
   let page = 1;
@@ -140,7 +140,7 @@ async function getOfferIds(
 
     const params = new URLSearchParams({
       fieldTreeId: "SearchDetailsFields.SERP",
-      adults: numGuests?.toString() ?? "1",
+      // adults: numGuests?.toString() ?? "1",
       // removed date details
       // arrival: checkIn.toISOString().split("T")[0] ?? "",
       // duration: getNumNights(checkIn, checkOut).toString(),
@@ -480,9 +480,9 @@ const fetchReviews = async (
 
 async function fetchPropertyDetails(
   offerId: string,
-  checkIn: string,
-  checkOut: string,
-  adults: number,
+  // checkIn: string,
+  // checkOut: string,
+  // adults: number,
   location: string,
   // price: {
   //   price: number;
@@ -494,11 +494,11 @@ async function fetchPropertyDetails(
   const url = `https://www.casamundo.com/rental/offer/${offerId}`;
 
   const params = new URLSearchParams({
-    adults: adults.toString(),
+    // adults: adults.toString(),
     // arrival: checkIn,
     // duration: getNumNights(new Date(checkIn), new Date(checkOut)).toString(),
     location: location,
-    persons: adults.toString(),
+    // persons: adults.toString(),
     pricetype: "perNight",
     prodName: "JM",
     prodSource: "Search",
@@ -612,7 +612,7 @@ async function fetchPropertyDetails(
     lat: data.geoLocation.lat,
   };
 
-  const numNights = getNumNights(new Date(checkIn), new Date(checkOut));
+  // const numNights = getNumNights(new Date(checkIn), new Date(checkOut));
 
   return {
     originalListingId: offerId,
@@ -647,13 +647,13 @@ async function fetchPropertyDetails(
 async function scrapeProperty(
   offerId: string,
   locationId: string,
-  checkIn: Date,
-  checkOut: Date,
-  numGuests?: number,
+  // checkIn: Date,
+  // checkOut: Date,
+  // numGuests?: number,
 ) {
-  if (!numGuests) {
-    throw new Error("Number of guests must be provided for Casamundo scraper");
-  }
+  // if (!numGuests) {
+  //   throw new Error("Number of guests must be provided for Casamundo scraper");
+  // }
 
   // const isAvailable = await checkAvailability(offerId, checkIn, checkOut);
 
@@ -670,9 +670,9 @@ async function scrapeProperty(
 
   const propertyDetails = await fetchPropertyDetails(
     offerId,
-    checkIn.toISOString().split("T")[0] ?? "",
-    checkOut.toISOString().split("T")[0] ?? "",
-    numGuests,
+    // checkIn.toISOString().split("T")[0] ?? "",
+    // checkOut.toISOString().split("T")[0] ?? "",
+    // numGuests,
     locationId,
     // price,
   );
@@ -692,7 +692,7 @@ export const casamundoScraper: DirectSiteScraper = async ({
   }
 
   const locationId = await getLocationId(location);
-  const offerIds = await getOfferIds(locationId, checkIn, checkOut, numGuests);
+  const offerIds = await getOfferIds(locationId);
 
   // const scrapedListings: ScrapedListing[] = [];
 
@@ -712,7 +712,7 @@ export const casamundoScraper: DirectSiteScraper = async ({
 
   const scrapedListings = await Promise.allSettled(
     offerIds.map((offer) =>
-      scrapeProperty(offer.id, locationId, checkIn, checkOut, numGuests),
+      scrapeProperty(offer.id, locationId),
     ),
   ).then(logAndFilterSettledResults);
 
