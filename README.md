@@ -1,6 +1,6 @@
 # Tramona
 
-We're using the [T3 stack](https://create.t3.gg/) with Drizzle, SST, and shadcn/ui:
+We're using the [T3 stack](https://create.t3.gg/) with Drizzle and shadcn/ui:
 
 - [Next.js](https://nextjs.org)
 - [NextAuth.js](https://next-auth.js.org)
@@ -14,6 +14,7 @@ We're using the [T3 stack](https://create.t3.gg/) with Drizzle, SST, and shadcn/
 1. `npm install -g pnpm` if you don't have pnpm ("performant npm") already. Use it like npm, just with a p in front (and do `pnpm ...` insetad of `npx ...`)
 2. `pnpm install`
 3. `pnpm run dev`
+4. copy paste env vars from `#env` in slack into a local `.env` file
 
 ## Using Shadcn
 
