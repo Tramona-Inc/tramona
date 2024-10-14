@@ -88,7 +88,7 @@ export default function PropertyPage({
       setReviewBackupImages(backup);
     }
     void createReviewBackupImages();
-  }, []);
+  }, [property.reviews.length]);
 
   const hostName = property.host
     ? `${property.host.firstName} ${property.host.lastName}`
@@ -253,7 +253,7 @@ export default function PropertyPage({
                   <PropertyCompareBtn
                     checkIn={offer.checkIn}
                     checkOut={offer.checkOut}
-                    numGuests={property.maxNumGuests ?? 1}
+                    numGuests={property.maxNumGuests}
                     originalListing={originalListing}
                   />
                 </div>

@@ -2,7 +2,6 @@ import { db } from "@/server/db";
 import { trips, refundedPayments } from "@/server/db/schema";
 import { stripe, stripeWithSecretKey } from "@/server/api/routers/stripeRouter";
 import { eq } from "drizzle-orm";
-import type { Stripe } from "stripe";
 
 //for functions that require alot code to be written after a stripe event
 interface CreatePayHostTransfer {

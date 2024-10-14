@@ -8,9 +8,7 @@ import UserAvatar from "@/components/_common/UserAvatar";
 import { api } from "@/utils/api";
 import { useConversation } from "@/utils/store/conversations";
 import { useEffect } from "react";
-import { useMessage } from "@/utils/store/messages";
 import supabase from "@/utils/supabase-client";
-import { type MessageDbType } from "@/types/supabase.message";
 import { useSession } from "next-auth/react";
 
 export default function HostMessagesOverview({
@@ -27,7 +25,6 @@ export default function HostMessagesOverview({
     },
   );
   const conversations = useConversation((state) => state.conversationList);
-  const { fetchInitialMessages } = useMessage();
   const { setConversationList } = useConversation();
   useEffect(() => {
     // Check if data has been fetched and hasn't been processed yet
@@ -45,8 +42,7 @@ export default function HostMessagesOverview({
           schema: "public",
           table: "messages",
         },
-        (payload: { new: MessageDbType }) =>
-          setConversationList(fetchedConversations ?? []),
+        () => setConversationList(fetchedConversations ?? []),
       )
       .subscribe();
 

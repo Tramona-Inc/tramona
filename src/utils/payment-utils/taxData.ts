@@ -1,5 +1,3 @@
-import { db } from "@/server/db";
-import { tripCheckouts } from "@/server/db/schema";
 
 type CityTaxRates = Record<string, Record<string, number>>; // Maps city names to taxes
 

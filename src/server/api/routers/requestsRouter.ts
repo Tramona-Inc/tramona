@@ -14,6 +14,7 @@ import {
   offers,
   rejectedRequests,
   properties,
+  tripCheckouts,
 } from "@/server/db/schema";
 import {
   sendText,
@@ -34,6 +35,7 @@ import {
   formatDateRange,
   plural,
   getHostPayout,
+  getTravelerOfferedPrice,
 } from "@/utils/utils";
 import { sendTextToHost, haversineDistance } from "@/server/server-utils";
 import { newLinkRequestSchema } from "@/utils/useSendUnsentRequests";
@@ -41,8 +43,9 @@ import { getCoordinates } from "@/server/google-maps";
 import { scrapeDirectListings } from "@/server/direct-sites-scraping";
 import { waitUntil } from "@vercel/functions";
 import { scrapeAirbnbPrice } from "@/server/scrapePrice";
-import { HOST_MARKUP } from "@/utils/constants";
+import { HOST_MARKUP, TRAVELER__MARKUP } from "@/utils/constants";
 import { differenceInDays } from "date-fns";
+import { breakdownPayment } from "@/utils/payment-utils/paymentBreakdown";
 
 export const requestsRouter = createTRPCRouter({
   getMyRequests: protectedProcedure.query(async ({ ctx }) => {
@@ -441,6 +444,38 @@ export async function handleRequestSubmission(
             console.log(
               "percent off is less than or equal to applicable discount",
             );
+
+            //create trip checkout First
+            const travelerOfferedPriceBeforeFees = getTravelerOfferedPrice({
+              propertyPrice: requestedNightlyPrice,
+              travelerMarkup: TRAVELER__MARKUP,
+              numNights,
+            });
+
+            const brokeDownPayment = await breakdownPayment({
+              numOfNights: numNights,
+              travelerOfferedPriceBeforeFees: travelerOfferedPriceBeforeFees,
+              isScrapedPropery: false,
+              lat: propertyDetails.latLngPoint.y,
+              lng: propertyDetails.latLngPoint.x,
+            });
+
+            const tripCheckout = await tx
+              .insert(tripCheckouts)
+              .values({
+                totalTripAmount: brokeDownPayment.totalTripAmount,
+                travelerOfferedPriceBeforeFees,
+                paymentIntentId: "",
+                taxesPaid: brokeDownPayment.taxesPaid,
+                taxPercentage: brokeDownPayment.taxPercentage,
+                superhogFee: brokeDownPayment.superhogFee,
+                stripeTransactionFee: brokeDownPayment.stripeTransactionFee,
+                checkoutSessionId: "",
+                totalSavings: brokeDownPayment.totalSavings,
+              })
+              .returning({ id: tripCheckouts.id })
+              .then((res) => res[0]!);
+
             await tx.insert(offers).values({
               requestId: request.id,
               propertyId: property.id,

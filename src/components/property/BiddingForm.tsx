@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/form";
 import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
 import { useBidding } from "@/utils/store/bidding";
-import { formatCurrency, getNumNights } from "@/utils/utils";
+import { formatCurrency } from "@/utils/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -45,7 +45,7 @@ export default function BiddingForm({
       setOpen(true);
       setDisplayUserBid(false);
     }
-  }, [displayUserBid]);
+  }, [displayUserBid, setDisplayUserBid]);
 
   const propertyIdBids = useBidding((state) => state.propertyIdBids);
   const alreadyBid = propertyIdBids.includes(propertyId);
@@ -55,15 +55,8 @@ export default function BiddingForm({
     defaultValues: {},
   });
 
-  const formValues = form.watch();
-  const numNights = formValues.date
-    ? getNumNights(formValues.date.from, formValues.date.to)
-    : 0;
-  const totalNightlyPrice = price * numNights;
   const resetSession = useBidding((state) => state.resetSession);
   const setDate = useBidding((state) => state.setDate);
-  const setGuest = useBidding((state) => state.setGuest);
-  const setStep = useBidding((state) => state.setStep);
 
   async function onSubmit(values: FormSchema) {
     // Reset session if on new date
@@ -130,7 +123,7 @@ export default function BiddingForm({
               </Button>
               {/* )} */}
             </div>
-            <DialogContent className="flex sm:max-w-lg  md:max-w-fit md:px-36 md:py-10">
+            <DialogContent className="flex sm:max-w-lg md:max-w-fit md:px-36 md:py-10">
               <MakeBid propertyId={propertyId} setOpen={setOpen} />
             </DialogContent>
           </Dialog>

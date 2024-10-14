@@ -2,7 +2,6 @@ import { useRef, useState } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 
-import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -34,14 +33,6 @@ export default function ReferralDashboard() {
   const messageWithLink = `${message}\n\n${url}`;
 
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
-
-  const { toast } = useToast();
-
-  function saveReferralMessage() {
-    localStorage.setItem("referralMessage", message);
-    setMessage(message);
-    toast({ title: "Message saved", description: "Copy it and share!" });
-  }
 
   if (isLoading) return <Spinner />;
 

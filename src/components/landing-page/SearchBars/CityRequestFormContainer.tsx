@@ -2,7 +2,6 @@ import Typewriter from "typewriter-effect";
 import RequestCityForm from "./RequestCityForm";
 import LinkRequestForm from "@/components/link-input/LinkRequestForm";
 import { Separator } from "@/components/ui/separator";
-import { useSession } from "next-auth/react";
 
 export default function CityRequestFormContainer({
   isRequestsPage = false,
