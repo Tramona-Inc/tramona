@@ -1,6 +1,6 @@
 # Tramona
 
-We're using the [T3 stack](https://create.t3.gg/) with Drizzle, SST, and shadcn/ui:
+We're using the [T3 stack](https://create.t3.gg/) with Drizzle and shadcn/ui:
 
 - [Next.js](https://nextjs.org)
 - [NextAuth.js](https://next-auth.js.org)
