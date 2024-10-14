@@ -560,15 +560,15 @@ export const offersRouter = createTRPCRouter({
         //sending emails to everyone in the groug
         //get everymember in the group
 
-        const allGroupMembers = await db.query.groupMembers.findMany({
-          where: eq(groupMembers.groupId, requestDetails.madeByGroupId),
-          columns: { userId: true },
-          with: {
-            user: {
-              columns: { email: true, firstName: true, name: true },
-            },
-          },
-        });
+        // const allGroupMembers = await db.query.groupMembers.findMany({
+        //   where: eq(groupMembers.groupId, requestDetails.madeByGroupId),
+        //   columns: { userId: true },
+        //   with: {
+        //     user: {
+        //       columns: { email: true, firstName: true, name: true },
+        //     },
+        //   },
+        // });
 
         // for (const member of allGroupMembers) {
           // await sendEmail({

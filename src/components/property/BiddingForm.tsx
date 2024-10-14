@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/form";
 import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
 import { useBidding } from "@/utils/store/bidding";
-import { formatCurrency, getNumNights } from "@/utils/utils";
+import { formatCurrency } from "@/utils/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -55,10 +55,6 @@ export default function BiddingForm({
     defaultValues: {},
   });
 
-  const formValues = form.watch();
-  const numNights = formValues.date
-    ? getNumNights(formValues.date.from, formValues.date.to)
-    : 0;
   const resetSession = useBidding((state) => state.resetSession);
   const setDate = useBidding((state) => state.setDate);
 

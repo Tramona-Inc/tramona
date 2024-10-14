@@ -48,7 +48,7 @@ export function useCityRequestForm({
     } else {
       try {
         console.log("newRequest", newRequest);
-        const { requestId, madeByGroupId } = await createRequests(newRequest);
+        const { madeByGroupId } = await createRequests(newRequest);
         form.reset();
         afterSubmit?.();
         setMadeByGroupId?.(madeByGroupId);

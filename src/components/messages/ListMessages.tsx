@@ -5,7 +5,6 @@ import { useEffect, useRef, useState } from "react";
 import { Icons } from "../_icons/icons";
 import { api } from "@/utils/api";
 import { useConversation } from "@/utils/store/conversations";
-import { errorToast } from "@/utils/toasts";
 import { useSession } from "next-auth/react";
 import LoadMoreMessages from "./LoadMoreMessages";
 import { groupMessages } from "./groupMessages";
@@ -20,14 +19,11 @@ function NoMessages() {
 }
 
 export default function ListMessages() {
-  const scrollRef = useRef() as React.MutableRefObject<HTMLDivElement>;
-
+  const scrollRef = useRef<HTMLDivElement>(null);
   const [userScrolled, setUserScrolled] = useState(false);
-
   const [notification, setNotification] = useState(0);
-
   const { conversations } = useMessage();
-  const optimisticIds = useMessage((state) => state.optimisticIds);
+
   const currentConversationId = useMessage(
     (state) => state.currentConversationId,
   );
@@ -36,10 +32,8 @@ export default function ListMessages() {
     (state) => state.addMessageToConversation,
   );
 
-  const { fetchInitialMessages } = useMessage()
-
   const messages = currentConversationId
-    ? conversations[currentConversationId]?.messages ?? []
+    ? (conversations[currentConversationId]?.messages ?? [])
     : [];
 
   const { mutateAsync } = api.messages.setMessagesToRead.useMutation();
@@ -62,7 +56,7 @@ export default function ListMessages() {
   }, [messages]);
 
   const hasMore = currentConversationId
-    ? conversations[currentConversationId]?.hasMore ?? false
+    ? (conversations[currentConversationId]?.hasMore ?? false)
     : false;
 
   const handlePostgresChange = async (payload: { new: MessageDbType }) => {
@@ -75,7 +69,7 @@ export default function ListMessages() {
     //   if (error) {
     //     errorToast();
     //   } else {
-    if(payload.new.user_id !== session?.user.id){
+    if (payload.new.user_id !== session?.user.id) {
       const newMessage: ChatMessageType = {
         id: payload.new.id,
         conversationId: payload.new.conversation_id,
@@ -87,15 +81,16 @@ export default function ListMessages() {
       };
       addMessageToConversation(payload.new.conversation_id, newMessage);
     }
-        // console.log(data);
-        // void fetchInitialMessages(currentConversationId ?? "")
+    // console.log(data);
+    // void fetchInitialMessages(currentConversationId ?? "")
     //   }
     // }
 
     const scrollContainer = scrollRef.current;
     if (
+      scrollContainer &&
       scrollContainer.scrollTop <
-      scrollContainer.scrollHeight - scrollContainer.clientHeight - 10
+        scrollContainer.scrollHeight - scrollContainer.clientHeight - 10
     ) {
       setNotification((current) => current + 1);
     }
@@ -154,7 +149,9 @@ export default function ListMessages() {
   const scrollDown = () => {
     // Clear notification when scorlled down
     setNotification(0);
-    scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
   };
 
   // Get all participants
@@ -177,9 +174,8 @@ export default function ListMessages() {
       }
 
       const user =
-        participants.find(
-          (participant) => participant.id === message.userId,
-        ) ?? null; // null means its a deleted user
+        participants.find((participant) => participant.id === message.userId) ??
+        null; // null means its a deleted user
 
       return { message, user };
     })
@@ -210,8 +206,6 @@ export default function ListMessages() {
           </div>
         )}
       </div>
-      {/* {JSON.stringify(messagesWithUser, null, 2)}
-      {JSON.stringify(messageGroups, null, 2)} */}
       {userScrolled && (
         <div
           className="absolute bottom-16 flex w-full items-center justify-center"

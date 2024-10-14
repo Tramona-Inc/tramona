@@ -10,7 +10,6 @@ import { ALL_PROPERTY_TYPES, PropertyType } from "@/server/db/schema/common";
 import { ListingSiteName } from "@/server/db/schema/common";
 import { getNumNights, logAndFilterSettledResults } from "@/utils/utils";
 import { parseHTML } from "@/utils/utils";
-import { axiosWithRetry, proxyAgent } from "../server-utils";
 
 const offerSchema = z.object({
   id: z.string(),

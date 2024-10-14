@@ -7,8 +7,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method === 'GET') {
     try {
       console.log('API route: Starting scraping process');
-      const today = new Date();
-      const twoDaysLater = new Date(today.getTime() + 2 * 24 * 60 * 60 * 1000);
+      // const today = new Date();
+      // const twoDaysLater = new Date(today.getTime() + 2 * 24 * 60 * 60 * 1000);
       // test proxy
       // const rr = await axios.get("https://randomuser.me/api/", { httpsAgent: proxyAgent })
       // // eslint-disable-next-line @typescript-eslint/no-unsafe-return

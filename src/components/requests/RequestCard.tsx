@@ -33,9 +33,7 @@ import { TravelerVerificationsDialog } from "./TravelerVerificationsDialog";
 import { formatDistanceToNowStrict } from "date-fns";
 import { LinkInputPropertyCard } from "../_common/LinkInputPropertyCard";
 import SingleLocationMap from "../_common/GoogleMaps/SingleLocationMap";
-import { api } from "@/utils/api";
 import { RequestCardOfferPreviews } from "./RequestCardOfferPreviews";
-
 export type GuestDashboardRequest = RouterOutputs["requests"]["getMyRequests"][
   | "activeRequests"
   | "inactiveRequests"][number];

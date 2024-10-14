@@ -88,7 +88,7 @@ export default function PropertyPage({
       setReviewBackupImages(backup);
     }
     void createReviewBackupImages();
-  }, []);
+  }, [property.reviews.length]);
 
   const hostName = property.host
     ? `${property.host.firstName} ${property.host.lastName}`
