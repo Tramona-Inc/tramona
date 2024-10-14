@@ -26,6 +26,7 @@ export default function ProfilePage() {
   const { data: profileInfo } = api.profile.getProfileInfo.useQuery();
 
   const editProfileDialogState = useDialogState();
+  console.log(profileInfo);
 
   return (
     <div className="mx-auto min-h-screen-minus-header max-w-4xl space-y-3 pb-10">
@@ -105,11 +106,13 @@ export default function ProfilePage() {
       <section className="space-y-2 rounded-lg border p-4">
         <h2 className="font-bold">About Me</h2>
         <p>
-          {profileInfo?.about ??
-            "Joined Tramona " +
-              (session?.user.createdAt
-                ? new Date(session.user.createdAt).toLocaleDateString()
-                : "")}
+          {profileInfo?.about}
+        </p>
+        <p>
+          {"Joined Tramona " +
+            (session?.user.createdAt
+              ? new Date(session.user.createdAt).toLocaleDateString()
+              : "")}
         </p>
       </section>
 

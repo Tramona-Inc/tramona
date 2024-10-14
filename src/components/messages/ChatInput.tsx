@@ -12,6 +12,9 @@ import { Input } from "../ui/input";
 
 import { api } from "@/utils/api";
 import { sub } from "date-fns";
+import { ArrowUp } from "lucide-react";
+import { Button } from "../ui/button";
+import { useUpdateUser } from "@/utils/utils";
 
 const formSchema = z.object({
   message: z.string().refine((data) => data.trim() !== ""),
@@ -45,7 +48,7 @@ export default function ChatInput({
     (state) => state.removeMessageFromConversation,
   );
 
-  const { mutateAsync: updateProfile } = api.users.updateProfile.useMutation();
+  const { updateUser } = useUpdateUser();
   const { mutateAsync: sendSMS } = api.twilio.sendSMS.useMutation();
   const { mutateAsync: sendSlackToAdmin } =
     api.messages.sendAdminSlackMessage.useMutation();
@@ -118,10 +121,7 @@ export default function ChatInput({
                       msg: "You have a new unread message in Tramona, visit Tramona.com to view",
                     });
                   }
-                  await updateProfile({
-                    id: id,
-                    lastTextAt: new Date(),
-                  });
+                  await updateUser({ lastTextAt: new Date() });
                 }
               }
             },
@@ -134,23 +134,32 @@ export default function ChatInput({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="p-2 pt-0">
-        <FormField
-          control={form.control}
-          name="message"
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <Input
-                  placeholder="Type a message"
-                  className="rounded-xl"
-                  autoFocus
-                  {...field}
-                />
-              </FormControl>
-              {/* <FormMessage /> */}
-            </FormItem>
-          )}
-        />
+        <div className="flex items-center overflow-clip rounded-full border-2">
+          <div className="flex-1">
+            <FormField
+              control={form.control}
+              name="message"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input
+                      placeholder="Type a message"
+                      className="border-none"
+                      autoFocus
+                      {...field}
+                    />
+                  </FormControl>
+                  {/* <FormMessage /> */}
+                </FormItem>
+              )}
+            />
+          </div>
+          <div className="pr-2">
+            <Button size="icon" type="submit" className="h-7 w-7 rounded-full">
+              <ArrowUp size={20} />
+            </Button>
+          </div>
+        </div>
       </form>
     </Form>
   );

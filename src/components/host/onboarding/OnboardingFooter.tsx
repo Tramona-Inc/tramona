@@ -21,7 +21,7 @@ export default function OnboardingFooter({
   handleError,
 }: OnboardingFooterProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const maxPages = 10;
+  const maxPages = 12;
 
   const progress = useHostOnboarding((state) => state.progress);
   const isEdit = useHostOnboarding((state) => state.isEdit);
@@ -53,7 +53,7 @@ export default function OnboardingFooter({
   async function onPressNext() {
     setIsLoading(true);
     try {
-      if (progress === 11) {
+      if (progress === 12) {
         if (!isHost) {
           await createHostProfile();
         }
@@ -92,13 +92,13 @@ export default function OnboardingFooter({
             if (isFormValid) {
               handleNext && handleNext();
               setIsEdit(false);
-              setProgress(11);
+              setProgress(12);
             } else {
               handleError && handleError();
             }
           } else {
             setIsEdit(false);
-            setProgress(11);
+            setProgress(12);
           }
         } else {
           if (isForm) {
@@ -143,9 +143,7 @@ export default function OnboardingFooter({
               <Button onClick={onPressNext} disabled={isLoading}>
                 {progress === 0
                   ? "Get Started"
-                  : progress === 10
-                    ? "Review"
-                    : progress === 11
+                  : progress === 12
                       ? "Finish"
                       : "Next"}
               </Button>

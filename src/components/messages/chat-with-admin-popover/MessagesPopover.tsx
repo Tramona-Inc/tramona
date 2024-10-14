@@ -261,17 +261,13 @@ export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
   });
 
   return (
-    <div>
+    <>
       {!isMobile ? (
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
-            {session?.user.role !== "host" && session?.user.role !== "admin" ? (
-              <Button className="w-18 h-18 bottom-4 right-4 z-50 m-4 hidden rounded-full border p-4 lg:fixed lg:block">
-                <MessageCircleMore />
-              </Button>
-            ) : (
-              <></>
-            )}
+            <Button className="w-18 h-18 bottom-4 right-4 z-50 m-4 hidden rounded-full border p-4 lg:fixed lg:block">
+              <MessageCircleMore />
+            </Button>
           </PopoverTrigger>
           <PopoverContent
             side="top"
@@ -290,13 +286,11 @@ export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
               <p>Tramona Concierge</p>
               <p>{concierge.name}</p>
             </div>
-            <div>
-              <ListMessagesWithAdmin
-                messages={messages}
-                conversationId={conversationId}
-                tempUserId={conversationIdAndTempUserId?.tempUserId ?? ""}
-              />
-            </div>
+            <ListMessagesWithAdmin
+              messages={messages}
+              conversationId={conversationId}
+              tempUserId={conversationIdAndTempUserId?.tempUserId ?? ""}
+            />
             <div className="p-2">
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(handleOnSend)}>
@@ -332,7 +326,7 @@ export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
           </PopoverContent>
         </Popover>
       ) : (
-        <div className="h-screen-minus-header-n-footer bg-black">
+        <div className="flex h-screen-minus-header-n-footer flex-col justify-between bg-black">
           <div className="relative bg-zinc-800 py-4 text-center text-xs text-white">
             <div className="flex items-center justify-center">
               <UserAvatar image={concierge.image} />
@@ -340,14 +334,12 @@ export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
             <p>Tramona Concierge</p>
             <p>{concierge.name}</p>
           </div>
-          <div>
-            <ListMessagesWithAdmin
-              messages={messages}
-              isMobile={isMobile}
-              conversationId={conversationId}
-              tempUserId={conversationIdAndTempUserId?.tempUserId ?? ""}
-            />
-          </div>
+          <ListMessagesWithAdmin
+            messages={messages}
+            isMobile={isMobile}
+            conversationId={conversationId}
+            tempUserId={conversationIdAndTempUserId?.tempUserId ?? ""}
+          />
           <div className="p-2">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(handleOnSend)}>
@@ -382,6 +374,6 @@ export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }

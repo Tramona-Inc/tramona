@@ -17,6 +17,8 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import duration from "dayjs/plugin/duration";
 import { HostRequestsPageData } from "@/server/api/routers/propertiesRouter";
 import * as cheerio from "cheerio";
+import { useSession } from "next-auth/react";
+import { api } from "./api";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -32,6 +34,10 @@ export function generateReferralCode() {
   }
 
   return randomString;
+}
+
+export function generatePhoneNumberOTP() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
 export async function sleep(ms: number) {
@@ -342,9 +348,7 @@ export function getHostPayout({
   hostMarkup: number;
   numNights: number;
 }) {
-  return (
-    Math.floor(propertyPrice * hostMarkup * numNights * 100) / 100
-  ).toFixed(2);
+  return Math.floor(propertyPrice * hostMarkup * numNights);
 }
 
 export function getTravelerOfferedPrice({
@@ -356,9 +360,7 @@ export function getTravelerOfferedPrice({
   travelerMarkup: number;
   numNights: number;
 }) {
-  return (
-    Math.ceil(propertyPrice * travelerMarkup * numNights * 100) / 100
-  ).toFixed(2);
+  return Math.ceil(propertyPrice * travelerMarkup * numNights);
 }
 
 export function getPropertyId(url: string): number | null {
@@ -680,7 +682,7 @@ export function mulberry32(seed: number) {
 // falls back to a random discount between 8% and 12% if the original nightly price is not available
 export function getOfferDiscountPercentage(offer: {
   createdAt: Date;
-  travelerOfferedPrice: number;
+  travelerOfferedPriceBeforeFees: number;
   checkIn: Date;
   checkOut: Date;
   scrapeUrl?: number | null;
@@ -688,7 +690,7 @@ export function getOfferDiscountPercentage(offer: {
   randomDirectListingDiscount?: number | null;
 }) {
   const numNights = getNumNights(offer.checkIn, offer.checkOut);
-  const offerNightlyPrice = offer.travelerOfferedPrice / numNights;
+  const offerNightlyPrice = offer.travelerOfferedPriceBeforeFees / numNights;
   //1.)check to see if scraped property(directListing) and the randomDirectListingDiscount is not null
   if (offer.randomDirectListingDiscount) {
     return offer.randomDirectListingDiscount;
@@ -698,10 +700,13 @@ export function getOfferDiscountPercentage(offer: {
 
   //3.) check the if the offer is by a real host and is listed on airbnb
   if (offer.datePriceFromAirbnb) {
-    console.log(offer.datePriceFromAirbnb, offer.travelerOfferedPrice);
+    console.log(
+      offer.datePriceFromAirbnb,
+      offer.travelerOfferedPriceBeforeFees,
+    );
     return getDiscountPercentage(
       offer.datePriceFromAirbnb,
-      offer.travelerOfferedPrice,
+      offer.travelerOfferedPriceBeforeFees,
     );
   }
   //4.)for other cases random number
@@ -763,4 +768,24 @@ export function logAndFilterSettledResults<T>(
       return r.status === "fulfilled";
     })
     .map((r) => r.value);
+}
+
+export function useUpdateUser() {
+  const { mutateAsync: updateProfile } = api.users.updateProfile.useMutation();
+  const { update } = useSession();
+
+  return {
+    updateUser: async (updates: Parameters<typeof updateProfile>[0]) => {
+      await updateProfile(updates);
+      await update();
+    },
+  };
+}
+
+export function removeTax(total: number, taxRate: number): number {
+  if (taxRate < 0 || taxRate >= 1) {
+    throw new Error("Tax rate must be between 0 and 1");
+  }
+  const amountWithoutTax = Math.round(total / (1 + taxRate));
+  return amountWithoutTax;
 }

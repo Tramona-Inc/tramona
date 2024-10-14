@@ -9,18 +9,17 @@ import {
   groups,
   requestInsertSchema,
   requestSelectSchema,
-  requestUpdatedInfo,
   requests,
   users,
   offers,
   rejectedRequests,
+  properties,
 } from "@/server/db/schema";
 import {
   sendText,
   sendWhatsApp,
   getPropertiesForRequest,
   createLatLngGISPoint,
-  sendScheduledText,
 } from "@/server/server-utils";
 import { sendSlackMessage } from "@/server/slack";
 import { isIncoming } from "@/utils/formatters";
@@ -34,22 +33,16 @@ import {
   getNumNights,
   formatDateRange,
   plural,
+  getHostPayout,
 } from "@/utils/utils";
 import { sendTextToHost, haversineDistance } from "@/server/server-utils";
 import { newLinkRequestSchema } from "@/utils/useSendUnsentRequests";
 import { getCoordinates } from "@/server/google-maps";
 import { scrapeDirectListings } from "@/server/direct-sites-scraping";
 import { waitUntil } from "@vercel/functions";
-import { addMinutes } from "date-fns";
-
-const updateRequestInputSchema = z.object({
-  requestId: z.number(),
-  updatedRequestInfo: z.object({
-    preferences: z.string().optional(),
-    updatedPriceNightlyUSD: z.number().optional(),
-    propertyLinks: z.array(z.string().url()).optional(),
-  }),
-});
+import { scrapeAirbnbPrice } from "@/server/scrapePrice";
+import { HOST_MARKUP } from "@/utils/constants";
+import { differenceInDays } from "date-fns";
 
 export const requestsRouter = createTRPCRouter({
   getMyRequests: protectedProcedure.query(async ({ ctx }) => {
@@ -70,7 +63,7 @@ export const requestsRouter = createTRPCRouter({
           offers: {
             columns: {
               id: true,
-              travelerOfferedPrice: true,
+              travelerOfferedPriceBeforeFees: true,
               createdAt: true,
               checkIn: true,
               checkOut: true,
@@ -281,97 +274,6 @@ export const requestsRouter = createTRPCRouter({
       await ctx.db.delete(requests).where(eq(requests.id, input.id));
     }),
 
-  update: protectedProcedure
-    .input(updateRequestInputSchema)
-    .mutation(async ({ ctx, input }) => {
-      const { requestId, updatedRequestInfo } = input;
-
-      // serialize propertyLinks to a JSON string
-      const serializedpropertyLinks = JSON.stringify(
-        updatedRequestInfo.propertyLinks,
-      );
-
-      const infoToUpdate = {
-        ...updatedRequestInfo,
-        propertyLinks: serializedpropertyLinks, // use the serialized string for DB storage
-      };
-
-      const existingUpdatedInfo =
-        await ctx.db.query.requestUpdatedInfo.findFirst({
-          where: eq(requestUpdatedInfo.requestId, requestId),
-        });
-
-      if (existingUpdatedInfo) {
-        await ctx.db
-          .update(requestUpdatedInfo)
-          .set(infoToUpdate)
-          .where(eq(requestUpdatedInfo.id, existingUpdatedInfo.id));
-      } else {
-        await ctx.db.insert(requestUpdatedInfo).values({
-          requestId,
-          ...infoToUpdate,
-        });
-      }
-    }),
-  checkRequestUpdate: protectedProcedure
-    .input(
-      z.object({
-        requestId: z.number(),
-      }),
-    )
-    .query(async ({ ctx, input }) => {
-      const { requestId } = input;
-      const existingUpdate = await ctx.db.query.requestUpdatedInfo.findFirst({
-        where: eq(requestUpdatedInfo.requestId, requestId),
-      });
-
-      if (existingUpdate) {
-        return { alreadyUpdated: true };
-      } else {
-        return { alreadyUpdated: false };
-      }
-    }),
-
-  // todo - change this when updaterequestinfo is not one to one anymore
-  getUpdatedRequestInfo: protectedProcedure
-    .input(
-      z.object({
-        requestId: z.number(),
-      }),
-    )
-    .query(async ({ ctx, input }) => {
-      const { requestId } = input;
-      const updateInfo = await ctx.db.query.requestUpdatedInfo.findFirst({
-        where: eq(requestUpdatedInfo.requestId, requestId),
-      });
-
-      if (!updateInfo) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: `No updated info found for request with ID ${requestId}`,
-        });
-      }
-
-      let deserializedPropertyLinks: any[] = [];
-      if (updateInfo.propertyLinks !== null) {
-        try {
-          deserializedPropertyLinks = JSON.parse(
-            updateInfo.propertyLinks,
-          ) as any[];
-        } catch (e) {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to parse propertyLinks",
-          });
-        }
-      }
-
-      return {
-        ...updateInfo,
-        propertyLinks: deserializedPropertyLinks,
-      };
-    }),
-
   rejectRequest: protectedProcedure
     .input(z.object({ requestId: z.number() }))
     .mutation(async ({ ctx, input }) => {
@@ -484,8 +386,91 @@ export async function handleRequestSubmission(
       { tx },
     );
 
+    const numNights = getNumNights(input.checkIn, input.checkOut);
+    const requestedNightlyPrice = input.maxTotalPrice / numNights;
+
+    for (const property of eligibleProperties) {
+      const propertyDetails = await tx.query.properties.findFirst({
+        where: eq(properties.id, property.id),
+      });
+
+      if (
+        propertyDetails?.autoOfferEnabled &&
+        propertyDetails.originalListingId &&
+        propertyDetails.originalListingPlatform === "Airbnb" &&
+        propertyDetails.autoOfferDiscountTiers
+      ) {
+        try {
+          console.log("aboutta scrape price of airbnb thing");
+          const airbnbTotalPrice = await scrapeAirbnbPrice({
+            airbnbListingId: propertyDetails.originalListingId,
+            params: {
+              checkIn: input.checkIn,
+              checkOut: input.checkOut,
+              numGuests: input.numGuests,
+            },
+          });
+          console.log(
+            "in da requests router and just scraped price",
+            airbnbTotalPrice,
+          );
+
+          const airbnbNightlyPrice = airbnbTotalPrice / numNights;
+          console.log("airbnb nightly price", airbnbNightlyPrice);
+          console.log("requested nightly price", requestedNightlyPrice);
+          const percentOff =
+            ((airbnbNightlyPrice - requestedNightlyPrice) /
+              airbnbNightlyPrice) *
+            100;
+
+          console.log("percent off", percentOff);
+
+          const daysUntilCheckIn = differenceInDays(input.checkIn, new Date());
+
+          const applicableDiscount =
+            propertyDetails.autoOfferDiscountTiers.find(
+              (tier) => daysUntilCheckIn >= tier.days,
+            );
+
+          console.log("applicable discount", applicableDiscount);
+
+          if (
+            applicableDiscount &&
+            percentOff <= applicableDiscount.percentOff
+          ) {
+            console.log(
+              "percent off is less than or equal to applicable discount",
+            );
+            await tx.insert(offers).values({
+              requestId: request.id,
+              propertyId: property.id,
+              tripCheckoutId: tripCheckout.id,
+              totalPrice: input.maxTotalPrice,
+              hostPayout: getHostPayout({
+                propertyPrice: requestedNightlyPrice,
+                hostMarkup: HOST_MARKUP,
+                numNights,
+              }),
+              travelerOfferedPriceBeforeFees,
+              checkIn: input.checkIn,
+              checkOut: input.checkOut,
+            });
+          }
+        } catch (error) {
+          console.error(
+            `Error processing auto-offer for property ${property.id}:`,
+            error,
+          );
+        }
+      }
+    }
+
+    const propertiesWithoutAutoOffers = eligibleProperties.filter(
+      (property) => !property.autoOfferEnabled,
+    );
+
     await sendTextToHost(
-      eligibleProperties,
+      propertiesWithoutAutoOffers,
       input.checkIn,
       input.checkOut,
       input.maxTotalPrice,

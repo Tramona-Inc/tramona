@@ -17,7 +17,6 @@ import {
   isNotNull,
   isNull,
   lte,
-  not,
   notExists,
   or,
   sql,
@@ -50,6 +49,7 @@ import { sendSlackMessage } from "./slack";
 import { HOST_MARKUP, TRAVELER__MARKUP } from "@/utils/constants";
 import { HostRequestsPageData } from "./api/routers/propertiesRouter";
 import { Session } from "next-auth";
+import { calculateTotalTax } from "@/utils/payment-utils/taxData";
 
 export const proxyAgent = new HttpsProxyAgent(env.PROXY_URL);
 
@@ -364,19 +364,19 @@ export async function addProperty({
     lat = location.lat;
     lng = location.lng;
   }
-  const city = await getCity({ lat, lng });
+  const locInfo = await getCity({ lat, lng });
+
+  const propertyValues = {
+    ...property,
+    hostId: userId,
+    city: locInfo.city,
+    latLngPoint: createLatLngGISPoint({ lat, lng }),
+    hostTeamId,
+  };
 
   const [insertedProperty] = await db
     .insert(properties)
-    .values({
-      ...property,
-      hostId: userId,
-      // latitude: lat,
-      // longitude: lng,
-      city: city,
-      latLngPoint: createLatLngGISPoint({ lat, lng }),
-      hostTeamId,
-    })
+    .values(propertyValues)
     .returning({ id: properties.id });
 
   // waitUntil(processRequests(insertedProperty!));
@@ -450,9 +450,12 @@ export async function getRequestsForProperties(
   const requestIsNearProperties: SQL[] = [];
   // let priceRestrictionsSQL: SQL[] | undefined[] = [sql`FALSE`];
   const propertyToRequestMap: {
-    property: Property;
+    property: Property & { taxAvailable: boolean };
     request: Request & {
-      traveler: Pick<User, "firstName" | "lastName" | "name" | "image">;
+      traveler: Pick<
+        User,
+        "firstName" | "lastName" | "name" | "image" | "location" | "about"
+      >;
     };
   }[] = [];
 
@@ -474,6 +477,14 @@ export async function getRequestsForProperties(
     //     )
     // `;
     requestIsNearProperties.push(requestIsNearProperty);
+
+    const { city, stateCode, country } = await getCity({
+      lat: property.latLngPoint.y,
+      lng: property.latLngPoint.x,
+    });
+
+    const taxInfo = calculateTotalTax(country, stateCode, city);
+    console.log("taxInfo", taxInfo, city);
 
     const requestsForProperty = await tx.query.requests.findMany({
       where: and(
@@ -521,6 +532,8 @@ export async function getRequestsForProperties(
                 name: true,
                 firstName: true,
                 lastName: true,
+                location: true,
+                about: true,
               },
             },
           },
@@ -530,14 +543,20 @@ export async function getRequestsForProperties(
 
     // Store the matched requests along with the property
     for (const request of requestsForProperty) {
+      //here we can  update each of the reque
       const traveler = {
         name: request.madeByGroup.owner.name,
         image: request.madeByGroup.owner.image,
         firstName: request.madeByGroup.owner.firstName,
         lastName: request.madeByGroup.owner.lastName,
+        location: request.madeByGroup.owner.location,
+        about: request.madeByGroup.owner.about,
       };
       propertyToRequestMap.push({
-        property,
+        property: {
+          ...property,
+          taxAvailable: taxInfo.length > 0 ? true : false, //// come back here
+        },
         request: {
           ...request,
           traveler, // Include traveler info
@@ -642,7 +661,13 @@ export async function getPropertiesForRequest(
         ),
       ),
     ),
-    columns: { id: true, hostId: true },
+    columns: {
+      id: true,
+      hostId: true,
+      autoOfferEnabled: true,
+      autoOfferDiscountTiers: true,
+      originalListingId: true,
+    },
   });
 
   return result;
@@ -729,7 +754,7 @@ export async function updateTravelerandHostMarkup({
   await db
     .update(offers)
     .set({
-      travelerOfferedPrice: travelerPrice,
+      travelerOfferedPriceBeforeFees: travelerPrice,
       hostPayout: hostPay,
     })
     .where(and(eq(offers.id, offerId), isNull(offers.acceptedAt)));

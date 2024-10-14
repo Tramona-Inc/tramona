@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { api } from "@/utils/api";
+import { useUpdateUser } from "@/utils/utils";
 import { zodString } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogTitle } from "@radix-ui/react-dialog";
@@ -32,22 +33,12 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 export default function PersonalInformation() {
-  const { data: session, update } = useSession({ required: true });
-
+  const { data: session } = useSession({ required: true });
   if (!session) return <Spinner />;
-
-  return <PersonalInformationForm session={session} update={update} />;
+  return <PersonalInformationForm session={session} />;
 }
 
-type PersonalInformationFormProps = {
-  session: Session;
-  update: (session: Session) => void;
-};
-
-function PersonalInformationForm({
-  session,
-  update,
-}: PersonalInformationFormProps) {
+function PersonalInformationForm({ session }: { session: Session }) {
   const [isEditing, setIsEditing] = useState(false);
 
   const { data: verificationStatus } =
@@ -77,14 +68,13 @@ function PersonalInformationForm({
     },
   });
 
-  const { mutateAsync: updateProfile } = api.users.updateProfile.useMutation();
+  const { updateUser } = useUpdateUser();
   const { data } = api.users.getPassword.useQuery();
 
   const isPasswordNull = data?.password === null;
 
   async function onSubmit(values: FormValues) {
-    await updateProfile({ ...values, id: session.user.id });
-    update(session);
+    await updateUser(values);
     setIsEditing(!isEditing);
   }
 

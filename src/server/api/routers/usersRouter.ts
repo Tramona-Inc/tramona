@@ -115,13 +115,14 @@ export const usersRouter = createTRPCRouter({
     return referralCode;
   }),
 
+  /** only for use with updateUser -- use updateUser instead of this */
   updateProfile: protectedProcedure
-    .input(userUpdateSchema)
+    .input(userUpdateSchema.omit({ id: true }))
     .mutation(async ({ ctx, input }) => {
       const updatedUser = await ctx.db
         .update(users)
         .set(input)
-        .where(eq(users.id, input.id))
+        .where(eq(users.id, ctx.user.id))
         .returning();
 
       if (updatedUser[0] && updatedUser[0]?.onboardingStep === 3) {
@@ -163,34 +164,6 @@ export const usersRouter = createTRPCRouter({
           message: "Must be admin to create URL",
         });
       }
-    }),
-
-  insertPhoneWithEmail: publicProcedure
-    .input(
-      z.object({
-        email: z.string(),
-        phone: z.string(),
-      }),
-    )
-    .mutation(async ({ input }) => {
-      return await db
-        .update(users)
-        .set({ phoneNumber: input.phone })
-        .where(eq(users.email, input.email));
-    }),
-
-  insertPhoneWithUserId: publicProcedure
-    .input(
-      z.object({
-        userId: z.string(),
-        phone: z.string(),
-      }),
-    )
-    .mutation(async ({ input }) => {
-      return await db
-        .update(users)
-        .set({ phoneNumber: input.phone })
-        .where(eq(users.id, input.userId));
     }),
 
   isHost: optionallyAuthedProcedure.query(async ({ ctx }) => {
@@ -519,40 +492,50 @@ export const usersRouter = createTRPCRouter({
 
         try {
           const propertyObjects = await Promise.all(
-            listings.map(async (property) => ({
-              hostId: ctx.user.id,
-              propertyType: z
-                .enum(ALL_PROPERTY_TYPES)
-                .catch("Other")
-                .parse(propertyTypeMap[property.propertyTypeId]),
-              roomType: roomTypeMapping[property.roomType],
-              maxNumGuests: property.personCapacity,
-              numBeds: property.bedsNumber,
-              numBedrooms: property.bedroomsNumber,
-              numBathrooms: property.bathroomsNumber,
-              latLngPoint: createLatLngGISPoint({
+            listings.map(async (property) => {
+              // Get location information
+              const locInfo = await getCity({
                 lat: property.lat,
                 lng: property.lng,
-              }),
-              city: await getCity({ lat: property.lat, lng: property.lng }),
-              hostName: property.contactName,
-              originalListingId: property.id.toString(),
-              checkInTime: convertToTimeString(property.checkInTimeStart),
-              checkOutTime: convertToTimeString(property.checkOutTime),
-              name: property.name,
-              about: property.description,
-              originalListingPlatform: "Hostaway" as const,
-              address: property.address,
-              avgRating: property.starRating ?? 0,
-              hostTeamId: teamId,
-              imageUrls: property.listingImages,
-              amenities: property.listingAmenities.map(
-                (amenity) => amenity.amenityName,
-              ), // Keep amenities as an array
-              cancellationPolicy: propertyInsertSchema.shape.cancellationPolicy
-                .catch(null)
-                .parse(property.cancellationPolicy),
-            })),
+              });
+
+              // Construct property object
+              return {
+                hostId: ctx.user.id,
+                propertyType: z
+                  .enum(ALL_PROPERTY_TYPES)
+                  .catch("Other")
+                  .parse(propertyTypeMap[property.propertyTypeId]),
+                roomType: roomTypeMapping[property.roomType],
+                maxNumGuests: property.personCapacity,
+                numBeds: property.bedsNumber,
+                numBedrooms: property.bedroomsNumber,
+                numBathrooms: property.bathroomsNumber,
+                latLngPoint: createLatLngGISPoint({
+                  lat: property.lat,
+                  lng: property.lng,
+                }),
+                city: locInfo.city,
+                hostName: property.contactName,
+                originalListingId: property.id.toString(),
+                checkInTime: convertToTimeString(property.checkInTimeStart),
+                checkOutTime: convertToTimeString(property.checkOutTime),
+                name: property.name,
+                about: property.description,
+                originalListingPlatform: "Hostaway" as const,
+                address: property.address,
+                avgRating: property.starRating ?? 0,
+                hostTeamId: teamId,
+                imageUrls: property.listingImages,
+                amenities: property.listingAmenities.map(
+                  (amenity) => amenity.amenityName,
+                ),
+                cancellationPolicy:
+                  propertyInsertSchema.shape.cancellationPolicy
+                    .catch(null)
+                    .parse(property.cancellationPolicy),
+              };
+            }),
           );
 
           // Now pass the resolved array of objects to the .values() method
@@ -769,8 +752,10 @@ export const usersRouter = createTRPCRouter({
       };
     }),
 
-  getMyVerifications: protectedProcedure.query(async ({ ctx }) => {
-    const verifications = ctx.db.query.users.findFirst({
+  getMyVerifications: optionallyAuthedProcedure.query(async ({ ctx }) => {
+    if (!ctx.user) return null;
+
+    const verifications = await ctx.db.query.users.findFirst({
       where: eq(users.id, ctx.user.id),
       columns: {
         dateOfBirth: true,
@@ -779,6 +764,8 @@ export const usersRouter = createTRPCRouter({
         lastName: true,
       },
     });
+
+    if (!verifications) throw new TRPCError({ code: "NOT_FOUND" });
 
     return verifications;
   }),

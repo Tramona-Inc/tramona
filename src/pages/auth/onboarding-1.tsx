@@ -14,7 +14,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Head from "next/head";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { convertDateFormat } from "@/utils/utils";
+import { convertDateFormat, useUpdateUser } from "@/utils/utils";
 import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
@@ -38,19 +38,16 @@ export default function DateOfBirth() {
   const { refetch: refetchVerifications } =
     api.users.getMyVerifications.useQuery(undefined, { enabled: false });
 
-  const { mutateAsync: updateProfile } = api.users.updateProfile.useMutation({
-    onSuccess: () => {
-      void refetchVerifications();
-      void router.push("/auth/onboarding-2");
-    },
-  });
+  const { updateUser } = useUpdateUser();
 
   async function onDobSubmit({ dob }: FormValues) {
-    if (session?.user.id && dob) {
-      await updateProfile({
-        id: session.user.id,
+    if (session?.user.id) {
+      await updateUser({
         dateOfBirth: convertDateFormat(dob),
         onboardingStep: 2,
+      }).then(() => {
+        void refetchVerifications();
+        void router.push("/auth/onboarding-2");
       });
     } else {
       form.setError("root", {

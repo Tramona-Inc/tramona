@@ -265,7 +265,9 @@ export async function scrapeAirbnbListing(
 
   const originalNightlyPrice = parseCurrency(originalNightlyPriceStr);
 
-  const city = await getCity({ lat: latitude, lng: longitude });
+  const city = await getCity({ lat: latitude, lng: longitude }).then(
+    (address) => address.city,
+  );
 
   const property: NewProperty = {
     name,

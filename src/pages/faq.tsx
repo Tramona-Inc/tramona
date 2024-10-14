@@ -1,302 +1,194 @@
+import { useState } from "react";
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Head from "next/head";
+import Link from "next/link";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import Head from "next/head";
+import { hostsFaqData, travelersFaqData } from "@/utils/constants";
+import { Button } from "@/components/ui/button";
 
 export default function FAQ() {
+  const [activeTab, setActiveTab] = useState<"travelers" | "hosts">(
+    "travelers",
+  );
+  const [openSections, setOpenSections] = useState<string[]>([]);
+
+  const toggleAllSections = () => {
+    const allQuestions =
+      activeTab === "hosts"
+        ? hostsFaqData.flatMap((section, sIndex) =>
+            section.questions.map((_, qIndex) => `item-${sIndex}-${qIndex}`),
+          )
+        : (travelersFaqData[0]?.questions.map((_, index) => `item-${index}`) ??
+          []);
+
+    if (openSections.length === allQuestions.length) {
+      setOpenSections([]);
+    } else {
+      setOpenSections(allQuestions);
+    }
+  };
+
   return (
     <>
       <Head>
         <title>FAQ | Tramona</title>
       </Head>
+      <style jsx global>{`
+        @import url("https://fonts.googleapis.com/css2?family=Mulish:wght@300;400;500;600;700&display=swap");
+      `}</style>
 
       <DashboardLayout>
-        <div className="mx-auto max-w-3xl p-4 pb-32">
-          <h1 className="pb-12 pt-20 text-center text-3xl font-bold">
-            Frequently Asked Questions
-          </h1>
+        <div className="font-mulish mx-auto max-w-3xl p-4 pb-32">
+          <h1 className="mb-6 text-3xl font-bold">FAQ</h1>
 
-          <Tabs defaultValue="traveler">
-            <TabsList className="flex w-full">
-              <TabsTrigger value="traveler">Travelers</TabsTrigger>
-              <TabsTrigger value="host">Hosts</TabsTrigger>
+          <Tabs
+            defaultValue="travelers"
+            onValueChange={(value) =>
+              setActiveTab(value as "travelers" | "hosts")
+            }
+          >
+            <TabsList className="mb-8 flex w-full">
+              <TabsTrigger
+                className={`flex-1 ${activeTab === "travelers" ? "border-b-2 border-[#134E4A] font-bold" : ""}`}
+                value="travelers"
+              >
+                Travelers
+              </TabsTrigger>
+              <TabsTrigger
+                className={`flex-1 ${activeTab === "hosts" ? "border-b-2 border-[#134E4A] font-bold" : ""}`}
+                value="hosts"
+              >
+                Hosts
+              </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="traveler">
-              <Accordion type="multiple">
-                <AccordionItem value="0">
-                  <AccordionTrigger>
-                    How can I book a stay on Tramona?
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    You can book a stay in two ways:
-                    <ol>
-                      <li className="list-inside list-decimal">
-                        Make an offer on a specific property for specific dates.
-                        If your offer is accepted by the host, your card will be
-                        charged.
-                      </li>
-                      <li className="list-inside list-decimal">
-                        Submit a city request with your desired dates and
-                        budget. Hosts in that city can then accept, deny, or
-                        counter your request.
-                      </li>
-                    </ol>
-                  </AccordionContent>
-                </AccordionItem>
+            <TabsContent value="travelers">
+              <div className="mb-12 grid grid-cols-3 gap-8">
+                {[
+                  "How it works (Travelers)",
+                  "How booking works",
+                  "Safety during traveler process",
+                ].map((title, index) => (
+                  <div key={index} className="flex flex-col items-center">
+                    <div className="mb-2 aspect-video w-full overflow-hidden rounded-lg bg-gray-200">
+                      <div className="animate-spin-slow h-full w-full bg-gradient-to-r from-gray-300 to-gray-100"></div>
+                    </div>
+                    <span className="text-center text-sm">{title}</span>
+                  </div>
+                ))}
+              </div>
 
-                <AccordionItem value="1">
-                  <AccordionTrigger>
-                    How long do hosts have to respond to my offer or city
-                    request?
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    Hosts have 24 hours to respond to an offer made on their
-                    listing. City requests expire one day before the check-in
-                    date.
-                  </AccordionContent>
-                </AccordionItem>
+              {travelersFaqData[0] && (
+                <>
+                  <div className="mb-8 flex items-center justify-between">
+                    <h2 className="text-xl font-semibold text-[#134E4A]">
+                      How it works
+                    </h2>
+                    <span
+                      className="cursor-pointer text-[#134E4A]"
+                      onClick={toggleAllSections}
+                    >
+                      {openSections.length ===
+                      travelersFaqData[0].questions.length
+                        ? "Close all"
+                        : "Open all"}
+                    </span>
+                  </div>
 
-                <AccordionItem value="2">
-                  <AccordionTrigger>
-                    How will I know if my offer or city request is accepted,
-                    denied, or countered by a host?
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    You will receive notifications via email and text message.
-                    Additionally, you can check the status of your offers and
-                    requests in the &quot;Offers/Requests&quot; section of the
-                    website.
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="3">
-                  <AccordionTrigger>
-                    What happens if my offer on a specific property is accepted
-                    by the host?
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    Once your offer is accepted, you will receive confirmation
-                    via text and email, and your card will be charged for the
-                    booking. You will now see the trip in your &quot;My
-                    Trips&quot; section of your account.
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="4">
-                  <AccordionTrigger>
-                    Can I cancel or modify my offer or city request after it has
-                    been submitted?
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    Yes, you can cancel or modify your offer or city request as
-                    long as the host has not yet accepted it. Once offers are
-                    accepted, the booking becomes binding according to the terms
-                    set by the host. If your city request is accepted, you have
-                    24 hours to pay otherwise the host&apos;s offer will be
-                    canceled.
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="5">
-                  <AccordionTrigger>
-                    Are there any fees associated with making an offer or city
-                    request on Tramona?
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    No, there are no fees for making offers or city requests on
-                    Tramona. You only pay for your booking if your offer is
-                    accepted by the host. Since you name the price, that is
-                    exactly what you will be paying.
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="6">
-                  <AccordionTrigger>
-                    How can I contact a host if I have questions about their
-                    property or my booking?
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    You can contact the host directly through the messaging
-                    system on Tramona. Simply navigate to the listing
-                    you&apos;re interested in and click on the &quot;Contact
-                    Host&quot; button.
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="7">
-                  <AccordionTrigger>
-                    What happens if my city request is not accepted by any
-                    hosts?
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    If your city request is not accepted by any hosts, you can
-                    consider making offers on specific properties within your
-                    desired city or expanding your search to nearby areas. You
-                    can also up your budget to try to further incentivize hosts.
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="8">
-                  <AccordionTrigger>
-                    How does negotiation work on Tramona?
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    Negotiation on Tramona occurs when hosts counter a
-                    traveler&apos;s offer or city request. You can then choose
-                    to accept their counteroffer, make a new offer, or continue
-                    negotiating until both parties reach an agreement.
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="9">
-                  <AccordionTrigger>Cancellation Policy</AccordionTrigger>
-                  <AccordionContent>
-                    Please refer to the cancellation policy page for more info.
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
+                  <div className="mb-8">
+                    <Accordion
+                      type="multiple"
+                      value={openSections}
+                      onValueChange={setOpenSections}
+                    >
+                      {travelersFaqData[0].questions.map((item, qIndex) => (
+                        <AccordionItem key={qIndex} value={`item-${qIndex}`}>
+                          <AccordionTrigger>{item.question}</AccordionTrigger>
+                          <AccordionContent>{item.answer}</AccordionContent>
+                        </AccordionItem>
+                      ))}
+                    </Accordion>
+                  </div>
+                </>
+              )}
             </TabsContent>
 
-            <TabsContent value="host">
-              <Accordion type="multiple">
-                <AccordionItem value="0">
-                  <AccordionTrigger>
-                    How does Tramona handle guest screening?
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    Tramona verifies each guest through a screening process
-                    conducted when guests submit a bid or city request. If
-                    guests pass the screening process, hosts are covered for up
-                    to $50,000 through our partner SuperHog.
-                  </AccordionContent>
-                </AccordionItem>
+            <TabsContent value="hosts">
+              <div className="mb-12 grid grid-cols-3 gap-8">
+                {[
+                  "How Tramona Works (Host)",
+                  "How to list",
+                  "How Tramona benefits you",
+                ].map((title, index) => (
+                  <div key={index} className="flex flex-col items-center">
+                    <div className="mb-2 aspect-video w-full overflow-hidden rounded-lg bg-gray-200">
+                      <div className="animate-spin-slow h-full w-full bg-gradient-to-r from-gray-300 to-gray-100"></div>
+                    </div>
+                    <span className="text-center text-sm">{title}</span>
+                  </div>
+                ))}
+              </div>
 
-                <AccordionItem value="1">
-                  <AccordionTrigger>
-                    Can I opt out of the guest screening process?
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    Yes, hosts have the option to opt out of the guest screening
-                    process. Please contact Tramona if you wish to opt out of
-                    our guest protection.
-                  </AccordionContent>
-                </AccordionItem>
+              <div className="mb-8 flex items-center justify-between">
+                <h2 className="text-xl font-semibold text-[#134E4A]">
+                  How it works
+                </h2>
+                <span
+                  className="cursor-pointer text-[#134E4A]"
+                  onClick={toggleAllSections}
+                >
+                  {openSections.length ===
+                  hostsFaqData.flatMap((section) => section.questions).length
+                    ? "Close all"
+                    : "Open all"}
+                </span>
+              </div>
 
-                <AccordionItem value="2">
-                  <AccordionTrigger>
-                    How are disputes between travelers and hosts handled?
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    Disputes are handled internally by our dispute resolution
-                    team. Each case is handled individually, and we strive to
-                    find a fair resolution for all parties involved.
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="3">
-                  <AccordionTrigger>
-                    How can I ensure prompt responses to city requests from
-                    travelers?
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    We encourage hosts to respond promptly to city requests by
-                    sending reminders about travelers interested in their city.
-                    When you send an offer to a traveler for their city request,
-                    we require them to respond within 24 hours to your offer.
-                    Additionally, city requests expire one day before the
-                    check-in date to ensure timely responses.
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="4">
-                  <AccordionTrigger>
-                    Can I set additional requirements for guests, such as age
-                    restrictions or house rules?
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    Yes, as a host, you can set additional requirements for
-                    guests on your listing. These may include age restrictions,
-                    house rules, or any other preferences you have for your
-                    guests.
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="5">
-                  <AccordionTrigger>
-                    How do I receive payment for bookings made through Tramona?
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    Payments for bookings made through Tramona are processed
-                    securely via Stripe. Within your host dashboard, navigate to
-                    &quot;Finances&quot; and set up your payout account.
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="6">
-                  <AccordionTrigger>
-                    Are there any restrictions on the types of properties I can
-                    list on Tramona?
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    Tramona accepts a wide range of properties for listing,
-                    including houses, apartments, condos, and more. However, all
-                    properties must meet certain quality and safety standards to
-                    be listed on our platform.
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="7">
-                  <AccordionTrigger>
-                    Can I communicate with guests before accepting their
-                    booking?
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    Yes, hosts can communicate with guests before accepting
-                    their booking. This allows you to ask any questions you may
-                    have and ensure that the guest is the right fit for your
-                    property.
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="8">
-                  <AccordionTrigger>How do offers work?</AccordionTrigger>
-                  <AccordionContent>
-                    When a guest makes an offer on one of your properties, you
-                    will be notified via SMS, email and within your Tramona
-                    account. Offers that guests send are binding and if you
-                    accept their offer, their card will be charged and the dates
-                    booked and confirmed. You have the ability to accept, deny
-                    or counter a guest&apos;s offer. You have 24 hours to make a
-                    decision on a guest&apos;s offer before it expires.
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="9">
-                  <AccordionTrigger>
-                    How do city requests work?
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    When a guest is not interested in any specific property but
-                    simply wants to visit a particular city, they can send a
-                    city request through Tramona. As a host with properties in
-                    that city, you will receive notifications of all city
-                    requests relevant to your listings. Upon receiving a city
-                    request, you have the option to accept, deny, or counter the
-                    request. It&apos;s important to note that a city request is
-                    not binding once it has been sent out. However, if you, as a
-                    host, choose to accept a city request, the guest will then
-                    be required to proceed with payment to finalize the booking.
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
+              {hostsFaqData.map((section, sIndex) => (
+                <div key={sIndex} className="mb-8">
+                  {sIndex !== 0 && (
+                    <h2 className="mb-4 text-xl font-semibold text-[#134E4A]">
+                      {section.category}
+                    </h2>
+                  )}
+                  <Accordion
+                    type="multiple"
+                    value={openSections}
+                    onValueChange={setOpenSections}
+                  >
+                    {section.questions.map((item, qIndex) => (
+                      <AccordionItem
+                        key={qIndex}
+                        value={`item-${sIndex}-${qIndex}`}
+                      >
+                        <AccordionTrigger>{item.question}</AccordionTrigger>
+                        <AccordionContent>{item.answer}</AccordionContent>
+                      </AccordionItem>
+                    ))}
+                  </Accordion>
+                </div>
+              ))}
             </TabsContent>
           </Tabs>
+
+          <p className="mb-4 text-center text-sm">
+            Anything we didn&apos;t answer? Send us a message with any other
+            questions.
+          </p>
+
+          <div className="flex justify-center">
+            <Link href={activeTab === "hosts" ? "/for-hosts" : "/"} passHref>
+              <Button className="bg-[#134E4A] text-white hover:bg-[#0D3D3B]">
+                {activeTab === "hosts" ? "Become a host" : "Make a request"}
+              </Button>
+            </Link>
+          </div>
         </div>
       </DashboardLayout>
     </>

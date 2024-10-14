@@ -6,9 +6,8 @@ import {
 } from "@/utils/store/conversations";
 import { useMessage, type ChatMessageType } from "@/utils/store/messages";
 import supabase from "@/utils/supabase-client";
-import { errorToast } from "@/utils/toasts";
-import { cn } from "@/utils/utils";
-import { sub } from "date-fns";
+import { cn, useUpdateUser } from "@/utils/utils";
+import { subHours } from "date-fns";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 import MessageEmptySvg from "../_common/EmptyStateSvg/MessageEmptySvg";
@@ -37,7 +36,7 @@ export function MessageConversation({
   const { mutateAsync: setMessageToReadMutate } =
     api.messages.setMessageToRead.useMutation();
 
-  const { mutate } = api.users.updateProfile.useMutation();
+  const { updateUser } = useUpdateUser();
 
   const setConversationReadState = useConversation(
     (state) => state.setConversationReadState,
@@ -47,10 +46,7 @@ export function MessageConversation({
     if (session?.user.id !== messages[0]?.userId && messages[0]?.id) {
       void setMessageToReadMutate({ messageId: messages[0]?.id });
       if (session) {
-        mutate({
-          id: session.user.id,
-          lastTextAt: sub(new Date(), { hours: 2 }),
-        });
+        await updateUser({ lastTextAt: subHours(new Date(), 2) });
       }
     }
     // Update local state to true
@@ -118,9 +114,9 @@ export default function MessagesSidebar({
   );
 
   const addMessageToConversation = useMessage(
-    (state) => state.addMessageToConversation
-  )
-  const { fetchInitialMessages } = useMessage()
+    (state) => state.addMessageToConversation,
+  );
+  const { fetchInitialMessages } = useMessage();
 
   useEffect(() => {
     // Check if data has been fetched and hasn't been processed yet
@@ -151,19 +147,19 @@ export default function MessagesSidebar({
       //   if (error) {
       //     errorToast();
       //   } else {
-          const newMessage: ChatMessageType = {
-            id: payload.new.id,
-            conversationId: payload.new.conversation_id,
-            userId: payload.new.user_id,
-            message: payload.new.message,
-            isEdit: payload.new.is_edit,
-            createdAt: payload.new.created_at,
-            read: payload.new.read,
-          };
+      const newMessage: ChatMessageType = {
+        id: payload.new.id,
+        conversationId: payload.new.conversation_id,
+        userId: payload.new.user_id,
+        message: payload.new.message,
+        isEdit: payload.new.is_edit,
+        createdAt: payload.new.created_at,
+        read: payload.new.read,
+      };
 
-          setConversationToTop(payload.new.conversation_id, newMessage);
-          // addMessageToConversation(payload.new.conversation_id, newMessage)
-          // void fetchInitialMessages(payload.new.conversation_id)
+      setConversationToTop(payload.new.conversation_id, newMessage);
+      // addMessageToConversation(payload.new.conversation_id, newMessage)
+      // void fetchInitialMessages(payload.new.conversation_id)
       //   }
       // }
     };

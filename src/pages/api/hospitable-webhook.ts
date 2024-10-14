@@ -10,9 +10,11 @@ import {
 import axios from "axios";
 import { type NextApiRequest, type NextApiResponse } from "next";
 import { db } from "@/server/db";
-import { eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { sendSlackMessage } from "@/server/slack";
 import { createLatLngGISPoint } from "@/server/server-utils";
+import { getCity } from "@/server/google-maps";
+import { calculateTotalTax } from "@/utils/payment-utils/taxData";
 
 export async function insertHost(id: string) {
   // Insert Host info
@@ -61,7 +63,6 @@ export async function insertHost(id: string) {
     channel: "host-bot",
   });
 }
-
 
 const airbnbPropertyTypes = [
   "house",
@@ -180,6 +181,7 @@ interface ListingCreatedWebhook {
     public_name: string;
     property_type: AirbnbPropertyType;
     room_type: keyof typeof roomTypeMapping;
+    house_rules: string;
     capacity: {
       max: number;
       beds: number;
@@ -207,6 +209,10 @@ interface ListingCreatedWebhook {
 interface ChannelActivatedWebhook {
   action: "channel.activated";
   data: {
+    name: string;
+    picture: string;
+    location: string;
+    description: string;
     customer: {
       id: string;
       name: string;
@@ -244,6 +250,14 @@ export default async function webhook(
       case "channel.activated":
         console.log("channel created");
         await insertHost(webhookData.data.customer.id);
+        await db
+          .update(users)
+          .set({
+            image: webhookData.data.picture,
+            location: webhookData.data.location,
+            about: webhookData.data.description,
+          })
+          .where(eq(users.id, webhookData.data.customer.id));
         break;
       case "listing.created":
         const userId = webhookData.data.channel.customer.id;
@@ -326,7 +340,24 @@ export default async function webhook(
         }
 
         // Insert data into the reservedDates table
-        const latLngPoint = createLatLngGISPoint({ lat: webhookData.data.address.latitude, lng: webhookData.data.address.longitude });
+        const latLngPoint = createLatLngGISPoint({
+          lat: webhookData.data.address.latitude,
+          lng: webhookData.data.address.longitude,
+        });
+
+        const { city, stateCode, country } = await getCity({
+          lat: webhookData.data.address.latitude,
+          lng: webhookData.data.address.longitude,
+        });
+
+        const taxInfo = calculateTotalTax(country, stateCode, city);
+
+        if (!taxInfo) {
+          await sendSlackMessage({
+            text: `Host created a listing in ${city}, ${stateCode}, ${country} but we don't have tax info for that location`,
+            channel: "host-bot",
+          });
+        }
 
         const propertyObject = {
           hostId: userId,
@@ -340,6 +371,7 @@ export default async function webhook(
           numBathrooms: webhookData.data.capacity.bathrooms,
           // latitude: webhookData.data.address.latitude,
           // longitude: webhookData.data.address.longitude,
+          otherHouseRules: webhookData.data.house_rules,
           latLngPoint: latLngPoint,
           city: webhookData.data.address.city,
           hostName: webhookData.data.channel.customer.name,
@@ -356,6 +388,7 @@ export default async function webhook(
           imageUrls: images,
           originalListingPlatform: "Hospitable" as const,
           originalListingId: webhookData.data.platform_id,
+
           //amenities: webhookData.data.amenities,
           //cancellationPolicy: webhookData.data.cancellation_policy,
           //ratings: webhookData.data.ratings,
@@ -372,7 +405,7 @@ export default async function webhook(
             propertyId: propertyId,
             start: dateRange.start,
             end: dateRange.end,
-            platformBookedOn: "airbnb"
+            platformBookedOn: "airbnb",
           });
         }
         break;
@@ -386,5 +419,3 @@ export default async function webhook(
     res.status(405).end("Method Not Allowed");
   }
 }
-
-

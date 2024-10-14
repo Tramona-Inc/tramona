@@ -127,6 +127,21 @@ function LargeHeader({ isHost }: { isHost: boolean }) {
           </Button>
         )}
       />
+    
+    <NavLink
+        href="/faq"
+        render={({ selected }) => (
+          <Button
+            variant="ghost"
+            className={cn(
+              "rounded-full hover:text-foreground",
+              selected && "text-foreground underline underline-offset-2",
+            )}
+          >
+            FAQ
+          </Button>
+        )}
+      />
 
       {status === "loading" ? null : hostBtn.isLoading ? (
         <div className="px-4">
@@ -164,7 +179,7 @@ function SmallHeader({ isHost }: { isHost: boolean }) {
       <div className="flex translate-y-0.5 items-center pl-2"></div>
 
       <div className="flex-1" />
-      <NavLink
+      {/* <NavLink
         href="/help-center"
         render={({ selected }) => (
           <Button
@@ -178,7 +193,7 @@ function SmallHeader({ isHost }: { isHost: boolean }) {
             24/7 Support
           </Button>
         )}
-      />
+      /> */}
 
       {!isHost || status === "loading" ? null : hostBtn.isLoading ? (
         <div className="px-4">

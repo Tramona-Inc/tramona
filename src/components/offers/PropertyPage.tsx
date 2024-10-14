@@ -27,9 +27,10 @@ import {
   FlameIcon,
   ArrowRightIcon,
   BookCheckIcon,
+  CheckIcon,
 } from "lucide-react";
 import Image from "next/image";
-
+import React from "react";
 import OfferPhotos from "./OfferPhotos";
 import AmenitiesComponent from "./CategorizedAmenities";
 import PropertyAmenities from "./PropertyAmenities";
@@ -56,7 +57,7 @@ import { createUserNameAndPic } from "../activity-feed/admin/generationHelper";
 import ReasonsToBook from "./ReasonsToBook";
 
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
-export type PropertyPageData = OfferWithDetails["property"];
+export type PropertyPageData = RouterOutputs["properties"]["getById"];
 //export type PropertyPageData = RouterOutputs["properties"]["getById"];
 
 export default function PropertyPage({
@@ -73,6 +74,7 @@ export default function PropertyPage({
   const aboutRef = useRef<HTMLDivElement>(null);
   const [isOverflowing, setIsOverflowing] = useState(false);
   const [reviewBackupImages, setReviewBackupImages] = useState<string[]>([]);
+  const [openUserInfo, setOpenUserInfo] = useState(false);
 
   useEffect(() => {
     const aboutElement = aboutRef.current;
@@ -88,7 +90,9 @@ export default function PropertyPage({
     void createReviewBackupImages();
   }, []);
 
-  const hostName = property.host?.name ?? property.hostName ?? "Tramona";
+  const hostName = property.host
+    ? `${property.host.firstName} ${property.host.lastName}`
+    : "Tramona";
 
   const originalListing = getOriginalListing(property);
 
@@ -102,7 +106,8 @@ export default function PropertyPage({
   const discountPercentage = offer
     ? getOfferDiscountPercentage({
         createdAt: offer.createdAt,
-        travelerOfferedPrice: offer.totalPrice,
+        travelerOfferedPriceBeforeFees:
+          offer.tripCheckout.travelerOfferedPriceBeforeFees,
         checkIn: offer.checkIn,
         checkOut: offer.checkOut,
         randomDirectListingDiscount: offer.randomDirectListingDiscount,
@@ -248,7 +253,7 @@ export default function PropertyPage({
                   <PropertyCompareBtn
                     checkIn={offer.checkIn}
                     checkOut={offer.checkOut}
-                    numGuests={offer.request?.numGuests ?? 1}
+                    numGuests={property.maxNumGuests ?? 1}
                     originalListing={originalListing}
                   />
                 </div>
@@ -257,14 +262,17 @@ export default function PropertyPage({
           </section>
 
           <section className="flex-justify-between mx-1 flex w-full border-t pt-4">
-            <div className="flex w-5/6 items-center gap-2">
+            <div
+              className="flex w-5/6 items-center gap-2"
+              onClick={() => setOpenUserInfo(true)}
+            >
               <UserAvatar
                 name={hostName}
                 email={property.host?.email}
                 image={
-                  property.host?.image ??
-                  property.hostProfilePic ??
-                  "/assets/images/tramona.svg"
+                  property.host?.id
+                    ? property.host.image
+                    : (property.hostProfilePic ?? "/assets/images/tramona.svg")
                 }
               />
               <div className="-space-y-1">
@@ -280,12 +288,33 @@ export default function PropertyPage({
               />
             )}
           </section>
-
+          <Dialog open={openUserInfo} onOpenChange={setOpenUserInfo}>
+            <DialogTitle className="text-lg font-semibold">
+              Host Information
+            </DialogTitle>
+            <DialogContent>
+              {/* <div className="flex space-x-2">
+                <div className="flex flex-col space-y-2"> */}
+              <UserInfo
+                hostName={hostName}
+                hostPic={property.host?.image ?? null}
+                hostDesc={property.host?.about ?? null}
+                hostLocation={property.host?.location ?? null}
+              />
+              {/* <HostVerificationInfo hostName={hostName} /> */}
+              {/* </div>
+                <div>
+                  <div className="text-lg font-bold">About {hostName}</div>{" "}
+                  {property.host?.hostProfile?.about}
+                </div>
+              </div> */}
+            </DialogContent>
+          </Dialog>
           <section>
             <h2 className="subheading border-t pb-2 pt-4">
               About this property
             </h2>
-            <div className="z-20 max-w-2xl text-zinc-700">
+            <div className="z-20 px-1 text-zinc-700">
               <div ref={aboutRef} className="line-clamp-5 break-words">
                 {property.about}
               </div>
@@ -445,13 +474,13 @@ export default function PropertyPage({
             <h2 className="subheading border-t pb-2 pt-4">House rules</h2>
             <div className="overflow-x-auto">
               <div className="flex gap-4">
-                {property.checkInTime !== null && (
+                {property.checkInTime && (
                   <CheckInTimeRule checkInTime={property.checkInTime} />
                 )}
-                {property.checkOutTime !== null && (
+                {property.checkOutTime && (
                   <CheckOutTimeRule checkOutTime={property.checkOutTime} />
                 )}
-                {property.petsAllowed !== null && (
+                {property.petsAllowed && (
                   <PetsRule petsAllowed={property.petsAllowed} />
                 )}
                 {property.smokingAllowed !== null && (
@@ -460,14 +489,14 @@ export default function PropertyPage({
               </div>
             </div>
             {property.cancellationPolicy !== null && (
-              <>
+              <div>
                 <h3 className="pb-2 pt-4 font-bold">Cancellation Policy</h3>
                 <p>
                   {getCancellationPolicyDescription(
                     property.cancellationPolicy,
                   )}
                 </p>
-              </>
+              </div>
             )}
           </section>
 
@@ -723,3 +752,69 @@ export function OfferPage({ offer }: { offer: OfferWithDetails }) {
     />
   );
 }
+
+export function UserInfo({
+  hostName,
+  hostPic,
+  hostDesc,
+  hostLocation,
+}: {
+  hostName: string;
+  hostPic: string | null;
+  hostDesc: string | null;
+  hostLocation: string | null;
+}) {
+  return (
+    <div className="flex flex-col">
+      <div className="flex items-center gap-4">
+        <div className="flex flex-col space-y-2">
+          <div className="flex flex-col items-center space-y-2 rounded-lg p-4 shadow-lg">
+            <UserAvatar name={hostName} image={hostPic} size={"lg"} />
+            <div className="text-left">
+              <p className="flex items-center gap-1">
+                <CheckIcon className="size-4" />
+                Email verified
+              </p>
+              <p className="flex items-center gap-1">
+                <CheckIcon className="size-4" />
+                Phone verified
+              </p>
+              <p className="flex items-center gap-1">
+                <CheckIcon className="size-4" />
+                Identity verified
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="space-y-1">
+          <div className="text-lg font-semibold">{hostName}</div>
+          <div className="text-muted-foreground">Located in {hostLocation}</div>
+          <div className="mt-2">
+            <p>{hostDesc}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// function HostVerificationInfo({ hostName }: { hostName: string }) {
+//   return (
+//     <div className="flex flex-col gap-2  p-4 ">
+//       <div className="space-y-1">
+//         <p className="text-lg font-semibold">{`${hostName}'s confirmed information`}</p>
+//       </div>
+//       <div className="flex items-center gap-2">
+//         <CheckIcon className="size-5" />
+//         <p className="text-md font-semibold">Email Address</p>
+//       </div>
+//       <div className="flex items-center gap-2">
+//         <CheckIcon className="size-5" />
+//         <p className="text-md font-semibold">Phone Number</p>
+//       </div>
+//       <p className="text-sm text-muted-foreground">
+//         {hostName} is a verified host
+//       </p>
+//     </div>
+//   );
+// }

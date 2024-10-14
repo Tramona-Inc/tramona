@@ -13,8 +13,23 @@ import OnboardingLayout from "../components/host/onboarding/layout";
 import Onboarding10 from "@/components/host/onboarding/Onboarding10";
 import Onboarding11 from "@/components/host/onboarding/Onboarding11";
 import OnboardingLinkInput from "@/components/host/onboarding/OnboardingLinkInput";
+import Onboarding12 from "@/components/host/onboarding/Onboarding12";
+import { getFeed } from "@/server/api/routers/feedRouter";
+import { type InferGetStaticPropsType } from "next";
 
-export default function Onboarding() {
+export const getStaticProps = async () => {
+  const requestFeed = await getFeed({ maxNumEntries: 10 }).then((r) =>
+    r.filter((r) => r.type === "request"),
+  );
+  return {
+    props: { requestFeed },
+    revalidate: 60 * 5, // 5 minutes
+  };
+};
+
+type Props = InferGetStaticPropsType<typeof getStaticProps>;
+
+export default function Onboarding({ requestFeed }: Props) {
   const progress = useHostOnboarding((state) => state.progress);
   const setProgress = useHostOnboarding((state) => state.setProgress);
 
@@ -36,6 +51,7 @@ export default function Onboarding() {
       {progress === 9 && <Onboarding10 />}
       {progress === 10 && <OnboardingLinkInput />}
       {progress === 11 && <Onboarding11 />}
+      {progress === 12 && <Onboarding12 requestFeed={requestFeed}/>}
     </OnboardingLayout>
   );
 }

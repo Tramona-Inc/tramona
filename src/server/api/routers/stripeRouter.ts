@@ -291,7 +291,6 @@ export const stripeRouter = createTRPCRouter({
         requestId: z.number().nullable(),
         name: z.string(),
         price: z.number(), // Total price included tramona fee
-        tramonaServiceFee: z.number(),
         description: z.string(),
         cancelUrl: z.string(),
         images: z.array(z.string().url()),
@@ -299,6 +298,11 @@ export const stripeRouter = createTRPCRouter({
         phoneNumber: z.string(),
         totalSavings: z.number(),
         hostStripeId: z.string().nullable(),
+        travelerOfferedPriceBeforeFees: z.number(),
+        taxesPaid: z.number(),
+        taxesPercentage: z.number().nullable(),
+        stripeTransactionFee: z.number(),
+        superhogFee: z.number(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -339,12 +343,17 @@ export const stripeRouter = createTRPCRouter({
         property_id: input.propertyId,
         request_id: input.requestId,
         price: input.price, // Total price included tramona fee
-        tramonaServiceFee: input.tramonaServiceFee,
         total_savings: input.totalSavings,
         confirmed_at: currentDate.toISOString(),
         phone_number: input.phoneNumber,
         host_stripe_id: input.hostStripeId ?? "",
         stripe_customer_id: stripeCustomerId,
+        traveler_offered_price_before_fees:
+          input.travelerOfferedPriceBeforeFees,
+        taxes_paid: input.taxesPaid,
+        tax_percentage: input.taxesPercentage,
+        stripe_transaction_fee: input.stripeTransactionFee,
+        superhog_paid: input.superhogFee,
       };
 
       const options: Stripe.PaymentIntentCreateParams = {
@@ -546,8 +555,8 @@ export const stripeRouter = createTRPCRouter({
         },
         individual: {
           email: ctx.user.email,
-          first_name: firstName,
-          last_name: lastName,
+          // first_name: firstName,
+          // last_name: lastName,
         },
       });
       await ctx.db
@@ -560,6 +569,13 @@ export const stripeRouter = createTRPCRouter({
       throw new Error("Stripe account already created");
     }
   }),
+
+  retrieveStripeConnectAccount: protectedProcedure
+    .input(z.string())
+    .query(async ({ input }) => {
+      const account = await stripeWithSecretKey.accounts.retrieve(input);
+      return account;
+    }),
 
   //we need this to create embedded connet account
   createStripeAccountSession: protectedProcedure
