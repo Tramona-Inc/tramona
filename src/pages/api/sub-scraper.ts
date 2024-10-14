@@ -1,9 +1,6 @@
 
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { SubScrapedResult, subsequentScrape } from '../../server/direct-sites-scraping';
-import { arizonaScraper } from "@/server/direct-sites-scraping/integrity-arizona";
-import axios from 'axios';
-import { proxyAgent } from "@/server/server-utils";
+import { subsequentScrape } from '../../server/direct-sites-scraping';
 
 // This is a testing API route that update the availabity and price of a listing in the offers table
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {

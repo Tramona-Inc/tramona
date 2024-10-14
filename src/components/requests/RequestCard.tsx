@@ -58,8 +58,6 @@ export default function RequestCard({
 ) & {
   children?: React.ReactNode;
 }) {
-  const utils = api.useUtils();
-
   const pricePerNight =
     request.maxTotalPrice / getNumNights(request.checkIn, request.checkOut);
   const fmtdPrice = formatCurrency(pricePerNight);

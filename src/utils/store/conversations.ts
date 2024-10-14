@@ -25,9 +25,7 @@ export const useConversation = create<ConversationListState>((set) => ({
   },
   setConversationToTop: (conversationId: string, newMessage: MessageType) => {
     set((state) => {
-      const updatedConversations: Conversations | [] = state.conversationList
-        ? [...state.conversationList]
-        : [];
+      const updatedConversations = [...state.conversationList];
 
       const conversationIndex = updatedConversations.findIndex(
         (conversation) => conversation.id === conversationId,

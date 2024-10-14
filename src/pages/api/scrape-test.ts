@@ -1,9 +1,6 @@
 
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { scrapeDirectListings } from '../../server/direct-sites-scraping';
-import { arizonaScraper } from "@/server/direct-sites-scraping/integrity-arizona";
-import axios from 'axios';
-import { proxyAgent } from "@/server/server-utils";
 
 // This is a testing API route that scrapes listings from the Integrity Arizona website
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {

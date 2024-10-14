@@ -3,7 +3,6 @@ import * as React from "react";
 import { cn } from "@/utils/utils";
 import { useMeasure } from "@uidotdev/usehooks";
 import { cva, type VariantProps } from "class-variance-authority";
-import { FormLabel } from "./form";
 import { labelVariants, overlayVariants } from "./input";
 import { XIcon } from "lucide-react";
 

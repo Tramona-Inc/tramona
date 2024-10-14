@@ -45,7 +45,7 @@ export default function BiddingForm({
       setOpen(true);
       setDisplayUserBid(false);
     }
-  }, [displayUserBid]);
+  }, [displayUserBid, setDisplayUserBid]);
 
   const propertyIdBids = useBidding((state) => state.propertyIdBids);
   const alreadyBid = propertyIdBids.includes(propertyId);
@@ -59,11 +59,8 @@ export default function BiddingForm({
   const numNights = formValues.date
     ? getNumNights(formValues.date.from, formValues.date.to)
     : 0;
-  const totalNightlyPrice = price * numNights;
   const resetSession = useBidding((state) => state.resetSession);
   const setDate = useBidding((state) => state.setDate);
-  const setGuest = useBidding((state) => state.setGuest);
-  const setStep = useBidding((state) => state.setStep);
 
   async function onSubmit(values: FormSchema) {
     // Reset session if on new date
@@ -130,7 +127,7 @@ export default function BiddingForm({
               </Button>
               {/* )} */}
             </div>
-            <DialogContent className="flex sm:max-w-lg  md:max-w-fit md:px-36 md:py-10">
+            <DialogContent className="flex sm:max-w-lg md:max-w-fit md:px-36 md:py-10">
               <MakeBid propertyId={propertyId} setOpen={setOpen} />
             </DialogContent>
           </Dialog>

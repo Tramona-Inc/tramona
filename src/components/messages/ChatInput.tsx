@@ -107,7 +107,7 @@ export default function ChatInput({
       if (participantPhoneNumbers) {
         void Promise.all(
           participantPhoneNumbers.map(
-            async ({ id, lastTextAt, phoneNumber, isWhatsApp }) => {
+            async ({ lastTextAt, phoneNumber, isWhatsApp }) => {
               if (lastTextAt && lastTextAt <= sub(new Date(), { hours: 1 })) {
                 if (phoneNumber) {
                   if (isWhatsApp) {

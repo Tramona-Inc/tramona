@@ -253,7 +253,7 @@ export default function PropertyPage({
                   <PropertyCompareBtn
                     checkIn={offer.checkIn}
                     checkOut={offer.checkOut}
-                    numGuests={property.maxNumGuests ?? 1}
+                    numGuests={property.maxNumGuests}
                     originalListing={originalListing}
                   />
                 </div>
