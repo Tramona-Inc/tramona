@@ -5,10 +5,9 @@ import {
   ALL_PROPERTY_TYPES,
   ListingSiteName,
 } from "@/server/db/schema/common";
-import { NewReview, type Review } from "@/server/db/schema";
+import { NewReview } from "@/server/db/schema";
 import { getNumNights, parseHTML } from "@/utils/utils";
 import { ScrapedListing } from "@/server/direct-sites-scraping";
-import { axiosWithRetry } from "@/server/server-utils";
 import axios from "axios";
 
 const propertySchema = z.object({

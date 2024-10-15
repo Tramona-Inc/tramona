@@ -246,13 +246,12 @@ export default async function webhook(
                 });
               }
               if (paymentIntentSucceeded.metadata.user_id) {
-                const conversationId =
-                  await createConversationWithOfferAfterBooking({
-                    offerId: offer.id.toString(),
-                    offerHostId: currentProperty!.hostId,
-                    offerPropertyName: currentProperty!.name,
-                    travelerId: paymentIntentSucceeded.metadata.user_id,
-                  });
+                await createConversationWithOfferAfterBooking({
+                  offerId: offer.id.toString(),
+                  offerHostId: currentProperty!.hostId,
+                  offerPropertyName: currentProperty!.name,
+                  travelerId: paymentIntentSucceeded.metadata.user_id,
+                });
               }
               // ------ Send Slack When trip is booked ------
               await sendSlackMessage({

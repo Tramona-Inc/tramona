@@ -14,10 +14,6 @@ function SimiliarProperties({ location, city }: SimilarProperties) {
   //create an array of the new citers
   //const locationCoordinates : { lat: number; lng: number } = {};
 
-  const { data: coordinates } = api.offers.getCoordinates.useQuery({
-    location: location,
-  });
-
   // ! Update later to fix the optional chain
   const {
     data: properties,

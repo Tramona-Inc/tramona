@@ -8,11 +8,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  BadgeHelpIcon,
   HandCoinsIcon,
   LogOutIcon,
   SettingsIcon,
-  User2Icon,
+  User2Icon
 } from "lucide-react";
 import { type Session } from "next-auth";
 import { signOut } from "next-auth/react";

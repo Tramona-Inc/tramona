@@ -9,7 +9,6 @@ import { conversations, messages } from "./../../db/schema/tables/messages";
 import { protectedProcedure } from "./../trpc";
 import { sendSlackMessage } from "@/server/slack";
 import { TRPCError } from "@trpc/server";
-import { columns } from "@/components/admin/view-recent-host/table/columns";
 
 const isProduction = process.env.NODE_ENV === "production";
 const baseUrl = isProduction
@@ -367,7 +366,7 @@ export const messagesRouter = createTRPCRouter({
         sessionToken: z.string(),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ input }) => {
       const tempUser = await db.query.users.findFirst({
         where: eq(users.sessionToken, input.sessionToken),
       });
@@ -384,7 +383,7 @@ export const messagesRouter = createTRPCRouter({
           message: "Guest Temporary User not found",
         });
       }
-      return { tempUserId: tempUser?.id, conversationId: conversationId };
+      return { tempUserId: tempUser.id, conversationId: conversationId };
     }),
 
   createOrFetchConversationWithOffer: protectedProcedure
@@ -664,6 +663,6 @@ export const messagesRouter = createTRPCRouter({
         // });
       }
 
-      return { conversationId: conversationId ?? "", tempUserId: tempUser?.id };
+      return { conversationId, tempUserId: tempUser?.id };
     }),
 });

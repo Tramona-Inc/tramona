@@ -667,7 +667,7 @@ export const subsequentScrape = async (options: { offerIds: number[] }) => {
             checkIn: offer.checkIn,
             checkOut: offer.checkOut,
           });
-          if (subScrapedResultEvolve) {
+          {
             const updateData: Partial<Offer> = {
               isAvailableOnOriginalSite:
                 subScrapedResultEvolve.isAvailableOnOriginalSite,

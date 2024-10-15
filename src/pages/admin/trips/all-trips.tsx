@@ -1,5 +1,4 @@
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
-import { api } from "@/utils/api";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   PreviousTrips,

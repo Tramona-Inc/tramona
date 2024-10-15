@@ -9,7 +9,6 @@ import {
   referralEarnings,
   users,
 } from "@/server/db/schema";
-import { sendEmail } from "@/server/server-utils";
 import { TRPCError } from "@trpc/server";
 import { and, eq, isNotNull, sql } from "drizzle-orm";
 import { z } from "zod";

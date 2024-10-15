@@ -352,7 +352,7 @@ export default async function webhook(
 
         const taxInfo = calculateTotalTax(country, stateCode, city);
 
-        if (!taxInfo) {
+        if (taxInfo.length === 0) {
           await sendSlackMessage({
             text: `Host created a listing in ${city}, ${stateCode}, ${country} but we don't have tax info for that location`,
             channel: "host-bot",

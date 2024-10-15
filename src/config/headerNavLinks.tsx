@@ -5,8 +5,7 @@ import {
   Home,
   InfoIcon,
   LinkIcon,
-  MessageCircleQuestion,
-  MessagesSquare,
+  MessageCircleQuestion
 } from "lucide-react";
 
 export const headerLinks = [
