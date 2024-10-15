@@ -23,7 +23,7 @@ export default function PastRequestsTab() {
         <EmptyStateValue
           title={"You have no history"}
           description={
-            "You haven't made any request or offers. Completed requets will show up here."
+            "You haven't made any request or offers. Completed requests will show up here."
           }
           redirectTitle={"Request Deal"}
           href={"/"}
