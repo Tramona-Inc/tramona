@@ -462,11 +462,6 @@ export const hostTeamsRouter = createTRPCRouter({
       }
 
       await ctx.db
-        .update(users)
-        .set({ mainHostId: null })
-        .where(eq(users.id, input.memberId));
-
-      await ctx.db
         .delete(hostTeamMembers)
         .where(
           and(
@@ -618,7 +613,7 @@ export const hostTeamsRouter = createTRPCRouter({
                 columns: {},
                 with: {
                   members: {
-                    columns: {},
+                    columns: { permission: true },
                     with: {
                       user: {
                         columns: {
@@ -626,8 +621,6 @@ export const hostTeamsRouter = createTRPCRouter({
                           email: true,
                           image: true,
                           id: true,
-                          coHostRole: true,
-                          mainHostId: true,
                         },
                       },
                     },
@@ -638,7 +631,12 @@ export const hostTeamsRouter = createTRPCRouter({
           },
         },
       })
-      .then((res) => res?.hostProfile?.curTeam.members.map((m) => m.user));
+      .then((res) =>
+        res?.hostProfile?.curTeam.members.map((m) => ({
+          ...m.user,
+          permission: m.permission,
+        })),
+      );
 
     if (!members) {
       throw new TRPCError({ code: "NOT_FOUND" });
@@ -781,20 +779,6 @@ export const hostTeamsRouter = createTRPCRouter({
         userId: ctx.user.id,
       });
 
-      const teamMembers = await ctx.db.query.hostTeamMembers.findMany({
-        where: eq(hostTeamMembers.hostTeamId, invite.hostTeam.id),
-      });
-
-      const mainHost = teamMembers.filter(
-        (teamMember) => teamMember.userId !== ctx.user.id,
-      );
-
-      // add main host id to mainHostId column in users table for cohost
-      await ctx.db
-        .update(users)
-        .set({ mainHostId: mainHost[0]?.userId })
-        .where(eq(users.id, ctx.user.id));
-
       // delete invite
       await ctx.db
         .delete(hostTeamInvites)
@@ -865,17 +849,23 @@ export const hostTeamsRouter = createTRPCRouter({
 
       return { status: "invite declined" } as const;
     }),
-  updateCohostRole: protectedProcedure
+  updateCoHostPermission: protectedProcedure
     .input(
       z.object({
         userId: z.string(),
-        coHostRole: z.enum(["strict", "medium", "loose"]),
+        permission: z.enum(["strict", "medium", "loose"]),
+        hostTeamId: z.number(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       await ctx.db
-        .update(users)
-        .set({ coHostRole: input.coHostRole })
-        .where(eq(users.id, input.userId));
+        .update(hostTeamMembers)
+        .set({ permission: input.permission })
+        .where(
+          and(
+            eq(hostTeamMembers.hostTeamId, input.hostTeamId),
+            eq(hostTeamMembers.userId, input.userId),
+          ),
+        );
     }),
 });

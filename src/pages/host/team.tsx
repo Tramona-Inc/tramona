@@ -46,6 +46,8 @@ export default function Page() {
     api.hostTeams.getCurTeamMembers.useQuery();
   const { data: pendingInvites, refetch: refetchInvites } =
     api.hostTeams.getCurTeamPendingInvites.useQuery();
+  const { mutateAsync: updatePermission } =
+    api.hostTeams.updateCoHostPermission.useMutation();
 
   const curTeam =
     hostProfile && hostTeams?.find((t) => t.id === hostProfile.curTeamId);
@@ -54,12 +56,6 @@ export default function Page() {
   const cancelInviteMutation = api.hostTeams.cancelInvite.useMutation();
   const removeTeamMemberMutation =
     api.hostTeams.removeHostTeamMember.useMutation();
-  const { mutateAsync: updateRole } =
-    api.hostTeams.updateCohostRole.useMutation();
-  const { data: user } = api.users.getUser.useQuery();
-  const { data: host } = api.users.getOtherUser.useQuery({
-    id: user?.mainHostId ?? "",
-  });
 
   const handleResendInvite = async (email: string) => {
     const res = await resendInviteMutation.mutateAsync({
@@ -111,10 +107,11 @@ export default function Page() {
 
   if (!session) return null;
 
-  const handleUpdateRole = async (userId: string, coHostRole: string) => {
-    await updateRole({
+  const handleUpdatePermission = async (userId: string, permission: string) => {
+    await updatePermission({
       userId: userId,
-      coHostRole: coHostRole as "strict" | "medium" | "loose",
+      permission: permission as "strict" | "medium" | "loose",
+      hostTeamId: curTeam!.id,
     });
   };
 
@@ -144,28 +141,23 @@ export default function Page() {
               setIsEditing={setIsEditing}
             />
           ) : (
-            // <Spinner />
-            <div>
-              <p>
-                You are co-hosting for{" "}
-                <span className="font-bold">{host?.name}</span> ({host?.email})
-              </p>
-              <p>
-                Restriction:{" "}
-                <span className="font-bold">{user?.coHostRole}</span>
-              </p>
-            </div>
+            <Spinner />
           )}
           {curTeamMembers
             ? curTeamMembers.map((member) => (
                 <TeamMember
+                  permission={
+                    curTeam?.ownerId !== member.id ? member.permission : null
+                  }
                   key={member.id}
                   member={member}
                   isYou={member.id === session.user.id}
                   isOwner={member.id === curTeam?.ownerId}
                   isEditing={isEditing}
                   onRemove={() => handleRemoveMember(member.id)}
-                  onUpdate={(role) => handleUpdateRole(member.id, role)}
+                  onUpdate={(permission) =>
+                    handleUpdatePermission(member.id, permission)
+                  }
                 />
               ))
             : null}
@@ -194,16 +186,17 @@ function TeamMember({
   isEditing,
   onRemove,
   onUpdate,
+  permission,
 }: React.PropsWithChildren<{
-  member: Pick<User, "name" | "email" | "image" | "coHostRole" | "mainHostId">;
+  member: Pick<User, "name" | "email" | "image">;
   isYou: boolean;
   isOwner: boolean;
   isEditing: boolean;
   onRemove: () => void;
   onUpdate: (role: string) => Promise<void>;
+  permission: "strict" | "medium" | "loose" | null;
 }>) {
   const [showRemoveConfirmation, setShowRemoveConfirmation] = useState(false);
-  const [permission, setPermission] = useState(member.coHostRole);
 
   const permissions = ["strict", "medium", "loose"];
 
@@ -216,7 +209,7 @@ function TeamMember({
       />
       <div className="flex-1 -space-y-1 font-medium">
         <div>
-          {member.name ?? member.email} {member.mainHostId && `(${permission})`}
+          {member.name ?? member.email}
           {isYou && <span className="text-muted-foreground">(You)</span>}{" "}
           {isOwner && (
             <Badge variant="secondary" size="sm">
@@ -224,9 +217,10 @@ function TeamMember({
             </Badge>
           )}
         </div>
-        <p className="text-sm text-muted-foreground">
-          {member.name ? member.email : ""}
-        </p>
+        <div className="text-sm text-muted-foreground">
+          <p>{member.name ? member.email : ""}</p>
+          {permission && <p>Permission: {permission}</p>}
+        </div>
       </div>
       {children}
       {isEditing && !isYou && !isOwner && (
@@ -245,9 +239,6 @@ function TeamMember({
                     <DropdownMenuItem
                       key={index}
                       onClick={async () => {
-                        setPermission(
-                          permission as "strict" | "medium" | "loose",
-                        );
                         await onUpdate(permission);
                       }}
                     >
