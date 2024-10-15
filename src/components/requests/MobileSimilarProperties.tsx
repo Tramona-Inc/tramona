@@ -12,10 +12,6 @@ interface SimilarProperties {
 }
 
 function MobileSimilarProperties({ location, city }: SimilarProperties) {
-  const { data: coordinates } = api.offers.getCoordinates.useQuery({
-    location: location,
-  });
-
   const { data: properties, isFetching } =
     api.properties.getAllInfiniteScroll.useInfiniteQuery(
       {

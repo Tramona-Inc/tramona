@@ -10,8 +10,7 @@ import {
 import { getNumNights, getTravelerOfferedPrice } from "@/utils/utils";
 import {
   DIRECTLISTINGMARKUP,
-  HOST_MARKUP,
-  TRAVELER__MARKUP,
+  HOST_MARKUP
 } from "@/utils/constants";
 import { breakdownPayment } from "@/utils/payment-utils/paymentBreakdown";
 
@@ -50,16 +49,18 @@ export async function scrapeExternalListings(request: MinimalRequest) {
   // i know this should be in a transaction but i was in a rush
 
   await Promise.all(
-    listings.map(async ({ totalPrice }, index) => {
+    listings.map(async ({ totalPrice, property }, index) => {
       const travelerOfferedPriceBeforeFees = getTravelerOfferedPrice({
         propertyPrice: totalPrice,
         travelerMarkup: DIRECTLISTINGMARKUP,
         numNights: getNumNights(request.checkIn, request.checkOut),
       });
-      const brokeDownPayment = breakdownPayment({
+      const brokeDownPayment = await breakdownPayment({
         numOfNights: numNights,
         travelerOfferedPriceBeforeFees,
         isScrapedPropery: true,
+        lat: property.latLngPoint.y,
+        lng: property.latLngPoint.x,
       });
 
       const tripCheckout = await db

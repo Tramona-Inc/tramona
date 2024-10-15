@@ -1,9 +1,4 @@
-import { useEffect, useState } from "react";
 import MainLayout from "@/components/_common/Layout/MainLayout";
-import { Button } from "@/components/ui/button";
-import { ExternalLinkIcon } from "lucide-react";
-import { useRouter } from "next/router";
-import { api } from "@/utils/api";
 
 export default function Page() {
   // const router = useRouter();

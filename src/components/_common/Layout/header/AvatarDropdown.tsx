@@ -8,16 +8,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  BadgeHelpIcon,
   HandCoinsIcon,
   LogOutIcon,
   SettingsIcon,
-  User2Icon,
+  User2Icon
 } from "lucide-react";
 import { type Session } from "next-auth";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
-//import HostTeamsDropdownItems from "./HostTeamsDropdownItems"; // removed host teams for now
+import HostTeamsDropdownItems from "./HostTeamsDropdownItems";
 
 import { useState } from "react";
 import CreateHostTeamDialog from "./CreateHostTeamDialog";
@@ -57,9 +56,6 @@ export default function AvatarDropdown({
   session: Session;
   size?: "sm" | "md" | "lg" | "huge";
 }) {
-  // const { data: hostProfile } = api.users.getMyHostProfile.useQuery();
-  // const { data: hostTeams } = api.hostTeams.getMyHostTeams.useQuery(); //removed host teams for now
-
   const [chtDialogOpen, setChtDialogOpen] = useState(false);
 
   return (
@@ -76,6 +72,8 @@ export default function AvatarDropdown({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-80 font-medium">
           <DropdownTop session={session} />
+          <DropdownMenuSeparator />
+          <HostTeamsDropdownItems setChtDialogOpen={setChtDialogOpen} />
           <DropdownMenuSeparator />
           <DropdownMenuItem asChild>
             <Link href="/account">

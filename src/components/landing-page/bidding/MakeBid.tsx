@@ -14,12 +14,9 @@ function MakeBid({
   propertyId: number;
   setOpen: (open: boolean) => void;
 }) {
-  const { data: property, isLoading } = api.properties.getById.useQuery({
+  const { data: property } = api.properties.getById.useQuery({
     id: propertyId,
   });
-
-  // const step = useBidding((state) => state.step);
-  // const setStep = useBidding((state) => state.setStep);
 
   const [step, setStep] = useState(0);
   const [price, setPrice] = useState(0);

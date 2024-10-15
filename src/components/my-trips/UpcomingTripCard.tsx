@@ -1,4 +1,4 @@
-import { HelpCircleIcon, MapPinIcon, MessageCircle } from "lucide-react";
+import { HelpCircleIcon, MapPinIcon } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -8,7 +8,6 @@ import UserAvatar from "../_common/UserAvatar";
 import { type TripCardDetails } from "@/pages/my-trips";
 import { api } from "@/utils/api";
 import ChatOfferButton from "../offers/ChatOfferButton";
-import SingleLocationMap from "@/components/_common/GoogleMaps/SingleLocationMap";
 import TripCancelDialog from "./TripCancelDialog";
 
 export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {

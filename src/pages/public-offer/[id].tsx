@@ -9,7 +9,6 @@ import {
   getOfferPageData,
   getPropertyForOffer,
 } from "@/server/api/routers/offersRouter";
-import { OfferWithProperty } from "../../components/requests/[id]/OfferCard/index";
 import type { RouterOutputs } from "@/utils/api";
 
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];

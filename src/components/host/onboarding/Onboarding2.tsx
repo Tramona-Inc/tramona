@@ -81,7 +81,7 @@ export default function Onboarding2({ editing = false }) {
           <FormField
             control={form.control}
             name="propertyType"
-            render={({ field }) => (
+            render={() => (
               <FormItem>
                 <div className="mb-5 flex flex-col gap-5">
                   {options.map((item) => (

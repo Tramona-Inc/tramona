@@ -27,7 +27,13 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import BidPaymentForm from "./BidPaymentForm";
 
-function BiddingInfoCard({ property, price }: { property: Property, price: number}) {
+function BiddingInfoCard({
+  property,
+  price,
+}: {
+  property: Property;
+  price: number;
+}) {
   const date = useBidding((state) => state.date);
   // const price = useBidding((state) => state.price);
   const totalNightlyPrice = price * getNumNights(date.from, date.to);
@@ -38,7 +44,7 @@ function BiddingInfoCard({ property, price }: { property: Property, price: numbe
       <h2 className="mb-2 text-lg font-semibold md:mb-5 md:text-2xl">
         Offer Details
       </h2>
-      <div className="flex max-w-full  items-center gap-4 rounded-2xl border-2 border-accent p-2">
+      <div className="flex max-w-full items-center gap-4 rounded-2xl border-2 border-accent p-2">
         <div className="h-[85px] w-[85px] md:h-[160px] md:w-[160px] lg:h-[95px] lg:w-[95px]">
           <AspectRatio ratio={1} className="">
             <Image
@@ -50,7 +56,7 @@ function BiddingInfoCard({ property, price }: { property: Property, price: numbe
           </AspectRatio>
         </div>
         <div className="flex flex-col text-sm tracking-tight md:text-base">
-          <h2 className="font-bold ">{property.name}</h2>
+          <h2 className="font-bold">{property.name}</h2>
           {property.originalNightlyPrice !== null && (
             <p className="text-xs md:text-base">
               Airbnb price: {formatCurrency(property.originalNightlyPrice)}
@@ -87,7 +93,7 @@ function BiddingInfoCard({ property, price }: { property: Property, price: numbe
         </p>
       </div>
       <div className="flex flex-col gap-y-2 text-xs font-semibold md:text-base">
-        <div className="mt-8 flex flex-row justify-between ">
+        <div className="mt-8 flex flex-row justify-between">
           <p>
             Offer Price: ${price} &times; {getNumNights(date.from, date.to)}{" "}
             nights
@@ -134,8 +140,9 @@ function BiddingStep2({
     onSuccess: async () => {
       addPropertyIdBids(property.id);
       setStep(2);
-      const traveler = session?.user;
+
       await slackMutation.mutateAsync({
+        isProductionOnly: true,
         message: `Tramona: A traveler submitted an offer of $${price}/night on ${property.name} from ${formatDateRange(date.from, date.to)}.`,
       });
       // if (traveler?.phoneNumber) {
@@ -194,11 +201,11 @@ function BiddingStep2({
   }, [payments]);
 
   return (
-    <div className="flex flex-col items-center justify-center space-y-5 text-sm md:space-y-1 md:text-xl ">
+    <div className="flex flex-col items-center justify-center space-y-5 text-sm md:space-y-1 md:text-xl">
       <h1 className="text-lg font-semibold tracking-tight md:text-3xl">
         Step 2 of 2: Confirm Payment{" "}
       </h1>
-      <BiddingInfoCard property={property} price={price}/>
+      <BiddingInfoCard property={property} price={price} />
       <div className="mt-4 w-[300px] md:w-[500px]">
         {payments && payments.cards.data.length > 0 ? (
           <div className="space-y-5">

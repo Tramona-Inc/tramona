@@ -9,7 +9,6 @@ import {
   groups,
   requestInsertSchema,
   requestSelectSchema,
-  requestUpdatedInfo,
   requests,
   users,
   offers,
@@ -22,7 +21,6 @@ import {
   sendWhatsApp,
   getPropertiesForRequest,
   createLatLngGISPoint,
-  sendScheduledText,
 } from "@/server/server-utils";
 import { sendSlackMessage } from "@/server/slack";
 import { isIncoming } from "@/utils/formatters";
@@ -47,17 +45,7 @@ import { waitUntil } from "@vercel/functions";
 import { scrapeAirbnbPrice } from "@/server/scrapePrice";
 import { HOST_MARKUP, TRAVELER__MARKUP } from "@/utils/constants";
 import { differenceInDays } from "date-fns";
-import { addMinutes } from "date-fns";
 import { breakdownPayment } from "@/utils/payment-utils/paymentBreakdown";
-
-const updateRequestInputSchema = z.object({
-  requestId: z.number(),
-  updatedRequestInfo: z.object({
-    preferences: z.string().optional(),
-    updatedPriceNightlyUSD: z.number().optional(),
-    propertyLinks: z.array(z.string().url()).optional(),
-  }),
-});
 
 export const requestsRouter = createTRPCRouter({
   getMyRequests: protectedProcedure.query(async ({ ctx }) => {
@@ -289,97 +277,6 @@ export const requestsRouter = createTRPCRouter({
       await ctx.db.delete(requests).where(eq(requests.id, input.id));
     }),
 
-  update: protectedProcedure
-    .input(updateRequestInputSchema)
-    .mutation(async ({ ctx, input }) => {
-      const { requestId, updatedRequestInfo } = input;
-
-      // serialize propertyLinks to a JSON string
-      const serializedpropertyLinks = JSON.stringify(
-        updatedRequestInfo.propertyLinks,
-      );
-
-      const infoToUpdate = {
-        ...updatedRequestInfo,
-        propertyLinks: serializedpropertyLinks, // use the serialized string for DB storage
-      };
-
-      const existingUpdatedInfo =
-        await ctx.db.query.requestUpdatedInfo.findFirst({
-          where: eq(requestUpdatedInfo.requestId, requestId),
-        });
-
-      if (existingUpdatedInfo) {
-        await ctx.db
-          .update(requestUpdatedInfo)
-          .set(infoToUpdate)
-          .where(eq(requestUpdatedInfo.id, existingUpdatedInfo.id));
-      } else {
-        await ctx.db.insert(requestUpdatedInfo).values({
-          requestId,
-          ...infoToUpdate,
-        });
-      }
-    }),
-  checkRequestUpdate: protectedProcedure
-    .input(
-      z.object({
-        requestId: z.number(),
-      }),
-    )
-    .query(async ({ ctx, input }) => {
-      const { requestId } = input;
-      const existingUpdate = await ctx.db.query.requestUpdatedInfo.findFirst({
-        where: eq(requestUpdatedInfo.requestId, requestId),
-      });
-
-      if (existingUpdate) {
-        return { alreadyUpdated: true };
-      } else {
-        return { alreadyUpdated: false };
-      }
-    }),
-
-  // todo - change this when updaterequestinfo is not one to one anymore
-  getUpdatedRequestInfo: protectedProcedure
-    .input(
-      z.object({
-        requestId: z.number(),
-      }),
-    )
-    .query(async ({ ctx, input }) => {
-      const { requestId } = input;
-      const updateInfo = await ctx.db.query.requestUpdatedInfo.findFirst({
-        where: eq(requestUpdatedInfo.requestId, requestId),
-      });
-
-      if (!updateInfo) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: `No updated info found for request with ID ${requestId}`,
-        });
-      }
-
-      let deserializedPropertyLinks: any[] = [];
-      if (updateInfo.propertyLinks !== null) {
-        try {
-          deserializedPropertyLinks = JSON.parse(
-            updateInfo.propertyLinks,
-          ) as any[];
-        } catch (e) {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to parse propertyLinks",
-          });
-        }
-      }
-
-      return {
-        ...updateInfo,
-        propertyLinks: deserializedPropertyLinks,
-      };
-    }),
-
   rejectRequest: protectedProcedure
     .input(z.object({ requestId: z.number() }))
     .mutation(async ({ ctx, input }) => {
@@ -555,10 +452,12 @@ export async function handleRequestSubmission(
               numNights,
             });
 
-            const brokeDownPayment = breakdownPayment({
+            const brokeDownPayment = await breakdownPayment({
               numOfNights: numNights,
               travelerOfferedPriceBeforeFees: travelerOfferedPriceBeforeFees,
               isScrapedPropery: false,
+              lat: propertyDetails.latLngPoint.y,
+              lng: propertyDetails.latLngPoint.x,
             });
 
             const tripCheckout = await tx

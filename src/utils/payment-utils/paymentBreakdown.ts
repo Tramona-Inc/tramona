@@ -2,14 +2,17 @@ import { TAX_PERCENTAGE } from "../constants";
 import { SUPERHOG_FEE } from "@/utils/constants";
 import { getNumNights } from "../utils";
 import { TripCheckout } from "../../server/db/schema/tables/payments";
+import { getTax } from "@/utils/payment-utils/calculateTax";
 
-export function breakdownPayment({
+export async function breakdownPayment({
   checkIn,
   checkOut,
   numOfNights,
   travelerOfferedPriceBeforeFees,
   isScrapedPropery,
   originalPrice,
+  lat,
+  lng,
 }: {
   checkIn?: Date; // Make checkIn and checkOut optional
   checkOut?: Date;
@@ -17,6 +20,8 @@ export function breakdownPayment({
   travelerOfferedPriceBeforeFees: number;
   isScrapedPropery: boolean;
   originalPrice?: number | null;
+  lat?: number;
+  lng?: number;
 }) {
   // Calculate numOfNights if checkIn and checkOut are provided
   if (checkIn && checkOut) {
@@ -27,6 +32,18 @@ export function breakdownPayment({
   if (numOfNights === undefined) {
     throw new Error("Either checkIn/checkOut or numOfNights must be provided.");
   }
+
+  //calculate tax
+
+  const calculatedTax =
+    lat && lng
+      ? await getTax({
+          lat,
+          lng,
+        })
+      : TAX_PERCENTAGE;
+
+  console.log(calculatedTax);
 
   // ---- if scrape property different structure(excludes superhog and taxes)
   let totalTripAmount;
@@ -47,7 +64,7 @@ export function breakdownPayment({
     // --------- OUR PROPERTY ------------
     superhogFee = numOfNights * SUPERHOG_FEE * 100;
     taxesPaid = Math.round(
-      (travelerOfferedPriceBeforeFees + superhogFee) * TAX_PERCENTAGE,
+      (travelerOfferedPriceBeforeFees + superhogFee) * calculatedTax,
     );
 
     stripeTransactionFee = Math.ceil(
@@ -73,7 +90,7 @@ export function breakdownPayment({
     totalTripAmount,
     paymentIntentId: "",
     taxesPaid,
-    taxPercentage: isScrapedPropery ? 0 : TAX_PERCENTAGE,
+    taxPercentage: isScrapedPropery ? 0 : calculatedTax,
     superhogFee,
     stripeTransactionFee,
     checkoutSessionId: "",

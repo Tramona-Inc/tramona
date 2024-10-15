@@ -1,6 +1,7 @@
 import {
   index,
   integer,
+  pgEnum,
   pgTable,
   primaryKey,
   serial,
@@ -8,6 +9,9 @@ import {
   timestamp,
 } from "drizzle-orm/pg-core";
 import { users } from "./users";
+
+export const COHOST_ROLES = ["strict", "medium", "loose"] as const;
+export const coHostRoleEnum = pgEnum("coHostRole", COHOST_ROLES);
 
 export const hostTeams = pgTable(
   "host_teams",
@@ -34,6 +38,7 @@ export const hostTeamMembers = pgTable(
     userId: text("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
+    permission: coHostRoleEnum("permission").default("strict"),
   },
   (vt) => ({
     compoundKey: primaryKey({ columns: [vt.hostTeamId, vt.userId] }),
@@ -43,14 +48,15 @@ export const hostTeamMembers = pgTable(
 export const hostTeamInvites = pgTable(
   "host_team_invites",
   {
+    id: text("id").notNull().primaryKey(),
     hostTeamId: integer("host_team_id")
       .notNull()
       .references(() => hostTeams.id, { onDelete: "cascade" }),
     inviteeEmail: text("invitee_email").notNull(),
     expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    lastSentAt: timestamp("last_sent_at", { withTimezone: true }).notNull(),
   },
   (t) => ({
-    compoundKey: primaryKey({ columns: [t.hostTeamId, t.inviteeEmail] }),
     hostTeamidIdx: index().on(t.hostTeamId),
   }),
 );

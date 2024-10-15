@@ -1,5 +1,4 @@
-import { type User, type Request } from "@/server/db/schema";
-import { capitalize } from "./utils";
+import { type User } from "@/server/db/schema";
 
 /**
  * The difference from utils.ts is that these functions are specific

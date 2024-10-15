@@ -17,12 +17,13 @@ import { type SeparatedData } from "@/server/server-utils";
 import { separateByPriceRestriction, plural } from "@/utils/utils";
 import { useRouter } from "next/router";
 import { HostRequestsPageData } from "@/server/api/routers/propertiesRouter";
-import { useToast } from "@/components/ui/use-toast";
 
 export default function HostRequestsLayout({
   children,
 }: React.PropsWithChildren) {
-  const [separatedData, setSeparatedData] = useState<SeparatedData | null>(null);
+  const [separatedData, setSeparatedData] = useState<SeparatedData | null>(
+    null,
+  );
   const [selectedOption, setSelectedOption] = useState<
     "normal" | "outsidePriceRestriction"
   >("normal");
@@ -30,18 +31,15 @@ export default function HostRequestsLayout({
   const [isDataLoading, setIsDataLoading] = useState(true); // New state to track data loading
   const router = useRouter();
 
-  const { toast } = useToast();
-
-  const { data: fetchedProperties, isLoading } = api.properties.getHostPropertiesWithRequests.useQuery(
-    undefined,
-    {
+  const { data: fetchedProperties, isLoading } =
+    api.properties.getHostPropertiesWithRequests.useQuery(undefined, {
       onSuccess: (fetchedProperties) => {
-        const separatedProperties = separateByPriceRestriction(fetchedProperties);
+        const separatedProperties =
+          separateByPriceRestriction(fetchedProperties);
         setSeparatedData(separatedProperties);
         setIsDataLoading(false); // Set loading state to false when data is fetched
       },
-    }
-  );
+    });
 
   useEffect(() => {
     if (isLoading) {

@@ -7,7 +7,6 @@ import {
   roleRestrictedProcedure,
 } from "@/server/api/trpc";
 import {
-  Property,
   groupMembers,
   offerSelectSchema,
   offerUpdateSchema,
@@ -16,7 +15,7 @@ import {
   referralCodes,
   requestSelectSchema,
   tripCheckouts,
-  trips,
+  trips
 } from "@/server/db/schema";
 import { getCity, getCoordinates } from "@/server/google-maps";
 import { sendText, sendWhatsApp } from "@/server/server-utils";
@@ -36,16 +35,13 @@ import {
 import { z } from "zod";
 import { requests } from "../../db/schema/tables/requests";
 import { db } from "@/server/db";
-import NewOfferReceivedEmail from "packages/transactional/emails/NewOfferReceivedEmail";
 import {
-  directSiteScrapers,
-  scrapeDirectListings,
+  scrapeDirectListings
 } from "@/server/direct-sites-scraping";
 import { createNormalDistributionDates } from "@/server/server-utils";
 import { scrapeAirbnbPrice } from "@/server/scrapePrice";
 import { TRPCClientError } from "@trpc/client";
 import { breakdownPayment } from "@/utils/payment-utils/paymentBreakdown";
-import { type Review } from "../../db/schema/tables/reviews";
 
 export const offersRouter = createTRPCRouter({
   accept: protectedProcedure
@@ -455,6 +451,8 @@ export const offersRouter = createTRPCRouter({
           imageUrls: true,
           originalListingId: true,
           maxNumGuests: true,
+          address: true,
+          latLngPoint: true,
         },
       });
       console.log(curProperty);
@@ -493,12 +491,14 @@ export const offersRouter = createTRPCRouter({
         // ------- Create trips checkout first ----
 
         // function to help break down the price of the offer
-        const brokeDownPayment = breakdownPayment({
+        const brokeDownPayment = await breakdownPayment({
           checkIn: requestDetails.checkIn,
           checkOut: requestDetails.checkOut,
           travelerOfferedPriceBeforeFees: input.travelerOfferedPriceBeforeFees,
           isScrapedPropery: false,
           originalPrice: datePriceFromAirbnb,
+          lat: curProperty!.latLngPoint.y,
+          lng: curProperty!.latLngPoint.x,
         });
         const tripCheckout = await db
           .insert(tripCheckouts)
@@ -524,8 +524,6 @@ export const offersRouter = createTRPCRouter({
           datePriceFromAirbnb: datePriceFromAirbnb,
           tripCheckoutId: tripCheckout.id,
         });
-
-        //find the property
 
         const request = await db.query.requests.findFirst({
           where: eq(requests.id, input.requestId),
@@ -562,17 +560,17 @@ export const offersRouter = createTRPCRouter({
         //sending emails to everyone in the groug
         //get everymember in the group
 
-        const allGroupMembers = await db.query.groupMembers.findMany({
-          where: eq(groupMembers.groupId, requestDetails.madeByGroupId),
-          columns: { userId: true },
-          with: {
-            user: {
-              columns: { email: true, firstName: true, name: true },
-            },
-          },
-        });
+        // const allGroupMembers = await db.query.groupMembers.findMany({
+        //   where: eq(groupMembers.groupId, requestDetails.madeByGroupId),
+        //   columns: { userId: true },
+        //   with: {
+        //     user: {
+        //       columns: { email: true, firstName: true, name: true },
+        //     },
+        //   },
+        // });
 
-        for (const member of allGroupMembers) {
+        // for (const member of allGroupMembers) {
           // await sendEmail({
           //   to: member.user.email,
           //   subject: "New offer received",
@@ -594,13 +592,15 @@ export const offersRouter = createTRPCRouter({
           //     offerLink: `${env.NEXTAUTH_URL}/requests/${input.requestId}`,
           //   }),
           // });
-        }
+        // }
       } else {
-        const brokeDownPayment = breakdownPayment({
+        const brokeDownPayment = await breakdownPayment({
           checkIn: input.checkIn,
           checkOut: input.checkOut,
           travelerOfferedPriceBeforeFees: input.travelerOfferedPriceBeforeFees,
           isScrapedPropery: false,
+          lat: curProperty!.latLngPoint.y,
+          lng: curProperty!.latLngPoint.x,
         });
 
         const tripCheckout = await db
@@ -756,9 +756,10 @@ export const offersRouter = createTRPCRouter({
         const fmtdDateRange = formatDateRange(offer.checkIn, offer.checkOut);
         const url = `${env.NEXTAUTH_URL}/requests`;
 
-        const location = await getCoordinates(property.address).then((res) =>
-          res.location ? getCity(res.location) : "[Unknown location]",
-        );
+        // const location = await getCoordinates(property.address).then(
+        //   async (res) =>
+        //     res.location ? await getCity(res.location) : "[Unknown location]",
+        // );
 
         if (member.phoneNumber) {
           if (member.isWhatsApp) {
@@ -783,7 +784,7 @@ export const offersRouter = createTRPCRouter({
           } else {
             void sendText({
               to: member.phoneNumber,
-              content: `Tramona: Hello, your ${property.name} in ${location} offer from ${fmtdDateRange} has expired. ${memberHasOtherOffers ? `Please tap below view your other offers: ${url}` : ""}`,
+              content: `Tramona: Hello, your ${property.name} in ${request?.location} offer from ${fmtdDateRange} has expired. ${memberHasOtherOffers ? `Please tap below view your other offers: ${url}` : ""}`,
             });
           }
         }
@@ -848,7 +849,7 @@ export const offersRouter = createTRPCRouter({
           scrapeDirectListings({
             checkIn: dateRange.checkIn,
             checkOut: dateRange.checkOut,
-            location: "San Francisco", // TODO TEMP AAAAAAAAAAAAAAAAAAAAA YEAH 😃
+            location: "San Francisco", // TODO TEMP
             requestNightlyPrice: 100, // TODO TEMP
           }),
         ),

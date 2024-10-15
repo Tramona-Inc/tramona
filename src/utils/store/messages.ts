@@ -65,10 +65,9 @@ export const useMessage = create<MessageState>((set, get) => ({
             newMessage,
             ...updatedConversations[conversationId].messages,
           ],
-          page: updatedConversations[conversationId]?.page ?? 1,
-          hasMore: updatedConversations[conversationId]?.hasMore ?? false,
-          alreadyFetched:
-            updatedConversations[conversationId]?.alreadyFetched ?? true,
+          page: updatedConversations[conversationId].page,
+          hasMore: updatedConversations[conversationId].hasMore,
+          alreadyFetched: updatedConversations[conversationId].alreadyFetched,
         };
       }
 
@@ -100,13 +99,12 @@ export const useMessage = create<MessageState>((set, get) => ({
         // Add the new message to the existing conversation
         updatedConversations[conversationId] = {
           messages: [
-            ...(updatedConversations[conversationId]?.messages ?? []),
+            ...updatedConversations[conversationId].messages,
             ...moreMessages,
           ],
-          page: (updatedConversations[conversationId]?.page ?? 1) + 1,
+          page: updatedConversations[conversationId].page + 1,
           hasMore: moreMessages.length >= LIMIT_MESSAGE,
-          alreadyFetched:
-            updatedConversations[conversationId]?.alreadyFetched ?? true,
+          alreadyFetched: updatedConversations[conversationId].alreadyFetched,
         };
       } else {
         // If the conversation doesn't exist, create a new conversation with the new message
@@ -151,37 +149,35 @@ export const useMessage = create<MessageState>((set, get) => ({
         throw new Error(error.message);
       }
 
-      if (data) {
-        const chatMessages: ChatMessageType[] = data.map((message) => ({
-          id: message.id,
-          createdAt: message.created_at,
-          conversationId: message.conversation_id,
-          userId: message.user_id,
-          message: message.message,
-          read: message.read ?? false, // since fetched means it's read
-          isEdit: message.is_edit ?? false, // Provide a default value if needed
-          user: {
-            name: message.user?.name ?? "",
-            image: message.user?.image ?? "",
-            email: message.user?.email ?? "",
-          },
-        }));
+      const chatMessages = data.map((message) => ({
+        id: message.id,
+        createdAt: message.created_at,
+        conversationId: message.conversation_id,
+        userId: message.user_id,
+        message: message.message,
+        read: message.read ?? false, // since fetched means it's read
+        isEdit: message.is_edit ?? false, // Provide a default value if needed
+        user: {
+          name: message.user?.name ?? "",
+          image: message.user?.image ?? "",
+          email: message.user?.email ?? "",
+        },
+      }));
 
-        const hasMore = chatMessages.length >= LIMIT_MESSAGE;
+      const hasMore = chatMessages.length >= LIMIT_MESSAGE;
 
-        set((state) => ({
-          ...state,
-          conversations: {
-            ...state.conversations,
-            [conversationId]: {
-              messages: chatMessages,
-              page: 1,
-              hasMore,
-              alreadyFetched: true, // Set the flag to true after fetching
-            },
+      set((state) => ({
+        ...state,
+        conversations: {
+          ...state.conversations,
+          [conversationId]: {
+            messages: chatMessages,
+            page: 1,
+            hasMore,
+            alreadyFetched: true, // Set the flag to true after fetching
           },
-        }));
-      }
+        },
+      }));
     } catch (error) {
       errorToast();
     }
@@ -199,14 +195,12 @@ export const useMessage = create<MessageState>((set, get) => ({
       if (updatedConversations[conversationId]) {
         // Remove the message from the existing conversation
         updatedConversations[conversationId] = {
-          messages:
-            updatedConversations[conversationId]?.messages.filter(
-              (message) => message.id !== messageId,
-            ) ?? [],
-          page: updatedConversations[conversationId]?.page ?? 1, // Set a default value for page
-          hasMore: updatedConversations[conversationId]?.hasMore ?? false,
-          alreadyFetched:
-            updatedConversations[conversationId]?.alreadyFetched ?? true,
+          messages: updatedConversations[conversationId].messages.filter(
+            (message) => message.id !== messageId,
+          ),
+          page: updatedConversations[conversationId].page,
+          hasMore: updatedConversations[conversationId].hasMore,
+          alreadyFetched: updatedConversations[conversationId].alreadyFetched,
         };
       }
 
