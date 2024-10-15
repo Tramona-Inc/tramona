@@ -21,8 +21,6 @@ import { zodString } from "@/utils/zod-utils";
 export const REFERRAL_CODE_LENGTH = 7;
 export const ALL_ROLES = ["guest", "host", "admin"] as const;
 export const roleEnum = pgEnum("role", ALL_ROLES);
-export const COHOST_ROLES = ["strict", "medium", "loose"] as const;
-export const coHostRoleEnum = pgEnum("coHostRole", COHOST_ROLES);
 export const referralTierEnum = pgEnum("referral_tier", [
   "Partner",
   "Ambassador",
