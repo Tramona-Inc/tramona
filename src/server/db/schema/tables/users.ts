@@ -62,8 +62,6 @@ export const users = pgTable(
       length: REFERRAL_CODE_LENGTH,
     }),
     role: roleEnum("role").notNull().default("guest"),
-    coHostRole: coHostRoleEnum("coHostRole").default("strict"),
-    mainHostId: varchar("mainHostId"),
     referralTier: referralTierEnum("referral_tier")
       .notNull()
       .default("Partner"),
