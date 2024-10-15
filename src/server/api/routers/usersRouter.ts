@@ -364,7 +364,7 @@ export const usersRouter = createTRPCRouter({
         // attachment: string | null;
         listingAmenities: ListingAmenity[];
         // listingBedTypes: any[];
-        listingImages: any[];
+        listingImages: string[];
         // listingTags: any[];
         // listingUnits: any[];
         // propertyLicenseNumber: string | null;
@@ -429,7 +429,7 @@ export const usersRouter = createTRPCRouter({
         countBlockedUnits: number;
         countReservedUnits: string | null;
         desiredUnitsToSell: string | null;
-        reservations: any[];
+        // reservations: any[];
       }
 
       interface CalendarResponse {

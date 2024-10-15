@@ -51,7 +51,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { sql } from "drizzle-orm";
 
 export default function HostPropertiesDetails({
   property,

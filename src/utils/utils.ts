@@ -1,4 +1,4 @@
-import { Property, REFERRAL_CODE_LENGTH } from "@/server/db/schema";
+import { REFERRAL_CODE_LENGTH } from "@/server/db/schema";
 import { SeparatedData } from "@/server/server-utils";
 import { useWindowSize } from "@uidotdev/usehooks";
 import { clsx, type ClassValue } from "clsx";
@@ -576,70 +576,71 @@ export function scrollToTop() {
 export function separateByPriceRestriction(
   organizedData: HostRequestsPageData[],
 ): SeparatedData {
-  const normal: HostRequestsPageData[] = [];
-  const outsidePriceRestriction: HostRequestsPageData[] = [];
+  const processedData = organizedData.map((cityData) => {
+    const processedRequests = cityData.requests.map((requestData) => {
+      const nightlyPrice =
+        requestData.request.maxTotalPrice /
+        getNumNights(requestData.request.checkIn, requestData.request.checkOut);
 
-  organizedData.forEach((cityData) => {
-    const normalRequests: HostRequestsPageData["requests"] = [];
-    const outsideRequests: HostRequestsPageData["requests"] = [];
-
-    cityData.requests.forEach((requestData) => {
-      const normalProperties: Property[] = [];
-      const outsideProperties: Property[] = [];
-
-      requestData.properties.forEach((property) => {
-        const nightlyPrice =
-          requestData.request.maxTotalPrice /
-          getNumNights(
-            requestData.request.checkIn,
-            requestData.request.checkOut,
-          );
-        if (
+      const normalProperties = requestData.properties.filter((property) => {
+        if (property.city === "Seattle, WA, US") {
+          console.log(property.priceRestriction, nightlyPrice);
+        }
+        return (
           property.priceRestriction == null ||
           property.priceRestriction <= nightlyPrice
-        ) {
-          if (property.city === "Seattle, WA, US") {
-            console.log(property.priceRestriction, nightlyPrice);
-          }
-          normalProperties.push(property);
-        } else {
-          if (property.priceRestriction >= nightlyPrice * 1.15) {
-            outsideProperties.push(property);
-          }
-        }
+        );
       });
 
-      if (normalProperties.length > 0) {
-        normalRequests.push({
-          ...requestData,
-          properties: normalProperties,
-        });
-      }
+      const outsideProperties = requestData.properties.filter(
+        (property) =>
+          property.priceRestriction != null &&
+          property.priceRestriction >= nightlyPrice * 1.15,
+      );
 
-      if (outsideProperties.length > 0) {
-        outsideRequests.push({
-          ...requestData,
-          properties: outsideProperties,
-        });
-      }
+      return {
+        normal:
+          normalProperties.length > 0
+            ? { ...requestData, properties: normalProperties }
+            : null,
+        outside:
+          outsideProperties.length > 0
+            ? { ...requestData, properties: outsideProperties }
+            : null,
+      };
     });
 
-    if (normalRequests.length > 0) {
-      normal.push({
-        city: cityData.city,
-        requests: normalRequests,
-      });
-    }
+    const normalRequests = processedRequests
+      .map((req) => req.normal)
+      .filter(
+        (req): req is HostRequestsPageData["requests"][number] => req !== null,
+      );
+    const outsideRequests = processedRequests
+      .map((req) => req.outside)
+      .filter(
+        (req): req is HostRequestsPageData["requests"][number] => req !== null,
+      );
 
-    if (outsideRequests.length > 0) {
-      outsidePriceRestriction.push({
-        city: cityData.city,
-        requests: outsideRequests,
-      });
-    }
+    return {
+      normal:
+        normalRequests.length > 0
+          ? { city: cityData.city, requests: normalRequests }
+          : null,
+      outsidePriceRestriction:
+        outsideRequests.length > 0
+          ? { city: cityData.city, requests: outsideRequests }
+          : null,
+    };
   });
 
-  return { normal, outsidePriceRestriction };
+  return {
+    normal: processedData
+      .map((data) => data.normal) //
+      .filter(Boolean),
+    outsidePriceRestriction: processedData
+      .map((data) => data.outsidePriceRestriction) //
+      .filter(Boolean),
+  };
 }
 
 export function containsHTML(str: string) {

@@ -35,7 +35,7 @@ export default function VerifyEmail() {
     if (id && token) {
       verifyEmailToken({ id: id, token: token, date: date });
     }
-  }, [id, token]);
+  }, [date, id, token, verifyEmailToken]);
 
   return (
     <div className="flex h-screen-minus-header flex-col items-center justify-center">

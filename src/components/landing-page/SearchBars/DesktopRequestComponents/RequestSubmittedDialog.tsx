@@ -5,7 +5,7 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import { ArrowRightIcon, CircleCheckBig, Sparkles } from "lucide-react";
+import { ArrowRightIcon, CircleCheckBig } from "lucide-react";
 import Confetti from "react-confetti";
 import Link from "next/link";
 import { api } from "@/utils/api";

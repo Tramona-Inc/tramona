@@ -13,19 +13,19 @@ import { trips } from "./trips";
 import { users } from "./users";
 import { superhogRequests } from "./superhogRequests";
 
-const claimStatus = pgEnum("claim_status", [
+export const claimStatus = pgEnum("claim_status", [
   "Submitted",
   "Resolved",
   "In Review",
 ]);
 
-const resolutionResults = pgEnum("resolution_results", [
+export const resolutionResults = pgEnum("resolution_results", [
   "Approved",
   "Insufficient evidence",
   "Rejected",
 ]);
 
-const paymentSources = pgEnum("payment_sources", [
+export const paymentSources = pgEnum("payment_sources", [
   "Superhog",
   "Security Deposit",
   "Tramona",
@@ -49,7 +49,7 @@ export const claims = pgTable(
       .defaultNow(),
     inReviewAt: timestamp("in_review_at", { withTimezone: true }),
     resolvedAt: timestamp("resolved_at", { withTimezone: true }),
-    superhogRequestId: varchar("superhog_request_id").references(
+    superhogRequestId: integer("superhog_request_id").references(
       () => superhogRequests.id,
     ),
     reportedThroughSuperhogAt: timestamp("reported_through_superhog_at", {
@@ -123,7 +123,7 @@ export const claimPayments = pgTable(
       .notNull()
       .references(() => claimItems.id, { onDelete: "cascade" }),
     source: paymentSources("source").notNull(), // Enum: Superhog, Security Deposit
-    superhogRequestId: varchar("superhog_request_id").references(
+    superhogRequestId: integer("superhog_request_id").references(
       () => superhogRequests.id,
     ),
     amountPaid: integer("amount_paid").notNull(),

@@ -25,7 +25,7 @@ export default function Referral() {
         } else {
           void router.push("/");
         }
-      } catch (error: any) {
+      } catch (error) {
         toast({
           title: "Error",
           description: `An error occurred while redirecting to the home page`,

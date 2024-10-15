@@ -20,8 +20,7 @@ import { errorToast } from "@/utils/toasts";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   OTPInput,
-  REGEXP_ONLY_DIGITS,
-  REGEXP_ONLY_DIGITS_AND_CHARS,
+  REGEXP_ONLY_DIGITS
 } from "input-otp";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";

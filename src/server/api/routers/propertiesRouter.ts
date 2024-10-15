@@ -7,14 +7,13 @@ import {
 } from "@/server/api/trpc";
 import { db } from "@/server/db";
 import {
-  groups,
   hostProfiles,
   propertyInsertSchema,
   propertySelectSchema,
   propertyUpdateSchema,
   type Request,
   type User,
-  users,
+  users
 } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { addDays } from "date-fns";

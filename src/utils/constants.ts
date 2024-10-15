@@ -226,3 +226,21 @@ export const travelersFaqData = [
     ],
   },
 ];
+
+export const whyListAccordionItems = [
+  {
+    question: "Does Tramona help with Taxes?",
+    answer:
+      "Yes, Tramona handles all the same taxes other sites like Airbnb and VRBO do.",
+  },
+  {
+    question: "How and when do I get paid?",
+    answer:
+      "Tramona collets the full amount from the traveler at the time of the booking, and pays the host 24 hours after check in. All payment are securely handled via Stripe.",
+  },
+  {
+    question: "How much protection does Tramona offer?",
+    answer:
+      "Tramona offers $50,000 of protection per booking. You also have the opportunity to add a security deposit.",
+  },
+];

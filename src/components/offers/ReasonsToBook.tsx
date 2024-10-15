@@ -4,7 +4,6 @@ import {
   LockKeyholeIcon,
   type LucideIcon,
 } from "lucide-react";
-import { ReactSVGElement } from "react";
 
 export default function ReasonsToBook() {
   return (

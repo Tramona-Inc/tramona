@@ -113,11 +113,6 @@ export default function MessagesSidebar({
     (state) => state.setConversationList,
   );
 
-  const addMessageToConversation = useMessage(
-    (state) => state.addMessageToConversation,
-  );
-  const { fetchInitialMessages } = useMessage();
-
   useEffect(() => {
     // Check if data has been fetched and hasn't been processed yet
     if (fetchedConversations) {

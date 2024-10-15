@@ -48,7 +48,7 @@ export default function CreateRequestForm({
 }) {
   const createFillerRequest = api.feed.createFillerRequest.useMutation();
   const updateFillerRequest = api.feed.updateFillerRequest.useMutation();
-  const { data: locationAndPrices, refetch: refetchLocationAndPrice } =
+  const { refetch: refetchLocationAndPrice } =
     api.feed.getLocationAndPrice.useQuery(
       { atLeastNumOfEntries: 30 },
       { enabled: false },
