@@ -1,6 +1,6 @@
 import { env } from "@/env";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
-import { trips, tripDamages, users } from "@/server/db/schema";
+import { trips, claimItems, users } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import Stripe from "stripe";
@@ -875,7 +875,7 @@ export const stripeRouter = createTRPCRouter({
         if (paymentIntent.status === "succeeded") {
           // we need to insert it into the database
           //creates the damage record as well
-          await ctx.db.insert(tripDamages).values({
+          await ctx.db.insert(claimItems).values({
             tripId: input.tripId,
             amount: input.amount,
             description: input.description,

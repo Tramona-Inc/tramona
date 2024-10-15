@@ -242,8 +242,8 @@ export const tripsRouter = createTRPCRouter({
       ),
     });
   }),
-  getAllTripDamages: roleRestrictedProcedure(["admin"]).query(async () => {
-    const allTrips = await db.query.tripDamages.findMany({});
+  getAllclaimItems: roleRestrictedProcedure(["admin"]).query(async () => {
+    const allTrips = await db.query.claimItems.findMany({});
     return allTrips.length > 0 ? allTrips : [];
   }),
 

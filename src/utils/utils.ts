@@ -17,6 +17,8 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import duration from "dayjs/plugin/duration";
 import { HostRequestsPageData } from "@/server/api/routers/propertiesRouter";
 import * as cheerio from "cheerio";
+import { useSession } from "next-auth/react";
+import { api } from "./api";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -32,6 +34,10 @@ export function generateReferralCode() {
   }
 
   return randomString;
+}
+
+export function generatePhoneNumberOTP() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
 export async function sleep(ms: number) {
@@ -762,6 +768,18 @@ export function logAndFilterSettledResults<T>(
       return r.status === "fulfilled";
     })
     .map((r) => r.value);
+}
+
+export function useUpdateUser() {
+  const { mutateAsync: updateProfile } = api.users.updateProfile.useMutation();
+  const { update } = useSession();
+
+  return {
+    updateUser: async (updates: Parameters<typeof updateProfile>[0]) => {
+      await updateProfile(updates);
+      await update();
+    },
+  };
 }
 
 export function removeTax(total: number, taxRate: number): number {

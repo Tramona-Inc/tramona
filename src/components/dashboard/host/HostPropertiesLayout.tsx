@@ -6,7 +6,7 @@ import {
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Pencil, PlusIcon } from "lucide-react";
+import { Pencil, PlusIcon, SettingsIcon } from "lucide-react";
 import HostProperties from "./HostProperties";
 import Link from "next/link";
 import {
@@ -99,8 +99,8 @@ export default function HostPropertiesLayout({
 
   return (
     <div className="flex">
-      <div className="sticky top-20 h-screen-minus-header-n-footer w-full overflow-auto border-r px-4 py-8 xl:w-96">
-        <ScrollArea>
+      <div className="sticky top-20 flex h-screen-minus-header-n-footer w-full flex-col overflow-auto border-r px-4 py-8 xl:w-96">
+        <ScrollArea className="flex h-full flex-col">
           <h1 className="text-3xl font-bold">Properties</h1>
           {/* <p className="text-muted-foreground">24% currently vacant</p> */}
           <div className="my-4">
@@ -154,10 +154,19 @@ export default function HostPropertiesLayout({
             </AccordionItem>
           </Accordion>
         </ScrollArea>
+        <Link
+          href="/host/properties/security-deposit-settings"
+          className="mt-auto w-full items-center"
+        >
+          <Button className="flex w-full" variant="ghost">
+            {" "}
+            <SettingsIcon /> Security Deposit Settings
+          </Button>
+        </Link>
       </div>
       <div className="hidden flex-1 xl:block">
         {children ? (
-          <div className="mx-auto my-8 min-h-screen-minus-header-n-footer max-w-4xl rounded-2xl border">
+          <div className="mx-auto my-8 min-h-screen-minus-header-n-footer max-w-6xl rounded-2xl border">
             <div className="grid grid-cols-1">{children}</div>
           </div>
         ) : (

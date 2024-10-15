@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { api } from "@/utils/api";
+import { useUpdateUser } from "@/utils/utils";
 import { zodString } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSession } from "next-auth/react";
@@ -39,20 +40,17 @@ export default function FirstAndLastName() {
   const { refetch: refetchVerifications } =
     api.users.getMyVerifications.useQuery(undefined, { enabled: false });
 
-  const { mutateAsync: updateProfile } = api.users.updateProfile.useMutation({
-    onSuccess: () => {
-      void refetchVerifications();
-      void router.push("/auth/onboarding-3");
-    },
-  });
+  const { updateUser } = useUpdateUser();
 
   async function onSubmit({ firstName, lastName }: FormValues) {
     if (session?.user.id && firstName && lastName) {
-      await updateProfile({
-        id: session.user.id,
+      await updateUser({
         firstName: firstName.replace(/[^a-zA-Z\s]/g, ""),
         lastName: lastName.replace(/[^a-zA-Z\s]/g, ""),
         onboardingStep: 3,
+      }).then(() => {
+        void refetchVerifications();
+        void router.push("/auth/onboarding-3");
       });
     }
   }

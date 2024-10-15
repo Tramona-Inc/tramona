@@ -17,9 +17,9 @@ function HostReportOverview() {
           Need to report damages to your property, an issue with a traveler, or{" "}
           request a security deposit charge? File a report to start the process.
         </div>
-        <Button variant="secondary">
-          <Link href="/host/report">Report here</Link>
-        </Button>
+        <Link href="/host/report">
+          <Button variant="secondary">Report here</Button>
+        </Link>
       </CardContent>
     </Card>
   );

@@ -206,13 +206,12 @@ export default function HostSecurityDepositSettings() {
       <h1 className="mb-6 text-3xl font-bold">
         Host Dashboard: Security Deposit Settings
       </h1>
-      <Tabs defaultValue="settings" className="space-y-4">
+      <Tabs defaultValue="claims" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="settings">Settings</TabsTrigger>
-          <TabsTrigger value="history">History</TabsTrigger>
-          <TabsTrigger value="management">Management</TabsTrigger>
           <TabsTrigger value="claims">Claims</TabsTrigger>
+          <TabsTrigger value="management">Management</TabsTrigger>
           <TabsTrigger value="claim-status">Claim Status</TabsTrigger>
+          <TabsTrigger value="history">History</TabsTrigger>
         </TabsList>
         <TabsContent value="settings">
           <div className="grid gap-6 md:grid-cols-2">

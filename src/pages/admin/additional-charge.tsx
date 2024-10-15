@@ -1,6 +1,6 @@
 import CreateAdditionalChargeForm from "@/components/admin/additional-charge/CreateAdditionalChargeForm";
 import AllPreviousTrips from "@/components/admin/additional-charge/AllPreviousTrips";
-import AllTripDamages from "@/components/admin/additional-charge/AllTripDamages";
+import AllclaimItems from "@/components/admin/additional-charge/AllclaimItems";
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 export default function Page() {
   return (
@@ -13,7 +13,7 @@ export default function Page() {
           </h1>
         </div>
         <CreateAdditionalChargeForm />
-        <AllTripDamages />
+        <AllclaimItems />
         <AllPreviousTrips />
       </div>
     </DashboardLayout>
