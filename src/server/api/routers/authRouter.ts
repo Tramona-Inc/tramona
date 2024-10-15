@@ -158,7 +158,7 @@ export const authRouter = createTRPCRouter({
       }
       waitUntil(handlePendingInviteMessages(input.email));
 
-      waitUntil(sendVerificationEmail(user));
+      await sendVerificationEmail(user);
 
       return {
         status: "success",
@@ -195,24 +195,19 @@ export const authRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      // check if user already exists
       const existedGuestTempUser = await ctx.db.query.users.findFirst({
         where: eq(users.sessionToken, input.sessionToken),
       });
       if (existedGuestTempUser) {
         return;
       }
-      // insert user to db
-      const user = await ctx.db
-        .insert(users)
-        .values({
-          id: crypto.randomUUID(),
-          email: input.email,
-          isBurner: input.isBurner,
-          sessionToken: input.sessionToken,
-        })
-        .returning()
-        .then((res) => res[0] ?? null);
+
+      await ctx.db.insert(users).values({
+        id: crypto.randomUUID(),
+        email: input.email,
+        isBurner: input.isBurner,
+        sessionToken: input.sessionToken,
+      });
     }),
 
   verifyEmailToken: publicProcedure

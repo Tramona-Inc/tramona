@@ -27,7 +27,6 @@ import {
   getNumNights,
   plural,
 } from "@/utils/utils";
-import RequestWaitlistDialog from "./DesktopRequestComponents/RequestWaitlistDialog";
 import { useRouter } from "next/router";
 import { toast } from "@/components/ui/use-toast";
 import { useSession } from "next-auth/react";

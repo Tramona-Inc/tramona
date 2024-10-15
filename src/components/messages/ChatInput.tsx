@@ -14,6 +14,7 @@ import { api } from "@/utils/api";
 import { sub } from "date-fns";
 import { ArrowUp } from "lucide-react";
 import { Button } from "../ui/button";
+import { useUpdateUser } from "@/utils/utils";
 
 const formSchema = z.object({
   message: z.string().refine((data) => data.trim() !== ""),
@@ -47,7 +48,7 @@ export default function ChatInput({
     (state) => state.removeMessageFromConversation,
   );
 
-  const { mutateAsync: updateProfile } = api.users.updateProfile.useMutation();
+  const { updateUser } = useUpdateUser();
   const { mutateAsync: sendSMS } = api.twilio.sendSMS.useMutation();
   const { mutateAsync: sendSlackToAdmin } =
     api.messages.sendAdminSlackMessage.useMutation();
@@ -106,7 +107,7 @@ export default function ChatInput({
       if (participantPhoneNumbers) {
         void Promise.all(
           participantPhoneNumbers.map(
-            async ({ id, lastTextAt, phoneNumber, isWhatsApp }) => {
+            async ({ lastTextAt, phoneNumber, isWhatsApp }) => {
               if (lastTextAt && lastTextAt <= sub(new Date(), { hours: 1 })) {
                 if (phoneNumber) {
                   if (isWhatsApp) {
@@ -120,10 +121,7 @@ export default function ChatInput({
                       msg: "You have a new unread message in Tramona, visit Tramona.com to view",
                     });
                   }
-                  await updateProfile({
-                    id: id,
-                    lastTextAt: new Date(),
-                  });
+                  await updateUser({ lastTextAt: new Date() });
                 }
               }
             },

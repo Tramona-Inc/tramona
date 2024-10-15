@@ -2,7 +2,7 @@ import { useSession } from "next-auth/react";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useState } from "react";
+import React from "react";
 
 import CopyToClipboardBtn from "@/components/_utils/CopyToClipboardBtn";
 import {
@@ -16,7 +16,6 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import * as SliderPrimitive from "@radix-ui/react-slider";
 
 import MainLayout from "@/components/_common/Layout/MainLayout";
-import Spinner from "@/components/_common/Spinner";
 import { api } from "@/utils/api";
 import { cn } from "@/utils/utils";
 import HowItWorks from "@/components/_common/HowItWorks";
@@ -40,96 +39,6 @@ const Slider = React.forwardRef<
   </SliderPrimitive.Root>
 ));
 Slider.displayName = SliderPrimitive.Root.displayName;
-
-function ExploreEarningsCard() {
-  const avgAnnualTravelSpendings = 169.2;
-
-  const tiers = [
-    {
-      name: "Partner",
-      percent: 30,
-      orMore: false,
-    },
-    {
-      name: "Ambassador",
-      percent: 50,
-      orMore: false,
-    },
-  ] as const;
-
-  const [tab, setTab] = useState(0);
-  const [referrals, setReferrals] = useState(200);
-
-  const currentTier = tiers[tab];
-  if (!currentTier) return <Spinner />;
-
-  const earnings = Math.floor(
-    referrals * avgAnnualTravelSpendings * (currentTier.percent / 100),
-  );
-
-  const fmtdEarnings = `$${earnings.toLocaleString()}${
-    currentTier.orMore ? "+" : ""
-  }`;
-
-  return (
-    <div className="min-w-max space-y-6 rounded-3xl border-2 border-slate-700 bg-slate-800 p-6 text-slate-50">
-      <div className="flex">
-        {tiers.map((tier, i) => (
-          <button
-            key={i}
-            onClick={() => setTab(i)}
-            className={`border-b-4 px-2 py-3 text-xs font-semibold sm:px-4 sm:text-base ${
-              i === tab
-                ? "border-pink-500 text-slate-50"
-                : "border-transparent text-slate-400 hover:border-pink-500/20"
-            }`}
-          >
-            {tier.name}{" "}
-            <span className="hidden rounded-full bg-slate-700 px-2 py-1 text-xs sm:inline">
-              {tier.percent}%{tier.orMore}
-            </span>
-          </button>
-        ))}
-      </div>
-      <div className="space-y-1">
-        <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
-          With
-        </p>
-        <div>
-          <div className="rounded-t-lg bg-zinc-900 p-4 pb-2">
-            <span className="inline-block text-3xl font-extrabold text-slate-50">
-              {referrals}
-            </span>{" "}
-            <span className="text-sm font-semibold text-slate-400">
-              referrals
-            </span>
-          </div>
-          <Slider
-            defaultValue={[referrals]}
-            min={50}
-            max={1000}
-            step={10}
-            onValueChange={(value) => setReferrals(value[0]!)}
-          />
-        </div>
-      </div>
-      <div className="space-y-1">
-        <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
-          You could earn
-        </p>
-        <p className="text-5xl font-extrabold">
-          {fmtdEarnings}
-          <span className="pl-2 text-sm font-semibold text-slate-400">
-            /year
-          </span>
-        </p>
-      </div>
-      <p className="text-right text-sm text-slate-400/75">
-        *Based on average ARR of ${avgAnnualTravelSpendings.toFixed(2)}/user
-      </p>
-    </div>
-  );
-}
 
 function IntroSection() {
   return (
@@ -318,38 +227,6 @@ function ProgramTiers() {
 //     </div>
 //   );
 // }
-
-function ExploreEarnings() {
-  return (
-    <section className="bg-slate-900">
-      <div className="grid gap-6 md:gap-10 xl:grid-cols-2 xl:gap-16">
-        <div className="relative space-y-6 xl:max-w-2xl">
-          <h2 className="text-center text-4xl font-bold tracking-tight text-white sm:text-left sm:text-6xl">
-            Explore how much you could earn
-          </h2>
-          <p className="text-lg tracking-tight text-zinc-400 sm:text-2xl">
-            Earnings are <strong className="text-zinc-300">uncapped</strong>.
-            The more people you refer, the more you earn.
-          </p>
-        </div>
-
-        <div className="space-y-10">
-          <ExploreEarningsCard />
-          <Link
-            href="/profile"
-            className={buttonVariants({
-              variant: "default",
-              size: "lg",
-              className: "rounded-xl lg:px-10 lg:py-6 lg:text-xl",
-            })}
-          >
-            Start earning now
-          </Link>
-        </div>
-      </div>
-    </section>
-  );
-}
 
 function FAQ() {
   return (
