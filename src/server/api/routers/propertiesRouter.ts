@@ -13,7 +13,7 @@ import {
   propertyUpdateSchema,
   type Request,
   type User,
-  users
+  users,
 } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { addDays } from "date-fns";
@@ -290,11 +290,11 @@ export const propertiesRouter = createTRPCRouter({
               !northeastLng &&
               !southwestLat &&
               !southwestLng
-              ? sql`ST_DWithin(
-                  ${properties.latLngPoint}::geography,
-                  ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)::geography,
-                  ${radius * 1000}
-                )`
+              ? sql`6371 * ACOS(
+                SIN(${(lat * Math.PI) / 180}) * SIN(radians(ST_Y(${properties.latLngPoint}))) + 
+                COS(${(lat * Math.PI) / 180}) * COS(radians(ST_Y(${properties.latLngPoint}))) * 
+                COS(radians(ST_X(${properties.latLngPoint})) - ${(lng * Math.PI) / 180})
+              ) <= ${radius}`
               : sql`TRUE`,
             input.roomType
               ? eq(properties.roomType, input.roomType)
@@ -437,11 +437,11 @@ export const propertiesRouter = createTRPCRouter({
               `
               : sql`TRUE`,
             input.latLngPoint?.lat && input.latLngPoint.lng && !boundaries
-              ? sql`ST_DWithin(
-                  ${properties.latLngPoint}::geography,
-                  ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)::geography,
-                  ${radius * 1000}
-                )`
+              ? sql`6371 * ACOS(
+              SIN(${(lat * Math.PI) / 180}) * SIN(radians(ST_Y(${properties.latLngPoint}))) + 
+              COS(${(lat * Math.PI) / 180}) * COS(radians(ST_Y(${properties.latLngPoint}))) * 
+              COS(radians(ST_X(${properties.latLngPoint})) - ${(lng * Math.PI) / 180})
+            ) <= ${radius}`
               : sql`TRUE`,
             input.roomType
               ? eq(properties.roomType, input.roomType)
@@ -681,7 +681,7 @@ export const propertiesRouter = createTRPCRouter({
             id: z.number(),
             originalListingId: z.string(),
             originalListingPlatform: z.string(),
-            maxNumGuests: z.number()
+            maxNumGuests: z.number(),
           }),
         ),
         checkIn: z.date(),
@@ -691,7 +691,7 @@ export const propertiesRouter = createTRPCRouter({
     )
     .mutation(async ({ input }) => {
       const eligibleProperties = input.propertyData.filter(
-        (p) => input.numGuests <= p.maxNumGuests
+        (p) => input.numGuests <= p.maxNumGuests,
       );
 
       if (eligibleProperties.length === 0) {
