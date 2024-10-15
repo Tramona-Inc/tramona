@@ -72,7 +72,7 @@ function MessageDisplay() {
 }
 
 export default function MessagePage() {
-  const { data: session } = useSession({ required: true });
+  useSession({ required: true });
 
   const { data: totalUnreadMessages } =
     api.messages.getNumUnreadMessages.useQuery();

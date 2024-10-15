@@ -1,8 +1,7 @@
 import {
-  AnonymousAvatar,
   Avatar,
   AvatarFallback,
-  AvatarImage,
+  AvatarImage
 } from "@/components/ui/avatar";
 import Stars from "@/components/_common/Stars";
 import { ChevronRight } from "lucide-react";

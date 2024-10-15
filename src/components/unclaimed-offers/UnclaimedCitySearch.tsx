@@ -64,10 +64,10 @@ function UnclaimedCitySearch() {
         <FormField
           name="city"
           control={form.control}
-          render={({ field }) => {
+          render={() => {
             return (
               <FormItem>
-                <FormLabel className="text-black ">
+                <FormLabel className="text-black">
                   {" "}
                   Select available cities{" "}
                 </FormLabel>

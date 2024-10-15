@@ -10,8 +10,7 @@ import {
 import { getNumNights, getTravelerOfferedPrice } from "@/utils/utils";
 import {
   DIRECTLISTINGMARKUP,
-  HOST_MARKUP,
-  TRAVELER__MARKUP,
+  HOST_MARKUP
 } from "@/utils/constants";
 import { breakdownPayment } from "@/utils/payment-utils/paymentBreakdown";
 

@@ -2,7 +2,6 @@ import { type RouterOutputs } from "@/utils/api";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -15,8 +14,6 @@ import {
 } from "@/utils/utils";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import AvatarDropdown from "@/components/_common/Layout/header/AvatarDropdown";
-import RequestGroupAvatars from "@/components/requests/RequestGroupAvatars";
 // Define an enum for trip statuses
 enum TripStatus {
   Booked = "Booked",

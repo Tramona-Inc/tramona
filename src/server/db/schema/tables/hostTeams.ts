@@ -52,7 +52,6 @@ export const hostTeamInvites = pgTable(
     lastSentAt: timestamp("last_sent_at", { withTimezone: true }).notNull(),
   },
   (t) => ({
-    compoundKey: primaryKey({ columns: [t.hostTeamId, t.inviteeEmail] }),
     hostTeamidIdx: index().on(t.hostTeamId),
   }),
 );

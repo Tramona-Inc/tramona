@@ -140,7 +140,7 @@ function BiddingStep2({
     onSuccess: async () => {
       addPropertyIdBids(property.id);
       setStep(2);
-      const traveler = session?.user;
+
       await slackMutation.mutateAsync({
         isProductionOnly: true,
         message: `Tramona: A traveler submitted an offer of $${price}/night on ${property.name} from ${formatDateRange(date.from, date.to)}.`,

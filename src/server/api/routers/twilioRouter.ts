@@ -4,26 +4,19 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "@/server/api/trpc";
+import { db } from "@/server/db";
+import { phoneNumberOTPs } from "@/server/db/schema/tables/auth/phoneNumberOTPs";
+import { sendText } from "@/server/server-utils";
 import { sendSlackMessage } from "@/server/slack";
-import { zodString } from "@/utils/zod-utils";
-import { MailService } from "@sendgrid/mail";
+import { generatePhoneNumberOTP } from "@/utils/utils";
+import { TRPCError } from "@trpc/server";
+import { subMinutes } from "date-fns";
+import { eq } from "drizzle-orm";
 import { Twilio } from "twilio";
-import {
-  type ServiceInstance,
-  type ServiceListInstanceCreateOptions,
-} from "twilio/lib/rest/verify/v2/service";
+import { type ServiceInstance } from "twilio/lib/rest/verify/v2/service";
 import { z } from "zod";
 
 const twilio = new Twilio(env.TWILIO_ACCOUNT_SID, env.TWILIO_AUTH_TOKEN);
-
-const sgMail = new MailService();
-
-sgMail.setApiKey(env.SENDGRID_API_KEY);
-
-const verificationServiceConfig: ServiceListInstanceCreateOptions = {
-  friendlyName: "Tramona",
-  codeLength: 6,
-};
 
 let service: ServiceInstance; // singleton
 
@@ -31,7 +24,10 @@ const createService = async () => {
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (service !== undefined) return;
 
-  service = await twilio.verify.v2.services.create(verificationServiceConfig);
+  service = await twilio.verify.v2.services.create({
+    friendlyName: "Tramona",
+    codeLength: 6,
+  });
 };
 
 export const twilioRouter = createTRPCRouter({
@@ -176,46 +172,20 @@ export const twilioRouter = createTRPCRouter({
       return response;
     }),
 
-  sendEmail: protectedProcedure
-    .input(
-      z.object({
-        to: zodString().email(),
-        subject: z.string(),
-        text: z.string(),
-        html: z.string(),
-      }),
-    )
+  sendOTP: publicProcedure
+    .input(z.object({ phoneNumber: z.string() }))
     .mutation(async ({ input }) => {
-      const { to, subject, text, html } = input;
+      const code = generatePhoneNumberOTP();
 
-      const response = await sgMail.send({
-        to,
-        from: env.SENDGRID_FROM,
-        subject,
-        text,
-        html,
+      await db.insert(phoneNumberOTPs).values({
+        phoneNumber: input.phoneNumber,
+        code,
       });
 
-      return response;
-    }),
-
-  sendOTP: publicProcedure
-    .input(z.object({ to: z.string() }))
-    .mutation(async ({ input }) => {
-      await createService();
-
-      const { to } = input;
-
-      const { sid } = service;
-
-      const verification = await twilio.verify.v2
-        .services(sid)
-        .verifications.create({
-          to,
-          channel: "sms",
-        });
-
-      return verification;
+      await sendText({
+        to: input.phoneNumber,
+        content: `Tramona: Your verification code is ${code}`,
+      });
     }),
 
   sendSlack: protectedProcedure
@@ -231,12 +201,41 @@ export const twilioRouter = createTRPCRouter({
     }),
 
   verifyOTP: publicProcedure
-    .input(z.object({ to: z.string(), code: z.string() }))
+    .input(z.object({ phoneNumber: z.string(), code: z.string() }))
     .mutation(async ({ input }) => {
       await createService();
+      const { phoneNumber, code } = input;
 
-      return await twilio.verify.v2
-        .services(service.sid)
-        .verificationChecks.create(input);
+      const otps = await db.query.phoneNumberOTPs.findMany({
+        where: eq(phoneNumberOTPs.phoneNumber, phoneNumber),
+      });
+
+      if (otps.length === 0) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: `No OTPs found for phone number ${phoneNumber}`,
+        });
+      }
+
+      const otp = otps.find((otp) => otp.code === code);
+
+      if (!otp) {
+        return { status: "wrong code" } as const;
+      }
+
+      if (otp.usedAt) {
+        return { status: "already used" } as const;
+      }
+
+      if (otp.createdAt < subMinutes(new Date(), 5)) {
+        return { status: "code expired" } as const;
+      }
+
+      await db
+        .update(phoneNumberOTPs)
+        .set({ usedAt: new Date() })
+        .where(eq(phoneNumberOTPs.id, otp.id));
+
+      return { status: "approved" } as const;
     }),
 });

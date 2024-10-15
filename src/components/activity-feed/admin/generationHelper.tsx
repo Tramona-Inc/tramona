@@ -75,6 +75,7 @@ export function createCreationTime() {
     const [datePart, timePart] = datetime.split("T");
     // Split the time part into hours, minutes, and seconds
     if (!timePart) throw new Error("Invalid datetime string");
+    // eslint-disable-next-line prefer-const
     let [hours, minutes, seconds] = timePart.split(":");
     // Pad the hours if it's a single digit
     if (!hours) throw new Error("Invalid time string");

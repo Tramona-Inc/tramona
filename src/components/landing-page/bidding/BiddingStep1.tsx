@@ -17,7 +17,6 @@ import { AspectRatio } from "@radix-ui/react-aspect-ratio";
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 

@@ -123,13 +123,14 @@ export const usersRouter = createTRPCRouter({
     return referralCode;
   }),
 
+  /** only for use with updateUser -- use updateUser instead of this */
   updateProfile: protectedProcedure
-    .input(userUpdateSchema)
+    .input(userUpdateSchema.omit({ id: true }))
     .mutation(async ({ ctx, input }) => {
       const updatedUser = await ctx.db
         .update(users)
         .set(input)
-        .where(eq(users.id, input.id))
+        .where(eq(users.id, ctx.user.id))
         .returning();
 
       if (updatedUser[0] && updatedUser[0]?.onboardingStep === 3) {
@@ -171,34 +172,6 @@ export const usersRouter = createTRPCRouter({
           message: "Must be admin to create URL",
         });
       }
-    }),
-
-  insertPhoneWithEmail: publicProcedure
-    .input(
-      z.object({
-        email: z.string(),
-        phone: z.string(),
-      }),
-    )
-    .mutation(async ({ input }) => {
-      return await db
-        .update(users)
-        .set({ phoneNumber: input.phone })
-        .where(eq(users.email, input.email));
-    }),
-
-  insertPhoneWithUserId: publicProcedure
-    .input(
-      z.object({
-        userId: z.string(),
-        phone: z.string(),
-      }),
-    )
-    .mutation(async ({ input }) => {
-      return await db
-        .update(users)
-        .set({ phoneNumber: input.phone })
-        .where(eq(users.id, input.userId));
     }),
 
   isHost: optionallyAuthedProcedure.query(async ({ ctx }) => {
@@ -399,7 +372,7 @@ export const usersRouter = createTRPCRouter({
         // attachment: string | null;
         listingAmenities: ListingAmenity[];
         // listingBedTypes: any[];
-        listingImages: any[];
+        listingImages: string[];
         // listingTags: any[];
         // listingUnits: any[];
         // propertyLicenseNumber: string | null;
@@ -464,7 +437,7 @@ export const usersRouter = createTRPCRouter({
         countBlockedUnits: number;
         countReservedUnits: string | null;
         desiredUnitsToSell: string | null;
-        reservations: any[];
+        // reservations: any[];
       }
 
       interface CalendarResponse {
@@ -787,8 +760,10 @@ export const usersRouter = createTRPCRouter({
       };
     }),
 
-  getMyVerifications: protectedProcedure.query(async ({ ctx }) => {
-    const verifications = ctx.db.query.users.findFirst({
+  getMyVerifications: optionallyAuthedProcedure.query(async ({ ctx }) => {
+    if (!ctx.user) return null;
+
+    const verifications = await ctx.db.query.users.findFirst({
       where: eq(users.id, ctx.user.id),
       columns: {
         dateOfBirth: true,
@@ -797,6 +772,8 @@ export const usersRouter = createTRPCRouter({
         lastName: true,
       },
     });
+
+    if (!verifications) throw new TRPCError({ code: "NOT_FOUND" });
 
     return verifications;
   }),

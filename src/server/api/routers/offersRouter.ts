@@ -7,7 +7,6 @@ import {
   roleRestrictedProcedure,
 } from "@/server/api/trpc";
 import {
-  Property,
   groupMembers,
   offerSelectSchema,
   offerUpdateSchema,
@@ -16,7 +15,7 @@ import {
   referralCodes,
   requestSelectSchema,
   tripCheckouts,
-  trips,
+  trips
 } from "@/server/db/schema";
 import { getCity, getCoordinates } from "@/server/google-maps";
 import { sendText, sendWhatsApp } from "@/server/server-utils";
@@ -37,8 +36,7 @@ import { z } from "zod";
 import { requests } from "../../db/schema/tables/requests";
 import { db } from "@/server/db";
 import {
-  directSiteScrapers,
-  scrapeDirectListings,
+  scrapeDirectListings
 } from "@/server/direct-sites-scraping";
 import { createNormalDistributionDates } from "@/server/server-utils";
 import { scrapeAirbnbPrice } from "@/server/scrapePrice";
@@ -562,17 +560,17 @@ export const offersRouter = createTRPCRouter({
         //sending emails to everyone in the groug
         //get everymember in the group
 
-        const allGroupMembers = await db.query.groupMembers.findMany({
-          where: eq(groupMembers.groupId, requestDetails.madeByGroupId),
-          columns: { userId: true },
-          with: {
-            user: {
-              columns: { email: true, firstName: true, name: true },
-            },
-          },
-        });
+        // const allGroupMembers = await db.query.groupMembers.findMany({
+        //   where: eq(groupMembers.groupId, requestDetails.madeByGroupId),
+        //   columns: { userId: true },
+        //   with: {
+        //     user: {
+        //       columns: { email: true, firstName: true, name: true },
+        //     },
+        //   },
+        // });
 
-        for (const member of allGroupMembers) {
+        // for (const member of allGroupMembers) {
           // await sendEmail({
           //   to: member.user.email,
           //   subject: "New offer received",
@@ -594,7 +592,7 @@ export const offersRouter = createTRPCRouter({
           //     offerLink: `${env.NEXTAUTH_URL}/requests/${input.requestId}`,
           //   }),
           // });
-        }
+        // }
       } else {
         const brokeDownPayment = await breakdownPayment({
           checkIn: input.checkIn,
@@ -758,10 +756,10 @@ export const offersRouter = createTRPCRouter({
         const fmtdDateRange = formatDateRange(offer.checkIn, offer.checkOut);
         const url = `${env.NEXTAUTH_URL}/requests`;
 
-        const location = await getCoordinates(property.address).then(
-          async (res) =>
-            res.location ? await getCity(res.location) : "[Unknown location]",
-        );
+        // const location = await getCoordinates(property.address).then(
+        //   async (res) =>
+        //     res.location ? await getCity(res.location) : "[Unknown location]",
+        // );
 
         if (member.phoneNumber) {
           if (member.isWhatsApp) {
@@ -851,7 +849,7 @@ export const offersRouter = createTRPCRouter({
           scrapeDirectListings({
             checkIn: dateRange.checkIn,
             checkOut: dateRange.checkOut,
-            location: "San Francisco", // TODO TEMP AAAAAAAAAAAAAAAAAAAAA YEAH 😃
+            location: "San Francisco", // TODO TEMP
             requestNightlyPrice: 100, // TODO TEMP
           }),
         ),

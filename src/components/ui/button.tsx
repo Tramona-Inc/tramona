@@ -4,6 +4,7 @@ import * as React from "react";
 
 import { cn } from "@/utils/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip";
+import { useState } from "react";
 
 const buttonVariants = cva(
   "inline-flex items-center gap-2 text-center justify-center whitespace-nowrap rounded-md text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
@@ -81,17 +82,25 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       tooltip,
       tooltipOptions = {},
       children,
+      onClick,
       ...props
     },
     ref,
   ) => {
     const Comp = asChild ? Slot : "button";
+    const [loading, setLoading] = useState(false);
+
     const button = (
       <Comp
         className={cn(buttonVariants({ variant, size, className }), "group")}
         ref={ref}
+        onClick={async (event) => {
+          setLoading(true);
+          if (onClick) await Promise.resolve(onClick(event));
+          setLoading(false);
+        }}
         {...props}
-        disabled={isLoading || props.disabled}
+        disabled={isLoading || loading || props.disabled}
       >
         {children}
       </Comp>

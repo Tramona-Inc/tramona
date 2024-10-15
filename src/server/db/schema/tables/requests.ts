@@ -8,10 +8,9 @@ import {
   pgTable,
   serial,
   smallint,
-  text,
   timestamp,
   varchar,
-  boolean
+  boolean,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { groups } from "./groups";
@@ -97,20 +96,3 @@ export const requestInsertSchema = createInsertSchema(requests, {
   latLngPoint: z.object({ x: z.number(), y: z.number() }),
   amenities: z.array(z.enum(ALL_REQUESTABLE_AMENITIES)),
 });
-
-// TO-DO: maybe add relation
-export const requestUpdatedInfo = pgTable(
-  "request_updated_info",
-  {
-    id: serial("id").primaryKey(),
-    requestId: integer("request_id").references(() => requests.id, {
-      onDelete: "cascade",
-    }),
-    preferences: varchar("preferences", { length: 255 }),
-    updatedPriceNightlyUSD: integer("updated_price_usd_nightly"),
-    propertyLinks: text("property_links"),
-  },
-  (t) => ({
-    requestidIdx: index().on(t.requestId),
-  }),
-);

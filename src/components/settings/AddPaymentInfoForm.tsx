@@ -16,7 +16,7 @@ export default function AddPaymentInfoForm() {
   const stripe = useStripe();
   const elements = useElements();
 
-  const [errorMessage, setErrorMessage] = useState<string | undefined>();
+  const [_, setErrorMessage] = useState<string | undefined>();
   const [loading, setLoading] = useState(false);
 
   const { mutateAsync: confirmSetupIntentMutation } =
