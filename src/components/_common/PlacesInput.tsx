@@ -27,7 +27,7 @@ export default function PlacesInput<TFieldValues extends FieldValues>({
   ...props
 }: Omit<React.ComponentProps<typeof FormField<TFieldValues>>, "render"> & {
   className?: string;
-  formLabel: string;
+  formLabel?: string;
   placeholder?: string;
   variant?: InputVariant;
   icon?: React.FC<{ className?: string }>;
@@ -92,7 +92,7 @@ export default function PlacesInput<TFieldValues extends FieldValues>({
                       type="button"
                       role="combobox"
                       icon={icon}
-                      className="bg-white"
+                      className={cn("bg-white", className)}
                     >
                       {value ? value : "Enter your destination"}
                     </InputButton>

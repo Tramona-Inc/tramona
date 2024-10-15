@@ -688,14 +688,26 @@ export const casamundoScraper: DirectSiteScraper = async ({
   ).then(logAndFilterSettledResults);
 };
 
-export const casamundoSubScraper: SubsequentScraper = async ({
+export const casamundoSubScraper: (
+  options: Parameters<SubsequentScraper>[0] & { numGuests?: number }
+) => ReturnType<SubsequentScraper> = async ({
   originalListingId,
   scrapeUrl,
   checkIn,
   checkOut,
+  numGuests: initialNumGuests,
 }) => {
-  const url = new URL(scrapeUrl);
-  const numGuests = parseInt(url.searchParams.get("adults") ?? "", 10);
+  let numGuests = initialNumGuests;
+  
+  if (scrapeUrl) {
+    try {
+      const url = new URL(scrapeUrl);
+      numGuests = parseInt(url.searchParams.get("adults") ?? "", 10) || initialNumGuests;
+    } catch (error) {
+      console.error("Invalid scrapeUrl provided:", error);
+    }
+  }
+  
   const numNights = getNumNights(checkIn, checkOut);
 
   const isAvailable = await checkAvailability(
