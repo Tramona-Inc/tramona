@@ -127,7 +127,6 @@ export default function ContactInfoForm() {
             <Button
               onClick={() => form.handleSubmit(onSubmit)()}
               variant="ghost"
-              disabled={form.formState.isSubmitting}
               className="mb-1 text-teal-900"
             >
               Add

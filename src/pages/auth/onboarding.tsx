@@ -18,10 +18,7 @@ import { toast } from "@/components/ui/use-toast";
 import { api } from "@/utils/api";
 import { errorToast } from "@/utils/toasts";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  OTPInput,
-  REGEXP_ONLY_DIGITS
-} from "input-otp";
+import { OTPInput, REGEXP_ONLY_DIGITS } from "input-otp";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
@@ -29,8 +26,8 @@ import { useForm } from "react-hook-form";
 import { type Country, isValidPhoneNumber } from "react-phone-number-input";
 import { z } from "zod";
 import { zodString } from "@/utils/zod-utils";
-import { Icons } from "@/components/_icons/icons";
 import { cn, useUpdateUser } from "@/utils/utils";
+import { ButtonSpinner } from "@/components/ui/button-spinner";
 // feel free to refactor this lol
 
 export default function Onboarding() {
@@ -201,10 +198,8 @@ export default function Onboarding() {
                       </FormItem>
                     )}
                   />
-                  <Button type="submit" disabled={form.formState.isSubmitting}>
-                    {form.formState.isSubmitting && (
-                      <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-                    )}
+                  <Button type="submit">
+                    <ButtonSpinner />
                     Send Verification Code
                   </Button>
                 </form>

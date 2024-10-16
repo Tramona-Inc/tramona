@@ -50,7 +50,6 @@ export default function LinkRequestForm() {
                       variant="lpDesktop"
                       placeholder="Paste link here"
                       icon={Link2}
-                      disabled={form.formState.isSubmitting}
                     />
                     <div className="absolute right-2 top-2">
                       {form.formState.isSubmitting && (

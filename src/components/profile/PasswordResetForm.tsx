@@ -93,12 +93,7 @@ export default function PasswordResetForm() {
           )}
         />
 
-        <Button
-          isLoading={form.formState.isSubmitting}
-          size="lg"
-          type="submit"
-          className="w-full"
-        >
+        <Button size="lg" type="submit" className="w-full">
           Submit
         </Button>
       </form>

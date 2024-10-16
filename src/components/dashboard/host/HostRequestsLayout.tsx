@@ -57,11 +57,7 @@ export default function HostRequestsLayout({
             <h1 className="text-3xl font-bold">Requests</h1>
             <div className="mt-4 flex flex-row gap-2">
               <Button
-                variant={
-                  selectedOption === "normal"
-                    ? "greenPrimary"
-                    : "secondaryLight"
-                }
+                variant={selectedOption === "normal" ? "primary" : "secondary"}
                 className="rounded-full"
                 onClick={() => setSelectedOption("normal")}
               >
@@ -72,8 +68,8 @@ export default function HostRequestsLayout({
                   <Button
                     variant={
                       selectedOption === "outsidePriceRestriction"
-                        ? "greenPrimary"
-                        : "secondaryLight"
+                        ? "primary"
+                        : "secondary"
                     }
                     className="rounded-full"
                     onClick={() => setSelectedOption("outsidePriceRestriction")}

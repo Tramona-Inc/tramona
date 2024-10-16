@@ -130,10 +130,7 @@ export function InviteByEmailForm({ request }: { request: RequestWithGroup }) {
               </FormItem>
             )}
           />
-          <Button
-            type="submit"
-            disabled={form.formState.isSubmitting || isEveryoneInvited}
-          >
+          <Button type="submit" disabled={isEveryoneInvited}>
             Invite
           </Button>
         </form>

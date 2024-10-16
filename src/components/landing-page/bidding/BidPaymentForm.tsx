@@ -151,7 +151,7 @@ export default function BidPaymentForm({
           >
             Log in
           </Button>
-          <Button asChild variant={"greenPrimary"} className="w-full">
+          <Button asChild className="w-full">
             <Link href={"/auth/signup"}>Sign Up</Link>
           </Button>
         </div>

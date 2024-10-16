@@ -101,12 +101,7 @@ export default function AddPaymentInfoForm() {
     <form onSubmit={handleSubmit}>
       <AddressElement options={{ mode: "billing" }} />
       <PaymentElement />
-      <Button
-        variant="greenPrimary"
-        className={"mt-4"}
-        type="submit"
-        disabled={!stripe || loading}
-      >
+      <Button className={"mt-4"} type="submit" disabled={!stripe || loading}>
         Add Payment Method
       </Button>
     </form>

@@ -88,9 +88,7 @@ export function MapModal({
           <Button variant="secondary">Cancel</Button>
         </DialogClose>
         <DialogClose asChild>
-          <Button variant="greenPrimary" onClick={saveEditedValues}>
-            Done
-          </Button>
+          <Button onClick={saveEditedValues}>Done</Button>
         </DialogClose>
       </DialogFooter>
     </>

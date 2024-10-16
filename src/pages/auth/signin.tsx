@@ -85,7 +85,10 @@ export default function SignIn() {
   }: z.infer<typeof formSchema>) => {
     // Relies on middleware to redirect to dashbaord
     // onboarding checks if user has a phone number else go to dashboard
-    const callbackUrl = router.query.callbackUrl as string || router.query.from as string || `${window.location.origin}`;
+    const callbackUrl =
+      (router.query.callbackUrl as string) ||
+      (router.query.from as string) ||
+      `${window.location.origin}`;
 
     await signIn("credentials", {
       email: email,
@@ -164,11 +167,7 @@ export default function SignIn() {
                   )}
                 />
                 <ErrorMsg>{form.formState.errors.root?.message}</ErrorMsg>
-                <Button
-                  disabled={form.formState.isSubmitting}
-                  type="submit"
-                  className="w-full"
-                >
+                <Button type="submit" className="w-full">
                   Log In
                 </Button>
               </form>

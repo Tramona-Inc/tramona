@@ -69,7 +69,7 @@ const IdentityModal = ({ isPrimary = false }: { isPrimary?: boolean }) => {
     <VerificationProvider>
       <Button
         role="link"
-        variant={isPrimary ? "greenPrimary" : "secondary"}
+        variant={isPrimary ? "primary" : "secondary"}
         disabled={!stripe}
         onClick={handleClick}
         className="w-full font-semibold"

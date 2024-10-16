@@ -25,7 +25,7 @@ export default function EmptyStateValue(props: EmptyStateProps) {
         )}
       </div>
       {props.href && (
-        <Button variant="greenPrimary" asChild>
+        <Button asChild>
           <Link href={props.href}>{props.redirectTitle}</Link>
         </Button>
       )}

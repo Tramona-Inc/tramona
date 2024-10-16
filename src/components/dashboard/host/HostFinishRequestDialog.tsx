@@ -42,11 +42,7 @@ export default function HostFinishRequestDialog({
           </EmptyStateDescription>
         </EmptyState>
         <DialogFooter className="pt-6">
-          <Button
-            onClick={() => setOpen(false)}
-            className="w-full"
-            variant={"greenPrimary"}
-          >
+          <Button onClick={() => setOpen(false)} className="w-full">
             Done
           </Button>
         </DialogFooter>
