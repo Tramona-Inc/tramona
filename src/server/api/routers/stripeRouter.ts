@@ -514,18 +514,14 @@ export const stripeRouter = createTRPCRouter({
   createStripeConnectAccount: protectedProcedure.mutation(async ({ ctx }) => {
     const res = await ctx.db.query.users.findFirst({
       columns: {
+        firstName: true,
+        lastName: true,
         stripeConnectId: true,
         chargesEnabled: true,
       },
       where: eq(users.id, ctx.user.id),
     });
     if (!res?.stripeConnectId) {
-      const [firstNameFallback, ...rest] = ctx.user.name!.split(" ");
-      const lastNameFallback = rest.join(" ");
-
-      const firstName = ctx.user.firstName ?? firstNameFallback;
-      const lastName = ctx.user.lastName ?? lastNameFallback;
-
       const stripeAccount = await stripeWithSecretKey.accounts.create({
         country: "US", //change this to the user country later
         email: ctx.user.email,
@@ -555,8 +551,7 @@ export const stripeRouter = createTRPCRouter({
         },
         individual: {
           email: ctx.user.email,
-          // first_name: firstName,
-          // last_name: lastName,
+          first_name: res?.firstName ?? "",
         },
       });
       await ctx.db
