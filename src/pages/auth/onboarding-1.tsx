@@ -41,6 +41,13 @@ export default function DateOfBirth() {
   const { updateUser } = useUpdateUser();
 
   async function onDobSubmit({ dob }: FormValues) {
+    if (new Date(dob) > new Date() || new Date(dob) < new Date("1900-01-01")) {
+      form.setError("root", {
+        type: "manual",
+        message: "Please enter a valid date of birth.",
+      });
+      return;
+    }
     if (session?.user.id) {
       await updateUser({
         dateOfBirth: convertDateFormat(dob),
