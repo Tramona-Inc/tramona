@@ -19,6 +19,7 @@ import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import ErrorMsg from "@/components/ui/ErrorMsg";
+import { ButtonSpinner } from "@/components/ui/button-spinner";
 
 export default function DateOfBirth() {
   const { data: session } = useSession();
@@ -91,14 +92,8 @@ export default function DateOfBirth() {
                     </FormItem>
                   )}
                 />
-                <Button
-                  type="submit"
-                  disabled={form.formState.isSubmitting}
-                  className="mt-4 w-full"
-                >
-                  {form.formState.isSubmitting && (
-                    <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-                  )}
+                <Button type="submit" className="mt-4 w-full">
+                  <ButtonSpinner />
                   Continue
                 </Button>
               </form>

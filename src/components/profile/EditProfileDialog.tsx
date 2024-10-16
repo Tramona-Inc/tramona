@@ -55,10 +55,8 @@ export default function EditProfileDialog({ state, profileInfo }: Props) {
       onOpenChange={(open) => !open && state.setState("closed")}
     >
       <DialogContent>
-        <DialogHeader className="border-b-2 pb-4">
-          <DialogTitle>
-            <h2 className="text-center">Edit Profile</h2>
-          </DialogTitle>
+        <DialogHeader>
+          <DialogTitle>Edit Profile</DialogTitle>
         </DialogHeader>
 
         <div>
@@ -147,15 +145,8 @@ export default function EditProfileDialog({ state, profileInfo }: Props) {
                 )}
               />
 
-              <div className="h-1"></div>
-
-              <DialogFooter className="border-t-2 pt-4">
-                <Button
-                  type="submit"
-                  className="w-full bg-teal-800/90 text-base hover:bg-teal-800"
-                >
-                  Save
-                </Button>
+              <DialogFooter>
+                <Button type="submit">Save</Button>
               </DialogFooter>
             </form>
           </Form>

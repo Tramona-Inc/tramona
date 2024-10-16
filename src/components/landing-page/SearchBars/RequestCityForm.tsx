@@ -143,13 +143,7 @@ export default function RequestCityForm({
           </CityRequestFiltersDialog>
         </div>
 
-        <Button
-          type="submit"
-          variant="greenPrimary"
-          disabled={form.formState.isSubmitting}
-        >
-          Submit request
-        </Button>
+        <Button type="submit">Submit request</Button>
       </form>
 
       <RequestSubmittedDialog

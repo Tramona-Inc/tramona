@@ -1,6 +1,7 @@
 import MainLayout from "@/components/_common/Layout/MainLayout";
 import { Icons } from "@/components/_icons/icons";
 import { Button } from "@/components/ui/button";
+import { ButtonSpinner } from "@/components/ui/button-spinner";
 import { Card, CardContent } from "@/components/ui/card";
 import ErrorMsg from "@/components/ui/ErrorMsg";
 import {
@@ -98,14 +99,8 @@ export default function FirstAndLastName() {
                     </FormItem>
                   )}
                 />
-                <Button
-                  type="submit"
-                  disabled={form.formState.isSubmitting}
-                  className="col-span-2 mt-4"
-                >
-                  {form.formState.isSubmitting && (
-                    <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-                  )}
+                <Button type="submit" className="col-span-2 mt-4">
+                  <ButtonSpinner />
                   Continue
                 </Button>
               </form>

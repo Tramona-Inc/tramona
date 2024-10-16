@@ -27,6 +27,7 @@ import { type Country, isValidPhoneNumber } from "react-phone-number-input";
 import { z } from "zod";
 import { zodString } from "@/utils/zod-utils";
 import { cn, useUpdateUser } from "@/utils/utils";
+import { ButtonSpinner } from "@/components/ui/button-spinner";
 // feel free to refactor this lol
 
 export default function Onboarding() {
@@ -197,7 +198,8 @@ export default function Onboarding() {
                       </FormItem>
                     )}
                   />
-                  <Button withSpinner type="submit">
+                  <Button type="submit">
+                    <ButtonSpinner />
                     Send Verification Code
                   </Button>
                 </form>

@@ -454,11 +454,7 @@ export default function AdminPropertyForm() {
             </FormItem>
           )}
         />
-        <Button
-          type="submit"
-          className="col-span-full"
-          disabled={form.formState.isSubmitting}
-        >
+        <Button type="submit" className="col-span-full">
           Upload Property
         </Button>
       </form>

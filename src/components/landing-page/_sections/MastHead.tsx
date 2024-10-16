@@ -170,14 +170,14 @@ export default function MastHead() {
               Check out our feed to see recent deals
             </div>
             <div className="hidden lg:block">
-              <Button asChild variant="greenPrimary">
+              <Button asChild>
                 <Link href="/exclusive-offers">View deals</Link>
               </Button>
             </div>
           </div>
           <CompletedRequestsSection />
           <div className="flex justify-center pt-8 lg:hidden">
-            <Button asChild variant="greenPrimary" size="lg">
+            <Button asChild size="lg">
               <Link href="/exclusive-offers">View deals</Link>
             </Button>
           </div>
@@ -221,12 +221,7 @@ export default function MastHead() {
           <p className="mb-6 text-sm text-zinc-600">
             properties your matches will be coming from
           </p>
-          <Button
-            onClick={scrollToTop}
-            variant="greenPrimary"
-            size="lg"
-            className="rounded-full"
-          >
+          <Button onClick={scrollToTop} size="lg" className="rounded-full">
             Submit a request
           </Button>
         </div>
@@ -244,12 +239,7 @@ export default function MastHead() {
           <p className="mb-6 text-sm text-zinc-600">
             increase in occupancy when using Tramona
           </p>
-          <Button
-            asChild
-            variant="greenPrimary"
-            size="lg"
-            className="rounded-full"
-          >
+          <Button asChild size="lg" className="rounded-full">
             <Link href="/for-hosts">List my place</Link>
           </Button>
         </div>
@@ -259,12 +249,7 @@ export default function MastHead() {
           <div className="text-sm font-medium text-zinc-600">
             Check out our FAQ for any questions, or send us a message directly
           </div>
-          <Button
-            asChild
-            variant="greenPrimary"
-            size="lg"
-            className="mt-4 w-40 rounded-full"
-          >
+          <Button asChild size="lg" className="mt-4 w-40 rounded-full">
             <Link href="/faq">FAQ</Link>
           </Button>
         </div>

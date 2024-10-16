@@ -257,12 +257,7 @@ export default function CreateRequestForm({
           )}
         />
 
-        <Button
-          disabled={form.formState.isSubmitting}
-          size="lg"
-          type="submit"
-          className="col-span-full"
-        >
+        <Button size="lg" type="submit" className="col-span-full">
           Confirm Request
         </Button>
       </form>
