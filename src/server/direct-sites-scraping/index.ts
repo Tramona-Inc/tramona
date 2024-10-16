@@ -296,7 +296,6 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
             lng: location.lng,
           });
         }
-
         const newPropertyListing = filterNewPropertyFields(listing);
         if (existingOriginalPropertyId) {
           const tramonaProperty = await trx
@@ -367,7 +366,8 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
               lng: listing.latLngPoint?.lng ?? location!.lng,
             });
 
-            const tripCheckout = await db
+
+            const tripCheckout = await trx
               .insert(tripCheckouts)
               .values({
                 totalTripAmount: brokeDownPayment.totalTripAmount,
@@ -468,7 +468,7 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
               lng: listing.latLngPoint?.lng ?? location!.lng,
             });
 
-            const tripCheckout = await db
+            const tripCheckout = await trx
               .insert(tripCheckouts)
               .values({
                 totalTripAmount: brokeDownPayment.totalTripAmount,
