@@ -42,7 +42,7 @@ export default function HostStaysCards({
         const travelerId = data?.id;
 
         return (
-          <>
+          <div key={trip.id}>
             <div
               className="grid grid-cols-1 items-center gap-4 overflow-hidden rounded-xl border md:grid-cols-7 md:rounded-2xl"
               key={trip.id}
@@ -130,7 +130,7 @@ export default function HostStaysCards({
             >
               Message
             </Button>
-          </>
+          </div>
         );
       })}
     </div>
