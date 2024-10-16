@@ -11,7 +11,6 @@ import HowItWorksHost from "@/components/landing-page/how-it-works-host";
 import TramonaIcon from "@/components/_icons/TramonaIcon";
 import Footer from "@/components/_common/Layout/Footer";
 import AccordionFaq from "@/components/_common/AccordionFaq";
-import { forHostsAccordionItems } from "@/utils/constants";
 import { TestimonialCarousel } from "@/components/landing-page/_sections/testimonials/TestimonialCarousel";
 import { Check } from "lucide-react";
 
@@ -67,6 +66,29 @@ function IntroSection({ requestFeed }: { requestFeed: FeedRequestItem[] }) {
 }
 
 function FAQ() {
+  const forHostsAccordionItems = [
+    {
+      question: "Can I counter offer requests?",
+      answer:
+        "Yes! You have full control over pricing. If a traveler submits a request, you can respond with an offer that fits your availability and pricing preferences.",
+    },
+    {
+      question: "Can I invite a co-host?",
+      answer:
+        "Yes, Tramona supports co-hosting. You can add a co-host to help manage bookings, respond to traveler inquiries, and coordinate check-ins. They’ll have access to the necessary tools without needing full access to your account.",
+    },
+    {
+      question: "Why list on Tramona?",
+      answer:
+        "Tramona helps you optimize occupancy and revenue by offering more flexibility. Just like how Priceline allowed hotels to offload unbooked rooms without lowering rates across the board, Tramona allows you to keep your listings at full price on other platforms while accepting offers for lower rates only when you choose. We also take lower fees than platforms like Airbnb and VRBO, meaning you can earn more while giving travelers better deals.",
+    },
+    {
+      question: "Can I sync my calendar with other platforms?",
+      answer:
+        "Yes, Tramona allows you to sync your calendar with Airbnb. This ensures your availability is updated across all platforms, preventing double bookings.",
+    },
+  ];
+
   return (
     <section className="mx-auto grid max-w-7xl grid-cols-1 gap-6 p-4 md:grid-cols-3">
       <div className="space-y-4">

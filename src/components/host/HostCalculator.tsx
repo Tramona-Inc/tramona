@@ -103,7 +103,7 @@ export default function HostCalculator() {
   };
 
   return (
-    <Card className="mx-auto w-full max-w-xl overflow-hidden rounded-lg bg-white shadow-lg @container">
+    <Card className="w-full max-w-xl overflow-hidden rounded-lg bg-white shadow-lg @container">
       <CardHeader>
         <CardTitle>
           How much more could you be making with your short-term rental?
