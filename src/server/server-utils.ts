@@ -40,6 +40,7 @@ import {
   referralCodes,
   requests,
   rejectedRequests,
+  hostTeams,
 } from "./db/schema";
 import { getCity, getCoordinates } from "./google-maps";
 import axios from "axios";
@@ -908,4 +909,28 @@ export async function checkRequestsWithoutOffers() {
   }
 
   return requestsWithoutOffers.length; // return whatever
+}
+
+/**
+ * Even though most hosts might not have a team, the simplest way to implement teams is
+ * to treat everything as a team, which means treating single hosts as teams of one.
+ * This function creates that initial team of one for a host.
+ */
+export async function createInitialHostTeam(
+  user: Pick<User, "id" | "name" | "username" | "email">,
+) {
+  const teamName = user.name ?? user.username ?? user.email;
+
+  const teamId = await db
+    .insert(hostTeams)
+    .values({ ownerId: user.id, name: teamName })
+    .returning()
+    .then((res) => res[0]!.id);
+
+  await db.insert(hostTeamMembers).values({
+    hostTeamId: teamId,
+    userId: user.id,
+  });
+
+  return teamId;
 }
