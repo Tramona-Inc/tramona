@@ -69,15 +69,6 @@ export default function HostRequestDialog({
     });
   };
 
-  const priceRegex = /^\d+(\.\d{0,2})?$/;
-
-  const handlePriceChange = (id: number, price: string) => {
-    const filteredValue = price.replace(/[^0-9.]/g, "");
-    if (priceRegex.test(filteredValue)) {
-      setPropertyPrices((prev) => ({ ...prev, [id]: price }));
-    }
-  };
-
   const selectAllProperties = () => {
     const allPropertyIds = properties
       .filter((property) => property.cancellationPolicy)
@@ -90,9 +81,11 @@ export default function HostRequestDialog({
     }
   };
 
-  const fmtdNightlyPrice = formatCurrency(
-    request.maxTotalPrice / getNumNights(request.checkIn, request.checkOut),
-  ).replace("$", "");
+  const fmtdNightlyPrice = (
+    request.maxTotalPrice /
+    getNumNights(request.checkIn, request.checkOut) /
+    100
+  ).toFixed(2);
 
   // console.log("selectedProperties1", selectedProperties);
 
@@ -104,7 +97,7 @@ export default function HostRequestDialog({
     setSelectedProperties(initialSelectedProperties);
 
     initialSelectedProperties.forEach((id) => {
-      if (!propertyPrices[id]) {
+      if (propertyPrices[id] === undefined) {
         setPropertyPrices((prevPrices) => ({
           ...prevPrices,
           [id]: fmtdNightlyPrice,
@@ -121,7 +114,6 @@ export default function HostRequestDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTitle></DialogTitle>
       <DialogContent className="max-w-lg p-6">
         <DialogHeader>
           <h3 className="text-center text-lg font-bold">Respond</h3>
@@ -130,48 +122,43 @@ export default function HostRequestDialog({
           Please select the properties you would like to offer and set the
           price.
         </DialogDescription>
-        <div className="space-y-4">
-          <div className="text-sm">
-            Select the property you&apos;d like to offer.
-          </div>
-          <div className="space-y-2">
-            <div className="rounded-md border bg-gray-50 p-4">
-              <div className="mb-4 flex justify-between">
-                <div className="flex flex-col items-start">
-                  <div className="text-dark text-lg font-bold">
-                    {formatCurrency(
-                      request.maxTotalPrice /
-                        getNumNights(request.checkIn, request.checkOut),
-                    )}
-                    /night
-                  </div>
-                  <div className="text-sm text-gray-600">
-                    {formatCurrency(request.maxTotalPrice)} total
-                  </div>
-                </div>
-                <div className="flex flex-col items-center">
-                  <div className="text-dark text-lg font-bold">
-                    {formatDateRange(request.checkIn, request.checkOut)}
-                  </div>
-                  <div className="text-sm text-gray-600">
-                    {plural(
+        <div className="space-y-2">
+          <div className="rounded-md border p-4">
+            <div className="mb-4 flex justify-between">
+              <div className="flex flex-col items-start">
+                <div className="text-dark text-lg font-bold">
+                  {formatCurrency(
+                    request.maxTotalPrice /
                       getNumNights(request.checkIn, request.checkOut),
-                      "night",
-                    )}
-                  </div>
+                  )}
+                  /night
                 </div>
-                <div className="flex flex-col items-end">
-                  <div className="text-dark text-lg font-bold">
-                    {plural(request.numGuests, "guest")}
-                  </div>
+                <div className="text-sm text-gray-600">
+                  {formatCurrency(request.maxTotalPrice)} total
                 </div>
               </div>
-              {request.note && (
-                <div className="rounded-md bg-gray-100 p-2">
-                  <div className="text-sm text-gray-700">{request.note}</div>
+              <div className="flex flex-col items-center">
+                <div className="text-dark text-lg font-bold">
+                  {formatDateRange(request.checkIn, request.checkOut)}
                 </div>
-              )}
+                <div className="text-sm text-gray-600">
+                  {plural(
+                    getNumNights(request.checkIn, request.checkOut),
+                    "night",
+                  )}
+                </div>
+              </div>
+              <div className="flex flex-col items-end">
+                <div className="text-dark text-lg font-bold">
+                  {plural(request.numGuests, "guest")}
+                </div>
+              </div>
             </div>
+            {request.note && (
+              <div className="rounded-md bg-gray-100 p-2">
+                <div className="text-sm text-gray-700">{request.note}</div>
+              </div>
+            )}
           </div>
         </div>
         <div className="mt-4">
@@ -255,12 +242,15 @@ export default function HostRequestDialog({
                         <div className="flex items-center space-x-2">
                           <div className="flex items-center rounded-md">
                             <Input
-                              type="text"
+                              type="number"
                               prefix="$"
                               suffix="/night"
                               value={propertyPrices[property.id]}
                               onChange={(e) =>
-                                handlePriceChange(property.id, e.target.value)
+                                setPropertyPrices((prev) => ({
+                                  ...prev,
+                                  [property.id]: e.target.value,
+                                }))
                               }
                             />
                           </div>

@@ -1,10 +1,11 @@
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import * as React from "react";
+import { createContext, useContext, useState } from "react";
 
 import { cn } from "@/utils/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip";
-import { useState } from "react";
+import { useFormContext } from "react-hook-form";
 
 const buttonVariants = cva(
   "inline-flex items-center gap-2 text-center justify-center whitespace-nowrap rounded-md text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
@@ -62,6 +63,20 @@ const buttonVariants = cva(
   },
 );
 
+interface ButtonContextType {
+  isLoading: boolean;
+}
+
+const ButtonContext = createContext<ButtonContextType | undefined>(undefined);
+
+export const useButtonContext = () => {
+  const context = useContext(ButtonContext);
+  if (!context) {
+    throw new Error("useButtonContext must be used within a Button");
+  }
+  return context;
+};
+
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
@@ -78,7 +93,6 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       variant,
       size,
       asChild = false,
-      isLoading = false,
       tooltip,
       tooltipOptions = {},
       children,
@@ -88,23 +102,32 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ref,
   ) => {
     const Comp = asChild ? Slot : "button";
-    const [loading, setLoading] = useState(false);
+    const [isOnClickLoading, setIsOnClickLoading] = useState(false);
+    const formContext = useFormContext();
+
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    const isLoading = isOnClickLoading || formContext?.formState.isSubmitting;
+
+    const handleClick = async (event: React.MouseEvent<HTMLButtonElement>) => {
+      setIsOnClickLoading(true);
+      if (onClick) await Promise.resolve(onClick(event));
+      setIsOnClickLoading(false);
+    };
 
     const button = (
-      <Comp
-        className={cn(buttonVariants({ variant, size, className }), "group")}
-        ref={ref}
-        onClick={async (event) => {
-          setLoading(true);
-          if (onClick) await Promise.resolve(onClick(event));
-          setLoading(false);
-        }}
-        {...props}
-        disabled={isLoading || loading || props.disabled}
-      >
-        {children}
-      </Comp>
+      <ButtonContext.Provider value={{ isLoading }}>
+        <Comp
+          className={cn(buttonVariants({ variant, size, className }), "group")}
+          ref={ref}
+          onClick={handleClick}
+          {...props}
+          disabled={isLoading || props.disabled}
+        >
+          {children}
+        </Comp>
+      </ButtonContext.Provider>
     );
+
     return tooltip ? (
       <Tooltip>
         <TooltipTrigger asChild>{button}</TooltipTrigger>
