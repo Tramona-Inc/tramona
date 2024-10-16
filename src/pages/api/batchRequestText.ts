@@ -72,7 +72,7 @@ export default async function handler() {
       for (const messageCase in messageCases) {
         const userRequests = messageCases[messageCase];
 
-        if (userRequests) {
+        if (userRequests && userRequests.length > 0) {
           const requestIds = userRequests.map((request) => request.id);
           let totalMatches = 0;
 
