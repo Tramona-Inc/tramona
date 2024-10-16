@@ -27,10 +27,6 @@
     {
       "path": "/api/task",
       "schedule": "* * * * *"
-    },
-    {
-      "path": "/api/batchRequestText",
-      "schedule": "*/3 * * * *"
     }
   ]
 }
