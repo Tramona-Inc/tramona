@@ -4,7 +4,7 @@ import HostStaysCards from "./HostStaysCards";
 import { addWeeks, isSameDay } from "date-fns";
 
 export default function HostStays() {
-  const { data: allTrips } = api.trips.getHostTrips.useQuery();
+  const { data: allTrips = [] } = api.trips.getHostTrips.useQuery();
 
   const currentDate = new Date();
   const twoWeeksFromNow = addWeeks(currentDate, 2);
