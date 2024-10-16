@@ -11,7 +11,7 @@ import {
   HandCoinsIcon,
   LogOutIcon,
   SettingsIcon,
-  User2Icon
+  User2Icon,
 } from "lucide-react";
 import { type Session } from "next-auth";
 import { signOut } from "next-auth/react";
@@ -20,6 +20,7 @@ import HostTeamsDropdownItems from "./HostTeamsDropdownItems";
 
 import { useState } from "react";
 import CreateHostTeamDialog from "./CreateHostTeamDialog";
+import { api } from "@/utils/api";
 
 function DropdownTop({ session }: { session: Session }) {
   const title = session.user.name ?? session.user.email;
@@ -57,6 +58,7 @@ export default function AvatarDropdown({
   size?: "sm" | "md" | "lg" | "huge";
 }) {
   const [chtDialogOpen, setChtDialogOpen] = useState(false);
+  const { data: hostProfile } = api.users.getMyHostProfile.useQuery();
 
   return (
     <>
@@ -73,8 +75,12 @@ export default function AvatarDropdown({
         <DropdownMenuContent align="end" className="w-80 font-medium">
           <DropdownTop session={session} />
           <DropdownMenuSeparator />
-          <HostTeamsDropdownItems setChtDialogOpen={setChtDialogOpen} />
-          <DropdownMenuSeparator />
+          {hostProfile && (
+            <>
+              <HostTeamsDropdownItems setChtDialogOpen={setChtDialogOpen} />
+              <DropdownMenuSeparator />
+            </>
+          )}
           <DropdownMenuItem asChild>
             <Link href="/account">
               <HandCoinsIcon />

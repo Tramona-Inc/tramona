@@ -165,7 +165,7 @@ export function ProgramFrom() {
             <CardTitle>Thank you for your application</CardTitle>
             <Icons iconName="success" className="h-[100px] w-[100px]" />
             <CardDescription className="font-center flex items-start justify-center">
-              We&apos;ve recieved your application! If you&apos;re a good fit we
+              We&apos;ve received your application! If you&apos;re a good fit we
               will reach out to you. Thank you!
             </CardDescription>
           </CardContent>
