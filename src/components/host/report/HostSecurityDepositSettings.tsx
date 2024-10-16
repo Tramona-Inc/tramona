@@ -35,15 +35,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { toast } from "@/components/ui/use-toast";
-import {
-  CameraIcon,
-  DollarSign,
-  FileTextIcon,
-  HistoryIcon,
-  HomeIcon,
-  InfoIcon,
-  LockIcon,
-} from "lucide-react";
+import { CameraIcon, DollarSign, FileTextIcon, InfoIcon } from "lucide-react";
+import SubmitClaim from "./SubmitClaim";
 
 export default function HostSecurityDepositSettings() {
   const [properties, setProperties] = useState([
