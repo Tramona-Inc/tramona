@@ -4,6 +4,7 @@ import {
   DialogContent,
   DialogFooter,
   DialogClose,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { ArrowRightIcon, CircleCheckBig } from "lucide-react";
 import Confetti from "react-confetti";
@@ -46,11 +47,11 @@ const RequestSubmittedDialog: React.FC<RequestSubmittedDialogProps> = ({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent>
-        <div className="mb-4 flex flex-row items-center text-center text-2xl font-bold">
-          <CircleCheckBig color="#528456" className="mr-2" /> Success! Your
-          Request Has Been Sent!
-        </div>
-        <p className="mb-4 ml-8">
+        <DialogTitle>
+          <CircleCheckBig color="#528456" className="mr-2" />
+          Success! Your Request Has Been Sent!
+        </DialogTitle>
+        <p>
           {location ? (
             <>
               Your request has been sent to every host in <b>{location}</b>.

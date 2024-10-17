@@ -573,7 +573,7 @@ function BookNowBtn({
         property.stripeVerRequired &&
         verificationStatus?.isIdentityVerified === "pending"
           ? "secondary"
-          : "greenPrimary"
+          : "primary"
       }
       size={btnSize}
       className="w-full"

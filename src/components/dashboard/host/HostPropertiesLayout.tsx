@@ -123,8 +123,7 @@ export default function HostPropertiesLayout({
           <div className="my-4 flex gap-4">
             <Link href="/host-onboarding">
               <Button
-                variant="secondaryLight"
-                className="font-semi bg-white"
+                variant="secondary"
                 onClick={() => {
                   setStatesDefault();
                 }}

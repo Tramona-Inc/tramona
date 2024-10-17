@@ -32,7 +32,7 @@ export default function HostTeamsDropdownItems({
           {curTeam ? (
             <>
               <UserAvatar size="sm" name={curTeam.name} />
-              {curTeam.name}
+              <p className="truncate">{curTeam.name}</p>
             </>
           ) : (
             <SkeletonText />

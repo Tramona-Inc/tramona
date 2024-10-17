@@ -154,11 +154,7 @@ const LinkConfirmation: React.FC<LinkConfirmationProps> = ({
             <Button onClick={() => setOpen(false)} variant="secondary">
               Cancel
             </Button>
-            <Button
-              onClick={submitRequest}
-              disabled={isLoading}
-              variant="greenPrimary"
-            >
+            <Button onClick={submitRequest} disabled={isLoading}>
               Submit request
             </Button>
           </DialogFooter>

@@ -127,8 +127,8 @@ function LargeHeader({ isHost }: { isHost: boolean }) {
           </Button>
         )}
       />
-    
-    <NavLink
+
+      <NavLink
         href="/faq"
         render={({ selected }) => (
           <Button
@@ -238,7 +238,7 @@ function LogInSignUp() {
       <Button asChild variant="secondary">
         <Link href="/auth/signin">Log In</Link>
       </Button>
-      <Button asChild variant="greenPrimary">
+      <Button asChild>
         <Link href="/auth/signup">Sign Up</Link>
       </Button>
     </>

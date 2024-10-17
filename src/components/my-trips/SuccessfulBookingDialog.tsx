@@ -55,10 +55,7 @@ export default function SuccessfulBidDialog({
           <div className="md:py-5">
             <Dialog>
               <DialogTrigger asChild>
-                <Button
-                  variant="greenPrimary"
-                  className="w-full rounded-full px-10 py-6 text-lg sm:w-auto"
-                >
+                <Button className="w-full rounded-full px-10 py-6 text-lg sm:w-auto">
                   Share
                 </Button>
               </DialogTrigger>

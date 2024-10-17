@@ -30,6 +30,7 @@ import { api } from "@/utils/api";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
+import { errorToast } from "@/utils/toasts";
 
 export default function HostConfirmRequestDialog({
   open,
@@ -57,7 +58,6 @@ export default function HostConfirmRequestDialog({
     number | null
   >(null);
   const [editValue, setEditValue] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const slackMutation = api.twilio.sendSlack.useMutation();
 
   const handleEdit = (id: number) => {
@@ -91,7 +91,6 @@ export default function HostConfirmRequestDialog({
   console.log("LLLLLL", filteredSelectedProperties);
 
   const handleSubmit = async () => {
-    setIsLoading(true);
     const propertiesWithNoTax = filteredSelectedProperties
       .filter((property) => !property.taxAvailable)
       .map((property) => property.city); // List cities of properties without tax
@@ -135,8 +134,6 @@ export default function HostConfirmRequestDialog({
       }),
     )
       .then(async () => {
-        setIsLoading(false);
-
         if (propertiesWithNoTax.length === 0) {
           // All properties had tax set up, proceed to step 2
           setStep(2);
@@ -164,7 +161,7 @@ export default function HostConfirmRequestDialog({
         }
       })
       .catch(() => {
-        setIsLoading(false);
+        errorToast();
         setStep(1);
       });
   };
@@ -269,7 +266,7 @@ export default function HostConfirmRequestDialog({
                   <div className="flex items-center space-x-2">
                     <div className="flex items-center rounded-md">
                       <Input
-                        type="text"
+                        type="number"
                         prefix="$"
                         suffix="/night"
                         value={editValue}
@@ -336,9 +333,7 @@ export default function HostConfirmRequestDialog({
           <Button variant="secondary" onClick={() => setStep(0)}>
             Back
           </Button>
-          <Button onClick={handleSubmit} disabled={isLoading}>
-            Send Matches
-          </Button>
+          <Button onClick={handleSubmit}>Send Matches</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

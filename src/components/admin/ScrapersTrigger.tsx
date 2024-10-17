@@ -83,9 +83,7 @@ export function ScrapersTrigger() {
                 </FormItem>
               )}
             />
-            <Button type="submit" disabled={form.formState.isSubmitting}>
-              Scrape
-            </Button>
+            <Button type="submit">Scrape</Button>
           </form>
         </Form>
       </CardContent>

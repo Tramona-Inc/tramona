@@ -39,7 +39,7 @@ export default function PropertiesEarningsChartOverview({
   }, [selectedProperty]);
 
   return (
-    <div className="flex bg-gray-50 p-6 font-sans">
+    <div className="font-sans flex bg-gray-50 p-6">
       <div className="w-full pr-3">
         <Card>
           <CardContent className="pt-6">
@@ -53,7 +53,7 @@ export default function PropertiesEarningsChartOverview({
                   {["month", "year", "all time"].map((period) => (
                     <Button
                       key={period}
-                      variant={timePeriod === period ? "default" : "ghost"}
+                      variant={timePeriod === period ? "primary" : "ghost"}
                       size="sm"
                       onClick={() => setTimePeriod(period)}
                     >

@@ -904,12 +904,7 @@ export default function AdminOfferForm({
           </div>
         </FormItem>
 
-        <Button
-          disabled={form.formState.isSubmitting}
-          size="lg"
-          type="submit"
-          className="col-span-full"
-        >
+        <Button size="lg" type="submit" className="col-span-full">
           {offer ? "Update" : "Make"} offer
         </Button>
       </form>
