@@ -18,6 +18,7 @@ import { EllipsisIcon, FlagIcon } from "lucide-react";
 import Link from "next/link";
 import { useChatWithHost } from "@/utils/messaging/useChatWithHost";
 import Spinner from "../_common/Spinner";
+import { env } from "@/env";
 
 export default function HostStaysCards({
   trips,
@@ -40,7 +41,7 @@ export default function HostStaysCards({
         const numNights = getNumNights(trip.checkIn, trip.checkOut);
         const totalPrice = trip.offer!.totalPrice;
 
-        const hostId = trip.property.host!.id;
+        const hostId = trip.property.host?.id ?? env.TRAMONA_ADMIN_USER_ID;
 
         return (
           <div key={trip.id}>
