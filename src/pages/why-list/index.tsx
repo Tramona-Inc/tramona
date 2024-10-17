@@ -65,7 +65,7 @@ function HeroSection() {
             The Priceline for Short-Term Rentals
           </p>
         </div>
-        <div className="w-full flex justify-center lg:flex-1 mt-8 lg:mt-0">
+        <div className="mt-8 flex w-full justify-center lg:mt-0 lg:flex-1">
           <HostCalculator />
         </div>
       </div>
@@ -84,20 +84,22 @@ function AboutSection() {
           </h3>
 
           <p className="mb-4 text-base leading-relaxed text-gray-700 lg:pr-20">
-            Tramona is a booking platform designed to supplement your existing
-            channels like Airbnb and{" "}
+            Tramona is a booking platform designed to help you{" "}
             <span className="font-bold text-black">
-              help you fill vacancies
+              fill those hard-to-book dates
             </span>
-            . With Tramona, you can optimize your calendar by having the{" "}
+            that typically go vacant, complementing your existing channels like
+            Airbnb and VRBO. With Tramona, you can unlock more revenue by
+            offering exclusive deals to travelers while maintaining your premium
+            pricing on other platforms. Think of us as the Priceline for
+            short-term rentals,{" "}
             <span className="font-bold text-black">
-              option to offer exclusive deals to travelers
+              ensuring that your calendar stays full
             </span>{" "}
-            while keeping your premium pricing on other platforms. Think of us
-            as the Priceline for short-term rentals, keeping your calendar full.
+            without sacrificing your pricing strategy.
           </p>
         </div>
-        <div className="relative flex justify-center ml-12 md:ml-20 lg:w-1/2 lg:justify-end">
+        <div className="relative ml-12 flex justify-center md:ml-20 lg:w-1/2 lg:justify-end">
           <Image
             src="/assets/images/why-list/productive.png"
             alt="Host using laptop"
@@ -143,7 +145,10 @@ function WhyListSection() {
           <div className="space-y-4">
             {["$1200/night", "$1180/night", "$1174/night"].map(
               (price, index) => (
-                <Card key={index} className="h-24 w-full sm:w-96 drop-shadow-lg">
+                <Card
+                  key={index}
+                  className="h-24 w-full drop-shadow-lg sm:w-96"
+                >
                   <CardContent>
                     <h3 className="mb-2 text-sm font-semibold text-blue-600">
                       Counter offer
@@ -167,16 +172,18 @@ function WhyListSection() {
             Why List on Tramona?
           </h2>
           <p className="mb-4 leading-relaxed text-gray-600 lg:pr-12">
-            While platforms like Airbnb allow you to offer deals, they
-            aren&apos;t designed to showcase them effectively. According to
-            industry research, 82% of travelers are budget-conscious, yet how do
-            travelers on Airbnb find these deals?{" "}
+            Maximize your income by{" "}
             <span className="font-bold text-black">
-              With Tramona, you can keep your property at full price on other
-              platforms and choose to offer exclusive discounts here
+              turning empty nights into bookings
             </span>
-            , ensuring your vacancies are filled while preserving your pricing
-            strategy elsewhere.
+            . With 82% of travelers actively seeking deals, Tramona is where
+            they come to find them. You stay in control—whether you prefer
+            instant bookings, a "Request to Book" option, or the ability to
+            negotiate directly by accepting, countering, or rejecting any offer.{" "}
+            <span className="font-bold text-black">
+              You&apos;re never forced to give discounts
+            </span>
+            , but you have the option to when you need to fill an empty night.
           </p>
         </div>
       </div>
@@ -209,7 +216,7 @@ function HotelIndustrySection() {
             </p>
           </div>
         </div>
-        <div className="flex flex-1 justify-center space-x-4 mt-8 md:mt-0">
+        <div className="mt-8 flex flex-1 justify-center space-x-4 md:mt-0">
           <Image
             src="/assets/images/why-list/ellipse.png"
             alt="Hilton logo"
@@ -272,7 +279,7 @@ function SecuritySection() {
   return (
     <section className="mx-auto max-w-6xl">
       <div className="flex flex-col items-center md:flex-row md:items-center md:space-x-8">
-        <div className="flex-1 text-center md:text-left md:pr-32">
+        <div className="flex-1 text-center md:pr-32 md:text-left">
           <h2 className="mb-6 text-2xl font-bold text-gray-600 sm:text-3xl">
             List With Confidence
           </h2>
@@ -288,7 +295,7 @@ function SecuritySection() {
             maximize your revenue.
           </p>
         </div>
-        <div className="flex-1 relative mt-8 md:mt-0">
+        <div className="relative mt-8 flex-1 md:mt-0">
           <Image
             src="/assets/images/why-list/usinglaptop.png"
             alt="Host using laptop"
@@ -296,7 +303,7 @@ function SecuritySection() {
             width={373}
             height={334}
           />
-          <div className="absolute bottom-0 right-20 transform translate-y-1/4 flex items-center space-x-2 border-8 border-primaryGreen shadow-lg p-3 bg-white">
+          <div className="absolute bottom-0 right-20 flex translate-y-1/4 transform items-center space-x-2 border-8 border-primaryGreen bg-white p-3 shadow-lg">
             <div className="flex h-6 w-6 items-center justify-center rounded-full text-primaryGreen">
               <CheckCircle />
             </div>
@@ -340,7 +347,7 @@ function KeyFeaturesSection() {
     <section className="mx-auto max-w-6xl">
       <div className="flex flex-col items-center lg:flex-row-reverse lg:space-x-8 lg:space-x-reverse">
         <div className="flex-1 space-y-3 text-left lg:text-left">
-          <h2 className="mb-8 text-center lg:text-left text-3xl font-bold text-primaryGreen sm:text-4xl">
+          <h2 className="mb-8 text-center text-3xl font-bold text-primaryGreen sm:text-4xl lg:text-left">
             Key Features for Hosts
           </h2>
           {features.map((feature, index) => (
@@ -354,7 +361,7 @@ function KeyFeaturesSection() {
             </div>
           ))}
         </div>
-        <div className="mt-8 flex-1 lg:mt-0 lg:mr-8">
+        <div className="mt-8 flex-1 lg:mr-8 lg:mt-0">
           <Image
             src="/assets/images/why-list/hiker.png"
             alt="Traveler with backpack"
