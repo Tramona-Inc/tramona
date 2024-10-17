@@ -33,7 +33,7 @@ export default function Referral() {
         });
       }
     }
-  }, [open]);
+  }, [cohostInviteId, open, router, toast]);
   return (
     <MainLayout>
       <Head>
