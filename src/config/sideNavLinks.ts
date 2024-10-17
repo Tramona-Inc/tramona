@@ -53,14 +53,22 @@ export const hostMobileNavLinks = [
 
 export const guestNavLinks = [
   { href: "/", name: "Home", icon: HomeIcon },
+  { href: "/how-it-works", name: "Name your own price", icon: HomeIcon },
+  { href: "/how-it-works", name: "Book it now", icon: MessagesSquare },
+];
+
+export const guestNavHamburgerLinks = [
   { href: "/requests", name: "Requests", icon: BadgePercent },
   { href: "/my-trips", name: "My Trips", icon: Briefcase },
   { href: "/messages", name: "Messages", icon: MessageCircleIcon },
+  { href: "/chat-with-admin", name: "Concierge", icon: MessagesSquare },
 ];
 
 export const unloggedNavLinks = [
   { href: "/", name: "Home", icon: HomeIcon },
   { href: "/chat-with-admin", name: "Concierge", icon: MessagesSquare },
-  { href: "/link-input", name: "Link Input", icon: LinkIcon },
+  { href: "/how-it-works", name: "Name your own price", icon: HomeIcon },
+  { href: "/how-it-works", name: "Book it now", icon: MessagesSquare },
+  // { href: "/link-input", name: "Link Input", icon: LinkIcon },
   // ...headerLinks,
 ];

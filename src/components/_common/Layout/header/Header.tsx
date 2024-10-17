@@ -24,6 +24,7 @@ import {
 } from "@/config/headerNavLinks";
 import { ArrowLeftRightIcon, DoorOpen, MenuIcon } from "lucide-react";
 import { SkeletonText } from "@/components/ui/skeleton";
+import { centerHeaderLinks } from "@/config/headerNavLinks";
 
 export function Header() {
   const { pathname } = useRouter();
@@ -46,7 +47,7 @@ export function Header() {
   );
 }
 
-function HamburgerMenu({
+export function HamburgerMenu({
   links,
 }: {
   links: {
@@ -101,7 +102,7 @@ function LargeHeader({ isHost }: { isHost: boolean }) {
               render={({ selected }) => (
                 <span
                   className={cn(
-                    "rounded-md px-2 py-3 text-sm font-bold text-zinc-600 hover:text-foreground xl:text-base",
+                    "rounded-md px-2 py-3 text-xs font-bold text-zinc-600 hover:text-foreground xl:text-sm",
                     selected && "text-foreground underline underline-offset-2",
                   )}
                 >
@@ -113,35 +114,59 @@ function LargeHeader({ isHost }: { isHost: boolean }) {
       </div>
 
       <div className="flex-1" />
-      <NavLink
-        href="/help-center"
-        render={({ selected }) => (
-          <Button
-            variant="ghost"
-            className={cn(
-              "rounded-full hover:text-foreground",
-              selected && "text-foreground underline underline-offset-2",
-            )}
-          >
-            24/7 Support
-          </Button>
-        )}
-      />
 
-      <NavLink
-        href="/faq"
-        render={({ selected }) => (
-          <Button
-            variant="ghost"
-            className={cn(
-              "rounded-full hover:text-foreground",
-              selected && "text-foreground underline underline-offset-2",
+      <div className="flex items-center">
+        {centerHeaderLinks.map((link) => (
+          <NavLink
+            href={link.href}
+            key={link.href}
+            render={({ selected }) => (
+              <span
+                className={cn(
+                  "rounded-md px-2 py-3 text-xs font-bold text-zinc-600 hover:text-foreground xl:text-sm",
+                  selected && "text-foreground underline underline-offset-2",
+                )}
+              >
+                {link.name}
+              </span>
             )}
-          >
-            FAQ
-          </Button>
-        )}
-      />
+          />
+        ))}
+      </div>
+
+      <div className="flex-1" />
+
+      {status === "authenticated" && (
+        <>
+          <NavLink
+            href="/faq"
+            render={({ selected }) => (
+              <span
+                className={cn(
+                  "rounded-md px-2 py-3 text-xs font-bold text-zinc-600 hover:text-foreground xl:text-sm",
+                  selected && "text-foreground underline underline-offset-2",
+                )}
+              >
+                100% Re booking guarantee
+              </span>
+            )}
+          />
+
+          <NavLink
+            href="/help-center"
+            render={({ selected }) => (
+              <span
+                className={cn(
+                  "rounded-md px-2 py-3 text-xs font-bold text-zinc-600 hover:text-foreground xl:text-sm",
+                  selected && "text-foreground underline underline-offset-2",
+                )}
+              >
+                24/7 Support
+              </span>
+            )}
+          />
+        </>
+      )}
 
       {status === "loading" ? null : hostBtn.isLoading ? (
         <div className="px-4">
@@ -179,23 +204,8 @@ function SmallHeader({ isHost }: { isHost: boolean }) {
       <div className="flex translate-y-0.5 items-center pl-2"></div>
 
       <div className="flex-1" />
-      {/* <NavLink
-        href="/help-center"
-        render={({ selected }) => (
-          <Button
-            variant="ghost"
-            size="sm"
-            className={cn(
-              "rounded-full px-2 py-3 text-sm tracking-tight hover:text-foreground",
-              selected && "text-foreground underline underline-offset-2",
-            )}
-          >
-            24/7 Support
-          </Button>
-        )}
-      /> */}
 
-      {!isHost || status === "loading" ? null : hostBtn.isLoading ? (
+      {status === "loading" ? null : hostBtn.isLoading ? (
         <div className="px-4">
           <SkeletonText className="w-24" />
         </div>
@@ -221,7 +231,7 @@ function SmallHeader({ isHost }: { isHost: boolean }) {
       {!isHost && (
         <HamburgerMenu
           links={[
-            ...(hostBtn.isLoading ? [] : [hostBtn]),
+            // ...(hostBtn.isLoading ? [] : [hostBtn]),
             ...(status === "unauthenticated"
               ? unloggedHamburgerLinksMobile
               : hamburgerLinksMobile),
