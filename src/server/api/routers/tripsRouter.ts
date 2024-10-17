@@ -102,7 +102,15 @@ export const tripsRouter = createTRPCRouter({
   getHostTrips: protectedProcedure.query(async ({ ctx }) => {
     return await db.query.trips.findMany({
       where: exists(
-        db.select().from(properties).where(eq(properties.hostId, ctx.user.id)),
+        db
+          .select()
+          .from(properties)
+          .where(
+            and(
+              eq(properties.hostId, ctx.user.id),
+              eq(properties.id, trips.propertyId),
+            ),
+          ),
       ),
       with: {
         property: {
