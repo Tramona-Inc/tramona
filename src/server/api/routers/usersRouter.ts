@@ -11,8 +11,6 @@ import {
   emergencyContacts,
   groups,
   hostProfiles,
-  hostTeamMembers,
-  hostTeams,
   properties,
   propertyInsertSchema,
   referralCodes,

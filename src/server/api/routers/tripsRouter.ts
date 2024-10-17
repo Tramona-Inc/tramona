@@ -277,7 +277,7 @@ export const tripsRouter = createTRPCRouter({
         refundAmount: z.number().optional(),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ input }) => {
       //1.cancel superhog.. skip request with null or rejected
       const curSuperhogRequest = await db.query.superhogRequests.findFirst({
         where: and(
