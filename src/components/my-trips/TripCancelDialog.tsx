@@ -56,6 +56,7 @@ export default function TripCancelDialog({
             partialRefundPercentage={partialRefundPercentage}
             description={description}
             totalPriceAfterFees={totalPriceAfterFees}
+            setClose={() => setIsOpen(false)}
           />
         ) : (
           <InvalidTripCancellation

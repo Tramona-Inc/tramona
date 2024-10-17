@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import { Text, Button } from "@react-email/components";
 import { Layout } from "./EmailComponents";
+import { formatCurrency } from "@/utils/utils";
 
 interface BookingCancellationEmailProps {
   userName: string;
@@ -51,7 +52,7 @@ export default function BookingCancellationEmail({
           canceled for {reason}.
         </Text>
         {refund && (
-          <Text className="mb-4 text-left">{`${partialRefund ? `You are eligible for a partial refund of $${refund} for the dates of ${partialRefundDateRange}` : `You are eligible for a full refund of $${refund}.`} The refund will be processed to your original payment method within 5-10 business days. You'll receive a separate email notification once the refund has been issued.`}</Text>
+          <Text className="mb-4 text-left">{`${partialRefund ? `You are eligible for a partial refund of $${formatCurrency(refund)} for the dates of ${partialRefundDateRange}` : `You are eligible for a full refund of $${refund}.`} The refund will be processed to your original payment method within 5-10 business days. You'll receive a separate email notification once the refund has been issued.`}</Text>
         )}
         <Text className="mb-4 text-left">
           If you believe this is an error please immediately contact our support

@@ -46,7 +46,7 @@ import {
   PetsRule,
   SmokingRule,
 } from "./HouseRules";
-import { OfferPriceDetails } from "../_common/OfferPriceDetails";
+import PriceDetailsBeforeTax from "@/components/_common/PriceDetailsBeforeTax";
 import { getCancellationPolicyDescription } from "@/config/getCancellationPolicyDescription";
 import { VerificationProvider } from "../_utils/VerificationContext";
 import IdentityModal from "../_utils/IdentityModal";
@@ -662,7 +662,7 @@ function OfferPageSidebar({
               You won&apos;t be charged yet
             </p>
           )}
-          <OfferPriceDetails
+          <PriceDetailsBeforeTax
             offer={offer}
             bookOnAirbnb={property.bookOnAirbnb}
           />
@@ -720,7 +720,7 @@ function OfferPageMobileBottomCard({
       <CardContent className="flex flex-row items-center justify-between px-4 py-1 text-sm">
         {offer.request && (
           <div className="flex basis-1/2 flex-col">
-            <OfferPriceDetails offer={offer} />
+            <PriceDetailsBeforeTax offer={offer} />
             <p className="font-semibold">
               {formatDateRange(offer.checkIn, offer.checkOut)}
             </p>

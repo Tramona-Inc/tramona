@@ -41,11 +41,13 @@ export default function TripCancellationOrPartialRefund({
   partialRefundPercentage,
   description,
   totalPriceAfterFees,
+  setClose,
 }: {
   tripId: number;
   partialRefundPercentage: number;
   description?: string;
   totalPriceAfterFees: number;
+  setClose: () => void;
 }) {
   const { data, isLoading } = api.trips.getMyTripsPageDetails.useQuery({
     tripId,
@@ -122,6 +124,8 @@ export default function TripCancellationOrPartialRefund({
       reason: data.reason,
       refundAmount: totalRefundAmount,
     });
+    setClose();
+
     return;
   }
   return (
