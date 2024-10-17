@@ -86,21 +86,36 @@ export default function HelpCenter() {
           </div>
           <div>
             <div className="flex flex-col gap-2 md:flex-row md:gap-4 md:*:flex-1">
-              <Button asChild variant="secondary" size="lg">
+              <Button
+                asChild
+                variant="secondary"
+                size="lg"
+                className="bg-primaryGreen text-white"
+              >
                 <Link href="/support">
                   <LightbulbIcon />
                   Request a feature
                   <ChevronRight />
                 </Link>
               </Button>
-              <Button asChild variant="secondary" size="lg">
+              <Button
+                asChild
+                variant="secondary"
+                size="lg"
+                className="bg-primaryGreen text-white"
+              >
                 <Link href="/support">
                   <BugIcon />
                   Report a bug
                   <ChevronRight />
                 </Link>
               </Button>
-              <Button asChild variant="secondary" size="lg">
+              <Button
+                asChild
+                variant="secondary"
+                size="lg"
+                className="bg-primaryGreen text-white"
+              >
                 <Link href="/faq">
                   <MessageCircleQuestionIcon />
                   FAQ
