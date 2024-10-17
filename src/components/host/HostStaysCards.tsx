@@ -40,7 +40,7 @@ export default function HostStaysCards({
         const numNights = getNumNights(trip.checkIn, trip.checkOut);
         const totalPrice = trip.offer!.totalPrice;
 
-        const hostId = trip.property.host!.id;
+        const hostId = trip.property.host?.id ?? "";
 
         return (
           <div key={trip.id}>
