@@ -15,6 +15,7 @@ import Link from "next/link";
 import { type SeparatedData } from "@/server/server-utils";
 import { separateByPriceRestriction } from "@/utils/utils";
 import { useToast } from "@/components/ui/use-toast";
+import { errorToast } from "@/utils/toasts";
 
 export default function HostRequests() {
   const { toast } = useToast();
@@ -27,7 +28,9 @@ export default function HostRequests() {
 
   const [selectedRequest, setSelectedRequest] =
     useState<HostDashboardRequest | null>(null);
-  const [properties, setProperties] = useState<(Property & {taxAvailable: boolean})[] | null>(null);
+  const [properties, setProperties] = useState<
+    (Property & { taxAvailable: boolean })[] | null
+  >(null);
   const [step, setStep] = useState(0);
 
   const [separatedData, setSeparatedData] = useState<SeparatedData | null>(
@@ -64,7 +67,8 @@ export default function HostRequests() {
 
   const cityData = requestsWithProperties?.find((p) => p.city === city);
 
-  const { mutate: rejectRequest } = api.requests.rejectRequest.useMutation();
+  const { mutateAsync: rejectRequest } =
+    api.requests.rejectRequest.useMutation();
 
   return (
     <div className="p-4">
@@ -80,8 +84,14 @@ export default function HostRequests() {
               <RequestCard request={requestData.request} type="host">
                 <Button
                   variant="secondary"
-                  onClick={() => {
-                    rejectRequest({ requestId: requestData.request.id });
+                  onClick={async () => {
+                    await rejectRequest({ requestId: requestData.request.id })
+                      .then(() => {
+                        toast({
+                          title: "Successfully rejected request",
+                        });
+                      })
+                      .catch(() => errorToast());
                   }}
                 >
                   Reject

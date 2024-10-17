@@ -142,11 +142,7 @@ export default function SignUp() {
               />
 
               <FormMessage />
-              <Button
-                type="submit"
-                disabled={form.formState.isSubmitting}
-                className="w-full"
-              >
+              <Button type="submit" className="w-full">
                 Sign up
               </Button>
             </form>

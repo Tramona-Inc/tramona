@@ -37,6 +37,7 @@ import { getCity } from "@/server/google-maps";
 import { sendSlackMessage } from "@/server/slack";
 import {
   createHostReferral,
+  createInitialHostTeam,
   createLatLngGISPoint,
   sendEmail,
 } from "@/server/server-utils";
@@ -189,25 +190,9 @@ export const usersRouter = createTRPCRouter({
         where: eq(hostProfiles.userId, ctx.user.id),
       });
 
-      if (existingHostProfile) {
-        return existingHostProfile;
-      }
+      if (existingHostProfile) return;
 
-      const teamId = await ctx.db
-        .insert(hostTeams)
-        .values({
-          ownerId: ctx.user.id,
-          name: `${ctx.user.name ?? ctx.user.username ?? ctx.user.email}`,
-        })
-        .returning()
-        .then((res) => res[0]!.id);
-
-      // Insert Host info
-
-      await ctx.db.insert(hostTeamMembers).values({
-        hostTeamId: teamId,
-        userId: ctx.user.id,
-      });
+      const teamId = await createInitialHostTeam(ctx.user);
 
       await ctx.db.insert(hostProfiles).values({
         userId: ctx.user.id,

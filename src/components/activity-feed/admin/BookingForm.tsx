@@ -242,12 +242,7 @@ export default function CreateBookingForm({
           )}
         />
 
-        <Button
-          disabled={form.formState.isSubmitting}
-          size="lg"
-          type="submit"
-          className="col-span-full"
-        >
+        <Button size="lg" type="submit" className="col-span-full">
           Confirm Booking
         </Button>
       </form>

@@ -49,7 +49,7 @@ export function LeaveGroupDialog({
         </DialogHeader>
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
+            <Button variant="secondary">Cancel</Button>
           </DialogClose>
           <Button onClick={() => leaveGroup()} disabled={mutation.isLoading}>
             Leave group

@@ -106,7 +106,7 @@ export const tripsRouter = createTRPCRouter({
       with: {
         property: {
           columns: { name: true, imageUrls: true, city: true },
-          with: { host: { columns: { name: true, image: true } } },
+          with: { host: { columns: { name: true, image: true, id: true } } },
         },
         offer: {
           columns: {

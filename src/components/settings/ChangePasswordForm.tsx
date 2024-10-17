@@ -105,13 +105,7 @@ export default function ChangePasswordForm() {
           )}
         />
         <div className="pt-2 text-end">
-          <Button
-            type="submit"
-            disabled={form.formState.isSubmitting}
-            className=" bg-teal-900"
-          >
-            Done
-          </Button>
+          <Button type="submit">Done</Button>
         </div>
       </form>
     </Form>

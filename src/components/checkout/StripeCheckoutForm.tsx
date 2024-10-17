@@ -131,7 +131,6 @@ export default function StripeCheckoutForm({
         />
         <Button
           type="submit"
-          variant="greenPrimary"
           className="w-full"
           disabled={!stripe || !termsAccepted}
         >

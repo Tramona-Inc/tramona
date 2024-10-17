@@ -167,7 +167,7 @@ export function CityRequestFiltersDialog({
         </div>
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="greenPrimary">Done</Button>
+            <Button>Done</Button>
           </DialogClose>
         </DialogFooter>
       </DialogContent>

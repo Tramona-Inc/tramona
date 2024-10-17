@@ -107,8 +107,7 @@ export default function HostPropertiesLayout({
             {/* <NewPropertyBtn open={open} setOpen={setOpen} /> */}
             <Link href="/host-onboarding">
               <Button
-                variant="secondaryLight"
-                className="font-semi bg-white"
+                variant="secondary"
                 onClick={() => {
                   setStatesDefault();
                 }}

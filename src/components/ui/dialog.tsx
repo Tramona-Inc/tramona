@@ -158,7 +158,10 @@ const DialogTitle = React.forwardRef<
   useIsSm() ? (
     <DialogPrimitive.Title
       ref={ref}
-      className={cn("text-xl font-bold leading-none tracking-tight", className)}
+      className={cn(
+        "flex items-center gap-2 text-xl font-bold leading-none tracking-tight",
+        className,
+      )}
       {...props}
     />
   ) : (

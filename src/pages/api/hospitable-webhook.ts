@@ -1,7 +1,5 @@
 import {
   hostProfiles,
-  hostTeamMembers,
-  hostTeams,
   properties,
   reservedDateRanges,
   users,
@@ -12,7 +10,10 @@ import { type NextApiRequest, type NextApiResponse } from "next";
 import { db } from "@/server/db";
 import { eq } from "drizzle-orm";
 import { sendSlackMessage } from "@/server/slack";
-import { createLatLngGISPoint } from "@/server/server-utils";
+import {
+  createInitialHostTeam,
+  createLatLngGISPoint,
+} from "@/server/server-utils";
 import { getCity } from "@/server/google-maps";
 import { calculateTotalTax } from "@/utils/payment-utils/taxData";
 
@@ -34,21 +35,7 @@ export async function insertHost(id: string) {
     return existingHostProfile;
   }
 
-  const teamId = await db
-    .insert(hostTeams)
-    .values({
-      ownerId: user.id,
-      name: `${user.name ?? user.username ?? user.email}`,
-    })
-    .returning()
-    .then((res) => res[0]!.id);
-
-  // Insert Host info
-
-  await db.insert(hostTeamMembers).values({
-    hostTeamId: teamId,
-    userId: user.id,
-  });
+  const teamId = await createInitialHostTeam(user);
 
   await db.insert(hostProfiles).values({
     userId: user.id,
