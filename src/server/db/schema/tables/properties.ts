@@ -322,6 +322,7 @@ export const properties = pgTable(
     autoOfferDiscountTiers: jsonb("auto_offer_discount_tiers").$type<
       DiscountTier[]
     >(),
+    bookItNowEnabled: boolean("book_it_now_enabled").notNull().default(false)
   },
   (t) => ({
     spatialIndex: index("spacial_index").using("gist", t.latLngPoint),

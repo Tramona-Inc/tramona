@@ -21,7 +21,7 @@ export default function OnboardingFooter({
   handleError,
 }: OnboardingFooterProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const maxPages = 12;
+  const maxPages = 13;
 
   const progress = useHostOnboarding((state) => state.progress);
   const isEdit = useHostOnboarding((state) => state.isEdit);
@@ -53,7 +53,7 @@ export default function OnboardingFooter({
   async function onPressNext() {
     setIsLoading(true);
     try {
-      if (progress === 12) {
+      if (progress === 13) {
         if (!isHost) {
           await createHostProfile();
         }
@@ -85,6 +85,7 @@ export default function OnboardingFooter({
           originalListingId: listing.originalListingId,
           originalListingPlatform: listing.originalListingPlatform,
           airbnbUrl: listing.airbnbUrl,
+          bookItNowEnabled: listing.bookItNowEnabled,
         }).catch(() => errorToast());
       } else {
         if (isEdit) {
@@ -92,13 +93,13 @@ export default function OnboardingFooter({
             if (isFormValid) {
               handleNext && handleNext();
               setIsEdit(false);
-              setProgress(12);
+              setProgress(13);
             } else {
               handleError && handleError();
             }
           } else {
             setIsEdit(false);
-            setProgress(12);
+            setProgress(13);
           }
         } else {
           if (isForm) {
@@ -143,7 +144,7 @@ export default function OnboardingFooter({
               <Button onClick={onPressNext} disabled={isLoading}>
                 {progress === 0
                   ? "Get Started"
-                  : progress === 12
+                  : progress === 13
                       ? "Finish"
                       : "Next"}
               </Button>

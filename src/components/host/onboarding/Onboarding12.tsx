@@ -1,201 +1,167 @@
-import React, { useState, KeyboardEvent } from "react";
-import RequestFeed from "@/components/activity-feed/RequestFeed";
-import { type FeedRequestItem } from "@/components/activity-feed/ActivityFeed";
-import { Button } from "@/components/ui/button";
+import { useHostOnboarding } from "@/utils/store/host-onboarding";
+import { MapPin } from "lucide-react";
+import Image from "next/image";
 import OnboardingFooter from "./OnboardingFooter";
-
-import { Input } from "@/components/ui/input";
-import { LinkIcon, MailsIcon, PlusIcon, X } from "lucide-react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { z } from "zod";
-import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/utils/api";
+import React from "react";
+import Summary1 from "./Summary1";
+import Summary2 from "./Summary2";
+import Summary4 from "./Summary4";
+import Summary7 from "./Summary7";
+import Summary8 from "./Summary8";
+import SingleLocationMap from "@/components/_common/GoogleMaps/SingleLocationMap";
+import { capitalize } from "@/utils/utils";
+import Summary9 from "./Summary9";
+import Summary10 from "./Summary10";
 
-type Props = {
-  requestFeed: FeedRequestItem[];
-};
+function Heading({
+  title,
+  editPage,
+  children,
+}: {
+  title: string;
+  editPage?: number;
+  children: React.ReactNode;
+}) {
+  const setProgress = useHostOnboarding((state) => state.setProgress);
+  const setIsEdit = useHostOnboarding((state) => state.setIsEdit);
 
-const Onboarding12: React.FC<Props> = ({ requestFeed }) => {
-  const { toast } = useToast();
-  const [email, setEmail] = useState("");
-  const [emailList, setEmailList] = useState<string[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const [emailListError, setEmailListError] = useState<string | null>(null);
+  return (
+    <div className="flex flex-col gap-3 py-5">
+      <div className="flex justify-between">
+        <h3 className="text-lg font-semibold">{title}</h3>
+        <p
+          className="text-sm underline transition duration-200 hover:cursor-pointer hover:text-muted-foreground"
+          onClick={() => {
+            if (editPage) {
+              setIsEdit(true);
+              setProgress(editPage);
+            }
+          }}
+        >
+          Edit
+        </p>
+      </div>
 
-  const sendEmailMutation =
-    api.emails.sendListOfHostReferralEmails.useMutation();
+      <div className="flex flex-col gap-2 text-muted-foreground">
+        {children}
+      </div>
+    </div>
+  );
+}
 
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEmail(e.target.value);
-    if (error) setError(null);
-  };
+export default function Onboarding12() {
+  const { listing } = useHostOnboarding((state) => state);
 
-  const emailSchema = z.string().email({ message: "Must be a valid email" });
+  const address = `${listing.location.street}${listing.location.apt ? `, ${listing.location.apt}` : ""}, ${listing.location.city}, ${listing.location.state} ${listing.location.zipcode}, ${listing.location.country}`;
 
-  const addEmail = () => {
-    const result = emailSchema.safeParse(email);
-    if (result.error && result.error.errors[0]) {
-      setError(result.error.errors[0].message);
-      return;
-    }
-    const lowerEmail = email.trim().toLowerCase();
-    const alreadyExist = emailList.some(
-      (existingEmail) => lowerEmail === existingEmail.trim().toLowerCase(),
-    );
-    if (alreadyExist) {
-      setError("This email is already added");
-    } else {
-      setEmailListError(null);
-      setEmailList([...emailList, email]);
-      setEmail("");
-      setError(null);
-    }
-  };
-  const removeEmail = (emailToRemove: string) => {
-    setEmailList(emailList.filter((e) => e !== emailToRemove));
-    toast({
-      title: "Removed email",
-    });
-  };
+  const { data: coordinateData } = api.offers.getCoordinates.useQuery({
+    location: address,
+  });
 
-  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      addEmail();
-    }
-  };
-
-  const sendEmails = async () => {
-    console.log(emailList);
-    if (emailList.length < 1) {
-      setEmailListError("Must add an email first");
-      return;
-    }
-
-    await sendEmailMutation.mutateAsync(
-      { emailList: emailList },
-      {
-        onSuccess: () => {
-          toast({
-            title: "Congratulations!",
-            description: "Emails successfully sent",
-            duration: 1500,
-          });
-          setEmailList([]);
-        },
-      },
-    );
-  };
+  const lat = coordinateData?.coordinates.location?.lat;
+  const lng = coordinateData?.coordinates.location?.lng;
 
   return (
     <>
-      <div className="mx-auto mt-24 flex min-h-screen flex-col md:mt-0 md:flex-row">
-        <div className="hidden md:flex md:w-1/2 md:items-center md:justify-center md:overflow-y-auto md:p-6">
-          <div className="h-[850px] rounded-lg border px-2 py-2 shadow-xl">
-            <RequestFeed requestFeed={requestFeed} />
-          </div>
-        </div>
+      <div className="container my-10 flex-grow sm:px-32">
+        <h1 className="mb-8 text-3xl font-semibold">Review your listing</h1>
+        <div className="grid grid-cols-1 space-y-3 divide-y">
+          <Summary1 />
+          <Summary2 />
 
-        <div className="hidden md:flex md:items-center">
-          <div className="h-5/6 w-px bg-black"></div>
-        </div>
+          <Heading title={"Location"} editPage={3}>
+            <div className="flex flex-row gap-5">
+              <MapPin />
 
-        <div className="flex flex-col items-start justify-center p-4 md:w-1/2 md:p-6 md:px-16">
-          <h2 className="mb-4 text-3xl font-bold md:text-4xl">
-            Know other hosts?
-          </h2>
-          <p className="mb-6 text-xl md:text-3xl">
-            Every day, hundreds of requests go to waste. Invite them now to fill
-            their calendar
-          </p>
-          <Card className="mx-auto w-full">
-            <CardHeader>
-              <CardTitle>Add Emails</CardTitle>
-            </CardHeader>
-            <CardContent className="w-full space-y-4">
-              {emailList.length > 0 && (
-                <div className="mb-4 rounded-md border">
-                  <ul className="space-y-2">
-                    {emailList.map((email, index) => (
-                      <li
-                        key={index}
-                        className="flex items-center justify-between rounded-md p-2 font-semibold"
-                      >
-                        <span className="text-sm">{email}</span>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => removeEmail(email)}
-                          className="h-8 w-8"
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              <div className="flex w-full space-x-2">
-                <div className="flex w-full flex-col gap-y-1">
-                  <Input
-                    type="email"
-                    placeholder="Enter email address"
-                    value={email}
-                    onChange={handleEmailChange}
-                    onKeyDown={handleKeyDown}
-                    className="w-full flex-grow"
-                  />
-                  {error && (
-                    <p className="mx-2 text-xs tracking-tight text-red-600">
-                      {error}
-                    </p>
-                  )}
-                </div>
-                <Button onClick={addEmail} variant="outline" className="w-1/3">
-                  Add
-                  <PlusIcon size={18} />
-                </Button>
+              <div>
+                <p> {listing.location.street}</p>
+                {listing.location.apt && <p>{listing.location.apt}</p>}
+                <p>
+                  {listing.location.city}, {listing.location.state}{" "}
+                  {listing.location.zipcode},
+                </p>
+                <p>{listing.location.country}</p>
               </div>
-              <p className="mt-4 text-sm text-gray-600">
-                Earn a feeless booking for each friend that&apos;s added
-              </p>
-            </CardContent>
-          </Card>
-          <div className="mx-auto my-4 flex w-full gap-x-6 px-1">
-            <Button className="w-full" variant="secondary">
-              Share Link
-              <LinkIcon size={18} />
-            </Button>
-            <Button
-              className="w-full"
-              onClick={async () => {
-                await sendEmails();
-              }}
-            >
-              {!sendEmailMutation.isLoading ? (
-                <div className="flex flex-row items-center gap-x-4">
-                  Send Emails <MailsIcon size={18} />{" "}
+            </div>
+            {coordinateData && (
+              <div className="relative mt-4 h-[400px]">
+                <div className="absolute inset-0 z-0">
+                  <SingleLocationMap lat={lat ?? 0} lng={lng ?? 0} />
                 </div>
-              ) : (
-                <div className="flex h-full items-center justify-center space-x-2">
-                  <span className="mx-2 text-white">Sending Emails</span>
-                  <div className="h-1 w-1 animate-bounce rounded-full bg-white [animation-delay:-0.3s]"></div>
-                  <div className="h-1 w-1 animate-bounce rounded-full bg-white [animation-delay:-0.15s]"></div>
-                  <div className="h-1 w-1 animate-bounce rounded-full bg-white"></div>
-                </div>
-              )}
-            </Button>
-          </div>
-          {emailListError && (
-            <p className="mx-2 text-center text-sm text-red-600">
-              {emailListError}
-            </p>
-          )}
+              </div>
+            )}
+          </Heading>
+          <Summary4 />
+          <Heading title={"Amenities"} editPage={5}>
+            <div className="grid grid-cols-2 gap-5">
+              {listing.amenities.map((amenity, index) => (
+                <p key={index} className="flex items-center">
+                  {amenity}
+                </p>
+              ))}
+              <div className="col-span-full">
+                <p className="font-semibold text-primary">Other Amenities</p>
+              </div>
+              {listing.otherAmenities.map((amenity, index) => (
+                <p key={index} className="flex items-center">
+                  {capitalize(amenity)}
+                </p>
+              ))}
+            </div>
+          </Heading>
+          <Heading title={"Photos"} editPage={6}>
+            <div className="grid h-[420.69px] grid-cols-4 grid-rows-2 gap-2 overflow-clip rounded-xl">
+              <div className="relative col-span-2 row-span-2 bg-accent">
+                <Image
+                  src={listing.imageUrls[0]!}
+                  alt=""
+                  fill
+                  objectFit="cover"
+                  priority
+                />
+              </div>
+              <div className="relative col-span-1 row-span-1 bg-accent">
+                <Image
+                  src={listing.imageUrls[1]!}
+                  alt=""
+                  fill
+                  objectFit="cover"
+                />
+              </div>
+              <div className="relative col-span-1 row-span-1 bg-accent">
+                <Image
+                  src={listing.imageUrls[2]!}
+                  alt=""
+                  fill
+                  objectFit="cover"
+                />
+              </div>
+              <div className="relative col-span-1 row-span-1 bg-accent">
+                <Image
+                  src={listing.imageUrls[3]!}
+                  alt=""
+                  fill
+                  objectFit="cover"
+                />
+              </div>
+              <div className="relative col-span-1 row-span-1 bg-accent">
+                <Image
+                  src={listing.imageUrls[4]!}
+                  alt=""
+                  fill
+                  objectFit="cover"
+                />
+              </div>
+            </div>
+          </Heading>
+          <Summary7 />
+          <Summary8 />
+          <Summary9 />
+          <Summary10 />
         </div>
       </div>
       <OnboardingFooter isForm={false} />
     </>
   );
-};
-
-export default Onboarding12;
+}
