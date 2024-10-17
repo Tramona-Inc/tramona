@@ -20,16 +20,15 @@ import {
   formatCurrency,
   formatDateRange,
   getDaysUntilTrip,
-  getNumNights,
-  removeTax,
 } from "@/utils/utils";
+
 import UserAvatar from "@/components/_common/UserAvatar";
 import { MapPinIcon } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { TAX_PERCENTAGE } from "@/utils/constants";
 import { Skeleton } from "@/components/ui/skeleton";
+
 const formSchema = z.object({
   tripId: z.number(),
   reason: z.string().min(4, "Reason must be 5 characters or longer"),
@@ -239,10 +238,9 @@ export default function TripCancellationOrPartialRefund({
             </p>
           </div>
 
-          {cancellationFee && (
+          {cancellationFee !== 0 && (
             <div className="flex flex-row justify-between">
-              <p>Cancellation Fee </p>{" "}
-              <p>${(cancellationFee / 100).toFixed(2)}</p>
+              <p>Cancellation Fee </p> <p>{formatCurrency(cancellationFee)}</p>
             </div>
           )}
 
