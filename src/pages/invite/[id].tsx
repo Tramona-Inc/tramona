@@ -33,7 +33,7 @@ export default function Invite() {
         },
       );
     }
-  }, [inviteLinkId]);
+  }, [inviteLinkId, inviteUser, router]);
 
   return (
     <div>

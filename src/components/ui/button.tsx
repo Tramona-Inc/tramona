@@ -99,8 +99,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const form = useFormContext();
     const isSubmitButton = props.type === "submit";
 
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     const isLoading =
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       isOnClickLoading || (isSubmitButton && form?.formState.isSubmitting);
 
     const handleClick = async (event: React.MouseEvent<HTMLButtonElement>) => {

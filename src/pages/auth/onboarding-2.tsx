@@ -1,5 +1,4 @@
 import MainLayout from "@/components/_common/Layout/MainLayout";
-import { Icons } from "@/components/_icons/icons";
 import { Button } from "@/components/ui/button";
 import { ButtonSpinner } from "@/components/ui/button-spinner";
 import { Card, CardContent } from "@/components/ui/card";
