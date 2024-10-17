@@ -69,7 +69,6 @@ export default function HostRequests() {
 
   const { mutateAsync: rejectRequest } =
     api.requests.rejectRequest.useMutation();
-  const { data: user } = api.users.getUser.useQuery();
 
   return (
     <div className="p-4">
@@ -94,9 +93,6 @@ export default function HostRequests() {
                       })
                       .catch(() => errorToast());
                   }}
-                  disabled={
-                    user?.mainHostId !== null && user?.coHostRole === "strict"
-                  }
                 >
                   Reject
                 </Button>
@@ -106,9 +102,6 @@ export default function HostRequests() {
                     setSelectedRequest(requestData.request);
                     setProperties(requestData.properties);
                   }}
-                  disabled={
-                    user?.mainHostId !== null && user?.coHostRole === "strict"
-                  }
                 >
                   Make an offer
                 </Button>

@@ -10,8 +10,8 @@ import {
 } from "drizzle-orm/pg-core";
 import { users } from "./users";
 
-export const COHOST_ROLES = ["strict", "medium", "loose"] as const;
-export const coHostRoleEnum = pgEnum("coHostRole", COHOST_ROLES);
+export const COHOST_ROLES = ["Strict", "Medium", "Loose"] as const;
+export const hostPermissionEnum = pgEnum("coHostRole", COHOST_ROLES);
 
 export const hostTeams = pgTable(
   "host_teams",
@@ -38,7 +38,7 @@ export const hostTeamMembers = pgTable(
     userId: text("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    permission: coHostRoleEnum("permission").default("strict"),
+    permission: hostPermissionEnum("permission").default("Strict"),
   },
   (vt) => ({
     compoundKey: primaryKey({ columns: [vt.hostTeamId, vt.userId] }),
