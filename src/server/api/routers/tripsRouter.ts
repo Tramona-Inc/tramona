@@ -11,6 +11,7 @@ import {
   groups,
   trips,
   tripCancellations,
+  tripCheckouts,
 } from "@/server/db/schema";
 import { cancelSuperhogReservation } from "@/utils/webhook-functions/superhog-utils";
 import { sendEmail } from "@/server/server-utils";
@@ -410,5 +411,17 @@ export const tripsRouter = createTRPCRouter({
         },
       });
       return;
+    }),
+  getTripCheckoutByTripId: protectedProcedure
+    .input(z.number())
+    .query(async ({ input }) => {
+      const tripCheckout = await db.query.trips.findFirst({
+        where: eq(trips.id, input),
+        columns: { tripCheckoutId: true },
+        with: { tripCheckout: true },
+      });
+
+      console.log(tripCheckout?.tripCheckout);
+      return tripCheckout?.tripCheckout;
     }),
 });
