@@ -10,7 +10,8 @@ import {
   
   export const searchSchema = z.object({
     location: optional(zodString()),
-    date: z.object({ from: z.date(), to: z.date() }).optional(),
+    checkIn: optional(z.date()),
+    checkOut: optional(z.date()),
     numGuests: optional(zodInteger({ min: 1 })),
     maxNightlyPriceUSD: optional(zodNumber({ min: 0 })),
   });

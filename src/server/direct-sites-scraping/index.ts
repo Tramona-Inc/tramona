@@ -723,13 +723,16 @@ export const checkAvailabilityForProperties = async (options: {
         subScrapedResult = await casamundoSubScraper(subScraperOptions);
         break;
       // Add other cases here as needed
-      // case "IntegrityArizona":
-      //   subScrapedResult = await arizonaSubScraper(subScraperOptions);
-      //   break;
+      case "IntegrityArizona":
+        subScrapedResult = await arizonaSubScraper(subScraperOptions);
+        break;
       // case "Cleanbnb":
       //   subScrapedResult = await cleanbnbSubScraper(subScraperOptions);
       //   break;
       // ... other cases ...
+      case "Evolve":
+        subScrapedResult = await evolveVacationRentalSubScraper(subScraperOptions);
+        break;
     }
 
     if (subScrapedResult) {
@@ -752,7 +755,7 @@ export const checkAvailabilityForProperties = async (options: {
     return true;
   });
 
-  console.log('Availability results:', availabilityResults);
+  // console.log('Availability results:', availabilityResults);
 
   return availabilityResults;
 };

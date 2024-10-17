@@ -708,6 +708,14 @@ export const propertiesRouter = createTRPCRouter({
         checkOut: input.checkOut,
         numGuests: input.numGuests,
       });
-      return results;
+
+      // Filter the results to only include available properties with a price
+      const filteredResults = results.filter(
+        (result) =>
+          result.isAvailableOnOriginalSite &&
+          result.originalNightlyPrice !== undefined,
+      );
+
+      return filteredResults;
     }),
 });

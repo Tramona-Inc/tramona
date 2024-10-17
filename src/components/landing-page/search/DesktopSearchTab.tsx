@@ -1,8 +1,15 @@
 import React, { useState, useRef, useCallback } from "react";
+import Image from "next/image";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useSearchBarForm } from "./useSearchBarForm";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   ChevronLeft,
   ChevronRight,
@@ -10,11 +17,10 @@ import {
   CalendarDays,
   Users,
 } from "lucide-react";
-import Image from "next/image";
-import PlacesInput from "@/components/_common/PlacesInput";
+import { useSearchBarForm } from "./useSearchBarForm";
 import { api } from "@/utils/api";
 import { useAdjustedProperties } from "./AdjustedPropertiesContext";
-import DateRangeInput from "@/components/_common/DateRangeInput";
+import SingleDateInput from "@/components/_common/SingleDateInput";
 
 const locations = [
   {
@@ -228,39 +234,35 @@ const locations = [
       "https://images.unsplash.com/photo-1617581629397-a72507c3de9e?w=300&h=200&fit=crop",
   },
 ];
+
 export function DesktopSearchTab() {
   const { form, onSubmit } = useSearchBarForm();
-  const [selectedLocation, setSelectedLocation] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
-  const { adjustedProperties, setAdjustedProperties } = useAdjustedProperties();
+  const { adjustedProperties, setAdjustedProperties, setIsSearching } = useAdjustedProperties();
   const runSubscrapers = api.properties.runSubscrapers.useMutation();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const checkInDate = form.watch("checkIn");
+  const checkOutDate = form.watch("checkOut");
 
   const handleLocationClick = useCallback(
-    async (location: string) => {
-      if (location !== selectedLocation) {
-        setSelectedLocation(location);
-        form.setValue("location", location);
-
-        const syntheticEvent = {
-          target: form.getValues(),
-        } as React.BaseSyntheticEvent;
-
-        try {
-          await onSubmit(syntheticEvent);
-        } catch (error) {
-          console.error("Error selecting location:", error);
-        }
-      }
+    (location: string) => {
+      form.setValue("location", location);
     },
-    [selectedLocation, form, onSubmit],
+    [form],
   );
 
   const handleSearch = async (event: React.FormEvent) => {
     event.preventDefault();
+    setIsLoading(true);
+    setIsSearching(true);
     const formData = form.getValues();
+    console.log("Form data:", formData);
 
     // Run the original onSubmit function
     await onSubmit(event as React.BaseSyntheticEvent);
+
+    console.log("Initial adjustedProperties:", adjustedProperties);
 
     // Get all property IDs and original listing IDs from adjustedProperties
     const propertyData =
@@ -273,8 +275,9 @@ export function DesktopSearchTab() {
         })),
       ) ?? [];
 
-    // Run subscrapers
-    if (formData.date) {
+    console.log("Property data:", propertyData);
+
+    if (formData.checkIn && formData.checkOut) {
       try {
         const results = await runSubscrapers.mutateAsync({
           propertyData: propertyData.filter(
@@ -292,34 +295,60 @@ export function DesktopSearchTab() {
               prop.originalListingPlatform !== null &&
               typeof prop.maxNumGuests === "number",
           ),
-          checkIn: new Date(formData.date.from),
-          checkOut: new Date(formData.date.to),
+          checkIn: new Date(formData.checkIn),
+          checkOut: new Date(formData.checkOut),
           numGuests: parseInt(formData.numGuests as string),
         });
         console.log("Subscraper results:", results);
 
-        // Update adjustedProperties with the new availability information
+        // Update adjustedProperties with only the properties that were updated
         if (adjustedProperties) {
-          const updatedPages = adjustedProperties.pages.map((page) => ({
-            ...page,
-            data: page.data.map((property) => {
-              const updatedProperty = results.find(
-                (r) => r.propertyId === property.id,
-              );
-              if (updatedProperty && updatedProperty.originalNightlyPrice) {
-                return {
-                  ...property,
-                  originalNightlyPrice: updatedProperty.originalNightlyPrice,
-                };
-              }
-              return property;
-            }),
-          }));
-          setAdjustedProperties({ ...adjustedProperties, pages: updatedPages });
+          const updatedProperties = results.filter(
+            (r) => r.isAvailableOnOriginalSite && r.originalNightlyPrice,
+          );
+
+          const updatedPages = [
+            {
+              data: adjustedProperties.pages[0].data
+                .filter((property) =>
+                  updatedProperties.some((r) => r.propertyId === property.id),
+                )
+                .map((property) => {
+                  const updatedProperty = updatedProperties.find(
+                    (r) => r.propertyId === property.id,
+                  );
+                  return {
+                    ...property,
+                    originalNightlyPrice: updatedProperty?.originalNightlyPrice,
+                  };
+                }),
+            },
+          ];
+
+          console.log("Updated pages:", updatedPages);
+          console.log(
+            "Number of properties updated:",
+            updatedProperties.length,
+          );
+          console.log(
+            "Total number of properties:",
+            updatedPages[0].data.length,
+          );
+
+          // Use a callback function with setAdjustedProperties
+          setAdjustedProperties((prevState) => {
+            if (!prevState) return null;
+            return { ...prevState, pages: updatedPages };
+          });
         }
       } catch (error) {
         console.error("Error running subscrapers:", error);
+      } finally {
+        setIsLoading(false);
+        setIsSearching(false);
       }
+    } else {
+      setIsLoading(false);
     }
   };
 
@@ -366,51 +395,84 @@ export function DesktopSearchTab() {
   return (
     <Form {...form}>
       <form onSubmit={handleSearch} className="w-full">
-        <div className="mx-auto mb-6 w-1/2">
+        <div className="mx-auto mb-6 w-[1200px]">
           <div className="flex items-center justify-between rounded-full border border-black bg-white p-2">
-            <div className="mx-2 flex flex-grow items-center">
+            <div className="mx-2 flex w-[400px] items-center">
               <Search className="mr-2 text-gray-400" />
-              <PlacesInput
-                control={form.control}
-                name="location"
-                variant="default"
-                placeholder="Search destinations"
-                className="w-full border-0 bg-white text-sm hover:cursor-default hover:bg-transparent focus:ring-0"
-              />
-            </div>
-            <div className="flex items-center border-l border-gray-300 px-4">
-              <CalendarDays className="mr-2 text-gray-400" />
-              <Input
-                placeholder="Check in"
-                className="w-24 border-0 bg-white text-sm focus:ring-0"
-              />
               <FormField
                 control={form.control}
-                name={`date`}
+                name="location"
+                render={({ field }) => (
+                  <FormItem className="w-full">
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="border-0 bg-transparent focus:ring-0">
+                          <SelectValue placeholder="Search destinations" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent
+                        className="h-48 overflow-y-auto"
+                        position="popper"
+                      >
+                        {locations.map((location) => (
+                          <SelectItem key={location.name} value={location.name}>
+                            {location.name}, {location.country}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="h-8 w-px bg-gray-300"></div>
+            <div className="flex w-[180px] items-center px-4">
+              <CalendarDays className="mr-2 text-gray-400" />
+              <FormField
+                control={form.control}
+                name={`checkIn`}
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <DateRangeInput
+                      <SingleDateInput
                         {...field}
-                        label="Check in/out"
-                        // icon={CalendarIcon}
+                        value={field.value ? new Date(field.value) : undefined}
                         variant="lpDesktop"
+                        placeholder="Check in"
                         disablePast
-                        className="bg-white"
+                        className="border-0 bg-transparent focus:ring-0 hover:bg-transparent"
+                        maxDate={checkOutDate ? new Date(checkOutDate) : undefined}
                       />
                     </FormControl>
                   </FormItem>
                 )}
               />
             </div>
-            <div className="flex items-center border-l border-gray-300 px-4">
+            <div className="h-8 w-px bg-gray-300"></div>
+            <div className="flex w-[180px] items-center px-4">
               <CalendarDays className="mr-2 text-gray-400" />
-              <Input
-                placeholder="Check out"
-                className="w-24 border-0 bg-white text-sm focus:ring-0"
+              <FormField
+                control={form.control}
+                name={`checkOut`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <SingleDateInput
+                        {...field}
+                        value={field.value ? new Date(field.value) : undefined}
+                        variant="lpDesktop"
+                        placeholder="Check Out"
+                        disablePast
+                        className="border-0 bg-transparent focus:ring-0 hover:bg-transparent"
+                        minDate={checkInDate ? new Date(checkInDate) : undefined}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
               />
             </div>
-            <div className="flex items-center border-l border-gray-300 px-4">
+            <div className="h-8 w-px bg-gray-300"></div>
+            <div className="flex w-[180px] items-center px-4">
               <Users className="mr-2 text-gray-400" />
               <FormField
                 control={form.control}
@@ -422,7 +484,7 @@ export function DesktopSearchTab() {
                         {...field}
                         type="number"
                         placeholder="1 Guest"
-                        className="w-20 border-0 bg-white text-sm focus:ring-0"
+                        className="w-28 border-0 bg-white text-sm focus:ring-0"
                         onChange={(e) =>
                           field.onChange(parseInt(e.target.value) || 1)
                         }
@@ -435,8 +497,13 @@ export function DesktopSearchTab() {
             <Button
               type="submit"
               className="rounded-full bg-primaryGreen text-white"
+              disabled={isLoading}
             >
-              <Search className="h-4 w-4" />
+              {isLoading ? (
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+              ) : (
+                <Search className="h-4 w-4" />
+              )}
             </Button>
           </div>
         </div>
@@ -451,7 +518,10 @@ export function DesktopSearchTab() {
               <div
                 key={location.name}
                 className="flex-shrink-0 cursor-pointer"
-                onClick={() => handleLocationClick(location.name)}
+                onClick={() => {
+                  handleLocationClick(location.name);
+                  form.setValue("location", location.name);
+                }}
               >
                 <div className="relative h-40 w-60 overflow-hidden rounded-lg">
                   <Image
@@ -469,17 +539,6 @@ export function DesktopSearchTab() {
             ))}
           </div>
         </div>
-        <FormField
-          control={form.control}
-          name="location"
-          render={({ field }) => (
-            <FormItem className="hidden">
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-            </FormItem>
-          )}
-        />
       </form>
     </Form>
   );
