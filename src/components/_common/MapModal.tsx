@@ -1,4 +1,4 @@
-import { Map, Marker, Circle } from "google-maps-react";
+import { Map, Marker, Circle } from "@peacechen/google-maps-react";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { DialogClose, DialogFooter } from "../ui/dialog";
@@ -47,7 +47,6 @@ export function MapModal({
         </div>
       </div>
       <div className="relative h-[300px] overflow-hidden rounded-lg border sm:h-[400px]">
-        {/* @ts-expect-error their typedefs are wrong */}
         <Map
           disableDefaultUI
           google={google}
@@ -68,7 +67,6 @@ export function MapModal({
           <Marker
             draggable
             position={editedLatLng}
-            // @ts-expect-error their typedefs are wrong
             onDragend={onDragendOrClick}
           />
         </Map>
@@ -90,9 +88,7 @@ export function MapModal({
           <Button variant="secondary">Cancel</Button>
         </DialogClose>
         <DialogClose asChild>
-          <Button variant="greenPrimary" onClick={saveEditedValues}>
-            Done
-          </Button>
+          <Button onClick={saveEditedValues}>Done</Button>
         </DialogClose>
       </DialogFooter>
     </>

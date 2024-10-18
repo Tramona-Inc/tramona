@@ -81,9 +81,7 @@ export function DeleteImage() {
                 </FormItem>
               )}
             />
-            <Button type="submit" disabled={form.formState.isSubmitting}>
-              Delete
-            </Button>
+            <Button type="submit">Delete</Button>
           </form>
         </Form>
       </CardContent>

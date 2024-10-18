@@ -119,9 +119,7 @@ export function ReferralCodeForm() {
               <DialogClose asChild>
                 <Button variant="outline">Skip</Button>
               </DialogClose>
-              <Button type="submit" disabled={form.formState.isSubmitting}>
-                Submit
-              </Button>
+              <Button type="submit">Submit</Button>
             </DialogFooter>
           </form>
         </Form>

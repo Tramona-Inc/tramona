@@ -191,7 +191,7 @@ export function DesktopSearchTab() {
 //         <Button
 //           type="submit"
 //           size="lg"
-//           disabled={form.formState.isSubmitting}
+//
 //           className="h-16 bg-teal-900 hover:bg-teal-950"
 //         >
 //           Search

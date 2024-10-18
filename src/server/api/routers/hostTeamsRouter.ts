@@ -64,12 +64,12 @@ async function createOrGetConversation(inviteeEmail: string, hostId: string) {
           .where(
             or(
               eq(conversationParticipants.userId, inviteeUser.id),
-              eq(conversationParticipants.userId, hostId)
-            )
+              eq(conversationParticipants.userId, hostId),
+            ),
           )
           .groupBy(conversationParticipants.conversationId)
           .having(sql`count(*) = 2`)
-          .limit(1)
+          .limit(1),
       ),
       with: {
         participants: true,
@@ -122,7 +122,7 @@ async function sendInviteMessage(
 async function sendAcceptMessage(
   conversationId: string | null,
   hostTeamName: string,
-  userId: string
+  userId: string,
 ) {
   if (!conversationId) return;
 
@@ -138,7 +138,7 @@ async function sendAcceptMessage(
 async function sendDeclineMessage(
   conversationId: string | null,
   hostTeamName: string,
-  userId: string
+  userId: string,
 ) {
   if (!conversationId) return;
 
@@ -544,20 +544,18 @@ export const hostTeamsRouter = createTRPCRouter({
         .insert(hostTeams)
         .values({ ownerId: ctx.user.id, name: input.name })
         .returning()
-        .then((res) => res[0]?.id);
+        .then((res) => res[0]!.id);
 
-      if (!hostTeamId) {
-        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
-      }
+      await Promise.all([
+        ctx.db
+          .insert(hostTeamMembers)
+          .values({ hostTeamId, userId: ctx.user.id }),
 
-      await ctx.db
-        .insert(hostTeamMembers)
-        .values({ hostTeamId, userId: ctx.user.id });
-
-      await ctx.db
-        .update(hostProfiles)
-        .set({ curTeamId: hostTeamId })
-        .where(eq(hostProfiles.userId, ctx.user.id));
+        ctx.db
+          .update(hostProfiles)
+          .set({ curTeamId: hostTeamId })
+          .where(eq(hostProfiles.userId, ctx.user.id)),
+      ]);
     }),
 
   getHostTeamDetails: protectedProcedure

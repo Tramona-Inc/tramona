@@ -11,6 +11,7 @@ import {
   groups,
   trips,
   tripCancellations,
+  tripCheckouts,
 } from "@/server/db/schema";
 import { cancelSuperhogReservation } from "@/utils/webhook-functions/superhog-utils";
 import { sendEmail } from "@/server/server-utils";
@@ -101,12 +102,20 @@ export const tripsRouter = createTRPCRouter({
   getHostTrips: protectedProcedure.query(async ({ ctx }) => {
     return await db.query.trips.findMany({
       where: exists(
-        db.select().from(properties).where(eq(properties.hostId, ctx.user.id)),
+        db
+          .select()
+          .from(properties)
+          .where(
+            and(
+              eq(properties.hostId, ctx.user.id),
+              eq(properties.id, trips.propertyId),
+            ),
+          ),
       ),
       with: {
         property: {
           columns: { name: true, imageUrls: true, city: true },
-          with: { host: { columns: { name: true, image: true } } },
+          with: { host: { columns: { name: true, image: true, id: true } } },
         },
         offer: {
           columns: {
@@ -264,7 +273,7 @@ export const tripsRouter = createTRPCRouter({
         refundAmount: z.number().optional(),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ input }) => {
       //1.cancel superhog.. skip request with null or rejected
       const curSuperhogRequest = await db.query.superhogRequests.findFirst({
         where: and(
@@ -428,4 +437,16 @@ export const tripsRouter = createTRPCRouter({
     });
     return allPayments;
   }),
+  getTripCheckoutByTripId: protectedProcedure
+    .input(z.number())
+    .query(async ({ input }) => {
+      const tripCheckout = await db.query.trips.findFirst({
+        where: eq(trips.id, input),
+        columns: { tripCheckoutId: true },
+        with: { tripCheckout: true },
+      });
+
+      console.log(tripCheckout?.tripCheckout);
+      return tripCheckout?.tripCheckout;
+    }),
 });

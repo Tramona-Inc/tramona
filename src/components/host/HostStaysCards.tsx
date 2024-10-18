@@ -12,11 +12,13 @@ import {
   getNumNights,
   plural,
 } from "@/utils/utils";
-import { api, type RouterOutputs } from "@/utils/api";
+import { type RouterOutputs } from "@/utils/api";
 import { formatDistanceToNowStrict } from "date-fns";
 import { EllipsisIcon, FlagIcon } from "lucide-react";
 import Link from "next/link";
 import { useChatWithHost } from "@/utils/messaging/useChatWithHost";
+import Spinner from "../_common/Spinner";
+import { env } from "@/env";
 
 export default function HostStaysCards({
   trips,
@@ -25,7 +27,7 @@ export default function HostStaysCards({
 }) {
   const chatWithHost = useChatWithHost();
 
-  if (!trips) return null;
+  if (!trips) return <Spinner />;
   if (trips.length === 0)
     return (
       <p className="mt-32 text-center text-muted-foreground">
@@ -37,12 +39,12 @@ export default function HostStaysCards({
     <div className="mb-36 space-y-6">
       {trips.map((trip) => {
         const numNights = getNumNights(trip.checkIn, trip.checkOut);
-        const totalPrice = trip.offer?.totalPrice ?? null;
-        const { data } = api.groups.getGroupOwner.useQuery(trip.groupId);
-        const travelerId = data?.id;
+        const totalPrice = trip.offer!.totalPrice;
+
+        const hostId = trip.property.host?.id ?? env.TRAMONA_ADMIN_USER_ID;
 
         return (
-          <>
+          <div key={trip.id}>
             <div
               className="grid grid-cols-1 items-center gap-4 overflow-hidden rounded-xl border md:grid-cols-7 md:rounded-2xl"
               key={trip.id}
@@ -92,7 +94,7 @@ export default function HostStaysCards({
                   </span>
                 )}
               </p>
-              <div className="mr-4 hidden flex-col items-end gap-y-4 text-end md:flex">
+              <div className="hidden flex-col items-end gap-y-4 pr-2 text-end md:flex">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
@@ -116,7 +118,7 @@ export default function HostStaysCards({
                 </DropdownMenu>
                 <Button
                   variant="secondary"
-                  onClick={() => chatWithHost({ hostId: travelerId ?? "" })}
+                  onClick={() => chatWithHost({ hostId })}
                 >
                   Message
                 </Button>
@@ -126,11 +128,11 @@ export default function HostStaysCards({
             <Button
               variant="secondary"
               className="w-full md:hidden"
-              onClick={() => chatWithHost({ hostId: travelerId ?? "" })}
+              onClick={() => chatWithHost({ hostId })}
             >
               Message
             </Button>
-          </>
+          </div>
         );
       })}
     </div>

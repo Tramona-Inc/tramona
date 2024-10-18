@@ -96,9 +96,7 @@ function PersonalInformationForm({ session }: { session: Session }) {
               </h1>
               {isEditing ? (
                 <form onSubmit={form.handleSubmit(onSubmit)}>
-                  <Button type="submit" disabled={form.formState.isSubmitting}>
-                    Save Changes
-                  </Button>
+                  <Button type="submit">Save Changes</Button>
                 </form>
               ) : (
                 <Button type="button" onClick={() => setIsEditing(!isEditing)}>

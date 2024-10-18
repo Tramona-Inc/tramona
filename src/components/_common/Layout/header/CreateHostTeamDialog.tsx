@@ -95,12 +95,10 @@ export default function CreateHostTeamDialog({
               )}
             />
             <DialogFooter className="pt-4">
-              <Button asChild variant="outline">
+              <Button asChild variant="secondary">
                 <DialogClose>Cancel</DialogClose>
               </Button>
-              <Button type="submit" disabled={form.formState.isSubmitting}>
-                Create
-              </Button>
+              <Button type="submit">Create</Button>
             </DialogFooter>
           </form>
         </Form>

@@ -1,5 +1,4 @@
 import MainLayout from "@/components/_common/Layout/MainLayout";
-import { Icons } from "@/components/_icons/icons";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -19,6 +18,7 @@ import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import ErrorMsg from "@/components/ui/ErrorMsg";
+import { ButtonSpinner } from "@/components/ui/button-spinner";
 
 export default function DateOfBirth() {
   const { data: session } = useSession();
@@ -41,6 +41,13 @@ export default function DateOfBirth() {
   const { updateUser } = useUpdateUser();
 
   async function onDobSubmit({ dob }: FormValues) {
+    if (new Date(dob) > new Date() || new Date(dob) < new Date("1900-01-01")) {
+      form.setError("root", {
+        type: "manual",
+        message: "Please enter a valid date of birth.",
+      });
+      return;
+    }
     if (session?.user.id) {
       await updateUser({
         dateOfBirth: convertDateFormat(dob),
@@ -84,14 +91,8 @@ export default function DateOfBirth() {
                     </FormItem>
                   )}
                 />
-                <Button
-                  type="submit"
-                  disabled={form.formState.isSubmitting}
-                  className="mt-4 w-full"
-                >
-                  {form.formState.isSubmitting && (
-                    <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-                  )}
+                <Button type="submit" className="mt-4 w-full">
+                  <ButtonSpinner />
                   Continue
                 </Button>
               </form>

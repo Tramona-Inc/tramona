@@ -167,11 +167,7 @@ export default function SignIn() {
                   )}
                 />
                 <ErrorMsg>{form.formState.errors.root?.message}</ErrorMsg>
-                <Button
-                  disabled={form.formState.isSubmitting}
-                  type="submit"
-                  className="w-full"
-                >
+                <Button type="submit" className="w-full">
                   Log In
                 </Button>
               </form>

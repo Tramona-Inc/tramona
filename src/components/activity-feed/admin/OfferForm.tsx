@@ -241,12 +241,7 @@ export default function CreateOfferForm({
           )}
         />
 
-        <Button
-          disabled={form.formState.isSubmitting}
-          size="lg"
-          type="submit"
-          className="col-span-full"
-        >
+        <Button size="lg" type="submit" className="col-span-full">
           Confirm Offer
         </Button>
       </form>

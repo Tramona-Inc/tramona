@@ -1,17 +1,11 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Plus,
-  MinusIcon,
-  LinkIcon,
-  MailIcon,
-  ShareIcon,
-  Loader2Icon,
-} from "lucide-react";
+import { Plus, MinusIcon, LinkIcon, MailIcon, ShareIcon } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { api } from "@/utils/api";
 import { errorToast } from "@/utils/toasts";
+import { ButtonSpinner } from "@/components/ui/button-spinner";
 
 interface RequestEmailInvitationProps {
   madeByGroupId: number;
@@ -24,7 +18,6 @@ const RequestEmailInvitation = ({
 }: RequestEmailInvitationProps) => {
   const [emails, setEmails] = useState<string[]>([""]);
   const [isEmailFormVisible, setIsEmailFormVisible] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
   const inviteUserByEmail = api.groups.inviteUserByEmail.useMutation();
 
@@ -57,8 +50,6 @@ const RequestEmailInvitation = ({
   };
 
   const handleInvite = async () => {
-    setIsLoading(true);
-
     await Promise.all(
       emails
         .filter(Boolean)
@@ -70,8 +61,6 @@ const RequestEmailInvitation = ({
         toast({ title: "Invites sent successfully!" });
       })
       .catch(() => errorToast("Error sending invites, please try again"));
-
-    setIsLoading(false);
   };
 
   return (
@@ -116,13 +105,9 @@ const RequestEmailInvitation = ({
             Copy invite link
           </button>
         )}
-        <Button
-          onClick={handleInvite}
-          variant="greenPrimary"
-          className="mt-2 w-full"
-          disabled={isLoading}
-        >
-          {isLoading ? <Loader2Icon className="animate-spin" /> : "Send"}
+        <Button onClick={handleInvite} className="mt-2 w-full">
+          <ButtonSpinner />
+          Send
         </Button>
       </div>
       <div className="block md:hidden">
@@ -204,13 +189,9 @@ const RequestEmailInvitation = ({
                   Add another email
                 </Button>
               )}
-              <Button
-                onClick={handleInvite}
-                variant="greenPrimary"
-                className="mt-2 w-full"
-                disabled={isLoading}
-              >
-                {isLoading ? <Loader2Icon className="animate-spin" /> : "Send"}
+              <Button onClick={handleInvite} className="mt-2 w-full">
+                <ButtonSpinner />
+                Send
               </Button>
             </div>
           )}

@@ -108,7 +108,6 @@ function ContactForm() {
         />
 
         <Button
-          isLoading={form.formState.isSubmitting}
           type="submit"
           size="lg"
           className="w-full rounded-full sm:w-auto"
