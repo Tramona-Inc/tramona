@@ -86,7 +86,7 @@ function AboutSection() {
           <p className="mb-4 text-base leading-relaxed text-gray-700 lg:pr-20">
             Tramona is a booking platform designed to help you{" "}
             <span className="font-bold text-black">
-              fill those hard-to-book dates
+              fill those hard-to-book dates{" "}
             </span>
             that typically go vacant, complementing your existing channels like
             Airbnb and VRBO. With Tramona, you can unlock more revenue by
