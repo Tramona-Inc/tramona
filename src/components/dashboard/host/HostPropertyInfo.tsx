@@ -7,6 +7,7 @@ import Link from "next/link";
 import HostAvailability from "./HostAvailability";
 import HostPropertiesRestrictions from "./HostPropertiesRestrictions";
 import HostAutoOffer from "./HostAutoOffer";
+import HostBookItNow from "./HostBookItNow";
 
 export default function HostPropertyInfo({ property }: { property: Property }) {
   return (
@@ -62,6 +63,12 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
           >
             Auto-offer
           </TabsTrigger>
+          <TabsTrigger
+            value="book-it-now"
+            className="data-[state=active]:border-b-teal-900 data-[state=active]:font-bold data-[state=active]:text-teal-900"
+          >
+            Book It Now
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="details">
           <HostPropertiesDetails property={property} />
@@ -80,6 +87,9 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
         </TabsContent>
         <TabsContent value="auto-offer">
           <HostAutoOffer property={property} />
+        </TabsContent>
+        <TabsContent value="book-it-now">
+          <HostBookItNow property={property} />
         </TabsContent>
       </Tabs>
     </div>

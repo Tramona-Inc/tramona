@@ -178,11 +178,13 @@ export function HostPropertyEditBtn({
   setEditing,
   onSubmit,
   property,
+  onCancel
 }: {
   editing: boolean;
   setEditing: (editing: boolean) => void;
   onSubmit?: () => void;
   property: Property;
+  onCancel: () => void;
 }) {
   const setPropertyType = useHostOnboarding((state) => state.setPropertyType);
   const setMaxGuests = useHostOnboarding((state) => state.setMaxGuests);
@@ -263,7 +265,10 @@ export function HostPropertyEditBtn({
     <div className="fixed bottom-20 right-4 z-50 sm:static">
       {editing ? (
         <div className="space-x-2">
-          <Button variant="secondary" onClick={() => setEditing(!editing)}>
+          <Button variant="secondary" onClick={() => {
+              setEditing(!editing);
+              onCancel?.();
+            }}>
             Cancel
           </Button>
           <Button

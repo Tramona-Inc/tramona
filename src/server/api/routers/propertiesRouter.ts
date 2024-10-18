@@ -667,4 +667,19 @@ export const propertiesRouter = createTRPCRouter({
         })
         .where(eq(properties.id, input.id));
     }),
+  updateBookItNowEnabled: protectedProcedure
+    .input(
+      z.object({
+        id: z.number(),
+        bookItNowEnabled: z.boolean(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db
+        .update(properties)
+        .set({
+          bookItNowEnabled: input.bookItNowEnabled,
+        })
+        .where(eq(properties.id, input.id));
+    }),
 });
