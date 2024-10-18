@@ -15,6 +15,7 @@ export default function ChatOfferButton({
   const chatWithOffer = useChatWithOffer();
   return (
     <Button
+      className="bg-primaryGreen text-white"
       variant="secondary"
       onClick={() =>
         chatWithOffer({

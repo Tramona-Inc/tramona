@@ -100,7 +100,11 @@ export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
               offerHostId={hostId ?? null}
               offerPropertyName={trip.property.name}
             />
-            <Button asChild variant="secondary">
+            <Button
+              asChild
+              variant="secondary"
+              className="bg-primaryGreen text-white"
+            >
               <Link href="/faq">
                 <HelpCircleIcon />
                 Help
