@@ -1,6 +1,5 @@
 import {
   BadgeHelp,
-  BadgeInfo,
   HandshakeIcon,
   Home,
   InfoIcon,
@@ -8,30 +7,22 @@ import {
   MessageCircleQuestion,
 } from "lucide-react";
 
+// same for logged and unlogged
 export const headerLinks = [
   { name: "Book it now", href: "/how-it-works", icon: LinkIcon },
   { name: "Name your own price", href: "/how-it-works", icon: InfoIcon },
-  // { name: "Link Input", href: "/link-input", icon: LinkIcon },
-  // { name: "How it works", href: "/how-it-works", icon: InfoIcon },
-  // { name: "Recent Deals", href: "/exclusive-offers", icon: HandshakeIcon },
-  // { name: "For Hosts", href: "/why-list", icon: Home },
-  // { name: "FAQ", href: "/faq", icon: MessageCircleQuestion },
-  // {
-  //   name: "Unclaimed Offers",
-  //   href: "/unclaimed-offers",
-  //   icon: BadgePercentIcon,
-  // },
 ];
 
-export const centerHeaderLinks = [
+// DESKTOP LINKS
+
+export const unloggedCenterHeaderLinks = [
   { name: "How it works", href: "/how-it-works", icon: InfoIcon },
   { name: "FAQ", href: "/faq", icon: MessageCircleQuestion },
   { name: "For Hosts", href: "/why-list", icon: Home },
-  { name: "Recent Deals", href: "/exclusive-offers", icon: HandshakeIcon },
 ];
 
-export const hamburgerLinksDesktop = [
-  { name: "Contact", href: "/support", icon: BadgeInfo },
+export const unloggedHamburgerLinksDesktop = [
+  { name: "Recent Deals", href: "/exclusive-offers", icon: BadgeHelp },
   { name: "24/7 Support", href: "/help-center", icon: BadgeHelp },
   {
     name: "100% Re booking guarantee",
@@ -40,19 +31,29 @@ export const hamburgerLinksDesktop = [
   },
 ];
 
-export const unloggedHamburgerLinksMobile = [
-  { name: "24/7 Support", href: "/help-center", icon: BadgeHelp },
-  { name: "How it Works", href: "/how-it-works", icon: InfoIcon },
-  { name: "For Hosts", href: "/why-list", icon: Home },
-  { name: "Recent Deals", href: "/exclusive-offers", icon: HandshakeIcon },
+export const loggedCenterHeaderLinks = [
+  { name: "How it works", href: "/how-it-works", icon: InfoIcon },
   { name: "FAQ", href: "/faq", icon: MessageCircleQuestion },
+  { name: "For Hosts", href: "/why-list", icon: Home },
+  { name: "Recent Deals", href: "/exclusive-offers", icon: BadgeHelp },
 ];
 
-export const hamburgerLinksMobile = [
-  { name: "24/7 Support", href: "/help-center", icon: BadgeHelp },
-  { name: "Link Input", href: "/link-input", icon: LinkIcon },
-  { name: "How it works", href: "/how-it-works", icon: InfoIcon },
+// MOBILE LINKS
+
+export const unloggedHamburgerLinksMobile = [
+  { name: "How it Works", href: "/how-it-works", icon: InfoIcon },
+  { name: "FAQ", href: "/faq", icon: MessageCircleQuestion },
   { name: "For Hosts", href: "/why-list", icon: Home },
   { name: "Recent Deals", href: "/exclusive-offers", icon: HandshakeIcon },
+  { name: "24/7 Support", href: "/help-center", icon: BadgeHelp },
+  { name: "100% Re booking guarantee", href: "/faq", icon: BadgeHelp },
+];
+
+export const loggedHamburgerLinksMobile = [
+  { name: "How it Works", href: "/how-it-works", icon: InfoIcon },
   { name: "FAQ", href: "/faq", icon: MessageCircleQuestion },
+  { name: "For Hosts", href: "/why-list", icon: Home },
+  { name: "Recent Deals", href: "/exclusive-offers", icon: HandshakeIcon },
+  { name: "24/7 Support", href: "/help-center", icon: BadgeHelp },
+  { name: "100% Re booking guarantee", href: "/faq", icon: BadgeHelp },
 ];

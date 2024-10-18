@@ -11,7 +11,6 @@ import {
   Users2Icon,
   WrenchIcon,
   MessagesSquare,
-  LinkIcon,
   BriefcaseIcon,
 } from "lucide-react";
 
@@ -33,6 +32,12 @@ export const adminNavLinks = [
   { href: "/requests", name: "Switch To Guest", icon: ArrowLeftRight },
 ];
 
+export const guestDesktopNavLinks = [
+  { href: "/", name: "Home", icon: HomeIcon },
+];
+
+// MOBILE LINKS
+
 export const hostMobileNavLinks = [
   {
     href: "/host",
@@ -51,20 +56,20 @@ export const hostMobileNavLinks = [
   { href: "/host/team", name: "Team", icon: Users2Icon },
 ];
 
-export const guestNavLinks = [
+export const guestMobileNavLinks = [
   { href: "/", name: "Home", icon: HomeIcon },
   { href: "/how-it-works", name: "Name your own price", icon: HomeIcon },
   { href: "/how-it-works", name: "Book it now", icon: MessagesSquare },
 ];
 
-export const guestNavHamburgerLinks = [
+export const guestMobileNavHamburgerLinks = [
   { href: "/requests", name: "Requests", icon: BadgePercent },
   { href: "/my-trips", name: "My Trips", icon: Briefcase },
   { href: "/messages", name: "Messages", icon: MessageCircleIcon },
   { href: "/chat-with-admin", name: "Concierge", icon: MessagesSquare },
 ];
 
-export const unloggedNavLinks = [
+export const unloggedMobileNavLinks = [
   { href: "/", name: "Home", icon: HomeIcon },
   { href: "/chat-with-admin", name: "Concierge", icon: MessagesSquare },
   { href: "/how-it-works", name: "Name your own price", icon: HomeIcon },

@@ -1,12 +1,11 @@
 import {
   adminNavLinks,
-  guestNavHamburgerLinks,
-  guestNavLinks,
+  guestMobileNavHamburgerLinks,
+  guestMobileNavLinks,
   hostMobileNavLinks,
-  unloggedNavLinks,
+  unloggedMobileNavLinks,
 } from "@/config/sideNavLinks";
-
-import { ArrowLeftRight, MessagesSquare } from "lucide-react";
+import { ArrowLeftRight } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { NavBarLink } from "./NavBarLink";
 import { HamburgerMenu } from "../_common/Layout/header/Header";
@@ -18,6 +17,7 @@ export default function MobileNav({
 }) {
   const { data: session, status } = useSession();
   const isAdmin = session && session.user.role === "admin";
+  const isHost = session && session.user.role === "host";
 
   let navLinks;
 
@@ -29,15 +29,15 @@ export default function MobileNav({
       navLinks = hostMobileNavLinks;
       break;
     case "unlogged":
-      navLinks = unloggedNavLinks;
+      navLinks = unloggedMobileNavLinks;
       break;
     default:
       navLinks = isAdmin
         ? [
-            ...guestNavLinks,
+            ...guestMobileNavLinks,
             { href: "/admin", name: "Switch To Admin", icon: ArrowLeftRight },
           ]
-        : [...guestNavLinks];
+        : [...guestMobileNavLinks];
       break;
   }
 
@@ -50,8 +50,8 @@ export default function MobileNav({
           {link.name}
         </NavBarLink>
       ))}
-      {status === "authenticated" && (
-        <HamburgerMenu links={guestNavHamburgerLinks} />
+      {status === "authenticated" && !isHost && (
+        <HamburgerMenu links={guestMobileNavHamburgerLinks} />
       )}
     </header>
   );
