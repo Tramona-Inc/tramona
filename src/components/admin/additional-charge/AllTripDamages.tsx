@@ -5,7 +5,7 @@ import { Separator } from "@/components/ui/separator";
 
 export default function AllTripDamages() {
   const { data: allTripDamages } = api.trips.getAllTripDamages.useQuery();
-  console.log("sllTripes", allTripDamages);
+
   return (
     <Card>
       <CardHeader>All Trip damages</CardHeader>

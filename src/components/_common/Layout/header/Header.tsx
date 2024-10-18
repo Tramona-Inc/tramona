@@ -18,11 +18,18 @@ import { api } from "@/utils/api";
 import TramonaIcon from "@/components/_icons/TramonaIcon";
 import {
   headerLinks,
-  hamburgerLinksDesktop,
-  hamburgerLinksMobile,
   unloggedHamburgerLinksMobile,
+  unloggedCenterHeaderLinks,
+  unloggedHamburgerLinksDesktop,
+  loggedCenterHeaderLinks,
+  loggedHamburgerLinksMobile,
 } from "@/config/headerNavLinks";
-import { ArrowLeftRightIcon, DoorOpen, MenuIcon } from "lucide-react";
+import {
+  ArrowLeftRightIcon,
+  ChevronDown,
+  DoorOpen,
+  MenuIcon,
+} from "lucide-react";
 import { SkeletonText } from "@/components/ui/skeleton";
 
 export function Header() {
@@ -46,7 +53,7 @@ export function Header() {
   );
 }
 
-function HamburgerMenu({
+export function HamburgerMenu({
   links,
 }: {
   links: {
@@ -92,7 +99,7 @@ function LargeHeader({ isHost }: { isHost: boolean }) {
     <header className="sticky top-0 z-50 flex h-header-height items-center gap-2 border-b bg-white p-4 lg:pl-8 xl:px-20">
       <TramonaLogo />
 
-      <div className="flex translate-y-0.5 items-center pl-2">
+      <div className="flex items-center pl-2">
         {!isHost &&
           headerLinks.map((link) => (
             <NavLink
@@ -101,7 +108,7 @@ function LargeHeader({ isHost }: { isHost: boolean }) {
               render={({ selected }) => (
                 <span
                   className={cn(
-                    "rounded-md px-2 py-3 text-sm font-bold text-zinc-600 hover:text-foreground xl:text-base",
+                    "rounded-md px-2 py-3 text-xs font-bold text-zinc-600 hover:text-foreground xl:text-sm",
                     selected && "text-foreground underline underline-offset-2",
                   )}
                 >
@@ -113,35 +120,67 @@ function LargeHeader({ isHost }: { isHost: boolean }) {
       </div>
 
       <div className="flex-1" />
-      <NavLink
-        href="/help-center"
-        render={({ selected }) => (
-          <Button
-            variant="ghost"
-            className={cn(
-              "rounded-full hover:text-foreground",
-              selected && "text-foreground underline underline-offset-2",
-            )}
-          >
-            24/7 Support
-          </Button>
-        )}
-      />
 
-      <NavLink
-        href="/faq"
-        render={({ selected }) => (
-          <Button
-            variant="ghost"
-            className={cn(
-              "rounded-full hover:text-foreground",
-              selected && "text-foreground underline underline-offset-2",
-            )}
-          >
-            FAQ
-          </Button>
-        )}
-      />
+      {!isHost && (
+        <div className="flex items-center">
+          {status === "authenticated"
+            ? loggedCenterHeaderLinks.map((link) => (
+                <NavLink
+                  href={link.href}
+                  key={link.href}
+                  render={({ selected }) => (
+                    <span
+                      className={cn(
+                        "rounded-md px-2 py-3 text-xs font-bold text-zinc-600 hover:text-foreground xl:text-sm",
+                        selected &&
+                          "text-foreground underline underline-offset-2",
+                      )}
+                    >
+                      {link.name}
+                    </span>
+                  )}
+                />
+              ))
+            : unloggedCenterHeaderLinks.map((link) => (
+                <NavLink
+                  href={link.href}
+                  key={link.href}
+                  render={({ selected }) => (
+                    <span
+                      className={cn(
+                        "rounded-md px-2 py-3 text-xs font-bold text-zinc-600 hover:text-foreground xl:text-sm",
+                        selected &&
+                          "text-foreground underline underline-offset-2",
+                      )}
+                    >
+                      {link.name}
+                    </span>
+                  )}
+                />
+              ))}
+        </div>
+      )}
+
+      <div className="flex-1" />
+
+      {status === "authenticated" && !isHost && (
+        <DropdownMenu>
+          <DropdownMenuTrigger className="flex items-center">
+            <p className="text-xs font-bold text-zinc-600 hover:text-foreground xl:text-sm">
+              Help
+            </p>
+            <ChevronDown size={15} />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <Link href="/faq">
+              <DropdownMenuItem>24/7 Support</DropdownMenuItem>
+            </Link>
+            <Link href="/help-center">
+              <DropdownMenuItem>100% Re booking guarantee</DropdownMenuItem>
+            </Link>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
 
       {status === "loading" ? null : hostBtn.isLoading ? (
         <div className="px-4">
@@ -160,7 +199,7 @@ function LargeHeader({ isHost }: { isHost: boolean }) {
       {status === "unauthenticated" && (
         <>
           <LogInSignUp />
-          <HamburgerMenu links={hamburgerLinksDesktop} />
+          <HamburgerMenu links={unloggedHamburgerLinksDesktop} />
         </>
       )}
 
@@ -179,23 +218,8 @@ function SmallHeader({ isHost }: { isHost: boolean }) {
       <div className="flex translate-y-0.5 items-center pl-2"></div>
 
       <div className="flex-1" />
-      {/* <NavLink
-        href="/help-center"
-        render={({ selected }) => (
-          <Button
-            variant="ghost"
-            size="sm"
-            className={cn(
-              "rounded-full px-2 py-3 text-sm tracking-tight hover:text-foreground",
-              selected && "text-foreground underline underline-offset-2",
-            )}
-          >
-            24/7 Support
-          </Button>
-        )}
-      /> */}
 
-      {!isHost || status === "loading" ? null : hostBtn.isLoading ? (
+      {status === "loading" ? null : hostBtn.isLoading ? (
         <div className="px-4">
           <SkeletonText className="w-24" />
         </div>
@@ -221,10 +245,10 @@ function SmallHeader({ isHost }: { isHost: boolean }) {
       {!isHost && (
         <HamburgerMenu
           links={[
-            ...(hostBtn.isLoading ? [] : [hostBtn]),
+            // ...(hostBtn.isLoading ? [] : [hostBtn]),
             ...(status === "unauthenticated"
               ? unloggedHamburgerLinksMobile
-              : hamburgerLinksMobile),
+              : loggedHamburgerLinksMobile),
           ]}
         />
       )}

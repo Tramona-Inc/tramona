@@ -24,7 +24,7 @@ export default function CashbackBalance() {
     api.referralCodes.getAllEarningsByReferralCode.useQuery();
 
   const { isStripeConnectInstanceReady } = useIsStripeConnectInstanceReady();
-  console.log(" here is the code object", allEarningTransactions);
+
   return (
     <>
       <Head>

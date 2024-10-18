@@ -17,18 +17,18 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import {
+  formatCurrency,
   formatDateRange,
   getDaysUntilTrip,
-  getNumNights,
-  removeTax,
 } from "@/utils/utils";
+
 import UserAvatar from "@/components/_common/UserAvatar";
 import { MapPinIcon } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { TAX_PERCENTAGE } from "@/utils/constants";
 import { Skeleton } from "@/components/ui/skeleton";
+
 const formSchema = z.object({
   tripId: z.number(),
   reason: z.string().min(4, "Reason must be 5 characters or longer"),
@@ -41,11 +41,15 @@ export default function TripCancellationOrPartialRefund({
   partialRefundPercentage,
   description,
   totalPriceAfterFees,
+  cancellationFee = 0,
+  setClose,
 }: {
   tripId: number;
   partialRefundPercentage: number;
   description?: string;
   totalPriceAfterFees: number;
+  cancellationFee: number | undefined;
+  setClose: () => void;
 }) {
   const { data, isLoading } = api.trips.getMyTripsPageDetails.useQuery({
     tripId,
@@ -54,6 +58,9 @@ export default function TripCancellationOrPartialRefund({
     api.offers.isOfferScrapedByTripId.useQuery(tripId);
 
   const { toast } = useToast();
+
+  const { data: tripCheckoutDetails } =
+    api.trips.getTripCheckoutByTripId.useQuery(tripId);
 
   const { mutateAsync: cancelTrip, isLoading: isSubmitting } =
     api.trips.cancelTripById.useMutation({
@@ -67,41 +74,28 @@ export default function TripCancellationOrPartialRefund({
       },
     });
 
-  // /-------------- Remove Tax and superhog from refund --------------
-  const refundAmountBeforeRemovingTaxAndSuperhogAndStripe = data
-    ? data.trip.totalPriceAfterFees
-    : 0;
-  console.log(refundAmountBeforeRemovingTaxAndSuperhogAndStripe);
   //extract stripe fee
-  const stripeFee =
-    refundAmountBeforeRemovingTaxAndSuperhogAndStripe -
-    Math.round(
-      (refundAmountBeforeRemovingTaxAndSuperhogAndStripe - 30) * 0.971,
-    );
-  console.log(stripeFee);
+  const stripeFee = tripCheckoutDetails?.stripeTransactionFee;
+  console.log(tripCheckoutDetails);
 
-  let totalRefundAmount: number = !data
+  let totalRefundAmount: number = !tripCheckoutDetails
     ? 0
-    : refundAmountBeforeRemovingTaxAndSuperhogAndStripe - stripeFee;
-
-  let amountWithoutTaxAndStripe = 0;
-  let superhogFees = 0;
+    : tripCheckoutDetails.travelerOfferedPriceBeforeFees;
 
   //if out property then we need to remove the superhog and tax  from the refund amount
-  if (!isLoading && data) {
+  if (!isLoading && tripCheckoutDetails && data) {
     if (!isScrapedProperty) {
       // Remove tax FIRST
-      amountWithoutTaxAndStripe = removeTax(totalRefundAmount, TAX_PERCENTAGE);
 
       // Apply partial refund percentage
-      const amountAfterPartialRefund =
-        partialRefundPercentage !== 1
-          ? amountWithoutTaxAndStripe * partialRefundPercentage
-          : amountWithoutTaxAndStripe;
 
-      const numOfNights = getNumNights(data.trip.checkIn, data.trip.checkOut);
-      superhogFees = numOfNights * 300;
-      totalRefundAmount = amountAfterPartialRefund - superhogFees; // Then subtract superhog fee
+      totalRefundAmount =
+        partialRefundPercentage !== 1
+          ? totalRefundAmount * partialRefundPercentage
+          : totalRefundAmount;
+
+      console.log(totalRefundAmount);
+      totalRefundAmount = totalRefundAmount - cancellationFee; // Then subtract any fixed cancellation fee
     }
   }
 
@@ -122,6 +116,8 @@ export default function TripCancellationOrPartialRefund({
       reason: data.reason,
       refundAmount: totalRefundAmount,
     });
+    setClose();
+
     return;
   }
   return (
@@ -221,24 +217,33 @@ export default function TripCancellationOrPartialRefund({
             <p>Total Trip Cost </p>{" "}
             <p>${(totalPriceAfterFees / 100).toFixed(2)}</p>
           </div>
-          {!isScrapedProperty && amountWithoutTaxAndStripe && (
+          {!isScrapedProperty && tripCheckoutDetails && (
             <div className="flex flex-row justify-between">
               <p>Non-refundable Tax </p>{" "}
-              <p>
-                $
-                {(
-                  (totalPriceAfterFees -
-                    (stripeFee + amountWithoutTaxAndStripe)) /
-                  100
-                ).toFixed(2)}
-              </p>
+              <p>{formatCurrency(tripCheckoutDetails.taxesPaid)}</p>
             </div>
           )}
           {/* --------remove superhog if not scraped ------- */}
           <div className="flex flex-row justify-between">
             <p>Processing Fee </p>{" "}
-            <p>${((stripeFee + superhogFees) / 100).toFixed(2)}</p>
+            <p>
+              {formatCurrency(
+                (tripCheckoutDetails?.superhogFee
+                  ? tripCheckoutDetails.superhogFee
+                  : 0) +
+                  (tripCheckoutDetails?.stripeTransactionFee
+                    ? tripCheckoutDetails.stripeTransactionFee
+                    : 0),
+              )}
+            </p>
           </div>
+
+          {cancellationFee !== 0 && (
+            <div className="flex flex-row justify-between">
+              <p>Cancellation Fee </p> <p>{formatCurrency(cancellationFee)}</p>
+            </div>
+          )}
+
           {partialRefundPercentage !== 1 && (
             <div className="flex flex-row justify-between">
               <p>Cancellation Policy </p>{" "}

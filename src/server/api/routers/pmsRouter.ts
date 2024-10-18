@@ -155,8 +155,7 @@ export const pmsRouter = createTRPCRouter({
       console.error("Error deleting Hospitable customer:", error);
       throw new Error("Failed to delete Hospitable customer");
     }
-  }
-  ),
+  }),
 
   createHospitableCustomer: protectedProcedure.mutation(async ({ ctx }) => {
     const user = await ctx.db.query.users.findFirst({
@@ -174,10 +173,10 @@ export const pmsRouter = createTRPCRouter({
 
     if (!id || !name || !email || !phoneNumber) {
       throw new Error("User is missing required information");
-    };
+    }
 
     try {
-      const response = await axios.post(
+      await axios.post(
         "https://connect.hospitable.com/api/v1/customers",
         {
           id,
