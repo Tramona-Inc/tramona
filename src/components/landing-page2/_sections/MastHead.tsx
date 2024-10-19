@@ -1,6 +1,4 @@
-import landing_hosts from "public/assets/images/landing-page/landing_hosts.png";
-import landing_travelers from "public/assets/images/landing-page/landing_travelers.png";
-
+import landingBg from "public/assets/images/landing-bg.jpg";
 import priceComparison from "public/assets/images/pricecomparison.jpg";
 import { Button } from "@/components/ui/button";
 import UserAvatarMastHead from "@/components/_common/UserAvatarMasthead";
@@ -17,101 +15,67 @@ import { scrollToTop } from "@/utils/utils";
 export default function MastHead() {
   return (
     <section className="relative bg-white pb-32">
-      {/* Main Title Section */}
       <div className="relative sm:mb-24 sm:h-[640px] lg:mb-0">
+        <div className="absolute inset-0">
+          <Image
+            src={landingBg}
+            alt=""
+            layout="fill"
+            objectFit="cover"
+            placeholder="blur"
+            className="select-none"
+          />
+        </div>
         <div className="relative grid h-full grid-cols-1 p-4 lg:grid-cols-1">
           <div className="flex flex-col justify-center">
             <div className="relative pt-10 text-center">
               <h1 className="mx-auto max-w-3xl text-balance text-3xl font-bold text-zinc-900 lg:text-5xl">
-                The best prices on Airbnbs anywhere
+                Name your own price for Airbnbs
               </h1>
               <p className="mx-auto max-w-[38rem] pt-4 text-xs font-semibold text-zinc-900 lg:pt-4 lg:text-base">
-                Make deals with hosts on their empty nights
+                Agree on a price with hosts every time
               </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Host/Traveler Section */}
-      <div className="relative mx-auto mb-16 max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="relative">
-          {/* Blue background with rounded corners */}
-          <div className="absolute inset-0 mt-8 rounded-3xl bg-blue-50"></div>
-
-          {/* Cards container */}
-          <div className="relative grid gap-6 px-4 pb-12 pt-4 sm:grid-cols-2 sm:px-6">
-            {/* Host Card */}
-            <div className="overflow-hidden rounded-lg bg-white shadow-lg">
-              <div className="relative h-48 sm:h-64">
-                <Image
-                  src={landing_hosts}
-                  alt="Hosts relaxing on beach"
-                  layout="fill"
-                  objectFit="cover"
-                />
-              </div>
-              <div className="p-6">
-                <h2 className="mb-2 text-2xl font-bold">Hosts</h2>
-                <p className="mb-4 text-sm">
-                  Tramona is the only platform built specifically for hosts to
-                  fill their hard-to-book, empty nights.
-                </p>
-                <Link
-                  href="/for-hosts"
-                  className="text-sm font-medium text-teal-600 hover:underline"
-                >
-                  Learn more about hosting
-                </Link>
-              </div>
-            </div>
-
-            {/* Traveler Card */}
-            <div className="overflow-hidden rounded-lg bg-white shadow-lg">
-              <div className="relative h-48 sm:h-64">
-                <Image
-                  src={landing_travelers}
-                  alt="Travelers enjoying a cabin"
-                  layout="fill"
-                  objectFit="cover"
-                />
-              </div>
-              <div className="p-6">
-                <h2 className="mb-2 text-2xl font-bold">Travelers</h2>
-                <p className="mb-4 text-sm">
-                  Tramona is the only platform where travelers can consistently
-                  find the best prices on Airbnbs.
+              <div className="hidden items-center justify-center pt-4 lg:flex">
+                <div className="-ml-2">
+                  <UserAvatarMastHead
+                    size={"md"}
+                    image="/assets/images/fake-reviews/shawnp.jpg"
+                  />
+                </div>
+                <div className="-ml-2">
+                  <UserAvatarMastHead
+                    size={"md"}
+                    image="/assets/images/fake-reviews/biancar.jpg"
+                  />
+                </div>
+                <div className="-ml-2">
+                  <UserAvatarMastHead
+                    size={"md"}
+                    image="/assets/images/fake-reviews/lamarf.jpg"
+                  />
+                </div>
+                <div className="-ml-2">
+                  <UserAvatarMastHead
+                    size={"md"}
+                    image="/assets/images/fake-reviews/susanl.jpg"
+                  />
+                </div>
+                <div className="-ml-2">
+                  <Avatar
+                    size={"md"}
+                    className="flex items-center justify-center border-2 border-[#EBF5F4] bg-teal-900 text-xs font-semibold text-white"
+                  >
+                    +800
+                  </Avatar>
+                </div>
+                <p className="ml-2 text-xs font-semibold text-[#7E7564]">
+                  Properties booked this month
                 </p>
               </div>
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Name Your Own Price and Form Section */}
-      <div className="relative mx-auto mb-16 max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid gap-8 lg:grid-cols-2">
-          <div className="flex flex-col justify-center">
-            <h2 className="mb-4 text-3xl lg:text-4xl">
-              <span className="font-bold">Name Your Own Price—</span>
-              <span className="font-normal">Anywhere in the U.S.</span>
-            </h2>
-            <p className="mb-6 text-lg text-gray-600">
-              When hosts have vacancies, no one wins.
-            </p>
-            <ul className="mb-6 list-decimal pl-5 text-lg text-gray-600">
-              <li>Where you want to go</li>
-              <li>How much you want to spend</li>
-              <li>Amount of guests</li>
-              <li>Your dates</li>
-            </ul>
-            <p className="text-lg text-gray-600">
-              Your request then goes out to every host in that area with a
-              vacancy
-            </p>
-          </div>
-          <div className="flex items-center justify-center">
-            <div className="w-full max-w-md rounded-2xl border bg-white p-6 shadow-xl">
+          <div className="flex justify-center lg:p-10">
+            <div className="mt-12 flex-1 rounded-2xl border bg-white p-4 shadow-2xl lg:mt-0 lg:max-w-xl">
               <CityRequestFormContainer />
             </div>
           </div>

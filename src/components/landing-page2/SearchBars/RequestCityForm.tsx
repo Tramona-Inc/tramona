@@ -67,7 +67,7 @@ export default function RequestCityForm({
           name="location"
           formLabel="Location"
           variant="lpDesktop"
-          placeholder="Enter your destination"
+          placeholder="Select a location"
           icon={MapPinIcon}
         />
 
