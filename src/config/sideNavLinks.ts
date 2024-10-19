@@ -34,6 +34,9 @@ export const adminNavLinks = [
 
 export const guestDesktopNavLinks = [
   { href: "/", name: "Home", icon: HomeIcon },
+  { href: "/requests", name: "Requests", icon: BadgePercent },
+  { href: "/my-trips", name: "My Trips", icon: Briefcase },
+  { href: "/messages", name: "Messages", icon: MessageCircleIcon },
 ];
 
 // MOBILE LINKS
