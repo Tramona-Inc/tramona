@@ -15,6 +15,7 @@ import { CheckIcon } from "lucide-react";
 import { scrollToTop } from "@/utils/utils";
 import landing_airbnb from "public/assets/images/landing-page/landing_airbnb.png";
 import LandingSearchBar from "../SearchBars/LandingSearchBar";
+import FAQ from "@/components/landing-page/_sections/FAQ";
 
 export default function MastHead() {
   return (
@@ -135,17 +136,47 @@ export default function MastHead() {
             </div>
           </div>
         </div>
+
+        {/* How Tramona Works Section */}
+        <div className="mt-12 rounded-3xl bg-[#F4F6F8] p-8">
+          <h2 className="mb-6 text-center text-3xl font-bold">
+            How Tramona works
+          </h2>
+
+          <div className="mb-6">
+            <p className="text-gray-700">
+              <span className="font-bold leading-relaxed text-black">
+                For Travelers:{" "}
+              </span>
+              Submit your travel request with dates, location, and budget, or
+              use the "Book it Now" option to instantly book available stays at
+              great prices. Hosts review your custom requests and send
+              personalized offers, and once you agree on the price, you can book
+              directly through Tramona.
+            </p>
+          </div>
+
+          <div className="mb-6">
+            <p className="text-gray-700">
+              <span className="font-bold leading-relaxed text-black">
+                For Hosts:{" "}
+              </span>
+              Receive traveler requests or enable the "Book it Now" feature for
+              instant bookings. You control the price and get the option fill
+              vacancies by offering deals directly to travelers.
+            </p>
+          </div>
+
+          <div className="flex justify-center">
+            <Button variant="secondary" className="bg-primaryGreen text-white">
+              <Link href="/how-it-works">How it works</Link>
+            </Button>
+          </div>
+        </div>
       </div>
 
       <div className="h-24 lg:h-60"></div>
 
-      <p className="text-balance p-4 text-center font-semibold">
-        Try it before you book. See what hosts will offer you!
-      </p>
-
-      <div className="mx-0 mt-8 flex max-w-full justify-center space-y-4 px-4 lg:mx-4 lg:mt-16 lg:flex lg:space-y-8">
-        <TestimonialCarousel />
-      </div>
       <div className="mx-auto my-40 w-5/6 max-w-7xl text-center text-2xl font-semibold tracking-tight lg:my-48 lg:text-4xl">
         When hosts have no one staying at their property, they would rather make
         something over nothing. With Tramona, your request goes out to every
@@ -239,6 +270,19 @@ export default function MastHead() {
         </div>
       </div>
 
+      <div className="mx-auto my-20 max-w-[90%] px-4 lg:max-w-[80%]">
+        {/* Black separator above carousel */}
+        <div className="border-gray mb-12 w-full border-t-2" />
+
+        {/* Carousel section */}
+        <div className="my-12">
+          <TestimonialCarousel />
+        </div>
+
+        {/* Black separator below carousel */}
+        <div className="border-gray mt-12 w-full border-t-2" />
+      </div>
+
       <div className="mx-auto mt-20 max-w-7xl justify-center space-y-4 p-4 lg:mt-28 lg:space-y-8">
         <h2 className="text-center text-2xl font-extrabold lg:text-4xl">
           Why use Tramona?
@@ -300,13 +344,7 @@ export default function MastHead() {
         </div>
 
         <div className="col-span-full flex flex-col items-center gap-2 rounded-2xl bg-zinc-100 p-6">
-          <h2 className="text-center text-3xl font-bold">New To Tramona?</h2>
-          <div className="text-sm font-medium text-zinc-600">
-            Check out our FAQ for any questions, or send us a message directly
-          </div>
-          <Button asChild size="lg" className="mt-4 w-40 rounded-full">
-            <Link href="/faq">FAQ</Link>
-          </Button>
+          <FAQ />
         </div>
       </div>
     </section>
