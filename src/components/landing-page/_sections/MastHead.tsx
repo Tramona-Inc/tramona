@@ -14,6 +14,7 @@ import { whyUseTramonaCopy } from "./why-use-tramona-copy";
 import { CheckIcon } from "lucide-react";
 import { scrollToTop } from "@/utils/utils";
 import landing_airbnb from "public/assets/images/landing-page/landing_airbnb.png";
+import landing_sunset from "public/assets/images/landing-page/landing_sunset.png";
 import LandingSearchBar from "../SearchBars/LandingSearchBar";
 import FAQ from "@/components/landing-page/_sections/FAQ";
 
@@ -173,99 +174,65 @@ export default function MastHead() {
             </Button>
           </div>
         </div>
-      </div>
 
-      <div className="h-24 lg:h-60"></div>
+        {/* Live Cities and Hosts Section */}
+        <div className="mt-16 rounded-3xl bg-white p-8">
+          <h2 className="mb-4 text-center text-3xl font-bold">
+            We are currently live in{" "}
+            <span className="underline">35 cities</span> and counting
+          </h2>
+          <p className="mb-8 text-center text-gray-600">
+            Are you a host in a city we are not yet live in?{" "}
+            <a href="/for-hosts" className="text-teal-600 hover:underline">
+              Become a host
+            </a>{" "}
+            and help us launch there.
+          </p>
 
-      <div className="mx-auto my-40 w-5/6 max-w-7xl text-center text-2xl font-semibold tracking-tight lg:my-48 lg:text-4xl">
-        When hosts have no one staying at their property, they would rather make
-        something over nothing. With Tramona, your request goes out to every
-        host with a vacancy, so you get the best deal, every time.
-      </div>
+          <hr className="mb-12 border-gray-300" />
 
-      <div className="mt-20 space-y-4 lg:space-y-12">
-        <h2 className="text-center text-2xl font-extrabold lg:text-4xl">
-          <span className="text-teal-900">How?</span> Negotiation, 50% less
-          fees. No markups.
-        </h2>
-        <div className="flex justify-center">
-          <div className="grid gap-8 lg:grid-cols-2 lg:gap-32">
-            <div>
-              <div className="hidden lg:block">
-                <Image
-                  src={priceComparison}
-                  alt=""
-                  height={250}
-                  placeholder="blur"
-                  className="select-none"
-                />
-              </div>
-              <div className="lg:hidden">
-                <Image
-                  src={priceComparison}
-                  alt=""
-                  width={350}
-                  placeholder="blur"
-                  className="select-none"
-                />
-              </div>
-              <div className="mt-2 text-center text-sm font-extrabold text-[#FF0000] lg:text-lg">
-                Airbnb
-              </div>
-              <div className="text-center text-xl font-extrabold text-[#FF0000] lg:text-2xl">
-                $300/night
-              </div>
+          <div className="grid gap-8 lg:grid-cols-2">
+            <div className="relative h-[400px] w-full">
+              <Image
+                src={landing_sunset} // Replace with the actual path to your image
+                alt="Family on beach at sunset"
+                layout="fill"
+                objectFit="cover"
+                className="rounded-lg"
+              />
             </div>
-            <div>
-              <div className="hidden lg:block">
-                <Image
-                  src={priceComparison}
-                  alt=""
-                  height={250}
-                  placeholder="blur"
-                  className="select-none"
-                />
-              </div>
-              <div className="lg:hidden">
-                <Image
-                  src={priceComparison}
-                  alt=""
-                  width={350}
-                  placeholder="blur"
-                  className="select-none"
-                />
-              </div>
-              <div className="mt-2 text-center text-sm font-extrabold text-teal-900 lg:text-lg">
-                Tramona
-              </div>
-              <div className="text-center text-xl font-extrabold text-teal-900 lg:text-2xl">
-                $250/night
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex justify-center">
-        <div className="mt-20 p-4 lg:grid lg:grid-cols-2 xl:gap-24">
-          <div className="flex flex-col space-y-1 pb-6 text-left lg:mr-24 lg:flex lg:flex-col lg:justify-center lg:space-y-4">
-            <h2 className="text-2xl font-extrabold lg:text-4xl">
-              See completed requests
-            </h2>
-            <div className="text-sm font-semibold text-muted-foreground">
-              Check out our feed to see recent deals
-            </div>
-            <div className="hidden lg:block">
-              <Button asChild>
-                <Link href="/exclusive-offers">View deals</Link>
+            <div className="flex flex-col justify-center">
+              <h3 className="mb-4 text-2xl font-bold">
+                Hosts: Fill Your Empty Nights and Earn More
+              </h3>
+              <p className="mb-6 text-zinc-900">
+                Whether you're in one of our 'Book It Now' cities or elsewhere
+                in the U.S., you can list your property and start earning.
+                Accept 'Name Your Own Price' offers from travelers nationwide.
+              </p>
+              <ul className="mb-6 space-y-2">
+                <li className="flex items-center">
+                  <span className="mr-2 text-teal-600">✓</span>
+                  $50k protection per booking
+                </li>
+                <li className="flex items-center">
+                  <span className="mr-2 text-teal-600">✓</span>3 levels of
+                  verification for travelers
+                </li>
+                <li className="flex items-center">
+                  <span className="mr-2 text-teal-600">✓</span>
+                  Easy to sync your calendar up with other platforms to prevent
+                  double bookings
+                </li>
+                <li className="flex items-center">
+                  <span className="mr-2 text-teal-600">✓</span>
+                  24/7 support
+                </li>
+              </ul>
+              <Button className="self-start bg-primaryGreen text-white">
+                <Link href="/for-hosts">List your property</Link>
               </Button>
             </div>
-          </div>
-          <CompletedRequestsSection />
-          <div className="flex justify-center pt-8 lg:hidden">
-            <Button asChild size="lg">
-              <Link href="/exclusive-offers">View deals</Link>
-            </Button>
           </div>
         </div>
       </div>
