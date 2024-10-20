@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useState } from "react";
-import Image from "next/image";
+import Image, { StaticImageData } from "next/image";
 import { ChevronRight } from "lucide-react";
 import {
   Carousel,
@@ -10,19 +10,24 @@ import {
   CarouselNext,
 } from "@/components/ui/carousel";
 
+import denver from "public/assets/images/landing-page/denver.jpg";
+import seattle from "public/assets/images/landing-page/seattle.jpg";
+import sanfran from "public/assets/images/landing-page/sanfran.jpg";
+import washdc from "public/assets/images/landing-page/washdc.jpg";
+import nyc from "public/assets/images/landing-page/newyork.jpg";
+
 // Define the structure for city data
 interface City {
   name: string;
-  image: string;
+  image: StaticImageData;
 }
 
-// Sample city data (replace with your actual data and images)
 const cities: City[] = [
-  { name: "Denver", image: "/images/denver.jpg" },
-  { name: "Seattle", image: "/images/seattle.jpg" },
-  { name: "San Francisco", image: "/images/san-francisco.jpg" },
-  { name: "Washington D.C.", image: "/images/washington-dc.jpg" },
-  // Add more cities as needed
+  { name: "Denver", image: denver },
+  { name: "Seattle", image: seattle },
+  { name: "San Francisco", image: sanfran },
+  { name: "Washington D.C.", image: washdc },
+  { name: "New York", image: nyc },
 ];
 
 export function CityCarousel() {
@@ -39,17 +44,17 @@ export function CityCarousel() {
         }}
       >
         <CarouselContent className="-ml-2 md:-ml-4">
-          {cities.map((city, index) => (
+          {cities.concat(cities).map((city, index) => (
             <CarouselItem
-              key={index}
+              key={`${city.name}-${index}`}
               className="pl-2 md:basis-1/2 md:pl-4 lg:basis-1/3 xl:basis-1/4"
             >
               <div className="relative aspect-[4/3] overflow-hidden rounded-lg">
                 <Image
                   src={city.image}
                   alt={city.name}
-                  layout="fill"
-                  objectFit="cover"
+                  fill
+                  style={{ objectFit: "cover" }}
                   className="transition-transform duration-300 hover:scale-110"
                 />
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">

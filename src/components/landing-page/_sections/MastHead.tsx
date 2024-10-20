@@ -23,6 +23,7 @@ import landing_airbnb from "public/assets/images/landing-page/landing_airbnb.png
 import landing_sunset from "public/assets/images/landing-page/landing_sunset.png";
 import LandingSearchBar from "../SearchBars/LandingSearchBar";
 import FAQ from "@/components/landing-page/_sections/FAQ";
+import { CityCarousel } from "./cities/CityCarousel";
 
 export default function MastHead() {
   return (
@@ -64,7 +65,7 @@ export default function MastHead() {
 
           {/* Host/Traveler Section */}
           <div className="relative my-16">
-            <div className="absolute inset-0 mt-8 rounded-3xl bg-[#DEEEFB]"></div>
+            <div className="absolute inset-0 mt-24 rounded-3xl bg-[#DEEEFB]"></div>
             <div className="relative grid gap-6 px-4 pb-12 pt-4 sm:grid-cols-2 sm:px-6">
               {/* Host Card */}
               <div className="overflow-hidden rounded-lg bg-white shadow-lg">
@@ -178,6 +179,14 @@ export default function MastHead() {
                 >
                   <Link href="/how-it-works">How it works</Link>
                 </Button>
+              </div>
+            </div>
+
+            {/* City Carousel Section */}
+            <div className="my-20">
+              {/* Carousel section */}
+              <div className="my-12">
+                <CityCarousel />
               </div>
             </div>
 
