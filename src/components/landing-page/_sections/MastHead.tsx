@@ -13,28 +13,47 @@ import Link from "next/link";
 import { whyUseTramonaCopy } from "./why-use-tramona-copy";
 import { CheckIcon } from "lucide-react";
 import { scrollToTop } from "@/utils/utils";
+import landing_airbnb from "public/assets/images/landing-page/landing_airbnb.png";
+import LandingSearchBar from "../SearchBars/LandingSearchBar";
 
 export default function MastHead() {
   return (
     <section className="relative bg-white pb-32">
-      {/* Main Title Section */}
-      <div className="relative sm:mb-24 sm:h-[640px] lg:mb-0">
-        <div className="relative grid h-full grid-cols-1 p-4 lg:grid-cols-1">
-          <div className="flex flex-col justify-center">
-            <div className="relative pt-10 text-center">
-              <h1 className="mx-auto max-w-3xl text-balance text-3xl font-bold text-zinc-900 lg:text-5xl">
-                The best prices on Airbnbs anywhere
-              </h1>
-              <p className="mx-auto max-w-[38rem] pt-4 text-xs font-semibold text-zinc-900 lg:pt-4 lg:text-base">
-                Make deals with hosts on their empty nights
-              </p>
+      <div className="relative mx-auto max-w-7xl px-4 pt-20 sm:px-6 lg:px-8">
+        <div className="relative min-h-[600px] overflow-hidden">
+          {/* Content */}
+          <h1 className="mb-4 text-4xl font-bold text-zinc-900 sm:text-5xl">
+            The best prices on Airbnbs anywhere
+          </h1>
+          <div className="relative z-10 max-w-2xl">
+            <p className="mb-8 text-xl text-zinc-900">
+              Make deals with hosts on their empty nights
+            </p>
+
+            {/* Search Bar */}
+            <div className="relative z-10 overflow-hidden rounded-2xl bg-white shadow-xl">
+              <LandingSearchBar />
+            </div>
+          </div>
+
+          {/* Background Image */}
+          <div className="absolute right-10 top-20">
+            <div className="relative h-[400px] w-[800px]">
+              <Image
+                src={landing_airbnb}
+                alt="Modern Airbnb property"
+                layout="fill"
+                objectFit="contain"
+                objectPosition="center" // Centering the image
+                className="rounded-l-[3rem]"
+              />
             </div>
           </div>
         </div>
       </div>
 
       {/* Host/Traveler Section */}
-      <div className="relative mx-auto mb-16 max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="relative mx-auto mb-16 mt-16 max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="relative">
           {/* Blue background with rounded corners */}
           <div className="absolute inset-0 mt-8 rounded-3xl bg-blue-50"></div>
