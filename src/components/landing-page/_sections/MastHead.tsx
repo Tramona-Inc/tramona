@@ -25,6 +25,10 @@ import LandingSearchBar from "../SearchBars/LandingSearchBar";
 import FAQ from "@/components/landing-page/_sections/FAQ";
 import { CityCarousel } from "./cities/CityCarousel";
 
+import LandingSimpleSearch, {
+  SimpleSearchBar,
+} from "../SearchBars/LandingSimpleSearch";
+
 export default function MastHead() {
   return (
     <>
@@ -179,6 +183,17 @@ export default function MastHead() {
                 >
                   <Link href="/how-it-works">How it works</Link>
                 </Button>
+              </div>
+            </div>
+
+            <div className="mt-16 rounded-3xl bg-white p-8">
+              <h2 className="mb-4 text-center text-3xl">
+                Book It Now- Best deals on Airbnbs{" "}
+                <span className="font-bold underline">Anywhere</span>
+              </h2>
+              <div className="mx-auto max-w-3xl">
+                {" "}
+                <SimpleSearchBar />
               </div>
             </div>
 

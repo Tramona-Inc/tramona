@@ -11,7 +11,7 @@ export default function LandingSearchBar() {
   const [activeTab, setActiveTab] = useState("search");
 
   return (
-    <div className="mx-auto max-w-5xl rounded-2xl bg-white p-6 shadow-lg">
+    <div className="mx-auto max-w-5xl rounded-2xl border-2 border-gray-300 bg-white p-6 shadow-lg">
       <div className="mb-4 flex">
         <button
           className={`flex-1 py-2 ${activeTab === "search" ? "border-b-2 border-teal-700 font-semibold text-teal-700" : "text-gray-500"}`}
