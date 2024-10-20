@@ -26,30 +26,28 @@ import FAQ from "@/components/landing-page/_sections/FAQ";
 
 export default function MastHead() {
   return (
-    <section className="relative bg-white pb-32">
-      {/* Main content wrapper */}
+    <section className="relative overflow-hidden bg-white pb-32">
       <div className="mx-auto max-w-[90%] px-4 lg:max-w-[80%]">
-        {/* Hero section */}
         <div className="relative pt-20">
-          <div className="relative min-h-[600px] overflow-hidden">
+          <div className="relative min-h-[600px]">
             {/* Content */}
-            <h1 className="mb-4 text-4xl font-bold text-zinc-900 sm:text-5xl">
-              The best prices on Airbnbs anywhere
-            </h1>
-            <div className="relative z-10 max-w-2xl">
-              <p className="mb-8 text-xl text-zinc-900">
+            <div className="relative z-20 mb-8">
+              <h1 className="mb-4 text-4xl font-bold text-zinc-900 sm:text-5xl">
+                The best prices on Airbnbs anywhere
+              </h1>
+              <p className="text-xl text-zinc-900">
                 Make deals with hosts on their empty nights
               </p>
+            </div>
 
-              {/* Search Bar */}
-              <div className="relative z-10 overflow-hidden rounded-2xl bg-white shadow-xl">
-                <LandingSearchBar />
-              </div>
+            {/* Search Bar */}
+            <div className="relative z-30 w-full overflow-hidden rounded-2xl shadow-xl lg:w-[60%]">
+              <LandingSearchBar />
             </div>
 
             {/* Background Image */}
-            <div className="absolute right-10 top-20">
-              <div className="relative h-[400px] w-[800px]">
+            <div className="absolute right-0 top-10 z-10 w-[800px] max-w-none">
+              <div className="relative h-[500px]">
                 <Image
                   src={landing_airbnb}
                   alt="Modern Airbnb property"
