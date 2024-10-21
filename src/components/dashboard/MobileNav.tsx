@@ -50,7 +50,7 @@ export default function MobileNav({
           {link.name}
         </NavBarLink>
       ))}
-      {status === "authenticated" && !isHost && (
+      {status === "authenticated" && type !== "host" && (
         <HamburgerMenu links={guestMobileNavHamburgerLinks} />
       )}
     </header>
