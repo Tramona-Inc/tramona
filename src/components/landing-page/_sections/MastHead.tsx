@@ -24,6 +24,7 @@ import landing_sunset from "public/assets/images/landing-page/landing_sunset.png
 import LandingSearchBar from "../SearchBars/LandingSearchBar";
 import FAQ from "@/components/landing-page/_sections/FAQ";
 import { CityCarousel } from "./cities/CityCarousel";
+import DynamicDesktopSearchBar from "../search/DynamicDesktopSearchBar";
 
 import LandingSimpleSearch, {
   SimpleSearchBar,
@@ -202,6 +203,7 @@ export default function MastHead() {
               {/* Carousel section */}
               <div className="my-12">
                 <CityCarousel />
+                <DynamicDesktopSearchBar />
               </div>
             </div>
 
