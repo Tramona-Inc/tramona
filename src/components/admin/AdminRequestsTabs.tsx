@@ -34,7 +34,7 @@ const navs = [
   },
   {
     title: "See all Reports",
-    decription: "See user and host reports for misconduct or property damamge",
+    description: "See user and host reports for misconduct or property damamge",
     href: "/admin/reports",
   },
   {

@@ -7,6 +7,7 @@ import {
   serial,
   timestamp,
   varchar,
+  text,
 } from "drizzle-orm/pg-core";
 import { properties } from "./properties";
 import { trips } from "./trips";
@@ -35,15 +36,15 @@ export const paymentSources = pgEnum("payment_sources", [
 export const claims = pgTable(
   "claims",
   {
-    id: serial("id").primaryKey().notNull(),
+    id: text("id").primaryKey().notNull(), //using uuid
     tripId: integer("trip_id")
       .notNull()
       .references(() => trips.id, { onDelete: "cascade" }),
-    filedByUserId: varchar("filed_by_user_id").references(() => users.id, {
+    filedByHostId: varchar("filed_by_host_id").references(() => users.id, {
       //we need to make it the teams id
       onDelete: "set null",
     }),
-    description: varchar("description").notNull(),
+    claimsLink: varchar("claims_link").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -59,7 +60,7 @@ export const claims = pgTable(
   },
   (t) => ({
     tripId: index().on(t.tripId),
-    filedByUserId: index().on(t.filedByUserId),
+    filedByHostId: index().on(t.filedByHostId),
   }),
 );
 
@@ -68,7 +69,7 @@ export const claimResolutions = pgTable(
   {
     //can have multiple per claim, 2+ is re resolve
     id: serial("id").primaryKey().notNull(),
-    claimId: integer("claim_id")
+    claimId: text("claim_id")
       .notNull()
       .references(() => claims.id)
       .notNull(),
@@ -90,7 +91,7 @@ export const claimItems = pgTable(
   {
     //can have multiple per claim
     id: serial("id").primaryKey(),
-    claimId: integer("claim_id")
+    claimId: text("claim_id")
       .notNull()
       .references(() => claims.id),
     tripId: integer("trips_id")

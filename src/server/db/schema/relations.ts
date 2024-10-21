@@ -453,7 +453,7 @@ export const claimsRelations = relations(claims, ({ one, many }) => ({
     references: [trips.id],
   }),
   user: one(users, {
-    fields: [claims.filedByUserId],
+    fields: [claims.filedByHostId],
     references: [users.id],
   }),
   superhogRequest: one(superhogRequests, {

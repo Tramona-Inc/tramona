@@ -17,7 +17,7 @@ import { cancelSuperhogReservation } from "@/utils/webhook-functions/superhog-ut
 import { sendEmail } from "@/server/server-utils";
 
 import { TRPCError } from "@trpc/server";
-import { and, eq, exists, isNotNull, isNull, ne, sql } from "drizzle-orm";
+import { and, eq, exists, isNotNull, isNull, lte, ne, sql } from "drizzle-orm";
 import { z } from "zod";
 import BookingCancellationEmail from "packages/transactional/emails/BookingCancellationEmail";
 import { formatDateRange, getNumNights, removeTax } from "@/utils/utils";
@@ -27,7 +27,7 @@ import { TAX_PERCENTAGE } from "@/utils/constants";
 export const tripsRouter = createTRPCRouter({
   getAllPreviousTripsWithDetails: roleRestrictedProcedure(["admin"]).query(
     async () => {
-      return await db.query.trips.findMany({
+      const previousTrips = await db.query.trips.findMany({
         with: {
           property: {
             columns: {
@@ -56,7 +56,10 @@ export const tripsRouter = createTRPCRouter({
             },
           },
         },
+        where: lte(trips.checkOut, new Date()),
       });
+
+      return previousTrips;
     },
   ),
 
@@ -252,8 +255,10 @@ export const tripsRouter = createTRPCRouter({
     });
   }),
   getAllclaimItems: roleRestrictedProcedure(["admin"]).query(async () => {
-    const allTrips = await db.query.claimItems.findMany({});
-    return allTrips.length > 0 ? allTrips : [];
+    const allClaimItems = await db.query.claimItems.findMany();
+    console.log("claim", allClaimItems);
+
+    return allClaimItems.length > 0 ? allClaimItems : [];
   }),
 
   getTripCancelationPolicyByTripId: protectedProcedure

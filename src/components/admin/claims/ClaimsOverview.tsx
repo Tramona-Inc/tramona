@@ -29,6 +29,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
+import OpenNewClaimForm from "./OpenNewClaimForm";
 
 // Mock data for claims
 const mockClaims = [
@@ -117,7 +118,7 @@ export default function AdminClaimsDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [messages, setMessages] = useState(mockMessages);
   const [newMessage, setNewMessage] = useState("");
-
+  const [isOpenClaimDialogOpen, setIsOpenClaimDialogOpen] = useState(false);
   const filteredClaims = claims.filter(
     (claim) =>
       (filterStatus === "all" || claim.status === filterStatus) &&
@@ -153,7 +154,7 @@ export default function AdminClaimsDashboard() {
     }
   };
 
-  const handleSubmitClaim = (event) => {
+  const handleSubmitClaim = (event: HTMLFormElement) => {
     event.preventDefault();
     // In a real application, you would send this data to your backend
     console.log(
@@ -174,7 +175,6 @@ export default function AdminClaimsDashboard() {
   return (
     <div className="container mx-auto space-y-8 p-4">
       <h1 className="mb-6 text-3xl font-bold">Admin Claims Dashboard</h1>
-
       <Card>
         <CardHeader>
           <CardTitle>Claims Summary</CardTitle>
