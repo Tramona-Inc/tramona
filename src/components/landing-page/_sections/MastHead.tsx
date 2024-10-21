@@ -1,34 +1,18 @@
 import landing_hosts from "public/assets/images/landing-page/landing_hosts.png";
 import landing_travelers from "public/assets/images/landing-page/landing_travelers.png";
-
-import priceComparison from "public/assets/images/pricecomparison.jpg";
-import { Button } from "@/components/ui/button";
-import UserAvatarMastHead from "@/components/_common/UserAvatarMasthead";
-import { Avatar } from "@/components/ui/avatar";
-import CityRequestFormContainer from "../SearchBars/CityRequestFormContainer";
-import { TestimonialCarousel } from "./testimonials/TestimonialCarousel";
-import Image from "next/image";
-import CompletedRequestsSection from "./CompletedRequests";
-import Link from "next/link";
-import { whyUseTramonaCopy } from "./why-use-tramona-copy";
-import {
-  CheckIcon,
-  Shield,
-  UserCheck,
-  Calendar,
-  PhoneCall,
-} from "lucide-react";
-import { scrollToTop } from "@/utils/utils";
 import landing_airbnb from "public/assets/images/landing-page/landing_airbnb.png";
 import landing_sunset from "public/assets/images/landing-page/landing_sunset.png";
+import { Button } from "@/components/ui/button";
+import CityRequestFormContainer from "../SearchBars/CityRequestFormContainer";
+import Link from "next/link";
+import { Shield, UserCheck, Calendar, PhoneCall } from "lucide-react";
 import LandingSearchBar from "../SearchBars/LandingSearchBar";
+import { SimpleSearchBar } from "../SearchBars/LandingSimpleSearch";
+import Image from "next/image";
+import { TestimonialCarousel } from "./testimonials/TestimonialCarousel";
 import FAQ from "@/components/landing-page/_sections/FAQ";
 import { CityCarousel } from "./cities/CityCarousel";
 import DynamicDesktopSearchBar from "../search/DynamicDesktopSearchBar";
-
-import LandingSimpleSearch, {
-  SimpleSearchBar,
-} from "../SearchBars/LandingSimpleSearch";
 
 export default function MastHead() {
   return (
@@ -53,7 +37,7 @@ export default function MastHead() {
               </div>
 
               {/* Background Image */}
-              <div className="absolute right-0 top-20 z-10 w-[815px] max-w-none">
+              <div className="absolute right-0 top-20 z-10 hidden w-[815px] max-w-none md:block">
                 <div className="relative h-[484px]">
                   <Image
                     src={landing_airbnb}
@@ -70,7 +54,7 @@ export default function MastHead() {
 
           {/* Host/Traveler Section */}
           <div className="relative my-16">
-            <div className="absolute inset-0 mt-24 rounded-3xl bg-[#DEEEFB]"></div>
+            <div className="absolute inset-0 mt-0 rounded-3xl bg-[#DEEEFB] md:mt-24"></div>
             <div className="relative grid gap-6 px-4 pb-12 pt-4 sm:grid-cols-2 sm:px-6">
               {/* Host Card */}
               <div className="overflow-hidden rounded-lg bg-white shadow-lg">
@@ -148,7 +132,7 @@ export default function MastHead() {
             </div>
 
             {/* How Tramona Works Section */}
-            <div className="mt-12 rounded-3xl bg-[#F4F6F8] p-8">
+            <div className="-mx-4 mt-12 rounded-none bg-[#F4F6F8] p-8 md:mx-0 md:rounded-3xl">
               <h2 className="mb-6 text-center text-3xl font-bold">
                 How Tramona works
               </h2>
@@ -193,17 +177,14 @@ export default function MastHead() {
                 <span className="font-bold underline">Anywhere</span>
               </h2>
               <div className="mx-auto max-w-3xl">
-                {" "}
                 <SimpleSearchBar />
               </div>
             </div>
 
             {/* City Carousel Section */}
             <div className="my-20">
-              {/* Carousel section */}
               <div className="my-12">
                 <CityCarousel />
-                <DynamicDesktopSearchBar />
               </div>
             </div>
 
@@ -215,16 +196,16 @@ export default function MastHead() {
               </h2>
               <p className="mb-8 text-center text-gray-600">
                 Are you a host in a city we are not yet live in?{" "}
-                <a href="/for-hosts" className="text-teal-600 hover:underline">
+                <a href="/for-hosts" className="text-teal-600 underline">
                   Become a host
                 </a>{" "}
                 and help us launch there.
               </p>
 
-              <div className="border-gray mb-12 w-full border-t-2" />
+              <div className="border-gray mb-12 hidden w-full border-t-2 md:block" />
 
               <div className="grid gap-8 lg:grid-cols-2">
-                <div className="relative h-[400px] w-full">
+                <div className="relative hidden h-[400px] w-full md:block">
                   <Image
                     src={landing_sunset}
                     alt="Family on beach at sunset"
@@ -270,23 +251,18 @@ export default function MastHead() {
             </div>
           </div>
 
-          {/* Testimonial Carousel Section */}
-          <div className="my-20">
-            {/* Black separator above carousel */}
+          {/* Testimonial Carousel Section - Hidden on Mobile */}
+          <div className="my-20 hidden md:block">
             <div className="border-gray mb-12 w-full border-t-2" />
-
-            {/* Carousel section */}
             <div className="my-12">
               <TestimonialCarousel />
             </div>
-
-            {/* Black separator below carousel */}
             <div className="border-gray mt-12 w-full border-t-2" />
           </div>
 
-          {/* Final CTA Section */}
+          {/* Final CTA Section - FAQ Hidden on Mobile */}
           <div className="grid gap-4 pt-32">
-            <div className="col-span-full flex flex-col items-center gap-2 rounded-2xl bg-zinc-100 p-6">
+            <div className="col-span-full hidden flex-col items-center gap-2 rounded-2xl bg-zinc-100 p-6 md:flex">
               <FAQ />
             </div>
           </div>
