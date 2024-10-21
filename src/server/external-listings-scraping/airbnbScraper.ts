@@ -20,7 +20,7 @@ export const airbnbScraper: DirectSiteScraper = async ({
     throw new Error("Missing required fields");
   }
 
-  const allListings = await getSearchResults({
+  const allListings = await scrapeAirbnbSearch({
     checkIn,
     checkOut,
     location,
@@ -77,7 +77,7 @@ export const airbnbScraper: DirectSiteScraper = async ({
   ).then((r) => r.filter(Boolean)); // filter out failed scrapes
 };
 
-async function getSearchResults({
+export async function scrapeAirbnbSearch({
   checkIn,
   checkOut,
   location,
@@ -169,7 +169,13 @@ const serpPageSchema = z.object({
       paginationInfo: z.object({ pageCursors: z.string().array() }),
       searchResults: z.array(
         z.object({
-          listing: z.object({ id: z.string() }),
+          listing: z.object({
+            id: z.string(),
+            name: z.string(),
+            avgRatingLocalized: z.string().nullish(),
+            structuredContent: z.object({ title: z.string().nullish() }),
+          }),
+          contextualPictures: z.array(z.object({ picture: z.string().url() })),
           pricingQuote: z.object({
             structuredStayDisplayPrice: z.union([
               z.object({
@@ -199,7 +205,7 @@ type SearchResult = z.infer<
 >["staysSearch"]["results"]["searchResults"][number];
 
 function transformSearchResult({
-  searchResult: { listing, pricingQuote },
+  searchResult: { listing, pricingQuote, contextualPictures },
   numNights,
 }: {
   searchResult: SearchResult;
@@ -227,5 +233,9 @@ function transformSearchResult({
     nightlyPrice,
     originalNightlyPrice,
     originalListingId: listing.id,
+    name: listing.name,
+    description: listing.structuredContent.title,
+    images: contextualPictures.map((p) => p.picture),
+    ratingStr: listing.avgRatingLocalized,
   };
 }
