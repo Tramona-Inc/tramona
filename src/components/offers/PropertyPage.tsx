@@ -55,6 +55,7 @@ import ChatOfferButton from "./ChatOfferButton";
 import { Airbnb } from "@/utils/listing-sites/Airbnb";
 import { createUserNameAndPic } from "../activity-feed/admin/generationHelper";
 import ReasonsToBook from "./ReasonsToBook";
+import { RequestToBookBtn } from "../property/RequestsToBookBtn";
 
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 export type PropertyPageData = RouterOutputs["properties"]["getById"];
@@ -258,7 +259,9 @@ export default function PropertyPage({
                   />
                 </div>
               )}
-              {!offer && !property.bookItNowEnabled && <Button onClick={() => 'hello'} className="">Request To Book</Button>}
+              {!offer && !property.bookItNowEnabled && (
+                <RequestToBookBtn propertyId={property.id} maxNumGuests={property.maxNumGuests} />
+              )}
               {!offer && property.bookItNowEnabled && <Button onClick={() => 'hello'} className="">Book It Now</Button>}
             </div>
           </section>

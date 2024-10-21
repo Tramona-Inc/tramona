@@ -5,6 +5,7 @@ import {
   pgTable,
   serial,
   smallint,
+  text,
   timestamp,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
@@ -19,7 +20,7 @@ export const requestsToBook = pgTable(
     propertyId: integer("property_id")
       .notNull()
       .references(() => properties.id),
-    userId: integer("user_id")
+    userId: text("user_id")
       .notNull()
       .references(() => users.id),
     madeByGroupId: integer("made_by_group_id")
