@@ -19,30 +19,13 @@ export const airbnbScraper: DirectSiteScraper = async ({
   if (!location || !numGuests) {
     throw new Error("Missing required fields");
   }
-  const serpUrl = getSerpUrl({
+
+  const allListings = await getSearchResults({
     checkIn,
     checkOut,
     location,
     numGuests,
   });
-
-  const pageData = await scrapePage(serpUrl).then(async (unparsedData) => {
-    return serpPageSchema.parse(unparsedData);
-  });
-
-  const cursors = pageData.staysSearch.results.paginationInfo.pageCursors;
-  const pageUrls = cursors.map((cursor) =>
-    getSerpUrl({ checkIn, checkOut, location, numGuests, cursor }),
-  );
-  const pages = await Promise.all(pageUrls.map(scrapePage));
-
-  const numNights = getNumNights(checkIn, checkOut);
-
-  const allListings = pages
-    .map((page) => serpPageSchema.parse(page))
-    .flatMap((data) => data.staysSearch.results.searchResults)
-    .map((searchResult) => transformSearchResult({ searchResult, numNights }))
-    .filter(Boolean);
 
   const filteredListings = sortBy(allListings, (l) => {
     if (!requestNightlyPrice) return 0; // no sorting
@@ -64,20 +47,22 @@ export const airbnbScraper: DirectSiteScraper = async ({
           { checkIn, checkOut, numGuests },
         );
 
+        const listingUrl = `https://www.airbnb.com/rooms/${originalListingId}`;
+
         const completeProperty: NewProperty = {
           ...property,
           originalListingId,
           originalListingPlatform: "Airbnb",
-          originalListingUrl: `https://www.airbnb.com/rooms/${originalListingId}`,
-          airbnbUrl: `https://www.airbnb.com/rooms/${originalListingId}`,
+          originalListingUrl: listingUrl,
+          airbnbUrl: listingUrl,
           bookOnAirbnb: true,
         };
 
         return {
           ...completeProperty,
+          scrapeUrl: listingUrl,
           reviews,
           nightlyPrice,
-          scrapeUrl: serpUrl,
           originalListingUrl: completeProperty.originalListingUrl!,
           latLngPoint: {
             lng: completeProperty.latLngPoint.x,
@@ -91,6 +76,41 @@ export const airbnbScraper: DirectSiteScraper = async ({
     }),
   ).then((r) => r.filter(Boolean)); // filter out failed scrapes
 };
+
+async function getSearchResults({
+  checkIn,
+  checkOut,
+  location,
+  numGuests,
+}: {
+  checkIn: Date;
+  checkOut: Date;
+  location: string;
+  numGuests: number;
+}) {
+  const serpUrl = getSerpUrl({
+    checkIn,
+    checkOut,
+    location,
+    numGuests,
+  });
+
+  const pageData = await scrapePage(serpUrl).then(async (unparsedData) => {
+    return serpPageSchema.parse(unparsedData);
+  });
+
+  const cursors = pageData.staysSearch.results.paginationInfo.pageCursors;
+  const pageUrls = cursors.map((cursor) =>
+    getSerpUrl({ checkIn, checkOut, location, numGuests, cursor }),
+  );
+
+  const numNights = getNumNights(checkIn, checkOut);
+
+  return (await Promise.all(pageUrls.map(scrapePage)))
+    .flatMap((data) => data.staysSearch.results.searchResults)
+    .map((searchResult) => transformSearchResult({ searchResult, numNights }))
+    .filter(Boolean);
+}
 
 function getSerpUrl({
   checkIn,
@@ -113,13 +133,9 @@ function getSerpUrl({
   url.searchParams.set("currency", "USD");
   url.searchParams.set("checkin", checkInStr);
   url.searchParams.set("checkout", checkOutStr);
-
   url.searchParams.set("query", location);
-
   url.searchParams.set("adults", numGuests.toString());
-  if (cursor) {
-    url.searchParams.set("cursor", cursor);
-  }
+  if (cursor) url.searchParams.set("cursor", cursor);
 
   return url.toString();
 }
@@ -139,7 +155,8 @@ async function scrapePage(url: string) {
     .then(($) => $("#data-deferred-state-0").text())
     .then((jsonStr) => JSON.parse(jsonStr))
     .then((unparsedData) => pageDataSchema.parse(unparsedData))
-    .then((data) => data.niobeMinimalClientData[0][1].data.presentation);
+    .then((data) => data.niobeMinimalClientData[0][1].data.presentation)
+    .then((page) => serpPageSchema.parse(page));
 
   // await writeFile("airbnb-page-data.json", JSON.stringify(ret, null, 2));
 
