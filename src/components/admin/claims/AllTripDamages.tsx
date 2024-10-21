@@ -18,11 +18,12 @@ export default function AllclaimItems() {
                   <div className="flex flex-row gap-x-4">
                     <div className="flex flex-col gap-y-1">
                       <h1 className="text-lg font-semibold">Trip</h1>
-                      <div>Trip ID: {trip.tripId}</div>
+                      <div>Trip Id: {trip.tripId}</div>
                     </div>
                     <div className="flex flex-col gap-y-1">
                       <h1 className="text-lg font-semibold">Amount</h1>
-                      <div>Amount: {trip.amount}</div>
+                      <div>Requested Amount: {trip.requestedAmount}</div>
+                      <div>Outstanding Amount: {trip.outstandingAmount}</div>
                       <div>
                         {trip.paymentCompleteAt ? (
                           <div>

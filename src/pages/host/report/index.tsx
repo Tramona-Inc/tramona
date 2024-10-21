@@ -229,14 +229,30 @@ export default function Component() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ul className="space-y-2 text-sm">
-                <li>
-                  Damage Reports: Typically reviewed within 2-3 business days
-                </li>
-                <li>
-                  Insurance Claims: Usually processed within 5-7 business days
-                </li>
-              </ul>
+              <div className="text-sm">
+                <p className="mb-4 text-gray-600">
+                  The processing time for security deposit claims depends on the
+                  claim amount. Please refer to the following breakdown:
+                </p>
+                <ul className="list-disc space-y-3 pl-6 tracking-tight text-gray-700">
+                  <li>
+                    <strong>Under $250:</strong> Processed within 3 business
+                    days.
+                  </li>
+                  <li>
+                    <strong>$250&thinsp;-&thinsp;$1,000:</strong> Processed
+                    within 4 business days.
+                  </li>
+                  <li>
+                    <strong>$1,000&thinsp;-&thinsp;$5,000:</strong> Processed
+                    within 6 business days.
+                  </li>
+                  <li>
+                    <strong>Over $5,000:</strong> Longer processing time. We’ll
+                    contact you directly for further details.
+                  </li>
+                </ul>
+              </div>
             </CardContent>
           </Card>
         </div>

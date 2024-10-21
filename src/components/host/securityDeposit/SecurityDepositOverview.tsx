@@ -43,6 +43,8 @@ import { Button } from "@/components/ui/button";
 import { useQueryClient } from "@tanstack/react-query";
 import { formatCurrency } from "@/utils/utils";
 import { getQueryKey } from "@trpc/react-query";
+import ListingsEmptySvg from "@/components/_common/EmptyStateSvg/ListingsEmptySvg";
+import EmptyStateValue from "@/components/_common/EmptyStateSvg/EmptyStateValue";
 
 export default function SecurityDepositOverview() {
   const queryClient = useQueryClient();
@@ -121,62 +123,68 @@ export default function SecurityDepositOverview() {
           <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
         <TabsContent value="overview">
-          <Card>
-            <CardHeader>
-              <CardTitle>Property Security Deposits</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {hostProperties ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Property</TableHead>
-                      <TableHead className="text-right">
-                        Security Deposit Amount
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {hostProperties.map((property, index) => (
-                      <TableRow key={index}>
-                        <TableCell>{property.name}</TableCell>
-                        <TableCell className="text-right">
-                          {formatCurrency(property.currentSecurityDeposit)}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              ) : (
-                <div className="space-y-2">
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-full" />
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-        <TabsContent value="settings">
-          <div className="grid gap-6 md:grid-cols-2">
+          {hostProperties && hostProperties.length > 0 ? (
             <Card>
               <CardHeader>
-                <CardTitle>Property-Specific Security Deposit</CardTitle>
-                <CardDescription>
-                  Set custom security deposit amounts for each of your
-                  properties
-                </CardDescription>
+                <CardTitle>Property Security Deposits</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="property-select">Select Property</Label>
-                  {hostProperties && (
+              <CardContent>
+                {hostProperties ? (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Property</TableHead>
+                        <TableHead className="text-right">
+                          Security Deposit Amount
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {hostProperties.map((property, index) => (
+                        <TableRow key={index}>
+                          <TableCell>{property.name}</TableCell>
+                          <TableCell className="text-right">
+                            {formatCurrency(property.currentSecurityDeposit)}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                ) : (
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-full" />
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ) : (
+            <EmptyStateValue description="No listed properties">
+              <ListingsEmptySvg />
+            </EmptyStateValue>
+          )}
+        </TabsContent>
+        <TabsContent value="settings">
+          {hostProperties && hostProperties.length > 0 ? (
+            <div className="grid gap-6 md:grid-cols-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Property-Specific Security Deposit</CardTitle>
+                  <CardDescription>
+                    Set custom security deposit amounts for each of your
+                    properties
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="property-select">Select Property</Label>
                     <Select
                       onValueChange={handlePropertyChange}
                       defaultValue={
                         selectedProperty
                           ? selectedProperty.id.toString()
-                          : hostProperties[0]!.id.toString()
+                          : (hostProperties[0]?.id.toString() ?? undefined)
                       }
                     >
                       <SelectTrigger id="property-select">
@@ -193,68 +201,67 @@ export default function SecurityDepositOverview() {
                         ))}
                       </SelectContent>
                     </Select>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center space-x-2">
-                    <Label htmlFor="deposit-amount">
-                      Security Deposit Amount
-                    </Label>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <InfoIcon className="h-4 w-4 text-muted-foreground" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>
-                            Set the security deposit amount for the selected
-                            property.
-                          </p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <DollarSign className="text-muted-foreground" />
-                    <Input
-                      id="deposit-amount"
-                      type="number"
-                      value={customAmount}
-                      disabled={selectedProperty === null}
-                      step={5}
-                      onChange={(e) =>
-                        handleDepositChange(Number(e.target.value))
-                      }
-                      className="w-24"
-                    />
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <Label htmlFor="deposit-amount">
+                        Security Deposit Amount
+                      </Label>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <InfoIcon className="h-4 w-4 text-muted-foreground" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>
+                              Set the security deposit amount for the selected
+                              property.
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <DollarSign className="text-muted-foreground" />
+                      <Input
+                        id="deposit-amount"
+                        type="number"
+                        value={customAmount}
+                        disabled={selectedProperty === null}
+                        step={5}
+                        onChange={(e) =>
+                          handleDepositChange(Number(e.target.value))
+                        }
+                        className="w-24"
+                      />
+                    </div>
+                    <div className="flex w-full flex-row justify-between">
+                      <Slider
+                        value={[customAmount]}
+                        onValueChange={([value]) => handleDepositChange(value)}
+                        max={2000}
+                        step={10}
+                        className="[data-disabled]:cursor-not-allowed w-[200px]"
+                        disabled={selectedProperty === null}
+                      />
+                      <Button onClick={handleSubmit}>
+                        {!updateSecurityDepositAmount.isLoading
+                          ? "Update Deposit"
+                          : "Updating..."}
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex w-full flex-row justify-between">
-                    <Slider
-                      value={[customAmount]}
-                      onValueChange={([value]) => handleDepositChange(value)}
-                      max={2000}
-                      step={10}
-                      className="[data-disabled]:cursor-not-allowed w-[200px]"
-                      disabled={selectedProperty === null}
-                    />
-                    <Button onClick={handleSubmit}>
-                      {!updateSecurityDepositAmount.isLoading
-                        ? "Update Deposit"
-                        : "Updating..."}
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>Global Default Settings</CardTitle>
-                <CardDescription>
-                  Set a default deposit for all properties
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* <div className="flex items-center space-x-2">
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Global Default Settings</CardTitle>
+                  <CardDescription>
+                    Set a default deposit for all properties
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* <div className="flex items-center space-x-2">
                   <Switch
                     id="global-default"
                     checked={globalDefault}
@@ -281,9 +288,14 @@ export default function SecurityDepositOverview() {
                     </div>
                   </div>
                 )} */}
-              </CardContent>
-            </Card>
-          </div>
+                </CardContent>
+              </Card>
+            </div>
+          ) : (
+            <EmptyStateValue description="No listed properties">
+              <ListingsEmptySvg />
+            </EmptyStateValue>
+          )}
         </TabsContent>
       </Tabs>
     </div>

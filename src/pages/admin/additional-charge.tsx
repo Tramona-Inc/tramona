@@ -1,6 +1,6 @@
-import CreateAdditionalChargeForm from "@/components/admin/additional-charge/CreateAdditionalChargeForm";
-import AllPreviousTrips from "@/components/admin/additional-charge/AllPreviousTrips";
-import AllclaimItems from "@/components/admin/additional-charge/AllclaimItems";
+import CreateAdditionalChargeForm from "@/components/admin/claims/CreateAdditionalChargeForm";
+import AllPreviousTrips from "@/components/admin/claims/AllPreviousTrips";
+import AllclaimItems from "@/components/admin/claims/A";
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 export default function Page() {
   return (
