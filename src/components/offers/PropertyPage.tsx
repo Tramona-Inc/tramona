@@ -258,12 +258,14 @@ export default function PropertyPage({
                   />
                 </div>
               )}
+              {!offer && !property.bookItNowEnabled && <Button onClick={() => 'hello'} className="">Request To Book</Button>}
+              {!offer && property.bookItNowEnabled && <Button onClick={() => 'hello'} className="">Book It Now</Button>}
             </div>
           </section>
 
           <section className="flex-justify-between mx-1 flex w-full border-t pt-4">
             <div
-              className="flex w-5/6 items-center gap-2"
+              className="flex w-5/6 items-center gap-2" 
               onClick={() => setOpenUserInfo(true)}
             >
               <UserAvatar

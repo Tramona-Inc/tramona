@@ -266,6 +266,7 @@ export const propertiesRouter = createTRPCRouter({
           numRatings: properties.numRatings,
           originalNightlyPrice: properties.originalNightlyPrice,
           latLngPoint: properties.latLngPoint,
+          bookItNowIsEnabled: properties.bookItNowEnabled,
           // lat: properties.latitude,
           // long: properties.longitude,
           distance: sql`
@@ -407,6 +408,7 @@ export const propertiesRouter = createTRPCRouter({
           numRatings: properties.numRatings,
           originalNightlyPrice: properties.originalNightlyPrice,
           latLngPoint: properties.latLngPoint,
+          bookItNowIsEnabled: properties.bookItNowEnabled,
           // lat: properties.latitude,
           // long: properties.longitude,
           distance: sql`

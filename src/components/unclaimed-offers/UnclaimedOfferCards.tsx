@@ -323,20 +323,22 @@ function UnMatchedPropertyCard({
               {plural(property.maxNumGuests, "Guest")}
             </div>
           </div>
-          <div className="flex items-center space-x-3 text-sm font-semibold">
-            <div>
+          <div className="flex justify-between">
+            <div className="flex items-center space-x-3 text-sm font-semibold">
+              <div>
               {property.originalNightlyPrice
                 ? formatCurrency(property.originalNightlyPrice)
                 : "N/A"}
               &nbsp;night
             </div>
-            <div className="text-xs text-zinc-500 line-through">
-              airbnb&nbsp;
+              <div className="text-xs text-zinc-500 line-through">
+               airbnb&nbsp;
               {property.originalNightlyPrice
-                ? formatCurrency(
+                  ? formatCurrency(
                     property.originalNightlyPrice * AVG_AIRBNB_MARKUP,
                   )
                 : "N/A"}
+            </div>
             </div>
           </div>
         </div>
