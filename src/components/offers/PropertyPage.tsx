@@ -46,7 +46,7 @@ import {
   PetsRule,
   SmokingRule,
 } from "./HouseRules";
-import { OfferPriceDetails } from "../_common/OfferPriceDetails";
+import PriceDetailsBeforeTax from "@/components/_common/PriceDetailsBeforeTax";
 import { getCancellationPolicyDescription } from "@/config/getCancellationPolicyDescription";
 import { VerificationProvider } from "../_utils/VerificationContext";
 import IdentityModal from "../_utils/IdentityModal";
@@ -234,10 +234,16 @@ export default function PropertyPage({
                 <p className="gap flex flex-wrap items-center gap-x-1 pt-1 text-sm font-medium capitalize">
                   {property.propertyType} in {property.city} ·{" "}
                   <StarIcon className="inline size-[1em] fill-primaryGreen stroke-primaryGreen" />{" "}
-                  {property.avgRating}{" "}
-                  <a href="#reviews" className="underline">
-                    ({plural(property.numRatings, "review")})
-                  </a>
+                  {property.numRatings === 0 ? (
+                    <>New</>
+                  ) : (
+                    <>
+                      {property.avgRating}{" "}
+                      <a href="#reviews" className="underline">
+                        ({plural(property.numRatings, "review")})
+                      </a>
+                    </>
+                  )}
                 </p>
                 <p className="text-sm font-medium">
                   {plural(property.maxNumGuests, "guest")} ·{" "}
@@ -662,7 +668,7 @@ function OfferPageSidebar({
               You won&apos;t be charged yet
             </p>
           )}
-          <OfferPriceDetails
+          <PriceDetailsBeforeTax
             offer={offer}
             bookOnAirbnb={property.bookOnAirbnb}
           />
@@ -720,7 +726,7 @@ function OfferPageMobileBottomCard({
       <CardContent className="flex flex-row items-center justify-between px-4 py-1 text-sm">
         {offer.request && (
           <div className="flex basis-1/2 flex-col">
-            <OfferPriceDetails offer={offer} />
+            <PriceDetailsBeforeTax offer={offer} />
             <p className="font-semibold">
               {formatDateRange(offer.checkIn, offer.checkOut)}
             </p>

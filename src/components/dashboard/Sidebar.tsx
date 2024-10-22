@@ -1,6 +1,6 @@
 import {
   adminNavLinks,
-  guestNavLinks,
+  guestDesktopNavLinks,
   hostMobileNavLinks,
 } from "@/config/sideNavLinks";
 import { api } from "@/utils/api";
@@ -31,10 +31,10 @@ export default function Sidebar({
         ? hostMobileNavLinks
         : isAdmin
           ? [
-              ...guestNavLinks,
+              ...guestDesktopNavLinks,
               { href: "/admin", name: "Switch To Admin", icon: ArrowLeftRight },
             ]
-          : guestNavLinks;
+          : guestDesktopNavLinks;
 
   const { data: totalUnreadMessages } =
     api.messages.getNumUnreadMessages.useQuery(undefined, {

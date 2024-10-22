@@ -13,7 +13,6 @@ export default function TripCancelDialog({
   checkOutDate,
   bookingDate,
   checkInTime,
-  checkOutTime,
   totalPriceAfterFees,
 }: {
   tripId: number;
@@ -27,15 +26,19 @@ export default function TripCancelDialog({
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const { canCancel, partialRefund, partialRefundPercentage, description } =
-    checkCancellation({
-      cancellationPolicy: tripCancellation,
-      checkInDate,
-      checkOutDate,
-      checkInTime,
-      checkOutTime,
-      bookingDate: bookingDate,
-    });
+  const {
+    canCancel,
+    partialRefund,
+    partialRefundPercentage,
+    description,
+    cancellationFee,
+  } = checkCancellation({
+    cancellationPolicy: tripCancellation,
+    checkInDate,
+    checkOutDate,
+    checkInTime,
+    bookingDate: bookingDate,
+  });
 
   //if the trip is scraped or cannot cancell make it request cancellation.
   return (
@@ -56,6 +59,8 @@ export default function TripCancelDialog({
             partialRefundPercentage={partialRefundPercentage}
             description={description}
             totalPriceAfterFees={totalPriceAfterFees}
+            cancellationFee={cancellationFee}
+            setClose={() => setIsOpen(false)}
           />
         ) : (
           <InvalidTripCancellation

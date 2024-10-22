@@ -41,7 +41,7 @@ Partial Refund: If they cancel less than 30 days before check-in, they get a 50%
 After Check-In: If they cancel during their stay, the next 30 days are non-refundable.`;
 
     case "Vacasa":
-      return "For new trips, you can cancel within 24 hours of booking and receive a full refund. If you cancel 30 or more days before check-in, you can receive a refund of any rental payments you’ve made, minus the booking fee and associated taxes. The 24-hour refund option doesn't apply if you book your stay the day before check-in. Reservations cannot be cancelled for a full refund on the day of check-in.";
+      return "For new trips, you can cancel within 24 hours of booking and receive a full refund. If you cancel 30 or more days before check-in, you can receive a refund of any rental payments you&apos;ve made, minus the booking fee and associated taxes. The 24-hour refund option doesn't apply if you book your stay the day before check-in. Reservations cannot be cancelled for a full refund on the day of check-in.";
 
     case "CB Island Vacations":
       return `Cancellation Policy: A service fee of $300 will be charged for all cancellations. If the cancellation is received prior to 60 days of your scheduled check in date, a refund of the deposit minus the $300 shall be returned. Cancellations made 60 days or less in advance of the scheduled date will receive a refund if the accommodation is re-rented by another party for all of the same dates and at the same rate, and pro-rata refunds for partial replacement reservations will be provided. However, if we cannot rent the unit then no refund will be returned for cancellations made within 60 days of the scheduled stay. There are no refunds for late cancellations or early checkouts.`;

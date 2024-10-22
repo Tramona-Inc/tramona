@@ -11,6 +11,7 @@ import {
   groups,
   trips,
   tripCancellations,
+  tripCheckouts,
   users,
 } from "@/server/db/schema";
 import { cancelSuperhogReservation } from "@/utils/webhook-functions/superhog-utils";
@@ -110,9 +111,9 @@ export const tripsRouter = createTRPCRouter({
           .select()
           .from(properties)
           .where(
-            eq(
-              properties.hostId,
-              user?.mainHostId ? user.mainHostId : ctx.user.id,
+            and(
+              eq(properties.hostId, ctx.user.id),
+              eq(properties.id, trips.propertyId),
             ),
           ),
       ),
@@ -415,5 +416,17 @@ export const tripsRouter = createTRPCRouter({
         },
       });
       return;
+    }),
+  getTripCheckoutByTripId: protectedProcedure
+    .input(z.number())
+    .query(async ({ input }) => {
+      const tripCheckout = await db.query.trips.findFirst({
+        where: eq(trips.id, input),
+        columns: { tripCheckoutId: true },
+        with: { tripCheckout: true },
+      });
+
+      console.log(tripCheckout?.tripCheckout);
+      return tripCheckout?.tripCheckout;
     }),
 });
