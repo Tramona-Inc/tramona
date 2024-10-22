@@ -235,15 +235,26 @@ const locations = [
   },
 ];
 
+
 export function DesktopSearchTab() {
   const { form, onSubmit } = useSearchBarForm();
   const containerRef = useRef<HTMLDivElement>(null);
   const { adjustedProperties, setAdjustedProperties, setIsSearching } = useAdjustedProperties();
   const runSubscrapers = api.properties.runSubscrapers.useMutation();
+
   const [isLoading, setIsLoading] = useState(false);
+  const utils = api.useUtils();
 
   const checkInDate = form.watch("checkIn");
   const checkOutDate = form.watch("checkOut");
+
+  type BookItNowProperties = (
+    {type: "Airbnb";
+    data: Property[];
+  } | {
+    type: "Subscraper";
+    data: Property[];
+  })[];
 
   const handleLocationClick = useCallback(
     (location: string) => {
@@ -252,96 +263,111 @@ export function DesktopSearchTab() {
     [form],
   );
 
-  const handleSearch = async (event: React.FormEvent) => {
-    event.preventDefault();
+  const handleSearch = form.handleSubmit(async () => {
     setIsLoading(true);
     setIsSearching(true);
     const formData = form.getValues();
     console.log("Form data:", formData);
 
     // Run the original onSubmit function
-    await onSubmit(event as React.BaseSyntheticEvent);
 
     console.log("Initial adjustedProperties:", adjustedProperties);
 
     // Get all property IDs and original listing IDs from adjustedProperties
-    const propertyData =
-      adjustedProperties?.pages.flatMap((page) =>
-        page.data.map((property) => ({
-          id: property.id,
-          originalListingId: property.originalListingId,
-          originalListingPlatform: property.originalListingPlatform,
-          maxNumGuests: property.maxNumGuests,
-        })),
-      ) ?? [];
+    // const propertyData =
+    //   adjustedProperties?.pages.flatMap((page) =>
+    //     page.data.map((property) => ({
+    //       id: property.id,
+    //       originalListingId: property.originalListingId,
+    //       originalListingPlatform: property.originalListingPlatform,
+    //       maxNumGuests: property.maxNumGuests,
+    //     })),
+    //   ) ?? [];
 
-    console.log("Property data:", propertyData);
 
     if (formData.checkIn && formData.checkOut) {
+      console.log("Running subscrapers...");
       try {
-        const results = await runSubscrapers.mutateAsync({
-          propertyData: propertyData.filter(
-            (
-              prop,
-            ): prop is {
-              id: number;
-              originalListingId: string;
-              originalListingPlatform: NonNullable<
-                typeof prop.originalListingPlatform
-              >;
-              maxNumGuests: number;
-            } =>
-              prop.originalListingId !== null &&
-              prop.originalListingPlatform !== null &&
-              typeof prop.maxNumGuests === "number",
-          ),
-          checkIn: new Date(formData.checkIn),
-          checkOut: new Date(formData.checkOut),
-          numGuests: parseInt(formData.numGuests as string),
+        const results: BookItNowProperties = await utils.properties.getBookItNowProperties.fetch({
+          checkIn: formData.checkIn,
+          checkOut: formData.checkOut,
+          numGuests: formData.numGuests!,
+          location: formData.location!,
         });
-        console.log("Subscraper results:", results);
+
+        console.log('results', results);
 
         // Update adjustedProperties with only the properties that were updated
-        if (adjustedProperties) {
-          const updatedProperties = results.filter(
-            (r) => r.isAvailableOnOriginalSite && r.originalNightlyPrice,
-          );
+        // if (adjustedProperties) {
 
-          const updatedPages = [
-            {
-              data: adjustedProperties.pages[0].data
-                .filter((property) =>
-                  updatedProperties.some((r) => r.propertyId === property.id),
-                )
-                .map((property) => {
-                  const updatedProperty = updatedProperties.find(
-                    (r) => r.propertyId === property.id,
-                  );
-                  return {
-                    ...property,
-                    originalNightlyPrice: updatedProperty?.originalNightlyPrice,
-                  };
-                }),
-            },
-          ];
+          // const airbnbProperties = results.filter(
+          //   (r) => r.originalListingPlatform === "Airbnb" ,
+          // );
+          // const updatedProperties = results.filter(
+          //   (r) =>
+          //     r.originalListingPlatform !== "Airbnb"
+          //       && r.nightlyPrice
+          //       && r.isAvailableOnOriginalSite,
+          // );
 
-          console.log("Updated pages:", updatedPages);
-          console.log(
-            "Number of properties updated:",
-            updatedProperties.length,
-          );
-          console.log(
-            "Total number of properties:",
-            updatedPages[0].data.length,
-          );
+          // console.log("Airbnb properties:", airbnbProperties);
+          // console.log("Updated properties:", updatedProperties);
+
+          // const combinedProperties = [...airbnbProperties, ...updatedProperties];
+
+          // const updatedPages = [
+          //   {
+          //     data: adjustedProperties.pages[0].data
+          //       .filter((property) =>
+          //         updatedProperties.some((r) => r.propertyId === property.id),
+          //       )
+          //       .map((property) => {
+          //         const updatedProperty = updatedProperties.find(
+          //           (r) => r.propertyId === property.id,
+          //         );
+          //         return {
+          //           ...property,
+          //           originalNightlyPrice: updatedProperty?.originalNightlyPrice,
+          //         };
+          //       }),
+          //   },
+          // ];
+
+          // const airbnbPages = [
+          //   {
+          //     data: adjustedProperties.pages[0].data.filter(
+          //       (property) =>
+          //         airbnbProperties.some((r) => r.originalListingId === property.originalListingId),
+          //     ).map((property) => {
+          //       const airbnbProperty = airbnbProperties.find(
+          //         (r) => r.originalListingId === property.originalListingId,
+          //       );
+          //       return {
+          //         ...property,
+          //         nightlyPrice: airbnbProperty?.nightlyPrice,
+          //       };
+          //     }),
+          //   },
+          // ];
+
+          // const allPages = [...updatedPages, ...airbnbPages];
+
+          // console.log("Updated pages:", allPages);
+          // console.log(
+          //   "Number of properties updated:",
+          //   updatedProperties.length,
+          // );
+          // console.log(
+          //   "Total number of properties:",
+          //   updatedPages[0].data.length,
+          // );
 
           // Use a callback function with setAdjustedProperties
           setAdjustedProperties((prevState) => {
             if (!prevState) return null;
-            return { ...prevState, pages: updatedPages };
+            return { ...prevState, pages: results };
           });
-        }
-      } catch (error) {
+        } catch (error) {
         console.error("Error running subscrapers:", error);
       } finally {
         setIsLoading(false);
@@ -350,7 +376,7 @@ export function DesktopSearchTab() {
     } else {
       setIsLoading(false);
     }
-  };
+  });
 
   const ScrollButtons = ({
     containerRef,

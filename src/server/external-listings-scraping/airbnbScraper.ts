@@ -237,5 +237,6 @@ function transformSearchResult({
     description: listing.structuredContent.title,
     images: contextualPictures.map((p) => p.picture),
     ratingStr: listing.avgRatingLocalized,
+    originalListingPlatform: "Airbnb",
   };
 }

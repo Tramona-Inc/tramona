@@ -24,8 +24,10 @@ import {
   eq,
   gt,
   gte,
+  like,
   lte,
   notExists,
+  SQL,
   sql,
 } from "drizzle-orm";
 import { z } from "zod";
@@ -43,6 +45,7 @@ import {
 } from "@/server/server-utils";
 import { getCoordinates } from "@/server/google-maps";
 import { checkAvailabilityForProperties } from "@/server/direct-sites-scraping";
+import { scrapeAirbnbSearch } from "@/server/external-listings-scraping/airbnbScraper";
 
 export type HostRequestsPageData = {
   city: string;
@@ -267,8 +270,8 @@ export const propertiesRouter = createTRPCRouter({
           latLngPoint: properties.latLngPoint,
           distance: sql`
           6371 * ACOS(
-            SIN(${(lat * Math.PI) / 180}) * SIN(radians(ST_Y(${properties.latLngPoint}))) + 
-            COS(${(lat * Math.PI) / 180}) * COS(radians(ST_Y(${properties.latLngPoint}))) * 
+            SIN(${(lat * Math.PI) / 180}) * SIN(radians(ST_Y(${properties.latLngPoint}))) +
+            COS(${(lat * Math.PI) / 180}) * COS(radians(ST_Y(${properties.latLngPoint}))) *
             COS(radians(ST_X(${properties.latLngPoint})) - ${(lng * Math.PI) / 180})
           ) AS distance`,
           vacancyCount: sql`
@@ -291,8 +294,8 @@ export const propertiesRouter = createTRPCRouter({
               !southwestLat &&
               !southwestLng
               ? sql`6371 * ACOS(
-                SIN(${(lat * Math.PI) / 180}) * SIN(radians(ST_Y(${properties.latLngPoint}))) + 
-                COS(${(lat * Math.PI) / 180}) * COS(radians(ST_Y(${properties.latLngPoint}))) * 
+                SIN(${(lat * Math.PI) / 180}) * SIN(radians(ST_Y(${properties.latLngPoint}))) +
+                COS(${(lat * Math.PI) / 180}) * COS(radians(ST_Y(${properties.latLngPoint}))) *
                 COS(radians(ST_X(${properties.latLngPoint})) - ${(lng * Math.PI) / 180})
               ) <= ${radius}`
               : sql`TRUE`,
@@ -414,8 +417,8 @@ export const propertiesRouter = createTRPCRouter({
           // long: properties.longitude,
           distance: sql`
             6371 * ACOS(
-              SIN(${(lat * Math.PI) / 180}) * SIN(radians(ST_Y(${properties.latLngPoint}))) + 
-              COS(${(lat * Math.PI) / 180}) * COS(radians(ST_Y(${properties.latLngPoint}))) * 
+              SIN(${(lat * Math.PI) / 180}) * SIN(radians(ST_Y(${properties.latLngPoint}))) +
+              COS(${(lat * Math.PI) / 180}) * COS(radians(ST_Y(${properties.latLngPoint}))) *
               COS(radians(ST_X(${properties.latLngPoint})) - ${(lng * Math.PI) / 180})
             ) AS distance`,
           vacancyCount: sql`
@@ -438,8 +441,8 @@ export const propertiesRouter = createTRPCRouter({
               : sql`TRUE`,
             input.latLngPoint?.lat && input.latLngPoint.lng && !boundaries
               ? sql`6371 * ACOS(
-              SIN(${(lat * Math.PI) / 180}) * SIN(radians(ST_Y(${properties.latLngPoint}))) + 
-              COS(${(lat * Math.PI) / 180}) * COS(radians(ST_Y(${properties.latLngPoint}))) * 
+              SIN(${(lat * Math.PI) / 180}) * SIN(radians(ST_Y(${properties.latLngPoint}))) +
+              COS(${(lat * Math.PI) / 180}) * COS(radians(ST_Y(${properties.latLngPoint}))) *
               COS(radians(ST_X(${properties.latLngPoint})) - ${(lng * Math.PI) / 180})
             ) <= ${radius}`
               : sql`TRUE`,
@@ -673,6 +676,99 @@ export const propertiesRouter = createTRPCRouter({
         .where(eq(properties.id, input.id));
     }),
 
+  getBookItNowProperties: publicProcedure
+    .input(z.object({
+      checkIn: z.date(),
+      checkOut: z.date(),
+      numGuests: z.number(),
+      location: z.string(),
+    }),
+    )
+    .query(async ({ input }) => {
+      const { location } = await getCoordinates(input.location);
+      if (!location) throw new Error("Could not get coordinates for address");
+      console.log("location", location);
+
+      let propertyIsNearRequest: SQL | undefined = sql`FALSE`;
+
+      //WAITING FOR MAP PIN TO MERGE IN TO TEST THIS
+      // if (req.lat != null && req.lng != null && req.radius != null) {
+      // Convert radius from miles to degrees (approximate)
+      const radiusInMeters = 10 * 1609.34;
+
+      propertyIsNearRequest = sql`
+        ST_DWithin(
+          ST_SetSRID(properties.lat_lng_point, 4326),
+          ST_SetSRID(ST_MakePoint(${location.lng}, ${location.lat}), 4326),
+          ${radiusInMeters}
+        )
+      `;
+      const [props, airbnbProperties] = await Promise.all([
+        db.execute(sql`
+          SELECT * FROM properties
+          WHERE ST_DWithin(
+            ST_SetSRID(properties.lat_lng_point, 4326),
+            ST_SetSRID(ST_MakePoint(${location.lng}, ${location.lat}), 4326),
+            ${radiusInMeters}
+          )
+        `),
+        scrapeAirbnbSearch({
+          checkIn: input.checkIn,
+          checkOut: input.checkOut,
+          location: input.location,
+          numGuests: input.numGuests,
+        }),
+      ]);
+
+
+      console.log("props done", props.length);
+
+
+      const eligibleProperties = props.filter(
+        (p) => input.numGuests <= p.maxNumGuests,
+      );
+
+      // const airbnbProperties = await scrapeAirbnbSearch({
+      //   checkIn: input.checkIn,
+      //   checkOut: input.checkOut,
+      //   location: input.location,
+      //   numGuests: input.numGuests,
+      // });
+
+      const results = await checkAvailabilityForProperties({
+        propertyIds: eligibleProperties.map((p) => p.id),
+        originalListingIds: eligibleProperties.map((p) => p.originalListingId ?? ""),
+        originalListingPlatforms: eligibleProperties.map(
+          (p) => p.originalListingPlatform ?? "",
+        ),
+        checkIn: input.checkIn,
+        checkOut: input.checkOut,
+        numGuests: input.numGuests,
+      });
+
+      // Filter the results to only include available properties with a price
+      const filteredResults = results.filter(
+        (result) =>
+          result.isAvailableOnOriginalSite &&
+          result.originalNightlyPrice !== undefined,
+      );
+
+      const filteredAirbnbProperties = airbnbProperties.filter(
+        (p) =>
+          p.nightlyPrice !== undefined &&
+          p.originalNightlyPrice !== undefined,
+      );
+
+      return [
+        {
+          type: "Airbnb",
+          data: filteredAirbnbProperties,
+        }, {
+          type: "Subscraper",
+          data: filteredResults,
+        }];
+    }),
+
   runSubscrapers: publicProcedure
     .input(
       z.object({
@@ -687,6 +783,7 @@ export const propertiesRouter = createTRPCRouter({
         checkIn: z.date(),
         checkOut: z.date(),
         numGuests: z.number(),
+        location: z.string(),
       }),
     )
     .mutation(async ({ input }) => {
@@ -697,6 +794,14 @@ export const propertiesRouter = createTRPCRouter({
       if (eligibleProperties.length === 0) {
         return [];
       }
+
+
+      const airbnbProperties = await scrapeAirbnbSearch({
+        checkIn: input.checkIn,
+        checkOut: input.checkOut,
+        location: input.location,
+        numGuests: input.numGuests,
+      });
 
       const results = await checkAvailabilityForProperties({
         propertyIds: eligibleProperties.map((p) => p.id),
@@ -716,6 +821,15 @@ export const propertiesRouter = createTRPCRouter({
           result.originalNightlyPrice !== undefined,
       );
 
-      return filteredResults;
+      const filteredAirbnbProperties = airbnbProperties.filter(
+        (p) =>
+          p.nightlyPrice !== undefined &&
+          p.originalNightlyPrice !== undefined,
+      );
+
+      const combinedResults = [...filteredAirbnbProperties, ...filteredResults];
+      console.log("Combined results:", combinedResults);
+
+      return combinedResults;
     }),
 });

@@ -46,6 +46,7 @@ import { addHours, addMinutes } from "date-fns";
 import { z } from "zod";
 import { formatZodError } from "../../utils/zod-utils";
 import { breakdownPayment } from "@/utils/payment-utils/paymentBreakdown";
+import { airbnbScraper, scrapeAirbnbSearch } from "../external-listings-scraping/airbnbScraper";
 
 type ScraperOptions = {
   location: string;
@@ -721,7 +722,7 @@ export const checkAvailabilityForProperties = async (options: {
   });
 
   const results = await Promise.all(availabilityPromises);
-  
+
   // Filter out null results and log them
   const availabilityResults = results.filter((result): result is (SubScrapedResult & { propertyId: number }) => {
     if (result === null) {
