@@ -669,3 +669,69 @@ export const subsequentScrape = async (options: { offerIds: number[] }) => {
   });
   return savedResult;
 };
+
+export const checkAvailabilityForProperties = async (options: {
+  propertyIds: number[];
+  originalListingIds: string[];
+  originalListingPlatforms: string[];
+  checkIn: Date;
+  checkOut: Date;
+  numGuests: number,
+}) => {
+  const { propertyIds, originalListingIds, originalListingPlatforms, checkIn, checkOut, numGuests } = options;
+
+  const availabilityPromises = propertyIds.map(async (propertyId, index) => {
+    const originalListingId = originalListingIds[index];
+    const originalListingPlatform = originalListingPlatforms[index];
+
+    const subScraperOptions = {
+      originalListingId: originalListingId!,
+      scrapeUrl: '',
+      checkIn,
+      checkOut,
+      numGuests,
+    };
+
+    let subScrapedResult: SubScrapedResult | undefined;
+
+    switch (originalListingPlatform) {
+      case "Casamundo":
+        subScrapedResult = await casamundoSubScraper(subScraperOptions);
+        break;
+      // Add other cases here as needed
+      case "IntegrityArizona":
+        subScrapedResult = await arizonaSubScraper(subScraperOptions);
+        break;
+      // case "Cleanbnb":
+      //   subScrapedResult = await cleanbnbSubScraper(subScraperOptions);
+      //   break;
+      // ... other cases ...
+      case "Evolve":
+        subScrapedResult = await evolveVacationRentalSubScraper(subScraperOptions);
+        break;
+    }
+
+    if (subScrapedResult) {
+      return {
+        ...subScrapedResult,
+        propertyId,
+      };
+    }
+    return null;
+  });
+
+  const results = await Promise.all(availabilityPromises);
+  
+  // Filter out null results and log them
+  const availabilityResults = results.filter((result): result is (SubScrapedResult & { propertyId: number }) => {
+    if (result === null) {
+      console.log('A subscraper returned null result');
+      return false;
+    }
+    return true;
+  });
+
+  // console.log('Availability results:', availabilityResults);
+
+  return availabilityResults;
+};

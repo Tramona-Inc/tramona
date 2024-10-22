@@ -13,7 +13,7 @@ import {
   propertyUpdateSchema,
   type Request,
   type User,
-  users
+  users,
 } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { addDays } from "date-fns";
@@ -42,6 +42,7 @@ import {
   getRequestsForProperties,
 } from "@/server/server-utils";
 import { getCoordinates } from "@/server/google-maps";
+import { checkAvailabilityForProperties } from "@/server/direct-sites-scraping";
 
 export type HostRequestsPageData = {
   city: string;
@@ -52,7 +53,7 @@ export type HostRequestsPageData = {
         "firstName" | "lastName" | "name" | "image" | "location" | "about"
       >;
     };
-    properties: (Property & {taxAvailable: boolean})[];
+    properties: (Property & { taxAvailable: boolean })[];
   }[];
 };
 
@@ -224,8 +225,6 @@ export const propertiesRouter = createTRPCRouter({
         maxNightlyPrice: z.number().optional(),
         avgRating: z.number().optional(),
         numRatings: z.number().optional(),
-        // lat: z.number().optional(),
-        // long: z.number().optional(),
         latLngPoint: z
           .object({
             lat: z.number(),
@@ -246,7 +245,7 @@ export const propertiesRouter = createTRPCRouter({
 
       const lat = input.latLngPoint?.lat ?? 0;
       const lng = input.latLngPoint?.lng ?? 0;
-      const radius = input.radius;
+      const radius = input.radius ?? 0;
 
       const northeastLat = input.northeastLat ?? 0;
       const northeastLng = input.northeastLng ?? 0;
@@ -266,8 +265,6 @@ export const propertiesRouter = createTRPCRouter({
           numRatings: properties.numRatings,
           originalNightlyPrice: properties.originalNightlyPrice,
           latLngPoint: properties.latLngPoint,
-          // lat: properties.latitude,
-          // long: properties.longitude,
           distance: sql`
           6371 * ACOS(
             SIN(${(lat * Math.PI) / 180}) * SIN(radians(ST_Y(${properties.latLngPoint}))) + 
@@ -293,7 +290,11 @@ export const propertiesRouter = createTRPCRouter({
               !northeastLng &&
               !southwestLat &&
               !southwestLng
-              ? sql`6371 * acos(SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(lng * Math.PI) / 180})) <= ${radius}`
+              ? sql`6371 * ACOS(
+                SIN(${(lat * Math.PI) / 180}) * SIN(radians(ST_Y(${properties.latLngPoint}))) + 
+                COS(${(lat * Math.PI) / 180}) * COS(radians(ST_Y(${properties.latLngPoint}))) * 
+                COS(radians(ST_X(${properties.latLngPoint})) - ${(lng * Math.PI) / 180})
+              ) <= ${radius}`
               : sql`TRUE`,
             input.roomType
               ? eq(properties.roomType, input.roomType)
@@ -341,8 +342,8 @@ export const propertiesRouter = createTRPCRouter({
 
             northeastLat && northeastLng && southwestLat && southwestLng
               ? sql`
-              latitude BETWEEN ${southwestLat} AND ${northeastLat}
-              AND longitude BETWEEN ${southwestLng} AND ${northeastLng}
+              ST_Y(${properties.latLngPoint}) BETWEEN ${southwestLat} AND ${northeastLat}
+              AND ST_X(${properties.latLngPoint}) BETWEEN ${southwestLng} AND ${northeastLng}
             `
               : sql`true`,
           ),
@@ -406,6 +407,8 @@ export const propertiesRouter = createTRPCRouter({
           avgRating: properties.avgRating,
           numRatings: properties.numRatings,
           originalNightlyPrice: properties.originalNightlyPrice,
+          originalListingPlatform: properties.originalListingPlatform,
+          originalListingId: properties.originalListingId,
           latLngPoint: properties.latLngPoint,
           // lat: properties.latitude,
           // long: properties.longitude,
@@ -434,11 +437,11 @@ export const propertiesRouter = createTRPCRouter({
               `
               : sql`TRUE`,
             input.latLngPoint?.lat && input.latLngPoint.lng && !boundaries
-              ? sql`ST_DWithin(
-                  ${properties.latLngPoint}::geography,
-                  ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)::geography,
-                  ${radius * 1000}
-                )`
+              ? sql`6371 * ACOS(
+              SIN(${(lat * Math.PI) / 180}) * SIN(radians(ST_Y(${properties.latLngPoint}))) + 
+              COS(${(lat * Math.PI) / 180}) * COS(radians(ST_Y(${properties.latLngPoint}))) * 
+              COS(radians(ST_X(${properties.latLngPoint})) - ${(lng * Math.PI) / 180})
+            ) <= ${radius}`
               : sql`TRUE`,
             input.roomType
               ? eq(properties.roomType, input.roomType)
@@ -561,7 +564,7 @@ export const propertiesRouter = createTRPCRouter({
               "firstName" | "lastName" | "name" | "image" | "location" | "about"
             >;
           };
-          properties: (Property & {taxAvailable: boolean})[];
+          properties: (Property & { taxAvailable: boolean })[];
         }
       >();
 
@@ -573,7 +576,7 @@ export const propertiesRouter = createTRPCRouter({
           // If not, create a new entry with an empty properties array
           requestsMap.set(request.id, {
             request,
-            properties: [] as (Property & {taxAvailable: boolean})[],
+            properties: [] as (Property & { taxAvailable: boolean })[],
           });
         }
 
@@ -583,7 +586,9 @@ export const propertiesRouter = createTRPCRouter({
       for (const requestWithProperties of requestsMap.values()) {
         const { request, properties } = requestWithProperties;
 
-        for (const property of properties as unknown as (Property & {taxAvailable: boolean})[]) {
+        for (const property of properties as unknown as (Property & {
+          taxAvailable: boolean;
+        })[]) {
           const cityGroup = findOrCreateCityGroup(property.city);
 
           // Find if the request already exists in the city's group to avoid duplicates
@@ -666,5 +671,51 @@ export const propertiesRouter = createTRPCRouter({
           autoOfferDiscountTiers: input.autoOfferDiscountTiers,
         })
         .where(eq(properties.id, input.id));
+    }),
+
+  runSubscrapers: publicProcedure
+    .input(
+      z.object({
+        propertyData: z.array(
+          z.object({
+            id: z.number(),
+            originalListingId: z.string(),
+            originalListingPlatform: z.string(),
+            maxNumGuests: z.number(),
+          }),
+        ),
+        checkIn: z.date(),
+        checkOut: z.date(),
+        numGuests: z.number(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const eligibleProperties = input.propertyData.filter(
+        (p) => input.numGuests <= p.maxNumGuests,
+      );
+
+      if (eligibleProperties.length === 0) {
+        return [];
+      }
+
+      const results = await checkAvailabilityForProperties({
+        propertyIds: eligibleProperties.map((p) => p.id),
+        originalListingIds: eligibleProperties.map((p) => p.originalListingId),
+        originalListingPlatforms: eligibleProperties.map(
+          (p) => p.originalListingPlatform,
+        ),
+        checkIn: input.checkIn,
+        checkOut: input.checkOut,
+        numGuests: input.numGuests,
+      });
+
+      // Filter the results to only include available properties with a price
+      const filteredResults = results.filter(
+        (result) =>
+          result.isAvailableOnOriginalSite &&
+          result.originalNightlyPrice !== undefined,
+      );
+
+      return filteredResults;
     }),
 });
