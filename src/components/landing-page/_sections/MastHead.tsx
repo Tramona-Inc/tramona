@@ -23,22 +23,70 @@ export default function MastHead() {
             <div className="relative min-h-[600px]">
               {/* Content */}
               <div className="relative z-20 mb-8">
-                <h1 className="mb-4 text-4xl font-bold text-zinc-900 sm:text-5xl">
-                  The best prices on Airbnbs anywhere
-                </h1>
-                <p className="text-xl text-zinc-900">
-                  Make deals with hosts on their empty nights
-                </p>
+                {/* Desktop Version */}
+                <div className="hidden md:block">
+                  <h1 className="mb-4 text-5xl font-bold text-zinc-900">
+                    The best prices on Airbnbs anywhere
+                  </h1>
+                  <p className="mb-8 text-xl text-zinc-900">
+                    Make deals with hosts on their empty nights
+                  </p>
+                </div>
+
+                {/* Mobile Version */}
+                <div className="md:hidden">
+                  <h1 className="mb-8 text-4xl font-bold text-zinc-900">
+                    The Best Prices on
+                    <br />
+                    Airbnbs Anywhere
+                  </h1>
+                </div>
               </div>
 
               {/* Search Bar */}
-              <div className="relative z-30 w-full overflow-hidden rounded-2xl shadow-xl lg:w-[60%]">
-                <LandingSearchBar />
+              <div className="relative z-30 w-full overflow-hidden lg:w-[60%]">
+                {/* Desktop Search - Now with original expandable functionality */}
+                <div className="hidden rounded-2xl shadow-xl md:block">
+                  <LandingSearchBar />
+                </div>
+
+                {/* Mobile Search */}
+                <div className="md:hidden">
+                  <div className="mb-8 rounded-full bg-white shadow-lg">
+                    <div className="flex items-center p-4">
+                      <span className="text-gray-500">
+                        Search or Request a deal
+                      </span>
+                    </div>
+                  </div>
+                  <p className="mb-8 text-center text-xl">
+                    Make deals with hosts on their empty nights
+                  </p>
+                  <div className="space-y-4">
+                    <div className="flex items-center">
+                      <span className="mr-2 text-teal-600">✓</span>
+                      <span>Flexible Cancelation Policies</span>
+                    </div>
+                    <div className="flex items-center">
+                      <span className="mr-2 text-teal-600">✓</span>
+                      <span>Same properties you see on Airbnb</span>
+                    </div>
+                    <div className="flex items-center">
+                      <span className="mr-2 text-teal-600">✓</span>
+                      <span>Best Prices</span>
+                    </div>
+                  </div>
+                  <p className="mt-8 text-center text-gray-600">
+                    Search the best deals available{" "}
+                    <span className="underline">anywhere</span> on short term
+                    rentals right now
+                  </p>
+                </div>
               </div>
 
-              {/* Background Image */}
-              <div className="absolute right-0 top-20 z-10 hidden w-[815px] max-w-none md:block">
-                <div className="relative h-[484px]">
+              {/* Background Image - Desktop Only */}
+              <div className="absolute right-0 top-20 z-10 hidden w-[750px] max-w-none md:block lg:-right-20">
+                <div className="relative h-[400px]">
                   <Image
                     src={landing_airbnb}
                     alt="Modern Airbnb property"
@@ -57,7 +105,7 @@ export default function MastHead() {
             <div className="absolute inset-0 mt-0 rounded-3xl bg-[#DEEEFB] md:mt-24"></div>
             <div className="relative grid gap-6 px-4 pb-12 pt-4 sm:grid-cols-2 sm:px-6">
               {/* Host Card */}
-              <div className="overflow-hidden rounded-lg bg-white shadow-lg">
+              <div className="overflow-hidden rounded-2xl bg-white shadow-lg">
                 <div className="relative h-48 sm:h-64">
                   <Image
                     src={landing_hosts}
@@ -82,7 +130,7 @@ export default function MastHead() {
               </div>
 
               {/* Traveler Card */}
-              <div className="overflow-hidden rounded-lg bg-white shadow-lg">
+              <div className="overflow-hidden rounded-2xl bg-white shadow-lg">
                 <div className="relative h-48 sm:h-64">
                   <Image
                     src={landing_travelers}
@@ -104,7 +152,7 @@ export default function MastHead() {
 
           {/* Name Your Own Price and Form Section */}
           <div className="relative mb-16">
-            <div className="grid gap-8 lg:grid-cols-2">
+            <div className="grid hidden gap-8 md:block lg:grid-cols-2">
               <div className="flex flex-col justify-center">
                 <h2 className="mb-4 text-3xl lg:text-4xl">
                   <span className="font-bold">Name Your Own Price—</span>
@@ -201,52 +249,51 @@ export default function MastHead() {
                 </a>{" "}
                 and help us launch there.
               </p>
+            </div>
 
-              <div className="border-gray mb-12 hidden w-full border-t-2 md:block" />
+            <div className="border-gray mb-12 hidden w-full border-t-2 md:block" />
 
-              <div className="grid gap-8 lg:grid-cols-2">
-                <div className="relative hidden h-[400px] w-full md:block">
-                  <Image
-                    src={landing_sunset}
-                    alt="Family on beach at sunset"
-                    layout="fill"
-                    objectFit="cover"
-                    className="rounded-lg"
-                  />
-                </div>
-                <div className="flex flex-col justify-center">
-                  <h3 className="mb-4 text-2xl font-bold">
-                    Hosts: Fill Your Empty Nights and Earn More
-                  </h3>
-                  <p className="mb-6 text-zinc-900">
-                    Whether you're in one of our 'Book It Now' cities or
-                    elsewhere in the U.S., you can list your property and start
-                    earning. Accept 'Name Your Own Price' offers from travelers
-                    nationwide.
-                  </p>
-                  <ul className="mb-6 space-y-2">
-                    <li className="flex items-center">
-                      <Shield className="mr-2 size-4 shrink-0 text-teal-600" />{" "}
-                      $50k protection per booking
-                    </li>
-                    <li className="flex items-center">
-                      <UserCheck className="mr-2 size-4 shrink-0 text-teal-600" />{" "}
-                      3 levels of verification for travelers
-                    </li>
-                    <li className="flex items-center">
-                      <Calendar className="mr-2 size-4 shrink-0 text-teal-600" />{" "}
-                      Easy to sync your calendar up with other platforms to
-                      prevent double bookings
-                    </li>
-                    <li className="flex items-center">
-                      <PhoneCall className="mr-2 size-4 shrink-0 text-teal-600" />{" "}
-                      24/7 support
-                    </li>
-                  </ul>
-                  <Button className="self-start bg-primaryGreen text-white">
-                    <Link href="/for-hosts">List your property</Link>
-                  </Button>
-                </div>
+            <div className="grid gap-8 lg:grid-cols-2">
+              <div className="relative hidden h-[400px] w-full md:block">
+                <Image
+                  src={landing_sunset}
+                  alt="Family on beach at sunset"
+                  layout="fill"
+                  objectFit="cover"
+                  className="rounded-lg"
+                />
+              </div>
+              <div className="flex flex-col justify-center">
+                <h3 className="mb-4 hidden text-2xl font-bold md:block">
+                  Hosts: Fill Your Empty Nights and Earn More
+                </h3>
+                <p className="mb-6 text-zinc-900">
+                  Whether you're in one of our 'Book It Now' cities or elsewhere
+                  in the U.S., you can list your property and start earning.
+                  Accept 'Name Your Own Price' offers from travelers nationwide.
+                </p>
+                <ul className="mb-6 space-y-2">
+                  <li className="flex items-center">
+                    <Shield className="mr-2 size-4 shrink-0 text-teal-600" />{" "}
+                    $50k protection per booking
+                  </li>
+                  <li className="flex items-center">
+                    <UserCheck className="mr-2 size-4 shrink-0 text-teal-600" />{" "}
+                    3 levels of verification for travelers
+                  </li>
+                  <li className="flex items-center">
+                    <Calendar className="mr-2 size-4 shrink-0 text-teal-600" />{" "}
+                    Easy to sync your calendar up with other platforms to
+                    prevent double bookings
+                  </li>
+                  <li className="flex items-center">
+                    <PhoneCall className="mr-2 size-4 shrink-0 text-teal-600" />{" "}
+                    24/7 support
+                  </li>
+                </ul>
+                <Button className="mx-auto bg-primaryGreen text-white md:mx-0 md:self-start">
+                  <Link href="/for-hosts">List your property</Link>
+                </Button>
               </div>
             </div>
           </div>
