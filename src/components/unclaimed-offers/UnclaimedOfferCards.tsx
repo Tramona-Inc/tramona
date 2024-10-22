@@ -21,6 +21,7 @@ import { useAdjustedProperties } from "../landing-page/search/AdjustedProperties
 import AddUnclaimedOffer from "./AddUnclaimedOffer";
 import { MapBoundary } from "../landing-page/search/SearchPropertiesMap";
 import { useLoading } from "./UnclaimedMapLoadingContext";
+import { Badge } from "../ui/badge";
 
 type Property =
   RouterOutputs["properties"]["getAllInfiniteScroll"]["data"][number];
@@ -127,7 +128,7 @@ export default function UnclaimedOfferCards({
   return (
     <div className="h-full w-full flex-col">
       <div className="flex h-screen-minus-header-n-footer w-full sm:h-screen-minus-header-n-footer-n-searchbar">
-        <div className="mr-auto h-full w-full overflow-y-scroll px-6 scrollbar-hide">
+        <div className="mr-auto h-full w-full overflow-y-scroll px-4 scrollbar-hide lg:px-2">
           {isDelayedLoading ? (
             <div className="grid w-full grid-cols-1 gap-x-6 sm:grid-cols-2 md:gap-y-6 lg:grid-cols-3 lg:gap-y-8 xl:gap-y-4 2xl:gap-y-0">
               {Array(24)
@@ -149,7 +150,7 @@ export default function UnclaimedOfferCards({
             </div>
           ) : (
             <div className="flex h-full w-full flex-col">
-              <div className="grid w-full grid-cols-1 gap-x-6 sm:grid-cols-2 md:gap-y-6 lg:grid-cols-3 lg:gap-y-8 xl:gap-y-4 2xl:gap-y-0">
+              <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                 {paginatedProperties.map((property, index) => (
                   <div
                     key={property.id}
@@ -241,11 +242,11 @@ function UnMatchedPropertyCard({
   return (
     <Link href={`/property/${property.id}`} className="block">
       <div
-        className="relative flex aspect-[3/4] w-full cursor-pointer flex-col overflow-hidden rounded-xl"
+        className="relative flex aspect-square w-full cursor-pointer flex-col overflow-hidden rounded-xl"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <div className="relative h-[58%] overflow-hidden">
+        <div className="relative h-full overflow-hidden">
           <div
             className="flex h-full transition-transform duration-300 ease-in-out"
             style={{ transform: `translateX(-${currentImageIndex * 100}%)` }}
@@ -284,6 +285,13 @@ function UnMatchedPropertyCard({
               </Button>
             )}
           </div>
+          <div className="absolute inset-0">
+            <div className="flex justify-between">
+              <Badge className="absolute left-3 top-3 h-8 bg-rose-500 font-semibold text-white">
+                Book on Airbnb
+              </Badge>
+            </div>
+          </div>
           <div className="absolute bottom-2 left-1/2 z-10 flex -translate-x-1/2 space-x-1">
             {property.imageUrls.map((_, index) => (
               <div
@@ -297,40 +305,44 @@ function UnMatchedPropertyCard({
             ))}
           </div>
         </div>
-        <div className="flex h-[42%] flex-col space-y-2 p-4">
-          <div className="space-y-1">
-            <div className="flex items-center justify-between">
-              <div className="min-w-0 flex-1">
-                <div className="line-clamp-1 overflow-hidden overflow-ellipsis font-bold">
-                  {property.name}
-                </div>
-              </div>
-              <div className="ml-2 flex items-center space-x-1 whitespace-nowrap">
-                <Star fill="gold" size={12} />
-                <div>
-                  {property.avgRating ? property.avgRating.toFixed(2) : "New"}
-                </div>
-                <div>
-                  {property.numRatings > 0 ? `(${property.numRatings})` : ""}
-                </div>
-              </div>
-            </div>
-            {/* <div className="text-sm text-zinc-500"> */}
-            {/* {formatDateRange(offer.checkIn, offer.checkOut)} */}
-            {/* replace with check in check out'
-            </div> */}
-            <div className="text-sm text-zinc-500">
-              {plural(property.maxNumGuests, "Guest")}
+      </div>
+      <div className="flex flex-col pt-2">
+        <div className="flex items-center justify-between">
+          <div className="min-w-0 flex-1">
+            <div className="line-clamp-1 overflow-hidden overflow-ellipsis font-semibold">
+              {property.name}
             </div>
           </div>
-          <div className="flex items-center space-x-3 text-sm font-semibold">
+          <div className="ml-2 flex items-center space-x-1 whitespace-nowrap">
+            <Star fill="black" size={12} />
             <div>
+              {property.avgRating ? property.avgRating.toFixed(2) : "New"}
+            </div>
+            <div>
+              {property.numRatings > 0 ? `(${property.numRatings})` : ""}
+            </div>
+          </div>
+        </div>
+        {/* <div className="text-sm text-zinc-500"> */}
+        {/* {formatDateRange(offer.checkIn, offer.checkOut)} */}
+        {/* replace with check in check out'
+            </div> */}
+        <div className="text-muted-foreground">
+          <p>{plural(property.numBedrooms, "bed")}</p>
+        </div>
+        <div className="underline">
+          <p>
+            <span className="font-semibold">
               {property.originalNightlyPrice
                 ? formatCurrency(property.originalNightlyPrice)
                 : "N/A"}
-              &nbsp;night
-            </div>
-            <div className="text-xs text-zinc-500 line-through">
+            </span>
+            &nbsp;night
+          </p>
+        </div>
+      </div>
+      {/* <div className="flex items-center space-x-3 text-sm font-semibold">
+          <div className="text-xs text-zinc-500 line-through">
               airbnb&nbsp;
               {property.originalNightlyPrice
                 ? formatCurrency(
@@ -338,9 +350,7 @@ function UnMatchedPropertyCard({
                   )
                 : "N/A"}
             </div>
-          </div>
-        </div>
-      </div>
+        </div> */}
     </Link>
   );
 }
