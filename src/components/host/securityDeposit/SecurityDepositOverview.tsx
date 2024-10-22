@@ -129,7 +129,7 @@ export default function SecurityDepositOverview() {
                 <CardTitle>Property Security Deposits</CardTitle>
               </CardHeader>
               <CardContent>
-                {hostProperties ? (
+                {hostProperties.length > 0 ? (
                   <Table>
                     <TableHeader>
                       <TableRow>

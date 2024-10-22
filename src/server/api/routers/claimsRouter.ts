@@ -12,6 +12,7 @@ import {
   claims,
   claimItems,
   hostProfiles,
+  trips,
 } from "@/server/db/schema";
 import { db } from "@/server/db";
 import { eq } from "drizzle-orm";
@@ -23,6 +24,13 @@ const isProduction = process.env.NODE_ENV === "production";
 const baseUrl = isProduction
   ? "https://www.tramona.com"
   : "http://localhost:3000"; //change to your live server
+
+const claimItemSchema = z.object({
+  itemName: z.string().min(1, "Item name is required"),
+  requestedAmount: z.number().min(0, "Price must be a positive number"),
+  description: z.string(),
+  imagesList: z.array(z.string()),
+});
 
 export const claimsRouter = createTRPCRouter({
   createClaim: protectedProcedure
@@ -62,6 +70,62 @@ export const claimsRouter = createTRPCRouter({
         });
       }
 
+      return;
+    }),
+
+  getClaimDetailsWProperty: protectedProcedure
+    .input(z.object({ claimId: z.string() }))
+    .query(async ({ input }) => {
+      const curClaim = await db.query.claims.findFirst({
+        where: eq(claims.id, input.claimId),
+        with: {
+          trip: {
+            with: {
+              property: {
+                columns: {
+                  name: true,
+                  city: true,
+                  imageUrls: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      return curClaim;
+    }),
+  //this is to submit claim evidence after recieving the email link
+  submitClaimEvidence: protectedProcedure
+    .input(
+      z.object({
+        claimId: z.string().uuid(),
+        tripId: z.number(),
+        claimItems: z.array(claimItemSchema),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const curTrip = await db.query.trips.findFirst({
+        where: eq(trips.id, input.tripId),
+      });
+
+      const inputToClaimsConversion = input.claimItems.map((item) => ({
+        claimId: input.claimId,
+        tripId: input.tripId,
+        propertyId: curTrip?.propertyId ?? null,
+        itemName: item.itemName,
+        requestedAmount: item.requestedAmount,
+        outstandingAmount: item.requestedAmount,
+        description: item.description,
+        imagesList: item.imagesList,
+      }));
+
+      const inserterdClaimItems = await db
+        .insert(claimItems)
+        .values(inputToClaimsConversion)
+        .returning();
+
+      console.log(inserterdClaimItems);
       return;
     }),
 });
