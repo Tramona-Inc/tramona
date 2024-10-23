@@ -14,8 +14,8 @@ export default async function handler(
   console.log("Scrape request received");
 
   const { checkIn, checkOut, originalListingId, scrapeUrl, numGuests } = req.body as {
-    checkIn: Date | undefined;
-    checkOut: Date | undefined;
+    checkIn: string;
+    checkOut: string;
     originalListingId: string;
     scrapeUrl: string;
     numGuests: number;
@@ -29,11 +29,14 @@ export default async function handler(
     return res.status(400).json({ error: "Missing checkIn or checkOut parameter" });
   }
 
+  const checkInDate = new Date(checkIn);
+  const checkOutDate = new Date(checkOut);
+
   const subScraperOptions = {
     originalListingId: originalListingId,
     scrapeUrl: '',
-    checkIn,
-    checkOut,
+    checkIn: checkInDate,
+    checkOut: checkOutDate,
     numGuests,
   };
 
