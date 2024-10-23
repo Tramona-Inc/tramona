@@ -32,6 +32,7 @@ import {
   createRandomMarkupEightToFourteenPercent,
   getNumNights,
   getTravelerOfferedPrice,
+  logAndFilterSettledResults,
 } from "@/utils/utils";
 import { DIRECTLISTINGMARKUP } from "@/utils/constants";
 import {
@@ -694,57 +695,32 @@ export const checkAvailabilityForProperties = async (options: {
       numGuests,
     };
 
-    console.log('originalListingPlatform', originalListingPlatform);
-
-    let subScrapedResult: SubScrapedResult | undefined;
-
-
-    try {
-      switch (originalListingPlatform) {
-        case "Casamundo":
-          subScrapedResult = await axios.post("https://tramona.com/api/bookitnow", subScraperOptions);
-          console.log('Casamundo subScrapedResult:', subScrapedResult); // Log result of axios call
-          break;
-
-        case "IntegrityArizona":
-          subScrapedResult = await arizonaSubScraper(subScraperOptions);
-          console.log('IntegrityArizona subScrapedResult:', subScrapedResult); // Log result
-          break;
-
-        case "Evolve":
-          subScrapedResult = await evolveVacationRentalSubScraper(subScraperOptions);
-          console.log('Evolve subScrapedResult:', subScrapedResult); // Log result
-          break;
-
-        // Add other cases here as needed
-      }
-    } catch (error) {
-      console.error(`Error in ${originalListingPlatform} subScraper:`, error);
+    type casamundoRes = {
+      subScrapedResult: SubScrapedResult;
     }
 
-    if (subScrapedResult) {
-      return {
-        ...subScrapedResult,
-        propertyId,
-      };
+    switch (originalListingPlatform) {
+      case "Casamundo":
+        const res = await axios.post<casamundoRes>("https://tramona.com/api/bookitnow", subScraperOptions);
+        return {...res.data.subScrapedResult, propertyId: propertyId};
+
+      case "IntegrityArizona":
+        return {...(await arizonaSubScraper(subScraperOptions)), propertyId: propertyId};
+
+      case "Evolve":
+        return {...(await evolveVacationRentalSubScraper(subScraperOptions)), propertyId: propertyId};
+
+      // Add other cases here as needed
     }
-    return null;
-  });
+  throw new Error('No subScrapedResult found');
+});
 
-  console.log('here')
+console.log('here')
+console.timeEnd("checkAvailability");
 
-  const results = await Promise.allSettled(availabilityPromises);
+const results = logAndFilterSettledResults(await Promise.allSettled(availabilityPromises));
 
-  // Filter out null results and log them
-  const availabilityResults = results.filter((result): result is (SubScrapedResult & { propertyId: number }) => {
-    if (result === null) {
-      console.log('A subscraper returned null result');
-      return false;
-    }
-    return true;
-  });
+const availabilityResults = results.filter((r) => r.isAvailableOnOriginalSite && r.originalNightlyPrice !== undefined);
 
-  // console.log('Availability results:', availabilityResults);
-
-  return availabilityResults;
+return availabilityResults;
 };

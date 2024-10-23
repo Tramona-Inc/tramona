@@ -692,9 +692,6 @@ export const propertiesRouter = createTRPCRouter({
 
       let propertyIsNearRequest: SQL | undefined = sql`FALSE`;
 
-      //WAITING FOR MAP PIN TO MERGE IN TO TEST THIS
-      // if (req.lat != null && req.lng != null && req.radius != null) {
-      // Convert radius from miles to degrees (approximate)
       const radiusInMeters = 10 * 1609.34;
 
       propertyIsNearRequest = sql`
@@ -704,35 +701,33 @@ export const propertiesRouter = createTRPCRouter({
           ${radiusInMeters}
         )
       `;
+      console.time("Properties query");
+      console.time("Airbnb search");
+      console.time("checkAvailability");
+      console.time("full procedure")
       const [props, airbnbProperties] = await Promise.all([
         db.query.properties.findMany({
           where: propertyIsNearRequest,
+        }).then(result => {
+          console.timeEnd("Properties query");
+          return result;
         }),
         scrapeAirbnbSearch({
           checkIn: input.checkIn,
           checkOut: input.checkOut,
           location: input.location,
           numGuests: input.numGuests,
+        }).then(result => {
+          console.timeEnd("Airbnb search");
+          return result;
         }),
       ]);
-
-
-      console.log("props done", props[0]);
-
-      const firstProps = props.slice(0, 60);
-
 
       const eligibleProperties = props.filter(
         (p ) => input.numGuests <= p.maxNumGuests,
       );
 
       console.log("eligibleProperties", eligibleProperties.length);
-      // const airbnbProperties = await scrapeAirbnbSearch({
-      //   checkIn: input.checkIn,
-      //   checkOut: input.checkOut,
-      //   location: input.location,
-      //   numGuests: input.numGuests,
-      // });
 
       const results = await checkAvailabilityForProperties({
         propertyIds: eligibleProperties.map((p) => p.id),
@@ -747,30 +742,24 @@ export const propertiesRouter = createTRPCRouter({
 
       console.log("results", results.length);
 
-      // Filter the results to only include available properties with a price
-      const filteredResults = results.filter(
-        (result) =>
-          result.isAvailableOnOriginalSite &&
-          result.originalNightlyPrice !== undefined,
-      );
       const fullPropertyData = await db.query.properties.findMany({
-        where: inArray(properties.id, filteredResults.map((r) => r.propertyId)),
+        where: inArray(properties.id, results.map((r) => r.propertyId)),
       });
-      console.log("filteredResults", filteredResults.length);
 
-      const filteredAirbnbProperties = airbnbProperties.filter(
-        (p) =>
-          p.nightlyPrice !== undefined &&
-          p.originalNightlyPrice !== undefined,
-      );
+      const updatedPropertyData = await Promise.all(results.map(async (r) => {
+        const property = fullPropertyData.find((p) => p.id === r.propertyId);
+        return {...r, originalNightlyPrice: property?.originalNightlyPrice};
+      }));
+
+      console.timeEnd("full procedure")
 
       return [
         {
           type: "Airbnb",
-          data: filteredAirbnbProperties,
+          data: airbnbProperties,
         }, {
           type: "Subscraper",
-          data: filteredResults,
+          data: updatedPropertyData,
         }];
     }),
 
