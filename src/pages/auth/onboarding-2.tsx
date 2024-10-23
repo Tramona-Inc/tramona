@@ -40,6 +40,8 @@ export default function FirstAndLastName() {
   const { refetch: refetchVerifications } =
     api.users.getMyVerifications.useQuery(undefined, { enabled: false });
 
+  const sendWelcomeEmail = api.emails.sendWelcomeEmail.useMutation();
+
   const { updateUser } = useUpdateUser();
 
   async function onSubmit({ firstName, lastName }: FormValues) {
@@ -49,6 +51,7 @@ export default function FirstAndLastName() {
         lastName: lastName.replace(/[^a-zA-Z\s]/g, ""),
         onboardingStep: 3,
       }).then(() => {
+        void sendWelcomeEmail.mutate();
         void refetchVerifications();
         void router.push("/auth/onboarding-3");
       });

@@ -126,22 +126,11 @@ export const usersRouter = createTRPCRouter({
   updateProfile: protectedProcedure
     .input(userUpdateSchema.omit({ id: true }))
     .mutation(async ({ ctx, input }) => {
-      const updatedUser = await ctx.db
+      return await ctx.db
         .update(users)
         .set(input)
         .where(eq(users.id, ctx.user.id))
         .returning();
-
-      if (updatedUser[0] && updatedUser[0]?.onboardingStep === 3) {
-        await sendEmail({
-          to: updatedUser[0].email,
-          subject: "Welcome to Tramona",
-          content: WelcomeEmail({
-            name: updatedUser[0].name ?? updatedUser[0].firstName ?? "Guest",
-          }),
-        });
-      }
-      return updatedUser;
     }),
 
   createUrlToBeHost: protectedProcedure

@@ -11,6 +11,7 @@ import { z } from "zod";
 import { referralCodes, users } from "@/server/db/schema";
 import { db } from "@/server/db";
 import { eq } from "drizzle-orm";
+import WelcomeEmail from "packages/transactional/emails/WelcomeEmail";
 
 export const emailRouter = createTRPCRouter({
   sendSupportEmail: publicProcedure
@@ -59,4 +60,14 @@ export const emailRouter = createTRPCRouter({
         });
       }
     }),
+
+  sendWelcomeEmail: protectedProcedure.mutation(async ({ ctx }) => {
+    await sendEmail({
+      to: ctx.user.email,
+      subject: "Welcome to Tramona",
+      content: WelcomeEmail({
+        name: ctx.user.firstName ?? ctx.user.name ?? "Guest",
+      }),
+    });
+  }),
 });
