@@ -37,7 +37,18 @@ export default async function handler(
     numGuests,
   };
 
-  const subScrapedResult = await casamundoSubScraper(subScraperOptions);
+  const subScrapedResult = await casamundoSubScraper(subScraperOptions).catch((err) => {
+    if (err instanceof Error) {
+      console.error(
+        `Error scraping listings for request ${originalListingId}:\n\n${err.stack}`,
+      );
+    } else {
+      console.error(
+        `Error scraping listings for request ${originalListingId}: ${err}`,
+      );
+    }
+    return res.status(500).json({ error: "Error scraping listings" });
+  });
 
   return res.status(200).json({ subScrapedResult });
 }
