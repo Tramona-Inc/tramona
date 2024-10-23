@@ -22,7 +22,9 @@ export const claimStatus = pgEnum("claim_status", [
 
 export const resolutionResults = pgEnum("resolution_results", [
   "Approved",
-  "Insufficient evidence",
+  "Partially Approved",
+  "Pending",
+  "Insufficient Evidence",
   "Rejected",
 ]);
 
@@ -71,12 +73,14 @@ export const claimResolutions = pgTable(
     id: serial("id").primaryKey().notNull(),
     claimId: text("claim_id")
       .notNull()
-      .references(() => claims.id)
+      .references(() => claims.id, { onDelete: "cascade" })
       .notNull(),
     resolutionResult: resolutionResults("resolution_results")
       .notNull()
-      .default("Approved"),
-    resolutionDescription: varchar("resolution_description").notNull(),
+      .default("Pending"),
+    resolutionDescription: varchar("resolution_description")
+      .notNull()
+      .default("No Description"),
     resolvedByAdminId: varchar("resolved_by_admin_id").references(
       () => users.id,
     ),
@@ -93,7 +97,7 @@ export const claimItems = pgTable(
     id: serial("id").primaryKey(),
     claimId: text("claim_id")
       .notNull()
-      .references(() => claims.id),
+      .references(() => claims.id, { onDelete: "cascade" }),
     tripId: integer("trips_id")
       .notNull()
       .references(() => trips.id, {
@@ -108,6 +112,7 @@ export const claimItems = pgTable(
     description: varchar("description").notNull(),
     propertyId: integer("property_id").references(() => properties.id),
     resolvedBySuperhog: boolean("resolved_by_superhog").default(false),
+    imageUrls: varchar("image_url").array().notNull(),
   },
   (t) => ({
     claimId: index().on(t.claimId),
@@ -137,3 +142,8 @@ export const claimPayments = pgTable(
     superhogRequestId: index().on(t.superhogRequestId),
   }),
 );
+
+export type Claim = typeof claims.$inferInsert;
+export type ClaimItem = typeof claimItems.$inferInsert;
+export type ClaimPayment = typeof claimPayments.$inferInsert;
+export type ClaimResolution = typeof claimResolutions.$inferInsert;

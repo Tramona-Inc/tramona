@@ -21,7 +21,7 @@ import { toast } from "@/components/ui/use-toast";
 import ImagesInput from "@/components/_common/ImagesInput";
 import CurrencyInput from "react-currency-input-field";
 import Image from "next/image";
-
+import { useRouter } from "next/router";
 const claimItemSchema = z.object({
   itemName: z.string().min(1, "Item name is required"),
   requestedAmount: z.number().min(0.01, "Amount must be greater than 0"),
@@ -41,6 +41,7 @@ export default function SubmitAllClaimItemsForm({
   tripId: number;
   claimId: string;
 }) {
+  const router = useRouter();
   const [claimItems, setClaimItems] = useState<ClaimItem[]>([]);
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
@@ -88,7 +89,6 @@ export default function SubmitAllClaimItemsForm({
       requestedAmount: item.requestedAmount * 100,
     }));
 
-    console.log(processedClaimItems);
     await submitAllClaimitems({
       tripId,
       claimId,
@@ -98,6 +98,7 @@ export default function SubmitAllClaimItemsForm({
         title: "Submitted",
         description: "We will proccess your damages within 2-4 bussiness days.",
       });
+      void router.push("/host/report");
     });
   }
 

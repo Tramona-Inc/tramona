@@ -28,10 +28,12 @@ export default function OpenNewClaimForm({
   defaultTripId,
   defaultHostId,
   superhogRequestId,
+  onFormSubmit,
 }: {
   defaultTripId: number;
   defaultHostId: string;
   superhogRequestId?: number;
+  onFormSubmit?: () => void;
 }) {
   const { mutateAsync: createClaim, isLoading } =
     api.claims.createClaim.useMutation({
@@ -40,6 +42,7 @@ export default function OpenNewClaimForm({
           title: "Successful!",
           description: "Created claim and email sent!",
         });
+        if (onFormSubmit) onFormSubmit();
       },
       onError: (error) => {
         console.log(error);
@@ -67,7 +70,6 @@ export default function OpenNewClaimForm({
     // Simulate API call to create a claim
     console.log("Claim created:", data);
     await createClaim(data);
-    console.log("SUCCESFUL ");
   };
 
   return (

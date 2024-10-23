@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,19 +17,20 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import Link from "next/link";
 import {
   AlertTriangle,
   FileText,
   Info,
   ChevronRight,
   Clock,
-  CheckCircle2,
+  Shield,
+  ShieldCheckIcon,
 } from "lucide-react";
+import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
+import MyClaimOverview from "./claim/MyClaimOverview";
 
-export default function Component() {
+export default function RefinedReportCenterDashboard() {
   const [activeCard, setActiveCard] = useState<string | null>(null);
 
   const handleCardHover = (cardId: string) => {
@@ -38,180 +39,136 @@ export default function Component() {
 
   return (
     <DashboardLayout>
-      <div className="container mx-auto max-w-7xl px-4 py-8">
-        <div className="mb-8 text-center">
+      <div className="container mx-auto max-w-7xl px-4 py-10">
+        <div className="mb-6 text-center">
           <h1 className="mb-2 text-4xl font-bold text-primary">
             Report Center
           </h1>
-          <p className="text-lg text-muted-foreground">
-            Manage property damages and insurance claims efficiently
+          <p className="text-xl text-muted-foreground">
+            Manage property incidents with efficiency
           </p>
         </div>
+        <Alert className="">
+          <AlertTriangle className="h-5 w-5" />
+          <AlertTitle>Important Notice</AlertTitle>
+          <AlertDescription>
+            Please submit all damage reports and protection incidents within 14
+            days of the guest&apos;s checkout to ensure timely processing.
+          </AlertDescription>
+        </Alert>
+        <MyClaimOverview />
+        <div className="grid gap-6 md:grid-cols-2">
+          <Card
+            className={`transition-shadow duration-300 ${
+              activeCard === "misconduct" ? "shadow-lg" : ""
+            }`}
+            onMouseEnter={() => handleCardHover("misconduct")}
+            onMouseLeave={() => handleCardHover("")}
+          >
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-2xl">
+                <FileText className="h-6 w-6 text-primary" />
+                Report Misconduct
+              </CardTitle>
+              <CardDescription>
+                Document and report any inappropriate behavior or rule
+                violations
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Accordion type="single" collapsible className="w-full">
+                <AccordionItem value="what-to-report">
+                  <AccordionTrigger>What should I report?</AccordionTrigger>
+                  <AccordionContent>
+                    Report any violations of house rules, inappropriate
+                    behavior, or communications that negatively impact your
+                    property or guests.
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="reporting-process">
+                  <AccordionTrigger>What&apos;s the process?</AccordionTrigger>
+                  <AccordionContent>
+                    Fill out the form, provide details, upload evidence, and
+                    submit for review.
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </CardContent>
+            <CardFooter>
+              <Button asChild className="w-full">
+                <Link
+                  href="/host/report/misconduct"
+                  className="flex items-center justify-center gap-2"
+                >
+                  Report Misconduct
+                  <ChevronRight className="h-4 w-4" />
+                </Link>
+              </Button>
+            </CardFooter>
+          </Card>
 
-        <Tabs defaultValue="report" className="mb-8">
-          <TabsList className="my-3 grid w-full grid-cols-2 rounded-lg">
-            <TabsTrigger value="report">Report Options</TabsTrigger>
-            <TabsTrigger value="status">Report Status</TabsTrigger>
-          </TabsList>
-          <TabsContent value="report">
-            <div className="grid gap-8 md:grid-cols-2">
-              <Card
-                className={`transition-shadow duration-300 ${activeCard === "damages" ? "shadow-lg" : ""}`}
-                onMouseEnter={() => handleCardHover("damages")}
-                onMouseLeave={() => handleCardHover("")}
-              >
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-2xl">
-                    <FileText className="h-6 w-6 text-primary" />
-                    Report Damages
-                  </CardTitle>
-                  <CardDescription>
-                    Document and report any damages to your property quickly and
-                    easily
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Accordion type="single" collapsible className="w-full">
-                    <AccordionItem value="what-to-report">
-                      <AccordionTrigger>What should I report?</AccordionTrigger>
-                      <AccordionContent>
-                        Report any physical damages to the property, including
-                        but not limited to broken furniture, stained carpets,
-                        damaged appliances, or structural issues caused by
-                        guests.
-                      </AccordionContent>
-                    </AccordionItem>
-                    <AccordionItem value="reporting-process">
-                      <AccordionTrigger>
-                        What&apos;s the reporting process?
-                      </AccordionTrigger>
-                      <AccordionContent>
-                        1. Fill out the damage report form 2. Upload photos or
-                        videos of the damage 3. Provide an estimated cost of
-                        repair 4. Submit the report for review
-                      </AccordionContent>
-                    </AccordionItem>
-                  </Accordion>
-                </CardContent>
-                <CardFooter>
-                  <Button asChild className="w-full">
-                    <Link
-                      href="/host/report/security-deposit"
-                      className="flex items-center justify-center gap-2"
-                    >
-                      Report Damages
-                      <ChevronRight className="h-4 w-4" />
-                    </Link>
-                  </Button>
-                </CardFooter>
-              </Card>
+          <Card
+            className={`transition-shadow duration-300 ${
+              activeCard === "protection" ? "shadow-lg" : ""
+            }`}
+            onMouseEnter={() => handleCardHover("protection")}
+            onMouseLeave={() => handleCardHover("")}
+          >
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-2xl">
+                <ShieldCheckIcon className="h-6 w-6 text-primary" />
+                File Protection Incident
+              </CardTitle>
+              <CardDescription>
+                Report property damages and get assistance with refunds
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Accordion type="single" collapsible className="w-full">
+                <AccordionItem value="when-to-file">
+                  <AccordionTrigger>What should I report?</AccordionTrigger>
+                  <AccordionContent>
+                    Report any physical damages to the property, including
+                    furniture, appliances, or structural issues caused by
+                    guests.
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="incident-process">
+                  <AccordionTrigger>What&apos;s the process?</AccordionTrigger>
+                  <AccordionContent>
+                    Gather documentation, fill out the form, provide detailed
+                    descriptions and evidence, then submit for review by our
+                    protection team.
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </CardContent>
+            <CardFooter>
+              <Button asChild variant="secondary" className="w-full">
+                <Link
+                  href="/host/report/resolution-form"
+                  className="flex items-center justify-center gap-2"
+                >
+                  File Incident
+                  <ChevronRight className="h-4 w-4" />
+                </Link>
+              </Button>
+            </CardFooter>
+          </Card>
+        </div>
 
-              <Card
-                className={`transition-shadow duration-300 ${activeCard === "insurance" ? "shadow-lg" : ""}`}
-                onMouseEnter={() => handleCardHover("insurance")}
-                onMouseLeave={() => handleCardHover("")}
-              >
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-2xl">
-                    <AlertTriangle className="h-6 w-6 text-primary" />
-                    File Insurance Claim
-                  </CardTitle>
-                  <CardDescription>
-                    If damages exceed your security deposit, file a claim with
-                    our comprehensive insurance
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Accordion type="single" collapsible className="w-full">
-                    <AccordionItem value="when-to-file">
-                      <AccordionTrigger>
-                        When should I file a claim?
-                      </AccordionTrigger>
-                      <AccordionContent>
-                        File an insurance claim when the cost of damages exceeds
-                        the security deposit amount, or for damages not
-                        typically covered by security deposits, such as
-                        extensive property damage.
-                      </AccordionContent>
-                    </AccordionItem>
-                    <AccordionItem value="claim-process">
-                      <AccordionTrigger>
-                        What&apos;s the claim process?
-                      </AccordionTrigger>
-                      <AccordionContent>
-                        1. Gather all necessary documentation 2. Fill out the
-                        insurance claim form 3. Provide detailed descriptions
-                        and evidence of damages 4. Submit the claim for review
-                        by our insurance team
-                      </AccordionContent>
-                    </AccordionItem>
-                  </Accordion>
-                </CardContent>
-                <CardFooter>
-                  <Button asChild variant="secondary" className="w-full">
-                    <Link
-                      href="/host/report/resolution-form"
-                      className="flex items-center justify-center gap-2"
-                    >
-                      File Insurance Claim
-                      <ChevronRight className="h-4 w-4" />
-                    </Link>
-                  </Button>
-                </CardFooter>
-              </Card>
-            </div>
-          </TabsContent>
-          <TabsContent value="status">
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Reports</CardTitle>
-                <CardDescription>
-                  View the status of your recent damage reports and insurance
-                  claims
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-4">
-                  <li className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-5 w-5 text-muted-foreground" />
-                      <span>Damage Report #1234</span>
-                    </div>
-                    <span className="text-sm text-muted-foreground">
-                      Under Review
-                    </span>
-                  </li>
-                  <li className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 className="h-5 w-5 text-green-500" />
-                      <span>Insurance Claim #5678</span>
-                    </div>
-                    <span className="text-sm text-green-500">Approved</span>
-                  </li>
-                </ul>
-              </CardContent>
-              <CardFooter>
-                <Button variant="outline" className="w-full">
-                  View All Reports
-                </Button>
-              </CardFooter>
-            </Card>
-          </TabsContent>
-        </Tabs>
-
-        <div className="grid gap-8 md:grid-cols-2">
+        <div className="mt-6 grid gap-8 md:grid-cols-2">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Info className="h-5 w-5 text-primary" />
+              <CardTitle className="flex items-center gap-2 text-2xl">
+                <Info className="h-6 w-6 text-primary" />
                 Need Help?
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">
-                If you&apos;re unsure about which option to choose or need
-                assistance with the reporting process, our support team is here
-                to help. Don&apos;t hesitate to reach out!
+              <p className="text-muted-foreground">
+                Our support team is here to assist you with any questions or
+                concerns about the reporting process.
               </p>
             </CardContent>
             <CardFooter>
@@ -223,49 +180,26 @@ export default function Component() {
 
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Clock className="h-5 w-5 text-primary" />
+              <CardTitle className="flex items-center gap-2 text-2xl">
+                <Clock className="h-6 w-6 text-primary" />
                 Processing Times
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-sm">
-                <p className="mb-4 text-gray-600">
-                  The processing time for security deposit claims depends on the
-                  claim amount. Please refer to the following breakdown:
+              <div className="text-sm text-muted-foreground">
+                <p className="mb-4">
+                  Estimated processing times based on incident amount:
                 </p>
-                <ul className="list-disc space-y-3 pl-6 tracking-tight text-gray-700">
-                  <li>
-                    <strong>Under $250:</strong> Processed within 3 business
-                    days.
-                  </li>
-                  <li>
-                    <strong>$250&thinsp;-&thinsp;$1,000:</strong> Processed
-                    within 4 business days.
-                  </li>
-                  <li>
-                    <strong>$1,000&thinsp;-&thinsp;$5,000:</strong> Processed
-                    within 6 business days.
-                  </li>
-                  <li>
-                    <strong>Over $5,000:</strong> Longer processing time. We’ll
-                    contact you directly for further details.
-                  </li>
+                <ul className="space-y-2">
+                  <li>Under $250: 3 business days</li>
+                  <li>$250 - $1,000: 4 business days</li>
+                  <li>$1,000 - $5,000: 6 business days</li>
+                  <li>Over $5,000: Contact for details</li>
                 </ul>
               </div>
             </CardContent>
           </Card>
         </div>
-
-        <Alert className="mt-8">
-          <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>Important Notice</AlertTitle>
-          <AlertDescription>
-            Please ensure all damage reports and insurance claims are submitted
-            within 14 days of the guest&apos;s checkout to ensure timely
-            processing.
-          </AlertDescription>
-        </Alert>
       </div>
     </DashboardLayout>
   );

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -29,425 +29,184 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
-import OpenNewClaimForm from "./OpenNewClaimForm";
+import { api } from "@/utils/api";
+import ClaimDetailsDialog from "./ClaimsDetailsDialog";
+import type {
+  Claim,
+  ClaimResolution,
+  ClaimPayment,
+  ClaimItem,
+} from "@/server/db/schema";
+import type { RouterOutputs } from "@/utils/api";
+import Spinner from "@/components/_common/Spinner";
+import { formatDate } from "date-fns";
 
-// Mock data for claims
-const mockClaims = [
-  {
-    id: 1,
-    host: "John Doe",
-    property: "Beachfront Villa",
-    guest: "Alice Smith",
-    amount: 250,
-    status: "Pending",
-    date: "2023-05-15",
-    progress: 33,
-  },
-  {
-    id: 2,
-    host: "Jane Doe",
-    property: "City Apartment",
-    guest: "Bob Johnson",
-    amount: 100,
-    status: "Approved",
-    date: "2023-05-14",
-    progress: 100,
-  },
-  {
-    id: 3,
-    host: "Mike Smith",
-    property: "Mountain Cabin",
-    guest: "Carol Williams",
-    amount: 500,
-    status: "Denied",
-    date: "2023-05-13",
-    progress: 100,
-  },
-  {
-    id: 4,
-    host: "Sarah Brown",
-    property: "Lakeside Cottage",
-    guest: "David Miller",
-    amount: 300,
-    status: "Pending",
-    date: "2023-05-12",
-    progress: 66,
-  },
-  {
-    id: 5,
-    host: "Tom Wilson",
-    property: "Downtown Loft",
-    guest: "Eva Davis",
-    amount: 150,
-    status: "Pending",
-    date: "2023-05-11",
-    progress: 0,
-  },
-];
-
-// Mock data for messages
-const mockMessages = [
-  {
-    id: 1,
-    sender: "John Doe",
-    recipient: "Alice Smith",
-    message: "Hi Alice, there seems to be some damage to the property.",
-    timestamp: "2023-05-15 10:00",
-  },
-  {
-    id: 2,
-    sender: "Alice Smith",
-    recipient: "John Doe",
-    message: "I'm sorry to hear that. Can you provide more details?",
-    timestamp: "2023-05-15 10:30",
-  },
-  {
-    id: 3,
-    sender: "John Doe",
-    recipient: "Alice Smith",
-    message:
-      "Sure, I've noticed scratches on the dining table and a broken vase.",
-    timestamp: "2023-05-15 11:00",
-  },
-];
+export type ClaimsWDetails = RouterOutputs["claims"]["getAllClaims"][number];
 
 export default function AdminClaimsDashboard() {
-  const [claims, setClaims] = useState(mockClaims);
-  const [selectedClaim, setSelectedClaim] = useState(null);
+  const [selectedClaim, setSelectedClaim] = useState<null | ClaimsWDetails>(
+    null,
+  );
   const [filterStatus, setFilterStatus] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
-  const [messages, setMessages] = useState(mockMessages);
-  const [newMessage, setNewMessage] = useState("");
-  const [isOpenClaimDialogOpen, setIsOpenClaimDialogOpen] = useState(false);
-  const filteredClaims = claims.filter(
+
+  const { data: allClaims, isLoading } = api.claims.getAllClaims.useQuery();
+
+  const filteredClaims = allClaims?.filter(
     (claim) =>
-      (filterStatus === "all" || claim.status === filterStatus) &&
-      (claim.host.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        claim.guest.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        claim.property.toLowerCase().includes(searchTerm.toLowerCase())),
+      (filterStatus === "all" || claim.claim.claimStatus === filterStatus) &&
+      claim.claim
+        .filedByHostId!.toLowerCase()
+        .includes(searchTerm.toLowerCase()),
   );
 
-  const handleDecision = (claimId, decision) => {
-    setClaims(
-      claims.map((claim) =>
-        claim.id === claimId
-          ? { ...claim, status: decision, progress: 100 }
-          : claim,
-      ),
-    );
-    setSelectedClaim(null);
-  };
+  function calculateTotalRequestedAmount(claimItems: ClaimItem[]) {
+    return (
+      claimItems.reduce((total, item) => total + item.requestedAmount, 0) / 100
+    ).toFixed(2);
+  }
 
-  const handleSendMessage = () => {
-    if (newMessage.trim()) {
-      setMessages([
-        ...messages,
-        {
-          id: messages.length + 1,
-          sender: "Admin",
-          recipient: selectedClaim.host,
-          message: newMessage,
-          timestamp: new Date().toLocaleString(),
-        },
-      ]);
-      setNewMessage("");
+  function calculateTotalOutstandingAmount(claimItems: ClaimItem[]) {
+    return (
+      claimItems.reduce(
+        (total, item) => total + (item.outstandingAmount ?? 0),
+        0,
+      ) / 100
+    ).toFixed(2);
+  }
+
+  function calculateProgress(
+    claimStatus: "Submitted" | "In Review" | "Resolved",
+  ) {
+    if (claimStatus === "Submitted") {
+      return 33;
+    } else if (claimStatus === "In Review") {
+      return 66;
+    } else {
+      return 100;
     }
-  };
-
-  const handleSubmitClaim = (event: HTMLFormElement) => {
-    event.preventDefault();
-    // In a real application, you would send this data to your backend
-    console.log(
-      "Claim submitted:",
-      Object.fromEntries(new FormData(event.target)),
-    );
-    // For demonstration, we'll just close the dialog
-    setSelectedClaim(null);
-  };
+  }
 
   const claimStats = {
-    total: claims.length,
-    pending: claims.filter((c) => c.status === "Pending").length,
-    approved: claims.filter((c) => c.status === "Approved").length,
-    denied: claims.filter((c) => c.status === "Denied").length,
+    total: allClaims?.length ?? 0,
+    submitted:
+      allClaims?.filter((c) => c.claim.claimStatus === "Submitted").length ?? 0,
+    resolved:
+      allClaims?.filter((c) => c.claim.claimStatus === "Resolved").length ?? 0,
+    inReview:
+      allClaims?.filter((c) => c.claim.claimStatus === "In Review").length ?? 0,
   };
 
   return (
-    <div className="container mx-auto space-y-8 p-4">
-      <h1 className="mb-6 text-3xl font-bold">Admin Claims Dashboard</h1>
-      <Card>
-        <CardHeader>
-          <CardTitle>Claims Summary</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-            <div className="text-center">
-              <p className="text-2xl font-bold">{claimStats.total}</p>
-              <p className="text-sm text-muted-foreground">Total Claims</p>
-            </div>
-            <div className="text-center">
-              <p className="text-2xl font-bold text-yellow-500">
-                {claimStats.pending}
-              </p>
-              <p className="text-sm text-muted-foreground">Pending</p>
-            </div>
-            <div className="text-center">
-              <p className="text-2xl font-bold text-green-500">
-                {claimStats.approved}
-              </p>
-              <p className="text-sm text-muted-foreground">Approved</p>
-            </div>
-            <div className="text-center">
-              <p className="text-2xl font-bold text-red-500">
-                {claimStats.denied}
-              </p>
-              <p className="text-sm text-muted-foreground">Denied</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+    <div className="container mx-auto p-4">
+      <h1 className="mb-6 text-3xl font-bold">Claims Dashboard</h1>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Claims Management</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="mb-4 flex flex-col items-center justify-between space-y-2 md:flex-row md:space-y-0">
-            <div className="flex items-center space-x-2">
-              <Label htmlFor="filter-status">Filter by Status:</Label>
-              <Select value={filterStatus} onValueChange={setFilterStatus}>
-                <SelectTrigger id="filter-status" className="w-[180px]">
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="Pending">Pending</SelectItem>
-                  <SelectItem value="Approved">Approved</SelectItem>
-                  <SelectItem value="Denied">Denied</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Label htmlFor="search">Search:</Label>
-              <Input
-                id="search"
-                placeholder="Search by host, guest, or property"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-          </div>
+      {/* Claims Summary */}
+      <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Claims</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{claimStats.total}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Submitted</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{claimStats.submitted}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">In Review</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{claimStats.inReview}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Resolved</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{claimStats.resolved}</div>
+          </CardContent>
+        </Card>
+      </div>
 
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>ID</TableHead>
-                <TableHead>Host</TableHead>
-                <TableHead>Property</TableHead>
-                <TableHead>Guest</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Progress</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredClaims.map((claim) => (
-                <TableRow key={claim.id}>
-                  <TableCell>{claim.id}</TableCell>
-                  <TableCell>{claim.host}</TableCell>
-                  <TableCell>{claim.property}</TableCell>
-                  <TableCell>{claim.guest}</TableCell>
-                  <TableCell>${claim.amount}</TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={
-                        claim.status === "Approved"
-                          ? "success"
-                          : claim.status === "Denied"
-                            ? "destructive"
-                            : "default"
-                      }
-                    >
-                      {claim.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{claim.date}</TableCell>
-                  <TableCell>
-                    <Progress value={claim.progress} className="w-[60px]" />
-                  </TableCell>
-                  <TableCell>
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setSelectedClaim(claim)}
-                        >
-                          Review
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-4xl">
-                        <DialogHeader>
-                          <DialogTitle>Review Claim #{claim.id}</DialogTitle>
-                        </DialogHeader>
-                        <Tabs defaultValue="details" className="w-full">
-                          <TabsList>
-                            <TabsTrigger value="details">
-                              Claim Details
-                            </TabsTrigger>
-                            <TabsTrigger value="evidence">Evidence</TabsTrigger>
-                            <TabsTrigger value="communication">
-                              Communication
-                            </TabsTrigger>
-                            <TabsTrigger value="submit">
-                              Submit Claim
-                            </TabsTrigger>
-                          </TabsList>
-                          <TabsContent value="details">
-                            <div className="grid grid-cols-2 gap-4">
-                              <div>
-                                <Label>Host</Label>
-                                <p>{claim.host}</p>
-                              </div>
-                              <div>
-                                <Label>Guest</Label>
-                                <p>{claim.guest}</p>
-                              </div>
-                              <div>
-                                <Label>Property</Label>
-                                <p>{claim.property}</p>
-                              </div>
-                              <div>
-                                <Label>Amount</Label>
-                                <p>${claim.amount}</p>
-                              </div>
-                              <div>
-                                <Label>Status</Label>
-                                <p>{claim.status}</p>
-                              </div>
-                              <div>
-                                <Label>Date</Label>
-                                <p>{claim.date}</p>
-                              </div>
-                            </div>
-                          </TabsContent>
-                          <TabsContent value="evidence">
-                            <p>Evidence files would be displayed here.</p>
-                          </TabsContent>
-                          <TabsContent value="communication">
-                            <div className="space-y-4">
-                              <div className="h-[300px] space-y-2 overflow-y-auto rounded border p-4">
-                                {messages.map((msg) => (
-                                  <div
-                                    key={msg.id}
-                                    className={`rounded p-2 ${msg.sender === "Admin" ? "ml-8 bg-blue-100" : "mr-8 bg-gray-100"}`}
-                                  >
-                                    <p className="font-semibold">
-                                      {msg.sender}
-                                    </p>
-                                    <p>{msg.message}</p>
-                                    <p className="text-xs text-gray-500">
-                                      {msg.timestamp}
-                                    </p>
-                                  </div>
-                                ))}
-                              </div>
-                              <div className="flex space-x-2">
-                                <Input
-                                  placeholder="Type your message..."
-                                  value={newMessage}
-                                  onChange={(e) =>
-                                    setNewMessage(e.target.value)
-                                  }
-                                />
-                                <Button onClick={handleSendMessage}>
-                                  Send
-                                </Button>
-                              </div>
-                            </div>
-                          </TabsContent>
-                          <TabsContent value="submit">
-                            <form
-                              onSubmit={handleSubmitClaim}
-                              className="space-y-4"
-                            >
-                              <div>
-                                <Label htmlFor="claim-amount">
-                                  Claim Amount
-                                </Label>
-                                <Input
-                                  id="claim-amount"
-                                  name="amount"
-                                  type="number"
-                                  required
-                                />
-                              </div>
-                              <div>
-                                <Label htmlFor="claim-description">
-                                  Description of Damage
-                                </Label>
-                                <Textarea
-                                  id="claim-description"
-                                  name="description"
-                                  required
-                                />
-                              </div>
-                              <div>
-                                <Label htmlFor="claim-evidence">
-                                  Evidence (Photos, Receipts)
-                                </Label>
-                                <Input
-                                  id="claim-evidence"
-                                  name="evidence"
-                                  type="file"
-                                  multiple
-                                />
-                              </div>
-                              <Button type="submit">Submit Claim</Button>
-                            </form>
-                          </TabsContent>
-                        </Tabs>
-                        <div className="mt-4 flex items-center justify-between">
-                          <div className="space-y-1">
-                            <Label>Claim Progress</Label>
-                            <Progress
-                              value={claim.progress}
-                              className="w-[200px]"
-                            />
-                          </div>
-                          <div className="space-x-2">
-                            <Button
-                              variant="outline"
-                              onClick={() => handleDecision(claim.id, "Denied")}
-                            >
-                              Deny Claim
-                            </Button>
-                            <Button
-                              variant="outline"
-                              onClick={() => setSelectedClaim(null)}
-                            >
-                              Close
-                            </Button>
-                            <Button
-                              onClick={() =>
-                                handleDecision(claim.id, "Approved")
-                              }
-                            >
-                              Approve Claim
-                            </Button>
-                          </div>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+      {/* Filters and Search */}
+      <div className="mb-6 flex flex-col gap-4 md:flex-row">
+        <Select value={filterStatus} onValueChange={setFilterStatus}>
+          <SelectTrigger className="w-full md:w-[180px]">
+            <SelectValue placeholder="Filter by status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Claims</SelectItem>
+            <SelectItem value="Submitted">Submitted</SelectItem>
+            <SelectItem value="In Review">In Review</SelectItem>
+            <SelectItem value="Resolved">Resolved</SelectItem>
+          </SelectContent>
+        </Select>
+        <Input
+          placeholder="Search by Host ID"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full md:w-auto"
+        />
+      </div>
+
+      {/* Claims Table */}
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Claim ID</TableHead>
+            <TableHead>Host ID</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Requested Amount</TableHead>
+            <TableHead>Outstanding Amount</TableHead>
+            <TableHead>Created At</TableHead>
+            <TableHead>Items</TableHead>
+            <TableHead>Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {filteredClaims?.map((claim) => (
+            <TableRow key={claim.claim.id}>
+              <TableCell>{claim.claim.id}</TableCell>
+              <TableCell>{claim.claim.filedByHostId}</TableCell>
+              <TableCell>
+                <Badge>{claim.claim.claimStatus}</Badge>
+              </TableCell>
+              <TableCell>
+                ${calculateTotalRequestedAmount(claim.claimItems)}
+              </TableCell>
+              <TableCell>
+                ${calculateTotalOutstandingAmount(claim.claimItems)}
+              </TableCell>
+              <TableCell>
+                {formatDate(claim.claim.createdAt!, "MM/dd/yyyy")}
+              </TableCell>
+              <TableCell>{claim.claimItems.length}</TableCell>
+              <TableCell>
+                <Button onClick={() => setSelectedClaim(claim)}>
+                  View Details
+                </Button>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+
+      {/* Claim Details Dialog */}
+      {selectedClaim && (
+        <ClaimDetailsDialog
+          claim={selectedClaim}
+          onClose={() => setSelectedClaim(null)}
+        />
+      )}
     </div>
   );
 }

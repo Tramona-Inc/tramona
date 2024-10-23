@@ -21,7 +21,8 @@ import {
 import { type RouterOutputs } from "@/utils/api";
 import Spinner from "@/components/_common/Spinner";
 
-type ClaimDetailsOutput = RouterOutputs["claims"]["getClaimDetailsWProperty"];
+type ClaimDetailsOutput =
+  RouterOutputs["claims"]["getClaimDetailsWPropertyById"];
 
 interface ClaimDetailsCardProps {
   claimDetails: ClaimDetailsOutput;

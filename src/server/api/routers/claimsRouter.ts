@@ -2,22 +2,37 @@ import {
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
+  roleRestrictedProcedure,
 } from "@/server/api/trpc";
 import { v4 as uuidv4 } from "uuid";
 
 import { z } from "zod";
 import {
-  referralCodes,
   users,
   claims,
   claimItems,
   hostProfiles,
   trips,
+  claimResolutions,
+} from "@/server/db/schema";
+import type {
+  Claim,
+  ClaimResolution,
+  ClaimPayment,
+  ClaimItem,
 } from "@/server/db/schema";
 import { db } from "@/server/db";
-import { eq } from "drizzle-orm";
+import { and, eq, gte } from "drizzle-orm";
 import { sendEmail } from "@/server/server-utils";
 import ClaimLinkEmail from "packages/transactional/emails/ClaimLinkEmail";
+import { sendSlackMessage } from "@/server/slack";
+import { subDays } from "date-fns"; // Importing a date utility to subtract days from current date
+
+interface QueryResultRow {
+  claims: Claim | null; // Claims can be nullable if no matching row
+  claim_items: ClaimItem | null; // ClaimItem can also be null
+  claim_resolutions: ClaimResolution | null; // ClaimResolution can be null
+}
 
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -33,6 +48,58 @@ const claimItemSchema = z.object({
 });
 
 export const claimsRouter = createTRPCRouter({
+  getAllClaims: roleRestrictedProcedure(["admin"]).query(async () => {
+    const allClaims = await db
+      .select()
+      .from(claims)
+      .leftJoin(claimResolutions, eq(claims.id, claimResolutions.claimId))
+      .leftJoin(claimItems, eq(claims.id, claimItems.claimId));
+
+    console.log(allClaims);
+    const result = allClaims.reduce<
+      Record<
+        string, // Use string for the ID key
+        {
+          claim: Claim;
+          claimItems: ClaimItem[];
+          claimResolutions: ClaimResolution[];
+        }
+      >
+    >((acc, row: QueryResultRow) => {
+      // Explicitly type `row` here
+      const claim = row.claims;
+      const claimItem = row.claim_items;
+      const claimResolution = row.claim_resolutions;
+
+      // Ensure that claim and claim.id exist
+      if (claim?.id) {
+        // Initialize the claim if it doesn't exist in the accumulator
+        if (!acc[claim.id]) {
+          acc[claim.id] = {
+            claim,
+            claimItems: [],
+            claimResolutions: [],
+          };
+        }
+
+        // If there's a claim item, add it to the array
+        if (claimItem) {
+          acc[claim.id]!.claimItems.push(claimItem);
+        }
+
+        // If there's a claim resolution, add it to the array
+        if (claimResolution) {
+          acc[claim.id]!.claimResolutions.push(claimResolution);
+        }
+      }
+
+      return acc;
+    }, {});
+
+    console.log(Object.values(result));
+    return Object.values(result); // Return the accumulated result as an array
+  }),
+
   createClaim: protectedProcedure
     .input(
       z.object({
@@ -56,6 +123,11 @@ export const claimsRouter = createTRPCRouter({
         superhogRequestId: input.superhogRequestId,
       });
 
+      //create a resolution result for that claim
+      await db.insert(claimResolutions).values({
+        claimId: newClaimId,
+      });
+
       const filedHost = await db.query.users.findFirst({
         where: eq(users.id, input.hostId),
       });
@@ -73,7 +145,16 @@ export const claimsRouter = createTRPCRouter({
       return;
     }),
 
-  getClaimDetailsWProperty: protectedProcedure
+  getMyClaims: protectedProcedure.query(async ({ ctx }) => {
+    const myClaims = await db.query.claims.findMany({
+      where: eq(claims.filedByHostId, ctx.user.id),
+    });
+    console.log(myClaims);
+
+    return myClaims;
+  }),
+
+  getClaimDetailsWPropertyById: protectedProcedure
     .input(z.object({ claimId: z.string() }))
     .query(async ({ input }) => {
       const curClaim = await db.query.claims.findFirst({
@@ -104,10 +185,16 @@ export const claimsRouter = createTRPCRouter({
         claimItems: z.array(claimItemSchema),
       }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ ctx, input }) => {
       const curTrip = await db.query.trips.findFirst({
         where: eq(trips.id, input.tripId),
       });
+
+      //set claim to inRever
+      await db
+        .update(claims)
+        .set({ claimStatus: "In Review" })
+        .where(eq(claims.id, input.claimId));
 
       const inputToClaimsConversion = input.claimItems.map((item) => ({
         claimId: input.claimId,
@@ -117,7 +204,7 @@ export const claimsRouter = createTRPCRouter({
         requestedAmount: item.requestedAmount,
         outstandingAmount: item.requestedAmount,
         description: item.description,
-        imagesList: item.imagesList,
+        imageUrls: item.imagesList,
       }));
 
       const inserterdClaimItems = await db
@@ -126,6 +213,16 @@ export const claimsRouter = createTRPCRouter({
         .returning();
 
       console.log(inserterdClaimItems);
+      await sendSlackMessage({
+        isProductionOnly: true,
+        channel: "tramona-bot",
+        text: [
+          `* ${ctx.user.email} added items to their claim report*`,
+          ` ${inserterdClaimItems.length} damaged item(s) has been added in their claim. Please review the details and proceed with the necessary actions.`,
+          `You can access the full report for further review and resolution at the link below:`,
+          `<https://tramona.com/admin/reports|Go to report dashboard>`,
+        ].join("\n"),
+      });
       return;
     }),
 });

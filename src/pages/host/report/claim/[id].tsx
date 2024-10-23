@@ -24,7 +24,7 @@ function Page() {
   const claimId = router.query.id as string;
 
   const { data: claimDetails, isLoading } =
-    api.claims.getClaimDetailsWProperty.useQuery(
+    api.claims.getClaimDetailsWPropertyById.useQuery(
       { claimId: claimId },
       {
         enabled: !!claimId, // Only run query when claimId is available and valid
