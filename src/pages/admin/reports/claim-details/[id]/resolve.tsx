@@ -18,22 +18,23 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/utils/utils";
-import ResolveClaimItemForm from "@/components/admin/claims/ResolveClaimItemForm";
-import {
-  CalendarIcon,
-  HomeIcon,
-  UserIcon,
-  CheckCircle,
-  AlertCircle,
-} from "lucide-react";
+import ResolveClaimItemForm, {
+  resolveItemFormSchema,
+} from "@/components/admin/claims/ResolveClaimItemForm";
+import { CheckCircle, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import ClaimPropertyCard from "@/components/admin/claims/ClaimPropertyCard";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "@/components/ui/use-toast";
+import { z } from "zod";
 
 export default function ResolveClaim() {
   const router = useRouter();
   const claimId = router.query.id as string;
   const [selectedItemId, setSelectedItemId] = useState<number | null>(null);
+  const [submittedValues, setSubmittedValues] = useState<z.infer<
+    typeof resolveItemFormSchema
+  > | null>(null);
 
   const { data: claim, isLoading: isClaimLoading } =
     api.claims.getClaimWithAllDetailsById.useQuery(claimId, {
@@ -47,6 +48,33 @@ export default function ResolveClaim() {
         enabled: !!claim,
       },
     );
+
+  const { mutateAsync: resolveClaimItem } =
+    api.claims.resolveClaimItem.useMutation();
+
+  const handleResolveClaimItemSubmit = async (
+    values: z.infer<typeof resolveItemFormSchema>,
+  ) => {
+    if (!claimId || !selectedItemId) return;
+
+    try {
+      await resolveClaimItem(values);
+
+      toast({
+        title: "Item Resolved",
+        description: "The claim item has been successfully resolved.",
+      });
+
+      setSubmittedValues(values);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "There was an error resolving the claim item.",
+        variant: "destructive",
+      });
+      console.error("Error resolving claim item:", error);
+    }
+  };
 
   return (
     <DashboardLayout>
@@ -126,6 +154,7 @@ export default function ResolveClaim() {
                             setSelectedItemId(
                               selectedItemId === item.id! ? null : item.id!,
                             );
+                            setSubmittedValues(null);
                           }
                         }}
                         className={`rounded-lg p-6 shadow-sm transition-all duration-200 ${
@@ -260,16 +289,54 @@ export default function ResolveClaim() {
           {selectedItemId && claim && (
             <Card>
               <CardContent>
-                <ResolveClaimItemForm
-                  claimItem={
-                    claim.claimItems.find((item) => item.id === selectedItemId)!
-                  }
-                  onSubmit={(values) => {
-                    console.log(values);
-                    // Here you would typically call your API to submit the form data
-                    // api.claims.resolveClaimItem.mutate({ claimId, itemId: selectedItemId, ...values });
-                  }}
-                />
+                {submittedValues ? (
+                  <div className="space-y-4">
+                    <h3 className="text-xl font-semibold">
+                      Resolution Summary
+                    </h3>
+                    <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <div className="space-y-1">
+                        <dt className="text-sm font-medium text-muted-foreground">
+                          Resolution Result
+                        </dt>
+                        <dd className="text-sm font-semibold">
+                          {submittedValues.resolutionResult}
+                        </dd>
+                      </div>
+                      <div className="space-y-1">
+                        <dt className="text-sm font-medium text-muted-foreground">
+                          Approved Amount
+                        </dt>
+                        <dd className="text-sm font-semibold">
+                          {formatCurrency(submittedValues.approvedAmount)}
+                        </dd>
+                      </div>
+                      <div className="col-span-2 space-y-1">
+                        <dt className="text-sm font-medium text-muted-foreground">
+                          Resolution Description
+                        </dt>
+                        <dd className="text-sm">
+                          {submittedValues.resolutionDescription}
+                        </dd>
+                      </div>
+                    </dl>
+                    <Button
+                      onClick={() => setSubmittedValues(null)}
+                      className="mt-4"
+                    >
+                      Edit Resolution
+                    </Button>
+                  </div>
+                ) : (
+                  <ResolveClaimItemForm
+                    claimItem={
+                      claim.claimItems.find(
+                        (item) => item.id === selectedItemId,
+                      )!
+                    }
+                    onSubmit={handleResolveClaimItemSubmit}
+                  />
+                )}
               </CardContent>
             </Card>
           )}

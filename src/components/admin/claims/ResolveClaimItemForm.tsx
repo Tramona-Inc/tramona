@@ -36,32 +36,38 @@ import {
   Send,
   FileQuestion,
 } from "lucide-react";
-import { ClaimItem } from "@/server/db/schema";
+import { ALL_PAYMENT_SOURCES, ClaimItem } from "@/server/db/schema";
 import { ALL_RESOLUTION_RESULTS } from "@/server/db/schema";
 
-const formSchema = z.object({
+export const resolveItemFormSchema = z.object({
+  claimId: z.string(),
+  claimItemId: z.number(),
   resolutionResult: z.enum(ALL_RESOLUTION_RESULTS),
   resolutionDescription: z
     .string()
     .min(1, "Resolution description is required"),
   approvedAmount: z.number().min(0, "Approved amount must be 0 or greater"),
+  paymentSource: z.enum(ALL_PAYMENT_SOURCES),
 });
 
 interface ResolveClaimItemFormProps {
   claimItem: ClaimItem;
-  onSubmit: (values: z.infer<typeof formSchema>) => void;
+  onSubmit: (values: z.infer<typeof resolveItemFormSchema>) => void;
 }
 
 export default function ResolveClaimItemForm({
   claimItem,
   onSubmit,
 }: ResolveClaimItemFormProps) {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof resolveItemFormSchema>>({
+    resolver: zodResolver(resolveItemFormSchema),
     defaultValues: {
+      claimId: claimItem.claimId,
+      claimItemId: claimItem.id,
       resolutionResult: "Approved",
       resolutionDescription: "",
       approvedAmount: claimItem.requestedAmount,
+      paymentSource: "Security Deposit",
     },
   });
 

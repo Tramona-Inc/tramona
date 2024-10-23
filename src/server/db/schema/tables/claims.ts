@@ -13,7 +13,7 @@ import { properties } from "./properties";
 import { trips } from "./trips";
 import { users } from "./users";
 import { superhogRequests } from "./superhogRequests";
-import { ALL_RESOLUTION_RESULTS } from "../common";
+import { ALL_PAYMENT_SOURCES, ALL_RESOLUTION_RESULTS } from "../common";
 export const claimStatus = pgEnum("claim_status", [
   "Submitted",
   "Resolved",
@@ -25,11 +25,7 @@ export const resolutionResults = pgEnum(
   ALL_RESOLUTION_RESULTS,
 );
 
-export const paymentSources = pgEnum("payment_sources", [
-  "Superhog",
-  "Security Deposit",
-  "Tramona",
-]);
+export const paymentSources = pgEnum("payment_sources", ALL_PAYMENT_SOURCES);
 
 //<------- tables  -------_>
 export const claims = pgTable(

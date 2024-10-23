@@ -90,3 +90,9 @@ export const ALL_RESOLUTION_RESULTS = [
   "Insufficient Evidence",
   "Rejected",
 ] as const;
+
+export const ALL_PAYMENT_SOURCES = [
+  "Superhog",
+  "Security Deposit",
+  "Tramona",
+] as const;

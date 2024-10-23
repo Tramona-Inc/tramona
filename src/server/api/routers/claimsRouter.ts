@@ -13,6 +13,10 @@ import {
   claimItems,
   trips,
   claimItemResolutions,
+  ALL_RESOLUTION_RESULTS,
+  ALL_PAYMENT_SOURCES,
+  claimPayments,
+  resolutionResults,
 } from "@/server/db/schema";
 
 import type {
@@ -22,7 +26,7 @@ import type {
   ClaimItem,
 } from "@/server/db/schema";
 import { db } from "@/server/db";
-import { and, eq, gte } from "drizzle-orm";
+import { and, eq, gte, sql } from "drizzle-orm";
 import { sendEmail } from "@/server/server-utils";
 import ClaimLinkEmail from "packages/transactional/emails/ClaimLinkEmail";
 import { sendSlackMessage } from "@/server/slack";
@@ -245,7 +249,7 @@ export const claimsRouter = createTRPCRouter({
       //set claim to inRever
       await db
         .update(claims)
-        .set({ claimStatus: "In Review" })
+        .set({ claimStatus: "In Review", inReviewAt: new Date() })
         .where(eq(claims.id, input.claimId));
 
       let insertedItemsLength = 0;
@@ -294,21 +298,61 @@ export const claimsRouter = createTRPCRouter({
       return;
     }),
 
-  resolveClaim: protectedProcedure
+  resolveClaimItem: protectedProcedure
     .input(
       z.object({
-        claimItemId: z.string(),
-        resolutionResult: z.enum([
-          "Approved",
-          "Partially Approved",
-          "Insufficient Evidence",
-          "Rejected",
-        ]),
-        description: z.string(),
-        amount: z.number(),
+        claimId: z.string(),
+        claimItemId: z.number(),
+        resolutionResult: z.enum(ALL_RESOLUTION_RESULTS),
+        resolutionDescription: z.string(),
+        approvedAmount: z.number(),
+        paymentSource: z.enum(ALL_PAYMENT_SOURCES),
       }),
     )
+    .mutation(async ({ ctx, input }) => {
+      //we need to do two things
+      //1.) create a payment result
+      //2.)we need to update the claim_resolution resolutionResults, description, resolved
+      //3.) update the claim_items payment complete, and outstandingAmount
+      //4.) Dont update claims do that at the verryyyy end
+
+      await db.insert(claimPayments).values({
+        claimItemId: input.claimItemId,
+        source: input.paymentSource,
+        amountPaid: input.approvedAmount,
+        paymentDate: new Date(),
+      });
+
+      //update claimResoultion
+      await db
+        .update(claimItemResolutions)
+        .set({
+          resolutionResult: input.resolutionResult,
+          resolutionDescription: input.resolutionDescription,
+          resolvedByAdminId: ctx.user.id,
+        })
+        .where(eq(claimItemResolutions.claimItemId, input.claimItemId));
+      //update claim items
+
+      await db
+        .update(claimItems)
+        .set({
+          outstandingAmount: sql`${claimItems.outstandingAmount} - ${input.approvedAmount}`,
+          paymentCompleteAt: new Date(),
+          resolvedBySuperhog: input.paymentSource === "Superhog" ? true : false,
+        })
+        .where(eq(claimItems.id, input.claimItemId));
+
+      return;
+    }),
+  closeClaim: roleRestrictedProcedure(["admin"])
+    .input(z.object({ claimId: z.string() }))
     .mutation(async ({ input }) => {
+      await db
+        .update(claims)
+        .set({ resolvedAt: new Date(), claimStatus: "Resolved" })
+        .where(eq(claims.id, input.claimId));
+
       return;
     }),
 });
