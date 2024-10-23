@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import MyClaimOverview from "./claim/MyClaimOverview";
+import BackButton from "@/components/_common/BackButton";
 
 export default function RefinedReportCenterDashboard() {
   const [activeCard, setActiveCard] = useState<string | null>(null);
@@ -39,7 +40,8 @@ export default function RefinedReportCenterDashboard() {
 
   return (
     <DashboardLayout>
-      <div className="container mx-auto max-w-7xl px-4 py-10">
+      <BackButton href="/host" />
+      <div className="container mx-auto max-w-7xl px-4 py-5">
         <div className="mb-6 text-center">
           <h1 className="mb-2 text-4xl font-bold text-primary">
             Report Center
@@ -172,9 +174,11 @@ export default function RefinedReportCenterDashboard() {
               </p>
             </CardContent>
             <CardFooter>
-              <Button variant="outline" className="w-full">
-                Contact Support
-              </Button>
+              <Link href="/help-center">
+                <Button variant="outline" className="w-full">
+                  Contact Support
+                </Button>
+              </Link>
             </CardFooter>
           </Card>
 

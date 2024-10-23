@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Table,
   TableBody,
@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+
 import {
   Select,
   SelectContent,
@@ -17,30 +17,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
-import { Progress } from "@/components/ui/progress";
 import { api } from "@/utils/api";
-import ClaimDetailsDialog from "./ClaimsDetailsDialog";
-import type {
-  Claim,
-  ClaimResolution,
-  ClaimPayment,
-  ClaimItem,
-} from "@/server/db/schema";
 import type { RouterOutputs } from "@/utils/api";
-import Spinner from "@/components/_common/Spinner";
 import { formatDate } from "date-fns";
-
+import Link from "next/link";
+import type { ClaimItem } from "@/server/db/schema";
 export type ClaimsWDetails = RouterOutputs["claims"]["getAllClaims"][number];
 
 export default function AdminClaimsDashboard() {
@@ -86,6 +69,20 @@ export default function AdminClaimsDashboard() {
       return 100;
     }
   }
+  const getBadgeByStatus = (
+    claimStatus: "Submitted" | "In Review" | "Resolved",
+  ) => {
+    switch (claimStatus) {
+      case "Submitted":
+        return <Badge variant="gray">Submitted</Badge>;
+
+      case "In Review":
+        return <Badge variant="yellow">In Review</Badge>;
+
+      case "Resolved":
+        return <Badge variant="green">Resolved</Badge>;
+    }
+  };
 
   const claimStats = {
     total: allClaims?.length ?? 0,
@@ -178,7 +175,7 @@ export default function AdminClaimsDashboard() {
               <TableCell>{claim.claim.id}</TableCell>
               <TableCell>{claim.claim.filedByHostId}</TableCell>
               <TableCell>
-                <Badge>{claim.claim.claimStatus}</Badge>
+                {getBadgeByStatus(claim.claim.claimStatus!)}
               </TableCell>
               <TableCell>
                 ${calculateTotalRequestedAmount(claim.claimItems)}
@@ -191,22 +188,16 @@ export default function AdminClaimsDashboard() {
               </TableCell>
               <TableCell>{claim.claimItems.length}</TableCell>
               <TableCell>
-                <Button onClick={() => setSelectedClaim(claim)}>
-                  View Details
-                </Button>
+                <Link href={`reports/claim-details/${claim.claim.id}`}>
+                  <Button onClick={() => setSelectedClaim(claim)}>
+                    View Details
+                  </Button>
+                </Link>
               </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
-
-      {/* Claim Details Dialog */}
-      {selectedClaim && (
-        <ClaimDetailsDialog
-          claim={selectedClaim}
-          onClose={() => setSelectedClaim(null)}
-        />
-      )}
     </div>
   );
 }

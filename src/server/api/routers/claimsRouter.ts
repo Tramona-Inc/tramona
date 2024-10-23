@@ -15,6 +15,7 @@ import {
   trips,
   claimResolutions,
 } from "@/server/db/schema";
+
 import type {
   Claim,
   ClaimResolution,
@@ -55,7 +56,6 @@ export const claimsRouter = createTRPCRouter({
       .leftJoin(claimResolutions, eq(claims.id, claimResolutions.claimId))
       .leftJoin(claimItems, eq(claims.id, claimItems.claimId));
 
-    console.log(allClaims);
     const result = allClaims.reduce<
       Record<
         string, // Use string for the ID key
@@ -66,7 +66,6 @@ export const claimsRouter = createTRPCRouter({
         }
       >
     >((acc, row: QueryResultRow) => {
-      // Explicitly type `row` here
       const claim = row.claims;
       const claimItem = row.claim_items;
       const claimResolution = row.claim_resolutions;
@@ -96,9 +95,48 @@ export const claimsRouter = createTRPCRouter({
       return acc;
     }, {});
 
-    console.log(Object.values(result));
     return Object.values(result); // Return the accumulated result as an array
   }),
+
+  getClaimWithAllDetailsById: roleRestrictedProcedure(["admin"])
+    .input(z.string())
+    .query(async ({ input }) => {
+      console.log("running");
+      const claimWDetails = await db
+        .select()
+        .from(claims)
+        .where(eq(claims.id, input))
+        .leftJoin(claimResolutions, eq(claims.id, claimResolutions.claimId))
+        .leftJoin(claimItems, eq(claims.id, claimItems.claimId));
+
+      const result = claimWDetails.reduce<{
+        claim: Claim;
+        claimItems: ClaimItem[];
+        claimResolutions: ClaimResolution[];
+      }>(
+        (acc, row) => {
+          const claim = row.claims;
+          const claimItem = row.claim_items;
+          const claimResolution = row.claim_resolutions;
+
+          acc.claim = claim;
+
+          if (claimItem) {
+            acc.claimItems.push(claimItem);
+          }
+          if (claimResolution) {
+            acc.claimResolutions.push(claimResolution);
+          }
+          return acc;
+        },
+        {
+          claim: null!,
+          claimItems: [],
+          claimResolutions: [],
+        },
+      );
+      return result;
+    }),
 
   createClaim: protectedProcedure
     .input(
@@ -121,11 +159,6 @@ export const claimsRouter = createTRPCRouter({
         claimsLink: newClaimsLink,
         reportedThroughSuperhogAt: input.superhogRequestId ? new Date() : null,
         superhogRequestId: input.superhogRequestId,
-      });
-
-      //create a resolution result for that claim
-      await db.insert(claimResolutions).values({
-        claimId: newClaimId,
       });
 
       const filedHost = await db.query.users.findFirst({
@@ -211,6 +244,11 @@ export const claimsRouter = createTRPCRouter({
         .insert(claimItems)
         .values(inputToClaimsConversion)
         .returning();
+
+      //create a resolution result for that claim
+      await db.insert(claimResolutions).values({
+        claimId: input.claimId,
+      });
 
       console.log(inserterdClaimItems);
       await sendSlackMessage({

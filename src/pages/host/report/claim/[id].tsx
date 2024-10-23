@@ -20,7 +20,7 @@ import Spinner from "@/components/_common/Spinner";
 
 function Page() {
   const router = useRouter();
-  const { data: session } = useSession({ required: true });
+  useSession({ required: true });
   const claimId = router.query.id as string;
 
   const { data: claimDetails, isLoading } =

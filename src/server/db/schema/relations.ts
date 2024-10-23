@@ -461,6 +461,7 @@ export const claimsRelations = relations(claims, ({ one, many }) => ({
     references: [superhogRequests.id],
   }),
   claimResolutions: many(claimResolutions),
+  claimItems: many(claimItems),
 }));
 
 export const claimResolutionsRelations = relations(
