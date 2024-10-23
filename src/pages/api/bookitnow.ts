@@ -39,16 +39,10 @@ export default async function handler(
 
   const subScrapedResult = await casamundoSubScraper(subScraperOptions).catch((err) => {
     if (err instanceof Error) {
-      console.error(
-        `Error scraping listings for request ${originalListingId}:\n\n${err.stack}`,
-      );
+      return res.status(500).json({ error: "error scraping casamundo: " + err.stack + " " + originalListingId });
     } else {
-      console.error(
-        `Error scraping listings for request ${originalListingId}: ${err}`,
-      );
+      return res.status(500).json({ error: "error scraping casamundo: " + err + " " + originalListingId });
     }
-    return res.status(500).json({ error: "Error scraping listings" });
   });
-
   return res.status(200).json({ subScrapedResult });
 }
