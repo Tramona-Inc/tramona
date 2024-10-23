@@ -37,12 +37,14 @@ export default async function handler(
     numGuests,
   };
 
-  const subScrapedResult = await casamundoSubScraper(subScraperOptions).catch((err) => {
+  try {
+    const subScrapedResult = await casamundoSubScraper(subScraperOptions);
+    return res.status(200).json({ subScrapedResult });
+  } catch (err) {
     if (err instanceof Error) {
-      return res.status(500).json({ error: "error scraping casamundo: " + err.stack + " " + originalListingId });
+      return res.status(500).json({ error: "Error scraping casamundo: " + err.stack + " " + originalListingId });
     } else {
-      return res.status(500).json({ error: "error scraping casamundo: " + err + " " + originalListingId });
+      return res.status(500).json({ error: `Error scraping casamundo: ${err} ${originalListingId}` });
     }
-  });
-  return res.status(200).json({ subScrapedResult });
+  }
 }
