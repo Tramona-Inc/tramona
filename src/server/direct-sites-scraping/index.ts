@@ -47,6 +47,7 @@ import { z } from "zod";
 import { formatZodError } from "../../utils/zod-utils";
 import { breakdownPayment } from "@/utils/payment-utils/paymentBreakdown";
 import { airbnbScraper, scrapeAirbnbSearch } from "../external-listings-scraping/airbnbScraper";
+import axios from "axios";
 
 type ScraperOptions = {
   location: string;
@@ -693,23 +694,32 @@ export const checkAvailabilityForProperties = async (options: {
       numGuests,
     };
 
+    console.log('originalListingPlatform', originalListingPlatform);
+
     let subScrapedResult: SubScrapedResult | undefined;
 
-    switch (originalListingPlatform) {
-      case "Casamundo":
-        subScrapedResult = await casamundoSubScraper(subScraperOptions);
-        break;
-      // Add other cases here as needed
-      case "IntegrityArizona":
-        subScrapedResult = await arizonaSubScraper(subScraperOptions);
-        break;
-      // case "Cleanbnb":
-      //   subScrapedResult = await cleanbnbSubScraper(subScraperOptions);
-      //   break;
-      // ... other cases ...
-      case "Evolve":
-        subScrapedResult = await evolveVacationRentalSubScraper(subScraperOptions);
-        break;
+
+    try {
+      switch (originalListingPlatform) {
+        case "Casamundo":
+          subScrapedResult = await axios.post("https://tramona.com/api/bookitnow", subScraperOptions);
+          console.log('Casamundo subScrapedResult:', subScrapedResult); // Log result of axios call
+          break;
+
+        case "IntegrityArizona":
+          subScrapedResult = await arizonaSubScraper(subScraperOptions);
+          console.log('IntegrityArizona subScrapedResult:', subScrapedResult); // Log result
+          break;
+
+        case "Evolve":
+          subScrapedResult = await evolveVacationRentalSubScraper(subScraperOptions);
+          console.log('Evolve subScrapedResult:', subScrapedResult); // Log result
+          break;
+
+        // Add other cases here as needed
+      }
+    } catch (error) {
+      console.error(`Error in ${originalListingPlatform} subScraper:`, error);
     }
 
     if (subScrapedResult) {
@@ -721,7 +731,9 @@ export const checkAvailabilityForProperties = async (options: {
     return null;
   });
 
-  const results = await Promise.all(availabilityPromises);
+  console.log('here')
+
+  const results = await Promise.allSettled(availabilityPromises);
 
   // Filter out null results and log them
   const availabilityResults = results.filter((result): result is (SubScrapedResult & { propertyId: number }) => {
