@@ -95,6 +95,7 @@ export const claimItems = pgTable(
   {
     //can have multiple per claim
     id: serial("id").primaryKey(),
+    itemName: text("item_name").notNull(),
     claimId: text("claim_id")
       .notNull()
       .references(() => claims.id, { onDelete: "cascade" }),
@@ -112,7 +113,7 @@ export const claimItems = pgTable(
     description: varchar("description").notNull(),
     propertyId: integer("property_id").references(() => properties.id),
     resolvedBySuperhog: boolean("resolved_by_superhog").default(false),
-    imageUrls: varchar("image_url").array().notNull(),
+    imageUrls: varchar("image_urls").array().notNull(),
   },
   (t) => ({
     claimId: index().on(t.claimId),

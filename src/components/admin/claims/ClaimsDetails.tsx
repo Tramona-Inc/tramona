@@ -3,18 +3,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+
 import type { Claim, ClaimResolution, ClaimItem } from "@/server/db/schema";
 import { format } from "date-fns";
+import ClaimResolutionForm from "./ClaimResolutionForm";
+import ClaimItemsInClaim from "./ClaimItemsInClaim";
 
-interface ClaimDetailsProps {
+export interface ClaimDetailsProps {
   claim: {
     claim: Claim;
     claimItems: ClaimItem[];
@@ -92,83 +87,10 @@ export default function ClaimDetails({ claim }: ClaimDetailsProps) {
           </Card>
         </TabsContent>
         <TabsContent value="items">
-          <Card>
-            <CardHeader>
-              <CardTitle>Claim Items</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Description</TableHead>
-                      <TableHead>Requested Amount</TableHead>
-                      <TableHead>Outstanding Amount</TableHead>
-                      <TableHead>Property ID</TableHead>
-                      <TableHead>Created At</TableHead>
-                      <TableHead>Resolved by Superhog</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {claim.claimItems.map((item) => (
-                      <TableRow key={item.id}>
-                        <TableCell>{item.description}</TableCell>
-                        <TableCell>
-                          {formatCurrency(item.requestedAmount)}
-                        </TableCell>
-                        <TableCell>
-                          {formatCurrency(item.outstandingAmount ?? 0)}
-                        </TableCell>
-                        <TableCell>{item.propertyId}</TableCell>
-                        <TableCell>
-                          {format(item.createdAt!, "MM/dd/yyyy")}
-                        </TableCell>
-                        <TableCell>
-                          {item.resolvedBySuperhog ? "Yes" : "No"}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            </CardContent>
-          </Card>
+          <ClaimItemsInClaim claim={claim} />
         </TabsContent>
         <TabsContent value="resolution">
-          <Card>
-            <CardHeader>
-              <CardTitle>Claim Resolutions</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {claim.claimResolutions.length > 0 ? (
-                claim.claimResolutions.map((resolution) => (
-                  <div
-                    key={resolution.id}
-                    className="mb-4 rounded-lg border p-4"
-                  >
-                    <p className="font-medium">
-                      Resolution Result:{" "}
-                      <Badge>{resolution.resolutionResult}</Badge>
-                    </p>
-                    <p className="mt-2">
-                      <span className="font-medium">Description:</span>{" "}
-                      {resolution.resolutionDescription}
-                    </p>
-                    {resolution.resolvedByAdminId && (
-                      <p className="mt-2">
-                        <span className="font-medium">
-                          Resolved By Admin ID:
-                        </span>{" "}
-                        {resolution.resolvedByAdminId}
-                      </p>
-                    )}
-                  </div>
-                ))
-              ) : (
-                <p>No resolutions available for this claim.</p>
-              )}
-            </CardContent>
-          </Card>
+          <ClaimResolutionForm claim={claim} />
         </TabsContent>
       </Tabs>
     </div>
