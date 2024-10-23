@@ -13,8 +13,13 @@ import { TestimonialCarousel } from "./testimonials/TestimonialCarousel";
 import FAQ from "@/components/landing-page/_sections/FAQ";
 import { CityCarousel } from "./cities/CityCarousel";
 import DynamicDesktopSearchBar from "../search/DynamicDesktopSearchBar";
+import MobileFilterBar from "../search/MobileFilterBar";
+import MobileSearchDialog from "../search/MobileSearchDialog";
+import { useState } from "react";
 
 export default function MastHead() {
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+
   return (
     <>
       <section className="relative overflow-hidden bg-white pb-32">
@@ -52,13 +57,10 @@ export default function MastHead() {
 
                 {/* Mobile Search */}
                 <div className="md:hidden">
-                  <div className="mb-8 rounded-full bg-white shadow-lg">
-                    <div className="flex items-center p-4">
-                      <span className="text-gray-500">
-                        Search or Request a deal
-                      </span>
-                    </div>
-                  </div>
+                  <MobileSearchDialog
+                    open={isSearchOpen}
+                    onOpenChange={setIsSearchOpen}
+                  />
                   <p className="mb-8 text-center text-xl">
                     Make deals with hosts on their empty nights
                   </p>
