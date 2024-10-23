@@ -1,29 +1,7 @@
 
 import { NextApiResponse } from "next";
-
 import { NextApiRequest } from "next";
-import { proxyAgent } from "@/server/server-utils";
-import axios, { AxiosResponse } from "axios";
-
-
-
-function getDatesArray(startDate: Date, endDate: Date): string[] {
-  const dates: string[] = [];
-  const currentDate = new Date(startDate);
-
-  while (currentDate <= endDate) {
-    dates.push(currentDate.toISOString().split("T")[0] ?? "");
-    currentDate.setDate(currentDate.getDate() + 1);
-  }
-
-  return dates;
-}
-
-interface CalendarResponse {
-  content: {
-    days: Record<string, number>;
-  };
-}
+import { casamundoSubScraper } from "@/server/direct-sites-scraping/casamundo-scraper";
 
 export default async function handler(
   req: NextApiRequest,
@@ -35,75 +13,27 @@ export default async function handler(
 
   console.log("Scrape request received");
 
-  const { offerId, checkIn, checkOut } = req.body as {
-    offerId: string;
+  const { checkIn, checkOut, originalListingId, scrapeUrl, numGuests } = req.body as {
     checkIn: Date;
     checkOut: Date;
+    originalListingId: string;
+    scrapeUrl: string;
+    numGuests: number;
   };
 
-  if (!offerId || !checkIn || !checkOut) {
+  if (!originalListingId || !scrapeUrl || checkIn === undefined || checkOut === undefined || !numGuests) {
     return res.status(400).json({ error: "Missing offerId, checkIn, or checkOut parameter" });
   }
 
-  const url = `https://www.casamundo.com/api/v2/calendar/${offerId}`;
+  const subScraperOptions = {
+    originalListingId: originalListingId,
+    scrapeUrl: '',
+    checkIn,
+    checkOut,
+    numGuests,
+  };
 
-  let currentYear: number = checkIn.getFullYear();
-  let currentMonth: number = checkIn.getMonth() + 1;
+  const subScrapedResult = await casamundoSubScraper(subScraperOptions);
 
-  const days: Record<string, number> = {};
-
-  const maxRetries = 3;
-
-  while (
-    currentYear < checkOut.getFullYear() ||
-    (currentYear === checkOut.getFullYear() &&
-      currentMonth <= checkOut.getMonth() + 1)
-  ) {
-    let success = false;
-    for (let attempt = 0; attempt < maxRetries; attempt++) {
-      try {
-        const response: AxiosResponse<CalendarResponse> = await axios.get(url, {
-          params: {
-            year: currentYear,
-            month: currentMonth,
-          },
-          httpsAgent: proxyAgent,
-          headers: {
-            accept: "application/json",
-            "accept-language": "en-US,en;q=0.9",
-          },
-        });
-
-        Object.assign(days, response.data.content.days);
-        success = true;
-        break; // Success, exit retry loop
-      } catch (error) {
-        if (axios.isAxiosError(error)) {
-          console.error(`Axios error for ${currentYear}-${currentMonth}:`, error.message);
-          if (error.response?.status === 522) {
-            console.error("Connection timeout error (522). Retrying...");
-          }
-        } else {
-          console.error(`Non-Axios error for ${currentYear}-${currentMonth}:`, error);
-        }
-        // No delay here, it will immediately retry
-      }
-    }
-
-    if (!success) {
-      console.error(`Failed to fetch data for ${currentYear}-${currentMonth} after ${maxRetries} attempts`);
-      return res.status(500).json({ error: "Failed to fetch data" });
-    }
-
-    currentMonth++;
-    if (currentMonth > 12) {
-      currentMonth = 1;
-      currentYear++;
-    }
-  }
-
-  const stayDates = getDatesArray(checkIn, checkOut);
-  const isAvailable = stayDates.every((date) => days[date] === 2);
-
-  return res.status(200).json({ isAvailable });
+  return res.status(200).json({ subScrapedResult });
 }
