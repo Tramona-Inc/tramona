@@ -12,7 +12,7 @@ import {
 } from "./EmailComponentsWithoutHost";
 import { Text, Section, Hr, Row, Column } from "@react-email/components";
 
-interface BookingConfirmationEmailProps {
+export interface BookingConfirmationEmailProps {
   name: string;
   placeName: string;
   hostName: string;

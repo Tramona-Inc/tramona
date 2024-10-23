@@ -12,7 +12,8 @@ import {
 import { Text, Section } from "@react-email/components";
 
 // Reuse the props from BookingConfirmationEmail
-import { BookingConfirmationEmailProps } from "./BookingConfirmationEmail";
+import { BookingConfirmationEmailProps } from './BookingConfirmationEmail';
+
 
 export default function OneWeekBeforeEmail({
   name,
