@@ -14,15 +14,19 @@ export default async function handler(
   console.log("Scrape request received");
 
   const { checkIn, checkOut, originalListingId, scrapeUrl, numGuests } = req.body as {
-    checkIn: Date;
-    checkOut: Date;
+    checkIn: Date | undefined;
+    checkOut: Date | undefined;
     originalListingId: string;
     scrapeUrl: string;
     numGuests: number;
   };
 
-  if (!originalListingId || !scrapeUrl || checkIn === undefined || checkOut === undefined || !numGuests) {
-    return res.status(400).json({ error: "Missing offerId, checkIn, or checkOut parameter" });
+  if (!originalListingId) {
+    return res.status(400).json({ error: "Missing originalListingId parameter" });
+  } else if (!numGuests) {
+    return res.status(400).json({ error: "Missing numGuests parameter" });
+  } else if (!checkIn || !checkOut) {
+    return res.status(400).json({ error: "Missing checkIn or checkOut parameter" });
   }
 
   const subScraperOptions = {
