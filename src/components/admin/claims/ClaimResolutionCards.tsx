@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { ClaimsWDetails } from "./ClaimsOverview";
 import { Badge } from "@/components/ui/badge";
 
-function ClaimResolutionForm({ claim }: { claim: ClaimsWDetails }) {
+function ClaimResolutionCards({ claim }: { claim: ClaimsWDetails }) {
   console.log(claim);
   return (
     <Card>
@@ -11,8 +11,8 @@ function ClaimResolutionForm({ claim }: { claim: ClaimsWDetails }) {
         <CardTitle>Claim Resolutions</CardTitle>
       </CardHeader>
       <CardContent>
-        {claim.claimResolutions.length > 0 ? (
-          claim.claimResolutions.map((resolution) => (
+        {claim.claimItemResolutions.length > 0 ? (
+          claim.claimItemResolutions.map((resolution) => (
             <div key={resolution.id} className="mb-4 rounded-lg border p-4">
               <p className="font-medium">
                 Resolution Result: <Badge>{resolution.resolutionResult}</Badge>
@@ -37,4 +37,4 @@ function ClaimResolutionForm({ claim }: { claim: ClaimsWDetails }) {
   );
 }
 
-export default ClaimResolutionForm;
+export default ClaimResolutionCards;

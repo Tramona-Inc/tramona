@@ -13,20 +13,17 @@ import { properties } from "./properties";
 import { trips } from "./trips";
 import { users } from "./users";
 import { superhogRequests } from "./superhogRequests";
-
+import { ALL_RESOLUTION_RESULTS } from "../common";
 export const claimStatus = pgEnum("claim_status", [
   "Submitted",
   "Resolved",
   "In Review",
 ]);
 
-export const resolutionResults = pgEnum("resolution_results", [
-  "Approved",
-  "Partially Approved",
-  "Pending",
-  "Insufficient Evidence",
-  "Rejected",
-]);
+export const resolutionResults = pgEnum(
+  "resolution_results",
+  ALL_RESOLUTION_RESULTS,
+);
 
 export const paymentSources = pgEnum("payment_sources", [
   "Superhog",
@@ -66,15 +63,17 @@ export const claims = pgTable(
   }),
 );
 
-export const claimResolutions = pgTable(
-  "claim_resolutions",
+export const claimItemResolutions = pgTable(
+  "claim_item_resolutions",
   {
     //can have multiple per claim, 2+ is re resolve
     id: serial("id").primaryKey().notNull(),
     claimId: text("claim_id")
-      .notNull()
       .references(() => claims.id, { onDelete: "cascade" })
       .notNull(),
+    claimItemId: integer("claim_item_id")
+      .notNull()
+      .references(() => claimItems.id, { onDelete: "cascade" }),
     resolutionResult: resolutionResults("resolution_results")
       .notNull()
       .default("Pending"),
@@ -87,6 +86,7 @@ export const claimResolutions = pgTable(
   },
   (t) => ({
     claimId: index().on(t.claimId),
+    claimItemId: index().on(t.claimItemId),
   }),
 );
 
@@ -147,4 +147,4 @@ export const claimPayments = pgTable(
 export type Claim = typeof claims.$inferInsert;
 export type ClaimItem = typeof claimItems.$inferInsert;
 export type ClaimPayment = typeof claimPayments.$inferInsert;
-export type ClaimResolution = typeof claimResolutions.$inferInsert;
+export type ClaimItemResolution = typeof claimItemResolutions.$inferInsert;

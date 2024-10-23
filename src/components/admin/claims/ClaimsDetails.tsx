@@ -4,16 +4,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 
-import type { Claim, ClaimResolution, ClaimItem } from "@/server/db/schema";
+import type { Claim, ClaimItemResolution, ClaimItem } from "@/server/db/schema";
 import { format } from "date-fns";
-import ClaimResolutionForm from "./ClaimResolutionForm";
+import ClaimResolutionCards from "./ClaimResolutionCards";
 import ClaimItemsInClaim from "./ClaimItemsInClaim";
 
 export interface ClaimDetailsProps {
   claim: {
     claim: Claim;
     claimItems: ClaimItem[];
-    claimResolutions: ClaimResolution[];
+    claimItemResolutions: ClaimItemResolution[];
   };
 }
 
@@ -24,13 +24,6 @@ export default function ClaimDetails({ claim }: ClaimDetailsProps) {
     if (claimStatus === "Submitted") return 33;
     if (claimStatus === "In Review") return 66;
     return 100;
-  }
-
-  function formatCurrency(amount: number) {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(amount / 100);
   }
 
   return (
@@ -90,7 +83,7 @@ export default function ClaimDetails({ claim }: ClaimDetailsProps) {
           <ClaimItemsInClaim claim={claim} />
         </TabsContent>
         <TabsContent value="resolution">
-          <ClaimResolutionForm claim={claim} />
+          <ClaimResolutionCards claim={claim} />
         </TabsContent>
       </Tabs>
     </div>

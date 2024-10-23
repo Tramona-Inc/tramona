@@ -127,6 +127,9 @@ export default function AllPreviousTrips() {
                               superhogRequestId={
                                 trip.superhogRequestId ?? undefined
                               }
+                              onFormSubmit={() =>
+                                setIsOpenClaimDialogOpen(false)
+                              }
                             />
                           </DialogContent>
                         </Dialog>

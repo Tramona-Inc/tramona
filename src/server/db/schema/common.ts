@@ -82,3 +82,11 @@ export const ALL_LISTING_SITE_NAMES = [
 export type ListingSiteName = (typeof ALL_LISTING_SITE_NAMES)[number];
 
 export const listingSiteEnum = pgEnum("listing_site", ALL_LISTING_SITE_NAMES);
+
+export const ALL_RESOLUTION_RESULTS = [
+  "Approved",
+  "Partially Approved",
+  "Pending",
+  "Insufficient Evidence",
+  "Rejected",
+] as const;

@@ -11,14 +11,13 @@ import {
   users,
   claims,
   claimItems,
-  hostProfiles,
   trips,
-  claimResolutions,
+  claimItemResolutions,
 } from "@/server/db/schema";
 
 import type {
   Claim,
-  ClaimResolution,
+  ClaimItemResolution,
   ClaimPayment,
   ClaimItem,
 } from "@/server/db/schema";
@@ -27,12 +26,11 @@ import { and, eq, gte } from "drizzle-orm";
 import { sendEmail } from "@/server/server-utils";
 import ClaimLinkEmail from "packages/transactional/emails/ClaimLinkEmail";
 import { sendSlackMessage } from "@/server/slack";
-import { subDays } from "date-fns"; // Importing a date utility to subtract days from current date
 
 interface QueryResultRow {
   claims: Claim | null; // Claims can be nullable if no matching row
   claim_items: ClaimItem | null; // ClaimItem can also be null
-  claim_resolutions: ClaimResolution | null; // ClaimResolution can be null
+  claim_item_resolutions: ClaimItemResolution | null; // ClaimItemResolution can be null
 }
 
 const isProduction = process.env.NODE_ENV === "production";
@@ -53,7 +51,10 @@ export const claimsRouter = createTRPCRouter({
     const allClaims = await db
       .select()
       .from(claims)
-      .leftJoin(claimResolutions, eq(claims.id, claimResolutions.claimId))
+      .leftJoin(
+        claimItemResolutions,
+        eq(claims.id, claimItemResolutions.claimId),
+      )
       .leftJoin(claimItems, eq(claims.id, claimItems.claimId));
 
     const result = allClaims.reduce<
@@ -62,13 +63,13 @@ export const claimsRouter = createTRPCRouter({
         {
           claim: Claim;
           claimItems: ClaimItem[];
-          claimResolutions: ClaimResolution[];
+          claimItemResolutions: ClaimItemResolution[];
         }
       >
     >((acc, row: QueryResultRow) => {
       const claim = row.claims;
       const claimItem = row.claim_items;
-      const claimResolution = row.claim_resolutions;
+      const claimItemResolution = row.claim_item_resolutions;
 
       // Ensure that claim and claim.id exist
       if (claim?.id) {
@@ -77,7 +78,7 @@ export const claimsRouter = createTRPCRouter({
           acc[claim.id] = {
             claim,
             claimItems: [],
-            claimResolutions: [],
+            claimItemResolutions: [],
           };
         }
 
@@ -87,8 +88,8 @@ export const claimsRouter = createTRPCRouter({
         }
 
         // If there's a claim resolution, add it to the array
-        if (claimResolution) {
-          acc[claim.id]!.claimResolutions.push(claimResolution);
+        if (claimItemResolution) {
+          acc[claim.id]!.claimItemResolutions.push(claimItemResolution);
         }
       }
 
@@ -101,40 +102,58 @@ export const claimsRouter = createTRPCRouter({
   getClaimWithAllDetailsById: roleRestrictedProcedure(["admin"])
     .input(z.string())
     .query(async ({ input }) => {
-      console.log("running");
       const claimWDetails = await db
         .select()
         .from(claims)
         .where(eq(claims.id, input))
-        .leftJoin(claimResolutions, eq(claims.id, claimResolutions.claimId))
+        .leftJoin(
+          claimItemResolutions,
+          eq(claims.id, claimItemResolutions.claimId),
+        )
         .leftJoin(claimItems, eq(claims.id, claimItems.claimId));
 
       const result = claimWDetails.reduce<{
         claim: Claim;
         claimItems: ClaimItem[];
-        claimResolutions: ClaimResolution[];
+        claimItemResolutions: ClaimItemResolution[];
       }>(
         (acc, row) => {
           const claim = row.claims;
           const claimItem = row.claim_items;
-          const claimResolution = row.claim_resolutions;
+          const claimItemResolution = row.claim_item_resolutions;
 
-          acc.claim = claim;
+          // Assign the claim once
+          if (!acc.claim) {
+            acc.claim = claim;
+          }
 
-          if (claimItem) {
+          // Deduplicate claimItems
+          if (
+            claimItem &&
+            !acc.claimItems.some((item) => item.id === claimItem.id)
+          ) {
             acc.claimItems.push(claimItem);
           }
-          if (claimResolution) {
-            acc.claimResolutions.push(claimResolution);
+
+          // Deduplicate claimItemResolutions
+          if (
+            claimItemResolution &&
+            !acc.claimItemResolutions.some(
+              (res) => res.id === claimItemResolution.id,
+            )
+          ) {
+            acc.claimItemResolutions.push(claimItemResolution);
           }
+
           return acc;
         },
         {
           claim: null!,
           claimItems: [],
-          claimResolutions: [],
+          claimItemResolutions: [],
         },
       );
+
       return result;
     }),
 
@@ -229,38 +248,67 @@ export const claimsRouter = createTRPCRouter({
         .set({ claimStatus: "In Review" })
         .where(eq(claims.id, input.claimId));
 
-      const inputToClaimsConversion = input.claimItems.map((item) => ({
-        claimId: input.claimId,
-        tripId: input.tripId,
-        propertyId: curTrip?.propertyId ?? null,
-        itemName: item.itemName,
-        requestedAmount: item.requestedAmount,
-        outstandingAmount: item.requestedAmount,
-        description: item.description,
-        imageUrls: item.imagesList,
-      }));
+      let insertedItemsLength = 0;
+      await db.transaction(async (trx) => {
+        // Convert input to claim items
+        const inputToClaimsConversion = input.claimItems.map((item) => ({
+          claimId: input.claimId,
+          tripId: input.tripId,
+          propertyId: curTrip?.propertyId ?? null,
+          itemName: item.itemName,
+          requestedAmount: item.requestedAmount,
+          outstandingAmount: item.requestedAmount,
+          description: item.description,
+          imageUrls: item.imagesList,
+        }));
 
-      const inserterdClaimItems = await db
-        .insert(claimItems)
-        .values(inputToClaimsConversion)
-        .returning();
+        // Insert the claim items in one go
+        const insertedClaimItems = await trx
+          .insert(claimItems)
+          .values(inputToClaimsConversion)
+          .returning();
+        // Store the length of inserted claim items
+        insertedItemsLength = insertedClaimItems.length;
+        console.log(insertedClaimItems);
 
-      //create a resolution result for that claim
-      await db.insert(claimResolutions).values({
-        claimId: input.claimId,
+        // Map the inserted claim items to claim resolutions in one go
+        const claimResolutions = insertedClaimItems.map((item) => ({
+          claimId: input.claimId,
+          claimItemId: item.id,
+        }));
+
+        // Insert the resolutions in one go
+        await trx.insert(claimItemResolutions).values(claimResolutions);
       });
 
-      console.log(inserterdClaimItems);
       await sendSlackMessage({
         isProductionOnly: true,
         channel: "tramona-bot",
         text: [
           `* ${ctx.user.email} added items to their claim report*`,
-          ` ${inserterdClaimItems.length} damaged item(s) has been added in their claim. Please review the details and proceed with the necessary actions.`,
+          ` ${insertedItemsLength} damaged item(s) has been added in their claim. Please review the details and proceed with the necessary actions.`,
           `You can access the full report for further review and resolution at the link below:`,
           `<https://tramona.com/admin/reports|Go to report dashboard>`,
         ].join("\n"),
       });
+      return;
+    }),
+
+  resolveClaim: protectedProcedure
+    .input(
+      z.object({
+        claimItemId: z.string(),
+        resolutionResult: z.enum([
+          "Approved",
+          "Partially Approved",
+          "Insufficient Evidence",
+          "Rejected",
+        ]),
+        description: z.string(),
+        amount: z.number(),
+      }),
+    )
+    .mutation(async ({ input }) => {
       return;
     }),
 });

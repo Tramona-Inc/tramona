@@ -33,7 +33,7 @@ import { linkInputProperties } from "./tables/linkInputProperties";
 import { rejectedRequests } from "./tables/rejectedRequests";
 import { tripCheckouts, refundedPayments } from "./tables/payments";
 import { claims, claimItems, claimPayments } from "./tables/claims";
-import { claimResolutions } from "./tables/claims";
+import { claimItemResolutions } from "./tables/claims";
 
 export const usersRelations = relations(users, ({ one, many }) => ({
   accounts: many(accounts),
@@ -55,7 +55,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   hostReferralDiscounts: many(hostReferralDiscounts),
   rejectedRequests: many(rejectedRequests),
   claims: many(claims),
-  claimResolutions: many(claimResolutions),
+  claimItemResolutions: many(claimItemResolutions),
 }));
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -460,16 +460,20 @@ export const claimsRelations = relations(claims, ({ one, many }) => ({
     fields: [claims.superhogRequestId],
     references: [superhogRequests.id],
   }),
-  claimResolutions: many(claimResolutions),
+  claimItemResolutions: many(claimItemResolutions),
   claimItems: many(claimItems),
 }));
 
 export const claimResolutionsRelations = relations(
-  claimResolutions,
+  claimItemResolutions,
   ({ one }) => ({
     claim: one(claims, {
-      fields: [claimResolutions.claimId],
+      fields: [claimItemResolutions.claimId],
       references: [claims.id],
+    }),
+    claimItem: one(claimItems, {
+      fields: [claimItemResolutions.claimItemId],
+      references: [claimItems.id],
     }),
   }),
 );
@@ -484,6 +488,7 @@ export const claimItemsRelations = relations(claimItems, ({ one, many }) => ({
     references: [properties.id],
   }),
   claimPayments: many(claimPayments),
+  claimItemResolutions: many(claimItemResolutions),
 }));
 
 export const claimPaymentsRelations = relations(claimPayments, ({ one }) => ({

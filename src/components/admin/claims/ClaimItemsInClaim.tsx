@@ -26,7 +26,7 @@ import { ImageIcon } from "lucide-react";
 
 function ClaimItemsInClaim({ claim }: { claim: ClaimsWDetails }) {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-
+  console.log(claim.claimItems.length);
   return (
     <Card>
       <CardHeader>

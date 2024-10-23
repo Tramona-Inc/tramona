@@ -1,32 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/router";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { format, formatDate } from "date-fns";
+import { formatDate } from "date-fns";
 import Image from "next/image";
 import { api } from "@/utils/api";
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import BackButton from "@/components/_common/BackButton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Carousel,
   CarouselContent,
@@ -36,273 +15,264 @@ import {
 } from "@/components/ui/carousel";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/utils/utils";
-
-const formSchema = z.object({
-  resolutionResult: z.enum(["Approved", "Denied", "Partially Approved"]),
-  resolutionDescription: z
-    .string()
-    .min(1, "Resolution description is required"),
-  approvedAmount: z.number().min(0, "Approved amount must be 0 or greater"),
-});
+import ResolveClaimItemForm from "@/components/admin/claims/ResolveClaimItemForm";
+import {
+  CalendarIcon,
+  HomeIcon,
+  UserIcon,
+  CheckCircle,
+  AlertCircle,
+} from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import ClaimPropertyCard from "@/components/admin/claims/ClaimPropertyCard";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ResolveClaim() {
   const router = useRouter();
   const claimId = router.query.id as string;
+  const [selectedItemId, setSelectedItemId] = useState<number | null>(null);
 
-  const { data: claim, isLoading } =
+  const { data: claim, isLoading: isClaimLoading } =
     api.claims.getClaimWithAllDetailsById.useQuery(claimId, {
       enabled: !!claimId,
     });
 
-  const { data: property } = api.properties.getById.useQuery(
-    { id: claim?.claimItems[0]?.propertyId ?? 0 },
-    {
-      enabled: !!claim,
-    },
-  );
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      resolutionResult: "Approved",
-      resolutionDescription: "",
-      approvedAmount: 0,
-    },
-  });
-
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log(values);
-    // Here you would typically call your API to submit the form data
-    // api.claims.resolveClaim.mutate({ claimId, ...values });
-  };
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
-  if (!claim) {
-    return <div>Claim not found</div>;
-  }
+  const { data: property, isLoading: isPropertyLoading } =
+    api.properties.getById.useQuery(
+      { id: claim?.claimItems[0]?.propertyId ?? 0 },
+      {
+        enabled: !!claim,
+      },
+    );
 
   return (
     <DashboardLayout>
       <div className="container mx-auto py-8">
-        <BackButton href={`/admin/reports/claim-details/${claimId}`} />
-        <h1 className="mb-8 text-3xl font-bold">Resolve Claim</h1>
+        <div className="mb-6 flex w-full flex-row items-end justify-start">
+          <BackButton href={`/admin/reports/claim-details/${claimId}`} />
+          <h1 className="mx-auto text-3xl font-bold">Resolve Claim</h1>
+        </div>
 
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>Claim and Property Details</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-              <div>
-                <h2 className="mb-4 text-xl font-semibold">
-                  Claim Information
-                </h2>
-                <dl className="grid grid-cols-2 gap-4">
-                  <div>
-                    <dt className="font-semibold">Claim ID</dt>
-                    <dd>{claim.claim.id}</dd>
-                  </div>
-                  <div>
-                    <dt className="font-semibold">Trip ID</dt>
-                    <dd>{claim.claim.tripId}</dd>
-                  </div>
-                  <div>
-                    <dt className="font-semibold">Filed By Host ID</dt>
-                    <dd>{claim.claim.filedByHostId}</dd>
-                  </div>
-                  <div>
-                    <dt className="font-semibold">Created At</dt>
-                    <dd>{formatDate(claim.claim.createdAt!, "MM/dd/yyyy")}</dd>
-                  </div>
-                  <div>
-                    <dt className="font-semibold">Status</dt>
-                    <dd>{claim.claim.claimStatus}</dd>
-                  </div>
-                  <div>
-                    <dt className="font-semibold">Superhog Request ID</dt>
-                    <dd>{claim.claim.superhogRequestId}</dd>
-                  </div>
-                </dl>
-              </div>
-              {property && (
-                <div>
-                  <h2 className="mb-4 text-xl font-semibold">
-                    Property Information
-                  </h2>
-                  <div className="mb-4 flex items-center">
-                    <div className="relative mr-4 h-24 w-24">
-                      <Image
-                        src={property.imageUrls[0]!}
-                        alt={property.name}
-                        fill
-                        className="rounded-md object-cover"
-                      />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold">{property.name}</h3>
-                      <p className="text-sm text-gray-500">
-                        {property.address}
-                      </p>
-                    </div>
-                  </div>
-                  <dl className="grid grid-cols-2 gap-4">
-                    <div>
-                      <dt className="font-semibold">Property ID</dt>
-                      <dd>{property.id}</dd>
-                    </div>
-                    <div>
-                      <dt className="font-semibold">Host ID</dt>
-                      <dd>{property.hostId ?? "N/A"}</dd>
-                    </div>
-                    <div>
-                      <dt className="font-semibold">Listing Platform</dt>
-                      <dd>{property.originalListingPlatform ?? "N/A"}</dd>
-                    </div>
-                  </dl>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-          <Card>
+        {isClaimLoading || isPropertyLoading ? (
+          <Card className="mb-4">
             <CardHeader>
-              <CardTitle>Resolve Claim</CardTitle>
+              <Skeleton className="h-6 w-3/4" />
             </CardHeader>
             <CardContent>
-              <Form {...form}>
-                <form
-                  onSubmit={form.handleSubmit(onSubmit)}
-                  className="space-y-6"
-                >
-                  <FormField
-                    control={form.control}
-                    name="resolutionResult"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Resolution Result</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a resolution result" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="Approved">Approved</SelectItem>
-                            <SelectItem value="Denied">Denied</SelectItem>
-                            <SelectItem value="Partially Approved">
-                              Partially Approved
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="resolutionDescription"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Resolution Description</FormLabel>
-                        <FormControl>
-                          <Textarea
-                            {...field}
-                            placeholder="Enter resolution description"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="approvedAmount"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Approved Amount</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            {...field}
-                            onChange={(e) =>
-                              field.onChange(parseFloat(e.target.value))
-                            }
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <Button type="submit">Submit Resolution</Button>
-                </form>
-              </Form>
+              <div className="flex flex-col md:flex-row">
+                <div className="flex-1">
+                  <Skeleton className="mb-2 h-4 w-1/2" />
+                  <Skeleton className="mb-2 h-4 w-3/4" />
+                  <Skeleton className="mb-2 h-4 w-2/3" />
+                </div>
+                <div className="flex-1">
+                  <Skeleton className="mb-2 h-32 w-32 rounded-md" />
+                  <Skeleton className="mb-2 h-4 w-1/2" />
+                  <Skeleton className="mb-2 h-4 w-3/4" />
+                </div>
+              </div>
             </CardContent>
           </Card>
+        ) : claim && property ? (
+          <ClaimPropertyCard claim={claim.claim} property={property} />
+        ) : (
+          <div>Claim or property not found</div>
+        )}
 
-          <Card>
+        <Alert className="bg-zinc-white mb-3">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Heads up!</AlertTitle>
+          <AlertDescription>
+            This form is for resolving individual items in a claim, not the
+            entire claim.
+          </AlertDescription>
+        </Alert>
+
+        <div
+          className={`grid gap-8 ${selectedItemId ? "lg:grid-cols-2" : "grid-cols-1"}`}
+        >
+          <Card className={selectedItemId ? "" : "col-span-full"}>
             <CardHeader>
               <CardTitle>Claim Items</CardTitle>
             </CardHeader>
             <CardContent>
-              <ScrollArea className="h-[500px] pr-4">
-                {claim.claimItems.map((item, index) => (
-                  <React.Fragment key={item.id}>
-                    {index > 0 && <Separator className="my-6" />}
-                    <div className="rounded-lg bg-muted p-4">
-                      <h3 className="mb-4 text-lg font-semibold">
-                        Item {index + 1}
-                      </h3>
-                      <dl className="mb-4 grid grid-cols-2 gap-4">
-                        <div>
-                          <dt className="font-semibold">Description</dt>
-                          <dd>{item.description}</dd>
+              <ScrollArea className="h-[600px] pr-4">
+                {isClaimLoading ? (
+                  Array.from({ length: 3 }).map((_, index) => (
+                    <React.Fragment key={index}>
+                      {index > 0 && <Separator className="my-8" />}
+                      <div className="rounded-lg p-6 shadow-sm">
+                        <Skeleton className="mb-4 h-8 w-3/4" />
+                        <Skeleton className="mb-4 h-40 w-full" />
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                          <Skeleton className="h-4 w-full" />
+                          <Skeleton className="h-4 w-full" />
+                          <Skeleton className="h-4 w-full" />
+                          <Skeleton className="h-4 w-full" />
                         </div>
-                        <div>
-                          <dt className="font-semibold">Requested Amount</dt>
-                          <dd>{formatCurrency(item.requestedAmount)}</dd>
+                      </div>
+                    </React.Fragment>
+                  ))
+                ) : claim ? (
+                  claim.claimItems.map((item, index) => (
+                    <React.Fragment key={item.id}>
+                      {index > 0 && <Separator className="my-8" />}
+                      <div
+                        onClick={() => {
+                          if (!item.paymentCompleteAt) {
+                            setSelectedItemId(
+                              selectedItemId === item.id! ? null : item.id!,
+                            );
+                          }
+                        }}
+                        className={`rounded-lg p-6 shadow-sm transition-all duration-200 ${
+                          item.paymentCompleteAt
+                            ? "bg-green-50"
+                            : selectedItemId === item.id
+                              ? "cursor-pointer border-2 border-blue-200 bg-zinc-50"
+                              : "cursor-pointer bg-card hover:bg-zinc-100"
+                        }`}
+                      >
+                        <span className="sr-only">
+                          {item.paymentCompleteAt
+                            ? "Completed claim item"
+                            : selectedItemId === item.id!
+                              ? "Deselect this item"
+                              : "Select this item for resolution"}
+                        </span>
+                        <div className="mb-6 flex items-center justify-between border-b-2 pb-1">
+                          <div className="flex items-center gap-2">
+                            <h3 className="text-3xl font-bold text-primary">
+                              {item.itemName}
+                            </h3>
+                            {item.paymentCompleteAt && (
+                              <Badge variant="green" className="text-xs">
+                                Resolved
+                              </Badge>
+                            )}
+                          </div>
+                          <Badge
+                            variant={
+                              item.paymentCompleteAt
+                                ? "green"
+                                : selectedItemId === item.id!
+                                  ? "blue"
+                                  : "gray"
+                            }
+                          >
+                            Item {index + 1}
+                          </Badge>
                         </div>
-                        <div>
-                          <dt className="font-semibold">Outstanding Amount</dt>
-                          <dd>{formatCurrency(item.outstandingAmount!)}</dd>
+
+                        <div className="relative mb-6 w-full">
+                          <Carousel className="w-full">
+                            <CarouselContent>
+                              {item.imageUrls.map((url, imgIndex) => (
+                                <CarouselItem key={imgIndex}>
+                                  <div className="relative aspect-video overflow-hidden rounded-lg">
+                                    <Image
+                                      src={url}
+                                      alt={`${item.itemName} image ${imgIndex + 1}`}
+                                      fill
+                                      className="object-cover"
+                                    />
+                                  </div>
+                                </CarouselItem>
+                              ))}
+                            </CarouselContent>
+                            <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2" />
+                            <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2" />
+                          </Carousel>
                         </div>
-                        <div>
-                          <dt className="font-semibold">Property ID</dt>
-                          <dd>{item.propertyId}</dd>
-                        </div>
-                      </dl>
-                      <Carousel className="w-full max-w-xs">
-                        <CarouselContent>
-                          {item.imageUrls.map((url, imgIndex) => (
-                            <CarouselItem key={imgIndex}>
-                              <div className="relative aspect-square">
-                                <Image
-                                  src={url}
-                                  alt={`Claim item ${index + 1} image ${imgIndex + 1}`}
-                                  fill
-                                  className="rounded-md object-cover"
-                                />
-                              </div>
-                            </CarouselItem>
-                          ))}
-                        </CarouselContent>
-                        <CarouselPrevious />
-                        <CarouselNext />
-                      </Carousel>
-                    </div>
-                  </React.Fragment>
-                ))}
+
+                        <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                          <div className="space-y-1">
+                            <dt className="text-sm font-medium text-muted-foreground">
+                              Description
+                            </dt>
+                            <dd className="text-sm">{item.description}</dd>
+                          </div>
+                          <div className="space-y-1">
+                            <dt className="text-sm font-medium text-muted-foreground">
+                              Requested Amount
+                            </dt>
+                            <dd className="text-lg font-semibold">
+                              {formatCurrency(item.requestedAmount)}
+                            </dd>
+                          </div>
+                          <div className="space-y-1">
+                            <dt className="text-sm font-medium text-muted-foreground">
+                              Outstanding Amount
+                            </dt>
+                            <dd className="text-lg font-semibold">
+                              {formatCurrency(item.outstandingAmount!)}
+                            </dd>
+                          </div>
+                          <div className="space-y-1">
+                            <dt className="text-sm font-medium text-muted-foreground">
+                              Property ID
+                            </dt>
+                            <dd className="text-sm">{item.propertyId}</dd>
+                          </div>
+                          {item.paymentCompleteAt && (
+                            <div className="col-span-2 space-y-1">
+                              <dt className="text-sm font-medium text-muted-foreground">
+                                Payment Completed
+                              </dt>
+                              <dd className="text-sm font-semibold text-green-600">
+                                <CheckCircle className="mr-1 inline-block h-4 w-4" />
+                                {formatDate(
+                                  item.paymentCompleteAt,
+                                  "MMMM d, yyyy",
+                                )}
+                              </dd>
+                            </div>
+                          )}
+                        </dl>
+
+                        {!item.paymentCompleteAt && (
+                          <Button
+                            variant={
+                              selectedItemId === item.id!
+                                ? "secondary"
+                                : "primary"
+                            }
+                            className="mt-4"
+                          >
+                            {selectedItemId === item.id!
+                              ? "Selected for Resolution"
+                              : "Click to Resolve"}
+                          </Button>
+                        )}
+                      </div>
+                    </React.Fragment>
+                  ))
+                ) : (
+                  <div>No claim items found</div>
+                )}
               </ScrollArea>
             </CardContent>
           </Card>
+
+          {selectedItemId && claim && (
+            <Card>
+              <CardContent>
+                <ResolveClaimItemForm
+                  claimItem={
+                    claim.claimItems.find((item) => item.id === selectedItemId)!
+                  }
+                  onSubmit={(values) => {
+                    console.log(values);
+                    // Here you would typically call your API to submit the form data
+                    // api.claims.resolveClaimItem.mutate({ claimId, itemId: selectedItemId, ...values });
+                  }}
+                />
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </DashboardLayout>
