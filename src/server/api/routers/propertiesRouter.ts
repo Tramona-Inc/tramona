@@ -24,6 +24,7 @@ import {
   eq,
   gt,
   gte,
+  inArray,
   like,
   lte,
   notExists,
@@ -698,20 +699,15 @@ export const propertiesRouter = createTRPCRouter({
 
       propertyIsNearRequest = sql`
         ST_DWithin(
-          ST_SetSRID(properties.lat_lng_point, 4326),
-          ST_SetSRID(ST_MakePoint(${location.lng}, ${location.lat}), 4326),
+          ST_Transform(ST_SetSRID(properties.lat_lng_point, 4326), 3857),
+          ST_Transform(ST_SetSRID(ST_MakePoint(${location.lng}, ${location.lat}), 4326), 3857),
           ${radiusInMeters}
         )
       `;
       const [props, airbnbProperties] = await Promise.all([
-        db.execute(sql`
-          SELECT * FROM properties
-          WHERE ST_DWithin(
-            ST_SetSRID(properties.lat_lng_point, 4326),
-            ST_SetSRID(ST_MakePoint(${location.lng}, ${location.lat}), 4326),
-            ${radiusInMeters}
-          )
-        `),
+        db.query.properties.findMany({
+          where: propertyIsNearRequest,
+        }),
         scrapeAirbnbSearch({
           checkIn: input.checkIn,
           checkOut: input.checkOut,
@@ -721,13 +717,16 @@ export const propertiesRouter = createTRPCRouter({
       ]);
 
 
-      console.log("props done", props.length);
+      console.log("props done", props[0]);
+
+      const firstProps = props.slice(0, 60);
 
 
       const eligibleProperties = props.filter(
-        (p) => input.numGuests <= p.maxNumGuests,
+        (p ) => input.numGuests <= p.maxNumGuests,
       );
 
+      console.log("eligibleProperties", eligibleProperties.length);
       // const airbnbProperties = await scrapeAirbnbSearch({
       //   checkIn: input.checkIn,
       //   checkOut: input.checkOut,
@@ -746,12 +745,18 @@ export const propertiesRouter = createTRPCRouter({
         numGuests: input.numGuests,
       });
 
+      console.log("results", results.length);
+
       // Filter the results to only include available properties with a price
       const filteredResults = results.filter(
         (result) =>
           result.isAvailableOnOriginalSite &&
           result.originalNightlyPrice !== undefined,
       );
+      const fullPropertyData = await db.query.properties.findMany({
+        where: inArray(properties.id, filteredResults.map((r) => r.propertyId)),
+      });
+      console.log("filteredResults", filteredResults.length);
 
       const filteredAirbnbProperties = airbnbProperties.filter(
         (p) =>

@@ -235,7 +235,7 @@ function transformSearchResult({
     originalListingId: listing.id,
     name: listing.name,
     description: listing.structuredContent.title,
-    images: contextualPictures.map((p) => p.picture),
+    imageUrls: contextualPictures.map((p) => p.picture),
     ratingStr: listing.avgRatingLocalized,
     originalListingPlatform: "Airbnb",
   };
