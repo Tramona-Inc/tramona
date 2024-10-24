@@ -2,15 +2,11 @@ import React from "react";
 import ClaimsOverview from "@/components/admin/claims/ClaimsOverview";
 import AdditionalChargeListAndForm from "@/components/admin/claims/AdditionalChargeListAndForm";
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
-import { Button } from "@/components/ui/button";
-import { useRouter } from "next/router";
-import { ArrowLeftIcon } from "lucide-react";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import BackButton from "@/components/_common/BackButton";
 
 export default function AdminReportsPage() {
-  const router = useRouter();
-
   return (
     <DashboardLayout>
       <div className="container flex flex-col items-center">
