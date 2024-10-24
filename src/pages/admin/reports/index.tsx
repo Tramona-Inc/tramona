@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/router";
 import { ArrowLeftIcon } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import BackButton from "@/components/_common/BackButton";
 
 export default function AdminReportsPage() {
   const router = useRouter();
@@ -13,15 +14,7 @@ export default function AdminReportsPage() {
   return (
     <DashboardLayout>
       <div className="container flex flex-col items-center">
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={() => router.back()}
-          className="-ml-4 mt-4 self-start"
-        >
-          <ArrowLeftIcon size={20} className="mr-2" />
-          Back
-        </Button>
+        <BackButton href="/admin" />
         <h1 className="mb-6 text-center text-2xl font-bold">Admin Reports</h1>
         <Tabs defaultValue="claims-overview" className="mx-auto w-full">
           <TabsList className="mx-auto max-w-screen-2xl">

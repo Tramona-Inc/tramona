@@ -1,6 +1,12 @@
 import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 
@@ -8,7 +14,10 @@ import type { Claim, ClaimItemResolution, ClaimItem } from "@/server/db/schema";
 import { format } from "date-fns";
 import ClaimResolutionCards from "./ClaimResolutionCards";
 import ClaimItemsInClaim from "./ClaimItemsInClaim";
-
+import { Button } from "@/components/ui/button";
+import { MessageCircle, XCircleIcon } from "lucide-react";
+import { api } from "@/utils/api";
+import { toast } from "@/components/ui/use-toast";
 export interface ClaimDetailsProps {
   claim: {
     claim: Claim;
@@ -25,6 +34,20 @@ export default function ClaimDetails({ claim }: ClaimDetailsProps) {
     if (claimStatus === "In Review") return 66;
     return 100;
   }
+
+  const { mutateAsync: closeClaim } = api.claims.closeClaim.useMutation();
+
+  const handleCloseClaim = async () => {
+    await closeClaim({
+      claimId: claim.claim.id,
+    }).then(() => {
+      toast({
+        title: "Claim Closed Successfully",
+        description:
+          "The claim has been successfully closed and marked as resolved.",
+      });
+    });
+  };
 
   return (
     <div className="container mx-auto py-8">
@@ -77,6 +100,16 @@ export default function ClaimDetails({ claim }: ClaimDetailsProps) {
                 />
               </div>
             </CardContent>
+            <CardFooter className="flex justify-end space-x-2">
+              <Button variant="primary">
+                <MessageCircle className="mr-2 h-4 w-4" />
+                Message Host
+              </Button>
+              <Button variant="primary" onClick={handleCloseClaim}>
+                <XCircleIcon className="mr-2 h-4 w-4" />
+                Close Claim
+              </Button>
+            </CardFooter>
           </Card>
         </TabsContent>
         <TabsContent value="items">

@@ -24,6 +24,7 @@ import type { RouterOutputs } from "@/utils/api";
 import { formatDate } from "date-fns";
 import Link from "next/link";
 import type { ClaimItem } from "@/server/db/schema";
+import { GetBadgeByClaimStatus } from "@/components/_common/BadgeFunctions";
 export type ClaimsWDetails = RouterOutputs["claims"]["getAllClaims"][number];
 
 export default function AdminClaimsDashboard() {
@@ -69,20 +70,6 @@ export default function AdminClaimsDashboard() {
       return 100;
     }
   }
-  const getBadgeByStatus = (
-    claimStatus: "Submitted" | "In Review" | "Resolved",
-  ) => {
-    switch (claimStatus) {
-      case "Submitted":
-        return <Badge variant="gray">Submitted</Badge>;
-
-      case "In Review":
-        return <Badge variant="yellow">In Review</Badge>;
-
-      case "Resolved":
-        return <Badge variant="green">Resolved</Badge>;
-    }
-  };
 
   const claimStats = {
     total: allClaims?.length ?? 0,
@@ -175,7 +162,7 @@ export default function AdminClaimsDashboard() {
               <TableCell>{claim.claim.id}</TableCell>
               <TableCell>{claim.claim.filedByHostId}</TableCell>
               <TableCell>
-                {getBadgeByStatus(claim.claim.claimStatus!)}
+                <GetBadgeByClaimStatus claimStatus={claim.claim.claimStatus} />
               </TableCell>
               <TableCell>
                 ${calculateTotalRequestedAmount(claim.claimItems)}

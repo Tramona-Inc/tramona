@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { formatCurrency } from "@/utils/utils";
 import { CalendarIcon, DollarSign, UserIcon } from "lucide-react";
+import { GetBadgeByClaimStatus } from "@/components/_common/BadgeFunctions";
 
 function ClaimResolutionCards({ claim }: { claim: ClaimsWDetails }) {
   return (
@@ -12,13 +13,7 @@ function ClaimResolutionCards({ claim }: { claim: ClaimsWDetails }) {
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <span>Claim Resolutions</span>
-          <Badge
-            variant={
-              claim.claim.claimStatus === "Resolved" ? "green" : "secondary"
-            }
-          >
-            {claim.claim.claimStatus}
-          </Badge>
+          <GetBadgeByClaimStatus claimStatus={claim.claim.claimStatus} />
         </CardTitle>
       </CardHeader>
       <CardContent>

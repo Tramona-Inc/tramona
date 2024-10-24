@@ -2,8 +2,7 @@ import { useRouter } from "next/router";
 import { api } from "@/utils/api";
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import ClaimDetails from "@/components/admin/claims/ClaimsDetails";
-import { Button } from "@/components/ui/button";
-import { ArrowLeftIcon } from "lucide-react";
+import BackButton from "@/components/_common/BackButton";
 
 export default function Page() {
   const router = useRouter();
@@ -17,15 +16,7 @@ export default function Page() {
   console.log(claim);
   return (
     <DashboardLayout>
-      <Button
-        size="sm"
-        variant="ghost"
-        onClick={() => router.back()}
-        className="ml-3 mt-4 self-start"
-      >
-        <ArrowLeftIcon size={20} />
-        Back
-      </Button>{" "}
+      <BackButton href="/admin/reports" />
       {claim && <ClaimDetails claim={claim} />}
     </DashboardLayout>
   );

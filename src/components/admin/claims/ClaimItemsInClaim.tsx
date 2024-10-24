@@ -23,6 +23,7 @@ import {
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ImageIcon } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 function ClaimItemsInClaim({ claim }: { claim: ClaimsWDetails }) {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -92,9 +93,13 @@ function ClaimItemsInClaim({ claim }: { claim: ClaimsWDetails }) {
                     <Link
                       href={`/admin/reports/claim-details/${claim.claim.id}/resolve`}
                     >
-                      <Button size="sm" variant="outline">
-                        Resolve
-                      </Button>
+                      {item.paymentCompleteAt ? (
+                        <Badge variant="green">Resolved</Badge>
+                      ) : (
+                        <Button size="sm" variant="outline">
+                          Resolve
+                        </Button>
+                      )}
                     </Link>
                   </TableCell>
                 </TableRow>
