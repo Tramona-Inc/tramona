@@ -13,6 +13,8 @@ import Footer from "@/components/_common/Layout/Footer";
 import AccordionFaq from "@/components/_common/AccordionFaq";
 import { TestimonialCarousel } from "@/components/landing-page/_sections/testimonials/TestimonialCarousel";
 import { Check } from "lucide-react";
+import Onboarding1 from "@/components/host/onboarding/Onboarding1";
+import { useHostOnboarding } from "@/utils/store/host-onboarding";
 
 type Tabs = {
   id: number;
@@ -43,9 +45,36 @@ const contents: Tabs[] = [
 ];
 
 function IntroSection({ requestFeed }: { requestFeed: FeedRequestItem[] }) {
+  const progress = useHostOnboarding((state) => state.progress);
+  const setProgress = useHostOnboarding((state) => state.setProgress);
+
+  function onPressNext() {
+    setProgress(progress + 1);
+  }
+
   return (
-    <section className="relative mx-auto flex max-w-7xl justify-center px-2">
-      <div className="flex flex-col items-center space-y-8 lg:flex-row lg:space-x-10 xl:space-x-20">
+    <section className="relative mx-auto max-w-7xl px-4">
+      <div className="flex flex-col gap-8 lg:flex-row">
+        <div className="basis-1/2">
+          <h2 className="text-center text-3xl font-bold">
+            Sign up and start booking these travelers
+          </h2>
+          <div className="px-10 py-6">
+            <div className="h-[450px] rounded-lg border px-2 py-2 shadow-xl">
+              <RequestFeed requestFeed={requestFeed} />
+            </div>
+          </div>
+          <p>Up to $50,000 of protection per bookings</p>
+          <p>Optional security deposits</p>
+          <p>24/7 support</p>
+          <p>3 levels of verification</p>
+          <p>Manual and automatic booking options</p>
+        </div>
+        <div className="basis-1/2">
+          <Onboarding1 onPressNext={onPressNext} />
+        </div>
+      </div>
+      {/* <div className="flex flex-col items-center space-y-8 lg:flex-row lg:space-x-10 xl:space-x-20">
         <div className="max-w-xl space-y-5">
           <h2 className="text-center text-4xl font-bold tracking-tight text-primaryGreen md:text-6xl">
             List on Tramona
@@ -60,7 +89,7 @@ function IntroSection({ requestFeed }: { requestFeed: FeedRequestItem[] }) {
         <div className="h-[450px] rounded-lg border px-2 py-2 shadow-xl">
           <RequestFeed requestFeed={requestFeed} />
         </div>
-      </div>
+      </div> */}
     </section>
   );
 }
@@ -136,17 +165,26 @@ function ListInAMinute() {
 
 function Questions() {
   return (
-    <section className="space-y-6 text-balance text-center lg:px-44">
+    <section className="space-y-10 text-balance text-center lg:px-44">
       <h1 className="text-3xl font-bold lg:text-5xl">Questions?</h1>
-      <p className="font-semibold lg:text-3xl">
-        Please look through our host FAQ video library. We specifically made it
-        to answer any and all questions a host might have.
-      </p>
-      <div>
+      <div className="grid grid-cols-2 items-center gap-y-8 text-xl font-bold">
+        <div>
+          <p>Schedule a call with our host onboarding team</p>
+        </div>
+        <div>
+          <p>FAQ</p>
+        </div>
+        <Link href="/faq">
+          <Button size="lg">Calendly Link</Button>
+        </Link>
         <Link href="/faq">
           <Button size="lg">FAQ Page</Button>
         </Link>
       </div>
+      {/* <p className="font-semibold lg:text-3xl">
+        Please look through our host FAQ video library. We specifically made it
+        to answer any and all questions a host might have.
+      </p> */}
     </section>
   );
 }
@@ -356,9 +394,9 @@ export default function HostWelcome({
         </div>
 
         <IntroSection requestFeed={requestFeed} />
+        <Questions />
         <HowItWorksHost />
         <TestimonialCarousel />
-        <Questions />
         <TailorYourBookingProcess />
         <DamageProtection />
         <ListInAMinute />

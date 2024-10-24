@@ -147,8 +147,8 @@ export default function Onboarding1({
 
   return (
     <>
-      <div className="w-full flex-grow max-sm:container lg:grid lg:grid-cols-2">
-        <div className="hidden flex-grow bg-muted lg:block">
+      <div className="w-full flex-grow max-sm:container lg:grid lg:grid-cols-1">
+        {/* <div className="hidden flex-grow bg-muted lg:block">
           <Image
             src="/assets/images/host-onboarding.png"
             alt="Image"
@@ -156,7 +156,7 @@ export default function Onboarding1({
             height="1080"
             className="h-full w-full object-cover"
           />
-        </div>
+        </div> */}
 
         <div className="my-6 flex flex-col items-center gap-6 sm:mx-20">
           <h1 className="text-center text-2xl font-semibold sm:text-4xl lg:text-3xl xl:text-4xl">
