@@ -36,13 +36,16 @@ type IncludeColumns<TableName extends keyof TablesWithRelations> =
 
 export type InferQueryModel<
   TableName extends keyof TablesWithRelations,
-  Columns extends IncludeColumns<TableName> | undefined = undefined,
-  With extends IncludeRelation<TableName> | undefined = undefined,
+  Options extends {
+    columns?: IncludeColumns<TableName>;
+    with?: IncludeRelation<TableName>;
+    // eslint-disable-next-line @typescript-eslint/ban-types
+  } = {},
 > = BuildQueryResult<
   TablesWithRelations,
   TablesWithRelations[TableName],
   {
-    columns: Columns;
-    with: With;
+    columns: Options["columns"];
+    with: Options["with"];
   }
 >;
