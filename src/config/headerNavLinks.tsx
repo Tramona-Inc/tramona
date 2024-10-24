@@ -57,3 +57,14 @@ export const loggedHamburgerLinksMobile = [
   { name: "24/7 Support", href: "/help-center", icon: BadgeHelp },
   { name: "100% Re booking guarantee", href: "/faq", icon: BadgeHelp },
 ];
+
+export const hostCenterHeaderLinks = [
+  { name: "Overview", href: "/host" },
+  { name: "Calendar", href: "/host/calendar" },
+  { name: "Listings", href: "/host/properties" },
+  { name: "Messaging", href: "/host/messages" },
+  { name: "Requests", href: "/host/requests" },
+  { name: "Stays", href: "/host/stays" },
+  { name: "Finances", href: "/host/finances" },
+  { name: "Team", href: "/host/team" },
+];
