@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 import {
   MapPinIcon,
   CalendarIcon,
@@ -6,9 +8,24 @@ import {
   DollarSignIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 
 export default function LandingSearchBar() {
   const [activeTab, setActiveTab] = useState("search");
+
+  const form = useForm({
+    defaultValues: {
+      destination: "",
+      dates: "",
+      price: "",
+      guests: "",
+    },
+  });
+
+  function onSubmit(data) {
+    console.log(data);
+  }
 
   return (
     <div className="mx-auto max-w-5xl rounded-2xl border-2 border-gray-300 bg-white p-6 shadow-lg">
@@ -26,47 +43,107 @@ export default function LandingSearchBar() {
           Name Your Own Price
         </button>
       </div>
-      <div className="mb-4 flex flex-col gap-4 sm:flex-row">
-        <div className="flex flex-1 items-center gap-2 rounded-full border px-4 py-2">
-          <MapPinIcon className="text-gray-400" />
-          <input
-            type="text"
-            placeholder="Enter your destination"
-            className="w-full outline-none"
-          />
-        </div>
-        <div className="flex flex-1 items-center gap-2 rounded-full border px-4 py-2">
-          <CalendarIcon className="text-gray-400" />
-          <input
-            type="text"
-            placeholder="Select dates"
-            className="w-full outline-none"
-          />
-        </div>
-        {activeTab === "name" && (
-          <div className="flex flex-1 items-center gap-2 rounded-full border px-4 py-2">
-            <DollarSignIcon className="text-gray-400" />
-            <input
-              type="text"
-              placeholder="Name your price"
-              className="w-full outline-none"
-            />
+
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          <div className="mb-4">
+            <div className="flex items-center justify-between rounded-full border border-black bg-white p-2">
+              <div className="mx-2 flex w-64 items-center">
+                <MapPinIcon className="mr-2 text-gray-400" />
+                <FormField
+                  control={form.control}
+                  name="destination"
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="Enter your destination"
+                          className="border-0 bg-transparent text-sm focus:outline-none focus:ring-0"
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="h-8 w-px bg-gray-300" />
+
+              <div className="flex w-48 items-center px-4">
+                <CalendarIcon className="mr-2 text-gray-400" />
+                <FormField
+                  control={form.control}
+                  name="dates"
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="Select dates"
+                          className="border-0 bg-transparent text-sm focus:outline-none focus:ring-0"
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {activeTab === "name" && (
+                <>
+                  <div className="h-8 w-px bg-gray-300" />
+                  <div className="flex w-48 items-center px-4">
+                    <DollarSignIcon className="mr-2 text-gray-400" />
+                    <FormField
+                      control={form.control}
+                      name="price"
+                      render={({ field }) => (
+                        <FormItem className="w-full">
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="Name your price"
+                              className="border-0 bg-transparent text-sm focus:outline-none focus:ring-0"
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </>
+              )}
+
+              <div className="h-8 w-px bg-gray-300" />
+
+              <div className="flex w-48 items-center px-4">
+                <Users2Icon className="mr-2 text-gray-400" />
+                <FormField
+                  control={form.control}
+                  name="guests"
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="Add guests"
+                          className="border-0 bg-transparent text-sm focus:outline-none focus:ring-0"
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <Button
+                type="submit"
+                className="rounded-full bg-teal-700 text-white"
+              >
+                Find Deals
+              </Button>
+            </div>
           </div>
-        )}
-        <div className="flex flex-1 items-center gap-2 rounded-full border px-4 py-2">
-          <Users2Icon className="text-gray-400" />
-          <input
-            type="text"
-            placeholder="Add guests"
-            className="w-full outline-none"
-          />
-        </div>
-      </div>
-      <div className="mb-4 flex justify-center">
-        <Button className="rounded-full bg-teal-700 px-8 py-2 text-white">
-          Find Deals
-        </Button>
-      </div>
+        </form>
+      </Form>
+
       <div className="mb-4 flex justify-center gap-8 text-sm text-gray-600">
         <div className="flex items-center gap-2">
           <svg

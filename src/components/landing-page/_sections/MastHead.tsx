@@ -33,7 +33,7 @@ export default function MastHead() {
                   <h1 className="mb-4 text-5xl font-bold text-zinc-900">
                     The best prices on Airbnbs anywhere
                   </h1>
-                  <p className="mb-8 text-xl text-zinc-900">
+                  <p className="mb-12 text-xl text-zinc-900">
                     Make deals with hosts on their empty nights
                   </p>
                 </div>
@@ -61,7 +61,7 @@ export default function MastHead() {
                     open={isSearchOpen}
                     onOpenChange={setIsSearchOpen}
                   />
-                  <p className="mb-8 text-center text-xl">
+                  <p className="mb-8 mt-8 text-center text-xl">
                     Make deals with hosts on their empty nights
                   </p>
                   <div className="space-y-4">
@@ -87,8 +87,8 @@ export default function MastHead() {
               </div>
 
               {/* Background Image - Desktop Only */}
-              <div className="absolute right-0 top-20 z-10 hidden w-[750px] max-w-none md:block lg:-right-20">
-                <div className="relative h-[400px]">
+              <div className="absolute right-0 top-20 z-10 mt-2 hidden w-[775px] max-w-none md:block">
+                <div className="relative h-[450px]">
                   <Image
                     src={landing_airbnb}
                     alt="Modern Airbnb property"
@@ -319,7 +319,7 @@ export default function MastHead() {
       </section>
 
       {/* Ready to Experience Tramona Section */}
-      <div className="col-span-full mt-16 bg-[#1C3D36] p-8 text-white">
+      <div className="col-span-full mt-16 hidden bg-[#1C3D36] p-8 text-white md:block">
         <h2 className="mb-8 text-center text-3xl font-bold">
           Ready to Experience Tramona
         </h2>
