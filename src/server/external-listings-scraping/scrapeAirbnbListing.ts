@@ -19,6 +19,19 @@ export function encodeAirbnbId(id: string) {
   return Buffer.from(`StayListing:${id}`).toString("base64");
 }
 
+export function getListingDataUrl(
+  id: string,
+  {
+    checkIn,
+    checkOut,
+    numGuests,
+  }: { checkIn?: Date; checkOut?: Date; numGuests?: number },
+) {
+  const encodedId = encodeAirbnbId(id);
+
+  return `https://www.airbnb.com/api/v3/StaysPdpSections/160265f6bdbacc2084cdf7de8641926c5ee141c3a2967dca0407ee47cec2a7d1?operationName=StaysPdpSections&locale=en&currency=USD&variables={"id":"${encodedId}","pdpSectionsRequest":{${checkIn ? `"checkIn":"${formatDateYearMonthDay(checkIn)}"` : ""}${checkOut ? `"checkOut":"${formatDateYearMonthDay(checkOut)}"` : ""},"adults":"${numGuests ? numGuests : ""}","layouts":["SIDEBAR","SINGLE_COLUMN"]}}&extensions={"persistedQuery":{"version":1,"sha256Hash":"160265f6bdbacc2084cdf7de8641926c5ee141c3a2967dca0407ee47cec2a7d1"}}`;
+}
+
 export async function scrapeAirbnbListing(
   id: string,
   {
@@ -29,10 +42,11 @@ export async function scrapeAirbnbListing(
 ) {
   const encodedId = encodeAirbnbId(id);
 
-  const checkInStr = formatDateYearMonthDay(checkIn);
-  const checkOutStr = formatDateYearMonthDay(checkOut);
-
-  const listingDataUrl = `https://www.airbnb.com/api/v3/StaysPdpSections/160265f6bdbacc2084cdf7de8641926c5ee141c3a2967dca0407ee47cec2a7d1?operationName=StaysPdpSections&locale=en&currency=USD&variables={"id":"${encodedId}","pdpSectionsRequest":{"checkIn":"${checkInStr}","checkOut":"${checkOutStr}","adults":"${numGuests}","layouts":["SIDEBAR","SINGLE_COLUMN"]}}&extensions={"persistedQuery":{"version":1,"sha256Hash":"160265f6bdbacc2084cdf7de8641926c5ee141c3a2967dca0407ee47cec2a7d1"}}`;
+  const listingDataUrl = getListingDataUrl(id, {
+    checkIn,
+    checkOut,
+    numGuests,
+  });
 
   const reviewsUrl = `https://www.airbnb.com/api/v3/StaysPdpReviewsQuery/dec1c8061483e78373602047450322fd474e79ba9afa8d3dbbc27f504030f91d?operationName=StaysPdpReviewsQuery&locale=en&currency=USD&variables={"id":"${encodedId}","pdpReviewsRequest":{"fieldSelector":"for_p3_translation_only","forPreview":false,"limit":10,"offset":"0","showingTranslationButton":false,"first":10,"sortingPreference":"RATING_DESC"}}&extensions={"persistedQuery":{"version":1,"sha256Hash":"dec1c8061483e78373602047450322fd474e79ba9afa8d3dbbc27f504030f91d"}}`;
 
