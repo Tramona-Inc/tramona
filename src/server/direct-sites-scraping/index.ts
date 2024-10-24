@@ -683,7 +683,7 @@ export const checkAvailabilityForProperties = async (options: {
 }) => {
   const { propertyIds, originalListingIds, originalListingPlatforms, checkIn, checkOut, numGuests } = options;
 
-  const availabilityPromises = propertyIds.map(async (propertyId, index) => {
+  const availabilityPromises = propertyIds.map((propertyId, index) => {
     const originalListingId = originalListingIds[index];
     const originalListingPlatform = originalListingPlatforms[index];
 
@@ -699,24 +699,37 @@ export const checkAvailabilityForProperties = async (options: {
       subScrapedResult: SubScrapedResult;
     }
 
-    switch (originalListingPlatform) {
-      case "Casamundo":
-        const res = await axios.post<casamundoRes>("https://tramona.com/api/bookitnow", subScraperOptions);
-        return {...res.data.subScrapedResult, propertyId: propertyId};
+    const timerLabel = `Property ${propertyId}`
 
-      case "IntegrityArizona":
-        return {...(await arizonaSubScraper(subScraperOptions)), propertyId: propertyId};
+    console.time(timerLabel);
+    console.log(originalListingId, 'jj');
 
-      case "Evolve":
-        return {...(await evolveVacationRentalSubScraper(subScraperOptions)), propertyId: propertyId};
+    return (async () => {
+      switch (originalListingPlatform) {
+        case "Casamundo":
+          const res = await axios.post<casamundoRes>("https://tramona.com/api/bookitnow", subScraperOptions);
+          console.timeEnd(timerLabel); // End timing for this property
+          return {...res.data.subScrapedResult, propertyId};
 
-      // Add other cases here as needed
-    }
-  throw new Error('No subScrapedResult found');
+        case "IntegrityArizona":
+          const arizonaResult = await arizonaSubScraper(subScraperOptions);
+          console.timeEnd(timerLabel); // End timing for this property
+          return {...arizonaResult, propertyId};
+
+        case "Evolve":
+          const evolveResult = await evolveVacationRentalSubScraper(subScraperOptions);
+          console.timeEnd(timerLabel); // End timing for this property
+          return {...evolveResult, propertyId};
+
+        // Add other cases here as needed
+        default:
+          throw new Error('No subScrapedResult found');
+      }
+    })();
 });
 
 console.log('here')
-console.timeEnd("checkAvailability");
+console.time("checkAvailability");
 
 const results = logAndFilterSettledResults(await Promise.allSettled(availabilityPromises));
 

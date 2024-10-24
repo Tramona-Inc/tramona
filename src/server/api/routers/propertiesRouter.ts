@@ -25,8 +25,10 @@ import {
   gt,
   gte,
   inArray,
+  isNotNull,
   like,
   lte,
+  ne,
   notExists,
   SQL,
   sql,
@@ -703,28 +705,28 @@ export const propertiesRouter = createTRPCRouter({
       `;
       console.time("Properties query");
       console.time("Airbnb search");
-      console.time("checkAvailability");
       console.time("full procedure")
-      const [props, airbnbProperties] = await Promise.all([
-        db.query.properties.findMany({
-          where: propertyIsNearRequest,
-        }).then(result => {
-          console.timeEnd("Properties query");
-          return result;
-        }),
-        scrapeAirbnbSearch({
-          checkIn: input.checkIn,
-          checkOut: input.checkOut,
-          location: input.location,
-          numGuests: input.numGuests,
-        }).then(result => {
-          console.timeEnd("Airbnb search");
-          return result;
-        }),
-      ]);
+
+      const propsPromise = db.query.properties.findMany({
+        where: and(isNotNull(properties.originalListingPlatform), propertyIsNearRequest, ne(properties.originalListingPlatform, "Airbnb")),
+      }).then(result => {
+        console.timeEnd("Properties query");
+        return result;
+      });
+      const airbnbPromise = scrapeAirbnbSearch({
+        checkIn: input.checkIn,
+        checkOut: input.checkOut,
+        location: input.location,
+        numGuests: input.numGuests,
+      }).then(result => {
+        console.timeEnd("Airbnb search");
+        return result;
+      });
+
+      const props = await propsPromise;
 
       const eligibleProperties = props.filter(
-        (p ) => input.numGuests <= p.maxNumGuests,
+        (p) => input.numGuests <= p.maxNumGuests,
       );
 
       console.log("eligibleProperties", eligibleProperties.length);
@@ -740,6 +742,7 @@ export const propertiesRouter = createTRPCRouter({
         numGuests: input.numGuests,
       });
 
+      console.timeEnd("checkAvailability");
       console.log("results", results.length);
 
       const fullPropertyData = await db.query.properties.findMany({
@@ -748,8 +751,10 @@ export const propertiesRouter = createTRPCRouter({
 
       const updatedPropertyData = await Promise.all(results.map(async (r) => {
         const property = fullPropertyData.find((p) => p.id === r.propertyId);
-        return {...r, originalNightlyPrice: property?.originalNightlyPrice};
+        return { ...property, originalNightlyPrice: r.originalNightlyPrice };
       }));
+
+      const airbnbProperties = await airbnbPromise; // Ensures it completes before returning
 
       console.timeEnd("full procedure")
 

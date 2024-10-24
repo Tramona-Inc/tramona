@@ -55,6 +55,7 @@ export default function UnclaimedOfferCards({
     return adjustedProperties?.pages.flatMap((page) => page.data) ?? [];
   }, [adjustedProperties]);
 
+
   const paginatedProperties = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
@@ -238,8 +239,11 @@ function UnMatchedPropertyCard({
     }
   };
 
+  const isAirbnb = property.originalListingPlatform === "Airbnb";
+  const link = isAirbnb ? `https://airbnb.com/rooms/${property.originalListingId}` : `/property/${property.id}`;
+
   return (
-    <Link href={`/property/${property.id}`} className="block">
+    <Link href={link} className="block">
       <div
         className="relative flex aspect-[3/4] w-full cursor-pointer flex-col overflow-hidden rounded-xl"
         onMouseEnter={() => setIsHovered(true)}

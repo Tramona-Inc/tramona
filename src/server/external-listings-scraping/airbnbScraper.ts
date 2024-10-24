@@ -108,7 +108,7 @@ export async function scrapeAirbnbSearch({
 
   return (await Promise.all(pageUrls.map(scrapePage)))
     .flatMap((data) => data.staysSearch.results.searchResults)
-    .map((searchResult) => transformSearchResult({ searchResult, numNights }))
+    .map((searchResult) => transformSearchResult({ searchResult, numNights, numGuests }))
     .filter(Boolean);
 }
 
@@ -207,9 +207,11 @@ type SearchResult = z.infer<
 function transformSearchResult({
   searchResult: { listing, pricingQuote, contextualPictures },
   numNights,
+  numGuests,
 }: {
   searchResult: SearchResult;
   numNights: number;
+  numGuests: number;
 }) {
   const discountedPriceStr =
     pricingQuote.structuredStayDisplayPrice.primaryLine.discountedPrice;
@@ -238,5 +240,6 @@ function transformSearchResult({
     imageUrls: contextualPictures.map((p) => p.picture),
     ratingStr: listing.avgRatingLocalized,
     originalListingPlatform: "Airbnb",
+    maxNumGuests: numGuests,
   };
 }

@@ -173,6 +173,7 @@ async function checkAvailability(
   checkIn: Date,
   checkOut: Date,
 ): Promise<boolean> {
+  console.log('checking availability', offerId);
   const url = `https://www.casamundo.com/api/v2/calendar/${offerId}`;
 
   let currentYear: number = checkIn.getFullYear();
@@ -206,6 +207,7 @@ async function checkAvailability(
         success = true;
         break; // Success, exit retry loop
       } catch (error) {
+        console.log('retrying', attempt);
         if (axios.isAxiosError(error)) {
           console.error(`Axios error for ${currentYear}-${currentMonth}:`, error.message);
           if (error.response?.status === 522) {
