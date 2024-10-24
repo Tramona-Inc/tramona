@@ -238,8 +238,7 @@ const locations = [
 export function DesktopSearchTab() {
   const { form, onSubmit } = useSearchBarForm();
   const containerRef = useRef<HTMLDivElement>(null);
-  const { adjustedProperties, setAdjustedProperties, setIsSearching } =
-    useAdjustedProperties();
+  const { adjustedProperties, setAdjustedProperties, setIsSearching } = useAdjustedProperties();
   const runSubscrapers = api.properties.runSubscrapers.useMutation();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -396,144 +395,116 @@ export function DesktopSearchTab() {
   return (
     <Form {...form}>
       <form onSubmit={handleSearch} className="w-full">
-        <div className="mb-16 hidden md:block">
-          <div className="mx-auto mb-6 w-full max-w-[1200px] px-4 lg:px-0">
-            <div className="flex flex-col items-center justify-between gap-2 rounded-full border border-black bg-white p-2 md:flex-row md:gap-0">
-              {/* Location Input */}
-              <div className="mx-2 flex w-full items-center md:w-[250px] lg:w-[400px]">
-                <Search className="mr-2 shrink-0 text-gray-400" />
-                <FormField
-                  control={form.control}
-                  name="location"
-                  render={({ field }) => (
-                    <FormItem className="w-full">
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
+        <div className="mx-auto mb-6 w-[1200px]">
+          <div className="flex items-center justify-between rounded-full border border-black bg-white p-2">
+            <div className="mx-2 flex w-[400px] items-center">
+              <Search className="mr-2 text-gray-400" />
+              <FormField
+                control={form.control}
+                name="location"
+                render={({ field }) => (
+                  <FormItem className="w-full">
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="border-0 bg-transparent focus:ring-0">
+                          <SelectValue placeholder="Search destinations" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent
+                        className="h-48 overflow-y-auto"
+                        position="popper"
                       >
-                        <FormControl>
-                          <SelectTrigger className="border-0 bg-transparent focus:ring-0">
-                            <SelectValue placeholder="Search destinations" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent
-                          className="h-48 overflow-y-auto"
-                          position="popper"
-                        >
-                          {locations.map((location) => (
-                            <SelectItem
-                              key={location.name}
-                              value={location.name}
-                            >
-                              {location.name}, {location.country}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="hidden h-8 w-px bg-gray-300 md:block"></div>
-
-              {/* Check In */}
-              <div className="flex w-full items-center px-4 md:w-[150px] lg:w-[180px]">
-                <CalendarDays className="mr-2 shrink-0 text-gray-400" />
-                <FormField
-                  control={form.control}
-                  name={`checkIn`}
-                  render={({ field }) => (
-                    <FormItem className="w-full">
-                      <FormControl>
-                        <SingleDateInput
-                          {...field}
-                          value={
-                            field.value ? new Date(field.value) : undefined
-                          }
-                          variant="lpDesktop"
-                          placeholder="Check in"
-                          disablePast
-                          className="border-0 bg-transparent hover:bg-transparent focus:ring-0"
-                          maxDate={
-                            checkOutDate ? new Date(checkOutDate) : undefined
-                          }
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="hidden h-8 w-px bg-gray-300 md:block"></div>
-
-              {/* Check Out */}
-              <div className="flex w-full items-center px-4 md:w-[150px] lg:w-[180px]">
-                <CalendarDays className="mr-2 shrink-0 text-gray-400" />
-                <FormField
-                  control={form.control}
-                  name={`checkOut`}
-                  render={({ field }) => (
-                    <FormItem className="w-full">
-                      <FormControl>
-                        <SingleDateInput
-                          {...field}
-                          value={
-                            field.value ? new Date(field.value) : undefined
-                          }
-                          variant="lpDesktop"
-                          placeholder="Check Out"
-                          disablePast
-                          className="border-0 bg-transparent hover:bg-transparent focus:ring-0"
-                          minDate={
-                            checkInDate ? new Date(checkInDate) : undefined
-                          }
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="hidden h-8 w-px bg-gray-300 md:block"></div>
-
-              {/* Guests Input */}
-              <div className="flex w-full items-center px-4 md:w-[150px] lg:w-[180px]">
-                <Users className="mr-2 shrink-0 text-gray-400" />
-                <FormField
-                  control={form.control}
-                  name="numGuests"
-                  render={({ field }) => (
-                    <FormItem className="w-full">
-                      <FormControl>
-                        <Input
-                          {...field}
-                          type="number"
-                          placeholder="1 Guest"
-                          className="w-full border-0 bg-white text-sm focus:ring-0 md:w-28"
-                          onChange={(e) =>
-                            field.onChange(parseInt(e.target.value) || 1)
-                          }
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              {/* Search Button */}
-              <Button
-                type="submit"
-                className="w-full rounded-full bg-[#F1536E] text-white hover:bg-[#e14661] md:w-auto"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                ) : (
-                  <Search className="h-4 w-4" />
+                        {locations.map((location) => (
+                          <SelectItem key={location.name} value={location.name}>
+                            {location.name}, {location.country}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
                 )}
-              </Button>
+              />
             </div>
+            <div className="h-8 w-px bg-gray-300"></div>
+            <div className="flex w-[180px] items-center px-4">
+              <CalendarDays className="mr-2 text-gray-400" />
+              <FormField
+                control={form.control}
+                name={`checkIn`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <SingleDateInput
+                        {...field}
+                        value={field.value ? new Date(field.value) : undefined}
+                        variant="lpDesktop"
+                        placeholder="Check in"
+                        disablePast
+                        className="border-0 bg-transparent focus:ring-0 hover:bg-transparent"
+                        maxDate={checkOutDate ? new Date(checkOutDate) : undefined}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="h-8 w-px bg-gray-300"></div>
+            <div className="flex w-[180px] items-center px-4">
+              <CalendarDays className="mr-2 text-gray-400" />
+              <FormField
+                control={form.control}
+                name={`checkOut`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <SingleDateInput
+                        {...field}
+                        value={field.value ? new Date(field.value) : undefined}
+                        variant="lpDesktop"
+                        placeholder="Check Out"
+                        disablePast
+                        className="border-0 bg-transparent focus:ring-0 hover:bg-transparent"
+                        minDate={checkInDate ? new Date(checkInDate) : undefined}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="h-8 w-px bg-gray-300"></div>
+            <div className="flex w-[180px] items-center px-4">
+              <Users className="mr-2 text-gray-400" />
+              <FormField
+                control={form.control}
+                name="numGuests"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="number"
+                        placeholder="1 Guest"
+                        className="w-28 border-0 bg-white text-sm focus:ring-0"
+                        onChange={(e) =>
+                          field.onChange(parseInt(e.target.value) || 1)
+                        }
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </div>
+            <Button
+              type="submit"
+              className="rounded-full bg-primaryGreen text-white"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+              ) : (
+                <Search className="h-4 w-4" />
+              )}
+            </Button>
           </div>
         </div>
         <div className="relative">
