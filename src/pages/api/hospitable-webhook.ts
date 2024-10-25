@@ -350,8 +350,10 @@ export default async function webhook(
           });
         }
 
-        const listingDataUrl = getListingDataUrl(webhookData.data.id, {});
-        const reviewsUrl = getReviewsUrl(webhookData.data.id);
+        const listingId = webhookData.data.platform_id;
+
+        const listingDataUrl = getListingDataUrl(listingId, {});
+        const reviewsUrl = getReviewsUrl(listingId);
 
         const [listingData, reviewsData] = (await Promise.all(
           [
@@ -372,8 +374,8 @@ export default async function webhook(
           ),
         )) as [string, string];
 
-        const cancellationPolicy = getCancellationPolicy(listingData, webhookData.data.id);
-        const amenities = getAmenities(listingData, webhookData.data.id);
+        const cancellationPolicy = getCancellationPolicy(listingData, listingId);
+        const amenities = getAmenities(listingData, listingId);
 
         const propertyObject = {
           hostId: userId,
@@ -403,7 +405,7 @@ export default async function webhook(
             webhookData.data.address.country_code,
           imageUrls: images,
           originalListingPlatform: "Hospitable" as const,
-          originalListingId: webhookData.data.platform_id,
+          originalListingId: listingId,
           amenities: amenities,
           cancellationPolicy: cancellationPolicy,
 
