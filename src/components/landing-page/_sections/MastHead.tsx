@@ -5,7 +5,7 @@ import landing_sunset from "public/assets/images/landing-page/landing_sunset.png
 import { Button } from "@/components/ui/button";
 import CityRequestFormContainer from "../SearchBars/CityRequestFormContainer";
 import Link from "next/link";
-import { Shield, UserCheck, Calendar, PhoneCall } from "lucide-react";
+import { Shield, UserCheck, Calendar, PhoneCall, Check } from "lucide-react";
 import LandingSearchBar from "../SearchBars/LandingSearchBar";
 import Image from "next/image";
 import { TestimonialCarousel } from "./testimonials/TestimonialCarousel";
@@ -116,19 +116,19 @@ export default function MastHead() {
 
                   <div className="space-y-4">
                     <div className="flex items-center">
-                      <span className="mr-2 text-teal-600">✓</span>
+                      <Check className="mr-2 text-primaryGreen" size={24} />
                       <span className="text-zinc-900">
                         Flexible Cancelation Policies
                       </span>
                     </div>
                     <div className="flex items-center">
-                      <span className="mr-2 text-teal-600">✓</span>
+                      <Check className="mr-2 text-primaryGreen" size={24} />
                       <span className="text-zinc-900">
                         Same properties you see on Airbnb
                       </span>
                     </div>
                     <div className="flex items-center">
-                      <span className="mr-2 text-teal-600">✓</span>
+                      <Check className="mr-2 text-primaryGreen" size={24} />
                       <span className="text-zinc-900">Best Prices</span>
                     </div>
                   </div>
@@ -370,7 +370,7 @@ export default function MastHead() {
 
           {/* Final CTA Section - FAQ Hidden on Mobile */}
           <div className="grid gap-4 pt-32">
-            <div className="col-span-full hidden flex-col items-center gap-2 rounded-2xl bg-zinc-100 p-6 md:flex">
+            <div className="col-span-full hidden flex-col gap-2 rounded-2xl bg-zinc-100 p-6 md:flex">
               <FAQ />
             </div>
           </div>

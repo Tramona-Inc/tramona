@@ -5,7 +5,7 @@ import {
   CalendarIcon,
   Users2Icon,
   DollarSignIcon,
-  CheckIcon,
+  Check,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
@@ -276,7 +276,7 @@ export default function LandingSearchBar() {
         <button
           className={`flex-1 py-2 text-sm sm:text-base ${
             activeTab === "search"
-              ? "border-b-2 border-teal-700 font-semibold text-teal-700"
+              ? "border-b-2 border-primaryGreen font-semibold text-primaryGreen"
               : "text-gray-500"
           }`}
           onClick={() => setActiveTab("search")}
@@ -286,7 +286,7 @@ export default function LandingSearchBar() {
         <button
           className={`flex-1 py-2 text-sm sm:text-base ${
             activeTab === "name"
-              ? "border-b-2 border-teal-700 font-semibold text-teal-700"
+              ? "border-b-2 border-primaryGreen font-semibold text-primaryGreen"
               : "text-gray-500"
           }`}
           onClick={() => setActiveTab("name")}
@@ -422,23 +422,23 @@ export default function LandingSearchBar() {
 
       <div className="mb-4 flex flex-col items-center space-y-2 text-xs text-gray-600 sm:flex-row sm:justify-center sm:space-x-8 sm:space-y-0 sm:text-sm">
         <div className="flex items-center gap-2">
-          <CheckIcon className="h-4 w-4 text-teal-700" />
+          <Check size={24} className="h-4 w-4 text-primaryGreen" />
           Flexible Cancelation
         </div>
         <div className="flex items-center gap-2">
-          <CheckIcon className="h-4 w-4 text-teal-700" />
+          <Check size={24} className="h-4 w-4 text-primaryGreen" />
           Same as Airbnb
         </div>
         <div className="flex items-center gap-2">
-          <CheckIcon className="h-4 w-4 text-teal-700" />
+          <Check size={24} className="h-4 w-4 text-primaryGreen" />
           Best Prices
         </div>
       </div>
 
       <div className="text-center text-xs text-gray-600 sm:text-sm">
         Search the best deals available{" "}
-        <span className="text-teal-700 underline">anywhere</span> on short term
-        rentals right now
+        <span className="text-primaryGreen underline">anywhere</span> on short
+        term rentals right now
       </div>
 
       <RequestSubmittedDialog
