@@ -6,17 +6,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertCircle } from "lucide-react";
 
-export default function PastTravelerDisputes() {
+export default function ClaimsPage() {
   const router = useRouter();
+
   const {
     data: allCurrentClaims,
     isLoading,
     error,
   } = api.claims.getCurrentAllClaimsAgainstTraveler.useQuery();
-
-  const handleViewDetails = (claimId: string) => {
-    void router.push(`/claims/${claimId}`);
-  };
 
   if (isLoading) {
     return (
@@ -55,11 +52,8 @@ export default function PastTravelerDisputes() {
   return (
     <div className="container mx-auto py-8">
       <h1 className="mb-6 text-3xl font-bold">Your Claims</h1>
-      {allCurrentClaims && allCurrentClaims.length > 0 ? (
-        <ClaimsTable
-          claims={allCurrentClaims}
-          onViewDetails={handleViewDetails}
-        />
+      {allCurrentClaims.length > 0 ? (
+        <ClaimsTable claims={allCurrentClaims} />
       ) : (
         <Card>
           <CardHeader>
