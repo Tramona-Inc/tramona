@@ -11,6 +11,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { api } from "@/utils/api";
 import { cn } from "@/utils/utils";
+import HostDashboardLayout from "@/components/_common/Layout/HostDashboardLayout";
 
 function MessageDisplay() {
   const [selectedConversation, setSelectedConversation] =
@@ -93,9 +94,9 @@ export default function MessagePage() {
           Messages | Tramona
         </title>
       </Head>
-      <DashboardLayout>
+      <HostDashboardLayout>
         <MessageDisplay />
-      </DashboardLayout>
+      </HostDashboardLayout>
     </>
   );
 }

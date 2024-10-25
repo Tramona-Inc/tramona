@@ -8,6 +8,7 @@ import { ConnectNotificationBanner } from "@stripe/react-connect-js";
 import useIsStripeConnectInstanceReady from "@/utils/store/stripe-connect";
 import { useRouter } from "next/router";
 import StripeConnectCurrentlyDueBeforePayouts from "@/components/host/finances/StripeConnectCurrentlyDueBeforePayout";
+import HostDashboardLayout from "@/components/_common/Layout/HostDashboardLayout";
 
 export default function Page() {
   useSession({ required: true });
@@ -46,7 +47,7 @@ export default function Page() {
   ]);
 
   return (
-    <DashboadLayout>
+    <HostDashboardLayout>
       <Head>
         <title>Host Finances | Tramona</title>
       </Head>
@@ -76,6 +77,6 @@ export default function Page() {
           <NoStripeAccount />
         )}
       </main>
-    </DashboadLayout>
+    </HostDashboardLayout>
   );
 }
