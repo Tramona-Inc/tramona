@@ -1,5 +1,5 @@
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
-import HostPropertiesLayout from "@/components/dashboard/host/HostPropertiesLayout";
+import HostPropertiesHome from "@/components/dashboard/host/HostPropertiesHome";
 import Head from "next/head";
 
 export default function Page() {
@@ -8,7 +8,7 @@ export default function Page() {
       <Head>
         <title>Properties | Tramona</title>
       </Head>
-      <HostPropertiesLayout />
+      <HostPropertiesHome />
     </DashboardLayout>
   );
 }
