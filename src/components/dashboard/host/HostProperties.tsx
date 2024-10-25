@@ -7,7 +7,6 @@ import {
 import { type Property } from "@/server/db/schema/tables/properties";
 import { AlertCircle, FenceIcon } from "lucide-react";
 import Image from "next/image";
-import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/router";
 
 export default function HostProperties({
@@ -17,14 +16,13 @@ export default function HostProperties({
 }) {
   return (
     <div>
-      <div className="mx-auto max-w-7xl space-y-4">
+      <div className="mx-auto my-4 max-w-7xl space-y-4">
         {properties ? (
           properties.length > 0 ? (
-            <div className="grid gap-4 lg:grid-cols-1">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
               {properties.map((property) => (
                 <>
                   <PropertyCard key={property.id} property={property} />
-                  <Separator />
                 </>
               ))}
             </div>
@@ -52,8 +50,8 @@ function PropertyCard({ property }: { property: Property }) {
       onClick={() => router.push(`/host/properties/${property.id}`)}
       className="cursor-pointer"
     >
-      <div className="relative flex items-center gap-2 overflow-clip rounded-lg border-zinc-100 bg-card px-2 py-3 hover:bg-zinc-100">
-        <div className="relative h-20 w-20">
+      <div className="relative flex flex-col items-center gap-2 overflow-clip rounded-lg border-zinc-100 bg-card px-2 py-3 hover:bg-zinc-100">
+        <div className="relative h-40 w-full">
           <Image
             src={property.imageUrls[0]!}
             fill
