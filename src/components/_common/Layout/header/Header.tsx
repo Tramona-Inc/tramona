@@ -23,6 +23,7 @@ import {
   unloggedHamburgerLinksDesktop,
   loggedCenterHeaderLinks,
   loggedHamburgerLinksMobile,
+  hostCenterHeaderLinks,
 } from "@/config/headerNavLinks";
 import {
   ArrowLeftRightIcon,
@@ -95,28 +96,32 @@ function LargeHeader({ isHost }: { isHost: boolean }) {
 
   const hostBtn = useHostBtn();
 
+  const links = isHost ? hostCenterHeaderLinks : headerLinks;
+
   return (
     <header className="sticky top-0 z-50 flex h-header-height items-center gap-2 border-b bg-white p-4 lg:pl-8 xl:px-20">
       <TramonaLogo />
 
+      {isHost && <div className="flex-1" />}
+
       <div className="flex items-center pl-2">
-        {!isHost &&
-          headerLinks.map((link) => (
-            <NavLink
-              key={link.href}
-              href={link.href}
-              render={({ selected }) => (
-                <span
-                  className={cn(
-                    "rounded-md px-2 py-3 text-xs font-bold text-zinc-600 hover:text-foreground xl:text-sm",
-                    selected && "text-foreground underline underline-offset-2",
-                  )}
-                >
-                  {link.name}
-                </span>
-              )}
-            />
-          ))}
+        {links.map((link) => (
+          <NavLink
+            key={link.href}
+            href={link.href}
+            noChildren={link.href === "/host"}
+            render={({ selected }) => (
+              <span
+                className={cn(
+                  "rounded-md px-4 py-3 text-xs font-bold text-zinc-600 hover:text-foreground xl:text-sm",
+                  selected && "text-foreground underline underline-offset-2",
+                )}
+              >
+                {link.name}
+              </span>
+            )}
+          />
+        ))}
       </div>
 
       <div className="flex-1" />

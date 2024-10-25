@@ -100,10 +100,12 @@ export default function OfferCard({
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-1">
-            {property.numRatings > 0 && (
+            {property.numRatings > 0 ? (
               <Badge variant="secondary" icon={<StarFilledIcon />}>
                 {property.avgRating} ({property.numRatings})
               </Badge>
+            ) : (
+              <Badge variant="secondary">New</Badge>
             )}
             <Badge variant="secondary">{property.propertyType}</Badge>
             {property.amenities.length > 0 && (

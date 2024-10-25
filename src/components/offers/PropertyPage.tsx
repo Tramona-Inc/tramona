@@ -234,10 +234,16 @@ export default function PropertyPage({
                 <p className="gap flex flex-wrap items-center gap-x-1 pt-1 text-sm font-medium capitalize">
                   {property.propertyType} in {property.city} ·{" "}
                   <StarIcon className="inline size-[1em] fill-primaryGreen stroke-primaryGreen" />{" "}
-                  {property.avgRating}{" "}
-                  <a href="#reviews" className="underline">
-                    ({plural(property.numRatings, "review")})
-                  </a>
+                  {property.numRatings === 0 ? (
+                    <>New</>
+                  ) : (
+                    <>
+                      {property.avgRating}{" "}
+                      <a href="#reviews" className="underline">
+                        ({plural(property.numRatings, "review")})
+                      </a>
+                    </>
+                  )}
                 </p>
                 <p className="text-sm font-medium">
                   {plural(property.maxNumGuests, "guest")} ·{" "}
