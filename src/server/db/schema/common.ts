@@ -91,6 +91,13 @@ export const ALL_RESOLUTION_RESULTS = [
   "Rejected",
 ] as const;
 
+export const ALL_TRAVELER_CLAIM_RESPONSES = [
+  "Accepted",
+  "Rejected",
+  "Partially Approved",
+  "Pending",
+] as const;
+
 export const ALL_PAYMENT_SOURCES = [
   "Superhog",
   "Security Deposit",

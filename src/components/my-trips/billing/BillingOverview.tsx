@@ -1,6 +1,6 @@
 import React from "react";
 import TravelerBillingTab from "./TravelerBillingTab";
-import SecurityDepositOverview from "./SecurityDeposit/SecurityDepositOverview";
+import SecurityDepositOverview from "./travelerClaims/SecurityDepositOverview";
 import PaymentHistoryOverview from "./PaymentHistoryOverview";
 import { useRouter } from "next/router";
 

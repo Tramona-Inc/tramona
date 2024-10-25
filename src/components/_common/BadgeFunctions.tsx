@@ -22,3 +22,19 @@ export const GetBadgeByClaimStatus = ({
       return <Badge variant="skeleton">{claimStatus}</Badge>; // Fallback for any unexpected values
   }
 };
+
+interface GetBadgeByClaimItemStatusProps {
+  isResolvedAt: Date | string | null | undefined;
+}
+
+export const GetBadgeByClaimItemStatus = ({
+  isResolvedAt,
+}: GetBadgeByClaimItemStatusProps) => {
+  if (isResolvedAt) {
+    return <Badge variant="green">Resolved</Badge>;
+  } else if (isResolvedAt === null) {
+    return <Badge variant="gray">Action Required</Badge>;
+  } else {
+    return <Badge variant="skeleton">Loading</Badge>; // Fallback for any unexpected values
+  }
+};

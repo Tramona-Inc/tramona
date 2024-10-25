@@ -35,7 +35,9 @@ export const tripsRouter = createTRPCRouter({
               name: true,
               city: true,
             },
-            with: { host: { columns: { name: true, profileUrl: true } } },
+            with: {
+              host: { columns: { name: true, profileUrl: true, id: true } },
+            },
           },
           offer: {
             columns: {

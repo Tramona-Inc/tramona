@@ -17,7 +17,6 @@ import { TriangleAlertIcon } from "lucide-react";
 import { api } from "@/utils/api";
 import { toast } from "@/components/ui/use-toast";
 
-// Zod schema to handle validation
 const claimSchema = z.object({
   tripId: z.number().min(1, { message: "Trip ID is required" }),
   hostId: z.string().min(1, { message: "Host ID is required" }),
@@ -31,7 +30,7 @@ export default function OpenNewClaimForm({
   onFormSubmit,
 }: {
   defaultTripId: number;
-  defaultHostId: string;
+  defaultHostId?: string;
   superhogRequestId?: number;
   onFormSubmit?: () => void;
 }) {
@@ -55,20 +54,16 @@ export default function OpenNewClaimForm({
       },
     });
 
-  // Initialize useForm with Zod validation schema
   const form = useForm({
     resolver: zodResolver(claimSchema),
     defaultValues: {
       tripId: defaultTripId,
-      hostId: defaultHostId,
+      hostId: defaultHostId ?? "No Host Associated",
       superhogRequestId: superhogRequestId,
     },
   });
 
-  // Handler for form submission
   const onSubmit = async (data: z.infer<typeof claimSchema>) => {
-    // Simulate API call to create a claim
-    console.log("Claim created:", data);
     await createClaim(data);
   };
 

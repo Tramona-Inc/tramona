@@ -42,6 +42,8 @@ import EmptyStateValue from "@/components/_common/EmptyStateSvg/EmptyStateValue"
 import React from "react";
 
 import { api } from "@/utils/api";
+import CurrentTravelerDisputes from "./CurrentTravelerDisputes";
+import PastTravelerDisputes from "./PastTravelerDisputes";
 
 function SecurityDepositOverview() {
   const [deposits, setDeposits] = useState([
@@ -144,32 +146,6 @@ function SecurityDepositOverview() {
     });
   };
 
-  const handleAcceptClaim = (claimId) => {
-    setClaims((prevClaims) =>
-      prevClaims.map((c) =>
-        c.id === claimId ? { ...c, status: "Accepted" } : c,
-      ),
-    );
-    toast({
-      title: "Claim Accepted",
-      description:
-        "You have accepted the claim. The deposit will be released to the host.",
-    });
-  };
-
-  const handleRejectClaim = (claimId) => {
-    setClaims((prevClaims) =>
-      prevClaims.map((c) =>
-        c.id === claimId ? { ...c, status: "Rejected" } : c,
-      ),
-    );
-    toast({
-      title: "Claim Rejected",
-      description:
-        "You have rejected the claim. Please provide a reason for your rejection.",
-    });
-  };
-
   return (
     <div>
       {true ? (
@@ -185,7 +161,7 @@ function SecurityDepositOverview() {
             <TabsList>
               <TabsTrigger value="deposits">My Deposits</TabsTrigger>
               <TabsTrigger value="disputes">Disputes</TabsTrigger>
-              <TabsTrigger value="claims">Claim History</TabsTrigger>
+              <TabsTrigger value="claim-history">Claim History</TabsTrigger>
             </TabsList>
             <TabsContent value="deposits">
               <Card>
@@ -244,120 +220,10 @@ function SecurityDepositOverview() {
               </Card>
             </TabsContent>
             <TabsContent value="disputes">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Active Disputes</CardTitle>
-                  <CardDescription>
-                    Review and respond to claims made against your deposits
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Property</TableHead>
-                        <TableHead>Amount Claimed</TableHead>
-                        <TableHead>Reason</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {claims
-                        .filter((claim) => claim.status === "Pending")
-                        .map((claim) => (
-                          <TableRow key={claim.id}>
-                            <TableCell>{claim.property}</TableCell>
-                            <TableCell>${claim.amount}</TableCell>
-                            <TableCell>{claim.reason}</TableCell>
-                            <TableCell>
-                              <Badge variant="warning">Pending</Badge>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex space-x-2">
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleAcceptClaim(claim.id)}
-                                >
-                                  Accept
-                                </Button>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleRejectClaim(claim.id)}
-                                >
-                                  Reject
-                                </Button>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleViewClaim(claim)}
-                                >
-                                  Details
-                                </Button>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
+              <CurrentTravelerDisputes />
             </TabsContent>
-            <TabsContent value="claims">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Claim History</CardTitle>
-                  <CardDescription>
-                    View the history of all claims made against your deposits
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Property</TableHead>
-                        <TableHead>Amount Claimed</TableHead>
-                        <TableHead>Reason</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {claims.map((claim) => (
-                        <TableRow key={claim.id}>
-                          <TableCell>{claim.property}</TableCell>
-                          <TableCell>${claim.amount}</TableCell>
-                          <TableCell>{claim.reason}</TableCell>
-                          <TableCell>
-                            <Badge
-                              variant={
-                                claim.status === "Pending"
-                                  ? "yellow"
-                                  : claim.status === "Accepted"
-                                    ? "green"
-                                    : "red"
-                              }
-                            >
-                              {claim.status}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleViewClaim(claim)}
-                            >
-                              View Details
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
+            <TabsContent value="claim-history">
+              <PastTravelerDisputes />
             </TabsContent>
           </Tabs>
 

@@ -123,7 +123,7 @@ export default function AllPreviousTrips() {
                           >
                             <OpenNewClaimForm
                               defaultTripId={trip.id}
-                              defaultHostId={trip.group.owner.id}
+                              defaultHostId={trip.property?.host?.id}
                               superhogRequestId={
                                 trip.superhogRequestId ?? undefined
                               }

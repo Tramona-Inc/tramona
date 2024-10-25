@@ -13,7 +13,11 @@ import { properties } from "./properties";
 import { trips } from "./trips";
 import { users } from "./users";
 import { superhogRequests } from "./superhogRequests";
-import { ALL_PAYMENT_SOURCES, ALL_RESOLUTION_RESULTS } from "../common";
+import {
+  ALL_PAYMENT_SOURCES,
+  ALL_RESOLUTION_RESULTS,
+  ALL_TRAVELER_CLAIM_RESPONSES,
+} from "../common";
 export const claimStatus = pgEnum("claim_status", [
   "Submitted",
   "Resolved",
@@ -23,6 +27,11 @@ export const claimStatus = pgEnum("claim_status", [
 export const resolutionResults = pgEnum(
   "resolution_results",
   ALL_RESOLUTION_RESULTS,
+);
+
+export const travelerClaimResponses = pgEnum(
+  "traveler_claim_response",
+  ALL_TRAVELER_CLAIM_RESPONSES,
 );
 
 export const paymentSources = pgEnum("payment_sources", ALL_PAYMENT_SOURCES);
@@ -110,6 +119,10 @@ export const claimItems = pgTable(
     propertyId: integer("property_id").references(() => properties.id),
     resolvedBySuperhog: boolean("resolved_by_superhog").default(false),
     imageUrls: varchar("image_urls").array().notNull(),
+    travelerClaimResponse: travelerClaimResponses("traveler_claim_responses")
+      .notNull()
+      .default("Pending"),
+    travelerResponseDescription: varchar("traveler_response_description"),
   },
   (t) => ({
     claimId: index().on(t.claimId),

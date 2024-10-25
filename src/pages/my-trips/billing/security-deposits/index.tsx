@@ -1,5 +1,5 @@
 import React from "react";
-import SecurityDepositOverview from "@/components/my-trips/billing/SecurityDeposit/SecurityDepositOverview";
+import SecurityDepositOverview from "@/components/my-trips/billing/travelerClaims/SecurityDepositOverview";
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import { ArrowLeftIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";

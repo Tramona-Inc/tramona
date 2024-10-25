@@ -17,6 +17,7 @@ import {
   ALL_PAYMENT_SOURCES,
   claimPayments,
   resolutionResults,
+  groups,
 } from "@/server/db/schema";
 
 import type {
@@ -103,7 +104,7 @@ export const claimsRouter = createTRPCRouter({
     return Object.values(result); // Return the accumulated result as an array
   }),
 
-  getClaimWithAllDetailsById: roleRestrictedProcedure(["admin"])
+  getClaimWithAllDetailsById: protectedProcedure
     .input(z.string())
     .query(async ({ input }) => {
       const claimWDetails = await db
@@ -160,6 +161,49 @@ export const claimsRouter = createTRPCRouter({
 
       return result;
     }),
+
+  getCurrentAllClaimsAgainstTraveler: protectedProcedure.query(
+    async ({ ctx }) => {
+      const claimsWithItemsRaw = await db
+        .select({ claims, claimItems })
+        .from(claims)
+        .innerJoin(trips, eq(claims.tripId, trips.id))
+        .innerJoin(groups, eq(trips.groupId, groups.id))
+        .innerJoin(claimItems, eq(claimItems.claimId, claims.id))
+        .where(eq(groups.ownerId, ctx.user.id));
+
+      console.log(claimsWithItemsRaw);
+      // Post-process the results to structure them by claims with nested claim items
+      const claimsAgainstUser = Object.values(
+        claimsWithItemsRaw.reduce<
+          Record<
+            string, // Use string for the ID key
+            {
+              claim: Claim;
+              claimItems: ClaimItem[];
+            }
+          >
+        >((acc, row) => {
+          const { claims, claimItems } = row;
+          const claimId = claims.id.toString();
+
+          if (acc[claimId]) {
+            acc[claimId].claimItems.push(claimItems);
+          } else {
+            // If the claim does not exist, initialize it with the claim and first item
+            acc[claimId] = {
+              claim: claims,
+              claimItems: [claimItems],
+            };
+          }
+
+          return acc;
+        }, {}),
+      );
+      console.log(claimsAgainstUser);
+      return claimsAgainstUser;
+    },
+  ),
 
   createClaim: protectedProcedure
     .input(

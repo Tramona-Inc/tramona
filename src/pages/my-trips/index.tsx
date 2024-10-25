@@ -10,7 +10,7 @@ import Spinner from "@/components/_common/Spinner";
 import { useRouter } from "next/router";
 import BillingOverview from "@/components/my-trips/billing/BillingOverview";
 import PaymentHistoryOverview from "@/components/my-trips/billing/PaymentHistoryOverview";
-import SecurityDepositOverview from "@/components/my-trips/billing/SecurityDeposit/SecurityDepositOverview";
+import SecurityDepositOverview from "@/components/my-trips/billing/travelerClaims/SecurityDepositOverview";
 
 export type TripCardDetails = RouterOutputs["trips"]["getMyTrips"][number];
 
