@@ -20,6 +20,7 @@ import { getCity } from "@/server/google-maps";
 import { calculateTotalTax } from "@/utils/payment-utils/taxData";
 import { getAmenities, getCancellationPolicy, getListingDataUrl, getReviewsUrl } from "@/server/external-listings-scraping/scrapeAirbnbListing";
 import { airbnbHeaders } from "@/utils/constants";
+import { addDays } from "date-fns";
 
 export async function insertHost(id: string) {
   // Insert Host info
@@ -351,8 +352,13 @@ export default async function webhook(
         }
 
         const listingId = webhookData.data.platform_id;
+        const dateIn3Days = addDays(new Date(), 3);
+        const dateIn5Days = addDays(new Date(), 5);
 
-        const listingDataUrl = getListingDataUrl(listingId, {});
+        const listingDataUrl = getListingDataUrl(listingId, {
+          checkIn: dateIn3Days,
+          checkOut: dateIn5Days,
+        });
         const reviewsUrl = getReviewsUrl(listingId);
 
         const [listingData, reviewsData] = (await Promise.all(
