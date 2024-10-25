@@ -29,7 +29,7 @@ export function getListingDataUrl(
 ) {
   const encodedId = encodeAirbnbId(id);
 
-  return `https://www.airbnb.com/api/v3/StaysPdpSections/160265f6bdbacc2084cdf7de8641926c5ee141c3a2967dca0407ee47cec2a7d1?operationName=StaysPdpSections&locale=en&currency=USD&variables={"id":"${encodedId}","pdpSectionsRequest":{${checkIn ? `"checkIn":"${formatDateYearMonthDay(checkIn)}"` : ""}${checkOut ? `"checkOut":"${formatDateYearMonthDay(checkOut)}"` : ""},"adults":"${numGuests ? numGuests : ""}","layouts":["SIDEBAR","SINGLE_COLUMN"]}}&extensions={"persistedQuery":{"version":1,"sha256Hash":"160265f6bdbacc2084cdf7de8641926c5ee141c3a2967dca0407ee47cec2a7d1"}}`;
+  return `https://www.airbnb.com/api/v3/StaysPdpSections/160265f6bdbacc2084cdf7de8641926c5ee141c3a2967dca0407ee47cec2a7d1?operationName=StaysPdpSections&locale=en&currency=USD&variables={"id":"${encodedId}","pdpSectionsRequest":{${checkIn ? `"checkIn":"${formatDateYearMonthDay(checkIn)}"` : ""},${checkOut ? `"checkOut":"${formatDateYearMonthDay(checkOut)}"` : ""},"adults":${numGuests ? numGuests : "1"},"layouts":["SIDEBAR","SINGLE_COLUMN"]}}&extensions={"persistedQuery":{"version":1,"sha256Hash":"160265f6bdbacc2084cdf7de8641926c5ee141c3a2967dca0407ee47cec2a7d1"}}`;
 }
 
 export function getReviewsUrl(id: string) {
