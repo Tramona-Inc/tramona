@@ -23,25 +23,24 @@ export default function MastHead() {
     <>
       <section className="relative overflow-hidden bg-white pb-32">
         <div className="mx-auto max-w-[90%] px-4 lg:max-w-[80%]">
-          <div className="relative md:pt-20">
-            <div className="relative min-h-[500px]">
-              {/* Content */}
+          <div className="relative min-[900px]:pt-20">
+            <div className="relative min-h-[500px] lg:min-h-[600px]">
+              {/* Content Section */}
               <div className="relative z-20 mb-8">
                 {/* Desktop Version */}
-                <div className="hidden md:block">
-                  <h1 className="mb-4 text-5xl font-bold text-zinc-900">
-                    The best prices on Airbnbs anywhere
+                <div className="hidden min-[900px]:block">
+                  <h1 className="mb-4 text-[44px] font-bold text-zinc-900 min-[1102px]:text-[48px]">
+                    The best prices on Airbnbs{" "}
+                    <span className="whitespace-nowrap">anywhere</span>
                   </h1>
-                  <p className="mb-12 text-xl text-zinc-900">
+                  <p className="mb-8 text-[22px] text-zinc-900 min-[1102px]:text-[24px]">
                     Make deals with hosts on their empty nights
                   </p>
                 </div>
 
                 {/* Mobile Version */}
-                <div className="text-center md:hidden md:text-left">
+                <div className="text-center min-[900px]:hidden">
                   <h1 className="mb-6 mt-0 pt-8 text-4xl font-bold text-zinc-900">
-                    {" "}
-                    {/* Reduced top padding */}
                     The Best Prices on
                     <br />
                     Airbnbs Anywhere
@@ -49,15 +48,17 @@ export default function MastHead() {
                 </div>
               </div>
 
-              {/* Search Bar */}
-              <div className="relative z-30 w-full overflow-hidden lg:w-[60%]">
-                {/* Desktop Search - Now with original expandable functionality */}
-                <div className="hidden rounded-2xl shadow-xl md:block">
-                  <LandingSearchBar />
+              {/* Search Bar Container */}
+              <div className="relative z-30 mt-14 w-full lg:w-[60%]">
+                {/* Desktop Search */}
+                <div className="hidden min-[900px]:block">
+                  <div className="rounded-2xl shadow-xl">
+                    <LandingSearchBar />
+                  </div>
                 </div>
 
                 {/* Mobile Search */}
-                <div className="md:hidden">
+                <div className="min-[900px]:hidden">
                   <MobileSearchDialog
                     open={isSearchOpen}
                     onOpenChange={setIsSearchOpen}
@@ -88,7 +89,7 @@ export default function MastHead() {
               </div>
 
               {/* Background Image - Desktop Only */}
-              <div className="absolute right-0 top-20 z-10 mt-2 hidden w-[775px] max-w-none md:block">
+              <div className="absolute right-0 top-20 z-10 mt-12 hidden w-[775px] max-w-none min-[900px]:block">
                 <div className="relative h-[450px]">
                   <Image
                     src={landing_airbnb}

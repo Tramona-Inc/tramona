@@ -59,7 +59,7 @@ export default function MobileSearchDialog({
       {/* Search Bar Trigger */}
       <div
         onClick={() => onOpenChange(true)}
-        className="flex w-full cursor-pointer items-center rounded-full border bg-white px-4 py-3 shadow-lg md:hidden"
+        className="flex w-full cursor-pointer items-center rounded-full border bg-white px-4 py-3 shadow-lg"
       >
         <Search className="mr-3 h-5 w-5 text-gray-400" />
         <span className="text-gray-500">Search or Request a deal</span>

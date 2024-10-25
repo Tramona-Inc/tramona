@@ -5,6 +5,7 @@ import {
   CalendarIcon,
   Users2Icon,
   DollarSignIcon,
+  CheckIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
@@ -237,8 +238,8 @@ export default function LandingSearchBar() {
   const [requestSubmittedDialogOpen, setRequestSubmittedDialogOpen] =
     useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
-  const [madeByGroupId, setMadeByGroupId] = useState<number>();
-  const [_inviteLink, setInviteLink] = useState<string | null>(null);
+  const [madeByGroupId, setMadeByGroupId] = useState();
+  const [_inviteLink, setInviteLink] = useState(null);
 
   const form = useForm({
     defaultValues: {
@@ -250,7 +251,7 @@ export default function LandingSearchBar() {
   });
 
   const inviteLinkQuery = api.groups.generateInviteLink.useQuery(
-    { groupId: madeByGroupId! },
+    { groupId: madeByGroupId },
     { enabled: madeByGroupId !== undefined },
   );
 
@@ -262,27 +263,32 @@ export default function LandingSearchBar() {
 
   async function onSubmit(data) {
     if (activeTab === "name") {
-      // Handle "Name Your Own Price" submission
       setRequestSubmittedDialogOpen(true);
       setShowConfetti(true);
-      // Add any additional submission logic here
     } else {
-      // Handle regular search submission
       console.log("Regular search submission:", data);
     }
   }
 
   return (
-    <div className="mx-auto max-w-5xl rounded-2xl border-2 border-gray-300 bg-white p-6 shadow-lg">
+    <div className="mx-auto min-w-[815px] max-w-5xl rounded-2xl border-2 border-gray-300 bg-white p-4 shadow-lg sm:p-6">
       <div className="mb-4 flex">
         <button
-          className={`flex-1 py-2 ${activeTab === "search" ? "border-b-2 border-teal-700 font-semibold text-teal-700" : "text-gray-500"}`}
+          className={`flex-1 py-2 text-sm sm:text-base ${
+            activeTab === "search"
+              ? "border-b-2 border-teal-700 font-semibold text-teal-700"
+              : "text-gray-500"
+          }`}
           onClick={() => setActiveTab("search")}
         >
           Search Deals
         </button>
         <button
-          className={`flex-1 py-2 ${activeTab === "name" ? "border-b-2 border-teal-700 font-semibold text-teal-700" : "text-gray-500"}`}
+          className={`flex-1 py-2 text-sm sm:text-base ${
+            activeTab === "name"
+              ? "border-b-2 border-teal-700 font-semibold text-teal-700"
+              : "text-gray-500"
+          }`}
           onClick={() => setActiveTab("name")}
         >
           Name Your Own Price
@@ -292,9 +298,9 @@ export default function LandingSearchBar() {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <div className="mb-4">
-            <div className="flex items-center justify-between rounded-full border border-black bg-white p-2">
-              <div className="mx-2 flex w-64 items-center">
-                <MapPinIcon className="mr-2 text-gray-400" />
+            <div className="flex flex-col space-y-4 rounded-lg border border-black bg-white p-2 sm:flex-row sm:items-center sm:space-y-0 sm:rounded-full">
+              <div className="flex w-full items-center sm:w-64 sm:px-2">
+                <MapPinIcon className="mr-2 h-4 w-4 text-gray-400 sm:h-5 sm:w-5" />
                 <FormField
                   control={form.control}
                   name="destination"
@@ -325,10 +331,10 @@ export default function LandingSearchBar() {
                 />
               </div>
 
-              <div className="h-8 w-px bg-gray-300" />
+              <div className="hidden sm:block sm:h-8 sm:w-px sm:bg-gray-300" />
 
-              <div className="flex w-48 items-center px-4">
-                <CalendarIcon className="mr-2 text-gray-400" />
+              <div className="flex w-full items-center sm:w-48 sm:px-4">
+                <CalendarIcon className="mr-2 h-4 w-4 text-gray-400 sm:h-5 sm:w-5" />
                 <FormField
                   control={form.control}
                   name="dates"
@@ -358,9 +364,9 @@ export default function LandingSearchBar() {
 
               {activeTab === "name" && (
                 <>
-                  <div className="h-8 w-px bg-gray-300" />
-                  <div className="flex w-48 items-center px-4">
-                    <DollarSignIcon className="mr-2 text-gray-400" />
+                  <div className="hidden sm:block sm:h-8 sm:w-px sm:bg-gray-300" />
+                  <div className="flex w-full items-center sm:w-48 sm:px-4">
+                    <DollarSignIcon className="mr-2 h-4 w-4 text-gray-400 sm:h-5 sm:w-5" />
                     <FormField
                       control={form.control}
                       name="price"
@@ -380,10 +386,10 @@ export default function LandingSearchBar() {
                 </>
               )}
 
-              <div className="h-8 w-px bg-gray-300" />
+              <div className="hidden sm:block sm:h-8 sm:w-px sm:bg-gray-300" />
 
-              <div className="flex w-48 items-center px-4">
-                <Users2Icon className="mr-2 text-gray-400" />
+              <div className="flex w-full items-center sm:w-48 sm:px-4">
+                <Users2Icon className="mr-2 h-4 w-4 text-gray-400 sm:h-5 sm:w-5" />
                 <FormField
                   control={form.control}
                   name="guests"
@@ -405,7 +411,7 @@ export default function LandingSearchBar() {
             <div className="mt-4 flex justify-center">
               <Button
                 type="submit"
-                className="rounded-ful px-8 py-2 text-white"
+                className="w-full rounded-full px-8 py-2 text-white sm:w-auto"
               >
                 Find Deals
               </Button>
@@ -414,64 +420,27 @@ export default function LandingSearchBar() {
         </form>
       </Form>
 
-      <div className="mb-4 flex justify-center gap-8 text-sm text-gray-600">
+      <div className="mb-4 flex flex-col items-center space-y-2 text-xs text-gray-600 sm:flex-row sm:justify-center sm:space-x-8 sm:space-y-0 sm:text-sm">
         <div className="flex items-center gap-2">
-          <svg
-            className="h-4 w-4 text-teal-700"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M5 13l4 4L19 7"
-            ></path>
-          </svg>
-          Flexible Cancelation Policies
+          <CheckIcon className="h-4 w-4 text-teal-700" />
+          Flexible Cancelation
         </div>
         <div className="flex items-center gap-2">
-          <svg
-            className="h-4 w-4 text-teal-700"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M5 13l4 4L19 7"
-            ></path>
-          </svg>
-          Same properties you see on Airbnb
+          <CheckIcon className="h-4 w-4 text-teal-700" />
+          Same as Airbnb
         </div>
         <div className="flex items-center gap-2">
-          <svg
-            className="h-4 w-4 text-teal-700"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M5 13l4 4L19 7"
-            ></path>
-          </svg>
+          <CheckIcon className="h-4 w-4 text-teal-700" />
           Best Prices
         </div>
       </div>
-      <div className="text-center text-sm text-gray-600">
+
+      <div className="text-center text-xs text-gray-600 sm:text-sm">
         Search the best deals available{" "}
         <span className="text-teal-700 underline">anywhere</span> on short term
         rentals right now
       </div>
+
       <RequestSubmittedDialog
         open={requestSubmittedDialogOpen}
         setOpen={setRequestSubmittedDialogOpen}
