@@ -1,6 +1,6 @@
 import { calculateTotalTax } from "@/utils/payment-utils/taxData";
 import { sumBy } from "lodash";
-import { getCity } from "@/server/google-maps";
+import { getAddress } from "@/server/google-maps";
 import { TAX_PERCENTAGE } from "../constants";
 
 export async function getTax({ lat, lng }: { lat: number; lng: number }) {
@@ -9,34 +9,28 @@ export async function getTax({ lat, lng }: { lat: number; lng: number }) {
   // Match the address against the regex
   //const match = location.match(usAddressRegex);
   console.log(lat, lng);
-  const { city, county, stateName, stateCode, country } = await getCity({
+  const { city, county, stateCode, country } = await getAddress({
     lat,
     lng,
   });
 
-  console.log(city, county, stateName, stateCode, country);
+  console.log(city, county, stateCode, country);
 
-  if (city) {
-    //const [fullMatch, city, state, country] = match;
+  if (!country) throw new Error(`Country not found for ${lat}, ${lng}`);
+  if (!stateCode) throw new Error(`State not found for ${lat}, ${lng}`);
+  if (!city) throw new Error(`City not found for ${lat}, ${lng}`);
 
-    if (!city || !stateName || !country) {
-      throw new Error("Invalid US address format");
-    }
+  let totalTaxRate = sumBy(
+    calculateTotalTax(country, stateCode, city),
+    (tax) => tax.taxRate,
+  );
 
-    let totalTaxRate = sumBy(
-      calculateTotalTax(country, stateCode, city),
-      (tax) => tax.taxRate,
-    );
-
-    console.log(totalTaxRate);
-    if (totalTaxRate <= 0) {
-      totalTaxRate = TAX_PERCENTAGE;
-    }
-
-    return totalTaxRate;
-  } else {
-    throw new Error("Invalid US address format");
+  console.log(totalTaxRate);
+  if (totalTaxRate <= 0) {
+    totalTaxRate = TAX_PERCENTAGE;
   }
+
+  return totalTaxRate;
 }
 
 // function calculateTaxPercentage({
