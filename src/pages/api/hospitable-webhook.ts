@@ -380,7 +380,7 @@ export default async function webhook(
           ),
         )) as [string, string];
 
-        // const cancellationPolicy = getCancellationPolicy(listingData, listingId);
+        const cancellationPolicy = getCancellationPolicy(listingData, listingId);
         const amenities = getAmenities(listingData, listingId);
 
         const propertyObject = {
@@ -413,7 +413,7 @@ export default async function webhook(
           originalListingPlatform: "Hospitable" as const,
           originalListingId: listingId,
           amenities: amenities,
-          // cancellationPolicy: cancellationPolicy,
+          cancellationPolicy: cancellationPolicy,
 
           //amenities: webhookData.data.amenities,
           //cancellationPolicy: webhookData.data.cancellation_policy,
