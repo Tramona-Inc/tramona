@@ -36,14 +36,14 @@ export default function SliderToggle({
 
         {/* Text Labels */}
         <span
-          className={`z-10 flex w-1/2 justify-center text-xs font-medium ${
+          className={`z-10 flex w-1/2 justify-center text-xs font-bold ${
             activeOption === "price" ? "text-white" : ""
           }`}
         >
           Name your price
         </span>
         <span
-          className={`z-10 flex w-1/2 justify-center text-xs font-medium ${
+          className={`z-10 flex w-1/2 justify-center text-xs font-bold ${
             activeOption === "book" ? "text-white" : ""
           }`}
         >
