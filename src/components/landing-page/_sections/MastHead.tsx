@@ -81,7 +81,7 @@ export default function MastHead() {
                 {/* Mobile Search */}
                 <div className="min-[900px]:hidden">
                   <div className="space-y-3">
-                    <p className="text-center text-sm font-semibold text-muted-foreground text-white lg:block">
+                    <p className="text-md text-center font-semibold text-muted-foreground text-white lg:block">
                       Send a request to every host in{" "}
                       <span className="font-bold text-white">
                         <Typewriter
