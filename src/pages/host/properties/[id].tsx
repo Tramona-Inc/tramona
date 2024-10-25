@@ -1,4 +1,5 @@
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
+import HostDashboardLayout from "@/components/_common/Layout/HostDashboardLayout";
 import HostPropertiesLayout from "@/components/dashboard/host/HostPropertiesLayout";
 import HostPropertyInfo from "@/components/dashboard/host/HostPropertyInfo";
 import { api } from "@/utils/api";
@@ -19,20 +20,11 @@ export default function Page() {
   );
 
   return (
-    <DashboardLayout>
+    <HostDashboardLayout>
       <Head>
         <title>Properties | Tramona</title>
       </Head>
-      <div className="hidden xl:block">
-        <HostPropertiesLayout>
-          {property && <HostPropertyInfo property={property} />}
-        </HostPropertiesLayout>
-      </div>
-      <div className="xl:hidden">
-        <div className="mb-6">
-          {property && <HostPropertyInfo property={property} />}
-        </div>
-      </div>
-    </DashboardLayout>
+      {property && <HostPropertyInfo property={property} />}
+    </HostDashboardLayout>
   );
 }

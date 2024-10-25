@@ -58,6 +58,8 @@ export default function HostPropertiesLayout({
     (state) => state.setOriginalListingId,
   );
 
+  const setProgress = useHostOnboarding((state) => state.setProgress);
+
   function setStatesDefault() {
     setPropertyType("Apartment"),
       setMaxGuests(1),
@@ -101,82 +103,10 @@ export default function HostPropertiesLayout({
   );
 
   return (
-    // <div className="flex">
-    //   <div className="sticky top-20 h-screen-minus-header-n-footer w-full overflow-auto border-r px-4 py-8 xl:w-96">
-    //     <ScrollArea>
-    //       <h1 className="text-3xl font-bold">Properties</h1>
-    //       {/* <p className="text-muted-foreground">24% currently vacant</p> */}
-    //       <div className="my-4">
-    //         {/* <NewPropertyBtn open={open} setOpen={setOpen} /> */}
-    //         <Link href="/host-onboarding">
-    //           <Button
-    //             variant="secondary"
-    //             onClick={() => {
-    //               setStatesDefault();
-    //             }}
-    //           >
-    //             <PlusIcon />
-    //             New Listing
-    //           </Button>
-    //         </Link>
-    //       </div>
-    //       <Accordion type="multiple" className="w-full">
-    //         <AccordionItem value="listed">
-    //           <AccordionTrigger>
-    //             Listed{" "}
-    //             <span className="text-muted-foreground">
-    //               {listedProperties?.length}
-    //             </span>
-    //           </AccordionTrigger>
-    //           <AccordionContent>
-    //             <HostProperties properties={listedProperties ?? null} />
-    //           </AccordionContent>
-    //         </AccordionItem>
-    //         <AccordionItem value="drafts">
-    //           <AccordionTrigger>
-    //             Drafts{" "}
-    //             <span className="text-muted-foreground">
-    //               {draftedProperties?.length}
-    //             </span>
-    //           </AccordionTrigger>
-    //           <AccordionContent>
-    //             <HostProperties properties={draftedProperties ?? null} />
-    //           </AccordionContent>
-    //         </AccordionItem>
-    //         <AccordionItem value="archive">
-    //           <AccordionTrigger>
-    //             Archives{" "}
-    //             <span className="text-muted-foreground">
-    //               {archivedProperties?.length}
-    //             </span>
-    //           </AccordionTrigger>
-    //           <AccordionContent>
-    //             <HostProperties properties={archivedProperties ?? null} />
-    //           </AccordionContent>
-    //         </AccordionItem>
-    //       </Accordion>
-    //     </ScrollArea>
-    //   </div>
-    //   <div className="hidden flex-1 xl:block">
-    //     {children ? (
-    //       <div className="mx-auto my-8 min-h-screen-minus-header-n-footer max-w-4xl rounded-2xl border">
-    //         <div className="grid grid-cols-1">{children}</div>
-    //       </div>
-    //     ) : (
-    //       <div className="hidden sm:block">
-    //         <div className="flex min-h-screen-minus-header-n-footer items-center justify-center">
-    //           <p className="font-medium text-muted-foreground">
-    //             Select a property to view more details
-    //           </p>
-    //         </div>
-    //       </div>
-    //     )}
-    //   </div>
-    // </div>
-    <section className="mx-auto my-14 max-w-7xl px-6">
-      <div className="flex justify-between">
-        <h1 className="text-4xl font-bold">Your properties</h1>
-        <div className="flex items-center gap-4">
+    <section className="mx-auto mb-24 mt-7 max-w-7xl px-6 md:my-14">
+      <div className="flex flex-col gap-4 sm:flex-row sm:justify-between">
+        <h1 className="text-2xl font-bold md:text-4xl">Your properties</h1>
+        <div className="flex items-center justify-center gap-4 lg:justify-start">
           <Button
             size="icon"
             className="rounded-full bg-white font-bold text-black shadow-xl"

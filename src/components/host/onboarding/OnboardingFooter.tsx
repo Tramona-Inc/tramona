@@ -21,7 +21,7 @@ export default function OnboardingFooter({
   handleError,
 }: OnboardingFooterProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const maxPages = 12;
+  const maxPages = 11;
 
   const progress = useHostOnboarding((state) => state.progress);
   const isEdit = useHostOnboarding((state) => state.isEdit);
@@ -53,7 +53,7 @@ export default function OnboardingFooter({
   async function onPressNext() {
     setIsLoading(true);
     try {
-      if (progress === 12) {
+      if (progress === 11) {
         if (!isHost) {
           await createHostProfile();
         }
@@ -92,13 +92,13 @@ export default function OnboardingFooter({
             if (isFormValid) {
               handleNext && handleNext();
               setIsEdit(false);
-              setProgress(12);
+              setProgress(11);
             } else {
               handleError && handleError();
             }
           } else {
             setIsEdit(false);
-            setProgress(12);
+            setProgress(11);
           }
         } else {
           if (isForm) {
@@ -124,33 +124,31 @@ export default function OnboardingFooter({
         value={(progress * 100) / maxPages}
         className="h-2 w-full rounded-none"
       />
-      {progress !== 0 && (
-        <div className="flex justify-between p-5">
-          <Button
-            variant={"ghost"}
-            onClick={() => {
-              if (progress - 1 > -1) {
-                setProgress(progress - 1);
-              }
-            }}
-          >
-            Back
-          </Button>
-          {isEdit ? (
-            <Button onClick={onPressNext}>Back to summary</Button>
-          ) : (
-            <div className="flex flex-row gap-2">
-              <Button onClick={onPressNext} disabled={isLoading}>
-                {progress === 0
-                  ? "Get Started"
-                  : progress === 12
-                      ? "Finish"
-                      : "Next"}
-              </Button>
-            </div>
-          )}
-        </div>
-      )}
+      <div className="flex justify-between p-5">
+        <Button
+          variant={"ghost"}
+          onClick={() => {
+            if (progress - 1 > -1) {
+              setProgress(progress - 1);
+            }
+          }}
+        >
+          Back
+        </Button>
+        {isEdit ? (
+          <Button onClick={onPressNext}>Back to summary</Button>
+        ) : (
+          <div className="flex flex-row gap-2">
+            <Button onClick={onPressNext} disabled={isLoading}>
+              {progress === 0
+                ? "Get Started"
+                : progress === 11
+                  ? "Finish"
+                  : "Next"}
+            </Button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
