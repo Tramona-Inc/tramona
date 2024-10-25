@@ -15,6 +15,8 @@ import MobileFilterBar from "../search/MobileFilterBar";
 import MobileSearchDialog from "../search/MobileSearchDialog";
 import { useState } from "react";
 import { AdjustedPropertiesProvider } from "../search/AdjustedPropertiesContext";
+import airbnbLanding from "public/assets/images/landing-page/airbnbLanding.png";
+import Typewriter from "typewriter-effect";
 
 export default function MastHead() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -22,6 +24,20 @@ export default function MastHead() {
   return (
     <>
       <section className="relative overflow-hidden bg-white pb-32">
+        {/* Mobile Background Image with overlay - hidden on desktop */}
+        <div className="absolute inset-0 z-0 min-[900px]:hidden">
+          <div className="relative h-[400px] w-full">
+            <Image
+              src={airbnbLanding}
+              alt="Modern Airbnb property"
+              layout="fill"
+              objectFit="cover"
+            />
+            {/* Shadow overlay */}
+            <div className="absolute inset-0 bg-black/40" />
+          </div>
+        </div>
+
         <div className="mx-auto max-w-[90%] px-4 lg:max-w-[80%]">
           <div className="relative min-[900px]:pt-20">
             <div className="relative min-h-[500px] lg:min-h-[600px]">
@@ -40,7 +56,7 @@ export default function MastHead() {
 
                 {/* Mobile Version */}
                 <div className="text-center min-[900px]:hidden">
-                  <h1 className="mb-6 mt-0 pt-8 text-4xl font-bold text-zinc-900">
+                  <h1 className="mb-6 mt-0 pt-8 text-4xl font-bold text-white">
                     The Best Prices on
                     <br />
                     Airbnbs Anywhere
@@ -49,7 +65,7 @@ export default function MastHead() {
               </div>
 
               {/* Search Bar Container */}
-              <div className="relative z-30 mt-14 w-full lg:w-[60%]">
+              <div className="relative z-30 mt-20 w-full lg:w-[60%]">
                 {/* Desktop Search */}
                 <div className="hidden min-[900px]:block">
                   <div className="rounded-2xl shadow-xl">
@@ -59,28 +75,43 @@ export default function MastHead() {
 
                 {/* Mobile Search */}
                 <div className="min-[900px]:hidden">
-                  <MobileSearchDialog
-                    open={isSearchOpen}
-                    onOpenChange={setIsSearchOpen}
-                  />
-                  <p className="mb-8 mt-8 text-center text-xl">
+                  <div className="space-y-3">
+                    <p className="text-center text-sm font-semibold text-muted-foreground text-white lg:block">
+                      Send a request to every host in{" "}
+                      <span className="font-bold text-[#35B51F]">
+                        <Typewriter
+                          component={"span"}
+                          options={{
+                            strings: ["SEATTLE", "PARIS", "MIAMI", "ANY CITY"],
+                            autoStart: true,
+                            loop: true,
+                          }}
+                        />
+                      </span>
+                    </p>
+                    <MobileSearchDialog
+                      open={isSearchOpen}
+                      onOpenChange={setIsSearchOpen}
+                    />
+                  </div>
+                  <p className="mb-8 mt-44 text-center text-xl text-zinc-900">
                     Make deals with hosts on their empty nights
                   </p>
-                  <div className="space-y-4">
+                  <div className="space-y-4 text-zinc-900">
                     <div className="flex items-center">
-                      <span className="mr-2 text-teal-600">✓</span>
+                      <span className="mr-2 text-teal-400">✓</span>
                       <span>Flexible Cancelation Policies</span>
                     </div>
                     <div className="flex items-center">
-                      <span className="mr-2 text-teal-600">✓</span>
+                      <span className="mr-2 text-teal-400">✓</span>
                       <span>Same properties you see on Airbnb</span>
                     </div>
                     <div className="flex items-center">
-                      <span className="mr-2 text-teal-600">✓</span>
+                      <span className="mr-2 text-teal-400">✓</span>
                       <span>Best Prices</span>
                     </div>
                   </div>
-                  <p className="mt-8 text-center text-gray-600">
+                  <p className="mt-8 text-center text-white">
                     Search the best deals available{" "}
                     <span className="underline">anywhere</span> on short term
                     rentals right now
@@ -88,7 +119,7 @@ export default function MastHead() {
                 </div>
               </div>
 
-              {/* Background Image - Desktop Only */}
+              {/* Desktop Background Image - Keep original styling */}
               <div className="absolute right-0 top-20 z-10 mt-12 hidden w-[775px] max-w-none min-[900px]:block">
                 <div className="relative h-[450px]">
                   <Image
@@ -181,8 +212,8 @@ export default function MastHead() {
               </div>
 
               {/* Right Column - Form */}
-              <div className="flex items-center justify-center">
-                <div className="w-full max-w-md rounded-2xl border bg-white p-6 shadow-xl">
+              <div className="flex items-center justify-end">
+                <div className="right-0 w-full max-w-md rounded-2xl border bg-white p-6 shadow-2xl lg:max-w-xl">
                   <CityRequestFormContainer />
                 </div>
               </div>

@@ -377,17 +377,17 @@ export function DesktopSearchTab() {
       <>
         <Button
           variant="ghost"
-          className="absolute left-0 top-1/2 z-10 -translate-y-1/2 bg-white"
+          className="absolute left-0 top-1/2 z-10 -translate-y-1/2 bg-white/60 hover:bg-white/70"
           onClick={() => scroll("left")}
         >
-          <ChevronLeft className="h-6 w-6" />
+          <ChevronLeft className="h-6 w-6 text-black" />
         </Button>
         <Button
           variant="ghost"
-          className="absolute right-0 top-1/2 z-10 -translate-y-1/2 bg-white"
+          className="absolute right-0 top-1/2 z-10 -translate-y-1/2 bg-white/60 hover:bg-white/70"
           onClick={() => scroll("right")}
         >
-          <ChevronRight className="h-6 w-6" />
+          <ChevronRight className="h-6 w-6 text-black" />
         </Button>
       </>
     );
