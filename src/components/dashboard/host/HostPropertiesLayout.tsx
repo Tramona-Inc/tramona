@@ -20,6 +20,7 @@ import {
 } from "@/server/db/schema/tables/properties";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useRouter } from "next/router";
+import ExpandableSearchBar from "@/components/_common/ExpandableSearchBar";
 
 export default function HostPropertiesLayout({
   children,
@@ -106,13 +107,8 @@ export default function HostPropertiesLayout({
     <section className="mx-auto mb-24 mt-7 max-w-7xl px-6 md:my-14">
       <div className="flex flex-col gap-4 sm:flex-row sm:justify-between">
         <h1 className="text-2xl font-bold md:text-4xl">Your properties</h1>
-        <div className="flex items-center justify-center gap-4 lg:justify-start">
-          <Button
-            size="icon"
-            className="rounded-full bg-white font-bold text-black shadow-xl"
-          >
-            <Search strokeWidth={2} />
-          </Button>
+        <div className="flex flex-1 items-center justify-end gap-4">
+          <ExpandableSearchBar />
           <Button
             size="icon"
             className="rounded-full bg-white font-bold text-black shadow-xl"
