@@ -83,7 +83,7 @@ export default function MastHead() {
                   <div className="space-y-3">
                     <p className="text-center text-sm font-semibold text-muted-foreground text-white lg:block">
                       Send a request to every host in{" "}
-                      <span className="font-bold text-[#35B51F]">
+                      <span className="font-bold text-white">
                         <Typewriter
                           component={"span"}
                           options={{
