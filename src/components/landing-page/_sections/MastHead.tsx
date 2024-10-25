@@ -17,16 +17,21 @@ import { useState } from "react";
 import { AdjustedPropertiesProvider } from "../search/AdjustedPropertiesContext";
 import airbnbLanding from "public/assets/images/landing-page/airbnbLanding.png";
 import Typewriter from "typewriter-effect";
+import SliderToggle from "../search/Slider";
 
 export default function MastHead() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [activeOption, setActiveOption] = useState<"price" | "book">("price");
 
+  const handleToggle = (value: "price" | "book") => {
+    setActiveOption(value);
+  };
   return (
     <>
       <section className="relative overflow-hidden bg-white pb-32">
         {/* Mobile Background Image with overlay - hidden on desktop */}
         <div className="absolute inset-0 z-0 min-[900px]:hidden">
-          <div className="relative h-[400px] w-full">
+          <div className="relative h-[440px] w-full">
             <Image
               src={airbnbLanding}
               alt="Modern Airbnb property"
@@ -92,26 +97,43 @@ export default function MastHead() {
                     <MobileSearchDialog
                       open={isSearchOpen}
                       onOpenChange={setIsSearchOpen}
+                      activeOption={activeOption}
+                    />
+                    <SliderToggle
+                      onToggle={handleToggle}
+                      defaultValue="price"
+                      className="mt-4"
                     />
                   </div>
-                  <p className="mb-8 mt-44 text-center text-xl text-zinc-900">
+                </div>
+              </div>
+
+              <div className="mt-32 min-[900px]:hidden">
+                <div className="space-y-6 rounded-2xl bg-white p-6">
+                  <h2 className="text-center text-xl font-medium">
                     Make deals with hosts on their empty nights
-                  </p>
-                  <div className="space-y-4 text-zinc-900">
+                  </h2>
+
+                  <div className="space-y-4">
                     <div className="flex items-center">
-                      <span className="mr-2 text-teal-400">✓</span>
-                      <span>Flexible Cancelation Policies</span>
+                      <span className="mr-2 text-teal-600">✓</span>
+                      <span className="text-zinc-900">
+                        Flexible Cancelation Policies
+                      </span>
                     </div>
                     <div className="flex items-center">
-                      <span className="mr-2 text-teal-400">✓</span>
-                      <span>Same properties you see on Airbnb</span>
+                      <span className="mr-2 text-teal-600">✓</span>
+                      <span className="text-zinc-900">
+                        Same properties you see on Airbnb
+                      </span>
                     </div>
                     <div className="flex items-center">
-                      <span className="mr-2 text-teal-400">✓</span>
-                      <span>Best Prices</span>
+                      <span className="mr-2 text-teal-600">✓</span>
+                      <span className="text-zinc-900">Best Prices</span>
                     </div>
                   </div>
-                  <p className="mt-8 text-center text-white">
+
+                  <p className="text-center text-sm text-gray-600">
                     Search the best deals available{" "}
                     <span className="underline">anywhere</span> on short term
                     rentals right now
@@ -259,7 +281,7 @@ export default function MastHead() {
               </div>
             </div>
 
-            <div className="mt-16 rounded-3xl bg-white p-8">
+            <div className="mt-16 hidden rounded-3xl bg-white p-8 md:block">
               <h2 className="text-center text-3xl">
                 Book It Now- Best deals on Airbnbs{" "}
                 <span className="font-bold underline">Anywhere</span>
@@ -268,15 +290,15 @@ export default function MastHead() {
             </div>
 
             {/* City Carousel Section */}
-            <div className="my-20">
+            <div className="md:my-20">
               <AdjustedPropertiesProvider>
                 <DynamicDesktopSearchBar />
               </AdjustedPropertiesProvider>
-              <div className="my-12"></div>
+              <div className="md:my-12"></div>
             </div>
 
             {/* Live Cities and Hosts Section */}
-            <div className="mt-16 rounded-3xl bg-white p-8">
+            <div className="rounded-3xl bg-white p-8 md:mt-16">
               <h2 className="mb-4 text-center text-3xl font-bold">
                 We are currently live in{" "}
                 <span className="underline">35 cities</span> and counting

@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { X, Search, Calendar, Users2, DollarSign } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/utils/utils";
 import { Input } from "@/components/ui/input";
 import DateRangeInput from "@/components/_common/DateRangeInput";
 import PlacesInput from "@/components/_common/PlacesInput";
@@ -16,17 +15,19 @@ import {
 import { useCityRequestForm } from "../SearchBars/useCityRequestForm";
 import { api } from "@/utils/api";
 import RequestSubmittedDialog from "@/components/landing-page/SearchBars/DesktopRequestComponents/RequestSubmittedDialog";
+import { useForm } from "react-hook-form";
 
 interface MobileSearchDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  activeOption: "price" | "book";
 }
 
 export default function MobileSearchDialog({
   open,
   onOpenChange,
+  activeOption,
 }: MobileSearchDialogProps) {
-  const [activeTab, setActiveTab] = useState<"search" | "request">("search");
   const [requestSubmittedDialogOpen, setRequestSubmittedDialogOpen] =
     useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -41,6 +42,14 @@ export default function MobileSearchDialog({
     setMadeByGroupId,
   });
 
+  // Form for the search tab
+  const searchForm = useForm();
+  const [searchLatLng, setSearchLatLng] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
+  const [searchRadius, setSearchRadius] = useState<number>(0);
+
   const inviteLinkQuery = api.groups.generateInviteLink.useQuery(
     { groupId: madeByGroupId! },
     { enabled: madeByGroupId !== undefined },
@@ -54,6 +63,9 @@ export default function MobileSearchDialog({
 
   const { latLng, radius } = form.watch();
 
+  // Map the activeOption to the tab state
+  const activeTab = activeOption === "price" ? "request" : "search";
+
   return (
     <>
       {/* Search Bar Trigger */}
@@ -62,7 +74,9 @@ export default function MobileSearchDialog({
         className="flex w-full cursor-pointer items-center rounded-full border bg-white px-4 py-3 shadow-lg"
       >
         <Search className="mr-3 h-5 w-5 text-gray-400" />
-        <span className="text-gray-500">Search or Request a deal</span>
+        <span className="text-gray-500">
+          {activeOption === "price" ? "Name your price" : "Search properties"}
+        </span>
       </div>
 
       {/* Search Dialog */}
@@ -74,30 +88,11 @@ export default function MobileSearchDialog({
               <button onClick={() => onOpenChange(false)}>
                 <X className="h-5 w-5" />
               </button>
-              <div className="flex gap-6">
-                <button
-                  onClick={() => setActiveTab("search")}
-                  className={cn(
-                    "border-b-2 pb-2",
-                    activeTab === "search"
-                      ? "border-black font-semibold"
-                      : "border-transparent text-gray-500",
-                  )}
-                >
-                  Search Properties
-                </button>
-                <button
-                  onClick={() => setActiveTab("request")}
-                  className={cn(
-                    "border-b-2 pb-2",
-                    activeTab === "request"
-                      ? "border-black font-semibold"
-                      : "border-transparent text-gray-500",
-                  )}
-                >
-                  Request deal
-                </button>
-              </div>
+              <h2 className="text-lg font-semibold">
+                {activeOption === "price"
+                  ? "Name your price"
+                  : "Search properties"}
+              </h2>
               <div className="w-5" />
             </div>
           </div>
@@ -105,43 +100,61 @@ export default function MobileSearchDialog({
           {/* Content */}
           {activeTab === "search" ? (
             <div className="flex-1 overflow-y-auto p-4">
-              <div className="flex flex-col space-y-8">
-                {/* Location Section */}
-                <div className="space-y-2">
-                  <h3 className="text-lg font-semibold">Location</h3>
-                  <div className="relative">
-                    <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-                    <Input
+              <Form {...searchForm}>
+                <form className="flex flex-col space-y-8">
+                  {/* Location Section */}
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-semibold">Location</h3>
+                    <PlacesInput
+                      control={searchForm.control}
+                      latLng={searchLatLng}
+                      setLatLng={setSearchLatLng}
+                      radius={searchRadius}
+                      setRadius={setSearchRadius}
+                      name="location"
+                      variant="mobile"
                       placeholder="Enter your destination"
-                      className="h-14 rounded-full border-gray-200 bg-white pl-12 text-base"
+                      className="relative h-14 w-full rounded-full border border-gray-200 bg-white"
+                      inputClassName="h-14 rounded-full border-0 pl-12 text-base placeholder:text-gray-500"
                     />
                   </div>
-                </div>
 
-                {/* Dates Section */}
-                <div className="space-y-2">
-                  <h3 className="text-lg font-semibold">Dates</h3>
-                  <div className="relative">
-                    <Calendar className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-                    <Input
-                      placeholder="Select dates"
-                      className="h-14 rounded-full border-gray-200 bg-white pl-12 text-base"
+                  {/* Dates Section */}
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-semibold">Dates</h3>
+                    <FormField
+                      control={searchForm.control}
+                      name="date"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <DateRangeInput
+                              {...field}
+                              variant="mobile"
+                              placeholder="Select dates"
+                              className="h-14 rounded-full border-gray-200 pl-12 text-base"
+                              disablePast
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
                   </div>
-                </div>
 
-                {/* Travelers Section */}
-                <div className="space-y-2">
-                  <h3 className="text-lg font-semibold">Travelers</h3>
-                  <div className="relative">
-                    <Users2 className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-                    <Input
-                      placeholder="Add guests"
-                      className="h-14 rounded-full border-gray-200 bg-white pl-12 text-base"
-                    />
+                  {/* Travelers Section */}
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-semibold">Travelers</h3>
+                    <div className="relative">
+                      <Users2 className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                      <Input
+                        placeholder="Add guests"
+                        className="h-14 rounded-full border-gray-200 bg-white pl-12 text-base"
+                      />
+                    </div>
                   </div>
-                </div>
-              </div>
+                </form>
+              </Form>
 
               {/* Search Footer */}
               <div className="fixed bottom-0 left-0 right-0 flex items-center justify-between border-t bg-white p-4">
