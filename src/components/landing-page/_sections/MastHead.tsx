@@ -54,7 +54,7 @@ export default function MastHead() {
                     The best prices on Airbnbs{" "}
                     <span className="whitespace-nowrap">anywhere</span>
                   </h1>
-                  <p className="mb-8 text-[22px] text-zinc-900 min-[1102px]:text-[24px]">
+                  <p className="mb-8 text-[22px] font-bold text-zinc-900 min-[1102px]:text-[24px]">
                     Make deals with hosts on their empty nights
                   </p>
                 </div>

@@ -297,7 +297,7 @@ export default function LandingSearchBar() {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
-          <div className="mb-4">
+          <div className="mb-6">
             <div className="flex flex-col space-y-4 rounded-lg border border-black bg-white p-2 sm:flex-row sm:items-center sm:space-y-0 sm:rounded-full">
               <div className="flex w-full items-center sm:w-64 sm:px-2">
                 <MapPinIcon className="mr-2 h-4 w-4 text-gray-400 sm:h-5 sm:w-5" />
@@ -333,7 +333,7 @@ export default function LandingSearchBar() {
 
               <div className="hidden sm:block sm:h-8 sm:w-px sm:bg-gray-300" />
 
-              <div className="flex w-full items-center sm:w-48 sm:px-4">
+              <div className="flex w-full items-center sm:w-56 sm:px-4">
                 <CalendarIcon className="mr-2 h-4 w-4 text-gray-400 sm:h-5 sm:w-5" />
                 <FormField
                   control={form.control}
@@ -375,7 +375,7 @@ export default function LandingSearchBar() {
                           <FormControl>
                             <Input
                               {...field}
-                              placeholder="Name your price"
+                              placeholder="Price"
                               className="border-0 bg-transparent text-sm focus:outline-none focus:ring-0"
                             />
                           </FormControl>
@@ -408,7 +408,7 @@ export default function LandingSearchBar() {
               </div>
             </div>
 
-            <div className="mt-4 flex justify-center">
+            <div className="mt-6 flex justify-center">
               <Button
                 type="submit"
                 className="w-full rounded-full px-8 py-2 text-white sm:w-auto"
@@ -421,19 +421,21 @@ export default function LandingSearchBar() {
       </Form>
 
       <div className="mb-4 flex flex-col items-center space-y-2 text-xs text-gray-600 sm:flex-row sm:justify-center sm:space-x-8 sm:space-y-0 sm:text-sm">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 font-bold">
           <Check size={24} className="h-4 w-4 text-primaryGreen" />
           Flexible Cancelation
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 font-bold">
           <Check size={24} className="h-4 w-4 text-primaryGreen" />
           Same as Airbnb
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 font-bold">
           <Check size={24} className="h-4 w-4 text-primaryGreen" />
           Best Prices
         </div>
       </div>
+
+      <div className="my-4 h-[1px] w-full bg-black" />
 
       <div className="text-center text-xs text-gray-600 sm:text-sm">
         Search the best deals available{" "}
