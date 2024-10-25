@@ -32,6 +32,50 @@ export function getListingDataUrl(
   return `https://www.airbnb.com/api/v3/StaysPdpSections/160265f6bdbacc2084cdf7de8641926c5ee141c3a2967dca0407ee47cec2a7d1?operationName=StaysPdpSections&locale=en&currency=USD&variables={"id":"${encodedId}","pdpSectionsRequest":{${checkIn ? `"checkIn":"${formatDateYearMonthDay(checkIn)}"` : ""}${checkOut ? `"checkOut":"${formatDateYearMonthDay(checkOut)}"` : ""},"adults":"${numGuests ? numGuests : ""}","layouts":["SIDEBAR","SINGLE_COLUMN"]}}&extensions={"persistedQuery":{"version":1,"sha256Hash":"160265f6bdbacc2084cdf7de8641926c5ee141c3a2967dca0407ee47cec2a7d1"}}`;
 }
 
+export function getReviewsUrl(id: string) {
+  const encodedId = encodeAirbnbId(id);
+  return `https://www.airbnb.com/api/v3/StaysPdpReviewsQuery/dec1c8061483e78373602047450322fd474e79ba9afa8d3dbbc27f504030f91d?operationName=StaysPdpReviewsQuery&locale=en&currency=USD&variables={"id":"${encodedId}","pdpReviewsRequest":{"fieldSelector":"for_p3_translation_only","forPreview":false,"limit":10,"offset":"0","showingTranslationButton":false,"first":10,"sortingPreference":"RATING_DESC"}}&extensions={"persistedQuery":{"version":1,"sha256Hash":"dec1c8061483e78373602047450322fd474e79ba9afa8d3dbbc27f504030f91d"}}`;
+}
+
+export function getAmenities(listingData: string, id: string) {
+  const amenitiesStr = /"seeAllAmenitiesGroups":(.+?\}\]\}\])/.exec(
+    listingData,
+  )?.[1];
+  if (!amenitiesStr)
+    throw new Error(`Airbnb id ${id}: Failed to find amenities`);
+
+  const amenities = z
+    .array(z.object({ amenities: z.array(z.object({ title: z.string() })) }))
+    .parse(JSON.parse(amenitiesStr))
+    .map(({ amenities }) => amenities.map(({ title }) => title))
+    .flat();
+
+  return amenities;
+}
+
+export function getCancellationPolicy(listingData: string, id: string) {
+  const cancellationPolicyStr =
+    /"localized_cancellation_policy_name":"(.+?)"/.exec(listingData)?.[1];
+  if (!cancellationPolicyStr)
+    throw new Error(`Airbnb id ${id}: Failed to find cancellation policy`);
+
+  const cancellationPolicy: CancellationPolicy = z
+    .enum([
+      "Flexible",
+      "Moderate",
+      "Firm",
+      "Strict",
+      "Super Strict 30 Days",
+      "Super Strict 60 Days",
+      "Long Term",
+      "Non-refundable",
+    ])
+    .catch("Non-refundable")
+    .parse(cancellationPolicyStr);
+
+  return cancellationPolicy;
+}
+
 export async function scrapeAirbnbListing(
   id: string,
   {
@@ -40,7 +84,6 @@ export async function scrapeAirbnbListing(
     numGuests,
   }: { checkIn: Date; checkOut: Date; numGuests: number },
 ) {
-  const encodedId = encodeAirbnbId(id);
 
   const listingDataUrl = getListingDataUrl(id, {
     checkIn,
@@ -48,7 +91,7 @@ export async function scrapeAirbnbListing(
     numGuests,
   });
 
-  const reviewsUrl = `https://www.airbnb.com/api/v3/StaysPdpReviewsQuery/dec1c8061483e78373602047450322fd474e79ba9afa8d3dbbc27f504030f91d?operationName=StaysPdpReviewsQuery&locale=en&currency=USD&variables={"id":"${encodedId}","pdpReviewsRequest":{"fieldSelector":"for_p3_translation_only","forPreview":false,"limit":10,"offset":"0","showingTranslationButton":false,"first":10,"sortingPreference":"RATING_DESC"}}&extensions={"persistedQuery":{"version":1,"sha256Hash":"dec1c8061483e78373602047450322fd474e79ba9afa8d3dbbc27f504030f91d"}}`;
+  const reviewsUrl = getReviewsUrl(id);
 
   const [listingData, reviewsData] = (await Promise.all(
     [
@@ -84,17 +127,19 @@ export async function scrapeAirbnbListing(
   if (!about)
     throw new Error(`Airbnb id ${id}: Failed to parse aboutHTML: ${aboutHTML}`);
 
-  const amenitiesStr = /"seeAllAmenitiesGroups":(.+?\}\]\}\])/.exec(
-    listingData,
-  )?.[1];
-  if (!amenitiesStr)
-    throw new Error(`Airbnb id ${id}: Failed to find amenities`);
+  const amenities = getAmenities(listingData, id);
 
-  const amenities = z
-    .array(z.object({ amenities: z.array(z.object({ title: z.string() })) }))
-    .parse(JSON.parse(amenitiesStr))
-    .map(({ amenities }) => amenities.map(({ title }) => title))
-    .flat();
+  // const amenitiesStr = /"seeAllAmenitiesGroups":(.+?\}\]\}\])/.exec(
+  //   listingData,
+  // )?.[1];
+  // if (!amenitiesStr)
+  //   throw new Error(`Airbnb id ${id}: Failed to find amenities`);
+
+  // const amenities = z
+  //   .array(z.object({ amenities: z.array(z.object({ title: z.string() })) }))
+  //   .parse(JSON.parse(amenitiesStr))
+  //   .map(({ amenities }) => amenities.map(({ title }) => title))
+  //   .flat();
 
   const heroImagesStr = /"previewImages":(.+?\])/.exec(listingData)?.[1];
   if (!heroImagesStr)
@@ -222,44 +267,46 @@ export async function scrapeAirbnbListing(
 
   const allOtherHouseRules = otherHouseRulesStr
     ? z
-        .array(z.object({ title: z.string() }))
-        .parse(JSON.parse(otherHouseRulesStr))
-        .map(({ title }) => title)
+      .array(z.object({ title: z.string() }))
+      .parse(JSON.parse(otherHouseRulesStr))
+      .map(({ title }) => title)
     : [];
 
   const otherHouseRules =
     allOtherHouseRules.length > 0
       ? allOtherHouseRules
-          .filter(
-            (rule) =>
-              // exclude rules for pets, smoking, and maximum number of guests
-              !["pets", "smoking", "guests"].some((keyword) =>
-                rule.toLowerCase().includes(keyword),
-              ),
-          )
-          .map((rule) => `- ${rule}`)
-          .join("\n")
+        .filter(
+          (rule) =>
+            // exclude rules for pets, smoking, and maximum number of guests
+            !["pets", "smoking", "guests"].some((keyword) =>
+              rule.toLowerCase().includes(keyword),
+            ),
+        )
+        .map((rule) => `- ${rule}`)
+        .join("\n")
       : null;
 
   // "localized_cancellation_policy_name"
-  const cancellationPolicyStr =
-    /"localized_cancellation_policy_name":"(.+?)"/.exec(listingData)?.[1];
-  if (!cancellationPolicyStr)
-    throw new Error(`Airbnb id ${id}: Failed to find cancellation policy`);
+  const cancellationPolicy = getCancellationPolicy(listingData, id);
 
-  const cancellationPolicy: CancellationPolicy = z
-    .enum([
-      "Flexible",
-      "Moderate",
-      "Firm",
-      "Strict",
-      "Super Strict 30 Days",
-      "Super Strict 60 Days",
-      "Long Term",
-      "Non-refundable",
-    ])
-    .catch("Non-refundable")
-    .parse(cancellationPolicyStr);
+  // const cancellationPolicyStr =
+  //   /"localized_cancellation_policy_name":"(.+?)"/.exec(listingData)?.[1];
+  // if (!cancellationPolicyStr)
+  //   throw new Error(`Airbnb id ${id}: Failed to find cancellation policy`);
+
+  // const cancellationPolicy: CancellationPolicy = z
+  //   .enum([
+  //     "Flexible",
+  //     "Moderate",
+  //     "Firm",
+  //     "Strict",
+  //     "Super Strict 30 Days",
+  //     "Super Strict 60 Days",
+  //     "Long Term",
+  //     "Non-refundable",
+  //   ])
+  //   .catch("Non-refundable")
+  //   .parse(cancellationPolicyStr);
 
   const nightlyPriceStr = /"discountedPrice":"(.+?)"/.exec(listingData)?.[1];
   if (!nightlyPriceStr)
