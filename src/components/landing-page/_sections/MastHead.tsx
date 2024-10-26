@@ -392,10 +392,8 @@ export default function MastHead() {
           </div>
 
           {/* Final CTA Section - FAQ Hidden on Mobile */}
-          <div className="grid gap-4 pt-32">
-            <div className="col-span-full hidden flex-col gap-2 rounded-2xl bg-zinc-100 p-6 md:flex">
-              <FAQ />
-            </div>
+          <div className="col-span-full hidden flex-col gap-2 rounded-2xl bg-zinc-100 p-6 md:flex">
+            <FAQ />
           </div>
         </div>
       </section>
