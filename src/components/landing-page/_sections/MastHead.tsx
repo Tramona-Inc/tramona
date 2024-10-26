@@ -159,8 +159,8 @@ export default function MastHead() {
 
           {/* Host/Traveler Section */}
           <div className="relative md:mb-24 md:mt-48">
-            <div className="absolute inset-0 mt-0 rounded-3xl bg-[#DEEEFB] md:mt-24"></div>
-            <div className="relative grid gap-6 px-4 pb-12 pt-4 sm:grid-cols-2 sm:px-6">
+            <div className="absolute inset-0 mt-0 rounded-3xl bg-primaryGreen md:mt-24"></div>
+            <div className="relative grid gap-6 px-4 pb-12 pt-4 sm:grid-cols-2 sm:px-12">
               {/* Host Card */}
               <div className="overflow-hidden rounded-2xl bg-white shadow-lg">
                 <div className="relative h-48 sm:h-64">
@@ -214,20 +214,24 @@ export default function MastHead() {
             <div className="hidden md:grid md:grid-cols-2 md:gap-8">
               {/* Left Column - Description */}
               <div className="flex flex-col justify-center">
-                <h2 className="mb-4 text-3xl lg:text-4xl">
-                  <span className="font-bold">Name Your Own Price—</span>
-                  <span className="font-normal">Anywhere in the U.S.</span>
+                <h2 className="mb-4 text-3xl lg:text-[34px]">
+                  <span className="font-bold text-primaryGreen">
+                    Name Your Own Price—
+                  </span>
+                  <span className="font-normal text-primaryGreen">
+                    Anywhere in the U.S.
+                  </span>
                 </h2>
-                <p className="mb-6 text-lg text-gray-600">
+                <p className="mb-6 text-center text-lg text-black">
                   When hosts have vacancies, no one wins.
                 </p>
-                <ul className="mb-6 list-decimal pl-5 text-lg text-gray-600">
+                <ul className="mb-6 list-decimal pl-5 text-lg text-black">
                   <li>Where you want to go</li>
                   <li>How much you want to spend</li>
                   <li>Amount of guests</li>
                   <li>Your dates</li>
                 </ul>
-                <p className="text-lg text-gray-600">
+                <p className="text-lg text-black">
                   Your request then goes out to every host in that area with a
                   vacancy
                 </p>
@@ -235,7 +239,7 @@ export default function MastHead() {
 
               {/* Right Column - Form */}
               <div className="flex items-center justify-end">
-                <div className="right-0 w-full max-w-md rounded-2xl border bg-white p-6 shadow-2xl lg:max-w-xl">
+                <div className="right-0 w-full max-w-md rounded-2xl border bg-white p-6 shadow-2xl lg:max-w-2xl">
                   <CityRequestFormContainer />
                 </div>
               </div>
@@ -243,35 +247,28 @@ export default function MastHead() {
 
             {/* How Tramona Works Section */}
             <div className="-mx-4 mt-12 rounded-none bg-[#F4F6F8] p-8 md:mx-0 md:rounded-3xl">
-              <h2 className="mb-6 text-center text-3xl font-bold">
+              <h2 className="mb-2 text-center text-3xl font-bold text-primaryGreen">
                 How Tramona works
               </h2>
+              <p className="mb-6 text-center text-xl font-medium text-primaryGreen">
+                The Priceline of Airbnbs
+              </p>
 
-              <div className="mb-6">
-                <p className="text-gray-700">
-                  <span className="font-bold leading-relaxed text-black">
-                    For Travelers:{" "}
-                  </span>
-                  Submit your travel request with dates, location, and budget,
-                  or use the "Book it Now" option to instantly book available
-                  stays at great prices. Hosts review your custom requests and
-                  send personalized offers, and once you agree on the price, you
-                  can book directly through Tramona.
-                </p>
+              <div className="mx-auto max-w-3xl">
+                <div className="mx-auto max-w-[700px]">
+                  <p className="text-large mb-6 text-left font-bold leading-relaxed text-primaryGreen">
+                    For Travelers: Set your budget, submit your offer, or book
+                    instantly at unbeatable prices.
+                  </p>
+
+                  <p className="text-large mb-12 text-left font-bold leading-relaxed text-primaryGreen">
+                    For Hosts: Receive requests, accept, reject, or counter
+                    offers with total control over pricing.
+                  </p>
+                </div>
               </div>
 
-              <div className="mb-6">
-                <p className="text-gray-700">
-                  <span className="font-bold leading-relaxed text-black">
-                    For Hosts:{" "}
-                  </span>
-                  Receive traveler requests or enable the "Book it Now" feature
-                  for instant bookings. You control the price and get the option
-                  fill vacancies by offering deals directly to travelers.
-                </p>
-              </div>
-
-              <div className="flex justify-center">
+              <div className="mb-4 flex justify-center">
                 <Button
                   variant="secondary"
                   className="bg-primaryGreen text-white"
@@ -279,23 +276,40 @@ export default function MastHead() {
                   <Link href="/how-it-works">How it works</Link>
                 </Button>
               </div>
+
+              <p className="font-[24px]text-primaryGreen text-center text-xl font-medium">
+                Never let a night go to waste
+              </p>
             </div>
 
+            {/* New Banner - Desktop Only */}
+            <div className="relative mt-12 hidden md:block">
+              <div className="absolute inset-x-0 left-[50%] w-screen -translate-x-1/2 bg-[#1C3D36] py-6">
+                <div className="text-center text-xl font-medium text-white">
+                  Lowest fees on the market. 40% lower than Airbnb and other
+                  competitors
+                </div>
+              </div>
+              {/* Spacer div to maintain layout flow */}
+              <div className="h-[72px]" />
+            </div>
+
+            {/* Book It Now Section */}
             <div className="mt-16 hidden rounded-3xl bg-white p-8 md:block">
-              <h2 className="text-center text-3xl">
+              <h2 className="text-center text-3xl font-bold text-primaryGreen">
                 Book It Now- Best deals on Airbnbs{" "}
-                <span className="font-bold underline">Anywhere</span>
+                <span className="font-bold text-primaryGreen underline">
+                  Anywhere
+                </span>
               </h2>
               <div className="mx-auto max-w-3xl"></div>
             </div>
 
             {/* City Carousel Section */}
-            <div className="md:my-20">
-              <AdjustedPropertiesProvider>
-                <DynamicDesktopSearchBar />
-              </AdjustedPropertiesProvider>
-              <div className="md:my-12"></div>
-            </div>
+            <AdjustedPropertiesProvider>
+              <DynamicDesktopSearchBar />
+            </AdjustedPropertiesProvider>
+            <div className="md:my-12"></div>
 
             {/* Live Cities and Hosts Section */}
             <div className="rounded-3xl bg-white p-8 md:mt-16">
@@ -303,16 +317,16 @@ export default function MastHead() {
                 We are currently live in{" "}
                 <span className="underline">35 cities</span> and counting
               </h2>
-              <p className="mb-8 text-center text-gray-600">
+              <p className="mb-8 text-center text-primaryGreen">
                 Are you a host in a city we are not yet live in?{" "}
                 <a href="/for-hosts" className="text-teal-600 underline">
                   Become a host
                 </a>{" "}
-                and help us launch there.
+                and help us launch there as soon as possible.
               </p>
             </div>
 
-            <div className="border-gray mb-12 hidden w-full border-t-2 md:block" />
+            <div className="mb-12 w-full border-t border-black" />
 
             <div className="grid gap-8 lg:grid-cols-2">
               <div className="relative hidden h-[400px] w-full md:block">
@@ -325,13 +339,18 @@ export default function MastHead() {
                 />
               </div>
               <div className="flex flex-col justify-center">
-                <h3 className="mb-4 hidden text-2xl font-bold md:block">
+                <h3 className="mb-3 hidden text-2xl font-bold text-primaryGreen md:block">
                   Hosts: Fill Your Empty Nights and Earn More
                 </h3>
-                <p className="mb-6 text-zinc-900">
-                  Whether you're in one of our 'Book It Now' cities or elsewhere
-                  in the U.S., you can list your property and start earning.
-                  Accept 'Name Your Own Price' offers from travelers nationwide.
+                <h3 className="mb-3 hidden text-2xl font-medium text-primaryGreen md:block">
+                  The Priceline for Airbnbs
+                </h3>
+                <p className="mb-6 text-black">
+                  Tramona helps you earn more from your empty nights. Keep your
+                  pricing unchanged on platforms like Airbnb and Vrbo, while
+                  receiving direct requests, on your empty nights, from
+                  travelers through Tramona. Accept, reject, or counter any
+                  request—your pricing, your control.
                 </p>
                 <ul className="mb-6 space-y-2">
                   <li className="flex items-center">
@@ -355,17 +374,21 @@ export default function MastHead() {
                 <Button className="mx-auto bg-primaryGreen text-white md:mx-0 md:self-start">
                   <Link href="/for-hosts">List your property</Link>
                 </Button>
+                <p className="mt-3 text-center text-sm text-gray-600 md:text-left">
+                  Fully sign up in 1 minute with our “Connect with Airbnb”
+                  option
+                </p>
               </div>
             </div>
           </div>
 
           {/* Testimonial Carousel Section - Hidden on Mobile */}
           <div className="my-20 hidden md:block">
-            <div className="border-gray mb-12 w-full border-t-2" />
+            <div className="mb-12 w-full border-t border-black" />
             <div className="my-12">
               <TestimonialCarousel />
             </div>
-            <div className="border-gray mt-12 w-full border-t-2" />
+            <div className="mt-12 w-full border-t border-black" />
           </div>
 
           {/* Final CTA Section - FAQ Hidden on Mobile */}
@@ -378,18 +401,27 @@ export default function MastHead() {
       </section>
 
       {/* Ready to Experience Tramona Section */}
-      <div className="col-span-full mt-16 hidden bg-[#1C3D36] p-8 text-white md:block">
-        <h2 className="mb-8 text-center text-3xl font-bold">
+      <div className="col-span-full mt-16 hidden bg-[#1C3D36] px-8 py-8 text-white md:block">
+        <h2 className="mb-6 text-center text-3xl font-bold">
           Ready to Experience Tramona
         </h2>
-        <div className="flex flex-col items-center justify-center space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0">
-          <Button variant="outline" className="w-full sm:w-auto">
-            <Link href="">Name Your Own Price</Link>
+        <div className="flex flex-col items-center justify-center space-y-4 sm:flex-row sm:space-x-12 sm:space-y-0">
+          <Button
+            variant="outline"
+            className="w-[200px] rounded-md bg-white py-6 text-black hover:bg-white/90"
+          >
+            <Link href="/how-it-works">Name Your Own Price</Link>
           </Button>
-          <Button variant="outline" className="w-full sm:w-auto">
-            <Link href="">Book it now</Link>
+          <Button
+            variant="outline"
+            className="w-[200px] rounded-md bg-white py-6 text-black hover:bg-white/90"
+          >
+            <Link href="/how-it-works">Book it Now</Link>
           </Button>
-          <Button variant="outline" className="w-full sm:w-auto">
+          <Button
+            variant="outline"
+            className="w-[200px] rounded-md bg-white py-6 text-black hover:bg-white/90"
+          >
             <Link href="/for-hosts">Become a host</Link>
           </Button>
         </div>

@@ -300,7 +300,7 @@ export default function LandingSearchBar() {
           <div className="mb-6">
             <div className="flex flex-col space-y-4 rounded-lg border border-black bg-white p-2 sm:flex-row sm:items-center sm:space-y-0 sm:rounded-full">
               <div className="flex w-full items-center sm:w-64 sm:px-2">
-                <MapPinIcon className="mr-2 h-4 w-4 text-gray-400 sm:h-5 sm:w-5" />
+                <MapPinIcon className="mr-2 h-4 w-4 text-primaryGreen sm:h-5 sm:w-5" />
                 <FormField
                   control={form.control}
                   name="destination"
@@ -334,7 +334,7 @@ export default function LandingSearchBar() {
               <div className="hidden sm:block sm:h-8 sm:w-px sm:bg-gray-300" />
 
               <div className="flex w-full items-center sm:w-56 sm:px-4">
-                <CalendarIcon className="mr-2 h-4 w-4 text-gray-400 sm:h-5 sm:w-5" />
+                <CalendarIcon className="mr-2 h-4 w-4 text-primaryGreen sm:h-5 sm:w-5" />
                 <FormField
                   control={form.control}
                   name="dates"
@@ -366,7 +366,7 @@ export default function LandingSearchBar() {
                 <>
                   <div className="hidden sm:block sm:h-8 sm:w-px sm:bg-gray-300" />
                   <div className="flex w-full items-center sm:w-48 sm:px-4">
-                    <DollarSignIcon className="mr-2 h-4 w-4 text-gray-400 sm:h-5 sm:w-5" />
+                    <DollarSignIcon className="mr-2 h-4 w-4 text-primaryGreen sm:h-5 sm:w-5" />
                     <FormField
                       control={form.control}
                       name="price"
@@ -389,7 +389,7 @@ export default function LandingSearchBar() {
               <div className="hidden sm:block sm:h-8 sm:w-px sm:bg-gray-300" />
 
               <div className="flex w-full items-center sm:w-48 sm:px-4">
-                <Users2Icon className="mr-2 h-4 w-4 text-gray-400 sm:h-5 sm:w-5" />
+                <Users2Icon className="mr-2 h-4 w-4 text-primaryGreen sm:h-5 sm:w-5" />
                 <FormField
                   control={form.control}
                   name="guests"
