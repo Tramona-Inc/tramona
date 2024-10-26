@@ -423,15 +423,15 @@ export default function LandingSearchBar() {
       <div className="mb-4 flex flex-col items-center space-y-2 text-xs text-gray-600 sm:flex-row sm:justify-center sm:space-x-8 sm:space-y-0 sm:text-sm">
         <div className="flex items-center gap-2 font-bold">
           <Check size={24} className="h-4 w-4 text-primaryGreen" />
-          Flexible Cancelation
+          Flexible Cancelation Policies
         </div>
         <div className="flex items-center gap-2 font-bold">
           <Check size={24} className="h-4 w-4 text-primaryGreen" />
-          Same as Airbnb
+          Same properties you see on Airbnb for less
         </div>
         <div className="flex items-center gap-2 font-bold">
           <Check size={24} className="h-4 w-4 text-primaryGreen" />
-          Best Prices
+          Best Prices Anywhere
         </div>
       </div>
 

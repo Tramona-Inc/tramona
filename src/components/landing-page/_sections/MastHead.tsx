@@ -18,6 +18,7 @@ import { AdjustedPropertiesProvider } from "../search/AdjustedPropertiesContext"
 import airbnbLanding from "public/assets/images/landing-page/airbnbLanding.png";
 import Typewriter from "typewriter-effect";
 import SliderToggle from "../search/Slider";
+import TotalBooking from "./TotalBooking";
 
 export default function MastHead() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -50,12 +51,12 @@ export default function MastHead() {
               <div className="relative z-20 mb-8">
                 {/* Desktop Version */}
                 <div className="hidden min-[900px]:block">
-                  <h1 className="mb-4 text-[44px] font-bold text-zinc-900 min-[1102px]:text-[48px]">
-                    The best prices on Airbnbs{" "}
+                  <h1 className="mb-4 text-[36px] font-bold text-black min-[1102px]:text-[40px]">
+                    Best Deals on Short-Term Rentals{" "}
                     <span className="whitespace-nowrap">anywhere</span>
                   </h1>
-                  <p className="mb-8 text-[22px] font-bold text-zinc-900 min-[1102px]:text-[24px]">
-                    Make deals with hosts on their empty nights
+                  <p className="mb-8 text-[22px] font-bold text-black min-[1102px]:text-[24px]">
+                    Name your price or book instantly at unbeatable rates
                   </p>
                 </div>
 
@@ -157,6 +158,14 @@ export default function MastHead() {
             </div>
           </div>
 
+          <div className="mb-24 mt-32 hidden md:block">
+            <div className="flex items-center justify-center">
+              <div className="w-full max-w-4xl">
+                <TotalBooking />
+              </div>
+            </div>
+          </div>
+
           {/* Host/Traveler Section */}
           <div className="relative md:mb-24 md:mt-48">
             <div className="absolute inset-0 mt-0 rounded-3xl bg-primaryGreen md:mt-24"></div>
@@ -254,14 +263,14 @@ export default function MastHead() {
                 The Priceline of Airbnbs
               </p>
 
-              <div className="mx-auto max-w-3xl">
-                <div className="mx-auto max-w-[700px]">
-                  <p className="text-large mb-6 text-left font-bold leading-relaxed text-primaryGreen">
+              <div className="mx-auto max-w-4xl">
+                <div className="mx-auto max-w-full">
+                  <p className="mb-6 text-left text-xl font-semibold leading-relaxed text-primaryGreen">
                     For Travelers: Set your budget, submit your offer, or book
                     instantly at unbeatable prices.
                   </p>
 
-                  <p className="text-large mb-12 text-left font-bold leading-relaxed text-primaryGreen">
+                  <p className="mb-12 text-left text-xl font-semibold leading-relaxed text-primaryGreen">
                     For Hosts: Receive requests, accept, reject, or counter
                     offers with total control over pricing.
                   </p>

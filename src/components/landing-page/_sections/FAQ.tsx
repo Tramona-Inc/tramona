@@ -4,6 +4,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import Link from "next/link";
 import React from "react";
 
 const FAQ = () => {
@@ -30,12 +31,18 @@ const FAQ = () => {
   ];
 
   return (
-    <section className="mx-4 lg:mx-24 md:mx-12">
+    <section className="mx-4 md:mx-12 lg:mx-24">
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div>
-          <h1 className="text-3xl font-bold md:text-4xl">
+          <h1 className="mb-2 text-left text-3xl font-bold md:text-4xl">
             Frequently asked questions
           </h1>
+          <Link
+            href="/faq"
+            className="text-md font-medium text-black underline"
+          >
+            See full FAQ
+          </Link>
         </div>
         <div>
           <Accordion type="multiple">
