@@ -1,28 +1,6 @@
 import React, { useState } from "react";
 import Image from "next/image";
-import { api } from "@/utils/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { z } from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import type { RouterOutputs } from "@/utils/api";
 import { formatDate } from "date-fns";
 import { formatCurrency } from "@/utils/utils";
@@ -34,41 +12,28 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { ZoomIn, ZoomOut } from "lucide-react";
+import RespondToClaimForm from "./RespondToClaimForm";
+import {
+  GetBadgeByClaimItemStatus,
+  GetBadgeByClaimStatus,
+} from "@/components/_common/BadgeFunctions";
 
 type ClaimDetails = RouterOutputs["claims"]["getClaimWithAllDetailsById"];
 
-const resolutionSchema = z.object({
-  resolutionResult: z.enum(["Accepted", "Rejected", "Partially Approved"]),
-  resolutionDescription: z.string().min(1, "Description is required"),
-});
-
-type ResolutionFormData = z.infer<typeof resolutionSchema>;
-
 function ImageGallery({ images }: { images: string[] }) {
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isZoomed, setIsZoomed] = useState(false);
 
   const toggleZoom = () => setIsZoomed(!isZoomed);
 
   return (
     <div className="mt-4">
-      <div className="flex space-x-2 overflow-x-auto">
+      <div className="flex space-x-2 overflow-x-auto pb-2">
         {images.map((image, index) => (
           <Dialog key={index}>
             <DialogTrigger asChild>
-              <button
-                className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-md"
-                onClick={() => setSelectedImage(image)}
-              >
+              <button className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border-2 sm:h-20 sm:w-20 md:h-24 md:w-24">
                 <Image
                   src={image}
                   alt={`Claim image ${index + 1}`}
@@ -78,7 +43,6 @@ function ImageGallery({ images }: { images: string[] }) {
               </button>
             </DialogTrigger>
             <DialogContent className="sm:max-h-[90vh] sm:max-w-[90vw]">
-              {/* THIS IS SO UGLY PLEASE SOMEBODY FIX IT  */}
               <div
                 className={`relative ${isZoomed ? "h-[70vh]" : "h-[50vh]"} w-full`}
               >
@@ -108,23 +72,19 @@ function ImageGallery({ images }: { images: string[] }) {
 }
 
 function RespondToClaim({ claimDetails }: { claimDetails: ClaimDetails }) {
-  const onSubmit = async (values: ResolutionFormData, itemId: string) => {
-    console.log(itemId, values);
-    // Here you would typically call your API to submit the form data
-    // api.claims.resolveClaimItem.mutate({ claimId: claimDetails.claim.id, claimItemId: itemId, ...values });
-  };
-
   return (
-    <div className="space-y-6">
+    <div className="mb-20 space-y-6 lg:mb-0">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <span>Claim Information</span>
-            <Badge>{claimDetails.claim.claimStatus}</Badge>
+            <GetBadgeByClaimStatus
+              claimStatus={claimDetails.claim.claimStatus}
+            />
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <dl className="grid grid-cols-2 gap-4">
+          <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <dt className="font-semibold">Claim ID</dt>
               <dd>{claimDetails.claim.id}</dd>
@@ -158,21 +118,13 @@ function RespondToClaim({ claimDetails }: { claimDetails: ClaimDetails }) {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="mb-16">
         <CardHeader>
           <CardTitle>Claim Items and Resolutions</CardTitle>
         </CardHeader>
         <CardContent>
-          <Accordion type="single" collapsible className="w-full">
-            {claimDetails.claimItems.map((item, index) => {
-              const form = useForm<ResolutionFormData>({
-                resolver: zodResolver(resolutionSchema),
-                defaultValues: {
-                  resolutionResult: "Accepted",
-                  resolutionDescription: "",
-                },
-              });
-
+          <Accordion type="single" collapsible className="mb-5 w-full">
+            {claimDetails.claimItems.map((item) => {
               return (
                 <AccordionItem value={`item-${item.id}`} key={item.id}>
                   <AccordionTrigger>
@@ -180,111 +132,46 @@ function RespondToClaim({ claimDetails }: { claimDetails: ClaimDetails }) {
                       <span>{item.itemName}</span>
                       <div className="flex items-center space-x-2">
                         <span>{formatCurrency(item.requestedAmount)}</span>
-                        <Badge
-                          variant={
-                            item.travelerClaimResponse ? "yellow" : "red"
-                          }
-                          className="text-xs"
-                        >
-                          {item.travelerClaimResponse
-                            ? "Needs Attention"
-                            : "In Review"}
-                        </Badge>
+                        <GetBadgeByClaimItemStatus
+                          travelerClaimResponse={item.travelerClaimResponse}
+                        />
                       </div>
                     </div>
                   </AccordionTrigger>
                   <AccordionContent>
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <dt className="font-semibold">Requested Amount</dt>
-                          <dd>{formatCurrency(item.requestedAmount)}</dd>
+                    <div className="flex h-full w-full flex-col gap-y-4 px-4 sm:px-6 md:px-8 lg:flex-row lg:gap-x-6">
+                      <div className="w-full space-y-4 lg:w-2/3">
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                          <div>
+                            <dt className="font-semibold">Requested Amount</dt>
+                            <dd>{formatCurrency(item.requestedAmount)}</dd>
+                          </div>
+                          <div>
+                            <dt className="font-semibold">
+                              Outstanding Amount
+                            </dt>
+                            <dd>{formatCurrency(item.outstandingAmount!)}</dd>
+                          </div>
+                          <div>
+                            <dt className="font-semibold">Description</dt>
+                            <dd>{item.description}</dd>
+                          </div>
+                          <div>
+                            <dt className="font-semibold">Created At</dt>
+                            <dd>{formatDate(item.createdAt!, "PPP")}</dd>
+                          </div>
                         </div>
-                        <div>
-                          <dt className="font-semibold">Outstanding Amount</dt>
-                          <dd>{formatCurrency(item.outstandingAmount!)}</dd>
-                        </div>
-                        <div>
-                          <dt className="font-semibold">Created At</dt>
-                          <dd>{formatDate(item.createdAt!, "PPP")}</dd>
-                        </div>
-                        <div>
-                          <dt className="font-semibold">Payment Complete At</dt>
-                          <dd>
-                            {item.paymentCompleteAt
-                              ? formatDate(item.paymentCompleteAt, "PPP")
-                              : "N/A"}
-                          </dd>
-                        </div>
+
+                        <ImageGallery images={item.imageUrls} />
                       </div>
-                      <div>
-                        <dt className="font-semibold">Description</dt>
-                        <dd>{item.description}</dd>
+                      <Separator
+                        className="h-300 hidden lg:block"
+                        orientation="vertical"
+                      />
+                      <Separator className="lg:hidden" />
+                      <div className="w-full lg:w-1/3">
+                        <RespondToClaimForm claimItem={item} />
                       </div>
-                      <ImageGallery images={item.imageUrls} />
-                      <Separator className="my-4" />
-                      <Form {...form}>
-                        <form
-                          onSubmit={form.handleSubmit((values) =>
-                            onSubmit(values, item.id),
-                          )}
-                          className="space-y-4"
-                        >
-                          <FormField
-                            control={form.control}
-                            name="resolutionResult"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Resolution Result</FormLabel>
-                                <Select
-                                  onValueChange={field.onChange}
-                                  defaultValue={field.value}
-                                >
-                                  <FormControl>
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Select a resolution result" />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    <SelectItem value="Accepted">
-                                      Accepted
-                                    </SelectItem>
-                                    <SelectItem value="Rejected">
-                                      Rejected
-                                    </SelectItem>
-                                    <SelectItem value="Partially Approved">
-                                      Partially Approved
-                                    </SelectItem>
-                                  </SelectContent>
-                                </Select>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            control={form.control}
-                            name="resolutionDescription"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Resolution Description</FormLabel>
-                                <FormControl>
-                                  <Textarea
-                                    placeholder="Provide details about the resolution"
-                                    className="resize-none"
-                                    {...field}
-                                  />
-                                </FormControl>
-                                <FormDescription>
-                                  Explain the reasons for your decision and any
-                                  relevant details.
-                                </FormDescription>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          <Button type="submit">Submit Resolution</Button>
-                        </form>
-                      </Form>
                     </div>
                   </AccordionContent>
                 </AccordionItem>

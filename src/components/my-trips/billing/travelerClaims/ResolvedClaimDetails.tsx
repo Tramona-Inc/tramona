@@ -22,7 +22,8 @@ import {
 } from "@/components/ui/carousel";
 import { GetBadgeByClaimStatus } from "@/components/_common/BadgeFunctions";
 
-type ClaimDetails = RouterOutputs["claims"]["getClaimWithAllDetailsById"];
+export type ClaimDetails =
+  RouterOutputs["claims"]["getClaimWithAllDetailsById"];
 
 interface ResolvedClaimDetailsProps {
   claimDetails: ClaimDetails;

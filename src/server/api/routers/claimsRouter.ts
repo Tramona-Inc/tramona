@@ -18,6 +18,7 @@ import {
   claimPayments,
   resolutionResults,
   groups,
+  ALL_TRAVELER_CLAIM_RESPONSES,
 } from "@/server/db/schema";
 
 import type {
@@ -31,6 +32,7 @@ import { and, eq, gte, sql } from "drizzle-orm";
 import { sendEmail } from "@/server/server-utils";
 import ClaimLinkEmail from "packages/transactional/emails/ClaimLinkEmail";
 import { sendSlackMessage } from "@/server/slack";
+import { TRPCError } from "@trpc/server";
 
 interface QueryResultRow {
   claims: Claim | null; // Claims can be nullable if no matching row
@@ -329,6 +331,8 @@ export const claimsRouter = createTRPCRouter({
         await trx.insert(claimItemResolutions).values(claimResolutions);
       });
 
+      //sendEmail to traveler that a claim has been opened against them
+
       await sendSlackMessage({
         isProductionOnly: true,
         channel: "tramona-bot",
@@ -339,6 +343,69 @@ export const claimsRouter = createTRPCRouter({
           `<https://tramona.com/admin/reports|Go to report dashboard>`,
         ].join("\n"),
       });
+      return;
+    }),
+
+  travelerCounterClaim: protectedProcedure
+    .input(
+      z.object({
+        claimId: z.string(),
+        claimItemId: z.number(),
+        travelerClaimResponse: z.enum(ALL_TRAVELER_CLAIM_RESPONSES),
+        travelerResponseDescription: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      //check to make sure that the correct traveler is submitting claim
+      const tripOwnerId = await db
+        .select({ id: users.id })
+        .from(claims)
+        .innerJoin(trips, eq(claims.tripId, trips.id))
+        .innerJoin(groups, eq(trips.groupId, groups.id))
+        .innerJoin(users, eq(groups.ownerId, users.id))
+        .where(eq(claims.id, input.claimId))
+        .execute()
+        .then((res) => res[0]!);
+
+      console.log(tripOwnerId.id);
+      if (ctx.user.id === tripOwnerId.id) {
+        //2.update the claimItems Id await
+        await db
+          .update(claimItems)
+          .set({
+            travelerClaimResponse: input.travelerClaimResponse,
+            travelerResponseDescription: input.travelerResponseDescription,
+          })
+          .where(eq(claimItems.id, input.claimItemId));
+        //check so if all the claim items are solved, then send slack (we might not need this)
+        const allClaimItemsFulfilled = await db.query.claimItems
+          .findMany({
+            where: eq(claimItems.claimId, input.claimId),
+          })
+          .then((res) => {
+            return res.every(
+              (item) => item.travelerClaimResponse !== "Pending",
+            );
+          });
+
+        if (allClaimItemsFulfilled) {
+          await sendSlackMessage({
+            text: [
+              "*A Traveler completed their claim response:*",
+              ` ${ctx.user.email} has completed claim ${input.claimId}`,
+              `<https://tramona.com/admin/reports/claim-details/${input.claimId}|Please Resolve Claim Here>`,
+            ].join("\n"),
+            channel: "tramona-bot",
+            isProductionOnly: false,
+          });
+        }
+      } else {
+        throw new TRPCError({
+          message: "Unauthorized",
+          code: "UNAUTHORIZED",
+          cause: "Unauthorized User",
+        });
+      }
       return;
     }),
 
@@ -389,6 +456,7 @@ export const claimsRouter = createTRPCRouter({
 
       return;
     }),
+
   closeClaim: roleRestrictedProcedure(["admin"])
     .input(z.object({ claimId: z.string() }))
     .mutation(async ({ input }) => {

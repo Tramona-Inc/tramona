@@ -1,32 +1,23 @@
 import React, { useState } from "react";
 import { useRouter } from "next/router";
-import { formatDate } from "date-fns";
-import Image from "next/image";
 import { api } from "@/utils/api";
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import BackButton from "@/components/_common/BackButton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/utils/utils";
 import ResolveClaimItemForm, {
   resolveItemFormSchema,
 } from "@/components/admin/claims/ResolveClaimItemForm";
-import { CheckCircle, AlertCircle } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import ClaimPropertyCard from "@/components/admin/claims/ClaimPropertyCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/components/ui/use-toast";
 import { z } from "zod";
+import ResolveClaimItemCard from "@/components/admin/claims/resolve-claim/ResolveClaimItemCard";
 
 export default function ResolveClaim() {
   const router = useRouter();
@@ -74,6 +65,11 @@ export default function ResolveClaim() {
       });
       console.error("Error resolving claim item:", error);
     }
+  };
+
+  const handleClaimItemClick = (itemId: number) => {
+    setSelectedItemId(selectedItemId === itemId ? null : itemId);
+    setSubmittedValues(null);
   };
 
   return (
@@ -146,138 +142,13 @@ export default function ResolveClaim() {
                   ))
                 ) : claim ? (
                   claim.claimItems.map((item, index) => (
-                    <React.Fragment key={item.id}>
-                      {index > 0 && <Separator className="my-8" />}
-                      <div
-                        onClick={() => {
-                          if (!item.paymentCompleteAt) {
-                            setSelectedItemId(
-                              selectedItemId === item.id! ? null : item.id!,
-                            );
-                            setSubmittedValues(null);
-                          }
-                        }}
-                        className={`rounded-lg p-6 shadow-sm transition-all duration-200 ${
-                          item.paymentCompleteAt
-                            ? "bg-green-50"
-                            : selectedItemId === item.id
-                              ? "cursor-pointer border-2 border-blue-200 bg-zinc-50"
-                              : "cursor-pointer bg-card hover:bg-zinc-100"
-                        }`}
-                      >
-                        <span className="sr-only">
-                          {item.paymentCompleteAt
-                            ? "Completed claim item"
-                            : selectedItemId === item.id!
-                              ? "Deselect this item"
-                              : "Select this item for resolution"}
-                        </span>
-                        <div className="mb-6 flex items-center justify-between border-b-2 pb-1">
-                          <div className="flex items-center gap-2">
-                            <h3 className="text-3xl font-bold text-primary">
-                              {item.itemName}
-                            </h3>
-                            {item.paymentCompleteAt && (
-                              <Badge variant="green" className="text-xs">
-                                Resolved
-                              </Badge>
-                            )}
-                          </div>
-                          <Badge
-                            variant={
-                              item.paymentCompleteAt
-                                ? "green"
-                                : selectedItemId === item.id!
-                                  ? "blue"
-                                  : "gray"
-                            }
-                          >
-                            Item {index + 1}
-                          </Badge>
-                        </div>
-
-                        <div className="relative mb-6 w-full">
-                          <Carousel className="w-full">
-                            <CarouselContent>
-                              {item.imageUrls.map((url, imgIndex) => (
-                                <CarouselItem key={imgIndex}>
-                                  <div className="relative aspect-video overflow-hidden rounded-lg">
-                                    <Image
-                                      src={url}
-                                      alt={`${item.itemName} image ${imgIndex + 1}`}
-                                      fill
-                                      className="object-cover"
-                                    />
-                                  </div>
-                                </CarouselItem>
-                              ))}
-                            </CarouselContent>
-                            <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2" />
-                            <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2" />
-                          </Carousel>
-                        </div>
-
-                        <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                          <div className="space-y-1">
-                            <dt className="text-sm font-medium text-muted-foreground">
-                              Description
-                            </dt>
-                            <dd className="text-sm">{item.description}</dd>
-                          </div>
-                          <div className="space-y-1">
-                            <dt className="text-sm font-medium text-muted-foreground">
-                              Requested Amount
-                            </dt>
-                            <dd className="text-lg font-semibold">
-                              {formatCurrency(item.requestedAmount)}
-                            </dd>
-                          </div>
-                          <div className="space-y-1">
-                            <dt className="text-sm font-medium text-muted-foreground">
-                              Outstanding Amount
-                            </dt>
-                            <dd className="text-lg font-semibold">
-                              {formatCurrency(item.outstandingAmount!)}
-                            </dd>
-                          </div>
-                          <div className="space-y-1">
-                            <dt className="text-sm font-medium text-muted-foreground">
-                              Property ID
-                            </dt>
-                            <dd className="text-sm">{item.propertyId}</dd>
-                          </div>
-                          {item.paymentCompleteAt && (
-                            <div className="col-span-2 space-y-1">
-                              <dt className="text-sm font-medium text-muted-foreground">
-                                Payment Completed
-                              </dt>
-                              <dd className="text-sm font-semibold text-green-600">
-                                <CheckCircle className="mr-1 inline-block h-4 w-4" />
-                                {formatDate(
-                                  item.paymentCompleteAt,
-                                  "MMMM d, yyyy",
-                                )}
-                              </dd>
-                            </div>
-                          )}
-                        </dl>
-
-                        {!item.paymentCompleteAt && (
-                          <Button
-                            variant={
-                              selectedItemId === item.id!
-                                ? "secondary"
-                                : "primary"
-                            }
-                            className="mt-4"
-                          >
-                            {selectedItemId === item.id!
-                              ? "Selected for Resolution"
-                              : "Click to Resolve"}
-                          </Button>
-                        )}
-                      </div>
-                    </React.Fragment>
+                    <ResolveClaimItemCard
+                      key={item.id}
+                      claimItem={item}
+                      index={index}
+                      isSelected={selectedItemId === item.id}
+                      onSelect={() => handleClaimItemClick(item.id!)}
+                    />
                   ))
                 ) : (
                   <div>No claim items found</div>

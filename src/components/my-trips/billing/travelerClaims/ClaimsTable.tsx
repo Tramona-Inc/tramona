@@ -21,7 +21,7 @@ import type { RouterOutputs } from "@/utils/api";
 import { formatCurrency } from "@/utils/utils";
 import {
   GetBadgeByClaimStatus,
-  GetBadgeByClaimItemStatus,
+  GetBadgeByClaimStatusForClaimItem,
 } from "@/components/_common/BadgeFunctions";
 import Link from "next/link";
 
@@ -120,7 +120,7 @@ export default function ClaimsTable({ claims }: ClaimsTableProps) {
                                 {formatCurrency(item.outstandingAmount!)}
                               </TableCell>
                               <TableCell>
-                                <GetBadgeByClaimItemStatus
+                                <GetBadgeByClaimStatusForClaimItem
                                   isResolvedAt={item.paymentCompleteAt}
                                 />
                               </TableCell>
