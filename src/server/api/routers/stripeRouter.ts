@@ -286,7 +286,7 @@ export const stripeRouter = createTRPCRouter({
     .input(
       z.object({
         isDirectListing: z.boolean().default(false),
-        offerId: z.number(),
+        offerId: z.number().nullable(),
         propertyId: z.number(),
         requestId: z.number().nullable(),
         name: z.string(),

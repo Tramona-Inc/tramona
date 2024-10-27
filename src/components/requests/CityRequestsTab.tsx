@@ -8,12 +8,18 @@ import { RequestCardAction } from "./RequestCardAction";
 
 export default function ActiveRequestsTab() {
   const { data: requests } = api.requests.getMyRequests.useQuery();
+  const { data: requestsToBook } = api.requestsToBook.getMyRequestsToBook.useQuery();
 
-  if (!requests) return <Spinner />;
+  if (!requests || !requestsToBook) return <Spinner />;
 
-  return requests.activeRequests.length !== 0 ? (
+  return requests.activeRequests.length !== 0 || requestsToBook.activeRequestsToBook.length !== 0 ? (
     <div className="space-y-4 pb-32">
       <NewCityRequestBtn />
+      {/* {requestsToBook.activeRequestsToBook.map((requestToBook) => (
+        <RequestCard key={requestToBook.id} type="guest" requestToBook={requestToBook}>
+          <RequestCardAction request={requestToBook} />
+        </RequestCard>
+      ))} */}
       {requests.activeRequests.map((request) => (
         <RequestCard key={request.id} type="guest" request={request}>
           <RequestCardAction request={request} />

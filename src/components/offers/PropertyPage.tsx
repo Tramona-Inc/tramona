@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { api, type RouterOutputs } from "@/utils/api";
 import {
+  formatDateMonthDayYear,
   formatDateRange,
   formatDateWeekMonthDay,
   getOfferDiscountPercentage,
@@ -55,7 +56,6 @@ import ChatOfferButton from "./ChatOfferButton";
 import { Airbnb } from "@/utils/listing-sites/Airbnb";
 import { createUserNameAndPic } from "../activity-feed/admin/generationHelper";
 import ReasonsToBook from "./ReasonsToBook";
-import { RequestToBookBtn } from "../property/RequestsToBookBtn";
 
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 export type PropertyPageData = RouterOutputs["properties"]["getById"];
@@ -234,7 +234,7 @@ export default function PropertyPage({
               <div className="flex-1">
                 <p className="gap flex flex-wrap items-center gap-x-1 pt-1 text-sm font-medium capitalize">
                   {property.propertyType} in {property.city} ·{" "}
-                  <StarIcon className="inline size-[1em] fill-primaryGreen stroke-primaryGreen" />{" "}
+                  <StarIcon className="size-[1em] inline fill-primaryGreen stroke-primaryGreen" />{" "}
                   {property.avgRating}{" "}
                   <a href="#reviews" className="underline">
                     ({plural(property.numRatings, "review")})
@@ -259,16 +259,12 @@ export default function PropertyPage({
                   />
                 </div>
               )}
-              {!offer && !property.bookItNowEnabled && (
-                <RequestToBookBtn propertyId={property.id} maxNumGuests={property.maxNumGuests} />
-              )}
-              {!offer && property.bookItNowEnabled && <Button onClick={() => 'hello'} className="">Book It Now</Button>}
             </div>
           </section>
 
           <section className="flex-justify-between mx-1 flex w-full border-t pt-4">
             <div
-              className="flex w-5/6 items-center gap-2" 
+              className="flex w-5/6 items-center gap-2"
               onClick={() => setOpenUserInfo(true)}
             >
               <UserAvatar
@@ -350,7 +346,7 @@ export default function PropertyPage({
                 {property.roomsWithBeds.map((room, index) => (
                   <div
                     key={index}
-                    className="flex min-w-56 flex-col items-center gap-4 whitespace-pre rounded-lg border p-4"
+                    className="min-w-56 flex flex-col items-center gap-4 whitespace-pre rounded-lg border p-4"
                   >
                     <BedDoubleIcon />
                     <p className="text-lg font-semibold">{room.name}</p>
@@ -409,7 +405,7 @@ export default function PropertyPage({
                   Guest Reviews
                 </h2>
                 <div className="flex items-center gap-2 pb-4">
-                  <StarIcon className="inline size-[1em] fill-primaryGreen stroke-primaryGreen" />{" "}
+                  <StarIcon className="size-[1em] inline fill-primaryGreen stroke-primaryGreen" />{" "}
                   {property.avgRating} · {plural(property.numRatings, "review")}
                 </div>
               </div>
@@ -456,7 +452,7 @@ export default function PropertyPage({
                     />
                     <p className="text-center text-lg font-bold">{hostName}</p>
                   </div>
-                  <div className="divide-y *:p-2">
+                  <div className="*:p-2 divide-y">
                     <div>
                       <p className="text-center text-lg font-bold">
                         {property.hostNumReviews}
@@ -634,7 +630,7 @@ function OfferPageSidebar({
       <Card>
         <CardContent className="space-y-4">
           {offer.request && (
-            <div className="grid grid-cols-2 rounded-lg border *:px-4 *:py-2">
+            <div className="*:px-4 *:py-2 grid grid-cols-2 rounded-lg border">
               <div className="border-r">
                 <p className="text-xs font-bold uppercase text-muted-foreground">
                   Check-in
@@ -746,6 +742,260 @@ function OfferPageMobileBottomCard({
 }
 
 export function OfferPage({ offer }: { offer: OfferWithDetails }) {
+  return (
+    <PropertyPage
+      property={offer.property}
+      offer={offer}
+      sidebar={<OfferPageSidebar offer={offer} property={offer.property} />}
+      mobileBottomCard={
+        <OfferPageMobileBottomCard offer={offer} property={offer.property} />
+      }
+    />
+  );
+}
+
+export type RequestToBookDetails = {
+  checkIn: Date;
+  checkOut: Date;
+  numGuests: number;
+};
+
+function ReserveBtn({
+  btnSize,
+  requestToBook,
+  property,
+}: {
+  btnSize: ButtonProps["size"];
+  requestToBook: RequestToBookDetails;
+  // property: Pick<
+  //   Property,
+  //   "stripeVerRequired" | "originalListingId" | "bookOnAirbnb"
+  // >;
+  property: PropertyPageData;
+}) {
+  const { data: verificationStatus } =
+    api.users.myVerificationStatus.useQuery();
+
+  const airbnbCheckoutUrl = Airbnb.createListing(
+    property.originalListingId!,
+  ).getCheckoutUrl({
+    checkIn: requestToBook.checkIn,
+    checkOut: requestToBook.checkOut,
+    numGuests: requestToBook.numGuests,
+  });
+
+  const checkIn = formatDateMonthDayYear(requestToBook.checkIn);
+  const checkOut = formatDateMonthDayYear(requestToBook.checkOut);
+
+  return (
+    <Button
+      variant={
+        property.stripeVerRequired &&
+        verificationStatus?.isIdentityVerified === "pending"
+          ? "secondary"
+          : "primary"
+      }
+      size={btnSize}
+      className="w-full"
+    >
+      {property.bookOnAirbnb ? (
+        <Link
+          href={airbnbCheckoutUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Book on Airbnb
+          <ExternalLinkIcon className="size-5" />
+        </Link>
+      ) : !property.stripeVerRequired ||
+        verificationStatus?.isIdentityVerified === "true" ? (
+        // <Link href={`/offer-checkout/${offer.id}`}>
+        <Link href={`/request-to-book-checkout/${property.id}checkIn=$?{checkIn}&checkOut=${checkOut}&numGuests=${requestToBook.numGuests}`}>
+          Reserve
+        </Link>
+      ) : verificationStatus?.isIdentityVerified === "pending" ? (
+        <p>Verification pending</p>
+      ) : (
+        <VerificationProvider>
+          <IdentityModal isPrimary={true} />
+          <p className="hidden text-center text-sm font-semibold text-red-500 md:block">
+            This host requires you to go through Stripe verification before you
+            book
+          </p>
+        </VerificationProvider>
+      )}
+    </Button>
+  );
+}
+
+function RequestToBookPageSidebar({
+  // offer,
+  property,
+  requestToBook,
+  acceptedAt,
+}: {
+  // offer: OfferWithDetails;
+  // property: Pick<
+  //   Property,
+  //   "stripeVerRequired" | "originalListingId" | "bookOnAirbnb"
+  // >;
+  property: PropertyPageData;
+  requestToBook: RequestToBookDetails;
+  acceptedAt: boolean;
+}) {
+  return (
+    <div className="space-y-4">
+      <Card>
+        <CardContent className="space-y-4">
+          <div className="*:px-4 *:py-2 grid grid-cols-2 rounded-lg border">
+            <div className="border-r">
+              <p className="text-xs font-bold uppercase text-muted-foreground">
+                Check-in
+              </p>
+              <p className="font-bold">
+                {formatDateWeekMonthDay(requestToBook.checkIn)}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs font-bold uppercase text-muted-foreground">
+                Check-out
+              </p>
+              <p className="font-bold">
+                {formatDateWeekMonthDay(requestToBook.checkOut)}
+              </p>
+            </div>
+            <div className="col-span-full border-t">
+              <p className="text-xs font-bold uppercase text-muted-foreground">
+                Guests
+              </p>
+              <p className="font-bold">
+                {plural(requestToBook.numGuests, "guest")}
+              </p>
+            </div>
+          </div>
+          <ReserveBtn
+            btnSize="lg"
+            requestToBook={requestToBook}
+            property={property}
+          />
+          {!acceptedAt && (
+            <p className="text-center text-xs text-zinc-500">
+              You won&apos;t be charged yet
+            </p>
+          )}
+          <PriceDetailsBeforeTax
+            property={property}
+            requestToBook={requestToBook}
+            bookOnAirbnb={property.bookOnAirbnb}
+          />
+        </CardContent>
+      </Card>
+
+      {!property.bookOnAirbnb && (
+        <div className="flex gap-2 rounded-xl border border-orange-300 bg-orange-50 p-3 text-orange-800">
+          <FlameIcon className="size-7 shrink-0" />
+          <div>
+            <p className="text-sm font-bold">Tramona exclusive deal</p>
+            <p className="text-xs">
+              This is an exclusive offer created just for you &ndash; you will
+              not be able to find this price anywh`ere else
+            </p>
+          </div>
+        </div>
+      )}
+      <div className="flex gap-2 rounded-xl border border-blue-300 bg-blue-50 p-3 text-blue-800">
+        <InfoIcon className="size-7 shrink-0" />
+        <div>
+          <p className="text-sm font-bold">Important Notes</p>
+          <p className="text-xs">
+            These dates could get booked on other platforms for full price. If
+            they do, your match will be automatically withdrawn.
+            <br />
+            <br />
+            After 24 hours, this match will become available for the public to
+            book.
+            <br />
+            <br />
+            <b>We encourage you to book within 24 hours for best results.</b>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RequestToBookPageMobileBottomCard({
+  property,
+  requestToBook,
+}: {
+  // property: Pick<
+  //   Property,
+  //   "stripeVerRequired" | "originalListingId" | "bookOnAirbnb"
+  // >;
+  property: PropertyPageData;
+  requestToBook: RequestToBookDetails;
+}) {
+  const { data: verificationStatus } =
+    api.users.myVerificationStatus.useQuery();
+
+  return (
+    <Card className="fixed bottom-16 left-0 w-full md:hidden">
+      <CardContent className="flex flex-row items-center justify-between px-4 py-1 text-sm">
+        <div className="flex basis-1/2 flex-col">
+          <PriceDetailsBeforeTax
+            property={property}
+            requestToBook={requestToBook}
+          />
+          <p className="font-semibold">
+            {formatDateRange(requestToBook.checkIn, requestToBook.checkOut)}
+          </p>
+        </div>
+        <div className="flex-1">
+          <ReserveBtn
+            btnSize="sm"
+            requestToBook={requestToBook}
+            property={property}
+          />
+          {verificationStatus?.isIdentityVerified === "false" &&
+            property.stripeVerRequired === true && (
+              <p className="text-center text-xs font-semibold text-red-500">
+                Host requires Stripe verification prior to booking
+              </p>
+            )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function RequestToBookPage({
+  property,
+  requestToBook,
+}: {
+  property: PropertyPageData;
+  requestToBook: RequestToBookDetails;
+}) {
+  return (
+    <PropertyPage
+      property={property}
+      sidebar={
+        <RequestToBookPageSidebar
+          property={property}
+          requestToBook={requestToBook}
+          acceptedAt={false}
+        />
+      }
+      mobileBottomCard={
+        <RequestToBookPageMobileBottomCard
+          property={property}
+          requestToBook={requestToBook}
+        />
+      }
+    />
+  );
+}
+
+export function BookItNowPage({ offer }: { offer: OfferWithDetails }) {
   return (
     <PropertyPage
       property={offer.property}

@@ -32,6 +32,7 @@ export const requestsToBook = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
+    resolvedAt: timestamp("resolved_at", { withTimezone: true }),
   },
   (t) => ({
     propertyIdIdx: index().on(t.propertyId),
