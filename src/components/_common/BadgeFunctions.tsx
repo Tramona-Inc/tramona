@@ -28,7 +28,8 @@ export const GetBadgeByClaimStatus = ({
 interface GetBadgeByClaimItemStatusProps {
   travelerClaimResponse:
     | (typeof ALL_TRAVELER_CLAIM_RESPONSES)[number]
-    | undefined;
+    | undefined
+    | null;
 }
 
 export const GetBadgeByClaimItemStatus = ({

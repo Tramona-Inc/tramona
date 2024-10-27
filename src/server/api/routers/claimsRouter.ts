@@ -1,7 +1,6 @@
 import {
   createTRPCRouter,
   protectedProcedure,
-  publicProcedure,
   roleRestrictedProcedure,
 } from "@/server/api/trpc";
 import { v4 as uuidv4 } from "uuid";
@@ -16,7 +15,6 @@ import {
   ALL_RESOLUTION_RESULTS,
   ALL_PAYMENT_SOURCES,
   claimPayments,
-  resolutionResults,
   groups,
   ALL_TRAVELER_CLAIM_RESPONSES,
 } from "@/server/db/schema";
@@ -33,6 +31,7 @@ import { sendEmail } from "@/server/server-utils";
 import ClaimLinkEmail from "packages/transactional/emails/ClaimLinkEmail";
 import { sendSlackMessage } from "@/server/slack";
 import { TRPCError } from "@trpc/server";
+import TravelerClaimLinkEmail from "packages/transactional/emails/TravelerClaimLinkEmail";
 
 interface QueryResultRow {
   claims: Claim | null; // Claims can be nullable if no matching row
@@ -66,7 +65,7 @@ export const claimsRouter = createTRPCRouter({
 
     const result = allClaims.reduce<
       Record<
-        string, // Use string for the ID key
+        string,
         {
           claim: Claim;
           claimItems: ClaimItem[];
@@ -78,7 +77,6 @@ export const claimsRouter = createTRPCRouter({
       const claimItem = row.claim_items;
       const claimItemResolution = row.claim_item_resolutions;
 
-      // Ensure that claim and claim.id exist
       if (claim?.id) {
         // Initialize the claim if it doesn't exist in the accumulator
         if (!acc[claim.id]) {
@@ -89,13 +87,21 @@ export const claimsRouter = createTRPCRouter({
           };
         }
 
-        // If there's a claim item, add it to the array
-        if (claimItem) {
+        // Add claim item if it doesn't already exist in the array
+        if (
+          claimItem &&
+          !acc[claim.id]!.claimItems.some((item) => item.id === claimItem.id)
+        ) {
           acc[claim.id]!.claimItems.push(claimItem);
         }
 
-        // If there's a claim resolution, add it to the array
-        if (claimItemResolution) {
+        // Add claim item resolution if it doesn't already exist in the array
+        if (
+          claimItemResolution &&
+          !acc[claim.id]!.claimItemResolutions.some(
+            (resolution) => resolution.id === claimItemResolution.id,
+          )
+        ) {
           acc[claim.id]!.claimItemResolutions.push(claimItemResolution);
         }
       }
@@ -174,7 +180,7 @@ export const claimsRouter = createTRPCRouter({
         .innerJoin(claimItems, eq(claimItems.claimId, claims.id))
         .where(eq(groups.ownerId, ctx.user.id));
 
-      console.log(claimsWithItemsRaw);
+      claimsWithItemsRaw;
       // Post-process the results to structure them by claims with nested claim items
       const claimsAgainstUser = Object.values(
         claimsWithItemsRaw.reduce<
@@ -202,7 +208,7 @@ export const claimsRouter = createTRPCRouter({
           return acc;
         }, {}),
       );
-      console.log(claimsAgainstUser);
+      claimsAgainstUser;
       return claimsAgainstUser;
     },
   ),
@@ -218,14 +224,13 @@ export const claimsRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       //check to see if inputs exist
       const newClaimId = uuidv4();
-      const newClaimsLink = `${baseUrl}/host/report/claim/${newClaimId}`;
-      console.log(input.superhogRequestId);
+      const newHostClaimLink = `${baseUrl}/host/report/claim/${newClaimId}`;
 
       await db.insert(claims).values({
         id: newClaimId,
         tripId: input.tripId,
         filedByHostId: input.hostId,
-        claimsLink: newClaimsLink,
+        claimsLink: newHostClaimLink,
         reportedThroughSuperhogAt: input.superhogRequestId ? new Date() : null,
         superhogRequestId: input.superhogRequestId,
       });
@@ -233,13 +238,14 @@ export const claimsRouter = createTRPCRouter({
       const filedHost = await db.query.users.findFirst({
         where: eq(users.id, input.hostId),
       });
+
       if (filedHost) {
         await sendEmail({
           to: filedHost.email,
           subject: "Complete Your Incident Report - Action Required",
           content: ClaimLinkEmail({
             hostName: filedHost.firstName ?? "Traveler",
-            claimLink: newClaimsLink,
+            claimLink: newHostClaimLink,
           }),
         });
       }
@@ -251,7 +257,7 @@ export const claimsRouter = createTRPCRouter({
     const myClaims = await db.query.claims.findMany({
       where: eq(claims.filedByHostId, ctx.user.id),
     });
-    console.log(myClaims);
+    myClaims;
 
     return myClaims;
   }),
@@ -319,7 +325,7 @@ export const claimsRouter = createTRPCRouter({
           .returning();
         // Store the length of inserted claim items
         insertedItemsLength = insertedClaimItems.length;
-        console.log(insertedClaimItems);
+        insertedClaimItems;
 
         // Map the inserted claim items to claim resolutions in one go
         const claimResolutions = insertedClaimItems.map((item) => ({
@@ -332,6 +338,25 @@ export const claimsRouter = createTRPCRouter({
       });
 
       //sendEmail to traveler that a claim has been opened against them
+      //send email to trip owner id
+      const newTravelerClaimLink = `${baseUrl}/my-trips/billing/claim-details/${input.claimId}`;
+
+      const tripOwner = await db
+        .select({ email: users.email, firstName: users.firstName })
+        .from(trips)
+        .innerJoin(groups, eq(trips.groupId, groups.id))
+        .innerJoin(users, eq(groups.ownerId, users.id))
+        .execute()
+        .then((res) => res[0]!);
+
+      await sendEmail({
+        to: tripOwner.email,
+        subject: "Damage - Action Required",
+        content: TravelerClaimLinkEmail({
+          travelerName: tripOwner.firstName ?? "Traveler",
+          claimLink: newTravelerClaimLink,
+        }),
+      });
 
       await sendSlackMessage({
         isProductionOnly: true,
@@ -367,7 +392,7 @@ export const claimsRouter = createTRPCRouter({
         .execute()
         .then((res) => res[0]!);
 
-      console.log(tripOwnerId.id);
+      tripOwnerId.id;
       if (ctx.user.id === tripOwnerId.id) {
         //2.update the claimItems Id await
         await db
