@@ -33,7 +33,7 @@ const resolutionSchema = z.object({
 type ResolutionFormData = z.infer<typeof resolutionSchema>;
 
 function RespondToClaimForm({ claimItem }: { claimItem: ClaimItem }) {
-  const { mutateAsync: submitClaimItem, isError } =
+  const { mutateAsync: submitClaimItem } =
     api.claims.travelerCounterClaim.useMutation();
 
   const isPending = claimItem.travelerClaimResponse === "Pending";

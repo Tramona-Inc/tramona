@@ -4,7 +4,7 @@ import type { ClaimsWDetails } from "./ClaimsOverview";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { formatCurrency } from "@/utils/utils";
-import { CalendarIcon, DollarSign, UserIcon } from "lucide-react";
+import { DollarSign, UserIcon } from "lucide-react";
 import { GetBadgeByClaimStatus } from "@/components/_common/BadgeFunctions";
 
 function ClaimResolutionCards({ claim }: { claim: ClaimsWDetails }) {

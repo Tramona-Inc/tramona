@@ -1,5 +1,4 @@
 import React from "react";
-import { useRouter } from "next/router";
 import { api } from "@/utils/api";
 import ClaimsTable from "@/components/my-trips/billing/travelerClaims/ClaimsTable";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,8 +6,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AlertCircle } from "lucide-react";
 
 export default function ClaimsPage() {
-  const router = useRouter();
-
   const {
     data: allCurrentClaims,
     isLoading,

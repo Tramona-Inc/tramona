@@ -15,7 +15,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PlusCircle, X, Edit, Check } from "lucide-react";
+import { PlusCircle, Edit, Check } from "lucide-react";
 import { api } from "@/utils/api";
 import { toast } from "@/components/ui/use-toast";
 import ImagesInput from "@/components/_common/ImagesInput";

@@ -11,7 +11,6 @@ import {
   groups,
   trips,
   tripCancellations,
-  tripCheckouts,
 } from "@/server/db/schema";
 import { cancelSuperhogReservation } from "@/utils/webhook-functions/superhog-utils";
 import { sendEmail } from "@/server/server-utils";

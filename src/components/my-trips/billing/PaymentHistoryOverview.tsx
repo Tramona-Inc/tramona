@@ -8,11 +8,8 @@ import { useRouter } from "next/router";
 import { Button } from "@/components/ui/button";
 
 function PaymentHistoryOverview() {
-  const {
-    data: paymentHistory,
-    isLoading,
-    error,
-  } = api.trips.getMyTripsPaymentHistory.useQuery();
+  const { data: paymentHistory, isLoading } =
+    api.trips.getMyTripsPaymentHistory.useQuery();
   const router = useRouter();
 
   return (

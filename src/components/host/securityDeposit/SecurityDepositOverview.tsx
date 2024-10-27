@@ -16,7 +16,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Tooltip,
@@ -29,7 +28,6 @@ import { DollarSign, InfoIcon } from "lucide-react";
 import type { Property } from "@/server/db/schema";
 
 import { api } from "@/utils/api";
-import Spinner from "@/components/_common/Spinner";
 import {
   Table,
   TableBody,

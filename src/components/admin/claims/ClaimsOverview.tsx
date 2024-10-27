@@ -18,7 +18,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { api } from "@/utils/api";
 import type { RouterOutputs } from "@/utils/api";
 import { formatDate } from "date-fns";
@@ -28,13 +27,10 @@ import { GetBadgeByClaimStatus } from "@/components/_common/BadgeFunctions";
 export type ClaimsWDetails = RouterOutputs["claims"]["getAllClaims"][number];
 
 export default function AdminClaimsDashboard() {
-  const [selectedClaim, setSelectedClaim] = useState<null | ClaimsWDetails>(
-    null,
-  );
   const [filterStatus, setFilterStatus] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
 
-  const { data: allClaims, isLoading } = api.claims.getAllClaims.useQuery();
+  const { data: allClaims } = api.claims.getAllClaims.useQuery();
 
   const filteredClaims = allClaims?.filter(
     (claim) =>
@@ -164,9 +160,7 @@ export default function AdminClaimsDashboard() {
               <TableCell>{claim.claimItems.length}</TableCell>
               <TableCell>
                 <Link href={`reports/claim-details/${claim.claim.id}`}>
-                  <Button onClick={() => setSelectedClaim(claim)}>
-                    View Details
-                  </Button>
+                  <Button>View Details</Button>
                 </Link>
               </TableCell>
             </TableRow>

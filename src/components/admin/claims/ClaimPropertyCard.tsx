@@ -3,7 +3,6 @@ import Image from "next/image";
 import { formatDate } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CalendarIcon, HomeIcon, UserIcon } from "lucide-react";
-import { formatCurrency } from "@/utils/utils";
 import type { Claim, Property } from "@/server/db/schema";
 
 export default function ClaimPropertyCard({

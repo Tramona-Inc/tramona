@@ -13,8 +13,10 @@ type DashboardLayoutProps = {
   children: React.ReactNode;
 };
 
-export default function HostDashboardLayout({ children }: DashboardLayoutProps) {
-  const { data: session, status } = useSession();
+export default function HostDashboardLayout({
+  children,
+}: DashboardLayoutProps) {
+  const { status } = useSession();
   const isMd = useIsMd();
 
   const router = useRouter();

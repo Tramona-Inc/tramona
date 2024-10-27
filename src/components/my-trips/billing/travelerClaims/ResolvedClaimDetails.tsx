@@ -1,18 +1,11 @@
 import React from "react";
 import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { formatDate } from "date-fns";
 import { cn, formatCurrency } from "@/utils/utils";
 import type { RouterOutputs } from "@/utils/api";
-import {
-  FileText,
-  Calendar,
-  DollarSign,
-  User,
-  CheckCircle,
-} from "lucide-react";
+import { FileText, Calendar, DollarSign, CheckCircle } from "lucide-react";
 import {
   Carousel,
   CarouselContent,

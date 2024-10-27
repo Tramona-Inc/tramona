@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { RouterOutputs } from "@/utils/api";
 import { formatDate } from "date-fns";
 import { formatCurrency } from "@/utils/utils";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
   Accordion,

@@ -870,14 +870,6 @@ export const stripeRouter = createTRPCRouter({
         if (paymentIntent.status === "succeeded") {
           // we need to insert it into the database
           //creates the damage record as well
-          await ctx.db.insert(claimItems).values({
-            tripId: input.tripId,
-            amount: input.amount,
-            description: input.description,
-            propertyId: input.propertyId,
-            paymentCompleteAt: new Date(),
-            createdAt: new Date(),
-          });
           console.log("Charge successful:", paymentIntent);
           return paymentIntent; // Payment was completed successfully
         } else if (
