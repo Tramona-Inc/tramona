@@ -5,7 +5,19 @@ import landing_sunset from "public/assets/images/landing-page/landing_sunset.png
 import { Button } from "@/components/ui/button";
 import CityRequestFormContainer from "../SearchBars/CityRequestFormContainer";
 import Link from "next/link";
-import { Shield, UserCheck, Calendar, PhoneCall, Check } from "lucide-react";
+import {
+  Shield,
+  UserCheck,
+  Calendar,
+  PhoneCall,
+  Check,
+  DollarSign,
+  ShieldCheck,
+  Percent,
+  Star,
+  Eye,
+  Lock,
+} from "lucide-react";
 import LandingSearchBar from "../SearchBars/LandingSearchBar";
 import Image from "next/image";
 import { TestimonialCarousel } from "./testimonials/TestimonialCarousel";
@@ -181,17 +193,36 @@ export default function MastHead() {
                   />
                 </div>
                 <div className="p-6">
-                  <h2 className="mb-2 text-2xl font-bold">Hosts</h2>
+                  <h2 className="mb-2 text-2xl font-bold">
+                    Hosts- Start booking your empty nights
+                  </h2>
                   <p className="mb-4 text-sm">
-                    Tramona is the only platform built specifically for hosts to
-                    fill their hard-to-book, empty nights.
+                    Get direct requests to fill your empty nights and maximize
+                    your revenue, all while keeping complete control over your
+                    pricing
                   </p>
-                  <Link
-                    href="/for-hosts"
-                    className="text-sm font-medium text-teal-600 hover:underline"
-                  >
-                    Learn more about hosting
-                  </Link>
+                  <div className="mb-6 space-y-2">
+                    <div className="flex items-center">
+                      <DollarSign className="mr-2 h-5 w-5 text-primaryGreen" />
+                      <span>Accept, reject, or counter offers easily</span>
+                    </div>
+                    <div className="flex items-center">
+                      <ShieldCheck className="mr-2 h-5 w-5 text-primaryGreen" />
+                      <span>
+                        Full pricing control - no obligation to discount
+                      </span>
+                    </div>
+                    <div className="flex items-center">
+                      <Percent className="mr-2 h-5 w-5 text-primaryGreen" />
+                      <span>
+                        Lowest host fees at just 2.5%, keeping more money in
+                        your pocket
+                      </span>
+                    </div>
+                  </div>
+                  <Button className="w-full bg-primaryGreen text-white">
+                    <Link href="/for-hosts">For Hosts</Link>
+                  </Button>
                 </div>
               </div>
 
@@ -206,12 +237,30 @@ export default function MastHead() {
                   />
                 </div>
                 <div className="p-6">
-                  <h2 className="mb-2 text-2xl font-bold">Travelers</h2>
+                  <h2 className="mb-2 text-2xl font-bold">
+                    Travelers- Get the best deals on Airbnbs anywhere
+                  </h2>
                   <p className="mb-4 text-sm">
-                    Tramona is the only platform where travelers can
-                    consistently find the best prices on Airbnbs. Name your own
-                    price, or book it now for an unbeatable price.
+                    Find the Best Deals on Airbnbs—Name Your Price or Book
+                    Instantly
                   </p>
+                  <div className="mb-6 space-y-2">
+                    <div className="flex items-center">
+                      <Star className="mr-2 h-5 w-5 text-primaryGreen" />
+                      <span>Exclusive, 1 of a kind prices</span>
+                    </div>
+                    <div className="flex items-center">
+                      <Eye className="mr-2 h-5 w-5 text-primaryGreen" />
+                      <span>See what hosts will offer you</span>
+                    </div>
+                    <div className="flex items-center">
+                      <Lock className="mr-2 h-5 w-5 text-primaryGreen" />
+                      <span>Safe, 100% re booking guarantee, always</span>
+                    </div>
+                  </div>
+                  <Button className="w-full bg-primaryGreen align-bottom text-white">
+                    <Link href="/try-before-book">Try it before you book</Link>
+                  </Button>
                 </div>
               </div>
             </div>

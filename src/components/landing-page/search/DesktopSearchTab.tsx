@@ -552,11 +552,11 @@ export function DesktopSearchTab() {
                   form.setValue("location", location.name);
                 }}
               >
-                <div className="relative h-40 w-60 overflow-hidden rounded-lg">
+                <div className="hover:scale-103 relative h-40 w-60 overflow-hidden rounded-lg transition-all duration-300 ease-in-out hover:shadow-lg">
                   <Image
                     src={location.image}
                     alt={location.name}
-                    className="h-full w-full object-cover"
+                    className="h-full w-full object-cover transition-transform duration-300 ease-in-out hover:scale-110"
                     fill
                   />
                   <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
