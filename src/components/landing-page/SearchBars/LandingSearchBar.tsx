@@ -20,6 +20,13 @@ import {
 import RequestSubmittedDialog from "@/components/landing-page/SearchBars/DesktopRequestComponents/RequestSubmittedDialog";
 import { api } from "@/utils/api";
 
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
 const locations = [
   {
     name: "Atlanta",
@@ -273,28 +280,44 @@ export default function LandingSearchBar() {
   return (
     <div className="mx-auto min-w-[815px] max-w-5xl rounded-2xl border-2 border-gray-300 bg-white p-4 shadow-lg sm:p-6">
       <div className="mb-4 flex">
-        <button
-          className={`flex-1 py-2 text-sm sm:text-base ${
-            activeTab === "search"
-              ? "border-b-2 border-primaryGreen font-semibold text-primaryGreen"
-              : "text-gray-500"
-          }`}
-          onClick={() => setActiveTab("search")}
-        >
-          Search Deals
-        </button>
-        <button
-          className={`flex-1 py-2 text-sm sm:text-base ${
-            activeTab === "name"
-              ? "border-b-2 border-primaryGreen font-semibold text-primaryGreen"
-              : "text-gray-500"
-          }`}
-          onClick={() => setActiveTab("name")}
-        >
-          Name Your Own Price
-        </button>
-      </div>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                className={`flex-1 py-2 text-sm sm:text-base ${
+                  activeTab === "search"
+                    ? "border-b-2 border-primaryGreen font-semibold text-primaryGreen"
+                    : "text-gray-500"
+                }`}
+                onClick={() => setActiveTab("search")}
+              >
+                Search Deals
+              </button>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-[200px] text-center">
+              Browse and book the best deals instantly.
+            </TooltipContent>
+          </Tooltip>
 
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                className={`flex-1 py-2 text-sm sm:text-base ${
+                  activeTab === "name"
+                    ? "border-b-2 border-primaryGreen font-semibold text-primaryGreen"
+                    : "text-gray-500"
+                }`}
+                onClick={() => setActiveTab("name")}
+              >
+                Name Your Own Price
+              </button>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-[200px] text-center">
+              Submit your budget and receive offers directly from hosts.
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <div className="mb-6">
