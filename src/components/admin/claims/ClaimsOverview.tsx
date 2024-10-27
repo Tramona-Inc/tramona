@@ -68,9 +68,6 @@ export default function AdminClaimsDashboard() {
     inReview:
       allClaims?.filter((c) => c.claim.claimStatus === "In Review").length ?? 0,
   };
-  const claimitemslist = allClaims?.filter(
-    (c) => c.claim.id === "2686abac-7141-4997-8184-4c740d5221f0",
-  );
 
   return (
     <div className="container mx-auto p-4">

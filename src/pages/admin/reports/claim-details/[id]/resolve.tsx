@@ -49,14 +49,21 @@ export default function ResolveClaim() {
     if (!claimId || !selectedItemId) return;
 
     try {
-      await resolveClaimItem(values);
+      console.log(values.approvedAmount);
+      //make sure to multiply input
+      const processedClaimItems = {
+        ...values,
+        approvedAmount: values.approvedAmount * 100,
+      };
+      console.log(processedClaimItems);
+      await resolveClaimItem(processedClaimItems);
 
       toast({
         title: "Item Resolved",
         description: "The claim item has been successfully resolved.",
       });
 
-      setSubmittedValues(values);
+      setSubmittedValues(processedClaimItems);
     } catch (error) {
       toast({
         title: "Error",

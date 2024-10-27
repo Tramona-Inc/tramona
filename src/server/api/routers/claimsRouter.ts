@@ -32,6 +32,7 @@ import ClaimLinkEmail from "packages/transactional/emails/ClaimLinkEmail";
 import { sendSlackMessage } from "@/server/slack";
 import { TRPCError } from "@trpc/server";
 import TravelerClaimLinkEmail from "packages/transactional/emails/TravelerClaimLinkEmail";
+import TravelerIncidentClosed from "packages/transactional/emails/TravelerIncidentClosed";
 
 interface QueryResultRow {
   claims: Claim | null; // Claims can be nullable if no matching row
@@ -470,10 +471,11 @@ export const claimsRouter = createTRPCRouter({
         .where(eq(claimItemResolutions.claimItemId, input.claimItemId));
       //update claim items
 
+      console.log(input.approvedAmount);
       await db
         .update(claimItems)
         .set({
-          outstandingAmount: sql`${claimItems.outstandingAmount} - ${input.approvedAmount}`,
+          outstandingAmount: sql`${claimItems.requestedAmount} - ${input.approvedAmount}`, //this is a problem if we need do multiple charges for each item
           paymentCompleteAt: new Date(),
           resolvedBySuperhog: input.paymentSource === "Superhog" ? true : false,
         })
@@ -490,6 +492,55 @@ export const claimsRouter = createTRPCRouter({
         .set({ resolvedAt: new Date(), claimStatus: "Resolved" })
         .where(eq(claims.id, input.claimId));
 
+      //send emails to both traveler and host
+      const travelerClaimCloseLink = `${baseUrl}/my-trips/billing/claim-details/${input.claimId}`;
+      const hostClaimCloseLink = `${baseUrl}/host/report/claim/${input.claimId}`;
+
+      const traveler = await getTripOwnerIdWithClaimId({
+        claimId: input.claimId,
+      });
+      const host = await db
+        .select({
+          id: users.id,
+          email: users.email,
+          firstName: users.firstName,
+        })
+        .from(claims)
+        .innerJoin(users, eq(claims.filedByHostId, users.id))
+        .where(eq(claims.id, input.claimId))
+        .execute()
+        .then((res) => res[0]!);
+
+      await sendEmail({
+        to: traveler.email,
+        subject: "Incident Report Update: Resolution",
+        content: TravelerIncidentClosed({
+          travelerName: traveler.firstName ?? "Traveler",
+          claimCloseLink: travelerClaimCloseLink,
+        }),
+      });
+      console.log();
+      await sendEmail({
+        to: host.email,
+        subject: "Incident Report Update: Resolution",
+        content: TravelerIncidentClosed({
+          travelerName: host.firstName ?? "Host",
+          claimCloseLink: hostClaimCloseLink,
+        }),
+      });
+
       return;
     }),
 });
+
+const getTripOwnerIdWithClaimId = async ({ claimId }: { claimId: string }) => {
+  return await db
+    .select({ id: users.id, email: users.email, firstName: users.firstName })
+    .from(claims)
+    .innerJoin(trips, eq(claims.tripId, trips.id))
+    .innerJoin(groups, eq(trips.groupId, groups.id))
+    .innerJoin(users, eq(groups.ownerId, users.id))
+    .where(eq(claims.id, claimId))
+    .execute()
+    .then((res) => res[0]!);
+};

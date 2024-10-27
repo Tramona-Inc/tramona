@@ -1,5 +1,5 @@
 import React from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import {} from // Card,
@@ -18,7 +18,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,12 +31,12 @@ import {
   CheckCircle,
   XCircle,
   HelpCircle,
-  DollarSign,
   Send,
   FileQuestion,
 } from "lucide-react";
 import { ALL_PAYMENT_SOURCES, ClaimItem } from "@/server/db/schema";
 import { ALL_RESOLUTION_RESULTS } from "@/server/db/schema";
+import CurrencyInput from "react-currency-input-field";
 
 export const resolveItemFormSchema = z.object({
   claimId: z.string(),
@@ -66,7 +65,7 @@ export default function ResolveClaimItemForm({
       claimItemId: claimItem.id,
       resolutionResult: "Approved",
       resolutionDescription: "",
-      approvedAmount: claimItem.requestedAmount,
+      approvedAmount: claimItem.requestedAmount / 100,
       paymentSource: "Security Deposit",
     },
   });
@@ -159,18 +158,28 @@ export default function ResolveClaimItemForm({
                 <FormItem>
                   <FormLabel>Approved Amount</FormLabel>
                   <FormControl>
-                    <div className="relative">
-                      <DollarSign className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
-                      <Input
-                        type="number"
-                        {...field}
-                        onChange={(e) =>
-                          field.onChange(parseFloat(e.target.value))
-                        }
-                        className="pl-10"
-                        placeholder="0.00"
-                      />
-                    </div>
+                    <Controller
+                      control={form.control}
+                      name="approvedAmount"
+                      render={({ field }) => (
+                        <CurrencyInput
+                          id="approvedAmount"
+                          placeholder="0.00"
+                          intlConfig={{
+                            locale: "en-US",
+                            currency: "GBP",
+                          }}
+                          decimalsLimit={2}
+                          allowNegativeValue={false}
+                          value={field.value}
+                          onValueChange={(value) => {
+                            field.onChange(value ? parseFloat(value) : "");
+                          }}
+                          className="flex h-10 w-full appearance-none items-center rounded-md border border-input bg-zinc-50 px-3 text-sm text-foreground outline outline-transparent file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:border-black focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50" // Replace with your actual input className
+                          prefix="$"
+                        />
+                      )}
+                    />
                   </FormControl>
                   <FormDescription>
                     Enter the approved amount for this claim item (if
