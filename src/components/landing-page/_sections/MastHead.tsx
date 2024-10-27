@@ -183,7 +183,7 @@ export default function MastHead() {
             <div className="absolute inset-0 mt-0 rounded-3xl bg-primaryGreen md:mt-24"></div>
             <div className="relative grid gap-6 px-4 pb-12 pt-4 sm:grid-cols-2 sm:px-12">
               {/* Host Card */}
-              <div className="overflow-hidden rounded-2xl bg-white shadow-lg">
+              <div className="flex flex-col overflow-hidden rounded-2xl bg-white shadow-lg">
                 <div className="relative h-48 sm:h-64">
                   <Image
                     src={landing_hosts}
@@ -192,42 +192,44 @@ export default function MastHead() {
                     objectFit="cover"
                   />
                 </div>
-                <div className="p-6">
-                  <h2 className="mb-2 text-2xl font-bold">
-                    Hosts- Start booking your empty nights
-                  </h2>
-                  <p className="mb-4 text-sm">
-                    Get direct requests to fill your empty nights and maximize
-                    your revenue, all while keeping complete control over your
-                    pricing
-                  </p>
-                  <div className="mb-6 space-y-2">
-                    <div className="flex items-center">
-                      <DollarSign className="mr-2 h-5 w-5 text-primaryGreen" />
-                      <span>Accept, reject, or counter offers easily</span>
-                    </div>
-                    <div className="flex items-center">
-                      <ShieldCheck className="mr-2 h-5 w-5 text-primaryGreen" />
-                      <span>
-                        Full pricing control - no obligation to discount
-                      </span>
-                    </div>
-                    <div className="flex items-center">
-                      <Percent className="mr-2 h-5 w-5 text-primaryGreen" />
-                      <span>
-                        Lowest host fees at just 2.5%, keeping more money in
-                        your pocket
-                      </span>
+                <div className="flex grow flex-col justify-between p-6">
+                  <div>
+                    <h2 className="mb-2 text-2xl font-bold">
+                      Hosts- Start booking your empty nights
+                    </h2>
+                    <p className="mb-4 text-sm">
+                      Get direct requests to fill your empty nights and maximize
+                      your revenue, all while keeping complete control over your
+                      pricing.
+                    </p>
+                    <div className="mb-6 space-y-2">
+                      <div className="flex items-center">
+                        <DollarSign className="mr-2 h-5 w-5 text-primaryGreen" />
+                        <span>Accept, reject, or counter offers easily</span>
+                      </div>
+                      <div className="flex items-center">
+                        <ShieldCheck className="mr-2 h-5 w-5 text-primaryGreen" />
+                        <span>
+                          Full pricing control - no obligation to discount
+                        </span>
+                      </div>
+                      <div className="flex items-center">
+                        <Percent className="mr-2 h-5 w-5 text-primaryGreen" />
+                        <span>
+                          Lowest host fees at just 2.5%, keeping more money in
+                          your pocket
+                        </span>
+                      </div>
                     </div>
                   </div>
-                  <Button className="w-full bg-primaryGreen text-white">
+                  <Button className="mt-auto w-full bg-primaryGreen text-white">
                     <Link href="/for-hosts">For Hosts</Link>
                   </Button>
                 </div>
               </div>
 
               {/* Traveler Card */}
-              <div className="overflow-hidden rounded-2xl bg-white shadow-lg">
+              <div className="flex flex-col overflow-hidden rounded-2xl bg-white shadow-lg">
                 <div className="relative h-48 sm:h-64">
                   <Image
                     src={landing_travelers}
@@ -236,29 +238,31 @@ export default function MastHead() {
                     objectFit="cover"
                   />
                 </div>
-                <div className="p-6">
-                  <h2 className="mb-2 text-2xl font-bold">
-                    Travelers- Get the best deals on Airbnbs anywhere
-                  </h2>
-                  <p className="mb-4 text-sm">
-                    Find the Best Deals on Airbnbs—Name Your Price or Book
-                    Instantly
-                  </p>
-                  <div className="mb-6 space-y-2">
-                    <div className="flex items-center">
-                      <Star className="mr-2 h-5 w-5 text-primaryGreen" />
-                      <span>Exclusive, 1 of a kind prices</span>
-                    </div>
-                    <div className="flex items-center">
-                      <Eye className="mr-2 h-5 w-5 text-primaryGreen" />
-                      <span>See what hosts will offer you</span>
-                    </div>
-                    <div className="flex items-center">
-                      <Lock className="mr-2 h-5 w-5 text-primaryGreen" />
-                      <span>Safe, 100% re booking guarantee, always</span>
+                <div className="flex grow flex-col justify-between p-6">
+                  <div>
+                    <h2 className="mb-2 text-2xl font-bold">
+                      Travelers- Get the best deals on Airbnbs anywhere
+                    </h2>
+                    <p className="mb-4 text-sm">
+                      Find the Best Deals on Airbnbs—Name Your Price or Book
+                      Instantly
+                    </p>
+                    <div className="mb-6 space-y-2">
+                      <div className="flex items-center">
+                        <Star className="mr-2 h-5 w-5 text-primaryGreen" />
+                        <span>Exclusive, 1 of a kind prices</span>
+                      </div>
+                      <div className="flex items-center">
+                        <Eye className="mr-2 h-5 w-5 text-primaryGreen" />
+                        <span>See what hosts will offer you</span>
+                      </div>
+                      <div className="flex items-center">
+                        <Lock className="mr-2 h-5 w-5 text-primaryGreen" />
+                        <span>Safe, 100% re-booking guarantee, always</span>
+                      </div>
                     </div>
                   </div>
-                  <Button className="w-full bg-primaryGreen align-bottom text-white">
+                  <Button className="mt-auto w-full bg-primaryGreen text-white">
                     <Link href="/try-before-book">Try it before you book</Link>
                   </Button>
                 </div>
@@ -371,7 +375,7 @@ export default function MastHead() {
 
             {/* Live Cities and Hosts Section */}
             <div className="rounded-3xl bg-white p-8 md:mt-16">
-              <h2 className="mb-4 text-center text-3xl font-bold">
+              <h2 className="mb-12 text-center text-3xl">
                 We are currently live in{" "}
                 <span className="underline">35 cities</span> and counting
               </h2>
