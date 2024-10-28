@@ -735,7 +735,7 @@ export const usersRouter = createTRPCRouter({
       },
     });
 
-    if (!verifications) throw new TRPCError({ code: "NOT_FOUND" });
+    //if (!verifications) throw new TRPCError({ code: "NOT_FOUND" });
 
     return verifications;
   }),
