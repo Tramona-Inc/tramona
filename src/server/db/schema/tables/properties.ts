@@ -294,6 +294,9 @@ export const properties = pgTable(
     numRatings: integer("num_ratings").notNull().default(0),
     airbnbUrl: varchar("airbnb_url"),
     originalNightlyPrice: integer("original_nightly_price"), // in cents
+    currentSecurityDeposit: integer("current_security_deposit")
+      .notNull()
+      .default(0), //cant be null
     areaDescription: text("area_description"),
     mapScreenshot: text("map_screenshot"),
     cancellationPolicy: text("cancellation_policy"),

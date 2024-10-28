@@ -51,7 +51,7 @@
 //                       src={property.imageUrls[0]!}
 //                       alt="Property image"
 //                       fill
-//                       objectFit="cover"
+//                      className="object-cover object-center"
 //                     />
 //                   </div>
 //                   <div>

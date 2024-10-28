@@ -37,9 +37,7 @@ import {
   createHostReferral,
   createInitialHostTeam,
   createLatLngGISPoint,
-  sendEmail,
 } from "@/server/server-utils";
-import WelcomeEmail from "packages/transactional/emails/WelcomeEmail";
 
 export const usersRouter = createTRPCRouter({
   getUser: optionallyAuthedProcedure.query(async ({ ctx }) => {
@@ -737,7 +735,7 @@ export const usersRouter = createTRPCRouter({
       },
     });
 
-    if (!verifications) throw new TRPCError({ code: "NOT_FOUND" });
+    //if (!verifications) throw new TRPCError({ code: "NOT_FOUND" });
 
     return verifications;
   }),
