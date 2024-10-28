@@ -816,7 +816,7 @@ function ReserveBtn({
       ) : !property.stripeVerRequired ||
         verificationStatus?.isIdentityVerified === "true" ? (
         // <Link href={`/offer-checkout/${offer.id}`}>
-        <Link href={`/request-to-book-checkout/${property.id}checkIn=$?{checkIn}&checkOut=${checkOut}&numGuests=${requestToBook.numGuests}`}>
+        <Link href={`/request-to-book-checkout/${property.id}checkIn=${checkIn}&checkOut=${checkOut}&numGuests=${requestToBook.numGuests}`}>
           Reserve
         </Link>
       ) : verificationStatus?.isIdentityVerified === "pending" ? (

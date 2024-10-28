@@ -9,7 +9,7 @@ import {
 
 // same for logged and unlogged
 export const headerLinks = [
-  { name: "Book it now", href: "/how-it-works", icon: LinkIcon },
+  { name: "Book it now", href: "/unclaimed-offers", icon: LinkIcon },
   { name: "Name your own price", href: "/how-it-works", icon: InfoIcon },
 ];
 

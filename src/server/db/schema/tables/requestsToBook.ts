@@ -7,6 +7,7 @@ import {
   smallint,
   text,
   timestamp,
+  boolean,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { groups } from "./groups";
@@ -33,6 +34,7 @@ export const requestsToBook = pgTable(
       .notNull()
       .defaultNow(),
     resolvedAt: timestamp("resolved_at", { withTimezone: true }),
+    isAccepted: boolean("is_accepted").notNull().default(false),
   },
   (t) => ({
     propertyIdIdx: index().on(t.propertyId),
