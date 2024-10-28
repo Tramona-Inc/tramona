@@ -2,6 +2,7 @@ import {
   hostProfiles,
   properties,
   reservedDateRanges,
+  reviews,
   users,
   type PropertyType,
 } from "@/server/db/schema";
@@ -190,6 +191,8 @@ interface ListingCreatedWebhook {
     };
     description: string;
     channel: {
+      id: string;
+      name: string;
       customer: {
         id: string;
         name: string;
@@ -205,7 +208,11 @@ interface ChannelActivatedWebhook {
     picture: string;
     location: string;
     description: string;
-    customer: {
+    channel: {
+      customer: {
+        id: string;
+        name: string;
+      };
       id: string;
       name: string;
     };
@@ -229,6 +236,27 @@ type DateResponse = {
   };
 };
 
+type ReviewResponse = {
+  data: {
+    id: string;
+    platform_id: string;
+    reservation_platform_id: string;
+    detailed_ratings: {
+      rating: number;
+      comment: string;
+    }[];
+  }[];
+}
+
+type ReservationResponse = {
+  data: {
+    id: string;
+    guest: {
+      first_name: string;
+      last_name: string;
+    }
+  }[]
+}
 type HospitableWebhook = ListingCreatedWebhook | ChannelActivatedWebhook;
 
 export default async function webhook(
@@ -241,7 +269,7 @@ export default async function webhook(
     switch (webhookData.action) {
       case "channel.activated":
         console.log("channel created");
-        await insertHost(webhookData.data.customer.id);
+        await insertHost(webhookData.data.channel.customer.id);
         await db
           .update(users)
           .set({
@@ -249,7 +277,7 @@ export default async function webhook(
             location: webhookData.data.location,
             about: webhookData.data.description,
           })
-          .where(eq(users.id, webhookData.data.customer.id));
+          .where(eq(users.id, webhookData.data.channel.customer.id));
         break;
       case "listing.created":
         const userId = webhookData.data.channel.customer.id;
@@ -350,10 +378,11 @@ export default async function webhook(
             channel: "host-bot",
           });
         }
-
         const listingId = webhookData.data.platform_id;
         const dateIn3Days = addDays(new Date(), 3);
         const dateIn5Days = addDays(new Date(), 5);
+
+        //const allReviews = await axios.get(`https://connect.hospitable.com/api/v1/channels/${channelId}/reviews`);
 
         const listingDataUrl = getListingDataUrl(listingId, {
           checkIn: dateIn3Days,
@@ -382,6 +411,20 @@ export default async function webhook(
 
         const cancellationPolicy = getCancellationPolicy(listingData, listingId);
         const amenities = getAmenities(listingData, listingId);
+
+        const allReviews = (await axios.get<ReviewResponse>(`https://connect.hospitable.com/api/v1/channels/${webhookData.data.channel.id}/reviews`)).data;
+        const reviewsForProperty = allReviews.data.filter((review) => {
+          return review.platform_id === listingId;
+        })[0];
+        let [numReviews, avgRating] = [0, 0];
+        if (reviewsForProperty) {
+          numReviews = reviewsForProperty.detailed_ratings.length;
+          let sum = 0;
+          for (const review of reviewsForProperty.detailed_ratings) {
+            sum += review.rating;
+          }
+          avgRating = sum / numReviews;
+        }
 
         const propertyObject = {
           hostId: userId,
@@ -414,6 +457,8 @@ export default async function webhook(
           originalListingId: listingId,
           amenities: amenities,
           cancellationPolicy: cancellationPolicy,
+          avgRating,
+          numRatings: numReviews,
 
           //amenities: webhookData.data.amenities,
           //cancellationPolicy: webhookData.data.cancellation_policy,
@@ -434,11 +479,22 @@ export default async function webhook(
             platformBookedOn: "airbnb",
           });
         }
+
+        if (reviewsForProperty) {
+          const reservation = (await axios.get<ReservationResponse>(`https://connect.hospitable.com/api/v1/listings/${webhookData.data.id}/reservations/${reviewsForProperty.reservation_platform_id}`)).data;
+          const reviewName = reservation.data[0]?.guest.first_name + ' ' + reservation.data[0]?.guest.last_name;
+          for (const review of reviewsForProperty.detailed_ratings) {
+            await db.insert(reviews).values({
+              propertyId,
+              rating: review.rating,
+              review: review.comment,
+              name: reviewName,
+            })
+          }
+        }
         break;
     }
-
     // Add your processing logic here
-
     res.json({ received: true });
   } else {
     res.setHeader("Allow", "POST");
