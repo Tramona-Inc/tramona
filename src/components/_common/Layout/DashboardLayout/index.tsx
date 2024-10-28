@@ -19,7 +19,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const router = useRouter();
 
-  const { data: verifications } = api.users.getMyVerifications.useQuery();
+  const { data: verifications } = api.users.getMyVerifications.useQuery(
+    undefined,
+    { enabled: !!session },
+  );
 
   useEffect(() => {
     if (verifications?.phoneNumber === null) {

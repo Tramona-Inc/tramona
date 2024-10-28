@@ -42,8 +42,7 @@ function ImageCarousel({
                   src={image}
                   alt={`Image ${index + 1} of ${itemName}`}
                   fill
-                  objectFit="contain"
-                  className="rounded-md"
+                  className="rounded-md object-contain"
                 />
               </div>
             </CarouselItem>
