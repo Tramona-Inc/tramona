@@ -10,7 +10,11 @@ import { PropertyType, NewReview } from "@/server/db/schema";
 import { ListingSiteName } from "@/server/db/schema/common";
 import { getNumNights, logAndFilterSettledResults } from "@/utils/utils";
 import { algoliasearch, SearchResponse } from "algoliasearch";
-import { getCity, getCoordinates, getCountryISO } from "@/server/google-maps";
+import {
+  getAddress,
+  getCoordinates,
+  getCountryISO,
+} from "@/server/google-maps";
 import { proxyAgent } from "../server-utils";
 
 const EvolvePropertySchema = z.object({
@@ -652,7 +656,7 @@ export const evolveVacationRentalScraper: DirectSiteScraper = async ({
 
   const { lat, lng } = geocodingResult.location;
 
-  const cityInfo = await getCity({ lat, lng });
+  const cityInfo = await getAddress({ lat, lng });
 
   if (cityInfo.city === "[Unknown]" && cityInfo.country === "[Unknown]") {
     const countryISO = await getCountryISO({ lat, lng });
@@ -663,7 +667,8 @@ export const evolveVacationRentalScraper: DirectSiteScraper = async ({
   }
 
   const city = cityInfo.city !== "[Unknown]" ? cityInfo.city : undefined;
-  let state = cityInfo.stateCode !== "[Unknown]" ? cityInfo.stateCode : undefined;
+  let state =
+    cityInfo.stateCode !== "[Unknown]" ? cityInfo.stateCode : undefined;
   let country = cityInfo.country;
 
   if (city === undefined && state === undefined) {

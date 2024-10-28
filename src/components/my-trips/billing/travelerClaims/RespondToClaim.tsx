@@ -36,8 +36,8 @@ function ImageGallery({ images }: { images: string[] }) {
                 <Image
                   src={image}
                   alt={`Claim image ${index + 1}`}
-                  layout="fill"
-                  objectFit="cover"
+                  fill
+                  className="select-none object-cover object-center"
                 />
               </button>
             </DialogTrigger>
@@ -48,7 +48,7 @@ function ImageGallery({ images }: { images: string[] }) {
                 <Image
                   src={image}
                   alt={`Claim image ${index + 1}`}
-                  layout="fill"
+                  fill
                   objectFit={isZoomed ? "contain" : "cover"}
                 />
                 <button

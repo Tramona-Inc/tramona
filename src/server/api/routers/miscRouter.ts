@@ -4,7 +4,7 @@ import { env } from "@/env";
 import { format } from "date-fns";
 import { TRPCError } from "@trpc/server";
 import { zodUrl } from "@/utils/zod-utils";
-import { getCity, getCoordinates } from "@/server/google-maps";
+import { getAddress, getCoordinates } from "@/server/google-maps";
 import { Airbnb } from "@/utils/listing-sites/Airbnb";
 import { z } from "zod";
 import { urlScrape } from "@/server/server-utils";
@@ -132,7 +132,8 @@ export const miscRouter = createTRPCRouter({
 
       const coords = await getCoordinates(cityName).then((res) => res.location);
 
-      const locationParts = coords && (await getCity(coords).catch(() => undefined));
+      const locationParts =
+        coords && (await getAddress(coords).catch(() => undefined));
 
       const location = `${locationParts?.city}, ${locationParts?.stateCode}, ${locationParts?.country}`;
 

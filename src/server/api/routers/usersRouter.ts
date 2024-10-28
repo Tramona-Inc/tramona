@@ -31,7 +31,7 @@ import { TRPCError } from "@trpc/server";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
 import axios from "axios";
-import { getCity } from "@/server/google-maps";
+import { getAddress } from "@/server/google-maps";
 import { sendSlackMessage } from "@/server/slack";
 import {
   createHostReferral,
@@ -464,7 +464,7 @@ export const usersRouter = createTRPCRouter({
           const propertyObjects = await Promise.all(
             listings.map(async (property) => {
               // Get location information
-              const locInfo = await getCity({
+              const locInfo = await getAddress({
                 lat: property.lat,
                 lng: property.lng,
               });
@@ -735,7 +735,7 @@ export const usersRouter = createTRPCRouter({
       },
     });
 
-    if (!verifications) throw new TRPCError({ code: "NOT_FOUND" });
+    //if (!verifications) throw new TRPCError({ code: "NOT_FOUND" });
 
     return verifications;
   }),

@@ -42,7 +42,7 @@ import {
   rejectedRequests,
   hostTeams,
 } from "./db/schema";
-import { getCity, getCoordinates } from "./google-maps";
+import { getAddress, getCoordinates } from "./google-maps";
 import axios from "axios";
 import { HttpsProxyAgent } from "https-proxy-agent";
 import * as cheerio from "cheerio";
@@ -365,7 +365,7 @@ export async function addProperty({
     lat = location.lat;
     lng = location.lng;
   }
-  const locInfo = await getCity({ lat, lng });
+  const locInfo = await getAddress({ lat, lng });
 
   const propertyValues = {
     ...property,
@@ -479,7 +479,7 @@ export async function getRequestsForProperties(
     // `;
     requestIsNearProperties.push(requestIsNearProperty);
 
-    const { city, stateCode, country } = await getCity({
+    const { city, stateCode, country } = await getAddress({
       lat: property.latLngPoint.y,
       lng: property.latLngPoint.x,
     });

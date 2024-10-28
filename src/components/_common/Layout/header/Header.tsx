@@ -32,6 +32,7 @@ import {
   MenuIcon,
 } from "lucide-react";
 import { SkeletonText } from "@/components/ui/skeleton";
+import { index } from "drizzle-orm/pg-core";
 
 export function Header() {
   const { pathname } = useRouter();
@@ -105,9 +106,9 @@ function LargeHeader({ isHost }: { isHost: boolean }) {
       {isHost && <div className="flex-1" />}
 
       <div className="flex items-center pl-2">
-        {links.map((link) => (
+        {links.map((link, index) => (
           <NavLink
-            key={link.href}
+            key={index}
             href={link.href}
             noChildren={link.href === "/host"}
             render={({ selected }) => (
