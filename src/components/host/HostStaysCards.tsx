@@ -106,10 +106,12 @@ export default function HostStaysCards({
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem asChild red>
-                      <Link href="/host/resolution-form">
-                        <FlagIcon height={16} />
-                        Report Damage
+                    <DropdownMenuItem>
+                      <Link
+                        href="/host/report/resolution-form"
+                        className="flex w-full flex-row justify-around gap-x-1"
+                      >
+                        Report Damage <FlagIcon height={16} />
                       </Link>
                     </DropdownMenuItem>
                   </DropdownMenuContent>

@@ -105,8 +105,14 @@ export default function Checkout({ offer }: { offer: OfferWithDetails }) {
                 <div className="flex items-center gap-1">
                   <Star size={10} />
                   <p className="text-xs">
-                    {offer.property.avgRating} (
-                    {plural(offer.property.numRatings, "review")})
+                    {offer.property.numRatings === 0 ? (
+                      <>New</>
+                    ) : (
+                      <>
+                        {offer.property.avgRating} (
+                        {plural(offer.property.numRatings, "review")})
+                      </>
+                    )}
                   </p>
                 </div>
               </div>

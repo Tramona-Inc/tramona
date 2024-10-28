@@ -11,13 +11,12 @@ import {
   groups,
   trips,
   tripCancellations,
-  tripCheckouts,
 } from "@/server/db/schema";
 import { cancelSuperhogReservation } from "@/utils/webhook-functions/superhog-utils";
 import { sendEmail } from "@/server/server-utils";
 
 import { TRPCError } from "@trpc/server";
-import { and, eq, exists, isNotNull, isNull, ne, sql } from "drizzle-orm";
+import { and, eq, exists, isNotNull, isNull, lte, ne, sql } from "drizzle-orm";
 import { z } from "zod";
 import BookingCancellationEmail from "packages/transactional/emails/BookingCancellationEmail";
 import { formatDateRange, getNumNights, removeTax } from "@/utils/utils";
@@ -27,7 +26,7 @@ import { TAX_PERCENTAGE } from "@/utils/constants";
 export const tripsRouter = createTRPCRouter({
   getAllPreviousTripsWithDetails: roleRestrictedProcedure(["admin"]).query(
     async () => {
-      return await db.query.trips.findMany({
+      const previousTrips = await db.query.trips.findMany({
         with: {
           property: {
             columns: {
@@ -35,7 +34,9 @@ export const tripsRouter = createTRPCRouter({
               name: true,
               city: true,
             },
-            with: { host: { columns: { name: true, profileUrl: true } } },
+            with: {
+              host: { columns: { name: true, profileUrl: true, id: true } },
+            },
           },
           offer: {
             columns: {
@@ -56,7 +57,10 @@ export const tripsRouter = createTRPCRouter({
             },
           },
         },
+        where: lte(trips.checkOut, new Date()),
       });
+
+      return previousTrips;
     },
   ),
 
@@ -251,9 +255,11 @@ export const tripsRouter = createTRPCRouter({
       ),
     });
   }),
-  getAllTripDamages: roleRestrictedProcedure(["admin"]).query(async () => {
-    const allTrips = await db.query.tripDamages.findMany({});
-    return allTrips.length > 0 ? allTrips : [];
+  getAllclaimItems: roleRestrictedProcedure(["admin"]).query(async () => {
+    const allClaimItems = await db.query.claimItems.findMany();
+    console.log("claim", allClaimItems);
+
+    return allClaimItems.length > 0 ? allClaimItems : [];
   }),
 
   getTripCancelationPolicyByTripId: protectedProcedure
@@ -412,6 +418,31 @@ export const tripsRouter = createTRPCRouter({
       });
       return;
     }),
+  getMyTripsPaymentHistory: protectedProcedure.query(async ({ ctx }) => {
+    const allPayments = await db.query.trips.findMany({
+      where: exists(
+        db
+          .select()
+          .from(groupMembers)
+          .where(
+            and(
+              eq(groupMembers.groupId, trips.groupId),
+              eq(groupMembers.userId, ctx.user.id),
+            ),
+          ),
+      ),
+      with: {
+        tripCheckout: true,
+        property: {
+          columns: {
+            name: true,
+            city: true,
+          },
+        },
+      },
+    });
+    return allPayments;
+  }),
   getTripCheckoutByTripId: protectedProcedure
     .input(z.number())
     .query(async ({ input }) => {
