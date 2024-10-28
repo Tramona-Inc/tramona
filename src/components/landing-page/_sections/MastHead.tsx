@@ -267,7 +267,7 @@ export default function MastHead() {
                   </Button>
                 </div>
               </div>
-              <div className="col-span-full mt-8 text-center text-xl font-semibold text-white">
+              <div className="col-span-full mt-8 text-center text-lg font-semibold text-white md:text-2xl">
                 Hosts can expect to make 10-15% more when using Tramona to book
                 their empty nights
               </div>
