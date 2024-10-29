@@ -52,43 +52,43 @@ export default function UnclaimedMap() {
     }
   }, [filters.filter]);
 
-  const {
-    data: fetchedAdjustedProperties,
-    fetchNextPage: fetchNextPageOfAdjustedProperties,
-    isLoading,
-    isFetching,
-  } = api.properties.getByBoundaryInfiniteScroll.useInfiniteQuery(
-    {
-      boundaries: mapBoundaries,
-      latLngPoint: filters.filter ? {
-        lat: filters.filter.lat,
-        lng: filters.filter.long,
-      } : undefined,
-      radius: filters.radius,
-    },
-    {
-      getNextPageParam: (lastPage) => lastPage.nextCursor,
-      refetchOnWindowFocus: false,
-    },
-  );
+  // const {
+  //   data: fetchedAdjustedProperties,
+  //   fetchNextPage: fetchNextPageOfAdjustedProperties,
+  //   isLoading,
+  //   isFetching,
+  // } = api.properties.getByBoundaryInfiniteScroll.useInfiniteQuery(
+  //   {
+  //     boundaries: mapBoundaries,
+  //     latLngPoint: filters.filter ? {
+  //       lat: filters.filter.lat,
+  //       lng: filters.filter.long,
+  //     } : undefined,
+  //     radius: filters.radius,
+  //   },
+  //   {
+  //     getNextPageParam: (lastPage) => lastPage.nextCursor,
+  //     refetchOnWindowFocus: false,
+  //   },
+  // );
+
+  // // useEffect(() => {
+  // //   setIsLoading(isLoading || isFetching);
+  // // }, [isLoading, isFetching, setIsLoading]);
 
   // useEffect(() => {
-  //   setIsLoading(isLoading || isFetching);
-  // }, [isLoading, isFetching, setIsLoading]);
+  //   if (fetchedAdjustedProperties) {
+  //     console.log("setting adjusted properties");
+  //     setAdjustedProperties(fetchedAdjustedProperties);
+  //   }
+  // }, [fetchedAdjustedProperties, setAdjustedProperties]);
 
-  useEffect(() => {
-    if (fetchedAdjustedProperties) {
-      console.log("setting adjusted properties");
-      setAdjustedProperties(fetchedAdjustedProperties);
-    }
-  }, [fetchedAdjustedProperties, setAdjustedProperties]);
+  // useEffect(() => {
+  //   console.log("setting function ref from UnclaimedMap");
+  //   setFunctionRef(fetchNextPageOfAdjustedProperties);
+  // }, [fetchNextPageOfAdjustedProperties, setFunctionRef]);
 
-  useEffect(() => {
-    console.log("setting function ref from UnclaimedMap");
-    setFunctionRef(fetchNextPageOfAdjustedProperties);
-  }, [fetchNextPageOfAdjustedProperties, setFunctionRef]);
 
-  
   return (
     <LoadingProvider>
       <div className="flex h-screen-minus-header-n-footer w-full sm:h-screen-minus-header-n-footer-n-searchbar">

@@ -51,8 +51,10 @@ import { HOST_MARKUP, TRAVELER__MARKUP } from "@/utils/constants";
 import { HostRequestsPageData } from "./api/routers/propertiesRouter";
 import { Session } from "next-auth";
 import { calculateTotalTax } from "@/utils/payment-utils/taxData";
+import { scrapePage, serpPageSchema, transformSearchResult } from "./external-listings-scraping/airbnbScraper";
+import { getSerpUrl } from "./external-listings-scraping/airbnbScraper";
 
-export const proxyAgent = new HttpsProxyAgent(env.PROXY_URL);
+export const proxyAgent = new HttpsProxyAgent(env.DATACENTER_PROXY_URL);
 
 export const axiosWithRetry = axios.create({
   httpsAgent: proxyAgent,
@@ -861,9 +863,9 @@ export function haversineDistance(
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(toRadians(lat1)) *
-      Math.cos(toRadians(lat2)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+    Math.cos(toRadians(lat2)) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c; // Distance in kilometers
 }
@@ -934,3 +936,71 @@ export async function createInitialHostTeam(
 
   return teamId;
 }
+
+export async function scrapeAirbnbInitialPageHelper({
+  checkIn,
+  checkOut,
+  location,
+  numGuests,
+}: {
+  checkIn: Date;
+  checkOut: Date;
+  location: string;
+  numGuests: number;
+}) {
+  const serpUrl = getSerpUrl({
+    checkIn: checkIn,
+    checkOut: checkOut,
+    location: location,
+    numGuests: numGuests,
+  });
+
+  const numNights = getNumNights(checkIn, checkOut);
+
+
+  const pageData = await scrapePage(serpUrl).then(async (unparsedData) => {
+    return serpPageSchema.parse(unparsedData);
+  })
+  const searchResults = (await Promise.all(
+    pageData.staysSearch.results.searchResults.map((searchResult) =>
+      transformSearchResult({ searchResult, numNights, numGuests })
+    )
+  )).filter(Boolean);
+
+  // console.log("length of results:", searchResults.length);
+  // console.log('result:', searchResults[0]);
+  // const results = pageData.flatMap((data) => data.staysSearch.results.searchResults)
+  return {data: pageData, res: searchResults};
+}
+
+export async function scrapeAirbnbPagesHelper({
+  checkIn,
+  checkOut,
+  location,
+  numGuests,
+  cursors,
+}: {
+  checkIn: Date;
+  checkOut: Date;
+  location: string;
+  numGuests: number;
+  cursors: string[];
+}) {
+  const pageUrls = cursors.map((cursor) =>
+    getSerpUrl({
+      checkIn,
+      checkOut,
+      location,
+      numGuests,
+      cursor
+    }),
+  );
+
+  const numNights = getNumNights(checkIn, checkOut);
+
+  return (await Promise.all(pageUrls.map(scrapePage)))
+    .flatMap((data) => data.staysSearch.results.searchResults)
+    .map((searchResult) => transformSearchResult({ searchResult, numNights, numGuests }))
+    .filter(Boolean);
+}
+

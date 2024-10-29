@@ -21,6 +21,7 @@ import { useSearchBarForm } from "./useSearchBarForm";
 import { api } from "@/utils/api";
 import { useAdjustedProperties } from "./AdjustedPropertiesContext";
 import SingleDateInput from "@/components/_common/SingleDateInput";
+import { transformSearchResult } from "@/server/external-listings-scraping/airbnbScraper";
 
 const locations = [
   {
@@ -248,13 +249,13 @@ export function DesktopSearchTab() {
   const checkInDate = form.watch("checkIn");
   const checkOutDate = form.watch("checkOut");
 
-  type BookItNowProperties = (
-    {type: "Airbnb";
-    data: Property[];
-  } | {
-    type: "Subscraper";
-    data: Property[];
-  })[];
+  // type BookItNowProperties = (
+  //   {type: "Airbnb";
+  //   data: Property[];
+  // } | {
+  //   type: "Subscraper";
+  //   data: Property[];
+  // })[];
 
   const handleLocationClick = useCallback(
     (location: string) => {
@@ -268,6 +269,10 @@ export function DesktopSearchTab() {
     setIsSearching(true);
     const formData = form.getValues();
     console.log("Form data:", formData);
+    setAdjustedProperties({
+      pages: [],
+      // ... other initial properties if any
+    });
 
     // Run the original onSubmit function
 
@@ -288,14 +293,66 @@ export function DesktopSearchTab() {
     if (formData.checkIn && formData.checkOut) {
       console.log("Running subscrapers...");
       try {
-        const results: BookItNowProperties = await utils.properties.getBookItNowProperties.fetch({
+        const scrapedResultsPromise = utils.properties.getBookItNowProperties.fetch({
+          checkIn: formData.checkIn,
+          checkOut: formData.checkOut,
+          numGuests: formData.numGuests!,
+          location: formData.location!,
+          firstBatch: true,
+        });
+
+        const airbnbResultsPromise = utils.misc.scrapeAirbnbInitialPage.fetch({
           checkIn: formData.checkIn,
           checkOut: formData.checkOut,
           numGuests: formData.numGuests!,
           location: formData.location!,
         });
 
-        console.log('results', results);
+        const airbnbResults = await airbnbResultsPromise;
+        // setAdjustedProperties((prevState) => ({
+        //   ...prevState,
+        //   pages: [...(prevState?.pages || []), ...airbnbResults],
+        // }));
+        const scrapedResults = await scrapedResultsPromise;
+        console.log("airbnb:", airbnbResults.res, "scraped:", scrapedResults);
+        setAdjustedProperties((prevState) => ({
+          ...prevState,
+          pages: [...(prevState?.pages || []), ...scrapedResults, ...airbnbResults.res],
+        }));
+
+        setIsLoading(false);
+        setIsSearching(false);
+
+        const cursors = airbnbResults.data.staysSearch.results.paginationInfo.pageCursors.slice(1);
+
+        const finishAirbnbResultsPromise = utils.misc.scrapeAirbnbPages.fetch({
+          checkIn: formData.checkIn,
+          checkOut: formData.checkOut,
+          numGuests: formData.numGuests!,
+          location: formData.location!,
+          pageCursors: cursors,
+        });
+
+        const finishScrapedResultPromise = utils.properties.getBookItNowProperties.fetch({
+          checkIn: formData.checkIn,
+          checkOut: formData.checkOut,
+          numGuests: formData.numGuests!,
+          location: formData.location!,
+          firstBatch: false,
+        })
+
+        const finishAirbnbResults = await finishAirbnbResultsPromise;
+        setAdjustedProperties((prevState) => ({
+          ...prevState,
+          pages: [...(prevState?.pages || []), ...finishAirbnbResults],
+        }));
+        const finishScrapedResults = await finishScrapedResultPromise;
+        setAdjustedProperties((prevState) => ({
+          ...prevState,
+          pages: [...(prevState?.pages || []), ...finishScrapedResults],
+        }));
+
+        // console.log('results', results);
 
         // Update adjustedProperties with only the properties that were updated
         // if (adjustedProperties) {
@@ -363,10 +420,10 @@ export function DesktopSearchTab() {
           // );
 
           // Use a callback function with setAdjustedProperties
-          setAdjustedProperties((prevState) => {
-            if (!prevState) return null;
-            return { ...prevState, pages: results };
-          });
+          // setAdjustedProperties((prevState) => {
+          //   if (!prevState) return null;
+          //   return { ...prevState, pages: results };
+          // });
         } catch (error) {
         console.error("Error running subscrapers:", error);
       } finally {

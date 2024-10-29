@@ -1,10 +1,11 @@
 import { DirectSiteScraper } from "../direct-sites-scraping";
-import { urlScrape } from "@/server/server-utils";
+import { scrapeAirbnbInitialPageHelper, scrapeAirbnbPagesHelper, urlScrape } from "@/server/server-utils";
 import { NewProperty } from "@/server/db/schema";
 import { z } from "zod";
 import { getNumNights, parseCurrency } from "@/utils/utils";
 import { sortBy } from "lodash";
 import { scrapeAirbnbListing } from "./scrapeAirbnbListing";
+import { db } from "../db";
 
 export const airbnbScraper: DirectSiteScraper = async ({
   checkIn,
@@ -88,31 +89,44 @@ export async function scrapeAirbnbSearch({
   location: string;
   numGuests: number;
 }) {
-  const serpUrl = getSerpUrl({
+  const pageData = await scrapeAirbnbInitialPageHelper({
     checkIn,
     checkOut,
     location,
     numGuests,
-  });
+  })
+  // const serpUrl = getSerpUrl({
+  //   checkIn,
+  //   checkOut,
+  //   location,
+  //   numGuests,
+  // });
 
-  const pageData = await scrapePage(serpUrl).then(async (unparsedData) => {
-    return serpPageSchema.parse(unparsedData);
-  });
+  // const pageData = await scrapePage(serpUrl).then(async (unparsedData) => {
+  //   return serpPageSchema.parse(unparsedData);
+  // });
 
-  const cursors = pageData.staysSearch.results.paginationInfo.pageCursors;
-  const pageUrls = cursors.map((cursor) =>
-    getSerpUrl({ checkIn, checkOut, location, numGuests, cursor }),
-  );
+  const cursors = pageData.data.staysSearch.results.paginationInfo.pageCursors.slice(1);
+  return await scrapeAirbnbPagesHelper({
+    checkIn,
+    checkOut,
+    location,
+    numGuests,
+    cursors,
+  })
+  // const pageUrls = cursors.map((cursor) =>
+  //   getSerpUrl({ checkIn, checkOut, location, numGuests, cursor }),
+  // );
 
-  const numNights = getNumNights(checkIn, checkOut);
+  // const numNights = getNumNights(checkIn, checkOut);
 
-  return (await Promise.all(pageUrls.map(scrapePage)))
-    .flatMap((data) => data.staysSearch.results.searchResults)
-    .map((searchResult) => transformSearchResult({ searchResult, numNights, numGuests }))
-    .filter(Boolean);
+  // return (await Promise.all(pageUrls.map(scrapePage)))
+  //   .flatMap((data) => data.staysSearch.results.searchResults)
+  //   .map((searchResult) => transformSearchResult({ searchResult, numNights, numGuests }))
+  //   .filter(Boolean);
 }
 
-function getSerpUrl({
+export function getSerpUrl({
   checkIn,
   checkOut,
   location,
@@ -140,7 +154,7 @@ function getSerpUrl({
   return url.toString();
 }
 
-async function scrapePage(url: string) {
+export async function scrapePage(url: string) {
   // niobeMinimalClientData[0][1].data.presentation...
   const pageDataSchema = z.object({
     niobeMinimalClientData: z.tuple([
@@ -163,7 +177,7 @@ async function scrapePage(url: string) {
   return ret;
 }
 
-const serpPageSchema = z.object({
+export const serpPageSchema = z.object({
   staysSearch: z.object({
     results: z.object({
       paginationInfo: z.object({ pageCursors: z.string().array() }),
@@ -204,7 +218,7 @@ type SearchResult = z.infer<
   typeof serpPageSchema
 >["staysSearch"]["results"]["searchResults"][number];
 
-function transformSearchResult({
+export function transformSearchResult({
   searchResult: { listing, pricingQuote, contextualPictures },
   numNights,
   numGuests,

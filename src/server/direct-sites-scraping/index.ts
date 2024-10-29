@@ -702,14 +702,15 @@ export const checkAvailabilityForProperties = async (options: {
     const timerLabel = `Property ${propertyId}`
 
     console.time(timerLabel);
-    console.log(originalListingId, 'jj');
 
     return (async () => {
       switch (originalListingPlatform) {
         case "Casamundo":
-          const res = await axios.post<casamundoRes>("https://tramona.com/api/bookitnow", subScraperOptions);
+          //const res = await axios.post<casamundoRes>("https://tramona.com/api/bookitnow", subScraperOptions);
+          const res = await casamundoSubScraper(subScraperOptions)
           console.timeEnd(timerLabel); // End timing for this property
-          return {...res.data.subScrapedResult, propertyId};
+          // return {...res.data.subScrapedResult, propertyId};
+          return { ...res, propertyId};
 
         case "IntegrityArizona":
           const arizonaResult = await arizonaSubScraper(subScraperOptions);

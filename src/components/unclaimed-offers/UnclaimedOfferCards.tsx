@@ -43,8 +43,7 @@ export default function UnclaimedOfferCards({
   useEffect(() => {
     if (
       !isDelayedLoading &&
-      (!adjustedProperties?.pages.length ||
-        !adjustedProperties.pages[0]?.data.length)
+      (!adjustedProperties?.pages.length)
     ) {
       setShowNoProperties(true);
     } else {
@@ -52,20 +51,28 @@ export default function UnclaimedOfferCards({
     }
   }, [isDelayedLoading, adjustedProperties]);
 
+  // const allProperties = useMemo(() => {
+  //   return adjustedProperties?.pages.flatMap((page) => page.data) ?? [];
+  // }, [adjustedProperties]);
+
   const allProperties = useMemo(() => {
-    return adjustedProperties?.pages.flatMap((page) => page.data) ?? [];
+    return adjustedProperties?.pages
+      // .flatMap((page) => page?.data || []) // Use optional chaining and fallback
+      // .filter(Boolean); // Filter out undefined values, if any
   }, [adjustedProperties]);
 
 
   const paginatedProperties = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-    return allProperties.slice(startIndex, endIndex);
+    return allProperties?.slice(startIndex, endIndex);
   }, [allProperties, currentPage, itemsPerPage]);
 
+  console.log("paginatedProps:", paginatedProperties);
+
   const totalPages = useMemo(() => {
-    return Math.max(1, Math.ceil(allProperties.length / itemsPerPage));
-  }, [allProperties.length, itemsPerPage]);
+    return Math.max(1, Math.ceil(allProperties?.length / itemsPerPage));
+  }, [allProperties?.length, itemsPerPage]);
 
   const handlePageChange = useCallback(
     (page: number) => {
@@ -152,9 +159,9 @@ export default function UnclaimedOfferCards({
           ) : (
             <div className="flex h-full w-full flex-col">
               <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                {paginatedProperties.map((property, index) => (
+                {paginatedProperties?.length && paginatedProperties.map((property, index) => (
                   <div
-                    key={property.id}
+                    key={property.originalListingId}
                     className="animate-fade-in"
                     style={{ animationDelay: `${index * 50}ms` }}
                   >

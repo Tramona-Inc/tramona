@@ -685,6 +685,7 @@ export const propertiesRouter = createTRPCRouter({
       checkOut: z.date(),
       numGuests: z.number(),
       location: z.string(),
+      firstBatch: z.boolean(),
     }),
     )
     .query(async ({ input }) => {
@@ -713,23 +714,28 @@ export const propertiesRouter = createTRPCRouter({
         console.timeEnd("Properties query");
         return result;
       });
-      const airbnbPromise = scrapeAirbnbSearch({
-        checkIn: input.checkIn,
-        checkOut: input.checkOut,
-        location: input.location,
-        numGuests: input.numGuests,
-      }).then(result => {
-        console.timeEnd("Airbnb search");
-        return result;
-      });
+      // const airbnbPromise = scrapeAirbnbSearch({
+      //   checkIn: input.checkIn,
+      //   checkOut: input.checkOut,
+      //   location: input.location,
+      //   numGuests: input.numGuests,
+      // }).then(result => {
+      //   console.timeEnd("Airbnb search");
+      //   return result;
+      // });
 
       const props = await propsPromise;
 
-      const eligibleProperties = props.filter(
+      let eligibleProperties = props.filter(
         (p) => input.numGuests <= p.maxNumGuests,
       );
 
       console.log("eligibleProperties", eligibleProperties.length);
+      if (input.firstBatch) {
+        eligibleProperties = eligibleProperties.slice(0, 30);
+      } else {
+        eligibleProperties = eligibleProperties.slice(30);
+      }
 
       const results = await checkAvailabilityForProperties({
         propertyIds: eligibleProperties.map((p) => p.id),
@@ -754,18 +760,11 @@ export const propertiesRouter = createTRPCRouter({
         return { ...property, originalNightlyPrice: r.originalNightlyPrice };
       }));
 
-      const airbnbProperties = await airbnbPromise; // Ensures it completes before returning
+      // const airbnbProperties = await airbnbPromise; // Ensures it completes before returning
 
       console.timeEnd("full procedure")
 
-      return [
-        {
-          type: "Airbnb",
-          data: airbnbProperties,
-        }, {
-          type: "Subscraper",
-          data: updatedPropertyData,
-        }];
+      return updatedPropertyData;
     }),
 
   runSubscrapers: publicProcedure

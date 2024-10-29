@@ -80,7 +80,9 @@ async function getLocationId(location: string): Promise<string> {
 
   const response: AxiosResponse<AutocompleteResponse> = await axios.get(
     `${autocompleteUrl}?${params.toString()}`,
-    { httpsAgent: proxyAgent },
+    {
+      httpsAgent: proxyAgent
+    },
   );
   const suggestions = response.data.suggestions;
 
@@ -144,7 +146,9 @@ async function getOfferIds(
 
   const response: AxiosResponse<OfferResponse> = await axios.get(
     `${url}?${params.toString()}`,
-    { headers, httpsAgent: proxyAgent },
+    { headers,
+      httpsAgent: proxyAgent
+    },
   );
 
   return response.data.offers.map((offer) => offerSchema.parse(offer));
@@ -173,7 +177,6 @@ async function checkAvailability(
   checkIn: Date,
   checkOut: Date,
 ): Promise<boolean> {
-  console.log('checking availability', offerId);
   const url = `https://www.casamundo.com/api/v2/calendar/${offerId}`;
 
   let currentYear: number = checkIn.getFullYear();
@@ -361,7 +364,9 @@ const fetchPrice = async (
       const response: AxiosResponse<ApiResponse> = await axios.post(
         `${url}?${queryParams.toString()}`,
         null,
-        { headers, httpsAgent: proxyAgent },
+        { headers,
+          httpsAgent: proxyAgent
+        },
       );
       const data = response.data;
 
