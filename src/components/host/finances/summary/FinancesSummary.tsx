@@ -1,6 +1,6 @@
 import SummaryChart from "@/components/host/finances/summary/SummaryChart";
 import { Separator } from "@/components/ui/separator";
-import YearToDateSummaryCard from "@/components/host/finances/common/YearToDateSummaryCard";
+import YearToDateSummaryCard from "@/components/host/finances/YearToDateSummaryCard";
 export default function FinanceSummary({
   hostStripeConnectId,
   becameHostAt,

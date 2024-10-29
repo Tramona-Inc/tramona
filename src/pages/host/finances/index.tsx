@@ -9,7 +9,7 @@ import { ConnectNotificationBanner } from "@stripe/react-connect-js";
 import useIsStripeConnectInstanceReady from "@/utils/store/stripe-connect";
 import FinanceLoading from "../../../components/host/finances/common/FinanceLoading";
 import StripeConnectCurrentlyDueBeforePayouts from "@/components/host/finances/StripeConnectCurrentlyDueBeforePayout";
-import SettingsAndDocuments from "../../../components/host/finances/common/SettingAndDocuments";
+import SettingsAndDocuments from "../../../components/host/finances/SettingAndDocuments";
 import { SettingsIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
