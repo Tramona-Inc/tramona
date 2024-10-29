@@ -17,7 +17,7 @@ import {
   createLatLngGISPoint,
   proxyAgent,
 } from "@/server/server-utils";
-import { getCity } from "@/server/google-maps";
+import { getAddress } from "@/server/google-maps";
 import { calculateTotalTax } from "@/utils/payment-utils/taxData";
 import {
   getAmenities,
@@ -331,7 +331,7 @@ export default async function webhook(
           lng: webhookData.data.address.longitude,
         });
 
-        const { city, stateCode, country } = await getCity({
+        const { city, stateCode, country } = await getAddress({
           lat: webhookData.data.address.latitude,
           lng: webhookData.data.address.longitude,
         });
