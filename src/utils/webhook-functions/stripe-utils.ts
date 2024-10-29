@@ -1,7 +1,13 @@
-import { stripeWithSecretKey } from "@/server/api/routers/stripeRouter";
+import { env } from "@/env";
 import { db } from "@/server/db";
 import { users } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
+import Stripe from "stripe";
+
+export const stripe = new Stripe(env.STRIPE_RESTRICTED_KEY_ALL);
+const stripeWithSecretKey = new Stripe(env.STRIPE_SECRET_KEY, {
+  typescript: true,
+});
 
 export async function createSetupIntent({
   customerId,
