@@ -7,9 +7,9 @@ import PaymentHistory from "@/components/host/finances/payment-history/PaymentHi
 import FinancesSummary from "@/components/host/finances/summary/FinancesSummary";
 import { ConnectNotificationBanner } from "@stripe/react-connect-js";
 import useIsStripeConnectInstanceReady from "@/utils/store/stripe-connect";
-import FinanceLoading from "./_components/FinanceLoading";
+import FinanceLoading from "../../../components/host/finances/common/FinanceLoading";
 import StripeConnectCurrentlyDueBeforePayouts from "@/components/host/finances/StripeConnectCurrentlyDueBeforePayout";
-import SettingsAndDocuments from "./_components/SettingAndDocuments";
+import SettingsAndDocuments from "../../../components/host/finances/common/SettingAndDocuments";
 import { SettingsIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
