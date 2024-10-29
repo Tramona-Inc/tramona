@@ -5,12 +5,7 @@ import Head from "next/head";
 import { useState } from "react";
 import PaymentHistory from "@/components/host/finances/payment-history/PaymentHistory";
 import FinancesSummary from "@/components/host/finances/summary/FinancesSummary";
-import NoStripeAccount from "@/components/host/finances/NoStripeAccount";
-import {
-  ConnectAccountOnboarding,
-  ConnectNotificationBanner,
-  ConnectAccountManagement,
-} from "@stripe/react-connect-js";
+import { ConnectNotificationBanner } from "@stripe/react-connect-js";
 import useIsStripeConnectInstanceReady from "@/utils/store/stripe-connect";
 import FinanceLoading from "./_components/FinanceLoading";
 import StripeConnectCurrentlyDueBeforePayouts from "@/components/host/finances/StripeConnectCurrentlyDueBeforePayout";
@@ -93,7 +88,6 @@ export default function Page() {
 
               <FinancesSummary
                 hostStripeConnectId={hostStripeConnectId}
-                isStripeConnectInstanceReady={isStripeConnectInstanceReady}
                 becameHostAt={hostInfo?.becameHostAt}
               />
               <SettingsAndDocuments items={settingsItems} />

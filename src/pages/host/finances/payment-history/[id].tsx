@@ -4,7 +4,7 @@ import BackButton from "@/components/_common/BackButton";
 import { ConnectAccountOnboarding } from "@stripe/react-connect-js";
 import { api } from "@/utils/api";
 import { useRouter } from "next/router";
-import { ErrorAlert } from "../_components/ErrorAlert";
+import ErrorAlert from "../_components/ErrorAlert";
 import useIsStripeConnectInstanceReady from "@/utils/store/stripe-connect";
 import {
   Card,
