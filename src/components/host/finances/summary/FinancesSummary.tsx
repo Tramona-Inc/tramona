@@ -4,6 +4,7 @@ import BalanceSummary from "@/components/host/finances/BalanceSummary";
 import AccountBalanceCard from "@/components/host/finances/summary/AccountBalanceCard";
 import { useEffect, useState } from "react";
 import { Separator } from "@/components/ui/separator";
+import YearToDateSummaryCard from "@/pages/host/finances/_components/YearToDateSummaryCard";
 export default function FinanceSummary({
   hostStripeConnectId,
   isStripeConnectInstanceReady,
@@ -46,23 +47,14 @@ export default function FinanceSummary({
 
   return (
     <div className="flex w-full flex-col justify-around gap-y-3">
-      <div className="flex flex-col-reverse gap-x-5 gap-y-3 lg:flex-row">
+      <div className="flex flex-col gap-x-5 gap-y-3 lg:flex-row">
         <SummaryChart
           becameHostAt={becameHostAt}
           hostStripeConnectId={hostStripeConnectId}
         />
         <Separator className="h-[2px] lg:hidden" />
         <div className="flex w-full flex-col gap-y-3">
-          <BalanceSummary
-            stripeConnectIdNumber={hostStripeConnectId}
-            balance={totalCurrentBalance}
-            isStripeConnectInstanceReady={isStripeConnectInstanceReady}
-          />
-
-          <AccountBalanceCard
-            accountBalance={accountBalance}
-            externalBanks={externalBanks}
-          />
+          <YearToDateSummaryCard />
         </div>
       </div>
     </div>
