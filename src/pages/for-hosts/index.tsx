@@ -110,7 +110,7 @@ function Questions() {
   ];
 
   return (
-    <div className="space-y-4 rounded-lg border p-4">
+    <div className="space-y-4 lg:rounded-lg lg:border lg:p-4">
       <h1 className="text-2xl font-bold">Questions?</h1>
       <div className="flex flex-col gap-2">
         {buttons.map((button, index) => (
