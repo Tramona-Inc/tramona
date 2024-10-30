@@ -1,6 +1,4 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import MyTripsEmptySvg from "@/components/_common/EmptyStateSvg/MyTripsEmptySvg";
-import EmptyStateValue from "@/components/_common/EmptyStateSvg/EmptyStateValue";
 import React from "react";
 
 import CurrentTravelerDisputes from "./CurrentTravelerDisputes";

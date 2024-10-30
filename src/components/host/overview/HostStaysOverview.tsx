@@ -5,11 +5,11 @@ import {
   BubbleTabsContent,
   BubbleTabsList,
 } from "@/components/ui/bubble-tabs";
-import HostStaysCards from "./HostStaysCards";
+import HostStaysCards from "../HostStaysCards";
 import { addWeeks, isSameDay } from "date-fns";
 
-// ____ DOUBLES AS THE OVERVIEW AND PAGE _____
-export default function HostStays() {
+// ____ Overview page _____
+export default function HostStaysOverview() {
   const { data: allTrips } = api.trips.getHostTrips.useQuery();
 
   const currentDate = new Date();
@@ -38,10 +38,10 @@ export default function HostStays() {
     (trip) => trip.checkIn <= currentDate && trip.checkOut >= currentDate,
   );
   return (
-    <div className="w-full">
-      <h1 className="mb-2 text-3xl font-bold md:mb-10 md:text-4xl">Stays</h1>
-      <BubbleTabs defaultValue="currently-hosting">
-        <BubbleTabsList className="mb-4">
+    <div className="flex flex-col gap-y-5">
+      <h2 className="text-4xl font-bold">Your reservations</h2>
+      <BubbleTabs defaultValue="currently-hosting" className="w-full">
+        <BubbleTabsList className="flex w-full flex-row justify-start overflow-x-auto px-1">
           <BubbleTabsTrigger value="currently-hosting">
             Currently hosting
           </BubbleTabsTrigger>
@@ -51,23 +51,25 @@ export default function HostStays() {
           <BubbleTabsTrigger value="upcoming">Upcoming</BubbleTabsTrigger>
           <BubbleTabsTrigger value="accepted">Accepted</BubbleTabsTrigger>
           <BubbleTabsTrigger value="history">History</BubbleTabsTrigger>
-          <div className="w-5/6 border-b-4" />
         </BubbleTabsList>
         <BubbleTabsContent value="currently-hosting">
-          <HostStaysCards trips={currentlyHostingTrips} />
+          <HostStaysCards
+            trips={currentlyHostingTrips}
+            staysTab="currently-hosting"
+          />
         </BubbleTabsContent>
         <BubbleTabsContent value="upcoming">
-          <HostStaysCards trips={upcomingTrips} />
+          <HostStaysCards trips={upcomingTrips} staysTab="upcoming" />
         </BubbleTabsContent>
         <BubbleTabsContent value="accepted">
-          <HostStaysCards trips={acceptedTrips} />
+          <HostStaysCards trips={acceptedTrips} staysTab="accepted" />
         </BubbleTabsContent>
         <BubbleTabsContent value="checking-out">
-          <HostStaysCards trips={checkingOutTrips} />
+          <HostStaysCards trips={checkingOutTrips} staysTab="checking-out" />
         </BubbleTabsContent>
 
         <BubbleTabsContent value="history">
-          <HostStaysCards trips={historyTrips} />
+          <HostStaysCards trips={historyTrips} staysTab="history" />
         </BubbleTabsContent>
       </BubbleTabs>
     </div>

@@ -6,7 +6,7 @@ import {
 } from "@/server/api/trpc";
 import { db } from "@/server/db";
 import { hostProfiles, properties, users } from "@/server/db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { z } from "zod";
 
 export const hostRouter = createTRPCRouter({
@@ -66,4 +66,19 @@ export const hostRouter = createTRPCRouter({
         where: eq(hostProfiles.userId, hostId),
       });
     }),
+  getAllOverviewNotifications: protectedProcedure.query(async ({ ctx }) => {
+    //we need to retrieve all of the propeties, and check to see if there is any properties that dont have thier calender synced
+    const unSyncedProperties = await db.query.properties.findMany({
+      where: and(
+        eq(properties.hostId, ctx.user.id),
+        isNull(properties.iCalLink),
+      ),
+      columns: {
+        id: true,
+        iCalLink: true,
+        name: true,
+      },
+    });
+    return unSyncedProperties;
+  }),
 });

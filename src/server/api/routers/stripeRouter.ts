@@ -1,6 +1,6 @@
 import { env } from "@/env";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
-import { trips, claimItems, users } from "@/server/db/schema";
+import { trips, users } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import Stripe from "stripe";
@@ -838,7 +838,7 @@ export const stripeRouter = createTRPCRouter({
         propertyId: z.number(),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ input }) => {
       try {
         //retreit the setupIntent objext to get the payment method
         const setupIntentObject = await stripe.setupIntents.retrieve(
