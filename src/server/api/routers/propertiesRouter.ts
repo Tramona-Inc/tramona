@@ -676,15 +676,18 @@ export const propertiesRouter = createTRPCRouter({
   getSearchResults: protectedProcedure
     .input(z.object({ searchQuery: z.string() }))
     .query(async ({ ctx, input }) => {
-      return await ctx.db.query.properties.findMany({
-        where: and(
-          eq(properties.hostId, ctx.user.id),
-          or(
-            like(properties.name, `%${input.searchQuery}%`),
-            like(properties.city, `%${capitalize(input.searchQuery)}%`),
+      if (input.searchQuery !== "") {
+        return await ctx.db.query.properties.findMany({
+          where: and(
+            eq(properties.hostId, ctx.user.id),
+            or(
+              like(properties.name, `%${input.searchQuery}%`),
+              like(properties.city, `%${capitalize(input.searchQuery)}%`),
+            ),
           ),
-        ),
-      });
+        });
+      }
+      return null;
     }),
 
   updatePropertySecurityDepositAmount: protectedProcedure

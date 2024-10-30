@@ -1,5 +1,5 @@
 import { Search, X } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Form, FormControl, FormField, FormItem } from "../ui/form";
@@ -25,6 +25,7 @@ const ExpandableSearchBar = ({
   const handleCollapse = () => {
     setIsExpanded(false);
     onExpandChange(false);
+    setSearchQuery("");
   };
 
   const formSchema = z.object({
@@ -35,34 +36,21 @@ const ExpandableSearchBar = ({
     schema: formSchema,
   });
 
-  const { data: searchResults, refetch } =
-    api.properties.getSearchResults.useQuery(
-      {
-        searchQuery,
+  api.properties.getSearchResults.useQuery(
+    {
+      searchQuery,
+    },
+    {
+      onSuccess: (data) => {
+        onSearchResultsUpdate(data ?? []);
       },
-      { enabled: !!searchQuery }, // only fetch when there is a searchQuery
-    );
+    },
+  );
 
   const onSubmit = form.handleSubmit(async (formValues) => {
-    console.log("formValues", formValues);
     setSearchQuery(formValues.searchQuery);
-    console.log("searchResults", searchResults);
     form.reset();
   });
-
-  useEffect(() => {
-    if (searchQuery) {
-      void refetch();
-      console.log("refactored");
-    }
-  }, [searchQuery, refetch]);
-
-  useEffect(() => {
-    if (searchResults) {
-      onSearchResultsUpdate(searchResults);
-      console.log("searchResults2", searchResults);
-    }
-  }, [onSearchResultsUpdate, searchResults]);
 
   return (
     <div
