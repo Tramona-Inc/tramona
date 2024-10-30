@@ -12,9 +12,10 @@ import TramonaIcon from "@/components/_icons/TramonaIcon";
 import Footer from "@/components/_common/Layout/Footer";
 import AccordionFaq from "@/components/_common/AccordionFaq";
 import { TestimonialCarousel } from "@/components/landing-page/_sections/testimonials/TestimonialCarousel";
-import { Check } from "lucide-react";
+import { Check, CircleCheckBig } from "lucide-react";
 import Onboarding1 from "@/components/host/onboarding/Onboarding1";
 import { useHostOnboarding } from "@/utils/store/host-onboarding";
+import { useRouter } from "next/router";
 
 type Tabs = {
   id: number;
@@ -52,45 +53,71 @@ function IntroSection({ requestFeed }: { requestFeed: FeedRequestItem[] }) {
     setProgress(progress + 1);
   }
 
+  const texts = [
+    "Up to $50,000 of protection per bookings",
+    "Optional security deposits",
+    "24/7 support",
+    "3 levels of verification",
+    "Complete control over pricing",
+    "Manual and automatic booking options",
+  ];
+
   return (
     <section className="relative mx-auto max-w-7xl px-4">
-      <div className="flex flex-col gap-8 lg:flex-row">
+      <div className="flex flex-col-reverse gap-10 lg:flex-row">
         <div className="basis-1/2">
-          <h2 className="text-center text-3xl font-bold">
-            Sign up and start booking these travelers
+          <h2 className="text-2xl font-bold">
+            Sign up and start booking your vacancies
           </h2>
-          <div className="px-10 py-6">
-            <div className="h-[450px] rounded-lg border px-2 py-2 shadow-xl">
+          <div className="px-2 py-4 lg:px-10 lg:py-6">
+            <div className="h-[350px] rounded-lg border px-2 py-2 shadow-xl lg:h-[450px]">
               <RequestFeed requestFeed={requestFeed} />
             </div>
           </div>
-          <p>Up to $50,000 of protection per bookings</p>
-          <p>Optional security deposits</p>
-          <p>24/7 support</p>
-          <p>3 levels of verification</p>
-          <p>Manual and automatic booking options</p>
+          <div className="space-y-1 text-lg">
+            {texts.map((text, index) => (
+              <div className="flex items-center gap-2" key={index}>
+                <CircleCheckBig className="text-teal-900" />
+                <p>{text}</p>
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="basis-1/2">
-          <Onboarding1 onPressNext={onPressNext} />
+        <div className="flex basis-1/2 flex-col gap-4">
+          <div className="lg:rounded-lg lg:border lg:p-4">
+            <Onboarding1 onPressNext={onPressNext} forHost />
+          </div>
+
+          <p className="text-lg font-semibold">
+            Hosts can expect to make 10-15% more when using Tramona to book
+            their empty nights
+          </p>
+          <Questions />
         </div>
       </div>
-      {/* <div className="flex flex-col items-center space-y-8 lg:flex-row lg:space-x-10 xl:space-x-20">
-        <div className="max-w-xl space-y-5">
-          <h2 className="text-center text-4xl font-bold tracking-tight text-primaryGreen md:text-6xl">
-            List on Tramona
-          </h2>
-          <p className="text-center text-4xl font-semibold tracking-tight md:text-6xl">
-            Let&apos;s make sure your calendar is filled
-          </p>
-          <p className="text-center text-lg font-medium tracking-tight md:text-2xl">
-            100% free to use, sign up and let the requests start rolling in
-          </p>
-        </div>
-        <div className="h-[450px] rounded-lg border px-2 py-2 shadow-xl">
-          <RequestFeed requestFeed={requestFeed} />
-        </div>
-      </div> */}
     </section>
+  );
+}
+
+function Questions() {
+  const router = useRouter();
+
+  const buttons = [
+    { title: "FAQ", onClick: () => router.push("/faq") },
+    { title: "Watch host side demo", onClick: () => router.push("/demos") },
+  ];
+
+  return (
+    <div className="space-y-4 rounded-lg border p-4">
+      <h1 className="text-2xl font-bold">Questions?</h1>
+      <div className="flex flex-col gap-2">
+        {buttons.map((button, index) => (
+          <Button key={index} onClick={button.onClick}>
+            {button.title}
+          </Button>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -159,32 +186,6 @@ function ListInAMinute() {
           </div>
         ))}
       </div>
-    </section>
-  );
-}
-
-function Questions() {
-  return (
-    <section className="space-y-10 text-balance text-center lg:px-44">
-      <h1 className="text-3xl font-bold lg:text-5xl">Questions?</h1>
-      <div className="grid grid-cols-2 items-center gap-y-8 text-xl font-bold">
-        <div>
-          <p>Schedule a call with our host onboarding team</p>
-        </div>
-        <div>
-          <p>FAQ</p>
-        </div>
-        <Link href="/faq">
-          <Button size="lg">Calendly Link</Button>
-        </Link>
-        <Link href="/faq">
-          <Button size="lg">FAQ Page</Button>
-        </Link>
-      </div>
-      {/* <p className="font-semibold lg:text-3xl">
-        Please look through our host FAQ video library. We specifically made it
-        to answer any and all questions a host might have.
-      </p> */}
     </section>
   );
 }
@@ -399,7 +400,7 @@ export default function HostWelcome({
         </div>
 
         <IntroSection requestFeed={requestFeed} />
-        <Questions />
+        {/* <Questions />
         <HowItWorksHost />
         <TestimonialCarousel />
         <TailorYourBookingProcess />
@@ -407,7 +408,7 @@ export default function HostWelcome({
         <ListInAMinute />
         <FAQ />
         <WhatAreYouWaitingFor />
-        <SendUsAnEmail />
+        <SendUsAnEmail /> */}
       </div>
       <div className="hidden md:block">
         <Footer />

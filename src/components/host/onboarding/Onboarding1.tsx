@@ -37,11 +37,14 @@ import { CaretSortIcon } from "@radix-ui/react-icons";
 import { ALL_PROPERTY_PMS } from "@/server/db/schema";
 import { api } from "@/utils/api";
 import { Home } from "lucide-react";
+import { cn } from "@/utils/utils";
 
 export default function Onboarding1({
   onPressNext,
+  forHost = false,
 }: {
   onPressNext: () => void;
+  forHost?: boolean;
 }) {
   const router = useRouter();
   const [showModal, setShowModal] = useState(false);
@@ -147,7 +150,7 @@ export default function Onboarding1({
 
   return (
     <>
-      <div className="w-full flex-grow max-sm:container lg:grid lg:grid-cols-1">
+      <div className="w-full flex-grow lg:grid lg:grid-cols-1">
         {/* <div className="hidden flex-grow bg-muted lg:block">
           <Image
             src="/assets/images/host-onboarding.png"
@@ -158,8 +161,19 @@ export default function Onboarding1({
           />
         </div> */}
 
-        <div className="my-6 flex flex-col items-center gap-6 sm:mx-20">
-          <h1 className="text-center text-2xl font-semibold sm:text-4xl lg:text-3xl xl:text-4xl">
+        <div
+          className={cn(
+            "flex flex-col gap-6",
+            forHost ? "m-0 items-start" : "my-6 items-center sm:mx-20",
+          )}
+        >
+          <h1
+            className={cn(
+              forHost
+                ? "text-2xl font-bold"
+                : "text-2xl font-semibold sm:text-4xl lg:text-3xl xl:text-4xl",
+            )}
+          >
             Get started on Tramona
           </h1>
           <div className="flex flex-col gap-4">
