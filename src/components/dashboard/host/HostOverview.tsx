@@ -8,6 +8,7 @@ import HostReportOverview from "./HostReportOverview";
 import { useSession } from "next-auth/react";
 import useIsStripeConnectInstanceReady from "@/utils/store/stripe-connect";
 import { api } from "@/utils/api";
+import AttentionOverviewSection from "@/components/host/attention-required/AttentionOverviewSection";
 
 export default function HostOverview() {
   const { data: session } = useSession({
@@ -18,7 +19,11 @@ export default function HostOverview() {
   const { isStripeConnectInstanceReady } = useIsStripeConnectInstanceReady();
 
   return session ? (
-    <div className="min-h-screen-minus-header space-y-4 p-4 pb-32">
+    <div className="max-w-8xl mx-auto mt-10 min-h-screen-minus-header space-y-4 p-4 pb-32">
+      <h1 className="text-5xl font-bold">
+        Welcome back, {user?.firstName ? user.firstName : "Host"}!{" "}
+      </h1>
+      <AttentionOverviewSection />
       <div className="flex flex-col gap-4 lg:flex-row">
         <HostAnalytics
           className="contents lg:flex lg:flex-1"
