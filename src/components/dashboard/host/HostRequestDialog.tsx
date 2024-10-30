@@ -303,7 +303,7 @@ export default function HostRequestDialog({
         <DialogFooter className="mt-6">
           <Button
             onClick={() => setStep(1)}
-            className="w-full bg-green-900 hover:bg-green-800"
+            className="w-full bg-primaryGreen hover:bg-green-100"
             disabled={selectedProperties.length === 0}
           >
             Confirm
