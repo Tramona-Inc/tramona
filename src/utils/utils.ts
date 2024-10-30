@@ -691,7 +691,6 @@ export function getOfferDiscountPercentage(offer: {
   randomDirectListingDiscount?: number | null;
 }) {
   const numNights = getNumNights(offer.checkIn, offer.checkOut);
-  const offerNightlyPrice = offer.travelerOfferedPriceBeforeFees / numNights;
   //1.)check to see if scraped property(directListing) and the randomDirectListingDiscount is not null
   if (offer.randomDirectListingDiscount) {
     return offer.randomDirectListingDiscount;

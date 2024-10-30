@@ -32,7 +32,6 @@ import jwt from "jsonwebtoken";
 import { z } from "zod";
 import axios from "axios";
 import { getAddress } from "@/server/google-maps";
-import { sendSlackMessage } from "@/server/slack";
 import {
   addHostProfile,
   createHostReferral,
