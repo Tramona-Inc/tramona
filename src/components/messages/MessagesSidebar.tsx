@@ -133,16 +133,7 @@ export default function MessagesSidebar({
   // Map and listen to all the connects the user is part of
   useEffect(() => {
     const handlePostgresChange = async (payload: { new: MessageDbType }) => {
-      // if (!optimisticIds.includes(payload.new.id)) {
-      //   const { error } = await supabase
-      //     .from("user")
-      //     .select("name, email, image")
-      //     .eq("id", payload.new.user_id)
-      //     .single();
-      //   if (error) {
-      //     errorToast();
-      //   } else {
-      const newMessage: ChatMessageType = {
+      setConversationToTop(payload.new.conversation_id, {
         id: payload.new.id,
         conversationId: payload.new.conversation_id,
         userId: payload.new.user_id,
@@ -150,13 +141,7 @@ export default function MessagesSidebar({
         isEdit: payload.new.is_edit,
         createdAt: payload.new.created_at,
         read: payload.new.read,
-      };
-
-      setConversationToTop(payload.new.conversation_id, newMessage);
-      // addMessageToConversation(payload.new.conversation_id, newMessage)
-      // void fetchInitialMessages(payload.new.conversation_id)
-      //   }
-      // }
+      });
     };
 
     const fetchConversationIds = async () => {

@@ -52,7 +52,7 @@ export type HostRequestsPageData = {
         "firstName" | "lastName" | "name" | "image" | "location" | "about"
       >;
     };
-    properties: (Property & {taxAvailable: boolean})[];
+    properties: (Property & { taxAvailable: boolean })[];
   }[];
 };
 
@@ -511,7 +511,7 @@ export const propertiesRouter = createTRPCRouter({
   //       sql`6371 * acos(SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})) <= ${radius}`,
   //     );
   // }),
-  getHostProperties: roleRestrictedProcedure(["host"])
+  getHostProperties: protectedProcedure
     .input(z.object({ limit: z.number().optional() }).optional())
     .query(async ({ ctx, input }) => {
       return await ctx.db.query.properties.findMany({
@@ -519,6 +519,7 @@ export const propertiesRouter = createTRPCRouter({
         limit: input?.limit,
       });
     }),
+
   getHostPropertiesWithRequests: roleRestrictedProcedure(["host"]).query(
     async ({ ctx }) => {
       // TODO: USE DRIZZLE relational query, then use groupby in js
@@ -561,7 +562,7 @@ export const propertiesRouter = createTRPCRouter({
               "firstName" | "lastName" | "name" | "image" | "location" | "about"
             >;
           };
-          properties: (Property & {taxAvailable: boolean})[];
+          properties: (Property & { taxAvailable: boolean })[];
         }
       >();
 
@@ -573,7 +574,7 @@ export const propertiesRouter = createTRPCRouter({
           // If not, create a new entry with an empty properties array
           requestsMap.set(request.id, {
             request,
-            properties: [] as (Property & {taxAvailable: boolean})[],
+            properties: [] as (Property & { taxAvailable: boolean })[],
           });
         }
 
@@ -583,7 +584,9 @@ export const propertiesRouter = createTRPCRouter({
       for (const requestWithProperties of requestsMap.values()) {
         const { request, properties } = requestWithProperties;
 
-        for (const property of properties as unknown as (Property & {taxAvailable: boolean})[]) {
+        for (const property of properties as unknown as (Property & {
+          taxAvailable: boolean;
+        })[]) {
           const cityGroup = findOrCreateCityGroup(property.city);
 
           // Find if the request already exists in the city's group to avoid duplicates
@@ -666,5 +669,18 @@ export const propertiesRouter = createTRPCRouter({
           autoOfferDiscountTiers: input.autoOfferDiscountTiers,
         })
         .where(eq(properties.id, input.id));
+    }),
+
+  updatePropertySecurityDepositAmount: protectedProcedure
+    .input(z.object({ propertyId: z.number(), amount: z.number() }))
+    .mutation(async ({ input }) => {
+      const property = await db
+        .update(properties)
+        .set({
+          currentSecurityDeposit: input.amount,
+        })
+        .where(eq(properties.id, input.propertyId));
+
+      return property;
     }),
 });

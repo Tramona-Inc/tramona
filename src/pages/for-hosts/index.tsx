@@ -147,8 +147,8 @@ function ListInAMinute() {
             <div className="relative h-32 w-5/12 overflow-clip rounded-xl lg:h-full">
               <Image
                 src={content.image}
-                objectFit="cover"
-                layout="fill"
+                className="select-none object-cover object-center"
+                fill
                 alt=""
               />
             </div>
@@ -213,7 +213,12 @@ function TailorYourBookingProcess() {
         {cards.map((card, index) => (
           <div key={index} className="basis-1/3 space-y-2">
             <div className="relative h-56 w-full overflow-clip rounded-xl">
-              <Image src={card.image} alt="" layout="fill" objectFit="cover" />
+              <Image
+                src={card.image}
+                alt=""
+                className="select-none object-cover object-center"
+                fill
+              />
             </div>
             <div>
               <h2 className="font-semibold lg:text-2xl">{card.title}</h2>
@@ -257,8 +262,8 @@ function DamageProtection() {
           <Image
             src="/assets/images/host-welcome/safe.jpeg"
             alt=""
-            objectFit="cover"
-            layout="fill"
+            className="select-none object-cover object-center"
+            fill
           />
         </div>
         <div className="flex-1 space-y-10">

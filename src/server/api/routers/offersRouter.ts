@@ -15,9 +15,9 @@ import {
   referralCodes,
   requestSelectSchema,
   tripCheckouts,
-  trips
+  trips,
 } from "@/server/db/schema";
-import { getCity, getCoordinates } from "@/server/google-maps";
+import { getAddress, getCoordinates } from "@/server/google-maps";
 import { sendText, sendWhatsApp } from "@/server/server-utils";
 import { formatDateRange, getNumNights } from "@/utils/utils";
 
@@ -35,9 +35,7 @@ import {
 import { z } from "zod";
 import { requests } from "../../db/schema/tables/requests";
 import { db } from "@/server/db";
-import {
-  scrapeDirectListings
-} from "@/server/direct-sites-scraping";
+import { scrapeDirectListings } from "@/server/direct-sites-scraping";
 import { createNormalDistributionDates } from "@/server/server-utils";
 import { scrapeAirbnbPrice } from "@/server/scrapePrice";
 import { TRPCClientError } from "@trpc/client";
@@ -240,7 +238,7 @@ export const offersRouter = createTRPCRouter({
   getCity: publicProcedure
     .input(z.object({ lat: z.number(), lng: z.number() }))
     .query(async ({ input }) => {
-      return await getCity(input);
+      return await getAddress(input);
     }),
 
   getByIdWithDetails: protectedProcedure
@@ -571,27 +569,27 @@ export const offersRouter = createTRPCRouter({
         // });
 
         // for (const member of allGroupMembers) {
-          // await sendEmail({
-          //   to: member.user.email,
-          //   subject: "New offer received",
-          //   content: NewOfferReceivedEmail({
-          //     userName:
-          //       member.user.firstName ?? member.user.name ?? "Tramona Traveler",
-          //     airbnbPrice: input.totalPrice * 1.25,
-          //     ourPrice: input.totalPrice,
-          //     property: curProperty!.name,
-          //     discountPercentage: 25,
-          //     nights: getNumNights(
-          //       requestDetails.checkIn,
-          //       requestDetails.checkOut,
-          //     ),
-          //     adults: curProperty!.maxNumGuests,
-          //     checkInDateTime: requestDetails.checkIn,
-          //     checkOutDateTime: requestDetails.checkOut,
-          //     imgUrl: curProperty!.imageUrls[0]!,
-          //     offerLink: `${env.NEXTAUTH_URL}/requests/${input.requestId}`,
-          //   }),
-          // });
+        // await sendEmail({
+        //   to: member.user.email,
+        //   subject: "New offer received",
+        //   content: NewOfferReceivedEmail({
+        //     userName:
+        //       member.user.firstName ?? member.user.name ?? "Tramona Traveler",
+        //     airbnbPrice: input.totalPrice * 1.25,
+        //     ourPrice: input.totalPrice,
+        //     property: curProperty!.name,
+        //     discountPercentage: 25,
+        //     nights: getNumNights(
+        //       requestDetails.checkIn,
+        //       requestDetails.checkOut,
+        //     ),
+        //     adults: curProperty!.maxNumGuests,
+        //     checkInDateTime: requestDetails.checkIn,
+        //     checkOutDateTime: requestDetails.checkOut,
+        //     imgUrl: curProperty!.imageUrls[0]!,
+        //     offerLink: `${env.NEXTAUTH_URL}/requests/${input.requestId}`,
+        //   }),
+        // });
         // }
       } else {
         const brokeDownPayment = await breakdownPayment({

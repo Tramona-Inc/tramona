@@ -1,5 +1,5 @@
 import { type MessageDbType } from "@/types/supabase.message";
-import { useMessage, type ChatMessageType } from "@/utils/store/messages";
+import { useMessage } from "@/utils/store/messages";
 import supabase from "@/utils/supabase-client";
 import { useEffect, useRef, useState } from "react";
 import { Icons } from "../_icons/icons";
@@ -60,17 +60,8 @@ export default function ListMessages() {
     : false;
 
   const handlePostgresChange = async (payload: { new: MessageDbType }) => {
-    // if (!optimisticIds.includes(payload.new.id)) {
-    //   const { data, error } = await supabase
-    //     .from("user")
-    //     .select("name, email, image")
-    //     .eq("id", payload.new.user_id)
-    //     .single();
-    //   if (error) {
-    //     errorToast();
-    //   } else {
     if (payload.new.user_id !== session?.user.id) {
-      const newMessage: ChatMessageType = {
+      addMessageToConversation(payload.new.conversation_id, {
         id: payload.new.id,
         conversationId: payload.new.conversation_id,
         userId: payload.new.user_id,
@@ -78,13 +69,8 @@ export default function ListMessages() {
         isEdit: payload.new.is_edit,
         createdAt: payload.new.created_at,
         read: payload.new.read,
-      };
-      addMessageToConversation(payload.new.conversation_id, newMessage);
+      });
     }
-    // console.log(data);
-    // void fetchInitialMessages(currentConversationId ?? "")
-    //   }
-    // }
 
     const scrollContainer = scrollRef.current;
     if (

@@ -529,7 +529,7 @@ export default function HostPropertiesDetails({
                 src={editing ? imageURLs[0]! : property.imageUrls[0]!}
                 alt=""
                 fill
-                objectFit="cover"
+                className="object-cover object-center"
                 priority
               />
             </div>
@@ -538,7 +538,7 @@ export default function HostPropertiesDetails({
                 src={editing ? imageURLs[1]! : property.imageUrls[1]!}
                 alt=""
                 fill
-                objectFit="cover"
+                className="object-cover object-center"
               />
             </div>
             <div className="relative col-span-1 row-span-1 bg-accent">
@@ -546,7 +546,7 @@ export default function HostPropertiesDetails({
                 src={editing ? imageURLs[2]! : property.imageUrls[2]!}
                 alt=""
                 fill
-                objectFit="cover"
+                className="object-cover object-center"
               />
             </div>
             <div className="relative col-span-1 row-span-1 bg-accent">
@@ -554,7 +554,7 @@ export default function HostPropertiesDetails({
                 src={editing ? imageURLs[3]! : property.imageUrls[3]!}
                 alt=""
                 fill
-                objectFit="cover"
+                className="object-cover object-center"
               />
             </div>
             <div className="relative col-span-1 row-span-1 bg-accent">
@@ -562,7 +562,7 @@ export default function HostPropertiesDetails({
                 src={editing ? imageURLs[4]! : property.imageUrls[4]!}
                 alt=""
                 fill
-                objectFit="cover"
+                className="object-cover object-center"
               />
             </div>
           </div>

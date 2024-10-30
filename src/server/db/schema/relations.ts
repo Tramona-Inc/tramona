@@ -26,12 +26,14 @@ import {
   superhogErrors,
 } from "./tables/superhogRequests";
 import { referralCodes, referralEarnings, users } from "./tables/users";
-import { trips, tripCancellations, tripDamages } from "./tables/trips";
+import { trips, tripCancellations } from "./tables/trips";
 import { reviews } from "./tables/reviews";
 import { fillerBookings, fillerOffers } from "./tables/feedFiller";
 import { linkInputProperties } from "./tables/linkInputProperties";
 import { rejectedRequests } from "./tables/rejectedRequests";
 import { tripCheckouts, refundedPayments } from "./tables/payments";
+import { claims, claimItems, claimPayments } from "./tables/claims";
+import { claimItemResolutions } from "./tables/claims";
 
 export const usersRelations = relations(users, ({ one, many }) => ({
   accounts: many(accounts),
@@ -52,6 +54,8 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   superHogErrors: many(superhogErrors),
   hostReferralDiscounts: many(hostReferralDiscounts),
   rejectedRequests: many(rejectedRequests),
+  claims: many(claims),
+  claimItemResolutions: many(claimItemResolutions),
 }));
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -105,7 +109,7 @@ export const propertiesRelations = relations(properties, ({ one, many }) => ({
   superhogRequests: many(superhogRequests),
   reviews: many(reviews),
   superhogErrors: many(superhogErrors),
-  tripDamages: many(tripDamages),
+  claimItems: many(claimItems),
 }));
 
 export const bookedDatesRelations = relations(bookedDates, ({ one }) => ({
@@ -337,6 +341,8 @@ export const superhogRequestsRelations = relations(
     }),
     trip: many(trips),
     superhogActionOnTrips: many(superhogActionOnTrips),
+    claims: many(claims),
+    claimPayments: many(claimPayments),
   }),
 );
 export const superhogActionOnTripsRelations = relations(
@@ -397,7 +403,8 @@ export const tripsRelations = relations(trips, ({ one, many }) => ({
   superhogErrors: many(superhogErrors),
   superhogActions: many(superhogActionOnTrips),
   tripCancellations: many(tripCancellations),
-  tripDamages: many(tripDamages),
+  claims: many(claims),
+  claimItems: many(claimItems),
   hostReferralDiscounts: many(hostReferralDiscounts),
 }));
 
@@ -439,13 +446,58 @@ export const fillerBookingsRelations = relations(fillerBookings, ({ one }) => ({
   }),
 }));
 
-export const tripDamagesRelations = relations(tripDamages, ({ one }) => ({
+// < -------- Claims ------- >
+export const claimsRelations = relations(claims, ({ one, many }) => ({
   trip: one(trips, {
-    fields: [tripDamages.tripId],
+    fields: [claims.tripId],
+    references: [trips.id],
+  }),
+  user: one(users, {
+    fields: [claims.filedByHostId],
+    references: [users.id],
+  }),
+  superhogRequest: one(superhogRequests, {
+    fields: [claims.superhogRequestId],
+    references: [superhogRequests.id],
+  }),
+  claimItemResolutions: many(claimItemResolutions),
+  claimItems: many(claimItems),
+}));
+
+export const claimResolutionsRelations = relations(
+  claimItemResolutions,
+  ({ one }) => ({
+    claim: one(claims, {
+      fields: [claimItemResolutions.claimId],
+      references: [claims.id],
+    }),
+    claimItem: one(claimItems, {
+      fields: [claimItemResolutions.claimItemId],
+      references: [claimItems.id],
+    }),
+  }),
+);
+
+export const claimItemsRelations = relations(claimItems, ({ one, many }) => ({
+  trip: one(trips, {
+    fields: [claimItems.tripId],
     references: [trips.id],
   }),
   property: one(properties, {
-    fields: [tripDamages.propertyId],
+    fields: [claimItems.propertyId],
     references: [properties.id],
+  }),
+  claimPayments: many(claimPayments),
+  claimItemResolutions: many(claimItemResolutions),
+}));
+
+export const claimPaymentsRelations = relations(claimPayments, ({ one }) => ({
+  claim: one(claims, {
+    fields: [claimPayments.claimItemId],
+    references: [claims.id],
+  }),
+  superhogRequest: one(superhogRequests, {
+    fields: [claimPayments.superhogRequestId],
+    references: [superhogRequests.id],
   }),
 }));

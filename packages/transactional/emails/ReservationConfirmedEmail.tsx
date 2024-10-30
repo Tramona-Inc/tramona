@@ -45,7 +45,7 @@ export default function ReservationConfirmedEmail({
   tramonaPrice = 150,
   serviceFee = 20,
   totalPrice = 20,
-  tripDetailLink = "",
+  tripDetailLink = "#",
   numOfNights = 1,
 }: ReservationConfirmedEmailProps) {
   return (

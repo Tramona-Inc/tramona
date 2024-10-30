@@ -20,10 +20,9 @@ export default function MastHead() {
           <Image
             src={landingBg}
             alt=""
-            layout="fill"
-            objectFit="cover"
+            fill
             placeholder="blur"
-            className="select-none"
+            className="select-none object-cover object-center"
           />
         </div>
         <div className="relative grid h-full grid-cols-1 p-4 lg:grid-cols-1">
