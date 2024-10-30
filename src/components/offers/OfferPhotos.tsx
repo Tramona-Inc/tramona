@@ -24,7 +24,7 @@ export default function OfferPhotos({
         loop: true,
         startIndex: indexOfSelectedImage,
       }}
-      className="w-full md:h-[700px] md:w-[600px] lg:h-[750px] lg:w-[800px] "
+      className="w-full md:h-[700px] md:w-[600px] lg:h-[750px] lg:w-[800px]"
     >
       <CarouselContent>
         {propertyImages.map((image, index) => (
@@ -37,7 +37,7 @@ export default function OfferPhotos({
                       src={image}
                       alt="Property Image"
                       fill
-                      objectFit="contain"
+                      className="object-contain object-center"
                     />
                   </div>
                 </CardContent>

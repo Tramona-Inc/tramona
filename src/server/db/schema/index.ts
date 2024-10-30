@@ -6,6 +6,7 @@ export * from "./tables/auth/accounts";
 export * from "./tables/auth/sessions";
 export * from "./tables/auth/verificationTokens";
 export * from "./tables/bids";
+export * from "./tables/claims";
 export * from "./tables/counters";
 export * from "./tables/groups";
 export * from "./tables/hostProfiles";

@@ -124,7 +124,12 @@ export default function PropertyPage({
             onClick={() => setSelectedImageIdx(0)}
             className="hover:opacity-90 sm:hidden"
           >
-            <Image src={firstImageUrl} alt="" fill objectFit="cover" />
+            <Image
+              src={firstImageUrl}
+              alt=""
+              fill
+              className="object-cover object-center"
+            />
           </DialogTrigger>
           <div className="hidden sm:contents">
             {property.imageUrls.slice(0, 5).map((imageUrl, index) => (
@@ -138,7 +143,12 @@ export default function PropertyPage({
                   onClick={() => setSelectedImageIdx(index)}
                   className="hover:opacity-90"
                 >
-                  <Image src={imageUrl} alt="" fill objectFit="cover" />
+                  <Image
+                    src={imageUrl}
+                    alt=""
+                    fill
+                    className="object-cover object-center"
+                  />
                 </DialogTrigger>
               </div>
             ))}
@@ -192,8 +202,7 @@ export default function PropertyPage({
                               src={imageUrl}
                               alt=""
                               fill
-                              objectFit="cover"
-                              className="h-full w-full"
+                              className="h-full w-full object-cover object-center"
                             />
                           </AspectRatio>
                         </div>

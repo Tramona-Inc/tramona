@@ -4,6 +4,7 @@ import HostFinancesOverview from "./HostFinancesOverview";
 import HostMessagesOverview from "./HostMesagesOverview";
 import HostPropertiesOverview from "./HostPropertiesOverview";
 import HostRequestsOverview from "./HostRequestsOverview";
+import HostReportOverview from "./HostReportOverview";
 import { useSession } from "next-auth/react";
 import useIsStripeConnectInstanceReady from "@/utils/store/stripe-connect";
 import { api } from "@/utils/api";
@@ -24,15 +25,16 @@ export default function HostOverview() {
           stripeConnectIdNumber={user?.stripeConnectId}
         />
         <HostRequestsOverview className="contents lg:flex lg:flex-1" />
+        <HostMessagesOverview className="contents flex-1 lg:flex" />
       </div>
       <div className="flex flex-col gap-4 lg:flex-row">
-        <HostMessagesOverview className="contents flex-1 lg:flex" />
+        <HostPropertiesOverview className="contents flex-1 lg:flex" />
         <HostFinancesOverview
           isStripeConnectInstanceReady={isStripeConnectInstanceReady}
           stripeConnectIdNumber={user?.stripeConnectId}
           className="contents flex-1 lg:flex"
         />
-        <HostPropertiesOverview className="contents flex-1 lg:flex" />
+        <HostReportOverview />
       </div>
     </div>
   ) : (

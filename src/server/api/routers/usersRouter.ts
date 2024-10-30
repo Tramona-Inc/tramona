@@ -31,15 +31,14 @@ import { TRPCError } from "@trpc/server";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
 import axios from "axios";
-import { getCity } from "@/server/google-maps";
+import { getAddress } from "@/server/google-maps";
 import { sendSlackMessage } from "@/server/slack";
 import {
+  addHostProfile,
   createHostReferral,
   createInitialHostTeam,
   createLatLngGISPoint,
-  sendEmail,
 } from "@/server/server-utils";
-import WelcomeEmail from "packages/transactional/emails/WelcomeEmail";
 
 export const usersRouter = createTRPCRouter({
   getUser: optionallyAuthedProcedure.query(async ({ ctx }) => {
@@ -181,21 +180,12 @@ export const usersRouter = createTRPCRouter({
 
       const teamId = await createInitialHostTeam(ctx.user);
 
-      await ctx.db.insert(hostProfiles).values({
+      await addHostProfile({
         userId: ctx.user.id,
         curTeamId: teamId,
         hostawayApiKey: input.hostawayApiKey,
         hostawayAccountId: input.hostawayAccountId,
         hostawayBearerToken: input.hostawayBearerToken,
-      });
-
-      await sendSlackMessage({
-        isProductionOnly: true,
-        text: [
-          "*Host Profile Created:*",
-          `User ${ctx.user.firstName} ${ctx.user.lastName} has become a host`,
-        ].join("\n"),
-        channel: "host-bot",
       });
 
       const curUser = await db.query.users.findFirst({
@@ -207,7 +197,7 @@ export const usersRouter = createTRPCRouter({
         curUser,
       );
       if (curUser) {
-        //creates the discount but doenst validate or resolve it
+        //creates the discount but doesnt validate or resolve it
         await createHostReferral({
           userId: curUser.id,
           referralCodeUsed: curUser.referralCodeUsed,
@@ -466,7 +456,7 @@ export const usersRouter = createTRPCRouter({
           const propertyObjects = await Promise.all(
             listings.map(async (property) => {
               // Get location information
-              const locInfo = await getCity({
+              const locInfo = await getAddress({
                 lat: property.lat,
                 lng: property.lng,
               });
@@ -737,7 +727,7 @@ export const usersRouter = createTRPCRouter({
       },
     });
 
-    if (!verifications) throw new TRPCError({ code: "NOT_FOUND" });
+    //if (!verifications) throw new TRPCError({ code: "NOT_FOUND" });
 
     return verifications;
   }),
@@ -770,4 +760,31 @@ export const usersRouter = createTRPCRouter({
       where: eq(emergencyContacts.userId, ctx.user.id),
     });
   }),
+
+  getUserByStripeConnectId: protectedProcedure
+    .input(z.object({ connectId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const connectID = `acct_${input.connectId}`; //add the acc_ back
+      console.log(connectID);
+      const curUser = await db.query.users.findFirst({
+        where: eq(users.stripeConnectId, connectID),
+      });
+      if (!curUser) {
+        throw new TRPCError({
+          //throw error if user does not have connect id shouldn't happen all host host have a connectId
+          message: "User does not have Connect Id ",
+          code: "NOT_FOUND",
+        });
+      }
+      {
+        if (ctx.user.id !== curUser.id)
+          throw new TRPCError({
+            //throw error if user is not current user
+            message: "Unauthorized",
+            code: "UNAUTHORIZED",
+          });
+
+        return curUser;
+      }
+    }),
 });

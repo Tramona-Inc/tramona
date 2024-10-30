@@ -11,14 +11,20 @@ import { db } from "@/server/db";
 import { eq } from "drizzle-orm";
 import { sendSlackMessage } from "@/server/slack";
 import {
+  addHostProfile,
   axiosWithRetry,
   createInitialHostTeam,
   createLatLngGISPoint,
   proxyAgent,
 } from "@/server/server-utils";
-import { getCity } from "@/server/google-maps";
+import { getAddress } from "@/server/google-maps";
 import { calculateTotalTax } from "@/utils/payment-utils/taxData";
-import { getAmenities, getCancellationPolicy, getListingDataUrl, getReviewsUrl } from "@/server/external-listings-scraping/scrapeAirbnbListing";
+import {
+  getAmenities,
+  getCancellationPolicy,
+  getListingDataUrl,
+  getReviewsUrl,
+} from "@/server/external-listings-scraping/scrapeAirbnbListing";
 import { airbnbHeaders } from "@/utils/constants";
 
 export async function insertHost(id: string) {
@@ -41,18 +47,7 @@ export async function insertHost(id: string) {
 
   const teamId = await createInitialHostTeam(user);
 
-  await db.insert(hostProfiles).values({
-    userId: user.id,
-    curTeamId: teamId,
-  });
-
-  await sendSlackMessage({
-    text: [
-      "*Host Profile Created:*",
-      `User ${user.firstName} ${user.lastName} has become a host`,
-    ].join("\n"),
-    channel: "host-bot",
-  });
+  await addHostProfile({ userId: user.id, curTeamId: teamId });
 }
 
 const airbnbPropertyTypes = [
@@ -336,7 +331,7 @@ export default async function webhook(
           lng: webhookData.data.address.longitude,
         });
 
-        const { city, stateCode, country } = await getCity({
+        const { city, stateCode, country } = await getAddress({
           lat: webhookData.data.address.latitude,
           lng: webhookData.data.address.longitude,
         });
@@ -372,7 +367,10 @@ export default async function webhook(
           ),
         )) as [string, string];
 
-        const cancellationPolicy = getCancellationPolicy(listingData, webhookData.data.id);
+        const cancellationPolicy = getCancellationPolicy(
+          listingData,
+          webhookData.data.id,
+        );
         const amenities = getAmenities(listingData, webhookData.data.id);
 
         const propertyObject = {

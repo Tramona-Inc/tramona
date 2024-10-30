@@ -12,7 +12,7 @@ import {
   NewReview,
 } from "@/server/db/schema";
 import { airbnbHeaders } from "@/utils/constants";
-import { getCity } from "../google-maps";
+import { getAddress } from "../google-maps";
 import { axiosWithRetry, proxyAgent } from "../server-utils";
 
 export function encodeAirbnbId(id: string) {
@@ -326,7 +326,7 @@ export async function scrapeAirbnbListing(
 
   const originalNightlyPrice = parseCurrency(originalNightlyPriceStr);
 
-  const city = await getCity({ lat: latitude, lng: longitude }).then(
+  const city = await getAddress({ lat: latitude, lng: longitude }).then(
     (address) => address.city,
   );
 

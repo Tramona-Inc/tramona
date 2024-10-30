@@ -1,7 +1,13 @@
 import { db } from "@/server/db";
-import { trips, refundedPayments } from "@/server/db/schema";
-import { stripe, stripeWithSecretKey } from "@/server/api/routers/stripeRouter";
+import { trips, refundedPayments, users } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
+import { env } from "@/env";
+import Stripe from "stripe";
+
+const stripeWithSecretKey = new Stripe(env.STRIPE_SECRET_KEY, {
+  typescript: true,
+});
+const stripe = new Stripe(env.STRIPE_RESTRICTED_KEY_ALL);
 
 //for functions that require alot code to be written after a stripe event
 interface CreatePayHostTransfer {
@@ -80,4 +86,64 @@ export async function refundTripWithStripe({
   console.log(refundedPayment);
   console.log(refund);
   return;
+}
+
+export async function createStripeConnectId({
+  userId,
+  userEmail,
+}: {
+  userId: string;
+  userEmail: string;
+}) {
+  const res = await db.query.users.findFirst({
+    columns: {
+      firstName: true,
+      lastName: true,
+      stripeConnectId: true,
+      chargesEnabled: true,
+    },
+    where: eq(users.id, userId),
+  });
+  if (!res?.stripeConnectId) {
+    const stripeAccount = await stripeWithSecretKey.accounts.create({
+      country: "US", //change this to the user country later
+      email: userEmail,
+      settings: {},
+      controller: {
+        losses: {
+          payments: "application",
+        },
+        fees: {
+          payer: "application",
+        },
+        stripe_dashboard: {
+          type: "express",
+        },
+      },
+      //charges_enabled: true,
+      capabilities: {
+        card_payments: { requested: true },
+        transfers: { requested: true },
+        tax_reporting_us_1099_k: { requested: true },
+      },
+      business_type: "individual",
+      business_profile: {
+        url: "https://tramona.com",
+        mcc: "4722",
+        product_description: "Travel and Tourism",
+      },
+      individual: {
+        email: userEmail,
+        first_name: res?.firstName ?? "",
+      },
+    });
+    await db
+      .update(users)
+      .set({ stripeConnectId: stripeAccount.id })
+      .where(eq(users.id, userId));
+
+    return stripeAccount;
+  } else {
+    throw new Error("Stripe account already created");
+  }
 }
