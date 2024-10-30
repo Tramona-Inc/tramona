@@ -82,29 +82,33 @@ export default function HostRequests() {
           {cityData.requests.map((requestData) => (
             <div key={requestData.request.id} className="mb-4">
               <RequestCard request={requestData.request} type="host">
-                <Button
-                  variant="secondary"
-                  onClick={async () => {
-                    await rejectRequest({ requestId: requestData.request.id })
-                      .then(() => {
-                        toast({
-                          title: "Successfully rejected request",
-                        });
-                      })
-                      .catch(() => errorToast());
-                  }}
-                >
-                  Reject
-                </Button>
-                <Button
-                  onClick={() => {
-                    setDialogOpen(true);
-                    setSelectedRequest(requestData.request);
-                    setProperties(requestData.properties);
-                  }}
-                >
-                  Make an offer
-                </Button>
+                <div className="mt-4 grid w-full grid-cols-2 gap-4">
+                  <Button
+                    className="w-full border-0 bg-gray-100 text-gray-900 hover:bg-gray-200"
+                    variant="outline"
+                    onClick={async () => {
+                      await rejectRequest({ requestId: requestData.request.id })
+                        .then(() => {
+                          toast({
+                            title: "Successfully rejected request",
+                          });
+                        })
+                        .catch(() => errorToast());
+                    }}
+                  >
+                    Reject
+                  </Button>
+                  <Button
+                    className="hover:bg-green-1000 w-full bg-primaryGreen text-white"
+                    onClick={() => {
+                      setDialogOpen(true);
+                      setSelectedRequest(requestData.request);
+                      setProperties(requestData.properties);
+                    }}
+                  >
+                    Make an offer
+                  </Button>
+                </div>
               </RequestCard>
             </div>
           ))}
