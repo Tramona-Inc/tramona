@@ -14,7 +14,7 @@ const BubbleTabsList = React.forwardRef<
   <TabsPrimitive.List
     ref={ref}
     className={cn(
-      "inline-flex items-center justify-center gap-x-4 rounded-md border-none bg-none p-1 text-muted-foreground",
+      "inline-flex items-center justify-center gap-x-3 rounded-md border-none bg-none p-1 text-muted-foreground",
       className,
     )}
     {...props}
@@ -29,7 +29,7 @@ const BubbleTabsTrigger = React.forwardRef<
   <TabsPrimitive.Trigger
     ref={ref}
     className={cn(
-      "inline-flex items-center justify-center whitespace-nowrap rounded-full bg-background px-3 py-1.5 text-base font-medium text-black ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-primaryGreen data-[state=active]:text-white data-[state=active]:shadow-sm",
+      "inline-flex items-center justify-center whitespace-nowrap rounded-full bg-white px-3 py-1.5 text-base font-medium text-black ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-primaryGreen data-[state=active]:text-white data-[state=active]:shadow-sm",
       className,
     )}
     {...props}

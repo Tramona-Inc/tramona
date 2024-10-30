@@ -3,7 +3,6 @@ import AttentionCard from "./AttentionCard";
 import { LightningBoltIcon } from "@radix-ui/react-icons";
 import { NotificationCard, NotificationCardSkeleton } from "./NotificationCard";
 import { api } from "@/utils/api";
-import { Skeleton } from "@/components/ui/skeleton";
 
 function AttentionOverviewSection() {
   const { data: allNotifications, isLoading } =
@@ -13,18 +12,14 @@ function AttentionOverviewSection() {
       {/* Notifications Cards */}
       <div className="grid auto-rows-fr grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {!isLoading
-          ? allNotifications?.map(
-              (
-                notification,
-                index, // when we want to add more notifications we can just create a new object
-              ) => (
-                <NotificationCard
-                  title={`Sync Calendar for \n ${notification.name}`}
-                  href={`/host/properties/${notification.id}`}
-                  className="col-auto"
-                  key={index}
-                />
-              ),
+          ? allNotifications?.length &&
+            allNotifications?.length > 0 && (
+              <NotificationCard
+                title={`Sync Calendar for \n ${allNotifications[0]!.name}`}
+                href={`/host/properties/${allNotifications[0]!.id}`}
+                className="col-auto"
+                length={allNotifications.length + 1}
+              />
             )
           : Array.from({ length: 4 }).map((_, index) => (
               <NotificationCardSkeleton key={index} />

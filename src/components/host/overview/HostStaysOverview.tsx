@@ -38,33 +38,37 @@ export default function HostStaysOverview() {
     (trip) => trip.checkIn <= currentDate && trip.checkOut >= currentDate,
   );
   return (
-    <BubbleTabs defaultValue="currently-hosting" className="w-full">
-      <BubbleTabsList className="flex w-full flex-row justify-start overflow-x-auto px-1">
-        <BubbleTabsTrigger value="currently-hosting">
-          Currently hosting
-        </BubbleTabsTrigger>
-        <BubbleTabsTrigger value="checking-out">Checking out</BubbleTabsTrigger>
-        <BubbleTabsTrigger value="upcoming">Upcoming</BubbleTabsTrigger>
-        <BubbleTabsTrigger value="accepted">Accepted</BubbleTabsTrigger>
-        <BubbleTabsTrigger value="history">History</BubbleTabsTrigger>
-        <div className="w-5/6 border-b-4" />
-      </BubbleTabsList>
-      <BubbleTabsContent value="currently-hosting">
-        <HostStaysCards trips={currentlyHostingTrips} />
-      </BubbleTabsContent>
-      <BubbleTabsContent value="upcoming">
-        <HostStaysCards trips={upcomingTrips} />
-      </BubbleTabsContent>
-      <BubbleTabsContent value="accepted">
-        <HostStaysCards trips={acceptedTrips} />
-      </BubbleTabsContent>
-      <BubbleTabsContent value="checking-out">
-        <HostStaysCards trips={checkingOutTrips} />
-      </BubbleTabsContent>
+    <div className="flex flex-col gap-y-5">
+      <h2 className="text-4xl font-bold">Your reservations</h2>
+      <BubbleTabs defaultValue="currently-hosting" className="w-full">
+        <BubbleTabsList className="flex w-full flex-row justify-start overflow-x-auto px-1">
+          <BubbleTabsTrigger value="currently-hosting">
+            Currently hosting
+          </BubbleTabsTrigger>
+          <BubbleTabsTrigger value="checking-out">
+            Checking out
+          </BubbleTabsTrigger>
+          <BubbleTabsTrigger value="upcoming">Upcoming</BubbleTabsTrigger>
+          <BubbleTabsTrigger value="accepted">Accepted</BubbleTabsTrigger>
+          <BubbleTabsTrigger value="history">History</BubbleTabsTrigger>
+        </BubbleTabsList>
+        <BubbleTabsContent value="currently-hosting">
+          <HostStaysCards trips={currentlyHostingTrips} />
+        </BubbleTabsContent>
+        <BubbleTabsContent value="upcoming">
+          <HostStaysCards trips={upcomingTrips} />
+        </BubbleTabsContent>
+        <BubbleTabsContent value="accepted">
+          <HostStaysCards trips={acceptedTrips} />
+        </BubbleTabsContent>
+        <BubbleTabsContent value="checking-out">
+          <HostStaysCards trips={checkingOutTrips} />
+        </BubbleTabsContent>
 
-      <BubbleTabsContent value="history">
-        <HostStaysCards trips={historyTrips} />
-      </BubbleTabsContent>
-    </BubbleTabs>
+        <BubbleTabsContent value="history">
+          <HostStaysCards trips={historyTrips} />
+        </BubbleTabsContent>
+      </BubbleTabs>
+    </div>
   );
 }
