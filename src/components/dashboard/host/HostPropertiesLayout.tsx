@@ -1,14 +1,6 @@
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Grid, Pencil, Plus, PlusIcon, Search } from "lucide-react";
+import { Grid, Pencil, Plus } from "lucide-react";
 import HostProperties from "./HostProperties";
-import Link from "next/link";
 import {
   type LocationType,
   useHostOnboarding,
@@ -21,11 +13,12 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useRouter } from "next/router";
 import ExpandableSearchBar from "@/components/_common/ExpandableSearchBar";
+import { useState } from "react";
 
-export default function HostPropertiesLayout({
-  children,
-}: React.PropsWithChildren) {
-  // const [open, setOpen] = useState(false);
+export default function HostPropertiesLayout() {
+  const [searchResults, setSearchResults] = useState<Property[]>([]);
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+
   const router = useRouter();
 
   const setPropertyType = useHostOnboarding((state) => state.setPropertyType);
@@ -58,8 +51,6 @@ export default function HostPropertiesLayout({
   const setOriginalListingId = useHostOnboarding(
     (state) => state.setOriginalListingId,
   );
-
-  const setProgress = useHostOnboarding((state) => state.setProgress);
 
   function setStatesDefault() {
     setPropertyType("Apartment"),
@@ -103,12 +94,19 @@ export default function HostPropertiesLayout({
     (property) => property.propertyStatus === "Drafted",
   );
 
+  const handleSearchResults = (results: Property[]) => {
+    setSearchResults(results);
+  };
+
   return (
     <section className="mx-auto mb-24 mt-7 max-w-7xl px-6 md:my-14">
       <div className="flex flex-col gap-4 sm:flex-row sm:justify-between">
         <h1 className="text-2xl font-bold md:text-4xl">Your properties</h1>
         <div className="flex flex-1 items-center justify-end gap-4">
-          <ExpandableSearchBar />
+          <ExpandableSearchBar
+            onSearchResultsUpdate={handleSearchResults}
+            onExpandChange={setIsSearchExpanded}
+          />
           <Button
             size="icon"
             className="rounded-full bg-white font-bold text-black shadow-xl"
@@ -127,23 +125,26 @@ export default function HostPropertiesLayout({
           </Button>
         </div>
       </div>
-
-      <Tabs className="mt-6" defaultValue="listed">
-        <TabsList>
-          <TabsTrigger value="listed">Listed</TabsTrigger>
-          <TabsTrigger value="drafts">Drafts</TabsTrigger>
-          <TabsTrigger value="archived">Archived</TabsTrigger>
-        </TabsList>
-        <TabsContent value="listed">
-          <HostProperties properties={listedProperties ?? null} />
-        </TabsContent>
-        <TabsContent value="drafts">
-          <HostProperties properties={draftedProperties ?? null} />
-        </TabsContent>
-        <TabsContent value="archived">
-          <HostProperties properties={archivedProperties ?? null} />
-        </TabsContent>
-      </Tabs>
+      {isSearchExpanded ? (
+        <HostProperties properties={searchResults} />
+      ) : (
+        <Tabs className="mt-6" defaultValue="listed">
+          <TabsList>
+            <TabsTrigger value="listed">Listed</TabsTrigger>
+            <TabsTrigger value="drafts">Drafts</TabsTrigger>
+            <TabsTrigger value="archived">Archived</TabsTrigger>
+          </TabsList>
+          <TabsContent value="listed">
+            <HostProperties properties={listedProperties ?? null} />
+          </TabsContent>
+          <TabsContent value="drafts">
+            <HostProperties properties={draftedProperties ?? null} />
+          </TabsContent>
+          <TabsContent value="archived">
+            <HostProperties properties={archivedProperties ?? null} />
+          </TabsContent>
+        </Tabs>
+      )}
     </section>
   );
 }

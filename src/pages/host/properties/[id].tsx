@@ -1,6 +1,4 @@
-import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import HostDashboardLayout from "@/components/_common/Layout/HostDashboardLayout";
-import HostPropertiesLayout from "@/components/dashboard/host/HostPropertiesLayout";
 import HostPropertyInfo from "@/components/dashboard/host/HostPropertyInfo";
 import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";

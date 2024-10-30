@@ -21,9 +21,7 @@ export default function HostProperties({
           properties.length > 0 ? (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
               {properties.map((property) => (
-                <>
-                  <PropertyCard key={property.id} property={property} />
-                </>
+                <PropertyCard key={property.id} property={property} />
               ))}
             </div>
           ) : (

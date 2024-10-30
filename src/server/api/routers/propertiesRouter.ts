@@ -13,7 +13,7 @@ import {
   propertyUpdateSchema,
   type Request,
   type User,
-  users
+  users,
 } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { addDays } from "date-fns";
@@ -24,8 +24,10 @@ import {
   eq,
   gt,
   gte,
+  like,
   lte,
   notExists,
+  or,
   sql,
 } from "drizzle-orm";
 import { z } from "zod";
@@ -42,6 +44,7 @@ import {
   getRequestsForProperties,
 } from "@/server/server-utils";
 import { getCoordinates } from "@/server/google-maps";
+import { capitalize } from "@/utils/utils";
 
 export type HostRequestsPageData = {
   city: string;
@@ -52,7 +55,7 @@ export type HostRequestsPageData = {
         "firstName" | "lastName" | "name" | "image" | "location" | "about"
       >;
     };
-    properties: (Property & {taxAvailable: boolean})[];
+    properties: (Property & { taxAvailable: boolean })[];
   }[];
 };
 
@@ -561,7 +564,7 @@ export const propertiesRouter = createTRPCRouter({
               "firstName" | "lastName" | "name" | "image" | "location" | "about"
             >;
           };
-          properties: (Property & {taxAvailable: boolean})[];
+          properties: (Property & { taxAvailable: boolean })[];
         }
       >();
 
@@ -573,7 +576,7 @@ export const propertiesRouter = createTRPCRouter({
           // If not, create a new entry with an empty properties array
           requestsMap.set(request.id, {
             request,
-            properties: [] as (Property & {taxAvailable: boolean})[],
+            properties: [] as (Property & { taxAvailable: boolean })[],
           });
         }
 
@@ -583,7 +586,9 @@ export const propertiesRouter = createTRPCRouter({
       for (const requestWithProperties of requestsMap.values()) {
         const { request, properties } = requestWithProperties;
 
-        for (const property of properties as unknown as (Property & {taxAvailable: boolean})[]) {
+        for (const property of properties as unknown as (Property & {
+          taxAvailable: boolean;
+        })[]) {
           const cityGroup = findOrCreateCityGroup(property.city);
 
           // Find if the request already exists in the city's group to avoid duplicates
@@ -666,5 +671,18 @@ export const propertiesRouter = createTRPCRouter({
           autoOfferDiscountTiers: input.autoOfferDiscountTiers,
         })
         .where(eq(properties.id, input.id));
+    }),
+  getSearchResults: protectedProcedure
+    .input(z.object({ searchQuery: z.string() }))
+    .query(async ({ ctx, input }) => {
+      return await ctx.db.query.properties.findMany({
+        where: and(
+          eq(properties.hostId, ctx.user.id),
+          or(
+            like(properties.name, `%${input.searchQuery}%`),
+            like(properties.city, `%${capitalize(input.searchQuery)}%`),
+          ),
+        ),
+      });
     }),
 });

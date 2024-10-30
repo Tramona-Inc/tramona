@@ -1,17 +1,68 @@
 import { Search, X } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
+import { Form, FormControl, FormField, FormItem } from "../ui/form";
+import { useZodForm } from "@/utils/useZodForm";
+import { z } from "zod";
+import { api } from "@/utils/api";
+import { Property } from "@/server/db/schema";
 
-const ExpandableSearchBar = () => {
+const ExpandableSearchBar = ({
+  onSearchResultsUpdate,
+  onExpandChange,
+}: {
+  onSearchResultsUpdate: (results: Property[]) => void;
+  onExpandChange: (isExpanded: boolean) => void;
+}) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const handleExpand = () => setIsExpanded(true);
+  const handleExpand = () => {
+    setIsExpanded(true);
+    onExpandChange(true);
+  };
   const handleCollapse = () => {
     setIsExpanded(false);
-    setSearchQuery("");
+    onExpandChange(false);
   };
+
+  const formSchema = z.object({
+    searchQuery: z.string(),
+  });
+
+  const form = useZodForm({
+    schema: formSchema,
+  });
+
+  const { data: searchResults, refetch } =
+    api.properties.getSearchResults.useQuery(
+      {
+        searchQuery,
+      },
+      { enabled: !!searchQuery }, // only fetch when there is a searchQuery
+    );
+
+  const onSubmit = form.handleSubmit(async (formValues) => {
+    console.log("formValues", formValues);
+    setSearchQuery(formValues.searchQuery);
+    console.log("searchResults", searchResults);
+    form.reset();
+  });
+
+  useEffect(() => {
+    if (searchQuery) {
+      void refetch();
+      console.log("refactored");
+    }
+  }, [searchQuery, refetch]);
+
+  useEffect(() => {
+    if (searchResults) {
+      onSearchResultsUpdate(searchResults);
+      console.log("searchResults2", searchResults);
+    }
+  }, [onSearchResultsUpdate, searchResults]);
 
   return (
     <div
@@ -21,14 +72,27 @@ const ExpandableSearchBar = () => {
     >
       <div className="relative w-full">
         {isExpanded ? (
-          <Input
-            type="text"
-            icon={Search}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search listings by name or location"
-            className="w-full rounded-full px-4 py-2 pl-10 text-black transition-all duration-300 focus:outline-none"
-          />
+          <Form {...form}>
+            <form onSubmit={onSubmit}>
+              <FormField
+                control={form.control}
+                name="searchQuery"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="text"
+                        icon={Search}
+                        placeholder="Search listings by name or location"
+                        className="w-full rounded-full px-4 py-2 pl-10 text-black transition-all duration-300 focus:outline-none"
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </form>
+          </Form>
         ) : (
           <Button
             size="icon"
