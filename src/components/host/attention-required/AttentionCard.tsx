@@ -30,9 +30,9 @@ export default function AttentionCard({
   className = "",
 }: AttentionCardProps) {
   return (
-    <Link href={href}>
-      <Card className={`h-full w-full`}>
-        <CardContent className={` ${className}`}>
+    <Link href={href} className={`w-80 ${className}`}>
+      <Card>
+        <CardContent>
           <div className="flex flex-col gap-3">
             {/* Icon */}
             <Icon className={iconClassName} />

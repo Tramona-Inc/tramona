@@ -13,6 +13,32 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatCurrency, formatDateRange } from "@/utils/utils";
 import { formatDistance } from "date-fns";
+import { enUS } from "date-fns/locale";
+import type {
+  FormatDistanceOptions,
+  FormatDistanceToken,
+  Locale,
+} from "date-fns";
+
+const createCustomLocale = (baseLocale: Locale): Locale => ({
+  ...baseLocale,
+  formatDistance: (
+    token: FormatDistanceToken,
+    count: number,
+    options?: FormatDistanceOptions,
+  ) => {
+    let result = baseLocale.formatDistance(token, count, options);
+    if (result.startsWith("about ")) {
+      result = result.replace("about ", "");
+    }
+    return result;
+  },
+});
+
+const userLocale = navigator.language || "en-US";
+const locale = userLocale === "en-US" ? createCustomLocale(enUS) : enUS; // Adjust as needed for additional locales
+
+// Usage example
 
 export default function HostPotentialBookingOverview({
   className,
@@ -47,9 +73,12 @@ export default function HostPotentialBookingOverview({
                   key={`${cityRequest.city}-${index}`}
                   className="w-[300px] flex-shrink-0 border"
                 >
-                  <CardContent className="pt-6">
+                  <CardContent className="">
                     <div className="justify-between space-y-4">
                       {/* User Info */}
+                      <p className="text-center font-semibold">
+                        {request.request.location}
+                      </p>
                       <div className="flex items-center gap-2">
                         <Avatar className="h-8 w-8">
                           <AvatarImage src={request.request.traveler.image!} />
@@ -70,7 +99,7 @@ export default function HostPotentialBookingOverview({
                             {formatDistance(
                               request.request.createdAt,
                               new Date(),
-                              { addSuffix: true },
+                              { addSuffix: true, locale },
                             )}
                           </span>
                         </div>
@@ -97,9 +126,11 @@ export default function HostPotentialBookingOverview({
 
                       {/* Actions */}
                       <div className="flex gap-2">
-                        <Button variant="secondary" className="w-full">
-                          Reject
-                        </Button>
+                        <Link href="/host/requests">
+                          <Button variant="secondary" className="w-full">
+                            Reject
+                          </Button>
+                        </Link>
                         <Link href="/host/requests">
                           <Button className="w-full" variant="primary">
                             Make an offer

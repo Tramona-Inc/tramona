@@ -18,7 +18,7 @@ export function NotificationCard({
   className = "",
 }: ConfirmationCardProps) {
   return (
-    <Card className={`w-full max-w-md ${className}`}>
+    <Card className={`${className}`}>
       <CardContent className="flex h-full min-h-[100px] flex-col gap-y-2 px-2 py-2 md:min-h-[180px]">
         <div className="flex-1 space-y-4">
           <div className="flex flex-row items-center justify-between">

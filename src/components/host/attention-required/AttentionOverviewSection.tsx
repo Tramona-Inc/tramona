@@ -7,45 +7,42 @@ import { api } from "@/utils/api";
 function AttentionOverviewSection() {
   const { data: allNotifications, isLoading } =
     api.host.getAllOverviewNotifications.useQuery();
+
   return (
-    <div className="flex flex-col gap-y-4">
-      {/* Notifications Cards */}
-      <div className="grid auto-rows-fr grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        {!isLoading
-          ? allNotifications?.length &&
-            allNotifications?.length > 0 && (
-              <NotificationCard
-                title={`Sync Calendar for \n ${allNotifications[0]!.name}`}
-                href={`/host/properties/${allNotifications[0]!.id}`}
-                className="col-auto"
-                length={allNotifications.length + 1}
-              />
-            )
-          : Array.from({ length: 4 }).map((_, index) => (
-              <NotificationCardSkeleton key={index} />
-            ))}
+    <div className="flex flex-col gap-4">
+      {/* Notification Card */}
+      <div className="flex w-full flex-col items-center md:flex-row md:items-start">
+        {!isLoading ? (
+          allNotifications?.length && allNotifications.length > 0 ? (
+            <NotificationCard
+              title={`Sync Calendar for \n ${allNotifications[0]!.name}`}
+              href={`/host/properties/${allNotifications[0]!.id}`}
+              className="w-80"
+              length={allNotifications.length + 1}
+            />
+          ) : null
+        ) : (
+          <NotificationCardSkeleton className="w-full" />
+        )}
       </div>
-      {/* AttentionCards */}
-      <div className="grid grid-cols-2 gap-x-3">
+
+      {/* Attention Cards */}
+      <div className="flex flex-col items-center gap-x-4 gap-y-4 md:flex-row md:items-start">
         <AttentionCard
           icon={LightningBoltIcon}
-          // Content props
           title="Edit Auto Pricing"
           description="Optimize pricing for higher booking chances."
           subtitle="Customize prices based on demand and season."
           href="/host/properties"
-          // Style props
-          className=""
+          className="h-full w-80"
         />
         <AttentionCard
           icon={LightningBoltIcon}
-          // Content props
           title="Turn Instant Booking On/Off"
           description="Control instant booking options for guests."
           subtitle="Allow guests to book automatically or require approval."
           href="/host/properties"
-          // Style props
-          className=""
+          className="h-full w-80"
         />
       </div>
     </div>
