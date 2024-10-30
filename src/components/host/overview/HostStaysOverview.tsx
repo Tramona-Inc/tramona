@@ -53,20 +53,23 @@ export default function HostStaysOverview() {
           <BubbleTabsTrigger value="history">History</BubbleTabsTrigger>
         </BubbleTabsList>
         <BubbleTabsContent value="currently-hosting">
-          <HostStaysCards trips={currentlyHostingTrips} />
+          <HostStaysCards
+            trips={currentlyHostingTrips}
+            staysTab="currently-hosting"
+          />
         </BubbleTabsContent>
         <BubbleTabsContent value="upcoming">
-          <HostStaysCards trips={upcomingTrips} />
+          <HostStaysCards trips={upcomingTrips} staysTab="upcoming" />
         </BubbleTabsContent>
         <BubbleTabsContent value="accepted">
-          <HostStaysCards trips={acceptedTrips} />
+          <HostStaysCards trips={acceptedTrips} staysTab="accepted" />
         </BubbleTabsContent>
         <BubbleTabsContent value="checking-out">
-          <HostStaysCards trips={checkingOutTrips} />
+          <HostStaysCards trips={checkingOutTrips} staysTab="checking-out" />
         </BubbleTabsContent>
 
         <BubbleTabsContent value="history">
-          <HostStaysCards trips={historyTrips} />
+          <HostStaysCards trips={historyTrips} staysTab="history" />
         </BubbleTabsContent>
       </BubbleTabs>
     </div>

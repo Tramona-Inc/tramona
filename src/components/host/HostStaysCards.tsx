@@ -21,15 +21,24 @@ import { Card, CardContent } from "../ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 
+type StaysTabs =
+  | "currently-hosting"
+  | "checking-out"
+  | "upcoming"
+  | "accepted"
+  | "history";
+
 export default function HostStaysCards({
   trips,
+  staysTab,
 }: {
   trips?: RouterOutputs["trips"]["getHostTrips"];
+  staysTab?: StaysTabs;
 }) {
   const chatWithHost = useChatWithHost();
 
   if (!trips) return <HostStaysSkeleton />;
-  if (trips.length === 0) return <HostStaysEmptyState />;
+  if (trips.length === 0) return <HostStaysEmptyState staysTab={staysTab} />;
 
   return (
     <div className="mb-36 space-y-6">
@@ -135,14 +144,37 @@ export default function HostStaysCards({
   );
 }
 
-export function HostStaysEmptyState() {
+export function HostStaysEmptyState({ staysTab }: { staysTab?: StaysTabs }) {
+  let text = "";
+
+  if (staysTab) {
+    switch (staysTab) {
+      case "currently-hosting":
+        text = "You don't currently have any guests staying.";
+        break;
+      case "checking-out":
+        text = "No guests are checking out today or tomorrow.";
+        break;
+      case "upcoming":
+        text = "You don't have any upcoming reservations.";
+        break;
+      case "accepted":
+        text = "You haven't accepted any reservations yet.";
+        break;
+      case "history":
+        text = "There are no past stays available in your history.";
+        break;
+      default:
+        text = "You don't have any reservations booked.";
+    }
+  } else {
+    text = "You don't have any reservations booked.";
+  }
   return (
     <Card className="border-primary/20">
       <CardContent className="flex flex-col items-center justify-center space-y-4 p-6 text-center">
         <CheckCircle className="h-8 w-8 text-primary" />
-        <p className="text-lg text-muted-foreground">
-          You don&apos;t have any guests or checking out today or tomorrow
-        </p>
+        <p className="text-lg text-muted-foreground">{text}</p>
         <Button variant="link" asChild>
           <Link href="/host/requests">See requests</Link>
         </Button>
