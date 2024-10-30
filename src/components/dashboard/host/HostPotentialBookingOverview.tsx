@@ -100,9 +100,11 @@ export default function HostPotentialBookingOverview({
                         <Button variant="secondary" className="w-full">
                           Reject
                         </Button>
-                        <Button className="w-full" variant="primary">
-                          Make an offer
-                        </Button>
+                        <Link href="/host/requests">
+                          <Button className="w-full" variant="primary">
+                            Make an offer
+                          </Button>
+                        </Link>
                       </div>
                     </div>
                   </CardContent>
