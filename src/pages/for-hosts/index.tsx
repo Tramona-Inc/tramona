@@ -46,11 +46,13 @@ const contents: Tabs[] = [
 ];
 
 function IntroSection({ requestFeed }: { requestFeed: FeedRequestItem[] }) {
+  const router = useRouter();
   const progress = useHostOnboarding((state) => state.progress);
   const setProgress = useHostOnboarding((state) => state.setProgress);
 
   function onPressNext() {
     setProgress(progress + 1);
+    void router.push("/host-onboarding");
   }
 
   const texts = [

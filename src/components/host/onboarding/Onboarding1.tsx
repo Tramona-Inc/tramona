@@ -205,7 +205,7 @@ export default function Onboarding1({
         </div>
       </div>
 
-      <OnboardingFooter isForm={false} />
+      {!forHost && <OnboardingFooter isForm={false} />}
       <Dialog open={showModal} onOpenChange={closeModal}>
         <DialogClose />
         <DialogContent>
