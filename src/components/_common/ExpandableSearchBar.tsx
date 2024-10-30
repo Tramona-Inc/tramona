@@ -9,11 +9,13 @@ import { api } from "@/utils/api";
 import { Property } from "@/server/db/schema";
 
 const ExpandableSearchBar = ({
+  className,
   onSearchResultsUpdate,
   onExpandChange,
 }: {
   onSearchResultsUpdate: (results: Property[]) => void;
   onExpandChange: (isExpanded: boolean) => void;
+  className?: string;
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -54,7 +56,7 @@ const ExpandableSearchBar = ({
 
   return (
     <div
-      className={`flex items-center transition-all duration-300 ${
+      className={`${className} flex items-center transition-all duration-300 ${
         isExpanded ? "w-full max-w-lg" : "w-auto"
       }`}
     >

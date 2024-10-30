@@ -100,10 +100,11 @@ export default function HostPropertiesLayout() {
 
   return (
     <section className="mx-auto mb-24 mt-7 max-w-7xl px-6 md:my-14">
-      <div className="flex flex-col gap-4 sm:flex-row sm:justify-between">
+      <div className="flex items-center gap-4 sm:flex-row sm:justify-between">
         <h1 className="text-2xl font-bold md:text-4xl">Your properties</h1>
         <div className="flex flex-1 items-center justify-end gap-4">
           <ExpandableSearchBar
+            className="hidden sm:flex"
             onSearchResultsUpdate={handleSearchResults}
             onExpandChange={setIsSearchExpanded}
           />
@@ -125,8 +126,13 @@ export default function HostPropertiesLayout() {
           </Button>
         </div>
       </div>
+      <ExpandableSearchBar
+        className="pt-4 sm:hidden"
+        onSearchResultsUpdate={handleSearchResults}
+        onExpandChange={setIsSearchExpanded}
+      />
       {isSearchExpanded ? (
-        <HostProperties properties={searchResults} />
+        <HostProperties properties={searchResults} searched />
       ) : (
         <Tabs className="mt-6" defaultValue="listed">
           <TabsList>

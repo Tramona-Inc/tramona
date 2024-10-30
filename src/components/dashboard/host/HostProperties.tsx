@@ -11,8 +11,10 @@ import { useRouter } from "next/router";
 
 export default function HostProperties({
   properties,
+  searched = false,
 }: {
   properties: Property[] | null;
+  searched?: boolean;
 }) {
   return (
     <div>
@@ -25,12 +27,18 @@ export default function HostProperties({
               ))}
             </div>
           ) : (
-            <EmptyState icon={FenceIcon}>
-              <EmptyStateTitle>No properties yet</EmptyStateTitle>
-              <EmptyStateDescription>
-                Add a property to get started!
-              </EmptyStateDescription>
-            </EmptyState>
+            <div className="pt-10">
+              <EmptyState icon={FenceIcon}>
+                <EmptyStateTitle>
+                  {searched ? "No properties found" : "No properties yet"}
+                </EmptyStateTitle>
+                <EmptyStateDescription>
+                  {searched
+                    ? "Try a different property name or location"
+                    : "Add a property to get started!"}
+                </EmptyStateDescription>
+              </EmptyState>
+            </div>
           )
         ) : (
           <Spinner />
