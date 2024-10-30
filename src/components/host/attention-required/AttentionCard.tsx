@@ -31,7 +31,7 @@ export default function AttentionCard({
 }: AttentionCardProps) {
   return (
     <Link href={href}>
-      <Card className={`w-full`}>
+      <Card className={`h-full w-full`}>
         <CardContent className={` ${className}`}>
           <div className="flex flex-col gap-3">
             {/* Icon */}
