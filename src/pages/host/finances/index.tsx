@@ -3,7 +3,6 @@ import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
 import { useState } from "react";
-import PaymentHistory from "@/components/host/finances/payment-history/PaymentHistory";
 import FinancesSummary from "@/components/host/finances/summary/FinancesSummary";
 import { ConnectNotificationBanner } from "@stripe/react-connect-js";
 import useIsStripeConnectInstanceReady from "@/utils/store/stripe-connect";
@@ -91,7 +90,6 @@ export default function Page() {
                 becameHostAt={hostInfo?.becameHostAt}
               />
               <SettingsAndDocuments items={settingsItems} />
-              <PaymentHistory />
             </div>
           )
         ) : (
