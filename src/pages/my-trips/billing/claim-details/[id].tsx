@@ -3,9 +3,6 @@ import { useRouter } from "next/router";
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import { api } from "@/utils/api";
 import ResolvedClaimDetails from "@/components/my-trips/billing/travelerClaims/ResolvedClaimDetails";
-import { z } from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import BackButton from "@/components/_common/BackButton";
 import RespondToClaim from "@/components/my-trips/billing/travelerClaims/RespondToClaim";
 

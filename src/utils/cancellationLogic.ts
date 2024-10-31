@@ -53,7 +53,6 @@ export function checkCancellation({
     bookingDateString,
   );
 
-  let isStrict;
   switch (cancellationPolicy) {
     case "Flexible":
       return flexibleCancel(
@@ -440,6 +439,3 @@ function redAwning14DaysCancel(daysDifference: number) {
     description,
   };
 }
-// Example usage:
-const checkInDate = new Date("2024-12-01"); // Specify the check-in date
-const checkOutDate = new Date("2024-12-10"); // Specify the check-out date
