@@ -969,7 +969,7 @@ export async function addHostProfile({
       isProductionOnly: true,
       text: [
         "*Host Profile Created:*",
-        `User ${curUser?.firstName} ${curUser.lastName} has become a host`,
+        `User ${curUser.firstName} ${curUser.lastName} has become a host`,
       ].join("\n"),
       channel: "host-bot",
     });

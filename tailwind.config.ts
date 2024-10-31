@@ -27,6 +27,9 @@ module.exports = {
           mulish: ["Mulish", "sans-serif"],
         },
       },
+      maxWidth: {
+        "8xl": "90rem", // 1440px
+      },
       spacing: {
         "screen-minus-header-n-footer": "var(--screen-minus-header-n-footer)",
         "screen-minus-header": "var(--screen-minus-header)",

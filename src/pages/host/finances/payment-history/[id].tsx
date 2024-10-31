@@ -45,7 +45,7 @@ export default function Page() {
       <div className="container mx-auto py-8">
         <BackButton href="/host/finances" />
         <h1 className="mx-auto mb-4 text-center text-3xl font-bold">
-          Finance Settings
+          Payment history
         </h1>
         <Card>
           <CardHeader>
