@@ -19,9 +19,12 @@ import OnboardingFooter from "./OnboardingFooter";
 import { api } from "@/utils/api";
 import SaveAndExit from "./SaveAndExit";
 import { useState, useEffect } from "react";
-import { SelectIcon } from "@radix-ui/react-select";
-import { CaretSortIcon } from "@radix-ui/react-icons";
+import StatesDropdown from "@/components/_common/country-dropdown/StatesDropdown";
 import SingleLocationMap from "@/components/_common/GoogleMaps/SingleLocationMap";
+import CountryDropdown from "@/components/_common/country-dropdown/CountryDropdown";
+import { useDropdownStore } from "@/utils/store/dropdown";
+import StateDropdown from "@/components/_common/country-dropdown/StatesDropdown";
+import { errorToast } from "@/utils/toasts";
 
 const formSchema = z.object({
   country: zodString(),
@@ -100,9 +103,23 @@ export default function Onboarding4({
       zipcode: values.zipcode,
       state: values.state,
     };
-
+    if (
+      !coordinateData?.coordinates.location ||
+      !coordinateData.coordinates.bounds
+    ) {
+      errorToast("Could not find your location."); // Set error to true if coordinates are not found
+      return; // Prevent form submission
+    }
+    console.log(location);
     setLocationInStore(location);
   }
+
+  const { countryValue, stateValue } = useDropdownStore();
+  useEffect(() => {
+    form.setValue("country", countryValue);
+    form.setValue("state", stateValue);
+  }, [countryValue, stateValue, form]);
+
   useEffect(() => {
     if (isLocationFilled()) {
       const location: LocationType = {
@@ -122,7 +139,7 @@ export default function Onboarding4({
     }
     setHandleOnboarding &&
       setHandleOnboarding(() => form.handleSubmit(handleFormSubmit));
-  }, [form.formState]);
+  }, [form, countryValue]);
   // I couldnt figure out a way for this hook to fire when the for was filled, so you will get console errors
   const { data: coordinateData } = api.offers.getCoordinates.useQuery({
     location: address,
@@ -143,32 +160,12 @@ export default function Onboarding4({
           {error && (
             <p className="text-red-500">Please fill out all required fields</p>
           )}
-
           <Form {...form}>
-            <FormField
-              control={form.control}
-              name="country"
-              render={({ field }) => (
-                <FormItem>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Country /region" />
-                      <SelectIcon>
-                        <CaretSortIcon className="h-4 w-4 opacity-50" />
-                      </SelectIcon>
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="United States">
-                        United States
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </FormItem>
-              )}
-            />
+            <div className="flex flex-col gap-y-1">
+              <CountryDropdown />
+              <StateDropdown />
+            </div>
+
             <div className="rounded-lg border">
               <FormField
                 control={form.control}
@@ -211,19 +208,6 @@ export default function Onboarding4({
               />
               <FormField
                 control={form.control}
-                name="state"
-                render={({ field }) => (
-                  <FormItem>
-                    <InputTogether
-                      className="border-b-1 rounded-t-lg border-x-0 border-t-0 p-6 focus:rounded-none"
-                      placeholder="State / territory"
-                      {...field}
-                    />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
                 name="zipcode"
                 render={({ field }) => (
                   <FormItem>
@@ -238,7 +222,7 @@ export default function Onboarding4({
               />
             </div>
           </Form>
-          {coordinateData && (
+          {coordinateData ? (
             <div className="relative mb-10 h-[400px]">
               <div className="absolute inset-0 z-0">
                 <SingleLocationMap
@@ -247,6 +231,8 @@ export default function Onboarding4({
                 />
               </div>
             </div>
+          ) : (
+            <div className="h-[400px]"></div>
           )}
         </div>
       </div>
