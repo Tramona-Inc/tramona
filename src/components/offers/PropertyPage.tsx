@@ -5,8 +5,6 @@ import ReviewCard from "@/components/_common/ReviewCard";
 import {
   DialogNoDrawer,
   DialogContentNoDrawer,
-  DialogHeaderNoDrawer,
-  DialogTitleNoDrawer,
   DialogTriggerNoDrawer,
 } from "@/components/ui/dialog-no-drawer";
 import {

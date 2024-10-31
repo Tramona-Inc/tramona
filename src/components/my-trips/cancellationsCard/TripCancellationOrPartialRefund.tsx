@@ -75,7 +75,6 @@ export default function TripCancellationOrPartialRefund({
     });
 
   //extract stripe fee
-  const stripeFee = tripCheckoutDetails?.stripeTransactionFee;
   console.log(tripCheckoutDetails);
 
   let totalRefundAmount: number = !tripCheckoutDetails

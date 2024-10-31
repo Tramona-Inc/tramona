@@ -24,7 +24,6 @@ const RequestSubmittedDialog: React.FC<RequestSubmittedDialogProps> = ({
   open,
   setOpen,
   showConfetti,
-  madeByGroupId,
   location,
   isRequestsPage = false,
 }) => {
