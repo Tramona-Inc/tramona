@@ -32,7 +32,6 @@ import {
   MenuIcon,
 } from "lucide-react";
 import { SkeletonText } from "@/components/ui/skeleton";
-import { index } from "drizzle-orm/pg-core";
 
 export function Header() {
   const { pathname } = useRouter();

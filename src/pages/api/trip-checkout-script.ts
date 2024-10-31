@@ -11,7 +11,6 @@ import { breakdownPayment } from "@/utils/payment-utils/paymentBreakdown";
 
 // create a script that will allow me to populate the tripscheckout for each offer
 
-console.log("hi");
 export default async function populateTripCheckout() {
   const allOffersWithoutCheckout = await db.query.offers.findMany({
     where: isNull(offers.tripCheckoutId),

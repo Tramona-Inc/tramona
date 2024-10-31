@@ -70,6 +70,7 @@ export default function OnboardingFooter({
           }, ${listing.location.city}, ${listing.location.state} ${listing.location.zipcode}, ${
             listing.location.country
           }`,
+          country: listing.location.country,
           checkInInfo: listing.checkInType,
           checkInTime: listing.checkIn,
           checkOutTime: listing.checkOut,
@@ -124,6 +125,33 @@ export default function OnboardingFooter({
         value={(progress * 100) / maxPages}
         className="h-2 w-full rounded-none"
       />
+      {progress !== 0 && (
+        <div className="flex justify-between p-5">
+          <Button
+            variant={"ghost"}
+            onClick={() => {
+              if (progress - 1 > -1) {
+                setProgress(progress - 1);
+              }
+            }}
+          >
+            Back
+          </Button>
+          {isEdit ? (
+            <Button onClick={onPressNext}>Back to summary</Button>
+          ) : (
+            <div className="flex flex-row gap-2">
+              <Button onClick={onPressNext} disabled={isLoading}>
+                {progress === 0
+                  ? "Get Started"
+                  : progress === 12
+                    ? "Finish"
+                    : "Next"}
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
       <div className="flex justify-between p-5">
         <Button
           variant={"ghost"}

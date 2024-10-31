@@ -10,6 +10,7 @@ import ErrorMsg from "../ui/ErrorMsg";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -49,6 +50,7 @@ const formSchema = z.object({
   numBathrooms: zodInteger({ min: 1 }),
 
   address: z.string().max(1000),
+  country: z.string().max(500),
 
   checkInInfo: z.string(),
   checkInTime: z.string(),
@@ -249,6 +251,22 @@ export default function AdminPropertyForm() {
               <FormControl>
                 <Input {...field} />
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="country"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Country</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormDescription>
+                Case Ex: (&qout;United States&qout;)
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
