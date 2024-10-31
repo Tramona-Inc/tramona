@@ -6,12 +6,9 @@ import RequestFeed from "@/components/activity-feed/RequestFeed";
 import { type FeedRequestItem } from "@/components/activity-feed/ActivityFeed";
 import { getFeed } from "@/server/api/routers/feedRouter";
 import { type InferGetStaticPropsType } from "next";
-import HowItWorksHost from "@/components/landing-page/how-it-works-host";
-// import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import TramonaIcon from "@/components/_icons/TramonaIcon";
 import Footer from "@/components/_common/Layout/Footer";
 import AccordionFaq from "@/components/_common/AccordionFaq";
-import { TestimonialCarousel } from "@/components/landing-page/_sections/testimonials/TestimonialCarousel";
 import { Check, CircleCheckBig } from "lucide-react";
 import Onboarding1 from "@/components/host/onboarding/Onboarding1";
 import { useHostOnboarding } from "@/utils/store/host-onboarding";
@@ -45,7 +42,7 @@ const contents: Tabs[] = [
   },
 ];
 
-function IntroSection({ requestFeed }: { requestFeed: FeedRequestItem[] }) {
+function MainSection({ requestFeed }: { requestFeed: FeedRequestItem[] }) {
   const router = useRouter();
   const progress = useHostOnboarding((state) => state.progress);
   const setProgress = useHostOnboarding((state) => state.setProgress);
@@ -414,16 +411,7 @@ export default function HostWelcome({
           <StickyTopBar />
         </div>
 
-        <IntroSection requestFeed={requestFeed} />
-        {/* <Questions />
-        <HowItWorksHost />
-        <TestimonialCarousel />
-        <TailorYourBookingProcess />
-        <DamageProtection />
-        <ListInAMinute />
-        <FAQ />
-        <WhatAreYouWaitingFor />
-        <SendUsAnEmail /> */}
+        <MainSection requestFeed={requestFeed} />
       </div>
       <div className="hidden md:block">
         <Footer />

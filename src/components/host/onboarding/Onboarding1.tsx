@@ -1,6 +1,5 @@
 import CardSelect from "@/components/_common/CardSelect";
 import { useRouter } from "next/router";
-import Image from "next/image";
 import OnboardingFooter from "./OnboardingFooter";
 import { useState } from "react";
 import { InlineWidget, useCalendlyEventListener } from "react-calendly";
@@ -149,16 +148,6 @@ export default function Onboarding1({
   return (
     <>
       <div className="w-full flex-grow lg:grid lg:grid-cols-1">
-        {/* <div className="hidden flex-grow bg-muted lg:block">
-          <Image
-            src="/assets/images/host-onboarding.png"
-            alt="Image"
-            width="1920"
-            height="1080"
-            className="h-full w-full object-cover"
-          />
-        </div> */}
-
         <div
           className={cn(
             "flex flex-col gap-6",
