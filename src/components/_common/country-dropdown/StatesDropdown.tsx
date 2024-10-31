@@ -75,7 +75,7 @@ const StateDropdown = () => {
                     setStateValue(state.state_code); // Store the state code (e.g., "CA")
                     setOpenStateDropdown(false);
                   }}
-                  className="flex cursor-pointer items-center justify-between text-xs hover:!bg-[#27272a] hover:!text-white"
+                  className="flex cursor-pointer items-center justify-between text-xs"
                 >
                   <div className="flex items-end gap-2">
                     <span className="">{state.name}</span>

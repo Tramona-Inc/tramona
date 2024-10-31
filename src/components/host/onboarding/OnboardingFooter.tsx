@@ -70,6 +70,7 @@ export default function OnboardingFooter({
           }, ${listing.location.city}, ${listing.location.state} ${listing.location.zipcode}, ${
             listing.location.country
           }`,
+          country: listing.location.country,
           checkInInfo: listing.checkInType,
           checkInTime: listing.checkIn,
           checkOutTime: listing.checkOut,
@@ -144,8 +145,8 @@ export default function OnboardingFooter({
                 {progress === 0
                   ? "Get Started"
                   : progress === 12
-                      ? "Finish"
-                      : "Next"}
+                    ? "Finish"
+                    : "Next"}
               </Button>
             </div>
           )}

@@ -1,13 +1,6 @@
 import { Form, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { InputTogether } from "@/components/ui/input-together";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   type LocationType,
   useHostOnboarding,
 } from "@/utils/store/host-onboarding";
@@ -19,7 +12,6 @@ import OnboardingFooter from "./OnboardingFooter";
 import { api } from "@/utils/api";
 import SaveAndExit from "./SaveAndExit";
 import { useState, useEffect } from "react";
-import StatesDropdown from "@/components/_common/country-dropdown/StatesDropdown";
 import SingleLocationMap from "@/components/_common/GoogleMaps/SingleLocationMap";
 import CountryDropdown from "@/components/_common/country-dropdown/CountryDropdown";
 import { useDropdownStore } from "@/utils/store/dropdown";
@@ -103,14 +95,11 @@ export default function Onboarding4({
       zipcode: values.zipcode,
       state: values.state,
     };
-    if (
-      !coordinateData?.coordinates.location ||
-      !coordinateData.coordinates.bounds
-    ) {
+    if (!coordinateData?.coordinates.location) {
       errorToast("Could not find your location."); // Set error to true if coordinates are not found
       return; // Prevent form submission
     }
-    console.log(location);
+
     setLocationInStore(location);
   }
 
@@ -139,7 +128,7 @@ export default function Onboarding4({
     }
     setHandleOnboarding &&
       setHandleOnboarding(() => form.handleSubmit(handleFormSubmit));
-  }, [form, countryValue]);
+  }, [form, countryValue, form.formState]);
   // I couldnt figure out a way for this hook to fire when the for was filled, so you will get console errors
   const { data: coordinateData } = api.offers.getCoordinates.useQuery({
     location: address,

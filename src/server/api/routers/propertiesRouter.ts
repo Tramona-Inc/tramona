@@ -13,7 +13,7 @@ import {
   propertyUpdateSchema,
   type Request,
   type User,
-  users
+  users,
 } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { addDays } from "date-fns";
