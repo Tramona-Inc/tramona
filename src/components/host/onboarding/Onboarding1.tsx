@@ -1,6 +1,4 @@
 import CardSelect from "@/components/_common/CardSelect";
-import AssistedListing from "@/components/_icons/AssistedListing";
-import ManuallyAdd from "@/components/_icons/ManuallyAdd";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import OnboardingFooter from "./OnboardingFooter";
@@ -36,7 +34,7 @@ import { SelectIcon } from "@radix-ui/react-select";
 import { CaretSortIcon } from "@radix-ui/react-icons";
 import { ALL_PROPERTY_PMS } from "@/server/db/schema";
 import { api } from "@/utils/api";
-import { Home } from "lucide-react";
+import { HelpCircle, Link, Plus } from "lucide-react";
 import { cn } from "@/utils/utils";
 
 export default function Onboarding1({
@@ -72,7 +70,7 @@ export default function Onboarding1({
   const items = [
     {
       id: "1",
-      icon: <Home size={50} />,
+      icon: <Link className="text-teal-900" strokeWidth={2} size={30} />,
       title: "Connect directly with Airbnb",
       text: "Connect with your Airbnb account. This is the easiest & preferred way",
       recommended: true,
@@ -84,23 +82,23 @@ export default function Onboarding1({
         }
       },
     },
+    // {
+    //   id: "2",
+    //   icon: <AssistedListing />,
+    //   title: "PMS",
+    //   text: "Connect with our PMS partners for effortless signup.",
+    //   onClick: () => openModal("syncPMS"),
+    // },
     {
       id: "2",
-      icon: <AssistedListing />,
-      title: "PMS",
-      text: "Connect with our PMS partners for effortless signup.",
-      onClick: () => openModal("syncPMS"),
-    },
-    {
-      id: "3",
-      icon: <ManuallyAdd />,
+      icon: <Plus className="text-teal-900" strokeWidth={2} size={30} />,
       title: "You Add",
       text: "Manually list your properties",
       onClick: onPressNext,
     },
     {
-      id: "4",
-      icon: <AssistedListing />,
+      id: "3",
+      icon: <HelpCircle className="text-teal-900" strokeWidth={2} size={30} />,
       title: "We Add",
       text: "Have the Tramona onboarding team set up your account.",
       onClick: () => openModal("assistedListing"),

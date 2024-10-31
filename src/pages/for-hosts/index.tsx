@@ -71,12 +71,12 @@ function IntroSection({ requestFeed }: { requestFeed: FeedRequestItem[] }) {
           <h2 className="text-2xl font-bold">
             Sign up and start booking your vacancies
           </h2>
-          <div className="px-2 py-4 lg:px-10 lg:py-6">
+          <div className="py-4 lg:py-6">
             <div className="h-[350px] rounded-lg border px-2 py-2 shadow-xl lg:h-[450px]">
               <RequestFeed requestFeed={requestFeed} />
             </div>
           </div>
-          <div className="space-y-1 text-lg">
+          <div className="hidden space-y-1 text-lg lg:block">
             {texts.map((text, index) => (
               <div className="flex items-center gap-2" key={index}>
                 <CircleCheckBig className="text-teal-900" />
@@ -84,17 +84,30 @@ function IntroSection({ requestFeed }: { requestFeed: FeedRequestItem[] }) {
               </div>
             ))}
           </div>
+          <div className="pt-4 lg:hidden">
+            <Questions />
+          </div>
         </div>
         <div className="flex basis-1/2 flex-col gap-4">
           <div className="lg:rounded-lg lg:border lg:p-4">
             <Onboarding1 onPressNext={onPressNext} forHost />
           </div>
 
-          <p className="text-lg font-semibold">
+          <p className="font-semibold lg:text-lg">
             Hosts can expect to make 10-15% more when using Tramona to book
             their empty nights
           </p>
-          <Questions />
+          <div className="space-y-1 text-lg lg:hidden">
+            {texts.map((text, index) => (
+              <div className="flex items-center gap-2" key={index}>
+                <CircleCheckBig className="text-teal-900" />
+                <p>{text}</p>
+              </div>
+            ))}
+          </div>
+          <div className="hidden lg:block">
+            <Questions />
+          </div>
         </div>
       </div>
     </section>
