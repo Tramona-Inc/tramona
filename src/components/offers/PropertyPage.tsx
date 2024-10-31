@@ -160,7 +160,7 @@ export default function PropertyPage({
               </div>
             ))}
           </div>
-          <DialogContentNoDrawer className="flex w-full items-center justify-center border-none bg-transparent">
+          <DialogContentNoDrawer className="flex w-full items-center justify-center border-none bg-transparent [&>button]:hidden">
             <div className="screen-full flex justify-center">
               <OfferPhotos
                 propertyImages={property.imageUrls}
@@ -186,10 +186,10 @@ export default function PropertyPage({
                   <DialogTitle>More Photos</DialogTitle>
                 </DialogHeader>
                 {/* //dialog within a dialog */}
-                <Dialog>
+                <DialogNoDrawer>
                   <div className="grid-row-4 grid min-h-[1000px] grid-cols-2 gap-2 rounded-xl">
                     {property.imageUrls.map((imageUrl, index) => (
-                      <DialogTrigger
+                      <DialogTriggerNoDrawer
                         key={index}
                         className={`hover:opacity-90 ${
                           index === 0 || index % 3 === 0
@@ -213,18 +213,18 @@ export default function PropertyPage({
                             />
                           </AspectRatio>
                         </div>
-                      </DialogTrigger>
+                      </DialogTriggerNoDrawer>
                     ))}
                   </div>
-                  <DialogContent className="max-w-screen flex items-center justify-center bg-transparent">
+                  <DialogContentNoDrawer className="flex items-center justify-center border-none bg-transparent [&>button]:hidden">
                     <div className="screen-full flex justify-center">
                       <OfferPhotos
                         propertyImages={property.imageUrls}
                         indexOfSelectedImage={selectedImageIdx}
                       />
                     </div>
-                  </DialogContent>
-                </Dialog>
+                  </DialogContentNoDrawer>
+                </DialogNoDrawer>
               </DialogContent>
             </Dialog>
           </div>
@@ -239,10 +239,10 @@ export default function PropertyPage({
         </div>
       )}
 
-      <div className="relative flex gap-8 pt-4">
+      <div className="relative flex gap-8 pt-5">
         <div className="min-w-0 flex-1 space-y-4">
           <section>
-            <h1 className="flex-1 text-3xl font-semibold sm:text-4xl">
+            <h1 className="flex-1 text-xl font-semibold sm:text-2xl">
               {property.name}
             </h1>
             <div className="flex flex-col gap-4 sm:flex-row">
