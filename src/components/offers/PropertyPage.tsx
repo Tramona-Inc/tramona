@@ -3,6 +3,13 @@ import UserAvatar from "@/components/_common/UserAvatar";
 import { Button, ButtonProps } from "@/components/ui/button";
 import ReviewCard from "@/components/_common/ReviewCard";
 import {
+  DialogNoDrawer,
+  DialogContentNoDrawer,
+  DialogHeaderNoDrawer,
+  DialogTitleNoDrawer,
+  DialogTriggerNoDrawer,
+} from "@/components/ui/dialog-no-drawer";
+import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -118,8 +125,8 @@ export default function PropertyPage({
   return (
     <div>
       <div className="relative grid h-[480px] grid-cols-4 grid-rows-2 gap-2 overflow-hidden rounded-xl">
-        <Dialog>
-          <DialogTrigger
+        <DialogNoDrawer>
+          <DialogTriggerNoDrawer
             key={0}
             onClick={() => setSelectedImageIdx(0)}
             className="hover:opacity-90 sm:hidden"
@@ -130,7 +137,7 @@ export default function PropertyPage({
               fill
               className="object-cover object-center"
             />
-          </DialogTrigger>
+          </DialogTriggerNoDrawer>
           <div className="hidden sm:contents">
             {property.imageUrls.slice(0, 5).map((imageUrl, index) => (
               <div
@@ -139,7 +146,7 @@ export default function PropertyPage({
                   index === 0 ? "col-span-2 row-span-2" : ""
                 }`}
               >
-                <DialogTrigger
+                <DialogTriggerNoDrawer
                   onClick={() => setSelectedImageIdx(index)}
                   className="hover:opacity-90"
                 >
@@ -149,19 +156,19 @@ export default function PropertyPage({
                     fill
                     className="object-cover object-center"
                   />
-                </DialogTrigger>
+                </DialogTriggerNoDrawer>
               </div>
             ))}
           </div>
-          <DialogContent className="max-w-screen flex items-center justify-center bg-transparent">
+          <DialogContentNoDrawer className="flex w-full items-center justify-center border-none bg-transparent">
             <div className="screen-full flex justify-center">
               <OfferPhotos
                 propertyImages={property.imageUrls}
                 indexOfSelectedImage={selectedImageIdx}
               />
             </div>
-          </DialogContent>
-        </Dialog>
+          </DialogContentNoDrawer>
+        </DialogNoDrawer>
 
         {/* If there are more than 5 images, render the "See more photos" button */}
         {renderSeeMoreButton && (

@@ -37,7 +37,7 @@ export default function OfferPhotos({
                       src={image}
                       alt="Property Image"
                       fill
-                      className="object-contain object-center"
+                      className="object-center"
                     />
                   </div>
                 </CardContent>
