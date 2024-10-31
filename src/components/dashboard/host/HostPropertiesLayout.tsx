@@ -21,6 +21,8 @@ export default function HostPropertiesLayout() {
 
   const router = useRouter();
 
+  const setProgress = useHostOnboarding((state) => state.setProgress);
+
   const setPropertyType = useHostOnboarding((state) => state.setPropertyType);
   const setMaxGuests = useHostOnboarding((state) => state.setMaxGuests);
   const setBedrooms = useHostOnboarding((state) => state.setBedrooms);
@@ -53,6 +55,7 @@ export default function HostPropertiesLayout() {
   );
 
   function setStatesDefault() {
+    setProgress(0);
     setPropertyType("Apartment"),
       setMaxGuests(1),
       setBedrooms(1),

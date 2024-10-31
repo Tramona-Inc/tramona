@@ -12,7 +12,7 @@ export default function HostOverview() {
   const { data: user } = api.users.getUser.useQuery();
 
   return session ? (
-    <div className="mx-auto mt-8 min-h-screen-minus-header max-w-8xl space-y-10 p-4 pb-32">
+    <div className="max-w-8xl mx-auto mt-8 min-h-screen-minus-header space-y-10 p-4 pb-32">
       <h1 className="text-3xl font-bold md:text-5xl">
         Welcome back, {user?.firstName ? user.firstName : "Host"}!{" "}
       </h1>
