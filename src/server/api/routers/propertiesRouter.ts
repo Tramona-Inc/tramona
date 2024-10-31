@@ -24,8 +24,10 @@ import {
   eq,
   gt,
   gte,
+  like,
   lte,
   notExists,
+  or,
   sql,
 } from "drizzle-orm";
 import { z } from "zod";
@@ -42,6 +44,7 @@ import {
   getRequestsForProperties,
 } from "@/server/server-utils";
 import { getCoordinates } from "@/server/google-maps";
+import { capitalize } from "@/utils/utils";
 
 export type HostRequestsPageData = {
   city: string;
@@ -669,6 +672,22 @@ export const propertiesRouter = createTRPCRouter({
           autoOfferDiscountTiers: input.autoOfferDiscountTiers,
         })
         .where(eq(properties.id, input.id));
+    }),
+  getSearchResults: protectedProcedure
+    .input(z.object({ searchQuery: z.string() }))
+    .query(async ({ ctx, input }) => {
+      if (input.searchQuery !== "") {
+        return await ctx.db.query.properties.findMany({
+          where: and(
+            eq(properties.hostId, ctx.user.id),
+            or(
+              like(properties.name, `%${input.searchQuery}%`),
+              like(properties.city, `%${capitalize(input.searchQuery)}%`),
+            ),
+          ),
+        });
+      }
+      return null;
     }),
 
   updatePropertySecurityDepositAmount: protectedProcedure
