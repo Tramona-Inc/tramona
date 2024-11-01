@@ -33,8 +33,7 @@ export function Header() {
   return (
     <>
       <div className="text-balance bg-primaryGreen px-4 py-2 text-center text-sm font-medium text-white">
-        Welcome to the Tramona, the best deals on Airbnbs anywhere. Enjoy 15%
-        off all stays during our launch!
+        Tramona is under maintenance right now, we&apos;ll be launching soon!
       </div>
       <div className="contents lg:hidden">
         <SmallHeader isHost={isHost} />
