@@ -11,6 +11,7 @@ import { db } from "@/server/db";
 import { eq } from "drizzle-orm";
 import { sendSlackMessage } from "@/server/slack";
 import {
+  addHostProfile,
   axiosWithRetry,
   createInitialHostTeam,
   createLatLngGISPoint,
@@ -18,7 +19,12 @@ import {
 } from "@/server/server-utils";
 import { getAddress } from "@/server/google-maps";
 import { calculateTotalTax } from "@/utils/payment-utils/taxData";
-import { getAmenities, getCancellationPolicy, getListingDataUrl, getReviewsUrl } from "@/server/external-listings-scraping/scrapeAirbnbListing";
+import {
+  getAmenities,
+  getCancellationPolicy,
+  getListingDataUrl,
+  getReviewsUrl,
+} from "@/server/external-listings-scraping/scrapeAirbnbListing";
 import { airbnbHeaders } from "@/utils/constants";
 
 export async function insertHost(id: string) {
@@ -41,18 +47,7 @@ export async function insertHost(id: string) {
 
   const teamId = await createInitialHostTeam(user);
 
-  await db.insert(hostProfiles).values({
-    userId: user.id,
-    curTeamId: teamId,
-  });
-
-  await sendSlackMessage({
-    text: [
-      "*Host Profile Created:*",
-      `User ${user.firstName} ${user.lastName} has become a host`,
-    ].join("\n"),
-    channel: "host-bot",
-  });
+  await addHostProfile({ userId: user.id, curTeamId: teamId });
 }
 
 const airbnbPropertyTypes = [
@@ -341,7 +336,7 @@ export default async function webhook(
           lng: webhookData.data.address.longitude,
         });
 
-        const taxInfo = calculateTotalTax(country, stateCode, city);
+        const taxInfo = calculateTotalTax(country!, stateCode!, city); //assertion for now to build
 
         if (taxInfo.length === 0) {
           await sendSlackMessage({
@@ -372,7 +367,10 @@ export default async function webhook(
           ),
         )) as [string, string];
 
-        const cancellationPolicy = getCancellationPolicy(listingData, webhookData.data.id);
+        const cancellationPolicy = getCancellationPolicy(
+          listingData,
+          webhookData.data.id,
+        );
         const amenities = getAmenities(listingData, webhookData.data.id);
 
         const propertyObject = {
@@ -387,6 +385,7 @@ export default async function webhook(
           numBathrooms: webhookData.data.capacity.bathrooms,
           // latitude: webhookData.data.address.latitude,
           // longitude: webhookData.data.address.longitude,
+          country: webhookData.data.address.country_code, //change to country
           otherHouseRules: webhookData.data.house_rules,
           latLngPoint: latLngPoint,
           city: webhookData.data.address.city,

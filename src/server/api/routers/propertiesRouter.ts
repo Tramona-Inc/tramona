@@ -25,8 +25,10 @@ import {
   eq,
   gt,
   gte,
+  like,
   lte,
   notExists,
+  or,
   sql,
 } from "drizzle-orm";
 import { z } from "zod";
@@ -44,6 +46,7 @@ import {
   getRequestsToBookForProperties,
 } from "@/server/server-utils";
 import { getCoordinates } from "@/server/google-maps";
+import { capitalize } from "@/utils/utils";
 
 export type HostRequestsPageData = {
   city: string;
@@ -641,18 +644,20 @@ export const propertiesRouter = createTRPCRouter({
         },
       );
 
-      console.log('hostreqs', hostRequestsToBook)
+      console.log("hostreqs", hostRequestsToBook);
 
       const propertiesWithRequestsToBook = hostProperties
         .filter((property) =>
           hostRequestsToBook.some(
-            (requestToBook) => requestToBook.requestToBook.propertyId === property.id,
+            (requestToBook) =>
+              requestToBook.requestToBook.propertyId === property.id,
           ),
         )
         .map((property) => ({
           property,
           requestToBook: hostRequestsToBook.filter(
-            (requestToBook) => requestToBook.requestToBook.propertyId === property.id,
+            (requestToBook) =>
+              requestToBook.requestToBook.propertyId === property.id,
           ),
         }));
 
@@ -738,6 +743,23 @@ export const propertiesRouter = createTRPCRouter({
             input.requestToBookDiscountPercentage,
         })
         .where(eq(properties.id, input.id));
+    }),
+
+  getSearchResults: protectedProcedure
+    .input(z.object({ searchQuery: z.string() }))
+    .query(async ({ ctx, input }) => {
+      if (input.searchQuery !== "") {
+        return await ctx.db.query.properties.findMany({
+          where: and(
+            eq(properties.hostId, ctx.user.id),
+            or(
+              like(properties.name, `%${input.searchQuery}%`),
+              like(properties.city, `%${capitalize(input.searchQuery)}%`),
+            ),
+          ),
+        });
+      }
+      return null;
     }),
 
   updatePropertySecurityDepositAmount: protectedProcedure

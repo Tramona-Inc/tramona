@@ -43,6 +43,7 @@ import {
   rejectedRequests,
   hostTeams,
   requestsToBook,
+  hostProfiles,
 } from "./db/schema";
 import { getAddress, getCoordinates } from "./google-maps";
 import axios from "axios";
@@ -53,6 +54,7 @@ import { HOST_MARKUP, TRAVELER__MARKUP } from "@/utils/constants";
 import { HostRequestsPageData } from "./api/routers/propertiesRouter";
 import { Session } from "next-auth";
 import { calculateTotalTax } from "@/utils/payment-utils/taxData";
+import { createStripeConnectId } from "@/utils/stripe-utils";
 
 export const proxyAgent = new HttpsProxyAgent(env.PROXY_URL);
 
@@ -1007,4 +1009,43 @@ export async function getRequestsToBookForProperties(
     }
   }
   return propertyToRequestMap;
+}
+
+export async function addHostProfile({
+  userId,
+  curTeamId,
+  hostawayApiKey,
+  hostawayAccountId,
+  hostawayBearerToken,
+}: {
+  userId: string;
+  curTeamId: number;
+  hostawayApiKey?: string;
+  hostawayAccountId?: string;
+  hostawayBearerToken?: string;
+}) {
+  const curUser = await db.query.users.findFirst({
+    columns: { email: true, firstName: true, lastName: true },
+    where: eq(users.id, userId),
+  });
+  if (curUser) {
+    await db.insert(hostProfiles).values({
+      userId,
+      curTeamId: curTeamId,
+      hostawayApiKey,
+      hostawayAccountId,
+      hostawayBearerToken,
+    });
+
+    await createStripeConnectId({ userId, userEmail: curUser.email });
+
+    await sendSlackMessage({
+      isProductionOnly: true,
+      text: [
+        "*Host Profile Created:*",
+        `User ${curUser.firstName} ${curUser.lastName} has become a host`,
+      ].join("\n"),
+      channel: "host-bot",
+    });
+  }
 }
