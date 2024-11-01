@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import Image from "next/image";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -235,8 +235,6 @@ const locations = [
       "https://images.unsplash.com/photo-1617581629397-a72507c3de9e?w=300&h=200&fit=crop",
   },
 ];
-
-
 export function DesktopSearchTab() {
   const { form, onSubmit } = useSearchBarForm();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -249,19 +247,22 @@ export function DesktopSearchTab() {
   const checkInDate = form.watch("checkIn");
   const checkOutDate = form.watch("checkOut");
 
-  // type BookItNowProperties = (
-  //   {type: "Airbnb";
-  //   data: Property[];
-  // } | {
-  //   type: "Subscraper";
-  //   data: Property[];
-  // })[];
+  const [isTopOfPage, setIsTopOfPage] = useState(true);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsTopOfPage(window.scrollY === 0);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const handleLocationClick = useCallback(
-    (location: string) => {
-      form.setValue("location", location);
-    },
-    [form],
+      (location: string) => {
+        form.setValue("location", location);
+      },
+      [form],
   );
 
   const handleSearch = form.handleSubmit(async () => {
@@ -271,24 +272,7 @@ export function DesktopSearchTab() {
     console.log("Form data:", formData);
     setAdjustedProperties({
       pages: [],
-      // ... other initial properties if any
     });
-
-    // Run the original onSubmit function
-
-    console.log("Initial adjustedProperties:", adjustedProperties);
-
-    // Get all property IDs and original listing IDs from adjustedProperties
-    // const propertyData =
-    //   adjustedProperties?.pages.flatMap((page) =>
-    //     page.data.map((property) => ({
-    //       id: property.id,
-    //       originalListingId: property.originalListingId,
-    //       originalListingPlatform: property.originalListingPlatform,
-    //       maxNumGuests: property.maxNumGuests,
-    //     })),
-    //   ) ?? [];
-
 
     if (formData.checkIn && formData.checkOut) {
       console.log("Running subscrapers...");
@@ -309,12 +293,7 @@ export function DesktopSearchTab() {
         });
 
         const airbnbResults = await airbnbResultsPromise;
-        // setAdjustedProperties((prevState) => ({
-        //   ...prevState,
-        //   pages: [...(prevState?.pages || []), ...airbnbResults],
-        // }));
         const scrapedResults = await scrapedResultsPromise;
-        console.log("airbnb:", airbnbResults.res, "scraped:", scrapedResults);
         setAdjustedProperties((prevState) => ({
           ...prevState,
           pages: [...(prevState?.pages || []), ...scrapedResults, ...airbnbResults.res],
@@ -339,7 +318,7 @@ export function DesktopSearchTab() {
           numGuests: formData.numGuests!,
           location: formData.location!,
           firstBatch: false,
-        })
+        });
 
         const finishAirbnbResults = await finishAirbnbResultsPromise;
         setAdjustedProperties((prevState) => ({
@@ -352,79 +331,7 @@ export function DesktopSearchTab() {
           pages: [...(prevState?.pages || []), ...finishScrapedResults],
         }));
 
-        // console.log('results', results);
-
-        // Update adjustedProperties with only the properties that were updated
-        // if (adjustedProperties) {
-
-          // const airbnbProperties = results.filter(
-          //   (r) => r.originalListingPlatform === "Airbnb" ,
-          // );
-          // const updatedProperties = results.filter(
-          //   (r) =>
-          //     r.originalListingPlatform !== "Airbnb"
-          //       && r.nightlyPrice
-          //       && r.isAvailableOnOriginalSite,
-          // );
-
-          // console.log("Airbnb properties:", airbnbProperties);
-          // console.log("Updated properties:", updatedProperties);
-
-          // const combinedProperties = [...airbnbProperties, ...updatedProperties];
-
-          // const updatedPages = [
-          //   {
-          //     data: adjustedProperties.pages[0].data
-          //       .filter((property) =>
-          //         updatedProperties.some((r) => r.propertyId === property.id),
-          //       )
-          //       .map((property) => {
-          //         const updatedProperty = updatedProperties.find(
-          //           (r) => r.propertyId === property.id,
-          //         );
-          //         return {
-          //           ...property,
-          //           originalNightlyPrice: updatedProperty?.originalNightlyPrice,
-          //         };
-          //       }),
-          //   },
-          // ];
-
-          // const airbnbPages = [
-          //   {
-          //     data: adjustedProperties.pages[0].data.filter(
-          //       (property) =>
-          //         airbnbProperties.some((r) => r.originalListingId === property.originalListingId),
-          //     ).map((property) => {
-          //       const airbnbProperty = airbnbProperties.find(
-          //         (r) => r.originalListingId === property.originalListingId,
-          //       );
-          //       return {
-          //         ...property,
-          //         nightlyPrice: airbnbProperty?.nightlyPrice,
-          //       };
-          //     }),
-          //   },
-          // ];
-
-          // const allPages = [...updatedPages, ...airbnbPages];
-
-          // console.log("Updated pages:", allPages);
-          // console.log(
-          //   "Number of properties updated:",
-          //   updatedProperties.length,
-          // );
-          // console.log(
-          //   "Total number of properties:",
-          //   updatedPages[0].data.length,
-          // );
-
-          // Use a callback function with setAdjustedProperties
-          // setAdjustedProperties((prevState) => {
-          //   if (!prevState) return null;
-          //   return { ...prevState, pages: results };
-          // });
-        } catch (error) {
+      } catch (error) {
         console.error("Error running subscrapers:", error);
       } finally {
         setIsLoading(false);
@@ -436,193 +343,195 @@ export function DesktopSearchTab() {
   });
 
   const ScrollButtons = ({
-    containerRef,
-  }: {
+                           containerRef,
+                         }: {
     containerRef: React.RefObject<HTMLDivElement>;
   }) => {
     const scroll = useCallback(
-      (direction: "left" | "right") => {
-        if (containerRef.current) {
-          containerRef.current.scrollBy({
-            left:
-              direction === "left"
-                ? -containerRef.current.clientWidth
-                : containerRef.current.clientWidth,
-            behavior: "smooth",
-          });
-        }
-      },
-      [containerRef],
+        (direction: "left" | "right") => {
+          if (containerRef.current) {
+            containerRef.current.scrollBy({
+              left:
+                  direction === "left"
+                      ? -containerRef.current.clientWidth
+                      : containerRef.current.clientWidth,
+              behavior: "smooth",
+            });
+          }
+        },
+        [containerRef],
     );
 
     return (
-      <>
-        <Button
-          variant="ghost"
-          className="absolute left-0 top-1/2 z-10 -translate-y-1/2 bg-white"
-          onClick={() => scroll("left")}
-        >
-          <ChevronLeft className="h-6 w-6" />
-        </Button>
-        <Button
-          variant="ghost"
-          className="absolute right-0 top-1/2 z-10 -translate-y-1/2 bg-white"
-          onClick={() => scroll("right")}
-        >
-          <ChevronRight className="h-6 w-6" />
-        </Button>
-      </>
+        <>
+          <Button
+              variant="ghost"
+              className="absolute left-0 top-1/2 z-10 -translate-y-1/2 bg-white"
+              onClick={() => scroll("left")}
+          >
+            <ChevronLeft className="h-6 w-6" />
+          </Button>
+          <Button
+              variant="ghost"
+              className="absolute right-0 top-1/2 z-10 -translate-y-1/2 bg-white"
+              onClick={() => scroll("right")}
+          >
+            <ChevronRight className="h-6 w-6" />
+          </Button>
+        </>
     );
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={handleSearch} className="w-full">
-        <div className="mx-auto mb-6 w-[1200px]">
-          <div className="flex items-center justify-between rounded-full border border-black bg-white p-2">
-            <div className="mx-2 flex w-[400px] items-center">
-              <Search className="mr-2 text-gray-400" />
-              <FormField
-                control={form.control}
-                name="location"
-                render={({ field }) => (
-                  <FormItem className="w-full">
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger className="border-0 bg-transparent focus:ring-0">
-                          <SelectValue placeholder="Search destinations" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent
-                        className="h-48 overflow-y-auto"
-                        position="popper"
-                      >
-                        {locations.map((location) => (
-                          <SelectItem key={location.name} value={location.name}>
-                            {location.name}, {location.country}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="h-8 w-px bg-gray-300"></div>
-            <div className="flex w-[180px] items-center px-4">
-              <CalendarDays className="mr-2 text-gray-400" />
-              <FormField
-                control={form.control}
-                name={`checkIn`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <SingleDateInput
-                        {...field}
-                        value={field.value ? new Date(field.value) : undefined}
-                        variant="lpDesktop"
-                        placeholder="Check in"
-                        disablePast
-                        className="border-0 bg-transparent focus:ring-0 hover:bg-transparent"
-                        maxDate={checkOutDate ? new Date(checkOutDate) : undefined}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="h-8 w-px bg-gray-300"></div>
-            <div className="flex w-[180px] items-center px-4">
-              <CalendarDays className="mr-2 text-gray-400" />
-              <FormField
-                control={form.control}
-                name={`checkOut`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <SingleDateInput
-                        {...field}
-                        value={field.value ? new Date(field.value) : undefined}
-                        variant="lpDesktop"
-                        placeholder="Check Out"
-                        disablePast
-                        className="border-0 bg-transparent focus:ring-0 hover:bg-transparent"
-                        minDate={checkInDate ? new Date(checkInDate) : undefined}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="h-8 w-px bg-gray-300"></div>
-            <div className="flex w-[180px] items-center px-4">
-              <Users className="mr-2 text-gray-400" />
-              <FormField
-                control={form.control}
-                name="numGuests"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        type="number"
-                        placeholder="1 Guest"
-                        className="w-28 border-0 bg-white text-sm focus:ring-0"
-                        onChange={(e) =>
-                          field.onChange(parseInt(e.target.value) || 1)
-                        }
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-            </div>
-            <Button
-              type="submit"
-              className="rounded-full bg-primaryGreen text-white"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-              ) : (
-                <Search className="h-4 w-4" />
-              )}
-            </Button>
-          </div>
-        </div>
-        <div className="relative">
-          <ScrollButtons containerRef={containerRef} />
-          <div
-            ref={containerRef}
-            id="location-container"
-            className="flex space-x-4 overflow-x-scroll scrollbar-hide"
-          >
-            {locations.map((location) => (
-              <div
-                key={location.name}
-                className="flex-shrink-0 cursor-pointer"
-                onClick={() => {
-                  handleLocationClick(location.name);
-                  form.setValue("location", location.name);
-                }}
+      <Form {...form}>
+        <form onSubmit={handleSearch} className="w-full">
+          <div className="mx-auto mb-6 w-[1200px]">
+            <div className="flex items-center justify-between rounded-full border border-black bg-white p-2">
+              <div className="mx-2 flex w-[400px] items-center">
+                <Search className="mr-2 text-gray-400" />
+                <FormField
+                    control={form.control}
+                    name="location"
+                    render={({ field }) => (
+                        <FormItem className="w-full">
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger className="border-0 bg-transparent focus:ring-0">
+                                <SelectValue placeholder="Search destinations" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent
+                                className="h-48 overflow-y-auto"
+                                position="popper"
+                            >
+                              {locations.map((location) => (
+                                  <SelectItem key={location.name} value={location.name}>
+                                    {location.name}, {location.country}
+                                  </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormItem>
+                    )}
+                />
+              </div>
+              <div className="h-8 w-px bg-gray-300"></div>
+              <div className="flex w-[180px] items-center px-4">
+                <CalendarDays className="mr-2 text-gray-400" />
+                <FormField
+                    control={form.control}
+                    name={`checkIn`}
+                    render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <SingleDateInput
+                                {...field}
+                                value={field.value ? new Date(field.value) : undefined}
+                                variant="lpDesktop"
+                                placeholder="Check in"
+                                disablePast
+                                className="border-0 bg-transparent focus:ring-0 hover:bg-transparent"
+                                maxDate={checkOutDate ? new Date(checkOutDate) : undefined}
+                            />
+                          </FormControl>
+                        </FormItem>
+                    )}
+                />
+              </div>
+              <div className="h-8 w-px bg-gray-300"></div>
+              <div className="flex w-[180px] items-center px-4">
+                <CalendarDays className="mr-2 text-gray-400" />
+                <FormField
+                    control={form.control}
+                    name={`checkOut`}
+                    render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <SingleDateInput
+                                {...field}
+                                value={field.value ? new Date(field.value) : undefined}
+                                variant="lpDesktop"
+                                placeholder="Check Out"
+                                disablePast
+                                className="border-0 bg-transparent focus:ring-0 hover:bg-transparent"
+                                minDate={checkInDate ? new Date(checkInDate) : undefined}
+                            />
+                          </FormControl>
+                        </FormItem>
+                    )}
+                />
+              </div>
+              <div className="h-8 w-px bg-gray-300"></div>
+              <div className="flex w-[180px] items-center px-4">
+                <Users className="mr-2 text-gray-400" />
+                <FormField
+                    control={form.control}
+                    name="numGuests"
+                    render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                                {...field}
+                                type="number"
+                                placeholder="1 Guest"
+                                className="w-28 border-0 bg-white text-sm focus:ring-0"
+                                onChange={(e) =>
+                                    field.onChange(parseInt(e.target.value) || 1)
+                                }
+                            />
+                          </FormControl>
+                        </FormItem>
+                    )}
+                />
+              </div>
+              <Button
+                  type="submit"
+                  className="rounded-full bg-primaryGreen text-white"
+                  disabled={isLoading}
               >
-                <div className="relative h-40 w-60 overflow-hidden rounded-lg">
-                  <Image
-                    src={location.image}
-                    alt={location.name}
-                    className="h-full w-full object-cover"
-                    fill
-                  />
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
-                    <h3 className="font-bold text-white">{location.name}</h3>
-                    <p className="text-sm text-white">{location.country}</p>
-                  </div>
+                {isLoading ? (
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                ) : (
+                    <Search className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
+          </div>
+          {isTopOfPage && (
+              <div className="relative">
+                <ScrollButtons containerRef={containerRef} />
+                <div
+                    ref={containerRef}
+                    id="location-container"
+                    className="flex space-x-4 overflow-x-scroll scrollbar-hide"
+                >
+                  {locations.map((location) => (
+                      <div
+                          key={location.name}
+                          className="flex-shrink-0 cursor-pointer"
+                          onClick={() => {
+                            handleLocationClick(location.name);
+                            form.setValue("location", location.name);
+                          }}
+                      >
+                        <div className="relative h-40 w-60 overflow-hidden rounded-lg">
+                          <Image
+                              src={location.image}
+                              alt={location.name}
+                              className="h-full w-full object-cover"
+                              fill
+                          />
+                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
+                            <h3 className="font-bold text-white">{location.name}</h3>
+                            <p className="text-sm text-white">{location.country}</p>
+                          </div>
+                        </div>
+                      </div>
+                  ))}
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-      </form>
-    </Form>
+          )}
+        </form>
+      </Form>
   );
 }
