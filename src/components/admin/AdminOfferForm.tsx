@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -62,6 +63,7 @@ const formSchema = z.object({
   hostName: zodString(),
   hostProfilePic: zodUrl(),
   address: zodString({ maxLen: 1000 }),
+  country: zodString({ maxLen: 1000 }),
   areaDescription: optional(zodString({ maxLen: Infinity })),
   maxNumGuests: zodInteger({ min: 1 }),
   numBeds: zodInteger({ min: 1 }),
@@ -131,6 +133,7 @@ export default function AdminOfferForm({
             hostName: offer.property.hostName ?? undefined,
             hostProfilePic: offer.property.hostProfilePic ?? undefined,
             address: offer.property.address,
+            country: offer.property.country,
             areaDescription: offer.property.areaDescription ?? undefined,
             mapScreenshot: offer.property.mapScreenshot ?? undefined,
             maxNumGuests: offer.property.maxNumGuests,
@@ -225,7 +228,7 @@ export default function AdminOfferForm({
       propertyData.originalListingUrl !== undefined
         ? parseListingUrl(propertyData.originalListingUrl)
         : undefined;
-    console.log(originalListing);
+
     const newProperty = {
       ...propertyData,
       name: propertyData.propertyName,
@@ -669,6 +672,22 @@ export default function AdminOfferForm({
               <FormControl>
                 <Input {...field} type="text" />
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="country"
+          render={({ field }) => (
+            <FormItem className="col-span-full">
+              <FormLabel>Country</FormLabel>
+              <FormControl>
+                <Input {...field} type="text" />
+              </FormControl>
+              <FormDescription>
+                Be sure to capitalize the first letter
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}

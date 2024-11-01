@@ -70,6 +70,7 @@ export default function OnboardingFooter({
           }, ${listing.location.city}, ${listing.location.state} ${listing.location.zipcode}, ${
             listing.location.country
           }`,
+          country: listing.location.country,
           checkInInfo: listing.checkInType,
           checkInTime: listing.checkIn,
           checkOutTime: listing.checkOut,
@@ -124,6 +125,7 @@ export default function OnboardingFooter({
         value={(progress * 100) / maxPages}
         className="h-2 w-full rounded-none"
       />
+
       <div className="flex justify-between p-5">
         <Button
           variant={"ghost"}

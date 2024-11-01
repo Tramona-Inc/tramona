@@ -336,7 +336,7 @@ export default async function webhook(
           lng: webhookData.data.address.longitude,
         });
 
-        const taxInfo = calculateTotalTax(country, stateCode, city);
+        const taxInfo = calculateTotalTax(country!, stateCode!, city); //assertion for now to build
 
         if (taxInfo.length === 0) {
           await sendSlackMessage({
@@ -385,6 +385,7 @@ export default async function webhook(
           numBathrooms: webhookData.data.capacity.bathrooms,
           // latitude: webhookData.data.address.latitude,
           // longitude: webhookData.data.address.longitude,
+          country: webhookData.data.address.country_code, //change to country
           otherHouseRules: webhookData.data.house_rules,
           latLngPoint: latLngPoint,
           city: webhookData.data.address.city,
