@@ -87,42 +87,24 @@ const ForHostsPage = () => {
   );
 };
 
-const StepByStepItem = ({
-  icon: Icon,
-  title,
-  description,
-}: {
-  icon: React.ElementType;
-  title: string;
-  description: string;
-}) => {
-  return (
-    <div className="mx-4 flex min-h-[254px] flex-col items-start gap-5">
-      <Icon size={30} className="text-primaryGreen" />
-      <div className="text-[20px] font-bold text-primaryGreen">{title}</div>
-      <div className="text-[14px] font-medium">{description}</div>
-    </div>
-  );
-};
-
 const FAQ = () => {
   return (
     <section className="mx-auto max-w-7xl pb-footer-height">
       <div className="flex flex-col space-y-6 p-4 md:grid md:grid-cols-3 md:gap-6">
-        <div className="space-y-4 text-center md:text-left">
+        <span className="space-y-4 text-center md:text-left">
           <h1 className="text-3xl font-bold md:text-4xl">
             Frequently asked questions
           </h1>
-        </div>
+        </span>
         <div className="col-span-2 border-t">
           <AccordionFaq accordionItems={whyListAccordionItems} />
-          <div className="mt-4 flex justify-center md:justify-start">
+          <span className="mt-4 flex justify-center md:justify-start">
             <Link href="/faq">
               <Button size="lg" className="bg-primaryGreen text-white">
                 View FAQ
               </Button>
             </Link>
-          </div>
+          </span>
         </div>
       </div>
     </section>
@@ -131,7 +113,7 @@ const FAQ = () => {
 
 const Banner = () => {
   return (
-    <div className="relative">
+    <section className="relative">
       <div className="relative h-[50vh] w-full lg:h-screen-minus-header">
         <Image
           src="/assets/images/why-list/host-banner.png"
@@ -141,7 +123,7 @@ const Banner = () => {
           priority // Optional: Use for images that are important for the initial load
         />
       </div>
-      <div className="absolute inset-0 bg-black opacity-50"></div>
+      <span className="absolute inset-0 bg-black opacity-50"></span>
       {/* Dark overlay */}
       <div className="absolute inset-0 flex items-center justify-start pr-8 md:justify-end">
         {/* Container for the text */}
@@ -166,13 +148,13 @@ const Banner = () => {
           </Link>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 
 const OptimizeEarnings = () => {
   return (
-    <div className="flex justify-center">
+    <section className="flex justify-center">
       <div className="mx-12 flex w-full flex-col justify-center gap-8 md:mx-36 lg:mx-24 lg:max-w-[70vw] lg:flex-row">
         <div className="flex-1">
           <h1 className="mb-4 text-2xl font-semibold text-[primaryGreen]">
@@ -188,29 +170,28 @@ const OptimizeEarnings = () => {
             or lowering pricing on Airbnb.
           </p>
         </div>
-
         {/* Image container that maintains aspect ratio */}
         <div className="flex flex-1 items-center justify-center lg:max-w-[40%]">
-          <div className="relative w-full">
+          <span className="relative w-full">
             <Image
               src="/assets/images/why-list/beautiful-villa.png"
-              alt="beautiful village"
+              alt="beautiful villa"
               width={435}
               height={345}
               className="h-auto w-full object-contain"
               priority
             />
-          </div>
+          </span>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 
 const HowItWorks = () => {
   return (
-    <div className="mx-6 flex flex-col justify-center gap-8 md:flex-row">
-      <div className="flex max-w-xl flex-col rounded-xl border border-solid border-gray-300 p-8 text-center">
+    <ul className="mx-6 flex flex-col justify-center gap-8 md:flex-row">
+      <li className="flex max-w-xl flex-col rounded-xl border border-solid border-gray-300 p-8 text-center">
         <h3 className="mb-6 text-xl font-semibold text-[primaryGreen]">
           Name your own price
         </h3>
@@ -220,8 +201,8 @@ const HowItWorks = () => {
           vacancy in that area.{" "}
           <b>Hosts then get to accept, counter offer or decline the request.</b>
         </p>
-      </div>
-      <div className="flex max-w-xl flex-col rounded-xl border border-solid border-gray-300 p-8 text-center">
+      </li>
+      <li className="flex max-w-xl flex-col rounded-xl border border-solid border-gray-300 p-8 text-center">
         <h3 className="mb-6 text-xl font-semibold text-[primaryGreen]">
           Book it now
         </h3>
@@ -233,14 +214,32 @@ const HowItWorks = () => {
             or request to book.
           </b>
         </p>
-      </div>
-    </div>
+      </li>
+    </ul>
+  );
+};
+
+const StepByStepItem = ({
+  icon: Icon,
+  title,
+  description,
+}: {
+  icon: React.ElementType;
+  title: string;
+  description: string;
+}) => {
+  return (
+    <li className="mx-4 flex min-h-[254px] flex-col items-start gap-5">
+      <Icon size={30} className="text-primaryGreen" />
+      <p className="text-[20px] font-bold text-primaryGreen">{title}</p>
+      <p className="text-[14px] font-medium">{description}</p>
+    </li>
   );
 };
 
 const StepByStepList = () => {
   return (
-    <div className="grid grid-cols-1 px-16 sm:grid-cols-2 lg:grid-cols-4">
+    <ul className="grid grid-cols-1 px-16 sm:grid-cols-2 lg:grid-cols-4">
       <StepByStepItem
         icon={PencilIcon}
         title="Sign up with Tramona"
@@ -261,13 +260,13 @@ const StepByStepList = () => {
         title="Enjoy a full calendar"
         description="Travelers who are looking to travel to your area will start to send you offers. You can accept, counteroffer, or reject from here."
       />
-    </div>
+    </ul>
   );
 };
 
 const Questions = () => {
   return (
-    <div className="mx-12 flex flex-wrap justify-center gap-24">
+    <ul className="mx-12 flex flex-wrap justify-center gap-24">
       <div className="flex flex-col items-center">
         <p className="mb-8 text-center text-xl font-medium">
           Schedule a call with our onboarding team
@@ -278,7 +277,7 @@ const Questions = () => {
           </Button>
         </Link>
       </div>
-      <div className="flex flex-col items-center">
+      <li className="flex flex-col items-center">
         <p className="mb-8 text-xl font-medium">
           Read some common questions and answers
         </p>
@@ -287,14 +286,14 @@ const Questions = () => {
             FAQ
           </Button>
         </Link>
-      </div>
-    </div>
+      </li>
+    </ul>
   );
 };
 
 const KeyFeatures = () => {
   return (
-    <div className="mx-12 flex flex-row flex-wrap justify-center gap-8">
+    <section className="mx-12 flex flex-row flex-wrap justify-center gap-8">
       <Image
         src="/assets/images/why-list/key-features.png"
         className="my-16 h-auto w-full rounded-3xl object-cover md:my-0 md:h-[600px] md:w-[440px]"
@@ -307,7 +306,7 @@ const KeyFeatures = () => {
           Key Features for Hosts
         </h2>
         {/* Feature List */}
-        <div className="mt-6 flex flex-col gap-4">
+        <ul className="mt-6 flex flex-col gap-4">
           <KeyFeatureItem
             title="Easy sync with Airbnb"
             description="Import all your properties and preferences in less than 1 minute
@@ -335,9 +334,9 @@ const KeyFeatures = () => {
             title="Co-hosting"
             description="Invite a co-host and have them do the hard stuff"
           />
-        </div>
+        </ul>
       </div>
-    </div>
+    </section>
   );
 };
 
@@ -349,10 +348,10 @@ const KeyFeatureItem = ({
   description: string;
 }) => {
   return (
-    <div className="flex flex-col">
+    <li className="flex flex-col">
       <h3 className="text-xl font-semibold">{title}</h3>
       <p className="text-base font-normal">{description}</p>
-    </div>
+    </li>
   );
 };
 
@@ -364,16 +363,16 @@ const SecurityPrivacyItem = ({
   title: string;
 }) => {
   return (
-    <div className="flex flex-row items-center gap-2">
+    <li className="flex flex-row items-center gap-2">
       <Icon className="text-primaryGreen" />
       <p className="text-base">{title}</p>
-    </div>
+    </li>
   );
 };
 
 const SecurityPrivacy = () => {
   return (
-    <div className="mx-12 flex flex-row flex-wrap-reverse items-center justify-center gap-12 md:gap-4">
+    <section className="mx-12 flex flex-row flex-wrap-reverse items-center justify-center gap-12 md:gap-4">
       {/* Text Container */}
       <div className="flex max-w-screen-sm flex-col text-left">
         <h2 className="text-3xl text-gray-600">List With Confidence</h2>
@@ -386,7 +385,7 @@ const SecurityPrivacy = () => {
           reliable platform that gives you the confidence to accept bookings and
           maximize your revenue.
         </p>
-        <div className="mt-5 flex flex-col gap-4">
+        <ul className="mt-5 flex flex-col gap-4">
           <SecurityPrivacyItem
             title="Up to $50,0000 of protection per booking"
             icon={ShieldIcon}
@@ -408,9 +407,9 @@ const SecurityPrivacy = () => {
             title="Manual and automatic booking options"
             icon={ToggleLeftIcon}
           />
-        </div>
+        </ul>
       </div>
-      <div className="mt-16 flex items-center justify-center">
+      <span className="mt-16 flex items-center justify-center">
         <Image
           src="/assets/images/why-list/secure.png"
           width={400}
@@ -418,8 +417,8 @@ const SecurityPrivacy = () => {
           alt="secure"
           className="object-contain"
         />
-      </div>
-    </div>
+      </span>
+    </section>
   );
 };
 
@@ -457,24 +456,24 @@ const ListInAMinute = () => {
       <h1 className="text-center text-3xl font-bold md:text-4xl lg:text-5xl">
         List in less than 1 minute with our effortless sign up flow
       </h1>
-      <div className="flex flex-col gap-6 lg:flex-row">
+      <ul className="flex flex-col gap-6 lg:flex-row">
         {contents.map((content) => (
-          <div key={content.id} className="flex basis-1/3 items-center gap-2">
-            <div className="relative h-32 w-5/12 overflow-clip rounded-xl lg:h-full">
+          <li key={content.id} className="flex basis-1/3 items-center gap-2">
+            <span className="relative h-32 w-5/12 overflow-clip rounded-xl lg:h-full">
               <Image
                 src={content.image}
                 objectFit="cover"
                 layout="fill"
                 alt={content.title}
               />
-            </div>
-            <div className="flex-1 space-y-2">
+            </span>
+            <span className="flex-1 space-y-2">
               <h2 className="font-bold">{content.title}</h2>
               <p className="text-sm">{content.info}</p>
-            </div>
-          </div>
+            </span>
+          </li>
         ))}
-      </div>
+      </ul>
     </section>
   );
 };
