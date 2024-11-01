@@ -4,11 +4,12 @@ import { type HostDashboardRequest } from "./RequestCard";
 import { getAge } from "@/utils/utils";
 import UserAvatar from "../_common/UserAvatar";
 import { BadgeCheck, BadgeX } from "lucide-react";
+import { HostDashboardRequestToBook } from "../requests-to-book/RequestToBookCard";
 
 export function TravelerVerificationsDialog({
   request,
 }: {
-  request: HostDashboardRequest;
+  request: HostDashboardRequest | HostDashboardRequestToBook;
 }) {
   const { data: verificationList } = api.users.getUserVerifications.useQuery({
     madeByGroupId: request.madeByGroupId,

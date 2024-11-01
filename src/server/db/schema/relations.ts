@@ -458,6 +458,7 @@ export const requestsToBookRelations = relations(requestsToBook, ({ one }) => ({
     fields: [requestsToBook.propertyId],
     references: [properties.id],
   }),
+  
 }));
 
 // < -------- Claims ------- >

@@ -10,13 +10,18 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { SkeletonText } from "@/components/ui/skeleton";
 import { api } from "@/utils/api";
 import { range } from "lodash";
-import { HandshakeIcon, MapPinIcon } from "lucide-react";
+import { HandshakeIcon, MapPinIcon, Home } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { type SeparatedData } from "@/server/server-utils";
 import { separateByPriceRestriction, plural } from "@/utils/utils";
 import { useRouter } from "next/router";
-import { HostRequestsPageData } from "@/server/api/routers/propertiesRouter";
+import {
+  HostRequestsPageData,
+  HostRequestsToBookPageData,
+} from "@/server/api/routers/propertiesRouter";
+import { Separator } from "@/components/ui/separator";
+import { Property, RequestsToBook } from "@/server/db/schema";
 
 export default function HostRequestsLayout({
   children,
@@ -24,11 +29,15 @@ export default function HostRequestsLayout({
   const [separatedData, setSeparatedData] = useState<SeparatedData | null>(
     null,
   );
+  const [propertiesWithRequestsToBook, setPropertiesWithRequestsToBook] =
+    useState<HostRequestsToBookPageData | null>(null);
   const [selectedOption, setSelectedOption] = useState<
     "normal" | "outsidePriceRestriction"
   >("normal");
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
+  const [selectedProperty, setSelectedProperty] = useState<number | null>(null);
   const [isDataLoading, setIsDataLoading] = useState(true); // New state to track data loading
+  const [isDataLoading2, setIsDataLoading2] = useState(true); // for requestsToBook -- rename
   const router = useRouter();
 
   const { data: fetchedProperties, isLoading } =
@@ -41,6 +50,20 @@ export default function HostRequestsLayout({
       },
     });
 
+  const {
+    data: fetchedPropertiesWithRequestsToBook,
+    isLoading: propertiesLoading,
+  } = api.properties.getHostPropertiesWithRequestsToBook.useQuery(undefined, {
+    onSuccess: (
+      fetchedPropertiesWithRequestsToBook: HostRequestsToBookPageData | null,
+    ) => {
+      setPropertiesWithRequestsToBook(fetchedPropertiesWithRequestsToBook);
+      setIsDataLoading2(false);
+    },
+  });
+
+  console.log('fetchedPropertiesWithRequestsToBook', fetchedPropertiesWithRequestsToBook)
+
   useEffect(() => {
     if (isLoading) {
       setIsDataLoading(true); // If API starts loading again, mark the data loading as true
@@ -49,10 +72,12 @@ export default function HostRequestsLayout({
 
   const displayedData = separatedData ? separatedData[selectedOption] : [];
 
+  const displayedPropertiesData = propertiesWithRequestsToBook ?? [];
+
   return (
     <div className="flex">
       <div className="sticky top-20 h-screen-minus-header-n-footer w-full overflow-auto border-r px-4 py-8 xl:w-96">
-        <ScrollArea>
+        <ScrollArea className="h-1/2">
           <div className="pb-4">
             <h1 className="text-3xl font-bold">Requests</h1>
             <div className="mt-4 flex flex-row gap-2">
@@ -92,6 +117,48 @@ export default function HostRequestsLayout({
                   selectedOption={selectedOption}
                   selectedCity={selectedCity}
                   setSelectedCity={setSelectedCity}
+                />
+              ))
+            ) : (
+              // Show the empty state only when not loading and no data is available
+              <EmptyState
+                icon={HandshakeIcon}
+                className="h-[calc(100vh-280px)]"
+              >
+                <EmptyStateTitle>No requests yet</EmptyStateTitle>
+                <EmptyStateDescription>
+                  Properties with requests will show up here
+                </EmptyStateDescription>
+                <EmptyStateFooter>
+                  <Button asChild variant="outline">
+                    <Link href="/host/properties">View all properties</Link>
+                  </Button>
+                </EmptyStateFooter>
+              </EmptyState>
+            )}
+          </div>
+        </ScrollArea>
+
+        <Separator />
+
+        <ScrollArea className="mt-12 h-1/2">
+          <div className="pb-4">
+            <h1 className="text-3xl font-bold">Request To Book</h1>
+          </div>
+          <div className="pt-4">
+            {isDataLoading2 ? (
+              // Show skeletons while loading
+              range(10).map((i) => <SidebarPropertySkeleton key={i} />)
+            ) : displayedPropertiesData.length > 0 ? (
+              displayedPropertiesData.map((propertyData) => (
+                <SidebarProperty
+                  key={propertyData.property.id}
+                  propertyData={{
+                    property: propertyData.property, // Ensure property is included
+                    requestToBook: propertyData.requestToBook,
+                  }}
+                  selectedProperty={selectedProperty}
+                  setSelectedProperty={setSelectedProperty}
                 />
               ))
             ) : (
@@ -176,5 +243,40 @@ function SidebarPropertySkeleton() {
         <Badge size="sm" variant="skeleton" className="w-20" />
       </div>
     </div>
+  );
+}
+
+function SidebarProperty({
+  propertyData,
+  selectedProperty,
+  setSelectedProperty,
+}: {
+  propertyData: {
+    property: Property;
+    requestToBook: RequestsToBook[]
+  };
+  selectedProperty: number | null;
+  setSelectedProperty: (property: number) => void;
+}) {
+  const href = `/host/requests-to-book/${propertyData.property.id}`;
+
+  const isSelected = selectedProperty === propertyData.property.id;
+  return (
+    <Link href={href} className="mb-4 block">
+      <div
+        className={`flex items-center gap-2 rounded-lg p-4 hover:bg-muted ${
+          isSelected ? "bg-muted" : ""
+        }`}
+        onClick={() => setSelectedProperty(propertyData.property.id)}
+      >
+        <Home className="h-8 w-8 text-gray-600" />
+        <div className="flex-1">
+          <h3 className="font-semibold">{propertyData.property.name}</h3>
+          <Badge size="md">
+            {plural(propertyData.requestToBook.length, "request")}
+          </Badge>
+        </div>
+      </div>
+    </Link>
   );
 }

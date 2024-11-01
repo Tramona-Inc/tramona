@@ -24,7 +24,7 @@ export default function ActiveRequestsTab() {
     <div className="space-y-4 pb-32">
       <NewCityRequestBtn />
       {requestsToBook.activeRequestsToBook.map((requestToBook) => (
-        <RequestToBookCard key={requestToBook.id} type="guest" requestToBook={requestToBook} property={requestToBook.property}>
+        <RequestToBookCard key={requestToBook.id} type="guest" requestToBook={requestToBook}>
           {/* <RequestCardAction request={requestToBook} /> */}
         </RequestToBookCard>
       ))}

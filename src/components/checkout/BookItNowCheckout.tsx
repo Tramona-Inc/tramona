@@ -16,7 +16,7 @@ import { OfferPriceDetails } from "../_common/OfferPriceDetails";
 import { getCancellationPolicyDescription } from "@/config/getCancellationPolicyDescription";
 import React from "react";
 import { RequestToBookPriceDetails } from "../_common/RequestToBookPriceDetails";
-export default function RequestToBookCheckout({
+export default function BookItNowCheckout({
   requestToBook,
   property,
 }: {
@@ -206,7 +206,7 @@ export default function RequestToBookCheckout({
       <div className="mb-4 flex items-center gap-2">
         <Link href="#" onClick={handleBackClick} className="contents">
           <ChevronLeft />
-          <p className="font-semibold">Request to book</p>
+          <p className="font-semibold">Book it now</p>
         </Link>
       </div>
       <div className="grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-20">

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import UserAvatar from "@/components/_common/UserAvatar";
 import { Button, ButtonProps } from "@/components/ui/button";
 import ReviewCard from "@/components/_common/ReviewCard";
@@ -14,6 +14,7 @@ import {
   formatDateMonthDayYear,
   formatDateRange,
   formatDateWeekMonthDay,
+  getApplicableBookItNowDiscount,
   getOfferDiscountPercentage,
   plural,
 } from "@/utils/utils";
@@ -791,17 +792,33 @@ function ReserveBtn({
   const { data: verificationStatus } =
     api.users.myVerificationStatus.useQuery();
 
-  const airbnbCheckoutUrl = Airbnb.createListing(
-    property.originalListingId!,
-  ).getCheckoutUrl({
-    checkIn: requestToBook.checkIn,
-    checkOut: requestToBook.checkOut,
-    numGuests: requestToBook.numGuests,
-  });
+  // const airbnbCheckoutUrl = Airbnb.createListing(
+  //   property.originalListingId!,
+  // ).getCheckoutUrl({
+  //   checkIn: requestToBook.checkIn,
+  //   checkOut: requestToBook.checkOut,
+  //   numGuests: requestToBook.numGuests,
+  // });
 
   const checkIn = formatDateMonthDayYear(requestToBook.checkIn);
   const checkOut = formatDateMonthDayYear(requestToBook.checkOut);
 
+  const baseCheckoutUrl = useMemo(() => {
+    const applicableDiscount = getApplicableBookItNowDiscount({
+      bookItNowDiscountTiers: property.bookItNowDiscountTiers,
+      checkIn: requestToBook.checkIn,
+    });
+  
+    if (property.bookItNowEnabled && applicableDiscount !== null) {
+      return "book-it-now-checkout";
+    }
+    
+    return "request-to-book-checkout";
+  }, [property.bookItNowEnabled, property.bookItNowDiscountTiers, requestToBook.checkIn]);
+
+  // console.log(new Date())
+  // console.log('bookItNowDiscountTiers', property.bookItNowDiscountTiers)
+  // console.log('baseCheckoutUrl', baseCheckoutUrl)
   return (
     <Button
       variant={
@@ -813,7 +830,7 @@ function ReserveBtn({
       size={btnSize}
       className="w-full"
     >
-      {property.bookOnAirbnb ? (
+      {/* {property.bookOnAirbnb ? (
         <Link
           href={airbnbCheckoutUrl}
           target="_blank"
@@ -822,10 +839,11 @@ function ReserveBtn({
           Book on Airbnb
           <ExternalLinkIcon className="size-5" />
         </Link>
-      ) : !property.stripeVerRequired ||
+      ) :  */}
+      {!property.stripeVerRequired ||
         verificationStatus?.isIdentityVerified === "true" ? (
         // <Link href={`/offer-checkout/${offer.id}`}>
-        <Link href={`/request-to-book-checkout/${property.id}checkIn=${checkIn}&checkOut=${checkOut}&numGuests=${requestToBook.numGuests}`}>
+        <Link href={`/${baseCheckoutUrl}/${property.id}?checkIn=${checkIn}&checkOut=${checkOut}&numGuests=${requestToBook.numGuests}`}>
           Reserve
         </Link>
       ) : verificationStatus?.isIdentityVerified === "pending" ? (

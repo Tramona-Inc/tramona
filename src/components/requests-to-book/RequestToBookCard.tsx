@@ -5,7 +5,6 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { type RouterOutputs } from "@/utils/api";
-import { getRequestStatus } from "@/utils/formatters";
 import {
   formatCurrency,
   formatDateRange,
@@ -15,75 +14,78 @@ import {
 import {
   CalendarIcon,
   EllipsisIcon,
-  LinkIcon,
+  Home,
   MapPinIcon,
   TrashIcon,
   Users2Icon,
 } from "lucide-react";
 import { Card, CardFooter } from "../ui/card";
-import RequestGroupAvatars from "../requests/RequestGroupAvatars";
-import RequestCardBadge from "../requests/RequestCardBadge";
+import RequestToBookCardBadge from "./RequestToBookCardBadge";
 import { Button } from "../ui/button";
 import { useState } from "react";
 import WithdrawRequestToBookDialog from "./WithdrawRequestToBookDialog";
 
-import { Badge } from "../ui/badge";
-import UserAvatar from "../_common/UserAvatar";
-import { TravelerVerificationsDialog } from "../requests/TravelerVerificationsDialog";
-import { formatDistanceToNowStrict } from "date-fns";
-import { LinkInputPropertyCard } from "../_common/LinkInputPropertyCard";
-import SingleLocationMap from "../_common/GoogleMaps/SingleLocationMap";
 import { RequestToBookCardPreviews } from "./RequestToBookCardPreviews";
-import { PropertyPageData } from "../offers/PropertyPage";
+import { Property } from "@/server/db/schema";
+import UserAvatar from "../_common/UserAvatar";
+import { formatDistanceToNowStrict } from "date-fns";
+import { TravelerVerificationsDialog } from "../requests/TravelerVerificationsDialog";
 
-export type GuestDashboardRequest = RouterOutputs["requests"]["getMyRequests"][
-  | "activeRequests"
-  | "inactiveRequests"][number];
+// export type GuestDashboardRequest = RouterOutputs["requests"]["getMyRequests"][
+//   | "activeRequests"
+//   | "inactiveRequests"][number];
 
-export type AdminDashboardRequst = RouterOutputs["requests"]["getAll"][
-  | "incomingRequests"
-  | "pastRequests"][number];
+// export type AdminDashboardRequst = RouterOutputs["requests"]["getAll"][
+//   | "incomingRequests"
+//   | "pastRequests"][number];
 
-// export type HostDashboardRequest =
-//   RouterOutputs["properties"]["getHostPropertiesWithRequests"][number]["requests"][number]["request"];
+export type HostDashboardRequestToBook =
+  RouterOutputs["requestsToBook"]["getHostRequestsToBookFromId"][
+    | "activeRequestsToBook"
+    | "inactiveRequestsToBook"][number];
 
-export type GuestDashboardRequestToBook = RouterOutputs["requestsToBook"]["getMyRequestsToBook"][
-  | "activeRequestsToBook"
-  | "inactiveRequestsToBook"][number];
-
-  export type ExtendedPropertyPageData = PropertyPageData & {
-    latLngPoint: {
-      y: number; // Latitude
-      x: number; // Longitude
-    };
-  };
+export type GuestDashboardRequestToBook =
+  RouterOutputs["requestsToBook"]["getMyRequestsToBook"][
+    | "activeRequestsToBook"
+    | "inactiveRequestsToBook"][number];
 
 export default function RequestToBookCard({
   requestToBook,
-  property,
+  // property,
   type,
   children,
 }: (
-  | { type: "guest"; requestToBook: GuestDashboardRequestToBook; property: ExtendedPropertyPageData }
+  | {
+      type: "guest";
+      requestToBook: GuestDashboardRequestToBook;
+    }
   // change these
-  | { type: "admin"; requestToBook: GuestDashboardRequestToBook; property: ExtendedPropertyPageData }
-  | { type: "host"; requestToBook: GuestDashboardRequestToBook; property: ExtendedPropertyPageData }
-  // | { type: "guest"; request: GuestDashboardRequest }
-  // | { type: "admin"; request: AdminDashboardRequst }
+  | {
+      type: "admin";
+      requestToBook: GuestDashboardRequestToBook;
+    }
+  | {
+      type: "host";
+      requestToBook: HostDashboardRequestToBook;
+      // property: Property;
+    } // | { type: "guest"; request: GuestDashboardRequest }
   // | { type: "host"; request: HostDashboardRequest }
-) & {
+) & // | { type: "admin"; request: AdminDashboardRequst }
+{
   children?: React.ReactNode;
 }) {
   const pricePerNight =
-    // request.maxTotalPrice 
-   34567 / getNumNights(requestToBook.checkIn, requestToBook.checkOut);
+    // request.maxTotalPrice
+    34567 / getNumNights(requestToBook.checkIn, requestToBook.checkOut);
   const fmtdPrice = formatCurrency(pricePerNight);
-  const fmtdDateRange = formatDateRange(requestToBook.checkIn, requestToBook.checkOut);
+  const fmtdDateRange = formatDateRange(
+    requestToBook.checkIn,
+    requestToBook.checkOut,
+  );
   const fmtdNumGuests = plural(requestToBook.numGuests, "guest");
 
   const showAvatars =
     (requestToBook.numGuests > 1 && type !== "host") || type === "admin";
-
 
   const [open, setOpen] = useState(false);
 
@@ -98,29 +100,31 @@ export default function RequestToBookCard({
       <div className="flex">
         <div className="flex-1 space-y-4 overflow-hidden p-4 pt-2">
           <div className="flex items-center gap-2">
-            {/* {type !== "host" && <RequestCardBadge request={request} />} */}
+            {type !== "host" && (
+              <RequestToBookCardBadge requestToBook={requestToBook} />
+            )}
             {/* {type === "guest" && request.linkInputProperty && (
               <Badge variant="pink">
                 <LinkIcon className="size-4" />
                 Airbnb Link
               </Badge>
             )} */}
-            {/* {type === "host" && (
+            {type === "host" && (
               <>
                 <UserAvatar
                   size="sm"
-                  name={request.traveler.name}
-                  image={request.traveler.image}
+                  name={requestToBook.madeByGroup.owner.name}
+                  image={requestToBook.madeByGroup.owner.image}
                 />
-                <TravelerVerificationsDialog request={request} />
+                <TravelerVerificationsDialog request={requestToBook} />
                 <p>&middot;</p>
                 <p>
-                  {formatDistanceToNowStrict(request.createdAt, {
+                  {formatDistanceToNowStrict(requestToBook.createdAt, {
                     addSuffix: true,
                   })}
                 </p>
               </>
-            )} */}
+            )}
             <div className="flex-1" />
             {/* figure out madeByGroupId stuff and then refactor */}
             {/* {showAvatars && (
@@ -147,11 +151,19 @@ export default function RequestToBookCard({
           </div>
           <div className="space-y-1">
             {type !== "host" && (
-              <div className="flex items-start gap-1">
-                <MapPinIcon className="shrink-0 text-primary" />
-                <h2 className="text-base font-bold text-primary md:text-lg">
-                  {property.city}
-                </h2>
+              <div>
+                <div className="flex items-start gap-1">
+                  <MapPinIcon className="shrink-0 text-primary" />
+                  <h2 className="text-base font-bold text-primary md:text-lg">
+                    {requestToBook.property.city}
+                  </h2>
+                </div>
+                <div className="flex items-start gap-1">
+                  <Home className="shrink-0 text-primary" />
+                  <h2 className="text-base font-bold text-primary md:text-lg">
+                    {requestToBook.property.name}
+                  </h2>
+                </div>
               </div>
             )}
             <div>
@@ -181,7 +193,7 @@ export default function RequestToBookCard({
               {property.numBathrooms && property.numBathrooms > 1 && (
                 <Badge>{property.numBathrooms}+ bathrooms</Badge>
               )} */}
-              {/* {<Badge>{property.propertyType}</Badge>}
+            {/* {<Badge>{property.propertyType}</Badge>}
               {property.amenities.map((amenity) => (
                 <Badge key={amenity}>{amenity}</Badge>
               ))} */}

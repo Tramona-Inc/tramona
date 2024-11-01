@@ -12,6 +12,7 @@ import {
   propertySelectSchema,
   propertyUpdateSchema,
   type Request,
+  type RequestsToBook,
   type User,
   users,
 } from "@/server/db/schema";
@@ -40,6 +41,7 @@ import {
   addProperty,
   createLatLngGISPoint,
   getRequestsForProperties,
+  getRequestsToBookForProperties,
 } from "@/server/server-utils";
 import { getCoordinates } from "@/server/google-maps";
 
@@ -55,6 +57,16 @@ export type HostRequestsPageData = {
     properties: (Property & { taxAvailable: boolean })[];
   }[];
 };
+
+export type HostRequestsToBookPageData = {
+  requestToBook: (RequestsToBook & {
+    traveler: Pick<
+      User,
+      "firstName" | "lastName" | "name" | "image" | "location" | "about"
+    >;
+  })[];
+  property: Property & { taxAvailable: boolean };
+}[];
 
 export const propertiesRouter = createTRPCRouter({
   create: protectedProcedure
@@ -612,6 +624,41 @@ export const propertiesRouter = createTRPCRouter({
       return groupedByCity;
     },
   ),
+
+  getHostPropertiesWithRequestsToBook: roleRestrictedProcedure(["host"]).query(
+    async ({ ctx }) => {
+      const hostProperties = await db.query.properties.findMany({
+        where: and(
+          eq(properties.hostId, ctx.user.id),
+          eq(properties.propertyStatus, "Listed"),
+        ),
+      });
+
+      const hostRequestsToBook = await getRequestsToBookForProperties(
+        hostProperties,
+        {
+          user: ctx.user,
+        },
+      );
+
+      console.log('hostreqs', hostRequestsToBook)
+
+      const propertiesWithRequestsToBook = hostProperties
+        .filter((property) =>
+          hostRequestsToBook.some(
+            (requestToBook) => requestToBook.requestToBook.propertyId === property.id,
+          ),
+        )
+        .map((property) => ({
+          property,
+          requestToBook: hostRequestsToBook.filter(
+            (requestToBook) => requestToBook.requestToBook.propertyId === property.id,
+          ),
+        }));
+
+      return propertiesWithRequestsToBook;
+    },
+  ),
   // hostInsertOnboardingProperty: roleRestrictedProcedure(["host"])
   //   .input(hostPropertyFormSchema)
   //   .mutation(async ({ ctx, input }) => {
@@ -672,11 +719,13 @@ export const propertiesRouter = createTRPCRouter({
         })
         .where(eq(properties.id, input.id));
     }),
-  updateBookItNowEnabled: protectedProcedure
+  updateBookItNow: protectedProcedure
     .input(
       z.object({
         id: z.number(),
         bookItNowEnabled: z.boolean(),
+        bookItNowDiscountTiers: z.array(discountTierSchema),
+        requestToBookDiscountPercentage: z.number(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -684,6 +733,9 @@ export const propertiesRouter = createTRPCRouter({
         .update(properties)
         .set({
           bookItNowEnabled: input.bookItNowEnabled,
+          bookItNowDiscountTiers: input.bookItNowDiscountTiers,
+          requestToBookDiscountPercentage:
+            input.requestToBookDiscountPercentage,
         })
         .where(eq(properties.id, input.id));
     }),

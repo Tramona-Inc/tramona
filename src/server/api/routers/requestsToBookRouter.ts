@@ -63,26 +63,26 @@ export const requestsToBookRouter = createTRPCRouter({
             bookOnAirbnb: true,
             hostName: true,
             hostProfilePic: true,
-            },
-          with: {
-            host: {
-              columns: {
-                image: true,
-                firstName: true,
-                lastName: true,
-                email: true,
-                id: true,
-                about: true,
-                location: true,
-              },
-              with: {
-                hostProfile: {
-                  columns: { curTeamId: true },
-                },
-              },
-            },
-            reviews: true,
           },
+          // with: {
+          //   host: {
+          //     columns: {
+          //       image: true,
+          //       firstName: true,
+          //       lastName: true,
+          //       email: true,
+          //       id: true,
+          //       about: true,
+          //       location: true,
+          //     },
+          //     with: {
+          //       hostProfile: {
+          //         columns: { curTeamId: true },
+          //       },
+          //     },
+          //   },
+          //   reviews: true,
+          // },
         },
       },
     });
@@ -124,6 +124,89 @@ export const requestsToBookRouter = createTRPCRouter({
 
       await ctx.db
         .delete(requestsToBook)
+        .where(eq(requestsToBook.id, input.id));
+    }),
+
+  getHostRequestsToBookFromId: protectedProcedure
+    .input(z.object({ propertyId: z.number() }))
+    .query(async ({ ctx, input }) => {
+      const property = await ctx.db.query.properties.findFirst({
+        where: eq(properties.id, input.propertyId),
+        columns: { hostId: true },
+      });
+
+      if (!property) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Property not found",
+        });
+      }
+
+      // Check if user is authorized
+      if (ctx.user.role !== "admin" && property.hostId !== ctx.user.id) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "You are not authorized to view these requests",
+        });
+      }
+
+      const propertyRequestsToBook = await ctx.db.query.requestsToBook.findMany(
+        {
+          where: eq(requestsToBook.propertyId, input.propertyId),
+          with: {
+            property: {
+              columns: {
+                name: true,
+                imageUrls: true,
+                numBedrooms: true,
+                numBathrooms: true,
+                bookOnAirbnb: true,
+                hostName: true,
+                hostProfilePic: true,
+              },
+            },
+            madeByGroup: {
+              columns: {
+                ownerId: true,
+              },
+              with: {
+                owner: {
+                  columns: {
+                    firstName: true,
+                    lastName: true,
+                    name: true,
+                    image: true,
+                    location: true,
+                    about: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      );
+
+      const transformedRequestsToBook = propertyRequestsToBook.map(request => ({
+        ...request,
+        traveler: request.madeByGroup.owner,
+      }));
+
+      return {
+        activeRequestsToBook: transformedRequestsToBook.filter(
+          (requestToBook) => requestToBook.resolvedAt === null,
+        ),
+        inactiveRequestsToBook: transformedRequestsToBook.filter(
+          (requestToBook) => requestToBook.resolvedAt !== null,
+        ),
+      };
+    }),
+
+  rejectRequestToBook: protectedProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db
+        .update(requestsToBook)
+        .set({ resolvedAt: new Date() })
         .where(eq(requestsToBook.id, input.id));
     }),
 });

@@ -3,6 +3,7 @@ import { SeparatedData } from "@/server/server-utils";
 import { useWindowSize } from "@uidotdev/usehooks";
 import { clsx, type ClassValue } from "clsx";
 import {
+  differenceInDays,
   differenceInYears,
   formatDate,
   type FormatOptions,
@@ -835,3 +836,30 @@ export function removeTax(total: number, taxRate: number): number {
   const amountWithoutTax = Math.round(total / (1 + taxRate));
   return amountWithoutTax;
 }
+
+export const getApplicableBookItNowDiscount = ({
+  bookItNowDiscountTiers,
+  checkIn,
+}: {
+  bookItNowDiscountTiers:
+    | { days: number; percentOff: number }[]
+    | null
+    | undefined;
+  checkIn: Date;
+}): number | null => {
+  if (!bookItNowDiscountTiers || bookItNowDiscountTiers.length === 0) {
+    return null;
+  }
+
+  const daysUntilCheckIn = differenceInDays(checkIn, new Date());
+
+  const sortedTiers = [...bookItNowDiscountTiers].sort(
+    (a, b) => b.days - a.days,
+  );
+
+  const applicableDiscount = sortedTiers.find(
+    (tier) => daysUntilCheckIn >= tier.days,
+  );
+
+  return applicableDiscount?.percentOff ?? null;
+};
