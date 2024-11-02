@@ -178,7 +178,7 @@ export default function HostPropertiesDetails({
   }, [propertyId]);
 
   return (
-    <div className="my-6">
+    <div className="my-6 h-[30rem] overflow-y-auto">
       <div className="flex items-center justify-between">
         {editing && (
           <div className="grid grid-cols-3 gap-2">
@@ -282,6 +282,10 @@ export default function HostPropertiesDetails({
             property={property}
           />
         </div>
+      </div>
+      <div>
+        <h2 className="text-lg font-bold">Title</h2>
+        <p className="text-muted-foreground">{property.name}</p>
       </div>
       <div className="divide-y">
         <section className="space-y-2 py-4">
