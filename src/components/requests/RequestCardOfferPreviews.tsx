@@ -47,16 +47,8 @@ export function RequestCardOfferPreviews({
                   fill
                   className="object-cover"
                 />
-                <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-b from-transparent to-black/65 to-[90%] p-2">
-                  <p className="line-clamp-1 text-sm font-semibold text-white">
-                    {property.name}
-                  </p>
-                  <p className="line-clamp-1 text-xs font-medium text-white">
-                    {property.numBedrooms} bed · {property.numBathrooms} bath
-                  </p>
-                </div>
-                <div className="absolute left-1 top-1 flex gap-1">
-                  <Badge variant="white">
+                <div className="absolute left-2 top-2 flex gap-1">
+                  <Badge variant="whiteGreen">
                     {discountPercentage}% off{" "}
                     {offer.property.bookOnAirbnb ? "" : "Airbnb price"}
                   </Badge>
@@ -64,12 +56,31 @@ export function RequestCardOfferPreviews({
                     <Badge variant="white">Airbnb</Badge>
                   )} */}
                 </div>
-                <div className="absolute right-1 top-1 flex -translate-y-2 items-center gap-1 rounded-full bg-black/40 px-3 py-1.5 text-xs font-medium text-white/80 opacity-0 backdrop-blur transition-all duration-200 group-hover:translate-y-0 group-hover:opacity-100">
-                  View offer <ExternalLinkIcon className="h-3.5 w-3.5" />
-                </div>
               </div>
-              <div className="text-xs font-semibold">
-                <div className="flex items-center gap-2 overflow-hidden p-1">
+              <div className="gap-y-1 px-2 pb-3 pt-1">
+                <div className="flex flex-row">
+                  <p className="truncate font-bold text-foreground">
+                    {property.name}
+                  </p>
+                  {/* add stars rating in future */}
+                </div>
+                <p className="line-clamp-1 text-xs font-medium text-muted-foreground">
+                  {property.numBedrooms} bed · {property.numBathrooms} bath
+                </p>
+                <div className="my-2 flex flex-row items-center">
+                  {offer.datePriceFromAirbnb && (
+                    <p className="mr-1 line-clamp-1 text-xs text-muted-foreground line-through">
+                      {formatCurrency(offer.datePriceFromAirbnb).split(".")[0]}
+                    </p>
+                  )}
+                  <p className="line-clamp-1 text-sm text-muted-foreground">
+                    <span className="text-sm font-bold text-foreground">
+                      {formatCurrency(offerNightlyPrice).split(".")[0]}
+                    </span>{" "}
+                    / night
+                  </p>
+                </div>
+                <div className="flex flex-row items-center gap-x-2">
                   <div className="shrink-0">
                     <UserAvatar
                       name={host?.name ?? property.hostName ?? "Tramona"}
@@ -78,30 +89,13 @@ export function RequestCardOfferPreviews({
                         property.hostProfilePic ??
                         "/assets/images/tramona.svg"
                       }
+                      size="xs"
                     />
                   </div>
-                  <div>
-                    <p className="line-clamp-1 text-xs text-muted-foreground">
-                      {host?.name ?? property.hostName ?? "Tramona"} offered ·{" "}
-                      {formatDistanceToNowStrict(offer.createdAt, {
-                        addSuffix: true,
-                      })}
-                    </p>
-                    <div className="flex items-end justify-between gap-1">
-                      <p className="line-clamp-1 font-bold">
-                        <span className="text-lg/none text-foreground">
-                          {formatCurrency(offerNightlyPrice).split(".")[0]}
-                        </span>
-                        /night
-                      </p>
-                    </div>
-                  </div>
+                  <p className="text-sm text-foreground">
+                    Listing by {host?.name ?? property.hostName ?? "Tramona"}
+                  </p>
                 </div>
-                {offer.property.bookOnAirbnb ? (
-                  <div>Booking through Airbnb</div>
-                ) : (
-                  <div>Booking through Tramona</div>
-                )}
               </div>
             </Link>
           );
