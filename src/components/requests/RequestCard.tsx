@@ -13,7 +13,7 @@ import {
   plural,
 } from "@/utils/utils";
 import {
-  CalendarIcon,
+  ClockIcon,
   EllipsisIcon,
   LinkIcon,
   MapPinIcon,
@@ -135,12 +135,12 @@ export default function RequestCard({
             )}
             <div>
               <p>
-                Requested <span className="font-semibold">{fmtdPrice}</span>
+                Requested <span className="font-medium">{fmtdPrice}</span>
                 /night
               </p>
-              <p className="flex items-center gap-2">
+              <p className="mt-3 flex items-center gap-2">
                 <span className="flex items-center gap-1">
-                  <CalendarIcon className="size-4" />
+                  <ClockIcon className="size-4" />
                   {fmtdDateRange}
                 </span>
                 &middot;
@@ -175,20 +175,22 @@ export default function RequestCard({
               <LinkInputPropertyCard property={request.linkInputProperty} />
             )}
           </div>
-          {type === "guest" && getRequestStatus(request) === "accepted" && (
-            <RequestCardOfferPreviews request={request} />
-          )}
+          <div className="flex flex-row gap-x-4">
+            {type === "guest" && getRequestStatus(request) === "accepted" && (
+              <RequestCardOfferPreviews request={request} />
+            )}
+            {type !== "host" && (
+              <div className="hidden w-64 shrink-0 overflow-hidden rounded-lg bg-zinc-100 lg:block">
+                <SingleLocationMap
+                  lat={request.latLngPoint.y}
+                  lng={request.latLngPoint.x}
+                  icon={true}
+                />
+              </div>
+            )}
+          </div>
           <CardFooter className="empty:hidden">{children}</CardFooter>
         </div>
-        {type !== "host" && (
-          <div className="hidden w-64 shrink-0 bg-zinc-100 lg:block">
-            <SingleLocationMap
-              lat={request.latLngPoint.y}
-              lng={request.latLngPoint.x}
-              icon={true}
-            />
-          </div>
-        )}
       </div>
     </Card>
   );
