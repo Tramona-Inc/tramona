@@ -17,7 +17,7 @@ import {
   getTravelerOfferedPrice,
   plural,
 } from "@/utils/utils";
-import { HOST_MARKUP, TRAVELER__MARKUP } from "@/utils/constants";
+import { TRAVELER_MARKUP } from "@/utils/constants";
 import Image from "next/image";
 import { EllipsisIcon } from "lucide-react";
 import {
@@ -102,24 +102,19 @@ export default function HostConfirmRequestDialog({
     await Promise.all(
       // todo: make procedure accept array
       propertiesWithTax.map(async (property) => {
+        const totalPrice =
+          parseInt(propertyPrices[property.id] ?? "0") * 100 * numNights;
+
         await createOffersMutation
           .mutateAsync({
             requestId: request.id,
             propertyId: property.id,
-            totalPrice:
-              parseInt(propertyPrices[property.id] ?? "0") * 100 * numNights,
-            hostPayout:
-              getHostPayout({
-                propertyPrice: parseFloat(propertyPrices[property.id] ?? "0"),
-                hostMarkup: HOST_MARKUP,
-                numNights,
-              }) * 100,
-            travelerOfferedPriceBeforeFees:
-              getTravelerOfferedPrice({
-                propertyPrice: parseFloat(propertyPrices[property.id] ?? "0"),
-                travelerMarkup: TRAVELER__MARKUP,
-                numNights,
-              }) * 100,
+            totalPrice,
+            hostPayout: getHostPayout(totalPrice),
+            travelerOfferedPriceBeforeFees: getTravelerOfferedPrice({
+              totalPrice,
+              travelerMarkup: TRAVELER_MARKUP,
+            }),
           })
           .catch((error) => {
             console.log("Error", error);
@@ -167,6 +162,7 @@ export default function HostConfirmRequestDialog({
   };
 
   const numNights = getNumNights(request.checkIn, request.checkOut);
+  const requestNightlyPriceCents = request.maxTotalPrice / numNights;
   // console.log("filteredSelectedProperties2", filteredSelectedProperties);
 
   return (
@@ -183,7 +179,7 @@ export default function HostConfirmRequestDialog({
           <div className="mb-4 flex justify-between">
             <div className="flex flex-col items-start">
               <div className="text-dark text-lg font-bold">
-                {formatCurrency(request.maxTotalPrice / numNights)}
+                {formatCurrency(requestNightlyPriceCents)}
                 /night
               </div>
               <div className="text-sm text-gray-600">
@@ -214,119 +210,121 @@ export default function HostConfirmRequestDialog({
         <h4 className="text-dark text-lg font-bold">Review your offers</h4>
 
         <div className="space-y-4">
-          {filteredSelectedProperties.map((property) => (
-            <div
-              key={property.id}
-              className="flex flex-col rounded-md border bg-white p-4"
-            >
-              <div className="mb-4 flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <Image
-                    src={property.imageUrls[0] ?? ""}
-                    alt={property.name}
-                    width={60}
-                    height={60}
-                    className="rounded"
-                  />
-                  <div className="flex flex-col">
-                    <div className="text-dark text-sm font-semibold">
-                      {property.name}
+          {filteredSelectedProperties.map((property) => {
+            const nightlyPriceCents =
+              parseFloat(propertyPrices[property.id] ?? "0") * 100;
+            const totalPriceCents = nightlyPriceCents * numNights;
+            const hostPayoutCents = getHostPayout(totalPriceCents);
+
+            const editNightlyPriceCents = parseFloat(editValue) * 100;
+
+            return (
+              <div
+                key={property.id}
+                className="flex flex-col rounded-md border bg-white p-4"
+              >
+                <div className="mb-4 flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <Image
+                      src={property.imageUrls[0] ?? ""}
+                      alt={property.name}
+                      width={60}
+                      height={60}
+                      className="rounded"
+                    />
+                    <div className="flex flex-col">
+                      <div className="text-dark text-sm font-semibold">
+                        {property.name}
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        {property.city}
+                      </div>
                     </div>
-                    <div className="text-sm text-gray-600">{property.city}</div>
                   </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="rounded-full"
+                      >
+                        <EllipsisIcon />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => handleEdit(property.id)}>
+                        Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleRemove(property.id)}
+                        className="text-red-600"
+                      >
+                        Remove
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
+                {selectedPropertyToEdit === property.id ? (
+                  <div className="flex flex-col space-y-4">
+                    <h4 className="text-dark text-sm font-semibold">
+                      What price would you like to offer?
+                    </h4>
+                    <div className="flex items-center space-x-2">
+                      <div className="flex items-center rounded-md">
+                        <Input
+                          type="number"
+                          prefix="$"
+                          suffix="/night"
+                          value={editValue}
+                          onChange={(e) => setEditValue(e.target.value)}
+                        />
+                      </div>
+                    </div>
                     <Button
-                      variant="ghost"
-                      size="icon"
-                      className="rounded-full"
+                      variant="secondary"
+                      onClick={() => {
+                        handlePriceChange(property.id, editValue);
+                        setSelectedPropertyToEdit(null);
+                      }}
                     >
-                      <EllipsisIcon />
+                      Save
                     </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => handleEdit(property.id)}>
-                      Edit
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => handleRemove(property.id)}
-                      className="text-red-600"
-                    >
-                      Remove
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                    {requestNightlyPriceCents * 1.1 < editNightlyPriceCents && (
+                      <div className="text-sm text-red-600">
+                        This offer is unlikely to get accepted since it is{" "}
+                        {Math.round(
+                          ((editNightlyPriceCents - requestNightlyPriceCents) /
+                            requestNightlyPriceCents) *
+                            100,
+                        )}
+                        % higher than the requested price.
+                      </div>
+                    )}
+                    {editValue && (
+                      <div className="text-sm text-gray-600">
+                        By offering this price, you will be paid{" "}
+                        {formatCurrency(
+                          getHostPayout(editNightlyPriceCents * numNights),
+                        )}{" "}
+                        all-in
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex flex-col space-y-2">
+                    <div className="rounded-md bg-gray-100 p-2">
+                      <div className="text-dark text-sm font-semibold">
+                        Your offer: ${propertyPrices[property.id]} / night
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        Total payout: {formatCurrency(hostPayoutCents)}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
-              {selectedPropertyToEdit === property.id ? (
-                <div className="flex flex-col space-y-4">
-                  <h4 className="text-dark text-sm font-semibold">
-                    What price would you like to offer?
-                  </h4>
-                  <div className="flex items-center space-x-2">
-                    <div className="flex items-center rounded-md">
-                      <Input
-                        type="number"
-                        prefix="$"
-                        suffix="/night"
-                        value={editValue}
-                        onChange={(e) => setEditValue(e.target.value)}
-                      />
-                    </div>
-                  </div>
-                  <Button
-                    variant="secondary"
-                    onClick={() => {
-                      handlePriceChange(property.id, editValue);
-                      setSelectedPropertyToEdit(null);
-                    }}
-                  >
-                    Save
-                  </Button>
-                  {(request.maxTotalPrice / numNights / 100) * 1.1 <
-                    parseInt(editValue) && (
-                    <div className="text-sm text-red-600">
-                      This offer is unlikely to get accepted since it is{" "}
-                      {Math.round(
-                        ((parseInt(editValue) -
-                          request.maxTotalPrice / numNights / 100) /
-                          (request.maxTotalPrice / numNights / 100)) *
-                          100,
-                      )}
-                      % higher than the requested price.
-                    </div>
-                  )}
-                  {editValue && (
-                    <div className="text-sm text-gray-600">
-                      By offering this price, you will be paid $
-                      {parseInt(editValue) * numNights} all-in
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="flex flex-col space-y-2">
-                  <div className="rounded-md bg-gray-100 p-2">
-                    <div className="text-dark text-sm font-semibold">
-                      Your offer: ${propertyPrices[property.id]} / night
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      Total payout: $
-                      {getHostPayout({
-                        propertyPrice: parseFloat(
-                          propertyPrices[property.id] ?? "0",
-                        ),
-                        hostMarkup: HOST_MARKUP,
-                        numNights: getNumNights(
-                          request.checkIn,
-                          request.checkOut,
-                        ),
-                      })}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <DialogFooter className="justify-between">

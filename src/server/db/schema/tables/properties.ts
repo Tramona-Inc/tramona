@@ -1,5 +1,5 @@
 import { zodTime } from "@/utils/zod-utils";
-import { sql } from "drizzle-orm";
+import { SQL, sql } from "drizzle-orm";
 import {
   boolean,
   date,
@@ -345,6 +345,7 @@ export const propertyInsertSchema = createInsertSchema(properties, {
   checkOutTime: zodTime,
   roomsWithBeds: roomsWithBedsSchema,
   autoOfferDiscountTiers: z.array(discountTierSchema),
+  latLngPoint: z.object({ x: z.number(), y: z.number() }),
 });
 
 // make everything except id optional

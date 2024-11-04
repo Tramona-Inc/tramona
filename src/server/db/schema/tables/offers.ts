@@ -56,16 +56,16 @@ export const offers = pgTable(
     becomeVisibleAt: timestamp("become_visible_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
-    tripCheckoutId: integer("trip_checkout_id")
-      .notNull()
-      .references(() => tripCheckouts.id, { onDelete: "cascade" }),
+    // tripCheckoutId: integer("trip_checkout_id")
+    //   .notNull()
+    //   .references(() => tripCheckouts.id, { onDelete: "cascade" }),
   },
   (t) => ({
     requestIdIdx: index().on(t.requestId),
     propertyIdIdx: index().on(t.propertyId),
     madePublicAtIndex: index().on(t.madePublicAt),
     acceptedAtIndex: index().on(t.acceptedAt),
-    tripCheckoutIdx: index().on(t.tripCheckoutId),
+    // tripCheckoutIdx: index().on(t.tripCheckoutId),
   }),
 );
 

@@ -16,7 +16,7 @@ import { generateTimeStamp } from "@/utils/utils";
 import { v4 as uuidv4 } from "uuid";
 import type { Trip } from "@/server/db/schema/tables/trips";
 import { formatDateYearMonthDay } from "@/utils/utils";
-import { getCountryISO, getPostcode } from "@/server/google-maps";
+import { getAddress } from "@/server/google-maps";
 import { sendSlackMessage } from "@/server/slack";
 
 import { stripe } from "@/server/api/routers/stripeRouter";
@@ -109,6 +109,12 @@ export async function createSuperhogReservation({
 
       return name.replace(/[^a-zA-Z\s]/g, "");
     }
+
+    const { countryISO, postcode } = await getAddress({
+      lat: property.latLngPoint.y,
+      lng: property.latLngPoint.x,
+    });
+
     const reservationObject = {
       metadata: {
         timeStamp: generateTimeStamp(),
@@ -121,14 +127,8 @@ export async function createSuperhogReservation({
           addressLine1: property.address,
           addressLine2: "", //can be null
           town: property.city,
-          countryIso: await getCountryISO({
-            lat: property.latLngPoint.y,
-            lng: property.latLngPoint.x,
-          }),
-          postcode: await getPostcode({
-            lat: property.latLngPoint.y,
-            lng: property.latLngPoint.x,
-          }),
+          countryIso: countryISO,
+          postcode,
         },
         petsAllowed: property.petsAllowed ? "true" : "false",
       },
