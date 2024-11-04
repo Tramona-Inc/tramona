@@ -7,11 +7,20 @@ import {
   timestamp,
   varchar,
   boolean,
+  pgEnum,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { properties } from "./properties";
 import { requests } from "./requests";
 import { tripCheckouts } from "./payments";
+
+export const ALL_TRIP_SOURCES = [
+  "City request",
+  "Request to book",
+  "Book it now",
+] as const;
+
+export const tripSourceEnum = pgEnum("trip_source", ALL_TRIP_SOURCES);
 
 export const offers = pgTable(
   "offers",
@@ -23,6 +32,8 @@ export const offers = pgTable(
     propertyId: integer("property_id")
       .notNull()
       .references(() => properties.id, { onDelete: "cascade" }),
+    tripSource: tripSourceEnum("trip_source").notNull().default("City request"),
+
     totalPrice: integer("total_price").notNull(), // in cents
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
