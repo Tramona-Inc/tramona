@@ -12,7 +12,7 @@ import {
   NewReview,
 } from "@/server/db/schema";
 import { airbnbHeaders } from "@/utils/constants";
-import { getAddress } from "../google-maps";
+import { getAddress, stringifyAddress } from "../google-maps";
 import { axiosWithRetry, proxyAgent } from "../server-utils";
 
 export function encodeAirbnbId(id: string) {
@@ -84,7 +84,6 @@ export async function scrapeAirbnbListing(
     numGuests,
   }: { checkIn: Date; checkOut: Date; numGuests: number },
 ) {
-
   const listingDataUrl = getListingDataUrl(id, {
     checkIn,
     checkOut,
@@ -267,23 +266,23 @@ export async function scrapeAirbnbListing(
 
   const allOtherHouseRules = otherHouseRulesStr
     ? z
-      .array(z.object({ title: z.string() }))
-      .parse(JSON.parse(otherHouseRulesStr))
-      .map(({ title }) => title)
+        .array(z.object({ title: z.string() }))
+        .parse(JSON.parse(otherHouseRulesStr))
+        .map(({ title }) => title)
     : [];
 
   const otherHouseRules =
     allOtherHouseRules.length > 0
       ? allOtherHouseRules
-        .filter(
-          (rule) =>
-            // exclude rules for pets, smoking, and maximum number of guests
-            !["pets", "smoking", "guests"].some((keyword) =>
-              rule.toLowerCase().includes(keyword),
-            ),
-        )
-        .map((rule) => `- ${rule}`)
-        .join("\n")
+          .filter(
+            (rule) =>
+              // exclude rules for pets, smoking, and maximum number of guests
+              !["pets", "smoking", "guests"].some((keyword) =>
+                rule.toLowerCase().includes(keyword),
+              ),
+          )
+          .map((rule) => `- ${rule}`)
+          .join("\n")
       : null;
 
   // "localized_cancellation_policy_name"
@@ -326,9 +325,7 @@ export async function scrapeAirbnbListing(
 
   const originalNightlyPrice = parseCurrency(originalNightlyPriceStr);
 
-  const city = await getAddress({ lat: latitude, lng: longitude }).then(
-    (address) => address.city,
-  );
+  const addressComponents = await getAddress({ lat: latitude, lng: longitude });
 
   const property: NewProperty = {
     name,
@@ -354,8 +351,11 @@ export async function scrapeAirbnbListing(
     otherHouseRules,
     cancellationPolicy,
     originalNightlyPrice,
-    city,
-    address: city, // cant get exact address from airbnb before booking so we go with the city
+    city: addressComponents.city,
+    country: addressComponents.country,
+    stateName: addressComponents.stateName,
+    stateCode: addressComponents.stateCode,
+    address: stringifyAddress(addressComponents),
   };
 
   // data.presentation.stayProductDetailPage.reviews.reviews

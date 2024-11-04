@@ -1,4 +1,4 @@
-import { REFERRAL_CODE_LENGTH } from "@/server/db/schema";
+import { Offer, REFERRAL_CODE_LENGTH } from "@/server/db/schema";
 import { SeparatedData } from "@/server/server-utils";
 import { useWindowSize } from "@uidotdev/usehooks";
 import { clsx, type ClassValue } from "clsx";
@@ -20,6 +20,7 @@ import { HostRequestsPageData } from "@/server/api/routers/propertiesRouter";
 import * as cheerio from "cheerio";
 import { useSession } from "next-auth/react";
 import { api } from "./api";
+import { HOST_MARKUP } from "./constants";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -295,73 +296,18 @@ export function getNumNights(from: Date | string, to: Date | string) {
   );
 }
 
-export function getDirectListingPriceBreakdown({
-  bookingCost,
-}: {
-  bookingCost: number;
-}) {
-  const stripeFee = 0.029 * bookingCost + 30; // Stripe fee calculation after markup (markup occured when offer was inserted)
-  const serviceFee = stripeFee;
-  const finalTotal = Math.floor(bookingCost + serviceFee);
-  return {
-    bookingCost,
-    finalTotal,
-    taxPaid: 0,
-    serviceFee,
-  };
-}
-
-export function getTramonaPriceBreakdown({
-  bookingCost,
-  numNights,
-  superhogFee,
-  tax,
-}: {
-  bookingCost: number;
-  numNights: number;
-  superhogFee: number;
-  tax: number;
-}) {
-  const superhogFeePaid = numNights * superhogFee * 100;
-  const taxPaid = (bookingCost + superhogFeePaid) * tax;
-  const totalMinusStripe = bookingCost + superhogFeePaid + taxPaid;
-  // should always cover the stripe fee + a little extra
-  const stripeCoverFee = Math.ceil(totalMinusStripe * 0.04); //this 4 percent
-  const serviceFee = superhogFeePaid + stripeCoverFee;
-  const finalTotal = Math.floor(totalMinusStripe + stripeCoverFee);
-
-  const priceBreakdown = {
-    bookingCost: bookingCost,
-    taxPaid: taxPaid,
-    serviceFee: serviceFee,
-    firstTotal: totalMinusStripe,
-    finalTotal: finalTotal,
-  };
-  return priceBreakdown;
-}
-
-export function getHostPayout({
-  propertyPrice,
-  hostMarkup,
-  numNights,
-}: {
-  propertyPrice: number;
-  hostMarkup: number;
-  numNights: number;
-}) {
-  return Math.floor(propertyPrice * hostMarkup * numNights);
+export function getHostPayout(totalPrice: number) {
+  return Math.floor(totalPrice * HOST_MARKUP);
 }
 
 export function getTravelerOfferedPrice({
-  propertyPrice,
+  totalPrice,
   travelerMarkup,
-  numNights,
 }: {
-  propertyPrice: number;
+  totalPrice: number;
   travelerMarkup: number;
-  numNights: number;
 }) {
-  return Math.ceil(propertyPrice * travelerMarkup * numNights);
+  return Math.ceil(totalPrice * travelerMarkup);
 }
 
 export function getPropertyId(url: string): number | null {
@@ -694,15 +640,18 @@ export function originalListingIdToRandomDiscount(input: string): number {
 }
 
 // falls back to a random discount between 8% and 12% if the original nightly price is not available
-export function getOfferDiscountPercentage(offer: {
-  createdAt: Date;
-  travelerOfferedPriceBeforeFees: number;
-  checkIn: Date;
-  checkOut: Date;
-  scrapeUrl?: number | null;
-  datePriceFromAirbnb: number | null;
-  randomDirectListingDiscount?: number | null;
-}) {
+export function getOfferDiscountPercentage(
+  offer: Pick<
+    Offer,
+    | "createdAt"
+    | "travelerOfferedPriceBeforeFees"
+    | "checkIn"
+    | "checkOut"
+    | "scrapeUrl"
+    | "datePriceFromAirbnb"
+    | "randomDirectListingDiscount"
+  >,
+) {
   //1.)check to see if scraped property(directListing) and the randomDirectListingDiscount is not null
   if (offer.randomDirectListingDiscount) {
     return offer.randomDirectListingDiscount;

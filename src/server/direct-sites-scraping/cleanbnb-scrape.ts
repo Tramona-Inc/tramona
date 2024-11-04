@@ -5,6 +5,7 @@ import { v2 } from "@google-cloud/translate";
 import { env } from "@/env";
 import { ListingSiteName, PropertyType } from "../db/schema";
 import { urlScrape } from "../server-utils";
+import { getAddress } from "../google-maps";
 
 const { Translate } = v2;
 
@@ -421,7 +422,6 @@ export const cleanbnbScraper: DirectSiteScraper = async ({
     const name = await translateText(scrapedData.name);
     const about = await translateText(scrapedData.description);
     const address = property.address;
-    const city = property.city;
     const latitude = scrapedData.latitude;
     const longitude = scrapedData.longitude;
     const maxNumGuests = scrapedData.containsPlace.occupancy.value;
@@ -429,6 +429,10 @@ export const cleanbnbScraper: DirectSiteScraper = async ({
     const numBeds = totalBeds;
     const numBedrooms = property.maxBedrooms;
     const numBathrooms = property.maxBathrooms;
+    const addressComponents = await getAddress({
+      lat: latitude,
+      lng: longitude,
+    });
 
     const amenities = await Promise.all(
       scrapedData.amenityFeature?.map(async (amenity) =>
@@ -447,7 +451,10 @@ export const cleanbnbScraper: DirectSiteScraper = async ({
       name,
       about,
       address,
-      city,
+      city: addressComponents.city,
+      stateName: addressComponents.stateName,
+      stateCode: addressComponents.stateCode,
+      country: addressComponents.country,
       maxNumGuests,
       numBeds,
       numBedrooms,

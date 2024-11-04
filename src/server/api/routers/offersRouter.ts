@@ -14,7 +14,6 @@ import {
   properties,
   referralCodes,
   requestSelectSchema,
-  tripCheckouts,
   trips,
 } from "@/server/db/schema";
 import { getAddress, getCoordinates } from "@/server/google-maps";
@@ -39,7 +38,6 @@ import { scrapeDirectListings } from "@/server/direct-sites-scraping";
 import { createNormalDistributionDates } from "@/server/server-utils";
 import { scrapeAirbnbPrice } from "@/server/scrapePrice";
 import { TRPCClientError } from "@trpc/client";
-import { breakdownPayment } from "@/utils/payment-utils/paymentBreakdown";
 
 export const offersRouter = createTRPCRouter({
   accept: protectedProcedure
@@ -161,7 +159,6 @@ export const offersRouter = createTRPCRouter({
       const offersByRequest = await ctx.db.query.offers.findMany({
         where: eq(offers.requestId, input.id),
         with: {
-          tripCheckout: true,
           request: {
             with: {
               madeByGroup: { with: { members: true } },
@@ -486,41 +483,12 @@ export const offersRouter = createTRPCRouter({
             })
           : null;
         console.log(datePriceFromAirbnb);
-        // ------- Create trips checkout first ----
-
-        // function to help break down the price of the offer
-        const brokeDownPayment = await breakdownPayment({
-          checkIn: requestDetails.checkIn,
-          checkOut: requestDetails.checkOut,
-          travelerOfferedPriceBeforeFees: input.travelerOfferedPriceBeforeFees,
-          isScrapedPropery: false,
-          originalPrice: datePriceFromAirbnb,
-          lat: curProperty!.latLngPoint.y,
-          lng: curProperty!.latLngPoint.x,
-        });
-        const tripCheckout = await db
-          .insert(tripCheckouts)
-          .values({
-            totalTripAmount: brokeDownPayment.totalTripAmount,
-            travelerOfferedPriceBeforeFees:
-              input.travelerOfferedPriceBeforeFees,
-            paymentIntentId: "",
-            taxesPaid: brokeDownPayment.taxesPaid,
-            taxPercentage: brokeDownPayment.taxPercentage,
-            superhogFee: brokeDownPayment.superhogFee,
-            stripeTransactionFee: brokeDownPayment.stripeTransactionFee,
-            checkoutSessionId: "",
-            totalSavings: brokeDownPayment.totalSavings,
-          })
-          .returning({ id: tripCheckouts.id })
-          .then((res) => res[0]!);
 
         await ctx.db.insert(offers).values({
           ...input,
           checkIn: requestDetails.checkIn,
           checkOut: requestDetails.checkOut,
           datePriceFromAirbnb: datePriceFromAirbnb,
-          tripCheckoutId: tripCheckout.id,
         });
 
         const request = await db.query.requests.findFirst({
@@ -592,37 +560,10 @@ export const offersRouter = createTRPCRouter({
         // });
         // }
       } else {
-        const brokeDownPayment = await breakdownPayment({
-          checkIn: input.checkIn,
-          checkOut: input.checkOut,
-          travelerOfferedPriceBeforeFees: input.travelerOfferedPriceBeforeFees,
-          isScrapedPropery: false,
-          lat: curProperty!.latLngPoint.y,
-          lng: curProperty!.latLngPoint.x,
-        });
-
-        const tripCheckout = await db
-          .insert(tripCheckouts)
-          .values({
-            totalTripAmount: brokeDownPayment.totalTripAmount,
-            travelerOfferedPriceBeforeFees:
-              input.travelerOfferedPriceBeforeFees,
-            paymentIntentId: "",
-            taxesPaid: brokeDownPayment.taxesPaid,
-            taxPercentage: brokeDownPayment.taxPercentage,
-            superhogFee: brokeDownPayment.superhogFee,
-            stripeTransactionFee: brokeDownPayment.stripeTransactionFee,
-            checkoutSessionId: "",
-            totalSavings: brokeDownPayment.totalSavings,
-          })
-          .returning({ id: tripCheckouts.id })
-          .then((res) => res[0]!);
-
         await ctx.db.insert(offers).values({
           ...input,
           checkIn: input.checkIn,
           checkOut: input.checkOut,
-          tripCheckoutId: tripCheckout.id,
         });
       }
     }),
@@ -753,11 +694,6 @@ export const offersRouter = createTRPCRouter({
 
         const fmtdDateRange = formatDateRange(offer.checkIn, offer.checkOut);
         const url = `${env.NEXTAUTH_URL}/requests`;
-
-        // const location = await getCoordinates(property.address).then(
-        //   async (res) =>
-        //     res.location ? await getCity(res.location) : "[Unknown location]",
-        // );
 
         if (member.phoneNumber) {
           if (member.isWhatsApp) {
@@ -1157,10 +1093,8 @@ export async function getOfferPageData(offerId: number) {
       isAvailableOnOriginalSite: true,
       randomDirectListingDiscount: true,
       datePriceFromAirbnb: true,
-      tripCheckoutId: true,
     },
     with: {
-      tripCheckout: true,
       request: {
         with: {
           madeByGroup: { with: { members: true } },

@@ -13,7 +13,7 @@ import {
 
 import { eq, isNotNull } from "drizzle-orm";
 import { formatDateYearMonthDay } from "@/utils/utils";
-import { getCountryISO } from "@/server/google-maps";
+import { getAddress } from "@/server/google-maps";
 import { sendSlackMessage } from "@/server/slack";
 import type { Trip, SuperhogRequests, Property } from "@/server/db/schema";
 type SuperhogRequestWithoutProperty = Trip & {
@@ -246,7 +246,7 @@ export const superhogRouter = createTRPCRouter({
           },
         });
 
-        const countryISO = await getCountryISO({
+        const { countryISO } = await getAddress({
           lat: latLngPoint!.latLngPoint.y,
           lng: latLngPoint!.latLngPoint.x,
         });

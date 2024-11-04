@@ -6,9 +6,10 @@ import {
   bidSelectSchema,
   bids,
   groupMembers,
-  groups, properties,
+  groups,
+  properties,
   trips,
-  users
+  users,
 } from "@/server/db/schema";
 import {
   counterInsertSchema,
@@ -22,8 +23,9 @@ import { and, desc, eq, exists, inArray } from "drizzle-orm";
 import { random } from "lodash";
 import { z } from "zod";
 import {
-  createTRPCRouter, protectedProcedure,
-  roleRestrictedProcedure
+  createTRPCRouter,
+  protectedProcedure,
+  roleRestrictedProcedure,
 } from "../trpc";
 import { stripe } from "./stripeRouter";
 
@@ -499,3 +501,9 @@ export const biddingRouter = createTRPCRouter({
     },
   ),
 });
+
+let a = 1;
+
+a = 2;
+
+console.log(a);

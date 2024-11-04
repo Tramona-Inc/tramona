@@ -1,12 +1,12 @@
 // tramona-specific constants
-export const TAX_PERCENTAGE = 0.08 as number;
-export const SUPERHOG_FEE = 3 as number;
-export const AVG_AIRBNB_MARKUP = 1.13868 as number;
-export const LINK_REQUEST_DISCOUNT_PERCENTAGE = 15 as number;
-export const TRAVELER__MARKUP = 1.025;
+export const TAX_PERCENTAGE = 0.08;
+export const SUPERHOG_FEE_CENTS_PER_NIGHT = 300;
+export const AVG_AIRBNB_MARKUP = 1.13868;
+export const LINK_REQUEST_DISCOUNT_PERCENTAGE = 15;
+export const TRAVELER_MARKUP = 1.025;
 export const HOST_MARKUP = 0.975;
-export const DIRECTLISTINGMARKUP = 1.015; // 1.5% markup for direct listings
-export const REFERRAL_CASHBACK = 2500 as number;
+export const DIRECT_LISTING_MARKUP = 1.015; // 1.5% markup for direct listings
+export const REFERRAL_CASHBACK = 2500;
 
 export const airbnbHeaders = {
   "x-airbnb-api-key": "d306zoyjsyarp7ifhu67rjxn52tv0t20",

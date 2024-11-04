@@ -180,10 +180,10 @@ export const offersRelations = relations(offers, ({ one }) => ({
     fields: [offers.requestId],
     references: [requests.id],
   }),
-  tripCheckout: one(tripCheckouts, {
-    fields: [offers.tripCheckoutId],
-    references: [tripCheckouts.id],
-  }),
+  // tripCheckout: one(tripCheckouts, {
+  //   fields: [offers.tripCheckoutId],
+  //   references: [tripCheckouts.id],
+  // }),
 }));
 
 export const earningsRelations = relations(referralEarnings, ({ one }) => ({

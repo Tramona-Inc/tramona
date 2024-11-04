@@ -3,7 +3,10 @@ import { formatCurrency, getNumNights } from "@/utils/utils";
 import { plural } from "@/utils/utils";
 import type { OfferWithDetails } from "@/components/offers/PropertyPage";
 import React from "react";
-import { getServiceFee } from "@/utils/payment-utils/paymentBreakdown";
+import {
+  breakdownPayment,
+  getServiceFee,
+} from "@/utils/payment-utils/paymentBreakdown";
 import {
   Tooltip,
   TooltipContent,
@@ -21,20 +24,12 @@ export function OfferPriceDetails({
 }) {
   const numberOfNights = getNumNights(offer.checkIn, offer.checkOut);
   const nightlyPrice = offer.travelerOfferedPriceBeforeFees / numberOfNights;
-  // const { bookingCost, taxPaid, serviceFee, finalTotal } = offer.scrapeUrl
-  //   ? getDirectListingPriceBreakdown({
-  //       bookingCost: offer.travelerOfferedPriceBeforeFees,
-  //     })
-  //   : getTramonaPriceBreakdown({
-  //       bookingCost: offer.travelerOfferedPriceBeforeFees,
-  //       numNights: numberOfNights,
-  //       superhogFee: SUPERHOG_FEE,
-  //       tax: TAX_PERCENTAGE,
-  //     });
+  const paymentBreakdown = breakdownPayment(offer);
+
   const items = [
     {
       title: `${formatCurrency(nightlyPrice)} x ${plural(numberOfNights, "night")}`,
-      price: `${formatCurrency(offer.tripCheckout.travelerOfferedPriceBeforeFees / numberOfNights)}`,
+      price: `${formatCurrency(offer.travelerOfferedPriceBeforeFees / numberOfNights)}`,
     },
     {
       title: "Cleaning fee",
@@ -42,11 +37,11 @@ export function OfferPriceDetails({
     },
     {
       title: "Tramona service fee",
-      price: `${formatCurrency(getServiceFee({ tripCheckout: offer.tripCheckout }))}`,
+      price: `${formatCurrency(getServiceFee({ tripCheckout: paymentBreakdown }))}`,
     },
     {
       title: "Taxes",
-      price: `${offer.tripCheckout.taxesPaid === 0 ? "included" : formatCurrency(offer.tripCheckout.taxesPaid)}`,
+      price: `${paymentBreakdown.taxesPaid === 0 ? "included" : formatCurrency(paymentBreakdown.taxesPaid)}`,
     },
   ];
 
@@ -62,7 +57,7 @@ export function OfferPriceDetails({
             <p>{item.price}</p>
           </div>
         ))}
-        {offer.tripCheckout.securityDeposit >= 0 && (
+        {offer.property.currentSecurityDeposit > 0 && (
           <div className="flex items-center justify-between text-sm font-light">
             <TooltipProvider>
               <Tooltip>
@@ -86,18 +81,18 @@ export function OfferPriceDetails({
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-            <p>{formatCurrency(offer.tripCheckout.securityDeposit)}</p>
+            <p>{formatCurrency(offer.property.currentSecurityDeposit)}</p>
           </div>
         )}
         <Separator />
         <div className="flex items-center justify-between pb-4 font-bold">
           <p>Total (USD)</p>
-          <p>{formatCurrency(offer.tripCheckout.totalTripAmount)}</p>
+          <p>{formatCurrency(paymentBreakdown.totalTripAmount)}</p>
         </div>
       </div>
       <div className="md:hidden">
         <p className="text-base font-bold">
-          {formatCurrency(offer.tripCheckout.totalTripAmount)}
+          {formatCurrency(paymentBreakdown.totalTripAmount)}
         </p>
         <p className="text-muted-foreground"> Total after taxes</p>
       </div>
