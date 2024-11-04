@@ -202,21 +202,21 @@ export function HostPropertyEditBtn({
   );
 
   const addressWithApt: LocationType = {
-    country: property.address.split(", ")[4] ?? "",
-    street: property.address.split(", ")[0] ?? "",
-    apt: property.address.split(", ")[1] ?? "",
-    city: property.address.split(", ")[2] ?? "",
-    state: property.address.split(", ")[3]?.split(" ")[0] ?? "",
-    zipcode: property.address.split(", ")[3]?.split(" ")[1] ?? "",
+    country: fetchedProperty?.address.split(", ")[4] ?? "",
+    street: fetchedProperty?.address.split(", ")[0] ?? "",
+    apt: fetchedProperty?.address.split(", ")[1] ?? "",
+    city: fetchedProperty?.address.split(", ")[2] ?? "",
+    state: fetchedProperty?.address.split(", ")[3]?.split(" ")[0] ?? "",
+    zipcode: fetchedProperty?.address.split(", ")[3]?.split(" ")[1] ?? "",
   };
 
   const addressWithoutApt: LocationType = {
-    country: property.address.split(", ")[3] ?? "",
-    street: property.address.split(", ")[0] ?? "",
+    country: fetchedProperty?.address.split(", ")[3] ?? "",
+    street: fetchedProperty?.address.split(", ")[0] ?? "",
     apt: "",
-    city: property.address.split(", ")[1] ?? "",
-    state: property.address.split(", ")[2]?.split(" ")[0] ?? "",
-    zipcode: property.address.split(", ")[2]?.split(" ")[1] ?? "",
+    city: fetchedProperty?.address.split(", ")[1] ?? "",
+    state: fetchedProperty?.address.split(", ")[2]?.split(" ")[0] ?? "",
+    zipcode: fetchedProperty?.address.split(", ")[2]?.split(" ")[1] ?? "",
   };
 
   const handleEditClick = () => {
@@ -229,6 +229,10 @@ export function HostPropertyEditBtn({
       fetchedProperty.numBathrooms &&
         setBathrooms(fetchedProperty.numBathrooms);
       setSpaceType(fetchedProperty.roomType);
+      console.log(
+        "fetchedProperty address",
+        fetchedProperty.address.split(", "),
+      );
       setLocation(
         fetchedProperty.address.split(", ").length > 4
           ? addressWithApt
