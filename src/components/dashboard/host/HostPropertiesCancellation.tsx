@@ -44,7 +44,7 @@ export default function HostPropertiesCancellation({
           onSubmit={onSubmit}
         />
       </div>
-      <div>
+      <div className="pt-4">
         {editing ? (
           <Form {...form}>
             <FormField
@@ -52,7 +52,7 @@ export default function HostPropertiesCancellation({
               name="policy"
               render={() => (
                 <FormItem>
-                  <div className="h-[35rem] space-y-4 overflow-y-auto pt-4">
+                  <div className="h-[34rem] space-y-4 overflow-y-auto pt-4">
                     {CANCELLATION_POLICIES.map((policy) => (
                       <CancellationCardSelect
                         key={policy}

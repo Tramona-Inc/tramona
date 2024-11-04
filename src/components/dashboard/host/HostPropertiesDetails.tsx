@@ -183,8 +183,8 @@ export default function HostPropertiesDetails({
   }, [propertyId]);
 
   return (
-    <>
-      <div className="flex items-center justify-between pt-4">
+    <div className="my-6">
+      <div className="flex items-center justify-between">
         {editing && (
           <div className="grid grid-cols-3 gap-2">
             <AlertDialog>
@@ -288,7 +288,7 @@ export default function HostPropertiesDetails({
           />
         </div>
       </div>
-      <div className="mb-6 mt-2 h-[35rem] overflow-y-auto">
+      <div className="h-[35rem] overflow-y-auto">
         <div className="my-4 space-y-4">
           <section className="space-y-2 rounded-xl border p-4">
             <div className="flex items-center justify-between">
@@ -709,6 +709,6 @@ export default function HostPropertiesDetails({
           </section>
         </div>
       </div>
-    </>
+    </div>
   );
 }
