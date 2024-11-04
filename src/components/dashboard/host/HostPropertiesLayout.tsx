@@ -169,6 +169,10 @@ export function HostPropertyEditBtn({
   onSubmit?: () => void;
   property: Property;
 }) {
+  const { data: fetchedProperty, refetch } = api.properties.getById.useQuery({
+    id: property.id,
+  });
+
   const setPropertyType = useHostOnboarding((state) => state.setPropertyType);
   const setMaxGuests = useHostOnboarding((state) => state.setMaxGuests);
   const setBedrooms = useHostOnboarding((state) => state.setBedrooms);
@@ -216,32 +220,36 @@ export function HostPropertyEditBtn({
   };
 
   const handleEditClick = () => {
-    setPropertyType(property.propertyType);
-    setMaxGuests(property.maxNumGuests);
-    setBedrooms(property.numBedrooms);
-    setBeds(property.numBeds);
-    property.numBathrooms && setBathrooms(property.numBathrooms);
-    setSpaceType(property.roomType);
-    setLocation(
-      property.address.split(", ").length > 4
-        ? addressWithApt
-        : addressWithoutApt,
-    );
-    setCheckInType(property.checkInInfo ?? "self");
-    setCheckIn(property.checkInTime ?? "00:00");
-    setCheckOut(property.checkOutTime ?? "00:00");
-    setAmenities(property.amenities);
-    setOtherAmenities(property.otherAmenities);
-    setImageUrls(property.imageUrls);
-    setTitle(property.name);
-    setDescription(property.about);
-    setPetsAllowed(property.petsAllowed ?? false);
-    setSmokingAllowed(property.smokingAllowed ?? false);
-    setOtherHouseRules(property.otherHouseRules ?? "");
-    setEditing(!editing);
-    setCancellationPolicy(
-      property.cancellationPolicy as CancellationPolicyWithInternals | null,
-    );
+    void refetch();
+    if (fetchedProperty) {
+      setPropertyType(fetchedProperty.propertyType);
+      setMaxGuests(fetchedProperty.maxNumGuests);
+      setBedrooms(fetchedProperty.numBedrooms);
+      setBeds(fetchedProperty.numBeds);
+      fetchedProperty.numBathrooms &&
+        setBathrooms(fetchedProperty.numBathrooms);
+      setSpaceType(fetchedProperty.roomType);
+      setLocation(
+        fetchedProperty.address.split(", ").length > 4
+          ? addressWithApt
+          : addressWithoutApt,
+      );
+      setCheckInType(fetchedProperty.checkInInfo ?? "self");
+      setCheckIn(fetchedProperty.checkInTime ?? "00:00");
+      setCheckOut(fetchedProperty.checkOutTime ?? "00:00");
+      setAmenities(fetchedProperty.amenities);
+      setOtherAmenities(fetchedProperty.otherAmenities);
+      setImageUrls(fetchedProperty.imageUrls);
+      setTitle(fetchedProperty.name);
+      setDescription(fetchedProperty.about);
+      setPetsAllowed(fetchedProperty.petsAllowed ?? false);
+      setSmokingAllowed(fetchedProperty.smokingAllowed ?? false);
+      setOtherHouseRules(fetchedProperty.otherHouseRules ?? "");
+      setEditing(!editing);
+      setCancellationPolicy(
+        fetchedProperty.cancellationPolicy as CancellationPolicyWithInternals | null,
+      );
+    }
   };
 
   return (

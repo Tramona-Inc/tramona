@@ -97,6 +97,10 @@ export default function HostPropertiesDetails({
     location: address,
   });
 
+  const { data: fetchedProperty, refetch } = api.properties.getById.useQuery({
+    id: property.id,
+  });
+
   const handleFormSubmit = async () => {
     const newProperty = {
       ...property,
@@ -121,6 +125,7 @@ export default function HostPropertiesDetails({
     };
 
     await updateProperty(newProperty);
+    await refetch();
   };
 
   const addressWithApt: LocationType = {
@@ -286,6 +291,50 @@ export default function HostPropertiesDetails({
       <div className="my-4 space-y-4">
         <section className="space-y-2 rounded-xl border p-4">
           <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-lg font-bold">
+              {(!property.name || !property.about) && (
+                <AlertCircle className="text-red-600" />
+              )}
+              Description
+            </div>
+            <Dialog>
+              <DialogTrigger>
+                {editing && <a className="text-sm font-bold underline">Edit</a>}
+              </DialogTrigger>
+              <DialogContent>
+                <Onboarding8
+                  editing
+                  setHandleOnboarding={setHandleOnboarding}
+                />
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button
+                      onClick={async () => {
+                        handleOnboarding?.();
+                      }}
+                    >
+                      Save
+                    </Button>
+                  </DialogClose>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
+          <div>
+            <h3 className="font-semibold">Name</h3>
+            <p className="text-muted-foreground">
+              {editing ? title : fetchedProperty?.name}
+            </p>
+          </div>
+          <div>
+            <h3 className="font-semibold">About</h3>
+            <p className="text-muted-foreground">
+              {editing ? description : fetchedProperty?.about}
+            </p>
+          </div>
+        </section>
+        <section className="space-y-2 rounded-xl border p-4">
+          <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold">Type of property</h2>
             <Dialog>
               <DialogTrigger>
@@ -302,7 +351,7 @@ export default function HostPropertiesDetails({
             </Dialog>
           </div>
           <p className="text-muted-foreground">
-            {editing ? propertyType : property.propertyType}
+            {editing ? propertyType : fetchedProperty?.propertyType}
           </p>
         </section>
         <section className="space-y-2 rounded-xl border p-4">
@@ -323,7 +372,7 @@ export default function HostPropertiesDetails({
             </Dialog>
           </div>
           <p className="text-muted-foreground">
-            {editing ? spaceType : property.roomType}
+            {editing ? spaceType : fetchedProperty?.roomType}
           </p>
           <div className="flex lowercase text-muted-foreground">
             {editing ? (
@@ -336,14 +385,14 @@ export default function HostPropertiesDetails({
               </>
             ) : (
               <>
-                {`${property.maxNumGuests} ${property.maxNumGuests > 1 ? "guests" : "guest"}`}{" "}
+                {`${fetchedProperty?.maxNumGuests} ${fetchedProperty && fetchedProperty.maxNumGuests > 1 ? "guests" : "guest"}`}{" "}
                 <Dot />
-                {`${property.numBedrooms} ${property.numBedrooms > 1 ? "bedrooms" : "bedroom"}`}{" "}
+                {`${fetchedProperty?.numBedrooms} ${fetchedProperty && fetchedProperty.numBedrooms > 1 ? "bedrooms" : "bedroom"}`}{" "}
                 <Dot />
-                {`${property.numBeds} ${property.numBeds > 1 ? "beds" : "bed"}`}{" "}
+                {`${fetchedProperty?.numBeds} ${fetchedProperty && fetchedProperty.numBeds > 1 ? "beds" : "bed"}`}{" "}
                 <Dot />
-                {property.numBathrooms &&
-                  `${property.numBathrooms} ${property.numBathrooms > 1 ? "bathrooms" : "bathroom"}`}
+                {fetchedProperty?.numBathrooms &&
+                  `${fetchedProperty.numBathrooms} ${fetchedProperty.numBathrooms > 1 ? "bathrooms" : "bathroom"}`}
               </>
             )}
           </div>
@@ -383,9 +432,9 @@ export default function HostPropertiesDetails({
                 ? address === ", ,   , "
                   ? "Please enter a valid address"
                   : address
-                : property.address === ", ,   , "
+                : fetchedProperty?.address === ", ,   , "
                   ? "Please enter a valid address"
-                  : property.address}
+                  : fetchedProperty?.address}
             </p>
           </div>
           <div className="relative mb-10 h-[400px]">
@@ -394,12 +443,12 @@ export default function HostPropertiesDetails({
                 lat={
                   editing
                     ? (coordinateData?.coordinates.location?.lat ?? 0)
-                    : property.latLngPoint.y
+                    : (fetchedProperty?.latLngPoint.y ?? null)
                 }
                 lng={
                   editing
                     ? (coordinateData?.coordinates.location?.lng ?? 0)
-                    : property.latLngPoint.x
+                    : (fetchedProperty?.latLngPoint.x ?? null)
                 }
               />
             </div>
@@ -434,23 +483,25 @@ export default function HostPropertiesDetails({
           </div>
           <div className="text-muted-foreground">
             <p>
-              {capitalize(editing ? checkInType : (property.checkInInfo ?? ""))}
+              {capitalize(
+                editing ? checkInType : (fetchedProperty?.checkInInfo ?? ""),
+              )}
             </p>
             <div className="flex">
               <p>
                 Check-in:{" "}
                 {editing
                   ? convertTo12HourFormat(checkIn)
-                  : property.checkInTime &&
-                    convertTo12HourFormat(property.checkInTime)}
+                  : fetchedProperty?.checkInTime &&
+                    convertTo12HourFormat(fetchedProperty.checkInTime)}
               </p>
               <Dot />
               <p>
                 Check-out:{" "}
                 {editing
                   ? convertTo12HourFormat(checkOut)
-                  : property.checkOutTime &&
-                    convertTo12HourFormat(property.checkOutTime)}
+                  : fetchedProperty?.checkOutTime &&
+                    convertTo12HourFormat(fetchedProperty.checkOutTime)}
               </p>
             </div>
           </div>
@@ -473,29 +524,31 @@ export default function HostPropertiesDetails({
             </Dialog>
           </div>
           <div className="grid grid-cols-2 gap-y-2 text-muted-foreground">
-            {(editing ? amenities : property.amenities).map(
-              (amenity, index) => (
-                <div key={index} className="flex items-center">
-                  <p>{amenity}</p>
-                </div>
-              ),
-            )}
+            {fetchedProperty &&
+              (editing ? amenities : fetchedProperty.amenities).map(
+                (amenity, index) => (
+                  <div key={index} className="flex items-center">
+                    <p>{amenity}</p>
+                  </div>
+                ),
+              )}
             <div className="col-span-full">
               <p className="font-semibold text-primary">Other Amenities</p>
             </div>
-            {(editing ? otherAmenities : property.otherAmenities).map(
-              (amenity, index) => (
-                <div key={index} className="flex items-center">
-                  <p>{capitalize(amenity)}</p>
-                </div>
-              ),
-            )}
+            {fetchedProperty &&
+              (editing ? otherAmenities : fetchedProperty.otherAmenities).map(
+                (amenity, index) => (
+                  <div key={index} className="flex items-center">
+                    <p>{capitalize(amenity)}</p>
+                  </div>
+                ),
+              )}
           </div>
         </section>
         <section className="space-y-2 rounded-xl border p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-lg font-bold">
-              {property.imageUrls.length === 0 && (
+              {fetchedProperty?.imageUrls.length === 0 && (
                 <AlertCircle className="text-red-600" />
               )}
               Photos
@@ -526,7 +579,11 @@ export default function HostPropertiesDetails({
           <div className="grid h-[420.69px] grid-cols-4 grid-rows-2 gap-2 overflow-clip rounded-xl">
             <div className="relative col-span-2 row-span-2 bg-accent">
               <Image
-                src={editing ? imageURLs[0]! : property.imageUrls[0]!}
+                src={
+                  editing
+                    ? imageURLs[0]!
+                    : (fetchedProperty?.imageUrls[0] ?? "")
+                }
                 alt=""
                 fill
                 className="object-cover object-center"
@@ -535,80 +592,52 @@ export default function HostPropertiesDetails({
             </div>
             <div className="relative col-span-1 row-span-1 bg-accent">
               <Image
-                src={editing ? imageURLs[1]! : property.imageUrls[1]!}
-                alt=""
-                fill
-                className="object-cover object-center"
-              />
-            </div>
-            <div className="relative col-span-1 row-span-1 bg-accent">
-              <Image
-                src={editing ? imageURLs[2]! : property.imageUrls[2]!}
-                alt=""
-                fill
-                className="object-cover object-center"
-              />
-            </div>
-            <div className="relative col-span-1 row-span-1 bg-accent">
-              <Image
-                src={editing ? imageURLs[3]! : property.imageUrls[3]!}
-                alt=""
-                fill
-                className="object-cover object-center"
-              />
-            </div>
-            <div className="relative col-span-1 row-span-1 bg-accent">
-              <Image
-                src={editing ? imageURLs[4]! : property.imageUrls[4]!}
-                alt=""
-                fill
-                className="object-cover object-center"
-              />
-            </div>
-          </div>
-        </section>
-        <section className="space-y-2 rounded-xl border p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-lg font-bold">
-              {(!property.name || !property.about) && (
-                <AlertCircle className="text-red-600" />
-              )}
-              Description
-            </div>
-            <Dialog>
-              <DialogTrigger>
-                {editing && <a className="text-sm font-bold underline">Edit</a>}
-              </DialogTrigger>
-              <DialogContent>
-                <Onboarding8
+                src={
                   editing
-                  setHandleOnboarding={setHandleOnboarding}
-                />
-                <DialogFooter>
-                  <DialogClose asChild>
-                    <Button
-                      onClick={async () => {
-                        handleOnboarding?.();
-                      }}
-                    >
-                      Save
-                    </Button>
-                  </DialogClose>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
-          <div>
-            <h3 className="font-semibold">Title</h3>
-            <p className="text-muted-foreground">
-              {editing ? title : property.name}
-            </p>
-          </div>
-          <div>
-            <h3 className="font-semibold">Description</h3>
-            <p className="text-muted-foreground">
-              {editing ? description : property.about}
-            </p>
+                    ? imageURLs[1]!
+                    : (fetchedProperty?.imageUrls[1] ?? "")
+                }
+                alt=""
+                fill
+                className="object-cover object-center"
+              />
+            </div>
+            <div className="relative col-span-1 row-span-1 bg-accent">
+              <Image
+                src={
+                  editing
+                    ? imageURLs[2]!
+                    : (fetchedProperty?.imageUrls[2] ?? "")
+                }
+                alt=""
+                fill
+                className="object-cover object-center"
+              />
+            </div>
+            <div className="relative col-span-1 row-span-1 bg-accent">
+              <Image
+                src={
+                  editing
+                    ? imageURLs[3]!
+                    : (fetchedProperty?.imageUrls[3] ?? "")
+                }
+                alt=""
+                fill
+                className="object-cover object-center"
+              />
+            </div>
+            <div className="relative col-span-1 row-span-1 bg-accent">
+              <Image
+                src={
+                  editing
+                    ? imageURLs[4]!
+                    : (fetchedProperty?.imageUrls[4] ?? "")
+                }
+                alt=""
+                fill
+                className="object-cover object-center"
+              />
+            </div>
           </div>
         </section>
         <section className="space-y-2 rounded-xl border p-4">
@@ -639,12 +668,12 @@ export default function HostPropertiesDetails({
           </div>
           <div className="text-muted-foreground">
             <p>
-              {(editing ? petsAllowed : property.petsAllowed)
+              {(editing ? petsAllowed : fetchedProperty?.petsAllowed)
                 ? "Pets allowed"
                 : "No pets"}
             </p>
             <p>
-              {(editing ? smokingAllowed : property.smokingAllowed)
+              {(editing ? smokingAllowed : fetchedProperty?.smokingAllowed)
                 ? "Smoking allowed"
                 : "No smoking"}
             </p>
@@ -655,8 +684,8 @@ export default function HostPropertiesDetails({
               ? otherHouseRules
                 ? otherHouseRules
                 : "No additional rules"
-              : property.otherHouseRules
-                ? property.otherHouseRules
+              : fetchedProperty?.otherHouseRules
+                ? fetchedProperty.otherHouseRules
                 : "No additional rules"}
           </p>
         </section>
