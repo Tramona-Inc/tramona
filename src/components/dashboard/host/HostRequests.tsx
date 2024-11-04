@@ -10,12 +10,19 @@ import { useState } from "react";
 import { type Property } from "@/server/db/schema";
 import HostConfirmRequestDialog from "./HostConfirmRequestDialog";
 import HostFinishRequestDialog from "./HostFinishRequestDialog";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, ArrowUpDown, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { type SeparatedData } from "@/server/server-utils";
 import { separateByPriceRestriction } from "@/utils/utils";
 import { useToast } from "@/components/ui/use-toast";
 import { errorToast } from "@/utils/toasts";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import HostRequestCalendar from "./HostRequestCalendar";
 
 export default function HostRequests() {
   const { toast } = useToast();
@@ -25,6 +32,10 @@ export default function HostRequests() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const router = useRouter();
   const { city, priceRestriction } = router.query;
+  const [priceSort, setPriceSort] = useState<"asc" | "desc" | null>(null);
+  const [selectedOption, setSelectedOption] = useState<
+    "normal" | "outsidePriceRestriction"
+  >(priceRestriction ? "outsidePriceRestriction" : "normal");
 
   const [selectedRequest, setSelectedRequest] =
     useState<HostDashboardRequest | null>(null);
@@ -36,7 +47,6 @@ export default function HostRequests() {
   const [separatedData, setSeparatedData] = useState<SeparatedData | null>(
     null,
   );
-
   const [selectedProperties, setSelectedProperties] = useState<number[]>([]);
 
   const { data: unusedReferralDiscounts } =
@@ -54,21 +64,66 @@ export default function HostRequests() {
       },
     });
 
-  api.properties.getHostPropertiesWithRequests.useQuery(undefined, {
-    onSuccess: (fetchedProperties) => {
-      const separatedProperties = separateByPriceRestriction(fetchedProperties);
-      setSeparatedData(separatedProperties);
-    },
-  });
+  const { data: fetchedProperties } =
+    api.properties.getHostPropertiesWithRequests.useQuery(undefined, {
+      onSuccess: (fetchedProperties) => {
+        const separatedProperties =
+          separateByPriceRestriction(fetchedProperties);
+        setSeparatedData(separatedProperties);
+      },
+    });
 
-  const requestsWithProperties = priceRestriction
-    ? separatedData?.outsidePriceRestriction
-    : separatedData?.normal;
+  const requestsWithProperties =
+    selectedOption === "normal"
+      ? separatedData?.normal
+      : separatedData?.outsidePriceRestriction;
 
   const cityData = requestsWithProperties?.find((p) => p.city === city);
 
+  // Sort requests based on price if sorting is active
+  const sortedRequests = cityData?.requests.slice().sort((a, b) => {
+    if (!priceSort) return 0;
+    const priceA = Number(propertyPrices[a.request.id] || 0);
+    const priceB = Number(propertyPrices[b.request.id] || 0);
+    return priceSort === "asc" ? priceA - priceB : priceB - priceA;
+  });
+
   const { mutateAsync: rejectRequest } =
     api.requests.rejectRequest.useMutation();
+
+  // Get the selected property data for the calendar
+  const selectedProperty = properties?.[0];
+  const calendarData = selectedProperty
+    ? {
+        title: selectedProperty.title,
+        details: {
+          guests: selectedProperty.maxGuests,
+          bedrooms: selectedProperty.bedrooms,
+          beds: selectedProperty.beds,
+          baths: selectedProperty.bathrooms,
+        },
+        occupancyText: "30% occupied over the next 3 months", // This should be calculated from actual booking data
+      }
+    : null;
+
+  // Handle option change
+  const handleOptionChange = (option: "normal" | "outsidePriceRestriction") => {
+    setSelectedOption(option);
+    const newQuery = {
+      ...router.query,
+      priceRestriction:
+        option === "outsidePriceRestriction" ? "true" : undefined,
+    };
+
+    if (!newQuery.priceRestriction) {
+      delete newQuery.priceRestriction;
+    }
+
+    void router.push({
+      pathname: router.pathname,
+      query: newQuery,
+    });
+  };
 
   return (
     <div className="p-4">
@@ -77,9 +132,80 @@ export default function HostRequests() {
           <ChevronLeft />
         </Link>
       </div>
+
+      {/* Action Buttons */}
+      <div className="mb-4 flex flex-row items-center justify-between">
+        {/* Primary/Other Toggle */}
+        <div className="flex gap-2">
+          <Button
+            variant={selectedOption === "normal" ? "primary" : "white"}
+            className="rounded-full shadow-md"
+            onClick={() => handleOptionChange("normal")}
+          >
+            Primary
+          </Button>
+          <Button
+            variant={
+              selectedOption === "outsidePriceRestriction" ? "primary" : "white"
+            }
+            className="rounded-full shadow-md"
+            onClick={() => handleOptionChange("outsidePriceRestriction")}
+          >
+            Other
+          </Button>
+        </div>
+
+        {/* Price Sort Dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="outline"
+              className="flex items-center gap-2 rounded-full bg-white px-4 py-2 shadow-sm hover:bg-gray-50"
+            >
+              <ArrowUpDown className="h-4 w-4" />
+              <span className="text-sm font-medium">Sort by price</span>
+              <ChevronDown className="h-4 w-4 opacity-50" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuItem
+              className="flex items-center gap-2"
+              onClick={() => setPriceSort("asc")}
+            >
+              Price: Low to High
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="flex items-center gap-2"
+              onClick={() => setPriceSort("desc")}
+            >
+              Price: High to Low
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => setPriceSort(null)}
+              className="text-gray-500"
+            >
+              Clear sorting
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      {/* Calendar */}
+      {/* Calendar */}
+      <HostRequestCalendar
+        title="Beautiful Downtown Apartment"
+        details={{
+          guests: 4,
+          bedrooms: 2,
+          beds: 3,
+          baths: 2,
+        }}
+        occupancyText="30% occupied over the next 3 months"
+      />
+
       {cityData ? (
-        <div className="grid gap-4 md:grid-cols-2">
-          {cityData.requests.map((requestData) => (
+        <div className="mt-4 grid gap-4 md:grid-cols-2">
+          {(sortedRequests || cityData.requests).map((requestData) => (
             <div key={requestData.request.id} className="mb-4">
               <RequestCard request={requestData.request} type="host">
                 <div className="mt-4 grid w-full grid-cols-2 gap-4">
@@ -116,6 +242,8 @@ export default function HostRequests() {
       ) : (
         <SkeletonText>No requests found for {city}</SkeletonText>
       )}
+
+      {/* Dialogs */}
       {step === 0 && properties && selectedRequest && (
         <HostRequestDialog
           propertyPrices={propertyPrices}
