@@ -283,12 +283,8 @@ export default function HostPropertiesDetails({
           />
         </div>
       </div>
-      <div>
-        <h2 className="text-lg font-bold">Title</h2>
-        <p className="text-muted-foreground">{property.name}</p>
-      </div>
-      <div className="divide-y">
-        <section className="space-y-2 py-4">
+      <div className="my-4 space-y-4">
+        <section className="space-y-2 rounded-xl border p-4">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold">Type of property</h2>
             <Dialog>
@@ -309,7 +305,7 @@ export default function HostPropertiesDetails({
             {editing ? propertyType : property.propertyType}
           </p>
         </section>
-        <section className="space-y-2 py-4">
+        <section className="space-y-2 rounded-xl border p-4">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold">Living situation</h2>
             <Dialog>
@@ -354,7 +350,7 @@ export default function HostPropertiesDetails({
         </section>
 
         {/* TODO: fix edit location functionality */}
-        <section className="space-y-2 py-4">
+        <section className="space-y-2 rounded-xl border p-4">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold">Location</h2>
             <Dialog>
@@ -410,7 +406,7 @@ export default function HostPropertiesDetails({
           </div>
         </section>
 
-        <section className="space-y-2 py-4">
+        <section className="space-y-2 rounded-xl border p-4">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold">Check-in</h2>
             <Dialog>
@@ -459,7 +455,7 @@ export default function HostPropertiesDetails({
             </div>
           </div>
         </section>
-        <section className="space-y-2 py-4">
+        <section className="space-y-2 rounded-xl border p-4">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold">Amenities</h2>
             <Dialog>
@@ -496,7 +492,7 @@ export default function HostPropertiesDetails({
             )}
           </div>
         </section>
-        <section className="space-y-2 py-4">
+        <section className="space-y-2 rounded-xl border p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-lg font-bold">
               {property.imageUrls.length === 0 && (
@@ -571,7 +567,7 @@ export default function HostPropertiesDetails({
             </div>
           </div>
         </section>
-        <section className="space-y-2 py-4">
+        <section className="space-y-2 rounded-xl border p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-lg font-bold">
               {(!property.name || !property.about) && (
@@ -615,7 +611,7 @@ export default function HostPropertiesDetails({
             </p>
           </div>
         </section>
-        <section className="space-y-2 py-4">
+        <section className="space-y-2 rounded-xl border p-4">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold">House rules</h2>
             <Dialog>
