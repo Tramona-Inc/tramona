@@ -204,9 +204,13 @@ export default function HostRequests() {
       />
 
       {cityData ? (
-        <div className="mt-4 grid gap-4 md:grid-cols-2">
+        <div className="mt-4 grid grid-cols-2 gap-4">
+          {" "}
+          {/* Removed md: breakpoint to keep 2 columns */}
           {(sortedRequests || cityData.requests).map((requestData) => (
-            <div key={requestData.request.id} className="mb-4">
+            <div key={requestData.request.id}>
+              {" "}
+              {/* Removed mb-4 since we're using gap */}
               <RequestCard request={requestData.request} type="host">
                 <div className="mt-4 grid w-full grid-cols-2 gap-4">
                   <Button

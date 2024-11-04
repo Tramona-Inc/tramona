@@ -8,6 +8,7 @@ export default function PropertyAvailabilityCalendar({
   occupancyText,
 }) {
   const [baseDate, setBaseDate] = React.useState(new Date());
+  const [selectedDate, setSelectedDate] = React.useState<Date | null>(null);
   const daysOfWeek = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 
   const getMonthData = (date) => {
@@ -38,6 +39,17 @@ export default function PropertyAvailabilityCalendar({
     setBaseDate(newDate);
   };
 
+  const handleDateClick = (day: number) => {
+    const clickedDate = new Date(monthData.year, monthData.month, day);
+    setSelectedDate(clickedDate);
+  };
+
+  const isDateSelected = (day: number) => {
+    if (!selectedDate) return false;
+    const date = new Date(monthData.year, monthData.month, day);
+    return date.toDateString() === selectedDate.toDateString();
+  };
+
   const renderMonth = (monthData) => {
     const days = [];
 
@@ -53,14 +65,16 @@ export default function PropertyAvailabilityCalendar({
     for (let day = 1; day <= monthData.daysInMonth; day++) {
       const date = new Date(monthData.year, monthData.month, day);
       const isToday = new Date().toDateString() === date.toDateString();
+      const isSelected = isDateSelected(day);
 
       days.push(
-        <div
+        <button
           key={day}
-          className={`flex h-8 items-center justify-center text-sm ${isToday ? "font-medium text-teal-600" : ""}`}
+          onClick={() => handleDateClick(day)}
+          className={`flex h-8 cursor-pointer items-center justify-center text-sm hover:bg-gray-100 ${isSelected ? "bg-primaryGreen text-white hover:bg-primaryGreen" : ""} ${isToday && !isSelected ? "font-medium text-teal-600" : ""}`}
         >
           {day}
-        </div>,
+        </button>,
       );
     }
 
@@ -83,14 +97,14 @@ export default function PropertyAvailabilityCalendar({
             className="rounded-full p-1 hover:bg-gray-100"
             onClick={() => navigateMonth(-1)}
           >
-            <ChevronLeft className="h-5 w-20 text-gray-600" />
+            <ChevronLeft className="h-5 w-5 text-gray-600" />
           </button>
           <div className="text-center font-medium">{monthData.monthName}</div>
           <button
             className="rounded-full p-1 hover:bg-gray-100"
             onClick={() => navigateMonth(1)}
           >
-            <ChevronRight className="h-5 w-20 text-gray-600" />
+            <ChevronRight className="h-5 w-5 text-gray-600" />
           </button>
         </div>
         <div className="grid grid-cols-7 gap-0">
@@ -116,6 +130,7 @@ export default function PropertyAvailabilityCalendar({
           {/* Image and text container */}
           <img
             src="https://via.placeholder.com/96"
+            alt="Property"
             className="mb-4 h-[200px] w-full rounded-lg object-cover md:mb-0 md:h-[300px] md:w-[300px]"
           />
           <div className="md:ml-4">
