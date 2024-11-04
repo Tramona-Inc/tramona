@@ -138,7 +138,7 @@ export default function HostRequestsLayout({
                     setActiveTab("city");
                   }}
                 >
-                  City Request
+                  Primary
                 </Button>
                 <Button
                   variant={
@@ -153,7 +153,7 @@ export default function HostRequestsLayout({
                     setActiveTab("book");
                   }}
                 >
-                  Request to Book
+                  Other
                 </Button>
               </div>
               {children}
