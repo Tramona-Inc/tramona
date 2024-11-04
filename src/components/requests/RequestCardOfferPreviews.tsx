@@ -2,14 +2,12 @@ import { type GuestDashboardRequest } from "./RequestCard";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 import Image from "next/image";
 import UserAvatar from "../_common/UserAvatar";
-import { formatDistanceToNowStrict } from "date-fns";
 import Link from "next/link";
 import {
   formatCurrency,
   getNumNights,
   getOfferDiscountPercentage,
 } from "@/utils/utils";
-import { ExternalLinkIcon } from "lucide-react";
 import { sortBy } from "lodash";
 import { Badge } from "../ui/badge";
 
