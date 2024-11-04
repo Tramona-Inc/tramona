@@ -13,11 +13,16 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useRouter } from "next/router";
 import ExpandableSearchBar from "@/components/_common/ExpandableSearchBar";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import HostPropertiesSidebar from "./HostPropertiesSidebar";
+import { cn } from "@/utils/utils";
+import HostPropertyInfo from "./HostPropertyInfo";
 
 export default function HostPropertiesLayout() {
   const [searchResults, setSearchResults] = useState<Property[]>([]);
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+  const [selectedProperty, setSelectedProperty] = useState<Property>();
+  const [open, setOpen] = useState(false);
 
   const router = useRouter();
 
@@ -101,8 +106,27 @@ export default function HostPropertiesLayout() {
     setSearchResults(results);
   };
 
+  const handleSelectedProperty = (property: Property) => {
+    setSelectedProperty(property);
+    setOpen(true);
+  };
+
+  useEffect(() => {
+    if (open) {
+      document.body.classList.add("overflow-hidden");
+    } else {
+      document.body.classList.remove("overflow-hidden");
+    }
+  }, [open]);
+
   return (
-    <section className="mx-auto mb-24 mt-7 max-w-7xl px-6 md:my-14">
+    <section className="relative mx-auto mb-24 mt-7 max-w-7xl px-6 md:my-14">
+      <HostPropertiesSidebar
+        onClose={() => setOpen(false)}
+        className={cn(!open && "hidden")}
+      >
+        {selectedProperty && <HostPropertyInfo property={selectedProperty} />}
+      </HostPropertiesSidebar>
       <div className="flex items-center gap-4 sm:flex-row sm:justify-between">
         <h1 className="text-2xl font-bold md:text-4xl">Your properties</h1>
         <div className="flex flex-1 items-center justify-end gap-4">
@@ -135,7 +159,11 @@ export default function HostPropertiesLayout() {
         onExpandChange={setIsSearchExpanded}
       />
       {isSearchExpanded ? (
-        <HostProperties properties={searchResults} searched />
+        <HostProperties
+          properties={searchResults}
+          onSelectedProperty={handleSelectedProperty}
+          searched
+        />
       ) : (
         <Tabs className="mt-6" defaultValue="listed">
           <TabsList>
@@ -144,13 +172,22 @@ export default function HostPropertiesLayout() {
             <TabsTrigger value="archived">Archived</TabsTrigger>
           </TabsList>
           <TabsContent value="listed">
-            <HostProperties properties={listedProperties ?? null} />
+            <HostProperties
+              properties={listedProperties ?? null}
+              onSelectedProperty={handleSelectedProperty}
+            />
           </TabsContent>
           <TabsContent value="drafts">
-            <HostProperties properties={draftedProperties ?? null} />
+            <HostProperties
+              properties={draftedProperties ?? null}
+              onSelectedProperty={handleSelectedProperty}
+            />
           </TabsContent>
           <TabsContent value="archived">
-            <HostProperties properties={archivedProperties ?? null} />
+            <HostProperties
+              properties={archivedProperties ?? null}
+              onSelectedProperty={handleSelectedProperty}
+            />
           </TabsContent>
         </Tabs>
       )}

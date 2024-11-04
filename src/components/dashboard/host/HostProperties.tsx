@@ -7,32 +7,22 @@ import {
 import { type Property } from "@/server/db/schema/tables/properties";
 import { AlertCircle, FenceIcon } from "lucide-react";
 import Image from "next/image";
-import HostPropertiesSidebar from "./HostPropertiesSidebar";
-import { useState } from "react";
-import { cn } from "@/utils/utils";
 
 export default function HostProperties({
   properties,
   searched = false,
+  onSelectedProperty,
 }: {
   properties: Property[] | null;
   searched?: boolean;
+  onSelectedProperty: (property: Property) => void;
 }) {
-  const [selectedProperty, setSelectedProperty] = useState<Property>();
-  const [open, setOpen] = useState(false);
-
   const handleCardClick = (property: Property) => {
-    setSelectedProperty(property);
-    setOpen(true);
+    onSelectedProperty(property);
   };
 
   return (
-    <div className="relative">
-      <HostPropertiesSidebar
-        property={selectedProperty}
-        onClose={() => setOpen(false)}
-        className={cn(!open && "hidden")}
-      />
+    <div>
       <div className="mx-auto my-4 max-w-7xl space-y-4">
         {properties ? (
           properties.length > 0 ? (
