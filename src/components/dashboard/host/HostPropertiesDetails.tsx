@@ -183,8 +183,8 @@ export default function HostPropertiesDetails({
   }, [propertyId]);
 
   return (
-    <div className="my-6 h-[30rem] overflow-y-auto">
-      <div className="flex items-center justify-between">
+    <>
+      <div className="flex items-center justify-between pt-4">
         {editing && (
           <div className="grid grid-cols-3 gap-2">
             <AlertDialog>
@@ -288,408 +288,427 @@ export default function HostPropertiesDetails({
           />
         </div>
       </div>
-      <div className="my-4 space-y-4">
-        <section className="space-y-2 rounded-xl border p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-lg font-bold">
-              {(!property.name || !property.about) && (
-                <AlertCircle className="text-red-600" />
-              )}
-              Description
+      <div className="mb-6 mt-2 h-[35rem] overflow-y-auto">
+        <div className="my-4 space-y-4">
+          <section className="space-y-2 rounded-xl border p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-lg font-bold">
+                {(!property.name || !property.about) && (
+                  <AlertCircle className="text-red-600" />
+                )}
+                Description
+              </div>
+              <Dialog>
+                <DialogTrigger>
+                  {editing && (
+                    <a className="text-sm font-bold underline">Edit</a>
+                  )}
+                </DialogTrigger>
+                <DialogContent>
+                  <Onboarding8
+                    editing
+                    setHandleOnboarding={setHandleOnboarding}
+                  />
+                  <DialogFooter>
+                    <DialogClose asChild>
+                      <Button
+                        onClick={async () => {
+                          handleOnboarding?.();
+                        }}
+                      >
+                        Save
+                      </Button>
+                    </DialogClose>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </div>
-            <Dialog>
-              <DialogTrigger>
-                {editing && <a className="text-sm font-bold underline">Edit</a>}
-              </DialogTrigger>
-              <DialogContent>
-                <Onboarding8
-                  editing
-                  setHandleOnboarding={setHandleOnboarding}
-                />
-                <DialogFooter>
-                  <DialogClose asChild>
-                    <Button
-                      onClick={async () => {
-                        handleOnboarding?.();
-                      }}
-                    >
-                      Save
-                    </Button>
-                  </DialogClose>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
-          <div>
-            <h3 className="font-semibold">Name</h3>
+            <div>
+              <h3 className="font-semibold">Name</h3>
+              <p className="text-muted-foreground">
+                {editing ? title : fetchedProperty?.name}
+              </p>
+            </div>
+            <div>
+              <h3 className="font-semibold">About</h3>
+              <p className="text-muted-foreground">
+                {editing ? description : fetchedProperty?.about}
+              </p>
+            </div>
+          </section>
+          <section className="space-y-2 rounded-xl border p-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold">Type of property</h2>
+              <Dialog>
+                <DialogTrigger>
+                  {editing && (
+                    <a className="text-sm font-bold underline">Edit</a>
+                  )}
+                </DialogTrigger>
+                <DialogContent>
+                  <Onboarding2 editing />
+                  <DialogFooter>
+                    <DialogClose asChild>
+                      <Button>Save</Button>
+                    </DialogClose>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
             <p className="text-muted-foreground">
-              {editing ? title : fetchedProperty?.name}
+              {editing ? propertyType : fetchedProperty?.propertyType}
             </p>
-          </div>
-          <div>
-            <h3 className="font-semibold">About</h3>
+          </section>
+          <section className="space-y-2 rounded-xl border p-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold">Living situation</h2>
+              <Dialog>
+                <DialogTrigger>
+                  {editing && (
+                    <a className="text-sm font-bold underline">Edit</a>
+                  )}
+                </DialogTrigger>
+                <DialogContent>
+                  <Onboarding3 editing />
+                  <DialogFooter>
+                    <DialogClose asChild>
+                      <Button>Save</Button>
+                    </DialogClose>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
             <p className="text-muted-foreground">
-              {editing ? description : fetchedProperty?.about}
+              {editing ? spaceType : fetchedProperty?.roomType}
             </p>
-          </div>
-        </section>
-        <section className="space-y-2 rounded-xl border p-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold">Type of property</h2>
-            <Dialog>
-              <DialogTrigger>
-                {editing && <a className="text-sm font-bold underline">Edit</a>}
-              </DialogTrigger>
-              <DialogContent>
-                <Onboarding2 editing />
-                <DialogFooter>
-                  <DialogClose asChild>
-                    <Button>Save</Button>
-                  </DialogClose>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
-          <p className="text-muted-foreground">
-            {editing ? propertyType : fetchedProperty?.propertyType}
-          </p>
-        </section>
-        <section className="space-y-2 rounded-xl border p-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold">Living situation</h2>
-            <Dialog>
-              <DialogTrigger>
-                {editing && <a className="text-sm font-bold underline">Edit</a>}
-              </DialogTrigger>
-              <DialogContent>
-                <Onboarding3 editing />
-                <DialogFooter>
-                  <DialogClose asChild>
-                    <Button>Save</Button>
-                  </DialogClose>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
-          <p className="text-muted-foreground">
-            {editing ? spaceType : fetchedProperty?.roomType}
-          </p>
-          <div className="flex lowercase text-muted-foreground">
-            {editing ? (
-              <>
-                {`${maxGuests} ${maxGuests > 1 ? "guests" : "guest"}`} <Dot />
-                {`${bedrooms} ${bedrooms > 1 ? "bedrooms" : "bedroom"}`} <Dot />
-                {`${beds} ${beds > 1 ? "beds" : "bed"}`} <Dot />
-                {bathrooms &&
-                  `${bathrooms} ${bathrooms > 1 ? "bathrooms" : "bathroom"}`}
-              </>
-            ) : (
-              <>
-                {`${fetchedProperty?.maxNumGuests} ${fetchedProperty && fetchedProperty.maxNumGuests > 1 ? "guests" : "guest"}`}{" "}
-                <Dot />
-                {`${fetchedProperty?.numBedrooms} ${fetchedProperty && fetchedProperty.numBedrooms > 1 ? "bedrooms" : "bedroom"}`}{" "}
-                <Dot />
-                {`${fetchedProperty?.numBeds} ${fetchedProperty && fetchedProperty.numBeds > 1 ? "beds" : "bed"}`}{" "}
-                <Dot />
-                {fetchedProperty?.numBathrooms &&
-                  `${fetchedProperty.numBathrooms} ${fetchedProperty.numBathrooms > 1 ? "bathrooms" : "bathroom"}`}
-              </>
-            )}
-          </div>
-        </section>
+            <div className="flex lowercase text-muted-foreground">
+              {editing ? (
+                <>
+                  {`${maxGuests} ${maxGuests > 1 ? "guests" : "guest"}`} <Dot />
+                  {`${bedrooms} ${bedrooms > 1 ? "bedrooms" : "bedroom"}`}{" "}
+                  <Dot />
+                  {`${beds} ${beds > 1 ? "beds" : "bed"}`} <Dot />
+                  {bathrooms &&
+                    `${bathrooms} ${bathrooms > 1 ? "bathrooms" : "bathroom"}`}
+                </>
+              ) : (
+                <>
+                  {`${fetchedProperty?.maxNumGuests} ${fetchedProperty && fetchedProperty.maxNumGuests > 1 ? "guests" : "guest"}`}{" "}
+                  <Dot />
+                  {`${fetchedProperty?.numBedrooms} ${fetchedProperty && fetchedProperty.numBedrooms > 1 ? "bedrooms" : "bedroom"}`}{" "}
+                  <Dot />
+                  {`${fetchedProperty?.numBeds} ${fetchedProperty && fetchedProperty.numBeds > 1 ? "beds" : "bed"}`}{" "}
+                  <Dot />
+                  {fetchedProperty?.numBathrooms &&
+                    `${fetchedProperty.numBathrooms} ${fetchedProperty.numBathrooms > 1 ? "bathrooms" : "bathroom"}`}
+                </>
+              )}
+            </div>
+          </section>
 
-        {/* TODO: fix edit location functionality */}
-        <section className="space-y-2 rounded-xl border p-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold">Location</h2>
-            <Dialog>
-              <DialogTrigger>
-                {editing && <a className="text-sm font-bold underline">Edit</a>}
-              </DialogTrigger>
-              <DialogContent>
-                <Onboarding4
-                  editing
-                  setHandleOnboarding={setHandleOnboarding}
+          {/* TODO: fix edit location functionality */}
+          <section className="space-y-2 rounded-xl border p-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold">Location</h2>
+              <Dialog>
+                <DialogTrigger>
+                  {editing && (
+                    <a className="text-sm font-bold underline">Edit</a>
+                  )}
+                </DialogTrigger>
+                <DialogContent>
+                  <Onboarding4
+                    editing
+                    setHandleOnboarding={setHandleOnboarding}
+                  />
+                  <DialogFooter>
+                    <DialogClose asChild>
+                      <Button
+                        onClick={async () => {
+                          handleOnboarding?.();
+                        }}
+                      >
+                        Save
+                      </Button>
+                    </DialogClose>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
+            <div className="flex items-center gap-2">
+              <MapPin />
+              <p className="text-muted-foreground">
+                {editing
+                  ? address === ", ,   , "
+                    ? "Please enter a valid address"
+                    : address
+                  : fetchedProperty?.address === ", ,   , "
+                    ? "Please enter a valid address"
+                    : fetchedProperty?.address}
+              </p>
+            </div>
+            <div className="relative mb-10 h-[400px]">
+              <div className="absolute inset-0 z-0">
+                <SingleLocationMap
+                  lat={
+                    editing
+                      ? (coordinateData?.coordinates.location?.lat ?? 0)
+                      : (fetchedProperty?.latLngPoint.y ?? null)
+                  }
+                  lng={
+                    editing
+                      ? (coordinateData?.coordinates.location?.lng ?? 0)
+                      : (fetchedProperty?.latLngPoint.x ?? null)
+                  }
                 />
-                <DialogFooter>
-                  <DialogClose asChild>
-                    <Button
-                      onClick={async () => {
-                        handleOnboarding?.();
-                      }}
-                    >
-                      Save
-                    </Button>
-                  </DialogClose>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
-          <div className="flex items-center gap-2">
-            <MapPin />
+              </div>
+            </div>
+          </section>
+
+          <section className="space-y-2 rounded-xl border p-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold">Check-in</h2>
+              <Dialog>
+                <DialogTrigger>
+                  {editing && (
+                    <a className="text-sm font-bold underline">Edit</a>
+                  )}
+                </DialogTrigger>
+                <DialogContent>
+                  <Onboarding5
+                    editing
+                    setHandleOnboarding={setHandleOnboarding}
+                  />
+                  <DialogFooter>
+                    <DialogClose asChild>
+                      <Button
+                        onClick={async () => {
+                          handleOnboarding?.();
+                        }}
+                      >
+                        Save
+                      </Button>
+                    </DialogClose>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
+            <div className="text-muted-foreground">
+              <p>
+                {capitalize(
+                  editing ? checkInType : (fetchedProperty?.checkInInfo ?? ""),
+                )}
+              </p>
+              <div className="flex">
+                <p>
+                  Check-in:{" "}
+                  {editing
+                    ? convertTo12HourFormat(checkIn)
+                    : fetchedProperty?.checkInTime &&
+                      convertTo12HourFormat(fetchedProperty.checkInTime)}
+                </p>
+                <Dot />
+                <p>
+                  Check-out:{" "}
+                  {editing
+                    ? convertTo12HourFormat(checkOut)
+                    : fetchedProperty?.checkOutTime &&
+                      convertTo12HourFormat(fetchedProperty.checkOutTime)}
+                </p>
+              </div>
+            </div>
+          </section>
+          <section className="space-y-2 rounded-xl border p-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold">Amenities</h2>
+              <Dialog>
+                <DialogTrigger>
+                  {editing && (
+                    <a className="text-sm font-bold underline">Edit</a>
+                  )}
+                </DialogTrigger>
+                <DialogContent>
+                  <Onboarding6 editing />
+                  <DialogFooter>
+                    <DialogClose asChild>
+                      <Button>Save</Button>
+                    </DialogClose>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
+            <div className="grid grid-cols-2 gap-y-2 text-muted-foreground">
+              {fetchedProperty &&
+                (editing ? amenities : fetchedProperty.amenities).map(
+                  (amenity, index) => (
+                    <div key={index} className="flex items-center">
+                      <p>{amenity}</p>
+                    </div>
+                  ),
+                )}
+              <div className="col-span-full">
+                <p className="font-semibold text-primary">Other Amenities</p>
+              </div>
+              {fetchedProperty &&
+                (editing ? otherAmenities : fetchedProperty.otherAmenities).map(
+                  (amenity, index) => (
+                    <div key={index} className="flex items-center">
+                      <p>{capitalize(amenity)}</p>
+                    </div>
+                  ),
+                )}
+            </div>
+          </section>
+          <section className="space-y-2 rounded-xl border p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-lg font-bold">
+                {fetchedProperty?.imageUrls.length === 0 && (
+                  <AlertCircle className="text-red-600" />
+                )}
+                Photos
+              </div>
+              <Dialog>
+                <DialogTrigger>
+                  {editing && (
+                    <a className="text-sm font-bold underline">Edit</a>
+                  )}
+                </DialogTrigger>
+                <DialogContent>
+                  <Onboarding7
+                    editing
+                    setHandleOnboarding={setHandleOnboarding}
+                  />
+                  <DialogFooter>
+                    <DialogClose asChild>
+                      <Button
+                        onClick={async () => {
+                          handleOnboarding?.();
+                        }}
+                      >
+                        Save
+                      </Button>
+                    </DialogClose>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
+            <div className="grid h-[420.69px] grid-cols-4 grid-rows-2 gap-2 overflow-clip rounded-xl">
+              <div className="relative col-span-2 row-span-2 bg-accent">
+                <Image
+                  src={
+                    editing
+                      ? imageURLs[0]!
+                      : (fetchedProperty?.imageUrls[0] ?? "")
+                  }
+                  alt=""
+                  fill
+                  className="object-cover object-center"
+                  priority
+                />
+              </div>
+              <div className="relative col-span-1 row-span-1 bg-accent">
+                <Image
+                  src={
+                    editing
+                      ? imageURLs[1]!
+                      : (fetchedProperty?.imageUrls[1] ?? "")
+                  }
+                  alt=""
+                  fill
+                  className="object-cover object-center"
+                />
+              </div>
+              <div className="relative col-span-1 row-span-1 bg-accent">
+                <Image
+                  src={
+                    editing
+                      ? imageURLs[2]!
+                      : (fetchedProperty?.imageUrls[2] ?? "")
+                  }
+                  alt=""
+                  fill
+                  className="object-cover object-center"
+                />
+              </div>
+              <div className="relative col-span-1 row-span-1 bg-accent">
+                <Image
+                  src={
+                    editing
+                      ? imageURLs[3]!
+                      : (fetchedProperty?.imageUrls[3] ?? "")
+                  }
+                  alt=""
+                  fill
+                  className="object-cover object-center"
+                />
+              </div>
+              <div className="relative col-span-1 row-span-1 bg-accent">
+                <Image
+                  src={
+                    editing
+                      ? imageURLs[4]!
+                      : (fetchedProperty?.imageUrls[4] ?? "")
+                  }
+                  alt=""
+                  fill
+                  className="object-cover object-center"
+                />
+              </div>
+            </div>
+          </section>
+          <section className="space-y-2 rounded-xl border p-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold">House rules</h2>
+              <Dialog>
+                <DialogTrigger>
+                  {editing && (
+                    <a className="text-sm font-bold underline">Edit</a>
+                  )}
+                </DialogTrigger>
+                <DialogContent>
+                  <Onboarding9
+                    editing
+                    setHandleOnboarding={setHandleOnboarding}
+                  />
+                  <DialogFooter>
+                    <DialogClose asChild>
+                      <Button
+                        onClick={async () => {
+                          handleOnboarding?.();
+                        }}
+                      >
+                        Save
+                      </Button>
+                    </DialogClose>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
+            <div className="text-muted-foreground">
+              <p>
+                {(editing ? petsAllowed : fetchedProperty?.petsAllowed)
+                  ? "Pets allowed"
+                  : "No pets"}
+              </p>
+              <p>
+                {(editing ? smokingAllowed : fetchedProperty?.smokingAllowed)
+                  ? "Smoking allowed"
+                  : "No smoking"}
+              </p>
+            </div>
+            <h3 className="font-semibold">Additional rules</h3>
             <p className="text-muted-foreground">
               {editing
-                ? address === ", ,   , "
-                  ? "Please enter a valid address"
-                  : address
-                : fetchedProperty?.address === ", ,   , "
-                  ? "Please enter a valid address"
-                  : fetchedProperty?.address}
-            </p>
-          </div>
-          <div className="relative mb-10 h-[400px]">
-            <div className="absolute inset-0 z-0">
-              <SingleLocationMap
-                lat={
-                  editing
-                    ? (coordinateData?.coordinates.location?.lat ?? 0)
-                    : (fetchedProperty?.latLngPoint.y ?? null)
-                }
-                lng={
-                  editing
-                    ? (coordinateData?.coordinates.location?.lng ?? 0)
-                    : (fetchedProperty?.latLngPoint.x ?? null)
-                }
-              />
-            </div>
-          </div>
-        </section>
-
-        <section className="space-y-2 rounded-xl border p-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold">Check-in</h2>
-            <Dialog>
-              <DialogTrigger>
-                {editing && <a className="text-sm font-bold underline">Edit</a>}
-              </DialogTrigger>
-              <DialogContent>
-                <Onboarding5
-                  editing
-                  setHandleOnboarding={setHandleOnboarding}
-                />
-                <DialogFooter>
-                  <DialogClose asChild>
-                    <Button
-                      onClick={async () => {
-                        handleOnboarding?.();
-                      }}
-                    >
-                      Save
-                    </Button>
-                  </DialogClose>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
-          <div className="text-muted-foreground">
-            <p>
-              {capitalize(
-                editing ? checkInType : (fetchedProperty?.checkInInfo ?? ""),
-              )}
-            </p>
-            <div className="flex">
-              <p>
-                Check-in:{" "}
-                {editing
-                  ? convertTo12HourFormat(checkIn)
-                  : fetchedProperty?.checkInTime &&
-                    convertTo12HourFormat(fetchedProperty.checkInTime)}
-              </p>
-              <Dot />
-              <p>
-                Check-out:{" "}
-                {editing
-                  ? convertTo12HourFormat(checkOut)
-                  : fetchedProperty?.checkOutTime &&
-                    convertTo12HourFormat(fetchedProperty.checkOutTime)}
-              </p>
-            </div>
-          </div>
-        </section>
-        <section className="space-y-2 rounded-xl border p-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold">Amenities</h2>
-            <Dialog>
-              <DialogTrigger>
-                {editing && <a className="text-sm font-bold underline">Edit</a>}
-              </DialogTrigger>
-              <DialogContent>
-                <Onboarding6 editing />
-                <DialogFooter>
-                  <DialogClose asChild>
-                    <Button>Save</Button>
-                  </DialogClose>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
-          <div className="grid grid-cols-2 gap-y-2 text-muted-foreground">
-            {fetchedProperty &&
-              (editing ? amenities : fetchedProperty.amenities).map(
-                (amenity, index) => (
-                  <div key={index} className="flex items-center">
-                    <p>{amenity}</p>
-                  </div>
-                ),
-              )}
-            <div className="col-span-full">
-              <p className="font-semibold text-primary">Other Amenities</p>
-            </div>
-            {fetchedProperty &&
-              (editing ? otherAmenities : fetchedProperty.otherAmenities).map(
-                (amenity, index) => (
-                  <div key={index} className="flex items-center">
-                    <p>{capitalize(amenity)}</p>
-                  </div>
-                ),
-              )}
-          </div>
-        </section>
-        <section className="space-y-2 rounded-xl border p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-lg font-bold">
-              {fetchedProperty?.imageUrls.length === 0 && (
-                <AlertCircle className="text-red-600" />
-              )}
-              Photos
-            </div>
-            <Dialog>
-              <DialogTrigger>
-                {editing && <a className="text-sm font-bold underline">Edit</a>}
-              </DialogTrigger>
-              <DialogContent>
-                <Onboarding7
-                  editing
-                  setHandleOnboarding={setHandleOnboarding}
-                />
-                <DialogFooter>
-                  <DialogClose asChild>
-                    <Button
-                      onClick={async () => {
-                        handleOnboarding?.();
-                      }}
-                    >
-                      Save
-                    </Button>
-                  </DialogClose>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
-          <div className="grid h-[420.69px] grid-cols-4 grid-rows-2 gap-2 overflow-clip rounded-xl">
-            <div className="relative col-span-2 row-span-2 bg-accent">
-              <Image
-                src={
-                  editing
-                    ? imageURLs[0]!
-                    : (fetchedProperty?.imageUrls[0] ?? "")
-                }
-                alt=""
-                fill
-                className="object-cover object-center"
-                priority
-              />
-            </div>
-            <div className="relative col-span-1 row-span-1 bg-accent">
-              <Image
-                src={
-                  editing
-                    ? imageURLs[1]!
-                    : (fetchedProperty?.imageUrls[1] ?? "")
-                }
-                alt=""
-                fill
-                className="object-cover object-center"
-              />
-            </div>
-            <div className="relative col-span-1 row-span-1 bg-accent">
-              <Image
-                src={
-                  editing
-                    ? imageURLs[2]!
-                    : (fetchedProperty?.imageUrls[2] ?? "")
-                }
-                alt=""
-                fill
-                className="object-cover object-center"
-              />
-            </div>
-            <div className="relative col-span-1 row-span-1 bg-accent">
-              <Image
-                src={
-                  editing
-                    ? imageURLs[3]!
-                    : (fetchedProperty?.imageUrls[3] ?? "")
-                }
-                alt=""
-                fill
-                className="object-cover object-center"
-              />
-            </div>
-            <div className="relative col-span-1 row-span-1 bg-accent">
-              <Image
-                src={
-                  editing
-                    ? imageURLs[4]!
-                    : (fetchedProperty?.imageUrls[4] ?? "")
-                }
-                alt=""
-                fill
-                className="object-cover object-center"
-              />
-            </div>
-          </div>
-        </section>
-        <section className="space-y-2 rounded-xl border p-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold">House rules</h2>
-            <Dialog>
-              <DialogTrigger>
-                {editing && <a className="text-sm font-bold underline">Edit</a>}
-              </DialogTrigger>
-              <DialogContent>
-                <Onboarding9
-                  editing
-                  setHandleOnboarding={setHandleOnboarding}
-                />
-                <DialogFooter>
-                  <DialogClose asChild>
-                    <Button
-                      onClick={async () => {
-                        handleOnboarding?.();
-                      }}
-                    >
-                      Save
-                    </Button>
-                  </DialogClose>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
-          <div className="text-muted-foreground">
-            <p>
-              {(editing ? petsAllowed : fetchedProperty?.petsAllowed)
-                ? "Pets allowed"
-                : "No pets"}
-            </p>
-            <p>
-              {(editing ? smokingAllowed : fetchedProperty?.smokingAllowed)
-                ? "Smoking allowed"
-                : "No smoking"}
-            </p>
-          </div>
-          <h3 className="font-semibold">Additional rules</h3>
-          <p className="text-muted-foreground">
-            {editing
-              ? otherHouseRules
                 ? otherHouseRules
-                : "No additional rules"
-              : fetchedProperty?.otherHouseRules
-                ? fetchedProperty.otherHouseRules
-                : "No additional rules"}
-          </p>
-        </section>
+                  ? otherHouseRules
+                  : "No additional rules"
+                : fetchedProperty?.otherHouseRules
+                  ? fetchedProperty.otherHouseRules
+                  : "No additional rules"}
+            </p>
+          </section>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

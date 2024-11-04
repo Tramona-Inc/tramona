@@ -13,7 +13,7 @@ export default function HostPropertiesSidebar({
   children?: ReactNode;
 }) {
   return (
-    <div className={cn(className, "fixed inset-0 top-[6.8rem] z-50")}>
+    <div className={cn(className, "fixed inset-0 z-50 h-screen")}>
       <div className="flex h-full">
         <div className="flex-1 bg-black/25" onClick={onClose}></div>
         <div className="relative h-full basis-5/12 bg-white p-4">
