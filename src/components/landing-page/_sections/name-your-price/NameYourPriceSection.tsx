@@ -22,9 +22,11 @@ export function NameYourPriceSection() {
         <h1 className="mx-auto max-w-3xl text-balance text-3xl font-bold text-primaryGreen lg:text-4xl">
           Name your own Price
         </h1>
+
+        {/* <div style="background-color: var(--background);">Test Background</div> */}
         <p className="text-lg font-semibold text-muted-foreground lg:block lg:text-xl">
           Send a request to every host in{" "}
-          <span className="font-bold text-teal-900">
+          <span className="font-bold text-primaryGreen">
             <Typewriter
               component={"span"}
               options={{

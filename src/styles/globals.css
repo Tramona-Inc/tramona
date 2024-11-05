@@ -12,7 +12,7 @@ body {
 
 @layer base {
   :root {
-    --background: var(--zinc-50);
+    --background: var(--offWhite);
     --foreground: var(--zinc-950);
     --card: var(--white);
     --card-foreground: var(--zinc-950);
