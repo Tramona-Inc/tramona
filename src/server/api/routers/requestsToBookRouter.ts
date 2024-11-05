@@ -1,4 +1,4 @@
-import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+import { createTRPCRouter, hostProcedure, protectedProcedure } from "@/server/api/trpc";
 import { db } from "@/server/db";
 import { requestsToBook, requestsToBookInsertSchema } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
@@ -127,12 +127,12 @@ export const requestsToBookRouter = createTRPCRouter({
         .where(eq(requestsToBook.id, input.id));
     }),
 
-  getHostRequestsToBookFromId: protectedProcedure
+  getHostRequestsToBookFromId: hostProcedure
     .input(z.object({ propertyId: z.number() }))
     .query(async ({ ctx, input }) => {
       const property = await ctx.db.query.properties.findFirst({
         where: eq(properties.id, input.propertyId),
-        columns: { hostId: true },
+        columns: { hostTeamId: true },
       });
 
       if (!property) {
@@ -143,7 +143,7 @@ export const requestsToBookRouter = createTRPCRouter({
       }
 
       // Check if user is authorized
-      if (ctx.user.role !== "admin" && property.hostId !== ctx.user.id) {
+      if (ctx.user.role !== "admin" && property.hostTeamId !== ctx.hostProfile.curTeamId) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "You are not authorized to view these requests",
