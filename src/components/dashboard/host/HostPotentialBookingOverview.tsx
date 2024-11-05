@@ -35,7 +35,7 @@ const createCustomLocale = (baseLocale: Locale): Locale => ({
   },
 });
 
-const userLocale = navigator.language || "en-US";
+const userLocale = typeof window !== "undefined" ? navigator.language : "en-US";
 const locale = userLocale === "en-US" ? createCustomLocale(enUS) : enUS; // Adjust as needed for additional locales
 
 // Usage example

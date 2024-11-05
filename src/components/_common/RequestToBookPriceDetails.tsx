@@ -1,37 +1,44 @@
 import { Separator } from "../ui/separator";
 import { formatCurrency, getNumNights } from "@/utils/utils";
 import { plural } from "@/utils/utils";
-import type { PropertyPageData, RequestToBookDetails } from "@/components/offers/PropertyPage";
+import type { PropertyPageData } from "@/components/offers/PropertyPage";
 import React from "react";
-import { getServiceFee } from "@/utils/payment-utils/paymentBreakdown";
+import {
+  breakdownPayment,
+  getServiceFee,
+} from "@/utils/payment-utils/paymentBreakdown";
+import { RequestToBookPricing } from "../checkout/RequestToBookCheckout";
 
 export function RequestToBookPriceDetails({
   property,
-  requestToBook,
   bookOnAirbnb,
+  requestToBookPricing,
 }: {
   property: PropertyPageData;
-  requestToBook: RequestToBookDetails;
   bookOnAirbnb?: boolean;
+  requestToBookPricing: RequestToBookPricing;
 }) {
-  const numberOfNights = getNumNights(requestToBook.checkIn, requestToBook.checkOut);
-//   const nightlyPrice = offer.travelerOfferedPriceBeforeFees / numberOfNights;
-const nightlyPrice = 31500 / numberOfNights;
-  // const { bookingCost, taxPaid, serviceFee, finalTotal } = offer.scrapeUrl
-  //   ? getDirectListingPriceBreakdown({
-  //       bookingCost: offer.travelerOfferedPriceBeforeFees,
-  //     })
-  //   : getTramonaPriceBreakdown({
-  //       bookingCost: offer.travelerOfferedPriceBeforeFees,
-  //       numNights: numberOfNights,
-  //       superhogFee: SUPERHOG_FEE,
-  //       tax: TAX_PERCENTAGE,
-  //     });
+  const numberOfNights = getNumNights(
+    requestToBookPricing.checkIn,
+    requestToBookPricing.checkOut,
+  );
+  const nightlyPrice =
+    requestToBookPricing.travelerOfferedPriceBeforeFees / numberOfNights;
+
+  const paymentBreakdown = breakdownPayment({
+    scrapeUrl: property.originalListingPlatform ?? null,
+    travelerOfferedPriceBeforeFees:
+      requestToBookPricing.travelerOfferedPriceBeforeFees,
+    datePriceFromAirbnb: requestToBookPricing.datePriceFromAirbnb,
+    checkIn: requestToBookPricing.checkIn,
+    checkOut: requestToBookPricing.checkOut,
+    property,
+  });
+
   const items = [
     {
       title: `${formatCurrency(nightlyPrice)} x ${plural(numberOfNights, "night")}`,
-    //   price: `${formatCurrency(offer.tripCheckout.travelerOfferedPriceBeforeFees / numberOfNights)}`,
-      price: `${formatCurrency(31500 / numberOfNights)}`,
+      price: `${formatCurrency(requestToBookPricing.travelerOfferedPriceBeforeFees)}`,
     },
     {
       title: "Cleaning fee",
@@ -39,13 +46,11 @@ const nightlyPrice = 31500 / numberOfNights;
     },
     {
       title: "Tramona service fee",
-    //   price: `${formatCurrency(getServiceFee({ tripCheckout: offer.tripCheckout }))}`,
-      price: `${formatCurrency(300 + 500 )}`,
+      price: `${formatCurrency(getServiceFee({ tripCheckout: paymentBreakdown }))}`,
     },
     {
       title: "Taxes",
-    //   price: `${offer.tripCheckout.taxesPaid === 0 ? "included" : formatCurrency(offer.tripCheckout.taxesPaid)}`,
-      price: `${"included"}`,
+      price: `${paymentBreakdown.taxesPaid === 0 ? "included" : formatCurrency(paymentBreakdown.taxesPaid)}`,
     },
   ];
 
@@ -64,15 +69,12 @@ const nightlyPrice = 31500 / numberOfNights;
         <Separator />
         <div className="flex items-center justify-between pb-4 font-bold">
           <p>Total (USD)</p>
-          {/* <p>{formatCurrency(offer.tripCheckout.totalTripAmount)}</p> */}
-          <p>{formatCurrency(35700)}</p>
+          <p>{formatCurrency(paymentBreakdown.totalTripAmount)}</p>
         </div>
       </div>
       <div className="md:hidden">
         <p className="text-base font-bold">
-          {/* {formatCurrency(offer.tripCheckout.totalTripAmount)} */}
-          {formatCurrency(78213)}
-
+          {formatCurrency(paymentBreakdown.totalTripAmount)}
         </p>
         <p className="text-muted-foreground"> Total after taxes</p>
       </div>

@@ -288,6 +288,30 @@ export const stripeRouter = createTRPCRouter({
       z.object({
         offerId: z.number(),
         cancelUrl: z.string(),
+        requestToBookPricing: z
+          .object({
+            requestId: z.number().nullable(),
+            scrapeUrl: z.string().nullable(),
+            travelerOfferedPriceBeforeFees: z.number(),
+            datePriceFromAirbnb: z.number(),
+            checkIn: z.date(),
+            checkOut: z.date(),
+            property: z.object({
+              id: z.number(),
+              originalNightlyPrice: z.number().nullable(),
+              city: z.string(),
+              county: z.string().nullable(),
+              stateName: z.string().nullable(),
+              stateCode: z.string().nullable(),
+              country: z.string(),
+              hostTeam: z.object({
+                owner: z.object({
+                  stripeConnectId: z.string().nullable()
+                })
+              })
+            }),
+          })
+          .optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -319,10 +343,15 @@ export const stripeRouter = createTRPCRouter({
         stripeCustomerId = customer.id;
       }
 
-      const offer = await ctx.db.query.offers.findFirst({
-        where: eq(offers.id, input.offerId),
-        with: { property: { with: { hostTeam: { with: { owner: true } } } } },
-      });
+      let offer = null;
+      if (input.offerId !== -1) {
+        offer = await ctx.db.query.offers.findFirst({
+          where: eq(offers.id, input.offerId),
+          with: { property: { with: { hostTeam: { with: { owner: true } } } } },
+        });
+      } else if (input.requestToBookPricing) {
+        offer = input.requestToBookPricing;
+      }
 
       if (!offer) {
         throw new TRPCError({

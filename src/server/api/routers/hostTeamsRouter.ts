@@ -568,7 +568,7 @@ export const hostTeamsRouter = createTRPCRouter({
           members: {
             with: { user: { columns: { name: true, email: true, id: true } } },
           },
-          owner: { columns: { name: true, email: true, id: true } },
+          owner: { columns: { name: true, email: true, id: true, stripeConnectId: true, } },
         },
       });
 

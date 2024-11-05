@@ -4,18 +4,32 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { Separator } from "../ui/separator";
 import { Avatar, AvatarImage } from "../ui/avatar";
-import { getOfferDiscountPercentage, useIsSm } from "@/utils/utils";
+import {
+  getApplicableBookItNowDiscount,
+  getTravelerOfferedPrice,
+  originalListingIdToRandomDiscount,
+  useIsSm,
+} from "@/utils/utils";
 import {
   PropertyPageData,
   type RequestToBookDetails,
 } from "../offers/PropertyPage";
 import { formatDateMonthDay, plural } from "@/utils/utils";
 import { useChatWithAdmin } from "@/utils/messaging/useChatWithAdmin";
-import RequestToBookCustomStripeCheckout from "./RequestToBookCustomStripeCheckout";
-import { OfferPriceDetails } from "../_common/OfferPriceDetails";
+import BookItNowCustomStripeCheckout from "./BookItNowCustomStripeCheckout";
 import { getCancellationPolicyDescription } from "@/config/getCancellationPolicyDescription";
 import React from "react";
 import { RequestToBookPriceDetails } from "../_common/RequestToBookPriceDetails";
+
+export type RequestToBookPricing = {
+  requestId: null;
+  scrapeUrl: string | null;
+  travelerOfferedPriceBeforeFees: number;
+  datePriceFromAirbnb: number;
+  checkIn: Date;
+  checkOut: Date;
+};
+
 export default function BookItNowCheckout({
   requestToBook,
   property,
@@ -27,6 +41,38 @@ export default function BookItNowCheckout({
   const isMobile = !useIsSm();
 
   const chatWithAdmin = useChatWithAdmin();
+
+  const scrapedPrice = 23456;
+
+  const randomDiscount = property.originalListingId
+    ? originalListingIdToRandomDiscount(property.originalListingId)
+    : null;
+
+  const applicableDiscount = getApplicableBookItNowDiscount({
+    bookItNowDiscountTiers: property.bookItNowDiscountTiers,
+    checkIn: requestToBook.checkIn,
+  });
+
+  let priceWithApplicableDiscount;
+  if (applicableDiscount && applicableDiscount > 0) {
+     priceWithApplicableDiscount =
+      scrapedPrice * (100 - applicableDiscount) * 0.01;
+  }
+
+  const travelerOfferedPriceBeforeFees = getTravelerOfferedPrice({
+    totalPrice: priceWithApplicableDiscount ?? scrapedPrice,
+    travelerMarkup: 1.015,
+  });
+
+  const requestToBookPricing: RequestToBookPricing = {
+    requestId: null,
+    scrapeUrl: property.originalListingPlatform ?? null,
+    travelerOfferedPriceBeforeFees,
+    datePriceFromAirbnb: scrapedPrice,
+    checkIn: requestToBook.checkIn,
+    checkOut: requestToBook.checkOut,
+  };
+
 
   const handleBackClick = (
     event: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
@@ -83,19 +129,6 @@ export default function BookItNowCheckout({
   }
 
   function CheckoutSummary() {
-    // const offerDiscountPercentage = getOfferDiscountPercentage({
-    //   createdAt: offer.createdAt,
-    //   travelerOfferedPriceBeforeFees:
-    //     offer.tripCheckout.travelerOfferedPriceBeforeFees,
-    //   checkIn: offer.checkIn,
-    //   checkOut: offer.checkOut,
-    //   randomDirectListingDiscount: offer.randomDirectListingDiscount,
-    //   datePriceFromAirbnb: offer.datePriceFromAirbnb,
-    // });
-    // console.log(offerDiscountPercentage);
-    const offerDiscountPercentage = 105;
-    // replace
-
     return (
       <div>
         <div className="md:rounded-t-xl md:border md:border-b-0 md:p-3">
@@ -136,14 +169,19 @@ export default function BookItNowCheckout({
             </div>
             <Separator className="my-4" />
           </div>
-          <RequestToBookPriceDetails property={property} requestToBook={requestToBook} />
+          <RequestToBookPriceDetails
+            property={property}
+            requestToBookPricing={requestToBookPricing}
+          />
         </div>
         <div className="rounded-md bg-teal-900 md:rounded-b-xl md:rounded-t-none">
-          {/* {((offer.datePriceFromAirbnb && offerDiscountPercentage > 0) ??
-          offer.randomDirectListingDiscount !== null) ? ( */}
-          {offerDiscountPercentage > 0 ? (
+          {applicableDiscount && applicableDiscount > 0 ? (
             <h2 className="py-1 text-center text-lg font-semibold text-white md:py-2">
-              {offerDiscountPercentage}% Off
+              {applicableDiscount}% Off
+            </h2>
+          ) : randomDiscount && randomDiscount > 0 ? (
+            <h2 className="py-1 text-center text-lg font-semibold text-white md:py-2">
+              {randomDiscount}% Off
             </h2>
           ) : (
             <Separator />
@@ -216,7 +254,13 @@ export default function BookItNowCheckout({
           <Separator className="my-4" />
           <CancellationPolicy />
           <Separator className="my-4" />
-          {!isMobile && <RequestToBookCustomStripeCheckout property={property} requestToBook={requestToBook}/>}
+          {!isMobile && (
+            <BookItNowCustomStripeCheckout
+              property={property}
+              requestToBook={requestToBook}
+              requestToBookPricing={requestToBookPricing}
+            />
+          )}
         </div>
         <div className="md:hidden">
           <BestPriceCard />
@@ -227,7 +271,13 @@ export default function BookItNowCheckout({
           <Separator className="my-6" />
           <CancellationPolicy />
           <Separator className="my-6" />
-          {isMobile && <RequestToBookCustomStripeCheckout property={property} requestToBook={requestToBook} />}
+          {isMobile && (
+            <BookItNowCustomStripeCheckout
+              property={property}
+              requestToBook={requestToBook}
+              requestToBookPricing={requestToBookPricing}
+            />
+          )}
           <Separator className="my-6" />
           <CustomerReview />
           <div className="mt-4">

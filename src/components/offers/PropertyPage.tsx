@@ -239,7 +239,7 @@ export default function PropertyPage({
               <div className="flex-1">
                 <p className="gap flex flex-wrap items-center gap-x-1 pt-1 text-sm font-medium capitalize">
                   {property.propertyType} in {property.city} ·{" "}
-                  <StarIcon className="inline size-[1em] fill-primaryGreen stroke-primaryGreen" />{" "}
+                  <StarIcon className="size-[1em] inline fill-primaryGreen stroke-primaryGreen" />{" "}
                   {property.numRatings === 0 ? (
                     <>New</>
                   ) : (
@@ -787,14 +787,6 @@ function ReserveBtn({
   const { data: verificationStatus } =
     api.users.myVerificationStatus.useQuery();
 
-  // const airbnbCheckoutUrl = Airbnb.createListing(
-  //   property.originalListingId!,
-  // ).getCheckoutUrl({
-  //   checkIn: requestToBook.checkIn,
-  //   checkOut: requestToBook.checkOut,
-  //   numGuests: requestToBook.numGuests,
-  // });
-
   const checkIn = formatDateMonthDayYear(requestToBook.checkIn);
   const checkOut = formatDateMonthDayYear(requestToBook.checkOut);
 
@@ -803,17 +795,18 @@ function ReserveBtn({
       bookItNowDiscountTiers: property.bookItNowDiscountTiers,
       checkIn: requestToBook.checkIn,
     });
-  
+
     if (property.bookItNowEnabled && applicableDiscount !== null) {
       return "book-it-now-checkout";
     }
-    
-    return "request-to-book-checkout";
-  }, [property.bookItNowEnabled, property.bookItNowDiscountTiers, requestToBook.checkIn]);
 
-  // console.log(new Date())
-  // console.log('bookItNowDiscountTiers', property.bookItNowDiscountTiers)
-  // console.log('baseCheckoutUrl', baseCheckoutUrl)
+    return "request-to-book-checkout";
+  }, [
+    property.bookItNowEnabled,
+    property.bookItNowDiscountTiers,
+    requestToBook.checkIn,
+  ]);
+
   return (
     <Button
       variant={
@@ -825,20 +818,11 @@ function ReserveBtn({
       size={btnSize}
       className="w-full"
     >
-      {/* {property.bookOnAirbnb ? (
-        <Link
-          href={airbnbCheckoutUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Book on Airbnb
-          <ExternalLinkIcon className="size-5" />
-        </Link>
-      ) :  */}
       {!property.stripeVerRequired ||
-        verificationStatus?.isIdentityVerified === "true" ? (
-        // <Link href={`/offer-checkout/${offer.id}`}>
-        <Link href={`/${baseCheckoutUrl}/${property.id}?checkIn=${checkIn}&checkOut=${checkOut}&numGuests=${requestToBook.numGuests}`}>
+      verificationStatus?.isIdentityVerified === "true" ? (
+        <Link
+          href={`/${baseCheckoutUrl}/${property.id}?checkIn=${checkIn}&checkOut=${checkOut}&numGuests=${requestToBook.numGuests}`}
+        >
           Reserve
         </Link>
       ) : verificationStatus?.isIdentityVerified === "pending" ? (
@@ -1018,19 +1002,6 @@ export function RequestToBookPage({
           property={property}
           requestToBook={requestToBook}
         />
-      }
-    />
-  );
-}
-
-export function BookItNowPage({ offer }: { offer: OfferWithDetails }) {
-  return (
-    <PropertyPage
-      property={offer.property}
-      offer={offer}
-      sidebar={<OfferPageSidebar offer={offer} property={offer.property} />}
-      mobileBottomCard={
-        <OfferPageMobileBottomCard offer={offer} property={offer.property} />
       }
     />
   );

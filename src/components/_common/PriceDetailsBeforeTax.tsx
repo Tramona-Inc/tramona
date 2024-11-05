@@ -1,19 +1,38 @@
 import { Separator } from "../ui/separator";
 import {
   formatCurrency,
+  getApplicableBookItNowDiscount,
   getNumNights,
   getTravelerOfferedPrice,
 } from "@/utils/utils";
 import { plural } from "@/utils/utils";
-import type { OfferWithDetails } from "@/components/offers/PropertyPage";
-import React from "react";
+import type {
+  OfferWithDetails,
+  PropertyPageData,
+  RequestToBookDetails,
+} from "@/components/offers/PropertyPage";
+import React, { useEffect, useState } from "react";
 import {
   breakdownPayment,
   getServiceFee,
 } from "@/utils/payment-utils/paymentBreakdown";
 
+type PaymentBreakdown = {
+  totalTripAmount: number;
+  taxesPaid: number;
+  taxPercentage: number;
+  superhogFee: number;
+  stripeTransactionFee: number;
+  totalSavings: number;
+};
+
+type PriceDetails = {
+  numberOfNights: number;
+  nightlyPrice: number;
+};
+
 export default function PriceDetailsBeforeTax({
-  bookOnAirbnb, /// do we need this?
+  bookOnAirbnb,
   offer,
   requestToBook,
   property,
@@ -23,14 +42,108 @@ export default function PriceDetailsBeforeTax({
   requestToBook?: RequestToBookDetails;
   property?: PropertyPageData;
 }) {
-  const numberOfNights = getNumNights(offer.checkIn, offer.checkOut);
-  const nightlyPrice = offer.travelerOfferedPriceBeforeFees / numberOfNights;
-  const paymentBreakdown = breakdownPayment(offer);
+  const [loading, setLoading] = useState(true);
+  const [brokeDownPayment, setBrokeDownPayment] =
+    useState<PaymentBreakdown | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [priceDetails, setPriceDetails] = useState<PriceDetails>({
+    numberOfNights: 1,
+    nightlyPrice: 0,
+  });
+
+  const scrapedPrice = 23456;
+
+  let priceWithApplicableDiscount;
+  if (requestToBook && property) {
+    const applicableDiscount = getApplicableBookItNowDiscount({
+      bookItNowDiscountTiers: property.bookItNowDiscountTiers,
+      checkIn: requestToBook.checkIn,
+    });
+
+    if (applicableDiscount && applicableDiscount > 0) {
+      priceWithApplicableDiscount =
+        scrapedPrice * (100 - applicableDiscount) * 0.01;
+    } else if (property.requestToBookDiscountPercentage && property.requestToBookDiscountPercentage > 0) {
+      priceWithApplicableDiscount = scrapedPrice * (100 - property.requestToBookDiscountPercentage) * 0.01;
+    }
+  }
+
+  const travelerOfferedPriceBeforeFees = getTravelerOfferedPrice({
+    totalPrice: priceWithApplicableDiscount ?? scrapedPrice,
+    travelerMarkup: 1.015,
+  });
+
+  useEffect(() => {
+    const calculatePayment = async () => {
+      try {
+        if (requestToBook && property) {
+          const nights = getNumNights(
+            requestToBook.checkIn,
+            requestToBook.checkOut,
+          );
+          const nightly = travelerOfferedPriceBeforeFees / nights;
+          setPriceDetails({
+            numberOfNights: nights,
+            nightlyPrice: nightly,
+          });
+
+          const payment = breakdownPayment({
+            scrapeUrl: property.originalListingPlatform ?? null,
+            travelerOfferedPriceBeforeFees,
+            datePriceFromAirbnb: scrapedPrice,
+            checkIn: requestToBook.checkIn,
+            checkOut: requestToBook.checkOut,
+            property,
+          });
+
+          setBrokeDownPayment(payment);
+        } else if (offer) {
+          const nights = getNumNights(offer.checkIn, offer.checkOut);
+          const nightly = offer.travelerOfferedPriceBeforeFees / nights;
+          setPriceDetails({
+            numberOfNights: nights,
+            nightlyPrice: nightly,
+          });
+
+          const payment = breakdownPayment(offer);
+          setBrokeDownPayment(payment);
+        } else {
+          throw new Error("Missing required booking information");
+        }
+      } catch (error) {
+        console.error("Error fetching payment breakdown:", error);
+        setError("Unable to calculate price details");
+        setBrokeDownPayment(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    void calculatePayment();
+  }, [
+    requestToBook,
+    property,
+    offer,
+    scrapedPrice,
+    travelerOfferedPriceBeforeFees,
+  ]);
+
+  if (loading) {
+    return <div>Loading price details...</div>;
+  }
+
+  if (!brokeDownPayment) {
+    return (
+      <div className="text-red-500">{"Unable to display price details"}</div>
+    );
+  }
 
   const items = [
     {
-      title: `${formatCurrency(nightlyPrice)} x ${plural(numberOfNights, "night")}`,
-      price: `${formatCurrency(offer.travelerOfferedPriceBeforeFees / numberOfNights)}`,
+      title: `${formatCurrency(priceDetails.nightlyPrice)} x ${plural(priceDetails.numberOfNights, "night")}`,
+      price: formatCurrency(
+        priceDetails.nightlyPrice * priceDetails.numberOfNights,
+      ),
     },
     {
       title: "Cleaning fee",
@@ -38,7 +151,7 @@ export default function PriceDetailsBeforeTax({
     },
     {
       title: "Tramona service fee",
-      price: `${formatCurrency(getServiceFee({ tripCheckout: paymentBreakdown }))}`, // no tax here
+      price: formatCurrency(getServiceFee({ tripCheckout: brokeDownPayment })),
     },
   ];
 
@@ -60,11 +173,11 @@ export default function PriceDetailsBeforeTax({
             <p>Total (USD)</p>
             <p>
               {formatCurrency(
-                paymentBreakdown.totalTripAmount - paymentBreakdown.taxesPaid,
+                brokeDownPayment.totalTripAmount - brokeDownPayment.taxesPaid,
               )}
             </p>
           </div>
-          {!priceDetails.isScraped && (
+          {offer && !offer.scrapeUrl && (
             <p className="text-sm text-muted-foreground">Total before taxes</p>
           )}
         </div>
@@ -72,12 +185,10 @@ export default function PriceDetailsBeforeTax({
       <div className="md:hidden">
         <p className="text-base font-bold">
           {formatCurrency(
-            paymentBreakdown.totalTripAmount - paymentBreakdown.taxesPaid,
+            brokeDownPayment.totalTripAmount - brokeDownPayment.taxesPaid,
           )}
         </p>
-        {!priceDetails.isScraped && (
-          <p className="text-muted-foreground">Total before taxes</p>
-        )}
+        <p className="text-muted-foreground">Total before taxes</p>
       </div>
     </>
   );

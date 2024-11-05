@@ -1,127 +1,85 @@
 import { api } from "@/utils/api";
 import { useStripe } from "@/utils/stripe-client";
-import { formatDateRange, getNumNights } from "@/utils/utils";
 import StripeCheckoutForm from "./StripeCheckoutForm";
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
-import type { PropertyPageData, RequestToBookDetails } from "../offers/PropertyPage";
+import type {
+  RequestToBookDetails,
+} from "../offers/PropertyPage";
 import { Elements } from "@stripe/react-stripe-js";
 import { type StripeElementsOptions } from "@stripe/stripe-js";
 import Spinner from "../_common/Spinner";
 import { useToast } from "../ui/use-toast";
-
-
-// columns: {
-//     id: true,
-//     checkIn: true,
-//     checkOut: true,
-//     createdAt: true,
-//     totalPrice: true,
-//     acceptedAt: true,
-//     propertyId: true,
-//     requestId: true,
-//     hostPayout: true,
-//     travelerOfferedPriceBeforeFees: true,
-//     scrapeUrl: true,
-//     isAvailableOnOriginalSite: true,
-//     randomDirectListingDiscount: true,
-//     datePriceFromAirbnb: true,
-//     tripCheckoutId: true,
-//   },
-
-
-// totalPrice: total price
-// hostPayout: total price * host markup (.975)
-// travelerOfferedPriceBeforeFees: total price * traveler markup (1.015)
-// randomDirectListingDiscount:
-// dataPriceFromAirbnb:
-
-
+import { Property } from "@/server/db/schema";
+import { RequestToBookPricing } from "./RequestToBookCheckout";
 
 const RequestToBookCustomStripeCheckout = ({
   property,
   requestToBook,
+  requestToBookPricing,
 }: {
-  property: PropertyPageData;
+  property: Property;
   requestToBook: RequestToBookDetails;
+  requestToBookPricing: RequestToBookPricing
 }) => {
   const { toast } = useToast();
   const stripePromise = useStripe();
   const { pathname } = useRouter();
   const session = useSession({ required: true });
 
-  const numNights = useMemo(
-    () => getNumNights(requestToBook.checkIn, requestToBook.checkOut),
-    [requestToBook.checkIn, requestToBook.checkOut],
-  );
-
-  const originalTotal = useMemo(
-    // () =>
-    //   offer.randomDirectListingDiscount
-    //     ? (offer.randomDirectListingDiscount / 100 + 1) *
-    //       offer.travelerOfferedPriceBeforeFees
-    //     : property.originalNightlyPrice! * numNights,
-    // [property.originalNightlyPrice, numNights],
-    () =>
-        100,
-      [property.originalNightlyPrice, numNights],
-  );
-
   const [options, setOptions] = useState<StripeElementsOptions | undefined>(
     undefined,
   );
   const [checkoutReady, setCheckoutReady] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const { data: propertyHostUserAccount } =
-    api.host.getHostUserAccount.useQuery(property.hostId!, {
-      enabled: !!property.hostId,
-    });
   const authorizePayment = api.stripe.authorizePayment.useMutation();
+
+  const { data: hostTeam, isLoading: isHostTeamLoading } =
+    api.hostTeams.getHostTeamDetails.useQuery(
+      {
+        hostTeamId: property.hostTeamId!,
+      },
+      {
+        retry: false,
+        enabled: !!property.hostTeamId,
+      },
+    );
+
   const fetchClientSecret = useCallback(async () => {
-    if (!session.data?.user) return;
+    if (!session.data?.user) {
+      console.error("Missing required data for payment");
+      return;
+    }
+
+    if (!hostTeam || "code" in hostTeam) {
+      console.error("No valid host team data found");
+      return;
+    }
+
+    if (!hostTeam.owner.stripeConnectId) {
+      console.error("No stripe connect ID found for host");
+      return;
+    }
+
     try {
+      const propertyWithHostTeam = {
+        ...property,
+        hostTeam: {
+          owner: {
+            stripeConnectId: hostTeam.owner.stripeConnectId,
+          },
+        },
+      };
+
       const response = await authorizePayment.mutateAsync({
-        // isDirectListing: offer.scrapeUrl !== null ? true : false,
-        // offerId: null,
-        // propertyId: property.id,
-        // requestId: offer.requestId ?? null,
-        // name: property.name,
-        // price: offer.tripCheckout.totalTripAmount,
-        // description: "From: " + formatDateRange(offer.checkIn, offer.checkOut),
-        // cancelUrl: pathname,
-        // images: property.imageUrls,
-        // totalSavings: Math.abs(
-        //   originalTotal - offer.tripCheckout.totalTripAmount,
-        // ),
-        // phoneNumber: session.data.user.phoneNumber ?? "",
-        // userId: session.data.user.id,
-        // hostStripeId: propertyHostUserAccount?.stripeConnectId ?? "",
-        // travelerOfferedPriceBeforeFees: offer.travelerOfferedPriceBeforeFees,
-        // superhogFee: offer.tripCheckout.superhogFee,
-        // taxesPaid: offer.tripCheckout.taxesPaid,
-        // taxesPercentage: offer.tripCheckout.taxPercentage,
-        // stripeTransactionFee: offer.tripCheckout.stripeTransactionFee,
-        isDirectListing: true,
-        offerId: null,
-        propertyId: property.id,
-        requestId: null,
-        name: property.name,
-        price: 95,
-        description: "From: " + formatDateRange(requestToBook.checkIn, requestToBook.checkOut),
+        offerId: -1,
         cancelUrl: pathname,
-        images: property.imageUrls,
-        totalSavings: Math.abs(
-          originalTotal - 95,
-        ),
-        phoneNumber: session.data.user.phoneNumber ?? "",
-        userId: session.data.user.id,
-        hostStripeId: propertyHostUserAccount?.stripeConnectId ?? "",
-        travelerOfferedPriceBeforeFees: 105,
-        superhogFee: 900,
-        taxesPaid: 320,
-        taxesPercentage: 8,
-        stripeTransactionFee: 6,
+        requestToBookPricing: {
+          ...requestToBookPricing,
+          property: propertyWithHostTeam,
+        },
       });
       return response;
     } catch (error) {
@@ -130,10 +88,23 @@ const RequestToBookCustomStripeCheckout = ({
         variant: "destructive",
       });
     }
-  }, []);
+  }, [
+    session.data?.user,
+    hostTeam,
+    property,
+    authorizePayment,
+    requestToBookPricing,
+    pathname,
+    toast,
+  ]);
 
   useEffect(() => {
+    if (!hostTeam || checkoutReady || isLoading) {
+      return;
+    }
+
     const fetchData = async () => {
+      setIsLoading(true);
       try {
         const response = await fetchClientSecret();
         if (!response) {
@@ -141,7 +112,7 @@ const RequestToBookCustomStripeCheckout = ({
         }
 
         setOptions({
-          clientSecret: response.client_secret!, //#004236 #f4f4f5
+          clientSecret: response.client_secret!,
           appearance: {
             theme: "stripe",
             variables: {
@@ -154,7 +125,6 @@ const RequestToBookCustomStripeCheckout = ({
               iconColor: "#004236",
               tabIconSelectedColor: "#004236",
               accessibleColorOnColorPrimary: "#004236",
-              //tabLogoColor: "#004236",
             },
             rules: {
               ".Block": {
@@ -196,16 +166,16 @@ const RequestToBookCustomStripeCheckout = ({
             },
           },
         });
-        setCheckoutReady(true); // Set checkoutReady to true when options are set
+        setCheckoutReady(true);
       } catch (error) {
         console.error("Error creating checkout session:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    fetchData().catch((error) => {
-      console.error("Error creating checkout session:", error);
-    });
-  }, []); // For some reason, I am getting a rerender
+    void fetchData();
+  }, []);
 
   return (
     <div className="w-full">
@@ -224,7 +194,9 @@ const RequestToBookCustomStripeCheckout = ({
   );
 };
 
-const MemoizedCustomStripeCheckout = React.memo(RequestToBookCustomStripeCheckout);
+const MemoizedCustomStripeCheckout = React.memo(
+  RequestToBookCustomStripeCheckout,
+);
 MemoizedCustomStripeCheckout.displayName = "RequestToBookCustomStripeCheckout";
 
 export default MemoizedCustomStripeCheckout;
