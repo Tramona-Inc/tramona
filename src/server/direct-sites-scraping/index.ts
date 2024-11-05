@@ -30,6 +30,7 @@ import { createLatLngGISPoint, sendText } from "@/server/server-utils";
 import { cleanbnbScraper, cleanbnbSubScraper } from "./cleanbnb-scrape";
 import { z } from "zod";
 import { formatZodError } from "../../utils/zod-utils";
+import { env } from "@/env";
 
 type ScraperOptions = {
   location: string;
@@ -286,11 +287,15 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
             lng: location.lng,
           });
         }
-        const newPropertyListing = filterNewPropertyFields(listing);
+        const newPropertyListing = {
+          ...filterNewPropertyFields(listing),
+          hostTeamId: env.ADMIN_TEAM_ID,
+          latLngPoint: formattedlatLngPoint,
+        };
         if (existingOriginalPropertyId) {
           const tramonaProperty = await trx
             .update(properties)
-            .set({ ...newPropertyListing, latLngPoint: formattedlatLngPoint }) // Only keeps fields that are defined in the NewProperty schema
+            .set(newPropertyListing) // Only keeps fields that are defined in the NewProperty schema
             .where(eq(properties.originalListingId, existingOriginalPropertyId))
             .returning({ id: properties.id });
 
@@ -369,10 +374,7 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
         } else {
           const propertyId = await trx
             .insert(properties)
-            .values({
-              ...newPropertyListing,
-              latLngPoint: formattedlatLngPoint,
-            })
+            .values(newPropertyListing)
             .returning()
             .then((res) => res[0]!.id);
 
