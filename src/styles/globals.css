@@ -19,7 +19,7 @@ body {
     --popover: var(--zinc-100);
     --popover-foreground: var(--zinc-950);
     /* --primary: var(--black); */
-    --primary: #09090b;
+    --primary: var(--blackText);
     --primary-foreground: var(--zinc-50);
     --secondary: var(--zinc-100);
     --secondary-foreground: var(--zinc-800);
