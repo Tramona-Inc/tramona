@@ -10,6 +10,7 @@ import { ALL_PROPERTY_TYPES, PropertyType } from "@/server/db/schema/common";
 import { ListingSiteName } from "@/server/db/schema/common";
 import { getNumNights, logAndFilterSettledResults } from "@/utils/utils";
 import { parseHTML } from "@/utils/utils";
+import { getAddress } from "../google-maps";
 
 const offerSchema = z.object({
   id: z.string(),
@@ -582,6 +583,8 @@ async function fetchPropertyDetails(
     lat: data.geoLocation.lat,
   };
 
+  const addressComponents = await getAddress(latLngPoint);
+
   const numNights = getNumNights(new Date(checkIn), new Date(checkOut));
 
   return {
@@ -590,7 +593,10 @@ async function fetchPropertyDetails(
     about: parseHTML(aboutSection),
     propertyType: mapPropertyType(data.type),
     address: data.locationShorted,
-    city: data.locationShorted,
+    city: addressComponents.city,
+    stateName: addressComponents.stateName,
+    stateCode: addressComponents.stateCode,
+    country: addressComponents.country,
     latLngPoint,
     maxNumGuests: data.persons,
     numBeds,

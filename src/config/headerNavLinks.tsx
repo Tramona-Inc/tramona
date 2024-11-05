@@ -26,7 +26,7 @@ export const unloggedHamburgerLinksDesktop = [
   { name: "24/7 Support", href: "/help-center", icon: BadgeHelp },
   {
     name: "100% Re booking guarantee",
-    href: "/faq",
+    href: "/rebooking-guarantee",
     icon: MessageCircleQuestion,
   },
 ];
@@ -46,7 +46,7 @@ export const unloggedHamburgerLinksMobile = [
   { name: "For Hosts", href: "/why-list", icon: Home },
   { name: "Recent Deals", href: "/exclusive-offers", icon: HandshakeIcon },
   { name: "24/7 Support", href: "/help-center", icon: BadgeHelp },
-  { name: "100% Re booking guarantee", href: "/faq", icon: BadgeHelp },
+  { name: "100% Re booking guarantee", href: "/rebooking-guarantee", icon: BadgeHelp },
 ];
 
 export const loggedHamburgerLinksMobile = [
@@ -55,5 +55,16 @@ export const loggedHamburgerLinksMobile = [
   { name: "For Hosts", href: "/why-list", icon: Home },
   { name: "Recent Deals", href: "/exclusive-offers", icon: HandshakeIcon },
   { name: "24/7 Support", href: "/help-center", icon: BadgeHelp },
-  { name: "100% Re booking guarantee", href: "/faq", icon: BadgeHelp },
+  { name: "100% Re booking guarantee", href: "/rebooking-guarantee", icon: BadgeHelp },
+];
+
+export const hostCenterHeaderLinks = [
+  { name: "Overview", href: "/host" },
+  { name: "Calendar", href: "/host/calendar" },
+  { name: "Listings", href: "/host/properties" },
+  { name: "Messaging", href: "/host/messages" },
+  { name: "Requests", href: "/host/requests" },
+  { name: "Stays", href: "/host/stays" },
+  { name: "Finances", href: "/host/finances" },
+  { name: "Team", href: "/host/team" },
 ];

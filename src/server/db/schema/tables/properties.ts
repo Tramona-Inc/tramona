@@ -1,5 +1,5 @@
 import { zodTime } from "@/utils/zod-utils";
-import { sql } from "drizzle-orm";
+import { SQL, sql } from "drizzle-orm";
 import {
   boolean,
   date,
@@ -259,16 +259,16 @@ export const properties = pgTable(
     hostRating: doublePrecision("host_rating"),
 
     address: varchar("address", { length: 1000 }).notNull(),
-    // latitude: doublePrecision("latitude").notNull(),
-    // longitude: doublePrecision("longitude").notNull(),
-    // latitude: doublePrecision("latitude").notNull(),
-    // longitude: doublePrecision("longitude").notNull(),
+    county: varchar("county", { length: 255 }),
+    stateName: varchar("state_name", { length: 255 }),
+    stateCode: varchar("state_code", { length: 8 }),
     city: varchar("city", { length: 255 }).notNull(),
+    country: varchar("country", { length: 255 }).notNull(),
+
     originalListingUrl: varchar("original_listing_url"),
     checkInInfo: varchar("check_in_info"),
     checkInTime: time("check_in_time").notNull().default("15:00:00"),
     checkOutTime: time("check_out_time").notNull().default("10:00:00"),
-
 
     // amenities: propertyAmenitiesEnum("amenities").array().notNull(),
     amenities: varchar("amenities")
@@ -294,6 +294,9 @@ export const properties = pgTable(
     numRatings: integer("num_ratings").notNull().default(0),
     airbnbUrl: varchar("airbnb_url"),
     originalNightlyPrice: integer("original_nightly_price"), // in cents
+    currentSecurityDeposit: integer("current_security_deposit")
+      .notNull()
+      .default(0), //cant be null
     areaDescription: text("area_description"),
     mapScreenshot: text("map_screenshot"),
     cancellationPolicy: text("cancellation_policy"),
@@ -342,6 +345,7 @@ export const propertyInsertSchema = createInsertSchema(properties, {
   checkOutTime: zodTime,
   roomsWithBeds: roomsWithBedsSchema,
   autoOfferDiscountTiers: z.array(discountTierSchema),
+  latLngPoint: z.object({ x: z.number(), y: z.number() }),
 });
 
 // make everything except id optional

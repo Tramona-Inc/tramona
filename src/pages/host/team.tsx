@@ -1,4 +1,4 @@
-import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
+import HostDashboardLayout from "@/components/_common/Layout/HostDashboardLayout";
 import Spinner from "@/components/_common/Spinner";
 import UserAvatar from "@/components/_common/UserAvatar";
 import { HostTeamInviteForm } from "@/components/dashboard/host/HostTeamInviteForm";
@@ -116,7 +116,7 @@ export default function Page() {
   };
 
   return (
-    <DashboardLayout>
+    <HostDashboardLayout>
       <Head>
         <title>Team | Tramona</title>
       </Head>
@@ -174,7 +174,7 @@ export default function Page() {
             : null}
         </div>
       </div>
-    </DashboardLayout>
+    </HostDashboardLayout>
   );
 }
 

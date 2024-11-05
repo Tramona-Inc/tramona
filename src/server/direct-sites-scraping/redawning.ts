@@ -11,7 +11,7 @@ import {
 } from "@/server/db/schema/common";
 import { CancellationPolicyWithInternals } from "../db/schema/tables/properties";
 //import { log } from "@/pages/api/script";
-import { googleMaps } from "../google-maps";
+import { getAddress, googleMaps, stringifyAddress } from "../google-maps";
 import { env } from "@/env";
 import axios from "axios";
 
@@ -223,17 +223,24 @@ export const mapTaxodataToScrapedListing = async (
           console.error("No amenities found");
         }
       }
+      const latLngPoint = {
+        lng: parseFloat(property.longitude),
+        lat: parseFloat(property.latitude),
+      };
+
+      const addressComponents = await getAddress(latLngPoint);
+
       return {
         originalListingId: property.pid.toString(),
         name: property.title,
         about: parseHTML(description),
         propertyType: mapPropertyType(originalType),
-        address: city, // cannot find detailed address in the website
-        city: city,
-        latLngPoint: {
-          lng: parseFloat(property.longitude),
-          lat: parseFloat(property.latitude),
-        },
+        address: stringifyAddress(addressComponents),
+        city: addressComponents.city,
+        stateName: addressComponents.stateName,
+        stateCode: addressComponents.stateCode,
+        country: addressComponents.country,
+        latLngPoint,
         maxNumGuests: maxNumGuests,
         numBeds: property.bedrooms,
         numBedrooms: property.bedrooms,

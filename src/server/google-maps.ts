@@ -1,7 +1,9 @@
 import { env } from "@/env";
-import { Client } from "@googlemaps/google-maps-services-js";
+import { Client, Language } from "@googlemaps/google-maps-services-js";
 
-export const googleMaps = new Client({});
+export const googleMaps = new Client({
+  config: {},
+});
 
 export async function getCoordinates(address: string) {
   return await googleMaps
@@ -19,184 +21,84 @@ export async function getCoordinates(address: string) {
     });
 }
 
-/**
- * Example outputs:
- * - "San Francisco, CA, US"
- * - "New York, NY, US"
- * - "London, United Kingdom"
- * - "Paris, France"
- */
-export async function getCity({ lat, lng }: { lat: number; lng: number }) {
-  const addressComponents = await googleMaps
+export async function getAddress({ lat, lng }: { lat: number; lng: number }) {
+  const firstResult = await googleMaps
     .reverseGeocode({
       params: {
         latlng: { lat, lng },
         key: env.GOOGLE_MAPS_KEY,
+        language: Language.en,
       },
     })
-    .then((res) => res.data.results[0]?.address_components);
+    .then((res) => res.data.results[0]);
 
-  if (!addressComponents) {
-    return {
-      city: "[Unknown]",
-      county: "[Unknown]",
-      stateName: "[Unknown]",
-      stateCode: "[Unknown]",
-      country: "[Unknown]",
-    };
+  if (!firstResult) {
+    throw new Error(`No results found for lat/lng ${lat}/${lng}`);
   }
 
-  const countryComponent = addressComponents.find((component) =>
-    component.types.includes("country"),
-  );
+  console.log(JSON.stringify(firstResult.address_components, null, 2));
 
-  const cityComponent = addressComponents.find(
-    (component) =>
-      component.types.includes("locality") ||
-      component.types.includes("sublocality") ||
-      component.types.includes("neighborhood") ||
-      component.types.includes("administrative_area_level_3"),
-  );
-
-  const stateComponent = addressComponents.find((component) =>
-    component.types.includes("administrative_area_level_1"),
-  );
-
-  const countyComponent = addressComponents.find((component) =>
-    component.types.includes("administrative_area_level_2"),
-  )?.long_name;
-
-  let city = cityComponent?.long_name;
-
-  // Map specific neighborhoods to their parent cities
-  if (cityComponent?.types.includes("neighborhood")) {
-    const parentLocality = addressComponents.find(
-      (component) =>
-        component.types.includes("locality") ||
-        component.types.includes("sublocality") ||
-        component.types.includes("administrative_area_level_3"),
+  const findComponent = (types: string[]) => {
+    return firstResult.address_components.find((c) =>
+      c.types.some((type) => types.includes(type)),
     );
-    if (parentLocality) {
-      city = parentLocality.long_name;
-    }
+  };
+
+  const countryComponent = findComponent(["country"]);
+  const stateComponent = findComponent(["administrative_area_level_1"]);
+  const countyComponent = findComponent(["administrative_area_level_2"]);
+  const postcodeComponent = findComponent(["postal_code"]);
+  const cityComponent =
+    findComponent(["locality", "administrative_area_level_2", "postal_town"]) ??
+    findComponent(["administrative_area_level_1"]) ??
+    findComponent(["administrative_area_level_3"]) ??
+    findComponent(["sublocality_level_1"]);
+
+  // since all locations of properties should have at least a city and country,
+  // we can throw an error if they're missing
+
+  if (!cityComponent) {
+    throw new Error(
+      `City not found for ${lat}, ${lng}\nrev geo result: ${JSON.stringify(
+        firstResult.address_components,
+        null,
+        2,
+      )}`,
+    );
+  }
+
+  if (!countryComponent) {
+    throw new Error(
+      `Country not found for ${lat}, ${lng}\nrev geo result: ${JSON.stringify(
+        firstResult.address_components,
+        null,
+        2,
+      )}`,
+    );
   }
 
   return {
-    city: city ?? "[Unknown]",
-    county: countyComponent ?? "[Unknown]",
-    stateName: stateComponent?.long_name ?? "[Unknown]", // State name
-    stateCode: stateComponent?.short_name ?? "[Unknown]", // State code (abbreviation)
-    country: (countryComponent?.short_name ?? countryComponent?.long_name) ?? "[Unknown]",
+    postcode: postcodeComponent?.long_name ?? null,
+    county: countyComponent?.long_name ?? null,
+    city: cityComponent.long_name, // non-null
+
+    stateName: stateComponent?.long_name ?? null,
+    stateCode:
+      stateComponent?.short_name === stateComponent?.long_name
+        ? null
+        : (stateComponent?.short_name ?? null),
+
+    country: countryComponent.long_name, // non-null
+    countryISO: countryComponent.short_name, // non-null
   };
 }
 
+export function stringifyAddress(
+  addressComponents: Awaited<ReturnType<typeof getAddress>>,
+) {
+  if (addressComponents.stateCode) {
+    return `${addressComponents.city}, ${addressComponents.stateCode}, ${addressComponents.countryISO}`;
+  }
 
-
-// export async function getCity({ lat, lng }: { lat: number; lng: number }) {
-//   const addressComponents = await googleMaps
-//     .reverseGeocode({
-//       params: {
-//         latlng: { lat, lng },
-//         key: env.GOOGLE_MAPS_KEY,
-//       },
-//     })
-//     .then((res) => res.data.results[0]?.address_components);
-
-//   if (!addressComponents) return "[Unknown location]";
-
-//   const country = addressComponents.find((component) =>
-//     component.types.includes("country"),
-//   );
-
-//   const cityComponent = addressComponents.find(
-//     (component) =>
-//       component.types.includes("locality") ||
-//       component.types.includes("sublocality") ||
-//       component.types.includes("neighborhood") ||
-//       component.types.includes("administrative_area_level_3"),
-//   );
-
-//   const state = addressComponents.find((component) =>
-//     component.types.includes("administrative_area_level_1"),
-//   )?.short_name;
-
-//   const county = addressComponents.find((component) =>
-//     component.types.includes("administrative_area_level_2"),
-//   )?.long_name;
-
-//   let city = cityComponent?.long_name;
-
-//   // Map specific neighborhoods to their parent cities
-//   if (cityComponent?.types.includes("neighborhood")) {
-//     const parentLocality = addressComponents.find(
-//       (component) =>
-//         component.types.includes("locality") ||
-//         component.types.includes("sublocality") ||
-//         component.types.includes("administrative_area_level_3"),
-//     );
-//     if (parentLocality) {
-//       city = parentLocality.long_name;
-//     }
-//   }
-
-//   if (!country || !city) return "[Unknown location]";
-
-//  let location = `${city}, ${state ?? ''}, ${country.short_name || ''}`;
-
-//   // Include county if available and country is US
-//   if (country.short_name === "US" && county) {
-//     location = `${city}, ${county}, ${state || ''}, ${country.short_name}`;
-//   }
-
-//   return location.trim();
-// }
-
-export async function getCountryISO({
-  lat,
-  lng,
-}: {
-  lat: number;
-  lng: number;
-}): Promise<string | null> {
-  const addressComponents = await googleMaps
-    .reverseGeocode({
-      params: {
-        latlng: { lat, lng },
-        key: env.GOOGLE_MAPS_KEY,
-      },
-    })
-    .then((res) => res.data.results[0]?.address_components);
-
-  if (!addressComponents) return null;
-
-  const country = addressComponents.find((component) =>
-    component.types.includes("country"),
-  );
-
-  return country ? country.short_name : null;
-}
-
-export async function getPostcode({
-  lat,
-  lng,
-}: {
-  lat: number;
-  lng: number;
-}): Promise<string | null> {
-  const addressComponents = await googleMaps
-    .reverseGeocode({
-      params: {
-        latlng: { lat, lng },
-        key: env.GOOGLE_MAPS_KEY,
-      },
-    })
-    .then((res) => res.data.results[0]?.address_components);
-
-  if (!addressComponents) return null;
-
-  const postalCode = addressComponents.find((component) =>
-    component.types.includes("postal_code"),
-  );
-
-  return postalCode ? postalCode.long_name : null;
+  return `${addressComponents.city}, ${addressComponents.countryISO}`;
 }

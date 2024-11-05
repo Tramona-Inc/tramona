@@ -18,22 +18,6 @@ function PaymentHistory() {
           <ConnectPayments />
         </Card>
       </div>
-      {/* <Card className="mt-2">
-        <CardHeader>
-          <h2 className="text-2xl font-bold">Previous Payouts</h2>
-        </CardHeader>
-        <CardContent>
-          {allPayouts && allPayouts.length > 0 ? (
-            allPayouts.map((payout) => (
-              <PayoutCard key={payout.id} payout={payout} />
-            ))
-          ) : (
-            <div className="py-8 text-center text-gray-500">
-              No previous payouts
-            </div>
-          )}
-        </CardContent>
-      </Card> */}
     </div>
   );
 }
