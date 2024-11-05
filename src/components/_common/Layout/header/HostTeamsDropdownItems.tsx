@@ -17,7 +17,7 @@ export default function HostTeamsDropdownItems({
 }: {
   setChtDialogOpen: (o: boolean) => void;
 }) {
-  const { data: hostProfile } = api.users.getMyHostProfile.useQuery();
+  const { data: hostProfile } = api.hosts.getMyHostProfile.useQuery();
   const { data: hostTeams } = api.hostTeams.getMyHostTeams.useQuery();
 
   const setCurHostTeam = api.hostTeams.setCurHostTeam.useMutation();

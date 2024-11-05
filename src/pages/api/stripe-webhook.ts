@@ -142,6 +142,7 @@ export default async function webhook(
                 properties.id,
                 parseInt(paymentIntentSucceeded.metadata.property_id!),
               ),
+              with: { hostTeam: true },
             });
 
             //<------- Setup Intent for future charge ---->
@@ -246,15 +247,15 @@ export default async function webhook(
                 await completeReferral({ user: user, offerId: offer.id });
               }
               //validate the host discount referral
-              if (currentProperty?.hostId) {
+              if (currentProperty?.hostTeam.ownerId) {
                 await validateHostDiscountReferral({
-                  hostUserId: currentProperty.hostId,
+                  hostUserId: currentProperty.hostTeam.ownerId,
                 });
               }
               if (paymentIntentSucceeded.metadata.user_id) {
                 await createConversationWithOfferAfterBooking({
                   offerId: offer.id.toString(),
-                  offerHostId: currentProperty!.hostId,
+                  offerHostId: currentProperty!.hostTeam.ownerId,
                   offerPropertyName: currentProperty!.name,
                   travelerId: paymentIntentSucceeded.metadata.user_id,
                 });

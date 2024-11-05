@@ -177,8 +177,6 @@ export default function HostPropertiesDetails({
     setEditing(false);
   }, [propertyId]);
 
-  const { data: user } = api.users.getUser.useQuery();
-
   return (
     <div className="my-6">
       <div className="flex items-center justify-between">
@@ -208,13 +206,13 @@ export default function HostPropertiesDetails({
               </AlertDialogContent>
             </AlertDialog>
 
-            {property.propertyStatus === "Listed" && (
+            {property.status === "Listed" && (
               <Button
                 variant="secondary"
                 onClick={() =>
                   updateProperty({
                     ...property,
-                    propertyStatus: "Archived",
+                    status: "Archived",
                     checkInTime: convertTo24HourFormat(checkIn),
                     checkOutTime: convertTo24HourFormat(checkOut),
                   })
@@ -224,13 +222,13 @@ export default function HostPropertiesDetails({
                 Archive
               </Button>
             )}
-            {property.propertyStatus === "Archived" && (
+            {property.status === "Archived" && (
               <Button
                 variant="secondary"
                 onClick={() =>
                   updateProperty({
                     ...property,
-                    propertyStatus: "Listed",
+                    status: "Listed",
                     checkInTime: convertTo24HourFormat(checkIn),
                     checkOutTime: convertTo24HourFormat(checkOut),
                   })
@@ -240,14 +238,14 @@ export default function HostPropertiesDetails({
                 List property
               </Button>
             )}
-            {property.propertyStatus === "Drafted" &&
+            {property.status === "Drafted" &&
               (isDraftValid() ? (
                 <Button
                   variant="secondary"
                   onClick={() =>
                     updateProperty({
                       ...property,
-                      propertyStatus: "Listed",
+                      status: "Listed",
                       checkInTime: convertTo24HourFormat(checkIn),
                       checkOutTime: convertTo24HourFormat(checkOut),
                     })
@@ -282,7 +280,6 @@ export default function HostPropertiesDetails({
             setEditing={setEditing}
             onSubmit={handleFormSubmit}
             property={property}
-            disabled={user?.mainHostId !== null && user?.coHostRole !== "loose"}
           />
         </div>
       </div>

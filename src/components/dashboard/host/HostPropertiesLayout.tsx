@@ -93,27 +93,16 @@ export default function HostPropertiesLayout() {
   }
 
   const { data: properties } = api.properties.getHostProperties.useQuery();
-  const { data: user } = api.users.getUser.useQuery();
-  const { data: mainHostProperties } =
-    api.properties.getMainHostProperties.useQuery({
-      mainHostId: user?.mainHostId ?? "",
-    });
 
-  const listedProperties = user?.mainHostId
-    ? mainHostProperties?.filter(
-        (property) => property.propertyStatus === "Listed",
-      )
-    : properties?.filter((property) => property.propertyStatus === "Listed");
-  const archivedProperties = user?.mainHostId
-    ? mainHostProperties?.filter(
-        (property) => property.propertyStatus === "Archived",
-      )
-    : properties?.filter((property) => property.propertyStatus === "Archived");
-  const draftedProperties = user?.mainHostId
-    ? mainHostProperties?.filter(
-        (property) => property.propertyStatus === "Drafted",
-      )
-    : properties?.filter((property) => property.propertyStatus === "Drafted");
+  const listedProperties = properties?.filter(
+    (property) => property.status === "Listed",
+  );
+  const archivedProperties = properties?.filter(
+    (property) => property.status === "Archived",
+  );
+  const draftedProperties = properties?.filter(
+    (property) => property.status === "Drafted",
+  );
 
   const handleSearchResults = (results: Property[]) => {
     setSearchResults(results);
@@ -248,8 +237,8 @@ export function HostPropertyEditBtn({
         : addressWithoutApt,
     );
     setCheckInType(property.checkInInfo ?? "self");
-    setCheckIn(property.checkInTime ?? "00:00");
-    setCheckOut(property.checkOutTime ?? "00:00");
+    setCheckIn(property.checkInTime);
+    setCheckOut(property.checkOutTime);
     setAmenities(property.amenities);
     setOtherAmenities(property.otherAmenities);
     setImageUrls(property.imageUrls);

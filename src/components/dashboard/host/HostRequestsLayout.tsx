@@ -15,7 +15,6 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { type SeparatedData } from "@/server/server-utils";
 import { separateByPriceRestriction, plural } from "@/utils/utils";
-import { useRouter } from "next/router";
 import { HostRequestsPageData } from "@/server/api/routers/propertiesRouter";
 
 export default function HostRequestsLayout({
@@ -29,7 +28,6 @@ export default function HostRequestsLayout({
   >("normal");
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
   const [isDataLoading, setIsDataLoading] = useState(true); // New state to track data loading
-  const router = useRouter();
 
   const { data: fetchedProperties, isLoading } =
     api.properties.getHostPropertiesWithRequests.useQuery(undefined, {

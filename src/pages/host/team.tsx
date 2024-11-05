@@ -4,7 +4,7 @@ import UserAvatar from "@/components/_common/UserAvatar";
 import { HostTeamInviteForm } from "@/components/dashboard/host/HostTeamInviteForm";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { type User } from "@/server/db/schema";
+import { COHOST_ROLES, CoHostRole, type User } from "@/server/db/schema";
 import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
@@ -36,84 +36,18 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { errorToast } from "@/utils/toasts";
 
 export default function Page() {
   const [isEditing, setIsEditing] = useState(false);
   const { data: session } = useSession({ required: true });
-  const { data: hostProfile } = api.users.getMyHostProfile.useQuery();
+  const { data: hostProfile } = api.hosts.getMyHostProfile.useQuery();
   const { data: hostTeams } = api.hostTeams.getMyHostTeams.useQuery();
-  const { data: curTeamMembers, refetch: refetchMembers } =
-    api.hostTeams.getCurTeamMembers.useQuery();
-  const { data: pendingInvites, refetch: refetchInvites } =
-    api.hostTeams.getCurTeamPendingInvites.useQuery();
-  const { mutateAsync: updatePermission } =
-    api.hostTeams.updateCoHostPermission.useMutation();
 
   const curTeam =
-    hostProfile && hostTeams?.find((t) => t.id === hostProfile.curTeamId);
+    hostProfile && hostTeams?.find((team) => team.id === hostProfile.curTeamId);
 
-  const resendInviteMutation = api.hostTeams.resendInvite.useMutation();
-  const cancelInviteMutation = api.hostTeams.cancelInvite.useMutation();
-  const removeTeamMemberMutation =
-    api.hostTeams.removeHostTeamMember.useMutation();
-
-  const handleResendInvite = async (email: string) => {
-    const res = await resendInviteMutation.mutateAsync({
-      email,
-      hostTeamId: curTeam!.id,
-    });
-    switch (res.status) {
-      case "invite resent":
-        toast({
-          title: `Emailed an invite to ${email}`,
-          description: "The invite will expire in 24 hours",
-        });
-        break;
-
-      case "cooldown":
-        toast({
-          title: `Invite failed`,
-          description: "Please wait a few minutes before resending the invite",
-          variant: "destructive",
-        });
-        break;
-    }
-    await refetchInvites();
-  };
-
-  const handleCancelInvite = async (email: string) => {
-    const res = await cancelInviteMutation.mutateAsync({
-      email,
-      hostTeamId: curTeam!.id,
-    });
-    switch (res.status) {
-      case "invite canceled":
-        toast({
-          title: "Invite canceled",
-          description: `Canceled invite to ${email}`,
-        });
-        break;
-    }
-    await refetchInvites();
-  };
-
-  const handleRemoveMember = async (userId: string) => {
-    await removeTeamMemberMutation.mutateAsync({
-      memberId: userId,
-      hostTeamId: curTeam!.id,
-    });
-    await refetchMembers();
-  };
-
-  if (!session) return null;
-
-  const handleUpdatePermission = async (userId: string, permission: string) => {
-    await updatePermission({
-      userId: userId,
-      permission: permission as "strict" | "medium" | "loose",
-      hostTeamId: curTeam!.id,
-    });
-  };
+  if (!session || !curTeam) return <Spinner />;
 
   return (
     <HostDashboardLayout>
@@ -135,43 +69,29 @@ export default function Page() {
               )}
             </Button>
           </div>
-          {curTeam ? (
-            <HostTeamInviteForm
+          <HostTeamInviteForm
+            hostTeamId={curTeam.id}
+            setIsEditing={setIsEditing}
+          />
+          {curTeam.members.map((member) => (
+            <TeamMember
+              key={member.userId}
               hostTeamId={curTeam.id}
-              setIsEditing={setIsEditing}
+              member={member.user}
+              role={member.role}
+              isYou={member.userId === session.user.id}
+              isOwner={member.userId === curTeam.ownerId}
+              isEditing={isEditing}
             />
-          ) : (
-            <Spinner />
-          )}
-          {curTeamMembers
-            ? curTeamMembers.map((member) => (
-                <TeamMember
-                  permission={
-                    curTeam?.ownerId !== member.id ? member.permission : null
-                  }
-                  key={member.id}
-                  member={member}
-                  isYou={member.id === session.user.id}
-                  isOwner={member.id === curTeam?.ownerId}
-                  isEditing={isEditing}
-                  onRemove={() => handleRemoveMember(member.id)}
-                  onUpdate={(permission) =>
-                    handleUpdatePermission(member.id, permission)
-                  }
-                />
-              ))
-            : null}
-          {pendingInvites
-            ? pendingInvites.map((invite) => (
-                <PendingInvite
-                  key={invite.inviteeEmail}
-                  email={invite.inviteeEmail}
-                  isEditing={isEditing}
-                  onResend={() => handleResendInvite(invite.inviteeEmail)}
-                  onCancel={() => handleCancelInvite(invite.inviteeEmail)}
-                />
-              ))
-            : null}
+          ))}
+          {curTeam.invites.map((invite) => (
+            <PendingInvite
+              key={invite.inviteeEmail}
+              hostTeamId={curTeam.id}
+              email={invite.inviteeEmail}
+              isEditing={isEditing}
+            />
+          ))}
         </div>
       </div>
     </HostDashboardLayout>
@@ -179,26 +99,49 @@ export default function Page() {
 }
 
 function TeamMember({
+  hostTeamId,
   member,
+  role,
   isYou,
   isOwner,
   children,
   isEditing,
-  onRemove,
-  onUpdate,
-  permission,
 }: React.PropsWithChildren<{
-  member: Pick<User, "name" | "email" | "image">;
+  hostTeamId: number;
+  member: Pick<User, "name" | "email" | "image" | "id">;
+  role: CoHostRole;
   isYou: boolean;
   isOwner: boolean;
   isEditing: boolean;
-  onRemove: () => void;
-  onUpdate: (role: string) => Promise<void>;
-  permission: "strict" | "medium" | "loose" | null;
 }>) {
+  const removeTeamMember = api.hostTeams.removeHostTeamMember.useMutation();
+  const updateRole = api.hostTeams.updateCoHostRole.useMutation();
+
   const [showRemoveConfirmation, setShowRemoveConfirmation] = useState(false);
 
-  const permissions = ["strict", "medium", "loose"];
+  async function handleRemove() {
+    await removeTeamMember
+      .mutateAsync({ memberId: member.id, hostTeamId })
+      .then(() => {
+        toast({
+          title: "Member removed",
+          description: `${member.name} has been removed from the team`,
+        });
+      })
+      .catch(() => errorToast());
+  }
+
+  async function handleUpdateRole() {
+    await updateRole
+      .mutateAsync({ userId: member.id, hostTeamId, role })
+      .then(() => {
+        toast({
+          title: "Role updated",
+          description: `${member.name} has been updated to ${role}`,
+        });
+      })
+      .catch(() => errorToast());
+  }
 
   return (
     <div className="flex items-center gap-4 py-2">
@@ -219,7 +162,7 @@ function TeamMember({
         </div>
         <div className="text-sm text-muted-foreground">
           <p>{member.name ? member.email : ""}</p>
-          {permission && <p>Permission: {permission}</p>}
+          <p>Role: {role}</p>
         </div>
       </div>
       {children}
@@ -235,14 +178,9 @@ function TeamMember({
               <DropdownMenuSubTrigger>Change role</DropdownMenuSubTrigger>
               <DropdownMenuPortal>
                 <DropdownMenuSubContent>
-                  {permissions.map((permission, index) => (
-                    <DropdownMenuItem
-                      key={index}
-                      onClick={async () => {
-                        await onUpdate(permission);
-                      }}
-                    >
-                      {permission}
+                  {COHOST_ROLES.map((role, index) => (
+                    <DropdownMenuItem key={index} onClick={handleUpdateRole}>
+                      {role}
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuSubContent>
@@ -267,14 +205,14 @@ function TeamMember({
           <AlertDialogHeader>
             <AlertDialogTitle>Remove Team Member</AlertDialogTitle>
             <AlertDialogDescription>
-              {`Are you sure you want to remove this member?`}
+              Are you sure you want to remove this member?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setShowRemoveConfirmation(false)}>
               Cancel
             </AlertDialogCancel>
-            <AlertDialogAction onClick={onRemove}>Remove</AlertDialogAction>
+            <AlertDialogAction onClick={handleRemove}>Remove</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -283,16 +221,54 @@ function TeamMember({
 }
 
 function PendingInvite({
+  hostTeamId,
   email,
   isEditing,
-  onResend,
-  onCancel,
 }: {
+  hostTeamId: number;
   email: string;
   isEditing: boolean;
-  onResend: () => void;
-  onCancel: () => void;
 }) {
+  const resendInvite = api.hostTeams.resendInvite.useMutation();
+  const cancelInvite = api.hostTeams.cancelInvite.useMutation();
+
+  const handleResendInvite = async () => {
+    await resendInvite
+      .mutateAsync({ email, hostTeamId })
+      .then((res) => {
+        switch (res.status) {
+          case "invite resent":
+            toast({
+              title: `Emailed an invite to ${email}`,
+              description: "The invite will expire in 24 hours",
+            });
+            break;
+
+          case "cooldown":
+            toast({
+              title: `Invite failed`,
+              description:
+                "Please wait a few minutes before resending the invite",
+              variant: "destructive",
+            });
+            break;
+        }
+      })
+      .catch(() => errorToast());
+  };
+
+  const handleCancelInvite = async () => {
+    await cancelInvite
+      .mutateAsync({ email, hostTeamId })
+      .then(() => {
+        toast({
+          title: "Invite canceled",
+          description: `Canceled invite to ${email}`,
+        });
+      })
+      .catch(() => errorToast());
+  };
+
   const [showCancelConfirmation, setShowCancelConfirmation] = useState(false);
 
   return (
@@ -313,16 +289,14 @@ function PendingInvite({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={onResend}
+                onClick={handleResendInvite}
                 className="hover:bg-transparent"
               >
                 <SendHorizonal className="text-primaryGreen" />
               </Button>
             </TooltipTrigger>
 
-            <TooltipContent className="" side="bottom">
-              Resend invite
-            </TooltipContent>
+            <TooltipContent side="bottom">Resend invite</TooltipContent>
           </Tooltip>
           <Tooltip>
             <TooltipTrigger>
@@ -336,9 +310,7 @@ function PendingInvite({
               </Button>
             </TooltipTrigger>
 
-            <TooltipContent className="" side="bottom">
-              Cancel invite
-            </TooltipContent>
+            <TooltipContent side="bottom">Cancel invite</TooltipContent>
           </Tooltip>
         </div>
       )}
@@ -351,14 +323,14 @@ function PendingInvite({
           <AlertDialogHeader>
             <AlertDialogTitle>Cancel Invite</AlertDialogTitle>
             <AlertDialogDescription>
-              {`Are you sure you want to cancel the team invite to ${email}?`}
+              Are you sure you want to cancel the team invite to {email}?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setShowCancelConfirmation(false)}>
               Cancel
             </AlertDialogCancel>
-            <AlertDialogAction onClick={onCancel}>
+            <AlertDialogAction onClick={handleCancelInvite}>
               Cancel Invite
             </AlertDialogAction>
           </AlertDialogFooter>

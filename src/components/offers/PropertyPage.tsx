@@ -95,9 +95,9 @@ export default function PropertyPage({
     void createReviewBackupImages();
   }, [property.reviews.length]);
 
-  const hostName = property.host
-    ? `${property.host.firstName} ${property.host.lastName}`
-    : "Tramona";
+  const hostName =
+    property.hostName ??
+    `${property.hostTeam.owner.firstName} ${property.hostTeam.owner.lastName}`;
 
   const originalListing = getOriginalListing(property);
 
@@ -278,12 +278,8 @@ export default function PropertyPage({
             >
               <UserAvatar
                 name={hostName}
-                email={property.host?.email}
-                image={
-                  property.host?.id
-                    ? property.host.image
-                    : (property.hostProfilePic ?? "/assets/images/tramona.svg")
-                }
+                email={property.hostTeam.owner.email}
+                image={property.hostTeam.owner.image}
               />
               <div className="-space-y-1">
                 <p className="text-sm text-muted-foreground">Hosted by</p>
@@ -293,23 +289,23 @@ export default function PropertyPage({
             {offer && (
               <ChatOfferButton
                 offerId={offer.id.toString()}
-                offerHostId={offer.property.hostId ?? null}
+                offerHostId={offer.property.hostTeam.ownerId}
                 offerPropertyName={offer.property.name}
               />
             )}
           </section>
           <Dialog open={openUserInfo} onOpenChange={setOpenUserInfo}>
-            <DialogTitle className="text-lg font-semibold">
-              Host Information
-            </DialogTitle>
             <DialogContent>
+              <DialogTitle className="text-lg font-semibold">
+                Host Information
+              </DialogTitle>
               {/* <div className="flex space-x-2">
                 <div className="flex flex-col space-y-2"> */}
               <UserInfo
                 hostName={hostName}
-                hostPic={property.host?.image ?? null}
-                hostDesc={property.host?.about ?? null}
-                hostLocation={property.host?.location ?? null}
+                hostPic={property.hostTeam.owner.image}
+                hostDesc={property.hostTeam.owner.about}
+                hostLocation={property.hostTeam.owner.location}
               />
               {/* <HostVerificationInfo hostName={hostName} /> */}
               {/* </div>
@@ -389,6 +385,7 @@ export default function PropertyPage({
               </DialogContent>
             </Dialog>
           </section>
+
           <section className="border-t pb-2 pt-4">
             <ReasonsToBook />
           </section>
@@ -457,7 +454,9 @@ export default function PropertyPage({
                     <UserAvatar
                       size="huge"
                       name={hostName}
-                      image={property.host?.image}
+                      image={
+                        property.hostProfilePic ?? property.hostTeam.owner.image
+                      }
                     />
                     <p className="text-center text-lg font-bold">{hostName}</p>
                   </div>

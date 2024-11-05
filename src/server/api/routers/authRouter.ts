@@ -79,29 +79,6 @@ async function sendVerificationEmail(user: User) {
   });
 }
 
-async function sendVerificationEmailWithConversation(
-  user: User,
-  conversationId: string,
-) {
-  const payload = {
-    email: user.email,
-    id: user.id,
-  };
-
-  // Create token
-  const token = jwt.sign(payload, env.NEXTAUTH_SECRET, {
-    expiresIn: "30m",
-  });
-
-  const url = `${env.NEXTAUTH_URL}/auth/verifying-email?id=${user.id}&token=${token}&conversationId=${conversationId}&userId=${user.id}`;
-
-  await sendEmail({
-    to: user.email,
-    subject: "Verify Email | Tramona",
-    content: VerifyEmailLink({ url, name: user.name ?? user.email }),
-  });
-}
-
 export const authRouter = createTRPCRouter({
   createUser: publicProcedure
     .input(

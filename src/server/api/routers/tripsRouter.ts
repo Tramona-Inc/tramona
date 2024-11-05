@@ -1,5 +1,6 @@
 import {
   createTRPCRouter,
+  hostProcedure,
   protectedProcedure,
   roleRestrictedProcedure,
 } from "@/server/api/trpc";
@@ -11,13 +12,12 @@ import {
   groups,
   trips,
   tripCancellations,
-  users,
 } from "@/server/db/schema";
 import { cancelSuperhogReservation } from "@/utils/webhook-functions/superhog-utils";
 import { sendEmail } from "@/server/server-utils";
 
 import { TRPCError } from "@trpc/server";
-import { and, eq, exists, isNotNull, isNull, lte, ne, sql } from "drizzle-orm";
+import { and, eq, exists, isNotNull, isNull, sql, lte, ne } from "drizzle-orm";
 import { z } from "zod";
 import BookingCancellationEmail from "packages/transactional/emails/BookingCancellationEmail";
 import { formatDateRange, getNumNights, removeTax } from "@/utils/utils";
@@ -36,7 +36,13 @@ export const tripsRouter = createTRPCRouter({
               city: true,
             },
             with: {
-              host: { columns: { name: true, profileUrl: true, id: true } },
+              hostTeam: {
+                with: {
+                  owner: {
+                    columns: { name: true, profileUrl: true, id: true },
+                  },
+                },
+              },
             },
           },
           offer: {
@@ -91,8 +97,14 @@ export const tripsRouter = createTRPCRouter({
             cancellationPolicy: true,
             checkInTime: true,
             checkOutTime: true,
+            hostName: true,
+            hostProfilePic: true,
           },
-          with: { host: { columns: { name: true, image: true } } },
+          with: {
+            hostTeam: {
+              with: { owner: { columns: { name: true, image: true } } },
+            },
+          },
         },
         offer: {
           columns: {
@@ -104,11 +116,7 @@ export const tripsRouter = createTRPCRouter({
     });
   }),
 
-  getHostTrips: protectedProcedure.query(async ({ ctx }) => {
-    const user = await ctx.db.query.users.findFirst({
-      where: eq(users.id, ctx.user.id),
-    });
-
+  getHostTrips: hostProcedure.query(async ({ ctx }) => {
     return await db.query.trips.findMany({
       where: exists(
         db
@@ -116,7 +124,7 @@ export const tripsRouter = createTRPCRouter({
           .from(properties)
           .where(
             and(
-              eq(properties.hostId, ctx.user.id),
+              eq(properties.hostTeamId, ctx.hostProfile.curTeamId),
               eq(properties.id, trips.propertyId),
             ),
           ),
@@ -124,7 +132,11 @@ export const tripsRouter = createTRPCRouter({
       with: {
         property: {
           columns: { name: true, imageUrls: true, city: true },
-          with: { host: { columns: { name: true, image: true, id: true } } },
+          with: {
+            hostTeam: {
+              with: { owner: { columns: { name: true, image: true } } },
+            },
+          },
         },
         offer: {
           columns: {
@@ -160,8 +172,15 @@ export const tripsRouter = createTRPCRouter({
         },
       });
 
+      if (!trip) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: `Trip not found for id ${input.tripId}`,
+        });
+      }
+
       const propertyForTrip = await db.query.properties.findFirst({
-        where: eq(properties.id, trip!.propertyId),
+        where: eq(properties.id, trip.propertyId),
         columns: {
           latLngPoint: true,
           id: true,
@@ -175,12 +194,22 @@ export const tripsRouter = createTRPCRouter({
           checkOutTime: true,
         },
         with: {
-          host: {
-            columns: { name: true, email: true, image: true, id: true },
+          hostTeam: {
+            with: {
+              owner: {
+                columns: { name: true, email: true, image: true, id: true },
+              },
+            },
           },
         },
       });
-      if (!trip || !propertyForTrip) throw new TRPCError({ code: "NOT_FOUND" });
+
+      if (!propertyForTrip) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: `Property not found for trip ${input.tripId}`,
+        });
+      }
 
       const fullTrip = { ...trip, property: propertyForTrip };
 
@@ -213,8 +242,12 @@ export const tripsRouter = createTRPCRouter({
               checkOutTime: true,
             },
             with: {
-              host: {
-                columns: { name: true, email: true, image: true, id: true },
+              hostTeam: {
+                with: {
+                  owner: {
+                    columns: { name: true, email: true, image: true, id: true },
+                  },
+                },
               },
             },
           },
@@ -248,7 +281,7 @@ export const tripsRouter = createTRPCRouter({
         },
         property: {
           columns: {
-            hostId: true,
+            hostTeamId: true,
           },
         },
       },

@@ -11,7 +11,8 @@ import {
 import { users } from "./users";
 
 export const COHOST_ROLES = ["Strict", "Medium", "Loose"] as const;
-export const hostPermissionEnum = pgEnum("coHostRole", COHOST_ROLES);
+export const cohostRoleEnum = pgEnum("coHostRole", COHOST_ROLES);
+export type CoHostRole = (typeof COHOST_ROLES)[number];
 
 export const hostTeams = pgTable(
   "host_teams",
@@ -38,7 +39,7 @@ export const hostTeamMembers = pgTable(
     userId: text("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    permission: hostPermissionEnum("permission").default("Strict"),
+    role: cohostRoleEnum("role").notNull().default("Strict"),
   },
   (vt) => ({
     compoundKey: primaryKey({ columns: [vt.hostTeamId, vt.userId] }),

@@ -1,3 +1,5 @@
+import { Property, Trip } from "@/server/db/schema";
+
 // Function to convert Date object to "yyyy-MM-dd" string
 function dateToString(date: Date): string {
   return date.toISOString().slice(0, 10);
@@ -17,19 +19,11 @@ function getDaysDifference(dateStr1: string, dateStr2: string): number {
   return timeDifference / (1000 * 60 * 60 * 24);
 }
 
-export function checkCancellation({
-  cancellationPolicy,
-  checkInDate,
-  checkOutDate,
-  checkInTime,
-  bookingDate,
-}: {
-  cancellationPolicy: string;
-  checkInDate: Date;
-  checkOutDate: Date;
-  checkInTime: string;
-  bookingDate: Date;
-}): {
+export function checkCancellation(
+  trip: Pick<Trip, "checkIn" | "checkOut" | "createdAt"> & {
+    property: Pick<Property, "cancellationPolicy" | "checkInTime">;
+  },
+): {
   canCancel: boolean;
   partialRefund: boolean;
   numOfRefundableNights: number;
@@ -38,11 +32,11 @@ export function checkCancellation({
   cancellationFee?: number;
 } {
   // Convert checkInDate and checkOutDate dates to strings in "yyyy-MM-dd" format
-  const checkInStr = dateToString(checkInDate);
-  const checkOutStr = dateToString(checkOutDate);
+  const checkInStr = dateToString(trip.checkIn);
+  const checkOutStr = dateToString(trip.checkOut);
   console.log(checkInStr);
   console.log(checkOutStr);
-  const bookingDateString = dateToString(bookingDate);
+  const bookingDateString = dateToString(trip.createdAt);
 
   const daysDifference = getDaysDifference(
     dateToString(new Date()), // Current date first
@@ -53,13 +47,13 @@ export function checkCancellation({
     bookingDateString,
   );
 
-  switch (cancellationPolicy) {
+  switch (trip.property.cancellationPolicy) {
     case "Flexible":
       return flexibleCancel(
         daysDifference,
         checkInStr,
         checkOutStr,
-        checkInTime,
+        trip.property.checkInTime,
       );
 
     case "Firm":

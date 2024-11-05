@@ -39,9 +39,7 @@ import {
 import { Textarea } from "../ui/textarea";
 import { CaretSortIcon } from "@radix-ui/react-icons";
 import { SelectIcon } from "@radix-ui/react-select";
-import { getS3ImgUrl } from "@/utils/formatters";
 import { getNumNights } from "@/utils/utils";
-import axios from "axios";
 import ErrorMsg from "../ui/ErrorMsg";
 import { parseListingUrl, zodListingUrl } from "@/utils/listing-sites";
 import { useZodForm } from "@/utils/useZodForm";
@@ -93,8 +91,6 @@ const formSchema = z.object({
       rating: zodInteger({ min: 1, max: 5 }),
     })
     .array(),
-
-  // mapScreenshot: optional(zodString()),
 });
 
 export default function AdminOfferForm({
@@ -135,7 +131,6 @@ export default function AdminOfferForm({
             address: offer.property.address,
             country: offer.property.country,
             areaDescription: offer.property.areaDescription ?? undefined,
-            mapScreenshot: offer.property.mapScreenshot ?? undefined,
             maxNumGuests: offer.property.maxNumGuests,
             numBeds: offer.property.numBeds,
             numBedrooms: offer.property.numBedrooms,
@@ -184,7 +179,6 @@ export default function AdminOfferForm({
   const createPropertyMutation = api.properties.create.useMutation();
   const createOfferMutation = api.offers.create.useMutation();
   const createReviewsMutation = api.reviews.create.useMutation();
-  const uploadFileMutation = api.files.upload.useMutation();
   const twilioMutation = api.twilio.sendSMS.useMutation();
   const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
   // const getOwnerMutation = api.groups.getGroupOwner.useMutation();
@@ -200,22 +194,6 @@ export default function AdminOfferForm({
     }
 
     const roomsWithBeds = res.data;
-
-    let url: string | null = null;
-
-    if (file) {
-      const fileName = file.name;
-
-      try {
-        const uploadUrlResponse = await uploadFileMutation.mutateAsync({
-          fileName,
-        });
-        await axios.put(uploadUrlResponse, file);
-        url = getS3ImgUrl(fileName);
-      } catch (error) {
-        throw new Error("error uploading file");
-      }
-    }
 
     const { offeredNightlyPriceUSD: _, ...propertyData } = data;
 
@@ -239,7 +217,6 @@ export default function AdminOfferForm({
       numBathrooms: 1,
       // offeredNightlyPrice: offeredNightlyPriceUSD,
       imageUrls: propertyData.imageUrls.map((urlObject) => urlObject.value),
-      mapScreenshot: url,
 
       originalListingPlatform: originalListing?.Site.siteName,
       originalListingId: originalListing?.listingId,
@@ -345,7 +322,6 @@ export default function AdminOfferForm({
   );
 
   const totalPrice = nightlyPrice * numberOfNights;
-  const [file] = useState<File | null>(null);
 
   return (
     <Form {...form}>
@@ -732,29 +708,6 @@ export default function AdminOfferForm({
             </FormItem>
           )}
         />
-
-        {/* <FormField
-          control={form.control}
-          name="mapScreenshot"
-          render={({ field }) => (
-            <FormItem className="col-span-full">
-              <FormLabel>Screenshot of Map (optional)</FormLabel>
-              <FormControl>
-                <Input
-                  {...field}
-                  type="file"
-                  accept="image/*"
-                  onChange={(event) => {
-                    const selectedFile = event.target.files?.[0];
-                    setFile(selectedFile ?? null);
-                    field.onChange(event);
-                  }}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        /> */}
 
         <FormField
           control={form.control}

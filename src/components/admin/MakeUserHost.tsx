@@ -15,7 +15,7 @@ export default function MakeUserHost() {
   const [conversationId, setConversationId] = useState<string>();
   const [url, setUrl] = useState<string>();
 
-  const { mutate } = api.users.createUrlToBeHost.useMutation({
+  const { mutate } = api.hosts.createUrlToBeHost.useMutation({
     onSuccess: (url: string) => {
       setUrl(url);
     },

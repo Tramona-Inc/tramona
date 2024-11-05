@@ -173,20 +173,24 @@ export const offersRouter = createTRPCRouter({
           offersByRequest.map((offer) => offer.propertyId),
         ),
         with: {
-          host: {
-            columns: {
-              id: true,
-              name: true,
-              email: true,
-              image: true,
-              firstName: true,
-              lastName: true,
-              about: true,
-              location: true,
-            },
+          hostTeam: {
             with: {
-              hostProfile: {
-                columns: { userId: true },
+              owner: {
+                columns: {
+                  id: true,
+                  name: true,
+                  email: true,
+                  image: true,
+                  firstName: true,
+                  lastName: true,
+                  about: true,
+                  location: true,
+                },
+                with: {
+                  hostProfile: {
+                    columns: { userId: true },
+                  },
+                },
               },
             },
           },
@@ -289,8 +293,12 @@ export const offersRouter = createTRPCRouter({
           },
           property: {
             with: {
-              host: {
-                columns: { id: true, name: true, email: true, image: true },
+              hostTeam: {
+                with: {
+                  owner: {
+                    columns: { id: true, name: true, email: true, image: true },
+                  },
+                },
               },
             },
           },
@@ -302,99 +310,6 @@ export const offersRouter = createTRPCRouter({
       }
       return offer;
     }),
-
-  makePublic: roleRestrictedProcedure(["admin", "host"])
-    .input(offerSelectSchema.pick({ id: true }))
-    .mutation(async ({ ctx, input }) => {
-      if (ctx.user.role === "host") {
-        const offer = await ctx.db.query.offers.findFirst({
-          where: eq(offers.id, input.id),
-          columns: {},
-          with: {
-            property: { columns: { hostId: true } },
-          },
-        });
-
-        if (offer?.property.hostId !== ctx.user.id) {
-          throw new TRPCError({ code: "UNAUTHORIZED" });
-        }
-      }
-
-      await ctx.db
-        .update(offers)
-        .set({ madePublicAt: new Date() })
-        .where(eq(offers.id, input.id));
-    }),
-
-  // getAllPublicOffers: publicProcedure.query(async ({ ctx }) => {
-  //   return (
-  //     await ctx.db.query.offers.findMany({
-  //       where: and(
-  //         isNull(offers.acceptedAt),
-  //         lt(offers.madePublicAt, new Date()),
-  //       ),
-  //       columns: { acceptedAt: false },
-  //       with: {
-  //         property: {
-  //           with: {
-  //             host: { columns: { name: true, email: true, image: true } },
-  //           },
-  //         },
-  //         request: { columns: { checkIn: true, checkOut: true } },
-  //       },
-  //       orderBy: desc(offers.madePublicAt),
-  //     })
-  //   ).map((offer) => ({
-  //     ...offer,
-  //     madePublicAt: offer.madePublicAt!,
-  //   }));
-  // }),
-
-  // getAllOffers: publicProcedure.query(async ({ ctx }) => {
-  //   return await ctx.db.query.offers.findMany({
-  //     with: {
-  //       property: {
-  //         with: {
-  //           host: { columns: { name: true, email: true, image: true } },
-  //         },
-  //         columns: { name: true, originalNightlyPrice: true, imageUrls: true },
-  //       },
-  //       request: {
-  //         columns: {
-  //           userId: true,
-  //           checkIn: true,
-  //           checkOut: true,
-  //           resolvedAt: true,
-  //         },
-  //         with: {
-  //           madeByUser: { columns: { name: true, image: true } }, // Fetch user name
-  //         },
-  //       },
-  //     },
-  //     where: and(
-  //       isNotNull(offers.acceptedAt),
-  //       isNotNull(offers.paymentIntentId),
-  //       isNotNull(offers.checkoutSessionId),
-  //     ),
-  //     orderBy: desc(offers.createdAt),
-  //   });
-
-  // return await ctx.db.query.requests.findMany({
-  //   with: {
-  //     offers: {
-  //       with: {
-  //         property: {
-  //           with: {
-  //             host: { columns: { name: true, email: true, image: true } },
-  //           },
-  //         },
-  //       },
-  //     },
-  //     madeByUser: { columns: { name: true, image: true } },
-  //   },
-  //   orderBy: desc(requests.createdAt),
-  // });
-  // }),
 
   create: protectedProcedure
     .input(
@@ -601,19 +516,6 @@ export const offersRouter = createTRPCRouter({
         throw new TRPCError({ code: "NOT_FOUND" });
       }
 
-      // ...and the associated property must be owned by the current user
-      // (or its an admin)
-      if (ctx.user.role === "host") {
-        const property = await ctx.db.query.properties.findFirst({
-          where: eq(properties.id, offer.property.id),
-          columns: { hostId: true },
-        });
-
-        if (property?.hostId !== ctx.user.id) {
-          throw new TRPCError({ code: "UNAUTHORIZED" });
-        }
-      }
-
       await ctx.db.update(offers).set(input).where(eq(offers.id, input.id));
     }),
 
@@ -628,7 +530,7 @@ export const offersRouter = createTRPCRouter({
         },
         with: {
           property: {
-            columns: { hostId: true, name: true, address: true },
+            columns: { hostTeamId: true, name: true, address: true },
           },
           request: {
             with: {
@@ -655,12 +557,6 @@ export const offersRouter = createTRPCRouter({
 
       if (!offer) {
         throw new TRPCError({ code: "NOT_FOUND" });
-      }
-
-      if (ctx.user.role === "host") {
-        if (offer.property.hostId !== ctx.user.id) {
-          throw new TRPCError({ code: "UNAUTHORIZED" });
-        }
       }
 
       await ctx.db.delete(offers).where(eq(offers.id, input.id));
@@ -856,20 +752,24 @@ export async function getPropertyForOffer(propertyId: number) {
     where: eq(properties.id, propertyId),
     with: {
       reviews: true,
-      host: {
-        columns: {
-          id: true,
-          firstName: true,
-          lastName: true,
-          email: true,
-          image: true,
-          about: true,
-          location: true,
-        },
+      hostTeam: {
         with: {
-          hostProfile: {
+          owner: {
             columns: {
-              userId: true,
+              id: true,
+              firstName: true,
+              lastName: true,
+              email: true,
+              image: true,
+              about: true,
+              location: true,
+            },
+            with: {
+              hostProfile: {
+                columns: {
+                  userId: true,
+                },
+              },
             },
           },
         },
