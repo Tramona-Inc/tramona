@@ -38,8 +38,7 @@
     "**/*.tsx",
     "**/*.cjs",
     "**/*.js",
-    ".next/types/**/*.ts",
-    "src/components/landing-page/SearchBars/CityRequestsFormtsx"
+    ".next/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }
