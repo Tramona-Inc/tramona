@@ -70,7 +70,6 @@ export default function OnboardingFooter({
           }, ${listing.location.city}, ${listing.location.state} ${listing.location.zipcode}, ${
             listing.location.country
           }`,
-          country: listing.location.country,
           checkInInfo: listing.checkInType,
           checkInTime: listing.checkIn,
           checkOutTime: listing.checkOut,

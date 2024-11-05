@@ -455,7 +455,7 @@ export const usersRouter = createTRPCRouter({
           const propertyObjects = await Promise.all(
             listings.map(async (property) => {
               // Get location information
-              const locInfo = await getAddress({
+              const addressComponents = await getAddress({
                 lat: property.lat,
                 lng: property.lng,
               });
@@ -476,7 +476,10 @@ export const usersRouter = createTRPCRouter({
                   lat: property.lat,
                   lng: property.lng,
                 }),
-                city: locInfo.city!,
+                city: addressComponents.city,
+                stateName: addressComponents.stateName,
+                stateCode: addressComponents.stateCode,
+                country: addressComponents.country,
                 hostName: property.contactName,
                 originalListingId: property.id.toString(),
                 checkInTime: convertToTimeString(property.checkInTimeStart),
@@ -485,7 +488,6 @@ export const usersRouter = createTRPCRouter({
                 about: property.description,
                 originalListingPlatform: "Hostaway" as const,
                 address: property.address,
-                country: property.country,
                 avgRating: property.starRating ?? 0,
                 hostTeamId: teamId,
                 imageUrls: property.listingImages,

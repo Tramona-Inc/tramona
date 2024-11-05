@@ -48,7 +48,7 @@ import axios from "axios";
 import { HttpsProxyAgent } from "https-proxy-agent";
 import * as cheerio from "cheerio";
 import { sendSlackMessage } from "./slack";
-import { HOST_MARKUP, TRAVELER__MARKUP } from "@/utils/constants";
+import { HOST_MARKUP, TRAVELER_MARKUP } from "@/utils/constants";
 import { HostRequestsPageData } from "./api/routers/propertiesRouter";
 import { Session } from "next-auth";
 import { calculateTotalTax } from "@/utils/payment-utils/taxData";
@@ -354,25 +354,43 @@ export async function addProperty({
   userEmail?: string;
   hostTeamId?: number | null;
   isAdmin: boolean;
-  property: Omit<NewProperty, "id" | "city" | "latLngPoint"> & {
-    latLngPoint?: { x: number; y: number };
+  property: Omit<
+    NewProperty,
+    | "id"
+    | "latLngPoint"
+    | "city"
+    | "county"
+    | "stateName"
+    | "stateCode"
+    | "country"
+  > & {
+    latLngPoint?: { x: number; y: number }; // make optional
   };
 }) {
   let lat = property.latLngPoint?.y;
   let lng = property.latLngPoint?.x;
 
   if (!lat || !lng) {
+    // get lat lng if not provided
     const { location } = await getCoordinates(property.address);
     if (!location) throw new Error("Could not get coordinates for address");
     lat = location.lat;
     lng = location.lng;
   }
-  const locInfo = await getAddress({ lat, lng });
+
+  const { city, country, county, stateCode, stateName } = await getAddress({
+    lat,
+    lng,
+  });
 
   const propertyValues = {
     ...property,
     hostId: userId,
-    city: locInfo.city,
+    city,
+    county,
+    stateCode,
+    stateName,
+    country,
     latLngPoint: createLatLngGISPoint({ lat, lng }),
     hostTeamId,
   };
@@ -486,7 +504,7 @@ export async function getRequestsForProperties(
       lng: property.latLngPoint.x,
     });
 
-    const taxInfo = calculateTotalTax(country, stateCode, city);
+    const taxInfo = calculateTotalTax({ country, stateCode, city });
     console.log("taxInfo", taxInfo, city);
 
     const requestsForProperty = await tx.query.requests.findMany({
@@ -751,7 +769,7 @@ export async function updateTravelerandHostMarkup({
   offerId: number;
 }) {
   console.log("offerTotalPrice", offerTotalPrice);
-  const travelerPrice = Math.ceil(offerTotalPrice * TRAVELER__MARKUP);
+  const travelerPrice = Math.ceil(offerTotalPrice * TRAVELER_MARKUP);
   const hostPay = Math.ceil(offerTotalPrice * HOST_MARKUP);
   console.log("travelerPrice", travelerPrice);
   await db
@@ -849,6 +867,9 @@ export function createLatLngGISPoint({
   return latLngPoint;
 }
 
+/**
+ * returns the distance in kilometers between two points
+ */
 export function haversineDistance(
   lat1: number,
   lon1: number,

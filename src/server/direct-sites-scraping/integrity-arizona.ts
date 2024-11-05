@@ -9,6 +9,7 @@ import { NewReview } from "@/server/db/schema";
 import { getNumNights, parseHTML } from "@/utils/utils";
 import { ScrapedListing } from "@/server/direct-sites-scraping";
 import axios from "axios";
+import { getAddress } from "../google-maps";
 
 const propertySchema = z.object({
   data: z.object({
@@ -95,53 +96,65 @@ const mapToReview = (
 };
 
 // Function to map validated data to NewProperty
-const mapToScrapedListing = (
+const mapToScrapedListing = async (
   validatedData: IntegrityArizonaPropertyInput,
   checkIn: Date,
   checkOut: Date,
   scrapeUrl: string,
-): ScrapedListing[] => {
-  return validatedData.data.available_properties.property.map((prop) => ({
-    originalListingId: prop.id.toString(),
-    name: prop.name,
-    about: parseHTML(prop.short_description), // may contain html
-    propertyType: convertPropertyType(prop.lodging_type_id),
-    address:
-      prop.location_area_name + ", " + prop.city + ", " + prop.state_name,
-    city: prop.city,
-    // latitude: prop.latitude,
-    // longitude: prop.longitude,
-    latLngPoint: {
-      lng: prop.longitude,
-      lat: prop.latitude,
-    },
-    maxNumGuests: prop.max_occupants,
-    numBeds: prop.bedrooms_number, // not provided, but required in NewProperty
-    numBedrooms: prop.bedrooms_number,
-    numBathrooms: prop.bathrooms_number,
-    amenities: prop.unit_amenities.amenity.map(
-      (am: { amenity_name: string }) => am.amenity_name,
-    ), // convert object to list
-    otherAmenities: [],
-    imageUrls: prop.gallery.image
-      .map((img: { image_path: string }) => img.image_path)
-      .slice(1), // remove first image with watermark
-    originalListingUrl: `https://integrityarizonavacationrentals.com/${prop.id}`,
-    avgRating: prop.rating_average ?? 0,
-    numRatings: prop.rating_count ?? 0,
-    originalListingPlatform: "IntegrityArizona" as ListingSiteName,
-    reservedDateRanges: [
-      {
-        start: checkIn,
-        end: checkOut,
-      },
-    ],
-    originalNightlyPrice:
-      Math.round(prop.total / getNumNights(checkIn, checkOut)) * 100, // convert to cents
-    reviews: [],
-    scrapeUrl: scrapeUrl,
-    cancellationPolicy: "Integrity Arizona",
-  }));
+): Promise<ScrapedListing[]> => {
+  return await Promise.all(
+    validatedData.data.available_properties.property.map(async (prop) => {
+      const latLngPoint = {
+        lng: prop.longitude,
+        lat: prop.latitude,
+      };
+
+      const addressComponents = await getAddress(latLngPoint);
+
+      return {
+        originalListingId: prop.id.toString(),
+        name: prop.name,
+        about: parseHTML(prop.short_description), // may contain html
+        propertyType: convertPropertyType(prop.lodging_type_id),
+        address:
+          prop.location_area_name + ", " + prop.city + ", " + prop.state_name,
+
+        city: addressComponents.city,
+        country: addressComponents.country,
+        stateName: addressComponents.stateName,
+        stateCode: addressComponents.stateCode,
+
+        latLngPoint,
+
+        maxNumGuests: prop.max_occupants,
+        numBeds: prop.bedrooms_number, // not provided, but required in NewProperty
+        numBedrooms: prop.bedrooms_number,
+        numBathrooms: prop.bathrooms_number,
+        amenities: prop.unit_amenities.amenity.map(
+          (am: { amenity_name: string }) => am.amenity_name,
+        ), // convert object to list
+        otherAmenities: [],
+        imageUrls: prop.gallery.image
+          .map((img: { image_path: string }) => img.image_path)
+          .slice(1), // remove first image with watermark
+        originalListingUrl: `https://integrityarizonavacationrentals.com/${prop.id}`,
+        avgRating: prop.rating_average ?? 0,
+        numRatings: prop.rating_count ?? 0,
+        originalListingPlatform: "IntegrityArizona" as ListingSiteName,
+        reservedDateRanges: [
+          {
+            start: checkIn,
+            end: checkOut,
+          },
+        ],
+        originalNightlyPrice:
+          Math.round(prop.total / getNumNights(checkIn, checkOut)) * 100, // convert to cents
+        reviews: [],
+        scrapeUrl: scrapeUrl,
+        cancellationPolicy: "Integrity Arizona",
+      };
+    }),
+  );
 };
 
 export const arizonaScraper: DirectSiteScraper = async ({

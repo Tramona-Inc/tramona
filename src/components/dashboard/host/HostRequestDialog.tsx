@@ -20,8 +20,6 @@ import Image from "next/image";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { AlertCircle } from "lucide-react";
-import { DialogTitle } from "@radix-ui/react-dialog";
-import { HOST_MARKUP } from "@/utils/constants";
 
 export default function HostRequestDialog({
   open,
@@ -50,6 +48,8 @@ export default function HostRequestDialog({
 
   // const [selectedProperties, setSelectedProperties] =
   //   useState<number[]>(allPropertyIds);
+
+  const numNights = getNumNights(request.checkIn, request.checkOut);
 
   const togglePropertySelection = (id: number) => {
     setSelectedProperties((prev) => {
@@ -81,11 +81,7 @@ export default function HostRequestDialog({
     }
   };
 
-  const fmtdNightlyPrice = (
-    request.maxTotalPrice /
-    getNumNights(request.checkIn, request.checkOut) /
-    100
-  ).toFixed(2);
+  const fmtdNightlyPrice = (request.maxTotalPrice / numNights / 100).toFixed(2);
 
   // console.log("selectedProperties1", selectedProperties);
 
@@ -127,10 +123,7 @@ export default function HostRequestDialog({
             <div className="mb-4 flex justify-between">
               <div className="flex flex-col items-start">
                 <div className="text-dark text-lg font-bold">
-                  {formatCurrency(
-                    request.maxTotalPrice /
-                      getNumNights(request.checkIn, request.checkOut),
-                  )}
+                  {formatCurrency(request.maxTotalPrice / numNights)}
                   /night
                 </div>
                 <div className="text-sm text-gray-600">
@@ -142,10 +135,7 @@ export default function HostRequestDialog({
                   {formatDateRange(request.checkIn, request.checkOut)}
                 </div>
                 <div className="text-sm text-gray-600">
-                  {plural(
-                    getNumNights(request.checkIn, request.checkOut),
-                    "night",
-                  )}
+                  {plural(numNights, "night")}
                 </div>
               </div>
               <div className="flex flex-col items-end">
@@ -177,6 +167,13 @@ export default function HostRequestDialog({
               const hasCancellationPolicy = Boolean(
                 property.cancellationPolicy,
               );
+
+              const nightlyPriceCents =
+                parseFloat(propertyPrices[property.id] ?? "0") * 100;
+
+              const totalPriceCents = nightlyPriceCents * numNights;
+              const hostPayoutCents = getHostPayout(totalPriceCents);
+
               return (
                 <div
                   key={property.id}
@@ -196,12 +193,13 @@ export default function HostRequestDialog({
                       className="h-4 w-4"
                       disabled={!hasCancellationPolicy}
                     />
+
                     <Image
-                      src={property.imageUrls[0] ?? ""}
+                      src={property.imageUrls[0]!}
                       alt={property.name}
-                      width={60}
-                      height={60}
-                      className="rounded"
+                      width={64}
+                      height={64}
+                      className="size-16 rounded object-cover"
                     />
                     <div className="flex flex-col">
                       <div className="text-dark text-sm font-semibold">
@@ -255,27 +253,14 @@ export default function HostRequestDialog({
                             />
                           </div>
                         </div>
-                        {(request.maxTotalPrice /
-                          getNumNights(request.checkIn, request.checkOut) /
-                          100) *
-                          1.1 <
+                        {(request.maxTotalPrice / numNights / 100) * 1.1 <
                           parseInt(propertyPrices[property.id] ?? "0") && (
                           <div className="text-sm text-red-600">
                             This offer is unlikely to get accepted since it is{" "}
                             {Math.round(
                               ((parseFloat(propertyPrices[property.id] ?? "0") -
-                                request.maxTotalPrice /
-                                  getNumNights(
-                                    request.checkIn,
-                                    request.checkOut,
-                                  ) /
-                                  100) /
-                                (request.maxTotalPrice /
-                                  getNumNights(
-                                    request.checkIn,
-                                    request.checkOut,
-                                  ) /
-                                  100)) *
+                                request.maxTotalPrice / numNights / 100) /
+                                (request.maxTotalPrice / numNights / 100)) *
                                 100,
                             )}
                             % higher than the requested price.
@@ -283,18 +268,8 @@ export default function HostRequestDialog({
                         )}
                         {propertyPrices[property.id] && (
                           <div className="text-sm text-gray-600">
-                            By offering this price, you will be paid $
-                            {getHostPayout({
-                              propertyPrice: parseFloat(
-                                propertyPrices[property.id] ?? "0",
-                              ),
-                              hostMarkup: HOST_MARKUP,
-                              numNights: getNumNights(
-                                request.checkIn,
-                                request.checkOut,
-                              ),
-                            })}{" "}
-                            all-in
+                            By offering this price, you will be paid{" "}
+                            {formatCurrency(hostPayoutCents)} all-in
                           </div>
                         )}
                       </div>

@@ -1,29 +1,12 @@
 import { calculateTotalTax } from "@/utils/payment-utils/taxData";
 import { sumBy } from "lodash";
-import { getAddress } from "@/server/google-maps";
 import { TAX_PERCENTAGE } from "../constants";
+import { Property } from "@/server/db/schema";
 
-export async function getTax({ lat, lng }: { lat: number; lng: number }) {
-  //const usAddressRegex = /(.+),\s*([A-Z]{2})\s*\d{5},\s*(USA)/;
-
-  // Match the address against the regex
-  //const match = location.match(usAddressRegex);
-  console.log(lat, lng);
-  const { city, county, stateCode, country } = await getAddress({
-    lat,
-    lng,
-  });
-
-  console.log(city, county, stateCode, country);
-
-  if (!country) throw new Error(`Country not found for ${lat}, ${lng}`);
-  if (!stateCode) throw new Error(`State not found for ${lat}, ${lng}`);
-  if (!city) throw new Error(`City not found for ${lat}, ${lng}`);
-
-  let totalTaxRate = sumBy(
-    calculateTotalTax(country, stateCode, city),
-    (tax) => tax.taxRate,
-  );
+export function getTaxPercentage(
+  property: Pick<Property, "city" | "county" | "stateCode" | "country">,
+) {
+  let totalTaxRate = sumBy(calculateTotalTax(property), (tax) => tax.taxRate);
 
   console.log(totalTaxRate);
   if (totalTaxRate <= 0) {

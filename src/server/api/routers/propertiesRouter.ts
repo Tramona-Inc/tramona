@@ -62,13 +62,20 @@ export type HostRequestsPageData = {
 export const propertiesRouter = createTRPCRouter({
   create: protectedProcedure
     .input(
-      propertyInsertSchema.omit({
-        hostId: true,
-        city: true,
-        // latitude: true,
-        // longitude: true,
-        latLngPoint: true,
-      }),
+      propertyInsertSchema
+        .omit({
+          hostId: true,
+
+          latLngPoint: true,
+          city: true,
+          county: true,
+          stateName: true,
+          stateCode: true,
+          country: true,
+        })
+        .extend({
+          latLngPoint: propertyInsertSchema.shape.latLngPoint.optional(),
+        }),
     )
     .mutation(async ({ ctx, input }) => {
       const hostTeamId = await db.query.hostProfiles
