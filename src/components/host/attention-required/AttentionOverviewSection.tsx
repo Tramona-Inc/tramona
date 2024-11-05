@@ -8,7 +8,7 @@ import { api } from "@/utils/api";
 
 export default function AttentionOverviewSection() {
   const { data: allNotifications, isLoading } =
-    api.host.getAllOverviewNotifications.useQuery();
+    api.hosts.getAllOverviewNotifications.useQuery();
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

@@ -36,8 +36,8 @@ const RequestToBookCustomStripeCheckout = ({
 
   const authorizePayment = api.stripe.authorizePayment.useMutation();
 
-  const { data: hostTeam, isLoading: isHostTeamLoading } =
-    api.hostTeams.getHostTeamDetails.useQuery(
+  const { data: hostTeamOwner, isLoading: isHostTeamLoading } =
+    api.hostTeams.getHostTeamOwner.useQuery(
       {
         hostTeamId: property.hostTeamId!,
       },
@@ -53,22 +53,23 @@ const RequestToBookCustomStripeCheckout = ({
       return;
     }
 
-    if (!hostTeam || "code" in hostTeam) {
+    if (!hostTeamOwner || "code" in hostTeamOwner) {
       console.error("No valid host team data found");
       return;
     }
 
-    if (!hostTeam.owner.stripeConnectId) {
+    if (!hostTeamOwner.stripeConnectId) {
       console.error("No stripe connect ID found for host");
       return;
     }
+
 
     try {
       const propertyWithHostTeam = {
         ...property,
         hostTeam: {
           owner: {
-            stripeConnectId: hostTeam.owner.stripeConnectId,
+            stripeConnectId: hostTeamOwner.stripeConnectId,
           },
         },
       };
@@ -90,7 +91,7 @@ const RequestToBookCustomStripeCheckout = ({
     }
   }, [
     session.data?.user,
-    hostTeam,
+    hostTeamOwner,
     property,
     authorizePayment,
     requestToBookPricing,
@@ -99,7 +100,7 @@ const RequestToBookCustomStripeCheckout = ({
   ]);
 
   useEffect(() => {
-    if (!hostTeam || checkoutReady || isLoading) {
+    if (!hostTeamOwner || checkoutReady || isLoading) {
       return;
     }
 

@@ -96,10 +96,6 @@ export const hostProfilesRelations = relations(hostProfiles, ({ one }) => ({
 }));
 
 export const propertiesRelations = relations(properties, ({ one, many }) => ({
-  host: one(users, {
-    fields: [properties.hostId],
-    references: [users.id],
-  }),
   hostTeam: one(hostTeams, {
     fields: [properties.hostTeamId],
     references: [hostTeams.id],

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Badge } from "../ui/badge";
 import UserAvatar from "../_common/UserAvatar";
-import { formatDateRange } from "@/utils/utils";
+import { formatDateRange, getHostNameAndImage } from "@/utils/utils";
 import Image from "next/image";
 import { type RouterOutputs } from "@/utils/api";
 
@@ -33,22 +33,17 @@ export default function PastTripCard({
             <h2 className="text-lg font-bold md:text-2xl">
               {trip.property.name}
             </h2>
-            {trip.property.host && (
-              <div className="flex gap-2">
-                <UserAvatar
-                  name={trip.property.host.name}
-                  image={trip.property.host.image}
-                />
-                <div>
-                  <p className="text-xs text-muted-foreground md:text-sm">
-                    Hosted by
-                  </p>
-                  <p className="text-sm md:text-base">
-                    {trip.property.host.name}
-                  </p>
-                </div>
+            <div className="flex gap-2">
+              <UserAvatar {...getHostNameAndImage(trip.property)} />
+              <div>
+                <p className="text-xs text-muted-foreground md:text-sm">
+                  Hosted by
+                </p>
+                <p className="text-sm md:text-base">
+                  {trip.property.hostTeam.owner.name}
+                </p>
               </div>
-            )}
+            </div>
           </div>
 
           <div className="h-[2px] rounded-full bg-gray-200"></div>

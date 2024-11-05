@@ -327,7 +327,7 @@ export async function scrapeAirbnbListing(
 
   const addressComponents = await getAddress({ lat: latitude, lng: longitude });
 
-  const property: NewProperty = {
+  const property: Omit<NewProperty, "hostTeamId"> = {
     name,
     about,
     imageUrls,

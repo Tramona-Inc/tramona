@@ -34,7 +34,7 @@ export default function OnboardingFooter({
   const router = useRouter();
 
   const { mutateAsync: createHostProfile } =
-    api.users.upsertHostProfile.useMutation();
+    api.hosts.upsertHostProfile.useMutation();
 
   const { data: isHost } = api.users.isHost.useQuery();
 

@@ -15,7 +15,7 @@ import Link from "next/link";
 
 export default function Page() {
   const { data: user } = api.users.getUser.useQuery();
-  const { data: hostInfo } = api.host.getUserHostInfo.useQuery();
+  const { data: hostProfile } = api.hosts.getMyHostProfile.useQuery();
   const { isStripeConnectInstanceReady } = useIsStripeConnectInstanceReady();
   const [hostStripeConnectId, setHostStripeConnectId] = useState<string>("");
   const trimmedConnectId = user?.stripeConnectId
@@ -87,7 +87,7 @@ export default function Page() {
 
               <FinancesSummary
                 hostStripeConnectId={hostStripeConnectId}
-                becameHostAt={hostInfo?.becameHostAt}
+                becameHostAt={hostProfile?.becameHostAt}
               />
               <SettingsAndDocuments items={settingsItems} />
             </div>
@@ -99,4 +99,3 @@ export default function Page() {
     </DashboadLayout>
   );
 }
-``;

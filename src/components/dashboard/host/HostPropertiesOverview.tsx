@@ -7,13 +7,13 @@ export default function HostPropertiesOverview() {
   const { data: properties } = api.properties.getHostProperties.useQuery();
 
   const listedProperties = properties?.filter(
-    (property) => property.propertyStatus === "Listed",
+    (property) => property.status === "Listed",
   );
   const archivedProperties = properties?.filter(
-    (property) => property.propertyStatus === "Archived",
+    (property) => property.status === "Archived",
   );
   const draftedProperties = properties?.filter(
-    (property) => property.propertyStatus === "Drafted",
+    (property) => property.status === "Drafted",
   );
   return (
     <div className="flex w-full flex-col items-start gap-y-5">

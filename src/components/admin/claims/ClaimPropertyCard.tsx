@@ -1,16 +1,16 @@
-import React from "react";
 import Image from "next/image";
 import { formatDate } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CalendarIcon, HomeIcon, UserIcon } from "lucide-react";
-import type { Claim, Property } from "@/server/db/schema";
+import type { Claim } from "@/server/db/schema";
+import { RouterOutputs } from "@/utils/api";
 
 export default function ClaimPropertyCard({
   claim,
   property,
 }: {
   claim: Claim;
-  property: Property;
+  property: RouterOutputs["properties"]["getById"];
 }) {
   return (
     <Card className="mb-4 overflow-hidden">
@@ -85,10 +85,10 @@ export default function ClaimPropertyCard({
                 <div className="mt-1 flex items-center space-x-2 text-xs">
                   <UserIcon className="h-3 w-3" />
                   <span className="font-medium text-muted-foreground">
-                    Host ID:
+                    Main host ID:
                   </span>
                   <span className="font-semibold">
-                    {property.hostId ?? "N/A"}
+                    {property.hostTeam.owner.id}
                   </span>
                 </div>
                 <div className="mt-1 flex items-center space-x-2 text-xs">

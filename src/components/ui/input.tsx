@@ -32,7 +32,7 @@ const inputVariants = cva(
   {
     variants: {
       variant: {
-        default: "h-10 bg-zinc-50",
+        default: "h-10 bg-white",
         lpDesktop: "h-16 pt-4",
         lpMobile: "h-12 bg-white",
       },
@@ -125,7 +125,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           typeof suffix === "string" ? "text-xs text-muted-foreground" : ""
         }
       >
-        {type === "password" ? suffix ?? passwordEyeballButton : suffix}
+        {type === "password" ? (suffix ?? passwordEyeballButton) : suffix}
       </div>
     );
 
