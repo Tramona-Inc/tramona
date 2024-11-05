@@ -91,7 +91,13 @@ export const requestsRouter = createTRPCRouter({
                   bookOnAirbnb: true,
                 },
                 with: {
-                  host: { columns: { name: true, email: true, image: true } },
+                  hostTeam: {
+                    with: {
+                      owner: {
+                        columns: { name: true, email: true, image: true },
+                      },
+                    },
+                  },
                 },
               },
             },
@@ -473,13 +479,10 @@ export async function handleRequestSubmission(
       (property) => !property.autoOfferEnabled,
     );
 
-    await sendTextToHost(
-      propertiesWithoutAutoOffers,
-      input.checkIn,
-      input.checkOut,
-      input.maxTotalPrice,
-      input.location,
-    );
+    await sendTextToHost({
+      matchingProperties: propertiesWithoutAutoOffers,
+      request: input,
+    });
 
     return { requestId: request.id, madeByGroupId };
   });

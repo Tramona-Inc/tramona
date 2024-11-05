@@ -7,7 +7,7 @@
  * need to use are documented accordingly near the end.
  */
 
-import { type User, users } from "../db/schema";
+import { hostProfiles, type User, users } from "../db/schema";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 import { type Session } from "next-auth";
@@ -135,6 +135,35 @@ export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
   });
 });
 
+export const hostProcedure = t.procedure.use(async ({ ctx, next }) => {
+  if (!ctx.session?.user) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
+
+  const { user, ...session } = ctx.session;
+
+  const hostProfile = await ctx.db.query.hostProfiles.findFirst({
+    where: eq(hostProfiles.userId, user.id),
+  });
+
+  if (!hostProfile) {
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+      message: `Host profile not found for user id ${user.id}`,
+    });
+  }
+
+  return next({
+    ctx: {
+      // infers the `session` as non-nullable
+      user,
+      hostProfile,
+      session,
+      db,
+    },
+  });
+});
+
 export const optionallyAuthedProcedure = t.procedure.use(({ ctx, next }) => {
   return next({
     ctx: {
@@ -171,7 +200,7 @@ export const roleRestrictedProcedure = <
       role !== "admin"
     ) {
       throw new TRPCError({ code: "UNAUTHORIZED" });
-    };
+    }
 
     return next({
       ctx: {

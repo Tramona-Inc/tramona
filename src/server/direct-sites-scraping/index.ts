@@ -14,14 +14,7 @@ import {
   requests,
   reviewsInsertSchema,
 } from "../db/schema";
-import {
-  NewOffer,
-  NewProperty,
-  Offer,
-  offers,
-  NewReview,
-  reviews,
-} from "../db/schema";
+import { NewOffer, NewProperty, Offer, offers, reviews } from "../db/schema";
 import { arizonaScraper, arizonaSubScraper } from "./integrity-arizona";
 import { redawningScraper } from "./redawning";
 
@@ -35,7 +28,6 @@ import {
 import { DIRECT_LISTING_MARKUP } from "@/utils/constants";
 import { createLatLngGISPoint, sendText } from "@/server/server-utils";
 import { cleanbnbScraper, cleanbnbSubScraper } from "./cleanbnb-scrape";
-//import { log } from "@/pages/api/script";
 import { z } from "zod";
 import { formatZodError } from "../../utils/zod-utils";
 
@@ -54,16 +46,8 @@ export type DirectSiteScraper = (
   options: ScraperOptions,
 ) => Promise<ScrapedListing[]>;
 
-export type ScrapedListing = Omit<NewProperty, "latLngPoint"> & {
-  originalListingUrl: string; // enforce that it's non-null
-  reviews: NewReview[];
-  scrapeUrl: string;
-  latLngPoint?: { lat: number; lng: number }; // make latLngPoint optional
-  nightlyPrice?: number; // airbnb scraper has nightlyPrice as real price and originalNightlyPrice as the price before discount
-};
-
 const scrapedListingSchema = propertyInsertSchema
-  .omit({ latLngPoint: true })
+  .omit({ latLngPoint: true, hostTeamId: true })
   .extend({
     originalListingUrl: z.string(),
     reviews: reviewsInsertSchema.omit({ propertyId: true }).array(),
@@ -71,6 +55,8 @@ const scrapedListingSchema = propertyInsertSchema
     latLngPoint: z.object({ lat: z.number(), lng: z.number() }).optional(),
     nightlyPrice: z.number().optional(),
   });
+
+export type ScrapedListing = z.infer<typeof scrapedListingSchema>;
 
 export type SubsequentScraper = (options: {
   originalListingId: string; // all input params are from offers and properties table

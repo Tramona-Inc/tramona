@@ -373,58 +373,62 @@ export default async function webhook(
         );
         const amenities = getAmenities(listingData, webhookData.data.id);
 
-        const propertyObject = {
-          hostId: userId,
-          propertyType: convertAirbnbPropertyType(
-            webhookData.data.property_type,
-          ),
-          roomType: roomTypeMapping[webhookData.data.room_type],
-          maxNumGuests: webhookData.data.capacity.max,
-          numBeds: webhookData.data.capacity.beds,
-          numBedrooms: webhookData.data.capacity.bedrooms,
-          numBathrooms: webhookData.data.capacity.bathrooms,
-          // latitude: webhookData.data.address.latitude,
-          // longitude: webhookData.data.address.longitude,
-          country: webhookData.data.address.country_code, //change to country
-          otherHouseRules: webhookData.data.house_rules,
-          latLngPoint: latLngPoint,
-          city: webhookData.data.address.city,
-          hostName: webhookData.data.channel.customer.name,
-          name: webhookData.data.public_name,
-          about: webhookData.data.description,
-          address:
-            webhookData.data.address.street +
-            ", " +
-            webhookData.data.address.city +
-            ", " +
-            webhookData.data.address.state +
-            ", " +
-            webhookData.data.address.country_code,
-          imageUrls: images,
-          originalListingPlatform: "Hospitable" as const,
-          originalListingId: webhookData.data.platform_id,
-          amenities: amenities,
-          cancellationPolicy: cancellationPolicy,
+        const hostProfile = await db.query.hostProfiles.findFirst({
+          where: eq(hostProfiles.userId, userId),
+        });
 
-          //amenities: webhookData.data.amenities,
-          //cancellationPolicy: webhookData.data.cancellation_policy,
-          //ratings: webhookData.data.ratings,
-        };
+        if (!hostProfile) {
+          throw new Error(`Host profile not found for user ${userId}`);
+        }
 
         const propertyId = await db
           .insert(properties)
-          .values(propertyObject)
+          .values({
+            hostTeamId: hostProfile.curTeamId,
+            propertyType: convertAirbnbPropertyType(
+              webhookData.data.property_type,
+            ),
+            roomType: roomTypeMapping[webhookData.data.room_type],
+            maxNumGuests: webhookData.data.capacity.max,
+            numBeds: webhookData.data.capacity.beds,
+            numBedrooms: webhookData.data.capacity.bedrooms,
+            numBathrooms: webhookData.data.capacity.bathrooms,
+            country: webhookData.data.address.country_code, //change to country
+            otherHouseRules: webhookData.data.house_rules,
+            latLngPoint: latLngPoint,
+            city: webhookData.data.address.city,
+            hostName: webhookData.data.channel.customer.name,
+            name: webhookData.data.public_name,
+            about: webhookData.data.description,
+            address:
+              webhookData.data.address.street +
+              ", " +
+              webhookData.data.address.city +
+              ", " +
+              webhookData.data.address.state +
+              ", " +
+              webhookData.data.address.country_code,
+            imageUrls: images,
+            originalListingPlatform: "Hospitable" as const,
+            originalListingId: webhookData.data.platform_id,
+            amenities: amenities,
+            cancellationPolicy: cancellationPolicy,
+            //amenities: webhookData.data.amenities,
+            //cancellationPolicy: webhookData.data.cancellation_policy,
+            //ratings: webhookData.data.ratings,
+          })
           .returning({ id: properties.id })
           .then((result) => result[0]!.id);
 
-        for (const dateRange of datesReserved) {
-          await db.insert(reservedDateRanges).values({
+        await db.insert(reservedDateRanges).values(
+          datesReserved.map((dateRange) => ({
             propertyId: propertyId,
             start: dateRange.start,
             end: dateRange.end,
-            platformBookedOn: "airbnb",
-          });
-        }
+            platformBookedOn: "airbnb" as const,
+          })),
+        );
+
         break;
     }
 
