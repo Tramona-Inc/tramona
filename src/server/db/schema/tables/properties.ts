@@ -344,6 +344,7 @@ export const propertyInsertSchema = createInsertSchema(properties, {
   checkOutTime: zodTime,
   roomsWithBeds: roomsWithBedsSchema,
   autoOfferDiscountTiers: z.array(discountTierSchema),
+  bookItNowDiscountTiers: z.array(discountTierSchema).nullable(),
   latLngPoint: z.object({ x: z.number(), y: z.number() }),
 });
 

@@ -777,37 +777,28 @@ function ReserveBtn({
 }: {
   btnSize: ButtonProps["size"];
   requestToBook: RequestToBookDetails;
-  // property: Pick<
-  //   Property,
-  //   "stripeVerRequired" | "originalListingId" | "bookOnAirbnb"
-  // >;
   property: PropertyPageData;
 }) {
-  const { data: verificationStatus } =
-    api.users.myVerificationStatus.useQuery();
+  const { data: verificationStatus } = api.users.myVerificationStatus.useQuery();
 
-  const checkIn = formatDateMonthDayYear(requestToBook.checkIn);
-  const checkOut = formatDateMonthDayYear(requestToBook.checkOut);
+  const checkoutUrl = useMemo(() => {
+    const checkIn = formatDateMonthDayYear(requestToBook.checkIn);
+    const checkOut = formatDateMonthDayYear(requestToBook.checkOut);
+    
+    const baseCheckoutPath = property.bookItNowEnabled && 
+      getApplicableBookItNowDiscount({
+        bookItNowDiscountTiers: property.bookItNowDiscountTiers,
+        checkIn: requestToBook.checkIn,
+      }) !== null
+      ? "book-it-now-checkout"
+      : "request-to-book-checkout";
 
-  const baseCheckoutUrl = useMemo(() => {
-    const applicableDiscount = getApplicableBookItNowDiscount({
-      bookItNowDiscountTiers: property.bookItNowDiscountTiers,
-      checkIn: requestToBook.checkIn,
-    });
-
-    if (property.bookItNowEnabled && applicableDiscount !== null) {
-      return "book-it-now-checkout";
-    }
-
-    return "request-to-book-checkout";
-  }, [
-    property.bookItNowEnabled,
-    property.bookItNowDiscountTiers,
-    requestToBook.checkIn,
-  ]);
+    return `/${baseCheckoutPath}/${property.id}?checkIn=${checkIn}&checkOut=${checkOut}&numGuests=${requestToBook.numGuests}`;
+  }, [property, requestToBook]);
 
   return (
     <Button
+      asChild={!property.stripeVerRequired || verificationStatus?.isIdentityVerified === "true"}
       variant={
         property.stripeVerRequired &&
         verificationStatus?.isIdentityVerified === "pending"
@@ -819,19 +810,14 @@ function ReserveBtn({
     >
       {!property.stripeVerRequired ||
       verificationStatus?.isIdentityVerified === "true" ? (
-        <Link
-          href={`/${baseCheckoutUrl}/${property.id}?checkIn=${checkIn}&checkOut=${checkOut}&numGuests=${requestToBook.numGuests}`}
-        >
-          Reserve
-        </Link>
+        <Link href={checkoutUrl}>Reserve</Link>
       ) : verificationStatus?.isIdentityVerified === "pending" ? (
         <p>Verification pending</p>
       ) : (
         <VerificationProvider>
           <IdentityModal isPrimary={true} />
           <p className="hidden text-center text-sm font-semibold text-red-500 md:block">
-            This host requires you to go through Stripe verification before you
-            book
+            This host requires you to go through Stripe verification before you book
           </p>
         </VerificationProvider>
       )}
