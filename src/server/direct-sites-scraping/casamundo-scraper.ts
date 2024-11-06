@@ -171,6 +171,56 @@ interface CalendarResponse {
     days: Record<string, number>;
   };
 }
+type AvailabilityResponse = Record<string, number>;
+
+export async function getAvailability(offerId: string): Promise<AvailabilityResponse> {
+  const url = `https://www.casamundo.com/api/v2/calendar/${offerId}`;
+
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear();
+  const currentMonth = currentDate.getMonth() + 1;
+
+  // Generate an array of { year, month } objects for the next 12 months
+  const monthsToFetch = Array.from({ length: 12 }, (_, i) => {
+    const month = (currentMonth + i - 1) % 12 + 1;
+    const year = currentYear + Math.floor((currentMonth + i - 1) / 12);
+    return { year, month };
+  });
+
+  const fetchMonthData = async (year: number, month: number) => {
+    const maxRetries = 3;
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        const response: AxiosResponse<CalendarResponse> = await axios.get(url, {
+          params: { year, month },
+          httpsAgent: proxyAgent,
+          headers: {
+            accept: "application/json",
+            "accept-language": "en-US,en;q=0.9",
+          },
+        });
+        return response.data.content.days;
+      } catch (error) {
+        console.error(`Error fetching data for ${year}-${month}:`, error);
+        if (attempt === maxRetries - 1) throw error; // Throw if all retries fail
+      }
+    }
+    return {}; // Empty response if all retries fail
+  };
+
+  // Fetch all months in parallel
+  const allMonthsData = await Promise.all(
+    monthsToFetch.map(({ year, month }) => fetchMonthData(year, month))
+  );
+
+  // Combine all the days data into a single object
+  const availability: AvailabilityResponse = {};
+  allMonthsData.forEach((days) => Object.assign(availability, days));
+
+  return availability;
+}
+
+
 
 async function checkAvailability(
   offerId: string,
@@ -179,7 +229,13 @@ async function checkAvailability(
 ): Promise<boolean> {
   const url = `https://www.casamundo.com/api/v2/calendar/${offerId}`;
 
+  const currentDate = new Date();
+
+
   let currentYear: number = checkIn.getFullYear();
+  if (checkIn < currentDate) {
+    currentYear = currentDate.getFullYear() + 1;
+  }
   let currentMonth: number = checkIn.getMonth() + 1;
 
   const days: Record<string, number> = {};
@@ -323,7 +379,7 @@ function formatCancellationPolicy(
   return policyString;
 }
 
-const fetchPrice = async (
+export const fetchPrice = async (
   params: PriceExtractionParams,
 ): Promise<PriceResult> => {
   const url = `https://www.casamundo.com/booking/checkout/priceDetails/${params.offerId}`;
