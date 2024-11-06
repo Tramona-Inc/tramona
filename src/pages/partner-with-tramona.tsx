@@ -25,7 +25,9 @@ export default function PartnerWithTramona() {
 function PartnerIntro() {
   return (
     <div className="text-center space-y-6 max-w-3xl mx-auto">
-      <h1 className="text-5xl font-bold text-[#004236] leading-tight">Partner with Tramona: Maximize Your Impact in the STR Industry</h1>
+      <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-4xl xl:text-5xl font-bold text-[#004236] leading-tight">
+        Partner with Tramona: Maximize Your Impact in the STR Industry
+      </h1>
       <p className="text-lg text-gray-600 leading-relaxed">
         Are you a property manager, a company offering STR technology, a service provider in the STR space, or a community leader? Tramona provides unique opportunities to grow your impact.
       </p>
