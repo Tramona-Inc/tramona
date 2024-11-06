@@ -296,6 +296,7 @@ export const stripeRouter = createTRPCRouter({
       //get hostID from the property
       // Object that can be access through webhook and client
       //check if a customer id exists
+
       let stripeCustomerId = await ctx.db.query.users
         .findFirst({
           columns: {

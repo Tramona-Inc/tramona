@@ -152,11 +152,8 @@ export default function TripCancellationOrPartialRefund({
                     </div>
                     <div className="mt-4 flex gap-2">
                       <UserAvatar
-                        name={data.trip.property.host?.name}
-                        image={
-                          data.trip.property.host?.image ??
-                          "/assets/images/tramona-logo.jpeg"
-                        }
+                        name={data.trip.property.hostTeam.owner.name}
+                        image={data.trip.property.hostTeam.owner.image}
                       />
                       <div className="flex w-full justify-between">
                         <div>
@@ -164,9 +161,8 @@ export default function TripCancellationOrPartialRefund({
                             Hosted by
                           </p>
                           <p>
-                            {data.trip.property.host?.name
-                              ? data.trip.property.host.name
-                              : "Tramona"}
+                            {data.trip.property.hostTeam.owner.name ??
+                              data.trip.property.hostTeam.name}
                           </p>
                         </div>
                       </div>

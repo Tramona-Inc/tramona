@@ -16,7 +16,6 @@ import { formatDistanceToNowStrict } from "date-fns";
 import { CheckCircle, EllipsisIcon, FlagIcon } from "lucide-react";
 import Link from "next/link";
 import { useChatWithHost } from "@/utils/messaging/useChatWithHost";
-import { env } from "@/env";
 import { Card, CardContent } from "../ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -46,7 +45,7 @@ export default function HostStaysCards({
         const numNights = getNumNights(trip.checkIn, trip.checkOut);
         const totalPrice = trip.offer!.totalPrice;
 
-        const hostId = trip.property.host?.id ?? env.TRAMONA_ADMIN_USER_ID;
+        const hostId = trip.property.hostTeam.ownerId;
 
         return (
           <div key={trip.id}>

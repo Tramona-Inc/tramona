@@ -7,7 +7,6 @@ import {
   bids,
   groupMembers,
   groups,
-  properties,
   trips,
   users,
 } from "@/server/db/schema";
@@ -19,7 +18,7 @@ import { getNumNights } from "@/utils/utils";
 import { zodInteger } from "@/utils/zod-utils";
 import { TRPCError } from "@trpc/server";
 import { add } from "date-fns";
-import { and, desc, eq, exists, inArray } from "drizzle-orm";
+import { and, desc, eq, exists } from "drizzle-orm";
 import { random } from "lodash";
 import { z } from "zod";
 import {
@@ -450,60 +449,4 @@ export const biddingRouter = createTRPCRouter({
       numGuests: random(1, 5),
     });
   }),
-
-  getAllHostPending: roleRestrictedProcedure(["host"]).query(
-    async ({ ctx }) => {
-      const allHostProperties = (
-        await db.query.properties.findMany({
-          where: eq(properties.hostId, ctx.user.id),
-          columns: {
-            id: true,
-          },
-        })
-      ).map((property) => property.id);
-
-      const allActiveBids = await db.query.bids.findMany({
-        with: {
-          madeByGroup: {
-            with: { members: { with: { user: true } }, invites: true },
-          },
-          property: {
-            columns: {
-              id: true,
-              name: true,
-              address: true,
-              imageUrls: true,
-              originalNightlyPrice: true,
-              originalListingUrl: true,
-              latLngPoint: true,
-            },
-          },
-          counters: {
-            orderBy: (counters, { desc }) => [desc(counters.createdAt)],
-            limit: 1,
-            columns: {
-              id: true,
-              counterAmount: true,
-              createdAt: true,
-              status: true,
-              userId: true,
-            },
-          },
-        },
-        where: and(
-          eq(bids.status, "Pending"),
-          inArray(bids.propertyId, allHostProperties),
-        ),
-        orderBy: desc(bids.createdAt),
-      });
-
-      return allActiveBids;
-    },
-  ),
 });
-
-let a = 1;
-
-a = 2;
-
-console.log(a);

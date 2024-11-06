@@ -20,6 +20,7 @@ import * as cheerio from "cheerio";
 import { useSession } from "next-auth/react";
 import { api } from "./api";
 import { HOST_MARKUP } from "./constants";
+import { InferQueryModel } from "@/server/db";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -755,3 +756,53 @@ export const titleCase = (str: string): string => {
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
 };
+
+export function getHostNameAndImage(
+  property: InferQueryModel<
+    "properties",
+    {
+      columns: {
+        id: true;
+        hostName: true;
+        hostProfilePic: true;
+      };
+      with: {
+        hostTeam: {
+          with: {
+            owner: {
+              columns: {
+                firstName: true;
+                lastName: true;
+                name: true;
+                image: true;
+              };
+            };
+          };
+        };
+      };
+    }
+  >,
+) {
+  const teamOwner = property.hostTeam.owner;
+
+  const ownerName =
+    teamOwner.firstName && teamOwner.lastName
+      ? `${teamOwner.firstName} ${teamOwner.lastName}`
+      : teamOwner.name;
+
+  if (!ownerName) {
+    throw new Error(`Host name not found for property ${property.id}`);
+  }
+
+  // since we will be hosting scraped properties from a tramona host team, we want
+  // to use the hostName and hostProfilePic if they exist, otherwise we use the
+  // team owner's name and image. Hopefully hostName and hostProfilePic will be
+  // available for scraped properties, but if they're not, it will fall back to
+  // saying "hosted by Tramona". And for non-scraped properties, hostName and
+  // hostProfilePic will be null, so this will return the team owner's name and
+  // image as intended.
+  return {
+    name: property.hostName ?? ownerName,
+    image: property.hostProfilePic ?? teamOwner.image,
+  };
+}

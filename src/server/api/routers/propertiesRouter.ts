@@ -1,5 +1,6 @@
 import {
   createTRPCRouter,
+  hostProcedure,
   optionallyAuthedProcedure,
   protectedProcedure,
   publicProcedure,
@@ -8,6 +9,8 @@ import {
 import { db } from "@/server/db";
 import {
   hostProfiles,
+  hostTeamMembers,
+  hostTeams,
   propertyInsertSchema,
   propertySelectSchema,
   propertyUpdateSchema,
@@ -64,7 +67,7 @@ export const propertiesRouter = createTRPCRouter({
     .input(
       propertyInsertSchema
         .omit({
-          hostId: true,
+          hostTeamId: true,
 
           latLngPoint: true,
           city: true,
@@ -78,70 +81,58 @@ export const propertiesRouter = createTRPCRouter({
         }),
     )
     .mutation(async ({ ctx, input }) => {
-      const hostTeamId = await db.query.hostProfiles
-        .findFirst({
-          where: eq(hostProfiles.userId, ctx.user.id),
-          columns: { curTeamId: true },
-        })
-        .then((res) => res?.curTeamId);
+      const hostProfile = await db.query.hostProfiles.findFirst({
+        where: eq(hostProfiles.userId, ctx.user.id),
+        columns: { curTeamId: true },
+      });
 
-      if (!hostTeamId) {
+      if (!hostProfile) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: `Host profile not found for user ${ctx.user.id}`,
+          message: "Host profile not found",
         });
       }
 
       const id = await addProperty({
-        isAdmin: ctx.user.role === "admin" ? true : false,
         property: input,
-        userId: ctx.user.id,
+        hostTeamId: hostProfile.curTeamId,
+        isAdmin: ctx.user.role === "admin",
         userEmail: ctx.user.email,
-        hostTeamId,
       });
       return id;
     }),
 
-  // uses the hostId passed in the input instead of the admin's user id
-  createForHost: roleRestrictedProcedure(["admin"])
+  // uses the hostTeamId passed in the input instead of the admin's user id
+  createForHostTeam: roleRestrictedProcedure(["admin"])
     .input(
-      propertyInsertSchema
-        .omit({
-          city: true,
-          // latitude: true,
-          // longitude: true,
-          latLngPoint: true,
-        })
-        .extend({ hostId: z.string() }),
-    ) // make hostid required
+      propertyInsertSchema.omit({
+        city: true,
+        latLngPoint: true,
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
-      const host = await ctx.db.query.users.findFirst({
-        columns: { name: true, role: true, email: true },
-        where: eq(users.id, input.hostId),
+      const hostTeam = await db.query.hostTeams.findFirst({
+        where: eq(hostTeams.id, input.hostTeamId),
       });
 
-      if (!host) {
-        return { status: "host not found" } as const;
-      }
-      if (host.role !== "host" && host.role !== "admin") {
-        return { status: "user not a host" } as const;
+      if (!hostTeam) {
+        return { status: "host team not found" } as const;
       }
 
       await addProperty({
         property: input,
-        userId: input.hostId,
-        userEmail: host.email,
-        isAdmin: false,
+        hostTeamId: hostTeam.id,
+        isAdmin: true,
+        userEmail: ctx.user.email,
       });
 
       return {
         status: "success",
-        hostName: host.name,
       } as const;
     }),
 
   update: roleRestrictedProcedure(["admin", "host"])
-    .input(propertyUpdateSchema.omit({ hostId: true, latLngPoint: true }))
+    .input(propertyUpdateSchema.omit({ hostTeamId: true, latLngPoint: true }))
     .mutation(async ({ ctx, input }) => {
       // TODO: auth
       if (input.address) {
@@ -167,14 +158,26 @@ export const propertiesRouter = createTRPCRouter({
     .input(propertySelectSchema.pick({ id: true }))
     .mutation(async ({ ctx, input }) => {
       if (ctx.user.role === "host") {
-        const request = await ctx.db.query.properties.findFirst({
+        const property = await db.query.properties.findFirst({
           where: eq(properties.id, input.id),
-          columns: {
-            hostId: true,
-          },
+          columns: { hostTeamId: true },
         });
 
-        if (request?.hostId !== ctx.user.id) {
+        if (!property) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Property not found",
+          });
+        }
+
+        const hostTeamMember = await db.query.hostTeamMembers.findFirst({
+          where: and(
+            eq(hostTeamMembers.hostTeamId, property.hostTeamId),
+            eq(hostTeamMembers.userId, ctx.user.id),
+          ),
+        });
+
+        if (!hostTeamMember) {
           throw new TRPCError({ code: "UNAUTHORIZED" });
         }
       }
@@ -188,19 +191,23 @@ export const propertiesRouter = createTRPCRouter({
       const property = await ctx.db.query.properties.findFirst({
         where: eq(properties.id, input.id),
         with: {
-          host: {
-            columns: {
-              image: true,
-              firstName: true,
-              lastName: true,
-              email: true,
-              id: true,
-              about: true,
-              location: true,
-            },
+          hostTeam: {
             with: {
-              hostProfile: {
-                columns: { curTeamId: true },
+              owner: {
+                columns: {
+                  image: true,
+                  firstName: true,
+                  lastName: true,
+                  email: true,
+                  id: true,
+                  about: true,
+                  location: true,
+                },
+                // with: {
+                //   hostProfile: {
+                //     columns: { curTeamId: true },
+                //   },
+                // },
               },
             },
           },
@@ -295,7 +302,7 @@ export const propertiesRouter = createTRPCRouter({
         .from(properties)
         .where(
           and(
-            eq(properties.propertyStatus, "Listed"),
+            eq(properties.status, "Listed"),
             cursor ? gt(properties.id, cursor) : undefined, // Use property ID as cursor
             input.latLngPoint?.lat &&
               input.latLngPoint.lng &&
@@ -521,115 +528,103 @@ export const propertiesRouter = createTRPCRouter({
   //       sql`6371 * acos(SIN(${(lat * Math.PI) / 180}) * SIN(radians(latitude)) + COS(${(lat * Math.PI) / 180}) * COS(radians(latitude)) * COS(radians(longitude) - ${(long * Math.PI) / 180})) <= ${radius}`,
   //     );
   // }),
-  getHostProperties: protectedProcedure
+  getHostProperties: hostProcedure
     .input(z.object({ limit: z.number().optional() }).optional())
     .query(async ({ ctx, input }) => {
       return await ctx.db.query.properties.findMany({
-        where: eq(properties.hostId, ctx.user.id),
+        where: eq(properties.hostTeamId, ctx.hostProfile.curTeamId),
         limit: input?.limit,
       });
     }),
 
-  getHostPropertiesWithRequests: roleRestrictedProcedure(["host"]).query(
-    async ({ ctx }) => {
-      // TODO: USE DRIZZLE relational query, then use groupby in js
-      const hostProperties = await db.query.properties.findMany({
-        where: and(
-          eq(properties.hostId, ctx.user.id),
-          eq(properties.propertyStatus, "Listed"),
-        ),
+  getHostPropertiesWithRequests: hostProcedure.query(async ({ ctx }) => {
+    const hostProperties = await db.query.properties.findMany({
+      where: and(
+        eq(properties.hostTeamId, ctx.hostProfile.curTeamId),
+        eq(properties.status, "Listed"),
+      ),
 
-        // columns: {
-        //   id: true,
-        //   propertyStatus: true,
-        //   latLngPoint: true,
-        //   priceRestriction: true,
-        //   city: true,
-        // },
-      });
+      // columns: {
+      //   id: true,
+      //   propertyStatus: true,
+      //   latLngPoint: true,
+      //   priceRestriction: true,
+      //   city: true,
+      // },
+    });
 
-      const hostRequests = await getRequestsForProperties(hostProperties, {
-        user: ctx.user,
-      });
+    const hostRequests = await getRequestsForProperties(hostProperties, {
+      user: ctx.user,
+    });
 
-      const groupedByCity: HostRequestsPageData[] = [];
+    const groupedByCity: HostRequestsPageData[] = [];
 
-      const findOrCreateCityGroup = (city: string) => {
-        let cityGroup = groupedByCity.find((group) => group.city === city);
-        if (!cityGroup) {
-          cityGroup = { city, requests: [] };
-          groupedByCity.push(cityGroup);
-        }
-        return cityGroup;
-      };
+    const findOrCreateCityGroup = (city: string) => {
+      let cityGroup = groupedByCity.find((group) => group.city === city);
+      if (!cityGroup) {
+        cityGroup = { city, requests: [] };
+        groupedByCity.push(cityGroup);
+      }
+      return cityGroup;
+    };
 
-      const requestsMap = new Map<
-        number,
-        {
-          request: Request & {
-            traveler: Pick<
-              User,
-              "firstName" | "lastName" | "name" | "image" | "location" | "about"
-            >;
-          };
-          properties: (Property & { taxAvailable: boolean })[];
-        }
-      >();
+    const requestsMap = new Map<
+      number,
+      {
+        request: Request & {
+          traveler: Pick<
+            User,
+            "firstName" | "lastName" | "name" | "image" | "location" | "about"
+          >;
+        };
+        properties: (Property & { taxAvailable: boolean })[];
+      }
+    >();
 
-      // Iterate over the hostRequests and gather all properties for each request
-      for (const { property, request } of hostRequests) {
-        // Check if this request already exists in the map
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        if (!requestsMap.has(request.id)) {
-          // If not, create a new entry with an empty properties array
-          requestsMap.set(request.id, {
+    // Iterate over the hostRequests and gather all properties for each request
+    for (const { property, request } of hostRequests) {
+      // Check if this request already exists in the map
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      if (!requestsMap.has(request.id)) {
+        // If not, create a new entry with an empty properties array
+        requestsMap.set(request.id, {
+          request,
+          properties: [] as (Property & { taxAvailable: boolean })[],
+        });
+      }
+
+      // Add the property to the request
+      requestsMap.get(request.id)!.properties.push(property);
+    }
+    for (const requestWithProperties of requestsMap.values()) {
+      const { request, properties } = requestWithProperties;
+
+      for (const property of properties as unknown as (Property & {
+        taxAvailable: boolean;
+      })[]) {
+        const cityGroup = findOrCreateCityGroup(property.city);
+
+        // Find if the request already exists in the city's group to avoid duplicates
+        const existingRequest = cityGroup.requests.find(
+          (item) => item.request.id === request.id,
+        );
+
+        if (existingRequest) {
+          // If the request already exists, just add the new property to it
+          existingRequest.properties.push(property);
+        } else {
+          // If the request doesn't exist, create a new entry with the property
+          cityGroup.requests.push({
             request,
-            properties: [] as (Property & { taxAvailable: boolean })[],
+            properties: [property], // Initialize with the current property
           });
         }
-
-        // Add the property to the request
-        requestsMap.get(request.id)!.properties.push(property);
       }
-      for (const requestWithProperties of requestsMap.values()) {
-        const { request, properties } = requestWithProperties;
+    }
 
-        for (const property of properties as unknown as (Property & {
-          taxAvailable: boolean;
-        })[]) {
-          const cityGroup = findOrCreateCityGroup(property.city);
+    return groupedByCity;
+  }),
 
-          // Find if the request already exists in the city's group to avoid duplicates
-          const existingRequest = cityGroup.requests.find(
-            (item) => item.request.id === request.id,
-          );
-
-          if (existingRequest) {
-            // If the request already exists, just add the new property to it
-            existingRequest.properties.push(property);
-          } else {
-            // If the request doesn't exist, create a new entry with the property
-            cityGroup.requests.push({
-              request,
-              properties: [property], // Initialize with the current property
-            });
-          }
-        }
-      }
-
-      return groupedByCity;
-    },
-  ),
-  // hostInsertOnboardingProperty: roleRestrictedProcedure(["host"])
-  //   .input(hostPropertyFormSchema)
-  //   .mutation(async ({ ctx, input }) => {
-  //     return await ctx.db.insert(properties).values({
-  //       ...input,
-  //       hostId: ctx.user.id,
-  //       hostName: ctx.user.name,
-  //       imageUrls: input.imageUrls,
-  //     });
-  //   }),
   getBlockedDates: protectedProcedure
     .input(z.object({ propertyId: z.number() }))
     .query(async ({ ctx, input }) => {
@@ -680,13 +675,14 @@ export const propertiesRouter = createTRPCRouter({
         })
         .where(eq(properties.id, input.id));
     }),
-  getSearchResults: protectedProcedure
+
+  getSearchResults: hostProcedure
     .input(z.object({ searchQuery: z.string() }))
     .query(async ({ ctx, input }) => {
       if (input.searchQuery !== "") {
         return await ctx.db.query.properties.findMany({
           where: and(
-            eq(properties.hostId, ctx.user.id),
+            eq(properties.hostTeamId, ctx.hostProfile.curTeamId),
             or(
               like(properties.name, `%${input.searchQuery}%`),
               like(properties.city, `%${capitalize(input.searchQuery)}%`),

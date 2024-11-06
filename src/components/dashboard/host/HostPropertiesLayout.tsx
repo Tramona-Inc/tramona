@@ -10,6 +10,13 @@ import {
   CancellationPolicyWithInternals,
   type Property,
 } from "@/server/db/schema/tables/properties";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useRouter } from "next/router";
 import ExpandableSearchBar from "@/components/_common/ExpandableSearchBar";
@@ -93,13 +100,13 @@ export default function HostPropertiesLayout() {
   const { data: properties } = api.properties.getHostProperties.useQuery();
 
   const listedProperties = properties?.filter(
-    (property) => property.propertyStatus === "Listed",
+    (property) => property.status === "Listed",
   );
   const archivedProperties = properties?.filter(
-    (property) => property.propertyStatus === "Archived",
+    (property) => property.status === "Archived",
   );
   const draftedProperties = properties?.filter(
-    (property) => property.propertyStatus === "Drafted",
+    (property) => property.status === "Drafted",
   );
 
   const handleSearchResults = (results: Property[]) => {
@@ -200,11 +207,13 @@ export function HostPropertyEditBtn({
   setEditing,
   onSubmit,
   property,
+  disabled,
 }: {
   editing: boolean;
   setEditing: (editing: boolean) => void;
   onSubmit?: () => void;
   property: Property;
+  disabled?: boolean;
 }) {
   const { data: fetchedProperty, refetch } = api.properties.getById.useQuery({
     id: property.id,
@@ -319,6 +328,7 @@ export function HostPropertyEditBtn({
             className="rounded-full bg-white font-bold shadow-md sm:rounded-lg sm:border-2 sm:shadow-none"
             onClick={handleEditClick}
             type="button"
+            disabled={disabled}
           >
             <Pencil size={20} />
             Enter edit mode
