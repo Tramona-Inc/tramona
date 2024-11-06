@@ -8,7 +8,6 @@ import { RequestCardAction } from "./RequestCardAction";
 
 export default function ActiveRequestsTab() {
   const { data: requests } = api.requests.getMyRequests.useQuery();
-
   if (!requests) return <Spinner />;
 
   return requests.activeRequests.length !== 0 ? (

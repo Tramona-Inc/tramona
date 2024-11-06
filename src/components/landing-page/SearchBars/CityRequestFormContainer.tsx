@@ -13,15 +13,13 @@ export default function CityRequestFormContainer({
   const formRef = useRef<{ submit: () => void }>(null);
 
   const handleSubmit = () => {
-    console.log(formRef.current);
     if (formRef.current) {
-      console.log("um");
       formRef.current.submit();
     }
   };
   return (
     <div
-      className={`flex w-full flex-col gap-y-3 ${isRequestsPage ? "" : "md:7/12 w-11/12 gap-y-3 lg:w-1/2"}`}
+      className={`max-w-5/6 flex flex-col gap-y-3 ${isRequestsPage ? "" : "md:7/12 w-11/12 gap-y-3 lg:w-1/2"}`}
     >
       {isRequestsPage && (
         <p className="text-sm font-semibold text-muted-foreground lg:block">

@@ -47,9 +47,8 @@ const RequestCityForm = forwardRef(
 
     //for landing page
     useImperativeHandle(ref, () => ({
-      submit: form.handleSubmit((data) => {
-        onSubmit(data); // Call `onSubmit` with the form data
-        console.log("yuh");
+      submit: form.handleSubmit(async (data) => {
+        await onSubmit(); // Call `onSubmit` with the form data
       }),
     }));
 
