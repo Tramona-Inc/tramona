@@ -244,7 +244,7 @@ export const stripeRouter = createTRPCRouter({
   authorizePayment: protectedProcedure // this is how will now creat a checkout session using a custom flow
     .input(
       z.object({
-        offerId: z.number(),
+        offerId: z.number(), //will either take an offerId or a requestToBookPricing
         cancelUrl: z.string(),
         requestToBookPricing: z
           .object({
@@ -306,7 +306,6 @@ export const stripeRouter = createTRPCRouter({
       if (input.offerId !== -1) {
         const offerWithoutProperty = await ctx.db.query.offers.findFirst({
           where: eq(offers.id, input.offerId),
-          //with: { property: { with: { hostTeam: { with: { owner: true } } } } },
         });
 
         if (!offerWithoutProperty) return;

@@ -2,7 +2,7 @@ import { api } from "@/utils/api";
 import { Card, CardContent } from "@/components/ui/card";
 import PriceDetailsBeforeTax from "@/components/_common/PriceDetailsBeforeTax";
 import { formatDateRange } from "@/utils/utils";
-import ReserveBtn, { PropertyPageData } from "./actionButtons/ReserveBtn";
+import ReserveBtn, { PropertyPageData } from "./actionButtons/RequestToBookBtn";
 
 export type RequestToBookDetails = {
   checkIn: Date;

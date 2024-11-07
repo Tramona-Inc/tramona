@@ -7,29 +7,31 @@ import { ArrowRightIcon, BookCheckIcon, ExternalLinkIcon } from "lucide-react";
 import Link from "next/link";
 import { VerificationProvider } from "@/components/_utils/VerificationContext";
 import IdentityModal from "@/components/_utils/IdentityModal";
+import { RequestToBookDetails } from "./RequestToBookBtn";
 
 export default function BookNowBtn({
   btnSize,
-  offer,
   property,
+  requestToBook, //we need this for the dates for now
 }: {
   btnSize: ButtonProps["size"];
-  offer: OfferWithDetails;
   property: Pick<
     Property,
     "stripeVerRequired" | "originalListingId" | "bookOnAirbnb"
   >;
+  requestToBook: RequestToBookDetails;
 }) {
+  const isBooked = false;
+
   const { data: verificationStatus } =
     api.users.myVerificationStatus.useQuery();
-  const isBooked = !!offer.acceptedAt;
 
   const airbnbCheckoutUrl = Airbnb.createListing(
     property.originalListingId!,
   ).getCheckoutUrl({
-    checkIn: offer.checkIn,
-    checkOut: offer.checkOut,
-    numGuests: offer.request?.numGuests ?? 1,
+    checkIn: requestToBook.checkIn,
+    checkOut: requestToBook.checkOut,
+    numGuests: requestToBook.numGuests,
   });
 
   return (
@@ -61,7 +63,7 @@ export default function BookNowBtn({
         </Link>
       ) : !property.stripeVerRequired ||
         verificationStatus?.isIdentityVerified === "true" ? (
-        <Link href={`/offer-checkout/${offer.id}`}>
+        <Link href={`/offer-checkout/$}`}>
           Book now
           <ArrowRightIcon className="size-5" />
         </Link>

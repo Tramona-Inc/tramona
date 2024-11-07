@@ -11,13 +11,14 @@ import Link from "next/link";
 import { useMemo } from "react";
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 export type PropertyPageData = RouterOutputs["properties"]["getById"];
+
 export type RequestToBookDetails = {
   checkIn: Date;
   checkOut: Date;
   numGuests: number;
 };
 
-export default function ReserveBtn({
+export default function RequestToBookBtn({
   btnSize,
   requestToBook,
   property,
@@ -62,7 +63,7 @@ export default function ReserveBtn({
     >
       {!property.stripeVerRequired ||
       verificationStatus?.isIdentityVerified === "true" ? (
-        <Link href={checkoutUrl}>Reserve</Link>
+        <Link href={checkoutUrl}>Request to book</Link>
       ) : verificationStatus?.isIdentityVerified === "pending" ? (
         <p>Verification pending</p>
       ) : (

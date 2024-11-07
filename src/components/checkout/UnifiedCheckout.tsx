@@ -20,7 +20,6 @@ import {
 } from "../propertyPages/PropertyPage";
 import { RequestToBookPriceDetails } from "../_common/RequestToBookPriceDetails";
 import { OfferPriceDetails } from "../_common/OfferPriceDetails";
-import StripeCheckoutForm from "./StripeCheckoutForm";
 import type { RequestToBookDetails } from "../propertyPages/RequestToBookPage";
 import type { CheckoutData, RequestToBookPricing } from "./types";
 import ChatWithHost from "./sections/ChatWithHost";
@@ -32,94 +31,98 @@ type CheckoutType = "offer" | "requestToBook" | "bookNow";
 
 type UnifiedCheckoutProps = {
   type: CheckoutType;
-  offer?: OfferWithDetails;
-  requestToBook?: RequestToBookDetails;
-  property?: PropertyPageData;
+  property?: PropertyPageData
+  & ( 
+    offer?: OfferWithDetails;
+    checkoutData: CheckoutData;
+  )
+  //requestToBook?: RequestToBookDetails;
 };
 
 export function UnifiedCheckout({
   type,
   offer,
-  requestToBook,
+  //requestToBook,
+  checkoutData,
   property,
 }: UnifiedCheckoutProps) {
   const router = useRouter();
   const isMobile = !useIsSm();
 
-  const getCheckoutData = (): CheckoutData => {
-    if (type === "offer" && offer) {
-      return {
-        title: "Confirm and pay",
-        dates: {
-          checkIn: offer.checkIn,
-          checkOut: offer.checkOut,
-        },
-        guests: offer.request?.numGuests ?? null,
-        property: offer.property,
-        pricing: null,
-        discount: getOfferDiscountPercentage(offer),
-      };
-    }
+  // const getCheckoutData = (): CheckoutData => {
+  //   if (type === "offer" && offer) {
+  //     return {
+  //       title: "Confirm and pay",
+  //       dates: {
+  //         checkIn: offer.checkIn,
+  //         checkOut: offer.checkOut,
+  //       },
+  //       guests: offer.request?.numGuests ?? null,
+  //       property: offer.property,
+  //       pricing: null,
+  //       discount: getOfferDiscountPercentage(offer),
+  //     };
+  //   }
 
-    if (
-      (type === "requestToBook" || type === "bookNow") &&
-      requestToBook &&
-      property
-    ) {
-      const scrapedPrice = 23456;
-      const randomDiscount = property.originalListingId
-        ? originalListingIdToRandomDiscount(property.originalListingId)
-        : null;
+  //   if (
+  //     (type === "requestToBook" || type === "bookNow") &&
+  //     requestToBook &&
+  //     property
+  //   ) {
+  //     const scrapedPrice = 23456;
+  //     const randomDiscount = property.originalListingId
+  //       ? originalListingIdToRandomDiscount(property.originalListingId)
+  //       : null;
 
-      let priceWithApplicableDiscount;
-      let applicableDiscount = 0;
+  //     let priceWithApplicableDiscount;
+  //     let applicableDiscount = 0;
 
-      if (type === "bookNow") {
-        applicableDiscount =
-          getApplicableBookItNowDiscount({
-            bookItNowDiscountTiers: property.bookItNowDiscountTiers,
-            checkIn: requestToBook.checkIn,
-          }) ?? 0;
-      } else {
-        applicableDiscount = property.requestToBookDiscountPercentage;
-      }
+  //     if (type === "bookNow") {
+  //       applicableDiscount =
+  //         getApplicableBookItNowDiscount({
+  //           bookItNowDiscountTiers: property.bookItNowDiscountTiers,
+  //           checkIn: requestToBook.checkIn,
+  //         }) ?? 0;
+  //     } else {
+  //       applicableDiscount = property.requestToBookDiscountPercentage;
+  //     }
 
-      if (applicableDiscount > 0) {
-        priceWithApplicableDiscount =
-          scrapedPrice * (100 - applicableDiscount) * 0.01;
-      }
+  //     if (applicableDiscount > 0) {
+  //       priceWithApplicableDiscount =
+  //         scrapedPrice * (100 - applicableDiscount) * 0.01;
+  //     }
 
-      const travelerOfferedPriceBeforeFees = getTravelerOfferedPrice({
-        totalPrice: priceWithApplicableDiscount ?? scrapedPrice,
-        travelerMarkup: 1.015,
-      });
+  //     const travelerOfferedPriceBeforeFees = getTravelerOfferedPrice({
+  //       totalPrice: priceWithApplicableDiscount ?? scrapedPrice,
+  //       travelerMarkup: 1.015,
+  //     });
 
-      const pricing: RequestToBookPricing = {
-        requestId: null,
-        scrapeUrl: property.originalListingPlatform ?? null,
-        travelerOfferedPriceBeforeFees,
-        datePriceFromAirbnb: scrapedPrice,
-        checkIn: requestToBook.checkIn,
-        checkOut: requestToBook.checkOut,
-      };
+  //     const pricing: RequestToBookPricing = {
+  //       requestId: null,
+  //       scrapeUrl: property.originalListingPlatform ?? null,
+  //       travelerOfferedPriceBeforeFees,
+  //       datePriceFromAirbnb: scrapedPrice,
+  //       checkIn: requestToBook.checkIn,
+  //       checkOut: requestToBook.checkOut,
+  //     };
 
-      return {
-        title: type === "requestToBook" ? "Request to book" : "Book it now",
-        dates: {
-          checkIn: requestToBook.checkIn,
-          checkOut: requestToBook.checkOut,
-        },
-        guests: requestToBook.numGuests,
-        property,
-        pricing,
-        discount: applicableDiscount,
-      };
-    }
+  //     return {
+  //       title: type === "requestToBook" ? "RequesToBook" : "BookItNow",
+  //       dates: {
+  //         checkIn: requestToBook.checkIn,
+  //         checkOut: requestToBook.checkOut,
+  //       },
+  //       guests: requestToBook.numGuests,
+  //       property,
+  //       pricing,
+  //       discount: applicableDiscount,
+  //     };
+  //   }
 
-    throw new Error("Invalid checkout configuration");
-  };
+  //   throw new Error("Invalid checkout configuration");
+  // };
 
-  const checkoutData = getCheckoutData();
+  // const checkoutData = getCheckoutData();
 
   const renderCheckoutForm = () => {
     if (isMobile) return null;

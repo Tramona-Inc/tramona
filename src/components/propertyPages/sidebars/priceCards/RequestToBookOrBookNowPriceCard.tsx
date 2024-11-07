@@ -8,7 +8,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { cn } from "@/utils/utils";
+import { cn, formatCurrency } from "@/utils/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -34,83 +34,83 @@ import {
 import {
   ChevronDown,
   ShoppingCart,
-  Shield,
-  DollarSign,
   Info,
   Clock,
   CheckCircle,
 } from "lucide-react";
 
-import ReserveBtn, {
+import RequestToBookBtn, {
   RequestToBookDetails,
   PropertyPageData,
-} from "../actionButtons/ReserveBtn";
+} from "../actionButtons/RequestToBookBtn";
+import PriceCardInformation from "./PriceCardInformation";
+import BookNowBtn from "../actionButtons/BookNowBtn";
 
 export default function RequestToBookOrBookNowPriceCard({
   // offer,
   property,
   requestToBook,
-  acceptedAt,
 }: {
   property: PropertyPageData;
   requestToBook: RequestToBookDetails;
-  acceptedAt: boolean;
 }) {
   const [date, setDate] = useState({
     from: new Date(2024, 10, 11),
     to: new Date(2024, 10, 14),
   });
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-  const [showBidInput, setShowBidInput] = useState(false);
-  const [bidAmount, setBidAmount] = useState("");
-  const [bidPercentage, setBidPercentage] = useState(5);
+  const [showrequestInput, setShowrequestInput] = useState(false);
+  const [requestAmount, setrequestAmount] = useState("");
+  const [requestPercentage, setrequestPercentage] = useState(5);
   const [selectedPreset, setSelectedPreset] = useState<number | null>(null);
-  const basePrice = 145; // per night price
+  const basePrice = 14500; // per night price
   const minDiscount = 5;
   const maxDiscount = 20;
 
   const presetOptions = [
-    { price: 116, label: "Good Bid", percentOff: 20 },
-    { price: 130, label: "Better Bid", percentOff: 10 },
+    { price: 116, label: "Good request", percentOff: 20 },
+    { price: 130, label: "Better request", percentOff: 10 },
     { price: 145, label: "Buy Now", percentOff: 0 },
   ];
 
   useEffect(() => {
-    if (showBidInput) {
-      const discountedPrice = Math.round(basePrice * (1 - bidPercentage / 100));
-      setBidAmount(discountedPrice.toString());
+    if (showrequestInput) {
+      const discountedPrice = Math.round(
+        basePrice * (1 - requestPercentage / 100),
+      );
+      setrequestAmount(discountedPrice.toString());
     }
-  }, [showBidInput, bidPercentage]);
+  }, [showrequestInput, requestPercentage]);
 
-  const handleBidChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newBidAmount = e.target.value;
-    setBidAmount(newBidAmount);
+  const handlerequestChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newrequestAmount = e.target.value;
+    setrequestAmount(newrequestAmount);
     const newPercentage = Math.round(
-      ((basePrice - parseFloat(newBidAmount)) / basePrice) * 100,
+      ((basePrice - parseFloat(newrequestAmount)) / basePrice) * 100,
     );
-    setBidPercentage(
+    setrequestPercentage(
       Math.max(minDiscount, Math.min(newPercentage, maxDiscount)),
     );
     setSelectedPreset(null);
   };
 
   const handleSliderChange = (value: number[]) => {
-    setBidPercentage(value[0]!);
-    const newBidAmount = Math.round(basePrice * (1 - value[0]! / 100));
-    setBidAmount(newBidAmount.toString());
+    setrequestPercentage(value[0]!);
+    const newrequestAmount = Math.round(basePrice * (1 - value[0]! / 100));
+    setrequestAmount(newrequestAmount.toString());
     setSelectedPreset(null);
   };
 
-  const getBidLikelihood = () => {
-    if (bidPercentage <= 10) return "Good chance of acceptance";
-    if (bidPercentage <= 15) return "Moderate chance of acceptance";
+  const getrequestLikelihood = () => {
+    if (requestPercentage <= 10) return "Good chance of acceptance";
+    if (requestPercentage <= 15) return "Moderate chance of acceptance";
     return "Lower chance of acceptance";
   };
 
   const handlePresetSelect = (price: number) => {
-    setBidAmount(price.toString());
+    setrequestAmount(price.toString());
     const newPercentage = Math.round(((basePrice - price) / basePrice) * 100);
-    setBidPercentage(
+    setrequestPercentage(
       Math.max(minDiscount, Math.min(newPercentage, maxDiscount)),
     );
     setSelectedPreset(price);
@@ -187,7 +187,7 @@ export default function RequestToBookOrBookNowPriceCard({
         </Popover>
 
         {/* Pricing and Booking Options */}
-        {showBidInput ? (
+        {showrequestInput ? (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">Pricing Options</h3>
@@ -198,7 +198,8 @@ export default function RequestToBookOrBookNowPriceCard({
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>
-                      These options offer estimated chances of bid acceptance.
+                      These options offer estimated chances of request
+                      acceptance.
                     </p>
                   </TooltipContent>
                 </Tooltip>
@@ -214,7 +215,7 @@ export default function RequestToBookOrBookNowPriceCard({
                     selectedPreset === option.price
                       ? "border-primary bg-primary/10"
                       : "border-gray-200 hover:border-primary/50",
-                    option.label === "Buy Now" && "font-semibold",
+                    option.label === "Book Now" && "font-semibold",
                   )}
                 >
                   <div className="text-xl font-bold">${option.price}</div>
@@ -242,15 +243,15 @@ export default function RequestToBookOrBookNowPriceCard({
                     </span>
                     <Input
                       type="number"
-                      placeholder="Enter Bid"
-                      value={bidAmount}
-                      onChange={handleBidChange}
+                      placeholder="Enter request"
+                      value={requestAmount}
+                      onChange={handlerequestChange}
                       className="pl-7"
                     />
                   </div>
                   <div className="flex-1 text-right">
                     <span className="text-lg font-medium text-green-600">
-                      {bidPercentage}% off
+                      {requestPercentage}% off
                     </span>
                   </div>
                 </div>
@@ -258,7 +259,7 @@ export default function RequestToBookOrBookNowPriceCard({
                 <div className="space-y-2">
                   <div className="relative">
                     <Slider
-                      value={[bidPercentage]}
+                      value={[requestPercentage]}
                       onValueChange={handleSliderChange}
                       max={maxDiscount}
                       min={minDiscount}
@@ -283,55 +284,48 @@ export default function RequestToBookOrBookNowPriceCard({
                 <div
                   className={cn(
                     "text-center text-sm font-medium",
-                    bidPercentage <= 10
+                    requestPercentage <= 10
                       ? "text-green-600"
-                      : bidPercentage <= 15
+                      : requestPercentage <= 15
                         ? "text-yellow-600"
                         : "text-red-600",
                   )}
                 >
-                  {getBidLikelihood()}
+                  {getrequestLikelihood()}
                 </div>
 
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4" />
                     <span>
-                      Hosts have 24 hours to accept or reject your bid.
+                      Hosts have 24 hours to accept or reject your request.
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <CheckCircle className="h-4 w-4" />
-                    <span>Accepted bids will be automatically booked.</span>
+                    <span>Accepted requests will be automatically booked.</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Info className="h-4 w-4" />
                     <span>
-                      You can place multiple bids. Overlapping bids will be
-                      canceled if one is accepted.
+                      You can place multiple requests. Overlapping requests will
+                      be canceled if one is accepted.
                     </span>
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between gap-4">
-                  <Button
-                    onClick={() => {
-                      console.log(`Bid placed: ${bidAmount}`);
-                      setShowBidInput(false);
-                      setBidAmount("");
-                      setBidPercentage(5);
-                      setSelectedPreset(null);
-                    }}
-                    className="flex-1"
-                  >
-                    Save Bid
-                  </Button>
+                  <RequestToBookBtn
+                    btnSize="sm"
+                    requestToBook={requestToBook}
+                    property={property}
+                  />
                   <Button
                     variant="outline"
                     className="flex-1"
-                    onClick={() => setShowBidInput(false)}
+                    onClick={() => setShowrequestInput(false)}
                   >
-                    Cancel Bid
+                    Cancel request
                   </Button>
                 </div>
               </div>
@@ -343,7 +337,7 @@ export default function RequestToBookOrBookNowPriceCard({
               <div className="mb-1 text-2xl font-bold">Book it now for</div>
               <div className="flex items-baseline gap-2">
                 <span className="text-5xl font-bold text-primary">
-                  ${basePrice}
+                  {formatCurrency(basePrice)}
                 </span>
                 <span className="text-xl text-muted-foreground">Per Night</span>
               </div>
@@ -357,21 +351,17 @@ export default function RequestToBookOrBookNowPriceCard({
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <ReserveBtn
+              <BookNowBtn
                 btnSize="sm"
-                requestToBook={requestToBook}
                 property={property}
+                requestToBook={requestToBook}
               />
               <Button
                 variant="outline"
                 className="w-full"
-                onClick={() => setShowBidInput(true)}
+                onClick={() => setShowrequestInput(true)}
               >
-                Place Bid
-              </Button>
-              <Button className="w-full">
-                <ShoppingCart className="mr-2 h-5 w-5" />
-                Buy Now
+                Place request
               </Button>
             </div>
             <p className="mt-2 text-center text-sm text-muted-foreground">
@@ -383,37 +373,7 @@ export default function RequestToBookOrBookNowPriceCard({
         <a href="#" className="block text-center text-primary hover:underline">
           Have a property? List now →
         </a>
-
-        <div className="mt-6 space-y-3">
-          <Collapsible>
-            <CollapsibleTrigger className="flex w-full items-center justify-between rounded-md p-2 text-left font-medium hover:bg-gray-100">
-              <div className="flex items-center gap-2">
-                <Shield className="h-5 w-5 text-green-600" />
-                <span className="text-green-600">Tramona Safety Guarantee</span>
-              </div>
-              <ChevronDown className="h-4 w-4 text-green-600" />
-            </CollapsibleTrigger>
-            <CollapsibleContent className="pl-9 pt-2 text-muted-foreground">
-              Our safety guarantee ensures your peace of mind during your stay.
-            </CollapsibleContent>
-          </Collapsible>
-
-          <Collapsible>
-            <CollapsibleTrigger className="flex w-full items-center justify-between rounded-md p-2 text-left font-medium hover:bg-gray-100">
-              <div className="flex items-center gap-2">
-                <DollarSign className="h-5 w-5 text-green-600" />
-                <span className="text-green-600">
-                  Lowest Fees Out of all the major Booking Platforms
-                </span>
-              </div>
-              <ChevronDown className="h-4 w-4 text-green-600" />
-            </CollapsibleTrigger>
-            <CollapsibleContent className="pl-9 pt-2 text-muted-foreground">
-              We pride ourselves on offering the most competitive fees in the
-              industry.
-            </CollapsibleContent>
-          </Collapsible>
-        </div>
+        <PriceCardInformation />
       </CardContent>
     </Card>
   );

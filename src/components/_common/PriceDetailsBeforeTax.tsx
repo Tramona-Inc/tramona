@@ -15,7 +15,7 @@ import {
   breakdownPayment,
   getServiceFee,
 } from "@/utils/payment-utils/paymentBreakdown";
-import type { RequestToBookDetails } from "../propertyPages/sidebars/actionButtons/ReserveBtn";
+import type { RequestToBookDetails } from "../propertyPages/sidebars/actionButtons/RequestToBookBtn";
 
 type PaymentBreakdown = {
   totalTripAmount: number;
