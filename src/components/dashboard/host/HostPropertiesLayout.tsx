@@ -302,11 +302,11 @@ export function HostPropertyEditBtn({
     <div className="fixed bottom-20 right-4 z-50">
       {editing ? (
         <div className="space-x-2">
-          <Button variant="secondary" onClick={() => setEditing(!editing)}>
+          <Button variant="outline" onClick={() => setEditing(!editing)}>
             Cancel
           </Button>
           <Button
-            variant="secondary"
+            variant="outline"
             className="shadow-lg sm:shadow-none"
             onClick={() => {
               setEditing(!editing);
@@ -320,7 +320,7 @@ export function HostPropertyEditBtn({
       ) : (
         <div className="space-x-2">
           <Button
-            variant="secondary"
+            variant="outline"
             className="rounded-full bg-white font-bold shadow-md sm:rounded-lg sm:border-2 sm:shadow-none"
             onClick={handleEditClick}
             type="button"

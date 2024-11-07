@@ -189,7 +189,7 @@ export default function HostPropertiesDetails({
           <div className="grid grid-cols-3 gap-2">
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="secondary" className="text-red-500">
+                <Button variant="outline" className="text-red-500">
                   <Trash2 />
                   Delete
                 </Button>
@@ -213,7 +213,7 @@ export default function HostPropertiesDetails({
 
             {property.status === "Listed" && (
               <Button
-                variant="secondary"
+                variant="outline"
                 onClick={() =>
                   updateProperty({
                     ...property,
@@ -229,7 +229,7 @@ export default function HostPropertiesDetails({
             )}
             {property.status === "Archived" && (
               <Button
-                variant="secondary"
+                variant="outline"
                 onClick={() =>
                   updateProperty({
                     ...property,
