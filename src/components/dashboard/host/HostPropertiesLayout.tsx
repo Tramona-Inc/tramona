@@ -275,10 +275,6 @@ export function HostPropertyEditBtn({
       fetchedProperty.numBathrooms &&
         setBathrooms(fetchedProperty.numBathrooms);
       setSpaceType(fetchedProperty.roomType);
-      console.log(
-        "fetchedProperty address",
-        fetchedProperty.address.split(", "),
-      );
       setLocation(
         fetchedProperty.address.split(", ").length > 4
           ? addressWithApt
@@ -303,7 +299,7 @@ export function HostPropertyEditBtn({
   };
 
   return (
-    <div className="fixed bottom-20 right-4 z-50 sm:static">
+    <div className="fixed bottom-20 right-4 z-50">
       {editing ? (
         <div className="space-x-2">
           <Button variant="secondary" onClick={() => setEditing(!editing)}>
