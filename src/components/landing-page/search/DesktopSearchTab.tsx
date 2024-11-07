@@ -242,113 +242,86 @@ export function DesktopSearchTab() {
   const runSubscrapers = api.properties.runSubscrapers.useMutation();
 
   const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState({
+    location: false,
+    checkIn: false,
+    checkOut: false,
+    numGuests: false,
+  });
+  const [isTopOfPage, setIsTopOfPage] = useState(true);
   const utils = api.useUtils();
 
   const checkInDate = form.watch("checkIn");
   const checkOutDate = form.watch("checkOut");
 
-  const [isTopOfPage, setIsTopOfPage] = useState(true);
-
   useEffect(() => {
-    const handleScroll = () => {
-      setIsTopOfPage(window.scrollY === 0);
-    };
-
+    const handleScroll = () => setIsTopOfPage(window.scrollY === 0);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const handleLocationClick = useCallback(
-      (location: string) => {
-        form.setValue("location", location);
-      },
-      [form],
+      (location) => form.setValue("location", location),
+      [form]
   );
 
+  const handleInputChange = (field, value) => {
+    form.setValue(field, value);
+    if (errors[field] && value) {
+      setErrors((prevErrors) => ({ ...prevErrors, [field]: false }));
+    }
+  };
+
   const handleSearch = form.handleSubmit(async () => {
+    const formData = form.getValues();
+    const newErrors = {
+      location: !formData.location,
+      checkIn: !formData.checkIn,
+      checkOut: !formData.checkOut,
+      numGuests: !formData.numGuests,
+    };
+
+    setErrors(newErrors);
+
+    if (Object.values(newErrors).some(Boolean)) return;
+
     setIsLoading(true);
     setIsSearching(true);
-    const formData = form.getValues();
-    console.log("Form data:", formData);
-    setAdjustedProperties({
-      pages: [],
-    });
+    setAdjustedProperties({ pages: [] });
 
-    if (formData.checkIn && formData.checkOut) {
-      console.log("Running subscrapers...");
-      try {
-        const scrapedResultsPromise = utils.properties.getBookItNowProperties.fetch({
-          checkIn: formData.checkIn,
-          checkOut: formData.checkOut,
-          numGuests: formData.numGuests!,
-          location: formData.location!,
-          firstBatch: true,
-        });
+    try {
+      const scrapedResultsPromise = utils.properties.getBookItNowProperties.fetch({
+        checkIn: formData.checkIn,
+        checkOut: formData.checkOut,
+        numGuests: formData.numGuests!,
+        location: formData.location!,
+        firstBatch: true,
+      });
+      const airbnbResultsPromise = utils.misc.scrapeAirbnbInitialPage.fetch({
+        checkIn: formData.checkIn,
+        checkOut: formData.checkOut,
+        numGuests: formData.numGuests!,
+        location: formData.location!,
+      });
 
-        const airbnbResultsPromise = utils.misc.scrapeAirbnbInitialPage.fetch({
-          checkIn: formData.checkIn,
-          checkOut: formData.checkOut,
-          numGuests: formData.numGuests!,
-          location: formData.location!,
-        });
+      const airbnbResults = await airbnbResultsPromise;
+      const scrapedResults = await scrapedResultsPromise;
 
-        const airbnbResults = await airbnbResultsPromise;
-        const scrapedResults = await scrapedResultsPromise;
-        setAdjustedProperties((prevState) => ({
-          ...prevState,
-          pages: [...(prevState?.pages || []), ...scrapedResults, ...airbnbResults.res],
-        }));
-
-        setIsLoading(false);
-        setIsSearching(false);
-
-        const cursors = airbnbResults.data.staysSearch.results.paginationInfo.pageCursors.slice(1);
-
-        const finishAirbnbResultsPromise = utils.misc.scrapeAirbnbPages.fetch({
-          checkIn: formData.checkIn,
-          checkOut: formData.checkOut,
-          numGuests: formData.numGuests!,
-          location: formData.location!,
-          pageCursors: cursors,
-        });
-
-        const finishScrapedResultPromise = utils.properties.getBookItNowProperties.fetch({
-          checkIn: formData.checkIn,
-          checkOut: formData.checkOut,
-          numGuests: formData.numGuests!,
-          location: formData.location!,
-          firstBatch: false,
-        });
-
-        const finishAirbnbResults = await finishAirbnbResultsPromise;
-        setAdjustedProperties((prevState) => ({
-          ...prevState,
-          pages: [...(prevState?.pages || []), ...finishAirbnbResults],
-        }));
-        const finishScrapedResults = await finishScrapedResultPromise;
-        setAdjustedProperties((prevState) => ({
-          ...prevState,
-          pages: [...(prevState?.pages || []), ...finishScrapedResults],
-        }));
-
-      } catch (error) {
-        console.error("Error running subscrapers:", error);
-      } finally {
-        setIsLoading(false);
-        setIsSearching(false);
-      }
-    } else {
+      setAdjustedProperties((prevState) => ({
+        ...prevState,
+        pages: [...(prevState?.pages || []), ...scrapedResults, ...airbnbResults.res],
+      }));
+    } catch (error) {
+      console.error("Error running subscrapers:", error);
+    } finally {
       setIsLoading(false);
+      setIsSearching(false);
     }
   });
 
-  const ScrollButtons = ({
-                           containerRef,
-                         }: {
-    containerRef: React.RefObject<HTMLDivElement>;
-  }) => {
+  const ScrollButtons = ({ containerRef }) => {
     const scroll = useCallback(
-        (direction: "left" | "right") => {
+        (direction) => {
           if (containerRef.current) {
             containerRef.current.scrollBy({
               left:
@@ -359,7 +332,7 @@ export function DesktopSearchTab() {
             });
           }
         },
-        [containerRef],
+        [containerRef]
     );
 
     return (
@@ -394,16 +367,16 @@ export function DesktopSearchTab() {
                     name="location"
                     render={({ field }) => (
                         <FormItem className="w-full">
-                          <Select onValueChange={field.onChange} value={field.value}>
+                          <Select
+                              onValueChange={(value) => handleInputChange("location", value)}
+                              value={field.value}
+                          >
                             <FormControl>
                               <SelectTrigger className="border-0 bg-transparent focus:ring-0">
                                 <SelectValue placeholder="Search destinations" />
                               </SelectTrigger>
                             </FormControl>
-                            <SelectContent
-                                className="h-48 overflow-y-auto"
-                                position="popper"
-                            >
+                            <SelectContent className="h-48 overflow-y-auto" position="popper">
                               {locations.map((location) => (
                                   <SelectItem key={location.name} value={location.name}>
                                     {location.name}, {location.country}
@@ -411,6 +384,9 @@ export function DesktopSearchTab() {
                               ))}
                             </SelectContent>
                           </Select>
+                          {errors.location && (
+                              <p className="text-red-500 text-sm">Location is required</p>
+                          )}
                         </FormItem>
                     )}
                 />
@@ -420,20 +396,22 @@ export function DesktopSearchTab() {
                 <CalendarDays className="mr-2 text-gray-400" />
                 <FormField
                     control={form.control}
-                    name={`checkIn`}
+                    name="checkIn"
                     render={({ field }) => (
                         <FormItem>
                           <FormControl>
                             <SingleDateInput
                                 {...field}
                                 value={field.value ? new Date(field.value) : undefined}
-                                variant="lpDesktop"
                                 placeholder="Check in"
                                 disablePast
-                                className="border-0 bg-transparent focus:ring-0 hover:bg-transparent"
                                 maxDate={checkOutDate ? new Date(checkOutDate) : undefined}
+                                onChange={(date) => handleInputChange("checkIn", date)}
                             />
                           </FormControl>
+                          {errors.checkIn && (
+                              <p className="text-red-500 text-sm">Check-in date is required</p>
+                          )}
                         </FormItem>
                     )}
                 />
@@ -443,20 +421,22 @@ export function DesktopSearchTab() {
                 <CalendarDays className="mr-2 text-gray-400" />
                 <FormField
                     control={form.control}
-                    name={`checkOut`}
+                    name="checkOut"
                     render={({ field }) => (
                         <FormItem>
                           <FormControl>
                             <SingleDateInput
                                 {...field}
                                 value={field.value ? new Date(field.value) : undefined}
-                                variant="lpDesktop"
-                                placeholder="Check Out"
+                                placeholder="Check out"
                                 disablePast
-                                className="border-0 bg-transparent focus:ring-0 hover:bg-transparent"
                                 minDate={checkInDate ? new Date(checkInDate) : undefined}
+                                onChange={(date) => handleInputChange("checkOut", date)}
                             />
                           </FormControl>
+                          {errors.checkOut && (
+                              <p className="text-red-500 text-sm">Check-out date is required</p>
+                          )}
                         </FormItem>
                     )}
                 />
@@ -475,20 +455,17 @@ export function DesktopSearchTab() {
                                 type="number"
                                 placeholder="1 Guest"
                                 className="w-28 border-0 bg-white text-sm focus:ring-0"
-                                onChange={(e) =>
-                                    field.onChange(parseInt(e.target.value) || 1)
-                                }
+                                onChange={(e) => handleInputChange("numGuests", parseInt(e.target.value) || 1)}
                             />
                           </FormControl>
+                          {errors.numGuests && (
+                              <p className="text-red-500 text-sm">Number of guests is required</p>
+                          )}
                         </FormItem>
                     )}
                 />
               </div>
-              <Button
-                  type="submit"
-                  className="rounded-full bg-primaryGreen text-white"
-                  disabled={isLoading}
-              >
+              <Button type="submit" className="rounded-full bg-primaryGreen text-white" disabled={isLoading}>
                 {isLoading ? (
                     <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
                 ) : (
@@ -500,27 +477,15 @@ export function DesktopSearchTab() {
           {isTopOfPage && (
               <div className="relative">
                 <ScrollButtons containerRef={containerRef} />
-                <div
-                    ref={containerRef}
-                    id="location-container"
-                    className="flex space-x-4 overflow-x-scroll scrollbar-hide"
-                >
+                <div ref={containerRef} className="flex space-x-4 overflow-x-scroll scrollbar-hide">
                   {locations.map((location) => (
                       <div
                           key={location.name}
                           className="flex-shrink-0 cursor-pointer"
-                          onClick={() => {
-                            handleLocationClick(location.name);
-                            form.setValue("location", location.name);
-                          }}
+                          onClick={() => handleLocationClick(location.name)}
                       >
                         <div className="relative h-40 w-60 overflow-hidden rounded-lg">
-                          <Image
-                              src={location.image}
-                              alt={location.name}
-                              className="h-full w-full object-cover"
-                              fill
-                          />
+                          <Image src={location.image} alt={location.name} className="h-full w-full object-cover" fill />
                           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
                             <h3 className="font-bold text-white">{location.name}</h3>
                             <p className="text-sm text-white">{location.country}</p>
