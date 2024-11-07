@@ -13,6 +13,8 @@ import StripeCheckoutForm from "./StripeCheckoutForm";
 import { OfferPriceDetails } from "../_common/OfferPriceDetails";
 import { getCancellationPolicyDescription } from "@/config/getCancellationPolicyDescription";
 
+import MemoizedCustomStripeCheckoutContainer from "./CustomStripeCheckoutContainer";
+
 export default function Checkout({ offer }: { offer: OfferWithDetails }) {
   const router = useRouter();
   const isMobile = !useIsSm();
@@ -201,7 +203,7 @@ export default function Checkout({ offer }: { offer: OfferWithDetails }) {
           <Separator className="my-4" />
           <CancellationPolicy />
           <Separator className="my-4" />
-          {!isMobile && <StripeCheckoutForm offer={offer} />}
+          {!isMobile && <MemoizedCustomStripeCheckoutContainer offer={offer} />}
         </div>
         <div className="md:hidden">
           <BestPriceCard />
@@ -212,7 +214,7 @@ export default function Checkout({ offer }: { offer: OfferWithDetails }) {
           <Separator className="my-6" />
           <CancellationPolicy />
           <Separator className="my-6" />
-          {isMobile && <StripeCheckoutForm offer={offer} />}
+          {isMobile && <MemoizedCustomStripeCheckoutContainer offer={offer} />}
           <Separator className="my-6" />
           <CustomerReview />
           <div className="mt-4">
