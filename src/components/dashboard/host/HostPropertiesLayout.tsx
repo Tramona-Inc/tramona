@@ -20,11 +20,16 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useRouter } from "next/router";
 import ExpandableSearchBar from "@/components/_common/ExpandableSearchBar";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import HostPropertiesSidebar from "./HostPropertiesSidebar";
+import { cn } from "@/utils/utils";
+import HostPropertyInfo from "./HostPropertyInfo";
 
 export default function HostPropertiesLayout() {
   const [searchResults, setSearchResults] = useState<Property[]>([]);
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+  const [selectedProperty, setSelectedProperty] = useState<Property>();
+  const [open, setOpen] = useState(false);
 
   const router = useRouter();
 
@@ -108,8 +113,27 @@ export default function HostPropertiesLayout() {
     setSearchResults(results);
   };
 
+  const handleSelectedProperty = (property: Property) => {
+    setSelectedProperty(property);
+    setOpen(true);
+  };
+
+  useEffect(() => {
+    if (open) {
+      document.body.classList.add("overflow-hidden");
+    } else {
+      document.body.classList.remove("overflow-hidden");
+    }
+  }, [open]);
+
   return (
-    <section className="mx-auto mb-24 mt-7 max-w-7xl px-6 md:my-14">
+    <section className="relative mx-auto mb-24 mt-7 max-w-7xl px-6 md:my-14">
+      <HostPropertiesSidebar
+        onClose={() => setOpen(false)}
+        className={cn(!open && "hidden")}
+      >
+        {selectedProperty && <HostPropertyInfo property={selectedProperty} />}
+      </HostPropertiesSidebar>
       <div className="flex items-center gap-4 sm:flex-row sm:justify-between">
         <h1 className="text-2xl font-bold md:text-4xl">Your properties</h1>
         <div className="flex flex-1 items-center justify-end gap-4">
@@ -142,7 +166,11 @@ export default function HostPropertiesLayout() {
         onExpandChange={setIsSearchExpanded}
       />
       {isSearchExpanded ? (
-        <HostProperties properties={searchResults} searched />
+        <HostProperties
+          properties={searchResults}
+          onSelectedProperty={handleSelectedProperty}
+          searched
+        />
       ) : (
         <Tabs className="mt-6" defaultValue="listed">
           <TabsList>
@@ -151,13 +179,22 @@ export default function HostPropertiesLayout() {
             <TabsTrigger value="archived">Archived</TabsTrigger>
           </TabsList>
           <TabsContent value="listed">
-            <HostProperties properties={listedProperties ?? null} />
+            <HostProperties
+              properties={listedProperties ?? null}
+              onSelectedProperty={handleSelectedProperty}
+            />
           </TabsContent>
           <TabsContent value="drafts">
-            <HostProperties properties={draftedProperties ?? null} />
+            <HostProperties
+              properties={draftedProperties ?? null}
+              onSelectedProperty={handleSelectedProperty}
+            />
           </TabsContent>
           <TabsContent value="archived">
-            <HostProperties properties={archivedProperties ?? null} />
+            <HostProperties
+              properties={archivedProperties ?? null}
+              onSelectedProperty={handleSelectedProperty}
+            />
           </TabsContent>
         </Tabs>
       )}
@@ -178,6 +215,10 @@ export function HostPropertyEditBtn({
   property: Property;
   disabled?: boolean;
 }) {
+  const { data: fetchedProperty, refetch } = api.properties.getById.useQuery({
+    id: property.id,
+  });
+
   const setPropertyType = useHostOnboarding((state) => state.setPropertyType);
   const setMaxGuests = useHostOnboarding((state) => state.setMaxGuests);
   const setBedrooms = useHostOnboarding((state) => state.setBedrooms);
@@ -207,61 +248,65 @@ export function HostPropertyEditBtn({
   );
 
   const addressWithApt: LocationType = {
-    country: property.address.split(", ")[4] ?? "",
-    street: property.address.split(", ")[0] ?? "",
-    apt: property.address.split(", ")[1] ?? "",
-    city: property.address.split(", ")[2] ?? "",
-    state: property.address.split(", ")[3]?.split(" ")[0] ?? "",
-    zipcode: property.address.split(", ")[3]?.split(" ")[1] ?? "",
+    country: fetchedProperty?.address.split(", ")[4] ?? "",
+    street: fetchedProperty?.address.split(", ")[0] ?? "",
+    apt: fetchedProperty?.address.split(", ")[1] ?? "",
+    city: fetchedProperty?.address.split(", ")[2] ?? "",
+    state: fetchedProperty?.address.split(", ")[3]?.split(" ")[0] ?? "",
+    zipcode: fetchedProperty?.address.split(", ")[3]?.split(" ")[1] ?? "",
   };
 
   const addressWithoutApt: LocationType = {
-    country: property.address.split(", ")[3] ?? "",
-    street: property.address.split(", ")[0] ?? "",
+    country: fetchedProperty?.address.split(", ")[3] ?? "",
+    street: fetchedProperty?.address.split(", ")[0] ?? "",
     apt: "",
-    city: property.address.split(", ")[1] ?? "",
-    state: property.address.split(", ")[2]?.split(" ")[0] ?? "",
-    zipcode: property.address.split(", ")[2]?.split(" ")[1] ?? "",
+    city: fetchedProperty?.address.split(", ")[1] ?? "",
+    state: fetchedProperty?.address.split(", ")[2]?.split(" ")[0] ?? "",
+    zipcode: fetchedProperty?.address.split(", ")[2]?.split(" ")[1] ?? "",
   };
 
   const handleEditClick = () => {
-    setPropertyType(property.propertyType);
-    setMaxGuests(property.maxNumGuests);
-    setBedrooms(property.numBedrooms);
-    setBeds(property.numBeds);
-    property.numBathrooms && setBathrooms(property.numBathrooms);
-    setSpaceType(property.roomType);
-    setLocation(
-      property.address.split(", ").length > 4
-        ? addressWithApt
-        : addressWithoutApt,
-    );
-    setCheckInType(property.checkInInfo ?? "self");
-    setCheckIn(property.checkInTime);
-    setCheckOut(property.checkOutTime);
-    setAmenities(property.amenities);
-    setOtherAmenities(property.otherAmenities);
-    setImageUrls(property.imageUrls);
-    setTitle(property.name);
-    setDescription(property.about);
-    setPetsAllowed(property.petsAllowed ?? false);
-    setSmokingAllowed(property.smokingAllowed ?? false);
-    setOtherHouseRules(property.otherHouseRules ?? "");
-    setEditing(!editing);
-    setCancellationPolicy(
-      property.cancellationPolicy as CancellationPolicyWithInternals | null,
-    );
+    void refetch();
+    if (fetchedProperty) {
+      setPropertyType(fetchedProperty.propertyType);
+      setMaxGuests(fetchedProperty.maxNumGuests);
+      setBedrooms(fetchedProperty.numBedrooms);
+      setBeds(fetchedProperty.numBeds);
+      fetchedProperty.numBathrooms &&
+        setBathrooms(fetchedProperty.numBathrooms);
+      setSpaceType(fetchedProperty.roomType);
+      setLocation(
+        fetchedProperty.address.split(", ").length > 4
+          ? addressWithApt
+          : addressWithoutApt,
+      );
+      setCheckInType(fetchedProperty.checkInInfo ?? "self");
+      setCheckIn(fetchedProperty.checkInTime ?? "00:00");
+      setCheckOut(fetchedProperty.checkOutTime ?? "00:00");
+      setAmenities(fetchedProperty.amenities);
+      setOtherAmenities(fetchedProperty.otherAmenities);
+      setImageUrls(fetchedProperty.imageUrls);
+      setTitle(fetchedProperty.name);
+      setDescription(fetchedProperty.about);
+      setPetsAllowed(fetchedProperty.petsAllowed ?? false);
+      setSmokingAllowed(fetchedProperty.smokingAllowed ?? false);
+      setOtherHouseRules(fetchedProperty.otherHouseRules ?? "");
+      setEditing(!editing);
+      setCancellationPolicy(
+        fetchedProperty.cancellationPolicy as CancellationPolicyWithInternals | null,
+      );
+    }
   };
 
   return (
-    <div className="fixed bottom-20 right-4 z-50 sm:static">
+    <div className="fixed bottom-20 right-4 z-50">
       {editing ? (
         <div className="space-x-2">
-          <Button variant="secondary" onClick={() => setEditing(!editing)}>
+          <Button variant="outline" onClick={() => setEditing(!editing)}>
             Cancel
           </Button>
           <Button
-            variant="secondary"
+            variant="outline"
             className="shadow-lg sm:shadow-none"
             onClick={() => {
               setEditing(!editing);
@@ -275,7 +320,7 @@ export function HostPropertyEditBtn({
       ) : (
         <div className="space-x-2">
           <Button
-            variant="secondary"
+            variant="outline"
             className="rounded-full bg-white font-bold shadow-md sm:rounded-lg sm:border-2 sm:shadow-none"
             onClick={handleEditClick}
             type="button"
