@@ -12,7 +12,7 @@ interface OfferPhotoProps {
   propertyImages?: string[];
   indexOfSelectedImage?: number;
 }
-export default function OfferPhotos({
+export default function PropertyPhotos({
   propertyImages = [],
   indexOfSelectedImage,
 }: OfferPhotoProps) {

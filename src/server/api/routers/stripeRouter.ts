@@ -125,48 +125,6 @@ export const stripeRouter = createTRPCRouter({
       return { clientSecret: session.client_secret };
     }),
 
-  // authorizePayment: protectedProcedure
-  //   .input(
-  //     z.object({
-  //       listingId: z.number(),
-  //       propertyId: z.number(),
-  //       requestId: z.number(),
-  //       name: z.string(),
-  //       price: z.number(),
-  //       description: z.string(),
-  //       cancelUrl: z.string(),
-  //       images: z.array(z.string().url()),
-  //       userId: z.string(),
-  //       phoneNumber: z.string(),
-  //       totalSavings: z.number(),
-  //       //hostId: z.string(),
-  //     }),
-  //   )
-  //   .mutation(({ ctx, input }) => {
-  //     const currentDate = new Date(); // Get the current date and time
-
-  //     // Object that can be access through webhook and client
-  //     const metadata = {
-  //       user_id: ctx.user.id,
-  //       listing_id: input.listingId,
-  //       property_id: input.propertyId,
-  //       request_id: input.requestId,
-  //       price: input.price,
-  //       total_savings: input.totalSavings,
-  //       confirmed_at: currentDate.toISOString(),
-  //       phone_number: input.phoneNumber,
-  //       // host_id: input.hostId,
-  //     };
-
-  //     return stripe.paymentIntents.create({
-  //       payment_method_types: ["card"],
-  //       amount: input.price,
-  //       currency: "usd",
-  //       capture_method: "manual",
-  //       metadata: metadata, // metadata access for checkout session
-  //     });
-  //   }),
-
   // Get the customer info
   createSetupIntentSession: protectedProcedure
     .input(
@@ -306,9 +264,9 @@ export const stripeRouter = createTRPCRouter({
               country: z.string(),
               hostTeam: z.object({
                 owner: z.object({
-                  stripeConnectId: z.string().nullable()
-                })
-              })
+                  stripeConnectId: z.string().nullable(),
+                }),
+              }),
             }),
           })
           .optional(),

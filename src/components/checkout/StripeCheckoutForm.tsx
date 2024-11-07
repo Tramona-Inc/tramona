@@ -8,7 +8,7 @@ import {
   ExpressCheckoutElement,
 } from "@stripe/react-stripe-js";
 import { Separator } from "../ui/separator";
-import ContactInfoForm from "./ContactInfoForm";
+import ContactInfoForm from "./sections/ContactInfoForm";
 import type {
   StripePaymentElementOptions,
   StripeExpressCheckoutElementOptions,
@@ -104,7 +104,7 @@ export default function StripeCheckoutForm({
             options={expressCheckoutOptions}
             onConfirm={() => handleSubmit}
           />
-          <div className="my-2 flex w-full flex-row items-center justify-center gap-x-2 text-nowrap text-sm text-muted-foreground">
+          <div className="text-nowrap my-2 flex w-full flex-row items-center justify-center gap-x-2 text-sm text-muted-foreground">
             <div className="w-full border border-t border-zinc-200" />
             Or pay with card
             <div className="w-full border border-t border-zinc-200" />

@@ -12,11 +12,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import DateRangePicker from "../_common/DateRangePicker";
-import MakeBid from "../landing-page/bidding/MakeBid";
-import { Button } from "../ui/button";
-import { Card } from "../ui/card";
-import { Form } from "../ui/form";
+import DateRangePicker from "../../_common/DateRangePicker";
+import MakeBid from "../../landing-page/bidding/MakeBid";
+import { Button } from "../../ui/button";
+import { Card } from "../../ui/card";
+import { Form } from "../../ui/form";
 
 const formSchema = z.object({
   date: z.object({

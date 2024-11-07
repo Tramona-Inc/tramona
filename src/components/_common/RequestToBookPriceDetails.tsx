@@ -1,7 +1,7 @@
 import { Separator } from "../ui/separator";
 import { formatCurrency, getNumNights } from "@/utils/utils";
 import { plural } from "@/utils/utils";
-import type { PropertyPageData } from "@/components/offers/PropertyPage";
+import type { PropertyPageData } from "@/components/propertyPages/PropertyPage";
 import React from "react";
 import {
   breakdownPayment,

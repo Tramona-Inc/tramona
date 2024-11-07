@@ -13,7 +13,7 @@ import {
 import { ExternalLinkIcon } from "lucide-react";
 import { sortBy } from "lodash";
 import { Badge } from "../ui/badge";
-import { PropertyPageData } from "../offers/PropertyPage";
+import { PropertyPageData } from "../propertyPages/PropertyPage";
 import { GuestDashboardRequestToBook } from "./RequestToBookCard";
 
 export function RequestToBookCardPreviews({
@@ -74,7 +74,9 @@ export function RequestToBookCardPreviews({
               <div className="shrink-0">
                 <UserAvatar
                   name={
-                    requestToBook.property.name ?? requestToBook.property.hostName ?? "Tramona"
+                    requestToBook.property.name ??
+                    requestToBook.property.hostName ??
+                    "Tramona"
                   }
                   image={
                     requestToBook.property.host?.image ??
@@ -85,7 +87,9 @@ export function RequestToBookCardPreviews({
               </div>
               <div>
                 <p className="line-clamp-1 text-xs text-muted-foreground">
-                  {requestToBook.property.name ?? requestToBook.property.hostName ?? "Tramona"}{" "}
+                  {requestToBook.property.name ??
+                    requestToBook.property.hostName ??
+                    "Tramona"}{" "}
                   offered ·{" "}
                   {formatDistanceToNowStrict(requestToBook.createdAt, {
                     addSuffix: true,

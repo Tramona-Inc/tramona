@@ -9,13 +9,13 @@ import { plural } from "@/utils/utils";
 import type {
   OfferWithDetails,
   PropertyPageData,
-  RequestToBookDetails,
-} from "@/components/offers/PropertyPage";
+} from "@/components/propertyPages/PropertyPage";
 import React, { useEffect, useState } from "react";
 import {
   breakdownPayment,
   getServiceFee,
 } from "@/utils/payment-utils/paymentBreakdown";
+import type { RequestToBookDetails } from "../propertyPages/sidebars/actionButtons/ReserveBtn";
 
 type PaymentBreakdown = {
   totalTripAmount: number;
@@ -63,8 +63,12 @@ export default function PriceDetailsBeforeTax({
     if (applicableDiscount && applicableDiscount > 0) {
       priceWithApplicableDiscount =
         scrapedPrice * (100 - applicableDiscount) * 0.01;
-    } else if (property.requestToBookDiscountPercentage && property.requestToBookDiscountPercentage > 0) {
-      priceWithApplicableDiscount = scrapedPrice * (100 - property.requestToBookDiscountPercentage) * 0.01;
+    } else if (
+      property.requestToBookDiscountPercentage &&
+      property.requestToBookDiscountPercentage > 0
+    ) {
+      priceWithApplicableDiscount =
+        scrapedPrice * (100 - property.requestToBookDiscountPercentage) * 0.01;
     }
   }
 

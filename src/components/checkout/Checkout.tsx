@@ -3,12 +3,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { Separator } from "../ui/separator";
-import { Avatar, AvatarImage } from "../ui/avatar";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { getOfferDiscountPercentage, useIsSm } from "@/utils/utils";
-import { type OfferWithDetails } from "../offers/PropertyPage";
+import { type OfferWithDetails } from "../propertyPages/PropertyPage";
 import { formatDateMonthDay, plural } from "@/utils/utils";
 import { useChatWithAdmin } from "@/utils/messaging/useChatWithAdmin";
-import CustomStripeCheckout from "./CustomStripeCheckout";
+
+import StripeCheckoutForm from "./StripeCheckoutForm";
 import { OfferPriceDetails } from "../_common/OfferPriceDetails";
 import { getCancellationPolicyDescription } from "@/config/getCancellationPolicyDescription";
 
@@ -200,7 +201,7 @@ export default function Checkout({ offer }: { offer: OfferWithDetails }) {
           <Separator className="my-4" />
           <CancellationPolicy />
           <Separator className="my-4" />
-          {!isMobile && <CustomStripeCheckout offer={offer} />}
+          {!isMobile && <StripeCheckoutForm offer={offer} />}
         </div>
         <div className="md:hidden">
           <BestPriceCard />
@@ -211,7 +212,7 @@ export default function Checkout({ offer }: { offer: OfferWithDetails }) {
           <Separator className="my-6" />
           <CancellationPolicy />
           <Separator className="my-6" />
-          {isMobile && <CustomStripeCheckout offer={offer} />}
+          {isMobile && <StripeCheckoutForm offer={offer} />}
           <Separator className="my-6" />
           <CustomerReview />
           <div className="mt-4">
