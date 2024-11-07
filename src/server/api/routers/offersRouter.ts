@@ -746,8 +746,7 @@ export const offersRouter = createTRPCRouter({
       return curTrip?.offer?.scrapeUrl !== null;
     }),
 
-
-    createOfferWithoutRequest: protectedProcedure
+  createOfferWithoutRequest: protectedProcedure
     .input(
       z
         .object({
@@ -903,7 +902,6 @@ export const offersRouter = createTRPCRouter({
             to: traveler.phoneNumber!,
             content: `Tramona: You have 1 match for your request for ${request.location} from ${formatDateRange(request.checkIn, request.checkOut)} for ${request.maxTotalPrice / getNumNights(request.checkIn, request.checkOut)}. Please tap below to view your offer: ${env.NEXTAUTH_URL}/requests/${request.id}`,
           }));
-
       } else {
         const brokeDownPayment = await breakdownPayment({
           checkIn: input.checkIn,
@@ -939,7 +937,6 @@ export const offersRouter = createTRPCRouter({
         });
       }
     }),
-    
 });
 
 export async function getPropertyForOffer(propertyId: number) {
@@ -958,6 +955,7 @@ export async function getPropertyForOffer(propertyId: number) {
               image: true,
               about: true,
               location: true,
+              stripeConnectId: true,
             },
             with: {
               hostProfile: {

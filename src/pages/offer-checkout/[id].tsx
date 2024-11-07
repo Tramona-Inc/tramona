@@ -1,6 +1,6 @@
 import MainLayout from "@/components/_common/Layout/MainLayout";
 import Spinner from "@/components/_common/Spinner";
-import Checkout from "@/components/checkout/Checkout";
+import { UnifiedCheckout } from "@/components/checkout/UnifiedCheckout";
 import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
@@ -23,8 +23,8 @@ export default function Page() {
 
   return (
     <MainLayout>
-      <div className="mx-auto my-8 min-h-screen-minus-header-n-footer max-w-6xl sm:my-16">
-        {offer ? <Checkout offer={offer} /> : <Spinner />}
+      <div className="min-h-screen-minus-header-n-footer mx-auto my-8 max-w-6xl sm:my-16">
+        {offer ? <UnifiedCheckout offer={offer} type="offer" /> : <Spinner />}
       </div>
     </MainLayout>
   );

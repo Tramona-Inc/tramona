@@ -8,7 +8,7 @@
 // import PaywallDialog from "@/common/components/paywall-dialog";
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import Spinner from "@/components/_common/Spinner";
-import { OfferPage } from "@/components/propertyPages/PropertyPage";
+import { OfferPage } from "@/components/propertyPages/OfferPage";
 import { api } from "@/utils/api";
 
 import { useSession } from "next-auth/react";

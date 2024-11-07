@@ -21,13 +21,12 @@ import {
 import { RequestToBookPriceDetails } from "../_common/RequestToBookPriceDetails";
 import { OfferPriceDetails } from "../_common/OfferPriceDetails";
 import StripeCheckoutForm from "./StripeCheckoutForm";
-import RequestToBookCustomStripeCheckout from "./RequestToBookCustomStripeCheckout";
-import BookItNowCustomStripeCheckout from "./BookItNowCustomStripeCheckout";
-import type { RequestToBookDetails } from "./RequestToBookCustomStripeCheckout";
+import type { RequestToBookDetails } from "../propertyPages/RequestToBookPage";
 import type { CheckoutData, RequestToBookPricing } from "./types";
 import ChatWithHost from "./sections/ChatWithHost";
 import CustomerReview from "./sections/CustomerReview";
 import MemoizedCustomStripeCheckoutContainer from "./CustomStripeCheckoutContainer";
+import BestPriceCard from "./sections/BestPriceCard";
 
 type CheckoutType = "offer" | "requestToBook" | "bookNow";
 
@@ -128,43 +127,33 @@ export function UnifiedCheckout({
     switch (type) {
       case "offer":
         return offer && <MemoizedCustomStripeCheckoutContainer offer={offer} />;
-      case "requestToBook":
-        return (
-          requestToBook &&
-          property &&
-          checkoutData.pricing && (
-            <MemoizedCustomStripeCheckoutContainer
-              property={property}
-              requestToBook={requestToBook}
-              requestToBookPricing={checkoutData.pricing}
-            />
-          )
-        );
-      case "bookNow":
-        return (
-          requestToBook &&
-          property &&
-          checkoutData.pricing && (
-            <MemoizedCustomStripeCheckoutContainer
-              property={property}
-              requestToBook={requestToBook}
-              requestToBookPricing={checkoutData.pricing}
-            />
-          )
-        );
+        // case "requestToBook":
+        //   return (
+        //     requestToBook &&
+        //     property &&
+        //     checkoutData.pricing && (
+        //       <MemoizedCustomStripeCheckoutContainer
+        //         property={property}
+        //         requestToBook={requestToBook}
+        //         requestToBookPricing={checkoutData.pricing}
+        //       />
+        //     )
+        //   );
+        // case "bookNow":
+        //   return (
+        //     requestToBook &&
+        //     property &&
+        //     checkoutData.pricing && (
+        //       <MemoizedCustomStripeCheckoutContainer
+        //         property={property}
+        //         requestToBook={requestToBook}
+        //         requestToBookPricing={checkoutData.pricing}
+        //       />
+        //     )
+        //   );
+        break;
     }
   };
-
-  function BestPriceCard() {
-    return (
-      <div className="rounded-lg border border-teal-900 bg-zinc-100 p-3 text-sm">
-        <h3 className="font-bold">Best price</h3>
-        <p className="font-semibold text-muted-foreground">
-          This is an exclusive price only available on Tramona.
-        </p>
-      </div>
-    );
-  }
 
   function TripDetails() {
     return (

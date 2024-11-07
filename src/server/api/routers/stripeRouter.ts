@@ -5,7 +5,7 @@ import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import Stripe from "stripe";
 import { z } from "zod";
-
+import { getPropertyForOffer } from "./offersRouter";
 import { createPayHostTransfer } from "@/utils/stripe-utils";
 import { breakdownPayment } from "@/utils/payment-utils/paymentBreakdown";
 
@@ -304,10 +304,17 @@ export const stripeRouter = createTRPCRouter({
 
       let offer = null;
       if (input.offerId !== -1) {
-        offer = await ctx.db.query.offers.findFirst({
+        const offerWithoutProperty = await ctx.db.query.offers.findFirst({
           where: eq(offers.id, input.offerId),
-          with: { property: { with: { hostTeam: { with: { owner: true } } } } },
+          //with: { property: { with: { hostTeam: { with: { owner: true } } } } },
         });
+
+        if (!offerWithoutProperty) return;
+
+        const propertyForOffer = await getPropertyForOffer(
+          offerWithoutProperty.propertyId,
+        );
+        offer = { ...offerWithoutProperty, property: propertyForOffer };
       } else if (input.requestToBookPricing) {
         offer = input.requestToBookPricing;
       }
@@ -333,8 +340,7 @@ export const stripeRouter = createTRPCRouter({
         offer_id: input.offerId,
         property_id: offer.property.id,
         request_id: offer.requestId,
-        host_stripe_id: offer.property.hostTeam?.owner.stripeConnectId ?? "",
-
+        host_stripe_id: offer.property.hostTeam.owner.stripeConnectId,
         traveler_offered_price_before_fees:
           offer.travelerOfferedPriceBeforeFees,
         price: paymentBreakdown.totalTripAmount, // Total price included tramona fee
