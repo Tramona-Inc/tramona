@@ -12,7 +12,7 @@ import type {
 } from "@/components/propertyPages/PropertyPage";
 import React, { useEffect, useState } from "react";
 import {
-  breakdownPayment,
+  breakdownPaymentByOffer,
   getServiceFee,
 } from "@/utils/payment-utils/paymentBreakdown";
 import type { RequestToBookDetails } from "../propertyPages/sidebars/actionButtons/RequestToBookBtn";
@@ -91,7 +91,7 @@ export default function PriceDetailsBeforeTax({
             nightlyPrice: nightly,
           });
 
-          const payment = breakdownPayment({
+          const payment = breakdownPaymentByOffer({
             scrapeUrl: property.originalListingPlatform ?? null,
             travelerOfferedPriceBeforeFees,
             datePriceFromAirbnb: scrapedPrice,
@@ -109,7 +109,7 @@ export default function PriceDetailsBeforeTax({
             nightlyPrice: nightly,
           });
 
-          const payment = breakdownPayment(offer);
+          const payment = breakdownPaymentByOffer(offer);
           setBrokeDownPayment(payment);
         } else {
           throw new Error("Missing required booking information");

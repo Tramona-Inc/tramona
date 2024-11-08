@@ -4,7 +4,7 @@ import { plural } from "@/utils/utils";
 import type { OfferWithDetails } from "@/components/propertyPages/PropertyPage";
 import React from "react";
 import {
-  breakdownPayment,
+  breakdownPaymentByOffer,
   getServiceFee,
 } from "@/utils/payment-utils/paymentBreakdown";
 
@@ -17,7 +17,7 @@ export default function PriceDetailsBeforeTax({
 }) {
   const numberOfNights = getNumNights(offer.checkIn, offer.checkOut);
   const nightlyPrice = offer.travelerOfferedPriceBeforeFees / numberOfNights;
-  const paymentBreakdown = breakdownPayment(offer);
+  const paymentBreakdown = breakdownPaymentByOffer(offer);
 
   const items = [
     {

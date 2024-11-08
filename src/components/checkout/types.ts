@@ -1,25 +1,47 @@
+import { NumberContext } from "twilio/lib/rest/pricing/v2/number";
 import {
   type OfferWithDetails,
   type PropertyPageData,
 } from "../propertyPages/PropertyPage";
 
-export interface RequestToBookPricing {
-  requestId: null;
-  scrapeUrl: string | null;
+export type RequestToBookPricing = {
   travelerOfferedPriceBeforeFees: number;
-  datePriceFromAirbnb: number;
-  checkIn: Date;
-  checkOut: Date;
-}
+  datePriceFromAirbnb: number | null;
+  discount: number;
+};
 
-export interface CheckoutData {
-  title: string;
+export interface UnifiedCheckoutData {
+  ///MUST BE TRANSFORMED IN THIS BEFORE GOING INTO THE UNIFIEC CHECKOUT PAGE
+  type: "Book it now" | "Offer" | "Request to book";
+  offerId?: number | undefined;
   dates: {
     checkIn: Date;
     checkOut: Date;
   };
   guests: number | null;
+  scrapeUrl: string | null;
   property: PropertyPageData;
-  pricing: RequestToBookPricing | null;
-  discount: number;
+  pricing: RequestToBookPricing;
 }
+
+// ------------ USED FOR PAYMENT BREAK DOWN   -----
+
+//input for non-properties
+export type PropertyAndTripParams = {
+  dates: {
+    checkIn: Date;
+    checkOut: Date;
+  };
+  travelerOfferPriceBeforeFees: number;
+  property: PropertyPageData;
+};
+
+//output
+export type PriceBreakdownOutput = {
+  totalTripAmount: number;
+  taxesPaid: number;
+  taxPercentage: number;
+  superhogFee: number;
+  stripeTransactionFee: number;
+  totalSavings: number;
+};

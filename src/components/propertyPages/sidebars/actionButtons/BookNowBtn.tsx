@@ -1,5 +1,4 @@
 import { api } from "@/utils/api";
-import type { OfferWithDetails } from "../../PropertyPage";
 import { Button, type ButtonProps } from "@/components/ui/button";
 import type { Property } from "@/server/db/schema";
 import { Airbnb } from "@/utils/listing-sites/Airbnb";
@@ -7,43 +6,56 @@ import { ArrowRightIcon, BookCheckIcon, ExternalLinkIcon } from "lucide-react";
 import Link from "next/link";
 import { VerificationProvider } from "@/components/_utils/VerificationContext";
 import IdentityModal from "@/components/_utils/IdentityModal";
-import { RequestToBookDetails } from "./RequestToBookBtn";
+import {
+  type OfferWithDetails,
+  RequestToBookDetails,
+} from "./RequestToBookBtn";
 
-export default function BookNowBtn({
-  btnSize,
-  property,
-  requestToBook, //we need this for the dates for now
-}: {
+interface BaseProps {
   btnSize: ButtonProps["size"];
   property: Pick<
     Property,
-    "stripeVerRequired" | "originalListingId" | "bookOnAirbnb"
+    "stripeVerRequired" | "originalListingId" | "bookOnAirbnb" | "maxNumGuests"
   >;
-  requestToBook: RequestToBookDetails;
-}) {
-  const isBooked = false;
+}
+
+// Union type for either `requestToBook` or `offer`
+type UnifiedProps =
+  | (BaseProps & { requestToBook: RequestToBookDetails; offer?: never }) // With requestToBook
+  | (BaseProps & { offer: OfferWithDetails; requestToBook?: never }); // With offer
+
+export default function BookNowBtn(props: UnifiedProps) {
+  const isBooked = props.offer?.acceptedAt ? true : false;
 
   const { data: verificationStatus } =
     api.users.myVerificationStatus.useQuery();
 
-  const airbnbCheckoutUrl = Airbnb.createListing(
-    property.originalListingId!,
-  ).getCheckoutUrl({
-    checkIn: requestToBook.checkIn,
-    checkOut: requestToBook.checkOut,
-    numGuests: requestToBook.numGuests,
-  });
+  const airbnbCheckoutUrl = props.offer
+    ? Airbnb.createListing(props.property.originalListingId!).getCheckoutUrl({
+        checkIn: props.offer.checkIn,
+        checkOut: props.offer.checkIn,
+        numGuests:
+          props.offer.request?.numGuests ?? props.property.maxNumGuests,
+      })
+    : Airbnb.createListing(props.property.originalListingId!).getCheckoutUrl({
+        checkIn: props.requestToBook.checkIn,
+        checkOut: props.requestToBook.checkIn,
+        numGuests: props.requestToBook.numGuests,
+      });
 
+  const checkoutUrl = props.offer
+    ? `/offer-checkout/${props.offer.id}`
+    : `book-it-now-checkout`; /// wait comback to this later
   return (
     <Button
       asChild={!isBooked}
       variant={
-        property.stripeVerRequired &&
+        props.property.stripeVerRequired &&
         verificationStatus?.isIdentityVerified === "pending"
           ? "secondary"
           : "primary"
       }
-      size={btnSize}
+      size={props.btnSize}
       className="w-full"
       disabled={isBooked}
     >
@@ -52,7 +64,7 @@ export default function BookNowBtn({
           <BookCheckIcon className="size-5" />
           Booked
         </>
-      ) : property.bookOnAirbnb ? (
+      ) : props.property.bookOnAirbnb ? (
         <Link
           href={airbnbCheckoutUrl}
           target="_blank"
@@ -61,9 +73,9 @@ export default function BookNowBtn({
           Book on Airbnb
           <ExternalLinkIcon className="size-5" />
         </Link>
-      ) : !property.stripeVerRequired ||
+      ) : !props.property.stripeVerRequired ||
         verificationStatus?.isIdentityVerified === "true" ? (
-        <Link href={`/offer-checkout/$}`}>
+        <Link href={checkoutUrl}>
           Book now
           <ArrowRightIcon className="size-5" />
         </Link>

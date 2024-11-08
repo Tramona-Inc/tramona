@@ -7,7 +7,7 @@ import Stripe from "stripe";
 import { z } from "zod";
 import { getPropertyForOffer } from "./offersRouter";
 import { createPayHostTransfer } from "@/utils/stripe-utils";
-import { breakdownPayment } from "@/utils/payment-utils/paymentBreakdown";
+import { breakdownPaymentByOffer } from "@/utils/payment-utils/paymentBreakdown";
 
 export const config = {
   api: {
@@ -244,7 +244,7 @@ export const stripeRouter = createTRPCRouter({
   authorizePayment: protectedProcedure // this is how will now creat a checkout session using a custom flow
     .input(
       z.object({
-        offerId: z.number(), //will either take an offerId or a requestToBookPricing
+        offerId: z.number().nullable(), //will either take an offerId or a requestToBookPricing
         cancelUrl: z.string(),
         requestToBookPricing: z
           .object({
@@ -303,7 +303,7 @@ export const stripeRouter = createTRPCRouter({
       }
 
       let offer = null;
-      if (input.offerId !== -1) {
+      if (input.offerId) {
         const offerWithoutProperty = await ctx.db.query.offers.findFirst({
           where: eq(offers.id, input.offerId),
         });
@@ -325,7 +325,7 @@ export const stripeRouter = createTRPCRouter({
         });
       }
 
-      const paymentBreakdown = breakdownPayment(offer);
+      const paymentBreakdown = breakdownPaymentByOffer(offer);
 
       const metadata = {
         is_charged_with_setup_intent: "false",

@@ -3,16 +3,16 @@ import { useStripe } from "@/utils/stripe-client";
 import StripeCheckoutForm from "./StripeCheckoutForm";
 import React, { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/router";
-import type { OfferWithDetails } from "../propertyPages/PropertyPage";
 import { Elements } from "@stripe/react-stripe-js";
 import { type StripeElementsOptions } from "@stripe/stripe-js";
 import Spinner from "../_common/Spinner";
 import { useToast } from "../ui/use-toast";
+import { UnifiedCheckoutData } from "./types";
 
 const CustomStripeCheckoutContainer = ({
-  offer: { property, ...offer },
+  unifiedCheckoutData,
 }: {
-  offer: OfferWithDetails;
+  unifiedCheckoutData: UnifiedCheckoutData;
 }) => {
   const { toast } = useToast();
   const stripePromise = useStripe();
@@ -22,12 +22,14 @@ const CustomStripeCheckoutContainer = ({
     undefined,
   );
   const [checkoutReady, setCheckoutReady] = useState(false);
+  console.log("hi");
 
   const authorizePayment = api.stripe.authorizePayment.useMutation();
   const fetchClientSecret = useCallback(async () => {
     try {
+      console.log("Being called?");
       return await authorizePayment.mutateAsync({
-        offerId: offer.id,
+        offerId: unifiedCheckoutData.offerId ?? null,
         cancelUrl: pathname,
       });
     } catch (error) {
@@ -118,7 +120,9 @@ const CustomStripeCheckoutContainer = ({
       {checkoutReady && options?.clientSecret ? (
         <Elements stripe={stripePromise} options={options}>
           <StripeCheckoutForm
-            originalListingPlatform={property.originalListingPlatform}
+            originalListingPlatform={
+              unifiedCheckoutData.property.originalListingPlatform
+            }
           />
         </Elements>
       ) : (

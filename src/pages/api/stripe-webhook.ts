@@ -28,7 +28,7 @@ import {
 import { createSetupIntent } from "@/utils/webhook-functions/stripe-utils";
 import { sendSlackMessage } from "@/server/slack";
 import { formatDateMonthDay } from "@/utils/utils";
-import { breakdownPayment } from "@/utils/payment-utils/paymentBreakdown";
+import { breakdownPaymentByOffer } from "@/utils/payment-utils/paymentBreakdown";
 // ! Necessary for stripe
 export const config = {
   api: {
@@ -165,7 +165,7 @@ export default async function webhook(
                 );
               }
 
-              const priceBreakdown = breakdownPayment(offer);
+              const priceBreakdown = breakdownPaymentByOffer(offer);
 
               const tripCheckout = await db
                 .insert(tripCheckouts)

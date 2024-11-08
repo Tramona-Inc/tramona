@@ -836,7 +836,7 @@ export const offersRouter = createTRPCRouter({
         // ------- Create trips checkout first ----
 
         // function to help break down the price of the offer
-        const brokeDownPayment = await breakdownPayment({
+        const brokeDownPayment = await breakdownPaymentByOffer({
           checkIn: requestDetails.checkIn,
           checkOut: requestDetails.checkOut,
           travelerOfferedPriceBeforeFees: input.travelerOfferedPriceBeforeFees,
@@ -903,7 +903,7 @@ export const offersRouter = createTRPCRouter({
             content: `Tramona: You have 1 match for your request for ${request.location} from ${formatDateRange(request.checkIn, request.checkOut)} for ${request.maxTotalPrice / getNumNights(request.checkIn, request.checkOut)}. Please tap below to view your offer: ${env.NEXTAUTH_URL}/requests/${request.id}`,
           }));
       } else {
-        const brokeDownPayment = await breakdownPayment({
+        const brokeDownPayment = await breakdownPaymentByOffer({
           checkIn: input.checkIn,
           checkOut: input.checkOut,
           travelerOfferedPriceBeforeFees: input.travelerOfferedPriceBeforeFees,

@@ -4,6 +4,7 @@ import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { UnifiedCheckout } from "@/components/checkout/UnifiedCheckout";
+import { type UnifiedCheckoutData } from "@/components/checkout/types";
 
 export default function Page() {
   useSession({ required: true });
@@ -18,7 +19,8 @@ export default function Page() {
     ? new Date(query.checkOut as string)
     : new Date();
   const numGuests = query.numGuests ? parseInt(query.numGuests as string) : 2;
-  const requestToBook = {
+
+  const checkoutData = {
     checkIn,
     checkOut,
     numGuests,
@@ -38,9 +40,9 @@ export default function Page() {
       <div className="min-h-screen-minus-header-n-footer mx-auto my-8 max-w-6xl sm:my-16">
         {property ? (
           <UnifiedCheckout
-            type="bookNow"
-            requestToBook={requestToBook}
+            type="bookItNow"
             property={property}
+            checkoutData={checkoutData}
           />
         ) : (
           <Spinner />
