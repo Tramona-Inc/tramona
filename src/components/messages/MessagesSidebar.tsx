@@ -17,6 +17,7 @@ import { ScrollArea } from "../ui/scroll-area";
 import { SidebarConversation } from "./SidebarConversation";
 import { Button } from "../ui/button";
 import { messages } from "@/server/db/schema";
+import { MessageSquare } from "lucide-react";
 
 export function MessageConversation({
   conversation,
@@ -195,6 +196,30 @@ export default function MessagesSidebar({
     );
   });
 
+  function MessageEmptyState({ unread = false }: { unread?: boolean }) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center gap-4 p-4 text-center text-muted-foreground">
+        <MessageSquare size={30} />
+        <h2 className="font-semibold">
+          {unread
+            ? "You don't have any unread messages"
+            : "You don't have any messages"}
+        </h2>
+        <p className="text-sm">
+          {unread
+            ? "When you have an unread message, it will appear here."
+            : "When you receive a new message, it will appear here."}
+        </p>
+        <div className="flex w-full flex-col gap-2 px-6">
+          <Button className="rounded-full">Make a request</Button>
+          <Button className="rounded-full" variant="outline">
+            Book it now
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="space-y-4 border-b p-4">
@@ -218,8 +243,8 @@ export default function MessagesSidebar({
       </div>
       <ScrollArea className="h-[35rem] border-b py-2">
         {!isLoading ? (
-          conversations.length > 0 ? (
-            showAllMsgs ? (
+          showAllMsgs ? (
+            conversations.length > 0 ? (
               conversations.map((conversation) => (
                 <SidebarConversation
                   key={conversation.id}
@@ -229,23 +254,19 @@ export default function MessagesSidebar({
                 />
               ))
             ) : (
-              unreadConversations.map((conversation) => (
-                <SidebarConversation
-                  key={conversation.id}
-                  conversation={conversation}
-                  isSelected={selectedConversation?.id === conversation.id}
-                  setSelected={setSelected}
-                />
-              ))
+              <MessageEmptyState />
             )
+          ) : unreadConversations.length > 0 ? (
+            unreadConversations.map((conversation) => (
+              <SidebarConversation
+                key={conversation.id}
+                conversation={conversation}
+                isSelected={selectedConversation?.id === conversation.id}
+                setSelected={setSelected}
+              />
+            ))
           ) : (
-            <div className="flex h-full flex-col items-center justify-center">
-              <MessageEmptySvg />
-              <h2 className="text-2xl font-bold">No conversations yet</h2>
-              <p className="max-w-[300px] text-center text-muted-foreground">
-                Messages from your conversations will show up here.
-              </p>
-            </div>
+            <MessageEmptyState unread />
           )
         ) : (
           <div className="grid place-items-center text-muted-foreground">
