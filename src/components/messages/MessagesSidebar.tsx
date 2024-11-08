@@ -189,7 +189,7 @@ export default function MessagesSidebar({
         <h1 className="text-2xl font-bold">Messages</h1>
       </div>
 
-      <ScrollArea className="h-full p-2">
+      <ScrollArea className="h-full py-2">
         {!isLoading ? (
           conversations.length > 0 ? (
             conversations.map((conversation) => (
