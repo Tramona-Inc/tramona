@@ -9,12 +9,14 @@ import supabase from "@/utils/supabase-client";
 import { cn, useUpdateUser } from "@/utils/utils";
 import { subHours } from "date-fns";
 import { useSession } from "next-auth/react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import MessageEmptySvg from "../_common/EmptyStateSvg/MessageEmptySvg";
 import Spinner from "../_common/Spinner";
 import UserAvatar from "../_common/UserAvatar";
 import { ScrollArea } from "../ui/scroll-area";
 import { SidebarConversation } from "./SidebarConversation";
+import { Button } from "../ui/button";
+import { messages } from "@/server/db/schema";
 
 export function MessageConversation({
   conversation,
@@ -100,6 +102,8 @@ export default function MessagesSidebar({
   selectedConversation,
   setSelected,
 }: SidebarProps) {
+  const [showAllMsgs, setShowAllMsgs] = useState(true);
+
   // Fetch only once on mount
   const { data: fetchedConversations, isLoading } =
     api.messages.getConversations.useQuery(undefined, {
@@ -183,23 +187,57 @@ export default function MessagesSidebar({
     setConversationToTop,
   ]);
 
+  const unreadConversations = conversations.filter((conversation) => {
+    return (
+      conversation.messages[0] &&
+      !conversation.messages[0].read &&
+      conversation.messages[0].userId !== session?.user.id
+    );
+  });
+
   return (
     <div>
-      <div className="flex h-[73px] items-center border-b p-4">
+      <div className="space-y-4 border-b p-4">
         <h1 className="text-2xl font-bold">Messages</h1>
+        <div className="flex items-center gap-1">
+          <Button
+            className="rounded-full"
+            variant={showAllMsgs ? "primary" : "outline"}
+            onClick={() => setShowAllMsgs(!showAllMsgs)}
+          >
+            All
+          </Button>
+          <Button
+            className="rounded-full"
+            variant={showAllMsgs ? "outline" : "primary"}
+            onClick={() => setShowAllMsgs(!showAllMsgs)}
+          >
+            Unread
+          </Button>
+        </div>
       </div>
-
-      <ScrollArea className="h-full py-2">
+      <ScrollArea className="h-[35rem] border-b py-2">
         {!isLoading ? (
           conversations.length > 0 ? (
-            conversations.map((conversation) => (
-              <SidebarConversation
-                key={conversation.id}
-                conversation={conversation}
-                isSelected={selectedConversation?.id === conversation.id}
-                setSelected={setSelected}
-              />
-            ))
+            showAllMsgs ? (
+              conversations.map((conversation) => (
+                <SidebarConversation
+                  key={conversation.id}
+                  conversation={conversation}
+                  isSelected={selectedConversation?.id === conversation.id}
+                  setSelected={setSelected}
+                />
+              ))
+            ) : (
+              unreadConversations.map((conversation) => (
+                <SidebarConversation
+                  key={conversation.id}
+                  conversation={conversation}
+                  isSelected={selectedConversation?.id === conversation.id}
+                  setSelected={setSelected}
+                />
+              ))
+            )
           ) : (
             <div className="flex h-full flex-col items-center justify-center">
               <MessageEmptySvg />
