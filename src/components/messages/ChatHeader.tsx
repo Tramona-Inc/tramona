@@ -29,7 +29,7 @@ export default function ChatHeader({
         />
 
         <div className="flex flex-col">
-          <p className="text-2xl font-bold">
+          <p className="text-lg font-semibold">
             {selectedConversation.participants[0]?.name}
           </p>
           {/* <p className="text-muted-foreground">Active 19m ago</p> */}
