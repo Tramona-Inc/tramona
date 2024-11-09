@@ -25,7 +25,10 @@ import {
   completeReferral,
   validateHostDiscountReferral,
 } from "@/utils/webhook-functions/referral-utils";
-import { createSetupIntent } from "@/utils/webhook-functions/stripe-utils";
+import {
+  createSetupIntent,
+  getRequestIdByOfferId,
+} from "@/utils/webhook-functions/stripe-utils";
 import { sendSlackMessage } from "@/server/slack";
 import { formatDateMonthDay } from "@/utils/utils";
 import { breakdownPaymentByOffer } from "@/utils/payment-utils/paymentBreakdown";
@@ -107,171 +110,169 @@ export default async function webhook(
               ),
             );
 
-          const requestId = paymentIntentSucceeded.metadata.request_id;
+          const requestId = await getRequestIdByOfferId(
+            paymentIntentSucceeded.metadata.offer_id,
+          ); // get request by offer
 
-          if (requestId && !isNaN(parseInt(requestId))) {
+          if (requestId) {
             await db
               .update(requests)
               .set({ resolvedAt: confirmedDate })
-              .where(eq(requests.id, parseInt(requestId)));
+              .where(eq(requests.id, requestId));
+          }
 
-            //lets test with out the propertyID
-            const offer = await db.query.offers.findFirst({
-              with: {
-                request: { columns: { latLngPoint: false } },
-                property: {
-                  columns: {
-                    originalNightlyPrice: true,
-                    city: true,
-                    county: true,
-                    stateName: true,
-                    stateCode: true,
-                    country: true,
-                    currentSecurityDeposit: true,
-                  },
+          //lets test with out the propertyID
+          const offer = await db.query.offers.findFirst({
+            with: {
+              request: { columns: { latLngPoint: false } },
+              property: {
+                columns: {
+                  originalNightlyPrice: true,
+                  city: true,
+                  county: true,
+                  stateName: true,
+                  stateCode: true,
+                  country: true,
+                  currentSecurityDeposit: true,
                 },
               },
-              where: eq(
-                offers.id,
-                parseInt(paymentIntentSucceeded.metadata.offer_id!),
-              ),
+            },
+            where: eq(
+              offers.id,
+              parseInt(paymentIntentSucceeded.metadata.offer_id!),
+            ),
+          });
+
+          const currentProperty = await db.query.properties.findFirst({
+            where: eq(
+              properties.id,
+              parseInt(paymentIntentSucceeded.metadata.property_id!),
+            ),
+            with: { hostTeam: true },
+          });
+
+          //<------- Setup Intent for future charge ---->
+
+          await createSetupIntent({
+            customerId: user!.stripeCustomerId!,
+            paymentMethodId: paymentIntentSucceeded.payment_method!,
+            userId: user!.id,
+          });
+
+          //create trip here need to create another case where there is not offer here ______________
+
+          if (offer?.request) {
+            const paymentIntentId =
+              paymentIntentSucceeded.payment_intent?.toString();
+
+            if (!paymentIntentId) {
+              throw new Error(`paymentIntentId is null for offer ${offer.id}`);
+            }
+
+            const priceBreakdown = breakdownPaymentByOffer(offer);
+
+            const tripCheckout = await db
+              .insert(tripCheckouts)
+              .values({
+                paymentIntentId,
+                travelerOfferedPriceBeforeFees:
+                  offer.travelerOfferedPriceBeforeFees,
+                totalTripAmount: priceBreakdown.totalTripAmount,
+                taxesPaid: priceBreakdown.taxesPaid,
+                superhogFee: priceBreakdown.superhogFee,
+                stripeTransactionFee: priceBreakdown.stripeTransactionFee,
+                totalSavings: priceBreakdown.totalSavings,
+                securityDeposit: offer.property.currentSecurityDeposit,
+              })
+              .returning()
+              .then((r) => r[0]!);
+
+            const currentTrip = await db
+              .insert(trips)
+              .values({
+                checkIn: offer.checkIn,
+                checkOut: offer.checkOut,
+                numGuests: offer.request.numGuests,
+                groupId: offer.request.madeByGroupId,
+                propertyId: offer.propertyId,
+                offerId: offer.id,
+                paymentIntentId,
+                totalPriceAfterFees: paymentIntentSucceeded.amount,
+                tripCheckoutId: tripCheckout.id,
+              })
+              .returning()
+              .then((res) => res[0]!);
+
+            const currentTripWCheckout: TripWCheckout = {
+              ...currentTrip,
+              tripCheckout,
+            };
+
+            //<___creating a superhog reservation only if does not exist__>
+
+            const currentSuperhogReservation = await db.query.trips.findFirst({
+              where: eq(trips.superhogRequestId, superhogRequests.id),
             });
 
-            const currentProperty = await db.query.properties.findFirst({
-              where: eq(
-                properties.id,
-                parseInt(paymentIntentSucceeded.metadata.property_id!),
-              ),
-              with: { hostTeam: true },
-            });
-
-            //<------- Setup Intent for future charge ---->
-
-            await createSetupIntent({
-              customerId: user!.stripeCustomerId!,
-              paymentMethodId: paymentIntentSucceeded.payment_method!,
-              userId: user!.id,
-            });
-
-            //create trip here
-
-            if (offer?.request) {
-              const paymentIntentId =
-                paymentIntentSucceeded.payment_intent?.toString();
-
-              if (!paymentIntentId) {
-                throw new Error(
-                  `paymentIntentId is null for offer ${offer.id}`,
-                );
-              }
-
-              const priceBreakdown = breakdownPaymentByOffer(offer);
-
-              const tripCheckout = await db
-                .insert(tripCheckouts)
-                .values({
-                  paymentIntentId,
-                  travelerOfferedPriceBeforeFees:
-                    offer.travelerOfferedPriceBeforeFees,
-                  totalTripAmount: priceBreakdown.totalTripAmount,
-                  taxesPaid: priceBreakdown.taxesPaid,
-                  superhogFee: priceBreakdown.superhogFee,
-                  stripeTransactionFee: priceBreakdown.stripeTransactionFee,
-                  totalSavings: priceBreakdown.totalSavings,
-                  securityDeposit: offer.property.currentSecurityDeposit,
-                })
-                .returning()
-                .then((r) => r[0]!);
-
-              const currentTrip = await db
-                .insert(trips)
-                .values({
-                  checkIn: offer.checkIn,
-                  checkOut: offer.checkOut,
-                  numGuests: offer.request.numGuests,
-                  groupId: offer.request.madeByGroupId,
-                  propertyId: offer.propertyId,
-                  offerId: offer.id,
-                  paymentIntentId,
-                  totalPriceAfterFees: paymentIntentSucceeded.amount,
-                  tripCheckoutId: tripCheckout.id,
-                })
-                .returning()
-                .then((res) => res[0]!);
-
-              const currentTripWCheckout: TripWCheckout = {
-                ...currentTrip,
-                tripCheckout,
-              };
-
-              //<___creating a superhog reservation only if does not exist__>
-
-              const currentSuperhogReservation = await db.query.trips.findFirst(
-                {
-                  where: eq(trips.superhogRequestId, superhogRequests.id),
-                },
-              );
-
-              if (!currentSuperhogReservation && !isDirectListingCharge) {
-                await createSuperhogReservation({
+            if (!currentSuperhogReservation && !isDirectListingCharge) {
+              await createSuperhogReservation({
+                paymentIntentId:
+                  paymentIntentSucceeded.payment_intent?.toString() ?? "",
+                propertyId: offer.propertyId,
+                userId: user!.id,
+                trip: currentTrip,
+              }); //creating a superhog reservation
+            } else {
+              if (isDirectListingCharge) {
+                await captureTripPaymentWithoutSuperhog({
                   paymentIntentId:
                     paymentIntentSucceeded.payment_intent?.toString() ?? "",
                   propertyId: offer.propertyId,
-                  userId: user!.id,
                   trip: currentTrip,
-                }); //creating a superhog reservation
+                });
               } else {
-                if (isDirectListingCharge) {
-                  await captureTripPaymentWithoutSuperhog({
-                    paymentIntentId:
-                      paymentIntentSucceeded.payment_intent?.toString() ?? "",
-                    propertyId: offer.propertyId,
-                    trip: currentTrip,
-                  });
-                } else {
-                  console.log("Superhog reservation already exists");
-                }
+                console.log("Superhog reservation already exists");
               }
-              //<<--------------------->>
+            }
+            //<<--------------------->>
 
-              //send email and whatsup (whatsup is not implemented yet)
-              console.log("Sending email and whatsup");
-              await sendEmailAndWhatsupConfirmation({
-                trip: currentTripWCheckout,
-                user: user!,
-                offer: offer,
-                property: currentProperty!,
-              });
-              //redeem the traveler and host refferal code
-              if (user?.referralCodeUsed) {
-                await completeReferral({ user: user, offerId: offer.id });
-              }
-              //validate the host discount referral
-              if (currentProperty?.hostTeam.ownerId) {
-                await validateHostDiscountReferral({
-                  hostUserId: currentProperty.hostTeam.ownerId,
-                });
-              }
-              if (paymentIntentSucceeded.metadata.user_id) {
-                await createConversationWithOfferAfterBooking({
-                  offerId: offer.id.toString(),
-                  offerHostId: currentProperty!.hostTeam.ownerId,
-                  offerPropertyName: currentProperty!.name,
-                  travelerId: paymentIntentSucceeded.metadata.user_id,
-                });
-              }
-              // ------ Send Slack When trip is booked ------
-              await sendSlackMessage({
-                isProductionOnly: true,
-                channel: "tramona-bot",
-                text: [
-                  `*${user?.email} just booked a trip: ${currentProperty?.name}*`,
-                  `*${currentProperty?.city}*`,
-                  `through ${isDirectListingCharge ? "a different platform (direct listing)" : "Tramona"} · ${formatDateMonthDay(offer.checkIn)}-${formatDateMonthDay(offer.checkOut)}`,
-                  `<https://tramona.com/admin|Go to admin dashboard>`,
-                ].join("\n"),
+            //send email and whatsup (whatsup is not implemented yet)
+            console.log("Sending email and whatsup");
+            await sendEmailAndWhatsupConfirmation({
+              trip: currentTripWCheckout,
+              user: user!,
+              offer: offer,
+              property: currentProperty!,
+            });
+            //redeem the traveler and host refferal code
+            if (user?.referralCodeUsed) {
+              await completeReferral({ user: user, offerId: offer.id });
+            }
+            //validate the host discount referral
+            if (currentProperty?.hostTeam.ownerId) {
+              await validateHostDiscountReferral({
+                hostUserId: currentProperty.hostTeam.ownerId,
               });
             }
+            if (paymentIntentSucceeded.metadata.user_id) {
+              await createConversationWithOfferAfterBooking({
+                offerId: offer.id.toString(),
+                offerHostId: currentProperty!.hostTeam.ownerId,
+                offerPropertyName: currentProperty!.name,
+                travelerId: paymentIntentSucceeded.metadata.user_id,
+              });
+            }
+            // ------ Send Slack When trip is booked ------
+            await sendSlackMessage({
+              isProductionOnly: true,
+              channel: "tramona-bot",
+              text: [
+                `*${user?.email} just booked a trip: ${currentProperty?.name}*`,
+                `*${currentProperty?.city}*`,
+                `through ${isDirectListingCharge ? "a different platform (direct listing)" : "Tramona"} · ${formatDateMonthDay(offer.checkIn)}-${formatDateMonthDay(offer.checkOut)}`,
+                `<https://tramona.com/admin|Go to admin dashboard>`,
+              ].join("\n"),
+            });
           }
         }
         break;

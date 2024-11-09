@@ -1,8 +1,6 @@
-import { NumberContext } from "twilio/lib/rest/pricing/v2/number";
-import {
-  type OfferWithDetails,
-  type PropertyPageData,
-} from "../propertyPages/PropertyPage";
+import { type PropertyPageData } from "../propertyPages/PropertyPage";
+import { z } from "zod";
+import { infer } from "zod-to-ts";
 
 export type RequestToBookPricing = {
   travelerOfferedPriceBeforeFees: number;

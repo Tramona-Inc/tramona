@@ -8,6 +8,7 @@ import { type StripeElementsOptions } from "@stripe/stripe-js";
 import Spinner from "../_common/Spinner";
 import { useToast } from "../ui/use-toast";
 import { UnifiedCheckoutData } from "./types";
+import { breakdownPaymentByPropertyAndTripParams } from "@/utils/payment-utils/paymentBreakdown";
 
 const CustomStripeCheckoutContainer = ({
   unifiedCheckoutData,
@@ -22,15 +23,33 @@ const CustomStripeCheckoutContainer = ({
     undefined,
   );
   const [checkoutReady, setCheckoutReady] = useState(false);
-  console.log("hi");
 
   const authorizePayment = api.stripe.authorizePayment.useMutation();
   const fetchClientSecret = useCallback(async () => {
     try {
       console.log("Being called?");
+      const { totalTripAmount } = breakdownPaymentByPropertyAndTripParams({
+        dates: {
+          checkIn: unifiedCheckoutData.dates.checkIn,
+          checkOut: unifiedCheckoutData.dates.checkOut,
+        },
+        travelerOfferPriceBeforeFees:
+          unifiedCheckoutData.pricing.travelerOfferedPriceBeforeFees,
+        property: unifiedCheckoutData.property,
+      });
+
       return await authorizePayment.mutateAsync({
-        offerId: unifiedCheckoutData.offerId ?? null,
+        totalAmountPaid: totalTripAmount,
+        travelerOfferedPriceBeforeFees:
+          unifiedCheckoutData.pricing.travelerOfferedPriceBeforeFees,
         cancelUrl: pathname,
+        propertyId: unifiedCheckoutData.property.id,
+        offerId: unifiedCheckoutData.offerId ?? null,
+        scrapeUrl: unifiedCheckoutData.scrapeUrl,
+
+        datePriceFromAirbnb: unifiedCheckoutData.pricing.datePriceFromAirbnb,
+        checkIn: unifiedCheckoutData.dates.checkIn,
+        checkOut: unifiedCheckoutData.dates.checkOut,
       });
     } catch (error) {
       toast({

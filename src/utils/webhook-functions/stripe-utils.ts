@@ -1,6 +1,6 @@
 import { env } from "@/env";
 import { db } from "@/server/db";
-import { users } from "@/server/db/schema";
+import { offers, users } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
 import Stripe from "stripe";
 
@@ -88,4 +88,22 @@ export async function chargeForDamagesOrMisc({
     console.error("Charge error:", error);
     throw error;
   }
+}
+
+//helper functions in stripe webhook
+export async function getRequestIdByOfferId(
+  offerId: string | number | undefined,
+) {
+  if (!offerId) return null;
+
+  if (typeof offerId === "string") {
+    offerId = parseInt(offerId, 10);
+  }
+  const curRequest = await db
+    .select({ id: offers.requestId })
+    .from(offers)
+    .where(eq(offers.id, offerId))
+    .then((res) => res[0]!);
+
+  return curRequest.id ? curRequest.id : null;
 }

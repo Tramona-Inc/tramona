@@ -1,13 +1,17 @@
 import { env } from "@/env";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
-import { offers, trips, users } from "@/server/db/schema";
+import { offers, properties, trips, users } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import Stripe from "stripe";
 import { z } from "zod";
 import { getPropertyForOffer } from "./offersRouter";
 import { createPayHostTransfer } from "@/utils/stripe-utils";
-import { breakdownPaymentByOffer } from "@/utils/payment-utils/paymentBreakdown";
+import {
+  breakdownPaymentByOffer,
+  breakdownPaymentByPropertyAndTripParams,
+} from "@/utils/payment-utils/paymentBreakdown";
+import { db } from "@/server/db";
 
 export const config = {
   api: {
@@ -244,32 +248,15 @@ export const stripeRouter = createTRPCRouter({
   authorizePayment: protectedProcedure // this is how will now creat a checkout session using a custom flow
     .input(
       z.object({
-        offerId: z.number().nullable(), //will either take an offerId or a requestToBookPricing
+        totalAmountPaid: z.number(),
         cancelUrl: z.string(),
-        requestToBookPricing: z
-          .object({
-            requestId: z.number().nullable(),
-            scrapeUrl: z.string().nullable(),
-            travelerOfferedPriceBeforeFees: z.number(),
-            datePriceFromAirbnb: z.number(),
-            checkIn: z.date(),
-            checkOut: z.date(),
-            property: z.object({
-              id: z.number(),
-              originalNightlyPrice: z.number().nullable(),
-              city: z.string(),
-              county: z.string().nullable(),
-              stateName: z.string().nullable(),
-              stateCode: z.string().nullable(),
-              country: z.string(),
-              hostTeam: z.object({
-                owner: z.object({
-                  stripeConnectId: z.string().nullable(),
-                }),
-              }),
-            }),
-          })
-          .optional(),
+        offerId: z.number().nullable(),
+        scrapeUrl: z.string().nullable(),
+        travelerOfferedPriceBeforeFees: z.number(),
+        datePriceFromAirbnb: z.number().nullable(),
+        checkIn: z.date(),
+        checkOut: z.date(),
+        propertyId: z.number(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -302,30 +289,28 @@ export const stripeRouter = createTRPCRouter({
         stripeCustomerId = customer.id;
       }
 
-      let offer = null;
-      if (input.offerId) {
-        const offerWithoutProperty = await ctx.db.query.offers.findFirst({
-          where: eq(offers.id, input.offerId),
-        });
+      const curProperty = await db.query.properties
+        .findFirst({
+          where: eq(properties.id, input.propertyId),
+          with: {
+            hostTeam: {
+              with: {
+                owner: true,
+              },
+            },
+            reviews: true,
+          },
+        })
+        .then((res) => res!);
 
-        if (!offerWithoutProperty) return;
-
-        const propertyForOffer = await getPropertyForOffer(
-          offerWithoutProperty.propertyId,
-        );
-        offer = { ...offerWithoutProperty, property: propertyForOffer };
-      } else if (input.requestToBookPricing) {
-        offer = input.requestToBookPricing;
-      }
-
-      if (!offer) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: `Offer not found with id ${input.offerId}`,
-        });
-      }
-
-      const paymentBreakdown = breakdownPaymentByOffer(offer);
+      const paymentBreakdown = breakdownPaymentByPropertyAndTripParams({
+        dates: {
+          checkIn: input.checkIn,
+          checkOut: input.checkOut,
+        },
+        travelerOfferPriceBeforeFees: input.travelerOfferedPriceBeforeFees,
+        property: curProperty,
+      });
 
       const metadata = {
         is_charged_with_setup_intent: "false",
@@ -337,11 +322,10 @@ export const stripeRouter = createTRPCRouter({
         stripe_customer_id: stripeCustomerId,
 
         offer_id: input.offerId,
-        property_id: offer.property.id,
-        request_id: offer.requestId,
-        host_stripe_id: offer.property.hostTeam.owner.stripeConnectId,
+        property_id: input.propertyId,
+        host_stripe_id: curProperty.hostTeam.owner.stripeConnectId,
         traveler_offered_price_before_fees:
-          offer.travelerOfferedPriceBeforeFees,
+          input.travelerOfferedPriceBeforeFees,
         price: paymentBreakdown.totalTripAmount, // Total price included tramona fee
         total_savings: paymentBreakdown.totalSavings,
         taxes_paid: paymentBreakdown.taxesPaid,
