@@ -4,13 +4,12 @@ import {
   useConversation,
   type Conversation,
 } from "@/utils/store/conversations";
-import { useMessage, type ChatMessageType } from "@/utils/store/messages";
+import { useMessage } from "@/utils/store/messages";
 import supabase from "@/utils/supabase-client";
 import { cn, useUpdateUser } from "@/utils/utils";
 import { subHours } from "date-fns";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
-import MessageEmptySvg from "../_common/EmptyStateSvg/MessageEmptySvg";
 import Spinner from "../_common/Spinner";
 import UserAvatar from "../_common/UserAvatar";
 import { ScrollArea } from "../ui/scroll-area";
@@ -18,6 +17,7 @@ import { SidebarConversation } from "./SidebarConversation";
 import { Button } from "../ui/button";
 import { messages } from "@/server/db/schema";
 import { MessageSquare } from "lucide-react";
+import { useRouter } from "next/router";
 
 export function MessageConversation({
   conversation,
@@ -197,6 +197,10 @@ export default function MessagesSidebar({
   });
 
   function MessageEmptyState({ unread = false }: { unread?: boolean }) {
+    const router = useRouter();
+    const session = useSession();
+    const role = session.data?.user.role;
+
     return (
       <div className="flex h-full flex-col items-center justify-center gap-4 p-4 text-center text-muted-foreground">
         <MessageSquare size={30} />
@@ -210,12 +214,23 @@ export default function MessagesSidebar({
             ? "When you have an unread message, it will appear here."
             : "When you receive a new message, it will appear here."}
         </p>
-        <div className="flex w-full flex-col gap-2 px-6">
-          <Button className="rounded-full">Make a request</Button>
-          <Button className="rounded-full" variant="outline">
-            Book it now
-          </Button>
-        </div>
+        {role === "guest" && (
+          <div className="flex w-full flex-col gap-2 px-6">
+            <Button
+              className="rounded-full"
+              onClick={() => router.push("/?tab=name-price")}
+            >
+              Make a request
+            </Button>
+            <Button
+              className="rounded-full"
+              onClick={() => router.push("/?tab=search")}
+              variant="outline"
+            >
+              Book it now
+            </Button>
+          </div>
+        )}
       </div>
     );
   }
@@ -228,14 +243,14 @@ export default function MessagesSidebar({
           <Button
             className="rounded-full"
             variant={showAllMsgs ? "primary" : "outline"}
-            onClick={() => setShowAllMsgs(!showAllMsgs)}
+            onClick={() => setShowAllMsgs(true)}
           >
             All
           </Button>
           <Button
             className="rounded-full"
             variant={showAllMsgs ? "outline" : "primary"}
-            onClick={() => setShowAllMsgs(!showAllMsgs)}
+            onClick={() => setShowAllMsgs(false)}
           >
             Unread
           </Button>
