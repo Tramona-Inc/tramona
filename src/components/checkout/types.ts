@@ -1,6 +1,4 @@
 import { type PropertyPageData } from "../propertyPages/PropertyPage";
-import { z } from "zod";
-import { infer } from "zod-to-ts";
 
 export type RequestToBookPricing = {
   travelerOfferedPriceBeforeFees: number;
