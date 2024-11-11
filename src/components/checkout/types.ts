@@ -28,7 +28,7 @@ export type PropertyAndTripParams = {
     checkIn: Date;
     checkOut: Date;
   };
-  travelerOfferPriceBeforeFees: number;
+  travelerPriceBeforeFees: number;
   property: PropertyPageData;
 };
 

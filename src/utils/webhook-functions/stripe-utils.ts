@@ -1,8 +1,31 @@
 import { env } from "@/env";
 import { db } from "@/server/db";
-import { offers, users } from "@/server/db/schema";
+import {
+  groupMembers,
+  groups,
+  offers,
+  properties,
+  superhogRequests,
+  tripCheckouts,
+  trips,
+  users,
+} from "@/server/db/schema";
 import { eq } from "drizzle-orm";
 import Stripe from "stripe";
+import { breakdownPaymentByPropertyAndTripParams } from "../payment-utils/paymentBreakdown";
+import {
+  captureTripPaymentWithoutSuperhog,
+  sendEmailAndWhatsupConfirmation,
+  TripWCheckout,
+} from "./trips-utils";
+import { createSuperhogReservation } from "./superhog-utils";
+import {
+  completeReferral,
+  validateHostDiscountReferral,
+} from "./referral-utils";
+import { createConversationWithOfferAfterBooking } from "./message-utils";
+import { sendSlackMessage } from "@/server/slack";
+import { formatDateMonthDay } from "../utils";
 
 export const stripe = new Stripe(env.STRIPE_RESTRICTED_KEY_ALL);
 const stripeWithSecretKey = new Stripe(env.STRIPE_SECRET_KEY, {
@@ -106,4 +129,179 @@ export async function getRequestIdByOfferId(
     .then((res) => res[0]!);
 
   return curRequest.id ? curRequest.id : null;
+}
+
+export async function completeBookingForBookItnow({
+  paymentIntentId,
+  numOfGuests,
+  travelerPriceBeforeFees,
+  checkIn,
+  checkOut,
+  propertyId,
+  userId,
+  isDirectListingCharge,
+}: {
+  paymentIntentId: string;
+  travelerPriceBeforeFees: number;
+  numOfGuests: number;
+  checkIn: Date;
+  checkOut: Date;
+  propertyId: number;
+  userId: string;
+  isDirectListingCharge: boolean;
+}) {
+  //1.) create  groupId
+  const madeByGroupId = await db
+    .insert(groups)
+    .values({ ownerId: userId })
+    .returning()
+    .then((res) => res[0]!.id);
+
+  await db.insert(groupMembers).values({
+    userId: userId,
+    groupId: madeByGroupId,
+  });
+
+  //1.get user for setup
+  const user = await db.query.users
+    .findFirst({
+      where: eq(users.id, userId),
+    })
+    .then((res) => res!);
+
+  // 2.) create params for breakdown
+  const property = await db.query.properties.findFirst({
+    where: eq(properties.id, propertyId),
+    with: {
+      hostTeam: {
+        with: {
+          owner: {
+            columns: {
+              image: true,
+              firstName: true,
+              lastName: true,
+              email: true,
+              id: true,
+              about: true,
+              location: true,
+            },
+            // with: {
+            //   hostProfile: {
+            //     columns: { curTeamId: true },
+            //   },
+            // },
+          },
+        },
+      },
+      reviews: true,
+    },
+  });
+  if (!property) throw new Error("no property");
+
+  const params = {
+    dates: {
+      checkIn: checkIn,
+      checkOut: checkOut,
+    },
+    travelerPriceBeforeFees: travelerPriceBeforeFees,
+    property: property,
+  };
+
+  const priceBreakdown = breakdownPaymentByPropertyAndTripParams(params);
+  // 2. Using breakdown create a tripCheckout and trip
+
+  const tripCheckout = await db
+    .insert(tripCheckouts)
+    .values({
+      paymentIntentId,
+      travelerOfferedPriceBeforeFees: travelerPriceBeforeFees,
+      totalTripAmount: priceBreakdown.totalTripAmount,
+      taxesPaid: priceBreakdown.taxesPaid,
+      superhogFee: priceBreakdown.superhogFee,
+      stripeTransactionFee: priceBreakdown.stripeTransactionFee,
+      totalSavings: priceBreakdown.totalSavings,
+      securityDeposit: property.currentSecurityDeposit,
+    })
+    .returning()
+    .then((r) => r[0]!);
+
+  const currentTrip = await db
+    .insert(trips)
+    .values({
+      checkIn: checkIn,
+      checkOut: checkOut,
+      numGuests: numOfGuests,
+      groupId: madeByGroupId,
+      propertyId: property.id,
+      paymentIntentId,
+      totalPriceAfterFees: priceBreakdown.totalTripAmount,
+      tripCheckoutId: tripCheckout.id,
+    })
+    .returning()
+    .then((res) => res[0]!);
+
+  const currentTripWCheckout: TripWCheckout = {
+    ...currentTrip,
+    tripCheckout,
+  };
+
+  //create superhog request
+  //<___creating a superhog  oreservationnly if does not exist__>
+
+  if (!currentTrip.superhogRequestId && !isDirectListingCharge) {
+    await createSuperhogReservation({
+      paymentIntentId,
+      propertyId: property.id,
+      userId: userId,
+      trip: currentTrip,
+    }); //creating a superhog reservation
+  } else {
+    if (isDirectListingCharge) {
+      await captureTripPaymentWithoutSuperhog({
+        paymentIntentId,
+        propertyId: property.id,
+        trip: currentTrip,
+      });
+    } else {
+      console.log("Superhog reservation already exists");
+    }
+  }
+  //<<--------------------->>
+
+  //send email and whatsup (whatsup is not implemented yet)
+  console.log("Sending email and whatsup");
+  await sendEmailAndWhatsupConfirmation({
+    trip: currentTripWCheckout,
+    user: user,
+    property: property,
+  });
+  // //redeem the traveler and host refferal code
+  // if (user?.referralCodeUsed) {
+  //   await completeReferral({ user: user, offerId: offer.id });
+  // }
+  // //validate the host discount referral
+  // if (currentProperty?.hostTeam.ownerId) {
+  //   await validateHostDiscountReferral({
+  //     hostUserId: currentProperty.hostTeam.ownerId,
+  //   });
+  // }
+  // if (paymentIntentSucceeded.metadata.user_id) {
+  //   await createConversationWithOfferAfterBooking({
+  //     offerId: offer.id.toString(),
+  //     offerHostId: currentProperty!.hostTeam.ownerId,
+  //     offerPropertyName: currentProperty!.name,
+  //     travelerId: paymentIntentSucceeded.metadata.user_id,
+  //   });
+  // }
+  // ------ Send Slack When trip is booked ------
+  await sendSlackMessage({
+    isProductionOnly: true,
+    channel: "tramona-bot",
+    text: [
+      `*${user.email} just booked a trip: ${property?.name}*`,
+      `*${property?.city}*`,
+      `through ${isDirectListingCharge ? "a different platform (direct listing)" : "Tramona"} · ${formatDateMonthDay(checkIn)}-${formatDateMonthDay(checkOut)}`,
+      `<https://tramona.com/admin|Go to admin dashboard>`,
+    ].join("\n"),
+  });
 }

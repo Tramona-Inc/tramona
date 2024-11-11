@@ -85,13 +85,11 @@ export function breakdownPaymentByPropertyAndTripParams(
     : getTaxPercentage(propertyAndTripParams.property);
   const superhogFee = isScraped ? 0 : numNights * SUPERHOG_FEE_CENTS_PER_NIGHT;
   const taxesPaid = Math.round(
-    (propertyAndTripParams.travelerOfferPriceBeforeFees + superhogFee) *
+    (propertyAndTripParams.travelerPriceBeforeFees + superhogFee) *
       taxPercentage,
   );
   const totalBeforeStripeFee =
-    propertyAndTripParams.travelerOfferPriceBeforeFees +
-    superhogFee +
-    taxesPaid;
+    propertyAndTripParams.travelerPriceBeforeFees + superhogFee + taxesPaid;
   const stripeFee = getStripeFee(totalBeforeStripeFee);
   const totalTripAmount = totalBeforeStripeFee + stripeFee;
 

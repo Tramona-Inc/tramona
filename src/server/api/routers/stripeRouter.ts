@@ -252,11 +252,13 @@ export const stripeRouter = createTRPCRouter({
         cancelUrl: z.string(),
         offerId: z.number().nullable(),
         scrapeUrl: z.string().nullable(),
+        numOfGuest: z.number().nullable(),
         travelerOfferedPriceBeforeFees: z.number(),
         datePriceFromAirbnb: z.number().nullable(),
         checkIn: z.date(),
         checkOut: z.date(),
         propertyId: z.number(),
+        type: z.enum(["bookItNow", "requestToBook", "offer"]),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -308,7 +310,7 @@ export const stripeRouter = createTRPCRouter({
           checkIn: input.checkIn,
           checkOut: input.checkOut,
         },
-        travelerOfferPriceBeforeFees: input.travelerOfferedPriceBeforeFees,
+        travelerPriceBeforeFees: input.travelerOfferedPriceBeforeFees,
         property: curProperty,
       });
 
@@ -322,6 +324,8 @@ export const stripeRouter = createTRPCRouter({
         stripe_customer_id: stripeCustomerId,
 
         offer_id: input.offerId,
+        check_in: input.checkIn.toString(),
+        check_out: input.checkOut.toString(),
         property_id: input.propertyId,
         host_stripe_id: curProperty.hostTeam.owner.stripeConnectId,
         traveler_offered_price_before_fees:
@@ -332,6 +336,9 @@ export const stripeRouter = createTRPCRouter({
         tax_percentage: paymentBreakdown.taxPercentage,
         stripe_transaction_fee: paymentBreakdown.stripeTransactionFee,
         superhog_paid: paymentBreakdown.superhogFee,
+        is_direct_listing: input.scrapeUrl ? "true" : "false",
+        num_of_guests: input.numOfGuest,
+        type: input.type,
       };
 
       const options: Stripe.PaymentIntentCreateParams = {
