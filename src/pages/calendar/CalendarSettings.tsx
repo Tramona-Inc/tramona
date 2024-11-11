@@ -43,9 +43,8 @@ export default function CalendarComponent() {
   const [percentOff, setPercentOff] = React.useState(5);
   const [offersToBookOpen, setOffersToBookOpen] = React.useState(false);
   const [nameYourPriceOpen, setNameYourPriceOpen] = React.useState(false);
-  const [selectedProperty, setSelectedProperty] = React.useState(
-    "The best place in SD",
-  );
+  const [selectedProperty, setSelectedProperty] =
+    React.useState("All Properties");
   const [bookItNowSaved, setBookItNowSaved] = React.useState(false);
   const [offersToBookSaved, setOffersToBookSaved] = React.useState(false);
   const [nameYourPriceSaved, setNameYourPriceSaved] = React.useState(false);
@@ -226,25 +225,30 @@ export default function CalendarComponent() {
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <Button
-                variant="outline"
+                variant="ghost"
                 size="icon"
                 onClick={() => changeMonth(-1)}
+                className="rounded-full border bg-white shadow-lg hover:bg-gray-50"
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-              <Button variant="outline" onClick={() => setDate(new Date())}>
+              <Button variant="ghost" onClick={() => setDate(new Date())}>
                 {date.toLocaleString("default", { month: "long" })}
               </Button>
               <Button
-                variant="outline"
+                variant="ghost"
                 size="icon"
                 onClick={() => changeMonth(1)}
+                className="rounded-full border bg-white shadow-lg hover:bg-gray-50"
               >
                 <ChevronRight className="h-4 w-4" />
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="ml-0 sm:ml-4">
+                  <Button
+                    variant="ghost"
+                    className="ml-0 rounded-full border shadow-lg sm:ml-4"
+                  >
                     <Globe className="mr-2 h-4 w-4" />
                     <span className="hidden sm:inline">{selectedProperty}</span>
                     <span className="sm:hidden">Property</span>
@@ -328,17 +332,25 @@ export default function CalendarComponent() {
 
             <TabsContent value="pricing" className="space-y-6 sm:space-y-8">
               {/* Book it now section */}
-              <div className="space-y-4">
+              <div className="space-y-4 rounded-lg border p-6">
+                {" "}
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-semibold">Book it now</h3>
-                    <p className="text-xs text-muted-foreground sm:text-sm">
+                    <h3 className="text-[20px] font-bold text-primaryGreen">
+                      {" "}
+                      Book it now
+                    </h3>
+                    <p className="text-base text-muted-foreground">
+                      {" "}
                       Set your price, starting as low as the price on Airbnb
                     </p>
                   </div>
-                  <Switch checked={bookItNow} onCheckedChange={setBookItNow} />
+                  <Switch
+                    checked={bookItNow}
+                    className="data-[state=checked]:bg-primaryGreen"
+                    onCheckedChange={setBookItNow}
+                  />
                 </div>
-
                 {bookItNow && (
                   <div className="space-y-4">
                     <Label>{percentOff}% OFF Airbnb Price</Label>
@@ -346,14 +358,13 @@ export default function CalendarComponent() {
                       value={[percentOff]}
                       onValueChange={(value) => setPercentOff(value[0])}
                       max={100}
-                      step={1}
                     />
                     <p className="text-xs text-muted-foreground">
                       This is likely to generate 1% more bookings, increase the
                       discount for a more significant effect
                     </p>
                     <div className="flex items-baseline gap-2">
-                      <span className="text-2xl font-bold sm:text-4xl">
+                      <span className="text-2xl font-bold text-primaryGreen sm:text-4xl">
                         ${calculateDiscountedPrice(168, percentOff)}
                       </span>
                       <span className="text-lg text-muted-foreground line-through sm:text-2xl">
@@ -372,23 +383,25 @@ export default function CalendarComponent() {
               </div>
 
               {/* Offers to book section */}
-              <div className="space-y-4">
+              <div className="space-y-4 rounded-lg border p-6">
                 <div
                   className="flex cursor-pointer items-center justify-between"
                   onClick={() => setOffersToBookOpen(!offersToBookOpen)}
                 >
-                  <h3 className="font-semibold">Offers to Book</h3>
+                  <h3 className="text-[20px] font-bold text-primaryGreen">
+                    Offers to Book
+                  </h3>
                   <Button variant="ghost" size="sm">
                     <ChevronDown className="h-4 w-4" />
                   </Button>
                 </div>
                 {offersToBookOpen && (
                   <>
-                    <p className="text-xs text-muted-foreground sm:text-sm">
+                    <p className="text-base text-muted-foreground">
                       What prices would you consider?
                     </p>
                     <div className="space-y-4">
-                      <div className="text-sm">
+                      <div className="text-lg font-medium">
                         <span>{percentOff}% off</span>
                       </div>
                       <Slider
@@ -400,14 +413,14 @@ export default function CalendarComponent() {
                         max={100}
                         step={1}
                       />
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-base text-muted-foreground">
                         You will see requests to book your property in your
                         "requests" tab. You will have the option to accept, deny
                         or counter offer.
                       </p>
                       <Button
                         variant="outline"
-                        className="w-full"
+                        className="w-full rounded-lg text-base"
                         onClick={handleOffersToBookSave}
                       >
                         {offersToBookSaved ? "Saved!" : "Save"}
@@ -418,28 +431,31 @@ export default function CalendarComponent() {
               </div>
 
               {/* Name your price section */}
-              <div className="space-y-4">
+              <div className="space-y-4 rounded-lg border p-6">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-semibold">Name Your Own Price</h3>
+                  <h3 className="text-[20px] font-bold text-primaryGreen">
+                    Name Your Own Price
+                  </h3>
                   <Switch
                     checked={nameYourPriceOpen}
+                    className="data-[state=checked]:bg-primaryGreen"
                     onCheckedChange={setNameYourPriceOpen}
                   />
                 </div>
                 {nameYourPriceOpen && (
                   <>
-                    <p className="text-xs text-muted-foreground sm:text-sm">
+                    <p className="text-base text-muted-foreground">
                       Every day we get thousands of requests from travelers. How
                       would you like to respond to them?
                     </p>
                     <div className="flex items-center justify-between">
-                      <Label>Auto-offer</Label>
-                      <Switch />
+                      <Label className="text-lg font-medium">Auto-offer</Label>
+                      <Switch className="data-[state=checked]:bg-primaryGreen" />
                     </div>
 
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
-                        <h4 className="font-medium">Discount Tiers</h4>
+                        <h4 className="text-lg font-medium">Discount Tiers</h4>
                         <Button
                           variant="ghost"
                           size="sm"
