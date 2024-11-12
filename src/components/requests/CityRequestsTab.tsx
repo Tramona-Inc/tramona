@@ -10,21 +10,25 @@ import RequestToBookCard from "../requests-to-book/RequestToBookCard";
 
 export default function ActiveRequestsTab() {
   const { data: requests } = api.requests.getMyRequests.useQuery();
-  const { data: requestsToBook } = api.requestsToBook.getMyRequestsToBook.useQuery();
+  const { data: requestsToBook } =
+    api.requestsToBook.getMyRequestsToBook.useQuery();
 
   useEffect(() => {
-    console.log('wah', requestsToBook)
-  }, [requestsToBook])
-
+    console.log("wah", requestsToBook);
+  }, [requestsToBook]);
 
   if (!requests || !requestsToBook) return <Spinner />;
 
-
-  return requests.activeRequests.length !== 0 || requestsToBook.activeRequestsToBook.length !== 0 ? (
+  return requests.activeRequests.length !== 0 ||
+    requestsToBook.activeRequestsToBook.length !== 0 ? (
     <div className="space-y-4 pb-32">
       <NewCityRequestBtn />
       {requestsToBook.activeRequestsToBook.map((requestToBook) => (
-        <RequestToBookCard key={requestToBook.id} type="guest" requestToBook={requestToBook}>
+        <RequestToBookCard
+          key={requestToBook.id}
+          type="guest"
+          requestToBook={requestToBook}
+        >
           {/* <RequestCardAction request={requestToBook} /> */}
         </RequestToBookCard>
       ))}

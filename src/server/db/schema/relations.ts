@@ -160,9 +160,9 @@ export const rejectedRequestsRelations = relations(
       fields: [rejectedRequests.requestId],
       references: [requests.id],
     }),
-    user: one(users, {
-      fields: [rejectedRequests.userId],
-      references: [users.id],
+    hostTeam: one(hostTeams, {
+      fields: [rejectedRequests.hostTeamId],
+      references: [hostTeams.id],
     }),
   }),
 );
