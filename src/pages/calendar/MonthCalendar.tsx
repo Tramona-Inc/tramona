@@ -65,11 +65,11 @@ export default function MonthCalendar({
 
     return (
       <div className="w-full">
-        <div className="grid grid-cols-7 gap-2">
+        <div className="grid grid-cols-7 divide-x divide-y divide-gray-200 border border-gray-200">
           {daysOfWeek.map((day) => (
             <div
               key={day}
-              className="mb-1 text-center text-sm font-bold text-gray-500"
+              className="mb-1 p-2 text-center text-sm font-bold text-gray-500"
             >
               {day}
             </div>
@@ -98,7 +98,7 @@ export default function MonthCalendar({
                   currentDate && isEditing && onDateClick?.(currentDate)
                 }
                 className={cn(
-                  "flex h-14 flex-1 items-center justify-center font-semibold sm:h-20",
+                  "flex min-h-[100px] flex-col items-center justify-center p-2",
                   day && isEditing && "cursor-pointer",
                   reservationClass,
                   currentDate &&
@@ -109,6 +109,7 @@ export default function MonthCalendar({
                       : currentDate.getTime() ===
                         selectedRange.start.getTime()) &&
                     "bg-blue-200",
+                  !day && "bg-gray-50", // Style for empty cells
                   day &&
                     date.getFullYear() === currentDate.getFullYear() &&
                     date.getMonth() === currentDate.getMonth() &&
@@ -117,10 +118,14 @@ export default function MonthCalendar({
                     : "text-muted-foreground",
                 )}
               >
-                <div className="flex flex-col items-center">
-                  <span>{day}</span>
-                  {day && <span className="text-xs">$168</span>}
-                </div>
+                {day && (
+                  <>
+                    <span className="text-sm font-medium">{day}</span>
+                    <span className="mt-1 text-xs text-muted-foreground">
+                      $168
+                    </span>
+                  </>
+                )}
               </div>
             );
           })}
