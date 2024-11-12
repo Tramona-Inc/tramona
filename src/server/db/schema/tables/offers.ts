@@ -7,7 +7,6 @@ import {
   timestamp,
   varchar,
   boolean,
-  pgEnum,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { properties } from "./properties";

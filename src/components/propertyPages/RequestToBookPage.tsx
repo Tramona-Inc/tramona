@@ -16,7 +16,6 @@ export default function RequestToBookPage({
   property,
 }: {
   property: PropertyPageData;
-  requestToBook: RequestToBookDetails;
 }) {
   return (
     <PropertyPage

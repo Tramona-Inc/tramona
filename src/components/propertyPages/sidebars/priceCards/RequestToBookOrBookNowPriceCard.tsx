@@ -24,8 +24,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { ChevronDown, Info, Clock, CheckCircle } from "lucide-react";
+import { ChevronDown, ChevronUp, Info, Clock, CheckCircle } from "lucide-react";
 import { useRouter } from "next/router";
+import PriceBreakdown from "./PriceBreakdown";
 
 import PriceCardInformation from "./PriceCardInformation";
 import BookNowBtn from "../actionButtons/BookNowBtn";
@@ -64,6 +65,7 @@ export default function RequestToBookOrBookNowPriceCard({
     from: initialRequestToBook.checkIn,
     to: initialRequestToBook.checkOut,
   });
+  const [showPriceBreakdown, setShowPriceBreakdown] = useState<boolean>(false);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [showRequestInput, setShowRequestInput] = useState(false);
   const [requestAmount, setRequestAmount] = useState(basePrice);
@@ -397,10 +399,21 @@ export default function RequestToBookOrBookNowPriceCard({
               <Button
                 variant="link"
                 className="mt-1 flex items-center gap-1 px-0 text-muted-foreground"
+                onClick={() => setShowPriceBreakdown(!showPriceBreakdown)}
               >
                 Price Breakdown
-                <ChevronDown className="h-4 w-4" />
+                {showPriceBreakdown ? (
+                  <ChevronUp className="h-4 w-4" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
               </Button>
+              {showPriceBreakdown && (
+                <PriceBreakdown
+                  requestToBookDetails={requestToBook}
+                  property={property}
+                />
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-1">
