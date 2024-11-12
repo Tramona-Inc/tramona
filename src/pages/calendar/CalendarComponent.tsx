@@ -152,44 +152,52 @@ export default function CalendarComponent() {
       {/* CALENDAR */}
       <Card className="h-full w-full max-w-[1050px] flex-shrink-0">
         <CardContent className="flex h-full flex-col p-3 sm:p-6">
-          <div className="mb-4 flex flex-col items-start justify-between gap-2 sm:mb-6 sm:flex-row sm:items-center">
+          <div className="mb-4 flex items-center justify-between">
+            {/* Left Side: Month/Year and Stats */}
             <div>
-              <h2 className="text-xl font-bold sm:text-2xl">
+              <h2 className="mb-2 text-xl font-bold sm:text-2xl">
                 {date.toLocaleString("default", {
                   month: "long",
                   year: "numeric",
                 })}
               </h2>
               <div className="text-xs text-muted-foreground sm:text-sm">
-                <p>15 vacancies this month</p>
+                <p className="py-1">15 vacancies this month</p>
                 <p>$1000 left on the table</p>
               </div>
             </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => changeMonth(-1)}
-                className="rounded-full border bg-white shadow-lg hover:bg-gray-50"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" onClick={() => setDate(new Date())}>
-                {date.toLocaleString("default", { month: "long" })}
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => changeMonth(1)}
-                className="rounded-full border bg-white shadow-lg hover:bg-gray-50"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
+
+            {/* Right Side: Navigation + Dropdown */}
+            <div className="flex flex-col gap-2">
+              {/* Navigation Buttons Row */}
+              <div className="flex items-center justify-end gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => changeMonth(-1)}
+                  className="rounded-full border bg-white shadow-lg hover:bg-gray-50"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" onClick={() => setDate(new Date())}>
+                  Today
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => changeMonth(1)}
+                  className="rounded-full border bg-white shadow-lg hover:bg-gray-50"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+
+              {/* Property Dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
-                    className="ml-0 rounded-full border shadow-lg sm:ml-4"
+                    className="rounded-full border shadow-lg"
                   >
                     <Globe className="mr-2 h-4 w-4" />
                     <span className="hidden sm:inline">{selectedProperty}</span>

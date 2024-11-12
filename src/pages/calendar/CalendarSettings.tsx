@@ -17,15 +17,21 @@ interface DiscountTier {
 }
 
 export default function CalendarSettings() {
+  // Separate state for each section's percentage
+  const [bookItNowPercent, setBookItNowPercent] = React.useState(5);
+  const [offersToBookPercent, setOffersToBookPercent] = React.useState(5);
+
+  // Other state variables remain the same
   const [bookItNow, setBookItNow] = React.useState(false);
-  const [percentOff, setPercentOff] = React.useState(5);
   const [offersToBookOpen, setOffersToBookOpen] = React.useState(false);
   const [nameYourPriceOpen, setNameYourPriceOpen] = React.useState(false);
   const [bookItNowSaved, setBookItNowSaved] = React.useState(false);
   const [offersToBookSaved, setOffersToBookSaved] = React.useState(false);
   const [nameYourPriceSaved, setNameYourPriceSaved] = React.useState(false);
-  const [propertyRestrictionsOpen, setPropertyRestrictionsOpen] = React.useState(false);
-  const [minimumOfferPriceOpen, setMinimumOfferPriceOpen] = React.useState(false);
+  const [propertyRestrictionsOpen, setPropertyRestrictionsOpen] =
+    React.useState(false);
+  const [minimumOfferPriceOpen, setMinimumOfferPriceOpen] =
+    React.useState(false);
   const [discountTiers, setDiscountTiers] = React.useState<DiscountTier[]>([
     { days: 90, discount: 5 },
     { days: 60, discount: 10 },
@@ -35,7 +41,10 @@ export default function CalendarSettings() {
     { days: 7, discount: 30 },
   ]);
 
-  const calculateDiscountedPrice = (originalPrice: number, percentOff: number) => {
+  const calculateDiscountedPrice = (
+    originalPrice: number,
+    percentOff: number,
+  ) => {
     return Math.round(originalPrice * (1 - percentOff / 100));
   };
 
@@ -79,27 +88,34 @@ export default function CalendarSettings() {
           <TabsContent value="pricing" className="space-y-6 sm:space-y-8">
             {/* Book it now section */}
             <div className="space-y-4 rounded-lg border p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-[20px] font-bold text-primaryGreen">
-                    Book it now
-                  </h3>
-                  <p className="text-base text-muted-foreground">
-                    Set your price, starting as low as the price on Airbnb
-                  </p>
-                </div>
-                <Switch
-                  checked={bookItNow}
-                  className="data-[state=checked]:bg-primaryGreen"
-                  onCheckedChange={setBookItNow}
-                />
+              <div
+                className="flex cursor-pointer items-center justify-between"
+                onClick={() => setBookItNow(!bookItNow)}
+              >
+                <h3 className="text-[20px] font-bold text-primaryGreen">
+                  Book it now
+                </h3>
+                <Button variant="ghost" size="sm">
+                  <ChevronDown
+                    className="h-4 w-4 transition-transform duration-300"
+                    style={{
+                      transform: bookItNow ? "rotate(180deg)" : "rotate(0deg)",
+                    }}
+                  />
+                </Button>
               </div>
-              {bookItNow && (
-                <div className="space-y-4">
-                  <Label>{percentOff}% OFF Airbnb Price</Label>
+              <div
+                className={`overflow-hidden transition-all duration-300 ease-in-out ${bookItNow ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0"}`}
+              >
+                <p className="text-base font-bold">
+                  Set your price, starting as low as the price on Airbnb
+                </p>
+                <div className="-mx-6 mt-4 w-[calc(100%+3rem)] border-b border-gray-200" />
+                <div className="space-y-4 pt-4">
+                  <Label>{bookItNowPercent}% OFF</Label>
                   <Slider
-                    value={[percentOff]}
-                    onValueChange={(value) => setPercentOff(value[0])}
+                    value={[bookItNowPercent]}
+                    onValueChange={(value) => setBookItNowPercent(value[0])}
                     max={100}
                   />
                   <p className="text-xs text-muted-foreground">
@@ -108,7 +124,7 @@ export default function CalendarSettings() {
                   </p>
                   <div className="flex items-baseline gap-2">
                     <span className="text-2xl font-bold text-primaryGreen sm:text-4xl">
-                      ${calculateDiscountedPrice(168, percentOff)}
+                      ${calculateDiscountedPrice(168, bookItNowPercent)}
                     </span>
                     <span className="text-lg text-muted-foreground line-through sm:text-2xl">
                       $168
@@ -124,7 +140,7 @@ export default function CalendarSettings() {
                     </Button>
                   </div>
                 </div>
-              )}
+              </div>
             </div>
 
             {/* Offers to book section */}
@@ -137,62 +153,83 @@ export default function CalendarSettings() {
                   Offers to Book
                 </h3>
                 <Button variant="ghost" size="sm">
-                  <ChevronDown className="h-4 w-4" />
+                  <ChevronDown
+                    className="h-4 w-4 transition-transform duration-300"
+                    style={{
+                      transform: offersToBookOpen
+                        ? "rotate(180deg)"
+                        : "rotate(0deg)",
+                    }}
+                  />
                 </Button>
               </div>
-              {offersToBookOpen && (
-                <>
-                  <p className="text-base text-muted-foreground">
-                    What prices would you consider?
-                  </p>
-                  <div className="space-y-4">
-                    <div className="text-lg font-medium">
-                      <span>{percentOff}% off</span>
-                    </div>
-                    <Slider
-                      value={[percentOff]}
-                      onValueChange={(value) => setPercentOff(Math.max(5, value[0]))}
-                      min={5}
-                      max={100}
-                      step={1}
-                    />
-                    <p className="text-base text-muted-foreground">
-                      You will see requests to book your property in your
-                      "requests" tab. You will have the option to accept, deny
-                      or counter offer.
-                    </p>
-                    <div className="flex justify-end">
-                      <Button
-                        variant="outline"
-                        className="bg-primaryGreen text-white hover:bg-primaryGreen/90"
-                        onClick={handleOffersToBookSave}
-                      >
-                        {offersToBookSaved ? "Saved!" : "Save"}
-                      </Button>
-                    </div>
+              <div
+                className={`overflow-hidden transition-all duration-300 ease-in-out ${offersToBookOpen ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0"}`}
+              >
+                <p className="text-base font-bold">
+                  What prices would you consider?
+                </p>
+                <div className="-mx-6 mt-4 w-[calc(100%+3rem)] border-b border-gray-200" />
+                <div className="space-y-4 pt-4">
+                  <div className="text-lg font-medium">
+                    <Label>{offersToBookPercent}% off Airbnb Prices</Label>
                   </div>
-                </>
-              )}
+                  <Slider
+                    value={[offersToBookPercent]}
+                    onValueChange={(value) =>
+                      setOffersToBookPercent(Math.max(5, value[0]))
+                    }
+                    min={5}
+                    max={100}
+                    step={1}
+                  />
+                  <p className="text-base text-muted-foreground">
+                    You will see requests to book your property in your
+                    "requests" tab. You will have the option to accept, deny or
+                    counter offer.
+                  </p>
+                  <div className="flex justify-end">
+                    <Button
+                      variant="outline"
+                      className="bg-primaryGreen text-white hover:bg-primaryGreen/90"
+                      onClick={handleOffersToBookSave}
+                    >
+                      {offersToBookSaved ? "Saved!" : "Save"}
+                    </Button>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Name your price section */}
             <div className="space-y-4 rounded-lg border p-6">
-              <div className="flex items-center justify-between">
+              <div
+                className="flex cursor-pointer items-center justify-between"
+                onClick={() => setNameYourPriceOpen(!nameYourPriceOpen)}
+              >
                 <h3 className="text-[20px] font-bold text-primaryGreen">
                   Name Your Own Price
                 </h3>
-                <Switch
-                  checked={nameYourPriceOpen}
-                  className="data-[state=checked]:bg-primaryGreen"
-                  onCheckedChange={setNameYourPriceOpen}
-                />
+                <Button variant="ghost" size="sm">
+                  <ChevronDown
+                    className="h-4 w-4 transition-transform duration-300"
+                    style={{
+                      transform: nameYourPriceOpen
+                        ? "rotate(180deg)"
+                        : "rotate(0deg)",
+                    }}
+                  />
+                </Button>
               </div>
-              {nameYourPriceOpen && (
-                <>
-                  <p className="text-base text-muted-foreground">
-                    Every day we get thousands of requests from travelers. How
-                    would you like to respond to them?
-                  </p>
+              <div
+                className={`overflow-hidden transition-all duration-300 ease-in-out ${nameYourPriceOpen ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0"}`}
+              >
+                <p className="text-base font-bold">
+                  Every day we get thousands of requests from travelers. How
+                  would you like to respond to them?
+                </p>
+                <div className="-mx-6 mt-4 w-[calc(100%+3rem)] border-b border-gray-200" />
+                <div className="space-y-4 pt-4">
                   <div className="flex items-center justify-between">
                     <Label className="text-lg font-medium">Auto-offer</Label>
                     <Switch className="data-[state=checked]:bg-primaryGreen" />
@@ -220,20 +257,26 @@ export default function CalendarSettings() {
                                 value={tier.days}
                                 onChange={(e) => {
                                   const newTiers = [...discountTiers];
-                                  newTiers[index].days = parseInt(e.target.value);
+                                  newTiers[index].days = parseInt(
+                                    e.target.value,
+                                  );
                                   setDiscountTiers(newTiers);
                                 }}
                                 className="w-16 sm:w-20"
                               />
                             </TableCell>
-                            <TableCell className="p-2">days before check-in:</TableCell>
+                            <TableCell className="p-2">
+                              days before check-in:
+                            </TableCell>
                             <TableCell className="p-2">
                               <Input
                                 type="number"
                                 value={tier.discount}
                                 onChange={(e) => {
                                   const newTiers = [...discountTiers];
-                                  newTiers[index].discount = parseInt(e.target.value);
+                                  newTiers[index].discount = parseInt(
+                                    e.target.value,
+                                  );
                                   setDiscountTiers(newTiers);
                                 }}
                                 className="w-16 sm:w-20"
@@ -254,65 +297,28 @@ export default function CalendarSettings() {
                       </TableBody>
                     </Table>
 
-                    <Button variant="outline" className="w-full" onClick={addTier}>
-                      Add tier
-                    </Button>
+                    <div className="flex justify-start">
+                      <Button
+                        variant="outline"
+                        onClick={addTier}
+                        className="w-auto"
+                      >
+                        Add tier
+                      </Button>
+                    </div>
                   </div>
 
                   <div className="flex justify-end gap-2">
                     <Button variant="outline">Cancel</Button>
-                    <Button onClick={handleNameYourPriceSave}>
+                    <Button
+                      variant="outline"
+                      className="bg-primaryGreen text-white hover:bg-primaryGreen/90"
+                      onClick={handleNameYourPriceSave}
+                    >
                       {nameYourPriceSaved ? "Saved!" : "Save"}
                     </Button>
                   </div>
-                </>
-              )}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="restrictions">
-            <div className="space-y-6 sm:space-y-8">
-              <div className="space-y-4">
-                <div
-                  className="flex cursor-pointer items-center justify-between"
-                  onClick={() => setPropertyRestrictionsOpen(!propertyRestrictionsOpen)}
-                >
-                  <h3 className="font-semibold">Property restrictions</h3>
-                  <Button variant="ghost" size="sm">
-                    <ChevronDown className="h-4 w-4" />
-                  </Button>
                 </div>
-                {propertyRestrictionsOpen && (
-                  <>
-                    <p className="mb-4 text-xs text-muted-foreground sm:text-sm">
-                      Travelers must be at least this old to book this property.
-                    </p>
-                    <Input placeholder="Minimum booking age" />
-                  </>
-                )}
-              </div>
-
-              <div className="space-y-4">
-                <div
-                  className="flex cursor-pointer items-center justify-between"
-                  onClick={() => setMinimumOfferPriceOpen(!minimumOfferPriceOpen)}
-                >
-                  <h3 className="font-semibold">Minimum offer price</h3>
-                  <Button variant="ghost" size="sm">
-                    <ChevronDown className="h-4 w-4" />
-                  </Button>
-                </div>
-                {minimumOfferPriceOpen && (
-                  <>
-                    <p className="mb-4 text-xs text-muted-foreground sm:text-sm">
-                      You will only see offers equal to or higher than this price.
-                    </p>
-                    <div className="relative">
-                      <span className="absolute left-3 top-2.5">$</span>
-                      <Input className="pl-6" placeholder="0" />
-                    </div>
-                  </>
-                )}
               </div>
             </div>
           </TabsContent>
