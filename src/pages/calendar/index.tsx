@@ -1,7 +1,7 @@
 "use client";
 
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
-import Component from "./CalendarSettings"; // Your existing calendar component
+import Component from "./CalendarComponent"; // Your existing calendar component
 import { useSession } from "next-auth/react";
 import Head from "next/head";
 
