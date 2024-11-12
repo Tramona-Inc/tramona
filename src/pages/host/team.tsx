@@ -445,7 +445,7 @@ export default function Component() {
                   control={form.control}
                   name="role"
                   render={({ field }) => (
-                    <FormItem className="min-w-48">
+                    <FormItem className="min-w-48 translate-y-0.5">
                       <FormLabel>Select Role</FormLabel>
                       <Select
                         onValueChange={field.onChange}
