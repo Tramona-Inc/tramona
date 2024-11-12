@@ -27,17 +27,17 @@ const CustomStripeCheckoutContainer = ({
   const authorizePayment = api.stripe.authorizePayment.useMutation();
   const fetchClientSecret = useCallback(async () => {
     try {
-      console.log("Being called?");
+      console.log(unifiedCheckoutData.pricing.travelerOfferedPriceBeforeFees);
       const { totalTripAmount } = breakdownPaymentByPropertyAndTripParams({
         dates: {
           checkIn: unifiedCheckoutData.dates.checkIn,
           checkOut: unifiedCheckoutData.dates.checkOut,
         },
-        travelerOfferPriceBeforeFees:
+        travelerPriceBeforeFees:
           unifiedCheckoutData.pricing.travelerOfferedPriceBeforeFees,
         property: unifiedCheckoutData.property,
       });
-
+      console.log(totalTripAmount);
       return await authorizePayment.mutateAsync({
         totalAmountPaid: totalTripAmount,
         travelerOfferedPriceBeforeFees:
@@ -50,6 +50,8 @@ const CustomStripeCheckoutContainer = ({
         datePriceFromAirbnb: unifiedCheckoutData.pricing.datePriceFromAirbnb,
         checkIn: unifiedCheckoutData.dates.checkIn,
         checkOut: unifiedCheckoutData.dates.checkOut,
+        type: unifiedCheckoutData.type,
+        numOfGuests: unifiedCheckoutData.guests,
       });
     } catch (error) {
       toast({

@@ -19,10 +19,16 @@ export default function Listings() {
     ? new Date(query.checkOut as string)
     : new Date();
   const numGuests = query.numGuests ? parseInt(query.numGuests as string) : 2;
+
+  const travelerOfferedPriceBeforeFees = parseInt(
+    query.travelerOfferedPriceBeforeFees as string,
+  );
+
   const requestToBook = {
     checkIn,
     checkOut,
     numGuests,
+    travelerOfferedPriceBeforeFees,
   };
   const { data: property } = api.properties.getById.useQuery(
     { id: propertyId },

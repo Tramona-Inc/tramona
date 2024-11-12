@@ -3,8 +3,11 @@ import { db } from "@/server/db";
 import {
   groupMembers,
   groups,
+  hostTeamMembers,
+  hostTeams,
   offers,
   properties,
+  requestsToBook,
   superhogRequests,
   tripCheckouts,
   trips,
@@ -26,6 +29,7 @@ import {
 import { createConversationWithOfferAfterBooking } from "./message-utils";
 import { sendSlackMessage } from "@/server/slack";
 import { formatDateMonthDay } from "../utils";
+import { TRAVELER_MARKUP } from "../constants";
 
 export const stripe = new Stripe(env.STRIPE_RESTRICTED_KEY_ALL);
 const stripeWithSecretKey = new Stripe(env.STRIPE_SECRET_KEY, {
@@ -131,7 +135,7 @@ export async function getRequestIdByOfferId(
   return curRequest.id ? curRequest.id : null;
 }
 
-export async function completeBookingForBookItnow({
+export async function finalizeTrip({
   paymentIntentId,
   numOfGuests,
   travelerPriceBeforeFees,
@@ -140,6 +144,7 @@ export async function completeBookingForBookItnow({
   propertyId,
   userId,
   isDirectListingCharge,
+  source,
 }: {
   paymentIntentId: string;
   travelerPriceBeforeFees: number;
@@ -149,6 +154,7 @@ export async function completeBookingForBookItnow({
   propertyId: number;
   userId: string;
   isDirectListingCharge: boolean;
+  source: "Book it now" | "Request to book";
 }) {
   //1.) create  groupId
   const madeByGroupId = await db
@@ -232,6 +238,7 @@ export async function completeBookingForBookItnow({
       checkOut: checkOut,
       numGuests: numOfGuests,
       groupId: madeByGroupId,
+      tripSource: source,
       propertyId: property.id,
       paymentIntentId,
       totalPriceAfterFees: priceBreakdown.totalTripAmount,
@@ -304,4 +311,106 @@ export async function completeBookingForBookItnow({
       `<https://tramona.com/admin|Go to admin dashboard>`,
     ].join("\n"),
   });
+}
+
+export async function createRequestToBook({
+  paymentIntentId,
+  numOfGuests,
+  travelerPriceBeforeFees,
+  checkIn,
+  checkOut,
+  propertyId,
+  userId,
+  isDirectListingCharge,
+}: {
+  paymentIntentId: string;
+  travelerPriceBeforeFees: number;
+  numOfGuests: number;
+  checkIn: Date;
+  checkOut: Date;
+  propertyId: number;
+  userId: string;
+  isDirectListingCharge: boolean;
+}) {
+  const user = await db.query.users
+    .findFirst({
+      where: eq(users.id, userId),
+    })
+    .then((res) => res!);
+
+  const property = await db.query.properties
+    .findFirst({
+      where: eq(properties.id, propertyId),
+    })
+    .then((res) => res!);
+
+  //create group
+  const madeByGroupId = await db
+    .insert(groups)
+    .values({ ownerId: userId })
+    .returning()
+    .then((res) => res[0]!.id);
+
+  await db.insert(groupMembers).values({
+    userId: userId,
+    groupId: madeByGroupId,
+  });
+
+  const hostTeam = await db.query.hostTeams
+    .findFirst({
+      where: eq(hostTeams.id, properties.hostTeamId),
+    })
+    .then((res) => res!);
+
+  await db.insert(requestsToBook).values({
+    hostTeamId: hostTeam.id,
+    createdAt: new Date(),
+    propertyId,
+    userId: userId,
+    madeByGroupId: madeByGroupId,
+    paymentIntentId,
+    checkIn,
+    checkOut,
+    numGuests: numOfGuests,
+    amountAfterTravelerMarkupAndBeforeFees:
+      travelerPriceBeforeFees * TRAVELER_MARKUP, //we add markup here
+    isDirectListing: isDirectListingCharge,
+  });
+
+  //    ------2 CASES: 1.)no direct listing so send to the host 2.) isDirectLIsting send message to us
+
+  // Case 1 : DIRECT LISTING. SEND SLACK
+  if (isDirectListingCharge) {
+    await sendSlackMessage({
+      isProductionOnly: true,
+      channel: "tramona-bot",
+      text: [
+        `*${user.email} just requested to book: ${property.name}*`,
+        `*${property.city}*`,
+        `through ${"a different platform (direct listing)"} · ${formatDateMonthDay(checkIn)}-${formatDateMonthDay(checkOut)}`,
+        `<https://tramona.com/admin|Go to admin dashboard>`,
+      ].join("\n"),
+    });
+  } else {
+    // Case 2: Not DirectListing so we need to send the request to the host
+    const members = await db.query.hostTeamMembers.findMany({
+      where: eq(hostTeamMembers.hostTeamId, hostTeam.id),
+    });
+
+    for (const member of members) {
+      console.log(member.userId); //send notifcation to host??
+    }
+
+    await sendSlackMessage({
+      isProductionOnly: true,
+      channel: "tramona-bot",
+      text: [
+        `*${user.email} just requested to book: ${property.name}*`,
+        `*${property.city}*`,
+        `through one of our properties· ${formatDateMonthDay(checkIn)}-${formatDateMonthDay(checkOut)}`,
+        `<https://tramona.com/admin|Go to admin dashboard>`,
+      ].join("\n"),
+    });
+  }
+  return;
 }

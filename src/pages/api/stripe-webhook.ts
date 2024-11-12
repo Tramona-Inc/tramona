@@ -28,7 +28,8 @@ import {
 import {
   createSetupIntent,
   getRequestIdByOfferId,
-  completeBookingForBookItnow,
+  finalizeTrip,
+  createRequestToBook,
 } from "@/utils/webhook-functions/stripe-utils";
 import { sendSlackMessage } from "@/server/slack";
 import { formatDateMonthDay } from "@/utils/utils";
@@ -127,9 +128,32 @@ export default async function webhook(
           }
 
           // --------- 3 Cases: 1. Book it now, 2.Request to book,  3. Offer  ---------------------------------------
-          //1 . Case : Book it now
+          //1 . CASE : Book it now
           if (paymentIntentSucceeded.metadata.type === "bookItNow") {
-            await completeBookingForBookItnow({
+            await finalizeTrip({
+              paymentIntentId,
+              numOfGuests: parseInt(
+                paymentIntentSucceeded.metadata.num_of_guests!,
+              ),
+              travelerPriceBeforeFees: parseInt(
+                paymentIntentSucceeded.metadata
+                  .traveler_offered_price_before_fees!,
+              ),
+              checkIn: new Date(paymentIntentSucceeded.metadata.check_in!),
+              checkOut: new Date(paymentIntentSucceeded.metadata.check_out!),
+              propertyId: parseInt(
+                paymentIntentSucceeded.metadata.property_id!,
+              ),
+              userId: paymentIntentSucceeded.metadata.user_id!,
+              isDirectListingCharge,
+              source: "Book it now",
+            });
+            //we need to work on referalls/messaging for book it now
+
+            // 2.  CASE : "RequestToBook"
+          } else if (paymentIntentSucceeded.metadata.type === "requestToBook") {
+            //not charging user or creating a superhog
+            await createRequestToBook({
               paymentIntentId,
               numOfGuests: parseInt(
                 paymentIntentSucceeded.metadata.num_of_guests!,
@@ -146,9 +170,6 @@ export default async function webhook(
               userId: paymentIntentSucceeded.metadata.user_id!,
               isDirectListingCharge,
             });
-            //we need to work on referalls for book it now
-            // 2.  Case : "RequestToBook"
-          } else if (paymentIntentSucceeded.metadata.type === "requestToBook") {
           } else {
             // 3. Case: "OFFER"
 

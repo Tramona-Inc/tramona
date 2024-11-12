@@ -8,7 +8,7 @@ export type RequestToBookPricing = {
 
 export interface UnifiedCheckoutData {
   ///MUST BE TRANSFORMED IN THIS BEFORE GOING INTO THE UNIFIEC CHECKOUT PAGE
-  type: "Book it now" | "Offer" | "Request to book";
+  type: "bookItNow" | "offer" | "requestToBook";
   offerId?: number | undefined;
   dates: {
     checkIn: Date;

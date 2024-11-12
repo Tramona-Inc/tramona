@@ -16,6 +16,7 @@ export type RequestToBookDetails = {
   checkIn: Date;
   checkOut: Date;
   numGuests: number;
+  travelerOfferedPriceBeforeFees: number;
 };
 
 export default function RequestToBookBtn({
@@ -43,7 +44,7 @@ export default function RequestToBookBtn({
         ? "book-it-now-checkout"
         : "request-to-book-checkout";
 
-    return `/${baseCheckoutPath}/${property.id}?checkIn=${checkIn}&checkOut=${checkOut}&numGuests=${requestToBook.numGuests}`;
+    return `/${baseCheckoutPath}/${property.id}?checkIn=${checkIn}&checkOut=${checkOut}&numGuests=${requestToBook.numGuests}&travelerOfferedPriceBeforeFees=${requestToBook.travelerOfferedPriceBeforeFees}`;
   }, [property, requestToBook]);
 
   return (

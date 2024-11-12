@@ -32,6 +32,7 @@ export function breakdownPaymentByOffer( ///// USING OFFER
     >;
   },
 ): PriceBreakdownOutput {
+  console.log("hi");
   const numNights = getNumNights(offer.checkIn, offer.checkOut);
   const isScraped = offer.scrapeUrl !== null;
 
@@ -44,13 +45,13 @@ export function breakdownPaymentByOffer( ///// USING OFFER
     offer.travelerOfferedPriceBeforeFees + superhogFee + taxesPaid;
   const stripeFee = getStripeFee(totalBeforeStripeFee);
   const totalTripAmount = totalBeforeStripeFee + stripeFee;
+  console.log(totalTripAmount);
 
   const { originalNightlyPrice } = offer.property;
 
   const originalTotalPrice =
     offer.datePriceFromAirbnb ??
     (originalNightlyPrice ? originalNightlyPrice * numNights : null);
-
   let totalSavings = originalTotalPrice
     ? originalTotalPrice - totalTripAmount
     : 0; //// um hopefully not negative
@@ -74,6 +75,7 @@ export function breakdownPaymentByOffer( ///// USING OFFER
 export function breakdownPaymentByPropertyAndTripParams(
   propertyAndTripParams: PropertyAndTripParams,
 ): PriceBreakdownOutput {
+  console.log(propertyAndTripParams.travelerPriceBeforeFees);
   const numNights = getNumNights(
     propertyAndTripParams.dates.checkIn,
     propertyAndTripParams.dates.checkOut,
@@ -88,11 +90,13 @@ export function breakdownPaymentByPropertyAndTripParams(
     (propertyAndTripParams.travelerPriceBeforeFees + superhogFee) *
       taxPercentage,
   );
+  console.log(taxesPaid);
   const totalBeforeStripeFee =
     propertyAndTripParams.travelerPriceBeforeFees + superhogFee + taxesPaid;
+  console.log(totalBeforeStripeFee);
   const stripeFee = getStripeFee(totalBeforeStripeFee);
   const totalTripAmount = totalBeforeStripeFee + stripeFee;
-
+  console.log(totalTripAmount);
   const { originalNightlyPrice } = propertyAndTripParams.property;
 
   const originalTotalPrice = originalNightlyPrice

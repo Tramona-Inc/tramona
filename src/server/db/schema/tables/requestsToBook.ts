@@ -13,11 +13,15 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { groups } from "./groups";
 import { properties } from "./properties";
 import { users } from "./users";
+import { hostTeams } from "./hostTeams";
 
 export const requestsToBook = pgTable(
   "requests_to_book",
   {
     id: serial("id").primaryKey(),
+    hostTeamId: integer("host_team_id")
+      .notNull()
+      .references(() => hostTeams.id),
     propertyId: integer("property_id")
       .notNull()
       .references(() => properties.id),
@@ -35,12 +39,17 @@ export const requestsToBook = pgTable(
       .defaultNow(),
     resolvedAt: timestamp("resolved_at", { withTimezone: true }),
     isAccepted: boolean("is_accepted").notNull().default(false),
+    paymentIntentId: text("payment_intent_id").notNull(),
+    amountAfterTravelerMarkupAndBeforeFees: integer(
+      "amount_after_traveler_markup_and_before_fees",
+    ).notNull(), // this is the amount the host will see the traveler requested.
+    isDirectListing: boolean("is_direct_listing").notNull(), //true = scraped property : false = our property
   },
   (t) => ({
     propertyIdIdx: index().on(t.propertyId),
     userIdIdx: index().on(t.userId),
     madeByGroupIdIdx: index().on(t.madeByGroupId),
-  })
+  }),
 );
 
 export type RequestsToBook = typeof requestsToBook.$inferSelect;

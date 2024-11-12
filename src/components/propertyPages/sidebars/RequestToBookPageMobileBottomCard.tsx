@@ -3,12 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import PriceDetailsBeforeTax from "@/components/_common/PriceDetailsBeforeTax";
 import { formatDateRange } from "@/utils/utils";
 import ReserveBtn, { PropertyPageData } from "./actionButtons/RequestToBookBtn";
-
-export type RequestToBookDetails = {
-  checkIn: Date;
-  checkOut: Date;
-  numGuests: number;
-};
+import type { RequestToBookDetails } from "./actionButtons/RequestToBookBtn";
 
 export default function RequestToBookPageMobileBottomCard({
   property,

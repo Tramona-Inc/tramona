@@ -4,7 +4,7 @@ import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { UnifiedCheckout } from "@/components/checkout/UnifiedCheckout";
-import { type UnifiedCheckoutData } from "@/components/checkout/types";
+import { requestOrBookItNowToUnifiedData } from "@/components/checkout/transformToUnifiedCheckoutData";
 
 export default function Page() {
   useSession({ required: true });
@@ -20,11 +20,9 @@ export default function Page() {
     : new Date();
   const numGuests = query.numGuests ? parseInt(query.numGuests as string) : 2;
 
-  const checkoutData = {
-    checkIn,
-    checkOut,
-    numGuests,
-  };
+  const travelerOfferedPriceBeforeFees = parseInt(
+    query.travelerOfferedPriceBeforeFees as string,
+  );
 
   const { data: property } = api.properties.getById.useQuery(
     { id: propertyId },
@@ -35,15 +33,21 @@ export default function Page() {
     return <h2>Loading</h2>;
   }
 
+  const unifiedCheckoutData = property
+    ? requestOrBookItNowToUnifiedData({
+        property,
+        checkIn,
+        checkOut,
+        numGuests,
+        travelerOfferedPriceBeforeFees,
+        type: "bookItNow",
+      })
+    : null;
   return (
     <MainLayout>
       <div className="min-h-screen-minus-header-n-footer mx-auto my-8 max-w-6xl sm:my-16">
-        {property ? (
-          <UnifiedCheckout
-            type="bookItNow"
-            property={property}
-            checkoutData={checkoutData}
-          />
+        {unifiedCheckoutData && property ? (
+          <UnifiedCheckout unifiedCheckoutData={unifiedCheckoutData} />
         ) : (
           <Spinner />
         )}

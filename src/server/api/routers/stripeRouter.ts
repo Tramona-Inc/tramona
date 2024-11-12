@@ -1,8 +1,14 @@
 import { env } from "@/env";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
-import { offers, properties, trips, users } from "@/server/db/schema";
+import {
+  offers,
+  properties,
+  requestsToBook,
+  trips,
+  users,
+} from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
-import { eq } from "drizzle-orm";
+import { and, between, eq, gte, isNull, lte, ne } from "drizzle-orm";
 import Stripe from "stripe";
 import { z } from "zod";
 import { getPropertyForOffer } from "./offersRouter";
@@ -12,6 +18,7 @@ import {
   breakdownPaymentByPropertyAndTripParams,
 } from "@/utils/payment-utils/paymentBreakdown";
 import { db } from "@/server/db";
+import { finalizeTrip } from "@/utils/webhook-functions/stripe-utils";
 
 export const config = {
   api: {
@@ -252,7 +259,7 @@ export const stripeRouter = createTRPCRouter({
         cancelUrl: z.string(),
         offerId: z.number().nullable(),
         scrapeUrl: z.string().nullable(),
-        numOfGuest: z.number().nullable(),
+        numOfGuests: z.number().nullable(),
         travelerOfferedPriceBeforeFees: z.number(),
         datePriceFromAirbnb: z.number().nullable(),
         checkIn: z.date(),
@@ -337,7 +344,7 @@ export const stripeRouter = createTRPCRouter({
         stripe_transaction_fee: paymentBreakdown.stripeTransactionFee,
         superhog_paid: paymentBreakdown.superhogFee,
         is_direct_listing: input.scrapeUrl ? "true" : "false",
-        num_of_guests: input.numOfGuest,
+        num_of_guests: input.numOfGuests,
         type: input.type,
       };
 
@@ -380,6 +387,68 @@ export const stripeRouter = createTRPCRouter({
         .set({ paymentCaptured: new Date() })
         .where(eq(trips.paymentIntentId, input.paymentIntentId));
       return intent;
+    }),
+
+  captureAndFinalizeRequestToBook: protectedProcedure
+    .input(
+      z.object({
+        requestToBookId: z.number(),
+        isAccepted: z.boolean(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      //check to make sure user is authorized
+
+      //update results in db.
+      const curRequestToBook = await db
+        .update(requestsToBook)
+        .set({
+          resolvedAt: new Date(),
+          isAccepted: input.isAccepted,
+        })
+        .where(eq(requestsToBook.id, input.requestToBookId))
+        .returning()
+        .then((res) => res[0]!);
+
+      if (!input.isAccepted) {
+        return;
+      } else {
+        //since accepted we need to finilize the trip
+
+        await finalizeTrip({
+          //trip and tripcheckout creattion, superhog, and sending notifcations
+          paymentIntentId: curRequestToBook.paymentIntentId,
+          numOfGuests: curRequestToBook.numGuests,
+          travelerPriceBeforeFees:
+            curRequestToBook.amountAfterTravelerMarkupAndBeforeFees, //markup already happened
+          checkIn: curRequestToBook.checkIn,
+          checkOut: curRequestToBook.checkOut,
+          propertyId: curRequestToBook.propertyId,
+          userId: curRequestToBook.userId,
+          isDirectListingCharge: curRequestToBook.isDirectListing,
+          source: "Request to book",
+        });
+
+        //now we need to cancel all current request during that same time,
+        const activeRequestToBookThatNeedsToBeRemoved = await db
+          .update(requestsToBook)
+          .set({
+            resolvedAt: new Date(),
+            isAccepted: false,
+          })
+          .where(
+            and(
+              isNull(requestsToBook.resolvedAt),
+              ne(requestsToBook.id, curRequestToBook.id),
+              and(
+                lte(requestsToBook.checkIn, curRequestToBook.checkOut),
+                gte(requestsToBook.checkOut, curRequestToBook.checkIn),
+              ),
+            ),
+          );
+        console.log(activeRequestToBookThatNeedsToBeRemoved);
+      }
+      return;
     }),
 
   confirmSetupIntent: protectedProcedure
