@@ -64,8 +64,6 @@ const AvatarFallback = React.forwardRef<
 ));
 AvatarFallback.displayName = AvatarPrimitive.Fallback.displayName;
 
-export { Avatar, AvatarImage, AvatarFallback };
-
 const AnonymousAvatar = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root> & AvatarVariants
@@ -81,3 +79,5 @@ const AnonymousAvatar = React.forwardRef<
   </AvatarPrimitive.Root>
 ));
 AnonymousAvatar.displayName = AvatarPrimitive.Root.displayName;
+
+export { Avatar, AvatarImage, AvatarFallback, AnonymousAvatar };

@@ -32,7 +32,6 @@ export function breakdownPaymentByOffer( ///// USING OFFER
     >;
   },
 ): PriceBreakdownOutput {
-  console.log("hi");
   const numNights = getNumNights(offer.checkIn, offer.checkOut);
   const isScraped = offer.scrapeUrl !== null;
 
