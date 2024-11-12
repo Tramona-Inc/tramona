@@ -53,6 +53,8 @@ export default function HostRequestDialog({
   // const [selectedProperties, setSelectedProperties] =
   //   useState<number[]>(allPropertyIds);
 
+  const numNights = getNumNights(request.checkIn, request.checkOut);
+
   const togglePropertySelection = (id: number) => {
     setSelectedProperties((prev) => {
       const newSelection = prev.includes(id)
@@ -83,11 +85,7 @@ export default function HostRequestDialog({
     }
   };
 
-  const fmtdNightlyPrice = (
-    request.maxTotalPrice /
-    getNumNights(request.checkIn, request.checkOut) /
-    100
-  ).toFixed(2);
+  const fmtdNightlyPrice = (request.maxTotalPrice / numNights / 100).toFixed(2);
 
   // console.log("selectedProperties1", selectedProperties);
 
@@ -212,6 +210,7 @@ export default function HostRequestDialog({
                       }
                       className="h-5 w-5 rounded-full"
                     />
+
                     <Image
                       src={property.imageUrls[0]}
                       alt={property.name}
@@ -231,72 +230,72 @@ export default function HostRequestDialog({
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <div className="relative flex items-center">
-                      <Input
-                        type="number"
-                        value={propertyPrices[property.id]}
-                        onChange={(e) =>
-                          setPropertyPrices((prev) => ({
-                            ...prev,
-                            [property.id]: e.target.value,
-                          }))
-                        }
-                        className="w-[140px] border-gray-200 bg-white text-right text-lg font-semibold [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                        prefix="$"
-                        onKeyDown={(e) => {
-                          if (e.key === "ArrowUp") {
-                            e.preventDefault();
-                            const currentValue = parseFloat(
-                              propertyPrices[property.id] || "0",
-                            );
-                            setPropertyPrices((prev) => ({
-                              ...prev,
-                              [property.id]: (currentValue + 1).toString(),
-                            }));
-                          }
-                          if (e.key === "ArrowDown") {
-                            e.preventDefault();
-                            const currentValue = parseFloat(
-                              propertyPrices[property.id] || "0",
-                            );
-                            if (currentValue > 0) {
-                              setPropertyPrices((prev) => ({
-                                ...prev,
-                                [property.id]: (currentValue - 1).toString(),
-                              }));
-                            }
-                          }
-                        }}
+                  {!hasCancellationPolicy && (
+                    <>
+                      <AlertCircle
+                        className="absolute right-2 top-2 text-red-600"
+                        size={16}
                       />
-                      <span className="ml-2 text-muted-foreground">
-                        per night
-                      </span>
-                    </div>
-                  </div>
-                </div>
+                      <div className="mt-2 text-sm text-red-600">
+                        This property does not have a cancellation policy
+                        assigned to it. Please{" "}
+                        <a
+                          href={`/host/properties/${property.id}`}
+                          className="text-primary underline"
+                        >
+                          click here
+                        </a>{" "}
+                        to assign a cancellation policy.
+                      </div>
+                    </>
+                  )}
 
-                {/* Bottom section with payout info */}
-                {selectedProperties.includes(property.id) && (
-                  <div className="border-t bg-white p-4">
-                    <div className="text-center text-green-900">
-                      You will be paid $
-                      {getHostPayout({
-                        propertyPrice: parseFloat(
-                          propertyPrices[property.id] ?? "0",
-                        ),
-                        hostMarkup: HOST_MARKUP,
-                        numNights: getNumNights(
-                          request.checkIn,
-                          request.checkOut,
-                        ),
-                      })}{" "}
-                      all-in
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
+                  {selectedProperties.includes(property.id) &&
+                    hasCancellationPolicy && (
+                      <div className="flex flex-col space-y-4">
+                        <h4 className="text-dark text-sm font-semibold">
+                          What price would you like to offer?
+                        </h4>
+                        <div className="flex items-center space-x-2">
+                          <div className="flex items-center rounded-md">
+                            <Input
+                              type="number"
+                              prefix="$"
+                              suffix="/night"
+                              value={propertyPrices[property.id]}
+                              onChange={(e) =>
+                                setPropertyPrices((prev) => ({
+                                  ...prev,
+                                  [property.id]: e.target.value,
+                                }))
+                              }
+                            />
+                          </div>
+                        </div>
+                        {(request.maxTotalPrice / numNights / 100) * 1.1 <
+                          parseInt(propertyPrices[property.id] ?? "0") && (
+                          <div className="text-sm text-red-600">
+                            This offer is unlikely to get accepted since it is{" "}
+                            {Math.round(
+                              ((parseFloat(propertyPrices[property.id] ?? "0") -
+                                request.maxTotalPrice / numNights / 100) /
+                                (request.maxTotalPrice / numNights / 100)) *
+                                100,
+                            )}
+                            % higher than the requested price.
+                          </div>
+                        )}
+                        {propertyPrices[property.id] && (
+                          <div className="text-sm text-gray-600">
+                            By offering this price, you will be paid{" "}
+                            {formatCurrency(hostPayoutCents)} all-in
+                          </div>
+                        )}
+                      </div>
+                    )}
+                </div>
+              );
+            })}
           </div>
         </div>
 

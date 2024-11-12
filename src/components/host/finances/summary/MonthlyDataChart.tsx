@@ -101,6 +101,7 @@ const MonthlyDataChart = ({
     <div className="flex h-full w-full flex-col sm:w-[600px] xl:w-[800px] 2xl:w-[1100px]">
       <div className="flex items-center justify-center">
         <p className="left-14 top-4 mb-1 mt-4 text-start text-2xl lg:absolute">
+          You&apos;ve made{" "}
           <strong>
             {formatCurrency(
               monthlyData.reduce((sum, day) => sum + day.Earnings, 0),

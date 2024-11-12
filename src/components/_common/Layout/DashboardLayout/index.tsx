@@ -19,7 +19,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const router = useRouter();
 
-  const { data: verifications } = api.users.getMyVerifications.useQuery();
+  const { data: verifications } = api.users.getMyVerifications.useQuery(
+    undefined,
+    { enabled: !!session },
+  );
 
   useEffect(() => {
     if (verifications?.phoneNumber === null) {
@@ -46,11 +49,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     <>
       <Header />
       <div className="relative min-h-screen-minus-header lg:flex">
-        {session && (
+        {/* {session && (
           <aside className="sticky top-header-height hidden h-screen-minus-header bg-zinc-100 lg:block">
             <Sidebar type={navType} />
           </aside>
-        )}
+        )} */}
         <div className="min-w-0 lg:flex-1">
           <main className="relative min-h-screen-minus-header">{children}</main>
           {status !== "loading" && <MobileNav type={navType} />}

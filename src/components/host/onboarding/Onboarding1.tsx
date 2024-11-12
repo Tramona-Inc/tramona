@@ -1,8 +1,5 @@
 import CardSelect from "@/components/_common/CardSelect";
-import AssistedListing from "@/components/_icons/AssistedListing";
-import ManuallyAdd from "@/components/_icons/ManuallyAdd";
 import { useRouter } from "next/router";
-import Image from "next/image";
 import OnboardingFooter from "./OnboardingFooter";
 import { useState } from "react";
 import { InlineWidget, useCalendlyEventListener } from "react-calendly";
@@ -36,12 +33,15 @@ import { SelectIcon } from "@radix-ui/react-select";
 import { CaretSortIcon } from "@radix-ui/react-icons";
 import { ALL_PROPERTY_PMS } from "@/server/db/schema";
 import { api } from "@/utils/api";
-import { Home } from "lucide-react";
+import { HelpCircle, Link, Plus } from "lucide-react";
+import { cn } from "@/utils/utils";
 
 export default function Onboarding1({
   onPressNext,
+  forHost = false,
 }: {
   onPressNext: () => void;
+  forHost?: boolean;
 }) {
   const router = useRouter();
   const [showModal, setShowModal] = useState(false);
@@ -69,7 +69,7 @@ export default function Onboarding1({
   const items = [
     {
       id: "1",
-      icon: <Home size={50} />,
+      icon: <Link className="text-teal-900" strokeWidth={2} size={30} />,
       title: "Connect directly with Airbnb",
       text: "Connect with your Airbnb account. This is the easiest & preferred way",
       recommended: true,
@@ -81,23 +81,23 @@ export default function Onboarding1({
         }
       },
     },
+    // {
+    //   id: "2",
+    //   icon: <AssistedListing />,
+    //   title: "PMS",
+    //   text: "Connect with our PMS partners for effortless signup.",
+    //   onClick: () => openModal("syncPMS"),
+    // },
     {
       id: "2",
-      icon: <AssistedListing />,
-      title: "PMS",
-      text: "Connect with our PMS partners for effortless signup.",
-      onClick: () => openModal("syncPMS"),
-    },
-    {
-      id: "3",
-      icon: <ManuallyAdd />,
+      icon: <Plus className="text-teal-900" strokeWidth={2} size={30} />,
       title: "You Add",
       text: "Manually list your properties",
       onClick: onPressNext,
     },
     {
-      id: "4",
-      icon: <AssistedListing />,
+      id: "3",
+      icon: <HelpCircle className="text-teal-900" strokeWidth={2} size={30} />,
       title: "We Add",
       text: "Have the Tramona onboarding team set up your account.",
       onClick: () => openModal("assistedListing"),
@@ -127,7 +127,7 @@ export default function Onboarding1({
     });
 
   const { mutateAsync: createHostProfile } =
-    api.users.upsertHostProfile.useMutation();
+    api.hosts.upsertHostProfile.useMutation();
 
   const { data: isHospitableCustomer } =
     api.pms.getHospitableCustomer.useQuery();
@@ -147,19 +147,20 @@ export default function Onboarding1({
 
   return (
     <>
-      <div className="w-full flex-grow max-sm:container lg:grid lg:grid-cols-2">
-        <div className="hidden flex-grow bg-muted lg:block">
-          <Image
-            src="/assets/images/host-onboarding.png"
-            alt="Image"
-            width="1920"
-            height="1080"
-            className="h-full w-full object-cover"
-          />
-        </div>
-
-        <div className="my-6 flex flex-col items-center gap-6 sm:mx-20">
-          <h1 className="text-center text-2xl font-semibold sm:text-4xl lg:text-3xl xl:text-4xl">
+      <div className="w-full flex-grow lg:grid lg:grid-cols-1">
+        <div
+          className={cn(
+            "flex flex-col gap-6",
+            forHost ? "m-0 items-start" : "my-6 items-center sm:mx-20",
+          )}
+        >
+          <h1
+            className={cn(
+              forHost
+                ? "text-2xl font-bold"
+                : "text-2xl font-semibold sm:text-4xl lg:text-3xl xl:text-4xl",
+            )}
+          >
             Get started on Tramona
           </h1>
           <div className="flex flex-col gap-4">
@@ -191,7 +192,7 @@ export default function Onboarding1({
         </div>
       </div>
 
-      <OnboardingFooter isForm={false} />
+      {!forHost && <OnboardingFooter isForm={false} />}
       <Dialog open={showModal} onOpenChange={closeModal}>
         <DialogClose />
         <DialogContent>

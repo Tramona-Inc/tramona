@@ -1,10 +1,8 @@
 import { api } from "@/utils/api";
 import { useStripe } from "@/utils/stripe-client";
-import { formatDateRange, getNumNights } from "@/utils/utils";
 import StripeCheckoutForm from "./StripeCheckoutForm";
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/router";
-import { useSession } from "next-auth/react";
 import type { OfferWithDetails } from "../offers/PropertyPage";
 import { Elements } from "@stripe/react-stripe-js";
 import { type StripeElementsOptions } from "@stripe/stripe-js";
@@ -19,58 +17,19 @@ const CustomStripeCheckout = ({
   const { toast } = useToast();
   const stripePromise = useStripe();
   const { pathname } = useRouter();
-  const session = useSession({ required: true });
-
-  const numNights = useMemo(
-    () => getNumNights(offer.checkIn, offer.checkOut),
-    [offer.checkIn, offer.checkOut],
-  );
-
-  const originalTotal = useMemo(
-    () =>
-      offer.randomDirectListingDiscount
-        ? (offer.randomDirectListingDiscount / 100 + 1) *
-          offer.travelerOfferedPriceBeforeFees
-        : property.originalNightlyPrice! * numNights,
-    [property.originalNightlyPrice, numNights],
-  );
 
   const [options, setOptions] = useState<StripeElementsOptions | undefined>(
     undefined,
   );
   const [checkoutReady, setCheckoutReady] = useState(false);
 
-  const { data: propertyHostUserAccount } =
-    api.host.getHostUserAccount.useQuery(property.hostId!, {
-      enabled: !!property.hostId,
-    });
   const authorizePayment = api.stripe.authorizePayment.useMutation();
   const fetchClientSecret = useCallback(async () => {
-    if (!session.data?.user) return;
     try {
-      const response = await authorizePayment.mutateAsync({
-        isDirectListing: offer.scrapeUrl !== null ? true : false,
+      return await authorizePayment.mutateAsync({
         offerId: offer.id,
-        propertyId: property.id,
-        requestId: offer.requestId ?? null,
-        name: property.name,
-        price: offer.tripCheckout.totalTripAmount,
-        description: "From: " + formatDateRange(offer.checkIn, offer.checkOut),
         cancelUrl: pathname,
-        images: property.imageUrls,
-        totalSavings: Math.abs(
-          originalTotal - offer.tripCheckout.totalTripAmount,
-        ),
-        phoneNumber: session.data.user.phoneNumber ?? "",
-        userId: session.data.user.id,
-        hostStripeId: propertyHostUserAccount?.stripeConnectId ?? "",
-        travelerOfferedPriceBeforeFees: offer.travelerOfferedPriceBeforeFees,
-        superhogFee: offer.tripCheckout.superhogFee,
-        taxesPaid: offer.tripCheckout.taxesPaid,
-        taxesPercentage: offer.tripCheckout.taxPercentage,
-        stripeTransactionFee: offer.tripCheckout.stripeTransactionFee,
       });
-      return response;
     } catch (error) {
       toast({
         title: "Error creating checkout session",

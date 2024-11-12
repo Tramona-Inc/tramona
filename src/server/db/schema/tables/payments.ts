@@ -15,14 +15,14 @@ export const tripCheckouts = pgTable("trip_checkouts", {
   travelerOfferedPriceBeforeFees: integer(
     "traveler_offered_price_before_fees",
   ).notNull(),
-  paymentIntentId: varchar("payment_intent_id").notNull().default(""),
+  paymentIntentId: varchar("payment_intent_id").notNull(),
   checkoutSessionId: varchar("checkout_session_id"),
-  taxesPaid: integer("taxes_paid").notNull().default(0),
+  taxesPaid: integer("taxes_paid").notNull(),
   taxPercentage: doublePrecision("tax_percentage"), //will save as percentage ex. 2.9  = 2.9%
-  superhogFee: integer("superhog_fee").notNull().default(0),
-  stripeTransactionFee: integer("stripe_transaction_fee").notNull().default(0),
-  totalSavings: integer("total_savings").default(0).notNull(),
-  securityDeposit: integer("security_deposit").default(0).notNull(),
+  superhogFee: integer("superhog_fee").notNull(),
+  stripeTransactionFee: integer("stripe_transaction_fee").notNull(),
+  totalSavings: integer("total_savings").notNull(),
+  securityDeposit: integer("security_deposit").notNull(),
 });
 
 export type TripCheckout = typeof tripCheckouts.$inferSelect;

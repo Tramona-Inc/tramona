@@ -1,5 +1,6 @@
 import {
   createTRPCRouter,
+  hostProcedure,
   protectedProcedure,
   roleRestrictedProcedure,
 } from "@/server/api/trpc";
@@ -16,7 +17,7 @@ import { cancelSuperhogReservation } from "@/utils/webhook-functions/superhog-ut
 import { sendEmail } from "@/server/server-utils";
 
 import { TRPCError } from "@trpc/server";
-import { and, eq, exists, isNotNull, isNull, ne, sql } from "drizzle-orm";
+import { and, eq, exists, isNotNull, isNull, sql, lte, ne } from "drizzle-orm";
 import { z } from "zod";
 import BookingCancellationEmail from "packages/transactional/emails/BookingCancellationEmail";
 import { formatDateRange, getNumNights, removeTax } from "@/utils/utils";
@@ -26,7 +27,7 @@ import { TAX_PERCENTAGE } from "@/utils/constants";
 export const tripsRouter = createTRPCRouter({
   getAllPreviousTripsWithDetails: roleRestrictedProcedure(["admin"]).query(
     async () => {
-      return await db.query.trips.findMany({
+      const previousTrips = await db.query.trips.findMany({
         with: {
           property: {
             columns: {
@@ -34,7 +35,15 @@ export const tripsRouter = createTRPCRouter({
               name: true,
               city: true,
             },
-            with: { host: { columns: { name: true, profileUrl: true } } },
+            with: {
+              hostTeam: {
+                with: {
+                  owner: {
+                    columns: { name: true, profileUrl: true, id: true },
+                  },
+                },
+              },
+            },
           },
           offer: {
             columns: {
@@ -55,7 +64,10 @@ export const tripsRouter = createTRPCRouter({
             },
           },
         },
+        where: lte(trips.checkOut, new Date()),
       });
+
+      return previousTrips;
     },
   ),
 
@@ -85,8 +97,14 @@ export const tripsRouter = createTRPCRouter({
             cancellationPolicy: true,
             checkInTime: true,
             checkOutTime: true,
+            hostName: true,
+            hostProfilePic: true,
           },
-          with: { host: { columns: { name: true, image: true } } },
+          with: {
+            hostTeam: {
+              with: { owner: { columns: { name: true, image: true } } },
+            },
+          },
         },
         offer: {
           columns: {
@@ -98,7 +116,7 @@ export const tripsRouter = createTRPCRouter({
     });
   }),
 
-  getHostTrips: protectedProcedure.query(async ({ ctx }) => {
+  getHostTrips: hostProcedure.query(async ({ ctx }) => {
     return await db.query.trips.findMany({
       where: exists(
         db
@@ -106,7 +124,7 @@ export const tripsRouter = createTRPCRouter({
           .from(properties)
           .where(
             and(
-              eq(properties.hostId, ctx.user.id),
+              eq(properties.hostTeamId, ctx.hostProfile.curTeamId),
               eq(properties.id, trips.propertyId),
             ),
           ),
@@ -114,7 +132,11 @@ export const tripsRouter = createTRPCRouter({
       with: {
         property: {
           columns: { name: true, imageUrls: true, city: true },
-          with: { host: { columns: { name: true, image: true, id: true } } },
+          with: {
+            hostTeam: {
+              with: { owner: { columns: { name: true, image: true } } },
+            },
+          },
         },
         offer: {
           columns: {
@@ -150,8 +172,15 @@ export const tripsRouter = createTRPCRouter({
         },
       });
 
+      if (!trip) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: `Trip not found for id ${input.tripId}`,
+        });
+      }
+
       const propertyForTrip = await db.query.properties.findFirst({
-        where: eq(properties.id, trip!.propertyId),
+        where: eq(properties.id, trip.propertyId),
         columns: {
           latLngPoint: true,
           id: true,
@@ -165,12 +194,22 @@ export const tripsRouter = createTRPCRouter({
           checkOutTime: true,
         },
         with: {
-          host: {
-            columns: { name: true, email: true, image: true, id: true },
+          hostTeam: {
+            with: {
+              owner: {
+                columns: { name: true, email: true, image: true, id: true },
+              },
+            },
           },
         },
       });
-      if (!trip || !propertyForTrip) throw new TRPCError({ code: "NOT_FOUND" });
+
+      if (!propertyForTrip) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: `Property not found for trip ${input.tripId}`,
+        });
+      }
 
       const fullTrip = { ...trip, property: propertyForTrip };
 
@@ -203,8 +242,12 @@ export const tripsRouter = createTRPCRouter({
               checkOutTime: true,
             },
             with: {
-              host: {
-                columns: { name: true, email: true, image: true, id: true },
+              hostTeam: {
+                with: {
+                  owner: {
+                    columns: { name: true, email: true, image: true, id: true },
+                  },
+                },
               },
             },
           },
@@ -238,7 +281,7 @@ export const tripsRouter = createTRPCRouter({
         },
         property: {
           columns: {
-            hostId: true,
+            hostTeamId: true,
           },
         },
       },
@@ -250,9 +293,11 @@ export const tripsRouter = createTRPCRouter({
       ),
     });
   }),
-  getAllTripDamages: roleRestrictedProcedure(["admin"]).query(async () => {
-    const allTrips = await db.query.tripDamages.findMany({});
-    return allTrips.length > 0 ? allTrips : [];
+  getAllclaimItems: roleRestrictedProcedure(["admin"]).query(async () => {
+    const allClaimItems = await db.query.claimItems.findMany();
+    console.log("claim", allClaimItems);
+
+    return allClaimItems.length > 0 ? allClaimItems : [];
   }),
 
   getTripCancelationPolicyByTripId: protectedProcedure
@@ -410,5 +455,42 @@ export const tripsRouter = createTRPCRouter({
         },
       });
       return;
+    }),
+  getMyTripsPaymentHistory: protectedProcedure.query(async ({ ctx }) => {
+    const allPayments = await db.query.trips.findMany({
+      where: exists(
+        db
+          .select()
+          .from(groupMembers)
+          .where(
+            and(
+              eq(groupMembers.groupId, trips.groupId),
+              eq(groupMembers.userId, ctx.user.id),
+            ),
+          ),
+      ),
+      with: {
+        tripCheckout: true,
+        property: {
+          columns: {
+            name: true,
+            city: true,
+          },
+        },
+      },
+    });
+    return allPayments;
+  }),
+  getTripCheckoutByTripId: protectedProcedure
+    .input(z.number())
+    .query(async ({ input }) => {
+      const tripCheckout = await db.query.trips.findFirst({
+        where: eq(trips.id, input),
+        columns: { tripCheckoutId: true },
+        with: { tripCheckout: true },
+      });
+
+      console.log(tripCheckout?.tripCheckout);
+      return tripCheckout?.tripCheckout;
     }),
 });

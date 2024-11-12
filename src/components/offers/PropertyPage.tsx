@@ -3,6 +3,11 @@ import UserAvatar from "@/components/_common/UserAvatar";
 import { Button, ButtonProps } from "@/components/ui/button";
 import ReviewCard from "@/components/_common/ReviewCard";
 import {
+  DialogNoDrawer,
+  DialogContentNoDrawer,
+  DialogTriggerNoDrawer,
+} from "@/components/ui/dialog-no-drawer";
+import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -46,7 +51,7 @@ import {
   PetsRule,
   SmokingRule,
 } from "./HouseRules";
-import { OfferPriceDetails } from "../_common/OfferPriceDetails";
+import PriceDetailsBeforeTax from "@/components/_common/PriceDetailsBeforeTax";
 import { getCancellationPolicyDescription } from "@/config/getCancellationPolicyDescription";
 import { VerificationProvider } from "../_utils/VerificationContext";
 import IdentityModal from "../_utils/IdentityModal";
@@ -90,9 +95,9 @@ export default function PropertyPage({
     void createReviewBackupImages();
   }, [property.reviews.length]);
 
-  const hostName = property.host
-    ? `${property.host.firstName} ${property.host.lastName}`
-    : "Tramona";
+  const hostName =
+    property.hostName ??
+    `${property.hostTeam.owner.firstName} ${property.hostTeam.owner.lastName}`;
 
   const originalListing = getOriginalListing(property);
 
@@ -103,29 +108,24 @@ export default function PropertyPage({
   const [selectedImageIdx, setSelectedImageIdx] = useState<number>(0);
   const firstImageUrl = property.imageUrls[0]!;
 
-  const discountPercentage = offer
-    ? getOfferDiscountPercentage({
-        createdAt: offer.createdAt,
-        travelerOfferedPriceBeforeFees:
-          offer.tripCheckout.travelerOfferedPriceBeforeFees,
-        checkIn: offer.checkIn,
-        checkOut: offer.checkOut,
-        randomDirectListingDiscount: offer.randomDirectListingDiscount,
-        datePriceFromAirbnb: offer.datePriceFromAirbnb,
-      })
-    : null;
+  const discountPercentage = offer ? getOfferDiscountPercentage(offer) : null;
 
   return (
     <div>
       <div className="relative grid h-[480px] grid-cols-4 grid-rows-2 gap-2 overflow-hidden rounded-xl">
-        <Dialog>
-          <DialogTrigger
+        <DialogNoDrawer>
+          <DialogTriggerNoDrawer
             key={0}
             onClick={() => setSelectedImageIdx(0)}
             className="hover:opacity-90 sm:hidden"
           >
-            <Image src={firstImageUrl} alt="" fill objectFit="cover" />
-          </DialogTrigger>
+            <Image
+              src={firstImageUrl}
+              alt=""
+              fill
+              className="object-cover object-center"
+            />
+          </DialogTriggerNoDrawer>
           <div className="hidden sm:contents">
             {property.imageUrls.slice(0, 5).map((imageUrl, index) => (
               <div
@@ -134,24 +134,29 @@ export default function PropertyPage({
                   index === 0 ? "col-span-2 row-span-2" : ""
                 }`}
               >
-                <DialogTrigger
+                <DialogTriggerNoDrawer
                   onClick={() => setSelectedImageIdx(index)}
                   className="hover:opacity-90"
                 >
-                  <Image src={imageUrl} alt="" fill objectFit="cover" />
-                </DialogTrigger>
+                  <Image
+                    src={imageUrl}
+                    alt=""
+                    fill
+                    className="object-cover object-center"
+                  />
+                </DialogTriggerNoDrawer>
               </div>
             ))}
           </div>
-          <DialogContent className="max-w-screen flex items-center justify-center bg-transparent">
+          <DialogContentNoDrawer className="flex w-full items-center justify-center border-none bg-transparent [&>button]:hidden">
             <div className="screen-full flex justify-center">
               <OfferPhotos
                 propertyImages={property.imageUrls}
                 indexOfSelectedImage={selectedImageIdx}
               />
             </div>
-          </DialogContent>
-        </Dialog>
+          </DialogContentNoDrawer>
+        </DialogNoDrawer>
 
         {/* If there are more than 5 images, render the "See more photos" button */}
         {renderSeeMoreButton && (
@@ -169,10 +174,10 @@ export default function PropertyPage({
                   <DialogTitle>More Photos</DialogTitle>
                 </DialogHeader>
                 {/* //dialog within a dialog */}
-                <Dialog>
+                <DialogNoDrawer>
                   <div className="grid-row-4 grid min-h-[1000px] grid-cols-2 gap-2 rounded-xl">
                     {property.imageUrls.map((imageUrl, index) => (
-                      <DialogTrigger
+                      <DialogTriggerNoDrawer
                         key={index}
                         className={`hover:opacity-90 ${
                           index === 0 || index % 3 === 0
@@ -192,23 +197,22 @@ export default function PropertyPage({
                               src={imageUrl}
                               alt=""
                               fill
-                              objectFit="cover"
-                              className="h-full w-full"
+                              className="h-full w-full object-cover object-center"
                             />
                           </AspectRatio>
                         </div>
-                      </DialogTrigger>
+                      </DialogTriggerNoDrawer>
                     ))}
                   </div>
-                  <DialogContent className="max-w-screen flex items-center justify-center bg-transparent">
+                  <DialogContentNoDrawer className="flex items-center justify-center border-none bg-transparent [&>button]:hidden">
                     <div className="screen-full flex justify-center">
                       <OfferPhotos
                         propertyImages={property.imageUrls}
                         indexOfSelectedImage={selectedImageIdx}
                       />
                     </div>
-                  </DialogContent>
-                </Dialog>
+                  </DialogContentNoDrawer>
+                </DialogNoDrawer>
               </DialogContent>
             </Dialog>
           </div>
@@ -223,10 +227,10 @@ export default function PropertyPage({
         </div>
       )}
 
-      <div className="relative flex gap-8 pt-4">
+      <div className="relative flex gap-8 pt-5">
         <div className="min-w-0 flex-1 space-y-4">
           <section>
-            <h1 className="flex-1 text-3xl font-semibold sm:text-4xl">
+            <h1 className="flex-1 text-xl font-semibold sm:text-2xl">
               {property.name}
             </h1>
             <div className="flex flex-col gap-4 sm:flex-row">
@@ -234,10 +238,16 @@ export default function PropertyPage({
                 <p className="gap flex flex-wrap items-center gap-x-1 pt-1 text-sm font-medium capitalize">
                   {property.propertyType} in {property.city} ·{" "}
                   <StarIcon className="inline size-[1em] fill-primaryGreen stroke-primaryGreen" />{" "}
-                  {property.avgRating}{" "}
-                  <a href="#reviews" className="underline">
-                    ({plural(property.numRatings, "review")})
-                  </a>
+                  {property.numRatings === 0 ? (
+                    <>New</>
+                  ) : (
+                    <>
+                      {property.avgRating}{" "}
+                      <a href="#reviews" className="underline">
+                        ({plural(property.numRatings, "review")})
+                      </a>
+                    </>
+                  )}
                 </p>
                 <p className="text-sm font-medium">
                   {plural(property.maxNumGuests, "guest")} ·{" "}
@@ -268,12 +278,8 @@ export default function PropertyPage({
             >
               <UserAvatar
                 name={hostName}
-                email={property.host?.email}
-                image={
-                  property.host?.id
-                    ? property.host.image
-                    : (property.hostProfilePic ?? "/assets/images/tramona.svg")
-                }
+                email={property.hostTeam.owner.email}
+                image={property.hostTeam.owner.image}
               />
               <div className="-space-y-1">
                 <p className="text-sm text-muted-foreground">Hosted by</p>
@@ -283,23 +289,23 @@ export default function PropertyPage({
             {offer && (
               <ChatOfferButton
                 offerId={offer.id.toString()}
-                offerHostId={offer.property.hostId ?? null}
+                offerHostId={offer.property.hostTeam.ownerId}
                 offerPropertyName={offer.property.name}
               />
             )}
           </section>
           <Dialog open={openUserInfo} onOpenChange={setOpenUserInfo}>
-            <DialogTitle className="text-lg font-semibold">
-              Host Information
-            </DialogTitle>
             <DialogContent>
+              <DialogTitle className="text-lg font-semibold">
+                Host Information
+              </DialogTitle>
               {/* <div className="flex space-x-2">
                 <div className="flex flex-col space-y-2"> */}
               <UserInfo
                 hostName={hostName}
-                hostPic={property.host?.image ?? null}
-                hostDesc={property.host?.about ?? null}
-                hostLocation={property.host?.location ?? null}
+                hostPic={property.hostTeam.owner.image}
+                hostDesc={property.hostTeam.owner.about}
+                hostLocation={property.hostTeam.owner.location}
               />
               {/* <HostVerificationInfo hostName={hostName} /> */}
               {/* </div>
@@ -379,6 +385,7 @@ export default function PropertyPage({
               </DialogContent>
             </Dialog>
           </section>
+
           <section className="border-t pb-2 pt-4">
             <ReasonsToBook />
           </section>
@@ -447,7 +454,9 @@ export default function PropertyPage({
                     <UserAvatar
                       size="huge"
                       name={hostName}
-                      image={property.host?.image}
+                      image={
+                        property.hostProfilePic ?? property.hostTeam.owner.image
+                      }
                     />
                     <p className="text-center text-lg font-bold">{hostName}</p>
                   </div>
@@ -662,7 +671,7 @@ function OfferPageSidebar({
               You won&apos;t be charged yet
             </p>
           )}
-          <OfferPriceDetails
+          <PriceDetailsBeforeTax
             offer={offer}
             bookOnAirbnb={property.bookOnAirbnb}
           />
@@ -720,7 +729,7 @@ function OfferPageMobileBottomCard({
       <CardContent className="flex flex-row items-center justify-between px-4 py-1 text-sm">
         {offer.request && (
           <div className="flex basis-1/2 flex-col">
-            <OfferPriceDetails offer={offer} />
+            <PriceDetailsBeforeTax offer={offer} />
             <p className="font-semibold">
               {formatDateRange(offer.checkIn, offer.checkOut)}
             </p>
