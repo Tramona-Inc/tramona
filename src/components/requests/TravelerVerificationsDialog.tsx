@@ -42,9 +42,7 @@ export function TravelerVerificationsDialog({
     <>
       <Dialog>
         <DialogTrigger>
-          <p className="underline underline-offset-2">
-            {request.traveler.firstName + " " + travelerLastInitial}
-          </p>
+          <p>{request.traveler.firstName + " " + travelerLastInitial}</p>
         </DialogTrigger>
         <DialogContent>
           <div className="flex items-center gap-4">

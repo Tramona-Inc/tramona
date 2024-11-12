@@ -23,9 +23,11 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Property, RequestsToBook } from "@/server/db/schema";
 
+// ---------- MAIN LAYOUT COMPONENT ----------
 export default function HostRequestsLayout({
   children,
 }: React.PropsWithChildren) {
+  // ---------- STATE MANAGEMENT ----------
   const [separatedData, setSeparatedData] = useState<SeparatedData | null>(
     null,
   );
@@ -40,13 +42,14 @@ export default function HostRequestsLayout({
   const [isDataLoading2, setIsDataLoading2] = useState(true); // for requestsToBook -- rename
   const router = useRouter();
 
+  // ---------- DATA FETCHING ----------
   const { data: fetchedProperties, isLoading } =
     api.properties.getHostPropertiesWithRequests.useQuery(undefined, {
       onSuccess: (fetchedProperties) => {
         const separatedProperties =
           separateByPriceRestriction(fetchedProperties);
         setSeparatedData(separatedProperties);
-        setIsDataLoading(false); // Set loading state to false when data is fetched
+        setIsDataLoading(false);
       },
     });
 
@@ -62,11 +65,14 @@ export default function HostRequestsLayout({
     },
   });
 
-  console.log('fetchedPropertiesWithRequestsToBook', fetchedPropertiesWithRequestsToBook)
+  console.log(
+    "fetchedPropertiesWithRequestsToBook",
+    fetchedPropertiesWithRequestsToBook,
+  );
 
   useEffect(() => {
     if (isLoading) {
-      setIsDataLoading(true); // If API starts loading again, mark the data loading as true
+      setIsDataLoading(true);
     }
   }, [isLoading]);
 
@@ -75,48 +81,104 @@ export default function HostRequestsLayout({
   const displayedPropertiesData = propertiesWithRequestsToBook ?? [];
 
   return (
-    <div className="flex">
+    <div className="flex bg-white">
+      {/* ---------- SIDEBAR ---------- */}
       <div className="sticky top-20 h-screen-minus-header-n-footer w-full overflow-auto border-r px-4 py-8 xl:w-96">
         <ScrollArea className="h-1/2">
           <div className="pb-4">
             <h1 className="text-3xl font-bold">Requests</h1>
-            <div className="mt-4 flex flex-row gap-2">
-              <Button
-                variant={selectedOption === "normal" ? "primary" : "secondary"}
-                className="rounded-full"
-                onClick={() => setSelectedOption("normal")}
-              >
-                Normal
-              </Button>
-              {separatedData?.outsidePriceRestriction &&
-                separatedData.outsidePriceRestriction.length > 0 && (
-                  <Button
-                    variant={
-                      selectedOption === "outsidePriceRestriction"
-                        ? "primary"
-                        : "secondary"
-                    }
-                    className="rounded-full"
-                    onClick={() => setSelectedOption("outsidePriceRestriction")}
-                  >
-                    Outside Price Restriction
-                  </Button>
-                )}
+
+            {/* Tab Navigation */}
+            <div className="mt-6 border-b">
+              <div className="flex w-full">
+                <button
+                  onClick={() => setActiveTab("city")}
+                  className={`text-md relative flex-1 pb-4 font-medium transition-colors ${
+                    activeTab === "city"
+                      ? "text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  City Requests
+                  {activeTab === "city" && (
+                    <span className="absolute bottom-0 left-0 right-0 h-1 bg-primaryGreen" />
+                  )}
+                </button>
+                <button
+                  onClick={() => setActiveTab("book")}
+                  className={`text-md relative flex-1 pb-4 font-medium transition-colors ${
+                    activeTab === "book"
+                      ? "text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  Requests to book
+                  {activeTab === "book" && (
+                    <span className="absolute bottom-0 left-0 right-0 h-1 bg-primaryGreen" />
+                  )}
+                </button>
+              </div>
             </div>
           </div>
+
+          {/* Sidebar Content */}
           <div className="pt-4">
             {isDataLoading ? (
-              // Show skeletons while loading
+              // Loading State
               range(10).map((i) => <SidebarPropertySkeleton key={i} />)
             ) : displayedData.length > 0 ? (
-              // Show the list of cities if data is available
+              // City List
               displayedData.map((cityData) => (
                 <SidebarCity
                   key={cityData.city}
                   cityData={cityData}
-                  selectedOption={selectedOption}
+                  selectedOption={
+                    activeTab === "city" ? "normal" : "outsidePriceRestriction"
+                  }
                   selectedCity={selectedCity}
                   setSelectedCity={setSelectedCity}
+                />
+              ))
+            ) : (
+              // Empty State
+              <EmptyState
+                icon={HandshakeIcon}
+                className="h-[calc(100vh-280px)]"
+              >
+                <EmptyStateTitle>No requests yet</EmptyStateTitle>
+                <EmptyStateDescription>
+                  Properties with requests will show up here
+                </EmptyStateDescription>
+                <EmptyStateFooter>
+                  <Button asChild variant="outline">
+                    <Link href="/host/properties">View all properties</Link>
+                  </Button>
+                </EmptyStateFooter>
+              </EmptyState>
+            )}
+          </div>
+        </ScrollArea>
+
+        <Separator />
+
+        <ScrollArea className="mt-12 h-1/2">
+          <div className="pb-4">
+            <h1 className="text-3xl font-bold">Request To Book</h1>
+          </div>
+          <div className="pt-4">
+            {isDataLoading2 ? (
+              // Show skeletons while loading
+              range(10).map((i) => <SidebarPropertySkeleton key={i} />)
+            ) : displayedPropertiesData.length > 0 ? (
+              displayedPropertiesData.map((propertyData) => (
+                <SidebarProperty
+                  key={propertyData.property.id}
+                  propertyData={{
+                    property: propertyData.property, // Ensure property is included
+                    requestToBook: propertyData.requestToBook,
+                  }}
+                  selectedProperty={selectedProperty}
+                  setSelectedProperty={setSelectedProperty}
                 />
               ))
             ) : (
@@ -181,16 +243,24 @@ export default function HostRequestsLayout({
           </div>
         </ScrollArea>
       </div>
-      <div className="hidden flex-1 xl:block">
+
+      {/* ---------- MAIN CONTENT AREA ---------- */}
+      <div className="hidden flex-1 bg-[#fafafa] xl:block">
         {children ? (
-          <div className="px-4 pb-32 pt-8">
-            <div className="mx-auto max-w-5xl">{children}</div>
+          <div className="px-8 pt-8">
+            <div className="w-full">{children}</div>
           </div>
         ) : (
-          <div className="grid h-screen-minus-header flex-1 place-items-center">
-            <p className="font-medium text-muted-foreground">
-              Select a city to view its requests
+          // Empty State for Main Content
+          <div className="flex h-[calc(100vh-280px)] flex-col items-center justify-center gap-2">
+            <h2 className="text-xl font-semibold">No requests found</h2>
+            <p className="text-center text-muted-foreground">
+              Consider loosen requirements or allow for more ways to book to see
+              more requests.
             </p>
+            <Button variant="secondary" className="mt-4">
+              Change requirements
+            </Button>
           </div>
         )}
       </div>
@@ -198,6 +268,7 @@ export default function HostRequestsLayout({
   );
 }
 
+// ---------- SIDEBAR CITY COMPONENT ----------
 function SidebarCity({
   cityData,
   selectedOption,
@@ -215,24 +286,29 @@ function SidebarCity({
       : `/host/requests/${cityData.city}?priceRestriction=true`;
 
   const isSelected = selectedCity === cityData.city;
+
   return (
-    <Link href={href} className="mb-4 block">
+    <Link href={href} className="block">
       <div
-        className={`flex items-center gap-2 rounded-lg p-4 hover:bg-muted ${
-          isSelected ? "bg-muted" : ""
+        className={`flex items-center justify-between rounded-xl p-4 ${
+          isSelected ? "bg-primaryGreen text-white" : ""
         }`}
         onClick={() => setSelectedCity(cityData.city)}
       >
-        <MapPinIcon className="h-8 w-8 text-gray-600" />
-        <div className="flex-1">
-          <h3 className="font-semibold">{cityData.city}</h3>
-          <Badge size="md">{plural(cityData.requests.length, "request")}</Badge>
+        <div>
+          <h3 className="font-medium">{cityData.city}</h3>
+        </div>
+        <div
+          className={`text-sm ${isSelected ? "text-white" : "text-muted-foreground"}`}
+        >
+          {cityData.requests.length} requests
         </div>
       </div>
     </Link>
   );
 }
 
+// ---------- SIDEBAR SKELETON COMPONENT ----------
 function SidebarPropertySkeleton() {
   return (
     <div className="flex gap-2 p-2">
@@ -253,7 +329,7 @@ function SidebarProperty({
 }: {
   propertyData: {
     property: Property;
-    requestToBook: RequestsToBook[]
+    requestToBook: RequestsToBook[];
   };
   selectedProperty: number | null;
   setSelectedProperty: (property: number) => void;

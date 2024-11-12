@@ -20,6 +20,10 @@ import Image from "next/image";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { AlertCircle } from "lucide-react";
+import { DialogTitle } from "@radix-ui/react-dialog";
+import { HOST_MARKUP } from "@/utils/constants";
+import UserAvatar from "@/components/_common/UserAvatar";
+import { formatDistanceToNowStrict } from "date-fns";
 
 export default function HostRequestDialog({
   open,
@@ -110,104 +114,119 @@ export default function HostRequestDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="max-w-lg p-6">
+      <DialogContent className="bg-white sm:max-w-[600px]">
         <DialogHeader>
-          <h3 className="text-center text-lg font-bold">Respond</h3>
+          <DialogTitle className="text-center text-2xl font-bold">
+            Make an offer to {request.traveler.name}
+          </DialogTitle>
         </DialogHeader>
-        <DialogDescription>
-          Please select the properties you would like to offer and set the
-          price.
-        </DialogDescription>
-        <div className="space-y-2">
-          <div className="rounded-md border p-4">
-            <div className="mb-4 flex justify-between">
-              <div className="flex flex-col items-start">
-                <div className="text-dark text-lg font-bold">
-                  {formatCurrency(request.maxTotalPrice / numNights)}
-                  /night
-                </div>
-                <div className="text-sm text-gray-600">
-                  {formatCurrency(request.maxTotalPrice)} total
-                </div>
-              </div>
-              <div className="flex flex-col items-center">
-                <div className="text-dark text-lg font-bold">
-                  {formatDateRange(request.checkIn, request.checkOut)}
-                </div>
-                <div className="text-sm text-gray-600">
-                  {plural(numNights, "night")}
-                </div>
-              </div>
-              <div className="flex flex-col items-end">
-                <div className="text-dark text-lg font-bold">
-                  {plural(request.numGuests, "guest")}
-                </div>
+
+        {/* Guest Request Card */}
+        <div className="rounded-lg bg-white p-6 shadow-md">
+          <div className="mb-4 flex items-center gap-3">
+            <UserAvatar
+              size="md"
+              name={request.traveler.name}
+              image={request.traveler.image}
+            />
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-medium">{request.traveler.name}</span>
+                <span className="text-muted-foreground">·</span>
+                <span className="text-muted-foreground">Verified</span>
+                <span className="text-muted-foreground">·</span>
+                <span className="text-muted-foreground">
+                  {formatDistanceToNowStrict(request.createdAt, {
+                    addSuffix: true,
+                  })}
+                </span>
               </div>
             </div>
-            {request.note && (
-              <div className="rounded-md bg-gray-100 p-2">
-                <div className="text-sm text-gray-700">{request.note}</div>
-              </div>
-            )}
+          </div>
+
+          <div className="space-y-2">
+            <div className="text-lg font-medium">
+              Requested{" "}
+              {formatCurrency(
+                request.maxTotalPrice /
+                  getNumNights(request.checkIn, request.checkOut),
+              )}
+              /night
+            </div>
+            <div className="text-muted-foreground">
+              {formatDateRange(request.checkIn, request.checkOut)} ·{" "}
+              {request.numGuests} guests
+            </div>
           </div>
         </div>
-        <div className="mt-4">
-          <div className="mb-2 flex justify-between">
-            <h4 className="text-dark text-lg font-bold">
-              Available properties
-            </h4>
-            <button className="text-primary" onClick={selectAllProperties}>
-              {selectedProperties.length === properties.length
-                ? "Deselect all"
-                : "Select all"}
-            </button>
+
+        <div className="mt-6 text-muted-foreground">
+          Please select the properties you would like to offer and set the
+          price.
+        </div>
+
+        {/* Properties Section */}
+        <div className="mt-6">
+          <div className="mb-4 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <h4 className="text-lg font-semibold">Available properties</h4>
+              <span className="text-muted-foreground">
+                ({selectedProperties.length} selected)
+              </span>
+            </div>
+            <div className="flex gap-4">
+              <button
+                className="text-sm text-muted-foreground hover:text-foreground"
+                onClick={() => setSelectedProperties([])}
+              >
+                Reset
+              </button>
+              <button
+                className="text-sm text-primary hover:text-primary/80"
+                onClick={selectAllProperties}
+              >
+                Select all
+              </button>
+            </div>
           </div>
-          <div className="mb-6 space-y-4">
-            {properties.map((property) => {
-              const hasCancellationPolicy = Boolean(
-                property.cancellationPolicy,
-              );
 
-              const nightlyPriceCents =
-                parseFloat(propertyPrices[property.id] ?? "0") * 100;
-
-              const totalPriceCents = nightlyPriceCents * numNights;
-              const hostPayoutCents = getHostPayout(totalPriceCents);
-
-              return (
-                <div
-                  key={property.id}
-                  className={`relative flex flex-col rounded-md border bg-white p-4 ${
-                    selectedProperties.includes(property.id)
-                      ? "border-primary"
-                      : "border-gray-200"
-                  } ${!hasCancellationPolicy ? "cursor-not-allowed" : ""}`}
-                >
-                  <div className="mb-4 flex items-center gap-4">
+          <div className="space-y-4">
+            {properties.map((property) => (
+              <div
+                key={property.id}
+                className={`overflow-hidden rounded-lg border ${
+                  selectedProperties.includes(property.id)
+                    ? "border-primary bg-white"
+                    : "border-gray-200 bg-[#fafafa]"
+                }`}
+              >
+                {/* Top section with property info and price */}
+                <div className="flex items-center justify-between p-4">
+                  <div className="flex items-center gap-4">
                     <Checkbox
                       checked={selectedProperties.includes(property.id)}
                       onCheckedChange={() =>
-                        hasCancellationPolicy &&
                         togglePropertySelection(property.id)
                       }
-                      className="h-4 w-4"
-                      disabled={!hasCancellationPolicy}
+                      className="h-5 w-5 rounded-full"
                     />
 
                     <Image
-                      src={property.imageUrls[0]!}
+                      src={property.imageUrls[0]}
                       alt={property.name}
-                      width={64}
-                      height={64}
-                      className="size-16 rounded object-cover"
+                      width={48}
+                      height={48}
+                      className="rounded-lg"
                     />
-                    <div className="flex flex-col">
-                      <div className="text-dark text-sm font-semibold">
-                        {property.name}
-                      </div>
-                      <div className="text-sm text-gray-600">
-                        {property.city}
-                      </div>
+                    <div
+                      className={
+                        selectedProperties.includes(property.id)
+                          ? "text-foreground"
+                          : "text-muted-foreground"
+                      }
+                    >
+                      <h5 className="text-lg font-medium">{property.name}</h5>
+                      <p>{property.city}</p>
                     </div>
                   </div>
 
@@ -279,11 +298,15 @@ export default function HostRequestDialog({
             })}
           </div>
         </div>
-        <DialogFooter>
-          <Button variant="secondary" onClick={() => setOpen(false)}>
-            Cancel
+
+        <DialogFooter className="mt-6">
+          <Button
+            onClick={() => setStep(1)}
+            className="w-full bg-primaryGreen hover:bg-green-100"
+            disabled={selectedProperties.length === 0}
+          >
+            Confirm
           </Button>
-          <Button onClick={() => setStep(1)}>Continue</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
