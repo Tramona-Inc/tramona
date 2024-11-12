@@ -518,7 +518,7 @@ export default function PropertyPage({
         </div>
 
         {sidebar && (
-          <div className="hidden shrink-0 md:block md:w-72 lg:w-96">
+          <div className="hidden shrink-0 md:block md:w-4/12 lg:w-96">
             <div className="sticky top-[calc(var(--header-height)+1rem)]">
               {sidebar}
             </div>

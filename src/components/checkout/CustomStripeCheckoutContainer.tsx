@@ -140,11 +140,7 @@ const CustomStripeCheckoutContainer = ({
     <div className="w-full">
       {checkoutReady && options?.clientSecret ? (
         <Elements stripe={stripePromise} options={options}>
-          <StripeCheckoutForm
-            originalListingPlatform={
-              unifiedCheckoutData.property.originalListingPlatform
-            }
-          />
+          <StripeCheckoutForm unifiedCheckoutData={unifiedCheckoutData} />
         </Elements>
       ) : (
         <div className="h-48">

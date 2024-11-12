@@ -4,18 +4,36 @@ import PriceDetailsBeforeTax from "@/components/_common/PriceDetailsBeforeTax";
 import { formatDateRange } from "@/utils/utils";
 import ReserveBtn, { PropertyPageData } from "./actionButtons/RequestToBookBtn";
 import type { RequestToBookDetails } from "./actionButtons/RequestToBookBtn";
-
+import { useRouter } from "next/router";
 export default function RequestToBookPageMobileBottomCard({
   property,
-  requestToBook,
 }: {
   // property: Pick<
   //   Property,
   //   "stripeVerRequired" | "originalListingId" | "bookOnAirbnb"
   // >;
   property: PropertyPageData;
-  requestToBook: RequestToBookDetails;
 }) {
+  const router = useRouter();
+  const { query } = useRouter();
+  const checkIn = query.checkIn
+    ? new Date(query.checkIn as string)
+    : new Date();
+  const checkOut = query.checkOut
+    ? new Date(query.checkOut as string)
+    : new Date();
+  const numGuests = query.numGuests ? parseInt(query.numGuests as string) : 2;
+
+  const travelerOfferedPriceBeforeFees = parseInt(
+    query.travelerOfferedPriceBeforeFees as string,
+  );
+
+  const requestToBook = {
+    checkIn,
+    checkOut,
+    numGuests,
+    travelerOfferedPriceBeforeFees,
+  };
   const { data: verificationStatus } =
     api.users.myVerificationStatus.useQuery();
 

@@ -14,7 +14,6 @@ export type RequestToBookDetails = {
 
 export default function RequestToBookPage({
   property,
-  requestToBook,
 }: {
   property: PropertyPageData;
   requestToBook: RequestToBookDetails;
@@ -23,17 +22,10 @@ export default function RequestToBookPage({
     <PropertyPage
       property={property}
       sidebar={
-        <RequestToBookPageSidebar
-          property={property}
-          requestToBook={requestToBook}
-          acceptedAt={false}
-        />
+        <RequestToBookPageSidebar property={property} acceptedAt={false} />
       }
       mobileBottomCard={
-        <RequestToBookPageMobileBottomCard
-          property={property}
-          requestToBook={requestToBook}
-        />
+        <RequestToBookPageMobileBottomCard property={property} />
       }
     />
   );

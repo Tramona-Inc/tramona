@@ -60,14 +60,7 @@ export default function BookNowBtn(props: UnifiedProps) {
     const checkIn = formatDateMonthDayYear(props.requestToBook.checkIn);
     const checkOut = formatDateMonthDayYear(props.requestToBook.checkOut);
 
-    const baseCheckoutPath =
-      props.property.bookItNowEnabled &&
-      getApplicableBookItNowDiscount({
-        bookItNowDiscountTiers: props.property.bookItNowDiscountTiers,
-        checkIn: props.requestToBook.checkIn,
-      }) !== null
-        ? "book-it-now-checkout"
-        : "request-to-book-checkout";
+    const baseCheckoutPath = "book-it-now-checkout";
 
     return `/${baseCheckoutPath}/${props.property.id}?checkIn=${checkIn}&checkOut=${checkOut}&numGuests=${props.requestToBook.numGuests}&travelerOfferedPriceBeforeFees=${props.requestToBook.travelerOfferedPriceBeforeFees}`;
   }, [props.property, props.requestToBook, props.offer]);
@@ -82,7 +75,7 @@ export default function BookNowBtn(props: UnifiedProps) {
           : "primary"
       }
       size={props.btnSize}
-      className="w-full"
+      className="w-full text-sm tracking-tight lg:text-base lg:tracking-normal"
       disabled={isBooked}
     >
       {isBooked ? (
@@ -100,7 +93,7 @@ export default function BookNowBtn(props: UnifiedProps) {
           <ExternalLinkIcon className="size-5" />
         </Link>
       ) : !props.property.stripeVerRequired ||
-        verificationStatus?.isIdentityVerified === "true" ? (
+        verificationStatus?.isIdentityVerified ? (
         <Link href={checkoutUrl}>
           Book now
           <ArrowRightIcon className="size-5" />
@@ -110,7 +103,7 @@ export default function BookNowBtn(props: UnifiedProps) {
       ) : (
         <VerificationProvider>
           <IdentityModal isPrimary={true} />
-          <p className="hidden text-center text-sm font-semibold text-red-500 md:block">
+          <p className="hidden text-center text-sm font-semibold tracking-tight text-red-500 md:block">
             This host requires you to go through Stripe verification before you
             book
           </p>

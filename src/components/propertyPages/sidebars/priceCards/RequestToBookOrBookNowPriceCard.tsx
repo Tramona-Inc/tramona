@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
@@ -11,11 +9,6 @@ import {
 import { cn, formatCurrency } from "@/utils/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import {
   Select,
   SelectContent,
@@ -31,44 +24,94 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import {
-  ChevronDown,
-  ShoppingCart,
-  Info,
-  Clock,
-  CheckCircle,
-} from "lucide-react";
+import { ChevronDown, Info, Clock, CheckCircle } from "lucide-react";
+import { useRouter } from "next/router";
 
-import RequestToBookBtn, {
-  RequestToBookDetails,
-  PropertyPageData,
-} from "../actionButtons/RequestToBookBtn";
 import PriceCardInformation from "./PriceCardInformation";
 import BookNowBtn from "../actionButtons/BookNowBtn";
+import RequestToBookBtn from "../actionButtons/RequestToBookBtn";
+import { PropertyPageData } from "../../PropertyPage";
+
+export type RequestToBookDetails = {
+  checkIn: Date;
+  checkOut: Date;
+  numGuests: number;
+  travelerOfferedPriceBeforeFees: number;
+};
 
 export default function RequestToBookOrBookNowPriceCard({
-  // offer,
   property,
-  requestToBook,
 }: {
   property: PropertyPageData;
-  requestToBook: RequestToBookDetails;
 }) {
-  const [date, setDate] = useState({
-    from: new Date(2024, 10, 11),
-    to: new Date(2024, 10, 14),
-  });
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-  const [showrequestInput, setShowrequestInput] = useState(false);
-  const [requestAmount, setrequestAmount] = useState("");
-  const [requestPercentage, setrequestPercentage] = useState(5);
-  const [selectedPreset, setSelectedPreset] = useState<number | null>(null);
-
   const basePrice = 14500; // per night price
   const minDiscount = 5;
   const maxDiscount = 20;
 
-  requestToBook.travelerOfferedPriceBeforeFees = basePrice;
+  const router = useRouter();
+  const { query } = router;
+
+  const initialRequestToBook: RequestToBookDetails = {
+    checkIn: query.checkIn ? new Date(query.checkIn as string) : new Date(),
+    checkOut: query.checkOut ? new Date(query.checkOut as string) : new Date(),
+    numGuests: query.numGuests ? parseInt(query.numGuests as string) : 2,
+    travelerOfferedPriceBeforeFees: query.travelerOfferedPriceBeforeFees
+      ? parseInt(query.travelerOfferedPriceBeforeFees as string)
+      : basePrice,
+  };
+
+  const [date, setDate] = useState({
+    from: initialRequestToBook.checkIn,
+    to: initialRequestToBook.checkOut,
+  });
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [showRequestInput, setShowRequestInput] = useState(false);
+  const [requestAmount, setRequestAmount] = useState(basePrice);
+  const [requestPercentage, setRequestPercentage] = useState(0);
+  const [selectedPreset, setSelectedPreset] = useState<number | null>(null);
+  const [requestToBook, setRequestToBook] =
+    useState<RequestToBookDetails>(initialRequestToBook);
+
+  useEffect(() => {
+    if (query.checkIn && query.checkOut && query.numGuests) {
+      const checkIn = new Date(query.checkIn as string);
+      const checkOut = new Date(query.checkOut as string);
+      const numGuests = parseInt(query.numGuests as string);
+      setDate({ from: checkIn, to: checkOut });
+      setRequestToBook((prevState) => ({
+        ...prevState,
+        checkIn,
+        checkOut,
+        numGuests,
+      }));
+    }
+  }, [query.checkIn, query.checkOut, query.numGuests]);
+
+  const updateRequestToBook = (updates: Partial<RequestToBookDetails>) => {
+    setRequestToBook((prevState) => ({
+      ...prevState,
+      ...updates,
+    }));
+
+    // Update URL query params
+    void router.push(
+      {
+        query: {
+          ...query,
+          ...updates,
+          checkIn: updates.checkIn?.toISOString() ?? query.checkIn,
+          checkOut: updates.checkOut?.toISOString() ?? query.checkOut,
+        },
+      },
+      undefined,
+      { shallow: true },
+    );
+  };
+
+  const handleGuestChange = (value: string) => {
+    const numGuests = parseInt(value);
+    updateRequestToBook({ numGuests });
+  };
 
   const presetOptions = [
     { price: 116, label: "Good request", percentOff: 20 },
@@ -77,43 +120,42 @@ export default function RequestToBookOrBookNowPriceCard({
   ];
 
   useEffect(() => {
-    if (showrequestInput) {
-      const discountedPrice = Math.round(
-        basePrice * (1 - requestPercentage / 100),
+    if (showRequestInput) {
+      const newPercentage = Math.round(
+        ((basePrice - requestAmount) / basePrice) * 100,
       );
-      setrequestAmount(discountedPrice.toString());
+      setRequestPercentage(
+        Math.max(minDiscount, Math.min(newPercentage, maxDiscount)),
+      );
     }
-  }, [showrequestInput, requestPercentage]);
+  }, [showRequestInput, requestAmount, basePrice]);
 
-  const handlerequestChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newrequestAmount = e.target.value;
-    setrequestAmount(newrequestAmount);
-    const newPercentage = Math.round(
-      ((basePrice - parseFloat(newrequestAmount)) / basePrice) * 100,
-    );
-    setrequestPercentage(
-      Math.max(minDiscount, Math.min(newPercentage, maxDiscount)),
-    );
+  const handleRequestChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newRequestAmount = parseInt(e.target.value);
+    setRequestAmount(newRequestAmount);
+    updateRequestToBook({ travelerOfferedPriceBeforeFees: newRequestAmount });
     setSelectedPreset(null);
   };
 
   const handleSliderChange = (value: number[]) => {
-    setrequestPercentage(value[0]!);
-    const newrequestAmount = Math.round(basePrice * (1 - value[0]! / 100));
-    setrequestAmount(newrequestAmount.toString());
+    const newRequestAmount = Math.round(basePrice * (1 - value[0]! / 100));
+    setRequestAmount(newRequestAmount);
+    setRequestPercentage(value[0]!);
+    updateRequestToBook({ travelerOfferedPriceBeforeFees: newRequestAmount });
     setSelectedPreset(null);
   };
 
-  const getrequestLikelihood = () => {
+  const getRequestLikelihood = () => {
     if (requestPercentage <= 10) return "Good chance of acceptance";
     if (requestPercentage <= 15) return "Moderate chance of acceptance";
     return "Lower chance of acceptance";
   };
 
   const handlePresetSelect = (price: number) => {
-    setrequestAmount(price.toString());
+    setRequestAmount(price);
+    updateRequestToBook({ travelerOfferedPriceBeforeFees: price });
     const newPercentage = Math.round(((basePrice - price) / basePrice) * 100);
-    setrequestPercentage(
+    setRequestPercentage(
       Math.max(minDiscount, Math.min(newPercentage, maxDiscount)),
     );
     setSelectedPreset(price);
@@ -121,7 +163,7 @@ export default function RequestToBookOrBookNowPriceCard({
 
   return (
     <Card className="w-full bg-gray-50 shadow-lg">
-      <CardContent className="flex flex-col gap-y-2 rounded-xl p-6">
+      <CardContent className="flex flex-col gap-y-2 rounded-xl md:p-2 xl:p-6">
         {/* Date Picker */}
         <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
           <PopoverTrigger asChild>
@@ -149,6 +191,10 @@ export default function RequestToBookOrBookNowPriceCard({
               onSelect={(selectedDate) => {
                 if (selectedDate?.from && selectedDate?.to) {
                   setDate({ from: selectedDate.from, to: selectedDate.to });
+                  updateRequestToBook({
+                    checkIn: selectedDate.from,
+                    checkOut: selectedDate.to,
+                  });
                   setIsCalendarOpen(false);
                 }
               }}
@@ -167,22 +213,26 @@ export default function RequestToBookOrBookNowPriceCard({
               )}
             >
               <div className="text-sm text-muted-foreground">GUESTS</div>
-              <div className="text-base font-medium">2 guests</div>
+              <div className="text-base font-medium">
+                {requestToBook.numGuests} guests
+              </div>
             </button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
             <div className="p-4">
-              <Select defaultOpen={true}>
+              <Select
+                defaultValue={requestToBook.numGuests.toString()}
+                onValueChange={handleGuestChange}
+              >
                 <SelectTrigger className="w-[200px]">
                   <SelectValue placeholder="Select guests" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="1">1 guest</SelectItem>
-                  <SelectItem value="2">2 guests</SelectItem>
-                  <SelectItem value="3">3 guests</SelectItem>
-                  <SelectItem value="4">4 guests</SelectItem>
-                  <SelectItem value="5">5 guests</SelectItem>
-                  <SelectItem value="6">6 guests</SelectItem>
+                  {[1, 2, 3, 4, 5, 6].map((num) => (
+                    <SelectItem key={num} value={num.toString()}>
+                      {num} guest{num !== 1 ? "s" : ""}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -190,7 +240,7 @@ export default function RequestToBookOrBookNowPriceCard({
         </Popover>
 
         {/* Pricing and Booking Options */}
-        {showrequestInput ? (
+        {showRequestInput ? (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">Pricing Options</h3>
@@ -248,7 +298,7 @@ export default function RequestToBookOrBookNowPriceCard({
                       type="number"
                       placeholder="Enter request"
                       value={requestAmount}
-                      onChange={handlerequestChange}
+                      onChange={handleRequestChange}
                       className="pl-7"
                     />
                   </div>
@@ -294,7 +344,7 @@ export default function RequestToBookOrBookNowPriceCard({
                         : "text-red-600",
                   )}
                 >
-                  {getrequestLikelihood()}
+                  {getRequestLikelihood()}
                 </div>
 
                 <div className="space-y-2 text-sm">
@@ -309,7 +359,7 @@ export default function RequestToBookOrBookNowPriceCard({
                     <span>Accepted requests will be automatically booked.</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Info className="h-4 w-4" />
+                    <Info className="h-5 w-5" />
                     <span>
                       You can place multiple requests. Overlapping requests will
                       be canceled if one is accepted.
@@ -326,7 +376,7 @@ export default function RequestToBookOrBookNowPriceCard({
                   <Button
                     variant="outline"
                     className="flex-1"
-                    onClick={() => setShowrequestInput(false)}
+                    onClick={() => setShowRequestInput(false)}
                   >
                     Cancel request
                   </Button>
@@ -339,7 +389,7 @@ export default function RequestToBookOrBookNowPriceCard({
             <div>
               <div className="mb-1 text-2xl font-bold">Book it now for</div>
               <div className="flex items-baseline gap-2">
-                <span className="text-5xl font-bold text-primary">
+                <span className="text-4xl font-bold text-primary lg:text-5xl">
                   {formatCurrency(basePrice)}
                 </span>
                 <span className="text-xl text-muted-foreground">Per Night</span>
@@ -353,16 +403,20 @@ export default function RequestToBookOrBookNowPriceCard({
               </Button>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <BookNowBtn
-                btnSize="sm"
-                property={property}
-                requestToBook={requestToBook}
-              />
+            <div className="grid grid-cols-2 gap-1">
+              {property.bookItNowEnabled && (
+                <BookNowBtn
+                  btnSize="sm"
+                  property={property}
+                  requestToBook={requestToBook}
+                />
+              )}
               <Button
                 variant="outline"
-                className="w-full"
-                onClick={() => setShowrequestInput(true)}
+                className={`col-auto w-full px-2 text-sm tracking-tight lg:text-base ${
+                  !property.bookItNowEnabled ? "col-span-2" : ""
+                }`}
+                onClick={() => setShowRequestInput(true)}
               >
                 Place request
               </Button>

@@ -11,64 +11,14 @@ export type PropertyPageData = RouterOutputs["properties"]["getById"];
 export default function RequestToBookPageSidebar({
   // offer,
   property,
-  requestToBook,
   acceptedAt,
 }: {
   property: PropertyPageData;
-  requestToBook: RequestToBookDetails;
   acceptedAt: boolean;
 }) {
   return (
     <div className="space-y-4">
-      {/* <Card>
-        <CardContent className="space-y-4">
-          <div className="*:px-4 *:py-2 grid grid-cols-2 rounded-lg border">
-            <div className="border-r">
-              <p className="text-xs font-bold uppercase text-muted-foreground">
-                Check-in
-              </p>
-              <p className="font-bold">
-                {formatDateWeekMonthDay(requestToBook.checkIn)}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs font-bold uppercase text-muted-foreground">
-                Check-out
-              </p>
-              <p className="font-bold">
-                {formatDateWeekMonthDay(requestToBook.checkOut)}
-              </p>
-            </div>
-            <div className="col-span-full border-t">
-              <p className="text-xs font-bold uppercase text-muted-foreground">
-                Guests
-              </p>
-              <p className="font-bold">
-                {plural(requestToBook.numGuests, "guest")}
-              </p>
-            </div>
-          </div>
-          <ReserveBtn
-            btnSize="lg"
-            requestToBook={requestToBook}
-            property={property}
-          />
-          {!acceptedAt && (
-            <p className="text-center text-xs text-zinc-500">
-              You won&apos;t be charged yet
-            </p>
-          )}
-          <PriceDetailsBeforeTax
-            property={property}
-            requestToBook={requestToBook}
-            bookOnAirbnb={property.bookOnAirbnb}
-          />
-        </CardContent>
-      </Card> */}
-      <RequestToBookOrBookNowPriceCard
-        property={property}
-        requestToBook={requestToBook}
-      />
+      <RequestToBookOrBookNowPriceCard property={property} />
 
       {!property.bookOnAirbnb && (
         <div className="flex gap-2 rounded-xl border border-orange-300 bg-orange-50 p-3 text-orange-800">

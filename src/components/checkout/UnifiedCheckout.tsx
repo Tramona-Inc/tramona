@@ -12,6 +12,7 @@ import { UnifiedCheckoutData } from "./types";
 import TripDetails from "./sections/TripDetails";
 import CancellationPolicy from "./sections/CancellationPolicy";
 import CheckoutSummary from "./sections/CheckoutSummary";
+import { useSession } from "next-auth/react";
 
 interface UnifiedCheckoutProps {
   unifiedCheckoutData: UnifiedCheckoutData;
@@ -19,6 +20,7 @@ interface UnifiedCheckoutProps {
 
 ////// --------------------------------------- THIS CHECKOUT WORKS FOR BOOK IT NOW, OFFERS, REQUEST TO BOOK (First needs to be modified by its respective page) ------------------------------------------
 export function UnifiedCheckout({ unifiedCheckoutData }: UnifiedCheckoutProps) {
+  useSession({ required: true });
   const router = useRouter();
   const isMobile = !useIsSm();
 
