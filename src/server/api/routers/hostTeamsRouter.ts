@@ -472,7 +472,7 @@ export const hostTeamsRouter = createTRPCRouter({
       return await ctx.db.query.hostTeams
         .findFirst({
           columns: {},
-          with: { owner: { columns: { phoneNumber: true, isWhatsApp: true } } },
+          with: { owner: { columns: { phoneNumber: true, isWhatsApp: true, stripeConnectId: true, } } },
           where: eq(hostTeams.id, input.hostTeamId),
         })
         .then((res) => res?.owner);

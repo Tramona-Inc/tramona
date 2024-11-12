@@ -410,7 +410,6 @@ export async function handleRequestSubmission(
         propertyDetails.autoOfferDiscountTiers
       ) {
         try {
-          console.log("aboutta scrape price of airbnb thing");
           const airbnbTotalPrice = await scrapeAirbnbPrice({
             airbnbListingId: propertyDetails.originalListingId,
             params: {
@@ -419,20 +418,13 @@ export async function handleRequestSubmission(
               numGuests: input.numGuests,
             },
           });
-          console.log(
-            "in da requests router and just scraped price",
-            airbnbTotalPrice,
-          );
 
           const airbnbNightlyPrice = airbnbTotalPrice / numNights;
-          console.log("airbnb nightly price", airbnbNightlyPrice);
-          console.log("requested nightly price", requestedNightlyPrice);
+
           const percentOff =
             ((airbnbNightlyPrice - requestedNightlyPrice) /
               airbnbNightlyPrice) *
             100;
-
-          console.log("percent off", percentOff);
 
           const daysUntilCheckIn = differenceInDays(input.checkIn, new Date());
 
@@ -441,15 +433,10 @@ export async function handleRequestSubmission(
               (tier) => daysUntilCheckIn >= tier.days,
             );
 
-          console.log("applicable discount", applicableDiscount);
-
           if (
             applicableDiscount &&
             percentOff <= applicableDiscount.percentOff
           ) {
-            console.log(
-              "percent off is less than or equal to applicable discount",
-            );
 
             //create trip checkout First
             const travelerOfferedPriceBeforeFees = getTravelerOfferedPrice({

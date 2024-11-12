@@ -1,10 +1,11 @@
-import { Separator } from "../ui/separator";
+import { Separator } from "../../ui/separator";
 import { formatCurrency, getNumNights } from "@/utils/utils";
 import { plural } from "@/utils/utils";
-import type { OfferWithDetails } from "@/components/offers/PropertyPage";
+import type { OfferWithDetails } from "@/components/propertyPages/PropertyPage";
 import React from "react";
 import {
-  breakdownPayment,
+  breakdownPaymentByOffer,
+  breakdownPaymentByPropertyAndTripParams,
   getServiceFee,
 } from "@/utils/payment-utils/paymentBreakdown";
 import {
@@ -14,22 +15,34 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { InfoIcon } from "lucide-react";
+import type { UnifiedCheckoutData } from "../types";
 
-export function OfferPriceDetails({
-  offer,
-  bookOnAirbnb,
+export function UnifiedPriceDetails({
+  unifiedCheckoutData,
 }: {
-  offer: OfferWithDetails;
-  bookOnAirbnb?: boolean;
+  unifiedCheckoutData: UnifiedCheckoutData;
 }) {
-  const numberOfNights = getNumNights(offer.checkIn, offer.checkOut);
-  const nightlyPrice = offer.travelerOfferedPriceBeforeFees / numberOfNights;
-  const paymentBreakdown = breakdownPayment(offer);
+  const numberOfNights = getNumNights(
+    unifiedCheckoutData.dates.checkIn,
+    unifiedCheckoutData.dates.checkOut,
+  );
+  const nightlyPrice =
+    unifiedCheckoutData.pricing.travelerOfferedPriceBeforeFees / numberOfNights;
+
+  const paymentBreakdown = breakdownPaymentByPropertyAndTripParams({
+    dates: {
+      checkIn: unifiedCheckoutData.dates.checkIn,
+      checkOut: unifiedCheckoutData.dates.checkOut,
+    },
+    travelerPriceBeforeFees:
+      unifiedCheckoutData.pricing.travelerOfferedPriceBeforeFees,
+    property: unifiedCheckoutData.property,
+  });
 
   const items = [
     {
       title: `${formatCurrency(nightlyPrice)} x ${plural(numberOfNights, "night")}`,
-      price: `${formatCurrency(offer.travelerOfferedPriceBeforeFees / numberOfNights)}`,
+      price: `${formatCurrency(unifiedCheckoutData.pricing.travelerOfferedPriceBeforeFees / numberOfNights)}`,
     },
     {
       title: "Cleaning fee",
@@ -57,7 +70,7 @@ export function OfferPriceDetails({
             <p>{item.price}</p>
           </div>
         ))}
-        {offer.property.currentSecurityDeposit > 0 && (
+        {unifiedCheckoutData.property.currentSecurityDeposit > 0 && (
           <div className="flex items-center justify-between text-sm font-light">
             <TooltipProvider>
               <Tooltip>
@@ -81,7 +94,11 @@ export function OfferPriceDetails({
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-            <p>{formatCurrency(offer.property.currentSecurityDeposit)}</p>
+            <p>
+              {formatCurrency(
+                unifiedCheckoutData.property.currentSecurityDeposit,
+              )}
+            </p>
           </div>
         )}
         <Separator />

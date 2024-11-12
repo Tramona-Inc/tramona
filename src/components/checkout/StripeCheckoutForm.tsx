@@ -8,7 +8,7 @@ import {
   ExpressCheckoutElement,
 } from "@stripe/react-stripe-js";
 import { Separator } from "../ui/separator";
-import ContactInfoForm from "./ContactInfoForm";
+import ContactInfoForm from "./sections/ContactInfoForm";
 import type {
   StripePaymentElementOptions,
   StripeExpressCheckoutElementOptions,
@@ -20,11 +20,12 @@ import { Checkbox } from "../ui/checkbox";
 import { Label } from "../ui/label";
 import Link from "next/link";
 import crypto from "crypto";
+import { UnifiedCheckoutData } from "./types";
 
 export default function StripeCheckoutForm({
-  originalListingPlatform,
+  unifiedCheckoutData,
 }: {
-  originalListingPlatform: string | null;
+  unifiedCheckoutData: UnifiedCheckoutData;
 }) {
   const isProduction = process.env.NODE_ENV === "production";
   const baseUrl = isProduction
@@ -61,7 +62,10 @@ export default function StripeCheckoutForm({
       //`Elements` instance that was used to create the Payment Element
       elements,
       confirmParams: {
-        return_url: `${baseUrl}/my-trips/confirmation`,
+        return_url:
+          unifiedCheckoutData.type === "requestToBook"
+            ? `${baseUrl}/request-to-book/${unifiedCheckoutData.property.id}`
+            : `${baseUrl}/my-trips/confirmation`,
       },
     });
 
@@ -104,7 +108,7 @@ export default function StripeCheckoutForm({
             options={expressCheckoutOptions}
             onConfirm={() => handleSubmit}
           />
-          <div className="my-2 flex w-full flex-row items-center justify-center gap-x-2 text-nowrap text-sm text-muted-foreground">
+          <div className="text-nowrap my-2 flex w-full flex-row items-center justify-center gap-x-3 whitespace-nowrap text-sm text-muted-foreground">
             <div className="w-full border border-t border-zinc-200" />
             Or pay with card
             <div className="w-full border border-t border-zinc-200" />
@@ -127,7 +131,9 @@ export default function StripeCheckoutForm({
         <TermsAndSubmit
           termsAccepted={termsAccepted}
           setTermsAccepted={setTermsAccepted}
-          originalListingPlatform={originalListingPlatform}
+          originalListingPlatform={
+            unifiedCheckoutData.property.originalListingPlatform
+          }
         />
         <Button
           type="submit"

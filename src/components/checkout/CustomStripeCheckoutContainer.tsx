@@ -3,16 +3,17 @@ import { useStripe } from "@/utils/stripe-client";
 import StripeCheckoutForm from "./StripeCheckoutForm";
 import React, { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/router";
-import type { OfferWithDetails } from "../offers/PropertyPage";
 import { Elements } from "@stripe/react-stripe-js";
 import { type StripeElementsOptions } from "@stripe/stripe-js";
 import Spinner from "../_common/Spinner";
 import { useToast } from "../ui/use-toast";
+import { UnifiedCheckoutData } from "./types";
+import { breakdownPaymentByPropertyAndTripParams } from "@/utils/payment-utils/paymentBreakdown";
 
-const CustomStripeCheckout = ({
-  offer: { property, ...offer },
+const CustomStripeCheckoutContainer = ({
+  unifiedCheckoutData,
 }: {
-  offer: OfferWithDetails;
+  unifiedCheckoutData: UnifiedCheckoutData;
 }) => {
   const { toast } = useToast();
   const stripePromise = useStripe();
@@ -26,9 +27,31 @@ const CustomStripeCheckout = ({
   const authorizePayment = api.stripe.authorizePayment.useMutation();
   const fetchClientSecret = useCallback(async () => {
     try {
+      console.log(unifiedCheckoutData.pricing.travelerOfferedPriceBeforeFees);
+      const { totalTripAmount } = breakdownPaymentByPropertyAndTripParams({
+        dates: {
+          checkIn: unifiedCheckoutData.dates.checkIn,
+          checkOut: unifiedCheckoutData.dates.checkOut,
+        },
+        travelerPriceBeforeFees:
+          unifiedCheckoutData.pricing.travelerOfferedPriceBeforeFees,
+        property: unifiedCheckoutData.property,
+      });
+      console.log(totalTripAmount);
       return await authorizePayment.mutateAsync({
-        offerId: offer.id,
+        totalAmountPaid: totalTripAmount,
+        travelerOfferedPriceBeforeFees:
+          unifiedCheckoutData.pricing.travelerOfferedPriceBeforeFees,
         cancelUrl: pathname,
+        propertyId: unifiedCheckoutData.property.id,
+        offerId: unifiedCheckoutData.offerId ?? null,
+        scrapeUrl: unifiedCheckoutData.scrapeUrl,
+
+        datePriceFromAirbnb: unifiedCheckoutData.pricing.datePriceFromAirbnb,
+        checkIn: unifiedCheckoutData.dates.checkIn,
+        checkOut: unifiedCheckoutData.dates.checkOut,
+        type: unifiedCheckoutData.type,
+        numOfGuests: unifiedCheckoutData.guests,
       });
     } catch (error) {
       toast({
@@ -117,9 +140,7 @@ const CustomStripeCheckout = ({
     <div className="w-full">
       {checkoutReady && options?.clientSecret ? (
         <Elements stripe={stripePromise} options={options}>
-          <StripeCheckoutForm
-            originalListingPlatform={property.originalListingPlatform}
-          />
+          <StripeCheckoutForm unifiedCheckoutData={unifiedCheckoutData} />
         </Elements>
       ) : (
         <div className="h-48">
@@ -130,7 +151,10 @@ const CustomStripeCheckout = ({
   );
 };
 
-const MemoizedCustomStripeCheckout = React.memo(CustomStripeCheckout);
-MemoizedCustomStripeCheckout.displayName = "CustomStripeCheckout";
+const MemoizedCustomStripeCheckoutContainer = React.memo(
+  CustomStripeCheckoutContainer,
+);
+MemoizedCustomStripeCheckoutContainer.displayName =
+  "CustomStripeCheckoutContainer";
 
-export default MemoizedCustomStripeCheckout;
+export default MemoizedCustomStripeCheckoutContainer;

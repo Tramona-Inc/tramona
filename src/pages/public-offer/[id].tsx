@@ -1,6 +1,6 @@
 import DashboadLayout from "@/components/_common/Layout/DashboardLayout";
 import Spinner from "@/components/_common/Spinner";
-import { OfferPage } from "@/components/offers/PropertyPage";
+import { OfferPage } from "@/components/propertyPages/PropertyPage";
 import { NextSeo } from "next-seo";
 import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";

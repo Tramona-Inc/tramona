@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import UserAvatar from "@/components/_common/UserAvatar";
 import { Button, ButtonProps } from "@/components/ui/button";
 import ReviewCard from "@/components/_common/ReviewCard";
@@ -14,35 +14,25 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { api, type RouterOutputs } from "@/utils/api";
-import {
-  formatDateRange,
-  formatDateWeekMonthDay,
-  getOfferDiscountPercentage,
-  plural,
-} from "@/utils/utils";
+import { type RouterOutputs } from "@/utils/api";
+import { getOfferDiscountPercentage, plural } from "@/utils/utils";
 import { AspectRatio } from "../ui/aspect-ratio";
 import {
   ImagesIcon,
   ChevronRight,
   StarIcon,
   BedDoubleIcon,
-  InfoIcon,
   ExternalLinkIcon,
-  FlameIcon,
-  ArrowRightIcon,
-  BookCheckIcon,
-  CheckIcon,
 } from "lucide-react";
 import Image from "next/image";
 import React from "react";
-import OfferPhotos from "./OfferPhotos";
-import AmenitiesComponent from "./CategorizedAmenities";
-import PropertyAmenities from "./PropertyAmenities";
+import PropertyPhotos from "./sections/PropertyPhotos";
+import AmenitiesComponent from "./sections/CategorizedAmenities";
+import PropertyAmenities from "./sections/PropertyAmenities";
 import ShareOfferDialog from "../_common/ShareLink/ShareOfferDialog";
 import { Card, CardContent } from "../ui/card";
 import { getOriginalListing } from "@/utils/listing-sites";
-import { PropertyCompareBtn } from "./PropertyCompareBtn";
+import { PropertyCompareBtn } from "./sections/PropertyCompareBtn";
 import SingleLocationMap from "../_common/GoogleMaps/SingleLocationMap";
 import Link from "next/link";
 import {
@@ -50,16 +40,12 @@ import {
   CheckOutTimeRule,
   PetsRule,
   SmokingRule,
-} from "./HouseRules";
-import PriceDetailsBeforeTax from "@/components/_common/PriceDetailsBeforeTax";
+} from "./sections/HouseRules";
 import { getCancellationPolicyDescription } from "@/config/getCancellationPolicyDescription";
-import { VerificationProvider } from "../_utils/VerificationContext";
-import IdentityModal from "../_utils/IdentityModal";
-import { Property } from "@/server/db/schema";
-import ChatOfferButton from "./ChatOfferButton";
-import { Airbnb } from "@/utils/listing-sites/Airbnb";
 import { createUserNameAndPic } from "../activity-feed/admin/generationHelper";
-import ReasonsToBook from "./ReasonsToBook";
+import ChatOfferButton from "./sections/ChatOfferButton";
+import ReasonsToBook from "./sections/ReasonsToBook";
+import UserInfo from "./sections/UserInfo";
 
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 export type PropertyPageData = RouterOutputs["properties"]["getById"];
@@ -100,8 +86,6 @@ export default function PropertyPage({
     `${property.hostTeam.owner.firstName} ${property.hostTeam.owner.lastName}`;
 
   const originalListing = getOriginalListing(property);
-
-  console.log(property.originalListingPlatform, property.originalListingId);
 
   const renderSeeMoreButton = property.imageUrls.length > 5;
 
@@ -150,7 +134,7 @@ export default function PropertyPage({
           </div>
           <DialogContentNoDrawer className="flex w-full items-center justify-center border-none bg-transparent [&>button]:hidden">
             <div className="screen-full flex justify-center">
-              <OfferPhotos
+              <PropertyPhotos
                 propertyImages={property.imageUrls}
                 indexOfSelectedImage={selectedImageIdx}
               />
@@ -206,7 +190,7 @@ export default function PropertyPage({
                   </div>
                   <DialogContentNoDrawer className="flex items-center justify-center border-none bg-transparent [&>button]:hidden">
                     <div className="screen-full flex justify-center">
-                      <OfferPhotos
+                      <PropertyPhotos
                         propertyImages={property.imageUrls}
                         indexOfSelectedImage={selectedImageIdx}
                       />
@@ -237,7 +221,7 @@ export default function PropertyPage({
               <div className="flex-1">
                 <p className="gap flex flex-wrap items-center gap-x-1 pt-1 text-sm font-medium capitalize">
                   {property.propertyType} in {property.city} ·{" "}
-                  <StarIcon className="inline size-[1em] fill-primaryGreen stroke-primaryGreen" />{" "}
+                  <StarIcon className="size-[1em] inline fill-primaryGreen stroke-primaryGreen" />{" "}
                   {property.numRatings === 0 ? (
                     <>New</>
                   ) : (
@@ -351,7 +335,7 @@ export default function PropertyPage({
                 {property.roomsWithBeds.map((room, index) => (
                   <div
                     key={index}
-                    className="flex min-w-56 flex-col items-center gap-4 whitespace-pre rounded-lg border p-4"
+                    className="min-w-56 flex flex-col items-center gap-4 whitespace-pre rounded-lg border p-4"
                   >
                     <BedDoubleIcon />
                     <p className="text-lg font-semibold">{room.name}</p>
@@ -411,7 +395,7 @@ export default function PropertyPage({
                   Guest Reviews
                 </h2>
                 <div className="flex items-center gap-2 pb-4">
-                  <StarIcon className="inline size-[1em] fill-primaryGreen stroke-primaryGreen" />{" "}
+                  <StarIcon className="size-[1em] inline fill-primaryGreen stroke-primaryGreen" />{" "}
                   {property.avgRating} · {plural(property.numRatings, "review")}
                 </div>
               </div>
@@ -460,7 +444,7 @@ export default function PropertyPage({
                     />
                     <p className="text-center text-lg font-bold">{hostName}</p>
                   </div>
-                  <div className="divide-y *:p-2">
+                  <div className="*:p-2 divide-y">
                     <div>
                       <p className="text-center text-lg font-bold">
                         {property.hostNumReviews}
@@ -534,7 +518,7 @@ export default function PropertyPage({
         </div>
 
         {sidebar && (
-          <div className="hidden shrink-0 md:block md:w-72 lg:w-96">
+          <div className="hidden shrink-0 md:block md:w-4/12 lg:w-96">
             <div className="sticky top-[calc(var(--header-height)+1rem)]">
               {sidebar}
             </div>
@@ -546,262 +530,6 @@ export default function PropertyPage({
             {mobileBottomCard}
           </div>
         )}
-      </div>
-    </div>
-  );
-}
-
-function BookNowBtn({
-  btnSize,
-  offer,
-  property,
-}: {
-  btnSize: ButtonProps["size"];
-  offer: OfferWithDetails;
-  property: Pick<
-    Property,
-    "stripeVerRequired" | "originalListingId" | "bookOnAirbnb"
-  >;
-}) {
-  const { data: verificationStatus } =
-    api.users.myVerificationStatus.useQuery();
-  const isBooked = !!offer.acceptedAt;
-
-  const airbnbCheckoutUrl = Airbnb.createListing(
-    property.originalListingId!,
-  ).getCheckoutUrl({
-    checkIn: offer.checkIn,
-    checkOut: offer.checkOut,
-    numGuests: offer.request?.numGuests ?? 1,
-  });
-
-  return (
-    <Button
-      asChild={!isBooked}
-      variant={
-        property.stripeVerRequired &&
-        verificationStatus?.isIdentityVerified === "pending"
-          ? "secondary"
-          : "primary"
-      }
-      size={btnSize}
-      className="w-full"
-      disabled={isBooked}
-    >
-      {isBooked ? (
-        <>
-          <BookCheckIcon className="size-5" />
-          Booked
-        </>
-      ) : property.bookOnAirbnb ? (
-        <Link
-          href={airbnbCheckoutUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Book on Airbnb
-          <ExternalLinkIcon className="size-5" />
-        </Link>
-      ) : !property.stripeVerRequired ||
-        verificationStatus?.isIdentityVerified === "true" ? (
-        <Link href={`/offer-checkout/${offer.id}`}>
-          Book now
-          <ArrowRightIcon className="size-5" />
-        </Link>
-      ) : verificationStatus?.isIdentityVerified === "pending" ? (
-        <p>Verification pending</p>
-      ) : (
-        <VerificationProvider>
-          <IdentityModal isPrimary={true} />
-          <p className="hidden text-center text-sm font-semibold text-red-500 md:block">
-            This host requires you to go through Stripe verification before you
-            book
-          </p>
-        </VerificationProvider>
-      )}
-    </Button>
-  );
-}
-
-function OfferPageSidebar({
-  offer,
-  property,
-}: {
-  offer: OfferWithDetails;
-  property: Pick<
-    Property,
-    "stripeVerRequired" | "originalListingId" | "bookOnAirbnb"
-  >;
-}) {
-  return (
-    <div className="space-y-4">
-      <Card>
-        <CardContent className="space-y-4">
-          {offer.request && (
-            <div className="grid grid-cols-2 rounded-lg border *:px-4 *:py-2">
-              <div className="border-r">
-                <p className="text-xs font-bold uppercase text-muted-foreground">
-                  Check-in
-                </p>
-                <p className="font-bold">
-                  {formatDateWeekMonthDay(offer.checkIn)}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs font-bold uppercase text-muted-foreground">
-                  Check-out
-                </p>
-                <p className="font-bold">
-                  {formatDateWeekMonthDay(offer.checkOut)}
-                </p>
-              </div>
-              <div className="col-span-full border-t">
-                <p className="text-xs font-bold uppercase text-muted-foreground">
-                  Guests
-                </p>
-                <p className="font-bold">
-                  {plural(offer.request.numGuests, "guest")}
-                </p>
-              </div>
-            </div>
-          )}
-          <BookNowBtn btnSize="lg" offer={offer} property={property} />
-          {!offer.acceptedAt && (
-            <p className="text-center text-xs text-zinc-500">
-              You won&apos;t be charged yet
-            </p>
-          )}
-          <PriceDetailsBeforeTax
-            offer={offer}
-            bookOnAirbnb={property.bookOnAirbnb}
-          />
-        </CardContent>
-      </Card>
-
-      {!property.bookOnAirbnb && (
-        <div className="flex gap-2 rounded-xl border border-orange-300 bg-orange-50 p-3 text-orange-800">
-          <FlameIcon className="size-7 shrink-0" />
-          <div>
-            <p className="text-sm font-bold">Tramona exclusive deal</p>
-            <p className="text-xs">
-              This is an exclusive offer created just for you &ndash; you will
-              not be able to find this price anywhere else
-            </p>
-          </div>
-        </div>
-      )}
-      <div className="flex gap-2 rounded-xl border border-blue-300 bg-blue-50 p-3 text-blue-800">
-        <InfoIcon className="size-7 shrink-0" />
-        <div>
-          <p className="text-sm font-bold">Important Notes</p>
-          <p className="text-xs">
-            These dates could get booked on other platforms for full price. If
-            they do, your match will be automatically withdrawn.
-            <br />
-            <br />
-            After 24 hours, this match will become available for the public to
-            book.
-            <br />
-            <br />
-            <b>We encourage you to book within 24 hours for best results.</b>
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function OfferPageMobileBottomCard({
-  offer,
-  property,
-}: {
-  offer: OfferWithDetails;
-  property: Pick<
-    Property,
-    "stripeVerRequired" | "originalListingId" | "bookOnAirbnb"
-  >;
-}) {
-  const { data: verificationStatus } =
-    api.users.myVerificationStatus.useQuery();
-
-  return (
-    <Card className="fixed bottom-16 left-0 w-full md:hidden">
-      <CardContent className="flex flex-row items-center justify-between px-4 py-1 text-sm">
-        {offer.request && (
-          <div className="flex basis-1/2 flex-col">
-            <PriceDetailsBeforeTax offer={offer} />
-            <p className="font-semibold">
-              {formatDateRange(offer.checkIn, offer.checkOut)}
-            </p>
-          </div>
-        )}
-        <div className="flex-1">
-          <BookNowBtn btnSize="sm" offer={offer} property={property} />
-          {verificationStatus?.isIdentityVerified === "false" &&
-            property.stripeVerRequired === true && (
-              <p className="text-center text-xs font-semibold text-red-500">
-                Host requires Stripe verification prior to booking
-              </p>
-            )}
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-export function OfferPage({ offer }: { offer: OfferWithDetails }) {
-  return (
-    <PropertyPage
-      property={offer.property}
-      offer={offer}
-      sidebar={<OfferPageSidebar offer={offer} property={offer.property} />}
-      mobileBottomCard={
-        <OfferPageMobileBottomCard offer={offer} property={offer.property} />
-      }
-    />
-  );
-}
-
-export function UserInfo({
-  hostName,
-  hostPic,
-  hostDesc,
-  hostLocation,
-}: {
-  hostName: string;
-  hostPic: string | null;
-  hostDesc: string | null;
-  hostLocation: string | null;
-}) {
-  return (
-    <div className="flex flex-col">
-      <div className="flex items-center gap-4">
-        <div className="flex flex-col space-y-2">
-          <div className="flex flex-col items-center space-y-2 rounded-lg p-4 shadow-lg">
-            <UserAvatar name={hostName} image={hostPic} size={"lg"} />
-            <div className="text-left">
-              <p className="flex items-center gap-1">
-                <CheckIcon className="size-4" />
-                Email verified
-              </p>
-              <p className="flex items-center gap-1">
-                <CheckIcon className="size-4" />
-                Phone verified
-              </p>
-              <p className="flex items-center gap-1">
-                <CheckIcon className="size-4" />
-                Identity verified
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className="space-y-1">
-          <div className="text-lg font-semibold">{hostName}</div>
-          <div className="text-muted-foreground">Located in {hostLocation}</div>
-          <div className="mt-2">
-            <p>{hostDesc}</p>
-          </div>
-        </div>
       </div>
     </div>
   );

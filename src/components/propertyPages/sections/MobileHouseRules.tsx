@@ -5,7 +5,7 @@ import {
   DialogContent,
   DialogTitle,
   DialogTrigger,
-} from "../ui/dialog";
+} from "../../ui/dialog";
 
 export function MobileHouseRules() {
   const houseRuleExample = {
@@ -31,16 +31,14 @@ export function MobileHouseRules() {
             <Dialog>
               <DialogTrigger className="inline-flex items-center justify-center text-[14px] text-foreground underline underline-offset-2">
                 Show more
-                <ChevronDown className="ml-1 size-4" />
+                <ChevronDown className="size-4 ml-1" />
               </DialogTrigger>
 
               <DialogContent className="w-full p-8">
                 <DialogHeader>
                   <DialogTitle>Cancellation Policy</DialogTitle>
                 </DialogHeader>
-                <p className="">
-                  {houseRuleExample.content}
-                </p>
+                <p className="">{houseRuleExample.content}</p>
               </DialogContent>
             </Dialog>
           </div>
@@ -57,16 +55,14 @@ export function MobileHouseRules() {
             <Dialog>
               <DialogTrigger className="inline-flex items-center justify-center text-[14px] text-foreground underline underline-offset-2">
                 Show more
-                <ChevronDown className="ml-1 size-4" />
+                <ChevronDown className="size-4 ml-1" />
               </DialogTrigger>
 
               <DialogContent className="w-full p-8">
                 <DialogHeader>
                   <DialogTitle>House Rules</DialogTitle>
                 </DialogHeader>
-                <p className="">
-                  {houseRuleExample.content}
-                </p>
+                <p className="">{houseRuleExample.content}</p>
               </DialogContent>
             </Dialog>
           </div>
@@ -83,16 +79,14 @@ export function MobileHouseRules() {
             <Dialog>
               <DialogTrigger className="inline-flex items-center justify-center text-[14px] text-foreground underline underline-offset-2">
                 Show more
-                <ChevronDown className="ml-1 size-4" />
+                <ChevronDown className="size-4 ml-1" />
               </DialogTrigger>
 
               <DialogContent className="w-full p-8">
                 <DialogHeader>
                   <DialogTitle>Additional Rules</DialogTitle>
                 </DialogHeader>
-                <p className="">
-                  {houseRuleExample.content}
-                </p>
+                <p className="">{houseRuleExample.content}</p>
               </DialogContent>
             </Dialog>
           </div>

@@ -6,7 +6,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "../ui/button";
+import { Button } from "../../ui/button";
 import { type OriginalListing } from "@/utils/listing-sites";
 import Link from "next/link";
 import { ExternalLinkIcon } from "lucide-react";

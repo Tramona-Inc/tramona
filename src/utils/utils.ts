@@ -3,6 +3,7 @@ import { SeparatedData } from "@/server/server-utils";
 import { useWindowSize } from "@uidotdev/usehooks";
 import { clsx, type ClassValue } from "clsx";
 import {
+  differenceInDays,
   differenceInYears,
   formatDate,
   type FormatOptions,
@@ -627,6 +628,18 @@ export function mulberry32(seed: number) {
   return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
 }
 
+export function originalListingIdToRandomDiscount(input: string): number {
+  let hash = 0;
+  for (let i = 0; i < input.length; i++) {
+    hash = (hash << 5) - hash + input.charCodeAt(i); // hash * 31 + charCode
+    hash |= 0; // convert to 32bit integer
+  }
+  // normalize hash to a float
+  const normalizedValue = (hash >>> 0) / 4294967296;
+  // scale to range [8, 14]
+  return 8 + normalizedValue * (14 - 8);
+}
+
 // falls back to a random discount between 8% and 12% if the original nightly price is not available
 export function getOfferDiscountPercentage(
   offer: Pick<
@@ -661,6 +674,39 @@ export function getOfferDiscountPercentage(
   //4.)for other cases random number
   else return Math.round(8 + 4 * mulberry32(offer.createdAt.getTime())); // random number between 8 and 12, deterministic based on offer creation time
 }
+
+// export function getRequestToBookDiscountPercentage(offer: {
+//   createdAt: Date;
+//   travelerOfferedPriceBeforeFees: number;
+//   checkIn: Date;
+//   checkOut: Date;
+//   scrapeUrl?: number | null;
+//   datePriceFromAirbnb: number | null;
+//   randomDirectListingDiscount?: number | null;
+// }) {
+//   const numNights = getNumNights(offer.checkIn, offer.checkOut);
+//   const offerNightlyPrice = offer.travelerOfferedPriceBeforeFees / numNights;
+//   //1.)check to see if scraped property(directListing) and the randomDirectListingDiscount is not null
+//   if (offer.randomDirectListingDiscount) {
+//     return offer.randomDirectListingDiscount;
+//   }
+
+//   //2.) check if the property is going to be booked directly on airbnb TODO
+
+//   //3.) check the if the offer is by a real host and is listed on airbnb
+//   if (offer.datePriceFromAirbnb) {
+//     console.log(
+//       offer.datePriceFromAirbnb,
+//       offer.travelerOfferedPriceBeforeFees,
+//     );
+//     return getDiscountPercentage(
+//       offer.datePriceFromAirbnb,
+//       offer.travelerOfferedPriceBeforeFees,
+//     );
+//   }
+//   //4.)for other cases random number
+//   else return Math.round(8 + 4 * mulberry32(offer.createdAt.getTime())); // random number between 8 and 12, deterministic based on offer creation time
+// }
 
 export function createRandomMarkupEightToFourteenPercent() {
   return Math.floor(Math.random() * 7 + 8);
@@ -738,6 +784,33 @@ export function removeTax(total: number, taxRate: number): number {
   const amountWithoutTax = Math.round(total / (1 + taxRate));
   return amountWithoutTax;
 }
+
+export const getApplicableBookItNowDiscount = ({
+  bookItNowDiscountTiers,
+  checkIn,
+}: {
+  bookItNowDiscountTiers:
+    | { days: number; percentOff: number }[]
+    | null
+    | undefined;
+  checkIn: Date;
+}): number | null => {
+  if (!bookItNowDiscountTiers || bookItNowDiscountTiers.length === 0) {
+    return null;
+  }
+
+  const daysUntilCheckIn = differenceInDays(checkIn, new Date());
+
+  const sortedTiers = [...bookItNowDiscountTiers].sort(
+    (a, b) => b.days - a.days,
+  );
+
+  const applicableDiscount = sortedTiers.find(
+    (tier) => daysUntilCheckIn >= tier.days,
+  );
+
+  return applicableDiscount?.percentOff ?? null;
+};
 
 export const capitalizeFirstLetter = (string: string): string => {
   return string.charAt(0).toUpperCase() + string.slice(1);
