@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { api } from "@/utils/api";
 import { Button, type ButtonProps } from "@/components/ui/button";
 import type { Property } from "@/server/db/schema";
@@ -10,42 +11,67 @@ import {
   type OfferWithDetails,
   RequestToBookDetails,
 } from "./RequestToBookBtn";
+import {
+  formatDateMonthDayYear,
+  getApplicableBookItNowDiscount,
+} from "@/utils/utils";
 
 interface BaseProps {
   btnSize: ButtonProps["size"];
   property: Pick<
     Property,
-    "stripeVerRequired" | "originalListingId" | "bookOnAirbnb" | "maxNumGuests"
+    | "stripeVerRequired"
+    | "originalListingId"
+    | "bookOnAirbnb"
+    | "maxNumGuests"
+    | "id"
+    | "bookItNowEnabled"
+    | "bookItNowDiscountTiers"
   >;
 }
 
-// Union type for either `requestToBook` or `offer`
 type UnifiedProps =
-  | (BaseProps & { requestToBook: RequestToBookDetails; offer?: never }) // With requestToBook
-  | (BaseProps & { offer: OfferWithDetails; requestToBook?: never }); // With offer
+  | (BaseProps & { requestToBook: RequestToBookDetails; offer?: never })
+  | (BaseProps & { offer: OfferWithDetails; requestToBook?: never });
 
 export default function BookNowBtn(props: UnifiedProps) {
-  const isBooked = props.offer?.acceptedAt ? true : false;
-
+  const isBooked = !!props.offer?.acceptedAt;
   const { data: verificationStatus } =
     api.users.myVerificationStatus.useQuery();
 
   const airbnbCheckoutUrl = props.offer
     ? Airbnb.createListing(props.property.originalListingId!).getCheckoutUrl({
         checkIn: props.offer.checkIn,
-        checkOut: props.offer.checkIn,
+        checkOut: props.offer.checkOut,
         numGuests:
           props.offer.request?.numGuests ?? props.property.maxNumGuests,
       })
     : Airbnb.createListing(props.property.originalListingId!).getCheckoutUrl({
         checkIn: props.requestToBook.checkIn,
-        checkOut: props.requestToBook.checkIn,
+        checkOut: props.requestToBook.checkOut,
         numGuests: props.requestToBook.numGuests,
       });
 
-  const checkoutUrl = props.offer
-    ? `/offer-checkout/${props.offer.id}`
-    : `book-it-now-checkout`; /// wait comback to this later
+  const checkoutUrl = useMemo(() => {
+    if (props.offer) {
+      return `/offer-checkout/${props.offer.id}`;
+    }
+
+    const checkIn = formatDateMonthDayYear(props.requestToBook.checkIn);
+    const checkOut = formatDateMonthDayYear(props.requestToBook.checkOut);
+
+    const baseCheckoutPath =
+      props.property.bookItNowEnabled &&
+      getApplicableBookItNowDiscount({
+        bookItNowDiscountTiers: props.property.bookItNowDiscountTiers,
+        checkIn: props.requestToBook.checkIn,
+      }) !== null
+        ? "book-it-now-checkout"
+        : "request-to-book-checkout";
+
+    return `/${baseCheckoutPath}/${props.property.id}?checkIn=${checkIn}&checkOut=${checkOut}&numGuests=${props.requestToBook.numGuests}&travelerOfferedPriceBeforeFees=${props.requestToBook.travelerOfferedPriceBeforeFees}`;
+  }, [props.property, props.requestToBook, props.offer]);
+
   return (
     <Button
       asChild={!isBooked}

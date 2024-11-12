@@ -34,7 +34,7 @@ export function UnifiedPriceDetails({
       checkIn: unifiedCheckoutData.dates.checkIn,
       checkOut: unifiedCheckoutData.dates.checkOut,
     },
-    travelerOfferPriceBeforeFees:
+    travelerPriceBeforeFees:
       unifiedCheckoutData.pricing.travelerOfferedPriceBeforeFees,
     property: unifiedCheckoutData.property,
   });

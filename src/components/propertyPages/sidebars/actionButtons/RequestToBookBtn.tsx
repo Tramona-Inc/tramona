@@ -28,6 +28,7 @@ export default function RequestToBookBtn({
   requestToBook: RequestToBookDetails;
   property: PropertyPageData;
 }) {
+  console.log(requestToBook);
   const { data: verificationStatus } =
     api.users.myVerificationStatus.useQuery();
 

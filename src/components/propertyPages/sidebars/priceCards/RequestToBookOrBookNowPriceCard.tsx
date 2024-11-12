@@ -63,9 +63,12 @@ export default function RequestToBookOrBookNowPriceCard({
   const [requestAmount, setrequestAmount] = useState("");
   const [requestPercentage, setrequestPercentage] = useState(5);
   const [selectedPreset, setSelectedPreset] = useState<number | null>(null);
+
   const basePrice = 14500; // per night price
   const minDiscount = 5;
   const maxDiscount = 20;
+
+  requestToBook.travelerOfferedPriceBeforeFees = basePrice;
 
   const presetOptions = [
     { price: 116, label: "Good request", percentOff: 20 },

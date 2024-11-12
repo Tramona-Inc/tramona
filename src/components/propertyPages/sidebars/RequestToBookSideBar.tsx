@@ -5,13 +5,9 @@ import ReserveBtn from "./actionButtons/RequestToBookBtn";
 import PriceDetailsBeforeTax from "@/components/_common/PriceDetailsBeforeTax";
 import { FlameIcon, InfoIcon } from "lucide-react";
 import RequestToBookOrBookNowPriceCard from "./priceCards/RequestToBookOrBookNowPriceCard";
-
+import type { RequestToBookDetails } from "../RequestToBookPage";
 export type PropertyPageData = RouterOutputs["properties"]["getById"];
-export type RequestToBookDetails = {
-  checkIn: Date;
-  checkOut: Date;
-  numGuests: number;
-};
+
 export default function RequestToBookPageSidebar({
   // offer,
   property,

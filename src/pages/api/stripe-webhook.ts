@@ -126,6 +126,7 @@ export default async function webhook(
           if (!paymentIntentId) {
             throw new Error(`paymentIntentId is null for userId  ${user?.id}`);
           }
+          console.log("hi");
 
           // --------- 3 Cases: 1. Book it now, 2.Request to book,  3. Offer  ---------------------------------------
           //1 . CASE : Book it now
@@ -153,6 +154,7 @@ export default async function webhook(
             // 2.  CASE : "RequestToBook"
           } else if (paymentIntentSucceeded.metadata.type === "requestToBook") {
             //not charging user or creating a superhog
+            console.log("hi");
             await createRequestToBook({
               paymentIntentId,
               numOfGuests: parseInt(
