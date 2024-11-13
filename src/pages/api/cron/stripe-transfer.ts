@@ -1,6 +1,6 @@
 import { eq, and, sql, isNull, isNotNull } from "drizzle-orm";
 import { db } from "../../../server/db";
-import { users, trips } from "../../../server/db/schema/index";
+import { trips } from "../../../server/db/schema/index";
 import { createPayHostTransfer } from "@/utils/stripe-utils";
 import { sendSlackMessage } from "../../../server/slack";
 // Your custom utility to create Stripe transfer
@@ -14,14 +14,10 @@ export default async function handler() {
     const TripsAfter24HourCheckIn = await db.query.trips.findMany({
       with: {
         offer: {
-          columns: {
-            hostPayout: true,
-          },
+          columns: { hostPayout: true },
         },
         property: {
-          columns: {
-            hostId: true,
-          },
+          with: { hostTeam: { with: { owner: true } } },
         },
       },
       where: and(
@@ -35,23 +31,16 @@ export default async function handler() {
     // Process each booking and create a transfer made an array in case host has multiple trips within 24 hours
     if (TripsAfter24HourCheckIn.length >= 1) {
       for (const trip of TripsAfter24HourCheckIn) {
-        const hostAccount = await db.query.users.findFirst({
-          where: eq(users.id, trip.property.hostId!),
-        });
-        if (!hostAccount) {
-          console.log("SKIIPPPPEEDD");
-          continue;
-        }
         await createPayHostTransfer({
           amount: trip.offer!.hostPayout,
-          destination: hostAccount.stripeConnectId!,
+          destination: trip.property.hostTeam.owner.stripeConnectId!,
           tripId: trip.id.toString(),
         });
         await sendSlackMessage({
           channel: "tramona-bot",
           text: [
             `A host has been paid for booking ${trip.id} that has passed the 24-hour check-in window.`,
-            `Host: ${hostAccount.firstName} was paid a total of ${trip.offer!.hostPayout}`,
+            `Host: ${trip.property.hostTeam.owner.firstName} was paid a total of ${trip.offer!.hostPayout}`,
             `Just using this because i want to test the payout job`,
           ].join("\n"),
         });

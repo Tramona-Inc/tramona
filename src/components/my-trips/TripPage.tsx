@@ -44,7 +44,7 @@ export default function TripPage({
 
   const tripDuration = dayjs(trip.checkOut).diff(trip.checkIn, "day");
   const { data } = api.properties.getById.useQuery({ id: trip.propertyId });
-  const hostId = data?.hostId;
+  const hostId = data?.hostTeam.owner.id;
 
   return (
     <div className="col-span-10 flex flex-col gap-5 p-4 py-10 2xl:col-span-11">
@@ -88,27 +88,23 @@ export default function TripPage({
               <div className="flex justify-between pt-2">
                 <div className="flex gap-2">
                   <UserAvatar
-                    name={trip.property.host?.name}
-                    // image={trip.property.host?.image}
+                    name={trip.property.hostTeam.owner.name}
                     image={
-                      trip.property.host?.image ??
+                      trip.property.hostTeam.owner.image ??
                       "/assets/images/tramona-logo.jpeg"
                     }
                   />
                   <div>
                     <p className="text-sm text-muted-foreground">Hosted by</p>
-                    <p>
-                      {trip.property.host?.name
-                        ? trip.property.host.name
-                        : "Tramona"}
-                    </p>
+                    <p>{trip.property.hostTeam.owner.name ?? "Tramona"}</p>
                   </div>
                 </div>
                 <Button
                   variant="secondary"
                   size="sm"
                   className="w-[160px] text-xs lg:w-[200px] lg:text-sm"
-                  onClick={() => chatWithHost({ hostId: hostId ?? "" })}
+                  disabled={!hostId}
+                  onClick={() => chatWithHost({ hostId: hostId! })}
                 >
                   <MessageCircle className="w-4 lg:w-5" /> Message your host
                 </Button>

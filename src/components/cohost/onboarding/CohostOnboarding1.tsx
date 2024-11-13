@@ -2,7 +2,12 @@ import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 import { api } from "@/utils/api";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 import { useCohostInviteStore } from "@/utils/store/cohostInvite";
 
@@ -16,20 +21,21 @@ export default function CohostInviteAcceptance() {
 
   const { isLoading: isLoadingProfile } = api.users.getUser.useQuery();
 
-  const { mutate: validateCohostInvite } = api.hostTeams.validateCohostInvite.useMutation({
-    onSuccess: (data) => {
-      setHostTeamId(data.hostTeamId);
-      setHostTeamName(data.hostTeamName);
-    },
-    onError: (error) => {
-      toast({
-        title: "Invalid Invite",
-        description: error.message,
-        variant: "destructive",
-      });
-      void router.push("/");
-    },
-  });
+  const { mutate: validateCohostInvite } =
+    api.hostTeams.validateCohostInvite.useMutation({
+      onSuccess: (data) => {
+        setHostTeamId(data.hostTeamId);
+        setHostTeamName(data.hostTeamName);
+      },
+      onError: (error) => {
+        toast({
+          title: "Invalid Invite",
+          description: error.message,
+          variant: "destructive",
+        });
+        void router.push("/");
+      },
+    });
 
   useEffect(() => {
     if (cohostInviteId) {
@@ -62,23 +68,24 @@ export default function CohostInviteAcceptance() {
     },
   });
 
-  const { mutate: declineHostTeamInvite } = api.hostTeams.declineHostTeamInvite.useMutation({
-    onSuccess: () => {
-      toast({
-        title: "Invite Declined",
-        description: "You've declined the host team invitation.",
-      });
-      void router.push("/");
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
-  
+  const { mutate: declineHostTeamInvite } =
+    api.hostTeams.declineHostTeamInvite.useMutation({
+      onSuccess: () => {
+        toast({
+          title: "Invite Declined",
+          description: "You've declined the host team invitation.",
+        });
+        void router.push("/");
+      },
+      onError: (error) => {
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive",
+        });
+      },
+    });
+
   const handleAccept = () => {
     if (!cohostInviteId) {
       toast({
@@ -118,7 +125,7 @@ export default function CohostInviteAcceptance() {
           </DialogHeader>
           <div className="py-6">
             <p className="mb-6 text-center">
-              {`You've been invited to join ${hostTeamName}'s host team on Tramona. Would you like to accept this invitation?`}
+              {`You've been invited to join ${hostTeamName} on Tramona. Would you like to accept this invitation?`}
             </p>
             <div className="flex justify-center space-x-4">
               <Button onClick={handleAccept} disabled={isAccepting}>

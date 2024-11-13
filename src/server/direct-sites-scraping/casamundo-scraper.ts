@@ -10,6 +10,7 @@ import { ALL_PROPERTY_TYPES, PropertyType } from "@/server/db/schema/common";
 import { ListingSiteName } from "@/server/db/schema/common";
 import { getNumNights, logAndFilterSettledResults } from "@/utils/utils";
 import { parseHTML } from "@/utils/utils";
+import { getAddress } from "../google-maps";
 
 const offerSchema = z.object({
   id: z.string(),
@@ -582,6 +583,8 @@ async function fetchPropertyDetails(
     lat: data.geoLocation.lat,
   };
 
+  const addressComponents = await getAddress(latLngPoint);
+
   const numNights = getNumNights(new Date(checkIn), new Date(checkOut));
 
   return {
@@ -590,7 +593,10 @@ async function fetchPropertyDetails(
     about: parseHTML(aboutSection),
     propertyType: mapPropertyType(data.type),
     address: data.locationShorted,
-    city: data.locationShorted,
+    city: addressComponents.city,
+    stateName: addressComponents.stateName,
+    stateCode: addressComponents.stateCode,
+    country: addressComponents.country,
     latLngPoint,
     maxNumGuests: data.persons,
     numBeds,
@@ -687,14 +693,27 @@ export const casamundoScraper: DirectSiteScraper = async ({
   ).then(logAndFilterSettledResults);
 };
 
-export const casamundoSubScraper: SubsequentScraper = async ({
+export const casamundoSubScraper: (
+  options: Parameters<SubsequentScraper>[0] & { numGuests?: number },
+) => ReturnType<SubsequentScraper> = async ({
   originalListingId,
   scrapeUrl,
   checkIn,
   checkOut,
+  numGuests: initialNumGuests,
 }) => {
-  const url = new URL(scrapeUrl);
-  const numGuests = parseInt(url.searchParams.get("adults") ?? "", 10);
+  let numGuests = initialNumGuests;
+
+  if (scrapeUrl) {
+    try {
+      const url = new URL(scrapeUrl);
+      numGuests =
+        parseInt(url.searchParams.get("adults") ?? "", 10) || initialNumGuests;
+    } catch (error) {
+      console.error("Invalid scrapeUrl provided:", error);
+    }
+  }
+
   const numNights = getNumNights(checkIn, checkOut);
 
   const isAvailable = await checkAvailability(
@@ -716,10 +735,47 @@ export const casamundoSubScraper: SubsequentScraper = async ({
       availabilityCheckedAt: new Date(),
     };
   }
-
   return {
     isAvailableOnOriginalSite: true,
     availabilityCheckedAt: new Date(),
     originalNightlyPrice: Math.round((price.price / numNights) * 100),
   };
 };
+
+
+// export const casamundoSubScraper: SubsequentScraper = async ({
+//   originalListingId,
+//   scrapeUrl,
+//   checkIn,
+//   checkOut,
+// }) => {
+//   const url = new URL(scrapeUrl);
+//   const numGuests = parseInt(url.searchParams.get("adults") ?? "", 10);
+//   const numNights = getNumNights(checkIn, checkOut);
+
+//   const isAvailable = await checkAvailability(
+//     originalListingId,
+//     checkIn,
+//     checkOut,
+//   );
+
+//   const price = await fetchPrice({
+//     offerId: originalListingId,
+//     numGuests,
+//     checkIn: checkIn,
+//     duration: numNights,
+//   });
+
+//   if (!isAvailable || price.price === -1) {
+//     return {
+//       isAvailableOnOriginalSite: false,
+//       availabilityCheckedAt: new Date(),
+//     };
+//   }
+
+//   return {
+//     isAvailableOnOriginalSite: true,
+//     availabilityCheckedAt: new Date(),
+//     originalNightlyPrice: Math.round((price.price / numNights) * 100),
+//   };
+// };

@@ -10,11 +10,7 @@ import { PropertyType, NewReview } from "@/server/db/schema";
 import { ListingSiteName } from "@/server/db/schema/common";
 import { getNumNights, logAndFilterSettledResults } from "@/utils/utils";
 import { algoliasearch, SearchResponse } from "algoliasearch";
-import {
-  getAddress,
-  getCoordinates,
-  getCountryISO,
-} from "@/server/google-maps";
+import { getAddress, getCoordinates } from "@/server/google-maps";
 import { proxyAgent } from "../server-utils";
 
 const EvolvePropertySchema = z.object({
@@ -556,6 +552,11 @@ const fetchPropertyDetails = async (
     checkInInfo,
   });
 
+  const addressComponents = await getAddress({
+    lat: propertyDetails.latitude,
+    lng: propertyDetails.longitude,
+  });
+
   return {
     originalListingId: propertyDetails.id,
     name: propertyDetails.name,
@@ -563,6 +564,9 @@ const fetchPropertyDetails = async (
     propertyType: mapPropertyType(propertyDetails.propertyType),
     address,
     city,
+    stateName: addressComponents.stateName,
+    stateCode: addressComponents.stateCode,
+    country: addressComponents.country,
     latLngPoint: {
       lat: propertyDetails.latitude,
       lng: propertyDetails.longitude,
@@ -656,36 +660,17 @@ export const evolveVacationRentalScraper: DirectSiteScraper = async ({
 
   const { lat, lng } = geocodingResult.location;
 
-  const cityInfo = await getAddress({ lat, lng });
-
-  if (cityInfo.city === "[Unknown]" && cityInfo.country === "[Unknown]") {
-    const countryISO = await getCountryISO({ lat, lng });
-    if (!countryISO) {
-      throw new Error("Unable to determine location");
-    }
-    cityInfo.country = countryISO;
-  }
-
-  const city = cityInfo.city !== "[Unknown]" ? cityInfo.city : undefined;
-  let state =
-    cityInfo.stateCode !== "[Unknown]" ? cityInfo.stateCode : undefined;
-  let country = cityInfo.country;
-
-  if (city === undefined && state === undefined) {
-    [state, country] = [location, country];
-  }
+  const { stateCode, country, city } = await getAddress({ lat, lng });
 
   const formattedCountry = country.toLowerCase().replace(/\s+/g, "-");
-  const formattedState = state?.toLowerCase().replace(/\s+/g, "-");
-  const formattedCity = city?.toLowerCase().replace(/\s+/g, "-");
+  const formattedCity = city.toLowerCase().replace(/\s+/g, "-");
+  const formattedState = stateCode?.toLowerCase();
 
   let urlLocationParam = `/${formattedCountry}`;
   if (formattedState) {
     urlLocationParam += `/${formattedState}`;
   }
-  if (formattedCity) {
-    urlLocationParam += `/${formattedCity}`;
-  }
+  urlLocationParam += `/${formattedCity}`;
 
   const searchResults = await fetchSearchResults(
     lat,

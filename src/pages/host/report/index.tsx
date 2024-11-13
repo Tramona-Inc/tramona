@@ -24,7 +24,6 @@ import {
   Info,
   ChevronRight,
   Clock,
-  Shield,
   ShieldCheckIcon,
 } from "lucide-react";
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";

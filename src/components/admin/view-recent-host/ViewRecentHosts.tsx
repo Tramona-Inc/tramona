@@ -9,10 +9,10 @@ import {
 import { columns } from "./table/columns";
 import { DataTable } from "./table/data-table";
 
-export type HostsInfo = RouterOutputs["users"]["getHostInfo"][number];
+export type HostsInfo = RouterOutputs["hosts"]["getHostInfo"][number];
 
 export default function ViewRecentHosts() {
-  const { data } = api.users.getHostInfo.useQuery();
+  const { data } = api.hosts.getHostInfo.useQuery();
 
   return (
     <Card>

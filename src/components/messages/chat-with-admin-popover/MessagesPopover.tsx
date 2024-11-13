@@ -283,13 +283,13 @@ export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
             <div className="p-2">
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(handleOnSend)}>
-                  <div className="flex justify-between rounded-full border p-2">
+                  <div className="flex rounded-full border p-2">
                     <FormField
                       control={form.control}
                       name="message"
                       render={({ field }) => {
                         return (
-                          <FormItem>
+                          <FormItem className="flex-1">
                             <FormControl>
                               <Input
                                 placeholder="Type your question here..."
@@ -332,13 +332,13 @@ export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
           <div className="p-2">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(handleOnSend)}>
-                <div className="flex justify-between rounded-full border p-2">
+                <div className="flex rounded-full border p-2">
                   <FormField
                     control={form.control}
                     name="message"
                     render={({ field }) => {
                       return (
-                        <FormItem>
+                        <FormItem className="flex-1">
                           <FormControl>
                             <Input
                               placeholder="Type your question here..."

@@ -19,14 +19,9 @@ import {
   ALL_TRAVELER_CLAIM_RESPONSES,
 } from "@/server/db/schema";
 
-import type {
-  Claim,
-  ClaimItemResolution,
-  ClaimPayment,
-  ClaimItem,
-} from "@/server/db/schema";
+import type { Claim, ClaimItemResolution, ClaimItem } from "@/server/db/schema";
 import { db } from "@/server/db";
-import { and, eq, gte, sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { sendEmail } from "@/server/server-utils";
 import ClaimLinkEmail from "packages/transactional/emails/ClaimLinkEmail";
 import { sendSlackMessage } from "@/server/slack";
@@ -137,9 +132,8 @@ export const claimsRouter = createTRPCRouter({
           const claimItemResolution = row.claim_item_resolutions;
 
           // Assign the claim once
-          if (!acc.claim) {
-            acc.claim = claim;
-          }
+
+          acc.claim = claim;
 
           // Deduplicate claimItems
           if (

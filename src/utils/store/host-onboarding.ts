@@ -44,6 +44,7 @@ type HostOnboardingState = {
     originalListingId: string | null | undefined;
     originalListingPlatform: Property["originalListingPlatform"] | undefined;
     airbnbUrl: string;
+    bookItNowEnabled: boolean;
   };
   setIsEdit: (isEdit: boolean) => void;
   setMaxGuests: (maxGuests: number) => void;
@@ -77,6 +78,7 @@ type HostOnboardingState = {
     originalListingPlatform: Property["originalListingPlatform"],
   ) => void;
   setAirbnbUrl: (airbnbUrl: string) => void;
+  setBookItNowEnabled: (bookItNowEnabled: boolean) => void;
   resetSession: () => void;
 };
 
@@ -116,6 +118,7 @@ export const useHostOnboarding = create<HostOnboardingState>()(
         originalListingId: null,
         originalListingPlatform: undefined,
         airbnbUrl: "",
+        bookItNowEnabled: false,
       },
       setIsEdit: (isEdit: boolean) => {
         set((state) => ({ ...state, isEdit }));
@@ -372,6 +375,15 @@ export const useHostOnboarding = create<HostOnboardingState>()(
           listing: {
             ...state.listing,
             airbnbUrl,
+          },
+        }));
+      },
+      setBookItNowEnabled: (bookItNowEnabled: boolean) => {
+        set((state) => ({
+          ...state,
+          listing: {
+            ...state.listing,
+            bookItNowEnabled,
           },
         }));
       },

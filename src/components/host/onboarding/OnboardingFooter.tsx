@@ -21,7 +21,7 @@ export default function OnboardingFooter({
   handleError,
 }: OnboardingFooterProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const maxPages = 12;
+  const maxPages = 13;
 
   const progress = useHostOnboarding((state) => state.progress);
   const isEdit = useHostOnboarding((state) => state.isEdit);
@@ -34,7 +34,7 @@ export default function OnboardingFooter({
   const router = useRouter();
 
   const { mutateAsync: createHostProfile } =
-    api.users.upsertHostProfile.useMutation();
+    api.hosts.upsertHostProfile.useMutation();
 
   const { data: isHost } = api.users.isHost.useQuery();
 
@@ -53,7 +53,7 @@ export default function OnboardingFooter({
   async function onPressNext() {
     setIsLoading(true);
     try {
-      if (progress === 12) {
+      if (progress === 13) {
         if (!isHost) {
           await createHostProfile();
         }
@@ -85,6 +85,7 @@ export default function OnboardingFooter({
           originalListingId: listing.originalListingId,
           originalListingPlatform: listing.originalListingPlatform,
           airbnbUrl: listing.airbnbUrl,
+          bookItNowEnabled: listing.bookItNowEnabled,
         }).catch(() => errorToast());
       } else {
         if (isEdit) {
@@ -92,13 +93,13 @@ export default function OnboardingFooter({
             if (isFormValid) {
               handleNext && handleNext();
               setIsEdit(false);
-              setProgress(12);
+              setProgress(13);
             } else {
               handleError && handleError();
             }
           } else {
             setIsEdit(false);
-            setProgress(12);
+            setProgress(13);
           }
         } else {
           if (isForm) {
@@ -124,8 +125,8 @@ export default function OnboardingFooter({
         value={(progress * 100) / maxPages}
         className="h-2 w-full rounded-none"
       />
-      {progress !== 0 && (
-        <div className="flex justify-between p-5">
+      <div className="flex justify-between p-5">
+        {progress !== 0 ? (
           <Button
             variant={"ghost"}
             onClick={() => {
@@ -136,21 +137,25 @@ export default function OnboardingFooter({
           >
             Back
           </Button>
-          {isEdit ? (
-            <Button onClick={onPressNext}>Back to summary</Button>
-          ) : (
-            <div className="flex flex-row gap-2">
-              <Button onClick={onPressNext} disabled={isLoading}>
-                {progress === 0
-                  ? "Get Started"
-                  : progress === 12
-                      ? "Finish"
-                      : "Next"}
-              </Button>
-            </div>
-          )}
-        </div>
-      )}
+        ) : (
+          <Button variant={"ghost"} onClick={() => router.back()}>
+            Back
+          </Button>
+        )}
+        {isEdit ? (
+          <Button onClick={onPressNext}>Back to summary</Button>
+        ) : (
+          <div className="flex flex-row gap-2">
+            <Button onClick={onPressNext} disabled={isLoading}>
+              {progress === 0
+                ? "Get Started"
+                : progress === 12
+                  ? "Finish"
+                  : "Next"}
+            </Button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

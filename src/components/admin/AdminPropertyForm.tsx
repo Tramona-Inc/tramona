@@ -2,7 +2,7 @@ import {
   CANCELLATION_POLICIES,
   ALL_PROPERTY_ROOM_TYPES,
 } from "@/server/db/schema";
-import { zodInteger, zodString } from "@/utils/zod-utils";
+import { zodInteger, zodNumber } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -10,6 +10,7 @@ import ErrorMsg from "../ui/ErrorMsg";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -38,7 +39,7 @@ import { CaretSortIcon } from "@radix-ui/react-icons";
 import { ALL_PROPERTY_TYPES } from "@/server/db/schema";
 
 const formSchema = z.object({
-  hostId: zodString(),
+  hostTeamId: zodNumber(),
 
   propertyType: z.enum(ALL_PROPERTY_TYPES),
   roomType: z.enum(ALL_PROPERTY_ROOM_TYPES),
@@ -49,6 +50,7 @@ const formSchema = z.object({
   numBathrooms: zodInteger({ min: 1 }),
 
   address: z.string().max(1000),
+  country: z.string().max(500),
 
   checkInInfo: z.string(),
   checkInTime: z.string(),
@@ -82,34 +84,22 @@ export default function AdminPropertyForm() {
   });
 
   const { mutateAsync: createProperty } =
-    api.properties.createForHost.useMutation();
+    api.properties.createForHostTeam.useMutation();
 
   async function onSubmit(data: FormSchema) {
     const res = await createProperty(data);
     switch (res.status) {
-      case "host not found":
+      case "host team not found":
         form.setError(
-          "hostId",
-          {
-            message: "Host with this id not found, please try again",
-          },
-          { shouldFocus: true },
-        );
-        break;
-
-      case "user not a host":
-        form.setError(
-          "hostId",
-          {
-            message: "The user with this id isn't a host, please try again",
-          },
+          "hostTeamId",
+          { message: "Host team with this id not found, please try again" },
           { shouldFocus: true },
         );
         break;
 
       case "success":
         toast({
-          title: `Successfully created property${res.hostName ? ` for ${res.hostName}` : ""}`,
+          title: `Successfully created property`,
         });
         break;
     }
@@ -125,7 +115,7 @@ export default function AdminPropertyForm() {
       >
         <FormField
           control={form.control}
-          name="hostId"
+          name="hostTeamId"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Host Id</FormLabel>
@@ -249,6 +239,22 @@ export default function AdminPropertyForm() {
               <FormControl>
                 <Input {...field} />
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="country"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Country</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormDescription>
+                Case Ex: (&qout;United States&qout;)
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
