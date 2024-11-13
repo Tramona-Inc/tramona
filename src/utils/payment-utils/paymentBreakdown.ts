@@ -3,12 +3,10 @@ import { TripCheckout } from "../../server/db/schema/tables/payments";
 import { getTaxPercentage } from "@/utils/payment-utils/calculateTax";
 import { Offer, Property } from "@/server/db/schema";
 import type {
-  UnifiedCheckoutData,
   PriceBreakdownOutput,
   PropertyAndTripParams,
 } from "@/components/checkout/types";
 import { getNumNights } from "../utils";
-import { PropertyPageData } from "@/components/propertyPages/PropertyPage";
 
 // -------------------------- 2 Different inputs for Breakdown payment  -------------------------
 // -----METHOD 1. USING OFFER

@@ -4,14 +4,12 @@ import {
   groupMembers,
   groups,
   hostTeamMembers,
-  hostTeams,
-  offers,
   properties,
   requestsToBook,
-  superhogRequests,
-  tripCheckouts,
+  offers,
   trips,
   users,
+  tripCheckouts,
 } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
 import Stripe from "stripe";
@@ -22,11 +20,7 @@ import {
   TripWCheckout,
 } from "./trips-utils";
 import { createSuperhogReservation } from "./superhog-utils";
-import {
-  completeReferral,
-  validateHostDiscountReferral,
-} from "./referral-utils";
-import { createConversationWithOfferAfterBooking } from "./message-utils";
+
 import { sendSlackMessage } from "@/server/slack";
 import { formatDateMonthDay } from "../utils";
 import { TRAVELER_MARKUP } from "../constants";

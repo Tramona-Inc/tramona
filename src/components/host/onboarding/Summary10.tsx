@@ -35,7 +35,7 @@ export default function Summary10() {
       </div>
       {!isEditing && (
         <div className="flex flex-col gap-2 capitalize text-muted-foreground">
-          <p>{listing.bookItNowEnabled ? 'Enabled' : 'Disabled'}</p>
+          <p>{listing.bookItNowEnabled ? "Enabled" : "Disabled"}</p>
         </div>
       )}
       {isEditing && (
@@ -43,13 +43,15 @@ export default function Summary10() {
           <Checkbox
             id="bookItNow"
             checked={listing.bookItNowEnabled}
-            onCheckedChange={(checked) => setBookItNowEnabled(checked as boolean)}
+            onCheckedChange={(checked) =>
+              setBookItNowEnabled(checked as boolean)
+            }
           />
           <Label
             htmlFor="bookItNow"
             className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
           >
-            Enable "Book It Now"
+            Enable &quot;Book It Now&quot;
           </Label>
         </div>
       )}

@@ -1,11 +1,6 @@
-import { Card, CardContent } from "@/components/ui/card";
 import { RouterOutputs } from "@/utils/api";
-import { formatDateWeekMonthDay, plural } from "@/utils/utils";
-import ReserveBtn from "./actionButtons/RequestToBookBtn";
-import PriceDetailsBeforeTax from "@/components/_common/PriceDetailsBeforeTax";
 import { FlameIcon, InfoIcon } from "lucide-react";
 import RequestToBookOrBookNowPriceCard from "./priceCards/RequestToBookOrBookNowPriceCard";
-import type { RequestToBookDetails } from "../RequestToBookPage";
 export type PropertyPageData = RouterOutputs["properties"]["getById"];
 
 export default function RequestToBookPageSidebar({
