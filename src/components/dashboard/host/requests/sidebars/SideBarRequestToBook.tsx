@@ -16,7 +16,11 @@ function SidebarRequestToBook({
     <div>
       {!isLoading ? (
         allRequestToBook && allRequestToBook.length > 0 ? (
-          <div />
+          <div>
+            {allRequestToBook.map((property) => (
+              <div key={property.id}></div>
+            ))}
+          </div>
         ) : (
           <EmptyRequestState />
         )

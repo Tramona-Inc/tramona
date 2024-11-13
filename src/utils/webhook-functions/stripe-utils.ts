@@ -52,7 +52,6 @@ export async function createSetupIntent({
       customer: customerId,
     },
   );
-  console.log("customer", customer);
 
   //first we need to create the setup Inten using information from the booking
 
@@ -356,14 +355,8 @@ export async function createRequestToBook({
     groupId: madeByGroupId,
   });
 
-  const hostTeam = await db.query.hostTeams
-    .findFirst({
-      where: eq(hostTeams.id, properties.hostTeamId),
-    })
-    .then((res) => res!);
-
   await db.insert(requestsToBook).values({
-    hostTeamId: hostTeam.id,
+    hostTeamId: property.hostTeamId,
     createdAt: new Date(),
     propertyId,
     userId: userId,
@@ -372,8 +365,9 @@ export async function createRequestToBook({
     checkIn,
     checkOut,
     numGuests: numOfGuests,
-    amountAfterTravelerMarkupAndBeforeFees:
-      travelerPriceBeforeFees * TRAVELER_MARKUP, //we add markup here
+    amountAfterTravelerMarkupAndBeforeFees: Math.floor(
+      travelerPriceBeforeFees * TRAVELER_MARKUP,
+    ), //we add markup here
     isDirectListing: isDirectListingCharge,
   });
 
@@ -394,7 +388,7 @@ export async function createRequestToBook({
   } else {
     // Case 2: Not DirectListing so we need to send the request to the host
     const members = await db.query.hostTeamMembers.findMany({
-      where: eq(hostTeamMembers.hostTeamId, hostTeam.id),
+      where: eq(hostTeamMembers.hostTeamId, properties.hostTeamId),
     });
 
     for (const member of members) {
