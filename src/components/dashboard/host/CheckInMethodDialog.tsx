@@ -1,7 +1,7 @@
-import { Input } from "@/components/ui/input";
 import { cn } from "@/utils/utils";
 import { useState } from "react";
 import DialogCancelSave from "./DialogCancelSave";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function CheckInMethodDialog() {
   const [selectedMethodIndex, setSelectedMethodIndex] = useState<number | null>(
@@ -52,7 +52,7 @@ export default function CheckInMethodDialog() {
       </div>
       <div>
         <h2 className="font-semibold">Additional check-in details</h2>
-        <Input placeholder="Add any important details for getting inside your place..." />
+        <Textarea placeholder="Add any important details for getting inside your place..." />
       </div>
       <p className="text-muted-foreground">
         Shared 24 to 48 hours before check-in

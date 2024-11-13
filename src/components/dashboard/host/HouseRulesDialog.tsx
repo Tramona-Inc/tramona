@@ -1,6 +1,6 @@
 import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
 import DialogCancelSave from "./DialogCancelSave";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function HouseRulesDialog() {
   const rules = [
@@ -42,7 +42,7 @@ export default function HouseRulesDialog() {
       </div>
       <div>
         <h2 className="font-semibold">Additional rules</h2>
-        <Input placeholder="Add any additional house rules..." />
+        <Textarea placeholder="Add any additional house rules..." />
       </div>
       <p className="text-muted-foreground">
         Available throughout the booking process

@@ -4,6 +4,7 @@ import CheckOutDialog from "./CheckOutDialog";
 import { useState } from "react";
 import HouseRulesDialog from "./HouseRulesDialog";
 import InteractionPreferencesDialog from "./InteractionPreferencesDialog";
+import DirectionsDialog from "./DirectionsDialog";
 
 export default function HostArrivalGuide() {
   const [activeDialog, setActiveDialog] = useState<number | null>(null);
@@ -32,7 +33,7 @@ export default function HostArrivalGuide() {
     {
       title: "Directions",
       subtitle: "Add details",
-      dialog: <CheckInMethodDialog />,
+      dialog: <DirectionsDialog />,
     },
     {
       title: "WiFi Details",
@@ -60,7 +61,7 @@ export default function HostArrivalGuide() {
           >
             <div className="space-y-2 rounded-xl border p-3">
               <h2 className="font-bold">{guide.title}</h2>
-              <p>{guide.subtitle}</p>
+              <p className="text-muted-foreground">{guide.subtitle}</p>
             </div>
           </DialogTrigger>
           <DialogContent>{guide.dialog}</DialogContent>

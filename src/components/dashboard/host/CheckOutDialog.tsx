@@ -1,6 +1,6 @@
 import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
 import DialogCancelSave from "./DialogCancelSave";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function CheckOutDialog() {
   const instructions = [
@@ -46,7 +46,7 @@ export default function CheckOutDialog() {
       </div>
       <div>
         <h2 className="font-semibold">Additional check-out details</h2>
-        <Input placeholder="Add any additional checkout instructions..." />
+        <Textarea placeholder="Add any additional checkout instructions..." />
       </div>
       <p className="text-muted-foreground">
         Shared at 9 PM the evening before checkout
