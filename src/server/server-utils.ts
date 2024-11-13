@@ -552,7 +552,7 @@ export async function getRequestsForProperties(
             .where(
               and(
                 eq(rejectedRequests.requestId, requests.id),
-                eq(rejectedRequests.userId, user.id),
+                eq(rejectedRequests.hostTeamId, property.hostTeamId),
               ),
             ),
         ),
@@ -963,7 +963,7 @@ export async function createInitialHostTeam(
   await db.insert(hostTeamMembers).values({
     hostTeamId: teamId,
     userId: user.id,
-    role: "Loose",
+    role: "Admin Access",
   });
 
   return teamId;

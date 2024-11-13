@@ -1,4 +1,5 @@
 import {
+  COHOST_ROLES,
   conversationParticipants,
   conversations,
   hostProfiles,
@@ -16,6 +17,7 @@ import { and, eq, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import {
   createTRPCRouter,
+  hostProcedure,
   protectedProcedure,
   roleRestrictedProcedure,
 } from "../trpc";
@@ -109,8 +111,8 @@ async function sendInviteMessage(
   if (!conversationId) return;
 
   const messageContent = isResend
-    ? `You have been re-invited to join ${hostTeamName}'s host team. Please check your email for the invitation link.`
-    : `You have been invited to join ${hostTeamName}'s host team. Please check your email for the invitation link.`;
+    ? `You have been re-invited to join ${hostTeamName}. Please check your email for the invitation link.`
+    : `You have been invited to join ${hostTeamName}. Please check your email for the invitation link.`;
 
   await db.insert(messages).values({
     conversationId,
@@ -126,7 +128,7 @@ async function sendAcceptMessage(
 ) {
   if (!conversationId) return;
 
-  const messageContent = `Invitation to join ${hostTeamName}'s host team accepted.`;
+  const messageContent = `Invitation to join ${hostTeamName} accepted.`;
 
   await db.insert(messages).values({
     conversationId,
@@ -142,7 +144,7 @@ async function sendDeclineMessage(
 ) {
   if (!conversationId) return;
 
-  const messageContent = `Invitation to join ${hostTeamName}'s host team declined.`;
+  const messageContent = `Invitation to join ${hostTeamName} declined.`;
 
   await db.insert(messages).values({
     conversationId,
@@ -152,11 +154,16 @@ async function sendDeclineMessage(
 }
 
 export const hostTeamsRouter = createTRPCRouter({
-  inviteUserByEmail: protectedProcedure
-    .input(z.object({ email: z.string(), hostTeamId: z.number() }))
+  inviteCoHost: hostProcedure
+    .input(
+      z.object({
+        email: z.string(),
+        role: z.enum(COHOST_ROLES),
+      }),
+    )
     .mutation(async ({ input, ctx }) => {
       const hostTeam = await ctx.db.query.hostTeams.findFirst({
-        where: eq(hostTeams.id, input.hostTeamId),
+        where: eq(hostTeams.id, ctx.hostProfile.curTeamId),
         columns: { name: true },
         with: { owner: { columns: { id: true } } },
       });
@@ -171,7 +178,7 @@ export const hostTeamsRouter = createTRPCRouter({
 
       const existingInvite = await ctx.db.query.hostTeamInvites.findFirst({
         where: and(
-          eq(hostTeamInvites.hostTeamId, input.hostTeamId),
+          eq(hostTeamInvites.hostTeamId, ctx.hostProfile.curTeamId),
           eq(hostTeamInvites.inviteeEmail, input.email),
         ),
         columns: { expiresAt: true },
@@ -190,7 +197,7 @@ export const hostTeamsRouter = createTRPCRouter({
         const userInTeam = await ctx.db.query.hostTeamMembers
           .findFirst({
             where: and(
-              eq(hostTeamMembers.hostTeamId, input.hostTeamId),
+              eq(hostTeamMembers.hostTeamId, ctx.hostProfile.curTeamId),
               eq(hostTeamMembers.userId, invitee.id),
             ),
           })
@@ -207,7 +214,7 @@ export const hostTeamsRouter = createTRPCRouter({
       await ctx.db.insert(hostTeamInvites).values({
         id,
         expiresAt: add(new Date(), { hours: 24 }),
-        hostTeamId: input.hostTeamId,
+        hostTeamId: ctx.hostProfile.curTeamId,
         inviteeEmail: input.email,
         lastSentAt: now,
       });
@@ -458,30 +465,6 @@ export const hostTeamsRouter = createTRPCRouter({
           ),
         );
     }),
-
-  getMyFriends: protectedProcedure.query(async ({ ctx }) => {
-    return await ctx.db.query.hostTeamMembers
-      .findMany({
-        where: eq(hostTeamMembers.userId, ctx.user.id),
-        with: {
-          hostTeam: {
-            with: {
-              members: {
-                with: {
-                  user: { columns: { name: true, email: true, image: true } },
-                },
-              },
-            },
-          },
-        },
-      })
-      .then((res) =>
-        res
-          .map((member) => member.hostTeam.members)
-          .flat(1)
-          .map((member) => member.user),
-      );
-  }),
 
   getHostTeamOwner: protectedProcedure
     .input(z.object({ hostTeamId: z.number() }))
@@ -753,7 +736,7 @@ export const hostTeamsRouter = createTRPCRouter({
     .input(
       z.object({
         userId: z.string(),
-        role: z.enum(["Strict", "Medium", "Loose"]),
+        role: z.enum(COHOST_ROLES),
         hostTeamId: z.number(),
       }),
     )

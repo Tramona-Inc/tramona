@@ -1,5 +1,6 @@
 import {
   createTRPCRouter,
+  hostProcedure,
   protectedProcedure,
   roleRestrictedProcedure,
 } from "@/server/api/trpc";
@@ -282,12 +283,12 @@ export const requestsRouter = createTRPCRouter({
       await ctx.db.delete(requests).where(eq(requests.id, input.id));
     }),
 
-  rejectRequest: protectedProcedure
+  rejectRequest: hostProcedure
     .input(z.object({ requestId: z.number() }))
     .mutation(async ({ ctx, input }) => {
       await ctx.db.insert(rejectedRequests).values({
         requestId: input.requestId,
-        userId: ctx.user.id,
+        hostTeamId: ctx.hostProfile.curTeamId,
       });
     }),
 });
