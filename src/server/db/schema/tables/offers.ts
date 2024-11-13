@@ -12,7 +12,6 @@ import {
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { properties } from "./properties";
 import { requests } from "./requests";
-import { tripCheckouts } from "./payments";
 
 export const ALL_TRIP_SOURCES = [
   "City request",

@@ -55,26 +55,29 @@ export default function ForgotPassword() {
 
   return (
     <MainLayout>
-      <div className="flex min-h-screen-minus-header flex-col items-center justify-center py-8">
-        <div className="w-full max-w-md rounded-lg md:border md:border-gray-300 p-8 md:shadow-lg">
-          <h1 className="text-3xl font-semibold text-center text-gray-800 tracking-tight">
+      <div className="min-h-screen-minus-header flex flex-col items-center justify-center py-8">
+        <div className="w-full max-w-md rounded-lg p-8 md:border md:border-gray-300 md:shadow-lg">
+          <h1 className="text-center text-3xl font-semibold tracking-tight text-gray-800">
             Forgot your password?
           </h1>
-          <p className="text-center text-base text-gray-500 mt-2">
-            Enter your email address, and we'll send you a link to get back into your account.
+          <p className="mt-2 text-center text-base text-gray-500">
+            Enter your email address, and we&apos;ll send you a link to get back
+            into your account.
           </p>
 
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(handleSubmit)}
-              className="flex flex-col gap-6 mt-6"
+              className="mt-6 flex flex-col gap-6"
             >
               <FormField
                 control={form.control}
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm text-gray-700 font-medium">Email address</FormLabel>
+                    <FormLabel className="text-sm font-medium text-gray-700">
+                      Email address
+                    </FormLabel>
                     <FormControl>
                       <Input {...field} placeholder="name@example.com" />
                     </FormControl>
@@ -82,7 +85,11 @@ export default function ForgotPassword() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" disabled={isLoading} className="w-full rounded-md bg-[#004236] text-white py-3 font-medium">
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="w-full rounded-md bg-[#004236] py-3 font-medium text-white"
+              >
                 Send link
               </Button>
             </form>
@@ -90,7 +97,7 @@ export default function ForgotPassword() {
 
           <Link
             href="/support"
-            className="text-center text-sm font-medium text-primary underline underline-offset-2 mt-6 block"
+            className="mt-6 block text-center text-sm font-medium text-primary underline underline-offset-2"
           >
             Need support?
           </Link>
