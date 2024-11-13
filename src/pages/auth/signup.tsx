@@ -9,9 +9,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import ErrorMsg from "@/components/ui/ErrorMsg";
-import Icons from "@/components/ui/icons";
 import { Input } from "@/components/ui/input";
-import { toast } from "@/components/ui/use-toast";
 import { api } from "@/utils/api";
 import { errorToast } from "@/utils/toasts";
 import { zodEmail } from "@/utils/zod-utils";
@@ -20,9 +18,8 @@ import { signIn } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import * as z from "zod";
+import { z } from "zod";
 import { FcGoogle } from "react-icons/fc";
 
 const formSchema = z
@@ -46,7 +43,7 @@ export default function SignUp() {
 
   const { mutateAsync: createUser } = api.auth.createUser.useMutation();
 
-  async function handleSubmit(newUser) {
+  async function handleSubmit(newUser: z.infer<typeof formSchema>) {
     await createUser(newUser)
       .then(async ({ status }) => {
         if (status === "email taken") {
@@ -67,27 +64,29 @@ export default function SignUp() {
         <title>Sign up | Tramona</title>
       </Head>
       <div className="flex min-h-screen-minus-header flex-col items-center justify-center py-8">
-        <div className="w-full max-w-lg rounded-lg md:border md:border-gray-300 p-10 md:shadow-lg">
-          <h1 className="text-3xl font-semibold text-center text-gray-800 tracking-tight">
+        <div className="w-full max-w-lg rounded-lg p-10 md:border md:border-gray-300 md:shadow-lg">
+          <h1 className="text-center text-3xl font-semibold tracking-tight text-gray-800">
             Create an account
           </h1>
-          <p className="text-center text-base text-gray-500 mt-2">
+          <p className="mt-2 text-center text-base text-gray-500">
             Sign up to experience the new, best ways to book rentals
           </p>
 
           <div className="my-6">
             <Button
               onClick={() => signIn("google")}
-              className="flex w-full items-center justify-center gap-2 rounded-md border border-gray-300 bg-white py-3 text-gray-700 shadow-sm tracking-wide"
+              className="flex w-full items-center justify-center gap-2 rounded-md border border-gray-300 bg-white py-3 tracking-wide text-gray-700 shadow-sm"
             >
               <FcGoogle className="h-5 w-5" />
               <span className="font-medium">Continue with Google</span>
             </Button>
           </div>
 
-          <div className="flex items-center my-4">
+          <div className="my-4 flex items-center">
             <div className="flex-grow border-t border-gray-300"></div>
-            <span className="mx-2 text-xs text-gray-500 tracking-wider">OR CONTINUE WITH EMAIL</span>
+            <span className="mx-2 text-xs tracking-wider text-gray-500">
+              OR CONTINUE WITH EMAIL
+            </span>
             <div className="flex-grow border-t border-gray-300"></div>
           </div>
 
@@ -101,7 +100,9 @@ export default function SignUp() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm text-gray-700 font-medium">Email address</FormLabel>
+                    <FormLabel className="text-sm font-medium text-gray-700">
+                      Email address
+                    </FormLabel>
                     <FormControl>
                       <Input {...field} placeholder="name@example.com" />
                     </FormControl>
@@ -114,7 +115,9 @@ export default function SignUp() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm text-gray-700 font-medium">Password</FormLabel>
+                    <FormLabel className="text-sm font-medium text-gray-700">
+                      Password
+                    </FormLabel>
                     <FormControl>
                       <Input type="password" {...field} />
                     </FormControl>
@@ -127,7 +130,9 @@ export default function SignUp() {
                 name="confirmPassword"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm text-gray-700 font-medium">Confirm password</FormLabel>
+                    <FormLabel className="text-sm font-medium text-gray-700">
+                      Confirm password
+                    </FormLabel>
                     <FormControl>
                       <Input type="password" {...field} />
                     </FormControl>
@@ -138,14 +143,14 @@ export default function SignUp() {
               <ErrorMsg>{form.formState.errors.root?.message}</ErrorMsg>
               <Button
                 type="submit"
-                className="w-full rounded-md text-[#004236] text-white py-3 font-medium"
+                className="w-full rounded-md py-3 font-medium text-[#004236] text-white"
               >
                 Sign Up
               </Button>
             </form>
           </Form>
 
-          <p className="text-center text-xs text-gray-500 mt-4">
+          <p className="mt-4 text-center text-xs text-gray-500">
             By signing up, you agree to our{" "}
             <Link href="/terms" className="text-primary underline">
               Terms of Service
@@ -156,7 +161,7 @@ export default function SignUp() {
             </Link>
           </p>
 
-          <p className="text-center text-sm mt-6">
+          <p className="mt-6 text-center text-sm">
             Already have an account?{" "}
             <Link
               href="/auth/signin"
