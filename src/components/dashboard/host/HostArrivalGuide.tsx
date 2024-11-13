@@ -5,6 +5,7 @@ import { useState } from "react";
 import HouseRulesDialog from "./HouseRulesDialog";
 import InteractionPreferencesDialog from "./InteractionPreferencesDialog";
 import DirectionsDialog from "./DirectionsDialog";
+import WifiDialog from "./WifiDialog";
 
 export default function HostArrivalGuide() {
   const [activeDialog, setActiveDialog] = useState<number | null>(null);
@@ -38,7 +39,7 @@ export default function HostArrivalGuide() {
     {
       title: "WiFi Details",
       subtitle: "Add details",
-      dialog: <CheckInMethodDialog />,
+      dialog: <WifiDialog />,
     },
     {
       title: "House manual",
