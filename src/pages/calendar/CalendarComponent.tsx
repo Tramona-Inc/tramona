@@ -161,7 +161,7 @@ export default function CalendarComponent() {
                   year: "numeric",
                 })}
               </h2>
-              <div className="text-xs text-muted-foreground sm:text-sm">
+              <div className="text-xs font-medium sm:text-sm">
                 <p className="py-1">15 vacancies this month</p>
                 <p>$1000 left on the table</p>
               </div>

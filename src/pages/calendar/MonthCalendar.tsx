@@ -136,25 +136,7 @@ export default function MonthCalendar({
 
   return (
     <div className="mx-auto max-w-4xl">
-      <div className="relative">
-        {renderMonth()}
-
-        {/* Legend */}
-        <div className="mt-12 flex flex-col space-y-2 text-sm">
-          <div className="flex items-center">
-            <div className="mr-2 h-6 w-6 bg-zinc-50"></div>
-            <span className="text-muted-foreground">Vacant</span>
-          </div>
-          <div className="flex items-center">
-            <div className="mr-2 h-6 w-6 bg-reserved-pattern"></div>
-            <span className="text-muted-foreground">Blocked on Airbnb</span>
-          </div>
-          <div className="flex items-center">
-            <div className="mr-2 h-6 w-6 bg-reserved-pattern-2"></div>
-            <span className="text-muted-foreground">Blocked on Tramona</span>
-          </div>
-        </div>
-      </div>
+      <div className="relative">{renderMonth()}</div>
     </div>
   );
 }
