@@ -1,5 +1,4 @@
 import MobileNav from "@/components/dashboard/MobileNav";
-import Sidebar from "@/components/dashboard/Sidebar";
 import { useSession } from "next-auth/react";
 import Footer from "../Footer";
 import { useIsMd } from "@/utils/utils";

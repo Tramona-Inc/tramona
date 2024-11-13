@@ -3,7 +3,6 @@ import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
 import { useState } from "react";
-import PaymentHistory from "@/components/host/finances/payment-history/PaymentHistory";
 import FinancesSummary from "@/components/host/finances/summary/FinancesSummary";
 import { ConnectNotificationBanner } from "@stripe/react-connect-js";
 import useIsStripeConnectInstanceReady from "@/utils/store/stripe-connect";
@@ -16,7 +15,7 @@ import Link from "next/link";
 
 export default function Page() {
   const { data: user } = api.users.getUser.useQuery();
-  const { data: hostInfo } = api.host.getUserHostInfo.useQuery();
+  const { data: hostProfile } = api.hosts.getMyHostProfile.useQuery();
   const { isStripeConnectInstanceReady } = useIsStripeConnectInstanceReady();
   const [hostStripeConnectId, setHostStripeConnectId] = useState<string>("");
   const trimmedConnectId = user?.stripeConnectId
@@ -88,10 +87,9 @@ export default function Page() {
 
               <FinancesSummary
                 hostStripeConnectId={hostStripeConnectId}
-                becameHostAt={hostInfo?.becameHostAt}
+                becameHostAt={hostProfile?.becameHostAt}
               />
               <SettingsAndDocuments items={settingsItems} />
-              <PaymentHistory />
             </div>
           )
         ) : (
@@ -101,4 +99,3 @@ export default function Page() {
     </DashboadLayout>
   );
 }
-``;

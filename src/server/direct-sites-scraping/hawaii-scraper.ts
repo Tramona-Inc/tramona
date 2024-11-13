@@ -11,7 +11,7 @@ import { PropertyType } from "@/server/db/schema";
 import * as cheerio from "cheerio";
 import { ListingSiteName } from "@/server/db/schema/common";
 import { getNumNights } from "@/utils/utils";
-import { getCoordinates } from "../google-maps";
+import { getAddress, getCoordinates } from "../google-maps";
 import { proxyAgent } from "../server-utils";
 
 const hawaiiPropertyTypes: Record<string, PropertyType> = {
@@ -423,7 +423,7 @@ const fetchAvailablePropertyEids = async (
 
 type CBIslandVacationsPropertyInput = z.infer<typeof PropertySchema>;
 
-const mapToScrapedListing = (
+const mapToScrapedListing = async (
   prop: CBIslandVacationsPropertyInput,
   scrapeUrl: string,
   reviews: NewReview[],
@@ -431,7 +431,7 @@ const mapToScrapedListing = (
   images: string[],
   description: string,
   originalNightlyPrice: number,
-): ScrapedListing => {
+): Promise<ScrapedListing> => {
   const allAmenities = new Set([
     ...(prop.sm_nid$rc_core_term_general_amenities$name ?? []),
     ...(prop.sm_nid$rc_core_term_bed_and_bathroom$name ?? []),
@@ -442,6 +442,13 @@ const mapToScrapedListing = (
     ...(prop.sm_nid$rc_core_term_outdoors$name ?? []),
     ...(prop.sm_nid$rc_core_term_views$name ?? []),
   ]);
+
+  const latLngPoint = {
+    lat: prop.fs_nid$field_location$latitude,
+    lng: prop.fs_nid$field_location$longitude,
+  };
+
+  const addressComponents = await getAddress(latLngPoint);
 
   return {
     originalListingId: prop.is_eid.toString(),
@@ -501,11 +508,11 @@ const mapToScrapedListing = (
     Thank you for choosing to stay with us!`,
     propertyType: mapPropertyType(prop.sm_nid$rc_core_term_type$name?.[0]),
     address: address,
-    city: prop.sm_nid$rc_core_term_city_type$name[0],
-    latLngPoint: {
-      lat: prop.fs_nid$field_location$latitude,
-      lng: prop.fs_nid$field_location$longitude,
-    },
+    stateName: addressComponents.stateName,
+    stateCode: addressComponents.stateCode,
+    country: addressComponents.country,
+    city: addressComponents.city,
+    latLngPoint,
     checkInInfo: `Check-In / Arrival Instructions:
     Check-In time will be stated in your arrival instructions. Please adhere to check in times
     to allow our crews time to clean. DO NOT check in early (unless special arrangements
@@ -573,109 +580,111 @@ export const cbIslandVacationsScraper: DirectSiteScraper = async ({
     numGuests,
   );
 
-  const availableProperties: ScrapedListing[] = [];
-
-  for (const eid of propertyEids) {
-    const solrUrl = "https://www.cbislandvacations.com/solr/";
-    const formData = querystring.stringify({
-      fq: "index_id:rci",
-      wt: "json",
-      q: `is_eid:${eid}`,
-      fl: "*",
-    });
-
-    const filteredPropertiesUrl =
-      "https://www.cbislandvacations.com/rcapi/item/avail/search";
-
-    const params = new URLSearchParams({
-      "rcav[begin]": checkIn.toISOString().split("T")[0] ?? "",
-      "rcav[end]": checkOut.toISOString().split("T")[0] ?? "",
-      "rcav[adult]": numGuests?.toString() ?? "1",
-      "rcav[child]": "0",
-      "rcav[flex]": "",
-      "rcav[flex_type]": "d",
-    });
-
-    const scrapeUrl = `${filteredPropertiesUrl}?${params.toString()}`;
-
-    try {
-      const response = await axios<{ response: { docs: PropertyDocument[] } }>({
-        method: "POST",
-        url: solrUrl,
-        data: formData,
+  const availableProperties = await Promise.all(
+    propertyEids.map(async (eid) => {
+      const solrUrl = "https://www.cbislandvacations.com/solr/";
+      const formData = querystring.stringify({
+        fq: "index_id:rci",
+        wt: "json",
+        q: `is_eid:${eid}`,
+        fl: "*",
       });
 
-      const propertyData = response.data.response.docs.find(
-        (doc: PropertyDocument) => {
-          if (!doc.is_eid) return false;
+      const filteredPropertiesUrl =
+        "https://www.cbislandvacations.com/rcapi/item/avail/search";
 
-          const docEid = String(doc.is_eid).trim();
-          const searchEid = String(eid).trim();
+      const params = new URLSearchParams({
+        "rcav[begin]": checkIn.toISOString().split("T")[0] ?? "",
+        "rcav[end]": checkOut.toISOString().split("T")[0] ?? "",
+        "rcav[adult]": numGuests?.toString() ?? "1",
+        "rcav[child]": "0",
+        "rcav[flex]": "",
+        "rcav[flex_type]": "d",
+      });
 
-          if (docEid.toLowerCase() === searchEid.toLowerCase()) return true;
+      const scrapeUrl = `${filteredPropertiesUrl}?${params.toString()}`;
 
-          if (docEid.toLowerCase().includes(searchEid.toLowerCase()))
-            return true;
+      try {
+        const response = await axios<{
+          response: { docs: PropertyDocument[] };
+        }>({
+          method: "POST",
+          url: solrUrl,
+          data: formData,
+        });
 
-          if (Array.isArray(doc.is_eid)) {
-            return doc.is_eid.some(
-              (id: number) =>
-                String(id).trim().toLowerCase() === searchEid.toLowerCase() ||
-                String(id)
-                  .trim()
-                  .toLowerCase()
-                  .includes(searchEid.toLowerCase()),
-            );
-          }
+        const propertyData = response.data.response.docs.find(
+          (doc: PropertyDocument) => {
+            if (!doc.is_eid) return false;
 
-          return false;
-        },
-      );
+            const docEid = String(doc.is_eid).trim();
+            const searchEid = String(eid).trim();
 
-      if (!propertyData) {
-        console.error(`No property found with eid: ${eid}`);
-        console.log(
-          "Available eids:",
-          response.data.response.docs.map(
-            (doc: PropertyDocument) => doc.is_eid,
-          ),
+            if (docEid.toLowerCase() === searchEid.toLowerCase()) return true;
+
+            if (docEid.toLowerCase().includes(searchEid.toLowerCase()))
+              return true;
+
+            if (Array.isArray(doc.is_eid)) {
+              return doc.is_eid.some(
+                (id: number) =>
+                  String(id).trim().toLowerCase() === searchEid.toLowerCase() ||
+                  String(id)
+                    .trim()
+                    .toLowerCase()
+                    .includes(searchEid.toLowerCase()),
+              );
+            }
+
+            return false;
+          },
         );
-        continue;
+
+        if (!propertyData) {
+          console.error(`No property found with eid: ${eid}`);
+          console.log(
+            "Available eids:",
+            response.data.response.docs.map(
+              (doc: PropertyDocument) => doc.is_eid,
+            ),
+          );
+          return;
+        }
+
+        const validatedData = PropertySchema.parse(propertyData);
+
+        const { reviews, address, description, images } =
+          await scrapePropertyPage(validatedData.ss_nid$url);
+
+        const totalPrice = await scrapeFinalPrice(eid, checkIn, checkOut);
+
+        if (totalPrice < 0) {
+          console.error(`Failed to fetch price for property ${eid}`);
+          return;
+        }
+
+        const originalNightlyPrice = Math.round(
+          totalPrice / getNumNights(checkIn, checkOut),
+        );
+
+        const scrapedListing = await mapToScrapedListing(
+          validatedData,
+          scrapeUrl,
+          reviews,
+          address,
+          images,
+          description,
+          originalNightlyPrice,
+        );
+
+        return scrapedListing;
+      } catch (error) {
+        console.error(`Error fetching property ${eid}:`, error);
       }
+    }),
+  );
 
-      const validatedData = PropertySchema.parse(propertyData);
-
-      const { reviews, address, description, images } =
-        await scrapePropertyPage(validatedData.ss_nid$url);
-
-      const totalPrice = await scrapeFinalPrice(eid, checkIn, checkOut);
-
-      if (totalPrice < 0) {
-        console.error(`Failed to fetch price for property ${eid}`);
-        continue;
-      }
-
-      const originalNightlyPrice = Math.round(
-        totalPrice / getNumNights(checkIn, checkOut),
-      );
-
-      const scrapedListing = mapToScrapedListing(
-        validatedData,
-        scrapeUrl,
-        reviews,
-        address,
-        images,
-        description,
-        originalNightlyPrice,
-      );
-
-      availableProperties.push(scrapedListing);
-    } catch (error) {
-      console.error(`Error fetching property ${eid}:`, error);
-    }
-  }
-
-  return availableProperties;
+  return availableProperties.filter(Boolean);
 };
 
 export const cbIslandVacationsSubScraper: SubsequentScraper = async ({

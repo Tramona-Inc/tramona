@@ -26,3 +26,4 @@ export * from "./tables/feedFiller";
 export * from "./tables/linkInputProperties";
 export * from "./tables/rejectedRequests";
 export * from "./tables/auth/phoneNumberOTPs";
+export * from "./tables/requestsToBook";

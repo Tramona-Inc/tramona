@@ -8,13 +8,13 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import ErrorMsg from "@/components/ui/ErrorMsg";
 import Icons from "@/components/ui/icons";
 import { Input } from "@/components/ui/input";
-import { authProviders } from "@/config/authProviders";
+import { toast } from "@/components/ui/use-toast";
 import { api } from "@/utils/api";
-import { useRequireNoAuth } from "@/utils/auth-utils";
 import { errorToast } from "@/utils/toasts";
-import { zodEmail, zodPassword } from "@/utils/zod-utils";
+import { zodEmail } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signIn } from "next-auth/react";
 import Head from "next/head";
@@ -22,40 +22,31 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+import * as z from "zod";
+import { FcGoogle } from "react-icons/fc";
 
 const formSchema = z
   .object({
     email: zodEmail(),
-    // name: zodString({ minLen: 2 }),
-    password: zodPassword(),
-    confirm: z.string(),
+    password: z.string(),
+    confirmPassword: z.string(),
   })
-  .refine((data) => data.password === data.confirm, {
+  .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
-    path: ["confirm"],
+    path: ["confirmPassword"],
   });
 
-type FormSchema = z.infer<typeof formSchema>;
-
 export default function SignUp() {
-  useRequireNoAuth();
-
   const router = useRouter();
-
-  useEffect(() => {
-    if (typeof router.query.code === "string") {
-      localStorage.setItem("referralCode", router.query.code);
-    }
-  }, [router.query.code]);
-
-  const form = useForm<FormSchema>({
+  const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    mode: "onSubmit",
+    reValidateMode: "onSubmit",
   });
 
   const { mutateAsync: createUser } = api.auth.createUser.useMutation();
 
-  async function handleSubmit(newUser: FormSchema) {
+  async function handleSubmit(newUser) {
     await createUser(newUser)
       .then(async ({ status }) => {
         if (status === "email taken") {
@@ -70,58 +61,62 @@ export default function SignUp() {
       .catch(() => errorToast("Couldn't sign up, please try again"));
   }
 
-  // TODO: Refactor later to separted form into its own component
-
   return (
     <MainLayout>
       <Head>
         <title>Sign up | Tramona</title>
       </Head>
-      <div className="flex min-h-screen-minus-header flex-col items-center justify-center space-y-10 py-8">
-        <h1 className="text-center text-2xl font-bold tracking-tight">
-          Sign up to experience more
-        </h1>
+      <div className="flex min-h-screen-minus-header flex-col items-center justify-center py-8">
+        <div className="w-full max-w-lg rounded-lg md:border md:border-gray-300 p-10 md:shadow-lg">
+          <h1 className="text-3xl font-semibold text-center text-gray-800 tracking-tight">
+            Create an account
+          </h1>
+          <p className="text-center text-base text-gray-500 mt-2">
+            Sign up to experience the new, best ways to book rentals
+          </p>
 
-        <section className="flex max-w-sm flex-col items-center justify-center space-y-5">
+          <div className="my-6">
+            <Button
+              onClick={() => signIn("google")}
+              className="flex w-full items-center justify-center gap-2 rounded-md border border-gray-300 bg-white py-3 text-gray-700 shadow-sm tracking-wide"
+            >
+              <FcGoogle className="h-5 w-5" />
+              <span className="font-medium">Continue with Google</span>
+            </Button>
+          </div>
+
+          <div className="flex items-center my-4">
+            <div className="flex-grow border-t border-gray-300"></div>
+            <span className="mx-2 text-xs text-gray-500 tracking-wider">OR CONTINUE WITH EMAIL</span>
+            <div className="flex-grow border-t border-gray-300"></div>
+          </div>
+
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(handleSubmit)}
-              className="space-y-2 self-stretch"
+              className="space-y-6"
             >
               <FormField
                 control={form.control}
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email address</FormLabel>
+                    <FormLabel className="text-sm text-gray-700 font-medium">Email address</FormLabel>
                     <FormControl>
-                      <Input {...field} autoFocus inputMode="email" />
+                      <Input {...field} placeholder="name@example.com" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              {/* <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Name</FormLabel>
-                    <FormControl>
-                      <Input {...field} type="text" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              /> */}
               <FormField
                 control={form.control}
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel className="text-sm text-gray-700 font-medium">Password</FormLabel>
                     <FormControl>
-                      <Input {...field} type="password" />
+                      <Input type="password" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -129,77 +124,48 @@ export default function SignUp() {
               />
               <FormField
                 control={form.control}
-                name="confirm"
+                name="confirmPassword"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Verify Password</FormLabel>
+                    <FormLabel className="text-sm text-gray-700 font-medium">Confirm password</FormLabel>
                     <FormControl>
-                      <Input {...field} type="password" />
+                      <Input type="password" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-
-              <FormMessage />
-              <Button type="submit" className="w-full">
-                Sign up
+              <ErrorMsg>{form.formState.errors.root?.message}</ErrorMsg>
+              <Button
+                type="submit"
+                className="w-full rounded-md text-[#004236] text-white py-3 font-medium"
+              >
+                Sign Up
               </Button>
             </form>
           </Form>
 
-          <div className="item-center flex w-full justify-center gap-2">
-            <div className="flex flex-1 items-center justify-center">
-              <div className="h-[1px] w-full border border-black" />
-            </div>
-            <p>or</p>
-            <div className="flex flex-1 items-center justify-center">
-              <div className="h-[1px] w-full border border-black" />
-            </div>
-          </div>
+          <p className="text-center text-xs text-gray-500 mt-4">
+            By signing up, you agree to our{" "}
+            <Link href="/terms" className="text-primary underline">
+              Terms of Service
+            </Link>{" "}
+            and{" "}
+            <Link href="/privacy-policy" className="text-primary underline">
+              Privacy Policy
+            </Link>
+          </p>
 
-          <div className="my-5 flex w-full flex-col items-center justify-center gap-5">
-            {authProviders.map((provider) => (
-              <Button
-                key={provider.name}
-                variant={"darkOutline"}
-                onClick={() => signIn(provider.id)}
-                className="grid w-[350px] grid-cols-5 place-content-center gap-5 rounded-3xl"
-              >
-                <Icons iconName={provider.name} />
-                <span className="col-span-3 text-lg font-extrabold tracking-tight">
-                  Sign up with {provider.name}
-                </span>
-              </Button>
-            ))}
-          </div>
-        </section>
-        <p>
-          Already have an account?{" "}
-          <Link
-            href="/auth/signin"
-            className="font-semibold text-primary underline underline-offset-2"
-          >
-            Log in
-          </Link>
-        </p>
-        <p className="text-xs text-muted-foreground">
-          By signing up, you agree to our{" "}
-          <Link
-            className="underline underline-offset-2 hover:text-primary"
-            href="/tos"
-          >
-            Terms of Service
-          </Link>{" "}
-          and{" "}
-          <Link
-            className="underline underline-offset-2 hover:text-primary"
-            href="/privacy-policy"
-          >
-            Privacy Policy
-          </Link>
-          .
-        </p>
+          <p className="text-center text-sm mt-6">
+            Already have an account?{" "}
+            <Link
+              href="/auth/signin"
+              className="font-medium text-primary underline underline-offset-2"
+            >
+              Log in
+            </Link>
+          </p>
+        </div>
       </div>
     </MainLayout>
   );

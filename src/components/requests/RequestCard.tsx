@@ -34,6 +34,7 @@ import { formatDistanceToNowStrict } from "date-fns";
 import { LinkInputPropertyCard } from "../_common/LinkInputPropertyCard";
 import SingleLocationMap from "../_common/GoogleMaps/SingleLocationMap";
 import { RequestCardOfferPreviews } from "./RequestCardOfferPreviews";
+
 export type GuestDashboardRequest = RouterOutputs["requests"]["getMyRequests"][
   | "activeRequests"
   | "inactiveRequests"][number];
@@ -134,20 +135,14 @@ export default function RequestCard({
               </div>
             )}
             <div>
-              <p>
-                Requested <span className="font-semibold">{fmtdPrice}</span>
+              <p className="mb-4 font-bold">
+                Requested <span className="font-bold">{fmtdPrice}</span>
                 /night
               </p>
               <p className="flex items-center gap-2">
-                <span className="flex items-center gap-1">
-                  <CalendarIcon className="size-4" />
-                  {fmtdDateRange}
-                </span>
+                <span className="flex items-center gap-1">{fmtdDateRange}</span>
                 &middot;
-                <span className="flex items-center gap-1">
-                  <Users2Icon className="size-4" />
-                  {fmtdNumGuests}
-                </span>
+                <span className="flex items-center gap-1">{fmtdNumGuests}</span>
               </p>
             </div>
             <div className="flex flex-wrap gap-1">

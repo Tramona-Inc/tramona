@@ -7,7 +7,7 @@ import { NextSeo } from "next-seo";
 import { db } from "@/server/db";
 import { properties } from "@/server/db/schema/tables/properties";
 import { eq } from "drizzle-orm";
-import PropertyPage from "@/components/offers/PropertyPage";
+import PropertyPage from "@/components/propertyPages/PropertyPage";
 
 export type PropertyWithDetails = RouterOutputs["properties"]["getById"];
 

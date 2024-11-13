@@ -5,24 +5,20 @@ import { checkCancellation } from "@/utils/cancellationLogic";
 import InvalidTripCancellation from "./cancellationsCard/InvalidTripCancellation";
 import TripCancellationOrPartialRefund from "./cancellationsCard/TripCancellationOrPartialRefund";
 import { useState } from "react";
+import { Property, Trip } from "@/server/db/schema";
 
 export default function TripCancelDialog({
-  tripId,
-  tripCancellation,
-  checkInDate,
-  checkOutDate,
-  bookingDate,
-  checkInTime,
-  totalPriceAfterFees,
+  trip,
 }: {
-  tripId: number;
-  tripCancellation: string;
-  checkInDate: Date;
-  checkOutDate: Date;
-  bookingDate: Date;
-  checkInTime: string;
-  checkOutTime: string;
-  totalPriceAfterFees: number;
+  trip: Pick<
+    Trip,
+    "id" | "checkIn" | "checkOut" | "createdAt" | "totalPriceAfterFees"
+  > & {
+    property: Pick<
+      Property,
+      "cancellationPolicy" | "checkInTime" | "checkOutTime"
+    >;
+  };
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -32,13 +28,7 @@ export default function TripCancelDialog({
     partialRefundPercentage,
     description,
     cancellationFee,
-  } = checkCancellation({
-    cancellationPolicy: tripCancellation,
-    checkInDate,
-    checkOutDate,
-    checkInTime,
-    bookingDate: bookingDate,
-  });
+  } = checkCancellation(trip);
 
   //if the trip is scraped or cannot cancell make it request cancellation.
   return (
@@ -55,17 +45,17 @@ export default function TripCancelDialog({
 
         {canCancel || partialRefund ? (
           <TripCancellationOrPartialRefund
-            tripId={tripId}
+            tripId={trip.id}
             partialRefundPercentage={partialRefundPercentage}
             description={description}
-            totalPriceAfterFees={totalPriceAfterFees}
-            cancellationFee={cancellationFee}
+            totalPriceAfterFees={trip.totalPriceAfterFees}
             setClose={() => setIsOpen(false)}
+            cancellationFee={cancellationFee}
           />
         ) : (
           <InvalidTripCancellation
-            tripId={tripId}
-            cancellationPolicy={tripCancellation}
+            tripId={trip.id}
+            cancellationPolicy={trip.property.cancellationPolicy!}
           />
         )}
       </DialogContent>

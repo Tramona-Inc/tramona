@@ -13,8 +13,8 @@ import { referralCodesRouter } from "./routers/referralCodesRouter";
 import { requestsRouter } from "./routers/requestsRouter";
 import { stripeRouter } from "./routers/stripeRouter";
 import { twilioRouter } from "./routers/twilioRouter";
-import { hostRouter } from "./routers/hostRouter";
 import { usersRouter } from "./routers/usersRouter";
+import { hostsRouter } from "./routers/hostsRouter";
 import { hostTeamsRouter } from "./routers/hostTeamsRouter";
 import { profileRouter } from "./routers/profileRouter";
 import { superhogRouter } from "./routers/superhogRouter";
@@ -22,6 +22,7 @@ import { pmsRouter } from "./routers/pmsRouter";
 import { reviewsRouter } from "./routers/reviewsRouter";
 import { feedRouter } from "./routers/feedRouter";
 import { calendarRouter } from "./routers/calendarRouter";
+import { requestsToBookRouter } from "./routers/requestsToBookRouter";
 import { claimsRouter } from "./routers/claimsRouter";
 /**
  * This is the primary router for your server.
@@ -30,6 +31,7 @@ import { claimsRouter } from "./routers/claimsRouter";
  */
 export const appRouter = createTRPCRouter({
   users: usersRouter,
+  hosts: hostsRouter,
   referralCodes: referralCodesRouter,
   requests: requestsRouter,
   properties: propertiesRouter,
@@ -38,7 +40,6 @@ export const appRouter = createTRPCRouter({
   auth: authRouter,
   trips: tripsRouter,
   twilio: twilioRouter,
-  host: hostRouter,
   messages: messagesRouter,
   files: filesRouter,
   misc: miscRouter,
@@ -52,6 +53,7 @@ export const appRouter = createTRPCRouter({
   reviews: reviewsRouter,
   feed: feedRouter,
   calendar: calendarRouter,
+  requestsToBook: requestsToBookRouter,
   claims: claimsRouter,
 });
 

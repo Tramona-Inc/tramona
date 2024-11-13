@@ -50,6 +50,7 @@ declare module "next-auth" {
       | "isIdentityVerified"
       | "isWhatsApp"
       | "dateOfBirth"
+      | "chargesEnabled"
     >;
   }
 }
@@ -76,12 +77,14 @@ export const authOptions: NextAuthOptions = {
           phoneNumber: token.phoneNumber,
           createdAt: token.createdAt,
           stripeCustomerId: token.stripeCustomerId,
+          stripeConnectId: token.stripeConnectId,
           setupIntentId: token.setupIntentId,
           isIdentityVerified: token.isIdentityVerified,
           isWhatsApp: token.isWhatsApp,
           dateOfBirth: token.dateOfBirth,
           firstName: token.firstName,
           lastName: token.lastName,
+          chargesEnabled: token.chargesEnabled,
         },
       };
     },
@@ -107,10 +110,12 @@ export const authOptions: NextAuthOptions = {
         newToken.phoneNumber = user.phoneNumber;
         newToken.createdAt = user.createdAt;
         newToken.stripeCustomerId = user.stripeCustomerId;
+        newToken.stripeConnectId = user.stripeConnectId;
         newToken.setupIntentId = user.setupIntentId;
         newToken.isIdentityVerified = user.isIdentityVerified;
         newToken.isWhatsApp = user.isWhatsApp;
         newToken.dateOfBirth = user.dateOfBirth;
+        newToken.chargesEnabled = user.chargesEnabled;
       }
 
       return newToken;
