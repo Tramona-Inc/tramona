@@ -128,7 +128,7 @@
     "perf_hooks": "^0.0.1",
     "pg": "^8.11.3",
     "postgres": "^3.4.3",
-    "puppeteer": "^22.4.1",
+    "puppeteer": "^23.0.0",
     "puppeteer-core": "^6",
     "react": "18.3.1",
     "react-calendly": "^4.3.0",
