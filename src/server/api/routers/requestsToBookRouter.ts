@@ -20,6 +20,7 @@ import {
   properties,
   tripCheckouts,
 } from "@/server/db/schema";
+import { unique } from "drizzle-orm/pg-core";
 
 export const requestsToBookRouter = createTRPCRouter({
   create: protectedProcedure
@@ -215,14 +216,13 @@ export const requestsToBookRouter = createTRPCRouter({
     }),
 
   getAllRequestToBookProperties: hostProcedure.query(async ({ ctx }) => {
-    const allRequestToBook = await db.query.requestsToBook.findMany({
-      where: and(
-        eq(requestsToBook.hostTeamId, ctx.hostProfile.curTeamId),
-        isNull(requestsToBook.resolvedAt),
-      ),
+    const allPropertiesWithRequestToBook = await db.query.properties.findMany({
+      where: eq(properties.hostTeamId, ctx.hostProfile.curTeamId),
+      with: {
+        requestsToBook: true,
+      },
     });
-    console.log(allRequestToBook);
 
-    return allRequestToBook;
+    return allPropertiesWithRequestToBook;
   }),
 });

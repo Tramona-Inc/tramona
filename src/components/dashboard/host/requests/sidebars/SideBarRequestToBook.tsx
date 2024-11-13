@@ -2,23 +2,30 @@ import React from "react";
 import { api } from "@/utils/api";
 import SidebarPropertySkeleton from "./SidebarPropertySkeleton";
 import EmptyRequestState from "./EmptyRequestState";
+import Link from "next/link";
 
 function SidebarRequestToBook({
   selectedOption,
 }: {
   selectedOption: "normal" | "outsidePriceRestriction";
 }) {
-  console.log("mounted");
-  const { data: allRequestToBook, isLoading } =
+  const { data: properties, isLoading } =
     api.requestsToBook.getAllRequestToBookProperties.useQuery();
 
   return (
     <div>
       {!isLoading ? (
-        allRequestToBook && allRequestToBook.length > 0 ? (
-          <div>
-            {allRequestToBook.map((property) => (
-              <div key={property.id}></div>
+        properties && properties.length > 0 ? (
+          <div className="flex flex-col">
+            {properties.map((property) => (
+              <Link key={property.id} href={`${property.id}`}>
+                <div className="flex flex-row gap-x-3 rounded-xl border p-3">
+                  <div className="text-wrap">{property.name}</div>
+                  <p className="text-nowrap flex flex-row text-xs">
+                    {property.requestsToBook.length} Requests
+                  </p>
+                </div>
+              </Link>
             ))}
           </div>
         ) : (
