@@ -5,15 +5,33 @@ import RequestEmptySvg from "../_common/EmptyStateSvg/RequestEmptySvg";
 import { NewCityRequestBtn } from "./NewCityRequestBtn";
 import RequestCard from "./RequestCard";
 import { RequestCardAction } from "./RequestCardAction";
+import { useEffect } from "react";
+import RequestToBookCard from "../requests-to-book/RequestToBookCard";
 
 export default function ActiveRequestsTab() {
   const { data: requests } = api.requests.getMyRequests.useQuery();
+  const { data: requestsToBook } =
+    api.requestsToBook.getMyRequestsToBook.useQuery();
 
-  if (!requests) return <Spinner />;
+  useEffect(() => {
+    console.log("wah", requestsToBook);
+  }, [requestsToBook]);
 
-  return requests.activeRequests.length !== 0 ? (
+  if (!requests || !requestsToBook) return <Spinner />;
+
+  return requests.activeRequests.length !== 0 ||
+    requestsToBook.activeRequestsToBook.length !== 0 ? (
     <div className="space-y-4 pb-32">
       <NewCityRequestBtn />
+      {requestsToBook.activeRequestsToBook.map((requestToBook) => (
+        <RequestToBookCard
+          key={requestToBook.id}
+          type="guest"
+          requestToBook={requestToBook}
+        >
+          {/* <RequestCardAction request={requestToBook} /> */}
+        </RequestToBookCard>
+      ))}
       {requests.activeRequests.map((request) => (
         <RequestCard key={request.id} type="guest" request={request}>
           <RequestCardAction request={request} />

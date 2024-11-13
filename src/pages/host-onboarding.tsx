@@ -12,8 +12,9 @@ import { useHostOnboarding } from "@/utils/store/host-onboarding";
 import OnboardingLayout from "../components/host/onboarding/layout";
 import Onboarding10 from "@/components/host/onboarding/Onboarding10";
 import Onboarding11 from "@/components/host/onboarding/Onboarding11";
-import OnboardingLinkInput from "@/components/host/onboarding/OnboardingLinkInput";
 import Onboarding12 from "@/components/host/onboarding/Onboarding12";
+import OnboardingLinkInput from "@/components/host/onboarding/OnboardingLinkInput";
+import Onboarding13 from "@/components/host/onboarding/Onboarding13";
 import { getFeed } from "@/server/api/routers/feedRouter";
 import { type InferGetStaticPropsType } from "next";
 
@@ -39,18 +40,20 @@ export default function Onboarding({ requestFeed }: Props) {
 
   return (
     <OnboardingLayout>
-      {progress === 0 && <Onboarding2 />}
-      {progress === 1 && <Onboarding3 />}
-      {progress === 2 && <Onboarding4 />}
-      {progress === 3 && <Onboarding5 />}
-      {progress === 4 && <Onboarding6 />}
-      {progress === 5 && <Onboarding7 />}
-      {progress === 6 && <Onboarding8 />}
-      {progress === 7 && <Onboarding9 />}
-      {progress === 8 && <Onboarding10 />}
-      {progress === 9 && <OnboardingLinkInput />}
-      {progress === 10 && <Onboarding11 />}
-      {progress === 11 && <Onboarding12 requestFeed={requestFeed} />}
+      {progress === 0 && <Onboarding1 onPressNext={onPressNext} />}
+      {progress === 1 && <Onboarding2 />}
+      {progress === 2 && <Onboarding3 />}
+      {progress === 3 && <Onboarding4 />}
+      {progress === 4 && <Onboarding5 />}
+      {progress === 5 && <Onboarding6 />}
+      {progress === 6 && <Onboarding7 />}
+      {progress === 7 && <Onboarding8 />}
+      {progress === 8 && <Onboarding9 />}
+      {progress === 9 && <Onboarding10 />}
+      {progress === 10 && <OnboardingLinkInput />}
+      {progress === 11 && <Onboarding11 />}
+      {progress === 12 && <Onboarding12 />}
+      {progress === 13 && <Onboarding13 requestFeed={requestFeed}/>}
     </OnboardingLayout>
   );
 }

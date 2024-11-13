@@ -11,8 +11,6 @@ import {
   hostProfiles,
   referralCodes,
   userUpdateSchema,
-  properties,
-  propertyInsertSchema,
   users,
 } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
@@ -26,16 +24,6 @@ import {
 import { zodString } from "@/utils/zod-utils";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import axios from "axios";
-import { getAddress } from "@/server/google-maps";
-import {
-  addHostProfile,
-  createHostReferral,
-  createInitialHostTeam,
-  createLatLngGISPoint,
-} from "@/server/server-utils";
-import { sendEmail } from "@/server/server-utils";
-import WelcomeEmail from "packages/transactional/emails/WelcomeEmail";
 
 export const usersRouter = createTRPCRouter({
   getUser: optionallyAuthedProcedure.query(async ({ ctx }) => {

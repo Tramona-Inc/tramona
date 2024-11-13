@@ -1,13 +1,24 @@
 import { env } from "@/env";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
-import { offers, trips, users } from "@/server/db/schema";
+import {
+  offers,
+  properties,
+  requestsToBook,
+  trips,
+  users,
+} from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
-import { eq } from "drizzle-orm";
+import { and, between, eq, gte, isNull, lte, ne } from "drizzle-orm";
 import Stripe from "stripe";
 import { z } from "zod";
-
+import { getPropertyForOffer } from "./offersRouter";
 import { createPayHostTransfer } from "@/utils/stripe-utils";
-import { breakdownPayment } from "@/utils/payment-utils/paymentBreakdown";
+import {
+  breakdownPaymentByOffer,
+  breakdownPaymentByPropertyAndTripParams,
+} from "@/utils/payment-utils/paymentBreakdown";
+import { db } from "@/server/db";
+import { finalizeTrip } from "@/utils/webhook-functions/stripe-utils";
 
 export const config = {
   api: {
@@ -124,48 +135,6 @@ export const stripeRouter = createTRPCRouter({
       console.log("This is the host stripe id ", metadata.host_stripe_id);
       return { clientSecret: session.client_secret };
     }),
-
-  // authorizePayment: protectedProcedure
-  //   .input(
-  //     z.object({
-  //       listingId: z.number(),
-  //       propertyId: z.number(),
-  //       requestId: z.number(),
-  //       name: z.string(),
-  //       price: z.number(),
-  //       description: z.string(),
-  //       cancelUrl: z.string(),
-  //       images: z.array(z.string().url()),
-  //       userId: z.string(),
-  //       phoneNumber: z.string(),
-  //       totalSavings: z.number(),
-  //       //hostId: z.string(),
-  //     }),
-  //   )
-  //   .mutation(({ ctx, input }) => {
-  //     const currentDate = new Date(); // Get the current date and time
-
-  //     // Object that can be access through webhook and client
-  //     const metadata = {
-  //       user_id: ctx.user.id,
-  //       listing_id: input.listingId,
-  //       property_id: input.propertyId,
-  //       request_id: input.requestId,
-  //       price: input.price,
-  //       total_savings: input.totalSavings,
-  //       confirmed_at: currentDate.toISOString(),
-  //       phone_number: input.phoneNumber,
-  //       // host_id: input.hostId,
-  //     };
-
-  //     return stripe.paymentIntents.create({
-  //       payment_method_types: ["card"],
-  //       amount: input.price,
-  //       currency: "usd",
-  //       capture_method: "manual",
-  //       metadata: metadata, // metadata access for checkout session
-  //     });
-  //   }),
 
   // Get the customer info
   createSetupIntentSession: protectedProcedure
@@ -286,8 +255,17 @@ export const stripeRouter = createTRPCRouter({
   authorizePayment: protectedProcedure // this is how will now creat a checkout session using a custom flow
     .input(
       z.object({
-        offerId: z.number(),
+        totalAmountPaid: z.number(),
         cancelUrl: z.string(),
+        offerId: z.number().nullable(),
+        scrapeUrl: z.string().nullable(),
+        numOfGuests: z.number().nullable(),
+        travelerOfferedPriceBeforeFees: z.number(),
+        datePriceFromAirbnb: z.number().nullable(),
+        checkIn: z.date(),
+        checkOut: z.date(),
+        propertyId: z.number(),
+        type: z.enum(["bookItNow", "requestToBook", "offer"]),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -320,19 +298,28 @@ export const stripeRouter = createTRPCRouter({
         stripeCustomerId = customer.id;
       }
 
-      const offer = await ctx.db.query.offers.findFirst({
-        where: eq(offers.id, input.offerId),
-        with: { property: { with: { hostTeam: { with: { owner: true } } } } },
+      const curProperty = await db.query.properties
+        .findFirst({
+          where: eq(properties.id, input.propertyId),
+          with: {
+            hostTeam: {
+              with: {
+                owner: true,
+              },
+            },
+            reviews: true,
+          },
+        })
+        .then((res) => res!);
+
+      const paymentBreakdown = breakdownPaymentByPropertyAndTripParams({
+        dates: {
+          checkIn: input.checkIn,
+          checkOut: input.checkOut,
+        },
+        travelerPriceBeforeFees: input.travelerOfferedPriceBeforeFees,
+        property: curProperty,
       });
-
-      if (!offer) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: `Offer not found with id ${input.offerId}`,
-        });
-      }
-
-      const paymentBreakdown = breakdownPayment(offer);
 
       const metadata = {
         is_charged_with_setup_intent: "false",
@@ -344,18 +331,21 @@ export const stripeRouter = createTRPCRouter({
         stripe_customer_id: stripeCustomerId,
 
         offer_id: input.offerId,
-        property_id: offer.property.id,
-        request_id: offer.requestId,
-        host_stripe_id: offer.property.hostTeam?.owner.stripeConnectId ?? "",
-
+        check_in: input.checkIn.toString(),
+        check_out: input.checkOut.toString(),
+        property_id: input.propertyId,
+        host_stripe_id: curProperty.hostTeam.owner.stripeConnectId,
         traveler_offered_price_before_fees:
-          offer.travelerOfferedPriceBeforeFees,
+          input.travelerOfferedPriceBeforeFees,
         price: paymentBreakdown.totalTripAmount, // Total price included tramona fee
         total_savings: paymentBreakdown.totalSavings,
         taxes_paid: paymentBreakdown.taxesPaid,
         tax_percentage: paymentBreakdown.taxPercentage,
         stripe_transaction_fee: paymentBreakdown.stripeTransactionFee,
         superhog_paid: paymentBreakdown.superhogFee,
+        is_direct_listing: input.scrapeUrl ? "true" : "false",
+        num_of_guests: input.numOfGuests,
+        type: input.type,
       };
 
       const options: Stripe.PaymentIntentCreateParams = {
@@ -397,6 +387,68 @@ export const stripeRouter = createTRPCRouter({
         .set({ paymentCaptured: new Date() })
         .where(eq(trips.paymentIntentId, input.paymentIntentId));
       return intent;
+    }),
+
+  rejectOrCaptureAndFinalizeRequestToBook: protectedProcedure
+    .input(
+      z.object({
+        requestToBookId: z.number(),
+        isAccepted: z.boolean(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      //check to make sure user is authorized
+
+      //update results in db.
+      const curRequestToBook = await db
+        .update(requestsToBook)
+        .set({
+          resolvedAt: new Date(),
+          isAccepted: input.isAccepted,
+        })
+        .where(eq(requestsToBook.id, input.requestToBookId))
+        .returning()
+        .then((res) => res[0]!);
+
+      if (!input.isAccepted) {
+        return;
+      } else {
+        //since accepted we need to finilize the trip
+
+        await finalizeTrip({
+          //trip and tripcheckout creattion, superhog, and sending notifcations
+          paymentIntentId: curRequestToBook.paymentIntentId,
+          numOfGuests: curRequestToBook.numGuests,
+          travelerPriceBeforeFees:
+            curRequestToBook.amountAfterTravelerMarkupAndBeforeFees, //markup already happened
+          checkIn: curRequestToBook.checkIn,
+          checkOut: curRequestToBook.checkOut,
+          propertyId: curRequestToBook.propertyId,
+          userId: curRequestToBook.userId,
+          isDirectListingCharge: curRequestToBook.isDirectListing,
+          source: "Request to book",
+        });
+
+        //now we need to cancel all current request during that same time,
+        const activeRequestToBookThatNeedsToBeRemoved = await db
+          .update(requestsToBook)
+          .set({
+            resolvedAt: new Date(),
+            isAccepted: false,
+          })
+          .where(
+            and(
+              isNull(requestsToBook.resolvedAt),
+              ne(requestsToBook.id, curRequestToBook.id),
+              and(
+                lte(requestsToBook.checkIn, curRequestToBook.checkOut),
+                gte(requestsToBook.checkOut, curRequestToBook.checkIn),
+              ),
+            ),
+          );
+        console.log(activeRequestToBookThatNeedsToBeRemoved);
+      }
+      return;
     }),
 
   confirmSetupIntent: protectedProcedure

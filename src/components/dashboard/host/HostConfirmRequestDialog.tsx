@@ -88,8 +88,6 @@ export default function HostConfirmRequestDialog({
     propertyPrices.hasOwnProperty(property.id),
   );
 
-  console.log("LLLLLL", filteredSelectedProperties);
-
   const handleSubmit = async () => {
     const propertiesWithNoTax = filteredSelectedProperties
       .filter((property) => !property.taxAvailable)

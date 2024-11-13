@@ -1,10 +1,19 @@
-import { useState } from "react";
 import { BookItNowSection } from "./book-it-now/BookItNowSection";
 import { NameYourPriceSection } from "./name-your-price/NameYourPriceSection";
 import landingBg from "public/assets/images/landing-bg.jpg";
+import { useRouter } from "next/router";
 
 export default function MastHead() {
-  const [activeTab, setActiveTab] = useState("search");
+  const router = useRouter();
+  const { query } = router;
+  const activeTab = query.tab ?? "search";
+
+  const handleTabChange = (tab: string) => {
+    void router.push({
+      pathname: router.pathname,
+      query: { ...query, tab },
+    });
+  };
 
   return (
     <div className="bg-background-offWhite">
@@ -31,7 +40,7 @@ export default function MastHead() {
         <div className="mx-auto mb-8 max-w-md md:max-w-lg lg:max-w-3xl">
           <div className="flex rounded-full border-2 border-primaryGreen bg-white p-1">
             <button
-              onClick={() => setActiveTab("search")}
+              onClick={() => handleTabChange("search")}
               className={`flex-1 rounded-full py-3 text-center transition-all duration-200 lg:px-6 ${
                 activeTab === "search"
                   ? "bg-primaryGreen text-white shadow-lg"
@@ -41,7 +50,7 @@ export default function MastHead() {
               Book it now
             </button>
             <button
-              onClick={() => setActiveTab("name-price")}
+              onClick={() => handleTabChange("name-price")}
               className={`flex-1 rounded-full px-6 py-3 text-center transition-all duration-200 ${
                 activeTab === "name-price"
                   ? "bg-primaryGreen text-white shadow-lg"

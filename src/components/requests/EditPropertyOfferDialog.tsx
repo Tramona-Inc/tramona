@@ -1,4 +1,4 @@
-import EditForm from "../property/EditForm";
+import EditForm from "../propertyPages/bidding/EditForm";
 import { Dialog, DialogContent, DialogTitle } from "../ui/dialog";
 
 export default function EditOfferDialog({

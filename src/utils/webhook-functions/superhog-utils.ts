@@ -121,7 +121,7 @@ export async function createSuperhogReservation({
         echoToken: uuidv4(),
       },
       listing: {
-        listingId: propertyId.toString(), //this is the offer ID
+        listingId: propertyId.toString(), //this is the property ID
         listingName: property.name,
         address: {
           addressLine1: property.address,

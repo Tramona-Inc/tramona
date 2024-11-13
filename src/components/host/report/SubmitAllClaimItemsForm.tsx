@@ -300,7 +300,7 @@ export default function SubmitAllClaimItemsForm({
                                   placeholder="0.00"
                                   intlConfig={{
                                     locale: "en-US",
-                                    currency: "GBP",
+                                    currency: "USD",
                                   }}
                                   decimalsLimit={2}
                                   decimalScale={2}
