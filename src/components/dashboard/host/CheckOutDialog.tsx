@@ -1,5 +1,6 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import DialogCancelSave from "./DialogCancelSave";
 
 export default function CheckOutDialog() {
   const instructions = [
@@ -50,6 +51,7 @@ export default function CheckOutDialog() {
       <p className="text-muted-foreground">
         Shared at 9 PM the evening before checkout
       </p>
+      <DialogCancelSave />
     </div>
   );
 }

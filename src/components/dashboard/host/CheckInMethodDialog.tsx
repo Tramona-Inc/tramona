@@ -1,4 +1,13 @@
+import { Input } from "@/components/ui/input";
+import { cn } from "@/utils/utils";
+import { useState } from "react";
+import DialogCancelSave from "./DialogCancelSave";
+
 export default function CheckInMethodDialog() {
+  const [selectedMethodIndex, setSelectedMethodIndex] = useState<number | null>(
+    null,
+  );
+
   const methods = [
     {
       title: "Smart lock",
@@ -23,17 +32,32 @@ export default function CheckInMethodDialog() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-xl font-bold">Select a check-in method</h1>
+        <h1 className="text-xl font-bold">Check-in method</h1>
         <p className="text-muted-foreground">How do travelers get in?</p>
       </div>
       <div className="space-y-4">
         {methods.map((method, index) => (
-          <div className="rounded-xl border p-3" key={index}>
-            <h2>{method.title}</h2>
-            <p>{method.subtitle}</p>
+          <div
+            className={cn(
+              selectedMethodIndex === index ? "bg-zinc-100" : "bg-white",
+              "rounded-xl border p-3 hover:cursor-pointer hover:bg-zinc-100",
+            )}
+            key={index}
+            onClick={() => setSelectedMethodIndex(index)}
+          >
+            <h2 className="font-semibold">{method.title}</h2>
+            <p className="text-muted-foreground">{method.subtitle}</p>
           </div>
         ))}
       </div>
+      <div>
+        <h2 className="font-semibold">Additional check-in details</h2>
+        <Input placeholder="Add any important details for getting inside your place..." />
+      </div>
+      <p className="text-muted-foreground">
+        Shared 24 to 48 hours before check-in
+      </p>
+      <DialogCancelSave />
     </div>
   );
 }

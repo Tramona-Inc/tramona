@@ -186,7 +186,7 @@ export default function HostPropertiesDetails({
     <div>
       <div className="flex items-center justify-between">
         {editing && (
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-2 py-2">
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="outline" className="text-red-500">

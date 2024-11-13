@@ -2,6 +2,7 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import CheckInMethodDialog from "./CheckInMethodDialog";
 import CheckOutDialog from "./CheckOutDialog";
 import { useState } from "react";
+import HouseRulesDialog from "./HouseRulesDialog";
 
 export default function HostArrivalGuide() {
   const [activeDialog, setActiveDialog] = useState<number | null>(null);
@@ -20,7 +21,7 @@ export default function HostArrivalGuide() {
     {
       title: "House rules",
       subtitle: "What are the rules of your property?",
-      dialog: <CheckInMethodDialog />,
+      dialog: <HouseRulesDialog />,
     },
     {
       title: "Interaction preferences",
