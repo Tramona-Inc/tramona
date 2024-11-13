@@ -1,4 +1,8 @@
-import { createTRPCRouter, hostProcedure, protectedProcedure } from "@/server/api/trpc";
+import {
+  createTRPCRouter,
+  hostProcedure,
+  protectedProcedure,
+} from "@/server/api/trpc";
 import { db } from "@/server/db";
 import { requestsToBook, requestsToBookInsertSchema } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
@@ -123,7 +127,11 @@ export const requestsToBookRouter = createTRPCRouter({
       }
 
       await ctx.db
-        .delete(requestsToBook)
+        .update(requestsToBook)
+        .set({
+          resolvedAt: new Date(),
+          isAccepted: false,
+        })
         .where(eq(requestsToBook.id, input.id));
     }),
 
@@ -143,7 +151,10 @@ export const requestsToBookRouter = createTRPCRouter({
       }
 
       // Check if user is authorized
-      if (ctx.user.role !== "admin" && property.hostTeamId !== ctx.hostProfile.curTeamId) {
+      if (
+        ctx.user.role !== "admin" &&
+        property.hostTeamId !== ctx.hostProfile.curTeamId
+      ) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "You are not authorized to view these requests",
@@ -186,10 +197,12 @@ export const requestsToBookRouter = createTRPCRouter({
         },
       );
 
-      const transformedRequestsToBook = propertyRequestsToBook.map(request => ({
-        ...request,
-        traveler: request.madeByGroup.owner,
-      }));
+      const transformedRequestsToBook = propertyRequestsToBook.map(
+        (request) => ({
+          ...request,
+          traveler: request.madeByGroup.owner,
+        }),
+      );
 
       return {
         activeRequestsToBook: transformedRequestsToBook.filter(
@@ -199,14 +212,5 @@ export const requestsToBookRouter = createTRPCRouter({
           (requestToBook) => requestToBook.resolvedAt !== null,
         ),
       };
-    }),
-
-  rejectRequestToBook: protectedProcedure
-    .input(z.object({ id: z.number() }))
-    .mutation(async ({ ctx, input }) => {
-      await ctx.db
-        .update(requestsToBook)
-        .set({ resolvedAt: new Date() })
-        .where(eq(requestsToBook.id, input.id));
     }),
 });

@@ -1,6 +1,6 @@
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
-import HostRequestsToBook from "@/components/dashboard/host/requests-to-book/HostRequestsToBook";
-import HostRequestsLayout from "@/components/dashboard/host/HostRequestsLayout";
+import HostRequestsToBook from "@/components/dashboard/host/requests/requests-to-book/HostRequestsToBook";
+import HostRequestsLayout from "@/components/dashboard/host/requests/HostRequestsLayout";
 import Head from "next/head";
 
 export default function Page() {

@@ -43,7 +43,7 @@ export default function HostStaysCards({
     <div className="mb-36 space-y-6">
       {trips.map((trip) => {
         const numNights = getNumNights(trip.checkIn, trip.checkOut);
-        const totalPrice = trip.offer!.totalPrice;
+        const totalPrice = trip.offer?.totalPrice;
 
         const hostId = trip.property.hostTeam.ownerId;
 

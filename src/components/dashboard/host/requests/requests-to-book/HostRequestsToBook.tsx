@@ -43,7 +43,9 @@ export default function HostRequestsToBook() {
   const router = useRouter();
   const { id } = router.query;
   const propertyId = parseInt(id as string);
-  const [property, setProperty] = useState<Property & { taxAvailable: boolean } | null>(null);
+  const [property, setProperty] = useState<
+    (Property & { taxAvailable: boolean }) | null
+  >(null);
   const [selectedRequest, setSelectedRequest] =
     useState<RequestsToBookWithProperty | null>(null);
   const [step, setStep] = useState(0);
@@ -78,7 +80,7 @@ export default function HostRequestsToBook() {
   );
 
   const { mutateAsync: rejectRequestToBook } =
-    api.requestsToBook.rejectRequestToBook.useMutation();
+    api.stripe.rejectOrCaptureAndFinalizeRequestToBook.useMutation();
 
   return (
     <div className="p-4">
@@ -96,7 +98,8 @@ export default function HostRequestsToBook() {
                   variant="secondary"
                   onClick={async () => {
                     await rejectRequestToBook({
-                      id: data.id,
+                      isAccepted: false,
+                      requestToBookId: data.id,
                     })
                       .then(() => {
                         toast({

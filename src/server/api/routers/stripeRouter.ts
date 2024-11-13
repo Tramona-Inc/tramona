@@ -389,7 +389,7 @@ export const stripeRouter = createTRPCRouter({
       return intent;
     }),
 
-  captureAndFinalizeRequestToBook: protectedProcedure
+  rejectOrCaptureAndFinalizeRequestToBook: protectedProcedure
     .input(
       z.object({
         requestToBookId: z.number(),

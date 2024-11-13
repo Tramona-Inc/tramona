@@ -1018,7 +1018,7 @@ export async function getRequestsToBookForProperties(
       lng: property.latLngPoint.x,
     });
 
-    const taxInfo = calculateTotalTax({country, stateCode, city});
+    const taxInfo = calculateTotalTax({ country, stateCode, city });
     console.log("taxInfo", taxInfo, city);
 
     for (const requestToBook of requestsForProperty) {

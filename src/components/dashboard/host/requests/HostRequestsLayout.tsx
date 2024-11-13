@@ -27,6 +27,29 @@ import { Property, RequestsToBook } from "@/server/db/schema";
 export default function HostRequestsLayout({
   children,
 }: React.PropsWithChildren) {
+  const router = useRouter();
+  const { query } = router;
+  const [activeTab, setActiveTab] = useState<"city" | "request-to-book">(
+    "city",
+  );
+
+  // Set activeTab based on URL query when the component mounts
+  useEffect(() => {
+    if (query.tabs === "request-to-book") {
+      setActiveTab("request-to-book");
+    } else {
+      setActiveTab("city");
+    }
+  }, [query.tabs]);
+
+  const handleTabChange = (tab: "city" | "request-to-book") => {
+    setActiveTab(tab);
+    void router.push({
+      pathname: "/host/requests",
+      query: { tabs: tab === "request-to-book" ? "request-to-book" : "city" },
+    });
+  };
+
   // ---------- STATE MANAGEMENT ----------
   const [separatedData, setSeparatedData] = useState<SeparatedData | null>(
     null,
@@ -36,11 +59,11 @@ export default function HostRequestsLayout({
   const [selectedOption, setSelectedOption] = useState<
     "normal" | "outsidePriceRestriction"
   >("normal");
+
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
   const [selectedProperty, setSelectedProperty] = useState<number | null>(null);
   const [isDataLoading, setIsDataLoading] = useState(true); // New state to track data loading
   const [isDataLoading2, setIsDataLoading2] = useState(true); // for requestsToBook -- rename
-  const router = useRouter();
 
   // ---------- DATA FETCHING ----------
   const { data: fetchedProperties, isLoading } =
@@ -92,7 +115,7 @@ export default function HostRequestsLayout({
             <div className="mt-6 border-b">
               <div className="flex w-full">
                 <button
-                  onClick={() => setActiveTab("city")}
+                  onClick={() => handleTabChange("city")}
                   className={`text-md relative flex-1 pb-4 font-medium transition-colors ${
                     activeTab === "city"
                       ? "text-foreground"
@@ -105,15 +128,15 @@ export default function HostRequestsLayout({
                   )}
                 </button>
                 <button
-                  onClick={() => setActiveTab("book")}
+                  onClick={() => handleTabChange("request-to-book")}
                   className={`text-md relative flex-1 pb-4 font-medium transition-colors ${
-                    activeTab === "book"
+                    activeTab === "request-to-book"
                       ? "text-foreground"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
                   Requests to book
-                  {activeTab === "book" && (
+                  {activeTab === "request-to-book" && (
                     <span className="absolute bottom-0 left-0 right-0 h-1 bg-primaryGreen" />
                   )}
                 </button>
@@ -125,7 +148,7 @@ export default function HostRequestsLayout({
           <div className="pt-4">
             {isDataLoading ? (
               // Loading State
-              range(10).map((i) => <SidebarPropertySkeleton key={i} />)
+              range(7).map((i) => <SidebarPropertySkeleton key={i} />)
             ) : displayedData.length > 0 ? (
               // City List
               displayedData.map((cityData) => (
@@ -158,97 +181,46 @@ export default function HostRequestsLayout({
             )}
           </div>
         </ScrollArea>
-
-        <Separator />
-
-        <ScrollArea className="mt-12 h-1/2">
-          <div className="pb-4">
-            <h1 className="text-3xl font-bold">Request To Book</h1>
-          </div>
-          <div className="pt-4">
-            {isDataLoading2 ? (
-              // Show skeletons while loading
-              range(10).map((i) => <SidebarPropertySkeleton key={i} />)
-            ) : displayedPropertiesData.length > 0 ? (
-              displayedPropertiesData.map((propertyData) => (
-                <SidebarProperty
-                  key={propertyData.property.id}
-                  propertyData={{
-                    property: propertyData.property, // Ensure property is included
-                    requestToBook: propertyData.requestToBook,
-                  }}
-                  selectedProperty={selectedProperty}
-                  setSelectedProperty={setSelectedProperty}
-                />
-              ))
-            ) : (
-              // Show the empty state only when not loading and no data is available
-              <EmptyState
-                icon={HandshakeIcon}
-                className="h-[calc(100vh-280px)]"
-              >
-                <EmptyStateTitle>No requests yet</EmptyStateTitle>
-                <EmptyStateDescription>
-                  Properties with requests will show up here
-                </EmptyStateDescription>
-                <EmptyStateFooter>
-                  <Button asChild variant="outline">
-                    <Link href="/host/properties">View all properties</Link>
-                  </Button>
-                </EmptyStateFooter>
-              </EmptyState>
-            )}
-          </div>
-        </ScrollArea>
-
-        <Separator />
-
-        <ScrollArea className="mt-12 h-1/2">
-          <div className="pb-4">
-            <h1 className="text-3xl font-bold">Request To Book</h1>
-          </div>
-          <div className="pt-4">
-            {isDataLoading2 ? (
-              // Show skeletons while loading
-              range(10).map((i) => <SidebarPropertySkeleton key={i} />)
-            ) : displayedPropertiesData.length > 0 ? (
-              displayedPropertiesData.map((propertyData) => (
-                <SidebarProperty
-                  key={propertyData.property.id}
-                  propertyData={{
-                    property: propertyData.property, // Ensure property is included
-                    requestToBook: propertyData.requestToBook,
-                  }}
-                  selectedProperty={selectedProperty}
-                  setSelectedProperty={setSelectedProperty}
-                />
-              ))
-            ) : (
-              // Show the empty state only when not loading and no data is available
-              <EmptyState
-                icon={HandshakeIcon}
-                className="h-[calc(100vh-280px)]"
-              >
-                <EmptyStateTitle>No requests yet</EmptyStateTitle>
-                <EmptyStateDescription>
-                  Properties with requests will show up here
-                </EmptyStateDescription>
-                <EmptyStateFooter>
-                  <Button asChild variant="outline">
-                    <Link href="/host/properties">View all properties</Link>
-                  </Button>
-                </EmptyStateFooter>
-              </EmptyState>
-            )}
-          </div>
-        </ScrollArea>
       </div>
 
       {/* ---------- MAIN CONTENT AREA ---------- */}
       <div className="hidden flex-1 bg-[#fafafa] xl:block">
         {children ? (
-          <div className="px-8 pt-8">
-            <div className="w-full">{children}</div>
+          <div className="pb-30 px-4 pt-8">
+            <div className="mx-auto max-w-5xl">
+              <div className="mb-4 flex flex-row gap-2">
+                <Button
+                  variant={
+                    activeTab === "city" && selectedOption === "normal"
+                      ? "primary"
+                      : "white"
+                  }
+                  className="rounded-full shadow-md"
+                  onClick={() => {
+                    setSelectedOption("normal");
+                    handleTabChange("city");
+                  }}
+                >
+                  Primary
+                </Button>
+                <Button
+                  variant={
+                    activeTab === "request-to-book" ||
+                    selectedOption === "outsidePriceRestriction"
+                      ? "primary"
+                      : "white"
+                  }
+                  className="rounded-full shadow-md"
+                  onClick={() => {
+                    setSelectedOption("outsidePriceRestriction");
+                    handleTabChange("request-to-book");
+                  }}
+                >
+                  Other
+                </Button>
+              </div>
+              {children}
+            </div>
           </div>
         ) : (
           // Empty State for Main Content
