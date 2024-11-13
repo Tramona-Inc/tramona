@@ -10,8 +10,13 @@ import {
 } from "drizzle-orm/pg-core";
 import { users } from "./users";
 
-export const COHOST_ROLES = ["strict", "medium", "loose"] as const;
-export const coHostRoleEnum = pgEnum("coHostRole", COHOST_ROLES);
+export const COHOST_ROLES = [
+  "Match Manager",
+  "Listing Manager",
+  "Admin Access",
+] as const;
+export const cohostRoleEnum = pgEnum("cohost_role", COHOST_ROLES);
+export type CoHostRole = (typeof COHOST_ROLES)[number];
 
 export const hostTeams = pgTable(
   "host_teams",
@@ -38,7 +43,7 @@ export const hostTeamMembers = pgTable(
     userId: text("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    permission: coHostRoleEnum("permission").default("strict"),
+    role: cohostRoleEnum("role").notNull().default("Admin Access"),
   },
   (vt) => ({
     compoundKey: primaryKey({ columns: [vt.hostTeamId, vt.userId] }),
@@ -53,6 +58,7 @@ export const hostTeamInvites = pgTable(
       .notNull()
       .references(() => hostTeams.id, { onDelete: "cascade" }),
     inviteeEmail: text("invitee_email").notNull(),
+    role: cohostRoleEnum("role").notNull().default("Admin Access"),
     expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
     lastSentAt: timestamp("last_sent_at", { withTimezone: true }).notNull(),
   },

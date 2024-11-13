@@ -11,7 +11,7 @@ import { useChatWithAdmin } from "@/utils/messaging/useChatWithAdmin";
 import CustomStripeCheckout from "./CustomStripeCheckout";
 import { OfferPriceDetails } from "../_common/OfferPriceDetails";
 import { getCancellationPolicyDescription } from "@/config/getCancellationPolicyDescription";
-import React from "react";
+
 export default function Checkout({ offer }: { offer: OfferWithDetails }) {
   const router = useRouter();
   const isMobile = !useIsSm();
@@ -73,15 +73,7 @@ export default function Checkout({ offer }: { offer: OfferWithDetails }) {
   }
 
   function CheckoutSummary() {
-    const offerDiscountPercentage = getOfferDiscountPercentage({
-      createdAt: offer.createdAt,
-      travelerOfferedPriceBeforeFees:
-        offer.tripCheckout.travelerOfferedPriceBeforeFees,
-      checkIn: offer.checkIn,
-      checkOut: offer.checkOut,
-      randomDirectListingDiscount: offer.randomDirectListingDiscount,
-      datePriceFromAirbnb: offer.datePriceFromAirbnb,
-    });
+    const offerDiscountPercentage = getOfferDiscountPercentage(offer);
     console.log(offerDiscountPercentage);
     return (
       <div>
@@ -105,8 +97,14 @@ export default function Checkout({ offer }: { offer: OfferWithDetails }) {
                 <div className="flex items-center gap-1">
                   <Star size={10} />
                   <p className="text-xs">
-                    {offer.property.avgRating} (
-                    {plural(offer.property.numRatings, "review")})
+                    {offer.property.numRatings === 0 ? (
+                      <>New</>
+                    ) : (
+                      <>
+                        {offer.property.avgRating} (
+                        {plural(offer.property.numRatings, "review")})
+                      </>
+                    )}
                   </p>
                 </div>
               </div>

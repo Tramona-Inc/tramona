@@ -27,8 +27,7 @@ export default function OfferCard({
   checkOut: Date;
   requestId: number;
 }>) {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const hostName = property.host?.name ?? property.hostName;
+  const hostName = property.hostTeam.owner.name;
 
   const numNights = getNumNights(checkIn, checkOut);
   const offerNightlyPrice = offer.totalPrice / numNights;
@@ -89,8 +88,8 @@ export default function OfferCard({
           <div className="flex gap-2">
             <UserAvatar
               name={hostName}
-              email={property.host?.email}
-              image={property.host?.image}
+              email={property.hostTeam.owner.email}
+              image={property.hostTeam.owner.image}
             />
             <div className="flex-1 -space-y-1">
               <p className="text-sm text-muted-foreground">
@@ -100,10 +99,12 @@ export default function OfferCard({
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-1">
-            {property.numRatings > 0 && (
+            {property.numRatings > 0 ? (
               <Badge variant="secondary" icon={<StarFilledIcon />}>
                 {property.avgRating} ({property.numRatings})
               </Badge>
+            ) : (
+              <Badge variant="secondary">New</Badge>
             )}
             <Badge variant="secondary">{property.propertyType}</Badge>
             {property.amenities.length > 0 && (

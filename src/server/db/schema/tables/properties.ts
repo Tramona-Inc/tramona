@@ -21,7 +21,6 @@ import {
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 import { ALL_PROPERTY_AMENITIES } from "./propertyAmenities";
-import { users } from "./users";
 import { ALL_LISTING_SITE_NAMES, propertyTypeEnum } from "../common";
 
 export const CANCELLATION_POLICIES = [
@@ -234,8 +233,7 @@ export const properties = pgTable(
   "properties",
   {
     id: serial("id").primaryKey(),
-    hostId: text("host_id").references(() => users.id, { onDelete: "cascade" }),
-    hostTeamId: integer("host_team_id"), // TODO: migrate fully away from hostId
+    hostTeamId: integer("host_team_id").notNull(),
     originalListingPlatform: listingPlatformEnum("original_listing_platform"), // null = only on Tramona
     originalListingId: varchar("original_listing_id"),
 
@@ -245,32 +243,30 @@ export const properties = pgTable(
       .notNull()
       .default("Entire place"),
 
-    // how many guests does this property accomodate at most?
+    /** how many guests does this property accomodate at most? */
     maxNumGuests: smallint("max_num_guests").notNull(),
     numBeds: smallint("num_beds").notNull(),
     numBedrooms: smallint("num_bedrooms").notNull(),
     numBathrooms: doublePrecision("num_bathrooms"),
     // propertyPMS: propertyPMSEnum("property_pms"),
 
-    // for when blake/preju manually upload, otherwise get the host's name via hostId
+    /** for when blake/preju manually upload, otherwise get the host's name via hostId */
     hostName: varchar("host_name", { length: 255 }),
     hostProfilePic: varchar("host_profile_pic"),
     hostNumReviews: integer("host_num_reviews"),
     hostRating: doublePrecision("host_rating"),
 
     address: varchar("address", { length: 1000 }).notNull(),
-    // latitude: doublePrecision("latitude").notNull(),
-    // longitude: doublePrecision("longitude").notNull(),
-    // latitude: doublePrecision("latitude").notNull(),
-    // longitude: doublePrecision("longitude").notNull(),
+    county: varchar("county", { length: 255 }),
+    stateName: varchar("state_name", { length: 255 }),
+    stateCode: varchar("state_code", { length: 8 }),
     city: varchar("city", { length: 255 }).notNull(),
+    country: varchar("country", { length: 255 }).notNull(),
+
     originalListingUrl: varchar("original_listing_url"),
     checkInInfo: varchar("check_in_info"),
     checkInTime: time("check_in_time").notNull().default("15:00:00"),
     checkOutTime: time("check_out_time").notNull().default("10:00:00"),
-
-
-    // amenities: propertyAmenitiesEnum("amenities").array().notNull(),
     amenities: varchar("amenities")
       .array()
       .notNull()
@@ -294,8 +290,10 @@ export const properties = pgTable(
     numRatings: integer("num_ratings").notNull().default(0),
     airbnbUrl: varchar("airbnb_url"),
     originalNightlyPrice: integer("original_nightly_price"), // in cents
+    currentSecurityDeposit: integer("current_security_deposit")
+      .notNull()
+      .default(0), //cant be null
     areaDescription: text("area_description"),
-    mapScreenshot: text("map_screenshot"),
     cancellationPolicy: text("cancellation_policy"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
@@ -304,8 +302,7 @@ export const properties = pgTable(
     ageRestriction: integer("age_restriction"),
     priceRestriction: integer("price_restriction").default(0),
     stripeVerRequired: boolean("stripe_ver_required").default(false),
-    propertyStatus: propertyStatusEnum("property_status").default("Listed"),
-    hostImageUrl: varchar("host_image_url"),
+    status: propertyStatusEnum("property_status").default("Listed"),
     pricingScreenUrl: varchar("pricing_screen_url"),
     currency: currencyEnum("currency").notNull().default("USD"),
     // hostawayListingId: integer("hostaway_listing_id"),
@@ -342,6 +339,7 @@ export const propertyInsertSchema = createInsertSchema(properties, {
   checkOutTime: zodTime,
   roomsWithBeds: roomsWithBedsSchema,
   autoOfferDiscountTiers: z.array(discountTierSchema),
+  latLngPoint: z.object({ x: z.number(), y: z.number() }),
 });
 
 // make everything except id optional

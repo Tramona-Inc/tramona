@@ -24,20 +24,20 @@ export default function OfferPhotos({
         loop: true,
         startIndex: indexOfSelectedImage,
       }}
-      className="w-full md:h-[700px] md:w-[600px] lg:h-[750px] lg:w-[800px] "
+      className="w-full md:h-[700px] md:w-[600px] lg:h-[750px] lg:w-[800px]"
     >
       <CarouselContent>
         {propertyImages.map((image, index) => (
           <CarouselItem key={index}>
             <div className="p-1">
-              <Card className="flex min-h-[700px] items-center border-none bg-transparent shadow-none">
+              <Card className="min-h-[230px] items-center border-none bg-transparent shadow-none sm:min-h-[400px] md:min-h-[700px]">
                 <CardContent>
                   <div className="flex items-center">
                     <Image
                       src={image}
                       alt="Property Image"
                       fill
-                      objectFit="contain"
+                      className="object-contain"
                     />
                   </div>
                 </CardContent>

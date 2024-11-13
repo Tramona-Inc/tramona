@@ -65,6 +65,23 @@ const Onboarding12: React.FC<Props> = ({ requestFeed }) => {
     }
   };
 
+  const handleShareLink = async () => {
+    try {
+      await navigator.clipboard.writeText(
+        "https://www.tramona.com/auth/signup",
+      );
+      toast({
+        title: "Link Copied",
+        description: "The signup link has been copied to your clipboard",
+      });
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Failed to copy the link",
+      });
+    }
+  };
+
   const sendEmails = async () => {
     console.log(emailList);
     if (emailList.length < 1) {
@@ -162,8 +179,12 @@ const Onboarding12: React.FC<Props> = ({ requestFeed }) => {
             </CardContent>
           </Card>
           <div className="mx-auto my-4 flex w-full gap-x-6 px-1">
-            <Button className="w-full" variant="secondary">
-              Share Link
+            <Button
+              className="w-full"
+              variant="secondary"
+              onClick={handleShareLink}
+            >
+              Copy Link
               <LinkIcon size={18} />
             </Button>
             <Button

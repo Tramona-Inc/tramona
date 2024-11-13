@@ -25,7 +25,7 @@ export function RequestCardOfferPreviews({
       <div className="flex gap-2">
         {sortedOffers.map((offer) => {
           const { property } = offer;
-          const { host } = property;
+          const host = property.hostTeam.owner;
 
           const numNights = getNumNights(offer.checkIn, offer.checkOut);
           const offerNightlyPrice =
@@ -71,18 +71,11 @@ export function RequestCardOfferPreviews({
               <div className="text-xs font-semibold">
                 <div className="flex items-center gap-2 overflow-hidden p-1">
                   <div className="shrink-0">
-                    <UserAvatar
-                      name={host?.name ?? property.hostName ?? "Tramona"}
-                      image={
-                        host?.image ??
-                        property.hostProfilePic ??
-                        "/assets/images/tramona.svg"
-                      }
-                    />
+                    <UserAvatar name={host.name} image={host.image} />
                   </div>
                   <div>
                     <p className="line-clamp-1 text-xs text-muted-foreground">
-                      {host?.name ?? property.hostName ?? "Tramona"} offered ·{" "}
+                      {host.name} offered ·{" "}
                       {formatDistanceToNowStrict(offer.createdAt, {
                         addSuffix: true,
                       })}

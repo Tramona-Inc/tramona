@@ -34,6 +34,7 @@ import { formatDistanceToNowStrict } from "date-fns";
 import { LinkInputPropertyCard } from "../_common/LinkInputPropertyCard";
 import SingleLocationMap from "../_common/GoogleMaps/SingleLocationMap";
 import { RequestCardOfferPreviews } from "./RequestCardOfferPreviews";
+
 export type GuestDashboardRequest = RouterOutputs["requests"]["getMyRequests"][
   | "activeRequests"
   | "inactiveRequests"][number];

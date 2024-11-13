@@ -115,7 +115,7 @@ export default function CalendarSettings() {
                   <Label>{bookItNowPercent}% OFF</Label>
                   <Slider
                     value={[bookItNowPercent]}
-                    onValueChange={(value) => setBookItNowPercent(value[0])}
+                    onValueChange={(value) => setBookItNowPercent(value[0]!)}
                     max={100}
                   />
                   <p className="text-xs text-muted-foreground">
@@ -177,7 +177,7 @@ export default function CalendarSettings() {
                   <Slider
                     value={[offersToBookPercent]}
                     onValueChange={(value) =>
-                      setOffersToBookPercent(Math.max(5, value[0]))
+                      setOffersToBookPercent(Math.max(5, value[0]!))
                     }
                     min={5}
                     max={100}
@@ -185,8 +185,8 @@ export default function CalendarSettings() {
                   />
                   <p className="text-base text-muted-foreground">
                     You will see requests to book your property in your
-                    "requests" tab. You will have the option to accept, deny or
-                    counter offer.
+                    &quot;requests&quot; tab. You will have the option to
+                    accept, deny or counter offer.
                   </p>
                   <div className="flex justify-end">
                     <Button
@@ -257,7 +257,7 @@ export default function CalendarSettings() {
                                 value={tier.days}
                                 onChange={(e) => {
                                   const newTiers = [...discountTiers];
-                                  newTiers[index].days = parseInt(
+                                  newTiers[index]!.days = parseInt(
                                     e.target.value,
                                   );
                                   setDiscountTiers(newTiers);
@@ -274,7 +274,7 @@ export default function CalendarSettings() {
                                 value={tier.discount}
                                 onChange={(e) => {
                                   const newTiers = [...discountTiers];
-                                  newTiers[index].discount = parseInt(
+                                  newTiers[index]!.discount = parseInt(
                                     e.target.value,
                                   );
                                   setDiscountTiers(newTiers);
