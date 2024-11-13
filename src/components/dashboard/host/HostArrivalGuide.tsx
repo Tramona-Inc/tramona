@@ -6,6 +6,7 @@ import HouseRulesDialog from "./HouseRulesDialog";
 import InteractionPreferencesDialog from "./InteractionPreferencesDialog";
 import DirectionsDialog from "./DirectionsDialog";
 import WifiDialog from "./WifiDialog";
+import HouseManualDialog from "./HouseManualDialog";
 
 export default function HostArrivalGuide() {
   const [activeDialog, setActiveDialog] = useState<number | null>(null);
@@ -44,7 +45,7 @@ export default function HostArrivalGuide() {
     {
       title: "House manual",
       subtitle: "Add details",
-      dialog: <CheckInMethodDialog />,
+      dialog: <HouseManualDialog />,
     },
   ];
 
