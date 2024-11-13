@@ -38,6 +38,7 @@ import { scrapeDirectListings } from "@/server/direct-sites-scraping";
 import { createNormalDistributionDates } from "@/server/server-utils";
 import { scrapeAirbnbPrice } from "@/server/scrapePrice";
 import { TRPCClientError } from "@trpc/client";
+import { breakdownPaymentByOffer } from "@/utils/payment-utils/paymentBreakdown";
 
 export const offersRouter = createTRPCRouter({
   accept: protectedProcedure
@@ -763,6 +764,7 @@ export async function getPropertyForOffer(propertyId: number) {
               image: true,
               about: true,
               location: true,
+              stripeConnectId: true,
             },
             with: {
               hostProfile: {

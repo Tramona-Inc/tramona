@@ -2,7 +2,6 @@ import {
   hostProfiles,
   properties,
   reservedDateRanges,
-  reviews,
   users,
   type PropertyType,
 } from "@/server/db/schema";
@@ -185,8 +184,6 @@ interface ListingCreatedWebhook {
     };
     description: string;
     channel: {
-      id: string;
-      name: string;
       customer: {
         id: string;
         name: string;
@@ -202,11 +199,7 @@ interface ChannelActivatedWebhook {
     picture: string;
     location: string;
     description: string;
-    channel: {
-      customer: {
-        id: string;
-        name: string;
-      };
+    customer: {
       id: string;
       name: string;
     };
@@ -263,7 +256,7 @@ export default async function webhook(
     switch (webhookData.action) {
       case "channel.activated":
         console.log("channel created");
-        await insertHost(webhookData.data.channel.customer.id);
+        await insertHost(webhookData.data.customer.id);
         await db
           .update(users)
           .set({
@@ -271,7 +264,7 @@ export default async function webhook(
             location: webhookData.data.location,
             about: webhookData.data.description,
           })
-          .where(eq(users.id, webhookData.data.channel.customer.id));
+          .where(eq(users.id, webhookData.data.customer.id));
         break;
       case "listing.created":
         const userId = webhookData.data.channel.customer.id;
@@ -513,7 +506,9 @@ export default async function webhook(
 
         break;
     }
+
     // Add your processing logic here
+
     res.json({ received: true });
   } else {
     res.setHeader("Allow", "POST");

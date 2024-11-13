@@ -6,7 +6,7 @@ import { formatDateRange, getDaysUntilTrip } from "@/utils/utils";
 import Image from "next/image";
 import UserAvatar from "../_common/UserAvatar";
 import { type TripCardDetails } from "@/pages/my-trips";
-import ChatOfferButton from "../offers/ChatOfferButton";
+import ChatOfferButton from "../propertyPages/sections/ChatOfferButton";
 import TripCancelDialog from "./TripCancelDialog";
 
 export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
