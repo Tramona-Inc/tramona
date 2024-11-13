@@ -1,5 +1,4 @@
 import Image from "next/image";
-import { Button } from "../ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,26 +13,31 @@ import {
 } from "@/utils/utils";
 import { type RouterOutputs } from "@/utils/api";
 import { formatDistanceToNowStrict } from "date-fns";
-import { EllipsisIcon, FlagIcon } from "lucide-react";
+import { CheckCircle, EllipsisIcon, FlagIcon } from "lucide-react";
 import Link from "next/link";
 import { useChatWithHost } from "@/utils/messaging/useChatWithHost";
-import Spinner from "../_common/Spinner";
-import { env } from "@/env";
+import { Card, CardContent } from "../ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+
+type StaysTabs =
+  | "currently-hosting"
+  | "checking-out"
+  | "upcoming"
+  | "accepted"
+  | "history";
 
 export default function HostStaysCards({
   trips,
+  staysTab,
 }: {
   trips?: RouterOutputs["trips"]["getHostTrips"];
+  staysTab?: StaysTabs;
 }) {
   const chatWithHost = useChatWithHost();
 
-  if (!trips) return <Spinner />;
-  if (trips.length === 0)
-    return (
-      <p className="mt-32 text-center text-muted-foreground">
-        No trips to show
-      </p>
-    );
+  if (!trips) return <HostStaysSkeleton />;
+  if (trips.length === 0) return <HostStaysEmptyState staysTab={staysTab} />;
 
   return (
     <div className="mb-36 space-y-6">
@@ -41,7 +45,7 @@ export default function HostStaysCards({
         const numNights = getNumNights(trip.checkIn, trip.checkOut);
         const totalPrice = trip.offer!.totalPrice;
 
-        const hostId = trip.property.host?.id ?? env.TRAMONA_ADMIN_USER_ID;
+        const hostId = trip.property.hostTeam.ownerId;
 
         return (
           <div key={trip.id}>
@@ -106,10 +110,12 @@ export default function HostStaysCards({
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem asChild red>
-                      <Link href="/host/resolution-form">
-                        <FlagIcon height={16} />
-                        Report Damage
+                    <DropdownMenuItem>
+                      <Link
+                        href="/host/report/resolution-form"
+                        className="flex w-full flex-row justify-around gap-x-1"
+                      >
+                        Report Damage <FlagIcon height={16} />
                       </Link>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -133,6 +139,75 @@ export default function HostStaysCards({
           </div>
         );
       })}
+    </div>
+  );
+}
+
+export function HostStaysEmptyState({ staysTab }: { staysTab?: StaysTabs }) {
+  let text = "";
+
+  if (staysTab) {
+    switch (staysTab) {
+      case "currently-hosting":
+        text = "You don't currently have any guests staying.";
+        break;
+      case "checking-out":
+        text = "No guests are checking out today or tomorrow.";
+        break;
+      case "upcoming":
+        text = "You don't have any upcoming reservations.";
+        break;
+      case "accepted":
+        text = "You haven't accepted any reservations yet.";
+        break;
+      case "history":
+        text = "There are no past stays available in your history.";
+        break;
+      default:
+        text = "You don't have any reservations booked.";
+    }
+  } else {
+    text = "You don't have any reservations booked.";
+  }
+  return (
+    <Card className="border-primary/20">
+      <CardContent className="flex flex-col items-center justify-center space-y-4 p-6 text-center">
+        <CheckCircle className="h-8 w-8 text-primary" />
+        <p className="text-lg text-muted-foreground">{text}</p>
+        <Button variant="link" asChild>
+          <Link href="/host/requests">See requests</Link>
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function HostStaysSkeleton() {
+  return (
+    <div className="space-y-3">
+      {[1, 2, 3].map((index) => (
+        <Card key={index} className="flex p-3">
+          {/* Property Image */}
+          <Skeleton className="aspect-[4/3] h-20 w-36 rounded-md" />
+
+          {/* Content Container */}
+          <div className="flex flex-1 flex-col justify-between pl-3">
+            <div className="flex items-start justify-between">
+              {/* Left side content */}
+              <div className="space-y-1">
+                <Skeleton className="h-5 w-28" /> {/* Property name */}
+                <Skeleton className="h-3 w-32" /> {/* Location */}
+              </div>
+
+              {/* Right side content */}
+              <div className="text-right">
+                <Skeleton className="h-3 w-20" /> {/* Dates */}
+                <Skeleton className="mt-1 h-2 w-28" /> {/* Check out status */}
+              </div>
+            </div>
+          </div>
+        </Card>
+      ))}
     </div>
   );
 }

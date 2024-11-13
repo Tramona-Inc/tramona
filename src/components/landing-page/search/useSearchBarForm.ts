@@ -9,11 +9,7 @@ export function useSearchBarForm({
 }: {
   afterSubmit?: () => void;
 } = {}) {
-  const form = useZodForm({
-    schema: searchSchema,
-    defaultValues: defaultSearchOrReqValues,
-    reValidateMode: "onSubmit",
-  });
+
 
   const { guests, filter, maxNightlyPrice, checkIn, checkOut } = useCitiesFilter(
     (state) => state,

@@ -1,14 +1,6 @@
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Pencil, PlusIcon } from "lucide-react";
+import { Grid, Pencil, Plus } from "lucide-react";
 import HostProperties from "./HostProperties";
-import Link from "next/link";
 import {
   type LocationType,
   useHostOnboarding,
@@ -18,11 +10,25 @@ import {
   CancellationPolicyWithInternals,
   type Property,
 } from "@/server/db/schema/tables/properties";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useRouter } from "next/router";
+import ExpandableSearchBar from "@/components/_common/ExpandableSearchBar";
+import { useState } from "react";
 
-export default function HostPropertiesLayout({
-  children,
-}: React.PropsWithChildren) {
-  // const [open, setOpen] = useState(false);
+export default function HostPropertiesLayout() {
+  const [searchResults, setSearchResults] = useState<Property[]>([]);
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+
+  const router = useRouter();
+
+  const setProgress = useHostOnboarding((state) => state.setProgress);
 
   const setPropertyType = useHostOnboarding((state) => state.setPropertyType);
   const setMaxGuests = useHostOnboarding((state) => state.setMaxGuests);
@@ -56,6 +62,7 @@ export default function HostPropertiesLayout({
   );
 
   function setStatesDefault() {
+    setProgress(0);
     setPropertyType("Apartment"),
       setMaxGuests(1),
       setBedrooms(1),
@@ -88,88 +95,73 @@ export default function HostPropertiesLayout({
   const { data: properties } = api.properties.getHostProperties.useQuery();
 
   const listedProperties = properties?.filter(
-    (property) => property.propertyStatus === "Listed",
+    (property) => property.status === "Listed",
   );
   const archivedProperties = properties?.filter(
-    (property) => property.propertyStatus === "Archived",
+    (property) => property.status === "Archived",
   );
   const draftedProperties = properties?.filter(
-    (property) => property.propertyStatus === "Drafted",
+    (property) => property.status === "Drafted",
   );
 
+  const handleSearchResults = (results: Property[]) => {
+    setSearchResults(results);
+  };
+
   return (
-    <div className="flex">
-      <div className="sticky top-20 h-screen-minus-header-n-footer w-full overflow-auto border-r px-4 py-8 xl:w-96">
-        <ScrollArea>
-          <h1 className="text-3xl font-bold">Properties</h1>
-          {/* <p className="text-muted-foreground">24% currently vacant</p> */}
-          <div className="my-4">
-            {/* <NewPropertyBtn open={open} setOpen={setOpen} /> */}
-            <Link href="/host-onboarding">
-              <Button
-                variant="secondary"
-                onClick={() => {
-                  setStatesDefault();
-                }}
-              >
-                <PlusIcon />
-                New Listing
-              </Button>
-            </Link>
-          </div>
-          <Accordion type="multiple" className="w-full">
-            <AccordionItem value="listed">
-              <AccordionTrigger>
-                Listed{" "}
-                <span className="text-muted-foreground">
-                  {listedProperties?.length}
-                </span>
-              </AccordionTrigger>
-              <AccordionContent>
-                <HostProperties properties={listedProperties ?? null} />
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="drafts">
-              <AccordionTrigger>
-                Drafts{" "}
-                <span className="text-muted-foreground">
-                  {draftedProperties?.length}
-                </span>
-              </AccordionTrigger>
-              <AccordionContent>
-                <HostProperties properties={draftedProperties ?? null} />
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="archive">
-              <AccordionTrigger>
-                Archives{" "}
-                <span className="text-muted-foreground">
-                  {archivedProperties?.length}
-                </span>
-              </AccordionTrigger>
-              <AccordionContent>
-                <HostProperties properties={archivedProperties ?? null} />
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        </ScrollArea>
+    <section className="mx-auto mb-24 mt-7 max-w-7xl px-6 md:my-14">
+      <div className="flex items-center gap-4 sm:flex-row sm:justify-between">
+        <h1 className="text-2xl font-bold md:text-4xl">Your properties</h1>
+        <div className="flex flex-1 items-center justify-end gap-4">
+          <ExpandableSearchBar
+            className="hidden sm:flex"
+            onSearchResultsUpdate={handleSearchResults}
+            onExpandChange={setIsSearchExpanded}
+          />
+          <Button
+            size="icon"
+            className="rounded-full bg-white font-bold text-black shadow-xl"
+          >
+            <Grid strokeWidth={2} />
+          </Button>
+          <Button
+            size="icon"
+            className="rounded-full bg-white font-bold text-black shadow-xl"
+            onClick={() => {
+              setStatesDefault();
+              void router.push("/host-onboarding");
+            }}
+          >
+            <Plus strokeWidth={2} />
+          </Button>
+        </div>
       </div>
-      <div className="hidden flex-1 xl:block">
-        {children ? (
-          <div className="mx-auto my-8 min-h-screen-minus-header-n-footer max-w-4xl rounded-2xl border">
-            <div className="grid grid-cols-1">{children}</div>
-          </div>
-        ) : (
-          <div className="hidden sm:block">
-            <div className="flex min-h-screen-minus-header-n-footer items-center justify-center">
-              <p className="font-medium text-muted-foreground">
-                Select a property to view more details
-              </p>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
+      <ExpandableSearchBar
+        className="pt-4 sm:hidden"
+        onSearchResultsUpdate={handleSearchResults}
+        onExpandChange={setIsSearchExpanded}
+      />
+      {isSearchExpanded ? (
+        <HostProperties properties={searchResults} searched />
+      ) : (
+        <Tabs className="mt-6" defaultValue="listed">
+          <TabsList>
+            <TabsTrigger value="listed">Listed</TabsTrigger>
+            <TabsTrigger value="drafts">Drafts</TabsTrigger>
+            <TabsTrigger value="archived">Archived</TabsTrigger>
+          </TabsList>
+          <TabsContent value="listed">
+            <HostProperties properties={listedProperties ?? null} />
+          </TabsContent>
+          <TabsContent value="drafts">
+            <HostProperties properties={draftedProperties ?? null} />
+          </TabsContent>
+          <TabsContent value="archived">
+            <HostProperties properties={archivedProperties ?? null} />
+          </TabsContent>
+        </Tabs>
+      )}
+    </section>
   );
 }
 
@@ -178,11 +170,13 @@ export function HostPropertyEditBtn({
   setEditing,
   onSubmit,
   property,
+  disabled,
 }: {
   editing: boolean;
   setEditing: (editing: boolean) => void;
   onSubmit?: () => void;
   property: Property;
+  disabled?: boolean;
 }) {
   const setPropertyType = useHostOnboarding((state) => state.setPropertyType);
   const setMaxGuests = useHostOnboarding((state) => state.setMaxGuests);
@@ -243,8 +237,8 @@ export function HostPropertyEditBtn({
         : addressWithoutApt,
     );
     setCheckInType(property.checkInInfo ?? "self");
-    setCheckIn(property.checkInTime ?? "00:00");
-    setCheckOut(property.checkOutTime ?? "00:00");
+    setCheckIn(property.checkInTime);
+    setCheckOut(property.checkOutTime);
     setAmenities(property.amenities);
     setOtherAmenities(property.otherAmenities);
     setImageUrls(property.imageUrls);
@@ -285,6 +279,7 @@ export function HostPropertyEditBtn({
             className="rounded-full bg-white font-bold shadow-md sm:rounded-lg sm:border-2 sm:shadow-none"
             onClick={handleEditClick}
             type="button"
+            disabled={disabled}
           >
             <Pencil size={20} />
             Enter edit mode

@@ -18,7 +18,6 @@ export default function Page() {
               src={linkInputBg}
               alt=""
               fill
-              objectFit="cover"
               placeholder="blur"
               className="select-none"
             />

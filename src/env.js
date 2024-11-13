@@ -1,6 +1,5 @@
 import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod";
-
 export const env = createEnv({
   /**
    * Specify your server-side environment variables schema here. This way you can ensure the app
@@ -29,6 +28,7 @@ export const env = createEnv({
     TWILIO_AUTH_TOKEN: z.string(),
     TWILIO_FROM: z.string(),
     TRAMONA_ADMIN_USER_ID: z.string(),
+    ADMIN_TEAM_ID: z.coerce.number(),
     SLACK_TOKEN: z.string(),
     AWS_ACCESS_KEY_ID: z.string(),
     AWS_SECRET_ACCESS_KEY: z.string(),
@@ -85,6 +85,7 @@ export const env = createEnv({
     TWILIO_AUTH_TOKEN: process.env.TWILIO_AUTH_TOKEN,
     TWILIO_FROM: process.env.TWILIO_FROM,
     TRAMONA_ADMIN_USER_ID: process.env.TRAMONA_ADMIN_USER_ID,
+    ADMIN_TEAM_ID: process.env.ADMIN_TEAM_ID,
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     SLACK_TOKEN: process.env.SLACK_TOKEN,

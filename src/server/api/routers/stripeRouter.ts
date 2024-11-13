@@ -1,12 +1,13 @@
 import { env } from "@/env";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
-import { trips, tripDamages, users } from "@/server/db/schema";
+import { offers, trips, users } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import Stripe from "stripe";
 import { z } from "zod";
 
 import { createPayHostTransfer } from "@/utils/stripe-utils";
+import { breakdownPayment } from "@/utils/payment-utils/paymentBreakdown";
 
 export const config = {
   api: {
@@ -285,24 +286,8 @@ export const stripeRouter = createTRPCRouter({
   authorizePayment: protectedProcedure // this is how will now creat a checkout session using a custom flow
     .input(
       z.object({
-        isDirectListing: z.boolean().default(false),
         offerId: z.number(),
-        propertyId: z.number(),
-        requestId: z.number().nullable(),
-        name: z.string(),
-        price: z.number(), // Total price included tramona fee
-        description: z.string(),
         cancelUrl: z.string(),
-        images: z.array(z.string().url()),
-        userId: z.string(),
-        phoneNumber: z.string(),
-        totalSavings: z.number(),
-        hostStripeId: z.string().nullable(),
-        travelerOfferedPriceBeforeFees: z.number(),
-        taxesPaid: z.number(),
-        taxesPercentage: z.number().nullable(),
-        stripeTransactionFee: z.number(),
-        superhogFee: z.number(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -311,6 +296,7 @@ export const stripeRouter = createTRPCRouter({
       //get hostID from the property
       // Object that can be access through webhook and client
       //check if a customer id exists
+
       let stripeCustomerId = await ctx.db.query.users
         .findFirst({
           columns: {
@@ -334,26 +320,42 @@ export const stripeRouter = createTRPCRouter({
         stripeCustomerId = customer.id;
       }
 
+      const offer = await ctx.db.query.offers.findFirst({
+        where: eq(offers.id, input.offerId),
+        with: { property: { with: { hostTeam: { with: { owner: true } } } } },
+      });
+
+      if (!offer) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: `Offer not found with id ${input.offerId}`,
+        });
+      }
+
+      const paymentBreakdown = breakdownPayment(offer);
+
       const metadata = {
-        is_direct_listing: input.isDirectListing.toString(),
         is_charged_with_setup_intent: "false",
+        confirmed_at: currentDate.toISOString(),
+
         user_email: ctx.user.email,
         user_id: ctx.user.id,
-        offer_id: input.offerId,
-        property_id: input.propertyId,
-        request_id: input.requestId,
-        price: input.price, // Total price included tramona fee
-        total_savings: input.totalSavings,
-        confirmed_at: currentDate.toISOString(),
-        phone_number: input.phoneNumber,
-        host_stripe_id: input.hostStripeId ?? "",
+        phone_number: ctx.user.phoneNumber,
         stripe_customer_id: stripeCustomerId,
+
+        offer_id: input.offerId,
+        property_id: offer.property.id,
+        request_id: offer.requestId,
+        host_stripe_id: offer.property.hostTeam?.owner.stripeConnectId ?? "",
+
         traveler_offered_price_before_fees:
-          input.travelerOfferedPriceBeforeFees,
-        taxes_paid: input.taxesPaid,
-        tax_percentage: input.taxesPercentage,
-        stripe_transaction_fee: input.stripeTransactionFee,
-        superhog_paid: input.superhogFee,
+          offer.travelerOfferedPriceBeforeFees,
+        price: paymentBreakdown.totalTripAmount, // Total price included tramona fee
+        total_savings: paymentBreakdown.totalSavings,
+        taxes_paid: paymentBreakdown.taxesPaid,
+        tax_percentage: paymentBreakdown.taxPercentage,
+        stripe_transaction_fee: paymentBreakdown.stripeTransactionFee,
+        superhog_paid: paymentBreakdown.superhogFee,
       };
 
       const options: Stripe.PaymentIntentCreateParams = {
@@ -838,7 +840,7 @@ export const stripeRouter = createTRPCRouter({
         propertyId: z.number(),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ input }) => {
       try {
         //retreit the setupIntent objext to get the payment method
         const setupIntentObject = await stripe.setupIntents.retrieve(
@@ -870,14 +872,6 @@ export const stripeRouter = createTRPCRouter({
         if (paymentIntent.status === "succeeded") {
           // we need to insert it into the database
           //creates the damage record as well
-          await ctx.db.insert(tripDamages).values({
-            tripId: input.tripId,
-            amount: input.amount,
-            description: input.description,
-            propertyId: input.propertyId,
-            paymentCompleteAt: new Date(),
-            createdAt: new Date(),
-          });
           console.log("Charge successful:", paymentIntent);
           return paymentIntent; // Payment was completed successfully
         } else if (

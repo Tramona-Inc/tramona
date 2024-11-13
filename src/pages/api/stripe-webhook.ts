@@ -28,6 +28,7 @@ import {
 import { createSetupIntent } from "@/utils/webhook-functions/stripe-utils";
 import { sendSlackMessage } from "@/server/slack";
 import { formatDateMonthDay } from "@/utils/utils";
+import { breakdownPayment } from "@/utils/payment-utils/paymentBreakdown";
 // ! Necessary for stripe
 export const config = {
   api: {
@@ -118,6 +119,17 @@ export default async function webhook(
             const offer = await db.query.offers.findFirst({
               with: {
                 request: { columns: { latLngPoint: false } },
+                property: {
+                  columns: {
+                    originalNightlyPrice: true,
+                    city: true,
+                    county: true,
+                    stateName: true,
+                    stateCode: true,
+                    country: true,
+                    currentSecurityDeposit: true,
+                  },
+                },
               },
               where: eq(
                 offers.id,
@@ -130,6 +142,7 @@ export default async function webhook(
                 properties.id,
                 parseInt(paymentIntentSucceeded.metadata.property_id!),
               ),
+              with: { hostTeam: true },
             });
 
             //<------- Setup Intent for future charge ---->
@@ -143,6 +156,33 @@ export default async function webhook(
             //create trip here
 
             if (offer?.request) {
+              const paymentIntentId =
+                paymentIntentSucceeded.payment_intent?.toString();
+
+              if (!paymentIntentId) {
+                throw new Error(
+                  `paymentIntentId is null for offer ${offer.id}`,
+                );
+              }
+
+              const priceBreakdown = breakdownPayment(offer);
+
+              const tripCheckout = await db
+                .insert(tripCheckouts)
+                .values({
+                  paymentIntentId,
+                  travelerOfferedPriceBeforeFees:
+                    offer.travelerOfferedPriceBeforeFees,
+                  totalTripAmount: priceBreakdown.totalTripAmount,
+                  taxesPaid: priceBreakdown.taxesPaid,
+                  superhogFee: priceBreakdown.superhogFee,
+                  stripeTransactionFee: priceBreakdown.stripeTransactionFee,
+                  totalSavings: priceBreakdown.totalSavings,
+                  securityDeposit: offer.property.currentSecurityDeposit,
+                })
+                .returning()
+                .then((r) => r[0]!);
+
               const currentTrip = await db
                 .insert(trips)
                 .values({
@@ -152,49 +192,16 @@ export default async function webhook(
                   groupId: offer.request.madeByGroupId,
                   propertyId: offer.propertyId,
                   offerId: offer.id,
-                  paymentIntentId:
-                    paymentIntentSucceeded.payment_intent?.toString() ?? "",
+                  paymentIntentId,
                   totalPriceAfterFees: paymentIntentSucceeded.amount,
-                  tripCheckoutId: offer.tripCheckoutId,
+                  tripCheckoutId: tripCheckout.id,
                 })
-                .returning()
-                .then((res) => res[0]!);
-
-              //<-------- update tripPayment here --------->
-
-              const currentTripPayment = await db
-                .update(tripCheckouts)
-                .set({
-                  totalTripAmount: paymentIntentSucceeded.amount,
-                  travelerOfferedPriceBeforeFees: parseInt(
-                    paymentIntentSucceeded.metadata
-                      .traveler_offered_price_before_fees!,
-                  ),
-                  taxesPaid: parseInt(
-                    paymentIntentSucceeded.metadata.taxes_paid!,
-                  ),
-                  taxPercentage: parseFloat(
-                    paymentIntentSucceeded.metadata.tax_percentage!,
-                  ),
-                  superhogFee: parseInt(
-                    paymentIntentSucceeded.metadata.superhog_paid!,
-                  ),
-                  stripeTransactionFee: parseInt(
-                    paymentIntentSucceeded.metadata.stripe_transaction_fee!,
-                  ),
-                  paymentIntentId:
-                    paymentIntentSucceeded.payment_intent?.toString() ?? "",
-                  totalSavings: parseInt(
-                    paymentIntentSucceeded.metadata.total_savings!,
-                  ),
-                })
-                .where(eq(tripCheckouts.id, offer.tripCheckoutId))
                 .returning()
                 .then((res) => res[0]!);
 
               const currentTripWCheckout: TripWCheckout = {
                 ...currentTrip,
-                tripCheckout: { ...currentTripPayment },
+                tripCheckout,
               };
 
               //<___creating a superhog reservation only if does not exist__>
@@ -240,15 +247,15 @@ export default async function webhook(
                 await completeReferral({ user: user, offerId: offer.id });
               }
               //validate the host discount referral
-              if (currentProperty?.hostId) {
+              if (currentProperty?.hostTeam.ownerId) {
                 await validateHostDiscountReferral({
-                  hostUserId: currentProperty.hostId,
+                  hostUserId: currentProperty.hostTeam.ownerId,
                 });
               }
               if (paymentIntentSucceeded.metadata.user_id) {
                 await createConversationWithOfferAfterBooking({
                   offerId: offer.id.toString(),
-                  offerHostId: currentProperty!.hostId,
+                  offerHostId: currentProperty!.hostTeam.ownerId,
                   offerPropertyName: currentProperty!.name,
                   travelerId: paymentIntentSucceeded.metadata.user_id,
                 });

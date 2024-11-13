@@ -3,9 +3,9 @@ import {
   useVerification,
 } from "@/components/_utils/VerificationContext";
 import Head from "next/head";
-import MastHead from "./_sections/MastHead";
 import Banner from "./Banner";
 import { useSendUnsentRequest } from "@/utils/useSendUnsentRequests";
+import MastHead from "./_sections/MastHead";
 
 export default function TravelerPage() {
   useSendUnsentRequest();

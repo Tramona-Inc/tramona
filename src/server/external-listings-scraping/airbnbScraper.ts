@@ -50,7 +50,7 @@ export const airbnbScraper: DirectSiteScraper = async ({
 
         const listingUrl = `https://www.airbnb.com/rooms/${originalListingId}`;
 
-        const completeProperty: NewProperty = {
+        const completeProperty: Omit<NewProperty, "hostTeamId"> = {
           ...property,
           originalListingId,
           originalListingPlatform: "Airbnb",

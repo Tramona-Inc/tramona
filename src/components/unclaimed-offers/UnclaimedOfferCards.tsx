@@ -2,7 +2,6 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { type RouterOutputs } from "@/utils/api";
-import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
 import { formatCurrency, plural } from "@/utils/utils";
 import { Star, ChevronLeft, ChevronRight } from "lucide-react";
 import { Skeleton } from "../ui/skeleton";
@@ -68,16 +67,21 @@ export default function UnclaimedOfferCards({
     return allProperties?.slice(startIndex, endIndex);
   }, [allProperties, currentPage, itemsPerPage]);
 
-  console.log("paginatedProps:", paginatedProperties);
+  // console.log("paginatedProps:", paginatedProperties);
 
   const totalPages = useMemo(() => {
     return Math.max(1, Math.ceil(allProperties?.length / itemsPerPage));
   }, [allProperties?.length, itemsPerPage]);
 
+  // const url = new URL(router.pathname);
+
   const handlePageChange = useCallback(
     (page: number) => {
+      // router.pathname.searchParams.set("page", page);
       setCurrentPage(page);
-      void router.push(`?page=${page}`, undefined, { shallow: true });
+      void router.push({pathname: router.pathname,
+        query: { ...router.query, page },
+      }, undefined, { shallow: true });
     },
     [router],
   );
@@ -158,7 +162,8 @@ export default function UnclaimedOfferCards({
             </div>
           ) : (
             <div className="flex h-full w-full flex-col">
-              <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+              {/* <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"> */}
+              <div className="min-[950px]:grid-cols-3 min-[1150px]:grid-cols-4 min-[580px]:grid-cols-2 grid grid-cols-1 gap-4">
                 {paginatedProperties?.length && paginatedProperties.map((property, index) => (
                   <div
                     key={property.originalListingId}
@@ -296,13 +301,15 @@ function UnMatchedPropertyCard({
               </Button>
             )}
           </div>
-          <div className="absolute inset-0">
-            <div className="flex justify-between">
-              <Badge className="absolute left-3 top-3 h-8 bg-rose-500 font-semibold text-white">
-                Book on Airbnb
-              </Badge>
+          {isAirbnb & (
+            <div className="absolute inset-0">
+              <div className="flex justify-between">
+                <Badge className="absolute left-3 top-3 h-8 bg-rose-500 font-semibold text-white">
+                  Book on Airbnb
+                </Badge>
+              </div>
             </div>
-          </div>
+          )}
           <div className="absolute bottom-2 left-1/2 z-10 flex -translate-x-1/2 space-x-1">
             {property.imageUrls.map((_, index) => (
               <div

@@ -1,8 +1,4 @@
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage
-} from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Stars from "@/components/_common/Stars";
 import { ChevronRight } from "lucide-react";
 import {
@@ -15,7 +11,13 @@ import {
 import { useRef, useState, useEffect } from "react";
 import { type Review } from "@/server/db/schema";
 
-export default function ReviewCard({ review, backupReview }: { review: Review, backupReview: string }) {
+export default function ReviewCard({
+  review,
+  backupReview,
+}: {
+  review: Review;
+  backupReview: string;
+}) {
   const reviewRef = useRef<HTMLDivElement>(null);
   const [isOverflowing, setIsOverflowing] = useState(false);
 
@@ -52,9 +54,7 @@ export default function ReviewCard({ review, backupReview }: { review: Review, b
       )}
       <div>
         <p className="font-bold">{review.name}</p>
-        <div className="flex">
-          <Stars rating={review.rating} size="small" />
-        </div>
+        <Stars rating={review.rating} size="small" />
         <div className="z-20 max-w-2xl py-2 text-zinc-600">
           <div ref={reviewRef} className="line-clamp-3 break-words text-sm">
             {review.review}
@@ -70,6 +70,7 @@ export default function ReviewCard({ review, backupReview }: { review: Review, b
                 <DialogContent className="max-w-3xl p-8">
                   <DialogHeader>
                     <DialogTitle>{review.name}&apos;s Review</DialogTitle>
+                    <Stars rating={review.rating} size="medium" />
                   </DialogHeader>
                   <p className="whitespace-break-spaces break-words text-base">
                     {review.review}

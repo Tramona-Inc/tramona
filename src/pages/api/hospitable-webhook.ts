@@ -11,11 +11,21 @@ import { db } from "@/server/db";
 import { eq } from "drizzle-orm";
 import { sendSlackMessage } from "@/server/slack";
 import {
+  addHostProfile,
+  axiosWithRetry,
   createInitialHostTeam,
   createLatLngGISPoint,
+  proxyAgent,
 } from "@/server/server-utils";
-import { getCity } from "@/server/google-maps";
+import { getAddress } from "@/server/google-maps";
 import { calculateTotalTax } from "@/utils/payment-utils/taxData";
+import {
+  getAmenities,
+  getCancellationPolicy,
+  getListingDataUrl,
+  getReviewsUrl,
+} from "@/server/external-listings-scraping/scrapeAirbnbListing";
+import { airbnbHeaders } from "@/utils/constants";
 
 export async function insertHost(id: string) {
   // Insert Host info
@@ -37,18 +47,7 @@ export async function insertHost(id: string) {
 
   const teamId = await createInitialHostTeam(user);
 
-  await db.insert(hostProfiles).values({
-    userId: user.id,
-    curTeamId: teamId,
-  });
-
-  await sendSlackMessage({
-    text: [
-      "*Host Profile Created:*",
-      `User ${user.firstName} ${user.lastName} has become a host`,
-    ].join("\n"),
-    channel: "host-bot",
-  });
+  await addHostProfile({ userId: user.id, curTeamId: teamId });
 }
 
 const airbnbPropertyTypes = [
@@ -332,12 +331,12 @@ export default async function webhook(
           lng: webhookData.data.address.longitude,
         });
 
-        const { city, stateCode, country } = await getCity({
+        const { city, stateCode, country } = await getAddress({
           lat: webhookData.data.address.latitude,
           lng: webhookData.data.address.longitude,
         });
 
-        const taxInfo = calculateTotalTax(country, stateCode, city);
+        const taxInfo = calculateTotalTax({ country, stateCode, city });
 
         if (taxInfo.length === 0) {
           await sendSlackMessage({
@@ -346,55 +345,90 @@ export default async function webhook(
           });
         }
 
-        const propertyObject = {
-          hostId: userId,
-          propertyType: convertAirbnbPropertyType(
-            webhookData.data.property_type,
-          ),
-          roomType: roomTypeMapping[webhookData.data.room_type],
-          maxNumGuests: webhookData.data.capacity.max,
-          numBeds: webhookData.data.capacity.beds,
-          numBedrooms: webhookData.data.capacity.bedrooms,
-          numBathrooms: webhookData.data.capacity.bathrooms,
-          // latitude: webhookData.data.address.latitude,
-          // longitude: webhookData.data.address.longitude,
-          otherHouseRules: webhookData.data.house_rules,
-          latLngPoint: latLngPoint,
-          city: webhookData.data.address.city,
-          hostName: webhookData.data.channel.customer.name,
-          name: webhookData.data.public_name,
-          about: webhookData.data.description,
-          address:
-            webhookData.data.address.street +
-            ", " +
-            webhookData.data.address.city +
-            ", " +
-            webhookData.data.address.state +
-            ", " +
-            webhookData.data.address.country_code,
-          imageUrls: images,
-          originalListingPlatform: "Hospitable" as const,
-          originalListingId: webhookData.data.platform_id,
+        const listingDataUrl = getListingDataUrl(webhookData.data.id, {});
+        const reviewsUrl = getReviewsUrl(webhookData.data.id);
 
-          //amenities: webhookData.data.amenities,
-          //cancellationPolicy: webhookData.data.cancellation_policy,
-          //ratings: webhookData.data.ratings,
-        };
+        const [listingData, reviewsData] = (await Promise.all(
+          [
+            listingDataUrl,
+            reviewsUrl, // 10 best reviews
+          ].map((url) =>
+            axiosWithRetry
+              .get<string>(url, {
+                headers: airbnbHeaders,
+                httpsAgent: proxyAgent,
+                responseType: "text",
+              })
+              .then((r) => r.data)
+              .catch((e) => {
+                console.error(`Error fetching ${url}:`, e);
+                throw e;
+              }),
+          ),
+        )) as [string, string];
+
+        const cancellationPolicy = getCancellationPolicy(
+          listingData,
+          webhookData.data.id,
+        );
+        const amenities = getAmenities(listingData, webhookData.data.id);
+
+        const hostProfile = await db.query.hostProfiles.findFirst({
+          where: eq(hostProfiles.userId, userId),
+        });
+
+        if (!hostProfile) {
+          throw new Error(`Host profile not found for user ${userId}`);
+        }
 
         const propertyId = await db
           .insert(properties)
-          .values(propertyObject)
+          .values({
+            hostTeamId: hostProfile.curTeamId,
+            propertyType: convertAirbnbPropertyType(
+              webhookData.data.property_type,
+            ),
+            roomType: roomTypeMapping[webhookData.data.room_type],
+            maxNumGuests: webhookData.data.capacity.max,
+            numBeds: webhookData.data.capacity.beds,
+            numBedrooms: webhookData.data.capacity.bedrooms,
+            numBathrooms: webhookData.data.capacity.bathrooms,
+            country: webhookData.data.address.country_code, //change to country
+            otherHouseRules: webhookData.data.house_rules,
+            latLngPoint: latLngPoint,
+            city: webhookData.data.address.city,
+            hostName: webhookData.data.channel.customer.name,
+            name: webhookData.data.public_name,
+            about: webhookData.data.description,
+            address:
+              webhookData.data.address.street +
+              ", " +
+              webhookData.data.address.city +
+              ", " +
+              webhookData.data.address.state +
+              ", " +
+              webhookData.data.address.country_code,
+            imageUrls: images,
+            originalListingPlatform: "Hospitable" as const,
+            originalListingId: webhookData.data.platform_id,
+            amenities: amenities,
+            cancellationPolicy: cancellationPolicy,
+            //amenities: webhookData.data.amenities,
+            //cancellationPolicy: webhookData.data.cancellation_policy,
+            //ratings: webhookData.data.ratings,
+          })
           .returning({ id: properties.id })
           .then((result) => result[0]!.id);
 
-        for (const dateRange of datesReserved) {
-          await db.insert(reservedDateRanges).values({
+        await db.insert(reservedDateRanges).values(
+          datesReserved.map((dateRange) => ({
             propertyId: propertyId,
             start: dateRange.start,
             end: dateRange.end,
-            platformBookedOn: "airbnb",
-          });
-        }
+            platformBookedOn: "airbnb" as const,
+          })),
+        );
+
         break;
     }
 

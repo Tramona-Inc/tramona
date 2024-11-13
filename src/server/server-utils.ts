@@ -41,18 +41,20 @@ import {
   requests,
   rejectedRequests,
   hostTeams,
+  hostProfiles,
 } from "./db/schema";
-import { getCity, getCoordinates } from "./google-maps";
+import { getAddress, getCoordinates } from "./google-maps";
 import axios from "axios";
 import { HttpsProxyAgent } from "https-proxy-agent";
 import * as cheerio from "cheerio";
 import { sendSlackMessage } from "./slack";
-import { HOST_MARKUP, TRAVELER__MARKUP } from "@/utils/constants";
+import { HOST_MARKUP, TRAVELER_MARKUP } from "@/utils/constants";
 import { HostRequestsPageData } from "./api/routers/propertiesRouter";
 import { Session } from "next-auth";
 import { calculateTotalTax } from "@/utils/payment-utils/taxData";
 import { scrapePage, serpPageSchema, transformSearchResult } from "./external-listings-scraping/airbnbScraper";
 import { getSerpUrl } from "./external-listings-scraping/airbnbScraper";
+import { createStripeConnectId } from "@/utils/stripe-utils";
 
 export const proxyAgent = new HttpsProxyAgent(env.DATACENTER_PROXY_URL);
 
@@ -344,45 +346,62 @@ export async function getHostTeamOwnerId(hostTeamId: number) {
 }
 
 export async function addProperty({
-  userId,
-  userEmail,
-  hostTeamId,
   property,
   isAdmin,
+  userEmail,
+  hostTeamId,
 }: {
-  userId?: string;
   userEmail?: string;
-  hostTeamId?: number | null;
+  hostTeamId: number;
   isAdmin: boolean;
-  property: Omit<NewProperty, "id" | "city" | "latLngPoint"> & {
-    latLngPoint?: { x: number; y: number };
+  property: Omit<
+    NewProperty,
+    | "id"
+    | "hostTeamId"
+    | "latLngPoint"
+    | "city"
+    | "county"
+    | "stateName"
+    | "stateCode"
+    | "country"
+  > & {
+    latLngPoint?: { x: number; y: number }; // make optional
   };
-}) {
+} & (
+  | { isAdmin?: boolean; userEmail: string }
+  | { isAdmin: true; userEmail?: undefined }
+)) {
   let lat = property.latLngPoint?.y;
   let lng = property.latLngPoint?.x;
 
   if (!lat || !lng) {
+    // get lat lng if not provided
     const { location } = await getCoordinates(property.address);
     if (!location) throw new Error("Could not get coordinates for address");
     lat = location.lat;
     lng = location.lng;
   }
-  const locInfo = await getCity({ lat, lng });
+
+  const { city, country, county, stateCode, stateName } = await getAddress({
+    lat,
+    lng,
+  });
 
   const propertyValues = {
     ...property,
-    hostId: userId,
-    city: locInfo.city,
-    latLngPoint: createLatLngGISPoint({ lat, lng }),
     hostTeamId,
+    city,
+    county,
+    stateCode,
+    stateName,
+    country,
+    latLngPoint: createLatLngGISPoint({ lat, lng }),
   };
 
   const [insertedProperty] = await db
     .insert(properties)
     .values(propertyValues)
     .returning({ id: properties.id });
-
-  // waitUntil(processRequests(insertedProperty!));
 
   await sendSlackMessage({
     isProductionOnly: true,
@@ -395,41 +414,55 @@ export async function addProperty({
   return insertedProperty!.id;
 }
 
-export async function sendTextToHost(
-  matchingProperties: { id: number; hostId: string | null }[],
-  checkIn: Date,
-  checkOut: Date,
-  maxTotalPrice: number,
-  location: string,
-) {
-  const uniqueHostIds = Array.from(
-    new Set(matchingProperties.map((property) => property.hostId)),
+export async function sendTextToHost({
+  matchingProperties,
+  request,
+}: {
+  matchingProperties: { id: number; hostTeamId: number }[];
+  request: Pick<Request, "checkIn" | "checkOut" | "maxTotalPrice" | "location">;
+}) {
+  const uniqueHostTeamIds = Array.from(
+    new Set(matchingProperties.map((property) => property.hostTeamId)),
   );
   const numHostPropertiesPerRequest = matchingProperties.reduce(
     (acc, property) => {
-      if (property.hostId) {
-        acc[property.hostId] = (acc[property.hostId] ?? 0) + 1;
+      if (property.hostTeamId) {
+        acc[property.hostTeamId] = (acc[property.hostTeamId] ?? 0) + 1;
       }
       return acc;
     },
-    {} as Record<string, number>,
+    {} as Record<number, number>,
   );
 
   waitUntil(
     Promise.all(
-      uniqueHostIds.filter(Boolean).map(async (hostId) => {
-        const host = await db.query.users.findFirst({
-          where: eq(users.id, hostId),
-          columns: { name: true, email: true, phoneNumber: true },
-        });
+      uniqueHostTeamIds.filter(Boolean).map(async (hostTeamId) => {
+        const hostTeamOwner = await db.query.hostTeams
+          .findFirst({
+            where: eq(hostTeams.id, hostTeamId),
+            with: {
+              owner: {
+                columns: { name: true, email: true, phoneNumber: true },
+              },
+            },
+          })
+          .then((res) => res?.owner);
 
-        if (!host?.phoneNumber) return;
+        if (!hostTeamOwner?.phoneNumber) return;
 
-        const numberOfNights = getNumNights(checkIn, checkOut);
+        const numberOfNights = getNumNights(request.checkIn, request.checkOut);
 
         await sendText({
-          to: host.phoneNumber,
-          content: `Tramona: There is a request for ${formatCurrency(maxTotalPrice / numberOfNights)} per night for ${plural(numberOfNights, "night")} in ${location}. You have ${plural(numHostPropertiesPerRequest[hostId] ?? 0, "eligible property", "eligible properties")}. Please click here to make a match: ${env.NEXTAUTH_URL}/host/requests`,
+          to: hostTeamOwner.phoneNumber,
+          content: `Tramona: There is a request for ${formatCurrency(
+            request.maxTotalPrice / numberOfNights,
+          )} per night for ${plural(numberOfNights, "night")} in ${
+            request.location
+          }. You have ${plural(
+            numHostPropertiesPerRequest[hostTeamId] ?? 0,
+            "eligible property",
+            "eligible properties",
+          )}. Please click here to make a match: ${env.NEXTAUTH_URL}/host/requests`,
         });
 
         //TODO SEND WHATSAPP MESSAGE
@@ -481,12 +514,12 @@ export async function getRequestsForProperties(
     // `;
     requestIsNearProperties.push(requestIsNearProperty);
 
-    const { city, stateCode, country } = await getCity({
+    const { city, stateCode, country } = await getAddress({
       lat: property.latLngPoint.y,
       lng: property.latLngPoint.x,
     });
 
-    const taxInfo = calculateTotalTax(country, stateCode, city);
+    const taxInfo = calculateTotalTax({ country, stateCode, city });
     console.log("taxInfo", taxInfo, city);
 
     const requestsForProperty = await tx.query.requests.findMany({
@@ -507,7 +540,7 @@ export async function getRequestsForProperties(
                     .where(
                       and(
                         eq(properties.id, offers.propertyId),
-                        eq(properties.hostTeamId, property.hostTeamId!),
+                        eq(properties.hostTeamId, property.hostTeamId),
                       ),
                     ),
                 ),
@@ -648,9 +681,8 @@ export async function getPropertiesForRequest(
 
   const numberOfNights = getNumNights(req.checkIn, req.checkOut);
 
-  const result = await tx.query.properties.findMany({
+  return await tx.query.properties.findMany({
     where: and(
-      isNotNull(properties.hostId),
       propertyIsNearRequest,
       propertyisAvailable,
       or(
@@ -666,14 +698,12 @@ export async function getPropertiesForRequest(
     ),
     columns: {
       id: true,
-      hostId: true,
+      hostTeamId: true,
       autoOfferEnabled: true,
       autoOfferDiscountTiers: true,
       originalListingId: true,
     },
   });
-
-  return result;
 }
 
 export async function getAdminId() {
@@ -751,7 +781,7 @@ export async function updateTravelerandHostMarkup({
   offerId: number;
 }) {
   console.log("offerTotalPrice", offerTotalPrice);
-  const travelerPrice = Math.ceil(offerTotalPrice * TRAVELER__MARKUP);
+  const travelerPrice = Math.ceil(offerTotalPrice * TRAVELER_MARKUP);
   const hostPay = Math.ceil(offerTotalPrice * HOST_MARKUP);
   console.log("travelerPrice", travelerPrice);
   await db
@@ -849,6 +879,9 @@ export function createLatLngGISPoint({
   return latLngPoint;
 }
 
+/**
+ * returns the distance in kilometers between two points
+ */
 export function haversineDistance(
   lat1: number,
   lon1: number,
@@ -932,6 +965,7 @@ export async function createInitialHostTeam(
   await db.insert(hostTeamMembers).values({
     hostTeamId: teamId,
     userId: user.id,
+    role: "Loose",
   });
 
   return teamId;
@@ -1004,3 +1038,42 @@ export async function scrapeAirbnbPagesHelper({
     .filter(Boolean);
 }
 
+
+export async function addHostProfile({
+  userId,
+  curTeamId,
+  hostawayApiKey,
+  hostawayAccountId,
+  hostawayBearerToken,
+}: {
+  userId: string;
+  curTeamId: number;
+  hostawayApiKey?: string;
+  hostawayAccountId?: string;
+  hostawayBearerToken?: string;
+}) {
+  const curUser = await db.query.users.findFirst({
+    columns: { email: true, firstName: true, lastName: true },
+    where: eq(users.id, userId),
+  });
+  if (curUser) {
+    await db.insert(hostProfiles).values({
+      userId,
+      curTeamId: curTeamId,
+      hostawayApiKey,
+      hostawayAccountId,
+      hostawayBearerToken,
+    });
+
+    await createStripeConnectId({ userId, userEmail: curUser.email });
+
+    await sendSlackMessage({
+      isProductionOnly: true,
+      text: [
+        "*Host Profile Created:*",
+        `User ${curUser.firstName} ${curUser.lastName} has become a host`,
+      ].join("\n"),
+      channel: "host-bot",
+    });
+  }
+}

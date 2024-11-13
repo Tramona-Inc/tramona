@@ -33,6 +33,11 @@ const navs = [
     href: "/admin/additional-charge",
   },
   {
+    title: "See all Reports",
+    description: "See user and host reports for misconduct or property damamge",
+    href: "/admin/reports",
+  },
+  {
     title: "Unclaimed Offers Scrapers",
     description: "Trigger the scraping for unclaimed offers page",
     href: "/admin/scrapers",

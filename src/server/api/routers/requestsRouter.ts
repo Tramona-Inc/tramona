@@ -14,7 +14,6 @@ import {
   offers,
   rejectedRequests,
   properties,
-  tripCheckouts,
 } from "@/server/db/schema";
 import {
   sendText,
@@ -43,9 +42,8 @@ import { getCoordinates } from "@/server/google-maps";
 import { scrapeDirectListings } from "@/server/direct-sites-scraping";
 import { waitUntil } from "@vercel/functions";
 import { scrapeAirbnbPrice } from "@/server/scrapePrice";
-import { HOST_MARKUP, TRAVELER__MARKUP } from "@/utils/constants";
+import { TRAVELER_MARKUP } from "@/utils/constants";
 import { differenceInDays } from "date-fns";
-import { breakdownPayment } from "@/utils/payment-utils/paymentBreakdown";
 
 export const requestsRouter = createTRPCRouter({
   getMyRequests: protectedProcedure.query(async ({ ctx }) => {
@@ -72,6 +70,7 @@ export const requestsRouter = createTRPCRouter({
               checkOut: true,
               randomDirectListingDiscount: true,
               datePriceFromAirbnb: true,
+              scrapeUrl: true,
             },
             where:
               ctx.user.role === "admin"
@@ -92,7 +91,13 @@ export const requestsRouter = createTRPCRouter({
                   bookOnAirbnb: true,
                 },
                 with: {
-                  host: { columns: { name: true, email: true, image: true } },
+                  hostTeam: {
+                    with: {
+                      owner: {
+                        columns: { name: true, email: true, image: true },
+                      },
+                    },
+                  },
                 },
               },
             },
@@ -447,45 +452,15 @@ export async function handleRequestSubmission(
 
             //create trip checkout First
             const travelerOfferedPriceBeforeFees = getTravelerOfferedPrice({
-              propertyPrice: requestedNightlyPrice,
-              travelerMarkup: TRAVELER__MARKUP,
-              numNights,
+              totalPrice: requestedNightlyPrice * numNights,
+              travelerMarkup: TRAVELER_MARKUP,
             });
-
-            const brokeDownPayment = await breakdownPayment({
-              numOfNights: numNights,
-              travelerOfferedPriceBeforeFees: travelerOfferedPriceBeforeFees,
-              isScrapedPropery: false,
-              lat: propertyDetails.latLngPoint.y,
-              lng: propertyDetails.latLngPoint.x,
-            });
-
-            const tripCheckout = await tx
-              .insert(tripCheckouts)
-              .values({
-                totalTripAmount: brokeDownPayment.totalTripAmount,
-                travelerOfferedPriceBeforeFees,
-                paymentIntentId: "",
-                taxesPaid: brokeDownPayment.taxesPaid,
-                taxPercentage: brokeDownPayment.taxPercentage,
-                superhogFee: brokeDownPayment.superhogFee,
-                stripeTransactionFee: brokeDownPayment.stripeTransactionFee,
-                checkoutSessionId: "",
-                totalSavings: brokeDownPayment.totalSavings,
-              })
-              .returning({ id: tripCheckouts.id })
-              .then((res) => res[0]!);
 
             await tx.insert(offers).values({
               requestId: request.id,
               propertyId: property.id,
-              tripCheckoutId: tripCheckout.id,
               totalPrice: input.maxTotalPrice,
-              hostPayout: getHostPayout({
-                propertyPrice: requestedNightlyPrice,
-                hostMarkup: HOST_MARKUP,
-                numNights,
-              }),
+              hostPayout: getHostPayout(requestedNightlyPrice * numNights),
               travelerOfferedPriceBeforeFees,
               checkIn: input.checkIn,
               checkOut: input.checkOut,
@@ -504,13 +479,10 @@ export async function handleRequestSubmission(
       (property) => !property.autoOfferEnabled,
     );
 
-    await sendTextToHost(
-      propertiesWithoutAutoOffers,
-      input.checkIn,
-      input.checkOut,
-      input.maxTotalPrice,
-      input.location,
-    );
+    await sendTextToHost({
+      matchingProperties: propertiesWithoutAutoOffers,
+      request: input,
+    });
 
     return { requestId: request.id, madeByGroupId };
   });

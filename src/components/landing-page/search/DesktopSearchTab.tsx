@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import Image from "next/image";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -16,12 +16,22 @@ import {
   Search,
   CalendarDays,
   Users,
+  Filter,
 } from "lucide-react";
 import { useSearchBarForm } from "./useSearchBarForm";
 import { api } from "@/utils/api";
 import { useAdjustedProperties } from "./AdjustedPropertiesContext";
 import SingleDateInput from "@/components/_common/SingleDateInput";
-import { transformSearchResult } from "@/server/external-listings-scraping/airbnbScraper";
+import { DialogFooter } from "@/components/ui/dialog";
+import { DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { DialogHeader } from "@/components/ui/dialog";
+import { DialogTrigger } from "@/components/ui/dialog";
+import { Dialog } from "@/components/ui/dialog";
+import { defaultSearchOrReqValues } from "./schemas";
+import { searchSchema } from "./schemas";
+import { useZodForm } from "@/utils/useZodForm";
+import { Property } from "@/server/db/schema";
+import { useRouter } from "next/router";
 
 const locations = [
   {
@@ -236,19 +246,34 @@ const locations = [
   },
 ];
 
-
 export function DesktopSearchTab() {
-  const { form, onSubmit } = useSearchBarForm();
+  const form = useZodForm({
+    schema: searchSchema,
+    defaultValues: defaultSearchOrReqValues,
+    reValidateMode: "onSubmit",
+  });
   const containerRef = useRef<HTMLDivElement>(null);
-  const { adjustedProperties, setAdjustedProperties, setIsSearching } = useAdjustedProperties();
+  const { adjustedProperties, setAdjustedProperties, setIsSearching } =
+    useAdjustedProperties();
+  const [allProperties, setAllProperties] = useState({ pages: [] });
   const runSubscrapers = api.properties.runSubscrapers.useMutation();
+  const [maxPrice, setMaxPrice] = useState("");
+  const [minPrice, setMinPrice] = useState("");
+  const [priceSort, setPriceSort] = useState("");
+  
 
+  const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const utils = api.useUtils();
-
+  const router = useRouter();
   const checkInDate = form.watch("checkIn");
   const checkOutDate = form.watch("checkOut");
 
+  const sortOptions = {
+    none: "Select a value", // Placeholder
+    leastExpensive: "Least Expensive",
+    mostExpensive: "Most Expensive",
+  };
   // type BookItNowProperties = (
   //   {type: "Airbnb";
   //   data: Property[];
@@ -257,6 +282,11 @@ export function DesktopSearchTab() {
   //   data: Property[];
   // })[];
 
+  useEffect(() => {
+    const data = searchSchema.safeParse(router.query);
+    if (data.success) form.reset(data.data);
+  }, [form, router.query])
+
   const handleLocationClick = useCallback(
     (location: string) => {
       form.setValue("location", location);
@@ -264,12 +294,17 @@ export function DesktopSearchTab() {
     [form],
   );
 
-  const handleSearch = form.handleSubmit(async () => {
+  const handleSearch = form.handleSubmit(async (data) => {
     setIsLoading(true);
     setIsSearching(true);
-    const formData = form.getValues();
-    console.log("Form data:", formData);
-    setAdjustedProperties({
+    const params = new URLSearchParams();
+    Object.entries(data).forEach(([key, value]) => {
+      if (value) params.set(key, value.toString());
+    });
+    void router.replace(`${window.location.pathname}?${params.toString()}`, undefined, { shallow: true });
+    // const formData = form.getValues();
+    // console.log("Form data:", formData);
+    setAllProperties({
       pages: [],
       // ... other initial properties if any
     });
@@ -289,142 +324,103 @@ export function DesktopSearchTab() {
     //     })),
     //   ) ?? [];
 
-
-    if (formData.checkIn && formData.checkOut) {
+    if (data.checkIn && data.checkOut) {
       console.log("Running subscrapers...");
       try {
-        const scrapedResultsPromise = utils.properties.getBookItNowProperties.fetch({
-          checkIn: formData.checkIn,
-          checkOut: formData.checkOut,
-          numGuests: formData.numGuests!,
-          location: formData.location!,
-          firstBatch: true,
-        });
+        const propertiesInArea =
+          await utils.properties.getBookItNowProperties.fetch({
+            checkIn: data.checkIn,
+            checkOut: data.checkOut,
+            numGuests: data.numGuests!,
+            location: data.location!,
+          });
 
-        const airbnbResultsPromise = utils.misc.scrapeAirbnbInitialPage.fetch({
-          checkIn: formData.checkIn,
-          checkOut: formData.checkOut,
-          numGuests: formData.numGuests!,
-          location: formData.location!,
-        });
+        console.log("props", propertiesInArea);
+        setAllProperties((prevState) => {
+          const updatedProperties = {
+            ...prevState,
+            pages: [
+              ...(prevState?.pages || []),
+              ...propertiesInArea.hostProperties,
+              ...propertiesInArea.scrapedProperties,
+            ],
+          };
 
-        const airbnbResults = await airbnbResultsPromise;
-        // setAdjustedProperties((prevState) => ({
-        //   ...prevState,
-        //   pages: [...(prevState?.pages || []), ...airbnbResults],
-        // }));
-        const scrapedResults = await scrapedResultsPromise;
-        console.log("airbnb:", airbnbResults.res, "scraped:", scrapedResults);
-        setAdjustedProperties((prevState) => ({
-          ...prevState,
-          pages: [...(prevState?.pages || []), ...scrapedResults, ...airbnbResults.res],
-        }));
+          // Immediately set adjustedProperties after updating allProperties
+          setAdjustedProperties({
+            ...updatedProperties,
+            pages: filterProperties(
+              updatedProperties.pages?.flat() || [],
+              minPrice !== "" ? minPrice * 100 : undefined,
+              maxPrice !== "" ? maxPrice * 100 : undefined,
+              priceSort,
+            ),
+          });
+
+          return updatedProperties;
+        });
 
         setIsLoading(false);
         setIsSearching(false);
+        const airbnbResultsPromise = utils.misc.scrapeAirbnbInitialPage.fetch({
+          checkIn: data.checkIn,
+          checkOut: data.checkOut,
+          numGuests: data.numGuests!,
+          location: data.location!,
+        });
+        const airbnbResults = await airbnbResultsPromise;
 
-        const cursors = airbnbResults.data.staysSearch.results.paginationInfo.pageCursors.slice(1);
+        setAllProperties((prevState) => {
+          const updatedProperties = {
+            ...prevState,
+            pages: [...(prevState?.pages || []), ...airbnbResults.res],
+          };
+
+          setAdjustedProperties({
+            ...updatedProperties,
+            pages: filterProperties(
+              allProperties.pages?.flat() || [],
+              minPrice !== "" ? minPrice * 100 : undefined,
+              maxPrice !== "" ? maxPrice * 100 : undefined,
+              priceSort,
+            ),
+          });
+          return updatedProperties;
+        });
+
+        const cursors =
+          airbnbResults.data.staysSearch.results.paginationInfo.pageCursors.slice(
+            1,
+          );
 
         const finishAirbnbResultsPromise = utils.misc.scrapeAirbnbPages.fetch({
-          checkIn: formData.checkIn,
-          checkOut: formData.checkOut,
-          numGuests: formData.numGuests!,
-          location: formData.location!,
+          checkIn: data.checkIn,
+          checkOut: data.checkOut,
+          numGuests: data.numGuests!,
+          location: data.location!,
           pageCursors: cursors,
         });
 
-        const finishScrapedResultPromise = utils.properties.getBookItNowProperties.fetch({
-          checkIn: formData.checkIn,
-          checkOut: formData.checkOut,
-          numGuests: formData.numGuests!,
-          location: formData.location!,
-          firstBatch: false,
-        })
-
         const finishAirbnbResults = await finishAirbnbResultsPromise;
-        setAdjustedProperties((prevState) => ({
+        setAllProperties((prevState) => {
+          const updatedProperties = {
           ...prevState,
           pages: [...(prevState?.pages || []), ...finishAirbnbResults],
-        }));
-        const finishScrapedResults = await finishScrapedResultPromise;
-        setAdjustedProperties((prevState) => ({
-          ...prevState,
-          pages: [...(prevState?.pages || []), ...finishScrapedResults],
-        }));
+          };
 
-        // console.log('results', results);
+          setAdjustedProperties({
+            ...updatedProperties,
+            pages: filterProperties(
+              allProperties.pages?.flat() || [],
+              minPrice !== "" ? minPrice * 100 : undefined,
+              maxPrice !== "" ? maxPrice * 100 : undefined,
+              priceSort,
+            ),
+          });
 
-        // Update adjustedProperties with only the properties that were updated
-        // if (adjustedProperties) {
-
-          // const airbnbProperties = results.filter(
-          //   (r) => r.originalListingPlatform === "Airbnb" ,
-          // );
-          // const updatedProperties = results.filter(
-          //   (r) =>
-          //     r.originalListingPlatform !== "Airbnb"
-          //       && r.nightlyPrice
-          //       && r.isAvailableOnOriginalSite,
-          // );
-
-          // console.log("Airbnb properties:", airbnbProperties);
-          // console.log("Updated properties:", updatedProperties);
-
-          // const combinedProperties = [...airbnbProperties, ...updatedProperties];
-
-          // const updatedPages = [
-          //   {
-          //     data: adjustedProperties.pages[0].data
-          //       .filter((property) =>
-          //         updatedProperties.some((r) => r.propertyId === property.id),
-          //       )
-          //       .map((property) => {
-          //         const updatedProperty = updatedProperties.find(
-          //           (r) => r.propertyId === property.id,
-          //         );
-          //         return {
-          //           ...property,
-          //           originalNightlyPrice: updatedProperty?.originalNightlyPrice,
-          //         };
-          //       }),
-          //   },
-          // ];
-
-          // const airbnbPages = [
-          //   {
-          //     data: adjustedProperties.pages[0].data.filter(
-          //       (property) =>
-          //         airbnbProperties.some((r) => r.originalListingId === property.originalListingId),
-          //     ).map((property) => {
-          //       const airbnbProperty = airbnbProperties.find(
-          //         (r) => r.originalListingId === property.originalListingId,
-          //       );
-          //       return {
-          //         ...property,
-          //         nightlyPrice: airbnbProperty?.nightlyPrice,
-          //       };
-          //     }),
-          //   },
-          // ];
-
-          // const allPages = [...updatedPages, ...airbnbPages];
-
-          // console.log("Updated pages:", allPages);
-          // console.log(
-          //   "Number of properties updated:",
-          //   updatedProperties.length,
-          // );
-          // console.log(
-          //   "Total number of properties:",
-          //   updatedPages[0].data.length,
-          // );
-
-          // Use a callback function with setAdjustedProperties
-          // setAdjustedProperties((prevState) => {
-          //   if (!prevState) return null;
-          //   return { ...prevState, pages: results };
-          // });
-        } catch (error) {
+          return updatedProperties;
+        });
+      } catch (error) {
         console.error("Error running subscrapers:", error);
       } finally {
         setIsLoading(false);
@@ -434,6 +430,37 @@ export function DesktopSearchTab() {
       setIsLoading(false);
     }
   });
+
+  console.log("all props", allProperties);
+
+  console.log("filteredProps", adjustedProperties);
+
+  const filterProperties = (
+    properties: Property[],
+    minPrice: string,
+    maxPrice: string,
+    priceSort: string,
+  ) => {
+    if (minPrice === "" && maxPrice === "" && priceSort === "") {
+      return properties;
+    }
+    return properties
+      .filter((property: Property) => {
+        const price = property.originalNightlyPrice; // Assuming each property has a `nightlyPrice` field
+        const meetsMinPrice = !minPrice || price >= parseFloat(minPrice);
+        const meetsMaxPrice = !maxPrice || price <= parseFloat(maxPrice);
+        return meetsMinPrice && meetsMaxPrice;
+      })
+      .sort((a, b) => {
+        if (priceSort === "leastExpensive") {
+          return a.originalNightlyPrice - b.originalNightlyPrice;
+        }
+        if (priceSort === "mostExpensive") {
+          return b.originalNightlyPrice - a.originalNightlyPrice;
+        }
+        return 0; // No sorting if "none" or undefined
+      });
+  };
 
   const ScrollButtons = ({
     containerRef,
@@ -523,8 +550,10 @@ export function DesktopSearchTab() {
                         variant="lpDesktop"
                         placeholder="Check in"
                         disablePast
-                        className="border-0 bg-transparent focus:ring-0 hover:bg-transparent"
-                        maxDate={checkOutDate ? new Date(checkOutDate) : undefined}
+                        className="border-0 bg-transparent hover:bg-transparent focus:ring-0"
+                        maxDate={
+                          checkOutDate ? new Date(checkOutDate) : undefined
+                        }
                       />
                     </FormControl>
                   </FormItem>
@@ -546,8 +575,10 @@ export function DesktopSearchTab() {
                         variant="lpDesktop"
                         placeholder="Check Out"
                         disablePast
-                        className="border-0 bg-transparent focus:ring-0 hover:bg-transparent"
-                        minDate={checkInDate ? new Date(checkInDate) : undefined}
+                        className="border-0 bg-transparent hover:bg-transparent focus:ring-0"
+                        minDate={
+                          checkInDate ? new Date(checkInDate) : undefined
+                        }
                       />
                     </FormControl>
                   </FormItem>
@@ -590,6 +621,115 @@ export function DesktopSearchTab() {
             </Button>
           </div>
         </div>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button
+              variant="outline"
+              className="ml-4 rounded-full border-gray-300 text-gray-600 hover:bg-gray-200"
+            >
+              <Filter className="mr-1 h-4 w-4" />
+              Filters
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Set Price Filters</DialogTitle>
+            </DialogHeader>
+            <div className="flex w-full justify-between">
+              <div>
+                <div>Min Price</div>
+                {/* <FormField
+                  name="minPrice"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl> */}
+                <Input
+                  type="number"
+                  placeholder="Min Price"
+                  value={minPrice}
+                  onChange={(e) => setMinPrice(e.target.value)}
+                />
+                {/* </FormControl>
+                    </FormItem>
+                  )}
+                /> */}
+              </div>
+              <div>
+                <div>Max Price</div>
+                {/* <FormField
+                  name="maxPrice"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl> */}
+                <Input
+                  type="number"
+                  placeholder="Max Price"
+                  value={maxPrice}
+                  onChange={(e) => setMaxPrice(e.target.value)}
+                />
+                {/* </FormControl>
+                    </FormItem>
+                  )}
+                /> */}
+              </div>
+            </div>
+            <div>Sort by Price</div>
+            {/* <FormField
+              control={form.control} // Ensure the form's control prop is passed here
+              name="priceSort" // Matches the schema field name in searchSchema
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl> */}
+            <Select
+              onValueChange={(value) => setPriceSort(value)} // Binds to form field
+              value={priceSort} // Default to "none" if no value is selected
+            >
+              <SelectTrigger className="w-full border-gray-300 bg-white">
+                <SelectValue
+                  className={
+                    priceSort === "none" ? "text-gray-400" : "text-black"
+                  }
+                >
+                  {priceSort === "none"
+                    ? "Select a value"
+                    : sortOptions[priceSort]}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent className="bg-white">
+                {Object.entries(sortOptions).map(([value, label]) => (
+                  <SelectItem key={value} value={value}>
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {/* </FormControl>
+                </FormItem>
+              )}
+            /> */}
+            <DialogFooter>
+              <Button
+                onClick={() => {
+                  /* handle the application of filter logic */
+                  // const { minPrice, maxPrice, priceSort } = form.getValues();
+
+                  setAdjustedProperties((prevState) => ({
+                    ...prevState,
+                    pages: filterProperties(
+                      allProperties.pages?.flat() || [],
+                      minPrice !== "" ? minPrice * 100 : undefined,
+                      maxPrice !== "" ? maxPrice * 100 : undefined,
+                      priceSort,
+                    ),
+                  }));
+                  setOpen(false);
+                }}
+              >
+                Apply Filters
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
         <div className="relative">
           <ScrollButtons containerRef={containerRef} />
           <div
