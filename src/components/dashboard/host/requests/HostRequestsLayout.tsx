@@ -7,7 +7,6 @@ import {
   EmptyStateTitle,
 } from "@/components/ui/empty-state";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { SkeletonText } from "@/components/ui/skeleton";
 import { api } from "@/utils/api";
 import { range } from "lodash";
 import { HandshakeIcon, MapPinIcon, Home } from "lucide-react";
@@ -16,12 +15,10 @@ import { useEffect, useState } from "react";
 import { type SeparatedData } from "@/server/server-utils";
 import { separateByPriceRestriction, plural } from "@/utils/utils";
 import { useRouter } from "next/router";
-import {
-  HostRequestsPageData,
-  HostRequestsToBookPageData,
-} from "@/server/api/routers/propertiesRouter";
-import { Separator } from "@/components/ui/separator";
+import { HostRequestsToBookPageData } from "@/server/api/routers/propertiesRouter";
 import { Property, RequestsToBook } from "@/server/db/schema";
+import SidebarCity from "./sidebars/SideBarCity";
+import SidebarPropertySkeleton from "./sidebars/SidebarSkeleton";
 
 // ---------- MAIN LAYOUT COMPONENT ----------
 export default function HostRequestsLayout({
@@ -56,14 +53,13 @@ export default function HostRequestsLayout({
   );
   const [propertiesWithRequestsToBook, setPropertiesWithRequestsToBook] =
     useState<HostRequestsToBookPageData | null>(null);
+
   const [selectedOption, setSelectedOption] = useState<
     "normal" | "outsidePriceRestriction"
   >("normal");
 
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
   const [selectedProperty, setSelectedProperty] = useState<number | null>(null);
-  const [isDataLoading, setIsDataLoading] = useState(true); // New state to track data loading
-  const [isDataLoading2, setIsDataLoading2] = useState(true); // for requestsToBook -- rename
 
   // ---------- DATA FETCHING ----------
   const { data: fetchedProperties, isLoading } =
@@ -72,36 +68,10 @@ export default function HostRequestsLayout({
         const separatedProperties =
           separateByPriceRestriction(fetchedProperties);
         setSeparatedData(separatedProperties);
-        setIsDataLoading(false);
       },
     });
 
-  const {
-    data: fetchedPropertiesWithRequestsToBook,
-    isLoading: propertiesLoading,
-  } = api.properties.getHostPropertiesWithRequestsToBook.useQuery(undefined, {
-    onSuccess: (
-      fetchedPropertiesWithRequestsToBook: HostRequestsToBookPageData | null,
-    ) => {
-      setPropertiesWithRequestsToBook(fetchedPropertiesWithRequestsToBook);
-      setIsDataLoading2(false);
-    },
-  });
-
-  console.log(
-    "fetchedPropertiesWithRequestsToBook",
-    fetchedPropertiesWithRequestsToBook,
-  );
-
-  useEffect(() => {
-    if (isLoading) {
-      setIsDataLoading(true);
-    }
-  }, [isLoading]);
-
   const displayedData = separatedData ? separatedData[selectedOption] : [];
-
-  const displayedPropertiesData = propertiesWithRequestsToBook ?? [];
 
   return (
     <div className="flex bg-white">
@@ -146,7 +116,7 @@ export default function HostRequestsLayout({
 
           {/* Sidebar Content */}
           <div className="pt-4">
-            {isDataLoading ? (
+            {isLoading ? (
               // Loading State
               range(7).map((i) => <SidebarPropertySkeleton key={i} />)
             ) : displayedData.length > 0 ? (
@@ -235,60 +205,6 @@ export default function HostRequestsLayout({
             </Button>
           </div>
         )}
-      </div>
-    </div>
-  );
-}
-
-// ---------- SIDEBAR CITY COMPONENT ----------
-function SidebarCity({
-  cityData,
-  selectedOption,
-  selectedCity,
-  setSelectedCity,
-}: {
-  cityData: HostRequestsPageData;
-  selectedOption: "normal" | "outsidePriceRestriction";
-  selectedCity: string | null;
-  setSelectedCity: (city: string) => void;
-}) {
-  const href =
-    selectedOption === "normal"
-      ? `/host/requests/${cityData.city}`
-      : `/host/requests/${cityData.city}?priceRestriction=true`;
-
-  const isSelected = selectedCity === cityData.city;
-
-  return (
-    <Link href={href} className="block">
-      <div
-        className={`flex items-center justify-between rounded-xl p-4 ${
-          isSelected ? "bg-primaryGreen text-white" : ""
-        }`}
-        onClick={() => setSelectedCity(cityData.city)}
-      >
-        <div>
-          <h3 className="font-medium">{cityData.city}</h3>
-        </div>
-        <div
-          className={`text-sm ${isSelected ? "text-white" : "text-muted-foreground"}`}
-        >
-          {cityData.requests.length} requests
-        </div>
-      </div>
-    </Link>
-  );
-}
-
-// ---------- SIDEBAR SKELETON COMPONENT ----------
-function SidebarPropertySkeleton() {
-  return (
-    <div className="flex gap-2 p-2">
-      <div className="h-16 w-16 rounded-md bg-accent" />
-      <div className="flex-1 text-sm">
-        <SkeletonText />
-        <SkeletonText className="w-2/3" />
-        <Badge size="sm" variant="skeleton" className="w-20" />
       </div>
     </div>
   );
