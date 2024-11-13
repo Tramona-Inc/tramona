@@ -3,6 +3,7 @@ import CheckInMethodDialog from "./CheckInMethodDialog";
 import CheckOutDialog from "./CheckOutDialog";
 import { useState } from "react";
 import HouseRulesDialog from "./HouseRulesDialog";
+import InteractionPreferencesDialog from "./InteractionPreferencesDialog";
 
 export default function HostArrivalGuide() {
   const [activeDialog, setActiveDialog] = useState<number | null>(null);
@@ -26,7 +27,7 @@ export default function HostArrivalGuide() {
     {
       title: "Interaction preferences",
       subtitle: "Add details",
-      dialog: <CheckInMethodDialog />,
+      dialog: <InteractionPreferencesDialog />,
     },
     {
       title: "Directions",
