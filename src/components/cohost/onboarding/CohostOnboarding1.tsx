@@ -125,7 +125,7 @@ export default function CohostInviteAcceptance() {
           </DialogHeader>
           <div className="py-6">
             <p className="mb-6 text-center">
-              {`You've been invited to join ${hostTeamName}'s host team on Tramona. Would you like to accept this invitation?`}
+              {`You've been invited to join ${hostTeamName} on Tramona. Would you like to accept this invitation?`}
             </p>
             <div className="flex justify-center space-x-4">
               <Button onClick={handleAccept} disabled={isAccepting}>

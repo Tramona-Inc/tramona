@@ -27,6 +27,7 @@ import {
   type Property,
   type User,
   type Request,
+  type RequestsToBook,
   bookedDates,
   groupInvites,
   groupMembers,
@@ -41,6 +42,7 @@ import {
   requests,
   rejectedRequests,
   hostTeams,
+  requestsToBook,
   hostProfiles,
 } from "./db/schema";
 import { getAddress, getCoordinates } from "./google-maps";
@@ -364,6 +366,8 @@ export async function addProperty({
     | "stateName"
     | "stateCode"
     | "country"
+    | "bookItNowEnabled"
+    | "bookItNowDiscountTiers"
   > & {
     latLngPoint?: { x: number; y: number }; // make optional
   };
@@ -554,7 +558,7 @@ export async function getRequestsForProperties(
             .where(
               and(
                 eq(rejectedRequests.requestId, requests.id),
-                eq(rejectedRequests.userId, user.id),
+                eq(rejectedRequests.hostTeamId, property.hostTeamId),
               ),
             ),
         ),
@@ -965,7 +969,7 @@ export async function createInitialHostTeam(
   await db.insert(hostTeamMembers).values({
     hostTeamId: teamId,
     userId: user.id,
-    role: "Loose",
+    role: "Admin Access",
   });
 
   return teamId;
@@ -1038,6 +1042,78 @@ export async function scrapeAirbnbPagesHelper({
     .filter(Boolean);
 }
 
+
+export async function getRequestsToBookForProperties(
+  hostProperties: Property[],
+  { user }: { user: Session["user"] },
+  { tx = db } = {},
+) {
+  const propertyToRequestMap: {
+    requestToBook: RequestsToBook & {
+      traveler: Pick<
+        User,
+        "firstName" | "lastName" | "name" | "image" | "location" | "about"
+      >;
+      property: Property & { taxAvailable: boolean };
+    };
+  }[] = [];
+
+  for (const property of hostProperties) {
+    const requestsForProperty = await tx.query.requestsToBook.findMany({
+      where: and(
+        eq(requestsToBook.propertyId, property.id),
+        eq(requestsToBook.userId, user.id),
+        gte(requestsToBook.checkIn, new Date()),
+      ),
+      with: {
+        madeByGroup: {
+          with: {
+            owner: {
+              columns: {
+                image: true,
+                name: true,
+                firstName: true,
+                lastName: true,
+                location: true,
+                about: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const { city, stateCode, country } = await getAddress({
+      lat: property.latLngPoint.y,
+      lng: property.latLngPoint.x,
+    });
+
+    const taxInfo = calculateTotalTax({ country, stateCode, city });
+    console.log("taxInfo", taxInfo, city);
+
+    for (const requestToBook of requestsForProperty) {
+      const traveler = {
+        name: requestToBook.madeByGroup.owner.name,
+        image: requestToBook.madeByGroup.owner.image,
+        firstName: requestToBook.madeByGroup.owner.firstName,
+        lastName: requestToBook.madeByGroup.owner.lastName,
+        location: requestToBook.madeByGroup.owner.location,
+        about: requestToBook.madeByGroup.owner.about,
+      };
+      propertyToRequestMap.push({
+        requestToBook: {
+          ...requestToBook,
+          traveler,
+          property: {
+            ...property,
+            taxAvailable: taxInfo.length > 0 ? true : false, //// come back here
+          },
+        },
+      });
+    }
+  }
+  return propertyToRequestMap;
+}
 
 export async function addHostProfile({
   userId,

@@ -14,8 +14,9 @@ import {
   propertyInsertSchema,
   propertySelectSchema,
   propertyUpdateSchema,
-  type Request,
   reservedDateRanges,
+  type Request,
+  type RequestsToBook,
   type User,
   users,
 } from "@/server/db/schema";
@@ -51,6 +52,7 @@ import {
   addProperty,
   createLatLngGISPoint,
   getRequestsForProperties,
+  getRequestsToBookForProperties,
 } from "@/server/server-utils";
 import { getCoordinates } from "@/server/google-maps";
 import { checkAvailabilityForProperties } from "@/server/direct-sites-scraping";
@@ -69,6 +71,16 @@ export type HostRequestsPageData = {
     properties: (Property & { taxAvailable: boolean })[];
   }[];
 };
+
+export type HostRequestsToBookPageData = {
+  requestToBook: (RequestsToBook & {
+    traveler: Pick<
+      User,
+      "firstName" | "lastName" | "name" | "image" | "location" | "about"
+    >;
+  })[];
+  property: Property & { taxAvailable: boolean };
+}[];
 
 export const propertiesRouter = createTRPCRouter({
   create: protectedProcedure
@@ -289,6 +301,9 @@ export const propertiesRouter = createTRPCRouter({
           numRatings: properties.numRatings,
           originalNightlyPrice: properties.originalNightlyPrice,
           latLngPoint: properties.latLngPoint,
+          bookItNowIsEnabled: properties.bookItNowEnabled,
+          // lat: properties.latitude,
+          // long: properties.longitude,
           distance: sql`
           6371 * ACOS(
             SIN(${(lat * Math.PI) / 180}) * SIN(radians(ST_Y(${properties.latLngPoint}))) +
@@ -434,6 +449,7 @@ export const propertiesRouter = createTRPCRouter({
           originalListingPlatform: properties.originalListingPlatform,
           originalListingId: properties.originalListingId,
           latLngPoint: properties.latLngPoint,
+          bookItNowIsEnabled: properties.bookItNowEnabled,
           // lat: properties.latitude,
           // long: properties.longitude,
           distance: sql`
@@ -635,6 +651,50 @@ export const propertiesRouter = createTRPCRouter({
     return groupedByCity;
   }),
 
+  getHostPropertiesWithRequestsToBook: hostProcedure.query(async ({ ctx }) => {
+    const hostProperties = await db.query.properties.findMany({
+      where: and(
+        eq(properties.hostTeamId, ctx.hostProfile.curTeamId),
+        eq(properties.status, "Listed"),
+      ),
+    });
+
+    const hostRequestsToBook = await getRequestsToBookForProperties(
+      hostProperties,
+      {
+        user: ctx.user,
+      },
+    );
+
+    console.log("hostreqs", hostRequestsToBook);
+
+    const propertiesWithRequestsToBook = hostProperties
+      .filter((property) =>
+        hostRequestsToBook.some(
+          (requestToBook) =>
+            requestToBook.requestToBook.propertyId === property.id,
+        ),
+      )
+      .map((property) => ({
+        property,
+        requestToBook: hostRequestsToBook.filter(
+          (requestToBook) =>
+            requestToBook.requestToBook.propertyId === property.id,
+        ),
+      }));
+
+    return propertiesWithRequestsToBook;
+  }),
+  // hostInsertOnboardingProperty: roleRestrictedProcedure(["host"])
+  //   .input(hostPropertyFormSchema)
+  //   .mutation(async ({ ctx, input }) => {
+  //     return await ctx.db.insert(properties).values({
+  //       ...input,
+  //       hostId: ctx.user.id,
+  //       hostName: ctx.user.name,
+  //       imageUrls: input.imageUrls,
+  //     });
+  //   }),
   getBlockedDates: protectedProcedure
     .input(z.object({ propertyId: z.number() }))
     .query(async ({ ctx, input }) => {
@@ -684,6 +744,243 @@ export const propertiesRouter = createTRPCRouter({
           autoOfferDiscountTiers: input.autoOfferDiscountTiers,
         })
         .where(eq(properties.id, input.id));
+    }),
+  updateBookItNow: protectedProcedure
+    .input(
+      z.object({
+        id: z.number(),
+        bookItNowEnabled: z.boolean(),
+        bookItNowDiscountTiers: z.array(discountTierSchema),
+        requestToBookDiscountPercentage: z.number(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db
+        .update(properties)
+        .set({
+          bookItNowEnabled: input.bookItNowEnabled,
+          bookItNowDiscountTiers: input.bookItNowDiscountTiers,
+          requestToBookDiscountPercentage:
+            input.requestToBookDiscountPercentage,
+        })
+        .where(eq(properties.id, input.id));
+    }),
+
+  // getBookItNowProperties: publicProcedure
+  //   .input(z.object({
+  //     checkIn: z.date(),
+  //     checkOut: z.date(),
+  //     numGuests: z.number(),
+  //     location: z.string(),
+  //     firstBatch: z.boolean(),
+  //   }),
+  //   )
+  //   .query(async ({ input }) => {
+  //     const { location } = await getCoordinates(input.location);
+  //     if (!location) throw new Error("Could not get coordinates for address");
+  //     console.log("location", location);
+
+  //     let propertyIsNearRequest: SQL | undefined = sql`FALSE`;
+
+  //     const radiusInMeters = 10 * 1609.34;
+
+  //     propertyIsNearRequest = sql`
+  //       ST_DWithin(
+  //         ST_Transform(ST_SetSRID(properties.lat_lng_point, 4326), 3857),
+  //         ST_Transform(ST_SetSRID(ST_MakePoint(${location.lng}, ${location.lat}), 4326), 3857),
+  //         ${radiusInMeters}
+  //       )
+  //     `;
+  //     console.time("Properties query");
+  //     console.time("Airbnb search");
+  //     console.time("full procedure")
+
+  //     const propsPromise = db.query.properties.findMany({
+  //       where: and(isNotNull(properties.originalListingPlatform), propertyIsNearRequest, ne(properties.originalListingPlatform, "Airbnb")),
+  //     }).then(result => {
+  //       console.timeEnd("Properties query");
+  //       return result;
+  //     });
+  //     // const airbnbPromise = scrapeAirbnbSearch({
+  //     //   checkIn: input.checkIn,
+  //     //   checkOut: input.checkOut,
+  //     //   location: input.location,
+  //     //   numGuests: input.numGuests,
+  //     // }).then(result => {
+  //     //   console.timeEnd("Airbnb search");
+  //     //   return result;
+  //     // });
+
+  //     const props = await propsPromise;
+
+  //     let eligibleProperties = props.filter(
+  //       (p) => input.numGuests <= p.maxNumGuests,
+  //     );
+
+  //     console.log("eligibleProperties", eligibleProperties.length);
+  //     if (input.firstBatch) {
+  //       eligibleProperties = eligibleProperties.slice(0, 30);
+  //     } else {
+  //       eligibleProperties = eligibleProperties.slice(30);
+  //     }
+
+  //     const results = await checkAvailabilityForProperties({
+  //       propertyIds: eligibleProperties.map((p) => p.id),
+  //       originalListingIds: eligibleProperties.map((p) => p.originalListingId ?? ""),
+  //       originalListingPlatforms: eligibleProperties.map(
+  //         (p) => p.originalListingPlatform ?? "",
+  //       ),
+  //       checkIn: input.checkIn,
+  //       checkOut: input.checkOut,
+  //       numGuests: input.numGuests,
+  //     });
+
+  //     console.timeEnd("checkAvailability");
+  //     console.log("results", results.length);
+
+  //     const fullPropertyData = await db.query.properties.findMany({
+  //       where: inArray(properties.id, results.map((r) => r.propertyId)),
+  //     });
+
+  //     const updatedPropertyData = await Promise.all(results.map(async (r) => {
+  //       const property = fullPropertyData.find((p) => p.id === r.propertyId);
+  //       return { ...property, originalNightlyPrice: r.originalNightlyPrice };
+  //     }));
+
+  //     // const airbnbProperties = await airbnbPromise; // Ensures it completes before returning
+
+  //     console.timeEnd("full procedure")
+
+  //     return updatedPropertyData;
+  //   }),
+
+  getBookItNowProperties: publicProcedure
+    .input(z.object({
+      checkIn: z.date(),
+      checkOut: z.date(),
+      numGuests: z.number(),
+      location: z.string(),
+    }))
+    .query(async ({ input }) => {
+      const { location } = await getCoordinates(input.location);
+      if (!location) throw new Error("Could not get coordinates for address");
+      console.log("location", location);
+
+      const radiusInMeters = 20 * 1609.34;
+
+      const propertyIsNearRequest = sql`
+      ST_DWithin(
+        ST_Transform(ST_SetSRID(properties.lat_lng_point, 4326), 3857),
+        ST_Transform(ST_SetSRID(ST_MakePoint(${location.lng}, ${location.lat}), 4326), 3857),
+        ${radiusInMeters}
+      )
+    `;
+
+      const { checkIn, checkOut } = input;
+
+      const checkInDate = checkIn.toISOString();
+      const checkOutDate = checkOut.toISOString();
+
+      const conflictingPropertyIds = await db.query.reservedDateRanges.findMany({
+        columns: {propertyId: true},
+        where: and(
+          or(
+            and(lte(reservedDateRanges.start, checkInDate), gte(reservedDateRanges.end, checkInDate)),
+            and(lte(reservedDateRanges.start, checkOutDate), gte(reservedDateRanges.end, checkOutDate)),
+            and(gte(reservedDateRanges.start, checkInDate), lte(reservedDateRanges.end, checkOutDate))
+          )
+        ),
+      });
+
+      // Extract conflicting property IDs into an array
+      const conflictingIds = conflictingPropertyIds.map(item => item.propertyId);
+
+      const hostProperties = await db.query.properties.findMany({
+        where: and(
+          eq(properties.originalListingPlatform, "Hospitable"),
+          propertyIsNearRequest,
+          notInArray(properties.id, conflictingIds) // Exclude properties with conflicting reservations
+        ),
+      });
+
+      // Query for scraped properties with non-intersecting dates
+      const scrapedProperties = await db.query.properties.findMany({
+        where: and(
+          ne(properties.originalListingPlatform, "Hospitable"),
+          ne(properties.originalListingPlatform, "Airbnb"),
+          propertyIsNearRequest,
+          ne(properties.originalNightlyPrice, -1),
+          isNotNull(properties.originalNightlyPrice),
+          notInArray(properties.id, conflictingIds) // Exclude properties with conflicting reservations
+        )
+      });
+      console.log(scrapedProperties);
+      return { hostProperties, scrapedProperties };
+    }),
+
+
+  runSubscrapers: publicProcedure
+    .input(
+      z.object({
+        propertyData: z.array(
+          z.object({
+            id: z.number(),
+            originalListingId: z.string(),
+            originalListingPlatform: z.string(),
+            maxNumGuests: z.number(),
+          }),
+        ),
+        checkIn: z.date(),
+        checkOut: z.date(),
+        numGuests: z.number(),
+        location: z.string(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const eligibleProperties = input.propertyData.filter(
+        (p) => input.numGuests <= p.maxNumGuests,
+      );
+
+      if (eligibleProperties.length === 0) {
+        return [];
+      }
+
+
+      const airbnbProperties = await scrapeAirbnbSearch({
+        checkIn: input.checkIn,
+        checkOut: input.checkOut,
+        location: input.location,
+        numGuests: input.numGuests,
+      });
+
+      const results = await checkAvailabilityForProperties({
+        propertyIds: eligibleProperties.map((p) => p.id),
+        originalListingIds: eligibleProperties.map((p) => p.originalListingId),
+        originalListingPlatforms: eligibleProperties.map(
+          (p) => p.originalListingPlatform,
+        ),
+        checkIn: input.checkIn,
+        checkOut: input.checkOut,
+        numGuests: input.numGuests,
+      });
+
+      // Filter the results to only include available properties with a price
+      const filteredResults = results.filter(
+        (result) =>
+          result.isAvailableOnOriginalSite &&
+          result.originalNightlyPrice !== undefined,
+      );
+
+      const filteredAirbnbProperties = airbnbProperties.filter(
+        (p) =>
+          p.nightlyPrice !== undefined &&
+          p.originalNightlyPrice !== undefined,
+      );
+
+      const combinedResults = [...filteredAirbnbProperties, ...filteredResults];
+      console.log("Combined results:", combinedResults);
+
+      return combinedResults;
     }),
 
   // getBookItNowProperties: publicProcedure

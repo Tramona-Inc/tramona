@@ -1,6 +1,6 @@
-import { integer, pgTable, primaryKey, text } from "drizzle-orm/pg-core";
+import { integer, pgTable, primaryKey } from "drizzle-orm/pg-core";
 import { requests } from "./requests";
-import { users } from "./users";
+import { hostTeams } from "./hostTeams";
 
 export const rejectedRequests = pgTable(
   "rejected_requests",
@@ -8,11 +8,11 @@ export const rejectedRequests = pgTable(
     requestId: integer("request_id")
       .notNull()
       .references(() => requests.id, { onDelete: "cascade" }),
-    userId: text("user_id")
+    hostTeamId: integer("host_team_id")
       .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
+      .references(() => hostTeams.id, { onDelete: "cascade" }),
   },
   (t) => ({
-    compoundKey: primaryKey({ columns: [t.requestId, t.userId] }),
+    compoundKey: primaryKey({ columns: [t.requestId, t.hostTeamId] }),
   }),
 );

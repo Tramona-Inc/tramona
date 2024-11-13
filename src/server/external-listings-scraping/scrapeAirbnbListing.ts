@@ -133,6 +133,13 @@ export async function scrapeAirbnbListing(
   // )?.[1];
   // if (!amenitiesStr)
   //   throw new Error(`Airbnb id ${id}: Failed to find amenities`);
+  const amenities = getAmenities(listingData, id);
+
+  // const amenitiesStr = /"seeAllAmenitiesGroups":(.+?\}\]\}\])/.exec(
+  //   listingData,
+  // )?.[1];
+  // if (!amenitiesStr)
+  //   throw new Error(`Airbnb id ${id}: Failed to find amenities`);
 
   // const amenities = z
   //   .array(z.object({ amenities: z.array(z.object({ title: z.string() })) }))

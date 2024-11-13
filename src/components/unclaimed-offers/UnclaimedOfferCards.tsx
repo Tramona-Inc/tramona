@@ -2,7 +2,8 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { type RouterOutputs } from "@/utils/api";
-import { formatCurrency, plural } from "@/utils/utils";
+import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
+import { formatCurrency, formatDateMonthDayYear, plural } from "@/utils/utils";
 import { Star, ChevronLeft, ChevronRight } from "lucide-react";
 import { Skeleton } from "../ui/skeleton";
 import React, { useEffect, useState, useMemo, useCallback } from "react";
@@ -253,7 +254,11 @@ function UnMatchedPropertyCard({
   };
 
   const isAirbnb = property.originalListingPlatform === "Airbnb";
-  const link = isAirbnb ? `https://airbnb.com/rooms/${property.originalListingId}` : `/property/${property.id}`;
+  const checkIn = formatDateMonthDayYear(new Date());
+  const checkOut = formatDateMonthDayYear(new Date(new Date().setDate(new Date().getDate() + 2)));
+  const numGuests = 3;
+  const link = isAirbnb ? `https://airbnb.com/rooms/${property.originalListingId}` : `/request-to-book/${property.id}?checkIn=${checkIn}&checkOut=${checkOut}&numGuests=${numGuests}`;
+
 
   return (
     <Link href={link} className="block" target="_blank" rel="noopener noreferrer">
@@ -345,30 +350,28 @@ function UnMatchedPropertyCard({
         {/* {formatDateRange(offer.checkIn, offer.checkOut)} */}
         {/* replace with check in check out'
             </div> */}
-        <div className="text-muted-foreground">
-          <p>{plural(property.numBedrooms, "bed")}</p>
-        </div>
-        <div className="underline">
-          <p>
-            <span className="font-semibold">
-              {property.originalNightlyPrice
-                ? formatCurrency(property.originalNightlyPrice)
-                : "N/A"}
-            </span>
-            &nbsp;night
-          </p>
-        </div>
-      </div>
-      {/* <div className="flex items-center space-x-3 text-sm font-semibold">
-          <div className="text-xs text-zinc-500 line-through">
-              airbnb&nbsp;
-              {property.originalNightlyPrice
-                ? formatCurrency(
-                    property.originalNightlyPrice * AVG_AIRBNB_MARKUP,
-                  )
-                : "N/A"}
+            <div className="text-sm text-zinc-500">
+              {plural(property.maxNumGuests, "Guest")}
             </div>
-        </div> */}
+          </div>
+          <div className="flex justify-between">
+            <div className="flex items-center space-x-3 text-sm font-semibold">
+              <div>
+                {property.originalNightlyPrice
+                  ? formatCurrency(property.originalNightlyPrice)
+                  : "N/A"}
+                &nbsp;night
+              </div>
+              <div className="text-xs text-zinc-500 line-through">
+                airbnb&nbsp;
+                {property.originalNightlyPrice
+                  ? formatCurrency(
+                      property.originalNightlyPrice * AVG_AIRBNB_MARKUP,
+                    )
+                  : "N/A"}
+              </div>
+            </div>
+        </div>
     </Link>
   );
 }

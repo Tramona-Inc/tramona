@@ -829,3 +829,41 @@ export const casamundoSubScraper: (
     originalNightlyPrice: Math.round((price.price / numNights) * 100),
   };
 };
+
+
+// export const casamundoSubScraper: SubsequentScraper = async ({
+//   originalListingId,
+//   scrapeUrl,
+//   checkIn,
+//   checkOut,
+// }) => {
+//   const url = new URL(scrapeUrl);
+//   const numGuests = parseInt(url.searchParams.get("adults") ?? "", 10);
+//   const numNights = getNumNights(checkIn, checkOut);
+
+//   const isAvailable = await checkAvailability(
+//     originalListingId,
+//     checkIn,
+//     checkOut,
+//   );
+
+//   const price = await fetchPrice({
+//     offerId: originalListingId,
+//     numGuests,
+//     checkIn: checkIn,
+//     duration: numNights,
+//   });
+
+//   if (!isAvailable || price.price === -1) {
+//     return {
+//       isAvailableOnOriginalSite: false,
+//       availabilityCheckedAt: new Date(),
+//     };
+//   }
+
+//   return {
+//     isAvailableOnOriginalSite: true,
+//     availabilityCheckedAt: new Date(),
+//     originalNightlyPrice: Math.round((price.price / numNights) * 100),
+//   };
+// };
