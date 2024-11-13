@@ -183,7 +183,7 @@ export default function HostPropertiesDetails({
   }, [propertyId]);
 
   return (
-    <div className="my-6">
+    <div>
       <div className="flex items-center justify-between">
         {editing && (
           <div className="grid grid-cols-3 gap-2">
@@ -288,7 +288,7 @@ export default function HostPropertiesDetails({
           />
         </div>
       </div>
-      <div className="h-[35rem] overflow-y-auto">
+      <div className="h-screen-minus-header-n-footer overflow-y-auto pb-16 pt-6">
         <div className="my-4 space-y-4">
           <section className="space-y-2 rounded-xl border p-4">
             <div className="flex items-center justify-between">
