@@ -10,6 +10,7 @@ import {
 } from "@/utils/utils";
 import { sortBy } from "lodash";
 import { Badge } from "../ui/badge";
+import { formatDistanceToNowStrict } from "date-fns";
 
 export function RequestCardOfferPreviews({
   request,
@@ -80,21 +81,6 @@ export function RequestCardOfferPreviews({
                 </div>
                 <div className="flex flex-row items-center gap-x-2">
                   <div className="shrink-0">
-<<<<<<< HEAD
-                    <UserAvatar
-                      name={host?.name ?? property.hostName ?? "Tramona"}
-                      image={
-                        host?.image ??
-                        property.hostProfilePic ??
-                        "/assets/images/tramona.svg"
-                      }
-                      size="xs"
-                    />
-                  </div>
-                  <p className="text-sm text-foreground">
-                    Listing by {host?.name ?? property.hostName ?? "Tramona"}
-                  </p>
-=======
                     <UserAvatar name={host.name} image={host.image} />
                   </div>
                   <div>
@@ -113,7 +99,6 @@ export function RequestCardOfferPreviews({
                       </p>
                     </div>
                   </div>
->>>>>>> origin/dev
                 </div>
               </div>
             </Link>
