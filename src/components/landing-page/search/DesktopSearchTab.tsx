@@ -18,7 +18,6 @@ import {
   Users,
   Filter,
 } from "lucide-react";
-import { useSearchBarForm } from "./useSearchBarForm";
 import { api } from "@/utils/api";
 import { useAdjustedProperties } from "./AdjustedPropertiesContext";
 import SingleDateInput from "@/components/_common/SingleDateInput";
@@ -246,6 +245,17 @@ const locations = [
   },
 ];
 
+type AirbnbSearchResult = {
+  description: string | null | undefined;
+  imageUrls: string[];
+  maxNumGuests: number;
+  name: string;
+  nightlyPrice: number;
+  originalListingId: string;
+  originalNightlyPrice: number;
+  originalListingPlatform: string;
+  ratingStr: string;
+};
 export function DesktopSearchTab() {
   const form = useZodForm({
     schema: searchSchema,
@@ -255,12 +265,118 @@ export function DesktopSearchTab() {
   const containerRef = useRef<HTMLDivElement>(null);
   const { adjustedProperties, setAdjustedProperties, setIsSearching } =
     useAdjustedProperties();
-  const [allProperties, setAllProperties] = useState({ pages: [] });
-  const runSubscrapers = api.properties.runSubscrapers.useMutation();
+
+  const [allProperties, setAllProperties] = useState<{
+    pages: (Property | AirbnbSearchResult)[];
+  }>({ pages: [] });
+
+  // const { isLoading } = api.properties.getBookItNowProperties.useQuery(
+  //   {
+  //     checkIn: form.watch("checkIn")!,
+  //     checkOut: form.watch("checkOut")!,
+  //     numGuests: form.watch("numGuests")!,
+  //     location: form.watch("location")!,
+  //   },
+  //   {
+  //     enabled:
+  //       !!form.watch("checkIn") &&
+  //       !!form.watch("checkOut") &&
+  //       !!form.watch("numGuests") &&
+  //       !!form.watch("location"),
+  //     onSuccess: (data) => {
+  //       const updatedProperties = {
+  //         pages: [...data.hostProperties, ...data.scrapedProperties],
+  //       };
+
+  //       // Filter the properties and set adjustedProperties via context
+  //       const filtered = filterProperties(
+  //         updatedProperties.pages?.flat() || [],
+  //         minPrice !== "" ? minPrice * 100 : undefined,
+  //         maxPrice !== "" ? maxPrice * 100 : undefined,
+  //         priceSort,
+  //       );
+
+  //       setAdjustedProperties({
+  //         ...updatedProperties,
+  //         pages: filtered,
+  //       });
+
+  //       setAllProperties(updatedProperties);
+  //       setIsSearching(false);
+  //     },
+  //   },
+  // );
+
+  // const airbnbProperties = api.misc.scrapeAirbnbInitialPage.useQuery(
+  //   {
+  //     checkIn: form.watch("checkIn")!,
+  //     checkOut: form.watch("checkOut")!,
+  //     numGuests: form.watch("numGuests")!,
+  //     location: form.watch("location")!,
+  //   },
+  //   {
+  //     enabled:
+  //       !!form.watch("checkIn") &&
+  //       !!form.watch("checkOut") &&
+  //       !!form.watch("numGuests") &&
+  //       !!form.watch("location"),
+  //     onSuccess: (data) => {
+  //       setAllProperties((prevState) => ({
+  //         ...prevState,
+  //         pages: [...(prevState.pages || []), data.res],
+  //       }));
+
+  //       setAdjustedProperties({
+  //         ...allProperties,
+  //         pages: filterProperties(
+  //           allProperties.pages?.flat() || [],
+  //           minPrice !== "" ? minPrice * 100 : undefined,
+  //           maxPrice !== "" ? maxPrice * 100 : undefined,
+  //           priceSort,
+  //         ),
+  //       });
+  //     },
+  //   },
+  // );
+
+  // const cursors =
+  //   airbnbProperties.data?.data.staysSearch.results.paginationInfo.pageCursors.slice(
+  //     1,
+  //   );
+
+  // const scrapeAirbnbPages = api.misc.scrapeAirbnbPages.useQuery(
+  //   {
+  //     checkIn: form.watch("checkIn")!,
+  //     checkOut: form.watch("checkOut")!,
+  //     numGuests: form.watch("numGuests")!,
+  //     location: form.watch("location")!,
+  //     pageCursors: cursors,
+  //   },
+  //   {
+  //     enabled: !!cursors,
+  //     onSuccess: (data) => {
+  //       setAllProperties((prevState) => ({
+  //         ...prevState,
+  //         pages: [...(prevState.pages || []), data],
+  //       }));
+
+  //       setAdjustedProperties({
+  //         ...allProperties,
+  //         pages: filterProperties(
+  //           allProperties.pages?.flat() || [],
+  //           minPrice !== "" ? minPrice * 100 : undefined,
+  //           maxPrice !== "" ? maxPrice * 100 : undefined,
+  //           priceSort,
+  //         ),
+  //       });
+  //     },
+  //   },
+  // );
+
+  //const runSubscrapers = api.properties.runSubscrapers.useMutation();
   const [maxPrice, setMaxPrice] = useState("");
   const [minPrice, setMinPrice] = useState("");
   const [priceSort, setPriceSort] = useState("");
-  
 
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -270,22 +386,15 @@ export function DesktopSearchTab() {
   const checkOutDate = form.watch("checkOut");
 
   const sortOptions = {
-    none: "Select a value", // Placeholder
+    none: "Select a value",
     leastExpensive: "Least Expensive",
     mostExpensive: "Most Expensive",
   };
-  // type BookItNowProperties = (
-  //   {type: "Airbnb";
-  //   data: Property[];
-  // } | {
-  //   type: "Subscraper";
-  //   data: Property[];
-  // })[];
 
   useEffect(() => {
     const data = searchSchema.safeParse(router.query);
     if (data.success) form.reset(data.data);
-  }, [form, router.query])
+  }, [form, router.query]);
 
   const handleLocationClick = useCallback(
     (location: string) => {
@@ -301,28 +410,15 @@ export function DesktopSearchTab() {
     Object.entries(data).forEach(([key, value]) => {
       if (value) params.set(key, value.toString());
     });
-    void router.replace(`${window.location.pathname}?${params.toString()}`, undefined, { shallow: true });
-    // const formData = form.getValues();
-    // console.log("Form data:", formData);
+    void router.replace(
+      `${window.location.pathname}?${params.toString()}`,
+      undefined,
+      { shallow: true },
+    );
+
     setAllProperties({
       pages: [],
-      // ... other initial properties if any
     });
-
-    // Run the original onSubmit function
-
-    console.log("Initial adjustedProperties:", adjustedProperties);
-
-    // Get all property IDs and original listing IDs from adjustedProperties
-    // const propertyData =
-    //   adjustedProperties?.pages.flatMap((page) =>
-    //     page.data.map((property) => ({
-    //       id: property.id,
-    //       originalListingId: property.originalListingId,
-    //       originalListingPlatform: property.originalListingPlatform,
-    //       maxNumGuests: property.maxNumGuests,
-    //     })),
-    //   ) ?? [];
 
     if (data.checkIn && data.checkOut) {
       console.log("Running subscrapers...");
@@ -335,7 +431,6 @@ export function DesktopSearchTab() {
             location: data.location!,
           });
 
-        console.log("props", propertiesInArea);
         setAllProperties((prevState) => {
           const updatedProperties = {
             ...prevState,
@@ -350,9 +445,9 @@ export function DesktopSearchTab() {
           setAdjustedProperties({
             ...updatedProperties,
             pages: filterProperties(
-              updatedProperties.pages?.flat() || [],
-              minPrice !== "" ? minPrice * 100 : undefined,
-              maxPrice !== "" ? maxPrice * 100 : undefined,
+              updatedProperties.pages.flat() || [],
+              minPrice !== "" ? (Number(minPrice) * 100).toString() : minPrice,
+              maxPrice !== "" ? (Number(maxPrice) * 100).toString() : maxPrice,
               priceSort,
             ),
           });
@@ -379,9 +474,9 @@ export function DesktopSearchTab() {
           setAdjustedProperties({
             ...updatedProperties,
             pages: filterProperties(
-              allProperties.pages?.flat() || [],
-              minPrice !== "" ? minPrice * 100 : undefined,
-              maxPrice !== "" ? maxPrice * 100 : undefined,
+              updatedProperties.pages?.flat() || [],
+              minPrice !== "" ? (Number(minPrice) * 100).toString() : minPrice,
+              maxPrice !== "" ? (Number(maxPrice) * 100).toString() : maxPrice,
               priceSort,
             ),
           });
@@ -404,16 +499,16 @@ export function DesktopSearchTab() {
         const finishAirbnbResults = await finishAirbnbResultsPromise;
         setAllProperties((prevState) => {
           const updatedProperties = {
-          ...prevState,
-          pages: [...(prevState?.pages || []), ...finishAirbnbResults],
+            ...prevState,
+            pages: [...(prevState?.pages || []), ...finishAirbnbResults],
           };
 
           setAdjustedProperties({
             ...updatedProperties,
             pages: filterProperties(
-              allProperties.pages?.flat() || [],
-              minPrice !== "" ? minPrice * 100 : undefined,
-              maxPrice !== "" ? maxPrice * 100 : undefined,
+              updatedProperties.pages?.flat() || [],
+              minPrice !== "" ? (Number(minPrice) * 100).toString() : minPrice,
+              maxPrice !== "" ? (Number(maxPrice) * 100).toString() : maxPrice,
               priceSort,
             ),
           });
@@ -446,17 +541,17 @@ export function DesktopSearchTab() {
     }
     return properties
       .filter((property: Property) => {
-        const price = property.originalNightlyPrice; // Assuming each property has a `nightlyPrice` field
+        const price = property.originalNightlyPrice!;
         const meetsMinPrice = !minPrice || price >= parseFloat(minPrice);
         const meetsMaxPrice = !maxPrice || price <= parseFloat(maxPrice);
         return meetsMinPrice && meetsMaxPrice;
       })
       .sort((a, b) => {
         if (priceSort === "leastExpensive") {
-          return a.originalNightlyPrice - b.originalNightlyPrice;
+          return a.originalNightlyPrice! - b.originalNightlyPrice!;
         }
         if (priceSort === "mostExpensive") {
-          return b.originalNightlyPrice - a.originalNightlyPrice;
+          return b.originalNightlyPrice! - a.originalNightlyPrice!;
         }
         return 0; // No sorting if "none" or undefined
       });
@@ -638,48 +733,24 @@ export function DesktopSearchTab() {
             <div className="flex w-full justify-between">
               <div>
                 <div>Min Price</div>
-                {/* <FormField
-                  name="minPrice"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl> */}
                 <Input
                   type="number"
                   placeholder="Min Price"
                   value={minPrice}
                   onChange={(e) => setMinPrice(e.target.value)}
                 />
-                {/* </FormControl>
-                    </FormItem>
-                  )}
-                /> */}
               </div>
               <div>
                 <div>Max Price</div>
-                {/* <FormField
-                  name="maxPrice"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl> */}
                 <Input
                   type="number"
                   placeholder="Max Price"
                   value={maxPrice}
                   onChange={(e) => setMaxPrice(e.target.value)}
                 />
-                {/* </FormControl>
-                    </FormItem>
-                  )}
-                /> */}
               </div>
             </div>
             <div>Sort by Price</div>
-            {/* <FormField
-              control={form.control} // Ensure the form's control prop is passed here
-              name="priceSort" // Matches the schema field name in searchSchema
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl> */}
             <Select
               onValueChange={(value) => setPriceSort(value)} // Binds to form field
               value={priceSort} // Default to "none" if no value is selected
@@ -692,7 +763,7 @@ export function DesktopSearchTab() {
                 >
                   {priceSort === "none"
                     ? "Select a value"
-                    : sortOptions[priceSort]}
+                    : sortOptions[priceSort as keyof typeof sortOptions]}
                 </SelectValue>
               </SelectTrigger>
               <SelectContent className="bg-white">
@@ -703,25 +774,35 @@ export function DesktopSearchTab() {
                 ))}
               </SelectContent>
             </Select>
-            {/* </FormControl>
-                </FormItem>
-              )}
-            /> */}
             <DialogFooter>
               <Button
+                variant="outline"
                 onClick={() => {
-                  /* handle the application of filter logic */
-                  // const { minPrice, maxPrice, priceSort } = form.getValues();
-
-                  setAdjustedProperties((prevState) => ({
-                    ...prevState,
-                    pages: filterProperties(
-                      allProperties.pages?.flat() || [],
-                      minPrice !== "" ? minPrice * 100 : undefined,
-                      maxPrice !== "" ? maxPrice * 100 : undefined,
-                      priceSort,
-                    ),
-                  }));
+                  setMinPrice("");
+                  setMaxPrice("");
+                  setPriceSort("none");
+                }}
+              >
+                Clear Filters
+              </Button>
+              <Button
+                onClick={() => {
+                  setAdjustedProperties((prevState) => {
+                    if (!prevState) return null;
+                    return {
+                      ...prevState,
+                      pages: filterProperties(
+                        allProperties.pages?.flat() || [],
+                        minPrice !== ""
+                          ? (Number(minPrice) * 100).toString()
+                          : minPrice,
+                        maxPrice !== ""
+                          ? (Number(maxPrice) * 100).toString()
+                          : maxPrice,
+                        priceSort,
+                      ),
+                    };
+                  });
                   setOpen(false);
                 }}
               >

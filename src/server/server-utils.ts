@@ -56,7 +56,7 @@ import { scrapePage, serpPageSchema, transformSearchResult } from "./external-li
 import { getSerpUrl } from "./external-listings-scraping/airbnbScraper";
 import { createStripeConnectId } from "@/utils/stripe-utils";
 
-export const proxyAgent = new HttpsProxyAgent(env.DATACENTER_PROXY_URL);
+export const proxyAgent = new HttpsProxyAgent(env.PROXY_URL);
 
 export const axiosWithRetry = axios.create({
   httpsAgent: proxyAgent,

@@ -256,7 +256,7 @@ function UnMatchedPropertyCard({
   const link = isAirbnb ? `https://airbnb.com/rooms/${property.originalListingId}` : `/property/${property.id}`;
 
   return (
-    <Link href={link} className="block">
+    <Link href={link} className="block" target="_blank" rel="noopener noreferrer">
       <div
         className="relative flex aspect-square w-full cursor-pointer flex-col overflow-hidden rounded-xl"
         onMouseEnter={() => setIsHovered(true)}
