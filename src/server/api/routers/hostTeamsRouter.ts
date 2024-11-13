@@ -111,8 +111,8 @@ async function sendInviteMessage(
   if (!conversationId) return;
 
   const messageContent = isResend
-    ? `You have been re-invited to join ${hostTeamName}'s host team. Please check your email for the invitation link.`
-    : `You have been invited to join ${hostTeamName}'s host team. Please check your email for the invitation link.`;
+    ? `You have been re-invited to join ${hostTeamName}. Please check your email for the invitation link.`
+    : `You have been invited to join ${hostTeamName}. Please check your email for the invitation link.`;
 
   await db.insert(messages).values({
     conversationId,
@@ -128,7 +128,7 @@ async function sendAcceptMessage(
 ) {
   if (!conversationId) return;
 
-  const messageContent = `Invitation to join ${hostTeamName}'s host team accepted.`;
+  const messageContent = `Invitation to join ${hostTeamName} accepted.`;
 
   await db.insert(messages).values({
     conversationId,
@@ -144,7 +144,7 @@ async function sendDeclineMessage(
 ) {
   if (!conversationId) return;
 
-  const messageContent = `Invitation to join ${hostTeamName}'s host team declined.`;
+  const messageContent = `Invitation to join ${hostTeamName} declined.`;
 
   await db.insert(messages).values({
     conversationId,
