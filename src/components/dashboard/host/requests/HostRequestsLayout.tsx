@@ -1,29 +1,22 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  EmptyState,
-  EmptyStateDescription,
-  EmptyStateFooter,
-  EmptyStateTitle,
-} from "@/components/ui/empty-state";
+
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { api } from "@/utils/api";
-import { range } from "lodash";
-import { HandshakeIcon, MapPinIcon, Home } from "lucide-react";
+
+import { Home } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { type SeparatedData } from "@/server/server-utils";
-import { separateByPriceRestriction, plural } from "@/utils/utils";
+import { plural } from "@/utils/utils";
 import { useRouter } from "next/router";
 import { HostRequestsToBookPageData } from "@/server/api/routers/propertiesRouter";
 import { Property, RequestsToBook } from "@/server/db/schema";
-import SidebarCity from "./sidebars/SideBarCity";
-import SidebarPropertySkeleton from "./sidebars/SidebarSkeleton";
-
+import SidebarCity from "./sidebars/SidebarCity";
+import SidebarRequestToBook from "./sidebars/SidebarRequestToBook";
 // ---------- MAIN LAYOUT COMPONENT ----------
 export default function HostRequestsLayout({
   children,
 }: React.PropsWithChildren) {
+  // ---------- TABS ----------
   const router = useRouter();
   const { query } = router;
   const [activeTab, setActiveTab] = useState<"city" | "request-to-book">(
@@ -47,31 +40,13 @@ export default function HostRequestsLayout({
     });
   };
 
-  // ---------- STATE MANAGEMENT ----------
-  const [separatedData, setSeparatedData] = useState<SeparatedData | null>(
-    null,
-  );
+  //---------- STATE ----------
   const [propertiesWithRequestsToBook, setPropertiesWithRequestsToBook] =
     useState<HostRequestsToBookPageData | null>(null);
 
   const [selectedOption, setSelectedOption] = useState<
     "normal" | "outsidePriceRestriction"
   >("normal");
-
-  const [selectedCity, setSelectedCity] = useState<string | null>(null);
-  const [selectedProperty, setSelectedProperty] = useState<number | null>(null);
-
-  // ---------- DATA FETCHING ----------
-  const { data: fetchedProperties, isLoading } =
-    api.properties.getHostPropertiesWithRequests.useQuery(undefined, {
-      onSuccess: (fetchedProperties) => {
-        const separatedProperties =
-          separateByPriceRestriction(fetchedProperties);
-        setSeparatedData(separatedProperties);
-      },
-    });
-
-  const displayedData = separatedData ? separatedData[selectedOption] : [];
 
   return (
     <div className="flex bg-white">
@@ -115,41 +90,11 @@ export default function HostRequestsLayout({
           </div>
 
           {/* Sidebar Content */}
-          <div className="pt-4">
-            {isLoading ? (
-              // Loading State
-              range(7).map((i) => <SidebarPropertySkeleton key={i} />)
-            ) : displayedData.length > 0 ? (
-              // City List
-              displayedData.map((cityData) => (
-                <SidebarCity
-                  key={cityData.city}
-                  cityData={cityData}
-                  selectedOption={
-                    activeTab === "city" ? "normal" : "outsidePriceRestriction"
-                  }
-                  selectedCity={selectedCity}
-                  setSelectedCity={setSelectedCity}
-                />
-              ))
-            ) : (
-              // Empty State
-              <EmptyState
-                icon={HandshakeIcon}
-                className="h-[calc(100vh-280px)]"
-              >
-                <EmptyStateTitle>No requests yet</EmptyStateTitle>
-                <EmptyStateDescription>
-                  Properties with requests will show up here
-                </EmptyStateDescription>
-                <EmptyStateFooter>
-                  <Button asChild variant="outline">
-                    <Link href="/host/properties">View all properties</Link>
-                  </Button>
-                </EmptyStateFooter>
-              </EmptyState>
-            )}
-          </div>
+          {activeTab === "city" ? (
+            <SidebarCity selectedOption={selectedOption} />
+          ) : (
+            <SidebarRequestToBook selectedOption={selectedOption} />
+          )}
         </ScrollArea>
       </div>
 
@@ -160,22 +105,16 @@ export default function HostRequestsLayout({
             <div className="mx-auto max-w-5xl">
               <div className="mb-4 flex flex-row gap-2">
                 <Button
-                  variant={
-                    activeTab === "city" && selectedOption === "normal"
-                      ? "primary"
-                      : "white"
-                  }
+                  variant={selectedOption === "normal" ? "primary" : "white"}
                   className="rounded-full shadow-md"
                   onClick={() => {
                     setSelectedOption("normal");
-                    handleTabChange("city");
                   }}
                 >
                   Primary
                 </Button>
                 <Button
                   variant={
-                    activeTab === "request-to-book" ||
                     selectedOption === "outsidePriceRestriction"
                       ? "primary"
                       : "white"
@@ -183,7 +122,6 @@ export default function HostRequestsLayout({
                   className="rounded-full shadow-md"
                   onClick={() => {
                     setSelectedOption("outsidePriceRestriction");
-                    handleTabChange("request-to-book");
                   }}
                 >
                   Other
@@ -207,40 +145,5 @@ export default function HostRequestsLayout({
         )}
       </div>
     </div>
-  );
-}
-
-function SidebarProperty({
-  propertyData,
-  selectedProperty,
-  setSelectedProperty,
-}: {
-  propertyData: {
-    property: Property;
-    requestToBook: RequestsToBook[];
-  };
-  selectedProperty: number | null;
-  setSelectedProperty: (property: number) => void;
-}) {
-  const href = `/host/requests-to-book/${propertyData.property.id}`;
-
-  const isSelected = selectedProperty === propertyData.property.id;
-  return (
-    <Link href={href} className="mb-4 block">
-      <div
-        className={`flex items-center gap-2 rounded-lg p-4 hover:bg-muted ${
-          isSelected ? "bg-muted" : ""
-        }`}
-        onClick={() => setSelectedProperty(propertyData.property.id)}
-      >
-        <Home className="h-8 w-8 text-gray-600" />
-        <div className="flex-1">
-          <h3 className="font-semibold">{propertyData.property.name}</h3>
-          <Badge size="md">
-            {plural(propertyData.requestToBook.length, "request")}
-          </Badge>
-        </div>
-      </div>
-    </Link>
   );
 }

@@ -1,5 +1,5 @@
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
-import HostRequests from "@/components/dashboard/host/requests/HostRequests";
+import HostRequests from "@/components/dashboard/host/requests/city/HostRequests";
 import HostRequestsLayout from "@/components/dashboard/host/requests/HostRequestsLayout";
 import Head from "next/head";
 

@@ -7,7 +7,7 @@ import { db } from "@/server/db";
 import { requestsToBook, requestsToBookInsertSchema } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { and, eq, exists, lt, sql } from "drizzle-orm";
+import { and, eq, exists, isNull, lt, sql } from "drizzle-orm";
 import {
   groupMembers,
   groups,
@@ -213,4 +213,16 @@ export const requestsToBookRouter = createTRPCRouter({
         ),
       };
     }),
+
+  getAllRequestToBookProperties: hostProcedure.query(async ({ ctx }) => {
+    const allRequestToBook = await db.query.requestsToBook.findMany({
+      where: and(
+        eq(requestsToBook.hostTeamId, ctx.hostProfile.curTeamId),
+        isNull(requestsToBook.resolvedAt),
+      ),
+    });
+    console.log(allRequestToBook);
+
+    return allRequestToBook;
+  }),
 });

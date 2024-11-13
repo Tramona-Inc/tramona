@@ -1,15 +1,15 @@
 import { SkeletonText } from "@/components/ui/skeleton";
 import { api } from "@/utils/api";
 import { useRouter } from "next/router";
-import HostRequestDialog from "./city/HostRequestDialog";
+import HostRequestDialog from "./HostRequestDialog";
 import RequestCard, {
   type HostDashboardRequest,
 } from "@/components/requests/RequestCard";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { type Property } from "@/server/db/schema";
-import HostConfirmRequestDialog from "../HostConfirmRequestDialog";
-import HostFinishRequestDialog from "./city/HostFinishRequestDialog";
+import HostConfirmRequestDialog from "../../HostConfirmRequestDialog";
+import HostFinishRequestDialog from "./HostFinishRequestDialog";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { type SeparatedData } from "@/server/server-utils";
