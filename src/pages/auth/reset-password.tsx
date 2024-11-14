@@ -25,7 +25,7 @@ const formSchema = z
   })
   .refine((data) => data.newPassword === data.verifyPassword, {
     message: "Passwords don't match",
-    path: ["confirm"],
+    path: ["verifyPassword"],
   });
 
 export default function ResetPassword() {
@@ -75,7 +75,6 @@ export default function ResetPassword() {
     void verifyResetPasswordToken();
   }, [query.id, query.token, verifyTokenMutateAsync]);
 
-  // Verify new password
   const {
     mutateAsync: resetPasswordMutateAsync,
     isLoading: isLoadingResetPassword,
@@ -112,29 +111,28 @@ export default function ResetPassword() {
 
   return (
     <MainLayout>
-      <div className="flex min-h-screen-minus-header flex-col items-center justify-center">
-        <section className="flex max-w-sm flex-col space-y-5">
-          <h1 className="text-4xl font-bold tracking-tight">
+      <div className="flex min-h-screen-minus-header flex-col items-center justify-center py-8">
+        <div className="w-full max-w-md rounded-lg md:border md:border-gray-300 p-8 md:shadow-lg">
+          <h1 className="text-3xl font-semibold text-center text-gray-800 tracking-tight">
             Reset your password
           </h1>
-          <p>
-            Enter your email address, and we&apos;ll send you a link to get back
-            into your account.
+          <p className="text-center text-base text-gray-500 mt-2">
+            Enter your new password below to access your account.
           </p>
 
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(handleSubmit)}
-              className="space-y-4"
+              className="space-y-6 mt-6"
             >
               <FormField
                 control={form.control}
                 name="newPassword"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>New Password</FormLabel>
+                    <FormLabel className="text-sm text-gray-700 font-medium">New Password</FormLabel>
                     <FormControl>
-                      <Input {...field} type={"password"} autoFocus />
+                      <Input {...field} type="password" placeholder="New password" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -145,25 +143,24 @@ export default function ResetPassword() {
                 name="verifyPassword"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Verify Password</FormLabel>
+                    <FormLabel className="text-sm text-gray-700 font-medium">Verify Password</FormLabel>
                     <FormControl>
-                      <Input {...field} type={"password"} />
+                      <Input {...field} type="password" placeholder="Verify password" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <FormMessage />
               <Button
                 type="submit"
                 disabled={isLoadingResetPassword}
-                className="w-full"
+                className="w-full rounded-md bg-[#004236] text-white py-3 font-medium"
               >
                 Reset password
               </Button>
             </form>
           </Form>
-        </section>
+        </div>
       </div>
     </MainLayout>
   );

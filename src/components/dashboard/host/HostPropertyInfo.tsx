@@ -6,6 +6,7 @@ import { AlertCircle } from "lucide-react";
 import HostAvailability from "./HostAvailability";
 import HostPropertiesRestrictions from "./HostPropertiesRestrictions";
 import HostAutoOffer from "./HostAutoOffer";
+import HostBookItNow from "./HostBookItNow";
 import HostArrivalGuide from "./HostArrivalGuide";
 
 export default function HostPropertyInfo({ property }: { property: Property }) {
@@ -74,6 +75,9 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
         </TabsContent>
         <TabsContent value="auto-offer">
           <HostAutoOffer property={property} />
+        </TabsContent>
+        <TabsContent value="book-it-now">
+          <HostBookItNow property={property} />
         </TabsContent>
         <TabsContent value="arrival-guide">
           <HostArrivalGuide />

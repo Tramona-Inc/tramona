@@ -55,45 +55,53 @@ export default function ForgotPassword() {
 
   return (
     <MainLayout>
-      <div className="flex min-h-screen-minus-header flex-col items-center justify-center">
-        <section className="flex max-w-sm flex-col space-y-5">
-          <h1 className="text-4xl font-bold tracking-tight">
+      <div className="min-h-screen-minus-header flex flex-col items-center justify-center py-8">
+        <div className="w-full max-w-md rounded-lg p-8 md:border md:border-gray-300 md:shadow-lg">
+          <h1 className="text-center text-3xl font-semibold tracking-tight text-gray-800">
             Forgot your password?
           </h1>
-          <p>
+          <p className="mt-2 text-center text-base text-gray-500">
             Enter your email address, and we&apos;ll send you a link to get back
             into your account.
           </p>
+
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(handleSubmit)}
-              className="flex flex-col gap-4"
+              className="mt-6 flex flex-col gap-6"
             >
               <FormField
                 control={form.control}
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email address</FormLabel>
+                    <FormLabel className="text-sm font-medium text-gray-700">
+                      Email address
+                    </FormLabel>
                     <FormControl>
-                      <Input {...field} autoFocus />
+                      <Input {...field} placeholder="name@example.com" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <Button type="submit" disabled={isLoading} className="block">
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="w-full rounded-md bg-[#004236] py-3 font-medium text-white"
+              >
                 Send link
               </Button>
             </form>
           </Form>
+
           <Link
             href="/support"
-            className="font-medium text-primary underline underline-offset-2"
+            className="mt-6 block text-center text-sm font-medium text-primary underline underline-offset-2"
           >
             Need support?
           </Link>
-        </section>
+        </div>
       </div>
     </MainLayout>
   );

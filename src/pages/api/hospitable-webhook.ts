@@ -223,6 +223,27 @@ type DateResponse = {
   };
 };
 
+type ReviewResponse = {
+  data: {
+    id: string;
+    platform_id: string;
+    reservation_platform_id: string;
+    detailed_ratings: {
+      rating: number;
+      comment: string;
+    }[];
+  }[];
+};
+
+type ReservationResponse = {
+  data: {
+    id: string;
+    guest: {
+      first_name: string;
+      last_name: string;
+    };
+  }[];
+};
 type HospitableWebhook = ListingCreatedWebhook | ChannelActivatedWebhook;
 
 export default async function webhook(
@@ -343,6 +364,60 @@ export default async function webhook(
             text: `Host created a listing in ${city}, ${stateCode}, ${country} but we don't have tax info for that location`,
             channel: "host-bot",
           });
+        }
+        const listingId = webhookData.data.platform_id;
+        const dateIn3Days = addDays(new Date(), 3);
+        const dateIn5Days = addDays(new Date(), 5);
+
+        //const allReviews = await axios.get(`https://connect.hospitable.com/api/v1/channels/${channelId}/reviews`);
+
+        const listingDataUrl = getListingDataUrl(listingId, {
+          checkIn: dateIn3Days,
+          checkOut: dateIn5Days,
+        });
+        const reviewsUrl = getReviewsUrl(listingId);
+
+        const [listingData, reviewsData] = (await Promise.all(
+          [
+            listingDataUrl,
+            reviewsUrl, // 10 best reviews
+          ].map((url) =>
+            axiosWithRetry
+              .get<string>(url, {
+                headers: airbnbHeaders,
+                httpsAgent: proxyAgent,
+                responseType: "text",
+              })
+              .then((r) => r.data)
+              .catch((e) => {
+                console.error(`Error fetching ${url}:`, e);
+                throw e;
+              }),
+          ),
+        )) as [string, string];
+
+        const cancellationPolicy = getCancellationPolicy(
+          listingData,
+          listingId,
+        );
+        const amenities = getAmenities(listingData, listingId);
+
+        const allReviews = (
+          await axios.get<ReviewResponse>(
+            `https://connect.hospitable.com/api/v1/channels/${webhookData.data.channel.id}/reviews`,
+          )
+        ).data;
+        const reviewsForProperty = allReviews.data.filter((review) => {
+          return review.platform_id === listingId;
+        })[0];
+        let [numReviews, avgRating] = [0, 0];
+        if (reviewsForProperty) {
+          numReviews = reviewsForProperty.detailed_ratings.length;
+          let sum = 0;
+          for (const review of reviewsForProperty.detailed_ratings) {
+            sum += review.rating;
+          }
+          avgRating = sum / numReviews;
         }
 
         const listingDataUrl = getListingDataUrl(webhookData.data.id, {});
