@@ -1,32 +1,51 @@
-import React from "react";
+import React, { useState } from "react";
 import { api } from "@/utils/api";
 import SidebarPropertySkeleton from "./SidebarPropertySkeleton";
 import EmptyRequestState from "./EmptyRequestState";
 import Link from "next/link";
+import { useRouter } from "next/router";
 
 function SidebarRequestToBook({
   selectedOption,
 }: {
   selectedOption: "normal" | "outsidePriceRestriction";
 }) {
+  const router = useRouter();
+
   const { data: properties, isLoading } =
     api.requestsToBook.getAllRequestToBookProperties.useQuery();
+
+  const [selectedPropertyId, setSelectedPropertyId] = useState<null | number>();
+
+  const handlePropertyClick = (propertyId: number) => {
+    setSelectedPropertyId(propertyId);
+    void router.push(
+      `/host/requests?tabs=request-to-book&propertyId=${propertyId}`,
+    );
+  };
 
   return (
     <div>
       {!isLoading ? (
         properties && properties.length > 0 ? (
-          <div className="flex flex-col">
-            {properties.map((property) => (
-              <Link key={property.id} href={`${property.id}`}>
-                <div className="flex flex-row gap-x-3 rounded-xl border p-3">
-                  <div className="text-wrap">{property.name}</div>
-                  <p className="text-nowrap flex flex-row text-xs">
-                    {property.requestsToBook.length} Requests
-                  </p>
-                </div>
-              </Link>
-            ))}
+          <div className="flex flex-col gap-y-2">
+            {properties.map(
+              (property) =>
+                property.requestsToBook.length > 0 && (
+                  <div
+                    key={property.id}
+                    onClick={() => handlePropertyClick(property.id)}
+                    className={`${selectedPropertyId === property.id ? "bg-primaryGreen text-white" : ""} pointer flex flex-row justify-between gap-x-3 rounded-xl border p-3 py-5`}
+                  >
+                    <div className="text-wrap cursor-pointer">
+                      {property.name}
+                    </div>
+                    <p className="text-nowrap flex flex-row text-xs">
+                      {property.requestsToBook.length} Requests
+                    </p>
+                  </div>
+                ),
+            )}
           </div>
         ) : (
           <EmptyRequestState />
