@@ -372,9 +372,9 @@ export async function addProperty({
     latLngPoint?: { x: number; y: number }; // make optional
   };
 } & (
-  | { isAdmin?: boolean; userEmail: string }
-  | { isAdmin: true; userEmail?: undefined }
-)) {
+    | { isAdmin?: boolean; userEmail: string }
+    | { isAdmin: true; userEmail?: undefined }
+  )) {
   let lat = property.latLngPoint?.y;
   let lng = property.latLngPoint?.x;
 
@@ -460,13 +460,12 @@ export async function sendTextToHost({
           to: hostTeamOwner.phoneNumber,
           content: `Tramona: There is a request for ${formatCurrency(
             request.maxTotalPrice / numberOfNights,
-          )} per night for ${plural(numberOfNights, "night")} in ${
-            request.location
-          }. You have ${plural(
-            numHostPropertiesPerRequest[hostTeamId] ?? 0,
-            "eligible property",
-            "eligible properties",
-          )}. Please click here to make a match: ${env.NEXTAUTH_URL}/host/requests`,
+          )} per night for ${plural(numberOfNights, "night")} in ${request.location
+            }. You have ${plural(
+              numHostPropertiesPerRequest[hostTeamId] ?? 0,
+              "eligible property",
+              "eligible properties",
+            )}. Please click here to make a match: ${env.NEXTAUTH_URL}/host/requests`,
         });
 
         //TODO SEND WHATSAPP MESSAGE
@@ -1008,7 +1007,7 @@ export async function scrapeAirbnbInitialPageHelper({
   // console.log("length of results:", searchResults.length);
   // console.log('result:', searchResults[0]);
   // const results = pageData.flatMap((data) => data.staysSearch.results.searchResults)
-  return {data: pageData, res: searchResults};
+  return { data: pageData, res: searchResults };
 }
 
 export async function scrapeAirbnbPagesHelper({
