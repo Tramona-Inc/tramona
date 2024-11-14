@@ -24,6 +24,7 @@ import { HOST_MARKUP } from "@/utils/constants";
 import { HostDashboardRequestToBook } from "@/components/requests-to-book/RequestToBookCard";
 import { api } from "@/utils/api";
 import Spinner from "@/components/_common/Spinner";
+import { toast } from "@/components/ui/use-toast";
 
 export default function HostRequestToBookDialog({
   open,
@@ -38,9 +39,18 @@ export default function HostRequestToBookDialog({
     id: requestToBook.propertyId,
   });
 
+  const { mutateAsync: acceptBookingRequest } =
+    api.stripe.rejectOrCaptureAndFinalizeRequestToBook.useMutation({
+      onSuccess: () => {
+        toast({
+          variant: "default",
+          title: "Booking Accepted",
+        });
+      },
+    });
+
   const hasCancellationPolicy = Boolean(property?.cancellationPolicy);
 
-  console.log(getNumNights(requestToBook.checkIn, requestToBook.checkOut));
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="max-w-lg p-6">
@@ -171,7 +181,16 @@ export default function HostRequestToBookDialog({
               <Button variant="secondary" onClick={() => setOpen(false)}>
                 Cancel
               </Button>
-              <Button onClick={() => setStep(1)}>Continue</Button>
+              <Button
+                onClick={() =>
+                  acceptBookingRequest({
+                    isAccepted: true,
+                    requestToBookId: requestToBook.id,
+                  })
+                }
+              >
+                Confirm
+              </Button>
             </DialogFooter>
           </>
         ) : (

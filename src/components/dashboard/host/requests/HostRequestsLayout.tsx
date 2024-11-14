@@ -84,7 +84,7 @@ export default function HostRequestsLayout({
           {activeTab === "city" ? (
             <SidebarCity selectedOption={selectedOption} />
           ) : (
-            <SidebarRequestToBook selectedOption={selectedOption} />
+            <SidebarRequestToBook />
           )}
         </ScrollArea>
       </div>

@@ -35,6 +35,7 @@ export default function SidebarCity({
 
   const displayedData = separatedData ? separatedData[selectedOption] : [];
 
+  console.log(fetchedProperties);
   return (
     <div className="pt-4">
       {isLoading ? (
@@ -45,8 +46,8 @@ export default function SidebarCity({
         displayedData.map((cityData, index) => {
           const href =
             selectedOption === "normal"
-              ? `/host/requests/${cityData.city}`
-              : `/host/requests/${cityData.city}?priceRestriction=true`;
+              ? `/host/requests/${cityData.city}?tabs=city`
+              : `/host/requests/${cityData.city}?tabs=city&priceRestriction=true`;
 
           const isSelected = selectedCity === cityData.city;
 
