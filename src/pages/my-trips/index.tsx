@@ -11,6 +11,7 @@ import { useRouter } from "next/router";
 import BillingOverview from "@/components/my-trips/billing/BillingOverview";
 import PaymentHistoryOverview from "@/components/my-trips/billing/PaymentHistoryOverview";
 import SecurityDepositOverview from "@/components/my-trips/billing/travelerClaims/SecurityDepositOverview";
+import InnerTravelerLayout from "@/components/_common/Layout/DashboardLayout/InnerTravelerLayout";
 
 export type TripCardDetails = RouterOutputs["trips"]["getMyTrips"][number];
 
@@ -52,9 +53,7 @@ export default function MyTrips({ billingRoute }: MyTripsProps) {
       <Head>
         <title>My Trips | Tramona</title>
       </Head>
-      <div className="container col-span-10 mx-auto flex max-w-7xl flex-col gap-10 py-10 pb-32 2xl:col-span-11">
-        <h1 className="text-4xl font-bold">My Trips</h1>
-
+      <InnerTravelerLayout title="My Trips">
         <Tabs value={selectedTab} onValueChange={handleTabClick}>
           <TabsList>
             <TabsTrigger value="upcoming">
@@ -102,7 +101,7 @@ export default function MyTrips({ billingRoute }: MyTripsProps) {
             </>
           )}
         </Tabs>
-      </div>
+      </InnerTravelerLayout>
     </DashboardLayout>
   );
 }
