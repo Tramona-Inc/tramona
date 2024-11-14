@@ -200,14 +200,12 @@ export function HostPropertyEditBtn({
   setEditing,
   onSubmit,
   property,
-  onCancel,
   disabled,
 }: {
   editing: boolean;
   setEditing: (editing: boolean) => void;
   onSubmit?: () => void;
   property: Property;
-  onCancel: () => void;
   disabled?: boolean;
 }) {
   const { data: fetchedProperty, refetch } = api.properties.getById.useQuery({

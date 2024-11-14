@@ -288,7 +288,7 @@ export default function HostPropertiesDetails({
           />
         </div>
       </div>
-      <div className="h-screen-minus-header-n-footer overflow-y-auto pb-16 pt-6">
+      <div className="h-screen-minus-header-n-footer overflow-y-auto pb-36 pt-6">
         <div className="my-4 space-y-4">
           <section className="space-y-2 rounded-xl border p-4">
             <div className="flex items-center justify-between">
