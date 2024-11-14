@@ -35,7 +35,6 @@ export default function SidebarCity({
 
   const displayedData = separatedData ? separatedData[selectedOption] : [];
 
-  console.log(fetchedProperties);
   return (
     <div className="pt-4">
       {isLoading ? (
