@@ -15,8 +15,8 @@ export default function HostRequestsToBook() {
   const { toast } = useToast();
   const [dialogOpen, setDialogOpen] = useState(false);
   const router = useRouter();
-  const propertyId = Number(router.query.propertyId);
-
+  const propertyId = parseInt(router.query.propertyId as string) || 0; // Default to 0 if parsing fails
+  console.log(propertyId);
   const { data: unusedReferralDiscounts } =
     api.referralCodes.getAllUnusedHostReferralDiscounts.useQuery(undefined, {
       onSuccess: () => {
@@ -37,6 +37,7 @@ export default function HostRequestsToBook() {
       { propertyId },
       { enabled: !!router.isReady },
     );
+  console.log(propertyRequests);
 
   const { mutateAsync: rejectRequestToBook } =
     api.stripe.rejectOrCaptureAndFinalizeRequestToBook.useMutation();
