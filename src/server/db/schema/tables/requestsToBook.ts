@@ -50,7 +50,7 @@ export const requestsToBook = pgTable(
       .references(() => groups.id, { onDelete: "cascade" }),
     checkIn: date("check_in", { mode: "date" }).notNull(),
     checkOut: date("check_out", { mode: "date" }).notNull(),
-    numGuests: smallint("num_guests").notNull().default(1),
+    numGuests: smallint("num_guests").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),

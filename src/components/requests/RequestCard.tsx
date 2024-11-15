@@ -18,7 +18,6 @@ import {
   LinkIcon,
   MapPinIcon,
   TrashIcon,
-  Users2Icon,
 } from "lucide-react";
 import { Card, CardFooter } from "../ui/card";
 import RequestGroupAvatars from "./RequestGroupAvatars";

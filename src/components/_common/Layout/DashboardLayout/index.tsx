@@ -1,5 +1,4 @@
 import MobileNav from "@/components/dashboard/MobileNav";
-import Sidebar from "@/components/dashboard/Sidebar";
 import { useSession } from "next-auth/react";
 import Footer from "../Footer";
 import { useIsMd } from "@/utils/utils";
@@ -49,11 +48,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     <>
       <Header />
       <div className="min-h-screen-minus-header relative lg:flex">
-        {/* {session && (
-          <aside className="sticky top-header-height hidden h-screen-minus-header bg-zinc-100 lg:block">
-            <Sidebar type={navType} />
-          </aside>
-        )} */}
         <div className="min-w-0 lg:flex-1">
           <main className="relative min-h-screen">{children}</main>
           {status !== "loading" && <MobileNav type={navType} />}

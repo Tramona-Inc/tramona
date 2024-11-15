@@ -23,7 +23,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Loader2, X } from "lucide-react";
+import { X } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import {
   Form,
@@ -426,7 +426,14 @@ export default function HostBookItNow({ property }: { property: Property }) {
           >
             <Accordion type="single" collapsible className="w-full">
               <AccordionItem value="discount-tiers">
-                <AccordionTrigger disabled={isSaving || !isEditing} className={isSaving || !isEditing ? "opacity-50 cursor-not-allowed" : ""}>
+                <AccordionTrigger
+                  disabled={isSaving || !isEditing}
+                  className={
+                    isSaving || !isEditing
+                      ? "cursor-not-allowed opacity-50"
+                      : ""
+                  }
+                >
                   Discount Tiers
                 </AccordionTrigger>
                 <AccordionContent>

@@ -277,8 +277,8 @@ export function HostPropertyEditBtn({
           : addressWithoutApt,
       );
       setCheckInType(fetchedProperty.checkInInfo ?? "self");
-      setCheckIn(fetchedProperty.checkInTime ?? "00:00");
-      setCheckOut(fetchedProperty.checkOutTime ?? "00:00");
+      setCheckIn(fetchedProperty.checkInTime);
+      setCheckOut(fetchedProperty.checkOutTime);
       setAmenities(fetchedProperty.amenities);
       setOtherAmenities(fetchedProperty.otherAmenities);
       setImageUrls(fetchedProperty.imageUrls);

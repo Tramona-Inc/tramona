@@ -1,4 +1,3 @@
-import { type Dispatch, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -7,7 +6,6 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { type Property } from "@/server/db/schema/tables/properties";
 import {
   formatCurrency,
   formatDateRange,
@@ -16,11 +14,7 @@ import {
   plural,
 } from "@/utils/utils";
 import Image from "next/image";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
 import { AlertCircle } from "lucide-react";
-import { DialogTitle } from "@radix-ui/react-dialog";
-import { HOST_MARKUP } from "@/utils/constants";
 import { HostDashboardRequestToBook } from "@/components/requests-to-book/RequestToBookCard";
 import { api } from "@/utils/api";
 import Spinner from "@/components/_common/Spinner";

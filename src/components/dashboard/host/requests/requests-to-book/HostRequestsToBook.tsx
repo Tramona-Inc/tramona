@@ -1,10 +1,8 @@
-import { SkeletonText } from "@/components/ui/skeleton";
 import { api } from "@/utils/api";
 import { useRouter } from "next/router";
 import HostRequestToBookDialog from "./HostRequestToBookDialog";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { RequestsToBook, User, type Property } from "@/server/db/schema";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { useToast } from "@/components/ui/use-toast";
@@ -19,7 +17,6 @@ export default function HostRequestsToBook() {
   const router = useRouter();
   const propertyId = Number(router.query.propertyId);
 
-  const [step, setStep] = useState(0);
   const { data: unusedReferralDiscounts } =
     api.referralCodes.getAllUnusedHostReferralDiscounts.useQuery(undefined, {
       onSuccess: () => {
