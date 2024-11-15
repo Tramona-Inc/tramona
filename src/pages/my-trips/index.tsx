@@ -35,7 +35,8 @@ export default function MyTrips({ billingRoute }: MyTripsProps) {
 
   // Determine which trips are upcoming and which are past
   const { upcomingTrips, pastTrips, currentTrips } = useMemo(() => {
-    if (!allTrips) return { upcomingTrips: [], pastTrips: [], currentTrip: [] };
+    if (!allTrips)
+      return { upcomingTrips: [], pastTrips: [], currentTrips: [] };
     const now = new Date();
     return {
       upcomingTrips: allTrips.filter((trip) => trip.checkIn > now),
