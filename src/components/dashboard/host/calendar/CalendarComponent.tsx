@@ -1,6 +1,5 @@
 "use client";
-
-import * as React from "react";
+import React, { useMemo } from "react";
 import { ChevronLeft, ChevronRight, ChevronDown, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,31 +20,58 @@ type ReservationInfo = {
   end: string;
   platformBookedOn: "airbnb" | "tramona";
 };
-
 export default function CalendarComponent() {
-  const [selectedDates, setSelectedDates] = React.useState<Date[]>([]);
+  const [selectedDates, setSelectedDates] = useState<Date[]>([]);
   const [date, setDate] = useState<Date>(new Date());
-  const [selectedProperty, setSelectedProperty] =
-    React.useState("All Properties");
+  const hostProperties = api.properties.getHostProperties.useQuery();
+  const [selectedProperty, setSelectedProperty] = useState(
+    hostProperties.data?.[0],
+  );
   const [editing, setEditing] = useState(false);
   const [selectedRange, setSelectedRange] = useState<{
     start: Date | null;
     end: Date | null;
   }>({ start: null, end: null });
 
-  // Example properties - replace with your API call
-  const properties = [
-    "The best place in SD",
-    "Cozy Downtown Loft",
-    "Beachfront Paradise",
-    "Mountain Retreat",
-  ];
+  const queryInput = useMemo(() => ({
+    propertyId: selectedProperty?.hospitableListingId,
+  }), [selectedProperty?.hospitableListingId]);
 
-  // Replace with your actual API call
-  const { data: reservedDateRanges, isLoading } =
-    api.calendar.getReservedDateRanges.useQuery({
-      propertyId: "property-id",
-    });
+  const { data: hospitableCalendarPrices } =
+    api.pms.getHospitableCalendar.useQuery(queryInput);
+
+
+  const prices = useMemo(() => {
+    const priceMap: Record<string, number | undefined> = {};
+    const initialDate = new Date(date.getFullYear(), date.getMonth(), 1);
+
+    for (let i = 0; i < 31 && initialDate.getMonth() === date.getMonth(); i++) {
+      const dateString = initialDate.toISOString().split("T")[0]!;
+      priceMap[dateString] =
+        hospitableCalendarPrices?.find((event) => event.date === dateString)?.price.amount/100;
+
+      // Clone initialDate to avoid mutating it
+      initialDate.setDate(initialDate.getDate() + 1);
+    }
+
+    return priceMap;
+  }, [date, hospitableCalendarPrices]);
+
+  console.log(
+    "hospitableCalendarPrices",
+    hospitableCalendarPrices,
+    selectedProperty,
+  );
+
+  const reservedDates = hospitableCalendarPrices
+    ?.filter((price) => !price.availability.available)
+    .map((price) => ({
+      start: price.date,
+      end: price.date,
+      platformBookedOn: "tramona",
+    }));
+
+  console.log("reservedDates", reservedDates);
 
   const handleDateClick = (date: Date) => {
     if (!editing) return;
@@ -96,8 +122,8 @@ export default function CalendarComponent() {
     });
   };
 
-  const dayWithPrice = (day: Date, prices: { [key: string]: number }) => {
-    const dateStr = day.toISOString().split("T")[0];
+  const dayWithPrice = (day: Date, prices: Record<string, number>) => {
+    const dateStr = day.toISOString().split("T")[0]!;
     const reservedInfo = isDateReserved(day);
 
     let reservationClass = "";
@@ -122,21 +148,13 @@ export default function CalendarComponent() {
       >
         <span className="text-xs font-medium sm:text-sm">{day.getDate()}</span>
         <span className="text-[10px] text-muted-foreground sm:text-xs">
-          ${prices[dateStr] || 168}
+          ${prices[dateStr] ?? 168}
         </span>
       </div>
     );
   };
 
-  const prices = React.useMemo(() => {
-    const priceMap: { [key: string]: number } = {};
-    const currentDate = new Date(date.getFullYear(), date.getMonth(), 1);
-    while (currentDate.getMonth() === date.getMonth()) {
-      priceMap[currentDate.toISOString().split("T")[0]] = 168;
-      currentDate.setDate(currentDate.getDate() + 1);
-    }
-    return priceMap;
-  }, [date]);
+
 
   const changeMonth = (increment: number) => {
     const newDate = new Date(
@@ -200,18 +218,20 @@ export default function CalendarComponent() {
                     className="rounded-full border shadow-lg"
                   >
                     <Globe className="mr-2 h-4 w-4" />
-                    <span className="hidden sm:inline">{selectedProperty}</span>
+                    <span className="hidden sm:inline">
+                      {selectedProperty?.name}
+                    </span>
                     <span className="sm:hidden">Property</span>
                     <ChevronDown className="ml-2 h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                  {properties.map((property) => (
+                  {hostProperties.data?.map((property) => (
                     <DropdownMenuItem
-                      key={property}
+                      key={property.id}
                       onSelect={() => setSelectedProperty(property)}
                     >
-                      {property}
+                      {property.name}
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
@@ -221,10 +241,11 @@ export default function CalendarComponent() {
           <div className="min-h-[600px] flex-1">
             <MonthCalendar
               date={date}
-              reservedDateRanges={reservedDateRanges}
+              reservedDateRanges={reservedDates}
               onDateClick={handleDateClick}
               selectedRange={selectedRange}
               isEditing={editing}
+              prices={prices}
             />
           </div>
           <div className="mt-4 flex flex-wrap gap-2">

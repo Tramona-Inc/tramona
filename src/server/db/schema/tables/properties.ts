@@ -117,6 +117,14 @@ export const ALL_PROPERTY_AMENITIES_ONBOARDING = [
   "Driveway parking",
 ] as const;
 
+export const ALL_CHECKOUT_TYPES = [
+  "Gather used towels",
+  "Throw trash away",
+  "Turn things off",
+  "Lock up",
+  "Return keys",
+] as const;
+
 export const propertySafetyItemsEnum = pgEnum(
   "property_safety_items",
   ALL_PROPERTY_SAFETY_ITEMS,
@@ -131,6 +139,14 @@ export const propertyStatusEnum = pgEnum("property_status", [
   "Drafted",
   "Archived",
 ]);
+
+// export const checkOutEnum = pgEnum("check_out", [
+//   "Gather used towels",
+//   "Throw trash away",
+//   "Turn things off",
+//   "Lock up",
+//   "Return keys",
+// ]);
 
 export const ALL_PROPERTY_PMS = ["Hostaway", "Hospitable", "Ownerrez"] as const;
 
@@ -265,6 +281,8 @@ export const properties = pgTable(
 
     originalListingUrl: varchar("original_listing_url"),
     checkInInfo: varchar("check_in_info"),
+    // checkOutInfo: checkOutEnum("check_out_enum").array(),
+    additionalCheckOutInfo: varchar("additional_check_out_info"),
     checkInTime: time("check_in_time").notNull().default("15:00:00"),
     checkOutTime: time("check_out_time").notNull().default("10:00:00"),
     amenities: varchar("amenities")
@@ -305,7 +323,7 @@ export const properties = pgTable(
     status: propertyStatusEnum("property_status").default("Listed"),
     pricingScreenUrl: varchar("pricing_screen_url"),
     currency: currencyEnum("currency").notNull().default("USD"),
-    // hostawayListingId: integer("hostaway_listing_id"),
+    hospitableListingId: varchar("hospitable_listing_id"),
     latLngPoint: geometry("lat_lng_point", {
       type: "point",
       mode: "xy",
@@ -321,9 +339,13 @@ export const properties = pgTable(
     >(),
     bookItNowEnabled: boolean("book_it_now_enabled").notNull().default(false),
     bookItNowDiscountTiers: jsonb("book_it_now_discount_tiers").$type<
-    DiscountTier[]
-  >(),
-    requestToBookDiscountPercentage: integer("request_to_book_discount_percentage").notNull().default(5),
+      DiscountTier[]
+    >(),
+    requestToBookDiscountPercentage: integer(
+      "request_to_book_discount_percentage",
+    )
+      .notNull()
+      .default(5),
   },
   (t) => ({
     spatialIndex: index("spacial_index").using("gist", t.latLngPoint),

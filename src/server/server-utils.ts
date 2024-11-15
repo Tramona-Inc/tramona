@@ -501,7 +501,7 @@ export async function getRequestsForProperties(
   for (const property of hostProperties) {
     const requestIsNearProperty = sql`
       ST_DWithin(
-        ST_Transform(requests.lat_lng_point, 3857),
+        ST_Transform(ST_SetSRID(requests.lat_lng_point, 4326), 3857),
         ST_Transform(ST_SetSRID(ST_MakePoint(${property.latLngPoint.x}, ${property.latLngPoint.y}), 4326), 3857),
         requests.radius * 1609.34
       )
@@ -631,7 +631,7 @@ export async function getPropertiesForRequest(
 
   propertyIsNearRequest = sql`
     ST_DWithin(
-      ST_Transform(properties.lat_lng_point, 3857),
+      ST_Transform(ST_SetSRID(properties.lat_lng_point, 4326), 3857),
       ST_Transform(ST_SetSRID(ST_MakePoint(${req.latLngPoint.x}, ${req.latLngPoint.y}), 4326), 3857),
       ${radiusInDegrees}
     )
@@ -715,10 +715,17 @@ export async function getAdminId() {
     .then((res) => res!.id);
 }
 
-type HospitablePriceResponse = {
+type HospitableCalendarResponse = {
   data: {
     dates: {
-      price: { amount: number };
+      date: string;
+      price: {
+        amount: number;
+        currency: string;
+      };
+      availability: {
+        available: boolean;
+      };
     }[];
   };
 };
@@ -729,6 +736,52 @@ type HostawayPriceResponse = {
   };
 };
 
+export async function getPropertyCalendar(propertyId: string) {
+  const now = new Date();
+  const firstStartDate = now.toISOString().split("T")[0];
+  const firstEndDate = new Date(now);
+  firstEndDate.setDate(firstEndDate.getDate() + 365);
+  const firstEndDateString = firstEndDate.toISOString().split("T")[0];
+
+  const secondStartDate = new Date(firstEndDate);
+  secondStartDate.setDate(secondStartDate.getDate() + 1);
+  const secondStartDateString = secondStartDate
+    .toISOString()
+    .split("T")[0];
+
+  const secondEndDate = new Date(now);
+  secondEndDate.setDate(now.getDate() + 539);
+  const secondEndDateString = secondEndDate.toISOString().split("T")[0];
+
+  // Construct the URL with query params for logging
+  const firstBatchUrl = `https://connect.hospitable.com/api/v1/listings/${propertyId}/calendar?start_date=${firstStartDate}&end_date=${firstEndDateString}`;
+  const secondBatchUrl = `https://connect.hospitable.com/api/v1/listings/${propertyId}/calendar?start_date=${secondStartDateString}&end_date=${secondEndDateString}`;
+
+  // Log the URLs
+  console.log("First request URL:", firstBatchUrl);
+  console.log("Second request URL:", secondBatchUrl);
+
+  // Make the requests
+  const firstBatch = await axios.get<HospitableCalendarResponse>(firstBatchUrl, {
+    headers: {
+      Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
+    },
+  });
+
+  const secondBatch = await axios.get<HospitableCalendarResponse>(secondBatchUrl, {
+    headers: {
+      Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
+    },
+  });
+
+
+  const combinedPricingAndCalendarResponse = [
+    ...firstBatch.data.data.dates,
+    ...secondBatch.data.data.dates,
+  ];
+  return combinedPricingAndCalendarResponse;
+}
+
 export async function getPropertyOriginalPrice(
   property: Pick<Property, "originalListingId" | "originalListingPlatform">,
   params: {
@@ -738,7 +791,7 @@ export async function getPropertyOriginalPrice(
   },
 ) {
   if (property.originalListingPlatform === "Hospitable") {
-    const { data } = await axios.get<HospitablePriceResponse>(
+    const { data } = await axios.get<HospitableCalendarResponse>(
       `https://connect.hospitable.com/api/v1/listings/${property.originalListingId}/calendar`,
       {
         headers: {

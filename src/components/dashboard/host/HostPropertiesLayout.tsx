@@ -10,13 +10,7 @@ import {
   CancellationPolicyWithInternals,
   type Property,
 } from "@/server/db/schema/tables/properties";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useRouter } from "next/router";
 import ExpandableSearchBar from "@/components/_common/ExpandableSearchBar";
@@ -283,8 +277,8 @@ export function HostPropertyEditBtn({
           : addressWithoutApt,
       );
       setCheckInType(fetchedProperty.checkInInfo ?? "self");
-      setCheckIn(fetchedProperty.checkInTime ?? "00:00");
-      setCheckOut(fetchedProperty.checkOutTime ?? "00:00");
+      setCheckIn(fetchedProperty.checkInTime);
+      setCheckOut(fetchedProperty.checkOutTime);
       setAmenities(fetchedProperty.amenities);
       setOtherAmenities(fetchedProperty.otherAmenities);
       setImageUrls(fetchedProperty.imageUrls);

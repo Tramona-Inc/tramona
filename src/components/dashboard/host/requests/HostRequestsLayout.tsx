@@ -1,17 +1,10 @@
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
-
-import { Home } from "lucide-react";
-import Link from "next/link";
 import { useEffect, useState } from "react";
-import { plural } from "@/utils/utils";
 import { useRouter } from "next/router";
-import { HostRequestsToBookPageData } from "@/server/api/routers/propertiesRouter";
-import { Property, RequestsToBook } from "@/server/db/schema";
-import SidebarCity from "./sidebars/SidebarCity";
-import SidebarRequestToBook from "./sidebars/SidebarRequestToBook";
+import SidebarCity from "./sidebars/SideBarCity";
+import SidebarRequestToBook from "./sidebars/SideBarRequestToBook";
 // ---------- MAIN LAYOUT COMPONENT ----------
 export default function HostRequestsLayout({
   children,
@@ -41,8 +34,6 @@ export default function HostRequestsLayout({
   };
 
   //---------- STATE ----------
-  const [propertiesWithRequestsToBook, setPropertiesWithRequestsToBook] =
-    useState<HostRequestsToBookPageData | null>(null);
 
   const [selectedOption, setSelectedOption] = useState<
     "normal" | "outsidePriceRestriction"
@@ -93,7 +84,7 @@ export default function HostRequestsLayout({
           {activeTab === "city" ? (
             <SidebarCity selectedOption={selectedOption} />
           ) : (
-            <SidebarRequestToBook selectedOption={selectedOption} />
+            <SidebarRequestToBook />
           )}
         </ScrollArea>
       </div>

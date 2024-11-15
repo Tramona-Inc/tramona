@@ -582,6 +582,7 @@ export const propertiesRouter = createTRPCRouter({
     const hostRequests = await getRequestsForProperties(hostProperties, {
       user: ctx.user,
     });
+    console.log(hostRequests);
 
     const groupedByCity: HostRequestsPageData[] = [];
 
@@ -647,7 +648,7 @@ export const propertiesRouter = createTRPCRouter({
         }
       }
     }
-
+    console.log(groupedByCity);
     return groupedByCity;
   }),
 
