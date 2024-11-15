@@ -783,7 +783,7 @@ export async function getPropertyCalendar(propertyId: string) {
 }
 
 export async function getPropertyOriginalPrice(
-  property: Pick<Property, "originalListingId" | "originalListingPlatform">,
+  property: Pick<Property, "hospitableListingId" | "originalListingPlatform" | "originalListingId">,
   params: {
     checkIn: string;
     checkOut: string;
@@ -792,7 +792,7 @@ export async function getPropertyOriginalPrice(
 ) {
   if (property.originalListingPlatform === "Hospitable") {
     const { data } = await axios.get<HospitableCalendarResponse>(
-      `https://connect.hospitable.com/api/v1/listings/${property.originalListingId}/calendar`,
+      `https://connect.hospitable.com/api/v1/listings/${property.hospitableListingId}/calendar`,
       {
         headers: {
           Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
@@ -803,10 +803,10 @@ export async function getPropertyOriginalPrice(
         },
       },
     );
-    const totalPrice = data.data.dates.reduce((acc, date) => {
+    const averagePrice = data.data.dates.reduce((acc, date) => {
       return acc + date.price.amount;
-    }, 0);
-    return totalPrice;
+    }, 0) / data.data.dates.length;
+    return averagePrice;
   } else if (property.originalListingPlatform === "Hostaway") {
     const { data } = await axios.get<HostawayPriceResponse>(
       `https://api.hostaway.com/v1/properties/${property.originalListingId}/calendar/priceDetails`,

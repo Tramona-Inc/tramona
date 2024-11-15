@@ -51,6 +51,7 @@ import {
 import {
   addProperty,
   createLatLngGISPoint,
+  getPropertyOriginalPrice,
   getRequestsForProperties,
   getRequestsToBookForProperties,
 } from "@/server/server-utils";
@@ -968,6 +969,18 @@ export const propertiesRouter = createTRPCRouter({
         ),
       });
 
+      //set the accurate original nightly price for Hospitable properties
+      await Promise.all(
+        hostProperties.map(async (property) => {
+          const originalPrice = await getPropertyOriginalPrice(property, {
+            checkIn: checkInDate,
+            checkOut: checkOutDate,
+            numGuests: input.numGuests,
+          });
+          property.originalNightlyPrice = originalPrice ?? null;
+        })
+      );
+
       // Query for scraped properties with non-intersecting dates
       const scrapedProperties = await db.query.properties.findMany({
         where: and(
@@ -979,7 +992,6 @@ export const propertiesRouter = createTRPCRouter({
           notInArray(properties.id, conflictingIds) // Exclude properties with conflicting reservations
         )
       });
-      console.log(scrapedProperties);
       return { hostProperties, scrapedProperties };
     }),
 
