@@ -17,7 +17,6 @@ export default function MobileNav({
 }) {
   const { data: session, status } = useSession();
   const isAdmin = session && session.user.role === "admin";
-  const isHost = session && session.user.role === "host";
 
   let navLinks;
 
@@ -43,7 +42,7 @@ export default function MobileNav({
 
   return (
     <header
-      className={`fixed inset-x-0 bottom-0 z-50 flex h-mobile-header-height items-center bg-[#fafafa] shadow-[0px_0px_10px_#0001] *:flex-1 lg:hidden *:lg:hidden`}
+      className={`*:flex-1 *:lg:hidden fixed inset-x-0 bottom-0 z-50 flex h-mobile-header-height items-center bg-[#fafafa] shadow-[0px_0px_10px_#0001] lg:hidden`}
     >
       {navLinks.map((link, index) => (
         <NavBarLink key={index} href={link.href} icon={link.icon}>

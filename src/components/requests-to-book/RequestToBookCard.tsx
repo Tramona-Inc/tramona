@@ -26,18 +26,9 @@ import { useState } from "react";
 import WithdrawRequestToBookDialog from "./WithdrawRequestToBookDialog";
 
 import { RequestToBookCardPreviews } from "./RequestToBookCardPreviews";
-import { Property } from "@/server/db/schema";
 import UserAvatar from "../_common/UserAvatar";
 import { formatDistanceToNowStrict } from "date-fns";
 import { TravelerVerificationsDialog } from "../requests/TravelerVerificationsDialog";
-
-// export type GuestDashboardRequest = RouterOutputs["requests"]["getMyRequests"][
-//   | "activeRequests"
-//   | "inactiveRequests"][number];
-
-// export type AdminDashboardRequst = RouterOutputs["requests"]["getAll"][
-//   | "incomingRequests"
-//   | "pastRequests"][number];
 
 export type HostDashboardRequestToBook =
   RouterOutputs["requestsToBook"]["getHostRequestsToBookFromId"][
@@ -69,23 +60,21 @@ export default function RequestToBookCard({
       requestToBook: HostDashboardRequestToBook;
       // property: Property;
     } // | { type: "guest"; request: GuestDashboardRequest }
-  // | { type: "host"; request: HostDashboardRequest }
-) & // | { type: "admin"; request: AdminDashboardRequst }
+  // | { type: "admin"; request: AdminDashboardRequst }
+) & // | { type: "host"; request: HostDashboardRequest }
 {
   children?: React.ReactNode;
 }) {
   const pricePerNight =
     // request.maxTotalPrice
-    34567 / getNumNights(requestToBook.checkIn, requestToBook.checkOut);
+    requestToBook.amountAfterTravelerMarkupAndBeforeFees /
+    getNumNights(requestToBook.checkIn, requestToBook.checkOut);
   const fmtdPrice = formatCurrency(pricePerNight);
   const fmtdDateRange = formatDateRange(
     requestToBook.checkIn,
     requestToBook.checkOut,
   );
   const fmtdNumGuests = plural(requestToBook.numGuests, "guest");
-
-  const showAvatars =
-    (requestToBook.numGuests > 1 && type !== "host") || type === "admin";
 
   const [open, setOpen] = useState(false);
 
@@ -97,18 +86,12 @@ export default function RequestToBookCard({
         open={open}
         onOpenChange={setOpen}
       />
-      <div className="flex">
+      <div className="flex p-2">
         <div className="flex-1 space-y-4 overflow-hidden p-4 pt-2">
           <div className="flex items-center gap-2">
             {type !== "host" && (
               <RequestToBookCardBadge requestToBook={requestToBook} />
             )}
-            {/* {type === "guest" && request.linkInputProperty && (
-              <Badge variant="pink">
-                <LinkIcon className="size-4" />
-                Airbnb Link
-              </Badge>
-            )} */}
             {type === "host" && (
               <>
                 <UserAvatar
@@ -126,13 +109,7 @@ export default function RequestToBookCard({
               </>
             )}
             <div className="flex-1" />
-            {/* figure out madeByGroupId stuff and then refactor */}
-            {/* {showAvatars && (
-              <RequestGroupAvatars
-                request={request}
-                isAdminDashboard={type === "admin"}
-              />
-            )} */}
+
             {type === "guest" && !requestToBook.resolvedAt && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -183,46 +160,12 @@ export default function RequestToBookCard({
                 </span>
               </p>
             </div>
-            {/* <div className="flex flex-wrap gap-1">
-              {property.numBeds > 1 && (
-                <Badge>{property.numBeds}+ beds</Badge>
-              )}
-              {property.numBedrooms > 1 && (
-                <Badge>{property.numBedrooms}+ bedrooms</Badge>
-              )}
-              {property.numBathrooms && property.numBathrooms > 1 && (
-                <Badge>{property.numBathrooms}+ bathrooms</Badge>
-              )} */}
-            {/* {<Badge>{property.propertyType}</Badge>}
-              {property.amenities.map((amenity) => (
-                <Badge key={amenity}>{amenity}</Badge>
-              ))} */}
-            {/* </div> */}
-            {/* {request.note && (
-              <div className="rounded-lg bg-zinc-100 px-4 py-2">
-                <p className="text-xs text-muted-foreground">Note</p>
-                <p>&ldquo;{request.note}&rdquo;</p>
-              </div>
-            )} */}
-            {/* {type !== "host" && request.linkInputProperty && (
-              <LinkInputPropertyCard property={request.linkInputProperty} />
-            )} */}
           </div>
-          {/* add an 'accepted' column to requestsToBook */}
-          {type === "guest" && !requestToBook.isAccepted && (
-            <RequestToBookCardPreviews requestToBook={requestToBook} />
-          )}
           <CardFooter className="empty:hidden">{children}</CardFooter>
         </div>
-        {/* {type !== "host" && (
-          <div className="hidden w-64 shrink-0 bg-zinc-100 lg:block">
-            <SingleLocationMap
-              lat={property.latLngPoint.y}
-              lng={property.latLngPoint.x}
-              icon={true}
-            />
-          </div>
-        )} */}
+        {type === "guest" && requestToBook.status !== "Accepted" && (
+          <RequestToBookCardPreviews requestToBook={requestToBook} />
+        )}
       </div>
     </Card>
   );
