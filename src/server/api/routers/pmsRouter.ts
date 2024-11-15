@@ -7,6 +7,7 @@ import { z } from "zod";
 import axios, { type AxiosResponse } from "axios";
 import { users } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
+import { getPropertyCalendar } from "@/server/server-utils";
 
 export const pmsRouter = createTRPCRouter({
   generateHostawayBearerToken: publicProcedure
@@ -232,5 +233,13 @@ export const pmsRouter = createTRPCRouter({
       console.error("Error syncing with Hospitable:", error);
       throw new Error("Failed to sync with Hospitable");
     }
+  }),
+
+  getHospitableCalendar: protectedProcedure
+    .input(z.object({ propertyId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const { propertyId } = input;
+      console.log("propertyId", propertyId);
+      return await getPropertyCalendar(propertyId);
   }),
 });

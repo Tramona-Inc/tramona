@@ -317,7 +317,7 @@ export const properties = pgTable(
     status: propertyStatusEnum("property_status").default("Listed"),
     pricingScreenUrl: varchar("pricing_screen_url"),
     currency: currencyEnum("currency").notNull().default("USD"),
-    // hostawayListingId: integer("hostaway_listing_id"),
+    hospitableListingId: varchar("hospitable_listing_id"),
     latLngPoint: geometry("lat_lng_point", {
       type: "point",
       mode: "xy",
