@@ -117,6 +117,14 @@ export const ALL_PROPERTY_AMENITIES_ONBOARDING = [
   "Driveway parking",
 ] as const;
 
+export const ALL_CHECKOUT_TYPES = [
+  "Gather used towels",
+  "Throw trash away",
+  "Turn things off",
+  "Lock up",
+  "Return keys",
+] as const;
+
 export const propertySafetyItemsEnum = pgEnum(
   "property_safety_items",
   ALL_PROPERTY_SAFETY_ITEMS,
@@ -132,13 +140,7 @@ export const propertyStatusEnum = pgEnum("property_status", [
   "Archived",
 ]);
 
-export const checkOutEnum = pgEnum("check_out", [
-  "Gather used towels",
-  "Throw trash away",
-  "Turn things off",
-  "Lock up",
-  "Return keys",
-]);
+export const checkOutEnum = pgEnum("check_out", ALL_CHECKOUT_TYPES);
 
 export const ALL_PROPERTY_PMS = ["Hostaway", "Hospitable", "Ownerrez"] as const;
 
@@ -273,7 +275,7 @@ export const properties = pgTable(
 
     originalListingUrl: varchar("original_listing_url"),
     checkInInfo: varchar("check_in_info"),
-    checkOutInfo: checkOutEnum("check_out_enum").array(),
+    checkOutInfo: checkOutEnum("check_out").array(),
     additionalCheckOutInfo: varchar("additional_check_out_info"),
     checkInTime: time("check_in_time").notNull().default("15:00:00"),
     checkOutTime: time("check_out_time").notNull().default("10:00:00"),
