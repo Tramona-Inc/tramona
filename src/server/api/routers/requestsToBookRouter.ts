@@ -7,25 +7,12 @@ import { db } from "@/server/db";
 import {
   requestsToBook,
   requestsToBookInsertSchema,
-  statusEnum,
   statusEnumArray,
 } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { and, eq, exists, isNull, lt, sql } from "drizzle-orm";
-import {
-  groupMembers,
-  groups,
-  requestInsertSchema,
-  requestSelectSchema,
-  requests,
-  users,
-  offers,
-  rejectedRequests,
-  properties,
-  tripCheckouts,
-} from "@/server/db/schema";
-import { unique } from "drizzle-orm/pg-core";
+import { eq } from "drizzle-orm";
+import { properties } from "@/server/db/schema";
 
 export const requestsToBookRouter = createTRPCRouter({
   create: protectedProcedure

@@ -28,6 +28,7 @@ export default function MonthCalendar({
   onDateClick,
   selectedRange,
   isEditing = false,
+  prices,
 }: MonthCalendarProps) {
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
 
@@ -38,9 +39,7 @@ export default function MonthCalendar({
 
   const isDateReserved = (date: Date): ReservationInfo | undefined => {
     return reservedDateRanges.find((reservedDate) => {
-      const start = new Date(reservedDate.start);
-      const end = new Date(reservedDate.end);
-      return date >= start && date < end;
+      return date.toISOString().split("T")[0] === reservedDate.start;
     });
   };
 
@@ -84,6 +83,7 @@ export default function MonthCalendar({
 
             let reservationClass = "";
             if (reservedInfo) {
+              console.log("reservedInfo", reservedInfo);
               if (reservedInfo.platformBookedOn === "airbnb") {
                 reservationClass = "bg-reserved-pattern";
               } else if (reservedInfo.platformBookedOn === "tramona") {
@@ -111,9 +111,9 @@ export default function MonthCalendar({
                     "bg-blue-200",
                   !day && "bg-gray-50", // Style for empty cells
                   day &&
-                    date.getFullYear() === currentDate.getFullYear() &&
-                    date.getMonth() === currentDate.getMonth() &&
-                    day === currentDate.getDate()
+                    date.getFullYear() === currentDate?.getFullYear() &&
+                    date.getMonth() === currentDate?.getMonth() &&
+                    day === currentDate?.getDate()
                     ? "font-semibold text-black"
                     : "text-muted-foreground",
                 )}
@@ -122,7 +122,8 @@ export default function MonthCalendar({
                   <>
                     <span className="text-sm font-medium">{day}</span>
                     <span className="mt-1 text-xs text-muted-foreground">
-                      $168
+                      ${prices[currentDate.toISOString().split("T")[0] ?? ""] ??
+                      168}
                     </span>
                   </>
                 )}

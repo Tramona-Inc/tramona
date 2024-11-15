@@ -40,12 +40,9 @@ export async function createSetupIntent({
   userId: string;
 }) {
   //now we need to update the customer account with the attached payment method
-  const customer = await stripeWithSecretKey.paymentMethods.attach(
-    paymentMethodId,
-    {
-      customer: customerId,
-    },
-  );
+  await stripeWithSecretKey.paymentMethods.attach(paymentMethodId, {
+    customer: customerId,
+  });
 
   //first we need to create the setup Inten using information from the booking
 
@@ -298,8 +295,8 @@ export async function finalizeTrip({
     isProductionOnly: true,
     channel: "tramona-bot",
     text: [
-      `*${user.email} just booked a trip: ${property?.name}*`,
-      `*${property?.city}*`,
+      `*${user.email} just booked a trip: ${property.name}*`,
+      `*${property.city}*`,
       `through ${isDirectListingCharge ? "a different platform (direct listing)" : "Tramona"} · ${formatDateMonthDay(checkIn)}-${formatDateMonthDay(checkOut)}`,
       `<https://tramona.com/admin|Go to admin dashboard>`,
     ].join("\n"),

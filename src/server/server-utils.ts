@@ -370,9 +370,9 @@ export async function addProperty({
     latLngPoint?: { x: number; y: number }; // make optional
   };
 } & (
-  | { isAdmin?: boolean; userEmail: string }
-  | { isAdmin: true; userEmail?: undefined }
-)) {
+    | { isAdmin?: boolean; userEmail: string }
+    | { isAdmin: true; userEmail?: undefined }
+  )) {
   let lat = property.latLngPoint?.y;
   let lng = property.latLngPoint?.x;
 
@@ -458,13 +458,12 @@ export async function sendTextToHost({
           to: hostTeamOwner.phoneNumber,
           content: `Tramona: There is a request for ${formatCurrency(
             request.maxTotalPrice / numberOfNights,
-          )} per night for ${plural(numberOfNights, "night")} in ${
-            request.location
-          }. You have ${plural(
-            numHostPropertiesPerRequest[hostTeamId] ?? 0,
-            "eligible property",
-            "eligible properties",
-          )}. Please click here to make a match: ${env.NEXTAUTH_URL}/host/requests`,
+          )} per night for ${plural(numberOfNights, "night")} in ${request.location
+            }. You have ${plural(
+              numHostPropertiesPerRequest[hostTeamId] ?? 0,
+              "eligible property",
+              "eligible properties",
+            )}. Please click here to make a match: ${env.NEXTAUTH_URL}/host/requests`,
         });
 
         //TODO SEND WHATSAPP MESSAGE
@@ -500,7 +499,7 @@ export async function getRequestsForProperties(
   for (const property of hostProperties) {
     const requestIsNearProperty = sql`
       ST_DWithin(
-        ST_Transform(requests.lat_lng_point, 3857),
+        ST_Transform(ST_SetSRID(requests.lat_lng_point, 4326), 3857),
         ST_Transform(ST_SetSRID(ST_MakePoint(${property.latLngPoint.x}, ${property.latLngPoint.y}), 4326), 3857),
         requests.radius * 1609.34
       )
@@ -630,7 +629,7 @@ export async function getPropertiesForRequest(
 
   propertyIsNearRequest = sql`
     ST_DWithin(
-      ST_Transform(properties.lat_lng_point, 3857),
+      ST_Transform(ST_SetSRID(properties.lat_lng_point, 4326), 3857),
       ST_Transform(ST_SetSRID(ST_MakePoint(${req.latLngPoint.x}, ${req.latLngPoint.y}), 4326), 3857),
       ${radiusInDegrees}
     )
@@ -714,10 +713,17 @@ export async function getAdminId() {
     .then((res) => res!.id);
 }
 
-type HospitablePriceResponse = {
+type HospitableCalendarResponse = {
   data: {
     dates: {
-      price: { amount: number };
+      date: string;
+      price: {
+        amount: number;
+        currency: string;
+      };
+      availability: {
+        available: boolean;
+      };
     }[];
   };
 };
@@ -728,6 +734,52 @@ type HostawayPriceResponse = {
   };
 };
 
+export async function getPropertyCalendar(propertyId: string) {
+  const now = new Date();
+  const firstStartDate = now.toISOString().split("T")[0];
+  const firstEndDate = new Date(now);
+  firstEndDate.setDate(firstEndDate.getDate() + 365);
+  const firstEndDateString = firstEndDate.toISOString().split("T")[0];
+
+  const secondStartDate = new Date(firstEndDate);
+  secondStartDate.setDate(secondStartDate.getDate() + 1);
+  const secondStartDateString = secondStartDate
+    .toISOString()
+    .split("T")[0];
+
+  const secondEndDate = new Date(now);
+  secondEndDate.setDate(now.getDate() + 539);
+  const secondEndDateString = secondEndDate.toISOString().split("T")[0];
+
+  // Construct the URL with query params for logging
+  const firstBatchUrl = `https://connect.hospitable.com/api/v1/listings/${propertyId}/calendar?start_date=${firstStartDate}&end_date=${firstEndDateString}`;
+  const secondBatchUrl = `https://connect.hospitable.com/api/v1/listings/${propertyId}/calendar?start_date=${secondStartDateString}&end_date=${secondEndDateString}`;
+
+  // Log the URLs
+  console.log("First request URL:", firstBatchUrl);
+  console.log("Second request URL:", secondBatchUrl);
+
+  // Make the requests
+  const firstBatch = await axios.get<HospitableCalendarResponse>(firstBatchUrl, {
+    headers: {
+      Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
+    },
+  });
+
+  const secondBatch = await axios.get<HospitableCalendarResponse>(secondBatchUrl, {
+    headers: {
+      Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
+    },
+  });
+
+
+  const combinedPricingAndCalendarResponse = [
+    ...firstBatch.data.data.dates,
+    ...secondBatch.data.data.dates,
+  ];
+  return combinedPricingAndCalendarResponse;
+}
+
 export async function getPropertyOriginalPrice(
   property: Pick<Property, "originalListingId" | "originalListingPlatform">,
   params: {
@@ -737,7 +789,7 @@ export async function getPropertyOriginalPrice(
   },
 ) {
   if (property.originalListingPlatform === "Hospitable") {
-    const { data } = await axios.get<HospitablePriceResponse>(
+    const { data } = await axios.get<HospitableCalendarResponse>(
       `https://connect.hospitable.com/api/v1/listings/${property.originalListingId}/calendar`,
       {
         headers: {
@@ -898,9 +950,9 @@ export function haversineDistance(
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(toRadians(lat1)) *
-      Math.cos(toRadians(lat2)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+    Math.cos(toRadians(lat2)) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c; // Distance in kilometers
 }
