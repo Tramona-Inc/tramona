@@ -1,14 +1,14 @@
+import React from "react";
 import Image from "next/image";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import Link from "next/link";
 import UserAvatar from "@/components/_common/UserAvatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   ArrowLeftIcon,
   ArrowRight,
-  Check,
+  Search,
   ChevronRight,
   MessageCircle,
 } from "lucide-react";
@@ -25,11 +25,11 @@ import SingleLocationMap from "../_common/GoogleMaps/SingleLocationMap";
 import { api, type RouterOutputs } from "@/utils/api";
 import { getCancellationPolicyDescription } from "@/config/getCancellationPolicyDescription";
 import { useChatWithHost } from "@/utils/messaging/useChatWithHost";
+
 export type TripWithDetails = RouterOutputs["trips"]["getMyTripsPageDetails"];
 export type TripWithDetailsConfirmation =
   RouterOutputs["trips"]["getMyTripsPageDetailsByPaymentIntentId"];
 
-// Plugin for relative time
 dayjs.extend(relativeTime);
 
 export default function TripPage({
@@ -39,222 +39,181 @@ export default function TripPage({
   isConfirmation?: boolean;
 }) {
   const chatWithHost = useChatWithHost();
-
   const { trip, coordinates } = tripData;
-
   const tripDuration = dayjs(trip.checkOut).diff(trip.checkIn, "day");
   const { data } = api.properties.getById.useQuery({ id: trip.propertyId });
   const hostId = data?.hostTeam.owner.id;
 
   return (
-    <div className="col-span-10 flex flex-col gap-5 p-4 py-10 2xl:col-span-11">
+    <div className="mx-auto max-w-3xl space-y-6 bg-white p-4 py-6">
       <Button asChild size="icon" variant="ghost" className="rounded-full">
         <Link href={"/my-trips"}>
           <ArrowLeftIcon />
         </Link>
       </Button>
 
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-        <div>
-          <div className="relative h-96 overflow-clip rounded-xl">
-            <Image
-              src={trip.property.imageUrls[0]!}
-              alt=""
-              fill
-              sizes="(min-width: 1024px) 50vw, 100vw"
-              priority
-              className="object-cover"
-            />
-            {/* <Badge
-              variant="lightZinc"
-              className="absolute right-4 top-4 font-bold"
-            >
-              <Images className="mx-1 w-4" /> Show all photos
-            </Badge> */}
-            <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-b from-transparent to-black"></div>
-            <div className="absolute bottom-5 left-4 text-white">
-              <p className="text-base font-semibold lg:text-lg">
-                The countdown to your trip begins
-              </p>
-              <p className="text-3xl font-bold">
-                {getDaysUntilTrip(trip.checkIn)} days to go
-              </p>
-            </div>
+      <div className="space-y-3">
+        {/* Main property image and booking status */}
+        <div className="relative h-[200px] overflow-hidden rounded-xl bg-zinc-100">
+          <Image
+            src={trip.property.imageUrls[0]!}
+            alt=""
+            fill
+            sizes="100vw"
+            priority
+            className="object-cover"
+          />
+          <div className="absolute left-4 top-4">
+            <span className="inline-flex items-center rounded-full bg-primaryGreen px-3 py-1 text-sm font-medium text-white">
+              Booking confirmed
+            </span>
           </div>
-
-          <div className="space-y-3 pt-8">
-            <div>
-              <h1 className="text-3xl font-bold">{trip.property.name}</h1>
-              <div className="flex justify-between pt-2">
-                <div className="flex gap-2">
-                  <UserAvatar
-                    name={trip.property.hostTeam.owner.name}
-                    image={
-                      trip.property.hostTeam.owner.image ??
-                      "/assets/images/tramona-logo.jpeg"
-                    }
-                  />
-                  <div>
-                    <p className="text-sm text-muted-foreground">Hosted by</p>
-                    <p>{trip.property.hostTeam.owner.name ?? "Tramona"}</p>
-                  </div>
-                </div>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="w-[160px] text-xs lg:w-[200px] lg:text-sm"
-                  disabled={!hostId}
-                  onClick={() => chatWithHost({ hostId: hostId! })}
-                >
-                  <MessageCircle className="w-4 lg:w-5" /> Message your host
-                </Button>
-              </div>
-            </div>
-
-            <div className="h-[2px] rounded-full bg-zinc-200"></div>
-
-            <div>
-              <div className="flex items-end justify-between">
-                <h2 className="text-2xl font-bold">Your trip</h2>
-                <Badge variant="green">
-                  <Check className="w-4" />
-                  Booking confirmed
-                </Badge>
-              </div>
-              <p>
-                <span>{plural(tripDuration, "night")}</span> ·{" "}
-                <span>{plural(trip.numGuests, "guest")}</span>
-              </p>
-
-              <div className="flex items-center justify-between py-5">
-                <div className="flex flex-col">
-                  <p className="text-sm font-semibold text-muted-foreground">
-                    Check-in
-                  </p>
-                  <p className="text-lg font-bold">
-                    {formatDateStringWithDayName(
-                      removeTimezoneFromDate(trip.checkIn),
-                    )}
-                  </p>
-                  <p className="font-semibold">
-                    {trip.property.checkInTime && (
-                      <p className="font-semibold">
-                        {convertTo12HourFormat(trip.property.checkInTime)}
-                      </p>
-                    )}
-                  </p>
-                </div>
-                <ArrowRight />
-                <div className="flex flex-col">
-                  <p className="text-sm font-semibold text-muted-foreground">
-                    Check-out
-                  </p>
-                  <p className="text-lg font-bold">
-                    {formatDateStringWithDayName(
-                      removeTimezoneFromDate(trip.checkOut),
-                    )}
-                  </p>
-                  {trip.property.checkOutTime && (
-                    <p className="font-semibold">
-                      {convertTo12HourFormat(trip.property.checkOutTime)}
-                    </p>
-                  )}
-                </div>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Address</p>
-                <p className="font-semibold">{trip.property.address}</p>
-              </div>
-
-              <div className="h-[2px] rounded-full bg-zinc-200"></div>
-
-              <div className="flex flex-col lg:hidden">
-                <p className="pb-2 pt-5 text-xl font-bold">Getting there</p>
-                {/* <p>1234 Sunshine Blvd</p>
-                <p>Los Angeles, CA, USA</p> */}
-                <p>{trip.property.address}</p>
-
-                <div className="relative z-10 my-3 overflow-clip rounded-lg">
-                  <SingleLocationMap
-                    lat={coordinates.location.lat}
-                    lng={coordinates.location.lng}
-                  />
-                </div>
-              </div>
-              <Link
-                href={`/property/${trip.property.id}`}
-                className="flex justify-between pb-5 pt-3 font-semibold hover:underline lg:pt-5"
-              >
-                Show property details <ChevronRight />
-              </Link>
-
-              <div className="h-[2px] rounded-full bg-zinc-200"></div>
-
-              <div>
-                <p className="pb-2 pt-5 text-xl font-bold">Payment info</p>
-                <div className="flex justify-between">
-                  <p className="font-bold">Total cost</p>
-                  <p className="text-sm text-muted-foreground">
-                    Paid {dayjs(trip.createdAt).format("MMM D")}
-                  </p>
-                </div>
-                <p>
-                  {formatCurrency(
-                    trip.tripCheckout?.totalTripAmount ??
-                      trip.totalPriceAfterFees,
-                  )}
-                </p>
-
-                {/* <Link
-                  href={`/`}
-                  className="flex justify-between py-5 font-semibold hover:underline"
-                >
-                  View payment details <ChevronRight />
-                </Link> */}
-              </div>
-
-              <div className="h-[2px] rounded-full bg-zinc-200"></div>
-
-              <div className="py-5">
-                {trip.property.checkInInfo && (
-                  <>
-                    <p className="pb-2 font-bold">Check-in info</p>
-                    <p>{trip.property.checkInInfo}</p>
-                  </>
-                )}
-
-                {trip.property.cancellationPolicy !== null && (
-                  <>
-                    <p className="pb-2 font-bold">Cancellation Policy</p>
-                    <p>
-                      {getCancellationPolicyDescription(
-                        trip.property.cancellationPolicy,
-                      )}
-                    </p>
-                  </>
-                )}
-              </div>
-
-              <div className="h-[2px] rounded-full bg-zinc-200"></div>
-
-              <div className="pt-5">
-                <p className="pb-3 font-bold">Support</p>
-
-                <Link
-                  href={"/help-center"}
-                  className="flex justify-between pb-3 pt-5 font-semibold hover:underline"
-                >
-                  Get Help <ChevronRight />
-                </Link>
-              </div>
-            </div>
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-4 text-white">
+            <p className="text-sm">The countdown to your trip begins</p>
+            <p className="text-2xl font-bold">
+              {getDaysUntilTrip(trip.checkIn)} days to go
+            </p>
           </div>
         </div>
-        <div className="sticky top-[100px] z-10 hidden h-[700px] overflow-clip rounded-lg lg:block">
+
+        {/* Property title and host */}
+        <div className="space-y-4">
+          <h1 className="text-2xl font-bold">{trip.property.name}</h1>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">Hosted by</span>
+              <div className="flex items-center gap-2">
+                <UserAvatar
+                  name={trip.property.hostTeam.owner.name}
+                  image={
+                    trip.property.hostTeam.owner.image ??
+                    "/assets/images/tramona-logo.jpeg"
+                  }
+                />
+                <span>{trip.property.hostTeam.owner.name ?? "Tramona"}</span>
+              </div>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2 border-primaryGreen"
+              onClick={() => chatWithHost({ hostId: hostId! })}
+            >
+              <MessageCircle className="h-4 w-4 text-primaryGreen" />
+              <span className="text-primaryGreen">Message your host</span>
+            </Button>
+          </div>
+        </div>
+
+        {/* Trip details */}
+        <div className="space-y-6 rounded-lg border border-zinc-200 bg-white p-6">
+          <div>
+            <h2 className="text-lg font-semibold">Your trip</h2>
+            <p className="text-sm text-muted-foreground">
+              {plural(tripDuration, "night")} ·{" "}
+              {plural(trip.numGuests, "guest")}
+            </p>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">Check-in</p>
+              <p className="font-semibold">
+                {formatDateStringWithDayName(
+                  removeTimezoneFromDate(trip.checkIn),
+                )}
+              </p>
+              {trip.property.checkInTime && (
+                <p className="text-sm">
+                  {convertTo12HourFormat(trip.property.checkInTime)}
+                </p>
+              )}
+            </div>
+            <ArrowRight className="text-muted-foreground" />
+            <div>
+              <p className="text-sm text-muted-foreground">Check-out</p>
+              <p className="font-semibold">
+                {formatDateStringWithDayName(
+                  removeTimezoneFromDate(trip.checkOut),
+                )}
+              </p>
+              {trip.property.checkOutTime && (
+                <p className="text-sm">
+                  {convertTo12HourFormat(trip.property.checkOutTime)}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div>
+            <p className="text-sm text-muted-foreground">Address</p>
+            <p className="font-semibold">{trip.property.address}</p>
+          </div>
+
+          <Button
+            asChild
+            variant="outline"
+            className="w-full justify-between border-primaryGreen"
+          >
+            <Link href={`/property/${trip.property.id}`}>
+              <span className="text-primaryGreen">Show property details</span>
+              <ChevronRight className="h-4 w-4 text-primaryGreen" />
+            </Link>
+          </Button>
+        </div>
+
+        {/* Map */}
+        <div className="h-[300px] overflow-hidden rounded-lg">
           <SingleLocationMap
             lat={coordinates.location.lat}
             lng={coordinates.location.lng}
           />
+        </div>
+
+        {/* Payment info */}
+        <div className="rounded-lg border border-zinc-200 bg-white p-6">
+          <h2 className="mb-4 text-lg font-semibold">Payment info</h2>
+          <div className="flex justify-between">
+            <span className="font-semibold">Total cost</span>
+            <div className="text-right">
+              <p className="font-semibold">
+                {formatCurrency(
+                  trip.tripCheckout?.totalTripAmount ??
+                    trip.totalPriceAfterFees,
+                )}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Paid {dayjs(trip.createdAt).format("MMM D")}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Cancellation Policy */}
+        {trip.property.cancellationPolicy !== null && (
+          <div className="rounded-lg border border-zinc-200 p-6">
+            <h2 className="mb-4 text-lg font-semibold">Cancellation Policy</h2>
+            <p className="text-sm text-muted-foreground">
+              {getCancellationPolicyDescription(
+                trip.property.cancellationPolicy,
+              )}
+            </p>
+          </div>
+        )}
+
+        {/* Support */}
+        <div className="rounded-lg border border-zinc-200 bg-white p-6">
+          <h2 className="mb-4 text-lg font-semibold">Support</h2>
+          <Button
+            asChild
+            variant="outline"
+            className="w-full justify-between border-primaryGreen"
+          >
+            <Link href="/help-center ">
+              <span className="text-primaryGreen">Get Help</span>
+              <ChevronRight className="h-4 w-4 text-primaryGreen" />
+            </Link>
+          </Button>
         </div>
       </div>
     </div>
