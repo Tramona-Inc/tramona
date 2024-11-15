@@ -6,6 +6,7 @@ import {
   serial,
   smallint,
   text,
+  pgEnum,
   timestamp,
   boolean,
 } from "drizzle-orm/pg-core";
@@ -14,6 +15,22 @@ import { groups } from "./groups";
 import { properties } from "./properties";
 import { users } from "./users";
 import { hostTeams } from "./hostTeams";
+
+export const statusEnumArray = [
+  "Accepted",
+  "Withdrawn",
+  "Denied",
+  "Expired",
+  "Pending",
+] as const;
+
+export const statusEnum = pgEnum("status", [
+  "Accepted",
+  "Withdrawn",
+  "Denied",
+  "Expired",
+  "Pending",
+]);
 
 export const requestsToBook = pgTable(
   "requests_to_book",
@@ -38,7 +55,7 @@ export const requestsToBook = pgTable(
       .notNull()
       .defaultNow(),
     resolvedAt: timestamp("resolved_at", { withTimezone: true }),
-    isAccepted: boolean("is_accepted").notNull().default(false),
+    status: statusEnum("status").default("Pending"),
     paymentIntentId: text("payment_intent_id").notNull(),
     amountAfterTravelerMarkupAndBeforeFees: integer(
       "amount_after_traveler_markup_and_before_fees",

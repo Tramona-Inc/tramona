@@ -4,7 +4,12 @@ import {
   protectedProcedure,
 } from "@/server/api/trpc";
 import { db } from "@/server/db";
-import { requestsToBook, requestsToBookInsertSchema } from "@/server/db/schema";
+import {
+  requestsToBook,
+  requestsToBookInsertSchema,
+  statusEnum,
+  statusEnumArray,
+} from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { and, eq, exists, isNull, lt, sql } from "drizzle-orm";
@@ -59,7 +64,6 @@ export const requestsToBookRouter = createTRPCRouter({
         property: {
           columns: {
             amenities: true,
-            // latLngPoint: true,
             city: true,
             imageUrls: true,
             name: true,
@@ -69,25 +73,6 @@ export const requestsToBookRouter = createTRPCRouter({
             hostName: true,
             hostProfilePic: true,
           },
-          // with: {
-          //   host: {
-          //     columns: {
-          //       image: true,
-          //       firstName: true,
-          //       lastName: true,
-          //       email: true,
-          //       id: true,
-          //       about: true,
-          //       location: true,
-          //     },
-          //     with: {
-          //       hostProfile: {
-          //         columns: { curTeamId: true },
-          //       },
-          //     },
-          //   },
-          //   reviews: true,
-          // },
         },
       },
     });
@@ -103,26 +88,24 @@ export const requestsToBookRouter = createTRPCRouter({
   }),
 
   delete: protectedProcedure
-    .input(requestSelectSchema.pick({ id: true }))
+    .input(z.object({ id: z.number(), status: z.enum(statusEnumArray) }))
     .mutation(async ({ ctx, input }) => {
       // Only group owner and admin can delete
       // (or anyone if there's no group owner for whatever reason)
 
       if (ctx.user.role !== "admin") {
-        const groupOwnerId = await ctx.db.query.requestsToBook.findFirst({
+        const request = await ctx.db.query.requestsToBook.findFirst({
           where: eq(requestsToBook.id, input.id),
-          columns: {},
-          // with: {
-          //   madeByGroup: { columns: { ownerId: true } },
-          // },
+          with: {
+            madeByGroup: true,
+          },
         });
-        // .then((res) => res?.madeByGroup.ownerId);
 
-        if (!groupOwnerId) {
+        if (!request?.madeByGroup) {
           throw new TRPCError({ code: "BAD_REQUEST" });
         }
 
-        if (ctx.user.id !== groupOwnerId) {
+        if (ctx.user.id !== request.madeByGroup.ownerId) {
           throw new TRPCError({ code: "UNAUTHORIZED" });
         }
       }
@@ -131,7 +114,7 @@ export const requestsToBookRouter = createTRPCRouter({
         .update(requestsToBook)
         .set({
           resolvedAt: new Date(),
-          isAccepted: false,
+          status: input.status,
         })
         .where(eq(requestsToBook.id, input.id));
     }),

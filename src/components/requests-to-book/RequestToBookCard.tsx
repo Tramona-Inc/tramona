@@ -26,18 +26,9 @@ import { useState } from "react";
 import WithdrawRequestToBookDialog from "./WithdrawRequestToBookDialog";
 
 import { RequestToBookCardPreviews } from "./RequestToBookCardPreviews";
-import { Property } from "@/server/db/schema";
 import UserAvatar from "../_common/UserAvatar";
 import { formatDistanceToNowStrict } from "date-fns";
 import { TravelerVerificationsDialog } from "../requests/TravelerVerificationsDialog";
-
-// export type GuestDashboardRequest = RouterOutputs["requests"]["getMyRequests"][
-//   | "activeRequests"
-//   | "inactiveRequests"][number];
-
-// export type AdminDashboardRequst = RouterOutputs["requests"]["getAll"][
-//   | "incomingRequests"
-//   | "pastRequests"][number];
 
 export type HostDashboardRequestToBook =
   RouterOutputs["requestsToBook"]["getHostRequestsToBookFromId"][
@@ -76,16 +67,14 @@ export default function RequestToBookCard({
 }) {
   const pricePerNight =
     // request.maxTotalPrice
-    34567 / getNumNights(requestToBook.checkIn, requestToBook.checkOut);
+    requestToBook.amountAfterTravelerMarkupAndBeforeFees /
+    getNumNights(requestToBook.checkIn, requestToBook.checkOut);
   const fmtdPrice = formatCurrency(pricePerNight);
   const fmtdDateRange = formatDateRange(
     requestToBook.checkIn,
     requestToBook.checkOut,
   );
   const fmtdNumGuests = plural(requestToBook.numGuests, "guest");
-
-  const showAvatars =
-    (requestToBook.numGuests > 1 && type !== "host") || type === "admin";
 
   const [open, setOpen] = useState(false);
 
@@ -97,7 +86,7 @@ export default function RequestToBookCard({
         open={open}
         onOpenChange={setOpen}
       />
-      <div className="flex">
+      <div className="flex p-2">
         <div className="flex-1 space-y-4 overflow-hidden p-4 pt-2">
           <div className="flex items-center gap-2">
             {type !== "host" && (
@@ -172,12 +161,11 @@ export default function RequestToBookCard({
               </p>
             </div>
           </div>
-          {/* add an 'accepted' column to requestsToBook */}
-          {type === "guest" && !requestToBook.isAccepted && (
-            <RequestToBookCardPreviews requestToBook={requestToBook} />
-          )}
           <CardFooter className="empty:hidden">{children}</CardFooter>
         </div>
+        {type === "guest" && requestToBook.status !== "Accepted" && (
+          <RequestToBookCardPreviews requestToBook={requestToBook} />
+        )}
       </div>
     </Card>
   );

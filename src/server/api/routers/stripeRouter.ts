@@ -404,7 +404,7 @@ export const stripeRouter = createTRPCRouter({
         .update(requestsToBook)
         .set({
           resolvedAt: new Date(),
-          isAccepted: input.isAccepted,
+          status: input.isAccepted ? "Accepted" : "Denied",
         })
         .where(eq(requestsToBook.id, input.requestToBookId))
         .returning()
@@ -434,7 +434,7 @@ export const stripeRouter = createTRPCRouter({
           .update(requestsToBook)
           .set({
             resolvedAt: new Date(),
-            isAccepted: false,
+            status: "Withdrawn",
           })
           .where(
             and(

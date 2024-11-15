@@ -23,7 +23,7 @@ export default function WithdrawRequestToBookDialog({
 
   async function handleWithdraw() {
     await mutation
-      .mutateAsync({ id: requestToBookId })
+      .mutateAsync({ id: requestToBookId, status: "Withdrawn" })
       .then(() => toast({ title: "Request successfully withdrawn" }))
       .catch(() => errorToast());
   }

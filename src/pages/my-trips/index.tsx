@@ -1,7 +1,7 @@
 import Head from "next/head";
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import PastTrips from "@/components/my-trips/PastTrips";
-import UpcomingTrips from "@/components/my-trips/UpcomingTrips";
+import TripsTab from "@/components/my-trips/TripTab";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BriefcaseIcon, HistoryIcon, ReceiptTextIcon } from "lucide-react";
 import { useMemo } from "react";
@@ -54,31 +54,46 @@ export default function MyTrips({ billingRoute }: MyTripsProps) {
         <title>My Trips | Tramona</title>
       </Head>
       <InnerTravelerLayout title="My Trips">
-        <Tabs value={selectedTab} onValueChange={handleTabClick}>
-          <TabsList>
-            <TabsTrigger value="upcoming">
-              <BriefcaseIcon />
-              Upcoming
-            </TabsTrigger>
-            <TabsTrigger value="history">
-              <HistoryIcon />
-              History
-            </TabsTrigger>
+        <Tabs
+          value={selectedTab}
+          onValueChange={handleTabClick}
+          className="w-full"
+        >
+          <TabsList className="">
+            {/* tabs list flex-row attributes do not work */}
+            <div className="flex w-full flex-row justify-between">
+              <div className="flex flex-row flex-nowrap">
+                <TabsTrigger value="current">
+                  <BriefcaseIcon />
+                  Current
+                </TabsTrigger>
+                <TabsTrigger value="upcoming">
+                  <BriefcaseIcon />
+                  Upcoming
+                </TabsTrigger>
 
-            {(pastTrips.length > 0 || upcomingTrips.length > 0) && (
-              <TabsTrigger value="billing">
-                <ReceiptTextIcon />
-                Billing
+                <TabsTrigger value="billing">
+                  <ReceiptTextIcon />
+                  Billing
+                </TabsTrigger>
+              </div>
+              <div className="w-full border-b-4"></div>
+              <TabsTrigger value="history" className="">
+                <HistoryIcon />
+                History
               </TabsTrigger>
-            )}
+            </div>
           </TabsList>
 
           {allTrips === undefined ? (
             <Spinner />
           ) : (
             <>
+              <TabsContent value="current">
+                <TripsTab trips={upcomingTrips} type="current" />
+              </TabsContent>
               <TabsContent value="upcoming">
-                <UpcomingTrips upcomingTrips={upcomingTrips} />
+                <TripsTab trips={upcomingTrips} type="upcoming" />
               </TabsContent>
               <TabsContent value="history">
                 <PastTrips pastTrips={pastTrips} />

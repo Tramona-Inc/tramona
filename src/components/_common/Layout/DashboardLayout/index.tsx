@@ -48,14 +48,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <>
       <Header />
-      <div className="relative min-h-screen-minus-header lg:flex">
+      <div className="min-h-screen-minus-header relative lg:flex">
         {/* {session && (
           <aside className="sticky top-header-height hidden h-screen-minus-header bg-zinc-100 lg:block">
             <Sidebar type={navType} />
           </aside>
         )} */}
         <div className="min-w-0 lg:flex-1">
-          <main className="relative min-h-screen-minus-header">{children}</main>
+          <main className="relative min-h-screen">{children}</main>
           {status !== "loading" && <MobileNav type={navType} />}
           <div className="hidden md:contents">
             <MessagesPopover isMobile={false} />
