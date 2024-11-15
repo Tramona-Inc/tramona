@@ -154,7 +154,9 @@ export default function ResolveClaimItemForm({
             <FormField
               control={form.control}
               name="approvedAmount"
-              render={({ field }) => (
+              render={(
+                {}, //might need to put field later
+              ) => (
                 <FormItem>
                   <FormLabel>Approved Amount</FormLabel>
                   <FormControl>

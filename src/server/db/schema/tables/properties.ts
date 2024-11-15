@@ -117,6 +117,14 @@ export const ALL_PROPERTY_AMENITIES_ONBOARDING = [
   "Driveway parking",
 ] as const;
 
+export const ALL_CHECKOUT_TYPES = [
+  "Gather used towels",
+  "Throw trash away",
+  "Turn things off",
+  "Lock up",
+  "Return keys",
+] as const;
+
 export const propertySafetyItemsEnum = pgEnum(
   "property_safety_items",
   ALL_PROPERTY_SAFETY_ITEMS,

@@ -191,7 +191,7 @@ export default function RequestToBookOrBookNowPriceCard({
               defaultMonth={date.from}
               selected={{ from: date.from, to: date.to }}
               onSelect={(selectedDate) => {
-                if (selectedDate?.from && selectedDate?.to) {
+                if (selectedDate?.from && selectedDate.to) {
                   setDate({ from: selectedDate.from, to: selectedDate.to });
                   updateRequestToBook({
                     checkIn: selectedDate.from,

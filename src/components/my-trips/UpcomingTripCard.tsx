@@ -91,11 +91,13 @@ export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
           <div className="h-[2px] rounded-full bg-gray-200"></div>
 
           <div className="flex flex-col justify-center gap-2 px-4 sm:flex-row lg:gap-4">
-            <ChatOfferButton
-              offerId={trip.offerId!.toString()}
-              offerHostId={trip.property.hostTeam.ownerId}
-              offerPropertyName={trip.property.name}
-            />
+            {trip.offerId && (
+              <ChatOfferButton
+                offerId={trip.offerId.toString()}
+                offerHostId={trip.property.hostTeam.ownerId}
+                offerPropertyName={trip.property.name}
+              />
+            )}
             <Button asChild variant="secondary">
               <Link href="/faq">
                 <HelpCircleIcon />

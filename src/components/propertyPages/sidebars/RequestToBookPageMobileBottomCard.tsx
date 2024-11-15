@@ -2,7 +2,7 @@ import { api } from "@/utils/api";
 import { Card, CardContent } from "@/components/ui/card";
 import PriceDetailsBeforeTax from "@/components/_common/PriceDetailsBeforeTax";
 import { formatDateRange } from "@/utils/utils";
-import ReserveBtn, { PropertyPageData } from "./actionButtons/RequestToBookBtn";
+import { PropertyPageData } from "./actionButtons/RequestToBookBtn";
 import RequestToBookOrBookNowPriceCard from "./priceCards/RequestToBookOrBookNowPriceCard";
 import BookNowBtn from "./actionButtons/BookNowBtn";
 import { useRouter } from "next/router";
@@ -17,7 +17,6 @@ export default function RequestToBookPageMobileBottomCard({
   // >;
   property: PropertyPageData;
 }) {
-  const router = useRouter();
   const { query } = useRouter();
   const checkIn = query.checkIn
     ? new Date(query.checkIn as string)

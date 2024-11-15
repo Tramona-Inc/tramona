@@ -1,4 +1,3 @@
-
 import { NextApiResponse } from "next";
 import { NextApiRequest } from "next";
 import { casamundoSubScraper } from "@/server/direct-sites-scraping/casamundo-scraper";
@@ -13,7 +12,7 @@ export default async function handler(
 
   console.log("Scrape request received");
 
-  const { checkIn, checkOut, originalListingId, scrapeUrl, numGuests } = req.body as {
+  const { checkIn, checkOut, originalListingId, numGuests } = req.body as {
     checkIn: string;
     checkOut: string;
     originalListingId: string;
@@ -22,11 +21,15 @@ export default async function handler(
   };
 
   if (!originalListingId) {
-    return res.status(400).json({ error: "Missing originalListingId parameter" });
+    return res
+      .status(400)
+      .json({ error: "Missing originalListingId parameter" });
   } else if (!numGuests) {
     return res.status(400).json({ error: "Missing numGuests parameter" });
   } else if (!checkIn || !checkOut) {
-    return res.status(400).json({ error: "Missing checkIn or checkOut parameter" });
+    return res
+      .status(400)
+      .json({ error: "Missing checkIn or checkOut parameter" });
   }
 
   const checkInDate = new Date(checkIn);
@@ -34,7 +37,7 @@ export default async function handler(
 
   const subScraperOptions = {
     originalListingId: originalListingId,
-    scrapeUrl: '',
+    scrapeUrl: "",
     checkIn: checkInDate,
     checkOut: checkOutDate,
     numGuests,
@@ -45,10 +48,19 @@ export default async function handler(
     return res.status(200).json({ subScrapedResult });
   } catch (err) {
     if (err instanceof Error) {
-      return res.status(500).json({ error: "Error scraping casamundo: " + err.stack + " " + originalListingId });
+      return res
+        .status(500)
+        .json({
+          error:
+            "Error scraping casamundo: " + err.stack + " " + originalListingId,
+        });
     } else {
       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-      return res.status(500).json({ error: `Error scraping casamundo: ${err} ${originalListingId}` });
+      return res
+        .status(500)
+        .json({
+          error: `Error scraping casamundo: ${err} ${originalListingId}`,
+        });
     }
   }
 }
