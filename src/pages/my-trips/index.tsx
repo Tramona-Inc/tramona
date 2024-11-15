@@ -34,11 +34,14 @@ export default function MyTrips({ billingRoute }: MyTripsProps) {
         : "upcoming";
 
   // Determine which trips are upcoming and which are past
-  const { upcomingTrips, pastTrips } = useMemo(() => {
-    if (!allTrips) return { upcomingTrips: [], pastTrips: [] };
+  const { upcomingTrips, pastTrips, currentTrips } = useMemo(() => {
+    if (!allTrips) return { upcomingTrips: [], pastTrips: [], currentTrip: [] };
     const now = new Date();
     return {
       upcomingTrips: allTrips.filter((trip) => trip.checkIn > now),
+      currentTrips: allTrips.filter(
+        (trip) => trip.checkIn <= now && trip.checkOut > now,
+      ),
       pastTrips: allTrips.filter((trip) => trip.checkIn <= now),
     };
   }, [allTrips]);
@@ -90,7 +93,7 @@ export default function MyTrips({ billingRoute }: MyTripsProps) {
           ) : (
             <>
               <TabsContent value="current">
-                <TripsTab trips={upcomingTrips} type="current" />
+                <TripsTab trips={currentTrips} type="current" />
               </TabsContent>
               <TabsContent value="upcoming">
                 <TripsTab trips={upcomingTrips} type="upcoming" />
