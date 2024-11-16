@@ -52,7 +52,7 @@ export default function MyTrips({ billingRoute }: MyTripsProps) {
       <Head>
         <title>My Trips | Tramona</title>
       </Head>
-      <div className="container col-span-10 mx-auto flex max-w-7xl flex-col gap-10 py-10 pb-32 2xl:col-span-11">
+      <div className="container col-span-10 mx-auto flex max-w-8xl flex-col gap-10 py-10 pb-32 2xl:col-span-11">
         <h1 className="text-4xl font-bold">My Trips</h1>
 
         <Tabs value={selectedTab} onValueChange={handleTabClick}>
