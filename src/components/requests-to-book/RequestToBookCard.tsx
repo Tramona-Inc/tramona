@@ -60,8 +60,8 @@ export default function RequestToBookCard({
       requestToBook: HostDashboardRequestToBook;
       // property: Property;
     } // | { type: "guest"; request: GuestDashboardRequest }
-  // | { type: "host"; request: HostDashboardRequest }
-) & // | { type: "admin"; request: AdminDashboardRequst }
+  // | { type: "admin"; request: AdminDashboardRequst }
+) & // | { type: "host"; request: HostDashboardRequest }
 {
   children?: React.ReactNode;
 }) {
@@ -89,9 +89,6 @@ export default function RequestToBookCard({
       <div className="flex p-2">
         <div className="flex-1 space-y-4 overflow-hidden p-4 pt-2">
           <div className="flex items-center gap-2">
-            {type !== "host" && (
-              <RequestToBookCardBadge requestToBook={requestToBook} />
-            )}
             {type === "host" && (
               <>
                 <UserAvatar
@@ -108,6 +105,7 @@ export default function RequestToBookCard({
                 </p>
               </>
             )}
+            <RequestToBookCardBadge requestToBook={requestToBook} />
             <div className="flex-1" />
 
             {type === "guest" && !requestToBook.resolvedAt && (

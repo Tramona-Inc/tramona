@@ -19,7 +19,7 @@ export default function RequestToBookCardBadge({
   requestToBook,
   size = "md",
 }: {
-  requestToBook: GuestDashboardRequestToBook;
+  requestToBook: GuestDashboardRequestToBook | HostDashboardRequestToBook;
   size?: "md" | "lg";
 }) {
   if (

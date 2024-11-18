@@ -10,13 +10,13 @@ import { errorToast } from "@/utils/toasts";
 import RequestToBookCard from "@/components/requests-to-book/RequestToBookCard";
 import { Home } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { RequestToBookCardPreviews } from "../../../../requests-to-book/RequestToBookCardPreviews";
 
 export default function HostRequestsToBook() {
   const { toast } = useToast();
   const [dialogOpen, setDialogOpen] = useState(false);
   const router = useRouter();
   const propertyId = parseInt(router.query.propertyId as string) || 0; // Default to 0 if parsing fails
-  console.log(propertyId);
   const { data: unusedReferralDiscounts } =
     api.referralCodes.getAllUnusedHostReferralDiscounts.useQuery(undefined, {
       onSuccess: () => {
@@ -54,30 +54,36 @@ export default function HostRequestsToBook() {
           {propertyRequests.activeRequestsToBook.map((data) => (
             <div key={data.id} className="mb-4">
               <RequestToBookCard requestToBook={data} type="host">
-                <Button
-                  variant="secondary"
-                  onClick={async () => {
-                    await rejectRequestToBook({
-                      isAccepted: false,
-                      requestToBookId: data.id,
-                    })
-                      .then(() => {
-                        toast({
-                          title: "Successfully rejected request",
-                        });
+                {data.status === "Pending" && (
+                  <Button
+                    variant="secondary"
+                    onClick={async () => {
+                      await rejectRequestToBook({
+                        isAccepted: false,
+                        requestToBookId: data.id,
                       })
-                      .catch(() => errorToast());
-                  }}
-                >
-                  Reject
-                </Button>
-                <Button
-                  onClick={() => {
-                    setDialogOpen(true);
-                  }}
-                >
-                  Respond
-                </Button>
+                        .then(() => {
+                          toast({
+                            title: "Successfully rejected request",
+                          });
+                        })
+                        .catch(() => errorToast());
+                    }}
+                  >
+                    Reject
+                  </Button>
+                )}
+                {data.status !== "Pending" ? (
+                  <Button
+                    onClick={() => {
+                      setDialogOpen(true);
+                    }}
+                  >
+                    Respond
+                  </Button>
+                ) : (
+                  <Button disabled>{data.status}</Button>
+                )}
               </RequestToBookCard>
               <HostRequestToBookDialog
                 open={dialogOpen}
