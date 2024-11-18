@@ -21,16 +21,12 @@ export default function Listings() {
 
   const { data: property } = api.properties.getById.useQuery(
     { id: propertyId },
-    { enabled: router.isReady, refetchOnWindowFocus: false },
+    {
+      enabled: router.isReady,
+      refetchOnWindowFocus: false,
+      refetchInterval: false,
+    },
   );
-
-  const [isDialogShown, setIsDialogShown] = useState(!!payment_intent);
-
-  useEffect(() => {
-    if (!isDialogShown && payment_intent) {
-      setIsDialogShown(true);
-    }
-  }, [payment_intent, isDialogShown]);
 
   if (router.isFallback) {
     return <h2>Loading</h2>;
@@ -45,16 +41,7 @@ export default function Listings() {
         <div className="mx-auto max-w-7xl">
           {property ? <RequestToBookPage property={property} /> : <Spinner />}
         </div>
-        {isDialogShown && (
-          <BidConfirmationDialog
-            isOpen={isDialogShown}
-            onClose={() => {}} // Close the dialog
-            onSubmitMoreBids={() => console.log("clicked")}
-            onSubmitRequest={() => {
-              console.log("submitted request");
-            }}
-          />
-        )}
+        {payment_intent && <BidConfirmationDialog isOpen={true} />}
       </div>
     </DashboardLayout>
   );

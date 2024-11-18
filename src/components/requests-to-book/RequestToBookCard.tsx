@@ -60,8 +60,8 @@ export default function RequestToBookCard({
       requestToBook: HostDashboardRequestToBook;
       // property: Property;
     } // | { type: "guest"; request: GuestDashboardRequest }
-  // | { type: "admin"; request: AdminDashboardRequst }
-) & // | { type: "host"; request: HostDashboardRequest }
+  // | { type: "host"; request: HostDashboardRequest }
+) & // | { type: "admin"; request: AdminDashboardRequst }
 {
   children?: React.ReactNode;
 }) {

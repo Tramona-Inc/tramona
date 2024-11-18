@@ -4,46 +4,24 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CheckCircle, AlertTriangle } from "lucide-react";
 import Confetti from "react-confetti";
+import Link from "next/link";
 
 interface BidPlacedPopupProps {
   isOpen: boolean;
-  onClose?: () => void;
-  onSubmitMoreBids?: () => void;
-  onSubmitRequest?: () => void;
 }
 
-export default function BidPlacedPopup({
-  isOpen,
-  onClose,
-  onSubmitMoreBids,
-  onSubmitRequest,
-}: BidPlacedPopupProps) {
+export default function BidPlacedPopup({ isOpen }: BidPlacedPopupProps) {
   const [showConfetti, setShowConfetti] = useState(false);
   const [open, setOpen] = useState(isOpen);
 
-  const handleClose = useCallback(() => {
-    setOpen(false);
-    if (onClose && typeof onClose === "function") {
-      onClose();
-    }
-  }, [onClose]);
-
   useEffect(() => {
     setOpen(isOpen);
-  }, [isOpen, handleClose]);
+    if (isOpen) setShowConfetti(true);
+  }, [isOpen]);
 
-  const handleSubmitMoreBids = useCallback(() => {
-    if (onSubmitMoreBids && typeof onSubmitMoreBids === "function") {
-      onSubmitMoreBids();
-    }
-  }, [onSubmitMoreBids]);
-
-  const handleSubmitRequest = useCallback(() => {
-    if (onSubmitRequest && typeof onSubmitRequest === "function") {
-      onSubmitRequest();
-    }
-  }, [onSubmitRequest]);
-
+  const handleClose = () => {
+    setOpen(false);
+  };
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[400px]">
@@ -58,7 +36,7 @@ export default function BidPlacedPopup({
           </p>
           <div className="mb-6 text-left">
             <p className="mb-2 text-black">
-              <strong>Next Steps:</strong>
+              <strong>Next Steps:</strong>1
             </p>
             <div className="mb-4 flex items-start">
               <CheckCircle className="mr-2 mt-1 h-5 w-5 flex-shrink-0 text-[#004236]" />
@@ -84,18 +62,16 @@ export default function BidPlacedPopup({
           </Alert>
           <div className="flex w-full flex-col gap-4">
             <div className="flex w-full flex-col gap-4 sm:flex-row">
-              <Button
-                className="w-full bg-[#004236] text-white hover:bg-[#003228]"
-                onClick={handleSubmitMoreBids}
-              >
-                Search More Properties
-              </Button>
-              <Button
-                className="w-full bg-[#004236] text-white hover:bg-[#003228]"
-                onClick={handleSubmitRequest}
-              >
-                View Requests
-              </Button>
+              <Link href="/unclaimed-offers'">
+                <Button className="w-full bg-[#004236] text-white hover:bg-[#003228]">
+                  Search More Properties
+                </Button>
+              </Link>
+              <Link href="/requests">
+                <Button className="w-full bg-[#004236] text-white hover:bg-[#003228]">
+                  View Requests
+                </Button>
+              </Link>
             </div>
             <Button
               variant="outline"
