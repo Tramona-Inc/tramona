@@ -140,7 +140,13 @@ export const propertyStatusEnum = pgEnum("property_status", [
   "Archived",
 ]);
 
-export const checkOutEnum = pgEnum("check_out", ALL_CHECKOUT_TYPES);
+// export const checkOutEnum = pgEnum("check_out", [
+//   "Gather used towels",
+//   "Throw trash away",
+//   "Turn things off",
+//   "Lock up",
+//   "Return keys",
+// ]);
 
 export const ALL_PROPERTY_PMS = ["Hostaway", "Hospitable", "Ownerrez"] as const;
 
@@ -272,10 +278,11 @@ export const properties = pgTable(
     stateCode: varchar("state_code", { length: 8 }),
     city: varchar("city", { length: 255 }).notNull(),
     country: varchar("country", { length: 255 }).notNull(),
+    countryISO: varchar("country_iso", { length: 3 }).notNull(),
 
     originalListingUrl: varchar("original_listing_url"),
     checkInInfo: varchar("check_in_info"),
-    checkOutInfo: checkOutEnum("check_out").array(),
+    // checkOutInfo: checkOutEnum("check_out_enum").array(),
     additionalCheckOutInfo: varchar("additional_check_out_info"),
     checkInTime: time("check_in_time").notNull().default("15:00:00"),
     checkOutTime: time("check_out_time").notNull().default("10:00:00"),

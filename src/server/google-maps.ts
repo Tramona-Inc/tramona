@@ -36,8 +36,6 @@ export async function getAddress({ lat, lng }: { lat: number; lng: number }) {
     throw new Error(`No results found for lat/lng ${lat}/${lng}`);
   }
 
-  console.log(JSON.stringify(firstResult.address_components, null, 2));
-
   const findComponent = (types: string[]) => {
     return firstResult.address_components.find((c) =>
       c.types.some((type) => types.includes(type)),
