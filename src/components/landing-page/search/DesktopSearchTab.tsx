@@ -263,8 +263,7 @@ export function DesktopSearchTab() {
     reValidateMode: "onSubmit",
   });
   const containerRef = useRef<HTMLDivElement>(null);
-  const { adjustedProperties, setAdjustedProperties, setIsSearching } =
-    useAdjustedProperties();
+  const { adjustedProperties, setAdjustedProperties } = useAdjustedProperties();
 
   const [allProperties, setAllProperties] = useState<{
     pages: (Property | AirbnbSearchResult)[];
@@ -405,7 +404,6 @@ export function DesktopSearchTab() {
 
   const handleSearch = form.handleSubmit(async (data) => {
     setIsLoading(true);
-    setIsSearching(true);
     const params = new URLSearchParams();
     Object.entries(data).forEach(([key, value]) => {
       if (value) params.set(key, value.toString());
@@ -456,7 +454,6 @@ export function DesktopSearchTab() {
         });
 
         setIsLoading(false);
-        setIsSearching(false);
         const airbnbResultsPromise = utils.misc.scrapeAirbnbInitialPage.fetch({
           checkIn: data.checkIn,
           checkOut: data.checkOut,
@@ -519,7 +516,6 @@ export function DesktopSearchTab() {
         console.error("Error running subscrapers:", error);
       } finally {
         setIsLoading(false);
-        setIsSearching(false);
       }
     } else {
       setIsLoading(false);

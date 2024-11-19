@@ -41,10 +41,7 @@ export default function UnclaimedOfferCards({
   const [showNoProperties, setShowNoProperties] = useState(false);
 
   useEffect(() => {
-    if (
-      !isDelayedLoading &&
-      (!adjustedProperties?.pages.length)
-    ) {
+    if (!isDelayedLoading && !adjustedProperties?.pages.length) {
       setShowNoProperties(true);
     } else {
       setShowNoProperties(false);
@@ -56,11 +53,10 @@ export default function UnclaimedOfferCards({
   // }, [adjustedProperties]);
 
   const allProperties = useMemo(() => {
-    return adjustedProperties?.pages
-      // .flatMap((page) => page?.data || []) // Use optional chaining and fallback
-      // .filter(Boolean); // Filter out undefined values, if any
+    return adjustedProperties?.pages;
+    // .flatMap((page) => page?.data || []) // Use optional chaining and fallback
+    // .filter(Boolean); // Filter out undefined values, if any
   }, [adjustedProperties]);
-
 
   const paginatedProperties = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -80,9 +76,11 @@ export default function UnclaimedOfferCards({
     (page: number) => {
       // router.pathname.searchParams.set("page", page);
       setCurrentPage(page);
-      void router.push({pathname: router.pathname,
-        query: { ...router.query, page },
-      }, undefined, { shallow: true });
+      void router.push(
+        { pathname: router.pathname, query: { ...router.query, page } },
+        undefined,
+        { shallow: true },
+      );
     },
     [router],
   );
@@ -164,16 +162,17 @@ export default function UnclaimedOfferCards({
           ) : (
             <div className="flex h-full w-full flex-col">
               {/* <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"> */}
-              <div className="min-[950px]:grid-cols-3 min-[1150px]:grid-cols-4 min-[580px]:grid-cols-2 grid grid-cols-1 gap-4">
-                {paginatedProperties?.length && paginatedProperties.map((property, index) => (
-                  <div
-                    key={property.originalListingId}
-                    className="animate-fade-in"
-                    style={{ animationDelay: `${index * 50}ms` }}
-                  >
-                    <UnMatchedPropertyCard property={property} />
-                  </div>
-                ))}
+              <div className="grid grid-cols-1 gap-4 min-[580px]:grid-cols-2 min-[950px]:grid-cols-3 min-[1150px]:grid-cols-4">
+                {paginatedProperties?.length &&
+                  paginatedProperties.map((property, index) => (
+                    <div
+                      key={property.originalListingId}
+                      className="animate-fade-in"
+                      style={{ animationDelay: `${index * 50}ms` }}
+                    >
+                      <UnMatchedPropertyCard property={property} />
+                    </div>
+                  ))}
               </div>
               {totalPages >= 1 && (
                 <div className="mt-auto px-6 py-4">
@@ -255,13 +254,21 @@ function UnMatchedPropertyCard({
 
   const isAirbnb = property.originalListingPlatform === "Airbnb";
   const checkIn = formatDateMonthDayYear(new Date());
-  const checkOut = formatDateMonthDayYear(new Date(new Date().setDate(new Date().getDate() + 2)));
+  const checkOut = formatDateMonthDayYear(
+    new Date(new Date().setDate(new Date().getDate() + 2)),
+  );
   const numGuests = 3;
-  const link = isAirbnb ? `https://airbnb.com/rooms/${property.originalListingId}` : `/request-to-book/${property.id}?checkIn=${checkIn}&checkOut=${checkOut}&numGuests=${numGuests}`;
-
+  const link = isAirbnb
+    ? `https://airbnb.com/rooms/${property.originalListingId}`
+    : `/request-to-book/${property.id}?checkIn=${checkIn}&checkOut=${checkOut}&numGuests=${numGuests}`; //TODO: change to checkin and checkout dates from form
 
   return (
-    <Link href={link} className="block" target="_blank" rel="noopener noreferrer">
+    <Link
+      href={link}
+      className="block"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
       <div
         className="relative flex aspect-square w-full cursor-pointer flex-col overflow-hidden rounded-xl"
         onMouseEnter={() => setIsHovered(true)}
@@ -306,7 +313,8 @@ function UnMatchedPropertyCard({
               </Button>
             )}
           </div>
-          {isAirbnb & (
+          {isAirbnb &
+          (
             <div className="absolute inset-0">
               <div className="flex justify-between">
                 <Badge className="absolute left-3 top-3 h-8 bg-rose-500 font-semibold text-white">
@@ -350,28 +358,28 @@ function UnMatchedPropertyCard({
         {/* {formatDateRange(offer.checkIn, offer.checkOut)} */}
         {/* replace with check in check out'
             </div> */}
-            <div className="text-sm text-zinc-500">
-              {plural(property.maxNumGuests, "Guest")}
-            </div>
-          </div>
-          <div className="flex justify-between">
-            <div className="flex items-center space-x-3 text-sm font-semibold">
-              <div>
-                {property.originalNightlyPrice
-                  ? formatCurrency(property.originalNightlyPrice)
-                  : "N/A"}
-                &nbsp;night
-              </div>
-              <div className="text-xs text-zinc-500 line-through">
-                airbnb&nbsp;
-                {property.originalNightlyPrice
-                  ? formatCurrency(
-                      property.originalNightlyPrice * AVG_AIRBNB_MARKUP,
-                    )
-                  : "N/A"}
-              </div>
-            </div>
+        <div className="text-sm text-zinc-500">
+          {plural(property.maxNumGuests, "Guest")}
         </div>
+      </div>
+      <div className="flex justify-between">
+        <div className="flex items-center space-x-3 text-sm font-semibold">
+          <div>
+            {property.originalNightlyPrice
+              ? formatCurrency(property.originalNightlyPrice)
+              : "N/A"}
+            &nbsp;night
+          </div>
+          <div className="text-xs text-zinc-500 line-through">
+            airbnb&nbsp;
+            {property.originalNightlyPrice
+              ? formatCurrency(
+                  property.originalNightlyPrice * AVG_AIRBNB_MARKUP,
+                )
+              : "N/A"}
+          </div>
+        </div>
+      </div>
     </Link>
   );
 }

@@ -941,7 +941,6 @@ export const propertiesRouter = createTRPCRouter({
         ${radiusInMeters}
       )
     `;
-
       const { checkIn, checkOut } = input;
 
       const checkInDate = checkIn.toISOString();
@@ -969,12 +968,14 @@ export const propertiesRouter = createTRPCRouter({
         ),
       });
 
+      const checkInNew = new Date(checkInDate).toISOString().split("T")[0];
+      const checkOutNew = new Date(checkOutDate).toISOString().split("T")[0];
       //set the accurate original nightly price for Hospitable properties
       await Promise.all(
         hostProperties.map(async (property) => {
           const originalPrice = await getPropertyOriginalPrice(property, {
-            checkIn: checkInDate,
-            checkOut: checkOutDate,
+            checkIn: checkInNew,
+            checkOut: checkOutNew,
             numGuests: input.numGuests,
           });
           property.originalNightlyPrice = originalPrice ?? null;

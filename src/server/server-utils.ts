@@ -791,6 +791,8 @@ export async function getPropertyOriginalPrice(
   },
 ) {
   if (property.originalListingPlatform === "Hospitable") {
+    const formattedCheckIn = new Date(params.checkIn).toISOString().split("T")[0];
+    const formattedCheckOut = new Date(params.checkOut).toISOString().split("T")[0];
     const { data } = await axios.get<HospitableCalendarResponse>(
       `https://connect.hospitable.com/api/v1/listings/${property.hospitableListingId}/calendar`,
       {
@@ -798,8 +800,8 @@ export async function getPropertyOriginalPrice(
           Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
         },
         params: {
-          start_date: params.checkIn,
-          end_date: params.checkOut,
+          start_date: formattedCheckIn,
+          end_date: formattedCheckOut,
         },
       },
     );
