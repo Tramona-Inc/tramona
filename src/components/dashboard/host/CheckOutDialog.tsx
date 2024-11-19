@@ -1,5 +1,4 @@
 import { Checkbox } from "@/components/ui/checkbox";
-import DialogCancelSave from "./DialogCancelSave";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Form,
@@ -7,14 +6,18 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { DialogClose } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import ErrorMsg from "@/components/ui/ErrorMsg";
 
 const formSchema = z.object({
-  checkOutInfo: z.string().array(),
-  additionalCheckOutInfo: z.string(),
+  checkOutInfo: z.string().array().optional(),
+  additionalCheckOutInfo: z.string().optional(),
 });
 
 type FormSchema = z.infer<typeof formSchema>;
@@ -27,9 +30,9 @@ export default function CheckOutDialog() {
     // }
   });
 
-  const onSubmit = (formValues: FormSchema) => {
+  function onSubmit(formValues: FormSchema) {
     console.log("formValues", formValues);
-  };
+  }
 
   const instructions = [
     {
@@ -63,6 +66,7 @@ export default function CheckOutDialog() {
         </p>
       </div>
       <Form {...form}>
+        <ErrorMsg>{form.formState.errors.root?.message}</ErrorMsg>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <FormField
             control={form.control}
@@ -73,7 +77,23 @@ export default function CheckOutDialog() {
                   <div className="space-y-4">
                     {instructions.map((instruction, index) => (
                       <div className="flex items-center gap-x-2" key={index}>
-                        <Checkbox id={instruction.id} />
+                        <Checkbox
+                          id={instruction.id}
+                          checked={field.value?.includes(
+                            instruction.description,
+                          )}
+                          onCheckedChange={(isChecked) => {
+                            const newValue = isChecked
+                              ? [
+                                  ...(field.value ?? []),
+                                  instruction.description,
+                                ]
+                              : (field.value?.filter(
+                                  (desc) => desc !== instruction.description,
+                                ) ?? []);
+                            field.onChange(newValue);
+                          }}
+                        />
                         <label
                           htmlFor={instruction.id}
                           className="font-semibold"
@@ -84,6 +104,7 @@ export default function CheckOutDialog() {
                     ))}
                   </div>
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -99,15 +120,24 @@ export default function CheckOutDialog() {
                   <Textarea
                     {...field}
                     placeholder="Add any additional checkout instructions..."
+                    value={field.value}
                   />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
           <p className="text-muted-foreground">
             Shared at 9 PM the evening before checkout
           </p>
-          <DialogCancelSave />
+          <div className="flex items-center justify-end gap-2">
+            <DialogClose>
+              <Button variant="outline" type="button">
+                Cancel
+              </Button>
+            </DialogClose>
+            <Button type="submit">Save</Button>
+          </div>
         </form>
       </Form>
     </div>
