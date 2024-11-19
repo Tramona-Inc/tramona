@@ -7,7 +7,7 @@ import { zodUrl } from "@/utils/zod-utils";
 import { getAddress, getCoordinates } from "@/server/google-maps";
 import { Airbnb } from "@/utils/listing-sites/Airbnb";
 import { z } from "zod";
-import { getPropertyOriginalPrice, urlScrape } from "@/server/server-utils";
+import { scrapeAirbnbInitialPageHelper, scrapeAirbnbPagesHelper, getPropertyOriginalPrice, urlScrape } from "@/server/server-utils";
 import { scrapeAirbnbPrice } from "@/server/scrapePrice";
 import { fetchPrice } from "@/server/direct-sites-scraping/casamundo-scraper";
 
@@ -61,12 +61,12 @@ export const miscRouter = createTRPCRouter({
     .query(async ({ input }) => {
       const price = (await fetch(
         `https://${env.RAPIDAPI_HOST}/search-location?` +
-          new URLSearchParams({
-            location: input.location,
-            checkin: format(input.checkIn, "yyyy-MM-dd"),
-            checkout: format(input.checkOut, "yyyy-MM-dd"),
-            adults: input.numGuests.toString(),
-          }).toString(),
+        new URLSearchParams({
+          location: input.location,
+          checkin: format(input.checkIn, "yyyy-MM-dd"),
+          checkout: format(input.checkOut, "yyyy-MM-dd"),
+          adults: input.numGuests.toString(),
+        }).toString(),
         {
           method: "GET",
           headers: {
@@ -84,11 +84,42 @@ export const miscRouter = createTRPCRouter({
       const averageNightlyPrice =
         Array.isArray(price.results) && price.results.length > 0
           ? price.results.reduce((acc, listing) => {
-              return acc + listing.price.rate;
-            }, 0) / price.results.length
+            return acc + listing.price.rate;
+          }, 0) / price.results.length
           : 0;
 
       return averageNightlyPrice;
+    }),
+
+  scrapeAirbnbInitialPage: publicProcedure
+    .input(z.object({
+      checkIn: z.date(),
+      checkOut: z.date(),
+      location: z.string(),
+      numGuests: z.number(),
+    }))
+    .query(async ({
+      input
+    }) => {
+      const {checkIn, checkOut, location, numGuests} = input;
+      return await scrapeAirbnbInitialPageHelper({checkIn, checkOut, location, numGuests});
+    }),
+
+  scrapeAirbnbPages: publicProcedure
+    .input(
+      z.object({
+        pageCursors: z.string().array(),
+        checkIn: z.date(),
+        checkOut: z.date(),
+        location: z.string(),
+        numGuests: z.number(),
+      })
+    )
+    .query(async ({
+      input
+    }) => {
+      const { checkIn, checkOut, location, numGuests, pageCursors } = input;
+      return await scrapeAirbnbPagesHelper({checkIn, checkOut, location, numGuests, cursors: pageCursors});
     }),
 
   getAverageHostPropertyPrice: publicProcedure

@@ -19,6 +19,10 @@ interface AdjustedPropertiesContextType {
   setAdjustedProperties: Dispatch<
     SetStateAction<AdjustedPropertiesType | null>
   >;
+  isSearching: boolean;
+  setIsSearching: Dispatch<
+    SetStateAction<boolean>
+  >;
 }
 
 // Create a context
@@ -35,10 +39,11 @@ export function AdjustedPropertiesProvider({
 }: AdjustedPropertiesProviderProps) {
   const [adjustedProperties, setAdjustedProperties] =
     useState<AdjustedPropertiesType | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
 
   return (
     <AdjustedPropertiesContext.Provider
-      value={{ adjustedProperties, setAdjustedProperties }}
+      value={{ adjustedProperties, setAdjustedProperties, isSearching, setIsSearching }}
     >
       {children}
     </AdjustedPropertiesContext.Provider>
