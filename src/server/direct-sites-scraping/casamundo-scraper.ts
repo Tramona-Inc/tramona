@@ -294,7 +294,7 @@ function formatCancellationPolicy(
   return policyString;
 }
 
-const fetchPrice = async (
+export const fetchPrice = async (
   params: PriceExtractionParams,
 ): Promise<PriceResult> => {
   const url = `https://www.casamundo.com/booking/checkout/priceDetails/${params.offerId}`;
