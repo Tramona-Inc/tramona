@@ -14,18 +14,18 @@ import ErrorMsg from "@/components/ui/ErrorMsg";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Property } from "@/server/db/schema";
+import { ALL_HOUSE_RULES, Property } from "@/server/db/schema";
 import { api } from "@/utils/api";
 
 const formSchema = z.object({
-  houseRules: z.string().array().optional(),
+  houseRules: z.array(z.enum(ALL_HOUSE_RULES)).optional(),
   additionalHouseRules: z.string().optional(),
 });
 
 type FormSchema = z.infer<typeof formSchema>;
 
 export default function HouseRulesDialog({ property }: { property: Property }) {
-  const { data: fetchedProperty } = api.properties.getById.useQuery({
+  const { data: fetchedProperty, refetch } = api.properties.getById.useQuery({
     id: property.id,
   });
   const { mutateAsync: updateProperty } = api.properties.update.useMutation();
@@ -33,8 +33,8 @@ export default function HouseRulesDialog({ property }: { property: Property }) {
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      houseRules: fetchedProperty.houseRules,
-      additionalHouseRules: fetchedProperty.additionalHouseRules,
+      houseRules: fetchedProperty?.houseRules ?? [],
+      additionalHouseRules: fetchedProperty?.additionalHouseRules ?? "",
     },
   });
 
@@ -57,8 +57,17 @@ export default function HouseRulesDialog({ property }: { property: Property }) {
     },
   ];
 
-  const onSubmit = (formValues: FormSchema) => {
+  const onSubmit = async (formValues: FormSchema) => {
     console.log("formValues", formValues);
+    await updateProperty({
+      ...property,
+      houseRules: formValues.houseRules,
+      additionalHouseRules:
+        formValues.additionalHouseRules === ""
+          ? null
+          : formValues.additionalHouseRules,
+    });
+    void refetch();
   };
 
   return (
@@ -116,6 +125,7 @@ export default function HouseRulesDialog({ property }: { property: Property }) {
                   <Textarea
                     {...field}
                     placeholder="Add any additional house rules..."
+                    value={field.value ?? ""}
                   />
                 </FormControl>
                 <FormMessage />

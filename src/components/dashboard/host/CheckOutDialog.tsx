@@ -25,7 +25,7 @@ const formSchema = z.object({
 type FormSchema = z.infer<typeof formSchema>;
 
 export default function CheckOutDialog({ property }: { property: Property }) {
-  const { data: fetchedProperty } = api.properties.getById.useQuery({
+  const { data: fetchedProperty, refetch } = api.properties.getById.useQuery({
     id: property.id,
   });
   const { mutateAsync: updateProperty } = api.properties.update.useMutation();
@@ -48,6 +48,7 @@ export default function CheckOutDialog({ property }: { property: Property }) {
           ? null
           : formValues.additionalCheckOutInfo,
     });
+    void refetch();
   };
 
   const instructions = [
