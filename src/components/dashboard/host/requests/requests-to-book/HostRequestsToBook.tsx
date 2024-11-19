@@ -7,10 +7,9 @@ import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { useToast } from "@/components/ui/use-toast";
 import { errorToast } from "@/utils/toasts";
-import RequestToBookCard from "@/components/requests-to-book/RequestToBookCard";
 import { Home } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { RequestToBookCardPreviews } from "../../../../requests-to-book/RequestToBookCardPreviews";
+import HostRequestToBookCard from "./HostRequestToBookCard";
 
 export default function HostRequestsToBook() {
   const { toast } = useToast();
@@ -53,7 +52,7 @@ export default function HostRequestsToBook() {
         <div className="grid gap-4 md:grid-cols-2">
           {propertyRequests.activeRequestsToBook.map((data) => (
             <div key={data.id} className="mb-4">
-              <RequestToBookCard requestToBook={data} type="host">
+              <HostRequestToBookCard requestToBook={data}>
                 {data.status === "Pending" && (
                   <Button
                     variant="secondary"
@@ -84,7 +83,7 @@ export default function HostRequestsToBook() {
                 ) : (
                   <Button disabled>{data.status}</Button>
                 )}
-              </RequestToBookCard>
+              </HostRequestToBookCard>
               <HostRequestToBookDialog
                 open={dialogOpen}
                 setOpen={setDialogOpen}

@@ -15,7 +15,7 @@ import {
 } from "@/utils/utils";
 import Image from "next/image";
 import { AlertCircle } from "lucide-react";
-import { HostDashboardRequestToBook } from "@/components/requests-to-book/RequestToBookCard";
+import { HostDashboardRequestToBook } from "@/components/requests-to-book/TravelerRequestToBookCard";
 import { api } from "@/utils/api";
 import Spinner from "@/components/_common/Spinner";
 import { toast } from "@/components/ui/use-toast";
