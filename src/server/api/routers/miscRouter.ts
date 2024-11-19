@@ -7,8 +7,9 @@ import { zodUrl } from "@/utils/zod-utils";
 import { getAddress, getCoordinates } from "@/server/google-maps";
 import { Airbnb } from "@/utils/listing-sites/Airbnb";
 import { z } from "zod";
-import { urlScrape } from "@/server/server-utils";
+import { getPropertyOriginalPrice, urlScrape } from "@/server/server-utils";
 import { scrapeAirbnbPrice } from "@/server/scrapePrice";
+import { fetchPrice } from "@/server/direct-sites-scraping/casamundo-scraper";
 
 type AirbnbListing = {
   id: string;
@@ -88,6 +89,43 @@ export const miscRouter = createTRPCRouter({
           : 0;
 
       return averageNightlyPrice;
+    }),
+
+  getAverageHostPropertyPrice: publicProcedure
+    .input(
+      z.object({
+        property: z.object({
+          originalListingId: z.string(),
+          originalListingPlatform: z.enum(["Hospitable", "Hostaway"]),
+          hospitableListingId: z.string(),
+        }),
+        checkIn: z.string(),
+        checkOut: z.string(),
+        numGuests: z.number(),
+      }),
+    )
+    .query(async ({ input: { property, checkIn, checkOut, numGuests } }) => {
+      const averagePrice = await getPropertyOriginalPrice(property, {
+        checkIn,
+        checkOut,
+        numGuests,
+      });
+      return averagePrice;
+    }),
+
+  scrapeAverageCasamundoPrice: publicProcedure
+    .input(
+      z.object({
+        offerId: z.string(),
+        checkIn: z.date(),
+        numGuests: z.number(),
+        duration: z.number(),
+      }),
+    )
+    .query(async ({ input: { offerId, checkIn, numGuests, duration } }) => {
+      const price = await fetchPrice({ offerId, checkIn, numGuests, duration });
+
+      return price.price / duration;
     }),
 
   scrapeAirbnbLink: publicProcedure

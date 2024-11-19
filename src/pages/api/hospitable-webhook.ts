@@ -356,7 +356,7 @@ export default async function webhook(
           lng: webhookData.data.address.longitude,
         });
 
-        const { city, stateCode, country } = await getAddress({
+        const { city, stateCode, country, countryISO, stateName, county } = await getAddress({
           lat: webhookData.data.address.latitude,
           lng: webhookData.data.address.longitude,
         });
@@ -460,10 +460,8 @@ export default async function webhook(
             numBeds: webhookData.data.capacity.beds,
             numBedrooms: webhookData.data.capacity.bedrooms,
             numBathrooms: webhookData.data.capacity.bathrooms,
-            country: webhookData.data.address.country_code, //change to country
             otherHouseRules: webhookData.data.house_rules,
             latLngPoint: latLngPoint,
-            city: webhookData.data.address.city,
             hostName: webhookData.data.channel.customer.name,
             name: webhookData.data.public_name,
             about: webhookData.data.description,
@@ -481,6 +479,12 @@ export default async function webhook(
             amenities: amenities,
             cancellationPolicy: cancellationPolicy,
             hospitableListingId: webhookData.data.id,
+            stateName: stateName,
+            stateCode: stateCode,
+            county: county,
+            city: city,
+            countryISO: countryISO,
+            country: country,
             //ratings: webhookData.data.ratings,
           })
           .returning({ id: properties.id })
