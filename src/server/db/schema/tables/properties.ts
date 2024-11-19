@@ -278,6 +278,7 @@ export const properties = pgTable(
     stateCode: varchar("state_code", { length: 8 }),
     city: varchar("city", { length: 255 }).notNull(),
     country: varchar("country", { length: 255 }).notNull(),
+    countryIso: varchar("country_iso", { length: 8 }).notNull(),
 
     originalListingUrl: varchar("original_listing_url"),
     checkInInfo: varchar("check_in_info"),
