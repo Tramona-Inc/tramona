@@ -1,57 +1,21 @@
-import { SkeletonText } from "@/components/ui/skeleton";
 import { api } from "@/utils/api";
 import { useRouter } from "next/router";
 import HostRequestToBookDialog from "./HostRequestToBookDialog";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { RequestsToBook, User, type Property } from "@/server/db/schema";
-import HostConfirmRequestToBookDialog from "./HostConfirmRequestToBookDialog";
-import HostFinishRequestToBookDialog from "./HostFinishRequestToBookDialog";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { useToast } from "@/components/ui/use-toast";
 import { errorToast } from "@/utils/toasts";
 import RequestToBookCard from "@/components/requests-to-book/RequestToBookCard";
-
-type RequestsToBookWithProperty = RequestsToBook & {
-  property: Property & { taxAvailable: boolean };
-  traveler: Pick<
-    User,
-    "firstName" | "lastName" | "name" | "image" | "location" | "about"
-  >;
-  madeByGroup: {
-    ownerId: string;
-    owner: {
-      name: string | null;
-      firstName: string | null;
-      lastName: string | null;
-      image: string | null;
-      location: string | null;
-      about: string | null;
-    };
-  };
-};
-
-type RequestsToBookResponse = {
-  activeRequestsToBook: RequestsToBookWithProperty[];
-  inactiveRequestsToBook: RequestsToBookWithProperty[];
-};
+import { Home } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function HostRequestsToBook() {
   const { toast } = useToast();
   const [dialogOpen, setDialogOpen] = useState(false);
   const router = useRouter();
-  const { id } = router.query;
-  const propertyId = parseInt(id as string);
-  const [property, setProperty] = useState<
-    (Property & { taxAvailable: boolean }) | null
-  >(null);
-  const [selectedRequest, setSelectedRequest] =
-    useState<RequestsToBookWithProperty | null>(null);
-  const [step, setStep] = useState(0);
-
-  const [propertiesData, setPropertiesData] =
-    useState<RequestsToBookResponse | null>(null);
+  const propertyId = Number(router.query.propertyId);
 
   const { data: unusedReferralDiscounts } =
     api.referralCodes.getAllUnusedHostReferralDiscounts.useQuery(undefined, {
@@ -68,16 +32,11 @@ export default function HostRequestsToBook() {
       },
     });
 
-  const { data } = api.requestsToBook.getHostRequestsToBookFromId.useQuery(
-    { propertyId },
-    {
-      onSuccess: (
-        fetchedPropertiesWithRequestsToBook: RequestsToBookResponse,
-      ) => {
-        setPropertiesData(fetchedPropertiesWithRequestsToBook);
-      },
-    },
-  );
+  const { data: propertyRequests } =
+    api.requestsToBook.getHostRequestsToBookFromId.useQuery(
+      { propertyId },
+      { enabled: !!router.isReady },
+    );
 
   const { mutateAsync: rejectRequestToBook } =
     api.stripe.rejectOrCaptureAndFinalizeRequestToBook.useMutation();
@@ -89,9 +48,9 @@ export default function HostRequestsToBook() {
           <ChevronLeft />
         </Link>
       </div>
-      {propertiesData?.activeRequestsToBook ? (
+      {propertyRequests?.activeRequestsToBook ? (
         <div className="grid gap-4 md:grid-cols-2">
-          {propertiesData.activeRequestsToBook.map((data) => (
+          {propertyRequests.activeRequestsToBook.map((data) => (
             <div key={data.id} className="mb-4">
               <RequestToBookCard requestToBook={data} type="host">
                 <Button
@@ -114,43 +73,32 @@ export default function HostRequestsToBook() {
                 <Button
                   onClick={() => {
                     setDialogOpen(true);
-                    setSelectedRequest(data);
-                    setProperty(data.property);
                   }}
                 >
                   Respond
                 </Button>
               </RequestToBookCard>
+              <HostRequestToBookDialog
+                open={dialogOpen}
+                setOpen={setDialogOpen}
+                requestToBook={data}
+              />
             </div>
           ))}
         </div>
       ) : (
-        <SkeletonText>No requests found for this property</SkeletonText>
-      )}
-      {step === 0 && property && selectedRequest && (
-        <HostRequestToBookDialog
-          open={dialogOpen}
-          setOpen={setDialogOpen}
-          property={property}
-          requestToBook={selectedRequest}
-          setStep={setStep}
-        />
-      )}
-      {step === 1 && property && selectedRequest && (
-        <HostConfirmRequestToBookDialog
-          requestToBook={selectedRequest}
-          property={property}
-          setStep={setStep}
-          open={dialogOpen}
-          setOpen={setDialogOpen}
-        />
-      )}
-      {step === 2 && selectedRequest && (
-        <HostFinishRequestToBookDialog
-          requestToBook={selectedRequest}
-          open={dialogOpen}
-          setOpen={setDialogOpen}
-        />
+        <Card className="flex h-full items-center justify-center">
+          <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+            <Home className="mb-4 h-12 w-12 text-gray-400" />
+            <h3 className="mb-2 text-lg font-semibold text-gray-900">
+              No Property Selected
+            </h3>
+            <p className="max-w-sm text-sm text-gray-500">
+              Please select a property from the list to view its requests and
+              details.
+            </p>
+          </CardContent>
+        </Card>
       )}
     </div>
   );

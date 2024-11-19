@@ -45,8 +45,8 @@ export default function SidebarCity({
         displayedData.map((cityData, index) => {
           const href =
             selectedOption === "normal"
-              ? `/host/requests/${cityData.city}`
-              : `/host/requests/${cityData.city}?priceRestriction=true`;
+              ? `/host/requests/${cityData.city}?tabs=city`
+              : `/host/requests/${cityData.city}?tabs=city&priceRestriction=true`;
 
           const isSelected = selectedCity === cityData.city;
 
