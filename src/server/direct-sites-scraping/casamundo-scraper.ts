@@ -10,6 +10,7 @@ import { ALL_PROPERTY_TYPES, PropertyType } from "@/server/db/schema/common";
 import { ListingSiteName } from "@/server/db/schema/common";
 import { getNumNights, logAndFilterSettledResults } from "@/utils/utils";
 import { parseHTML } from "@/utils/utils";
+import { proxyAgent } from "../server-utils";
 import { getAddress } from "../google-maps";
 
 const offerSchema = z.object({
@@ -80,7 +81,9 @@ async function getLocationId(location: string): Promise<string> {
 
   const response: AxiosResponse<AutocompleteResponse> = await axios.get(
     `${autocompleteUrl}?${params.toString()}`,
-    // { httpsAgent: proxyAgent },
+    {
+      httpsAgent: proxyAgent
+    },
   );
   const suggestions = response.data.suggestions;
 
@@ -144,7 +147,9 @@ async function getOfferIds(
 
   const response: AxiosResponse<OfferResponse> = await axios.get(
     `${url}?${params.toString()}`,
-    // { headers, httpsAgent: proxyAgent },
+    { headers,
+      httpsAgent: proxyAgent
+    },
   );
 
   return response.data.offers.map((offer) => offerSchema.parse(offer));
@@ -167,6 +172,56 @@ interface CalendarResponse {
     days: Record<string, number>;
   };
 }
+type AvailabilityResponse = Record<string, number>;
+
+export async function getAvailability(offerId: string): Promise<AvailabilityResponse> {
+  const url = `https://www.casamundo.com/api/v2/calendar/${offerId}`;
+
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear();
+  const currentMonth = currentDate.getMonth() + 1;
+
+  // Generate an array of { year, month } objects for the next 12 months
+  const monthsToFetch = Array.from({ length: 12 }, (_, i) => {
+    const month = (currentMonth + i - 1) % 12 + 1;
+    const year = currentYear + Math.floor((currentMonth + i - 1) / 12);
+    return { year, month };
+  });
+
+  const fetchMonthData = async (year: number, month: number) => {
+    const maxRetries = 3;
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        const response: AxiosResponse<CalendarResponse> = await axios.get(url, {
+          params: { year, month },
+          httpsAgent: proxyAgent,
+          headers: {
+            accept: "application/json",
+            "accept-language": "en-US,en;q=0.9",
+          },
+        });
+        return response.data.content.days;
+      } catch (error) {
+        console.error(`Error fetching data for ${year}-${month}:`, error);
+        if (attempt === maxRetries - 1) throw error; // Throw if all retries fail
+      }
+    }
+    return {}; // Empty response if all retries fail
+  };
+
+  // Fetch all months in parallel
+  const allMonthsData = await Promise.all(
+    monthsToFetch.map(({ year, month }) => fetchMonthData(year, month))
+  );
+
+  // Combine all the days data into a single object
+  const availability: AvailabilityResponse = {};
+  allMonthsData.forEach((days) => Object.assign(availability, days));
+
+  return availability;
+}
+
+
 
 async function checkAvailability(
   offerId: string,
@@ -175,29 +230,60 @@ async function checkAvailability(
 ): Promise<boolean> {
   const url = `https://www.casamundo.com/api/v2/calendar/${offerId}`;
 
+  const currentDate = new Date();
+
+
   let currentYear: number = checkIn.getFullYear();
+  if (checkIn < currentDate) {
+    currentYear = currentDate.getFullYear() + 1;
+  }
   let currentMonth: number = checkIn.getMonth() + 1;
 
   const days: Record<string, number> = {};
+
+  const maxRetries = 3;
 
   while (
     currentYear < checkOut.getFullYear() ||
     (currentYear === checkOut.getFullYear() &&
       currentMonth <= checkOut.getMonth() + 1)
   ) {
-    const response: AxiosResponse<CalendarResponse> = await axios.get(url, {
-      params: {
-        year: currentYear,
-        month: currentMonth,
-      },
-      // httpsAgent: proxyAgent,
-      headers: {
-        accept: "application/json",
-        "accept-language": "en-US,en;q=0.9",
-      },
-    });
+    let success = false;
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        const response: AxiosResponse<CalendarResponse> = await axios.get(url, {
+          params: {
+            year: currentYear,
+            month: currentMonth,
+          },
+          httpsAgent: proxyAgent,
+          headers: {
+            accept: "application/json",
+            "accept-language": "en-US,en;q=0.9",
+          },
+        });
 
-    Object.assign(days, response.data.content.days);
+        Object.assign(days, response.data.content.days);
+        success = true;
+        break; // Success, exit retry loop
+      } catch (error) {
+        console.log('retrying', attempt);
+        if (axios.isAxiosError(error)) {
+          console.error(`Axios error for ${currentYear}-${currentMonth}:`, error.message);
+          if (error.response?.status === 522) {
+            console.error("Connection timeout error (522). Retrying...");
+          }
+        } else {
+          console.error(`Non-Axios error for ${currentYear}-${currentMonth}:`, error);
+        }
+        // No delay here, it will immediately retry
+      }
+    }
+
+    if (!success) {
+      console.error(`Failed to fetch data for ${currentYear}-${currentMonth} after ${maxRetries} attempts`);
+      return false; // Consider the property unavailable if we can't fetch the data
+    }
 
     currentMonth++;
     if (currentMonth > 12) {
@@ -335,7 +421,9 @@ export const fetchPrice = async (
       const response: AxiosResponse<ApiResponse> = await axios.post(
         `${url}?${queryParams.toString()}`,
         null,
-        // { headers, httpsAgent: proxyAgent },
+        { headers,
+          httpsAgent: proxyAgent
+        },
       );
       const data = response.data;
 
@@ -417,7 +505,7 @@ const fetchReviews = async (
     .get(
       `https://www.casamundo.com/reviews/list/${offerId}?scale=5&bcEnabled=false&googleReviews=false`,
       {
-        // httpsAgent: proxyAgent,
+        httpsAgent: proxyAgent,
         headers: {
           accept: "*/*",
           "accept-language": "en-US,en;q=0.9",
@@ -541,7 +629,7 @@ async function fetchPropertyDetails(
 
   const data = await axios
     .get(`${url}?${params.toString()}`, {
-      // httpsAgent: proxyAgent,
+      httpsAgent: proxyAgent,
       headers,
     })
     .then((res) => res.data as unknown)

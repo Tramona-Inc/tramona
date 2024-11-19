@@ -24,7 +24,14 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { ChevronDown, ChevronUp, Info, Clock, CheckCircle } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  Info,
+  Clock,
+  CheckCircle,
+  Calendar as CalendarIcon,
+} from "lucide-react";
 import { useRouter } from "next/router";
 import PriceBreakdown from "./PriceBreakdown";
 
@@ -86,8 +93,19 @@ export default function RequestToBookOrBookNowPriceCard({
       },
     );
 
-  console.log(isCasamundoPriceLoading, "isCasamundoPriceLoading", isHostPriceLoading, "isHostPriceLoading");
-  console.log(property, "akdfkjsldfj", casamundoPrice, query.checkIn, numNights);
+  console.log(
+    isCasamundoPriceLoading,
+    "isCasamundoPriceLoading",
+    isHostPriceLoading,
+    "isHostPriceLoading",
+  );
+  console.log(
+    property,
+    "akdfkjsldfj",
+    casamundoPrice,
+    query.checkIn,
+    numNights,
+  );
 
   const originalPrice = isHospitable ? hostPrice : casamundoPrice * 100;
 
@@ -197,7 +215,9 @@ export default function RequestToBookOrBookNowPriceCard({
   const handlePresetSelect = (price: number) => {
     setRequestAmount(price);
     updateRequestToBook({ travelerOfferedPriceBeforeFees: price });
-    const newPercentage = Math.round(((originalPrice - price) / originalPrice) * 100);
+    const newPercentage = Math.round(
+      ((originalPrice - price) / originalPrice) * 100,
+    );
     setRequestPercentage(
       Math.max(minDiscount, Math.min(newPercentage, maxDiscount)),
     );
@@ -205,7 +225,7 @@ export default function RequestToBookOrBookNowPriceCard({
   };
 
   return isLoading ? (
-    <Skeleton className="w-full h-[200px]" />
+    <Skeleton className="h-[200px] w-full" />
   ) : (
     <Card className="w-full bg-gray-50 shadow-lg">
       <CardContent className="flex flex-col gap-y-2 rounded-xl md:p-2 xl:p-6">
@@ -426,7 +446,7 @@ export default function RequestToBookOrBookNowPriceCard({
               </div>
             </div>
           </div>
-        ) : (
+        ) : originalPrice > 0 ? (
           <>
             <div>
               <div className="mb-1 text-2xl font-bold">Book it now for</div>
@@ -478,6 +498,32 @@ export default function RequestToBookOrBookNowPriceCard({
               You won&apos;t be charged yet
             </p>
           </>
+        ) : (
+          <div className="flex flex-col items-center justify-center">
+            <div className="flex items-center gap-2">
+              <Info className="h-4 w-4 text-red-500" />
+              <div className="mb-1 text-2xl font-bold text-red-500">
+                Dates Unavailable
+              </div>
+            </div>
+            <p className="pb-4 text-center text-sm text-muted-foreground">
+              The selected dates are no longer available. Try adjusting your
+              search.
+            </p>
+            <p className="text-md pb-4 text-center text-muted-foreground">
+              Pricing will update once new dates are selected.
+            </p>
+            <Button
+              variant="darkPrimary"
+              className="mt-2 flex min-w-full"
+              onClick={() => setIsCalendarOpen(true)}
+            >
+              <div className="flex items-center gap-2">
+                <CalendarIcon className="h-4 w-4" />
+                Change Dates
+              </div>
+            </Button>
+          </div>
         )}
 
         <a href="#" className="block text-center text-primary hover:underline">

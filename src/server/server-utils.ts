@@ -54,6 +54,8 @@ import { HOST_MARKUP, TRAVELER_MARKUP } from "@/utils/constants";
 import { HostRequestsPageData } from "./api/routers/propertiesRouter";
 import { Session } from "next-auth";
 import { calculateTotalTax } from "@/utils/payment-utils/taxData";
+import { scrapePage, serpPageSchema, transformSearchResult } from "./external-listings-scraping/airbnbScraper";
+import { getSerpUrl } from "./external-listings-scraping/airbnbScraper";
 import { createStripeConnectId } from "@/utils/stripe-utils";
 
 export const proxyAgent = new HttpsProxyAgent(env.PROXY_URL);
@@ -789,6 +791,8 @@ export async function getPropertyOriginalPrice(
   },
 ) {
   if (property.originalListingPlatform === "Hospitable") {
+    const formattedCheckIn = new Date(params.checkIn).toISOString().split("T")[0];
+    const formattedCheckOut = new Date(params.checkOut).toISOString().split("T")[0];
     const { data } = await axios.get<HospitableCalendarResponse>(
       `https://connect.hospitable.com/api/v1/listings/${property.hospitableListingId}/calendar`,
       {
@@ -796,8 +800,8 @@ export async function getPropertyOriginalPrice(
           Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
         },
         params: {
-          start_date: params.checkIn,
-          end_date: params.checkOut,
+          start_date: formattedCheckIn,
+          end_date: formattedCheckOut,
         },
       },
     );
@@ -1024,6 +1028,74 @@ export async function createInitialHostTeam(
 
   return teamId;
 }
+
+export async function scrapeAirbnbInitialPageHelper({
+  checkIn,
+  checkOut,
+  location,
+  numGuests,
+}: {
+  checkIn: Date;
+  checkOut: Date;
+  location: string;
+  numGuests: number;
+}) {
+  const serpUrl = getSerpUrl({
+    checkIn: checkIn,
+    checkOut: checkOut,
+    location: location,
+    numGuests: numGuests,
+  });
+
+  const numNights = getNumNights(checkIn, checkOut);
+
+
+  const pageData = await scrapePage(serpUrl).then(async (unparsedData) => {
+    return serpPageSchema.parse(unparsedData);
+  })
+  const searchResults = (await Promise.all(
+    pageData.staysSearch.results.searchResults.map((searchResult) =>
+      transformSearchResult({ searchResult, numNights, numGuests })
+    )
+  )).filter(Boolean);
+
+  // console.log("length of results:", searchResults.length);
+  // console.log('result:', searchResults[0]);
+  // const results = pageData.flatMap((data) => data.staysSearch.results.searchResults)
+  return { data: pageData, res: searchResults };
+}
+
+export async function scrapeAirbnbPagesHelper({
+  checkIn,
+  checkOut,
+  location,
+  numGuests,
+  cursors,
+}: {
+  checkIn: Date;
+  checkOut: Date;
+  location: string;
+  numGuests: number;
+  cursors: string[];
+}) {
+  const pageUrls = cursors.map((cursor) =>
+    getSerpUrl({
+      checkIn,
+      checkOut,
+      location,
+      numGuests,
+      cursor
+    }),
+  );
+
+  const numNights = getNumNights(checkIn, checkOut);
+
+  return (await Promise.all(pageUrls.map(scrapePage)))
+    .flatMap((data) => data.staysSearch.results.searchResults)
+    .map((searchResult) => transformSearchResult({ searchResult, numNights, numGuests }))
+    .filter(Boolean);
+}
+
 
 export async function getRequestsToBookForProperties(
   hostProperties: Property[],
