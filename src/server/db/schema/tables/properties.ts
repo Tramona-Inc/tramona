@@ -132,6 +132,13 @@ export const ALL_HOUSE_RULES = [
   "Quiet hours",
 ] as const;
 
+export const ALL_INTERACTION_PREFERENCES = [
+  "not available",
+  "say hello",
+  "socialize",
+  "no preference",
+] as const;
+
 export const propertySafetyItemsEnum = pgEnum(
   "property_safety_items",
   ALL_PROPERTY_SAFETY_ITEMS,
@@ -150,6 +157,11 @@ export const propertyStatusEnum = pgEnum("property_status", [
 export const checkOutEnum = pgEnum("check_out_info", ALL_CHECKOUT_TYPES);
 
 export const houseRulesEnum = pgEnum("house_rules", ALL_HOUSE_RULES);
+
+export const interactionPreferencesEnum = pgEnum(
+  "interaction_preference",
+  ALL_INTERACTION_PREFERENCES,
+);
 
 export const ALL_PROPERTY_PMS = ["Hostaway", "Hospitable", "Ownerrez"] as const;
 
@@ -289,6 +301,7 @@ export const properties = pgTable(
     additionalCheckOutInfo: varchar("additional_check_out_info"),
     houseRules: houseRulesEnum("house_rules").array(),
     additionalHouseRules: varchar("additional_house_rules"),
+    interactionPreference: interactionPreferencesEnum("interaction_preference"),
     checkInTime: time("check_in_time").notNull().default("15:00:00"),
     checkOutTime: time("check_out_time").notNull().default("10:00:00"),
     amenities: varchar("amenities")
