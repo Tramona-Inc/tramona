@@ -7,8 +7,9 @@ import InteractionPreferencesDialog from "./InteractionPreferencesDialog";
 import DirectionsDialog from "./DirectionsDialog";
 import WifiDialog from "./WifiDialog";
 import HouseManualDialog from "./HouseManualDialog";
+import { Property } from "@/server/db/schema";
 
-export default function HostArrivalGuide() {
+export default function HostArrivalGuide({ property }: { property: Property }) {
   const [activeDialog, setActiveDialog] = useState<number | null>(null);
 
   const guides = [
@@ -20,7 +21,7 @@ export default function HostArrivalGuide() {
     {
       title: "Check out instructions",
       subtitle: "What should travelers do before they check out?",
-      dialog: <CheckOutDialog />,
+      dialog: <CheckOutDialog property={property} />,
     },
     {
       title: "House rules",

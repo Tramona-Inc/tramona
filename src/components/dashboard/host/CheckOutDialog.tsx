@@ -14,25 +14,41 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import ErrorMsg from "@/components/ui/ErrorMsg";
+import { api } from "@/utils/api";
+import { ALL_CHECKOUT_TYPES, Property } from "@/server/db/schema";
 
 const formSchema = z.object({
-  checkOutInfo: z.string().array().optional(),
+  checkOutInfo: z.array(z.enum(ALL_CHECKOUT_TYPES)).optional(),
   additionalCheckOutInfo: z.string().optional(),
 });
 
 type FormSchema = z.infer<typeof formSchema>;
 
-export default function CheckOutDialog() {
+export default function CheckOutDialog({ property }: { property: Property }) {
+  const { data: fetchedProperty } = api.properties.getById.useQuery({
+    id: property.id,
+  });
+  const { mutateAsync: updateProperty } = api.properties.update.useMutation();
+
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
-    // defaultValues: {
-
-    // }
+    defaultValues: {
+      checkOutInfo: fetchedProperty?.checkOutInfo ?? [],
+      additionalCheckOutInfo: fetchedProperty?.additionalCheckOutInfo ?? "",
+    },
   });
 
-  function onSubmit(formValues: FormSchema) {
+  const onSubmit = async (formValues: FormSchema) => {
     console.log("formValues", formValues);
-  }
+    await updateProperty({
+      ...property,
+      checkOutInfo: formValues.checkOutInfo,
+      additionalCheckOutInfo:
+        formValues.additionalCheckOutInfo === ""
+          ? null
+          : formValues.additionalCheckOutInfo,
+    });
+  };
 
   const instructions = [
     {
@@ -120,6 +136,7 @@ export default function CheckOutDialog() {
                   <Textarea
                     {...field}
                     placeholder="Add any additional checkout instructions..."
+                    value={field.value ?? ""}
                   />
                 </FormControl>
                 <FormMessage />
@@ -129,13 +146,15 @@ export default function CheckOutDialog() {
           <p className="text-muted-foreground">
             Shared at 9 PM the evening before checkout
           </p>
-          <div className="flex items-center justify-end gap-2">
+          <div className="flex items-center justify-end">
             <DialogClose>
-              <Button variant="outline" type="button">
-                Cancel
-              </Button>
+              <div className="flex items-center justify-end gap-2">
+                <Button variant="outline" type="button">
+                  Cancel
+                </Button>
+                <Button type="submit">Save</Button>
+              </div>
             </DialogClose>
-            <Button type="submit">Save</Button>
           </div>
         </form>
       </Form>

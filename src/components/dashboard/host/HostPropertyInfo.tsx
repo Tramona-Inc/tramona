@@ -80,7 +80,7 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
           <HostBookItNow property={property} />
         </TabsContent>
         <TabsContent value="arrival-guide">
-          <HostArrivalGuide />
+          <HostArrivalGuide property={property} />
         </TabsContent>
       </Tabs>
     </div>
