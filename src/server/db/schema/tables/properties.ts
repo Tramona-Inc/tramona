@@ -140,13 +140,7 @@ export const propertyStatusEnum = pgEnum("property_status", [
   "Archived",
 ]);
 
-// export const checkOutEnum = pgEnum("check_out", [
-//   "Gather used towels",
-//   "Throw trash away",
-//   "Turn things off",
-//   "Lock up",
-//   "Return keys",
-// ]);
+export const checkOutEnum = pgEnum("check_out_info", ALL_CHECKOUT_TYPES);
 
 export const ALL_PROPERTY_PMS = ["Hostaway", "Hospitable", "Ownerrez"] as const;
 
@@ -282,7 +276,7 @@ export const properties = pgTable(
 
     originalListingUrl: varchar("original_listing_url"),
     checkInInfo: varchar("check_in_info"),
-    // checkOutInfo: checkOutEnum("check_out_enum").array(),
+    checkOutInfo: checkOutEnum("check_out_info").array(),
     additionalCheckOutInfo: varchar("additional_check_out_info"),
     checkInTime: time("check_in_time").notNull().default("15:00:00"),
     checkOutTime: time("check_out_time").notNull().default("10:00:00"),
@@ -359,6 +353,7 @@ export const propertySelectSchema = createSelectSchema(properties);
 
 // https://github.com/drizzle-team/drizzle-orm/issues/1609
 export const propertyInsertSchema = createInsertSchema(properties, {
+  checkOutInfo: z.array(z.enum(ALL_CHECKOUT_TYPES)),
   imageUrls: z.array(z.string().url()),
   originalListingUrl: z.string().url(),
   amenities: z.array(z.string()),
