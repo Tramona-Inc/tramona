@@ -67,7 +67,7 @@ export default function CheckOutDialog() {
       </div>
       <Form {...form}>
         <ErrorMsg>{form.formState.errors.root?.message}</ErrorMsg>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
             control={form.control}
             name="checkOutInfo"
@@ -120,7 +120,6 @@ export default function CheckOutDialog() {
                   <Textarea
                     {...field}
                     placeholder="Add any additional checkout instructions..."
-                    value={field.value}
                   />
                 </FormControl>
                 <FormMessage />
