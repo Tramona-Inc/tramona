@@ -14,6 +14,8 @@ import ErrorMsg from "@/components/ui/ErrorMsg";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Property } from "@/server/db/schema";
+import { api } from "@/utils/api";
 
 const formSchema = z.object({
   houseRules: z.string().array().optional(),
@@ -22,9 +24,18 @@ const formSchema = z.object({
 
 type FormSchema = z.infer<typeof formSchema>;
 
-export default function HouseRulesDialog() {
+export default function HouseRulesDialog({ property }: { property: Property }) {
+  const { data: fetchedProperty } = api.properties.getById.useQuery({
+    id: property.id,
+  });
+  const { mutateAsync: updateProperty } = api.properties.update.useMutation();
+
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      houseRules: fetchedProperty.houseRules,
+      additionalHouseRules: fetchedProperty.additionalHouseRules,
+    },
   });
 
   const rules = [
@@ -114,13 +125,15 @@ export default function HouseRulesDialog() {
           <p className="text-muted-foreground">
             Available throughout the booking process
           </p>
-          <div className="flex items-center justify-end gap-2">
+          <div className="flex items-center justify-end">
             <DialogClose>
-              <Button variant="outline" type="button">
-                Cancel
-              </Button>
+              <div className="flex items-center justify-end gap-2">
+                <Button variant="outline" type="button">
+                  Cancel
+                </Button>
+                <Button type="submit">Save</Button>
+              </div>
             </DialogClose>
-            <Button type="submit">Save</Button>
           </div>
         </form>
       </Form>

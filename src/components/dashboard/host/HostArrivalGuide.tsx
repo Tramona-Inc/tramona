@@ -26,7 +26,7 @@ export default function HostArrivalGuide({ property }: { property: Property }) {
     {
       title: "House rules",
       subtitle: "What are the rules of your property?",
-      dialog: <HouseRulesDialog />,
+      dialog: <HouseRulesDialog property={property} />,
     },
     {
       title: "Interaction preferences",
