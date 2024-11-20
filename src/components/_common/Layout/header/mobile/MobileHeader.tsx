@@ -76,7 +76,10 @@ export default function MobileHeader({ isHost }: { isHost: boolean }) {
                         href={item.href}
                         className="flex items-center justify-between rounded-md py-3 pr-4 text-primaryGreen transition-colors duration-200 hover:bg-background"
                       >
-                        {item.title}
+                        <div className="flex flex-row items-center gap-x-2">
+                          <item.icon />
+                          {item.title}
+                        </div>
                         <ChevronRight className="h-4 w-4 text-slate-400" />
                       </Link>
                     ))}
@@ -93,7 +96,10 @@ export default function MobileHeader({ isHost }: { isHost: boolean }) {
                         href={item.href}
                         className="flex items-center justify-between rounded-md py-3 pr-4 text-primaryGreen transition-colors duration-200 hover:bg-background"
                       >
-                        {item.title}
+                        <div className="flex flex-row items-center gap-x-2">
+                          <item.icon />
+                          {item.title}
+                        </div>
                         <ChevronRight className="h-4 w-4 text-slate-400" />
                       </Link>
                     ))}
@@ -119,9 +125,9 @@ export default function MobileHeader({ isHost }: { isHost: boolean }) {
         </Sheet>
         <Link
           href="/"
-          className="absolute inset-0 z-0 flex items-center justify-center"
+          className="absolute left-16 z-0 flex items-center justify-center sm:inset-0"
         >
-          <span className="text-xl font-semibold text-primaryGreen">
+          <span className="text-xl font-semibold tracking-tight text-primaryGreen sm:tracking-normal">
             Tramona
           </span>
         </Link>

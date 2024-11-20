@@ -14,6 +14,7 @@ import {
   BriefcaseIcon,
   ClipboardIcon,
   UserIcon,
+  SearchIcon,
 } from "lucide-react";
 
 export const adminNavLinks = [
@@ -59,7 +60,7 @@ export const hostMobileNavLinks = [
 
 export const guestMobileNavLinks = [
   { href: "/", name: "Dashboard", icon: HomeIcon },
-  { href: "/requests", name: "Name your own price", icon: ClipboardIcon },
+  { href: "/unclaimed-offers", name: "Explore", icon: SearchIcon },
   { href: "/", name: "Concierge", icon: UserIcon },
 ];
 

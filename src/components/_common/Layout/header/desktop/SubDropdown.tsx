@@ -13,7 +13,7 @@ export default function SubDropdown({
   menuItems,
 }: {
   title: string;
-  menuItems: { href: string; title: string }[];
+  menuItems: { href: string; title: string; icon: React.FC }[];
 }) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const setOpenChange = () => {
@@ -31,7 +31,10 @@ export default function SubDropdown({
       <DropdownMenuContent className="w-64 text-primaryGreen">
         {menuItems.map((item, index) => (
           <Link href={item.href} key={index}>
-            <DropdownMenuItem>{item.title}</DropdownMenuItem>
+            <DropdownMenuItem className="flex flex-row justify-start">
+              <item.icon />
+              {item.title}
+            </DropdownMenuItem>
           </Link>
         ))}
       </DropdownMenuContent>

@@ -4,7 +4,16 @@ import {
   Home,
   InfoIcon,
   LinkIcon,
+  ReceiptText,
+  TvMinimalPlay,
   MessageCircleQuestion,
+  HeadsetIcon,
+  ShieldCheckIcon,
+  UsersIcon,
+  LayoutDashboard,
+  HouseIcon,
+  HandCoins,
+  SettingsIcon,
 } from "lucide-react";
 //  <---------------- DESKTOP LINKS ----------------->
 
@@ -17,45 +26,57 @@ export const leftHeaderLinks = [
 
 //------- DROPDOWN LINKS ------
 export const aboutMenuItems = [
-  { href: "/how-it-works", title: "How it Works" },
-  { href: "/exclusive-offers", title: "Recent Deals" },
-  { href: "/faq", title: "FAQ" },
-  { href: "/demo", title: "Demo" },
-  { href: "/partner-with-tramona", title: "Partnerships" },
+  { href: "/how-it-works", title: "How it Works", icon: InfoIcon },
+  { href: "/exclusive-offers", title: "Recent Deals", icon: HandshakeIcon },
+  { href: "/faq", title: "FAQ", icon: BadgeHelp },
+  { href: "/demo", title: "Demo", icon: TvMinimalPlay },
+  { href: "/partner-with-tramona", title: "Partnerships", icon: UsersIcon },
 ];
 
 export const helpMenuItems = [
-  { href: "/help-center", title: "24/7 Support" },
-  { href: "/rebooking-guarantee", title: "100% Re-booking Guarantee" },
+  { href: "/help-center", title: "24/7 Support", icon: HeadsetIcon },
+  {
+    href: "/rebooking-guarantee",
+    title: "100% Re-booking Guarantee",
+    icon: ShieldCheckIcon,
+  },
 ];
 
 //  ------------MOBILE LINKS--------
 
 export const browseLinkItems = [
   //mobile only
-  { href: "/how-it-works", title: "How it Works" },
-  { href: "/exclusive-offers", title: "Recent Deals" },
-  { href: "/demo", title: "Demo" },
-  { href: "/partner-with-tramona", title: "Partnerships" },
+  { href: "/how-it-works", title: "How it Works", icon: InfoIcon },
+  { href: "/exclusive-offers", title: "Recent Deals", icon: HandshakeIcon },
+  { href: "/demo", title: "Demo", icon: TvMinimalPlay },
+  {
+    href: "/partner-with-tramona",
+    title: "Partnerships",
+    icon: UsersIcon,
+  },
 ];
 
 export const aboutLinkItems = [
   //mobile only
-  { href: "/faq", title: "FAQ" },
-  { href: "/help-center", title: "24/7 Support" },
-  { href: "/rebooking-guarantee", title: "100% Re-booking Guarantee" },
+  { href: "/faq", title: "FAQ", icon: BadgeHelp },
+  { href: "/help-center", title: "24/7 Support", icon: HeadsetIcon },
+  {
+    href: "/rebooking-guarantee",
+    title: "100% Re-booking Guarantee",
+    icon: ShieldCheckIcon,
+  },
 ];
 
 // <----------- HOST MOBILE LINKS ---------->
 export const hostManageLinks = [
-  { href: "/host", title: "Dashboard" },
-  { href: "listings", title: "Properties" },
-  { href: "team", title: "Team" },
+  { href: "/host", title: "Dashboard", icon: LayoutDashboard },
+  { href: "listings", title: "Properties", icon: HouseIcon },
+  { href: "team", title: "Team", icon: UsersIcon },
 ];
 
 export const hostAccountLinks = [
-  { href: "finances", title: "Earnings" },
-  { href: "settings", title: "Settings" },
+  { href: "finances", title: "Earnings", icon: HandCoins },
+  { href: "settings", title: "Settings", icon: SettingsIcon },
 ];
 
 // ----------- HOST DESKTOP LINKS

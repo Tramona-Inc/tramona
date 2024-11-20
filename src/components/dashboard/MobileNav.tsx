@@ -12,7 +12,7 @@ export default function MobileNav({
 }: {
   type: "admin" | "guest" | "host" | "unlogged";
 }) {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const isAdmin = session && session.user.role === "admin";
 
   let navLinks;
