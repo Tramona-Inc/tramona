@@ -1,22 +1,12 @@
 import { env } from "@/env";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
-import {
-  offers,
-  properties,
-  requestsToBook,
-  trips,
-  users,
-} from "@/server/db/schema";
+import { properties, requestsToBook, trips, users } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
-import { and, between, eq, gte, isNull, lte, ne } from "drizzle-orm";
+import { and, eq, gte, isNull, lte, ne } from "drizzle-orm";
 import Stripe from "stripe";
 import { z } from "zod";
-import { getPropertyForOffer } from "./offersRouter";
 import { createPayHostTransfer } from "@/utils/stripe-utils";
-import {
-  breakdownPaymentByOffer,
-  breakdownPaymentByPropertyAndTripParams,
-} from "@/utils/payment-utils/paymentBreakdown";
+import { breakdownPaymentByPropertyAndTripParams } from "@/utils/payment-utils/paymentBreakdown";
 import { db } from "@/server/db";
 import { finalizeTrip } from "@/utils/webhook-functions/stripe-utils";
 
@@ -396,7 +386,7 @@ export const stripeRouter = createTRPCRouter({
         isAccepted: z.boolean(),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ input }) => {
       //check to make sure user is authorized
 
       //update results in db.

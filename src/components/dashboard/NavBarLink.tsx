@@ -17,8 +17,8 @@ export function NavBarLink({
       render={({ selected }) => (
         <div
           className={cn(
-            "relative flex flex-col items-center gap-1 px-1 py-3 text-center text-xs font-light",
-            selected ? "text-teal-700" : "text-zinc-800",
+            "relative flex flex-col items-center gap-1 px-1 py-2 text-center text-xs font-light",
+            selected ? "text-primaryGreen" : "text-gray-500",
           )}
         >
           {/* @ts-expect-error ignore because of the strokeWidth, We might change it so i didnt refactor, idk. */}

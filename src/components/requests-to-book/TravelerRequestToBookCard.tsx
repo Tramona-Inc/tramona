@@ -26,9 +26,6 @@ import { useState } from "react";
 import WithdrawRequestToBookDialog from "./WithdrawRequestToBookDialog";
 
 import { RequestToBookCardPreviews } from "./RequestToBookCardPreviews";
-import UserAvatar from "../_common/UserAvatar";
-import { formatDistanceToNowStrict } from "date-fns";
-import { TravelerVerificationsDialog } from "../requests/TravelerVerificationsDialog";
 
 export type HostDashboardRequestToBook =
   RouterOutputs["requestsToBook"]["getHostRequestsToBookFromId"][
