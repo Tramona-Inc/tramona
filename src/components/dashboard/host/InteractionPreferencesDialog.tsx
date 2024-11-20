@@ -13,20 +13,57 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import ErrorMsg from "@/components/ui/ErrorMsg";
 import { DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { api } from "@/utils/api";
+import { Property } from "@/server/db/schema";
 
 const formSchema = z.object({
-  interactionPreference: z.string(),
+  interactionPreference: z.string().optional(),
 });
 
 type FormSchema = z.infer<typeof formSchema>;
 
-export default function InteractionPreferencesDialog() {
+type InteractionPreferences =
+  | "not available"
+  | "say hello"
+  | "socialize"
+  | "no preference"
+  | null;
+
+export default function InteractionPreferencesDialog({
+  property,
+}: {
+  property: Property;
+}) {
+  const { data: fetchedProperty, refetch } = api.properties.getById.useQuery({
+    id: property.id,
+  });
+  const { mutateAsync: updateProperty } = api.properties.update.useMutation();
+
+  let modifiedInteractionPrefIndex = null;
+  switch (fetchedProperty?.interactionPreference) {
+    case "not available":
+      modifiedInteractionPrefIndex = 0;
+      break;
+    case "say hello":
+      modifiedInteractionPrefIndex = 1;
+      break;
+    case "socialize":
+      modifiedInteractionPrefIndex = 2;
+      break;
+    case "no preference":
+      modifiedInteractionPrefIndex = 3;
+      break;
+  }
+
   const [selectedMethodIndex, setSelectedMethodIndex] = useState<number | null>(
-    null,
+    modifiedInteractionPrefIndex,
   );
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      interactionPreference: fetchedProperty?.interactionPreference ?? "",
+    },
   });
 
   const interactions = [
@@ -45,8 +82,28 @@ export default function InteractionPreferencesDialog() {
     },
   ];
 
-  const onSubmit = (formValues: FormSchema) => {
+  const onSubmit = async (formValues: FormSchema) => {
     console.log("formValues", formValues);
+    let modifiedInteractionPref: InteractionPreferences = null;
+    switch (formValues.interactionPreference) {
+      case "I won't be available in person, and prefer communicating through the app.":
+        modifiedInteractionPref = "not available";
+        break;
+      case "I like to say hello in person, but keep to myself otherwise.":
+        modifiedInteractionPref = "say hello";
+        break;
+      case "I like socializing and spending time with guests.":
+        modifiedInteractionPref = "socialize";
+        break;
+      case "No preferences - I follow my guests' lead.":
+        modifiedInteractionPref = "no preference";
+        break;
+    }
+    await updateProperty({
+      ...property,
+      interactionPreference: modifiedInteractionPref,
+    });
+    void refetch();
   };
 
   return (
@@ -69,7 +126,7 @@ export default function InteractionPreferencesDialog() {
                       <div
                         className={cn(
                           selectedMethodIndex === index
-                            ? "bg-zinc-100"
+                            ? "bg-zinc-200"
                             : "bg-white",
                           "rounded-xl border p-3 hover:cursor-pointer hover:bg-zinc-100",
                         )}
@@ -88,13 +145,15 @@ export default function InteractionPreferencesDialog() {
               </FormItem>
             )}
           />
-          <div className="flex items-center justify-end gap-2">
+          <div className="flex items-center justify-end">
             <DialogClose>
-              <Button variant="outline" type="button">
-                Cancel
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" type="button">
+                  Cancel
+                </Button>
+                <Button type="submit">Save</Button>
+              </div>
             </DialogClose>
-            <Button type="submit">Save</Button>
           </div>
         </form>
       </Form>

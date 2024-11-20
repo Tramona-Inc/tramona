@@ -31,7 +31,7 @@ export default function HostArrivalGuide({ property }: { property: Property }) {
     {
       title: "Interaction preferences",
       subtitle: "Add details",
-      dialog: <InteractionPreferencesDialog />,
+      dialog: <InteractionPreferencesDialog property={property} />,
     },
     {
       title: "Directions",
