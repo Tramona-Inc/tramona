@@ -3,7 +3,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu";
 import { type RouterOutputs } from "@/utils/api";
 import {
   formatCurrency,
@@ -19,54 +19,28 @@ import {
   TrashIcon,
   Users2Icon,
 } from "lucide-react";
-import { Card, CardFooter } from "../ui/card";
-import RequestToBookCardBadge from "./RequestToBookCardBadge";
-import { Button } from "../ui/button";
+import { Card, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import WithdrawRequestToBookDialog from "./WithdrawRequestToBookDialog";
-
-import { RequestToBookCardPreviews } from "./RequestToBookCardPreviews";
-import UserAvatar from "../_common/UserAvatar";
+import UserAvatar from "@/components/_common/UserAvatar";
 import { formatDistanceToNowStrict } from "date-fns";
-import { TravelerVerificationsDialog } from "../requests/TravelerVerificationsDialog";
+import { TravelerVerificationsDialog } from "@/components/requests/TravelerVerificationsDialog";
+import WithdrawRequestToBookDialog from "@/components/requests-to-book/WithdrawRequestToBookDialog";
+import RequestToBookCardBadge from "@/components/requests-to-book/RequestToBookCardBadge";
 
 export type HostDashboardRequestToBook =
   RouterOutputs["requestsToBook"]["getHostRequestsToBookFromId"][
     | "activeRequestsToBook"
     | "inactiveRequestsToBook"][number];
 
-export type GuestDashboardRequestToBook =
-  RouterOutputs["requestsToBook"]["getMyRequestsToBook"][
-    | "activeRequestsToBook"
-    | "inactiveRequestsToBook"][number];
-
-export default function RequestToBookCard({
+export default function HostRequestToBookCard({
   requestToBook,
-  // property,
-  type,
   children,
-}: (
-  | {
-      type: "guest";
-      requestToBook: GuestDashboardRequestToBook;
-    }
-  // change these
-  | {
-      type: "admin";
-      requestToBook: GuestDashboardRequestToBook;
-    }
-  | {
-      type: "host";
-      requestToBook: HostDashboardRequestToBook;
-      // property: Property;
-    } // | { type: "guest"; request: GuestDashboardRequest }
-  // | { type: "admin"; request: AdminDashboardRequst }
-) & // | { type: "host"; request: HostDashboardRequest }
-{
+}: {
+  requestToBook: HostDashboardRequestToBook;
   children?: React.ReactNode;
 }) {
   const pricePerNight =
-    // request.maxTotalPrice
     requestToBook.amountAfterTravelerMarkupAndBeforeFees /
     getNumNights(requestToBook.checkIn, requestToBook.checkOut);
   const fmtdPrice = formatCurrency(pricePerNight);
@@ -89,28 +63,25 @@ export default function RequestToBookCard({
       <div className="flex p-2">
         <div className="flex-1 space-y-4 overflow-hidden p-4 pt-2">
           <div className="flex items-center gap-2">
-            {type !== "host" && (
-              <RequestToBookCardBadge requestToBook={requestToBook} />
-            )}
-            {type === "host" && (
-              <>
-                <UserAvatar
-                  size="sm"
-                  name={requestToBook.madeByGroup.owner.name}
-                  image={requestToBook.madeByGroup.owner.image}
-                />
-                <TravelerVerificationsDialog request={requestToBook} />
-                <p>&middot;</p>
-                <p>
-                  {formatDistanceToNowStrict(requestToBook.createdAt, {
-                    addSuffix: true,
-                  })}
-                </p>
-              </>
-            )}
+            <>
+              <UserAvatar
+                size="sm"
+                name={requestToBook.madeByGroup.owner.name}
+                image={requestToBook.madeByGroup.owner.image}
+              />
+              <TravelerVerificationsDialog request={requestToBook} />
+              <p>&middot;</p>
+              <p>
+                {formatDistanceToNowStrict(requestToBook.createdAt, {
+                  addSuffix: true,
+                })}
+              </p>
+            </>
+
+            <RequestToBookCardBadge requestToBook={requestToBook} />
             <div className="flex-1" />
 
-            {type === "guest" && !requestToBook.resolvedAt && (
+            {!requestToBook.resolvedAt && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="rounded-full">
@@ -127,22 +98,20 @@ export default function RequestToBookCard({
             )}
           </div>
           <div className="space-y-1">
-            {type !== "host" && (
-              <div>
-                <div className="flex items-start gap-1">
-                  <MapPinIcon className="shrink-0 text-primary" />
-                  <h2 className="text-base font-bold text-primary md:text-lg">
-                    {requestToBook.property.city}
-                  </h2>
-                </div>
-                <div className="flex items-start gap-1">
-                  <Home className="shrink-0 text-primary" />
-                  <h2 className="text-base font-bold text-primary md:text-lg">
-                    {requestToBook.property.name}
-                  </h2>
-                </div>
+            <div>
+              <div className="flex items-start gap-1">
+                <MapPinIcon className="shrink-0 text-primary" />
+                <h2 className="text-base font-bold text-primary md:text-lg">
+                  {requestToBook.property.name}
+                </h2>
               </div>
-            )}
+              <div className="flex items-start gap-1">
+                <Home className="shrink-0 text-primary" />
+                <h2 className="text-base font-bold text-primary md:text-lg">
+                  {requestToBook.property.name}
+                </h2>
+              </div>
+            </div>
             <div>
               <p>
                 Requested <span className="font-semibold">{fmtdPrice}</span>
@@ -163,9 +132,6 @@ export default function RequestToBookCard({
           </div>
           <CardFooter className="empty:hidden">{children}</CardFooter>
         </div>
-        {type === "guest" && requestToBook.status !== "Accepted" && (
-          <RequestToBookCardPreviews requestToBook={requestToBook} />
-        )}
       </div>
     </Card>
   );

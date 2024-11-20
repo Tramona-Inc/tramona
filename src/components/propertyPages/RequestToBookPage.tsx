@@ -18,14 +18,16 @@ export default function RequestToBookPage({
   property: PropertyPageData;
 }) {
   return (
-    <PropertyPage
-      property={property}
-      sidebar={
-        <RequestToBookPageSidebar property={property} acceptedAt={false} />
-      }
-      mobileBottomCard={
-        <RequestToBookPageMobileBottomCard property={property} />
-      }
-    />
+    <>
+      <PropertyPage
+        property={property}
+        sidebar={
+          <RequestToBookPageSidebar property={property} acceptedAt={false} />
+        }
+        mobileBottomCard={
+          <RequestToBookPageMobileBottomCard property={property} />
+        }
+      />
+    </>
   );
 }
