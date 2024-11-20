@@ -33,7 +33,7 @@ const buttonVariants = cva(
         filledInput:
           "w-full bg-primary-foreground px-3 font-normal text-black hover:bg-accent border border-input outline-offset-0 focus-visible:outline-2 focus-visible:outline-ring disabled:opacity-50",
         darkPrimary: "bg-black text-white hover:bg-black/80",
-        darkOutline: "border-2 border-black hover:bg-zinc-200",
+        darkOutline: "border border-black hover:bg-zinc-200",
         darkOutlineWhite: "border-2 border-white text-white",
         white: "bg-white text-black hover:bg-zinc-200",
         wrapper:

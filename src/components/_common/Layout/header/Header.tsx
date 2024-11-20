@@ -14,24 +14,19 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import AvatarDropdown from "./AvatarDropdown";
-import { api } from "@/utils/api";
 import TramonaIcon from "@/components/_icons/TramonaIcon";
 import {
-  headerLinks,
-  unloggedHamburgerLinksMobile,
-  unloggedCenterHeaderLinks,
-  unloggedHamburgerLinksDesktop,
-  loggedCenterHeaderLinks,
-  loggedHamburgerLinksMobile,
+  leftHeaderLinks,
   hostCenterHeaderLinks,
+  helpMenuItems,
+  aboutMenuItems,
 } from "@/config/headerNavLinks";
-import {
-  ArrowLeftRightIcon,
-  ChevronDown,
-  DoorOpen,
-  MenuIcon,
-} from "lucide-react";
+import { MenuIcon } from "lucide-react";
 import { SkeletonText } from "@/components/ui/skeleton";
+import SubDropdown from "./desktop/SubDropdown";
+import MobileHeader from "./mobile/MobileHeader";
+import useHostBtn from "./useHostBtn";
+import LogInSignUp from "./LoginOrSignup";
 
 export function Header() {
   const { pathname } = useRouter();
@@ -43,8 +38,8 @@ export function Header() {
       <div className="text-balance bg-primaryGreen px-4 py-2 text-center text-sm font-medium text-white">
         Tramona is under maintenance right now, we&apos;ll be launching soon!
       </div>
-      <div className="contents lg:hidden">
-        <SmallHeader isHost={isHost} />
+      <div className="lg:hidden">
+        <MobileHeader isHost={isHost} />
       </div>
       <div className="container hidden lg:contents">
         <LargeHeader isHost={isHost} />
@@ -95,7 +90,7 @@ function LargeHeader({ isHost }: { isHost: boolean }) {
 
   const hostBtn = useHostBtn();
 
-  const links = isHost ? hostCenterHeaderLinks : headerLinks;
+  const links = isHost ? hostCenterHeaderLinks : leftHeaderLinks;
 
   return (
     <header className="sticky top-0 z-50 flex h-header-height items-center gap-2 border-b bg-white p-4 lg:pl-8 xl:px-20">
@@ -126,64 +121,10 @@ function LargeHeader({ isHost }: { isHost: boolean }) {
       <div className="flex-1" />
 
       {!isHost && (
-        <div className="flex items-center">
-          {status === "authenticated"
-            ? loggedCenterHeaderLinks.map((link) => (
-                <NavLink
-                  href={link.href}
-                  key={link.href}
-                  render={({ selected }) => (
-                    <span
-                      className={cn(
-                        "rounded-md px-2 py-3 text-xs font-bold text-zinc-600 hover:text-foreground xl:text-sm",
-                        selected &&
-                          "text-foreground underline underline-offset-2",
-                      )}
-                    >
-                      {link.name}
-                    </span>
-                  )}
-                />
-              ))
-            : unloggedCenterHeaderLinks.map((link) => (
-                <NavLink
-                  href={link.href}
-                  key={link.href}
-                  render={({ selected }) => (
-                    <span
-                      className={cn(
-                        "rounded-md px-2 py-3 text-xs font-bold text-zinc-600 hover:text-foreground xl:text-sm",
-                        selected &&
-                          "text-foreground underline underline-offset-2",
-                      )}
-                    >
-                      {link.name}
-                    </span>
-                  )}
-                />
-              ))}
+        <div className="mx-2 flex flex-row gap-x-6">
+          <SubDropdown title="About" menuItems={aboutMenuItems} />
+          <SubDropdown title="Help" menuItems={helpMenuItems} />
         </div>
-      )}
-
-      <div className="flex-1" />
-
-      {status === "authenticated" && !isHost && (
-        <DropdownMenu>
-          <DropdownMenuTrigger className="flex items-center">
-            <p className="text-xs font-bold text-zinc-600 hover:text-foreground xl:text-sm">
-              Help
-            </p>
-            <ChevronDown size={15} />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <Link href="/faq">
-              <DropdownMenuItem>24/7 Support</DropdownMenuItem>
-            </Link>
-            <Link href="/help-center">
-              <DropdownMenuItem>100% Re booking guarantee</DropdownMenuItem>
-            </Link>
-          </DropdownMenuContent>
-        </DropdownMenu>
       )}
 
       {status === "loading" ? null : hostBtn.isLoading ? (
@@ -203,7 +144,6 @@ function LargeHeader({ isHost }: { isHost: boolean }) {
       {status === "unauthenticated" && (
         <>
           <LogInSignUp />
-          <HamburgerMenu links={unloggedHamburgerLinksDesktop} />
         </>
       )}
 
@@ -245,65 +185,6 @@ function SmallHeader({ isHost }: { isHost: boolean }) {
       )}
 
       {status === "unauthenticated" && <LogInSignUp />}
-
-      {!isHost && (
-        <HamburgerMenu
-          links={[
-            // ...(hostBtn.isLoading ? [] : [hostBtn]),
-            ...(status === "unauthenticated"
-              ? unloggedHamburgerLinksMobile
-              : loggedHamburgerLinksMobile),
-          ]}
-        />
-      )}
     </header>
   );
-}
-
-function LogInSignUp() {
-  return (
-    <>
-      <Button asChild variant="secondary">
-        <Link href="/auth/signin">Log In</Link>
-      </Button>
-      <Button asChild>
-        <Link href="/auth/signup">Sign Up</Link>
-      </Button>
-    </>
-  );
-}
-
-function useHostBtn() {
-  const { data: isHost, isLoading: isHostLoading } =
-    api.users.isHost.useQuery();
-
-  const { status: sessionStatus } = useSession();
-
-  const { pathname } = useRouter();
-
-  if (sessionStatus === "loading" || isHostLoading) {
-    return { isLoading: true } as const;
-  }
-
-  if (sessionStatus === "unauthenticated" || !isHost) {
-    return {
-      href: "/for-hosts",
-      name: "Become a host",
-      icon: DoorOpen,
-    } as const;
-  }
-
-  if (pathname.includes("/host")) {
-    return {
-      href: "/",
-      name: "Switch to Traveler",
-      icon: ArrowLeftRightIcon,
-    } as const;
-  }
-
-  return {
-    href: "/host",
-    name: "Switch to Host",
-    icon: ArrowLeftRightIcon,
-  } as const;
 }

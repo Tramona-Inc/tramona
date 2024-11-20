@@ -6,57 +6,59 @@ import {
   LinkIcon,
   MessageCircleQuestion,
 } from "lucide-react";
+//  <---------------- DESKTOP LINKS ----------------->
 
 // same for logged and unlogged
-export const headerLinks = [
-  { name: "Book it now", href: "/unclaimed-offers", icon: LinkIcon },
-  { name: "Name your own price", href: "/how-it-works", icon: InfoIcon },
+export const leftHeaderLinks = [
+  { name: "Requests", href: "/requests", icon: LinkIcon },
+  { name: "Trips", href: "/my-trips", icon: InfoIcon },
+  { name: "Messages", href: "/messages", icon: InfoIcon },
 ];
 
-// DESKTOP LINKS
-
-export const unloggedCenterHeaderLinks = [
-  { name: "How it works", href: "/how-it-works", icon: InfoIcon },
-  { name: "FAQ", href: "/faq", icon: MessageCircleQuestion },
-  { name: "For Hosts", href: "/why-list", icon: Home },
+//------- DROPDOWN LINKS ------
+export const aboutMenuItems = [
+  { href: "/how-it-works", title: "How it Works" },
+  { href: "/exclusive-offers", title: "Recent Deals" },
+  { href: "/faq", title: "FAQ" },
+  { href: "/demo", title: "Demo" },
+  { href: "/partner-with-tramona", title: "Partnerships" },
 ];
 
-export const unloggedHamburgerLinksDesktop = [
-  { name: "Recent Deals", href: "/exclusive-offers", icon: BadgeHelp },
-  { name: "24/7 Support", href: "/help-center", icon: BadgeHelp },
-  {
-    name: "100% Re booking guarantee",
-    href: "/rebooking-guarantee",
-    icon: MessageCircleQuestion,
-  },
+export const helpMenuItems = [
+  { href: "/help-center", title: "24/7 Support" },
+  { href: "/rebooking-guarantee", title: "100% Re-booking Guarantee" },
 ];
 
-export const loggedCenterHeaderLinks = [
-  { name: "How it works", href: "/how-it-works", icon: InfoIcon },
-  { name: "FAQ", href: "/faq", icon: MessageCircleQuestion },
-  { name: "For Hosts", href: "/why-list", icon: Home },
-  { name: "Recent Deals", href: "/exclusive-offers", icon: BadgeHelp },
+//  ------------MOBILE LINKS--------
+
+export const browseLinkItems = [
+  //mobile only
+  { href: "/how-it-works", title: "How it Works" },
+  { href: "/exclusive-offers", title: "Recent Deals" },
+  { href: "/demo", title: "Demo" },
+  { href: "/partner-with-tramona", title: "Partnerships" },
 ];
 
-// MOBILE LINKS
-
-export const unloggedHamburgerLinksMobile = [
-  { name: "How it Works", href: "/how-it-works", icon: InfoIcon },
-  { name: "FAQ", href: "/faq", icon: MessageCircleQuestion },
-  { name: "For Hosts", href: "/why-list", icon: Home },
-  { name: "Recent Deals", href: "/exclusive-offers", icon: HandshakeIcon },
-  { name: "24/7 Support", href: "/help-center", icon: BadgeHelp },
-  { name: "100% Re booking guarantee", href: "/rebooking-guarantee", icon: BadgeHelp },
+export const aboutLinkItems = [
+  //mobile only
+  { href: "/faq", title: "FAQ" },
+  { href: "/help-center", title: "24/7 Support" },
+  { href: "/rebooking-guarantee", title: "100% Re-booking Guarantee" },
 ];
 
-export const loggedHamburgerLinksMobile = [
-  { name: "How it Works", href: "/how-it-works", icon: InfoIcon },
-  { name: "FAQ", href: "/faq", icon: MessageCircleQuestion },
-  { name: "For Hosts", href: "/why-list", icon: Home },
-  { name: "Recent Deals", href: "/exclusive-offers", icon: HandshakeIcon },
-  { name: "24/7 Support", href: "/help-center", icon: BadgeHelp },
-  { name: "100% Re booking guarantee", href: "/rebooking-guarantee", icon: BadgeHelp },
+// <----------- HOST MOBILE LINKS ---------->
+export const hostManageLinks = [
+  { href: "/host", title: "Dashboard" },
+  { href: "listings", title: "Properties" },
+  { href: "team", title: "Team" },
 ];
+
+export const hostAccountLinks = [
+  { href: "finances", title: "Earnings" },
+  { href: "settings", title: "Settings" },
+];
+
+// ----------- HOST DESKTOP LINKS
 
 export const hostCenterHeaderLinks = [
   { name: "Overview", href: "/host" },
