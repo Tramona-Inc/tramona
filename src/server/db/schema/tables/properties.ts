@@ -303,6 +303,8 @@ export const properties = pgTable(
     additionalHouseRules: varchar("additional_house_rules"),
     interactionPreference: interactionPreferencesEnum("interaction_preference"),
     directions: varchar("directions"),
+    wifiName: varchar("wifi_name"),
+    wifiPassword: varchar("wifi_password"),
     checkInTime: time("check_in_time").notNull().default("15:00:00"),
     checkOutTime: time("check_out_time").notNull().default("10:00:00"),
     amenities: varchar("amenities")
