@@ -22,7 +22,7 @@ const formSchema = z.object({
 type FormSchema = z.infer<typeof formSchema>;
 
 export default function DirectionsDialog({ property }: { property: Property }) {
-  const { data: fetchedProperty } = api.properties.getById.useQuery({
+  const { data: fetchedProperty, refetch } = api.properties.getById.useQuery({
     id: property.id,
   });
 
@@ -41,6 +41,7 @@ export default function DirectionsDialog({ property }: { property: Property }) {
       ...property,
       directions: formValues.directions === "" ? null : formValues.directions,
     });
+    void refetch();
   };
 
   return (

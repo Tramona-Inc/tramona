@@ -41,7 +41,7 @@ export default function HostArrivalGuide({ property }: { property: Property }) {
     {
       title: "WiFi Details",
       subtitle: "Add details",
-      dialog: <WifiDialog />,
+      dialog: <WifiDialog property={property} />,
     },
     {
       title: "House manual",

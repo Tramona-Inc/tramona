@@ -144,6 +144,9 @@ export default function InteractionPreferencesDialog({
               </FormItem>
             )}
           />
+          <p className="text-muted-foreground">
+            Available throughout the booking process
+          </p>
           <DialogCancelSave />
         </form>
       </Form>
