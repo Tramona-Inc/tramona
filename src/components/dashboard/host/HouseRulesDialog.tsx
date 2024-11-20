@@ -57,7 +57,6 @@ export default function HouseRulesDialog({ property }: { property: Property }) {
   ];
 
   const onSubmit = async (formValues: FormSchema) => {
-    console.log("formValues", formValues);
     await updateProperty({
       ...property,
       houseRules: formValues.houseRules,

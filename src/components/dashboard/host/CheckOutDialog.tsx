@@ -38,7 +38,6 @@ export default function CheckOutDialog({ property }: { property: Property }) {
   });
 
   const onSubmit = async (formValues: FormSchema) => {
-    console.log("formValues", formValues);
     await updateProperty({
       ...property,
       checkOutInfo: formValues.checkOutInfo,

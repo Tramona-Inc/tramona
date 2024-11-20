@@ -46,7 +46,7 @@ export default function HostArrivalGuide({ property }: { property: Property }) {
     {
       title: "House manual",
       subtitle: "Add details",
-      dialog: <HouseManualDialog />,
+      dialog: <HouseManualDialog property={property} />,
     },
   ];
 

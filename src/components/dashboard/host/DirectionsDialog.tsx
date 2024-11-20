@@ -36,7 +36,6 @@ export default function DirectionsDialog({ property }: { property: Property }) {
   });
 
   const onSubmit = async (formValues: FormSchema) => {
-    console.log("formValues", formValues);
     await updateProperty({
       ...property,
       directions: formValues.directions === "" ? null : formValues.directions,

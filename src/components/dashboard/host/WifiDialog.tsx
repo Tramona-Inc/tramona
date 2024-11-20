@@ -30,7 +30,6 @@ export default function WifiDialog({ property }: { property: Property }) {
   });
 
   const onSubmit = async (formValues: FormSchema) => {
-    console.log("formValues", formValues);
     await updateProperty({
       ...property,
       wifiName: formValues.wifiName === "" ? null : formValues.wifiName,
