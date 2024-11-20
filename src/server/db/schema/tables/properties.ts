@@ -305,6 +305,7 @@ export const properties = pgTable(
     directions: varchar("directions"),
     wifiName: varchar("wifi_name"),
     wifiPassword: varchar("wifi_password"),
+    houseManual: varchar("house_manual"),
     checkInTime: time("check_in_time").notNull().default("15:00:00"),
     checkOutTime: time("check_out_time").notNull().default("10:00:00"),
     amenities: varchar("amenities")
