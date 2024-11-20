@@ -1,7 +1,5 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
-import { DialogClose } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -16,6 +14,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ALL_HOUSE_RULES, Property } from "@/server/db/schema";
 import { api } from "@/utils/api";
+import DialogCancelSave from "./DialogCancelSave";
 
 const formSchema = z.object({
   houseRules: z.array(z.enum(ALL_HOUSE_RULES)).optional(),
@@ -135,16 +134,7 @@ export default function HouseRulesDialog({ property }: { property: Property }) {
           <p className="text-muted-foreground">
             Available throughout the booking process
           </p>
-          <div className="flex items-center justify-end">
-            <DialogClose>
-              <div className="flex items-center justify-end gap-2">
-                <Button variant="outline" type="button">
-                  Cancel
-                </Button>
-                <Button type="submit">Save</Button>
-              </div>
-            </DialogClose>
-          </div>
+          <DialogCancelSave />
         </form>
       </Form>
     </div>

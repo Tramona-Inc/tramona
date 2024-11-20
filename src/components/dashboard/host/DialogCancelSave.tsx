@@ -3,11 +3,15 @@ import { DialogClose } from "@/components/ui/dialog";
 
 export default function DialogCancelSave() {
   return (
-    <div className="flex items-center justify-end gap-2">
+    <div className="flex items-center justify-end">
       <DialogClose>
-        <Button variant="outline">Cancel</Button>
+        <div className="flex items-center justify-end gap-2">
+          <Button variant="outline" type="button">
+            Cancel
+          </Button>
+          <Button type="submit">Save</Button>
+        </div>
       </DialogClose>
-      <Button>Save</Button>
     </div>
   );
 }

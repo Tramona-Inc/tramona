@@ -11,10 +11,9 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import ErrorMsg from "@/components/ui/ErrorMsg";
-import { DialogClose } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { api } from "@/utils/api";
 import { Property } from "@/server/db/schema";
+import DialogCancelSave from "./DialogCancelSave";
 
 const formSchema = z.object({
   interactionPreference: z.string().optional(),
@@ -145,16 +144,7 @@ export default function InteractionPreferencesDialog({
               </FormItem>
             )}
           />
-          <div className="flex items-center justify-end">
-            <DialogClose>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" type="button">
-                  Cancel
-                </Button>
-                <Button type="submit">Save</Button>
-              </div>
-            </DialogClose>
-          </div>
+          <DialogCancelSave />
         </form>
       </Form>
     </div>
