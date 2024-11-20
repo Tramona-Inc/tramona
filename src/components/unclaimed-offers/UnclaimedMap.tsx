@@ -1,15 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import UnclaimedOfferCards from "@/components/unclaimed-offers/UnclaimedOfferCards";
-import { LoadingProvider, useLoading } from "@/components/unclaimed-offers/UnclaimedMapLoadingContext";
-// import SearchPropertiesMap, {
-//   MapBoundary,
-// } from "../landing-page/search/SearchPropertiesMap";
-import { Button } from "../ui/button";
+import { LoadingProvider } from "@/components/unclaimed-offers/UnclaimedMapLoadingContext";
+
 import type { fetchNextPageOfAdjustedPropertiesType } from "@/components/landing-page/search/SearchPropertiesMap";
 import type { InfiniteQueryObserverResult } from "@tanstack/react-query";
 import { useAdjustedProperties } from "../landing-page/search/AdjustedPropertiesContext";
-import { api } from "@/utils/api";
 import { useCitiesFilter } from "@/utils/store/cities-filter";
 
 export type MapBoundary = {
@@ -88,18 +84,21 @@ export default function UnclaimedMap() {
   //   setFunctionRef(fetchNextPageOfAdjustedProperties);
   // }, [fetchNextPageOfAdjustedProperties, setFunctionRef]);
 
-
   return (
     <LoadingProvider>
       <div className="flex h-screen-minus-header-n-footer w-full sm:h-screen-minus-header-n-footer-n-searchbar">
         <div
-          className={`h-full-minus-searchbar w-full max-w-7xl px-2 mx-auto ${showMap ? "hidden" : "h-full w-full"}`}
+          className={`h-full-minus-searchbar mx-auto w-full max-w-7xl px-2 ${showMap ? "hidden" : "h-full w-full"}`}
         >
           {isSearching ? (
             <div className="flex h-full flex-col items-center justify-center">
               <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-primaryGreen border-t-transparent"></div>
-              <p className="text-lg font-semibold text-gray-700">Finding your perfect stay...</p>
-              <p className="mt-2 text-sm text-gray-500">We&quot;re searching for the best offers just for you</p>
+              <p className="text-lg font-semibold text-gray-700">
+                Finding your perfect stay...
+              </p>
+              <p className="mt-2 text-sm text-gray-500">
+                We&quot;re searching for the best offers just for you
+              </p>
             </div>
           ) : (
             <div className="flex justify-center">

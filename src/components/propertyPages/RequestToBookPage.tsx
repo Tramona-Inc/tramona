@@ -21,9 +21,7 @@ export default function RequestToBookPage({
     <>
       <PropertyPage
         property={property}
-        sidebar={
-          <RequestToBookPageSidebar property={property} acceptedAt={false} />
-        }
+        sidebar={<RequestToBookPageSidebar property={property} />}
         mobileBottomCard={
           <RequestToBookPageMobileBottomCard property={property} />
         }

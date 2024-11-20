@@ -1,12 +1,9 @@
 import {
   BadgeHelp,
   HandshakeIcon,
-  Home,
   InfoIcon,
   LinkIcon,
-  ReceiptText,
   TvMinimalPlay,
-  MessageCircleQuestion,
   HeadsetIcon,
   ShieldCheckIcon,
   UsersIcon,
