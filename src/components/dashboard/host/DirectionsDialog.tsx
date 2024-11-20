@@ -1,7 +1,48 @@
+import { z } from "zod";
 import DialogCancelSave from "./DialogCancelSave";
 import { Textarea } from "@/components/ui/textarea";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { api } from "@/utils/api";
+import { Property } from "@/server/db/schema";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import ErrorMsg from "@/components/ui/ErrorMsg";
 
-export default function DirectionsDialog() {
+const formSchema = z.object({
+  directions: z.string().nullable(),
+});
+
+type FormSchema = z.infer<typeof formSchema>;
+
+export default function DirectionsDialog({ property }: { property: Property }) {
+  const { data: fetchedProperty } = api.properties.getById.useQuery({
+    id: property.id,
+  });
+
+  const { mutateAsync: updateProperty } = api.properties.update.useMutation();
+
+  const form = useForm<FormSchema>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      directions: fetchedProperty?.directions ?? null,
+    },
+  });
+
+  const onSubmit = async (formValues: FormSchema) => {
+    console.log("formValues", formValues);
+    await updateProperty({
+      ...property,
+      directions: formValues.directions === "" ? null : formValues.directions,
+    });
+  };
+
   return (
     <div className="space-y-8">
       <div>
@@ -9,13 +50,35 @@ export default function DirectionsDialog() {
         <p className="text-muted-foreground">Add details</p>
       </div>
       <div>
-        <h2 className="font-semibold">Directions to property</h2>
-        <Textarea placeholder="Provide detailed directions to help guests find your property..." />
+        <Form {...form}>
+          <ErrorMsg>{form.formState.errors.root?.message}</ErrorMsg>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              name="directions"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-base font-semibold text-black">
+                    Directions to property
+                  </FormLabel>
+                  <FormControl>
+                    <Textarea
+                      {...field}
+                      placeholder="Provide detailed directions to help guests find your property..."
+                      value={field.value ?? ""}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <p className="text-muted-foreground">
+              Typically provided close to check-in
+            </p>
+            <DialogCancelSave />
+          </form>
+        </Form>
       </div>
-      <p className="text-muted-foreground">
-        Typically provided close to check-in
-      </p>
-      <DialogCancelSave />
     </div>
   );
 }

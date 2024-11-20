@@ -36,7 +36,7 @@ export default function HostArrivalGuide({ property }: { property: Property }) {
     {
       title: "Directions",
       subtitle: "Add details",
-      dialog: <DirectionsDialog />,
+      dialog: <DirectionsDialog property={property} />,
     },
     {
       title: "WiFi Details",
