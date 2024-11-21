@@ -12,6 +12,9 @@ import {
   WrenchIcon,
   MessagesSquare,
   BriefcaseIcon,
+  ClipboardIcon,
+  UserIcon,
+  SearchIcon,
 } from "lucide-react";
 
 export const adminNavLinks = [
@@ -50,19 +53,15 @@ export const hostMobileNavLinks = [
   {
     href: "/host/requests",
     name: "Requests",
-    icon: BadgePercent,
+    icon: ClipboardIcon,
   },
   { href: "/host/messages", name: "Messages", icon: MessageCircleIcon },
-  { href: "/host/properties", name: "Properties", icon: HomeIcon },
-  { href: "/host/stays", name: "Stays", icon: Briefcase },
-  { href: "/host/finances", name: "Finances", icon: DollarSign },
-  { href: "/host/team", name: "Team", icon: Users2Icon },
 ];
 
 export const guestMobileNavLinks = [
-  { href: "/", name: "Home", icon: HomeIcon },
-  { href: "/how-it-works", name: "Name your own price", icon: HomeIcon },
-  { href: "/how-it-works", name: "Book it now", icon: MessagesSquare },
+  { href: "/", name: "Dashboard", icon: HomeIcon },
+  { href: "/unclaimed-offers", name: "Explore", icon: SearchIcon },
+  { href: "/", name: "Concierge", icon: UserIcon },
 ];
 
 export const guestMobileNavHamburgerLinks = [
@@ -70,13 +69,4 @@ export const guestMobileNavHamburgerLinks = [
   { href: "/my-trips", name: "My Trips", icon: Briefcase },
   { href: "/messages", name: "Messages", icon: MessageCircleIcon },
   { href: "/chat-with-admin", name: "Concierge", icon: MessagesSquare },
-];
-
-export const unloggedMobileNavLinks = [
-  { href: "/", name: "Home", icon: HomeIcon },
-  { href: "/chat-with-admin", name: "Concierge", icon: MessagesSquare },
-  { href: "/how-it-works", name: "Name your own price", icon: HomeIcon },
-  { href: "/how-it-works", name: "Book it now", icon: MessagesSquare },
-  // { href: "/link-input", name: "Link Input", icon: LinkIcon },
-  // ...headerLinks,
 ];

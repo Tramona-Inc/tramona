@@ -6,7 +6,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { cn, formatCurrency } from "@/utils/utils";
+import { cn, formatCurrency, getNumNights } from "@/utils/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -24,7 +24,14 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { ChevronDown, ChevronUp, Info, Clock, CheckCircle } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  Info,
+  Clock,
+  CheckCircle,
+  Calendar as CalendarIcon,
+} from "lucide-react";
 import { useRouter } from "next/router";
 import PriceBreakdown from "./PriceBreakdown";
 
@@ -32,6 +39,8 @@ import PriceCardInformation from "./PriceCardInformation";
 import BookNowBtn from "../actionButtons/BookNowBtn";
 import RequestToBookBtn from "../actionButtons/RequestToBookBtn";
 import { PropertyPageData } from "../../PropertyPage";
+import { api } from "@/utils/api";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export type RequestToBookDetails = {
   checkIn: Date;
@@ -52,13 +61,63 @@ export default function RequestToBookOrBookNowPriceCard({
   const router = useRouter();
   const { query } = router;
 
+  const isHospitable = property.originalListingPlatform === "Hospitable";
+
+  const numNights = getNumNights(
+    query.checkIn as string,
+    query.checkOut as string,
+  );
+
+  const { data: hostPrice, isLoading: isHostPriceLoading } =
+    api.misc.getAverageHostPropertyPrice.useQuery(
+      {
+        property,
+        checkIn: query.checkIn as string,
+        checkOut: query.checkOut as string,
+        numGuests: query.numGuests ? parseInt(query.numGuests as string) : 2,
+      },
+      {
+        enabled: isHospitable,
+      },
+    );
+  const { data: casamundoPrice, isLoading: isCasamundoPriceLoading } =
+    api.misc.scrapeAverageCasamundoPrice.useQuery(
+      {
+        offerId: property.originalListingId!,
+        checkIn: new Date(query.checkIn as string),
+        numGuests: query.numGuests ? parseInt(query.numGuests as string) : 2,
+        duration: numNights,
+      },
+      {
+        enabled: !isHospitable,
+      },
+    );
+
+  console.log(
+    isCasamundoPriceLoading,
+    "isCasamundoPriceLoading",
+    isHostPriceLoading,
+    "isHostPriceLoading",
+  );
+  console.log(
+    property,
+    "akdfkjsldfj",
+    casamundoPrice,
+    query.checkIn,
+    numNights,
+  );
+
+  const originalPrice = isHospitable ? hostPrice : casamundoPrice * 100;
+
+  const isLoading = isHostPriceLoading && isCasamundoPriceLoading;
+
   const initialRequestToBook: RequestToBookDetails = {
     checkIn: query.checkIn ? new Date(query.checkIn as string) : new Date(),
     checkOut: query.checkOut ? new Date(query.checkOut as string) : new Date(),
     numGuests: query.numGuests ? parseInt(query.numGuests as string) : 2,
     travelerOfferedPriceBeforeFees: query.travelerOfferedPriceBeforeFees
       ? parseInt(query.travelerOfferedPriceBeforeFees as string)
-      : basePrice,
+      : originalPrice,
   };
 
   const [date, setDate] = useState({
@@ -68,7 +127,7 @@ export default function RequestToBookOrBookNowPriceCard({
   const [showPriceBreakdown, setShowPriceBreakdown] = useState<boolean>(false);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [showRequestInput, setShowRequestInput] = useState(false);
-  const [requestAmount, setRequestAmount] = useState(basePrice);
+  const [requestAmount, setRequestAmount] = useState(originalPrice);
   const [requestPercentage, setRequestPercentage] = useState(0);
   const [selectedPreset, setSelectedPreset] = useState<number | null>(null);
   const [requestToBook, setRequestToBook] =
@@ -124,13 +183,13 @@ export default function RequestToBookOrBookNowPriceCard({
   useEffect(() => {
     if (showRequestInput) {
       const newPercentage = Math.round(
-        ((basePrice - requestAmount) / basePrice) * 100,
+        ((originalPrice - requestAmount) / originalPrice) * 100,
       );
       setRequestPercentage(
         Math.max(minDiscount, Math.min(newPercentage, maxDiscount)),
       );
     }
-  }, [showRequestInput, requestAmount, basePrice]);
+  }, [showRequestInput, requestAmount, originalPrice]);
 
   const handleRequestChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newRequestAmount = parseInt(e.target.value);
@@ -140,7 +199,7 @@ export default function RequestToBookOrBookNowPriceCard({
   };
 
   const handleSliderChange = (value: number[]) => {
-    const newRequestAmount = Math.round(basePrice * (1 - value[0]! / 100));
+    const newRequestAmount = Math.round(originalPrice * (1 - value[0]! / 100));
     setRequestAmount(newRequestAmount);
     setRequestPercentage(value[0]!);
     updateRequestToBook({ travelerOfferedPriceBeforeFees: newRequestAmount });
@@ -156,17 +215,20 @@ export default function RequestToBookOrBookNowPriceCard({
   const handlePresetSelect = (price: number) => {
     setRequestAmount(price);
     updateRequestToBook({ travelerOfferedPriceBeforeFees: price });
-    const newPercentage = Math.round(((basePrice - price) / basePrice) * 100);
+    const newPercentage = Math.round(
+      ((originalPrice - price) / originalPrice) * 100,
+    );
     setRequestPercentage(
       Math.max(minDiscount, Math.min(newPercentage, maxDiscount)),
     );
     setSelectedPreset(price);
   };
 
-  return (
+  return isLoading ? (
+    <Skeleton className="h-[200px] w-full" />
+  ) : (
     <Card className="w-full bg-gray-50 shadow-lg">
       <CardContent className="flex flex-col gap-y-2 rounded-xl md:p-2 xl:p-6">
-        {/* Date Picker */}
         <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
           <PopoverTrigger asChild>
             <button className="grid w-full grid-cols-2 overflow-hidden rounded-lg border text-left focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
@@ -206,7 +268,6 @@ export default function RequestToBookOrBookNowPriceCard({
           </PopoverContent>
         </Popover>
 
-        {/* Guest Selector */}
         <Popover>
           <PopoverTrigger asChild>
             <button
@@ -241,7 +302,6 @@ export default function RequestToBookOrBookNowPriceCard({
           </PopoverContent>
         </Popover>
 
-        {/* Pricing and Booking Options */}
         {showRequestInput ? (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -386,13 +446,13 @@ export default function RequestToBookOrBookNowPriceCard({
               </div>
             </div>
           </div>
-        ) : (
+        ) : originalPrice > 0 ? (
           <>
             <div>
               <div className="mb-1 text-2xl font-bold">Book it now for</div>
               <div className="flex items-baseline gap-2">
                 <span className="text-4xl font-bold text-primary lg:text-5xl">
-                  {formatCurrency(basePrice)}
+                  {formatCurrency(originalPrice)}
                 </span>
                 <span className="text-xl text-muted-foreground">Per Night</span>
               </div>
@@ -438,6 +498,32 @@ export default function RequestToBookOrBookNowPriceCard({
               You won&apos;t be charged yet
             </p>
           </>
+        ) : (
+          <div className="flex flex-col items-center justify-center">
+            <div className="flex items-center gap-2">
+              <Info className="h-4 w-4 text-red-500" />
+              <div className="mb-1 text-2xl font-bold text-red-500">
+                Dates Unavailable
+              </div>
+            </div>
+            <p className="pb-4 text-center text-sm text-muted-foreground">
+              The selected dates are no longer available. Try adjusting your
+              search.
+            </p>
+            <p className="text-md pb-4 text-center text-muted-foreground">
+              Pricing will update once new dates are selected.
+            </p>
+            <Button
+              variant="darkPrimary"
+              className="mt-2 flex min-w-full"
+              onClick={() => setIsCalendarOpen(true)}
+            >
+              <div className="flex items-center gap-2">
+                <CalendarIcon className="h-4 w-4" />
+                Change Dates
+              </div>
+            </Button>
+          </div>
         )}
 
         <a href="#" className="block text-center text-primary hover:underline">

@@ -5,7 +5,7 @@ import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import Link from "next/link";
 import { api } from "@/utils/api";
 import Spinner from "../_common/Spinner";
-import RequestToBookCard from "../requests-to-book/RequestToBookCard";
+import TravelerRequestToBookCard from "../requests-to-book/TravelerRequestToBookCard";
 import { Card, CardContent } from "../ui/card";
 
 function BidsTab() {
@@ -32,13 +32,13 @@ function BidsTab() {
         <Spinner />
       ) : requestsToBook && requestsToBook.activeRequestsToBook.length > 0 ? (
         requestsToBook.activeRequestsToBook.map((requestToBook) => (
-          <RequestToBookCard
+          <TravelerRequestToBookCard
             key={requestToBook.id}
             type="guest"
             requestToBook={requestToBook}
           >
             {/* <RequestCardAction request={requestToBook} /> */}
-          </RequestToBookCard>
+          </TravelerRequestToBookCard>
         ))
       ) : (
         <Card className="flex h-full items-center justify-center">

@@ -9,13 +9,9 @@ export function useSearchBarForm({
 }: {
   afterSubmit?: () => void;
 } = {}) {
-  const form = useZodForm({
-    schema: searchSchema,
-    defaultValues: defaultSearchOrReqValues,
-    reValidateMode: "onSubmit",
-  });
 
-  const { guests, filter, maxNightlyPrice, checkIn } = useCitiesFilter(
+
+  const { guests, filter, maxNightlyPrice, checkIn, checkOut } = useCitiesFilter(
     (state) => state,
   );
 
@@ -32,15 +28,16 @@ export function useSearchBarForm({
 
   useEffect(() => {
     if (!filter) form.setValue("location", undefined);
-    if (!checkIn) form.setValue("date", undefined);
+    if (!checkIn) form.setValue("checkIn", undefined);
+    if (!checkOut) form.setValue("checkOut", undefined)
     if (!guests) form.setValue("numGuests", undefined);
     if (!maxNightlyPrice) form.setValue("maxNightlyPriceUSD", undefined);
-  }, [checkIn, filter, form, guests, maxNightlyPrice]);
+  }, [checkIn, checkOut, filter, form, guests, maxNightlyPrice]);
 
   const utils = api.useUtils();
 
   const onSubmit = form.handleSubmit(
-    async ({ date, location, maxNightlyPriceUSD, numGuests }) => {
+    async ({ checkIn, checkOut, location, maxNightlyPriceUSD, numGuests }) => {
       if (location) {
         const { coordinates } = await utils.offers.getCoordinates.fetch({
           location,
@@ -75,8 +72,8 @@ export function useSearchBarForm({
 
       setGuests(numGuests ?? 0);
       setMaxNightlyPrice((maxNightlyPriceUSD ?? 0) * 100);
-      setCheckIn(date?.from);
-      setCheckOut(date?.to);
+      setCheckIn(checkIn);
+      setCheckOut(checkOut);
 
       afterSubmit?.();
     },

@@ -37,7 +37,7 @@ body {
     --primary-green-background: var(--primaryGreen-200);
     --primary-green-hover: var(--primaryGreen-100);
     --secondary-green: var(--primaryGreen-200);
-    --mobile-header-height: 74px;
+    --mobile-header-height: 60px;
     --header-height: 56px;
     --footer-height: var(--mobile-header-height);
     --screen-minus-header: calc(100vh - var(--header-height));
@@ -64,7 +64,7 @@ body {
 
   @media (min-width: 640px) {
     :root {
-      --searchbar-height: 90px;
+      --searchbar-height: 300px;
     }
   }
   /* We don't have dark mode yet, but we will use this if we want to add it */
