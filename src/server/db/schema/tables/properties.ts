@@ -296,7 +296,7 @@ export const properties = pgTable(
     countryISO: varchar("country_iso", { length: 3 }).notNull(),
 
     originalListingUrl: varchar("original_listing_url"),
-    checkInInfo: varchar("check_in_info"),
+    // checkInInfo: varchar("check_in_info"),
     checkOutInfo: checkOutEnum("check_out_info").array(),
     additionalCheckOutInfo: varchar("additional_check_out_info"),
     houseRules: houseRulesEnum("house_rules").array(),
