@@ -18,6 +18,7 @@ import {
   type RequestsToBook,
   type User,
   users,
+  Offer,
 } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { addDays } from "date-fns";
@@ -73,6 +74,26 @@ export type HostRequestsToBookPageData = {
   })[];
   property: Property & { taxAvailable: boolean };
 }[];
+
+export type HostRequestsPageOfferData = {
+  city: string;
+  requests: {
+    offer: Offer,
+    request: {
+      id: number,
+      madeByGroupId: number;
+      checkIn: Date,
+      checkOut: Date,
+      numGuests: number,
+      location: string,
+      traveler: Pick<
+        User,
+        "firstName" | "lastName" | "name" | "image" | "location" | "about"
+      >;
+    };
+    property: ({ city: string });
+  }[];
+};
 
 export const propertiesRouter = createTRPCRouter({
   create: protectedProcedure

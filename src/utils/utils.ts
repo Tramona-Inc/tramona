@@ -1,5 +1,5 @@
 import { Offer, REFERRAL_CODE_LENGTH } from "@/server/db/schema";
-import { SeparatedData } from "@/server/server-utils";
+import { RequestsPageOfferData, SeparatedData } from "@/server/server-utils";
 import { useWindowSize } from "@uidotdev/usehooks";
 import { clsx, type ClassValue } from "clsx";
 import {
@@ -16,7 +16,10 @@ import { twMerge } from "tailwind-merge";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import duration from "dayjs/plugin/duration";
-import { HostRequestsPageData } from "@/server/api/routers/propertiesRouter";
+import {
+  HostRequestsPageData,
+  HostRequestsPageOfferData,
+} from "@/server/api/routers/propertiesRouter";
 import * as cheerio from "cheerio";
 import { useSession } from "next-auth/react";
 import { api } from "./api";
@@ -588,6 +591,14 @@ export function separateByPriceRestriction(
     outsidePriceRestriction: processedData
       .map((data) => data.outsidePriceRestriction) //
       .filter(Boolean),
+  };
+}
+
+export function formatOfferData(
+  organizedData: HostRequestsPageOfferData[],
+): RequestsPageOfferData {
+  return {
+    sent: organizedData,
   };
 }
 

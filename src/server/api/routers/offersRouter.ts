@@ -2,6 +2,7 @@ import { env } from "@/env";
 
 import {
   createTRPCRouter,
+  hostProcedure,
   protectedProcedure,
   publicProcedure,
   roleRestrictedProcedure,
@@ -23,6 +24,7 @@ import { formatDateRange, getNumNights } from "@/utils/utils";
 import { TRPCError } from "@trpc/server";
 import {
   and,
+  desc,
   eq,
   inArray,
   isNotNull,
@@ -39,6 +41,7 @@ import { createNormalDistributionDates } from "@/server/server-utils";
 import { scrapeAirbnbPrice } from "@/server/scrapePrice";
 import { TRPCClientError } from "@trpc/client";
 import { breakdownPaymentByOffer } from "@/utils/payment-utils/paymentBreakdown";
+import { HostRequestsPageOfferData } from "./propertiesRouter";
 
 export const offersRouter = createTRPCRouter({
   accept: protectedProcedure
@@ -746,6 +749,97 @@ export const offersRouter = createTRPCRouter({
       });
       return curTrip?.offer?.scrapeUrl !== null;
     }),
+
+  getAllHostOffers: hostProcedure.query(async ({ ctx }) => {
+    const hostProperties = await db.query.properties.findMany({
+      where: eq(properties.hostTeamId, ctx.hostProfile.curTeamId),
+      columns: { id: true },
+    });
+
+    const propertyIds = hostProperties.map((property) => property.id);
+
+    const hostOffers = await db.query.offers.findMany({
+      where: inArray(offers.propertyId, propertyIds),
+      with: {
+        property: {
+          columns: {
+            city: true,
+          },
+        },
+        request: {
+          columns: {
+            id: true,
+            madeByGroupId: true,
+            checkIn: true,
+            checkOut: true,
+            numGuests: true,
+            location: true,
+          },
+          with: {
+            madeByGroup: {
+              with: {
+                owner: {
+                  columns: {
+                    firstName: true,
+                    lastName: true,
+                    name: true,
+                    image: true,
+                    location: true,
+                    about: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      orderBy: [desc(offers.createdAt)],
+    });
+
+    const groupedByCity: HostRequestsPageOfferData[] = [];
+
+    const findOrCreateCityGroup = (city: string) => {
+      let cityGroup = groupedByCity.find((group) => group.city === city);
+      if (!cityGroup) {
+        cityGroup = { city, requests: [] };
+        groupedByCity.push(cityGroup);
+      }
+      return cityGroup;
+    };
+
+    for (const offer of hostOffers) {
+      if (!offer.property || !offer.request) continue;
+
+      const cityGroup = findOrCreateCityGroup(offer.property.city);
+
+      const existingOffer = cityGroup.requests.find(
+        (item) => item.offer.id === offer?.id,
+      );
+
+      if (existingOffer) {
+        continue;
+      } else {
+        cityGroup.requests.push({
+          offer,
+          request: {
+            ...offer.request,
+            traveler: {
+              firstName: offer.request.madeByGroup.owner.firstName,
+              lastName: offer.request.madeByGroup.owner.lastName,
+              name: offer.request.madeByGroup.owner.name,
+              image: offer.request.madeByGroup.owner.image,
+              location: offer.request.madeByGroup.owner.location,
+              about: offer.request.madeByGroup.owner.about,
+            },
+          },
+          property: {
+            city: offer.property.city,
+          },
+        });
+      }
+    }
+    return groupedByCity;
+  }),
 });
 
 export async function getPropertyForOffer(propertyId: number) {

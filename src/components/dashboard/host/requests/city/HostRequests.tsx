@@ -7,15 +7,21 @@ import RequestCard, {
 } from "@/components/requests/RequestCard";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { type Property } from "@/server/db/schema";
+import { Offer, type Property } from "@/server/db/schema";
 import HostConfirmRequestDialog from "../../HostConfirmRequestDialog";
 import HostFinishRequestDialog from "./HostFinishRequestDialog";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
-import { type SeparatedData } from "@/server/server-utils";
-import { separateByPriceRestriction } from "@/utils/utils";
+import {
+  RequestsPageOfferData,
+  type SeparatedData,
+} from "@/server/server-utils";
+import { formatOfferData, separateByPriceRestriction } from "@/utils/utils";
 import { useToast } from "@/components/ui/use-toast";
 import { errorToast } from "@/utils/toasts";
+import { HostRequestsPageOfferData } from "@/server/api/routers/propertiesRouter";
+import PastOfferCard from "./PastOfferCard";
+import PastOfferWithdrawDialog from "./PastOfferWithdrawDialog";
 
 export default function HostRequests() {
   const { toast } = useToast();
@@ -24,7 +30,7 @@ export default function HostRequests() {
   );
   const [dialogOpen, setDialogOpen] = useState(false);
   const router = useRouter();
-  const { city, priceRestriction } = router.query;
+  const { city, priceRestriction, offers } = router.query;
 
   const [selectedRequest, setSelectedRequest] =
     useState<HostDashboardRequest | null>(null);
@@ -36,6 +42,15 @@ export default function HostRequests() {
   const [separatedData, setSeparatedData] = useState<SeparatedData | null>(
     null,
   );
+
+  const [offerData, setOfferData] = useState<RequestsPageOfferData | null>(
+    null,
+  );
+  const [selectedOffer, setSelectedOffer] =
+    useState<number | null>(null);
+
+  const [offerWithdrawalDialogOpen, setOfferWithdrawalDialogOpen] =
+    useState(false);
 
   const [selectedProperties, setSelectedProperties] = useState<number[]>([]);
 
@@ -65,10 +80,23 @@ export default function HostRequests() {
     ? separatedData?.outsidePriceRestriction
     : separatedData?.normal;
 
-  const cityData = requestsWithProperties?.find((p) => p.city === city);
+  const cityRequestsData = requestsWithProperties?.find((p) => p.city === city);
 
   const { mutateAsync: rejectRequest } =
     api.requests.rejectRequest.useMutation();
+
+  api.offers.getAllHostOffers.useQuery(undefined, {
+    onSuccess: (fetchedOffers) => {
+      const formattedData = formatOfferData(fetchedOffers);
+      setOfferData(formattedData);
+    },
+  });
+
+  const offersWithProperties = offerData?.sent
+    ? Object.values(offerData.sent)
+    : [];
+
+  const cityOffersData = offersWithProperties.find((o) => o.city === city);
 
   return (
     <div className="p-4">
@@ -77,9 +105,9 @@ export default function HostRequests() {
           <ChevronLeft />
         </Link>
       </div>
-      {cityData ? (
+      {cityRequestsData && !offers ? (
         <div className="grid gap-4 md:grid-cols-2">
-          {cityData.requests.map((requestData) => (
+          {cityRequestsData.requests.map((requestData) => (
             <div key={requestData.request.id} className="mb-4">
               <RequestCard request={requestData.request} type="host">
                 <Button
@@ -106,6 +134,27 @@ export default function HostRequests() {
                   Make an offer
                 </Button>
               </RequestCard>
+            </div>
+          ))}
+        </div>
+      ) : cityOffersData && offers ? (
+        <div className="grid gap-4 md:grid-cols-2">
+          {cityOffersData.requests.map((offerData) => (
+            <div key={offerData.offer.id} className="mb-4">
+              <PastOfferCard
+                request={offerData.request}
+                offer={offerData.offer}
+                property={offerData.property}
+              >
+                <Button
+                onClick={() => {
+                  setOfferWithdrawalDialogOpen(true);
+                  setSelectedOffer(offerData.offer.id);
+                }}
+                >
+                  Withdraw
+                </Button>
+              </PastOfferCard>
             </div>
           ))}
         </div>
@@ -142,6 +191,13 @@ export default function HostRequests() {
           request={selectedRequest}
           open={dialogOpen}
           setOpen={setDialogOpen}
+        />
+      )}
+      {selectedOffer && (
+        <PastOfferWithdrawDialog
+          offerId={selectedOffer}
+          open={offerWithdrawalDialogOpen}
+          onOpenChange={setOfferWithdrawalDialogOpen}
         />
       )}
     </div>

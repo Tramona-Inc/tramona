@@ -20,6 +20,9 @@ export const taxRates: TaxRates = {
         "San Diego": {
           "San Diego Transit Occupancy Tax": 0.105,
         },
+        // "Los Angeles": {
+        //   "San Diego Transit Occupancy Tax": 0.105,
+        // },
         // Add more cities as needed
       },
     },

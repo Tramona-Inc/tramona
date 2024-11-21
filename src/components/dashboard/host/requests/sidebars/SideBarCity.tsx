@@ -2,8 +2,15 @@ import { api } from "@/utils/api";
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { type SeparatedData } from "@/server/server-utils";
-import { separateByPriceRestriction, plural } from "@/utils/utils";
+import {
+  RequestsPageOfferData,
+  type SeparatedData,
+} from "@/server/server-utils";
+import {
+  separateByPriceRestriction,
+  plural,
+  formatOfferData,
+} from "@/utils/utils";
 import { HostRequestsToBookPageData } from "@/server/api/routers/propertiesRouter";
 import { range } from "lodash";
 import EmptyRequestState from "./EmptyRequestState";
@@ -14,14 +21,20 @@ import SidebarPropertySkeleton from "./SidebarPropertySkeleton";
 export default function SidebarCity({
   selectedOption,
 }: {
-  selectedOption: "normal" | "outsidePriceRestriction";
+  selectedOption: "normal" | "outsidePriceRestriction" | "sent";
 }) {
   // ---------- STATE MANAGEMENT ----------
   const [separatedData, setSeparatedData] = useState<SeparatedData | null>(
     null,
   );
 
+  const [offerData, setOfferData] = useState<RequestsPageOfferData | null>(
+    null,
+  );
+
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
+
+  const [selectedCityOffers, setSelectedCityOffers] = useState<string | null>(null);
 
   // ---------- DATA FETCHING ----------
   const { data: fetchedProperties, isLoading } =
@@ -33,7 +46,69 @@ export default function SidebarCity({
       },
     });
 
-  const displayedData = separatedData ? separatedData[selectedOption] : [];
+  const { data: fetchedOffers, isLoading: isLoadingOffers } =
+    api.offers.getAllHostOffers.useQuery(undefined, {
+      onSuccess: (fetchedOffers) => {
+        const formattedOfferData = formatOfferData(fetchedOffers);
+        setOfferData(formattedOfferData);
+      },
+    });
+
+  const displayedData =
+    separatedData && selectedOption !== "sent"
+      ? separatedData[selectedOption]
+      : offerData && selectedOption === "sent"
+        ? offerData[selectedOption]
+        : [];
+
+  const handleCityOffersClick = (city: string) => {
+    setSelectedCityOffers(city);
+    setSelectedCity(null);
+  }
+
+  const handleCityClick = (city: string) => {
+    setSelectedCityOffers(null);
+    setSelectedCity(city);
+  }
+
+  if (selectedOption === "sent") {
+    return (
+      <div className="pt-4">
+        {isLoadingOffers ? (
+          // Loading State
+          range(7).map((i) => <SidebarPropertySkeleton key={i} />)
+        ) : displayedData.length > 0 ? (
+          // City List
+          displayedData.map((cityData, index) => {
+            const href = `/host/requests/${cityData.city}?tabs=city&offers=true`;
+            const isSelected = selectedCityOffers === cityData.city;
+            return (
+              <Link href={href} className="block" key={index}>
+                <div
+                  className={`flex items-center justify-between rounded-xl p-4 ${
+                    isSelected ? "bg-primaryGreen text-white" : ""
+                  }`}
+                  onClick={() => handleCityOffersClick(cityData.city)}
+                >
+                  <div>
+                    <h3 className="font-medium">{cityData.city}</h3>
+                  </div>
+                  <div
+                    className={`text-sm ${isSelected ? "text-white" : "text-muted-foreground"}`}
+                  >
+                    {cityData.requests.length} offers
+                  </div>
+                </div>
+              </Link>
+            );
+          })
+        ) : (
+          // Empty State
+          <EmptyRequestState />
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="pt-4">
@@ -49,14 +124,13 @@ export default function SidebarCity({
               : `/host/requests/${cityData.city}?tabs=city&priceRestriction=true`;
 
           const isSelected = selectedCity === cityData.city;
-
           return (
             <Link href={href} className="block" key={index}>
               <div
                 className={`flex items-center justify-between rounded-xl p-4 ${
                   isSelected ? "bg-primaryGreen text-white" : ""
                 }`}
-                onClick={() => setSelectedCity(cityData.city)}
+                onClick={() => handleCityClick(cityData.city)}
               >
                 <div>
                   <h3 className="font-medium">{cityData.city}</h3>

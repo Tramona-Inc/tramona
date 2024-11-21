@@ -36,7 +36,7 @@ export default function HostRequestsLayout({
   //---------- STATE ----------
 
   const [selectedOption, setSelectedOption] = useState<
-    "normal" | "outsidePriceRestriction"
+    "normal" | "outsidePriceRestriction" | "sent"
   >("normal");
 
   return (
@@ -94,16 +94,31 @@ export default function HostRequestsLayout({
         {children ? (
           <div className="pb-30 px-4 pt-8">
             <div className="mx-auto max-w-5xl">
-              <div className="mb-4 flex flex-row gap-2">
-                <Button
-                  variant={selectedOption === "normal" ? "primary" : "white"}
-                  className="rounded-full shadow-md"
-                  onClick={() => {
-                    setSelectedOption("normal");
-                  }}
-                >
-                  Primary
-                </Button>
+              <div className="mb-4 flex flex-row justify-between">
+                <div className="flex gap-2">
+                  <Button
+                    variant={selectedOption === "normal" ? "primary" : "white"}
+                    className="rounded-full shadow-md"
+                    onClick={() => {
+                      setSelectedOption("normal");
+                    }}
+                  >
+                    Primary
+                  </Button>
+                  <Button
+                    variant={
+                      selectedOption === "sent"
+                        ? "primary"
+                        : "white"
+                    }
+                    className="rounded-full shadow-md"
+                    onClick={() => {
+                      setSelectedOption("sent");
+                    }}
+                  >
+                    Sent
+                  </Button>
+                </div>
                 <Button
                   variant={
                     selectedOption === "outsidePriceRestriction"
