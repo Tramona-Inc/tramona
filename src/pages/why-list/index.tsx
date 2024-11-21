@@ -133,7 +133,7 @@ const Banner = () => {
             FOR HOSTS
           </h2>
           <h3 className="my-2 text-2xl font-bold text-white md:text-3xl lg:text-5xl">
-            Let&aposs make sure your calendar is filled
+            Let&apos;s make sure your calendar is filled
           </h3>
           <p className="my-2 break-words text-xl text-white md:text-2xl lg:text-4xl">
             Built to fill empty and hard to book dates
@@ -164,7 +164,7 @@ const OptimizeEarnings = () => {
             Tramona is a booking platform designed to <b>fill your calendar</b>{" "}
             by supplementing your existing channels like Airbnb or Vrbo.
             There&apos;s nothing more frustrating than having empty nights, and
-            that&aposs where Tramona comes in. With our platform, you have a
+            that&apos; where Tramona comes in. With our platform, you have a
             simple, effective way to decide if you want to book those vacant
             dates,{" "}
             <b>ensuring you maximize your income without any extra hassle,</b>{" "}
@@ -382,7 +382,7 @@ const SecurityPrivacy = () => {
         </h1>
         <p className="mt-4 text-base">
           At Tramona, we understand that trust is essential when opening your
-          property to travelers. We&aposre committed to providing a secure and
+          property to travelers. We&apos;re committed to providing a secure and
           reliable platform that gives you the confidence to accept bookings and
           maximize your revenue.
         </p>
