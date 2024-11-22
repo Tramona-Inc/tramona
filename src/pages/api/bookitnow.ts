@@ -48,19 +48,15 @@ export default async function handler(
     return res.status(200).json({ subScrapedResult });
   } catch (err) {
     if (err instanceof Error) {
-      return res
-        .status(500)
-        .json({
-          error:
-            "Error scraping casamundo: " + err.stack + " " + originalListingId,
-        });
+      return res.status(500).json({
+        error:
+          "Error scraping casamundo: " + err.stack + " " + originalListingId,
+      });
     } else {
       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-      return res
-        .status(500)
-        .json({
-          error: `Error scraping casamundo: ${err} ${originalListingId}`,
-        });
+      return res.status(500).json({
+        error: `Error scraping casamundo: ${err as string} ${originalListingId}`,
+      });
     }
   }
 }

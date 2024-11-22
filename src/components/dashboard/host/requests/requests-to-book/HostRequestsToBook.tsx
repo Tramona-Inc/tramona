@@ -3,20 +3,20 @@ import { useRouter } from "next/router";
 import HostRequestToBookDialog from "./HostRequestToBookDialog";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { ChevronLeft } from "lucide-react";
+import { AlertTriangleIcon, ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { useToast } from "@/components/ui/use-toast";
 import { errorToast } from "@/utils/toasts";
-import RequestToBookCard from "@/components/requests-to-book/RequestToBookCard";
 import { Home } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import HostRequestToBookCard from "./HostRequestToBookCard";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function HostRequestsToBook() {
   const { toast } = useToast();
   const [dialogOpen, setDialogOpen] = useState(false);
   const router = useRouter();
-  const propertyId = Number(router.query.propertyId);
-
+  const propertyId = parseInt(router.query.propertyId as string) || 0; // Default to 0 if parsing fails
   const { data: unusedReferralDiscounts } =
     api.referralCodes.getAllUnusedHostReferralDiscounts.useQuery(undefined, {
       onSuccess: () => {
@@ -37,6 +37,7 @@ export default function HostRequestsToBook() {
       { propertyId },
       { enabled: !!router.isReady },
     );
+  console.log(propertyRequests);
 
   const { mutateAsync: rejectRequestToBook } =
     api.stripe.rejectOrCaptureAndFinalizeRequestToBook.useMutation();
@@ -48,36 +49,51 @@ export default function HostRequestsToBook() {
           <ChevronLeft />
         </Link>
       </div>
+      <Alert className="mb-2">
+        <AlertTriangleIcon />
+        <AlertTitle>Tip</AlertTitle>
+        <AlertDescription>
+          As soon as a bid is accepted, the booking will instantly go through.
+          and will block off your calander. Any outstanding matches will be
+          automatically withdrawn.
+        </AlertDescription>
+      </Alert>
       {propertyRequests?.activeRequestsToBook ? (
         <div className="grid gap-4 md:grid-cols-2">
           {propertyRequests.activeRequestsToBook.map((data) => (
             <div key={data.id} className="mb-4">
-              <RequestToBookCard requestToBook={data} type="host">
-                <Button
-                  variant="secondary"
-                  onClick={async () => {
-                    await rejectRequestToBook({
-                      isAccepted: false,
-                      requestToBookId: data.id,
-                    })
-                      .then(() => {
-                        toast({
-                          title: "Successfully rejected request",
-                        });
+              <HostRequestToBookCard requestToBook={data}>
+                {data.status === "Pending" && (
+                  <Button
+                    variant="secondary"
+                    onClick={async () => {
+                      await rejectRequestToBook({
+                        isAccepted: false,
+                        requestToBookId: data.id,
                       })
-                      .catch(() => errorToast());
-                  }}
-                >
-                  Reject
-                </Button>
-                <Button
-                  onClick={() => {
-                    setDialogOpen(true);
-                  }}
-                >
-                  Respond
-                </Button>
-              </RequestToBookCard>
+                        .then(() => {
+                          toast({
+                            title: "Successfully rejected request",
+                          });
+                        })
+                        .catch(() => errorToast());
+                    }}
+                  >
+                    Reject
+                  </Button>
+                )}
+                {data.status !== "Pending" ? (
+                  <Button
+                    onClick={() => {
+                      setDialogOpen(true);
+                    }}
+                  >
+                    Respond
+                  </Button>
+                ) : (
+                  <Button disabled>{data.status}</Button>
+                )}
+              </HostRequestToBookCard>
               <HostRequestToBookDialog
                 open={dialogOpen}
                 setOpen={setDialogOpen}

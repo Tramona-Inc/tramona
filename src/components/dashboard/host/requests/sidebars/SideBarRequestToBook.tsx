@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { api } from "@/utils/api";
 import SidebarPropertySkeleton from "./SidebarPropertySkeleton";
 import EmptyRequestState from "./EmptyRequestState";
-import Link from "next/link";
 import { useRouter } from "next/router";
 
 function SidebarRequestToBook() {

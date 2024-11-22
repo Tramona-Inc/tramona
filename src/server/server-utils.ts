@@ -476,7 +476,6 @@ export async function sendTextToHost({
 
 export async function getRequestsForProperties(
   hostProperties: Property[],
-  { user }: { user: Session["user"] },
   //{
   // id: number;
   // propertyStaus: string;

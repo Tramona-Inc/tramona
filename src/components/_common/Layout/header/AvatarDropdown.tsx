@@ -76,7 +76,10 @@ export default function AvatarDropdown({
             size={size}
           />
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-80 font-medium">
+        <DropdownMenuContent
+          align="end"
+          className="w-80 font-medium text-primaryGreen"
+        >
           <DropdownTop session={session} />
           <DropdownMenuSeparator />
           {hostProfile && (

@@ -17,7 +17,7 @@ export default function SettingsAndDocuments({
   items,
 }: SettingsAndDocumentsProps) {
   return (
-    <Card className="mx-auto w-full">
+    <Card className="mx-auto w-full border shadow-none">
       <CardHeader>
         <CardTitle className="text-2xl font-bold">
           Settings and documents

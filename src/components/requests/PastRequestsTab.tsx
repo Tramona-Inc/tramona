@@ -3,6 +3,10 @@ import Spinner from "@/components/_common/Spinner";
 import { api } from "@/utils/api";
 import RequestCard from "./RequestCard";
 import { RequestCardAction } from "./RequestCardAction";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertTriangle, PlusIcon } from "lucide-react";
+import { Button } from "../ui/button";
+import Link from "next/link";
 
 export default function PastRequestsTab() {
   const { data: requests } = api.requests.getMyRequests.useQuery();
@@ -10,7 +14,21 @@ export default function PastRequestsTab() {
   if (!requests) return <Spinner />;
 
   return requests.inactiveRequests.length !== 0 ? (
-    <div className="space-y-4 pb-32">
+    <div className="space-y-3 pb-32">
+      <Link href="/">
+        <Button variant="primary" className="max-w-fit">
+          <PlusIcon className="size-5 -ml-1" />
+          Make Another Trip
+        </Button>
+      </Link>
+      <Alert className="bg-white">
+        <AlertTriangle className="h-4 w-4" />
+        <AlertTitle>Tip</AlertTitle>
+        <AlertDescription>
+          This is where past accepted bids and requests show up. Check &quot;My
+          Trips&quot; for upcoming details.
+        </AlertDescription>
+      </Alert>
       {requests.inactiveRequests.map((request) => (
         <RequestCard key={request.id} type="guest" request={request}>
           <RequestCardAction request={request} />

@@ -4,12 +4,9 @@ import RequestToBookOrBookNowPriceCard from "./priceCards/RequestToBookOrBookNow
 export type PropertyPageData = RouterOutputs["properties"]["getById"];
 
 export default function RequestToBookPageSidebar({
-  // offer,
   property,
-  acceptedAt,
 }: {
   property: PropertyPageData;
-  acceptedAt: boolean;
 }) {
   return (
     <div className="space-y-4">
