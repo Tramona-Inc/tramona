@@ -305,7 +305,7 @@ export const properties = pgTable(
     countryISO: varchar("country_iso", { length: 3 }).notNull(),
 
     originalListingUrl: varchar("original_listing_url"),
-    checkInType: checkInEnum("check_in_type").array(),
+    checkInType: checkInEnum("check_in_type"),
     additionalCheckInInfo: varchar("additional_check_in_info"),
     checkOutInfo: checkOutEnum("check_out_info").array(),
     additionalCheckOutInfo: varchar("additional_check_out_info"),
@@ -391,7 +391,6 @@ export const propertySelectSchema = createSelectSchema(properties);
 
 // https://github.com/drizzle-team/drizzle-orm/issues/1609
 export const propertyInsertSchema = createInsertSchema(properties, {
-  checkInType: z.array(z.enum(ALL_CHECKIN_TYPES)),
   checkOutInfo: z.array(z.enum(ALL_CHECKOUT_TYPES)),
   houseRules: z.array(z.enum(ALL_HOUSE_RULES)),
   imageUrls: z.array(z.string().url()),
