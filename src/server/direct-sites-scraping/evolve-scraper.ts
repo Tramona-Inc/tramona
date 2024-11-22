@@ -30,7 +30,7 @@ const EvolvePropertySchema = z.object({
   price: z.number(),
   description: z.string(),
   otherHouseRules: z.string().optional(),
-  checkInInfo: z.string().optional(),
+  additionalCheckInInfo: z.string().optional(),
   checkInTime: z.string().optional(),
   checkOutTime: z.string().optional(),
 });
@@ -586,7 +586,7 @@ const fetchPropertyDetails = async (
     cancellationPolicy: "Evolve",
     areaDescription: propertyDetails.areaDescription,
     otherHouseRules: propertyDetails.otherHouseRules,
-    checkInInfo: propertyDetails.checkInInfo,
+    additionalCheckInInfo: propertyDetails.additionalCheckInInfo,
     checkInTime: propertyDetails.checkInTime,
     checkOutTime: propertyDetails.checkOutTime,
     reviews: formattedReviews,
