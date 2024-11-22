@@ -496,7 +496,9 @@ export default function HostPropertiesDetails({
             <div className="text-muted-foreground">
               <p>
                 {capitalize(
-                  editing ? checkInType : (fetchedProperty?.checkInInfo ?? ""),
+                  editing
+                    ? checkInType
+                    : (fetchedProperty?.additionalCheckInInfo ?? ""),
                 )}
               </p>
               <div className="flex">
