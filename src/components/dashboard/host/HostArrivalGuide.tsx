@@ -13,11 +13,11 @@ export default function HostArrivalGuide({ property }: { property: Property }) {
   const [activeDialog, setActiveDialog] = useState<number | null>(null);
 
   const guides = [
-    // {
-    //   title: "Check in method",
-    //   subtitle: "How do travelers get in?",
-    //   dialog: <CheckInMethodDialog />,
-    // },
+    {
+      title: "Check in method",
+      subtitle: "How do travelers get in?",
+      dialog: <CheckInMethodDialog property={property} />,
+    },
     {
       title: "Check out instructions",
       subtitle: "What should travelers do before they check out?",

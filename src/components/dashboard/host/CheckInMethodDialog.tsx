@@ -2,11 +2,50 @@ import { cn } from "@/utils/utils";
 import { useState } from "react";
 import DialogCancelSave from "./DialogCancelSave";
 import { Textarea } from "@/components/ui/textarea";
+import { z } from "zod";
+import { ALL_CHECKIN_TYPES, Property } from "@/server/db/schema";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { api } from "@/utils/api";
+import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 
-export default function CheckInMethodDialog() {
+const formSchema = z.object({
+  checkInType: z.enum(ALL_CHECKIN_TYPES).optional(),
+  additionalCheckInInfo: z.string().optional(),
+});
+
+type FormSchema = z.infer<typeof formSchema>;
+
+export default function CheckInMethodDialog({
+  property,
+}: {
+  property: Property;
+}) {
   const [selectedMethodIndex, setSelectedMethodIndex] = useState<number | null>(
     null,
   );
+
+  const { data: fetchedProperty } = api.properties.getById.useQuery({
+    id: property.id,
+  });
+
+  const { mutateAsync: updateProperty } = api.properties.update.useMutation();
+
+  const form = useForm<FormSchema>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      checkInType: fetchedProperty?.checkInType ?? "",
+      additionalCheckInInfo: fetchedProperty?.additionalCheckInInfo ?? "",
+    },
+  });
+
+  const onSubmit = async (formValues: FormSchema) => {
+    await updateProperty({
+      ...property,
+      checkInType: formValues.checkInType,
+      additionalCheckInInfo: formValues.additionalCheckInInfo,
+    });
+  };
 
   const methods = [
     {
@@ -35,29 +74,63 @@ export default function CheckInMethodDialog() {
         <h1 className="text-xl font-bold">Check-in method</h1>
         <p className="text-muted-foreground">How do travelers get in?</p>
       </div>
-      <div className="space-y-4">
-        {methods.map((method, index) => (
-          <div
-            className={cn(
-              selectedMethodIndex === index ? "bg-zinc-100" : "bg-white",
-              "rounded-xl border p-3 hover:cursor-pointer hover:bg-zinc-100",
+      <Form {...form}>
+        <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
+          <FormField
+            name="checkInType"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <div className="space-y-4">
+                    {methods.map((method, index) => (
+                      <div
+                        className={cn(
+                          selectedMethodIndex === index
+                            ? "bg-zinc-200"
+                            : "bg-white",
+                          "rounded-xl border p-3 hover:cursor-pointer hover:bg-zinc-100",
+                        )}
+                        key={index}
+                        onClick={() => setSelectedMethodIndex(index)}
+                      >
+                        <h2 className="font-semibold">{method.title}</h2>
+                        <p className="text-muted-foreground">
+                          {method.subtitle}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </FormControl>
+              </FormItem>
             )}
-            key={index}
-            onClick={() => setSelectedMethodIndex(index)}
-          >
-            <h2 className="font-semibold">{method.title}</h2>
-            <p className="text-muted-foreground">{method.subtitle}</p>
-          </div>
-        ))}
-      </div>
-      <div>
-        <h2 className="font-semibold">Additional check-in details</h2>
-        <Textarea placeholder="Add any important details for getting inside your place..." />
-      </div>
-      <p className="text-muted-foreground">
-        Shared 24 to 48 hours before check-in
-      </p>
-      <DialogCancelSave />
+          />
+          <FormField
+            name="additionalCheckInInfo"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <div>
+                    <h2 className="font-semibold">
+                      Additional check-in details
+                    </h2>
+                    <Textarea
+                      {...field}
+                      placeholder="Add any important details for getting inside your place..."
+                      value={field.value ?? ""}
+                    />
+                  </div>
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <p className="text-muted-foreground">
+            Shared 24 to 48 hours before check-in
+          </p>
+          <DialogCancelSave />
+        </form>
+      </Form>
     </div>
   );
 }
