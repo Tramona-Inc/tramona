@@ -216,10 +216,10 @@ export default function TripPage({
               <div className="h-[2px] rounded-full bg-zinc-200"></div>
 
               <div className="py-5">
-                {trip.property.checkInInfo && (
+                {trip.property.additionalCheckInInfo && (
                   <>
                     <p className="pb-2 font-bold">Check-in info</p>
-                    <p>{trip.property.checkInInfo}</p>
+                    <p>{trip.property.additionalCheckInInfo}</p>
                   </>
                 )}
 

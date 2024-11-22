@@ -274,7 +274,7 @@ export function HostPropertyEditBtn({
           ? addressWithApt
           : addressWithoutApt,
       );
-      setCheckInType(fetchedProperty.checkInInfo ?? "self");
+      setCheckInType(fetchedProperty.additionalCheckInInfo ?? "self");
       setCheckIn(fetchedProperty.checkInTime);
       setCheckOut(fetchedProperty.checkOutTime);
       setAmenities(fetchedProperty.amenities);
