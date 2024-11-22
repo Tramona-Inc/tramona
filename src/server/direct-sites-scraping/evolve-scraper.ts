@@ -565,6 +565,7 @@ const fetchPropertyDetails = async (
     address,
     city,
     stateName: addressComponents.stateName,
+    countryISO: addressComponents.countryISO,
     stateCode: addressComponents.stateCode,
     country: addressComponents.country,
     latLngPoint: {
