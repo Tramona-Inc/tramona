@@ -35,7 +35,7 @@ export default function HostPropertiesCancellation({
   });
 
   return (
-    <div className="my-6">
+    <div className="my-6 w-full">
       <div className="text-end">
         <HostPropertyEditBtn
           editing={editing}

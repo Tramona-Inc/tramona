@@ -124,7 +124,7 @@ export default function HostPropertiesLayout() {
     <section className="relative mx-auto mb-24 mt-7 max-w-7xl px-6 md:my-14">
       <HostPropertiesSidebar
         onClose={() => setOpen(false)}
-        className={cn(!open && "hidden")}
+        className={cn("", !open && "hidden")}
       >
         {selectedProperty && <HostPropertyInfo property={selectedProperty} />}
       </HostPropertiesSidebar>
@@ -201,14 +201,12 @@ export function HostPropertyEditBtn({
   setEditing,
   onSubmit,
   property,
-  onCancel,
   disabled,
 }: {
   editing: boolean;
   setEditing: (editing: boolean) => void;
   onSubmit?: () => void;
   property: Property;
-  onCancel: () => void;
   disabled?: boolean;
 }) {
   const { data: fetchedProperty, refetch } = api.properties.getById.useQuery({
@@ -295,7 +293,7 @@ export function HostPropertyEditBtn({
   };
 
   return (
-    <div className="fixed bottom-20 right-4 z-50">
+    <div className="absolute bottom-8 left-4 z-50">
       {editing ? (
         <div className="space-x-2">
           <Button variant="outline" onClick={() => setEditing(!editing)}>
