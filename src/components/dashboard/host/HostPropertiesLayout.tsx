@@ -121,15 +121,15 @@ export default function HostPropertiesLayout() {
   }, [open]);
 
   return (
-    <section className="relative mx-auto mb-24 mt-7 max-w-7xl px-6 md:my-14">
+    <section className="relative mx-auto mb-24 mt-7 max-w-8xl px-6 md:my-14">
       <HostPropertiesSidebar
         onClose={() => setOpen(false)}
-        className={cn(!open && "hidden")}
+        className={cn("", !open && "hidden")}
       >
         {selectedProperty && <HostPropertyInfo property={selectedProperty} />}
       </HostPropertiesSidebar>
       <div className="flex items-center gap-4 sm:flex-row sm:justify-between">
-        <h1 className="text-2xl font-bold md:text-4xl">Your properties</h1>
+        <h1 className="text-2xl font-bold md:text-4xl">Your Properties</h1>
         <div className="flex flex-1 items-center justify-end gap-4">
           <ExpandableSearchBar
             className="hidden sm:flex"
@@ -201,14 +201,12 @@ export function HostPropertyEditBtn({
   setEditing,
   onSubmit,
   property,
-  onCancel,
   disabled,
 }: {
   editing: boolean;
   setEditing: (editing: boolean) => void;
   onSubmit?: () => void;
   property: Property;
-  onCancel: () => void;
   disabled?: boolean;
 }) {
   const { data: fetchedProperty, refetch } = api.properties.getById.useQuery({
@@ -295,7 +293,7 @@ export function HostPropertyEditBtn({
   };
 
   return (
-    <div className="fixed bottom-20 right-4 z-50">
+    <div className="absolute bottom-8 left-4 z-50">
       {editing ? (
         <div className="space-x-2">
           <Button variant="outline" onClick={() => setEditing(!editing)}>

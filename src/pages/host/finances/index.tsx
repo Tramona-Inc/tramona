@@ -54,14 +54,18 @@ export default function Page() {
         <title>Host Finances | Tramona</title>
       </Head>
 
-      <main className="container mb-24 flex w-11/12 flex-col gap-y-3">
+      <main className="mx-auto mb-24 mt-7 flex max-w-8xl flex-col gap-y-3 md:my-14">
         <div className="flex flex-row items-end justify-between">
-          <h2 className="fond-black ml-4 mt-7 text-left text-4xl tracking-tight">
+          <h2 className="fond-black ml-4 text-left text-2xl font-bold tracking-tight md:text-4xl">
             Finances
           </h2>
-          <Button size="icon" variant="ghost">
-            <Link href="host/finance/settings">
-              <SettingsIcon size={25} />
+          <Button
+            size="icon"
+            variant="ghost"
+            className="rounded-full bg-white p-3"
+          >
+            <Link href={`/host/finances/settings/${trimmedConnectId}`}>
+              <SettingsIcon size={23} />
             </Link>
           </Button>
         </div>
@@ -79,7 +83,7 @@ export default function Page() {
           stripeLoading ? (
             <div>Loading Stripe account details...</div>
           ) : (
-            <div className="flex flex-col gap-y-3">
+            <div className="mx-auto flex flex-col gap-y-3">
               {stripeAccount?.requirements?.currently_due &&
                 stripeAccount.requirements.currently_due.length > 1 && (
                   <StripeConnectCurrentlyDueBeforePayouts />

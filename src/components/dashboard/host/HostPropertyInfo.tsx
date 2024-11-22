@@ -7,6 +7,7 @@ import HostAvailability from "./HostAvailability";
 import HostPropertiesRestrictions from "./HostPropertiesRestrictions";
 import HostAutoOffer from "./HostAutoOffer";
 import HostBookItNow from "./HostBookItNow";
+import HostPolicySection from "./HostPolicySection";
 
 export default function HostPropertyInfo({ property }: { property: Property }) {
   return (
@@ -33,10 +34,10 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
             Availability
           </TabsTrigger> */}
           <TabsTrigger
-            value="cancellation"
+            value="policy"
             className="relative w-1/2 data-[state=active]:border-b-teal-900 data-[state=active]:font-bold data-[state=active]:text-teal-900"
           >
-            Cancellation policy
+            Policy
             {!property.cancellationPolicy && (
               <AlertCircle
                 className="absolute right-0 top-0 text-red-600"
@@ -51,7 +52,7 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
             Auto-offer
           </TabsTrigger> */}
         </TabsList>
-        <TabsContent value="details">
+        <TabsContent value="details" className="">
           <HostPropertiesDetails property={property} />
         </TabsContent>
         <TabsContent value="restrictions">
@@ -63,8 +64,8 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
         <TabsContent value="availability">
           <HostAvailability property={property} />
         </TabsContent>
-        <TabsContent value="cancellation">
-          <HostPropertiesCancellation property={property} />
+        <TabsContent value="policy">
+          <HostPolicySection property={property} />
         </TabsContent>
         <TabsContent value="auto-offer">
           <HostAutoOffer property={property} />

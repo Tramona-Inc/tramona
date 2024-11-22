@@ -1,7 +1,6 @@
 import { NextApiResponse } from "next";
 import { NextApiRequest } from "next";
 import { casamundoSubScraper } from "@/server/direct-sites-scraping/casamundo-scraper";
-import { error } from "node:console";
 
 export default async function handler(
   req: NextApiRequest,
