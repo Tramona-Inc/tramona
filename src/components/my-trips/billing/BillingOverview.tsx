@@ -6,8 +6,9 @@ import { useRouter } from "next/router";
 
 const nav = [
   {
-    title: "Security Deposit",
-    description: "Your security deposit for each trip in one place.",
+    title: "Security Deposit/Incidents",
+    description:
+      "Your security deposit and incidents for each trip in one place.",
     href: "/my-trips/billing/security-deposits",
   },
   {

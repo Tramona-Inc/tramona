@@ -20,13 +20,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/components/ui/use-toast";
 import { Slider } from "@/components/ui/slider";
 
 function HostSecurityDepositSection({ property }: { property: Property }) {
-  const queryClient = useQueryClient();
-
   const updateSecurityDepositAmount =
     api.properties.updatePropertySecurityDepositAmount.useMutation();
 
