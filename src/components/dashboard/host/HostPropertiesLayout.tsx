@@ -121,7 +121,7 @@ export default function HostPropertiesLayout() {
   }, [open]);
 
   return (
-    <section className="relative mx-auto mb-24 mt-7 max-w-7xl px-6 md:my-14">
+    <section className="relative mx-auto mb-24 mt-7 max-w-8xl px-6 md:my-14">
       <HostPropertiesSidebar
         onClose={() => setOpen(false)}
         className={cn("", !open && "hidden")}
@@ -129,7 +129,7 @@ export default function HostPropertiesLayout() {
         {selectedProperty && <HostPropertyInfo property={selectedProperty} />}
       </HostPropertiesSidebar>
       <div className="flex items-center gap-4 sm:flex-row sm:justify-between">
-        <h1 className="text-2xl font-bold md:text-4xl">Your properties</h1>
+        <h1 className="text-2xl font-bold md:text-4xl">Your Properties</h1>
         <div className="flex flex-1 items-center justify-end gap-4">
           <ExpandableSearchBar
             className="hidden sm:flex"

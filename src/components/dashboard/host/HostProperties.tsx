@@ -23,7 +23,7 @@ export default function HostProperties({
 
   return (
     <div>
-      <div className="mx-auto my-4 max-w-7xl space-y-4">
+      <div className="mx-auto my-4 max-w-8xl space-y-4">
         {properties ? (
           properties.length > 0 ? (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
