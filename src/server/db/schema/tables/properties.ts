@@ -125,13 +125,6 @@ export const ALL_CHECKOUT_TYPES = [
   "Return keys",
 ] as const;
 
-export const ALL_HOUSE_RULES = [
-  "No smoking",
-  "No pets",
-  "No parties or events",
-  "Quiet hours",
-] as const;
-
 export const propertySafetyItemsEnum = pgEnum(
   "property_safety_items",
   ALL_PROPERTY_SAFETY_ITEMS,
@@ -148,8 +141,6 @@ export const propertyStatusEnum = pgEnum("property_status", [
 ]);
 
 export const checkOutEnum = pgEnum("check_out_info", ALL_CHECKOUT_TYPES);
-
-export const houseRulesEnum = pgEnum("house_rules", ALL_HOUSE_RULES);
 
 export const ALL_PROPERTY_PMS = ["Hostaway", "Hospitable", "Ownerrez"] as const;
 
@@ -284,11 +275,9 @@ export const properties = pgTable(
     countryISO: varchar("country_iso", { length: 3 }).notNull(),
 
     originalListingUrl: varchar("original_listing_url"),
-    checkInInfo: varchar("check_in_info"),
+    // checkInInfo: varchar("check_in_info"),
     checkOutInfo: checkOutEnum("check_out_info").array(),
     additionalCheckOutInfo: varchar("additional_check_out_info"),
-    houseRules: houseRulesEnum("house_rules").array(),
-    additionalHouseRules: varchar("additional_house_rules"),
     checkInTime: time("check_in_time").notNull().default("15:00:00"),
     checkOutTime: time("check_out_time").notNull().default("10:00:00"),
     amenities: varchar("amenities")
@@ -364,7 +353,6 @@ export const propertySelectSchema = createSelectSchema(properties);
 
 // https://github.com/drizzle-team/drizzle-orm/issues/1609
 export const propertyInsertSchema = createInsertSchema(properties, {
-  houseRules: z.array(z.enum(ALL_HOUSE_RULES)),
   checkOutInfo: z.array(z.enum(ALL_CHECKOUT_TYPES)),
   imageUrls: z.array(z.string().url()),
   originalListingUrl: z.string().url(),

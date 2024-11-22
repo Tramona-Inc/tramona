@@ -235,6 +235,8 @@ function UnMatchedPropertyCard({
 }): JSX.Element {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+  const router = useRouter();
+
 
   const nextImage = (e: React.MouseEvent): void => {
     e.preventDefault();
@@ -253,14 +255,16 @@ function UnMatchedPropertyCard({
   };
 
   const isAirbnb = property.originalListingPlatform === "Airbnb";
-  const checkIn = formatDateMonthDayYear(new Date());
+  const checkIn = formatDateMonthDayYear(
+    new Date(router.query.checkIn as string),
+  );
   const checkOut = formatDateMonthDayYear(
-    new Date(new Date().setDate(new Date().getDate() + 2)),
+    new Date(router.query.checkOut as string),
   );
   const numGuests = 3;
   const link = isAirbnb
     ? `https://airbnb.com/rooms/${property.originalListingId}`
-    : `/request-to-book/${property.id}?checkIn=${checkIn}&checkOut=${checkOut}&numGuests=${numGuests}`; //TODO: change to checkin and checkout dates from form
+    : `/request-to-book/${property.id}?checkIn=${checkIn}&checkOut=${checkOut}&numGuests=${numGuests}`;
 
   return (
     <Link
