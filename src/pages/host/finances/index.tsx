@@ -56,12 +56,16 @@ export default function Page() {
 
       <main className="container mb-24 flex w-11/12 flex-col gap-y-3">
         <div className="flex flex-row items-end justify-between">
-          <h2 className="fond-black ml-4 mt-7 text-left text-4xl tracking-tight">
+          <h2 className="fond-black ml-4 mt-7 text-left text-4xl font-semibold tracking-tight">
             Finances
           </h2>
-          <Button size="icon" variant="ghost">
+          <Button
+            size="icon"
+            variant="ghost"
+            className="rounded-full bg-white p-3"
+          >
             <Link href="host/finance/settings">
-              <SettingsIcon size={25} />
+              <SettingsIcon size={23} />
             </Link>
           </Button>
         </div>
@@ -79,7 +83,7 @@ export default function Page() {
           stripeLoading ? (
             <div>Loading Stripe account details...</div>
           ) : (
-            <div className="flex flex-col gap-y-3">
+            <div className="mx-auto flex flex-col gap-y-3">
               {stripeAccount?.requirements?.currently_due &&
                 stripeAccount.requirements.currently_due.length > 1 && (
                   <StripeConnectCurrentlyDueBeforePayouts />

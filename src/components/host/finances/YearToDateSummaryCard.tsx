@@ -22,7 +22,7 @@ export default function YearToDateSummaryCard() {
   ];
 
   return (
-    <Card className="mx-auto h-full w-full max-w-md p-6 shadow-sm">
+    <Card className="mx-auto w-full border p-6 shadow-none lg:max-w-md">
       <CardHeader className="pb-6">
         <CardTitle className="text-2xl font-bold">
           Year-to-date summary

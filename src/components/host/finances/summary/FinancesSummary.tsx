@@ -16,9 +16,7 @@ export default function FinanceSummary({
           hostStripeConnectId={hostStripeConnectId}
         />
         <Separator className="h-[2px] lg:hidden" />
-        <div className="flex w-full flex-col gap-y-3">
-          <YearToDateSummaryCard />
-        </div>
+        <YearToDateSummaryCard />
       </div>
     </div>
   );
