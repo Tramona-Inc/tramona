@@ -10,7 +10,7 @@ import { api } from "@/utils/api";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 
 const formSchema = z.object({
-  checkInType: z.enum(ALL_CHECKIN_TYPES).optional(),
+  checkInType: z.enum(ALL_CHECKIN_TYPES).nullable(),
   additionalCheckInInfo: z.string().optional(),
 });
 
@@ -21,20 +21,37 @@ export default function CheckInMethodDialog({
 }: {
   property: Property;
 }) {
-  const [selectedMethodIndex, setSelectedMethodIndex] = useState<number | null>(
-    null,
-  );
-
-  const { data: fetchedProperty } = api.properties.getById.useQuery({
+  const { data: fetchedProperty, refetch } = api.properties.getById.useQuery({
     id: property.id,
   });
 
+  let modifiedCheckInType = null;
+
+  switch (fetchedProperty?.checkInType) {
+    case "Smart lock":
+      modifiedCheckInType = 0;
+      break;
+    case "Keypad":
+      modifiedCheckInType = 1;
+      break;
+    case "Lockbox":
+      modifiedCheckInType = 2;
+      break;
+    case "Building staff":
+      modifiedCheckInType = 3;
+      break;
+  }
+
   const { mutateAsync: updateProperty } = api.properties.update.useMutation();
+
+  const [selectedMethodIndex, setSelectedMethodIndex] = useState<number | null>(
+    modifiedCheckInType,
+  );
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      checkInType: fetchedProperty?.checkInType ?? "",
+      checkInType: fetchedProperty?.checkInType ?? null,
       additionalCheckInInfo: fetchedProperty?.additionalCheckInInfo ?? "",
     },
   });
@@ -42,9 +59,11 @@ export default function CheckInMethodDialog({
   const onSubmit = async (formValues: FormSchema) => {
     await updateProperty({
       ...property,
-      checkInType: formValues.checkInType,
+      checkInType: formValues.checkInType ?? null,
       additionalCheckInInfo: formValues.additionalCheckInInfo,
     });
+
+    void refetch();
   };
 
   const methods = [
@@ -92,7 +111,10 @@ export default function CheckInMethodDialog({
                           "rounded-xl border p-3 hover:cursor-pointer hover:bg-zinc-100",
                         )}
                         key={index}
-                        onClick={() => setSelectedMethodIndex(index)}
+                        onClick={() => {
+                          setSelectedMethodIndex(index);
+                          field.onChange(method.title);
+                        }}
                       >
                         <h2 className="font-semibold">{method.title}</h2>
                         <p className="text-muted-foreground">
