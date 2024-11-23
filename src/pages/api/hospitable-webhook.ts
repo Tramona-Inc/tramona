@@ -5,7 +5,7 @@ import {
   users,
   type PropertyType,
 } from "@/server/db/schema";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { type NextApiRequest, type NextApiResponse } from "next";
 import { db } from "@/server/db";
 import { eq } from "drizzle-orm";
@@ -15,6 +15,7 @@ import {
   axiosWithRetry,
   createInitialHostTeam,
   createLatLngGISPoint,
+  getPropertyCalendar,
   proxyAgent,
 } from "@/server/server-utils";
 import { getAddress } from "@/server/google-maps";
@@ -26,6 +27,7 @@ import {
   getReviewsUrl,
 } from "@/server/external-listings-scraping/scrapeAirbnbListing";
 import { airbnbHeaders } from "@/utils/constants";
+import { addDays } from "@/utils/utils";
 
 export async function insertHost(id: string) {
   // Insert Host info
@@ -184,6 +186,8 @@ interface ListingCreatedWebhook {
     };
     description: string;
     channel: {
+      id: string;
+      name: string;
       customer: {
         id: string;
         name: string;
@@ -267,6 +271,7 @@ export default async function webhook(
           .where(eq(users.id, webhookData.data.customer.id));
         break;
       case "listing.created":
+        console.log("listing created", webhookData.data);
         const userId = webhookData.data.channel.customer.id;
         const imageResponse = await axios.get<ImageResponse>(
           `https://connect.hospitable.com/api/v1/customers/${userId}/listings/${webhookData.data.id}/images`,
@@ -277,51 +282,7 @@ export default async function webhook(
           },
         );
         const images = imageResponse.data.data.map((image) => image.url);
-        const now = new Date();
-        const firstStartDate = now.toISOString().split("T")[0];
-        const firstEndDate = new Date(now);
-        firstEndDate.setDate(firstEndDate.getDate() + 365);
-        const firstEndDateString = firstEndDate.toISOString().split("T")[0];
-
-        const secondStartDate = new Date(firstEndDate);
-        secondStartDate.setDate(secondStartDate.getDate() + 1);
-        const secondStartDateString = secondStartDate
-          .toISOString()
-          .split("T")[0];
-
-        const secondEndDate = new Date(now);
-        secondEndDate.setDate(now.getDate() + 539);
-        const secondEndDateString = secondEndDate.toISOString().split("T")[0];
-
-        //have to send 2 batches because hospitable only allows 365 days at a time, but it allows up to 540 days in the future
-        const firstBatch = await axios.get<DateResponse>(
-          `https://connect.hospitable.com/api/v1/listings/${webhookData.data.id}/calendar`,
-          {
-            headers: {
-              Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
-            },
-            params: {
-              start_date: firstStartDate,
-              end_date: firstEndDateString,
-            },
-          },
-        );
-        const secondBatch = await axios.get<DateResponse>(
-          `https://connect.hospitable.com/api/v1/listings/${webhookData.data.id}/calendar`,
-          {
-            headers: {
-              Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
-            },
-            params: {
-              start_date: secondStartDateString,
-              end_date: secondEndDateString,
-            },
-          },
-        );
-        const combinedPricingAndCalendarResponse = [
-          ...firstBatch.data.data.dates,
-          ...secondBatch.data.data.dates,
-        ];
+        const combinedPricingAndCalendarResponse = await getPropertyCalendar(webhookData.data.id);
 
         let currentRange: { start: string; end: string } | null = null;
         const datesReserved: { start: string; end: string }[] = [];
@@ -352,7 +313,7 @@ export default async function webhook(
           lng: webhookData.data.address.longitude,
         });
 
-        const { city, stateCode, country } = await getAddress({
+        const { city, stateCode, country, countryISO, stateName, county } = await getAddress({
           lat: webhookData.data.address.latitude,
           lng: webhookData.data.address.longitude,
         });
@@ -375,6 +336,8 @@ export default async function webhook(
           checkIn: dateIn3Days,
           checkOut: dateIn5Days,
         });
+
+        console.log("listingDataUrl", listingDataUrl);
         const reviewsUrl = getReviewsUrl(listingId);
 
         const [listingData, reviewsData] = (await Promise.all(
@@ -396,57 +359,43 @@ export default async function webhook(
           ),
         )) as [string, string];
 
-        const cancellationPolicy = getCancellationPolicy(
-          listingData,
-          listingId,
-        );
-        const amenities = getAmenities(listingData, listingId);
 
-        const allReviews = (
-          await axios.get<ReviewResponse>(
-            `https://connect.hospitable.com/api/v1/channels/${webhookData.data.channel.id}/reviews`,
-          )
-        ).data;
-        const reviewsForProperty = allReviews.data.filter((review) => {
-          return review.platform_id === listingId;
-        })[0];
-        let [numReviews, avgRating] = [0, 0];
-        if (reviewsForProperty) {
-          numReviews = reviewsForProperty.detailed_ratings.length;
-          let sum = 0;
-          for (const review of reviewsForProperty.detailed_ratings) {
-            sum += review.rating;
-          }
-          avgRating = sum / numReviews;
+        // console.log("listingData", listingData);
+
+        let cancellationPolicy;
+        try {
+          cancellationPolicy = getCancellationPolicy(listingData, listingId);
+        } catch (error) {
+          const axiosError = error as AxiosError;
+          console.error(axiosError.message);
+          cancellationPolicy = "Flexible";
         }
 
-        const listingDataUrl = getListingDataUrl(webhookData.data.id, {});
-        const reviewsUrl = getReviewsUrl(webhookData.data.id);
+        const amenities = getAmenities(listingData, listingId);
 
-        const [listingData, reviewsData] = (await Promise.all(
-          [
-            listingDataUrl,
-            reviewsUrl, // 10 best reviews
-          ].map((url) =>
-            axiosWithRetry
-              .get<string>(url, {
-                headers: airbnbHeaders,
-                httpsAgent: proxyAgent,
-                responseType: "text",
-              })
-              .then((r) => r.data)
-              .catch((e) => {
-                console.error(`Error fetching ${url}:`, e);
-                throw e;
-              }),
-          ),
-        )) as [string, string];
+        // const allReviews = (
+        //   await axios.get<ReviewResponse>(
+        //     `https://connect.hospitable.com/api/v1/channels/${webhookData.data.channel.id}/reviews`,
+        //     {
+        //       headers: {
+        //         Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
+        //       },
+        //     },
+        //   )
+        // ).data;
+        // const reviewsForProperty = allReviews.data.filter((review) => {
+        //   return review.platform_id === listingId;
+        // })[0];
+        // let [numReviews, avgRating] = [0, 0];
+        // if (reviewsForProperty) {
+        //   numReviews = reviewsForProperty.detailed_ratings.length;
+        //   let sum = 0;
+        //   for (const review of reviewsForProperty.detailed_ratings) {
+        //     sum += review.rating;
+        //   }
+        //   avgRating = sum / numReviews;
+        // }
 
-        const cancellationPolicy = getCancellationPolicy(
-          listingData,
-          webhookData.data.id,
-        );
-        const amenities = getAmenities(listingData, webhookData.data.id);
 
         const hostProfile = await db.query.hostProfiles.findFirst({
           where: eq(hostProfiles.userId, userId),
@@ -468,10 +417,8 @@ export default async function webhook(
             numBeds: webhookData.data.capacity.beds,
             numBedrooms: webhookData.data.capacity.bedrooms,
             numBathrooms: webhookData.data.capacity.bathrooms,
-            country: webhookData.data.address.country_code, //change to country
             otherHouseRules: webhookData.data.house_rules,
             latLngPoint: latLngPoint,
-            city: webhookData.data.address.city,
             hostName: webhookData.data.channel.customer.name,
             name: webhookData.data.public_name,
             about: webhookData.data.description,
@@ -488,8 +435,13 @@ export default async function webhook(
             originalListingId: webhookData.data.platform_id,
             amenities: amenities,
             cancellationPolicy: cancellationPolicy,
-            //amenities: webhookData.data.amenities,
-            //cancellationPolicy: webhookData.data.cancellation_policy,
+            hospitableListingId: webhookData.data.id,
+            stateName: stateName,
+            stateCode: stateCode,
+            county: county,
+            city: city,
+            countryISO: countryISO,
+            country: country,
             //ratings: webhookData.data.ratings,
           })
           .returning({ id: properties.id })

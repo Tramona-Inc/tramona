@@ -6,7 +6,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { cn, formatCurrency } from "@/utils/utils";
+import {
+  cn,
+  formatCurrency,
+  getApplicableBookItNowDiscount,
+  getNumNights,
+} from "@/utils/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -24,7 +29,14 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { ChevronDown, ChevronUp, Info, Clock, CheckCircle } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  Info,
+  Clock,
+  CheckCircle,
+  Calendar as CalendarIcon,
+} from "lucide-react";
 import { useRouter } from "next/router";
 import PriceBreakdown from "./PriceBreakdown";
 
@@ -32,6 +44,9 @@ import PriceCardInformation from "./PriceCardInformation";
 import BookNowBtn from "../actionButtons/BookNowBtn";
 import RequestToBookBtn from "../actionButtons/RequestToBookBtn";
 import { PropertyPageData } from "../../PropertyPage";
+import { api } from "@/utils/api";
+import { Skeleton } from "@/components/ui/skeleton";
+import { isNumber } from "lodash";
 
 export type RequestToBookDetails = {
   checkIn: Date;
@@ -45,12 +60,78 @@ export default function RequestToBookOrBookNowPriceCard({
 }: {
   property: PropertyPageData;
 }) {
-  const basePrice = 14500; // per night price
-  const minDiscount = 5;
+  const minDiscount = 0;
   const maxDiscount = 20;
 
   const router = useRouter();
   const { query } = router;
+
+  const isHospitable = property.originalListingPlatform === "Hospitable";
+
+  const numNights = getNumNights(
+    query.checkIn as string,
+    query.checkOut as string,
+  );
+
+  const { data: hostPrice, isLoading: isHostPriceLoading } =
+    api.misc.getAverageHostPropertyPrice.useQuery(
+      {
+        property,
+        checkIn: query.checkIn as string,
+        checkOut: query.checkOut as string,
+        numGuests: query.numGuests ? parseInt(query.numGuests as string) : 2,
+      },
+      {
+        enabled: isHospitable,
+      },
+    );
+
+  const hostDiscount = getApplicableBookItNowDiscount({
+    bookItNowDiscountTiers: property.bookItNowDiscountTiers,
+    checkIn: new Date(query.checkIn as string),
+  });
+  const hostPriceAfterDiscount = hostDiscount
+    ? hostPrice * (1 - hostDiscount)
+    : hostPrice;
+  const { data: casamundoPrice, isLoading: isCasamundoPriceLoading, refetch: refetchCasamundoPrice } =
+    api.misc.scrapeAverageCasamundoPrice.useQuery(
+      {
+        offerId: property.originalListingId!,
+        checkIn: new Date(query.checkIn as string),
+        numGuests: query.numGuests ? parseInt(query.numGuests as string) : 2,
+        duration: numNights,
+      },
+      {
+        enabled: !isHospitable,
+        refetchOnWindowFocus: false,
+      },
+    );
+
+  console.log(
+    isCasamundoPriceLoading,
+    "isCasamundoPriceLoading",
+    isHostPriceLoading,
+    "isHostPriceLoading",
+  );
+  console.log(
+    property,
+    "akdfkjsldfj",
+    casamundoPrice,
+    query.checkIn,
+    numNights,
+  );
+
+  const { data: bookedDates } = api.calendar.getReservedDates.useQuery({
+    propertyId: property.id,
+  });
+
+  const isLoading = isHostPriceLoading && isCasamundoPriceLoading;
+
+  const originalPrice = isHospitable
+    ? hostPriceAfterDiscount
+    : isNumber(casamundoPrice)
+      ? casamundoPrice * 100
+      : undefined;
 
   const initialRequestToBook: RequestToBookDetails = {
     checkIn: query.checkIn ? new Date(query.checkIn as string) : new Date(),
@@ -58,17 +139,24 @@ export default function RequestToBookOrBookNowPriceCard({
     numGuests: query.numGuests ? parseInt(query.numGuests as string) : 2,
     travelerOfferedPriceBeforeFees: query.travelerOfferedPriceBeforeFees
       ? parseInt(query.travelerOfferedPriceBeforeFees as string)
-      : basePrice,
+      : originalPrice,
   };
 
   const [date, setDate] = useState({
     from: initialRequestToBook.checkIn,
     to: initialRequestToBook.checkOut,
   });
+  const [unsetDate, setUnsetDate] = useState<{
+    checkIn?: Date;
+    checkOut?: Date;
+  }>({
+    checkIn: initialRequestToBook.checkIn,
+    checkOut: initialRequestToBook.checkOut,
+  });
   const [showPriceBreakdown, setShowPriceBreakdown] = useState<boolean>(false);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [showRequestInput, setShowRequestInput] = useState(false);
-  const [requestAmount, setRequestAmount] = useState(basePrice);
+  const [requestAmount, setRequestAmount] = useState(originalPrice);
   const [requestPercentage, setRequestPercentage] = useState(0);
   const [selectedPreset, setSelectedPreset] = useState<number | null>(null);
   const [requestToBook, setRequestToBook] =
@@ -116,21 +204,29 @@ export default function RequestToBookOrBookNowPriceCard({
   };
 
   const presetOptions = [
-    { price: 116, label: "Good request", percentOff: 20 },
-    { price: 130, label: "Better request", percentOff: 10 },
-    { price: 145, label: "Buy Now", percentOff: 0 },
+    {
+      price: Math.round(originalPrice * 0.8),
+      label: "Good request",
+      percentOff: 20,
+    },
+    {
+      price: Math.round(originalPrice * 0.9),
+      label: "Better request",
+      percentOff: 10,
+    },
+    { price: originalPrice, label: "Buy Now", percentOff: 0 },
   ];
 
   useEffect(() => {
     if (showRequestInput) {
       const newPercentage = Math.round(
-        ((basePrice - requestAmount) / basePrice) * 100,
+        ((originalPrice - requestAmount) / originalPrice) * 100,
       );
       setRequestPercentage(
         Math.max(minDiscount, Math.min(newPercentage, maxDiscount)),
       );
     }
-  }, [showRequestInput, requestAmount, basePrice]);
+  }, [showRequestInput, requestAmount, originalPrice]);
 
   const handleRequestChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newRequestAmount = parseInt(e.target.value);
@@ -140,7 +236,7 @@ export default function RequestToBookOrBookNowPriceCard({
   };
 
   const handleSliderChange = (value: number[]) => {
-    const newRequestAmount = Math.round(basePrice * (1 - value[0]! / 100));
+    const newRequestAmount = Math.round(originalPrice * (1 - value[0]! / 100));
     setRequestAmount(newRequestAmount);
     setRequestPercentage(value[0]!);
     updateRequestToBook({ travelerOfferedPriceBeforeFees: newRequestAmount });
@@ -153,10 +249,12 @@ export default function RequestToBookOrBookNowPriceCard({
     return "Lower chance of acceptance";
   };
 
-  const handlePresetSelect = (price: number) => {
+  const handlePresetSelect = (price: string) => {
     setRequestAmount(price);
     updateRequestToBook({ travelerOfferedPriceBeforeFees: price });
-    const newPercentage = Math.round(((basePrice - price) / basePrice) * 100);
+    const newPercentage = Math.round(
+      ((originalPrice - price) / originalPrice) * 100,
+    );
     setRequestPercentage(
       Math.max(minDiscount, Math.min(newPercentage, maxDiscount)),
     );
@@ -166,7 +264,6 @@ export default function RequestToBookOrBookNowPriceCard({
   return (
     <Card className="w-full bg-gray-50 shadow-lg">
       <CardContent className="flex flex-col gap-y-2 rounded-xl md:p-2 xl:p-6">
-        {/* Date Picker */}
         <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
           <PopoverTrigger asChild>
             <button className="grid w-full grid-cols-2 overflow-hidden rounded-lg border text-left focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
@@ -188,10 +285,13 @@ export default function RequestToBookOrBookNowPriceCard({
             <Calendar
               initialFocus
               mode="range"
-              defaultMonth={date.from}
-              selected={{ from: date.from, to: date.to }}
+              defaultMonth={unsetDate.checkIn}
+              selected={{
+                from: unsetDate.checkIn,
+                to: unsetDate.checkOut,
+              }}
               onSelect={(selectedDate) => {
-                if (selectedDate?.from && selectedDate?.to) {
+                if (selectedDate?.from && selectedDate.to) {
                   setDate({ from: selectedDate.from, to: selectedDate.to });
                   updateRequestToBook({
                     checkIn: selectedDate.from,
@@ -199,14 +299,25 @@ export default function RequestToBookOrBookNowPriceCard({
                   });
                   setIsCalendarOpen(false);
                 }
+                setUnsetDate({
+                  checkIn: selectedDate?.from,
+                  checkOut: selectedDate?.to,
+                });
               }}
               numberOfMonths={2}
-              disabled={(date) => date < new Date()}
+              disabled={(date) =>
+                date < new Date() ||
+                bookedDates?.some((bookedDate) => {
+                  return (
+                    date >= new Date(bookedDate.start) &&
+                    date <= new Date(bookedDate.end)
+                  );
+                })
+              }
             />
           </PopoverContent>
         </Popover>
 
-        {/* Guest Selector */}
         <Popover>
           <PopoverTrigger asChild>
             <button
@@ -241,7 +352,6 @@ export default function RequestToBookOrBookNowPriceCard({
           </PopoverContent>
         </Popover>
 
-        {/* Pricing and Booking Options */}
         {showRequestInput ? (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -273,7 +383,9 @@ export default function RequestToBookOrBookNowPriceCard({
                     option.label === "Book Now" && "font-semibold",
                   )}
                 >
-                  <div className="text-xl font-bold">${option.price}</div>
+                  <div className="text-md font-bold">
+                    {formatCurrency(option.price)}
+                  </div>
                   <div className="text-sm text-muted-foreground">
                     {option.label}
                   </div>
@@ -293,20 +405,21 @@ export default function RequestToBookOrBookNowPriceCard({
               <div className="space-y-4">
                 <div className="flex items-center gap-4">
                   <div className="relative flex-1">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                      $
-                    </span>
+                    {/* <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+
+                    </span> */}
                     <Input
-                      type="number"
                       placeholder="Enter request"
-                      value={requestAmount}
+                      value={requestAmount ? formatCurrency(requestAmount) : ""}
                       onChange={handleRequestChange}
                       className="pl-7"
                     />
                   </div>
                   <div className="flex-1 text-right">
                     <span className="text-lg font-medium text-green-600">
-                      {requestPercentage}% off
+                      {Number.isNaN(requestPercentage)
+                        ? ""
+                        : `${requestPercentage}% off`}
                     </span>
                   </div>
                 </div>
@@ -386,13 +499,15 @@ export default function RequestToBookOrBookNowPriceCard({
               </div>
             </div>
           </div>
-        ) : (
+        ) : isLoading ? (
+          <Skeleton className="h-[200px] w-full" />
+        ) : isNumber(originalPrice) ? (
           <>
             <div>
               <div className="mb-1 text-2xl font-bold">Book it now for</div>
               <div className="flex items-baseline gap-2">
                 <span className="text-4xl font-bold text-primary lg:text-5xl">
-                  {formatCurrency(basePrice)}
+                  {formatCurrency(originalPrice)}
                 </span>
                 <span className="text-xl text-muted-foreground">Per Night</span>
               </div>
@@ -437,6 +552,52 @@ export default function RequestToBookOrBookNowPriceCard({
             <p className="mt-2 text-center text-sm text-muted-foreground">
               You won&apos;t be charged yet
             </p>
+          </>
+        ) : casamundoPrice === "unavailable" ? (
+          <div className="flex flex-col items-center justify-center">
+            <div className="flex items-center gap-2">
+              <Info className="h-4 w-4 text-red-500" />
+              <div className="mb-1 text-2xl font-bold text-red-500">
+                Dates Unavailable
+              </div>
+            </div>
+            <p className="pb-4 text-center text-sm text-muted-foreground">
+              The selected dates are no longer available. Try adjusting your
+              search.
+            </p>
+            <p className="text-md pb-4 text-center text-muted-foreground">
+              Pricing will update once new dates are selected.
+            </p>
+            <Button
+              variant="darkPrimary"
+              className="mt-2 flex min-w-full"
+              onClick={() => setIsCalendarOpen(true)}
+            >
+              <div className="flex items-center gap-2">
+                <CalendarIcon className="h-4 w-4" />
+                Change Dates
+              </div>
+            </Button>
+          </div>
+        ) : (
+          <>
+            <div className="flex flex-col items-center justify-center">
+              <div className="flex items-center gap-2">
+                <Info className="h-4 w-4 text-red-500" />
+                <div className="mb-1 text-2xl font-bold text-red-500">
+                  Sorry, an error occured
+                </div>
+              </div>
+              <p className="pb-4 text-center text-sm text-muted-foreground">
+                Please try again. If the error persists, send us a message using concierge or choose a new property.
+              </p>
+              <Button
+                variant="darkPrimary"
+                onClick={() => refetchCasamundoPrice()}
+              >
+                Try Again
+              </Button>
+            </div>
           </>
         )}
 

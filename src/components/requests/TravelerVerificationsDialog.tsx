@@ -4,7 +4,7 @@ import { type HostDashboardRequest } from "./RequestCard";
 import { getAge } from "@/utils/utils";
 import UserAvatar from "../_common/UserAvatar";
 import { BadgeCheck, BadgeX } from "lucide-react";
-import { HostDashboardRequestToBook } from "../requests-to-book/RequestToBookCard";
+import { HostDashboardRequestToBook } from "../requests-to-book/TravelerRequestToBookCard";
 
 export function TravelerVerificationsDialog({
   request,

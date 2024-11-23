@@ -279,7 +279,7 @@ export default function HostPropertiesDetails({
               ))}
           </div>
         )}
-        <div className="flex-1 text-end">
+        <div className="text-end">
           <HostPropertyEditBtn
             editing={editing}
             setEditing={setEditing}
@@ -288,7 +288,7 @@ export default function HostPropertiesDetails({
           />
         </div>
       </div>
-      <div className="h-[35rem] overflow-y-auto">
+      <div className="h-[45rem] overflow-y-auto">
         <div className="my-4 space-y-4">
           <section className="space-y-2 rounded-xl border p-4">
             <div className="flex items-center justify-between">
@@ -496,7 +496,9 @@ export default function HostPropertiesDetails({
             <div className="text-muted-foreground">
               <p>
                 {capitalize(
-                  editing ? checkInType : (fetchedProperty?.checkInInfo ?? ""),
+                  editing
+                    ? checkInType
+                    : (fetchedProperty?.additionalCheckInInfo ?? ""),
                 )}
               </p>
               <div className="flex">

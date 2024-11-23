@@ -147,7 +147,7 @@ export default function AdminOfferForm({
             originalNightlyPriceUSD: offer.property.originalNightlyPrice
               ? offer.property.originalNightlyPrice / 100
               : 0,
-            checkInInfo: offer.property.checkInInfo!,
+            checkInInfo: offer.property.additionalCheckInInfo!,
             checkInTime: offer.property.checkInTime,
             checkOutTime: offer.property.checkOutTime,
             imageUrls: offer.property.imageUrls.map((url) => ({ value: url })),

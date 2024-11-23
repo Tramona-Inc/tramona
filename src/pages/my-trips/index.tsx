@@ -1,7 +1,7 @@
 import Head from "next/head";
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import PastTrips from "@/components/my-trips/PastTrips";
-import UpcomingTrips from "@/components/my-trips/UpcomingTrips";
+import TripsTab from "@/components/my-trips/TripTab";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BriefcaseIcon, HistoryIcon, ReceiptTextIcon } from "lucide-react";
 import { useMemo } from "react";
@@ -11,6 +11,7 @@ import { useRouter } from "next/router";
 import BillingOverview from "@/components/my-trips/billing/BillingOverview";
 import PaymentHistoryOverview from "@/components/my-trips/billing/PaymentHistoryOverview";
 import SecurityDepositOverview from "@/components/my-trips/billing/travelerClaims/SecurityDepositOverview";
+import InnerTravelerLayout from "@/components/_common/Layout/DashboardLayout/InnerTravelerLayout";
 
 export type TripCardDetails = RouterOutputs["trips"]["getMyTrips"][number];
 
@@ -33,11 +34,15 @@ export default function MyTrips({ billingRoute }: MyTripsProps) {
         : "upcoming";
 
   // Determine which trips are upcoming and which are past
-  const { upcomingTrips, pastTrips } = useMemo(() => {
-    if (!allTrips) return { upcomingTrips: [], pastTrips: [] };
+  const { upcomingTrips, pastTrips, currentTrips } = useMemo(() => {
+    if (!allTrips)
+      return { upcomingTrips: [], pastTrips: [], currentTrips: [] };
     const now = new Date();
     return {
       upcomingTrips: allTrips.filter((trip) => trip.checkIn > now),
+      currentTrips: allTrips.filter(
+        (trip) => trip.checkIn <= now && trip.checkOut > now,
+      ),
       pastTrips: allTrips.filter((trip) => trip.checkIn <= now),
     };
   }, [allTrips]);
@@ -52,34 +57,47 @@ export default function MyTrips({ billingRoute }: MyTripsProps) {
       <Head>
         <title>My Trips | Tramona</title>
       </Head>
-      <div className="container col-span-10 mx-auto flex max-w-8xl flex-col gap-10 py-10 pb-32 2xl:col-span-11">
-        <h1 className="text-4xl font-bold">My Trips</h1>
+      <InnerTravelerLayout title="My Trips">
+        <Tabs
+          value={selectedTab}
+          onValueChange={handleTabClick}
+          className="w-full"
+        >
+          <TabsList className="">
+            {/* tabs list flex-row attributes do not work */}
+            <div className="flex w-full flex-row justify-between">
+              <div className="flex flex-row flex-nowrap">
+                <TabsTrigger value="current">
+                  <BriefcaseIcon />
+                  Current
+                </TabsTrigger>
+                <TabsTrigger value="upcoming">
+                  <BriefcaseIcon />
+                  Upcoming
+                </TabsTrigger>
 
-        <Tabs value={selectedTab} onValueChange={handleTabClick}>
-          <TabsList>
-            <TabsTrigger value="upcoming">
-              <BriefcaseIcon />
-              Upcoming
-            </TabsTrigger>
-            <TabsTrigger value="history">
-              <HistoryIcon />
-              History
-            </TabsTrigger>
-
-            {(pastTrips.length > 0 || upcomingTrips.length > 0) && (
-              <TabsTrigger value="billing">
-                <ReceiptTextIcon />
-                Billing
+                <TabsTrigger value="billing">
+                  <ReceiptTextIcon />
+                  Billing
+                </TabsTrigger>
+              </div>
+              <div className="w-full border-b-4"></div>
+              <TabsTrigger value="history" className="">
+                <HistoryIcon />
+                History
               </TabsTrigger>
-            )}
+            </div>
           </TabsList>
 
           {allTrips === undefined ? (
             <Spinner />
           ) : (
             <>
+              <TabsContent value="current">
+                <TripsTab trips={currentTrips} type="current" />
+              </TabsContent>
               <TabsContent value="upcoming">
-                <UpcomingTrips upcomingTrips={upcomingTrips} />
+                <TripsTab trips={upcomingTrips} type="upcoming" />
               </TabsContent>
               <TabsContent value="history">
                 <PastTrips pastTrips={pastTrips} />
@@ -102,7 +120,7 @@ export default function MyTrips({ billingRoute }: MyTripsProps) {
             </>
           )}
         </Tabs>
-      </div>
+      </InnerTravelerLayout>
     </DashboardLayout>
   );
 }

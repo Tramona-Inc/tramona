@@ -29,7 +29,7 @@ export function getListingDataUrl(
 ) {
   const encodedId = encodeAirbnbId(id);
 
-  return `https://www.airbnb.com/api/v3/StaysPdpSections/160265f6bdbacc2084cdf7de8641926c5ee141c3a2967dca0407ee47cec2a7d1?operationName=StaysPdpSections&locale=en&currency=USD&variables={"id":"${encodedId}","pdpSectionsRequest":{${checkIn ? `"checkIn":"${formatDateYearMonthDay(checkIn)}"` : ""}${checkOut ? `"checkOut":"${formatDateYearMonthDay(checkOut)}"` : ""},"adults":"${numGuests ? numGuests : ""}","layouts":["SIDEBAR","SINGLE_COLUMN"]}}&extensions={"persistedQuery":{"version":1,"sha256Hash":"160265f6bdbacc2084cdf7de8641926c5ee141c3a2967dca0407ee47cec2a7d1"}}`;
+  return `https://www.airbnb.com/api/v3/StaysPdpSections/160265f6bdbacc2084cdf7de8641926c5ee141c3a2967dca0407ee47cec2a7d1?operationName=StaysPdpSections&locale=en&currency=USD&variables={"id":"${encodedId}","pdpSectionsRequest":{${checkIn ? `"checkIn":"${formatDateYearMonthDay(checkIn)}"` : ""},${checkOut ? `"checkOut":"${formatDateYearMonthDay(checkOut)}"` : ""},"adults":"${numGuests ? numGuests : 1}","layouts":["SIDEBAR","SINGLE_COLUMN"]}}&extensions={"persistedQuery":{"version":1,"sha256Hash":"160265f6bdbacc2084cdf7de8641926c5ee141c3a2967dca0407ee47cec2a7d1"}}`;
 }
 
 export function getReviewsUrl(id: string) {
@@ -126,20 +126,12 @@ export async function scrapeAirbnbListing(
   if (!about)
     throw new Error(`Airbnb id ${id}: Failed to parse aboutHTML: ${aboutHTML}`);
 
-  const amenities = getAmenities(listingData, id);
-
   // const amenitiesStr = /"seeAllAmenitiesGroups":(.+?\}\]\}\])/.exec(
   //   listingData,
   // )?.[1];
   // if (!amenitiesStr)
   //   throw new Error(`Airbnb id ${id}: Failed to find amenities`);
   const amenities = getAmenities(listingData, id);
-
-  // const amenitiesStr = /"seeAllAmenitiesGroups":(.+?\}\]\}\])/.exec(
-  //   listingData,
-  // )?.[1];
-  // if (!amenitiesStr)
-  //   throw new Error(`Airbnb id ${id}: Failed to find amenities`);
 
   // const amenities = z
   //   .array(z.object({ amenities: z.array(z.object({ title: z.string() })) }))

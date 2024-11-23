@@ -1,23 +1,19 @@
 import {
   adminNavLinks,
-  guestMobileNavHamburgerLinks,
   guestMobileNavLinks,
   hostMobileNavLinks,
-  unloggedMobileNavLinks,
 } from "@/config/sideNavLinks";
 import { ArrowLeftRight } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { NavBarLink } from "./NavBarLink";
-import { HamburgerMenu } from "../_common/Layout/header/Header";
 
 export default function MobileNav({
   type,
 }: {
   type: "admin" | "guest" | "host" | "unlogged";
 }) {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const isAdmin = session && session.user.role === "admin";
-  const isHost = session && session.user.role === "host";
 
   let navLinks;
 
@@ -27,9 +23,6 @@ export default function MobileNav({
       break;
     case "host":
       navLinks = hostMobileNavLinks;
-      break;
-    case "unlogged":
-      navLinks = unloggedMobileNavLinks;
       break;
     default:
       navLinks = isAdmin
@@ -43,16 +36,13 @@ export default function MobileNav({
 
   return (
     <header
-      className={`fixed inset-x-0 bottom-0 z-50 flex h-mobile-header-height items-center bg-[#fafafa] shadow-[0px_0px_10px_#0001] *:flex-1 lg:hidden *:lg:hidden`}
+      className={`*:w-full *:lg:hidden fixed inset-x-0 bottom-0 z-50 flex h-mobile-header-height w-full flex-row items-center justify-around bg-background shadow-[0px_0px_10px_#0001] lg:hidden`}
     >
       {navLinks.map((link, index) => (
         <NavBarLink key={index} href={link.href} icon={link.icon}>
           {link.name}
         </NavBarLink>
       ))}
-      {status === "authenticated" && type !== "host" && (
-        <HamburgerMenu links={guestMobileNavHamburgerLinks} />
-      )}
     </header>
   );
 }

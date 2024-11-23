@@ -1,4 +1,3 @@
-import { type GuestDashboardRequest } from "./RequestToBookCard";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 import Image from "next/image";
 import UserAvatar from "../_common/UserAvatar";
@@ -8,13 +7,10 @@ import {
   formatCurrency,
   formatDateMonthDayYear,
   getNumNights,
-  getOfferDiscountPercentage,
 } from "@/utils/utils";
 import { ExternalLinkIcon } from "lucide-react";
-import { sortBy } from "lodash";
-import { Badge } from "../ui/badge";
-import { PropertyPageData } from "../propertyPages/PropertyPage";
-import { GuestDashboardRequestToBook } from "./RequestToBookCard";
+
+import { GuestDashboardRequestToBook } from "./TravelerRequestToBookCard";
 
 export function RequestToBookCardPreviews({
   requestToBook,
@@ -22,10 +18,8 @@ export function RequestToBookCardPreviews({
   requestToBook: GuestDashboardRequestToBook;
 }) {
   const numNights = getNumNights(requestToBook.checkIn, requestToBook.checkOut);
-  const offerNightlyPrice = 22334;
-  // offer.travelerOfferedPriceBeforeFees / numNights;
-  const discountPercentage = 33445;
-  // getOfferDiscountPercentage(offer);
+  const requestedNightlyPrice =
+    requestToBook.amountAfterTravelerMarkupAndBeforeFees / numNights;
 
   const checkIn = formatDateMonthDayYear(requestToBook.checkIn);
   const checkOut = formatDateMonthDayYear(requestToBook.checkOut);
@@ -56,15 +50,7 @@ export function RequestToBookCardPreviews({
                 {requestToBook.property.numBathrooms} bath
               </p>
             </div>
-            <div className="absolute left-1 top-1 flex gap-1">
-              <Badge variant="white">
-                {discountPercentage}% off{" "}
-                {requestToBook.property.bookOnAirbnb ? "" : "Airbnb price"}
-              </Badge>
-              {/* {offer.property.bookOnAirbnb && (
-                    <Badge variant="white">Airbnb</Badge>
-                  )} */}
-            </div>
+            <div className="absolute left-1 top-1 flex gap-1"></div>
             <div className="absolute right-1 top-1 flex -translate-y-2 items-center gap-1 rounded-full bg-black/40 px-3 py-1.5 text-xs font-medium text-white/80 opacity-0 backdrop-blur transition-all duration-200 group-hover:translate-y-0 group-hover:opacity-100">
               View property <ExternalLinkIcon className="h-3.5 w-3.5" />
             </div>
@@ -73,13 +59,8 @@ export function RequestToBookCardPreviews({
             <div className="flex items-center gap-2 overflow-hidden p-1">
               <div className="shrink-0">
                 <UserAvatar
-                  name={
-                    requestToBook.property.name ??
-                    requestToBook.property.hostName ??
-                    "Tramona"
-                  }
+                  name={requestToBook.property.name}
                   image={
-                    requestToBook.property.host?.image ??
                     requestToBook.property.hostProfilePic ??
                     "/assets/images/tramona.svg"
                   }
@@ -87,10 +68,7 @@ export function RequestToBookCardPreviews({
               </div>
               <div>
                 <p className="line-clamp-1 text-xs text-muted-foreground">
-                  {requestToBook.property.name ??
-                    requestToBook.property.hostName ??
-                    "Tramona"}{" "}
-                  offered ·{" "}
+                  You requested ·{" "}
                   {formatDistanceToNowStrict(requestToBook.createdAt, {
                     addSuffix: true,
                   })}
@@ -98,7 +76,7 @@ export function RequestToBookCardPreviews({
                 <div className="flex items-end justify-between gap-1">
                   <p className="line-clamp-1 font-bold">
                     <span className="text-lg/none text-foreground">
-                      {formatCurrency(offerNightlyPrice).split(".")[0]}
+                      {formatCurrency(requestedNightlyPrice).split(".")[0]}
                     </span>
                     /night
                   </p>

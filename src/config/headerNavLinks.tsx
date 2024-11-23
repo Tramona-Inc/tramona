@@ -1,62 +1,82 @@
 import {
   BadgeHelp,
   HandshakeIcon,
-  Home,
   InfoIcon,
   LinkIcon,
-  MessageCircleQuestion,
+  TvMinimalPlay,
+  HeadsetIcon,
+  ShieldCheckIcon,
+  UsersIcon,
+  LayoutDashboard,
+  HouseIcon,
+  HandCoins,
+  SettingsIcon,
 } from "lucide-react";
+//  <---------------- DESKTOP LINKS ----------------->
 
 // same for logged and unlogged
-export const headerLinks = [
-  { name: "Book it now", href: "/unclaimed-offers", icon: LinkIcon },
-  { name: "Name your own price", href: "/how-it-works", icon: InfoIcon },
+export const leftHeaderLinks = [
+  { name: "Requests", href: "/requests", icon: LinkIcon },
+  { name: "Trips", href: "/my-trips", icon: InfoIcon },
+  { name: "Messages", href: "/messages", icon: InfoIcon },
 ];
 
-// DESKTOP LINKS
-
-export const unloggedCenterHeaderLinks = [
-  { name: "How it works", href: "/how-it-works", icon: InfoIcon },
-  { name: "FAQ", href: "/faq", icon: MessageCircleQuestion },
-  { name: "For Hosts", href: "/why-list", icon: Home },
+//------- DROPDOWN LINKS ------
+export const aboutMenuItems = [
+  { href: "/how-it-works", title: "How it Works", icon: InfoIcon },
+  { href: "/exclusive-offers", title: "Recent Deals", icon: HandshakeIcon },
+  { href: "/faq", title: "FAQ", icon: BadgeHelp },
+  { href: "/demo", title: "Demo", icon: TvMinimalPlay },
+  { href: "/partner-with-tramona", title: "Partnerships", icon: UsersIcon },
 ];
 
-export const unloggedHamburgerLinksDesktop = [
-  { name: "Recent Deals", href: "/exclusive-offers", icon: BadgeHelp },
-  { name: "24/7 Support", href: "/help-center", icon: BadgeHelp },
+export const helpMenuItems = [
+  { href: "/help-center", title: "24/7 Support", icon: HeadsetIcon },
   {
-    name: "100% Re booking guarantee",
     href: "/rebooking-guarantee",
-    icon: MessageCircleQuestion,
+    title: "100% Re-booking Guarantee",
+    icon: ShieldCheckIcon,
   },
 ];
 
-export const loggedCenterHeaderLinks = [
-  { name: "How it works", href: "/how-it-works", icon: InfoIcon },
-  { name: "FAQ", href: "/faq", icon: MessageCircleQuestion },
-  { name: "For Hosts", href: "/why-list", icon: Home },
-  { name: "Recent Deals", href: "/exclusive-offers", icon: BadgeHelp },
+//  ------------MOBILE LINKS--------
+
+export const browseLinkItems = [
+  //mobile only
+  { href: "/how-it-works", title: "How it Works", icon: InfoIcon },
+  { href: "/exclusive-offers", title: "Recent Deals", icon: HandshakeIcon },
+  { href: "/demo", title: "Demo", icon: TvMinimalPlay },
+  {
+    href: "/partner-with-tramona",
+    title: "Partnerships",
+    icon: UsersIcon,
+  },
 ];
 
-// MOBILE LINKS
-
-export const unloggedHamburgerLinksMobile = [
-  { name: "How it Works", href: "/how-it-works", icon: InfoIcon },
-  { name: "FAQ", href: "/faq", icon: MessageCircleQuestion },
-  { name: "For Hosts", href: "/why-list", icon: Home },
-  { name: "Recent Deals", href: "/exclusive-offers", icon: HandshakeIcon },
-  { name: "24/7 Support", href: "/help-center", icon: BadgeHelp },
-  { name: "100% Re booking guarantee", href: "/rebooking-guarantee", icon: BadgeHelp },
+export const aboutLinkItems = [
+  //mobile only
+  { href: "/faq", title: "FAQ", icon: BadgeHelp },
+  { href: "/help-center", title: "24/7 Support", icon: HeadsetIcon },
+  {
+    href: "/rebooking-guarantee",
+    title: "100% Re-booking Guarantee",
+    icon: ShieldCheckIcon,
+  },
 ];
 
-export const loggedHamburgerLinksMobile = [
-  { name: "How it Works", href: "/how-it-works", icon: InfoIcon },
-  { name: "FAQ", href: "/faq", icon: MessageCircleQuestion },
-  { name: "For Hosts", href: "/why-list", icon: Home },
-  { name: "Recent Deals", href: "/exclusive-offers", icon: HandshakeIcon },
-  { name: "24/7 Support", href: "/help-center", icon: BadgeHelp },
-  { name: "100% Re booking guarantee", href: "/rebooking-guarantee", icon: BadgeHelp },
+// <----------- HOST MOBILE LINKS ---------->
+export const hostManageLinks = [
+  { href: "/host", title: "Dashboard", icon: LayoutDashboard },
+  { href: "listings", title: "Properties", icon: HouseIcon },
+  { href: "team", title: "Team", icon: UsersIcon },
 ];
+
+export const hostAccountLinks = [
+  { href: "finances", title: "Earnings", icon: HandCoins },
+  { href: "settings", title: "Settings", icon: SettingsIcon },
+];
+
+// ----------- HOST DESKTOP LINKS
 
 export const hostCenterHeaderLinks = [
   { name: "Overview", href: "/host" },

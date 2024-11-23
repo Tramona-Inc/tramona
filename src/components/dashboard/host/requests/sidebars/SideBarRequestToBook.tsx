@@ -1,33 +1,47 @@
-import React from "react";
+import React, { useState } from "react";
 import { api } from "@/utils/api";
 import SidebarPropertySkeleton from "./SidebarPropertySkeleton";
 import EmptyRequestState from "./EmptyRequestState";
-import Link from "next/link";
+import { useRouter } from "next/router";
 
-function SidebarRequestToBook({
-  selectedOption,
-}: {
-  selectedOption: "normal" | "outsidePriceRestriction";
-}) {
+function SidebarRequestToBook() {
+  const router = useRouter();
+
   const { data: properties, isLoading } =
     api.requestsToBook.getAllRequestToBookProperties.useQuery();
+
+  const [selectedPropertyId, setSelectedPropertyId] = useState<null | number>();
+
+  const handlePropertyClick = (propertyId: number) => {
+    setSelectedPropertyId(propertyId);
+    void router.push(
+      `/host/requests?tabs=request-to-book&propertyId=${propertyId}`,
+    );
+  };
+
+  const content = properties?.map((property) => {
+    const unResolvedRequests = property.requestsToBook.filter(
+      (request) => request.resolvedAt === null,
+    );
+    return unResolvedRequests.length > 0 ? (
+      <div
+        key={property.id}
+        onClick={() => handlePropertyClick(property.id)}
+        className={`${selectedPropertyId === property.id ? "bg-primaryGreen text-white" : ""} pointer flex flex-row justify-between gap-x-3 rounded-xl border p-3 py-5`}
+      >
+        <div className="text-wrap cursor-pointer">{property.name}</div>
+        <p className="text-nowrap flex flex-row text-xs">
+          {unResolvedRequests.length} Requests
+        </p>
+      </div>
+    ) : null;
+  });
 
   return (
     <div>
       {!isLoading ? (
-        properties && properties.length > 0 ? (
-          <div className="flex flex-col">
-            {properties.map((property) => (
-              <Link key={property.id} href={`${property.id}`}>
-                <div className="flex flex-row gap-x-3 rounded-xl border p-3">
-                  <div className="text-wrap">{property.name}</div>
-                  <p className="text-nowrap flex flex-row text-xs">
-                    {property.requestsToBook.length} Requests
-                  </p>
-                </div>
-              </Link>
-            ))}
-          </div>
+        content && content.length > 0 ? (
+          <div className="flex flex-col gap-y-2">{content}</div>
         ) : (
           <EmptyRequestState />
         )
@@ -39,38 +53,3 @@ function SidebarRequestToBook({
 }
 
 export default SidebarRequestToBook;
-
-// function SidebarProperty({
-//   propertyData,
-//   selectedProperty,
-//   setSelectedProperty,
-// }: {
-//   propertyData: {
-//     property: Property;
-//     requestToBook: RequestsToBook[];
-//   };
-//   selectedProperty: number | null;
-//   setSelectedProperty: (property: number) => void;
-// }) {
-//   const href = `/host/requests-to-book/${propertyData.property.id}`;
-
-//   const isSelected = selectedProperty === propertyData.property.id;
-//   return (
-//     <Link href={href} className="mb-4 block">
-//       <div
-//         className={`flex items-center gap-2 rounded-lg p-4 hover:bg-muted ${
-//           isSelected ? "bg-muted" : ""
-//         }`}
-//         onClick={() => setSelectedProperty(propertyData.property.id)}
-//       >
-//         <Home className="h-8 w-8 text-gray-600" />
-//         <div className="flex-1">
-//           <h3 className="font-semibold">{propertyData.property.name}</h3>
-//           <Badge size="md">
-//             {plural(propertyData.requestToBook.length, "request")}
-//           </Badge>
-//         </div>
-//       </div>
-//     </Link>
-//   );
-// }
