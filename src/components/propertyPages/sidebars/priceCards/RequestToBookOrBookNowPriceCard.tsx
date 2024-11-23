@@ -6,7 +6,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { cn, formatCurrency, getNumNights } from "@/utils/utils";
+import {
+  cn,
+  formatCurrency,
+  getApplicableBookItNowDiscount,
+  getNumNights,
+} from "@/utils/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -41,6 +46,7 @@ import RequestToBookBtn from "../actionButtons/RequestToBookBtn";
 import { PropertyPageData } from "../../PropertyPage";
 import { api } from "@/utils/api";
 import { Skeleton } from "@/components/ui/skeleton";
+import { isNumber } from "lodash";
 
 export type RequestToBookDetails = {
   checkIn: Date;
@@ -54,8 +60,7 @@ export default function RequestToBookOrBookNowPriceCard({
 }: {
   property: PropertyPageData;
 }) {
-  const basePrice = 14500; // per night price
-  const minDiscount = 5;
+  const minDiscount = 0;
   const maxDiscount = 20;
 
   const router = useRouter();
@@ -80,7 +85,15 @@ export default function RequestToBookOrBookNowPriceCard({
         enabled: isHospitable,
       },
     );
-  const { data: casamundoPrice, isLoading: isCasamundoPriceLoading } =
+
+  const hostDiscount = getApplicableBookItNowDiscount({
+    bookItNowDiscountTiers: property.bookItNowDiscountTiers,
+    checkIn: new Date(query.checkIn as string),
+  });
+  const hostPriceAfterDiscount = hostDiscount
+    ? hostPrice * (1 - hostDiscount)
+    : hostPrice;
+  const { data: casamundoPrice, isLoading: isCasamundoPriceLoading, refetch: refetchCasamundoPrice } =
     api.misc.scrapeAverageCasamundoPrice.useQuery(
       {
         offerId: property.originalListingId!,
@@ -90,6 +103,7 @@ export default function RequestToBookOrBookNowPriceCard({
       },
       {
         enabled: !isHospitable,
+        refetchOnWindowFocus: false,
       },
     );
 
@@ -107,9 +121,17 @@ export default function RequestToBookOrBookNowPriceCard({
     numNights,
   );
 
-  const originalPrice = isHospitable ? hostPrice : casamundoPrice * 100;
+  const { data: bookedDates } = api.calendar.getReservedDates.useQuery({
+    propertyId: property.id,
+  });
 
   const isLoading = isHostPriceLoading && isCasamundoPriceLoading;
+
+  const originalPrice = isHospitable
+    ? hostPriceAfterDiscount
+    : isNumber(casamundoPrice)
+      ? casamundoPrice * 100
+      : undefined;
 
   const initialRequestToBook: RequestToBookDetails = {
     checkIn: query.checkIn ? new Date(query.checkIn as string) : new Date(),
@@ -123,6 +145,13 @@ export default function RequestToBookOrBookNowPriceCard({
   const [date, setDate] = useState({
     from: initialRequestToBook.checkIn,
     to: initialRequestToBook.checkOut,
+  });
+  const [unsetDate, setUnsetDate] = useState<{
+    checkIn?: Date;
+    checkOut?: Date;
+  }>({
+    checkIn: initialRequestToBook.checkIn,
+    checkOut: initialRequestToBook.checkOut,
   });
   const [showPriceBreakdown, setShowPriceBreakdown] = useState<boolean>(false);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
@@ -175,9 +204,17 @@ export default function RequestToBookOrBookNowPriceCard({
   };
 
   const presetOptions = [
-    { price: 116, label: "Good request", percentOff: 20 },
-    { price: 130, label: "Better request", percentOff: 10 },
-    { price: 145, label: "Buy Now", percentOff: 0 },
+    {
+      price: Math.round(originalPrice * 0.8),
+      label: "Good request",
+      percentOff: 20,
+    },
+    {
+      price: Math.round(originalPrice * 0.9),
+      label: "Better request",
+      percentOff: 10,
+    },
+    { price: originalPrice, label: "Buy Now", percentOff: 0 },
   ];
 
   useEffect(() => {
@@ -212,7 +249,7 @@ export default function RequestToBookOrBookNowPriceCard({
     return "Lower chance of acceptance";
   };
 
-  const handlePresetSelect = (price: number) => {
+  const handlePresetSelect = (price: string) => {
     setRequestAmount(price);
     updateRequestToBook({ travelerOfferedPriceBeforeFees: price });
     const newPercentage = Math.round(
@@ -224,9 +261,7 @@ export default function RequestToBookOrBookNowPriceCard({
     setSelectedPreset(price);
   };
 
-  return isLoading ? (
-    <Skeleton className="h-[200px] w-full" />
-  ) : (
+  return (
     <Card className="w-full bg-gray-50 shadow-lg">
       <CardContent className="flex flex-col gap-y-2 rounded-xl md:p-2 xl:p-6">
         <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
@@ -250,8 +285,11 @@ export default function RequestToBookOrBookNowPriceCard({
             <Calendar
               initialFocus
               mode="range"
-              defaultMonth={date.from}
-              selected={{ from: date.from, to: date.to }}
+              defaultMonth={unsetDate.checkIn}
+              selected={{
+                from: unsetDate.checkIn,
+                to: unsetDate.checkOut,
+              }}
               onSelect={(selectedDate) => {
                 if (selectedDate?.from && selectedDate.to) {
                   setDate({ from: selectedDate.from, to: selectedDate.to });
@@ -261,9 +299,21 @@ export default function RequestToBookOrBookNowPriceCard({
                   });
                   setIsCalendarOpen(false);
                 }
+                setUnsetDate({
+                  checkIn: selectedDate?.from,
+                  checkOut: selectedDate?.to,
+                });
               }}
               numberOfMonths={2}
-              disabled={(date) => date < new Date()}
+              disabled={(date) =>
+                date < new Date() ||
+                bookedDates?.some((bookedDate) => {
+                  return (
+                    date >= new Date(bookedDate.start) &&
+                    date <= new Date(bookedDate.end)
+                  );
+                })
+              }
             />
           </PopoverContent>
         </Popover>
@@ -333,7 +383,9 @@ export default function RequestToBookOrBookNowPriceCard({
                     option.label === "Book Now" && "font-semibold",
                   )}
                 >
-                  <div className="text-xl font-bold">${option.price}</div>
+                  <div className="text-md font-bold">
+                    {formatCurrency(option.price)}
+                  </div>
                   <div className="text-sm text-muted-foreground">
                     {option.label}
                   </div>
@@ -353,20 +405,21 @@ export default function RequestToBookOrBookNowPriceCard({
               <div className="space-y-4">
                 <div className="flex items-center gap-4">
                   <div className="relative flex-1">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                      $
-                    </span>
+                    {/* <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+
+                    </span> */}
                     <Input
-                      type="number"
                       placeholder="Enter request"
-                      value={requestAmount}
+                      value={requestAmount ? formatCurrency(requestAmount) : ""}
                       onChange={handleRequestChange}
                       className="pl-7"
                     />
                   </div>
                   <div className="flex-1 text-right">
                     <span className="text-lg font-medium text-green-600">
-                      {requestPercentage}% off
+                      {Number.isNaN(requestPercentage)
+                        ? ""
+                        : `${requestPercentage}% off`}
                     </span>
                   </div>
                 </div>
@@ -446,7 +499,9 @@ export default function RequestToBookOrBookNowPriceCard({
               </div>
             </div>
           </div>
-        ) : originalPrice > 0 ? (
+        ) : isLoading ? (
+          <Skeleton className="h-[200px] w-full" />
+        ) : isNumber(originalPrice) ? (
           <>
             <div>
               <div className="mb-1 text-2xl font-bold">Book it now for</div>
@@ -498,7 +553,7 @@ export default function RequestToBookOrBookNowPriceCard({
               You won&apos;t be charged yet
             </p>
           </>
-        ) : (
+        ) : casamundoPrice === "unavailable" ? (
           <div className="flex flex-col items-center justify-center">
             <div className="flex items-center gap-2">
               <Info className="h-4 w-4 text-red-500" />
@@ -524,6 +579,26 @@ export default function RequestToBookOrBookNowPriceCard({
               </div>
             </Button>
           </div>
+        ) : (
+          <>
+            <div className="flex flex-col items-center justify-center">
+              <div className="flex items-center gap-2">
+                <Info className="h-4 w-4 text-red-500" />
+                <div className="mb-1 text-2xl font-bold text-red-500">
+                  Sorry, an error occured
+                </div>
+              </div>
+              <p className="pb-4 text-center text-sm text-muted-foreground">
+                Please try again. If the error persists, send us a message using concierge or choose a new property.
+              </p>
+              <Button
+                variant="darkPrimary"
+                onClick={() => refetchCasamundoPrice()}
+              >
+                Try Again
+              </Button>
+            </div>
+          </>
         )}
 
         <a href="#" className="block text-center text-primary hover:underline">

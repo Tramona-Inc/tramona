@@ -147,7 +147,8 @@ async function getOfferIds(
 
   const response: AxiosResponse<OfferResponse> = await axios.get(
     `${url}?${params.toString()}`,
-    { headers,
+    {
+      headers,
       httpsAgent: proxyAgent
     },
   );
@@ -344,6 +345,18 @@ interface PriceResult {
   cancellationPolicy: string;
 }
 
+type OnlyPriceResult =
+  | {
+    status: "success";
+    price: number;
+    currency: string;
+    id: string;
+  }
+  | {
+    status: "failed" | "unavailable";
+  };
+
+
 function formatCancellationPolicy(
   cancellationDetails: CancellationDetails,
 ): string {
@@ -421,7 +434,8 @@ export const fetchPrice = async (
       const response: AxiosResponse<ApiResponse> = await axios.post(
         `${url}?${queryParams.toString()}`,
         null,
-        { headers,
+        {
+          headers,
           httpsAgent: proxyAgent
         },
       );
@@ -473,6 +487,91 @@ export const fetchPrice = async (
     currency: "N/A",
     id: params.offerId,
     cancellationPolicy: "N/A",
+  };
+};
+
+export const fetchPriceNoRateLimit = async (
+  params: PriceExtractionParams
+): Promise<OnlyPriceResult> => {
+  const url = `https://www.casamundo.com/booking/checkout/priceDetails/${params.offerId}`;
+  const queryParams = new URLSearchParams({
+    sT: "withDates",
+    adults: params.numGuests?.toString() ?? "1",
+    children: "0",
+    pets: "0",
+    arrival: params.checkIn.toISOString().split("T")[0] ?? "",
+    c: "USD",
+    duration: params.duration.toString(),
+    pricetype: "perNight",
+    country: "US",
+    isExtrasTouched: "0",
+    action: "pageOpen",
+    pageType: "details",
+    isCachedPaymentMethods: "true",
+  });
+
+  const headers = {
+    accept: "*/*",
+    "accept-language": "en-US,en;q=0.9",
+    "sec-ch-ua":
+      '"Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"',
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": '"macOS"',
+    "sec-fetch-dest": "empty",
+    "sec-fetch-mode": "cors",
+    "sec-fetch-site": "same-origin",
+  };
+
+  const maxRetries = 2;
+  const retryDelay = 2000;
+
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const response: AxiosResponse<ApiResponse> = await axios.post(
+        `${url}?${queryParams.toString()}`,
+        null,
+        {
+          headers,
+          httpsAgent: proxyAgent,
+        }
+      );
+
+      const data = response.data;
+      console.log(data);
+
+      if (!data.hasErrors && data.content.priceDetails.isAvailable) {
+        return {
+          status: "success",
+          price: data.content.priceDetails.travelPrice.raw,
+          currency: data.content.priceDetails.currency,
+          id: params.offerId,
+        };
+      }
+
+      if (data.errorMessage === "price_not_available") {
+        if (attempt < maxRetries - 1) {
+          await new Promise((resolve) => setTimeout(resolve, retryDelay));
+          continue;
+        }
+      }
+
+      if (data.content.priceDetails.isAvailable === false) {
+        return {
+          status: "unavailable",
+        };
+      }
+    } catch (error) {
+      if (attempt < maxRetries - 1) {
+        await new Promise((resolve) => setTimeout(resolve, retryDelay));
+      } else {
+        return {
+          status: "failed",
+        };
+      }
+    }
+  }
+  return {
+    status: "failed",
   };
 };
 
@@ -790,45 +889,45 @@ export const casamundoSubScraper: (
   checkOut,
   numGuests: initialNumGuests,
 }) => {
-  let numGuests = initialNumGuests;
+    let numGuests = initialNumGuests;
 
-  if (scrapeUrl) {
-    try {
-      const url = new URL(scrapeUrl);
-      numGuests =
-        parseInt(url.searchParams.get("adults") ?? "", 10) || initialNumGuests;
-    } catch (error) {
-      console.error("Invalid scrapeUrl provided:", error);
+    if (scrapeUrl) {
+      try {
+        const url = new URL(scrapeUrl);
+        numGuests =
+          parseInt(url.searchParams.get("adults") ?? "", 10) || initialNumGuests;
+      } catch (error) {
+        console.error("Invalid scrapeUrl provided:", error);
+      }
     }
-  }
 
-  const numNights = getNumNights(checkIn, checkOut);
+    const numNights = getNumNights(checkIn, checkOut);
 
-  const isAvailable = await checkAvailability(
-    originalListingId,
-    checkIn,
-    checkOut,
-  );
+    const isAvailable = await checkAvailability(
+      originalListingId,
+      checkIn,
+      checkOut,
+    );
 
-  const price = await fetchPrice({
-    offerId: originalListingId,
-    numGuests,
-    checkIn: checkIn,
-    duration: numNights,
-  });
+    const price = await fetchPrice({
+      offerId: originalListingId,
+      numGuests,
+      checkIn: checkIn,
+      duration: numNights,
+    });
 
-  if (!isAvailable || price.price === -1) {
+    if (!isAvailable || price.price === -1) {
+      return {
+        isAvailableOnOriginalSite: false,
+        availabilityCheckedAt: new Date(),
+      };
+    }
     return {
-      isAvailableOnOriginalSite: false,
+      isAvailableOnOriginalSite: true,
       availabilityCheckedAt: new Date(),
+      originalNightlyPrice: Math.round((price.price / numNights) * 100),
     };
-  }
-  return {
-    isAvailableOnOriginalSite: true,
-    availabilityCheckedAt: new Date(),
-    originalNightlyPrice: Math.round((price.price / numNights) * 100),
   };
-};
 
 
 // export const casamundoSubScraper: SubsequentScraper = async ({

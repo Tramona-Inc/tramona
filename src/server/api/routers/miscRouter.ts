@@ -9,7 +9,7 @@ import { Airbnb } from "@/utils/listing-sites/Airbnb";
 import { z } from "zod";
 import { scrapeAirbnbInitialPageHelper, scrapeAirbnbPagesHelper, getPropertyOriginalPrice, urlScrape } from "@/server/server-utils";
 import { scrapeAirbnbPrice } from "@/server/scrapePrice";
-import { fetchPrice } from "@/server/direct-sites-scraping/casamundo-scraper";
+import { fetchPrice, fetchPriceNoRateLimit } from "@/server/direct-sites-scraping/casamundo-scraper";
 
 type AirbnbListing = {
   id: string;
@@ -154,9 +154,12 @@ export const miscRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input: { offerId, checkIn, numGuests, duration } }) => {
-      const price = await fetchPrice({ offerId, checkIn, numGuests, duration });
+      const price = await fetchPriceNoRateLimit({ offerId, checkIn, numGuests, duration });
 
-      return price.price / duration;
+      if (price.status === "success") {
+        return price.price / duration;
+      }
+      return price.status;
     }),
 
   scrapeAirbnbLink: publicProcedure

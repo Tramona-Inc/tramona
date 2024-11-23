@@ -14,7 +14,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { type RouterOutputs } from "@/utils/api";
+import { api, type RouterOutputs } from "@/utils/api";
 import { getOfferDiscountPercentage, plural } from "@/utils/utils";
 import { AspectRatio } from "../ui/aspect-ratio";
 import {
@@ -66,6 +66,14 @@ export default function PropertyPage({
   const [isOverflowing, setIsOverflowing] = useState(false);
   const [reviewBackupImages, setReviewBackupImages] = useState<string[]>([]);
   const [openUserInfo, setOpenUserInfo] = useState(false);
+
+  api.calendar.updateHostCalendar.useQuery({
+    hospitableListingId: property.hospitableListingId,  ///HERERE
+    },
+    {
+      enabled: property.originalListingPlatform === "Hospitable",
+    },
+  );
 
   useEffect(() => {
     const aboutElement = aboutRef.current;

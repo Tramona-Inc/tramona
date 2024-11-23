@@ -15,6 +15,7 @@ import {
   axiosWithRetry,
   createInitialHostTeam,
   createLatLngGISPoint,
+  getPropertyCalendar,
   proxyAgent,
 } from "@/server/server-utils";
 import { getAddress } from "@/server/google-maps";
@@ -281,51 +282,7 @@ export default async function webhook(
           },
         );
         const images = imageResponse.data.data.map((image) => image.url);
-        const now = new Date();
-        const firstStartDate = now.toISOString().split("T")[0];
-        const firstEndDate = new Date(now);
-        firstEndDate.setDate(firstEndDate.getDate() + 365);
-        const firstEndDateString = firstEndDate.toISOString().split("T")[0];
-
-        const secondStartDate = new Date(firstEndDate);
-        secondStartDate.setDate(secondStartDate.getDate() + 1);
-        const secondStartDateString = secondStartDate
-          .toISOString()
-          .split("T")[0];
-
-        const secondEndDate = new Date(now);
-        secondEndDate.setDate(now.getDate() + 539);
-        const secondEndDateString = secondEndDate.toISOString().split("T")[0];
-
-        //have to send 2 batches because hospitable only allows 365 days at a time, but it allows up to 540 days in the future
-        const firstBatch = await axios.get<DateResponse>(
-          `https://connect.hospitable.com/api/v1/listings/${webhookData.data.id}/calendar`,
-          {
-            headers: {
-              Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
-            },
-            params: {
-              start_date: firstStartDate,
-              end_date: firstEndDateString,
-            },
-          },
-        );
-        const secondBatch = await axios.get<DateResponse>(
-          `https://connect.hospitable.com/api/v1/listings/${webhookData.data.id}/calendar`,
-          {
-            headers: {
-              Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
-            },
-            params: {
-              start_date: secondStartDateString,
-              end_date: secondEndDateString,
-            },
-          },
-        );
-        const combinedPricingAndCalendarResponse = [
-          ...firstBatch.data.data.dates,
-          ...secondBatch.data.data.dates,
-        ];
+        const combinedPricingAndCalendarResponse = await getPropertyCalendar(webhookData.data.id);
 
         let currentRange: { start: string; end: string } | null = null;
         const datesReserved: { start: string; end: string }[] = [];

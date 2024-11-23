@@ -20,7 +20,7 @@ const SummaryChart = ({
   return (
     <Tabs
       defaultValue="month"
-      className="rounded-2xl bg-white px-4 py-8 shadow-sm"
+      className="rounded-2xl border bg-white px-4 shadow-none"
     >
       <div className="relative flex w-full flex-col items-center justify-start md:items-end">
         <div className="z-20 mx-5 mt-4 flex flex-row-reverse justify-between text-center md:mt-3">

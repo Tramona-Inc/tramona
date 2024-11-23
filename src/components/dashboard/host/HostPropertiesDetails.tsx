@@ -290,7 +290,7 @@ export default function HostPropertiesDetails({
                   ))}
               </div>
             )}
-            <div className="flex-1 text-end">
+            <div className="text-end">
               <HostPropertyEditBtn
                 editing={editing}
                 setEditing={setEditing}
@@ -299,7 +299,7 @@ export default function HostPropertiesDetails({
               />
             </div>
           </div>
-          <div className="h-screen-minus-header-n-footer overflow-y-auto pb-36 pt-6">
+          <div className="h-[45rem] overflow-y-auto">
             <div className="my-4 space-y-4">
               <section className="space-y-2 rounded-xl border p-4">
                 <div className="flex items-center justify-between">

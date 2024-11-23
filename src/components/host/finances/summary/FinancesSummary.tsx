@@ -9,17 +9,13 @@ export default function FinanceSummary({
   becameHostAt: Date | undefined;
 }) {
   return (
-    <div className="flex w-full flex-col justify-around gap-y-3">
-      <div className="flex flex-col gap-x-5 gap-y-3 lg:flex-row">
-        <SummaryChart
-          becameHostAt={becameHostAt}
-          hostStripeConnectId={hostStripeConnectId}
-        />
-        <Separator className="h-[2px] lg:hidden" />
-        <div className="flex w-full flex-col gap-y-3">
-          <YearToDateSummaryCard />
-        </div>
-      </div>
+    <div className="flex w-full flex-col gap-x-5 gap-y-3 lg:flex-row">
+      <SummaryChart
+        becameHostAt={becameHostAt}
+        hostStripeConnectId={hostStripeConnectId}
+      />
+      <Separator className="h-[2px] lg:hidden" />
+      <YearToDateSummaryCard />
     </div>
   );
 }
