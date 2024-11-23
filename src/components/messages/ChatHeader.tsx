@@ -14,7 +14,7 @@ export default function ChatHeader({
   setSelected,
 }: ContentProps) {
   return (
-    <div className="flex items-center justify-between border-b p-4">
+    <div className="flex items-center justify-between border-b bg-white p-4">
       <div className="flex items-center gap-2 lg:gap-3">
         <div className="block md:hidden">
           <Button variant="ghost" size="icon" onClick={() => setSelected(null)}>
@@ -29,7 +29,7 @@ export default function ChatHeader({
         />
 
         <div className="flex flex-col">
-          <p className="text-2xl font-bold">
+          <p className="text-lg font-semibold">
             {selectedConversation.participants[0]?.name}
           </p>
           {/* <p className="text-muted-foreground">Active 19m ago</p> */}

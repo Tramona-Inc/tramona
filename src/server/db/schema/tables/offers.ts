@@ -11,7 +11,6 @@ import {
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { properties } from "./properties";
 import { requests } from "./requests";
-import { tripCheckouts } from "./payments";
 
 export const offers = pgTable(
   "offers",
@@ -23,6 +22,7 @@ export const offers = pgTable(
     propertyId: integer("property_id")
       .notNull()
       .references(() => properties.id, { onDelete: "cascade" }),
+
     totalPrice: integer("total_price").notNull(), // in cents
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
@@ -45,16 +45,16 @@ export const offers = pgTable(
     becomeVisibleAt: timestamp("become_visible_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
-    tripCheckoutId: integer("trip_checkout_id")
-      .notNull()
-      .references(() => tripCheckouts.id, { onDelete: "cascade" }),
+    // tripCheckoutId: integer("trip_checkout_id")
+    //   .notNull()
+    //   .references(() => tripCheckouts.id, { onDelete: "cascade" }),
   },
   (t) => ({
     requestIdIdx: index().on(t.requestId),
     propertyIdIdx: index().on(t.propertyId),
     madePublicAtIndex: index().on(t.madePublicAt),
     acceptedAtIndex: index().on(t.acceptedAt),
-    tripCheckoutIdx: index().on(t.tripCheckoutId),
+    // tripCheckoutIdx: index().on(t.tripCheckoutId),
   }),
 );
 

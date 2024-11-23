@@ -1,18 +1,8 @@
 import { sortBy } from "lodash";
 import { db } from "../db";
-import {
-  MinimalRequest,
-  NewProperty,
-  offers,
-  properties,
-  tripCheckouts,
-} from "../db/schema";
+import { MinimalRequest, NewProperty, offers, properties } from "../db/schema";
 import { getNumNights, getTravelerOfferedPrice } from "@/utils/utils";
-import {
-  DIRECTLISTINGMARKUP,
-  HOST_MARKUP
-} from "@/utils/constants";
-import { breakdownPayment } from "@/utils/payment-utils/paymentBreakdown";
+import { DIRECT_LISTING_MARKUP, HOST_MARKUP } from "@/utils/constants";
 
 // maximum discount we want to give, we don't want to go too low
 const MAX_DISCOUNT = 0.3;
@@ -49,35 +39,11 @@ export async function scrapeExternalListings(request: MinimalRequest) {
   // i know this should be in a transaction but i was in a rush
 
   await Promise.all(
-    listings.map(async ({ totalPrice, property }, index) => {
+    listings.map(async ({ totalPrice }, index) => {
       const travelerOfferedPriceBeforeFees = getTravelerOfferedPrice({
-        propertyPrice: totalPrice,
-        travelerMarkup: DIRECTLISTINGMARKUP,
-        numNights: getNumNights(request.checkIn, request.checkOut),
+        totalPrice,
+        travelerMarkup: DIRECT_LISTING_MARKUP,
       });
-      const brokeDownPayment = await breakdownPayment({
-        numOfNights: numNights,
-        travelerOfferedPriceBeforeFees,
-        isScrapedPropery: true,
-        lat: property.latLngPoint.y,
-        lng: property.latLngPoint.x,
-      });
-
-      const tripCheckout = await db
-        .insert(tripCheckouts)
-        .values({
-          totalTripAmount: brokeDownPayment.totalTripAmount,
-          travelerOfferedPriceBeforeFees,
-          paymentIntentId: "",
-          taxesPaid: brokeDownPayment.taxesPaid,
-          taxPercentage: brokeDownPayment.taxPercentage,
-          superhogFee: brokeDownPayment.superhogFee,
-          stripeTransactionFee: brokeDownPayment.stripeTransactionFee,
-          checkoutSessionId: "",
-          totalSavings: brokeDownPayment.totalSavings,
-        })
-        .returning({ id: tripCheckouts.id })
-        .then((res) => res[0]!);
 
       await db.insert(offers).values({
         propertyId: propertyIds[index]!,
@@ -87,7 +53,6 @@ export async function scrapeExternalListings(request: MinimalRequest) {
         checkOut: request.checkOut,
         hostPayout: totalPrice * HOST_MARKUP,
         travelerOfferedPriceBeforeFees,
-        tripCheckoutId: tripCheckout.id,
       });
     }),
   );

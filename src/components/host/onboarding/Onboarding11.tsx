@@ -1,165 +1,67 @@
 import { useHostOnboarding } from "@/utils/store/host-onboarding";
-import { MapPin } from "lucide-react";
-import Image from "next/image";
+import { useState } from "react";
+import { cn } from "@/utils/utils";
 import OnboardingFooter from "./OnboardingFooter";
-import { api } from "@/utils/api";
-import React from "react";
-import Summary1 from "./Summary1";
-import Summary2 from "./Summary2";
-import Summary4 from "./Summary4";
-import Summary7 from "./Summary7";
-import Summary8 from "./Summary8";
-import SingleLocationMap from "@/components/_common/GoogleMaps/SingleLocationMap";
-import { capitalize } from "@/utils/utils";
-import Summary9 from "./Summary9";
+import SaveAndExit from "./SaveAndExit";
+import { Checkbox } from "@/components/ui/checkbox";
 
-function Heading({
-  title,
-  editPage,
-  children,
-}: {
-  title: string;
-  editPage?: number;
-  children: React.ReactNode;
-}) {
-  const setProgress = useHostOnboarding((state) => state.setProgress);
-  const setIsEdit = useHostOnboarding((state) => state.setIsEdit);
-
-  return (
-    <div className="flex flex-col gap-3 py-5">
-      <div className="flex justify-between">
-        <h3 className="text-lg font-semibold">{title}</h3>
-        <p
-          className="text-sm underline transition duration-200 hover:cursor-pointer hover:text-muted-foreground"
-          onClick={() => {
-            if (editPage) {
-              setIsEdit(true);
-              setProgress(editPage);
-            }
-          }}
-        >
-          Edit
-        </p>
-      </div>
-
-      <div className="flex flex-col gap-2 text-muted-foreground">
-        {children}
-      </div>
-    </div>
+export default function Onboarding11({ editing = false }) {
+  const bookItNowEnabled = useHostOnboarding(
+    (state) => state.listing.bookItNowEnabled
   );
-}
+  const setBookItNowEnabled = useHostOnboarding(
+    (state) => state.setBookItNowEnabled
+  );
+  const [error, setError] = useState(false);
+  const [isChecked, setIsChecked] = useState(bookItNowEnabled);
 
-export default function Onboarding11() {
-  const { listing } = useHostOnboarding((state) => state);
+  function handleFormSubmit() {
+    setBookItNowEnabled(isChecked);
+  }
 
-  const address = `${listing.location.street}${listing.location.apt ? `, ${listing.location.apt}` : ""}, ${listing.location.city}, ${listing.location.state} ${listing.location.zipcode}, ${listing.location.country}`;
-
-  const { data: coordinateData } = api.offers.getCoordinates.useQuery({
-    location: address,
-  });
-
-  const lat = coordinateData?.coordinates.location?.lat;
-  const lng = coordinateData?.coordinates.location?.lng;
+  function handleError() {
+    setError(true);
+  }
 
   return (
     <>
-      <div className="container my-10 flex-grow sm:px-32">
-        <h1 className="mb-8 text-3xl font-semibold">Review your listing</h1>
-        <div className="grid grid-cols-1 space-y-3 divide-y">
-          <Summary1 />
-          <Summary2 />
+      {!editing && <SaveAndExit />}
+      <div className="flex-grow flex flex-col justify-center mx-auto mb-10 max-w-3xl space-y-5">
+        <h1
+          className={`text-4xl font-bold ${cn(editing && "text-center text-xl")}`}
+        >
+          Enable "Book It Now" feature
+        </h1>
+        {error && (
+          <p className="text-red-500">Please make a selection</p>
+        )}
 
-          <Heading title={"Location"} editPage={3}>
-            <div className="flex flex-row gap-5">
-              <MapPin />
-
-              <div>
-                <p> {listing.location.street}</p>
-                {listing.location.apt && <p>{listing.location.apt}</p>}
-                <p>
-                  {listing.location.city}, {listing.location.state}{" "}
-                  {listing.location.zipcode},
-                </p>
-                <p>{listing.location.country}</p>
-              </div>
-            </div>
-            {coordinateData && (
-              <div className="relative mt-4 h-[400px]">
-                <div className="absolute inset-0 z-0">
-                  <SingleLocationMap lat={lat ?? 0} lng={lng ?? 0} />
-                </div>
-              </div>
-            )}
-          </Heading>
-          <Summary4 />
-          <Heading title={"Amenities"} editPage={5}>
-            <div className="grid grid-cols-2 gap-5">
-              {listing.amenities.map((amenity, index) => (
-                <p key={index} className="flex items-center">
-                  {amenity}
-                </p>
-              ))}
-              <div className="col-span-full">
-                <p className="font-semibold text-primary">Other Amenities</p>
-              </div>
-              {listing.otherAmenities.map((amenity, index) => (
-                <p key={index} className="flex items-center">
-                  {capitalize(amenity)}
-                </p>
-              ))}
-            </div>
-          </Heading>
-          <Heading title={"Photos"} editPage={6}>
-            <div className="grid h-[420.69px] grid-cols-4 grid-rows-2 gap-2 overflow-clip rounded-xl">
-              <div className="relative col-span-2 row-span-2 bg-accent">
-                <Image
-                  src={listing.imageUrls[0]!}
-                  alt=""
-                  fill
-                  objectFit="cover"
-                  priority
-                />
-              </div>
-              <div className="relative col-span-1 row-span-1 bg-accent">
-                <Image
-                  src={listing.imageUrls[1]!}
-                  alt=""
-                  fill
-                  objectFit="cover"
-                />
-              </div>
-              <div className="relative col-span-1 row-span-1 bg-accent">
-                <Image
-                  src={listing.imageUrls[2]!}
-                  alt=""
-                  fill
-                  objectFit="cover"
-                />
-              </div>
-              <div className="relative col-span-1 row-span-1 bg-accent">
-                <Image
-                  src={listing.imageUrls[3]!}
-                  alt=""
-                  fill
-                  objectFit="cover"
-                />
-              </div>
-              <div className="relative col-span-1 row-span-1 bg-accent">
-                <Image
-                  src={listing.imageUrls[4]!}
-                  alt=""
-                  fill
-                  objectFit="cover"
-                />
-              </div>
-            </div>
-          </Heading>
-          <Summary7 />
-          <Summary8 />
-          <Summary9 />
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="bookItNow"
+            checked={isChecked}
+            onCheckedChange={(checked) => setIsChecked(checked as boolean)}
+          />
+          <label
+            htmlFor="bookItNow"
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          >
+            Enable "Book It Now"
+          </label>
         </div>
+
+        <p className="text-sm text-gray-600">
+          By enabling "Book It Now", guests can instantly book your property without requiring your approval for each reservation. This can increase your bookings, but you'll have less control over who stays at your property.
+        </p>
       </div>
-      <OnboardingFooter isForm={false} />
+      {!editing && (
+        <OnboardingFooter
+          handleNext={handleFormSubmit}
+          isFormValid={true}
+          isForm={true}
+          handleError={handleError}
+        />
+      )}
     </>
   );
 }

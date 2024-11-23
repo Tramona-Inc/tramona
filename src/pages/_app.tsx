@@ -15,6 +15,7 @@ import SEO from "../../next-seo.config";
 import { Mulish } from "next/font/google";
 import { DefaultSeo } from "next-seo";
 import NextTopLoader from "nextjs-toploader";
+import { ToastProvider } from "@/components/ui/toast";
 
 export const mulish = Mulish({
   subsets: ["latin"],
@@ -26,32 +27,32 @@ const MyApp: AppType<{ session: Session | null }> = ({
   pageProps: { session, ...pageProps },
 }) => {
   return (
-    // <HydrationOverlay>
-    <TooltipProvider delayDuration={50} disableHoverableContent>
-      <NextTopLoader showSpinner={false} color="#003546" />
-      <DefaultSeo {...SEO} />
-      <APIProvider
-        apiKey={env.NEXT_PUBLIC_GOOGLE_PLACES_KEY}
-        onLoad={() => console.log("Maps API has loaded.")}
-      >
-        <SessionProvider session={session}>
-          <Head>
-            <meta
-              name="viewport"
-              content="width=device-width, initial-scale=1, maximum-scale=1"
-            />
-          </Head>
-          <StripeConnectSessionProvider>
-            <Component {...pageProps} />
-          </StripeConnectSessionProvider>
+    <ToastProvider>
+      <TooltipProvider delayDuration={50} disableHoverableContent>
+        <NextTopLoader showSpinner={false} color="#003546" />
+        <DefaultSeo {...SEO} />
+        <APIProvider
+          apiKey={env.NEXT_PUBLIC_GOOGLE_PLACES_KEY}
+          onLoad={() => console.log("Maps API has loaded.")}
+        >
+          <SessionProvider session={session}>
+            <Head>
+              <meta
+                name="viewport"
+                content="width=device-width, initial-scale=1, maximum-scale=1"
+              />
+            </Head>
+            <StripeConnectSessionProvider>
+              <Component {...pageProps} />
+            </StripeConnectSessionProvider>
 
-          {/* Helps display screen size (Only in developer mode) */}
-          <TailwindIndicator />
-          <Toaster />
-        </SessionProvider>
-      </APIProvider>
-    </TooltipProvider>
-    // </HydrationOverlay>
+            {/* Helps display screen size (Only in developer mode) */}
+            <TailwindIndicator />
+            <Toaster />
+          </SessionProvider>
+        </APIProvider>
+      </TooltipProvider>
+    </ToastProvider>
   );
 };
 

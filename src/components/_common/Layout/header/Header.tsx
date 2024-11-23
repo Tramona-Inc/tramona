@@ -14,16 +14,19 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import AvatarDropdown from "./AvatarDropdown";
-import { api } from "@/utils/api";
 import TramonaIcon from "@/components/_icons/TramonaIcon";
 import {
-  headerLinks,
-  hamburgerLinksDesktop,
-  hamburgerLinksMobile,
-  unloggedHamburgerLinksMobile,
+  leftHeaderLinks,
+  hostCenterHeaderLinks,
+  helpMenuItems,
+  aboutMenuItems,
 } from "@/config/headerNavLinks";
-import { ArrowLeftRightIcon, DoorOpen, MenuIcon } from "lucide-react";
+import { MenuIcon } from "lucide-react";
 import { SkeletonText } from "@/components/ui/skeleton";
+import SubDropdown from "./desktop/SubDropdown";
+import MobileHeader from "./mobile/MobileHeader";
+import useHostBtn from "./useHostBtn";
+import LogInSignUp from "./LoginOrSignup";
 
 export function Header() {
   const { pathname } = useRouter();
@@ -35,8 +38,8 @@ export function Header() {
       <div className="text-balance bg-primaryGreen px-4 py-2 text-center text-sm font-medium text-white">
         Tramona is under maintenance right now, we&apos;ll be launching soon!
       </div>
-      <div className="contents lg:hidden">
-        <SmallHeader isHost={isHost} />
+      <div className="lg:hidden">
+        <MobileHeader isHost={isHost} />
       </div>
       <div className="container hidden lg:contents">
         <LargeHeader isHost={isHost} />
@@ -45,7 +48,7 @@ export function Header() {
   );
 }
 
-function HamburgerMenu({
+export function HamburgerMenu({
   links,
 }: {
   links: {
@@ -87,60 +90,42 @@ function LargeHeader({ isHost }: { isHost: boolean }) {
 
   const hostBtn = useHostBtn();
 
+  const links = isHost ? hostCenterHeaderLinks : leftHeaderLinks;
+
   return (
     <header className="sticky top-0 z-50 flex h-header-height items-center gap-2 border-b bg-white p-4 lg:pl-8 xl:px-20">
       <TramonaLogo />
 
-      <div className="flex translate-y-0.5 items-center pl-2">
-        {!isHost &&
-          headerLinks.map((link) => (
-            <NavLink
-              key={link.href}
-              href={link.href}
-              render={({ selected }) => (
-                <span
-                  className={cn(
-                    "rounded-md px-2 py-3 text-sm font-bold text-zinc-600 hover:text-foreground xl:text-base",
-                    selected && "text-foreground underline underline-offset-2",
-                  )}
-                >
-                  {link.name}
-                </span>
-              )}
-            />
-          ))}
+      {isHost && <div className="flex-1" />}
+
+      <div className="flex items-center pl-2">
+        {links.map((link, index) => (
+          <NavLink
+            key={index}
+            href={link.href}
+            noChildren={link.href === "/host"}
+            render={({ selected }) => (
+              <span
+                className={cn(
+                  "rounded-md px-4 py-3 text-xs font-bold text-zinc-600 hover:text-foreground xl:text-sm",
+                  selected && "text-foreground underline underline-offset-2",
+                )}
+              >
+                {link.name}
+              </span>
+            )}
+          />
+        ))}
       </div>
 
       <div className="flex-1" />
-      <NavLink
-        href="/help-center"
-        render={({ selected }) => (
-          <Button
-            variant="ghost"
-            className={cn(
-              "rounded-full hover:text-foreground",
-              selected && "text-foreground underline underline-offset-2",
-            )}
-          >
-            24/7 Support
-          </Button>
-        )}
-      />
 
-      <NavLink
-        href="/faq"
-        render={({ selected }) => (
-          <Button
-            variant="ghost"
-            className={cn(
-              "rounded-full hover:text-foreground",
-              selected && "text-foreground underline underline-offset-2",
-            )}
-          >
-            FAQ
-          </Button>
-        )}
-      />
+      {!isHost && (
+        <div className="mx-2 flex flex-row gap-x-6">
+          <SubDropdown title="About" menuItems={aboutMenuItems} />
+          <SubDropdown title="Help" menuItems={helpMenuItems} />
+        </div>
+      )}
 
       {status === "loading" ? null : hostBtn.isLoading ? (
         <div className="px-4">
@@ -159,122 +144,10 @@ function LargeHeader({ isHost }: { isHost: boolean }) {
       {status === "unauthenticated" && (
         <>
           <LogInSignUp />
-          <HamburgerMenu links={hamburgerLinksDesktop} />
         </>
       )}
 
       {status === "authenticated" && <AvatarDropdown session={session} />}
     </header>
   );
-}
-
-function SmallHeader({ isHost }: { isHost: boolean }) {
-  const { status, data: session } = useSession();
-  const hostBtn = useHostBtn();
-
-  return (
-    <header className="sticky top-0 z-50 flex h-header-height items-center gap-2 border-b bg-white px-2 pl-4 text-sm sm:text-base">
-      <TramonaLogo />
-      <div className="flex translate-y-0.5 items-center pl-2"></div>
-
-      <div className="flex-1" />
-      {/* <NavLink
-        href="/help-center"
-        render={({ selected }) => (
-          <Button
-            variant="ghost"
-            size="sm"
-            className={cn(
-              "rounded-full px-2 py-3 text-sm tracking-tight hover:text-foreground",
-              selected && "text-foreground underline underline-offset-2",
-            )}
-          >
-            24/7 Support
-          </Button>
-        )}
-      /> */}
-
-      {!isHost || status === "loading" ? null : hostBtn.isLoading ? (
-        <div className="px-4">
-          <SkeletonText className="w-24" />
-        </div>
-      ) : (
-        <Button
-          asChild
-          size="sm"
-          variant="ghost"
-          className={cn(
-            hostBtn.href !== "/for-hosts" && "rounded-full px-2 tracking-tight",
-          )}
-        >
-          <Link href={hostBtn.href}>{hostBtn.name}</Link>
-        </Button>
-      )}
-
-      {status === "authenticated" && (
-        <AvatarDropdown session={session} size="sm" />
-      )}
-
-      {status === "unauthenticated" && <LogInSignUp />}
-
-      {!isHost && (
-        <HamburgerMenu
-          links={[
-            ...(hostBtn.isLoading ? [] : [hostBtn]),
-            ...(status === "unauthenticated"
-              ? unloggedHamburgerLinksMobile
-              : hamburgerLinksMobile),
-          ]}
-        />
-      )}
-    </header>
-  );
-}
-
-function LogInSignUp() {
-  return (
-    <>
-      <Button asChild variant="secondary">
-        <Link href="/auth/signin">Log In</Link>
-      </Button>
-      <Button asChild>
-        <Link href="/auth/signup">Sign Up</Link>
-      </Button>
-    </>
-  );
-}
-
-function useHostBtn() {
-  const { data: isHost, isLoading: isHostLoading } =
-    api.users.isHost.useQuery();
-
-  const { status: sessionStatus } = useSession();
-
-  const { pathname } = useRouter();
-
-  if (sessionStatus === "loading" || isHostLoading) {
-    return { isLoading: true } as const;
-  }
-
-  if (sessionStatus === "unauthenticated" || !isHost) {
-    return {
-      href: "/for-hosts",
-      name: "Become a host",
-      icon: DoorOpen,
-    } as const;
-  }
-
-  if (pathname.includes("/host")) {
-    return {
-      href: "/",
-      name: "Switch to Traveler",
-      icon: ArrowLeftRightIcon,
-    } as const;
-  }
-
-  return {
-    href: "/host",
-    name: "Switch to Host",
-    icon: ArrowLeftRightIcon,
-  } as const;
 }

@@ -27,6 +27,7 @@ import {
   type Property,
   type User,
   type Request,
+  type RequestsToBook,
   bookedDates,
   groupInvites,
   groupMembers,
@@ -41,16 +42,21 @@ import {
   requests,
   rejectedRequests,
   hostTeams,
+  requestsToBook,
+  hostProfiles,
 } from "./db/schema";
-import { getCity, getCoordinates } from "./google-maps";
+import { getAddress, getCoordinates } from "./google-maps";
 import axios from "axios";
 import { HttpsProxyAgent } from "https-proxy-agent";
 import * as cheerio from "cheerio";
 import { sendSlackMessage } from "./slack";
-import { HOST_MARKUP, TRAVELER__MARKUP } from "@/utils/constants";
+import { HOST_MARKUP, TRAVELER_MARKUP } from "@/utils/constants";
 import { HostRequestsPageData } from "./api/routers/propertiesRouter";
 import { Session } from "next-auth";
 import { calculateTotalTax } from "@/utils/payment-utils/taxData";
+import { scrapePage, serpPageSchema, transformSearchResult } from "./external-listings-scraping/airbnbScraper";
+import { getSerpUrl } from "./external-listings-scraping/airbnbScraper";
+import { createStripeConnectId } from "@/utils/stripe-utils";
 
 export const proxyAgent = new HttpsProxyAgent(env.PROXY_URL);
 
@@ -342,45 +348,64 @@ export async function getHostTeamOwnerId(hostTeamId: number) {
 }
 
 export async function addProperty({
-  userId,
-  userEmail,
-  hostTeamId,
   property,
   isAdmin,
+  userEmail,
+  hostTeamId,
 }: {
-  userId?: string;
   userEmail?: string;
-  hostTeamId?: number | null;
+  hostTeamId: number;
   isAdmin: boolean;
-  property: Omit<NewProperty, "id" | "city" | "latLngPoint"> & {
-    latLngPoint?: { x: number; y: number };
+  property: Omit<
+    NewProperty,
+    | "id"
+    | "hostTeamId"
+    | "latLngPoint"
+    | "city"
+    | "county"
+    | "stateName"
+    | "stateCode"
+    | "country"
+    | "bookItNowEnabled"
+    | "bookItNowDiscountTiers"
+  > & {
+    latLngPoint?: { x: number; y: number }; // make optional
   };
-}) {
+} & (
+    | { isAdmin?: boolean; userEmail: string }
+    | { isAdmin: true; userEmail?: undefined }
+  )) {
   let lat = property.latLngPoint?.y;
   let lng = property.latLngPoint?.x;
 
   if (!lat || !lng) {
+    // get lat lng if not provided
     const { location } = await getCoordinates(property.address);
     if (!location) throw new Error("Could not get coordinates for address");
     lat = location.lat;
     lng = location.lng;
   }
-  const locInfo = await getCity({ lat, lng });
+
+  const { city, country, county, stateCode, stateName } = await getAddress({
+    lat,
+    lng,
+  });
 
   const propertyValues = {
     ...property,
-    hostId: userId,
-    city: locInfo.city,
-    latLngPoint: createLatLngGISPoint({ lat, lng }),
     hostTeamId,
+    city,
+    county,
+    stateCode,
+    stateName,
+    country,
+    latLngPoint: createLatLngGISPoint({ lat, lng }),
   };
 
   const [insertedProperty] = await db
     .insert(properties)
     .values(propertyValues)
     .returning({ id: properties.id });
-
-  // waitUntil(processRequests(insertedProperty!));
 
   await sendSlackMessage({
     isProductionOnly: true,
@@ -393,41 +418,54 @@ export async function addProperty({
   return insertedProperty!.id;
 }
 
-export async function sendTextToHost(
-  matchingProperties: { id: number; hostId: string | null }[],
-  checkIn: Date,
-  checkOut: Date,
-  maxTotalPrice: number,
-  location: string,
-) {
-  const uniqueHostIds = Array.from(
-    new Set(matchingProperties.map((property) => property.hostId)),
+export async function sendTextToHost({
+  matchingProperties,
+  request,
+}: {
+  matchingProperties: { id: number; hostTeamId: number }[];
+  request: Pick<Request, "checkIn" | "checkOut" | "maxTotalPrice" | "location">;
+}) {
+  const uniqueHostTeamIds = Array.from(
+    new Set(matchingProperties.map((property) => property.hostTeamId)),
   );
   const numHostPropertiesPerRequest = matchingProperties.reduce(
     (acc, property) => {
-      if (property.hostId) {
-        acc[property.hostId] = (acc[property.hostId] ?? 0) + 1;
+      if (property.hostTeamId) {
+        acc[property.hostTeamId] = (acc[property.hostTeamId] ?? 0) + 1;
       }
       return acc;
     },
-    {} as Record<string, number>,
+    {} as Record<number, number>,
   );
 
   waitUntil(
     Promise.all(
-      uniqueHostIds.filter(Boolean).map(async (hostId) => {
-        const host = await db.query.users.findFirst({
-          where: eq(users.id, hostId),
-          columns: { name: true, email: true, phoneNumber: true },
-        });
+      uniqueHostTeamIds.filter(Boolean).map(async (hostTeamId) => {
+        const hostTeamOwner = await db.query.hostTeams
+          .findFirst({
+            where: eq(hostTeams.id, hostTeamId),
+            with: {
+              owner: {
+                columns: { name: true, email: true, phoneNumber: true },
+              },
+            },
+          })
+          .then((res) => res?.owner);
 
-        if (!host?.phoneNumber) return;
+        if (!hostTeamOwner?.phoneNumber) return;
 
-        const numberOfNights = getNumNights(checkIn, checkOut);
+        const numberOfNights = getNumNights(request.checkIn, request.checkOut);
 
         await sendText({
-          to: host.phoneNumber,
-          content: `Tramona: There is a request for ${formatCurrency(maxTotalPrice / numberOfNights)} per night for ${plural(numberOfNights, "night")} in ${location}. You have ${plural(numHostPropertiesPerRequest[hostId] ?? 0, "eligible property", "eligible properties")}. Please click here to make a match: ${env.NEXTAUTH_URL}/host/requests`,
+          to: hostTeamOwner.phoneNumber,
+          content: `Tramona: There is a request for ${formatCurrency(
+            request.maxTotalPrice / numberOfNights,
+          )} per night for ${plural(numberOfNights, "night")} in ${request.location
+            }. You have ${plural(
+              numHostPropertiesPerRequest[hostTeamId] ?? 0,
+              "eligible property",
+              "eligible properties",
+            )}. Please click here to make a match: ${env.NEXTAUTH_URL}/host/requests`,
         });
 
         //TODO SEND WHATSAPP MESSAGE
@@ -438,7 +476,6 @@ export async function sendTextToHost(
 
 export async function getRequestsForProperties(
   hostProperties: Property[],
-  { user }: { user: Session["user"] },
   //{
   // id: number;
   // propertyStaus: string;
@@ -463,7 +500,7 @@ export async function getRequestsForProperties(
   for (const property of hostProperties) {
     const requestIsNearProperty = sql`
       ST_DWithin(
-        ST_Transform(requests.lat_lng_point, 3857),
+        ST_Transform(ST_SetSRID(requests.lat_lng_point, 4326), 3857),
         ST_Transform(ST_SetSRID(ST_MakePoint(${property.latLngPoint.x}, ${property.latLngPoint.y}), 4326), 3857),
         requests.radius * 1609.34
       )
@@ -479,12 +516,12 @@ export async function getRequestsForProperties(
     // `;
     requestIsNearProperties.push(requestIsNearProperty);
 
-    const { city, stateCode, country } = await getCity({
+    const { city, stateCode, country } = await getAddress({
       lat: property.latLngPoint.y,
       lng: property.latLngPoint.x,
     });
 
-    const taxInfo = calculateTotalTax(country, stateCode, city);
+    const taxInfo = calculateTotalTax({ country, stateCode, city });
     console.log("taxInfo", taxInfo, city);
 
     const requestsForProperty = await tx.query.requests.findMany({
@@ -505,7 +542,7 @@ export async function getRequestsForProperties(
                     .where(
                       and(
                         eq(properties.id, offers.propertyId),
-                        eq(properties.hostTeamId, property.hostTeamId!),
+                        eq(properties.hostTeamId, property.hostTeamId),
                       ),
                     ),
                 ),
@@ -519,7 +556,7 @@ export async function getRequestsForProperties(
             .where(
               and(
                 eq(rejectedRequests.requestId, requests.id),
-                eq(rejectedRequests.userId, user.id),
+                eq(rejectedRequests.hostTeamId, property.hostTeamId),
               ),
             ),
         ),
@@ -593,7 +630,7 @@ export async function getPropertiesForRequest(
 
   propertyIsNearRequest = sql`
     ST_DWithin(
-      ST_Transform(properties.lat_lng_point, 3857),
+      ST_Transform(ST_SetSRID(properties.lat_lng_point, 4326), 3857),
       ST_Transform(ST_SetSRID(ST_MakePoint(${req.latLngPoint.x}, ${req.latLngPoint.y}), 4326), 3857),
       ${radiusInDegrees}
     )
@@ -646,9 +683,8 @@ export async function getPropertiesForRequest(
 
   const numberOfNights = getNumNights(req.checkIn, req.checkOut);
 
-  const result = await tx.query.properties.findMany({
+  return await tx.query.properties.findMany({
     where: and(
-      isNotNull(properties.hostId),
       propertyIsNearRequest,
       propertyisAvailable,
       or(
@@ -664,14 +700,12 @@ export async function getPropertiesForRequest(
     ),
     columns: {
       id: true,
-      hostId: true,
+      hostTeamId: true,
       autoOfferEnabled: true,
       autoOfferDiscountTiers: true,
       originalListingId: true,
     },
   });
-
-  return result;
 }
 
 export async function getAdminId() {
@@ -680,10 +714,17 @@ export async function getAdminId() {
     .then((res) => res!.id);
 }
 
-type HospitablePriceResponse = {
+type HospitableCalendarResponse = {
   data: {
     dates: {
-      price: { amount: number };
+      date: string;
+      price: {
+        amount: number;
+        currency: string;
+      };
+      availability: {
+        available: boolean;
+      };
     }[];
   };
 };
@@ -694,8 +735,54 @@ type HostawayPriceResponse = {
   };
 };
 
+export async function getPropertyCalendar(propertyId: string) {
+  const now = new Date();
+  const firstStartDate = now.toISOString().split("T")[0];
+  const firstEndDate = new Date(now);
+  firstEndDate.setDate(firstEndDate.getDate() + 365);
+  const firstEndDateString = firstEndDate.toISOString().split("T")[0];
+
+  const secondStartDate = new Date(firstEndDate);
+  secondStartDate.setDate(secondStartDate.getDate() + 1);
+  const secondStartDateString = secondStartDate
+    .toISOString()
+    .split("T")[0];
+
+  const secondEndDate = new Date(now);
+  secondEndDate.setDate(now.getDate() + 539);
+  const secondEndDateString = secondEndDate.toISOString().split("T")[0];
+
+  // Construct the URL with query params for logging
+  const firstBatchUrl = `https://connect.hospitable.com/api/v1/listings/${propertyId}/calendar?start_date=${firstStartDate}&end_date=${firstEndDateString}`;
+  const secondBatchUrl = `https://connect.hospitable.com/api/v1/listings/${propertyId}/calendar?start_date=${secondStartDateString}&end_date=${secondEndDateString}`;
+
+  // Log the URLs
+  console.log("First request URL:", firstBatchUrl);
+  console.log("Second request URL:", secondBatchUrl);
+
+  // Make the requests
+  const firstBatch = await axios.get<HospitableCalendarResponse>(firstBatchUrl, {
+    headers: {
+      Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
+    },
+  });
+
+  const secondBatch = await axios.get<HospitableCalendarResponse>(secondBatchUrl, {
+    headers: {
+      Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
+    },
+  });
+
+
+  const combinedPricingAndCalendarResponse = [
+    ...firstBatch.data.data.dates,
+    ...secondBatch.data.data.dates,
+  ];
+  return combinedPricingAndCalendarResponse;
+}
+
 export async function getPropertyOriginalPrice(
-  property: Pick<Property, "originalListingId" | "originalListingPlatform">,
+  property: Pick<Property, "hospitableListingId" | "originalListingPlatform" | "originalListingId">,
   params: {
     checkIn: string;
     checkOut: string;
@@ -703,22 +790,24 @@ export async function getPropertyOriginalPrice(
   },
 ) {
   if (property.originalListingPlatform === "Hospitable") {
-    const { data } = await axios.get<HospitablePriceResponse>(
-      `https://connect.hospitable.com/api/v1/listings/${property.originalListingId}/calendar`,
+    const formattedCheckIn = new Date(params.checkIn).toISOString().split("T")[0];
+    const formattedCheckOut = new Date(params.checkOut).toISOString().split("T")[0];
+    const { data } = await axios.get<HospitableCalendarResponse>(
+      `https://connect.hospitable.com/api/v1/listings/${property.hospitableListingId}/calendar`,
       {
         headers: {
           Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
         },
         params: {
-          start_date: params.checkIn,
-          end_date: params.checkOut,
+          start_date: formattedCheckIn,
+          end_date: formattedCheckOut,
         },
       },
     );
-    const totalPrice = data.data.dates.reduce((acc, date) => {
+    const averagePrice = data.data.dates.reduce((acc, date) => {
       return acc + date.price.amount;
-    }, 0);
-    return totalPrice;
+    }, 0) / data.data.dates.length;
+    return averagePrice;
   } else if (property.originalListingPlatform === "Hostaway") {
     const { data } = await axios.get<HostawayPriceResponse>(
       `https://api.hostaway.com/v1/properties/${property.originalListingId}/calendar/priceDetails`,
@@ -749,7 +838,7 @@ export async function updateTravelerandHostMarkup({
   offerId: number;
 }) {
   console.log("offerTotalPrice", offerTotalPrice);
-  const travelerPrice = Math.ceil(offerTotalPrice * TRAVELER__MARKUP);
+  const travelerPrice = Math.ceil(offerTotalPrice * TRAVELER_MARKUP);
   const hostPay = Math.ceil(offerTotalPrice * HOST_MARKUP);
   console.log("travelerPrice", travelerPrice);
   await db
@@ -847,6 +936,9 @@ export function createLatLngGISPoint({
   return latLngPoint;
 }
 
+/**
+ * returns the distance in kilometers between two points
+ */
 export function haversineDistance(
   lat1: number,
   lon1: number,
@@ -861,9 +953,9 @@ export function haversineDistance(
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(toRadians(lat1)) *
-      Math.cos(toRadians(lat2)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+    Math.cos(toRadians(lat2)) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c; // Distance in kilometers
 }
@@ -930,7 +1022,187 @@ export async function createInitialHostTeam(
   await db.insert(hostTeamMembers).values({
     hostTeamId: teamId,
     userId: user.id,
+    role: "Admin Access",
   });
 
   return teamId;
+}
+
+export async function scrapeAirbnbInitialPageHelper({
+  checkIn,
+  checkOut,
+  location,
+  numGuests,
+}: {
+  checkIn: Date;
+  checkOut: Date;
+  location: string;
+  numGuests: number;
+}) {
+  const serpUrl = getSerpUrl({
+    checkIn: checkIn,
+    checkOut: checkOut,
+    location: location,
+    numGuests: numGuests,
+  });
+
+  const numNights = getNumNights(checkIn, checkOut);
+
+
+  const pageData = await scrapePage(serpUrl).then(async (unparsedData) => {
+    return serpPageSchema.parse(unparsedData);
+  })
+  const searchResults = (await Promise.all(
+    pageData.staysSearch.results.searchResults.map((searchResult) =>
+      transformSearchResult({ searchResult, numNights, numGuests })
+    )
+  )).filter(Boolean);
+
+  // console.log("length of results:", searchResults.length);
+  // console.log('result:', searchResults[0]);
+  // const results = pageData.flatMap((data) => data.staysSearch.results.searchResults)
+  return { data: pageData, res: searchResults };
+}
+
+export async function scrapeAirbnbPagesHelper({
+  checkIn,
+  checkOut,
+  location,
+  numGuests,
+  cursors,
+}: {
+  checkIn: Date;
+  checkOut: Date;
+  location: string;
+  numGuests: number;
+  cursors: string[];
+}) {
+  const pageUrls = cursors.map((cursor) =>
+    getSerpUrl({
+      checkIn,
+      checkOut,
+      location,
+      numGuests,
+      cursor
+    }),
+  );
+
+  const numNights = getNumNights(checkIn, checkOut);
+
+  return (await Promise.all(pageUrls.map(scrapePage)))
+    .flatMap((data) => data.staysSearch.results.searchResults)
+    .map((searchResult) => transformSearchResult({ searchResult, numNights, numGuests }))
+    .filter(Boolean);
+}
+
+
+export async function getRequestsToBookForProperties(
+  hostProperties: Property[],
+  { user }: { user: Session["user"] },
+  { tx = db } = {},
+) {
+  const propertyToRequestMap: {
+    requestToBook: RequestsToBook & {
+      traveler: Pick<
+        User,
+        "firstName" | "lastName" | "name" | "image" | "location" | "about"
+      >;
+      property: Property & { taxAvailable: boolean };
+    };
+  }[] = [];
+
+  for (const property of hostProperties) {
+    const requestsForProperty = await tx.query.requestsToBook.findMany({
+      where: and(
+        eq(requestsToBook.propertyId, property.id),
+        eq(requestsToBook.userId, user.id),
+        gte(requestsToBook.checkIn, new Date()),
+      ),
+      with: {
+        madeByGroup: {
+          with: {
+            owner: {
+              columns: {
+                image: true,
+                name: true,
+                firstName: true,
+                lastName: true,
+                location: true,
+                about: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const { city, stateCode, country } = await getAddress({
+      lat: property.latLngPoint.y,
+      lng: property.latLngPoint.x,
+    });
+
+    const taxInfo = calculateTotalTax({ country, stateCode, city });
+    console.log("taxInfo", taxInfo, city);
+
+    for (const requestToBook of requestsForProperty) {
+      const traveler = {
+        name: requestToBook.madeByGroup.owner.name,
+        image: requestToBook.madeByGroup.owner.image,
+        firstName: requestToBook.madeByGroup.owner.firstName,
+        lastName: requestToBook.madeByGroup.owner.lastName,
+        location: requestToBook.madeByGroup.owner.location,
+        about: requestToBook.madeByGroup.owner.about,
+      };
+      propertyToRequestMap.push({
+        requestToBook: {
+          ...requestToBook,
+          traveler,
+          property: {
+            ...property,
+            taxAvailable: taxInfo.length > 0 ? true : false, //// come back here
+          },
+        },
+      });
+    }
+  }
+  return propertyToRequestMap;
+}
+
+export async function addHostProfile({
+  userId,
+  curTeamId,
+  hostawayApiKey,
+  hostawayAccountId,
+  hostawayBearerToken,
+}: {
+  userId: string;
+  curTeamId: number;
+  hostawayApiKey?: string;
+  hostawayAccountId?: string;
+  hostawayBearerToken?: string;
+}) {
+  const curUser = await db.query.users.findFirst({
+    columns: { email: true, firstName: true, lastName: true },
+    where: eq(users.id, userId),
+  });
+  if (curUser) {
+    await db.insert(hostProfiles).values({
+      userId,
+      curTeamId: curTeamId,
+      hostawayApiKey,
+      hostawayAccountId,
+      hostawayBearerToken,
+    });
+
+    await createStripeConnectId({ userId, userEmail: curUser.email });
+
+    await sendSlackMessage({
+      isProductionOnly: true,
+      text: [
+        "*Host Profile Created:*",
+        `User ${curUser.firstName} ${curUser.lastName} has become a host`,
+      ].join("\n"),
+      channel: "host-bot",
+    });
+  }
 }

@@ -12,7 +12,7 @@ import {
   NewReview,
 } from "@/server/db/schema";
 import { airbnbHeaders } from "@/utils/constants";
-import { getCity } from "../google-maps";
+import { getAddress, stringifyAddress } from "../google-maps";
 import { axiosWithRetry, proxyAgent } from "../server-utils";
 
 export function encodeAirbnbId(id: string) {
@@ -29,7 +29,7 @@ export function getListingDataUrl(
 ) {
   const encodedId = encodeAirbnbId(id);
 
-  return `https://www.airbnb.com/api/v3/StaysPdpSections/160265f6bdbacc2084cdf7de8641926c5ee141c3a2967dca0407ee47cec2a7d1?operationName=StaysPdpSections&locale=en&currency=USD&variables={"id":"${encodedId}","pdpSectionsRequest":{${checkIn ? `"checkIn":"${formatDateYearMonthDay(checkIn)}"` : ""},${checkOut ? `"checkOut":"${formatDateYearMonthDay(checkOut)}"` : ""},"adults":${numGuests ? numGuests : "1"},"layouts":["SIDEBAR","SINGLE_COLUMN"]}}&extensions={"persistedQuery":{"version":1,"sha256Hash":"160265f6bdbacc2084cdf7de8641926c5ee141c3a2967dca0407ee47cec2a7d1"}}`;
+  return `https://www.airbnb.com/api/v3/StaysPdpSections/160265f6bdbacc2084cdf7de8641926c5ee141c3a2967dca0407ee47cec2a7d1?operationName=StaysPdpSections&locale=en&currency=USD&variables={"id":"${encodedId}","pdpSectionsRequest":{${checkIn ? `"checkIn":"${formatDateYearMonthDay(checkIn)}"` : ""},${checkOut ? `"checkOut":"${formatDateYearMonthDay(checkOut)}"` : ""},"adults":"${numGuests ? numGuests : 1}","layouts":["SIDEBAR","SINGLE_COLUMN"]}}&extensions={"persistedQuery":{"version":1,"sha256Hash":"160265f6bdbacc2084cdf7de8641926c5ee141c3a2967dca0407ee47cec2a7d1"}}`;
 }
 
 export function getReviewsUrl(id: string) {
@@ -84,13 +84,11 @@ export async function scrapeAirbnbListing(
     numGuests,
   }: { checkIn: Date; checkOut: Date; numGuests: number },
 ) {
-
   const listingDataUrl = getListingDataUrl(id, {
     checkIn,
     checkOut,
     numGuests,
   });
-
 
   const reviewsUrl = getReviewsUrl(id);
 
@@ -128,13 +126,12 @@ export async function scrapeAirbnbListing(
   if (!about)
     throw new Error(`Airbnb id ${id}: Failed to parse aboutHTML: ${aboutHTML}`);
 
-  const amenities = getAmenities(listingData, id);
-
   // const amenitiesStr = /"seeAllAmenitiesGroups":(.+?\}\]\}\])/.exec(
   //   listingData,
   // )?.[1];
   // if (!amenitiesStr)
   //   throw new Error(`Airbnb id ${id}: Failed to find amenities`);
+  const amenities = getAmenities(listingData, id);
 
   // const amenities = z
   //   .array(z.object({ amenities: z.array(z.object({ title: z.string() })) }))
@@ -268,23 +265,23 @@ export async function scrapeAirbnbListing(
 
   const allOtherHouseRules = otherHouseRulesStr
     ? z
-      .array(z.object({ title: z.string() }))
-      .parse(JSON.parse(otherHouseRulesStr))
-      .map(({ title }) => title)
+        .array(z.object({ title: z.string() }))
+        .parse(JSON.parse(otherHouseRulesStr))
+        .map(({ title }) => title)
     : [];
 
   const otherHouseRules =
     allOtherHouseRules.length > 0
       ? allOtherHouseRules
-        .filter(
-          (rule) =>
-            // exclude rules for pets, smoking, and maximum number of guests
-            !["pets", "smoking", "guests"].some((keyword) =>
-              rule.toLowerCase().includes(keyword),
-            ),
-        )
-        .map((rule) => `- ${rule}`)
-        .join("\n")
+          .filter(
+            (rule) =>
+              // exclude rules for pets, smoking, and maximum number of guests
+              !["pets", "smoking", "guests"].some((keyword) =>
+                rule.toLowerCase().includes(keyword),
+              ),
+          )
+          .map((rule) => `- ${rule}`)
+          .join("\n")
       : null;
 
   // "localized_cancellation_policy_name"
@@ -327,11 +324,9 @@ export async function scrapeAirbnbListing(
 
   const originalNightlyPrice = parseCurrency(originalNightlyPriceStr);
 
-  const city = await getCity({ lat: latitude, lng: longitude }).then(
-    (address) => address.city,
-  );
+  const addressComponents = await getAddress({ lat: latitude, lng: longitude });
 
-  const property: NewProperty = {
+  const property: Omit<NewProperty, "hostTeamId"> = {
     name,
     about,
     imageUrls,
@@ -355,8 +350,11 @@ export async function scrapeAirbnbListing(
     otherHouseRules,
     cancellationPolicy,
     originalNightlyPrice,
-    city,
-    address: city, // cant get exact address from airbnb before booking so we go with the city
+    city: addressComponents.city,
+    country: addressComponents.country,
+    stateName: addressComponents.stateName,
+    stateCode: addressComponents.stateCode,
+    address: stringifyAddress(addressComponents),
   };
 
   // data.presentation.stayProductDetailPage.reviews.reviews

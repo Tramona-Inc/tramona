@@ -4,11 +4,12 @@ import { env } from "@/env";
 import { format } from "date-fns";
 import { TRPCError } from "@trpc/server";
 import { zodUrl } from "@/utils/zod-utils";
-import { getCity, getCoordinates } from "@/server/google-maps";
+import { getAddress, getCoordinates } from "@/server/google-maps";
 import { Airbnb } from "@/utils/listing-sites/Airbnb";
 import { z } from "zod";
-import { urlScrape } from "@/server/server-utils";
+import { scrapeAirbnbInitialPageHelper, scrapeAirbnbPagesHelper, getPropertyOriginalPrice, urlScrape } from "@/server/server-utils";
 import { scrapeAirbnbPrice } from "@/server/scrapePrice";
+import { fetchPrice, fetchPriceNoRateLimit } from "@/server/direct-sites-scraping/casamundo-scraper";
 
 type AirbnbListing = {
   id: string;
@@ -60,12 +61,12 @@ export const miscRouter = createTRPCRouter({
     .query(async ({ input }) => {
       const price = (await fetch(
         `https://${env.RAPIDAPI_HOST}/search-location?` +
-          new URLSearchParams({
-            location: input.location,
-            checkin: format(input.checkIn, "yyyy-MM-dd"),
-            checkout: format(input.checkOut, "yyyy-MM-dd"),
-            adults: input.numGuests.toString(),
-          }).toString(),
+        new URLSearchParams({
+          location: input.location,
+          checkin: format(input.checkIn, "yyyy-MM-dd"),
+          checkout: format(input.checkOut, "yyyy-MM-dd"),
+          adults: input.numGuests.toString(),
+        }).toString(),
         {
           method: "GET",
           headers: {
@@ -83,11 +84,82 @@ export const miscRouter = createTRPCRouter({
       const averageNightlyPrice =
         Array.isArray(price.results) && price.results.length > 0
           ? price.results.reduce((acc, listing) => {
-              return acc + listing.price.rate;
-            }, 0) / price.results.length
+            return acc + listing.price.rate;
+          }, 0) / price.results.length
           : 0;
 
       return averageNightlyPrice;
+    }),
+
+  scrapeAirbnbInitialPage: publicProcedure
+    .input(z.object({
+      checkIn: z.date(),
+      checkOut: z.date(),
+      location: z.string(),
+      numGuests: z.number(),
+    }))
+    .query(async ({
+      input
+    }) => {
+      const {checkIn, checkOut, location, numGuests} = input;
+      return await scrapeAirbnbInitialPageHelper({checkIn, checkOut, location, numGuests});
+    }),
+
+  scrapeAirbnbPages: publicProcedure
+    .input(
+      z.object({
+        pageCursors: z.string().array(),
+        checkIn: z.date(),
+        checkOut: z.date(),
+        location: z.string(),
+        numGuests: z.number(),
+      })
+    )
+    .query(async ({
+      input
+    }) => {
+      const { checkIn, checkOut, location, numGuests, pageCursors } = input;
+      return await scrapeAirbnbPagesHelper({checkIn, checkOut, location, numGuests, cursors: pageCursors});
+    }),
+
+  getAverageHostPropertyPrice: publicProcedure
+    .input(
+      z.object({
+        property: z.object({
+          originalListingId: z.string(),
+          originalListingPlatform: z.enum(["Hospitable", "Hostaway"]),
+          hospitableListingId: z.string(),
+        }),
+        checkIn: z.string(),
+        checkOut: z.string(),
+        numGuests: z.number(),
+      }),
+    )
+    .query(async ({ input: { property, checkIn, checkOut, numGuests } }) => {
+      const averagePrice = await getPropertyOriginalPrice(property, {
+        checkIn,
+        checkOut,
+        numGuests,
+      });
+      return averagePrice;
+    }),
+
+  scrapeAverageCasamundoPrice: publicProcedure
+    .input(
+      z.object({
+        offerId: z.string(),
+        checkIn: z.date(),
+        numGuests: z.number(),
+        duration: z.number(),
+      }),
+    )
+    .query(async ({ input: { offerId, checkIn, numGuests, duration } }) => {
+      const price = await fetchPriceNoRateLimit({ offerId, checkIn, numGuests, duration });
+
+      if (price.status === "success") {
+        return price.price / duration;
+      }
+      return price.status;
     }),
 
   scrapeAirbnbLink: publicProcedure
@@ -132,7 +204,8 @@ export const miscRouter = createTRPCRouter({
 
       const coords = await getCoordinates(cityName).then((res) => res.location);
 
-      const locationParts = coords && (await getCity(coords).catch(() => undefined));
+      const locationParts =
+        coords && (await getAddress(coords).catch(() => undefined));
 
       const location = `${locationParts?.city}, ${locationParts?.stateCode}, ${locationParts?.country}`;
 
