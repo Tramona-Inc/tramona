@@ -879,3 +879,32 @@ export function getHostNameAndImage(
     image: property.hostProfilePic ?? teamOwner.image,
   };
 }
+
+type InteractionPreferences =
+  | "not available"
+  | "say hello"
+  | "socialize"
+  | "no preference"
+  | null;
+
+export function convertInteractionPreference(pref: InteractionPreferences) {
+  let modifiedPref = null;
+  switch (pref) {
+    case "not available":
+      modifiedPref =
+        "I won't be available in person, and prefer communicating through the app.";
+      break;
+    case "say hello":
+      modifiedPref =
+        "I like to say hello in person, but keep to myself otherwise.";
+      break;
+    case "socialize":
+      modifiedPref = "I like socializing and spending time with guests.";
+      break;
+    case "no preference":
+      modifiedPref = "No preferences - I follow my guests' lead.";
+      break;
+  }
+
+  return modifiedPref;
+}

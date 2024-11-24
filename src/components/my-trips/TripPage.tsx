@@ -19,6 +19,7 @@ import {
   plural,
   convertTo12HourFormat,
   getDaysUntilTrip,
+  convertInteractionPreference,
 } from "@/utils/utils";
 
 import SingleLocationMap from "../_common/GoogleMaps/SingleLocationMap";
@@ -215,25 +216,115 @@ export default function TripPage({
 
               <div className="h-[2px] rounded-full bg-zinc-200"></div>
 
-              <div className="py-5">
+              <div className="space-y-2 py-4">
+                <p className="font-bold">Check-in info</p>
                 {trip.property.additionalCheckInInfo && (
-                  <>
-                    <p className="pb-2 font-bold">Check-in info</p>
-                    <p>{trip.property.additionalCheckInInfo}</p>
-                  </>
-                )}
-
-                {trip.property.cancellationPolicy !== null && (
-                  <>
-                    <p className="pb-2 font-bold">Cancellation Policy</p>
-                    <p>
-                      {getCancellationPolicyDescription(
-                        trip.property.cancellationPolicy,
-                      )}
-                    </p>
-                  </>
+                  <div className="flex items-center">
+                    <div className="basis-1/2">
+                      <p className="text-muted-foreground">Check-in type</p>
+                      <p>{trip.property.checkInType}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">
+                        Additional check-in info
+                      </p>
+                      <p>{trip.property.additionalCheckInInfo}</p>
+                    </div>
+                  </div>
                 )}
               </div>
+
+              <div className="h-[2px] rounded-full bg-zinc-200"></div>
+
+              <div className="space-y-2 py-4">
+                <p className="font-bold">Check-out info</p>
+                <div className="flex items-center">
+                  <div className="basis-1/2">
+                    <p className="text-muted-foreground">Check-out type</p>
+                    <p>{trip.property.checkOutInfo}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">
+                      Additional check-out info
+                    </p>
+                    <p>{trip.property.additionalCheckOutInfo}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="h-[2px] rounded-full bg-zinc-200"></div>
+
+              <div className="space-y-2 py-4">
+                <p className="font-bold">House Rules</p>
+                <div className="flex items-center">
+                  <div className="basis-1/2">
+                    <p className="text-muted-foreground">House Rules</p>
+                    {trip.property.houseRules?.map((rule, index) => (
+                      <p key={index}>{rule}</p>
+                    ))}
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">
+                      Additional house rules
+                    </p>
+                    <p>{trip.property.additionalHouseRules}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="h-[2px] rounded-full bg-zinc-200"></div>
+
+              <div className="space-y-2 py-4">
+                <p className="font-bold">Interaction preference</p>
+                <p>
+                  {convertInteractionPreference(
+                    trip.property.interactionPreference,
+                  )}
+                </p>
+              </div>
+
+              <div className="h-[2px] rounded-full bg-zinc-200"></div>
+
+              <div className="space-y-2 py-4">
+                <p className="font-bold">Directions</p>
+                <p>{trip.property.directions}</p>
+              </div>
+
+              <div className="h-[2px] rounded-full bg-zinc-200"></div>
+
+              <div className="space-y-2 py-4">
+                <p className="font-bold">Wifi details</p>
+                <div className="flex items-center">
+                  <div className="basis-1/2">
+                    <p className="text-muted-foreground">Wifi name</p>
+                    <p>{trip.property.wifiName}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Wifi password</p>
+                    <p>{trip.property.wifiPassword}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="h-[2px] rounded-full bg-zinc-200"></div>
+
+              <div className="space-y-2 py-4">
+                <p className="font-bold">House Manual</p>
+                <p>{trip.property.houseManual}</p>
+              </div>
+
+              <div className="h-[2px] rounded-full bg-zinc-200"></div>
+
+              {trip.property.cancellationPolicy !== null && (
+                <div className="space-y-2 py-4">
+                  <p className="font-bold">Cancellation Policy</p>
+                  <p>
+                    {getCancellationPolicyDescription(
+                      trip.property.cancellationPolicy,
+                    )}
+                  </p>
+                </div>
+              )}
 
               <div className="h-[2px] rounded-full bg-zinc-200"></div>
 
