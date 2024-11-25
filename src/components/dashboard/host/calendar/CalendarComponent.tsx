@@ -1,5 +1,5 @@
 "use client";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { ChevronLeft, ChevronRight, ChevronDown, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,6 +14,7 @@ import { cn } from "@/utils/utils";
 import MonthCalendar from "./MonthCalendar";
 import CalendarSettings from "./CalendarSettings";
 import { useState } from "react";
+import { Property } from "@/server/db/schema/tables/properties";
 
 type ReservationInfo = {
   start: string;
@@ -23,10 +24,21 @@ type ReservationInfo = {
 export default function CalendarComponent() {
   const [selectedDates, setSelectedDates] = useState<Date[]>([]);
   const [date, setDate] = useState<Date>(new Date());
-  const hostProperties = api.properties.getHostProperties.useQuery();
-  const [selectedProperty, setSelectedProperty] = useState(
-    hostProperties.data?.[0],
+  const [selectedProperty, setSelectedProperty] = useState<Property | null>(
+    null
   );
+  const hostProperties = api.properties.getHostProperties.useQuery({
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+
+  // Set initial selected property when data loads
+  useEffect(() => {
+    if (hostProperties.data && hostProperties.data.length > 0) {
+      setSelectedProperty(hostProperties.data[0]);
+    }
+  }, [hostProperties.data]);
+
   const [editing, setEditing] = useState(false);
   const [selectedRange, setSelectedRange] = useState<{
     start: Date | null;
@@ -296,7 +308,7 @@ export default function CalendarComponent() {
       </Card>
 
       {/* SETTINGS */}
-      <CalendarSettings />
+      <CalendarSettings property={selectedProperty} />
     </div>
   );
 }
