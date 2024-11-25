@@ -27,7 +27,7 @@ const ChartComponent = ({
 }: ChartComponentProps) => {
   const currencyFormatter = (value: number) => formatCurrency(value);
   return (
-    <div className="relative h-96 w-full">
+    <div className="relative h-80 w-full">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={data}

@@ -10,7 +10,7 @@ import { useState } from "react";
 import { Offer, type Property } from "@/server/db/schema";
 import HostConfirmRequestDialog from "../../HostConfirmRequestDialog";
 import HostFinishRequestDialog from "./HostFinishRequestDialog";
-import { ChevronLeft } from "lucide-react";
+import { AlertCircleIcon, AlertTriangleIcon, ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import {
   RequestsPageOfferData,
@@ -19,9 +19,7 @@ import {
 import { formatOfferData, separateByPriceRestriction } from "@/utils/utils";
 import { useToast } from "@/components/ui/use-toast";
 import { errorToast } from "@/utils/toasts";
-import { HostRequestsPageOfferData } from "@/server/api/routers/propertiesRouter";
-import PastOfferCard from "./PastOfferCard";
-import PastOfferWithdrawDialog from "./PastOfferWithdrawDialog";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function HostRequests() {
   const { toast } = useToast();
@@ -99,13 +97,24 @@ export default function HostRequests() {
   const cityOffersData = offersWithProperties.find((o) => o.city === city);
 
   return (
-    <div className="p-4">
+    <div className="p-1">
       <div className="mb-4 xl:hidden">
         <Link href="/host/requests">
           <ChevronLeft />
         </Link>
       </div>
-      {cityRequestsData && !offers ? (
+      <Alert className="mb-2">
+        <AlertTriangleIcon />
+        <AlertTitle>Tip</AlertTitle>
+        <AlertDescription>
+          These is where you see requests travelers have made. These have been
+          sent out to all hosts in (name) with an empty night. Accept, deny, or
+          counter offer each request to get the traveler to make a booking. Once
+          a traveler books, your calander will be blocked and all outstanding
+          matches will be withdrawn
+        </AlertDescription>
+      </Alert>
+      {cityData ? (
         <div className="grid gap-4 md:grid-cols-2">
           {cityRequestsData.requests.map((requestData) => (
             <div key={requestData.request.id} className="mb-4">
@@ -159,7 +168,22 @@ export default function HostRequests() {
           ))}
         </div>
       ) : (
-        <SkeletonText>No requests found for {city}</SkeletonText>
+        // empty state
+        <div className="flex flex-col items-center gap-y-3 rounded-lg border bg-white py-4">
+          <h3 className="text-lg font-semibold">No requests found</h3>
+          <p>
+            Consider loosen requirements or allow for more ways to book to see
+            more requests.
+          </p>
+          <Link href="/host/calendar">
+            <Button
+              className="border-black text-primaryGreen"
+              variant="outline"
+            >
+              Change Restrictions
+            </Button>
+          </Link>
+        </div>
       )}
       {step === 0 && properties && selectedRequest && (
         <HostRequestDialog

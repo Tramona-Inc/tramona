@@ -22,7 +22,6 @@ export default function CalendarSettings() {
   const [offersToBookPercent, setOffersToBookPercent] = React.useState(5);
 
   // Other state variables remain the same
-  const [bookItNow, setBookItNow] = React.useState(false);
   const [offersToBookOpen, setOffersToBookOpen] = React.useState(false);
   const [nameYourPriceOpen, setNameYourPriceOpen] = React.useState(false);
   const [bookItNowSaved, setBookItNowSaved] = React.useState(false);
@@ -88,57 +87,45 @@ export default function CalendarSettings() {
           <TabsContent value="pricing" className="space-y-6 sm:space-y-8">
             {/* Book it now section */}
             <div className="space-y-4 rounded-lg border p-6">
-              <div
-                className="flex cursor-pointer items-center justify-between"
-                onClick={() => setBookItNow(!bookItNow)}
-              >
+              <div className="flex cursor-pointer items-center justify-between">
                 <h3 className="text-[20px] font-bold text-primaryGreen">
                   Book it now
                 </h3>
-                <Button variant="ghost" size="sm">
-                  <ChevronDown
-                    className="h-4 w-4 transition-transform duration-300"
-                    style={{
-                      transform: bookItNow ? "rotate(180deg)" : "rotate(0deg)",
-                    }}
-                  />
-                </Button>
               </div>
-              <div
-                className={`overflow-hidden transition-all duration-300 ease-in-out ${bookItNow ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0"}`}
-              >
+              <div className="flex flex-row justify-between">
                 <p className="text-base font-bold">
                   Set your price, starting as low as the price on Airbnb
                 </p>
-                <div className="-mx-6 mt-4 w-[calc(100%+3rem)] border-b border-gray-200" />
-                <div className="space-y-4 pt-4">
-                  <Label>{bookItNowPercent}% OFF</Label>
-                  <Slider
-                    value={[bookItNowPercent]}
-                    onValueChange={(value) => setBookItNowPercent(value[0]!)}
-                    max={100}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    This is likely to generate 1% more bookings, increase the
-                    discount for a more significant effect
-                  </p>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-bold text-primaryGreen sm:text-4xl">
-                      ${calculateDiscountedPrice(168, bookItNowPercent)}
-                    </span>
-                    <span className="text-lg text-muted-foreground line-through sm:text-2xl">
-                      $168
-                    </span>
-                  </div>
-                  <div className="flex justify-end">
-                    <Button
-                      variant="outline"
-                      className="bg-primaryGreen text-white hover:bg-primaryGreen/90"
-                      onClick={handleBookItNowSave}
-                    >
-                      {bookItNowSaved ? "Saved!" : "Save"}
-                    </Button>
-                  </div>
+                <Switch className="data-[state=checked]:bg-primaryGreen data-[state=unchecked]:bg-gray-300" />
+              </div>
+              <div className="-mx-6 mt-4 w-[calc(100%+3rem)] border-b border-gray-200" />
+              <div className="space-y-4 pt-4">
+                <Label>{bookItNowPercent}% OFF</Label>
+                <Slider
+                  value={[bookItNowPercent]}
+                  onValueChange={(value) => setBookItNowPercent(value[0]!)}
+                  max={100}
+                />
+                <p className="text-xs text-muted-foreground">
+                  This is likely to generate 1% more bookings, increase the
+                  discount for a more significant effect
+                </p>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-2xl font-bold text-primaryGreen sm:text-4xl">
+                    ${calculateDiscountedPrice(168, bookItNowPercent)}
+                  </span>
+                  <span className="text-lg text-muted-foreground line-through sm:text-2xl">
+                    $168
+                  </span>
+                </div>
+                <div className="flex justify-end">
+                  <Button
+                    variant="outline"
+                    className="border-black bg-white text-black"
+                    onClick={handleBookItNowSave}
+                  >
+                    {bookItNowSaved ? "Saved!" : "Save"}
+                  </Button>
                 </div>
               </div>
             </div>
@@ -228,6 +215,7 @@ export default function CalendarSettings() {
                   Every day we get thousands of requests from travelers. How
                   would you like to respond to them?
                 </p>
+
                 <div className="-mx-6 mt-4 w-[calc(100%+3rem)] border-b border-gray-200" />
                 <div className="space-y-4 pt-4">
                   <div className="flex items-center justify-between">
