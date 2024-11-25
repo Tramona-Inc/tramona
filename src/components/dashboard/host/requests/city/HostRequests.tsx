@@ -19,6 +19,9 @@ import {
 import { formatOfferData, separateByPriceRestriction } from "@/utils/utils";
 import { useToast } from "@/components/ui/use-toast";
 import { errorToast } from "@/utils/toasts";
+import { HostRequestsPageOfferData } from "@/server/api/routers/propertiesRouter";
+import PastOfferCard from "./PastOfferCard";
+import PastOfferWithdrawDialog from "./PastOfferWithdrawDialog";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function HostRequests() {
@@ -114,7 +117,7 @@ export default function HostRequests() {
           matches will be withdrawn
         </AlertDescription>
       </Alert>
-      {cityData ? (
+      {cityRequestsData && !offers ? (
         <div className="grid gap-4 md:grid-cols-2">
           {cityRequestsData.requests.map((requestData) => (
             <div key={requestData.request.id} className="mb-4">
