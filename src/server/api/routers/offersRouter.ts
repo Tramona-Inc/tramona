@@ -759,7 +759,10 @@ export const offersRouter = createTRPCRouter({
     const propertyIds = hostProperties.map((property) => property.id);
 
     const hostOffers = await db.query.offers.findMany({
-      where: inArray(offers.propertyId, propertyIds),
+      where: and(
+        inArray(offers.propertyId, propertyIds),
+        eq(offers.status, "Pending")
+      ),
       with: {
         property: {
           columns: {

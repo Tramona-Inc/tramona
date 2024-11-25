@@ -235,7 +235,7 @@ export const tripsRouter = createTRPCRouter({
               imageUrls: true,
               city: true,
               name: true,
-              checkInInfo: true,
+              // checkInInfo: true,
               address: true,
               cancellationPolicy: true,
               checkInTime: true,
@@ -253,13 +253,14 @@ export const tripsRouter = createTRPCRouter({
           },
         },
       });
+
       const propertyLatLngPoint = await db.query.properties.findFirst({
         where: eq(properties.id, trip!.propertyId),
         columns: { latLngPoint: true },
       });
       if (!trip) {
         throw new Error("Trip not found");
-      } else {
+      } else {                                                                                                                                                                                                                                                                                     
         const coordinates = {
           location: {
             lat: propertyLatLngPoint!.latLngPoint.y,

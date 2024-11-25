@@ -1,5 +1,6 @@
 import { env } from "@/env";
 import { db } from "@/server/db";
+import { and, eq, or, sql } from "drizzle-orm";
 import {
   groupMembers,
   groups,
@@ -11,7 +12,6 @@ import {
   users,
   tripCheckouts,
 } from "@/server/db/schema";
-import { eq } from "drizzle-orm";
 import Stripe from "stripe";
 import { breakdownPaymentByPropertyAndTripParams } from "../payment-utils/paymentBreakdown";
 import {
@@ -24,6 +24,7 @@ import { createSuperhogReservation } from "./superhog-utils";
 import { sendSlackMessage } from "@/server/slack";
 import { formatDateMonthDay } from "../utils";
 import { TRAVELER_MARKUP } from "../constants";
+import { check } from "drizzle-orm/mysql-core";
 
 export const stripe = new Stripe(env.STRIPE_RESTRICTED_KEY_ALL);
 const stripeWithSecretKey = new Stripe(env.STRIPE_SECRET_KEY, {
@@ -398,4 +399,59 @@ export async function createRequestToBook({
     });
   }
   return;
+}
+
+
+export async function withdrawOverlappingOffers({
+  propertyId,
+  checkIn,
+  checkOut,
+  excludeOfferId,
+}: {
+  propertyId: number;
+  checkIn: Date;
+  checkOut: Date;
+  excludeOfferId?: number;
+}) {
+  // find pending offers for this property that overlap with the date range of accepted offer/book it now
+  // an offer overlaps if:
+  // 1. check-in date falls between the booked check-in and check-out dates
+  // 2. check-out date falls between the booked check-in and check-out dates
+  // 3. dates completely encompasses the booked dates
+  const checkInStr = checkIn.toISOString();
+  const checkOutStr = checkOut.toISOString();
+
+  const overlappingOffersQuery = db
+    .update(offers)
+    .set({
+      status: "Withdrawn"
+    })
+    .where(
+      and(
+        eq(offers.propertyId, propertyId),
+        eq(offers.status, "Pending"),
+        excludeOfferId ? sql`${offers.id} != ${excludeOfferId}` : undefined,
+        or(
+          // if offer check-in falls within booked period
+          and(
+            sql`${offers.checkIn}::date >= ${checkInStr}::date`,
+            sql`${offers.checkIn}::date < ${checkOutStr}::date`
+          ),
+          // if offer check-out falls within booked period
+          and(
+            sql`${offers.checkOut}::date > ${checkInStr}::date`,
+            sql`${offers.checkOut}::date <= ${checkOutStr}::date`
+          ),
+          // if offer completely overlaps booked period
+          and(
+            sql`${offers.checkIn}::date <= ${checkInStr}::date`,
+            sql`${offers.checkOut}::date >= ${checkOutStr}::date`
+          )
+        )
+      )
+    )
+    .returning();
+
+  const rejectedOffers = await overlappingOffersQuery;
+  return rejectedOffers;
 }
