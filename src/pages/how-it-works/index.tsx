@@ -1,7 +1,4 @@
 import Head from "next/head";
-import ForHosts from "@/components/landing-page/_sections/ForHosts";
-import ReferAndEarn from "@/components/landing-page/_sections/ReferAndEarn";
-import SocialFeed from "@/components/landing-page/_sections/SocialFeed";
 import FAQ from "@/components/landing-page/_sections/FAQ";
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import Image from "next/image";
@@ -20,8 +17,6 @@ import {
 import { useIsSm } from "@/utils/utils";
 import { MobileTestimonialCarousel } from "@/components/landing-page/_sections/testimonials/MobileTestimonialCarousel";
 import { TestimonialCarousel } from "@/components/landing-page/_sections/testimonials/TestimonialCarousel";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 
 export default function Page() {
   return (
@@ -57,53 +52,59 @@ export default function Page() {
             </div>
           </section>
 
-          <div className="mx-12 my-8 space-y-6">
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div className="flex flex-col items-center text-center">
-                <FaShoppingBag className="text-4xl text-[#004236] mb-4" />
-                <h3 className="text-lg font-bold">Book it now</h3>
-                <p className="text-sm text-muted-foreground max-w-lg">
-                  Classic booking process you're familiar with. Instant confirmation for
-                  available properties. Less fees and 24/7 support with 100% rebooking
-                  guarantee if something goes wrong.
-                </p>
-              </div>
+          <div className="w-full bg-[#FAF9F6] py-8">
+            <div className="mx-auto max-w-screen-xl space-y-6">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="flex flex-col items-center text-center">
+                  <FaShoppingBag className="text-4xl text-[#004236] mb-4" />
+                  <h3 className="text-lg font-bold">Book it now</h3>
+                  <p className="text-sm text-muted-foreground max-w-lg">
+                    Classic booking process you're familiar with. Instant confirmation for
+                    available properties. Less fees and 24/7 support with 100% rebooking
+                    guarantee if something goes wrong.
+                  </p>
+                </div>
 
-              <div className="flex flex-col items-center text-center">
-                <FaLock className="text-4xl text-[#004236] mb-4" />
-                <h3 className="text-lg font-bold">Place a bid</h3>
-                <p className="text-sm text-muted-foreground max-w-lg">
-                  Bid on specific properties you like. Set your price and wait for host
-                  acceptance. Multiple bids allowed - when one&apos;s accepted, others
-                  cancel automatically. Instant charging upon acceptance.
-                </p>
-                <p className="mt-2 text-xs text-muted-foreground max-w-lg">
-                  Submit multiple bids to explore various host offers and secure the best deal.
-                </p>
-              </div>
+                <div className="flex flex-col items-center text-center">
+                  <FaLock className="text-4xl text-[#004236] mb-4" />
+                  <h3 className="text-lg font-bold">Place a bid</h3>
+                  <p className="text-sm text-muted-foreground max-w-lg">
+                    Bid on specific properties you like. Set your price and wait for host
+                    acceptance. Multiple bids allowed - when one&apos;s accepted, others
+                    cancel automatically. Instant charging upon acceptance.
+                  </p>
+                  <p className="mt-2 text-xs text-muted-foreground max-w-lg">
+                    Submit multiple bids to explore various host offers and secure the best deal.
+                  </p>
+                </div>
 
-              <div className="flex flex-col items-center text-center">
-                <FaPaperPlane className="text-4xl text-[#004236] mb-4" />
-                <h3 className="text-lg font-bold">Make a request</h3>
-                <p className="text-sm text-muted-foreground max-w-lg">
-                  Send your budget to all hosts with vacancies. Receive tailored offers
-                  from hosts. Compare multiple offers and choose the best fit. Perfect for
-                  flexible travelers seeking the best deals.
-                </p>
-                <p className="mt-2 text-xs text-muted-foreground max-w-lg">
-                  Submit multiple requests to receive diverse, tailored pricing options from hosts.
-                </p>
-              </div>
+                <div className="flex flex-col items-center text-center">
+                  <FaPaperPlane className="text-4xl text-[#004236] mb-4" />
+                  <h3 className="text-lg font-bold">Make a request</h3>
+                  <p className="text-sm text-muted-foreground max-w-lg">
+                    Send your budget to all hosts with vacancies. Receive tailored offers
+                    from hosts. Compare multiple offers and choose the best fit. Perfect for
+                    flexible travelers seeking the best deals.
+                  </p>
+                  <p className="mt-2 text-xs text-muted-foreground max-w-lg">
+                    Submit multiple requests to receive diverse, tailored pricing options from hosts.
+                  </p>
+                </div>
 
-              <div className="flex flex-col items-center text-center">
-                <FaLink className="text-4xl text-[#004236] mb-4" />
-                <h3 className="text-lg font-bold">Link insert</h3>
-                <p className="text-sm text-muted-foreground max-w-lg">
-                  Have a specific property in mind? Submit the link and let your request
-                  reach that property and similar ones nearby. All local hosts can make
-                  offers, expanding your options.
-                </p>
+                <div className="flex flex-col items-center text-center">
+                  <FaLink className="text-4xl text-[#004236] mb-4" />
+                  <h3 className="text-lg font-bold">Link insert</h3>
+                  <p className="text-sm text-muted-foreground max-w-lg">
+                    Have a specific property in mind? Submit the link and let your request
+                    reach that property and similar ones nearby. All local hosts can make
+                    offers, expanding your options.
+                  </p>
+                </div>
               </div>
+            </div>
+
+            <div className="flex justify-center mt-8">
+              <div className="w-4/5 h-[1px] bg-gray-200"></div>
             </div>
           </div>
 
@@ -117,126 +118,223 @@ export default function Page() {
               <span className="text-red-500">other major </span>
               <span className="text-blue-500">marketplaces</span>
             </p>
-          </div>
 
-          <div className="flex flex-col items-center justify-center md:flex-row md:gap-6 px-12 py-8">
-            <div className="text-center">
-              <h2 className="text-2xl font-semibold text-[#004236]">
-                Hosts, Learn More About How Tramona Works for You
-              </h2>
-              <a href="/for-hosts">
-                <button className="mt-4 px-6 py-2 rounded-full bg-[#004236] text-white font-medium text-sm hover:bg-[#003622]">
-                  For Hosts
-                </button>
-              </a>
-            </div>
-            <div className="w-full max-w-xs">
-              <img
-                src="/assets/images/landing-page/how_it_works_exterior.png"
-                alt="Hosts in front of their house"
-                className="rounded-lg shadow-md"
-              />
+            {/* Horizontal Spacer */}
+            <div className="relative flex justify-center w-full mt-8">
+              <div className="w-4/5 h-[1px] bg-gray-200"></div>
             </div>
           </div>
-
-          <div className="mx-12 my-8 space-y-6">
-            <h2 className="text-center text-2xl font-bold text-[#004236]">
-              Unique, exclusive prices that can’t be found on other platforms
+          
+          <div className="flex flex-col items-center justify-center px-12 py-8 bg-[#FAF9F6]">
+            {/* Text and Button */}
+            <h2 className="text-2xl font-bold text-[#004236] mb-8 text-center">
+              How it works for hosts
             </h2>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-              <div className="flex flex-col items-center text-center">
-                <FaChartBar className="text-4xl text-[#004236] mb-4" />
-                <h3 className="text-lg font-bold">24/7 Support</h3>
-                <p className="text-sm text-muted-foreground max-w-sm">
-                  Access to assistance at any time of the day or night. Immediate help
-                  with booking issues, questions, and unexpected situations. Support is
-                  just a message away.
-                </p>
-                <p className="mt-2 text-sm font-medium text-[#004236] cursor-pointer">
-                  Learn More ++++
-                </p>
+
+            {/* Steps Container */}
+            <div className="w-full max-w-4xl space-y-6">
+              {/* Step 1 */}
+              <div className="flex items-center bg-white rounded-lg shadow-sm p-6">
+                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[#004236] text-white font-bold mr-4">
+                  1
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-[#004236]">Link your Tramona account</h3>
+                  <p className="text-sm text-gray-600">
+                    Connect directly with Airbnb for easy and quick calendar, pricing, and other information syncing.
+                  </p>
+                </div>
               </div>
 
-              <div className="flex flex-col items-center text-center">
-                <FaClock className="text-4xl text-[#004236] mb-4" />
-                <h3 className="text-lg font-bold">Rebooking Guarantee</h3>
-                <p className="text-sm text-muted-foreground max-w-sm">
-                  If your booking falls through, we'll help you find a new place fast. No
-                  extra cost for rebooking assistance in case of cancellations. Reliable
-                  backup options to keep your travel plans on track.
-                </p>
-                <p className="mt-2 text-sm font-medium text-[#004236] cursor-pointer">
-                  Learn More ++++
-                </p>
+              {/* Step 2 */}
+              <div className="flex items-center bg-white rounded-lg shadow-sm p-6">
+                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[#004236] text-white font-bold mr-4">
+                  2
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-[#004236]">Set your preferences</h3>
+                  <p className="text-sm text-gray-600">
+                    Customize pricing filters, set different rates based on check-in timing, and choose between autolet integration or manual control.
+                  </p>
+                </div>
               </div>
 
-              <div className="flex flex-col items-center text-center">
-                <FaLayerGroup className="text-4xl text-[#004236] mb-4" />
-                <h3 className="text-lg font-bold">Best Prices on Airbnbs Anywhere</h3>
-                <p className="text-sm text-muted-foreground max-w-sm">
-                  Find unbeatable prices for Airbnbs on Tramona. Access exclusive deals
-                  and discounts not available on other platforms. Save money on every
-                  booking without sacrificing quality.
-                </p>
-                <p className="mt-2 text-sm font-medium text-[#004236] cursor-pointer">
-                  Learn More ++++
-                </p>
+              {/* Step 3 */}
+              <div className="flex items-center bg-white rounded-lg shadow-sm p-6">
+                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[#004236] text-white font-bold mr-4">
+                  3
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-[#004236]">Manage requests</h3>
+                  <p className="text-sm text-gray-600">
+                    Accept, deny, or counter-offer each request—or set preferences to automatically handle it all for you.
+                  </p>
+                </div>
               </div>
 
-              <div className="flex flex-col items-center text-center">
-                <FaShieldAlt className="text-4xl text-[#004236] mb-4" />
-                <h3 className="text-lg font-bold">Same Features You Are Used To</h3>
-                <p className="text-sm text-muted-foreground max-w-sm">
-                  Similar features to other major platforms, making it easy to use. All
-                  the essentials like messaging, secure payments, and verified hosts.
-                  Flexible cancellation policies.
-                </p>
-                <p className="mt-2 text-sm font-medium text-[#004236] cursor-pointer">
-                  Learn More ++++
-                </p>
+              {/* Step 4 */}
+              <div className="flex items-center bg-white rounded-lg shadow-sm p-6 mb-6">
+                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[#004236] text-white font-bold mr-4">
+                  4
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-[#004236] mb-6">Fill empty nights</h3>
+                  <p className="text-sm text-gray-600">
+                    Maximize your property's potential by efficiently managing your calendar and filling vacant dates.
+                  </p>
+                </div>
+              </div>
+            </div>
+            {/* Header */}
+            <h2 className="text-xl font-medium text-[#004236] text-center">
+              Currently live for book it now in 6 cities. Live for requests in{" "}
+              <a className="text-[#004236] font-semibold underline">
+                every city!
+              </a>
+            </h2>
+
+            {/* Cities Radio Buttons */}
+            <div className="flex overflow-x-auto space-x-4 py-4 px-2 mb-6">
+              {["Los Angeles", "Chicago", "Miami", "San Diego", "New York", "Austin"].map((city, index) => (
+                <label
+                  key={index}
+                  className="flex items-center px-4 py-2 rounded-full border border-gray-300 text-sm font-medium text-gray-700 shadow-sm whitespace-nowrap cursor-pointer"
+                >
+                  <input
+                    type="radio"
+                    name="city"
+                    className="appearance-none w-4 h-4 rounded-full border border-gray-400 mr-2 checked:bg-[#004236] checked:border-[#004236]"
+                  />
+                  {city}
+                </label>
+              ))}
+            </div>
+
+            {/* Subheader */}
+            <p className="text-base font-medium text-[#004236] text-center mb-6">
+              Are you a host? We’re expanding fast. The first 100 hosts in each city get fee-less bookings for their first 5 trips.
+            </p>
+
+            {/* Call-to-Action Button */}
+            <a
+              href="/start-hosting"
+              className="inline-block px-6 py-2 rounded-full bg-[#004236] text-white text-sm font-medium hover:bg-[#003622] mb-6"
+            >
+              Start hosting now
+            </a>
+            <div className="mx-12 space-y-6">
+              <h2 className="text-center text-2xl font-bold text-[#004236]">
+                Unique, exclusive prices that can’t be found on other platforms
+              </h2>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <div className="flex flex-col items-center text-center">
+                  <FaChartBar className="text-4xl text-[#004236] mb-4" />
+                  <h3 className="text-lg font-bold">24/7 Support</h3>
+                  <p className="text-sm text-muted-foreground max-w-sm">
+                    Access to assistance at any time of the day or night. Immediate help
+                    with booking issues, questions, and unexpected situations. Support is
+                    just a message away.
+                  </p>
+                  <p className="mt-2 text-sm font-medium text-[#004236] cursor-pointer">
+                    Learn More ++++
+                  </p>
+                </div>
+
+                <div className="flex flex-col items-center text-center">
+                  <FaClock className="text-4xl text-[#004236] mb-4" />
+                  <h3 className="text-lg font-bold">Rebooking Guarantee</h3>
+                  <p className="text-sm text-muted-foreground max-w-sm">
+                    If your booking falls through, we'll help you find a new place fast. No
+                    extra cost for rebooking assistance in case of cancellations. Reliable
+                    backup options to keep your travel plans on track.
+                  </p>
+                  <p className="mt-2 text-sm font-medium text-[#004236] cursor-pointer">
+                    Learn More ++++
+                  </p>
+                </div>
+
+                <div className="flex flex-col items-center text-center">
+                  <FaLayerGroup className="text-4xl text-[#004236] mb-4" />
+                  <h3 className="text-lg font-bold">Best Prices on Airbnbs Anywhere</h3>
+                  <p className="text-sm text-muted-foreground max-w-sm">
+                    Find unbeatable prices for Airbnbs on Tramona. Access exclusive deals
+                    and discounts not available on other platforms. Save money on every
+                    booking without sacrificing quality.
+                  </p>
+                  <p className="mt-2 text-sm font-medium text-[#004236] cursor-pointer">
+                    Learn More ++++
+                  </p>
+                </div>
+
+                <div className="flex flex-col items-center text-center">
+                  <FaShieldAlt className="text-4xl text-[#004236] mb-4" />
+                  <h3 className="text-lg font-bold">Same Features You Are Used To</h3>
+                  <p className="text-sm text-muted-foreground max-w-sm">
+                    Similar features to other major platforms, making it easy to use. All
+                    the essentials like messaging, secure payments, and verified hosts.
+                    Flexible cancellation policies.
+                  </p>
+                  <p className="mt-2 text-sm font-medium text-[#004236] cursor-pointer">
+                    Learn More ++++
+                  </p>
+                </div>
+
+                <div className="flex flex-col items-center text-center">
+                  <FaExchangeAlt className="text-4xl text-[#004236] mb-4" />
+                  <h3 className="text-lg font-bold">Flexible Booking Options</h3>
+                  <p className="text-sm text-muted-foreground max-w-sm">
+                    Choose how you want to get the best deals. Customize your booking
+                    experience to match your budget. More flexibility means more savings
+                    and choices.
+                  </p>
+                  <p className="mt-2 text-sm font-medium text-[#004236] cursor-pointer">
+                    Learn More ++++
+                  </p>
+                </div>
+
+                <div className="flex flex-col items-center text-center">
+                  <FaCheckCircle className="text-4xl text-[#004236] mb-4" />
+                  <h3 className="text-lg font-bold">No BS</h3>
+                  <p className="text-sm text-muted-foreground max-w-sm">
+                    No hidden fees or surprises. Transparent pricing and policies from start
+                    to finish. A straightforward platform focused on allowing you to travel
+                    more.
+                  </p>
+                  <p className="mt-2 text-sm font-medium text-[#004236] cursor-pointer">
+                    Learn More ++++
+                  </p>
+                </div>
               </div>
 
-              <div className="flex flex-col items-center text-center">
-                <FaExchangeAlt className="text-4xl text-[#004236] mb-4" />
-                <h3 className="text-lg font-bold">Flexible Booking Options</h3>
-                <p className="text-sm text-muted-foreground max-w-sm">
-                  Choose how you want to get the best deals. Customize your booking
-                  experience to match your budget. More flexibility means more savings
-                  and choices.
-                </p>
-                <p className="mt-2 text-sm font-medium text-[#004236] cursor-pointer">
-                  Learn More ++++
-                </p>
-              </div>
-
-              <div className="flex flex-col items-center text-center">
-                <FaCheckCircle className="text-4xl text-[#004236] mb-4" />
-                <h3 className="text-lg font-bold">No BS</h3>
-                <p className="text-sm text-muted-foreground max-w-sm">
-                  No hidden fees or surprises. Transparent pricing and policies from start
-                  to finish. A straightforward platform focused on allowing you to travel
-                  more.
-                </p>
-                <p className="mt-2 text-sm font-medium text-[#004236] cursor-pointer">
-                  Learn More ++++
-                </p>
+              <div className="flex justify-center mt-8">
+                <div className="w-4/5 h-[1px] bg-gray-200"></div>
               </div>
             </div>
           </div>
+          
+          <div className="flex flex-col px-12 py-8 space-y-6">
+            {/* Content container */}
+            <div className="flex flex-col md:flex-row items-center justify-center space-y-6 md:space-y-0 md:space-x-8">
+              {/* Text Section */}
+              <div className="text-center md:text-left max-w-lg">
+                <p className="text-xl font-semibold text-[#004236]">
+                  Tramona is the only platform where hosts can turn empty nights into bookings by connecting with travelers looking for deals. That’s why Tramona consistently offers the best prices on the market.
+                </p>
+              </div>
 
-          <div className="flex flex-col md:flex-row items-center justify-center px-12 py-8 space-y-6 md:space-y-0 md:space-x-8">
-            <div className="text-center md:text-left max-w-lg">
-              <p className="text-xl font-semibold text-[#004236]">
-                Tramona is the only platform where hosts can turn empty nights into bookings by connecting with travelers looking for deals. That’s why Tramona consistently offers the best prices on the market.
-              </p>
+              {/* Image Section */}
+              <div className="w-full max-w-md">
+                <img
+                  src="/assets/images/landing-page/how_it_works_interior.png"
+                  alt="Interior of a cozy house"
+                  className="rounded-lg shadow-md"
+                />
+              </div>
             </div>
 
-            <div className="w-full max-w-md">
-              <img
-                src="/assets/images/landing-page/how_it_works_interior.png"
-                alt="Interior of a cozy house"
-                className="rounded-lg shadow-md"
-              />
+            {/* Horizontal Spacer */}
+            <div className="flex justify-center mt-8">
+              <div className="w-4/5 h-[2px] bg-gray-200"></div>
             </div>
           </div>
 
@@ -291,10 +389,12 @@ export default function Page() {
               Tramona gives travelers access to deals they won’t find elsewhere, making it the perfect platform for finding affordable stays and for hosts to fill those empty nights effortlessly.
             </p>
           </div>
+          <div className="relative flex justify-center w-full mt-8">
+              <div className="w-4/5 h-[1px] bg-gray-200"></div>
+          </div>
         </div>
 
-
-          <div className="flex flex-col md:flex-row items-center justify-center px-12 py-8 space-y-6 md:space-y-0 md:space-x-8">
+          <div className="w-full bg-[#FAF9F6] flex flex-col md:flex-row items-center justify-center px-12 py-8 space-y-6 md:space-y-0 md:space-x-8">
             <div className="w-full max-w-md">
               <img
                 src="/assets/images/landing-page/try_before_you_book.png"
@@ -348,7 +448,6 @@ export default function Page() {
               </div>
             </div>
           </div>
-
           <hr className="border-none" />
         </div>
       </div>
