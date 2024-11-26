@@ -22,7 +22,7 @@ export default async function handler(batch: string[]) {
         // );
         // logToFile(`Processed availability for Offer ID: ${offerId} | Response Time: ${responseTime} ms`);
       } catch (error) {
-        console.error(`Error with Offer ID: ${offerId}`, error.response?.status);
+        console.error(`Error with Offer ID: ${offerId}`, error);
         throw error;
       }
     })));

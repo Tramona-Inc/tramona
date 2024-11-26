@@ -10,6 +10,7 @@ import { ALL_PROPERTY_TYPES, PropertyType } from "@/server/db/schema/common";
 import { ListingSiteName } from "@/server/db/schema/common";
 import { getNumNights, logAndFilterSettledResults } from "@/utils/utils";
 import { parseHTML } from "@/utils/utils";
+import { proxyAgent } from "../server-utils";
 
 const offerSchema = z.object({
   id: z.string(),
@@ -166,6 +167,69 @@ interface CalendarResponse {
     days: Record<string, number>;
   };
 }
+
+type AvailabilityResponse = Record<string, number>;
+
+export async function getAvailability(offerId: string): Promise<AvailabilityResponse> {
+  const url = `https://www.casamundo.com/api/v2/calendar/${offerId}`;
+
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear();
+  const currentMonth = currentDate.getMonth() + 1;
+
+  // Generate an array of { year, month } objects for the next 12 months
+  const monthsToFetch = Array.from({ length: 12 }, (_, i) => {
+    const month = (currentMonth + i - 1) % 12 + 1;
+    const year = currentYear + Math.floor((currentMonth + i - 1) / 12);
+    return { year, month };
+  });
+
+  const fetchMonthData = async (year: number, month: number) => {
+    const maxRetries = 3;
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        const response: AxiosResponse<CalendarResponse> = await axios.get(url, {
+          params: { year, month },
+          httpsAgent: proxyAgent,
+          headers: {
+            accept: "application/json",
+            "accept-language": "en-US,en;q=0.9",
+          },
+          timeout: 10000,
+        });
+        return response.data.content.days;
+      } catch (error) {
+        // console.error(`Error fetching data for ${year}-${month}:`, error);
+        if (attempt === maxRetries - 1) {
+          console.error(`Failed to fetch data for ${year}-${month}, ${error}`);
+          throw error; // Throw if all retries fail
+        }
+      }
+    }
+    return {}; // Empty response if all retries fail
+  };
+
+  // Fetch all months in parallel
+  const allMonthsData = await timeoutPromise(
+    Promise.all(monthsToFetch.map(({ year, month }) => fetchMonthData(year, month))),
+    60000 // 60 seconds timeout for the entire operation
+  );
+
+  // Combine all the days data into a single object
+  const availability: AvailabilityResponse = {};
+  allMonthsData.forEach((days) => Object.assign(availability, days));
+
+  return availability;
+}
+
+const timeoutPromise = (promise: Promise<any>, ms: number) => {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("Timeout exceeded")), ms)
+    ),
+  ]);
+};
 
 async function checkAvailability(
   offerId: string,
