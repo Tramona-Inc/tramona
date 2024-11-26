@@ -16,7 +16,7 @@ export async function syncCalendar({
 }: {
   iCalLink: string;
   propertyId: number;
-  platformBookedOn: 'airbnb' | 'tramona';
+  platformBookedOn: "airbnb" | "tramona";
 }): Promise<void> {
   const events = await axios
     .get<string>(iCalLink)
@@ -35,11 +35,11 @@ export async function syncCalendar({
       .where(
         and(
           eq(reservedDateRanges.propertyId, propertyId),
-          eq(reservedDateRanges.platformBookedOn, platformBookedOn)
-        )
+          eq(reservedDateRanges.platformBookedOn, platformBookedOn),
+        ),
       );
 
-    console.log('deleted');
+    console.log("deleted");
 
     // Insert new entries
     await tx.insert(reservedDateRanges).values(
@@ -104,9 +104,10 @@ export const calendarRouter = createTRPCRouter({
 
   updateHostCalendar: publicProcedure
     .input(z.object({ hospitableListingId: z.string() }))
-    .query(async ({ input }) => {
+    .mutation(async ({ input }) => {
       const { hospitableListingId } = input;
-      const combinedPricingAndCalendarResponse = await getPropertyCalendar(hospitableListingId);
+      const combinedPricingAndCalendarResponse =
+        await getPropertyCalendar(hospitableListingId);
       let currentRange: { start: string; end: string } | null = null;
       const datesReserved: { start: string; end: string }[] = [];
 
@@ -132,12 +133,12 @@ export const calendarRouter = createTRPCRouter({
 
       const property = await db.query.properties.findFirst({
         columns: { id: true },
-        where: eq(properties.hospitableListingId, hospitableListingId)
-      })
+        where: eq(properties.hospitableListingId, hospitableListingId),
+      });
 
       await db.insert(reservedDateRanges).values(
         datesReserved.map((dateRange) => ({
-          propertyId: property.id,
+          propertyId: property!.id,
           start: dateRange.start,
           end: dateRange.end,
           platformBookedOn: "airbnb" as const,
@@ -200,18 +201,18 @@ export const calendarRouter = createTRPCRouter({
                 eq(reservedDateRanges.propertyId, propertyId),
                 eq(reservedDateRanges.platformBookedOn, platformBookedOn),
                 lte(reservedDateRanges.start, end),
-                gte(reservedDateRanges.end, start)
-              )
+                gte(reservedDateRanges.end, start),
+              ),
             );
 
           if (overlappingRanges.length > 0) {
             const mergedStart = overlappingRanges.reduce(
               (min, range) => (range.start < min ? range.start : min),
-              start
+              start,
             );
             const mergedEnd = overlappingRanges.reduce(
               (max, range) => (range.end > max ? range.end : max),
-              end
+              end,
             );
 
             await tx
@@ -221,8 +222,8 @@ export const calendarRouter = createTRPCRouter({
                   eq(reservedDateRanges.propertyId, propertyId),
                   eq(reservedDateRanges.platformBookedOn, platformBookedOn),
                   lte(reservedDateRanges.start, mergedEnd),
-                  gte(reservedDateRanges.end, mergedStart)
-                )
+                  gte(reservedDateRanges.end, mergedStart),
+                ),
               );
 
             // insert merged range
@@ -250,8 +251,8 @@ export const calendarRouter = createTRPCRouter({
                 eq(reservedDateRanges.propertyId, propertyId),
                 eq(reservedDateRanges.platformBookedOn, platformBookedOn),
                 lte(reservedDateRanges.start, end),
-                gte(reservedDateRanges.end, start)
-              )
+                gte(reservedDateRanges.end, start),
+              ),
             );
         }
       });

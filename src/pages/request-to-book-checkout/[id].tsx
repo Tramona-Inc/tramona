@@ -3,6 +3,7 @@ import Spinner from "@/components/_common/Spinner";
 import { requestOrBookItNowToUnifiedData } from "@/components/checkout/transformToUnifiedCheckoutData";
 import { UnifiedCheckout } from "@/components/checkout/UnifiedCheckout";
 import { api } from "@/utils/api";
+import { useGetOriginalPropertyPricing } from "@/utils/payment-utils/useGetOriginalPropertyPricing";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 
@@ -29,20 +30,38 @@ export default function Page() {
     { enabled: router.isReady },
   );
 
+  // <---------------- Calculate the price here  ---------------->
+  const propertyPricing = useGetOriginalPropertyPricing({
+    property,
+    checkIn,
+    checkOut,
+    numGuests,
+  });
+  // ----------------
   if (router.isFallback) {
     return <h2>Loading</h2>;
   }
-
-  const unifiedCheckoutData = property
-    ? requestOrBookItNowToUnifiedData({
-        property,
-        checkIn,
-        checkOut,
-        numGuests,
-        travelerOfferedPriceBeforeFees,
-        type: "requestToBook",
-      })
-    : null;
+  //error state
+  if (propertyPricing.error && !propertyPricing.isLoading) {
+    return (
+      <MainLayout>
+        <div className="min-h-screen-minus-header-n-footer mx-auto my-8 max-w-6xl sm:my-16">
+          Something went wrong ...
+        </div>
+      </MainLayout>
+    );
+  }
+  const unifiedCheckoutData =
+    property && propertyPricing.originalPrice
+      ? requestOrBookItNowToUnifiedData({
+          property,
+          checkIn,
+          checkOut,
+          numGuests,
+          travelerOfferedPriceBeforeFees: propertyPricing.originalPrice,
+          type: "requestToBook",
+        })
+      : null;
 
   return (
     <MainLayout>

@@ -60,7 +60,7 @@ export default function RequestToBookOrBookNowPriceCard({
 }: {
   property: PropertyPageData;
 }) {
-  const minDiscount = 0;
+  const minDiscount = 0; //where we put host discounts
   const maxDiscount = 20;
 
   const router = useRouter();
@@ -73,6 +73,7 @@ export default function RequestToBookOrBookNowPriceCard({
     query.checkOut as string,
   );
 
+  //if property is hospitable
   const { data: hostPrice, isLoading: isHostPriceLoading } =
     api.misc.getAverageHostPropertyPrice.useQuery(
       {
@@ -82,7 +83,7 @@ export default function RequestToBookOrBookNowPriceCard({
         numGuests: query.numGuests ? parseInt(query.numGuests as string) : 2,
       },
       {
-        enabled: isHospitable,
+        enabled: isHospitable && router.isReady,
       },
     );
 
@@ -93,19 +94,24 @@ export default function RequestToBookOrBookNowPriceCard({
   const hostPriceAfterDiscount = hostDiscount
     ? hostPrice * (1 - hostDiscount)
     : hostPrice;
-  const { data: casamundoPrice, isLoading: isCasamundoPriceLoading, refetch: refetchCasamundoPrice } =
-    api.misc.scrapeAverageCasamundoPrice.useQuery(
-      {
-        offerId: property.originalListingId!,
-        checkIn: new Date(query.checkIn as string),
-        numGuests: query.numGuests ? parseInt(query.numGuests as string) : 2,
-        duration: numNights,
-      },
-      {
-        enabled: !isHospitable,
-        refetchOnWindowFocus: false,
-      },
-    );
+
+  //if scraped property
+  const {
+    data: casamundoPrice,
+    isLoading: isCasamundoPriceLoading,
+    refetch: refetchCasamundoPrice,
+  } = api.misc.scrapeAverageCasamundoPrice.useQuery(
+    {
+      offerId: property.originalListingId!, // confused why the parameter name is named offerId
+      checkIn: new Date(query.checkIn as string),
+      numGuests: query.numGuests ? parseInt(query.numGuests as string) : 2,
+      duration: numNights,
+    },
+    {
+      enabled: !isHospitable,
+      refetchOnWindowFocus: false,
+    },
+  );
 
   console.log(
     isCasamundoPriceLoading,
@@ -113,19 +119,11 @@ export default function RequestToBookOrBookNowPriceCard({
     isHostPriceLoading,
     "isHostPriceLoading",
   );
-  console.log(
-    property,
-    "akdfkjsldfj",
-    casamundoPrice,
-    query.checkIn,
-    numNights,
-  );
+  console.log(property, casamundoPrice, query.checkIn, numNights);
 
   const { data: bookedDates } = api.calendar.getReservedDates.useQuery({
     propertyId: property.id,
   });
-
-  const isLoading = isHostPriceLoading && isCasamundoPriceLoading;
 
   const originalPrice = isHospitable
     ? hostPriceAfterDiscount
@@ -139,7 +137,7 @@ export default function RequestToBookOrBookNowPriceCard({
     numGuests: query.numGuests ? parseInt(query.numGuests as string) : 2,
     travelerOfferedPriceBeforeFees: query.travelerOfferedPriceBeforeFees
       ? parseInt(query.travelerOfferedPriceBeforeFees as string)
-      : originalPrice,
+      : (originalPrice ?? 0),
   };
 
   const [date, setDate] = useState({
@@ -174,6 +172,7 @@ export default function RequestToBookOrBookNowPriceCard({
         checkOut,
         numGuests,
       }));
+      console.log(requestAmount);
     }
   }, [query.checkIn, query.checkOut, query.numGuests]);
 
@@ -274,7 +273,7 @@ export default function RequestToBookOrBookNowPriceCard({
                 </div>
               </div>
               <div className="p-3">
-                <div className="text-sm text-muted-foreground">CHECKOUT</div>
+                <div className="text-sm text-muted-foreground">CHECK-OUT</div>
                 <div className="text-base font-medium">
                   {format(date.to, "MM/dd/yyyy")}
                 </div>
@@ -499,7 +498,7 @@ export default function RequestToBookOrBookNowPriceCard({
               </div>
             </div>
           </div>
-        ) : isLoading ? (
+        ) : isCasamundoPriceLoading && isHostPriceLoading ? (
           <Skeleton className="h-[200px] w-full" />
         ) : isNumber(originalPrice) ? (
           <>
@@ -589,7 +588,8 @@ export default function RequestToBookOrBookNowPriceCard({
                 </div>
               </div>
               <p className="pb-4 text-center text-sm text-muted-foreground">
-                Please try again. If the error persists, send us a message using concierge or choose a new property.
+                Please try again. If the error persists, send us a message using
+                concierge or choose a new property.
               </p>
               <Button
                 variant="darkPrimary"
