@@ -18,7 +18,6 @@ import {
   type Request,
   type RequestsToBook,
   type User,
-  users,
 } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { addDays } from "date-fns";
@@ -29,13 +28,11 @@ import {
   eq,
   gt,
   gte,
-  inArray,
   isNotNull,
   like,
   lte,
   ne,
   notExists,
-  SQL,
   or,
   sql,
   notInArray,
@@ -89,7 +86,7 @@ export const propertiesRouter = createTRPCRouter({
       propertyInsertSchema
         .omit({
           hostTeamId: true,
-
+          countryISO: true,
           latLngPoint: true,
           city: true,
           county: true,
@@ -974,8 +971,8 @@ export const propertiesRouter = createTRPCRouter({
       await Promise.all(
         hostProperties.map(async (property) => {
           const originalPrice = await getPropertyOriginalPrice(property, {
-            checkIn: checkInNew,
-            checkOut: checkOutNew,
+            checkIn: checkInNew!,
+            checkOut: checkOutNew!,
             numGuests: input.numGuests,
           });
           property.originalNightlyPrice = originalPrice ?? null;
