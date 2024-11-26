@@ -12,24 +12,24 @@ export default function HostRequestsLayout({
   // ---------- TABS ----------
   const router = useRouter();
   const { query } = router;
-  const [activeTab, setActiveTab] = useState<"city" | "request-to-book">(
+  const [activeTab, setActiveTab] = useState<"city" | "property-bids">(
     "city",
   );
 
   // Set activeTab based on URL query when the component mounts
   useEffect(() => {
-    if (query.tabs === "request-to-book") {
-      setActiveTab("request-to-book");
+    if (query.tabs === "property-bids") {
+      setActiveTab("property-bids");
     } else {
       setActiveTab("city");
     }
   }, [query.tabs]);
 
-  const handleTabChange = (tab: "city" | "request-to-book") => {
+  const handleTabChange = (tab: "city" | "property-bids") => {
     setActiveTab(tab);
     void router.push({
       pathname: "/host/requests",
-      query: { tabs: tab === "request-to-book" ? "request-to-book" : "city" },
+      query: { tabs: tab === "property-bids" ? "property-bids" : "city" },
     });
   };
 
@@ -64,15 +64,15 @@ export default function HostRequestsLayout({
                   )}
                 </button>
                 <button
-                  onClick={() => handleTabChange("request-to-book")}
+                  onClick={() => handleTabChange("property-bids")}
                   className={`text-md relative flex-1 pb-4 font-medium transition-colors ${
-                    activeTab === "request-to-book"
+                    activeTab === "property-bids"
                       ? "text-foreground"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  Requests to book
-                  {activeTab === "request-to-book" && (
+                  Property Bids
+                  {activeTab === "property-bids" && (
                     <span className="absolute bottom-0 left-0 right-0 h-1 bg-primaryGreen" />
                   )}
                 </button>

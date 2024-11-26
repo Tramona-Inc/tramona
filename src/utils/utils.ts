@@ -573,24 +573,20 @@ export function separateByPriceRestriction(
       );
 
     return {
-      normal:
-        normalRequests.length > 0
-          ? { city: cityData.city, requests: normalRequests }
-          : null,
-      outsidePriceRestriction:
-        outsideRequests.length > 0
-          ? { city: cityData.city, requests: outsideRequests }
-          : null,
+      normal: { 
+        city: cityData.city, 
+        requests: normalRequests 
+      },
+      outsidePriceRestriction: { 
+        city: cityData.city, 
+        requests: outsideRequests 
+      },
     };
   });
 
   return {
-    normal: processedData
-      .map((data) => data.normal) //
-      .filter(Boolean),
-    outsidePriceRestriction: processedData
-      .map((data) => data.outsidePriceRestriction) //
-      .filter(Boolean),
+    normal: processedData.map((data) => data.normal),
+    outsidePriceRestriction: processedData.map((data) => data.outsidePriceRestriction),
   };
 }
 

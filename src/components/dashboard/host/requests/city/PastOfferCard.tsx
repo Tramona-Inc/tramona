@@ -33,6 +33,7 @@ import { Offer, User } from "@/server/db/schema";
 export type PastOfferRequestDetails = {
   id: number;
   madeByGroupId: number;
+  maxTotalPrice: number;
   checkIn: Date;
   checkOut: Date;
   numGuests: number;
@@ -51,12 +52,15 @@ export default function PastOfferCard({
 }: {
   offer: Offer;
   request: PastOfferRequestDetails;
-  property: { city: string };
+  property: { city: string, name: string };
   children?: React.ReactNode;
 }) {
-  const pricePerNight =
+  const requestPricePerNight =
+    request.maxTotalPrice / getNumNights(offer.checkIn, offer.checkOut);
+  const fmtdRequestPrice = formatCurrency(requestPricePerNight);
+  const offerPricePerNight =
     offer.totalPrice / getNumNights(offer.checkIn, offer.checkOut);
-  const fmtdPrice = formatCurrency(pricePerNight);
+  const fmtdOfferPrice = formatCurrency(offerPricePerNight);
   const fmtdDateRange = formatDateRange(offer.checkIn, offer.checkOut);
   const fmtdNumGuests = plural(request.numGuests, "guest");
 
@@ -73,7 +77,8 @@ export default function PastOfferCard({
             />
             <TravelerVerificationsDialog request={request} />
             <p>&middot;</p>
-            <p>Sent&nbsp;
+            <p>
+              Sent&nbsp;
               {formatDistanceToNowStrict(offer.createdAt, {
                 addSuffix: true,
               })}
@@ -82,8 +87,14 @@ export default function PastOfferCard({
           </div>
           <div className="space-y-1">
             <div>
+              <p className="font-bold">{property.name}</p>
               <p>
-                Requested <span className="font-medium">{fmtdPrice}</span>
+                Requested{" "}
+                <span className="font-medium">{fmtdRequestPrice}</span>
+                /night
+              </p>
+              <p>
+                Offered <span className="font-medium">{fmtdOfferPrice}</span>
                 /night
               </p>
               <p className="mt-3 flex items-center gap-2">

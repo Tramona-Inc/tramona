@@ -30,13 +30,11 @@ import {
   eq,
   gt,
   gte,
-  inArray,
   isNotNull,
   like,
   lte,
   ne,
   notExists,
-  SQL,
   or,
   sql,
   notInArray,
@@ -91,6 +89,7 @@ export type HostRequestsPageOfferData = {
     request: {
       id: number,
       madeByGroupId: number;
+      maxTotalPrice: number;
       checkIn: Date,
       checkOut: Date,
       numGuests: number,
@@ -100,7 +99,7 @@ export type HostRequestsPageOfferData = {
         "firstName" | "lastName" | "name" | "image" | "location" | "about"
       >;
     };
-    property: ({ city: string });
+    property: ({ city: string, name: string });
   }[];
 };
 
@@ -110,7 +109,7 @@ export const propertiesRouter = createTRPCRouter({
       propertyInsertSchema
         .omit({
           hostTeamId: true,
-
+          countryISO: true,
           latLngPoint: true,
           city: true,
           county: true,
@@ -585,94 +584,98 @@ export const propertiesRouter = createTRPCRouter({
       });
     }),
 
-  getHostPropertiesWithRequests: hostProcedure.query(async ({ ctx }) => {
-    const hostProperties = await db.query.properties.findMany({
-      where: and(
-        eq(properties.hostTeamId, ctx.hostProfile.curTeamId),
-        eq(properties.status, "Listed"),
-      ),
-
-      // columns: {
-      //   id: true,
-      //   propertyStatus: true,
-      //   latLngPoint: true,
-      //   priceRestriction: true,
-      //   city: true,
-      // },
-    });
-
-    const hostRequests = await getRequestsForProperties(hostProperties, {
-      user: ctx.user,
-    });
-    console.log(hostRequests);
-
-    const groupedByCity: HostRequestsPageData[] = [];
-
-    const findOrCreateCityGroup = (city: string) => {
-      let cityGroup = groupedByCity.find((group) => group.city === city);
-      if (!cityGroup) {
-        cityGroup = { city, requests: [] };
-        groupedByCity.push(cityGroup);
-      }
-      return cityGroup;
-    };
-
-    const requestsMap = new Map<
-      number,
-      {
-        request: Request & {
-          traveler: Pick<
-            User,
-            "firstName" | "lastName" | "name" | "image" | "location" | "about"
-          >;
-        };
-        properties: (Property & { taxAvailable: boolean })[];
-      }
-    >();
-
-    // Iterate over the hostRequests and gather all properties for each request
-    for (const { property, request } of hostRequests) {
-      // Check if this request already exists in the map
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      if (!requestsMap.has(request.id)) {
-        // If not, create a new entry with an empty properties array
-        requestsMap.set(request.id, {
-          request,
-          properties: [] as (Property & { taxAvailable: boolean })[],
-        });
-      }
-
-      // Add the property to the request
-      requestsMap.get(request.id)!.properties.push(property);
-    }
-    for (const requestWithProperties of requestsMap.values()) {
-      const { request, properties } = requestWithProperties;
-
-      for (const property of properties as unknown as (Property & {
-        taxAvailable: boolean;
-      })[]) {
-        const cityGroup = findOrCreateCityGroup(property.city);
-
-        // Find if the request already exists in the city's group to avoid duplicates
-        const existingRequest = cityGroup.requests.find(
-          (item) => item.request.id === request.id,
-        );
-
-        if (existingRequest) {
-          // If the request already exists, just add the new property to it
-          existingRequest.properties.push(property);
-        } else {
-          // If the request doesn't exist, create a new entry with the property
-          cityGroup.requests.push({
+    getHostPropertiesWithRequests: hostProcedure.query(async ({ ctx }) => {
+      const hostProperties = await db.query.properties.findMany({
+        where: and(
+          eq(properties.hostTeamId, ctx.hostProfile.curTeamId),
+          eq(properties.status, "Listed"),
+        ),
+  
+        // columns: {
+        //   id: true,
+        //   propertyStatus: true,
+        //   latLngPoint: true,
+        //   priceRestriction: true,
+        //   city: true,
+        // },
+      });
+  
+      // First, create groups for all cities from properties, even those without requests
+      const groupedByCity: HostRequestsPageData[] = [];
+      console.log(hostProperties.map(property => property.city))
+      const citiesSet = new Set(hostProperties.map(property => property.city));
+      citiesSet.forEach(city => {
+        groupedByCity.push({ city, requests: [] });
+      });
+  
+      const hostRequests = await getRequestsForProperties(hostProperties);
+      console.log(hostRequests);
+  
+      const findOrCreateCityGroup = (city: string) => {
+        let cityGroup = groupedByCity.find((group) => group.city === city);
+        if (!cityGroup) {
+          cityGroup = { city, requests: [] };
+          groupedByCity.push(cityGroup);
+        }
+        return cityGroup;
+      };
+  
+      const requestsMap = new Map<
+        number,
+        {
+          request: Request & {
+            traveler: Pick<
+              User,
+              "firstName" | "lastName" | "name" | "image" | "location" | "about"
+            >;
+          };
+          properties: (Property & { taxAvailable: boolean })[];
+        }
+      >();
+  
+      // Iterate over the hostRequests and gather all properties for each request
+      for (const { property, request } of hostRequests) {
+        // Check if this request already exists in the map
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        if (!requestsMap.has(request.id)) {
+          // If not, create a new entry with an empty properties array
+          requestsMap.set(request.id, {
             request,
-            properties: [property], // Initialize with the current property
+            properties: [] as (Property & { taxAvailable: boolean })[],
           });
         }
+  
+        // Add the property to the request
+        requestsMap.get(request.id)!.properties.push(property);
       }
-    }
-    console.log(groupedByCity);
-    return groupedByCity;
-  }),
+      for (const requestWithProperties of requestsMap.values()) {
+        const { request, properties } = requestWithProperties;
+  
+        for (const property of properties as unknown as (Property & {
+          taxAvailable: boolean;
+        })[]) {
+          const cityGroup = findOrCreateCityGroup(property.city);
+  
+          // Find if the request already exists in the city's group to avoid duplicates
+          const existingRequest = cityGroup.requests.find(
+            (item) => item.request.id === request.id,
+          );
+  
+          if (existingRequest) {
+            // If the request already exists, just add the new property to it
+            existingRequest.properties.push(property);
+          } else {
+            // If the request doesn't exist, create a new entry with the property
+            cityGroup.requests.push({
+              request,
+              properties: [property], // Initialize with the current property
+            });
+          }
+        }
+      }
+      console.log(groupedByCity);
+      return groupedByCity;
+    }),
 
   getHostPropertiesWithRequestsToBook: hostProcedure.query(async ({ ctx }) => {
     const hostProperties = await db.query.properties.findMany({
@@ -995,8 +998,8 @@ export const propertiesRouter = createTRPCRouter({
       await Promise.all(
         hostProperties.map(async (property) => {
           const originalPrice = await getPropertyOriginalPrice(property, {
-            checkIn: checkInNew,
-            checkOut: checkOutNew,
+            checkIn: checkInNew!,
+            checkOut: checkOutNew!,
             numGuests: input.numGuests,
           });
           property.originalNightlyPrice = originalPrice ?? null;

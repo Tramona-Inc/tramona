@@ -753,26 +753,38 @@ export const offersRouter = createTRPCRouter({
   getAllHostOffers: hostProcedure.query(async ({ ctx }) => {
     const hostProperties = await db.query.properties.findMany({
       where: eq(properties.hostTeamId, ctx.hostProfile.curTeamId),
-      columns: { id: true },
+      columns: {
+        id: true,
+        city: true,
+      },
     });
 
     const propertyIds = hostProperties.map((property) => property.id);
 
+    // Create initial groupedByCity with all cities, even those without offers
+    const groupedByCity: HostRequestsPageOfferData[] = [];
+    const citiesSet = new Set(hostProperties.map((property) => property.city));
+    citiesSet.forEach((city) => {
+      groupedByCity.push({ city, requests: [] });
+    });
+
     const hostOffers = await db.query.offers.findMany({
       where: and(
         inArray(offers.propertyId, propertyIds),
-        eq(offers.status, "Pending")
+        eq(offers.status, "Pending"),
       ),
       with: {
         property: {
           columns: {
             city: true,
+            name: true,
           },
         },
         request: {
           columns: {
             id: true,
             madeByGroupId: true,
+            maxTotalPrice: true,
             checkIn: true,
             checkOut: true,
             numGuests: true,
@@ -799,21 +811,15 @@ export const offersRouter = createTRPCRouter({
       orderBy: [desc(offers.createdAt)],
     });
 
-    const groupedByCity: HostRequestsPageOfferData[] = [];
-
-    const findOrCreateCityGroup = (city: string) => {
-      let cityGroup = groupedByCity.find((group) => group.city === city);
-      if (!cityGroup) {
-        cityGroup = { city, requests: [] };
-        groupedByCity.push(cityGroup);
-      }
-      return cityGroup;
+    const findCityGroup = (city: string) => {
+      return groupedByCity.find((group) => group.city === city);
     };
 
     for (const offer of hostOffers) {
       if (!offer.property || !offer.request) continue;
 
-      const cityGroup = findOrCreateCityGroup(offer.property.city);
+      const cityGroup = findCityGroup(offer.property.city);
+      if (!cityGroup) continue; // Skip if somehow the city isn't in our list
 
       const existingOffer = cityGroup.requests.find(
         (item) => item.offer.id === offer?.id,
@@ -837,6 +843,7 @@ export const offersRouter = createTRPCRouter({
           },
           property: {
             city: offer.property.city,
+            name: offer.property.name,
           },
         });
       }
