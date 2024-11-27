@@ -143,7 +143,7 @@ export default function CheckOutDialog({ property }: { property: Property }) {
             )}
           />
           <p className="text-muted-foreground">
-            Shared at 9 PM the evening before checkout
+            Shared at 5 PM the evening before checkout
           </p>
           <DialogCancelSave />
         </form>

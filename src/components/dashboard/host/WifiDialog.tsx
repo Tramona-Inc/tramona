@@ -84,7 +84,7 @@ export default function WifiDialog({ property }: { property: Property }) {
             )}
           />
           <div className="space-y-4 text-muted-foreground">
-            <p>Shared 24-48 hours before check-in</p>
+            <p>Shared 48 hours before check-in</p>
           </div>
           <DialogCancelSave />
         </form>

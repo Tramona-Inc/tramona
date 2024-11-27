@@ -73,7 +73,7 @@ export default function DirectionsDialog({ property }: { property: Property }) {
               )}
             />
             <p className="text-muted-foreground">
-              Typically provided close to check-in
+              Available throughout the booking process
             </p>
             <DialogCancelSave />
           </form>

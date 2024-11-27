@@ -67,7 +67,7 @@ export default function HouseManualDialog({
             )}
           />
           <p className="text-muted-foreground">
-            Shared 24 to 48 hours before check-in
+            Shared 48 hours before check-in
           </p>
           <DialogCancelSave />
         </form>
