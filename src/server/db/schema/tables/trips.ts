@@ -68,9 +68,7 @@ export const trips = pgTable(
       { onDelete: "set null" },
     ),
     tripSource: tripSourceEnum("trip_source").notNull().default("City request"),
-    isLessThan24Hours: boolean("is_less_than_24_hours")
-      .notNull()
-      .default(false),
+    isWithin48Hours: boolean("is_within_48_hours").notNull().default(false),
   },
   (t) => ({
     groupIdIdx: index().on(t.groupId),
