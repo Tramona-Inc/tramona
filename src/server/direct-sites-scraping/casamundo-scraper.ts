@@ -200,19 +200,24 @@ export async function getAvailability(offerId: string): Promise<AvailabilityResp
             accept: "application/json",
             "accept-language": "en-US,en;q=0.9",
           },
+          timeout: 10000,
         });
         return response.data.content.days;
       } catch (error) {
-        console.error(`Error fetching data for ${year}-${month}:`, error);
-        if (attempt === maxRetries - 1) throw error; // Throw if all retries fail
+        // console.error(`Error fetching data for ${year}-${month}:`, error);
+        if (attempt === maxRetries - 1) {
+          console.error(`Failed to fetch data for ${year}-${month}, ${error}`);
+          throw error; // Throw if all retries fail
+        }
       }
     }
     return {}; // Empty response if all retries fail
   };
 
   // Fetch all months in parallel
-  const allMonthsData = await Promise.all(
-    monthsToFetch.map(({ year, month }) => fetchMonthData(year, month))
+  const allMonthsData = await timeoutPromise(
+    Promise.all(monthsToFetch.map(({ year, month }) => fetchMonthData(year, month))),
+    60000 // 60 seconds timeout for the entire operation
   );
 
   // Combine all the days data into a single object
@@ -221,6 +226,16 @@ export async function getAvailability(offerId: string): Promise<AvailabilityResp
 
   return availability;
 }
+
+const timeoutPromise = (promise: Promise<any>, ms: number) => {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("Timeout exceeded")), ms)
+    ),
+  ]);
+};
+
 
 
 
