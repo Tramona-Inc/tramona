@@ -33,7 +33,8 @@ export default function Page() {
                 src="/assets/images/why-list/host-banner.png"
                 alt="beach banner"
                 fill
-                className="object-cover"
+                objectFit="cover"
+                objectPosition="center"
                 priority
               />
             </div>
@@ -297,7 +298,9 @@ export default function Page() {
                 <Image
                   src="/assets/images/landing-page/how_it_works_interior.png"
                   alt="Interior of a cozy house"
-                  className="rounded-lg shadow-md"
+                  className="rounded-lg object-cover shadow-md"
+                  width={400}
+                  height={400}
                 />
               </div>
             </div>
@@ -384,7 +387,9 @@ export default function Page() {
                 <Image
                   src="/assets/images/landing-page/try_before_you_book.png"
                   alt="Cozy house with people sitting"
-                  className="rounded-lg shadow-md"
+                  className="rounded-lg object-cover shadow-md"
+                  width={400}
+                  height={400}
                 />
               </div>
               <div className="max-w-lg text-center md:text-left">
