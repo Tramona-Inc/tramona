@@ -81,7 +81,7 @@ export const useGetOriginalPropertyPricing = ({
       : undefined;
 
   // Aggregate loading states
-  const isLoading = isCasamundoPriceLoading || isHostPriceLoading;
+  const isLoading = isCasamundoPriceLoading && isHostPriceLoading;
   const error =
     originalPrice === undefined ? "Original price is unavailable." : null;
 
