@@ -293,15 +293,20 @@ export function HostPropertyEditBtn({
   };
 
   return (
-    <div className="absolute bottom-8 left-4 z-50">
+    <div className="absolute right-8 top-10 space-x-2">
       {editing ? (
-        <div className="space-x-2">
-          <Button variant="outline" onClick={() => setEditing(!editing)}>
+        <>
+          <Button
+            variant="outline"
+            className="text-sm shadow-lg sm:shadow-none"
+            onClick={() => setEditing(!editing)}
+            type="button"
+          >
             Cancel
           </Button>
           <Button
-            variant="outline"
-            className="shadow-lg sm:shadow-none"
+            // variant="outline"
+            className="text-sm shadow-lg sm:shadow-none"
             onClick={() => {
               setEditing(!editing);
               onSubmit?.();
@@ -310,20 +315,17 @@ export function HostPropertyEditBtn({
           >
             Done
           </Button>
-        </div>
+        </>
       ) : (
-        <div className="space-x-2">
-          <Button
-            variant="outline"
-            className="rounded-full bg-white font-bold shadow-md sm:rounded-lg sm:border-2 sm:shadow-none"
-            onClick={handleEditClick}
-            type="button"
-            disabled={disabled}
-          >
-            <Pencil size={20} />
-            Enter edit mode
-          </Button>
-        </div>
+        <Button
+          // variant="outline"
+          className="text-sm"
+          onClick={handleEditClick}
+          // type="button"
+          disabled={disabled}
+        >
+          Edit
+        </Button>
       )}
     </div>
   );
