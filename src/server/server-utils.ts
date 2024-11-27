@@ -366,6 +366,7 @@ export async function addProperty({
     | "stateName"
     | "stateCode"
     | "country"
+    | "countryISO"
     | "bookItNowEnabled"
     | "bookItNowDiscountTiers"
   > & {
@@ -386,9 +387,10 @@ export async function addProperty({
     lng = location.lng;
   }
 
-  const { city, country, county, stateCode, stateName } = await getAddress({
-    lat,
-    lng,
+  const { city, country, countryISO, county, stateCode, stateName } =
+    await getAddress({
+      lat,
+      lng,
   });
 
   const propertyValues = {
@@ -399,6 +401,7 @@ export async function addProperty({
     stateCode,
     stateName,
     country,
+    countryISO,
     latLngPoint: createLatLngGISPoint({ lat, lng }),
   };
 

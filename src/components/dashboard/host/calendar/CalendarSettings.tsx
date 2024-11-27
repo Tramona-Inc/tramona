@@ -1,6 +1,3 @@
-"use client";
-
-import * as React from "react";
 import { ChevronDown, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,28 +7,30 @@ import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import HostPropertiesRestrictions from "../HostPropertiesRestrictions";
+import { Property } from "@/server/db/schema/tables/properties";
+import { useState } from "react";
 
 interface DiscountTier {
   days: number;
   discount: number;
 }
 
-export default function CalendarSettings() {
+export default function CalendarSettings({ property }: { property: Property }) {
   // Separate state for each section's percentage
-  const [bookItNowPercent, setBookItNowPercent] = React.useState(5);
-  const [offersToBookPercent, setOffersToBookPercent] = React.useState(5);
+  const [bookItNowPercent, setBookItNowPercent] = useState(5);
+  const [offersToBookPercent, setOffersToBookPercent] = useState(5);
 
   // Other state variables remain the same
-  const [offersToBookOpen, setOffersToBookOpen] = React.useState(false);
-  const [nameYourPriceOpen, setNameYourPriceOpen] = React.useState(false);
-  const [bookItNowSaved, setBookItNowSaved] = React.useState(false);
-  const [offersToBookSaved, setOffersToBookSaved] = React.useState(false);
-  const [nameYourPriceSaved, setNameYourPriceSaved] = React.useState(false);
+  const [offersToBookOpen, setOffersToBookOpen] = useState(false);
+  const [nameYourPriceOpen, setNameYourPriceOpen] = useState(false);
+  const [bookItNowSaved, setBookItNowSaved] = useState(false);
+  const [offersToBookSaved, setOffersToBookSaved] = useState(false);
+  const [nameYourPriceSaved, setNameYourPriceSaved] = useState(false);
   const [propertyRestrictionsOpen, setPropertyRestrictionsOpen] =
-    React.useState(false);
-  const [minimumOfferPriceOpen, setMinimumOfferPriceOpen] =
-    React.useState(false);
-  const [discountTiers, setDiscountTiers] = React.useState<DiscountTier[]>([
+    useState(false);
+  const [minimumOfferPriceOpen, setMinimumOfferPriceOpen] = useState(false);
+  const [discountTiers, setDiscountTiers] = useState<DiscountTier[]>([
     { days: 90, discount: 5 },
     { days: 60, discount: 10 },
     { days: 30, discount: 15 },
@@ -309,6 +308,9 @@ export default function CalendarSettings() {
                 </div>
               </div>
             </div>
+          </TabsContent>
+          <TabsContent value="restrictions" className="space-y-6 sm:space-y-8">
+            <HostPropertiesRestrictions property={property} />
           </TabsContent>
         </Tabs>
       </CardContent>
