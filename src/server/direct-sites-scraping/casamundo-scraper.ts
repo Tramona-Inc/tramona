@@ -4,7 +4,7 @@ import {
   ScrapedListing,
 } from "@/server/direct-sites-scraping";
 import { NewReview } from "@/server/db/schema";
-import axios, { AxiosResponse } from "axios";
+import axios, { AxiosError, AxiosResponse } from "axios";
 import { z } from "zod";
 import { ALL_PROPERTY_TYPES, PropertyType } from "@/server/db/schema/common";
 import { ListingSiteName } from "@/server/db/schema/common";
@@ -168,6 +168,9 @@ interface CalendarResponse {
   };
 }
 
+type MonthData = Record<string, number>;
+
+
 type AvailabilityResponse = Record<string, number>;
 
 export async function getAvailability(offerId: string): Promise<AvailabilityResponse> {
@@ -184,7 +187,7 @@ export async function getAvailability(offerId: string): Promise<AvailabilityResp
     return { year, month };
   });
 
-  const fetchMonthData = async (year: number, month: number) => {
+  const fetchMonthData = async (year: number, month: number): Promise<MonthData> => {
     const maxRetries = 3;
     for (let attempt = 0; attempt < maxRetries; attempt++) {
       try {
@@ -198,7 +201,7 @@ export async function getAvailability(offerId: string): Promise<AvailabilityResp
           timeout: 10000,
         });
         return response.data.content.days;
-      } catch (error) {
+      } catch (error: any) {
         // console.error(`Error fetching data for ${year}-${month}:`, error);
         if (attempt === maxRetries - 1) {
           console.error(`Failed to fetch data for ${year}-${month}, ${error}`);
@@ -210,9 +213,9 @@ export async function getAvailability(offerId: string): Promise<AvailabilityResp
   };
 
   // Fetch all months in parallel
-  const allMonthsData = await timeoutPromise(
+  const allMonthsData: MonthData[] = await timeoutPromise(
     Promise.all(monthsToFetch.map(({ year, month }) => fetchMonthData(year, month))),
-    60000 // 60 seconds timeout for the entire operation
+    60000
   );
 
   // Combine all the days data into a single object
@@ -222,14 +225,15 @@ export async function getAvailability(offerId: string): Promise<AvailabilityResp
   return availability;
 }
 
-const timeoutPromise = (promise: Promise<any>, ms: number) => {
-  return Promise.race([
+const timeoutPromise = <T>(promise: Promise<T>, ms: number): Promise<T> => {
+  return Promise.race<T>([
     promise,
-    new Promise((_, reject) =>
+    new Promise<never>((_, reject) =>
       setTimeout(() => reject(new Error("Timeout exceeded")), ms)
     ),
   ]);
 };
+
 
 async function checkAvailability(
   offerId: string,
