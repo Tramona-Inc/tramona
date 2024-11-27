@@ -17,6 +17,7 @@ import {
 import { useIsSm } from "@/utils/utils";
 import { MobileTestimonialCarousel } from "@/components/landing-page/_sections/testimonials/MobileTestimonialCarousel";
 import { TestimonialCarousel } from "@/components/landing-page/_sections/testimonials/TestimonialCarousel";
+import Link from "next/link";
 
 export default function Page() {
   return (
@@ -60,7 +61,7 @@ export default function Page() {
                   <FaShoppingBag className="mb-4 text-4xl text-[#004236]" />
                   <h3 className="text-lg font-bold">Book it now</h3>
                   <p className="max-w-lg text-sm text-muted-foreground">
-                    Classic booking process you're familiar with. Instant
+                    Classic booking process you&apos;re familiar with. Instant
                     confirmation for available properties. Less fees and 24/7
                     support with 100% rebooking guarantee if something goes
                     wrong.
@@ -183,24 +184,24 @@ export default function Page() {
                     Fill empty nights
                   </h3>
                   <p className="text-sm text-gray-600">
-                    Maximize your property's potential by efficiently managing
-                    your calendar and filling vacant dates.
+                    Maximize your property&apos;s potential by efficiently
+                    managing your calendar and filling vacant dates.
                   </p>
                 </div>
               </div>
             </div>
             <div className="mb-12"></div>
             <p className="mb-6 text-center text-base font-medium text-[#004236]">
-              Hosts, we're expanding fast. The first 100 hosts in each city get
-              fee-less bookings for their first 5 trips. Sign up now to help us
-              launch in your city quicker
+              Hosts, we&apos;re expanding fast. The first 100 hosts in each city
+              get fee-less bookings for their first 5 trips. Sign up now to help
+              us launch in your city quicker
             </p>
-            <a
+            <Link
               href="/for-hosts"
               className="inline-block rounded-full bg-[#004236] px-6 py-2 text-sm font-medium text-white hover:bg-[#003622]"
             >
               Start hosting now
-            </a>
+            </Link>
           </div>
           <div className="mx-12 space-y-6">
             <h2 className="text-center text-2xl font-bold text-[#004236]">
@@ -216,7 +217,7 @@ export default function Page() {
                   situations. Support is just a message away.
                 </p>
                 <p className="mt-2 cursor-pointer text-sm font-medium text-[#004236]">
-                  <a href="/help-center">Learn More ++++</a>
+                  <Link href="/help-center">Learn More ++++</Link>
                 </p>
               </div>
 
@@ -224,13 +225,13 @@ export default function Page() {
                 <FaClock className="mb-4 text-4xl text-[#004236]" />
                 <h3 className="text-lg font-bold">Rebooking Guarantee</h3>
                 <p className="max-w-sm text-sm text-muted-foreground">
-                  If your booking falls through, we'll help you find a new place
-                  fast. No extra cost for rebooking assistance in case of
+                  If your booking falls through, we&apos;ll help you find a new
+                  place fast. No extra cost for rebooking assistance in case of
                   cancellations. Reliable backup options to keep your travel
                   plans on track.
                 </p>
                 <p className="mt-2 cursor-pointer text-sm font-medium text-[#004236]">
-                  <a href="/rebooking-guarantee">Learn More ++++</a>
+                  <Link href="/rebooking-guarantee">Learn More ++++</Link>
                 </p>
               </div>
 
@@ -287,13 +288,13 @@ export default function Page() {
                 <p className="text-xl font-semibold text-[#004236]">
                   Tramona is the only platform where hosts can turn empty nights
                   into bookings by connecting with travelers looking for deals.
-                  That’s why Tramona consistently offers the best prices on the
-                  market.
+                  That&apos;s why Tramona consistently offers the best prices on
+                  the market.
                 </p>
               </div>
 
               <div className="w-full max-w-md">
-                <img
+                <Image
                   src="/assets/images/landing-page/how_it_works_interior.png"
                   alt="Interior of a cozy house"
                   className="rounded-lg shadow-md"
@@ -317,7 +318,7 @@ export default function Page() {
             </h2>
 
             <p className="text-center text-sm text-muted-foreground">
-              We've created a comparison chart to showcase the savings our
+              We&apos;ve created a comparison chart to showcase the savings our
               travelers experience on Tramona compared to Airbnb.
             </p>
 
@@ -380,7 +381,7 @@ export default function Page() {
           <div className="w-full px-12 py-8">
             <div className="flex flex-col items-center justify-center space-y-6 md:flex-row md:space-x-8 md:space-y-0">
               <div className="w-full max-w-md">
-                <img
+                <Image
                   src="/assets/images/landing-page/try_before_you_book.png"
                   alt="Cozy house with people sitting"
                   className="rounded-lg shadow-md"
@@ -398,16 +399,16 @@ export default function Page() {
               </div>
             </div>
           </div>
-          
+
           <div className="w-full bg-[#FAF9F6] py-8">
             <FAQ />
             <div className="mt-6 flex justify-center md:justify-end md:pr-[33%]">
-              <a
+              <Link
                 href="/faq"
                 className="hover:bg-primaryGreen-dark inline-block rounded-full bg-primaryGreen px-6 py-3 text-sm font-medium text-white"
               >
                 View FAQ
-              </a>
+              </Link>
             </div>
           </div>
           <div className="bg-primaryGreen py-8">
@@ -416,24 +417,24 @@ export default function Page() {
                 Start your journey with Tramona now
               </h2>
               <div className="mt-6 flex flex-col items-center space-y-4 md:flex-row md:justify-center md:space-x-6 md:space-y-0">
-                <a
+                <Link
                   href="/?tab=name-price"
                   className="inline-block rounded-full bg-white px-6 py-3 text-sm font-medium text-primaryGreen hover:bg-gray-100"
                 >
                   Name Your Own Price
-                </a>
-                <a
+                </Link>
+                <Link
                   href="/unclaimed-offers"
                   className="inline-block rounded-full bg-white px-6 py-3 text-sm font-medium text-primaryGreen hover:bg-gray-100"
                 >
                   Book it Now
-                </a>
-                <a
+                </Link>
+                <Link
                   href="/host-onboarding"
                   className="inline-block rounded-full bg-white px-6 py-3 text-sm font-medium text-primaryGreen hover:bg-gray-100"
                 >
                   Become a host
-                </a>
+                </Link>
               </div>
             </div>
           </div>
