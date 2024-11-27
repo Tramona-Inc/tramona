@@ -18,10 +18,7 @@ import {
   urlScrape,
 } from "@/server/server-utils";
 import { scrapeAirbnbPrice } from "@/server/scrapePrice";
-import {
-  fetchPrice,
-  fetchPriceNoRateLimit,
-} from "@/server/direct-sites-scraping/casamundo-scraper";
+import { fetchPriceNoRateLimit } from "@/server/direct-sites-scraping/casamundo-scraper";
 
 type AirbnbListing = {
   id: string;

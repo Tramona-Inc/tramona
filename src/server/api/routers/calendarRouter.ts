@@ -7,7 +7,6 @@ import { reservedDateRanges } from "@/server/db/schema/tables/reservedDateRanges
 import { and, eq, gte, lte } from "drizzle-orm";
 import { properties } from "@/server/db/schema/tables/properties";
 import { getPropertyCalendar } from "@/server/server-utils";
-import { users } from "@/server/db/schema";
 
 export async function syncCalendar({
   iCalLink,

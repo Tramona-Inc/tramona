@@ -8,11 +8,13 @@ export const useGetOriginalPropertyPricing = ({
   checkIn,
   checkOut,
   numGuests,
+  requestPercentage,
 }: {
   property: PropertyPageData | undefined;
   checkIn: Date;
   checkOut: Date;
   numGuests: number;
+  requestPercentage?: number;
 }) => {
   // Always define these, even if property is undefined
   const isHospitable = property?.originalListingPlatform === "Hospitable";
@@ -74,11 +76,17 @@ export const useGetOriginalPropertyPricing = ({
   );
 
   // Calculate original price
-  const originalPrice = isHospitable
+  let originalPrice = isHospitable
     ? hostPriceAfterDiscount
     : isNumber(casamundoPrice)
       ? casamundoPrice * 100
       : undefined;
+
+  //traveler requested bid amount if request to book
+  if (requestPercentage && originalPrice) {
+    originalPrice = originalPrice * (1 - requestPercentage / 100);
+  }
+  console.log("requestPercentage", requestPercentage);
 
   // Aggregate loading states
   const isLoading = isCasamundoPriceLoading && isHostPriceLoading;

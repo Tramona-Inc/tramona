@@ -48,7 +48,7 @@ export type RequestToBookDetails = {
   checkIn: Date;
   checkOut: Date;
   numGuests: number;
-  travelerOfferedPriceBeforeFees: number;
+  travelerOfferedPriceBeforeFees?: number;
 };
 
 export default function RequestToBookOrBookNowPriceCard({
@@ -98,7 +98,6 @@ export default function RequestToBookOrBookNowPriceCard({
     checkIn: checkIn,
     checkOut: checkOut,
     numGuests: numGuests,
-    travelerOfferedPriceBeforeFees: propertyPricing.originalPrice ?? 0,
   };
 
   const [date, setDate] = useState({
@@ -204,7 +203,6 @@ export default function RequestToBookOrBookNowPriceCard({
       setRawRequestAmount(inputValue); // Update raw input state
       const parsedValue = inputValue ? parseInt(inputValue, 10) : 0;
       setRequestAmount(parsedValue); // Update parsed value
-      updateRequestToBook({ travelerOfferedPriceBeforeFees: parsedValue });
       setSelectedPreset(null);
     }
   };
@@ -219,7 +217,6 @@ export default function RequestToBookOrBookNowPriceCard({
     setRequestAmount(newRequestAmount);
     setRawRequestAmount(formatCurrency(newRequestAmount));
     setRequestPercentage(value[0]!);
-    updateRequestToBook({ travelerOfferedPriceBeforeFees: newRequestAmount });
     setSelectedPreset(null);
   };
 
@@ -233,7 +230,6 @@ export default function RequestToBookOrBookNowPriceCard({
     setRequestAmount(price);
     setRawRequestAmount(formatCurrency(price)); // Update raw input state
 
-    updateRequestToBook({ travelerOfferedPriceBeforeFees: price });
     const newPercentage = Math.round(
       ((propertyPricing.originalPrice! - price) /
         propertyPricing.originalPrice!) *
@@ -386,7 +382,7 @@ export default function RequestToBookOrBookNowPriceCard({
                     )
                   }
                   className={cn(
-                    "flex flex-col items-center justify-between rounded-lg border text-center transition-colors lg:p-4",
+                    "flex flex-col items-center justify-between rounded-lg border py-3 text-center transition-colors lg:p-4",
                     selectedPreset === option.price
                       ? "border-primary bg-primary/10"
                       : "border-gray-200 hover:border-primary/50",
@@ -501,6 +497,7 @@ export default function RequestToBookOrBookNowPriceCard({
                     btnSize="sm"
                     requestToBook={requestToBook}
                     property={property}
+                    requestPercentage={requestPercentage} // we are getting the request price by using the percentage and saving that in the url for the checkout to get the price
                   />
                   <Button
                     variant="outline"
@@ -541,6 +538,7 @@ export default function RequestToBookOrBookNowPriceCard({
                 <PriceBreakdown
                   requestToBookDetails={requestToBook}
                   property={property}
+                  requestAmount={requestAmount} //
                 />
               )}
             </div>

@@ -21,8 +21,9 @@ export default function Page() {
     : new Date();
   const numGuests = query.numGuests ? parseInt(query.numGuests as string) : 2;
 
-  const travelerOfferedPriceBeforeFees = parseInt(
-    query.travelerOfferedPriceBeforeFees as string,
+  const requestPercentage = parseInt(
+    //exclusive to request-to-book
+    query.requestPercentage as string,
   );
 
   const { data: property } = api.properties.getById.useQuery(
@@ -36,6 +37,7 @@ export default function Page() {
     checkIn,
     checkOut,
     numGuests,
+    requestPercentage,
   });
   // ----------------
   if (router.isFallback) {
