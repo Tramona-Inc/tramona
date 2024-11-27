@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import UserAvatar from "@/components/_common/UserAvatar";
-import { Button, ButtonProps } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import ReviewCard from "@/components/_common/ReviewCard";
 import {
   DialogNoDrawer,
@@ -67,13 +67,24 @@ export default function PropertyPage({
   const [reviewBackupImages, setReviewBackupImages] = useState<string[]>([]);
   const [openUserInfo, setOpenUserInfo] = useState(false);
 
-  api.calendar.updateHostCalendar.useQuery({
-    hospitableListingId: property.hospitableListingId,  ///HERERE
-    },
-    {
-      enabled: property.originalListingPlatform === "Hospitable",
-    },
-  );
+  const { mutateAsync: updateCalender } =
+    api.calendar.updateHostCalendar.useMutation();
+
+  useEffect(() => {
+    const updateCalendarIfNeeded = async () => {
+      if (property.hospitableListingId === "Hospitable") {
+        try {
+          await updateCalender({
+            hospitableListingId: property.hospitableListingId,
+          });
+        } catch (error) {
+          console.error("Failed to update calendar:", error);
+        }
+      }
+    };
+
+    void updateCalendarIfNeeded();
+  }, [property.hospitableListingId, updateCalender]);
 
   useEffect(() => {
     const aboutElement = aboutRef.current;
@@ -229,7 +240,7 @@ export default function PropertyPage({
               <div className="flex-1">
                 <p className="gap flex flex-wrap items-center gap-x-1 pt-1 text-sm font-medium capitalize">
                   {property.propertyType} in {property.city} ·{" "}
-                  <StarIcon className="inline size-[1em] fill-primaryGreen stroke-primaryGreen" />{" "}
+                  <StarIcon className="size-[1em] inline fill-primaryGreen stroke-primaryGreen" />{" "}
                   {property.numRatings === 0 ? (
                     <>New</>
                   ) : (
@@ -343,7 +354,7 @@ export default function PropertyPage({
                 {property.roomsWithBeds.map((room, index) => (
                   <div
                     key={index}
-                    className="flex min-w-56 flex-col items-center gap-4 whitespace-pre rounded-lg border p-4"
+                    className="min-w-56 flex flex-col items-center gap-4 whitespace-pre rounded-lg border p-4"
                   >
                     <BedDoubleIcon />
                     <p className="text-lg font-semibold">{room.name}</p>
@@ -403,7 +414,7 @@ export default function PropertyPage({
                   Guest Reviews
                 </h2>
                 <div className="flex items-center gap-2 pb-4">
-                  <StarIcon className="inline size-[1em] fill-primaryGreen stroke-primaryGreen" />{" "}
+                  <StarIcon className="size-[1em] inline fill-primaryGreen stroke-primaryGreen" />{" "}
                   {property.avgRating} · {plural(property.numRatings, "review")}
                 </div>
               </div>
@@ -452,7 +463,7 @@ export default function PropertyPage({
                     />
                     <p className="text-center text-lg font-bold">{hostName}</p>
                   </div>
-                  <div className="divide-y *:p-2">
+                  <div className="*:p-2 divide-y">
                     <div>
                       <p className="text-center text-lg font-bold">
                         {property.hostNumReviews}
@@ -526,7 +537,7 @@ export default function PropertyPage({
         </div>
 
         {sidebar && (
-          <div className="hidden shrink-0 md:block md:w-4/12 lg:w-96">
+          <div className="hidden shrink-0 md:block md:w-5/12 lg:w-96">
             <div className="sticky top-[calc(var(--header-height)+1rem)]">
               {sidebar}
             </div>
