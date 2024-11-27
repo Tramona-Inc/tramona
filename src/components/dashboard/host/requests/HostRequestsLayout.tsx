@@ -92,8 +92,10 @@ export default function HostRequestsLayout({
       {/* ---------- MAIN CONTENT AREA ---------- */}
       <div className="hidden flex-1 bg-[#fafafa] xl:block">
         {children ? (
+          
           <div className="pb-30 px-4 pt-8">
             <div className="mx-auto max-w-5xl">
+            {activeTab === "city" && (
               <div className="mb-4 flex flex-row justify-between">
                 <div className="flex gap-2">
                   <Button
@@ -133,6 +135,7 @@ export default function HostRequestsLayout({
                   Other
                 </Button>
               </div>
+            )}
               {children}
             </div>
           </div>

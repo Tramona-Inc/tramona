@@ -94,7 +94,7 @@ export default function HostConfirmRequestDialog({
       .map((property) => property.city); // List cities of properties without tax
 
     const propertiesWithTax = filteredSelectedProperties.filter(
-      (property) => !property.taxAvailable,
+      (property) => property.taxAvailable,
     );
 
     await Promise.all(
