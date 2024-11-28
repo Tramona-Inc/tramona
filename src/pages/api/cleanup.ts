@@ -6,4 +6,5 @@ export default async function handler() {
   await db.delete(bookedDates).where(lt(bookedDates.date, new Date()));
 }
 
+await handler();
 process.exit(1);
