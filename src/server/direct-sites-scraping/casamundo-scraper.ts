@@ -193,7 +193,7 @@ export async function getAvailability(offerId: string): Promise<AvailabilityResp
       try {
         const response: AxiosResponse<CalendarResponse> = await axios.get(url, {
           params: { year, month },
-          httpsAgent: proxyAgent,
+          // httpsAgent: proxyAgent,
           headers: {
             accept: "application/json",
             "accept-language": "en-US,en;q=0.9",
