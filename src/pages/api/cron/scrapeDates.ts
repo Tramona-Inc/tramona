@@ -137,6 +137,7 @@ async function handler() {
 
       // console.log(`Processing offer ID: ${offerId}`);
       const ranges = getReservedDateRanges(data);
+      console.log(`Found ${ranges.length} ranges for offer ID: ${offerId}`);
 
       let propertyId = propertyCache.get(offerId);
       if (!propertyId) {
@@ -237,7 +238,7 @@ async function handler() {
 
   console.log("Processing complete.");
 
-  const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
   await db.delete(properties).where(
     sql`dates_last_updated < ${twentyFourHoursAgo}`
