@@ -263,8 +263,8 @@ export default function TripPage({
                   </div>
                 ) : (
                   <p className="text-muted-foreground">
-                    This information will be released at 5pm before your
-                    checkout date.
+                    This information will be released at 5:00 PM before your
+                    check-out date.
                   </p>
                 )}
               </div>
@@ -380,7 +380,7 @@ export default function TripPage({
 function InfoReleased48HoursBeforeCheckIn() {
   return (
     <p className="text-muted-foreground">
-      This information will be released 48 hours before your check in date
+      This information will be released 48 hours before your check-in date.
     </p>
   );
 }
