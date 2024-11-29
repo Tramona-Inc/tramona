@@ -20,6 +20,8 @@ import {
   convertTo12HourFormat,
   getDaysUntilTrip,
   convertInteractionPreference,
+  isTripWithin48Hours,
+  isTrip5pmBeforeCheckout,
 } from "@/utils/utils";
 
 import SingleLocationMap from "../_common/GoogleMaps/SingleLocationMap";
@@ -46,6 +48,8 @@ export default function TripPage({
   const tripDuration = dayjs(trip.checkOut).diff(trip.checkIn, "day");
   const { data } = api.properties.getById.useQuery({ id: trip.propertyId });
   const hostId = data?.hostTeam.owner.id;
+
+  const tripWithin48Hours = isTripWithin48Hours(tripData);
 
   return (
     <div className="col-span-10 flex flex-col gap-5 p-4 py-10 2xl:col-span-11">
@@ -191,10 +195,10 @@ export default function TripPage({
 
               <div className="h-[2px] rounded-full bg-zinc-200"></div>
 
-              <div>
-                <p className="pb-2 pt-5 text-xl font-bold">Payment info</p>
+              <div className="py-4">
+                <p className="font-bold">Payment info</p>
                 <div className="flex justify-between">
-                  <p className="font-bold">Total cost</p>
+                  <p className="text-muted-foreground">Total cost</p>
                   <p className="text-sm text-muted-foreground">
                     Paid {dayjs(trip.createdAt).format("MMM D")}
                   </p>
@@ -218,19 +222,25 @@ export default function TripPage({
 
               <div className="space-y-2 py-4">
                 <p className="font-bold">Check-in info</p>
-                {trip.property.additionalCheckInInfo && (
-                  <div className="flex items-center">
-                    <div className="basis-1/2">
-                      <p className="text-muted-foreground">Check-in type</p>
-                      <p>{trip.property.checkInType}</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">
-                        Additional check-in info
-                      </p>
-                      <p>{trip.property.additionalCheckInInfo}</p>
-                    </div>
-                  </div>
+                {tripWithin48Hours ? (
+                  <>
+                    {trip.property.additionalCheckInInfo && (
+                      <div className="flex items-center">
+                        <div className="basis-1/2">
+                          <p className="text-muted-foreground">Check-in type</p>
+                          <p>{trip.property.checkInType}</p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground">
+                            Additional check-in info
+                          </p>
+                          <p>{trip.property.additionalCheckInInfo}</p>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <InfoReleased48HoursBeforeCheckIn />
                 )}
               </div>
 
@@ -238,18 +248,25 @@ export default function TripPage({
 
               <div className="space-y-2 py-4">
                 <p className="font-bold">Check-out info</p>
-                <div className="flex items-center">
-                  <div className="basis-1/2">
-                    <p className="text-muted-foreground">Check-out type</p>
-                    <p>{trip.property.checkOutInfo}</p>
+                {isTrip5pmBeforeCheckout(tripData) ? (
+                  <div className="flex items-center">
+                    <div className="basis-1/2">
+                      <p className="text-muted-foreground">Check-out type</p>
+                      <p>{trip.property.checkOutInfo}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">
+                        Additional check-out info
+                      </p>
+                      <p>{trip.property.additionalCheckOutInfo}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-muted-foreground">
-                      Additional check-out info
-                    </p>
-                    <p>{trip.property.additionalCheckOutInfo}</p>
-                  </div>
-                </div>
+                ) : (
+                  <p className="text-muted-foreground">
+                    This information will be released at 5pm before your
+                    checkout date.
+                  </p>
+                )}
               </div>
 
               <div className="h-[2px] rounded-full bg-zinc-200"></div>
@@ -294,23 +311,31 @@ export default function TripPage({
 
               <div className="space-y-2 py-4">
                 <p className="font-bold">Wifi details</p>
-                <div className="flex items-center">
-                  <div className="basis-1/2">
-                    <p className="text-muted-foreground">Wifi name</p>
-                    <p>{trip.property.wifiName}</p>
+                {tripWithin48Hours ? (
+                  <div className="flex items-center">
+                    <div className="basis-1/2">
+                      <p className="text-muted-foreground">Wifi name</p>
+                      <p>{trip.property.wifiName}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Wifi password</p>
+                      <p>{trip.property.wifiPassword}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-muted-foreground">Wifi password</p>
-                    <p>{trip.property.wifiPassword}</p>
-                  </div>
-                </div>
+                ) : (
+                  <InfoReleased48HoursBeforeCheckIn />
+                )}
               </div>
 
               <div className="h-[2px] rounded-full bg-zinc-200"></div>
 
               <div className="space-y-2 py-4">
                 <p className="font-bold">House Manual</p>
-                <p>{trip.property.houseManual}</p>
+                {tripWithin48Hours ? (
+                  <p>{trip.property.houseManual}</p>
+                ) : (
+                  <InfoReleased48HoursBeforeCheckIn />
+                )}
               </div>
 
               <div className="h-[2px] rounded-full bg-zinc-200"></div>
@@ -349,5 +374,13 @@ export default function TripPage({
         </div>
       </div>
     </div>
+  );
+}
+
+function InfoReleased48HoursBeforeCheckIn() {
+  return (
+    <p className="text-muted-foreground">
+      This information will be released 48 hours before your check in date
+    </p>
   );
 }
