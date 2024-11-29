@@ -141,13 +141,13 @@ export default function TripPage({
                       removeTimezoneFromDate(trip.checkIn),
                     )}
                   </p>
-                  <p className="font-semibold">
+                  <div>
                     {trip.property.checkInTime && (
                       <p className="font-semibold">
                         {convertTo12HourFormat(trip.property.checkInTime)}
                       </p>
                     )}
-                  </p>
+                  </div>
                 </div>
                 <ArrowRight />
                 <div className="flex flex-col">
