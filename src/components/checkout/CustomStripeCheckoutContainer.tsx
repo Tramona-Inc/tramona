@@ -27,7 +27,6 @@ const CustomStripeCheckoutContainer = ({
   const authorizePayment = api.stripe.authorizePayment.useMutation();
   const fetchClientSecret = useCallback(async () => {
     try {
-      console.log(unifiedCheckoutData.pricing.travelerOfferedPriceBeforeFees);
       const { totalTripAmount } = breakdownPaymentByPropertyAndTripParams({
         dates: {
           checkIn: unifiedCheckoutData.dates.checkIn,
@@ -37,7 +36,7 @@ const CustomStripeCheckoutContainer = ({
           unifiedCheckoutData.pricing.travelerOfferedPriceBeforeFees,
         property: unifiedCheckoutData.property,
       });
-      console.log(totalTripAmount);
+
       return await authorizePayment.mutateAsync({
         totalAmountPaid: totalTripAmount,
         travelerOfferedPriceBeforeFees:

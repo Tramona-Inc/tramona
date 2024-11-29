@@ -16,19 +16,19 @@ export type RequestToBookDetails = {
   checkIn: Date;
   checkOut: Date;
   numGuests: number;
-  travelerOfferedPriceBeforeFees: number;
 };
 
 export default function RequestToBookBtn({
   btnSize,
   requestToBook,
   property,
+  requestPercentage,
 }: {
   btnSize: ButtonProps["size"];
   requestToBook: RequestToBookDetails;
   property: PropertyPageData;
+  requestPercentage: number;
 }) {
-  console.log(requestToBook);
   const { data: verificationStatus } =
     api.users.myVerificationStatus.useQuery();
 
@@ -45,8 +45,8 @@ export default function RequestToBookBtn({
         ? "book-it-now-checkout"
         : "request-to-book-checkout";
 
-    return `/${baseCheckoutPath}/${property.id}?checkIn=${checkIn}&checkOut=${checkOut}&numGuests=${requestToBook.numGuests}&travelerOfferedPriceBeforeFees=${requestToBook.travelerOfferedPriceBeforeFees}`;
-  }, [property, requestToBook]);
+    return `/${baseCheckoutPath}/${property.id}?checkIn=${checkIn}&checkOut=${checkOut}&numGuests=${requestToBook.numGuests}&requestPercentage=${requestPercentage}`;
+  }, [property, requestToBook, requestPercentage]);
 
   return (
     <Button
