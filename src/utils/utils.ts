@@ -925,11 +925,11 @@ export function isTrip5pmBeforeCheckout(
   const targetDate = new Date(checkoutDate);
   // set target date to day before checkout date
   targetDate.setDate(checkoutDate.getDate() - 1);
-  // seet time to 5:00 pm
+  // set time to 5:00 pm
   targetDate.setHours(17, 0, 0, 0);
 
-  // return if current time is between 5 pm on the day before checkout and the end of the checkout day
-  return now >= targetDate && now <= checkoutDate;
+  // check if current date is after 5 pm on the day before checkout
+  return now >= targetDate;
 }
 
 export function isTripWithin48Hours(
@@ -938,8 +938,11 @@ export function isTripWithin48Hours(
   const { trip } = tripData;
   // now: current date and time
   const now = new Date();
-  // targetDate: 48 hours from now
-  const targetDate = new Date(now.getTime() + 48 * 60 * 60 * 1000);
 
-  return trip.checkIn >= now && trip.checkIn <= targetDate;
+  const checkInDate = new Date(trip.checkIn);
+  // targetDate: 48 hours before check-in date
+  const targetDate = new Date(checkInDate.getTime() - 48 * 60 * 60 * 1000);
+
+  // check if current date is after target date
+  return now >= targetDate;
 }
