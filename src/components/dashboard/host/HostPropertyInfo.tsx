@@ -8,6 +8,7 @@ import HostPropertiesRestrictions from "./HostPropertiesRestrictions";
 import HostAutoOffer from "./HostAutoOffer";
 import HostBookItNow from "./HostBookItNow";
 import HostPolicySection from "./HostPolicySection";
+import HostArrivalGuide from "./HostArrivalGuide";
 
 export default function HostPropertyInfo({ property }: { property: Property }) {
   return (
@@ -45,6 +46,12 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
               />
             )}
           </TabsTrigger>
+          <TabsTrigger
+            value="arrival-guide"
+            className="w-1/2 data-[state=active]:border-b-teal-900 data-[state=active]:font-bold data-[state=active]:text-teal-900"
+          >
+            Arrival Guide
+          </TabsTrigger>
           {/* <TabsTrigger
             value="auto-offer"
             className="data-[state=active]:border-b-teal-900 data-[state=active]:font-bold data-[state=active]:text-teal-900"
@@ -72,6 +79,9 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
         </TabsContent>
         <TabsContent value="book-it-now">
           <HostBookItNow property={property} />
+        </TabsContent>
+        <TabsContent value="arrival-guide">
+          <HostArrivalGuide property={property} />
         </TabsContent>
       </Tabs>
     </div>

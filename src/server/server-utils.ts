@@ -54,7 +54,11 @@ import { HOST_MARKUP, TRAVELER_MARKUP } from "@/utils/constants";
 import { HostRequestsPageData } from "./api/routers/propertiesRouter";
 import { Session } from "next-auth";
 import { calculateTotalTax } from "@/utils/payment-utils/taxData";
-import { scrapePage, serpPageSchema, transformSearchResult } from "./external-listings-scraping/airbnbScraper";
+import {
+  scrapePage,
+  serpPageSchema,
+  transformSearchResult,
+} from "./external-listings-scraping/airbnbScraper";
 import { getSerpUrl } from "./external-listings-scraping/airbnbScraper";
 import { createStripeConnectId } from "@/utils/stripe-utils";
 
@@ -373,9 +377,9 @@ export async function addProperty({
     latLngPoint?: { x: number; y: number }; // make optional
   };
 } & (
-    | { isAdmin?: boolean; userEmail: string }
-    | { isAdmin: true; userEmail?: undefined }
-  )) {
+  | { isAdmin?: boolean; userEmail: string }
+  | { isAdmin: true; userEmail?: undefined }
+)) {
   let lat = property.latLngPoint?.y;
   let lng = property.latLngPoint?.x;
 
@@ -391,7 +395,7 @@ export async function addProperty({
     await getAddress({
       lat,
       lng,
-  });
+    });
 
   const propertyValues = {
     ...property,
@@ -463,12 +467,13 @@ export async function sendTextToHost({
           to: hostTeamOwner.phoneNumber,
           content: `Tramona: There is a request for ${formatCurrency(
             request.maxTotalPrice / numberOfNights,
-          )} per night for ${plural(numberOfNights, "night")} in ${request.location
-            }. You have ${plural(
-              numHostPropertiesPerRequest[hostTeamId] ?? 0,
-              "eligible property",
-              "eligible properties",
-            )}. Please click here to make a match: ${env.NEXTAUTH_URL}/host/requests`,
+          )} per night for ${plural(numberOfNights, "night")} in ${
+            request.location
+          }. You have ${plural(
+            numHostPropertiesPerRequest[hostTeamId] ?? 0,
+            "eligible property",
+            "eligible properties",
+          )}. Please click here to make a match: ${env.NEXTAUTH_URL}/host/requests`,
         });
 
         //TODO SEND WHATSAPP MESSAGE
@@ -747,9 +752,7 @@ export async function getPropertyCalendar(propertyId: string) {
 
   const secondStartDate = new Date(firstEndDate);
   secondStartDate.setDate(secondStartDate.getDate() + 1);
-  const secondStartDateString = secondStartDate
-    .toISOString()
-    .split("T")[0];
+  const secondStartDateString = secondStartDate.toISOString().split("T")[0];
 
   const secondEndDate = new Date(now);
   secondEndDate.setDate(now.getDate() + 539);
@@ -764,18 +767,23 @@ export async function getPropertyCalendar(propertyId: string) {
   console.log("Second request URL:", secondBatchUrl);
 
   // Make the requests
-  const firstBatch = await axios.get<HospitableCalendarResponse>(firstBatchUrl, {
-    headers: {
-      Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
+  const firstBatch = await axios.get<HospitableCalendarResponse>(
+    firstBatchUrl,
+    {
+      headers: {
+        Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
+      },
     },
-  });
+  );
 
-  const secondBatch = await axios.get<HospitableCalendarResponse>(secondBatchUrl, {
-    headers: {
-      Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
+  const secondBatch = await axios.get<HospitableCalendarResponse>(
+    secondBatchUrl,
+    {
+      headers: {
+        Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
+      },
     },
-  });
-
+  );
 
   const combinedPricingAndCalendarResponse = [
     ...firstBatch.data.data.dates,
@@ -785,7 +793,10 @@ export async function getPropertyCalendar(propertyId: string) {
 }
 
 export async function getPropertyOriginalPrice(
-  property: Pick<Property, "hospitableListingId" | "originalListingPlatform" | "originalListingId">,
+  property: Pick<
+    Property,
+    "hospitableListingId" | "originalListingPlatform" | "originalListingId"
+  >,
   params: {
     checkIn: string;
     checkOut: string;
@@ -793,8 +804,12 @@ export async function getPropertyOriginalPrice(
   },
 ) {
   if (property.originalListingPlatform === "Hospitable") {
-    const formattedCheckIn = new Date(params.checkIn).toISOString().split("T")[0];
-    const formattedCheckOut = new Date(params.checkOut).toISOString().split("T")[0];
+    const formattedCheckIn = new Date(params.checkIn)
+      .toISOString()
+      .split("T")[0];
+    const formattedCheckOut = new Date(params.checkOut)
+      .toISOString()
+      .split("T")[0];
     const { data } = await axios.get<HospitableCalendarResponse>(
       `https://connect.hospitable.com/api/v1/listings/${property.hospitableListingId}/calendar`,
       {
@@ -807,9 +822,10 @@ export async function getPropertyOriginalPrice(
         },
       },
     );
-    const averagePrice = data.data.dates.reduce((acc, date) => {
-      return acc + date.price.amount;
-    }, 0) / data.data.dates.length;
+    const averagePrice =
+      data.data.dates.reduce((acc, date) => {
+        return acc + date.price.amount;
+      }, 0) / data.data.dates.length;
     return averagePrice;
   } else if (property.originalListingPlatform === "Hostaway") {
     const { data } = await axios.get<HostawayPriceResponse>(
@@ -956,9 +972,9 @@ export function haversineDistance(
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(toRadians(lat1)) *
-    Math.cos(toRadians(lat2)) *
-    Math.sin(dLon / 2) *
-    Math.sin(dLon / 2);
+      Math.cos(toRadians(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c; // Distance in kilometers
 }
@@ -1051,15 +1067,16 @@ export async function scrapeAirbnbInitialPageHelper({
 
   const numNights = getNumNights(checkIn, checkOut);
 
-
   const pageData = await scrapePage(serpUrl).then(async (unparsedData) => {
     return serpPageSchema.parse(unparsedData);
-  })
-  const searchResults = (await Promise.all(
-    pageData.staysSearch.results.searchResults.map((searchResult) =>
-      transformSearchResult({ searchResult, numNights, numGuests })
+  });
+  const searchResults = (
+    await Promise.all(
+      pageData.staysSearch.results.searchResults.map((searchResult) =>
+        transformSearchResult({ searchResult, numNights, numGuests }),
+      ),
     )
-  )).filter(Boolean);
+  ).filter(Boolean);
 
   // console.log("length of results:", searchResults.length);
   // console.log('result:', searchResults[0]);
@@ -1086,7 +1103,7 @@ export async function scrapeAirbnbPagesHelper({
       checkOut,
       location,
       numGuests,
-      cursor
+      cursor,
     }),
   );
 
@@ -1094,10 +1111,11 @@ export async function scrapeAirbnbPagesHelper({
 
   return (await Promise.all(pageUrls.map(scrapePage)))
     .flatMap((data) => data.staysSearch.results.searchResults)
-    .map((searchResult) => transformSearchResult({ searchResult, numNights, numGuests }))
+    .map((searchResult) =>
+      transformSearchResult({ searchResult, numNights, numGuests }),
+    )
     .filter(Boolean);
 }
-
 
 export async function getRequestsToBookForProperties(
   hostProperties: Property[],
