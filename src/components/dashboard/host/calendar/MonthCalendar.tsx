@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { cn } from "@/utils/utils";
+import { Loader2Icon } from "lucide-react";
 
 const daysOfWeek = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 
@@ -20,6 +21,8 @@ interface MonthCalendarProps {
     end: Date | null;
   };
   isEditing?: boolean;
+  prices: Record<string, number | undefined>;
+  isLoading?: boolean;
 }
 
 export default function MonthCalendar({
@@ -29,6 +32,7 @@ export default function MonthCalendar({
   selectedRange,
   isEditing = false,
   prices,
+  isLoading = false,
 }: MonthCalendarProps) {
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
 
@@ -37,10 +41,26 @@ export default function MonthCalendar({
     setCurrentDate(today);
   }, []);
 
+  const normalizeToUTCMidnight = (d: Date) => {
+    const normalized = new Date(
+      Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()),
+    );
+    return normalized;
+  };
+
   const isDateReserved = (date: Date): ReservationInfo | undefined => {
+    const normalizedDate = normalizeToUTCMidnight(date);
+
     return reservedDateRanges.find((reservedDate) => {
-      return date.toISOString().split("T")[0] === reservedDate.start;
+      const start = normalizeToUTCMidnight(new Date(reservedDate.start));
+      const end = normalizeToUTCMidnight(new Date(reservedDate.end));
+
+      return normalizedDate >= start && normalizedDate <= end;
     });
+  };
+
+  const isPastDate = (date: Date): boolean => {
+    return date < new Date(currentDate.toISOString().split("T")[0]!);
   };
 
   const generateCalendarDays = (date: Date): (number | null)[] => {
@@ -81,9 +101,10 @@ export default function MonthCalendar({
               ? isDateReserved(currentDate)
               : null;
 
+            const isGrayedOut = currentDate ? isPastDate(currentDate) : false;
+
             let reservationClass = "";
             if (reservedInfo) {
-              console.log("reservedInfo", reservedInfo);
               if (reservedInfo.platformBookedOn === "airbnb") {
                 reservationClass = "bg-reserved-pattern";
               } else if (reservedInfo.platformBookedOn === "tramona") {
@@ -95,12 +116,16 @@ export default function MonthCalendar({
               <div
                 key={index}
                 onClick={() =>
-                  currentDate && isEditing && onDateClick?.(currentDate)
+                  currentDate &&
+                  !isGrayedOut &&
+                  isEditing &&
+                  onDateClick?.(currentDate)
                 }
                 className={cn(
                   "flex min-h-[100px] flex-col items-center justify-center p-2",
-                  day && isEditing && "cursor-pointer",
+                  day && isEditing && !isGrayedOut && "cursor-pointer",
                   reservationClass,
+                  isGrayedOut && "cursor-not-allowed bg-gray-200 text-gray-400",
                   currentDate &&
                     selectedRange?.start &&
                     (selectedRange.end
@@ -109,7 +134,7 @@ export default function MonthCalendar({
                       : currentDate.getTime() ===
                         selectedRange.start.getTime()) &&
                     "bg-blue-200",
-                  !day && "bg-gray-50", // Style for empty cells
+                  !day && "bg-gray-50",
                   day &&
                     date.getFullYear() === currentDate?.getFullYear() &&
                     date.getMonth() === currentDate?.getMonth() &&
@@ -118,12 +143,26 @@ export default function MonthCalendar({
                     : "text-muted-foreground",
                 )}
               >
-                {day && (
+                {day && currentDate && (
                   <>
                     <span className="text-sm font-medium">{day}</span>
                     <span className="mt-1 text-xs text-muted-foreground">
-                      ${prices[currentDate.toISOString().split("T")[0] ?? ""] ??
-                      168}
+                      {isLoading ? (
+                        <Loader2Icon
+                          size={20}
+                          className="mx-auto animate-spin text-accent"
+                        />
+                      ) : (
+                        (() => {
+                          const price =
+                            prices[
+                              currentDate.toISOString().split("T")[0] ?? ""
+                            ];
+                          return price !== undefined && !isNaN(price)
+                            ? `$${price}`
+                            : "";
+                        })()
+                      )}
                     </span>
                   </>
                 )}
