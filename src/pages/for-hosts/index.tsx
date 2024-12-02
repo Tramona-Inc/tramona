@@ -7,12 +7,12 @@ import { type FeedRequestItem } from "@/components/activity-feed/ActivityFeed";
 import { getFeed } from "@/server/api/routers/feedRouter";
 import { type InferGetStaticPropsType } from "next";
 import HowItWorksHost from "@/components/landing-page/how-it-works-host";
-// import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import TramonaIcon from "@/components/_icons/TramonaIcon";
 import Footer from "@/components/_common/Layout/Footer";
 import AccordionFaq from "@/components/_common/AccordionFaq";
 import { TestimonialCarousel } from "@/components/landing-page/_sections/testimonials/TestimonialCarousel";
 import { Check } from "lucide-react";
+import { Skeleton, SkeletonText } from "@/components/skeleton"; // 引入 Skeleton 组件
 
 type Tabs = {
   id: number;
@@ -42,26 +42,40 @@ const contents: Tabs[] = [
   },
 ];
 
-function IntroSection({ requestFeed }: { requestFeed: FeedRequestItem[] }) {
+function IntroSection({
+                        requestFeed,
+                        isLoading,
+                      }: {
+  requestFeed?: FeedRequestItem[];
+  isLoading: boolean;
+}) {
   return (
-    <section className="relative mx-auto flex max-w-7xl justify-center px-2">
-      <div className="flex flex-col items-center space-y-8 lg:flex-row lg:space-x-10 xl:space-x-20">
-        <div className="max-w-xl space-y-5">
-          <h2 className="text-center text-4xl font-bold tracking-tight text-primaryGreen md:text-6xl">
-            List on Tramona
-          </h2>
-          <p className="text-center text-4xl font-semibold tracking-tight md:text-6xl">
-            Let&apos;s make sure your calendar is filled
-          </p>
-          <p className="text-center text-lg font-medium tracking-tight md:text-2xl">
-            100% free to use, sign up and let the requests start rolling in
-          </p>
+      <section className="relative mx-auto flex max-w-7xl justify-center px-2">
+        <div className="flex flex-col items-center space-y-8 lg:flex-row lg:space-x-10 xl:space-x-20">
+          <div className="max-w-xl space-y-5">
+            <h2 className="text-center text-4xl font-bold tracking-tight text-primaryGreen md:text-6xl">
+              List on Tramona
+            </h2>
+            <p className="text-center text-4xl font-semibold tracking-tight md:text-6xl">
+              Let&apos;s make sure your calendar is filled
+            </p>
+            <p className="text-center text-lg font-medium tracking-tight md:text-2xl">
+              100% free to use, sign up and let the requests start rolling in
+            </p>
+          </div>
+          <div className="h-[450px] rounded-lg border px-2 py-2 shadow-xl">
+            {isLoading ? (
+                <div className="space-y-4">
+                  <SkeletonText className="w-1/2 mx-auto" />
+                  <Skeleton className="h-32 w-full" />
+                  <Skeleton className="h-32 w-full" />
+                </div>
+            ) : (
+                <RequestFeed requestFeed={requestFeed!} />
+            )}
+          </div>
         </div>
-        <div className="h-[450px] rounded-lg border px-2 py-2 shadow-xl">
-          <RequestFeed requestFeed={requestFeed} />
-        </div>
-      </div>
-    </section>
+      </section>
   );
 }
 
@@ -70,69 +84,79 @@ function FAQ() {
     {
       question: "Can I counter offer requests?",
       answer:
-        "Yes! You have full control over pricing. If a traveler submits a request, you can respond with an offer that fits your availability and pricing preferences.",
+          "Yes! You have full control over pricing. If a traveler submits a request, you can respond with an offer that fits your availability and pricing preferences.",
     },
     {
       question: "Can I invite a co-host?",
       answer:
-        "Yes, Tramona supports co-hosting. You can add a co-host to help manage bookings, respond to traveler inquiries, and coordinate check-ins. They’ll have access to the necessary tools without needing full access to your account.",
+          "Yes, Tramona supports co-hosting. You can add a co-host to help manage bookings, respond to traveler inquiries, and coordinate check-ins. They’ll have access to the necessary tools without needing full access to your account.",
     },
     {
       question: "Why list on Tramona?",
       answer:
-        "Tramona helps you optimize occupancy and revenue by offering more flexibility. Just like how Priceline allowed hotels to offload unbooked rooms without lowering rates across the board, Tramona allows you to keep your listings at full price on other platforms while accepting offers for lower rates only when you choose. We also take lower fees than platforms like Airbnb and VRBO, meaning you can earn more while giving travelers better deals.",
+          "Tramona helps you optimize occupancy and revenue by offering more flexibility. Just like how Priceline allowed hotels to offload unbooked rooms without lowering rates across the board, Tramona allows you to keep your listings at full price on other platforms while accepting offers for lower rates only when you choose. We also take lower fees than platforms like Airbnb and VRBO, meaning you can earn more while giving travelers better deals.",
     },
     {
       question: "Can I sync my calendar with other platforms?",
       answer:
-        "Yes, Tramona allows you to sync your calendar with Airbnb. This ensures your availability is updated across all platforms, preventing double bookings.",
+          "Yes, Tramona allows you to sync your calendar with Airbnb. This ensures your availability is updated across all platforms, preventing double bookings.",
     },
   ];
 
   return (
-    <section className="mx-auto grid max-w-7xl grid-cols-1 gap-6 p-4 md:grid-cols-3">
-      <div className="space-y-4">
-        <h1 className="text-3xl font-bold md:text-4xl">
-          Frequently asked questions
-        </h1>
-        <h2 className="text-lg font-bold underline">
-          <Link href="/faq">See full FAQ </Link>
-        </h2>
-      </div>
-      <div className="col-span-2 border-t">
-        <AccordionFaq accordionItems={forHostsAccordionItems} />
-      </div>
-    </section>
+      <section className="mx-auto grid max-w-7xl grid-cols-1 gap-6 p-4 md:grid-cols-3">
+        <div className="space-y-4">
+          <h1 className="text-3xl font-bold md:text-4xl">Frequently asked questions</h1>
+          <h2 className="text-lg font-bold underline">
+            <Link href="/faq">See full FAQ </Link>
+          </h2>
+        </div>
+        <div className="col-span-2 border-t">
+          <AccordionFaq accordionItems={forHostsAccordionItems} />
+        </div>
+      </section>
   );
 }
 
-function ListInAMinute() {
+export async function getStaticProps() {
+  const requestFeed = await getFeed({ maxNumEntries: 10 }).then((r) =>
+      r.filter((r) => r.type === "request"),
+  );
+  return {
+    props: { requestFeed },
+    revalidate: 60 * 5, // 5 minutes
+  };
+}
+
+export default function HostWelcome({
+                                      requestFeed,
+                                    }: InferGetStaticPropsType<typeof getStaticProps>) {
+  const isLoading = !requestFeed;
+
   return (
-    <section className="mx-auto max-w-7xl space-y-8 px-4 sm:px-6 md:space-y-20 md:px-8 lg:px-10 xl:px-12">
-      <h1 className="text-center text-3xl font-bold md:text-4xl lg:text-5xl">
-        List in less than 1 minute with our effortless sign up flow
-      </h1>
-      <div className="flex flex-col gap-6 lg:flex-row">
-        {contents.map((content) => (
-          <div key={content.id} className="flex basis-1/3 items-center gap-2">
-            <div className="relative h-32 w-5/12 overflow-clip rounded-xl lg:h-full">
-              <Image
-                src={content.image}
-                objectFit="cover"
-                layout="fill"
-                alt=""
-              />
-            </div>
-            <div className="flex-1 space-y-2">
-              <h2 className="font-bold">{content.title}</h2>
-              <p className="text-sm">{content.info}</p>
-            </div>
+      <div>
+        <div className="relative space-y-32 overflow-x-hidden pb-32">
+          <Head>
+            <title>Hosts | Tramona</title>
+          </Head>
+          <div className="md:hidden">
+            <MobileStickyBar />
           </div>
-        ))}
+          <div className="hidden md:block">
+            <StickyTopBar />
+          </div>
+          <IntroSection requestFeed={requestFeed} isLoading={isLoading} />
+          <HowItWorksHost />
+          <TestimonialCarousel />
+          <FAQ />
+        </div>
+        <div className="hidden md:block">
+          <Footer />
+        </div>
       </div>
-    </section>
   );
 }
+
 
 function Questions() {
   return (
@@ -328,47 +352,4 @@ function MobileStickyBar() {
     </div>
   );
 }
-export async function getStaticProps() {
-  const requestFeed = await getFeed({ maxNumEntries: 10 }).then((r) =>
-    r.filter((r) => r.type === "request"),
-  );
-  return {
-    props: { requestFeed },
-    revalidate: 60 * 5, // 5 minutes
-  };
-}
 
-export default function HostWelcome({
-  requestFeed,
-}: InferGetStaticPropsType<typeof getStaticProps>) {
-  return (
-    <div>
-      <div className="relative space-y-32 overflow-x-hidden pb-32">
-        <Head>
-          <title>Hosts | Tramona</title>
-        </Head>
-        <div className="md:hidden">
-          <MobileStickyBar />
-        </div>
-
-        <div className="hidden md:block">
-          <StickyTopBar />
-        </div>
-
-        <IntroSection requestFeed={requestFeed} />
-        <HowItWorksHost />
-        <TestimonialCarousel />
-        <Questions />
-        <TailorYourBookingProcess />
-        <DamageProtection />
-        <ListInAMinute />
-        <FAQ />
-        <WhatAreYouWaitingFor />
-        <SendUsAnEmail />
-      </div>
-      <div className="hidden md:block">
-        <Footer />
-      </div>
-    </div>
-  );
-}

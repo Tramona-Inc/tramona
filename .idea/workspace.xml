@@ -6,7 +6,18 @@
   <component name="ChangeListManager">
     <list default="true" id="ccc7e23b-2e8d-4d39-b13e-859f5f4f54eb" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/transactional/node_modules/.bin/email" beforeDir="false" afterPath="$PROJECT_DIR$/packages/transactional/node_modules/.bin/email" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/for-hosts/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/for-hosts/index.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/host/finances/[id].tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/host/finances/[id].tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/host/finances/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/host/finances/index.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/host/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/host/index.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/host/messages/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/host/messages/index.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/host/properties/[id].tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/host/properties/[id].tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/host/properties/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/host/properties/index.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/host/requests/[city].tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/host/requests/[city].tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/host/requests/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/host/requests/index.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/host/resolution-form.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/host/resolution-form.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/host/stays.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/host/stays.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/host/team.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/host/team.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -73,7 +84,8 @@
       <workItem from="1730943086203" duration="1948000" />
       <workItem from="1731299440438" duration="7643000" />
       <workItem from="1731971170340" duration="4000" />
-      <workItem from="1732146989923" duration="4444000" />
+      <workItem from="1732146989923" duration="5801000" />
+      <workItem from="1732948129567" duration="6836000" />
     </task>
     <servers />
   </component>

@@ -11,6 +11,7 @@ import Head from "next/head";
 import { useState } from "react";
 import { Pencil, X, SendHorizonal, Ellipsis } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
+import { Skeleton, SkeletonText } from "@/components/skeleton"; // 引入 Skeleton 组件
 import {
   Tooltip,
   TooltipContent,
@@ -36,20 +37,22 @@ import {
 export default function Page() {
   const [isEditing, setIsEditing] = useState(false);
   const { data: session } = useSession({ required: true });
-  const { data: hostProfile } = api.users.getMyHostProfile.useQuery();
-  const { data: hostTeams } = api.hostTeams.getMyHostTeams.useQuery();
-  const { data: curTeamMembers, refetch: refetchMembers } =
-    api.hostTeams.getCurTeamMembers.useQuery();
-  const { data: pendingInvites, refetch: refetchInvites } =
-    api.hostTeams.getCurTeamPendingInvites.useQuery();
+  const { data: hostProfile, isLoading: isHostProfileLoading } =
+      api.users.getMyHostProfile.useQuery();
+  const { data: hostTeams, isLoading: isHostTeamsLoading } =
+      api.hostTeams.getMyHostTeams.useQuery();
+  const { data: curTeamMembers, isLoading: isCurTeamMembersLoading, refetch: refetchMembers } =
+      api.hostTeams.getCurTeamMembers.useQuery();
+  const { data: pendingInvites, isLoading: isPendingInvitesLoading, refetch: refetchInvites } =
+      api.hostTeams.getCurTeamPendingInvites.useQuery();
 
   const curTeam =
-    hostProfile && hostTeams?.find((t) => t.id === hostProfile.curTeamId);
+      hostProfile && hostTeams?.find((t) => t.id === hostProfile.curTeamId);
 
   const resendInviteMutation = api.hostTeams.resendInvite.useMutation();
   const cancelInviteMutation = api.hostTeams.cancelInvite.useMutation();
   const removeTeamMemberMutation =
-    api.hostTeams.removeHostTeamMember.useMutation();
+      api.hostTeams.removeHostTeamMember.useMutation();
 
   const handleResendInvite = async (email: string) => {
     const res = await resendInviteMutation.mutateAsync({
@@ -102,61 +105,80 @@ export default function Page() {
   if (!session) return null;
 
   return (
-    <DashboardLayout>
-      <Head>
-        <title>Team | Tramona</title>
-      </Head>
-      <div className="px-4 pb-32 pt-16">
-        <div className="mx-auto max-w-xl space-y-4">
-          <div className="flex items-center">
-            <h1 className="text-3xl font-bold">Manage team</h1>
-            <Button
-              onClick={() => setIsEditing(!isEditing)}
-              className="bg-transparent"
-            >
-              {isEditing ? (
-                <X className="text-primaryGreen" />
-              ) : (
-                <Pencil className="text-primaryGreen" />
-              )}
-            </Button>
+      <DashboardLayout>
+        <Head>
+          <title>Team | Tramona</title>
+        </Head>
+        <div className="px-4 pb-32 pt-16">
+          <div className="mx-auto max-w-xl space-y-4">
+            <div className="flex items-center">
+              <h1 className="text-3xl font-bold">Manage team</h1>
+              <Button
+                  onClick={() => setIsEditing(!isEditing)}
+                  className="bg-transparent"
+              >
+                {isEditing ? (
+                    <X className="text-primaryGreen" />
+                ) : (
+                    <Pencil className="text-primaryGreen" />
+                )}
+              </Button>
+            </div>
+
+            {isHostProfileLoading || isHostTeamsLoading ? (
+                <SkeletonText className="w-1/3" />
+            ) : curTeam ? (
+                <HostTeamInviteForm
+                    hostTeamId={curTeam.id}
+                    setIsEditing={setIsEditing}
+                />
+            ) : (
+                <Spinner />
+            )}
+
+            {isCurTeamMembersLoading ? (
+                <div className="space-y-4">
+                  <Skeleton className="w-full h-12" />
+                  <Skeleton className="w-full h-12" />
+                  <Skeleton className="w-full h-12" />
+                </div>
+            ) : (
+                curTeamMembers?.map((member) => (
+                    <TeamMember
+                        key={member.id}
+                        member={member}
+                        isYou={member.id === session.user.id}
+                        isOwner={member.id === curTeam?.ownerId}
+                        isEditing={isEditing}
+                        onRemove={() => handleRemoveMember(member.id)}
+                    />
+                ))
+            )}
+
+            {isPendingInvitesLoading ? (
+                <div className="space-y-4">
+                  <Skeleton className="w-full h-12" />
+                  <Skeleton className="w-full h-12" />
+                </div>
+            ) : (
+                pendingInvites?.map((invite) => (
+                    <PendingInvite
+                        key={invite.inviteeEmail}
+                        email={invite.inviteeEmail}
+                        isEditing={isEditing}
+                        onResend={() => handleResendInvite(invite.inviteeEmail)}
+                        onCancel={() => handleCancelInvite(invite.inviteeEmail)}
+                    />
+                ))
+            )}
           </div>
-          {curTeam ? (
-            <HostTeamInviteForm
-              hostTeamId={curTeam.id}
-              setIsEditing={setIsEditing}
-            />
-          ) : (
-            <Spinner />
-          )}
-          {curTeamMembers
-            ? curTeamMembers.map((member) => (
-                <TeamMember
-                  key={member.id}
-                  member={member}
-                  isYou={member.id === session.user.id}
-                  isOwner={member.id === curTeam?.ownerId}
-                  isEditing={isEditing}
-                  onRemove={() => handleRemoveMember(member.id)}
-                />
-              ))
-            : null}
-          {pendingInvites
-            ? pendingInvites.map((invite) => (
-                <PendingInvite
-                  key={invite.inviteeEmail}
-                  email={invite.inviteeEmail}
-                  isEditing={isEditing}
-                  onResend={() => handleResendInvite(invite.inviteeEmail)}
-                  onCancel={() => handleCancelInvite(invite.inviteeEmail)}
-                />
-              ))
-            : null}
         </div>
-      </div>
-    </DashboardLayout>
+      </DashboardLayout>
   );
 }
+
+// `TeamMember` and `PendingInvite` remain the same as in your original code.
+
 
 function TeamMember({
   member,
