@@ -193,7 +193,7 @@ export default function HostPropertiesDetails({
         <Spinner />
       ) : (
         <div>
-          <div className="flex items-center justify-between">
+          <div className="flex h-full items-center justify-between">
             {editing && (
               <div className="grid grid-cols-3 gap-2 py-2">
                 <AlertDialog>
@@ -299,7 +299,7 @@ export default function HostPropertiesDetails({
               />
             </div>
           </div>
-          <div className="h-[45rem] overflow-y-auto">
+          <div className="h-[45rem] overflow-y-auto lg:h-[50rem]">
             <div className="my-4 space-y-4">
               <section className="space-y-2 rounded-xl border p-4">
                 <div className="flex items-center justify-between">

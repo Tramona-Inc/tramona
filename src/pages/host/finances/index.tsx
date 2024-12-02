@@ -56,7 +56,7 @@ export default function Page() {
 
       <main className="mx-auto mb-24 mt-7 flex max-w-8xl flex-col gap-y-3 md:my-14">
         <div className="flex flex-row items-end justify-between">
-          <h2 className="fond-black ml-4 text-left text-2xl font-bold tracking-tight md:text-4xl">
+          <h2 className="ml-4 text-left text-2xl font-semibold tracking-tight md:text-4xl">
             Finances
           </h2>
           <Button

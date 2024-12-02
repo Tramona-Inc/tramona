@@ -39,7 +39,7 @@ export default function HostStaysOverview() {
   );
   return (
     <div className="flex flex-col gap-y-5">
-      <h2 className="text-4xl font-bold">Your Reservations</h2>
+      <h2 className="text-4xl font-semibold">Your Reservations</h2>
       <BubbleTabs defaultValue="currently-hosting" className="w-full">
         <BubbleTabsList className="flex w-full flex-row justify-start overflow-x-auto px-1">
           <BubbleTabsTrigger value="currently-hosting">

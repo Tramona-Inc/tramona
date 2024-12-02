@@ -19,6 +19,7 @@ import type {
   FormatDistanceToken,
   Locale,
 } from "date-fns";
+import { CheckCircle } from "lucide-react";
 
 const createCustomLocale = (baseLocale: Locale): Locale => ({
   ...baseLocale,
@@ -51,7 +52,7 @@ export default function HostPotentialBookingOverview({
   return (
     <div>
       <div className="flex items-center gap-x-2 pb-2">
-        <h2 className="text-4xl font-bold">Potential Bookings</h2>
+        <h2 className="text-4xl font-semibold">Potential Bookings</h2>
         <div className="flex-1" />
         <Button variant="ghost" asChild>
           <Link href="/host/requests">
@@ -144,8 +145,26 @@ export default function HostPotentialBookingOverview({
             )}
           </div>
         </BubbleTabsContent>
-        <BubbleTabsContent value="property"></BubbleTabsContent>
+        <BubbleTabsContent value="property">
+          <EmptyBookingState />
+        </BubbleTabsContent>
       </BubbleTabs>
     </div>
+  );
+}
+
+function EmptyBookingState() {
+  return (
+    <Card className="border-primary/20">
+      <CardContent className="flex flex-col items-center justify-center space-y-4 p-6 text-center">
+        <CheckCircle className="h-6 w-6 text-primary" />
+        <p className="text-lg text-muted-foreground">
+          You don&apos;t have any potential bookings as of now
+        </p>
+        <Button variant="link" asChild>
+          <Link href="/host/calendar">Edit Restrictions</Link>
+        </Button>
+      </CardContent>
+    </Card>
   );
 }
