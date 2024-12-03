@@ -16,7 +16,21 @@ export default function AttentionOverviewSection() {
       {!isLoading ? (
         allNotifications?.length && allNotifications.length > 0 ? (
           <NotificationCard
-            title={`Sync Calendar for \n ${allNotifications[0]!.name}`}
+            action={`Sync Calendar for \n`}
+            title={` ${allNotifications[0]!.name}`}
+            href={`/host/properties/${allNotifications[0]!.id}`}
+            className="col-span-1"
+            length={allNotifications.length + 1}
+          />
+        ) : null
+      ) : (
+        <NotificationCardSkeleton className="col-span-full lg:col-span-4" />
+      )}
+      {!isLoading ? (
+        allNotifications?.length && allNotifications.length > 0 ? (
+          <NotificationCard
+            action={`Enable Auto Offers \n`}
+            title={`for \n ${allNotifications[0]!.name}`}
             href={`/host/properties/${allNotifications[0]!.id}`}
             className="col-span-1"
             length={allNotifications.length + 1}
@@ -37,7 +51,7 @@ export default function AttentionOverviewSection() {
       />
       <AttentionCard
         icon={ZapIcon}
-        title="Turn Instant Booking On/Off"
+        title="Turn Instant Booking On"
         description="Control instant booking options for guests."
         subtitle="Allow guests to book automatically or require approval."
         href="/host/properties"

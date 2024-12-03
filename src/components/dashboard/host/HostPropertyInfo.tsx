@@ -12,9 +12,9 @@ import HostArrivalGuide from "./HostArrivalGuide";
 
 export default function HostPropertyInfo({ property }: { property: Property }) {
   return (
-    <div key={property.id} className="space-y-4">
+    <div key={property.id} className="h-full space-y-4">
       <h1 className="text-2xl font-bold">Properties editor</h1>
-      <Tabs defaultValue="details">
+      <Tabs defaultValue="details" className="h-full">
         <TabsList noBorder>
           <TabsTrigger
             value="details"
@@ -38,7 +38,7 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
             value="policy"
             className="relative w-1/2 data-[state=active]:border-b-teal-900 data-[state=active]:font-bold data-[state=active]:text-teal-900"
           >
-            Policy
+            Policy & Deposits
             {!property.cancellationPolicy && (
               <AlertCircle
                 className="absolute right-0 top-0 text-red-600"

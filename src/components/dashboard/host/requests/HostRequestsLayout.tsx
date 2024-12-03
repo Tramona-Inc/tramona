@@ -45,7 +45,7 @@ export default function HostRequestsLayout({
       <div className="sticky top-20 h-screen-minus-header-n-footer w-full overflow-auto border-r px-4 py-8 xl:w-96">
         <ScrollArea className="h-1/2">
           <div className="pb-4">
-            <h1 className="text-3xl font-bold">Requests</h1>
+            <h1 className="ml-3 text-3xl font-semibold">Requests</h1>
 
             {/* Tab Navigation */}
             <div className="mt-6 border-b">
