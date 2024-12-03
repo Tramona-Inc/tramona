@@ -798,6 +798,7 @@ async function fetchPropertyDetails(
     stateName: addressComponents.stateName,
     stateCode: addressComponents.stateCode,
     country: addressComponents.country,
+    countryISO: addressComponents.countryISO,
     latLngPoint,
     maxNumGuests: data.persons,
     numBeds,

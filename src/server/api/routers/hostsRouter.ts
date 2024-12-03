@@ -386,6 +386,7 @@ export const hostsRouter = createTRPCRouter({
                 county: addressComponents.county,
                 stateName: addressComponents.stateName,
                 stateCode: addressComponents.stateCode,
+                countryISO: addressComponents.countryISO,
                 country: addressComponents.country,
                 hostName: property.contactName,
                 originalListingId: property.id.toString(),

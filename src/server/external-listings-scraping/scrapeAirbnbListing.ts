@@ -354,6 +354,7 @@ export async function scrapeAirbnbListing(
     country: addressComponents.country,
     stateName: addressComponents.stateName,
     stateCode: addressComponents.stateCode,
+    countryISO: addressComponents.countryISO,
     address: stringifyAddress(addressComponents),
   };
 
