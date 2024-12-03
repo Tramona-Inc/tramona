@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowRightIcon } from "@radix-ui/react-icons";
+import { ArrowRightIcon } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { api } from "@/utils/api";
@@ -50,14 +50,14 @@ export default function HostPotentialBookingOverview({
     api.properties.getHostPropertiesWithRequests.useQuery();
 
   return (
-    <div>
+    <div className="space-y-4">
       <div className="flex items-center gap-x-2 pb-2">
         <h2 className="text-4xl font-semibold">Potential Bookings</h2>
         <div className="flex-1" />
         <Button variant="ghost" asChild>
           <Link href="/host/requests">
             See all
-            <ArrowRightIcon />
+            <ArrowRightIcon className="h-4 w-4" />
           </Link>
         </Button>
       </div>
