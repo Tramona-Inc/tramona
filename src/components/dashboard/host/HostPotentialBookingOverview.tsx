@@ -20,6 +20,7 @@ import type {
   Locale,
 } from "date-fns";
 import { CheckCircle } from "lucide-react";
+import { cn } from "@/utils/utils";
 
 const createCustomLocale = (baseLocale: Locale): Locale => ({
   ...baseLocale,

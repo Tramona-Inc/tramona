@@ -32,12 +32,10 @@ type PriceDetails = {
 };
 
 export default function PriceDetailsBeforeTax({
-  bookOnAirbnb,
   offer,
   requestToBook,
   property,
 }: {
-  bookOnAirbnb?: boolean;
   offer?: OfferWithDetails;
   requestToBook?: RequestToBookDetails;
   property?: PropertyPageData;

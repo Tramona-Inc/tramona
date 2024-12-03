@@ -1,7 +1,7 @@
 import { breakdownPaymentByOffer } from "@/utils/payment-utils/paymentBreakdown";
 import { UnifiedCheckoutData } from "./types";
 import { RouterOutputs } from "@/utils/api";
-import PropertyPage, { PropertyPageData } from "../propertyPages/PropertyPage";
+import { PropertyPageData } from "../propertyPages/PropertyPage";
 
 type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 
