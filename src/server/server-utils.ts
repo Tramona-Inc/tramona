@@ -561,11 +561,13 @@ export async function getRequestsForProperties(
 
     const taxInfo = calculateTotalTax({ country, stateCode, city });
     console.log("taxInfo", taxInfo, city);
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
     const requestsForProperty = await tx.query.requests.findMany({
       where: and(
         requestIsNearProperty,
         gte(requests.checkIn, new Date()),
+        gte(requests.createdAt, twentyFourHoursAgo),
         notExists(
           db
             .select()
