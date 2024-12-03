@@ -228,6 +228,36 @@ export async function addUserToHostTeams(user: Pick<User, "email" | "id">) {
   });
 }
 
+export async function sendTextToHostTeamMembers({
+  hostTeamId,
+  message,
+}: {
+  hostTeamId: number;
+  message: string;
+}) {
+  const hostTeamMembers = await db.query.hostTeams.findMany({
+    where: eq(hostTeams.id, hostTeamId),
+    with: {
+      members: {
+        with: {
+          user: {
+            columns: { phoneNumber: true },
+          },
+        },
+      },
+    },
+  });
+  const hostTeamMemberPhoneNumbers = hostTeamMembers.flatMap((member) =>
+    member.members.map((m) => m.user.phoneNumber),
+  );
+
+  await Promise.all(
+    hostTeamMemberPhoneNumbers.map((phoneNumber) =>
+      sendText({ to: phoneNumber!, content: message }),
+    ),
+  );
+}
+
 export async function sendText({
   to,
   content,

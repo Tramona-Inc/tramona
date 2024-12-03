@@ -24,6 +24,8 @@ import { createSuperhogReservation } from "./superhog-utils";
 import { sendSlackMessage } from "@/server/slack";
 import { formatDateMonthDay } from "../utils";
 import { TRAVELER_MARKUP } from "../constants";
+import { sendText } from "@/server/server-utils";
+import { sendTextToHostTeamMembers } from "@/server/server-utils";
 
 export const stripe = new Stripe(env.STRIPE_RESTRICTED_KEY_ALL);
 const stripeWithSecretKey = new Stripe(env.STRIPE_SECRET_KEY, {
@@ -265,6 +267,20 @@ export async function finalizeTrip({
   }
   //<<--------------------->>
 
+  if (source === "Book it now") {
+    //send that there is a new booking to the host TODO
+    await sendTextToHostTeamMembers({
+      hostTeamId: property.hostTeamId,
+      message: `${user.email} just booked your property`,
+    });
+  } else {
+    //send text to traveler
+    await sendText({
+      to: user.phoneNumber!,
+      content: `Your request to book ${property.name} has been accepted by the host. You're going to ${property.city} from ${formatDateMonthDay(checkIn)} to ${formatDateMonthDay(checkOut)}!`,
+    });
+  }
+
   //send email and whatsup (whatsup is not implemented yet)
   console.log("Sending email and whatsup");
   await sendEmailAndWhatsupConfirmation({
@@ -364,8 +380,8 @@ export async function createRequestToBook({
 
   //    ------2 CASES: 1.)no direct listing so send to the host 2.) isDirectLIsting send message to us
 
-  // Case 1 : DIRECT LISTING. SEND SLACK
-  if (isDirectListingCharge) {
+    // Case 1 : DIRECT LISTING. SEND SLACK
+    if (isDirectListingCharge) {
     await sendSlackMessage({
       isProductionOnly: true,
       channel: "tramona-bot",
@@ -378,13 +394,10 @@ export async function createRequestToBook({
     });
   } else {
     // Case 2: Not DirectListing so we need to send the request to the host
-    const members = await db.query.hostTeamMembers.findMany({
-      where: eq(hostTeamMembers.hostTeamId, properties.hostTeamId),
+    await sendTextToHostTeamMembers({
+      hostTeamId: property.hostTeamId,
+      message: `${user.email} just requested to book your property`,
     });
-
-    for (const member of members) {
-      console.log(member.userId); //send notifcation to host??
-    }
 
     await sendSlackMessage({
       isProductionOnly: true,
