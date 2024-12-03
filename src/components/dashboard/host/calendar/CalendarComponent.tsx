@@ -14,7 +14,7 @@ import MonthCalendar from "./MonthCalendar";
 import CalendarSettings from "./CalendarSettings";
 import { useState } from "react";
 import { Property } from "@/server/db/schema/tables/properties";
-import { eachDayOfInterval, isBefore } from "date-fns";
+import { eachDayOfInterval, isBefore, parseISO } from "date-fns";
 
 type ReservationInfo = {
   start: string;
@@ -154,16 +154,6 @@ export default function CalendarComponent() {
     return [...reservedHospitable, ...reservedDates2];
   }, [hospitableCalendarPrices, reservedDateRanges]);
 
-  const reservedDays = useMemo(() => {
-    if (!reservedDates) return new Set();
-    return new Set(
-      reservedDates.map(
-        (reservation) =>
-          new Date(reservation.start).toISOString().split("T")[0],
-      ),
-    );
-  }, [reservedDates]);
-
   console.log("reservedDates", reservedDates);
 
   const handleDateClick = (date: Date) => {
@@ -191,7 +181,8 @@ export default function CalendarComponent() {
   const handleBlockDates = () => handleUpdateAvailability(false);
   const handleUnblockDates = () => handleUpdateAvailability(true);
   const handleUpdateAvailability = async (isAvailable: boolean) => {
-    if (!selectedRange.start || !selectedProperty) return;
+    if (!selectedRange.start || !selectedProperty || !selectedProperty.id)
+      return;
     // if only one date is clicked -> user wants to block one date
     if (!selectedRange.end) {
       selectedRange.end = selectedRange.start;
@@ -240,23 +231,32 @@ export default function CalendarComponent() {
     }
   };
 
+  const isDateReserved = (dateISO: string): ReservationInfo | undefined => {
+    const normalizedDate = parseISO(dateISO);
+    if (!reservedDateRanges) return undefined;
+
+    return reservedDateRanges.find((reservedDate) => {
+      const start = parseISO(reservedDate.start);
+      const end = parseISO(reservedDate.end);
+
+      return normalizedDate >= start && normalizedDate <= end;
+    });
+  };
+
   const totalVacancies = useMemo(() => {
     const today = new Date();
     const startOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
     const endOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-
     return eachDayOfInterval({ start: startOfMonth, end: endOfMonth }).filter(
-      (day) =>
-        isBefore(today, day) &&
-        !reservedDays.has(day.toISOString().split("T")[0]),
+      (day) => isBefore(today, day) && !isDateReserved(day.toISOString()),
     ).length;
-  }, [reservedDays, date]);
+  }, [reservedDates, date]);
 
   const leftOnTheTable = useMemo(() => {
     return Object.entries(prices || {})
-      .filter(([dateStr]) => !reservedDays.has(dateStr))
+      .filter(([dateStr]) => !isDateReserved(dateStr))
       .reduce((sum, [_, price]) => (price ? sum + price : sum), 0);
-  }, [reservedDays, prices]);
+  }, [reservedDates, prices]);
 
   const changeMonth = (increment: number) => {
     const newDate = new Date(
