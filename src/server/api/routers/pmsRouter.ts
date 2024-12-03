@@ -237,7 +237,7 @@ export const pmsRouter = createTRPCRouter({
 
   getHospitableCalendar: protectedProcedure
     .input(z.object({ propertyId: z.string() }))
-    .query(async ({ ctx, input }) => {
+    .query(async ({ input }) => {
       const { propertyId } = input;
       console.log("propertyId", propertyId);
       return await getPropertyCalendar(propertyId);

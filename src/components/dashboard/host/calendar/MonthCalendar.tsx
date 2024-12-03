@@ -122,8 +122,9 @@ export default function MonthCalendar({
                   <>
                     <span className="text-sm font-medium">{day}</span>
                     <span className="mt-1 text-xs text-muted-foreground">
-                      ${prices[currentDate.toISOString().split("T")[0] ?? ""] ??
-                      168}
+                      $
+                      {prices[currentDate.toISOString().split("T")[0] ?? ""] ??
+                        168}
                     </span>
                   </>
                 )}

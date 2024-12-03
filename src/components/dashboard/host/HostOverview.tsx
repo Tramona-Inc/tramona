@@ -12,15 +12,14 @@ export default function HostOverview() {
   const { data: user } = api.users.getUser.useQuery();
 
   return session ? (
-    <div className="max-w-8xl mx-auto mt-8 min-h-screen-minus-header space-y-10 p-4 pb-32">
-      <h1 className="text-3xl font-bold md:text-5xl">
+    <div className="min-h-screen-minus-header mx-auto mt-8 max-w-8xl space-y-20 p-4 pb-32">
+      <h1 className="text-3xl font-semibold md:text-5xl">
         Welcome back, {user?.firstName ? user.firstName : "Host"}!{" "}
       </h1>
       <AttentionOverviewSection />
-      <div className="flex flex-col gap-y-10">
-        <HostStaysOverview />
-        <HostPotentialBookingOverview className="contents lg:flex lg:flex-1" />
-      </div>
+
+      <HostStaysOverview />
+      <HostPotentialBookingOverview className="contents lg:flex lg:flex-1" />
       <div className="flex flex-col gap-4 lg:flex-row">
         <HostPropertiesOverview />
       </div>
@@ -29,3 +28,5 @@ export default function HostOverview() {
     <Spinner />
   );
 }
+
+// add more spacking on bottom of reservations
