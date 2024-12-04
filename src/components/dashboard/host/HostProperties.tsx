@@ -6,7 +6,7 @@ import {
   EmptyStateTitle,
 } from "@/components/ui/empty-state";
 import { type Property } from "@/server/db/schema/tables/properties";
-import { AlertCircle, FenceIcon } from "lucide-react";
+import { FenceIcon } from "lucide-react";
 import Image from "next/image";
 
 export default function HostProperties({

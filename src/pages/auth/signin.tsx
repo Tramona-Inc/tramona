@@ -9,7 +9,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import Icons from "@/components/ui/icons";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
 import { api } from "@/utils/api";
@@ -47,7 +46,10 @@ export default function Login() {
   const cohostInviteId = useCohostInviteStore((state) => state.cohostInviteId);
   const { mutate: inviteUser } = api.groups.inviteCurUserToGroup.useMutation();
 
-  const handleSubmit = async ({ email, password }: z.infer<typeof formSchema>) => {
+  const handleSubmit = async ({
+    email,
+    password,
+  }: z.infer<typeof formSchema>) => {
     const callbackUrl =
       (router.query.callbackUrl as string) ||
       (router.query.from as string) ||
@@ -91,28 +93,30 @@ export default function Login() {
       <Head>
         <title>Log in | Tramona</title>
       </Head>
-      <div className="flex min-h-screen-minus-header flex-col items-center justify-center py-8">
-        <div className="w-full max-w-lg rounded-lg md:border md:border-gray-300 p-10 md:shadow-lg">
-          <h1 className="text-3xl font-semibold text-center text-gray-800 tracking-tight">
+      <div className="min-h-screen-minus-header flex flex-col items-center justify-center py-8">
+        <div className="w-full max-w-lg rounded-lg p-10 md:border md:border-gray-300 md:shadow-lg">
+          <h1 className="text-center text-3xl font-semibold tracking-tight text-gray-800">
             Log in to Tramona
           </h1>
-          <p className="text-center text-base text-gray-500 mt-2">
+          <p className="mt-2 text-center text-base text-gray-500">
             Welcome back! Please enter your details
           </p>
 
           <div className="my-6">
             <Button
               onClick={() => signIn("google")}
-              className="flex w-full items-center justify-center gap-2 rounded-md border border-gray-300 bg-white py-3 text-gray-700 shadow-sm tracking-wide"
+              className="flex w-full items-center justify-center gap-2 rounded-md border border-gray-300 bg-white py-3 tracking-wide text-gray-700 shadow-sm"
             >
               <FcGoogle className="h-5 w-5" />
               <span className="font-medium">Sign in with Google</span>
             </Button>
           </div>
 
-          <div className="flex items-center my-4">
+          <div className="my-4 flex items-center">
             <div className="flex-grow border-t border-gray-300"></div>
-            <span className="mx-2 text-xs text-gray-500 tracking-wider">OR CONTINUE WITH EMAIL</span>
+            <span className="mx-2 text-xs tracking-wider text-gray-500">
+              OR CONTINUE WITH EMAIL
+            </span>
             <div className="flex-grow border-t border-gray-300"></div>
           </div>
 
@@ -126,7 +130,9 @@ export default function Login() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm text-gray-700 font-medium">Email address</FormLabel>
+                    <FormLabel className="text-sm font-medium text-gray-700">
+                      Email address
+                    </FormLabel>
                     <FormControl>
                       <Input {...field} placeholder="name@example.com" />
                     </FormControl>
@@ -139,8 +145,10 @@ export default function Login() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <div className="flex justify-between items-center">
-                      <FormLabel className="text-sm text-gray-700 font-medium">Password</FormLabel>
+                    <div className="flex items-center justify-between">
+                      <FormLabel className="text-sm font-medium text-gray-700">
+                        Password
+                      </FormLabel>
                       <Link
                         href="/auth/forgot-password"
                         className="text-xs text-gray-500 underline hover:text-gray-700"
@@ -158,14 +166,14 @@ export default function Login() {
               <ErrorMsg>{form.formState.errors.root?.message}</ErrorMsg>
               <Button
                 type="submit"
-                className="w-full rounded-md text-[#004236] text-white py-3 font-medium"
+                className="w-full rounded-md py-3 font-medium text-[#004236] text-white"
               >
                 Log in
               </Button>
             </form>
           </Form>
 
-          <p className="text-center text-xs text-gray-500 mt-6">
+          <p className="mt-6 text-center text-xs text-gray-500">
             By logging in, you agree to our{" "}
             <Link href="/terms" className="text-primary underline">
               Terms of Service
@@ -176,7 +184,7 @@ export default function Login() {
             </Link>
           </p>
 
-          <p className="text-center text-sm mt-6">
+          <p className="mt-6 text-center text-sm">
             Don&apos;t have an account?{" "}
             <Link
               href="/auth/signup"

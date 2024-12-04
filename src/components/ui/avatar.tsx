@@ -1,19 +1,38 @@
 import * as React from "react";
 import * as AvatarPrimitive from "@radix-ui/react-avatar";
-import { type VariantProps, cva } from "class-variance-authority";
+
 import { cn } from "@/utils/utils";
+import { type VariantProps, cva } from "class-variance-authority";
 import { User2Icon } from "lucide-react";
 
+//revist later
+// const avatarVariants = cva(
+//   "relative flex shrink-0 overflow-hidden rounded-full",
+//   {
+//     variants: {
+//       size: {
+//         xs: "h-10 w-10 text-xs",
+//         sm: "size-8 text-xs",
+//         md: "size-10 text-base",
+//         lg: "size-14 text-lg",
+//         huge: "size-24 text-3xl",
+//       },
+//     },
+//     defaultVariants: {
+//       size: "md",
+//     },
+//   },
+// );
 const avatarVariants = cva(
   "relative flex shrink-0 overflow-hidden rounded-full",
   {
     variants: {
       size: {
-        xs: "size-6 text-xs",
-        sm: "size-8 text-xs",
-        md: "size-10 text-base",
-        lg: "size-14 text-lg",
-        huge: "size-24 text-3xl",
+        xs: "h-6 w-6 text-xs",
+        sm: "h-8 w-8  text-xs",
+        md: "h-10 w-10  text-base",
+        lg: "h-12 w-12  text-lg",
+        huge: "h-14 w-14 text-3xl",
       },
     },
     defaultVariants: {
@@ -21,6 +40,7 @@ const avatarVariants = cva(
     },
   },
 );
+
 export type AvatarVariants = VariantProps<typeof avatarVariants>;
 
 const Avatar = React.forwardRef<
@@ -29,11 +49,7 @@ const Avatar = React.forwardRef<
 >(({ className, size, ...props }, ref) => (
   <AvatarPrimitive.Root
     ref={ref}
-    className={cn(
-      "relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full",
-      avatarVariants({ size }),
-      className,
-    )}
+    className={cn(avatarVariants({ size }), className)}
     {...props}
   />
 ));
@@ -45,7 +61,8 @@ const AvatarImage = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <AvatarPrimitive.Image
     ref={ref}
-    className={cn("aspect-square h-full w-full", className)}
+    className={cn("aspect-square h-full w-full object-cover", className)}
+    referrerPolicy="no-referrer"
     {...props}
   />
 ));
@@ -58,7 +75,7 @@ const AvatarFallback = React.forwardRef<
   <AvatarPrimitive.Fallback
     ref={ref}
     className={cn(
-      "flex h-full w-full items-center justify-center rounded-full bg-muted",
+      "flex h-full w-full select-none items-center justify-center overflow-clip rounded-full border border-zinc-300 bg-gradient-to-b from-zinc-300 to-white text-accent-foreground",
       className,
     )}
     {...props}
