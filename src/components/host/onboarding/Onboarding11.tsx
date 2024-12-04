@@ -7,10 +7,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 export default function Onboarding11({ editing = false }) {
   const bookItNowEnabled = useHostOnboarding(
-    (state) => state.listing.bookItNowEnabled
+    (state) => state.listing.bookItNowEnabled,
   );
   const setBookItNowEnabled = useHostOnboarding(
-    (state) => state.setBookItNowEnabled
+    (state) => state.setBookItNowEnabled,
   );
   const [error, setError] = useState(false);
   const [isChecked, setIsChecked] = useState(bookItNowEnabled);
@@ -26,15 +26,13 @@ export default function Onboarding11({ editing = false }) {
   return (
     <>
       {!editing && <SaveAndExit />}
-      <div className="flex-grow flex flex-col justify-center mx-auto mb-10 max-w-3xl space-y-5">
+      <div className="mx-auto mb-10 flex max-w-3xl flex-grow flex-col justify-center space-y-5">
         <h1
           className={`text-4xl font-bold ${cn(editing && "text-center text-xl")}`}
         >
-          Enable "Book It Now" feature
+          Enable &quot;Book It Now&quot; feature
         </h1>
-        {error && (
-          <p className="text-red-500">Please make a selection</p>
-        )}
+        {error && <p className="text-red-500">Please make a selection</p>}
 
         <div className="flex items-center space-x-2">
           <Checkbox
@@ -46,12 +44,15 @@ export default function Onboarding11({ editing = false }) {
             htmlFor="bookItNow"
             className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
           >
-            Enable "Book It Now"
+            Enable &quot;Book It Now&quot;
           </label>
         </div>
 
         <p className="text-sm text-gray-600">
-          By enabling "Book It Now", guests can instantly book your property without requiring your approval for each reservation. This can increase your bookings, but you'll have less control over who stays at your property.
+          By enabling &quot;Book It Now&quot;, guests can instantly book your
+          property without requiring your approval for each reservation. This
+          can increase your bookings, but you&apos;ll have less control over who
+          stays at your property.
         </p>
       </div>
       {!editing && (

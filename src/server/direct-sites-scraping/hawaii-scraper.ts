@@ -511,6 +511,7 @@ const mapToScrapedListing = async (
     stateName: addressComponents.stateName,
     stateCode: addressComponents.stateCode,
     country: addressComponents.country,
+    countryISO: addressComponents.countryISO,
     city: addressComponents.city,
     latLngPoint,
     checkInInfo: `Check-In / Arrival Instructions:

@@ -34,7 +34,7 @@ export default function TripCancelDialog({
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger>
-        <Button variant="secondary">
+        <Button variant="primary">
           <TicketXIcon className="" />
           Cancel Trip
         </Button>

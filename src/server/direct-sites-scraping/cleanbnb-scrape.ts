@@ -455,6 +455,7 @@ export const cleanbnbScraper: DirectSiteScraper = async ({
       stateName: addressComponents.stateName,
       stateCode: addressComponents.stateCode,
       country: addressComponents.country,
+      countryISO: addressComponents.countryISO,
       maxNumGuests,
       numBeds,
       numBedrooms,

@@ -46,21 +46,16 @@ export default function HostDashboardLayout({
   return (
     <>
       <Header />
-      <div className="relative min-h-screen-minus-header lg:flex">
-        {/* {session && (
-          <aside className="sticky top-header-height hidden h-screen-minus-header bg-zinc-100 lg:block">
-            <Sidebar type={navType} />
-          </aside>
-        )} */}
-        <div className="min-w-0 lg:flex-1">
-          <main className="relative min-h-screen-minus-header">{children}</main>
-          {status !== "loading" && <MobileNav type={navType} />}
-          <div className="hidden md:contents">
-            <MessagesPopover isMobile={false} />
-          </div>
-          {isMd && <Footer />}
+      <div className="min-h-screen-minus-header relative lg:flex">
+        <main className="relative min-h-[calc(100vh-4rem-3rem)] lg:flex-1">
+          {children}
+        </main>
+        {status !== "loading" && <MobileNav type={navType} />}
+        <div className="hidden md:contents">
+          <MessagesPopover isMobile={false} />
         </div>
       </div>
+      {isMd && <Footer />}
     </>
   );
 }

@@ -127,12 +127,16 @@ export const requestsRouter = createTRPCRouter({
         ),
       );
 
+    const fortyEightHoursAgo = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
+
     return {
       activeRequests: myRequests.filter(
-        (request) => request.resolvedAt === null,
+        (request) =>
+          request.resolvedAt === null &&
+          request.createdAt > fortyEightHoursAgo,
       ),
       inactiveRequests: myRequests.filter(
-        (request) => request.resolvedAt !== null,
+        (request) => request.resolvedAt !== null || request.createdAt < fortyEightHoursAgo,
       ),
     };
   }),

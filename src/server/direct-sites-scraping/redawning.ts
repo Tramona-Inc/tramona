@@ -239,6 +239,7 @@ export const mapTaxodataToScrapedListing = async (
         city: addressComponents.city,
         stateName: addressComponents.stateName,
         stateCode: addressComponents.stateCode,
+        countryISO: addressComponents.countryISO,
         country: addressComponents.country,
         latLngPoint,
         maxNumGuests: maxNumGuests,

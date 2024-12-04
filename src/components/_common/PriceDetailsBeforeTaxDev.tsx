@@ -9,7 +9,6 @@ import {
 } from "@/utils/payment-utils/paymentBreakdown";
 
 export default function PriceDetailsBeforeTax({
-  bookOnAirbnb, /// do we need this?
   offer,
 }: {
   offer: OfferWithDetails;

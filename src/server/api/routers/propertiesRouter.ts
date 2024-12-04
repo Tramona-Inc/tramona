@@ -561,6 +561,12 @@ export const propertiesRouter = createTRPCRouter({
       });
     }),
 
+  updatePropertyDatesLastUpdated: hostProcedure
+    .input(z.object({ propertyId: z.number(), datesLastUpdated: z.date() }))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db.update(properties).set({ datesLastUpdated: input.datesLastUpdated }).where(eq(properties.id, input.propertyId));
+    }),
+
   getHostPropertiesWithRequests: hostProcedure.query(async ({ ctx }) => {
     const hostProperties = await db.query.properties.findMany({
       where: and(

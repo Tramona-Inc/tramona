@@ -1,4 +1,4 @@
-import { CreditCardIcon, UserIcon } from "lucide-react";
+import { Bell, CreditCardIcon, UserIcon } from "lucide-react";
 
 export const settingsLinks = [
   {
@@ -11,9 +11,9 @@ export const settingsLinks = [
     label: "Payment information",
     icon: CreditCardIcon,
   },
-  // {
-  //   href: "/settings/notifications",
-  //   label: "Notifications",
-  //   icon: Bell,
-  // },
+  {
+    href: "/settings/notifications",
+    label: "Notifications",
+    icon: Bell,
+  },
 ];

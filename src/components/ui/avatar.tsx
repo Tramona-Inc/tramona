@@ -25,12 +25,13 @@ export type AvatarVariants = VariantProps<typeof avatarVariants>;
 
 const Avatar = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root>
->(({ className, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root> & AvatarVariants
+>(({ className, size, ...props }, ref) => (
   <AvatarPrimitive.Root
     ref={ref}
     className={cn(
       "relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full",
+      avatarVariants({ size }),
       className,
     )}
     {...props}

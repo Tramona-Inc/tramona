@@ -103,7 +103,7 @@ export const calendarRouter = createTRPCRouter({
 
   updateHostCalendar: publicProcedure
     .input(z.object({ hospitableListingId: z.string() }))
-    .mutation(async ({ input }) => {
+    .query(async ({ input }) => {
       const { hospitableListingId } = input;
       const combinedPricingAndCalendarResponse =
         await getPropertyCalendar(hospitableListingId);
@@ -143,6 +143,8 @@ export const calendarRouter = createTRPCRouter({
           platformBookedOn: "airbnb" as const,
         })),
       );
+
+      return combinedPricingAndCalendarResponse;
     }),
 
   getReservedDateRanges: publicProcedure
@@ -177,101 +179,98 @@ export const calendarRouter = createTRPCRouter({
       return generateICSContent(reservedDates);
     }),
 
-  updateCalendar: publicProcedure
-    .input(
-      z.object({
-        propertyId: z.number(),
-        start: z.string(),
-        end: z.string(),
-        isAvailable: z.boolean(),
-        platformBookedOn: z.enum(["airbnb", "tramona"]),
-      }),
-    )
-    .mutation(async ({ input }) => {
-      const { propertyId, start, end, isAvailable, platformBookedOn } = input;
+  // updateCalendar: publicProcedure
+  //   .input(
+  //     z.object({
+  //       updates: z.array(
+  //         z.object({
+  //           propertyId: z.number(),
+  //           start: z.string(),
+  //           end: z.string(),
+  //           isAvailable: z.boolean(),
+  //           platformBookedOn: z.enum(["airbnb", "tramona"]),
+  //         })
+  //       ),
+  //     })
+  //   )
+  //   .mutation(async ({ input }) => {
+  //     const { updates } = input;
 
-      await db.transaction(async (tx) => {
-        if (!isAvailable) {
-          const overlappingRanges = await tx
-            .select()
-            .from(reservedDateRanges)
-            .where(
-              and(
-                eq(reservedDateRanges.propertyId, propertyId),
-                eq(reservedDateRanges.platformBookedOn, platformBookedOn),
-                lte(reservedDateRanges.start, end),
-                gte(reservedDateRanges.end, start),
-              ),
-            );
+  //     await db.transaction(async (tx) => {
+  //       // Process all updates in parallel using Promise.all
+  //       await Promise.all(
+  //         updates.map(async (update) => {
+  //           const { propertyId, start, end, isAvailable, platformBookedOn } =
+  //             update;
 
-          if (overlappingRanges.length > 0) {
-            const mergedStart = overlappingRanges.reduce(
-              (min, range) => (range.start < min ? range.start : min),
-              start,
-            );
-            const mergedEnd = overlappingRanges.reduce(
-              (max, range) => (range.end > max ? range.end : max),
-              end,
-            );
+  //           if (!isAvailable) {
+  //             const overlappingRanges = await tx
+  //               .select()
+  //               .from(reservedDateRanges)
+  //               .where(
+  //                 and(
+  //                   eq(reservedDateRanges.propertyId, propertyId),
+  //                   eq(reservedDateRanges.platformBookedOn, platformBookedOn),
+  //                   lte(reservedDateRanges.start, end),
+  //                   gte(reservedDateRanges.end, start)
+  //                 )
+  //               );
 
-            await tx
-              .delete(reservedDateRanges)
-              .where(
-                and(
-                  eq(reservedDateRanges.propertyId, propertyId),
-                  eq(reservedDateRanges.platformBookedOn, platformBookedOn),
-                  lte(reservedDateRanges.start, mergedEnd),
-                  gte(reservedDateRanges.end, mergedStart),
-                ),
-              );
+  //             if (overlappingRanges.length > 0) {
+  //               const mergedStart = overlappingRanges.reduce(
+  //                 (min, range) => (range.start < min ? range.start : min),
+  //                 start
+  //               );
+  //               const mergedEnd = overlappingRanges.reduce(
+  //                 (max, range) => (range.end > max ? range.end : max),
+  //                 end
+  //               );
 
-            // insert merged range
-            await tx.insert(reservedDateRanges).values({
-              propertyId,
-              start: mergedStart,
-              end: mergedEnd,
-              platformBookedOn,
-            });
-          } else {
-            // if no overlapping ranges, insert new range
-            await tx.insert(reservedDateRanges).values({
-              propertyId,
-              start,
-              end,
-              platformBookedOn,
-            });
-          }
-        } else {
-          // unblocking date range
-          await tx
-            .delete(reservedDateRanges)
-            .where(
-              and(
-                eq(reservedDateRanges.propertyId, propertyId),
-                eq(reservedDateRanges.platformBookedOn, platformBookedOn),
-                lte(reservedDateRanges.start, end),
-                gte(reservedDateRanges.end, start),
-              ),
-            );
-        }
-      });
+  //               await tx
+  //                 .delete(reservedDateRanges)
+  //                 .where(
+  //                   and(
+  //                     eq(reservedDateRanges.propertyId, propertyId),
+  //                     eq(reservedDateRanges.platformBookedOn, platformBookedOn),
+  //                     lte(reservedDateRanges.start, mergedEnd),
+  //                     gte(reservedDateRanges.end, mergedStart)
+  //                   )
+  //                 );
 
-      const updatedReservedDates = await db
-        .select({
-          start: reservedDateRanges.start,
-          end: reservedDateRanges.end,
-          platformBookedOn: reservedDateRanges.platformBookedOn,
-        })
-        .from(reservedDateRanges)
-        .where(eq(reservedDateRanges.propertyId, propertyId));
+  //               // Insert merged range
+  //               await tx.insert(reservedDateRanges).values({
+  //                 propertyId,
+  //                 start: mergedStart,
+  //                 end: mergedEnd,
+  //                 platformBookedOn,
+  //               });
+  //             } else {
+  //               // If no overlapping ranges, insert new range
+  //               await tx.insert(reservedDateRanges).values({
+  //                 propertyId,
+  //                 start,
+  //                 end,
+  //                 platformBookedOn,
+  //               });
+  //             }
+  //           } else {
+  //             // Unblocking date range
+  //             await tx
+  //               .delete(reservedDateRanges)
+  //               .where(
+  //                 and(
+  //                   eq(reservedDateRanges.propertyId, propertyId),
+  //                   eq(reservedDateRanges.platformBookedOn, platformBookedOn),
+  //                   lte(reservedDateRanges.start, end),
+  //                   gte(reservedDateRanges.end, start)
+  //                 )
+  //               );
+  //           }
+  //         })
+  //       );
+  //     });
+  //   }),
 
-      const updatedICSContent = await generateICSContent(updatedReservedDates);
-
-      return {
-        icsUrl: `https://tramona.com/api/ics/${propertyId}`,
-        icsContent: updatedICSContent,
-      };
-    }),
   getReservedDates: publicProcedure
     .input(z.object({ propertyId: z.number() }))
     .query(async ({ input }) => {

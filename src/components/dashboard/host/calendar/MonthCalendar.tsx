@@ -28,9 +28,9 @@ interface MonthCalendarProps {
 export default function MonthCalendar({
   date,
   reservedDateRanges = [],
-  onDateClick,
+  // onDateClick,
   selectedRange,
-  isEditing = false,
+  // isEditing = false,
   prices,
   isLoading = false,
 }: MonthCalendarProps) {
@@ -117,13 +117,11 @@ export default function MonthCalendar({
                 key={index}
                 onClick={() =>
                   currentDate &&
-                  !isGrayedOut &&
-                  isEditing &&
-                  onDateClick?.(currentDate)
+                  !isGrayedOut
                 }
                 className={cn(
                   "flex min-h-[100px] flex-col items-center justify-center p-2",
-                  day && isEditing && !isGrayedOut && "cursor-pointer",
+                  day && !isGrayedOut && "cursor-pointer",
                   reservationClass,
                   isGrayedOut && "cursor-not-allowed bg-gray-200 text-gray-400",
                   currentDate &&
