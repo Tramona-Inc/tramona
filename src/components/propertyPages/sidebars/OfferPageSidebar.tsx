@@ -60,10 +60,7 @@ export default function OfferPageSidebar({
               You won&apos;t be charged yet
             </p>
           )}
-          <PriceDetailsBeforeTax
-            offer={offer}
-            bookOnAirbnb={property.bookOnAirbnb}
-          />
+          <PriceDetailsBeforeTax offer={offer} />
         </CardContent>
       </Card>
 
