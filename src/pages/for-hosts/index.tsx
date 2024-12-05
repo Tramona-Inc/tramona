@@ -13,6 +13,7 @@ import { Check, CircleCheckBig } from "lucide-react";
 import Onboarding1 from "@/components/host/onboarding/Onboarding1";
 import { useHostOnboarding } from "@/utils/store/host-onboarding";
 import { useRouter } from "next/router";
+import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
 
 type Tabs = {
   id: number;
@@ -169,34 +170,6 @@ function FAQ() {
       </div>
       <div className="col-span-2 border-t">
         <AccordionFaq accordionItems={forHostsAccordionItems} />
-      </div>
-    </section>
-  );
-}
-
-function ListInAMinute() {
-  return (
-    <section className="mx-auto max-w-7xl space-y-8 px-4 sm:px-6 md:space-y-20 md:px-8 lg:px-10 xl:px-12">
-      <h1 className="text-center text-3xl font-bold md:text-4xl lg:text-5xl">
-        List in less than 1 minute with our effortless sign up flow
-      </h1>
-      <div className="flex flex-col gap-6 lg:flex-row">
-        {contents.map((content) => (
-          <div key={content.id} className="flex basis-1/3 items-center gap-2">
-            <div className="relative h-32 w-5/12 overflow-clip rounded-xl lg:h-full">
-              <Image
-                src={content.image}
-                className="select-none object-cover object-center"
-                fill
-                alt=""
-              />
-            </div>
-            <div className="flex-1 space-y-2">
-              <h2 className="font-bold">{content.title}</h2>
-              <p className="text-sm">{content.info}</p>
-            </div>
-          </div>
-        ))}
       </div>
     </section>
   );
