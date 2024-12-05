@@ -1,6 +1,6 @@
 import { sendEmail } from "@/server/server-utils";
 import { db } from "@/server/db";
-import { users } from "@/server/db/schema";
+import { users, type User } from "@/server/db/schema";
 import { and, gte, lte } from "drizzle-orm";
 import HowToUseTramonaEmail from "packages/transactional/emails/HowToUseTramonaEmail";
 import WhyWeBuiltThisEmail from "packages/transactional/emails/WhyWeBuiltThisEmail";
@@ -35,7 +35,8 @@ export async function scheduledEmailPostOnboard() {
     for (const user of usersFourDaysAgo) {
       await sendEmail({
         to: user.email,
-        subject: "Real Stories: Travelers Saving Money, Hosts Lowering Vacancies",
+        subject:
+          "Real Stories: Travelers Saving Money, Hosts Lowering Vacancies",
         content: CaseStudyEmail({
           name: user.firstName ?? user.name ?? "Traveler",
         }),
@@ -59,15 +60,18 @@ export async function scheduledEmailPostOnboard() {
 }
 
 // Utility function to find users created `hours` ago
-async function findUsersCreatedHoursAgo(hours: number): Promise<any[]> {
-  const targetTime = new Date(Date.now() - hours * 60 * 60 * 1000).toISOString().slice(0, 19).replace("T", " ");
+async function findUsersCreatedHoursAgo(hours: number): Promise<User[]> {
+  const targetTime = new Date(Date.now() - hours * 60 * 60 * 1000)
+    .toISOString()
+    .slice(0, 19)
+    .replace("T", " ");
   return await db.query.users.findMany({
     where: gte(users.createdAt, targetTime),
   });
 }
 
 // Utility function to find users created `days` ago
-async function findUsersCreatedDaysAgo(days: number): Promise<any[]> {
+async function findUsersCreatedDaysAgo(days: number): Promise<User[]> {
   const startOfDay = new Date();
   startOfDay.setUTCDate(startOfDay.getUTCDate() - days);
   startOfDay.setUTCHours(0, 0, 0, 0);
@@ -84,7 +88,6 @@ async function findUsersCreatedDaysAgo(days: number): Promise<any[]> {
   });
 }
 
-
 // API handler function to trigger the email scheduling
 type Request = {
   body: Record<string, unknown>;
@@ -98,7 +101,10 @@ type Response = {
   // 添加其他需要的字段
 };
 
-export default async function handler(req: Request, res: Response): Promise<void> {
+export default async function handler(
+  req: Request,
+  res: Response,
+): Promise<void> {
   try {
     await scheduledEmailPostOnboard();
     res.status(200).json({ message: "Emails scheduled successfully!" });
