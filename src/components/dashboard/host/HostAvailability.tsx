@@ -143,13 +143,6 @@ export default function HostAvailability({ property }: { property: Property }) {
       const end = new Date(selectedRange.end);
       end.setHours(23, 59, 59, 999);
 
-      await updateCalendar({
-        propertyId: property.id,
-        start: start.toISOString(),
-        end: end.toISOString(),
-        isAvailable: !isBlocking,
-        platformBookedOn: "tramona",
-      });
       await refetch();
       setSelectedRange({ start: null, end: null });
     } catch (error) {

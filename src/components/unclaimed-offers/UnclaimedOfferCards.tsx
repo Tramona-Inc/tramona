@@ -170,13 +170,12 @@ export default function UnclaimedOfferCards({
                       className="animate-fade-in"
                       style={{ animationDelay: `${index * 50}ms` }}
                     >
-                      {properties &&
-                        properties.data.map((property) => (
-                          <UnMatchedPropertyCard
-                            property={property}
-                            key={property.id}
-                          />
-                        ))}
+                      {properties.data.map((property) => (
+                        <UnMatchedPropertyCard
+                          property={property}
+                          key={property.id}
+                        />
+                      ))}
                     </div>
                   ))}
               </div>
@@ -322,8 +321,7 @@ function UnMatchedPropertyCard({
               </Button>
             )}
           </div>
-          {isAirbnb &
-          (
+          {isAirbnb && (
             <div className="absolute inset-0">
               <div className="flex justify-between">
                 <Badge className="absolute left-3 top-3 h-8 bg-rose-500 font-semibold text-white">

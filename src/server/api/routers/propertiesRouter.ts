@@ -301,6 +301,7 @@ export const propertiesRouter = createTRPCRouter({
           latLngPoint: properties.latLngPoint,
           bookItNowIsEnabled: properties.bookItNowEnabled,
           originalListingId: properties.originalListingId,
+          originalListingPlatform: properties.originalListingPlatform,
           // lat: properties.latitude,
           // long: properties.longitude,
           distance: sql`
@@ -587,9 +588,7 @@ export const propertiesRouter = createTRPCRouter({
       // },
     });
 
-    const hostRequests = await getRequestsForProperties(hostProperties, {
-      user: ctx.user,
-    });
+    const hostRequests = await getRequestsForProperties(hostProperties);
     console.log(hostRequests);
 
     const groupedByCity: HostRequestsPageData[] = [];

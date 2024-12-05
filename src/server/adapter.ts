@@ -172,10 +172,9 @@ export function CustomPgDrizzleAdapter(
         .returning()
         .then((res) => res[0] ?? null);
     },
-    async unlinkAccount(account: Pick<
-      AdapterAccount,
-      "provider" | "providerAccountId"
-    >) {
+    async unlinkAccount(
+      account: Pick<AdapterAccount, "provider" | "providerAccountId">,
+    ) {
       const deletedAccount = await db
         .delete(accounts)
         .where(

@@ -4,7 +4,7 @@ import axios from "axios";
 import ical from "node-ical";
 import { db } from "@/server/db";
 import { reservedDateRanges } from "@/server/db/schema/tables/reservedDateRanges";
-import { and, eq, gte, lte } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { properties } from "@/server/db/schema/tables/properties";
 import { getPropertyCalendar } from "@/server/server-utils";
 

@@ -107,7 +107,7 @@ export default function MonthCalendar({
             if (reservedInfo) {
               if (reservedInfo.platformBookedOn === "airbnb") {
                 reservationClass = "bg-reserved-pattern";
-              } else if (reservedInfo.platformBookedOn === "tramona") {
+              } else {
                 reservationClass = "bg-reserved-pattern-2";
               }
             }
@@ -115,10 +115,7 @@ export default function MonthCalendar({
             return (
               <div
                 key={index}
-                onClick={() =>
-                  currentDate &&
-                  !isGrayedOut
-                }
+                onClick={() => currentDate && !isGrayedOut}
                 className={cn(
                   "flex min-h-[100px] flex-col items-center justify-center p-2",
                   day && !isGrayedOut && "cursor-pointer",

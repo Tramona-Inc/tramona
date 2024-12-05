@@ -348,7 +348,6 @@ export default function HostAutoOffer({ property }: { property: Property }) {
           setEditing={setIsEditing}
           property={property}
           onSubmit={form.handleSubmit(handleSubmit)}
-          onCancel={handleCancel} // Use handleCancel for cancel action
         />
       </div>
       <div className="flex items-center space-x-4">
