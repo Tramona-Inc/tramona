@@ -5,12 +5,10 @@ import { ChatMessageType } from "@/utils/store/messages";
 export default function ListMessagesWithAdmin({
   messages,
   isMobile,
-  conversationId,
   tempUserId,
 }: {
   messages: ChatMessageType[];
   isMobile?: boolean;
-  conversationId: string;
   tempUserId: string;
 }) {
   const { data: session } = useSession();

@@ -61,9 +61,10 @@ export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
 
   useEffect(() => {
     if (!session && typeof window !== "undefined") {
-      const storedToken = localStorage.getItem("tempToken") ?? "";
-      setTempToken(storedToken);
-      if (!storedToken) {
+      const storedToken = localStorage.getItem("tempToken");
+      if (storedToken) {
+        setTempToken(storedToken);
+      } else {
         const uuid = crypto.randomUUID();
         setTempToken(uuid);
       }
@@ -87,20 +88,10 @@ export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
 
   useEffect(() => {
     // Ensure having a valid user ID before making the call (the session is loaded or guest has tempToken)
-    if (session?.user.id ?? tempToken) {
-      const fetchData = () => {
-        try {
-          if (conversationIdAndTempUserId) {
-            setConversationId(conversationIdAndTempUserId.conversationId);
-          }
-        } catch (error) {
-          errorToast();
-        }
-      };
-
-      fetchData();
+    if ((session !== null || tempToken) && conversationIdAndTempUserId) {
+      setConversationId(conversationIdAndTempUserId.conversationId);
     }
-  }, [conversationIdAndTempUserId, session?.user.id, tempToken]);
+  }, [conversationIdAndTempUserId, session, tempToken]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -112,6 +103,7 @@ export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
   }, [conversationId, fetchInitialMessages]);
 
   useEffect(() => {
+    if (!conversationId) return;
     const channel = supabase
       .channel(conversationId)
       .on(
@@ -130,13 +122,12 @@ export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
     return () => {
       void channel.unsubscribe();
     };
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [supabase, messages]);
+  }, [messages, conversationId]);
 
   const handlePostgresChange = async (payload: { new: MessageDbType }) => {
     if (!optimisticIds.includes(payload.new.id)) {
-      const newMessage: ChatMessageType = {
+      addMessageToConversation(payload.new.conversation_id, {
         id: payload.new.id,
         conversationId: payload.new.conversation_id,
         userId: payload.new.user_id,
@@ -144,9 +135,7 @@ export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
         isEdit: payload.new.is_edit,
         createdAt: payload.new.created_at,
         read: payload.new.read,
-      };
-      addMessageToConversation(payload.new.conversation_id, newMessage);
-      // setOptimisticIds(newMessage.id)
+      });
     }
   };
 
@@ -180,7 +169,7 @@ export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
       const newMessage: ChatMessageType = {
         id: nanoid(),
         createdAt: new Date().toISOString().slice(0, -1),
-        conversationId: conversationId ?? "",
+        conversationId: conversationId,
         message: values.message,
         read: false,
         isEdit: false,
@@ -197,7 +186,7 @@ export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
         user_id: newMessage.userId,
       };
 
-      addMessageToConversation(conversationId ?? "", newMessage);
+      addMessageToConversation(conversationId, newMessage);
       setOptimisticIds(newMessage.id);
       const { error } = await supabase
         .from("messages")
@@ -206,12 +195,12 @@ export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
         .single();
 
       if (error) {
-        removeMessageFromConversation(conversationId ?? "", newMessage.id);
+        removeMessageFromConversation(conversationId, newMessage.id);
         errorToast();
       }
       await sendChatboxSlackMessage({
         message: newMessage.message,
-        conversationId: conversationId ?? "",
+        conversationId: conversationId,
         senderId: newMessage.userId,
       });
     } else {
@@ -219,7 +208,7 @@ export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
       const newMessage: ChatMessageType = {
         id: nanoid(),
         createdAt: new Date().toISOString().slice(0, -1),
-        conversationId: conversationId ?? "",
+        conversationId: conversationId,
         userId: session.user.id,
         message: values.message,
         read: false,
@@ -228,7 +217,7 @@ export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
 
       const newMessageToDb = {
         id: newMessage.id,
-        conversation_id: conversationId ?? "",
+        conversation_id: conversationId,
         user_id: newMessage.userId,
         message: newMessage.message,
         read: newMessage.read,
@@ -236,7 +225,7 @@ export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
         created_at: new Date().toISOString(),
       };
 
-      addMessageToConversation(conversationId ?? "", newMessage);
+      addMessageToConversation(conversationId, newMessage);
       setOptimisticIds(newMessage.id);
       const { error } = await supabase
         .from("messages")
@@ -245,12 +234,12 @@ export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
         .single();
 
       if (error) {
-        removeMessageFromConversation(conversationId ?? "", newMessage.id);
+        removeMessageFromConversation(conversationId, newMessage.id);
         errorToast();
       }
       await sendChatboxSlackMessage({
         message: newMessage.message,
-        conversationId: conversationId ?? "",
+        conversationId: conversationId,
         senderId: newMessage.userId,
       });
     }
@@ -288,19 +277,18 @@ export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
             </div>
             <ListMessagesWithAdmin
               messages={messages}
-              conversationId={conversationId}
               tempUserId={conversationIdAndTempUserId?.tempUserId ?? ""}
             />
             <div className="p-2">
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(handleOnSend)}>
-                  <div className="flex justify-between rounded-full border p-2">
+                  <div className="flex rounded-full border p-2">
                     <FormField
                       control={form.control}
                       name="message"
                       render={({ field }) => {
                         return (
-                          <FormItem>
+                          <FormItem className="flex-1">
                             <FormControl>
                               <Input
                                 placeholder="Type your question here..."
@@ -337,19 +325,18 @@ export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
           <ListMessagesWithAdmin
             messages={messages}
             isMobile={isMobile}
-            conversationId={conversationId}
             tempUserId={conversationIdAndTempUserId?.tempUserId ?? ""}
           />
           <div className="p-2">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(handleOnSend)}>
-                <div className="flex justify-between rounded-full border p-2">
+                <div className="flex rounded-full border p-2">
                   <FormField
                     control={form.control}
                     name="message"
                     render={({ field }) => {
                       return (
-                        <FormItem>
+                        <FormItem className="flex-1">
                           <FormControl>
                             <Input
                               placeholder="Type your question here..."

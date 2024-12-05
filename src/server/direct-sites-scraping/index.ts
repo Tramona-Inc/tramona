@@ -13,16 +13,8 @@ import {
   propertyInsertSchema,
   requests,
   reviewsInsertSchema,
-  tripCheckouts,
 } from "../db/schema";
-import {
-  NewOffer,
-  NewProperty,
-  Offer,
-  offers,
-  NewReview,
-  reviews,
-} from "../db/schema";
+import { NewOffer, NewProperty, Offer, offers, reviews } from "../db/schema";
 import { arizonaScraper, arizonaSubScraper } from "./integrity-arizona";
 import { redawningScraper } from "./redawning";
 
@@ -32,20 +24,14 @@ import {
   createRandomMarkupEightToFourteenPercent,
   getNumNights,
   getTravelerOfferedPrice,
+  logAndFilterSettledResults,
 } from "@/utils/utils";
-import { DIRECTLISTINGMARKUP } from "@/utils/constants";
-import {
-  createLatLngGISPoint,
-  sendScheduledText,
-  sendText,
-} from "@/server/server-utils";
+import { DIRECT_LISTING_MARKUP } from "@/utils/constants";
+import { createLatLngGISPoint, sendText } from "@/server/server-utils";
 import { cleanbnbScraper, cleanbnbSubScraper } from "./cleanbnb-scrape";
-//import { log } from "@/pages/api/script";
-import { env } from "@/env";
-import { addHours, addMinutes } from "date-fns";
 import { z } from "zod";
 import { formatZodError } from "../../utils/zod-utils";
-import { breakdownPayment } from "@/utils/payment-utils/paymentBreakdown";
+import { env } from "@/env";
 
 type ScraperOptions = {
   location: string;
@@ -62,16 +48,8 @@ export type DirectSiteScraper = (
   options: ScraperOptions,
 ) => Promise<ScrapedListing[]>;
 
-export type ScrapedListing = Omit<NewProperty, "latLngPoint"> & {
-  originalListingUrl: string; // enforce that it's non-null
-  reviews: NewReview[];
-  scrapeUrl: string;
-  latLngPoint?: { lat: number; lng: number }; // make latLngPoint optional
-  nightlyPrice?: number; // airbnb scraper has nightlyPrice as real price and originalNightlyPrice as the price before discount
-};
-
 const scrapedListingSchema = propertyInsertSchema
-  .omit({ latLngPoint: true })
+  .omit({ latLngPoint: true, hostTeamId: true })
   .extend({
     originalListingUrl: z.string(),
     reviews: reviewsInsertSchema.omit({ propertyId: true }).array(),
@@ -79,6 +57,8 @@ const scrapedListingSchema = propertyInsertSchema
     latLngPoint: z.object({ lat: z.number(), lng: z.number() }).optional(),
     nightlyPrice: z.number().optional(),
   });
+
+export type ScrapedListing = z.infer<typeof scrapedListingSchema>;
 
 export type SubsequentScraper = (options: {
   originalListingId: string; // all input params are from offers and properties table
@@ -243,25 +223,37 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
       "Case 2: No matches within the price range (all matches are 50% + outside)",
     );
     if (userFromRequest) {
-      await db.update(requests).set({ messageCase: "No matches within price range" }).where(eq(requests.id, options.requestId!));
+      await db
+        .update(requests)
+        .set({ messageCase: "No matches within price range" })
+        .where(eq(requests.id, options.requestId!));
     }
   } else if (closeMatches.length > 0 && closeMatches.length <= 3) {
     console.log("Case 3: 1-3 matches within 0-20%, but more in 20-50%");
     listings = closeMatches.concat(midMatches).slice(0, 10);
     if (userFromRequest) {
-      await db.update(requests).set({ messageCase: "Some close matches" }).where(eq(requests.id, options.requestId!));
+      await db
+        .update(requests)
+        .set({ messageCase: "Some close matches" })
+        .where(eq(requests.id, options.requestId!));
     }
   } else if (closeMatches.length === 0 && midMatches.length > 0) {
     console.log("Case 4: No close matches, but some in 20-50%");
     if (userFromRequest) {
-      await db.update(requests).set({ messageCase: "No close matches" }).where(eq(requests.id, options.requestId!));
+      await db
+        .update(requests)
+        .set({ messageCase: "No close matches" })
+        .where(eq(requests.id, options.requestId!));
     }
     listings = midMatches.slice(0, 10); // Send 20-50% matches
   } else if (closeMatches.length > 3) {
     listings = closeMatches.slice(0, 10); // Send 0-20% matches
     console.log("Case 5: 4 or more close matches (0-20%)");
     if (userFromRequest) {
-      await db.update(requests).set({ messageCase: "Many close matches" }).where(eq(requests.id, options.requestId!));
+      await db
+        .update(requests)
+        .set({ messageCase: "Many close matches" })
+        .where(eq(requests.id, options.requestId!));
     }
   }
 
@@ -296,11 +288,15 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
             lng: location.lng,
           });
         }
-        const newPropertyListing = filterNewPropertyFields(listing);
+        const newPropertyListing = {
+          ...filterNewPropertyFields(listing),
+          hostTeamId: env.ADMIN_TEAM_ID,
+          latLngPoint: formattedlatLngPoint,
+        };
         if (existingOriginalPropertyId) {
           const tramonaProperty = await trx
             .update(properties)
-            .set({ ...newPropertyListing, latLngPoint: formattedlatLngPoint }) // Only keeps fields that are defined in the NewProperty schema
+            .set(newPropertyListing) // Only keeps fields that are defined in the NewProperty schema
             .where(eq(properties.originalListingId, existingOriginalPropertyId))
             .returning({ id: properties.id });
 
@@ -351,37 +347,9 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
 
             // ----- create checkout and offer
             const travelerOfferedPriceBeforeFees = getTravelerOfferedPrice({
-              propertyPrice: originalTotalPrice,
-              travelerMarkup: DIRECTLISTINGMARKUP,
-              numNights: getNumNights(options.checkIn, options.checkOut),
+              totalPrice: originalTotalPrice,
+              travelerMarkup: DIRECT_LISTING_MARKUP,
             });
-
-            const { location } = await getCoordinates(listing.address);
-
-            const brokeDownPayment = await breakdownPayment({
-              numOfNights: getNumNights(options.checkIn, options.checkOut),
-              travelerOfferedPriceBeforeFees,
-              isScrapedPropery: true,
-              lat: listing.latLngPoint?.lat ?? location!.lat,
-              lng: listing.latLngPoint?.lng ?? location!.lng,
-            });
-
-
-            const tripCheckout = await trx
-              .insert(tripCheckouts)
-              .values({
-                totalTripAmount: brokeDownPayment.totalTripAmount,
-                travelerOfferedPriceBeforeFees,
-                paymentIntentId: "",
-                taxesPaid: brokeDownPayment.taxesPaid,
-                taxPercentage: brokeDownPayment.taxPercentage,
-                superhogFee: brokeDownPayment.superhogFee,
-                stripeTransactionFee: brokeDownPayment.stripeTransactionFee,
-                checkoutSessionId: "",
-                totalSavings: brokeDownPayment.totalSavings,
-              })
-              .returning({ id: tripCheckouts.id })
-              .then((res) => res[0]!);
 
             const newOffer: NewOffer = {
               propertyId: tramonaPropertyId,
@@ -397,7 +365,6 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
               randomDirectListingDiscount:
                 createRandomMarkupEightToFourteenPercent(),
               ...(options.requestId && { requestId: options.requestId }),
-              tripCheckoutId: tripCheckout.id,
             };
 
             await trx
@@ -408,10 +375,7 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
         } else {
           const propertyId = await trx
             .insert(properties)
-            .values({
-              ...newPropertyListing,
-              latLngPoint: formattedlatLngPoint,
-            })
+            .values(newPropertyListing)
             .returning()
             .then((res) => res[0]!.id);
 
@@ -455,34 +419,9 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
               getNumNights(options.checkIn, options.checkOut);
 
             const travelerOfferedPriceBeforeFees = getTravelerOfferedPrice({
-              propertyPrice: originalTotalPrice,
-              travelerMarkup: DIRECTLISTINGMARKUP,
-              numNights: getNumNights(options.checkIn, options.checkOut),
+              totalPrice: originalTotalPrice,
+              travelerMarkup: DIRECT_LISTING_MARKUP,
             });
-
-            const brokeDownPayment = await breakdownPayment({
-              numOfNights: getNumNights(options.checkIn, options.checkOut),
-              travelerOfferedPriceBeforeFees,
-              isScrapedPropery: true,
-              lat: listing.latLngPoint?.lat ?? location!.lat,
-              lng: listing.latLngPoint?.lng ?? location!.lng,
-            });
-
-            const tripCheckout = await trx
-              .insert(tripCheckouts)
-              .values({
-                totalTripAmount: brokeDownPayment.totalTripAmount,
-                travelerOfferedPriceBeforeFees,
-                paymentIntentId: "",
-                taxesPaid: brokeDownPayment.taxesPaid,
-                taxPercentage: brokeDownPayment.taxPercentage,
-                superhogFee: brokeDownPayment.superhogFee,
-                stripeTransactionFee: brokeDownPayment.stripeTransactionFee,
-                checkoutSessionId: "",
-                totalSavings: brokeDownPayment.totalSavings,
-              })
-              .returning({ id: tripCheckouts.id })
-              .then((res) => res[0]!);
 
             await trx.insert(offers).values({
               propertyId,
@@ -498,7 +437,6 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
                 createRandomMarkupEightToFourteenPercent(),
               becomeVisibleAt: new Date(becomeVisibleAtNumber),
               ...(options.requestId && { requestId: options.requestId }),
-              tripCheckoutId: tripCheckout.id,
             });
           }
         }
@@ -668,4 +606,82 @@ export const subsequentScrape = async (options: { offerIds: number[] }) => {
     }
   });
   return savedResult;
+};
+
+export const checkAvailabilityForProperties = async (options: {
+  propertyIds: number[];
+  originalListingIds: string[];
+  originalListingPlatforms: string[];
+  checkIn: Date;
+  checkOut: Date;
+  numGuests: number;
+}) => {
+  const {
+    propertyIds,
+    originalListingIds,
+    originalListingPlatforms,
+    checkIn,
+    checkOut,
+    numGuests,
+  } = options;
+
+  const availabilityPromises = propertyIds.map((propertyId, index) => {
+    const originalListingId = originalListingIds[index];
+    const originalListingPlatform = originalListingPlatforms[index];
+
+    const subScraperOptions = {
+      originalListingId: originalListingId!,
+      scrapeUrl: "",
+      checkIn,
+      checkOut,
+      numGuests,
+    };
+
+    type casamundoRes = {
+      subScrapedResult: SubScrapedResult;
+    };
+
+    const timerLabel = `Property ${propertyId}`;
+
+    console.time(timerLabel);
+
+    return (async () => {
+      switch (originalListingPlatform) {
+        case "Casamundo":
+          //const res = await axios.post<casamundoRes>("https://tramona.com/api/bookitnow", subScraperOptions);
+          const res = await casamundoSubScraper(subScraperOptions);
+          console.timeEnd(timerLabel); // End timing for this property
+          // return {...res.data.subScrapedResult, propertyId};
+          return { ...res, propertyId };
+
+        case "IntegrityArizona":
+          const arizonaResult = await arizonaSubScraper(subScraperOptions);
+          console.timeEnd(timerLabel); // End timing for this property
+          return { ...arizonaResult, propertyId };
+
+        case "Evolve":
+          const evolveResult =
+            await evolveVacationRentalSubScraper(subScraperOptions);
+          console.timeEnd(timerLabel); // End timing for this property
+          return { ...evolveResult, propertyId };
+
+        // Add other cases here as needed
+        default:
+          throw new Error("No subScrapedResult found");
+      }
+    })();
+  });
+
+  console.log("here");
+  console.time("checkAvailability");
+
+  const results = logAndFilterSettledResults(
+    await Promise.allSettled(availabilityPromises),
+  );
+
+  const availabilityResults = results.filter(
+    (r) => r.isAvailableOnOriginalSite && r.originalNightlyPrice !== undefined,
+  );
+
+  return availabilityResults;
 };

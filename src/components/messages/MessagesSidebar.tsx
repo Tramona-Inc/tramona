@@ -4,17 +4,19 @@ import {
   useConversation,
   type Conversation,
 } from "@/utils/store/conversations";
-import { useMessage, type ChatMessageType } from "@/utils/store/messages";
+import { useMessage } from "@/utils/store/messages";
 import supabase from "@/utils/supabase-client";
 import { cn, useUpdateUser } from "@/utils/utils";
 import { subHours } from "date-fns";
 import { useSession } from "next-auth/react";
-import { useEffect } from "react";
-import MessageEmptySvg from "../_common/EmptyStateSvg/MessageEmptySvg";
+import { useEffect, useState } from "react";
 import Spinner from "../_common/Spinner";
 import UserAvatar from "../_common/UserAvatar";
 import { ScrollArea } from "../ui/scroll-area";
 import { SidebarConversation } from "./SidebarConversation";
+import { Button } from "../ui/button";
+import { MessageSquare } from "lucide-react";
+import { useRouter } from "next/router";
 
 export function MessageConversation({
   conversation,
@@ -100,6 +102,8 @@ export default function MessagesSidebar({
   selectedConversation,
   setSelected,
 }: SidebarProps) {
+  const [showAllMsgs, setShowAllMsgs] = useState(true);
+
   // Fetch only once on mount
   const { data: fetchedConversations, isLoading } =
     api.messages.getConversations.useQuery(undefined, {
@@ -133,16 +137,7 @@ export default function MessagesSidebar({
   // Map and listen to all the connects the user is part of
   useEffect(() => {
     const handlePostgresChange = async (payload: { new: MessageDbType }) => {
-      // if (!optimisticIds.includes(payload.new.id)) {
-      //   const { error } = await supabase
-      //     .from("user")
-      //     .select("name, email, image")
-      //     .eq("id", payload.new.user_id)
-      //     .single();
-      //   if (error) {
-      //     errorToast();
-      //   } else {
-      const newMessage: ChatMessageType = {
+      setConversationToTop(payload.new.conversation_id, {
         id: payload.new.id,
         conversationId: payload.new.conversation_id,
         userId: payload.new.user_id,
@@ -150,13 +145,7 @@ export default function MessagesSidebar({
         isEdit: payload.new.is_edit,
         createdAt: payload.new.created_at,
         read: payload.new.read,
-      };
-
-      setConversationToTop(payload.new.conversation_id, newMessage);
-      // addMessageToConversation(payload.new.conversation_id, newMessage)
-      // void fetchInitialMessages(payload.new.conversation_id)
-      //   }
-      // }
+      });
     };
 
     const fetchConversationIds = async () => {
@@ -198,16 +187,91 @@ export default function MessagesSidebar({
     setConversationToTop,
   ]);
 
+  const unreadConversations = conversations.filter((conversation) => {
+    return (
+      conversation.messages[0] &&
+      !conversation.messages[0].read &&
+      conversation.messages[0].userId !== session?.user.id
+    );
+  });
+
+  function MessageEmptyState({ unread = false }: { unread?: boolean }) {
+    const router = useRouter();
+    const session = useSession();
+    const role = session.data?.user.role;
+
+    return (
+      <div className="flex h-full flex-col items-center justify-center gap-4 p-4 text-center text-muted-foreground">
+        <MessageSquare size={30} />
+        <h2 className="font-semibold">
+          {unread
+            ? "You don't have any unread messages"
+            : "You don't have any messages"}
+        </h2>
+        <p className="text-sm">
+          {unread
+            ? "When you have an unread message, it will appear here."
+            : "When you receive a new message, it will appear here."}
+        </p>
+        {role === "guest" && (
+          <div className="flex w-full flex-col gap-2 px-6">
+            <Button
+              className="rounded-full"
+              onClick={() => router.push("/?tab=name-price")}
+            >
+              Make a request
+            </Button>
+            <Button
+              className="rounded-full"
+              onClick={() => router.push("/?tab=search")}
+              variant="outline"
+            >
+              Book it now
+            </Button>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div>
-      <div className="flex h-[73px] items-center border-b p-4">
+      <div className="space-y-4 border-b p-4">
         <h1 className="text-2xl font-bold">Messages</h1>
+        <div className="flex items-center gap-1">
+          <Button
+            className="rounded-full"
+            variant={showAllMsgs ? "primary" : "outline"}
+            onClick={() => setShowAllMsgs(true)}
+          >
+            All
+          </Button>
+          <Button
+            className="rounded-full"
+            variant={showAllMsgs ? "outline" : "primary"}
+            onClick={() => setShowAllMsgs(false)}
+          >
+            Unread
+          </Button>
+        </div>
       </div>
-
-      <ScrollArea className="h-full p-2">
+      <ScrollArea className="h-[35rem] border-b py-2">
         {!isLoading ? (
-          conversations.length > 0 ? (
-            conversations.map((conversation) => (
+          showAllMsgs ? (
+            conversations.length > 0 ? (
+              conversations.map((conversation) => (
+                <SidebarConversation
+                  key={conversation.id}
+                  conversation={conversation}
+                  isSelected={selectedConversation?.id === conversation.id}
+                  setSelected={setSelected}
+                />
+              ))
+            ) : (
+              <MessageEmptyState />
+            )
+          ) : unreadConversations.length > 0 ? (
+            unreadConversations.map((conversation) => (
               <SidebarConversation
                 key={conversation.id}
                 conversation={conversation}
@@ -216,13 +280,7 @@ export default function MessagesSidebar({
               />
             ))
           ) : (
-            <div className="flex h-full flex-col items-center justify-center">
-              <MessageEmptySvg />
-              <h2 className="text-2xl font-bold">No conversations yet</h2>
-              <p className="max-w-[300px] text-center text-muted-foreground">
-                Messages from your conversations will show up here.
-              </p>
-            </div>
+            <MessageEmptyState unread />
           )
         ) : (
           <div className="grid place-items-center text-muted-foreground">

@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { type RouterOutputs } from "@/utils/api";
 import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
-import { formatCurrency, plural } from "@/utils/utils";
+import { formatCurrency, formatDateMonthDayYear, plural } from "@/utils/utils";
 import { Star, ChevronLeft, ChevronRight } from "lucide-react";
 import { Skeleton } from "../ui/skeleton";
 import React, { useEffect, useState, useMemo, useCallback } from "react";
@@ -17,13 +17,21 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { useAdjustedProperties } from "../landing-page/search/AdjustedPropertiesContext";
+import { AirbnbSearchResult, useAdjustedProperties } from "../landing-page/search/AdjustedPropertiesContext";
 import AddUnclaimedOffer from "./AddUnclaimedOffer";
-import { MapBoundary } from "../landing-page/search/SearchPropertiesMap";
 import { useLoading } from "./UnclaimedMapLoadingContext";
+import { Badge } from "../ui/badge";
+import { Property } from "@/server/db/schema/tables/properties";
 
-type Property =
-  RouterOutputs["properties"]["getAllInfiniteScroll"]["data"][number];
+// type Property =
+//   RouterOutputs["properties"]["getAllInfiniteScroll"]["data"][number];
+
+export type MapBoundary = {
+  north: number;
+  south: number;
+  east: number;
+  west: number;
+};
 
 export default function UnclaimedOfferCards({
   mapBoundaries,
@@ -40,35 +48,46 @@ export default function UnclaimedOfferCards({
   const [showNoProperties, setShowNoProperties] = useState(false);
 
   useEffect(() => {
-    if (
-      !isDelayedLoading &&
-      (!adjustedProperties?.pages.length ||
-        !adjustedProperties.pages[0]?.data.length)
-    ) {
+    if (!isDelayedLoading && !adjustedProperties?.pages.length) {
       setShowNoProperties(true);
     } else {
       setShowNoProperties(false);
     }
   }, [isDelayedLoading, adjustedProperties]);
 
+  // const allProperties = useMemo(() => {
+  //   return adjustedProperties?.pages.flatMap((page) => page.data) ?? [];
+  // }, [adjustedProperties]);
+
   const allProperties = useMemo(() => {
-    return adjustedProperties?.pages.flatMap((page) => page.data) ?? [];
+    return adjustedProperties?.pages;
+    // .flatMap((page) => page?.data || []) // Use optional chaining and fallback
+    // .filter(Boolean); // Filter out undefined values, if any
   }, [adjustedProperties]);
 
   const paginatedProperties = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-    return allProperties.slice(startIndex, endIndex);
+    return allProperties?.slice(startIndex, endIndex);
   }, [allProperties, currentPage, itemsPerPage]);
 
+  // console.log("paginatedProps:", paginatedProperties);
+
   const totalPages = useMemo(() => {
-    return Math.max(1, Math.ceil(allProperties.length / itemsPerPage));
-  }, [allProperties.length, itemsPerPage]);
+    return Math.max(1, Math.ceil(allProperties?.length ?? 0 / itemsPerPage));
+  }, [allProperties?.length, itemsPerPage]);
+
+  // const url = new URL(router.pathname);
 
   const handlePageChange = useCallback(
     (page: number) => {
+      // router.pathname.searchParams.set("page", page);
       setCurrentPage(page);
-      void router.push(`?page=${page}`, undefined, { shallow: true });
+      void router.push(
+        { pathname: router.pathname, query: { ...router.query, page } },
+        undefined,
+        { shallow: true },
+      );
     },
     [router],
   );
@@ -127,7 +146,7 @@ export default function UnclaimedOfferCards({
   return (
     <div className="h-full w-full flex-col">
       <div className="flex h-screen-minus-header-n-footer w-full sm:h-screen-minus-header-n-footer-n-searchbar">
-        <div className="mr-auto h-full w-full overflow-y-scroll px-6 scrollbar-hide">
+        <div className="mr-auto h-full w-full overflow-y-scroll px-4 scrollbar-hide lg:px-2">
           {isDelayedLoading ? (
             <div className="grid w-full grid-cols-1 gap-x-6 sm:grid-cols-2 md:gap-y-6 lg:grid-cols-3 lg:gap-y-8 xl:gap-y-4 2xl:gap-y-0">
               {Array(24)
@@ -149,16 +168,20 @@ export default function UnclaimedOfferCards({
             </div>
           ) : (
             <div className="flex h-full w-full flex-col">
-              <div className="grid w-full grid-cols-1 gap-x-6 sm:grid-cols-2 md:gap-y-6 lg:grid-cols-3 lg:gap-y-8 xl:gap-y-4 2xl:gap-y-0">
-                {paginatedProperties.map((property, index) => (
-                  <div
-                    key={property.id}
-                    className="animate-fade-in"
-                    style={{ animationDelay: `${index * 50}ms` }}
-                  >
-                    <UnMatchedPropertyCard property={property} />
-                  </div>
-                ))}
+              {/* <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"> */}
+              <div className="grid grid-cols-1 gap-4 min-[580px]:grid-cols-2 min-[950px]:grid-cols-3 min-[1150px]:grid-cols-4">
+                {paginatedProperties?.length &&
+                  paginatedProperties.map((property, index) => (
+                    <div
+                      key={index}
+                      className="animate-fade-in"
+                      style={{ animationDelay: `${index * 50}ms` }}
+                    >
+                      <UnMatchedPropertyCard
+                        property={property}
+                      />
+                    </div>
+                  ))}
               </div>
               {totalPages >= 1 && (
                 <div className="mt-auto px-6 py-4">
@@ -217,10 +240,11 @@ export default function UnclaimedOfferCards({
 function UnMatchedPropertyCard({
   property,
 }: {
-  property: Property;
+  property: Property | AirbnbSearchResult;
 }): JSX.Element {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+  const router = useRouter();
 
   const nextImage = (e: React.MouseEvent): void => {
     e.preventDefault();
@@ -238,14 +262,36 @@ function UnMatchedPropertyCard({
     }
   };
 
+  const isAirbnb = property.originalListingPlatform === "Airbnb";
+  const checkIn = formatDateMonthDayYear(
+    new Date(router.query.checkIn as string),
+  );
+  const checkOut = formatDateMonthDayYear(
+    new Date(router.query.checkOut as string),
+  );
+  const numGuests = 3;
+  const link = isAirbnb
+  ? `https://airbnb.com/rooms/${property.originalListingId}`
+  : (() => {
+      if ("id" in property) {
+        return `/request-to-book/${property.id}?checkIn=${checkIn}&checkOut=${checkOut}&numGuests=${numGuests}`;
+      }
+      throw new Error("Property ID is required for non-Airbnb properties");
+    })();
+
   return (
-    <Link href={`/property/${property.id}`} className="block">
+    <Link
+      href={link}
+      className="block"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
       <div
-        className="relative flex aspect-[3/4] w-full cursor-pointer flex-col overflow-hidden rounded-xl"
+        className="relative flex aspect-square w-full cursor-pointer flex-col overflow-hidden rounded-xl"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <div className="relative h-[58%] overflow-hidden">
+        <div className="relative h-full overflow-hidden">
           <div
             className="flex h-full transition-transform duration-300 ease-in-out"
             style={{ transform: `translateX(-${currentImageIndex * 100}%)` }}
@@ -284,6 +330,15 @@ function UnMatchedPropertyCard({
               </Button>
             )}
           </div>
+          {isAirbnb && (
+            <div className="absolute inset-0">
+              <div className="flex justify-between">
+                <Badge className="absolute left-3 top-3 h-8 bg-rose-500 font-semibold text-white">
+                  Book on Airbnb
+                </Badge>
+              </div>
+            </div>
+          )}
           <div className="absolute bottom-2 left-1/2 z-10 flex -translate-x-1/2 space-x-1">
             {property.imageUrls.map((_, index) => (
               <div
@@ -297,47 +352,47 @@ function UnMatchedPropertyCard({
             ))}
           </div>
         </div>
-        <div className="flex h-[42%] flex-col space-y-2 p-4">
-          <div className="space-y-1">
-            <div className="flex items-center justify-between">
-              <div className="min-w-0 flex-1">
-                <div className="line-clamp-1 overflow-hidden overflow-ellipsis font-bold">
-                  {property.name}
-                </div>
-              </div>
-              <div className="ml-2 flex items-center space-x-1 whitespace-nowrap">
-                <Star fill="gold" size={12} />
-                <div>
-                  {property.avgRating ? property.avgRating.toFixed(2) : "New"}
-                </div>
-                <div>
-                  {property.numRatings > 0 ? `(${property.numRatings})` : ""}
-                </div>
-              </div>
-            </div>
-            {/* <div className="text-sm text-zinc-500"> */}
-            {/* {formatDateRange(offer.checkIn, offer.checkOut)} */}
-            {/* replace with check in check out'
-            </div> */}
-            <div className="text-sm text-zinc-500">
-              {plural(property.maxNumGuests, "Guest")}
+      </div>
+      <div className="flex flex-col pt-2">
+        <div className="flex items-center justify-between">
+          <div className="min-w-0 flex-1">
+            <div className="line-clamp-1 overflow-hidden overflow-ellipsis font-semibold">
+              {property.name}
             </div>
           </div>
-          <div className="flex items-center space-x-3 text-sm font-semibold">
+          <div className="ml-2 flex items-center space-x-1 whitespace-nowrap">
+            <Star fill="black" size={12} />
             <div>
-              {property.originalNightlyPrice
-                ? formatCurrency(property.originalNightlyPrice)
-                : "N/A"}
-              &nbsp;night
+              {"avgRating" in property ? property.avgRating.toFixed(2) : "New"}
             </div>
-            <div className="text-xs text-zinc-500 line-through">
-              airbnb&nbsp;
-              {property.originalNightlyPrice
-                ? formatCurrency(
-                    property.originalNightlyPrice * AVG_AIRBNB_MARKUP,
-                  )
-                : "N/A"}
+            <div>
+              {"numRatings" in property ? `(${property.numRatings})` : ""}
             </div>
+          </div>
+        </div>
+        {/* <div className="text-sm text-zinc-500"> */}
+        {/* {formatDateRange(offer.checkIn, offer.checkOut)} */}
+        {/* replace with check in check out'
+            </div> */}
+        <div className="text-sm text-zinc-500">
+          {plural(property.maxNumGuests, "Guest")}
+        </div>
+      </div>
+      <div className="flex justify-between">
+        <div className="flex items-center space-x-3 text-sm font-semibold">
+          <div>
+            {property.originalNightlyPrice
+              ? formatCurrency(property.originalNightlyPrice)
+              : "N/A"}
+            &nbsp;night
+          </div>
+          <div className="text-xs text-zinc-500 line-through">
+            airbnb&nbsp;
+            {property.originalNightlyPrice
+              ? formatCurrency(
+                  property.originalNightlyPrice * AVG_AIRBNB_MARKUP,
+                )
+              : "N/A"}
           </div>
         </div>
       </div>

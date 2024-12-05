@@ -23,7 +23,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Loader2, X } from "lucide-react";
+import { X } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import {
   Form,
@@ -32,6 +32,7 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
+import { HostPropertyEditBtn } from "./HostPropertiesLayout";
 
 const MAX_TIERS = 10;
 const MIN_TIERS = 1;
@@ -90,6 +91,7 @@ export default function HostAutoOffer({ property }: { property: Property }) {
   const [showEnableConfirmation, setShowEnableConfirmation] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   const originalValuesRef = useRef<FormSchema>({
     autoOfferEnabled: property.autoOfferEnabled,
@@ -340,13 +342,21 @@ export default function HostAutoOffer({ property }: { property: Property }) {
 
   return (
     <div className="my-6 space-y-4">
+      <div className="text-end">
+        <HostPropertyEditBtn
+          editing={isEditing}
+          setEditing={setIsEditing}
+          property={property}
+          onSubmit={form.handleSubmit(handleSubmit)}
+        />
+      </div>
       <div className="flex items-center space-x-4">
         <h2 className="text-lg font-semibold">Auto-Offer</h2>
         <Switch
           className="data-[state=checked]:bg-primaryGreen"
           checked={form.watch("autoOfferEnabled")}
           onCheckedChange={handleAutoOfferToggle}
-          disabled={isSaving}
+          disabled={isSaving || !isEditing}
         />
       </div>
       {form.watch("autoOfferEnabled") && (
@@ -357,7 +367,14 @@ export default function HostAutoOffer({ property }: { property: Property }) {
           >
             <Accordion type="single" collapsible className="w-full">
               <AccordionItem value="discount-tiers">
-                <AccordionTrigger disabled={isSaving}>
+                <AccordionTrigger
+                  disabled={isSaving || !isEditing}
+                  className={
+                    isSaving || !isEditing
+                      ? "cursor-not-allowed opacity-50"
+                      : ""
+                  }
+                >
                   Discount Tiers
                 </AccordionTrigger>
                 <AccordionContent>
@@ -376,28 +393,8 @@ export default function HostAutoOffer({ property }: { property: Property }) {
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
-            <div className="flex justify-between">
-              <div className="flex space-x-2">
-                <Button type="submit" disabled={!hasUnsavedChanges || isSaving}>
-                  {isSaving ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Saving...
-                    </>
-                  ) : (
-                    "Save"
-                  )}
-                </Button>
-                <Button
-                  type="button"
-                  onClick={handleCancel}
-                  variant="outline"
-                  disabled={!hasUnsavedChanges || isSaving}
-                >
-                  Cancel
-                </Button>
-              </div>
-              <div>
+            {isEditing && (
+              <div className="flex justify-end">
                 <Button
                   type="button"
                   onClick={handleResetToDefault}
@@ -407,7 +404,7 @@ export default function HostAutoOffer({ property }: { property: Property }) {
                   Reset to Default
                 </Button>
               </div>
-            </div>
+            )}
           </form>
         </Form>
       )}

@@ -49,7 +49,7 @@ export function SidebarConversation({
   return (
     <button
       className={cn(
-        "relative flex min-h-20 w-full gap-4 rounded-lg p-2 text-left",
+        "relative flex min-h-20 w-full gap-4 p-2 text-left",
         isSelected ? "bg-zinc-100" : "hover:bg-zinc-50",
       )}
       onClick={() => handleSelected()}

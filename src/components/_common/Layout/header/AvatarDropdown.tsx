@@ -58,7 +58,11 @@ export default function AvatarDropdown({
   size?: "sm" | "md" | "lg" | "huge";
 }) {
   const [chtDialogOpen, setChtDialogOpen] = useState(false);
-  const { data: hostProfile } = api.users.getMyHostProfile.useQuery();
+  const { data: hostProfile } = api.hosts.getMyHostProfile.useQuery();
+
+  // prefetch data for HostTeamsDropdownItems instead of waiting for the dropdown to open
+  api.hosts.getMyHostProfile.useQuery();
+  api.hostTeams.getMyHostTeams.useQuery();
 
   return (
     <>
@@ -72,7 +76,10 @@ export default function AvatarDropdown({
             size={size}
           />
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-80 font-medium">
+        <DropdownMenuContent
+          align="end"
+          className="w-80 font-medium text-primaryGreen"
+        >
           <DropdownTop session={session} />
           <DropdownMenuSeparator />
           {hostProfile && (

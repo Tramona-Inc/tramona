@@ -25,6 +25,10 @@
       "schedule": "0 * * * *"
     },
     {
+      "path": "/api/cron/expire-request-book",
+      "schedule": "0 * * * *"
+    },
+    {
       "path": "/api/task",
       "schedule": "* * * * *"
     },

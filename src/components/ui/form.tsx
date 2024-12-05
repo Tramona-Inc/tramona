@@ -154,7 +154,7 @@ const FormMessage = React.forwardRef<
   const body = error ? String(error.message) : "";
 
   return (
-    <ErrorMsg ref={ref} id={formMessageId} className="pt-0.5" {...props}>
+    <ErrorMsg ref={ref} id={formMessageId} className="mt-0.5" {...props}>
       {body}
     </ErrorMsg>
   );

@@ -42,7 +42,7 @@ export default function SaveAndExit() {
       }, ${listing.location.city}, ${listing.location.state} ${listing.location.zipcode}, ${
         listing.location.country
       }`,
-      checkInInfo: listing.checkInType,
+      additionalCheckInInfo: listing.checkInType,
       checkInTime: listing.checkIn,
       checkOutTime: listing.checkOut,
       amenities: listing.amenities,
@@ -53,7 +53,7 @@ export default function SaveAndExit() {
       petsAllowed: listing.petsAllowed,
       smokingAllowed: listing.smokingAllowed,
       otherHouseRules: listing.otherHouseRules ?? undefined,
-      propertyStatus: "Drafted",
+      status: "Drafted",
       cancellationPolicy: listing.cancellationPolicy,
     });
   }

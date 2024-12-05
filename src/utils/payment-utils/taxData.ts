@@ -1,3 +1,4 @@
+import { Property } from "@/server/db/schema";
 
 type CityTaxRates = Record<string, Record<string, number>>; // Maps city names to taxes
 
@@ -49,11 +50,11 @@ type TaxDetail = {
   taxRate: number;
 };
 
-export function calculateTotalTax(
-  country: string,
-  stateCode: string,
-  city?: string,
-): TaxDetail[] {
+export function calculateTotalTax({
+  country,
+  stateCode,
+  city,
+}: Pick<Property, "country" | "stateCode" | "city">): TaxDetail[] {
   const countryData = taxRates[country];
   if (!countryData) return [];
 
@@ -61,12 +62,14 @@ export function calculateTotalTax(
     return [{ taxName: "Puerto Rico Room Tax", taxRate: 0.07 }];
   }
 
+  if (!stateCode) return [];
+
   const stateData = countryData[stateCode];
   if (!stateData) return [];
 
   if (
     stateData.hasOwnProperty("cities") &&
-    !stateData.cities?.hasOwnProperty(city!)
+    !stateData.cities?.hasOwnProperty(city)
   ) {
     return [];
   }

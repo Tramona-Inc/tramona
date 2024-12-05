@@ -27,6 +27,9 @@ module.exports = {
           mulish: ["Mulish", "sans-serif"],
         },
       },
+      maxWidth: {
+        "8xl": "90rem", // 1440px
+      },
       spacing: {
         "screen-minus-header-n-footer": "var(--screen-minus-header-n-footer)",
         "screen-minus-header": "var(--screen-minus-header)",
@@ -42,8 +45,8 @@ module.exports = {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
-        background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        background: { DEFAULT: "hsl(var(--background))" },
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",

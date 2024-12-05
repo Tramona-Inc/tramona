@@ -12,7 +12,7 @@ export default function HostRequestsOverview({
   className?: string;
 }) {
   const { data: requestsWithProperties } =
-  api.properties.getHostPropertiesWithRequests.useQuery();
+    api.properties.getHostPropertiesWithRequests.useQuery();
 
   return (
     <Card className={className}>
@@ -29,25 +29,25 @@ export default function HostRequestsOverview({
           </Button>
         </div>
       </CardHeader>
-        <div className="max-h-[400px] overflow-y-auto">
-          {requestsWithProperties?.map((request, id) => (
-            <CardContent key={id}>
-              <div className="flex items-start gap-2 rounded-lg border p-4">
-                <MapPinIcon className="text-muted-foreground" />
-                <div className="flex-1">
-                  <div className="flex items-start justify-between">
-                    <p className="text-xl font-semibold">{request.city}</p>
-                  </div>
-                  <div className="flex gap-1">
-                    <Badge variant="secondary" size="sm">
-                      {request.requests.length} requests
-                    </Badge>
-                  </div>
+      <div className="max-h-[400px] overflow-y-auto">
+        {requestsWithProperties?.map((request, id) => (
+          <CardContent key={id}>
+            <div className="flex items-start gap-2 rounded-lg border p-4">
+              <MapPinIcon className="text-muted-foreground" />
+              <div className="flex-1">
+                <div className="flex items-start justify-between">
+                  <p className="text-xl font-semibold">{request.city}</p>
+                </div>
+                <div className="flex gap-1">
+                  <Badge variant="secondary" size="sm">
+                    {request.requests.length} requests
+                  </Badge>
                 </div>
               </div>
-            </CardContent>
-          ))}
-        </div>
+            </div>
+          </CardContent>
+        ))}
+      </div>
     </Card>
   );
 }

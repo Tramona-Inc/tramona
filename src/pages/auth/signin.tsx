@@ -1,5 +1,3 @@
-// https://next-auth.js.org/configuration/pages
-
 import MainLayout from "@/components/_common/Layout/MainLayout";
 import { Button } from "@/components/ui/button";
 import ErrorMsg from "@/components/ui/ErrorMsg";
@@ -11,7 +9,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import Icons from "@/components/ui/icons";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
 import { api } from "@/utils/api";
@@ -28,44 +25,13 @@ import * as z from "zod";
 import { useInviteStore } from "@/utils/store/inviteLink";
 import { authProviders } from "@/config/authProviders";
 import { useCohostInviteStore } from "@/utils/store/cohostInvite";
+import { FcGoogle } from "react-icons/fc";
 
-export default function SignIn() {
-  const utils = api.useUtils();
-
-  const formSchema = z
-    .object({
-      email: zodEmail(),
-      password: z.string(),
-    })
-    .superRefine(async (credentials, ctx) => {
-      const result = await utils.users.checkCredentials.fetch(credentials);
-      if (result === "success") return;
-      switch (result) {
-        case "email not found":
-          ctx.addIssue({
-            message: "Account not found for this email",
-            code: "custom",
-            path: ["email"],
-          });
-          break;
-        case "passwordless":
-          ctx.addIssue({
-            message:
-              // TODO: edit this if/when we add other auth providers
-              "Password not linked to this account, try Google sign-in",
-            code: "custom",
-            path: ["password"],
-          });
-          break;
-        case "incorrect password":
-          ctx.addIssue({
-            message: "Incorrect password, please try again",
-            code: "custom",
-            path: ["password"],
-          });
-          break;
-      }
-    });
+export default function Login() {
+  const formSchema = z.object({
+    email: zodEmail(),
+    password: z.string(),
+  });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -74,7 +40,6 @@ export default function SignIn() {
   });
 
   const router = useRouter();
-  // const router = useRouter();
   const [inviteLinkId] = useInviteStore((state) => [state.inviteLinkId]);
   const cohostInviteId = useCohostInviteStore((state) => state.cohostInviteId);
   const { mutate: inviteUser } = api.groups.inviteCurUserToGroup.useMutation();
@@ -83,16 +48,14 @@ export default function SignIn() {
     email,
     password,
   }: z.infer<typeof formSchema>) => {
-    // Relies on middleware to redirect to dashbaord
-    // onboarding checks if user has a phone number else go to dashboard
     const callbackUrl =
       (router.query.callbackUrl as string) ||
       (router.query.from as string) ||
       `${window.location.origin}`;
 
     await signIn("credentials", {
-      email: email,
-      password: password,
+      email,
+      password,
       callbackUrl,
     }).then(() => {
       if (inviteLinkId) {
@@ -128,99 +91,107 @@ export default function SignIn() {
       <Head>
         <title>Log in | Tramona</title>
       </Head>
-      <div className="flex min-h-screen-minus-header flex-col items-center justify-center space-y-10 py-8">
-        <h1 className="text-4xl font-bold tracking-tight md:text-5xl">
-          Log in to Tramona
-        </h1>
+      <div className="min-h-screen-minus-header flex flex-col items-center justify-center py-8">
+        <div className="w-full max-w-lg rounded-lg p-10 md:border md:border-gray-300 md:shadow-lg">
+          <h1 className="text-center text-3xl font-semibold tracking-tight text-gray-800">
+            Log in to Tramona
+          </h1>
+          <p className="mt-2 text-center text-base text-gray-500">
+            Welcome back! Please enter your details
+          </p>
 
-        <section className="flex flex-col items-center justify-center space-y-5">
-          <div className="w-full space-y-5">
-            <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(handleSubmit)}
-                className="space-y-4"
-              >
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email address</FormLabel>
-                      <FormControl>
-                        <Input {...field} autoFocus inputMode="email" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Password</FormLabel>
-                      <FormControl>
-                        <Input type="password" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <ErrorMsg>{form.formState.errors.root?.message}</ErrorMsg>
-                <Button type="submit" className="w-full">
-                  Log In
-                </Button>
-              </form>
-            </Form>
+          <div className="my-6">
+            <Button
+              onClick={() => signIn("google")}
+              className="flex w-full items-center justify-center gap-2 rounded-md border border-gray-300 bg-white py-3 tracking-wide text-gray-700 shadow-sm"
+            >
+              <FcGoogle className="h-5 w-5" />
+              <span className="font-medium">Sign in with Google</span>
+            </Button>
           </div>
 
-          <div className="item-center flex w-full justify-center gap-2">
-            <div className="flex flex-1 items-center justify-center">
-              <div className="h-[1px] w-full border border-black" />
-            </div>
-            <p>or</p>
-            <div className="flex flex-1 items-center justify-center">
-              <div className="h-[1px] w-full border border-black" />
-            </div>
+          <div className="my-4 flex items-center">
+            <div className="flex-grow border-t border-gray-300"></div>
+            <span className="mx-2 text-xs tracking-wider text-gray-500">
+              OR CONTINUE WITH EMAIL
+            </span>
+            <div className="flex-grow border-t border-gray-300"></div>
           </div>
 
-          <div className="my-5 flex w-full flex-col gap-5">
-            {authProviders.map((provider) => (
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(handleSubmit)}
+              className="space-y-6"
+            >
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium text-gray-700">
+                      Email address
+                    </FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="name@example.com" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <div className="flex items-center justify-between">
+                      <FormLabel className="text-sm font-medium text-gray-700">
+                        Password
+                      </FormLabel>
+                      <Link
+                        href="/auth/forgot-password"
+                        className="text-xs text-gray-500 underline hover:text-gray-700"
+                      >
+                        Forgot your password?
+                      </Link>
+                    </div>
+                    <FormControl>
+                      <Input type="password" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <ErrorMsg>{form.formState.errors.root?.message}</ErrorMsg>
               <Button
-                key={provider.name}
-                variant={"darkOutline"}
-                onClick={() => signIn(provider.id)}
-                className="grid w-[350px] grid-cols-5 place-content-center gap-5 rounded-3xl"
+                type="submit"
+                className="w-full rounded-md py-3 font-medium text-[#004236] text-white"
               >
-                <Icons iconName={provider.name} />
-                <span className="col-span-3 text-lg font-extrabold tracking-tight">
-                  Sign in with {provider.name}
-                </span>
+                Log in
               </Button>
-            ))}
-          </div>
+            </form>
+          </Form>
 
-          <Link
-            href="/auth/forgot-password"
-            className="font-medium text-primary underline underline-offset-2"
-          >
-            Forgot your password?
-          </Link>
+          <p className="mt-6 text-center text-xs text-gray-500">
+            By logging in, you agree to our{" "}
+            <Link href="/terms" className="text-primary underline">
+              Terms of Service
+            </Link>{" "}
+            and{" "}
+            <Link href="/privacy-policy" className="text-primary underline">
+              Privacy Policy
+            </Link>
+          </p>
 
-          <div className="flex w-full flex-1 items-center justify-center">
-            <div className="h-[1px] w-full border border-black" />
-          </div>
-        </section>
-
-        <p>
-          Don&apos;t have an account?{" "}
-          <Link
-            href="/auth/signup"
-            className="font-semibold text-primary underline underline-offset-2"
-          >
-            Sign up
-          </Link>
-        </p>
+          <p className="mt-6 text-center text-sm">
+            Don&apos;t have an account?{" "}
+            <Link
+              href="/auth/signup"
+              className="font-medium text-primary underline underline-offset-2"
+            >
+              Sign up
+            </Link>
+          </p>
+        </div>
       </div>
     </MainLayout>
   );

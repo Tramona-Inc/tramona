@@ -2,17 +2,17 @@ import {
   ArrowLeftRight,
   BadgePercent,
   Briefcase,
-  DollarSign,
   HistoryIcon,
   HomeIcon,
   InboxIcon,
   LayoutDashboardIcon,
   MessageCircleIcon,
-  Users2Icon,
   WrenchIcon,
   MessagesSquare,
-  LinkIcon,
   BriefcaseIcon,
+  ClipboardIcon,
+  UserIcon,
+  SearchIcon,
 } from "lucide-react";
 
 export const adminNavLinks = [
@@ -33,6 +33,15 @@ export const adminNavLinks = [
   { href: "/requests", name: "Switch To Guest", icon: ArrowLeftRight },
 ];
 
+export const guestDesktopNavLinks = [
+  { href: "/", name: "Home", icon: HomeIcon },
+  { href: "/requests", name: "Requests", icon: BadgePercent },
+  { href: "/my-trips", name: "My Trips", icon: Briefcase },
+  { href: "/messages", name: "Messages", icon: MessageCircleIcon },
+];
+
+// MOBILE LINKS
+
 export const hostMobileNavLinks = [
   {
     href: "/host",
@@ -42,25 +51,20 @@ export const hostMobileNavLinks = [
   {
     href: "/host/requests",
     name: "Requests",
-    icon: BadgePercent,
+    icon: ClipboardIcon,
   },
   { href: "/host/messages", name: "Messages", icon: MessageCircleIcon },
-  { href: "/host/properties", name: "Properties", icon: HomeIcon },
-  { href: "/host/stays", name: "Stays", icon: Briefcase },
-  { href: "/host/finances", name: "Finances", icon: DollarSign },
-  { href: "/host/team", name: "Team", icon: Users2Icon },
 ];
 
-export const guestNavLinks = [
-  { href: "/", name: "Home", icon: HomeIcon },
+export const guestMobileNavLinks = [
+  { href: "/", name: "Dashboard", icon: HomeIcon },
+  { href: "/unclaimed-offers", name: "Explore", icon: SearchIcon },
+  { href: "/", name: "Concierge", icon: UserIcon },
+];
+
+export const guestMobileNavHamburgerLinks = [
   { href: "/requests", name: "Requests", icon: BadgePercent },
   { href: "/my-trips", name: "My Trips", icon: Briefcase },
   { href: "/messages", name: "Messages", icon: MessageCircleIcon },
-];
-
-export const unloggedNavLinks = [
-  { href: "/", name: "Home", icon: HomeIcon },
   { href: "/chat-with-admin", name: "Concierge", icon: MessagesSquare },
-  { href: "/link-input", name: "Link Input", icon: LinkIcon },
-  // ...headerLinks,
 ];

@@ -1,11 +1,9 @@
 import {
   adminNavLinks,
-  guestNavLinks,
+  guestMobileNavLinks,
   hostMobileNavLinks,
-  unloggedNavLinks,
 } from "@/config/sideNavLinks";
-
-import { ArrowLeftRight, MessagesSquare } from "lucide-react";
+import { ArrowLeftRight } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { NavBarLink } from "./NavBarLink";
 
@@ -26,29 +24,19 @@ export default function MobileNav({
     case "host":
       navLinks = hostMobileNavLinks;
       break;
-    case "unlogged":
-      navLinks = unloggedNavLinks;
-      break;
     default:
       navLinks = isAdmin
         ? [
-            ...guestNavLinks,
+            ...guestMobileNavLinks,
             { href: "/admin", name: "Switch To Admin", icon: ArrowLeftRight },
           ]
-        : [
-            ...guestNavLinks,
-            {
-              href: "/chat-with-admin",
-              name: "Concierge",
-              icon: MessagesSquare,
-            },
-          ];
+        : [...guestMobileNavLinks];
       break;
   }
 
   return (
     <header
-      className={`fixed inset-x-0 bottom-0 z-50 flex h-mobile-header-height items-center bg-[#fafafa] shadow-[0px_0px_10px_#0001] *:flex-1 lg:hidden *:lg:hidden`}
+      className={`*:w-full *:lg:hidden fixed inset-x-0 bottom-0 z-50 flex h-mobile-header-height w-full flex-row items-center justify-around bg-background shadow-[0px_0px_10px_#0001] lg:hidden`}
     >
       {navLinks.map((link, index) => (
         <NavBarLink key={index} href={link.href} icon={link.icon}>

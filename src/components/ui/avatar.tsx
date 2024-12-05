@@ -5,15 +5,34 @@ import { cn } from "@/utils/utils";
 import { type VariantProps, cva } from "class-variance-authority";
 import { User2Icon } from "lucide-react";
 
+//revist later
+// const avatarVariants = cva(
+//   "relative flex shrink-0 overflow-hidden rounded-full",
+//   {
+//     variants: {
+//       size: {
+//         xs: "h-10 w-10 text-xs",
+//         sm: "size-8 text-xs",
+//         md: "size-10 text-base",
+//         lg: "size-14 text-lg",
+//         huge: "size-24 text-3xl",
+//       },
+//     },
+//     defaultVariants: {
+//       size: "md",
+//     },
+//   },
+// );
 const avatarVariants = cva(
   "relative flex shrink-0 overflow-hidden rounded-full",
   {
     variants: {
       size: {
-        sm: "size-8 text-xs",
-        md: "size-10 text-base",
-        lg: "size-14 text-lg",
-        huge: "size-24 text-3xl",
+        xs: "h-6 w-6 text-xs",
+        sm: "h-8 w-8  text-xs",
+        md: "h-10 w-10  text-base",
+        lg: "h-12 w-12  text-lg",
+        huge: "h-14 w-14 text-3xl",
       },
     },
     defaultVariants: {
