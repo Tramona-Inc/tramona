@@ -308,12 +308,12 @@ export default function RequestToBookOrBookNowPriceCard({
               numberOfMonths={2}
               disabled={(date) =>
                 date < new Date() ||
-                bookedDates?.some((bookedDate) => {
+                (bookedDates?.some((bookedDate) => {
                   return (
                     date >= new Date(bookedDate.start) &&
                     date <= new Date(bookedDate.end)
                   );
-                })
+                }) ?? false)
               }
             />
           </PopoverContent>
@@ -538,7 +538,7 @@ export default function RequestToBookOrBookNowPriceCard({
                 <PriceBreakdown
                   requestToBookDetails={requestToBook}
                   property={property}
-                  requestAmount={requestAmount} //
+                  requestAmount={requestAmount!} //
                 />
               )}
             </div>

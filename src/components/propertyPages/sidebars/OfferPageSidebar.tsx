@@ -13,7 +13,13 @@ export default function OfferPageSidebar({
   offer: OfferWithDetails;
   property: Pick<
     Property,
-    "stripeVerRequired" | "originalListingId" | "bookOnAirbnb"
+    | "stripeVerRequired"
+    | "originalListingId"
+    | "bookOnAirbnb"
+    | "maxNumGuests"
+    | "id"
+    | "bookItNowEnabled"
+    | "bookItNowDiscountTiers"
   >;
 }) {
   return (

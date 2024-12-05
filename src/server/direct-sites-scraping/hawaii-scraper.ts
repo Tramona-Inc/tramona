@@ -514,7 +514,7 @@ const mapToScrapedListing = async (
     countryISO: addressComponents.countryISO,
     city: addressComponents.city,
     latLngPoint,
-    checkInInfo: `Check-In / Arrival Instructions:
+    additionalCheckInInfo: `Check-In / Arrival Instructions:
     Check-In time will be stated in your arrival instructions. Please adhere to check in times
     to allow our crews time to clean. DO NOT check in early (unless special arrangements
     have been made or secured) and unload belongings into a yet-to-be-cleaned property
