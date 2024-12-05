@@ -271,8 +271,13 @@ function UnMatchedPropertyCard({
   );
   const numGuests = 3;
   const link = isAirbnb
-    ? `https://airbnb.com/rooms/${property.originalListingId}`
-    : `/request-to-book/${property.id}?checkIn=${checkIn}&checkOut=${checkOut}&numGuests=${numGuests}`;
+  ? `https://airbnb.com/rooms/${property.originalListingId}`
+  : (() => {
+      if ("id" in property) {
+        return `/request-to-book/${property.id}?checkIn=${checkIn}&checkOut=${checkOut}&numGuests=${numGuests}`;
+      }
+      throw new Error("Property ID is required for non-Airbnb properties");
+    })();
 
   return (
     <Link
