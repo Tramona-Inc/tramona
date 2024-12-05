@@ -2,7 +2,7 @@ import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import HostRequests from "@/components/dashboard/host/requests/city/HostRequests";
 import HostRequestsLayout from "@/components/dashboard/host/requests/HostRequestsLayout";
 import Head from "next/head";
-import { Skeleton, SkeletonText } from "@/components/skeleton"; // 引入 Skeleton 组件
+import { Skeleton, SkeletonText } from "@/components/ui/skeleton"; // 引入 Skeleton 组件
 import { api } from "@/utils/api"; // 假设用于查询数据
 
 export default function Page() {

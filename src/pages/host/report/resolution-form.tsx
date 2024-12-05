@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
-import { Skeleton, SkeletonText } from "@/components/skeleton"; // 引入 Skeleton 组件
+import { Skeleton, SkeletonText } from "@/components/ui/skeleton"; // 引入 Skeleton 组件
 
 declare global {
   interface Window {

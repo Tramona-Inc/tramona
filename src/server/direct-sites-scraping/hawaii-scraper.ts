@@ -559,8 +559,8 @@ const mapToScrapedListing = async (
 export const cbIslandVacationsScraper: DirectSiteScraper = async ({
   checkIn,
   checkOut,
-  requestNightlyPrice,
-  requestId,
+  // requestNightlyPrice,
+  // requestId,
   location,
   numGuests,
 }) => {

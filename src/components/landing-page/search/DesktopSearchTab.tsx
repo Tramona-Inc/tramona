@@ -19,7 +19,7 @@ import {
   Filter,
 } from "lucide-react";
 import { api } from "@/utils/api";
-import { useAdjustedProperties } from "./AdjustedPropertiesContext";
+import { AirbnbSearchResult, useAdjustedProperties } from "./AdjustedPropertiesContext";
 import SingleDateInput from "@/components/_common/SingleDateInput";
 import { DialogFooter } from "@/components/ui/dialog";
 import { DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -245,17 +245,7 @@ const locations = [
   },
 ];
 
-type AirbnbSearchResult = {
-  description: string | null | undefined;
-  imageUrls: string[];
-  maxNumGuests: number;
-  name: string;
-  nightlyPrice: number;
-  originalListingId: string;
-  originalNightlyPrice: number;
-  originalListingPlatform: string;
-  ratingStr: string | null | undefined;
-};
+
 export function DesktopSearchTab() {
   const form = useZodForm({
     schema: searchSchema,
