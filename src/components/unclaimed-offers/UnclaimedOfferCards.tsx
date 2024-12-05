@@ -67,7 +67,7 @@ export default function UnclaimedOfferCards({
   // console.log("paginatedProps:", paginatedProperties);
 
   const totalPages = useMemo(() => {
-    return Math.max(1, Math.ceil(allProperties?.length / itemsPerPage));
+    return Math.max(1, Math.ceil(allProperties?.length ?? 0 / itemsPerPage));
   }, [allProperties?.length, itemsPerPage]);
 
   // const url = new URL(router.pathname);
@@ -164,13 +164,19 @@ export default function UnclaimedOfferCards({
               {/* <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"> */}
               <div className="grid grid-cols-1 gap-4 min-[580px]:grid-cols-2 min-[950px]:grid-cols-3 min-[1150px]:grid-cols-4">
                 {paginatedProperties?.length &&
-                  paginatedProperties.map((property, index) => (
+                  paginatedProperties.map((properties, index) => (
                     <div
-                      key={property.originalListingId}
+                      key={index}
                       className="animate-fade-in"
                       style={{ animationDelay: `${index * 50}ms` }}
                     >
-                      <UnMatchedPropertyCard property={property} />
+                      {properties &&
+                        properties.data.map((property) => (
+                          <UnMatchedPropertyCard
+                            property={property}
+                            key={property.id}
+                          />
+                        ))}
                     </div>
                   ))}
               </div>
@@ -236,7 +242,6 @@ function UnMatchedPropertyCard({
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const router = useRouter();
-
 
   const nextImage = (e: React.MouseEvent): void => {
     e.preventDefault();
