@@ -12,6 +12,7 @@ import {
 import { daysOfWeek, months } from "@/utils/constants";
 import { Button } from "@/components/ui/button";
 import HostICalSync from "./HostICalSync";
+import { FcElectricalSensor } from "react-icons/fc";
 
 type ReservationInfo = {
   start: string;
@@ -208,10 +209,7 @@ export default function HostAvailability({ property }: { property: Property }) {
             if (reservedInfo) {
               if (reservedInfo.platformBookedOn === "airbnb") {
                 reservationClass = "bg-reserved-pattern";
-              } else if (
-                reservedInfo.platformBookedOn === "tramona" &&
-                reservationClass === ""
-              ) {
+              } else {
                 reservationClass = "bg-reserved-pattern-2";
               }
             }

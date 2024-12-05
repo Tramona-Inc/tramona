@@ -400,6 +400,7 @@ export const propertyInsertSchema = createInsertSchema(properties, {
   originalListingUrl: z.string().url(),
   amenities: z.array(z.string()),
   otherAmenities: z.array(z.string()),
+  additionalCheckInInfo: z.string(),
   checkInTime: zodTime,
   checkOutTime: zodTime,
   roomsWithBeds: roomsWithBedsSchema,
