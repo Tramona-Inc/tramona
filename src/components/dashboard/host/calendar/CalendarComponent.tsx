@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect } from "react";
+import React, { useMemo, useEffect, useCallback } from "react";
 import { ChevronLeft, ChevronRight, ChevronDown, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -31,21 +31,21 @@ export default function CalendarComponent() {
   }, [hostProperties]);
 
   // const [editing, setEditing] = useState(false);
-  const [selectedRange, setSelectedRange] = useState<{
-    start: Date | null;
-    end: Date | null;
-  }>({ start: null, end: null });
+  // const [selectedRange, setSelectedRange] = useState<{
+  //   start: Date | null;
+  //   end: Date | null;
+  // }>({ start: null, end: null });
 
-  const queryInput = useMemo(
-    () => ({
-      hospitableListingId: selectedProperty?.hospitableListingId,
-    }),
-    [selectedProperty?.hospitableListingId],
-  );
+  const queryInput = useMemo(() => {
+    if (!selectedProperty?.hospitableListingId) return null; // Early return
+    return {
+      hospitableListingId: selectedProperty.hospitableListingId,
+    };
+  }, [selectedProperty?.hospitableListingId]);
 
   const { data: hospitableCalendarPrices, isLoading: loadingPrices } =
-    api.calendar.updateHostCalendar.useQuery(queryInput, {
-      enabled: Boolean(selectedProperty?.hospitableListingId),
+    api.calendar.getAndUpdateHostCalendar.useQuery(queryInput!, {
+      enabled: Boolean(queryInput),
     });
 
   const prices = useMemo(() => {
@@ -101,7 +101,7 @@ export default function CalendarComponent() {
   // };
 
 
-  const isDateReserved = (date: string) => {
+  const isDateReserved = useCallback((date: string) => {
     const parsedDate = parseISO(date);
 
     const normalizedDate = format(parsedDate, "yyyy-MM-dd");
@@ -120,8 +120,10 @@ export default function CalendarComponent() {
       return true;
     }
 
-    return false;
-  };
+      return false;
+    },
+    [reservedDates],
+  );
 
   const totalVacancies = useMemo(() => {
     const today = new Date();
@@ -130,7 +132,7 @@ export default function CalendarComponent() {
     return eachDayOfInterval({ start: startOfMonth, end: endOfMonth }).filter(
       (day) => isBefore(today, day) && !isDateReserved(day.toISOString()),
     ).length;
-  }, [reservedDates, date]);
+  }, [date, isDateReserved]);
 
   const leftOnTheTable = useMemo(() => {
     return Object.entries(prices || {})
@@ -235,7 +237,7 @@ export default function CalendarComponent() {
               date={date}
               reservedDateRanges={reservedDates}
               // onDateClick={handleDateClick}
-              selectedRange={selectedRange}
+              // selectedRange={selectedRange}
               // isEditing={editing}
               prices={prices}
               isLoading={isLoading}

@@ -67,8 +67,9 @@ export default function PropertyPage({
   const [reviewBackupImages, setReviewBackupImages] = useState<string[]>([]);
   const [openUserInfo, setOpenUserInfo] = useState(false);
 
-  api.calendar.updateHostCalendar.useQuery({
-    hospitableListingId: property.hospitableListingId!,
+  api.calendar.getAndUpdateHostCalendar.useQuery(
+    {
+      hospitableListingId: property.hospitableListingId!,
     },
     {
       enabled: Boolean(property.hospitableListingId),
