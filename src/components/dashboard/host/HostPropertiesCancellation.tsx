@@ -16,6 +16,9 @@ export default function HostPropertiesCancellation({
   const [editing, setEditing] = useState(false);
 
   const { mutateAsync: updateProperty } = api.properties.update.useMutation();
+  const { data: fetchedProperty, refetch } = api.properties.getById.useQuery({
+    id: property.id,
+  });
 
   const form = useZodForm({
     schema: z.object({
@@ -28,10 +31,11 @@ export default function HostPropertiesCancellation({
   const onSubmit = form.handleSubmit(async ({ policy }) => {
     await updateProperty({ id: property.id, cancellationPolicy: policy });
     setEditing(false);
+    void refetch();
   });
 
   return (
-    <div className="my-6">
+    <div className="my-6 w-full">
       <div className="text-end">
         <HostPropertyEditBtn
           editing={editing}
@@ -48,7 +52,7 @@ export default function HostPropertiesCancellation({
               name="policy"
               render={() => (
                 <FormItem>
-                  <div className="space-y-4 pt-4">
+                  <div className="h-screen-minus-header-n-footer space-y-4 overflow-y-auto pb-16 pt-6">
                     {CANCELLATION_POLICIES.map((policy) => (
                       <CancellationCardSelect
                         key={policy}
@@ -64,14 +68,14 @@ export default function HostPropertiesCancellation({
             />
           </Form>
         ) : (
-          <>
+          <div className="my-6">
             <h2 className="text-sm font-bold uppercase text-muted-foreground">
               Your Policy
             </h2>
             <p className="text-lg font-semibold">
-              {property.cancellationPolicy ?? "No policy"}
+              {fetchedProperty?.cancellationPolicy ?? "No policy"}
             </p>
-          </>
+          </div>
         )}
       </div>
     </div>

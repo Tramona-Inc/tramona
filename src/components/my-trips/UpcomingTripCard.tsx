@@ -1,4 +1,4 @@
-import { HelpCircleIcon, MapPinIcon } from "lucide-react";
+import { HelpCircleIcon, MessageCircleMore } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -6,13 +6,14 @@ import { formatDateRange, getDaysUntilTrip } from "@/utils/utils";
 import Image from "next/image";
 import UserAvatar from "../_common/UserAvatar";
 import { type TripCardDetails } from "@/pages/my-trips";
-import { api } from "@/utils/api";
-import ChatOfferButton from "../offers/ChatOfferButton";
+import ChatOfferButton from "../propertyPages/sections/ChatOfferButton";
 import TripCancelDialog from "./TripCancelDialog";
+import { useChatWithHost } from "@/utils/messaging/useChatWithHost";
 
 export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
-  const { data } = api.properties.getById.useQuery({ id: trip.propertyId });
-  const hostId = data?.hostId;
+  const chatWithHost = useChatWithHost();
+  const hostId = trip.property.hostTeam.ownerId;
+
   return (
     <div className="w-full">
       <div className="flex flex-col overflow-clip rounded-xl border shadow-md lg:flex-row">
@@ -37,9 +38,9 @@ export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
               </div>
               <div className="mt-4 flex gap-2">
                 <UserAvatar
-                  name={trip.property.host?.name}
+                  name={trip.property.hostTeam.owner.name}
                   image={
-                    trip.property.host?.image ??
+                    trip.property.hostTeam.owner.image ??
                     "/assets/images/tramona-logo.jpeg"
                   }
                 />
@@ -47,9 +48,8 @@ export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
                   <div>
                     <p className="text-sm text-muted-foreground">Hosted by</p>
                     <p>
-                      {trip.property.host?.name
-                        ? trip.property.host.name
-                        : "Tramona"}
+                      {trip.property.hostTeam.owner.name ??
+                        trip.property.hostTeam.name}
                     </p>
                   </div>
                 </div>
@@ -64,7 +64,6 @@ export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
               </Link>
 
               <p className="flex flex-row items-center gap-x-1">
-                <MapPinIcon size={18} />
                 {trip.property.address}
               </p>
 
@@ -95,29 +94,26 @@ export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
           <div className="h-[2px] rounded-full bg-gray-200"></div>
 
           <div className="flex flex-col justify-center gap-2 px-4 sm:flex-row lg:gap-4">
-            <ChatOfferButton
-              offerId={trip.offerId!.toString()}
-              offerHostId={hostId ?? null}
-              offerPropertyName={trip.property.name}
-            />
-            <Button asChild variant="secondary">
+            {trip.offerId && (
+              <ChatOfferButton
+                offerId={trip.offerId.toString()}
+                offerHostId={trip.property.hostTeam.ownerId}
+                offerPropertyName={trip.property.name}
+              />
+            )}
+            <Button asChild variant="primary">
               <Link href="/faq">
                 <HelpCircleIcon />
                 Help
               </Link>
             </Button>
             {trip.tripsStatus !== "Cancelled" && (
-              <TripCancelDialog
-                tripId={trip.id}
-                tripCancellation={trip.property.cancellationPolicy!}
-                bookingDate={trip.createdAt}
-                checkInDate={trip.checkIn}
-                checkOutDate={trip.checkOut}
-                checkInTime={trip.property.checkInTime}
-                checkOutTime={trip.property.checkOutTime}
-                totalPriceAfterFees={trip.totalPriceAfterFees}
-              />
+              <TripCancelDialog trip={trip} />
             )}
+            <Button onClick={() => chatWithHost({ hostId })}>
+              <MessageCircleMore />
+              Message Host
+            </Button>
           </div>
         </div>
       </div>

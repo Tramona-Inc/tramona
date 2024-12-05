@@ -178,49 +178,36 @@ async function generateConversation(
   conversationName?: string,
   offerId?: string,
 ) {
-  const [createdConversation] = await db
+  return await db
     .insert(conversations)
     .values({ name: conversationName ? conversationName : null, offerId })
-    .returning({ id: conversations.id });
-
-  return createdConversation?.id;
+    .returning({ id: conversations.id })
+    .then((res) => res[0]!.id);
 }
 
 export async function createConversationWithAdmin(userId: string) {
-  // Generate conversation and get id
-  const createdConversationId = await generateConversation();
+  const conversationId = await generateConversation();
 
-  if (createdConversationId !== undefined) {
-    // Insert participants for the user and admin
-    const participantValues = [
-      { conversationId: createdConversationId, userId: userId },
-      { conversationId: createdConversationId, userId: ADMIN_ID },
-    ];
+  await db.insert(conversationParticipants).values([
+    { conversationId, userId: userId },
+    { conversationId, userId: ADMIN_ID },
+  ]);
 
-    await db.insert(conversationParticipants).values(participantValues);
-
-    return createdConversationId;
-  }
+  return conversationId;
 }
 
 export async function createConversationWithHost(
   userId: string,
   hostId: string,
 ) {
-  // Generate conversation and get id
-  const createdConversationId = await generateConversation();
+  const conversationId = await generateConversation();
 
-  if (createdConversationId !== undefined) {
-    // Insert participants for the user and admin
-    const participantValues = [
-      { conversationId: createdConversationId, userId: userId },
-      { conversationId: createdConversationId, userId: hostId },
-    ];
+  await db.insert(conversationParticipants).values([
+    { conversationId, userId: userId },
+    { conversationId, userId: hostId },
+  ]);
 
-    await db.insert(conversationParticipants).values(participantValues);
-
-    return createdConversationId;
-  }
+  return conversationId;
 }
 
 export async function createConversationWithOfferHelper(
@@ -229,33 +216,14 @@ export async function createConversationWithOfferHelper(
   propertyName: string,
   offerId: string,
 ) {
-  console.log(
-    "called Create conversation here is the host/admin id",
-    offerHostOrAllAdmins,
-  );
-  // Generate conversation and get id
-  const createdConversationId = await generateConversation(
-    propertyName,
-    offerId,
-  );
-  console.log("here is the generated Conversation", createdConversationId);
+  const conversationId = await generateConversation(propertyName, offerId);
 
-  if (createdConversationId !== undefined) {
-    // Check if offerHostOrAllAdmins is a string or an array of strings
-    const participantValues: { conversationId: string; userId: string }[] = [
-      { conversationId: createdConversationId, userId: userId },
-      {
-        conversationId: createdConversationId,
-        userId: offerHostOrAllAdmins,
-      },
-    ];
+  await db.insert(conversationParticipants).values([
+    { conversationId, userId: userId },
+    { conversationId, userId: offerHostOrAllAdmins },
+  ]);
 
-    // Insert participants for the user and admin
-    console.log(participantValues);
-    await db.insert(conversationParticipants).values(participantValues);
-  }
-
-  return createdConversationId;
+  return conversationId;
 }
 
 async function addUserToConversation(userId: string, conversationId: string) {
@@ -268,20 +236,14 @@ export async function addTwoUserToConversation(
   user1Id: string,
   user2Id: string,
 ) {
-  // Generate conversation and get id
-  const createdConversationId = await generateConversation();
+  const conversationId = await generateConversation();
 
-  if (createdConversationId !== undefined) {
-    // Insert participants for the user and admin
-    const participantValues = [
-      { conversationId: createdConversationId, userId: user1Id },
-      { conversationId: createdConversationId, userId: user2Id },
-    ];
+  await db.insert(conversationParticipants).values([
+    { conversationId, userId: user1Id },
+    { conversationId, userId: user2Id },
+  ]);
 
-    await db.insert(conversationParticipants).values(participantValues);
-
-    return createdConversationId;
-  }
+  return conversationId;
 }
 
 export const messagesRouter = createTRPCRouter({
@@ -370,19 +332,21 @@ export const messagesRouter = createTRPCRouter({
       const tempUser = await db.query.users.findFirst({
         where: eq(users.sessionToken, input.sessionToken),
       });
-      let conversationId = null;
-      if (tempUser) {
-        conversationId = await fetchConversationWithAdmin(tempUser.id);
-        // Create conversation with admin if it doesn't exist
-        if (!conversationId) {
-          conversationId = await createConversationWithAdmin(tempUser.id);
-        }
-      } else {
+
+      if (!tempUser) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Guest Temporary User not found",
         });
       }
+
+      let conversationId = null;
+      conversationId = await fetchConversationWithAdmin(tempUser.id);
+      // Create conversation with admin if it doesn't exist
+      if (!conversationId) {
+        conversationId = await createConversationWithAdmin(tempUser.id);
+      }
+
       return { tempUserId: tempUser.id, conversationId: conversationId };
     }),
 

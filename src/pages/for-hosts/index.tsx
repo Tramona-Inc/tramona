@@ -6,13 +6,14 @@ import RequestFeed from "@/components/activity-feed/RequestFeed";
 import { type FeedRequestItem } from "@/components/activity-feed/ActivityFeed";
 import { getFeed } from "@/server/api/routers/feedRouter";
 import { type InferGetStaticPropsType } from "next";
-import HowItWorksHost from "@/components/landing-page/how-it-works-host";
 import TramonaIcon from "@/components/_icons/TramonaIcon";
 import Footer from "@/components/_common/Layout/Footer";
 import AccordionFaq from "@/components/_common/AccordionFaq";
-import { TestimonialCarousel } from "@/components/landing-page/_sections/testimonials/TestimonialCarousel";
-import { Check } from "lucide-react";
-import { Skeleton, SkeletonText } from "@/components/skeleton"; // 引入 Skeleton 组件
+import { Check, CircleCheckBig } from "lucide-react";
+import Onboarding1 from "@/components/host/onboarding/Onboarding1";
+import { useHostOnboarding } from "@/utils/store/host-onboarding";
+import { useRouter } from "next/router";
+import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
 
 type Tabs = {
   id: number;
@@ -42,40 +43,94 @@ const contents: Tabs[] = [
   },
 ];
 
-function IntroSection({
-                        requestFeed,
-                        isLoading,
-                      }: {
-  requestFeed?: FeedRequestItem[];
-  isLoading: boolean;
-}) {
+function MainSection({ requestFeed }: { requestFeed: FeedRequestItem[] }) {
+  const router = useRouter();
+  const progress = useHostOnboarding((state) => state.progress);
+  const setProgress = useHostOnboarding((state) => state.setProgress);
+
+  function onPressNext() {
+    setProgress(progress + 1);
+    void router.push("/host-onboarding");
+  }
+
+  const texts = [
+    "Up to $50,000 of protection per bookings",
+    "Optional security deposits",
+    "24/7 support",
+    "3 levels of verification",
+    "Complete control over pricing",
+    "Manual and automatic booking options",
+  ];
+
   return (
-      <section className="relative mx-auto flex max-w-7xl justify-center px-2">
-        <div className="flex flex-col items-center space-y-8 lg:flex-row lg:space-x-10 xl:space-x-20">
-          <div className="max-w-xl space-y-5">
-            <h2 className="text-center text-4xl font-bold tracking-tight text-primaryGreen md:text-6xl">
-              List on Tramona
-            </h2>
-            <p className="text-center text-4xl font-semibold tracking-tight md:text-6xl">
-              Let&apos;s make sure your calendar is filled
-            </p>
-            <p className="text-center text-lg font-medium tracking-tight md:text-2xl">
-              100% free to use, sign up and let the requests start rolling in
-            </p>
+    <section className="relative mx-auto max-w-7xl px-4">
+      <div className="flex flex-col-reverse gap-10 lg:flex-row">
+        <div className="basis-1/2">
+          <h2 className="text-2xl font-bold">
+            Sign up and start booking your vacancies
+          </h2>
+          <div className="py-4 lg:py-6">
+            <div className="h-[350px] rounded-lg border px-2 py-2 shadow-xl lg:h-[450px]">
+              <RequestFeed requestFeed={requestFeed} />
+            </div>
           </div>
-          <div className="h-[450px] rounded-lg border px-2 py-2 shadow-xl">
-            {isLoading ? (
-                <div className="space-y-4">
-                  <SkeletonText className="w-1/2 mx-auto" />
-                  <Skeleton className="h-32 w-full" />
-                  <Skeleton className="h-32 w-full" />
-                </div>
-            ) : (
-                <RequestFeed requestFeed={requestFeed!} />
-            )}
+          <div className="hidden space-y-1 text-lg lg:block">
+            {texts.map((text, index) => (
+              <div className="flex items-center gap-2" key={index}>
+                <CircleCheckBig className="text-teal-900" />
+                <p>{text}</p>
+              </div>
+            ))}
+          </div>
+          <div className="pt-4 lg:hidden">
+            <Questions />
           </div>
         </div>
-      </section>
+        <div className="flex basis-1/2 flex-col gap-4">
+          <div className="lg:rounded-lg lg:border lg:p-4">
+            <Onboarding1 onPressNext={onPressNext} forHost />
+          </div>
+
+          <p className="font-semibold lg:text-lg">
+            Hosts can expect to make 10-15% more when using Tramona to book
+            their empty nights
+          </p>
+          <div className="space-y-1 text-lg lg:hidden">
+            {texts.map((text, index) => (
+              <div className="flex items-center gap-2" key={index}>
+                <CircleCheckBig className="text-teal-900" />
+                <p>{text}</p>
+              </div>
+            ))}
+          </div>
+          <div className="hidden lg:block">
+            <Questions />
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Questions() {
+  const router = useRouter();
+
+  const buttons = [
+    { title: "FAQ", onClick: () => router.push("/faq") },
+    { title: "Watch host side demo", onClick: () => router.push("/demos") },
+  ];
+
+  return (
+    <div className="space-y-4 lg:rounded-lg lg:border lg:p-4">
+      <h1 className="text-2xl font-bold">Questions?</h1>
+      <div className="flex flex-col gap-2">
+        {buttons.map((button, index) => (
+          <Button key={index} onClick={button.onClick}>
+            {button.title}
+          </Button>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -84,92 +139,37 @@ function FAQ() {
     {
       question: "Can I counter offer requests?",
       answer:
-          "Yes! You have full control over pricing. If a traveler submits a request, you can respond with an offer that fits your availability and pricing preferences.",
+        "Yes! You have full control over pricing. If a traveler submits a request, you can respond with an offer that fits your availability and pricing preferences.",
     },
     {
       question: "Can I invite a co-host?",
       answer:
-          "Yes, Tramona supports co-hosting. You can add a co-host to help manage bookings, respond to traveler inquiries, and coordinate check-ins. They’ll have access to the necessary tools without needing full access to your account.",
+        "Yes, Tramona supports co-hosting. You can add a co-host to help manage bookings, respond to traveler inquiries, and coordinate check-ins. They’ll have access to the necessary tools without needing full access to your account.",
     },
     {
       question: "Why list on Tramona?",
       answer:
-          "Tramona helps you optimize occupancy and revenue by offering more flexibility. Just like how Priceline allowed hotels to offload unbooked rooms without lowering rates across the board, Tramona allows you to keep your listings at full price on other platforms while accepting offers for lower rates only when you choose. We also take lower fees than platforms like Airbnb and VRBO, meaning you can earn more while giving travelers better deals.",
+        "Tramona helps you optimize occupancy and revenue by offering more flexibility. Just like how Priceline allowed hotels to offload unbooked rooms without lowering rates across the board, Tramona allows you to keep your listings at full price on other platforms while accepting offers for lower rates only when you choose. We also take lower fees than platforms like Airbnb and VRBO, meaning you can earn more while giving travelers better deals.",
     },
     {
       question: "Can I sync my calendar with other platforms?",
       answer:
-          "Yes, Tramona allows you to sync your calendar with Airbnb. This ensures your availability is updated across all platforms, preventing double bookings.",
+        "Yes, Tramona allows you to sync your calendar with Airbnb. This ensures your availability is updated across all platforms, preventing double bookings.",
     },
   ];
 
   return (
-      <section className="mx-auto grid max-w-7xl grid-cols-1 gap-6 p-4 md:grid-cols-3">
-        <div className="space-y-4">
-          <h1 className="text-3xl font-bold md:text-4xl">Frequently asked questions</h1>
-          <h2 className="text-lg font-bold underline">
-            <Link href="/faq">See full FAQ </Link>
-          </h2>
-        </div>
-        <div className="col-span-2 border-t">
-          <AccordionFaq accordionItems={forHostsAccordionItems} />
-        </div>
-      </section>
-  );
-}
-
-export async function getStaticProps() {
-  const requestFeed = await getFeed({ maxNumEntries: 10 }).then((r) =>
-      r.filter((r) => r.type === "request"),
-  );
-  return {
-    props: { requestFeed },
-    revalidate: 60 * 5, // 5 minutes
-  };
-}
-
-export default function HostWelcome({
-                                      requestFeed,
-                                    }: InferGetStaticPropsType<typeof getStaticProps>) {
-  const isLoading = !requestFeed;
-
-  return (
-      <div>
-        <div className="relative space-y-32 overflow-x-hidden pb-32">
-          <Head>
-            <title>Hosts | Tramona</title>
-          </Head>
-          <div className="md:hidden">
-            <MobileStickyBar />
-          </div>
-          <div className="hidden md:block">
-            <StickyTopBar />
-          </div>
-          <IntroSection requestFeed={requestFeed} isLoading={isLoading} />
-          <HowItWorksHost />
-          <TestimonialCarousel />
-          <FAQ />
-        </div>
-        <div className="hidden md:block">
-          <Footer />
-        </div>
+    <section className="mx-auto grid max-w-7xl grid-cols-1 gap-6 p-4 md:grid-cols-3">
+      <div className="space-y-4">
+        <h1 className="text-3xl font-bold md:text-4xl">
+          Frequently asked questions
+        </h1>
+        <h2 className="text-lg font-bold underline">
+          <Link href="/faq">See full FAQ </Link>
+        </h2>
       </div>
-  );
-}
-
-
-function Questions() {
-  return (
-    <section className="space-y-6 text-balance text-center lg:px-44">
-      <h1 className="text-3xl font-bold lg:text-5xl">Questions?</h1>
-      <p className="font-semibold lg:text-3xl">
-        Please look through our host FAQ video library. We specifically made it
-        to answer any and all questions a host might have.
-      </p>
-      <div>
-        <Link href="/faq">
-          <Button size="lg">FAQ Page</Button>
-        </Link>
+      <div className="col-span-2 border-t">
+        <AccordionFaq accordionItems={forHostsAccordionItems} />
       </div>
     </section>
   );
@@ -199,7 +199,12 @@ function TailorYourBookingProcess() {
         {cards.map((card, index) => (
           <div key={index} className="basis-1/3 space-y-2">
             <div className="relative h-56 w-full overflow-clip rounded-xl">
-              <Image src={card.image} alt="" layout="fill" objectFit="cover" />
+              <Image
+                src={card.image}
+                alt=""
+                className="select-none object-cover object-center"
+                fill
+              />
             </div>
             <div>
               <h2 className="font-semibold lg:text-2xl">{card.title}</h2>
@@ -243,8 +248,8 @@ function DamageProtection() {
           <Image
             src="/assets/images/host-welcome/safe.jpeg"
             alt=""
-            objectFit="cover"
-            layout="fill"
+            className="select-none object-cover object-center"
+            fill
           />
         </div>
         <div className="flex-1 space-y-10">
@@ -352,4 +357,38 @@ function MobileStickyBar() {
     </div>
   );
 }
+export async function getStaticProps() {
+  const requestFeed = await getFeed({ maxNumEntries: 10 }).then((r) =>
+    r.filter((r) => r.type === "request"),
+  );
+  return {
+    props: { requestFeed },
+    revalidate: 60 * 5, // 5 minutes
+  };
+}
 
+export default function HostWelcome({
+  requestFeed,
+}: InferGetStaticPropsType<typeof getStaticProps>) {
+  return (
+    <div>
+      <div className="relative space-y-32 overflow-x-hidden pb-32">
+        <Head>
+          <title>Hosts | Tramona</title>
+        </Head>
+        <div className="md:hidden">
+          <MobileStickyBar />
+        </div>
+
+        <div className="hidden md:block">
+          <StickyTopBar />
+        </div>
+
+        <MainSection requestFeed={requestFeed} />
+      </div>
+      <div className="hidden md:block">
+        <Footer />
+      </div>
+    </div>
+  );
+}

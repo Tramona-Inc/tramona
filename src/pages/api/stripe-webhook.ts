@@ -25,9 +25,16 @@ import {
   completeReferral,
   validateHostDiscountReferral,
 } from "@/utils/webhook-functions/referral-utils";
-import { createSetupIntent } from "@/utils/webhook-functions/stripe-utils";
+import {
+  createSetupIntent,
+  getRequestIdByOfferId,
+  finalizeTrip,
+  createRequestToBook,
+} from "@/utils/webhook-functions/stripe-utils";
 import { sendSlackMessage } from "@/server/slack";
 import { formatDateMonthDay } from "@/utils/utils";
+import { breakdownPaymentByOffer } from "@/utils/payment-utils/paymentBreakdown";
+
 // ! Necessary for stripe
 export const config = {
   api: {
@@ -76,9 +83,11 @@ export default async function webhook(
           paymentIntentSucceeded.metadata.is_direct_listing === "true"
             ? true
             : false;
-        paymentIntentSucceeded.metadata.offer_id === undefined
-          ? undefined
-          : parseInt(paymentIntentSucceeded.metadata.offer_id);
+
+        const offerId =
+          paymentIntentSucceeded.metadata.offer_id === undefined //test to make sure its actually undefined lates
+            ? undefined
+            : parseInt(paymentIntentSucceeded.metadata.offer_id);
 
         if (isChargedWithSetupIntent) return;
         console.log(
@@ -94,110 +103,155 @@ export default async function webhook(
         if (confirmedAt && Date.parse(confirmedAt)) {
           const confirmedDate = new Date(confirmedAt);
 
-          await db
-            .update(offers)
-            .set({
-              acceptedAt: confirmedDate,
-            })
-            .where(
-              eq(
-                offers.id,
-                parseInt(paymentIntentSucceeded.metadata.offer_id!),
+          const currentProperty = await db.query.properties.findFirst({
+            where: eq(
+              properties.id,
+              parseInt(paymentIntentSucceeded.metadata.property_id!),
+            ),
+            with: { hostTeam: true },
+          });
+          3;
+
+          //<------- Setup Intent for future charge ---->
+
+          await createSetupIntent({
+            customerId: user!.stripeCustomerId!,
+            paymentMethodId: paymentIntentSucceeded.payment_method!,
+            userId: user!.id,
+          });
+
+          const paymentIntentId =
+            paymentIntentSucceeded.payment_intent?.toString();
+
+          if (!paymentIntentId) {
+            throw new Error(`paymentIntentId is null for userId  ${user?.id}`);
+          }
+          console.log("hi");
+
+          // --------- 3 Cases: 1. Book it now, 2.Request to book,  3. Offer  ---------------------------------------
+          //1 . CASE : Book it now
+          if (paymentIntentSucceeded.metadata.type === "bookItNow") {
+            await finalizeTrip({
+              paymentIntentId,
+              numOfGuests: parseInt(
+                paymentIntentSucceeded.metadata.num_of_guests!,
               ),
-            );
-
-          const requestId = paymentIntentSucceeded.metadata.request_id;
-
-          if (requestId && !isNaN(parseInt(requestId))) {
-            await db
-              .update(requests)
-              .set({ resolvedAt: confirmedDate })
-              .where(eq(requests.id, parseInt(requestId)));
-
-            //lets test with out the propertyID
-            const offer = await db.query.offers.findFirst({
-              with: {
-                request: { columns: { latLngPoint: false } },
-              },
-              where: eq(
-                offers.id,
-                parseInt(paymentIntentSucceeded.metadata.offer_id!),
+              travelerPriceBeforeFees: parseInt(
+                paymentIntentSucceeded.metadata
+                  .traveler_offered_price_before_fees!,
               ),
-            });
-
-            const currentProperty = await db.query.properties.findFirst({
-              where: eq(
-                properties.id,
-                parseInt(paymentIntentSucceeded.metadata.property_id!),
+              checkIn: new Date(paymentIntentSucceeded.metadata.check_in!),
+              checkOut: new Date(paymentIntentSucceeded.metadata.check_out!),
+              propertyId: parseInt(
+                paymentIntentSucceeded.metadata.property_id!,
               ),
+              userId: paymentIntentSucceeded.metadata.user_id!,
+              isDirectListingCharge,
+              source: "Book it now",
             });
+            //we need to work on referalls/messaging for book it now
 
-            //<------- Setup Intent for future charge ---->
-
-            await createSetupIntent({
-              customerId: user!.stripeCustomerId!,
-              paymentMethodId: paymentIntentSucceeded.payment_method!,
-              userId: user!.id,
+            // 2.  CASE : "RequestToBook"
+          } else if (paymentIntentSucceeded.metadata.type === "requestToBook") {
+            //not charging user or creating a superhog
+            console.log("hi");
+            await createRequestToBook({
+              paymentIntentId,
+              numOfGuests: parseInt(
+                paymentIntentSucceeded.metadata.num_of_guests!,
+              ),
+              travelerPriceBeforeFees: parseInt(
+                paymentIntentSucceeded.metadata
+                  .traveler_offered_price_before_fees!,
+              ),
+              checkIn: new Date(paymentIntentSucceeded.metadata.check_in!),
+              checkOut: new Date(paymentIntentSucceeded.metadata.check_out!),
+              propertyId: parseInt(
+                paymentIntentSucceeded.metadata.property_id!,
+              ),
+              userId: paymentIntentSucceeded.metadata.user_id!,
+              isDirectListingCharge,
             });
+          } else {
+            // 3. Case: "OFFER"
 
-            //create trip here
+            if (offerId) {
+              await db
+                .update(offers)
+                .set({
+                  acceptedAt: confirmedDate,
+                })
+                .where(eq(offers.id, offerId));
 
-            if (offer?.request) {
+              const requestId = await getRequestIdByOfferId(offerId); // get request by offer
+
+              if (requestId) {
+                await db
+                  .update(requests)
+                  .set({ resolvedAt: confirmedDate })
+                  .where(eq(requests.id, requestId));
+              }
+
+              const offer = await db.query.offers
+                .findFirst({
+                  with: {
+                    request: { columns: { latLngPoint: false } },
+                    property: {
+                      columns: {
+                        originalNightlyPrice: true,
+                        city: true,
+                        county: true,
+                        stateName: true,
+                        stateCode: true,
+                        country: true,
+                        currentSecurityDeposit: true,
+                      },
+                    },
+                  },
+                  where: eq(offers.id, offerId),
+                })
+                .then((res) => res!);
+
+              const priceBreakdown = breakdownPaymentByOffer(offer);
+
+              const tripCheckout = await db
+                .insert(tripCheckouts)
+                .values({
+                  paymentIntentId,
+                  travelerOfferedPriceBeforeFees:
+                    offer.travelerOfferedPriceBeforeFees,
+                  totalTripAmount: priceBreakdown.totalTripAmount,
+                  taxesPaid: priceBreakdown.taxesPaid,
+                  superhogFee: priceBreakdown.superhogFee,
+                  stripeTransactionFee: priceBreakdown.stripeTransactionFee,
+                  totalSavings: priceBreakdown.totalSavings,
+                  securityDeposit: offer.property.currentSecurityDeposit,
+                })
+                .returning()
+                .then((r) => r[0]!);
+
               const currentTrip = await db
                 .insert(trips)
                 .values({
                   checkIn: offer.checkIn,
                   checkOut: offer.checkOut,
-                  numGuests: offer.request.numGuests,
-                  groupId: offer.request.madeByGroupId,
+                  numGuests: offer.request?.numGuests ?? 0,
+                  groupId: offer.request?.madeByGroupId ?? 0,
                   propertyId: offer.propertyId,
                   offerId: offer.id,
-                  paymentIntentId:
-                    paymentIntentSucceeded.payment_intent?.toString() ?? "",
+                  paymentIntentId,
                   totalPriceAfterFees: paymentIntentSucceeded.amount,
-                  tripCheckoutId: offer.tripCheckoutId,
+                  tripCheckoutId: tripCheckout.id,
                 })
-                .returning()
-                .then((res) => res[0]!);
-
-              //<-------- update tripPayment here --------->
-
-              const currentTripPayment = await db
-                .update(tripCheckouts)
-                .set({
-                  totalTripAmount: paymentIntentSucceeded.amount,
-                  travelerOfferedPriceBeforeFees: parseInt(
-                    paymentIntentSucceeded.metadata
-                      .traveler_offered_price_before_fees!,
-                  ),
-                  taxesPaid: parseInt(
-                    paymentIntentSucceeded.metadata.taxes_paid!,
-                  ),
-                  taxPercentage: parseFloat(
-                    paymentIntentSucceeded.metadata.tax_percentage!,
-                  ),
-                  superhogFee: parseInt(
-                    paymentIntentSucceeded.metadata.superhog_paid!,
-                  ),
-                  stripeTransactionFee: parseInt(
-                    paymentIntentSucceeded.metadata.stripe_transaction_fee!,
-                  ),
-                  paymentIntentId:
-                    paymentIntentSucceeded.payment_intent?.toString() ?? "",
-                  totalSavings: parseInt(
-                    paymentIntentSucceeded.metadata.total_savings!,
-                  ),
-                })
-                .where(eq(tripCheckouts.id, offer.tripCheckoutId))
                 .returning()
                 .then((res) => res[0]!);
 
               const currentTripWCheckout: TripWCheckout = {
                 ...currentTrip,
-                tripCheckout: { ...currentTripPayment },
+                tripCheckout,
               };
 
-              //<___creating a superhog reservation only if does not exist__>
+              //<___creating a superhog  oreservationnly if does not exist__>
 
               const currentSuperhogReservation = await db.query.trips.findFirst(
                 {
@@ -240,15 +294,15 @@ export default async function webhook(
                 await completeReferral({ user: user, offerId: offer.id });
               }
               //validate the host discount referral
-              if (currentProperty?.hostId) {
+              if (currentProperty?.hostTeam.ownerId) {
                 await validateHostDiscountReferral({
-                  hostUserId: currentProperty.hostId,
+                  hostUserId: currentProperty.hostTeam.ownerId,
                 });
               }
               if (paymentIntentSucceeded.metadata.user_id) {
                 await createConversationWithOfferAfterBooking({
                   offerId: offer.id.toString(),
-                  offerHostId: currentProperty!.hostId,
+                  offerHostId: currentProperty!.hostTeam.ownerId,
                   offerPropertyName: currentProperty!.name,
                   travelerId: paymentIntentSucceeded.metadata.user_id,
                 });

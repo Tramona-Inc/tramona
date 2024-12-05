@@ -1,45 +1,90 @@
 import {
   BadgeHelp,
-  BadgeInfo,
   HandshakeIcon,
-  Home,
   InfoIcon,
   LinkIcon,
-  MessageCircleQuestion
+  TvMinimalPlay,
+  HeadsetIcon,
+  ShieldCheckIcon,
+  UsersIcon,
+  LayoutDashboard,
+  HouseIcon,
+  HandCoins,
+  SettingsIcon,
 } from "lucide-react";
+//  <---------------- DESKTOP LINKS ----------------->
 
-export const headerLinks = [
-  { name: "Link Input", href: "/link-input", icon: LinkIcon },
-  { name: "How it works", href: "/how-it-works", icon: InfoIcon },
-  { name: "Recent Deals", href: "/exclusive-offers", icon: HandshakeIcon },
-  { name: "For Hosts", href: "/why-list", icon: Home },
-  // { name: "FAQ", href: "/faq", icon: MessageCircleQuestion },
-  // {
-  //   name: "Unclaimed Offers",
-  //   href: "/unclaimed-offers",
-  //   icon: BadgePercentIcon,
-  // },
+// same for logged and unlogged
+export const leftHeaderLinks = [
+  { name: "Requests", href: "/requests", icon: LinkIcon },
+  { name: "Trips", href: "/my-trips", icon: InfoIcon },
+  { name: "Messages", href: "/messages", icon: InfoIcon },
 ];
 
-export const hamburgerLinksDesktop = [
-  // { name: "FAQ", href: "/faq", icon: MessageCircleQuestion },
-  { name: "Contact", href: "/support", icon: BadgeInfo },
-  //{ name: "24/7 Support", href: "/help-center", icon: BadgeHelp },
+//------- DROPDOWN LINKS ------
+export const aboutMenuItems = [
+  { href: "/how-it-works", title: "How it Works", icon: InfoIcon },
+  { href: "/exclusive-offers", title: "Recent Deals", icon: HandshakeIcon },
+  { href: "/faq", title: "FAQ", icon: BadgeHelp },
+  { href: "/demo", title: "Demo", icon: TvMinimalPlay },
+  { href: "/partner-with-tramona", title: "Partnerships", icon: UsersIcon },
 ];
 
-export const unloggedHamburgerLinksMobile = [
-  { name: "24/7 Support", href: "/help-center", icon: BadgeHelp },
-  { name: "How it Works", href: "/how-it-works", icon: InfoIcon },
-  { name: "For Hosts", href: "/why-list", icon: Home },
-  { name: "Recent Deals", href: "/exclusive-offers", icon: HandshakeIcon },
-  { name: "FAQ", href: "/faq", icon: MessageCircleQuestion },
+export const helpMenuItems = [
+  { href: "/help-center", title: "24/7 Support", icon: HeadsetIcon },
+  {
+    href: "/rebooking-guarantee",
+    title: "100% Re-booking Guarantee",
+    icon: ShieldCheckIcon,
+  },
 ];
 
-export const hamburgerLinksMobile = [
-  { name: "24/7 Support", href: "/help-center", icon: BadgeHelp },
-  { name: "Link Input", href: "/link-input", icon: LinkIcon },
-  { name: "How it works", href: "/how-it-works", icon: InfoIcon },
-  { name: "For Hosts", href: "/why-list", icon: Home },
-  { name: "Recent Deals", href: "/exclusive-offers", icon: HandshakeIcon },
-  { name: "FAQ", href: "/faq", icon: MessageCircleQuestion },
+//  ------------MOBILE LINKS--------
+
+export const browseLinkItems = [
+  //mobile only
+  { href: "/how-it-works", title: "How it Works", icon: InfoIcon },
+  { href: "/exclusive-offers", title: "Recent Deals", icon: HandshakeIcon },
+  { href: "/demo", title: "Demo", icon: TvMinimalPlay },
+  {
+    href: "/partner-with-tramona",
+    title: "Partnerships",
+    icon: UsersIcon,
+  },
+];
+
+export const aboutLinkItems = [
+  //mobile only
+  { href: "/faq", title: "FAQ", icon: BadgeHelp },
+  { href: "/help-center", title: "24/7 Support", icon: HeadsetIcon },
+  {
+    href: "/rebooking-guarantee",
+    title: "100% Re-booking Guarantee",
+    icon: ShieldCheckIcon,
+  },
+];
+
+// <----------- HOST MOBILE LINKS ---------->
+export const hostManageLinks = [
+  { href: "/host", title: "Dashboard", icon: LayoutDashboard },
+  { href: "listings", title: "Properties", icon: HouseIcon },
+  { href: "team", title: "Team", icon: UsersIcon },
+];
+
+export const hostAccountLinks = [
+  { href: "finances", title: "Earnings", icon: HandCoins },
+  { href: "settings", title: "Settings", icon: SettingsIcon },
+];
+
+// ----------- HOST DESKTOP LINKS
+
+export const hostCenterHeaderLinks = [
+  { name: "Overview", href: "/host" },
+  { name: "Calendar", href: "/host/calendar" },
+  { name: "Listings", href: "/host/properties" },
+  { name: "Messaging", href: "/host/messages" },
+  { name: "Requests", href: "/host/requests" },
+  { name: "Stays", href: "/host/stays" },
+  { name: "Finances", href: "/host/finances" },
+  { name: "Team", href: "/host/team" },
 ];

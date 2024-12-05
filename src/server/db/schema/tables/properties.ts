@@ -21,7 +21,6 @@ import {
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 import { ALL_PROPERTY_AMENITIES } from "./propertyAmenities";
-import { users } from "./users";
 import { ALL_LISTING_SITE_NAMES, propertyTypeEnum } from "../common";
 
 export const CANCELLATION_POLICIES = [
@@ -118,6 +117,35 @@ export const ALL_PROPERTY_AMENITIES_ONBOARDING = [
   "Driveway parking",
 ] as const;
 
+export const ALL_CHECKIN_TYPES = [
+  "Smart lock",
+  "Keypad",
+  "Lockbox",
+  "Building staff",
+] as const;
+
+export const ALL_CHECKOUT_TYPES = [
+  "Gather used towels",
+  "Throw trash away",
+  "Turn things off",
+  "Lock up",
+  "Return keys",
+] as const;
+
+export const ALL_HOUSE_RULES = [
+  "No smoking",
+  "No pets",
+  "No parties or events",
+  "Quiet hours",
+] as const;
+
+export const ALL_INTERACTION_PREFERENCES = [
+  "not available",
+  "say hello",
+  "socialize",
+  "no preference",
+] as const;
+
 export const propertySafetyItemsEnum = pgEnum(
   "property_safety_items",
   ALL_PROPERTY_SAFETY_ITEMS,
@@ -132,6 +160,17 @@ export const propertyStatusEnum = pgEnum("property_status", [
   "Drafted",
   "Archived",
 ]);
+
+export const checkInEnum = pgEnum("check_in_type", ALL_CHECKIN_TYPES);
+
+export const checkOutEnum = pgEnum("check_out_info", ALL_CHECKOUT_TYPES);
+
+export const houseRulesEnum = pgEnum("house_rules", ALL_HOUSE_RULES);
+
+export const interactionPreferencesEnum = pgEnum(
+  "interaction_preference",
+  ALL_INTERACTION_PREFERENCES,
+);
 
 export const ALL_PROPERTY_PMS = ["Hostaway", "Hospitable", "Ownerrez"] as const;
 
@@ -234,8 +273,7 @@ export const properties = pgTable(
   "properties",
   {
     id: serial("id").primaryKey(),
-    hostId: text("host_id").references(() => users.id, { onDelete: "cascade" }),
-    hostTeamId: integer("host_team_id"), // TODO: migrate fully away from hostId
+    hostTeamId: integer("host_team_id").notNull(),
     originalListingPlatform: listingPlatformEnum("original_listing_platform"), // null = only on Tramona
     originalListingId: varchar("original_listing_id"),
 
@@ -245,32 +283,41 @@ export const properties = pgTable(
       .notNull()
       .default("Entire place"),
 
-    // how many guests does this property accomodate at most?
+    /** how many guests does this property accomodate at most? */
     maxNumGuests: smallint("max_num_guests").notNull(),
     numBeds: smallint("num_beds").notNull(),
     numBedrooms: smallint("num_bedrooms").notNull(),
     numBathrooms: doublePrecision("num_bathrooms"),
     // propertyPMS: propertyPMSEnum("property_pms"),
 
-    // for when blake/preju manually upload, otherwise get the host's name via hostId
+    /** for when blake/preju manually upload, otherwise get the host's name via hostId */
     hostName: varchar("host_name", { length: 255 }),
     hostProfilePic: varchar("host_profile_pic"),
     hostNumReviews: integer("host_num_reviews"),
     hostRating: doublePrecision("host_rating"),
 
     address: varchar("address", { length: 1000 }).notNull(),
-    // latitude: doublePrecision("latitude").notNull(),
-    // longitude: doublePrecision("longitude").notNull(),
-    // latitude: doublePrecision("latitude").notNull(),
-    // longitude: doublePrecision("longitude").notNull(),
+    county: varchar("county", { length: 255 }),
+    stateName: varchar("state_name", { length: 255 }),
+    stateCode: varchar("state_code", { length: 8 }),
     city: varchar("city", { length: 255 }).notNull(),
+    country: varchar("country", { length: 255 }).notNull(),
+    countryISO: varchar("country_iso", { length: 3 }).notNull(),
+
     originalListingUrl: varchar("original_listing_url"),
-    checkInInfo: varchar("check_in_info"),
+    checkInType: checkInEnum("check_in_type"),
+    additionalCheckInInfo: varchar("additional_check_in_info"),
+    checkOutInfo: checkOutEnum("check_out_info").array(),
+    additionalCheckOutInfo: varchar("additional_check_out_info"),
+    houseRules: houseRulesEnum("house_rules").array(),
+    additionalHouseRules: varchar("additional_house_rules"),
+    interactionPreference: interactionPreferencesEnum("interaction_preference"),
+    directions: varchar("directions"),
+    wifiName: varchar("wifi_name"),
+    wifiPassword: varchar("wifi_password"),
+    houseManual: varchar("house_manual"),
     checkInTime: time("check_in_time").notNull().default("15:00:00"),
     checkOutTime: time("check_out_time").notNull().default("10:00:00"),
-
-
-    // amenities: propertyAmenitiesEnum("amenities").array().notNull(),
     amenities: varchar("amenities")
       .array()
       .notNull()
@@ -294,8 +341,10 @@ export const properties = pgTable(
     numRatings: integer("num_ratings").notNull().default(0),
     airbnbUrl: varchar("airbnb_url"),
     originalNightlyPrice: integer("original_nightly_price"), // in cents
+    currentSecurityDeposit: integer("current_security_deposit")
+      .notNull()
+      .default(0), //cant be null
     areaDescription: text("area_description"),
-    mapScreenshot: text("map_screenshot"),
     cancellationPolicy: text("cancellation_policy"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
@@ -304,11 +353,11 @@ export const properties = pgTable(
     ageRestriction: integer("age_restriction"),
     priceRestriction: integer("price_restriction").default(0),
     stripeVerRequired: boolean("stripe_ver_required").default(false),
-    propertyStatus: propertyStatusEnum("property_status").default("Listed"),
-    hostImageUrl: varchar("host_image_url"),
+    status: propertyStatusEnum("property_status").default("Listed"),
     pricingScreenUrl: varchar("pricing_screen_url"),
     currency: currencyEnum("currency").notNull().default("USD"),
-    // hostawayListingId: integer("hostaway_listing_id"),
+    hospitableListingId: varchar("hospitable_listing_id"),
+    datesLastUpdated: timestamp("dates_last_updated", { withTimezone: true }).defaultNow(),
     latLngPoint: geometry("lat_lng_point", {
       type: "point",
       mode: "xy",
@@ -322,6 +371,15 @@ export const properties = pgTable(
     autoOfferDiscountTiers: jsonb("auto_offer_discount_tiers").$type<
       DiscountTier[]
     >(),
+    bookItNowEnabled: boolean("book_it_now_enabled").notNull().default(false),
+    bookItNowDiscountTiers: jsonb("book_it_now_discount_tiers").$type<
+      DiscountTier[]
+    >(),
+    requestToBookDiscountPercentage: integer(
+      "request_to_book_discount_percentage",
+    )
+      .notNull()
+      .default(5),
   },
   (t) => ({
     spatialIndex: index("spacial_index").using("gist", t.latLngPoint),
@@ -334,6 +392,8 @@ export const propertySelectSchema = createSelectSchema(properties);
 
 // https://github.com/drizzle-team/drizzle-orm/issues/1609
 export const propertyInsertSchema = createInsertSchema(properties, {
+  checkOutInfo: z.array(z.enum(ALL_CHECKOUT_TYPES)),
+  houseRules: z.array(z.enum(ALL_HOUSE_RULES)),
   imageUrls: z.array(z.string().url()),
   originalListingUrl: z.string().url(),
   amenities: z.array(z.string()),
@@ -342,6 +402,8 @@ export const propertyInsertSchema = createInsertSchema(properties, {
   checkOutTime: zodTime,
   roomsWithBeds: roomsWithBedsSchema,
   autoOfferDiscountTiers: z.array(discountTierSchema),
+  bookItNowDiscountTiers: z.array(discountTierSchema).nullable(),
+  latLngPoint: z.object({ x: z.number(), y: z.number() }),
 });
 
 // make everything except id optional

@@ -12,8 +12,8 @@ export function NewCityRequestBtn() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="secondary">
-          <PlusIcon className="-ml-1 size-5" />
+        <Button variant="primary">
+          <PlusIcon className="size-5 -ml-1" />
           New request
         </Button>
       </DialogTrigger>

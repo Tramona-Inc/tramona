@@ -22,7 +22,7 @@ const buttonVariants = cva(
         destructive:
           "bg-destructive text-destructive-foreground hover:bg-destructive/90 disabled:bg-zinc-400 disabled:text-secondary-foreground",
         outline:
-          "border border-primary bg-background text-primary hover:bg-zinc-200 focus-visible:bg-zinc-200",
+          "border border-[#c9c9c9] bg-white text-primary font-normal text-base hover:bg-zinc-100 focus-visible:bg-zinc-200",
         secondary:
           "bg-zinc-100 border border-zinc-300 text-secondary-foreground hover:bg-zinc-200",
         ghost:
@@ -33,7 +33,7 @@ const buttonVariants = cva(
         filledInput:
           "w-full bg-primary-foreground px-3 font-normal text-black hover:bg-accent border border-input outline-offset-0 focus-visible:outline-2 focus-visible:outline-ring disabled:opacity-50",
         darkPrimary: "bg-black text-white hover:bg-black/80",
-        darkOutline: "border-2 border-black hover:bg-zinc-200",
+        darkOutline: "border border-black hover:bg-zinc-200",
         darkOutlineWhite: "border-2 border-white text-white",
         white: "bg-white text-black hover:bg-zinc-200",
         wrapper:
@@ -46,7 +46,7 @@ const buttonVariants = cva(
           "rounded-full border-2 flex items-center justify-center hover:border-black transition-all duration-200",
         underline: "hover:bg-accent text-zinc-800 underline",
         primary:
-          "bg-primaryGreen hover:opacity-90 text-white disabled:bg-zinc-400 disabled:text-secondary-foreground",
+          "bg-primaryGreen hover:opacity-90 text-[#fafafa] disabled:bg-zinc-400 disabled:text-secondary-foreground",
       },
     },
     defaultVariants: {

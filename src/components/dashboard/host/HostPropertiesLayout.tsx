@@ -1,14 +1,6 @@
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Pencil, PlusIcon } from "lucide-react";
+import { Grid, Plus } from "lucide-react";
 import HostProperties from "./HostProperties";
-import Link from "next/link";
 import {
   type LocationType,
   useHostOnboarding,
@@ -18,11 +10,23 @@ import {
   CancellationPolicyWithInternals,
   type Property,
 } from "@/server/db/schema/tables/properties";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useRouter } from "next/router";
+import ExpandableSearchBar from "@/components/_common/ExpandableSearchBar";
+import { useEffect, useState } from "react";
+import HostPropertiesSidebar from "./HostPropertiesSidebar";
+import { cn } from "@/utils/utils";
+import HostPropertyInfo from "./HostPropertyInfo";
 
-export default function HostPropertiesLayout({
-  children,
-}: React.PropsWithChildren) {
-  // const [open, setOpen] = useState(false);
+export default function HostPropertiesLayout() {
+  const [searchResults, setSearchResults] = useState<Property[]>([]);
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+  const [selectedProperty, setSelectedProperty] = useState<Property>();
+  const [open, setOpen] = useState(false);
+
+  const router = useRouter();
+
+  const setProgress = useHostOnboarding((state) => state.setProgress);
 
   const setPropertyType = useHostOnboarding((state) => state.setPropertyType);
   const setMaxGuests = useHostOnboarding((state) => state.setMaxGuests);
@@ -56,6 +60,7 @@ export default function HostPropertiesLayout({
   );
 
   function setStatesDefault() {
+    setProgress(0);
     setPropertyType("Apartment"),
       setMaxGuests(1),
       setBedrooms(1),
@@ -88,88 +93,105 @@ export default function HostPropertiesLayout({
   const { data: properties } = api.properties.getHostProperties.useQuery();
 
   const listedProperties = properties?.filter(
-    (property) => property.propertyStatus === "Listed",
+    (property) => property.status === "Listed",
   );
   const archivedProperties = properties?.filter(
-    (property) => property.propertyStatus === "Archived",
+    (property) => property.status === "Archived",
   );
   const draftedProperties = properties?.filter(
-    (property) => property.propertyStatus === "Drafted",
+    (property) => property.status === "Drafted",
   );
 
+  const handleSearchResults = (results: Property[]) => {
+    setSearchResults(results);
+  };
+
+  const handleSelectedProperty = (property: Property) => {
+    setSelectedProperty(property);
+    setOpen(true);
+  };
+
+  useEffect(() => {
+    if (open) {
+      document.body.classList.add("overflow-hidden");
+    } else {
+      document.body.classList.remove("overflow-hidden");
+    }
+  }, [open]);
+
   return (
-    <div className="flex">
-      <div className="sticky top-20 h-screen-minus-header-n-footer w-full overflow-auto border-r px-4 py-8 xl:w-96">
-        <ScrollArea>
-          <h1 className="text-3xl font-bold">Properties</h1>
-          {/* <p className="text-muted-foreground">24% currently vacant</p> */}
-          <div className="my-4">
-            {/* <NewPropertyBtn open={open} setOpen={setOpen} /> */}
-            <Link href="/host-onboarding">
-              <Button
-                variant="secondary"
-                onClick={() => {
-                  setStatesDefault();
-                }}
-              >
-                <PlusIcon />
-                New Listing
-              </Button>
-            </Link>
-          </div>
-          <Accordion type="multiple" className="w-full">
-            <AccordionItem value="listed">
-              <AccordionTrigger>
-                Listed{" "}
-                <span className="text-muted-foreground">
-                  {listedProperties?.length}
-                </span>
-              </AccordionTrigger>
-              <AccordionContent>
-                <HostProperties properties={listedProperties ?? null} />
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="drafts">
-              <AccordionTrigger>
-                Drafts{" "}
-                <span className="text-muted-foreground">
-                  {draftedProperties?.length}
-                </span>
-              </AccordionTrigger>
-              <AccordionContent>
-                <HostProperties properties={draftedProperties ?? null} />
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="archive">
-              <AccordionTrigger>
-                Archives{" "}
-                <span className="text-muted-foreground">
-                  {archivedProperties?.length}
-                </span>
-              </AccordionTrigger>
-              <AccordionContent>
-                <HostProperties properties={archivedProperties ?? null} />
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        </ScrollArea>
+    <section className="relative mx-auto mb-24 mt-7 max-w-8xl px-6 md:my-14">
+      <HostPropertiesSidebar
+        onClose={() => setOpen(false)}
+        className={cn("", !open && "hidden")}
+      >
+        {selectedProperty && <HostPropertyInfo property={selectedProperty} />}
+      </HostPropertiesSidebar>
+      <div className="flex items-center gap-4 sm:flex-row sm:justify-between">
+        <h1 className="text-2xl font-semibold md:text-4xl">Your Properties</h1>
+        <div className="flex flex-1 items-center justify-end gap-4">
+          <ExpandableSearchBar
+            className="hidden sm:flex"
+            onSearchResultsUpdate={handleSearchResults}
+            onExpandChange={setIsSearchExpanded}
+          />
+          <Button
+            size="icon"
+            className="rounded-full bg-white font-bold text-black shadow-xl"
+          >
+            <Grid strokeWidth={2} />
+          </Button>
+          <Button
+            size="icon"
+            className="rounded-full bg-white font-bold text-black shadow-xl"
+            onClick={() => {
+              setStatesDefault();
+              void router.push("/host-onboarding");
+            }}
+          >
+            <Plus strokeWidth={2} />
+          </Button>
+        </div>
       </div>
-      <div className="hidden flex-1 xl:block">
-        {children ? (
-          <div className="mx-auto my-8 min-h-screen-minus-header-n-footer max-w-4xl rounded-2xl border">
-            <div className="grid grid-cols-1">{children}</div>
-          </div>
-        ) : (
-          <div className="hidden sm:block">
-            <div className="flex min-h-screen-minus-header-n-footer items-center justify-center">
-              <p className="font-medium text-muted-foreground">
-                Select a property to view more details
-              </p>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
+      <ExpandableSearchBar
+        className="pt-4 sm:hidden"
+        onSearchResultsUpdate={handleSearchResults}
+        onExpandChange={setIsSearchExpanded}
+      />
+      {isSearchExpanded ? (
+        <HostProperties
+          properties={searchResults}
+          onSelectedProperty={handleSelectedProperty}
+          searched
+        />
+      ) : (
+        <Tabs className="mt-6" defaultValue="listed">
+          <TabsList>
+            <TabsTrigger value="listed">Listed</TabsTrigger>
+            <TabsTrigger value="drafts">Drafts</TabsTrigger>
+            <TabsTrigger value="archived">Archived</TabsTrigger>
+          </TabsList>
+          <TabsContent value="listed">
+            <HostProperties
+              properties={listedProperties ?? null}
+              onSelectedProperty={handleSelectedProperty}
+            />
+          </TabsContent>
+          <TabsContent value="drafts">
+            <HostProperties
+              properties={draftedProperties ?? null}
+              onSelectedProperty={handleSelectedProperty}
+            />
+          </TabsContent>
+          <TabsContent value="archived">
+            <HostProperties
+              properties={archivedProperties ?? null}
+              onSelectedProperty={handleSelectedProperty}
+            />
+          </TabsContent>
+        </Tabs>
+      )}
+    </section>
   );
 }
 
@@ -178,12 +200,18 @@ export function HostPropertyEditBtn({
   setEditing,
   onSubmit,
   property,
+  disabled,
 }: {
   editing: boolean;
   setEditing: (editing: boolean) => void;
   onSubmit?: () => void;
   property: Property;
+  disabled?: boolean;
 }) {
+  const { data: fetchedProperty, refetch } = api.properties.getById.useQuery({
+    id: property.id,
+  });
+
   const setPropertyType = useHostOnboarding((state) => state.setPropertyType);
   const setMaxGuests = useHostOnboarding((state) => state.setMaxGuests);
   const setBedrooms = useHostOnboarding((state) => state.setBedrooms);
@@ -213,62 +241,71 @@ export function HostPropertyEditBtn({
   );
 
   const addressWithApt: LocationType = {
-    country: property.address.split(", ")[4] ?? "",
-    street: property.address.split(", ")[0] ?? "",
-    apt: property.address.split(", ")[1] ?? "",
-    city: property.address.split(", ")[2] ?? "",
-    state: property.address.split(", ")[3]?.split(" ")[0] ?? "",
-    zipcode: property.address.split(", ")[3]?.split(" ")[1] ?? "",
+    country: fetchedProperty?.address.split(", ")[4] ?? "",
+    street: fetchedProperty?.address.split(", ")[0] ?? "",
+    apt: fetchedProperty?.address.split(", ")[1] ?? "",
+    city: fetchedProperty?.address.split(", ")[2] ?? "",
+    state: fetchedProperty?.address.split(", ")[3]?.split(" ")[0] ?? "",
+    zipcode: fetchedProperty?.address.split(", ")[3]?.split(" ")[1] ?? "",
   };
 
   const addressWithoutApt: LocationType = {
-    country: property.address.split(", ")[3] ?? "",
-    street: property.address.split(", ")[0] ?? "",
+    country: fetchedProperty?.address.split(", ")[3] ?? "",
+    street: fetchedProperty?.address.split(", ")[0] ?? "",
     apt: "",
-    city: property.address.split(", ")[1] ?? "",
-    state: property.address.split(", ")[2]?.split(" ")[0] ?? "",
-    zipcode: property.address.split(", ")[2]?.split(" ")[1] ?? "",
+    city: fetchedProperty?.address.split(", ")[1] ?? "",
+    state: fetchedProperty?.address.split(", ")[2]?.split(" ")[0] ?? "",
+    zipcode: fetchedProperty?.address.split(", ")[2]?.split(" ")[1] ?? "",
   };
 
   const handleEditClick = () => {
-    setPropertyType(property.propertyType);
-    setMaxGuests(property.maxNumGuests);
-    setBedrooms(property.numBedrooms);
-    setBeds(property.numBeds);
-    property.numBathrooms && setBathrooms(property.numBathrooms);
-    setSpaceType(property.roomType);
-    setLocation(
-      property.address.split(", ").length > 4
-        ? addressWithApt
-        : addressWithoutApt,
-    );
-    setCheckInType(property.checkInInfo ?? "self");
-    setCheckIn(property.checkInTime ?? "00:00");
-    setCheckOut(property.checkOutTime ?? "00:00");
-    setAmenities(property.amenities);
-    setOtherAmenities(property.otherAmenities);
-    setImageUrls(property.imageUrls);
-    setTitle(property.name);
-    setDescription(property.about);
-    setPetsAllowed(property.petsAllowed ?? false);
-    setSmokingAllowed(property.smokingAllowed ?? false);
-    setOtherHouseRules(property.otherHouseRules ?? "");
-    setEditing(!editing);
-    setCancellationPolicy(
-      property.cancellationPolicy as CancellationPolicyWithInternals | null,
-    );
+    void refetch();
+    if (fetchedProperty) {
+      setPropertyType(fetchedProperty.propertyType);
+      setMaxGuests(fetchedProperty.maxNumGuests);
+      setBedrooms(fetchedProperty.numBedrooms);
+      setBeds(fetchedProperty.numBeds);
+      fetchedProperty.numBathrooms &&
+        setBathrooms(fetchedProperty.numBathrooms);
+      setSpaceType(fetchedProperty.roomType);
+      setLocation(
+        fetchedProperty.address.split(", ").length > 4
+          ? addressWithApt
+          : addressWithoutApt,
+      );
+      setCheckInType(fetchedProperty.additionalCheckInInfo ?? "self");
+      setCheckIn(fetchedProperty.checkInTime);
+      setCheckOut(fetchedProperty.checkOutTime);
+      setAmenities(fetchedProperty.amenities);
+      setOtherAmenities(fetchedProperty.otherAmenities);
+      setImageUrls(fetchedProperty.imageUrls);
+      setTitle(fetchedProperty.name);
+      setDescription(fetchedProperty.about);
+      setPetsAllowed(fetchedProperty.petsAllowed ?? false);
+      setSmokingAllowed(fetchedProperty.smokingAllowed ?? false);
+      setOtherHouseRules(fetchedProperty.otherHouseRules ?? "");
+      setEditing(!editing);
+      setCancellationPolicy(
+        fetchedProperty.cancellationPolicy as CancellationPolicyWithInternals | null,
+      );
+    }
   };
 
   return (
-    <div className="fixed bottom-20 right-4 z-50 sm:static">
+    <div className="absolute bottom-20 left-8 z-40 space-x-2 lg:bottom-6">
       {editing ? (
-        <div className="space-x-2">
-          <Button variant="secondary" onClick={() => setEditing(!editing)}>
+        <>
+          <Button
+            variant="outline"
+            className="text-sm shadow-lg sm:shadow-none"
+            onClick={() => setEditing(!editing)}
+            type="button"
+          >
             Cancel
           </Button>
           <Button
-            variant="secondary"
-            className="shadow-lg sm:shadow-none"
+            // variant="outline"
+            className="text-sm shadow-lg sm:shadow-none"
             onClick={() => {
               setEditing(!editing);
               onSubmit?.();
@@ -277,19 +314,17 @@ export function HostPropertyEditBtn({
           >
             Done
           </Button>
-        </div>
+        </>
       ) : (
-        <div className="space-x-2">
-          <Button
-            variant="secondary"
-            className="rounded-full bg-white font-bold shadow-md sm:rounded-lg sm:border-2 sm:shadow-none"
-            onClick={handleEditClick}
-            type="button"
-          >
-            <Pencil size={20} />
-            Enter edit mode
-          </Button>
-        </div>
+        <Button
+          // variant="outline"
+          className="text-sm"
+          onClick={handleEditClick}
+          // type="button"
+          disabled={disabled}
+        >
+          Edit
+        </Button>
       )}
     </div>
   );

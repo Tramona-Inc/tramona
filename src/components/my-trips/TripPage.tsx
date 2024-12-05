@@ -19,6 +19,9 @@ import {
   plural,
   convertTo12HourFormat,
   getDaysUntilTrip,
+  convertInteractionPreference,
+  isTripWithin48Hours,
+  isTrip5pmBeforeCheckout,
 } from "@/utils/utils";
 
 import SingleLocationMap from "../_common/GoogleMaps/SingleLocationMap";
@@ -44,7 +47,9 @@ export default function TripPage({
 
   const tripDuration = dayjs(trip.checkOut).diff(trip.checkIn, "day");
   const { data } = api.properties.getById.useQuery({ id: trip.propertyId });
-  const hostId = data?.hostId;
+  const hostId = data?.hostTeam.owner.id;
+
+  const tripWithin48Hours = isTripWithin48Hours(tripData);
 
   return (
     <div className="col-span-10 flex flex-col gap-5 p-4 py-10 2xl:col-span-11">
@@ -88,27 +93,23 @@ export default function TripPage({
               <div className="flex justify-between pt-2">
                 <div className="flex gap-2">
                   <UserAvatar
-                    name={trip.property.host?.name}
-                    // image={trip.property.host?.image}
+                    name={trip.property.hostTeam.owner.name}
                     image={
-                      trip.property.host?.image ??
+                      trip.property.hostTeam.owner.image ??
                       "/assets/images/tramona-logo.jpeg"
                     }
                   />
                   <div>
                     <p className="text-sm text-muted-foreground">Hosted by</p>
-                    <p>
-                      {trip.property.host?.name
-                        ? trip.property.host.name
-                        : "Tramona"}
-                    </p>
+                    <p>{trip.property.hostTeam.owner.name ?? "Tramona"}</p>
                   </div>
                 </div>
                 <Button
                   variant="secondary"
                   size="sm"
                   className="w-[160px] text-xs lg:w-[200px] lg:text-sm"
-                  onClick={() => chatWithHost({ hostId: hostId ?? "" })}
+                  disabled={!hostId}
+                  onClick={() => chatWithHost({ hostId: hostId! })}
                 >
                   <MessageCircle className="w-4 lg:w-5" /> Message your host
                 </Button>
@@ -140,13 +141,13 @@ export default function TripPage({
                       removeTimezoneFromDate(trip.checkIn),
                     )}
                   </p>
-                  <p className="font-semibold">
+                  <div>
                     {trip.property.checkInTime && (
                       <p className="font-semibold">
                         {convertTo12HourFormat(trip.property.checkInTime)}
                       </p>
                     )}
-                  </p>
+                  </div>
                 </div>
                 <ArrowRight />
                 <div className="flex flex-col">
@@ -194,10 +195,10 @@ export default function TripPage({
 
               <div className="h-[2px] rounded-full bg-zinc-200"></div>
 
-              <div>
-                <p className="pb-2 pt-5 text-xl font-bold">Payment info</p>
+              <div className="py-4">
+                <p className="font-bold">Payment info</p>
                 <div className="flex justify-between">
-                  <p className="font-bold">Total cost</p>
+                  <p className="text-muted-foreground">Total cost</p>
                   <p className="text-sm text-muted-foreground">
                     Paid {dayjs(trip.createdAt).format("MMM D")}
                   </p>
@@ -219,25 +220,136 @@ export default function TripPage({
 
               <div className="h-[2px] rounded-full bg-zinc-200"></div>
 
-              <div className="py-5">
-                {trip.property.checkInInfo && (
+              <div className="space-y-2 py-4">
+                <p className="font-bold">Check-in info</p>
+                {tripWithin48Hours ? (
                   <>
-                    <p className="pb-2 font-bold">Check-in info</p>
-                    <p>{trip.property.checkInInfo}</p>
+                    {trip.property.additionalCheckInInfo && (
+                      <div className="flex items-center">
+                        <div className="basis-1/2">
+                          <p className="text-muted-foreground">Check-in type</p>
+                          <p>{trip.property.checkInType}</p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground">
+                            Additional check-in info
+                          </p>
+                          <p>{trip.property.additionalCheckInInfo}</p>
+                        </div>
+                      </div>
+                    )}
                   </>
-                )}
-
-                {trip.property.cancellationPolicy !== null && (
-                  <>
-                    <p className="pb-2 font-bold">Cancellation Policy</p>
-                    <p>
-                      {getCancellationPolicyDescription(
-                        trip.property.cancellationPolicy,
-                      )}
-                    </p>
-                  </>
+                ) : (
+                  <InfoReleased48HoursBeforeCheckIn />
                 )}
               </div>
+
+              <div className="h-[2px] rounded-full bg-zinc-200"></div>
+
+              <div className="space-y-2 py-4">
+                <p className="font-bold">Check-out info</p>
+                {isTrip5pmBeforeCheckout(tripData) ? (
+                  <div className="flex items-center">
+                    <div className="basis-1/2">
+                      <p className="text-muted-foreground">Check-out type</p>
+                      <p>{trip.property.checkOutInfo}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">
+                        Additional check-out info
+                      </p>
+                      <p>{trip.property.additionalCheckOutInfo}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground">
+                    This information will be released at 5:00 PM before your
+                    check-out date.
+                  </p>
+                )}
+              </div>
+
+              <div className="h-[2px] rounded-full bg-zinc-200"></div>
+
+              <div className="space-y-2 py-4">
+                <p className="font-bold">House Rules</p>
+                <div className="flex items-center">
+                  <div className="basis-1/2">
+                    <p className="text-muted-foreground">House Rules</p>
+                    {trip.property.houseRules?.map((rule, index) => (
+                      <p key={index}>{rule}</p>
+                    ))}
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">
+                      Additional house rules
+                    </p>
+                    <p>{trip.property.additionalHouseRules}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="h-[2px] rounded-full bg-zinc-200"></div>
+
+              <div className="space-y-2 py-4">
+                <p className="font-bold">Interaction preference</p>
+                <p>
+                  {convertInteractionPreference(
+                    trip.property.interactionPreference,
+                  )}
+                </p>
+              </div>
+
+              <div className="h-[2px] rounded-full bg-zinc-200"></div>
+
+              <div className="space-y-2 py-4">
+                <p className="font-bold">Directions</p>
+                <p>{trip.property.directions}</p>
+              </div>
+
+              <div className="h-[2px] rounded-full bg-zinc-200"></div>
+
+              <div className="space-y-2 py-4">
+                <p className="font-bold">Wifi details</p>
+                {tripWithin48Hours ? (
+                  <div className="flex items-center">
+                    <div className="basis-1/2">
+                      <p className="text-muted-foreground">Wifi name</p>
+                      <p>{trip.property.wifiName}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Wifi password</p>
+                      <p>{trip.property.wifiPassword}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <InfoReleased48HoursBeforeCheckIn />
+                )}
+              </div>
+
+              <div className="h-[2px] rounded-full bg-zinc-200"></div>
+
+              <div className="space-y-2 py-4">
+                <p className="font-bold">House Manual</p>
+                {tripWithin48Hours ? (
+                  <p>{trip.property.houseManual}</p>
+                ) : (
+                  <InfoReleased48HoursBeforeCheckIn />
+                )}
+              </div>
+
+              <div className="h-[2px] rounded-full bg-zinc-200"></div>
+
+              {trip.property.cancellationPolicy !== null && (
+                <div className="space-y-2 py-4">
+                  <p className="font-bold">Cancellation Policy</p>
+                  <p>
+                    {getCancellationPolicyDescription(
+                      trip.property.cancellationPolicy,
+                    )}
+                  </p>
+                </div>
+              )}
 
               <div className="h-[2px] rounded-full bg-zinc-200"></div>
 
@@ -262,5 +374,13 @@ export default function TripPage({
         </div>
       </div>
     </div>
+  );
+}
+
+function InfoReleased48HoursBeforeCheckIn() {
+  return (
+    <p className="text-muted-foreground">
+      This information will be released 48 hours before your check-in date.
+    </p>
   );
 }

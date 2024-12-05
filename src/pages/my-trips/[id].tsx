@@ -10,12 +10,8 @@ export default function TripDetailsPage() {
   const tripId = parseInt(router.query.id as string);
 
   const { data: trip } = api.trips.getMyTripsPageDetails.useQuery(
-    {
-      tripId: tripId,
-    },
-    {
-      enabled: router.isReady,
-    },
+    { tripId: tripId },
+    { enabled: router.isReady },
   );
 
   return (

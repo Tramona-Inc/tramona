@@ -7,6 +7,7 @@ import {
   timestamp,
   varchar,
   pgEnum,
+  boolean,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { groups } from "./groups";
@@ -21,6 +22,14 @@ const TRIP_STATUS = ["Booked", "Needs attention", "Cancelled"] as const;
 export type TripStatus = (typeof TRIP_STATUS)[number];
 
 export const tripStatusEnum = pgEnum("trip_status", TRIP_STATUS);
+
+export const ALL_TRIP_SOURCES = [
+  "City request",
+  "Request to book",
+  "Book it now",
+] as const;
+
+export const tripSourceEnum = pgEnum("trip_source", ALL_TRIP_SOURCES);
 
 export const trips = pgTable(
   "trips",
@@ -58,6 +67,7 @@ export const trips = pgTable(
       () => tripCheckouts.id,
       { onDelete: "set null" },
     ),
+    tripSource: tripSourceEnum("trip_source").notNull().default("City request"),
   },
   (t) => ({
     groupIdIdx: index().on(t.groupId),
@@ -102,21 +112,3 @@ export const tripCancellations = pgTable(
     };
   },
 );
-
-export const tripDamages = pgTable("trip-damages", {
-  id: serial("id").primaryKey(),
-  tripId: integer("trips_id")
-    .notNull()
-    .references(() => trips.id, {
-      onDelete: "cascade",
-    }),
-  amount: integer("amount").notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-  paymentCompleteAt: timestamp("payment_complete_at", { withTimezone: true }),
-  description: varchar("description").notNull(),
-  propertyId: integer("property_id").references(() => properties.id, {
-    onDelete: "cascade",
-  }),
-});

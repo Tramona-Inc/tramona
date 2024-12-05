@@ -12,8 +12,9 @@ import { useHostOnboarding } from "@/utils/store/host-onboarding";
 import OnboardingLayout from "../components/host/onboarding/layout";
 import Onboarding10 from "@/components/host/onboarding/Onboarding10";
 import Onboarding11 from "@/components/host/onboarding/Onboarding11";
-import OnboardingLinkInput from "@/components/host/onboarding/OnboardingLinkInput";
 import Onboarding12 from "@/components/host/onboarding/Onboarding12";
+import OnboardingLinkInput from "@/components/host/onboarding/OnboardingLinkInput";
+import Onboarding13 from "@/components/host/onboarding/Onboarding13";
 import { getFeed } from "@/server/api/routers/feedRouter";
 import { type InferGetStaticPropsType } from "next";
 
@@ -51,7 +52,8 @@ export default function Onboarding({ requestFeed }: Props) {
       {progress === 9 && <Onboarding10 />}
       {progress === 10 && <OnboardingLinkInput />}
       {progress === 11 && <Onboarding11 />}
-      {progress === 12 && <Onboarding12 requestFeed={requestFeed}/>}
+      {progress === 12 && <Onboarding12 />}
+      {progress === 13 && <Onboarding13 requestFeed={requestFeed}/>}
     </OnboardingLayout>
   );
 }

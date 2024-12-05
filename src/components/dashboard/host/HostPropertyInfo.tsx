@@ -2,37 +2,27 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { type Property } from "@/server/db/schema";
 import HostPropertiesCancellation from "./HostPropertiesCancellation";
 import HostPropertiesDetails from "./HostPropertiesDetails";
-import { AlertCircle, ChevronLeft } from "lucide-react";
-import Link from "next/link";
+import { AlertCircle } from "lucide-react";
 import HostAvailability from "./HostAvailability";
 import HostPropertiesRestrictions from "./HostPropertiesRestrictions";
 import HostAutoOffer from "./HostAutoOffer";
+import HostBookItNow from "./HostBookItNow";
+import HostPolicySection from "./HostPolicySection";
+import HostArrivalGuide from "./HostArrivalGuide";
 
 export default function HostPropertyInfo({ property }: { property: Property }) {
   return (
-    <div key={property.id} className="space-y-4 p-4 sm:p-6">
-      <Link href="/host/properties" className="xl:hidden">
-        <ChevronLeft />
-      </Link>
-      <div>
-        <h1 className="text-2xl font-bold">
-          {property.name === "" ? "No property name provided" : property.name}
-        </h1>
-        <p className="font-semibold text-muted-foreground">
-          {property.address === ", ,   , "
-            ? "No address provided"
-            : property.address}
-        </p>
-      </div>
-      <Tabs defaultValue="details">
-        <TabsList>
+    <div key={property.id} className="h-full space-y-4">
+      <h1 className="text-2xl font-bold">Properties editor</h1>
+      <Tabs defaultValue="details" className="h-full">
+        <TabsList noBorder>
           <TabsTrigger
             value="details"
-            className="data-[state=active]:border-b-teal-900 data-[state=active]:font-bold data-[state=active]:text-teal-900"
+            className="w-1/2 data-[state=active]:border-b-teal-900 data-[state=active]:font-bold data-[state=active]:text-teal-900"
           >
-            Listing details
+            Details
           </TabsTrigger>
-          <TabsTrigger
+          {/* <TabsTrigger
             value="restrictions"
             className="data-[state=active]:border-b-teal-900 data-[state=active]:font-bold data-[state=active]:text-teal-900"
           >
@@ -43,12 +33,12 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
             className="data-[state=active]:border-b-teal-900 data-[state=active]:font-bold data-[state=active]:text-teal-900"
           >
             Availability
-          </TabsTrigger>
+          </TabsTrigger> */}
           <TabsTrigger
-            value="cancellation"
-            className="relative data-[state=active]:border-b-teal-900 data-[state=active]:font-bold data-[state=active]:text-teal-900"
+            value="policy"
+            className="relative w-1/2 data-[state=active]:border-b-teal-900 data-[state=active]:font-bold data-[state=active]:text-teal-900"
           >
-            Cancellation policy
+            Policy & Deposits
             {!property.cancellationPolicy && (
               <AlertCircle
                 className="absolute right-0 top-0 text-red-600"
@@ -57,13 +47,19 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
             )}
           </TabsTrigger>
           <TabsTrigger
+            value="arrival-guide"
+            className="w-1/2 data-[state=active]:border-b-teal-900 data-[state=active]:font-bold data-[state=active]:text-teal-900"
+          >
+            Arrival Guide
+          </TabsTrigger>
+          {/* <TabsTrigger
             value="auto-offer"
             className="data-[state=active]:border-b-teal-900 data-[state=active]:font-bold data-[state=active]:text-teal-900"
           >
             Auto-offer
-          </TabsTrigger>
+          </TabsTrigger> */}
         </TabsList>
-        <TabsContent value="details">
+        <TabsContent value="details" className="">
           <HostPropertiesDetails property={property} />
         </TabsContent>
         <TabsContent value="restrictions">
@@ -75,11 +71,17 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
         <TabsContent value="availability">
           <HostAvailability property={property} />
         </TabsContent>
-        <TabsContent value="cancellation">
-          <HostPropertiesCancellation property={property} />
+        <TabsContent value="policy">
+          <HostPolicySection property={property} />
         </TabsContent>
         <TabsContent value="auto-offer">
           <HostAutoOffer property={property} />
+        </TabsContent>
+        <TabsContent value="book-it-now">
+          <HostBookItNow property={property} />
+        </TabsContent>
+        <TabsContent value="arrival-guide">
+          <HostArrivalGuide property={property} />
         </TabsContent>
       </Tabs>
     </div>

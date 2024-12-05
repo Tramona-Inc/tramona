@@ -7,15 +7,17 @@ import { type InferQueryModel } from "@/server/db";
 
 export type RequestWithGroup = InferQueryModel<
   "requests",
-  { numGuests: true },
   {
-    madeByGroup: {
-      with: {
-        invites: true;
-        members: {
-          with: {
-            user: {
-              columns: { name: true; email: true; image: true; id: true };
+    columns: { numGuests: true };
+    with: {
+      madeByGroup: {
+        with: {
+          invites: true;
+          members: {
+            with: {
+              user: {
+                columns: { name: true; email: true; image: true; id: true };
+              };
             };
           };
         };

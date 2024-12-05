@@ -1,346 +1,571 @@
-import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
-import Spinner from "@/components/_common/Spinner";
-import UserAvatar from "@/components/_common/UserAvatar";
-import { HostTeamInviteForm } from "@/components/dashboard/host/HostTeamInviteForm";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { type User } from "@/server/db/schema";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import {
+  Calendar,
+  MessageSquare,
+  Users,
+  Check,
+  X,
+  Trash2,
+  Shield,
+  ChevronDown,
+  MoreVertical,
+} from "lucide-react";
 import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
-import Head from "next/head";
-import { useState } from "react";
-import { Pencil, X, SendHorizonal, Ellipsis } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
-import { Skeleton, SkeletonText } from "@/components/skeleton"; // 引入 Skeleton 组件
+import { errorToast } from "@/utils/toasts";
+import UserAvatar from "@/components/_common/UserAvatar";
+import { useState } from "react";
+import { COHOST_ROLES, CoHostRole } from "@/server/db/schema/tables/hostTeams";
+import Spinner from "@/components/_common/Spinner";
+import { formatDistanceToNowStrict } from "date-fns";
+import { useZodForm } from "@/utils/useZodForm";
+import { z } from "zod";
+import { zodEmail } from "@/utils/zod-utils";
+import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+  FormLabel,
+} from "@/components/ui/form";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { MoreHorizontal } from "lucide-react";
+import { ReloadIcon } from "@radix-ui/react-icons";
+import HostDashboardLayout from "@/components/_common/Layout/HostDashboardLayout";
 
-export default function Page() {
-  const [isEditing, setIsEditing] = useState(false);
+const roleDescriptions = {
+  "Match Manager": {
+    title: "Match Manager",
+    description:
+      "Manage bookings, respond to requests, and handle availability.",
+    icon: <Calendar className="size-4" />,
+    color: "bg-blue-100 text-blue-800",
+    checkColor: "text-blue-500",
+    xColor: "text-blue-300",
+    can: [
+      "Accept or reject booking requests",
+      "Adjust property availability",
+      "Modify pricing for specific dates",
+      "Communicate with potential guests",
+    ],
+    cant: [
+      "Edit property details or photos",
+      "Access financial information",
+      "Modify overall pricing strategy",
+    ],
+  },
+  "Listing Manager": {
+    title: "Listing Manager",
+    description: "Manage guest communications and property details.",
+    icon: <MessageSquare className="size-4" />,
+    color: "bg-green-100 text-green-800",
+    checkColor: "text-green-500",
+    xColor: "text-green-300",
+    can: [
+      "Update property descriptions and amenities",
+      "Manage property photos",
+      "Respond to guest inquiries",
+      "Coordinate check-ins and check-outs",
+    ],
+    cant: [
+      "Accept or reject booking requests",
+      "Modify pricing or availability",
+      "Access financial reports",
+    ],
+  },
+  "Admin Access": {
+    title: "Admin Access",
+    description:
+      "Provides full access to manage both booking and operational tasks.",
+    icon: <Shield className="size-4" />,
+    color: "bg-purple-100 text-purple-800",
+    checkColor: "text-purple-500",
+    xColor: "text-purple-300",
+    can: [
+      "All Match Manager permissions",
+      "All Listing Manager permissions",
+      "View financial reports",
+      "Modify overall pricing strategy",
+    ],
+    cant: [
+      "Access or modify payment information",
+      "Delete the property listing",
+      "Change the primary host",
+    ],
+  },
+} as const;
+
+const inviteSchema = z.object({
+  email: zodEmail(),
+  role: z.enum(COHOST_ROLES),
+});
+
+export default function Component() {
   const { data: session } = useSession({ required: true });
-  const { data: hostProfile, isLoading: isHostProfileLoading } =
-      api.users.getMyHostProfile.useQuery();
-  const { data: hostTeams, isLoading: isHostTeamsLoading } =
-      api.hostTeams.getMyHostTeams.useQuery();
-  const { data: curTeamMembers, isLoading: isCurTeamMembersLoading, refetch: refetchMembers } =
-      api.hostTeams.getCurTeamMembers.useQuery();
-  const { data: pendingInvites, isLoading: isPendingInvitesLoading, refetch: refetchInvites } =
-      api.hostTeams.getCurTeamPendingInvites.useQuery();
+  const { data: hostProfile } = api.hosts.getMyHostProfile.useQuery();
+  const { data: hostTeams } = api.hostTeams.getMyHostTeams.useQuery();
 
   const curTeam =
-      hostProfile && hostTeams?.find((t) => t.id === hostProfile.curTeamId);
+    hostProfile && hostTeams?.find((team) => team.id === hostProfile.curTeamId);
+
+  const updateRoleMutation = api.hostTeams.updateCoHostRole.useMutation();
+
+  const inviteMutation = api.hostTeams.inviteCoHost.useMutation();
 
   const resendInviteMutation = api.hostTeams.resendInvite.useMutation();
+
   const cancelInviteMutation = api.hostTeams.cancelInvite.useMutation();
-  const removeTeamMemberMutation =
-      api.hostTeams.removeHostTeamMember.useMutation();
 
-  const handleResendInvite = async (email: string) => {
-    const res = await resendInviteMutation.mutateAsync({
-      email,
-      hostTeamId: curTeam!.id,
-    });
-    switch (res.status) {
-      case "invite resent":
-        toast({
-          title: `Emailed an invite to ${email}`,
-          description: "The invite will expire in 24 hours",
-        });
-        break;
+  const removeHostTeamMemberMutation =
+    api.hostTeams.removeHostTeamMember.useMutation();
 
-      case "cooldown":
-        toast({
-          title: `Invite failed`,
-          description: "Please wait a few minutes before resending the invite",
-          variant: "destructive",
-        });
-        break;
-    }
-    await refetchInvites();
-  };
+  const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
 
-  const handleCancelInvite = async (email: string) => {
-    const res = await cancelInviteMutation.mutateAsync({
-      email,
-      hostTeamId: curTeam!.id,
-    });
-    switch (res.status) {
-      case "invite canceled":
-        toast({
-          title: "Invite canceled",
-          description: `Canceled invite to ${email}`,
-        });
-        break;
-    }
-    await refetchInvites();
-  };
+  const form = useZodForm({
+    schema: inviteSchema,
+    defaultValues: {
+      role: "Match Manager",
+    },
+  });
 
-  const handleRemoveMember = async (userId: string) => {
-    await removeTeamMemberMutation.mutateAsync({
-      memberId: userId,
-      hostTeamId: curTeam!.id,
-    });
-    await refetchMembers();
-  };
+  const onSubmit = form.handleSubmit(async ({ email, role }) => {
+    await inviteMutation
+      .mutateAsync({ email, role })
+      .then(({ status }) => {
+        console.log(status);
+        switch (status) {
+          case "sent invite":
+            toast({
+              title: `Emailed an invite to ${email}`,
+              description: "The invite will expire in 24 hours",
+            });
+            form.reset();
 
-  if (!session) return null;
+            break;
 
-  return (
-      <DashboardLayout>
-        <Head>
-          <title>Team | Tramona</title>
-        </Head>
-        <div className="px-4 pb-32 pt-16">
-          <div className="mx-auto max-w-xl space-y-4">
-            <div className="flex items-center">
-              <h1 className="text-3xl font-bold">Manage team</h1>
-              <Button
-                  onClick={() => setIsEditing(!isEditing)}
-                  className="bg-transparent"
-              >
-                {isEditing ? (
-                    <X className="text-primaryGreen" />
-                ) : (
-                    <Pencil className="text-primaryGreen" />
-                )}
-              </Button>
+          case "already in team":
+            form.setError("email", { message: "User is already in the team" });
+            break;
+
+          case "already invited":
+            form.setError("email", { message: "User is already invited" });
+            break;
+        }
+
+        setInviteDialogOpen(false);
+      })
+      .catch(() => errorToast());
+  });
+
+  if (!session || !curTeam) return <Spinner />;
+
+  const CoHostsList = () => (
+    <div className="min-h-40 space-y-4">
+      <CardTitle>Current Co-Hosts</CardTitle>
+      {curTeam.members.map((member) => (
+        <div key={member.userId} className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <UserAvatar {...member.user} />
+            <div>
+              <div className="font-medium">{member.user.name}</div>
+              <div className="text-sm text-muted-foreground">
+                {member.user.email}
+              </div>
             </div>
-
-            {isHostProfileLoading || isHostTeamsLoading ? (
-                <SkeletonText className="w-1/3" />
-            ) : curTeam ? (
-                <HostTeamInviteForm
-                    hostTeamId={curTeam.id}
-                    setIsEditing={setIsEditing}
-                />
-            ) : (
-                <Spinner />
-            )}
-
-            {isCurTeamMembersLoading ? (
-                <div className="space-y-4">
-                  <Skeleton className="w-full h-12" />
-                  <Skeleton className="w-full h-12" />
-                  <Skeleton className="w-full h-12" />
-                </div>
-            ) : (
-                curTeamMembers?.map((member) => (
-                    <TeamMember
-                        key={member.id}
-                        member={member}
-                        isYou={member.id === session.user.id}
-                        isOwner={member.id === curTeam?.ownerId}
-                        isEditing={isEditing}
-                        onRemove={() => handleRemoveMember(member.id)}
-                    />
-                ))
-            )}
-
-            {isPendingInvitesLoading ? (
-                <div className="space-y-4">
-                  <Skeleton className="w-full h-12" />
-                  <Skeleton className="w-full h-12" />
-                </div>
-            ) : (
-                pendingInvites?.map((invite) => (
-                    <PendingInvite
-                        key={invite.inviteeEmail}
-                        email={invite.inviteeEmail}
-                        isEditing={isEditing}
-                        onResend={() => handleResendInvite(invite.inviteeEmail)}
-                        onCancel={() => handleCancelInvite(invite.inviteeEmail)}
-                    />
-                ))
+          </div>
+          <div className="flex items-center gap-4">
+            <Select
+              value={member.role}
+              onValueChange={(newRole) => {
+                updateRoleMutation
+                  .mutateAsync({
+                    userId: member.userId,
+                    role: newRole as CoHostRole,
+                    hostTeamId: curTeam.id,
+                  })
+                  .then(() => {
+                    toast({
+                      title: "Role updated",
+                      description:
+                        "The co-host's role has been updated successfully",
+                    });
+                  })
+                  .catch(() => errorToast());
+              }}
+              disabled={
+                updateRoleMutation.isLoading ||
+                member.userId === curTeam.ownerId
+              }
+            >
+              <SelectTrigger className="w-48 pl-2">
+                <SelectValue>
+                  <div className="flex items-center gap-2">
+                    <div
+                      className={`rounded-full p-1.5 ${roleDescriptions[member.role].color}`}
+                    >
+                      {roleDescriptions[member.role].icon}
+                    </div>
+                    <span>{roleDescriptions[member.role].title}</span>
+                  </div>
+                </SelectValue>
+                <ChevronDown className="h-4 w-4" />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.entries(roleDescriptions).map(
+                  ([role, { title, icon, color }]) => (
+                    <SelectItem key={role} value={role}>
+                      <div className="flex items-center gap-2">
+                        <div className={`rounded-full p-1.5 ${color}`}>
+                          {icon}
+                        </div>
+                        <span>{title}</span>
+                      </div>
+                    </SelectItem>
+                  ),
+                )}
+              </SelectContent>
+            </Select>
+            {member.userId !== curTeam.ownerId && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  removeHostTeamMemberMutation
+                    .mutateAsync({
+                      memberId: member.userId,
+                      hostTeamId: curTeam.id,
+                    })
+                    .then(() => {
+                      toast({
+                        title: "Member removed",
+                        description:
+                          "The team member has been removed successfully",
+                      });
+                    })
+                    .catch(() => errorToast());
+                }}
+                disabled={removeHostTeamMemberMutation.isLoading}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Remove
+              </Button>
             )}
           </div>
         </div>
-      </DashboardLayout>
-  );
-}
-
-// `TeamMember` and `PendingInvite` remain the same as in your original code.
-
-
-function TeamMember({
-  member,
-  isYou,
-  isOwner,
-  children,
-  isEditing,
-  onRemove,
-}: React.PropsWithChildren<{
-  member: Pick<User, "name" | "email" | "image">;
-  isYou: boolean;
-  isOwner: boolean;
-  isEditing: boolean;
-  onRemove: () => void;
-}>) {
-  const [showRemoveConfirmation, setShowRemoveConfirmation] = useState(false);
-
-  return (
-    <div className="flex items-center gap-4 py-2">
-      <UserAvatar
-        name={member.name}
-        email={member.email}
-        image={member.image}
-      />
-      <div className="flex-1 -space-y-1 font-medium">
-        <div>
-          {member.name ?? member.email}{" "}
-          {isYou && <span className="text-muted-foreground">(You)</span>}{" "}
-          {isOwner && (
-            <Badge variant="secondary" size="sm">
-              Team owner
-            </Badge>
-          )}
-        </div>
-        <p className="text-sm text-muted-foreground">
-          {member.name ? member.email : ""}
-        </p>
-      </div>
-      {children}
-      {isEditing && !isYou && !isOwner && (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="hover:bg-transparent">
-              <Ellipsis />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent side="bottom" align="center">
-            <DropdownMenuItem>Change role</DropdownMenuItem>
-            <DropdownMenuItem red onClick={() => setShowRemoveConfirmation(true)}>
-              Remove
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )}
-
-      <AlertDialog
-        open={showRemoveConfirmation}
-        onOpenChange={setShowRemoveConfirmation}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Remove Team Member</AlertDialogTitle>
-            <AlertDialogDescription>
-              {`Are you sure you want to remove this member?`}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setShowRemoveConfirmation(false)}>
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction onClick={onRemove}>
-              Remove
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      ))}
     </div>
   );
-}
 
-function PendingInvite({
-  email,
-  isEditing,
-  onResend,
-  onCancel,
-}: {
-  email: string;
-  isEditing: boolean;
-  onResend: () => void;
-  onCancel: () => void;
-}) {
-  const [showCancelConfirmation, setShowCancelConfirmation] = useState(false);
+  const PendingInvitesList = () => (
+    <div className="min-h-40 space-y-4">
+      <CardTitle>Pending Invites</CardTitle>
+      <CardContent>
+        {curTeam.invites.length === 0 ? (
+          <p className="text-pretty py-16 text-center text-sm text-zinc-500">
+            No pending invites, invite co-hosts by email with the form above
+          </p>
+        ) : (
+          <div className="divide-y">
+            {curTeam.invites.map((invite) => (
+              <div
+                key={invite.id}
+                className="flex items-center justify-between py-2"
+              >
+                <div>
+                  <div className="font-medium">{invite.inviteeEmail}</div>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <div
+                      className={`rounded-full p-1.5 ${roleDescriptions[invite.role].color}`}
+                    >
+                      {roleDescriptions[invite.role].icon}
+                    </div>
+                    <span>{roleDescriptions[invite.role].title}</span>
+                    <span>·</span>
+                    <span>
+                      Expires{" "}
+                      {formatDistanceToNowStrict(invite.expiresAt, {
+                        addSuffix: true,
+                      })}
+                    </span>
+                  </div>
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="secondary" size="icon">
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem
+                      onClick={() =>
+                        resendInviteMutation
+                          .mutateAsync({
+                            email: invite.inviteeEmail,
+                            hostTeamId: curTeam.id,
+                          })
+                          .then((res) => {
+                            if (res.status === "invite resent") {
+                              toast({
+                                title: "Invitation resent",
+                                description:
+                                  "The invitation will expire in 24 hours",
+                              });
+                            } else {
+                              toast({
+                                title: "Invite failed",
+                                description:
+                                  "Please wait a few minutes before resending",
+                                variant: "destructive",
+                              });
+                            }
+                          })
+                          .catch(() => errorToast())
+                      }
+                      disabled={resendInviteMutation.isLoading}
+                    >
+                      <ReloadIcon className="mr-2 h-4 w-4" />
+                      Resend invitation
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      red
+                      onClick={() =>
+                        cancelInviteMutation
+                          .mutateAsync({
+                            email: invite.inviteeEmail,
+                            hostTeamId: curTeam.id,
+                          })
+                          .then(() => {
+                            toast({
+                              title: "Invitation cancelled",
+                              description:
+                                "The co-host invitation has been cancelled",
+                            });
+                          })
+                          .catch(() => errorToast())
+                      }
+                      disabled={cancelInviteMutation.isLoading}
+                    >
+                      <X className="mr-2 h-4 w-4" />
+                      Cancel invitation
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </div>
+  );
 
   return (
-    <div className="flex items-center gap-4 py-2">
-      <UserAvatar name={email} email={email} />
-      <div className="flex-1 -space-y-1 font-medium">
-        <div>{email}</div>
-      </div>
-      {!isEditing && (
-        <Badge variant="secondary" size="sm">
-          Pending
-        </Badge>
-      )}
-      {isEditing && (
-        <div className="space-x-2">
-          <Tooltip>
-            <TooltipTrigger>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onResend}
-                className="hover:bg-transparent"
-              >
-                <SendHorizonal className="text-primaryGreen" />
-              </Button>
-            </TooltipTrigger>
-
-            <TooltipContent className="" side="bottom">
-              Resend invite
-            </TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowCancelConfirmation(true)}
-                className="hover:bg-transparent"
-              >
-                <X className="text-primaryGreen" />
-              </Button>
-            </TooltipTrigger>
-
-            <TooltipContent className="" side="bottom">
-              Cancel invite
-            </TooltipContent>
-          </Tooltip>
+    <HostDashboardLayout>
+      <div className="mx-auto max-w-4xl space-y-4 py-16">
+        {/* Header */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Users className="h-6 w-6" />
+            <h1 className="text-2xl font-bold">Manage Co-Hosts</h1>
+          </div>
+          <p className="text-muted-foreground">
+            Assign specific roles to your co-hosts to control their access and
+            responsibilities.
+          </p>
         </div>
-      )}
 
-      <AlertDialog
-        open={showCancelConfirmation}
-        onOpenChange={setShowCancelConfirmation}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Cancel Invite</AlertDialogTitle>
-            <AlertDialogDescription>
-              {`Are you sure you want to cancel the team invite to ${email}?`}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setShowCancelConfirmation(false)}>
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction onClick={onCancel}>
-              Cancel Invite
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
+        {/* Add New Co-Host Form */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Add New Co-Host</CardTitle>
+            <CardDescription>
+              You can always adjust a co-host&apos;s role later if needed.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form
+                onSubmit={onSubmit}
+                className="flex flex-col gap-2 sm:flex-row sm:items-end"
+              >
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <div className="flex items-start justify-between pb-1">
+                        <FormLabel>Invite Co-Host by Email</FormLabel>
+                        <FormMessage />
+                      </div>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          type="email"
+                          autoComplete="email"
+                          placeholder="Enter email address"
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="role"
+                  render={({ field }) => (
+                    <FormItem className="min-w-48 translate-y-0.5">
+                      <FormLabel>Select Role</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="pl-2">
+                            <SelectValue />
+                            <ChevronDown className="h-4 w-4" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {Object.entries(roleDescriptions).map(
+                            ([role, { title, icon, color }]) => (
+                              <SelectItem key={role} value={role}>
+                                <div className="flex items-center gap-2">
+                                  <div
+                                    className={`rounded-full p-1.5 ${color}`}
+                                  >
+                                    {icon}
+                                  </div>
+                                  <div className="font-medium">{title}</div>
+                                </div>
+                              </SelectItem>
+                            ),
+                          )}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <Button type="submit" disabled={form.formState.isSubmitting}>
+                  Invite Co-Host
+                </Button>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+
+        {/* Lists */}
+        <Card>
+          <CoHostsList />
+        </Card>
+
+        <Card>
+          <PendingInvitesList />
+        </Card>
+
+        {/* Understanding Roles */}
+        <Card>
+          <CardTitle>Understanding Co-Host Roles</CardTitle>
+          <div className="space-y-6">
+            {Object.entries(roleDescriptions).map(
+              (
+                [
+                  role,
+                  {
+                    title,
+                    description,
+                    icon,
+                    color,
+                    can,
+                    cant,
+                    checkColor,
+                    xColor,
+                  },
+                ],
+                index,
+              ) => (
+                <div key={role}>
+                  {index > 0 && <Separator className="my-4" />}
+                  <div className="rounded-lg bg-white p-4">
+                    <div className="mb-2 flex items-center gap-2">
+                      <div className={`rounded-full p-1.5 ${color}`}>
+                        {icon}
+                      </div>
+                      <h4 className="text-lg font-medium">{title}</h4>
+                      {role === "adminAccess" && (
+                        <Badge variant="secondary" className="ml-2">
+                          Equivalent to Airbnb Co-Host
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="mb-4 text-sm text-muted-foreground">
+                      {description}
+                    </p>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div>
+                        <h5 className="mb-2 flex items-center gap-2 font-medium">
+                          <Check className={`h-4 w-4 ${checkColor}`} />
+                          Can:
+                        </h5>
+                        <ul className="list-inside list-disc space-y-1 text-sm">
+                          {can.map((item, index) => (
+                            <li key={index}>{item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div>
+                        <h5 className="mb-2 flex items-center gap-2 font-medium">
+                          <X className={`h-4 w-4 ${xColor}`} />
+                          Can&apos;t:
+                        </h5>
+                        <ul className="list-inside list-disc space-y-1 text-sm text-muted-foreground">
+                          {cant.map((item, index) => (
+                            <li key={index}>{item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ),
+            )}
+          </div>
+        </Card>
+      </div>
+    </HostDashboardLayout>
   );
 }
