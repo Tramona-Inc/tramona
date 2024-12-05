@@ -73,6 +73,7 @@ const formSchema = z.object({
   otherHouseRules: z.string().max(1000).optional(),
 
   cancellationPolicy: z.enum(CANCELLATION_POLICIES),
+  countryISO: z.string(),
 });
 
 type FormSchema = z.infer<typeof formSchema>;
@@ -456,6 +457,18 @@ export default function AdminPropertyForm() {
                     ))}
                   </SelectContent>
                 </Select>
+              </FormControl>
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="countryISO"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Country ISO</FormLabel>
+              <FormControl>
+                <Input {...field} type="text" placeholder="Ex: USA" />
               </FormControl>
             </FormItem>
           )}
