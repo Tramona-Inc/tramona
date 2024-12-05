@@ -51,7 +51,7 @@ export default function HostPotentialBookingOverview({
     api.properties.getHostPropertiesWithRequests.useQuery();
 
   return (
-    <div className="space-y-4">
+    <div className={cn("space-y-4", className)}>
       <div className="flex items-center gap-x-2 pb-2">
         <h2 className="text-4xl font-semibold">Potential Bookings</h2>
         <div className="flex-1" />

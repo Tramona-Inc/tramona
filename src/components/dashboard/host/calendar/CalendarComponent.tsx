@@ -1,5 +1,4 @@
-"use client";
-import React, { useEffect, useMemo } from "react";
+import React, { useMemo, useEffect } from "react";
 import { ChevronLeft, ChevronRight, ChevronDown, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,163 +9,133 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { api } from "@/utils/api";
-import { cn } from "@/utils/utils";
 import MonthCalendar from "./MonthCalendar";
 import CalendarSettings from "./CalendarSettings";
 import { useState } from "react";
 import { Property } from "@/server/db/schema/tables/properties";
+import { eachDayOfInterval, format, isBefore, parseISO } from "date-fns";
 
-type ReservationInfo = {
-  start: string;
-  end: string;
-  platformBookedOn: "airbnb" | "tramona";
-};
 export default function CalendarComponent() {
-  const [selectedDates, setSelectedDates] = useState<Date[]>([]);
   const [date, setDate] = useState<Date>(new Date());
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(
-    null
+    null,
   );
-  const hostProperties = api.properties.getHostProperties.useQuery({
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-  });
+  const { data: hostProperties, isLoading: loadingProperties } =
+    api.properties.getHostProperties.useQuery(undefined, {
+      refetchOnWindowFocus: false,
+    });
 
   // Set initial selected property when data loads
   useEffect(() => {
-    if (hostProperties.data && hostProperties.data.length > 0) {
-      setSelectedProperty(hostProperties.data[0]);
-    }
-  }, [hostProperties.data]);
+    setSelectedProperty(hostProperties?.[0] ?? null);
+  }, [hostProperties]);
 
-  const [editing, setEditing] = useState(false);
+  // const [editing, setEditing] = useState(false);
   const [selectedRange, setSelectedRange] = useState<{
     start: Date | null;
     end: Date | null;
   }>({ start: null, end: null });
 
-  const queryInput = useMemo(() => ({
-    propertyId: selectedProperty?.hospitableListingId,
-  }), [selectedProperty?.hospitableListingId]);
+  const queryInput = useMemo(
+    () => ({
+      hospitableListingId: selectedProperty?.hospitableListingId,
+    }),
+    [selectedProperty?.hospitableListingId],
+  );
 
-  const { data: hospitableCalendarPrices } =
-    api.pms.getHospitableCalendar.useQuery(queryInput);
-
+  const { data: hospitableCalendarPrices, isLoading: loadingPrices } =
+    api.calendar.updateHostCalendar.useQuery(queryInput, {
+      enabled: Boolean(selectedProperty?.hospitableListingId),
+    });
 
   const prices = useMemo(() => {
     const priceMap: Record<string, number | undefined> = {};
-    const initialDate = new Date(date.getFullYear(), date.getMonth(), 1);
+    const daysInMonth = eachDayOfInterval({
+      start: new Date(date.getFullYear(), date.getMonth(), 1),
+      end: new Date(date.getFullYear(), date.getMonth() + 1, 0),
+    });
 
-    for (let i = 0; i < 31 && initialDate.getMonth() === date.getMonth(); i++) {
-      const dateString = initialDate.toISOString().split("T")[0]!;
-      priceMap[dateString] =
-        hospitableCalendarPrices?.find((event) => event.date === dateString)?.price.amount/100;
-
-      // Clone initialDate to avoid mutating it
-      initialDate.setDate(initialDate.getDate() + 1);
-    }
+    daysInMonth.forEach((currentDate) => {
+      const dateString = currentDate.toISOString().split("T")[0]!;
+      const priceEvent = hospitableCalendarPrices?.find(
+        (event) => event.date === dateString,
+      );
+      if (dateString) {
+        priceMap[dateString] = priceEvent?.price.amount
+          ? priceEvent.price.amount / 100
+          : undefined;
+      }
+    });
 
     return priceMap;
   }, [date, hospitableCalendarPrices]);
 
-  console.log(
-    "hospitableCalendarPrices",
-    hospitableCalendarPrices,
-    selectedProperty,
-  );
-
   const reservedDates = hospitableCalendarPrices
-    ?.filter((price) => !price.availability.available)
+    ?.filter((price) => price.availability.available === false)
     .map((price) => ({
       start: price.date,
       end: price.date,
-      platformBookedOn: "tramona",
+      platformBookedOn: "airbnb" as const,
     }));
 
-  console.log("reservedDates", reservedDates);
+  // const handleDateClick = (date: Date) => {
+  //   if (!editing) return;
 
-  const handleDateClick = (date: Date) => {
-    if (!editing) return;
+  //   setSelectedRange((prev) => {
+  //     if (!prev.start || (prev.start && prev.end)) {
+  //       // Start a new range
+  //       return { start: date, end: null };
+  //     }
+  //     if (!prev.end) {
+  //       // Set the end date if it’s not already set
+  //       if (date >= prev.start) {
+  //         return { ...prev, end: date };
+  //       } else {
+  //         // If clicked date is before the start date, reverse the range
+  //         return { start: date, end: prev.start };
+  //       }
+  //     }
+  //     // Default fallback (shouldn't normally hit this point)
+  //     return { start: date, end: null };
+  //   });
+  // };
 
-    setSelectedRange((prev) => {
-      if (!prev.start) {
-        return { start: date, end: date };
-      }
-      if (!prev.end) {
-        if (date < prev.start) {
-          return { start: date, end: prev.start };
-        }
-        return { ...prev, end: date };
-      }
-      return { start: date, end: date };
-    });
-  };
+  const isDateReserved = (date: string) => {
+    const parsedDate = parseISO(date);
 
-  const handleBlockDates = async () => {
-    if (!selectedRange.start || !selectedRange.end) return;
+    const normalizedDate = format(parsedDate, "yyyy-MM-dd");
 
-    try {
-      // Add your API call here to block dates
-      console.log("Blocking dates:", selectedRange);
-      setSelectedRange({ start: null, end: null });
-    } catch (error) {
-      console.error("Error blocking dates:", error);
-    }
-  };
-
-  const handleUnblockDates = async () => {
-    if (!selectedRange.start || !selectedRange.end) return;
-
-    try {
-      // Add your API call here to unblock dates
-      console.log("Unblocking dates:", selectedRange);
-      setSelectedRange({ start: null, end: null });
-    } catch (error) {
-      console.error("Error unblocking dates:", error);
-    }
-  };
-
-  const isDateReserved = (date: Date): ReservationInfo | undefined => {
-    return reservedDates.find((reservation) => {
-      const start = new Date(reservation.start);
-      const end = new Date(reservation.end);
-      return date >= start && date < end;
-    });
-  };
-
-  const dayWithPrice = (day: Date, prices: Record<string, number>) => {
-    const dateStr = day.toISOString().split("T")[0]!;
-    const reservedInfo = isDateReserved(day);
-
-    let reservationClass = "";
-    if (reservedInfo) {
-      if (reservedInfo.platformBookedOn === "airbnb") {
-        reservationClass = "bg-reserved-pattern";
-      } else if (reservedInfo.platformBookedOn === "tramona") {
-        reservationClass = "bg-reserved-pattern-2";
-      }
+    if (isBefore(parsedDate, new Date())) {
+      return true;
     }
 
-    return (
-      <div
-        className={cn(
-          "h-14 w-full p-1 sm:h-20 sm:p-2",
-          "flex flex-col justify-between",
-          "hover:bg-accent hover:text-accent-foreground",
-          reservationClass,
-          selectedDates.some((d) => d.getTime() === day.getTime()) &&
-            "bg-blue-200",
-        )}
-      >
-        <span className="text-xs font-medium sm:text-sm">{day.getDate()}</span>
-        <span className="text-[10px] text-muted-foreground sm:text-xs">
-          ${prices[dateStr] ?? 168}
-        </span>
-      </div>
-    );
+    if (
+      reservedDates?.some(
+        (reservedDate) =>
+          reservedDate.start <= normalizedDate &&
+          reservedDate.end >= normalizedDate,
+      )
+    ) {
+      return true;
+    }
+
+    return false;
   };
 
+  const totalVacancies = useMemo(() => {
+    const today = new Date();
+    const startOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+    const endOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+    return eachDayOfInterval({ start: startOfMonth, end: endOfMonth }).filter(
+      (day) => isBefore(today, day) && !isDateReserved(day.toISOString()),
+    ).length;
+  }, [reservedDates, date]);
 
+  const leftOnTheTable = useMemo(() => {
+    return Object.entries(prices || {})
+      .filter(([dateStr]) => !isDateReserved(dateStr))
+      .reduce((sum, [_, price]) => (price ? sum + price : sum), 0);
+  }, [prices, isDateReserved]);
 
   const changeMonth = (increment: number) => {
     const newDate = new Date(
@@ -176,6 +145,8 @@ export default function CalendarComponent() {
     );
     setDate(newDate);
   };
+
+  const isLoading = loadingProperties || loadingPrices;
 
   return (
     <div className="flex min-h-[calc(100vh-4rem)] flex-col gap-4 p-2 sm:p-4 lg:flex-row">
@@ -192,8 +163,16 @@ export default function CalendarComponent() {
                 })}
               </h2>
               <div className="text-xs font-medium sm:text-sm">
-                <p className="py-1">15 vacancies this month</p>
-                <p>$1000 left on the table</p>
+                <p className="py-1">
+                  {isLoading
+                    ? "Loading vacancies..."
+                    : `${totalVacancies} vacancies this month`}
+                </p>
+                <p>
+                  {isLoading
+                    ? "Loading money left on table..."
+                    : `$${leftOnTheTable.toFixed(2)} left on the table`}
+                </p>
               </div>
             </div>
 
@@ -238,7 +217,7 @@ export default function CalendarComponent() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                  {hostProperties.data?.map((property) => (
+                  {hostProperties?.map((property) => (
                     <DropdownMenuItem
                       key={property.id}
                       onSelect={() => setSelectedProperty(property)}
@@ -254,14 +233,15 @@ export default function CalendarComponent() {
             <MonthCalendar
               date={date}
               reservedDateRanges={reservedDates}
-              onDateClick={handleDateClick}
+              // onDateClick={handleDateClick}
               selectedRange={selectedRange}
-              isEditing={editing}
+              // isEditing={editing}
               prices={prices}
+              isLoading={isLoading}
             />
           </div>
           <div className="mt-4 flex flex-wrap gap-2">
-            <Button
+            {/* <Button
               variant="secondary"
               size="sm"
               className="flex-grow sm:flex-grow-0"
@@ -276,7 +256,7 @@ export default function CalendarComponent() {
               onClick={handleUnblockDates}
             >
               Unblock Dates
-            </Button>
+            </Button> */}
             <Button
               variant="secondary"
               size="sm"
@@ -284,7 +264,7 @@ export default function CalendarComponent() {
             >
               Edit iCal Link
             </Button>
-            <div className="w-full sm:w-auto sm:flex-1" />
+            {/* <div className="w-full sm:w-auto sm:flex-1" />
             <Button
               variant="outline"
               size="sm"
@@ -302,13 +282,13 @@ export default function CalendarComponent() {
               onClick={() => setEditing(!editing)}
             >
               {editing ? "Done" : "Edit"}
-            </Button>
+            </Button> */}
           </div>
         </CardContent>
       </Card>
 
       {/* SETTINGS */}
-      <CalendarSettings property={selectedProperty} />
+      {selectedProperty && <CalendarSettings property={selectedProperty} />}
     </div>
   );
 }

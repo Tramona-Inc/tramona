@@ -67,24 +67,32 @@ export default function PropertyPage({
   const [reviewBackupImages, setReviewBackupImages] = useState<string[]>([]);
   const [openUserInfo, setOpenUserInfo] = useState(false);
 
-  const { mutateAsync: updateCalender } =
-    api.calendar.updateHostCalendar.useMutation();
+  api.calendar.updateHostCalendar.useQuery({
+    hospitableListingId: property.hospitableListingId!,
+    },
+    {
+      enabled: Boolean(property.hospitableListingId),
+    },
+  );
 
-  useEffect(() => {
-    const updateCalendarIfNeeded = async () => {
-      if (property.hospitableListingId === "Hospitable") {
-        try {
-          await updateCalender({
-            hospitableListingId: property.hospitableListingId,
-          });
-        } catch (error) {
-          console.error("Failed to update calendar:", error);
-        }
-      }
-    };
+  // const { mutateAsync: updateCalender } =
+  //   api.calendar.updateHostCalendar.useMutation();
 
-    void updateCalendarIfNeeded();
-  }, [property.hospitableListingId, updateCalender]);
+  // useEffect(() => {
+  //   const updateCalendarIfNeeded = async () => {
+  //     if (property.hospitableListingId === "Hospitable") {
+  //       try {
+  //         await updateCalender({
+  //           hospitableListingId: property.hospitableListingId,
+  //         });
+  //       } catch (error) {
+  //         console.error("Failed to update calendar:", error);
+  //       }
+  //     }
+  //   };
+
+  //   void updateCalendarIfNeeded();
+  // }, [property.hospitableListingId, updateCalender]);
 
   useEffect(() => {
     const aboutElement = aboutRef.current;
