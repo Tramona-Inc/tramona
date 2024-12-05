@@ -3,7 +3,6 @@ import { db } from "@/server/db";
 import {
   groupMembers,
   groups,
-  hostTeamMembers,
   properties,
   requestsToBook,
   offers,
@@ -380,8 +379,8 @@ export async function createRequestToBook({
 
   //    ------2 CASES: 1.)no direct listing so send to the host 2.) isDirectLIsting send message to us
 
-    // Case 1 : DIRECT LISTING. SEND SLACK
-    if (isDirectListingCharge) {
+  // Case 1 : DIRECT LISTING. SEND SLACK
+  if (isDirectListingCharge) {
     await sendSlackMessage({
       isProductionOnly: true,
       channel: "tramona-bot",

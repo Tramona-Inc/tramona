@@ -7,7 +7,6 @@ import {
   timestamp,
   varchar,
   pgEnum,
-  boolean,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { groups } from "./groups";

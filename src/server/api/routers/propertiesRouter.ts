@@ -825,10 +825,7 @@ export const propertiesRouter = createTRPCRouter({
           result.originalNightlyPrice !== undefined,
       );
 
-      const filteredAirbnbProperties = airbnbProperties.filter(
-        (p) =>
-          p.nightlyPrice !== undefined && p.originalNightlyPrice !== undefined,
-      );
+      const filteredAirbnbProperties = airbnbProperties //use to have a filter function removing null values 
 
       const combinedResults = [...filteredAirbnbProperties, ...filteredResults];
       console.log("Combined results:", combinedResults);
