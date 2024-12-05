@@ -15,7 +15,6 @@ import UserAvatar from "../_common/UserAvatar";
 import { ScrollArea } from "../ui/scroll-area";
 import { SidebarConversation } from "./SidebarConversation";
 import { Button } from "../ui/button";
-import { messages } from "@/server/db/schema";
 import { MessageSquare } from "lucide-react";
 import { useRouter } from "next/router";
 

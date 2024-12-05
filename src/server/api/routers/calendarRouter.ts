@@ -104,6 +104,8 @@ export const calendarRouter = createTRPCRouter({
   getAndUpdateHostCalendar: publicProcedure
     .input(z.object({ hospitableListingId: z.string() }))
     .query(async ({ input }) => {
+      if (!input.hospitableListingId) return;
+
       const { hospitableListingId } = input;
       const combinedPricingAndCalendarResponse =
         await getPropertyCalendar(hospitableListingId);
@@ -189,9 +191,9 @@ export const calendarRouter = createTRPCRouter({
   //           end: z.string(),
   //           isAvailable: z.boolean(),
   //           platformBookedOn: z.enum(["airbnb", "tramona"]),
-  //         })
+  //         }),
   //       ),
-  //     })
+  //     }),
   //   )
   //   .mutation(async ({ input }) => {
   //     const { updates } = input;
@@ -212,18 +214,18 @@ export const calendarRouter = createTRPCRouter({
   //                   eq(reservedDateRanges.propertyId, propertyId),
   //                   eq(reservedDateRanges.platformBookedOn, platformBookedOn),
   //                   lte(reservedDateRanges.start, end),
-  //                   gte(reservedDateRanges.end, start)
-  //                 )
+  //                   gte(reservedDateRanges.end, start),
+  //                 ),
   //               );
 
   //             if (overlappingRanges.length > 0) {
   //               const mergedStart = overlappingRanges.reduce(
   //                 (min, range) => (range.start < min ? range.start : min),
-  //                 start
+  //                 start,
   //               );
   //               const mergedEnd = overlappingRanges.reduce(
   //                 (max, range) => (range.end > max ? range.end : max),
-  //                 end
+  //                 end,
   //               );
 
   //               await tx
@@ -233,8 +235,8 @@ export const calendarRouter = createTRPCRouter({
   //                     eq(reservedDateRanges.propertyId, propertyId),
   //                     eq(reservedDateRanges.platformBookedOn, platformBookedOn),
   //                     lte(reservedDateRanges.start, mergedEnd),
-  //                     gte(reservedDateRanges.end, mergedStart)
-  //                   )
+  //                     gte(reservedDateRanges.end, mergedStart),
+  //                   ),
   //                 );
 
   //               // Insert merged range
@@ -262,11 +264,11 @@ export const calendarRouter = createTRPCRouter({
   //                   eq(reservedDateRanges.propertyId, propertyId),
   //                   eq(reservedDateRanges.platformBookedOn, platformBookedOn),
   //                   lte(reservedDateRanges.start, end),
-  //                   gte(reservedDateRanges.end, start)
-  //                 )
+  //                   gte(reservedDateRanges.end, start),
+  //                 ),
   //               );
   //           }
-  //         })
+  //         }),
   //       );
   //     });
   //   }),

@@ -2,11 +2,9 @@ import { DirectSiteScraper } from "../direct-sites-scraping";
 import { scrapeAirbnbInitialPageHelper, scrapeAirbnbPagesHelper, urlScrape } from "@/server/server-utils";
 import { NewProperty } from "@/server/db/schema";
 import { z } from "zod";
-import { getNumNights, parseCurrency } from "@/utils/utils";
+import { parseCurrency } from "@/utils/utils";
 import { sortBy } from "lodash";
 import { scrapeAirbnbListing } from "./scrapeAirbnbListing";
-import { db } from "../db";
-
 export const airbnbScraper: DirectSiteScraper = async ({
   checkIn,
   checkOut,

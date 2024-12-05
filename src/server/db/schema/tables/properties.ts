@@ -357,7 +357,9 @@ export const properties = pgTable(
     pricingScreenUrl: varchar("pricing_screen_url"),
     currency: currencyEnum("currency").notNull().default("USD"),
     hospitableListingId: varchar("hospitable_listing_id"),
-    datesLastUpdated: timestamp("dates_last_updated", { withTimezone: true }).defaultNow(),
+    datesLastUpdated: timestamp("dates_last_updated", {
+      withTimezone: true,
+    }).defaultNow(),
     latLngPoint: geometry("lat_lng_point", {
       type: "point",
       mode: "xy",

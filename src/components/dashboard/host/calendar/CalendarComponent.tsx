@@ -138,7 +138,7 @@ export default function CalendarComponent() {
     return Object.entries(prices || {})
       .filter(([dateStr]) => !isDateReserved(dateStr))
       .reduce((sum, [_, price]) => (price ? sum + price : sum), 0);
-  }, [reservedDates, prices]);
+  }, [prices, isDateReserved]);
 
   const changeMonth = (increment: number) => {
     const newDate = new Date(

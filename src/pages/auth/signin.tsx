@@ -28,8 +28,6 @@ import { useCohostInviteStore } from "@/utils/store/cohostInvite";
 import { FcGoogle } from "react-icons/fc";
 
 export default function Login() {
-  const utils = api.useUtils();
-
   const formSchema = z.object({
     email: zodEmail(),
     password: z.string(),
