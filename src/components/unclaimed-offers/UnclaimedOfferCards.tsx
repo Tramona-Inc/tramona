@@ -17,14 +17,21 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { useAdjustedProperties } from "../landing-page/search/AdjustedPropertiesContext";
+import { AirbnbSearchResult, useAdjustedProperties } from "../landing-page/search/AdjustedPropertiesContext";
 import AddUnclaimedOffer from "./AddUnclaimedOffer";
-import { MapBoundary } from "../landing-page/search/SearchPropertiesMap";
 import { useLoading } from "./UnclaimedMapLoadingContext";
 import { Badge } from "../ui/badge";
+import { Property } from "@/server/db/schema/tables/properties";
 
-type Property =
-  RouterOutputs["properties"]["getAllInfiniteScroll"]["data"][number];
+// type Property =
+//   RouterOutputs["properties"]["getAllInfiniteScroll"]["data"][number];
+
+export type MapBoundary = {
+  north: number;
+  south: number;
+  east: number;
+  west: number;
+};
 
 export default function UnclaimedOfferCards({
   mapBoundaries,
@@ -164,18 +171,15 @@ export default function UnclaimedOfferCards({
               {/* <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"> */}
               <div className="grid grid-cols-1 gap-4 min-[580px]:grid-cols-2 min-[950px]:grid-cols-3 min-[1150px]:grid-cols-4">
                 {paginatedProperties?.length &&
-                  paginatedProperties.map((properties, index) => (
+                  paginatedProperties.map((property, index) => (
                     <div
                       key={index}
                       className="animate-fade-in"
                       style={{ animationDelay: `${index * 50}ms` }}
                     >
-                      {properties.data.map((property) => (
-                        <UnMatchedPropertyCard
-                          property={property}
-                          key={property.id}
-                        />
-                      ))}
+                      <UnMatchedPropertyCard
+                        property={property}
+                      />
                     </div>
                   ))}
               </div>
@@ -236,7 +240,7 @@ export default function UnclaimedOfferCards({
 function UnMatchedPropertyCard({
   property,
 }: {
-  property: Property;
+  property: Property | AirbnbSearchResult;
 }): JSX.Element {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
@@ -354,10 +358,10 @@ function UnMatchedPropertyCard({
           <div className="ml-2 flex items-center space-x-1 whitespace-nowrap">
             <Star fill="black" size={12} />
             <div>
-              {property.avgRating ? property.avgRating.toFixed(2) : "New"}
+              {"avgRating" in property ? property.avgRating.toFixed(2) : "New"}
             </div>
             <div>
-              {property.numRatings > 0 ? `(${property.numRatings})` : ""}
+              {"numRatings" in property ? `(${property.numRatings})` : ""}
             </div>
           </div>
         </div>

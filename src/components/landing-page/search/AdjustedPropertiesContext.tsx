@@ -27,7 +27,7 @@ export type AirbnbSearchResult = {
   ratingStr: string | null | undefined;
 };
 
-type PropertyPages = {
+export type PropertyPages = {
   pages: (Property | AirbnbSearchResult)[];
 };
 
