@@ -300,6 +300,7 @@ export const propertiesRouter = createTRPCRouter({
           originalNightlyPrice: properties.originalNightlyPrice,
           latLngPoint: properties.latLngPoint,
           bookItNowIsEnabled: properties.bookItNowEnabled,
+          originalListingId: properties.originalListingId,
           // lat: properties.latitude,
           // long: properties.longitude,
           distance: sql`
@@ -564,7 +565,10 @@ export const propertiesRouter = createTRPCRouter({
   updatePropertyDatesLastUpdated: hostProcedure
     .input(z.object({ propertyId: z.number(), datesLastUpdated: z.date() }))
     .mutation(async ({ ctx, input }) => {
-      await ctx.db.update(properties).set({ datesLastUpdated: input.datesLastUpdated }).where(eq(properties.id, input.propertyId));
+      await ctx.db
+        .update(properties)
+        .set({ datesLastUpdated: input.datesLastUpdated })
+        .where(eq(properties.id, input.propertyId));
     }),
 
   getHostPropertiesWithRequests: hostProcedure.query(async ({ ctx }) => {
@@ -797,7 +801,6 @@ export const propertiesRouter = createTRPCRouter({
         return [];
       }
 
-
       const airbnbProperties = await scrapeAirbnbSearch({
         checkIn: input.checkIn,
         checkOut: input.checkOut,
@@ -825,8 +828,7 @@ export const propertiesRouter = createTRPCRouter({
 
       const filteredAirbnbProperties = airbnbProperties.filter(
         (p) =>
-          p.nightlyPrice !== undefined &&
-          p.originalNightlyPrice !== undefined,
+          p.nightlyPrice !== undefined && p.originalNightlyPrice !== undefined,
       );
 
       const combinedResults = [...filteredAirbnbProperties, ...filteredResults];
@@ -924,12 +926,14 @@ export const propertiesRouter = createTRPCRouter({
   //   }),
 
   getBookItNowProperties: publicProcedure
-    .input(z.object({
-      checkIn: z.date(),
-      checkOut: z.date(),
-      numGuests: z.number(),
-      location: z.string(),
-    }))
+    .input(
+      z.object({
+        checkIn: z.date(),
+        checkOut: z.date(),
+        numGuests: z.number(),
+        location: z.string(),
+      }),
+    )
     .query(async ({ input }) => {
       const { location } = await getCoordinates(input.location);
       if (!location) throw new Error("Could not get coordinates for address");
@@ -949,25 +953,38 @@ export const propertiesRouter = createTRPCRouter({
       const checkInDate = checkIn.toISOString();
       const checkOutDate = checkOut.toISOString();
 
-      const conflictingPropertyIds = await db.query.reservedDateRanges.findMany({
-        columns: { propertyId: true },
-        where: and(
-          or(
-            and(lte(reservedDateRanges.start, checkInDate), gte(reservedDateRanges.end, checkInDate)),
-            and(lte(reservedDateRanges.start, checkOutDate), gte(reservedDateRanges.end, checkOutDate)),
-            and(gte(reservedDateRanges.start, checkInDate), lte(reservedDateRanges.end, checkOutDate))
-          )
-        ),
-      });
+      const conflictingPropertyIds = await db.query.reservedDateRanges.findMany(
+        {
+          columns: { propertyId: true },
+          where: and(
+            or(
+              and(
+                lte(reservedDateRanges.start, checkInDate),
+                gte(reservedDateRanges.end, checkInDate),
+              ),
+              and(
+                lte(reservedDateRanges.start, checkOutDate),
+                gte(reservedDateRanges.end, checkOutDate),
+              ),
+              and(
+                gte(reservedDateRanges.start, checkInDate),
+                lte(reservedDateRanges.end, checkOutDate),
+              ),
+            ),
+          ),
+        },
+      );
 
       // Extract conflicting property IDs into an array
-      const conflictingIds = conflictingPropertyIds.map(item => item.propertyId);
+      const conflictingIds = conflictingPropertyIds.map(
+        (item) => item.propertyId,
+      );
 
       const hostProperties = await db.query.properties.findMany({
         where: and(
           eq(properties.originalListingPlatform, "Hospitable"),
           propertyIsNearRequest,
-          notInArray(properties.id, conflictingIds) // Exclude properties with conflicting reservations
+          notInArray(properties.id, conflictingIds), // Exclude properties with conflicting reservations
         ),
       });
 
@@ -982,7 +999,7 @@ export const propertiesRouter = createTRPCRouter({
             numGuests: input.numGuests,
           });
           property.originalNightlyPrice = originalPrice ?? null;
-        })
+        }),
       );
 
       // Query for scraped properties with non-intersecting dates
@@ -993,8 +1010,8 @@ export const propertiesRouter = createTRPCRouter({
           propertyIsNearRequest,
           ne(properties.originalNightlyPrice, -1),
           isNotNull(properties.originalNightlyPrice),
-          notInArray(properties.id, conflictingIds) // Exclude properties with conflicting reservations
-        )
+          notInArray(properties.id, conflictingIds), // Exclude properties with conflicting reservations
+        ),
       });
       return { hostProperties, scrapedProperties };
     }),

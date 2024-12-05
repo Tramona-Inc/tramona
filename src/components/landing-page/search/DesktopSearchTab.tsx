@@ -433,7 +433,7 @@ export function DesktopSearchTab() {
           const updatedProperties = {
             ...prevState,
             pages: [
-              ...(prevState?.pages || []),
+              ...(prevState.pages || []),
               ...propertiesInArea.hostProperties,
               ...propertiesInArea.scrapedProperties,
             ],
