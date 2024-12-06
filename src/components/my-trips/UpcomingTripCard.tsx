@@ -1,4 +1,4 @@
-import { HelpCircleIcon, MapPinIcon } from "lucide-react";
+import { HelpCircleIcon, MessageCircleMore } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -8,8 +8,12 @@ import UserAvatar from "../_common/UserAvatar";
 import { type TripCardDetails } from "@/pages/my-trips";
 import ChatOfferButton from "../propertyPages/sections/ChatOfferButton";
 import TripCancelDialog from "./TripCancelDialog";
+import { useChatWithHost } from "@/utils/messaging/useChatWithHost";
 
 export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
+  const chatWithHost = useChatWithHost();
+  const hostId = trip.property.hostTeam.ownerId;
+
   return (
     <div className="w-full">
       <div className="flex flex-col overflow-clip rounded-xl border shadow-md lg:flex-row">
@@ -60,7 +64,6 @@ export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
               </Link>
 
               <p className="flex flex-row items-center gap-x-1">
-                <MapPinIcon size={18} />
                 {trip.property.address}
               </p>
 
@@ -98,7 +101,7 @@ export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
                 offerPropertyName={trip.property.name}
               />
             )}
-            <Button asChild variant="secondary">
+            <Button asChild variant="primary">
               <Link href="/faq">
                 <HelpCircleIcon />
                 Help
@@ -107,6 +110,10 @@ export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
             {trip.tripsStatus !== "Cancelled" && (
               <TripCancelDialog trip={trip} />
             )}
+            <Button onClick={() => chatWithHost({ hostId })}>
+              <MessageCircleMore />
+              Message Host
+            </Button>
           </div>
         </div>
       </div>

@@ -40,6 +40,7 @@ const RequestSubmittedDialog: React.FC<RequestSubmittedDialogProps> = ({
   useEffect(() => {
     if (inviteLinkQuery.data) {
       setInviteLink(inviteLinkQuery.data.link);
+      console.log(inviteLink); //when we bring invites back
     }
   }, [inviteLinkQuery.data]);
 

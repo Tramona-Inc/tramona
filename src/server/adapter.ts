@@ -1,5 +1,5 @@
 import { and, eq } from "drizzle-orm";
-import { type Adapter } from "next-auth/adapters";
+import { AdapterAccount, AdapterUser, type Adapter } from "next-auth/adapters";
 import { type PgDatabase } from "drizzle-orm/pg-core";
 import {
   sessions,
@@ -15,7 +15,7 @@ export function CustomPgDrizzleAdapter(
   db: InstanceType<typeof PgDatabase>,
 ): Adapter {
   return {
-    async createUser(user) {
+    async createUser(user: Omit<AdapterUser, "id">) {
       const userId = crypto.randomUUID();
 
       const newUser = await db.transaction(async (tx) => {
@@ -93,7 +93,7 @@ export function CustomPgDrizzleAdapter(
         .returning()
         .then((res) => res[0]);
     },
-    async linkAccount(rawAccount) {
+    async linkAccount(rawAccount: AdapterAccount) {
       const updatedAccount = await db
         .insert(accounts)
         .values(rawAccount)
@@ -172,7 +172,9 @@ export function CustomPgDrizzleAdapter(
         .returning()
         .then((res) => res[0] ?? null);
     },
-    async unlinkAccount(account) {
+    async unlinkAccount(
+      account: Pick<AdapterAccount, "provider" | "providerAccountId">,
+    ) {
       const deletedAccount = await db
         .delete(accounts)
         .where(

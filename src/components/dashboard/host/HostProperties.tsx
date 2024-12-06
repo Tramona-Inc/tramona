@@ -1,11 +1,12 @@
 import Spinner from "@/components/_common/Spinner";
+import { Badge } from "@/components/ui/badge";
 import {
   EmptyState,
   EmptyStateDescription,
   EmptyStateTitle,
 } from "@/components/ui/empty-state";
 import { type Property } from "@/server/db/schema/tables/properties";
-import { AlertCircle, FenceIcon } from "lucide-react";
+import { FenceIcon } from "lucide-react";
 import Image from "next/image";
 
 export default function HostProperties({
@@ -86,10 +87,11 @@ function PropertyCard({
           </p>
         </div>
         {!property.cancellationPolicy && (
-          <AlertCircle
-            className="absolute right-1 top-1 text-red-600"
-            size={16}
-          />
+          <Badge variant="red" className="absolute left-4 top-5 space-x-1">
+            {" "}
+            <div className="h-2 w-2 rounded-full bg-red-600" />
+            <p>Needs Attention</p>
+          </Badge>
         )}
       </div>
     </a>

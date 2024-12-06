@@ -1,10 +1,9 @@
 import { api } from "@/utils/api";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { type SeparatedData } from "@/server/server-utils";
-import { separateByPriceRestriction, plural } from "@/utils/utils";
-import { HostRequestsToBookPageData } from "@/server/api/routers/propertiesRouter";
+import { separateByPriceRestriction } from "@/utils/utils";
 import { range } from "lodash";
 import EmptyRequestState from "./EmptyRequestState";
 import SidebarPropertySkeleton from "./SidebarPropertySkeleton";

@@ -7,7 +7,6 @@ import {
   timestamp,
   varchar,
   pgEnum,
-  boolean,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { groups } from "./groups";
@@ -68,7 +67,6 @@ export const trips = pgTable(
       { onDelete: "set null" },
     ),
     tripSource: tripSourceEnum("trip_source").notNull().default("City request"),
-    isWithin48Hours: boolean("is_within_48_hours").notNull().default(false),
   },
   (t) => ({
     groupIdIdx: index().on(t.groupId),

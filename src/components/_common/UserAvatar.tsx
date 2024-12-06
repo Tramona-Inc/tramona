@@ -18,7 +18,7 @@ export default function UserAvatar({
   name,
   email,
   image,
-  size,
+  size = "md",
 }: {
   name?: string | null;
   email?: string | null;

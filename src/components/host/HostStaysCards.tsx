@@ -172,7 +172,7 @@ export function HostStaysEmptyState({ staysTab }: { staysTab?: StaysTabs }) {
   return (
     <Card className="border-primary/20">
       <CardContent className="flex flex-col items-center justify-center space-y-4 p-6 text-center">
-        <CheckCircle className="h-8 w-8 text-primary" />
+        <CheckCircle className="h-6 w-6 text-primary" />
         <p className="text-lg text-muted-foreground">{text}</p>
         <Button variant="link" asChild>
           <Link href="/host/requests">See requests</Link>

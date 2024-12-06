@@ -12,11 +12,12 @@ import {
 import { daysOfWeek, months } from "@/utils/constants";
 import { Button } from "@/components/ui/button";
 import HostICalSync from "./HostICalSync";
+import { FcElectricalSensor } from "react-icons/fc";
 
 type ReservationInfo = {
   start: string;
   end: string;
-  platformBookedOn: 'airbnb' | 'tramona';
+  platformBookedOn: "airbnb" | "tramona";
 };
 
 export default function HostAvailability({ property }: { property: Property }) {
@@ -30,8 +31,14 @@ export default function HostAvailability({ property }: { property: Property }) {
   const [isRefetching, setIsRefetching] = useState(false);
 
   const { mutateAsync: syncCalendar } = api.calendar.syncCalendar.useMutation();
-  const { mutateAsync: updateCalendar } =
-    api.calendar.updateCalendar.useMutation();
+
+  const hospitableListingId = property.hospitableListingId;
+
+  const { data } = api.calendar.updateHostCalendar.useQuery({
+    //updated the updatehostCalendar
+    hospitableListingId,
+  });
+
   const {
     data: reservedDateRanges,
     isLoading,
@@ -94,15 +101,20 @@ export default function HostAvailability({ property }: { property: Property }) {
         return { start: null, end: null };
       }
 
-      if (clickedReservation && clickedReservation.platformBookedOn === "tramona") {
+      if (
+        clickedReservation &&
+        clickedReservation.platformBookedOn === "tramona"
+      ) {
         const reservationStart = new Date(clickedReservation.start);
         const reservationEnd = new Date(clickedReservation.end);
-        
-        if (prev.start?.getTime() === reservationStart.getTime() && 
-            prev.end?.getTime() === reservationEnd.getTime()) {
+
+        if (
+          prev.start?.getTime() === reservationStart.getTime() &&
+          prev.end?.getTime() === reservationEnd.getTime()
+        ) {
           return { start: null, end: null };
         }
-      
+
         return { start: reservationStart, end: reservationEnd };
       }
 
@@ -132,13 +144,6 @@ export default function HostAvailability({ property }: { property: Property }) {
       const end = new Date(selectedRange.end);
       end.setHours(23, 59, 59, 999);
 
-      await updateCalendar({
-        propertyId: property.id,
-        start: start.toISOString(),
-        end: end.toISOString(),
-        isAvailable: !isBlocking,
-        platformBookedOn: "tramona",
-      });
       await refetch();
       setSelectedRange({ start: null, end: null });
     } catch (error) {
@@ -200,14 +205,14 @@ export default function HostAvailability({ property }: { property: Property }) {
                 ? date >= selectedRange.start && date <= selectedRange.end
                 : date.getTime() === selectedRange.start.getTime());
 
-                let reservationClass = "";
-                if (reservedInfo) {
-                  if (reservedInfo.platformBookedOn === "airbnb") {
-                    reservationClass = "bg-reserved-pattern";
-                  } else if (reservedInfo.platformBookedOn === "tramona" && reservationClass === "") {
-                    reservationClass = "bg-reserved-pattern-2";
-                  }
-                }
+            let reservationClass = "";
+            if (reservedInfo) {
+              if (reservedInfo.platformBookedOn === "airbnb") {
+                reservationClass = "bg-reserved-pattern";
+              } else {
+                reservationClass = "bg-reserved-pattern-2";
+              }
+            }
 
             return (
               <div
@@ -247,7 +252,7 @@ export default function HostAvailability({ property }: { property: Property }) {
 
   return (
     <div className="mb-16 mt-6 space-y-10">
-      <div className="flex items-center justify-center sm:justify-end space-x-2">
+      <div className="flex items-center justify-center space-x-2 sm:justify-end">
         {editing && selectedRange.start && selectedRange.end && (
           <>
             <Button onClick={() => handleRangeSubmit(true)} variant="secondary">
@@ -265,10 +270,7 @@ export default function HostAvailability({ property }: { property: Property }) {
           <>
             <Tooltip>
               <TooltipTrigger>
-                <Button
-                  disabled
-                  variant="secondary"
-                >
+                <Button disabled variant="secondary">
                   Block Date Range
                 </Button>
               </TooltipTrigger>
@@ -279,10 +281,7 @@ export default function HostAvailability({ property }: { property: Property }) {
             </Tooltip>
             <Tooltip>
               <TooltipTrigger>
-                <Button
-                  disabled
-                  variant="secondary"
-                >
+                <Button disabled variant="secondary">
                   Unblock Date Range
                 </Button>
               </TooltipTrigger>
@@ -301,7 +300,11 @@ export default function HostAvailability({ property }: { property: Property }) {
             {isRefetching ? "Refreshing..." : "Refresh Calendar"}
           </Button>
         )}
-        <div className={property.iCalLink && editing ? "hidden sm:block" : "hidden"}>
+        <div
+          className={
+            property.iCalLink && editing ? "hidden sm:block" : "hidden"
+          }
+        >
           <HostICalSync property={property} />
         </div>
         {property.iCalLink && (
@@ -390,7 +393,7 @@ export default function HostAvailability({ property }: { property: Property }) {
               </TooltipContent>
             </Tooltip>
             <div className="flex items-center">
-              <div className="bg-reserved-pattern-2 mr-2 h-6 w-6"></div>
+              <div className="mr-2 h-6 w-6 bg-reserved-pattern-2"></div>
               <span className="text-muted-foreground">Blocked on Tramona</span>
             </div>
           </div>

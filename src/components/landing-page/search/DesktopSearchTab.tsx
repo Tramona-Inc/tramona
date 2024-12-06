@@ -142,7 +142,7 @@ export function DesktopSearchTab({
           const updatedProperties = {
             ...prevState,
             pages: [
-              ...(prevState?.pages || []),
+              ...(prevState.pages || []),
               ...propertiesInArea.hostProperties,
               ...propertiesInArea.scrapedProperties,
             ],
@@ -151,7 +151,7 @@ export function DesktopSearchTab({
           setAdjustedProperties({
             ...updatedProperties,
             pages: filterProperties(
-              updatedProperties.pages.flat() || [],
+              updatedProperties.pages.flat() as Property[],
               minPrice !== "" ? (Number(minPrice) * 100).toString() : minPrice,
               maxPrice !== "" ? (Number(maxPrice) * 100).toString() : maxPrice,
               priceSort,
@@ -178,7 +178,7 @@ export function DesktopSearchTab({
           setAdjustedProperties({
             ...updatedProperties,
             pages: filterProperties(
-              updatedProperties.pages?.flat() || [],
+              updatedProperties.pages.flat() as Property[],
               minPrice !== "" ? (Number(minPrice) * 100).toString() : minPrice,
               maxPrice !== "" ? (Number(maxPrice) * 100).toString() : maxPrice,
               priceSort,
@@ -210,7 +210,7 @@ export function DesktopSearchTab({
           setAdjustedProperties({
             ...updatedProperties,
             pages: filterProperties(
-              updatedProperties.pages?.flat() || [],
+              updatedProperties.pages.flat() as Property[],
               minPrice !== "" ? (Number(minPrice) * 100).toString() : minPrice,
               maxPrice !== "" ? (Number(maxPrice) * 100).toString() : maxPrice,
               priceSort,
@@ -378,7 +378,7 @@ export function DesktopSearchTab({
                     return {
                       ...prevState,
                       pages: filterProperties(
-                        allProperties.pages?.flat() || [],
+                        allProperties.pages.flat() as Property[],
                         minPrice !== ""
                           ? (Number(minPrice) * 100).toString()
                           : minPrice,

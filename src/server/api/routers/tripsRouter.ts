@@ -192,6 +192,16 @@ export const tripsRouter = createTRPCRouter({
           cancellationPolicy: true,
           checkInTime: true,
           checkOutTime: true,
+          checkInType: true,
+          checkOutInfo: true,
+          additionalCheckOutInfo: true,
+          houseRules: true,
+          additionalHouseRules: true,
+          interactionPreference: true,
+          directions: true,
+          wifiName: true,
+          wifiPassword: true,
+          houseManual: true,
         },
         with: {
           hostTeam: {
@@ -240,6 +250,16 @@ export const tripsRouter = createTRPCRouter({
               cancellationPolicy: true,
               checkInTime: true,
               checkOutTime: true,
+              checkInType: true,
+              checkOutInfo: true,
+              additionalCheckOutInfo: true,
+              houseRules: true,
+              additionalHouseRules: true,
+              interactionPreference: true,
+              directions: true,
+              wifiName: true,
+              wifiPassword: true,
+              houseManual: true,
             },
             with: {
               hostTeam: {

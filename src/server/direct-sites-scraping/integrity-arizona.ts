@@ -123,7 +123,7 @@ const mapToScrapedListing = async (
         country: addressComponents.country,
         stateName: addressComponents.stateName,
         stateCode: addressComponents.stateCode,
-
+        countryISO: addressComponents.countryISO,
         latLngPoint,
 
         maxNumGuests: prop.max_occupants,

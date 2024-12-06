@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Grid, Pencil, Plus } from "lucide-react";
+import { Grid, Plus } from "lucide-react";
 import HostProperties from "./HostProperties";
 import {
   type LocationType,
@@ -10,7 +10,6 @@ import {
   CancellationPolicyWithInternals,
   type Property,
 } from "@/server/db/schema/tables/properties";
-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useRouter } from "next/router";
 import ExpandableSearchBar from "@/components/_common/ExpandableSearchBar";
@@ -129,7 +128,7 @@ export default function HostPropertiesLayout() {
         {selectedProperty && <HostPropertyInfo property={selectedProperty} />}
       </HostPropertiesSidebar>
       <div className="flex items-center gap-4 sm:flex-row sm:justify-between">
-        <h1 className="text-2xl font-bold md:text-4xl">Your Properties</h1>
+        <h1 className="text-2xl font-semibold md:text-4xl">Your Properties</h1>
         <div className="flex flex-1 items-center justify-end gap-4">
           <ExpandableSearchBar
             className="hidden sm:flex"
@@ -293,7 +292,7 @@ export function HostPropertyEditBtn({
   };
 
   return (
-    <div className="absolute right-8 top-10 space-x-2">
+    <div className="absolute bottom-20 left-8 z-40 space-x-2 lg:bottom-6">
       {editing ? (
         <>
           <Button

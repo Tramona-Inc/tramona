@@ -277,7 +277,6 @@ export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
             </div>
             <ListMessagesWithAdmin
               messages={messages}
-              conversationId={conversationId}
               tempUserId={conversationIdAndTempUserId?.tempUserId ?? ""}
             />
             <div className="p-2">
@@ -326,7 +325,6 @@ export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
           <ListMessagesWithAdmin
             messages={messages}
             isMobile={isMobile}
-            conversationId={conversationId}
             tempUserId={conversationIdAndTempUserId?.tempUserId ?? ""}
           />
           <div className="p-2">
