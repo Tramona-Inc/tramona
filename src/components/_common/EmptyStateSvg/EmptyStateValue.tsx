@@ -12,7 +12,7 @@ type EmptyStateProps = {
 
 export default function EmptyStateValue(props: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center gap-6 pt-32">
+    <div className="flex flex-col items-center gap-6 py-32">
       {props.children}
       <div>
         {props.title && (
