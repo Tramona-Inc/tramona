@@ -22,7 +22,7 @@ export default function HostSection({
         <div className="mx-8 grid items-center gap-4 lg:grid-cols-5">
           <div className="flex justify-center lg:col-span-2 lg:justify-start">
             <Image
-              src="/assets/images/why-list/usinglaptop.png"
+              src="/assets/images/why-list/secure.png"
               alt="Host using laptop"
               width={700}
               height={500}
@@ -36,7 +36,7 @@ export default function HostSection({
             <p className="mb-4 text-lg md:text-xl">
               The Only Booking Platform Built to Fill Your Vacancies
             </p>
-            <p className="mb-6 text-wrap">
+            <p className="text-wrap mb-6">
               Tramona lets you maximize earnings by listing your property at
               full price while maintaining the option to offer exclusive
               discounts when you choose. Unlike other platforms, Tramona gives
