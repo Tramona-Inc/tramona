@@ -1,7 +1,7 @@
 // MastHead.tsx
 import { BookItNowSection } from "./book-it-now/BookItNowSection";
 import { NameYourPriceSection } from "./name-your-price/NameYourPriceSection";
-import landingBg2 from "public/assets/images/landing-page/BCS-2024-Paris-Bakery-Homepage-Desktop.webp";
+import landingBg2 from "public/assets/images/landing-page/blakesingleton_httpss.mj.runL0v8UkwKU1k_this_will_be_the_backgr_0c65f94f-431e-4e9d-bae4-58e5ec2999e1.png";
 import { useRouter } from "next/router";
 import DynamicDesktopSearchBar from "../search/DynamicDesktopSearchBar";
 import { AdjustedPropertiesProvider } from "../search/AdjustedPropertiesContext";
@@ -16,7 +16,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { HelpCircle } from "lucide-react";
+import { ChevronRight, HelpCircle } from "lucide-react";
 import OverviewRequestCards from "./name-your-price/OverviewRequestCards";
 import HowTramonaWorks from "./name-your-price/HowTramonaWorks";
 import { TestimonialCarousel } from "./testimonials/TestimonialCarousel";
@@ -37,7 +37,7 @@ export default function MastHead() {
 
       if (toggleSectionRef.current) {
         const buttonPosition = toggleSectionRef.current.offsetTop;
-        setHasPassedButtons(scrollPosition > buttonPosition + 450);
+        setHasPassedButtons(scrollPosition > buttonPosition + 400);
       }
     };
 
@@ -67,11 +67,18 @@ export default function MastHead() {
     }
   };
 
+  const scrollToHowItWorks = () => {
+    window.scrollTo({
+      top: 1500,
+      behavior: "smooth",
+    });
+  };
+
   return (
     <div className="bg-background-offWhite">
       <div
-        className={`sticky top-0 z-20 flex w-full flex-col items-center justify-center bg-white transition-all duration-300 ease-in-out lg:top-16 ${
-          isScrolled ? "border-b-2 shadow-md" : "border-b-1"
+        className={`-mt-24 lg:mt-0 sticky -top-24 z-20 flex w-full flex-col items-center justify-center border-b-2 transition-all duration-300 ease-in-out translate-y-24 lg:translate-y-0 lg:top-16 ${
+          isScrolled ? "shadow-md bg-white border-white" : "bg-transparent lg:bg-white border-transparent"
         }`}
       >
         <AdjustedPropertiesProvider>
@@ -148,12 +155,42 @@ export default function MastHead() {
           />
           <div className="absolute inset-0 bg-black bg-opacity-30" />
 
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <h2 className="mt-8 text-center text-4xl font-semibold text-white">
-              Hosts accept, deny, or counter offer all sent requests
+          <div className="absolute inset-0 mx-auto flex max-w-7xl flex-col justify-center pl-4 text-left lg:hidden brightness-75">
+            <h2 className="mt-8 text-left text-4xl font-bold text-white">
+              Turn empty nights <br /> into opportunities
             </h2>
-            <h3 className="mt-2 text-center text-3xl text-white">
-              Try it before you book
+            <h3 className="mt-6 text-lg font-semibold text-white">
+              Name your own price or book it now
+            </h3>
+            <h3 className="mt-2 text-lg font-semibold text-white">
+              Host accepts, counter, or reject requests
+            </h3>
+            <h3 className="mt-4 text-lg font-semibold text-white">
+              <Link href={"/how-it-works"} className="flex items-center">
+                  How it works
+                  <ChevronRight className="" />
+              </Link>
+            </h3>
+          </div>
+
+          <div className="absolute inset-0 mx-auto hidden max-w-7xl flex-col justify-center pl-4 text-left lg:flex">
+            <h2 className="mt-8 text-left text-4xl font-bold text-white">
+              Turn empty nights <br /> into opportunities
+            </h2>
+            <h3 className="mt-6 text-xl font-semibold text-white">
+              Name your own price or book it now
+            </h3>
+            <h3 className="mt-2 text-xl font-semibold text-white">
+              Host accepts, counter, or reject requests
+            </h3>
+            <h3 className="mt-4 text-xl font-semibold text-white">
+              <button
+                className="flex items-center"
+                onClick={scrollToHowItWorks}
+              >
+                How it works
+                <ChevronRight className="" />
+              </button>
             </h3>
           </div>
         </div>

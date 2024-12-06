@@ -1,19 +1,6 @@
-import OverviewRequestCards from "./OverviewRequestCards";
-import { Button } from "@/components/ui/button";
-import { TestimonialCarousel } from "../testimonials/TestimonialCarousel";
 
 import Typewriter from "typewriter-effect";
 import CityRequestFormContainer from "../../SearchBars/CityRequestFormContainer";
-import HowTramonaWorks from "./HowTramonaWorks";
-import HostSection from "./HostSection";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { AccordionItem } from "@radix-ui/react-accordion";
-import Link from "next/link";
-import { HelpCircle } from "lucide-react";
 
 export function NameYourPriceSection() {
   return (

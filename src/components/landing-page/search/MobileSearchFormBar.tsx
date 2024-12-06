@@ -16,7 +16,7 @@ const MobileSearchFormBar = ({ form, onSubmit, isLoading }) => {
     if (location) {
       return location;
     }
-    return 'Find places and things to do';
+    return 'Best prices on Airbnbs anywhere';
   };
 
   return (
@@ -35,10 +35,10 @@ const MobileSearchFormBar = ({ form, onSubmit, isLoading }) => {
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-[600px] p-0">
-        <div className="flex flex-col">
-          <div className="p-4">
-            <h2 className="text-lg font-semibold mb-4">Where to?</h2>
+      <DialogContent className="sm:max-w-[600px] p-0 h-[90vh] overflow-y-auto">
+        <div className="flex flex-col h-full">
+          <div className="p-4 space-y-6">
+            <h2 className="text-lg font-semibold">Where to?</h2>
             <Form {...form}>
               <form onSubmit={(e) => {
                 e.preventDefault();
@@ -47,7 +47,7 @@ const MobileSearchFormBar = ({ form, onSubmit, isLoading }) => {
                   setOpen(false);
                 })(e);
               }}>
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <SearchFormBar
                     form={form}
                     onSubmit={() => {}}
