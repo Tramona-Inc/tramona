@@ -609,7 +609,7 @@ export const propertiesRouter = createTRPCRouter({
       });
   
       const hostRequests = await getRequestsForProperties(hostProperties);
-      console.log(hostRequests);
+      // console.log(hostRequests);
   
       const findOrCreateCityGroup = (city: string) => {
         let cityGroup = groupedByCity.find((group) => group.city === city);

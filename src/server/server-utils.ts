@@ -525,7 +525,7 @@ export async function getRequestsForProperties(
     });
 
     const taxInfo = calculateTotalTax({ country, stateCode, city });
-    console.log("taxInfo", taxInfo, city);
+    // console.log("taxInfo", taxInfo, city);
 
     const requestsForProperty = await tx.query.requests.findMany({
       where: and(
