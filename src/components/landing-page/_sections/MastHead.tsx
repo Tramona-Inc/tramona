@@ -151,11 +151,11 @@ export default function MastHead() {
             src={landingBg2}
             alt=""
             fill
-            className="object-cover object-center"
+            className="object-cover object-center brightness-50"
           />
           <div className="absolute inset-0 bg-black bg-opacity-30" />
 
-          <div className="absolute inset-0 mx-auto flex max-w-7xl flex-col justify-center pl-4 text-left lg:hidden brightness-75">
+          <div className="absolute inset-0 mx-auto flex max-w-7xl flex-col justify-center pl-4 text-left lg:hidden">
             <h2 className="mt-8 text-left text-4xl font-bold text-white">
               Turn empty nights <br /> into opportunities
             </h2>
