@@ -68,7 +68,12 @@ const ForHostsPage = ({
             change.
           </p>
         </div>
-        <KeyFeatures />
+        <div className="bg-[#FAF9F6]">
+          <Features2 />
+        </div>
+        <div className="mt-12">
+          <KeyFeatures />
+        </div>
         <hr className="mx-8 border-t border-gray-300" />
         <Features />
         <div className="flex justify-center bg-[#FAF9F6] p-20">
@@ -487,12 +492,6 @@ type Tabs = {
   image: string;
 };
 
-type Tabs2 = {
-  id: number;
-  title: string;
-  image: string;
-};
-
 const contents: Tabs[] = [
   {
     id: 0,
@@ -508,6 +507,12 @@ const contents: Tabs[] = [
     image: "/assets/images/host-welcome/3.png",
   },
 ];
+
+type Tabs2 = {
+  id: number;
+  title: string;
+  image: string;
+};
 
 const content2: Tabs2[] = [
   {
@@ -560,6 +565,58 @@ const Features = () => {
             demo
           </Button>
         </Link>
+      </div>
+    </section>
+  );
+};
+
+const Features2 = () => {
+  return (
+    <section className="mb-12 mt-12 py-12">
+      <div className="flex flex-col items-center space-y-12">
+        {/* First Row: Image on left, text on right */}
+        <div className="flex w-full max-w-6xl items-center gap-16 sm:flex-row">
+          <div className="relative h-64 w-64 flex-shrink-0 overflow-hidden rounded-lg bg-gray-200 shadow-md">
+            {/* Replace the src with your actual image path */}
+            <Image
+              src="/path/to/image-requests.jpg"
+              objectFit="cover"
+              layout="fill"
+              alt="Requests"
+            />
+          </div>
+          <h2 className="text-2xl font-semibold text-[#333]">Requests</h2>
+        </div>
+
+        {/* Second Row: Text on left, image on right */}
+        <div className="flex w-full max-w-6xl items-center gap-16 sm:flex-row-reverse">
+          <div className="relative h-64 w-64 flex-shrink-0 overflow-hidden rounded-lg bg-gray-200 shadow-md">
+            {/* Replace the src with your actual image path */}
+            <Image
+              src="/path/to/image-cal.jpg"
+              objectFit="cover"
+              layout="fill"
+              alt="Cal"
+            />
+          </div>
+          <h2 className="text-2xl font-semibold text-[#333]">Cal</h2>
+        </div>
+
+        {/* Third Row: Image on left, text on right */}
+        <div className="flex w-full max-w-6xl items-center gap-16 sm:flex-row">
+          <div className="relative h-64 w-64 flex-shrink-0 overflow-hidden rounded-lg bg-gray-200 shadow-md">
+            {/* Replace the src with your actual image path */}
+            <Image
+              src="/path/to/image-customized-pricing.jpg"
+              objectFit="cover"
+              layout="fill"
+              alt="Customized Pricing"
+            />
+          </div>
+          <h2 className="text-2xl font-semibold text-[#333]">
+            Customized Pricing
+          </h2>
+        </div>
       </div>
     </section>
   );

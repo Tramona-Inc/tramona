@@ -1,14 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { formatCurrency } from "@/utils/utils";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatCurrency } from "@/utils/utils"; // Ensure this doesn't divide by 100
 import { Badge } from "../ui/badge";
 import { Slider } from "../ui/slider";
 import { SlidersHorizontal } from "lucide-react";
@@ -25,13 +19,7 @@ export default function HostCalculator() {
       optimistic: 0,
     },
   });
-
   const [error, setError] = useState("");
-  const formatNumber = (num: number) => {
-    return new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 }).format(
-      num,
-    );
-  };
 
   const calculateEarnings = useCallback(
     (
@@ -39,20 +27,18 @@ export default function HostCalculator() {
       customAveragePrice: number,
       customCleaningFee: number,
     ): number => {
-      // useCallback
       const daysPerYear = 365;
       const occupiedDays = daysPerYear * (1 - customVacancyRate / 100);
       const earningsPerStay = Math.max(
         0,
         customAveragePrice - customCleaningFee,
       );
-      return occupiedDays * earningsPerStay;
+      return occupiedDays * earningsPerStay * 100; // Multiply by 100
     },
     [],
   );
 
   const calculateAllEarnings = useCallback(() => {
-    // useCallback
     const current = calculateEarnings(vacancyRate, averagePrice, cleaningFee);
     const calculateExtraEarnings = (vacancyReduction: number) => {
       const newVacancyRate = Math.max(0, vacancyRate - vacancyReduction);
@@ -61,10 +47,10 @@ export default function HostCalculator() {
         averagePrice,
         cleaningFee,
       );
-      return Math.max(0, newEarnings - current); // Adds protection for negative values
+      return Math.max(0, newEarnings - current);
     };
     setEarnings({
-      current: current,
+      current,
       tramona: {
         conservative: calculateExtraEarnings(10),
         moderate: calculateExtraEarnings(20),
@@ -79,7 +65,7 @@ export default function HostCalculator() {
 
   const setVacancy = (rate: number) => {
     setVacancyRate(rate);
-    setError(""); // Clears error on valid input
+    setError("");
   };
 
   const getMostLikelyEstimate = () => {
@@ -94,7 +80,6 @@ export default function HostCalculator() {
     min = 0,
     max = Infinity,
   ) => {
-    // Generalized input handler with error handling
     const value = e.target.value === "" ? "" : Number(e.target.value);
     if (value === "" || (value >= min && value <= max)) {
       setValue(value === "" ? 0 : value);
@@ -119,7 +104,11 @@ export default function HostCalculator() {
             </label>
             <Slider
               value={[vacancyRate]}
-              onValueChange={(value) => setVacancyRate(value[0])}
+              onValueChange={(value) => {
+                if (value[0] !== undefined) {
+                  setVacancyRate(value[0]);
+                }
+              }}
               min={0}
               max={100}
               step={1}
@@ -134,7 +123,6 @@ export default function HostCalculator() {
                 {error}
               </span>
             )}
-
             <div className="mt-4 flex flex-col gap-2 *:flex-1 @sm:flex-row">
               <Button
                 onClick={() => setVacancy(70)}
@@ -175,7 +163,7 @@ export default function HostCalculator() {
                 type="number"
                 inputMode="decimal"
                 value={averagePrice || ""}
-                onChange={(e) => handleInputChange(e, setAveragePrice)} // Handles input and error
+                onChange={(e) => handleInputChange(e, setAveragePrice)}
                 className="w-full"
                 min="0"
               />
@@ -189,7 +177,7 @@ export default function HostCalculator() {
                 type="number"
                 inputMode="decimal"
                 value={cleaningFee || ""}
-                onChange={(e) => handleInputChange(e, setCleaningFee)} // Handles input and error
+                onChange={(e) => handleInputChange(e, setCleaningFee)}
                 className="w-full"
                 min="0"
               />
@@ -201,10 +189,9 @@ export default function HostCalculator() {
             Current Annual Earnings
           </h3>
           <p className="text-3xl font-bold text-zinc-900">
-            {formatNumber(earnings.current * 100)}
+            {formatCurrency(earnings.current)}
           </p>
         </div>
-
         <div className="space-y-4">
           <h3 className="text-center text-xl font-semibold text-zinc-800">
             Potential Extra Annual Earnings with Tramona
