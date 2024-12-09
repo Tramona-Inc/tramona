@@ -1,20 +1,20 @@
 import { DirectSiteScraper } from "../direct-sites-scraping";
-import { scrapeAirbnbInitialPageHelper, scrapeAirbnbPagesHelper, urlScrape } from "@/server/server-utils";
+import {
+  scrapeAirbnbInitialPageHelper,
+  scrapeAirbnbPagesHelper,
+  urlScrape,
+} from "@/server/server-utils";
 import { NewProperty } from "@/server/db/schema";
 import { z } from "zod";
-import { getNumNights, parseCurrency } from "@/utils/utils";
+import { parseCurrency } from "@/utils/utils";
 import { sortBy } from "lodash";
 import { scrapeAirbnbListing } from "./scrapeAirbnbListing";
-import { db } from "../db";
-
 export const airbnbScraper: DirectSiteScraper = async ({
   checkIn,
   checkOut,
   requestNightlyPrice,
   numGuests,
   location,
-  latitude,
-  longitude,
 }) => {
   const limit = 100; // in case too many results, could be removed later
   if (!location || !numGuests) {
@@ -94,7 +94,7 @@ export async function scrapeAirbnbSearch({
     checkOut,
     location,
     numGuests,
-  })
+  });
   // const serpUrl = getSerpUrl({
   //   checkIn,
   //   checkOut,
@@ -106,14 +106,15 @@ export async function scrapeAirbnbSearch({
   //   return serpPageSchema.parse(unparsedData);
   // });
 
-  const cursors = pageData.data.staysSearch.results.paginationInfo.pageCursors.slice(1);
+  const cursors =
+    pageData.data.staysSearch.results.paginationInfo.pageCursors.slice(1);
   return await scrapeAirbnbPagesHelper({
     checkIn,
     checkOut,
     location,
     numGuests,
     cursors,
-  })
+  });
   // const pageUrls = cursors.map((cursor) =>
   //   getSerpUrl({ checkIn, checkOut, location, numGuests, cursor }),
   // );

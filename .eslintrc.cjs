@@ -38,7 +38,10 @@ const config = {
     "@typescript-eslint/ban-types": "warn",
     "@typescript-eslint/no-inferrable-types": "warn",
     "@typescript-eslint/no-explicit-any": "warn",
-    "@typescript-eslint/no-unnecessary-condition": "warn",
+    "@typescript-eslint/no-unnecessary-condition": [
+      "warn",
+      { allowConstantLoopConditions: true },
+    ],
     // "no-console": "warn",
     eqeqeq: ["warn", "smart"],
     "prefer-const": "warn",

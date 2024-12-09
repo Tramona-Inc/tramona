@@ -1,4 +1,3 @@
-import { SkeletonText } from "@/components/ui/skeleton";
 import { api } from "@/utils/api";
 import { useRouter } from "next/router";
 import HostRequestDialog from "./HostRequestDialog";
@@ -10,7 +9,7 @@ import { useState } from "react";
 import { Offer, type Property } from "@/server/db/schema";
 import HostConfirmRequestDialog from "../../HostConfirmRequestDialog";
 import HostFinishRequestDialog from "./HostFinishRequestDialog";
-import { AlertCircleIcon, AlertTriangleIcon, ChevronLeft } from "lucide-react";
+import { AlertTriangleIcon, ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import {
   RequestsPageOfferData,

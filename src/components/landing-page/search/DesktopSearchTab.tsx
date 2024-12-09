@@ -19,7 +19,7 @@ import {
   Filter,
 } from "lucide-react";
 import { api } from "@/utils/api";
-import { useAdjustedProperties } from "./AdjustedPropertiesContext";
+import { AirbnbSearchResult, useAdjustedProperties } from "./AdjustedPropertiesContext";
 import SingleDateInput from "@/components/_common/SingleDateInput";
 import { DialogFooter } from "@/components/ui/dialog";
 import { DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -245,17 +245,7 @@ const locations = [
   },
 ];
 
-type AirbnbSearchResult = {
-  description: string | null | undefined;
-  imageUrls: string[];
-  maxNumGuests: number;
-  name: string;
-  nightlyPrice: number;
-  originalListingId: string;
-  originalNightlyPrice: number;
-  originalListingPlatform: string;
-  ratingStr: string;
-};
+
 export function DesktopSearchTab() {
   const form = useZodForm({
     schema: searchSchema,
@@ -433,7 +423,7 @@ export function DesktopSearchTab() {
           const updatedProperties = {
             ...prevState,
             pages: [
-              ...(prevState?.pages || []),
+              ...(prevState.pages || []),
               ...propertiesInArea.hostProperties,
               ...propertiesInArea.scrapedProperties,
             ],
@@ -443,7 +433,7 @@ export function DesktopSearchTab() {
           setAdjustedProperties({
             ...updatedProperties,
             pages: filterProperties(
-              updatedProperties.pages.flat() || [],
+              updatedProperties.pages.flat() as Property[],
               minPrice !== "" ? (Number(minPrice) * 100).toString() : minPrice,
               maxPrice !== "" ? (Number(maxPrice) * 100).toString() : maxPrice,
               priceSort,
@@ -471,7 +461,7 @@ export function DesktopSearchTab() {
           setAdjustedProperties({
             ...updatedProperties,
             pages: filterProperties(
-              updatedProperties.pages?.flat() || [],
+              updatedProperties.pages.flat() as Property[],
               minPrice !== "" ? (Number(minPrice) * 100).toString() : minPrice,
               maxPrice !== "" ? (Number(maxPrice) * 100).toString() : maxPrice,
               priceSort,
@@ -503,7 +493,7 @@ export function DesktopSearchTab() {
           setAdjustedProperties({
             ...updatedProperties,
             pages: filterProperties(
-              updatedProperties.pages?.flat() || [],
+              updatedProperties.pages.flat() as Property[],
               minPrice !== "" ? (Number(minPrice) * 100).toString() : minPrice,
               maxPrice !== "" ? (Number(maxPrice) * 100).toString() : maxPrice,
               priceSort,
@@ -788,7 +778,7 @@ export function DesktopSearchTab() {
                     return {
                       ...prevState,
                       pages: filterProperties(
-                        allProperties.pages?.flat() || [],
+                        allProperties.pages.flat() as Property[],
                         minPrice !== ""
                           ? (Number(minPrice) * 100).toString()
                           : minPrice,

@@ -6,20 +6,21 @@ import { formatCurrency } from "@/utils/utils";
 function PriceBreakdown({
   requestToBookDetails,
   property,
+  requestAmount,
 }: {
   requestToBookDetails: RequestToBookDetails;
   property: PropertyPageData;
+  requestAmount: number; //if book it now, it will be the full price
 }) {
   const brokedownPrice = breakdownPaymentByPropertyAndTripParams({
     dates: {
       checkIn: requestToBookDetails.checkIn,
       checkOut: requestToBookDetails.checkOut,
     },
-    travelerPriceBeforeFees:
-      requestToBookDetails.travelerOfferedPriceBeforeFees,
-    property: property,
+    property,
+    travelerPriceBeforeFees: requestAmount,
   });
-  console.log(brokedownPrice);
+  console.log("brokedownPrice", brokedownPrice);
   const serviceFee =
     brokedownPrice.superhogFee + brokedownPrice.stripeTransactionFee;
 

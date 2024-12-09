@@ -371,7 +371,6 @@ export default function HostBookItNow({ property }: { property: Property }) {
           setEditing={setIsEditing}
           property={property}
           onSubmit={form.handleSubmit(handleSubmit)}
-          onCancel={handleCancel}
         />
       </div>
 

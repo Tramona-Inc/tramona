@@ -25,6 +25,10 @@ import { useSession } from "next-auth/react";
 import { api } from "./api";
 import { HOST_MARKUP } from "./constants";
 import { InferQueryModel } from "@/server/db";
+import {
+  TripWithDetails,
+  TripWithDetailsConfirmation,
+} from "@/components/my-trips/TripPage";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -885,4 +889,67 @@ export function getHostNameAndImage(
     name: property.hostName ?? ownerName,
     image: property.hostProfilePic ?? teamOwner.image,
   };
+}
+
+type InteractionPreferences =
+  | "not available"
+  | "say hello"
+  | "socialize"
+  | "no preference"
+  | null;
+
+export function convertInteractionPreference(pref: InteractionPreferences) {
+  let modifiedPref = null;
+  switch (pref) {
+    case "not available":
+      modifiedPref =
+        "I won't be available in person, and prefer communicating through the app.";
+      break;
+    case "say hello":
+      modifiedPref =
+        "I like to say hello in person, but keep to myself otherwise.";
+      break;
+    case "socialize":
+      modifiedPref = "I like socializing and spending time with guests.";
+      break;
+    case "no preference":
+      modifiedPref = "No preferences - I follow my guests' lead.";
+      break;
+  }
+
+  return modifiedPref;
+}
+
+export function isTrip5pmBeforeCheckout(
+  tripData: TripWithDetails | TripWithDetailsConfirmation,
+) {
+  const { trip } = tripData;
+
+  const now = new Date();
+
+  const checkoutDate = new Date(trip.checkOut);
+
+  const targetDate = new Date(checkoutDate);
+  // set target date to day before checkout date
+  targetDate.setDate(checkoutDate.getDate() - 1);
+  // set time to 5:00 pm
+  targetDate.setHours(17, 0, 0, 0);
+
+  // check if current date is after 5 pm on the day before checkout
+  return now >= targetDate;
+}
+
+export function isTripWithin48Hours(
+  tripData: TripWithDetails | TripWithDetailsConfirmation,
+) {
+  const { trip } = tripData;
+  // now: current date and time
+  const now = new Date();
+
+  const checkInDate = new Date(trip.checkIn);
+  // targetDate: 48 hours before check-in date
+  const targetDate = new Date(checkInDate.getTime() - 48 * 60 * 60 * 1000);
+
+  // check if current date is after target date
+  return now >= targetDate;
 }

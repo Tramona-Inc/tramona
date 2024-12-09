@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import UnclaimedOfferCards from "@/components/unclaimed-offers/UnclaimedOfferCards";
 import { LoadingProvider } from "@/components/unclaimed-offers/UnclaimedMapLoadingContext";
 
-import type { fetchNextPageOfAdjustedPropertiesType } from "@/components/landing-page/search/SearchPropertiesMap";
+// import type { fetchNextPageOfAdjustedPropertiesType } from "@/components/landing-page/search/SearchPropertiesMap";
 import type { InfiniteQueryObserverResult } from "@tanstack/react-query";
 import { useAdjustedProperties } from "../landing-page/search/AdjustedPropertiesContext";
 import { useCitiesFilter } from "@/utils/store/cities-filter";
@@ -15,20 +15,20 @@ export type MapBoundary = {
   west: number;
 };
 
-type FetchNextPageRefFunction = () => Promise<
-  InfiniteQueryObserverResult<fetchNextPageOfAdjustedPropertiesType>
->;
+// type FetchNextPageRefFunction = () => Promise<
+//   InfiniteQueryObserverResult<fetchNextPageOfAdjustedPropertiesType>
+// >;
 
 export default function UnclaimedMap() {
   const filters = useCitiesFilter((state) => state);
   // const { setIsLoading } = useLoading();
   const { setAdjustedProperties, isSearching } = useAdjustedProperties();
 
-  const fetchNextPageRef = useRef<FetchNextPageRefFunction | null>(null);
+  // const fetchNextPageRef = useRef<FetchNextPageRefFunction | null>(null);
 
-  const setFunctionRef = useCallback((ref: FetchNextPageRefFunction) => {
-    fetchNextPageRef.current = ref;
-  }, []);
+  // const setFunctionRef = useCallback((ref: FetchNextPageRefFunction) => {
+  //   fetchNextPageRef.current = ref;
+  // }, []);
 
   const [mapBoundaries, setMapBoundaries] = useState<MapBoundary | null>(null);
   const [showMap, setShowMap] = useState(false);

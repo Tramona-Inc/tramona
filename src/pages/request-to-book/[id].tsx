@@ -6,7 +6,7 @@ import { api } from "@/utils/api";
 
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { useState, useMemo, useEffect } from "react";
+import { useMemo } from "react";
 
 export default function Listings() {
   const router = useRouter();

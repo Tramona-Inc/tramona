@@ -3,6 +3,8 @@
 // import { getAddress } from "@/server/google-maps";
 // import { eq, inArray, isNull } from "drizzle-orm";
 // import { groupBy } from "lodash";
+// import dotenv from "dotenv";
+// dotenv.config();
 
 // function addressToString(
 //   address: Awaited<ReturnType<typeof getAddress>> | null,
@@ -27,8 +29,8 @@
 //     latLngPoint: true,
 //     city: true,
 //   },
-//   // where: eq(properties.originalListingPlatform, "Airbnb"),
-//   // limit: 2000,
+//   where: eq(properties.originalListingPlatform, "Airbnb"),
+//   limit: 2000,
 //   where: isNull(properties.country),
 // });
 
@@ -37,53 +39,53 @@
 // const groupedProperties = groupBy(allProperties, (p) => p.city);
 
 // for (const [city, props] of Object.entries(groupedProperties)) {
-//   // console.log(
-//   //   `\nGetting address for property ${property.id} with current city ${city} and coords ${property.latLngPoint.y}/${property.latLngPoint.x}`,
-//   // );
-//   // const unswappedCity = await getCity(
-//   //   property.latLngPoint.y,
-//   //   property.latLngPoint.x,
-//   // );
-//   // const swappedCity = await getCity(
-//   //   property.latLngPoint.x,
-//   //   property.latLngPoint.y,
-//   // );
-//   // async function swapCoords() {
-//   //   await db
-//   //     .update(properties)
-//   //     .set({
-//   //       latLngPoint: { x: property.latLngPoint.y, y: property.latLngPoint.x },
-//   //     })
-//   //     .where(eq(properties.id, property.id))
-//   //     .returning();
-//   // }
-//   // if (unswappedCity === null) {
-//   //   if (swappedCity === null) {
-//   //     console.error("Both were null");
-//   //     continue;
-//   //   }
-//   //   console.warn(`swapping coords, swapped city: ${swappedCity}`);
-//   //   await swapCoords();
-//   // } else {
-//   //   if (city.includes(unswappedCity)) {
-//   //     console.log(`City likely correct: ${unswappedCity}`);
-//   //     continue;
-//   //   }
-//   //   if (swappedCity === null) {
-//   //     console.error(
-//   //       `Swapped city was null and unswapped city was ${unswappedCity}`,
-//   //     );
-//   //     continue;
-//   //   }
-//   //   if (city.includes(swappedCity)) {
-//   //     console.warn(`swapping coords, swapped city: ${swappedCity}`);
-//   //     await swapCoords();
-//   //   } else {
-//   //     console.error(
-//   //       `Both wrong, unswapped city: ${unswappedCity}, swapped city: ${swappedCity}`,
-//   //     );
-//   //   }
-//   // }
+//   console.log(
+//     `\nGetting address for property ${property.id} with current city ${city} and coords ${property.latLngPoint.y}/${property.latLngPoint.x}`,
+//   );
+//   const unswappedCity = await getCity(
+//     property.latLngPoint.y,
+//     property.latLngPoint.x,
+//   );
+//   const swappedCity = await getCity(
+//     property.latLngPoint.x,
+//     property.latLngPoint.y,
+//   );
+//   async function swapCoords() {
+//     await db
+//       .update(properties)
+//       .set({
+//         latLngPoint: { x: property.latLngPoint.y, y: property.latLngPoint.x },
+//       })
+//       .where(eq(properties.id, property.id))
+//       .returning();
+//   }
+//   if (unswappedCity === null) {
+//     if (swappedCity === null) {
+//       console.error("Both were null");
+//       continue;
+//     }
+//     console.warn(`swapping coords, swapped city: ${swappedCity}`);
+//     await swapCoords();
+//   } else {
+//     if (city.includes(unswappedCity)) {
+//       console.log(`City likely correct: ${unswappedCity}`);
+//       continue;
+//     }
+//     if (swappedCity === null) {
+//       console.error(
+//         `Swapped city was null and unswapped city was ${unswappedCity}`,
+//       );
+//       continue;
+//     }
+//     if (city.includes(swappedCity)) {
+//       console.warn(`swapping coords, swapped city: ${swappedCity}`);
+//       await swapCoords();
+//     } else {
+//       console.error(
+//         `Both wrong, unswapped city: ${unswappedCity}, swapped city: ${swappedCity}`,
+//       );
+//     }
+//   }
 
 //   console.log(`Getting address for city ${city}`);
 

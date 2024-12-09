@@ -234,6 +234,7 @@ export const offersRouter = createTRPCRouter({
   getCoordinates: publicProcedure
     .input(z.object({ location: z.string() }))
     .query(async ({ input }) => {
+      console.log(input.location, "d", "c");
       const coords = await getCoordinates(input.location);
       return {
         coordinates: coords,

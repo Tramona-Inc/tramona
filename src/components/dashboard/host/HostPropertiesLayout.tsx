@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Grid, Pencil, Plus } from "lucide-react";
+import { Grid, Plus } from "lucide-react";
 import HostProperties from "./HostProperties";
 import {
   type LocationType,
@@ -10,7 +10,6 @@ import {
   CancellationPolicyWithInternals,
   type Property,
 } from "@/server/db/schema/tables/properties";
-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useRouter } from "next/router";
 import ExpandableSearchBar from "@/components/_common/ExpandableSearchBar";
@@ -129,7 +128,7 @@ export default function HostPropertiesLayout() {
         {selectedProperty && <HostPropertyInfo property={selectedProperty} />}
       </HostPropertiesSidebar>
       <div className="flex items-center gap-4 sm:flex-row sm:justify-between">
-        <h1 className="text-2xl font-bold md:text-4xl">Your Properties</h1>
+        <h1 className="text-2xl font-semibold md:text-4xl">Your Properties</h1>
         <div className="flex flex-1 items-center justify-end gap-4">
           <ExpandableSearchBar
             className="hidden sm:flex"
@@ -293,15 +292,20 @@ export function HostPropertyEditBtn({
   };
 
   return (
-    <div className="absolute bottom-8 left-4 z-50">
+    <div className="absolute bottom-20 left-8 z-40 space-x-2 lg:bottom-6">
       {editing ? (
-        <div className="space-x-2">
-          <Button variant="outline" onClick={() => setEditing(!editing)}>
+        <>
+          <Button
+            variant="outline"
+            className="text-sm shadow-lg sm:shadow-none"
+            onClick={() => setEditing(!editing)}
+            type="button"
+          >
             Cancel
           </Button>
           <Button
-            variant="outline"
-            className="shadow-lg sm:shadow-none"
+            // variant="outline"
+            className="text-sm shadow-lg sm:shadow-none"
             onClick={() => {
               setEditing(!editing);
               onSubmit?.();
@@ -310,20 +314,17 @@ export function HostPropertyEditBtn({
           >
             Done
           </Button>
-        </div>
+        </>
       ) : (
-        <div className="space-x-2">
-          <Button
-            variant="outline"
-            className="rounded-full bg-white font-bold shadow-md sm:rounded-lg sm:border-2 sm:shadow-none"
-            onClick={handleEditClick}
-            type="button"
-            disabled={disabled}
-          >
-            <Pencil size={20} />
-            Enter edit mode
-          </Button>
-        </div>
+        <Button
+          // variant="outline"
+          className="text-sm"
+          onClick={handleEditClick}
+          // type="button"
+          disabled={disabled}
+        >
+          Edit
+        </Button>
       )}
     </div>
   );

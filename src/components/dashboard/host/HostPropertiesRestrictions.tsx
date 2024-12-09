@@ -62,7 +62,7 @@ export default function HostPropertiesRestrictions({
   };
 
   return (
-    <div className="mb-24 mt-6">
+    <div className="mb-24 mt-6 space-y-2">
       <div className="text-end">
         <HostPropertyEditBtn
           editing={editing}
@@ -71,97 +71,109 @@ export default function HostPropertiesRestrictions({
           onSubmit={form.handleSubmit(onSubmit)}
         />
       </div>
-      <div className="space-y-4">
-        <h2 className="text-xl font-bold">Property restrictions</h2>
+      <div className="space-y-3 px-4">
         <Form {...form}>
           <ErrorMsg>{form.formState.errors.root?.message}</ErrorMsg>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            <div className="grid grid-cols-1 items-center gap-4 rounded-xl bg-zinc-100 p-4 sm:grid-cols-2 sm:gap-6">
-              <div>
-                <h3 className="text-lg font-semibold">Minimum age to book</h3>
-                <p className="text-muted-foreground">
-                  Travelers must be at least this old to book the property.
+            <div className="space-y-3">
+              {/* Property Restrictions */}
+              <div className="mb-6 space-y-2">
+                <h3 className="text-xl font-bold leading-tight">
+                  Property restrictions
+                </h3>
+                <p className="text-base leading-normal">
+                  Travelers must be at least this old to book this property.
                 </p>
+                <FormField
+                  name="age"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          className="w-full rounded-md border p-2 text-base"
+                          disabled={!editing}
+                          type="number"
+                          placeholder="Minimum booking age"
+                          suffix="/ years old"
+                          value={field.value ?? ""}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
-              <FormField
-                name="age"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        className="w-full"
-                        disabled={!editing}
-                        type="number"
-                        placeholder="Minimum booking age"
-                        value={field.value ?? ""}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div>
-                <h3 className="text-lg font-semibold">Minimum offer price</h3>
-                <p className="text-muted-foreground">
+              {/* Minimum Offer Price */}
+              <div className="mt-6 space-y-2">
+                <h3 className="text-xl font-bold leading-tight">
+                  Minimum offer price
+                </h3>
+                <p className="text-base leading-normal">
                   You will only see offers equal to or higher than this price.
                 </p>
+                <FormField
+                  name="price"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <div className="relative">
+                          <Input
+                            {...field}
+                            className="w-full rounded-md border p-2 pl-6 text-base"
+                            icon={DollarSignIcon}
+                            disabled={!editing}
+                            placeholder="0"
+                            suffix="/ night"
+                            type="number"
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
-              <FormField
-                name="price"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        className="w-full"
-                        disabled={!editing}
-                        icon={DollarSignIcon}
-                        placeholder="Minimum nightly price"
-                        suffix="/night"
-                        type="number"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div>
-                <h3 className="text-lg font-semibold">Stripe verification</h3>
-                <p className="text-muted-foreground">
+
+              {/* Stripe Verification */}
+              <div className="mt-6 space-y-2">
+                <h3 className="mt-6 text-xl font-bold leading-tight">
+                  Stripe verification
+                </h3>
+                <p className="text-base leading-normal">
                   Do you want travelers to be verified by Stripe for this
                   property?
                 </p>
+                <FormField
+                  name="stripeVerRequired"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <RadioGroup
+                          defaultValue={field.value}
+                          onValueChange={field.onChange}
+                          disabled={!editing}
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className="flex items-center space-x-1">
+                              <RadioGroupItem value="no" id="r1" />
+                              <Label htmlFor="r1">No</Label>
+                            </div>
+                            <div className="flex items-center space-x-1">
+                              <RadioGroupItem value="yes" id="r2" />
+                              <Label htmlFor="r2">Yes</Label>
+                            </div>
+                          </div>
+                        </RadioGroup>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
-              <FormField
-                name="stripeVerRequired"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <RadioGroup
-                        defaultValue={field.value}
-                        onValueChange={field.onChange}
-                        disabled={!editing}
-                      >
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center space-x-1">
-                            <RadioGroupItem value="no" id="r1" />
-                            <Label htmlFor="r1">No</Label>
-                          </div>
-                          <div className="flex items-center space-x-1">
-                            <RadioGroupItem value="yes" id="r2" />
-                            <Label htmlFor="r2">Yes</Label>
-                          </div>
-                        </div>
-                      </RadioGroup>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
             </div>
           </form>
         </Form>

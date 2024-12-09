@@ -323,6 +323,8 @@ export const propertiesRouter = createTRPCRouter({
           originalNightlyPrice: properties.originalNightlyPrice,
           latLngPoint: properties.latLngPoint,
           bookItNowIsEnabled: properties.bookItNowEnabled,
+          originalListingId: properties.originalListingId,
+          originalListingPlatform: properties.originalListingPlatform,
           // lat: properties.latitude,
           // long: properties.longitude,
           distance: sql`
@@ -584,62 +586,92 @@ export const propertiesRouter = createTRPCRouter({
       });
     }),
 
-    getHostPropertiesWithRequests: hostProcedure.query(async ({ ctx }) => {
-      const hostProperties = await db.query.properties.findMany({
-        where: and(
-          eq(properties.hostTeamId, ctx.hostProfile.curTeamId),
-          eq(properties.status, "Listed"),
-        ),
-  
-        // columns: {
-        //   id: true,
-        //   propertyStatus: true,
-        //   latLngPoint: true,
-        //   priceRestriction: true,
-        //   city: true,
-        // },
-      });
-  
-      // First, create groups for all cities from properties, even those without requests
-      const groupedByCity: HostRequestsPageData[] = [];
-      console.log(hostProperties.map(property => property.city))
-      const citiesSet = new Set(hostProperties.map(property => property.city));
-      citiesSet.forEach(city => {
-        groupedByCity.push({ city, requests: [] });
-      });
-  
-      const hostRequests = await getRequestsForProperties(hostProperties);
-      // console.log(hostRequests);
-  
-      const findOrCreateCityGroup = (city: string) => {
-        let cityGroup = groupedByCity.find((group) => group.city === city);
-        if (!cityGroup) {
-          cityGroup = { city, requests: [] };
-          groupedByCity.push(cityGroup);
-        }
-        return cityGroup;
-      };
-  
-      const requestsMap = new Map<
-        number,
-        {
-          request: Request & {
-            traveler: Pick<
-              User,
-              "firstName" | "lastName" | "name" | "image" | "location" | "about"
-            >;
-          };
-          properties: (Property & { taxAvailable: boolean })[];
-        }
-      >();
-  
-      // Iterate over the hostRequests and gather all properties for each request
-      for (const { property, request } of hostRequests) {
-        // Check if this request already exists in the map
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        if (!requestsMap.has(request.id)) {
-          // If not, create a new entry with an empty properties array
-          requestsMap.set(request.id, {
+  updatePropertyDatesLastUpdated: hostProcedure
+    .input(z.object({ propertyId: z.number(), datesLastUpdated: z.date() }))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db
+        .update(properties)
+        .set({ datesLastUpdated: input.datesLastUpdated })
+        .where(eq(properties.id, input.propertyId));
+    }),
+
+  getHostPropertiesWithRequests: hostProcedure.query(async ({ ctx }) => {
+    const hostProperties = await db.query.properties.findMany({
+      where: and(
+        eq(properties.hostTeamId, ctx.hostProfile.curTeamId),
+        eq(properties.status, "Listed"),
+      ),
+
+      // columns: {
+      //   id: true,
+      //   propertyStatus: true,
+      //   latLngPoint: true,
+      //   priceRestriction: true,
+      //   city: true,
+      // },
+    });
+
+    const hostRequests = await getRequestsForProperties(hostProperties);
+    console.log(hostRequests);
+
+    const groupedByCity: HostRequestsPageData[] = [];
+
+    const findOrCreateCityGroup = (city: string) => {
+      let cityGroup = groupedByCity.find((group) => group.city === city);
+      if (!cityGroup) {
+        cityGroup = { city, requests: [] };
+        groupedByCity.push(cityGroup);
+      }
+      return cityGroup;
+    };
+
+    const requestsMap = new Map<
+      number,
+      {
+        request: Request & {
+          traveler: Pick<
+            User,
+            "firstName" | "lastName" | "name" | "image" | "location" | "about"
+          >;
+        };
+        properties: (Property & { taxAvailable: boolean })[];
+      }
+    >();
+
+    // Iterate over the hostRequests and gather all properties for each request
+    for (const { property, request } of hostRequests) {
+      // Check if this request already exists in the map
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      if (!requestsMap.has(request.id)) {
+        // If not, create a new entry with an empty properties array
+        requestsMap.set(request.id, {
+          request,
+          properties: [] as (Property & { taxAvailable: boolean })[],
+        });
+      }
+
+      // Add the property to the request
+      requestsMap.get(request.id)!.properties.push(property);
+    }
+    for (const requestWithProperties of requestsMap.values()) {
+      const { request, properties } = requestWithProperties;
+
+      for (const property of properties as unknown as (Property & {
+        taxAvailable: boolean;
+      })[]) {
+        const cityGroup = findOrCreateCityGroup(property.city);
+
+        // Find if the request already exists in the city's group to avoid duplicates
+        const existingRequest = cityGroup.requests.find(
+          (item) => item.request.id === request.id,
+        );
+
+        if (existingRequest) {
+          // If the request already exists, just add the new property to it
+          existingRequest.properties.push(property);
+        } else {
+          // If the request doesn't exist, create a new entry with the property
+          cityGroup.requests.push({
             request,
             properties: [] as (Property & { taxAvailable: boolean })[],
           });
@@ -818,7 +850,6 @@ export const propertiesRouter = createTRPCRouter({
         return [];
       }
 
-
       const airbnbProperties = await scrapeAirbnbSearch({
         checkIn: input.checkIn,
         checkOut: input.checkOut,
@@ -844,11 +875,7 @@ export const propertiesRouter = createTRPCRouter({
           result.originalNightlyPrice !== undefined,
       );
 
-      const filteredAirbnbProperties = airbnbProperties.filter(
-        (p) =>
-          p.nightlyPrice !== undefined &&
-          p.originalNightlyPrice !== undefined,
-      );
+      const filteredAirbnbProperties = airbnbProperties //use to have a filter function removing null values 
 
       const combinedResults = [...filteredAirbnbProperties, ...filteredResults];
       console.log("Combined results:", combinedResults);
@@ -945,12 +972,14 @@ export const propertiesRouter = createTRPCRouter({
   //   }),
 
   getBookItNowProperties: publicProcedure
-    .input(z.object({
-      checkIn: z.date(),
-      checkOut: z.date(),
-      numGuests: z.number(),
-      location: z.string(),
-    }))
+    .input(
+      z.object({
+        checkIn: z.date(),
+        checkOut: z.date(),
+        numGuests: z.number(),
+        location: z.string(),
+      }),
+    )
     .query(async ({ input }) => {
       const { location } = await getCoordinates(input.location);
       if (!location) throw new Error("Could not get coordinates for address");
@@ -970,25 +999,38 @@ export const propertiesRouter = createTRPCRouter({
       const checkInDate = checkIn.toISOString();
       const checkOutDate = checkOut.toISOString();
 
-      const conflictingPropertyIds = await db.query.reservedDateRanges.findMany({
-        columns: { propertyId: true },
-        where: and(
-          or(
-            and(lte(reservedDateRanges.start, checkInDate), gte(reservedDateRanges.end, checkInDate)),
-            and(lte(reservedDateRanges.start, checkOutDate), gte(reservedDateRanges.end, checkOutDate)),
-            and(gte(reservedDateRanges.start, checkInDate), lte(reservedDateRanges.end, checkOutDate))
-          )
-        ),
-      });
+      const conflictingPropertyIds = await db.query.reservedDateRanges.findMany(
+        {
+          columns: { propertyId: true },
+          where: and(
+            or(
+              and(
+                lte(reservedDateRanges.start, checkInDate),
+                gte(reservedDateRanges.end, checkInDate),
+              ),
+              and(
+                lte(reservedDateRanges.start, checkOutDate),
+                gte(reservedDateRanges.end, checkOutDate),
+              ),
+              and(
+                gte(reservedDateRanges.start, checkInDate),
+                lte(reservedDateRanges.end, checkOutDate),
+              ),
+            ),
+          ),
+        },
+      );
 
       // Extract conflicting property IDs into an array
-      const conflictingIds = conflictingPropertyIds.map(item => item.propertyId);
+      const conflictingIds = conflictingPropertyIds.map(
+        (item) => item.propertyId,
+      );
 
       const hostProperties = await db.query.properties.findMany({
         where: and(
           eq(properties.originalListingPlatform, "Hospitable"),
           propertyIsNearRequest,
-          notInArray(properties.id, conflictingIds) // Exclude properties with conflicting reservations
+          notInArray(properties.id, conflictingIds), // Exclude properties with conflicting reservations
         ),
       });
 
@@ -1003,7 +1045,7 @@ export const propertiesRouter = createTRPCRouter({
             numGuests: input.numGuests,
           });
           property.originalNightlyPrice = originalPrice ?? null;
-        })
+        }),
       );
 
       // Query for scraped properties with non-intersecting dates
@@ -1014,8 +1056,8 @@ export const propertiesRouter = createTRPCRouter({
           propertyIsNearRequest,
           ne(properties.originalNightlyPrice, -1),
           isNotNull(properties.originalNightlyPrice),
-          notInArray(properties.id, conflictingIds) // Exclude properties with conflicting reservations
-        )
+          notInArray(properties.id, conflictingIds), // Exclude properties with conflicting reservations
+        ),
       });
       return { hostProperties, scrapedProperties };
     }),

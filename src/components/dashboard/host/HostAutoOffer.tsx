@@ -23,7 +23,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Loader2, X } from "lucide-react";
+import { X } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import {
   Form,
@@ -342,13 +342,12 @@ export default function HostAutoOffer({ property }: { property: Property }) {
 
   return (
     <div className="my-6 space-y-4">
-       <div className="text-end">
+      <div className="text-end">
         <HostPropertyEditBtn
           editing={isEditing}
           setEditing={setIsEditing}
           property={property}
           onSubmit={form.handleSubmit(handleSubmit)}
-          onCancel={handleCancel} // Use handleCancel for cancel action
         />
       </div>
       <div className="flex items-center space-x-4">
@@ -368,7 +367,14 @@ export default function HostAutoOffer({ property }: { property: Property }) {
           >
             <Accordion type="single" collapsible className="w-full">
               <AccordionItem value="discount-tiers">
-                <AccordionTrigger disabled={isSaving || !isEditing} className={isSaving || !isEditing ? "opacity-50 cursor-not-allowed" : ""}>
+                <AccordionTrigger
+                  disabled={isSaving || !isEditing}
+                  className={
+                    isSaving || !isEditing
+                      ? "cursor-not-allowed opacity-50"
+                      : ""
+                  }
+                >
                   Discount Tiers
                 </AccordionTrigger>
                 <AccordionContent>

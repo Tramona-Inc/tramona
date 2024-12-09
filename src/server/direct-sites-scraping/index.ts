@@ -32,8 +32,6 @@ import { cleanbnbScraper, cleanbnbSubScraper } from "./cleanbnb-scrape";
 import { z } from "zod";
 import { formatZodError } from "../../utils/zod-utils";
 import { env } from "@/env";
-import { airbnbScraper, scrapeAirbnbSearch } from "../external-listings-scraping/airbnbScraper";
-import axios from "axios";
 
 type ScraperOptions = {
   location: string;
@@ -616,9 +614,16 @@ export const checkAvailabilityForProperties = async (options: {
   originalListingPlatforms: string[];
   checkIn: Date;
   checkOut: Date;
-  numGuests: number,
+  numGuests: number;
 }) => {
-  const { propertyIds, originalListingIds, originalListingPlatforms, checkIn, checkOut, numGuests } = options;
+  const {
+    propertyIds,
+    originalListingIds,
+    originalListingPlatforms,
+    checkIn,
+    checkOut,
+    numGuests,
+  } = options;
 
   const availabilityPromises = propertyIds.map((propertyId, index) => {
     const originalListingId = originalListingIds[index];
@@ -626,7 +631,7 @@ export const checkAvailabilityForProperties = async (options: {
 
     const subScraperOptions = {
       originalListingId: originalListingId!,
-      scrapeUrl: '',
+      scrapeUrl: "",
       checkIn,
       checkOut,
       numGuests,
@@ -634,9 +639,9 @@ export const checkAvailabilityForProperties = async (options: {
 
     type casamundoRes = {
       subScrapedResult: SubScrapedResult;
-    }
+    };
 
-    const timerLabel = `Property ${propertyId}`
+    const timerLabel = `Property ${propertyId}`;
 
     console.time(timerLabel);
 
@@ -644,34 +649,39 @@ export const checkAvailabilityForProperties = async (options: {
       switch (originalListingPlatform) {
         case "Casamundo":
           //const res = await axios.post<casamundoRes>("https://tramona.com/api/bookitnow", subScraperOptions);
-          const res = await casamundoSubScraper(subScraperOptions)
+          const res = await casamundoSubScraper(subScraperOptions);
           console.timeEnd(timerLabel); // End timing for this property
           // return {...res.data.subScrapedResult, propertyId};
-          return { ...res, propertyId};
+          return { ...res, propertyId };
 
         case "IntegrityArizona":
           const arizonaResult = await arizonaSubScraper(subScraperOptions);
           console.timeEnd(timerLabel); // End timing for this property
-          return {...arizonaResult, propertyId};
+          return { ...arizonaResult, propertyId };
 
         case "Evolve":
-          const evolveResult = await evolveVacationRentalSubScraper(subScraperOptions);
+          const evolveResult =
+            await evolveVacationRentalSubScraper(subScraperOptions);
           console.timeEnd(timerLabel); // End timing for this property
-          return {...evolveResult, propertyId};
+          return { ...evolveResult, propertyId };
 
         // Add other cases here as needed
         default:
-          throw new Error('No subScrapedResult found');
+          throw new Error("No subScrapedResult found");
       }
     })();
-});
+  });
 
-console.log('here')
-console.time("checkAvailability");
+  console.log("here");
+  console.time("checkAvailability");
 
-const results = logAndFilterSettledResults(await Promise.allSettled(availabilityPromises));
+  const results = logAndFilterSettledResults(
+    await Promise.allSettled(availabilityPromises),
+  );
 
-const availabilityResults = results.filter((r) => r.isAvailableOnOriginalSite && r.originalNightlyPrice !== undefined);
+  const availabilityResults = results.filter(
+    (r) => r.isAvailableOnOriginalSite && r.originalNightlyPrice !== undefined,
+  );
 
-return availabilityResults;
+  return availabilityResults;
 };

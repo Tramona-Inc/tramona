@@ -11,10 +11,7 @@ import {
   type OfferWithDetails,
   RequestToBookDetails,
 } from "./RequestToBookBtn";
-import {
-  formatDateMonthDayYear,
-  getApplicableBookItNowDiscount,
-} from "@/utils/utils";
+import { formatDateMonthDayYear } from "@/utils/utils";
 
 interface BaseProps {
   btnSize: ButtonProps["size"];
@@ -62,7 +59,7 @@ export default function BookNowBtn(props: UnifiedProps) {
 
     const baseCheckoutPath = "book-it-now-checkout";
 
-    return `/${baseCheckoutPath}/${props.property.id}?checkIn=${checkIn}&checkOut=${checkOut}&numGuests=${props.requestToBook.numGuests}&travelerOfferedPriceBeforeFees=${props.requestToBook.travelerOfferedPriceBeforeFees}`;
+    return `/${baseCheckoutPath}/${props.property.id}?checkIn=${checkIn}&checkOut=${checkOut}&numGuests=${props.requestToBook.numGuests}`;
   }, [props.property, props.requestToBook, props.offer]);
 
   return (

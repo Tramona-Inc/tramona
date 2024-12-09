@@ -17,14 +17,21 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { useAdjustedProperties } from "../landing-page/search/AdjustedPropertiesContext";
+import { AirbnbSearchResult, useAdjustedProperties } from "../landing-page/search/AdjustedPropertiesContext";
 import AddUnclaimedOffer from "./AddUnclaimedOffer";
-import { MapBoundary } from "../landing-page/search/SearchPropertiesMap";
 import { useLoading } from "./UnclaimedMapLoadingContext";
 import { Badge } from "../ui/badge";
+import { Property } from "@/server/db/schema/tables/properties";
 
-type Property =
-  RouterOutputs["properties"]["getAllInfiniteScroll"]["data"][number];
+// type Property =
+//   RouterOutputs["properties"]["getAllInfiniteScroll"]["data"][number];
+
+export type MapBoundary = {
+  north: number;
+  south: number;
+  east: number;
+  west: number;
+};
 
 export default function UnclaimedOfferCards({
   mapBoundaries,
@@ -67,7 +74,7 @@ export default function UnclaimedOfferCards({
   // console.log("paginatedProps:", paginatedProperties);
 
   const totalPages = useMemo(() => {
-    return Math.max(1, Math.ceil(allProperties?.length / itemsPerPage));
+    return Math.max(1, Math.ceil(allProperties?.length ?? 0 / itemsPerPage));
   }, [allProperties?.length, itemsPerPage]);
 
   // const url = new URL(router.pathname);
@@ -166,11 +173,13 @@ export default function UnclaimedOfferCards({
                 {paginatedProperties?.length &&
                   paginatedProperties.map((property, index) => (
                     <div
-                      key={property.originalListingId}
+                      key={index}
                       className="animate-fade-in"
                       style={{ animationDelay: `${index * 50}ms` }}
                     >
-                      <UnMatchedPropertyCard property={property} />
+                      <UnMatchedPropertyCard
+                        property={property}
+                      />
                     </div>
                   ))}
               </div>
@@ -231,12 +240,11 @@ export default function UnclaimedOfferCards({
 function UnMatchedPropertyCard({
   property,
 }: {
-  property: Property;
+  property: Property | AirbnbSearchResult;
 }): JSX.Element {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const router = useRouter();
-
 
   const nextImage = (e: React.MouseEvent): void => {
     e.preventDefault();
@@ -263,8 +271,13 @@ function UnMatchedPropertyCard({
   );
   const numGuests = 3;
   const link = isAirbnb
-    ? `https://airbnb.com/rooms/${property.originalListingId}`
-    : `/request-to-book/${property.id}?checkIn=${checkIn}&checkOut=${checkOut}&numGuests=${numGuests}`;
+  ? `https://airbnb.com/rooms/${property.originalListingId}`
+  : (() => {
+      if ("id" in property) {
+        return `/request-to-book/${property.id}?checkIn=${checkIn}&checkOut=${checkOut}&numGuests=${numGuests}`;
+      }
+      throw new Error("Property ID is required for non-Airbnb properties");
+    })();
 
   return (
     <Link
@@ -317,8 +330,7 @@ function UnMatchedPropertyCard({
               </Button>
             )}
           </div>
-          {isAirbnb &
-          (
+          {isAirbnb && (
             <div className="absolute inset-0">
               <div className="flex justify-between">
                 <Badge className="absolute left-3 top-3 h-8 bg-rose-500 font-semibold text-white">
@@ -351,10 +363,10 @@ function UnMatchedPropertyCard({
           <div className="ml-2 flex items-center space-x-1 whitespace-nowrap">
             <Star fill="black" size={12} />
             <div>
-              {property.avgRating ? property.avgRating.toFixed(2) : "New"}
+              {"avgRating" in property ? property.avgRating.toFixed(2) : "New"}
             </div>
             <div>
-              {property.numRatings > 0 ? `(${property.numRatings})` : ""}
+              {"numRatings" in property ? `(${property.numRatings})` : ""}
             </div>
           </div>
         </div>

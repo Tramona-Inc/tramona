@@ -9,11 +9,14 @@ export function useSearchBarForm({
 }: {
   afterSubmit?: () => void;
 } = {}) {
+  const form = useZodForm({
+    schema: searchSchema,
+    defaultValues: defaultSearchOrReqValues,
+    reValidateMode: "onSubmit",
+  });
 
-
-  const { guests, filter, maxNightlyPrice, checkIn, checkOut } = useCitiesFilter(
-    (state) => state,
-  );
+  const { guests, filter, maxNightlyPrice, checkIn, checkOut } =
+    useCitiesFilter((state) => state);
 
   const setGuests = useCitiesFilter((state) => state.setGuests);
   const setFilter = useCitiesFilter((state) => state.setFilter);
@@ -29,7 +32,7 @@ export function useSearchBarForm({
   useEffect(() => {
     if (!filter) form.setValue("location", undefined);
     if (!checkIn) form.setValue("checkIn", undefined);
-    if (!checkOut) form.setValue("checkOut", undefined)
+    if (!checkOut) form.setValue("checkOut", undefined);
     if (!guests) form.setValue("numGuests", undefined);
     if (!maxNightlyPrice) form.setValue("maxNightlyPriceUSD", undefined);
   }, [checkIn, checkOut, filter, form, guests, maxNightlyPrice]);

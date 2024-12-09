@@ -18,7 +18,7 @@ export default function HostPropertiesOverview() {
   return (
     <div className="flex w-full flex-col items-start gap-y-5">
       <div className="flex w-full flex-row items-center justify-between gap-2">
-        <h2 className="text-4xl font-bold">Properties</h2>
+        <h2 className="text-4xl font-semibold">Properties</h2>
         <Button variant="ghost" asChild>
           <Link href="/host/properties">
             See all
