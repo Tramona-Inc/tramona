@@ -31,7 +31,6 @@ export default function HostRequestsLayout({
   const [separatedData, setSeparatedData] = useState<SeparatedData | null>(null);
   const [offerData, setOfferData] = useState<RequestsPageOfferData | null>(null);
 
-  // Configure queries to only run once and cache results
   const { data: properties, isLoading: isLoadingProperties } = api.properties.getHostPropertiesWithRequests.useQuery(
     undefined,
     {
@@ -68,7 +67,6 @@ export default function HostRequestsLayout({
     }
   );
 
-  // Process data once when received
   useEffect(() => {
     if (properties) {
       const separated = separateByPriceRestriction(properties);
@@ -83,7 +81,6 @@ export default function HostRequestsLayout({
     }
   }, [offers]);
 
-  // Set activeTab based on URL query
   useEffect(() => {
     if (query.tabs) {
       setActiveTab(query.tabs);
@@ -93,12 +90,10 @@ export default function HostRequestsLayout({
   const handleTabChange = useCallback((tab: TabType) => {
     const newQuery: RouterQuery = { ...query, tabs: tab };
     
-    // If switching to property-bids tab, preserve propertyId
     if (tab === "property-bids" && !newQuery.propertyId && requestToBookProperties?.[0]) {
       newQuery.propertyId = requestToBookProperties[0].id.toString();
     }
     
-    // If switching to city tab, preserve city and offer parameters
     if (tab === "city" && !newQuery.city && separatedData?.normal?.[0]) {
       newQuery.city = separatedData.normal[0].city;
     }

@@ -26,6 +26,7 @@ import {
   and,
   desc,
   eq,
+  gte,
   inArray,
   isNotNull,
   isNull,
@@ -768,11 +769,14 @@ export const offersRouter = createTRPCRouter({
     citiesSet.forEach((city) => {
       groupedByCity.push({ city, requests: [] });
     });
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
     const hostOffers = await db.query.offers.findMany({
       where: and(
         inArray(offers.propertyId, propertyIds),
         eq(offers.status, "Pending"),
+        gte(requests.checkIn, new Date()),
+        gte(requests.createdAt, twentyFourHoursAgo),
       ),
       with: {
         property: {

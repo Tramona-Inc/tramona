@@ -70,7 +70,7 @@ export default function SidebarCity({
               <div
                 className={`flex items-center justify-between rounded-xl p-4 ${
                   isSelected ? "bg-primaryGreen text-white" : ""
-                } ${cityData.requests.length === 0 ? "opacity-50 hover:opacity-75" : ""}`}
+                }`}
                 onClick={() => handleCityOffersClick(cityData.city)}
               >
                 <div>
