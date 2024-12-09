@@ -30,13 +30,13 @@ const FAQ = () => {
   ];
 
   return (
-    <section className="mx-4 lg:mx-24 md:mx-12">
+    <section className="mx-4 md:mx-12 lg:mx-24">
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div>
-          <h1 className="text-3xl font-bold md:text-4xl">
+        <span className="space-y-4 text-center md:text-left">
+          <h1 className="text-3xl font-bold text-[#004236] md:text-4xl">
             Frequently asked questions
           </h1>
-        </div>
+        </span>
         <div>
           <Accordion type="multiple">
             {items.map((item, index) => (
