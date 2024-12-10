@@ -3,14 +3,13 @@ import { useRouter } from "next/router";
 import HostRequestToBookDialog from "./HostRequestToBookDialog";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { AlertTriangleIcon, ChevronLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { useToast } from "@/components/ui/use-toast";
 import { errorToast } from "@/utils/toasts";
 import { Home } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import HostRequestToBookCard from "./HostRequestToBookCard";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function HostRequestsToBook() {
   const { toast } = useToast();
@@ -43,21 +42,12 @@ export default function HostRequestsToBook() {
     api.stripe.rejectOrCaptureAndFinalizeRequestToBook.useMutation();
 
   return (
-    <div className="p-4">
+    <div>
       <div className="mb-4 xl:hidden">
         <Link href="/host/requests">
           <ChevronLeft />
         </Link>
       </div>
-      <Alert className="mb-2">
-        <AlertTriangleIcon />
-        <AlertTitle>Tip</AlertTitle>
-        <AlertDescription>
-          As soon as a bid is accepted, the booking will instantly go through.
-          and will block off your calander. Any outstanding matches will be
-          automatically withdrawn.
-        </AlertDescription>
-      </Alert>
       {propertyRequests?.activeRequestsToBook ? (
         <div className="grid gap-4 md:grid-cols-2">
           {propertyRequests.activeRequestsToBook.map((data) => (
@@ -107,7 +97,7 @@ export default function HostRequestsToBook() {
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
             <Home className="mb-4 h-12 w-12 text-gray-400" />
             <h3 className="mb-2 text-lg font-semibold text-gray-900">
-              No Property Selected
+              No property selected
             </h3>
             <p className="max-w-sm text-sm text-gray-500">
               Please select a property from the list to view its requests and

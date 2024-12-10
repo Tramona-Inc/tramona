@@ -9,7 +9,7 @@ import { useState } from "react";
 import { Offer, type Property } from "@/server/db/schema";
 import HostConfirmRequestDialog from "../../HostConfirmRequestDialog";
 import HostFinishRequestDialog from "./HostFinishRequestDialog";
-import { AlertTriangleIcon, ChevronLeft } from "lucide-react";
+import { ChevronLeft, Home } from "lucide-react";
 import Link from "next/link";
 import {
   RequestsPageOfferData,
@@ -21,7 +21,7 @@ import { errorToast } from "@/utils/toasts";
 import { HostRequestsPageOfferData } from "@/server/api/routers/propertiesRouter";
 import PastOfferCard from "./PastOfferCard";
 import PastOfferWithdrawDialog from "./PastOfferWithdrawDialog";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function HostRequests() {
   const { toast } = useToast();
@@ -46,8 +46,7 @@ export default function HostRequests() {
   const [offerData, setOfferData] = useState<RequestsPageOfferData | null>(
     null,
   );
-  const [selectedOffer, setSelectedOffer] =
-    useState<number | null>(null);
+  const [selectedOffer, setSelectedOffer] = useState<number | null>(null);
 
   const [offerWithdrawalDialogOpen, setOfferWithdrawalDialogOpen] =
     useState(false);
@@ -99,23 +98,12 @@ export default function HostRequests() {
   const cityOffersData = offersWithProperties.find((o) => o.city === city);
 
   return (
-    <div className="p-1">
+    <div>
       <div className="mb-4 xl:hidden">
         <Link href="/host/requests">
           <ChevronLeft />
         </Link>
       </div>
-      <Alert className="mb-2">
-        <AlertTriangleIcon />
-        <AlertTitle>Tip</AlertTitle>
-        <AlertDescription>
-          These is where you see requests travelers have made. These have been
-          sent out to all hosts in (name) with an empty night. Accept, deny, or
-          counter offer each request to get the traveler to make a booking. Once
-          a traveler books, your calander will be blocked and all outstanding
-          matches will be withdrawn
-        </AlertDescription>
-      </Alert>
       {cityRequestsData && !offers ? (
         <div className="grid gap-4 md:grid-cols-2">
           {cityRequestsData.requests.map((requestData) => (
@@ -158,10 +146,10 @@ export default function HostRequests() {
                 property={offerData.property}
               >
                 <Button
-                onClick={() => {
-                  setOfferWithdrawalDialogOpen(true);
-                  setSelectedOffer(offerData.offer.id);
-                }}
+                  onClick={() => {
+                    setOfferWithdrawalDialogOpen(true);
+                    setSelectedOffer(offerData.offer.id);
+                  }}
                 >
                   Withdraw
                 </Button>
@@ -170,22 +158,26 @@ export default function HostRequests() {
           ))}
         </div>
       ) : (
-        // empty state
-        <div className="flex flex-col items-center gap-y-3 rounded-lg border bg-white py-4">
-          <h3 className="text-lg font-semibold">No requests found</h3>
-          <p>
-            Consider loosen requirements or allow for more ways to book to see
-            more requests.
-          </p>
-          <Link href="/host/calendar">
+        // Empty state
+        <Card className="flex h-full items-center justify-center">
+          <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+            <Home className="mb-4 h-12 w-12 text-gray-400" />
+            <h3 className="mb-2 text-lg font-semibold text-gray-900">
+              No requests found
+            </h3>
+            <p className="max-w-sm text-sm text-gray-500">
+              Consider looser requirements or allow for more ways to book to see
+              more requests.
+            </p>
             <Button
-              className="border-black text-primaryGreen"
-              variant="outline"
+              className="mt-4"
+              variant="primary"
+              onClick={() => router.push("/host/calendar")}
             >
               Change Restrictions
             </Button>
-          </Link>
-        </div>
+          </CardContent>
+        </Card>
       )}
       {step === 0 && properties && selectedRequest && (
         <HostRequestDialog
