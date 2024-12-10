@@ -1,10 +1,27 @@
 import { Button } from "@/components/ui/button";
-
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import SidebarCity from "./sidebars/SideBarCity";
 import SidebarRequestToBook from "./sidebars/SideBarRequestToBook";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertTriangleIcon } from "lucide-react";
+
+const alerts = [
+  {
+    name: "city requests",
+    text: "This is where you see requests travelers have made. These have been sent out to all hosts in (name) with an empty night. Accept, deny, or counter offer each request to get the traveler to make a booking. Once a traveler books, your calander will be blocked and all outstanding matches will be withdrawn",
+  },
+  {
+    name: "request to book",
+    text: "As soon as a bid is accepted, the booking will instantly go through and will block off your calander. Any outstanding matches will be automatically withdrawn.",
+  },
+  {
+    name: "other",
+    text: "In the other tab, you'll find offers to book your property outside the price you specified. If you have a vacancy, we encourage you to review these offers—they might be the perfect fit.",
+  },
+];
+
 // ---------- MAIN LAYOUT COMPONENT ----------
 export default function HostRequestsLayout({
   children,
@@ -118,6 +135,18 @@ export default function HostRequestsLayout({
                   Other
                 </Button>
               </div>
+              <Alert className="mb-2">
+                <AlertTriangleIcon />
+                <AlertTitle>Tip</AlertTitle>
+                <AlertDescription>
+                  {selectedOption === "normal" && activeTab === "city"
+                    ? alerts[0]?.text
+                    : selectedOption === "normal" &&
+                        activeTab === "request-to-book"
+                      ? alerts[1]?.text
+                      : alerts[2]?.text}
+                </AlertDescription>
+              </Alert>
               {children}
             </div>
           </div>
