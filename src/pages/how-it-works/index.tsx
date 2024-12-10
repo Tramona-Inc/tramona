@@ -1,5 +1,4 @@
 import Head from "next/head";
-import FAQ from "@/components/landing-page/_sections/FAQ";
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import Image from "next/image";
 import {
@@ -18,6 +17,8 @@ import { useIsSm } from "@/utils/utils";
 import { MobileTestimonialCarousel } from "@/components/landing-page/_sections/testimonials/MobileTestimonialCarousel";
 import { TestimonialCarousel } from "@/components/landing-page/_sections/testimonials/TestimonialCarousel";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import AccordionFaq from "@/components/_common/AccordionFaq";
 
 export default function Page() {
   return (
@@ -113,19 +114,19 @@ export default function Page() {
           </div>
 
           <div className="flex flex-col items-center justify-center px-12 py-6">
-            <p className="text-center text-2xl font-semibold text-[#004236] lg:text-3xl">
+            <p className="text-center text-2xl font-semibold lg:text-3xl">
               When hosts have empty nights, no one wins. Tramona makes the
               rental market more efficient.
             </p>
-            <p className="mt-4 text-center text-base font-medium">
-              <span className="text-[#004236]">Lowest fees compared to </span>
-              <span className="text-red-500">other major </span>
-              <span className="text-blue-500">marketplaces</span>
+            <p className="mt-4 text-center text-base">
+              <span className="font-semibold">
+                Lowest fees compared to other major marketplaces
+              </span>
             </p>
           </div>
 
           <div className="flex flex-col items-center justify-center bg-[#FAF9F6] px-12 py-8">
-            <h2 className="mb-8 text-center text-2xl font-bold text-[#004236]">
+            <h2 className="mb-8 text-center text-2xl font-semibold">
               How it works for hosts
             </h2>
 
@@ -197,15 +198,14 @@ export default function Page() {
               get fee-less bookings for their first 5 trips. Sign up now to help
               us launch in your city quicker
             </p>
-            <Link
-              href="/for-hosts"
-              className="inline-block rounded-full bg-[#004236] px-6 py-2 text-sm font-medium text-white hover:bg-[#003622]"
-            >
-              Start hosting now
+            <Link href="/for-hosts">
+              <Button size="lg" className="bg-primaryGreen text-white">
+                Start hosting now
+              </Button>
             </Link>
           </div>
           <div className="mx-12 space-y-6">
-            <h2 className="text-center text-2xl font-bold text-[#004236]">
+            <h2 className="text-center text-2xl font-semibold">
               Unique, exclusive prices that can’t be found on other platforms
             </h2>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -315,12 +315,11 @@ export default function Page() {
           </div>
 
           <div className="flex flex-col items-center justify-center bg-[#FAF9F6] px-12 py-8">
-            <h2 className="text-center text-2xl font-bold text-[#004236]">
-              Booking on Tramona vs <span className="text-red-500">other</span>{" "}
-              <span className="text-blue-500">platforms</span>
+            <h2 className="mb-4 text-center text-2xl font-semibold">
+              Booking on Tramona vs other platforms
             </h2>
 
-            <p className="text-center text-sm text-muted-foreground">
+            <p className="mb-4 text-center text-sm text-muted-foreground">
               We&apos;ve created a comparison chart to showcase the savings our
               travelers experience on Tramona compared to Airbnb.
             </p>
@@ -393,7 +392,7 @@ export default function Page() {
                 />
               </div>
               <div className="max-w-lg text-center md:text-left">
-                <h2 className="mb-4 text-2xl font-bold text-[#004236]">
+                <h2 className="mb-4 text-2xl font-semibold">
                   Try it before you book
                 </h2>
                 <p className="text-base leading-relaxed text-[#004236]">
@@ -404,48 +403,85 @@ export default function Page() {
               </div>
             </div>
           </div>
-
-          <div className="w-full bg-[#FAF9F6] py-8">
-            <FAQ />
-            <div className="mt-6 flex justify-center md:justify-end md:pr-[33%]">
-              <Link
-                href="/faq"
-                className="hover:bg-primaryGreen-dark inline-block rounded-full bg-primaryGreen px-6 py-3 text-sm font-medium text-white"
+        </div>
+      </div>
+      <div className="bg-[#FAF9F6] p-20">
+        <FAQ />
+      </div>
+      <div className="bg-primaryGreen py-8">
+        <div className="text-center text-white">
+          <h2 className="text-2xl font-semibold">
+            Start your journey with Tramona now
+          </h2>
+          <div className="mt-6 flex flex-col items-center space-y-4 md:flex-row md:justify-center md:space-x-6 md:space-y-0">
+            <Link href="/?tab=name-price">
+              <Button
+                size="lg"
+                className="bg-primaryGreen bg-white text-primaryGreen"
               >
-                View FAQ
-              </Link>
-            </div>
+                Name Your Own Price
+              </Button>
+            </Link>
+            <Link href="/unclaimed-offers">
+              <Button
+                size="lg"
+                className="bg-primaryGreen bg-white text-primaryGreen"
+              >
+                Book it Now
+              </Button>
+            </Link>
+            <Link href="/host-onboarding">
+              <Button
+                size="lg"
+                className="bg-primaryGreen bg-white text-primaryGreen"
+              >
+                Become a host
+              </Button>
+            </Link>
           </div>
-          <div className="bg-primaryGreen py-8">
-            <div className="text-center text-white">
-              <h2 className="text-2xl font-semibold">
-                Start your journey with Tramona now
-              </h2>
-              <div className="mt-6 flex flex-col items-center space-y-4 md:flex-row md:justify-center md:space-x-6 md:space-y-0">
-                <Link
-                  href="/?tab=name-price"
-                  className="inline-block rounded-full bg-white px-6 py-3 text-sm font-medium text-primaryGreen hover:bg-gray-100"
-                >
-                  Name Your Own Price
-                </Link>
-                <Link
-                  href="/unclaimed-offers"
-                  className="inline-block rounded-full bg-white px-6 py-3 text-sm font-medium text-primaryGreen hover:bg-gray-100"
-                >
-                  Book it Now
-                </Link>
-                <Link
-                  href="/host-onboarding"
-                  className="inline-block rounded-full bg-white px-6 py-3 text-sm font-medium text-primaryGreen hover:bg-gray-100"
-                >
-                  Become a host
-                </Link>
-              </div>
-            </div>
-          </div>
-          <hr className="border-none" />
         </div>
       </div>
     </DashboardLayout>
   );
 }
+
+const FAQ = () => {
+  return (
+    <section className="mx-auto max-w-7xl pb-footer-height">
+      <div className="flex flex-col space-y-6 p-4 md:grid md:grid-cols-3 md:gap-6">
+        <span className="space-y-4 text-center md:text-left">
+          <h1 className="text-3xl font-semibold md:text-4xl">
+            Frequently asked questions
+          </h1>
+        </span>
+        <div className="col-span-2 border-t">
+          <AccordionFaq accordionItems={whyListAccordionItems} />
+          <span className="mt-8 flex justify-center md:justify-start">
+            <Link href="/faq">
+              <Button size="lg" className="bg-primaryGreen text-white">
+                View FAQ
+              </Button>
+            </Link>
+          </span>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const whyListAccordionItems = [
+  {
+    question: "How much does it cost to sign up?",
+    answer: "Tramona is completely free to sign up and use.",
+  },
+  {
+    question: "What happens if I don't like the price?",
+    answer:
+      "If you dont like the prices, submit another offer! We dont need your credit card until you purchase your trip so there is no harm in sending a request.",
+  },
+  {
+    question: "When do I have to put my credit card in?",
+    answer:
+      "We only ask for your credit card when you are ready to pay. Make a request, it's easy.",
+  },
+];

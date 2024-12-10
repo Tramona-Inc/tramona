@@ -130,12 +130,12 @@ export default function HostPropertiesLayout() {
       <div className="flex items-center gap-4 sm:flex-row sm:justify-between">
         <h1 className="text-2xl font-semibold md:text-4xl">Your Properties</h1>
         <div className="flex flex-1 items-center justify-end gap-4">
-          <ExpandableSearchBar
+          {/* <ExpandableSearchBar
             className="hidden sm:flex"
             onSearchResultsUpdate={handleSearchResults}
             onExpandChange={setIsSearchExpanded}
-          />
-          <Button
+          /> */}
+          {/* <Button
             size="icon"
             className="rounded-full bg-white font-bold text-black shadow-xl"
           >
@@ -150,7 +150,7 @@ export default function HostPropertiesLayout() {
             }}
           >
             <Plus strokeWidth={2} />
-          </Button>
+          </Button> */}
         </div>
       </div>
       <ExpandableSearchBar

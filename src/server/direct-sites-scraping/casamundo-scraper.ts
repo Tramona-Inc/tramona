@@ -4,7 +4,7 @@ import {
   ScrapedListing,
 } from "@/server/direct-sites-scraping";
 import { NewReview } from "@/server/db/schema";
-import axios, { AxiosResponse } from "axios";
+import axios, { AxiosError, AxiosResponse } from "axios";
 import { z } from "zod";
 import { ALL_PROPERTY_TYPES, PropertyType } from "@/server/db/schema/common";
 import { ListingSiteName } from "@/server/db/schema/common";

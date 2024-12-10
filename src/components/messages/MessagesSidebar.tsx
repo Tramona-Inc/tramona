@@ -237,7 +237,7 @@ export default function MessagesSidebar({
   return (
     <div>
       <div className="space-y-4 border-b p-4">
-        <h1 className="text-2xl font-bold">Messages</h1>
+        <h1 className="text-2xl font-semibold">Messages</h1>
         <div className="flex items-center gap-1">
           <Button
             className="rounded-full"

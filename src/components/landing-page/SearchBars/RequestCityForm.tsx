@@ -145,7 +145,7 @@ const RequestCityForm = forwardRef(
               <Button
                 variant="ghost"
                 type="button"
-                className="px-2 text-teal-900 hover:bg-teal-900/15"
+                className="hover:bg-teal-900/15 px-2 text-teal-900"
               >
                 <FilterIcon />
                 More filters
