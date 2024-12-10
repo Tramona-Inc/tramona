@@ -16,7 +16,7 @@ import {
 const alerts = [
   {
     name: "city requests",
-    text: "This is where you see requests travelers have made. These have been sent out to all hosts in (name) with an empty night. Accept, deny, or counter offer each request to get the traveler to make a booking. Once a traveler books, your calander will be blocked and all outstanding matches will be withdrawn",
+    text: "This is where you see requests travelers have made. These have been sent out to all hosts with an empty night. Accept, deny, or counter offer each request to get the traveler to make a booking. Once a traveler books, your calander will be blocked and all outstanding matches will be withdrawn",
   },
   {
     name: "property bids",
@@ -25,6 +25,10 @@ const alerts = [
   {
     name: "other",
     text: "In the other tab, you'll find offers to book your property outside the price you specified. If you have a vacancy, we encourage you to review these offers—they might be the perfect fit.",
+  },
+  {
+    name: "sent",
+    text: "This is where you see matches you made for travelers requests.",
   },
 ];
 
@@ -242,7 +246,7 @@ export default function HostRequestsLayout({
                       : activeTab === "city" &&
                           selectedOption === "outsidePriceRestriction"
                         ? alerts[2]?.text
-                        : ""}
+                        : alerts[3]?.text}
                 </AlertDescription>
               </Alert>
               {children}
