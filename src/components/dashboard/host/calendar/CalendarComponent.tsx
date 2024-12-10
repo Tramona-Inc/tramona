@@ -14,6 +14,7 @@ import CalendarSettings from "./CalendarSettings";
 import { useState } from "react";
 import { Property } from "@/server/db/schema/tables/properties";
 import { eachDayOfInterval, format, isBefore, parseISO } from "date-fns";
+import HostICalSync from "../HostICalSync";
 
 export default function CalendarComponent() {
   const [date, setDate] = useState<Date>(new Date());
@@ -257,13 +258,15 @@ export default function CalendarComponent() {
             >
               Unblock Dates
             </Button> */}
-            <Button
+            {/* <Button
               variant="secondary"
               size="sm"
               className="flex-grow sm:flex-grow-0"
             >
               Edit iCal Link
-            </Button>
+            </Button> */}
+
+            <HostICalSync property={selectedProperty}/>
             {/* <div className="w-full sm:w-auto sm:flex-1" />
             <Button
               variant="outline"

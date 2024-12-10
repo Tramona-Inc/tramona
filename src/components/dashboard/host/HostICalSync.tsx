@@ -14,14 +14,23 @@ import {
 import HostICalHowToDialog from "./HostICalHowToDialog";
 import { Label } from "@/components/ui/label";
 import { Copy, Edit2 } from "lucide-react";
+import Spinner from "@/components/_common/Spinner";
 
-export default function HostICalSync({ property }: { property: Property }) {
+export default function HostICalSync({
+  property,
+}: {
+  property: Property | null;
+}) {
   const [iCalLink, setiCalLink] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const { toast } = useToast();
 
   const { mutateAsync: syncCalendar, isLoading } =
     api.calendar.syncCalendar.useMutation();
+
+  if (property === null) {
+    return <Spinner/>;
+  }
 
   const handleFormSubmit = async () => {
     try {
@@ -41,8 +50,7 @@ export default function HostICalSync({ property }: { property: Property }) {
       console.error("Error syncing calendar:", error);
       toast({
         title: "No calendar data found",
-        description:
-          "Please make sure the iCal URL is correct and try again.",
+        description: "Please make sure the iCal URL is correct and try again.",
         variant: "destructive",
       });
     }
