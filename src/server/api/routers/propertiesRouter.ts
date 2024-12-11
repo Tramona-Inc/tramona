@@ -736,12 +736,31 @@ export const propertiesRouter = createTRPCRouter({
       return { count };
     }),
 
+  updateRequestToBook: protectedProcedure
+    .input(
+      z.object({
+        propertyId: z.number(),
+        requestToBookDiscountPercentage: z.number(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      await db
+        .update(properties)
+        .set({
+          requestToBookDiscountPercentage:
+            input.requestToBookDiscountPercentage,
+        })
+        .where(eq(properties.id, input.propertyId));
+      console.log("YAY");
+      return;
+    }),
+
   updateAutoOffer: protectedProcedure
     .input(
       z.object({
         id: z.number(),
-        autoOfferEnabled: z.boolean(),
-        autoOfferDiscountTiers: z.array(discountTierSchema),
+        autoOfferEnabled: z.boolean().optional(),
+        autoOfferDiscountTiers: z.array(discountTierSchema).optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -753,23 +772,25 @@ export const propertiesRouter = createTRPCRouter({
         })
         .where(eq(properties.id, input.id));
     }),
+
   updateBookItNow: protectedProcedure
     .input(
       z.object({
         id: z.number(),
-        bookItNowEnabled: z.boolean(),
-        bookItNowDiscountTiers: z.array(discountTierSchema),
-        requestToBookDiscountPercentage: z.number(),
+        bookItNowEnabled: z.boolean().optional(),
+        bookItNowDiscountTiers: z.array(discountTierSchema).optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       await ctx.db
         .update(properties)
         .set({
-          bookItNowEnabled: input.bookItNowEnabled,
-          bookItNowDiscountTiers: input.bookItNowDiscountTiers,
-          requestToBookDiscountPercentage:
-            input.requestToBookDiscountPercentage,
+          ...(input.bookItNowEnabled !== undefined && {
+            bookItNowEnabled: input.bookItNowEnabled,
+          }),
+          ...(input.bookItNowDiscountTiers && {
+            bookItNowDiscountTiers: input.bookItNowDiscountTiers,
+          }),
         })
         .where(eq(properties.id, input.id));
     }),
@@ -825,7 +846,7 @@ export const propertiesRouter = createTRPCRouter({
           result.originalNightlyPrice !== undefined,
       );
 
-      const filteredAirbnbProperties = airbnbProperties //use to have a filter function removing null values 
+      const filteredAirbnbProperties = airbnbProperties; //use to have a filter function removing null values
 
       const combinedResults = [...filteredAirbnbProperties, ...filteredResults];
       console.log("Combined results:", combinedResults);

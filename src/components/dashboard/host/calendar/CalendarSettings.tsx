@@ -9,28 +9,41 @@ import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import HostPropertiesRestrictions from "../HostPropertiesRestrictions";
 import { Property } from "@/server/db/schema/tables/properties";
-import { useState } from "react";
-
+import { useState, useEffect } from "react";
+import { api } from "@/utils/api";
+import { toast } from "@/components/ui/use-toast";
 interface DiscountTier {
   days: number;
   discount: number;
 }
 
 export default function CalendarSettings({ property }: { property: Property }) {
-  // Separate state for each section's percentage
-  const [bookItNowPercent, setBookItNowPercent] = useState(5);
-  const [offersToBookPercent, setOffersToBookPercent] = useState(5);
+  console.log(property.id);
 
+  // <---------------------------------- MUTATIONS ---------------------------------->
+  const { mutateAsync: updateBookItNow } =
+    api.properties.updateBookItNow.useMutation();
+
+  const { mutateAsync: updateRequestToBook } =
+    api.properties.updateRequestToBook.useMutation();
+
+  // Book it now section
+  const [isChecked, setIsChecked] = useState<boolean | undefined>(
+    property.bookItNowEnabled,
+  );
+  const [bookItNowPercent, setBookItNowPercent] = useState<number>(
+    property.requestToBookDiscountPercentage,
+  );
+  const [bookItNowSaved, setBookItNowSaved] = useState(false);
+
+  const [offersToBookPercent, setOffersToBookPercent] = useState(5);
   // Other state variables remain the same
   const [offersToBookOpen, setOffersToBookOpen] = useState(false);
   const [nameYourPriceOpen, setNameYourPriceOpen] = useState(false);
-  const [bookItNowSaved, setBookItNowSaved] = useState(false);
   const [offersToBookSaved, setOffersToBookSaved] = useState(false);
   const [nameYourPriceSaved, setNameYourPriceSaved] = useState(false);
   const [propertyRestrictionsOpen, setPropertyRestrictionsOpen] =
     useState(false);
-
-  const [minimumOfferPriceOpen, setMinimumOfferPriceOpen] = useState(false);
 
   const [discountTiers, setDiscountTiers] = useState<DiscountTier[]>([
     { days: 90, discount: 5 },
@@ -41,6 +54,12 @@ export default function CalendarSettings({ property }: { property: Property }) {
     { days: 7, discount: 30 },
   ]);
 
+  useEffect(() => {
+    setIsChecked(property.bookItNowEnabled);
+    setBookItNowPercent(property.requestToBookDiscountPercentage);
+    setOffersToBookPercent(property.requestToBookDiscountPercentage);
+  }, [property]); //update when the selected property changes
+
   const calculateDiscountedPrice = (
     originalPrice: number,
     percentOff: number,
@@ -48,14 +67,64 @@ export default function CalendarSettings({ property }: { property: Property }) {
     return Math.round(originalPrice * (1 - percentOff / 100));
   };
 
-  const handleBookItNowSave = () => {
-    setBookItNowSaved(true);
-    setTimeout(() => setBookItNowSaved(false), 2000);
+  const handleBookItNowSwitch = async (checked: boolean) => {
+    setIsChecked(checked);
+    //only update if turned off
+    try {
+      await updateBookItNow({
+        id: property.id,
+        bookItNowEnabled: checked,
+      });
+      if (!checked) {
+        toast({
+          title: `Book it now disabled`,
+        });
+      }
+    } catch (err) {
+      toast({
+        title: "Something went wrong...",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleOffersToBookSave = () => {
+  const handleBookItNowSave = async () => {
+    setBookItNowSaved(true);
+    setTimeout(() => setBookItNowSaved(false), 2000);
+    try {
+      await updateBookItNow({
+        id: property.id,
+        bookItNowEnabled: isChecked,
+      }); // Enable "Book It Now"
+      toast({
+        title: `Update successful.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Try again",
+        description: "Something went wrong...",
+      });
+    }
+  };
+
+  const handleOffersToBookSave = async () => {
+    //update request to book discount percentage
     setOffersToBookSaved(true);
     setTimeout(() => setOffersToBookSaved(false), 2000);
+    try {
+      await updateRequestToBook({
+        propertyId: property.id,
+        requestToBookDiscountPercentage: offersToBookPercent,
+      });
+      toast({
+        title: "Update successful",
+      });
+    } catch (error) {
+      toast({
+        title: "Something went wrong",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleNameYourPriceSave = () => {
@@ -87,7 +156,7 @@ export default function CalendarSettings({ property }: { property: Property }) {
 
           <TabsContent value="pricing" className="space-y-6 sm:space-y-8">
             {/* Book it now section */}
-            <div className="space-y-4 rounded-lg border p-6">
+            <div className="space-y-3 rounded-lg border p-6">
               <div className="flex cursor-pointer items-center justify-between">
                 <h3 className="text-[20px] font-bold text-black">
                   Book it now
@@ -98,20 +167,22 @@ export default function CalendarSettings({ property }: { property: Property }) {
                   Set your price, starting as low as the price on Airbnb
                 </p>
                 <Switch
+                  checked={isChecked}
                   className="data-[state=checked]:bg-primaryGreen data-[state=unchecked]:bg-gray-300"
-                  onClick={
-                    () => setMinimumOfferPriceOpen(!minimumOfferPriceOpen) //add functionality later!
-                  }
+                  onCheckedChange={(checked) => {
+                    void handleBookItNowSwitch(checked);
+                  }}
                 />
               </div>
-              <div className="-mx-6 mt-4 w-[calc(100%+3rem)] border-b border-gray-200" />
-              {minimumOfferPriceOpen && (
+
+              {isChecked && (
                 <div className="space-y-4 pt-4">
+                  <div className="my-6 w-[calc(100%+3rem)] border-b border-gray-200" />
                   <Label>{bookItNowPercent}% OFF</Label>
                   <Slider
                     value={[bookItNowPercent]}
                     onValueChange={(value) => setBookItNowPercent(value[0]!)}
-                    max={100}
+                    max={80}
                   />
                   <p className="text-xs text-muted-foreground">
                     This is likely to generate 1% more bookings, increase the
@@ -130,8 +201,9 @@ export default function CalendarSettings({ property }: { property: Property }) {
                       variant="outline"
                       className="border-black bg-white text-black"
                       onClick={handleBookItNowSave}
+                      disabled={bookItNowSaved}
                     >
-                      {bookItNowSaved ? "Saved!" : "Save"}
+                      {bookItNowSaved ? "Saving!" : "Save"}
                     </Button>
                   </div>
                 </div>
@@ -139,9 +211,9 @@ export default function CalendarSettings({ property }: { property: Property }) {
             </div>
 
             {/* Offers to book section */}
-            <div className="space-y-4 rounded-lg border p-6">
+            <div className="rounded-lg border">
               <div
-                className="flex cursor-pointer items-center justify-between"
+                className="flex cursor-pointer items-center justify-between px-6 py-8"
                 onClick={() => setOffersToBookOpen(!offersToBookOpen)}
               >
                 <h3 className="text-[20px] font-bold text-black">
@@ -159,7 +231,7 @@ export default function CalendarSettings({ property }: { property: Property }) {
                 </Button>
               </div>
               <div
-                className={`overflow-hidden transition-all duration-300 ease-in-out ${offersToBookOpen ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0"}`}
+                className={`overflow-hidden transition-all duration-300 ease-in-out ${offersToBookOpen ? "-mt-4 max-h-[1000px] p-6 opacity-100" : "max-h-0 opacity-0"}`}
               >
                 <p className="text-base font-bold">
                   What prices would you consider?
@@ -197,12 +269,12 @@ export default function CalendarSettings({ property }: { property: Property }) {
             </div>
 
             {/* Name your price section */}
-            <div className="space-y-4 rounded-lg border p-6">
+            <div className="rounded-lg border">
               <div
-                className="flex cursor-pointer items-center justify-between"
+                className="flex cursor-pointer items-center justify-between px-6 py-8"
                 onClick={() => setNameYourPriceOpen(!nameYourPriceOpen)}
               >
-                <h3 className="text-[20px] font-bold text-black">
+                <h3 className="text-xl font-bold text-black">
                   Name Your Own Price
                 </h3>
                 <Button variant="ghost" size="sm">
@@ -217,7 +289,7 @@ export default function CalendarSettings({ property }: { property: Property }) {
                 </Button>
               </div>
               <div
-                className={`overflow-hidden transition-all duration-300 ease-in-out ${nameYourPriceOpen ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0"}`}
+                className={`overflow-hidden transition-all duration-300 ease-in-out ${nameYourPriceOpen ? "-mt-4 max-h-[1000px] p-6 opacity-100" : "max-h-0 opacity-0"}`}
               >
                 <p className="text-base font-bold">
                   Every day we get thousands of requests from travelers. How
