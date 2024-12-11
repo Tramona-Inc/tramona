@@ -9,6 +9,8 @@ import { MobileTestimonialCarousel } from "@/components/landing-page/_sections/t
 import { useIsSm } from "@/utils/utils";
 import React from "react";
 import HostCalculator from "@/components/host/HostCalculator";
+import { StickyTopBar } from "@/pages/for-hosts";
+import { MobileStickyBar } from "@/pages/for-hosts";
 
 import {
   FaInfoCircle,
@@ -34,13 +36,19 @@ const ForHostsPage = ({
   requestFeed,
 }: InferGetStaticPropsType<typeof getStaticProps>) => {
   return (
-    <DashboardLayout>
+    <div className="relative space-y-32 overflow-x-hidden pb-32">
       <Head>
         <title>For Hosts | Tramona</title>
       </Head>
-      <div className="relative bg-white">
+      <div>
         <div className="bg-[#FAF9F6]">
           <Banner />
+          <div className="md:hidden">
+            <MobileStickyBar />
+          </div>
+          <div className="hidden md:block">
+            <StickyTopBar />
+          </div>
           <SignUpNow requestFeed={requestFeed} />
         </div>
         <div>
@@ -113,7 +121,7 @@ const ForHostsPage = ({
           </div>
         </div>
       </div>
-    </DashboardLayout>
+    </div>
   );
 };
 
@@ -217,7 +225,7 @@ const SignUpNow = ({ requestFeed }: { requestFeed: FeedRequestItem[] }) => {
             go un booked.
           </h2>
           <div className="mb-12 flex justify-center">
-            <Link href="/for-hosts">
+            <Link href="/why-list">
               <Button size="lg" className="bg-primaryGreen text-white">
                 Sign up and start getting booking requests
               </Button>
@@ -437,7 +445,7 @@ const KeyFeatures = () => {
         <ul className="mt-6 flex flex-col gap-4">
           <KeyFeatureItem
             title="Easy Sync with Airbnb"
-            description="Import all your properties and preferences in <b>less than 1 minute</b> 
+            description="Import all your properties and preferences in <b>less than 1 minute</b>
       by syncing with Airbnb. This also syncs your calendar to ensure no double bookings."
           />
           <KeyFeatureItem
@@ -450,7 +458,7 @@ const KeyFeatures = () => {
           />
           <KeyFeatureItem
             title="Property Protection"
-            description="We protect up to <b>50k of protection per booking</b> and also allow for 
+            description="We protect up to <b>50k of protection per booking</b> and also allow for
       security deposits."
           />
           <KeyFeatureItem

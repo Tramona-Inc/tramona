@@ -331,7 +331,7 @@ export default function MastHead() {
                     Book One-of-a-Kind Prices
                   </Button>
                 </Link>
-                <Link href="/for-hosts">
+                <Link href="/why-list">
                   <Button className="w-full bg-white px-4 text-[#004236] hover:bg-gray-100 sm:w-auto sm:px-8">
                     List Your Property
                   </Button>

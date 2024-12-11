@@ -15,7 +15,7 @@ const ForHosts = () => {
               Join the 300,000+ properties we already have.
             </p>
             <div className="ml-2 flex md:justify-start">
-              <Link href="/for-hosts">
+              <Link href="/why-list">
                 <button className="rounded-lg border-2 border-black bg-white px-6 py-3 hover:bg-[#e5e5e5]">
                   Learn more
                 </button>
