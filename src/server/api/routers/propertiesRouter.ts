@@ -18,6 +18,8 @@ import {
   type Request,
   type RequestsToBook,
   type User,
+  users,
+  Offer,
 } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { addDays } from "date-fns";
@@ -79,6 +81,27 @@ export type HostRequestsToBookPageData = {
   })[];
   property: Property & { taxAvailable: boolean };
 }[];
+
+export type HostRequestsPageOfferData = {
+  city: string;
+  requests: {
+    offer: Offer;
+    request: {
+      id: number;
+      madeByGroupId: number;
+      maxTotalPrice: number;
+      checkIn: Date;
+      checkOut: Date;
+      numGuests: number;
+      location: string;
+      traveler: Pick<
+        User,
+        "firstName" | "lastName" | "name" | "image" | "location" | "about"
+      >;
+    };
+    property: { city: string; name: string };
+  }[];
+};
 
 export const propertiesRouter = createTRPCRouter({
   create: protectedProcedure
@@ -578,20 +601,15 @@ export const propertiesRouter = createTRPCRouter({
         eq(properties.hostTeamId, ctx.hostProfile.curTeamId),
         eq(properties.status, "Listed"),
       ),
-
-      // columns: {
-      //   id: true,
-      //   propertyStatus: true,
-      //   latLngPoint: true,
-      //   priceRestriction: true,
-      //   city: true,
-      // },
     });
 
     const hostRequests = await getRequestsForProperties(hostProperties);
-    console.log(hostRequests);
 
     const groupedByCity: HostRequestsPageData[] = [];
+    const citiesSet = new Set(hostProperties.map((property) => property.city));
+    citiesSet.forEach((city) => {
+      groupedByCity.push({ city, requests: [] });
+    });
 
     const findOrCreateCityGroup = (city: string) => {
       let cityGroup = groupedByCity.find((group) => group.city === city);
@@ -615,47 +633,35 @@ export const propertiesRouter = createTRPCRouter({
       }
     >();
 
-    // Iterate over the hostRequests and gather all properties for each request
     for (const { property, request } of hostRequests) {
-      // Check if this request already exists in the map
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       if (!requestsMap.has(request.id)) {
-        // If not, create a new entry with an empty properties array
         requestsMap.set(request.id, {
           request,
-          properties: [] as (Property & { taxAvailable: boolean })[],
+          properties: [],
         });
       }
-
-      // Add the property to the request
       requestsMap.get(request.id)!.properties.push(property);
     }
+
     for (const requestWithProperties of requestsMap.values()) {
       const { request, properties } = requestWithProperties;
-
-      for (const property of properties as unknown as (Property & {
-        taxAvailable: boolean;
-      })[]) {
+      for (const property of properties) {
         const cityGroup = findOrCreateCityGroup(property.city);
-
-        // Find if the request already exists in the city's group to avoid duplicates
         const existingRequest = cityGroup.requests.find(
           (item) => item.request.id === request.id,
         );
 
         if (existingRequest) {
-          // If the request already exists, just add the new property to it
           existingRequest.properties.push(property);
         } else {
-          // If the request doesn't exist, create a new entry with the property
           cityGroup.requests.push({
             request,
-            properties: [property], // Initialize with the current property
+            properties: [property],
           });
         }
       }
     }
-    console.log(groupedByCity);
+
     return groupedByCity;
   }),
 
@@ -669,12 +675,8 @@ export const propertiesRouter = createTRPCRouter({
 
     const hostRequestsToBook = await getRequestsToBookForProperties(
       hostProperties,
-      {
-        user: ctx.user,
-      },
+      { user: ctx.user },
     );
-
-    console.log("hostreqs", hostRequestsToBook);
 
     const propertiesWithRequestsToBook = hostProperties
       .filter((property) =>
@@ -693,6 +695,7 @@ export const propertiesRouter = createTRPCRouter({
 
     return propertiesWithRequestsToBook;
   }),
+
   // hostInsertOnboardingProperty: roleRestrictedProcedure(["host"])
   //   .input(hostPropertyFormSchema)
   //   .mutation(async ({ ctx, input }) => {
@@ -767,8 +770,12 @@ export const propertiesRouter = createTRPCRouter({
       await ctx.db
         .update(properties)
         .set({
-          autoOfferEnabled: input.autoOfferEnabled,
-          autoOfferDiscountTiers: input.autoOfferDiscountTiers,
+          ...(input.autoOfferEnabled !== undefined && {
+            autoOfferEnabled: input.autoOfferEnabled,
+          }),
+          ...(input.autoOfferDiscountTiers !== undefined && {
+            autoOfferDiscountTiers: input.autoOfferDiscountTiers,
+          }),
         })
         .where(eq(properties.id, input.id));
     }),

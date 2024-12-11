@@ -18,14 +18,15 @@ interface DiscountTier {
 }
 
 export default function CalendarSettings({ property }: { property: Property }) {
-  console.log(property.id);
-
   // <---------------------------------- MUTATIONS ---------------------------------->
   const { mutateAsync: updateBookItNow } =
     api.properties.updateBookItNow.useMutation();
 
   const { mutateAsync: updateRequestToBook } =
     api.properties.updateRequestToBook.useMutation();
+
+  const { mutateAsync: updateAutoOffer } =
+    api.properties.updateAutoOffer.useMutation();
 
   // Book it now section
   const [isChecked, setIsChecked] = useState<boolean | undefined>(
@@ -44,6 +45,11 @@ export default function CalendarSettings({ property }: { property: Property }) {
   const [nameYourPriceSaved, setNameYourPriceSaved] = useState(false);
   const [propertyRestrictionsOpen, setPropertyRestrictionsOpen] =
     useState(false);
+
+  //Name your price  & Auto offers section
+  const [isAutoOfferChecked, setIsAutoOfferChecked] = useState<
+    undefined | boolean
+  >(property.autoOfferEnabled);
 
   const [discountTiers, setDiscountTiers] = useState<DiscountTier[]>([
     { days: 90, discount: 5 },
@@ -132,6 +138,15 @@ export default function CalendarSettings({ property }: { property: Property }) {
     setTimeout(() => setNameYourPriceSaved(false), 2000);
   };
 
+  const handleAutoOfferSwitch = async (checked: boolean) => {
+    setIsAutoOfferChecked(checked);
+    await updateAutoOffer({
+      id: property.id,
+      autoOfferEnabled: checked,
+    });
+    console.log("done");
+  };
+
   const removeTier = (index: number) => {
     setDiscountTiers(discountTiers.filter((_, i) => i !== index));
   };
@@ -185,17 +200,9 @@ export default function CalendarSettings({ property }: { property: Property }) {
                     max={80}
                   />
                   <p className="text-xs text-muted-foreground">
-                    This is likely to generate 1% more bookings, increase the
-                    discount for a more significant effect
+                    Enhance the discount to create a more impactful incentive
+                    and boost bookings
                   </p>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-bold text-primaryGreen sm:text-4xl">
-                      ${calculateDiscountedPrice(168, bookItNowPercent)}
-                    </span>
-                    <span className="text-lg text-muted-foreground line-through sm:text-2xl">
-                      $168
-                    </span>
-                  </div>
                   <div className="flex justify-end">
                     <Button
                       variant="outline"
@@ -300,7 +307,13 @@ export default function CalendarSettings({ property }: { property: Property }) {
                 <div className="space-y-4 pt-4">
                   <div className="flex items-center justify-between">
                     <Label className="text-lg font-medium">Auto-offer</Label>
-                    <Switch className="data-[state=checked]:bg-primaryGreen" />
+                    <Switch
+                      checked={isAutoOfferChecked}
+                      onCheckedChange={(checked) =>
+                        handleAutoOfferSwitch(checked)
+                      }
+                      className="data-[state=checked]:bg-primaryGreen"
+                    />
                   </div>
 
                   <div className="space-y-4">

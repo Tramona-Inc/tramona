@@ -135,7 +135,7 @@ function LargeHeader({ isHost }: { isHost: boolean }) {
         <Button
           asChild
           variant="ghost"
-          className={cn(hostBtn.href !== "/for-hosts" && "rounded-full")}
+          className={cn(hostBtn.href !== "/why-list" && "rounded-full")}
         >
           <Link href={hostBtn.href}>{hostBtn.name}</Link>
         </Button>

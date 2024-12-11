@@ -35,6 +35,10 @@
     {
       "path": "/api/batchRequestText",
       "schedule": "*/3 * * * *"
+    },
+    {
+      "path": "/api/cron/scrapeDates",
+      "schedule": "* * * * *"
     }
   ]
 }

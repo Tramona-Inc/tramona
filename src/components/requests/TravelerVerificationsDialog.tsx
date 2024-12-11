@@ -4,12 +4,13 @@ import { type HostDashboardRequest } from "./RequestCard";
 import { getAge } from "@/utils/utils";
 import UserAvatar from "../_common/UserAvatar";
 import { BadgeCheck, BadgeX } from "lucide-react";
-import { HostDashboardRequestToBook } from "../requests-to-book/TravelerRequestToBookCard";
+import { HostDashboardRequestToBook } from "@/components/dashboard/host/requests/requests-to-book/HostRequestToBookCard";
+import { PastOfferRequestDetails } from "../dashboard/host/requests/city/PastOfferCard";
 
 export function TravelerVerificationsDialog({
   request,
 }: {
-  request: HostDashboardRequest | HostDashboardRequestToBook;
+  request: HostDashboardRequest | HostDashboardRequestToBook | PastOfferRequestDetails;
 }) {
   const { data: verificationList } = api.users.getUserVerifications.useQuery({
     madeByGroupId: request.madeByGroupId,
