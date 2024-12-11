@@ -143,7 +143,7 @@ export default function MobileHeader({ isHost }: { isHost: boolean }) {
               variant="ghost"
               className={cn(
                 "text-black",
-                hostBtn.href !== "/for-hosts" && "text-sm tracking-tight",
+                hostBtn.href !== "/why-list" && "text-sm tracking-tight",
               )}
             >
               <Link href={hostBtn.href}>{hostBtn.name}</Link>

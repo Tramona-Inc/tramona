@@ -17,7 +17,7 @@ export default function useHostBtn(isMobile?: boolean) {
 
   if (sessionStatus === "unauthenticated" || !isHost) {
     return {
-      href: "/for-hosts",
+      href: "/why-list",
       name: isMobile ? "Host" : "Become a host",
       icon: DoorOpen,
     } as const;

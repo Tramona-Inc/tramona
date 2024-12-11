@@ -52,7 +52,7 @@ export function DesktopSearchTab({
     originalListingId: string;
     originalNightlyPrice: number;
     originalListingPlatform: string;
-    ratingStr: string;
+    ratingStr: string | null | undefined;
   };
 
   const [allProperties, setAllProperties] = useState<{
@@ -231,10 +231,10 @@ export function DesktopSearchTab({
 
 
 //   <div
-//   className={`z-50 w-full transition-all duration-300 ease-in-out 
-//     sm:w-[400px] 
-//     md:w-[500px] 
-//     lg:w-[600px] 
+//   className={`z-50 w-full transition-all duration-300 ease-in-out
+//     sm:w-[400px]
+//     md:w-[500px]
+//     lg:w-[600px]
 //     xl:w-[800px]
 //     ${isCompact ? "scale-70" : "scale-100"}`}
 // >

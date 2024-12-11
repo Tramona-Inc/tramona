@@ -4,8 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Search } from 'lucide-react';
 import { Form } from '@/components/ui/form';
 import { SearchFormBar } from './SearchFormBar';
+import type { UseFormReturn } from 'react-hook-form';
+import type { z } from 'zod';
+import { searchSchema } from './schemas';
 
-const MobileSearchFormBar = ({ form, onSubmit, isLoading }) => {
+type SearchFormValues = z.infer<typeof searchSchema>;
+
+const MobileSearchFormBar = ({ form, onSubmit, isLoading }: { form: UseFormReturn<SearchFormValues>, onSubmit: (data: SearchFormValues) => void, isLoading: boolean }) => {
   const [open, setOpen] = React.useState(false);
   const location = form.watch('location');
   const checkIn = form.watch('checkIn');
@@ -50,7 +55,7 @@ const MobileSearchFormBar = ({ form, onSubmit, isLoading }) => {
                 <div className="space-y-6">
                   <SearchFormBar
                     form={form}
-                    onSubmit={() => {}}
+                    onSubmit={onSubmit}
                     isLoading={isLoading}
                     variant="modal"
                   />

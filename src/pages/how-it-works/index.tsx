@@ -198,7 +198,7 @@ export default function Page() {
               get fee-less bookings for their first 5 trips. Sign up now to help
               us launch in your city quicker
             </p>
-            <Link href="/for-hosts">
+            <Link href="/why-list">
               <Button size="lg" className="bg-primaryGreen text-white">
                 Start hosting now
               </Button>
