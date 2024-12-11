@@ -299,7 +299,6 @@ export function DesktopSearchTab({
       <div className="hidden lg:flex w-full flex-row items-center justify-center space-x-2 px-16">
         <LocationGallery
           onLocationSelect={handleLocationSelect}
-          isLandingPage={true}
           isCompact={isCompact}
         />
         <Dialog open={open} onOpenChange={setOpen}>
