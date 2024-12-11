@@ -52,7 +52,7 @@ export function DesktopSearchTab({
     originalListingId: string;
     originalNightlyPrice: number;
     originalListingPlatform: string;
-    ratingStr: string;
+    ratingStr: string | null | undefined;
   };
 
   const [allProperties, setAllProperties] = useState<{
@@ -231,10 +231,10 @@ export function DesktopSearchTab({
 
 
 //   <div
-//   className={`z-50 w-full transition-all duration-300 ease-in-out 
-//     sm:w-[400px] 
-//     md:w-[500px] 
-//     lg:w-[600px] 
+//   className={`z-50 w-full transition-all duration-300 ease-in-out
+//     sm:w-[400px]
+//     md:w-[500px]
+//     lg:w-[600px]
 //     xl:w-[800px]
 //     ${isCompact ? "scale-70" : "scale-100"}`}
 // >
@@ -299,7 +299,6 @@ export function DesktopSearchTab({
       <div className="hidden lg:flex w-full flex-row items-center justify-center space-x-2 px-16">
         <LocationGallery
           onLocationSelect={handleLocationSelect}
-          isLandingPage={true}
           isCompact={isCompact}
         />
         <Dialog open={open} onOpenChange={setOpen}>

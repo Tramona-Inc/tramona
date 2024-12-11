@@ -9,9 +9,9 @@ interface LocationGalleryProps {
   isCompact?: boolean;
 }
 
-export function LocationGallery({ 
+export function LocationGallery({
   onLocationSelect,
-  isCompact = false
+  isCompact = false,
 }: LocationGalleryProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
