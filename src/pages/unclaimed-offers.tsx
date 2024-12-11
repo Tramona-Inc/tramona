@@ -31,7 +31,7 @@ export default function Page() {
           }`}
         >
 
-            <DesktopSearchTab isCompact={isScrolled} handleTabChange={() => {}} />
+            <DesktopSearchTab isCompact={isScrolled} handleTabChange={() => {}} isLandingPage={false} />
 
         </div>
 

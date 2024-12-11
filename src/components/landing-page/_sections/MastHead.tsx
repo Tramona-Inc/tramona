@@ -84,6 +84,7 @@ export default function MastHead() {
           <DesktopSearchTab
             isCompact={isScrolled}
             handleTabChange={handleTabChange}
+            isLandingPage={true}
           />
         </AdjustedPropertiesProvider>
 

@@ -31,11 +31,13 @@ import MobileSearchFormBar from "./MobileSearchFormBar";
 interface DesktopSearchTabProps {
   isCompact?: boolean;
   handleTabChange: (tab: string, scroll?: boolean) => void;
+  isLandingPage: boolean;
 }
 
 export function DesktopSearchTab({
   isCompact = false,
   handleTabChange,
+  isLandingPage,
 }: DesktopSearchTabProps) {
   const form = useZodForm({
     schema: searchSchema,
@@ -229,17 +231,16 @@ export function DesktopSearchTab({
     }
   });
 
-
-//   <div
-//   className={`z-50 w-full transition-all duration-300 ease-in-out
-//     sm:w-[400px]
-//     md:w-[500px]
-//     lg:w-[600px]
-//     xl:w-[800px]
-//     ${isCompact ? "scale-70" : "scale-100"}`}
-// >
+  //   <div
+  //   className={`z-50 w-full transition-all duration-300 ease-in-out
+  //     sm:w-[400px]
+  //     md:w-[500px]
+  //     lg:w-[600px]
+  //     xl:w-[800px]
+  //     ${isCompact ? "scale-70" : "scale-100"}`}
+  // >
   return (
-    <div className="w-full space-y-8 mt-4 py-4 mx-auto max-w-7xl px-4">
+    <div className="mt-4 w-full space-y-8 py-4">
       <div className="">
         <div className="flex justify-center">
           {/* Mobile Search */}
@@ -252,150 +253,154 @@ export function DesktopSearchTab({
           </div>
 
           {/* Desktop Search */}
-          <div className="hidden lg:flex items-center gap-4">
-            <div
-              className={`z-50 transition-all duration-300 ease-in-out ${
-                isCompact ? "w-[600px]" : "w-[800px]"
-              }`}
-            >
-              <SearchFormBar
-                form={form}
-                onSubmit={handleSearch}
-                isLoading={isLoading}
-                isCompact={isCompact}
-              />
-            </div>
+          <div className="hidden items-center lg:flex">
+            <div className="flex w-full max-w-[2000px] justify-center gap-4">
+              <div
+                className={`z-50 transition-all duration-300 ease-in-out ${
+                  isCompact ? "w-[600px]" : "w-[800px]"
+                }`}
+              >
+                <SearchFormBar
+                  form={form}
+                  onSubmit={handleSearch}
+                  isLoading={isLoading}
+                  isCompact={isCompact}
+                />
+              </div>
 
-            {/* Divider */}
-            <div
-              className={`hidden xl:flex flex-shrink-0 flex-col items-center justify-center transition-all duration-300 ease-in-out ${
-                isCompact ? "h-10 text-xs" : "h-14 text-base"
-              }`}
-            >
-              <div className="h-4 w-px bg-slate-700" />
-              <span className="my-1 text-sm">or</span>
-              <div className="h-4 w-px bg-slate-700" />
-            </div>
+              {/* Divider */}
+              <div
+                className={`flex-shrink-0 flex-col items-center justify-center transition-all duration-300 ease-in-out ${
+                  isCompact ? "h-10 text-xs" : "h-14 text-base"
+                } ${isLandingPage ? "hidden xl:flex" : "hidden"}`}
+              >
+                <div className="h-4 w-px bg-slate-700" />
+                <span className="my-1 text-sm">or</span>
+                <div className="h-4 w-px bg-slate-700" />
+              </div>
 
-            {/* Button */}
-            <Button
-              onClick={() => handleTabChange("name-price", true)}
-              variant="outline"
-              className={`hidden xl:block flex-shrink-0 whitespace-nowrap border border-black transition-all duration-300 ease-in-out ${
-                isCompact ? "h-10 px-3 text-xs" : "h-14 px-6 text-base"
-              }`}
-            >
-              Name your own price
-            </Button>
+              {/* Button */}
+              <Button
+                onClick={() => handleTabChange("name-price", true)}
+                variant="outline"
+                className={`flex-shrink-0 whitespace-nowrap border border-black transition-all duration-300 ease-in-out ${
+                  isCompact ? "h-10 px-3 text-xs" : "h-14 px-6 text-base"
+                } ${isLandingPage ? "hidden xl:block" : "hidden"}`}
+              >
+                Name your own price
+              </Button>
+            </div>
           </div>
         </div>
       </div>
 
-
-      {/* <div className={`hidden lg:flex w-full flex-row items-center justify-center space-x-2 px-16 z-50 transition-all duration-300 ease-in-out ${
-                isCompact ? "w-[600px]" : "w-[800px]"
-              }`}> */}
-
-      <div className="hidden lg:flex w-full flex-row items-center justify-center space-x-2 px-16">
-        <LocationGallery
-          onLocationSelect={handleLocationSelect}
-          isCompact={isCompact}
-        />
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button
-              variant="outline"
-              className="rounded-md border-gray-300 text-gray-600 hover:bg-gray-200"
-            >
-              <Filter className="mr-1 h-4 w-4" />
-              Filters
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Set Price Filters</DialogTitle>
-            </DialogHeader>
-            <div className="flex w-full justify-between">
-              <div>
-                <div>Min Price</div>
-                <Input
-                  type="number"
-                  placeholder="Min Price"
-                  value={minPrice}
-                  onChange={(e) => setMinPrice(e.target.value)}
-                />
-              </div>
-              <div>
-                <div>Max Price</div>
-                <Input
-                  type="number"
-                  placeholder="Max Price"
-                  value={maxPrice}
-                  onChange={(e) => setMaxPrice(e.target.value)}
-                />
-              </div>
-            </div>
-            <div>Sort by Price</div>
-            <Select
-              onValueChange={(value) => setPriceSort(value)}
-              value={priceSort}
-            >
-              <SelectTrigger className="w-full border-gray-300 bg-white">
-                <SelectValue
-                  className={
-                    priceSort === "none" ? "text-gray-400" : "text-black"
-                  }
+      {/* LocationGallery container that matches content width */}
+      <div className="hidden w-full justify-center lg:flex">
+        <div
+          className={`w-full max-w-[2000px] px-4 pr-36 transition-all duration-300 ease-in-out`}
+        >
+          <div className="flex items-center justify-between">
+            <LocationGallery
+              onLocationSelect={handleLocationSelect}
+              isCompact={isCompact}
+            />
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="ml-2 rounded-md border-gray-300 text-gray-600 hover:bg-gray-200"
                 >
-                  {priceSort === "none"
-                    ? "Select a value"
-                    : sortOptions[priceSort as keyof typeof sortOptions]}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent className="bg-white">
-                {Object.entries(sortOptions).map(([value, label]) => (
-                  <SelectItem key={value} value={value}>
-                    {label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setMinPrice("");
-                  setMaxPrice("");
-                  setPriceSort("none");
-                }}
-              >
-                Clear Filters
-              </Button>
-              <Button
-                onClick={() => {
-                  setAdjustedProperties((prevState) => {
-                    if (!prevState) return null;
-                    return {
-                      ...prevState,
-                      pages: filterProperties(
-                        allProperties.pages.flat() as Property[],
-                        minPrice !== ""
-                          ? (Number(minPrice) * 100).toString()
-                          : minPrice,
-                        maxPrice !== ""
-                          ? (Number(maxPrice) * 100).toString()
-                          : maxPrice,
-                        priceSort,
-                      ),
-                    };
-                  });
-                  setOpen(false);
-                }}
-              >
-                Apply Filters
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+                  <Filter className="mr-1 h-4 w-4" />
+                  Filters
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Set Price Filters</DialogTitle>
+                </DialogHeader>
+                <div className="flex w-full justify-between">
+                  <div>
+                    <div>Min Price</div>
+                    <Input
+                      type="number"
+                      placeholder="Min Price"
+                      value={minPrice}
+                      onChange={(e) => setMinPrice(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <div>Max Price</div>
+                    <Input
+                      type="number"
+                      placeholder="Max Price"
+                      value={maxPrice}
+                      onChange={(e) => setMaxPrice(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <div>Sort by Price</div>
+                <Select
+                  onValueChange={(value) => setPriceSort(value)}
+                  value={priceSort}
+                >
+                  <SelectTrigger className="w-full border-gray-300 bg-white">
+                    <SelectValue
+                      className={
+                        priceSort === "none" ? "text-gray-400" : "text-black"
+                      }
+                    >
+                      {priceSort === "none"
+                        ? "Select a value"
+                        : sortOptions[priceSort as keyof typeof sortOptions]}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent className="bg-white">
+                    {Object.entries(sortOptions).map(([value, label]) => (
+                      <SelectItem key={value} value={value}>
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <DialogFooter>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setMinPrice("");
+                      setMaxPrice("");
+                      setPriceSort("none");
+                    }}
+                  >
+                    Clear Filters
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setAdjustedProperties((prevState) => {
+                        if (!prevState) return null;
+                        return {
+                          ...prevState,
+                          pages: filterProperties(
+                            allProperties.pages.flat() as Property[],
+                            minPrice !== ""
+                              ? (Number(minPrice) * 100).toString()
+                              : minPrice,
+                            maxPrice !== ""
+                              ? (Number(maxPrice) * 100).toString()
+                              : maxPrice,
+                            priceSort,
+                          ),
+                        };
+                      });
+                      setOpen(false);
+                    }}
+                  >
+                    Apply Filters
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
       </div>
     </div>
   );
