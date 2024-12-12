@@ -528,7 +528,7 @@ export function scrollToTop() {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-export function separateByPriceRestriction(
+export function separateByPriceAndAgeRestriction(
   organizedData: HostRequestsPageData[],
 ): SeparatedData {
   const processedData = organizedData.map((cityData) => {
@@ -537,20 +537,28 @@ export function separateByPriceRestriction(
         requestData.request.maxTotalPrice /
         getNumNights(requestData.request.checkIn, requestData.request.checkOut);
 
+      const travelerAge = requestData.request.traveler.dateOfBirth ? getAge(requestData.request.traveler.dateOfBirth) : null;
+
       const normalProperties = requestData.properties.filter((property) => {
         if (property.city === "Seattle, WA, US") {
           console.log(property.priceRestriction, nightlyPrice);
         }
         return (
-          property.priceRestriction == null ||
-          property.priceRestriction <= nightlyPrice
+          (property.priceRestriction == null ||
+          property.priceRestriction <= nightlyPrice) &&
+          (property.ageRestriction == null ||
+          (travelerAge !== null &&
+          travelerAge >= property.ageRestriction))
         );
       });
 
       const outsideProperties = requestData.properties.filter(
         (property) =>
-          property.priceRestriction != null &&
-          property.priceRestriction >= nightlyPrice * 1.15,
+          (property.priceRestriction != null &&
+          property.priceRestriction >= nightlyPrice * 1.15) &&
+          (property.ageRestriction != null &&
+          (travelerAge === null ||
+          travelerAge < property.ageRestriction))
       );
 
       return {
@@ -577,13 +585,13 @@ export function separateByPriceRestriction(
       );
 
     return {
-      normal: { 
-        city: cityData.city, 
-        requests: normalRequests 
+      normal: {
+        city: cityData.city,
+        requests: normalRequests
       },
-      outsidePriceRestriction: { 
-        city: cityData.city, 
-        requests: outsideRequests 
+      outsidePriceRestriction: {
+        city: cityData.city,
+        requests: outsideRequests
       },
     };
   });

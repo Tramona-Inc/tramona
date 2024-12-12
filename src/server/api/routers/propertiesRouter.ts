@@ -65,7 +65,7 @@ export type HostRequestsPageData = {
     request: Request & {
       traveler: Pick<
         User,
-        "firstName" | "lastName" | "name" | "image" | "location" | "about"
+        "firstName" | "lastName" | "name" | "image" | "location" | "about" | "dateOfBirth"
       >;
     };
     properties: (Property & { taxAvailable: boolean })[];
@@ -602,7 +602,7 @@ export const propertiesRouter = createTRPCRouter({
           eq(properties.status, "Listed"),
         ),
       });
-  
+
 
       const hostRequests = await getRequestsForProperties(hostProperties);
 
@@ -611,7 +611,7 @@ export const propertiesRouter = createTRPCRouter({
       citiesSet.forEach((city) => {
         groupedByCity.push({ city, requests: [] });
       });
-  
+
       const findOrCreateCityGroup = (city: string) => {
         let cityGroup = groupedByCity.find((group) => group.city === city);
         if (!cityGroup) {
@@ -620,20 +620,20 @@ export const propertiesRouter = createTRPCRouter({
         }
         return cityGroup;
       };
-  
+
       const requestsMap = new Map<
         number,
         {
           request: Request & {
             traveler: Pick<
               User,
-              "firstName" | "lastName" | "name" | "image" | "location" | "about"
+              "firstName" | "lastName" | "name" | "image" | "location" | "about" | "dateOfBirth"
             >;
           };
           properties: (Property & { taxAvailable: boolean })[];
         }
       >();
-  
+
       for (const { property, request } of hostRequests) {
         if (!requestsMap.has(request.id)) {
           requestsMap.set(request.id, {
@@ -643,7 +643,7 @@ export const propertiesRouter = createTRPCRouter({
         }
         requestsMap.get(request.id)!.properties.push(property);
       }
-  
+
       for (const requestWithProperties of requestsMap.values()) {
         const { request, properties } = requestWithProperties;
         for (const property of properties) {
@@ -651,7 +651,7 @@ export const propertiesRouter = createTRPCRouter({
           const existingRequest = cityGroup.requests.find(
             (item) => item.request.id === request.id
           );
-  
+
           if (existingRequest) {
             existingRequest.properties.push(property);
           } else {
@@ -662,10 +662,10 @@ export const propertiesRouter = createTRPCRouter({
           }
         }
       }
-  
+
       return groupedByCity;
     }),
-  
+
     getHostPropertiesWithRequestsToBook: hostProcedure.query(async ({ ctx }) => {
       const hostProperties = await db.query.properties.findMany({
         where: and(
@@ -673,12 +673,12 @@ export const propertiesRouter = createTRPCRouter({
           eq(properties.status, "Listed")
         ),
       });
-  
+
       const hostRequestsToBook = await getRequestsToBookForProperties(
         hostProperties,
         { user: ctx.user }
       );
-  
+
       const propertiesWithRequestsToBook = hostProperties
         .filter((property) =>
           hostRequestsToBook.some(
@@ -693,7 +693,7 @@ export const propertiesRouter = createTRPCRouter({
               requestToBook.requestToBook.propertyId === property.id
           ),
         }));
-  
+
       return propertiesWithRequestsToBook;
     }),
 
