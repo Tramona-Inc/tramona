@@ -1,10 +1,8 @@
 import { Separator } from "../../ui/separator";
 import { formatCurrency, getNumNights } from "@/utils/utils";
 import { plural } from "@/utils/utils";
-import type { OfferWithDetails } from "@/components/propertyPages/PropertyPage";
 import React from "react";
 import {
-  breakdownPaymentByOffer,
   breakdownPaymentByPropertyAndTripParams,
   getServiceFee,
 } from "@/utils/payment-utils/paymentBreakdown";
@@ -42,7 +40,7 @@ export function UnifiedPriceDetails({
   const items = [
     {
       title: `${formatCurrency(nightlyPrice)} x ${plural(numberOfNights, "night")}`,
-      price: `${formatCurrency(unifiedCheckoutData.pricing.travelerOfferedPriceBeforeFees / numberOfNights)}`,
+      price: `${formatCurrency(unifiedCheckoutData.pricing.travelerOfferedPriceBeforeFees)}`,
     },
     {
       title: "Cleaning fee",

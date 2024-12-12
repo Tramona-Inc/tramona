@@ -32,12 +32,10 @@ type PriceDetails = {
 };
 
 export default function PriceDetailsBeforeTax({
-  bookOnAirbnb,
   offer,
   requestToBook,
   property,
 }: {
-  bookOnAirbnb?: boolean;
   offer?: OfferWithDetails;
   requestToBook?: RequestToBookDetails;
   property?: PropertyPageData;
@@ -45,7 +43,6 @@ export default function PriceDetailsBeforeTax({
   const [loading, setLoading] = useState(true);
   const [brokeDownPayment, setBrokeDownPayment] =
     useState<PaymentBreakdown | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [priceDetails, setPriceDetails] = useState<PriceDetails>({
     numberOfNights: 1,
     nightlyPrice: 0,
@@ -64,11 +61,13 @@ export default function PriceDetailsBeforeTax({
       priceWithApplicableDiscount =
         scrapedPrice * (100 - applicableDiscount) * 0.01;
     } else if (
-      property.requestToBookDiscountPercentage &&
-      property.requestToBookDiscountPercentage > 0
+      property.requestToBookMaxDiscountPercentage &&
+      property.requestToBookMaxDiscountPercentage > 0
     ) {
       priceWithApplicableDiscount =
-        scrapedPrice * (100 - property.requestToBookDiscountPercentage) * 0.01;
+        scrapedPrice *
+        (100 - property.requestToBookMaxDiscountPercentage) *
+        0.01;
     }
   }
 
@@ -116,7 +115,6 @@ export default function PriceDetailsBeforeTax({
         }
       } catch (error) {
         console.error("Error fetching payment breakdown:", error);
-        setError("Unable to calculate price details");
         setBrokeDownPayment(null);
       } finally {
         setLoading(false);

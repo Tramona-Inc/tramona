@@ -17,13 +17,24 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { useAdjustedProperties } from "../landing-page/search/AdjustedPropertiesContext";
+import {
+  AirbnbSearchResult,
+  useAdjustedProperties,
+} from "../landing-page/search/AdjustedPropertiesContext";
 import AddUnclaimedOffer from "./AddUnclaimedOffer";
-import { MapBoundary } from "../landing-page/search/SearchPropertiesMap";
 import { useLoading } from "./UnclaimedMapLoadingContext";
+import { Badge } from "../ui/badge";
+import { Property } from "@/server/db/schema/tables/properties";
 
-type Property =
-  RouterOutputs["properties"]["getAllInfiniteScroll"]["data"][number];
+// type Property =
+//   RouterOutputs["properties"]["getAllInfiniteScroll"]["data"][number];
+
+export type MapBoundary = {
+  north: number;
+  south: number;
+  east: number;
+  west: number;
+};
 
 export default function UnclaimedOfferCards({
   mapBoundaries,
@@ -33,42 +44,53 @@ export default function UnclaimedOfferCards({
   const { adjustedProperties } = useAdjustedProperties();
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 24;
+  const itemsPerPage = 40;
   const { data: session } = useSession();
   const { isLoading } = useLoading();
   const [isDelayedLoading, setIsDelayedLoading] = useState(true);
   const [showNoProperties, setShowNoProperties] = useState(false);
 
   useEffect(() => {
-    if (
-      !isDelayedLoading &&
-      (!adjustedProperties?.pages.length ||
-        !adjustedProperties.pages[0]?.data.length)
-    ) {
+    if (!isDelayedLoading && !adjustedProperties?.pages.length) {
       setShowNoProperties(true);
     } else {
       setShowNoProperties(false);
     }
   }, [isDelayedLoading, adjustedProperties]);
 
+  // const allProperties = useMemo(() => {
+  //   return adjustedProperties?.pages.flatMap((page) => page.data) ?? [];
+  // }, [adjustedProperties]);
+
   const allProperties = useMemo(() => {
-    return adjustedProperties?.pages.flatMap((page) => page.data) ?? [];
+    return adjustedProperties?.pages;
+    // .flatMap((page) => page?.data || []) // Use optional chaining and fallback
+    // .filter(Boolean); // Filter out undefined values, if any
   }, [adjustedProperties]);
 
   const paginatedProperties = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-    return allProperties.slice(startIndex, endIndex);
+    return allProperties?.slice(startIndex, endIndex);
   }, [allProperties, currentPage, itemsPerPage]);
 
+  // console.log("paginatedProps:", paginatedProperties);
+
   const totalPages = useMemo(() => {
-    return Math.max(1, Math.ceil(allProperties.length / itemsPerPage));
-  }, [allProperties.length, itemsPerPage]);
+    return Math.max(1, Math.ceil(allProperties?.length ?? 0 / itemsPerPage));
+  }, [allProperties?.length, itemsPerPage]);
+
+  // const url = new URL(router.pathname);
 
   const handlePageChange = useCallback(
     (page: number) => {
+      // router.pathname.searchParams.set("page", page);
       setCurrentPage(page);
-      void router.push(`?page=${page}`, undefined, { shallow: true });
+      void router.push(
+        { pathname: router.pathname, query: { ...router.query, page } },
+        undefined,
+        { shallow: true },
+      );
     },
     [router],
   );
@@ -103,40 +125,83 @@ export default function UnclaimedOfferCards({
 
   const renderPaginationItems = useCallback(() => {
     const items = [];
-
-    for (let i = 1; i <= totalPages; i++) {
+    const SIBLING_COUNT = 1;
+    const BOUNDARY_COUNT = 1;
+  
+    const createPageItem = (pageNum: number) => (
+      <PaginationItem key={pageNum}>
+        <PaginationLink
+          href={`?page=${pageNum}`}
+          onClick={(e) => {
+            e.preventDefault();
+            handlePageChange(pageNum);
+          }}
+          isActive={currentPage === pageNum}
+        >
+          {pageNum}
+        </PaginationLink>
+      </PaginationItem>
+    );
+  
+    // Always show first BOUNDARY_COUNT pages
+    for (let i = 1; i <= Math.min(BOUNDARY_COUNT, totalPages); i++) {
+      items.push(createPageItem(i));
+    }
+  
+    // Calculate range around current page
+    const startPage = Math.max(BOUNDARY_COUNT + 1, currentPage - SIBLING_COUNT);
+    const endPage = Math.min(totalPages - BOUNDARY_COUNT, currentPage + SIBLING_COUNT);
+  
+    // Add ellipsis after boundary if there's a gap
+    if (startPage > BOUNDARY_COUNT + 1) {
       items.push(
-        <PaginationItem key={i}>
-          <PaginationLink
-            href={`?page=${i}`}
-            onClick={(e) => {
-              e.preventDefault();
-              handlePageChange(i);
-            }}
-            isActive={currentPage === i}
-          >
-            {i}
-          </PaginationLink>
-        </PaginationItem>,
+        <PaginationItem key="start-ellipsis" className="px-2">
+          ...
+        </PaginationItem>
       );
     }
-
+  
+    // Add pages around current page
+    for (let i = startPage; i <= endPage; i++) {
+      if (i > BOUNDARY_COUNT && i < totalPages - BOUNDARY_COUNT + 1) {
+        items.push(createPageItem(i));
+      }
+    }
+  
+    // Add ellipsis before end boundary if there's a gap
+    if (endPage < totalPages - BOUNDARY_COUNT) {
+      items.push(
+        <PaginationItem key="end-ellipsis" className="px-2">
+          ...
+        </PaginationItem>
+      );
+    }
+  
+    // Always show last BOUNDARY_COUNT pages
+    for (let i = Math.max(totalPages - BOUNDARY_COUNT + 1, BOUNDARY_COUNT + 1); i <= totalPages; i++) {
+      if (i > endPage) {
+        items.push(createPageItem(i));
+      }
+    }
+  
     return items;
   }, [totalPages, currentPage, handlePageChange]);
 
   return (
-    <div className="h-full w-full flex-col">
-      <div className="flex h-screen-minus-header-n-footer w-full sm:h-screen-minus-header-n-footer-n-searchbar">
-        <div className="mr-auto h-full w-full overflow-y-scroll px-6 scrollbar-hide">
+    <div className="w-full">
+      <div className="w-full">
+        <div className="mr-auto w-full overflow-y-auto">
           {isDelayedLoading ? (
-            <div className="grid w-full grid-cols-1 gap-x-6 sm:grid-cols-2 md:gap-y-6 lg:grid-cols-3 lg:gap-y-8 xl:gap-y-4 2xl:gap-y-0">
-              {Array(24)
-                .fill(null)
-                .map((_, index) => (
-                  <div key={`skeleton-${index}`}>
-                    <PropertyCardSkeleton />
-                  </div>
-                ))}
+            <div className="mx-auto max-w-[2000px] px-4">
+              <div className="grid w-full grid-cols-1 gap-4 min-[580px]:grid-cols-2 min-[800px]:grid-cols-3 min-[1000px]:grid-cols-4 min-[1200px]:grid-cols-5 min-[1400px]:grid-cols-6">
+                {Array(24)
+                  .fill(null)
+                  .map((_, index) => (
+                    <div key={`skeleton-${index}`}>
+                      <PropertyCardSkeleton />
+                    </div>
+                  ))}
+              </div>
             </div>
           ) : showNoProperties ? (
             <div className="flex h-full w-full items-center justify-center">
@@ -148,64 +213,74 @@ export default function UnclaimedOfferCards({
               </div>
             </div>
           ) : (
-            <div className="flex h-full w-full flex-col">
-              <div className="grid w-full grid-cols-1 gap-x-6 sm:grid-cols-2 md:gap-y-6 lg:grid-cols-3 lg:gap-y-8 xl:gap-y-4 2xl:gap-y-0">
-                {paginatedProperties.map((property, index) => (
-                  <div
-                    key={property.id}
-                    className="animate-fade-in"
-                    style={{ animationDelay: `${index * 50}ms` }}
-                  >
-                    <UnMatchedPropertyCard property={property} />
-                  </div>
-                ))}
-              </div>
-              {totalPages >= 1 && (
-                <div className="mt-auto px-6 py-4">
-                  <Pagination>
-                    <PaginationContent>
-                      <PaginationItem>
-                        <PaginationPrevious
-                          href={`?page=${Math.max(1, currentPage - 1)}`}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handlePageChange(Math.max(1, currentPage - 1));
-                          }}
-                          className={
-                            currentPage === 1
-                              ? "pointer-events-none opacity-50"
-                              : ""
-                          }
-                        />
-                      </PaginationItem>
-                      {renderPaginationItems()}
-                      <PaginationItem>
-                        <PaginationNext
-                          href={`?page=${Math.min(totalPages, currentPage + 1)}`}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handlePageChange(
-                              Math.min(totalPages, currentPage + 1),
-                            );
-                          }}
-                          className={
-                            currentPage === totalPages
-                              ? "pointer-events-none opacity-50"
-                              : ""
-                          }
-                        />
-                      </PaginationItem>
-                    </PaginationContent>
-                  </Pagination>
+            <div className="flex w-full flex-col">
+              <div className="mx-auto max-w-[2000px] px-4">
+                <div className="grid w-full grid-cols-1 gap-4 min-[580px]:grid-cols-2 min-[800px]:grid-cols-3 min-[1000px]:grid-cols-4 min-[1200px]:grid-cols-5 min-[1400px]:grid-cols-6">
+                  {paginatedProperties?.length &&
+                    paginatedProperties.map((property, index) => (
+                      <div
+                        key={index}
+                        className="animate-fade-in"
+                        style={{ animationDelay: `${index * 50}ms` }}
+                      >
+                        <UnMatchedPropertyCard property={property} />
+                      </div>
+                    ))}
                 </div>
-              )}
+
+                {/* Move pagination inside the max-width container */}
+                {totalPages >= 1 && (
+                  <div className="mt-8">
+                    <Pagination>
+                      {/* Add overflow handling and center alignment */}
+                      <PaginationContent className="flex flex-wrap justify-center overflow-x-auto">
+                        <PaginationItem>
+                          <PaginationPrevious
+                            href={`?page=${Math.max(1, currentPage - 1)}`}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handlePageChange(Math.max(1, currentPage - 1));
+                            }}
+                            className={
+                              currentPage === 1
+                                ? "pointer-events-none opacity-50"
+                                : ""
+                            }
+                          />
+                        </PaginationItem>
+                        <div className="flex flex-wrap justify-center">
+                          {renderPaginationItems()}
+                        </div>
+                        <PaginationItem>
+                          <PaginationNext
+                            href={`?page=${Math.min(totalPages, currentPage + 1)}`}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handlePageChange(
+                                Math.min(totalPages, currentPage + 1),
+                              );
+                            }}
+                            className={
+                              currentPage === totalPages
+                                ? "pointer-events-none opacity-50"
+                                : ""
+                            }
+                          />
+                        </PaginationItem>
+                      </PaginationContent>
+                    </Pagination>
+                  </div>
+                )}
+              </div>
             </div>
           )}
           {!isLoading &&
             !isDelayedLoading &&
             session?.user.role === "admin" && (
-              <div className="mt-20 rounded-xl border-4 p-4">
-                <AddUnclaimedOffer />
+              <div className="mx-auto mt-20 max-w-[2000px] px-4">
+                <div className="rounded-xl border-4 p-4">
+                  <AddUnclaimedOffer />
+                </div>
               </div>
             )}
         </div>
@@ -217,10 +292,11 @@ export default function UnclaimedOfferCards({
 function UnMatchedPropertyCard({
   property,
 }: {
-  property: Property;
+  property: Property | AirbnbSearchResult;
 }): JSX.Element {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+  const router = useRouter();
 
   const nextImage = (e: React.MouseEvent): void => {
     e.preventDefault();
@@ -238,21 +314,36 @@ function UnMatchedPropertyCard({
     }
   };
 
-  const checkIn = formatDateMonthDayYear(new Date());
-  const checkOut = formatDateMonthDayYear(new Date(new Date().setDate(new Date().getDate() + 2)));
+  const isAirbnb = property.originalListingPlatform === "Airbnb";
+  const checkIn = formatDateMonthDayYear(
+    new Date(router.query.checkIn as string),
+  );
+  const checkOut = formatDateMonthDayYear(
+    new Date(router.query.checkOut as string),
+  );
   const numGuests = 3;
+  const link = isAirbnb
+    ? `https://airbnb.com/rooms/${property.originalListingId}`
+    : (() => {
+        if ("id" in property) {
+          return `/request-to-book/${property.id}?checkIn=${checkIn}&checkOut=${checkOut}&numGuests=${numGuests}`;
+        }
+        throw new Error("Property ID is required for non-Airbnb properties");
+      })();
 
   return (
     <Link
-      href={`/request-to-book/${property.id}?checkIn=${checkIn}&checkOut=${checkOut}&numGuests=${numGuests}`}
+      href={link}
       className="block"
+      target="_blank"
+      rel="noopener noreferrer"
     >
       <div
-        className="relative flex aspect-[3/4] w-full cursor-pointer flex-col overflow-hidden rounded-xl"
+        className="relative flex aspect-square w-full cursor-pointer flex-col overflow-hidden rounded-xl"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <div className="relative h-[58%] overflow-hidden">
+        <div className="relative h-full overflow-hidden">
           <div
             className="flex h-full transition-transform duration-300 ease-in-out"
             style={{ transform: `translateX(-${currentImageIndex * 100}%)` }}
@@ -291,6 +382,15 @@ function UnMatchedPropertyCard({
               </Button>
             )}
           </div>
+          {isAirbnb && (
+            <div className="absolute inset-0">
+              <div className="flex justify-between">
+                <Badge className="absolute left-3 top-3 h-8 bg-rose-500 font-semibold text-white">
+                  Book on Airbnb
+                </Badge>
+              </div>
+            </div>
+          )}
           <div className="absolute bottom-2 left-1/2 z-10 flex -translate-x-1/2 space-x-1">
             {property.imageUrls.map((_, index) => (
               <div
@@ -304,49 +404,47 @@ function UnMatchedPropertyCard({
             ))}
           </div>
         </div>
-        <div className="flex h-[42%] flex-col space-y-2 p-4">
-          <div className="space-y-1">
-            <div className="flex items-center justify-between">
-              <div className="min-w-0 flex-1">
-                <div className="line-clamp-1 overflow-hidden overflow-ellipsis font-bold">
-                  {property.name}
-                </div>
-              </div>
-              <div className="ml-2 flex items-center space-x-1 whitespace-nowrap">
-                <Star fill="gold" size={12} />
-                <div>
-                  {property.avgRating ? property.avgRating.toFixed(2) : "New"}
-                </div>
-                <div>
-                  {property.numRatings > 0 ? `(${property.numRatings})` : ""}
-                </div>
-              </div>
-            </div>
-            {/* <div className="text-sm text-zinc-500"> */}
-            {/* {formatDateRange(offer.checkIn, offer.checkOut)} */}
-            {/* replace with check in check out'
-            </div> */}
-            <div className="text-sm text-zinc-500">
-              {plural(property.maxNumGuests, "Guest")}
+      </div>
+      <div className="flex flex-col pt-2">
+        <div className="flex items-center justify-between">
+          <div className="min-w-0 flex-1">
+            <div className="line-clamp-1 overflow-hidden overflow-ellipsis font-semibold">
+              {property.name}
             </div>
           </div>
-          <div className="flex justify-between">
-            <div className="flex items-center space-x-3 text-sm font-semibold">
-              <div>
-                {property.originalNightlyPrice
-                  ? formatCurrency(property.originalNightlyPrice)
-                  : "N/A"}
-                &nbsp;night
-              </div>
-              <div className="text-xs text-zinc-500 line-through">
-                airbnb&nbsp;
-                {property.originalNightlyPrice
-                  ? formatCurrency(
-                      property.originalNightlyPrice * AVG_AIRBNB_MARKUP,
-                    )
-                  : "N/A"}
-              </div>
+          <div className="ml-2 flex items-center space-x-1 whitespace-nowrap">
+            <Star fill="black" size={12} />
+            <div>
+              {"avgRating" in property ? property.avgRating.toFixed(2) : "New"}
             </div>
+            <div>
+              {"numRatings" in property ? `(${property.numRatings})` : ""}
+            </div>
+          </div>
+        </div>
+        {/* <div className="text-sm text-zinc-500"> */}
+        {/* {formatDateRange(offer.checkIn, offer.checkOut)} */}
+        {/* replace with check in check out'
+            </div> */}
+        <div className="text-sm text-zinc-500">
+          {plural(property.maxNumGuests, "Guest")}
+        </div>
+      </div>
+      <div className="flex justify-between">
+        <div className="flex items-center space-x-3 text-sm font-semibold">
+          <div>
+            {property.originalNightlyPrice
+              ? formatCurrency(property.originalNightlyPrice)
+              : "N/A"}
+            &nbsp;night
+          </div>
+          <div className="text-xs text-zinc-500 line-through">
+            airbnb&nbsp;
+            {property.originalNightlyPrice
+              ? formatCurrency(
+                  property.originalNightlyPrice * AVG_AIRBNB_MARKUP,
+                )
+              : "N/A"}
           </div>
         </div>
       </div>

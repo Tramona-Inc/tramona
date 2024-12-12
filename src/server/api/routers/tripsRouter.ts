@@ -187,11 +187,21 @@ export const tripsRouter = createTRPCRouter({
           imageUrls: true,
           city: true,
           name: true,
-          checkInInfo: true,
+          additionalCheckInInfo: true,
           address: true,
           cancellationPolicy: true,
           checkInTime: true,
           checkOutTime: true,
+          checkInType: true,
+          checkOutInfo: true,
+          additionalCheckOutInfo: true,
+          houseRules: true,
+          additionalHouseRules: true,
+          interactionPreference: true,
+          directions: true,
+          wifiName: true,
+          wifiPassword: true,
+          houseManual: true,
         },
         with: {
           hostTeam: {
@@ -235,11 +245,21 @@ export const tripsRouter = createTRPCRouter({
               imageUrls: true,
               city: true,
               name: true,
-              checkInInfo: true,
+              additionalCheckInInfo: true,
               address: true,
               cancellationPolicy: true,
               checkInTime: true,
               checkOutTime: true,
+              checkInType: true,
+              checkOutInfo: true,
+              additionalCheckOutInfo: true,
+              houseRules: true,
+              additionalHouseRules: true,
+              interactionPreference: true,
+              directions: true,
+              wifiName: true,
+              wifiPassword: true,
+              houseManual: true,
             },
             with: {
               hostTeam: {
@@ -253,13 +273,14 @@ export const tripsRouter = createTRPCRouter({
           },
         },
       });
+
       const propertyLatLngPoint = await db.query.properties.findFirst({
         where: eq(properties.id, trip!.propertyId),
         columns: { latLngPoint: true },
       });
       if (!trip) {
         throw new Error("Trip not found");
-      } else {
+      } else {                                                                                                                                                                                                                                                                                     
         const coordinates = {
           location: {
             lat: propertyLatLngPoint!.latLngPoint.y,

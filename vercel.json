@@ -25,12 +25,20 @@
       "schedule": "0 * * * *"
     },
     {
+      "path": "/api/cron/expire-request-book",
+      "schedule": "0 * * * *"
+    },
+    {
       "path": "/api/task",
       "schedule": "* * * * *"
     },
     {
       "path": "/api/batchRequestText",
       "schedule": "*/3 * * * *"
+    },
+    {
+      "path": "/api/cron/scrapeDates",
+      "schedule": "* * * * *"
     }
   ]
 }

@@ -51,9 +51,15 @@ import { HttpsProxyAgent } from "https-proxy-agent";
 import * as cheerio from "cheerio";
 import { sendSlackMessage } from "./slack";
 import { HOST_MARKUP, TRAVELER_MARKUP } from "@/utils/constants";
-import { HostRequestsPageData } from "./api/routers/propertiesRouter";
+import { HostRequestsPageData, HostRequestsPageOfferData } from "./api/routers/propertiesRouter";
 import { Session } from "next-auth";
 import { calculateTotalTax } from "@/utils/payment-utils/taxData";
+import {
+  scrapePage,
+  serpPageSchema,
+  transformSearchResult,
+} from "./external-listings-scraping/airbnbScraper";
+import { getSerpUrl } from "./external-listings-scraping/airbnbScraper";
 import { createStripeConnectId } from "@/utils/stripe-utils";
 
 export const proxyAgent = new HttpsProxyAgent(env.PROXY_URL);
@@ -222,6 +228,36 @@ export async function addUserToHostTeams(user: Pick<User, "email" | "id">) {
   });
 }
 
+export async function sendTextToHostTeamMembers({
+  hostTeamId,
+  message,
+}: {
+  hostTeamId: number;
+  message: string;
+}) {
+  const hostTeamMembers = await db.query.hostTeams.findMany({
+    where: eq(hostTeams.id, hostTeamId),
+    with: {
+      members: {
+        with: {
+          user: {
+            columns: { phoneNumber: true },
+          },
+        },
+      },
+    },
+  });
+  const hostTeamMemberPhoneNumbers = hostTeamMembers.flatMap((member) =>
+    member.members.map((m) => m.user.phoneNumber),
+  );
+
+  await Promise.all(
+    hostTeamMemberPhoneNumbers.map((phoneNumber) =>
+      sendText({ to: phoneNumber!, content: message }),
+    ),
+  );
+}
+
 export async function sendText({
   to,
   content,
@@ -364,15 +400,16 @@ export async function addProperty({
     | "stateName"
     | "stateCode"
     | "country"
+    | "countryISO"
     | "bookItNowEnabled"
     | "bookItNowDiscountTiers"
   > & {
     latLngPoint?: { x: number; y: number }; // make optional
   };
 } & (
-    | { isAdmin?: boolean; userEmail: string }
-    | { isAdmin: true; userEmail?: undefined }
-  )) {
+  | { isAdmin?: boolean; userEmail: string }
+  | { isAdmin: true; userEmail?: undefined }
+)) {
   let lat = property.latLngPoint?.y;
   let lng = property.latLngPoint?.x;
 
@@ -384,10 +421,11 @@ export async function addProperty({
     lng = location.lng;
   }
 
-  const { city, country, county, stateCode, stateName } = await getAddress({
-    lat,
-    lng,
-  });
+  const { city, country, countryISO, county, stateCode, stateName } =
+    await getAddress({
+      lat,
+      lng,
+    });
 
   const propertyValues = {
     ...property,
@@ -397,6 +435,7 @@ export async function addProperty({
     stateCode,
     stateName,
     country,
+    countryISO,
     latLngPoint: createLatLngGISPoint({ lat, lng }),
   };
 
@@ -458,12 +497,13 @@ export async function sendTextToHost({
           to: hostTeamOwner.phoneNumber,
           content: `Tramona: There is a request for ${formatCurrency(
             request.maxTotalPrice / numberOfNights,
-          )} per night for ${plural(numberOfNights, "night")} in ${request.location
-            }. You have ${plural(
-              numHostPropertiesPerRequest[hostTeamId] ?? 0,
-              "eligible property",
-              "eligible properties",
-            )}. Please click here to make a match: ${env.NEXTAUTH_URL}/host/requests`,
+          )} per night for ${plural(numberOfNights, "night")} in ${
+            request.location
+          }. You have ${plural(
+            numHostPropertiesPerRequest[hostTeamId] ?? 0,
+            "eligible property",
+            "eligible properties",
+          )}. Please click here to make a match: ${env.NEXTAUTH_URL}/host/requests`,
         });
 
         //TODO SEND WHATSAPP MESSAGE
@@ -474,7 +514,6 @@ export async function sendTextToHost({
 
 export async function getRequestsForProperties(
   hostProperties: Property[],
-  { user }: { user: Session["user"] },
   //{
   // id: number;
   // propertyStaus: string;
@@ -491,7 +530,7 @@ export async function getRequestsForProperties(
     request: Request & {
       traveler: Pick<
         User,
-        "firstName" | "lastName" | "name" | "image" | "location" | "about"
+        "firstName" | "lastName" | "name" | "image" | "location" | "about" | "dateOfBirth"
       >;
     };
   }[] = [];
@@ -522,11 +561,13 @@ export async function getRequestsForProperties(
 
     const taxInfo = calculateTotalTax({ country, stateCode, city });
     console.log("taxInfo", taxInfo, city);
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
     const requestsForProperty = await tx.query.requests.findMany({
       where: and(
         requestIsNearProperty,
         gte(requests.checkIn, new Date()),
+        gte(requests.createdAt, twentyFourHoursAgo),
         notExists(
           db
             .select()
@@ -571,6 +612,7 @@ export async function getRequestsForProperties(
                 lastName: true,
                 location: true,
                 about: true,
+                dateOfBirth: true,
               },
             },
           },
@@ -588,6 +630,7 @@ export async function getRequestsForProperties(
         lastName: request.madeByGroup.owner.lastName,
         location: request.madeByGroup.owner.location,
         about: request.madeByGroup.owner.about,
+        dateOfBirth: request.madeByGroup.owner.dateOfBirth,
       };
       propertyToRequestMap.push({
         property: {
@@ -743,9 +786,7 @@ export async function getPropertyCalendar(propertyId: string) {
 
   const secondStartDate = new Date(firstEndDate);
   secondStartDate.setDate(secondStartDate.getDate() + 1);
-  const secondStartDateString = secondStartDate
-    .toISOString()
-    .split("T")[0];
+  const secondStartDateString = secondStartDate.toISOString().split("T")[0];
 
   const secondEndDate = new Date(now);
   secondEndDate.setDate(now.getDate() + 539);
@@ -760,18 +801,23 @@ export async function getPropertyCalendar(propertyId: string) {
   console.log("Second request URL:", secondBatchUrl);
 
   // Make the requests
-  const firstBatch = await axios.get<HospitableCalendarResponse>(firstBatchUrl, {
-    headers: {
-      Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
+  const firstBatch = await axios.get<HospitableCalendarResponse>(
+    firstBatchUrl,
+    {
+      headers: {
+        Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
+      },
     },
-  });
+  );
 
-  const secondBatch = await axios.get<HospitableCalendarResponse>(secondBatchUrl, {
-    headers: {
-      Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
+  const secondBatch = await axios.get<HospitableCalendarResponse>(
+    secondBatchUrl,
+    {
+      headers: {
+        Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
+      },
     },
-  });
-
+  );
 
   const combinedPricingAndCalendarResponse = [
     ...firstBatch.data.data.dates,
@@ -781,7 +827,10 @@ export async function getPropertyCalendar(propertyId: string) {
 }
 
 export async function getPropertyOriginalPrice(
-  property: Pick<Property, "originalListingId" | "originalListingPlatform">,
+  property: Pick<
+    Property,
+    "hospitableListingId" | "originalListingPlatform" | "originalListingId"
+  >,
   params: {
     checkIn: string;
     checkOut: string;
@@ -789,22 +838,29 @@ export async function getPropertyOriginalPrice(
   },
 ) {
   if (property.originalListingPlatform === "Hospitable") {
+    const formattedCheckIn = new Date(params.checkIn)
+      .toISOString()
+      .split("T")[0];
+    const formattedCheckOut = new Date(params.checkOut)
+      .toISOString()
+      .split("T")[0];
     const { data } = await axios.get<HospitableCalendarResponse>(
-      `https://connect.hospitable.com/api/v1/listings/${property.originalListingId}/calendar`,
+      `https://connect.hospitable.com/api/v1/listings/${property.hospitableListingId}/calendar`,
       {
         headers: {
           Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
         },
         params: {
-          start_date: params.checkIn,
-          end_date: params.checkOut,
+          start_date: formattedCheckIn,
+          end_date: formattedCheckOut,
         },
       },
     );
-    const totalPrice = data.data.dates.reduce((acc, date) => {
-      return acc + date.price.amount;
-    }, 0);
-    return totalPrice;
+    const averagePrice =
+      data.data.dates.reduce((acc, date) => {
+        return acc + date.price.amount;
+      }, 0) / data.data.dates.length;
+    return averagePrice;
   } else if (property.originalListingPlatform === "Hostaway") {
     const { data } = await axios.get<HostawayPriceResponse>(
       `https://api.hostaway.com/v1/properties/${property.originalListingId}/calendar/priceDetails`,
@@ -824,6 +880,10 @@ export async function getPropertyOriginalPrice(
 export interface SeparatedData {
   normal: HostRequestsPageData[];
   outsidePriceRestriction: HostRequestsPageData[];
+}
+
+export interface RequestsPageOfferData {
+  sent: HostRequestsPageOfferData[];
 }
 
 //update spread on every fetch to keep information updated
@@ -950,9 +1010,9 @@ export function haversineDistance(
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(toRadians(lat1)) *
-    Math.cos(toRadians(lat2)) *
-    Math.sin(dLon / 2) *
-    Math.sin(dLon / 2);
+      Math.cos(toRadians(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c; // Distance in kilometers
 }
@@ -1023,6 +1083,76 @@ export async function createInitialHostTeam(
   });
 
   return teamId;
+}
+
+export async function scrapeAirbnbInitialPageHelper({
+  checkIn,
+  checkOut,
+  location,
+  numGuests,
+}: {
+  checkIn: Date;
+  checkOut: Date;
+  location: string;
+  numGuests: number;
+}) {
+  const serpUrl = getSerpUrl({
+    checkIn: checkIn,
+    checkOut: checkOut,
+    location: location,
+    numGuests: numGuests,
+  });
+
+  const numNights = getNumNights(checkIn, checkOut);
+
+  const pageData = await scrapePage(serpUrl).then(async (unparsedData) => {
+    return serpPageSchema.parse(unparsedData);
+  });
+  const searchResults = (
+    await Promise.all(
+      pageData.staysSearch.results.searchResults.map((searchResult) =>
+        transformSearchResult({ searchResult, numNights, numGuests }),
+      ),
+    )
+  ).filter(Boolean);
+
+  // console.log("length of results:", searchResults.length);
+  // console.log('result:', searchResults[0]);
+  // const results = pageData.flatMap((data) => data.staysSearch.results.searchResults)
+  return { data: pageData, res: searchResults };
+}
+
+export async function scrapeAirbnbPagesHelper({
+  checkIn,
+  checkOut,
+  location,
+  numGuests,
+  cursors,
+}: {
+  checkIn: Date;
+  checkOut: Date;
+  location: string;
+  numGuests: number;
+  cursors: string[];
+}) {
+  const pageUrls = cursors.map((cursor) =>
+    getSerpUrl({
+      checkIn,
+      checkOut,
+      location,
+      numGuests,
+      cursor,
+    }),
+  );
+
+  const numNights = getNumNights(checkIn, checkOut);
+
+  return (await Promise.all(pageUrls.map(scrapePage)))
+    .flatMap((data) => data.staysSearch.results.searchResults)
+    .map((searchResult) =>
+      transformSearchResult({ searchResult, numNights, numGuests }),
+    )
+    .filter(Boolean);
 }
 
 export async function getRequestsToBookForProperties(

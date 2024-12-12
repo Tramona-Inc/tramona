@@ -70,13 +70,13 @@ const formSchema = z.object({
         path: ["bookItNowDiscountTiers"],
       },
     ),
-  requestToBookDiscountPercentage: z
+  requestToBookMaxDiscountPercentage: z
     .number()
     .min(5)
     .max(99)
     .refine((value) => value >= 5 && value <= 99, {
       message: "Discount percentage must be between 5 and 99",
-      path: ["requestToBookDiscountPercentage"],
+      path: ["requestToBookMaxDiscountPercentage"],
     }),
 });
 
@@ -105,7 +105,8 @@ export default function HostBookItNow({ property }: { property: Property }) {
   const originalValuesRef = useRef<FormSchema>({
     bookItNowEnabled: property.bookItNowEnabled,
     bookItNowDiscountTiers: property.bookItNowDiscountTiers ?? DEFAULT_TIERS,
-    requestToBookDiscountPercentage: property.requestToBookDiscountPercentage,
+    requestToBookMaxDiscountPercentage:
+      property.requestToBookMaxDiscountPercentage,
   });
 
   const form = useForm<FormSchema>({
@@ -151,8 +152,8 @@ export default function HostBookItNow({ property }: { property: Property }) {
 
     if (
       currentValues.bookItNowEnabled !== original.bookItNowEnabled ||
-      currentValues.requestToBookDiscountPercentage !==
-        original.requestToBookDiscountPercentage
+      currentValues.requestToBookMaxDiscountPercentage !==
+        original.requestToBookMaxDiscountPercentage
     ) {
       return true;
     }
@@ -224,8 +225,8 @@ export default function HostBookItNow({ property }: { property: Property }) {
             id: property.id,
             bookItNowEnabled: data.bookItNowEnabled,
             bookItNowDiscountTiers: orderedTiers,
-            requestToBookDiscountPercentage:
-              data.requestToBookDiscountPercentage,
+            requestToBookMaxDiscountPercentage:
+              data.requestToBookMaxDiscountPercentage,
           });
           handleSuccessfulSubmit(data);
         } catch (error) {
@@ -249,7 +250,8 @@ export default function HostBookItNow({ property }: { property: Property }) {
     const defaultValues = {
       bookItNowEnabled: property.bookItNowEnabled,
       bookItNowDiscountTiers: DEFAULT_TIERS,
-      requestToBookDiscountPercentage: property.requestToBookDiscountPercentage,
+      requestToBookMaxDiscountPercentage:
+        property.requestToBookMaxDiscountPercentage,
     };
     form.reset(defaultValues);
     const isChanged = checkForChanges(defaultValues);
@@ -258,7 +260,7 @@ export default function HostBookItNow({ property }: { property: Property }) {
   }, [
     form,
     property.bookItNowEnabled,
-    property.requestToBookDiscountPercentage,
+    property.requestToBookMaxDiscountPercentage,
     checkForChanges,
   ]);
 
@@ -371,7 +373,6 @@ export default function HostBookItNow({ property }: { property: Property }) {
           setEditing={setIsEditing}
           property={property}
           onSubmit={form.handleSubmit(handleSubmit)}
-          onCancel={handleCancel}
         />
       </div>
 
@@ -381,7 +382,7 @@ export default function HostBookItNow({ property }: { property: Property }) {
           <form className="space-y-4">
             <FormField
               control={form.control}
-              name="requestToBookDiscountPercentage"
+              name="requestToBookMaxDiscountPercentage"
               render={({ field }) => (
                 <FormItem className="flex items-center space-x-3">
                   <FormControl>

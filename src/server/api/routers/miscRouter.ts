@@ -1,4 +1,8 @@
-import { requestSelectSchema } from "@/server/db/schema";
+import {
+  ALL_LISTING_SITE_NAMES,
+  ALL_PROPERTY_PMS,
+  requestSelectSchema,
+} from "@/server/db/schema";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { env } from "@/env";
 import { format } from "date-fns";
@@ -7,8 +11,14 @@ import { zodUrl } from "@/utils/zod-utils";
 import { getAddress, getCoordinates } from "@/server/google-maps";
 import { Airbnb } from "@/utils/listing-sites/Airbnb";
 import { z } from "zod";
-import { urlScrape } from "@/server/server-utils";
+import {
+  scrapeAirbnbInitialPageHelper,
+  scrapeAirbnbPagesHelper,
+  getPropertyOriginalPrice,
+  urlScrape,
+} from "@/server/server-utils";
 import { scrapeAirbnbPrice } from "@/server/scrapePrice";
+import { fetchPriceNoRateLimit } from "@/server/direct-sites-scraping/casamundo-scraper";
 
 type AirbnbListing = {
   id: string;
@@ -88,6 +98,96 @@ export const miscRouter = createTRPCRouter({
           : 0;
 
       return averageNightlyPrice;
+    }),
+
+  scrapeAirbnbInitialPage: publicProcedure
+    .input(
+      z.object({
+        checkIn: z.date(),
+        checkOut: z.date(),
+        location: z.string(),
+        numGuests: z.number(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const { checkIn, checkOut, location, numGuests } = input;
+      return await scrapeAirbnbInitialPageHelper({
+        checkIn,
+        checkOut,
+        location,
+        numGuests,
+      });
+    }),
+
+  scrapeAirbnbPages: publicProcedure
+    .input(
+      z.object({
+        pageCursors: z.string().array(),
+        checkIn: z.date(),
+        checkOut: z.date(),
+        location: z.string(),
+        numGuests: z.number(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const { checkIn, checkOut, location, numGuests, pageCursors } = input;
+      return await scrapeAirbnbPagesHelper({
+        checkIn,
+        checkOut,
+        location,
+        numGuests,
+        cursors: pageCursors,
+      });
+    }),
+
+  getAverageHostPropertyPrice: publicProcedure
+    .input(
+      z.object({
+        property: z.object({
+          originalListingId: z.string().nullable(),
+          originalListingPlatform: z
+            .enum([...ALL_LISTING_SITE_NAMES, ...ALL_PROPERTY_PMS])
+            .nullable(), //["Hospitable", "Hostaway"]
+          hospitableListingId: z.string().nullable(),
+        }),
+        checkIn: z.string(),
+        checkOut: z.string(),
+        numGuests: z.number(),
+      }),
+    )
+    .query(async ({ input: { property, checkIn, checkOut, numGuests } }) => {
+      //This should only work for properties that are linked to hostinger
+      if (!property.originalListingPlatform) throw new Error();
+
+      const averagePrice = await getPropertyOriginalPrice(property, {
+        checkIn,
+        checkOut,
+        numGuests,
+      });
+      return averagePrice;
+    }),
+
+  scrapeAverageCasamundoPrice: publicProcedure
+    .input(
+      z.object({
+        offerId: z.string(),
+        checkIn: z.date(),
+        numGuests: z.number(),
+        duration: z.number(),
+      }),
+    )
+    .query(async ({ input: { offerId, checkIn, numGuests, duration } }) => {
+      const price = await fetchPriceNoRateLimit({
+        offerId,
+        checkIn,
+        numGuests,
+        duration,
+      });
+
+      if (price.status === "success") {
+        return price.price / duration;
+      }
+      return price.status;
     }),
 
   scrapeAirbnbLink: publicProcedure

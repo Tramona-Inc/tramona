@@ -39,7 +39,7 @@ export default function HostStays() {
   );
   return (
     <div className="w-full">
-      <h1 className="mb-2 text-3xl font-bold md:mb-10 md:text-4xl">Stays</h1>
+      <h1 className="mb-2 text-3xl font-semibold md:mb-7 md:text-4xl">Stays</h1>
       <BubbleTabs defaultValue="currently-hosting">
         <BubbleTabsList className="mb-4">
           <BubbleTabsTrigger value="currently-hosting">

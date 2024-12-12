@@ -7,6 +7,9 @@ import {
 } from "@/components/ui/bubble-tabs";
 import HostStaysCards from "../HostStaysCards";
 import { addWeeks, isSameDay } from "date-fns";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { ArrowRightIcon } from "lucide-react";
 
 // ____ Overview page _____
 export default function HostStaysOverview() {
@@ -38,8 +41,17 @@ export default function HostStaysOverview() {
     (trip) => trip.checkIn <= currentDate && trip.checkOut >= currentDate,
   );
   return (
-    <div className="flex flex-col gap-y-5">
-      <h2 className="text-4xl font-bold">Your reservations</h2>
+    <div className="flex flex-col gap-y-4">
+      <div className="flex items-center gap-x-2 pb-2">
+        <h2 className="text-4xl font-semibold">Your Reservations</h2>
+        <div className="flex-1" />
+        <Button variant="ghost" asChild>
+          <Link href="/host/stays">
+            See all
+            <ArrowRightIcon className="h-4 w-4" />
+          </Link>
+        </Button>
+      </div>
       <BubbleTabs defaultValue="currently-hosting" className="w-full">
         <BubbleTabsList className="flex w-full flex-row justify-start overflow-x-auto px-1">
           <BubbleTabsTrigger value="currently-hosting">

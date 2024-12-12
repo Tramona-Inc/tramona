@@ -5,8 +5,8 @@ import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import Link from "next/link";
 import { api } from "@/utils/api";
 import Spinner from "../_common/Spinner";
-import RequestToBookCard from "../requests-to-book/RequestToBookCard";
-import { Card, CardContent } from "../ui/card";
+import TravelerRequestToBookCard from "../requests-to-book/TravelerRequestToBookCard";
+import EmptyStateValue from "../_common/EmptyStateSvg/EmptyStateValue";
 
 function BidsTab() {
   const { data: requestsToBook, isLoading } =
@@ -25,37 +25,32 @@ function BidsTab() {
         <AlertTitle>Tip</AlertTitle>
         <AlertDescription>
           If one of your bids is accepted, it will be instantly booked and all
-          other bids will be automatically withdrawn
+          other bids will be automatically withdrawn.
         </AlertDescription>
       </Alert>
       {isLoading ? (
         <Spinner />
       ) : requestsToBook && requestsToBook.activeRequestsToBook.length > 0 ? (
         requestsToBook.activeRequestsToBook.map((requestToBook) => (
-          <RequestToBookCard
+          <TravelerRequestToBookCard
             key={requestToBook.id}
             type="guest"
             requestToBook={requestToBook}
           >
             {/* <RequestCardAction request={requestToBook} /> */}
-          </RequestToBookCard>
+          </TravelerRequestToBookCard>
         ))
       ) : (
-        <Card className="flex h-full items-center justify-center">
-          <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-            <PackageOpenIcon className="mb-4 h-12 w-12 text-gray-400" />
-            <h3 className="mb-2 text-lg font-semibold text-gray-900">
-              No Bids Yet
-            </h3>
-            <p className="mb-4 max-w-sm text-sm text-gray-500">
-              You haven&apos;t made any bids on properties yet. Start exploring
-              and find your perfect stay!
-            </p>
-            <Button asChild>
-              <Link href="/unclaimed-offers">Explore Properties</Link>
-            </Button>
-          </CardContent>
-        </Card>
+        <EmptyStateValue
+          title={"No bids yet"}
+          description={
+            "You haven't made any bids on properties yet. Start exploring and find your perfect stay!"
+          }
+          redirectTitle={"Explore Properties"}
+          href={"/unclaimed-offers"}
+        >
+          <PackageOpenIcon className="mb-4 h-28 w-28 text-gray-400" />
+        </EmptyStateValue>
       )}
     </div>
   );

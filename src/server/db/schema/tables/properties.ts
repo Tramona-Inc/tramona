@@ -117,12 +117,33 @@ export const ALL_PROPERTY_AMENITIES_ONBOARDING = [
   "Driveway parking",
 ] as const;
 
+export const ALL_CHECKIN_TYPES = [
+  "Smart lock",
+  "Keypad",
+  "Lockbox",
+  "Building staff",
+] as const;
+
 export const ALL_CHECKOUT_TYPES = [
   "Gather used towels",
   "Throw trash away",
   "Turn things off",
   "Lock up",
   "Return keys",
+] as const;
+
+export const ALL_HOUSE_RULES = [
+  "No smoking",
+  "No pets",
+  "No parties or events",
+  "Quiet hours",
+] as const;
+
+export const ALL_INTERACTION_PREFERENCES = [
+  "not available",
+  "say hello",
+  "socialize",
+  "no preference",
 ] as const;
 
 export const propertySafetyItemsEnum = pgEnum(
@@ -140,13 +161,16 @@ export const propertyStatusEnum = pgEnum("property_status", [
   "Archived",
 ]);
 
-// export const checkOutEnum = pgEnum("check_out", [
-//   "Gather used towels",
-//   "Throw trash away",
-//   "Turn things off",
-//   "Lock up",
-//   "Return keys",
-// ]);
+export const checkInEnum = pgEnum("check_in_type", ALL_CHECKIN_TYPES);
+
+export const checkOutEnum = pgEnum("check_out_info", ALL_CHECKOUT_TYPES);
+
+export const houseRulesEnum = pgEnum("house_rules", ALL_HOUSE_RULES);
+
+export const interactionPreferencesEnum = pgEnum(
+  "interaction_preference",
+  ALL_INTERACTION_PREFERENCES,
+);
 
 export const ALL_PROPERTY_PMS = ["Hostaway", "Hospitable", "Ownerrez"] as const;
 
@@ -281,9 +305,18 @@ export const properties = pgTable(
     countryISO: varchar("country_iso", { length: 3 }).notNull(),
 
     originalListingUrl: varchar("original_listing_url"),
-    checkInInfo: varchar("check_in_info"),
-    // checkOutInfo: checkOutEnum("check_out_enum").array(),
+    // checkInInfo: varchar("check_in_info"),
+    checkInType: checkInEnum("check_in_type"),
+    additionalCheckInInfo: varchar("additional_check_in_info"),
+    checkOutInfo: checkOutEnum("check_out_info").array(),
     additionalCheckOutInfo: varchar("additional_check_out_info"),
+    houseRules: houseRulesEnum("house_rules").array(),
+    additionalHouseRules: varchar("additional_house_rules"),
+    interactionPreference: interactionPreferencesEnum("interaction_preference"),
+    directions: varchar("directions"),
+    wifiName: varchar("wifi_name"),
+    wifiPassword: varchar("wifi_password"),
+    houseManual: varchar("house_manual"),
     checkInTime: time("check_in_time").notNull().default("15:00:00"),
     checkOutTime: time("check_out_time").notNull().default("10:00:00"),
     amenities: varchar("amenities")
@@ -325,6 +358,9 @@ export const properties = pgTable(
     pricingScreenUrl: varchar("pricing_screen_url"),
     currency: currencyEnum("currency").notNull().default("USD"),
     hospitableListingId: varchar("hospitable_listing_id"),
+    datesLastUpdated: timestamp("dates_last_updated", {
+      withTimezone: true,
+    }).defaultNow(),
     latLngPoint: geometry("lat_lng_point", {
       type: "point",
       mode: "xy",
@@ -342,8 +378,8 @@ export const properties = pgTable(
     bookItNowDiscountTiers: jsonb("book_it_now_discount_tiers").$type<
       DiscountTier[]
     >(),
-    requestToBookDiscountPercentage: integer(
-      "request_to_book_discount_percentage",
+    requestToBookMaxDiscountPercentage: integer(
+      "request_to_book_max_discount_percentage",
     )
       .notNull()
       .default(5),
@@ -359,10 +395,13 @@ export const propertySelectSchema = createSelectSchema(properties);
 
 // https://github.com/drizzle-team/drizzle-orm/issues/1609
 export const propertyInsertSchema = createInsertSchema(properties, {
+  checkOutInfo: z.array(z.enum(ALL_CHECKOUT_TYPES)),
+  houseRules: z.array(z.enum(ALL_HOUSE_RULES)),
   imageUrls: z.array(z.string().url()),
   originalListingUrl: z.string().url(),
   amenities: z.array(z.string()),
   otherAmenities: z.array(z.string()),
+  additionalCheckInInfo: z.string(),
   checkInTime: zodTime,
   checkOutTime: zodTime,
   roomsWithBeds: roomsWithBedsSchema,

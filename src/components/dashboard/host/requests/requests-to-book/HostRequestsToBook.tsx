@@ -7,16 +7,15 @@ import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { useToast } from "@/components/ui/use-toast";
 import { errorToast } from "@/utils/toasts";
-import RequestToBookCard from "@/components/requests-to-book/RequestToBookCard";
 import { Home } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import HostRequestToBookCard from "./HostRequestToBookCard";
 
 export default function HostRequestsToBook() {
   const { toast } = useToast();
   const [dialogOpen, setDialogOpen] = useState(false);
   const router = useRouter();
-  const propertyId = Number(router.query.propertyId);
-
+  const propertyId = parseInt(router.query.propertyId as string) || 0; // Default to 0 if parsing fails
   const { data: unusedReferralDiscounts } =
     api.referralCodes.getAllUnusedHostReferralDiscounts.useQuery(undefined, {
       onSuccess: () => {
@@ -37,12 +36,13 @@ export default function HostRequestsToBook() {
       { propertyId },
       { enabled: !!router.isReady },
     );
+  console.log(propertyRequests);
 
   const { mutateAsync: rejectRequestToBook } =
     api.stripe.rejectOrCaptureAndFinalizeRequestToBook.useMutation();
 
   return (
-    <div className="p-4">
+    <div>
       <div className="mb-4 xl:hidden">
         <Link href="/host/requests">
           <ChevronLeft />
@@ -52,32 +52,38 @@ export default function HostRequestsToBook() {
         <div className="grid gap-4 md:grid-cols-2">
           {propertyRequests.activeRequestsToBook.map((data) => (
             <div key={data.id} className="mb-4">
-              <RequestToBookCard requestToBook={data} type="host">
-                <Button
-                  variant="secondary"
-                  onClick={async () => {
-                    await rejectRequestToBook({
-                      isAccepted: false,
-                      requestToBookId: data.id,
-                    })
-                      .then(() => {
-                        toast({
-                          title: "Successfully rejected request",
-                        });
+              <HostRequestToBookCard requestToBook={data}>
+                {data.status === "Pending" && (
+                  <Button
+                    variant="secondary"
+                    onClick={async () => {
+                      await rejectRequestToBook({
+                        isAccepted: false,
+                        requestToBookId: data.id,
                       })
-                      .catch(() => errorToast());
-                  }}
-                >
-                  Reject
-                </Button>
-                <Button
-                  onClick={() => {
-                    setDialogOpen(true);
-                  }}
-                >
-                  Respond
-                </Button>
-              </RequestToBookCard>
+                        .then(() => {
+                          toast({
+                            title: "Successfully rejected request",
+                          });
+                        })
+                        .catch(() => errorToast());
+                    }}
+                  >
+                    Reject
+                  </Button>
+                )}
+                {data.status !== "Pending" ? (
+                  <Button
+                    onClick={() => {
+                      setDialogOpen(true);
+                    }}
+                  >
+                    Respond
+                  </Button>
+                ) : (
+                  <Button disabled>{data.status}</Button>
+                )}
+              </HostRequestToBookCard>
               <HostRequestToBookDialog
                 open={dialogOpen}
                 setOpen={setDialogOpen}
@@ -91,7 +97,7 @@ export default function HostRequestsToBook() {
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
             <Home className="mb-4 h-12 w-12 text-gray-400" />
             <h3 className="mb-2 text-lg font-semibold text-gray-900">
-              No Property Selected
+              No property selected
             </h3>
             <p className="max-w-sm text-sm text-gray-500">
               Please select a property from the list to view its requests and

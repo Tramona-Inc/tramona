@@ -30,6 +30,7 @@ import {
   getRequestIdByOfferId,
   finalizeTrip,
   createRequestToBook,
+  withdrawOverlappingOffers,
 } from "@/utils/webhook-functions/stripe-utils";
 import { sendSlackMessage } from "@/server/slack";
 import { formatDateMonthDay } from "@/utils/utils";
@@ -149,6 +150,12 @@ export default async function webhook(
               isDirectListingCharge,
               source: "Book it now",
             });
+            // rejecting overlapping offers
+            await withdrawOverlappingOffers({
+              propertyId: parseInt(paymentIntentSucceeded.metadata.property_id!),
+              checkIn: new Date(paymentIntentSucceeded.metadata.check_in!),
+              checkOut: new Date(paymentIntentSucceeded.metadata.check_out!),
+            });
             //we need to work on referalls/messaging for book it now
 
             // 2.  CASE : "RequestToBook"
@@ -180,6 +187,7 @@ export default async function webhook(
                 .update(offers)
                 .set({
                   acceptedAt: confirmedDate,
+                  status: "Accepted"
                 })
                 .where(eq(offers.id, offerId));
 
@@ -251,6 +259,14 @@ export default async function webhook(
                 tripCheckout,
               };
 
+              // rejecting overlapping offers
+              await withdrawOverlappingOffers({
+                propertyId: offer.propertyId,
+                checkIn: offer.checkIn,
+                checkOut: offer.checkOut,
+                excludeOfferId: offerId,
+              });
+              
               //<___creating a superhog  oreservationnly if does not exist__>
 
               const currentSuperhogReservation = await db.query.trips.findFirst(

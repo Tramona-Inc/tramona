@@ -10,7 +10,7 @@ import {
 } from "@/utils/utils";
 import { ExternalLinkIcon } from "lucide-react";
 
-import { GuestDashboardRequestToBook } from "./RequestToBookCard";
+import { GuestDashboardRequestToBook } from "./TravelerRequestToBookCard";
 
 export function RequestToBookCardPreviews({
   requestToBook,

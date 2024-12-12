@@ -1,7 +1,6 @@
 "use client";
 
-import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
-import Component from "../../../components/dashboard/host/calendar/CalendarComponent"; // Your existing calendar component
+import CalendarComponent from "../../../components/dashboard/host/calendar/CalendarComponent"; // Your existing calendar component
 import { useSession } from "next-auth/react";
 import Head from "next/head";
 import HostDashboardLayout from "@/components/_common/Layout/HostDashboardLayout";
@@ -15,7 +14,7 @@ export default function CalendarPage() {
         <title>Calendar | Tramona</title>
       </Head>
       <HostDashboardLayout>
-        <Component />
+        <CalendarComponent />
       </HostDashboardLayout>
     </>
   );

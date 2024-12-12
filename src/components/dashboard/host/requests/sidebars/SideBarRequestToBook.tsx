@@ -1,54 +1,93 @@
-import React, { useState } from "react";
-import { api } from "@/utils/api";
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/router";
+import { plural } from "@/utils/utils";
 import SidebarPropertySkeleton from "./SidebarPropertySkeleton";
 import EmptyRequestState from "./EmptyRequestState";
-import Link from "next/link";
-import { useRouter } from "next/router";
+import type { Property } from "@/server/db/schema";
 
-function SidebarRequestToBook() {
+interface RequestToBook {
+  resolvedAt: Date | null;
+}
+
+interface PropertyWithRequests extends Property {
+  requestsToBook: RequestToBook[];
+}
+
+interface SidebarRequestToBookProps {
+  properties: PropertyWithRequests[] | undefined;
+  isLoading: boolean;
+  initialSelectedPropertyId?: number;
+}
+
+function SidebarRequestToBook({
+  properties,
+  isLoading,
+  initialSelectedPropertyId
+}: SidebarRequestToBookProps) {
   const router = useRouter();
+  const [selectedPropertyId, setSelectedPropertyId] = useState<number | null>(
+    initialSelectedPropertyId ?? null
+  );
 
-  const { data: properties, isLoading } =
-    api.requestsToBook.getAllRequestToBookProperties.useQuery();
-
-  const [selectedPropertyId, setSelectedPropertyId] = useState<null | number>();
+  useEffect(() => {
+    setSelectedPropertyId(initialSelectedPropertyId ?? null);
+  }, [initialSelectedPropertyId]);
 
   const handlePropertyClick = (propertyId: number) => {
     setSelectedPropertyId(propertyId);
     void router.push(
-      `/host/requests?tabs=request-to-book&propertyId=${propertyId}`,
+      {
+        pathname: "/host/requests",
+        query: { 
+          ...router.query,
+          tabs: "property-bids",
+          propertyId: propertyId.toString()
+        } as Record<string, string>,
+      },
+      undefined,
+      { shallow: true }
     );
   };
 
-  const content = properties?.map((property) => {
-    const unResolvedRequests = property.requestsToBook.filter(
-      (request) => request.resolvedAt === null,
-    );
-    return unResolvedRequests.length > 0 ? (
-      <div
-        key={property.id}
-        onClick={() => handlePropertyClick(property.id)}
-        className={`${selectedPropertyId === property.id ? "bg-primaryGreen text-white" : ""} pointer flex flex-row justify-between gap-x-3 rounded-xl border p-3 py-5`}
-      >
-        <div className="text-wrap cursor-pointer">{property.name}</div>
-        <p className="text-nowrap flex flex-row text-xs">
-          {unResolvedRequests.length} Requests
-        </p>
-      </div>
-    ) : null;
-  });
+  if (isLoading) {
+    return <SidebarPropertySkeleton />;
+  }
+
+  if (!properties || properties.length === 0) {
+    return <EmptyRequestState />;
+  }
 
   return (
-    <div>
-      {!isLoading ? (
-        content && content.length > 0 ? (
-          <div className="flex flex-col gap-y-2">{content}</div>
-        ) : (
-          <EmptyRequestState />
-        )
-      ) : (
-        <SidebarPropertySkeleton />
-      )}
+    <div className="flex flex-col gap-y-2">
+      {properties.map((property) => {
+        const unResolvedRequests = property.requestsToBook.filter(
+          (request) => request.resolvedAt === null,
+        );
+        const requestCount = unResolvedRequests.length;
+        
+        return (
+          <div
+            key={property.id}
+            onClick={() => handlePropertyClick(property.id)}
+            className={`${
+              selectedPropertyId === property.id 
+                ? "bg-primaryGreen text-white" 
+                : ""
+            } pointer flex items-center gap-x-3 rounded-xl border p-3 py-5 cursor-pointer`}
+          >
+            <div className="flex-1 text-wrap min-w-0">
+              {property.name}
+            </div>
+            <div className={`flex-shrink-0 whitespace-nowrap text-xs ${
+              selectedPropertyId === property.id 
+                ? "text-white" 
+                : "text-muted-foreground"
+            }`}>
+              {plural(requestCount, "Bid", "Bids")}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

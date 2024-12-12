@@ -1,6 +1,6 @@
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import Spinner from "@/components/_common/Spinner";
-import { OfferPage } from "@/components/propertyPages/PropertyPage";
+import OfferPage from "@/components/propertyPages/PropertyPage";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/utils/api";
@@ -112,7 +112,7 @@ function Page({
                 </div>
                 {offers.map((offer) => (
                   <TabsContent key={offer.id} value={`${offer.id}`}>
-                    <OfferPage offer={offer} />
+                    <OfferPage offer={offer} property={offer.property} />
                   </TabsContent>
                 ))}
               </Tabs>

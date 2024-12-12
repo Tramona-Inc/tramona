@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import UserAvatar from "@/components/_common/UserAvatar";
-import { Button, ButtonProps } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import ReviewCard from "@/components/_common/ReviewCard";
 import {
   DialogNoDrawer,
@@ -14,7 +14,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { type RouterOutputs } from "@/utils/api";
+import { api, type RouterOutputs } from "@/utils/api";
 import { getOfferDiscountPercentage, plural } from "@/utils/utils";
 import { AspectRatio } from "../ui/aspect-ratio";
 import {
@@ -66,6 +66,33 @@ export default function PropertyPage({
   const [isOverflowing, setIsOverflowing] = useState(false);
   const [reviewBackupImages, setReviewBackupImages] = useState<string[]>([]);
   const [openUserInfo, setOpenUserInfo] = useState(false);
+
+  api.calendar.updateHostCalendar.useQuery({
+    hospitableListingId: property.hospitableListingId!,
+    },
+    {
+      enabled: Boolean(property.hospitableListingId),
+    },
+  );
+
+  // const { mutateAsync: updateCalender } =
+  //   api.calendar.updateHostCalendar.useMutation();
+
+  // useEffect(() => {
+  //   const updateCalendarIfNeeded = async () => {
+  //     if (property.hospitableListingId === "Hospitable") {
+  //       try {
+  //         await updateCalender({
+  //           hospitableListingId: property.hospitableListingId,
+  //         });
+  //       } catch (error) {
+  //         console.error("Failed to update calendar:", error);
+  //       }
+  //     }
+  //   };
+
+  //   void updateCalendarIfNeeded();
+  // }, [property.hospitableListingId, updateCalender]);
 
   useEffect(() => {
     const aboutElement = aboutRef.current;
@@ -493,15 +520,15 @@ export default function PropertyPage({
             )}
           </section>
 
-          {property.checkInInfo !== null && (
+          {property.additionalCheckInInfo !== null && (
             <section>
               <h2 className="subheading border-t pb-2 pt-4">
                 Check-in information
               </h2>
               <p>
-                {property.checkInInfo === "self"
+                {property.additionalCheckInInfo === "self"
                   ? "Self check-in"
-                  : property.checkInInfo}
+                  : property.additionalCheckInInfo}
               </p>
             </section>
           )}
@@ -518,7 +545,7 @@ export default function PropertyPage({
         </div>
 
         {sidebar && (
-          <div className="hidden shrink-0 md:block md:w-4/12 lg:w-96">
+          <div className="hidden shrink-0 md:block md:w-5/12 lg:w-96">
             <div className="sticky top-[calc(var(--header-height)+1rem)]">
               {sidebar}
             </div>

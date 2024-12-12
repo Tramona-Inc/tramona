@@ -13,7 +13,13 @@ export default function OfferPageSidebar({
   offer: OfferWithDetails;
   property: Pick<
     Property,
-    "stripeVerRequired" | "originalListingId" | "bookOnAirbnb"
+    | "stripeVerRequired"
+    | "originalListingId"
+    | "bookOnAirbnb"
+    | "maxNumGuests"
+    | "id"
+    | "bookItNowEnabled"
+    | "bookItNowDiscountTiers"
   >;
 }) {
   return (
@@ -54,10 +60,7 @@ export default function OfferPageSidebar({
               You won&apos;t be charged yet
             </p>
           )}
-          <PriceDetailsBeforeTax
-            offer={offer}
-            bookOnAirbnb={property.bookOnAirbnb}
-          />
+          <PriceDetailsBeforeTax offer={offer} />
         </CardContent>
       </Card>
 

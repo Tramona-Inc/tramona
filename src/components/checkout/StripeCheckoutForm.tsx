@@ -148,7 +148,11 @@ export default function StripeCheckoutForm({
               <div className="h-1 w-1 animate-bounce rounded-full bg-white"></div>
             </div>
           ) : (
-            "Confirm and Book"
+            <p>
+              {unifiedCheckoutData.type === "requestToBook"
+                ? "Place Bid"
+                : "Confirm and Book"}
+            </p>
           )}
         </Button>
       </form>

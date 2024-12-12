@@ -1,9 +1,9 @@
 import { env } from "@/env";
 import { db } from "@/server/db";
+import { and, eq, or, sql } from "drizzle-orm";
 import {
   groupMembers,
   groups,
-  hostTeamMembers,
   properties,
   requestsToBook,
   offers,
@@ -11,7 +11,6 @@ import {
   users,
   tripCheckouts,
 } from "@/server/db/schema";
-import { eq } from "drizzle-orm";
 import Stripe from "stripe";
 import { breakdownPaymentByPropertyAndTripParams } from "../payment-utils/paymentBreakdown";
 import {
@@ -24,6 +23,8 @@ import { createSuperhogReservation } from "./superhog-utils";
 import { sendSlackMessage } from "@/server/slack";
 import { formatDateMonthDay } from "../utils";
 import { TRAVELER_MARKUP } from "../constants";
+import { sendText } from "@/server/server-utils";
+import { sendTextToHostTeamMembers } from "@/server/server-utils";
 
 export const stripe = new Stripe(env.STRIPE_RESTRICTED_KEY_ALL);
 const stripeWithSecretKey = new Stripe(env.STRIPE_SECRET_KEY, {
@@ -265,6 +266,20 @@ export async function finalizeTrip({
   }
   //<<--------------------->>
 
+  if (source === "Book it now") {
+    //send that there is a new booking to the host TODO
+    await sendTextToHostTeamMembers({
+      hostTeamId: property.hostTeamId,
+      message: `${user.email} just booked your property`,
+    });
+  } else {
+    //send text to traveler
+    await sendText({
+      to: user.phoneNumber!,
+      content: `Your request to book ${property.name} has been accepted by the host. You're going to ${property.city} from ${formatDateMonthDay(checkIn)} to ${formatDateMonthDay(checkOut)}!`,
+    });
+  }
+
   //send email and whatsup (whatsup is not implemented yet)
   console.log("Sending email and whatsup");
   await sendEmailAndWhatsupConfirmation({
@@ -378,13 +393,10 @@ export async function createRequestToBook({
     });
   } else {
     // Case 2: Not DirectListing so we need to send the request to the host
-    const members = await db.query.hostTeamMembers.findMany({
-      where: eq(hostTeamMembers.hostTeamId, properties.hostTeamId),
+    await sendTextToHostTeamMembers({
+      hostTeamId: property.hostTeamId,
+      message: `${user.email} just requested to book your property`,
     });
-
-    for (const member of members) {
-      console.log(member.userId); //send notifcation to host??
-    }
 
     await sendSlackMessage({
       isProductionOnly: true,
@@ -398,4 +410,59 @@ export async function createRequestToBook({
     });
   }
   return;
+}
+
+
+export async function withdrawOverlappingOffers({
+  propertyId,
+  checkIn,
+  checkOut,
+  excludeOfferId,
+}: {
+  propertyId: number;
+  checkIn: Date;
+  checkOut: Date;
+  excludeOfferId?: number;
+}) {
+  // find pending offers for this property that overlap with the date range of accepted offer/book it now
+  // an offer overlaps if:
+  // 1. check-in date falls between the booked check-in and check-out dates
+  // 2. check-out date falls between the booked check-in and check-out dates
+  // 3. dates completely encompasses the booked dates
+  const checkInStr = checkIn.toISOString();
+  const checkOutStr = checkOut.toISOString();
+
+  const overlappingOffersQuery = db
+    .update(offers)
+    .set({
+      status: "Withdrawn"
+    })
+    .where(
+      and(
+        eq(offers.propertyId, propertyId),
+        eq(offers.status, "Pending"),
+        excludeOfferId ? sql`${offers.id} != ${excludeOfferId}` : undefined,
+        or(
+          // if offer check-in falls within booked period
+          and(
+            sql`${offers.checkIn}::date >= ${checkInStr}::date`,
+            sql`${offers.checkIn}::date < ${checkOutStr}::date`
+          ),
+          // if offer check-out falls within booked period
+          and(
+            sql`${offers.checkOut}::date > ${checkInStr}::date`,
+            sql`${offers.checkOut}::date <= ${checkOutStr}::date`
+          ),
+          // if offer completely overlaps booked period
+          and(
+            sql`${offers.checkIn}::date <= ${checkInStr}::date`,
+            sql`${offers.checkOut}::date >= ${checkOutStr}::date`
+          )
+        )
+      )
+    )
+    .returning();
+
+  const rejectedOffers = await overlappingOffersQuery;
+  return rejectedOffers;
 }
