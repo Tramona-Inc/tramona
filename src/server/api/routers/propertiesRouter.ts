@@ -743,15 +743,15 @@ export const propertiesRouter = createTRPCRouter({
     .input(
       z.object({
         propertyId: z.number(),
-        requestToBookDiscountPercentage: z.number(),
+        requestToBookMaxDiscountPercentage: z.number(),
       }),
     )
     .mutation(async ({ input }) => {
       await db
         .update(properties)
         .set({
-          requestToBookDiscountPercentage:
-            input.requestToBookDiscountPercentage,
+          requestToBookMaxDiscountPercentage:
+            input.requestToBookMaxDiscountPercentage,
         })
         .where(eq(properties.id, input.propertyId));
       console.log("YAY");

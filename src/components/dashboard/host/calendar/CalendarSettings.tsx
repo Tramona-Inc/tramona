@@ -32,19 +32,19 @@ export default function CalendarSettings({ property }: { property: Property }) {
   const [isChecked, setIsChecked] = useState<boolean | undefined>(
     property.bookItNowEnabled,
   );
-  const [bookItNowPercent, setBookItNowPercent] = useState<number>(
-    property.requestToBookDiscountPercentage,
+  const [bookItNowPercent, setBookItNowPercent] = useState<number>( //HERE CHANGE THIS BECAUSE IT SUPPOSE BE CONNECTED TO THE PROPERTY PRICING
+    property.requestToBookMaxDiscountPercentage,
   );
   const [bookItNowSaved, setBookItNowSaved] = useState(false);
 
-  const [offersToBookPercent, setOffersToBookPercent] = useState(5);
+  const [offersToBookPercent, setOffersToBookPercent] = useState<number>(
+    property.requestToBookMaxDiscountPercentage,
+  );
   // Other state variables remain the same
   const [offersToBookOpen, setOffersToBookOpen] = useState(false);
   const [nameYourPriceOpen, setNameYourPriceOpen] = useState(false);
   const [offersToBookSaved, setOffersToBookSaved] = useState(false);
   const [nameYourPriceSaved, setNameYourPriceSaved] = useState(false);
-  const [propertyRestrictionsOpen, setPropertyRestrictionsOpen] =
-    useState(false);
 
   //Name your price  & Auto offers section
   const [isAutoOfferChecked, setIsAutoOfferChecked] = useState<
@@ -62,16 +62,9 @@ export default function CalendarSettings({ property }: { property: Property }) {
 
   useEffect(() => {
     setIsChecked(property.bookItNowEnabled);
-    setBookItNowPercent(property.requestToBookDiscountPercentage);
-    setOffersToBookPercent(property.requestToBookDiscountPercentage);
+    setBookItNowPercent(property.requestToBookMaxDiscountPercentage);
+    setOffersToBookPercent(property.requestToBookMaxDiscountPercentage);
   }, [property]); //update when the selected property changes
-
-  const calculateDiscountedPrice = (
-    originalPrice: number,
-    percentOff: number,
-  ) => {
-    return Math.round(originalPrice * (1 - percentOff / 100));
-  };
 
   const handleBookItNowSwitch = async (checked: boolean) => {
     setIsChecked(checked);
@@ -120,7 +113,7 @@ export default function CalendarSettings({ property }: { property: Property }) {
     try {
       await updateRequestToBook({
         propertyId: property.id,
-        requestToBookDiscountPercentage: offersToBookPercent,
+        requestToBookMaxDiscountPercentage: offersToBookPercent,
       });
       toast({
         title: "Update successful",
@@ -192,7 +185,7 @@ export default function CalendarSettings({ property }: { property: Property }) {
 
               {isChecked && (
                 <div className="space-y-4 pt-4">
-                  <div className="my-6 w-[calc(100%+3rem)] border-b border-gray-200" />
+                  <div className="my-6 w-full border-b border-gray-200" />
                   <Label>{bookItNowPercent}% OFF</Label>
                   <Slider
                     value={[bookItNowPercent]}
@@ -205,8 +198,6 @@ export default function CalendarSettings({ property }: { property: Property }) {
                   </p>
                   <div className="flex justify-end">
                     <Button
-                      variant="outline"
-                      className="border-black bg-white text-black"
                       onClick={handleBookItNowSave}
                       disabled={bookItNowSaved}
                     >
@@ -263,11 +254,7 @@ export default function CalendarSettings({ property }: { property: Property }) {
                     accept, deny or counter offer.
                   </p>
                   <div className="flex justify-end">
-                    <Button
-                      variant="outline"
-                      className="bg-primaryGreen text-white hover:bg-primaryGreen/90"
-                      onClick={handleOffersToBookSave}
-                    >
+                    <Button onClick={handleOffersToBookSave}>
                       {offersToBookSaved ? "Saved!" : "Save"}
                     </Button>
                   </div>
@@ -391,11 +378,7 @@ export default function CalendarSettings({ property }: { property: Property }) {
 
                   <div className="flex justify-end gap-2">
                     <Button variant="outline">Cancel</Button>
-                    <Button
-                      variant="outline"
-                      className="bg-primaryGreen text-white hover:bg-primaryGreen/90"
-                      onClick={handleNameYourPriceSave}
-                    >
+                    <Button onClick={handleNameYourPriceSave}>
                       {nameYourPriceSaved ? "Saved!" : "Save"}
                     </Button>
                   </div>

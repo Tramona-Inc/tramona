@@ -86,7 +86,6 @@ export const useGetOriginalPropertyPricing = ({
   if (requestPercentage && originalPrice) {
     originalPrice = originalPrice * (1 - requestPercentage / 100);
   }
-  console.log("requestPercentage", requestPercentage);
 
   // Aggregate loading states
   const isLoading = isCasamundoPriceLoading && isHostPriceLoading;
