@@ -83,12 +83,12 @@ function GrowthMetricCard({
   Icon: React.ElementType;
 }) {
   return (
-    <div className="flex items-center gap-6 rounded-xl bg-white p-6 shadow">
-      <div className="rounded-full bg-[#E6F0EE] p-4">
+    <div className="flex flex-col items-center justify-center text-center gap-4 rounded-xl bg-white p-6 shadow">
+      <div className="flex items-center justify-center rounded-full bg-[#E6F0EE] p-4">
         <Icon className="h-10 w-10 text-[#004236]" />
       </div>
       <div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-center gap-2">
           <span className="text-3xl font-bold text-[#004236]">{title}</span>
           <TrendingUp className="h-6 w-6 text-[#004236]" />
         </div>
@@ -109,10 +109,12 @@ function PartnerBenefitItem({
 }) {
   return (
     <li className="flex items-start gap-4">
-      <Icon className="mt-1 h-7 w-7 flex-shrink-0 text-[#004236]" />
+      <Icon className="mt-1 h-6 w-6 text-[#004236]" />
       <div>
-        <p className="text-lg font-medium text-[#004236]">{title}</p>
-        <p className="text-base text-gray-600">{description}</p>
+        <h4 className="text-base font-semibold text-[#004236] sm:text-lg">
+          {title}
+        </h4>
+        <p className="text-sm text-gray-600 sm:text-base">{description}</p>
       </div>
     </li>
   );
@@ -140,20 +142,23 @@ function TangiblePartnerBenefits() {
   ];
 
   return (
-    <div className="space-y-8">
-      <h2 className="text-center text-3xl font-bold text-[#004236]">
+    <div className="space-y-6 p-4 sm:p-6">
+      <h2 className="text-center text-2xl font-bold text-[#004236] sm:text-3xl">
         Tangible Benefits for Your Company
       </h2>
-      <div className="mx-auto grid max-w-5xl gap-8 md:grid-cols-3">
+      <div className="mx-auto grid max-w-3xl gap-6 sm:max-w-5xl sm:gap-8 md:grid-cols-3">
         {benefits.map((benefit, index) => (
-          <Card key={index} className="rounded-lg shadow">
-            <CardContent className="space-y-4 p-6">
-              <benefit.icon className="h-12 w-12 text-[#004236]" />
-              <h3 className="text-xl font-semibold text-[#004236]">
-                {benefit.title}
-              </h3>
-              <p className="text-gray-600">{benefit.description}</p>
-            </CardContent>
+          <Card
+            key={index}
+            className="flex flex-col items-center text-center space-y-4 rounded-lg shadow p-6"
+          >
+            <benefit.icon className="h-12 w-12 text-[#004236]" />
+            <h3 className="text-lg font-semibold text-[#004236] sm:text-xl">
+              {benefit.title}
+            </h3>
+            <p className="text-sm text-gray-600 sm:text-base">
+              {benefit.description}
+            </p>
           </Card>
         ))}
       </div>
@@ -163,14 +168,14 @@ function TangiblePartnerBenefits() {
 
 function PartnerConnectSection() {
   return (
-    <div className="mx-auto max-w-2xl space-y-8 text-center">
+    <div className="mx-auto max-w-2xl space-y-8 text-center p-6 rounded-lg shadow-md bg-white">
       <h2 className="text-3xl font-bold text-[#004236]">Let&apos;s Connect</h2>
       <p className="text-lg text-gray-600">
         Ready to give your hosts more opportunities to succeed and add value to
         your company? We&apos;d love to discuss a partnership tailored to your
         needs.
       </p>
-      <div className="flex justify-center gap-4">
+      <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
         <Button
           className="rounded-md bg-[#004236] px-10 py-3 text-lg font-semibold text-white hover:bg-[#003228]"
           onClick={() => window.open("https://calendly.com/tramona", "_blank")}
@@ -236,17 +241,17 @@ function WhyPartnerSection() {
   ];
 
   return (
-    <div className="space-y-12">
-      <h2 className="text-center text-3xl font-bold text-[#004236]">
+    <div className="space-y-8 p-4 sm:p-6">
+      <h2 className="text-center text-2xl font-bold text-[#004236] sm:text-3xl">
         Why Partner with Tramona?
       </h2>
-      <div className="grid gap-12 md:grid-cols-2">
+      <div className="grid gap-8 sm:gap-12 sm:max-w-xl lg:max-w-5xl mx-auto md:grid-cols-2">
         {partnerTypes.map((type, index) => (
           <div key={index} className="space-y-6">
-            <h3 className="border-b-2 border-[#004236]/10 pb-3 text-2xl font-semibold text-[#004236]">
+            <h3 className="border-b-2 border-[#004236]/10 pb-3 text-xl font-semibold text-[#004236] sm:text-2xl">
               {type.title}
             </h3>
-            <ul className="space-y-5">
+            <ul className="space-y-4">
               {type.benefits.map((benefit, i) => (
                 <PartnerBenefitItem
                   key={i}
@@ -271,19 +276,22 @@ function WinWinPartnership() {
   ];
 
   return (
-    <div className="space-y-8">
-      <h2 className="text-center text-3xl font-bold text-[#004236]">
+    <div className="space-y-6 p-4 sm:p-6">
+      <h2 className="text-center text-2xl font-bold text-[#004236] sm:text-3xl">
         A Win-Win Partnership
       </h2>
-      <p className="mx-auto max-w-3xl text-center text-lg text-gray-600">
+      <p className="mx-auto max-w-xl text-center text-base text-gray-600 sm:text-lg">
         Our mission is simple: create a win-win for hosts and the partners that
         support them. As a Tramona partner, you&apos;ll:
       </p>
-      <ul className="mx-auto max-w-3xl space-y-4">
+      <ul className="mx-auto max-w-xl space-y-4">
         {partnershipBenefits.map((benefit, index) => (
-          <li key={index} className="flex gap-3">
+          <li
+            key={index}
+            className="flex items-start gap-3 text-sm text-gray-600 sm:text-base"
+          >
             <CheckCircle2 className="mt-1 h-5 w-5 flex-shrink-0 text-[#004236]" />
-            <span className="text-gray-600">{benefit}</span>
+            <span>{benefit}</span>
           </li>
         ))}
       </ul>
