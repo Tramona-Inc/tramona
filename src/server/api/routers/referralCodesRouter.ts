@@ -190,4 +190,10 @@ export const referralCodesRouter = createTRPCRouter({
       return discounts;
     },
   ),
+
+  getMyReferralCodeData: protectedProcedure.query(async ({ ctx }) => {
+    return await ctx.db.query.referralCodes.findFirst({
+      where: eq(referralCodes.ownerId, ctx.user.id),
+    });
+  }),
 });
