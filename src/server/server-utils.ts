@@ -530,7 +530,7 @@ export async function getRequestsForProperties(
     request: Request & {
       traveler: Pick<
         User,
-        "firstName" | "lastName" | "name" | "image" | "location" | "about"
+        "firstName" | "lastName" | "name" | "image" | "location" | "about" | "dateOfBirth"
       >;
     };
   }[] = [];
@@ -612,6 +612,7 @@ export async function getRequestsForProperties(
                 lastName: true,
                 location: true,
                 about: true,
+                dateOfBirth: true,
               },
             },
           },
@@ -629,6 +630,7 @@ export async function getRequestsForProperties(
         lastName: request.madeByGroup.owner.lastName,
         location: request.madeByGroup.owner.location,
         about: request.madeByGroup.owner.about,
+        dateOfBirth: request.madeByGroup.owner.dateOfBirth,
       };
       propertyToRequestMap.push({
         property: {

@@ -15,7 +15,7 @@ import {
   RequestsPageOfferData,
   type SeparatedData,
 } from "@/server/server-utils";
-import { formatOfferData, separateByPriceRestriction } from "@/utils/utils";
+import { formatOfferData, separateByPriceAndAgeRestriction } from "@/utils/utils";
 import { useToast } from "@/components/ui/use-toast";
 import { errorToast } from "@/utils/toasts";
 import { HostRequestsPageOfferData } from "@/server/api/routers/propertiesRouter";
@@ -70,7 +70,7 @@ export default function HostRequests() {
 
   api.properties.getHostPropertiesWithRequests.useQuery(undefined, {
     onSuccess: (fetchedProperties) => {
-      const separatedProperties = separateByPriceRestriction(fetchedProperties);
+      const separatedProperties = separateByPriceAndAgeRestriction(fetchedProperties);
       setSeparatedData(separatedProperties);
     },
   });

@@ -65,7 +65,7 @@ export type HostRequestsPageData = {
     request: Request & {
       traveler: Pick<
         User,
-        "firstName" | "lastName" | "name" | "image" | "location" | "about"
+        "firstName" | "lastName" | "name" | "image" | "location" | "about" | "dateOfBirth"
       >;
     };
     properties: (Property & { taxAvailable: boolean })[];
@@ -595,106 +595,107 @@ export const propertiesRouter = createTRPCRouter({
         .where(eq(properties.id, input.propertyId));
     }),
 
-  getHostPropertiesWithRequests: hostProcedure.query(async ({ ctx }) => {
-    const hostProperties = await db.query.properties.findMany({
-      where: and(
-        eq(properties.hostTeamId, ctx.hostProfile.curTeamId),
-        eq(properties.status, "Listed"),
-      ),
-    });
+    getHostPropertiesWithRequests: hostProcedure.query(async ({ ctx }) => {
+      const hostProperties = await db.query.properties.findMany({
+        where: and(
+          eq(properties.hostTeamId, ctx.hostProfile.curTeamId),
+          eq(properties.status, "Listed"),
+        ),
+      });
 
-    const hostRequests = await getRequestsForProperties(hostProperties);
 
-    const groupedByCity: HostRequestsPageData[] = [];
-    const citiesSet = new Set(hostProperties.map((property) => property.city));
-    citiesSet.forEach((city) => {
-      groupedByCity.push({ city, requests: [] });
-    });
+      const hostRequests = await getRequestsForProperties(hostProperties);
 
-    const findOrCreateCityGroup = (city: string) => {
-      let cityGroup = groupedByCity.find((group) => group.city === city);
-      if (!cityGroup) {
-        cityGroup = { city, requests: [] };
-        groupedByCity.push(cityGroup);
-      }
-      return cityGroup;
-    };
+      const groupedByCity: HostRequestsPageData[] = [];
+      const citiesSet = new Set(hostProperties.map((property) => property.city));
+      citiesSet.forEach((city) => {
+        groupedByCity.push({ city, requests: [] });
+      });
 
-    const requestsMap = new Map<
-      number,
-      {
-        request: Request & {
-          traveler: Pick<
-            User,
-            "firstName" | "lastName" | "name" | "image" | "location" | "about"
-          >;
-        };
-        properties: (Property & { taxAvailable: boolean })[];
-      }
-    >();
+      const findOrCreateCityGroup = (city: string) => {
+        let cityGroup = groupedByCity.find((group) => group.city === city);
+        if (!cityGroup) {
+          cityGroup = { city, requests: [] };
+          groupedByCity.push(cityGroup);
+        }
+        return cityGroup;
+      };
 
-    for (const { property, request } of hostRequests) {
-      if (!requestsMap.has(request.id)) {
-        requestsMap.set(request.id, {
-          request,
-          properties: [],
-        });
-      }
-      requestsMap.get(request.id)!.properties.push(property);
-    }
+      const requestsMap = new Map<
+        number,
+        {
+          request: Request & {
+            traveler: Pick<
+              User,
+              "firstName" | "lastName" | "name" | "image" | "location" | "about" | "dateOfBirth"
+            >;
+          };
+          properties: (Property & { taxAvailable: boolean })[];
+        }
+      >();
 
-    for (const requestWithProperties of requestsMap.values()) {
-      const { request, properties } = requestWithProperties;
-      for (const property of properties) {
-        const cityGroup = findOrCreateCityGroup(property.city);
-        const existingRequest = cityGroup.requests.find(
-          (item) => item.request.id === request.id,
-        );
-
-        if (existingRequest) {
-          existingRequest.properties.push(property);
-        } else {
-          cityGroup.requests.push({
+      for (const { property, request } of hostRequests) {
+        if (!requestsMap.has(request.id)) {
+          requestsMap.set(request.id, {
             request,
-            properties: [property],
+            properties: [],
           });
         }
+        requestsMap.get(request.id)!.properties.push(property);
       }
-    }
 
-    return groupedByCity;
-  }),
+      for (const requestWithProperties of requestsMap.values()) {
+        const { request, properties } = requestWithProperties;
+        for (const property of properties) {
+          const cityGroup = findOrCreateCityGroup(property.city);
+          const existingRequest = cityGroup.requests.find(
+            (item) => item.request.id === request.id
+          );
 
-  getHostPropertiesWithRequestsToBook: hostProcedure.query(async ({ ctx }) => {
-    const hostProperties = await db.query.properties.findMany({
-      where: and(
-        eq(properties.hostTeamId, ctx.hostProfile.curTeamId),
-        eq(properties.status, "Listed"),
-      ),
-    });
+          if (existingRequest) {
+            existingRequest.properties.push(property);
+          } else {
+            cityGroup.requests.push({
+              request,
+              properties: [property],
+            });
+          }
+        }
+      }
 
-    const hostRequestsToBook = await getRequestsToBookForProperties(
-      hostProperties,
-      { user: ctx.user },
-    );
+      return groupedByCity;
+    }),
 
-    const propertiesWithRequestsToBook = hostProperties
-      .filter((property) =>
-        hostRequestsToBook.some(
-          (requestToBook) =>
-            requestToBook.requestToBook.propertyId === property.id,
+    getHostPropertiesWithRequestsToBook: hostProcedure.query(async ({ ctx }) => {
+      const hostProperties = await db.query.properties.findMany({
+        where: and(
+          eq(properties.hostTeamId, ctx.hostProfile.curTeamId),
+          eq(properties.status, "Listed")
         ),
-      )
-      .map((property) => ({
-        property,
-        requestToBook: hostRequestsToBook.filter(
-          (requestToBook) =>
-            requestToBook.requestToBook.propertyId === property.id,
-        ),
-      }));
+      });
 
-    return propertiesWithRequestsToBook;
-  }),
+      const hostRequestsToBook = await getRequestsToBookForProperties(
+        hostProperties,
+        { user: ctx.user }
+      );
+
+      const propertiesWithRequestsToBook = hostProperties
+        .filter((property) =>
+          hostRequestsToBook.some(
+            (requestToBook) =>
+              requestToBook.requestToBook.propertyId === property.id
+          )
+        )
+        .map((property) => ({
+          property,
+          requestToBook: hostRequestsToBook.filter(
+            (requestToBook) =>
+              requestToBook.requestToBook.propertyId === property.id
+          ),
+        }));
+
+      return propertiesWithRequestsToBook;
+    }),
 
   // hostInsertOnboardingProperty: roleRestrictedProcedure(["host"])
   //   .input(hostPropertyFormSchema)
