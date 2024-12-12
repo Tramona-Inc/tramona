@@ -118,7 +118,19 @@ export default function HostAutoOffer({ property }: { property: Property }) {
         description: "Auto-offer settings have been successfully updated.",
         duration: 3000,
       });
-      originalValuesRef.current = variables;
+      if (
+        variables.autoOfferDiscountTiers !== undefined &&
+        variables.autoOfferEnabled !== undefined
+      ) {
+        // Create a narrowed version of the variables
+        const safeVariables = {
+          id: variables.id,
+          autoOfferEnabled: variables.autoOfferEnabled,
+          autoOfferDiscountTiers: variables.autoOfferDiscountTiers,
+        };
+        originalValuesRef.current = safeVariables;
+      }
+
       setHasUnsavedChanges(false);
     },
     onError: (error) => {
