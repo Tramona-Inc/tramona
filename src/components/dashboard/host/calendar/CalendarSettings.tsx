@@ -9,47 +9,28 @@ import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import HostPropertiesRestrictions from "../HostPropertiesRestrictions";
 import { Property } from "@/server/db/schema/tables/properties";
-import { useState, useEffect } from "react";
-import { api } from "@/utils/api";
-import { toast } from "@/components/ui/use-toast";
+import { useState } from "react";
+
 interface DiscountTier {
   days: number;
   discount: number;
 }
 
 export default function CalendarSettings({ property }: { property: Property }) {
-  // <---------------------------------- MUTATIONS ---------------------------------->
-  const { mutateAsync: updateBookItNow } =
-    api.properties.updateBookItNow.useMutation();
+  // Separate state for each section's percentage
+  const [bookItNowPercent, setBookItNowPercent] = useState(5);
+  const [offersToBookPercent, setOffersToBookPercent] = useState(5);
 
-  const { mutateAsync: updateRequestToBook } =
-    api.properties.updateRequestToBook.useMutation();
-
-  const { mutateAsync: updateAutoOffer } =
-    api.properties.updateAutoOffer.useMutation();
-
-  // Book it now section
-  const [isChecked, setIsChecked] = useState<boolean | undefined>(
-    property.bookItNowEnabled,
-  );
-  const [bookItNowPercent, setBookItNowPercent] = useState<number>( //HERE CHANGE THIS BECAUSE IT SUPPOSE BE CONNECTED TO THE PROPERTY PRICING
-    property.requestToBookMaxDiscountPercentage,
-  );
-  const [bookItNowSaved, setBookItNowSaved] = useState(false);
-
-  const [offersToBookPercent, setOffersToBookPercent] = useState<number>(
-    property.requestToBookMaxDiscountPercentage,
-  );
   // Other state variables remain the same
   const [offersToBookOpen, setOffersToBookOpen] = useState(false);
   const [nameYourPriceOpen, setNameYourPriceOpen] = useState(false);
+  const [bookItNowSaved, setBookItNowSaved] = useState(false);
   const [offersToBookSaved, setOffersToBookSaved] = useState(false);
   const [nameYourPriceSaved, setNameYourPriceSaved] = useState(false);
+  const [propertyRestrictionsOpen, setPropertyRestrictionsOpen] =
+    useState(false);
 
-  //Name your price  & Auto offers section
-  const [isAutoOfferChecked, setIsAutoOfferChecked] = useState<
-    undefined | boolean
-  >(property.autoOfferEnabled);
+  const [minimumOfferPriceOpen, setMinimumOfferPriceOpen] = useState(false);
 
   const [discountTiers, setDiscountTiers] = useState<DiscountTier[]>([
     { days: 90, discount: 5 },
@@ -60,84 +41,26 @@ export default function CalendarSettings({ property }: { property: Property }) {
     { days: 7, discount: 30 },
   ]);
 
-  useEffect(() => {
-    setIsChecked(property.bookItNowEnabled);
-    setBookItNowPercent(property.requestToBookMaxDiscountPercentage);
-    setOffersToBookPercent(property.requestToBookMaxDiscountPercentage);
-  }, [property]); //update when the selected property changes
-
-  const handleBookItNowSwitch = async (checked: boolean) => {
-    setIsChecked(checked);
-    //only update if turned off
-    try {
-      await updateBookItNow({
-        id: property.id,
-        bookItNowEnabled: checked,
-      });
-      if (!checked) {
-        toast({
-          title: `Book it now disabled`,
-        });
-      }
-    } catch (err) {
-      toast({
-        title: "Something went wrong...",
-        variant: "destructive",
-      });
-    }
+  const calculateDiscountedPrice = (
+    originalPrice: number,
+    percentOff: number,
+  ) => {
+    return Math.round(originalPrice * (1 - percentOff / 100));
   };
 
-  const handleBookItNowSave = async () => {
+  const handleBookItNowSave = () => {
     setBookItNowSaved(true);
     setTimeout(() => setBookItNowSaved(false), 2000);
-    try {
-      await updateBookItNow({
-        id: property.id,
-        bookItNowEnabled: isChecked,
-      }); // Enable "Book It Now"
-      toast({
-        title: `Update successful.`,
-      });
-    } catch (error) {
-      toast({
-        title: "Try again",
-        description: "Something went wrong...",
-      });
-    }
   };
 
-  const handleOffersToBookSave = async () => {
-    //update request to book discount percentage
+  const handleOffersToBookSave = () => {
     setOffersToBookSaved(true);
     setTimeout(() => setOffersToBookSaved(false), 2000);
-    try {
-      await updateRequestToBook({
-        propertyId: property.id,
-        requestToBookMaxDiscountPercentage: offersToBookPercent,
-      });
-      toast({
-        title: "Update successful",
-      });
-    } catch (error) {
-      toast({
-        title: "Something went wrong",
-        variant: "destructive",
-      });
-    }
   };
 
   const handleNameYourPriceSave = () => {
     setNameYourPriceSaved(true);
     setTimeout(() => setNameYourPriceSaved(false), 2000);
-  };
-
-  const handleAutoOfferSwitch = async (checked: boolean) => {
-    setIsAutoOfferChecked(checked);
-    await updateAutoOffer({
-      id: property.id,
-      autoOfferEnabled: checked,
-    });
-    console.log("done");
   };
 
   const removeTier = (index: number) => {
@@ -164,7 +87,7 @@ export default function CalendarSettings({ property }: { property: Property }) {
 
           <TabsContent value="pricing" className="space-y-6 sm:space-y-8">
             {/* Book it now section */}
-            <div className="space-y-3 rounded-lg border p-6">
+            <div className="space-y-4 rounded-lg border p-6">
               <div className="flex cursor-pointer items-center justify-between">
                 <h3 className="text-[20px] font-bold text-black">
                   Book it now
@@ -175,33 +98,40 @@ export default function CalendarSettings({ property }: { property: Property }) {
                   Set your price, starting as low as the price on Airbnb
                 </p>
                 <Switch
-                  checked={isChecked}
                   className="data-[state=checked]:bg-primaryGreen data-[state=unchecked]:bg-gray-300"
-                  onCheckedChange={(checked) => {
-                    void handleBookItNowSwitch(checked);
-                  }}
+                  onClick={
+                    () => setMinimumOfferPriceOpen(!minimumOfferPriceOpen) //add functionality later!
+                  }
                 />
               </div>
-
-              {isChecked && (
+              <div className="-mx-6 mt-4 w-[calc(100%+3rem)] border-b border-gray-200" />
+              {minimumOfferPriceOpen && (
                 <div className="space-y-4 pt-4">
-                  <div className="my-6 w-full border-b border-gray-200" />
                   <Label>{bookItNowPercent}% OFF</Label>
                   <Slider
                     value={[bookItNowPercent]}
                     onValueChange={(value) => setBookItNowPercent(value[0]!)}
-                    max={80}
+                    max={100}
                   />
                   <p className="text-xs text-muted-foreground">
-                    Enhance the discount to create a more impactful incentive
-                    and boost bookings
+                    This is likely to generate 1% more bookings, increase the
+                    discount for a more significant effect
                   </p>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-2xl font-bold text-primaryGreen sm:text-4xl">
+                      ${calculateDiscountedPrice(168, bookItNowPercent)}
+                    </span>
+                    <span className="text-lg text-muted-foreground line-through sm:text-2xl">
+                      $168
+                    </span>
+                  </div>
                   <div className="flex justify-end">
                     <Button
+                      variant="outline"
+                      className="border-black bg-white text-black"
                       onClick={handleBookItNowSave}
-                      disabled={bookItNowSaved}
                     >
-                      {bookItNowSaved ? "Saving!" : "Save"}
+                      {bookItNowSaved ? "Saved!" : "Save"}
                     </Button>
                   </div>
                 </div>
@@ -209,9 +139,9 @@ export default function CalendarSettings({ property }: { property: Property }) {
             </div>
 
             {/* Offers to book section */}
-            <div className="rounded-lg border">
+            <div className="space-y-4 rounded-lg border p-6">
               <div
-                className="flex cursor-pointer items-center justify-between px-6 py-8"
+                className="flex cursor-pointer items-center justify-between"
                 onClick={() => setOffersToBookOpen(!offersToBookOpen)}
               >
                 <h3 className="text-[20px] font-bold text-black">
@@ -229,7 +159,7 @@ export default function CalendarSettings({ property }: { property: Property }) {
                 </Button>
               </div>
               <div
-                className={`overflow-hidden transition-all duration-300 ease-in-out ${offersToBookOpen ? "-mt-4 max-h-[1000px] p-6 opacity-100" : "max-h-0 opacity-0"}`}
+                className={`overflow-hidden transition-all duration-300 ease-in-out ${offersToBookOpen ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0"}`}
               >
                 <p className="text-base font-bold">
                   What prices would you consider?
@@ -254,7 +184,11 @@ export default function CalendarSettings({ property }: { property: Property }) {
                     accept, deny or counter offer.
                   </p>
                   <div className="flex justify-end">
-                    <Button onClick={handleOffersToBookSave}>
+                    <Button
+                      variant="outline"
+                      className="bg-primaryGreen text-white hover:bg-primaryGreen/90"
+                      onClick={handleOffersToBookSave}
+                    >
                       {offersToBookSaved ? "Saved!" : "Save"}
                     </Button>
                   </div>
@@ -263,12 +197,12 @@ export default function CalendarSettings({ property }: { property: Property }) {
             </div>
 
             {/* Name your price section */}
-            <div className="rounded-lg border">
+            <div className="space-y-4 rounded-lg border p-6">
               <div
-                className="flex cursor-pointer items-center justify-between px-6 py-8"
+                className="flex cursor-pointer items-center justify-between"
                 onClick={() => setNameYourPriceOpen(!nameYourPriceOpen)}
               >
-                <h3 className="text-xl font-bold text-black">
+                <h3 className="text-[20px] font-bold text-black">
                   Name Your Own Price
                 </h3>
                 <Button variant="ghost" size="sm">
@@ -283,7 +217,7 @@ export default function CalendarSettings({ property }: { property: Property }) {
                 </Button>
               </div>
               <div
-                className={`overflow-hidden transition-all duration-300 ease-in-out ${nameYourPriceOpen ? "-mt-4 max-h-[1000px] p-6 opacity-100" : "max-h-0 opacity-0"}`}
+                className={`overflow-hidden transition-all duration-300 ease-in-out ${nameYourPriceOpen ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0"}`}
               >
                 <p className="text-base font-bold">
                   Every day we get thousands of requests from travelers. How
@@ -294,13 +228,7 @@ export default function CalendarSettings({ property }: { property: Property }) {
                 <div className="space-y-4 pt-4">
                   <div className="flex items-center justify-between">
                     <Label className="text-lg font-medium">Auto-offer</Label>
-                    <Switch
-                      checked={isAutoOfferChecked}
-                      onCheckedChange={(checked) =>
-                        handleAutoOfferSwitch(checked)
-                      }
-                      className="data-[state=checked]:bg-primaryGreen"
-                    />
+                    <Switch className="data-[state=checked]:bg-primaryGreen" />
                   </div>
 
                   <div className="space-y-4">
@@ -378,7 +306,11 @@ export default function CalendarSettings({ property }: { property: Property }) {
 
                   <div className="flex justify-end gap-2">
                     <Button variant="outline">Cancel</Button>
-                    <Button onClick={handleNameYourPriceSave}>
+                    <Button
+                      variant="outline"
+                      className="bg-primaryGreen text-white hover:bg-primaryGreen/90"
+                      onClick={handleNameYourPriceSave}
+                    >
                       {nameYourPriceSaved ? "Saved!" : "Save"}
                     </Button>
                   </div>
