@@ -69,7 +69,7 @@ export function DesktopSearchTab({
 
   const router = useRouter();
   const utils = api.useUtils();
-  const { adjustedProperties, setAdjustedProperties } = useAdjustedProperties();
+  const { setAdjustedProperties } = useAdjustedProperties();
 
   const sortOptions = {
     none: "Select a value",
@@ -144,7 +144,7 @@ export function DesktopSearchTab({
           const updatedProperties = {
             ...prevState,
             pages: [
-              ...(prevState.pages || []),
+              ...prevState.pages,
               ...propertiesInArea.hostProperties,
               ...propertiesInArea.scrapedProperties,
             ],
@@ -153,7 +153,7 @@ export function DesktopSearchTab({
           setAdjustedProperties({
             ...updatedProperties,
             pages: filterProperties(
-              updatedProperties.pages.flat() as Property[],
+              updatedProperties.pages as Property[],
               minPrice !== "" ? (Number(minPrice) * 100).toString() : minPrice,
               maxPrice !== "" ? (Number(maxPrice) * 100).toString() : maxPrice,
               priceSort,
@@ -174,13 +174,13 @@ export function DesktopSearchTab({
         setAllProperties((prevState) => {
           const updatedProperties = {
             ...prevState,
-            pages: [...(prevState?.pages || []), ...airbnbResults.res],
+            pages: [...prevState.pages, ...airbnbResults.res],
           };
 
           setAdjustedProperties({
             ...updatedProperties,
             pages: filterProperties(
-              updatedProperties.pages.flat() as Property[],
+              updatedProperties.pages as Property[],
               minPrice !== "" ? (Number(minPrice) * 100).toString() : minPrice,
               maxPrice !== "" ? (Number(maxPrice) * 100).toString() : maxPrice,
               priceSort,
@@ -206,13 +206,13 @@ export function DesktopSearchTab({
         setAllProperties((prevState) => {
           const updatedProperties = {
             ...prevState,
-            pages: [...(prevState?.pages || []), ...finishAirbnbResults],
+            pages: [...prevState.pages, ...finishAirbnbResults],
           };
 
           setAdjustedProperties({
             ...updatedProperties,
             pages: filterProperties(
-              updatedProperties.pages.flat() as Property[],
+              updatedProperties.pages as Property[],
               minPrice !== "" ? (Number(minPrice) * 100).toString() : minPrice,
               maxPrice !== "" ? (Number(maxPrice) * 100).toString() : maxPrice,
               priceSort,
@@ -231,14 +231,6 @@ export function DesktopSearchTab({
     }
   });
 
-  //   <div
-  //   className={`z-50 w-full transition-all duration-300 ease-in-out
-  //     sm:w-[400px]
-  //     md:w-[500px]
-  //     lg:w-[600px]
-  //     xl:w-[800px]
-  //     ${isCompact ? "scale-70" : "scale-100"}`}
-  // >
   return (
     <div className="mt-4 w-full space-y-8 py-4">
       <div className="">
@@ -380,7 +372,7 @@ export function DesktopSearchTab({
                         return {
                           ...prevState,
                           pages: filterProperties(
-                            allProperties.pages.flat() as Property[],
+                            allProperties.pages as Property[],
                             minPrice !== ""
                               ? (Number(minPrice) * 100).toString()
                               : minPrice,
