@@ -1,4 +1,3 @@
-import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import Image from "next/image";
 import Head from "next/head";
 import AccordionFaq from "@/components/_common/AccordionFaq";
@@ -36,7 +35,7 @@ const ForHostsPage = ({
   requestFeed,
 }: InferGetStaticPropsType<typeof getStaticProps>) => {
   return (
-    <div className="relative space-y-32 overflow-x-hidden pb-32">
+    <div className="relative space-y-32 overflow-x-hidden pb-20 md:pb-0">
       <Head>
         <title>For Hosts | Tramona</title>
       </Head>
@@ -100,11 +99,11 @@ const ForHostsPage = ({
           </h2>
           <Questions />
         </div>
-        <div className="bg-[#FAF9F6] p-20 md:pb-8 pb-4">
+        <div className="bg-[#FAF9F6] p-20 pb-4 md:pb-8">
           <FAQ />
         </div>
       </div>
-      <div className="bg-primaryGreen py-8 mt-0">
+      <div className="mt-0 bg-primaryGreen py-8">
         <div className="text-center text-white">
           <h2 className="text-2xl font-semibold">
             Turn hard-to-book dates into profitable stays
@@ -245,7 +244,7 @@ const HowItWorks = () => {
         <h3 className="mb-6 text-center text-xl font-bold text-[primaryGreen]">
           1. Book it Now
         </h3>
-        <p className="font-semibold text-center md:text-left">
+        <p className="text-center font-semibold md:text-left">
           Allow travelers to book instantly, or request to book, just like other
           booking platforms.
         </p>
@@ -279,7 +278,7 @@ const HowItWorks = () => {
         <h3 className="mb-6 text-center text-xl font-bold text-[primaryGreen]">
           2. Receiving Bids
         </h3>
-        <p className="font-semibold text-center md:text-left">
+        <p className="text-center font-semibold md:text-left">
           Travelers send offers for your empty nights.
         </p>
         <div className="flex items-center">
@@ -313,7 +312,7 @@ const HowItWorks = () => {
         <h3 className="mb-6 text-center text-xl font-bold text-[primaryGreen]">
           3. Receiving Requests
         </h3>
-        <p className="font-semibold text-center md:text-left">
+        <p className="text-center font-semibold md:text-left">
           Always have an option to book a night.
         </p>
         <div className="flex items-center">
@@ -360,19 +359,22 @@ const AutoManual = () => {
           <div className="flex items-start">
             <BsLightningCharge className="mr-2 text-primaryGreen" />
             <p className="text-sm text-gray-600">
-              <strong>Instant Matching:</strong> Automatically respond to matches based on your preferences.
+              <strong>Instant Matching:</strong> Automatically respond to
+              matches based on your preferences.
             </p>
           </div>
           <div className="flex items-start">
             <BsCalendar4 className="mr-2 text-primaryGreen" />
             <p className="text-sm text-gray-600">
-              <strong>Book It Now:</strong> Enable travelers to book instantly without needing approval.
+              <strong>Book It Now:</strong> Enable travelers to book instantly
+              without needing approval.
             </p>
           </div>
           <div className="flex items-start">
             <BsSliders className="mr-2 text-primaryGreen" />
             <p className="text-sm text-gray-600">
-              <strong>Custom Rules:</strong> Set a hidden discount for dates not booked a certain number of days out.
+              <strong>Custom Rules:</strong> Set a hidden discount for dates not
+              booked a certain number of days out.
             </p>
           </div>
         </div>
@@ -394,19 +396,22 @@ const AutoManual = () => {
           <div className="flex items-start">
             <BsClipboard className="mr-2 text-primaryGreen" />
             <p className="text-sm text-gray-600">
-              <strong>Set request to book:</strong> Approve each booking manually.
+              <strong>Set request to book:</strong> Approve each booking
+              manually.
             </p>
           </div>
           <div className="flex items-start">
             <BsPerson className="mr-2 text-primaryGreen" />
             <p className="text-sm text-gray-600">
-              <strong>Respond to requests:</strong> Accept, deny, or submit counteroffers.
+              <strong>Respond to requests:</strong> Accept, deny, or submit
+              counteroffers.
             </p>
           </div>
           <div className="flex items-start">
             <BsCalendar4 className="mr-2 text-primaryGreen" />
             <p className="text-sm text-gray-600">
-              <strong>Inspect traveler details:</strong> Verify profiles before confirming bookings.
+              <strong>Inspect traveler details:</strong> Verify profiles before
+              confirming bookings.
             </p>
           </div>
         </div>
@@ -586,7 +591,7 @@ const Features2 = () => {
     <section className="mb-12 mt-12 py-12">
       <div className="flex flex-col items-center space-y-12">
         {/* First Row: Image on left, text on right */}
-        <div className="flex w-full max-w-4xl items-center gap-12 sm:flex-row flex-col text-center sm:text-left mx-auto px-6">
+        <div className="mx-auto flex w-full max-w-4xl flex-col items-center gap-12 px-6 text-center sm:flex-row sm:text-left">
           <div className="relative h-64 w-64 flex-shrink-0 overflow-hidden rounded-lg bg-gray-200 shadow-md">
             <Image
               src="/path/to/image-requests.jpg"
@@ -595,13 +600,13 @@ const Features2 = () => {
               alt="Requests"
             />
           </div>
-          <h2 className="text-xl sm:text-2xl font-semibold text-[#333]">
+          <h2 className="text-xl font-semibold text-[#333] sm:text-2xl">
             Requests
           </h2>
         </div>
 
         {/* Second Row: Text on left, image on right */}
-        <div className="flex w-full max-w-4xl items-center gap-12 sm:flex-row-reverse flex-col text-center sm:text-left mx-auto px-6">
+        <div className="mx-auto flex w-full max-w-4xl flex-col items-center gap-12 px-6 text-center sm:flex-row-reverse sm:text-left">
           <div className="relative h-64 w-64 flex-shrink-0 overflow-hidden rounded-lg bg-gray-200 shadow-md">
             <Image
               src="/path/to/image-cal.jpg"
@@ -610,13 +615,11 @@ const Features2 = () => {
               alt="Cal"
             />
           </div>
-          <h2 className="text-xl sm:text-2xl font-semibold text-[#333]">
-            Cal
-          </h2>
+          <h2 className="text-xl font-semibold text-[#333] sm:text-2xl">Cal</h2>
         </div>
 
         {/* Third Row: Image on left, text on right */}
-        <div className="flex w-full max-w-4xl items-center gap-12 sm:flex-row flex-col text-center sm:text-left mx-auto px-6">
+        <div className="mx-auto flex w-full max-w-4xl flex-col items-center gap-12 px-6 text-center sm:flex-row sm:text-left">
           <div className="relative h-64 w-64 flex-shrink-0 overflow-hidden rounded-lg bg-gray-200 shadow-md">
             <Image
               src="/path/to/image-customized-pricing.jpg"
@@ -625,7 +628,7 @@ const Features2 = () => {
               alt="Customized Pricing"
             />
           </div>
-          <h2 className="text-xl sm:text-2xl font-semibold text-[#333]">
+          <h2 className="text-xl font-semibold text-[#333] sm:text-2xl">
             Customized Pricing
           </h2>
         </div>
