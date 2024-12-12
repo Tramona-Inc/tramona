@@ -67,13 +67,13 @@ export const aboutLinkItems = [
 // <----------- HOST MOBILE LINKS ---------->
 export const hostManageLinks = [
   { href: "/host", title: "Dashboard", icon: LayoutDashboard },
-  { href: "listings", title: "Properties", icon: HouseIcon },
-  { href: "team", title: "Team", icon: UsersIcon },
+  { href: "/host/properties", title: "Properties", icon: HouseIcon },
+  { href: "/host/team", title: "Team", icon: UsersIcon },
 ];
 
 export const hostAccountLinks = [
-  { href: "finances", title: "Earnings", icon: HandCoins },
-  { href: "settings", title: "Settings", icon: SettingsIcon },
+  { href: "/host/finances", title: "Earnings", icon: HandCoins },
+  { href: "/settings", title: "Settings", icon: SettingsIcon },
 ];
 
 // ----------- HOST DESKTOP LINKS
