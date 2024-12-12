@@ -3,9 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrency } from "@/utils/utils"; // Ensure this doesn't divide by 100
-import { Badge } from "../ui/badge";
 import { Slider } from "../ui/slider";
-import { SlidersHorizontal } from "lucide-react";
 
 export default function HostCalculator() {
   const [vacancyRate, setVacancyRate] = useState(50);
@@ -123,7 +121,7 @@ export default function HostCalculator() {
                 {error}
               </span>
             )}
-            <div className="mt-4 flex flex-col gap-2 *:flex-1 @sm:flex-row">
+            <div className="*:flex-1 mt-4 flex flex-col gap-2 @sm:flex-row">
               <Button
                 onClick={() => setVacancy(70)}
                 variant="secondary"
@@ -153,7 +151,7 @@ export default function HostCalculator() {
               </Button>
             </div>
           </div>
-          <div className="flex flex-col gap-2 *:flex-1 @sm:flex-row">
+          <div className="*:flex-1 flex flex-col gap-2 @sm:flex-row">
             <div>
               <label className="mb-1 block text-sm font-medium text-zinc-700">
                 Average Price per Night

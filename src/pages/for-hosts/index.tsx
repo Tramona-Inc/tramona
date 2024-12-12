@@ -13,7 +13,6 @@ import { Check, CircleCheckBig } from "lucide-react";
 import Onboarding1 from "@/components/host/onboarding/Onboarding1";
 import { useHostOnboarding } from "@/utils/store/host-onboarding";
 import { useRouter } from "next/router";
-import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
 import { api } from "@/utils/api";
 
 type Tabs = {
@@ -315,7 +314,7 @@ function SendUsAnEmail() {
 
 export function StickyTopBar() {
   const { data: isHospitableCustomer } =
-  api.pms.getHospitableCustomer.useQuery();
+    api.pms.getHospitableCustomer.useQuery();
 
   console.log(Boolean(isHospitableCustomer));
   return (
@@ -328,7 +327,10 @@ export function StickyTopBar() {
         </Link>
         <div className="flex items-center space-x-6">
           <span className="text-xl font-medium">Ready to List?</span>
-          <Link href={Boolean(isHospitableCustomer) ? "/host" : "/host-onboarding"} passHref>
+          <Link
+            href={Boolean(isHospitableCustomer) ? "/host" : "/host-onboarding"}
+            passHref
+          >
             <Button className="bg-primaryGreen px-6 py-3 text-lg font-semibold text-white">
               Tramona Setup
             </Button>

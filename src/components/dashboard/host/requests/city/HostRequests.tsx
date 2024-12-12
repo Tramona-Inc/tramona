@@ -6,7 +6,7 @@ import RequestCard, {
 } from "@/components/requests/RequestCard";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { Offer, type Property } from "@/server/db/schema";
+import { type Property } from "@/server/db/schema";
 import HostConfirmRequestDialog from "../../HostConfirmRequestDialog";
 import HostFinishRequestDialog from "./HostFinishRequestDialog";
 import { ChevronLeft, Home } from "lucide-react";
@@ -15,10 +15,12 @@ import {
   RequestsPageOfferData,
   type SeparatedData,
 } from "@/server/server-utils";
-import { formatOfferData, separateByPriceAndAgeRestriction } from "@/utils/utils";
+import {
+  formatOfferData,
+  separateByPriceAndAgeRestriction,
+} from "@/utils/utils";
 import { useToast } from "@/components/ui/use-toast";
 import { errorToast } from "@/utils/toasts";
-import { HostRequestsPageOfferData } from "@/server/api/routers/propertiesRouter";
 import PastOfferCard from "./PastOfferCard";
 import PastOfferWithdrawDialog from "./PastOfferWithdrawDialog";
 import { Card, CardContent } from "@/components/ui/card";
@@ -70,7 +72,8 @@ export default function HostRequests() {
 
   api.properties.getHostPropertiesWithRequests.useQuery(undefined, {
     onSuccess: (fetchedProperties) => {
-      const separatedProperties = separateByPriceAndAgeRestriction(fetchedProperties);
+      const separatedProperties =
+        separateByPriceAndAgeRestriction(fetchedProperties);
       setSeparatedData(separatedProperties);
     },
   });

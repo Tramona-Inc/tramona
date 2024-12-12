@@ -1,10 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import {  useEffect, useState } from "react";
 
 import UnclaimedOfferCards from "@/components/unclaimed-offers/UnclaimedOfferCards";
 import { LoadingProvider } from "@/components/unclaimed-offers/UnclaimedMapLoadingContext";
 
 // import type { fetchNextPageOfAdjustedPropertiesType } from "@/components/landing-page/search/SearchPropertiesMap";
-import type { InfiniteQueryObserverResult } from "@tanstack/react-query";
 import { useAdjustedProperties } from "../landing-page/search/AdjustedPropertiesContext";
 import { useCitiesFilter } from "@/utils/store/cities-filter";
 
