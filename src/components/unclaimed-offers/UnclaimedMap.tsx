@@ -86,18 +86,16 @@ export default function UnclaimedMap() {
 
   return (
     <LoadingProvider>
-      <div className="flex h-screen-minus-header-n-footer w-full sm:h-screen-minus-header-n-footer-n-searchbar">
-        <div
-          className={`h-full-minus-searchbar mx-auto w-full max-w-7xl px-2 ${showMap ? "hidden" : "h-full w-full"}`}
-        >
+      <div className="w-full">
+        <div className={`w-full ${showMap ? "hidden" : "w-full"}`}>
           {isSearching ? (
-            <div className="flex h-full flex-col items-center justify-center">
+            <div className="flex flex-col items-center justify-center py-12">
               <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-primaryGreen border-t-transparent"></div>
               <p className="text-lg font-semibold text-gray-700">
                 Finding your perfect stay...
               </p>
               <p className="mt-2 text-sm text-gray-500">
-                We&quot;re searching for the best offers just for you
+                We&apos;re searching for the best offers just for you
               </p>
             </div>
           ) : (
@@ -105,26 +103,7 @@ export default function UnclaimedMap() {
               <UnclaimedOfferCards mapBoundaries={mapBoundaries} />
             </div>
           )}
-          {/* <div className="fixed bottom-10 left-1/2 -translate-x-1/2 transform rounded-full md:hidden">
-            <Button size="sm" onClick={toggleView} className="text-xs">
-              Show Map
-            </Button>
-          </div> */}
         </div>
-        {/* <div
-          className={`mx-1 h-full md:flex md:w-1/3 md:flex-grow ${showMap ? "flex h-full w-full md:hidden" : "hidden"}`}
-        >
-          <SearchPropertiesMap
-            setFunctionRef={setFunctionRef}
-            mapBoundaries={mapBoundaries}
-            setMapBoundaries={setMapBoundaries}
-          />
-          <div className="fixed bottom-10 left-1/2 -translate-x-1/2 transform rounded-full md:hidden">
-            <Button size={"sm"} onClick={toggleView} className="text-xs">
-              Show List
-            </Button>
-          </div>
-        </div> */}
       </div>
     </LoadingProvider>
   );
