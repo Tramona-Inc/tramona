@@ -61,13 +61,11 @@ export default function PriceDetailsBeforeTax({
       priceWithApplicableDiscount =
         scrapedPrice * (100 - applicableDiscount) * 0.01;
     } else if (
-      property.requestToBookMaxDiscountPercentage &&
-      property.requestToBookMaxDiscountPercentage > 0
+      property.requestToBookDiscountPercentage &&
+      property.requestToBookDiscountPercentage > 0
     ) {
       priceWithApplicableDiscount =
-        scrapedPrice *
-        (100 - property.requestToBookMaxDiscountPercentage) *
-        0.01;
+        scrapedPrice * (100 - property.requestToBookDiscountPercentage) * 0.01;
     }
   }
 

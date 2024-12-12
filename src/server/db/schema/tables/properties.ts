@@ -378,8 +378,8 @@ export const properties = pgTable(
     bookItNowDiscountTiers: jsonb("book_it_now_discount_tiers").$type<
       DiscountTier[]
     >(),
-    requestToBookMaxDiscountPercentage: integer(
-      "request_to_book_max_discount_percentage",
+    requestToBookDiscountPercentage: integer(
+      "request_to_book_discount_percentage",
     )
       .notNull()
       .default(5),

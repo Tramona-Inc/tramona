@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useState } from "react";
+import React, { useMemo, useEffect } from "react";
 import { ChevronLeft, ChevronRight, ChevronDown, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,14 +11,12 @@ import {
 import { api } from "@/utils/api";
 import MonthCalendar from "./MonthCalendar";
 import CalendarSettings from "./CalendarSettings";
+import { useState } from "react";
 import { Property } from "@/server/db/schema/tables/properties";
 import { eachDayOfInterval, format, isBefore, parseISO } from "date-fns";
 import HostICalSync from "../HostICalSync";
-import { useRouter } from "next/router";
 
 export default function CalendarComponent() {
-  const router = useRouter();
-  const { propertyId } = router.query;
   const [date, setDate] = useState<Date>(new Date());
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(
     null,
@@ -30,14 +28,8 @@ export default function CalendarComponent() {
 
   // Set initial selected property when data loads
   useEffect(() => {
-    if (hostProperties) {
-      const initialProperty =
-        hostProperties.find((property) => property.id === Number(propertyId)) ??
-        hostProperties[0] ??
-        null;
-      setSelectedProperty(initialProperty);
-    }
-  }, [hostProperties, propertyId]);
+    setSelectedProperty(hostProperties?.[0] ?? null);
+  }, [hostProperties]);
 
   // const [editing, setEditing] = useState(false);
   const [selectedRange, setSelectedRange] = useState<{
@@ -229,16 +221,7 @@ export default function CalendarComponent() {
                   {hostProperties?.map((property) => (
                     <DropdownMenuItem
                       key={property.id}
-                      onSelect={() =>
-                        void router.push(
-                          {
-                            pathname: router.pathname,
-                            query: { ...router.query, propertyId: property.id },
-                          },
-                          undefined,
-                          { shallow: true },
-                        )
-                      }
+                      onSelect={() => setSelectedProperty(property)}
                     >
                       {property.name}
                     </DropdownMenuItem>
@@ -283,7 +266,7 @@ export default function CalendarComponent() {
               Edit iCal Link
             </Button> */}
 
-            <HostICalSync property={selectedProperty} />
+            <HostICalSync property={selectedProperty}/>
             {/* <div className="w-full sm:w-auto sm:flex-1" />
             <Button
               variant="outline"

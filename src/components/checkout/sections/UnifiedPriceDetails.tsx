@@ -40,7 +40,7 @@ export function UnifiedPriceDetails({
   const items = [
     {
       title: `${formatCurrency(nightlyPrice)} x ${plural(numberOfNights, "night")}`,
-      price: `${formatCurrency(unifiedCheckoutData.pricing.travelerOfferedPriceBeforeFees)}`,
+      price: `${formatCurrency(unifiedCheckoutData.pricing.travelerOfferedPriceBeforeFees / numberOfNights)}`,
     },
     {
       title: "Cleaning fee",

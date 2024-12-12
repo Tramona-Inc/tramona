@@ -577,22 +577,20 @@ export function separateByPriceRestriction(
       );
 
     return {
-      normal: {
-        city: cityData.city,
-        requests: normalRequests,
+      normal: { 
+        city: cityData.city, 
+        requests: normalRequests 
       },
-      outsidePriceRestriction: {
-        city: cityData.city,
-        requests: outsideRequests,
+      outsidePriceRestriction: { 
+        city: cityData.city, 
+        requests: outsideRequests 
       },
     };
   });
 
   return {
     normal: processedData.map((data) => data.normal),
-    outsidePriceRestriction: processedData.map(
-      (data) => data.outsidePriceRestriction,
-    ),
+    outsidePriceRestriction: processedData.map((data) => data.outsidePriceRestriction),
   };
 }
 
@@ -688,7 +686,7 @@ export function getOfferDiscountPercentage(
   else return Math.round(8 + 4 * mulberry32(offer.createdAt.getTime())); // random number between 8 and 12, deterministic based on offer creation time
 }
 
-// export function getrequestToBookMaxDiscountPercentage(offer: {
+// export function getRequestToBookDiscountPercentage(offer: {
 //   createdAt: Date;
 //   travelerOfferedPriceBeforeFees: number;
 //   checkIn: Date;

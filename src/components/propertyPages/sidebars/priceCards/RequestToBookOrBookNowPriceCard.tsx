@@ -57,7 +57,7 @@ export default function RequestToBookOrBookNowPriceCard({
   property: PropertyPageData;
 }) {
   const minDiscount = 0; //where we put host discounts
-  const maxDiscount = property.requestToBookMaxDiscountPercentage;
+  const maxDiscount = 20;
 
   const router = useRouter();
   const { query } = router;
@@ -81,18 +81,12 @@ export default function RequestToBookOrBookNowPriceCard({
     numGuests,
   });
 
-  const [error, setError] = useState<React.ReactNode | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   // Monitor `originalPrice` for errors
   useEffect(() => {
     if (propertyPricing.originalPrice === undefined) {
-      setError(
-        <>
-          Original price is unavailable.
-          <br />
-          Please adjust your dates.
-        </>,
-      );
+      setError("Original price is unavailable. Please adjust your dates.");
     } else {
       setError(null); // Clear the error when `originalPrice` is valid
     }
@@ -172,19 +166,19 @@ export default function RequestToBookOrBookNowPriceCard({
   };
   const presetOptions = [
     {
-      price: propertyPricing.originalPrice!,
-      label: "Buy Now",
-      percentOff: 0,
+      price: propertyPricing.originalPrice! * 0.8,
+      label: "Good request",
+      percentOff: 20,
     },
     {
       price: propertyPricing.originalPrice! * 0.9,
       label: "Better request",
-      percentOff: Math.ceil(property.requestToBookMaxDiscountPercentage / 2),
+      percentOff: 10,
     },
     {
-      price: propertyPricing.originalPrice! * 0.8,
-      label: "Good request",
-      percentOff: property.requestToBookMaxDiscountPercentage,
+      price: propertyPricing.originalPrice!,
+      label: "Buy Now",
+      percentOff: 0,
     },
   ];
 
@@ -199,12 +193,7 @@ export default function RequestToBookOrBookNowPriceCard({
         Math.max(minDiscount, Math.min(newPercentage, maxDiscount)),
       );
     }
-  }, [
-    showRequestInput,
-    requestAmount,
-    propertyPricing.originalPrice,
-    maxDiscount,
-  ]);
+  }, [showRequestInput, requestAmount, propertyPricing.originalPrice]);
 
   const handleRequestChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;
@@ -232,18 +221,8 @@ export default function RequestToBookOrBookNowPriceCard({
   };
 
   const getRequestLikelihood = () => {
-    if (
-      requestPercentage <=
-      property.requestToBookMaxDiscountPercentage * 0.1
-    ) {
-      return "Good chance of acceptance";
-    }
-    if (
-      requestPercentage <=
-      property.requestToBookMaxDiscountPercentage * 0.5
-    ) {
-      return "Moderate chance of acceptance";
-    }
+    if (requestPercentage <= 10) return "Good chance of acceptance";
+    if (requestPercentage <= 15) return "Moderate chance of acceptance";
     return "Lower chance of acceptance";
   };
 
@@ -261,6 +240,27 @@ export default function RequestToBookOrBookNowPriceCard({
     );
     setSelectedPreset(price);
   };
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center">
+        <div className="flex items-center gap-2">
+          <Info className="h-4 w-4 text-red-500" />
+          <div className="mb-1 text-2xl font-bold text-red-500">{error}</div>
+        </div>
+        <p className="pb-4 text-center text-sm text-muted-foreground">
+          Try adjusting your dates or select another property.
+        </p>
+        <Button
+          variant="darkPrimary"
+          className="mt-2 flex min-w-full"
+          onClick={() => router.push("/search")} // Adjust your navigation logic
+        >
+          Search Again
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <Card className="w-full bg-gray-50 shadow-lg">
@@ -313,8 +313,7 @@ export default function RequestToBookOrBookNowPriceCard({
                     date >= new Date(bookedDate.start) &&
                     date <= new Date(bookedDate.end)
                   );
-                }) ??
-                  false)
+                }) ?? false)
               }
             />
           </PopoverContent>
