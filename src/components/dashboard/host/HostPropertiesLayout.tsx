@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Grid, Plus } from "lucide-react";
 import HostProperties from "./HostProperties";
 import {
   type LocationType,
