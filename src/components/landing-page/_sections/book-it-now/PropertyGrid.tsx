@@ -5,7 +5,7 @@ import { PropertyCard } from "./PropertyCard";
 export function PropertyGrid() {
   return (
     <div className="mb-5 space-y-4">
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {Array.from({ length: 9 }).map((_, i) => (
           <PropertyCard key={i} index={i} />
         ))}

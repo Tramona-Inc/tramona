@@ -1,15 +1,9 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { formatCurrency } from "@/utils/utils";
-import { Badge } from "../ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatCurrency } from "@/utils/utils"; // Ensure this doesn't divide by 100
+import { Slider } from "../ui/slider";
 
 export default function HostCalculator() {
   const [vacancyRate, setVacancyRate] = useState(50);
@@ -23,13 +17,7 @@ export default function HostCalculator() {
       optimistic: 0,
     },
   });
-
   const [error, setError] = useState("");
-  const formatNumber = (num: number) => {
-    return new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 }).format(
-      num,
-    );
-  };
 
   const calculateEarnings = useCallback(
     (
@@ -37,20 +25,18 @@ export default function HostCalculator() {
       customAveragePrice: number,
       customCleaningFee: number,
     ): number => {
-      // useCallback
       const daysPerYear = 365;
       const occupiedDays = daysPerYear * (1 - customVacancyRate / 100);
       const earningsPerStay = Math.max(
         0,
         customAveragePrice - customCleaningFee,
       );
-      return occupiedDays * earningsPerStay;
+      return occupiedDays * earningsPerStay * 100; // Multiply by 100
     },
     [],
   );
 
   const calculateAllEarnings = useCallback(() => {
-    // useCallback
     const current = calculateEarnings(vacancyRate, averagePrice, cleaningFee);
     const calculateExtraEarnings = (vacancyReduction: number) => {
       const newVacancyRate = Math.max(0, vacancyRate - vacancyReduction);
@@ -59,10 +45,10 @@ export default function HostCalculator() {
         averagePrice,
         cleaningFee,
       );
-      return Math.max(0, newEarnings - current); // Adds protection for negative values
+      return Math.max(0, newEarnings - current);
     };
     setEarnings({
-      current: current,
+      current,
       tramona: {
         conservative: calculateExtraEarnings(10),
         moderate: calculateExtraEarnings(20),
@@ -77,7 +63,7 @@ export default function HostCalculator() {
 
   const setVacancy = (rate: number) => {
     setVacancyRate(rate);
-    setError(""); // Clears error on valid input
+    setError("");
   };
 
   const getMostLikelyEstimate = () => {
@@ -92,7 +78,6 @@ export default function HostCalculator() {
     min = 0,
     max = Infinity,
   ) => {
-    // Generalized input handler with error handling
     const value = e.target.value === "" ? "" : Number(e.target.value);
     if (value === "" || (value >= min && value <= max)) {
       setValue(value === "" ? 0 : value);
@@ -105,46 +90,68 @@ export default function HostCalculator() {
   return (
     <Card className="w-full max-w-xl overflow-hidden rounded-lg bg-white shadow-lg @container">
       <CardHeader>
-        <CardTitle>
-          How much more could you be making with your short-term rental?
+        <CardTitle className="mt-12 text-center text-[#004236]">
+          How much more could you be making annually?
         </CardTitle>
-        <CardDescription>
-          We turn your empty dates into extra money!
-        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-4 pt-4">
           <div>
-            <label className="mb-1 block text-sm font-medium text-zinc-700">
+            <label className="mb-6 block text-sm font-medium text-zinc-700">
               Vacancy Rate (%)
             </label>
-            <Input
-              type="number"
-              value={vacancyRate || ""}
-              onChange={(e) => handleInputChange(e, setVacancyRate, 0, 100)} // Handles input and error
+            <Slider
+              value={[vacancyRate]}
+              onValueChange={(value) => {
+                if (value[0] !== undefined) {
+                  setVacancyRate(value[0]);
+                }
+              }}
+              min={0}
+              max={100}
+              step={1}
               aria-describedby={error ? "vacancyError" : undefined}
-              className="mb-2 w-full"
-              min="0"
-              max="100"
+              className="mb-4 w-full"
             />
+            <div className="mt-4 text-center text-sm font-medium text-zinc-700">
+              {vacancyRate}%
+            </div>
             {error && (
               <span id="vacancyError" className="text-red-500">
                 {error}
               </span>
             )}
-            <div className="flex flex-col gap-2 *:flex-1 @sm:flex-row">
-              <Button onClick={() => setVacancy(70)} variant="secondary">
+            <div className="*:flex-1 mt-4 flex flex-col gap-2 @sm:flex-row">
+              <Button
+                onClick={() => setVacancy(70)}
+                variant="secondary"
+                className={`border-primaryGreen ${
+                  vacancyRate === 70 ? "bg-primaryGreen text-white" : "bg-white"
+                } `}
+              >
                 High (70%)
               </Button>
-              <Button onClick={() => setVacancy(50)} variant="secondary">
+              <Button
+                onClick={() => setVacancy(50)}
+                variant="secondary"
+                className={`border-primaryGreen ${
+                  vacancyRate === 50 ? "bg-primaryGreen text-white" : "bg-white"
+                } `}
+              >
                 Medium (50%)
               </Button>
-              <Button onClick={() => setVacancy(25)} variant="secondary">
+              <Button
+                onClick={() => setVacancy(25)}
+                variant="secondary"
+                className={`border-primaryGreen ${
+                  vacancyRate === 25 ? "bg-primaryGreen text-white" : "bg-white"
+                }`}
+              >
                 Low (25%)
               </Button>
             </div>
           </div>
-          <div className="flex flex-col gap-2 *:flex-1 @sm:flex-row">
+          <div className="*:flex-1 flex flex-col gap-2 @sm:flex-row">
             <div>
               <label className="mb-1 block text-sm font-medium text-zinc-700">
                 Average Price per Night
@@ -154,7 +161,7 @@ export default function HostCalculator() {
                 type="number"
                 inputMode="decimal"
                 value={averagePrice || ""}
-                onChange={(e) => handleInputChange(e, setAveragePrice)} // Handles input and error
+                onChange={(e) => handleInputChange(e, setAveragePrice)}
                 className="w-full"
                 min="0"
               />
@@ -168,22 +175,21 @@ export default function HostCalculator() {
                 type="number"
                 inputMode="decimal"
                 value={cleaningFee || ""}
-                onChange={(e) => handleInputChange(e, setCleaningFee)} // Handles input and error
+                onChange={(e) => handleInputChange(e, setCleaningFee)}
                 className="w-full"
                 min="0"
               />
             </div>
           </div>
         </div>
-        <div className="rounded-md bg-zinc-100 p-4">
+        <div className="rounded-md border border-b p-4 pb-2">
           <h3 className="font-semibold text-zinc-500">
             Current Annual Earnings
           </h3>
           <p className="text-3xl font-bold text-zinc-900">
-            {formatNumber(earnings.current * 100)}
+            {formatCurrency(earnings.current)}
           </p>
         </div>
-
         <div className="space-y-4">
           <h3 className="text-center text-xl font-semibold text-zinc-800">
             Potential Extra Annual Earnings with Tramona
@@ -196,7 +202,7 @@ export default function HostCalculator() {
                 reduction: 10,
               },
               {
-                title: "Moderate",
+                title: "Most likely",
                 value: earnings.tramona.moderate,
                 reduction: 20,
               },
@@ -234,18 +240,17 @@ const EstimateCard = ({
   reduction: number;
   isMostLikely: boolean;
 }) => (
-  <div className="relative pt-6">
-    {isMostLikely && (
-      <div className="absolute left-0 right-0 top-0 rounded-t-md bg-primaryGreen py-1 text-center text-sm font-semibold text-white">
-        Most likely
-      </div>
-    )}
-    <div className="flex flex-col items-center rounded-lg border p-4">
-      <p className="text-sm font-semibold">{title}</p>
-      <p className="text-2xl font-bold text-green-600">
-        +{formatCurrency(value * 100)}
-      </p>
-      <Badge>-{reduction}% vacancy</Badge>
-    </div>
+  <div
+    className={`flex flex-col items-center rounded-lg border-2 p-4 ${
+      isMostLikely
+        ? "border-4 border-primaryGreen text-primaryGreen"
+        : "border-gray-300"
+    }`}
+  >
+    <p className="text-sm font-semibold text-gray-800">{title}</p>
+    <p className="text-2xl font-bold text-primaryGreen">
+      +{formatCurrency(value)}
+    </p>
+    <p className="text-sm text-gray-600">-{reduction}% vacancy</p>
   </div>
 );

@@ -51,7 +51,7 @@ import { HttpsProxyAgent } from "https-proxy-agent";
 import * as cheerio from "cheerio";
 import { sendSlackMessage } from "./slack";
 import { HOST_MARKUP, TRAVELER_MARKUP } from "@/utils/constants";
-import { HostRequestsPageData } from "./api/routers/propertiesRouter";
+import { HostRequestsPageData, HostRequestsPageOfferData } from "./api/routers/propertiesRouter";
 import { Session } from "next-auth";
 import { calculateTotalTax } from "@/utils/payment-utils/taxData";
 import {
@@ -530,7 +530,7 @@ export async function getRequestsForProperties(
     request: Request & {
       traveler: Pick<
         User,
-        "firstName" | "lastName" | "name" | "image" | "location" | "about"
+        "firstName" | "lastName" | "name" | "image" | "location" | "about" | "dateOfBirth"
       >;
     };
   }[] = [];
@@ -612,6 +612,7 @@ export async function getRequestsForProperties(
                 lastName: true,
                 location: true,
                 about: true,
+                dateOfBirth: true,
               },
             },
           },
@@ -629,6 +630,7 @@ export async function getRequestsForProperties(
         lastName: request.madeByGroup.owner.lastName,
         location: request.madeByGroup.owner.location,
         about: request.madeByGroup.owner.about,
+        dateOfBirth: request.madeByGroup.owner.dateOfBirth,
       };
       propertyToRequestMap.push({
         property: {
@@ -878,6 +880,10 @@ export async function getPropertyOriginalPrice(
 export interface SeparatedData {
   normal: HostRequestsPageData[];
   outsidePriceRestriction: HostRequestsPageData[];
+}
+
+export interface RequestsPageOfferData {
+  sent: HostRequestsPageOfferData[];
 }
 
 //update spread on every fetch to keep information updated

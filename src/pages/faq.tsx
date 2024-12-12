@@ -353,7 +353,7 @@ export default function FAQ() {
           </p>
 
           <div className="flex justify-center">
-            <Link href={activeTab === "hosts" ? "/for-hosts" : "/"} passHref>
+            <Link href={activeTab === "hosts" ? "/why-list" : "/"} passHref>
               <Button className="bg-[#134E4A] text-white hover:bg-[#0D3D3B]">
                 {activeTab === "hosts" ? "Become a host" : "Make a request"}
               </Button>

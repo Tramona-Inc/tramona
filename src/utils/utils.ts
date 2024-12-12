@@ -1,5 +1,5 @@
 import { Offer, REFERRAL_CODE_LENGTH } from "@/server/db/schema";
-import { SeparatedData } from "@/server/server-utils";
+import { RequestsPageOfferData, SeparatedData } from "@/server/server-utils";
 import { useWindowSize } from "@uidotdev/usehooks";
 import { clsx, type ClassValue } from "clsx";
 import {
@@ -16,7 +16,10 @@ import { twMerge } from "tailwind-merge";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import duration from "dayjs/plugin/duration";
-import { HostRequestsPageData } from "@/server/api/routers/propertiesRouter";
+import {
+  HostRequestsPageData,
+  HostRequestsPageOfferData,
+} from "@/server/api/routers/propertiesRouter";
 import * as cheerio from "cheerio";
 import { useSession } from "next-auth/react";
 import { api } from "./api";
@@ -525,7 +528,7 @@ export function scrollToTop() {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-export function separateByPriceRestriction(
+export function separateByPriceAndAgeRestriction(
   organizedData: HostRequestsPageData[],
 ): SeparatedData {
   const processedData = organizedData.map((cityData) => {
@@ -534,20 +537,28 @@ export function separateByPriceRestriction(
         requestData.request.maxTotalPrice /
         getNumNights(requestData.request.checkIn, requestData.request.checkOut);
 
+      const travelerAge = requestData.request.traveler.dateOfBirth ? getAge(requestData.request.traveler.dateOfBirth) : null;
+
       const normalProperties = requestData.properties.filter((property) => {
         if (property.city === "Seattle, WA, US") {
           console.log(property.priceRestriction, nightlyPrice);
         }
         return (
-          property.priceRestriction == null ||
-          property.priceRestriction <= nightlyPrice
+          (property.priceRestriction == null ||
+          property.priceRestriction <= nightlyPrice) &&
+          (property.ageRestriction == null ||
+          (travelerAge !== null &&
+          travelerAge >= property.ageRestriction))
         );
       });
 
       const outsideProperties = requestData.properties.filter(
         (property) =>
-          property.priceRestriction != null &&
-          property.priceRestriction >= nightlyPrice * 1.15,
+          (property.priceRestriction != null &&
+          property.priceRestriction >= nightlyPrice * 1.15) &&
+          (property.ageRestriction != null &&
+          (travelerAge === null ||
+          travelerAge < property.ageRestriction))
       );
 
       return {
@@ -574,24 +585,30 @@ export function separateByPriceRestriction(
       );
 
     return {
-      normal:
-        normalRequests.length > 0
-          ? { city: cityData.city, requests: normalRequests }
-          : null,
-      outsidePriceRestriction:
-        outsideRequests.length > 0
-          ? { city: cityData.city, requests: outsideRequests }
-          : null,
+      normal: {
+        city: cityData.city,
+        requests: normalRequests
+      },
+      outsidePriceRestriction: {
+        city: cityData.city,
+        requests: outsideRequests
+      },
     };
   });
 
   return {
-    normal: processedData
-      .map((data) => data.normal) //
-      .filter(Boolean),
-    outsidePriceRestriction: processedData
-      .map((data) => data.outsidePriceRestriction) //
-      .filter(Boolean),
+    normal: processedData.map((data) => data.normal),
+    outsidePriceRestriction: processedData.map(
+      (data) => data.outsidePriceRestriction,
+    ),
+  };
+}
+
+export function formatOfferData(
+  organizedData: HostRequestsPageOfferData[],
+): RequestsPageOfferData {
+  return {
+    sent: organizedData,
   };
 }
 
@@ -679,7 +696,7 @@ export function getOfferDiscountPercentage(
   else return Math.round(8 + 4 * mulberry32(offer.createdAt.getTime())); // random number between 8 and 12, deterministic based on offer creation time
 }
 
-// export function getRequestToBookDiscountPercentage(offer: {
+// export function getrequestToBookMaxDiscountPercentage(offer: {
 //   createdAt: Date;
 //   travelerOfferedPriceBeforeFees: number;
 //   checkIn: Date;

@@ -305,6 +305,7 @@ export const properties = pgTable(
     countryISO: varchar("country_iso", { length: 3 }).notNull(),
 
     originalListingUrl: varchar("original_listing_url"),
+    // checkInInfo: varchar("check_in_info"),
     checkInType: checkInEnum("check_in_type"),
     additionalCheckInInfo: varchar("additional_check_in_info"),
     checkOutInfo: checkOutEnum("check_out_info").array(),
@@ -377,8 +378,8 @@ export const properties = pgTable(
     bookItNowDiscountTiers: jsonb("book_it_now_discount_tiers").$type<
       DiscountTier[]
     >(),
-    requestToBookDiscountPercentage: integer(
-      "request_to_book_discount_percentage",
+    requestToBookMaxDiscountPercentage: integer(
+      "request_to_book_max_discount_percentage",
     )
       .notNull()
       .default(5),

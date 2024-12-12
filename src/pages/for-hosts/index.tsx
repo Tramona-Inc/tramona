@@ -13,7 +13,7 @@ import { Check, CircleCheckBig } from "lucide-react";
 import Onboarding1 from "@/components/host/onboarding/Onboarding1";
 import { useHostOnboarding } from "@/utils/store/host-onboarding";
 import { useRouter } from "next/router";
-import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
+import { api } from "@/utils/api";
 
 type Tabs = {
   id: number;
@@ -112,7 +112,7 @@ function MainSection({ requestFeed }: { requestFeed: FeedRequestItem[] }) {
   );
 }
 
-function Questions() {
+export function Questions() {
   const router = useRouter();
 
   const buttons = [
@@ -312,7 +312,11 @@ function SendUsAnEmail() {
   );
 }
 
-function StickyTopBar() {
+export function StickyTopBar() {
+  const { data: isHospitableCustomer } =
+    api.pms.getHospitableCustomer.useQuery();
+
+  console.log(Boolean(isHospitableCustomer));
   return (
     <div className="fixed left-0 right-0 top-0 z-50 bg-white px-4 py-3 shadow-md">
       <div className="mx-auto flex max-w-7xl items-center justify-between">
@@ -323,7 +327,10 @@ function StickyTopBar() {
         </Link>
         <div className="flex items-center space-x-6">
           <span className="text-xl font-medium">Ready to List?</span>
-          <Link href="/host-onboarding">
+          <Link
+            href={Boolean(isHospitableCustomer) ? "/host" : "/host-onboarding"}
+            passHref
+          >
             <Button className="bg-primaryGreen px-6 py-3 text-lg font-semibold text-white">
               Tramona Setup
             </Button>
@@ -334,7 +341,7 @@ function StickyTopBar() {
   );
 }
 
-function MobileStickyBar() {
+export function MobileStickyBar() {
   return (
     <div className="fixed inset-x-0 z-50">
       <div className="fixed left-0 right-0 top-0 bg-white p-4 shadow-md">
