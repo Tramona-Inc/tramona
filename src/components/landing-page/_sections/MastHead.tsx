@@ -3,7 +3,6 @@ import { BookItNowSection } from "./book-it-now/BookItNowSection";
 import { NameYourPriceSection } from "./name-your-price/NameYourPriceSection";
 import landingBg2 from "public/assets/images/landing-page/blakesingleton_httpss.mj.runL0v8UkwKU1k_this_will_be_the_backgr_0c65f94f-431e-4e9d-bae4-58e5ec2999e1.png";
 import { useRouter } from "next/router";
-import DynamicDesktopSearchBar from "../search/DynamicDesktopSearchBar";
 import { AdjustedPropertiesProvider } from "../search/AdjustedPropertiesContext";
 import { DesktopSearchTab } from "../search/DesktopSearchTab";
 import { useEffect, useState, useRef } from "react";
@@ -85,6 +84,7 @@ export default function MastHead() {
           <DesktopSearchTab
             isCompact={isScrolled}
             handleTabChange={handleTabChange}
+            isLandingPage={true}
           />
         </AdjustedPropertiesProvider>
 

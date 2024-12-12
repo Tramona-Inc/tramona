@@ -740,40 +740,65 @@ export const propertiesRouter = createTRPCRouter({
       return { count };
     }),
 
+  updateRequestToBook: protectedProcedure
+    .input(
+      z.object({
+        propertyId: z.number(),
+        requestToBookMaxDiscountPercentage: z.number(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      await db
+        .update(properties)
+        .set({
+          requestToBookMaxDiscountPercentage:
+            input.requestToBookMaxDiscountPercentage,
+        })
+        .where(eq(properties.id, input.propertyId));
+      console.log("YAY");
+      return;
+    }),
+
   updateAutoOffer: protectedProcedure
     .input(
       z.object({
         id: z.number(),
-        autoOfferEnabled: z.boolean(),
-        autoOfferDiscountTiers: z.array(discountTierSchema),
+        autoOfferEnabled: z.boolean().optional(),
+        autoOfferDiscountTiers: z.array(discountTierSchema).optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       await ctx.db
         .update(properties)
         .set({
-          autoOfferEnabled: input.autoOfferEnabled,
-          autoOfferDiscountTiers: input.autoOfferDiscountTiers,
+          ...(input.autoOfferEnabled !== undefined && {
+            autoOfferEnabled: input.autoOfferEnabled,
+          }),
+          ...(input.autoOfferDiscountTiers !== undefined && {
+            autoOfferDiscountTiers: input.autoOfferDiscountTiers,
+          }),
         })
         .where(eq(properties.id, input.id));
     }),
+
   updateBookItNow: protectedProcedure
     .input(
       z.object({
         id: z.number(),
-        bookItNowEnabled: z.boolean(),
-        bookItNowDiscountTiers: z.array(discountTierSchema),
-        requestToBookDiscountPercentage: z.number(),
+        bookItNowEnabled: z.boolean().optional(),
+        bookItNowDiscountTiers: z.array(discountTierSchema).optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       await ctx.db
         .update(properties)
         .set({
-          bookItNowEnabled: input.bookItNowEnabled,
-          bookItNowDiscountTiers: input.bookItNowDiscountTiers,
-          requestToBookDiscountPercentage:
-            input.requestToBookDiscountPercentage,
+          ...(input.bookItNowEnabled !== undefined && {
+            bookItNowEnabled: input.bookItNowEnabled,
+          }),
+          ...(input.bookItNowDiscountTiers && {
+            bookItNowDiscountTiers: input.bookItNowDiscountTiers,
+          }),
         })
         .where(eq(properties.id, input.id));
     }),

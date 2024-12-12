@@ -17,7 +17,10 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { AirbnbSearchResult, useAdjustedProperties } from "../landing-page/search/AdjustedPropertiesContext";
+import {
+  AirbnbSearchResult,
+  useAdjustedProperties,
+} from "../landing-page/search/AdjustedPropertiesContext";
 import AddUnclaimedOffer from "./AddUnclaimedOffer";
 import { useLoading } from "./UnclaimedMapLoadingContext";
 import { Badge } from "../ui/badge";
@@ -41,7 +44,7 @@ export default function UnclaimedOfferCards({
   const { adjustedProperties } = useAdjustedProperties();
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 24;
+  const itemsPerPage = 40;
   const { data: session } = useSession();
   const { isLoading } = useLoading();
   const [isDelayedLoading, setIsDelayedLoading] = useState(true);
@@ -122,40 +125,83 @@ export default function UnclaimedOfferCards({
 
   const renderPaginationItems = useCallback(() => {
     const items = [];
-
-    for (let i = 1; i <= totalPages; i++) {
+    const SIBLING_COUNT = 1;
+    const BOUNDARY_COUNT = 1;
+  
+    const createPageItem = (pageNum: number) => (
+      <PaginationItem key={pageNum}>
+        <PaginationLink
+          href={`?page=${pageNum}`}
+          onClick={(e) => {
+            e.preventDefault();
+            handlePageChange(pageNum);
+          }}
+          isActive={currentPage === pageNum}
+        >
+          {pageNum}
+        </PaginationLink>
+      </PaginationItem>
+    );
+  
+    // Always show first BOUNDARY_COUNT pages
+    for (let i = 1; i <= Math.min(BOUNDARY_COUNT, totalPages); i++) {
+      items.push(createPageItem(i));
+    }
+  
+    // Calculate range around current page
+    const startPage = Math.max(BOUNDARY_COUNT + 1, currentPage - SIBLING_COUNT);
+    const endPage = Math.min(totalPages - BOUNDARY_COUNT, currentPage + SIBLING_COUNT);
+  
+    // Add ellipsis after boundary if there's a gap
+    if (startPage > BOUNDARY_COUNT + 1) {
       items.push(
-        <PaginationItem key={i}>
-          <PaginationLink
-            href={`?page=${i}`}
-            onClick={(e) => {
-              e.preventDefault();
-              handlePageChange(i);
-            }}
-            isActive={currentPage === i}
-          >
-            {i}
-          </PaginationLink>
-        </PaginationItem>,
+        <PaginationItem key="start-ellipsis" className="px-2">
+          ...
+        </PaginationItem>
       );
     }
-
+  
+    // Add pages around current page
+    for (let i = startPage; i <= endPage; i++) {
+      if (i > BOUNDARY_COUNT && i < totalPages - BOUNDARY_COUNT + 1) {
+        items.push(createPageItem(i));
+      }
+    }
+  
+    // Add ellipsis before end boundary if there's a gap
+    if (endPage < totalPages - BOUNDARY_COUNT) {
+      items.push(
+        <PaginationItem key="end-ellipsis" className="px-2">
+          ...
+        </PaginationItem>
+      );
+    }
+  
+    // Always show last BOUNDARY_COUNT pages
+    for (let i = Math.max(totalPages - BOUNDARY_COUNT + 1, BOUNDARY_COUNT + 1); i <= totalPages; i++) {
+      if (i > endPage) {
+        items.push(createPageItem(i));
+      }
+    }
+  
     return items;
   }, [totalPages, currentPage, handlePageChange]);
 
   return (
-    <div className="h-full w-full flex-col">
-      <div className="flex h-screen-minus-header-n-footer w-full sm:h-screen-minus-header-n-footer-n-searchbar">
-        <div className="mr-auto h-full w-full overflow-y-scroll px-4 scrollbar-hide lg:px-2">
+    <div className="w-full">
+      <div className="w-full">
+        <div className="mr-auto w-full overflow-y-auto">
           {isDelayedLoading ? (
-            <div className="grid w-full grid-cols-1 gap-x-6 sm:grid-cols-2 md:gap-y-6 lg:grid-cols-3 lg:gap-y-8 xl:gap-y-4 2xl:gap-y-0">
-              {Array(24)
-                .fill(null)
-                .map((_, index) => (
-                  <div key={`skeleton-${index}`}>
-                    <PropertyCardSkeleton />
-                  </div>
-                ))}
+            <div className="mx-auto max-w-[2000px] px-4">
+              <div className="grid w-full grid-cols-1 gap-4 min-[580px]:grid-cols-2 min-[800px]:grid-cols-3 min-[1000px]:grid-cols-4 min-[1200px]:grid-cols-5 min-[1400px]:grid-cols-6">
+                {Array(24)
+                  .fill(null)
+                  .map((_, index) => (
+                    <div key={`skeleton-${index}`}>
+                      <PropertyCardSkeleton />
+                    </div>
+                  ))}
+              </div>
             </div>
           ) : showNoProperties ? (
             <div className="flex h-full w-full items-center justify-center">
@@ -167,68 +213,74 @@ export default function UnclaimedOfferCards({
               </div>
             </div>
           ) : (
-            <div className="flex h-full w-full flex-col">
-              {/* <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"> */}
-              <div className="grid grid-cols-1 gap-4 min-[580px]:grid-cols-2 min-[950px]:grid-cols-3 min-[1150px]:grid-cols-4">
-                {paginatedProperties?.length &&
-                  paginatedProperties.map((property, index) => (
-                    <div
-                      key={index}
-                      className="animate-fade-in"
-                      style={{ animationDelay: `${index * 50}ms` }}
-                    >
-                      <UnMatchedPropertyCard
-                        property={property}
-                      />
-                    </div>
-                  ))}
-              </div>
-              {totalPages >= 1 && (
-                <div className="mt-auto px-6 py-4">
-                  <Pagination>
-                    <PaginationContent>
-                      <PaginationItem>
-                        <PaginationPrevious
-                          href={`?page=${Math.max(1, currentPage - 1)}`}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handlePageChange(Math.max(1, currentPage - 1));
-                          }}
-                          className={
-                            currentPage === 1
-                              ? "pointer-events-none opacity-50"
-                              : ""
-                          }
-                        />
-                      </PaginationItem>
-                      {renderPaginationItems()}
-                      <PaginationItem>
-                        <PaginationNext
-                          href={`?page=${Math.min(totalPages, currentPage + 1)}`}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handlePageChange(
-                              Math.min(totalPages, currentPage + 1),
-                            );
-                          }}
-                          className={
-                            currentPage === totalPages
-                              ? "pointer-events-none opacity-50"
-                              : ""
-                          }
-                        />
-                      </PaginationItem>
-                    </PaginationContent>
-                  </Pagination>
+            <div className="flex w-full flex-col">
+              <div className="mx-auto max-w-[2000px] px-4">
+                <div className="grid w-full grid-cols-1 gap-4 min-[580px]:grid-cols-2 min-[800px]:grid-cols-3 min-[1000px]:grid-cols-4 min-[1200px]:grid-cols-5 min-[1400px]:grid-cols-6">
+                  {paginatedProperties?.length &&
+                    paginatedProperties.map((property, index) => (
+                      <div
+                        key={index}
+                        className="animate-fade-in"
+                        style={{ animationDelay: `${index * 50}ms` }}
+                      >
+                        <UnMatchedPropertyCard property={property} />
+                      </div>
+                    ))}
                 </div>
-              )}
+
+                {/* Move pagination inside the max-width container */}
+                {totalPages >= 1 && (
+                  <div className="mt-8">
+                    <Pagination>
+                      {/* Add overflow handling and center alignment */}
+                      <PaginationContent className="flex flex-wrap justify-center overflow-x-auto">
+                        <PaginationItem>
+                          <PaginationPrevious
+                            href={`?page=${Math.max(1, currentPage - 1)}`}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handlePageChange(Math.max(1, currentPage - 1));
+                            }}
+                            className={
+                              currentPage === 1
+                                ? "pointer-events-none opacity-50"
+                                : ""
+                            }
+                          />
+                        </PaginationItem>
+                        <div className="flex flex-wrap justify-center">
+                          {renderPaginationItems()}
+                        </div>
+                        <PaginationItem>
+                          <PaginationNext
+                            href={`?page=${Math.min(totalPages, currentPage + 1)}`}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handlePageChange(
+                                Math.min(totalPages, currentPage + 1),
+                              );
+                            }}
+                            className={
+                              currentPage === totalPages
+                                ? "pointer-events-none opacity-50"
+                                : ""
+                            }
+                          />
+                        </PaginationItem>
+                      </PaginationContent>
+                    </Pagination>
+                  </div>
+                )}
+              </div>
             </div>
           )}
           {!isLoading &&
             !isDelayedLoading &&
             session?.user.role === "admin" && (
-              <div className="mt-20 rounded-xl border-4 p-4">
-                <AddUnclaimedOffer />
+              <div className="mx-auto mt-20 max-w-[2000px] px-4">
+                <div className="rounded-xl border-4 p-4">
+                  <AddUnclaimedOffer />
+                </div>
               </div>
             )}
         </div>
@@ -271,13 +323,13 @@ function UnMatchedPropertyCard({
   );
   const numGuests = 3;
   const link = isAirbnb
-  ? `https://airbnb.com/rooms/${property.originalListingId}`
-  : (() => {
-      if ("id" in property) {
-        return `/request-to-book/${property.id}?checkIn=${checkIn}&checkOut=${checkOut}&numGuests=${numGuests}`;
-      }
-      throw new Error("Property ID is required for non-Airbnb properties");
-    })();
+    ? `https://airbnb.com/rooms/${property.originalListingId}`
+    : (() => {
+        if ("id" in property) {
+          return `/request-to-book/${property.id}?checkIn=${checkIn}&checkOut=${checkOut}&numGuests=${numGuests}`;
+        }
+        throw new Error("Property ID is required for non-Airbnb properties");
+      })();
 
   return (
     <Link

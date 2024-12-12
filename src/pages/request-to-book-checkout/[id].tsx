@@ -39,6 +39,7 @@ export default function Page() {
     numGuests,
     requestPercentage,
   });
+  console.log(propertyPricing);
   // ----------------
   if (router.isFallback) {
     return <h2>Loading</h2>;
