@@ -20,6 +20,7 @@ import OverviewRequestCards from "./name-your-price/OverviewRequestCards";
 import HowTramonaWorks from "./name-your-price/HowTramonaWorks";
 import { TestimonialCarousel } from "./testimonials/TestimonialCarousel";
 import HostSection from "./name-your-price/HostSection";
+import UnclaimedMap from "@/components/unclaimed-offers/UnclaimedMap";
 
 export default function MastHead() {
   const router = useRouter();
@@ -74,19 +75,20 @@ export default function MastHead() {
   };
 
   return (
+    <AdjustedPropertiesProvider>
     <div className="bg-background-offWhite">
       <div
         className={`-mt-24 lg:mt-0 sticky -top-24 z-20 flex w-full flex-col items-center justify-center border-b-2 transition-all duration-300 ease-in-out translate-y-24 lg:translate-y-0 lg:top-16 ${
           isScrolled ? "shadow-md bg-white border-white" : "bg-transparent lg:bg-white border-transparent"
         }`}
       >
-        <AdjustedPropertiesProvider>
+
           <DesktopSearchTab
             isCompact={isScrolled}
             handleTabChange={handleTabChange}
             isLandingPage={true}
           />
-        </AdjustedPropertiesProvider>
+
 
         {/* Booking Toggle in Sticky Header */}
         <div
@@ -174,8 +176,8 @@ export default function MastHead() {
           </div>
 
           <div className="absolute inset-0 mx-auto hidden max-w-7xl flex-col justify-center pl-4 text-left lg:flex">
-            <h2 className="mt-8 text-left text-4xl font-bold text-white">
-              Turn empty nights <br /> into opportunities
+            <h2 className="mt-8 text-left text-6xl font-bold text-white">
+              Turn empty nights into opportunities
             </h2>
             <h3 className="mt-6 text-xl font-semibold text-white">
               Name your own price or book it now
@@ -229,7 +231,9 @@ export default function MastHead() {
         </div>
 
         {activeTab === "search" ? (
-          <BookItNowSection />
+          <div className="px-16">
+          <UnclaimedMap />
+          </div>
         ) : (
           <NameYourPriceSection />
         )}
@@ -342,5 +346,6 @@ export default function MastHead() {
         </section>
       </div>
     </div>
+    </AdjustedPropertiesProvider>
   );
 }
