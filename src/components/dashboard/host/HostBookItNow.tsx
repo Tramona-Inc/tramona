@@ -129,7 +129,21 @@ export default function HostBookItNow({ property }: { property: Property }) {
         description: "Book It Now settings have been successfully updated.",
         duration: 3000,
       });
-      originalValuesRef.current = variables;
+      if (
+        variables.bookItNowDiscountTiers !== undefined &&
+        variables.bookItNowEnabled !== undefined
+      ) {
+        // Create a narrowed version of the variables
+        const safeVariables = {
+          id: variables.id,
+          bookItNowEnabled: variables.bookItNowEnabled,
+          bookItNowDiscountTiers: variables.bookItNowDiscountTiers,
+        };
+        originalValuesRef.current = {
+          ...originalValuesRef.current,
+          ...safeVariables,
+        };
+      }
       setHasUnsavedChanges(false);
     },
     onError: (error) => {
@@ -225,8 +239,6 @@ export default function HostBookItNow({ property }: { property: Property }) {
             id: property.id,
             bookItNowEnabled: data.bookItNowEnabled,
             bookItNowDiscountTiers: orderedTiers,
-            requestToBookMaxDiscountPercentage:
-              data.requestToBookMaxDiscountPercentage,
           });
           handleSuccessfulSubmit(data);
         } catch (error) {
