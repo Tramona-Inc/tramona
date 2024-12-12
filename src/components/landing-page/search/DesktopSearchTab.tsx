@@ -3,7 +3,11 @@ import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/router";
 import { api } from "@/utils/api";
 import { useZodForm } from "@/utils/useZodForm";
-import { searchSchema, defaultSearchOrReqValues } from "./schemas";
+import {
+  searchSchema,
+  defaultSearchOrReqValues,
+  SearchFormValues,
+} from "./schemas";
 import { useAdjustedProperties } from "./AdjustedPropertiesContext";
 import { SearchFormBar } from "./SearchFormBar";
 import { LocationGallery } from "./LocationGallery";
@@ -116,10 +120,10 @@ export function DesktopSearchTab({
     [form],
   );
 
-  const handleSearch = form.handleSubmit(async (data) => {
+  const handleSearch = async (values: SearchFormValues) => {
     setIsLoading(true);
     const params = new URLSearchParams();
-    Object.entries(data).forEach(([key, value]) => {
+    Object.entries(values).forEach(([key, value]) => {
       if (value) params.set(key, value.toString());
     });
     void router.replace(
@@ -130,14 +134,14 @@ export function DesktopSearchTab({
 
     setAllProperties({ pages: [] });
 
-    if (data.checkIn && data.checkOut) {
+    if (values.checkIn && values.checkOut) {
       try {
         const propertiesInArea =
           await utils.properties.getBookItNowProperties.fetch({
-            checkIn: data.checkIn,
-            checkOut: data.checkOut,
-            numGuests: data.numGuests!,
-            location: data.location!,
+            checkIn: values.checkIn,
+            checkOut: values.checkOut,
+            numGuests: values.numGuests!,
+            location: values.location!,
           });
 
         setAllProperties((prevState) => {
@@ -164,10 +168,10 @@ export function DesktopSearchTab({
         });
 
         const airbnbResultsPromise = utils.misc.scrapeAirbnbInitialPage.fetch({
-          checkIn: data.checkIn,
-          checkOut: data.checkOut,
-          numGuests: data.numGuests!,
-          location: data.location!,
+          checkIn: values.checkIn,
+          checkOut: values.checkOut,
+          numGuests: values.numGuests!,
+          location: values.location!,
         });
         const airbnbResults = await airbnbResultsPromise;
 
@@ -195,10 +199,10 @@ export function DesktopSearchTab({
           );
 
         const finishAirbnbResultsPromise = utils.misc.scrapeAirbnbPages.fetch({
-          checkIn: data.checkIn,
-          checkOut: data.checkOut,
-          numGuests: data.numGuests!,
-          location: data.location!,
+          checkIn: values.checkIn,
+          checkOut: values.checkOut,
+          numGuests: values.numGuests!,
+          location: values.location!,
           pageCursors: cursors,
         });
 
@@ -229,7 +233,7 @@ export function DesktopSearchTab({
     } else {
       setIsLoading(false);
     }
-  });
+  };
 
   return (
     <div className="mt-4 w-full space-y-8 py-4">
