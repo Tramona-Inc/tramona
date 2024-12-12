@@ -7,7 +7,7 @@ import SidebarRequestToBook from "./sidebars/SideBarRequestToBook";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangleIcon } from "lucide-react";
 import { api } from "@/utils/api";
-import { separateByPriceRestriction, formatOfferData } from "@/utils/utils";
+import { separateByPriceAndAgeRestriction, formatOfferData } from "@/utils/utils";
 import {
   type SeparatedData,
   type RequestsPageOfferData,
@@ -91,7 +91,7 @@ export default function HostRequestsLayout({
 
   useEffect(() => {
     if (properties) {
-      const separated = separateByPriceRestriction(properties);
+      const separated = separateByPriceAndAgeRestriction(properties);
       setSeparatedData(separated);
     }
   }, [properties]);
