@@ -1,25 +1,37 @@
 import { Header } from "@/components/_common/Layout/header/Header";
 import { StickyTopBar } from "@/pages/for-hosts";
 import { MobileStickyBar } from "@/pages/for-hosts";
+import { cn } from "@/utils/utils";
 import { useSession } from "next-auth/react";
 
 export default function OnboardingLayout({
   children,
+  className,
 }: {
   children: React.ReactNode;
+  className?: string;
 }) {
   useSession({ required: true });
 
   return (
     <>
-      {/* <Header /> */}
-      <div className="md:hidden">
-        <MobileStickyBar />
+      <div className="flex min-h-screen flex-col">
+        {/* <Header /> */}
+        <div className="md:hidden">
+          <MobileStickyBar />
+        </div>
+        <div className="hidden md:block">
+          <StickyTopBar />
+        </div>
+        <div
+          className={cn(
+            "flex-grow min-h-screen-minus-header",
+            className,
+          )}
+        >
+          {children}
+        </div>
       </div>
-      <div className="hidden md:block">
-        <StickyTopBar />
-      </div>
-      <div className="min-h-screen-minus-header flex flex-col">{children}</div>
     </>
   );
 }
