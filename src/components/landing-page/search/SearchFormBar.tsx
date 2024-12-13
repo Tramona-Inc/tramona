@@ -14,8 +14,7 @@ import SingleDateInput from "@/components/_common/SingleDateInput";
 import GuestInput from "@/components/_common/GuestInput";
 import type { UseFormReturn } from "react-hook-form";
 import { locations } from "./locations";
-import type { z } from "zod";
-import { SearchFormValues, searchSchema } from "./schemas";
+import { SearchFormValues } from "./schemas";
 
 interface SearchFormBarProps {
   form: UseFormReturn<SearchFormValues, unknown, SearchFormValues>;  // Added unknown as the second type parameter

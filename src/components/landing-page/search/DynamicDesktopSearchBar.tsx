@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import React from "react";
 
 const DynamicDesktopSearchBar = React.memo(() => {
-  const [show, setShow] = useState(true);
+  const [_show, setShow] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isScrolling, setIsScrolling] = useState(false);
 

@@ -51,7 +51,7 @@ export function MobileSearchFormBar({
             <Search className="mr-4 h-4 w-4" />
             <div className="flex flex-col items-start">
               <span className="text-sm font-medium">{getDisplayText()}</span>
-              {(checkIn || checkOut || numGuests) && (
+              {(checkIn ?? checkOut ?? numGuests) && (
                 <span className="text-xs text-gray-500">
                   {[
                     checkIn && new Date(checkIn).toLocaleDateString(),
