@@ -17,7 +17,7 @@ interface DiscountTier {
 
 function NameYourOwnPriceSection({ property }: { property: Property }) {
   const { mutateAsync: updateAutoOffer } =
-    api.properties.updateAutoOffer.useMutation(); //auto offerdiscount tiers
+    api.properties.updateAutoOffer.useMutation(); //auto offer and discount tiers
 
   const [nameYourPriceOpen, setNameYourPriceOpen] = useState(false);
   const [nameYourPriceSaved, setNameYourPriceSaved] = useState(false);
@@ -31,9 +31,13 @@ function NameYourOwnPriceSection({ property }: { property: Property }) {
     property.autoOfferDiscountTiers,
   );
 
-  const handleNameYourPriceSave = () => {
+  const handleNameYourPriceSave = async () => {
     setNameYourPriceSaved(true);
     setTimeout(() => setNameYourPriceSaved(false), 2000);
+    await updateAutoOffer({
+      id: property.id,
+      autoOfferDiscountTiers: discountTiers,
+    });
   };
 
   const handleAutoOfferSwitch = async (checked: boolean) => {
@@ -60,6 +64,11 @@ function NameYourOwnPriceSection({ property }: { property: Property }) {
       ]);
     }
   };
+
+  const handleCancel = () => {
+    setDiscountTiers(property.autoOfferDiscountTiers);
+  };
+
   return (
     <div className="rounded-lg border">
       <div
@@ -170,7 +179,9 @@ function NameYourOwnPriceSection({ property }: { property: Property }) {
           </div>
 
           <div className="flex justify-end gap-2">
-            <Button variant="outline">Cancel</Button>
+            <Button variant="outline" onClick={handleCancel}>
+              Cancel
+            </Button>
             <Button onClick={handleNameYourPriceSave}>
               {nameYourPriceSaved ? "Saved!" : "Save"}
             </Button>

@@ -774,7 +774,6 @@ export const propertiesRouter = createTRPCRouter({
       z.object({
         id: z.number(),
         autoOfferEnabled: z.boolean().optional(),
-        autoOfferDiscountTiers: z.array(discountTierSchema).optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -783,9 +782,6 @@ export const propertiesRouter = createTRPCRouter({
         .set({
           ...(input.autoOfferEnabled !== undefined && {
             autoOfferEnabled: input.autoOfferEnabled,
-          }),
-          ...(input.autoOfferDiscountTiers !== undefined && {
-            autoOfferDiscountTiers: input.autoOfferDiscountTiers,
           }),
         })
         .where(eq(properties.id, input.id));
