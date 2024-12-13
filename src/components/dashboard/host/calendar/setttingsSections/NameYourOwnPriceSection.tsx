@@ -16,8 +16,11 @@ interface DiscountTier {
 }
 
 function NameYourOwnPriceSection({ property }: { property: Property }) {
-  const { mutateAsync: updateAutoOffer } =
-    api.properties.updateAutoOffer.useMutation(); //auto offer and discount tiers
+  const { mutateAsync: toggleAutoOffer } =
+    api.properties.toggleAutoOffer.useMutation(); //auto offer and discount tiers
+
+  const { mutateAsync: updateDiscountTier } =
+    api.properties.updatePropertyDiscountTiers.useMutation();
 
   const [nameYourPriceOpen, setNameYourPriceOpen] = useState(false);
   const [nameYourPriceSaved, setNameYourPriceSaved] = useState(false);
@@ -34,15 +37,19 @@ function NameYourOwnPriceSection({ property }: { property: Property }) {
   const handleNameYourPriceSave = async () => {
     setNameYourPriceSaved(true);
     setTimeout(() => setNameYourPriceSaved(false), 2000);
-    await updateAutoOffer({
-      id: property.id,
-      autoOfferDiscountTiers: discountTiers,
+    await updateDiscountTier({
+      propertyId: property.id,
+      discountTiers: discountTiers,
+    }).then(() => {
+      toast({
+        title: "Discount tier successfully updated",
+      });
     });
   };
 
   const handleAutoOfferSwitch = async (checked: boolean) => {
     setIsAutoOfferChecked(checked);
-    await updateAutoOffer({
+    await toggleAutoOffer({
       id: property.id,
       autoOfferEnabled: checked,
     });
