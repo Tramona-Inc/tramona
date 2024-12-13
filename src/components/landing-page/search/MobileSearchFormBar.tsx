@@ -1,13 +1,19 @@
-import React from 'react';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Search } from 'lucide-react';
-import { Form, FormControl, FormField, FormItem } from '@/components/ui/form';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { SearchFormBar } from './SearchFormBar';
-import type { UseFormReturn } from 'react-hook-form';
-import { type SearchFormValues } from './schemas';
-import { locations } from './locations';
+import React from "react";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Search } from "lucide-react";
+import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { SearchFormBar } from "./SearchFormBar";
+import type { UseFormReturn } from "react-hook-form";
+import { type SearchFormValues } from "./schemas";
+import { locations } from "./locations";
 
 interface MobileSearchFormBarProps {
   form: UseFormReturn<SearchFormValues, unknown, SearchFormValues>;
@@ -21,16 +27,16 @@ export function MobileSearchFormBar({
   isLoading,
 }: MobileSearchFormBarProps) {
   const [open, setOpen] = React.useState(false);
-  const location = form.watch('location');
-  const checkIn = form.watch('checkIn');
-  const checkOut = form.watch('checkOut');
-  const numGuests = form.watch('numGuests');
+  const location = form.watch("location");
+  const checkIn = form.watch("checkIn");
+  const checkOut = form.watch("checkOut");
+  const numGuests = form.watch("numGuests");
 
   const getDisplayText = () => {
     if (location) {
       return location;
     }
-    return 'Best prices on Airbnbs anywhere';
+    return "Best prices on Airbnbs anywhere";
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -56,8 +62,11 @@ export function MobileSearchFormBar({
                   {[
                     checkIn && new Date(checkIn).toLocaleDateString(),
                     checkOut && new Date(checkOut).toLocaleDateString(),
-                    numGuests && `${numGuests} guest${numGuests !== 1 ? 's' : ''}`
-                  ].filter(Boolean).join(' · ')}
+                    numGuests &&
+                      `${numGuests} guest${numGuests !== 1 ? "s" : ""}`,
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")}
                 </span>
               )}
             </div>
@@ -65,9 +74,9 @@ export function MobileSearchFormBar({
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-[600px] p-0 h-[90vh] overflow-y-auto">
-        <div className="flex flex-col h-full">
-          <div className="p-4 space-y-6">
+      <DialogContent className="h-[90vh] overflow-y-auto p-0 sm:max-w-[600px]">
+        <div className="flex h-full flex-col">
+          <div className="space-y-6 p-4">
             <h2 className="text-lg font-semibold">Where to?</h2>
             <Form {...form}>
               <form onSubmit={handleSubmit}>
@@ -101,7 +110,7 @@ export function MobileSearchFormBar({
                       </FormItem>
                     )}
                   />
-                  
+
                   <SearchFormBar
                     form={form}
                     onSubmit={onSubmit}
