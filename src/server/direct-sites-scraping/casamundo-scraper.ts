@@ -82,7 +82,7 @@ async function getLocationId(location: string): Promise<string> {
   const response: AxiosResponse<AutocompleteResponse> = await axios.get(
     `${autocompleteUrl}?${params.toString()}`,
     {
-      httpsAgent: proxyAgent
+      httpsAgent: proxyAgent,
     },
   );
   const suggestions = response.data.suggestions;
@@ -149,7 +149,7 @@ async function getOfferIds(
     `${url}?${params.toString()}`,
     {
       headers,
-      httpsAgent: proxyAgent
+      httpsAgent: proxyAgent,
     },
   );
 
@@ -174,7 +174,9 @@ interface CalendarResponse {
   };
 }
 type AvailabilityResponse = Record<string, number>;
-export async function getAvailability(offerId: string): Promise<AvailabilityResponse> {
+export async function getAvailability(
+  offerId: string,
+): Promise<AvailabilityResponse> {
   const url = `https://www.casamundo.com/api/v2/calendar/${offerId}`;
 
   const currentDate = new Date();
@@ -183,14 +185,17 @@ export async function getAvailability(offerId: string): Promise<AvailabilityResp
 
   // Generate an array of { year, month } objects for the next 12 months
   const monthsToFetch = Array.from({ length: 12 }, (_, i) => {
-    const month = (currentMonth + i - 1) % 12 + 1;
+    const month = ((currentMonth + i - 1) % 12) + 1;
     const year = currentYear + Math.floor((currentMonth + i - 1) / 12);
     return { year, month };
   });
 
   type MonthData = Record<string, number>;
 
-  const fetchMonthData = async (year: number, month: number): Promise<MonthData> => {
+  const fetchMonthData = async (
+    year: number,
+    month: number,
+  ): Promise<MonthData> => {
     const maxRetries = 3;
     for (let attempt = 0; attempt < maxRetries; attempt++) {
       try {
@@ -217,8 +222,10 @@ export async function getAvailability(offerId: string): Promise<AvailabilityResp
 
   // Fetch all months in parallel
   const allMonthsData: MonthData[] = await timeoutPromise(
-    Promise.all(monthsToFetch.map(({ year, month }) => fetchMonthData(year, month))),
-    60000
+    Promise.all(
+      monthsToFetch.map(({ year, month }) => fetchMonthData(year, month)),
+    ),
+    60000,
   );
 
   // Combine all the days data into a single object
@@ -232,11 +239,10 @@ const timeoutPromise = <T>(promise: Promise<T>, ms: number): Promise<T> => {
   return Promise.race<T>([
     promise,
     new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error("Timeout exceeded")), ms)
+      setTimeout(() => reject(new Error("Timeout exceeded")), ms),
     ),
   ]);
 };
-
 
 async function checkAvailability(
   offerId: string,
@@ -246,7 +252,6 @@ async function checkAvailability(
   const url = `https://www.casamundo.com/api/v2/calendar/${offerId}`;
 
   const currentDate = new Date();
-
 
   let currentYear: number = checkIn.getFullYear();
   if (checkIn < currentDate) {
@@ -282,21 +287,29 @@ async function checkAvailability(
         success = true;
         break; // Success, exit retry loop
       } catch (error) {
-        console.log('retrying', attempt);
+        console.log("retrying", attempt);
         if (axios.isAxiosError(error)) {
-          console.error(`Axios error for ${currentYear}-${currentMonth}:`, error.message);
+          console.error(
+            `Axios error for ${currentYear}-${currentMonth}:`,
+            error.message,
+          );
           if (error.response?.status === 522) {
             console.error("Connection timeout error (522). Retrying...");
           }
         } else {
-          console.error(`Non-Axios error for ${currentYear}-${currentMonth}:`, error);
+          console.error(
+            `Non-Axios error for ${currentYear}-${currentMonth}:`,
+            error,
+          );
         }
         // No delay here, it will immediately retry
       }
     }
 
     if (!success) {
-      console.error(`Failed to fetch data for ${currentYear}-${currentMonth} after ${maxRetries} attempts`);
+      console.error(
+        `Failed to fetch data for ${currentYear}-${currentMonth} after ${maxRetries} attempts`,
+      );
       return false; // Consider the property unavailable if we can't fetch the data
     }
 
@@ -361,15 +374,14 @@ interface PriceResult {
 
 type OnlyPriceResult =
   | {
-    status: "success";
-    price: number;
-    currency: string;
-    id: string;
-  }
+      status: "success";
+      price: number;
+      currency: string;
+      id: string;
+    }
   | {
-    status: "failed" | "unavailable";
-  };
-
+      status: "failed" | "unavailable";
+    };
 
 function formatCancellationPolicy(
   cancellationDetails: CancellationDetails,
@@ -450,7 +462,7 @@ export const fetchPrice = async (
         null,
         {
           headers,
-          httpsAgent: proxyAgent
+          httpsAgent: proxyAgent,
         },
       );
       const data = response.data;
@@ -463,6 +475,7 @@ export const fetchPrice = async (
         formatCancellationPolicy(cancellationDetails);
 
       if (!data.hasErrors) {
+        console.log(data);
         return {
           price: data.content.priceDetails.travelPrice.raw,
           currency: data.content.priceDetails.currency,
@@ -505,7 +518,7 @@ export const fetchPrice = async (
 };
 
 export const fetchPriceNoRateLimit = async (
-  params: PriceExtractionParams
+  params: PriceExtractionParams,
 ): Promise<OnlyPriceResult> => {
   const url = `https://www.casamundo.com/booking/checkout/priceDetails/${params.offerId}`;
   const queryParams = new URLSearchParams({
@@ -547,7 +560,7 @@ export const fetchPriceNoRateLimit = async (
         {
           headers,
           httpsAgent: proxyAgent,
-        }
+        },
       );
 
       const data = response.data;
@@ -575,6 +588,7 @@ export const fetchPriceNoRateLimit = async (
         };
       }
     } catch (error) {
+      console.log(error);
       if (attempt < maxRetries - 1) {
         await new Promise((resolve) => setTimeout(resolve, retryDelay));
       } else {
@@ -904,46 +918,45 @@ export const casamundoSubScraper: (
   checkOut,
   numGuests: initialNumGuests,
 }) => {
-    let numGuests = initialNumGuests;
+  let numGuests = initialNumGuests;
 
-    if (scrapeUrl) {
-      try {
-        const url = new URL(scrapeUrl);
-        numGuests =
-          parseInt(url.searchParams.get("adults") ?? "", 10) || initialNumGuests;
-      } catch (error) {
-        console.error("Invalid scrapeUrl provided:", error);
-      }
+  if (scrapeUrl) {
+    try {
+      const url = new URL(scrapeUrl);
+      numGuests =
+        parseInt(url.searchParams.get("adults") ?? "", 10) || initialNumGuests;
+    } catch (error) {
+      console.error("Invalid scrapeUrl provided:", error);
     }
+  }
 
-    const numNights = getNumNights(checkIn, checkOut);
+  const numNights = getNumNights(checkIn, checkOut);
 
-    const isAvailable = await checkAvailability(
-      originalListingId,
-      checkIn,
-      checkOut,
-    );
+  const isAvailable = await checkAvailability(
+    originalListingId,
+    checkIn,
+    checkOut,
+  );
 
-    const price = await fetchPrice({
-      offerId: originalListingId,
-      numGuests,
-      checkIn: checkIn,
-      duration: numNights,
-    });
+  const price = await fetchPrice({
+    offerId: originalListingId,
+    numGuests,
+    checkIn: checkIn,
+    duration: numNights,
+  });
 
-    if (!isAvailable || price.price === -1) {
-      return {
-        isAvailableOnOriginalSite: false,
-        availabilityCheckedAt: new Date(),
-      };
-    }
+  if (!isAvailable || price.price === -1) {
     return {
-      isAvailableOnOriginalSite: true,
+      isAvailableOnOriginalSite: false,
       availabilityCheckedAt: new Date(),
-      originalNightlyPrice: Math.round((price.price / numNights) * 100),
     };
+  }
+  return {
+    isAvailableOnOriginalSite: true,
+    availabilityCheckedAt: new Date(),
+    originalNightlyPrice: Math.round((price.price / numNights) * 100),
   };
-
+};
 
 // export const casamundoSubScraper: SubsequentScraper = async ({
 //   originalListingId,
