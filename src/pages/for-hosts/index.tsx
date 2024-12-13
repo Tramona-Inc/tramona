@@ -121,6 +121,25 @@ export function Questions() {
   ];
 
   return (
+    <div className="space-y-6">
+      <h1 className="text-2xl font-bold text-center">Questions?</h1>
+      <div className="flex flex-col items-center gap-4">
+        {buttons.map((button, index) => (
+          <button
+            key={index}
+            onClick={button.onClick}
+            className="w-80 bg-white border-2 border-[#004236] text-[#004236] py-3 rounded-lg text-lg font-semibold transition-all hover:bg-[#f5f5f5] hover:text-[#003626]"
+          >
+            {button.title}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+
+
+
+  return (
     <div className="space-y-4 lg:rounded-lg lg:border lg:p-4">
       <h1 className="text-2xl font-bold">Questions?</h1>
       <div className="flex flex-col gap-2">
