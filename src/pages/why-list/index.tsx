@@ -55,8 +55,7 @@ const ForHostsPage = ({
             How Tramona Works for Hosts
           </h1>
           <p className="mb-12 mt-1 text-center text-lg font-normal text-gray-500">
-            Say goodbye to empty nights with tools designed to maximize your
-            earnings.
+            Say goodbye to empty nights
           </p>
           <HowItWorks />
         </div>
@@ -66,7 +65,7 @@ const ForHostsPage = ({
             Automation vs Manual
           </h1>
           <p className="mb-12 mt-1 text-center text-lg font-normal text-gray-500">
-            Over 70% of Tramona hosts use automation to save time.
+            Tramoma can be as hands on or hands off as you want.
           </p>
           <AutoManual />
           <p className="text-med mb-12 mt-8 text-center font-normal text-gray-500">
@@ -213,15 +212,14 @@ const SignUpNow = ({ requestFeed }: { requestFeed: FeedRequestItem[] }) => {
     <section className="flex justify-center">
       <div className="mx-12 flex flex-col justify-center gap-8 md:mx-36 lg:mx-24 lg:max-w-[70vw] lg:flex-row">
         <div className="flex-1">
-          <h1 className="mb-12 mt-12 text-center text-2xl font-semibold">
-            Sign up now to start booking your empty nights
+          <h1 className="mb-10 mt-10 text-center text-2xl font-semibold">
+            Tramona was built for hosts to fill empty nights. Suppliment your other booking platforms by always having an option to book an empty night.
           </h1>
           <div className="h-[450px] rounded-lg border px-2 py-2 shadow-xl">
             <RequestFeed requestFeed={requestFeed} />
           </div>
-          <h2 className="mb-12 mt-12 text-center text-2xl font-semibold">
-            Tramona is rapidly expanding. Everyday we have requests <br /> that
-            go un booked.
+          <h2 className="mb-12 mt-12 text-center text-2xl font-medium">
+            Everyday we have requests that go un booked.
           </h2>
           <div className="mb-12 flex justify-center">
             <Link href="/why-list">
@@ -244,17 +242,15 @@ const HowItWorks = () => {
         <h3 className="mb-6 text-center text-xl font-bold text-[primaryGreen]">
           1. Book it Now
         </h3>
-        <p className="text-center font-semibold md:text-left">
-          Allow travelers to book instantly, or request to book, just like other
-          booking platforms.
+        <p className="text-center font-medium md:text-left">
+          Classic book it now. Your property is showcased just like it is on Airbnb or Vrbo. Travelers can instantly book with or without waiting for approval.
         </p>
         <div className="flex items-center">
           <FaInfoCircle />
           <h4 className="m-3 ml-2 font-bold">How it Works:</h4>
         </div>
         <p className="text-gray-500">
-          Your property is showcased just like it is on Airbnb or Vrbo, and
-          travelers can instantly book with or without waiting for approval.
+          When you sign up as a host, your account is instantly synced with Airbb. Whenever you change your aavailability, price, or anything else on Airbnb. It is instantly reflected on Tramona.
         </p>
         <hr className="my-4 border-t border-gray-300" />
         <div className="flex items-center">
@@ -278,31 +274,34 @@ const HowItWorks = () => {
         <h3 className="mb-6 text-center text-xl font-bold text-[primaryGreen]">
           2. Receiving Bids
         </h3>
-        <p className="text-center font-semibold md:text-left">
-          Travelers send offers for your empty nights.
+        <p className="text-center font-medium md:text-left">
+          Travelers can send offers for your available nights.
         </p>
-        <div className="flex items-center">
+
+        <div className="flex items-center mt-4">
           <FaInfoCircle />
           <h4 className="m-3 ml-2 font-bold">How it Works:</h4>
         </div>
         <p className="text-gray-500">
-          Travelers can send you bids with their preferred price. You can
-          accept, deny, or set automatic rules to approve certain bids. Set
-          preferences on the host side of what you would consider, don’t see the
-          rest.
+          Travelers can book instantly or place a bid. You can accept, reject, or set automatic rules to approve bids that meet your criteria. Only see the offers that match your preferences.
         </p>
+
         <hr className="my-4 border-t border-gray-300" />
+
         <div className="flex items-center">
           <FaSlidersH />
           <h4 className="m-2 ml-2 font-bold">Your Flexibility:</h4>
         </div>
+
         <ul className="m-1 ml-1">
           <li className="flex items-center text-gray-500">
-            <FaCheck className="mr-2" size={12} /> Manually approve or deny bids
+            <FaCheck className="mr-2" size={12} /> Choose to automatically accept bids that meet your hidden price
           </li>
           <li className="flex items-center text-gray-500">
-            <FaCheck className="mr-2" size={12} /> Automate approval for
-            qualifying bids
+            <FaCheck className="mr-2" size={12} /> Set rules for the offers you’ll allow, ignore the rest
+          </li>
+          <li className="flex items-center text-gray-500">
+            <FaCheck className="mr-2" size={12} /> If Book It Now is off, travelers can only submit bids
           </li>
         </ul>
       </li>
@@ -313,15 +312,14 @@ const HowItWorks = () => {
           3. Receiving Requests
         </h3>
         <p className="text-center font-semibold md:text-left">
-          Always have an option to book a night.
+          Never let a night sit empty.
         </p>
         <div className="flex items-center">
           <FaInfoCircle />
           <h4 className="m-3 ml-2 font-bold">How it Works:</h4>
         </div>
         <p className="text-gray-500">
-          Travelers specify their budget, dates, and preferences. You can
-          accept, deny, or counteroffer based on what price works for you.
+          Travelers specify their budget, dates, and preferences, and send a request to every host on Tramona. Hosts have the option to accept, deny, or counteroffer all requests.
         </p>
         <hr className="my-4 border-t border-gray-300" />
         <div className="flex items-center">
@@ -330,12 +328,11 @@ const HowItWorks = () => {
         </div>
         <ul className="m-1 ml-1">
           <li className="flex items-center text-gray-500">
-            <FaCheck className="mr-2" size={16} /> Set rules to make
-            auto-matches on certain requests
+            <FaCheck className="mr-2" size={16} /> Choose to maually respond or automatically respond to each match.
           </li>
           <li className="flex items-center text-gray-500">
-            <FaCheck className="mr-2" size={18} /> Manually review and accept,
-            counteroffer, or reject each request
+            <FaCheck className="mr-2" size={18} /> Set hidden rules to make
+            auto-matches on certain requests
           </li>
         </ul>
       </li>
@@ -601,7 +598,7 @@ const Features2 = () => {
             />
           </div>
           <h2 className="text-xl font-semibold text-[#333] sm:text-2xl">
-            Requests
+            Full flexibility on all bookings.
           </h2>
         </div>
 
@@ -615,7 +612,7 @@ const Features2 = () => {
               alt="Cal"
             />
           </div>
-          <h2 className="text-xl font-semibold text-[#333] sm:text-2xl">Cal</h2>
+          <h2 className="text-xl font-semibold text-[#333] sm:text-2xl">Automatically synced calandar and pricing with Airbnb</h2>
         </div>
 
         {/* Third Row: Image on left, text on right */}
@@ -629,7 +626,7 @@ const Features2 = () => {
             />
           </div>
           <h2 className="text-xl font-semibold text-[#333] sm:text-2xl">
-            Customized Pricing
+            Choose when to give discounts, and when to keep your price regular.
           </h2>
         </div>
       </div>
