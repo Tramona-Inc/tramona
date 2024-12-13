@@ -6,8 +6,6 @@ import { formatCurrency } from "@/utils/utils";
 import Spinner from "../_common/Spinner";
 import { ChevronRight } from "lucide-react";
 
-const defaultMessage = `Hey! Join this new travel platform. They let people travel at any price they want. You name the price and they'll find a bnb out of your budget and make it work with your price. Here's the link, check it out:`;
-
 export default function ReferralDashboard() {
   const { data: session } = useSession();
   const user = session?.user;

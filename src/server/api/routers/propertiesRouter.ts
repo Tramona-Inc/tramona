@@ -769,24 +769,18 @@ export const propertiesRouter = createTRPCRouter({
       return;
     }),
 
-  updateAutoOffer: protectedProcedure
+  toggleAutoOffer: protectedProcedure
     .input(
       z.object({
         id: z.number(),
-        autoOfferEnabled: z.boolean().optional(),
-        autoOfferDiscountTiers: z.array(discountTierSchema).optional(),
+        autoOfferEnabled: z.boolean(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       await ctx.db
         .update(properties)
         .set({
-          ...(input.autoOfferEnabled !== undefined && {
-            autoOfferEnabled: input.autoOfferEnabled,
-          }),
-          ...(input.autoOfferDiscountTiers !== undefined && {
-            autoOfferDiscountTiers: input.autoOfferDiscountTiers,
-          }),
+          autoOfferEnabled: input.autoOfferEnabled,
         })
         .where(eq(properties.id, input.id));
     }),
@@ -811,6 +805,24 @@ export const propertiesRouter = createTRPCRouter({
           }),
         })
         .where(eq(properties.id, input.id));
+    }),
+
+  updatePropertyDiscountTiers: protectedProcedure
+    .input(
+      z.object({
+        propertyId: z.number(),
+        discountTiers: z.array(discountTierSchema).nullable(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      await db
+        .update(properties)
+        .set({
+          ...(input.discountTiers && {
+            autoOfferDiscountTiers: input.discountTiers,
+          }),
+        })
+        .where(eq(properties.id, input.propertyId));
     }),
 
   runSubscrapers: publicProcedure

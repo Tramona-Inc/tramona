@@ -16,8 +16,11 @@ interface DiscountTier {
 }
 
 function NameYourOwnPriceSection({ property }: { property: Property }) {
-  const { mutateAsync: updateAutoOffer } =
-    api.properties.updateAutoOffer.useMutation(); //auto offerdiscount tiers
+  const { mutateAsync: toggleAutoOffer } =
+    api.properties.toggleAutoOffer.useMutation(); //auto offer and discount tiers
+
+  const { mutateAsync: updateDiscountTier } =
+    api.properties.updatePropertyDiscountTiers.useMutation();
 
   const [nameYourPriceOpen, setNameYourPriceOpen] = useState(false);
   const [nameYourPriceSaved, setNameYourPriceSaved] = useState(false);
@@ -31,14 +34,22 @@ function NameYourOwnPriceSection({ property }: { property: Property }) {
     property.autoOfferDiscountTiers,
   );
 
-  const handleNameYourPriceSave = () => {
+  const handleNameYourPriceSave = async () => {
     setNameYourPriceSaved(true);
     setTimeout(() => setNameYourPriceSaved(false), 2000);
+    await updateDiscountTier({
+      propertyId: property.id,
+      discountTiers: discountTiers,
+    }).then(() => {
+      toast({
+        title: "Discount tier successfully updated",
+      });
+    });
   };
 
   const handleAutoOfferSwitch = async (checked: boolean) => {
     setIsAutoOfferChecked(checked);
-    await updateAutoOffer({
+    await toggleAutoOffer({
       id: property.id,
       autoOfferEnabled: checked,
     });
@@ -60,6 +71,11 @@ function NameYourOwnPriceSection({ property }: { property: Property }) {
       ]);
     }
   };
+
+  const handleCancel = () => {
+    setDiscountTiers(property.autoOfferDiscountTiers);
+  };
+
   return (
     <div className="rounded-lg border">
       <div
@@ -170,7 +186,9 @@ function NameYourOwnPriceSection({ property }: { property: Property }) {
           </div>
 
           <div className="flex justify-end gap-2">
-            <Button variant="outline">Cancel</Button>
+            <Button variant="outline" onClick={handleCancel}>
+              Cancel
+            </Button>
             <Button onClick={handleNameYourPriceSave}>
               {nameYourPriceSaved ? "Saved!" : "Save"}
             </Button>
