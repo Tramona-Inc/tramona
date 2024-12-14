@@ -206,7 +206,7 @@ export default function MastHead() {
               hasPassedButtons ? "opacity-0" : "opacity-100"
             }`}
           >
-            <div className="flex rounded-full border-2 border-primaryGreen bg-white">
+            <div className="flex rounded-full border-2 border-gray-400 bg-white">
               <button
                 onClick={() => handleTabChange("search")}
                 className={`flex-1 rounded-full py-2 text-center text-sm transition-all duration-200 ${

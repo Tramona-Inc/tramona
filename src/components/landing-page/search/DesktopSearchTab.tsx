@@ -278,8 +278,8 @@ export function DesktopSearchTab({
               {/* Button */}
               <Button
                 onClick={() => handleTabChange("name-price", true)}
-                variant="outline"
-                className={`flex-shrink-0 whitespace-nowrap border border-black transition-all duration-300 ease-in-out ${
+                variant="primary"
+                className={`flex-shrink-0 whitespace-nowrap border border-black ${
                   isCompact ? "h-10 px-3 text-xs" : "h-14 px-6 text-base"
                 } ${isLandingPage ? "hidden xl:block" : "hidden"}`}
               >
