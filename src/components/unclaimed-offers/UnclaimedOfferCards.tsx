@@ -127,7 +127,7 @@ export default function UnclaimedOfferCards({
     const items = [];
     const SIBLING_COUNT = 1;
     const BOUNDARY_COUNT = 1;
-  
+
     const createPageItem = (pageNum: number) => (
       <PaginationItem key={pageNum}>
         <PaginationLink
@@ -142,14 +142,14 @@ export default function UnclaimedOfferCards({
         </PaginationLink>
       </PaginationItem>
     );
-  
+
     for (let i = 1; i <= Math.min(BOUNDARY_COUNT, totalPages); i++) {
       items.push(createPageItem(i));
     }
 
     const startPage = Math.max(BOUNDARY_COUNT + 1, currentPage - SIBLING_COUNT);
     const endPage = Math.min(totalPages - BOUNDARY_COUNT, currentPage + SIBLING_COUNT);
-  
+
     if (startPage > BOUNDARY_COUNT + 1) {
       items.push(
         <PaginationItem key="start-ellipsis" className="px-2">
@@ -157,13 +157,13 @@ export default function UnclaimedOfferCards({
         </PaginationItem>
       );
     }
-  
+
     for (let i = startPage; i <= endPage; i++) {
       if (i > BOUNDARY_COUNT && i < totalPages - BOUNDARY_COUNT + 1) {
         items.push(createPageItem(i));
       }
     }
-  
+
     if (endPage < totalPages - BOUNDARY_COUNT) {
       items.push(
         <PaginationItem key="end-ellipsis" className="px-2">
@@ -171,13 +171,13 @@ export default function UnclaimedOfferCards({
         </PaginationItem>
       );
     }
-  
+
     for (let i = Math.max(totalPages - BOUNDARY_COUNT + 1, BOUNDARY_COUNT + 1); i <= totalPages; i++) {
       if (i > endPage) {
         items.push(createPageItem(i));
       }
     }
-  
+
     return items;
   }, [totalPages, currentPage, handlePageChange]);
 
