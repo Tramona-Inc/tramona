@@ -1,7 +1,7 @@
 // MastHead.tsx
 import { BookItNowSection } from "./book-it-now/BookItNowSection";
 import { NameYourPriceSection } from "./name-your-price/NameYourPriceSection";
-import landingBg2 from "public/assets/images/landing-page/blakesingleton_httpss.mj.runL0v8UkwKU1k_this_will_be_the_backgr_0c65f94f-431e-4e9d-bae4-58e5ec2999e1.png";
+import landingBg2 from "public/assets/images/landing-page/man_standing_on_rock.png";
 import { useRouter } from "next/router";
 import { AdjustedPropertiesProvider } from "../search/AdjustedPropertiesContext";
 import { DesktopSearchTab } from "../search/DesktopSearchTab";
@@ -78,23 +78,25 @@ export default function MastHead() {
     <AdjustedPropertiesProvider>
       <div className="bg-background-offWhite">
         <div
-          className={`-mt-24 lg:mt-0 sticky -top-24 z-20 flex w-full flex-col items-center justify-center border-b-2 transition-all duration-300 ease-in-out translate-y-24 lg:translate-y-0 lg:top-16 ${isScrolled ? "shadow-md bg-white border-white" : "bg-transparent lg:bg-white border-transparent"
-            }`}
+          className={`sticky -top-24 z-20 -mt-24 flex w-full translate-y-24 flex-col items-center justify-center border-b-2 transition-all duration-300 ease-in-out lg:top-16 lg:mt-0 lg:translate-y-0 ${
+            isScrolled
+              ? "border-white bg-white shadow-md"
+              : "border-transparent bg-transparent lg:bg-white"
+          }`}
         >
-
           <DesktopSearchTab
             isCompact={isScrolled}
             handleTabChange={handleTabChange}
             isLandingPage={true}
           />
 
-
           {/* Booking Toggle in Sticky Header */}
           <div
-            className={`w-full transition-all duration-300 ease-in-out ${hasPassedButtons
+            className={`w-full transition-all duration-300 ease-in-out ${
+              hasPassedButtons
                 ? "mt-1 h-9 opacity-100"
                 : "pointer-events-none h-0 opacity-0"
-              }`}
+            }`}
           >
             <div className="mx-auto max-w-sm px-4 md:max-w-md lg:max-w-2xl">
               <div className="flex justify-center gap-12 lg:gap-60">
@@ -103,18 +105,20 @@ export default function MastHead() {
                   className={`group relative py-2 text-center text-sm transition-all duration-200`}
                 >
                   <span
-                    className={`${activeTab === "search"
+                    className={`${
+                      activeTab === "search"
                         ? "text-primaryGreen"
                         : "text-gray-500 group-hover:text-gray-700"
-                      }`}
+                    }`}
                   >
                     Book it now
                   </span>
                   <span
-                    className={`absolute bottom-0 left-0 h-0.5 w-full scale-x-125 transition-transform duration-200 ${activeTab === "search"
+                    className={`absolute bottom-0 left-0 h-0.5 w-full scale-x-125 transition-transform duration-200 ${
+                      activeTab === "search"
                         ? "bg-primaryGreen"
                         : "bg-transparent group-hover:bg-gray-200"
-                      }`}
+                    }`}
                   />
                 </button>
                 <button
@@ -122,18 +126,20 @@ export default function MastHead() {
                   className={`group relative py-2 text-center text-sm transition-all duration-200`}
                 >
                   <span
-                    className={`${activeTab === "name-price"
+                    className={`${
+                      activeTab === "name-price"
                         ? "text-primaryGreen"
                         : "text-gray-500 group-hover:text-gray-700"
-                      }`}
+                    }`}
                   >
                     Name your own price
                   </span>
                   <span
-                    className={`absolute bottom-0 left-0 h-0.5 w-full scale-x-125 transition-transform duration-200 ${activeTab === "name-price"
+                    className={`absolute bottom-0 left-0 h-0.5 w-full scale-x-125 transition-transform duration-200 ${
+                      activeTab === "name-price"
                         ? "bg-primaryGreen"
                         : "bg-transparent group-hover:bg-gray-200"
-                      }`}
+                    }`}
                   />
                 </button>
               </div>
@@ -147,19 +153,19 @@ export default function MastHead() {
               src={landingBg2}
               alt=""
               fill
-              className="object-cover object-center brightness-50"
+              className="object-cover object-center brightness-90"
             />
-            <div className="absolute inset-0 bg-black bg-opacity-30" />
+            <div className="absolute inset-0 bg-black bg-opacity-40" />
 
             <div className="absolute inset-0 mx-auto flex max-w-7xl flex-col justify-center pl-4 text-left lg:hidden">
               <h2 className="mt-8 text-left text-4xl font-bold text-white">
-                Turn nights <br /> into opportunities
+                Tramona turns empty nights into bookings
               </h2>
               <h3 className="mt-6 text-lg font-semibold text-white">
                 Name your own price or book it now
               </h3>
               <h3 className="mt-2 text-lg font-semibold text-white">
-                Host accepts, counter, or reject requests
+                when hosts have empty nights, no one wins
               </h3>
               <h3 className="mt-4 text-lg font-semibold text-white">
                 <Link href={"/how-it-works"} className="flex items-center">
@@ -177,7 +183,7 @@ export default function MastHead() {
                 Name your own price or book it now
               </h3>
               <h3 className="mt-2 text-xl font-semibold text-white">
-                Host accepts, counter, or reject requests
+                when hosts have empty nights, no one wins
               </h3>
               <h3 className="mt-4 text-xl font-semibold text-white">
                 <button
@@ -196,25 +202,28 @@ export default function MastHead() {
           {/* Original Booking Toggle */}
           <div
             ref={toggleSectionRef}
-            className={`mx-auto mb-6 max-w-sm transition-all duration-300 md:max-w-md lg:max-w-2xl ${hasPassedButtons ? "opacity-0" : "opacity-100"
-              }`}
+            className={`mx-auto mb-6 max-w-sm transition-all duration-300 md:max-w-md lg:max-w-2xl ${
+              hasPassedButtons ? "opacity-0" : "opacity-100"
+            }`}
           >
             <div className="flex rounded-full border-2 border-primaryGreen bg-white">
               <button
                 onClick={() => handleTabChange("search")}
-                className={`flex-1 rounded-full py-2 text-center text-sm transition-all duration-200 ${activeTab === "search"
+                className={`flex-1 rounded-full py-2 text-center text-sm transition-all duration-200 ${
+                  activeTab === "search"
                     ? "bg-primaryGreen text-white shadow-lg"
                     : "bg-white text-primaryGreen hover:bg-zinc-100"
-                  }`}
+                }`}
               >
                 Book it now
               </button>
               <button
                 onClick={() => handleTabChange("name-price")}
-                className={`flex-1 rounded-full py-2 text-center text-sm transition-all duration-200 ${activeTab === "name-price"
+                className={`flex-1 rounded-full py-2 text-center text-sm transition-all duration-200 ${
+                  activeTab === "name-price"
                     ? "bg-primaryGreen text-white shadow-lg"
                     : "bg-white text-primaryGreen hover:bg-zinc-100"
-                  }`}
+                }`}
               >
                 Name your own price
               </button>
@@ -267,8 +276,8 @@ export default function MastHead() {
                     </div>
                   </AccordionTrigger>
                   <AccordionContent>
-                    Absolutely. Tramona allows you to add a co-host to help manage
-                    requests and bookings on your property.
+                    Absolutely. Tramona allows you to add a co-host to help
+                    manage requests and bookings on your property.
                   </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="item-3">
@@ -280,9 +289,9 @@ export default function MastHead() {
                   </AccordionTrigger>
                   <AccordionContent>
                     Tramona allows you to list your property at full price and
-                    still receive direct booking requests. You can offer exclusive
-                    discounts only when you choose, helping you fill empty nights
-                    without compromising on price.
+                    still receive direct booking requests. You can offer
+                    exclusive discounts only when you choose, helping you fill
+                    empty nights without compromising on price.
                   </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="item-4">
@@ -293,8 +302,8 @@ export default function MastHead() {
                     </div>
                   </AccordionTrigger>
                   <AccordionContent>
-                    Yes! Tramona integrates with other platforms to prevent double
-                    bookings, making it easy to manage your calendar.
+                    Yes! Tramona integrates with other platforms to prevent
+                    double bookings, making it easy to manage your calendar.
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
@@ -317,8 +326,8 @@ export default function MastHead() {
                   Ready to Experience the Best of Short-Term Rentals?
                 </h2>
                 <p className="mb-4 text-lg sm:text-xl">
-                  Join Tramona today to access unbeatable deals on unique stays or
-                  to start earning more on your empty nights.
+                  Join Tramona today to access unbeatable deals on unique stays
+                  or to start earning more on your empty nights.
                 </p>
                 <div className="flex flex-col justify-center space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0">
                   <Link href="/">
