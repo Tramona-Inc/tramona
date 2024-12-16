@@ -23,9 +23,9 @@ export default function ChatHeader({
         </div>
 
         <UserAvatar
-          email={selectedConversation.participants[0]?.email ?? ""}
-          image={selectedConversation.participants[0]?.image ?? ""}
-          name={selectedConversation.participants[0]?.name ?? ""}
+          email={selectedConversation.participants[0]!.email}
+          image={selectedConversation.participants[0]!.image}
+          name={selectedConversation.participants[0]!.name}
         />
 
         <div className="flex flex-col">

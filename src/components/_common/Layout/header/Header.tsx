@@ -28,16 +28,18 @@ import MobileHeader from "./mobile/MobileHeader";
 import useHostBtn from "./useHostBtn";
 import LogInSignUp from "./LoginOrSignup";
 
-export function Header() {
+export function Header({ noBanner = false }: { noBanner?: boolean }) {
   const { pathname } = useRouter();
 
   const isHost = pathname.includes("/host") ? true : false;
 
   return (
     <>
-      <div className="text-balance bg-primaryGreen px-4 py-2 text-center text-sm font-medium text-white">
-        Tramona is under maintenance right now, we&apos;ll be launching soon!
-      </div>
+      {!noBanner && (
+        <div className="text-balance bg-primaryGreen px-4 py-2 text-center text-sm font-medium text-white">
+          Tramona is under maintenance right now, we&apos;ll be launching soon!
+        </div>
+      )}
       <div className="lg:hidden">
         <MobileHeader isHost={isHost} />
       </div>

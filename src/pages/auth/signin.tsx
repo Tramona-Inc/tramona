@@ -73,6 +73,8 @@ export default function Login() {
         toast({ title: "Please log in to continue" });
       } else if (router.query.error === "OAuthCallback") {
         errorToast("Couldn't log in, try using email/password");
+      } else if (router.query.error === "CredentialsSignin") {
+        errorToast("Incorrect email or password, please try again");
       } else {
         errorToast("Couldn't log in, please try again");
       }

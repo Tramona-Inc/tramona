@@ -35,6 +35,10 @@ import { tripCheckouts, refundedPayments } from "./tables/payments";
 import { requestsToBook } from "./tables/requestsToBook";
 import { claims, claimItems, claimPayments } from "./tables/claims";
 import { claimItemResolutions } from "./tables/claims";
+import {
+  propertyMessages,
+  propertyConversations,
+} from "./tables/propertyMessages";
 
 export const usersRelations = relations(users, ({ one, many }) => ({
   accounts: many(accounts),
@@ -57,6 +61,9 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   rejectedRequests: many(rejectedRequests),
   claims: many(claims),
   claimItemResolutions: many(claimItemResolutions),
+  propertyConversations: many(propertyConversations, {
+    relationName: "traveler",
+  }),
 }));
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -107,7 +114,8 @@ export const propertiesRelations = relations(properties, ({ one, many }) => ({
   reviews: many(reviews),
   superhogErrors: many(superhogErrors),
   claimItems: many(claimItems),
-  requestsToBook: many(requestsToBook)
+  requestsToBook: many(requestsToBook),
+  conversations: many(propertyConversations),
 }));
 
 export const bookedDatesRelations = relations(bookedDates, ({ one }) => ({
@@ -454,7 +462,6 @@ export const requestsToBookRelations = relations(requestsToBook, ({ one }) => ({
     fields: [requestsToBook.propertyId],
     references: [properties.id],
   }),
-  
 }));
 
 // < -------- Claims ------- >
@@ -512,3 +519,44 @@ export const claimPaymentsRelations = relations(claimPayments, ({ one }) => ({
     references: [superhogRequests.id],
   }),
 }));
+
+export const propertyMessagesRelations = relations(
+  propertyMessages,
+  ({ one }) => ({
+    conversation: one(propertyConversations, {
+      fields: [propertyMessages.conversationId],
+      references: [propertyConversations.id],
+    }),
+    author: one(users, {
+      fields: [propertyMessages.authorId],
+      references: [users.id],
+    }),
+  }),
+);
+
+export const propertyConversationsRelations = relations(
+  propertyConversations,
+  ({ one, many }) => ({
+    traveler: one(users, {
+      fields: [propertyConversations.travelerId],
+      references: [users.id],
+    }),
+    property: one(properties, {
+      fields: [propertyConversations.propertyId],
+      references: [properties.id],
+    }),
+    messages: many(propertyMessages),
+    offer: one(offers, {
+      fields: [propertyConversations.offerId],
+      references: [offers.id],
+    }),
+    requestToBook: one(requestsToBook, {
+      fields: [propertyConversations.requestToBookId],
+      references: [requestsToBook.id],
+    }),
+    trip: one(trips, {
+      fields: [propertyConversations.tripId],
+      references: [trips.id],
+    }),
+  }),
+);

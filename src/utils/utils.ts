@@ -963,3 +963,28 @@ export function isTripWithin48Hours(
   // check if current date is after target date
   return now >= targetDate;
 }
+
+export function toReversed<T>(arr: T[]) {
+  return [...arr].reverse();
+}
+
+export function formatRelativeDateShort(
+  date: Date,
+  { withSuffix }: { withSuffix?: boolean } = {},
+) {
+  const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+  const months = Math.floor(days / 30);
+  const years = Math.floor(months / 12);
+
+  const suffix = withSuffix ? " ago" : "";
+
+  if (years > 0) return `${years}y${suffix}`;
+  if (months > 0) return `${months}mo${suffix}`;
+  if (days > 0) return `${days}d${suffix}`;
+  if (hours > 0) return `${hours}h${suffix}`;
+  if (minutes > 0) return `${minutes}m${suffix}`;
+  return "now";
+}
