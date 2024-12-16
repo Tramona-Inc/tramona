@@ -52,7 +52,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <main className="relative min-h-screen">{children}</main>
           {status !== "loading" && <MobileNav type={navType} />}
           <div className="hidden md:contents">
-            <MessagesPopover isMobile={false} />
+            <MessagesPopover isMobile={false} isHostOnboarding={false} />
           </div>
           {isMd && <Footer />}
         </div>
