@@ -144,7 +144,7 @@ export default function HostPropertiesRestrictions({
                 </h3>
                 <p className="text-base leading-normal">
                   Do you want travelers to be verified by Stripe for this
-                  property?
+                  property? This is an 8 hour long p
                 </p>
                 <FormField
                   name="stripeVerRequired"
