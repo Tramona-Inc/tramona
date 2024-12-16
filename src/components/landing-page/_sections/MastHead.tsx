@@ -19,6 +19,7 @@ import { ChevronRight, HelpCircle } from "lucide-react";
 import OverviewRequestCards from "./name-your-price/OverviewRequestCards";
 import HowTramonaWorks from "./name-your-price/HowTramonaWorks";
 import { TestimonialCarousel } from "./testimonials/TestimonialCarousel";
+import { landingPageTestimonals } from "./testimonials/testimonials-data";
 import HostSection from "./name-your-price/HostSection";
 import UnclaimedMap from "@/components/unclaimed-offers/UnclaimedMap";
 
@@ -230,13 +231,19 @@ export default function MastHead() {
             </div>
           </div>
 
-          {activeTab === "search" ? (
-            <div className="px-16">
-              <UnclaimedMap />
-            </div>
-          ) : (
-            <NameYourPriceSection />
-          )}
+        {activeTab === "search" ? (
+          <BookItNowSection />
+        ) : (
+          <NameYourPriceSection />
+        )}
+      </div>
+
+      <div className="mt-12 flex flex-col items-center gap-y-20 lg:gap-y-24">
+        {/* other  sections */}
+        <OverviewRequestCards className="w-11/12 lg:w-2/3" />
+        <HowTramonaWorks className="w-11/12" />
+        <div className="mx-0 flex max-w-full justify-center space-y-4 px-4 lg:mx-4 lg:flex lg:space-y-8">
+          <TestimonialCarousel testimonials={landingPageTestimonals}/>
         </div>
 
         <div className="mt-12 flex flex-col items-center gap-y-20 lg:gap-y-24">

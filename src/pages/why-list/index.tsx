@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { TestimonialCarousel } from "@/components/landing-page/_sections/testimonials/TestimonialCarousel";
 import { MobileTestimonialCarousel } from "@/components/landing-page/_sections/testimonials/MobileTestimonialCarousel";
+import { whyListTestimonals } from "@/components/landing-page/_sections/testimonials/testimonials-data";
 import { useIsSm } from "@/utils/utils";
 import React from "react";
 import HostCalculator from "@/components/host/HostCalculator";
@@ -35,12 +36,12 @@ const ForHostsPage = ({
   requestFeed,
 }: InferGetStaticPropsType<typeof getStaticProps>) => {
   return (
-    <div className="relative space-y-32 overflow-x-hidden pb-20 md:pb-0">
+    <div className="bg-white relative space-y-32 overflow-x-hidden pb-20 md:pb-0">
       <Head>
         <title>For Hosts | Tramona</title>
       </Head>
       <div>
-        <div className="bg-[#FAF9F6]">
+        <div className="bg-white">
           <Banner />
           <div className="md:hidden">
             <MobileStickyBar />
@@ -50,7 +51,7 @@ const ForHostsPage = ({
           </div>
           <SignUpNow requestFeed={requestFeed} />
         </div>
-        <div>
+        <div className="bg-[#FAF9F6]">
           <h1 className="mt-12 text-center text-3xl font-semibold">
             How Tramona Works for Hosts
           </h1>
@@ -59,7 +60,6 @@ const ForHostsPage = ({
           </p>
           <HowItWorks />
         </div>
-        <hr className="mx-8 border-t border-gray-300" />
         <div>
           <h1 className="mt-12 text-center text-3xl font-semibold">
             Automation vs Manual
@@ -77,7 +77,7 @@ const ForHostsPage = ({
         <div className="bg-[#FAF9F6]">
           <Features2 />
         </div>
-        <div className="mt-12">
+        <div className="bg-white mt-12">
           <KeyFeatures />
         </div>
         <hr className="mx-8 border-t border-gray-300" />
@@ -86,7 +86,7 @@ const ForHostsPage = ({
           <HostCalculator />
         </div>
         <div className="mx-0 flex max-w-full justify-center space-y-4 px-4 lg:mx-4 lg:mb-16 lg:mt-16 lg:flex lg:space-y-8">
-          {useIsSm() ? <MobileTestimonialCarousel /> : <TestimonialCarousel />}
+          {useIsSm() ? <MobileTestimonialCarousel testimonials={whyListTestimonals} /> : <TestimonialCarousel testimonials={whyListTestimonals} />}
         </div>
         <div className="bg-[#FAF9F6] p-8">
           <ListInAMinute />
