@@ -1,6 +1,6 @@
 // SearchFormBar.tsx
 import React from "react";
-import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -36,11 +36,15 @@ export function SearchFormBar({
   const checkOutDate = form.watch("checkOut");
   const numGuests = form.watch("numGuests") ?? 1;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const values = form.getValues();
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   const values = form.getValues();
+  //   await onSubmit(values);
+  // };
+
+  const handleSubmit = form.handleSubmit(async (values) => {
     await onSubmit(values);
-  };
+  });
 
   if (variant === 'modal') {
     return (
@@ -167,33 +171,36 @@ export function SearchFormBar({
                   name="location"
                   render={({ field }) => (
                     <FormItem className="w-full">
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger
-                            className={`border-0 bg-transparent focus:ring-0 transition-all duration-300 ease-in-out ${
-                              isCompact ? "text-xs" : "text-base"
-                            }`}
-                          >
-                            <SelectValue placeholder="Search destinations" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent
-                          className="h-48 overflow-y-auto"
-                          position="popper"
+                      <div className="relative">
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
                         >
-                          {locations.map((location) => (
-                            <SelectItem
-                              key={location.name}
-                              value={location.name}
+                          <FormControl>
+                            <SelectTrigger
+                              className={`border-0 bg-transparent focus:ring-0 transition-all duration-300 ease-in-out ${
+                                isCompact ? "text-xs" : "text-base"
+                              }`}
                             >
-                              {location.name}, {location.country}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                              <SelectValue placeholder="Search destinations" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent
+                            className="h-48 overflow-y-auto"
+                            position="popper"
+                          >
+                            {locations.map((location) => (
+                              <SelectItem
+                                key={location.name}
+                                value={location.name}
+                              >
+                                {location.name}, {location.country}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -229,8 +236,13 @@ export function SearchFormBar({
                             isCompact ? "text-xs" : "text-base"
                           }`}
                           maxDate={checkOutDate instanceof Date ? checkOutDate : undefined}
+                          onChange={(e) => {
+                            field.onChange(e);
+                            form.setError("checkIn", { message: "" });
+                          }}
                         />
                       </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -266,8 +278,13 @@ export function SearchFormBar({
                             isCompact ? "text-xs" : "text-base"
                           }`}
                           minDate={checkInDate instanceof Date ? checkInDate : undefined}
+                          onChange={(e) => {
+                            field.onChange(e);
+                            form.setError("checkOut", { message: "" });
+                          }}
                         />
                       </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -305,6 +322,7 @@ export function SearchFormBar({
                           maxGuests={999}
                         />
                       </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -321,7 +339,7 @@ export function SearchFormBar({
                 {isLoading ? (
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
                 ) : (
-                  <Search 
+                  <Search
                     className={`transition-all duration-300 ease-in-out ${
                       isCompact ? "scale-75" : "scale-100"
                     }`}
