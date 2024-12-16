@@ -16,6 +16,7 @@ import {
 import { useIsSm } from "@/utils/utils";
 import { MobileTestimonialCarousel } from "@/components/landing-page/_sections/testimonials/MobileTestimonialCarousel";
 import { TestimonialCarousel } from "@/components/landing-page/_sections/testimonials/TestimonialCarousel";
+import { howItWorksTestimonals } from "@/components/landing-page/_sections/testimonials/testimonials-data";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import AccordionFaq from "@/components/_common/AccordionFaq";
@@ -309,9 +310,9 @@ export default function Page() {
 
           <div className="mx-0 flex max-w-full justify-center space-y-4 px-4 lg:mx-4 lg:mt-16 lg:flex lg:space-y-8">
             {useIsSm() ? (
-              <MobileTestimonialCarousel />
+              <MobileTestimonialCarousel testimonials={howItWorksTestimonals}/>
             ) : (
-              <TestimonialCarousel />
+              <TestimonialCarousel testimonials={howItWorksTestimonals}/>
             )}
           </div>
 

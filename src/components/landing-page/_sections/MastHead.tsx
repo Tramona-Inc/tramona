@@ -19,6 +19,7 @@ import { ChevronRight, HelpCircle } from "lucide-react";
 import OverviewRequestCards from "./name-your-price/OverviewRequestCards";
 import HowTramonaWorks from "./name-your-price/HowTramonaWorks";
 import { TestimonialCarousel } from "./testimonials/TestimonialCarousel";
+import { landingPageTestimonals } from "./testimonials/testimonials-data";
 import HostSection from "./name-your-price/HostSection";
 
 export default function MastHead() {
@@ -240,7 +241,7 @@ export default function MastHead() {
         <OverviewRequestCards className="w-11/12 lg:w-2/3" />
         <HowTramonaWorks className="w-11/12" />
         <div className="mx-0 flex max-w-full justify-center space-y-4 px-4 lg:mx-4 lg:flex lg:space-y-8">
-          <TestimonialCarousel />
+          <TestimonialCarousel testimonials={landingPageTestimonals}/>
         </div>
         <HostSection className="w-full" />
 

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { TestimonialCarousel } from "@/components/landing-page/_sections/testimonials/TestimonialCarousel";
 import { MobileTestimonialCarousel } from "@/components/landing-page/_sections/testimonials/MobileTestimonialCarousel";
+import { whyListTestimonals } from "@/components/landing-page/_sections/testimonials/testimonials-data";
 import { useIsSm } from "@/utils/utils";
 import React from "react";
 import HostCalculator from "@/components/host/HostCalculator";
@@ -86,7 +87,7 @@ const ForHostsPage = ({
           <HostCalculator />
         </div>
         <div className="mx-0 flex max-w-full justify-center space-y-4 px-4 lg:mx-4 lg:mb-16 lg:mt-16 lg:flex lg:space-y-8">
-          {useIsSm() ? <MobileTestimonialCarousel /> : <TestimonialCarousel />}
+          {useIsSm() ? <MobileTestimonialCarousel testimonials={whyListTestimonals} /> : <TestimonialCarousel testimonials={whyListTestimonals} />}
         </div>
         <div className="bg-[#FAF9F6] p-8">
           <ListInAMinute />
