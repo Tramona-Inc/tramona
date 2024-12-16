@@ -14,18 +14,16 @@ import SingleDateInput from "@/components/_common/SingleDateInput";
 import GuestInput from "@/components/_common/GuestInput";
 import type { UseFormReturn } from "react-hook-form";
 import { locations } from "./locations";
-import type { z } from "zod";
-import { searchSchema } from "./schemas";
-
-type SearchFormValues = z.infer<typeof searchSchema>;
+import { SearchFormValues } from "./schemas";
 
 interface SearchFormBarProps {
-  form: UseFormReturn<SearchFormValues>;
-  onSubmit: (data: SearchFormValues) => void;
+  form: UseFormReturn<SearchFormValues, unknown, SearchFormValues>;  // Added unknown as the second type parameter
+  onSubmit: (values: SearchFormValues) => Promise<void> | void;
   isLoading: boolean;
   isCompact?: boolean;
   variant?: 'default' | 'modal';
 }
+
 
 export function SearchFormBar({
   form,
@@ -38,35 +36,16 @@ export function SearchFormBar({
   const checkOutDate = form.watch("checkOut");
   const numGuests = form.watch("numGuests") ?? 1;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    void form.handleSubmit(onSubmit)(e);
+    const values = form.getValues();
+    await onSubmit(values);
   };
 
   if (variant === 'modal') {
     return (
       <Form {...form}>
         <div className="space-y-4">
-          {/* Location */}
-          <FormField
-            control={form.control}
-            name="location"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      placeholder="Search destinations"
-                      className="w-full rounded-lg border border-gray-300 p-4 pl-10"
-                      {...field}
-                    />
-                    <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-                  </div>
-                </FormControl>
-              </FormItem>
-            )}
-          />
 
           {/* Check-in */}
           <FormField
@@ -78,11 +57,11 @@ export function SearchFormBar({
                   <div className="relative">
                     <SingleDateInput
                       {...field}
-                      value={field.value ? new Date(field.value) : undefined}
+                      value={field.value instanceof Date ? field.value : undefined}
                       placeholder="Check in"
                       disablePast
                       className="w-full rounded-lg border border-gray-300 p-4 pl-10"
-                      maxDate={checkOutDate ? new Date(checkOutDate) : undefined}
+                      maxDate={checkOutDate instanceof Date ? checkOutDate : undefined}
                     />
                     <CalendarDays className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
                   </div>
@@ -101,11 +80,11 @@ export function SearchFormBar({
                   <div className="relative">
                     <SingleDateInput
                       {...field}
-                      value={field.value ? new Date(field.value) : undefined}
+                      value={field.value instanceof Date ? field.value : undefined}
                       placeholder="Check out"
                       disablePast
                       className="w-full rounded-lg border border-gray-300 p-4 pl-10"
-                      minDate={checkInDate ? new Date(checkInDate) : undefined}
+                      minDate={checkInDate instanceof Date ? checkInDate : undefined}
                     />
                     <CalendarDays className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
                   </div>
@@ -141,6 +120,7 @@ export function SearchFormBar({
             type="submit"
             className="w-full rounded-full bg-primaryGreen py-6 text-white"
             disabled={isLoading}
+            onClick={handleSubmit}
           >
             {isLoading ? (
               <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -155,7 +135,6 @@ export function SearchFormBar({
       </Form>
     );
   }
-
 
   return (
     <Form {...form}>
@@ -242,14 +221,14 @@ export function SearchFormBar({
                       <FormControl>
                         <SingleDateInput
                           {...field}
-                          value={field.value ? new Date(field.value) : undefined}
+                          value={field.value instanceof Date ? field.value : undefined}
                           variant="lpDesktop"
                           placeholder="Check in"
                           disablePast
                           className={`border-0 bg-transparent hover:bg-transparent focus:ring-0 transition-all duration-300 ease-in-out ${
                             isCompact ? "text-xs" : "text-base"
                           }`}
-                          maxDate={checkOutDate ? new Date(checkOutDate) : undefined}
+                          maxDate={checkOutDate instanceof Date ? checkOutDate : undefined}
                         />
                       </FormControl>
                     </FormItem>
@@ -279,14 +258,14 @@ export function SearchFormBar({
                       <FormControl>
                         <SingleDateInput
                           {...field}
-                          value={field.value ? new Date(field.value) : undefined}
+                          value={field.value instanceof Date ? field.value : undefined}
                           variant="lpDesktop"
                           placeholder="Check Out"
                           disablePast
                           className={`border-0 bg-transparent hover:bg-transparent focus:ring-0 transition-all duration-300 ease-in-out ${
                             isCompact ? "text-xs" : "text-base"
                           }`}
-                          minDate={checkInDate ? new Date(checkInDate) : undefined}
+                          minDate={checkInDate instanceof Date ? checkInDate : undefined}
                         />
                       </FormControl>
                     </FormItem>

@@ -1,6 +1,6 @@
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import {
   CheckCircle2,
   Globe2,
@@ -83,7 +83,7 @@ function GrowthMetricCard({
   Icon: React.ElementType;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center text-center gap-4 rounded-xl bg-white p-6 shadow">
+    <div className="flex flex-col items-center justify-center gap-4 rounded-xl bg-white p-6 text-center shadow">
       <div className="flex items-center justify-center rounded-full bg-[#E6F0EE] p-4">
         <Icon className="h-10 w-10 text-[#004236]" />
       </div>
@@ -150,7 +150,7 @@ function TangiblePartnerBenefits() {
         {benefits.map((benefit, index) => (
           <Card
             key={index}
-            className="flex flex-col items-center text-center space-y-4 rounded-lg shadow p-6"
+            className="flex flex-col items-center space-y-4 rounded-lg p-6 text-center shadow"
           >
             <benefit.icon className="h-12 w-12 text-[#004236]" />
             <h3 className="text-lg font-semibold text-[#004236] sm:text-xl">
@@ -168,7 +168,7 @@ function TangiblePartnerBenefits() {
 
 function PartnerConnectSection() {
   return (
-    <div className="mx-auto max-w-2xl space-y-8 text-center p-6 rounded-lg shadow-md bg-white">
+    <div className="mx-auto max-w-2xl space-y-8 rounded-lg bg-white p-6 text-center shadow-md">
       <h2 className="text-3xl font-bold text-[#004236]">Let&apos;s Connect</h2>
       <p className="text-lg text-gray-600">
         Ready to give your hosts more opportunities to succeed and add value to
@@ -245,7 +245,7 @@ function WhyPartnerSection() {
       <h2 className="text-center text-2xl font-bold text-[#004236] sm:text-3xl">
         Why Partner with Tramona?
       </h2>
-      <div className="grid gap-8 sm:gap-12 sm:max-w-xl lg:max-w-5xl mx-auto md:grid-cols-2">
+      <div className="mx-auto grid gap-8 sm:max-w-xl sm:gap-12 md:grid-cols-2 lg:max-w-5xl">
         {partnerTypes.map((type, index) => (
           <div key={index} className="space-y-6">
             <h3 className="border-b-2 border-[#004236]/10 pb-3 text-xl font-semibold text-[#004236] sm:text-2xl">

@@ -39,7 +39,7 @@ export default function Onboarding({ requestFeed }: Props) {
   }
 
   return (
-    <OnboardingLayout>
+    <OnboardingLayout className="flex flex-col">
       {progress === 0 && <Onboarding1 onPressNext={onPressNext} />}
       {progress === 1 && <Onboarding2 />}
       {progress === 2 && <Onboarding3 />}

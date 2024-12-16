@@ -23,22 +23,26 @@ export default function Page() {
       <div className="relative h-screen overflow-y-auto">
         {/* Sticky header */}
         <AdjustedPropertiesProvider>
-        <div
-          className={`sticky top-0 z-20 w-full border-b-2 transition-all duration-300 ease-in-out ${
-            isScrolled
-              ? "border-white bg-white shadow-md"
-              : "border-transparent bg-white"
-          }`}
-        >
+          <div
+            className={`sticky top-0 z-20 w-full border-b-2 transition-all duration-300 ease-in-out ${
+              isScrolled
+                ? "border-white bg-white shadow-md"
+                : "border-transparent bg-white"
+            }`}
+          >
+            <DesktopSearchTab
+              isCompact={isScrolled}
+              handleTabChange={() => {
+                return;
+              }}
+              isLandingPage={false}
+            />
+          </div>
 
-            <DesktopSearchTab isCompact={isScrolled} handleTabChange={() => {}} isLandingPage={false} />
-
-        </div>
-
-        {/* Scrollable content */}
-        <div className="">
-          <UnclaimedMap />
-        </div>
+          {/* Scrollable content */}
+          <div className="">
+            <UnclaimedMap />
+          </div>
         </AdjustedPropertiesProvider>
       </div>
     </DashboardLayout>

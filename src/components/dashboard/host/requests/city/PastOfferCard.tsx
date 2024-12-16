@@ -1,30 +1,12 @@
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { type RouterOutputs } from "@/utils/api";
-import { getRequestStatus } from "@/utils/formatters";
-import {
   formatCurrency,
   formatDateRange,
   getNumNights,
   plural,
 } from "@/utils/utils";
-import {
-  ClockIcon,
-  EllipsisIcon,
-  LinkIcon,
-  MapPinIcon,
-  TrashIcon,
-} from "lucide-react";
+import { ClockIcon } from "lucide-react";
 import { Card, CardFooter } from "@/components/ui/card";
 // import RequestGroupAvatars from "./RequestGroupAvatars";
-import { Button } from "@/components/ui/button";
-import { useState } from "react";
-import PastOfferWithdrawDialog from "./PastOfferWithdrawDialog";
-import { Badge } from "@/components/ui/badge";
 import UserAvatar from "@/components/_common/UserAvatar";
 import { TravelerVerificationsDialog } from "@/components/requests/TravelerVerificationsDialog";
 import { formatDistanceToNowStrict } from "date-fns";
@@ -52,7 +34,7 @@ export default function PastOfferCard({
 }: {
   offer: Offer;
   request: PastOfferRequestDetails;
-  property: { city: string, name: string };
+  property: { city: string; name: string };
   children?: React.ReactNode;
 }) {
   const requestPricePerNight =

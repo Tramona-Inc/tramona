@@ -3,7 +3,7 @@ interface Location {
     country: string;
     image: string;
   }
-  
+
   export const locations: Location[] = [
     {
       name: "Atlanta",
@@ -12,6 +12,11 @@ interface Location {
     },
     {
       name: "Austin",
+      country: "USA",
+      image: "https://images.unsplash.com/photo-1531218150217-54595bc2b934?w=300&h=200&fit=crop",
+    },
+    {
+      name: "Dallas",
       country: "USA",
       image: "https://images.unsplash.com/photo-1531218150217-54595bc2b934?w=300&h=200&fit=crop",
     },
