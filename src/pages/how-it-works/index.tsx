@@ -28,33 +28,32 @@ export default function Page() {
           <title>How It Works | Tramona</title>
         </Head>
         <div className="mb-12 space-y-12 md:mb-20 md:space-y-20">
-          <section className="relative -mb-1">
-            <div className="relative h-[40vh] w-full">
-              <Image
-                src="/assets/images/why-list/host-banner.png"
-                alt="beach banner"
-                fill
-                objectFit="cover"
-                objectPosition="center"
-                priority
-              />
+        <section className="relative -mb-1">
+          <div className="relative h-[30vh] w-full">
+            <Image
+              src="/assets/images/why-list/host-banner.png"
+              alt="How It Works Banner"
+              fill
+              objectFit="cover"
+              objectPosition="center"
+              priority
+            />
+          </div>
+          <span className="absolute inset-0 bg-black opacity-50"></span>
+          <div className="absolute top-6 left-0 right-0 px-6 md:px-12">
+            <div className="relative z-10 max-w-4xl text-left text-white">
+              <h2 className="text-sm font-medium uppercase tracking-wide md:text-lg">
+                HOW IT WORKS
+              </h2>
+              <h3 className="mt-2 text-xl font-bold leading-snug md:text-3xl lg:text-4xl">
+                Tramona connects travelers with unbeatable deals and hosts with more bookings
+              </h3>
+              <p className="mt-4 text-sm md:text-base lg:text-lg">
+                See what hosts will offer you
+              </p>
             </div>
-            <span className="absolute inset-0 bg-black opacity-50"></span>
-            <div className="absolute inset-0 flex items-center px-6">
-              <div className="relative z-10 max-w-4xl text-left text-white">
-                <h2 className="text-sm font-medium uppercase tracking-wide md:text-lg">
-                  HOW IT WORKS
-                </h2>
-                <h3 className="mt-2 text-xl font-bold leading-snug md:text-3xl lg:text-4xl">
-                  Tramona connects travelers with unbeatable deals and hosts
-                  with more bookings
-                </h3>
-                <p className="mt-4 text-sm md:text-base lg:text-lg">
-                  See what hosts will offer you
-                </p>
-              </div>
-            </div>
-          </section>
+          </div>
+        </section>
 
           <div className="w-full bg-[#FAF9F6] py-8">
             <div className="mx-auto max-w-screen-xl space-y-6">
