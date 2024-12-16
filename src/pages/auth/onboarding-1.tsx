@@ -19,6 +19,10 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import ErrorMsg from "@/components/ui/ErrorMsg";
 import { ButtonSpinner } from "@/components/ui/button-spinner";
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs from "dayjs";
 
 export default function DateOfBirth() {
   const { data: session } = useSession();
@@ -79,18 +83,38 @@ export default function DateOfBirth() {
             <Form {...form}>
               <ErrorMsg>{form.formState.errors.root?.message}</ErrorMsg>
               <form onSubmit={form.handleSubmit(onDobSubmit)}>
-                <FormField
-                  name="dob"
-                  control={form.control}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Input {...field} type="date" autoFocus />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <DatePicker
+                    label="Date of Birth"
+                    openTo="year"
+                    views={['year', 'month', 'day']} 
+                    maxDate={dayjs()}
+                    value={form.watch('dob') ? dayjs(form.watch('dob')) : null}
+                    onChange={(newValue) => form.setValue('dob', newValue?.format('YYYY-MM-DD') ?? '')}
+                    slotProps={{
+                      textField: {
+                        fullWidth: true,
+                        sx: {
+                          '& .MuiInputBase-root': {
+                            width: '100%',
+                            borderRadius: '0.5rem',
+                          },
+                          '& .MuiOutlinedInput-root': {
+                            '& fieldset': {
+                              borderColor: '#E5E7EB', // Light gray border
+                            },
+                            '&:hover fieldset': {
+                              borderColor: '#004236', // Your theme color on hover
+                            },
+                            '&.Mui-focused fieldset': {
+                              borderColor: '#004236', // Your theme color when focused
+                            },
+                          },
+                        },
+                      },
+                    }}
+                  />
+                </LocalizationProvider>
                 <Button type="submit" className="mt-4 w-full">
                   <ButtonSpinner />
                   Continue
