@@ -45,9 +45,7 @@ export default function MastHead() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleTabChange = (tab: string, scroll?: boolean) => {
-    const currentScroll = window.scrollY;
-
+  const handleTabChange = (tab: string) => {
     void router.push(
       {
         pathname: router.pathname,
@@ -57,19 +55,24 @@ export default function MastHead() {
       {
         shallow: true,
         scroll: false,
-      },
+      }
     );
 
-    if (scroll && tab === "name-price" && toggleSectionRef.current) {
-      toggleSectionRef.current.scrollIntoView({ behavior: "smooth" });
-    } else {
-      window.scrollTo(0, currentScroll);
+    if (toggleSectionRef.current) {
+      const headerOffset = 250;
+      const elementPosition = toggleSectionRef.current.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth"
+      });
     }
   };
 
   const scrollToHowItWorks = () => {
     window.scrollTo({
-      top: 1500,
+      top: 3000,
       behavior: "smooth",
     });
   };
@@ -159,13 +162,13 @@ export default function MastHead() {
 
             <div className="absolute inset-0 mx-auto flex max-w-7xl flex-col justify-center pl-4 text-left lg:hidden">
               <h2 className="mt-8 text-left text-4xl font-bold text-white">
-                Tramona turns empty nights into bookings
+                Lets turn empty nights into bookings
               </h2>
               <h3 className="mt-6 text-lg font-semibold text-white">
-                Name your own price or book it now
+                When hosts have empty nights, no one wins
               </h3>
               <h3 className="mt-2 text-lg font-semibold text-white">
-                when hosts have empty nights, no one wins
+                Name your own price or book it now
               </h3>
               <h3 className="mt-4 text-lg font-semibold text-white">
                 <Link href={"/how-it-works"} className="flex items-center">
@@ -176,7 +179,7 @@ export default function MastHead() {
             </div>
 
             <div className="absolute inset-0 mx-auto hidden max-w-7xl flex-col justify-center pl-4 text-left lg:flex">
-              <h2 className="mt-8 text-left text-6xl font-bold text-white">
+              <h2 className="mt-8 text-left text-5xl font-bold text-white">
                 Turn empty nights into opportunities
               </h2>
               <h3 className="mt-6 text-xl font-semibold text-white">
@@ -185,7 +188,7 @@ export default function MastHead() {
               <h3 className="mt-2 text-xl font-semibold text-white">
                 when hosts have empty nights, no one wins
               </h3>
-              <h3 className="mt-4 text-xl font-semibold text-white">
+              <h3 className="mt-4 text-lg font-semibold text-white">
                 <button
                   className="flex items-center"
                   onClick={scrollToHowItWorks}
@@ -206,27 +209,31 @@ export default function MastHead() {
               hasPassedButtons ? "opacity-0" : "opacity-100"
             }`}
           >
-            <div className="flex rounded-full border-2 border-gray-400 bg-white">
-              <button
-                onClick={() => handleTabChange("search")}
-                className={`flex-1 rounded-full py-2 text-center text-sm transition-all duration-200 ${
-                  activeTab === "search"
-                    ? "bg-primaryGreen text-white shadow-lg"
-                    : "bg-white text-primaryGreen hover:bg-zinc-100"
-                }`}
-              >
-                Book it now
-              </button>
-              <button
-                onClick={() => handleTabChange("name-price")}
-                className={`flex-1 rounded-full py-2 text-center text-sm transition-all duration-200 ${
-                  activeTab === "name-price"
-                    ? "bg-primaryGreen text-white shadow-lg"
-                    : "bg-white text-primaryGreen hover:bg-zinc-100"
-                }`}
-              >
-                Name your own price
-              </button>
+            <div className="mx-auto max-w-sm px-4 md:max-w-md lg:max-w-2xl">
+              <div className="flex w-full overflow-hidden rounded-full border border-[#004236] bg-white">
+                <button
+                  onClick={() => handleTabChange("search")}
+                  className={`w-1/2 px-8 py-3 text-center text-sm font-medium transition-all duration-200 
+                    ${
+                    activeTab === "search"
+                      ? "bg-[#004236] text-white" 
+                      : "bg-white text-[#004236]"
+                  }`}
+                >
+                  Book it now
+                </button>
+                <button
+                  onClick={() => handleTabChange("name-price")}
+                  className={`w-1/2 px-8 py-3 text-center text-sm font-medium transition-all duration-200 
+                    ${
+                    activeTab === "name-price"
+                      ? "bg-[#004236] text-white"
+                      : "bg-white text-[#004236]"
+                  }`}
+                >
+                  Name your own price
+                </button>
+              </div>
             </div>
           </div>
 

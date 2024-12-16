@@ -1,4 +1,3 @@
-
 import Typewriter from "typewriter-effect";
 import CityRequestFormContainer from "../../SearchBars/CityRequestFormContainer";
 
@@ -10,7 +9,6 @@ export function NameYourPriceSection() {
           Name your own Price
         </h1>
 
-        {/* <div style="background-color: var(--background);">Test Background</div> */}
         <p className="text-lg font-semibold text-muted-foreground lg:block lg:text-xl">
           Send a request to every host in{" "}
           <span className="font-bold text-primaryGreen">
@@ -24,7 +22,9 @@ export function NameYourPriceSection() {
             />
           </span>
         </p>
-        <CityRequestFormContainer />
+        <div className="border border-white rounded-lg">
+          <CityRequestFormContainer />
+        </div>
       </div>
     </div>
   );

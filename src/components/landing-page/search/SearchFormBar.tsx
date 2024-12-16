@@ -146,7 +146,7 @@ export function SearchFormBar({
             }`}
           >
             <div
-              className={`z-50 mx-auto flex w-full items-center justify-between rounded-full border border-black bg-white drop-shadow-lg transition-all duration-300 ease-in-out ${
+              className={`z-50 mx-auto flex w-full items-center justify-between rounded-full border border-gray-200 bg-white drop-shadow-lg transition-all duration-300 ease-in-out ${
                 isCompact ? "h-10 px-2" : "h-14 px-4"
               }`}
             >
@@ -181,8 +181,10 @@ export function SearchFormBar({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent
-                          className="h-48 overflow-y-auto"
-                          position="popper"
+                          className="max-h-[300px] overflow-y-auto rounded-lg border border-gray-200 bg-white p-1 shadow-lg"
+                          position="item-aligned"
+                          sideOffset={4}
+                          align="start"
                         >
                           {locations.map((location) => (
                             <SelectItem
@@ -316,6 +318,12 @@ export function SearchFormBar({
                 className={`ml-2 rounded-full bg-primaryGreen text-white transition-all duration-300 ease-in-out ${
                   isCompact ? "h-6 w-6 p-0" : "h-9 w-9 p-0"
                 }`}
+                onClick={() => {
+                  window.scrollTo({
+                    top: 350,
+                    behavior: "smooth"
+                  });
+                }}
                 disabled={isLoading}
               >
                 {isLoading ? (
