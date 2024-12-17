@@ -11,6 +11,10 @@ import {
   HouseIcon,
   HandCoins,
   SettingsIcon,
+  CalendarIcon,
+  MessageCircleIcon,
+  MapPinCheckIcon,
+  LuggageIcon,
 } from "lucide-react";
 //  <---------------- DESKTOP LINKS ----------------->
 
@@ -66,8 +70,12 @@ export const aboutLinkItems = [
 
 // <----------- HOST MOBILE LINKS ---------->
 export const hostManageLinks = [
-  { href: "/host", title: "Dashboard", icon: LayoutDashboard },
-  { href: "/host/properties", title: "Properties", icon: HouseIcon },
+  { href: "/host", title: "Overview", icon: LayoutDashboard },
+  { href: "/calendar", title: "Calendar", icon: CalendarIcon },
+  { href: "/host/properties", title: "Listings", icon: HouseIcon },
+  { href: "/host/messages", title: "Messages", icon: MessageCircleIcon },
+  { href: "/host/requests", title: "Requests", icon: MapPinCheckIcon },
+  { href: "/host/stays", title: "Stays", icon: LuggageIcon },
   { href: "/host/team", title: "Team", icon: UsersIcon },
 ];
 
