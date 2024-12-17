@@ -82,7 +82,7 @@ function NameYourOwnPriceSection({ property }: { property: Property }) {
         className="flex cursor-pointer items-center justify-between px-6 py-8"
         onClick={() => setNameYourPriceOpen(!nameYourPriceOpen)}
       >
-        <h3 className="text-xl font-bold text-black">Name Your Own Price</h3>
+        <h3 className="text-xl font-bold text-black">Requests and Bids Automation</h3>
         <Button variant="ghost" size="sm">
           <ChevronDown
             className="h-4 w-4 transition-transform duration-300"
@@ -95,9 +95,8 @@ function NameYourOwnPriceSection({ property }: { property: Property }) {
       <div
         className={`overflow-hidden transition-all duration-300 ease-in-out ${nameYourPriceOpen ? "-mt-4 max-h-[1000px] p-6 opacity-100" : "max-h-0 opacity-0"}`}
       >
-        <p className="text-base font-bold">
-          Every day we get thousands of requests from travelers. How would you
-          like to respond to them?
+        <p className="text-base font-semibold">
+          Every day we get thousands of requests from travelers. Heres how you can automate your response to make sure you maximize your bookings.
         </p>
 
         <div className="-mx-6 mt-4 w-[calc(100%+3rem)] border-b border-gray-200" />

@@ -10,9 +10,15 @@ import {
 import { useEffect, useState, useRef } from "react";
 import { QuoteIcon } from "lucide-react";
 import UserAvatar from "@/components/_common/UserAvatar";
-import { testimonials } from "./testimonials-data";
+import { testimonials as defaultTestimonials } from "./testimonials-data";
 
-export function MobileTestimonialCarousel() {
+type MobileTestimonialCarouselProps = {
+  testimonials?: typeof defaultTestimonials;
+};
+
+export function MobileTestimonialCarousel({
+  testimonials = defaultTestimonials,
+}: MobileTestimonialCarouselProps) {
   const [api, setApi] = useState<CarouselApi>();
   const [, forceUpdate] = useState({});
   const currentIndexRef = useRef(0);
@@ -42,7 +48,7 @@ export function MobileTestimonialCarousel() {
     const distance = Math.min(
       Math.abs((index % totalItems) - currentIndexRef.current),
       Math.abs((index % totalItems) - totalItems - currentIndexRef.current),
-      Math.abs((index % totalItems) + totalItems - currentIndexRef.current),
+      Math.abs((index % totalItems) + totalItems - currentIndexRef.current)
     );
     if (distance === 0) return "opacity-100";
     if (distance === 1) return "opacity-45";
@@ -68,12 +74,10 @@ export function MobileTestimonialCarousel() {
               className="basis-[80%] pl-4 transition-opacity duration-300 lg:basis-1/4"
             >
               <div className="h-[300px] w-full">
-                {" "}
-                {/* Fixed size container */}
                 <Card
                   className={cn(
                     "h-full w-full border-none bg-gray-100 shadow-none transition-opacity duration-300",
-                    getOpacity(index),
+                    getOpacity(index)
                   )}
                 >
                   <CardContent className="flex h-full flex-col p-6">

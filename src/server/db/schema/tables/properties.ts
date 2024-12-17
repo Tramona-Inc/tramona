@@ -375,6 +375,11 @@ export const properties = pgTable(
       DiscountTier[]
     >(),
     bookItNowEnabled: boolean("book_it_now_enabled").notNull().default(false),
+    bookItNowHostDiscountPercentOffInput: integer(
+      "book_it_now_host_discount_percent_off_input",
+    )
+      .default(0)
+      .notNull(), //the host inputs this in in the /calender settings page. Percent off of airbnb price
     bookItNowDiscountTiers: jsonb("book_it_now_discount_tiers").$type<
       DiscountTier[]
     >(),
