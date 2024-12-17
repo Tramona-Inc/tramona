@@ -785,23 +785,39 @@ export const propertiesRouter = createTRPCRouter({
         .where(eq(properties.id, input.id));
     }),
 
+  toggleBookItNow: protectedProcedure
+    .input(
+      z.object({
+        id: z.number(),
+        bookItNowEnabled: z.boolean(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const [updatedProperty] = await ctx.db
+        .update(properties)
+        .set({
+          bookItNowEnabled: input.bookItNowEnabled,
+        })
+        .where(eq(properties.id, input.id))
+        .returning({ bookItNowEnabled: properties.bookItNowEnabled });
+
+      return updatedProperty?.bookItNowEnabled ? true : false;
+    }),
+
   updateBookItNow: protectedProcedure
     .input(
       z.object({
         id: z.number(),
-        bookItNowEnabled: z.boolean().optional(),
-        bookItNowDiscountTiers: z.array(discountTierSchema).optional(),
+        bookItNowHostDiscountPercentOffInput: z.number().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       await ctx.db
         .update(properties)
         .set({
-          ...(input.bookItNowEnabled !== undefined && {
-            bookItNowEnabled: input.bookItNowEnabled,
-          }),
-          ...(input.bookItNowDiscountTiers && {
-            bookItNowDiscountTiers: input.bookItNowDiscountTiers,
+          ...(input.bookItNowHostDiscountPercentOffInput !== undefined && {
+            bookItNowHostDiscountPercentOffInput:
+              input.bookItNowHostDiscountPercentOffInput,
           }),
         })
         .where(eq(properties.id, input.id));
