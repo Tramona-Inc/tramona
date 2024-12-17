@@ -1,4 +1,3 @@
-import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import Image from "next/image";
 import Head from "next/head";
 import AccordionFaq from "@/components/_common/AccordionFaq";
@@ -6,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { TestimonialCarousel } from "@/components/landing-page/_sections/testimonials/TestimonialCarousel";
 import { MobileTestimonialCarousel } from "@/components/landing-page/_sections/testimonials/MobileTestimonialCarousel";
+import { whyListTestimonals } from "@/components/landing-page/_sections/testimonials/testimonials-data";
 import { useIsSm } from "@/utils/utils";
 import React from "react";
 import HostCalculator from "@/components/host/HostCalculator";
@@ -36,12 +36,12 @@ const ForHostsPage = ({
   requestFeed,
 }: InferGetStaticPropsType<typeof getStaticProps>) => {
   return (
-    <div className="relative space-y-32 overflow-x-hidden pb-32">
+    <div className="bg-white relative space-y-32 overflow-x-hidden pb-20 md:pb-0">
       <Head>
         <title>For Hosts | Tramona</title>
       </Head>
       <div>
-        <div className="bg-[#FAF9F6]">
+        <div className="bg-white">
           <Banner />
           <div className="md:hidden">
             <MobileStickyBar />
@@ -51,23 +51,21 @@ const ForHostsPage = ({
           </div>
           <SignUpNow requestFeed={requestFeed} />
         </div>
-        <div>
+        <div className="bg-[#FAF9F6]">
           <h1 className="mt-12 text-center text-3xl font-semibold">
             How Tramona Works for Hosts
           </h1>
           <p className="mb-12 mt-1 text-center text-lg font-normal text-gray-500">
-            Say goodbye to empty nights with tools designed to maximize your
-            earnings.
+            Say goodbye to empty nights
           </p>
           <HowItWorks />
         </div>
-        <hr className="mx-8 border-t border-gray-300" />
         <div>
           <h1 className="mt-12 text-center text-3xl font-semibold">
             Automation vs Manual
           </h1>
           <p className="mb-12 mt-1 text-center text-lg font-normal text-gray-500">
-            Over 70% of Tramona hosts use automation to save time.
+            Tramoma can be as hands on or hands off as you want.
           </p>
           <AutoManual />
           <p className="text-med mb-12 mt-8 text-center font-normal text-gray-500">
@@ -79,7 +77,7 @@ const ForHostsPage = ({
         <div className="bg-[#FAF9F6]">
           <Features2 />
         </div>
-        <div className="mt-12">
+        <div className="bg-white mt-12">
           <KeyFeatures />
         </div>
         <hr className="mx-8 border-t border-gray-300" />
@@ -88,7 +86,7 @@ const ForHostsPage = ({
           <HostCalculator />
         </div>
         <div className="mx-0 flex max-w-full justify-center space-y-4 px-4 lg:mx-4 lg:mb-16 lg:mt-16 lg:flex lg:space-y-8">
-          {useIsSm() ? <MobileTestimonialCarousel /> : <TestimonialCarousel />}
+          {useIsSm() ? <MobileTestimonialCarousel testimonials={whyListTestimonals} /> : <TestimonialCarousel testimonials={whyListTestimonals} />}
         </div>
         <div className="bg-[#FAF9F6] p-8">
           <ListInAMinute />
@@ -100,11 +98,11 @@ const ForHostsPage = ({
           </h2>
           <Questions />
         </div>
-        <div className="bg-[#FAF9F6] p-20">
+        <div className="bg-[#FAF9F6] p-20 pb-4 md:pb-8">
           <FAQ />
         </div>
       </div>
-      <div className="bg-primaryGreen py-8">
+      <div className="mt-0 bg-primaryGreen py-8">
         <div className="text-center text-white">
           <h2 className="text-2xl font-semibold">
             Turn hard-to-book dates into profitable stays
@@ -127,8 +125,8 @@ const ForHostsPage = ({
 
 const FAQ = () => {
   return (
-    <section className="mx-auto max-w-7xl pb-footer-height">
-      <div className="flex flex-col space-y-6 p-4 md:grid md:grid-cols-3 md:gap-6">
+    <section className="mx-auto max-w-7xl pb-8 md:pb-1">
+      <div className="flex flex-col space-y-6 p-2 md:grid md:grid-cols-3 md:gap-6">
         <span className="space-y-4 text-center md:text-left">
           <h1 className="text-3xl font-semibold md:text-4xl">
             Frequently asked questions
@@ -214,15 +212,14 @@ const SignUpNow = ({ requestFeed }: { requestFeed: FeedRequestItem[] }) => {
     <section className="flex justify-center">
       <div className="mx-12 flex flex-col justify-center gap-8 md:mx-36 lg:mx-24 lg:max-w-[70vw] lg:flex-row">
         <div className="flex-1">
-          <h1 className="mb-12 mt-12 text-center text-2xl font-semibold">
-            Sign up now to start booking your empty nights
+          <h1 className="mb-10 mt-10 text-center text-2xl font-semibold">
+            Tramona was built for hosts to fill empty nights. Suppliment your other booking platforms by always having an option to book an empty night.
           </h1>
           <div className="h-[450px] rounded-lg border px-2 py-2 shadow-xl">
             <RequestFeed requestFeed={requestFeed} />
           </div>
-          <h2 className="mb-12 mt-12 text-center text-2xl font-semibold">
-            Tramona is rapidly expanding. Everyday we have requests <br /> that
-            go un booked.
+          <h2 className="mb-12 mt-12 text-center text-2xl font-medium">
+            Everyday we have requests that go un booked.
           </h2>
           <div className="mb-12 flex justify-center">
             <Link href="/why-list">
@@ -239,25 +236,23 @@ const SignUpNow = ({ requestFeed }: { requestFeed: FeedRequestItem[] }) => {
 
 const HowItWorks = () => {
   return (
-    <ul className="mx-6 mb-12 flex flex-col justify-center gap-8 md:flex-row">
+    <ul className="mx-auto mb-12 flex flex-col items-center gap-8 md:flex-row md:justify-center">
       {/* Book it Now */}
-      <li className="flex w-96 flex-col rounded-xl p-8 text-left shadow-lg">
+      <li className="flex w-full max-w-sm flex-col rounded-xl bg-white p-6 text-left shadow-lg md:w-96">
         <h3 className="mb-6 text-center text-xl font-bold text-[primaryGreen]">
           1. Book it Now
         </h3>
-        <p className="font-semibold">
-          Allow travelers to book instantly, or request to book, just like other
-          booking platforms.
+        <p className="text-center font-medium md:text-left">
+          Classic book it now. Your property is showcased just like it is on Airbnb or Vrbo. Travelers can instantly book with or without waiting for approval.
         </p>
         <div className="flex items-center">
           <FaInfoCircle />
           <h4 className="m-3 ml-2 font-bold">How it Works:</h4>
         </div>
         <p className="text-gray-500">
-          Your property is showcased just like it is on Airbnb or Vrbo, and
-          travelers can instantly book with or without waiting for approval.
+          When you sign up as a host, your account is instantly synced with Airbb. Whenever you change your aavailability, price, or anything else on Airbnb. It is instantly reflected on Tramona.
         </p>
-        <hr style={{ border: "1px solid lightgrey", margin: "16px 0" }} />
+        <hr className="my-4 border-t border-gray-300" />
         <div className="flex items-center">
           <FaSlidersH />
           <h4 className="m-2 ml-2 font-bold">Your Flexibility:</h4>
@@ -275,66 +270,69 @@ const HowItWorks = () => {
       </li>
 
       {/* Receiving Bids */}
-      <li className="flex w-96 flex-col rounded-xl p-8 text-left shadow-lg">
+      <li className="flex w-full max-w-sm flex-col rounded-xl bg-white p-6 text-left shadow-lg md:w-96">
         <h3 className="mb-6 text-center text-xl font-bold text-[primaryGreen]">
           2. Receiving Bids
         </h3>
-        <p className="font-semibold">
-          Travelers send offers for your empty nights.
+        <p className="text-center font-medium md:text-left">
+          Travelers can send offers for your available nights.
         </p>
-        <div className="flex items-center">
+
+        <div className="flex items-center mt-4">
           <FaInfoCircle />
           <h4 className="m-3 ml-2 font-bold">How it Works:</h4>
         </div>
         <p className="text-gray-500">
-          Travelers can send you bids with their preferred price. You can
-          accept, deny, or set automatic rules to approve certain bids. Set
-          preferences on the host side of what you would consider, don’t see the
-          rest.
+          Travelers can book instantly or place a bid. You can accept, reject, or set automatic rules to approve bids that meet your criteria. Only see the offers that match your preferences.
         </p>
-        <hr style={{ border: "1px solid lightgrey", margin: "16px 0" }} />
+
+        <hr className="my-4 border-t border-gray-300" />
+
         <div className="flex items-center">
           <FaSlidersH />
           <h4 className="m-2 ml-2 font-bold">Your Flexibility:</h4>
         </div>
+
         <ul className="m-1 ml-1">
           <li className="flex items-center text-gray-500">
-            <FaCheck className="mr-2" size={12} /> Manually approve or deny bids
+            <FaCheck className="mr-2" size={12} /> Choose to automatically accept bids that meet your hidden price
           </li>
           <li className="flex items-center text-gray-500">
-            <FaCheck className="mr-2" size={12} /> Automate approval for
-            qualifying bids
+            <FaCheck className="mr-2" size={12} /> Set rules for the offers you’ll allow, ignore the rest
+          </li>
+          <li className="flex items-center text-gray-500">
+            <FaCheck className="mr-2" size={12} /> If Book It Now is off, travelers can only submit bids
           </li>
         </ul>
       </li>
 
       {/* Receiving Requests */}
-      <li className="flex w-96 flex-col rounded-xl p-8 text-left shadow-lg">
+      <li className="flex w-full max-w-sm flex-col rounded-xl bg-white p-6 text-left shadow-lg md:w-96">
         <h3 className="mb-6 text-center text-xl font-bold text-[primaryGreen]">
           3. Receiving Requests
         </h3>
-        <p className="font-semibold">Always have an option to book a night.</p>
+        <p className="text-center font-semibold md:text-left">
+          Never let a night sit empty.
+        </p>
         <div className="flex items-center">
           <FaInfoCircle />
           <h4 className="m-3 ml-2 font-bold">How it Works:</h4>
         </div>
         <p className="text-gray-500">
-          Travelers specify their budget, dates, and preferences. You can
-          accept, deny, or counteroffer based on what price works for you.
+          Travelers specify their budget, dates, and preferences, and send a request to every host on Tramona. Hosts have the option to accept, deny, or counteroffer all requests.
         </p>
-        <hr style={{ border: "1px solid lightgrey", margin: "16px 0" }} />
+        <hr className="my-4 border-t border-gray-300" />
         <div className="flex items-center">
           <FaSlidersH />
           <h4 className="m-2 ml-2 font-bold">Your Flexibility:</h4>
         </div>
         <ul className="m-1 ml-1">
           <li className="flex items-center text-gray-500">
-            <FaCheck className="mr-2" size={16} /> Set rules to make
-            auto-matches on certain requests
+            <FaCheck className="mr-2" size={16} /> Choose to maually respond or automatically respond to each match.
           </li>
           <li className="flex items-center text-gray-500">
-            <FaCheck className="mr-2" size={18} /> Manually review and accept,
-            counteroffer, or reject each request
+            <FaCheck className="mr-2" size={18} /> Set hidden rules to make
+            auto-matches on certain requests
           </li>
         </ul>
       </li>
@@ -344,74 +342,81 @@ const HowItWorks = () => {
 
 const AutoManual = () => {
   return (
-    <ul className="mx-6 flex flex-col justify-center gap-8 md:flex-row">
-      <li className="flex h-80 flex-col rounded-xl p-8 text-left shadow-lg">
-        <div className="mb-4 flex items-center justify-center text-center text-xl">
-          <RiRobot2Line className="mr-2" />
+    <div className="mx-6 grid gap-8 sm:grid-cols-1 md:grid-cols-2">
+      {/* Automation Section */}
+      <div className="flex flex-col rounded-xl bg-white p-6 shadow-lg">
+        <div className="mb-4 flex items-center justify-center">
+          <RiRobot2Line className="mr-2 text-2xl text-primaryGreen" />
           <h3 className="text-xl font-bold">Automation</h3>
         </div>
-        <p className="mb-4 text-center font-normal text-gray-500">
+        <p className="mb-4 text-center text-gray-500">
           Automate everything. Save time with your rental.
         </p>
-        <div className="flex items-center">
-          <BsLightningCharge />
-          <h4 className="m-3 ml-2 font-normal">
-            Instant Matching: Automatically respond to matches based on your
-            preferences.
-          </h4>
+        <div className="space-y-4">
+          <div className="flex items-start">
+            <BsLightningCharge className="mr-2 text-primaryGreen" />
+            <p className="text-sm text-gray-600">
+              <strong>Instant Matching:</strong> Automatically respond to
+              matches based on your preferences.
+            </p>
+          </div>
+          <div className="flex items-start">
+            <BsCalendar4 className="mr-2 text-primaryGreen" />
+            <p className="text-sm text-gray-600">
+              <strong>Book It Now:</strong> Enable travelers to book instantly
+              without needing approval.
+            </p>
+          </div>
+          <div className="flex items-start">
+            <BsSliders className="mr-2 text-primaryGreen" />
+            <p className="text-sm text-gray-600">
+              <strong>Custom Rules:</strong> Set a hidden discount for dates not
+              booked a certain number of days out.
+            </p>
+          </div>
         </div>
-        <div className="flex items-center">
-          <BsCalendar4 />
-          <h4 className="m-3 ml-2 font-normal">
-            Book It Now: Enable travelers to book instantly without needing
-            approval.
-          </h4>
-        </div>
-        <div className="flex items-center">
-          <BsSliders />
-          <h4 className="m-3 ml-2 font-normal">
-            Custom Rules: Set a hidden discount for dates not booked a certain
-            number of days out.
-          </h4>
-        </div>
-        <p className="mb-3 text-left text-sm text-gray-500">
+        <p className="mt-4 text-sm text-gray-500">
           Ideal for saving time and maximizing occupancy.
         </p>
-      </li>
+      </div>
 
-      <li className="flex h-80 flex-col rounded-xl p-8 text-left shadow-lg">
-        <div className="mb-4 flex items-center justify-center text-center text-xl">
-          <FaRegHandshake className="mr-2" />
+      {/* Manual Section */}
+      <div className="flex flex-col rounded-xl bg-white p-6 shadow-lg">
+        <div className="mb-4 flex items-center justify-center">
+          <FaRegHandshake className="mr-2 text-2xl text-primaryGreen" />
           <h3 className="text-xl font-bold">Manual</h3>
         </div>
-        <p className="mb-4 text-center font-normal text-gray-500">
+        <p className="mb-4 text-center text-gray-500">
           Manually decide which bookings you allow.
         </p>
-        <div className="flex items-center">
-          <BsClipboard />
-          <h4 className="m-3 ml-2 font-normal">
-            Set request to book and approve each booking.
-          </h4>
+        <div className="space-y-4">
+          <div className="flex items-start">
+            <BsClipboard className="mr-2 text-primaryGreen" />
+            <p className="text-sm text-gray-600">
+              <strong>Set request to book:</strong> Approve each booking
+              manually.
+            </p>
+          </div>
+          <div className="flex items-start">
+            <BsPerson className="mr-2 text-primaryGreen" />
+            <p className="text-sm text-gray-600">
+              <strong>Respond to requests:</strong> Accept, deny, or submit
+              counteroffers.
+            </p>
+          </div>
+          <div className="flex items-start">
+            <BsCalendar4 className="mr-2 text-primaryGreen" />
+            <p className="text-sm text-gray-600">
+              <strong>Inspect traveler details:</strong> Verify profiles before
+              confirming bookings.
+            </p>
+          </div>
         </div>
-        <div className="flex items-center">
-          <BsPerson />
-          <h4 className="m-3 ml-2 font-normal">
-            Respond to requests and bids manually accepting, denying, or
-            submitting a counteroffer.
-          </h4>
-        </div>
-        <div className="flex items-center">
-          <BsCalendar4 />
-          <h4 className="m-3 ml-2 font-normal">
-            Inspect traveler details to verify their profiles before confirming
-            bookings.
-          </h4>
-        </div>
-        <p className="mb-3 text-left text-sm text-gray-500">
+        <p className="mt-4 text-sm text-gray-500">
           Perfect for hosts who prefer a hands-on approach to guest selection.
         </p>
-      </li>
-    </ul>
+      </div>
+    </div>
   );
 };
 
@@ -583,9 +588,8 @@ const Features2 = () => {
     <section className="mb-12 mt-12 py-12">
       <div className="flex flex-col items-center space-y-12">
         {/* First Row: Image on left, text on right */}
-        <div className="flex w-full max-w-6xl items-center gap-16 sm:flex-row">
+        <div className="mx-auto flex w-full max-w-4xl flex-col items-center gap-12 px-6 text-center sm:flex-row sm:text-left">
           <div className="relative h-64 w-64 flex-shrink-0 overflow-hidden rounded-lg bg-gray-200 shadow-md">
-            {/* Replace the src with your actual image path */}
             <Image
               src="/path/to/image-requests.jpg"
               objectFit="cover"
@@ -593,13 +597,14 @@ const Features2 = () => {
               alt="Requests"
             />
           </div>
-          <h2 className="text-2xl font-semibold text-[#333]">Requests</h2>
+          <h2 className="text-xl font-semibold text-[#333] sm:text-2xl">
+            Full flexibility on all bookings.
+          </h2>
         </div>
 
         {/* Second Row: Text on left, image on right */}
-        <div className="flex w-full max-w-6xl items-center gap-16 sm:flex-row-reverse">
+        <div className="mx-auto flex w-full max-w-4xl flex-col items-center gap-12 px-6 text-center sm:flex-row-reverse sm:text-left">
           <div className="relative h-64 w-64 flex-shrink-0 overflow-hidden rounded-lg bg-gray-200 shadow-md">
-            {/* Replace the src with your actual image path */}
             <Image
               src="/path/to/image-cal.jpg"
               objectFit="cover"
@@ -607,13 +612,12 @@ const Features2 = () => {
               alt="Cal"
             />
           </div>
-          <h2 className="text-2xl font-semibold text-[#333]">Cal</h2>
+          <h2 className="text-xl font-semibold text-[#333] sm:text-2xl">Automatically synced calandar and pricing with Airbnb</h2>
         </div>
 
         {/* Third Row: Image on left, text on right */}
-        <div className="flex w-full max-w-6xl items-center gap-16 sm:flex-row">
+        <div className="mx-auto flex w-full max-w-4xl flex-col items-center gap-12 px-6 text-center sm:flex-row sm:text-left">
           <div className="relative h-64 w-64 flex-shrink-0 overflow-hidden rounded-lg bg-gray-200 shadow-md">
-            {/* Replace the src with your actual image path */}
             <Image
               src="/path/to/image-customized-pricing.jpg"
               objectFit="cover"
@@ -621,8 +625,8 @@ const Features2 = () => {
               alt="Customized Pricing"
             />
           </div>
-          <h2 className="text-2xl font-semibold text-[#333]">
-            Customized Pricing
+          <h2 className="text-xl font-semibold text-[#333] sm:text-2xl">
+            Choose when to give discounts, and when to keep your price regular.
           </h2>
         </div>
       </div>

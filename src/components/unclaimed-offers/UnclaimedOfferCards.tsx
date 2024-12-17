@@ -44,7 +44,7 @@ export default function UnclaimedOfferCards({
   const { adjustedProperties } = useAdjustedProperties();
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 40;
+  const itemsPerPage = 36;
   const { data: session } = useSession();
   const { isLoading } = useLoading();
   const [isDelayedLoading, setIsDelayedLoading] = useState(true);
@@ -127,7 +127,7 @@ export default function UnclaimedOfferCards({
     const items = [];
     const SIBLING_COUNT = 1;
     const BOUNDARY_COUNT = 1;
-  
+
     const createPageItem = (pageNum: number) => (
       <PaginationItem key={pageNum}>
         <PaginationLink
@@ -142,17 +142,14 @@ export default function UnclaimedOfferCards({
         </PaginationLink>
       </PaginationItem>
     );
-  
-    // Always show first BOUNDARY_COUNT pages
+
     for (let i = 1; i <= Math.min(BOUNDARY_COUNT, totalPages); i++) {
       items.push(createPageItem(i));
     }
-  
-    // Calculate range around current page
+
     const startPage = Math.max(BOUNDARY_COUNT + 1, currentPage - SIBLING_COUNT);
     const endPage = Math.min(totalPages - BOUNDARY_COUNT, currentPage + SIBLING_COUNT);
-  
-    // Add ellipsis after boundary if there's a gap
+
     if (startPage > BOUNDARY_COUNT + 1) {
       items.push(
         <PaginationItem key="start-ellipsis" className="px-2">
@@ -160,15 +157,13 @@ export default function UnclaimedOfferCards({
         </PaginationItem>
       );
     }
-  
-    // Add pages around current page
+
     for (let i = startPage; i <= endPage; i++) {
       if (i > BOUNDARY_COUNT && i < totalPages - BOUNDARY_COUNT + 1) {
         items.push(createPageItem(i));
       }
     }
-  
-    // Add ellipsis before end boundary if there's a gap
+
     if (endPage < totalPages - BOUNDARY_COUNT) {
       items.push(
         <PaginationItem key="end-ellipsis" className="px-2">
@@ -176,14 +171,13 @@ export default function UnclaimedOfferCards({
         </PaginationItem>
       );
     }
-  
-    // Always show last BOUNDARY_COUNT pages
+
     for (let i = Math.max(totalPages - BOUNDARY_COUNT + 1, BOUNDARY_COUNT + 1); i <= totalPages; i++) {
       if (i > endPage) {
         items.push(createPageItem(i));
       }
     }
-  
+
     return items;
   }, [totalPages, currentPage, handlePageChange]);
 
@@ -208,7 +202,7 @@ export default function UnclaimedOfferCards({
               <div className="text-center">
                 <div className="text-lg font-bold">No properties found</div>
                 <div className="mt-2 text-sm text-zinc-500">
-                  Try adjusting your search filters or zooming out on the map
+                  Try adjusting your search filters
                 </div>
               </div>
             </div>
@@ -228,11 +222,9 @@ export default function UnclaimedOfferCards({
                     ))}
                 </div>
 
-                {/* Move pagination inside the max-width container */}
                 {totalPages >= 1 && (
                   <div className="mt-8">
                     <Pagination>
-                      {/* Add overflow handling and center alignment */}
                       <PaginationContent className="flex flex-wrap justify-center overflow-x-auto">
                         <PaginationItem>
                           <PaginationPrevious

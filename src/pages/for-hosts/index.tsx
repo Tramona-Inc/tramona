@@ -13,7 +13,6 @@ import { Check, CircleCheckBig } from "lucide-react";
 import Onboarding1 from "@/components/host/onboarding/Onboarding1";
 import { useHostOnboarding } from "@/utils/store/host-onboarding";
 import { useRouter } from "next/router";
-import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
 import { api } from "@/utils/api";
 
 type Tabs = {
@@ -120,6 +119,25 @@ export function Questions() {
     { title: "FAQ", onClick: () => router.push("/faq") },
     { title: "Watch host side demo", onClick: () => router.push("/demos") },
   ];
+
+  return (
+    <div className="space-y-6">
+      <h1 className="text-2xl font-bold text-center">Questions?</h1>
+      <div className="flex flex-col items-center gap-4">
+        {buttons.map((button, index) => (
+          <button
+            key={index}
+            onClick={button.onClick}
+            className="w-80 bg-white border-2 border-[#004236] text-[#004236] py-3 rounded-lg text-lg font-semibold transition-all hover:bg-[#f5f5f5] hover:text-[#003626]"
+          >
+            {button.title}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+
+
 
   return (
     <div className="space-y-4 lg:rounded-lg lg:border lg:p-4">
@@ -315,7 +333,7 @@ function SendUsAnEmail() {
 
 export function StickyTopBar() {
   const { data: isHospitableCustomer } =
-  api.pms.getHospitableCustomer.useQuery();
+    api.pms.getHospitableCustomer.useQuery();
 
   console.log(Boolean(isHospitableCustomer));
   return (
@@ -328,7 +346,10 @@ export function StickyTopBar() {
         </Link>
         <div className="flex items-center space-x-6">
           <span className="text-xl font-medium">Ready to List?</span>
-          <Link href={Boolean(isHospitableCustomer) ? "/host" : "/host-onboarding"} passHref>
+          <Link
+            href={Boolean(isHospitableCustomer) ? "/host" : "/host-onboarding"}
+            passHref
+          >
             <Button className="bg-primaryGreen px-6 py-3 text-lg font-semibold text-white">
               Tramona Setup
             </Button>

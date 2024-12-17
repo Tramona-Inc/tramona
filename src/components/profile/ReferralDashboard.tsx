@@ -1,18 +1,10 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
-
 import { api } from "@/utils/api";
 import { formatCurrency } from "@/utils/utils";
-import CopyToClipboardBtn from "@/components/_utils/CopyToClipboardBtn";
 import Spinner from "../_common/Spinner";
 import { ChevronRight } from "lucide-react";
-
-const defaultMessage = `Hey! Join this new travel platform. They let people travel at any price they want. You name the price and they'll find a bnb out of your budget and make it work with your price. Here's the link, check it out:`;
 
 export default function ReferralDashboard() {
   const { data: session } = useSession();
@@ -20,132 +12,173 @@ export default function ReferralDashboard() {
 
   const { data, isLoading } = api.users.myReferralCode.useQuery();
 
-  const [message, setMessage] = useState(
-    typeof window === "undefined"
-      ? ""
-      : (localStorage.getItem("referralMessage") ?? defaultMessage),
-  );
-
   const code =
     user?.referralCodeUsed && data?.referralCode ? "" : data?.referralCode;
   const url = `https://tramona.com/auth/signup?code=${code}`;
 
-  const messageWithLink = `${message}\n\n${url}`;
-
-  const textAreaRef = useRef<HTMLTextAreaElement>(null);
-
   if (isLoading) return <Spinner />;
 
   return (
-    <div className="space-y-8 pb-20 lg:pt-16">
-      <div className="space-y-2 border-b p-4 lg:border-0 lg:p-0">
-        <h1 className="text-2xl font-bold lg:text-4xl">My Referrals</h1>
-        <p className="text-sm lg:text-lg">
-          Earn $25 cash for each user&apos;s first booking!
-        </p>
-      </div>
-      <div className="grid grid-cols-1 space-y-2 lg:grid-cols-3 lg:gap-4 lg:space-y-0">
-        <section className="space-y-6 rounded-lg border p-4">
+    <div className="flex min-h-screen flex-col items-center bg-gray-50 px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-6xl p-4 sm:p-8">
+        <div className="mb-8 flex flex-col items-start justify-between lg:flex-row">
           <div>
-            <div className="flex justify-between">
-              <p className="text-base">Referral Status</p>
+            <h1 className="text-3xl font-bold text-[#004236]">My Referrals</h1>
+            <p className="text-lg text-gray-600">
+              Earn $25 cash for each user&apos;s first booking!
+            </p>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 gap-6 sm:gap-8 lg:grid-cols-2">
+          {/* Referral Status */}
+          <div className="rounded-lg bg-white p-4 shadow-md sm:p-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-[#004236]">
+                Referral Status
+              </h2>
               <Link
                 href="/program"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="ml-2 text-sm font-medium underline underline-offset-2"
+                className="text-sm text-gray-600 transition-colors duration-200 hover:text-[#004236]"
               >
                 Learn more
               </Link>
             </div>
-            <p className="text-2xl font-semibold">{user?.referralTier}</p>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="border-r-2">
-              <p className="text-4xl font-semibold">
-                {data?.numSignUpsUsingCode ?? "-"}
-              </p>
-              <p>Referred</p>
-            </div>
-            <div>
-              <p className="text-4xl font-semibold">
-                {data?.numBookingsUsingCode ?? 0}
-              </p>
-              <p>Bookings</p>
-            </div>
-            <div className="col-span-2 border-t-2 pt-4">
-              <p className="text-4xl font-semibold">
-                {formatCurrency(data?.totalBookingVolume ?? 0)}
-              </p>
-              <p>Total cash back</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-1">
-            <Link
-              href="/account/balance"
-              className={
-                "text-sm font-bold hover:underline hover:underline-offset-2"
-              }
-            >
-              View cash back
-            </Link>
-            <ChevronRight size={16} />
-          </div>
-        </section>
-        <div className="col-span-2 space-y-10 rounded-lg p-4">
-          <section className="space-y-2">
-            <h3 className="text-xl font-bold">Share your referral link</h3>
-            <p className="text-sm">
-              Share your referral link by copying and sending it or sharing it
-              on your social media.
-            </p>
-            <div className="flex flex-col gap-2 sm:flex-row">
-              <div className="flex-1">
-                <Input value={url} readOnly />
-              </div>
-              <CopyToClipboardBtn
-                message={url}
-                render={({ justCopied, copyMessage }) => (
-                  <Button
-                    onClick={copyMessage}
-                    className="bg-teal-900 px-0 lg:w-20"
-                  >
-                    {justCopied ? "Copied!" : "Copy"}
-                  </Button>
-                )}
+            {/* <h3 className="text-lg font-bold text-[#004236] mt-4">
+              {user?.referralTier}
+            </h3> */}
+            <div className="my-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <StatusItem
+                title="Referred"
+                value={data?.numSignUpsUsingCode ?? "-"}
+              />
+              <StatusItem
+                title="Bookings"
+                value={data?.numBookingsUsingCode ?? 0}
+              />
+              <StatusItem
+                title="Total cash back"
+                value={formatCurrency(data?.totalBookingVolume ?? 0)}
+                centered
               />
             </div>
-          </section>
-          <section className="space-y-2">
-            <h3 className="text-xl font-bold">Share a message</h3>
-            <p className="text-sm">
-              Your referral link will be automatically added to the end of the
-              message.
-            </p>
+            <div className="flex items-center gap-1">
+              <Link
+                href="/account/balance"
+                className="text-sm font-bold hover:underline hover:underline-offset-2"
+              >
+                View cash back
+              </Link>
+              <ChevronRight size={16} />
+            </div>
+          </div>
 
-            <Textarea
-              ref={textAreaRef}
-              // disabled={!isEditingMessage}
-              defaultValue={`${message}`}
-              onChange={(e) => setMessage(e.target.value)}
-              className="h-36 text-base lg:h-24"
+          {/* Share Link and Message */}
+          <div className="space-y-6">
+            <ShareCard
+              title="Share your referral link"
+              description="Share your referral link by copying and sending it or sharing it on your social media."
+              inputValue={url}
+              buttonText="Copy"
             />
-            <div className="flex justify-end">
-              <CopyToClipboardBtn
-                message={messageWithLink}
-                render={({ justCopied, copyMessage }) => (
-                  <Button
-                    onClick={copyMessage}
-                    className="w-full bg-teal-900 px-6 lg:w-auto"
-                  >
-                    {justCopied ? "Copied!" : "Copy"}
-                  </Button>
-                )}
-              />
-            </div>
-          </section>
+            <ShareCard
+              title="Share a message"
+              message={`Hey, check out this site, Tramona. You can name your own price on Airbnbs, and hosts offer you one-of-a-kind deals to try to get you to stay with them. They also charge less in fees than the other booking sites. Click this link and sign up (${url}) you’ll get 50% lower fees on your first trip, and I get a bounce back.`}
+              buttonText="Copy message with link"
+              showFooterMessage
+            />
+          </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+interface StatusItemProps {
+  title: string;
+  value: string | number;
+  centered?: boolean;
+  icon?: React.ReactNode;
+}
+
+function StatusItem({ title, value, icon, centered }: StatusItemProps) {
+  return (
+    <div
+      className={`flex flex-col items-center space-y-2 rounded-lg border p-4 ${
+        centered ? "text-center sm:text-left" : ""
+      }`}
+    >
+      {icon && <div className="text-2xl text-[#004236]">{icon}</div>}
+      <div className="text-2xl font-bold text-[#004236]">{value}</div>
+      <div className="text-sm text-gray-600">{title}</div>
+    </div>
+  );
+}
+
+interface ShareCardProps {
+  title: string;
+  description?: string;
+  message?: string;
+  inputValue?: string;
+  buttonText: string;
+  showFooterMessage?: boolean;
+}
+
+function ShareCard({
+  title,
+  description,
+  message,
+  inputValue = "",
+  buttonText,
+  showFooterMessage,
+}: ShareCardProps) {
+  const handleCopy = () => {
+    const textToCopy = message ? message : inputValue;
+    void navigator.clipboard.writeText(textToCopy).then(() => {
+      alert("Copied to clipboard");
+    });
+  };
+
+  return (
+    <div className="space-y-4 rounded-lg bg-white p-4 shadow-md sm:p-6">
+      <h2 className="text-xl font-semibold text-[#004236]">{title}</h2>
+      {showFooterMessage && (
+        <p className="text-sm text-gray-500">
+          Your referral link will be automatically added to the end of the
+          message.
+        </p>
+      )}
+      {description && <p className="text-sm text-gray-600">{description}</p>}
+      {message && (
+        <div className="rounded-lg border border-gray-300 p-4 text-sm text-gray-600">
+          {message}
+        </div>
+      )}
+      {inputValue && (
+        <div className="flex items-center">
+          <input
+            type="text"
+            readOnly
+            value={inputValue}
+            className="flex-grow rounded-l-lg border border-gray-300 px-4 py-2 text-gray-700 focus:outline-none"
+          />
+          <button
+            onClick={handleCopy}
+            className="rounded-r-lg bg-[#004236] px-4 py-2 text-white transition-colors duration-200 hover:bg-[#004236]"
+          >
+            {buttonText}
+          </button>
+        </div>
+      )}
+      {!inputValue && (
+        <button
+          onClick={handleCopy}
+          className="rounded-lg bg-[#004236] px-4 py-2 text-white transition-colors duration-200 hover:bg-[#004236]"
+        >
+          {buttonText}
+        </button>
+      )}
     </div>
   );
 }

@@ -16,6 +16,7 @@ import {
 import { useIsSm } from "@/utils/utils";
 import { MobileTestimonialCarousel } from "@/components/landing-page/_sections/testimonials/MobileTestimonialCarousel";
 import { TestimonialCarousel } from "@/components/landing-page/_sections/testimonials/TestimonialCarousel";
+import { howItWorksTestimonals } from "@/components/landing-page/_sections/testimonials/testimonials-data";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import AccordionFaq from "@/components/_common/AccordionFaq";
@@ -29,10 +30,10 @@ export default function Page() {
         </Head>
         <div className="mb-12 space-y-12 md:mb-20 md:space-y-20">
           <section className="relative -mb-1">
-            <div className="relative h-[40vh] w-full">
+            <div className="relative h-[30vh] w-full">
               <Image
                 src="/assets/images/why-list/host-banner.png"
-                alt="beach banner"
+                alt="How It Works Banner"
                 fill
                 objectFit="cover"
                 objectPosition="center"
@@ -40,14 +41,13 @@ export default function Page() {
               />
             </div>
             <span className="absolute inset-0 bg-black opacity-50"></span>
-            <div className="absolute inset-0 flex items-center px-6">
+            <div className="absolute top-6 left-0 right-0 px-6 md:px-12">
               <div className="relative z-10 max-w-4xl text-left text-white">
                 <h2 className="text-sm font-medium uppercase tracking-wide md:text-lg">
                   HOW IT WORKS
                 </h2>
                 <h3 className="mt-2 text-xl font-bold leading-snug md:text-3xl lg:text-4xl">
-                  Tramona connects travelers with unbeatable deals and hosts
-                  with more bookings
+                  Tramona connects travelers with unbeatable deals and hosts with more bookings
                 </h3>
                 <p className="mt-4 text-sm md:text-base lg:text-lg">
                   See what hosts will offer you
@@ -55,7 +55,9 @@ export default function Page() {
               </div>
             </div>
           </section>
-
+          <h1 className="mb-12 mt-12 text-center text-2xl font-semibold">
+              Sign up now to start booking your empty nights
+          </h1>
           <div className="w-full bg-[#FAF9F6] py-8">
             <div className="mx-auto max-w-screen-xl space-y-6">
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -63,8 +65,7 @@ export default function Page() {
                   <FaShoppingBag className="mb-4 text-4xl text-[#004236]" />
                   <h3 className="text-lg font-bold">Book it now</h3>
                   <p className="max-w-lg text-sm text-muted-foreground">
-                    Classic booking process you&apos;re familiar with. Instant
-                    confirmation for available properties. Less fees and 24/7
+                    Classic booking process you&apos;re familiar with. Search for a property and book it just like you would anywhere else. Low fees and 24/7
                     support with 100% rebooking guarantee if something goes
                     wrong.
                   </p>
@@ -74,10 +75,9 @@ export default function Page() {
                   <FaLock className="mb-4 text-4xl text-[#004236]" />
                   <h3 className="text-lg font-bold">Place a bid</h3>
                   <p className="max-w-lg text-sm text-muted-foreground">
-                    Bid on specific properties you like. Set your price and wait
-                    for host acceptance. Multiple bids allowed - when one&apos;s
-                    accepted, others cancel automatically. Instant charging upon
-                    acceptance.
+                    See a property you like with a vacancy? Place a bid and see if the hosts accept.
+                    When hosts have empty nights, no one wins. When a bid is
+                    accepted, all outstanding bids are automatically cancelled. Once the bid is accepted, your card will instantly be charged.
                   </p>
                   <p className="mt-2 max-w-lg text-xs text-muted-foreground">
                     Submit multiple bids to explore various host offers and
@@ -89,8 +89,8 @@ export default function Page() {
                   <FaPaperPlane className="mb-4 text-4xl text-[#004236]" />
                   <h3 className="text-lg font-bold">Make a request</h3>
                   <p className="max-w-lg text-sm text-muted-foreground">
-                    Send your budget to all hosts with vacancies. Receive
-                    tailored offers from hosts. Compare multiple offers and
+                    Name your own price and send it to all hosts with vacancies. Receive
+                    exclusive, one- of-a kind offers from hosts. Compare multiple offers and
                     choose the best fit. Perfect for flexible travelers seeking
                     the best deals.
                   </p>
@@ -109,18 +109,30 @@ export default function Page() {
                     All local hosts can make offers, expanding your options.
                   </p>
                 </div>
+                <div className="flex flex-col items-center text-center">
+                  <button
+                    onClick={() => {
+                      window.location.href = "/why-list";
+                    }}
+                    className="rounded-lg bg-[#004236] px-6 py-3 text-lg font-bold text-white hover:bg-[#003228] transition-colors"
+                  >
+                    Host? Learn how hosting works
+                  </button>
+                  <p className="max-w-lg text-sm text-muted-foreground">
+                  </p>
+                </div>
               </div>
             </div>
           </div>
 
           <div className="flex flex-col items-center justify-center px-12 py-6">
             <p className="text-center text-2xl font-semibold lg:text-3xl">
-              When hosts have empty nights, no one wins. Tramona makes the
+              When nights are empty, no one wins. Tramona makes the
               rental market more efficient.
             </p>
             <p className="mt-4 text-center text-base">
-              <span className="font-semibold">
-                Lowest fees compared to other major marketplaces
+              <span className="font-normal">
+                Try it before you book anywhere else, see what deals you can get.
               </span>
             </p>
           </div>
@@ -137,11 +149,10 @@ export default function Page() {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-[#004236]">
-                    Link your Tramona account
+                    Link your Tramona and Airbnb account
                   </h3>
                   <p className="text-sm text-gray-600">
-                    Connect directly with Airbnb for easy and quick calendar,
-                    pricing, and other information syncing.
+                    Instantly sync with Airbnb for a hassle-free setup. Keep your calendar, pricing, and availability up to date automatically. Say goodbye to double bookings.
                   </p>
                 </div>
               </div>
@@ -155,9 +166,7 @@ export default function Page() {
                     Set your preferences
                   </h3>
                   <p className="text-sm text-gray-600">
-                    Customize pricing filters, set different rates based on
-                    check-in timing, and choose between autolet integration or
-                    manual control.
+                    Customize your pricing strategy, set rates based on vacancies, and choose between automated or manual control of your bookings.
                   </p>
                 </div>
               </div>
@@ -168,12 +177,10 @@ export default function Page() {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-[#004236]">
-                    Manage requests
+                    Get bookings
                   </h3>
                   <p className="text-sm text-gray-600">
-                    Accept, deny, or counter-offer each request—or set
-                    preferences to automatically handle it all for you.
-                  </p>
+                    Tramona was built to increase your bookings. Accept, deny or counter requests, and choose to accept or deny bids. Hosts always have full control.                  </p>
                 </div>
               </div>
 
@@ -183,24 +190,18 @@ export default function Page() {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-[#004236]">
-                    Fill empty nights
+                    Enjoy the benefits
                   </h3>
                   <p className="text-sm text-gray-600">
-                    Maximize your property&apos;s potential by efficiently
-                    managing your calendar and filling vacant dates.
+                    Enjoy and utilize all the benefits of hosting on Tramona. We take care of taxes the same way Airbnb does, you can add a co host, give exclusive disconts while keeping your property full price else where, etc.
                   </p>
                 </div>
               </div>
             </div>
             <div className="mb-12"></div>
-            <p className="mb-6 text-center text-base font-medium text-[#004236]">
-              Hosts, we&apos;re expanding fast. The first 100 hosts in each city
-              get fee-less bookings for their first 5 trips. Sign up now to help
-              us launch in your city quicker
-            </p>
             <Link href="/why-list">
-              <Button size="lg" className="bg-primaryGreen text-white">
-                Start hosting now
+              <Button size="lg" className="bg-primaryGreen text-white" onClick={() => window.location.href = "/demo"}>
+                View the host side demo
               </Button>
             </Link>
           </div>
@@ -287,10 +288,7 @@ export default function Page() {
             <div className="flex flex-col items-center justify-center space-y-6 md:flex-row md:space-x-8 md:space-y-0">
               <div className="max-w-lg text-center md:text-left">
                 <p className="text-xl font-semibold text-[#004236]">
-                  Tramona is the only platform where hosts can turn empty nights
-                  into bookings by connecting with travelers looking for deals.
-                  That&apos;s why Tramona consistently offers the best prices on
-                  the market.
+                  Tramona allows is the only platform with the goal for people to travel more, and hosts to make more money. We work for you.
                 </p>
               </div>
 
@@ -308,9 +306,9 @@ export default function Page() {
 
           <div className="mx-0 flex max-w-full justify-center space-y-4 px-4 lg:mx-4 lg:mt-16 lg:flex lg:space-y-8">
             {useIsSm() ? (
-              <MobileTestimonialCarousel />
+              <MobileTestimonialCarousel testimonials={howItWorksTestimonals}/>
             ) : (
-              <TestimonialCarousel />
+              <TestimonialCarousel testimonials={howItWorksTestimonals}/>
             )}
           </div>
 
@@ -380,9 +378,11 @@ export default function Page() {
             </div>
           </div>
 
-          <div className="w-full px-12 py-8">
-            <div className="flex flex-col items-center justify-center space-y-6 md:flex-row md:space-x-8 md:space-y-0">
-              <div className="w-full max-w-md">
+          <div className="w-full max-w-6xl mx-auto px-4 py-8">
+            <div className="flex flex-col items-center justify-center md:flex-row md:items-center md:justify-center gap-8">
+
+              {/* Image Section */}
+              <div className="w-full max-w-md flex justify-center">
                 <Image
                   src="/assets/images/landing-page/try_before_you_book.png"
                   alt="Cozy house with people sitting"
@@ -391,18 +391,20 @@ export default function Page() {
                   height={400}
                 />
               </div>
-              <div className="max-w-lg text-center md:text-left">
+
+              {/* Text Section */}
+              <div className="w-full max-w-lg text-center md:text-center flex flex-col items-center">
                 <h2 className="mb-4 text-2xl font-semibold">
                   Try it before you book
                 </h2>
                 <p className="text-base leading-relaxed text-[#004236]">
-                  Already committed to traveling? Submit a request or place bids
-                  to get the best prices on the market. Each deal you get will
-                  be a one-of-a-kind deal.
+                  Already committed to traveling? Submit a request or place bids to get the best prices on the market. Each deal you get will be a one-of-a-kind deal.
                 </p>
               </div>
+
             </div>
           </div>
+
         </div>
       </div>
       <div className="bg-[#FAF9F6] p-20">

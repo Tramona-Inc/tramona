@@ -3,7 +3,11 @@ import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/router";
 import { api } from "@/utils/api";
 import { useZodForm } from "@/utils/useZodForm";
-import { searchSchema, defaultSearchOrReqValues } from "./schemas";
+import {
+  searchSchema,
+  defaultSearchOrReqValues,
+  SearchFormValues,
+} from "./schemas";
 import { useAdjustedProperties } from "./AdjustedPropertiesContext";
 import { SearchFormBar } from "./SearchFormBar";
 import { LocationGallery } from "./LocationGallery";
@@ -69,7 +73,7 @@ export function DesktopSearchTab({
 
   const router = useRouter();
   const utils = api.useUtils();
-  const { adjustedProperties, setAdjustedProperties } = useAdjustedProperties();
+  const { setAdjustedProperties } = useAdjustedProperties();
 
   const sortOptions = {
     none: "Select a value",
@@ -116,10 +120,10 @@ export function DesktopSearchTab({
     [form],
   );
 
-  const handleSearch = form.handleSubmit(async (data) => {
+  const handleSearch = async (values: SearchFormValues) => {
     setIsLoading(true);
     const params = new URLSearchParams();
-    Object.entries(data).forEach(([key, value]) => {
+    Object.entries(values).forEach(([key, value]) => {
       if (value) params.set(key, value.toString());
     });
     void router.replace(
@@ -130,21 +134,21 @@ export function DesktopSearchTab({
 
     setAllProperties({ pages: [] });
 
-    if (data.checkIn && data.checkOut) {
+    if (values.checkIn && values.checkOut) {
       try {
         const propertiesInArea =
           await utils.properties.getBookItNowProperties.fetch({
-            checkIn: data.checkIn,
-            checkOut: data.checkOut,
-            numGuests: data.numGuests!,
-            location: data.location!,
+            checkIn: values.checkIn,
+            checkOut: values.checkOut,
+            numGuests: values.numGuests!,
+            location: values.location!,
           });
 
         setAllProperties((prevState) => {
           const updatedProperties = {
             ...prevState,
             pages: [
-              ...(prevState.pages || []),
+              ...prevState.pages,
               ...propertiesInArea.hostProperties,
               ...propertiesInArea.scrapedProperties,
             ],
@@ -153,7 +157,7 @@ export function DesktopSearchTab({
           setAdjustedProperties({
             ...updatedProperties,
             pages: filterProperties(
-              updatedProperties.pages.flat() as Property[],
+              updatedProperties.pages as Property[],
               minPrice !== "" ? (Number(minPrice) * 100).toString() : minPrice,
               maxPrice !== "" ? (Number(maxPrice) * 100).toString() : maxPrice,
               priceSort,
@@ -164,23 +168,23 @@ export function DesktopSearchTab({
         });
 
         const airbnbResultsPromise = utils.misc.scrapeAirbnbInitialPage.fetch({
-          checkIn: data.checkIn,
-          checkOut: data.checkOut,
-          numGuests: data.numGuests!,
-          location: data.location!,
+          checkIn: values.checkIn,
+          checkOut: values.checkOut,
+          numGuests: values.numGuests!,
+          location: values.location!,
         });
         const airbnbResults = await airbnbResultsPromise;
 
         setAllProperties((prevState) => {
           const updatedProperties = {
             ...prevState,
-            pages: [...(prevState?.pages || []), ...airbnbResults.res],
+            pages: [...prevState.pages, ...airbnbResults.res],
           };
 
           setAdjustedProperties({
             ...updatedProperties,
             pages: filterProperties(
-              updatedProperties.pages.flat() as Property[],
+              updatedProperties.pages as Property[],
               minPrice !== "" ? (Number(minPrice) * 100).toString() : minPrice,
               maxPrice !== "" ? (Number(maxPrice) * 100).toString() : maxPrice,
               priceSort,
@@ -195,10 +199,10 @@ export function DesktopSearchTab({
           );
 
         const finishAirbnbResultsPromise = utils.misc.scrapeAirbnbPages.fetch({
-          checkIn: data.checkIn,
-          checkOut: data.checkOut,
-          numGuests: data.numGuests!,
-          location: data.location!,
+          checkIn: values.checkIn,
+          checkOut: values.checkOut,
+          numGuests: values.numGuests!,
+          location: values.location!,
           pageCursors: cursors,
         });
 
@@ -206,13 +210,13 @@ export function DesktopSearchTab({
         setAllProperties((prevState) => {
           const updatedProperties = {
             ...prevState,
-            pages: [...(prevState?.pages || []), ...finishAirbnbResults],
+            pages: [...prevState.pages, ...finishAirbnbResults],
           };
 
           setAdjustedProperties({
             ...updatedProperties,
             pages: filterProperties(
-              updatedProperties.pages.flat() as Property[],
+              updatedProperties.pages as Property[],
               minPrice !== "" ? (Number(minPrice) * 100).toString() : minPrice,
               maxPrice !== "" ? (Number(maxPrice) * 100).toString() : maxPrice,
               priceSort,
@@ -229,16 +233,8 @@ export function DesktopSearchTab({
     } else {
       setIsLoading(false);
     }
-  });
+  };
 
-  //   <div
-  //   className={`z-50 w-full transition-all duration-300 ease-in-out
-  //     sm:w-[400px]
-  //     md:w-[500px]
-  //     lg:w-[600px]
-  //     xl:w-[800px]
-  //     ${isCompact ? "scale-70" : "scale-100"}`}
-  // >
   return (
     <div className="mt-4 w-full space-y-8 py-4">
       <div className="">
@@ -282,8 +278,8 @@ export function DesktopSearchTab({
               {/* Button */}
               <Button
                 onClick={() => handleTabChange("name-price", true)}
-                variant="outline"
-                className={`flex-shrink-0 whitespace-nowrap border border-black transition-all duration-300 ease-in-out ${
+                variant="primary"
+                className={`flex-shrink-0 whitespace-nowrap border border-black ${
                   isCompact ? "h-10 px-3 text-xs" : "h-14 px-6 text-base"
                 } ${isLandingPage ? "hidden xl:block" : "hidden"}`}
               >
@@ -380,7 +376,7 @@ export function DesktopSearchTab({
                         return {
                           ...prevState,
                           pages: filterProperties(
-                            allProperties.pages.flat() as Property[],
+                            allProperties.pages as Property[],
                             minPrice !== ""
                               ? (Number(minPrice) * 100).toString()
                               : minPrice,

@@ -151,7 +151,7 @@ export default function Onboarding1({
       <div className="w-full flex-grow lg:grid lg:grid-cols-1">
         <div
           className={cn(
-            "flex flex-col gap-6",
+            "flex flex-col justify-center gap-6",
             forHost ? "m-0 items-start" : "my-6 items-center sm:mx-20",
           )}
         >

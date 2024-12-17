@@ -23,6 +23,7 @@ export const cities = [
   "Seattle",
   "Boston",
   "Austin",
+  "Dallas",
   "Denver",
   "Nashville",
   "Washington D.C.",

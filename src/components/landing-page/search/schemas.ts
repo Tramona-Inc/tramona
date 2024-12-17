@@ -9,15 +9,19 @@ import {
   // import { ALL_PROPERTY_ROOM_TYPES_WITHOUT_OTHER } from '@/server/db/schema';
 
   export const searchSchema = z.object({
-    location: optional(zodString()),
-    checkIn: optional(z.date()),
-    checkOut: optional(z.date()),
-    numGuests: optional(zodInteger({ min: 1 })),
-    maxNightlyPriceUSD: optional(zodNumber({ min: 0 })),
+    location: z.string().optional(),
+    checkIn: z.date().nullable().optional(),
+    checkOut: z.date().nullable().optional(),
+    numGuests: z.number().int().min(1).optional(),
+    maxNightlyPriceUSD: z.number().min(0).optional(),
   });
+  
+  export type SearchFormValues = z.infer<typeof searchSchema>;
+  
+  export const defaultSearchOrReqValues: Partial<SearchFormValues> = {
+    numGuests: 1
+  };
 
-  export const defaultSearchOrReqValues: Partial<z.input<typeof searchSchema>> =
-    {};
   const cityRequestSchema = z
     .object({
       location: zodString(),
