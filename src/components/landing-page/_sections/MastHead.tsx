@@ -232,7 +232,9 @@ export default function MastHead() {
           </div>
 
           {activeTab === "search" ? (
-            <BookItNowSection />
+            <div className="px-16">
+              <UnclaimedMap />
+            </div>
           ) : (
             <NameYourPriceSection />
           )}
