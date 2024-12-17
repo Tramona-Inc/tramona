@@ -22,21 +22,23 @@ export function NotificationCard({
   return (
     <Card className={`${className}`}>
       <CardContent className="flex h-full min-h-[100px] flex-col gap-y-2 px-2 py-2 md:min-h-[180px]">
-        <div className="flex h-full flex-col justify-between">
-          <CardTitle className="flex flex-row items-center justify-between gap-x-2 text-base font-semibold text-red-600">
+        <div className="flex h-full flex-col justify-between gap-y-2">
+          <CardTitle className="flex flex-row items-center justify-between gap-x-2 text-xs font-semibold text-red-600 md:text-base">
             <div className="flex flex-row gap-x-2">
-              <AlertCircle className="h-6 w-6" />
+              <AlertCircle className="h-5 w-5 md:h-6 md:w-6" />
               Confirm important details
             </div>
-            <div className="rounded-full border border-destructive px-2 text-sm text-destructive">
+            <div className="rounded-full border border-destructive px-2 text-xs text-destructive md:text-sm">
               {length}
             </div>
           </CardTitle>
-          <p className="line-clamp-2 overflow-hidden text-ellipsis text-base tracking-tight text-muted-foreground">
+          <p className="line-clamp-2 overflow-hidden text-ellipsis text-xs tracking-tight text-muted-foreground md:text-base">
             <span className="text-black">{action}</span> {title}
           </p>
           <Button asChild className="w-full" size="sm">
-            <Link href={href}>Start</Link>
+            <Link href={href} className="text-sm">
+              Start
+            </Link>
           </Button>
         </div>
       </CardContent>
