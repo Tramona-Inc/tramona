@@ -93,7 +93,7 @@ export function breakdownPaymentByPropertyAndTripParams(
   console.log(totalBeforeStripeFee);
   const stripeFee = getStripeFee(totalBeforeStripeFee);
   const totalTripAmount = totalBeforeStripeFee + stripeFee;
-  console.log(totalTripAmount);
+
   const { originalNightlyPrice } = propertyAndTripParams.property;
 
   const originalTotalPrice = originalNightlyPrice

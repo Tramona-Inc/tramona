@@ -19,7 +19,7 @@ export default function RequestToBookPageSidebar({
             <p className="text-sm font-bold">Tramona exclusive deal</p>
             <p className="text-xs">
               This is an exclusive offer created just for you &ndash; you will
-              not be able to find this price anywh`ere else
+              not be able to find this price anywhere else
             </p>
           </div>
         </div>
