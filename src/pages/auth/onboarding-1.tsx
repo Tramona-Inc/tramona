@@ -15,9 +15,9 @@ import Head from "next/head";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import {
-  convertDateFormat,
   convertMonthToNumber,
   useUpdateUser,
+  validateDateValues,
 } from "@/utils/utils";
 import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
@@ -55,15 +55,15 @@ export default function DateOfBirth() {
   const { updateUser } = useUpdateUser();
 
   async function onDobSubmit({ day, month, year }: FormValues) {
-    if (
-      new Date(Number(year), convertMonthToNumber(month), Number(day)) >
-        new Date() ||
-      new Date(Number(year), convertMonthToNumber(month), Number(day)) <
-        new Date("1900-01-01")
-    ) {
+    const isDobValid = validateDateValues({
+      day: Number(day),
+      month: convertMonthToNumber(month),
+      year: Number(year),
+    });
+    if (isDobValid !== "valid") {
       form.setError("root", {
         type: "manual",
-        message: "Please enter a valid date of birth.",
+        message: isDobValid,
       });
       return;
     }

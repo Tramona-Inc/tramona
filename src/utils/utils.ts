@@ -994,3 +994,39 @@ export function convertMonthToNumber(month: string) {
       return 0;
   }
 }
+
+export function validateDateValues({
+  day,
+  month,
+  year,
+}: {
+  day: number;
+  month: number;
+  year: number;
+}) {
+  if (year < 1900 || year > new Date().getFullYear()) {
+    return "Please enter a valid year";
+  }
+  if (month >= 0 && month <= 6) {
+    if (month % 2 === 0) {
+      if (day < 1 || day > 31) {
+        return "Please enter a valid day";
+      }
+    } else {
+      if (day < 1 || day > 30) {
+        return "Please enter a valid day";
+      }
+    }
+  } else {
+    if (month % 2 === 0) {
+      if (day < 1 || day > 30) {
+        return "Please enter a valid day";
+      } else {
+        if (day < 1 || day > 31) {
+          return "Please enter a valid day";
+        }
+      }
+    }
+  }
+  return "valid";
+}
