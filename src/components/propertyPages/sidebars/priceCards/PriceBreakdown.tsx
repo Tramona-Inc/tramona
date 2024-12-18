@@ -30,7 +30,8 @@ function PriceBreakdown({
         <span>Trip Subtotal</span>
         <span className="font-semibold">
           {formatCurrency(
-            brokedownPrice.totalTripAmount - brokedownPrice.taxesPaid,
+            brokedownPrice.totalTripAmount -
+              (brokedownPrice.taxesPaid + serviceFee),
           )}
         </span>
       </div>
