@@ -785,23 +785,39 @@ export const propertiesRouter = createTRPCRouter({
         .where(eq(properties.id, input.id));
     }),
 
+  toggleBookItNow: protectedProcedure
+    .input(
+      z.object({
+        id: z.number(),
+        bookItNowEnabled: z.boolean(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const [updatedProperty] = await ctx.db
+        .update(properties)
+        .set({
+          bookItNowEnabled: input.bookItNowEnabled,
+        })
+        .where(eq(properties.id, input.id))
+        .returning({ bookItNowEnabled: properties.bookItNowEnabled });
+
+      return updatedProperty?.bookItNowEnabled ? true : false;
+    }),
+
   updateBookItNow: protectedProcedure
     .input(
       z.object({
         id: z.number(),
-        bookItNowEnabled: z.boolean().optional(),
-        bookItNowDiscountTiers: z.array(discountTierSchema).optional(),
+        bookItNowHostDiscountPercentOffInput: z.number().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       await ctx.db
         .update(properties)
         .set({
-          ...(input.bookItNowEnabled !== undefined && {
-            bookItNowEnabled: input.bookItNowEnabled,
-          }),
-          ...(input.bookItNowDiscountTiers && {
-            bookItNowDiscountTiers: input.bookItNowDiscountTiers,
+          ...(input.bookItNowHostDiscountPercentOffInput !== undefined && {
+            bookItNowHostDiscountPercentOffInput:
+              input.bookItNowHostDiscountPercentOffInput,
           }),
         })
         .where(eq(properties.id, input.id));
@@ -1027,6 +1043,8 @@ export const propertiesRouter = createTRPCRouter({
         (item) => item.propertyId,
       );
 
+      console.log("conflictingIds", conflictingIds.length);
+
       const hostProperties = await db.query.properties.findMany({
         where: and(
           eq(properties.originalListingPlatform, "Hospitable"),
@@ -1035,19 +1053,30 @@ export const propertiesRouter = createTRPCRouter({
         ),
       });
 
+      console.log("hostProperties", hostProperties.length);
+
       const checkInNew = new Date(checkInDate).toISOString().split("T")[0];
       const checkOutNew = new Date(checkOutDate).toISOString().split("T")[0];
+      const validHostProperties: Property[] = [];
       //set the accurate original nightly price for Hospitable properties
       await Promise.all(
         hostProperties.map(async (property) => {
-          const originalPrice = await getPropertyOriginalPrice(property, {
-            checkIn: checkInNew!,
-            checkOut: checkOutNew!,
-            numGuests: input.numGuests,
-          });
-          property.originalNightlyPrice = originalPrice ?? null;
+          try {
+            const originalPrice = await getPropertyOriginalPrice(property, {
+              checkIn: checkInNew!,
+              checkOut: checkOutNew!,
+              numGuests: input.numGuests,
+            });
+            property.originalNightlyPrice = originalPrice ?? null;
+
+            // Push property to validHostProperties if successful
+            validHostProperties.push(property);
+          } catch (error) {
+            console.error(`Failed for property ID ${property.id}:`, error);
+          }
         }),
       );
+
 
       // Query for scraped properties with non-intersecting dates
       const scrapedProperties = await db.query.properties.findMany({
@@ -1060,7 +1089,7 @@ export const propertiesRouter = createTRPCRouter({
           notInArray(properties.id, conflictingIds), // Exclude properties with conflicting reservations
         ),
       });
-      return { hostProperties, scrapedProperties };
+      return { hostProperties: validHostProperties, scrapedProperties };
     }),
 
   getSearchResults: hostProcedure

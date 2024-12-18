@@ -2,6 +2,7 @@ import { api } from "@/utils/api";
 import { getNumNights, getApplicableBookItNowDiscount } from "@/utils/utils";
 import { PropertyPageData } from "@/components/propertyPages/PropertyPage";
 import { isNumber } from "lodash";
+import { TRAVELER_MARKUP } from "../constants";
 
 export const useGetOriginalPropertyPricing = ({
   property,
@@ -21,7 +22,7 @@ export const useGetOriginalPropertyPricing = ({
   const numNights = getNumNights(checkIn, checkOut);
 
   // Host price logic
-  const { data: hostPrice, isLoading: isHostPriceLoading } =
+  const { data: hostPricePerNight, isLoading: isHostPriceLoading } =
     api.misc.getAverageHostPropertyPrice.useQuery(
       {
         property: property!,
@@ -33,7 +34,7 @@ export const useGetOriginalPropertyPricing = ({
         enabled: isHospitable && !!property, // Ensure hooks always run but only fetch when valid
       },
     );
-
+  console.log(hostPricePerNight);
   const hostDiscount = isHospitable
     ? getApplicableBookItNowDiscount({
         bookItNowDiscountTiers: property.bookItNowDiscountTiers ?? [],
@@ -42,14 +43,14 @@ export const useGetOriginalPropertyPricing = ({
     : undefined;
 
   const hostPriceAfterDiscount = hostDiscount
-    ? hostPrice
-      ? hostPrice * (1 - hostDiscount)
+    ? hostPricePerNight
+      ? hostPricePerNight * (1 - hostDiscount)
       : undefined
-    : hostPrice;
+    : hostPricePerNight;
 
   // Scraped property logic
   const {
-    data: casamundoPrice,
+    data: casamundoPrice, // is this per night or total???
     isLoading: isCasamundoPriceLoading,
     refetch: refetchCasamundoPrice,
   } = api.misc.scrapeAverageCasamundoPrice.useQuery(
@@ -76,30 +77,38 @@ export const useGetOriginalPropertyPricing = ({
   );
 
   // Calculate original price
-  let originalPrice = isHospitable
+  let originalPricePerNight = isHospitable
     ? hostPriceAfterDiscount
     : isNumber(casamundoPrice)
       ? casamundoPrice * 100
       : undefined;
 
   //traveler requested bid amount if request to book
-  if (requestPercentage && originalPrice) {
-    originalPrice = originalPrice * (1 - requestPercentage / 100);
+  if (requestPercentage && originalPricePerNight) {
+    originalPricePerNight =
+      originalPricePerNight * (1 - requestPercentage / 100);
   }
   console.log("requestPercentage", requestPercentage);
 
   // Aggregate loading states
   const isLoading = isCasamundoPriceLoading && isHostPriceLoading;
   const error =
-    originalPrice === undefined ? "Original price is unavailable." : null;
+    originalPricePerNight === undefined
+      ? "Original price is unavailable."
+      : null;
+
+  //Multiply be num of nights becuase original price should be total price ++ MARKUP
+  const originalPrice = originalPricePerNight
+    ? Math.floor(originalPricePerNight * numNights * TRAVELER_MARKUP)
+    : originalPricePerNight;
 
   // Return everything as undefined or valid values, but ensure hooks are always run
   return {
-    originalPrice,
+    originalPrice, //we really only care about this
     isLoading,
     error,
-    casamundoPrice: isHospitable ? undefined : casamundoPrice,
-    hostPrice: isHospitable ? hostPrice : undefined,
+    casamundoPrice: isHospitable ? undefined : casamundoPrice, //REVISIT ONCE SCRAPER IS FIXED  note: used if you want prices without modification
+    hostPricePerNight: isHospitable ? hostPricePerNight : undefined, // note: used if you want prices without modification
     bookedDates,
     refetchCasamundoPrice,
     isHostPriceLoading,

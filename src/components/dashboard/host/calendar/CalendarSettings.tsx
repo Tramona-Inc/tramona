@@ -1,11 +1,9 @@
 import { ChevronDown, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import HostPropertiesRestrictions from "../HostPropertiesRestrictions";
 import { Property } from "@/server/db/schema/tables/properties";
@@ -16,7 +14,9 @@ import NameYourOwnPriceSection from "./setttingsSections/NameYourOwnPriceSection
 
 export default function CalendarSettings({ property }: { property: Property }) {
   // <---------------------------------- MUTATIONS ---------------------------------->
-  const { mutateAsync: updateBookItNow } =
+  const { mutateAsync: toggleBookItNow } =
+    api.properties.toggleBookItNow.useMutation();
+  const { mutateAsync: updateBookItNow, isLoading: isUpdatingBookItNow } =
     api.properties.updateBookItNow.useMutation();
 
   const { mutateAsync: updateRequestToBook } =
@@ -27,9 +27,8 @@ export default function CalendarSettings({ property }: { property: Property }) {
     property.bookItNowEnabled,
   );
   const [bookItNowPercent, setBookItNowPercent] = useState<number>( //HERE CHANGE THIS BECAUSE IT SUPPOSE BE CONNECTED TO THE PROPERTY PRICING
-    property.requestToBookMaxDiscountPercentage,
+    property.bookItNowHostDiscountPercentOffInput,
   );
-  const [bookItNowSaved, setBookItNowSaved] = useState(false);
 
   const [biddingOpen, setBiddingOpen] = useState(false);
   const [biddingSaved, setBiddingSaved] = useState(false);
@@ -39,7 +38,7 @@ export default function CalendarSettings({ property }: { property: Property }) {
 
   useEffect(() => {
     setIsChecked(property.bookItNowEnabled);
-    setBookItNowPercent(property.requestToBookMaxDiscountPercentage);
+    setBookItNowPercent(property.bookItNowHostDiscountPercentOffInput);
     setBiddingPercent(property.requestToBookMaxDiscountPercentage);
   }, [property]); //update when the selected property changes
 
@@ -47,15 +46,16 @@ export default function CalendarSettings({ property }: { property: Property }) {
     setIsChecked(checked);
     //only update if turned off
     try {
-      await updateBookItNow({
+      await toggleBookItNow({
         id: property.id,
         bookItNowEnabled: checked,
+      }).then((res) => {
+        if (!res) {
+          toast({
+            title: `Book it now disabled`,
+          });
+        }
       });
-      if (!checked) {
-        toast({
-          title: `Book it now disabled`,
-        });
-      }
     } catch (err) {
       toast({
         title: "Something went wrong...",
@@ -64,17 +64,18 @@ export default function CalendarSettings({ property }: { property: Property }) {
     }
   };
 
-  const handleBookItNowSave = async () => {
-    setBookItNowSaved(true);
-    setTimeout(() => setBookItNowSaved(false), 2000);
+  const handleBookItNowSlider = async () => {
     try {
-      await updateBookItNow({
-        id: property.id,
-        bookItNowEnabled: isChecked,
-      }); // Enable "Book It Now"
-      toast({
-        title: `Update successful.`,
-      });
+      if (isChecked) {
+        console.log(bookItNowPercent);
+        await updateBookItNow({
+          id: property.id,
+          bookItNowHostDiscountPercentOffInput: bookItNowPercent,
+        });
+        toast({
+          title: `Update successful.`,
+        });
+      }
     } catch (error) {
       toast({
         title: "Try again",
@@ -154,10 +155,10 @@ export default function CalendarSettings({ property }: { property: Property }) {
                   </p>
                   <div className="flex justify-end">
                     <Button
-                      onClick={handleBookItNowSave}
-                      disabled={bookItNowSaved}
+                      onClick={handleBookItNowSlider}
+                      disabled={isUpdatingBookItNow}
                     >
-                      {bookItNowSaved ? "Saving!" : "Save"}
+                      {isUpdatingBookItNow ? "Saving!" : "Save"}
                     </Button>
                   </div>
                 </div>

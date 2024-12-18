@@ -6,7 +6,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { cn, formatCurrency } from "@/utils/utils";
+import { cn, formatCurrency, getNumNights } from "@/utils/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -81,14 +81,18 @@ export default function RequestToBookOrBookNowPriceCard({
     numGuests,
   });
 
-  const [error, setError] = useState<string | null>(null);
-
+  const [error, setError] = useState<React.ReactNode | null>(null);
+  const [requestAmount, setRequestAmount] = useState(
+    propertyPricing.originalPrice,
+  );
   // Monitor `originalPrice` for errors
   useEffect(() => {
     if (propertyPricing.originalPrice === undefined) {
       setError("Original price is unavailable. Please adjust your dates.");
     } else {
       setError(null); // Clear the error when `originalPrice` is valid
+      //setPropertyprice into state
+      setRequestAmount(propertyPricing.originalPrice);
     }
   }, [propertyPricing.originalPrice]);
 
@@ -114,15 +118,14 @@ export default function RequestToBookOrBookNowPriceCard({
   const [showPriceBreakdown, setShowPriceBreakdown] = useState<boolean>(false);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [showRequestInput, setShowRequestInput] = useState(false);
-  const [requestAmount, setRequestAmount] = useState(
-    propertyPricing.originalPrice,
-  );
+
   const [requestPercentage, setRequestPercentage] = useState(0);
   const [selectedPreset, setSelectedPreset] = useState<number | null>(null);
   const [requestToBook, setRequestToBook] =
     useState<RequestToBookDetails>(initialRequestToBook);
   const [rawRequestAmount, setRawRequestAmount] = useState(""); // Raw input for typing
 
+  console.log(requestAmount);
   useEffect(() => {
     if (query.checkIn && query.checkOut && query.numGuests) {
       const checkIn = new Date(query.checkIn as string);
@@ -313,7 +316,8 @@ export default function RequestToBookOrBookNowPriceCard({
                     date >= new Date(bookedDate.start) &&
                     date <= new Date(bookedDate.end)
                   );
-                }) ?? false)
+                }) ??
+                  false)
               }
             />
           </PopoverContent>
@@ -334,21 +338,23 @@ export default function RequestToBookOrBookNowPriceCard({
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
             <div className="p-4">
-              <Select
-                defaultValue={requestToBook.numGuests.toString()}
-                onValueChange={handleGuestChange}
-              >
-                <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="Select guests" />
-                </SelectTrigger>
-                <SelectContent>
-                  {[1, 2, 3, 4, 5, 6].map((num, index) => (
-                    <SelectItem key={index} value={num.toString()}>
+              <div className="w-[200px]">
+                {Array.from({ length: property.maxNumGuests }, (_, index) => {
+                  const num = index + 1; // Start from 1, not 0
+                  return (
+                    <div
+                      key={num}
+                      onClick={() => handleGuestChange(num.toString())} // Handle selection
+                      className={cn(
+                        "cursor-pointer rounded-lg p-1 hover:bg-gray-200",
+                        requestToBook.numGuests === num && "font-semibold",
+                      )}
+                    >
                       {num} guest{num !== 1 ? "s" : ""}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </PopoverContent>
         </Popover>
@@ -511,14 +517,22 @@ export default function RequestToBookOrBookNowPriceCard({
             </div>
           </div>
         ) : propertyPricing.isLoading ? (
-          <Skeleton className="h-[200px] w-full" />
+          <div className="space-y-2 p-2">
+            <Skeleton className="h-6 w-3/4" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-4 w-1/3" />
+            <Skeleton className="h-10 w-full" />
+          </div>
         ) : isNumber(propertyPricing.originalPrice) ? (
           <>
             <div>
               <div className="mb-1 text-2xl font-bold">Book it now for</div>
               <div className="flex items-baseline gap-2">
                 <span className="text-4xl font-bold text-primary lg:text-5xl">
-                  {formatCurrency(propertyPricing.originalPrice)}
+                  {formatCurrency(
+                    propertyPricing.originalPrice /
+                      getNumNights(checkIn, checkOut),
+                  )}
                 </span>
                 <span className="text-xl text-muted-foreground">Per Night</span>
               </div>
@@ -561,9 +575,6 @@ export default function RequestToBookOrBookNowPriceCard({
                 Place request
               </Button>
             </div>
-            <p className="mt-2 text-center text-sm text-muted-foreground">
-              You won&apos;t be charged yet
-            </p>
           </>
         ) : propertyPricing.casamundoPrice === "unavailable" ? (
           <div className="flex flex-col items-center justify-center">
@@ -613,7 +624,9 @@ export default function RequestToBookOrBookNowPriceCard({
             </div>
           </>
         )}
-
+        <p className="my-1 text-center text-sm text-muted-foreground">
+          You won&apos;t be charged yet
+        </p>
         <a href="#" className="block text-center text-primary hover:underline">
           Have a property? List now →
         </a>

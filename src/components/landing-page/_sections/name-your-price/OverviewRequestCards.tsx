@@ -6,23 +6,23 @@ import { cn } from "@/utils/utils";
 const cardData = [
   {
     icon: SendIcon,
-    title: "Send Request",
-    description: "Submit an offer to all available hosts",
+    title: "Send a request",
+    description: "Enter where you want to go, your dates, price and people you are traveling with, and send that request to everyhost in the area with a vacancy",
   },
   {
     icon: ClockIcon,
-    title: "Get Offers",
-    description: "Receive custom prices just for you",
+    title: "Book it now",
+    description: "Find a property you like, and book it now. Just like you're used to",
   },
   {
     icon: SearchIcon,
-    title: "Compare Deals",
-    description: "Pick your perfect match",
+    title: "Place a bid",
+    description: "See an empty night? Place a bid to see to see if you can make a deal",
   },
   {
     icon: CheckCircleIcon,
-    title: "Book Instantly",
-    description: "Secure your stay right away",
+    title: "Try it before you book",
+    description: "Already set on traveling? Try Tramona and see what hosts will offer you",
   },
 ];
 
