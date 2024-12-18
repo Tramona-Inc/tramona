@@ -12,7 +12,7 @@ export default function HostICalHowToDialog() {
   return (
     <Dialog>
       <DialogTrigger className="size-sm inline-flex items-center justify-center text-sm text-muted-foreground underline underline-offset-2">
-        <Info className="size-4" />
+        <Info className="h-4 w-4" />
       </DialogTrigger>
       <DialogContent className="max-w-3xl p-8">
         <DialogHeader>

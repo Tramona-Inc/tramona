@@ -142,7 +142,7 @@ const LinkConfirmation: React.FC<LinkConfirmationProps> = ({
               ].map(({ icon: Icon, content }, index) => (
                 <div key={index} className="flex items-center gap-2">
                   <div className="rounded-full bg-zinc-200 p-1.5">
-                    <Icon className="size-4 text-zinc-600" />
+                    <Icon className="h-4 w-4 text-zinc-600" />
                   </div>
                   <div className="text-sm font-medium">{content}</div>
                 </div>

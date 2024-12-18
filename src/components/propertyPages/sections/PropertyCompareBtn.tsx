@@ -54,13 +54,13 @@ export function PropertyCompareBtn({
           <Button asChild variant="secondary">
             <Link target="_blank" rel="noopener noreferrer" href={listingUrl}>
               See property on {originalListing.site.siteName}
-              <ExternalLinkIcon className="size-4" />
+              <ExternalLinkIcon className="h-4 w-4" />
             </Link>
           </Button>
           <Button asChild>
             <Link target="_blank" rel="noopener noreferrer" href={checkoutUrl}>
               See pricing on {originalListing.site.siteName}
-              <ExternalLinkIcon className="size-4" />
+              <ExternalLinkIcon className="h-4 w-4" />
             </Link>
           </Button>
         </DialogFooter>

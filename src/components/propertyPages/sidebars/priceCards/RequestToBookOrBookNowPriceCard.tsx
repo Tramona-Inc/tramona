@@ -67,8 +67,13 @@ export default function RequestToBookOrBookNowPriceCard({
   const checkOut = query.checkOut
     ? new Date(query.checkOut as string)
     : new Date();
-  const numGuests = query.numGuests ? parseInt(query.numGuests as string) : 2;
+  const numGuests = !query.numGuests
+    ? property.maxNumGuests
+    : parseInt(query.numGuests as string) > property.maxNumGuests
+      ? property.maxNumGuests
+      : parseInt(query.numGuests as string);
 
+  console.log(numGuests);
   const { data: bookedDates } = api.calendar.getReservedDates.useQuery({
     propertyId: property.id,
   });
@@ -136,7 +141,11 @@ export default function RequestToBookOrBookNowPriceCard({
     if (query.checkIn && query.checkOut && query.numGuests) {
       const checkIn = new Date(query.checkIn as string);
       const checkOut = new Date(query.checkOut as string);
-      const numGuests = parseInt(query.numGuests as string);
+      const numGuests = !query.numGuests
+        ? property.maxNumGuests
+        : parseInt(query.numGuests as string) > property.maxNumGuests
+          ? property.maxNumGuests
+          : parseInt(query.numGuests as string);
       setDate({ from: checkIn, to: checkOut });
       setRequestToBook((prevState) => ({
         ...prevState,
@@ -146,7 +155,13 @@ export default function RequestToBookOrBookNowPriceCard({
       }));
       console.log(requestAmount);
     }
-  }, [query.checkIn, query.checkOut, query.numGuests, requestAmount]);
+  }, [
+    query.checkIn,
+    query.checkOut,
+    query.numGuests,
+    requestAmount,
+    property.maxNumGuests,
+  ]);
 
   const updateRequestToBook = (updates: Partial<RequestToBookDetails>) => {
     setRequestToBook((prevState) => ({
@@ -558,13 +573,6 @@ export default function RequestToBookOrBookNowPriceCard({
             </div>
 
             <div className="grid grid-cols-2 gap-1">
-              {property.bookItNowEnabled && (
-                <BookNowBtn
-                  btnSize="sm"
-                  property={property}
-                  requestToBook={requestToBook}
-                />
-              )}
               <Button
                 variant="outline"
                 className={`col-auto w-full px-2 text-sm tracking-tight lg:text-base ${
@@ -574,6 +582,9 @@ export default function RequestToBookOrBookNowPriceCard({
               >
                 Place request
               </Button>
+              {property.bookItNowEnabled && (
+                <BookNowBtn property={property} requestToBook={requestToBook} />
+              )}
             </div>
           </>
         ) : propertyPricing.casamundoPrice === "unavailable" ? (

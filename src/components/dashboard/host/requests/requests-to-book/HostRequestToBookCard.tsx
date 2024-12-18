@@ -119,12 +119,12 @@ export default function HostRequestToBookCard({
               </p>
               <p className="flex items-center gap-2">
                 <span className="flex items-center gap-1">
-                  <CalendarIcon className="size-4" />
+                  <CalendarIcon className="h-4 w-4" />
                   {fmtdDateRange}
                 </span>
                 &middot;
                 <span className="flex items-center gap-1">
-                  <Users2Icon className="size-4" />
+                  <Users2Icon className="h-4 w-4" />
                   {fmtdNumGuests}
                 </span>
               </p>

@@ -222,6 +222,7 @@ export async function finalizeTrip({
     .returning()
     .then((r) => r[0]!);
 
+  console.log();
   const currentTrip = await db
     .insert(trips)
     .values({
@@ -412,7 +413,6 @@ export async function createRequestToBook({
   return;
 }
 
-
 export async function withdrawOverlappingOffers({
   propertyId,
   checkIn,
@@ -435,7 +435,7 @@ export async function withdrawOverlappingOffers({
   const overlappingOffersQuery = db
     .update(offers)
     .set({
-      status: "Withdrawn"
+      status: "Withdrawn",
     })
     .where(
       and(
@@ -446,20 +446,20 @@ export async function withdrawOverlappingOffers({
           // if offer check-in falls within booked period
           and(
             sql`${offers.checkIn}::date >= ${checkInStr}::date`,
-            sql`${offers.checkIn}::date < ${checkOutStr}::date`
+            sql`${offers.checkIn}::date < ${checkOutStr}::date`,
           ),
           // if offer check-out falls within booked period
           and(
             sql`${offers.checkOut}::date > ${checkInStr}::date`,
-            sql`${offers.checkOut}::date <= ${checkOutStr}::date`
+            sql`${offers.checkOut}::date <= ${checkOutStr}::date`,
           ),
           // if offer completely overlaps booked period
           and(
             sql`${offers.checkIn}::date <= ${checkInStr}::date`,
-            sql`${offers.checkOut}::date >= ${checkOutStr}::date`
-          )
-        )
-      )
+            sql`${offers.checkOut}::date >= ${checkOutStr}::date`,
+          ),
+        ),
+      ),
     )
     .returning();
 
