@@ -43,6 +43,7 @@ import { api } from "@/utils/api";
 import { Skeleton } from "@/components/ui/skeleton";
 import { isNumber } from "lodash";
 import { useGetOriginalPropertyPricing } from "@/utils/payment-utils/useGetOriginalPropertyPricing";
+import Link from "next/link";
 
 export type RequestToBookDetails = {
   checkIn: Date;
@@ -659,9 +660,12 @@ export default function RequestToBookOrBookNowPriceCard({
         <p className="my-1 text-center text-sm text-muted-foreground">
           You won&apos;t be charged yet
         </p>
-        <a href="#" className="block text-center text-primary hover:underline">
+        <Link
+          href="/why-list"
+          className="block text-center text-primary hover:underline"
+        >
           Have a property? List now →
-        </a>
+        </Link>
         <PriceCardInformation />
       </CardContent>
     </Card>

@@ -72,7 +72,7 @@ export default function HostRequestsToBook() {
                     Reject
                   </Button>
                 )}
-                {data.status !== "Pending" ? (
+                {data.status === "Pending" ? (
                   <Button
                     onClick={() => {
                       setDialogOpen(true);
