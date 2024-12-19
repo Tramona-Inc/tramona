@@ -32,6 +32,7 @@ export default function Page() {
   );
 
   // <---------------- Calculate the price here  ---------------->
+  console.log(requestPercentage);
   const propertyPricing = useGetOriginalPropertyPricing({
     property,
     checkIn,

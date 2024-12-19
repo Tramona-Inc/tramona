@@ -36,14 +36,7 @@ export default function RequestToBookBtn({
     const checkIn = formatDateMonthDayYear(requestToBook.checkIn);
     const checkOut = formatDateMonthDayYear(requestToBook.checkOut);
 
-    const baseCheckoutPath =
-      property.bookItNowEnabled &&
-      getApplicableBookItNowDiscount({
-        discountTiers: property.discountTiers,
-        checkIn: requestToBook.checkIn,
-      }) !== null
-        ? "book-it-now-checkout"
-        : "request-to-book-checkout";
+    const baseCheckoutPath = "request-to-book-checkout";
 
     return `/${baseCheckoutPath}/${property.id}?checkIn=${checkIn}&checkOut=${checkOut}&numGuests=${requestToBook.numGuests}&requestPercentage=${requestPercentage}`;
   }, [property, requestToBook, requestPercentage]);

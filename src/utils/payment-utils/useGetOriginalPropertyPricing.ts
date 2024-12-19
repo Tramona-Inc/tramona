@@ -65,17 +65,11 @@ export const useGetOriginalPropertyPricing = ({
   );
 
   // Calculate original price
-  let originalPricePerNight = isHospitable
+  const originalPricePerNight = isHospitable
     ? hostPricePerNight
     : isNumber(casamundoPrice)
       ? casamundoPrice * 100
       : undefined;
-
-  //traveler requested bid amount if request to book
-  if (requestPercentage && originalPricePerNight) {
-    originalPricePerNight =
-      originalPricePerNight * (1 - requestPercentage / 100);
-  }
 
   // Aggregate loading states
   const isLoading = isCasamundoPriceLoading && isHostPriceLoading;
@@ -85,11 +79,19 @@ export const useGetOriginalPropertyPricing = ({
       : null;
 
   //Multiply be num of nights becuase original price should be total price ++ MARKUP
-  const originalPrice = originalPricePerNight
+  let originalPrice = originalPricePerNight
     ? Math.floor(originalPricePerNight * numNights * TRAVELER_MARKUP)
     : originalPricePerNight;
 
-  //discounts here
+  // <--------------------------------- DISCOUNTS HERE --------------------------------->
+
+  // 1.) apply traveler requested bid amount if request to book
+  if (requestPercentage && originalPrice) {
+    originalPrice = originalPrice * (1 - requestPercentage / 100);
+  }
+  console.log(requestPercentage);
+  console.log(originalPrice);
+  //2.)apply discount tier discounts
   const hostDiscount = isHospitable //hostDiscount = percent off
     ? getApplicableBookItNowDiscount({
         discountTiers: property.discountTiers ?? [],
