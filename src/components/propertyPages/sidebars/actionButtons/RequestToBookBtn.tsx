@@ -39,7 +39,7 @@ export default function RequestToBookBtn({
     const baseCheckoutPath =
       property.bookItNowEnabled &&
       getApplicableBookItNowDiscount({
-        bookItNowDiscountTiers: property.bookItNowDiscountTiers,
+        discountTiers: property.discountTiers,
         checkIn: requestToBook.checkIn,
       }) !== null
         ? "book-it-now-checkout"

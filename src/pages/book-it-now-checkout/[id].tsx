@@ -55,7 +55,8 @@ export default function Page() {
         checkIn,
         checkOut,
         numGuests,
-        travelerOfferedPriceBeforeFees: propertyPricing.originalPrice!,
+        travelerOfferedPriceBeforeFees:
+          propertyPricing.originalPriceAfterTierDiscount!,
         type: "bookItNow",
       })
     : null;

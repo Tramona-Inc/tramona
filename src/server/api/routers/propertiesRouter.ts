@@ -835,7 +835,7 @@ export const propertiesRouter = createTRPCRouter({
         .update(properties)
         .set({
           ...(input.discountTiers && {
-            autoOfferDiscountTiers: input.discountTiers,
+            discountTiers: input.discountTiers,
           }),
         })
         .where(eq(properties.id, input.propertyId));
@@ -1076,7 +1076,6 @@ export const propertiesRouter = createTRPCRouter({
           }
         }),
       );
-
 
       // Query for scraped properties with non-intersecting dates
       const scrapedProperties = await db.query.properties.findMany({

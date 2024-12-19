@@ -88,11 +88,11 @@ export default function RequestToBookOrBookNowPriceCard({
 
   const [error, setError] = useState<React.ReactNode | null>(null);
   const [requestAmount, setRequestAmount] = useState(
-    propertyPricing.originalPrice,
+    propertyPricing.originalPriceAfterTierDiscount,
   );
   // Monitor `originalPrice` for errors
   useEffect(() => {
-    if (propertyPricing.originalPrice === undefined) {
+    if (propertyPricing.originalPriceAfterTierDiscount === undefined) {
       setError(
         <>
           Original price is unavailable.
@@ -103,9 +103,9 @@ export default function RequestToBookOrBookNowPriceCard({
     } else {
       setError(null); // Clear the error when `originalPrice` is valid
       //setPropertyprice into state
-      setRequestAmount(propertyPricing.originalPrice);
+      setRequestAmount(propertyPricing.originalPriceAfterTierDiscount);
     }
-  }, [propertyPricing.originalPrice]);
+  }, [propertyPricing.originalPriceAfterTierDiscount]);
 
   // ----------------
 
@@ -190,17 +190,17 @@ export default function RequestToBookOrBookNowPriceCard({
   };
   const presetOptions = [
     {
-      price: propertyPricing.originalPrice!,
+      price: propertyPricing.originalPriceAfterTierDiscount!,
       label: "Buy Now",
       percentOff: 0,
     },
     {
-      price: propertyPricing.originalPrice! * 0.9,
+      price: propertyPricing.originalPriceAfterTierDiscount! * 0.9,
       label: "Better request",
       percentOff: Math.ceil(property.requestToBookMaxDiscountPercentage / 2),
     },
     {
-      price: propertyPricing.originalPrice! * 0.8,
+      price: propertyPricing.originalPriceAfterTierDiscount! * 0.8,
       label: "Good request",
       percentOff: property.requestToBookMaxDiscountPercentage,
     },
@@ -209,8 +209,8 @@ export default function RequestToBookOrBookNowPriceCard({
   useEffect(() => {
     if (showRequestInput) {
       const newPercentage = Math.round(
-        ((propertyPricing.originalPrice! - requestAmount!) /
-          propertyPricing.originalPrice!) *
+        ((propertyPricing.originalPriceAfterTierDiscount! - requestAmount!) /
+          propertyPricing.originalPriceAfterTierDiscount!) *
           100,
       );
       setRequestPercentage(
@@ -220,7 +220,7 @@ export default function RequestToBookOrBookNowPriceCard({
   }, [
     showRequestInput,
     requestAmount,
-    propertyPricing.originalPrice,
+    propertyPricing.originalPriceAfterTierDiscount,
     maxDiscount,
   ]);
 
@@ -241,7 +241,7 @@ export default function RequestToBookOrBookNowPriceCard({
   };
   const handleSliderChange = (value: number[]) => {
     const newRequestAmount = Math.round(
-      propertyPricing.originalPrice! * (1 - value[0]! / 100),
+      propertyPricing.originalPriceAfterTierDiscount! * (1 - value[0]! / 100),
     );
     setRequestAmount(newRequestAmount);
     setRawRequestAmount(formatCurrency(newRequestAmount));
@@ -270,8 +270,8 @@ export default function RequestToBookOrBookNowPriceCard({
     setRawRequestAmount(formatCurrency(price)); // Update raw input state
 
     const newPercentage = Math.round(
-      ((propertyPricing.originalPrice! - price) /
-        propertyPricing.originalPrice!) *
+      ((propertyPricing.originalPriceAfterTierDiscount! - price) /
+        propertyPricing.originalPriceAfterTierDiscount!) *
         100,
     );
     setRequestPercentage(
@@ -398,7 +398,7 @@ export default function RequestToBookOrBookNowPriceCard({
                   key={index}
                   onClick={() =>
                     handlePresetSelect(
-                      propertyPricing.originalPrice! *
+                      propertyPricing.originalPriceAfterTierDiscount! *
                         ((100 - option.percentOff) / 100),
                     )
                   }
@@ -412,7 +412,7 @@ export default function RequestToBookOrBookNowPriceCard({
                 >
                   <div className="lg:text-md text-sm font-bold">
                     {formatCurrency(
-                      propertyPricing.originalPrice! *
+                      propertyPricing.originalPriceAfterTierDiscount! *
                         ((100 - option.percentOff) / 100),
                     )}
                   </div>
@@ -538,17 +538,38 @@ export default function RequestToBookOrBookNowPriceCard({
             <Skeleton className="h-4 w-1/3" />
             <Skeleton className="h-10 w-full" />
           </div>
-        ) : isNumber(propertyPricing.originalPrice) ? (
+        ) : isNumber(propertyPricing.originalPriceAfterTierDiscount) ? (
           <>
             <div>
               <div className="mb-1 text-2xl font-bold">Book it now for</div>
               <div className="flex items-baseline gap-2">
-                <span className="text-4xl font-bold text-primary lg:text-5xl">
-                  {formatCurrency(
-                    propertyPricing.originalPrice /
-                      getNumNights(checkIn, checkOut),
+                <div className="text-4xl font-bold text-primary lg:text-5xl">
+                  {propertyPricing.originalPrice &&
+                  propertyPricing.originalPriceAfterTierDiscount <
+                    propertyPricing.originalPrice ? (
+                    <div className="flex flex-row items-start gap-x-2 text-base">
+                      <p className="text-3xl">
+                        {formatCurrency(
+                          propertyPricing.originalPriceAfterTierDiscount /
+                            getNumNights(checkIn, checkOut),
+                        )}
+                      </p>
+                      <p className="text-muted-foreground line-through">
+                        {formatCurrency(
+                          propertyPricing.originalPrice /
+                            getNumNights(checkIn, checkOut),
+                        )}
+                      </p>
+                    </div>
+                  ) : (
+                    <span>
+                      {formatCurrency(
+                        propertyPricing.originalPriceAfterTierDiscount /
+                          getNumNights(checkIn, checkOut),
+                      )}
+                    </span>
                   )}
-                </span>
+                </div>
                 <span className="text-xl text-muted-foreground">Per Night</span>
               </div>
               <Button

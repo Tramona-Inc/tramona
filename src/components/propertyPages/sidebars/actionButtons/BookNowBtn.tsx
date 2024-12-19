@@ -23,7 +23,7 @@ interface BaseProps {
     | "maxNumGuests"
     | "id"
     | "bookItNowEnabled"
-    | "bookItNowDiscountTiers"
+    | "discountTiers"
   >;
 }
 
