@@ -51,7 +51,10 @@ import { HttpsProxyAgent } from "https-proxy-agent";
 import * as cheerio from "cheerio";
 import { sendSlackMessage } from "./slack";
 import { HOST_MARKUP, TRAVELER_MARKUP } from "@/utils/constants";
-import { HostRequestsPageData, HostRequestsPageOfferData } from "./api/routers/propertiesRouter";
+import {
+  HostRequestsPageData,
+  HostRequestsPageOfferData,
+} from "./api/routers/propertiesRouter";
 import { Session } from "next-auth";
 import { calculateTotalTax } from "@/utils/payment-utils/taxData";
 import {
@@ -402,7 +405,7 @@ export async function addProperty({
     | "country"
     | "countryISO"
     | "bookItNowEnabled"
-    | "bookItNowDiscountTiers"
+    | "discountTiers"
   > & {
     latLngPoint?: { x: number; y: number }; // make optional
   };
@@ -530,7 +533,13 @@ export async function getRequestsForProperties(
     request: Request & {
       traveler: Pick<
         User,
-        "firstName" | "lastName" | "name" | "image" | "location" | "about" | "dateOfBirth"
+        | "firstName"
+        | "lastName"
+        | "name"
+        | "image"
+        | "location"
+        | "about"
+        | "dateOfBirth"
       >;
     };
   }[] = [];
@@ -744,7 +753,7 @@ export async function getPropertiesForRequest(
       id: true,
       hostTeamId: true,
       autoOfferEnabled: true,
-      autoOfferDiscountTiers: true,
+      discountTiers: true,
       originalListingId: true,
     },
   });

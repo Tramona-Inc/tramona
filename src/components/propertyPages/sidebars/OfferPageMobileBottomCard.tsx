@@ -18,7 +18,7 @@ export default function OfferPageMobileBottomCard({
     | "maxNumGuests"
     | "id"
     | "bookItNowEnabled"
-    | "bookItNowDiscountTiers"
+    | "discountTiers"
   >;
 }) {
   const { data: verificationStatus } =

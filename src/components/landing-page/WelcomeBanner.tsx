@@ -20,7 +20,7 @@
 //         }}
 //         className="rounded-full p-1 hover:bg-white/10"
 //       >
-//         <XIcon className="size-4" />
+//         <XIcon className="h-4 w-4" />
 //       </button>
 //     </div>
 //   );

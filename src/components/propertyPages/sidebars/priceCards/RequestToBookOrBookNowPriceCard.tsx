@@ -67,8 +67,13 @@ export default function RequestToBookOrBookNowPriceCard({
   const checkOut = query.checkOut
     ? new Date(query.checkOut as string)
     : new Date();
-  const numGuests = query.numGuests ? parseInt(query.numGuests as string) : 2;
+  const numGuests = !query.numGuests
+    ? property.maxNumGuests
+    : parseInt(query.numGuests as string) > property.maxNumGuests
+      ? property.maxNumGuests
+      : parseInt(query.numGuests as string);
 
+  console.log(numGuests);
   const { data: bookedDates } = api.calendar.getReservedDates.useQuery({
     propertyId: property.id,
   });
@@ -83,11 +88,11 @@ export default function RequestToBookOrBookNowPriceCard({
 
   const [error, setError] = useState<React.ReactNode | null>(null);
   const [requestAmount, setRequestAmount] = useState(
-    propertyPricing.originalPrice,
+    propertyPricing.originalPriceAfterTierDiscount,
   );
   // Monitor `originalPrice` for errors
   useEffect(() => {
-    if (propertyPricing.originalPrice === undefined) {
+    if (propertyPricing.originalPriceAfterTierDiscount === undefined) {
       setError(
         <>
           Original price is unavailable.
@@ -98,9 +103,9 @@ export default function RequestToBookOrBookNowPriceCard({
     } else {
       setError(null); // Clear the error when `originalPrice` is valid
       //setPropertyprice into state
-      setRequestAmount(propertyPricing.originalPrice);
+      setRequestAmount(propertyPricing.originalPriceAfterTierDiscount);
     }
-  }, [propertyPricing.originalPrice]);
+  }, [propertyPricing.originalPriceAfterTierDiscount]);
 
   // ----------------
 
@@ -136,7 +141,11 @@ export default function RequestToBookOrBookNowPriceCard({
     if (query.checkIn && query.checkOut && query.numGuests) {
       const checkIn = new Date(query.checkIn as string);
       const checkOut = new Date(query.checkOut as string);
-      const numGuests = parseInt(query.numGuests as string);
+      const numGuests = !query.numGuests
+        ? property.maxNumGuests
+        : parseInt(query.numGuests as string) > property.maxNumGuests
+          ? property.maxNumGuests
+          : parseInt(query.numGuests as string);
       setDate({ from: checkIn, to: checkOut });
       setRequestToBook((prevState) => ({
         ...prevState,
@@ -146,7 +155,13 @@ export default function RequestToBookOrBookNowPriceCard({
       }));
       console.log(requestAmount);
     }
-  }, [query.checkIn, query.checkOut, query.numGuests, requestAmount]);
+  }, [
+    query.checkIn,
+    query.checkOut,
+    query.numGuests,
+    requestAmount,
+    property.maxNumGuests,
+  ]);
 
   const updateRequestToBook = (updates: Partial<RequestToBookDetails>) => {
     setRequestToBook((prevState) => ({
@@ -175,17 +190,17 @@ export default function RequestToBookOrBookNowPriceCard({
   };
   const presetOptions = [
     {
-      price: propertyPricing.originalPrice!,
+      price: propertyPricing.originalPriceAfterTierDiscount!,
       label: "Buy Now",
       percentOff: 0,
     },
     {
-      price: propertyPricing.originalPrice! * 0.9,
+      price: propertyPricing.originalPriceAfterTierDiscount! * 0.9,
       label: "Better request",
       percentOff: Math.ceil(property.requestToBookMaxDiscountPercentage / 2),
     },
     {
-      price: propertyPricing.originalPrice! * 0.8,
+      price: propertyPricing.originalPriceAfterTierDiscount! * 0.8,
       label: "Good request",
       percentOff: property.requestToBookMaxDiscountPercentage,
     },
@@ -194,8 +209,8 @@ export default function RequestToBookOrBookNowPriceCard({
   useEffect(() => {
     if (showRequestInput) {
       const newPercentage = Math.round(
-        ((propertyPricing.originalPrice! - requestAmount!) /
-          propertyPricing.originalPrice!) *
+        ((propertyPricing.originalPriceAfterTierDiscount! - requestAmount!) /
+          propertyPricing.originalPriceAfterTierDiscount!) *
           100,
       );
       setRequestPercentage(
@@ -205,7 +220,7 @@ export default function RequestToBookOrBookNowPriceCard({
   }, [
     showRequestInput,
     requestAmount,
-    propertyPricing.originalPrice,
+    propertyPricing.originalPriceAfterTierDiscount,
     maxDiscount,
   ]);
 
@@ -226,7 +241,7 @@ export default function RequestToBookOrBookNowPriceCard({
   };
   const handleSliderChange = (value: number[]) => {
     const newRequestAmount = Math.round(
-      propertyPricing.originalPrice! * (1 - value[0]! / 100),
+      propertyPricing.originalPriceAfterTierDiscount! * (1 - value[0]! / 100),
     );
     setRequestAmount(newRequestAmount);
     setRawRequestAmount(formatCurrency(newRequestAmount));
@@ -255,8 +270,8 @@ export default function RequestToBookOrBookNowPriceCard({
     setRawRequestAmount(formatCurrency(price)); // Update raw input state
 
     const newPercentage = Math.round(
-      ((propertyPricing.originalPrice! - price) /
-        propertyPricing.originalPrice!) *
+      ((propertyPricing.originalPriceAfterTierDiscount! - price) /
+        propertyPricing.originalPriceAfterTierDiscount!) *
         100,
     );
     setRequestPercentage(
@@ -383,7 +398,7 @@ export default function RequestToBookOrBookNowPriceCard({
                   key={index}
                   onClick={() =>
                     handlePresetSelect(
-                      propertyPricing.originalPrice! *
+                      propertyPricing.originalPriceAfterTierDiscount! *
                         ((100 - option.percentOff) / 100),
                     )
                   }
@@ -397,7 +412,7 @@ export default function RequestToBookOrBookNowPriceCard({
                 >
                   <div className="lg:text-md text-sm font-bold">
                     {formatCurrency(
-                      propertyPricing.originalPrice! *
+                      propertyPricing.originalPriceAfterTierDiscount! *
                         ((100 - option.percentOff) / 100),
                     )}
                   </div>
@@ -523,17 +538,38 @@ export default function RequestToBookOrBookNowPriceCard({
             <Skeleton className="h-4 w-1/3" />
             <Skeleton className="h-10 w-full" />
           </div>
-        ) : isNumber(propertyPricing.originalPrice) ? (
+        ) : isNumber(propertyPricing.originalPriceAfterTierDiscount) ? (
           <>
             <div>
               <div className="mb-1 text-2xl font-bold">Book it now for</div>
               <div className="flex items-baseline gap-2">
-                <span className="text-4xl font-bold text-primary lg:text-5xl">
-                  {formatCurrency(
-                    propertyPricing.originalPrice /
-                      getNumNights(checkIn, checkOut),
+                <div className="text-4xl font-bold text-primary lg:text-5xl">
+                  {propertyPricing.originalPrice &&
+                  propertyPricing.originalPriceAfterTierDiscount <
+                    propertyPricing.originalPrice ? (
+                    <div className="flex flex-row items-start gap-x-2 text-base">
+                      <p className="text-3xl">
+                        {formatCurrency(
+                          propertyPricing.originalPriceAfterTierDiscount /
+                            getNumNights(checkIn, checkOut),
+                        )}
+                      </p>
+                      <p className="text-muted-foreground line-through">
+                        {formatCurrency(
+                          propertyPricing.originalPrice /
+                            getNumNights(checkIn, checkOut),
+                        )}
+                      </p>
+                    </div>
+                  ) : (
+                    <span>
+                      {formatCurrency(
+                        propertyPricing.originalPriceAfterTierDiscount /
+                          getNumNights(checkIn, checkOut),
+                      )}
+                    </span>
                   )}
-                </span>
+                </div>
                 <span className="text-xl text-muted-foreground">Per Night</span>
               </div>
               <Button
@@ -558,13 +594,6 @@ export default function RequestToBookOrBookNowPriceCard({
             </div>
 
             <div className="grid grid-cols-2 gap-1">
-              {property.bookItNowEnabled && (
-                <BookNowBtn
-                  btnSize="sm"
-                  property={property}
-                  requestToBook={requestToBook}
-                />
-              )}
               <Button
                 variant="outline"
                 className={`col-auto w-full px-2 text-sm tracking-tight lg:text-base ${
@@ -574,6 +603,9 @@ export default function RequestToBookOrBookNowPriceCard({
               >
                 Place request
               </Button>
+              {property.bookItNowEnabled && (
+                <BookNowBtn property={property} requestToBook={requestToBook} />
+              )}
             </div>
           </>
         ) : propertyPricing.casamundoPrice === "unavailable" ? (

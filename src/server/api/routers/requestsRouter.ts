@@ -77,7 +77,7 @@ export const requestsRouter = createTRPCRouter({
               eq(offers.status, "Pending"),
               ctx.user.role === "admin"
                 ? undefined // show all offers for admins
-                : lt(offers.becomeVisibleAt, new Date())
+                : lt(offers.becomeVisibleAt, new Date()),
             ),
             with: {
               property: {
@@ -134,11 +134,11 @@ export const requestsRouter = createTRPCRouter({
     return {
       activeRequests: myRequests.filter(
         (request) =>
-          request.resolvedAt === null &&
-          request.createdAt > fortyEightHoursAgo,
+          request.resolvedAt === null && request.createdAt > fortyEightHoursAgo,
       ),
       inactiveRequests: myRequests.filter(
-        (request) => request.resolvedAt !== null || request.createdAt < fortyEightHoursAgo,
+        (request) =>
+          request.resolvedAt !== null || request.createdAt < fortyEightHoursAgo,
       ),
     };
   }),
@@ -413,7 +413,7 @@ export async function handleRequestSubmission(
         propertyDetails?.autoOfferEnabled &&
         propertyDetails.originalListingId &&
         propertyDetails.originalListingPlatform === "Airbnb" &&
-        propertyDetails.autoOfferDiscountTiers
+        propertyDetails.discountTiers
       ) {
         try {
           const airbnbTotalPrice = await scrapeAirbnbPrice({
@@ -434,16 +434,14 @@ export async function handleRequestSubmission(
 
           const daysUntilCheckIn = differenceInDays(input.checkIn, new Date());
 
-          const applicableDiscount =
-            propertyDetails.autoOfferDiscountTiers.find(
-              (tier) => daysUntilCheckIn >= tier.days,
-            );
+          const applicableDiscount = propertyDetails.discountTiers.find(
+            (tier) => daysUntilCheckIn >= tier.days,
+          );
 
           if (
             applicableDiscount &&
             percentOff <= applicableDiscount.percentOff
           ) {
-
             //create trip checkout First
             const travelerOfferedPriceBeforeFees = getTravelerOfferedPrice({
               totalPrice: requestedNightlyPrice * numNights,

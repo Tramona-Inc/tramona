@@ -81,7 +81,7 @@ export default function RequestCard({
             {type !== "host" && <RequestCardBadge request={request} />}
             {type === "guest" && request.linkInputProperty && (
               <Badge variant="pink">
-                <LinkIcon className="size-4" />
+                <LinkIcon className="h-4 w-4" />
                 Airbnb Link
               </Badge>
             )}
@@ -140,7 +140,7 @@ export default function RequestCard({
               </p>
               <p className="mt-3 flex items-center gap-2">
                 <span className="flex items-center gap-1">
-                  <ClockIcon className="size-4" />
+                  <ClockIcon className="h-4 w-4" />
                   {fmtdDateRange}
                 </span>
                 &middot;

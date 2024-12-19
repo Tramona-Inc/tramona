@@ -132,6 +132,7 @@ export default async function webhook(
           // --------- 3 Cases: 1. Book it now, 2.Request to book,  3. Offer  ---------------------------------------
           //1 . CASE : Book it now
           if (paymentIntentSucceeded.metadata.type === "bookItNow") {
+            console.log(paymentIntentId);
             await finalizeTrip({
               paymentIntentId,
               numOfGuests: parseInt(
@@ -152,7 +153,9 @@ export default async function webhook(
             });
             // rejecting overlapping offers
             await withdrawOverlappingOffers({
-              propertyId: parseInt(paymentIntentSucceeded.metadata.property_id!),
+              propertyId: parseInt(
+                paymentIntentSucceeded.metadata.property_id!,
+              ),
               checkIn: new Date(paymentIntentSucceeded.metadata.check_in!),
               checkOut: new Date(paymentIntentSucceeded.metadata.check_out!),
             });
@@ -187,7 +190,7 @@ export default async function webhook(
                 .update(offers)
                 .set({
                   acceptedAt: confirmedDate,
-                  status: "Accepted"
+                  status: "Accepted",
                 })
                 .where(eq(offers.id, offerId));
 
@@ -266,7 +269,7 @@ export default async function webhook(
                 checkOut: offer.checkOut,
                 excludeOfferId: offerId,
               });
-              
+
               //<___creating a superhog  oreservationnly if does not exist__>
 
               const currentSuperhogReservation = await db.query.trips.findFirst(

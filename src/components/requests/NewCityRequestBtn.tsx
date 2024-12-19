@@ -17,8 +17,8 @@ export function NewCityRequestBtn() {
           New request
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-4xl">
-        <DialogHeader className="border-b pb-2 font-bold">
+      <DialogContent className="flex w-full flex-col items-center">
+        <DialogHeader className="w-full border-b pb-2 font-bold">
           Request a deal
         </DialogHeader>
         <CityRequestFormContainer isRequestsPage />

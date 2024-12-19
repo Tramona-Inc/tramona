@@ -14,7 +14,7 @@ import {
 import { formatDateMonthDayYear } from "@/utils/utils";
 
 interface BaseProps {
-  btnSize: ButtonProps["size"];
+  btnSize?: ButtonProps["size"];
   property: Pick<
     Property,
     | "stripeVerRequired"
@@ -23,7 +23,7 @@ interface BaseProps {
     | "maxNumGuests"
     | "id"
     | "bookItNowEnabled"
-    | "bookItNowDiscountTiers"
+    | "discountTiers"
   >;
 }
 

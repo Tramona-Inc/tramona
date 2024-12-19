@@ -56,7 +56,7 @@
 
 // const formSchema = z.object({
 //   bookItNowEnabled: z.boolean(),
-//   bookItNowDiscountTiers: z
+//   discountTiers: z
 //     .array(discountTierSchema)
 //     .min(MIN_TIERS)
 //     .max(MAX_TIERS)
@@ -67,7 +67,7 @@
 //       },
 //       {
 //         message: "Each 'days' value must be unique",
-//         path: ["bookItNowDiscountTiers"],
+//         path: ["discountTiers"],
 //       },
 //     ),
 //   requestToBookMaxDiscountPercentage: z
@@ -83,13 +83,13 @@
 // type FormSchema = z.infer<typeof formSchema>;
 
 // const orderTiers = (
-//   tiers: FormSchema["bookItNowDiscountTiers"],
-// ): FormSchema["bookItNowDiscountTiers"] => {
+//   tiers: FormSchema["discountTiers"],
+// ): FormSchema["discountTiers"] => {
 //   return [...tiers].sort((a, b) => b.days - a.days);
 // };
 
 // const hasHighDiscount = (
-//   tiers: FormSchema["bookItNowDiscountTiers"],
+//   tiers: FormSchema["discountTiers"],
 // ): boolean => {
 //   return tiers.some((tier) => tier.percentOff >= HIGH_DISCOUNT_THRESHOLD);
 // };
@@ -104,7 +104,7 @@
 
 //   const originalValuesRef = useRef<FormSchema>({
 //     bookItNowEnabled: property.bookItNowEnabled,
-//     bookItNowDiscountTiers: property.bookItNowDiscountTiers ?? DEFAULT_TIERS,
+//     discountTiers: property.discountTiers ?? DEFAULT_TIERS,
 //     requestToBookMaxDiscountPercentage:
 //       property.requestToBookMaxDiscountPercentage,
 //   });
@@ -116,7 +116,7 @@
 
 //   const { fields, append, remove } = useFieldArray({
 //     control: form.control,
-//     name: "bookItNowDiscountTiers",
+//     name: "discountTiers",
 //   });
 
 //   const updateBookItNowMutation = api.properties.updateBookItNow.useMutation({
@@ -130,14 +130,14 @@
 //         duration: 3000,
 //       });
 //       if (
-//         variables.bookItNowDiscountTiers !== undefined &&
+//         variables.discountTiers !== undefined &&
 //         variables.bookItNowEnabled !== undefined
 //       ) {
 //         // Create a narrowed version of the variables
 //         const safeVariables = {
 //           id: variables.id,
 //           bookItNowEnabled: variables.bookItNowEnabled,
-//           bookItNowDiscountTiers: variables.bookItNowDiscountTiers,
+//           discountTiers: variables.discountTiers,
 //         };
 //         originalValuesRef.current = {
 //           ...originalValuesRef.current,
@@ -173,18 +173,18 @@
 //     }
 
 //     if (
-//       currentValues.bookItNowDiscountTiers.length !==
-//       original.bookItNowDiscountTiers.length
+//       currentValues.discountTiers.length !==
+//       original.discountTiers.length
 //     ) {
 //       return true;
 //     }
 
-//     for (let i = 0; i < currentValues.bookItNowDiscountTiers.length; i++) {
+//     for (let i = 0; i < currentValues.discountTiers.length; i++) {
 //       if (
-//         currentValues.bookItNowDiscountTiers[i]?.days !==
-//           original.bookItNowDiscountTiers[i]?.days ||
-//         currentValues.bookItNowDiscountTiers[i]?.percentOff !==
-//           original.bookItNowDiscountTiers[i]?.percentOff
+//         currentValues.discountTiers[i]?.days !==
+//           original.discountTiers[i]?.days ||
+//         currentValues.discountTiers[i]?.percentOff !==
+//           original.discountTiers[i]?.percentOff
 //       ) {
 //         return true;
 //       }
@@ -219,7 +219,7 @@
 //     async (data: FormSchema) => {
 //       if (isSaving) return;
 
-//       const orderedTiers = orderTiers(data.bookItNowDiscountTiers);
+//       const orderedTiers = orderTiers(data.discountTiers);
 //       const uniqueDays = new Set(orderedTiers.map((tier) => tier.days));
 //       if (uniqueDays.size !== orderedTiers.length) {
 //         toast({
@@ -238,7 +238,7 @@
 //           await updateBookItNowMutation.mutateAsync({
 //             id: property.id,
 //             bookItNowEnabled: data.bookItNowEnabled,
-//             bookItNowDiscountTiers: orderedTiers,
+//             discountTiers: orderedTiers,
 //           });
 //           handleSuccessfulSubmit(data);
 //         } catch (error) {
@@ -261,7 +261,7 @@
 //   const handleConfirmReset = useCallback(() => {
 //     const defaultValues = {
 //       bookItNowEnabled: property.bookItNowEnabled,
-//       bookItNowDiscountTiers: DEFAULT_TIERS,
+//       discountTiers: DEFAULT_TIERS,
 //       requestToBookMaxDiscountPercentage:
 //         property.requestToBookMaxDiscountPercentage,
 //     };
@@ -300,14 +300,14 @@
 
 //   const renderDiscountTierFields = useCallback(
 //     (
-//       fields: FieldArrayWithId<FormSchema, "bookItNowDiscountTiers", "id">[],
+//       fields: FieldArrayWithId<FormSchema, "discountTiers", "id">[],
 //       remove: (index: number) => void,
 //     ) =>
 //       fields.map((field, index) => (
 //         <div key={field.id} className="my-2 flex items-center space-x-2">
 //           <FormField
 //             control={form.control}
-//             name={`bookItNowDiscountTiers.${index}.days`}
+//             name={`discountTiers.${index}.days`}
 //             render={({ field }) => (
 //               <FormItem>
 //                 <FormControl>
@@ -332,7 +332,7 @@
 //           <span>days before check-in:</span>
 //           <FormField
 //             control={form.control}
-//             name={`bookItNowDiscountTiers.${index}.percentOff`}
+//             name={`discountTiers.${index}.percentOff`}
 //             render={({ field }) => (
 //               <FormItem>
 //                 <FormControl>

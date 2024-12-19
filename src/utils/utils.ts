@@ -537,7 +537,9 @@ export function separateByPriceAndAgeRestriction(
         requestData.request.maxTotalPrice /
         getNumNights(requestData.request.checkIn, requestData.request.checkOut);
 
-      const travelerAge = requestData.request.traveler.dateOfBirth ? getAge(requestData.request.traveler.dateOfBirth) : null;
+      const travelerAge = requestData.request.traveler.dateOfBirth
+        ? getAge(requestData.request.traveler.dateOfBirth)
+        : null;
 
       const normalProperties = requestData.properties.filter((property) => {
         if (property.city === "Seattle, WA, US") {
@@ -545,20 +547,18 @@ export function separateByPriceAndAgeRestriction(
         }
         return (
           (property.priceRestriction == null ||
-          property.priceRestriction <= nightlyPrice) &&
+            property.priceRestriction <= nightlyPrice) &&
           (property.ageRestriction == null ||
-          (travelerAge !== null &&
-          travelerAge >= property.ageRestriction))
+            (travelerAge !== null && travelerAge >= property.ageRestriction))
         );
       });
 
       const outsideProperties = requestData.properties.filter(
         (property) =>
-          (property.priceRestriction != null &&
-          property.priceRestriction >= nightlyPrice * 1.15) &&
-          (property.ageRestriction != null &&
-          (travelerAge === null ||
-          travelerAge < property.ageRestriction))
+          property.priceRestriction != null &&
+          property.priceRestriction >= nightlyPrice * 1.15 &&
+          property.ageRestriction != null &&
+          (travelerAge === null || travelerAge < property.ageRestriction),
       );
 
       return {
@@ -587,11 +587,11 @@ export function separateByPriceAndAgeRestriction(
     return {
       normal: {
         city: cityData.city,
-        requests: normalRequests
+        requests: normalRequests,
       },
       outsidePriceRestriction: {
         city: cityData.city,
-        requests: outsideRequests
+        requests: outsideRequests,
       },
     };
   });
@@ -807,24 +807,19 @@ export function removeTax(total: number, taxRate: number): number {
 }
 
 export const getApplicableBookItNowDiscount = ({
-  bookItNowDiscountTiers,
+  discountTiers,
   checkIn,
 }: {
-  bookItNowDiscountTiers:
-    | { days: number; percentOff: number }[]
-    | null
-    | undefined;
+  discountTiers: { days: number; percentOff: number }[] | null | undefined;
   checkIn: Date;
 }): number | null => {
-  if (!bookItNowDiscountTiers || bookItNowDiscountTiers.length === 0) {
+  if (!discountTiers || discountTiers.length === 0) {
     return null;
   }
 
   const daysUntilCheckIn = differenceInDays(checkIn, new Date());
 
-  const sortedTiers = [...bookItNowDiscountTiers].sort(
-    (a, b) => b.days - a.days,
-  );
+  const sortedTiers = [...discountTiers].sort((a, b) => b.days - a.days);
 
   const applicableDiscount = sortedTiers.find(
     (tier) => daysUntilCheckIn >= tier.days,

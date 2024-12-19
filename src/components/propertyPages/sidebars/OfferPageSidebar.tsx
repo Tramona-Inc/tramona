@@ -19,7 +19,7 @@ export default function OfferPageSidebar({
     | "maxNumGuests"
     | "id"
     | "bookItNowEnabled"
-    | "bookItNowDiscountTiers"
+    | "discountTiers"
   >;
 }) {
   return (

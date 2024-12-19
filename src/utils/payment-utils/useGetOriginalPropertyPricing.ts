@@ -35,18 +35,6 @@ export const useGetOriginalPropertyPricing = ({
       },
     );
   console.log(hostPricePerNight);
-  const hostDiscount = isHospitable
-    ? getApplicableBookItNowDiscount({
-        bookItNowDiscountTiers: property.bookItNowDiscountTiers ?? [],
-        checkIn,
-      })
-    : undefined;
-
-  const hostPriceAfterDiscount = hostDiscount
-    ? hostPricePerNight
-      ? hostPricePerNight * (1 - hostDiscount)
-      : undefined
-    : hostPricePerNight;
 
   // Scraped property logic
   const {
@@ -77,17 +65,11 @@ export const useGetOriginalPropertyPricing = ({
   );
 
   // Calculate original price
-  let originalPricePerNight = isHospitable
-    ? hostPriceAfterDiscount
+  const originalPricePerNight = isHospitable
+    ? hostPricePerNight
     : isNumber(casamundoPrice)
       ? casamundoPrice * 100
       : undefined;
-
-  //traveler requested bid amount if request to book
-  if (requestPercentage && originalPricePerNight) {
-    originalPricePerNight =
-      originalPricePerNight * (1 - requestPercentage / 100);
-  }
 
   // Aggregate loading states
   const isLoading = isCasamundoPriceLoading && isHostPriceLoading;
@@ -97,13 +79,34 @@ export const useGetOriginalPropertyPricing = ({
       : null;
 
   //Multiply be num of nights becuase original price should be total price ++ MARKUP
-  const originalPrice = originalPricePerNight
+  let originalPrice = originalPricePerNight
     ? Math.floor(originalPricePerNight * numNights * TRAVELER_MARKUP)
     : originalPricePerNight;
+
+  // <--------------------------------- DISCOUNTS HERE --------------------------------->
+
+  // 1.) apply traveler requested bid amount if request to book
+  if (requestPercentage && originalPrice) {
+    originalPrice = originalPrice * (1 - requestPercentage / 100);
+  }
+  console.log(requestPercentage);
+  console.log(originalPrice);
+  //2.)apply discount tier discounts
+  const hostDiscount = isHospitable //hostDiscount = percent off
+    ? getApplicableBookItNowDiscount({
+        discountTiers: property.discountTiers ?? [],
+        checkIn,
+      })
+    : undefined;
+
+  const originalPriceAfterTierDiscount = originalPrice
+    ? originalPrice * (1 - (hostDiscount ?? 0) / 100)
+    : undefined;
 
   // Return everything as undefined or valid values, but ensure hooks are always run
   return {
     originalPrice, //we really only care about this
+    originalPriceAfterTierDiscount,
     isLoading,
     error,
     casamundoPrice: isHospitable ? undefined : casamundoPrice, //REVISIT ONCE SCRAPER IS FIXED  note: used if you want prices without modification
