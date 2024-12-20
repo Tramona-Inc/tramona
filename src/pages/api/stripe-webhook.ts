@@ -9,6 +9,7 @@ import {
   trips,
   tripCheckouts,
   users,
+  reservedDateRanges,
 } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
 import { buffer } from "micro";
@@ -298,6 +299,17 @@ export default async function webhook(
                   console.log("Superhog reservation already exists");
                 }
               }
+
+              await db.insert(reservedDateRanges).values({
+                start: currentTripWCheckout.checkIn.toISOString(),
+                end: currentTripWCheckout.checkOut.toISOString(),
+                platformBookedOn: "tramona",
+                propertyId: currentTripWCheckout.propertyId,
+              });
+
+              await db.update(properties).set({
+                datesLastUpdated: new Date(),
+              }).where(eq(properties.id, currentTripWCheckout.propertyId));
               //<<--------------------->>
 
               //send email and whatsup (whatsup is not implemented yet)

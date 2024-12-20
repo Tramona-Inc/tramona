@@ -369,6 +369,9 @@ export const properties = pgTable(
       .notNull()
       .$type<{ x: number; y: number }>(),
     iCalLink: text("ical_link"),
+    iCalLinkLastUpdated: timestamp("ical_link_last_updated", {
+      withTimezone: true,
+    }),
     bookOnAirbnb: boolean("book_on_airbnb").notNull().default(false),
     autoOfferEnabled: boolean("auto_offer_enabled").notNull().default(false),
     discountTiers: jsonb("discount_tiers").$type<DiscountTier[]>(),
