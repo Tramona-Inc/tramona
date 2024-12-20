@@ -97,21 +97,20 @@ export default function HostRequestToBookCard({
               </DropdownMenu>
             )}
           </div>
-          <div className="space-y-1">
-            <div>
-              <div className="flex items-start gap-1">
-                <MapPinIcon className="shrink-0 text-primary" />
-                <h2 className="text-base font-bold text-primary md:text-lg">
-                  {requestToBook.property.name}
-                </h2>
-              </div>
-              <div className="flex items-start gap-1">
-                <Home className="shrink-0 text-primary" />
-                <h2 className="text-base font-bold text-primary md:text-lg">
-                  {requestToBook.property.name}
-                </h2>
-              </div>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <MapPinIcon className="h-5 w-5 shrink-0 text-primary" />
+              <h2 className="text-sm font-semibold text-primary md:text-base">
+                {requestToBook.property.city}
+              </h2>
             </div>
+            <div className="flex items-start gap-2">
+              <Home className="mt-1 h-5 w-5 shrink-0 text-primary" />
+              <h2 className="text-sm font-semibold text-primary md:text-base">
+                {requestToBook.property.name}
+              </h2>
+            </div>
+
             <div>
               <p>
                 Requested <span className="font-semibold">{fmtdPrice}</span>
@@ -119,12 +118,12 @@ export default function HostRequestToBookCard({
               </p>
               <p className="flex items-center gap-2">
                 <span className="flex items-center gap-1">
-                  <CalendarIcon className="size-4" />
+                  <CalendarIcon className="h-4 w-4" />
                   {fmtdDateRange}
                 </span>
                 &middot;
                 <span className="flex items-center gap-1">
-                  <Users2Icon className="size-4" />
+                  <Users2Icon className="h-4 w-4" />
                   {fmtdNumGuests}
                 </span>
               </p>

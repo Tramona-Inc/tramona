@@ -807,24 +807,19 @@ export function removeTax(total: number, taxRate: number): number {
 }
 
 export const getApplicableBookItNowDiscount = ({
-  bookItNowDiscountTiers,
+  discountTiers,
   checkIn,
 }: {
-  bookItNowDiscountTiers:
-    | { days: number; percentOff: number }[]
-    | null
-    | undefined;
+  discountTiers: { days: number; percentOff: number }[] | null | undefined;
   checkIn: Date;
 }): number | null => {
-  if (!bookItNowDiscountTiers || bookItNowDiscountTiers.length === 0) {
+  if (!discountTiers || discountTiers.length === 0) {
     return null;
   }
 
   const daysUntilCheckIn = differenceInDays(checkIn, new Date());
 
-  const sortedTiers = [...bookItNowDiscountTiers].sort(
-    (a, b) => b.days - a.days,
-  );
+  const sortedTiers = [...discountTiers].sort((a, b) => b.days - a.days);
 
   const applicableDiscount = sortedTiers.find(
     (tier) => daysUntilCheckIn >= tier.days,

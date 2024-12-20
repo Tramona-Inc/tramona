@@ -62,12 +62,12 @@ export default function BidPlacedPopup({ isOpen }: BidPlacedPopupProps) {
           </Alert>
           <div className="flex w-full flex-col gap-4">
             <div className="flex w-full flex-col gap-4 sm:flex-row">
-              <Link href="/unclaimed-offers'">
+              <Link href="/?page=1">
                 <Button className="w-full bg-[#004236] text-white hover:bg-[#003228]">
                   Search More Properties
                 </Button>
               </Link>
-              <Link href="/requests">
+              <Link href="/requests?tab=bids">
                 <Button className="w-full bg-[#004236] text-white hover:bg-[#003228]">
                   View Requests
                 </Button>

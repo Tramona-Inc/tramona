@@ -160,7 +160,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           />
         </Slot>
         <div className={overlayVariants({ variant })}>
-          {Icon && <Icon className="size-4" />}
+          {Icon && <Icon className="h-4 w-4" />}
           <div
             className={cn(
               "flex-1 items-baseline justify-between",

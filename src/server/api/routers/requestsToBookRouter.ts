@@ -145,6 +145,7 @@ export const requestsToBookRouter = createTRPCRouter({
                 bookOnAirbnb: true,
                 hostName: true,
                 hostProfilePic: true,
+                city: true,
               },
             },
             madeByGroup: {

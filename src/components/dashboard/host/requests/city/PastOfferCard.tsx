@@ -81,7 +81,7 @@ export default function PastOfferCard({
               </p>
               <p className="mt-3 flex items-center gap-2">
                 <span className="flex items-center gap-1">
-                  <ClockIcon className="size-4" />
+                  <ClockIcon className="h-4 w-4" />
                   {fmtdDateRange}
                 </span>
                 &middot;

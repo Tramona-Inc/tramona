@@ -371,18 +371,13 @@ export const properties = pgTable(
     iCalLink: text("ical_link"),
     bookOnAirbnb: boolean("book_on_airbnb").notNull().default(false),
     autoOfferEnabled: boolean("auto_offer_enabled").notNull().default(false),
-    autoOfferDiscountTiers: jsonb("auto_offer_discount_tiers").$type<
-      DiscountTier[]
-    >(),
+    discountTiers: jsonb("discount_tiers").$type<DiscountTier[]>(),
     bookItNowEnabled: boolean("book_it_now_enabled").notNull().default(false),
     bookItNowHostDiscountPercentOffInput: integer(
       "book_it_now_host_discount_percent_off_input",
     )
       .default(0)
       .notNull(), //the host inputs this in in the /calender settings page. Percent off of airbnb price
-    bookItNowDiscountTiers: jsonb("book_it_now_discount_tiers").$type<
-      DiscountTier[]
-    >(),
     requestToBookMaxDiscountPercentage: integer(
       "request_to_book_max_discount_percentage",
     )
@@ -410,8 +405,7 @@ export const propertyInsertSchema = createInsertSchema(properties, {
   checkInTime: zodTime,
   checkOutTime: zodTime,
   roomsWithBeds: roomsWithBedsSchema,
-  autoOfferDiscountTiers: z.array(discountTierSchema),
-  bookItNowDiscountTiers: z.array(discountTierSchema).nullable(),
+  discountTiers: z.array(discountTierSchema).nullable(),
   latLngPoint: z.object({ x: z.number(), y: z.number() }),
 });
 

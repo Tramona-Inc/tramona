@@ -10,7 +10,7 @@ import { Property } from "@/server/db/schema/tables/properties";
 import { useState, useEffect } from "react";
 import { api } from "@/utils/api";
 import { toast } from "@/components/ui/use-toast";
-import NameYourOwnPriceSection from "./setttingsSections/NameYourOwnPriceSection";
+import RequestAndBidAutomationSection from "./setttingsSections/RequestAndBidAutomationSection";
 
 export default function CalendarSettings({ property }: { property: Property }) {
   // <---------------------------------- MUTATIONS ---------------------------------->
@@ -218,7 +218,7 @@ export default function CalendarSettings({ property }: { property: Property }) {
             </div>
 
             {/* Name your price section */}
-            <NameYourOwnPriceSection property={property} />
+            <RequestAndBidAutomationSection property={property} />
           </TabsContent>
           <TabsContent value="restrictions" className="space-y-6 sm:space-y-8">
             <HostPropertiesRestrictions property={property} />

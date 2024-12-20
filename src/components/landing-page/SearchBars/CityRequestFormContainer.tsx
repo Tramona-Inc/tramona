@@ -4,6 +4,7 @@ import LinkRequestForm from "@/components/link-input/LinkRequestForm";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { useRef } from "react";
+import { cn } from "@/utils/utils";
 
 export default function CityRequestFormContainer({
   isRequestsPage = false,
@@ -17,12 +18,15 @@ export default function CityRequestFormContainer({
       formRef.current.submit();
     }
   };
+  console.log(isRequestsPage);
   return (
     <div
-      className={`max-w-5/6 flex flex-col gap-y-3 ${isRequestsPage ? "" : "md:7/12 w-11/12 gap-y-3 lg:w-1/2"}`}
+      className={cn("max-w-5/6 flex w-5/6 flex-col gap-y-3 lg:w-1/2", {
+        "lg:w-11/12": isRequestsPage,
+      })}
     >
       {isRequestsPage && (
-        <p className="text-sm font-semibold text-muted-foreground lg:block">
+        <p className="pt-2 text-sm font-semibold text-muted-foreground lg:block">
           Send a request to every host in{" "}
           <span className="font-bold text-teal-900">
             <Typewriter

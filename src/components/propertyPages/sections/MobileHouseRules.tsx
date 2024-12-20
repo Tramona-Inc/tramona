@@ -31,7 +31,7 @@ export function MobileHouseRules() {
             <Dialog>
               <DialogTrigger className="inline-flex items-center justify-center text-[14px] text-foreground underline underline-offset-2">
                 Show more
-                <ChevronDown className="size-4 ml-1" />
+                <ChevronDown className="ml-1 h-4 w-4" />
               </DialogTrigger>
 
               <DialogContent className="w-full p-8">
@@ -55,7 +55,7 @@ export function MobileHouseRules() {
             <Dialog>
               <DialogTrigger className="inline-flex items-center justify-center text-[14px] text-foreground underline underline-offset-2">
                 Show more
-                <ChevronDown className="size-4 ml-1" />
+                <ChevronDown className="ml-1 h-4 w-4" />
               </DialogTrigger>
 
               <DialogContent className="w-full p-8">
@@ -79,7 +79,7 @@ export function MobileHouseRules() {
             <Dialog>
               <DialogTrigger className="inline-flex items-center justify-center text-[14px] text-foreground underline underline-offset-2">
                 Show more
-                <ChevronDown className="size-4 ml-1" />
+                <ChevronDown className="ml-1 h-4 w-4" />
               </DialogTrigger>
 
               <DialogContent className="w-full p-8">
