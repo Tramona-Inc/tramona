@@ -36,7 +36,9 @@ export function Header() {
   return (
     <>
       <div className="text-balance bg-primaryGreen px-4 py-2 text-center text-sm font-medium text-white">
-      Hosts, we are expaning fast. Be one of the first 100 hosts in your city, and enjoy no fees on your first 5 bookings!      </div>
+        Hosts, we are expanding fast. Be one of the first 100 hosts in your
+        city, and enjoy no fees on your first 5 bookings!{" "}
+      </div>
       <div className="lg:hidden">
         <MobileHeader isHost={isHost} />
       </div>
