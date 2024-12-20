@@ -304,18 +304,18 @@ export function getNumNights(from: Date | string, to: Date | string) {
   );
 }
 
-export function getHostPayout(totalPrice: number) {
-  return Math.floor(totalPrice * HOST_MARKUP);
+export function getHostPayout(totalBasePriceBeforeFees: number) {
+  return Math.floor(totalBasePriceBeforeFees * HOST_MARKUP);
 }
 
 export function getTravelerOfferedPrice({
-  totalPrice,
+  totalBasePriceBeforeFees,
   travelerMarkup,
 }: {
-  totalPrice: number;
+  totalBasePriceBeforeFees: number;
   travelerMarkup: number;
 }) {
-  return Math.ceil(totalPrice * travelerMarkup);
+  return Math.ceil(totalBasePriceBeforeFees * travelerMarkup);
 }
 
 export function getPropertyId(url: string): number | null {

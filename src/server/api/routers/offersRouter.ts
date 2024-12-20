@@ -50,7 +50,7 @@ export const offersRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const offer = await ctx.db.query.offers.findFirst({
         where: eq(offers.id, input.id),
-        columns: { totalPrice: true, propertyId: true },
+        columns: { totalBasePriceBeforeFees: true, propertyId: true },
         with: {
           request: {
             columns: {
@@ -103,7 +103,7 @@ export const offersRouter = createTRPCRouter({
             tx
               .update(referralCodes)
               .set({
-                totalBookingVolume: sql`${referralCodes.totalBookingVolume} + ${offer.totalPrice}`,
+                totalBookingVolume: sql`${referralCodes.totalBookingVolume} + ${offer.totalBasePriceBeforeFees}`,
               })
               .where(eq(referralCodes.referralCode, ctx.user.referralCodeUsed)),
 
@@ -223,7 +223,7 @@ export const offersRouter = createTRPCRouter({
       offersByRequestWithProperties.map((offer) => {
         if (offer.acceptedAt !== null || offer.scrapeUrl) return offer;
         // void updateTravelerandHostMarkup({
-        //   offerTotalPrice: offer.totalPrice,
+        //   offertotalBasePriceBeforeFees: offer.totalBasePriceBeforeFees,
         //   offerId: offer.id,
         // });
         return offer;
@@ -281,7 +281,7 @@ export const offersRouter = createTRPCRouter({
         ),
         columns: {
           createdAt: true,
-          totalPrice: true,
+          totalBasePriceBeforeFees: true,
           acceptedAt: true,
           id: true,
           hostPayout: true,
@@ -322,7 +322,7 @@ export const offersRouter = createTRPCRouter({
       z
         .object({
           propertyId: z.number(),
-          totalPrice: z.number().min(1),
+          totalBasePriceBeforeFees: z.number().min(1),
           hostPayout: z.number(),
           travelerOfferedPriceBeforeFees: z.number(),
         })
@@ -465,7 +465,7 @@ export const offersRouter = createTRPCRouter({
         //     userName:
         //       member.user.firstName ?? member.user.name ?? "Tramona Traveler",
         //     airbnbPrice: input.totalPrice * 1.25,
-        //     ourPrice: input.totalPrice,
+        //     ourPrice: input.totalBasePriceBeforeFees,
         //     property: curProperty!.name,
         //     discountPercentage: 25,
         //     nights: getNumNights(
@@ -899,7 +899,7 @@ export async function getOfferPageData(offerId: number) {
       checkIn: true,
       checkOut: true,
       createdAt: true,
-      totalPrice: true,
+      totalBasePriceBeforeFees: true,
       acceptedAt: true,
       propertyId: true,
       requestId: true,

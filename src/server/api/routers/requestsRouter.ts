@@ -444,14 +444,14 @@ export async function handleRequestSubmission(
           ) {
             //create trip checkout First
             const travelerOfferedPriceBeforeFees = getTravelerOfferedPrice({
-              totalPrice: requestedNightlyPrice * numNights,
+              totalBasePriceBeforeFees: requestedNightlyPrice * numNights,
               travelerMarkup: TRAVELER_MARKUP,
             });
 
             await tx.insert(offers).values({
               requestId: request.id,
               propertyId: property.id,
-              totalPrice: input.maxTotalPrice,
+              totalBasePriceBeforeFees: input.maxTotalPrice,
               hostPayout: getHostPayout(requestedNightlyPrice * numNights),
               travelerOfferedPriceBeforeFees,
               checkIn: input.checkIn,

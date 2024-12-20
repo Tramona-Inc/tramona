@@ -37,7 +37,7 @@ function BiddingInfoCard({
   const date = useBidding((state) => state.date);
   // const price = useBidding((state) => state.price);
   const totalNightlyPrice = price * getNumNights(date.from, date.to);
-  const totalPrice = totalNightlyPrice;
+  const totalBasePriceBeforeFees = totalNightlyPrice;
 
   return (
     <div className="flex-col">
@@ -67,7 +67,7 @@ function BiddingInfoCard({
           <p className="text-muted-foreground">
             {formatDateRange(date.from, date.to)}
           </p>
-          <p className="my-2 text-nowrap text-xs tracking-tighter text-muted-foreground md:my-4 md:text-base">
+          <p className="text-nowrap my-2 text-xs tracking-tighter text-muted-foreground md:my-4 md:text-base">
             {plural(property.maxNumGuests, "guest")} ·{" "}
             {plural(property.numBedrooms, "bedroom")} ·{" "}
             {plural(property.numBeds, "bed")} ·{" "}
@@ -103,7 +103,7 @@ function BiddingInfoCard({
         <hr />
         <div className="my-2 flex flex-row justify-between">
           <p>Offer Total</p>
-          <p>${totalPrice}</p>
+          <p>${totalBasePriceBeforeFees}</p>
         </div>
       </div>
     </div>
@@ -132,7 +132,7 @@ function BiddingStep2({
   const guest = useBidding((state) => state.guest);
   // const setStep = useBidding((state) => state.setStep);
   const totalNightlyPrice = price * getNumNights(date.from, date.to);
-  const totalPrice = totalNightlyPrice;
+  const totalBasePriceBeforeFees = totalNightlyPrice;
   const stripePromise = useStripe();
   const slackMutation = api.twilio.sendSlack.useMutation();
 
@@ -177,7 +177,7 @@ function BiddingStep2({
   const bid = {
     propertyId: property.id,
     numGuests: guest,
-    amount: totalPrice * 100, //convert to stripe cents
+    amount: totalBasePriceBeforeFees * 100, //convert to stripe cents
     checkIn: date.from,
     checkOut: date.to,
   };

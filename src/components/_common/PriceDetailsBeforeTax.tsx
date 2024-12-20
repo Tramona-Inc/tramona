@@ -72,7 +72,7 @@ export default function PriceDetailsBeforeTax({
   }
 
   const travelerOfferedPriceBeforeFees = getTravelerOfferedPrice({
-    totalPrice: priceWithApplicableDiscount ?? scrapedPrice,
+    totalBasePriceBeforeFees: priceWithApplicableDiscount ?? scrapedPrice,
     travelerMarkup: 1.015,
   });
 
