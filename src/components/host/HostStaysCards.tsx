@@ -43,7 +43,7 @@ export default function HostStaysCards({
     <div className="mb-36 space-y-6">
       {trips.map((trip) => {
         const numNights = getNumNights(trip.checkIn, trip.checkOut);
-        const totalPrice = trip.offer?.totalPrice;
+        const totalBasePriceBeforeFees = trip.offer?.totalBasePriceBeforeFees;
 
         const hostId = trip.property.hostTeam.ownerId;
 
@@ -78,13 +78,13 @@ export default function HostStaysCards({
                   </p>
                 }
               </div>
-              {totalPrice && (
+              {totalBasePriceBeforeFees && (
                 <div className="px-4 md:px-0">
                   <p className="font-bold">
-                    {formatCurrency(totalPrice / numNights)}/night
+                    {formatCurrency(totalBasePriceBeforeFees / numNights)}/night
                   </p>
                   <p className="text-muted-foreground">
-                    {formatCurrency(totalPrice)} total
+                    {formatCurrency(totalBasePriceBeforeFees)} total
                   </p>
                 </div>
               )}

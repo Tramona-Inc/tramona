@@ -34,20 +34,21 @@ export function successfulRequestToast(
 
 export function successfulAdminOfferToast({
   propertyName,
-  totalPrice,
+  totalBasePriceBeforeFees,
   checkIn,
   checkOut,
   isUpdate = false,
 }: {
   propertyName: string;
-  totalPrice: number;
+  totalBasePriceBeforeFees: number;
   checkIn: Date;
   checkOut: Date;
   isUpdate?: boolean;
 }) {
-  const pricePerNight = totalPrice / getNumNights(checkIn, checkOut);
+  const pricePerNight =
+    totalBasePriceBeforeFees / getNumNights(checkIn, checkOut);
 
-  const fmtdTotalPrice = `${formatCurrency(totalPrice)} total`;
+  const fmtdTotalPrice = `${formatCurrency(totalBasePriceBeforeFees)} total`;
   const fmtdNightlyPrice = `${formatCurrency(pricePerNight)}/night`;
   const fmtdDateRange = formatDateRange(checkIn, checkOut);
 

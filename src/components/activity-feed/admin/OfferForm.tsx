@@ -54,7 +54,7 @@ export default function CreateOfferForm({
             propertyUrl: "https://www.tramona.com/property/" + offer.propertyId,
             entryCreationTime: offer.createdAt.toISOString().slice(0, 19),
             nightlyPrice:
-              offer.totalPrice /
+              offer.totalBasePriceBeforeFees /
               getNumNights(offer.checkIn, offer.checkOut) /
               100,
             originalNightlyPrice:
