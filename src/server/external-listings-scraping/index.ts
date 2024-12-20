@@ -41,14 +41,14 @@ export async function scrapeExternalListings(request: MinimalRequest) {
   await Promise.all(
     listings.map(async ({ totalPrice }, index) => {
       const travelerOfferedPriceBeforeFees = getTravelerOfferedPrice({
-        totalPrice,
+        totalBasePriceBeforeFees: totalPrice,
         travelerMarkup: DIRECT_LISTING_MARKUP,
       });
 
       await db.insert(offers).values({
         propertyId: propertyIds[index]!,
         requestId: request.id,
-        totalPrice,
+        totalBasePriceBeforeFees: totalPrice,
         checkIn: request.checkIn,
         checkOut: request.checkOut,
         hostPayout: totalPrice * HOST_MARKUP,

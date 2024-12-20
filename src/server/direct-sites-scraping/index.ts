@@ -341,13 +341,13 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
             }
             const realNightlyPrice =
               listing.nightlyPrice ?? listing.originalNightlyPrice;
-            const originalTotalPrice =
+            const originalTotalBasePriceBeforeFees =
               realNightlyPrice *
               getNumNights(options.checkIn, options.checkOut);
 
             // ----- create checkout and offer
             const travelerOfferedPriceBeforeFees = getTravelerOfferedPrice({
-              totalPrice: originalTotalPrice,
+              totalBasePriceBeforeFees: originalTotalBasePriceBeforeFees,
               travelerMarkup: DIRECT_LISTING_MARKUP,
             });
 
@@ -355,8 +355,8 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
               propertyId: tramonaPropertyId,
               checkIn: options.checkIn,
               checkOut: options.checkOut,
-              totalPrice: originalTotalPrice,
-              hostPayout: originalTotalPrice,
+              totalBasePriceBeforeFees: originalTotalBasePriceBeforeFees,
+              hostPayout: originalTotalBasePriceBeforeFees,
               travelerOfferedPriceBeforeFees,
               scrapeUrl: listing.scrapeUrl,
               isAvailableOnOriginalSite: true,
@@ -414,12 +414,12 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
             const realNightlyPrice =
               listing.nightlyPrice ?? listing.originalNightlyPrice;
 
-            const originalTotalPrice =
+            const originalTotalBasePriceBeforeFees =
               realNightlyPrice *
               getNumNights(options.checkIn, options.checkOut);
 
             const travelerOfferedPriceBeforeFees = getTravelerOfferedPrice({
-              totalPrice: originalTotalPrice,
+              totalBasePriceBeforeFees: originalTotalBasePriceBeforeFees,
               travelerMarkup: DIRECT_LISTING_MARKUP,
             });
 
@@ -427,8 +427,8 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
               propertyId,
               checkIn: options.checkIn,
               checkOut: options.checkOut,
-              totalPrice: originalTotalPrice,
-              hostPayout: originalTotalPrice,
+              totalBasePriceBeforeFees: originalTotalBasePriceBeforeFees,
+              hostPayout: originalTotalBasePriceBeforeFees,
               travelerOfferedPriceBeforeFees,
               scrapeUrl: listing.scrapeUrl,
               isAvailableOnOriginalSite: true,
@@ -479,7 +479,7 @@ export const subsequentScrape = async (options: { offerIds: number[] }) => {
           };
 
           if (subScrapedResult.originalNightlyPrice) {
-            updateIntegrityArizonaData.totalPrice =
+            updateIntegrityArizonaData.totalBasePriceBeforeFees =
               subScrapedResult.originalNightlyPrice *
               getNumNights(offer.checkIn, offer.checkOut);
           }
@@ -506,7 +506,7 @@ export const subsequentScrape = async (options: { offerIds: number[] }) => {
           };
 
           if (cleanbnbSubResult.originalNightlyPrice) {
-            updateCleanbnbData.totalPrice =
+            updateCleanbnbData.totalBasePriceBeforeFees =
               cleanbnbSubResult.originalNightlyPrice *
               getNumNights(offer.checkIn, offer.checkOut);
           }
@@ -534,7 +534,7 @@ export const subsequentScrape = async (options: { offerIds: number[] }) => {
           };
 
           if (subScrapedResultCBIsland.originalNightlyPrice) {
-            updateCBIslandVacationsData.totalPrice =
+            updateCBIslandVacationsData.totalBasePriceBeforeFees =
               subScrapedResultCBIsland.originalNightlyPrice *
               getNumNights(offer.checkIn, offer.checkOut);
           }
@@ -562,7 +562,7 @@ export const subsequentScrape = async (options: { offerIds: number[] }) => {
           };
 
           if (subScrapedResultCasamundo.originalNightlyPrice) {
-            updateData.totalPrice =
+            updateData.totalBasePriceBeforeFees =
               subScrapedResultCasamundo.originalNightlyPrice *
               getNumNights(offer.checkIn, offer.checkOut);
           }
@@ -590,7 +590,7 @@ export const subsequentScrape = async (options: { offerIds: number[] }) => {
             };
 
             if (subScrapedResultEvolve.originalNightlyPrice) {
-              updateData.totalPrice =
+              updateData.totalBasePriceBeforeFees =
                 subScrapedResultEvolve.originalNightlyPrice *
                 getNumNights(offer.checkIn, offer.checkOut);
             }

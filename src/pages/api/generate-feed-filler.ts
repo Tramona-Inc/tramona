@@ -66,7 +66,7 @@ export default async function handler() {
   // generate filler offers
   const realOffers = await db.query.offers.findMany({
     columns: {
-      totalPrice: true,
+      totalBasePriceBeforeFees: true,
       checkIn: true,
       checkOut: true,
     },
@@ -85,13 +85,13 @@ export default async function handler() {
   const generatedOffers = realOffers
     .filter((offer) => offer.property.originalNightlyPrice !== null)
     .map((offer) => {
-      const { totalPrice, checkIn, checkOut, property } = offer;
+      const { totalBasePriceBeforeFees, checkIn, checkOut, property } = offer;
       const { originalNightlyPrice } = property;
       const nights = getNumNights(checkIn, checkOut);
       if (!originalNightlyPrice)
         throw new Error("originalNightlyPrice is undefined");
 
-      const actualNightlyPrice = totalPrice / nights;
+      const actualNightlyPrice = totalBasePriceBeforeFees / nights;
       let generatedNightlyPrice: number;
 
       if (

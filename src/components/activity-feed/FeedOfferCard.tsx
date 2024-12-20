@@ -28,7 +28,7 @@ export default function FeedOfferCard({ offer }: { offer: FeedOfferItem }) {
   const discount = offer.property.originalNightlyPrice
     ? Math.round(
         (1 -
-          offer.totalPrice /
+          offer.totalBasePriceBeforeFees /
             numOfNights /
             offer.property.originalNightlyPrice) *
           100,
@@ -62,7 +62,7 @@ export default function FeedOfferCard({ offer }: { offer: FeedOfferItem }) {
               <p className="font-bold">
                 Tramona Price:{" "}
                 <span className="text-teal-900">
-                  {formatCurrency(offer.totalPrice / numOfNights)}
+                  {formatCurrency(offer.totalBasePriceBeforeFees / numOfNights)}
                 </span>
               </p>
               {offer.property.originalNightlyPrice && (
@@ -72,7 +72,7 @@ export default function FeedOfferCard({ offer }: { offer: FeedOfferItem }) {
                     {offer.isFiller
                       ? formatCurrency(offer.property.originalNightlyPrice)
                       : formatCurrency(
-                          offer.totalPrice /
+                          offer.totalBasePriceBeforeFees /
                             numOfNights /
                             (1 - offer.randomDirectListingDiscount! / 100),
                         )}
@@ -121,11 +121,11 @@ export default function FeedOfferCard({ offer }: { offer: FeedOfferItem }) {
                   ))}
               </CarouselContent>
               <CarouselPrevious
-                className="absolute left-2 top-1/2 size-6 -translate-y-1/2"
+                className="size-6 absolute left-2 top-1/2 -translate-y-1/2"
                 variant={"white"}
               />
               <CarouselNext
-                className="absolute right-2 top-1/2 size-6 -translate-y-1/2"
+                className="size-6 absolute right-2 top-1/2 -translate-y-1/2"
                 variant={"white"}
               />
               <CarouselDots count={count} current={current} />

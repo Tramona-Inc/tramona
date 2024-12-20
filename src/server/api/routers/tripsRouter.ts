@@ -140,7 +140,7 @@ export const tripsRouter = createTRPCRouter({
         },
         offer: {
           columns: {
-            totalPrice: true,
+            totalBasePriceBeforeFees: true,
             checkIn: true,
             checkOut: true,
           },
@@ -280,7 +280,7 @@ export const tripsRouter = createTRPCRouter({
       });
       if (!trip) {
         throw new Error("Trip not found");
-      } else {                                                                                                                                                                                                                                                                                     
+      } else {
         const coordinates = {
           location: {
             lat: propertyLatLngPoint!.latLngPoint.y,

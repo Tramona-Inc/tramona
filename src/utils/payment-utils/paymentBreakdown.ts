@@ -46,11 +46,11 @@ export function breakdownPaymentByOffer( ///// USING OFFER
 
   const { originalNightlyPrice } = offer.property;
 
-  const originalTotalPrice =
+  const originalTotalBasePriceBeforeFees =
     offer.datePriceFromAirbnb ??
     (originalNightlyPrice ? originalNightlyPrice * numNights : null);
-  let totalSavings = originalTotalPrice
-    ? originalTotalPrice - totalTripAmount
+  let totalSavings = originalTotalBasePriceBeforeFees
+    ? originalTotalBasePriceBeforeFees - totalTripAmount
     : 0; //// um hopefully not negative
 
   //if totalSavings is negative just make it zero dude
@@ -96,12 +96,12 @@ export function breakdownPaymentByPropertyAndTripParams(
 
   const { originalNightlyPrice } = propertyAndTripParams.property;
 
-  const originalTotalPrice = originalNightlyPrice
+  const originalTotalBasePriceBeforeFees = originalNightlyPrice
     ? originalNightlyPrice * numNights
     : null;
 
-  let totalSavings = originalTotalPrice
-    ? originalTotalPrice - totalTripAmount
+  let totalSavings = originalTotalBasePriceBeforeFees
+    ? originalTotalBasePriceBeforeFees - totalTripAmount
     : 0; //// um hopefully not negative
 
   //if totalSavings is negative just make it zero dude

@@ -30,7 +30,7 @@ export default function OfferCard({
   const hostName = property.hostTeam.owner.name;
 
   const numNights = getNumNights(checkIn, checkOut);
-  const offerNightlyPrice = offer.totalPrice / numNights;
+  const offerNightlyPrice = offer.totalBasePriceBeforeFees / numNights;
 
   const discountPercentage = getDiscountPercentage(
     property.originalNightlyPrice ?? 0,
@@ -78,7 +78,7 @@ export default function OfferCard({
                 <p className="text-xs font-semibold uppercase">Total cost</p>
                 <p>
                   <span className="text-3xl font-bold text-primary">
-                    {formatCurrency(offer.totalPrice)}
+                    {formatCurrency(offer.totalBasePriceBeforeFees)}
                   </span>
                   <span className="text-sm"></span>
                 </p>

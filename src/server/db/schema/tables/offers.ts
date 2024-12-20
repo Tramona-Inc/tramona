@@ -24,7 +24,7 @@ export const offers = pgTable(
       .notNull()
       .references(() => properties.id, { onDelete: "cascade" }),
 
-    totalPrice: integer("total_price").notNull(), // in cents
+    totalBasePriceBeforeFees: integer("total_base_price_before_fees").notNull(), // in cents
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
