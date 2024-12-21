@@ -2,7 +2,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import type { OfferWithDetails } from "../PropertyPage";
 import type { Property } from "@/server/db/schema";
 import { api } from "@/utils/api";
-import PriceDetailsBeforeTax from "@/components/_common/PriceDetailsBeforeTax";
 import { formatDateRange } from "@/utils/utils";
 import BookNowBtn from "./actionButtons/BookNowBtn";
 export default function OfferPageMobileBottomCard({
@@ -29,7 +28,6 @@ export default function OfferPageMobileBottomCard({
       <CardContent className="flex flex-row items-center justify-between px-4 py-1 text-sm">
         {offer.request && (
           <div className="flex basis-1/2 flex-col">
-            <PriceDetailsBeforeTax offer={offer} />
             <p className="font-semibold">
               {formatDateRange(offer.checkIn, offer.checkOut)}
             </p>

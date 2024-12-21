@@ -1,26 +1,44 @@
 import React from "react";
 import type { RequestToBookDetails } from "./RequestToBookOrBookNowPriceCard";
-import { breakdownPaymentByPropertyAndTripParams } from "@/utils/payment-utils/paymentBreakdown";
+import {
+  breakdownPaymentByOffer,
+  breakdownPaymentByPropertyAndTripParams,
+} from "@/utils/payment-utils/paymentBreakdown";
 import type { PropertyPageData } from "../RequestToBookSideBar";
 import { formatCurrency } from "@/utils/utils";
-function PriceBreakdown({
-  requestToBookDetails,
-  property,
-  requestAmount,
-}: {
-  requestToBookDetails: RequestToBookDetails;
-  property: PropertyPageData;
-  requestAmount: number; //if book it now, it will be the full price
-}) {
-  const brokedownPrice = breakdownPaymentByPropertyAndTripParams({
-    dates: {
-      checkIn: requestToBookDetails.checkIn,
-      checkOut: requestToBookDetails.checkOut,
-    },
-    property,
-    travelerPriceBeforeFees: requestAmount,
-  });
+import type { OfferWithDetails } from "@/components/propertyPages/PropertyPage";
+
+function PriceBreakdown(
+  props:
+    | {
+        requestToBookDetails: RequestToBookDetails;
+        property: PropertyPageData;
+        requestAmount: number; // Required in this case
+        offer?: never; // Explicitly disallow `offer` if these props are provided
+      }
+    | {
+        offer: OfferWithDetails; // Required in this case
+        requestToBookDetails?: never; // Explicitly disallow these props if `offer` is provided
+        property?: never;
+        requestAmount?: never;
+      },
+) {
+  let brokedownPrice;
+  if (props.offer) {
+    brokedownPrice = breakdownPaymentByOffer(props.offer);
+  } else {
+    brokedownPrice = breakdownPaymentByPropertyAndTripParams({
+      dates: {
+        checkIn: props.requestToBookDetails.checkIn,
+        checkOut: props.requestToBookDetails.checkOut,
+      },
+      property: props.property,
+      travelerPriceBeforeFees: props.requestAmount,
+    });
+  }
   console.log("brokedownPrice", brokedownPrice);
+  if (!brokedownPrice) return <div>Loading ...</div>;
+
   const serviceFee =
     brokedownPrice.superhogFee + brokedownPrice.stripeTransactionFee;
 
@@ -34,8 +52,7 @@ function PriceBreakdown({
               (brokedownPrice.taxesPaid + serviceFee),
           )}
         </span>
-      </div>ke
-      
+      </div>
       <div className="flex items-center justify-between">
         <span>Taxes</span>
         <span>{formatCurrency(brokedownPrice.taxesPaid)}</span>
