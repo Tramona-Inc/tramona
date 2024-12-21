@@ -308,9 +308,9 @@ export function getHostPayout(totalBasePriceBeforeFees: number) {
   return Math.floor(totalBasePriceBeforeFees * HOST_MARKUP);
 }
 
-export function getTravelerOfferedPrice({
+export function getTravelerOfferedPrice({ 
   totalBasePriceBeforeFees,
-  travelerMarkup,
+  travelerMarkup, //we need this because can be traveler or direct listing markup
 }: {
   totalBasePriceBeforeFees: number;
   travelerMarkup: number;
