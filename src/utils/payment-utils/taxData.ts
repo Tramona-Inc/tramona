@@ -28,14 +28,14 @@ export const taxRates: TaxRates = {
     },
     TX: {
       stateRate: {
-        "Texas State Hotel Occupancy Tax": 6.0,
+        "Texas State Hotel Occupancy Tax": 0.06,
       },
       cities: {
         Austin: {
-          "Austin Hotel Occupancy Tax": 11.0,
+          "Austin Hotel Occupancy Tax": 0.11,
         },
         Dallas: {
-          "Dallas Hotel Occupancy Tax": 11.0,
+          "Dallas Hotel Occupancy Tax": 0.11,
         },
         // Add more cities as needed
       },
