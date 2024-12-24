@@ -56,10 +56,10 @@ export default function TravelerRequestToBookCard({
   children?: React.ReactNode;
 }) {
   const pricePerNight =
-    // request.maxTotalPrice
     requestToBook.amountAfterTravelerMarkupAndBeforeFees /
     getNumNights(requestToBook.checkIn, requestToBook.checkOut);
-  const fmtdPrice = formatCurrency(pricePerNight);
+
+  const fmtdPrice = formatCurrency(pricePerNight); //price before fees but after markup
   const fmtdDateRange = formatDateRange(
     requestToBook.checkIn,
     requestToBook.checkOut,

@@ -92,6 +92,7 @@ export function breakdownPaymentByPropertyAndTripParams(
     propertyAndTripParams.travelerPriceBeforeFees + superhogFee + taxesPaid;
   console.log(totalBeforeStripeFee);
   const stripeFee = getStripeFee(totalBeforeStripeFee);
+  console.log(stripeFee);
   const totalTripAmount = Math.round(totalBeforeStripeFee + stripeFee);
 
   const { originalNightlyPrice } = propertyAndTripParams.property;
