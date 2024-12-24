@@ -49,8 +49,9 @@ export default function HostRequestsLayout({
   const router = useRouter();
   const query = router.query as RouterQuery;
   const [activeTab, setActiveTab] = useState<TabType>("city");
+  const option = query.option as SelectedOptionType;
   const [selectedOption, setSelectedOption] =
-    useState<SelectedOptionType>("normal");
+    useState<SelectedOptionType>(option || "normal");
 
   const [separatedData, setSeparatedData] = useState<SeparatedData | null>(
     null,
@@ -209,14 +210,34 @@ export default function HostRequestsLayout({
                         selectedOption === "normal" ? "primary" : "white"
                       }
                       className="rounded-full shadow-md"
-                      onClick={() => setSelectedOption("normal")}
+                      onClick={() => {
+                        setSelectedOption("normal");
+                        void router.push(
+                          {
+                            pathname: "/host/requests",
+                            query: { tabs: "city", option: "normal" },
+                          },
+                          undefined,
+                          { shallow: true },
+                        );
+                      }}
                     >
                       Primary
                     </Button>
                     <Button
                       variant={selectedOption === "sent" ? "primary" : "white"}
                       className="rounded-full shadow-md"
-                      onClick={() => setSelectedOption("sent")}
+                      onClick={() => {
+                        setSelectedOption("sent");
+                        void router.push(
+                          {
+                            pathname: "/host/requests",
+                            query: { tabs: "city", option: "sent" },
+                          },
+                          undefined,
+                          { shallow: true },
+                        );
+                      }}
                     >
                       Sent
                     </Button>
@@ -228,7 +249,17 @@ export default function HostRequestsLayout({
                         : "white"
                     }
                     className="rounded-full shadow-md"
-                    onClick={() => setSelectedOption("outsidePriceRestriction")}
+                    onClick={() => {
+                      setSelectedOption("outsidePriceRestriction");
+                      void router.push(
+                        {
+                          pathname: "/host/requests",
+                          query: { tabs: "city", option: "outsidePriceRestriction" },
+                        },
+                        undefined,
+                        { shallow: true },
+                      );
+                    }}
                   >
                     Other
                   </Button>
