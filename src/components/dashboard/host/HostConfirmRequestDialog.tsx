@@ -107,7 +107,7 @@ export default function HostConfirmRequestDialog({
           .mutateAsync({
             requestId: request.id,
             propertyId: property.id,
-            totalPrice: totalBasePriceBeforeFees,
+            totalBasePriceBeforeFees: totalBasePriceBeforeFees,
             hostPayout: getHostPayout(totalBasePriceBeforeFees),
             travelerOfferedPriceBeforeFees: getTravelerOfferedPrice({
               totalBasePriceBeforeFees,
