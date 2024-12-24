@@ -136,6 +136,7 @@ export async function finalizeTrip({
   userId,
   isDirectListingCharge,
   source,
+  bidId, // AKA REQUEST TO BOOK ID
 }: {
   paymentIntentId: string;
   travelerPriceBeforeFees: number;
@@ -146,6 +147,7 @@ export async function finalizeTrip({
   userId: string;
   isDirectListingCharge: boolean;
   source: "Book it now" | "Request to book";
+  bidId?: number;
 }) {
   //1.) create  groupId
   const madeByGroupId = await db
@@ -226,6 +228,7 @@ export async function finalizeTrip({
   const currentTrip = await db
     .insert(trips)
     .values({
+      ...(bidId && { bidId: bidId }),
       checkIn: checkIn,
       checkOut: checkOut,
       numGuests: numOfGuests,

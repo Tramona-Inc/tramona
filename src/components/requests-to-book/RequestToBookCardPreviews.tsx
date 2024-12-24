@@ -29,7 +29,7 @@ export function RequestToBookCardPreviews({
       <div className="flex gap-2">
         <Link
           key={requestToBook.id}
-          href={`/request-to-book/${requestToBook.propertyId}checkIn=${checkIn}&checkOut=${checkOut}&numGuests=${requestToBook.numGuests}`}
+          href={`/request-to-book/${requestToBook.propertyId}?checkIn=${checkIn}&checkOut=${checkOut}&numGuests=${requestToBook.numGuests}`}
           target="_blank"
           rel="noopener noreferrer"
           className="group w-60 overflow-hidden rounded-lg border hover:bg-zinc-100"

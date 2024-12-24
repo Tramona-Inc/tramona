@@ -299,7 +299,7 @@ export default async function webhook(
                   console.log("Superhog reservation already exists");
                 }
               }
-
+              // <----- ICAL ----->
               await db.insert(reservedDateRanges).values({
                 start: currentTripWCheckout.checkIn.toISOString(),
                 end: currentTripWCheckout.checkOut.toISOString(),
@@ -307,9 +307,12 @@ export default async function webhook(
                 propertyId: currentTripWCheckout.propertyId,
               });
 
-              await db.update(properties).set({
-                datesLastUpdated: new Date(),
-              }).where(eq(properties.id, currentTripWCheckout.propertyId));
+              await db
+                .update(properties)
+                .set({
+                  datesLastUpdated: new Date(),
+                })
+                .where(eq(properties.id, currentTripWCheckout.propertyId));
               //<<--------------------->>
 
               //send email and whatsup (whatsup is not implemented yet)
