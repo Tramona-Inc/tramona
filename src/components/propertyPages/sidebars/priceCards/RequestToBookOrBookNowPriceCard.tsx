@@ -68,7 +68,6 @@ export default function RequestToBookOrBookNowPriceCard({
       ? property.maxNumGuests
       : parseInt(query.numGuests as string);
 
-  console.log(numGuests);
   const { data: bookedDates } = api.calendar.getReservedDates.useQuery({
     propertyId: property.id,
   });

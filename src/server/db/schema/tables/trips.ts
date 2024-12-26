@@ -12,7 +12,7 @@ import { createInsertSchema } from "drizzle-zod";
 import { groups } from "./groups";
 import { offers } from "./offers";
 import { superhogRequests } from "./superhogRequests";
-import { bids } from "./bids";
+import { requestsToBook } from "./requestsToBook";
 import { properties } from "./properties";
 import { z } from "zod";
 import { tripCheckouts } from "./payments";
@@ -43,7 +43,12 @@ export const trips = pgTable(
     offerId: integer("offer_id").references(() => offers.id, {
       onDelete: "cascade",
     }),
-    bidId: integer("bid_id").references(() => bids.id, { onDelete: "cascade" }),
+    requestToBookId: integer("request_to_book_id").references(
+      () => requestsToBook.id,
+      {
+        onDelete: "cascade",
+      },
+    ),
     propertyId: integer("property_id")
       .notNull()
       .references(() => properties.id, { onDelete: "cascade" }),
@@ -71,7 +76,7 @@ export const trips = pgTable(
   (t) => ({
     groupIdIdx: index().on(t.groupId),
     offerIdIdx: index().on(t.offerId),
-    bidIdIdx: index().on(t.bidId),
+    requestToBookIdx: index().on(t.requestToBookId),
     propertyIdIdx: index().on(t.propertyId),
     tripCheckoutIdx: index().on(t.tripCheckoutId),
   }),
@@ -82,7 +87,7 @@ export type Trip = typeof trips.$inferSelect;
 // enforce mutual exclusion of offerId and bidId -- note that this is
 // not reflected in the types but you can use non-null assertions to work around it
 export const tripInsertSchema = createInsertSchema(trips)
-  .omit({ bidId: true, offerId: true })
+  .omit({ requestToBookId: true, offerId: true })
   .and(
     z.union([
       z.object({ offerId: z.number(), bidId: z.undefined() }),
