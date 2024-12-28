@@ -20,6 +20,7 @@ import {
   captureTripPaymentWithoutSuperhog,
   sendEmailAndWhatsupConfirmation,
   TripWCheckout,
+  updateICalAfterBookingTrip,
 } from "@/utils/webhook-functions/trips-utils";
 import { createSuperhogReservation } from "@/utils/webhook-functions/superhog-utils";
 import {
@@ -185,7 +186,6 @@ export default async function webhook(
             });
           } else {
             // 3. Case: "OFFER"
-
             if (offerId) {
               await db
                 .update(offers)
@@ -300,19 +300,7 @@ export default async function webhook(
                 }
               }
               // <----- ICAL ----->
-              await db.insert(reservedDateRanges).values({
-                start: currentTripWCheckout.checkIn.toISOString(),
-                end: currentTripWCheckout.checkOut.toISOString(),
-                platformBookedOn: "tramona",
-                propertyId: currentTripWCheckout.propertyId,
-              });
-
-              await db
-                .update(properties)
-                .set({
-                  datesLastUpdated: new Date(),
-                })
-                .where(eq(properties.id, currentTripWCheckout.propertyId));
+              await updateICalAfterBookingTrip(currentTripWCheckout);
               //<<--------------------->>
 
               //send email and whatsup (whatsup is not implemented yet)
@@ -343,7 +331,7 @@ export default async function webhook(
               }
               // ------ Send Slack When trip is booked ------
               await sendSlackMessage({
-                isProductionOnly: true,
+                isProductionOnly: false,
                 channel: "tramona-bot",
                 text: [
                   `*${user?.email} just booked a trip: ${currentProperty?.name}*`,

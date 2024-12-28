@@ -17,6 +17,7 @@ import {
   captureTripPaymentWithoutSuperhog,
   sendEmailAndWhatsupConfirmation,
   TripWCheckout,
+  updateICalAfterBookingTrip,
 } from "./trips-utils";
 import { createSuperhogReservation } from "./superhog-utils";
 
@@ -251,12 +252,15 @@ export async function finalizeTrip({
   //<___creating a superhog  oreservationnly if does not exist__>
 
   if (!currentTrip.superhogRequestId && !isDirectListingCharge) {
+    //1. create superhog, and update ICAL
     await createSuperhogReservation({
       paymentIntentId,
       propertyId: property.id,
       userId: userId,
       trip: currentTrip,
     }); //creating a superhog reservation
+
+    await updateICalAfterBookingTrip(currentTripWCheckout);
   } else {
     if (isDirectListingCharge) {
       await captureTripPaymentWithoutSuperhog({
@@ -311,7 +315,7 @@ export async function finalizeTrip({
   // }
   // ------ Send Slack When trip is booked ------
   await sendSlackMessage({
-    isProductionOnly: true,
+    isProductionOnly: false,
     channel: "tramona-bot",
     text: [
       `*${user.email} just booked a trip: ${property.name}*`,
@@ -386,7 +390,7 @@ export async function createRequestToBook({
   // Case 1 : DIRECT LISTING. SEND SLACK
   if (isDirectListingCharge) {
     await sendSlackMessage({
-      isProductionOnly: true,
+      isProductionOnly: false,
       channel: "tramona-bot",
       text: [
         `*${user.email} just requested to book: ${property.name}*`,

@@ -8,6 +8,7 @@ import {
   groups,
   properties,
   tripCheckouts,
+  reservedDateRanges,
 } from "@/server/db/schema";
 
 import { cancelSuperhogReservation } from "./superhog-utils";
@@ -217,4 +218,24 @@ export async function captureTripPaymentWithoutSuperhog({
     ].join("\n"),
   });
   return intent;
+}
+
+export async function updateICalAfterBookingTrip(
+  currentTripWCheckout: TripWCheckout,
+) {
+  console.log("Updating Ical");
+  await db.insert(reservedDateRanges).values({
+    start: currentTripWCheckout.checkIn.toISOString(),
+    end: currentTripWCheckout.checkOut.toISOString(),
+    platformBookedOn: "tramona",
+    propertyId: currentTripWCheckout.propertyId,
+  });
+
+  await db
+    .update(properties)
+    .set({
+      datesLastUpdated: new Date(),
+    })
+    .where(eq(properties.id, currentTripWCheckout.propertyId));
+  return;
 }
