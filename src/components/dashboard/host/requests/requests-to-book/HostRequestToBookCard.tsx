@@ -27,6 +27,7 @@ import { formatDistanceToNowStrict } from "date-fns";
 import { TravelerVerificationsDialog } from "@/components/requests/TravelerVerificationsDialog";
 import WithdrawRequestToBookDialog from "@/components/requests-to-book/WithdrawRequestToBookDialog";
 import RequestToBookCardBadge from "@/components/requests-to-book/RequestToBookCardBadge";
+import { TRAVELER_MARKUP } from "@/utils/constants";
 
 export type HostDashboardRequestToBook =
   RouterOutputs["requestsToBook"]["getHostRequestsToBookFromId"][
@@ -40,9 +41,12 @@ export default function HostRequestToBookCard({
   requestToBook: HostDashboardRequestToBook;
   children?: React.ReactNode;
 }) {
+  //remove the traveler markup and get num of nights
   const pricePerNight =
     requestToBook.amountAfterTravelerMarkupAndBeforeFees /
+    TRAVELER_MARKUP /
     getNumNights(requestToBook.checkIn, requestToBook.checkOut);
+
   const fmtdPrice = formatCurrency(pricePerNight);
   const fmtdDateRange = formatDateRange(
     requestToBook.checkIn,

@@ -417,7 +417,7 @@ export const stripeRouter = createTRPCRouter({
           userId: curRequestToBook.userId,
           isDirectListingCharge: curRequestToBook.isDirectListing,
           source: "Request to book",
-          bidId: curRequestToBook.id,
+          requestToBookId: curRequestToBook.id,
         });
 
         //now we need to cancel all current request during that same time,
