@@ -36,6 +36,7 @@ const inputButtonVariants = cva(
         default: "h-10 bg-zinc-50",
         lpDesktop: "h-16 pt-4",
         lpMobile: "h-12 bg-white",
+        lpDesktopSearch: "h-16 pt-4",
       },
     },
     defaultVariants: {
