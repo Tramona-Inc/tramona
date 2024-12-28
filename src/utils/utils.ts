@@ -23,7 +23,7 @@ import {
 import * as cheerio from "cheerio";
 import { useSession } from "next-auth/react";
 import { api } from "./api";
-import { HOST_MARKUP } from "./constants";
+import { HOST_MARKUP, TRAVELER_MARKUP } from "./constants";
 import { InferQueryModel } from "@/server/db";
 import {
   TripWithDetails,
@@ -308,7 +308,7 @@ export function getHostPayout(totalBasePriceBeforeFees: number) {
   return Math.floor(totalBasePriceBeforeFees * HOST_MARKUP);
 }
 
-export function getTravelerOfferedPrice({ 
+export function getTravelerOfferedPrice({
   totalBasePriceBeforeFees,
   travelerMarkup, //we need this because can be traveler or direct listing markup
 }: {
@@ -316,6 +316,11 @@ export function getTravelerOfferedPrice({
   travelerMarkup: number;
 }) {
   return Math.ceil(totalBasePriceBeforeFees * travelerMarkup);
+}
+
+export function removeTravelerMarkup(amountWithTravelerMarkup: number) {
+  const basePrice = amountWithTravelerMarkup / TRAVELER_MARKUP;
+  return Math.round(basePrice);
 }
 
 export function getPropertyId(url: string): number | null {

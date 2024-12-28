@@ -20,6 +20,7 @@ import {
   captureTripPaymentWithoutSuperhog,
   sendEmailAndWhatsupConfirmation,
   TripWCheckout,
+  updateICalAfterBookingTrip,
 } from "@/utils/webhook-functions/trips-utils";
 import { createSuperhogReservation } from "@/utils/webhook-functions/superhog-utils";
 import {
@@ -75,6 +76,7 @@ export default async function webhook(
       case "charge.succeeded": //use to be payment_intent.succeeded
         console.log(event.data.object);
         const paymentIntentSucceeded = event.data.object;
+
         const isChargedWithSetupIntent = //check if this charge was from damages or setup intent to skip the rest of the code
           paymentIntentSucceeded.metadata.is_charged_with_setup_intent ===
           "true"
@@ -131,6 +133,14 @@ export default async function webhook(
           console.log("hi");
 
           // --------- 3 Cases: 1. Book it now, 2.Request to book,  3. Offer  ---------------------------------------
+          //prevent duplicate trips creatations
+          const existingTrip = await db.query.trips.findFirst({
+            where: eq(trips.paymentIntentId, paymentIntentId),
+          });
+          if (existingTrip) {
+            console.log("Trip already exists for this paymentIntentId");
+            return;
+          }
           //1 . CASE : Book it now
           if (paymentIntentSucceeded.metadata.type === "bookItNow") {
             console.log(paymentIntentId);
@@ -183,9 +193,8 @@ export default async function webhook(
               userId: paymentIntentSucceeded.metadata.user_id!,
               isDirectListingCharge,
             });
-          } else {
+          } else if (paymentIntentSucceeded.metadata.type === "offer") {
             // 3. Case: "OFFER"
-
             if (offerId) {
               await db
                 .update(offers)
@@ -300,19 +309,7 @@ export default async function webhook(
                 }
               }
               // <----- ICAL ----->
-              await db.insert(reservedDateRanges).values({
-                start: currentTripWCheckout.checkIn.toISOString(),
-                end: currentTripWCheckout.checkOut.toISOString(),
-                platformBookedOn: "tramona",
-                propertyId: currentTripWCheckout.propertyId,
-              });
-
-              await db
-                .update(properties)
-                .set({
-                  datesLastUpdated: new Date(),
-                })
-                .where(eq(properties.id, currentTripWCheckout.propertyId));
+              await updateICalAfterBookingTrip(currentTripWCheckout);
               //<<--------------------->>
 
               //send email and whatsup (whatsup is not implemented yet)
@@ -343,7 +340,7 @@ export default async function webhook(
               }
               // ------ Send Slack When trip is booked ------
               await sendSlackMessage({
-                isProductionOnly: true,
+                isProductionOnly: false,
                 channel: "tramona-bot",
                 text: [
                   `*${user?.email} just booked a trip: ${currentProperty?.name}*`,
@@ -353,6 +350,12 @@ export default async function webhook(
                 ].join("\n"),
               });
             }
+          } else {
+            console.log("Unhandled payment intent type or missing offerId");
+            await sendSlackMessage({
+              text: "UNHANDLED PAYMENT: Trip type could not be determined",
+            });
+            return;
           }
         }
         break;

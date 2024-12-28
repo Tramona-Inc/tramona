@@ -17,11 +17,12 @@ import {
   captureTripPaymentWithoutSuperhog,
   sendEmailAndWhatsupConfirmation,
   TripWCheckout,
+  updateICalAfterBookingTrip,
 } from "./trips-utils";
 import { createSuperhogReservation } from "./superhog-utils";
 
 import { sendSlackMessage } from "@/server/slack";
-import { formatDateMonthDay } from "../utils";
+import { formatDateMonthDay, removeTravelerMarkup } from "../utils";
 import { TRAVELER_MARKUP } from "../constants";
 import { sendText } from "@/server/server-utils";
 import { sendTextToHostTeamMembers } from "@/server/server-utils";
@@ -136,7 +137,7 @@ export async function finalizeTrip({
   userId,
   isDirectListingCharge,
   source,
-  bidId, // AKA REQUEST TO BOOK ID
+  requestToBookId, // AKA REQUEST TO BID ID
 }: {
   paymentIntentId: string;
   travelerPriceBeforeFees: number;
@@ -147,7 +148,7 @@ export async function finalizeTrip({
   userId: string;
   isDirectListingCharge: boolean;
   source: "Book it now" | "Request to book";
-  bidId?: number;
+  requestToBookId?: number;
 }) {
   //1.) create  groupId
   const madeByGroupId = await db
@@ -228,7 +229,7 @@ export async function finalizeTrip({
   const currentTrip = await db
     .insert(trips)
     .values({
-      ...(bidId && { bidId: bidId }),
+      ...(requestToBookId && { requestToBookId: requestToBookId }),
       checkIn: checkIn,
       checkOut: checkOut,
       numGuests: numOfGuests,
@@ -251,12 +252,15 @@ export async function finalizeTrip({
   //<___creating a superhog  oreservationnly if does not exist__>
 
   if (!currentTrip.superhogRequestId && !isDirectListingCharge) {
+    //1. create superhog, and update ICAL
     await createSuperhogReservation({
       paymentIntentId,
       propertyId: property.id,
       userId: userId,
       trip: currentTrip,
     }); //creating a superhog reservation
+
+    await updateICalAfterBookingTrip(currentTripWCheckout);
   } else {
     if (isDirectListingCharge) {
       await captureTripPaymentWithoutSuperhog({
@@ -311,7 +315,7 @@ export async function finalizeTrip({
   // }
   // ------ Send Slack When trip is booked ------
   await sendSlackMessage({
-    isProductionOnly: true,
+    isProductionOnly: false,
     channel: "tramona-bot",
     text: [
       `*${user.email} just booked a trip: ${property.name}*`,
@@ -375,9 +379,8 @@ export async function createRequestToBook({
     checkIn,
     checkOut,
     numGuests: numOfGuests,
-    amountAfterTravelerMarkupAndBeforeFees: Math.floor(
-      travelerPriceBeforeFees * TRAVELER_MARKUP,
-    ), //we add markup here
+    baseAmountBeforeFees: removeTravelerMarkup(travelerPriceBeforeFees),
+    amountAfterTravelerMarkupAndBeforeFees: Math.floor(travelerPriceBeforeFees),
     isDirectListing: isDirectListingCharge,
   });
 
@@ -386,7 +389,7 @@ export async function createRequestToBook({
   // Case 1 : DIRECT LISTING. SEND SLACK
   if (isDirectListingCharge) {
     await sendSlackMessage({
-      isProductionOnly: true,
+      isProductionOnly: false,
       channel: "tramona-bot",
       text: [
         `*${user.email} just requested to book: ${property.name}*`,

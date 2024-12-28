@@ -36,7 +36,7 @@ export default function BidPlacedPopup({ isOpen }: BidPlacedPopupProps) {
           </p>
           <div className="mb-6 text-left">
             <p className="mb-2 text-black">
-              <strong>Next Steps:</strong>1
+              <strong>Next Steps:</strong>
             </p>
             <div className="mb-4 flex items-start">
               <CheckCircle className="mr-2 mt-1 h-5 w-5 flex-shrink-0 text-[#004236]" />
@@ -69,7 +69,7 @@ export default function BidPlacedPopup({ isOpen }: BidPlacedPopupProps) {
               </Link>
               <Link href="/requests?tab=bids">
                 <Button className="w-full bg-[#004236] text-white hover:bg-[#003228]">
-                  View Requests
+                  View Bids
                 </Button>
               </Link>
             </div>

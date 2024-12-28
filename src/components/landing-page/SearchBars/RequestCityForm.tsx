@@ -26,8 +26,10 @@ const RequestCityForm = forwardRef(
   (
     {
       isRequestsPage = false,
+      onLoadingChange,
     }: {
       isRequestsPage?: boolean;
+      onLoadingChange: (isLoading: boolean) => void;
     },
     ref: React.Ref<any>,
   ) => {
@@ -36,7 +38,6 @@ const RequestCityForm = forwardRef(
     const [showConfetti, setShowConfetti] = useState(false);
     const [madeByGroupId, setMadeByGroupId] = useState<number>();
     const [_inviteLink, setInviteLink] = useState<string | null>(null);
-
     const { form, onSubmit } = useCityRequestForm({
       afterSubmit() {
         setRequestSubmittedDialogOpen(true);
@@ -47,9 +48,15 @@ const RequestCityForm = forwardRef(
 
     //for landing page
     useImperativeHandle(ref, () => ({
-      submit: form.handleSubmit(async (data) => {
-        await onSubmit(); // Call `onSubmit` with the form data
+      submit: form.handleSubmit(async () => {
+        try {
+          onLoadingChange(true);
+          await onSubmit(); // Call `onSubmit` with the form data
+        } finally {
+          onLoadingChange(false);
+        }
       }),
+      isLoading: form.formState.isSubmitting, // Expose the loading state to the parent
     }));
 
     const inviteLinkQuery = api.groups.generateInviteLink.useQuery(

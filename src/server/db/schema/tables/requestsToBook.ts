@@ -44,7 +44,7 @@ export const requestsToBook = pgTable(
       .references(() => properties.id),
     userId: text("user_id")
       .notNull()
-      .references(() => users.id),
+      .references(() => users.id, { onDelete: "cascade" }),
     madeByGroupId: integer("made_by_group_id")
       .notNull()
       .references(() => groups.id, { onDelete: "cascade" }),
@@ -57,6 +57,7 @@ export const requestsToBook = pgTable(
     resolvedAt: timestamp("resolved_at", { withTimezone: true }),
     status: statusEnum("status").default("Pending"),
     paymentIntentId: text("payment_intent_id").notNull(),
+    baseAmountBeforeFees: integer("base_amount_before_fees").notNull(), //we need both in case we change the markup it wouldn't affect previous request to books
     amountAfterTravelerMarkupAndBeforeFees: integer(
       "amount_after_traveler_markup_and_before_fees",
     ).notNull(), // this is the amount the host will see the traveler requested.
