@@ -22,7 +22,7 @@ import {
 import { createSuperhogReservation } from "./superhog-utils";
 
 import { sendSlackMessage } from "@/server/slack";
-import { formatDateMonthDay } from "../utils";
+import { formatDateMonthDay, removeTravelerMarkup } from "../utils";
 import { TRAVELER_MARKUP } from "../constants";
 import { sendText } from "@/server/server-utils";
 import { sendTextToHostTeamMembers } from "@/server/server-utils";
@@ -379,6 +379,7 @@ export async function createRequestToBook({
     checkIn,
     checkOut,
     numGuests: numOfGuests,
+    baseAmountBeforeFees: removeTravelerMarkup(travelerPriceBeforeFees),
     amountAfterTravelerMarkupAndBeforeFees: Math.floor(travelerPriceBeforeFees),
     isDirectListing: isDirectListingCharge,
   });
