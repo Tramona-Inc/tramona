@@ -317,7 +317,6 @@ export default async function webhook(
               await sendEmailAndWhatsupConfirmation({
                 trip: currentTripWCheckout,
                 user: user!,
-                offer: offer,
                 property: currentProperty!,
               });
               //redeem the traveler and host refferal code
