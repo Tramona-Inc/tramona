@@ -23,7 +23,6 @@ import { createSuperhogReservation } from "./superhog-utils";
 
 import { sendSlackMessage } from "@/server/slack";
 import { formatDateMonthDay, removeTravelerMarkup } from "../utils";
-import { TRAVELER_MARKUP } from "../constants";
 import { sendText } from "@/server/server-utils";
 import { sendTextToHostTeamMembers } from "@/server/server-utils";
 

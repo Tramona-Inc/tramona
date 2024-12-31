@@ -7,13 +7,17 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle, PlusIcon } from "lucide-react";
 import { Button } from "../ui/button";
 import Link from "next/link";
+import TravelerRequestToBookCard from "../requests-to-book/TravelerRequestToBookCard";
 
 export default function PastRequestsTab() {
   const { data: requests } = api.requests.getMyRequests.useQuery();
+  const { data: requestsToBook } =
+    api.requestsToBook.getMyRequestsToBook.useQuery();
 
   if (!requests) return <Spinner />;
 
-  return requests.inactiveRequests.length !== 0 ? (
+  return requests.inactiveRequests.length !== 0 ||
+    requestsToBook?.inactiveRequestsToBook.length !== 0 ? (
     <div className="space-y-3 pb-32">
       <Link href="/">
         <Button variant="primary" className="max-w-fit">
@@ -29,6 +33,13 @@ export default function PastRequestsTab() {
           Trips&quot; for upcoming details.
         </AlertDescription>
       </Alert>
+      {requestsToBook?.inactiveRequestsToBook.map((requestToBook) => (
+        <TravelerRequestToBookCard
+          key={requestToBook.id}
+          type="guest"
+          requestToBook={requestToBook}
+        ></TravelerRequestToBookCard>
+      ))}
       {requests.inactiveRequests.map((request) => (
         <RequestCard key={request.id} type="guest" request={request}>
           <RequestCardAction request={request} />
