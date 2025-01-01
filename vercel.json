@@ -22,7 +22,7 @@
     },
     {
       "path": "/api/cron/scheduledEmailPostOnboard",
-      "schedule": "0 * * * *"
+      "schedule": "0 0 * * *"
     },
     {
       "path": "/api/cron/expire-request-book",
