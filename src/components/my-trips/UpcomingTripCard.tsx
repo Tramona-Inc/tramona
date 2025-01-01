@@ -102,7 +102,7 @@ export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
               />
             )}
             <Button asChild variant="primary">
-              <Link href="/faq">
+              <Link href="/help-center">
                 <HelpCircleIcon />
                 Help
               </Link>
