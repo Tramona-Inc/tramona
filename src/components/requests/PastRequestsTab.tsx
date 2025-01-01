@@ -25,7 +25,7 @@ export default function PastRequestsTab() {
           Make Another Trip
         </Button>
       </Link>
-      <Alert className="bg-white">
+      <Alert className="">
         <AlertTriangle className="h-4 w-4" />
         <AlertTitle>Tip</AlertTitle>
         <AlertDescription>
