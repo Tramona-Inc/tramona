@@ -877,7 +877,9 @@ export function getHostNameAndImage(
     }
   >,
 ) {
-  const teamOwner = property.hostTeam.owner;
+  let teamOwner;
+
+  teamOwner = property.hostTeam.owner;
 
   const ownerName =
     teamOwner.firstName && teamOwner.lastName

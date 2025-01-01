@@ -273,20 +273,6 @@ export async function finalizeTrip({
   }
   //<<--------------------->>
 
-  if (source === "Book it now") {
-    //send that there is a new booking to the host TODO
-    await sendTextToHostTeamMembers({
-      hostTeamId: property.hostTeamId,
-      message: `${user.email} just booked your property`,
-    });
-  } else {
-    //send text to traveler
-    await sendText({
-      to: user.phoneNumber!,
-      content: `Your request to book ${property.name} has been accepted by the host. You're going to ${property.city} from ${formatDateMonthDay(checkIn)} to ${formatDateMonthDay(checkOut)}!`,
-    });
-  }
-
   //send email and whatsup (whatsup is not implemented yet)
   console.log("Sending email and whatsup");
   await sendEmailAndWhatsupConfirmation({
@@ -323,6 +309,20 @@ export async function finalizeTrip({
       `<https://tramona.com/admin|Go to admin dashboard>`,
     ].join("\n"),
   });
+
+  if (source === "Book it now") {
+    //send that there is a new booking to the host TODO
+    await sendTextToHostTeamMembers({
+      hostTeamId: property.hostTeamId,
+      message: `${user.email} just booked your property`,
+    });
+  } else {
+    //send text to traveler
+    await sendText({
+      to: user.phoneNumber!,
+      content: `Your request to book ${property.name} has been accepted by the host. You're going to ${property.city} from ${formatDateMonthDay(checkIn)} to ${formatDateMonthDay(checkOut)}!`,
+    });
+  }
 }
 
 export async function createRequestToBook({

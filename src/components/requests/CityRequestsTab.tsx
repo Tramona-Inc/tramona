@@ -13,10 +13,10 @@ export default function ActiveRequestsTab() {
   if (!requests) return <Spinner />;
 
   return (
-    <div>
+    <div className="space-y-3">
       <div className="space-y-3">
         <NewCityRequestBtn />
-        <Alert className="bg-white">
+        <Alert className="">
           <AlertTriangle className="h-4 w-4" />
           <AlertTitle>Tip</AlertTitle>
           <AlertDescription>

@@ -10,6 +10,7 @@ import {
   tripCheckouts,
   users,
   reservedDateRanges,
+  requestsToBook,
 } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
 import { buffer } from "micro";
@@ -133,14 +134,22 @@ export default async function webhook(
           console.log("hi");
 
           // --------- 3 Cases: 1. Book it now, 2.Request to book,  3. Offer  ---------------------------------------
-          //prevent duplicate trips creatations
+          //prevent DUPLICATES
+          //1.) trips creatations
           const existingTrip = await db.query.trips.findFirst({
             where: eq(trips.paymentIntentId, paymentIntentId),
           });
-          if (existingTrip) {
-            console.log("Trip already exists for this paymentIntentId");
+          //2.) request to book duplication
+          const existingRequestToBook = await db.query.requestsToBook.findFirst(
+            {
+              where: eq(requestsToBook.paymentIntentId, paymentIntentId),
+            },
+          );
+          if (existingRequestToBook ?? existingTrip) {
+            console.log("Trip or request to book already exist... Returning");
             return;
           }
+
           //1 . CASE : Book it now
           if (paymentIntentSucceeded.metadata.type === "bookItNow") {
             console.log(paymentIntentId);
@@ -317,7 +326,6 @@ export default async function webhook(
               await sendEmailAndWhatsupConfirmation({
                 trip: currentTripWCheckout,
                 user: user!,
-                offer: offer,
                 property: currentProperty!,
               });
               //redeem the traveler and host refferal code

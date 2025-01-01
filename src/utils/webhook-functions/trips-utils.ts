@@ -134,12 +134,10 @@ export async function cancelTripByPaymentIntent({
 export async function sendEmailAndWhatsupConfirmation({
   trip,
   user,
-  offer,
   property,
 }: {
   trip: TripWCheckout;
   user: User;
-  offer?: Offer;
   property: Property;
 }) {
   //get price breakdown
@@ -167,9 +165,7 @@ export async function sendEmailAndWhatsupConfirmation({
       address: property.address,
       propertyImageLink: property.imageUrls[0] ?? property.imageUrls[1] ?? "",
       tripDetailLink: `https://www.tramona.com/offers/${trip.id}`,
-      tramonaPrice:
-        offer?.travelerOfferedPriceBeforeFees ??
-        trip.tripCheckout.travelerOfferedPriceBeforeFees,
+      tramonaPrice: trip.tripCheckout.travelerOfferedPriceBeforeFees,
       totalPrice: trip.tripCheckout.totalTripAmount,
       numOfNights: numOfNights,
       serviceFee: serviceFee,

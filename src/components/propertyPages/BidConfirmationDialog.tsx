@@ -24,7 +24,7 @@ export default function BidPlacedPopup({ isOpen }: BidPlacedPopupProps) {
   };
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[400px]">
+      <DialogContent className="sm:max-w-[450px]">
         <div className="flex flex-col items-center text-center">
           <CheckCircle className="mb-4 h-12 w-12 text-[#004236]" />
           <h2 className="mb-4 text-2xl font-bold text-black">
@@ -61,21 +61,17 @@ export default function BidPlacedPopup({ isOpen }: BidPlacedPopupProps) {
             </AlertDescription>
           </Alert>
           <div className="flex w-full flex-col gap-4">
-            <div className="flex w-full flex-col gap-4 sm:flex-row">
+            <div className="grid grid-cols-2 gap-2 sm:flex-row">
               <Link href="/?page=1">
-                <Button className="w-full bg-[#004236] text-white hover:bg-[#003228]">
-                  Search More Properties
-                </Button>
+                <Button className="w-full">Search More Properties</Button>
               </Link>
               <Link href="/requests?tab=bids">
-                <Button className="w-full bg-[#004236] text-white hover:bg-[#003228]">
-                  View Bids
-                </Button>
+                <Button className="w-full flex-1">View My Bids</Button>
               </Link>
             </div>
             <Button
               variant="outline"
-              className="w-full border-[#004236] text-[#004236] hover:bg-[#004236] hover:text-white"
+              className="w-full border-[#004236] text-[#004236]"
               onClick={handleClose}
             >
               Close
