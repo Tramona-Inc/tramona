@@ -15,7 +15,7 @@
 //         </p>
 //         <Button asChild>
 //           <a href="https://mail.google.com" target="_blank" rel="noreferrer">
-//             Open Gmail <ExternalLinkIcon className="size-4" />
+//             Open Gmail <ExternalLinkIcon className="h-4 w-4" />
 //           </a>
 //         </Button>
 //       </div>
@@ -54,7 +54,7 @@ export default function Page() {
 
   return (
     <MainLayout className="flex flex-col justify-center">
-      <div className="flex min-h-screen-minus-header flex-col items-center justify-center gap-4 p-4">
+      <div className="min-h-screen-minus-header flex flex-col items-center justify-center gap-4 p-4">
         <h1 className="text-center text-5xl font-bold tracking-tight">
           Check your email
         </h1>
@@ -64,7 +64,7 @@ export default function Page() {
         </p>
         <Button asChild>
           <a href="https://mail.google.com" target="_blank" rel="noreferrer">
-            Open Gmail <ExternalLinkIcon className="size-4" />
+            Open Gmail <ExternalLinkIcon className="h-4 w-4" />
           </a>
         </Button>
         {verified && (

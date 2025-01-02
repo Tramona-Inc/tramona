@@ -62,7 +62,7 @@ const roleDescriptions = {
     title: "Match Manager",
     description:
       "Manage bookings, respond to requests, and handle availability.",
-    icon: <Calendar className="size-4" />,
+    icon: <Calendar className="h-4 w-4" />,
     color: "bg-blue-100 text-blue-800",
     checkColor: "text-blue-500",
     xColor: "text-blue-300",
@@ -81,7 +81,7 @@ const roleDescriptions = {
   "Listing Manager": {
     title: "Listing Manager",
     description: "Manage guest communications and property details.",
-    icon: <MessageSquare className="size-4" />,
+    icon: <MessageSquare className="h-4 w-4" />,
     color: "bg-green-100 text-green-800",
     checkColor: "text-green-500",
     xColor: "text-green-300",
@@ -101,7 +101,7 @@ const roleDescriptions = {
     title: "Admin Access",
     description:
       "Provides full access to manage both booking and operational tasks.",
-    icon: <Shield className="size-4" />,
+    icon: <Shield className="h-4 w-4" />,
     color: "bg-purple-100 text-purple-800",
     checkColor: "text-purple-500",
     xColor: "text-purple-300",

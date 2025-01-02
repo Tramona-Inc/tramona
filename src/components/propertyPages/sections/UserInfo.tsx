@@ -20,15 +20,15 @@ export default function UserInfo({
             <UserAvatar name={hostName} image={hostPic} size={"lg"} />
             <div className="text-left">
               <p className="flex items-center gap-1">
-                <CheckIcon className="size-4" />
+                <CheckIcon className="h-4 w-4" />
                 Email verified
               </p>
               <p className="flex items-center gap-1">
-                <CheckIcon className="size-4" />
+                <CheckIcon className="h-4 w-4" />
                 Phone verified
               </p>
               <p className="flex items-center gap-1">
-                <CheckIcon className="size-4" />
+                <CheckIcon className="h-4 w-4" />
                 Identity verified
               </p>
             </div>

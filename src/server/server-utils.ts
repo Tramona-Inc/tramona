@@ -372,7 +372,7 @@ export async function addProperty({
     | "country"
     | "countryISO"
     | "bookItNowEnabled"
-    | "bookItNowDiscountTiers"
+    | "discountTiers"
   > & {
     latLngPoint?: { x: number; y: number }; // make optional
   };
@@ -703,7 +703,7 @@ export async function getPropertiesForRequest(
       id: true,
       hostTeamId: true,
       autoOfferEnabled: true,
-      autoOfferDiscountTiers: true,
+      discountTiers: true,
       originalListingId: true,
     },
   });
@@ -732,7 +732,7 @@ type HospitableCalendarResponse = {
 
 type HostawayPriceResponse = {
   result: {
-    totalPrice: number;
+    totalBasePriceBeforeFees: number;
   };
 };
 
@@ -830,8 +830,8 @@ export async function getPropertyOriginalPrice(
         params,
       },
     );
-    const totalPrice = data.result.totalPrice;
-    return totalPrice;
+    const totalBasePriceBeforeFees = data.result.totalBasePriceBeforeFees;
+    return totalBasePriceBeforeFees;
   }
   // code for other options
 }
@@ -847,15 +847,17 @@ export interface RequestsPageOfferData {
 
 //update spread on every fetch to keep information updated
 export async function updateTravelerandHostMarkup({
-  offerTotalPrice,
+  offerTotalBasePriceBeforeFees,
   offerId,
 }: {
-  offerTotalPrice: number;
+  offerTotalBasePriceBeforeFees: number;
   offerId: number;
 }) {
-  console.log("offerTotalPrice", offerTotalPrice);
-  const travelerPrice = Math.ceil(offerTotalPrice * TRAVELER_MARKUP);
-  const hostPay = Math.ceil(offerTotalPrice * HOST_MARKUP);
+  console.log("offerTotalBasePriceBeforeFees", offerTotalBasePriceBeforeFees);
+  const travelerPrice = Math.ceil(
+    offerTotalBasePriceBeforeFees * TRAVELER_MARKUP,
+  );
+  const hostPay = Math.ceil(offerTotalBasePriceBeforeFees * HOST_MARKUP);
   console.log("travelerPrice", travelerPrice);
   await db
     .update(offers)

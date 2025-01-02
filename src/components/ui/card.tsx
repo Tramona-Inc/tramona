@@ -39,6 +39,21 @@ const CardHeader = React.forwardRef<
 ));
 CardHeader.displayName = "CardHeader";
 
+const CardBanner = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn(
+      "absolute top-0 left-0 right-0 h-10 rounded-t-xl bg-banner text-banner-foreground flex items-center justify-center",
+      className,
+    )}
+    {...props}
+  />
+));
+CardBanner.displayName = "CardBanner";
+
 const CardTitle = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLHeadingElement>
@@ -93,4 +108,5 @@ export {
   CardTitle,
   CardDescription,
   CardContent,
+  CardBanner,
 };

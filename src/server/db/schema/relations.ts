@@ -393,9 +393,9 @@ export const tripsRelations = relations(trips, ({ one, many }) => ({
     fields: [trips.offerId],
     references: [offers.id],
   }),
-  bid: one(bids, {
-    fields: [trips.bidId],
-    references: [bids.id],
+  requestToBook: one(requestsToBook, {
+    fields: [trips.requestToBookId],
+    references: [requestsToBook.id],
   }),
   superhogRequests: one(superhogRequests, {
     fields: [trips.superhogRequestId],
@@ -453,16 +453,20 @@ export const fillerBookingsRelations = relations(fillerBookings, ({ one }) => ({
 }));
 
 // < -------- Requests To Book ------- >
-export const requestsToBookRelations = relations(requestsToBook, ({ one }) => ({
-  madeByGroup: one(groups, {
-    fields: [requestsToBook.madeByGroupId],
-    references: [groups.id],
+export const requestsToBookRelations = relations(
+  requestsToBook,
+  ({ one, many }) => ({
+    madeByGroup: one(groups, {
+      fields: [requestsToBook.madeByGroupId],
+      references: [groups.id],
+    }),
+    property: one(properties, {
+      fields: [requestsToBook.propertyId],
+      references: [properties.id],
+    }),
+    trips: many(trips),
   }),
-  property: one(properties, {
-    fields: [requestsToBook.propertyId],
-    references: [properties.id],
-  }),
-}));
+);
 
 // < -------- Claims ------- >
 export const claimsRelations = relations(claims, ({ one, many }) => ({

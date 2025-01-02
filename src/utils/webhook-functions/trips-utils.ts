@@ -8,6 +8,7 @@ import {
   groups,
   properties,
   tripCheckouts,
+  reservedDateRanges,
 } from "@/server/db/schema";
 
 import { cancelSuperhogReservation } from "./superhog-utils";
@@ -133,12 +134,10 @@ export async function cancelTripByPaymentIntent({
 export async function sendEmailAndWhatsupConfirmation({
   trip,
   user,
-  offer,
   property,
 }: {
   trip: TripWCheckout;
   user: User;
-  offer?: Offer;
   property: Property;
 }) {
   //get price breakdown
@@ -166,9 +165,7 @@ export async function sendEmailAndWhatsupConfirmation({
       address: property.address,
       propertyImageLink: property.imageUrls[0] ?? property.imageUrls[1] ?? "",
       tripDetailLink: `https://www.tramona.com/offers/${trip.id}`,
-      tramonaPrice:
-        offer?.travelerOfferedPriceBeforeFees ??
-        trip.tripCheckout.travelerOfferedPriceBeforeFees,
+      tramonaPrice: trip.tripCheckout.travelerOfferedPriceBeforeFees,
       totalPrice: trip.tripCheckout.totalTripAmount,
       numOfNights: numOfNights,
       serviceFee: serviceFee,
@@ -217,4 +214,24 @@ export async function captureTripPaymentWithoutSuperhog({
     ].join("\n"),
   });
   return intent;
+}
+
+export async function updateICalAfterBookingTrip(
+  currentTripWCheckout: TripWCheckout,
+) {
+  console.log("Updating Ical");
+  await db.insert(reservedDateRanges).values({
+    start: currentTripWCheckout.checkIn.toISOString(),
+    end: currentTripWCheckout.checkOut.toISOString(),
+    platformBookedOn: "tramona",
+    propertyId: currentTripWCheckout.propertyId,
+  });
+
+  await db
+    .update(properties)
+    .set({
+      datesLastUpdated: new Date(),
+    })
+    .where(eq(properties.id, currentTripWCheckout.propertyId));
+  return;
 }

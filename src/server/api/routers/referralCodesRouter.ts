@@ -133,7 +133,7 @@ export const referralCodesRouter = createTRPCRouter({
       //     },
       //     offer: {
       //       columns: {
-      //         totalPrice: true,
+      //         totalBasePriceBeforeFees: true,
       //       },
       //     },
       //   },

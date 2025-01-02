@@ -1,4 +1,3 @@
-import { Header } from "@/components/_common/Layout/header/Header";
 import { StickyTopBar } from "@/pages/for-hosts";
 import { MobileStickyBar } from "@/pages/for-hosts";
 import { cn } from "@/utils/utils";
@@ -23,12 +22,7 @@ export default function OnboardingLayout({
         <div className="hidden md:block">
           <StickyTopBar />
         </div>
-        <div
-          className={cn(
-            "flex-grow min-h-screen-minus-header",
-            className,
-          )}
-        >
+        <div className={cn("min-h-screen-minus-header flex-grow", className)}>
           {children}
         </div>
       </div>

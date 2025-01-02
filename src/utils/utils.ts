@@ -23,7 +23,7 @@ import {
 import * as cheerio from "cheerio";
 import { useSession } from "next-auth/react";
 import { api } from "./api";
-import { HOST_MARKUP } from "./constants";
+import { HOST_MARKUP, TRAVELER_MARKUP } from "./constants";
 import { InferQueryModel } from "@/server/db";
 import {
   TripWithDetails,
@@ -304,18 +304,23 @@ export function getNumNights(from: Date | string, to: Date | string) {
   );
 }
 
-export function getHostPayout(totalPrice: number) {
-  return Math.floor(totalPrice * HOST_MARKUP);
+export function getHostPayout(totalBasePriceBeforeFees: number) {
+  return Math.floor(totalBasePriceBeforeFees * HOST_MARKUP);
 }
 
 export function getTravelerOfferedPrice({
-  totalPrice,
-  travelerMarkup,
+  totalBasePriceBeforeFees,
+  travelerMarkup, //we need this because can be traveler or direct listing markup
 }: {
-  totalPrice: number;
+  totalBasePriceBeforeFees: number;
   travelerMarkup: number;
 }) {
-  return Math.ceil(totalPrice * travelerMarkup);
+  return Math.ceil(totalBasePriceBeforeFees * travelerMarkup);
+}
+
+export function removeTravelerMarkup(amountWithTravelerMarkup: number) {
+  const basePrice = amountWithTravelerMarkup / TRAVELER_MARKUP;
+  return Math.round(basePrice);
 }
 
 export function getPropertyId(url: string): number | null {
@@ -537,7 +542,9 @@ export function separateByPriceAndAgeRestriction(
         requestData.request.maxTotalPrice /
         getNumNights(requestData.request.checkIn, requestData.request.checkOut);
 
-      const travelerAge = requestData.request.traveler.dateOfBirth ? getAge(requestData.request.traveler.dateOfBirth) : null;
+      const travelerAge = requestData.request.traveler.dateOfBirth
+        ? getAge(requestData.request.traveler.dateOfBirth)
+        : null;
 
       const normalProperties = requestData.properties.filter((property) => {
         if (property.city === "Seattle, WA, US") {
@@ -545,20 +552,18 @@ export function separateByPriceAndAgeRestriction(
         }
         return (
           (property.priceRestriction == null ||
-          property.priceRestriction <= nightlyPrice) &&
+            property.priceRestriction <= nightlyPrice) &&
           (property.ageRestriction == null ||
-          (travelerAge !== null &&
-          travelerAge >= property.ageRestriction))
+            (travelerAge !== null && travelerAge >= property.ageRestriction))
         );
       });
 
       const outsideProperties = requestData.properties.filter(
         (property) =>
-          (property.priceRestriction != null &&
-          property.priceRestriction >= nightlyPrice * 1.15) &&
-          (property.ageRestriction != null &&
-          (travelerAge === null ||
-          travelerAge < property.ageRestriction))
+          property.priceRestriction != null &&
+          property.priceRestriction >= nightlyPrice * 1.15 &&
+          property.ageRestriction != null &&
+          (travelerAge === null || travelerAge < property.ageRestriction),
       );
 
       return {
@@ -587,11 +592,11 @@ export function separateByPriceAndAgeRestriction(
     return {
       normal: {
         city: cityData.city,
-        requests: normalRequests
+        requests: normalRequests,
       },
       outsidePriceRestriction: {
         city: cityData.city,
-        requests: outsideRequests
+        requests: outsideRequests,
       },
     };
   });
@@ -807,24 +812,19 @@ export function removeTax(total: number, taxRate: number): number {
 }
 
 export const getApplicableBookItNowDiscount = ({
-  bookItNowDiscountTiers,
+  discountTiers,
   checkIn,
 }: {
-  bookItNowDiscountTiers:
-    | { days: number; percentOff: number }[]
-    | null
-    | undefined;
+  discountTiers: { days: number; percentOff: number }[] | null | undefined;
   checkIn: Date;
 }): number | null => {
-  if (!bookItNowDiscountTiers || bookItNowDiscountTiers.length === 0) {
+  if (!discountTiers || discountTiers.length === 0) {
     return null;
   }
 
   const daysUntilCheckIn = differenceInDays(checkIn, new Date());
 
-  const sortedTiers = [...bookItNowDiscountTiers].sort(
-    (a, b) => b.days - a.days,
-  );
+  const sortedTiers = [...discountTiers].sort((a, b) => b.days - a.days);
 
   const applicableDiscount = sortedTiers.find(
     (tier) => daysUntilCheckIn >= tier.days,
@@ -877,7 +877,9 @@ export function getHostNameAndImage(
     }
   >,
 ) {
-  const teamOwner = property.hostTeam.owner;
+  let teamOwner;
+
+  teamOwner = property.hostTeam.owner;
 
   const ownerName =
     teamOwner.firstName && teamOwner.lastName
@@ -962,6 +964,73 @@ export function isTripWithin48Hours(
 
   // check if current date is after target date
   return now >= targetDate;
+}
+
+export function convertMonthToNumber(month: string) {
+  switch (month) {
+    case "January":
+      return 0;
+    case "February":
+      return 1;
+    case "March":
+      return 2;
+    case "April":
+      return 3;
+    case "May":
+      return 4;
+    case "June":
+      return 5;
+    case "July":
+      return 6;
+    case "August":
+      return 7;
+    case "September":
+      return 8;
+    case "October":
+      return 9;
+    case "November":
+      return 10;
+    case "December":
+      return 11;
+    default:
+      return 0;
+  }
+}
+
+export function validateDateValues({
+  day,
+  month,
+  year,
+}: {
+  day: number;
+  month: number;
+  year: number;
+}) {
+  if (year < 1900 || year > new Date().getFullYear()) {
+    return "Please enter a valid year";
+  }
+  if (month >= 0 && month <= 6) {
+    if (month % 2 === 0) {
+      if (day < 1 || day > 31) {
+        return "Please enter a valid day";
+      }
+    } else {
+      if (day < 1 || day > 30) {
+        return "Please enter a valid day";
+      }
+    }
+  } else {
+    if (month % 2 === 0) {
+      if (day < 1 || day > 30) {
+        return "Please enter a valid day";
+      } else {
+        if (day < 1 || day > 31) {
+          return "Please enter a valid day";
+        }
+      }
+    }
+  }
+  return "valid";
 }
 
 export function toReversed<T>(arr: T[]) {

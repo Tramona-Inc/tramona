@@ -5,7 +5,7 @@ export const referralCashbackSchema = z.object({
   referralCode: z.string(),
   createdAt: z.date(),
   referee: z.object({ name: z.string().nullable() }),
-  offer: z.object({ totalPrice: z.number().int().nullable() }),
+  offer: z.object({ totalBasePriceBeforeFees: z.number().int().nullable() }),
   earningStatus: z.enum(["pending", "paid", "cancelled"]),
   cashbackEarned: z.number(),
 });

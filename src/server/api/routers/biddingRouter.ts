@@ -315,68 +315,68 @@ export const biddingRouter = createTRPCRouter({
         .values({ bidId, propertyId, userId, counterAmount });
     }),
 
-  accept: protectedProcedure
-    .input(z.object({ bidId: z.number(), amount: z.number() }))
-    .mutation(async ({ input }) => {
-      const bidInfo = await db.query.bids.findFirst({
-        where: eq(bids.id, input.bidId),
-        with: {
-          madeByGroup: {
-            with: { members: { with: { user: true } }, invites: true },
-          },
-        },
-      });
+  // accept: protectedProcedure
+  //   .input(z.object({ bidId: z.number(), amount: z.number() }))
+  //   .mutation(async ({ input }) => {
+  //     const bidInfo = await db.query.bids.findFirst({
+  //       where: eq(bids.id, input.bidId),
+  //       with: {
+  //         madeByGroup: {
+  //           with: { members: { with: { user: true } }, invites: true },
+  //         },
+  //       },
+  //     });
 
-      if (!bidInfo) {
-        throw new TRPCError({ code: "NOT_FOUND" });
-      }
+  //     if (!bidInfo) {
+  //       throw new TRPCError({ code: "NOT_FOUND" });
+  //     }
 
-      const groupOwner = await db.query.users.findFirst({
-        where: eq(users.id, bidInfo.madeByGroup.ownerId),
-      });
+  //     const groupOwner = await db.query.users.findFirst({
+  //       where: eq(users.id, bidInfo.madeByGroup.ownerId),
+  //     });
 
-      if (!groupOwner) {
-        throw new TRPCError({ code: "NOT_FOUND" });
-      }
+  //     if (!groupOwner) {
+  //       throw new TRPCError({ code: "NOT_FOUND" });
+  //     }
 
-      const metadata = {
-        bid_id: input.bidId,
-        property_id: bidInfo.propertyId,
-        confirmed_at: new Date().toUTCString(),
-      };
+  //     const metadata = {
+  //       bid_id: input.bidId,
+  //       property_id: bidInfo.propertyId,
+  //       confirmed_at: new Date().toUTCString(),
+  //     };
 
-      if (groupOwner.stripeCustomerId && bidInfo.paymentMethodId) {
-        // Create payment intent
-        const pi = await stripe.paymentIntents.create({
-          payment_method: bidInfo.paymentMethodId,
-          amount: input.amount,
-          currency: "usd",
-          capture_method: "automatic", // Change capture_method to automatic
-          metadata: metadata, // metadata access for checkout session
-          customer: groupOwner.stripeCustomerId, // Add null check for 'user' variable
-          return_url: `${env.NEXTAUTH_URL}/my-trips`, // Specify return_url here
-          confirm: true,
-        });
+  //     if (groupOwner.stripeCustomerId && bidInfo.paymentMethodId) {
+  //       // Create payment intent
+  //       const pi = await stripe.paymentIntents.create({
+  //         payment_method: bidInfo.paymentMethodId,
+  //         amount: input.amount,
+  //         currency: "usd",
+  //         capture_method: "automatic", // Change capture_method to automatic
+  //         metadata: metadata, // metadata access for checkout session
+  //         customer: groupOwner.stripeCustomerId, // Add null check for 'user' variable
+  //         return_url: `${env.NEXTAUTH_URL}/my-trips`, // Specify return_url here
+  //         confirm: true,
+  //       });
 
-        if (pi.status === "succeeded") {
-          await updateBidStatus({
-            id: input.bidId,
-            status: "Accepted",
-            paymentIntentId: pi.id,
-          });
+  //       if (pi.status === "succeeded") {
+  //         await updateBidStatus({
+  //           id: input.bidId,
+  //           status: "Accepted",
+  //           paymentIntentId: pi.id,
+  //         });
 
-          await db.insert(trips).values({
-            checkIn: bidInfo.checkIn,
-            checkOut: bidInfo.checkOut,
-            numGuests: bidInfo.numGuests,
-            propertyId: bidInfo.propertyId,
-            groupId: bidInfo.madeByGroupId,
-            bidId: input.bidId,
-          });
-        }
-      }
-      // TODO: email travllers
-    }),
+  //         await db.insert(trips).values({
+  //           checkIn: bidInfo.checkIn,
+  //           checkOut: bidInfo.checkOut,
+  //           numGuests: bidInfo.numGuests,
+  //           propertyId: bidInfo.propertyId,
+  //           groupId: bidInfo.madeByGroupId,
+  //           bidId: input.bidId,
+  //         });
+  //       }
+  //     }
+  //     // TODO: email travllers
+  //   }),
 
   reject: protectedProcedure
     .input(z.object({ bidId: z.number() }))

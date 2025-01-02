@@ -29,7 +29,7 @@ export default function GroupMembersList({
         className="rounded-full"
         tooltip="Leave group"
       >
-        <LogOutIcon className="size-4" />
+        <LogOutIcon className="h-4 w-4" />
       </Button>
     </LeaveGroupDialog>
   );
@@ -50,7 +50,7 @@ export default function GroupMembersList({
           className="rounded-full"
           tooltip="Remove from group"
         >
-          <LogOutIcon className="size-4" />
+          <LogOutIcon className="h-4 w-4" />
         </Button>
       </RemoveFromGroupDialog>
     );

@@ -53,7 +53,7 @@ export default function PriceDetailsBeforeTax({
   let priceWithApplicableDiscount;
   if (requestToBook && property) {
     const applicableDiscount = getApplicableBookItNowDiscount({
-      bookItNowDiscountTiers: property.bookItNowDiscountTiers,
+      discountTiers: property.discountTiers,
       checkIn: requestToBook.checkIn,
     });
 
@@ -72,7 +72,7 @@ export default function PriceDetailsBeforeTax({
   }
 
   const travelerOfferedPriceBeforeFees = getTravelerOfferedPrice({
-    totalPrice: priceWithApplicableDiscount ?? scrapedPrice,
+    totalBasePriceBeforeFees: priceWithApplicableDiscount ?? scrapedPrice,
     travelerMarkup: 1.015,
   });
 

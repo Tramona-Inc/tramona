@@ -16,6 +16,7 @@ import {
 import { useIsSm } from "@/utils/utils";
 import { MobileTestimonialCarousel } from "@/components/landing-page/_sections/testimonials/MobileTestimonialCarousel";
 import { TestimonialCarousel } from "@/components/landing-page/_sections/testimonials/TestimonialCarousel";
+import { howItWorksTestimonals } from "@/components/landing-page/_sections/testimonials/testimonials-data";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import AccordionFaq from "@/components/_common/AccordionFaq";
@@ -29,10 +30,10 @@ export default function Page() {
         </Head>
         <div className="mb-12 space-y-12 md:mb-20 md:space-y-20">
           <section className="relative -mb-1">
-            <div className="relative h-[40vh] w-full">
+            <div className="relative h-[30vh] w-full">
               <Image
                 src="/assets/images/why-list/host-banner.png"
-                alt="beach banner"
+                alt="How It Works Banner"
                 fill
                 objectFit="cover"
                 objectPosition="center"
@@ -40,14 +41,13 @@ export default function Page() {
               />
             </div>
             <span className="absolute inset-0 bg-black opacity-50"></span>
-            <div className="absolute inset-0 flex items-center px-6">
+            <div className="absolute top-6 left-0 right-0 px-6 md:px-12">
               <div className="relative z-10 max-w-4xl text-left text-white">
                 <h2 className="text-sm font-medium uppercase tracking-wide md:text-lg">
                   HOW IT WORKS
                 </h2>
                 <h3 className="mt-2 text-xl font-bold leading-snug md:text-3xl lg:text-4xl">
-                  Tramona connects travelers with unbeatable deals and hosts
-                  with more bookings
+                  Tramona connects travelers with unbeatable deals and hosts with more bookings
                 </h3>
                 <p className="mt-4 text-sm md:text-base lg:text-lg">
                   See what hosts will offer you
@@ -55,7 +55,9 @@ export default function Page() {
               </div>
             </div>
           </section>
-
+          <h1 className="mb-12 mt-12 text-center text-2xl font-semibold">
+              Sign up now to start booking your empty nights
+          </h1>
           <div className="w-full bg-[#FAF9F6] py-8">
             <div className="mx-auto max-w-screen-xl space-y-6">
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -304,9 +306,9 @@ export default function Page() {
 
           <div className="mx-0 flex max-w-full justify-center space-y-4 px-4 lg:mx-4 lg:mt-16 lg:flex lg:space-y-8">
             {useIsSm() ? (
-              <MobileTestimonialCarousel />
+              <MobileTestimonialCarousel testimonials={howItWorksTestimonals}/>
             ) : (
-              <TestimonialCarousel />
+              <TestimonialCarousel testimonials={howItWorksTestimonals}/>
             )}
           </div>
 

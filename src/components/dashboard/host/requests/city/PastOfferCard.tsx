@@ -41,7 +41,8 @@ export default function PastOfferCard({
     request.maxTotalPrice / getNumNights(offer.checkIn, offer.checkOut);
   const fmtdRequestPrice = formatCurrency(requestPricePerNight);
   const offerPricePerNight =
-    offer.totalPrice / getNumNights(offer.checkIn, offer.checkOut);
+    offer.totalBasePriceBeforeFees /
+    getNumNights(offer.checkIn, offer.checkOut);
   const fmtdOfferPrice = formatCurrency(offerPricePerNight);
   const fmtdDateRange = formatDateRange(offer.checkIn, offer.checkOut);
   const fmtdNumGuests = plural(request.numGuests, "guest");
@@ -81,7 +82,7 @@ export default function PastOfferCard({
               </p>
               <p className="mt-3 flex items-center gap-2">
                 <span className="flex items-center gap-1">
-                  <ClockIcon className="size-4" />
+                  <ClockIcon className="h-4 w-4" />
                   {fmtdDateRange}
                 </span>
                 &middot;

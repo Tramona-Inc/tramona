@@ -42,17 +42,20 @@ export default function SingleDateInput({
     if (maxDate && isAfter(date, maxDate)) return true;
     return disabledDays.some((d) => isSameDay(date, d));
   }
-  
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild className="h-full flex items-center justify-center p-0">
+      <PopoverTrigger
+        asChild
+        className="flex h-full items-center justify-center p-0"
+      >
         <InputButton
           className={className}
           placeholder={placeholder}
           variant={variant}
           label={label}
           icon={icon}
-          value={value ? format(value, 'MM/dd/yyyy') : ''}
+          value={value ? format(value, "MM/dd/yyyy") : ""}
           setValue={() => onChange(undefined)}
         />
       </PopoverTrigger>

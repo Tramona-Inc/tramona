@@ -64,7 +64,7 @@ export default function ReviewCard({
               <Dialog>
                 <DialogTrigger className="size-sm inline-flex items-center justify-center text-sm text-muted-foreground underline underline-offset-2">
                   Show more
-                  <ChevronRight className="ml-2 size-4" />
+                  <ChevronRight className="ml-2 h-4 w-4" />
                 </DialogTrigger>
 
                 <DialogContent className="max-w-3xl p-8">
