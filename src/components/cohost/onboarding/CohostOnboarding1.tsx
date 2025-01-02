@@ -45,18 +45,36 @@ export default function CohostInviteAcceptance() {
 
   const { mutate: joinHostTeam } = api.hostTeams.joinHostTeam.useMutation({
     onSuccess: (data) => {
-      if (data.status === "joined team") {
-        toast({
-          title: "Invite Accepted",
-          description: `You've successfully joined ${data.hostTeamName}'s team!`,
-        });
-        void router.push("/");
-      } else {
-        toast({
-          title: "Already a Member",
-          description: `You're already a member of ${data.hostTeamName}'s team.`,
-        });
-        void router.push("/");
+      switch (data.status) {
+        case "joined team":
+          toast({
+            title: "Invite Accepted",
+            description: `You've successfully joined ${data.hostTeamName}'s team!`,
+          });
+          void router.push("/host/team");
+          return;
+        case "already in team":
+          toast({
+            title: "Already a Member",
+            description: `You're already a member of ${data.hostTeamName}'s team`,
+          });
+          void router.push("/host/team");
+          return;
+        case "expired":
+          toast({
+            title: "Invite Expired",
+            description:
+              "The invite has expired, please ask the host to resend an invite",
+          });
+          void router.push("/");
+          return;
+        case "wrong account":
+          toast({
+            title: `Invite intended for ${data.intendedEmail}`,
+            description: `Please log in to ${data.intendedEmail} and try again`,
+          });
+          void router.push("/");
+          return;
       }
     },
     onError: (error) => {

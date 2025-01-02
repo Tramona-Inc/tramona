@@ -29,7 +29,7 @@ import useHostBtn from "./useHostBtn";
 import LogInSignUp from "./LoginOrSignup";
 import { api } from "@/utils/api";
 
-export function Header() {
+export function Header({ noBanner = false }: { noBanner?: boolean }) {
   const router = useRouter();
 
   const { data: hasHostProfile, isLoading: hasHostProfileIsLoading } =

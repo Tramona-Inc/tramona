@@ -198,39 +198,6 @@ export async function addUserToGroups(user: Pick<User, "email" | "id">) {
   });
 }
 
-export async function addUserToHostTeams(user: Pick<User, "email" | "id">) {
-  const hostTeamIds = await db.query.hostTeamInvites
-    .findMany({
-      where: eq(hostTeamInvites.inviteeEmail, user.email),
-      columns: { hostTeamId: true },
-    })
-    .then((res) => res.map((invite) => invite.hostTeamId));
-
-  if (hostTeamIds.length === 0) return;
-
-  // make the user a host
-  await db.update(users).set({ role: "host" }).where(eq(users.id, user.id));
-
-  await db.transaction(async (tx) => {
-    // add user to teams
-    await tx
-      .insert(hostTeamMembers)
-      .values(
-        hostTeamIds.map((hostTeamId) => ({ hostTeamId, userId: user.id })),
-      );
-
-    // delete invites
-    await tx
-      .delete(hostTeamInvites)
-      .where(
-        and(
-          inArray(hostTeamInvites.hostTeamId, hostTeamIds),
-          eq(hostTeamInvites.inviteeEmail, user.email),
-        ),
-      );
-  });
-}
-
 export async function sendTextToHostTeamMembers({
   hostTeamId,
   message,
@@ -425,10 +392,7 @@ export async function addProperty({
   }
 
   const { city, country, countryISO, county, stateCode, stateName } =
-    await getAddress({
-      lat,
-      lng,
-    });
+    await getAddress({ lat, lng });
 
   const propertyValues = {
     ...property,
@@ -562,14 +526,6 @@ export async function getRequestsForProperties(
     //     )
     // `;
     requestIsNearProperties.push(requestIsNearProperty);
-
-    const { city, stateCode, country } = await getAddress({
-      lat: property.latLngPoint.y,
-      lng: property.latLngPoint.x,
-    });
-
-    const taxInfo = calculateTotalTax({ country, stateCode, city });
-    console.log("taxInfo", taxInfo, city);
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
     const requestsForProperty = await tx.query.requests.findMany({
@@ -632,19 +588,13 @@ export async function getRequestsForProperties(
     // Store the matched requests along with the property
     for (const request of requestsForProperty) {
       //here we can  update each of the reque
-      const traveler = {
-        name: request.madeByGroup.owner.name,
-        image: request.madeByGroup.owner.image,
-        firstName: request.madeByGroup.owner.firstName,
-        lastName: request.madeByGroup.owner.lastName,
-        location: request.madeByGroup.owner.location,
-        about: request.madeByGroup.owner.about,
-        dateOfBirth: request.madeByGroup.owner.dateOfBirth,
-      };
+      const traveler = request.madeByGroup.owner;
+      const taxInfo = calculateTotalTax(property);
+
       propertyToRequestMap.push({
         property: {
           ...property,
-          taxAvailable: taxInfo.length > 0 ? true : false, //// come back here
+          taxAvailable: taxInfo.length > 0, //// come back here
         },
         request: {
           ...request,

@@ -15,6 +15,7 @@ export const COHOST_ROLES = [
   "Listing Manager",
   "Admin Access",
 ] as const;
+
 export const cohostRoleEnum = pgEnum("cohost_role", COHOST_ROLES);
 export type CoHostRole = (typeof COHOST_ROLES)[number];
 

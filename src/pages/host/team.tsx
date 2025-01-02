@@ -384,7 +384,7 @@ export default function Component() {
 
   return (
     <HostDashboardLayout>
-      <div className="mx-auto max-w-4xl space-y-4 py-16">
+      <div className="mx-auto max-w-4xl space-y-4 px-4 py-16">
         {/* Header */}
         <div className="space-y-2">
           <div className="flex items-center gap-2">
