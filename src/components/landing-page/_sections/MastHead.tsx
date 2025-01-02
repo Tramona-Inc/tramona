@@ -56,17 +56,19 @@ export default function MastHead() {
       {
         shallow: true,
         scroll: false,
-      }
+      },
     );
 
     if (toggleSectionRef.current) {
       const headerOffset = 250;
-      const elementPosition = toggleSectionRef.current.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+      const elementPosition =
+        toggleSectionRef.current.getBoundingClientRect().top;
+      const offsetPosition =
+        elementPosition + window.pageYOffset - headerOffset;
 
       window.scrollTo({
         top: offsetPosition,
-        behavior: "smooth"
+        behavior: "smooth",
       });
     }
   };
@@ -187,7 +189,7 @@ export default function MastHead() {
                 Name your own price or book it now
               </h3>
               <h3 className="mt-2 text-xl font-semibold text-white">
-                when hosts have empty nights, no one wins
+                When hosts have empty nights, no one wins
               </h3>
               <h3 className="mt-4 text-lg font-semibold text-white">
                 <button
@@ -214,10 +216,9 @@ export default function MastHead() {
               <div className="flex w-full overflow-hidden rounded-full border border-[#004236] bg-white">
                 <button
                   onClick={() => handleTabChange("search")}
-                  className={`w-1/2 px-8 py-3 text-center text-sm font-medium transition-all duration-200 
-                    ${
+                  className={`w-1/2 px-8 py-3 text-center text-sm font-medium transition-all duration-200 ${
                     activeTab === "search"
-                      ? "bg-[#004236] text-white" 
+                      ? "bg-[#004236] text-white"
                       : "bg-white text-[#004236]"
                   }`}
                 >
@@ -225,8 +226,7 @@ export default function MastHead() {
                 </button>
                 <button
                   onClick={() => handleTabChange("name-price")}
-                  className={`w-1/2 px-8 py-3 text-center text-sm font-medium transition-all duration-200 
-                    ${
+                  className={`w-1/2 px-8 py-3 text-center text-sm font-medium transition-all duration-200 ${
                     activeTab === "name-price"
                       ? "bg-[#004236] text-white"
                       : "bg-white text-[#004236]"
@@ -248,13 +248,6 @@ export default function MastHead() {
         </div>
 
         <div className="mt-12 flex flex-col items-center gap-y-20 lg:gap-y-24">
-          {/* other  sections */}
-          <OverviewRequestCards className="w-11/12 lg:w-2/3" />
-          <HowTramonaWorks className="w-11/12" />
-          <div className="mx-0 flex max-w-full justify-center space-y-4 px-4 lg:mx-4 lg:flex lg:space-y-8">
-            <TestimonialCarousel testimonials={landingPageTestimonals} />
-          </div>
-
           <div className="mt-12 flex flex-col items-center gap-y-20 lg:gap-y-24">
             {/* other  sections */}
             <OverviewRequestCards className="w-11/12 lg:w-2/3" />
