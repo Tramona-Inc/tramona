@@ -70,19 +70,19 @@ export default function MobileHeader({ isHost }: { isHost: boolean }) {
                     {isHost ? "Manage" : "Browse"}
                   </AccordionTrigger>
                   <AccordionContent className="space-y-2 bg-white py-2 pl-4">
-                  {firstLinkItems.map((item, index) => (
-                    <Link
-                      key={index}
-                      href={item.href}
-                      className="flex items-center justify-between rounded-md py-3 pr-4 text-primaryGreen transition-colors duration-200 hover:bg-background"
-                    >
-                      <div className="flex flex-row items-center gap-x-2">
-                        {item.icon ? <item.icon /> : null}
-                        {item.title}
-                      </div>
-                      <ChevronRight className="h-4 w-4 text-slate-400" />
-                    </Link>
-                  ))}
+                    {firstLinkItems.map((item, index) => (
+                      <Link
+                        key={index}
+                        href={item.href}
+                        className="flex items-center justify-between rounded-md py-3 pr-4 text-primaryGreen transition-colors duration-200 hover:bg-background"
+                      >
+                        <div className="flex flex-row items-center gap-x-2">
+                          {item.icon ? <item.icon /> : null}
+                          {item.title}
+                        </div>
+                        <ChevronRight className="h-4 w-4 text-slate-400" />
+                      </Link>
+                    ))}
                   </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="about">
@@ -159,4 +159,3 @@ export default function MobileHeader({ isHost }: { isHost: boolean }) {
     </header>
   );
 }
-
