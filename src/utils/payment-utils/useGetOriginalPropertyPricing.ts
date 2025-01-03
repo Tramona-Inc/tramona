@@ -37,22 +37,24 @@ export const useGetOriginalPropertyPricing = ({
   console.log(hostPricePerNight);
 
   // Scraped property logic
-  const {
-    data: casamundoPrice, // is this per night or total???
-    isLoading: isCasamundoPriceLoading,
-    refetch: refetchCasamundoPrice,
-  } = api.misc.scrapeAverageCasamundoPrice.useQuery(
-    {
-      offerId: property?.originalListingId ?? "", // Fallback for undefined property
-      checkIn,
-      numGuests: numGuests || 2,
-      duration: numNights,
-    },
-    {
-      enabled: !isHospitable && !!property, // Ensure hooks always run but only fetch when valid
-      refetchOnWindowFocus: false,
-    },
-  );
+  // const {
+  //   data: casamundoPrice, // is this per night or total???
+  //   isLoading: isCasamundoPriceLoading,
+  //   refetch: refetchCasamundoPrice,
+  // } = api.misc.scrapeAverageCasamundoPrice.useQuery(
+  //   {
+  //     offerId: property?.originalListingId ?? "", // Fallback for undefined property
+  //     checkIn,
+  //     numGuests: numGuests || 2,
+  //     duration: numNights,
+  //   },
+  //   {
+  //     enabled: !isHospitable && !!property, // Ensure hooks always run but only fetch when valid
+  //     refetchOnWindowFocus: false,
+  //   },
+  // );
+  const casamundoPrice = property?.tempCasamundoPrice;
+  const isCasamundoPriceLoading = false;
 
   // Reserved dates
   const { data: bookedDates } = api.calendar.getReservedDates.useQuery(
@@ -68,11 +70,11 @@ export const useGetOriginalPropertyPricing = ({
   const originalPricePerNight = isHospitable
     ? hostPricePerNight
     : isNumber(casamundoPrice)
-      ? casamundoPrice * 100
+      ? casamundoPrice
       : undefined;
 
   // Aggregate loading states
-  const isLoading = isCasamundoPriceLoading && isHostPriceLoading;
+  const isLoading = isHospitable ? isHostPriceLoading : isCasamundoPriceLoading;
   const error =
     originalPricePerNight === undefined
       ? "Original price is unavailable."
@@ -89,8 +91,6 @@ export const useGetOriginalPropertyPricing = ({
   if (requestPercentage && originalPrice) {
     originalPrice = originalPrice * (1 - requestPercentage / 100);
   }
-  console.log(requestPercentage);
-  console.log(originalPrice);
   //2.)apply discount tier discounts
   const hostDiscount = isHospitable //hostDiscount = percent off
     ? getApplicableBookItNowDiscount({
@@ -112,7 +112,7 @@ export const useGetOriginalPropertyPricing = ({
     casamundoPrice: isHospitable ? undefined : casamundoPrice, //REVISIT ONCE SCRAPER IS FIXED  note: used if you want prices without modification
     hostPricePerNight: isHospitable ? hostPricePerNight : undefined, // note: used if you want prices without modification
     bookedDates,
-    refetchCasamundoPrice,
+    // refetchCasamundoPrice,
     isHostPriceLoading,
     isCasamundoPriceLoading,
   };

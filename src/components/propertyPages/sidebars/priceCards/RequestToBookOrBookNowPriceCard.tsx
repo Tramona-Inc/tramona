@@ -196,6 +196,7 @@ export default function RequestToBookOrBookNowPriceCard({
     const numGuests = parseInt(value);
     updateRequestToBook({ numGuests });
   };
+  // Only set presetOptions if randomPrice is available
   const presetOptions = [
     {
       price: propertyPricingPerNightAfterTierDiscount,
@@ -203,10 +204,9 @@ export default function RequestToBookOrBookNowPriceCard({
       percentOff: 0,
     },
     {
-      price:
-        propertyPricingPerNightAfterTierDiscount !== undefined
-          ? propertyPricingPerNightAfterTierDiscount * 0.9
-          : undefined,
+      price: propertyPricingPerNightAfterTierDiscount
+        ? propertyPricingPerNightAfterTierDiscount * 0.9
+        : undefined,
       label: "Better request",
       percentOff: Math.ceil(property.requestToBookMaxDiscountPercentage / 2),
     },
@@ -407,39 +407,40 @@ export default function RequestToBookOrBookNowPriceCard({
               </TooltipProvider>
             </div>
             <div className="grid grid-cols-3 gap-2 lg:gap-4">
-              {presetOptions.map((option, index) => (
-                <button
-                  key={index}
-                  onClick={() =>
-                    handlePresetSelect(
-                      propertyPricingPerNightAfterTierDiscount! *
-                        ((100 - option.percentOff) / 100),
-                    )
-                  }
-                  className={cn(
-                    "flex flex-col items-center justify-between rounded-lg border py-3 text-center transition-colors lg:p-4",
-                    selectedPreset === option.price
-                      ? "border-primary bg-primary/10"
-                      : "border-gray-200 hover:border-primary/50",
-                    option.label === "Book Now" && "font-semibold",
-                  )}
-                >
-                  <div className="lg:text-md text-sm font-bold">
-                    {formatCurrency(
-                      propertyPricingPerNightAfterTierDiscount! *
-                        ((100 - option.percentOff) / 100),
+              {
+                presetOptions.map((option, index) => (
+                  <button
+                    key={index}
+                    onClick={() =>
+                      handlePresetSelect(
+                        propertyPricingPerNightAfterTierDiscount! *
+                          ((100 - option.percentOff) / 100),
+                      )
+                    }
+                    className={cn(
+                      "flex flex-col items-center justify-between rounded-lg border py-3 text-center transition-colors lg:p-4",
+                      selectedPreset === option.price
+                        ? "border-primary bg-primary/10"
+                        : "border-gray-200 hover:border-primary/50",
+                      option.label === "Book Now" && "font-semibold",
                     )}
-                  </div>
-                  <div className="text-xs leading-5 text-muted-foreground lg:text-sm">
-                    {option.label}
-                  </div>
-                  {option.percentOff > 0 && (
-                    <div className="w-full text-center text-xs font-medium text-green-600">
-                      {option.percentOff}% off
+                  >
+                    <div className="lg:text-md text-sm font-bold">
+                      {formatCurrency(
+                        propertyPricingPerNightAfterTierDiscount! *
+                          ((100 - option.percentOff) / 100),
+                      )}
                     </div>
-                  )}
-                </button>
-              ))}
+                    <div className="text-xs leading-5 text-muted-foreground lg:text-sm">
+                      {option.label}
+                    </div>
+                    {option.percentOff > 0 && (
+                      <div className="w-full text-center text-xs font-medium text-green-600">
+                        {option.percentOff}% off
+                      </div>
+                    )}
+                  </button>
+                ))}
             </div>
 
             <div>
@@ -620,51 +621,96 @@ export default function RequestToBookOrBookNowPriceCard({
               )}
             </div>
           </>
-        ) : propertyPricing.casamundoPrice === "unavailable" ? (
-          <div className="flex flex-col items-center justify-center">
-            <div className="flex items-center gap-2">
-              <Info className="h-4 w-4 text-red-500" />
-              <div className="mb-1 text-2xl font-bold text-red-500">
-                Dates Unavailable
-              </div>
-            </div>
-            <p className="pb-4 text-center text-sm text-muted-foreground">
-              The selected dates are no longer available. Try adjusting your
-              search.
-            </p>
-            <p className="text-md pb-4 text-center text-muted-foreground">
-              Pricing will update once new dates are selected.
-            </p>
-            <Button
-              variant="darkPrimary"
-              className="mt-2 flex min-w-full"
-              onClick={() => setIsCalendarOpen(true)}
-            >
-              <div className="flex items-center gap-2">
-                <CalendarIcon className="h-4 w-4" />
-                Change Dates
-              </div>
-            </Button>
-          </div>
+        // ) : propertyPricing.casamundoPrice === "unavailable" ? (
+        //   <div className="flex flex-col items-center justify-center">
+        //     <div className="flex items-center gap-2">
+        //       <Info className="h-4 w-4 text-red-500" />
+        //       <div className="mb-1 text-2xl font-bold text-red-500">
+        //         Dates Unavailable
+        //       </div>
+        //     </div>
+        //     <p className="pb-4 text-center text-sm text-muted-foreground">
+        //       The selected dates are no longer available. Try adjusting your
+        //       search.
+        //     </p>
+        //     <p className="text-md pb-4 text-center text-muted-foreground">
+        //       Pricing will update once new dates are selected.
+        //     </p>
+        //     <Button
+        //       variant="darkPrimary"
+        //       className="mt-2 flex min-w-full"
+        //       onClick={() => setIsCalendarOpen(true)}
+        //     >
+        //       <div className="flex items-center gap-2">
+        //         <CalendarIcon className="h-4 w-4" />
+        //         Change Dates
+        //       </div>
+        //     </Button>
+        //   </div>
         ) : (
+          // <>
+          //   <div className="flex flex-col items-center justify-center">
+          //     <div className="flex items-center gap-2">
+          //       <Info className="h-4 w-4 text-red-500" />
+          //       <div className="mb-1 text-2xl font-bold text-red-500">
+          //         Sorry, an error occured
+          //       </div>
+          //     </div>
+          //     <p className="pb-4 text-center text-sm text-muted-foreground">
+          //       Please try again. If the error persists, send us a message using
+          //       concierge or choose a new property.
+          //     </p>
+          //     <Button
+          //       variant="darkPrimary"
+          //       onClick={() => propertyPricing.refetchCasamundoPrice()}
+          //     >
+          //       Try Again
+          //     </Button>
+          //   </div>
+          // </>
           <>
-            <div className="flex flex-col items-center justify-center">
-              <div className="flex items-center gap-2">
-                <Info className="h-4 w-4 text-red-500" />
-                <div className="mb-1 text-2xl font-bold text-red-500">
-                  Sorry, an error occured
+            <div>
+              <div className="mb-1 text-2xl font-bold">Request to book for</div>
+              <div className="flex items-baseline gap-2">
+                <div className="text-4xl font-bold text-primary lg:text-5xl">
+                  {formatCurrency(propertyPricingPerNightAfterTierDiscount!)}
                 </div>
+                <span className="text-xl text-muted-foreground">Per Night</span>
               </div>
-              <p className="pb-4 text-center text-sm text-muted-foreground">
-                Please try again. If the error persists, send us a message using
-                concierge or choose a new property.
-              </p>
               <Button
-                variant="darkPrimary"
-                onClick={() => propertyPricing.refetchCasamundoPrice()}
+                variant="link"
+                className="mt-1 flex items-center gap-1 px-0 text-muted-foreground"
+                onClick={() => setShowPriceBreakdown(!showPriceBreakdown)}
               >
-                Try Again
+                Price Breakdown
+                {showPriceBreakdown ? (
+                  <ChevronUp className="h-4 w-4" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
               </Button>
+              {showPriceBreakdown && (
+                <PriceBreakdown
+                  requestToBookDetails={requestToBook}
+                  property={property}
+                  requestAmount={propertyPricingPerNightAfterTierDiscount! * numOfNights}
+                />
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-1">
+              <Button
+                variant="outline"
+                className={`col-auto w-full px-2 text-sm tracking-tight lg:text-base ${
+                  !property.bookItNowEnabled ? "col-span-2" : ""
+                }`}
+                onClick={() => setShowRequestInput(true)}
+              >
+                Place request
+              </Button>
+              {property.bookItNowEnabled && (
+                <BookNowBtn property={property} requestToBook={requestToBook} />
+              )}
             </div>
           </>
         )}
