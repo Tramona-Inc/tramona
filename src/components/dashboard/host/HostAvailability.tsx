@@ -34,9 +34,9 @@ export default function HostAvailability({ property }: { property: Property }) {
 
   const hospitableListingId = property.hospitableListingId;
 
-  const { data } = api.calendar.updateHostCalendar.useQuery({
+  const { data } = api.calendar.getAndUpdateHostCalendar.useQuery({
     //updated the updatehostCalendar
-    hospitableListingId,
+    hospitableListingId: hospitableListingId!,
   });
 
   const {

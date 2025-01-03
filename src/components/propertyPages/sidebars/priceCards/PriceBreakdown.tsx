@@ -7,6 +7,7 @@ import {
 import type { PropertyPageData } from "../RequestToBookSideBar";
 import { formatCurrency } from "@/utils/utils";
 import type { OfferWithDetails } from "@/components/propertyPages/PropertyPage";
+import { getNumNights } from "@/utils/utils";
 
 function PriceBreakdown(
   props:
@@ -24,8 +25,10 @@ function PriceBreakdown(
       },
 ) {
   let brokedownPrice;
+  let numOfNights;
   if (props.offer) {
     brokedownPrice = breakdownPaymentByOffer(props.offer);
+    numOfNights = getNumNights(props.offer.checkIn, props.offer.checkOut);
   } else {
     brokedownPrice = breakdownPaymentByPropertyAndTripParams({
       dates: {
@@ -35,17 +38,22 @@ function PriceBreakdown(
       property: props.property,
       travelerPriceBeforeFees: props.requestAmount,
     });
+    numOfNights = getNumNights(
+      props.requestToBookDetails.checkIn,
+      props.requestToBookDetails.checkOut,
+    );
   }
-  console.log("brokedownPrice", brokedownPrice);
-  if (!brokedownPrice) return <div>Loading ...</div>;
 
   const serviceFee =
     brokedownPrice.superhogFee + brokedownPrice.stripeTransactionFee;
 
   return (
     <div className="my-2 flex w-full flex-col gap-y-1 text-sm text-muted-foreground">
-      <div className="flex items-center justify-between">
-        <span>Trip Subtotal</span>
+      <div className="flex items-center justify-between font-semibold">
+        <span>
+          Trip Subtotal{" "}
+          <span className="text-xs font-light">{numOfNights}x nights</span>
+        </span>
         <span className="font-semibold">
           {formatCurrency(
             brokedownPrice.totalTripAmount -

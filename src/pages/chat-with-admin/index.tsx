@@ -16,7 +16,7 @@ export default function AdminMessagesPage() {
 
   return (
     <DashboardLayout>
-      <MessagesPopover isMobile={true} />
+      <MessagesPopover isMobile={true} isHostOnboarding={false} />
     </DashboardLayout>
   );
 }

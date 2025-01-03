@@ -372,6 +372,7 @@ export const properties = pgTable(
     iCalLinkLastUpdated: timestamp("ical_link_last_updated", {
       withTimezone: true,
     }),
+    tempCasamundoPrice: integer("temp_casamundo_price"),
     bookOnAirbnb: boolean("book_on_airbnb").notNull().default(false),
     autoOfferEnabled: boolean("auto_offer_enabled").notNull().default(false),
     discountTiers: jsonb("discount_tiers").$type<DiscountTier[]>(),

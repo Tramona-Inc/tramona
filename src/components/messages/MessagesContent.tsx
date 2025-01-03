@@ -14,7 +14,7 @@ export default function MessagesContent({
 }) {
   if (!selectedConversation) {
     return (
-      <EmptyStateValue description="Select a convesation to read more">
+      <EmptyStateValue description="Select a conversation to read more">
         <ConversationsEmptySvg />
       </EmptyStateValue>
     );

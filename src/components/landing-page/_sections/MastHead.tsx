@@ -1,5 +1,4 @@
 // MastHead.tsx
-import { BookItNowSection } from "./book-it-now/BookItNowSection";
 import { NameYourPriceSection } from "./name-your-price/NameYourPriceSection";
 import landingBg2 from "public/assets/images/landing-page/man_standing_on_rock.png";
 import { useRouter } from "next/router";
@@ -20,7 +19,6 @@ import OverviewRequestCards from "./name-your-price/OverviewRequestCards";
 import HowTramonaWorks from "./name-your-price/HowTramonaWorks";
 import { TestimonialCarousel } from "./testimonials/TestimonialCarousel";
 import { landingPageTestimonals } from "./testimonials/testimonials-data";
-import HostSection from "./name-your-price/HostSection";
 import UnclaimedMap from "@/components/unclaimed-offers/UnclaimedMap";
 
 export default function MastHead() {
@@ -56,17 +54,19 @@ export default function MastHead() {
       {
         shallow: true,
         scroll: false,
-      }
+      },
     );
 
     if (toggleSectionRef.current) {
       const headerOffset = 250;
-      const elementPosition = toggleSectionRef.current.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+      const elementPosition =
+        toggleSectionRef.current.getBoundingClientRect().top;
+      const offsetPosition =
+        elementPosition + window.pageYOffset - headerOffset;
 
       window.scrollTo({
         top: offsetPosition,
-        behavior: "smooth"
+        behavior: "smooth",
       });
     }
   };
@@ -77,6 +77,29 @@ export default function MastHead() {
       behavior: "smooth",
     });
   };
+
+  const faqData = [
+    {
+      question: "Can I counter offer requests?",
+      answer:
+        "Yes, as a host, you have the option to counter traveler requests, giving you flexibility and control over each booking.",
+    },
+    {
+      question: "Can I invite a co-host?",
+      answer:
+        "Absolutely. Tramona allows you to add a co-host to help manage requests and bookings on your property.",
+    },
+    {
+      question: "Why list on Tramona?",
+      answer:
+        "Tramona allows you to list your property at full price and still receive direct booking requests. You can offer exclusive discounts only when you choose, helping you fill empty nights without compromising on price.",
+    },
+    {
+      question: "Can I sync my calendar with other platforms?",
+      answer:
+        "Yes! Tramona integrates with other platforms to prevent double bookings, making it easy to manage your calendar.",
+    },
+  ];
 
   return (
     <AdjustedPropertiesProvider>
@@ -214,10 +237,9 @@ export default function MastHead() {
               <div className="flex w-full overflow-hidden rounded-full border border-[#004236] bg-white">
                 <button
                   onClick={() => handleTabChange("search")}
-                  className={`w-1/2 px-8 py-3 text-center text-sm font-medium transition-all duration-200 
-                    ${
+                  className={`w-1/2 px-8 py-3 text-center text-sm font-medium transition-all duration-200 ${
                     activeTab === "search"
-                      ? "bg-[#004236] text-white" 
+                      ? "bg-[#004236] text-white"
                       : "bg-white text-[#004236]"
                   }`}
                 >
@@ -225,8 +247,7 @@ export default function MastHead() {
                 </button>
                 <button
                   onClick={() => handleTabChange("name-price")}
-                  className={`w-1/2 px-8 py-3 text-center text-sm font-medium transition-all duration-200 
-                    ${
+                  className={`w-1/2 px-8 py-3 text-center text-sm font-medium transition-all duration-200 ${
                     activeTab === "name-price"
                       ? "bg-[#004236] text-white"
                       : "bg-white text-[#004236]"
@@ -249,88 +270,42 @@ export default function MastHead() {
 
         <div className="mt-12 flex flex-col items-center gap-y-20 lg:gap-y-24">
           {/* other  sections */}
-          <OverviewRequestCards className="w-11/12 lg:w-2/3" />
-          <HowTramonaWorks className="w-11/12" />
+          <OverviewRequestCards />
+          <HowTramonaWorks className="max-w-6xl" />
           <div className="mx-0 flex max-w-full justify-center space-y-4 px-4 lg:mx-4 lg:flex lg:space-y-8">
             <TestimonialCarousel testimonials={landingPageTestimonals} />
           </div>
 
-          <div className="mt-12 flex flex-col items-center gap-y-20 lg:gap-y-24">
-            {/* other  sections */}
-            <OverviewRequestCards className="w-11/12 lg:w-2/3" />
-            <HowTramonaWorks className="w-11/12" />
-            <div className="mx-0 flex max-w-full justify-center space-y-4 px-4 lg:mx-4 lg:flex lg:space-y-8">
-              <TestimonialCarousel />
-            </div>
-            <HostSection className="w-full" />
-
+          <div className="mx-2 my-12 flex flex-col items-center gap-y-20 lg:gap-y-24">
             {/* FAQ */}
-            <section className="w-11/12 bg-gray-50">
-              <h2 className="mb-8 text-center text-3xl font-bold">
+            <section className="w-full space-y-8 bg-gray-50">
+              <h2 className="text-center text-3xl font-bold">
                 Frequently Asked Questions
               </h2>
-              <div className="mx-auto w-5/6 max-w-5xl">
-                <Accordion type="single" collapsible className="w-full">
-                  <AccordionItem value="item-1">
+              <Accordion
+                type="single"
+                collapsible
+                className="mx-auto max-w-2xl"
+              >
+                {faqData.map((faq, index) => (
+                  <AccordionItem key={index} value={index.toString()}>
                     <AccordionTrigger>
                       <div className="flex items-center">
                         <HelpCircle className="mr-2 h-5 w-5" />
-                        Can I counter offer requests?
+                        {faq.question}
                       </div>
                     </AccordionTrigger>
-                    <AccordionContent>
-                      Yes, as a host, you have the option to counter traveler
-                      requests, giving you flexibility and control over each
-                      booking.
-                    </AccordionContent>
+                    <AccordionContent>{faq.answer}</AccordionContent>
                   </AccordionItem>
-                  <AccordionItem value="item-2">
-                    <AccordionTrigger>
-                      <div className="flex items-center">
-                        <HelpCircle className="mr-2 h-5 w-5" />
-                        Can I invite a co-host?
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      Absolutely. Tramona allows you to add a co-host to help
-                      manage requests and bookings on your property.
-                    </AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="item-3">
-                    <AccordionTrigger>
-                      <div className="flex items-center">
-                        <HelpCircle className="mr-2 h-5 w-5" />
-                        Why list on Tramona?
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      Tramona allows you to list your property at full price and
-                      still receive direct booking requests. You can offer
-                      exclusive discounts only when you choose, helping you fill
-                      empty nights without compromising on price.
-                    </AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="item-4">
-                    <AccordionTrigger>
-                      <div className="flex items-center">
-                        <HelpCircle className="mr-2 h-5 w-5" />
-                        Can I sync my calendar with other platforms?
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      Yes! Tramona integrates with other platforms to prevent
-                      double bookings, making it easy to manage your calendar.
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
-                <div className="mt-8 text-center">
-                  <Link
-                    href="/faq"
-                    className="font-semibold text-[#004236] hover:underline"
-                  >
-                    See full FAQ
-                  </Link>
-                </div>
+                ))}
+              </Accordion>
+              <div className="text-center">
+                <Link
+                  href="/faq"
+                  className="font-semibold text-[#004236] hover:underline"
+                >
+                  See full FAQ
+                </Link>
               </div>
             </section>
 

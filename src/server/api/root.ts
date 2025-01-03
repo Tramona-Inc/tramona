@@ -24,6 +24,7 @@ import { feedRouter } from "./routers/feedRouter";
 import { calendarRouter } from "./routers/calendarRouter";
 import { requestsToBookRouter } from "./routers/requestsToBookRouter";
 import { claimsRouter } from "./routers/claimsRouter";
+import { propertyMessagesRouter } from "./routers/propertyMessagesRouter";
 /**
  * This is the primary router for your server.
  *
@@ -55,6 +56,7 @@ export const appRouter = createTRPCRouter({
   calendar: calendarRouter,
   requestsToBook: requestsToBookRouter,
   claims: claimsRouter,
+  propertyMessages: propertyMessagesRouter,
 });
 
 // export type definition of API

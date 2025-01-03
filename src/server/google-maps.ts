@@ -91,8 +91,13 @@ export async function getAddress({ lat, lng }: { lat: number; lng: number }) {
   };
 }
 
+export type AddressComponents = Awaited<ReturnType<typeof getAddress>>;
+
 export function stringifyAddress(
-  addressComponents: Awaited<ReturnType<typeof getAddress>>,
+  addressComponents: Pick<
+    AddressComponents,
+    "city" | "stateCode" | "countryISO"
+  >,
 ) {
   if (addressComponents.stateCode) {
     return `${addressComponents.city}, ${addressComponents.stateCode}, ${addressComponents.countryISO}`;

@@ -29,7 +29,7 @@ export default function MonthCalendar({
   date,
   reservedDateRanges = [],
   // onDateClick,
-  selectedRange,
+  // selectedRange,
   // isEditing = false,
   prices,
   isLoading = false,
@@ -121,15 +121,7 @@ export default function MonthCalendar({
                   day && !isGrayedOut && "cursor-pointer",
                   reservationClass,
                   isGrayedOut && "cursor-not-allowed bg-gray-200 text-gray-400",
-                  currentDate &&
-                    selectedRange?.start &&
-                    (selectedRange.end
-                      ? currentDate >= selectedRange.start &&
-                        currentDate <= selectedRange.end
-                      : currentDate.getTime() ===
-                        selectedRange.start.getTime()) &&
-                    "bg-blue-200",
-                  !day && "bg-gray-50",
+                  currentDate && !day && "bg-gray-50",
                   day &&
                     date.getFullYear() === currentDate?.getFullYear() &&
                     date.getMonth() === currentDate?.getMonth() &&

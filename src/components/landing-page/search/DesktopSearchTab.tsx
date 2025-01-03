@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/select";
 import { Property } from "@/server/db/schema";
 import MobileSearchFormBar from "./MobileSearchFormBar";
+import { UseFormReturn } from "react-hook-form";
 
 interface DesktopSearchTabProps {
   isCompact?: boolean;
@@ -140,8 +141,8 @@ export function DesktopSearchTab({
           await utils.properties.getBookItNowProperties.fetch({
             checkIn: values.checkIn,
             checkOut: values.checkOut,
-            numGuests: values.numGuests!,
-            location: values.location!,
+            numGuests: values.numGuests,
+            location: values.location,
           });
 
         setAllProperties((prevState) => {
@@ -170,8 +171,8 @@ export function DesktopSearchTab({
         const airbnbResultsPromise = utils.misc.scrapeAirbnbInitialPage.fetch({
           checkIn: values.checkIn,
           checkOut: values.checkOut,
-          numGuests: values.numGuests!,
-          location: values.location!,
+          numGuests: values.numGuests,
+          location: values.location,
         });
         const airbnbResults = await airbnbResultsPromise;
 
@@ -201,8 +202,8 @@ export function DesktopSearchTab({
         const finishAirbnbResultsPromise = utils.misc.scrapeAirbnbPages.fetch({
           checkIn: values.checkIn,
           checkOut: values.checkOut,
-          numGuests: values.numGuests!,
-          location: values.location!,
+          numGuests: values.numGuests,
+          location: values.location,
           pageCursors: cursors,
         });
 
@@ -242,7 +243,7 @@ export function DesktopSearchTab({
           {/* Mobile Search */}
           <div className="w-full lg:hidden">
             <MobileSearchFormBar
-              form={form}
+              form={form as UseFormReturn<SearchFormValues, unknown, SearchFormValues>}
               onSubmit={handleSearch}
               isLoading={isLoading}
             />
@@ -257,7 +258,7 @@ export function DesktopSearchTab({
                 }`}
               >
                 <SearchFormBar
-                  form={form}
+                  form={form as UseFormReturn<SearchFormValues, unknown, SearchFormValues>}
                   onSubmit={handleSearch}
                   isLoading={isLoading}
                   isCompact={isCompact}

@@ -26,7 +26,7 @@ import { useEffect, useState } from "react";
 
 import { type MessageDbType } from "@/types/supabase.message";
 
-export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
+export default function MessagesPopover({ isMobile, isHostOnboarding }: { isMobile: boolean, isHostOnboarding: boolean }) {
   const { data: session } = useSession();
   const [conversationId, setConversationId] = useState<string>("");
   const [tempToken, setTempToken] = useState<string>("");
@@ -248,6 +248,13 @@ export default function MessagesPopover({ isMobile }: { isMobile: boolean }) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
+
+  useEffect(() => {
+    if (isHostOnboarding) {
+      // Set a default message if onboarding is true
+      form.setValue("message", "I need help with host onboarding. I had an issue logging in with Hospitable.");
+    }
+  }, [isHostOnboarding, form]);
 
   return (
     <>

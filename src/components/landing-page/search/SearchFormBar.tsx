@@ -1,6 +1,12 @@
 // SearchFormBar.tsx
 import React from "react";
-import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -35,11 +41,15 @@ export function SearchFormBar({
   const checkOutDate = form.watch("checkOut");
   const numGuests = form.watch("numGuests") ?? 1;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const values = form.getValues();
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   const values = form.getValues();
+  //   await onSubmit(values);
+  // };
+
+  const handleSubmit = form.handleSubmit(async (values) => {
     await onSubmit(values);
-  };
+  });
 
   if (variant === "modal") {
     return (
@@ -168,6 +178,7 @@ export function SearchFormBar({
                   }`}
                   size={20}
                 /> */}
+
                 <FormField
                   control={form.control}
                   name="location"
@@ -251,9 +262,14 @@ export function SearchFormBar({
                               ? checkOutDate
                               : undefined
                           }
+                          onChange={(e) => {
+                            field.onChange(e);
+                            form.setError("checkIn", { message: "" });
+                          }}
                           icon={CalendarDays}
                         />
                       </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -297,9 +313,14 @@ export function SearchFormBar({
                               ? checkInDate
                               : undefined
                           }
+                          onChange={(e) => {
+                            field.onChange(e);
+                            form.setError("checkOut", { message: "" });
+                          }}
                           icon={CalendarDays}
                         />
                       </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -338,6 +359,7 @@ export function SearchFormBar({
                           icon={Users}
                         />
                       </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />

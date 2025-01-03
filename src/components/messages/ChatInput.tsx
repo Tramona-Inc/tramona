@@ -93,36 +93,39 @@ export default function ChatInput({
         // .select("*")
         .single();
       // // Perform the async operation outside the set function
-      await sendSlackToAdmin({
-        message: newMessage.message,
-        conversationId,
-        senderId: newMessage.userId,
-      });
 
       if (error) {
         removeMessageFromConversation(conversationId, newMessage.id);
         errorToast();
       }
 
+      await sendSlackToAdmin({
+        message: newMessage.message,
+        conversationId,
+        senderId: newMessage.userId,
+      });
+
       if (participantPhoneNumbers) {
         void Promise.all(
           participantPhoneNumbers.map(
             async ({ lastTextAt, phoneNumber, isWhatsApp }) => {
-              if (lastTextAt && lastTextAt <= sub(new Date(), { hours: 1 })) {
-                if (phoneNumber) {
-                  if (isWhatsApp) {
-                    await twilioWhatsAppMutation.mutateAsync({
-                      templateId: "HXae95c5b28aa2f5448a5d63ee454ccb74",
-                      to: phoneNumber,
-                    });
-                  } else {
-                    await sendSMS({
-                      to: phoneNumber,
-                      msg: "You have a new unread message in Tramona, visit Tramona.com to view",
-                    });
-                  }
-                  await updateUser({ lastTextAt: new Date() });
+              if (
+                phoneNumber &&
+                lastTextAt &&
+                lastTextAt <= sub(new Date(), { hours: 1 })
+              ) {
+                if (isWhatsApp) {
+                  await twilioWhatsAppMutation.mutateAsync({
+                    templateId: "HXae95c5b28aa2f5448a5d63ee454ccb74",
+                    to: phoneNumber,
+                  });
+                } else {
+                  await sendSMS({
+                    to: phoneNumber,
+                    msg: "You have a new unread message in Tramona, visit Tramona.com to view",
+                  });
                 }
+                await updateUser({ lastTextAt: new Date() });
               }
             },
           ),
