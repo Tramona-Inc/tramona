@@ -105,8 +105,8 @@ export const calendarRouter = createTRPCRouter({
       await syncCalendar({ iCalLink, propertyId, platformBookedOn });
     }),
 
-  updateHostCalendar: publicProcedure
-    .input(z.object({ hospitableListingId: z.string().nullable().optional() }))
+  getAndUpdateHostCalendar: publicProcedure
+    .input(z.object({ hospitableListingId: z.string() }))
     .query(async ({ input }) => {
       if (!input.hospitableListingId) return;
 
