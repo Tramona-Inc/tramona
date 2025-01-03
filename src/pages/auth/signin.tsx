@@ -44,27 +44,42 @@ export default function Login() {
   const cohostInviteId = useCohostInviteStore((state) => state.cohostInviteId);
   const { mutate: inviteUser } = api.groups.inviteCurUserToGroup.useMutation();
 
-  const handleSubmit = async ({
-    email,
-    password,
-  }: z.infer<typeof formSchema>) => {
-    const callbackUrl =
-      (router.query.callbackUrl as string) ||
-      (router.query.from as string) ||
-      `${window.location.origin}`;
+  const handleSubmit = async ({ email, password }: z.infer<typeof formSchema>) => {
+    try {
+      const callbackUrl =
+        (router.query.callbackUrl as string) ||
+        (router.query.from as string) ||
+        `${window.location.origin}`;
 
-    await signIn("credentials", {
-      email,
-      password,
-      callbackUrl,
-    }).then(() => {
+      // Attempt to sign in, but do not auto-redirect
+      const result = await signIn("credentials", {
+        email,
+        password,
+        callbackUrl,
+        redirect: false,  // Prevent automatic redirect
+      });
+
+      // Handle error if sign-in fails
+      if (result?.error) {
+        throw new Error(result.error);  // Display the error message
+      }
+
+      // Handle any custom logic for invites or redirects
       if (inviteLinkId) {
         void inviteUser({ inviteLinkId });
       }
+
       if (cohostInviteId) {
         void router.push(`/cohost-invite/${cohostInviteId}`);
+      } else {
+        // Redirect to callback URL if sign-in is successful
+        void router.push(callbackUrl);  // You can use callbackUrl or set a default redirect URL
       }
-    });
+
+    } catch (err: any) {
+      // Show a generic error toast if login failed
+      errorToast("Invalid email or password. Please try again.");
+    }
   };
 
   useEffect(() => {

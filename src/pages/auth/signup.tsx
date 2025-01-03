@@ -12,7 +12,7 @@ import ErrorMsg from "@/components/ui/ErrorMsg";
 import { Input } from "@/components/ui/input";
 import { api } from "@/utils/api";
 import { errorToast } from "@/utils/toasts";
-import { zodEmail } from "@/utils/zod-utils";
+import { zodEmail, zodPassword } from "@/utils/zod-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signIn } from "next-auth/react";
 import Head from "next/head";
@@ -44,6 +44,15 @@ export default function SignUp() {
   const { mutateAsync: createUser } = api.auth.createUser.useMutation();
 
   async function handleSubmit(newUser: z.infer<typeof formSchema>) {
+    const result = zodPassword().safeParse(newUser.password);
+    if (!result.success) {
+      // Map Zod issues to form errors
+      const issues = result.error.errors;
+      issues.forEach((issue) => {
+        form.setError("password", { message: issue.message });
+      });
+      return;
+    }
     await createUser(newUser)
       .then(async ({ status }) => {
         if (status === "email taken") {
