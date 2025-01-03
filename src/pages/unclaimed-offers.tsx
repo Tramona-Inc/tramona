@@ -1,22 +1,50 @@
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import { AdjustedPropertiesProvider } from "@/components/landing-page/search/AdjustedPropertiesContext";
-import DynamicDesktopSearchBar from "@/components/landing-page/search/DynamicDesktopSearchBar";
+import { DesktopSearchTab } from "@/components/landing-page/search/DesktopSearchTab";
 import UnclaimedMap from "@/components/unclaimed-offers/UnclaimedMap";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 export default function Page() {
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      setIsScrolled(scrollPosition > 20);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
     <DashboardLayout>
-      <AdjustedPropertiesProvider>
-        <div className="h-full w-full flex-col">
-          <div className="sticky top-header-height z-10 flex h-searchbar-height justify-center">
-            <DynamicDesktopSearchBar />
+      {/* Main scrolling container */}
+      <div className="relative h-screen overflow-y-auto">
+        {/* Sticky header */}
+        <AdjustedPropertiesProvider>
+          <div
+            className={`sticky top-0 z-20 w-full border-b-2 transition-all duration-300 ease-in-out ${
+              isScrolled
+                ? "border-white bg-white shadow-md"
+                : "border-transparent bg-white"
+            }`}
+          >
+            <DesktopSearchTab
+              isCompact={isScrolled}
+              handleTabChange={() => {
+                return;
+              }}
+              isLandingPage={false}
+            />
           </div>
-          <div className="h-full w-full">
+
+          {/* Scrollable content */}
+          <div className="">
             <UnclaimedMap />
           </div>
-        </div>
-      </AdjustedPropertiesProvider>
+        </AdjustedPropertiesProvider>
+      </div>
     </DashboardLayout>
   );
 }

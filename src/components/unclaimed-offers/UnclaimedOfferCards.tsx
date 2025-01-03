@@ -17,14 +17,24 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { useAdjustedProperties } from "../landing-page/search/AdjustedPropertiesContext";
+import {
+  AirbnbSearchResult,
+  useAdjustedProperties,
+} from "../landing-page/search/AdjustedPropertiesContext";
 import AddUnclaimedOffer from "./AddUnclaimedOffer";
-import { MapBoundary } from "../landing-page/search/SearchPropertiesMap";
 import { useLoading } from "./UnclaimedMapLoadingContext";
 import { Badge } from "../ui/badge";
+import { Property } from "@/server/db/schema/tables/properties";
 
-type Property =
-  RouterOutputs["properties"]["getAllInfiniteScroll"]["data"][number];
+// type Property =
+//   RouterOutputs["properties"]["getAllInfiniteScroll"]["data"][number];
+
+export type MapBoundary = {
+  north: number;
+  south: number;
+  east: number;
+  west: number;
+};
 
 export default function UnclaimedOfferCards({
   mapBoundaries,
@@ -34,7 +44,7 @@ export default function UnclaimedOfferCards({
   const { adjustedProperties } = useAdjustedProperties();
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 24;
+  const itemsPerPage = 36;
   const { data: session } = useSession();
   const { isLoading } = useLoading();
   const [isDelayedLoading, setIsDelayedLoading] = useState(true);
@@ -115,116 +125,154 @@ export default function UnclaimedOfferCards({
 
   const renderPaginationItems = useCallback(() => {
     const items = [];
+    const SIBLING_COUNT = 1;
+    const BOUNDARY_COUNT = 1;
 
-    for (let i = 1; i <= totalPages; i++) {
+    const createPageItem = (pageNum: number) => (
+      <PaginationItem key={pageNum}>
+        <PaginationLink
+          href={`?page=${pageNum}`}
+          onClick={(e) => {
+            e.preventDefault();
+            handlePageChange(pageNum);
+          }}
+          isActive={currentPage === pageNum}
+        >
+          {pageNum}
+        </PaginationLink>
+      </PaginationItem>
+    );
+
+    for (let i = 1; i <= Math.min(BOUNDARY_COUNT, totalPages); i++) {
+      items.push(createPageItem(i));
+    }
+
+    const startPage = Math.max(BOUNDARY_COUNT + 1, currentPage - SIBLING_COUNT);
+    const endPage = Math.min(totalPages - BOUNDARY_COUNT, currentPage + SIBLING_COUNT);
+
+    if (startPage > BOUNDARY_COUNT + 1) {
       items.push(
-        <PaginationItem key={i}>
-          <PaginationLink
-            href={`?page=${i}`}
-            onClick={(e) => {
-              e.preventDefault();
-              handlePageChange(i);
-            }}
-            isActive={currentPage === i}
-          >
-            {i}
-          </PaginationLink>
-        </PaginationItem>,
+        <PaginationItem key="start-ellipsis" className="px-2">
+          ...
+        </PaginationItem>
       );
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      if (i > BOUNDARY_COUNT && i < totalPages - BOUNDARY_COUNT + 1) {
+        items.push(createPageItem(i));
+      }
+    }
+
+    if (endPage < totalPages - BOUNDARY_COUNT) {
+      items.push(
+        <PaginationItem key="end-ellipsis" className="px-2">
+          ...
+        </PaginationItem>
+      );
+    }
+
+    for (let i = Math.max(totalPages - BOUNDARY_COUNT + 1, BOUNDARY_COUNT + 1); i <= totalPages; i++) {
+      if (i > endPage) {
+        items.push(createPageItem(i));
+      }
     }
 
     return items;
   }, [totalPages, currentPage, handlePageChange]);
 
   return (
-    <div className="h-full w-full flex-col">
-      <div className="flex h-screen-minus-header-n-footer w-full sm:h-screen-minus-header-n-footer-n-searchbar">
-        <div className="mr-auto h-full w-full overflow-y-scroll px-4 scrollbar-hide lg:px-2">
+    <div className="w-full">
+      <div className="w-full">
+        <div className="mr-auto w-full overflow-y-auto">
           {isDelayedLoading ? (
-            <div className="grid w-full grid-cols-1 gap-x-6 sm:grid-cols-2 md:gap-y-6 lg:grid-cols-3 lg:gap-y-8 xl:gap-y-4 2xl:gap-y-0">
-              {Array(24)
-                .fill(null)
-                .map((_, index) => (
-                  <div key={`skeleton-${index}`}>
-                    <PropertyCardSkeleton />
-                  </div>
-                ))}
+            <div className="mx-auto max-w-[2000px] px-4">
+              <div className="grid w-full grid-cols-1 gap-4 min-[580px]:grid-cols-2 min-[800px]:grid-cols-3 min-[1000px]:grid-cols-4 min-[1200px]:grid-cols-5 min-[1400px]:grid-cols-6">
+                {Array(24)
+                  .fill(null)
+                  .map((_, index) => (
+                    <div key={`skeleton-${index}`}>
+                      <PropertyCardSkeleton />
+                    </div>
+                  ))}
+              </div>
             </div>
           ) : showNoProperties ? (
             <div className="flex h-full w-full items-center justify-center">
               <div className="text-center">
                 <div className="text-lg font-bold">No properties found</div>
                 <div className="mt-2 text-sm text-zinc-500">
-                  Try adjusting your search filters or zooming out on the map
+                  Try adjusting your search filters
                 </div>
               </div>
             </div>
           ) : (
-            <div className="flex h-full w-full flex-col">
-              {/* <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"> */}
-              <div className="grid grid-cols-1 gap-4 min-[580px]:grid-cols-2 min-[950px]:grid-cols-3 min-[1150px]:grid-cols-4">
-                {paginatedProperties?.length &&
-                  paginatedProperties.map((properties, index) => (
-                    <div
-                      key={index}
-                      className="animate-fade-in"
-                      style={{ animationDelay: `${index * 50}ms` }}
-                    >
-                      {properties.data.map((property) => (
-                        <UnMatchedPropertyCard
-                          property={property}
-                          key={property.id}
-                        />
-                      ))}
-                    </div>
-                  ))}
-              </div>
-              {totalPages >= 1 && (
-                <div className="mt-auto px-6 py-4">
-                  <Pagination>
-                    <PaginationContent>
-                      <PaginationItem>
-                        <PaginationPrevious
-                          href={`?page=${Math.max(1, currentPage - 1)}`}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handlePageChange(Math.max(1, currentPage - 1));
-                          }}
-                          className={
-                            currentPage === 1
-                              ? "pointer-events-none opacity-50"
-                              : ""
-                          }
-                        />
-                      </PaginationItem>
-                      {renderPaginationItems()}
-                      <PaginationItem>
-                        <PaginationNext
-                          href={`?page=${Math.min(totalPages, currentPage + 1)}`}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handlePageChange(
-                              Math.min(totalPages, currentPage + 1),
-                            );
-                          }}
-                          className={
-                            currentPage === totalPages
-                              ? "pointer-events-none opacity-50"
-                              : ""
-                          }
-                        />
-                      </PaginationItem>
-                    </PaginationContent>
-                  </Pagination>
+            <div className="flex w-full flex-col">
+              <div className="mx-auto max-w-[2000px] px-4">
+                <div className="grid w-full grid-cols-1 gap-4 min-[580px]:grid-cols-2 min-[800px]:grid-cols-3 min-[1000px]:grid-cols-4 min-[1200px]:grid-cols-5 min-[1400px]:grid-cols-6">
+                  {paginatedProperties?.length &&
+                    paginatedProperties.map((property, index) => (
+                      <div
+                        key={index}
+                        className="animate-fade-in"
+                        style={{ animationDelay: `${index * 50}ms` }}
+                      >
+                        <UnMatchedPropertyCard property={property} />
+                      </div>
+                    ))}
                 </div>
-              )}
+
+                {totalPages >= 1 && (
+                  <div className="mt-8">
+                    <Pagination>
+                      <PaginationContent className="flex flex-wrap justify-center overflow-x-auto">
+                        <PaginationItem>
+                          <PaginationPrevious
+                            href={`?page=${Math.max(1, currentPage - 1)}`}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handlePageChange(Math.max(1, currentPage - 1));
+                            }}
+                            className={
+                              currentPage === 1
+                                ? "pointer-events-none opacity-50"
+                                : ""
+                            }
+                          />
+                        </PaginationItem>
+                        <div className="flex flex-wrap justify-center">
+                          {renderPaginationItems()}
+                        </div>
+                        <PaginationItem>
+                          <PaginationNext
+                            href={`?page=${Math.min(totalPages, currentPage + 1)}`}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handlePageChange(
+                                Math.min(totalPages, currentPage + 1),
+                              );
+                            }}
+                            className={
+                              currentPage === totalPages
+                                ? "pointer-events-none opacity-50"
+                                : ""
+                            }
+                          />
+                        </PaginationItem>
+                      </PaginationContent>
+                    </Pagination>
+                  </div>
+                )}
+              </div>
             </div>
           )}
           {!isLoading &&
             !isDelayedLoading &&
             session?.user.role === "admin" && (
-              <div className="mt-20 rounded-xl border-4 p-4">
-                <AddUnclaimedOffer />
+              <div className="mx-auto mt-20 max-w-[2000px] px-4">
+                <div className="rounded-xl border-4 p-4">
+                  <AddUnclaimedOffer />
+                </div>
               </div>
             )}
         </div>
@@ -236,7 +284,7 @@ export default function UnclaimedOfferCards({
 function UnMatchedPropertyCard({
   property,
 }: {
-  property: Property;
+  property: Property | AirbnbSearchResult;
 }): JSX.Element {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
@@ -268,7 +316,12 @@ function UnMatchedPropertyCard({
   const numGuests = 3;
   const link = isAirbnb
     ? `https://airbnb.com/rooms/${property.originalListingId}`
-    : `/request-to-book/${property.id}?checkIn=${checkIn}&checkOut=${checkOut}&numGuests=${numGuests}`;
+    : (() => {
+        if ("id" in property) {
+          return `/request-to-book/${property.id}?checkIn=${checkIn}&checkOut=${checkOut}&numGuests=${numGuests}`;
+        }
+        throw new Error("Property ID is required for non-Airbnb properties");
+      })();
 
   return (
     <Link
@@ -354,10 +407,10 @@ function UnMatchedPropertyCard({
           <div className="ml-2 flex items-center space-x-1 whitespace-nowrap">
             <Star fill="black" size={12} />
             <div>
-              {property.avgRating ? property.avgRating.toFixed(2) : "New"}
+              {"avgRating" in property ? property.avgRating.toFixed(2) : "New"}
             </div>
             <div>
-              {property.numRatings > 0 ? `(${property.numRatings})` : ""}
+              {"numRatings" in property ? `(${property.numRatings})` : ""}
             </div>
           </div>
         </div>

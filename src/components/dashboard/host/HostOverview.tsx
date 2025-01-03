@@ -1,6 +1,6 @@
 import Spinner from "@/components/_common/Spinner";
 import HostPropertiesOverview from "./HostPropertiesOverview";
-import HostPotentialBookingOverview from "./HostPotentialBookingOverview";
+import HostPotentialBookingOverview from "../../host/overview/potential-booking-overview/HostPotentialBookingOverview";
 import { useSession } from "next-auth/react";
 import { api } from "@/utils/api";
 import AttentionOverviewSection from "@/components/host/attention-required/AttentionOverviewSection";
@@ -19,7 +19,7 @@ export default function HostOverview() {
       <AttentionOverviewSection />
 
       <HostStaysOverview />
-      <HostPotentialBookingOverview className="contents lg:flex lg:flex-1" />
+      <HostPotentialBookingOverview className="flex-col lg:flex lg:flex-1" />
       <div className="flex flex-col gap-4 lg:flex-row">
         <HostPropertiesOverview />
       </div>

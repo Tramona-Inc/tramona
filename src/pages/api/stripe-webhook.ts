@@ -9,6 +9,8 @@ import {
   trips,
   tripCheckouts,
   users,
+  reservedDateRanges,
+  requestsToBook,
 } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
 import { buffer } from "micro";
@@ -19,6 +21,7 @@ import {
   captureTripPaymentWithoutSuperhog,
   sendEmailAndWhatsupConfirmation,
   TripWCheckout,
+  updateICalAfterBookingTrip,
 } from "@/utils/webhook-functions/trips-utils";
 import { createSuperhogReservation } from "@/utils/webhook-functions/superhog-utils";
 import {
@@ -30,6 +33,7 @@ import {
   getRequestIdByOfferId,
   finalizeTrip,
   createRequestToBook,
+  withdrawOverlappingOffers,
 } from "@/utils/webhook-functions/stripe-utils";
 import { sendSlackMessage } from "@/server/slack";
 import { formatDateMonthDay } from "@/utils/utils";
@@ -73,6 +77,7 @@ export default async function webhook(
       case "charge.succeeded": //use to be payment_intent.succeeded
         console.log(event.data.object);
         const paymentIntentSucceeded = event.data.object;
+
         const isChargedWithSetupIntent = //check if this charge was from damages or setup intent to skip the rest of the code
           paymentIntentSucceeded.metadata.is_charged_with_setup_intent ===
           "true"
@@ -129,8 +134,25 @@ export default async function webhook(
           console.log("hi");
 
           // --------- 3 Cases: 1. Book it now, 2.Request to book,  3. Offer  ---------------------------------------
+          //prevent DUPLICATES
+          //1.) trips creatations
+          const existingTrip = await db.query.trips.findFirst({
+            where: eq(trips.paymentIntentId, paymentIntentId),
+          });
+          //2.) request to book duplication
+          const existingRequestToBook = await db.query.requestsToBook.findFirst(
+            {
+              where: eq(requestsToBook.paymentIntentId, paymentIntentId),
+            },
+          );
+          if (existingRequestToBook ?? existingTrip) {
+            console.log("Trip or request to book already exist... Returning");
+            return;
+          }
+
           //1 . CASE : Book it now
           if (paymentIntentSucceeded.metadata.type === "bookItNow") {
+            console.log(paymentIntentId);
             await finalizeTrip({
               paymentIntentId,
               numOfGuests: parseInt(
@@ -148,6 +170,14 @@ export default async function webhook(
               userId: paymentIntentSucceeded.metadata.user_id!,
               isDirectListingCharge,
               source: "Book it now",
+            });
+            // rejecting overlapping offers
+            await withdrawOverlappingOffers({
+              propertyId: parseInt(
+                paymentIntentSucceeded.metadata.property_id!,
+              ),
+              checkIn: new Date(paymentIntentSucceeded.metadata.check_in!),
+              checkOut: new Date(paymentIntentSucceeded.metadata.check_out!),
             });
             //we need to work on referalls/messaging for book it now
 
@@ -172,14 +202,14 @@ export default async function webhook(
               userId: paymentIntentSucceeded.metadata.user_id!,
               isDirectListingCharge,
             });
-          } else {
+          } else if (paymentIntentSucceeded.metadata.type === "offer") {
             // 3. Case: "OFFER"
-
             if (offerId) {
               await db
                 .update(offers)
                 .set({
                   acceptedAt: confirmedDate,
+                  status: "Accepted",
                 })
                 .where(eq(offers.id, offerId));
 
@@ -251,6 +281,14 @@ export default async function webhook(
                 tripCheckout,
               };
 
+              // rejecting overlapping offers
+              await withdrawOverlappingOffers({
+                propertyId: offer.propertyId,
+                checkIn: offer.checkIn,
+                checkOut: offer.checkOut,
+                excludeOfferId: offerId,
+              });
+
               //<___creating a superhog  oreservationnly if does not exist__>
 
               const currentSuperhogReservation = await db.query.trips.findFirst(
@@ -279,6 +317,8 @@ export default async function webhook(
                   console.log("Superhog reservation already exists");
                 }
               }
+              // <----- ICAL ----->
+              await updateICalAfterBookingTrip(currentTripWCheckout);
               //<<--------------------->>
 
               //send email and whatsup (whatsup is not implemented yet)
@@ -286,7 +326,6 @@ export default async function webhook(
               await sendEmailAndWhatsupConfirmation({
                 trip: currentTripWCheckout,
                 user: user!,
-                offer: offer,
                 property: currentProperty!,
               });
               //redeem the traveler and host refferal code
@@ -309,7 +348,7 @@ export default async function webhook(
               }
               // ------ Send Slack When trip is booked ------
               await sendSlackMessage({
-                isProductionOnly: true,
+                isProductionOnly: false,
                 channel: "tramona-bot",
                 text: [
                   `*${user?.email} just booked a trip: ${currentProperty?.name}*`,
@@ -319,6 +358,12 @@ export default async function webhook(
                 ].join("\n"),
               });
             }
+          } else {
+            console.log("Unhandled payment intent type or missing offerId");
+            await sendSlackMessage({
+              text: "UNHANDLED PAYMENT: Trip type could not be determined",
+            });
+            return;
           }
         }
         break;

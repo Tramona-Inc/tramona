@@ -53,7 +53,7 @@ export default function PriceDetailsBeforeTax({
   let priceWithApplicableDiscount;
   if (requestToBook && property) {
     const applicableDiscount = getApplicableBookItNowDiscount({
-      bookItNowDiscountTiers: property.bookItNowDiscountTiers,
+      discountTiers: property.discountTiers,
       checkIn: requestToBook.checkIn,
     });
 
@@ -61,16 +61,18 @@ export default function PriceDetailsBeforeTax({
       priceWithApplicableDiscount =
         scrapedPrice * (100 - applicableDiscount) * 0.01;
     } else if (
-      property.requestToBookDiscountPercentage &&
-      property.requestToBookDiscountPercentage > 0
+      property.requestToBookMaxDiscountPercentage &&
+      property.requestToBookMaxDiscountPercentage > 0
     ) {
       priceWithApplicableDiscount =
-        scrapedPrice * (100 - property.requestToBookDiscountPercentage) * 0.01;
+        scrapedPrice *
+        (100 - property.requestToBookMaxDiscountPercentage) *
+        0.01;
     }
   }
 
   const travelerOfferedPriceBeforeFees = getTravelerOfferedPrice({
-    totalPrice: priceWithApplicableDiscount ?? scrapedPrice,
+    totalBasePriceBeforeFees: priceWithApplicableDiscount ?? scrapedPrice,
     travelerMarkup: 1.015,
   });
 

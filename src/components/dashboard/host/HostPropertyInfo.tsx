@@ -4,8 +4,8 @@ import HostPropertiesDetails from "./HostPropertiesDetails";
 import { AlertCircle } from "lucide-react";
 import HostAvailability from "./HostAvailability";
 import HostPropertiesRestrictions from "./HostPropertiesRestrictions";
-import HostAutoOffer from "./HostAutoOffer";
-import HostBookItNow from "./HostBookItNow";
+//import HostAutoOffer from "./HostAutoOffer";
+// import HostBookItNow from "./HostBookItNow";
 import HostPolicySection from "./HostPolicySection";
 import HostArrivalGuide from "./HostArrivalGuide";
 
@@ -74,10 +74,10 @@ export default function HostPropertyInfo({ property }: { property: Property }) {
           <HostPolicySection property={property} />
         </TabsContent>
         <TabsContent value="auto-offer">
-          <HostAutoOffer property={property} />
+          {/* <HostAutoOffer property={property} /> */}
         </TabsContent>
         <TabsContent value="book-it-now">
-          <HostBookItNow property={property} />
+          {/* <HostBookItNow property={property} /> */}
         </TabsContent>
         <TabsContent value="arrival-guide">
           <HostArrivalGuide property={property} />

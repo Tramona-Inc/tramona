@@ -5,6 +5,7 @@ import { createTRPCContext } from '@/server/api/trpc';
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { propertyId } = req.query;
 
+  console.log("propertyId", propertyId);
   if (!propertyId || Array.isArray(propertyId)) {
     return res.status(400).json({ error: 'Invalid propertyId' });
   }

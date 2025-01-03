@@ -125,7 +125,7 @@ export default function MonthCalendar({
                   day &&
                     date.getFullYear() === currentDate?.getFullYear() &&
                     date.getMonth() === currentDate?.getMonth() &&
-                    day === currentDate?.getDate()
+                    day === currentDate.getDate()
                     ? "font-semibold text-black"
                     : "text-muted-foreground",
                 )}

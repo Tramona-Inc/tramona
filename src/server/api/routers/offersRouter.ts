@@ -2,6 +2,7 @@ import { env } from "@/env";
 
 import {
   createTRPCRouter,
+  hostProcedure,
   protectedProcedure,
   publicProcedure,
   roleRestrictedProcedure,
@@ -23,7 +24,9 @@ import { formatDateRange, getNumNights } from "@/utils/utils";
 import { TRPCError } from "@trpc/server";
 import {
   and,
+  desc,
   eq,
+  gte,
   inArray,
   isNotNull,
   isNull,
@@ -38,6 +41,8 @@ import { scrapeDirectListings } from "@/server/direct-sites-scraping";
 import { createNormalDistributionDates } from "@/server/server-utils";
 import { scrapeAirbnbPrice } from "@/server/scrapePrice";
 import { TRPCClientError } from "@trpc/client";
+import { breakdownPaymentByOffer } from "@/utils/payment-utils/paymentBreakdown";
+import { HostRequestsPageOfferData } from "./propertiesRouter";
 
 export const offersRouter = createTRPCRouter({
   accept: protectedProcedure
@@ -45,7 +50,7 @@ export const offersRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const offer = await ctx.db.query.offers.findFirst({
         where: eq(offers.id, input.id),
-        columns: { totalPrice: true, propertyId: true },
+        columns: { totalBasePriceBeforeFees: true, propertyId: true },
         with: {
           request: {
             columns: {
@@ -98,7 +103,7 @@ export const offersRouter = createTRPCRouter({
             tx
               .update(referralCodes)
               .set({
-                totalBookingVolume: sql`${referralCodes.totalBookingVolume} + ${offer.totalPrice}`,
+                totalBookingVolume: sql`${referralCodes.totalBookingVolume} + ${offer.totalBasePriceBeforeFees}`,
               })
               .where(eq(referralCodes.referralCode, ctx.user.referralCodeUsed)),
 
@@ -218,7 +223,7 @@ export const offersRouter = createTRPCRouter({
       offersByRequestWithProperties.map((offer) => {
         if (offer.acceptedAt !== null || offer.scrapeUrl) return offer;
         // void updateTravelerandHostMarkup({
-        //   offerTotalPrice: offer.totalPrice,
+        //   offertotalBasePriceBeforeFees: offer.totalBasePriceBeforeFees,
         //   offerId: offer.id,
         // });
         return offer;
@@ -276,7 +281,7 @@ export const offersRouter = createTRPCRouter({
         ),
         columns: {
           createdAt: true,
-          totalPrice: true,
+          totalBasePriceBeforeFees: true,
           acceptedAt: true,
           id: true,
           hostPayout: true,
@@ -317,7 +322,7 @@ export const offersRouter = createTRPCRouter({
       z
         .object({
           propertyId: z.number(),
-          totalPrice: z.number().min(1),
+          totalBasePriceBeforeFees: z.number().min(1),
           hostPayout: z.number(),
           travelerOfferedPriceBeforeFees: z.number(),
         })
@@ -460,7 +465,7 @@ export const offersRouter = createTRPCRouter({
         //     userName:
         //       member.user.firstName ?? member.user.name ?? "Tramona Traveler",
         //     airbnbPrice: input.totalPrice * 1.25,
-        //     ourPrice: input.totalPrice,
+        //     ourPrice: input.totalBasePriceBeforeFees,
         //     property: curProperty!.name,
         //     discountPercentage: 25,
         //     nights: getNumNights(
@@ -746,6 +751,110 @@ export const offersRouter = createTRPCRouter({
       });
       return curTrip?.offer?.scrapeUrl !== null;
     }),
+
+  getAllHostOffers: hostProcedure.query(async ({ ctx }) => {
+    const hostProperties = await db.query.properties.findMany({
+      where: eq(properties.hostTeamId, ctx.hostProfile.curTeamId),
+      columns: {
+        id: true,
+        city: true,
+      },
+    });
+
+    const propertyIds = hostProperties.map((property) => property.id);
+
+    // Create initial groupedByCity with all cities, even those without offers
+    const groupedByCity: HostRequestsPageOfferData[] = [];
+    const citiesSet = new Set(hostProperties.map((property) => property.city));
+    citiesSet.forEach((city) => {
+      groupedByCity.push({ city, requests: [] });
+    });
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+    const hostOffers = await db.query.offers.findMany({
+      where: and(
+        inArray(offers.propertyId, propertyIds),
+        eq(offers.status, "Pending"),
+        gte(requests.checkIn, new Date()),
+        gte(requests.createdAt, twentyFourHoursAgo),
+      ),
+      with: {
+        property: {
+          columns: {
+            city: true,
+            name: true,
+          },
+        },
+        request: {
+          columns: {
+            id: true,
+            madeByGroupId: true,
+            maxTotalPrice: true,
+            checkIn: true,
+            checkOut: true,
+            numGuests: true,
+            location: true,
+          },
+          with: {
+            madeByGroup: {
+              with: {
+                owner: {
+                  columns: {
+                    firstName: true,
+                    lastName: true,
+                    name: true,
+                    image: true,
+                    location: true,
+                    about: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      orderBy: [desc(offers.createdAt)],
+    });
+
+    const findCityGroup = (city: string) => {
+      return groupedByCity.find((group) => group.city === city);
+    };
+
+    for (const offer of hostOffers) {
+      if (!offer.property || !offer.request) continue;
+
+      const cityGroup = findCityGroup(offer.property.city);
+      if (!cityGroup) continue; // Skip if somehow the city isn't in our list
+
+      const existingOffer = cityGroup.requests.find(
+        (item) => item.offer.id === offer?.id,
+      );
+
+      if (existingOffer) {
+        continue;
+      } else {
+        cityGroup.requests.push({
+          offer,
+          request: {
+            ...offer.request,
+            traveler: {
+              firstName: offer.request.madeByGroup.owner.firstName,
+              lastName: offer.request.madeByGroup.owner.lastName,
+              name: offer.request.madeByGroup.owner.name,
+              image: offer.request.madeByGroup.owner.image,
+              location: offer.request.madeByGroup.owner.location,
+              about: offer.request.madeByGroup.owner.about,
+            },
+          },
+          property: {
+            city: offer.property.city,
+            name: offer.property.name,
+          },
+        });
+      }
+    }
+    return groupedByCity;
+  }),
 });
 
 export async function getPropertyForOffer(propertyId: number) {
@@ -790,7 +899,7 @@ export async function getOfferPageData(offerId: number) {
       checkIn: true,
       checkOut: true,
       createdAt: true,
-      totalPrice: true,
+      totalBasePriceBeforeFees: true,
       acceptedAt: true,
       propertyId: true,
       requestId: true,

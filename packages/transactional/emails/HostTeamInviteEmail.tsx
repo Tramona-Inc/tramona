@@ -18,13 +18,15 @@ export default function HostTeamInviteEmail({
 
   const inviteUrl = `${baseUrl}/cohost-invite/${cohostInviteId}`;
   return (
-    <Layout title_preview="Tramona hostTeam invitation">
+    <Layout
+      title_preview={`${name ?? email} invited you to their host team on Tramona`}
+    >
       <div className="pt-2" style={{ textAlign: "center" }}>
         <div className="text-brand px-6 text-left text-base">
           <Text className="text-brand text-left">
             Hello, {name ?? email} invited you to their host team on Tramona!
-            Sign up or login at <Link href={inviteUrl}>{`${inviteUrl}`}</Link> with this email to be
-            added to the team.
+            Sign up or login at <Link href={inviteUrl}>{`${inviteUrl}`}</Link>{" "}
+            with this email to be added to the team.
           </Text>
         </div>
       </div>

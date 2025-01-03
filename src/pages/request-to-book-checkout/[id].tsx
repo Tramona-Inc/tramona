@@ -32,6 +32,7 @@ export default function Page() {
   );
 
   // <---------------- Calculate the price here  ---------------->
+  console.log(requestPercentage);
   const propertyPricing = useGetOriginalPropertyPricing({
     property,
     checkIn,
@@ -39,6 +40,7 @@ export default function Page() {
     numGuests,
     requestPercentage,
   });
+  console.log(propertyPricing);
   // ----------------
   if (router.isFallback) {
     return <h2>Loading</h2>;
@@ -54,13 +56,14 @@ export default function Page() {
     );
   }
   const unifiedCheckoutData =
-    property && propertyPricing.originalPrice
+    property && propertyPricing.originalPriceAfterTierDiscount
       ? requestOrBookItNowToUnifiedData({
           property,
           checkIn,
           checkOut,
           numGuests,
-          travelerOfferedPriceBeforeFees: propertyPricing.originalPrice,
+          travelerOfferedPriceBeforeFees:
+            propertyPricing.originalPriceAfterTierDiscount,
           type: "requestToBook",
         })
       : null;

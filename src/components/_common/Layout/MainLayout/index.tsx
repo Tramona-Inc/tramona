@@ -10,9 +10,9 @@ type MainLayoutProps = {
 
 export default function MainLayout({ className, children }: MainLayoutProps) {
   return (
-    <div vaul-drawer-wrapper="">
+    <div vaul-drawer-wrapper="" className="flex flex-col min-h-screen">
       <Header />
-      <main className={cn("min-h-screen-minus-header", className)}>
+      <main className={cn("flex-grow min-h-screen-minus-header", className)}>
         {children}
       </main>
       <Footer />

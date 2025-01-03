@@ -27,9 +27,9 @@ export function BookItNowSection() {
 
   return (
     <>
-      <CityCarousel setLocation={setLocation} />
-      <div className="mx-32 grid gap-6 lg:grid-cols-[300px_1fr]">
-        <FilterSidebar
+      {/* <CityCarousel setLocation={setLocation} /> */}
+      <div className="grid gap-6 max-w-7xl mx-auto px-12">
+        {/* <FilterSidebar
           location={location}
           setLocation={setLocation}
           date={date}
@@ -37,9 +37,10 @@ export function BookItNowSection() {
           minPrice={minPrice}
           maxPrice={maxPrice}
           handlePriceChange={handlePriceChange}
-        />
+        /> */}
         <PropertyGrid />
       </div>
+      
     </>
   );
 }

@@ -4,7 +4,7 @@ import {
   ScrapedListing,
 } from "@/server/direct-sites-scraping";
 import { NewReview } from "@/server/db/schema";
-import axios, { AxiosResponse } from "axios";
+import axios, { AxiosError, AxiosResponse } from "axios";
 import { z } from "zod";
 import { ALL_PROPERTY_TYPES, PropertyType } from "@/server/db/schema/common";
 import { ListingSiteName } from "@/server/db/schema/common";
@@ -82,7 +82,7 @@ async function getLocationId(location: string): Promise<string> {
   const response: AxiosResponse<AutocompleteResponse> = await axios.get(
     `${autocompleteUrl}?${params.toString()}`,
     {
-      httpsAgent: proxyAgent
+      httpsAgent: proxyAgent,
     },
   );
   const suggestions = response.data.suggestions;
@@ -149,7 +149,7 @@ async function getOfferIds(
     `${url}?${params.toString()}`,
     {
       headers,
-      httpsAgent: proxyAgent
+      httpsAgent: proxyAgent,
     },
   );
 
@@ -174,7 +174,9 @@ interface CalendarResponse {
   };
 }
 type AvailabilityResponse = Record<string, number>;
-export async function getAvailability(offerId: string): Promise<AvailabilityResponse> {
+export async function getAvailability(
+  offerId: string,
+): Promise<AvailabilityResponse> {
   const url = `https://www.casamundo.com/api/v2/calendar/${offerId}`;
 
   const currentDate = new Date();
@@ -183,14 +185,17 @@ export async function getAvailability(offerId: string): Promise<AvailabilityResp
 
   // Generate an array of { year, month } objects for the next 12 months
   const monthsToFetch = Array.from({ length: 12 }, (_, i) => {
-    const month = (currentMonth + i - 1) % 12 + 1;
+    const month = ((currentMonth + i - 1) % 12) + 1;
     const year = currentYear + Math.floor((currentMonth + i - 1) / 12);
     return { year, month };
   });
 
   type MonthData = Record<string, number>;
 
-  const fetchMonthData = async (year: number, month: number): Promise<MonthData> => {
+  const fetchMonthData = async (
+    year: number,
+    month: number,
+  ): Promise<MonthData> => {
     const maxRetries = 3;
     for (let attempt = 0; attempt < maxRetries; attempt++) {
       try {
@@ -217,8 +222,10 @@ export async function getAvailability(offerId: string): Promise<AvailabilityResp
 
   // Fetch all months in parallel
   const allMonthsData: MonthData[] = await timeoutPromise(
-    Promise.all(monthsToFetch.map(({ year, month }) => fetchMonthData(year, month))),
-    60000
+    Promise.all(
+      monthsToFetch.map(({ year, month }) => fetchMonthData(year, month)),
+    ),
+    60000,
   );
 
   // Combine all the days data into a single object
@@ -232,11 +239,10 @@ const timeoutPromise = <T>(promise: Promise<T>, ms: number): Promise<T> => {
   return Promise.race<T>([
     promise,
     new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error("Timeout exceeded")), ms)
+      setTimeout(() => reject(new Error("Timeout exceeded")), ms),
     ),
   ]);
 };
-
 
 async function checkAvailability(
   offerId: string,
@@ -246,7 +252,6 @@ async function checkAvailability(
   const url = `https://www.casamundo.com/api/v2/calendar/${offerId}`;
 
   const currentDate = new Date();
-
 
   let currentYear: number = checkIn.getFullYear();
   if (checkIn < currentDate) {
@@ -282,21 +287,29 @@ async function checkAvailability(
         success = true;
         break; // Success, exit retry loop
       } catch (error) {
-        console.log('retrying', attempt);
+        console.log("retrying", attempt);
         if (axios.isAxiosError(error)) {
-          console.error(`Axios error for ${currentYear}-${currentMonth}:`, error.message);
+          console.error(
+            `Axios error for ${currentYear}-${currentMonth}:`,
+            error.message,
+          );
           if (error.response?.status === 522) {
             console.error("Connection timeout error (522). Retrying...");
           }
         } else {
-          console.error(`Non-Axios error for ${currentYear}-${currentMonth}:`, error);
+          console.error(
+            `Non-Axios error for ${currentYear}-${currentMonth}:`,
+            error,
+          );
         }
         // No delay here, it will immediately retry
       }
     }
 
     if (!success) {
-      console.error(`Failed to fetch data for ${currentYear}-${currentMonth} after ${maxRetries} attempts`);
+      console.error(
+        `Failed to fetch data for ${currentYear}-${currentMonth} after ${maxRetries} attempts`,
+      );
       return false; // Consider the property unavailable if we can't fetch the data
     }
 
@@ -369,7 +382,6 @@ type OnlyPriceResult =
   | {
     status: "failed" | "unavailable";
   };
-
 
 function formatCancellationPolicy(
   cancellationDetails: CancellationDetails,
@@ -450,7 +462,7 @@ export const fetchPrice = async (
         null,
         {
           headers,
-          httpsAgent: proxyAgent
+          httpsAgent: proxyAgent,
         },
       );
       const data = response.data;
@@ -463,6 +475,7 @@ export const fetchPrice = async (
         formatCancellationPolicy(cancellationDetails);
 
       if (!data.hasErrors) {
+        console.log(data);
         return {
           price: data.content.priceDetails.travelPrice.raw,
           currency: data.content.priceDetails.currency,
@@ -505,7 +518,7 @@ export const fetchPrice = async (
 };
 
 export const fetchPriceNoRateLimit = async (
-  params: PriceExtractionParams
+  params: PriceExtractionParams,
 ): Promise<OnlyPriceResult> => {
   const url = `https://www.casamundo.com/booking/checkout/priceDetails/${params.offerId}`;
   const queryParams = new URLSearchParams({
@@ -527,13 +540,16 @@ export const fetchPriceNoRateLimit = async (
   const headers = {
     accept: "*/*",
     "accept-language": "en-US,en;q=0.9",
-    "sec-ch-ua":
-      '"Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"',
-    "sec-ch-ua-mobile": "?0",
-    "sec-ch-ua-platform": '"macOS"',
-    "sec-fetch-dest": "empty",
-    "sec-fetch-mode": "cors",
-    "sec-fetch-site": "same-origin",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+    Referer: "https://www.casamundo.com/",
+    Origin: "https://www.casamundo.com",
+    // "sec-ch-ua":
+    //   '"Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"',
+    // "sec-ch-ua-mobile": "?0",
+    // "sec-ch-ua-platform": '"macOS"',
+    // "sec-fetch-dest": "empty",
+    // "sec-fetch-mode": "cors",
+    // "sec-fetch-site": "same-origin",
   };
 
   const maxRetries = 2;
@@ -546,8 +562,8 @@ export const fetchPriceNoRateLimit = async (
         null,
         {
           headers,
-          httpsAgent: proxyAgent,
-        }
+          // httpsAgent: proxyAgent,
+        },
       );
 
       const data = response.data;
@@ -575,6 +591,7 @@ export const fetchPriceNoRateLimit = async (
         };
       }
     } catch (error) {
+      console.log(error);
       if (attempt < maxRetries - 1) {
         await new Promise((resolve) => setTimeout(resolve, retryDelay));
       } else {
@@ -943,7 +960,6 @@ export const casamundoSubScraper: (
       originalNightlyPrice: Math.round((price.price / numNights) * 100),
     };
   };
-
 
 // export const casamundoSubScraper: SubsequentScraper = async ({
 //   originalListingId,

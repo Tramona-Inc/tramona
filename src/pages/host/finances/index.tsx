@@ -12,6 +12,7 @@ import SettingsAndDocuments from "../../../components/host/finances/SettingAndDo
 import { SettingsIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
 
 export default function Page() {
   const { data: user } = api.users.getUser.useQuery();
@@ -81,7 +82,12 @@ export default function Page() {
 
         {isStripeConnectInstanceReady ? (
           stripeLoading ? (
-            <div>Loading Stripe account details...</div>
+            <div className="space-y-4">
+              {/* Skeleton 占位符 */}
+              <SkeletonText className="w-1/3" />
+              <SkeletonText className="w-1/2" />
+              <Skeleton className="h-12 w-full" />
+            </div>
           ) : (
             <div className="mx-auto flex flex-col gap-y-3">
               {stripeAccount?.requirements?.currently_due &&

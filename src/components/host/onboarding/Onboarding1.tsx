@@ -35,6 +35,7 @@ import { ALL_PROPERTY_PMS } from "@/server/db/schema";
 import { api } from "@/utils/api";
 import { HelpCircle, Link, Plus } from "lucide-react";
 import { cn } from "@/utils/utils";
+import { Questions } from "@/pages/for-hosts";
 
 export default function Onboarding1({
   onPressNext,
@@ -88,20 +89,20 @@ export default function Onboarding1({
     //   text: "Connect with our PMS partners for effortless signup.",
     //   onClick: () => openModal("syncPMS"),
     // },
-    {
-      id: "2",
-      icon: <Plus className="text-teal-900" strokeWidth={2} size={30} />,
-      title: "You Add",
-      text: "Manually list your properties",
-      onClick: onPressNext,
-    },
-    {
-      id: "3",
-      icon: <HelpCircle className="text-teal-900" strokeWidth={2} size={30} />,
-      title: "We Add",
-      text: "Have the Tramona onboarding team set up your account.",
-      onClick: () => openModal("assistedListing"),
-    },
+    // {
+    //   id: "2",
+    //   icon: <Plus className="text-teal-900" strokeWidth={2} size={30} />,
+    //   title: "You Add",
+    //   text: "Manually list your properties",
+    //   onClick: onPressNext,
+    // },
+    // {
+    //   id: "3",
+    //   icon: <HelpCircle className="text-teal-900" strokeWidth={2} size={30} />,
+    //   title: "We Add",
+    //   text: "Have the Tramona onboarding team set up your account.",
+    //   onClick: () => openModal("assistedListing"),
+    // },
   ];
 
   const form = useZodForm({
@@ -150,7 +151,7 @@ export default function Onboarding1({
       <div className="w-full flex-grow lg:grid lg:grid-cols-1">
         <div
           className={cn(
-            "flex flex-col gap-6",
+            "flex flex-col justify-center gap-6",
             forHost ? "m-0 items-start" : "my-6 items-center sm:mx-20",
           )}
         >
@@ -189,10 +190,18 @@ export default function Onboarding1({
               ),
             )}
           </div>
+          <p className="font-semibold lg:text-lg">
+            Hosts can expect to make 10-15% more when using Tramona to book
+            their empty nights
+          </p>
+
+          <div className="hidden lg:block">
+            <Questions />
+          </div>
         </div>
       </div>
 
-      {!forHost && <OnboardingFooter isForm={false} />}
+      {/* {!forHost && <OnboardingFooter isForm={false} />} */}
       <Dialog open={showModal} onOpenChange={closeModal}>
         <DialogClose />
         <DialogContent>

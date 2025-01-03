@@ -6,6 +6,7 @@ import {
   FormControl,
   FormField,
   FormItem,
+  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -13,26 +14,39 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Head from "next/head";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { convertDateFormat, useUpdateUser } from "@/utils/utils";
+import {
+  convertMonthToNumber,
+  useUpdateUser,
+  validateDateValues,
+} from "@/utils/utils";
 import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import ErrorMsg from "@/components/ui/ErrorMsg";
 import { ButtonSpinner } from "@/components/ui/button-spinner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { months } from "@/utils/constants";
 
 export default function DateOfBirth() {
   const { data: session } = useSession();
   const router = useRouter();
 
   const formSchema = z.object({
-    dob: z.string(),
+    day: z.string(),
+    month: z.string(),
+    year: z.string(),
   });
 
   type FormValues = z.infer<typeof formSchema>;
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: { dob: "" },
   });
 
   const { refetch: refetchVerifications } =
@@ -40,17 +54,22 @@ export default function DateOfBirth() {
 
   const { updateUser } = useUpdateUser();
 
-  async function onDobSubmit({ dob }: FormValues) {
-    if (new Date(dob) > new Date() || new Date(dob) < new Date("1900-01-01")) {
+  async function onDobSubmit({ day, month, year }: FormValues) {
+    const isDobValid = validateDateValues({
+      day: Number(day),
+      month: convertMonthToNumber(month),
+      year: Number(year),
+    });
+    if (isDobValid !== "valid") {
       form.setError("root", {
         type: "manual",
-        message: "Please enter a valid date of birth.",
+        message: isDobValid,
       });
       return;
     }
     if (session?.user.id) {
       await updateUser({
-        dateOfBirth: convertDateFormat(dob),
+        dateOfBirth: `${convertMonthToNumber(month) + 1}/${day}/${year}`,
         onboardingStep: 2,
       }).then(() => {
         void refetchVerifications();
@@ -79,18 +98,58 @@ export default function DateOfBirth() {
             <Form {...form}>
               <ErrorMsg>{form.formState.errors.root?.message}</ErrorMsg>
               <form onSubmit={form.handleSubmit(onDobSubmit)}>
-                <FormField
-                  name="dob"
-                  control={form.control}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Input {...field} type="date" autoFocus />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="flex items-center gap-4">
+                  <FormField
+                    name="day"
+                    control={form.control}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Day</FormLabel>
+                        <FormControl>
+                          <Input {...field} autoFocus />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    name="month"
+                    control={form.control}
+                    render={({ field }) => (
+                      <FormItem className="w-3/5">
+                        <FormLabel>Month</FormLabel>
+                        <FormControl>
+                          <Select onValueChange={field.onChange}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a month" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {months.map((month) => (
+                                <SelectItem key={month} value={month}>
+                                  {month}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    name="year"
+                    control={form.control}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Year</FormLabel>
+                        <FormControl>
+                          <Input {...field} autoFocus />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
                 <Button type="submit" className="mt-4 w-full">
                   <ButtonSpinner />
                   Continue

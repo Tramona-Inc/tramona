@@ -32,7 +32,7 @@ export default function FeedBookingCard({
     booking.property.originalNightlyPrice && booking.offer
       ? Math.round(
           (1 -
-            booking.offer.totalPrice /
+            booking.offer.totalBasePriceBeforeFees /
               numOfNights /
               booking.property.originalNightlyPrice) *
             100,
@@ -69,7 +69,9 @@ export default function FeedBookingCard({
                 <p className="font-bold">
                   Tramona Price:{" "}
                   <span className="text-teal-900">
-                    {formatCurrency(booking.offer.totalPrice / numOfNights)}
+                    {formatCurrency(
+                      booking.offer.totalBasePriceBeforeFees / numOfNights,
+                    )}
                   </span>
                 </p>
               )}
@@ -123,11 +125,11 @@ export default function FeedBookingCard({
                   ))}
               </CarouselContent>
               <CarouselPrevious
-                className="absolute left-2 top-1/2 size-6 -translate-y-1/2"
+                className="size-6 absolute left-2 top-1/2 -translate-y-1/2"
                 variant={"white"}
               />
               <CarouselNext
-                className="absolute right-2 top-1/2 size-6 -translate-y-1/2"
+                className="size-6 absolute right-2 top-1/2 -translate-y-1/2"
                 variant={"white"}
               />
               <CarouselDots count={count} current={current} />

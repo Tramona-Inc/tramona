@@ -23,7 +23,7 @@ export default function Page() {
   // }, [getVerification, router]);
 
   return (
-    <MainLayout>
+    <MainLayout className="flex flex-col justify-center">
       <div className="flex min-h-screen-minus-header flex-col items-center justify-center gap-4">
         <h1 className="text-center text-5xl font-bold tracking-tight">
           Email Successfully Verified! You can now close this page.

@@ -1,5 +1,5 @@
 import { Offer, REFERRAL_CODE_LENGTH } from "@/server/db/schema";
-import { SeparatedData } from "@/server/server-utils";
+import { RequestsPageOfferData, SeparatedData } from "@/server/server-utils";
 import { useWindowSize } from "@uidotdev/usehooks";
 import { clsx, type ClassValue } from "clsx";
 import {
@@ -16,11 +16,14 @@ import { twMerge } from "tailwind-merge";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import duration from "dayjs/plugin/duration";
-import { HostRequestsPageData } from "@/server/api/routers/propertiesRouter";
+import {
+  HostRequestsPageData,
+  HostRequestsPageOfferData,
+} from "@/server/api/routers/propertiesRouter";
 import * as cheerio from "cheerio";
 import { useSession } from "next-auth/react";
 import { api } from "./api";
-import { HOST_MARKUP } from "./constants";
+import { HOST_MARKUP, TRAVELER_MARKUP } from "./constants";
 import { InferQueryModel } from "@/server/db";
 import {
   TripWithDetails,
@@ -301,18 +304,23 @@ export function getNumNights(from: Date | string, to: Date | string) {
   );
 }
 
-export function getHostPayout(totalPrice: number) {
-  return Math.floor(totalPrice * HOST_MARKUP);
+export function getHostPayout(totalBasePriceBeforeFees: number) {
+  return Math.floor(totalBasePriceBeforeFees * HOST_MARKUP);
 }
 
 export function getTravelerOfferedPrice({
-  totalPrice,
-  travelerMarkup,
+  totalBasePriceBeforeFees,
+  travelerMarkup, //we need this because can be traveler or direct listing markup
 }: {
-  totalPrice: number;
+  totalBasePriceBeforeFees: number;
   travelerMarkup: number;
 }) {
-  return Math.ceil(totalPrice * travelerMarkup);
+  return Math.ceil(totalBasePriceBeforeFees * travelerMarkup);
+}
+
+export function removeTravelerMarkup(amountWithTravelerMarkup: number) {
+  const basePrice = amountWithTravelerMarkup / TRAVELER_MARKUP;
+  return Math.round(basePrice);
 }
 
 export function getPropertyId(url: string): number | null {
@@ -525,7 +533,7 @@ export function scrollToTop() {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-export function separateByPriceRestriction(
+export function separateByPriceAndAgeRestriction(
   organizedData: HostRequestsPageData[],
 ): SeparatedData {
   const processedData = organizedData.map((cityData) => {
@@ -534,20 +542,28 @@ export function separateByPriceRestriction(
         requestData.request.maxTotalPrice /
         getNumNights(requestData.request.checkIn, requestData.request.checkOut);
 
+      const travelerAge = requestData.request.traveler.dateOfBirth
+        ? getAge(requestData.request.traveler.dateOfBirth)
+        : null;
+
       const normalProperties = requestData.properties.filter((property) => {
         if (property.city === "Seattle, WA, US") {
           console.log(property.priceRestriction, nightlyPrice);
         }
         return (
-          property.priceRestriction == null ||
-          property.priceRestriction <= nightlyPrice
+          (property.priceRestriction == null ||
+            property.priceRestriction <= nightlyPrice) &&
+          (property.ageRestriction == null ||
+            (travelerAge !== null && travelerAge >= property.ageRestriction))
         );
       });
 
       const outsideProperties = requestData.properties.filter(
         (property) =>
           property.priceRestriction != null &&
-          property.priceRestriction >= nightlyPrice * 1.15,
+          property.priceRestriction >= nightlyPrice * 1.15 &&
+          property.ageRestriction != null &&
+          (travelerAge === null || travelerAge < property.ageRestriction),
       );
 
       return {
@@ -574,24 +590,30 @@ export function separateByPriceRestriction(
       );
 
     return {
-      normal:
-        normalRequests.length > 0
-          ? { city: cityData.city, requests: normalRequests }
-          : null,
-      outsidePriceRestriction:
-        outsideRequests.length > 0
-          ? { city: cityData.city, requests: outsideRequests }
-          : null,
+      normal: {
+        city: cityData.city,
+        requests: normalRequests,
+      },
+      outsidePriceRestriction: {
+        city: cityData.city,
+        requests: outsideRequests,
+      },
     };
   });
 
   return {
-    normal: processedData
-      .map((data) => data.normal) //
-      .filter(Boolean),
-    outsidePriceRestriction: processedData
-      .map((data) => data.outsidePriceRestriction) //
-      .filter(Boolean),
+    normal: processedData.map((data) => data.normal),
+    outsidePriceRestriction: processedData.map(
+      (data) => data.outsidePriceRestriction,
+    ),
+  };
+}
+
+export function formatOfferData(
+  organizedData: HostRequestsPageOfferData[],
+): RequestsPageOfferData {
+  return {
+    sent: organizedData,
   };
 }
 
@@ -679,7 +701,7 @@ export function getOfferDiscountPercentage(
   else return Math.round(8 + 4 * mulberry32(offer.createdAt.getTime())); // random number between 8 and 12, deterministic based on offer creation time
 }
 
-// export function getRequestToBookDiscountPercentage(offer: {
+// export function getrequestToBookMaxDiscountPercentage(offer: {
 //   createdAt: Date;
 //   travelerOfferedPriceBeforeFees: number;
 //   checkIn: Date;
@@ -790,24 +812,19 @@ export function removeTax(total: number, taxRate: number): number {
 }
 
 export const getApplicableBookItNowDiscount = ({
-  bookItNowDiscountTiers,
+  discountTiers,
   checkIn,
 }: {
-  bookItNowDiscountTiers:
-    | { days: number; percentOff: number }[]
-    | null
-    | undefined;
+  discountTiers: { days: number; percentOff: number }[] | null | undefined;
   checkIn: Date;
 }): number | null => {
-  if (!bookItNowDiscountTiers || bookItNowDiscountTiers.length === 0) {
+  if (!discountTiers || discountTiers.length === 0) {
     return null;
   }
 
   const daysUntilCheckIn = differenceInDays(checkIn, new Date());
 
-  const sortedTiers = [...bookItNowDiscountTiers].sort(
-    (a, b) => b.days - a.days,
-  );
+  const sortedTiers = [...discountTiers].sort((a, b) => b.days - a.days);
 
   const applicableDiscount = sortedTiers.find(
     (tier) => daysUntilCheckIn >= tier.days,
@@ -860,7 +877,9 @@ export function getHostNameAndImage(
     }
   >,
 ) {
-  const teamOwner = property.hostTeam.owner;
+  let teamOwner;
+
+  teamOwner = property.hostTeam.owner;
 
   const ownerName =
     teamOwner.firstName && teamOwner.lastName
@@ -945,4 +964,96 @@ export function isTripWithin48Hours(
 
   // check if current date is after target date
   return now >= targetDate;
+}
+
+export function convertMonthToNumber(month: string) {
+  switch (month) {
+    case "January":
+      return 0;
+    case "February":
+      return 1;
+    case "March":
+      return 2;
+    case "April":
+      return 3;
+    case "May":
+      return 4;
+    case "June":
+      return 5;
+    case "July":
+      return 6;
+    case "August":
+      return 7;
+    case "September":
+      return 8;
+    case "October":
+      return 9;
+    case "November":
+      return 10;
+    case "December":
+      return 11;
+    default:
+      return 0;
+  }
+}
+
+export function validateDateValues({
+  day,
+  month,
+  year,
+}: {
+  day: number;
+  month: number;
+  year: number;
+}) {
+  if (year < 1900 || year > new Date().getFullYear()) {
+    return "Please enter a valid year";
+  }
+  if (month >= 0 && month <= 6) {
+    if (month % 2 === 0) {
+      if (day < 1 || day > 31) {
+        return "Please enter a valid day";
+      }
+    } else {
+      if (day < 1 || day > 30) {
+        return "Please enter a valid day";
+      }
+    }
+  } else {
+    if (month % 2 === 0) {
+      if (day < 1 || day > 30) {
+        return "Please enter a valid day";
+      } else {
+        if (day < 1 || day > 31) {
+          return "Please enter a valid day";
+        }
+      }
+    }
+  }
+  return "valid";
+}
+
+export function toReversed<T>(arr: T[]) {
+  return [...arr].reverse();
+}
+
+export function formatRelativeDateShort(
+  date: Date,
+  { withSuffix }: { withSuffix?: boolean } = {},
+) {
+  const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+  const months = Math.floor(days / 30);
+  const years = Math.floor(months / 12);
+
+  const suffix = withSuffix ? " ago" : "";
+
+  if (years > 0) return `${years}y${suffix}`;
+  if (months > 0) return `${months}mo${suffix}`;
+  if (days > 0) return `${days}d${suffix}`;
+  if (hours > 0) return `${hours}h${suffix}`;
+  if (minutes > 0) return `${minutes}m${suffix}`;
+  return "now";
 }

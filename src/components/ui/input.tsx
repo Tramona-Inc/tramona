@@ -35,6 +35,7 @@ const inputVariants = cva(
         default: "h-10 bg-white",
         lpDesktop: "h-16 pt-4",
         lpMobile: "h-12 bg-white",
+        lpDesktopSearch: "h-16 pt-4",
       },
     },
     defaultVariants: {
@@ -51,6 +52,7 @@ export const overlayVariants = cva(
         default: "h-10",
         lpDesktop: "h-12",
         lpMobile: "h-12",
+        lpDesktopSearch: "h-6",
       },
     },
     defaultVariants: {
@@ -65,6 +67,8 @@ export const labelVariants = cva("", {
       default: "text-sm font-medium text-muted-foreground pb-1",
       lpDesktop: "text-xs text-foreground font-bold absolute left-2 top-1",
       lpMobile: "text-sm text-foreground pb-2",
+      lpDesktopSearch:
+        "text-xs text-foreground font-bold absolute left-2 top-1",
     },
   },
   defaultVariants: {
@@ -160,7 +164,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           />
         </Slot>
         <div className={overlayVariants({ variant })}>
-          {Icon && <Icon className="size-4" />}
+          {Icon && <Icon className="h-4 w-4" />}
           <div
             className={cn(
               "flex-1 items-baseline justify-between",

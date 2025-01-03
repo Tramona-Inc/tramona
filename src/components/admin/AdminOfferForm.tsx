@@ -108,7 +108,7 @@ export default function AdminOfferForm({
     ? getNumNights(request.checkIn, request.checkOut)
     : 1;
   const offeredNightlyPriceUSD = offer
-    ? Math.round(offer.totalPrice / numberOfNights / 100)
+    ? Math.round(offer.totalBasePriceBeforeFees / numberOfNights / 100)
     : 1;
 
   const form = useZodForm({
@@ -142,7 +142,7 @@ export default function AdminOfferForm({
             about: offer.property.about,
             airbnbUrl: offer.property.airbnbUrl ?? undefined,
             propertyName: offer.property.name,
-            offeredPriceUSD: offer.totalPrice / 100,
+            offeredPriceUSD: offer.totalBasePriceBeforeFees / 100,
             offeredNightlyPriceUSD: offeredNightlyPriceUSD,
             originalNightlyPriceUSD: offer.property.originalNightlyPrice
               ? offer.property.originalNightlyPrice / 100
@@ -197,8 +197,8 @@ export default function AdminOfferForm({
 
     const { offeredNightlyPriceUSD: _, ...propertyData } = data;
 
-    // const totalPrice = offeredPriceUSD * 100;
-    const totalPrice = Math.round(
+    // const totalBasePriceBeforeFees = offeredPriceUSD * 100;
+    const totalBasePriceBeforeFees = Math.round(
       data.offeredNightlyPriceUSD * numberOfNights * 100,
     );
 
@@ -230,7 +230,7 @@ export default function AdminOfferForm({
         id: offer.id,
         requestId: request ? request.id : offer.request?.id,
         propertyId: offer.property.id,
-        totalPrice,
+        totalBasePriceBeforeFees,
       };
       ``;
 
@@ -263,9 +263,9 @@ export default function AdminOfferForm({
       const newOffer = {
         requestId: request?.id,
         propertyId,
-        totalPrice,
+        totalBasePriceBeforeFees,
         hostPayout: 0,
-        travelerOfferedPriceBeforeFees: totalPrice,
+        travelerOfferedPriceBeforeFees: totalBasePriceBeforeFees,
         checkIn: request ? request.checkIn : new Date(checkInDate!),
         checkOut: request ? request.checkOut : new Date(checkOutDate!),
         // groupId: request?.madeByGroupId,
@@ -307,7 +307,7 @@ export default function AdminOfferForm({
 
     successfulAdminOfferToast({
       propertyName: newProperty.name,
-      totalPrice,
+      totalBasePriceBeforeFees,
       checkIn: request ? request.checkIn : new Date(checkInDate!),
       checkOut: request ? request.checkOut : new Date(checkOutDate!),
       isUpdate: !!offer,
@@ -321,7 +321,7 @@ export default function AdminOfferForm({
     offer ? offeredNightlyPriceUSD : defaultNightlyPrice,
   );
 
-  const totalPrice = nightlyPrice * numberOfNights;
+  const totalBasePriceBeforeFees = nightlyPrice * numberOfNights;
 
   return (
     <Form {...form}>
@@ -457,7 +457,7 @@ export default function AdminOfferForm({
                 Total offered price ({plural(numberOfNights, "night")})
               </FormLabel>
               <FormControl>
-                <Input prefix="$" value={totalPrice} readOnly />
+                <Input prefix="$" value={totalBasePriceBeforeFees} readOnly />
               </FormControl>
               <FormMessage />
             </FormItem>

@@ -17,12 +17,12 @@ export default function HostSection({
 }) {
   return (
     <div className={cn(className)}>
-      {/* Host-Specific Section */}
+      {/* Host-Specific Section
       <section className="w-full bg-gray-50 py-12">
         <div className="mx-8 grid items-center gap-4 lg:grid-cols-5">
           <div className="flex justify-center lg:col-span-2 lg:justify-start">
             <Image
-              src="/assets/images/why-list/usinglaptop.png"
+              src="/assets/images/why-list/secure.png"
               alt="Host using laptop"
               width={700}
               height={500}
@@ -36,7 +36,7 @@ export default function HostSection({
             <p className="mb-4 text-lg md:text-xl">
               The Only Booking Platform Built to Fill Your Vacancies
             </p>
-            <p className="mb-6 text-wrap">
+            <p className="text-wrap mb-6">
               Tramona lets you maximize earnings by listing your property at
               full price while maintaining the option to offer exclusive
               discounts when you choose. Unlike other platforms, Tramona gives
@@ -74,15 +74,13 @@ export default function HostSection({
         </div>
       </section>
 
-      {/* Protection Section */}
+      Protection Section */}
       <section className="bg-white py-12">
         <div className="container px-4 md:px-6">
           <div className="mx-auto max-w-3xl text-center">
-            <div className="mb-6 inline-block rounded-full bg-[#004236] p-2">
-              <Shield className="h-12 w-12 text-white" />
-            </div>
+            
             <h2 className="mb-8 text-3xl font-bold">
-              Stay Protected with Tramona
+             Feel Safer When Booking Through Tramona
             </h2>
             <div className="grid gap-6 text-left md:grid-cols-2">
               <div className="flex items-start">
@@ -101,11 +99,9 @@ export default function HostSection({
               <div className="flex items-start">
                 <CheckCircle className="mr-2 h-6 w-6 flex-shrink-0 text-[#004236]" />
                 <div>
-                  <h3 className="mb-1 font-semibold">Verified Travelers</h3>
+                  <h3 className="mb-1 font-semibold">Verified Travelers and Hosts</h3>
                   <p>
-                    With three levels of traveler verification, hosts can feel
-                    confident in knowing who they&apos;re hosting. This helps
-                    build a trusted community for everyone on the platform.
+                    Tramona has three levels of traveler verification, and all hosts sign up via their Airbnb account. This adds an extra layer of protection for both hosts and travelers.
                   </p>
                 </div>
               </div>
@@ -114,9 +110,7 @@ export default function HostSection({
                 <div>
                   <h3 className="mb-1 font-semibold">Secure Payments</h3>
                   <p>
-                    All transactions are securely processed through Stripe,
-                    protecting both travelers and hosts from fraud and ensuring
-                    reliable payment processing.
+                    All transactions are securely processed and money is held until check-in it complete, protecting both travelers and hosts from fraud and ensuring reliable payment processing..
                   </p>
                 </div>
               </div>
@@ -132,8 +126,11 @@ export default function HostSection({
                 </div>
               </div>
             </div>
-            <Button className="mt-8 bg-[#004236] text-white hover:bg-[#005a4b]">
-              Learn More About Protection
+            <Button 
+              className="mt-8 bg-[#004236] text-white hover:bg-[#005a4b]"
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            >
+              Book Now
             </Button>
           </div>
         </div>

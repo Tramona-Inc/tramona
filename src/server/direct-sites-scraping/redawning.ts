@@ -275,10 +275,7 @@ export const mapTaxodataToScrapedListing = async (
 export const redawningScraper: DirectSiteScraper = async ({
   checkIn,
   checkOut,
-  requestNightlyPrice,
   location,
-  latitude,
-  longitude,
 }) => {
   const result = await googleMaps
     .geocode({

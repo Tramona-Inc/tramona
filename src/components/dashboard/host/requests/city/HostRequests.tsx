@@ -9,13 +9,22 @@ import { useState } from "react";
 import { type Property } from "@/server/db/schema";
 import HostConfirmRequestDialog from "../../HostConfirmRequestDialog";
 import HostFinishRequestDialog from "./HostFinishRequestDialog";
-import { AlertTriangleIcon, ChevronLeft } from "lucide-react";
+import { ChevronLeft, Home } from "lucide-react";
 import Link from "next/link";
-import { type SeparatedData } from "@/server/server-utils";
-import { separateByPriceRestriction } from "@/utils/utils";
+import {
+  RequestsPageOfferData,
+  type SeparatedData,
+} from "@/server/server-utils";
+import {
+  formatOfferData,
+  separateByPriceAndAgeRestriction,
+} from "@/utils/utils";
 import { useToast } from "@/components/ui/use-toast";
 import { errorToast } from "@/utils/toasts";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import PastOfferCard from "./PastOfferCard";
+import PastOfferWithdrawDialog from "./PastOfferWithdrawDialog";
+import { Card, CardContent } from "@/components/ui/card";
+import { HostRequestsPageOfferData } from "@/server/api/routers/propertiesRouter";
 
 export default function HostRequests() {
   const { toast } = useToast();
@@ -24,7 +33,8 @@ export default function HostRequests() {
   );
   const [dialogOpen, setDialogOpen] = useState(false);
   const router = useRouter();
-  const { city, priceRestriction } = router.query;
+  const { city, option } = router.query;
+  const priceRestriction = option === "outsidePriceRestriction";
 
   const [selectedRequest, setSelectedRequest] =
     useState<HostDashboardRequest | null>(null);
@@ -36,6 +46,14 @@ export default function HostRequests() {
   const [separatedData, setSeparatedData] = useState<SeparatedData | null>(
     null,
   );
+
+  const [cityOfferData, setCityOfferData] = useState<HostRequestsPageOfferData | null>(
+    null,
+  );
+  const [selectedOffer, setSelectedOffer] = useState<number | null>(null);
+
+  const [offerWithdrawalDialogOpen, setOfferWithdrawalDialogOpen] =
+    useState(false);
 
   const [selectedProperties, setSelectedProperties] = useState<number[]>([]);
 
@@ -56,7 +74,8 @@ export default function HostRequests() {
 
   api.properties.getHostPropertiesWithRequests.useQuery(undefined, {
     onSuccess: (fetchedProperties) => {
-      const separatedProperties = separateByPriceRestriction(fetchedProperties);
+      const separatedProperties =
+        separateByPriceAndAgeRestriction(fetchedProperties);
       setSeparatedData(separatedProperties);
     },
   });
@@ -65,32 +84,29 @@ export default function HostRequests() {
     ? separatedData?.outsidePriceRestriction
     : separatedData?.normal;
 
-  const cityData = requestsWithProperties?.find((p) => p.city === city);
+  const cityRequestsData = requestsWithProperties?.find((p) => p.city === city);
 
   const { mutateAsync: rejectRequest } =
     api.requests.rejectRequest.useMutation();
 
+  api.offers.getAllHostOffers.useQuery(undefined, {
+    onSuccess: (fetchedOffers) => {
+      const formattedData = formatOfferData(fetchedOffers);
+      const offersWithProperties = formattedData.sent ? Object.values(formattedData.sent).find((o) => o.city === city) : [];
+      setCityOfferData(offersWithProperties as HostRequestsPageOfferData);
+    },
+  });
+
   return (
-    <div className="p-1">
+    <div>
       <div className="mb-4 xl:hidden">
         <Link href="/host/requests">
           <ChevronLeft />
         </Link>
       </div>
-      <Alert className="mb-2">
-        <AlertTriangleIcon />
-        <AlertTitle>Tip</AlertTitle>
-        <AlertDescription>
-          These is where you see requests travelers have made. These have been
-          sent out to all hosts in (name) with an empty night. Accept, deny, or
-          counter offer each request to get the traveler to make a booking. Once
-          a traveler books, your calander will be blocked and all outstanding
-          matches will be withdrawn
-        </AlertDescription>
-      </Alert>
-      {cityData ? (
+      {cityRequestsData && option === "normal" ? (
         <div className="grid gap-4 md:grid-cols-2">
-          {cityData.requests.map((requestData) => (
+          {cityRequestsData.requests.map((requestData) => (
             <div key={requestData.request.id} className="mb-4">
               <RequestCard request={requestData.request} type="host">
                 <Button
@@ -120,23 +136,48 @@ export default function HostRequests() {
             </div>
           ))}
         </div>
+      ) : cityOfferData && option === "sent" ? (
+        <div className="grid gap-4 md:grid-cols-2">
+          {cityOfferData.requests.map((offerData) => (
+            <div key={offerData.offer.id} className="mb-4">
+              <PastOfferCard
+                request={offerData.request}
+                offer={offerData.offer}
+                property={offerData.property}
+              >
+                <Button
+                  onClick={() => {
+                    setOfferWithdrawalDialogOpen(true);
+                    setSelectedOffer(offerData.offer.id);
+                  }}
+                >
+                  Withdraw
+                </Button>
+              </PastOfferCard>
+            </div>
+          ))}
+        </div>
       ) : (
-        // empty state
-        <div className="flex flex-col items-center gap-y-3 rounded-lg border bg-white py-4">
-          <h3 className="text-lg font-semibold">No requests found</h3>
-          <p>
-            Consider loosen requirements or allow for more ways to book to see
-            more requests.
-          </p>
-          <Link href="/host/calendar">
+        // Empty state
+        <Card className="flex h-full items-center justify-center">
+          <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+            <Home className="mb-4 h-12 w-12 text-gray-400" />
+            <h3 className="mb-2 text-lg font-semibold text-gray-900">
+              No requests found
+            </h3>
+            <p className="max-w-sm text-sm text-gray-500">
+              Consider looser requirements or allow for more ways to book to see
+              more requests.
+            </p>
             <Button
-              className="border-black text-primaryGreen"
-              variant="outline"
+              className="mt-4"
+              variant="primary"
+              onClick={() => router.push("/host/calendar")}
             >
               Change Restrictions
             </Button>
-          </Link>
-        </div>
+          </CardContent>
+        </Card>
       )}
       {step === 0 && properties && selectedRequest && (
         <HostRequestDialog
@@ -168,6 +209,14 @@ export default function HostRequests() {
           request={selectedRequest}
           open={dialogOpen}
           setOpen={setDialogOpen}
+          setStep={setStep}
+        />
+      )}
+      {selectedOffer && (
+        <PastOfferWithdrawDialog
+          offerId={selectedOffer}
+          open={offerWithdrawalDialogOpen}
+          onOpenChange={setOfferWithdrawalDialogOpen}
         />
       )}
     </div>

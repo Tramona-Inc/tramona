@@ -66,7 +66,7 @@ export async function getFeed({ maxNumEntries = 30 } = {}) {
         id: true,
         propertyId: true,
         requestId: true,
-        totalPrice: true,
+        totalBasePriceBeforeFees: true,
         createdAt: true,
         checkIn: true,
         checkOut: true,
@@ -121,7 +121,7 @@ export async function getFeed({ maxNumEntries = 30 } = {}) {
         },
         offer: {
           columns: {
-            totalPrice: true,
+            totalBasePriceBeforeFees: true,
           },
         },
         property: {
@@ -227,7 +227,7 @@ export async function getFeed({ maxNumEntries = 30 } = {}) {
         createdAt: item.entryCreationTime,
         checkIn: item.checkIn,
         checkOut: item.checkOut,
-        totalPrice: item.maxTotalPrice,
+        totalBasePriceBeforeFees: item.maxTotalPrice,
         requestId: null,
         propertyId: item.propertyId,
         property: {
@@ -262,7 +262,7 @@ export async function getFeed({ maxNumEntries = 30 } = {}) {
             image: item.userProfilePicUrl,
           },
         },
-        offer: { totalPrice: item.maxTotalPrice },
+        offer: { totalBasePriceBeforeFees: item.maxTotalPrice },
         property: {
           id: item.propertyId,
           imageUrls: item.property.imageUrls,
@@ -459,7 +459,7 @@ export const feedRouter = createTRPCRouter({
     // generate filler offers
     const realOffers = await db.query.offers.findMany({
       columns: {
-        totalPrice: true,
+        totalBasePriceBeforeFees: true,
         checkIn: true,
         checkOut: true,
       },
@@ -478,13 +478,13 @@ export const feedRouter = createTRPCRouter({
     const generatedOffers = realOffers
       .filter((offer) => offer.property.originalNightlyPrice !== null)
       .map((offer) => {
-        const { totalPrice, checkIn, checkOut, property } = offer;
+        const { totalBasePriceBeforeFees, checkIn, checkOut, property } = offer;
         const { originalNightlyPrice } = property;
         const nights = getNumNights(checkIn, checkOut);
         if (!originalNightlyPrice)
           throw new Error("originalNightlyPrice is undefined");
 
-        const actualNightlyPrice = totalPrice / nights;
+        const actualNightlyPrice = totalBasePriceBeforeFees / nights;
         let generatedNightlyPrice: number;
 
         if (

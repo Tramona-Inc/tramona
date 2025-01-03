@@ -29,8 +29,8 @@ export default function AttentionOverviewSection() {
       {!isLoading ? (
         allNotifications?.length && allNotifications.length > 0 ? (
           <NotificationCard
-            action={`Enable Auto Offers \n`}
-            title={`for \n ${allNotifications[0]!.name}`}
+            action={`Enable Auto Offers for\n`}
+            title={`\n ${allNotifications[0]!.name}`}
             href={`/host/properties/${allNotifications[0]!.id}`}
             className="col-span-1"
             length={allNotifications.length + 1}

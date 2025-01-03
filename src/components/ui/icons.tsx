@@ -88,7 +88,7 @@ const iconComponents: Icons = {
       </svg>
     );
   },
-  github: (props) => {
+  github: (props: React.JSX.IntrinsicAttributes & React.SVGProps<SVGSVGElement>) => {
     return (
       <svg
         fill="none"
@@ -105,7 +105,7 @@ const iconComponents: Icons = {
       </svg>
     );
   },
-  contact: (props) => {
+  contact: (props: React.JSX.IntrinsicAttributes & React.SVGProps<SVGSVGElement>) => {
     return (
       <svg
         width="36"
@@ -122,7 +122,7 @@ const iconComponents: Icons = {
       </svg>
     );
   },
-  edit: (props) => {
+  edit: (props: React.JSX.IntrinsicAttributes & React.SVGProps<SVGSVGElement>) => {
     return (
       <svg
         width="24"

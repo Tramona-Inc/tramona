@@ -77,7 +77,7 @@ export default function MobileHeader({ isHost }: { isHost: boolean }) {
                         className="flex items-center justify-between rounded-md py-3 pr-4 text-primaryGreen transition-colors duration-200 hover:bg-background"
                       >
                         <div className="flex flex-row items-center gap-x-2">
-                          <item.icon />
+                          {item.icon ? <item.icon /> : null}
                           {item.title}
                         </div>
                         <ChevronRight className="h-4 w-4 text-slate-400" />
@@ -108,7 +108,7 @@ export default function MobileHeader({ isHost }: { isHost: boolean }) {
               </Accordion>
               <div className="space-y-4 border-t p-4">
                 <Link
-                  href="/terms-and-conditions"
+                  href="/terms-and-conditions/default"
                   className="block text-sm text-primaryGreen/70 transition-colors duration-200 hover:text-primaryGreen"
                 >
                   Terms
@@ -143,7 +143,7 @@ export default function MobileHeader({ isHost }: { isHost: boolean }) {
               variant="ghost"
               className={cn(
                 "text-black",
-                hostBtn.href !== "/for-hosts" && "text-sm tracking-tight",
+                hostBtn.href !== "/why-list" && "text-sm tracking-tight",
               )}
             >
               <Link href={hostBtn.href}>{hostBtn.name}</Link>

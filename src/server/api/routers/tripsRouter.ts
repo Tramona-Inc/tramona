@@ -140,7 +140,7 @@ export const tripsRouter = createTRPCRouter({
         },
         offer: {
           columns: {
-            totalPrice: true,
+            totalBasePriceBeforeFees: true,
             checkIn: true,
             checkOut: true,
           },
@@ -273,6 +273,7 @@ export const tripsRouter = createTRPCRouter({
           },
         },
       });
+
       const propertyLatLngPoint = await db.query.properties.findFirst({
         where: eq(properties.id, trip!.propertyId),
         columns: { latLngPoint: true },

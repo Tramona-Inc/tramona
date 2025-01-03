@@ -14,22 +14,28 @@ type TaxRates = Record<string, CountryTaxRates | null>;
 //if tax rate array is null then it wont show
 
 export const taxRates: TaxRates = {
-  US: {
+  "United States": {
     CA: {
       cities: {
         "San Diego": {
           "San Diego Transit Occupancy Tax": 0.105,
+        },
+        "Los Angeles": {
+          "Los Angeles Transit Occupancy Tax": 0.105,
         },
         // Add more cities as needed
       },
     },
     TX: {
       stateRate: {
-        "Texas State Hotel Occupancy Tax": 60,
+        "Texas State Hotel Occupancy Tax": 0.06,
       },
       cities: {
         Austin: {
-          "Austin Hotel Occupancy Tax": 11.0,
+          "Austin Hotel Occupancy Tax": 0.11,
+        },
+        Dallas: {
+          "Dallas Hotel Occupancy Tax": 0.11,
         },
         // Add more cities as needed
       },

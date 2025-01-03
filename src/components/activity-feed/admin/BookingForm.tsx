@@ -56,7 +56,7 @@ export default function CreateBookingForm({
               "https://www.tramona.com/property/" + booking.property.id,
             entryCreationTime: booking.createdAt.toISOString().slice(0, 19),
             nightlyPrice:
-              (booking.offer?.totalPrice ?? 0) /
+              (booking.offer?.totalBasePriceBeforeFees ?? 0) /
               getNumNights(booking.checkIn, booking.checkOut) /
               100,
             originalNightlyPrice:

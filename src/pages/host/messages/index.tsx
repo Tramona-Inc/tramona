@@ -5,13 +5,13 @@ import {
   useConversation,
   type Conversation,
 } from "@/utils/store/conversations";
-// import { useSession } from "next-auth/react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { api } from "@/utils/api";
 import { cn } from "@/utils/utils";
 import HostDashboardLayout from "@/components/_common/Layout/HostDashboardLayout";
+import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
 
 function MessageDisplay() {
   const [selectedConversation, setSelectedConversation] =
@@ -22,9 +22,12 @@ function MessageDisplay() {
   };
 
   // * Allows us to open message from url query
-  const [isViewed, setIsViewd] = useState(false);
+  const [isViewed, setIsViewed] = useState(false);
   const conversations = useConversation((state) => state.conversationList);
   const { query } = useRouter();
+
+  const { isLoading: isSidebarLoading } =
+    api.messages.getConversations.useQuery(); // 假设有获取对话的 API
 
   useEffect(() => {
     if (query.conversationId && conversations.length > 0 && !isViewed) {
@@ -40,7 +43,7 @@ function MessageDisplay() {
         setSelectedConversation(conversationToSelect);
       }
 
-      setIsViewd(true);
+      setIsViewed(true);
     }
   }, [conversations, isViewed, query.conversationId, selectedConversation?.id]);
 
@@ -52,10 +55,18 @@ function MessageDisplay() {
           selectedConversation && "hidden md:block",
         )}
       >
-        <MessagesSidebar
-          selectedConversation={selectedConversation}
-          setSelected={selectConversation}
-        />
+        {isSidebarLoading ? (
+          <div className="space-y-4 p-4">
+            <SkeletonText className="w-full" />
+            <SkeletonText className="w-2/3" />
+            <SkeletonText className="w-1/2" />
+          </div>
+        ) : (
+          <MessagesSidebar
+            selectedConversation={selectedConversation}
+            setSelected={selectConversation}
+          />
+        )}
       </div>
       <div
         className={cn(
@@ -63,10 +74,14 @@ function MessageDisplay() {
           !selectedConversation && "hidden md:flex",
         )}
       >
-        <MessagesContent
-          selectedConversation={selectedConversation}
-          setSelected={selectConversation}
-        />
+        {selectedConversation ? (
+          <MessagesContent
+            selectedConversation={selectedConversation}
+            setSelected={selectConversation}
+          />
+        ) : (
+          <Skeleton className="h-96 w-3/4" />
+        )}
       </div>
     </div>
   );
@@ -75,7 +90,7 @@ function MessageDisplay() {
 export default function MessagePage() {
   // const { data: session } = useSession({ required: true });
 
-  const { data: totalUnreadMessages } =
+  const { data: totalUnreadMessages, isLoading: isUnreadLoading } =
     api.messages.getNumUnreadMessages.useQuery();
 
   useEffect(() => {
@@ -88,15 +103,17 @@ export default function MessagePage() {
     <>
       <Head>
         <title>
-          {totalUnreadMessages && totalUnreadMessages > 0
-            ? `(${totalUnreadMessages})`
-            : ""}{" "}
+          {isUnreadLoading
+            ? "Loading..."
+            : totalUnreadMessages && totalUnreadMessages > 0
+              ? `(${totalUnreadMessages})`
+              : ""}{" "}
           Messages | Tramona
         </title>
       </Head>
-      <HostDashboardLayout>
+      <DashboardLayout>
         <MessageDisplay />
-      </HostDashboardLayout>
+      </DashboardLayout>
     </>
   );
 }

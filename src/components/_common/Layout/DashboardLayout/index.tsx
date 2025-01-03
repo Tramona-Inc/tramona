@@ -10,9 +10,15 @@ import MessagesPopover from "@/components/messages/chat-with-admin-popover/Messa
 
 type DashboardLayoutProps = {
   children: React.ReactNode;
+  noFooter?: boolean;
+  noBanner?: boolean;
 };
 
-export default function DashboardLayout({ children }: DashboardLayoutProps) {
+export default function DashboardLayout({
+  children,
+  noFooter = false,
+  noBanner = false,
+}: DashboardLayoutProps) {
   const { data: session, status } = useSession();
   const isMd = useIsMd();
 
@@ -46,15 +52,15 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   return (
     <>
-      <Header />
-      <div className="min-h-screen-minus-header relative lg:flex">
-        <div className="min-w-0 lg:flex-1">
-          <main className="relative min-h-screen">{children}</main>
+      <Header noBanner={noBanner} />
+      <div className="min-h-screen-minus-header-n-footer relative lg:flex">
+        <div className="min-h-full min-w-0 lg:flex-1">
+          <main className="relative min-h-full">{children}</main>
           {status !== "loading" && <MobileNav type={navType} />}
           <div className="hidden md:contents">
             <MessagesPopover isMobile={false} />
           </div>
-          {isMd && <Footer />}
+          {!noFooter && isMd && <Footer />}
         </div>
       </div>
     </>

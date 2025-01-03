@@ -145,6 +145,7 @@ export const requestsToBookRouter = createTRPCRouter({
                 bookOnAirbnb: true,
                 hostName: true,
                 hostProfilePic: true,
+                city: true,
               },
             },
             madeByGroup: {
@@ -189,7 +190,15 @@ export const requestsToBookRouter = createTRPCRouter({
     const allPropertiesWithRequestToBook = await db.query.properties.findMany({
       where: eq(properties.hostTeamId, ctx.hostProfile.curTeamId),
       with: {
-        requestsToBook: true,
+        requestsToBook: {
+          with: {
+            madeByGroup: {
+              with: {
+                owner: true,
+              },
+            },
+          },
+        },
       },
     });
 

@@ -8,7 +8,8 @@ import { useRouter } from "next/router";
 export default function Page() {
   const router = useRouter();
   const isRequestToBook =
-    router.query.tabs === "request-to-book" ? true : false;
+    router.query.tabs === "property-bids" ? true : false;
+
   return (
     <HostDashboardLayout>
       <Head>

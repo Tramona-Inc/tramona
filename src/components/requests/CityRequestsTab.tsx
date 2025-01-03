@@ -12,34 +12,40 @@ export default function ActiveRequestsTab() {
 
   if (!requests) return <Spinner />;
 
-  return requests.activeRequests.length !== 0 ? (
-    <div className="space-y-3 pb-32">
-      <NewCityRequestBtn />
-      <Alert className="bg-white">
-        <AlertTriangle className="h-4 w-4" />
-        <AlertTitle>Tip</AlertTitle>
-        <AlertDescription>
-          Hosts will sen you unique offers for your requests. Submit multiple
-          request to see what offers you get!
-        </AlertDescription>
-      </Alert>
-
-      {requests.activeRequests.map((request) => (
-        <RequestCard key={request.id} type="guest" request={request}>
-          <RequestCardAction request={request} />
-        </RequestCard>
-      ))}
+  return (
+    <div className="space-y-3">
+      <div className="space-y-3">
+        <NewCityRequestBtn />
+        <Alert className="">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Tip</AlertTitle>
+          <AlertDescription>
+            Requests are sent to all hosts with vacancies in the area. Make a
+            request and uncover one-of-a-kind offers to stay at their
+            properties.
+          </AlertDescription>
+        </Alert>
+      </div>
+      {requests.activeRequests.length !== 0 ? (
+        <div className="space-y-3 pb-32">
+          {requests.activeRequests.map((request) => (
+            <RequestCard key={request.id} type="guest" request={request}>
+              <RequestCardAction request={request} />
+            </RequestCard>
+          ))}
+        </div>
+      ) : (
+        <EmptyStateValue
+          title={"No city requests"}
+          description={
+            "You don't have any active requests. Requests that you submit will show up here."
+          }
+          redirectTitle={"Request Deal"}
+          href={"/"}
+        >
+          <RequestEmptySvg />
+        </EmptyStateValue>
+      )}
     </div>
-  ) : (
-    <EmptyStateValue
-      title={"No city requests"}
-      description={
-        "You don't have any active requests. Requests that you submit will show up here."
-      }
-      redirectTitle={"Request Deal"}
-      href={"/"}
-    >
-      <RequestEmptySvg />
-    </EmptyStateValue>
   );
 }
