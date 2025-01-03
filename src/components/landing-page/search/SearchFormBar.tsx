@@ -1,6 +1,12 @@
 // SearchFormBar.tsx
 import React from "react";
-import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -172,12 +178,12 @@ export function SearchFormBar({
                   }`}
                   size={20}
                 /> */}
+
                 <FormField
                   control={form.control}
                   name="location"
                   render={({ field }) => (
                     <FormItem className="w-full">
-
                       <Select
                         onValueChange={field.onChange}
                         value={field.value}
@@ -203,31 +209,16 @@ export function SearchFormBar({
                           sideOffset={4}
                           align="start"
                         >
-                          <FormControl>
-                            <SelectTrigger
-                              className={`border-0 bg-transparent focus:ring-0 transition-all duration-300 ease-in-out ${
-                                isCompact ? "text-xs" : "text-base"
-                              }`}
+                          {locations.map((location) => (
+                            <SelectItem
+                              key={location.name}
+                              value={location.name}
                             >
-                              <SelectValue placeholder="Search destinations" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent
-                            className="h-48 overflow-y-auto"
-                            position="popper"
-                          >
-                            {locations.map((location) => (
-                              <SelectItem
-                                key={location.name}
-                                value={location.name}
-                              >
-                                {location.name}, {location.country}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <FormMessage />
+                              {location.name}, {location.country}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </FormItem>
                   )}
                 />
@@ -266,13 +257,16 @@ export function SearchFormBar({
                           className={`border-0 bg-transparent transition-all duration-300 ease-in-out hover:bg-transparent focus:ring-0 ${
                             isCompact ? "text-xs" : "text-base"
                           }`}
-                          maxDate={checkOutDate instanceof Date ? checkOutDate : undefined}
+                          maxDate={
+                            checkOutDate instanceof Date
+                              ? checkOutDate
+                              : undefined
+                          }
                           onChange={(e) => {
                             field.onChange(e);
                             form.setError("checkIn", { message: "" });
                           }}
                           icon={CalendarDays}
-
                         />
                       </FormControl>
                       <FormMessage />
@@ -314,7 +308,11 @@ export function SearchFormBar({
                           className={`border-0 bg-transparent transition-all duration-300 ease-in-out hover:bg-transparent focus:ring-0 ${
                             isCompact ? "text-xs" : "text-base"
                           }`}
-                          minDate={checkInDate instanceof Date ? checkInDate : undefined}
+                          minDate={
+                            checkInDate instanceof Date
+                              ? checkInDate
+                              : undefined
+                          }
                           onChange={(e) => {
                             field.onChange(e);
                             form.setError("checkOut", { message: "" });
