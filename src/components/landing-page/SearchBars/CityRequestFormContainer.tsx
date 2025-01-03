@@ -3,26 +3,33 @@ import RequestCityForm from "./RequestCityForm";
 import LinkRequestForm from "@/components/link-input/LinkRequestForm";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { useRef } from "react";
+import { useRef, useState } from "react";
+import { cn } from "@/utils/utils";
+import clsx from "clsx";
 
 export default function CityRequestFormContainer({
   isRequestsPage = false,
 }: {
   isRequestsPage?: boolean;
 }) {
-  const formRef = useRef<{ submit: () => void }>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const formRef = useRef<{ submit: () => void; isLoading: boolean }>(null);
 
   const handleSubmit = () => {
     if (formRef.current) {
       formRef.current.submit();
     }
   };
+
+  console.log(isLoading);
   return (
     <div
-      className={`max-w-5/6 flex flex-col gap-y-3 ${isRequestsPage ? "" : "md:7/12 w-11/12 gap-y-3 lg:w-1/2"}`}
+      className={cn("max-w-5/6 flex w-5/6 flex-col gap-y-3 lg:w-1/2", {
+        "lg:w-11/12": isRequestsPage,
+      })}
     >
       {isRequestsPage && (
-        <p className="text-sm font-semibold text-muted-foreground lg:block">
+        <p className="pt-2 text-sm font-semibold text-muted-foreground lg:block">
           Send a request to every host in{" "}
           <span className="font-bold text-teal-900">
             <Typewriter
@@ -36,7 +43,11 @@ export default function CityRequestFormContainer({
           </span>
         </p>
       )}
-      <RequestCityForm isRequestsPage={isRequestsPage} ref={formRef} />
+      <RequestCityForm
+        isRequestsPage={isRequestsPage}
+        ref={formRef}
+        onLoadingChange={setIsLoading}
+      />
       <div className="flex items-center gap-x-4 text-zinc-400">
         <Separator className="flex-1 bg-zinc-400" />
         <p>or</p>
@@ -51,9 +62,19 @@ export default function CityRequestFormContainer({
         <Button
           type="submit"
           onClick={handleSubmit}
-          className="mt-2 w-full py-6"
+          className={clsx("mt-2 w-full py-6")}
+          disabled={isLoading}
         >
-          Submit Request
+          {!isLoading ? (
+            <p> Submit Request </p>
+          ) : (
+            <div className="flex h-full items-center justify-center space-x-2">
+              <span className="mr-2 text-white">Submitting Request</span>
+              <div className="h-1 w-1 animate-bounce rounded-full bg-white [animation-delay:-0.3s]"></div>
+              <div className="h-1 w-1 animate-bounce rounded-full bg-white [animation-delay:-0.15s]"></div>
+              <div className="h-1 w-1 animate-bounce rounded-full bg-white"></div>
+            </div>
+          )}
         </Button>
       )}
     </div>

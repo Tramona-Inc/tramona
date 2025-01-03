@@ -17,20 +17,19 @@ import { locations } from "./locations";
 import { SearchFormValues } from "./schemas";
 
 interface SearchFormBarProps {
-  form: UseFormReturn<SearchFormValues, unknown, SearchFormValues>;  // Added unknown as the second type parameter
+  form: UseFormReturn<SearchFormValues, unknown, SearchFormValues>; // Added unknown as the second type parameter
   onSubmit: (values: SearchFormValues) => Promise<void> | void;
   isLoading: boolean;
   isCompact?: boolean;
-  variant?: 'default' | 'modal';
+  variant?: "default" | "modal";
 }
-
 
 export function SearchFormBar({
   form,
   onSubmit,
   isLoading,
   isCompact = false,
-  variant = 'default',
+  variant = "default",
 }: SearchFormBarProps) {
   const checkInDate = form.watch("checkIn");
   const checkOutDate = form.watch("checkOut");
@@ -46,11 +45,10 @@ export function SearchFormBar({
     await onSubmit(values);
   });
 
-  if (variant === 'modal') {
+  if (variant === "modal") {
     return (
       <Form {...form}>
         <div className="space-y-4">
-
           {/* Check-in */}
           <FormField
             control={form.control}
@@ -61,11 +59,15 @@ export function SearchFormBar({
                   <div className="relative">
                     <SingleDateInput
                       {...field}
-                      value={field.value instanceof Date ? field.value : undefined}
+                      value={
+                        field.value instanceof Date ? field.value : undefined
+                      }
                       placeholder="Check in"
                       disablePast
                       className="w-full rounded-lg border border-gray-300 p-4 pl-10"
-                      maxDate={checkOutDate instanceof Date ? checkOutDate : undefined}
+                      maxDate={
+                        checkOutDate instanceof Date ? checkOutDate : undefined
+                      }
                     />
                     <CalendarDays className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
                   </div>
@@ -84,11 +86,15 @@ export function SearchFormBar({
                   <div className="relative">
                     <SingleDateInput
                       {...field}
-                      value={field.value instanceof Date ? field.value : undefined}
+                      value={
+                        field.value instanceof Date ? field.value : undefined
+                      }
                       placeholder="Check out"
                       disablePast
                       className="w-full rounded-lg border border-gray-300 p-4 pl-10"
-                      minDate={checkInDate instanceof Date ? checkInDate : undefined}
+                      minDate={
+                        checkInDate instanceof Date ? checkInDate : undefined
+                      }
                     />
                     <CalendarDays className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
                   </div>
@@ -145,12 +151,12 @@ export function SearchFormBar({
       <form onSubmit={handleSubmit} className="w-full">
         <div className="flex w-full justify-center">
           <div
-            className={`flex items-end w-full transition-all duration-300 ease-in-out ${
+            className={`flex w-full items-end transition-all duration-300 ease-in-out ${
               isCompact ? "mt-2 h-9" : "-mt-6 h-20"
             }`}
           >
             <div
-              className={`z-50 mx-auto flex w-full items-center justify-between rounded-full border border-black bg-white drop-shadow-lg transition-all duration-300 ease-in-out ${
+              className={`z-50 mx-auto flex w-full items-center justify-between rounded-full border border-gray-200 bg-white drop-shadow-lg transition-all duration-300 ease-in-out ${
                 isCompact ? "h-10 px-2" : "h-14 px-4"
               }`}
             >
@@ -160,21 +166,42 @@ export function SearchFormBar({
                   isCompact ? "w-40" : "w-72"
                 }`}
               >
-                <Search
+                {/* <Search
                   className={`mr-2 text-gray-400 transition-all duration-300 ease-in-out ${
                     isCompact ? "scale-75" : "scale-100"
                   }`}
                   size={20}
-                />
+                /> */}
                 <FormField
                   control={form.control}
                   name="location"
                   render={({ field }) => (
                     <FormItem className="w-full">
-                      <div className="relative">
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
+
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger
+                            className={`justify-start border-0 bg-transparent transition-all duration-300 ease-in-out focus:ring-0 ${
+                              isCompact ? "text-xs" : "text-base"
+                            }`}
+                          >
+                            <Search
+                              className={`mr-2 text-gray-400 transition-all duration-300 ease-in-out ${
+                                isCompact ? "scale-75" : "scale-100"
+                              }`}
+                              size={20}
+                            />
+                            <SelectValue placeholder="Search Destinations" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent
+                          className="max-h-[300px] overflow-y-auto rounded-lg border border-gray-200 bg-white p-1 shadow-lg"
+                          position="item-aligned"
+                          sideOffset={4}
+                          align="start"
                         >
                           <FormControl>
                             <SelectTrigger
@@ -214,12 +241,12 @@ export function SearchFormBar({
                   isCompact ? "w-28" : "w-40"
                 }`}
               >
-                <CalendarDays
+                {/* <CalendarDays
                   className={`mr-2 text-gray-400 transition-all duration-300 ease-in-out ${
                     isCompact ? "scale-75" : "scale-100"
                   }`}
                   size={20}
-                />
+                /> */}
                 <FormField
                   control={form.control}
                   name="checkIn"
@@ -228,11 +255,15 @@ export function SearchFormBar({
                       <FormControl>
                         <SingleDateInput
                           {...field}
-                          value={field.value instanceof Date ? field.value : undefined}
-                          variant="lpDesktop"
+                          value={
+                            field.value instanceof Date
+                              ? field.value
+                              : undefined
+                          }
+                          variant="lpDesktopSearch"
                           placeholder="Check in"
                           disablePast
-                          className={`border-0 bg-transparent hover:bg-transparent focus:ring-0 transition-all duration-300 ease-in-out ${
+                          className={`border-0 bg-transparent transition-all duration-300 ease-in-out hover:bg-transparent focus:ring-0 ${
                             isCompact ? "text-xs" : "text-base"
                           }`}
                           maxDate={checkOutDate instanceof Date ? checkOutDate : undefined}
@@ -240,6 +271,8 @@ export function SearchFormBar({
                             field.onChange(e);
                             form.setError("checkIn", { message: "" });
                           }}
+                          icon={CalendarDays}
+
                         />
                       </FormControl>
                       <FormMessage />
@@ -256,12 +289,12 @@ export function SearchFormBar({
                   isCompact ? "w-28" : "w-40"
                 }`}
               >
-                <CalendarDays
+                {/* <CalendarDays
                   className={`mr-2 text-gray-400 transition-all duration-300 ease-in-out ${
                     isCompact ? "scale-75" : "scale-100"
                   }`}
                   size={20}
-                />
+                /> */}
                 <FormField
                   control={form.control}
                   name="checkOut"
@@ -270,11 +303,15 @@ export function SearchFormBar({
                       <FormControl>
                         <SingleDateInput
                           {...field}
-                          value={field.value instanceof Date ? field.value : undefined}
-                          variant="lpDesktop"
+                          value={
+                            field.value instanceof Date
+                              ? field.value
+                              : undefined
+                          }
+                          variant="lpDesktopSearch"
                           placeholder="Check Out"
                           disablePast
-                          className={`border-0 bg-transparent hover:bg-transparent focus:ring-0 transition-all duration-300 ease-in-out ${
+                          className={`border-0 bg-transparent transition-all duration-300 ease-in-out hover:bg-transparent focus:ring-0 ${
                             isCompact ? "text-xs" : "text-base"
                           }`}
                           minDate={checkInDate instanceof Date ? checkInDate : undefined}
@@ -282,6 +319,7 @@ export function SearchFormBar({
                             field.onChange(e);
                             form.setError("checkOut", { message: "" });
                           }}
+                          icon={CalendarDays}
                         />
                       </FormControl>
                       <FormMessage />
@@ -298,12 +336,12 @@ export function SearchFormBar({
                   isCompact ? "w-28" : "w-40"
                 }`}
               >
-                <Users
+                {/* <Users
                   className={`mr-2 text-gray-400 transition-all duration-300 ease-in-out ${
                     isCompact ? "scale-75" : "scale-100"
                   }`}
                   size={20}
-                />
+                /> */}
                 <FormField
                   control={form.control}
                   name="numGuests"
@@ -312,14 +350,15 @@ export function SearchFormBar({
                       <FormControl>
                         <GuestInput
                           {...field}
-                          variant="lpDesktop"
+                          variant="lpDesktopSearch"
                           placeholder="Guests"
-                          className={`border-0 bg-transparent hover:bg-transparent focus:ring-0 transition-all duration-300 ease-in-out ${
+                          className={`border-0 bg-transparent transition-all duration-300 ease-in-out hover:bg-transparent focus:ring-0 ${
                             isCompact ? "text-xs" : "text-base"
                           }`}
                           value={numGuests}
                           minGuests={1}
                           maxGuests={999}
+                          icon={Users}
                         />
                       </FormControl>
                       <FormMessage />
@@ -334,6 +373,12 @@ export function SearchFormBar({
                 className={`ml-2 rounded-full bg-primaryGreen text-white transition-all duration-300 ease-in-out ${
                   isCompact ? "h-6 w-6 p-0" : "h-9 w-9 p-0"
                 }`}
+                onClick={() => {
+                  window.scrollTo({
+                    top: 350,
+                    behavior: "smooth",
+                  });
+                }}
                 disabled={isLoading}
               >
                 {isLoading ? (

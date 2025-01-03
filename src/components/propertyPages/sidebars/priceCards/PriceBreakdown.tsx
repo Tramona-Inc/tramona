@@ -1,36 +1,63 @@
 import React from "react";
 import type { RequestToBookDetails } from "./RequestToBookOrBookNowPriceCard";
-import { breakdownPaymentByPropertyAndTripParams } from "@/utils/payment-utils/paymentBreakdown";
+import {
+  breakdownPaymentByOffer,
+  breakdownPaymentByPropertyAndTripParams,
+} from "@/utils/payment-utils/paymentBreakdown";
 import type { PropertyPageData } from "../RequestToBookSideBar";
 import { formatCurrency } from "@/utils/utils";
-function PriceBreakdown({
-  requestToBookDetails,
-  property,
-  requestAmount,
-}: {
-  requestToBookDetails: RequestToBookDetails;
-  property: PropertyPageData;
-  requestAmount: number; //if book it now, it will be the full price
-}) {
-  const brokedownPrice = breakdownPaymentByPropertyAndTripParams({
-    dates: {
-      checkIn: requestToBookDetails.checkIn,
-      checkOut: requestToBookDetails.checkOut,
-    },
-    property,
-    travelerPriceBeforeFees: requestAmount,
-  });
-  console.log("brokedownPrice", brokedownPrice);
+import type { OfferWithDetails } from "@/components/propertyPages/PropertyPage";
+import { getNumNights } from "@/utils/utils";
+
+function PriceBreakdown(
+  props:
+    | {
+        requestToBookDetails: RequestToBookDetails;
+        property: PropertyPageData;
+        requestAmount: number; // Required in this case
+        offer?: never; // Explicitly disallow `offer` if these props are provided
+      }
+    | {
+        offer: OfferWithDetails; // Required in this case
+        requestToBookDetails?: never; // Explicitly disallow these props if `offer` is provided
+        property?: never;
+        requestAmount?: never;
+      },
+) {
+  let brokedownPrice;
+  let numOfNights;
+  if (props.offer) {
+    brokedownPrice = breakdownPaymentByOffer(props.offer);
+    numOfNights = getNumNights(props.offer.checkIn, props.offer.checkOut);
+  } else {
+    brokedownPrice = breakdownPaymentByPropertyAndTripParams({
+      dates: {
+        checkIn: props.requestToBookDetails.checkIn,
+        checkOut: props.requestToBookDetails.checkOut,
+      },
+      property: props.property,
+      travelerPriceBeforeFees: props.requestAmount,
+    });
+    numOfNights = getNumNights(
+      props.requestToBookDetails.checkIn,
+      props.requestToBookDetails.checkOut,
+    );
+  }
+
   const serviceFee =
     brokedownPrice.superhogFee + brokedownPrice.stripeTransactionFee;
 
   return (
     <div className="my-2 flex w-full flex-col gap-y-1 text-sm text-muted-foreground">
-      <div className="flex items-center justify-between">
-        <span>Trip Subtotal</span>
+      <div className="flex items-center justify-between font-semibold">
+        <span>
+          Trip Subtotal{" "}
+          <span className="text-xs font-light">{numOfNights}x nights</span>
+        </span>
         <span className="font-semibold">
           {formatCurrency(
-            brokedownPrice.totalTripAmount - brokedownPrice.taxesPaid,
+            brokedownPrice.totalTripAmount -
+              (brokedownPrice.taxesPaid + serviceFee),
           )}
         </span>
       </div>

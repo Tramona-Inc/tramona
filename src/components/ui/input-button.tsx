@@ -36,6 +36,7 @@ const inputButtonVariants = cva(
         default: "h-10 bg-zinc-50",
         lpDesktop: "h-16 pt-4",
         lpMobile: "h-12 bg-white",
+        lpDesktopSearch: "h-16 pt-4",
       },
     },
     defaultVariants: {
@@ -113,7 +114,7 @@ const InputButton = React.forwardRef<HTMLButtonElement, InputButtonProps>(
           <div className="line-clamp-1">{(value || placeholder) ?? ""}</div>
         </button>
         <div className={overlayVariants({ variant })}>
-          {Icon && <Icon className="size-4" />}
+          {Icon && <Icon className="h-4 w-4" />}
           <div
             className={cn(
               "flex-1 items-baseline justify-between",
@@ -130,7 +131,7 @@ const InputButton = React.forwardRef<HTMLButtonElement, InputButtonProps>(
             className="absolute bottom-4 right-1 rounded-full bg-white p-1 hover:bg-zinc-200"
             onClick={() => setValue?.(undefined)}
           >
-            <XIcon className="size-4" />
+            <XIcon className="h-4 w-4" />
           </button>
         )}
       </div>

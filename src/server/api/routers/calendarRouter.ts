@@ -50,6 +50,10 @@ export async function syncCalendar({
       })),
     );
 
+    await tx.update(properties).set({
+      iCalLinkLastUpdated: new Date(),
+    }).where(eq(properties.id, propertyId));
+
     // Update the iCalLink if it's changed
     await tx
       .update(properties)
@@ -101,8 +105,8 @@ export const calendarRouter = createTRPCRouter({
       await syncCalendar({ iCalLink, propertyId, platformBookedOn });
     }),
 
-  updateHostCalendar: publicProcedure
-    .input(z.object({ hospitableListingId: z.string().nullable().optional() }))
+  getAndUpdateHostCalendar: publicProcedure
+    .input(z.object({ hospitableListingId: z.string() }))
     .query(async ({ input }) => {
       if (!input.hospitableListingId) return;
 
@@ -177,6 +181,11 @@ export const calendarRouter = createTRPCRouter({
         })
         .from(reservedDateRanges)
         .where(eq(reservedDateRanges.propertyId, propertyId));
+
+      await db
+        .update(properties)
+        .set({ iCalLinkLastUpdated: new Date() })
+        .where(eq(properties.id, propertyId));
 
       return generateICSContent(reservedDates);
     }),

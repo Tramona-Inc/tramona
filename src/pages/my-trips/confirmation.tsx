@@ -12,7 +12,6 @@ export default function TripDetailsPage() {
   const [open, setOpen] = useState(true);
   const router = useRouter();
   const { payment_intent, redirect_status } = router.query;
-
   const paymentIntent =
     (Array.isArray(payment_intent) ? payment_intent[0] : payment_intent) ?? "";
   const redirectStatus =

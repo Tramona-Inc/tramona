@@ -1,22 +1,22 @@
-import { ChevronDown, X } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import HostPropertiesRestrictions from "../HostPropertiesRestrictions";
 import { Property } from "@/server/db/schema/tables/properties";
 import { useState, useEffect } from "react";
 import { api } from "@/utils/api";
 import { toast } from "@/components/ui/use-toast";
-import NameYourOwnPriceSection from "./setttingsSections/NameYourOwnPriceSection";
+import RequestAndBidAutomationSection from "./setttingsSections/RequestAndBidAutomationSection";
 
 export default function CalendarSettings({ property }: { property: Property }) {
   // <---------------------------------- MUTATIONS ---------------------------------->
-  const { mutateAsync: updateBookItNow } =
+  const { mutateAsync: toggleBookItNow } =
+    api.properties.toggleBookItNow.useMutation();
+  const { mutateAsync: updateBookItNow, isLoading: isUpdatingBookItNow } =
     api.properties.updateBookItNow.useMutation();
 
   const { mutateAsync: updateRequestToBook } =
@@ -27,36 +27,35 @@ export default function CalendarSettings({ property }: { property: Property }) {
     property.bookItNowEnabled,
   );
   const [bookItNowPercent, setBookItNowPercent] = useState<number>( //HERE CHANGE THIS BECAUSE IT SUPPOSE BE CONNECTED TO THE PROPERTY PRICING
-    property.requestToBookMaxDiscountPercentage,
+    property.bookItNowHostDiscountPercentOffInput,
   );
-  const [bookItNowSaved, setBookItNowSaved] = useState(false);
 
-  const [offersToBookPercent, setOffersToBookPercent] = useState<number>(
+  const [biddingOpen, setBiddingOpen] = useState(false);
+  const [biddingSaved, setBiddingSaved] = useState(false);
+  const [biddingPercent, setBiddingPercent] = useState<number>(
     property.requestToBookMaxDiscountPercentage,
   );
-  // Other state variables remain the same
-  const [offersToBookOpen, setOffersToBookOpen] = useState(false);
-  const [offersToBookSaved, setOffersToBookSaved] = useState(false);
 
   useEffect(() => {
     setIsChecked(property.bookItNowEnabled);
-    setBookItNowPercent(property.requestToBookMaxDiscountPercentage);
-    setOffersToBookPercent(property.requestToBookMaxDiscountPercentage);
+    setBookItNowPercent(property.bookItNowHostDiscountPercentOffInput);
+    setBiddingPercent(property.requestToBookMaxDiscountPercentage);
   }, [property]); //update when the selected property changes
 
   const handleBookItNowSwitch = async (checked: boolean) => {
     setIsChecked(checked);
     //only update if turned off
     try {
-      await updateBookItNow({
+      await toggleBookItNow({
         id: property.id,
         bookItNowEnabled: checked,
+      }).then((res) => {
+        if (!res) {
+          toast({
+            title: `Book it now disabled`,
+          });
+        }
       });
-      if (!checked) {
-        toast({
-          title: `Book it now disabled`,
-        });
-      }
     } catch (err) {
       toast({
         title: "Something went wrong...",
@@ -65,17 +64,18 @@ export default function CalendarSettings({ property }: { property: Property }) {
     }
   };
 
-  const handleBookItNowSave = async () => {
-    setBookItNowSaved(true);
-    setTimeout(() => setBookItNowSaved(false), 2000);
+  const handleBookItNowSlider = async () => {
     try {
-      await updateBookItNow({
-        id: property.id,
-        bookItNowEnabled: isChecked,
-      }); // Enable "Book It Now"
-      toast({
-        title: `Update successful.`,
-      });
+      if (isChecked) {
+        console.log(bookItNowPercent);
+        await updateBookItNow({
+          id: property.id,
+          bookItNowHostDiscountPercentOffInput: bookItNowPercent,
+        });
+        toast({
+          title: `Update successful.`,
+        });
+      }
     } catch (error) {
       toast({
         title: "Try again",
@@ -84,14 +84,13 @@ export default function CalendarSettings({ property }: { property: Property }) {
     }
   };
 
-  const handleOffersToBookSave = async () => {
-    //update request to book discount percentage
-    setOffersToBookSaved(true);
-    setTimeout(() => setOffersToBookSaved(false), 2000);
+  const handleBiddingSave = async () => {
+    setBiddingSaved(true);
+    setTimeout(() => setBiddingSaved(false), 2000);
     try {
       await updateRequestToBook({
         propertyId: property.id,
-        requestToBookMaxDiscountPercentage: offersToBookPercent,
+        requestToBookMaxDiscountPercentage: biddingPercent,
       });
       toast({
         title: "Update successful",
@@ -128,7 +127,9 @@ export default function CalendarSettings({ property }: { property: Property }) {
               </div>
               <div className="flex flex-row justify-between">
                 <p className="text-base text-muted-foreground">
-                  Set your price, starting as low as the price on Airbnb
+                  Turn on Book it now to allow guests to book your property
+                  instantly. All bookings automatically block off the dates on
+                  Tramona and Airbnb.
                 </p>
                 <Switch
                   checked={isChecked}
@@ -149,35 +150,33 @@ export default function CalendarSettings({ property }: { property: Property }) {
                     max={80}
                   />
                   <p className="text-xs text-muted-foreground">
-                    Enhance the discount to create a more impactful incentive
-                    and boost bookings
+                    Hosts that offer a discount on Tramona and keep pricing
+                    normal on Airbnb see the best results.
                   </p>
                   <div className="flex justify-end">
                     <Button
-                      onClick={handleBookItNowSave}
-                      disabled={bookItNowSaved}
+                      onClick={handleBookItNowSlider}
+                      disabled={isUpdatingBookItNow}
                     >
-                      {bookItNowSaved ? "Saving!" : "Save"}
+                      {isUpdatingBookItNow ? "Saving!" : "Save"}
                     </Button>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Offers to book section */}
+            {/* Bidding section */}
             <div className="rounded-lg border">
               <div
                 className="flex cursor-pointer items-center justify-between px-6 py-8"
-                onClick={() => setOffersToBookOpen(!offersToBookOpen)}
+                onClick={() => setBiddingOpen(!biddingOpen)}
               >
-                <h3 className="text-[20px] font-bold text-black">
-                  Offers to Book
-                </h3>
+                <h3 className="text-[20px] font-bold text-black">Bidding</h3>
                 <Button variant="ghost" size="sm">
                   <ChevronDown
                     className="h-4 w-4 transition-transform duration-300"
                     style={{
-                      transform: offersToBookOpen
+                      transform: biddingOpen
                         ? "rotate(180deg)"
                         : "rotate(0deg)",
                     }}
@@ -185,33 +184,33 @@ export default function CalendarSettings({ property }: { property: Property }) {
                 </Button>
               </div>
               <div
-                className={`overflow-hidden transition-all duration-300 ease-in-out ${offersToBookOpen ? "-mt-4 max-h-[1000px] p-6 opacity-100" : "max-h-0 opacity-0"}`}
+                className={`overflow-hidden transition-all duration-300 ease-in-out ${biddingOpen ? "-mt-4 max-h-[1000px] p-6 opacity-100" : "max-h-0 opacity-0"}`}
               >
-                <p className="text-base font-bold">
-                  What prices would you consider?
+                <p className="text-base font-semibold">
+                  What prices would you consider accepting?
                 </p>
                 <div className="-mx-6 mt-4 w-[calc(100%+3rem)] border-b border-gray-200" />
                 <div className="space-y-4 pt-4">
                   <div className="text-lg font-medium">
-                    <Label>{offersToBookPercent}% off Airbnb Prices</Label>
+                    <Label>{biddingPercent}% off Airbnb Prices</Label>
                   </div>
                   <Slider
-                    value={[offersToBookPercent]}
+                    value={[biddingPercent]}
                     onValueChange={(value) =>
-                      setOffersToBookPercent(Math.max(5, value[0]!))
+                      setBiddingPercent(Math.max(5, value[0]!))
                     }
                     min={5}
                     max={100}
                     step={1}
                   />
                   <p className="text-base text-muted-foreground">
-                    You will see requests to book your property in your
-                    &quot;requests&quot; tab. You will have the option to
-                    accept, deny or counter offer.
+                    You can think of this as request to book. To ensure you
+                    don&apos;t get lowballed, tell us the %off you would
+                    consider accepting.
                   </p>
                   <div className="flex justify-end">
-                    <Button onClick={handleOffersToBookSave}>
-                      {offersToBookSaved ? "Saved!" : "Save"}
+                    <Button onClick={handleBiddingSave}>
+                      {biddingSaved ? "Saved!" : "Save"}
                     </Button>
                   </div>
                 </div>
@@ -219,7 +218,7 @@ export default function CalendarSettings({ property }: { property: Property }) {
             </div>
 
             {/* Name your price section */}
-            <NameYourOwnPriceSection property={property} />
+            <RequestAndBidAutomationSection property={property} />
           </TabsContent>
           <TabsContent value="restrictions" className="space-y-6 sm:space-y-8">
             <HostPropertiesRestrictions property={property} />

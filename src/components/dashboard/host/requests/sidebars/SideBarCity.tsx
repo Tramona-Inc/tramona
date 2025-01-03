@@ -6,6 +6,7 @@ import EmptyRequestState from "./EmptyRequestState";
 import SidebarPropertySkeleton from "./SidebarPropertySkeleton";
 import { range } from "lodash";
 import { type SeparatedData, type RequestsPageOfferData } from "@/server/server-utils";
+import { useRouter } from "next/router";
 
 interface SidebarCityProps {
   selectedOption: "normal" | "outsidePriceRestriction" | "sent";
@@ -24,6 +25,9 @@ export default function SidebarCity({
 }: SidebarCityProps) {
   const [selectedCity, setSelectedCity] = useState<string | null>(initialSelectedCity ?? null);
   const [selectedCityOffers, setSelectedCityOffers] = useState<string | null>(null);
+  const router = useRouter();
+  const { query } = router;
+  const { tabs, offers, city } = query;
 
   useEffect(() => {
     setSelectedCity(initialSelectedCity ?? null);
@@ -63,10 +67,12 @@ export default function SidebarCity({
     return (
       <div className="pt-4">
         {displayedData.map((cityData, index) => {
-          const href = `/host/requests/${cityData.city}?tabs=city&offers=true`;
-          const isSelected = selectedCityOffers === cityData.city;
+          const isSelected = cityData.city === city;
           return (
-            <Link href={{ pathname: href, query: {} as Record<string, string> }} className="block" key={index} shallow={true}>
+            <Link href={{
+              pathname: `/host/requests/${cityData.city}`,
+              query: { tabs: 'city', option: 'sent' },
+            }} className="block" key={index} shallow={true}>
               <div
                 className={`flex items-center justify-between rounded-xl p-4 ${
                   isSelected ? "bg-primaryGreen text-white" : ""
@@ -92,13 +98,14 @@ export default function SidebarCity({
   return (
     <div className="pt-4">
       {displayedData.map((cityData, index) => {
-        const href = selectedOption === "normal"
-          ? `/host/requests/${cityData.city}?tabs=city`
-          : `/host/requests/${cityData.city}?tabs=city&priceRestriction=true`;
-
         const isSelected = selectedCity === cityData.city;
         return (
-          <Link href={href} className="block" key={index} shallow={true}>
+          <Link href={{
+            pathname: `/host/requests/${cityData.city}`,
+            query: selectedOption === "normal"
+              ? { tabs: 'city', option: 'normal' }
+              : { tabs: 'city', option: 'outsidePriceRestriction' },
+          }} className="block" key={index} shallow={true}>
             <div
               className={`flex items-center justify-between rounded-xl p-4 ${
                 isSelected ? "bg-primaryGreen text-white" : ""

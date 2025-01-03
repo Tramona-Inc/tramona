@@ -51,7 +51,10 @@ import { HttpsProxyAgent } from "https-proxy-agent";
 import * as cheerio from "cheerio";
 import { sendSlackMessage } from "./slack";
 import { HOST_MARKUP, TRAVELER_MARKUP } from "@/utils/constants";
-import { HostRequestsPageData, HostRequestsPageOfferData } from "./api/routers/propertiesRouter";
+import {
+  HostRequestsPageData,
+  HostRequestsPageOfferData,
+} from "./api/routers/propertiesRouter";
 import { Session } from "next-auth";
 import { calculateTotalTax } from "@/utils/payment-utils/taxData";
 import {
@@ -190,39 +193,6 @@ export async function addUserToGroups(user: Pick<User, "email" | "id">) {
         and(
           inArray(groupInvites.groupId, groupIds),
           eq(groupInvites.inviteeEmail, user.email),
-        ),
-      );
-  });
-}
-
-export async function addUserToHostTeams(user: Pick<User, "email" | "id">) {
-  const hostTeamIds = await db.query.hostTeamInvites
-    .findMany({
-      where: eq(hostTeamInvites.inviteeEmail, user.email),
-      columns: { hostTeamId: true },
-    })
-    .then((res) => res.map((invite) => invite.hostTeamId));
-
-  if (hostTeamIds.length === 0) return;
-
-  // make the user a host
-  await db.update(users).set({ role: "host" }).where(eq(users.id, user.id));
-
-  await db.transaction(async (tx) => {
-    // add user to teams
-    await tx
-      .insert(hostTeamMembers)
-      .values(
-        hostTeamIds.map((hostTeamId) => ({ hostTeamId, userId: user.id })),
-      );
-
-    // delete invites
-    await tx
-      .delete(hostTeamInvites)
-      .where(
-        and(
-          inArray(hostTeamInvites.hostTeamId, hostTeamIds),
-          eq(hostTeamInvites.inviteeEmail, user.email),
         ),
       );
   });
@@ -402,7 +372,7 @@ export async function addProperty({
     | "country"
     | "countryISO"
     | "bookItNowEnabled"
-    | "bookItNowDiscountTiers"
+    | "discountTiers"
   > & {
     latLngPoint?: { x: number; y: number }; // make optional
   };
@@ -422,10 +392,7 @@ export async function addProperty({
   }
 
   const { city, country, countryISO, county, stateCode, stateName } =
-    await getAddress({
-      lat,
-      lng,
-    });
+    await getAddress({ lat, lng });
 
   const propertyValues = {
     ...property,
@@ -530,7 +497,13 @@ export async function getRequestsForProperties(
     request: Request & {
       traveler: Pick<
         User,
-        "firstName" | "lastName" | "name" | "image" | "location" | "about" | "dateOfBirth"
+        | "firstName"
+        | "lastName"
+        | "name"
+        | "image"
+        | "location"
+        | "about"
+        | "dateOfBirth"
       >;
     };
   }[] = [];
@@ -553,14 +526,6 @@ export async function getRequestsForProperties(
     //     )
     // `;
     requestIsNearProperties.push(requestIsNearProperty);
-
-    const { city, stateCode, country } = await getAddress({
-      lat: property.latLngPoint.y,
-      lng: property.latLngPoint.x,
-    });
-
-    const taxInfo = calculateTotalTax({ country, stateCode, city });
-    console.log("taxInfo", taxInfo, city);
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
     const requestsForProperty = await tx.query.requests.findMany({
@@ -623,19 +588,13 @@ export async function getRequestsForProperties(
     // Store the matched requests along with the property
     for (const request of requestsForProperty) {
       //here we can  update each of the reque
-      const traveler = {
-        name: request.madeByGroup.owner.name,
-        image: request.madeByGroup.owner.image,
-        firstName: request.madeByGroup.owner.firstName,
-        lastName: request.madeByGroup.owner.lastName,
-        location: request.madeByGroup.owner.location,
-        about: request.madeByGroup.owner.about,
-        dateOfBirth: request.madeByGroup.owner.dateOfBirth,
-      };
+      const traveler = request.madeByGroup.owner;
+      const taxInfo = calculateTotalTax(property);
+
       propertyToRequestMap.push({
         property: {
           ...property,
-          taxAvailable: taxInfo.length > 0 ? true : false, //// come back here
+          taxAvailable: taxInfo.length > 0, //// come back here
         },
         request: {
           ...request,
@@ -744,7 +703,7 @@ export async function getPropertiesForRequest(
       id: true,
       hostTeamId: true,
       autoOfferEnabled: true,
-      autoOfferDiscountTiers: true,
+      discountTiers: true,
       originalListingId: true,
     },
   });
@@ -773,7 +732,7 @@ type HospitableCalendarResponse = {
 
 type HostawayPriceResponse = {
   result: {
-    totalPrice: number;
+    totalBasePriceBeforeFees: number;
   };
 };
 
@@ -871,8 +830,8 @@ export async function getPropertyOriginalPrice(
         params,
       },
     );
-    const totalPrice = data.result.totalPrice;
-    return totalPrice;
+    const totalBasePriceBeforeFees = data.result.totalBasePriceBeforeFees;
+    return totalBasePriceBeforeFees;
   }
   // code for other options
 }
@@ -888,15 +847,17 @@ export interface RequestsPageOfferData {
 
 //update spread on every fetch to keep information updated
 export async function updateTravelerandHostMarkup({
-  offerTotalPrice,
+  offerTotalBasePriceBeforeFees,
   offerId,
 }: {
-  offerTotalPrice: number;
+  offerTotalBasePriceBeforeFees: number;
   offerId: number;
 }) {
-  console.log("offerTotalPrice", offerTotalPrice);
-  const travelerPrice = Math.ceil(offerTotalPrice * TRAVELER_MARKUP);
-  const hostPay = Math.ceil(offerTotalPrice * HOST_MARKUP);
+  console.log("offerTotalBasePriceBeforeFees", offerTotalBasePriceBeforeFees);
+  const travelerPrice = Math.ceil(
+    offerTotalBasePriceBeforeFees * TRAVELER_MARKUP,
+  );
+  const hostPay = Math.ceil(offerTotalBasePriceBeforeFees * HOST_MARKUP);
   console.log("travelerPrice", travelerPrice);
   await db
     .update(offers)

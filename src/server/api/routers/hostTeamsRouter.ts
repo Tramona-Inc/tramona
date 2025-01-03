@@ -249,65 +249,6 @@ export const hostTeamsRouter = createTRPCRouter({
       });
 
       return { status: "sent invite" } as const;
-      // }Wha
-
-      // await ctx.db.insert(hostTeamMembers).values({
-      //   hostTeamId: input.hostTeamId,
-      //   userId: invitee.id,
-      // });
-
-      // return { status: "added user", inviteeName: invitee.name } as const;
-    }),
-
-  addUserToHostTeam: protectedProcedure
-    .input(z.object({ userId: z.string(), hostTeamId: z.number() }))
-    .mutation(async ({ input, ctx }) => {
-      const hostTeam = await ctx.db.query.hostTeams.findFirst({
-        where: eq(hostTeams.id, input.hostTeamId),
-        columns: { name: true },
-        with: { owner: { columns: { id: true } } },
-      });
-
-      if (!hostTeam) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Host team not found",
-        });
-      }
-
-      if (ctx.user.id !== hostTeam.owner.id) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "Only the host team owner can add members",
-        });
-      }
-
-      const userToAdd = await ctx.db.query.users.findFirst({
-        where: eq(users.id, input.userId),
-        columns: { id: true },
-      });
-
-      if (!userToAdd) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
-      }
-
-      const existingMember = await ctx.db.query.hostTeamMembers.findFirst({
-        where: and(
-          eq(hostTeamMembers.hostTeamId, input.hostTeamId),
-          eq(hostTeamMembers.userId, input.userId),
-        ),
-      });
-
-      if (existingMember) {
-        return { status: "already in team" } as const;
-      }
-
-      await ctx.db.insert(hostTeamMembers).values({
-        hostTeamId: input.hostTeamId,
-        userId: input.userId,
-      });
-
-      return { status: "added to team" } as const;
     }),
 
   resendInvite: protectedProcedure
@@ -610,10 +551,7 @@ export const hostTeamsRouter = createTRPCRouter({
     .input(z.object({ cohostInviteId: z.string() }))
     .mutation(async ({ input, ctx }) => {
       const invite = await ctx.db.query.hostTeamInvites.findFirst({
-        where: and(
-          eq(hostTeamInvites.id, input.cohostInviteId),
-          eq(hostTeamInvites.inviteeEmail, ctx.user.email),
-        ),
+        where: and(eq(hostTeamInvites.id, input.cohostInviteId)),
         with: {
           hostTeam: {
             columns: {
@@ -634,15 +572,19 @@ export const hostTeamsRouter = createTRPCRouter({
       if (!invite) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "Invite not found or not intended for this user",
+          message: `Invite not found with id ${input.cohostInviteId}`,
         });
       }
 
       if (invite.expiresAt < new Date()) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Invite has expired",
-        });
+        return { status: "expired" } as const;
+      }
+
+      if (invite.inviteeEmail !== ctx.user.email) {
+        return {
+          status: "wrong account",
+          intendedEmail: invite.inviteeEmail,
+        } as const;
       }
 
       const existingMember = await ctx.db.query.hostTeamMembers.findFirst({
@@ -670,6 +612,7 @@ export const hostTeamsRouter = createTRPCRouter({
         ctx.user.email,
         invite.hostTeam.owner.id,
       );
+
       await sendAcceptMessage(
         conversationId,
         invite.hostTeam.name,

@@ -32,7 +32,7 @@ export default function RequestCashback({
           <Section key={transaction.id}>
             <Text className="text-sm text-muted-foreground">{`(ID: ${transaction.id})`}</Text>
             <Text>{`${formatCurrency(transaction.cashbackEarned)} cashback from ${transaction.referee.name}'s booking`}</Text>
-            <Text className="text-sm text-muted-foreground">{`Payment of ${formatCurrency(transaction.offer.totalPrice!)} (${formatDate(transaction.createdAt, "MM/dd/yyyy")})`}</Text>
+            <Text className="text-sm text-muted-foreground">{`Payment of ${formatCurrency(transaction.offer.totalBasePriceBeforeFees!)} (${formatDate(transaction.createdAt, "MM/dd/yyyy")})`}</Text>
 
             <Hr className="mx-0 my-[26px] w-full border border-solid border-[#eaeaea]" />
           </Section>

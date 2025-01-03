@@ -19,11 +19,13 @@ import { CheckCircleIcon } from "lucide-react"; // Assuming you're using Lucide 
 export default function HostFinishRequestDialog({
   open,
   setOpen,
+  setStep,
   request,
 }: {
   open: boolean;
   setOpen: (open: boolean) => void;
   request: HostDashboardRequest;
+  setStep: (step: number) => void;
 }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -42,7 +44,13 @@ export default function HostFinishRequestDialog({
           </EmptyStateDescription>
         </EmptyState>
         <DialogFooter className="pt-6">
-          <Button onClick={() => setOpen(false)} className="w-full">
+          <Button
+            onClick={() => {
+              setOpen(false);
+              setStep(0);
+            }}
+            className="w-full"
+          >
             Done
           </Button>
         </DialogFooter>

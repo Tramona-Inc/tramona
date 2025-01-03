@@ -100,17 +100,17 @@ export default function HostConfirmRequestDialog({
     await Promise.all(
       // todo: make procedure accept array
       propertiesWithTax.map(async (property) => {
-        const totalPrice =
+        const totalBasePriceBeforeFees =
           parseInt(propertyPrices[property.id] ?? "0") * 100 * numNights;
 
         await createOffersMutation
           .mutateAsync({
             requestId: request.id,
             propertyId: property.id,
-            totalPrice,
-            hostPayout: getHostPayout(totalPrice),
+            totalBasePriceBeforeFees: totalBasePriceBeforeFees,
+            hostPayout: getHostPayout(totalBasePriceBeforeFees),
             travelerOfferedPriceBeforeFees: getTravelerOfferedPrice({
-              totalPrice,
+              totalBasePriceBeforeFees,
               travelerMarkup: TRAVELER_MARKUP,
             }),
           })
@@ -211,8 +211,10 @@ export default function HostConfirmRequestDialog({
           {filteredSelectedProperties.map((property) => {
             const nightlyPriceCents =
               parseFloat(propertyPrices[property.id] ?? "0") * 100;
-            const totalPriceCents = nightlyPriceCents * numNights;
-            const hostPayoutCents = getHostPayout(totalPriceCents);
+            const totalBasePriceBeforeFeesCents = nightlyPriceCents * numNights;
+            const hostPayoutCents = getHostPayout(
+              totalBasePriceBeforeFeesCents,
+            );
 
             const editNightlyPriceCents = parseFloat(editValue) * 100;
 

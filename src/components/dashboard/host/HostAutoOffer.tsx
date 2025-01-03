@@ -60,13 +60,13 @@
 // type FormSchema = z.infer<typeof formSchema>;
 
 // const orderTiers = (
-//   tiers: FormSchema["autoOfferDiscountTiers"],
-// ): FormSchema["autoOfferDiscountTiers"] => {
+//   tiers: FormSchema["discountTiers"],
+// ): FormSchema["discountTiers"] => {
 //   return [...tiers].sort((a, b) => b.days - a.days);
 // };
 
 // const hasHighDiscount = (
-//   tiers: FormSchema["autoOfferDiscountTiers"],
+//   tiers: FormSchema["discountTiers"],
 // ): boolean => {
 //   return tiers.some((tier) => tier.percentOff >= HIGH_DISCOUNT_THRESHOLD);
 // };
@@ -90,7 +90,7 @@
 
 //   const { fields, append, remove } = useFieldArray({
 //     control: form.control,
-//     name: "autoOfferDiscountTiers",
+//     name: "discountTiers",
 //   });
 
 //   const toggleAutoOfferMutation = api.properties.toggleAutoOffer.useMutation({
@@ -136,18 +136,18 @@
 //     }
 
 //     if (
-//       currentValues.autoOfferDiscountTiers.length !==
-//       original.autoOfferDiscountTiers.length
+//       currentValues.discountTiers.length !==
+//       original.discountTiers.length
 //     ) {
 //       return true;
 //     }
 
-//     for (let i = 0; i < currentValues.autoOfferDiscountTiers.length; i++) {
+//     for (let i = 0; i < currentValues.discountTiers.length; i++) {
 //       if (
-//         currentValues.autoOfferDiscountTiers[i]?.days !==
-//           original.autoOfferDiscountTiers[i]?.days ||
-//         currentValues.autoOfferDiscountTiers[i]?.percentOff !==
-//           original.autoOfferDiscountTiers[i]?.percentOff
+//         currentValues.discountTiers[i]?.days !==
+//           original.discountTiers[i]?.days ||
+//         currentValues.discountTiers[i]?.percentOff !==
+//           original.discountTiers[i]?.percentOff
 //       ) {
 //         return true;
 //       }
@@ -182,7 +182,7 @@
 //     async (data: FormSchema) => {
 //       if (isSaving) return;
 
-//       const orderedTiers = orderTiers(data.autoOfferDiscountTiers);
+//       const orderedTiers = orderTiers(data.discountTiers);
 //       const uniqueDays = new Set(orderedTiers.map((tier) => tier.days));
 //       if (uniqueDays.size !== orderedTiers.length) {
 //         toast({
@@ -223,7 +223,7 @@
 //   const handleConfirmReset = useCallback(() => {
 //     const defaultValues = {
 //       autoOfferEnabled: property.autoOfferEnabled,
-//       autoOfferDiscountTiers: DEFAULT_TIERS,
+//       discountTiers: DEFAULT_TIERS,
 //     };
 //     form.reset(defaultValues);
 //     const isChanged = checkForChanges(defaultValues);
@@ -255,14 +255,14 @@
 
 //   const renderDiscountTierFields = useCallback(
 //     (
-//       fields: FieldArrayWithId<FormSchema, "autoOfferDiscountTiers", "id">[],
+//       fields: FieldArrayWithId<FormSchema, "discountTiers", "id">[],
 //       remove: (index: number) => void,
 //     ) =>
 //       fields.map((field, index) => (
 //         <div key={field.id} className="my-2 flex items-center space-x-2">
 //           <FormField
 //             control={form.control}
-//             name={`autoOfferDiscountTiers.${index}.days`}
+//             name={`discountTiers.${index}.days`}
 //             render={({ field }) => (
 //               <FormItem>
 //                 <FormControl>
@@ -287,7 +287,7 @@
 //           <span>days before check-in:</span>
 //           <FormField
 //             control={form.control}
-//             name={`autoOfferDiscountTiers.${index}.percentOff`}
+//             name={`discountTiers.${index}.percentOff`}
 //             render={({ field }) => (
 //               <FormItem>
 //                 <FormControl>

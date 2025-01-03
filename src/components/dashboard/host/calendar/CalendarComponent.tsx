@@ -1,7 +1,12 @@
-import React, { useMemo, useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight, ChevronDown, Globe } from "lucide-react";
+import React, { useMemo, useEffect, useState, useCallback } from "react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronDown,
+  Globe,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardBanner } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,10 +20,18 @@ import { Property } from "@/server/db/schema/tables/properties";
 import { eachDayOfInterval, format, isBefore, parseISO } from "date-fns";
 import HostICalSync from "../HostICalSync";
 import { useRouter } from "next/router";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+} from "@/components/ui/dialog";
 
 export default function CalendarComponent() {
   const router = useRouter();
   const { propertyId } = router.query;
+  const [hasDismissedModal, setHasDismissedModal] = useState(false);
   const [date, setDate] = useState<Date>(new Date());
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(
     null,
@@ -40,21 +53,21 @@ export default function CalendarComponent() {
   }, [hostProperties, propertyId]);
 
   // const [editing, setEditing] = useState(false);
-  const [selectedRange, setSelectedRange] = useState<{
-    start: Date | null;
-    end: Date | null;
-  }>({ start: null, end: null });
+  // const [selectedRange, setSelectedRange] = useState<{
+  //   start: Date | null;
+  //   end: Date | null;
+  // }>({ start: null, end: null });
 
-  const queryInput = useMemo(
-    () => ({
-      hospitableListingId: selectedProperty?.hospitableListingId,
-    }),
-    [selectedProperty?.hospitableListingId],
-  );
+  const queryInput = useMemo(() => {
+    if (!selectedProperty?.hospitableListingId) return null; // Early return
+    return {
+      hospitableListingId: selectedProperty.hospitableListingId,
+    };
+  }, [selectedProperty?.hospitableListingId]);
 
   const { data: hospitableCalendarPrices, isLoading: loadingPrices } =
-    api.calendar.updateHostCalendar.useQuery(queryInput, {
-      enabled: Boolean(selectedProperty?.hospitableListingId),
+    api.calendar.getAndUpdateHostCalendar.useQuery(queryInput!, {
+      enabled: Boolean(queryInput),
     });
 
   const prices = useMemo(() => {
@@ -108,8 +121,7 @@ export default function CalendarComponent() {
   //     return { start: date, end: null };
   //   });
   // };
-
-  const isDateReserved = (date: string) => {
+  const isDateReserved = useCallback((date: string) => {
     const parsedDate = parseISO(date);
 
     const normalizedDate = format(parsedDate, "yyyy-MM-dd");
@@ -128,8 +140,10 @@ export default function CalendarComponent() {
       return true;
     }
 
-    return false;
-  };
+      return false;
+    },
+    [reservedDates],
+  );
 
   const totalVacancies = useMemo(() => {
     const today = new Date();
@@ -138,7 +152,7 @@ export default function CalendarComponent() {
     return eachDayOfInterval({ start: startOfMonth, end: endOfMonth }).filter(
       (day) => isBefore(today, day) && !isDateReserved(day.toISOString()),
     ).length;
-  }, [reservedDates, date]);
+  }, [date, isDateReserved]);
 
   const leftOnTheTable = useMemo(() => {
     return Object.entries(prices || {})
@@ -161,6 +175,12 @@ export default function CalendarComponent() {
     <div className="flex min-h-[calc(100vh-4rem)] flex-col gap-4 p-2 sm:p-4 lg:flex-row">
       {/* CALENDAR */}
       <Card className="h-full w-full max-w-[1050px] flex-shrink-0">
+        {selectedProperty?.datesLastUpdated && selectedProperty.iCalLinkLastUpdated &&
+          selectedProperty.iCalLinkLastUpdated < selectedProperty.datesLastUpdated && (
+            <CardBanner className="bg-red-500 text-sm text-white cursor-pointer" onClick={() => setHasDismissedModal(false)}>
+              Calendar not synced
+            </CardBanner>
+          )}
         <CardContent className="flex h-full flex-col p-3 sm:p-6">
           <div className="mb-4 flex items-center justify-between">
             {/* Left Side: Month/Year and Stats */}
@@ -252,7 +272,7 @@ export default function CalendarComponent() {
               date={date}
               reservedDateRanges={reservedDates}
               // onDateClick={handleDateClick}
-              selectedRange={selectedRange}
+              // selectedRange={selectedRange}
               // isEditing={editing}
               prices={prices}
               isLoading={isLoading}
@@ -309,6 +329,31 @@ export default function CalendarComponent() {
 
       {/* SETTINGS */}
       {selectedProperty && <CalendarSettings property={selectedProperty} />}
+      {selectedProperty?.datesLastUpdated &&
+        selectedProperty.iCalLinkLastUpdated &&
+        selectedProperty.iCalLinkLastUpdated <
+          selectedProperty.datesLastUpdated && (
+          <Dialog open={!hasDismissedModal} onOpenChange={setHasDismissedModal}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Calendar not synced</DialogTitle>
+              </DialogHeader>
+              <DialogDescription>
+                This calendar may be out of sync with your new bookings. The
+                booking dates will be updated here within 2 hours (Don&apos;t
+                worry, travelers will not be able to submit requests for the
+                newly blocked dates.)
+                <br />
+                <br />
+                If you wish to manually sync your calendar, please go on airbnb
+                and click the &quot;Sync&quot; button.
+              </DialogDescription>
+              <Button onClick={() => setHasDismissedModal(true)}>
+                Dismiss
+              </Button>
+            </DialogContent>
+          </Dialog>
+        )}
     </div>
   );
 }

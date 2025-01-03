@@ -10,9 +10,15 @@ import {
 import { useEffect, useState, useRef } from "react";
 import { QuoteIcon } from "lucide-react";
 import UserAvatar from "@/components/_common/UserAvatar";
-import { testimonials } from "./testimonials-data";
+import { testimonials as defaultTestimonials } from "./testimonials-data";
 
-export function TestimonialCarousel() {
+type TestimonialCarouselProps = {
+  testimonials?: typeof defaultTestimonials;
+};
+
+export function TestimonialCarousel({
+  testimonials = defaultTestimonials,
+}: TestimonialCarouselProps) {
   const [api, setApi] = useState<CarouselApi>();
   const [, forceUpdate] = useState({});
   const currentIndexRef = useRef(0);
@@ -42,7 +48,7 @@ export function TestimonialCarousel() {
     const distance = Math.min(
       Math.abs((index % totalItems) - currentIndexRef.current),
       Math.abs((index % totalItems) - totalItems - currentIndexRef.current),
-      Math.abs((index % totalItems) + totalItems - currentIndexRef.current),
+      Math.abs((index % totalItems) + totalItems - currentIndexRef.current)
     );
     if (distance === 0) return "opacity-100";
     if (distance === 1) return "opacity-45";
@@ -71,7 +77,7 @@ export function TestimonialCarousel() {
                 <Card
                   className={cn(
                     "h-full w-full border-none bg-gray-100 shadow-none transition-opacity duration-300",
-                    getOpacity(index),
+                    getOpacity(index)
                   )}
                 >
                   <CardContent className="flex h-full flex-col p-6">

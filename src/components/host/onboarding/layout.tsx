@@ -1,5 +1,6 @@
 import { Header } from "@/components/_common/Layout/header/Header";
 import MessagesPopover from "@/components/messages/chat-with-admin-popover/MessagesPopover";
+
 import { StickyTopBar } from "@/pages/for-hosts";
 import { MobileStickyBar } from "@/pages/for-hosts";
 import { cn } from "@/utils/utils";

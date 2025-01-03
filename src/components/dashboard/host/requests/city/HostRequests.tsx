@@ -24,6 +24,7 @@ import { errorToast } from "@/utils/toasts";
 import PastOfferCard from "./PastOfferCard";
 import PastOfferWithdrawDialog from "./PastOfferWithdrawDialog";
 import { Card, CardContent } from "@/components/ui/card";
+import { HostRequestsPageOfferData } from "@/server/api/routers/propertiesRouter";
 
 export default function HostRequests() {
   const { toast } = useToast();
@@ -32,7 +33,8 @@ export default function HostRequests() {
   );
   const [dialogOpen, setDialogOpen] = useState(false);
   const router = useRouter();
-  const { city, priceRestriction, offers } = router.query;
+  const { city, option } = router.query;
+  const priceRestriction = option === "outsidePriceRestriction";
 
   const [selectedRequest, setSelectedRequest] =
     useState<HostDashboardRequest | null>(null);
@@ -45,7 +47,7 @@ export default function HostRequests() {
     null,
   );
 
-  const [offerData, setOfferData] = useState<RequestsPageOfferData | null>(
+  const [cityOfferData, setCityOfferData] = useState<HostRequestsPageOfferData | null>(
     null,
   );
   const [selectedOffer, setSelectedOffer] = useState<number | null>(null);
@@ -90,15 +92,10 @@ export default function HostRequests() {
   api.offers.getAllHostOffers.useQuery(undefined, {
     onSuccess: (fetchedOffers) => {
       const formattedData = formatOfferData(fetchedOffers);
-      setOfferData(formattedData);
+      const offersWithProperties = formattedData.sent ? Object.values(formattedData.sent).find((o) => o.city === city) : [];
+      setCityOfferData(offersWithProperties as HostRequestsPageOfferData);
     },
   });
-
-  const offersWithProperties = offerData?.sent
-    ? Object.values(offerData.sent)
-    : [];
-
-  const cityOffersData = offersWithProperties.find((o) => o.city === city);
 
   return (
     <div>
@@ -107,7 +104,7 @@ export default function HostRequests() {
           <ChevronLeft />
         </Link>
       </div>
-      {cityRequestsData && !offers ? (
+      {cityRequestsData && option === "normal" ? (
         <div className="grid gap-4 md:grid-cols-2">
           {cityRequestsData.requests.map((requestData) => (
             <div key={requestData.request.id} className="mb-4">
@@ -139,9 +136,9 @@ export default function HostRequests() {
             </div>
           ))}
         </div>
-      ) : cityOffersData && offers ? (
+      ) : cityOfferData && option === "sent" ? (
         <div className="grid gap-4 md:grid-cols-2">
-          {cityOffersData.requests.map((offerData) => (
+          {cityOfferData.requests.map((offerData) => (
             <div key={offerData.offer.id} className="mb-4">
               <PastOfferCard
                 request={offerData.request}
@@ -212,6 +209,7 @@ export default function HostRequests() {
           request={selectedRequest}
           open={dialogOpen}
           setOpen={setDialogOpen}
+          setStep={setStep}
         />
       )}
       {selectedOffer && (
