@@ -6,7 +6,8 @@ import {
   text,
   timestamp,
   varchar,
-  decimal,
+  real,
+  doublePrecision,
 } from "drizzle-orm/pg-core";
 import { nanoid } from "nanoid";
 import { users } from "./users";
@@ -72,9 +73,9 @@ export const flaggedMessages = pgTable(
     conversationId: varchar("conversation_id", { length: 21 })
       .notNull()
       .references(() => conversations.id, { onDelete: "cascade" }),
-    confidence: decimal("confidence").notNull(),
+    confidence: real("confidence").notNull(), // Change from decimal to float
     violationType: varchar("violation_type", {
-      enum: ["OFF_PLATFORM_BOOKING", "CONTACT_INFO", "INAPPROPRIATE", "UNKNOWN"],
+      enum: ["OFF_PLATFORM_BOOKING", "CONTACT_INFO", "INAPPROPRIATE", "UNKNOWN"], // Ensure UNKNOWN is included
     }).notNull(),
     reason: text("reason"),
     status: varchar("status", {

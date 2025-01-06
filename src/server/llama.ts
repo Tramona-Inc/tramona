@@ -15,7 +15,7 @@ interface LlamaResponse {
 interface ContentModerationResult {
     isAppropriate: boolean;
     confidence: number;
-    violationType?: string;
+    violationType?: "OFF_PLATFORM_BOOKING" | "CONTACT_INFO" | "INAPPROPRIATE" | "UNKNOWN";
     reason?: string;
 }
 
