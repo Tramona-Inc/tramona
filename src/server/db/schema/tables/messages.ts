@@ -6,6 +6,7 @@ import {
   text,
   timestamp,
   varchar,
+  decimal,
 } from "drizzle-orm/pg-core";
 import { nanoid } from "nanoid";
 import { users } from "./users";
@@ -60,4 +61,38 @@ export const conversationParticipants = pgTable(
   }),
 );
 
+// added for flagged messages
+export const flaggedMessages = pgTable(
+  "flagged_messages",
+  {
+    id: varchar("id", { length: 21 }).primaryKey().$defaultFn(nanoid),
+    messageId: varchar("message_id", { length: 21 })
+      .notNull()
+      .references(() => messages.id, { onDelete: "cascade" }),
+    conversationId: varchar("conversation_id", { length: 21 })
+      .notNull()
+      .references(() => conversations.id, { onDelete: "cascade" }),
+    confidence: decimal("confidence").notNull(),
+    violationType: varchar("violation_type", {
+      enum: ["OFF_PLATFORM_BOOKING", "CONTACT_INFO", "INAPPROPRIATE", "UNKNOWN"],
+    }).notNull(),
+    reason: text("reason"),
+    status: varchar("status", {
+      enum: ["PENDING", "REVIEWED", "DISMISSED"],
+    }).default("PENDING"),
+    reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+    reviewedBy: text("reviewed_by").references(() => users.id),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => ({
+    messageIdIdx: index().on(table.messageId),
+    conversationIdIdx: index().on(table.conversationId),
+    statusIdx: index().on(table.status),
+  }),
+);
+
+
 export type MessageType = typeof messages.$inferSelect;
+export type FlaggedMessageType = typeof flaggedMessages.$inferSelect;
