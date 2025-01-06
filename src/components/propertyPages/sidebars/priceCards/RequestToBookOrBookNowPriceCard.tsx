@@ -87,6 +87,7 @@ export default function RequestToBookOrBookNowPriceCard({
       ? propertyPricing.originalPriceAfterTierDiscount / numOfNights
       : undefined;
 
+
   const [error, setError] = useState<React.ReactNode | null>(null);
   const [requestAmount, setRequestAmount] = useState(
     propertyPricingPerNightAfterTierDiscount,

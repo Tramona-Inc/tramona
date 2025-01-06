@@ -306,6 +306,21 @@ export const messagesRouter = createTRPCRouter({
     return conversationId;
   }),
 
+  createConversationHostWithUser: protectedProcedure
+    .input(z.object({ userId: zodString() }))
+    .mutation(async ({ ctx, input }) => {
+      const conversationId = await fetchConversationWithHost(
+        input.userId,
+        ctx.user.id,
+      );
+
+      if (!conversationId) {
+        return await createConversationWithHost( input.userId, ctx.user.id);
+      }
+
+      return conversationId;
+    }),
+
   createConversationWithHost: protectedProcedure
     .input(z.object({ hostId: zodString() }))
     .mutation(async ({ ctx, input }) => {

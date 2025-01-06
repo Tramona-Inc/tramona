@@ -29,7 +29,7 @@ export default function TripsTab({
         </AlertTitle>
         <AlertDescription>
           {type === "upcoming"
-            ? "Get ready for your future stays. ALl your upcoming bookings appear here."
+            ? "Get ready for your future stays. ALL your upcoming bookings appear here."
             : "These are your ongoing trips. Enjoy your stay"}
         </AlertDescription>
       </Alert>
