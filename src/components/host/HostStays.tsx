@@ -51,7 +51,6 @@ export default function HostStays() {
           <BubbleTabsTrigger value="upcoming">Upcoming</BubbleTabsTrigger>
           <BubbleTabsTrigger value="accepted">Accepted</BubbleTabsTrigger>
           <BubbleTabsTrigger value="history">History</BubbleTabsTrigger>
-          <div className="w-5/6 border-b-4" />
         </BubbleTabsList>
         <BubbleTabsContent value="currently-hosting">
           <HostStaysCards

@@ -103,7 +103,7 @@ export default function HostStaysCards({
                   </span>
                 )}
               </p>
-              <div>
+              <div className="flex justify-center">
                 <Badge
                   variant={
                     trip.tripsStatus === "Booked"
@@ -112,6 +112,8 @@ export default function HostStaysCards({
                         ? "yellow"
                         : "red"
                   }
+                  className="w-full justify-center rounded-none md:w-auto md:rounded-full"
+                  size="lg"
                 >
                   {trip.tripsStatus}
                 </Badge>
@@ -149,7 +151,7 @@ export default function HostStaysCards({
 
             <Button
               variant="secondary"
-              className="w-full md:hidden"
+              className="mt-2 w-full md:hidden"
               onClick={() => chatWithHost({ hostId })}
             >
               Message
