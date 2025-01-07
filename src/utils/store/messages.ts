@@ -129,8 +129,14 @@ export const useMessage = create<MessageState>((set, get) => ({
 
     // Check if messages for this conversation have already been fetched
     if (state.conversations[conversationId]?.alreadyFetched) {
+      console.log(
+        `Messages for ${conversationId} already fetched. Skipping initial fetch.`,
+      );
       return;
     }
+    console.log(
+      `Fetching initial messages for conversationId: ${conversationId}`,
+    );
 
     try {
       const { data, error } = await supabase
@@ -146,6 +152,7 @@ export const useMessage = create<MessageState>((set, get) => ({
         .order("created_at", { ascending: true });
 
       if (error) {
+        console.error(`Supabase fetch error:`, error.message);
         throw new Error(error.message);
       }
 
@@ -155,8 +162,8 @@ export const useMessage = create<MessageState>((set, get) => ({
         conversationId: message.conversation_id,
         userId: message.user_id,
         message: message.message,
-        read: message.read ?? false, // since fetched means it's read
-        isEdit: message.is_edit ?? false, // Provide a default value if needed
+        read: message.read ?? false,
+        isEdit: message.is_edit ?? false,
         user: {
           name: message.user?.name ?? "",
           image: message.user?.image ?? "",
@@ -174,11 +181,12 @@ export const useMessage = create<MessageState>((set, get) => ({
             messages: chatMessages,
             page: 1,
             hasMore,
-            alreadyFetched: true, // Set the flag to true after fetching
+            alreadyFetched: true,
           },
         },
       }));
     } catch (error) {
+      console.error("Error fetchInitialMessages:", error);
       errorToast();
     }
   },

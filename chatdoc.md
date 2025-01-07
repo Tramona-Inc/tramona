@@ -1,180 +1,293 @@
-Overall System Architecture
+Overview
 
-The messaging system you've built is a complex application integrating several key areas:
+The Tramona messaging system provides a real-time chat functionality within the application. It allows users to communicate with each other, particularly between travelers and hosts, or with the Tramona admin team. The system is built with the following principles in mind:
 
-User Interface (React Components): Responsible for rendering the chat interface, message lists, and handling user input.
-State Management (Zustand): Manages the state of conversations, messages, and other relevant data in a centralized manner.
-Server-Side API (tRPC): Provides the backend logic for querying, creating, and modifying data related to messages and conversations.
-Database (Postgres/Drizzle): Stores conversations, messages, users, and all persistent data.
-Real-Time Updates (Supabase): Provides real-time updates for new messages and changes to the conversations.
-External Services (Twilio, Slack): Sends SMS messages, WhatsApp messages, and Slack notifications.
-Authentication (NextAuth.js): Handles user authentication and session management.
-Detailed Component Interaction
+Real-time Updates: Messages are delivered and displayed in real time, leveraging Supabase's real-time capabilities.
+State Management: The application uses Zustand for state management to handle messages and conversations, which enables performant and responsive UI.
+Authentication & Authorization: The system integrates with NextAuth.js to ensure that messaging features are only accessible to authenticated users, with certain actions restricted based on user roles (e.g., admin-only features).
+Backend API: tRPC is used for the backend API, creating a type-safe communication layer between the client and server.
+Scalable Components: The message system is built with modular components that can be reused throughout the application.
+Key Components
 
-Let's dissect each component and their interactions:
+Let's break down the key components of the messaging system and how they interact:
 
-1. Authentication & Authorization
+./src/components/messages/ChatInput.tsx (Chat Input Component)
+Purpose: Handles the input of new messages. Users type messages here, and upon submission, the component triggers several actions to send and display the message.
+Functionality:
+Uses React Hook Form for form management with Zod for schema validation.
+On submission, it creates a new message object with a unique ID (nanoid) and relevant information.
+It updates the application state optimistically with useMessage's addMessageToConversation and setOptimisticIds. This means the message appears instantly on the UI while the server request happens in the background.
+It saves the message to the Supabase database. If saving to the database fails, it removes the message optimistically (with removeMessageFromConversation).
+It handles sending notifications to the admin via Slack.
+Conditionally sends SMS/WhatsApp notifications to other participants in the conversation, but not more than once an hour, to avoid excessive spamming.
+Calls the useUpdateUser hook to update the lastTextAt of the message sender
+Interactions:
+Sends data to Supabase for persistence.
+Interacts with Zustand store (useMessage) for message state.
+Uses api.messages for sending Slack messages and retrieving participant phone numbers and api.twilio for SMS/WhatsApp sending.
+Interacts with useConversation to set a conversation to top after a message is sent.
+Key Points:
+The component is robust, handling both optimistic updates and database errors.
+It follows a clear flow: create optimistic message → save to database → handle notifications & errors.
+It also performs error logging.
+./src/components/messages/ChatMessages.tsx (Chat Messages Container)
+Purpose: Acts as a container to manage message display and lifecycle events.
+Functionality:
+It switches the current conversation with useMessage's switchConversation.
+It fetches initial messages for the specified conversationId with useMessage's fetchInitialMessages when mounted.
+This component uses LIMIT_MESSAGE (20 by default) to manage the amount of messages initially fetched from the db.
+Interactions:
+Interacts with useMessage to manage which messages are displayed.
+Key Points:
+It serves as the entry point for message rendering and ensures that messages are loaded for new conversations.
+./src/components/messages/ListMessages.tsx (Message List)
+Purpose: Responsible for rendering the actual list of chat messages and handling real-time updates.
+Functionality:
+Uses a scrollRef to manage scrolling within the message container.
+It sets a userScrolled variable when the user scrolls. This triggers a new message indicator at the bottom of the chat window.
+It listens to PostgreSQL changes on Supabase and updates the message list in real time (with handlePostgresChange), ensuring that new messages are displayed as soon as they come. This is where the real-time updating logic is.
+On load, it marks unread messages as read if the current user has not sent it.
+It groups messages from the same user by date with groupMessages.
+It renders messages with MessageGroup.
+Fetches and applies the user data to the messages.
+If the user has scrolled, the notification at the bottom appears until the user scrolls to the bottom again
+Interactions:
+Listens to Supabase changes.
+Interacts with useMessage to retrieve message data.
+Uses useConversation to get information about chat participants.
+Uses the api.messages for marking messages as read.
+Key Points:
+This component manages the complexities of real-time updates, scrolling, and message grouping.
+It's a performant way to manage a long list of messages.
+./src/components/messages/MessageGroup.tsx (Message Grouping)
+Purpose: Groups together consecutive messages from the same user, improving UI organization.
+Functionality:
+Renders a list of consecutive messages from the same user, grouped in a bubble.
+Displays the sender's name and timestamp.
+Interactions:
+Utilizes the logic provided by ./src/components/messages/groupMessages.ts.
+Key Points:
+Provides a clean user interface by grouping messages.
+./src/components/messages/HostInitiateChat.tsx
+Purpose: Enables a host to message a traveler.
+Functionality:
+Uses api.messages.createConversationHostWithUser to create a conversation between the host and the traveler.
+Redirects the host to the messages page after a new conversation has been created.
+Interactions:
+Interacts with api.messages and next router.
+./src/components/checkout/sections/ChatWithHost.tsx
+Purpose: Allows a traveler to quickly chat with the host from the checkout page.
+Functionality:
+Uses useChatWithAdmin custom hook to initiate the chat.
+Interactions:
+Interacts with useChatWithAdmin custom hook.
+./src/utils/store/messages.ts (Message Store)
+Purpose: Manages the client-side state of messages, conversations, and loading. It makes use of zustand which allows for easy reactive state management and fast UI updates
+State:
+conversations: An object keyed by conversationId to store all message data.
+currentConversationId: The currently selected conversation ID.
+optimisticIds: Array of IDs of messages that are being saved to supabase to avoid showing duplicate messages.
+Methods:
+setCurrentConversationId: Sets the currently selected conversation.
+switchConversation: Sets the currently selected conversation.
+addMessageToConversation: Add a new message to the state.
+setOptimisticIds: Stores the id of any message that is being saved to supabase.
+setMoreMessagesToConversation: Loads more messages to the correct conversation.
+fetchInitialMessages: Fetches initial messages from Supabase.
+removeMessageFromConversation: Removes messages from state.
+Interactions:
+Used by components to set and get message data.
+Interacts with Supabase for data fetching.
+Key Points:
+Centralized message state management, making it easier to manage all message-related data.
+./src/utils/store/conversations.ts (Conversation Store)
+Purpose: Manages the list of conversations that are visible in the app. It makes use of zustand which allows for easy reactive state management and fast UI updates
+State:
+conversationList: An array of all conversations the user is a part of.
+Methods:
+setConversationList: Sets the initial list of conversations, this is used in the parent components for managing the current state of the list.
+setConversationToTop: Moves the current active conversation to the top and updates the message list within the conversation object.
+setConversationReadState: Sets read status of all messages in state.
+Interactions:
+Interacts with the messages state.
+Key Points:
+Centralized conversation state management, making it easier to manage all conversations-related data.
+./src/utils/supabase-client.ts (Supabase Client)
+Purpose: Centralized Supabase client initialization.
+Functionality:
+Creates a new Supabase client, ensuring that database interactions across the application are consistent.
+Interactions:
+Used by other components and server utils to access Supabase.
+Key Points:
+Provides a single point of configuration for the Supabase client.
+./src/types/supabase.ts & ./src/types/supabase.message.ts (Supabase Types)
+Purpose: Type definitions for Supabase database schema.
+Functionality:
+Provide Typescript types for tables, enums, etc...
+Interactions:
+Used across the application for type safety.
+Key Points:
+Enhances type safety and reduces errors in development.
+./src/components/ui (UI Components)
+Purpose: Reusable user interface components with a cohesive design.
+Functionality:
+Contains UI elements like buttons, forms, popovers etc. These provide a clean and unified user interface.
+Interactions:
+Used across the application for consistent UIs.
+Key Points:
+Provides a consistent user experience and makes it easier to update/modify the UI.
+./src/server/server-utils.ts (Server Utilities)
+Purpose: Contains a collection of functions that facilitates communication with external services. These utilities centralize and simplify common server-side tasks across the application, such as sending emails, text messages, interacting with APIs, and fetching data.
+Functionality:
+Sends email and text messages.
+Manages external APIs, fetching data for different providers.
+Handles group and host team functionalities.
+Manages properties, requests, and offers.
+Implements various helpers that facilitates data manipulation.
+Interactions:
+Interacts with Nodemailer, Twilio, and external APIs and database for fetching and managing data.
+Key Points:
+Centralizes server-side utilities in a modular fashion.
+./src/utils/payment-utils (Payment Utilities)
+Purpose: Consists of functions for calculation payment breakdowns and interactions with Stripe.
+Functionality:
+Calculates taxes, service fees and discounts for the final price.
+Interacts with Stripe for payment authorization, transfers and refunds.
+Interactions:
+Relies on the calculations functions and interacts with the Stripe API.
+Key Points:
+Provides consistent price calculation across the app.
+./src/utils/webhook-functions/stripe-utils.ts & ./src/utils/webhook-functions/trips-utils.ts (Stripe Webhook Utils)
+Purpose: Manages interactions with Stripe's API through webhooks for events such as successful payments and payment method setup.
+Functionality:
+Creates and Manages Stripe payment intents.
+Handles the checkout process including updating the trips, setting up payment intents for both credit card payments and future payments, and managing the superhog request id.
+Manages notifications after a successful payment
+Interactions:
+Interacts with the Stripe API and database.
+Key Points:
+Provides logic for webhook management.
+./src/components/messages/chat-with-admin-popover/MessagesPopover.tsx (Admin Messaging UI)
+Purpose: Displays a chat UI between a user and the Tramona Admin team using a popover component.
+Functionality:
+The component is similar to ChatInput but provides a customized user interface for interactions with the admin.
+It uses a tempToken in the localStorage to identify a non-logged user, which allows the user to chat with admin before having signed in.
+Listens to real-time changes from supabase and updates the messages accordingly.
+Interactions:
+Interacts with useMessage for messages state and api.messages for fetching conversations and messages data.
+Key Points:
+It supports both logged-in users and guests.
+./src/components/messages/chat-with-admin-popover/ListMessagesWithAdmin.tsx (Admin Message Listing)
+Purpose: Lists the messages for the admin messaging feature.
+Functionality:
+Shows messages in a conversation between a user and an admin.
+Adjusts UI to differentiate between logged and non-logged in users.
+Interactions:
+Displays data that are passed in by MessagesPopover.tsx
+Key Points:
+Provides a UI for the messages inside the popover.
+./src/components/messages/MessagesSidebar.tsx (Message Sidebar)
+Purpose: List all conversations for a user, this is displayed in host and regular user settings
+Functionality:
+Shows a list of active conversations, allows you to view conversations based of all messages or just unread messages.
+Uses SidebarConversation component to display individual conversation components.
+Listens to postgres changes to receive messages.
+When an item is clicked the app updates state accordingly.
+Interactions:
+Uses supabase to listen to postgres changes.
+Uses zustand for state management for conversations useConversation.
+Uses next router for navigation.
+Uses useSession to detect the current session.
+Key Points:
+Centralize conversations view with real time updates.
+./src/components/messages/SidebarConversation.tsx (Sidebar Conversation Component)
+Purpose: Displays individual conversation UI components in a sidebar listing format.
+Functionality:
+Uses UserAvatar component for the participants photo
+Displays name or email or participants in the converstation.
+Displays the latest message and the timestamp if there's any.
+Interactions:
+Interacts with api.messages to update message to read when the item is selected.
+Interacts with useConversation to update the read state.
+Updates the parent component MessageSidebar state.
+Key Points:
+Displays a single item in a conversation list
+./src/components/messages/MessagesContent.tsx (Messages Content Display)
+Purpose: Manages the chat and layout of components for the active conversation being displayed.
+Functionality:
+Conditionally displays either EmptyStateValue or the chat messaging components depending on the selected conversation.
+Displays ChatHeader, ChatMessages and ChatInput components.
+Interactions:
+Passes state down to child components.
+Key Points:
+Acts as a layout container for the conversation window.
+./src/server/api/routers/messagesRouter.ts (tRPC Router for Messages)
+Purpose: Defines all backend endpoints and the logic associated with messaging functionality.
+Functionality:
+Manages conversation data by fetching, creating, and managing conversations between users.
+Provides a getConversations endpoint to retrieve all conversations for a user.
+Defines endpoint for creating conversations with admin, host or any user by id.
+Defines a mutation endpoint that sets a message as read in the database.
+Manages participants phone numbers for sending notifications.
+Provides a mutation for sending Slack notifications and getting the number of unread messages.
+Interactions:
+Uses Drizzle ORM for database interactions and interacts with Supabase.
+Interacts with other components to send message to admin and other users using different channels.
+Key Points:
+Provides all the logic for messaging including type safety, data processing and error handling.
+./src/utils/messaging/useChatWithUser.ts (Messaging Hook)
+Purpose: Provides custom logic for initiating chat between users.
+Functionality:
+It utilizes the createConversationHostWithUser endpoint via tRPC to create the conversation.
+Redirects user to message view after a conversation is created.
+Interactions:
+Interacts with the backend API.
+Key Points:
+Abstraction of conversation creation logic for easier reuse.
+./src/utils/payment-utils/useGetOriginalPropertyPricing.ts (Price Fetching Hook)
+Purpose: A custom hook designed to retrieve pricing information for a property, including the original nightly price (which can be scraped from external sources), host specific prices, and other pricing adjustments (e.g., discounts).
+Functionality:
+Queries and retrieves price data for both scraped and direct listing properties (e.g., from Hospitable).
+Applies markups and calculates prices for each listing.
+Returns loading state to indicate if the pricing data is loading, or if an error occurs.
+It also handles discount applications.
+Interactions:
+Interacts with backend endpoints to get pricing and calendar information and api.misc for prices.
+Key Points:
+Centralizes logic for fetching and calculating property prices.
+How Everything Works Together
 
-./src/server/api/trpc.ts: This file sets up the tRPC context and procedures.
-Context (createTRPCContext): Establishes the context available to all tRPC procedures, including the user's session (ctx.session), the database client (ctx.db), and an S3 client (ctx.s3).
-Procedures:
-publicProcedure: Unauthenticated access.
-protectedProcedure: Requires authentication (ctx.session.user is not null).
-hostProcedure: Requires authentication and that the user has a hostProfile in the database.
-optionallyAuthedProcedure: Allows access whether or not the user is logged in.
-roleRestrictedProcedure: Allows access based on roles.
-Key Interaction: Every tRPC request goes through this file to authenticate and authorize.
-./src/server/auth.ts: This file configures NextAuth.js for user authentication.
-authOptions: This object configures various providers (Google, Credentials), database adapter, session management (JWT), and callbacks (session and JWT).
-getServerAuthSession: A helper function to easily access server-side sessions without importing auth options every time.
-Key Interaction: This module is used to authenticate users across the app, specifically the session callback is where the user roles are set.
-./src/server/db/schema/tables/users.ts: This file defines the users, referralCodes, and referralEarnings tables in your Drizzle ORM setup.
-users table: Defines user properties like id, name, email, role etc.
-referralCodes table: Stores referral codes and their related data.
-referralEarnings table: Stores info about referral earnings.
-Key Interaction: This is where all the user data is set up. Also, every time there is a new column in the users table, it needs to be modified in the auth.ts file 2. State Management
+Initiating a Chat: When a user wants to start a new conversation, components like HostInitiateChat.tsx, or the logic within MessagesPopover.tsx and other UI components, call the backend api.messages endpoints to create the conversation. When the conversation is initiated, the user is either redirected to the messaging page or a popover is displayed.
+Sending a Message: The ChatInput.tsx component takes a user’s input and adds that message optimistically to the UI using the state manager useMessage in addMessageToConversation. In the background, Supabase stores the new message and all the relevant notification are sent.
+Real-Time Updates: Supabase triggers a real-time event (PostgreSQL changes). This is listened to in the ListMessages.tsx component to update the UI with the new message, providing a seamless real-time experience.
+Message Grouping: Before rendering, the ListMessages.tsx component uses the groupMessages function in ./src/components/messages/groupMessages.ts to group messages, ensuring messages from the same user display within a single container.
+State Management: Zustand, with useMessage and useConversation handles the state of conversations, messages, and other data to achieve an optimized UI.
+Authentication & Authorization: NextAuth.js ensures all message routes in tRPC are protected. The protectedProcedure verifies that a user session exists before processing any message-related action. Some routes use the custom role checking methods to authorize users based on their role.
+Error Handling: The system provides feedback to the user and also does error logging via the console. For example the ChatInput.tsx handles a failure to post the message to Supabase, and makes use of errorToast custom hook.
+Deep Dive into Specific Workflows
 
-./src/utils/store/messages.ts: This file manages the state for individual chat messages.
-ConversationsState: Stores messages for each conversation using a record, including the page number, hasMore flag, and if the messages have been fetched.
-MessageState: Manages state of all messages, conversation IDs, optimistic updates, etc.
-Key Interaction: The useMessage hook contains all functions to modify the state of a single conversation.
-./src/utils/store/conversations.ts: This file manages the state for lists of conversations.
-ConversationListState: stores all the conversations for the current user.
-Key Interaction: Manages the state of all conversations for a user. 3. Supabase Integration
+User-to-User Messaging:
+When a traveler initiates a chat with a host, HostInitiateChat.tsx calls tRPC to create a new conversation in the conversations table.
+Once created, the conversationParticipants table is updated, associating both users with the new conversation.
+Both users see the new conversation in their sidebar through the use of useConversation.
+Messages are exchanged, and notifications are sent to ensure that the conversation is active and up to date.
+Guest User Messaging:
+Guest users that have not logged in can use the MessagesPopover popover to initiate a chat with admin.
+A tempToken is used in the background and stored in localStorage to identify a temporary user.
+When the user sends a message, it interacts with createConversationWithAdminFromGuest which uses the tempToken and sends the message.
+Real-Time Updates:
+The Supabase channel listens to the messages table changes and dispatches updates via event listeners, which are processed in the ListMessages.tsx component using handlePostgresChange.
+Zustand store with useMessage updates state immediately on the UI while all other processes are happening.
+Potential Improvements
 
-./src/utils/supabase-client.ts:
-Creates the Supabase client using environment variables, to be used to directly modify the database.
-Key Interaction: Provides a single way to query Supabase from the front end.
-./src/types/supabase.message.ts:
-Defines the type for the messages database table.
-Key Interaction: Ensures that the types are consistent across files when using the supabase client. 4. UI Components
+Typing Indicator: Add a typing indicator to the message view, enhancing the real-time nature of the chat.
+Read Receipts: Improve read receipts to handle when the user has not seen the message yet.
+Optimized Queries: Fine-tune database queries for better performance (e.g., using indices, optimizing fetches etc).
+Error Logging: Implement a full error logger and not just console.error.
+Test Suite: Write comprehensive tests for the entire chat functionality.
+Notification Handling: Add logic for push notifications.
+Search Functionality: Add a search functionality within a conversation.
+Performance Improvements: Refine performance to handle a large amount of conversations.
+Overall Summary
 
-./src/components/ui/popover.tsx: Custom Popover component using Radix UI primitives.
-./src/components/ui/form.tsx: Provides a form component with error handling and styling for use with react hook form.
-Key Interaction: These are reusable components that provide the building blocks for the messaging system UI. 5. Server-Side Logic (./src/server/api/routers/messagesRouter.ts)
-
-This file contains all the server-side tRPC procedures related to messages and conversations:
-
-Core Logic:
-fetchUsersConversations: Fetches all conversations for a user, including the last message and participants.
-fetchConversationWithAdmin: Fetches a conversation between the current user and the admin.
-fetchConversationWithHost: Fetches a conversation between two specified users.
-fetchConversationWithOffer: Fetches a conversation related to an offer id.
-generateConversation: Creates a new conversation entry in the database
-createConversationWithAdmin: Creates a conversation with the admin user
-createConversationWithHost: Creates a conversation between two users
-createConversationWithOfferHelper: Creates a conversation related to a specific offer.
-addUserToConversation: Adds a user as a participant to a conversation.
-addTwoUserToConversation: adds two users to a conversation
-tRPC Procedures:
-getConversations: Returns all of the user's conversations.
-createConversationWithAdmin: Creates a conversation with admin (or returns existing one).
-createConversationHostWithUser: Creates a conversation between a user and host (or returns existing one).
-createConversationWithHost: Creates a conversation with a host (or returns existing one).
-createConversationWithAdminFromGuest: Creates a conversation with admin from a logged out user using a sessionToken.
-createOrFetchConversationWithOffer: Creates or retrieves a conversation related to an offer.
-addUserToConversation: Adds a new user to a conversation
-setMessageToRead: Sets messages as read
-addTwoUsersToConversation: creates a new conversation between two users.
-getParticipantsPhoneNumbers: gets the phone number of a all participants in a conversation, excluding the current user.
-getNumUnreadMessages: gets the number of unread messages.
-setMessagesToRead: sets the messages as read.
-sendAdminSlackMessage: Sends a slack message to the admin when a non-admin user sends a message.
-sendChatboxSlackMessage: Sends a slack message to the chatbox channel, specifically for logged out users.
-getConversationsWithAdmin: fetches a conversation with the admin, and also returns the temp user id. 6. Messaging Components (Chat Interface)
-
-./src/components/dashboard/host/requests/requests-to-book/HostRequestsToBook.tsx: Renders the UI for a host to see their requests.
-Key Interaction: This component fetches data, and calls the useChatWithUser hook.
-./src/components/landing-page/search/DesktopSearchTab.tsx: Renders the search results for the landing page.
-Key Interaction: Has no interaction with messaging
-./src/components/my-trips/TripTab.tsx: Renders the user's list of trips
-Key Interaction: Has no interaction with messaging
-./src/components/my-trips/UpcomingTripCard.tsx: Renders the card for upcoming trips.
-
-- Key Interaction: Calls the useChatWithHost hook.
-  ./src/components/propertyPages/PropertyPage.tsx: This page renders the details of a single property and its reviews.
-  Key Interaction: Can call the useChatWithHost and useChatWithAdmin hooks
-  ./src/components/propertyPages/sidebars/priceCards/RequestToBookOrBookNowPriceCard.tsx: renders the sidebar for each property.
-  Key Interaction: Has no interaction with messaging
-  ./src/components/messages/chat-with-admin-popover/MessagesPopover.tsx: This component renders a popover/dialog for messaging with the admin.
-  Key Interaction: Creates or gets a message conversation with an admin.
-  Uses fetchInitialMessages to load existing messages.
-  Uses supabase to send and retrieve messages and maintain a real time connection.
-  createOrRetrieveConversation is used by logged in users, and createOrRetrieveConversationFromGuest is for logged out users.
-  Contains the form to submit messages, and uses zustand to update the front end.
-  ./src/components/messages/chat-with-admin-popover/ListMessagesWithAdmin.tsx: This component displays a list of chat messages in a MessagesPopover.tsx.
-  Key Interaction: Simply displays messages and has no side effects.
-  ./src/components/messages/SidebarConversation.tsx: Represents a single conversation item in the messages sidebar.
-  Key Interaction: Calls setMessageToReadMutate, and updates the read state when selected.
-  ./src/components/messages/ChatMessages.tsx: This component is the main chat message window.
-  Key Interaction:
-  switchConversation sets the current conversation ID in zustand.
-  fetchInitialMessages gets the messages from supabase.
-  ./src/components/messages/groupMessages.ts: utility to group messages made by the same user within a short time.
-  Key Interaction: this is used to group messages for rendering in the ListMessages component.
-  ./src/components/messages/ChatHeader.tsx: Renders the header for the chat UI
-  Key Interaction: Simply displays information, no interactions.
-  ./src/components/messages/MessagesSidebar.tsx: This renders all available conversations.
-  Key Interaction:
-  Uses supabase to subscribe to changes in each of the conversations and updates the ui with setConversationToTop.
-  Sets the conversation list in zustand with setConversationList.
-  Renders the different SidebarConversation components, as well as some empty states.
-  ./src/components/messages/HostInitiateChat.tsx: Component to initiate a chat as a host to a traveler.
-  Key Interaction: Uses the initiateHostConversation method, and navigates the user to the chat.
-  ./src/components/messages/ListMessages.tsx: Displays a list of messages in a chat.
-  Key Interaction:
-  Uses supabase to maintain a connection to retrieve messages in real time.
-  Uses the groupMessages to display messages.
-  Uses setMessagesToRead to set messages as read when the component is loaded.
-  ./src/components/messages/ChatInput.tsx: This component is responsible for user input.
-  Key Interaction:
-  Uses react hook form to create the input.
-  Uses zustand to optimistically update the UI with a new message, and then inserts the message into supabase.
-  Calls the twilio and slack mutations.
-  Uses zustand to push conversations to the top of the list and update setOptimisticIds.
-  ./src/components/messages/LoadMoreMessages.tsx: displays a button to load more messages for a single conversation.
-- Key Interaction: fetches and updates the state for new messages in a conversation.
-  ./src/components/messages/MessagesContent.tsx: The main component for the chat view
-  Key Interaction: Renders the ChatHeader, ChatMessages, and ChatInput components.
-  ./src/components/messages/MessageGroup.tsx: renders a single user's messages
-  Key Interaction: Renders the messages, timestamps, and read status.
-
-7. Helper Utilities & Third Party Integrations
-
-./src/utils/utils.ts: Contains utility functions such as formatCurrency, pluralize, date formatting and helpers, and the useUpdateUser function.
-./src/server/server-utils.ts: Contains many utility functions for interacting with the database, 3rd party services such as stripe, Twilio, slack, axios, and google maps, also has methods to scrape website data.
-./src/utils/payment-utils/paymentBreakdown.ts: Used to calculate prices for payment before sending to stripe.
-./src/utils/stripe-utils.ts: contains the stripe logic for setting up stripe connect accounts and refunding transactions.
-./src/utils/webhook-functions/stripe-utils.ts: Contains all the webhook logic for interacting with stripe.
-./src/utils/payment-utils/useGetOriginalPropertyPricing.ts: used to get the original listing price for a property.
-./src/utils/messaging/useChatWithUser.ts: Client-side hook that calls the createConversationWithHost tRPC mutation and navigates the user to the chat interface.
-./src/utils/messaging/useChatWithHost.ts: Client-side hook that initiates a chat with a host.
-./src/utils/messaging/useChatWithAdmin.ts: Client-side hook that initiates a chat with the admin.
-How it all fits together (Host Initiates Chat)
-
-Host Action: A host clicks a "Message Traveler" button on the host UI.
-useChatWithUser: This button triggers the useChatWithUser hook.
-createConversationWithHost tRPC Call: The hook calls the tRPC mutation createConversationHostWithUser from messagesRouter.
-createConversationWithHost (Server):
-The server calls generateConversation to make an entry for the conversation.
-The server uses the database db.insert to add two entries in conversationParticipants for the host and user
-Returns the new conversationId.
-Client Navigation: The hook receives the conversationId and uses router.push to navigate the host to the chat interface at /messages?conversationId=....
-Chat Interface (/messages):
-The ChatMessages component renders, using the useMessage hook and fetchInitialMessages to load existing messages via Supabase.
-The ListMessages component displays all existing messages, and uses supabase to update in real time with new messages.
-ChatInput Component is used to send new messages, which:
-Uses supabase to insert the message into the messages table.
-Optimistically updates the UI using useMessage.
-Sends slack message.
-Sends twilio messages.
-Real-Time Updates: Supabase's real-time capabilities push new messages to clients listening to changes in the specific conversation channel. This allows for real time updates with new messages.
-Key Data Flow
-
-UI --> State: The UI uses hooks to update state in Zustands.
-UI --> tRPC: The UI uses the api to make calls to the backend tRPC routes, for creating, querying or modifying database data
-tRPC --> Database: The tRPC routes use Drizzle to query/modify data in the Postgres database.
-Supabase <--> UI: The UI uses the supabase client to listen for real time updates in the database.
-In Summary
-
-The messaging system is a collection of components that work together to provide real time communication between users. This includes UI components that display the messages and allow user input, zustand to manage the state, tRPC to query and modify the database, and supabase to manage real time messaging.
+The Tramona messaging system is a well-structured, modular, and robust solution for real-time chat. It leverages powerful technologies like Supabase for real-time updates, Zustand for state management, and tRPC for type-safe API communication. The system is designed with scalability and maintainability in mind, making it a solid foundation for ongoing enhancements.

@@ -50,6 +50,20 @@ for file in "${AUTH_FILES[@]}"; do
     add_file_to_html "$file"
 done
 
+# Messaging System Core Files
+add_section_header "Messaging System Core"
+MESSAGING_CORE_FILES=(
+    "./src/components/messages/ChatInput.tsx"
+    "./src/components/messages/ChatMessages.tsx"
+    "./src/components/messages/ListMessages.tsx"
+    "./src/components/messages/MessageGroup.tsx"
+    "./src/components/messages/HostInitiateChat.tsx"
+    "./src/components/checkout/sections/ChatWithHost.tsx"
+)
+for file in "${MESSAGING_CORE_FILES[@]}"; do
+    add_file_to_html "$file"
+done
+
 # State Management
 add_section_header "State Management"
 STATE_FILES=(
@@ -64,6 +78,7 @@ done
 add_section_header "Supabase Integration"
 SUPABASE_FILES=(
     "./src/utils/supabase-client.ts"
+    "./src/types/supabase.ts"
     "./src/types/supabase.message.ts"
 )
 for file in "${SUPABASE_FILES[@]}"; do
@@ -120,6 +135,44 @@ done
 # Messaging Components
 add_section_header "Messaging Components"
 for file in $(find ./src/components/messages -type f -exec grep -l "message\|chat\|conversation" {} \;); do
+    add_file_to_html "$file"
+done
+
+# Core UI and Layout
+add_section_header "Core UI and Layout"
+CORE_UI_FILES=(
+    "./src/pages/_app.tsx"
+    "./src/components/_common/UserAvatar.tsx"
+    "./src/components/ui/button.tsx"
+    "./src/components/_common/EmptyStateSvg/*.tsx"
+)
+for file in "${CORE_UI_FILES[@]}"; do
+    add_file_to_html "$file"
+done
+
+# API Routers
+add_section_header "API Routers"
+API_ROUTER_FILES=(
+    "./src/server/api/routers/propertiesRouter.ts"
+    "./src/server/api/routers/authRouter.ts"
+    "./src/server/api/routers/stripeRouter.ts"
+    "./src/server/api/routers/miscRouter.ts"
+    "./src/server/api/routers/referralCodesRouter.ts"
+    "./src/server/api/routers/requestsToBookRouter.ts"
+)
+for file in "${API_ROUTER_FILES[@]}"; do
+    add_file_to_html "$file"
+done
+
+# Utilities and Helpers
+add_section_header "Utilities and Helpers"
+UTIL_FILES=(
+    "./src/utils/utils.ts"
+    "./src/utils/toasts.ts"
+    "./src/utils/zod-utils.ts"
+    "./src/config/*.ts"
+)
+for file in "${UTIL_FILES[@]}"; do
     add_file_to_html "$file"
 done
 

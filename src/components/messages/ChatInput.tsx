@@ -79,6 +79,7 @@ export default function ChatInput({
       console.log("1. Starting message submission...");
       console.log("Current conversation ID:", conversationId);
       console.log("Available conversations:", conversationList);
+      console.log("Fetching conversation from DB with ID:", conversationId);
 
       // First verify the conversation exists in Supabase
       const { data: dbConversation, error: checkError } = await supabase
