@@ -114,35 +114,44 @@ export default function MessagesSidebar({
   });
 
   const conversations = useConversation((state) => state.conversationList);
-
   const setConversationList = useConversation(
     (state) => state.setConversationList,
   );
-
-  useEffect(() => {
-    // Check if data has been fetched and hasn't been processed yet
-    if (fetchedConversations) {
-      console.log("initial fetch successful");
-      setConversationList(fetchedConversations);
-    } else {
-      //refetch if data is not available
-      console.log("initial fetch unsuccessful so refetching data");
-      void refetch();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fetchedConversations, setConversationList, refetch]);
-
-  const optimisticIds = useMessage((state) => state.optimisticIds);
-
   const setConversationToTop = useConversation(
     (state) => state.setConversationToTop,
   );
-
   const { data: session } = useSession();
 
-  // Map and listen to all the connects the user is part of
   useEffect(() => {
+    console.log("MessagesSidebar: useEffect triggered", {
+      hasFetchedData: !!fetchedConversations,
+      conversationsCount: fetchedConversations?.length ?? 0,
+    });
+
+    if (fetchedConversations) {
+      console.log(
+        "MessagesSidebar: Initial fetch successful, setting conversation list:",
+        fetchedConversations.map((c) => ({ id: c.id, name: c.name })),
+      );
+      setConversationList(fetchedConversations);
+    } else {
+      console.log(
+        "MessagesSidebar: Initial fetch unsuccessful, triggering refetch",
+      );
+      void refetch();
+    }
+  }, [fetchedConversations, setConversationList, refetch]);
+
+  // Handle real-time updates
+  useEffect(() => {
+    console.log("MessagesSidebar: Setting up Supabase listeners");
+
     const handlePostgresChange = async (payload: { new: MessageDbType }) => {
+      console.log("MessagesSidebar: Received real-time update", {
+        conversationId: payload.new.conversation_id,
+        messageId: payload.new.id,
+      });
+
       setConversationToTop(payload.new.conversation_id, {
         id: payload.new.id,
         conversationId: payload.new.conversation_id,
@@ -185,13 +194,9 @@ export default function MessagesSidebar({
     };
 
     void fetchConversationIds();
-  }, [
-    conversations,
-    optimisticIds,
-    selectedConversation?.id,
-    session,
-    setConversationToTop,
-  ]);
+  }, [conversations, session, selectedConversation?.id, setConversationToTop]);
+
+  const optimisticIds = useMessage((state) => state.optimisticIds);
 
   const unreadConversations = conversations.filter((conversation) => {
     return (

@@ -18,27 +18,31 @@ const baseUrl = isProduction
 const ADMIN_ID = env.TRAMONA_ADMIN_USER_ID;
 
 export async function fetchUsersConversations(userId: string) {
-  return await db.query.users.findFirst({
-    where: eq(users.id, userId),
-    columns: {},
-    with: {
-      conversations: {
-        columns: {},
-        with: {
-          conversation: {
-            with: {
-              messages: {
-                orderBy: (messages, { desc }) => [desc(messages.createdAt)],
-                limit: 1,
-              },
-              participants: {
-                with: {
-                  user: {
-                    columns: {
-                      id: true,
-                      name: true,
-                      email: true,
-                      image: true,
+  console.log("fetchUsersConversations: Starting fetch for user:", userId);
+
+  try {
+    const result = await db.query.users.findFirst({
+      where: eq(users.id, userId),
+      columns: {},
+      with: {
+        conversations: {
+          columns: {},
+          with: {
+            conversation: {
+              with: {
+                messages: {
+                  orderBy: (messages, { desc }) => [desc(messages.createdAt)],
+                  limit: 1,
+                },
+                participants: {
+                  with: {
+                    user: {
+                      columns: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        image: true,
+                      },
                     },
                   },
                 },
@@ -47,8 +51,27 @@ export async function fetchUsersConversations(userId: string) {
           },
         },
       },
-    },
-  });
+    });
+
+    if (!result) {
+      console.warn("fetchUsersConversations: No user found for ID:", userId);
+      return null;
+    }
+
+    console.log("fetchUsersConversations: Success", {
+      userId,
+      conversationsCount: result.conversations.length,
+      firstConversationId: result.conversations[0]?.conversation.id,
+    });
+
+    return result;
+  } catch (error) {
+    console.error("fetchUsersConversations: Error", {
+      userId,
+      error: error instanceof Error ? error.message : error,
+    });
+    return null;
+  }
 }
 
 export async function fetchConversationWithAdmin(userId: string) {
@@ -255,51 +278,62 @@ async function verifyConversationExists(conversationId: string) {
 
 export const messagesRouter = createTRPCRouter({
   getConversations: protectedProcedure.query(async ({ ctx }) => {
+    console.log("messagesRouter.getConversations: Starting", {
+      userId: ctx.user.id,
+    });
+
     const result = await fetchUsersConversations(ctx.user.id);
 
-    if (result) {
-      const orderedConversations = result.conversations.map(
-        ({ conversation }) => ({
-          ...conversation,
-          participants: conversation.participants
-            .filter((p) => p.user.id !== ctx.user.id)
-            .map((p) => p.user)
-            .filter(Boolean),
-        }),
+    if (!result) {
+      console.warn(
+        "messagesRouter.getConversations: No conversations found, returning empty array",
       );
-
-      // Order conversations by the most recent activity (conversation or message creation)
-      orderedConversations.sort((a, b) => {
-        // Get the conversation's createdAt date
-        const aConversationDate = new Date(a.createdAt);
-        const bConversationDate = new Date(b.createdAt);
-
-        // Get the latest message's createdAt date, or use the conversation's createdAt date if no messages
-        const aLatestMessageDate = a.messages[0]
-          ? new Date(a.messages[0].createdAt)
-          : aConversationDate;
-        const bLatestMessageDate = b.messages[0]
-          ? new Date(b.messages[0].createdAt)
-          : bConversationDate;
-
-        // Use the most recent of the two dates for comparison
-        const aMostRecentDate =
-          aLatestMessageDate > aConversationDate
-            ? aLatestMessageDate
-            : aConversationDate;
-        const bMostRecentDate =
-          bLatestMessageDate > bConversationDate
-            ? bLatestMessageDate
-            : bConversationDate;
-
-        // Sort in descending order of the most recent activity
-        return bMostRecentDate.getTime() - aMostRecentDate.getTime();
-      });
-
-      return orderedConversations;
+      return [];
     }
 
-    return [];
+    const orderedConversations = result.conversations.map(
+      ({ conversation }) => ({
+        ...conversation,
+        participants: conversation.participants
+          .filter((p) => p.user.id !== ctx.user.id)
+          .map((p) => p.user)
+          .filter(Boolean),
+      }),
+    );
+
+    // Order conversations by the most recent activity (conversation or message creation)
+    orderedConversations.sort((a, b) => {
+      // Get the conversation's createdAt date
+      const aConversationDate = new Date(a.createdAt);
+      const bConversationDate = new Date(b.createdAt);
+
+      // Get the latest message's createdAt date, or use the conversation's createdAt date if no messages
+      const aLatestMessageDate = a.messages[0]
+        ? new Date(a.messages[0].createdAt)
+        : aConversationDate;
+      const bLatestMessageDate = b.messages[0]
+        ? new Date(b.messages[0].createdAt)
+        : bConversationDate;
+
+      // Use the most recent of the two dates for comparison
+      const aMostRecentDate =
+        aLatestMessageDate > aConversationDate
+          ? aLatestMessageDate
+          : aConversationDate;
+      const bMostRecentDate =
+        bLatestMessageDate > bConversationDate
+          ? bLatestMessageDate
+          : bConversationDate;
+
+      // Sort in descending order of the most recent activity
+      return bMostRecentDate.getTime() - aMostRecentDate.getTime();
+    });
+
+    console.log("messagesRouter.getConversations: Success", {
+      conversationsCount: orderedConversations.length,
+    });
+
+    return orderedConversations;
   }),
 
   createConversationWithAdmin: protectedProcedure.mutation(async ({ ctx }) => {
@@ -663,7 +697,7 @@ export const messagesRouter = createTRPCRouter({
         message: z.string(),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ input }) => {
       const exists = await verifyConversationExists(input.conversationId);
       if (!exists) {
         throw new Error("Conversation not found");

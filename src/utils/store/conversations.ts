@@ -21,9 +21,19 @@ type ConversationListState = {
 export const useConversation = create<ConversationListState>((set) => ({
   conversationList: [],
   setConversationList: (conversationList: Conversations | []) => {
+    console.log("Conversation Store: Setting conversation list", {
+      count: conversationList.length,
+      firstId: conversationList[0]?.id,
+      isEmpty: conversationList.length === 0,
+    });
     set(() => ({ conversationList }));
   },
   setConversationToTop: (conversationId: string, newMessage: MessageType) => {
+    console.log("Conversation Store: Moving conversation to top", {
+      conversationId,
+      messageId: newMessage.id,
+    });
+
     set((state) => {
       const updatedConversations = [...state.conversationList];
       const conversationIndex = updatedConversations.findIndex(
@@ -35,23 +45,44 @@ export const useConversation = create<ConversationListState>((set) => ({
         if (conversation) {
           // Remove conversation from current position
           updatedConversations.splice(conversationIndex, 1);
-          // Add conversation to top with updated messages and ensure participants is defined
+          // Add conversation to top with updated messages
           updatedConversations.unshift({
             ...conversation,
-            participants: conversation.participants ?? [],
+            participants: conversation.participants || [],
             id: conversation.id,
             name: conversation.name,
             createdAt: conversation.createdAt,
             offerId: conversation.offerId ?? null,
             messages: [newMessage, ...conversation.messages],
           });
+
+          console.log(
+            "Conversation Store: Successfully moved conversation to top",
+            {
+              conversationId,
+              newPosition: 0,
+              messageCount: conversation.messages.length + 1,
+            },
+          );
         }
+      } else {
+        console.warn(
+          "Conversation Store: Conversation not found for moving to top",
+          {
+            conversationId,
+            totalConversations: updatedConversations.length,
+          },
+        );
       }
 
       return { conversationList: updatedConversations };
     });
   },
   setConversationReadState: (conversationId: string) => {
+    console.log("Conversation Store: Setting conversation read state", {
+      conversationId,
+    });
+
     set((state) => {
       const updatedConversations = state.conversationList.map(
         (conversation) => {
