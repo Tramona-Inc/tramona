@@ -24,7 +24,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { HostRequestsPageOfferData } from "@/server/api/routers/propertiesRouter";
 import { useChatWithUser } from "@/utils/messaging/useChatWithUser";
 import { useHostTeamStore } from "@/utils/store/hostTeamStore";
-import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 export default function HostRequests() {
   const { currentHostTeamId } = useHostTeamStore();
   const { toast } = useToast();
