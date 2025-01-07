@@ -76,16 +76,24 @@ export default function ChatInput({
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (session) {
+      console.log("1. Starting message submission...");
       console.log("Current conversation ID:", conversationId);
       console.log("Available conversations:", conversationList);
 
-      const conversationExists = conversationList.some(
-        (conv) => conv.id === conversationId,
-      );
+      // First verify the conversation exists in Supabase
+      const { data: dbConversation, error: checkError } = await supabase
+        .from("conversations")
+        .select("id, created_at, name")
+        .eq("id", conversationId)
+        .single();
 
-      console.log("Conversation exists?", conversationExists);
+      console.log("2. Database check result:", {
+        conversation: dbConversation,
+        error: checkError,
+      });
 
-      if (!conversationExists) {
+      if (checkError ?? !dbConversation) {
+        console.error("3. Conversation not found in database:", checkError);
         errorToast("Conversation not found. Please refresh the page.");
         return;
       }
@@ -99,6 +107,8 @@ export default function ChatInput({
         read: false,
         isEdit: false,
       };
+
+      console.log("4. Created new message object:", newMessage);
 
       // Add message optimistically
       addMessageToConversation(conversationId, newMessage);
@@ -114,8 +124,10 @@ export default function ChatInput({
       });
       form.reset();
 
+      console.log("5. Attempting Supabase message insert...");
+
       // Insert message into database
-      const { error } = await supabase.from("messages").insert({
+      const messageData = {
         id: newMessage.id,
         conversation_id: conversationId,
         user_id: newMessage.userId,
@@ -123,14 +135,24 @@ export default function ChatInput({
         read: false,
         is_edit: false,
         created_at: new Date().toISOString(),
-      });
+      };
+
+      console.log("6. Message data to insert:", messageData);
+
+      const { error } = await supabase.from("messages").insert(messageData);
 
       if (error) {
-        console.error("Supabase error:", error);
+        console.error("7. Supabase insert error:", {
+          error,
+          messageData,
+          conversationId,
+        });
         removeMessageFromConversation(conversationId, newMessage.id);
         errorToast();
         return;
       }
+
+      console.log("8. Message successfully inserted");
 
       // Send Slack notification
       await sendSlackToAdmin({
