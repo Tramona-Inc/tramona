@@ -45,7 +45,7 @@ export const propertyMessagesRouter = createTRPCRouter({
 
   getHostTeamConversations: hostProcedure
     .input(z.object({ currentHostTeamId: z.number() }))
-    .query(async ({ ctx, input }) => {
+    .query(async ({ input }) => {
       // all conversations whose property belongs to the host team
       return await db.query.propertyConversations.findMany({
         where: inArray(

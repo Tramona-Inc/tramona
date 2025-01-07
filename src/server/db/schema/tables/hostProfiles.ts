@@ -11,7 +11,6 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 import { referralCodes, users } from "./users";
-import { hostTeams } from "./hostTeams";
 import { trips } from "./trips";
 
 export const ALL_HOST_TYPES = ["airbnb", "direct", "vrbo", "other"] as const;

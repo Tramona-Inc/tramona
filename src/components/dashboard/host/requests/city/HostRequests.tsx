@@ -120,7 +120,10 @@ export default function HostRequests() {
                 <Button
                   variant="secondary"
                   onClick={async () => {
-                    await rejectRequest({ requestId: requestData.request.id })
+                    await rejectRequest({
+                      requestId: requestData.request.id,
+                      currentHostTeamId: currentHostTeamId!,
+                    })
                       .then(() => {
                         toast({
                           title: "Successfully rejected request",
