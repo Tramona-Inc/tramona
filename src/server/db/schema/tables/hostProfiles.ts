@@ -31,13 +31,6 @@ export const hostProfiles = pgTable("host_profiles", {
   hostawayAccountId: varchar("hostaway_account_id"),
   hostawayBearerToken: varchar("hostaway_bearer_token"),
   isHospitableCustomer: boolean("is_hospitable_customer").default(false),
-  // //   curTeamId: integer("cur_team_id")
-  // //     .notNull()
-  // //     .references(() => hostTeams.id),
-  // // },
-  // (t) => ({
-  //   curTeamidIdx: index().on(t.curTeamId),
-  // }),
 });
 
 export type HostProfile = typeof hostProfiles.$inferSelect;

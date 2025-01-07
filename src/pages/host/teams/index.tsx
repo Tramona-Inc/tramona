@@ -56,8 +56,8 @@ import {
 import { ReloadIcon } from "@radix-ui/react-icons";
 import HostDashboardLayout from "@/components/_common/Layout/HostDashboardLayout";
 import AllTeamsOverview from "@/components/host/teams/AllTeamsOverview";
-
-const CURRENT_HOST_TEAM_ID = 89;
+import useSetInitialHostTeamId from "@/components/_common/CustomHooks/useSetInitialHostTeamId";
+import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 
 const roleDescriptions = {
   "Match Manager": {
@@ -127,6 +127,11 @@ const inviteSchema = z.object({
 });
 
 export default function Component() {
+  useSetInitialHostTeamId();
+  const { currentHostTeamId, setCurrentHostTeam } = useHostTeamStore();
+  const CURRENT_HOST_TEAM_ID = currentHostTeamId;
+  console.log(CURRENT_HOST_TEAM_ID);
+  //= 89;
   const { data: session } = useSession({ required: true });
   const { data: hostProfile } = api.hosts.getMyHostProfile.useQuery();
   const { data: hostTeams } = api.hostTeams.getMyHostTeams.useQuery();
