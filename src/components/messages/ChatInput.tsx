@@ -60,8 +60,6 @@ export default function ChatInput({
   const { data: _conversationExists } =
     api.messages.getConversations.useQuery();
 
-  const conversationList = useConversation((state) => state.conversationList);
-
   // Add check before sending message
   if (!conversationId) {
     console.error("No conversation ID available");
@@ -76,22 +74,12 @@ export default function ChatInput({
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (session) {
-      console.log("1. Starting message submission...");
-      console.log("Current conversation ID:", conversationId);
-      console.log("Available conversations:", conversationList);
-      console.log("Fetching conversation from DB with ID:", conversationId);
-
       // First verify the conversation exists in Supabase
       const { data: dbConversation, error: checkError } = await supabase
         .from("conversations")
         .select("id, created_at, name")
         .eq("id", conversationId)
         .single();
-
-      console.log("2. Database check result:", {
-        conversation: dbConversation,
-        error: checkError,
-      });
 
       if (checkError ?? !dbConversation) {
         console.error("3. Conversation not found in database:", checkError);
@@ -109,8 +97,6 @@ export default function ChatInput({
         isEdit: false,
       };
 
-      console.log("4. Created new message object:", newMessage);
-
       // Add message optimistically
       addMessageToConversation(conversationId, newMessage);
       setOptimisticIds(newMessage.id);
@@ -125,8 +111,6 @@ export default function ChatInput({
       });
       form.reset();
 
-      console.log("5. Attempting Supabase message insert...");
-
       // Insert message into database
       const messageData = {
         id: newMessage.id,
@@ -137,8 +121,6 @@ export default function ChatInput({
         is_edit: false,
         created_at: new Date().toISOString(),
       };
-
-      console.log("6. Message data to insert:", messageData);
 
       const { error } = await supabase.from("messages").insert(messageData);
 
@@ -152,8 +134,6 @@ export default function ChatInput({
         errorToast();
         return;
       }
-
-      console.log("8. Message successfully inserted");
 
       // Send Slack notification
       await sendSlackToAdmin({
