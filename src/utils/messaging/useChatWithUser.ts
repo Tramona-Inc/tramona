@@ -11,7 +11,14 @@ export function useChatWithUser() {
   const chatWithUser = async (userId: string) => {
     try {
       const conversation = await createConversation({ userId });
-      void router.push(`/host/messages?conversationId=${conversation.id}`);
+
+      if (!conversation.id) {
+        throw new Error("Failed to create conversation");
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      await router.push(`/host/messages?conversationId=${conversation.id}`);
     } catch (error) {
       const tRPCError = error as TRPCError;
       console.error("Failed to create conversation:", tRPCError.message);

@@ -57,6 +57,18 @@ export default function ChatInput({
 
   const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
 
+  // Add check before sending message
+  if (!conversationId) {
+    console.error("No conversation ID available");
+    return;
+  }
+
+  // Validate conversation ID format if using nanoid
+  if (conversationId.length !== 21) {
+    console.error("Invalid conversation ID format");
+    return;
+  }
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (session) {
       const newMessage: ChatMessageType = {
@@ -69,43 +81,32 @@ export default function ChatInput({
         isEdit: false,
       };
 
-      const newMessageToDb = {
-        id: newMessage.id,
-        conversation_id: conversationId,
-        user_id: newMessage.userId,
-        message: newMessage.message,
-        read: newMessage.read,
-        is_edit: newMessage.isEdit,
-        created_at: new Date().toISOString(),
-      };
-
-      setConversationToTop(conversationId, newMessage);
+      // Add message optimistically
       addMessageToConversation(conversationId, newMessage);
       setOptimisticIds(newMessage.id);
-
+      setConversationToTop(conversationId, {
+        id: newMessage.id,
+        conversationId: conversationId,
+        userId: session.user.id,
+        message: newMessage.message,
+        createdAt: new Date().toISOString(),
+        read: false,
+        isEdit: false,
+      });
       form.reset();
 
-      // ! Optimistic UI first then add to db
-      const { data, error } = await supabase
+      // Insert message into database
+      const { data: _data, error } = await supabase
         .from("messages")
-        .insert(newMessageToDb)
-        .select(
-          `
-          id,
-          conversation_id,
-          user_id,
-          message,
-          read,
-          is_edit,
-          created_at,
-          user:user_id (
-            id,
-            email,
-            name,
-            image
-          )
-        `,
-        )
+        .insert({
+          id: newMessage.id,
+          conversation_id: conversationId,
+          user_id: newMessage.userId,
+          message: newMessage.message,
+          read: newMessage.read,
+          is_edit: newMessage.isEdit,
+        })
+        .select()
         .single();
 
       if (error) {
@@ -115,23 +116,24 @@ export default function ChatInput({
         return;
       }
 
-      console.log("Message sent successfully:", data);
-
+      // Send Slack notification
       await sendSlackToAdmin({
         message: newMessage.message,
         conversationId,
         senderId: newMessage.userId,
       });
 
+      // Only send SMS/WhatsApp if there are unread messages and enough time has passed
       if (participantPhoneNumbers) {
-        void Promise.all(
-          participantPhoneNumbers.map(
-            async ({ lastTextAt, phoneNumber, isWhatsApp }) => {
-              if (
-                phoneNumber &&
-                lastTextAt &&
-                lastTextAt <= sub(new Date(), { hours: 1 })
-              ) {
+        const unreadParticipants = participantPhoneNumbers.filter(
+          ({ lastTextAt }) =>
+            !lastTextAt || lastTextAt <= sub(new Date(), { hours: 1 }),
+        );
+
+        if (unreadParticipants.length > 0) {
+          void Promise.all(
+            unreadParticipants.map(async ({ phoneNumber, isWhatsApp }) => {
+              if (phoneNumber) {
                 if (isWhatsApp) {
                   await twilioWhatsAppMutation.mutateAsync({
                     templateId: "HXae95c5b28aa2f5448a5d63ee454ccb74",
@@ -145,9 +147,9 @@ export default function ChatInput({
                 }
                 await updateUser({ lastTextAt: new Date() });
               }
-            },
-          ),
-        );
+            }),
+          );
+        }
       }
     }
   };
