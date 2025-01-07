@@ -44,12 +44,17 @@ const locale = userLocale === "en-US" ? createCustomLocale(enUS) : enUS; // Adju
 // Usage example
 
 export default function HostPotentialBookingOverview({
+  currentHostTeamId,
   className,
 }: {
+  currentHostTeamId: number | null | undefined;
   className?: string;
 }) {
   const { data: requestsWithProperties, isLoading } =
-    api.properties.getHostPropertiesWithRequests.useQuery();
+    api.properties.getHostPropertiesWithRequests.useQuery(
+      { currentHostTeamId: currentHostTeamId! },
+      { enabled: !!currentHostTeamId },
+    );
 
   return (
     <div className={cn("space-y-4", className)}>
@@ -154,7 +159,7 @@ export default function HostPotentialBookingOverview({
           )}
         </BubbleTabsContent>
         <BubbleTabsContent value="property">
-          <RequestToBookPropertiesTab />
+          <RequestToBookPropertiesTab currentHostTeamId={currentHostTeamId} />
         </BubbleTabsContent>
       </BubbleTabs>
     </div>

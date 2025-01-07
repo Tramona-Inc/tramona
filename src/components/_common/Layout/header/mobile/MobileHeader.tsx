@@ -77,7 +77,7 @@ export default function MobileHeader({ isHost }: { isHost: boolean }) {
                         className="flex items-center justify-between rounded-md py-3 pr-4 text-primaryGreen transition-colors duration-200 hover:bg-background"
                       >
                         <div className="flex flex-row items-center gap-x-2">
-                          {item.icon ? <item.icon /> : null}
+                          <item.icon />
                           {item.title}
                         </div>
                         <ChevronRight className="h-4 w-4 text-slate-400" />

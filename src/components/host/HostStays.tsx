@@ -7,10 +7,15 @@ import {
 } from "@/components/ui/bubble-tabs";
 import HostStaysCards from "./HostStaysCards";
 import { addWeeks, isSameDay } from "date-fns";
+import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 
 // ____ DOUBLES AS THE OVERVIEW AND PAGE _____
 export default function HostStays() {
-  const { data: allTrips } = api.trips.getHostTrips.useQuery();
+  const { currentHostTeamId } = useHostTeamStore();
+  const { data: allTrips } = api.trips.getHostTrips.useQuery(
+    { currentHostTeamId: currentHostTeamId! },
+    { enabled: !!currentHostTeamId },
+  );
 
   const currentDate = new Date();
   const twoWeeksFromNow = addWeeks(currentDate, 2);

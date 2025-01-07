@@ -1,4 +1,3 @@
-import { env } from "@/env";
 import { db } from "@/server/db";
 import {
   type Bid,

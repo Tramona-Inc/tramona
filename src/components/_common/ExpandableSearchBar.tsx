@@ -9,10 +9,12 @@ import { api } from "@/utils/api";
 import { Property } from "@/server/db/schema";
 
 const ExpandableSearchBar = ({
+  currentHostTeamId,
   className,
   onSearchResultsUpdate,
   onExpandChange,
 }: {
+  currentHostTeamId: number | null | undefined;
   onSearchResultsUpdate: (results: Property[]) => void;
   onExpandChange: (isExpanded: boolean) => void;
   className?: string;
@@ -40,9 +42,11 @@ const ExpandableSearchBar = ({
 
   api.properties.getSearchResults.useQuery(
     {
+      currentHostTeamId: currentHostTeamId!,
       searchQuery,
     },
     {
+      enabled: !!currentHostTeamId,
       onSuccess: (data) => {
         onSearchResultsUpdate(data ?? []);
       },

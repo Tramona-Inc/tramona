@@ -47,9 +47,7 @@ export async function insertHost(id: string) {
     return existingHostProfile;
   }
 
-  const teamId = await createInitialHostTeam(user);
-
-  await addHostProfile({ userId: user.id, curTeamId: teamId });
+  await addHostProfile({ userId: user.id });
 }
 
 const airbnbPropertyTypes = [
@@ -261,6 +259,7 @@ export default async function webhook(
       case "channel.activated":
         console.log("channel created");
         await insertHost(webhookData.data.customer.id);
+
         await db
           .update(users)
           .set({
@@ -270,9 +269,12 @@ export default async function webhook(
           })
           .where(eq(users.id, webhookData.data.customer.id));
         break;
+
       case "listing.created":
         console.log("listing created", webhookData.data);
+
         const userId = webhookData.data.channel.customer.id;
+
         const imageResponse = await axios.get<ImageResponse>(
           `https://connect.hospitable.com/api/v1/customers/${userId}/listings/${webhookData.data.id}/images`,
           {
@@ -282,7 +284,9 @@ export default async function webhook(
           },
         );
         const images = imageResponse.data.data.map((image) => image.url);
-        const combinedPricingAndCalendarResponse = await getPropertyCalendar(webhookData.data.id);
+        const combinedPricingAndCalendarResponse = await getPropertyCalendar(
+          webhookData.data.id,
+        );
 
         let currentRange: { start: string; end: string } | null = null;
         const datesReserved: { start: string; end: string }[] = [];
@@ -313,10 +317,11 @@ export default async function webhook(
           lng: webhookData.data.address.longitude,
         });
 
-        const { city, stateCode, country, countryISO, stateName, county } = await getAddress({
-          lat: webhookData.data.address.latitude,
-          lng: webhookData.data.address.longitude,
-        });
+        const { city, stateCode, country, countryISO, stateName, county } =
+          await getAddress({
+            lat: webhookData.data.address.latitude,
+            lng: webhookData.data.address.longitude,
+          });
 
         const taxInfo = calculateTotalTax({ country, stateCode, city });
 
@@ -359,7 +364,6 @@ export default async function webhook(
           ),
         )) as [string, string];
 
-
         // console.log("listingData", listingData);
 
         let cancellationPolicy;
@@ -396,7 +400,6 @@ export default async function webhook(
         //   avgRating = sum / numReviews;
         // }
 
-
         const hostProfile = await db.query.hostProfiles.findFirst({
           where: eq(hostProfiles.userId, userId),
         });
@@ -405,10 +408,18 @@ export default async function webhook(
           throw new Error(`Host profile not found for user ${userId}`);
         }
 
+        const user = await db.query.users
+          .findFirst({
+            where: eq(users.id, userId),
+          })
+          .then((res) => res!);
+
+        const initialTeamId = await createInitialHostTeam(user); //CREATING THE HOST TEAM ON LISTING INITIALIZATION
+
         const propertyId = await db
           .insert(properties)
           .values({
-            hostTeamId: hostProfile.curTeamId,
+            hostTeamId: initialTeamId,
             propertyType: convertAirbnbPropertyType(
               webhookData.data.property_type,
             ),

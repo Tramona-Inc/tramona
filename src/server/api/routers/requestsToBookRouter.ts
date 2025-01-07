@@ -107,9 +107,9 @@ export const requestsToBookRouter = createTRPCRouter({
     }),
 
   getHostRequestsToBookFromId: hostProcedure
-    .input(z.object({ propertyId: z.number() }))
+    .input(z.object({ propertyId: z.number(), currentHostTeamId: z.number() }))
     .query(async ({ ctx, input }) => {
-      const property = await ctx.db.query.properties.findFirst({
+      const property = await db.query.properties.findFirst({
         where: eq(properties.id, input.propertyId),
         columns: { hostTeamId: true },
       });
@@ -124,7 +124,7 @@ export const requestsToBookRouter = createTRPCRouter({
       // Check if user is authorized
       if (
         ctx.user.role !== "admin" &&
-        property.hostTeamId !== ctx.hostProfile.curTeamId
+        property.hostTeamId !== input.currentHostTeamId
       ) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
@@ -186,22 +186,26 @@ export const requestsToBookRouter = createTRPCRouter({
       };
     }),
 
-  getAllRequestToBookProperties: hostProcedure.query(async ({ ctx }) => {
-    const allPropertiesWithRequestToBook = await db.query.properties.findMany({
-      where: eq(properties.hostTeamId, ctx.hostProfile.curTeamId),
-      with: {
-        requestsToBook: {
+  getAllRequestToBookProperties: hostProcedure
+    .input(z.object({ currentHostTeamId: z.number() }))
+    .query(async ({ input }) => {
+      const allPropertiesWithRequestToBook = await db.query.properties.findMany(
+        {
+          where: eq(properties.hostTeamId, input.currentHostTeamId),
           with: {
-            madeByGroup: {
+            requestsToBook: {
               with: {
-                owner: true,
+                madeByGroup: {
+                  with: {
+                    owner: true,
+                  },
+                },
               },
             },
           },
         },
-      },
-    });
+      );
 
-    return allPropertiesWithRequestToBook;
-  }),
+      return allPropertiesWithRequestToBook;
+    }),
 });
