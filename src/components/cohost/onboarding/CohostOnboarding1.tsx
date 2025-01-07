@@ -51,14 +51,14 @@ export default function CohostInviteAcceptance() {
             title: "Invite Accepted",
             description: `You've successfully joined ${data.hostTeamName}'s team!`,
           });
-          void router.push("/host/team");
+          void router.push("/host/teams");
           return;
         case "already in team":
           toast({
             title: "Already a Member",
             description: `You're already a member of ${data.hostTeamName}'s team`,
           });
-          void router.push("/host/team");
+          void router.push("/host/teams");
           return;
         case "expired":
           toast({

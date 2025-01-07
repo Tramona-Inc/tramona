@@ -53,9 +53,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal } from "lucide-react";
 import { ReloadIcon } from "@radix-ui/react-icons";
 import HostDashboardLayout from "@/components/_common/Layout/HostDashboardLayout";
+import AllTeamsOverview from "@/components/host/teams/AllTeamsOverview";
+
+const CURRENT_HOST_TEAM_ID = 89;
 
 const roleDescriptions = {
   "Match Manager": {
@@ -130,7 +132,7 @@ export default function Component() {
   const { data: hostTeams } = api.hostTeams.getMyHostTeams.useQuery();
 
   const curTeam =
-    hostProfile && hostTeams?.find((team) => team.id === hostProfile.curTeamId);
+    hostProfile && hostTeams?.find((team) => team.id === CURRENT_HOST_TEAM_ID);
 
   const updateRoleMutation = api.hostTeams.updateCoHostRole.useMutation();
 
@@ -154,7 +156,7 @@ export default function Component() {
 
   const onSubmit = form.handleSubmit(async ({ email, role }) => {
     await inviteMutation
-      .mutateAsync({ email, role })
+      .mutateAsync({ email, role, hostTeamId: CURRENT_HOST_TEAM_ID })
       .then(({ status }) => {
         console.log(status);
         switch (status) {
@@ -385,18 +387,21 @@ export default function Component() {
   return (
     <HostDashboardLayout>
       <div className="mx-auto max-w-4xl space-y-4 px-4 py-16">
-        {/* Header */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <Users className="h-6 w-6" />
-            <h1 className="text-2xl font-bold">Manage Co-Hosts</h1>
-          </div>
-          <p className="text-muted-foreground">
-            Assign specific roles to your co-hosts to control their access and
-            responsibilities.
-          </p>
-        </div>
-
+        {/* All Team overview  */}
+        <SubHeader
+          title="Manage Teams"
+          description="Viewing all Teams."
+          icon={Users}
+        />
+        {/* All Current Teams and be able to toggle between them */}
+        <AllTeamsOverview />
+        {/* Manage */}
+        <SubHeader
+          title="Manage Co-Hosts"
+          description="Assign specific roles to your co-hosts to control their access and
+        responsibilities."
+          icon={Users}
+        />
         {/* Add New Co-Host Form */}
         <Card>
           <CardHeader>
@@ -557,5 +562,27 @@ export default function Component() {
         </Card>
       </div>
     </HostDashboardLayout>
+  );
+}
+
+function SubHeader({
+  title,
+  description,
+  icon: Icon,
+}: {
+  title: string;
+  description: string;
+  icon: React.FC<{ className?: string }>;
+  iconClassName?: string;
+}) {
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-2">
+        <Icon className="size-5" />
+
+        <h1 className="text-2xl font-bold">{title}</h1>
+      </div>
+      <p className="text-muted-foreground">{description}</p>
+    </div>
   );
 }

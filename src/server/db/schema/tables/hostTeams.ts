@@ -36,6 +36,7 @@ export const hostTeams = pgTable(
 export type HostTeam = typeof hostTeams.$inferSelect;
 
 export const hostTeamMembers = pgTable(
+  //this will double, as keeping track of the members within a team, and all of the teams a member belongs to.
   "host_team_members",
   {
     hostTeamId: integer("host_team_id")

@@ -159,11 +159,12 @@ export const hostTeamsRouter = createTRPCRouter({
       z.object({
         email: z.string(),
         role: z.enum(COHOST_ROLES),
+        hostTeamId: z.number(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
       const hostTeam = await ctx.db.query.hostTeams.findFirst({
-        where: eq(hostTeams.id, ctx.hostProfile.curTeamId),
+        where: eq(hostTeams.id, input.hostTeamId),
         columns: { name: true },
         with: { owner: { columns: { id: true } } },
       });
@@ -178,7 +179,7 @@ export const hostTeamsRouter = createTRPCRouter({
 
       const existingInvite = await ctx.db.query.hostTeamInvites.findFirst({
         where: and(
-          eq(hostTeamInvites.hostTeamId, ctx.hostProfile.curTeamId),
+          eq(hostTeamInvites.hostTeamId, input.hostTeamId),
           eq(hostTeamInvites.inviteeEmail, input.email),
         ),
         columns: { expiresAt: true },
@@ -197,7 +198,7 @@ export const hostTeamsRouter = createTRPCRouter({
         const userInTeam = await ctx.db.query.hostTeamMembers
           .findFirst({
             where: and(
-              eq(hostTeamMembers.hostTeamId, ctx.hostProfile.curTeamId),
+              eq(hostTeamMembers.hostTeamId, input.hostTeamId),
               eq(hostTeamMembers.userId, invitee.id),
             ),
           })
@@ -214,7 +215,7 @@ export const hostTeamsRouter = createTRPCRouter({
       await ctx.db.insert(hostTeamInvites).values({
         id,
         expiresAt: add(new Date(), { hours: 24 }),
-        hostTeamId: ctx.hostProfile.curTeamId,
+        hostTeamId: input.hostTeamId,
         inviteeEmail: input.email,
         lastSentAt: now,
       });
@@ -413,7 +414,15 @@ export const hostTeamsRouter = createTRPCRouter({
       return await ctx.db.query.hostTeams
         .findFirst({
           columns: {},
-          with: { owner: { columns: { phoneNumber: true, isWhatsApp: true, stripeConnectId: true, } } },
+          with: {
+            owner: {
+              columns: {
+                phoneNumber: true,
+                isWhatsApp: true,
+                stripeConnectId: true,
+              },
+            },
+          },
           where: eq(hostTeams.id, input.hostTeamId),
         })
         .then((res) => res?.owner);
@@ -453,25 +462,25 @@ export const hostTeamsRouter = createTRPCRouter({
     return hostTeams;
   }),
 
-  setCurHostTeam: protectedProcedure
-    .input(z.object({ hostTeamId: z.number() }))
-    .mutation(async ({ ctx, input }) => {
-      const hostTeamNamePromise = ctx.db.query.hostTeams
-        .findFirst({
-          where: eq(hostTeams.id, input.hostTeamId),
-          columns: { name: true },
-        })
-        .then((res) => res?.name);
+  // setCurHostTeam: protectedProcedure
+  //   .input(z.object({ hostTeamId: z.number() }))
+  //   .mutation(async ({ ctx, input }) => {
+  //     const hostTeamNamePromise = ctx.db.query.hostTeams
+  //       .findFirst({
+  //         where: eq(hostTeams.id, input.hostTeamId),
+  //         columns: { name: true },
+  //       })
+  //       .then((res) => res?.name);
 
-      const mutation = ctx.db
-        .update(hostProfiles)
-        .set({ curTeamId: input.hostTeamId })
-        .where(eq(hostProfiles.userId, ctx.user.id));
+  //     const mutation = ctx.db
+  //       .update(hostProfiles)
+  //       .set({ curTeamId: input.hostTeamId })
+  //       .where(eq(hostProfiles.userId, ctx.user.id));
 
-      const [hostTeamName] = await Promise.all([hostTeamNamePromise, mutation]);
+  //     const [hostTeamName] = await Promise.all([hostTeamNamePromise, mutation]);
 
-      return { hostTeamName };
-    }),
+  //     return { hostTeamName };
+  //   }),
 
   createHostTeam: roleRestrictedProcedure(["host", "admin"])
     .input(z.object({ name: z.string() }))
@@ -486,11 +495,6 @@ export const hostTeamsRouter = createTRPCRouter({
         ctx.db
           .insert(hostTeamMembers)
           .values({ hostTeamId, userId: ctx.user.id }),
-
-        ctx.db
-          .update(hostProfiles)
-          .set({ curTeamId: hostTeamId })
-          .where(eq(hostProfiles.userId, ctx.user.id)),
       ]);
     }),
 
