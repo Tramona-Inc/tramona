@@ -25,7 +25,7 @@ import PastOfferCard from "./PastOfferCard";
 import PastOfferWithdrawDialog from "./PastOfferWithdrawDialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { HostRequestsPageOfferData } from "@/server/api/routers/propertiesRouter";
-
+import { useChatWithUser } from "@/utils/messaging/useChatWithUser";
 export default function HostRequests() {
   const { toast } = useToast();
   const [propertyPrices, setPropertyPrices] = useState<Record<number, string>>(
@@ -34,6 +34,7 @@ export default function HostRequests() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const router = useRouter();
   const { city, option } = router.query;
+  const chatWithUser = useChatWithUser();
   const priceRestriction = option === "outsidePriceRestriction";
 
   const [selectedRequest, setSelectedRequest] =
@@ -109,6 +110,14 @@ export default function HostRequests() {
           {cityRequestsData.requests.map((requestData) => (
             <div key={requestData.request.id} className="mb-4">
               <RequestCard request={requestData.request} type="host">
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    void chatWithUser(requestData.request.traveler.id);
+                  }}
+                >
+                  Message User
+                </Button>
                 <Button
                   variant="secondary"
                   onClick={async () => {
