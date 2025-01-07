@@ -62,8 +62,8 @@ export const useMessage = create<MessageState>((set, get) => ({
       if (updatedConversations[conversationId]) {
         updatedConversations[conversationId] = {
           messages: [
-            newMessage,
             ...updatedConversations[conversationId].messages,
+            newMessage,
           ],
           page: updatedConversations[conversationId].page,
           hasMore: updatedConversations[conversationId].hasMore,
@@ -143,7 +143,7 @@ export const useMessage = create<MessageState>((set, get) => ({
         )
         .range(0, LIMIT_MESSAGE)
         .eq("conversation_id", conversationId)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: true });
 
       if (error) {
         throw new Error(error.message);

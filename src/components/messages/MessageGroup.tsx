@@ -22,8 +22,8 @@ export function MessageGroup({ messageGroup }: { messageGroup: MessageGroup }) {
       {/* {user ? <UserAvatar {...user} /> : <AnonymousAvatar />} */}
       <div
         className={cn(
-          "max-w-72 sm:max-w-96 rounded-xl px-4 py-2 lg:max-w-prose",
-          me ? "bg-white" : "bg-teal-900 text-white",
+          "max-w-72 rounded-xl px-4 py-2 sm:max-w-96 lg:max-w-prose",
+          me ? "bg-teal-900 text-white" : "bg-white",
         )}
       >
         {/* <div className="flex items-baseline gap-2">

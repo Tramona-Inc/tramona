@@ -56,9 +56,12 @@ export default function HostRequestsToBook() {
           {propertyRequests.activeRequestsToBook.map((data) => (
             <div key={data.id} className="mb-4">
               <HostRequestToBookCard requestToBook={data}>
-                <Button variant="secondary" onClick={() => {
-                  void chatWithUser({ userId: data.userId })
-                }}>
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    void chatWithUser(data.userId);
+                  }}
+                >
                   Message User
                 </Button>
                 {data.status === "Pending" && (

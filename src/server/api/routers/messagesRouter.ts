@@ -315,10 +315,14 @@ export const messagesRouter = createTRPCRouter({
       );
 
       if (!conversationId) {
-        return await createConversationWithHost( input.userId, ctx.user.id);
+        const newConversationId = await createConversationWithHost(
+          ctx.user.id,
+          input.userId,
+        );
+        return { id: newConversationId };
       }
 
-      return conversationId;
+      return { id: conversationId };
     }),
 
   createConversationWithHost: protectedProcedure

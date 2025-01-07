@@ -71,12 +71,12 @@ export default function ChatInput({
 
       const newMessageToDb = {
         id: newMessage.id,
-        created_at: new Date().toISOString(),
         conversation_id: conversationId,
         user_id: newMessage.userId,
         message: newMessage.message,
         read: newMessage.read,
         is_edit: newMessage.isEdit,
+        created_at: new Date().toISOString(),
       };
 
       setConversationToTop(conversationId, newMessage);
@@ -86,18 +86,36 @@ export default function ChatInput({
       form.reset();
 
       // ! Optimistic UI first then add to db
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("messages")
         .insert(newMessageToDb)
-        .select("*, user(email, name, image)")
-        // .select("*")
+        .select(
+          `
+          id,
+          conversation_id,
+          user_id,
+          message,
+          read,
+          is_edit,
+          created_at,
+          user:user_id (
+            id,
+            email,
+            name,
+            image
+          )
+        `,
+        )
         .single();
-      // // Perform the async operation outside the set function
 
       if (error) {
+        console.error("Supabase error:", error);
         removeMessageFromConversation(conversationId, newMessage.id);
         errorToast();
+        return;
       }
+
+      console.log("Message sent successfully:", data);
 
       await sendSlackToAdmin({
         message: newMessage.message,

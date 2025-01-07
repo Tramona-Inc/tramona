@@ -150,10 +150,7 @@ export default function ListMessages() {
   const participants = conversationList[conversationIndex]?.participants;
 
   const messagesWithUser = messages
-    .slice()
-    .reverse()
     .map((message) => {
-      // Display message with user
       if (!participants || !session) return null;
       if (message.userId === session.user.id) {
         return { message, user: session.user };
@@ -161,7 +158,7 @@ export default function ListMessages() {
 
       const user =
         participants.find((participant) => participant.id === message.userId) ??
-        null; // null means its a deleted user
+        null;
 
       return { message, user };
     })

@@ -2,15 +2,14 @@ import { useRouter } from "next/router";
 import { api } from "@/utils/api";
 import { type TRPCError } from "@trpc/server";
 
-export function useChatWithUser() {
+export function HostInitiateChat({ travelerId }: { travelerId: string }) {
   const router = useRouter();
-
   const { mutateAsync: createConversation } =
     api.messages.createConversationHostWithUser.useMutation();
 
-  const chatWithUser = async (userId: string) => {
+  const handleClick = async () => {
     try {
-      const conversation = await createConversation({ userId });
+      const conversation = await createConversation({ userId: travelerId });
       void router.push(`/host/messages?conversationId=${conversation.id}`);
     } catch (error) {
       const tRPCError = error as TRPCError;
@@ -18,5 +17,5 @@ export function useChatWithUser() {
     }
   };
 
-  return chatWithUser;
+  return <button onClick={() => void handleClick()}>Message Traveler</button>;
 }
