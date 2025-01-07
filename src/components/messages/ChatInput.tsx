@@ -57,6 +57,11 @@ export default function ChatInput({
 
   const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
 
+  const { data: _conversationExists } =
+    api.messages.getConversations.useQuery();
+
+  const conversationList = useConversation((state) => state.conversationList);
+
   // Add check before sending message
   if (!conversationId) {
     console.error("No conversation ID available");
@@ -71,6 +76,20 @@ export default function ChatInput({
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (session) {
+      console.log("Current conversation ID:", conversationId);
+      console.log("Available conversations:", conversationList);
+
+      const conversationExists = conversationList.some(
+        (conv) => conv.id === conversationId,
+      );
+
+      console.log("Conversation exists?", conversationExists);
+
+      if (!conversationExists) {
+        errorToast("Conversation not found. Please refresh the page.");
+        return;
+      }
+
       const newMessage: ChatMessageType = {
         id: nanoid(),
         createdAt: new Date().toISOString(),
@@ -96,18 +115,15 @@ export default function ChatInput({
       form.reset();
 
       // Insert message into database
-      const { data: _data, error } = await supabase
-        .from("messages")
-        .insert({
-          id: newMessage.id,
-          conversation_id: conversationId,
-          user_id: newMessage.userId,
-          message: newMessage.message,
-          read: newMessage.read,
-          is_edit: newMessage.isEdit,
-        })
-        .select()
-        .single();
+      const { error } = await supabase.from("messages").insert({
+        id: newMessage.id,
+        conversation_id: conversationId,
+        user_id: newMessage.userId,
+        message: newMessage.message,
+        read: false,
+        is_edit: false,
+        created_at: new Date().toISOString(),
+      });
 
       if (error) {
         console.error("Supabase error:", error);
