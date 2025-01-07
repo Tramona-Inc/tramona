@@ -24,7 +24,10 @@ export class LlamaClient {
     private baseUrl: string;
 
     constructor() {
-        this.apiKey = process.env.LLAMA_API_KEY ?? '';
+        this.apiKey = process.env.LLAMA_API_KEY || ""; // Provide a fallback value
+        if (!this.apiKey) {
+            throw new Error("LLAMA_API_KEY is not defined in the environment variables");
+        }
         this.baseUrl = "https://api.llama-api.com";
     }
 

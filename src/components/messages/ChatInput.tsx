@@ -56,11 +56,26 @@ export default function ChatInput({
     api.messages.getParticipantsPhoneNumbers.useQuery({ conversationId });
 
   const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
+  const { mutateAsync: checkMessageModeration } = api.llama.checkMessage.useMutation();
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (session) {
+      const messageId = nanoid();
+
+      // checks if message is appropriate before sending
+      const moderationResult = await checkMessageModeration({
+        message: values.message,
+        conversationId,
+        messageId: messageId,
+      });
+
+      if (!moderationResult.result.isAppropriate && moderationResult.result.confidence >= 0.8) {
+        errorToast("Message flagged for inappropriate content, and was not sent");
+        return; // Don't send message if flagged
+      }
+
       const newMessage: ChatMessageType = {
-        id: nanoid(),
+        id: messageId,
         createdAt: new Date().toISOString(),
         conversationId: conversationId,
         userId: session.user.id,
