@@ -23,6 +23,7 @@ import {
   StarIcon,
   BedDoubleIcon,
   ExternalLinkIcon,
+  MessageCircleMore,
 } from "lucide-react";
 import Image from "next/image";
 import React from "react";
@@ -46,7 +47,8 @@ import { createUserNameAndPic } from "../activity-feed/admin/generationHelper";
 import ChatOfferButton from "./sections/ChatOfferButton";
 import ReasonsToBook from "./sections/ReasonsToBook";
 import UserInfo from "./sections/UserInfo";
-
+import { useChatWithHost } from "@/utils/messaging/useChatWithHost";
+import { useChatWithAdmin } from "@/utils/messaging/useChatWithAdmin";
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 export type PropertyPageData = RouterOutputs["properties"]["getById"];
 //export type PropertyPageData = RouterOutputs["properties"]["getById"];
@@ -66,6 +68,8 @@ export default function PropertyPage({
   const [isOverflowing, setIsOverflowing] = useState(false);
   const [reviewBackupImages, setReviewBackupImages] = useState<string[]>([]);
   const [openUserInfo, setOpenUserInfo] = useState(false);
+  const chatWithHost = useChatWithHost();
+  const chatWithAdmin = useChatWithAdmin();
 
   api.calendar.getAndUpdateHostCalendar.useQuery(
     {
@@ -75,6 +79,8 @@ export default function PropertyPage({
       enabled: Boolean(property.hospitableListingId),
     },
   );
+
+  const isHospitableUser = property.originalListingPlatform === "Hospitable";
 
   // const { mutateAsync: updateCalender } =
   //   api.calendar.updateHostCalendar.useMutation();
@@ -242,9 +248,15 @@ export default function PropertyPage({
       <div className="relative flex gap-8 pt-5">
         <div className="min-w-0 flex-1 space-y-4">
           <section>
-            <h1 className="flex-1 text-xl font-semibold sm:text-2xl">
-              {property.name}
-            </h1>
+            <div className="flex items-center justify-between">
+              <h1 className="flex-1 text-xl font-semibold sm:text-2xl">
+                {property.name}
+              </h1>
+              <Button onClick={() => isHospitableUser ? chatWithHost({ hostId: property.hostTeam.ownerId }) : chatWithAdmin()}>
+                <MessageCircleMore />
+                Message Host
+              </Button>
+            </div>
             <div className="flex flex-col gap-4 sm:flex-row">
               <div className="flex-1">
                 <p className="gap flex flex-wrap items-center gap-x-1 pt-1 text-sm font-medium capitalize">
@@ -265,7 +277,7 @@ export default function PropertyPage({
                   {plural(property.maxNumGuests, "guest")} ·{" "}
                   {plural(property.numBedrooms, "bedroom")} ·{" "}
                   {plural(property.numBeds, "bed")}
-                  {property.numBathrooms && (
+                  {property.numBathrooms && property.numBathrooms > 0 && (
                     <> · {plural(property.numBathrooms, "bath")}</>
                   )}
                 </p>

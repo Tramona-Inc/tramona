@@ -57,8 +57,36 @@ export default function ChatInput({
 
   const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
 
+  const { data: _conversationExists } =
+    api.messages.getConversations.useQuery();
+
+  // Add check before sending message
+  if (!conversationId) {
+    console.error("No conversation ID available");
+    return;
+  }
+
+  // Validate conversation ID format if using nanoid
+  if (conversationId.length !== 21) {
+    console.error("Invalid conversation ID format");
+    return;
+  }
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (session) {
+      // First verify the conversation exists in Supabase
+      const { data: dbConversation, error: checkError } = await supabase
+        .from("conversations")
+        .select("id, created_at, name")
+        .eq("id", conversationId)
+        .single();
+
+      if (checkError ?? !dbConversation) {
+        console.error("3. Conversation not found in database:", checkError);
+        errorToast("Conversation not found. Please refresh the page.");
+        return;
+      }
+
       const newMessage: ChatMessageType = {
         id: nanoid(),
         createdAt: new Date().toISOString(),
@@ -69,51 +97,62 @@ export default function ChatInput({
         isEdit: false,
       };
 
-      const newMessageToDb = {
+      // Add message optimistically
+      addMessageToConversation(conversationId, newMessage);
+      setOptimisticIds(newMessage.id);
+      setConversationToTop(conversationId, {
         id: newMessage.id,
-        created_at: new Date().toISOString(),
+        conversationId: conversationId,
+        userId: session.user.id,
+        message: newMessage.message,
+        createdAt: new Date().toISOString(),
+        read: false,
+        isEdit: false,
+      });
+      form.reset();
+
+      // Insert message into database
+      const messageData = {
+        id: newMessage.id,
         conversation_id: conversationId,
         user_id: newMessage.userId,
         message: newMessage.message,
-        read: newMessage.read,
-        is_edit: newMessage.isEdit,
+        read: false,
+        is_edit: false,
+        created_at: new Date().toISOString(),
       };
 
-      setConversationToTop(conversationId, newMessage);
-      addMessageToConversation(conversationId, newMessage);
-      setOptimisticIds(newMessage.id);
-
-      form.reset();
-
-      // ! Optimistic UI first then add to db
-      const { error } = await supabase
-        .from("messages")
-        .insert(newMessageToDb)
-        .select("*, user(email, name, image)")
-        // .select("*")
-        .single();
-      // // Perform the async operation outside the set function
+      const { error } = await supabase.from("messages").insert(messageData);
 
       if (error) {
+        console.error("7. Supabase insert error:", {
+          error,
+          messageData,
+          conversationId,
+        });
         removeMessageFromConversation(conversationId, newMessage.id);
         errorToast();
+        return;
       }
 
+      // Send Slack notification
       await sendSlackToAdmin({
         message: newMessage.message,
         conversationId,
         senderId: newMessage.userId,
       });
 
+      // Only send SMS/WhatsApp if there are unread messages and enough time has passed
       if (participantPhoneNumbers) {
-        void Promise.all(
-          participantPhoneNumbers.map(
-            async ({ lastTextAt, phoneNumber, isWhatsApp }) => {
-              if (
-                phoneNumber &&
-                lastTextAt &&
-                lastTextAt <= sub(new Date(), { hours: 1 })
-              ) {
+        const unreadParticipants = participantPhoneNumbers.filter(
+          ({ lastTextAt }) =>
+            !lastTextAt || lastTextAt <= sub(new Date(), { hours: 1 }),
+        );
+
+        if (unreadParticipants.length > 0) {
+          void Promise.all(
+            unreadParticipants.map(async ({ phoneNumber, isWhatsApp }) => {
+              if (phoneNumber) {
                 if (isWhatsApp) {
                   await twilioWhatsAppMutation.mutateAsync({
                     templateId: "HXae95c5b28aa2f5448a5d63ee454ccb74",
@@ -127,9 +166,9 @@ export default function ChatInput({
                 }
                 await updateUser({ lastTextAt: new Date() });
               }
-            },
-          ),
-        );
+            }),
+          );
+        }
       }
     }
   };

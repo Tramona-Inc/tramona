@@ -26,34 +26,25 @@ export const useConversation = create<ConversationListState>((set) => ({
   setConversationToTop: (conversationId: string, newMessage: MessageType) => {
     set((state) => {
       const updatedConversations = [...state.conversationList];
-
       const conversationIndex = updatedConversations.findIndex(
         (conversation) => conversation.id === conversationId,
       );
 
       if (conversationIndex !== -1) {
-        const movedConversation = updatedConversations.splice(
-          conversationIndex,
-          1,
-        )[0];
-
-        // Check if movedConversation is not undefined
-        if (movedConversation) {
-          // Update the first message in the messages array with the new message
-          movedConversation.messages = [
-            {
-              id: newMessage.id,
-              userId: newMessage.userId,
-              createdAt: newMessage.createdAt,
-              conversationId: newMessage.conversationId,
-              message: newMessage.message,
-              read: newMessage.read,
-              isEdit: newMessage.isEdit,
-            },
-            ...movedConversation.messages.slice(1), // Include the rest of the messages
-          ];
-
-          updatedConversations.unshift(movedConversation);
+        const conversation = updatedConversations[conversationIndex];
+        if (conversation) {
+          // Remove conversation from current position
+          updatedConversations.splice(conversationIndex, 1);
+          // Add conversation to top with updated messages and ensure participants is defined
+          updatedConversations.unshift({
+            ...conversation,
+            participants: conversation.participants ?? [],
+            id: conversation.id,
+            name: conversation.name,
+            createdAt: conversation.createdAt,
+            offerId: conversation.offerId ?? null,
+            messages: [newMessage, ...conversation.messages],
+          });
         }
       }
 

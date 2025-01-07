@@ -503,6 +503,7 @@ export async function getRequestsForProperties(
         | "location"
         | "about"
         | "dateOfBirth"
+        | "id"
       >;
     };
   }[] = [];
@@ -577,6 +578,7 @@ export async function getRequestsForProperties(
                 location: true,
                 about: true,
                 dateOfBirth: true,
+                id: true,
               },
             },
           },

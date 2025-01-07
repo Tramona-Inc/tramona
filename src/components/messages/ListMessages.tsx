@@ -150,23 +150,39 @@ export default function ListMessages() {
   const participants = conversationList[conversationIndex]?.participants;
 
   const messagesWithUser = messages
-    .slice()
-    .reverse()
     .map((message) => {
-      // Display message with user
       if (!participants || !session) return null;
+
+      // Handle current user messages
       if (message.userId === session.user.id) {
-        return { message, user: session.user };
+        return {
+          message,
+          user: {
+            id: session.user.id,
+            name: session.user.name,
+            image: session.user.image,
+            email: session.user.email,
+          },
+        };
       }
 
-      const user =
-        participants.find((participant) => participant.id === message.userId) ??
-        null; // null means its a deleted user
+      // Handle other participants' messages
+      const participant = participants.find((p) => p.id === message.userId);
+      if (!participant) return null;
 
-      return { message, user };
+      return {
+        message,
+        user: {
+          id: participant.id,
+          name: participant.name,
+          image: participant.image,
+          email: participant.email,
+        },
+      };
     })
     .filter(Boolean);
 
+  // Messages are now in correct order before grouping
   const messageGroups = groupMessages(messagesWithUser);
 
   return (

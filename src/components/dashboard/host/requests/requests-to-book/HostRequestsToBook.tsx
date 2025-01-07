@@ -10,6 +10,7 @@ import { errorToast } from "@/utils/toasts";
 import { Home } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import HostRequestToBookCard from "./HostRequestToBookCard";
+import { useChatWithUser } from "@/utils/messaging/useChatWithUser";
 import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 import useSetInitialHostTeamId from "@/components/_common/CustomHooks/useSetInitialHostTeamId";
 
@@ -45,6 +46,8 @@ export default function HostRequestsToBook() {
   const { mutateAsync: rejectRequestToBook } =
     api.stripe.rejectOrCaptureAndFinalizeRequestToBook.useMutation();
 
+  const chatWithUser = useChatWithUser();
+
   return (
     <div>
       <div className="mb-4 xl:hidden">
@@ -57,6 +60,14 @@ export default function HostRequestsToBook() {
           {propertyRequests.activeRequestsToBook.map((data) => (
             <div key={data.id} className="mb-4">
               <HostRequestToBookCard requestToBook={data}>
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    void chatWithUser(data.userId);
+                  }}
+                >
+                  Message User
+                </Button>
                 {data.status === "Pending" && (
                   <Button
                     variant="secondary"

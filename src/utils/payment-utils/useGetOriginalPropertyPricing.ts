@@ -54,6 +54,7 @@ export const useGetOriginalPropertyPricing = ({
   //   },
   // );
   const casamundoPrice = property?.tempCasamundoPrice;
+  console.log("casamundoPrice", casamundoPrice);
   const isCasamundoPriceLoading = false;
 
   // Reserved dates

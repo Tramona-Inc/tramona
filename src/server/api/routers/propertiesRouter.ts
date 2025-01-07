@@ -71,6 +71,7 @@ export type HostRequestsPageData = {
         | "location"
         | "about"
         | "dateOfBirth"
+        | "id"
       >;
     };
     properties: (Property & { taxAvailable: boolean })[];
@@ -647,6 +648,7 @@ export const propertiesRouter = createTRPCRouter({
               | "location"
               | "about"
               | "dateOfBirth"
+              | "id"
             >;
           };
           properties: (Property & { taxAvailable: boolean })[];
