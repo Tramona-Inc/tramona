@@ -17,12 +17,14 @@ import { type Session } from "next-auth";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
 import HostTeamsDropdownItems from "./HostTeamsDropdownItems";
+import useSetInitialHostTeamId from "../../CustomHooks/useSetInitialHostTeamId";
 
 import { useState } from "react";
 import CreateHostTeamDialog from "./CreateHostTeamDialog";
 import { api } from "@/utils/api";
 
 function DropdownTop({ session }: { session: Session }) {
+  useSetInitialHostTeamId();
   const title = session.user.name ?? session.user.email;
   const subtitle = session.user.name ? session.user.email : null;
 

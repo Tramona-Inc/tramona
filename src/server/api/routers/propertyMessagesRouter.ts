@@ -43,27 +43,29 @@ export const propertyMessagesRouter = createTRPCRouter({
       .then((convos) => sortBy(convos, (c) => -c.latestMessage.createdAt));
   }),
 
-  getHostTeamConversations: hostProcedure.query(async ({ ctx }) => {
-    // all conversations whose property belongs to the host team
-    return await db.query.propertyConversations.findMany({
-      where: inArray(
-        propertyConversations.propertyId,
-        db
-          .select()
-          .from(properties)
-          .where(eq(properties.hostTeamId, ctx.hostProfile.curTeamId)),
-      ),
-      with: {
-        traveler: {
-          columns: { id: true, name: true, email: true, image: true },
+  getHostTeamConversations: hostProcedure
+    .input(z.object({ currentHostTeamId: z.number() }))
+    .query(async ({ ctx, input }) => {
+      // all conversations whose property belongs to the host team
+      return await db.query.propertyConversations.findMany({
+        where: inArray(
+          propertyConversations.propertyId,
+          db
+            .select()
+            .from(properties)
+            .where(eq(properties.hostTeamId, input.currentHostTeamId)),
+        ),
+        with: {
+          traveler: {
+            columns: { id: true, name: true, email: true, image: true },
+          },
+          messages: {
+            limit: 1,
+            orderBy: desc(propertyMessages.createdAt),
+          },
         },
-        messages: {
-          limit: 1,
-          orderBy: desc(propertyMessages.createdAt),
-        },
-      },
-    });
-  }),
+      });
+    }),
 
   getMessages: protectedProcedure
     .input(

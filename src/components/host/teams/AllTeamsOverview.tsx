@@ -22,10 +22,13 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useHostTeamStore } from "@/utils/store/hostTeamStore";
+import { toast } from "@/components/ui/use-toast";
 
 type HostTeam = RouterOutputs["hostTeams"]["getMyHostTeams"][number];
 
 function AllTeamsOverview() {
+  const { currentHostTeamId, setCurrentHostTeam } = useHostTeamStore();
   const { data: hostTeams = [] } = api.hostTeams.getMyHostTeams.useQuery();
 
   const columns: ColumnDef<HostTeam>[] = React.useMemo(
@@ -77,12 +80,24 @@ function AllTeamsOverview() {
         header: "",
         cell: ({ row }) => (
           <div className="flex flex-row justify-end space-x-2">
-            <Button variant="primary">Selected Team</Button>
+            <Button
+              className="w-24 text-sm"
+              variant="primary"
+              disabled={row.original.id === currentHostTeamId}
+              onClick={() => {
+                setCurrentHostTeam(row.original.id);
+                toast({
+                  title: "Team Switch Successful",
+                });
+              }}
+            >
+              {row.original.id === currentHostTeamId ? "Selected" : "Select"}
+            </Button>
           </div>
         ),
       },
     ],
-    [],
+    [currentHostTeamId, setCurrentHostTeam],
   );
 
   const table = useReactTable({

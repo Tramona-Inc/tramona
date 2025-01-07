@@ -12,8 +12,19 @@ import Link from "next/link";
 import { ArrowRightIcon } from "lucide-react";
 
 // ____ Overview page _____
-export default function HostStaysOverview() {
-  const { data: allTrips } = api.trips.getHostTrips.useQuery();
+export default function HostStaysOverview({
+  currentHostTeamId,
+}: {
+  currentHostTeamId: number | undefined | null;
+}) {
+  const { data: allTrips } = api.trips.getHostTrips.useQuery(
+    {
+      currentHostTeamId: currentHostTeamId!,
+    },
+    {
+      enabled: !!currentHostTeamId,
+    },
+  );
 
   const currentDate = new Date();
   const twoWeeksFromNow = addWeeks(currentDate, 2);

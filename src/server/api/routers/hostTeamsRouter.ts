@@ -429,6 +429,7 @@ export const hostTeamsRouter = createTRPCRouter({
     }),
 
   getInitialHostTeamId: protectedProcedure.query(async ({ ctx }) => {
+    console.log("ran");
     const initialHostTeamId = await db.query.hostTeamMembers
       .findMany({
         where: eq(hostTeamMembers.userId, ctx.user.id),

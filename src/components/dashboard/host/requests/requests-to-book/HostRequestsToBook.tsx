@@ -10,8 +10,12 @@ import { errorToast } from "@/utils/toasts";
 import { Home } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import HostRequestToBookCard from "./HostRequestToBookCard";
+import { useHostTeamStore } from "@/utils/store/hostTeamStore";
+import useSetInitialHostTeamId from "@/components/_common/CustomHooks/useSetInitialHostTeamId";
 
 export default function HostRequestsToBook() {
+  useSetInitialHostTeamId();
+  const { currentHostTeamId } = useHostTeamStore();
   const { toast } = useToast();
   const [dialogOpen, setDialogOpen] = useState(false);
   const router = useRouter();
@@ -33,8 +37,8 @@ export default function HostRequestsToBook() {
 
   const { data: propertyRequests } =
     api.requestsToBook.getHostRequestsToBookFromId.useQuery(
-      { propertyId },
-      { enabled: !!router.isReady },
+      { propertyId, currentHostTeamId: currentHostTeamId! },
+      { enabled: !!router.isReady && !!currentHostTeamId },
     );
   console.log(propertyRequests);
 

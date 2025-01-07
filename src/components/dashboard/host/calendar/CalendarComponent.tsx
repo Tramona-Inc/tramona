@@ -1,10 +1,5 @@
 import React, { useMemo, useEffect, useState, useCallback } from "react";
-import {
-  ChevronLeft,
-  ChevronRight,
-  ChevronDown,
-  Globe,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronDown, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardBanner } from "@/components/ui/card";
 import {
@@ -27,8 +22,12 @@ import {
   DialogDescription,
   DialogHeader,
 } from "@/components/ui/dialog";
+import { useHostTeamStore } from "@/utils/store/hostTeamStore";
+import useSetInitialHostTeamId from "@/components/_common/CustomHooks/useSetInitialHostTeamId";
 
 export default function CalendarComponent() {
+  useSetInitialHostTeamId();
+  const { currentHostTeamId } = useHostTeamStore();
   const router = useRouter();
   const { propertyId } = router.query;
   const [hasDismissedModal, setHasDismissedModal] = useState(false);
@@ -37,9 +36,13 @@ export default function CalendarComponent() {
     null,
   );
   const { data: hostProperties, isLoading: loadingProperties } =
-    api.properties.getHostProperties.useQuery(undefined, {
-      refetchOnWindowFocus: false,
-    });
+    api.properties.getHostProperties.useQuery(
+      { currentHostTeamId: currentHostTeamId! },
+      {
+        enabled: !!currentHostTeamId,
+        refetchOnWindowFocus: false,
+      },
+    );
 
   // Set initial selected property when data loads
   useEffect(() => {
@@ -121,24 +124,25 @@ export default function CalendarComponent() {
   //     return { start: date, end: null };
   //   });
   // };
-  const isDateReserved = useCallback((date: string) => {
-    const parsedDate = parseISO(date);
+  const isDateReserved = useCallback(
+    (date: string) => {
+      const parsedDate = parseISO(date);
 
-    const normalizedDate = format(parsedDate, "yyyy-MM-dd");
+      const normalizedDate = format(parsedDate, "yyyy-MM-dd");
 
-    if (isBefore(parsedDate, new Date())) {
-      return true;
-    }
+      if (isBefore(parsedDate, new Date())) {
+        return true;
+      }
 
-    if (
-      reservedDates?.some(
-        (reservedDate) =>
-          reservedDate.start <= normalizedDate &&
-          reservedDate.end >= normalizedDate,
-      )
-    ) {
-      return true;
-    }
+      if (
+        reservedDates?.some(
+          (reservedDate) =>
+            reservedDate.start <= normalizedDate &&
+            reservedDate.end >= normalizedDate,
+        )
+      ) {
+        return true;
+      }
 
       return false;
     },
@@ -175,9 +179,14 @@ export default function CalendarComponent() {
     <div className="flex min-h-[calc(100vh-4rem)] flex-col gap-4 p-2 sm:p-4 lg:flex-row">
       {/* CALENDAR */}
       <Card className="h-full w-full max-w-[1050px] flex-shrink-0">
-        {selectedProperty?.datesLastUpdated && selectedProperty.iCalLinkLastUpdated &&
-          selectedProperty.iCalLinkLastUpdated < selectedProperty.datesLastUpdated && (
-            <CardBanner className="bg-red-500 text-sm text-white cursor-pointer" onClick={() => setHasDismissedModal(false)}>
+        {selectedProperty?.datesLastUpdated &&
+          selectedProperty.iCalLinkLastUpdated &&
+          selectedProperty.iCalLinkLastUpdated <
+            selectedProperty.datesLastUpdated && (
+            <CardBanner
+              className="cursor-pointer bg-red-500 text-sm text-white"
+              onClick={() => setHasDismissedModal(false)}
+            >
               Calendar not synced
             </CardBanner>
           )}

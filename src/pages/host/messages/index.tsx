@@ -12,6 +12,8 @@ import { api } from "@/utils/api";
 import { cn } from "@/utils/utils";
 import HostDashboardLayout from "@/components/_common/Layout/HostDashboardLayout";
 import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
+import useSetInitialHostTeamId from "@/components/_common/CustomHooks/useSetInitialHostTeamId";
+import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 
 function MessageDisplay() {
   const [selectedConversation, setSelectedConversation] =
@@ -89,6 +91,8 @@ function MessageDisplay() {
 
 export default function MessagePage() {
   // const { data: session } = useSession({ required: true });
+  useSetInitialHostTeamId();
+  const { currentHostTeamId } = useHostTeamStore(); // use this to get the correct messages depending on the team
 
   const { data: totalUnreadMessages, isLoading: isUnreadLoading } =
     api.messages.getNumUnreadMessages.useQuery();

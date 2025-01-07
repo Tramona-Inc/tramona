@@ -9,9 +9,18 @@ import { api } from "@/utils/api";
 import UserAvatar from "@/components/_common/UserAvatar";
 import { formatDistanceToNowStrict } from "date-fns";
 
-function RequestToBookPropertiesTab() {
+function RequestToBookPropertiesTab({
+  currentHostTeamId,
+}: {
+  currentHostTeamId: number | null | undefined;
+}) {
   const { data: properties, isLoading } =
-    api.requestsToBook.getAllRequestToBookProperties.useQuery();
+    api.requestsToBook.getAllRequestToBookProperties.useQuery(
+      { currentHostTeamId: currentHostTeamId! },
+      {
+        enabled: !!currentHostTeamId,
+      },
+    );
 
   if (
     !properties ||

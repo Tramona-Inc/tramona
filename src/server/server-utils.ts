@@ -32,7 +32,6 @@ import {
   groupInvites,
   groupMembers,
   groups,
-  hostTeamInvites,
   hostTeamMembers,
   properties,
   offers,
@@ -1190,13 +1189,11 @@ export async function getRequestsToBookForProperties(
 
 export async function addHostProfile({
   userId,
-  curTeamId,
   hostawayApiKey,
   hostawayAccountId,
   hostawayBearerToken,
 }: {
   userId: string;
-  curTeamId: number;
   hostawayApiKey?: string;
   hostawayAccountId?: string;
   hostawayBearerToken?: string;
@@ -1208,7 +1205,6 @@ export async function addHostProfile({
   if (curUser) {
     await db.insert(hostProfiles).values({
       userId,
-      curTeamId: curTeamId,
       hostawayApiKey,
       hostawayAccountId,
       hostawayBearerToken,

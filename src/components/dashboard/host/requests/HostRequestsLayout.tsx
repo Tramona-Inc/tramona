@@ -7,11 +7,16 @@ import SidebarRequestToBook from "./sidebars/SideBarRequestToBook";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangleIcon } from "lucide-react";
 import { api } from "@/utils/api";
-import { separateByPriceAndAgeRestriction, formatOfferData } from "@/utils/utils";
+import {
+  separateByPriceAndAgeRestriction,
+  formatOfferData,
+} from "@/utils/utils";
 import {
   type SeparatedData,
   type RequestsPageOfferData,
 } from "@/server/server-utils";
+import { useHostTeamStore } from "@/utils/store/hostTeamStore";
+import useSetInitialHostTeamId from "@/components/_common/CustomHooks/useSetInitialHostTeamId";
 
 const alerts = [
   {
@@ -46,12 +51,15 @@ type RouterQuery = Record<string, string> & {
 export default function HostRequestsLayout({
   children,
 }: React.PropsWithChildren) {
+  useSetInitialHostTeamId();
+  const { currentHostTeamId } = useHostTeamStore();
   const router = useRouter();
   const query = router.query as RouterQuery;
   const [activeTab, setActiveTab] = useState<TabType>("city");
   const option = query.option as SelectedOptionType;
-  const [selectedOption, setSelectedOption] =
-    useState<SelectedOptionType>(option || "normal");
+  const [selectedOption, setSelectedOption] = useState<SelectedOptionType>(
+    option || "normal",
+  );
 
   const [separatedData, setSeparatedData] = useState<SeparatedData | null>(
     null,
@@ -61,34 +69,46 @@ export default function HostRequestsLayout({
   );
 
   const { data: properties, isLoading: isLoadingProperties } =
-    api.properties.getHostPropertiesWithRequests.useQuery(undefined, {
-      refetchOnWindowFocus: false,
-      refetchOnMount: false,
-      refetchOnReconnect: false,
-      staleTime: Infinity,
-      cacheTime: Infinity,
-      retry: false,
-    });
+    api.properties.getHostPropertiesWithRequests.useQuery(
+      { currentHostTeamId: currentHostTeamId! },
+      {
+        enabled: !!currentHostTeamId,
+        refetchOnWindowFocus: false,
+        refetchOnMount: false,
+        refetchOnReconnect: false,
+        staleTime: Infinity,
+        cacheTime: Infinity,
+        retry: false,
+      },
+    );
 
   const { data: offers, isLoading: isLoadingOffers } =
-    api.offers.getAllHostOffers.useQuery(undefined, {
-      refetchOnWindowFocus: false,
-      refetchOnMount: false,
-      refetchOnReconnect: false,
-      staleTime: Infinity,
-      cacheTime: Infinity,
-      retry: false,
-    });
+    api.offers.getAllHostOffers.useQuery(
+      { currentHostTeamId: currentHostTeamId! },
+      {
+        enabled: !!currentHostTeamId,
+        refetchOnWindowFocus: false,
+        refetchOnMount: false,
+        refetchOnReconnect: false,
+        staleTime: Infinity,
+        cacheTime: Infinity,
+        retry: false,
+      },
+    );
 
   const { data: requestToBookProperties, isLoading: isLoadingRequestToBook } =
-    api.requestsToBook.getAllRequestToBookProperties.useQuery(undefined, {
-      refetchOnWindowFocus: false,
-      refetchOnMount: false,
-      refetchOnReconnect: false,
-      staleTime: Infinity,
-      cacheTime: Infinity,
-      retry: false,
-    });
+    api.requestsToBook.getAllRequestToBookProperties.useQuery(
+      { currentHostTeamId: currentHostTeamId! },
+      {
+        enabled: !!currentHostTeamId,
+        refetchOnWindowFocus: false,
+        refetchOnMount: false,
+        refetchOnReconnect: false,
+        staleTime: Infinity,
+        cacheTime: Infinity,
+        retry: false,
+      },
+    );
 
   useEffect(() => {
     if (properties) {
@@ -254,7 +274,10 @@ export default function HostRequestsLayout({
                       void router.push(
                         {
                           pathname: "/host/requests",
-                          query: { tabs: "city", option: "outsidePriceRestriction" },
+                          query: {
+                            tabs: "city",
+                            option: "outsidePriceRestriction",
+                          },
                         },
                         undefined,
                         { shallow: true },

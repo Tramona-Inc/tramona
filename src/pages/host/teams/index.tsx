@@ -129,15 +129,13 @@ const inviteSchema = z.object({
 export default function Component() {
   useSetInitialHostTeamId();
   const { currentHostTeamId, setCurrentHostTeam } = useHostTeamStore();
-  const CURRENT_HOST_TEAM_ID = currentHostTeamId;
-  console.log(CURRENT_HOST_TEAM_ID);
-  //= 89;
+
   const { data: session } = useSession({ required: true });
   const { data: hostProfile } = api.hosts.getMyHostProfile.useQuery();
   const { data: hostTeams } = api.hostTeams.getMyHostTeams.useQuery();
 
   const curTeam =
-    hostProfile && hostTeams?.find((team) => team.id === CURRENT_HOST_TEAM_ID);
+    hostProfile && hostTeams?.find((team) => team.id === currentHostTeamId);
 
   const updateRoleMutation = api.hostTeams.updateCoHostRole.useMutation();
 
@@ -161,7 +159,7 @@ export default function Component() {
 
   const onSubmit = form.handleSubmit(async ({ email, role }) => {
     await inviteMutation
-      .mutateAsync({ email, role, hostTeamId: CURRENT_HOST_TEAM_ID })
+      .mutateAsync({ email, role, hostTeamId: currentHostTeamId! })
       .then(({ status }) => {
         console.log(status);
         switch (status) {
