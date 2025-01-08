@@ -122,13 +122,13 @@ export function Questions() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-center">Questions?</h1>
+      <h1 className="text-center text-2xl font-bold">Questions?</h1>
       <div className="flex flex-col items-center gap-4">
         {buttons.map((button, index) => (
           <button
             key={index}
             onClick={button.onClick}
-            className="w-80 bg-white border-2 border-[#004236] text-[#004236] py-3 rounded-lg text-lg font-semibold transition-all hover:bg-[#f5f5f5] hover:text-[#003626]"
+            className="w-80 rounded-lg border-2 border-[#004236] bg-white py-3 text-lg font-semibold text-[#004236] transition-all hover:bg-[#f5f5f5] hover:text-[#003626]"
           >
             {button.title}
           </button>
@@ -136,8 +136,6 @@ export function Questions() {
       </div>
     </div>
   );
-
-
 
   return (
     <div className="space-y-4 lg:rounded-lg lg:border lg:p-4">
@@ -346,10 +344,7 @@ export function StickyTopBar() {
         </Link>
         <div className="flex items-center space-x-6">
           <span className="text-xl font-medium">Ready to List?</span>
-          <Link
-            href={Boolean(isHospitableCustomer) ? "/host" : "/host-onboarding"}
-            passHref
-          >
+          <Link href={"/host-onboarding"} passHref>
             <Button className="bg-primaryGreen px-6 py-3 text-lg font-semibold text-white">
               Tramona Setup
             </Button>

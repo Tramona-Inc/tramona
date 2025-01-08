@@ -1,6 +1,5 @@
 import CardSelect from "@/components/_common/CardSelect";
 import { useRouter } from "next/router";
-import OnboardingFooter from "./OnboardingFooter";
 import { useState } from "react";
 import { InlineWidget, useCalendlyEventListener } from "react-calendly";
 import {
@@ -30,12 +29,13 @@ import {
 import { useZodForm } from "@/utils/useZodForm";
 import { z } from "zod";
 import { SelectIcon } from "@radix-ui/react-select";
-import { CaretSortIcon } from "@radix-ui/react-icons";
+import { CaretSortIcon, ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import { ALL_PROPERTY_PMS } from "@/server/db/schema";
 import { api } from "@/utils/api";
-import { HelpCircle, Link, Plus } from "lucide-react";
+import { Link } from "lucide-react";
 import { cn } from "@/utils/utils";
 import { Questions } from "@/pages/for-hosts";
+import usePopoverStore from "@/utils/store/messagePopoverStore";
 
 export default function Onboarding1({
   onPressNext,
@@ -45,6 +45,7 @@ export default function Onboarding1({
   forHost?: boolean;
 }) {
   const router = useRouter();
+  const { setOpen } = usePopoverStore();
   const [showModal, setShowModal] = useState(false);
   const [showHospitablePopup, setShowHospitablePopup] = useState(false);
   const [eventScheduled, setEventScheduled] = useState(false);
@@ -167,17 +168,16 @@ export default function Onboarding1({
           <div className="flex flex-col gap-4">
             {items.map((item) =>
               item.id === "1" ? (
-                !isHospitableCustomer && (
-                  <CardSelect
-                    key={item.id}
-                    title={item.title}
-                    text={item.text}
-                    onClick={item.onClick}
-                    recommended={item.recommended}
-                  >
-                    {item.icon}
-                  </CardSelect>
-                )
+                <CardSelect
+                  key={item.id}
+                  title={item.title}
+                  text={item.text}
+                  onClick={item.onClick}
+                  recommended={item.recommended}
+                  disabled={isHospitableCustomer ? true : false}
+                >
+                  {item.icon}
+                </CardSelect>
               ) : (
                 <CardSelect
                   key={item.title}
@@ -198,6 +198,33 @@ export default function Onboarding1({
           <div className="hidden lg:block">
             <Questions />
           </div>
+          {isHospitableCustomer && (
+            <div className="flex flex-col gap-2 rounded-md border border-gray-200 p-4">
+              <div className="flex items-center gap-2 text-xl font-bold text-red-600">
+                <ExclamationTriangleIcon className="text-red-600" />
+                Having trouble?
+              </div>
+              <div>
+                We&apos;re here to help! You can either send us a message
+                directly or email our support team.
+              </div>
+              <button
+                className="rounded-md border border-gray-200 p-2"
+                onClick={() => setOpen(true)}
+              >
+                Send us a message
+              </button>
+              <div className="text-center">Or</div>
+              <button
+                className="rounded-md border border-gray-200 p-2"
+                onClick={() => {
+                  window.open("mailto:support@tramona.com", "_blank");
+                }}
+              >
+                Email us at support@tramona.com
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
