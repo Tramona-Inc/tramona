@@ -1,4 +1,8 @@
 import { type PropertyPageData } from "../propertyPages/PropertyPage";
+import { RouterOutputs } from "@/utils/api";
+
+export type RequestToBookProperty =
+  RouterOutputs["requestsToBook"]["getMyRequestsToBook"]["activeRequestsToBook"][number]["property"];
 
 export type RequestToBookPricing = {
   travelerOfferedPriceBeforeFees: number;
@@ -29,7 +33,7 @@ export type PropertyAndTripParams = {
     checkOut: Date;
   };
   travelerPriceBeforeFees: number;
-  property: PropertyPageData;
+  property: PropertyPageData | RequestToBookProperty;
 };
 
 //output
