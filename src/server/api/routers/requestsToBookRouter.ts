@@ -52,6 +52,9 @@ export const requestsToBookRouter = createTRPCRouter({
           columns: {
             amenities: true,
             city: true,
+            county: true,
+            stateCode: true,
+            country: true,
             imageUrls: true,
             name: true,
             numBedrooms: true,
@@ -59,6 +62,8 @@ export const requestsToBookRouter = createTRPCRouter({
             bookOnAirbnb: true,
             hostName: true,
             hostProfilePic: true,
+            originalListingUrl: true,
+            originalNightlyPrice: true,
           },
         },
       },

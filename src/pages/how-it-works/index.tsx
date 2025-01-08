@@ -410,7 +410,7 @@ export default function Page() {
       <div className="bg-[#FAF9F6] p-20">
         <FAQ />
       </div>
-      <div className="bg-primaryGreen py-8">
+      <div className="bg-primaryGreen py-8 pb-[calc(var(--mobile-header-height)+1.5rem)] lg:pb-8">
         <div className="text-center text-white">
           <h2 className="text-2xl font-semibold">
             Start your journey with Tramona now

@@ -16,7 +16,6 @@ import { formatDateRange, getNumNights } from "../utils";
 import type {
   User,
   Trip,
-  Offer,
   Property,
   TripCheckout,
 } from "../../server/db/schema";
