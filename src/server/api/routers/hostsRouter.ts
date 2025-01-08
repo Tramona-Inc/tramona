@@ -87,7 +87,6 @@ export const hostsRouter = createTRPCRouter({
 
       await addHostProfile({
         userId: ctx.user.id,
-        curTeamId: teamId,
         hostawayApiKey: input.hostawayApiKey,
         hostawayAccountId: input.hostawayAccountId,
         hostawayBearerToken: input.hostawayBearerToken,
@@ -474,19 +473,23 @@ export const hostsRouter = createTRPCRouter({
     }));
   }),
 
-  getAllOverviewNotifications: hostProcedure.query(async ({ ctx }) => {
-    //we need to retrieve all of the propeties, and check to see if there is any properties that dont have thier calender synced
-    const unSyncedProperties = await db.query.properties.findMany({
-      where: and(
-        eq(properties.hostTeamId, ctx.hostProfile.curTeamId),
-        isNull(properties.iCalLink),
-      ),
-      columns: {
-        id: true,
-        iCalLink: true,
-        name: true,
-      },
-    });
-    return unSyncedProperties;
-  }),
+  getAllOverviewNotifications: hostProcedure
+    .input(z.object({ currentHostTeamId: z.number() }))
+    .query(async ({ input }) => {
+      //we need to retrieve all of the propeties, and check to see if there is any properties that dont have thier calender synced
+      console.log("loading");
+      const unSyncedProperties = await db.query.properties.findMany({
+        where: and(
+          eq(properties.hostTeamId, input.currentHostTeamId),
+          isNull(properties.iCalLink),
+        ),
+        columns: {
+          id: true,
+          iCalLink: true,
+          name: true,
+        },
+      });
+      console.log(unSyncedProperties);
+      return unSyncedProperties;
+    }),
 });

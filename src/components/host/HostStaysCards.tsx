@@ -19,6 +19,7 @@ import { useChatWithHost } from "@/utils/messaging/useChatWithHost";
 import { Card, CardContent } from "../ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { Badge } from "../ui/badge";
 
 type StaysTabs =
   | "currently-hosting"
@@ -65,29 +66,33 @@ export default function HostStaysCards({
                 <h1 className="text-balance font-bold">{trip.property.name}</h1>
                 <p className="text-muted-foreground">{trip.property.city}</p>
               </div>
-              <div className="px-4 md:px-0">
-                <p className="font-bold">
-                  {formatDateRange(trip.checkIn, trip.checkOut)}
-                </p>
-                {
-                  <p className="text-sm text-blue-600">
-                    Checks out{" "}
-                    {formatDistanceToNowStrict(trip.checkOut, {
-                      addSuffix: true,
-                    })}
-                  </p>
-                }
-              </div>
-              {totalBasePriceBeforeFees && (
-                <div className="px-4 md:px-0">
+              <div className="space-y-2 px-4 md:px-0">
+                <div>
                   <p className="font-bold">
-                    {formatCurrency(totalBasePriceBeforeFees / numNights)}/night
+                    {formatDateRange(trip.checkIn, trip.checkOut)}
                   </p>
-                  <p className="text-muted-foreground">
-                    {formatCurrency(totalBasePriceBeforeFees)} total
-                  </p>
+                  {
+                    <p className="text-sm text-blue-600">
+                      Checks out{" "}
+                      {formatDistanceToNowStrict(trip.checkOut, {
+                        addSuffix: true,
+                      })}
+                    </p>
+                  }
                 </div>
-              )}
+                {totalBasePriceBeforeFees && (
+                  <div className="px-4 md:px-0">
+                    <p className="font-bold">
+                      {formatCurrency(totalBasePriceBeforeFees / numNights)}
+                      /night
+                    </p>
+                    <p className="text-muted-foreground">
+                      {formatCurrency(totalBasePriceBeforeFees)} total
+                    </p>
+                  </div>
+                )}
+              </div>
+
               <p className="mb-4 px-4 md:mb-0 md:px-0">
                 <span className="underline">
                   {trip.offer?.request?.madeByGroup.owner.name}
@@ -98,6 +103,21 @@ export default function HostStaysCards({
                   </span>
                 )}
               </p>
+              <div className="flex justify-center">
+                <Badge
+                  variant={
+                    trip.tripsStatus === "Booked"
+                      ? "green"
+                      : trip.tripsStatus === "Needs attention"
+                        ? "yellow"
+                        : "red"
+                  }
+                  className="w-full justify-center rounded-none md:w-auto md:rounded-full"
+                  size="lg"
+                >
+                  {trip.tripsStatus}
+                </Badge>
+              </div>
               <div className="hidden flex-col items-end gap-y-4 pr-2 text-end md:flex">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -131,7 +151,7 @@ export default function HostStaysCards({
 
             <Button
               variant="secondary"
-              className="w-full md:hidden"
+              className="mt-2 w-full md:hidden"
               onClick={() => chatWithHost({ hostId })}
             >
               Message
@@ -155,7 +175,7 @@ export function HostStaysEmptyState({ staysTab }: { staysTab?: StaysTabs }) {
         text = "No guests are checking out today or tomorrow.";
         break;
       case "upcoming":
-        text = "You don't have any upcoming reservations.";
+        text = "You don't have any upcoming reservations within 2 weeks.";
         break;
       case "accepted":
         text = "You haven't accepted any reservations yet.";

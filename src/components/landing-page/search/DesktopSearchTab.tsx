@@ -191,8 +191,11 @@ export function DesktopSearchTab({
               priceSort,
             ),
           });
+          setIsLoading(false);
           return updatedProperties;
+
         });
+        // setIsLoading(false);
 
         const cursors =
           airbnbResults.data.staysSearch.results.paginationInfo.pageCursors.slice(

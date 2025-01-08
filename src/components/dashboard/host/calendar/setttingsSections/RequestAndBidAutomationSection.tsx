@@ -1,5 +1,5 @@
 import React from "react";
-import { ChevronDown, X } from "lucide-react";
+import { ChevronDown, X, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,7 +17,7 @@ interface DiscountTier {
 
 function RequestAndBidAutomationSection({ property }: { property: Property }) {
   const { mutateAsync: toggleAutoOffer } =
-    api.properties.toggleAutoOffer.useMutation(); //auto offer and discount tiers
+    api.properties.toggleAutoOffer.useMutation();
 
   const { mutateAsync: updateDiscountTier } =
     api.properties.updatePropertyDiscountTiers.useMutation();
@@ -25,7 +25,7 @@ function RequestAndBidAutomationSection({ property }: { property: Property }) {
   const [nameYourPriceOpen, setNameYourPriceOpen] = useState(false);
   const [nameYourPriceSaved, setNameYourPriceSaved] = useState(false);
 
-  //Name your price  & Auto offers section
+  // Name your price & Auto offers section
   const [isAutoOfferChecked, setIsAutoOfferChecked] = useState<
     undefined | boolean
   >(property.autoOfferEnabled);
@@ -34,7 +34,7 @@ function RequestAndBidAutomationSection({ property }: { property: Property }) {
     property.discountTiers,
   );
 
-  //reset when the property changes
+  // Reset when the property changes
   useEffect(() => {
     setNameYourPriceOpen(false);
     setIsAutoOfferChecked(property.autoOfferEnabled);
@@ -72,10 +72,7 @@ function RequestAndBidAutomationSection({ property }: { property: Property }) {
     if (!discountTiers) {
       setDiscountTiers([{ days: 0, percentOff: 0 }]); // Initialize with the new tier if null
     } else {
-      setDiscountTiers([
-        ...discountTiers, // Spread existing tiers
-        { days: 0, percentOff: 0 }, // Add the new tier
-      ]);
+      setDiscountTiers([...discountTiers, { days: 0, percentOff: 0 }]);
     }
   };
 
@@ -84,14 +81,25 @@ function RequestAndBidAutomationSection({ property }: { property: Property }) {
   };
 
   return (
-    <div className="rounded-lg border">
+    <div className="relative rounded-lg border">
+      {/* Overlay */}
+      {nameYourPriceOpen && (
+        <div
+          className="absolute inset-0 z-10 bg-white bg-opacity-50 backdrop-blur-sm flex flex-col items-center justify-center"
+          style={{ pointerEvents: "auto" }}
+        >
+          <Lock className="h-8 w-8 text-gray-500" />
+          <p className="mt-2 text-lg font-semibold text-gray-600">
+            Coming Soon
+          </p>
+        </div>
+      )}
+
       <div
-        className="flex cursor-pointer items-center justify-between px-6 py-8"
+        className="relative z-20 flex cursor-pointer items-center justify-between px-6 py-8"
         onClick={() => setNameYourPriceOpen(!nameYourPriceOpen)}
       >
-        <h3 className="text-xl font-bold text-black">
-          Requests and Bids Automation
-        </h3>
+        <h3 className="text-xl font-bold text-black">Requests and Bids Automation</h3>
         <Button variant="ghost" size="sm">
           <ChevronDown
             className="h-4 w-4 transition-transform duration-300"
@@ -101,11 +109,16 @@ function RequestAndBidAutomationSection({ property }: { property: Property }) {
           />
         </Button>
       </div>
+
       <div
-        className={`overflow-hidden transition-all duration-300 ease-in-out ${nameYourPriceOpen ? "-mt-4 max-h-[1000px] p-6 opacity-100" : "max-h-0 opacity-0"}`}
+        className={`relative overflow-hidden transition-all duration-300 ease-in-out ${
+          nameYourPriceOpen
+            ? "-mt-4 max-h-[1000px] p-6 opacity-100"
+            : "max-h-0 opacity-0"
+        }`}
       >
         <p className="text-base font-semibold">
-          Every day we get thousands of requests from travelers. Heres how you
+          Every day we get thousands of requests from travelers. Here&apos;s how you
           can automate your response to make sure you maximize your bookings.
         </p>
 
@@ -117,6 +130,7 @@ function RequestAndBidAutomationSection({ property }: { property: Property }) {
               checked={isAutoOfferChecked}
               onCheckedChange={(checked) => handleAutoOfferSwitch(checked)}
               className="data-[state=checked]:bg-primaryGreen"
+              disabled={nameYourPriceOpen}
             />
           </div>
 
@@ -127,6 +141,7 @@ function RequestAndBidAutomationSection({ property }: { property: Property }) {
                 variant="ghost"
                 size="sm"
                 onClick={() => setDiscountTiers([])}
+                disabled={nameYourPriceOpen}
               >
                 Reset
               </Button>
@@ -136,8 +151,7 @@ function RequestAndBidAutomationSection({ property }: { property: Property }) {
               <TableBody>
                 {!discountTiers || discountTiers.length === 0 ? (
                   <div>
-                    Click &quot;Add tier&quot; to add discounts to your auto
-                    matches
+                    Click &quot;Add tier&quot; to add discounts to your auto matches
                   </div>
                 ) : (
                   discountTiers?.map((tier, index) => (
@@ -154,9 +168,7 @@ function RequestAndBidAutomationSection({ property }: { property: Property }) {
                           className="w-16 sm:w-20"
                         />
                       </TableCell>
-                      <TableCell className="p-2">
-                        days before check-in:
-                      </TableCell>
+                      <TableCell className="p-2">days before check-in:</TableCell>
                       <TableCell className="p-2">
                         <Input
                           type="number"
@@ -164,7 +176,7 @@ function RequestAndBidAutomationSection({ property }: { property: Property }) {
                           onChange={(e) => {
                             const newTiers = [...discountTiers];
                             newTiers[index]!.percentOff = parseInt(
-                              e.target.value,
+                              e.target.value
                             );
                             setDiscountTiers(newTiers);
                           }}
@@ -177,6 +189,7 @@ function RequestAndBidAutomationSection({ property }: { property: Property }) {
                           variant="ghost"
                           size="sm"
                           onClick={() => removeTier(index)}
+                          disabled={nameYourPriceOpen}
                         >
                           <X className="h-4 w-4" />
                         </Button>
@@ -188,17 +201,29 @@ function RequestAndBidAutomationSection({ property }: { property: Property }) {
             </Table>
 
             <div className="flex justify-start">
-              <Button variant="outline" onClick={addTier} className="w-auto">
+              <Button
+                variant="outline"
+                onClick={addTier}
+                className="w-auto"
+                disabled={nameYourPriceOpen}
+              >
                 Add tier
               </Button>
             </div>
           </div>
 
           <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={handleCancel}>
+            <Button
+              variant="outline"
+              onClick={handleCancel}
+              disabled={nameYourPriceOpen}
+            >
               Cancel
             </Button>
-            <Button onClick={handleNameYourPriceSave}>
+            <Button
+              onClick={handleNameYourPriceSave}
+              disabled={nameYourPriceOpen}
+            >
               {nameYourPriceSaved ? "Saved!" : "Save"}
             </Button>
           </div>

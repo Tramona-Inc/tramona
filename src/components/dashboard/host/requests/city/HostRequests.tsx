@@ -11,10 +11,7 @@ import HostConfirmRequestDialog from "../../HostConfirmRequestDialog";
 import HostFinishRequestDialog from "./HostFinishRequestDialog";
 import { ChevronLeft, Home } from "lucide-react";
 import Link from "next/link";
-import {
-  RequestsPageOfferData,
-  type SeparatedData,
-} from "@/server/server-utils";
+import { type SeparatedData } from "@/server/server-utils";
 import {
   formatOfferData,
   separateByPriceAndAgeRestriction,
@@ -25,8 +22,10 @@ import PastOfferCard from "./PastOfferCard";
 import PastOfferWithdrawDialog from "./PastOfferWithdrawDialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { HostRequestsPageOfferData } from "@/server/api/routers/propertiesRouter";
-
+import { useChatWithUser } from "@/utils/messaging/useChatWithUser";
+import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 export default function HostRequests() {
+  const { currentHostTeamId } = useHostTeamStore();
   const { toast } = useToast();
   const [propertyPrices, setPropertyPrices] = useState<Record<number, string>>(
     {},
@@ -34,6 +33,7 @@ export default function HostRequests() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const router = useRouter();
   const { city, option } = router.query;
+  const chatWithUser = useChatWithUser();
   const priceRestriction = option === "outsidePriceRestriction";
 
   const [selectedRequest, setSelectedRequest] =
@@ -47,9 +47,8 @@ export default function HostRequests() {
     null,
   );
 
-  const [cityOfferData, setCityOfferData] = useState<HostRequestsPageOfferData | null>(
-    null,
-  );
+  const [cityOfferData, setCityOfferData] =
+    useState<HostRequestsPageOfferData | null>(null);
   const [selectedOffer, setSelectedOffer] = useState<number | null>(null);
 
   const [offerWithdrawalDialogOpen, setOfferWithdrawalDialogOpen] =
@@ -72,13 +71,17 @@ export default function HostRequests() {
       },
     });
 
-  api.properties.getHostPropertiesWithRequests.useQuery(undefined, {
-    onSuccess: (fetchedProperties) => {
-      const separatedProperties =
-        separateByPriceAndAgeRestriction(fetchedProperties);
-      setSeparatedData(separatedProperties);
+  api.properties.getHostPropertiesWithRequests.useQuery(
+    { currentHostTeamId: currentHostTeamId! },
+    {
+      enabled: !!currentHostTeamId,
+      onSuccess: (fetchedProperties) => {
+        const separatedProperties =
+          separateByPriceAndAgeRestriction(fetchedProperties);
+        setSeparatedData(separatedProperties);
+      },
     },
-  });
+  );
 
   const requestsWithProperties = priceRestriction
     ? separatedData?.outsidePriceRestriction
@@ -89,13 +92,19 @@ export default function HostRequests() {
   const { mutateAsync: rejectRequest } =
     api.requests.rejectRequest.useMutation();
 
-  api.offers.getAllHostOffers.useQuery(undefined, {
-    onSuccess: (fetchedOffers) => {
-      const formattedData = formatOfferData(fetchedOffers);
-      const offersWithProperties = formattedData.sent ? Object.values(formattedData.sent).find((o) => o.city === city) : [];
-      setCityOfferData(offersWithProperties as HostRequestsPageOfferData);
+  api.offers.getAllHostOffers.useQuery(
+    { currentHostTeamId: currentHostTeamId! },
+    {
+      enabled: !!currentHostTeamId,
+      onSuccess: (fetchedOffers) => {
+        const formattedData = formatOfferData(fetchedOffers);
+        const offersWithProperties = formattedData.sent
+          ? Object.values(formattedData.sent).find((o) => o.city === city)
+          : [];
+        setCityOfferData(offersWithProperties as HostRequestsPageOfferData);
+      },
     },
-  });
+  );
 
   return (
     <div>
@@ -111,8 +120,19 @@ export default function HostRequests() {
               <RequestCard request={requestData.request} type="host">
                 <Button
                   variant="secondary"
+                  onClick={() => {
+                    void chatWithUser(requestData.request.traveler.id);
+                  }}
+                >
+                  Message User
+                </Button>
+                <Button
+                  variant="secondary"
                   onClick={async () => {
-                    await rejectRequest({ requestId: requestData.request.id })
+                    await rejectRequest({
+                      requestId: requestData.request.id,
+                      currentHostTeamId: currentHostTeamId!,
+                    })
                       .then(() => {
                         toast({
                           title: "Successfully rejected request",

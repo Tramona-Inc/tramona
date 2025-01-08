@@ -39,6 +39,8 @@ export async function fetchUsersConversations(userId: string) {
                       name: true,
                       email: true,
                       image: true,
+                      firstName: true,
+                      lastName: true,
                     },
                   },
                 },
@@ -246,6 +248,13 @@ export async function addTwoUserToConversation(
   return conversationId;
 }
 
+async function verifyConversationExists(conversationId: string) {
+  const conversation = await db.query.conversations.findFirst({
+    where: eq(conversations.id, conversationId),
+  });
+  return !!conversation;
+}
+
 export const messagesRouter = createTRPCRouter({
   getConversations: protectedProcedure.query(async ({ ctx }) => {
     const result = await fetchUsersConversations(ctx.user.id);
@@ -305,6 +314,25 @@ export const messagesRouter = createTRPCRouter({
 
     return conversationId;
   }),
+
+  createConversationHostWithUser: protectedProcedure
+    .input(z.object({ userId: zodString() }))
+    .mutation(async ({ ctx, input }) => {
+      const conversationId = await fetchConversationWithHost(
+        input.userId,
+        ctx.user.id,
+      );
+
+      if (!conversationId) {
+        const newConversationId = await createConversationWithHost(
+          ctx.user.id,
+          input.userId,
+        );
+        return { id: newConversationId };
+      }
+
+      return { id: conversationId };
+    }),
 
   createConversationWithHost: protectedProcedure
     .input(z.object({ hostId: zodString() }))
@@ -628,5 +656,20 @@ export const messagesRouter = createTRPCRouter({
       }
 
       return { conversationId, tempUserId: tempUser?.id };
+    }),
+
+  createMessage: protectedProcedure
+    .input(
+      z.object({
+        conversationId: z.string(),
+        message: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const exists = await verifyConversationExists(input.conversationId);
+      if (!exists) {
+        throw new Error("Conversation not found");
+      }
+      // proceed with message creation
     }),
 });

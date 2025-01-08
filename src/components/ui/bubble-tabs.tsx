@@ -13,10 +13,7 @@ const BubbleTabsList = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <TabsPrimitive.List
     ref={ref}
-    className={cn(
-      "inline-flex items-center justify-center gap-x-3 rounded-md border-none bg-none p-1 text-muted-foreground",
-      className,
-    )}
+    className={cn("flex gap-x-2 overflow-x-auto", className)}
     {...props}
   />
 ));

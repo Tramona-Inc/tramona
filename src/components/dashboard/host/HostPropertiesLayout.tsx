@@ -10,20 +10,21 @@ import {
   type Property,
 } from "@/server/db/schema/tables/properties";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useRouter } from "next/router";
 import ExpandableSearchBar from "@/components/_common/ExpandableSearchBar";
 import { useEffect, useState } from "react";
 import HostPropertiesSidebar from "./HostPropertiesSidebar";
 import { cn } from "@/utils/utils";
 import HostPropertyInfo from "./HostPropertyInfo";
+import useSetInitialHostTeamId from "@/components/_common/CustomHooks/useSetInitialHostTeamId";
+import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 
 export default function HostPropertiesLayout() {
+  useSetInitialHostTeamId();
+  const { currentHostTeamId } = useHostTeamStore();
   const [searchResults, setSearchResults] = useState<Property[]>([]);
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState<Property>();
   const [open, setOpen] = useState(false);
-
-  const router = useRouter();
 
   const setProgress = useHostOnboarding((state) => state.setProgress);
 
@@ -89,7 +90,12 @@ export default function HostPropertiesLayout() {
       setOriginalListingId("");
   }
 
-  const { data: properties } = api.properties.getHostProperties.useQuery();
+  const { data: properties } = api.properties.getHostProperties.useQuery(
+    { currentHostTeamId: currentHostTeamId! },
+    {
+      enabled: !!currentHostTeamId,
+    },
+  );
 
   const listedProperties = properties?.filter(
     (property) => property.status === "Listed",
@@ -153,6 +159,7 @@ export default function HostPropertiesLayout() {
         </div>
       </div>
       <ExpandableSearchBar
+        currentHostTeamId={currentHostTeamId}
         className="pt-4 sm:hidden"
         onSearchResultsUpdate={handleSearchResults}
         onExpandChange={setIsSearchExpanded}

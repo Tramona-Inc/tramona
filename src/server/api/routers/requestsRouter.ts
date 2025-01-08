@@ -290,11 +290,11 @@ export const requestsRouter = createTRPCRouter({
     }),
 
   rejectRequest: hostProcedure
-    .input(z.object({ requestId: z.number() }))
+    .input(z.object({ requestId: z.number(), currentHostTeamId: z.number() }))
     .mutation(async ({ ctx, input }) => {
       await ctx.db.insert(rejectedRequests).values({
         requestId: input.requestId,
-        hostTeamId: ctx.hostProfile.curTeamId,
+        hostTeamId: input.currentHostTeamId,
       });
     }),
 });

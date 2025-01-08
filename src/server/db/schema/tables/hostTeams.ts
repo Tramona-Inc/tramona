@@ -27,6 +27,9 @@ export const hostTeams = pgTable(
     ownerId: text("owner_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
   },
   (t) => ({
     owneridIdx: index().on(t.ownerId),
@@ -36,6 +39,7 @@ export const hostTeams = pgTable(
 export type HostTeam = typeof hostTeams.$inferSelect;
 
 export const hostTeamMembers = pgTable(
+  //this will double, as keeping track of the members within a team, and all of the teams a member belongs to.
   "host_team_members",
   {
     hostTeamId: integer("host_team_id")
@@ -45,6 +49,9 @@ export const hostTeamMembers = pgTable(
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     role: cohostRoleEnum("role").notNull().default("Admin Access"),
+    addedAt: timestamp("added_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
   },
   (vt) => ({
     compoundKey: primaryKey({ columns: [vt.hostTeamId, vt.userId] }),

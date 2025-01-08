@@ -116,51 +116,53 @@ export const tripsRouter = createTRPCRouter({
     });
   }),
 
-  getHostTrips: hostProcedure.query(async ({ ctx }) => {
-    return await db.query.trips.findMany({
-      where: exists(
-        db
-          .select()
-          .from(properties)
-          .where(
-            and(
-              eq(properties.hostTeamId, ctx.hostProfile.curTeamId),
-              eq(properties.id, trips.propertyId),
+  getHostTrips: hostProcedure
+    .input(z.object({ currentHostTeamId: z.number() }))
+    .query(async ({ input }) => {
+      return await db.query.trips.findMany({
+        where: exists(
+          db
+            .select()
+            .from(properties)
+            .where(
+              and(
+                eq(properties.hostTeamId, input.currentHostTeamId),
+                eq(properties.id, trips.propertyId),
+              ),
             ),
-          ),
-      ),
-      with: {
-        property: {
-          columns: { name: true, imageUrls: true, city: true },
-          with: {
-            hostTeam: {
-              with: { owner: { columns: { name: true, image: true } } },
+        ),
+        with: {
+          property: {
+            columns: { name: true, imageUrls: true, city: true },
+            with: {
+              hostTeam: {
+                with: { owner: { columns: { name: true, image: true } } },
+              },
             },
           },
-        },
-        offer: {
-          columns: {
-            totalBasePriceBeforeFees: true,
-            checkIn: true,
-            checkOut: true,
-          },
-          with: {
-            request: {
-              columns: {
-                location: true,
-                numGuests: true,
-              },
-              with: {
-                madeByGroup: {
-                  with: { owner: { columns: { name: true } } },
+          offer: {
+            columns: {
+              totalBasePriceBeforeFees: true,
+              checkIn: true,
+              checkOut: true,
+            },
+            with: {
+              request: {
+                columns: {
+                  location: true,
+                  numGuests: true,
+                },
+                with: {
+                  madeByGroup: {
+                    with: { owner: { columns: { name: true } } },
+                  },
                 },
               },
             },
           },
         },
-      },
-    });
-  }),
+      });
+    }),
 
   getMyTripsPageDetails: protectedProcedure
     .input(z.object({ tripId: z.number() }))
