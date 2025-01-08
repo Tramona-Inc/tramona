@@ -54,19 +54,18 @@ export default function Page() {
 
   return (
     <MainLayout className="flex flex-col justify-center">
-      <div className="min-h-screen-minus-header flex flex-col items-center justify-center gap-4 p-4">
-        <h1 className="text-center text-5xl font-bold tracking-tight">
+      <div className="flex min-h-screen-minus-header flex-col items-center justify-center gap-y-2 px-6">
+        <h1 className="-mt-32 mb-2 text-center text-4xl font-bold tracking-tight sm:text-5xl">
           Check your email
         </h1>
-        <p className="text-center text-muted-foreground">
+        <p className="text-center text-sm md:text-base">
           Account successfully created! Please check your email for a secure
           login link.
         </p>
-        <Button asChild>
-          <a href="https://mail.google.com" target="_blank" rel="noreferrer">
-            Open Gmail <ExternalLinkIcon className="h-4 w-4" />
-          </a>
-        </Button>
+        <p className="text-center text-xs text-muted-foreground md:text-sm">
+          If you don&apos;t see the email in your inbox, please check your spam
+          or other folders.
+        </p>
         {verified && (
           <p className="text-green-500">Email verified! Redirecting...</p>
         )}
