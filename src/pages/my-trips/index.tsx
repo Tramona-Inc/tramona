@@ -12,7 +12,7 @@ import BillingOverview from "@/components/my-trips/billing/BillingOverview";
 import PaymentHistoryOverview from "@/components/my-trips/billing/PaymentHistoryOverview";
 import SecurityDepositOverview from "@/components/my-trips/billing/travelerClaims/SecurityDepositOverview";
 import InnerTravelerLayout from "@/components/_common/Layout/DashboardLayout/InnerTravelerLayout";
-
+import { useSession } from "next-auth/react";
 export type TripCardDetails = RouterOutputs["trips"]["getMyTrips"][number];
 
 interface MyTripsProps {
@@ -20,6 +20,7 @@ interface MyTripsProps {
 }
 
 export default function MyTrips({ billingRoute }: MyTripsProps) {
+  useSession({ required: true });
   const { data: allTrips } = api.trips.getMyTrips.useQuery();
   const router = useRouter();
   const { tab } = router.query;
