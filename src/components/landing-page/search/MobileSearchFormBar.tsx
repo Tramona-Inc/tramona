@@ -1,7 +1,7 @@
 import React from "react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
+import { Search, SearchIcon } from "lucide-react";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import {
   Select,
@@ -51,14 +51,14 @@ export function MobileSearchFormBar({
       <DialogTrigger asChild>
         <Button
           variant="outline"
-          className="w-full rounded-full border border-gray-200 bg-white p-0 shadow-md hover:shadow-lg lg:hidden"
+          className="w-full rounded-full border-2 border-gray-200 bg-white p-0 py-5 shadow-md hover:shadow-lg lg:hidden"
         >
-          <div className="flex w-full items-center px-6 py-3">
+          <div className="flex w-full items-center px-6 py-4">
             <Search className="mr-4 h-4 w-4" />
             <div className="flex flex-col items-start">
               <span className="text-sm font-medium">{getDisplayText()}</span>
               {(checkIn ?? checkOut ?? numGuests) && (
-                <span className="text-xs text-gray-500">
+                <span className="-mt-1 text-xs text-gray-500">
                   {[
                     checkIn && new Date(checkIn).toLocaleDateString(),
                     checkOut && new Date(checkOut).toLocaleDateString(),
@@ -74,50 +74,59 @@ export function MobileSearchFormBar({
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="h-[90vh] overflow-y-auto p-0 sm:max-w-[600px]">
+      <DialogContent className="overflow-y-none h-[60vh] pb-12 sm:max-w-[700px]">
         <div className="flex h-full flex-col">
           <div className="space-y-6 p-4">
             <h2 className="text-lg font-semibold">Where to?</h2>
             <Form {...form}>
-              <form onSubmit={handleSubmit}>
-                <div className="space-y-6">
-                  {/* Location Select */}
-                  <FormField
-                    control={form.control}
-                    name="location"
-                    render={({ field }) => (
-                      <FormItem>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
+              <form onSubmit={handleSubmit} className="w-full space-y-4">
+                {/* Location Select */}
+                <FormField
+                  control={form.control}
+                  name="location"
+                  render={({ field }) => (
+                    <FormItem>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-13 flex w-full items-center justify-start rounded-lg bg-gray-50 px-3">
+                            <SearchIcon className="size-5 text-gray-400" />
+                            <div className="flex-1">
+                              <SelectValue
+                                placeholder="Search destinations"
+                                className="text-gray-400"
+                              />
+                            </div>
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent
+                          position="popper"
+                          align="center"
+                          className="h-48 w-full overflow-y-auto"
                         >
-                          <FormControl>
-                            <SelectTrigger className="w-full rounded-lg border border-gray-300 p-4 pl-10">
-                              <SelectValue placeholder="Search destinations" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent className="h-48 overflow-y-auto">
-                            {locations.map((location) => (
-                              <SelectItem
-                                key={location.name}
-                                value={location.name}
-                              >
-                                {location.name}, {location.country}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormItem>
-                    )}
-                  />
+                          {locations.map((location) => (
+                            <SelectItem
+                              key={location.name}
+                              value={location.name}
+                              className="w-full"
+                            >
+                              {location.name}, {location.country}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
 
-                  <SearchFormBar
-                    form={form}
-                    onSubmit={onSubmit}
-                    isLoading={isLoading}
-                    variant="modal"
-                  />
-                </div>
+                <SearchFormBar
+                  form={form}
+                  onSubmit={onSubmit}
+                  isLoading={isLoading}
+                  variant="modal"
+                />
               </form>
             </Form>
           </div>
