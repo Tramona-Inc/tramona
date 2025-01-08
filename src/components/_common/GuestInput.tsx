@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   Popover,
   PopoverContent,
@@ -48,18 +48,21 @@ export default function GuestInput({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild className="h-full flex items-center justify-center p-0">
+      <PopoverTrigger
+        asChild
+        className="flex h-full items-center justify-center p-0"
+      >
         <InputButton
           className={className}
           placeholder={placeholder}
           variant={variant}
           label={label}
           icon={icon}
-          value={`${value} ${value === 1 ? 'Guest' : 'Guests'}`}
+          value={`${value} ${value === 1 ? "Guest" : "Guests"}`}
         />
       </PopoverTrigger>
       <PopoverContent
-        className="w-auto rounded-3xl p-6 backdrop-blur-md"
+        className="w-64 rounded-3xl p-6 backdrop-blur-md md:w-auto"
         align="center"
         side="bottom"
         avoidCollisions={false}
@@ -75,11 +78,11 @@ export default function GuestInput({
           >
             <Minus className="h-4 w-4" />
           </Button>
-          
-          <span className="text-center min-w-[3rem]">
-            {value} {value === 1 ? 'Guest' : 'Guests'}
+
+          <span className="min-w-[3rem] text-center">
+            {value} {value === 1 ? "Guest" : "Guests"}
           </span>
-          
+
           <Button
             type="button"
             variant="outline"

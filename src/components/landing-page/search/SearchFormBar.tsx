@@ -74,6 +74,7 @@ export function SearchFormBar({
                       maxDate={
                         checkOutDate instanceof Date ? checkOutDate : undefined
                       }
+                      popoverSide="top"
                     />
                     <CalendarDays className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
                   </div>
@@ -101,6 +102,7 @@ export function SearchFormBar({
                       minDate={
                         checkInDate instanceof Date ? checkInDate : undefined
                       }
+                      popoverSide="top"
                     />
                     <CalendarDays className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
                   </div>

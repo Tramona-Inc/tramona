@@ -21,6 +21,7 @@ export default function SingleDateInput({
   onChange,
   minDate,
   maxDate,
+  popoverSide = "bottom",
 }: {
   className?: string;
   label?: string;
@@ -33,6 +34,7 @@ export default function SingleDateInput({
   onChange: (value?: Date) => void;
   minDate?: Date;
   maxDate?: Date;
+  popoverSide?: "top" | "right" | "bottom" | "left";
 }) {
   const [open, setOpen] = useState(false);
 
@@ -62,7 +64,7 @@ export default function SingleDateInput({
       <PopoverContent
         className="z-0 w-auto rounded-3xl p-0 backdrop-blur-md"
         align="center"
-        side="bottom"
+        side={popoverSide}
         avoidCollisions={false}
       >
         <Calendar
@@ -73,7 +75,7 @@ export default function SingleDateInput({
             setOpen(false);
           }}
           disabled={dateIsDisabled}
-          className="h-80"
+          className="h-72"
           fromDate={minDate}
         />
       </PopoverContent>
