@@ -16,7 +16,7 @@ export function MessageGroup({ messageGroup }: { messageGroup: MessageGroup }) {
     <div
       className={cn(
         "flex items-start gap-2",
-        me ? "justify-start" : "justify-end",
+        me ? "justify-end" : "justify-start",
       )}
     >
       {/* {user ? <UserAvatar {...user} /> : <AnonymousAvatar />} */}

@@ -20,7 +20,12 @@ export function SidebarConversation({
   const { participants, messages, name } = conversation;
 
   const displayParticipants = participants
-    .map((participant) => participant.name ?? participant.id)
+    .map(
+      (participant) =>
+        participant.firstName
+          ? participant.firstName + " " + participant.lastName
+          : participant.id,
+    )
     .join(", ");
 
   const { data: session } = useSession();

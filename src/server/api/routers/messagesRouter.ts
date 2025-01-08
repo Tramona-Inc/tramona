@@ -39,6 +39,8 @@ export async function fetchUsersConversations(userId: string) {
                       name: true,
                       email: true,
                       image: true,
+                      firstName: true,
+                      lastName: true,
                     },
                   },
                 },

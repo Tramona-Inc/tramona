@@ -146,7 +146,7 @@ export default function ChatInput({
       if (participantPhoneNumbers) {
         const unreadParticipants = participantPhoneNumbers.filter(
           ({ lastTextAt }) =>
-            !lastTextAt || lastTextAt <= sub(new Date(), { hours: 1 }),
+            !lastTextAt || lastTextAt <= sub(new Date(), { hours: 12 }),
         );
 
         if (unreadParticipants.length > 0) {
