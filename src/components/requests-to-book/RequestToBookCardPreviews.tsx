@@ -41,7 +41,7 @@ export function RequestToBookCardPreviews({
               fill
               className="object-cover"
             />
-            <div className="to-black/65 absolute inset-0 flex flex-col justify-end bg-gradient-to-b from-transparent to-[90%] p-2">
+            <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-b from-transparent to-black/65 to-[90%] p-2">
               <p className="line-clamp-1 text-sm font-semibold text-white">
                 {requestToBook.property.name}
               </p>
