@@ -176,6 +176,7 @@ export const optionallyAuthedProcedure = t.procedure.use(({ ctx, next }) => {
 });
 
 export const roleRestrictedProcedure = <
+  //primarly used with Admin accounts
   TAllowedRoles extends readonly User["role"][],
 >(
   allowedRoles: TAllowedRoles,
@@ -211,3 +212,36 @@ export const roleRestrictedProcedure = <
       },
     });
   });
+
+//Co-host Procedure
+
+export const coHostProcedure = t.procedure.use(async ({ ctx, next }) => {
+  if (!ctx.session?.user) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
+
+  const { user, ...session } = ctx.session;
+
+  const hostProfile = await ctx.db.query.hostProfiles.findFirst({
+    where: eq(hostProfiles.userId, user.id),
+  });
+
+  if (!hostProfile) {
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+      message: `Host profile not found for user id ${user.id}`,
+    });
+  }
+
+  //find the host
+
+  return next({
+    ctx: {
+      // infers the `session` as non-nullable
+      user,
+      hostProfile,
+      session,
+      db,
+    },
+  });
+});
