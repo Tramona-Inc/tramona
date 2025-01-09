@@ -210,7 +210,7 @@ export default function MastHead() {
                 Name your own price or book it now
               </h3>
               <h3 className="mt-2 text-xl font-semibold text-white">
-                when hosts have empty nights, no one wins
+                When hosts have empty nights, no one wins
               </h3>
               <h3 className="mt-4 text-lg font-semibold text-white">
                 <button
