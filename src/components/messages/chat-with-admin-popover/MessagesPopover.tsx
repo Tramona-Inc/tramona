@@ -25,12 +25,12 @@ import ListMessagesWithAdmin from "./ListMessagesWithAdmin";
 import { useEffect, useState } from "react";
 
 import { type MessageDbType } from "@/types/supabase.message";
-
+import usePopoverStore from "@/utils/store/messagePopoverStore";
 export default function MessagesPopover({ isMobile, isHostOnboarding }: { isMobile: boolean, isHostOnboarding: boolean }) {
   const { data: session } = useSession();
   const [conversationId, setConversationId] = useState<string>("");
   const [tempToken, setTempToken] = useState<string>("");
-  const [open, setOpen] = useState(false);
+  const { open, setOpen } = usePopoverStore();
 
   const { mutateAsync: createOrRetrieveConversation } =
     api.messages.createConversationWithAdmin.useMutation();
@@ -297,9 +297,9 @@ export default function MessagesPopover({ isMobile, isHostOnboarding }: { isMobi
                         return (
                           <FormItem className="flex-1">
                             <FormControl>
-                              <Input
+                              <textarea
                                 placeholder="Type your question here..."
-                                className="border-none bg-transparent text-white"
+                                className="border-none bg-transparent text-white resize-none"
                                 {...field}
                               />
                             </FormControl>
