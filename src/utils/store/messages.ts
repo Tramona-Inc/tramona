@@ -1,10 +1,12 @@
 import { LIMIT_MESSAGE } from "@/components/messages/ChatMessages";
 import { type MessageType } from "@/server/db/schema";
+import { type FlaggedMessageType } from "@/server/db/schema";
 import { create } from "zustand";
 import supabase from "../supabase-client";
 import { errorToast } from "../toasts";
 
 export type ChatMessageType = MessageType & { userId: string }; // make userId non-null
+export type ChatFlaggedMessageType = FlaggedMessageType & { userId: string };
 
 type ConversationsState = Record<
   string,

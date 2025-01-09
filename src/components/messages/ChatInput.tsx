@@ -1,5 +1,6 @@
 import { useConversation } from "@/utils/store/conversations";
 import { type ChatMessageType, useMessage } from "@/utils/store/messages";
+import { type ChatFlaggedMessageType } from "@/utils/store/messages";
 import supabase from "@/utils/supabase-client";
 import { errorToast } from "@/utils/toasts";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -71,7 +72,34 @@ export default function ChatInput({
 
       if (!moderationResult.result.isAppropriate && moderationResult.result.confidence >= 0.8) {
         errorToast("Message flagged for inappropriate content, and was not sent");
-        return; // Don't send message if flagged
+        const newMessage: ChatFlaggedMessageType = {
+          id: messageId,
+          conversationId: conversationId,
+          userId: session.user.id,
+          confidence: moderationResult.result.confidence,
+          message: values.message,
+          violationType: moderationResult.result.violationType ?? "UNKNOWN",
+          reason: moderationResult.result.reason ?? "",
+          createdAt: new Date(),
+        };
+
+        const { error } = await supabase
+          .from("flaggedMessages")
+          .insert({
+            id: newMessage.id,
+            conversation_id: newMessage.conversationId,
+            user_id: newMessage.userId,
+            confidence: newMessage.confidence,
+            message: newMessage.message,
+            violation_type: newMessage.violationType,
+            reason: newMessage.reason,
+            created_at: newMessage.createdAt.toISOString(),
+          })
+          .select("*, user(email, name, image)")
+          .single();
+        form.reset();
+
+        return;
       }
 
       const newMessage: ChatMessageType = {

@@ -67,30 +67,31 @@ export const flaggedMessages = pgTable(
   "flagged_messages",
   {
     id: varchar("id", { length: 21 }).primaryKey().$defaultFn(nanoid),
-    messageId: varchar("message_id", { length: 21 })
-      .notNull()
-      .references(() => messages.id, { onDelete: "cascade" }),
     conversationId: varchar("conversation_id", { length: 21 })
       .notNull()
       .references(() => conversations.id, { onDelete: "cascade" }),
+    userId: text("user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
     confidence: real("confidence").notNull(), // Change from decimal to float
     violationType: varchar("violation_type", {
       enum: ["OFF_PLATFORM_BOOKING", "CONTACT_INFO", "INAPPROPRIATE", "UNKNOWN"], // Ensure UNKNOWN is included
     }).notNull(),
+    message: varchar("message", { length: 1500 }).notNull(),
     reason: text("reason"),
-    status: varchar("status", {
-      enum: ["PENDING", "REVIEWED", "DISMISSED"],
-    }).default("PENDING"),
-    reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
-    reviewedBy: text("reviewed_by").references(() => users.id),
+    // possibly later add for admin message check
+    //  status: varchar("status", {
+    //    enum: ["PENDING", "REVIEWED", "DISMISSED"],
+    //  }).default("PENDING"),
+    //  reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+    // reviewedBy: text("reviewed_by").references(() => users.id),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
   },
-  (table) => ({
-    messageIdIdx: index().on(table.messageId),
-    conversationIdIdx: index().on(table.conversationId),
-    statusIdx: index().on(table.status),
+  (t) => ({
+    conversationidIdx: index().on(t.conversationId),
+    useridIdx: index().on(t.userId),
   }),
 );
 

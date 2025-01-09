@@ -21,9 +21,10 @@ export const llamaRouter = createTRPCRouter({
                     await ctx.db
                         .insert(flaggedMessages)
                         .values({
-                            messageId: input.messageId,
+                            id: input.messageId,
                             conversationId: input.conversationId,
                             confidence: result.confidence,
+                            message: input.message,
                             violationType: result.violationType ?? "UNKNOWN",
                             reason: result.reason ?? "",
                             createdAt: new Date(),
