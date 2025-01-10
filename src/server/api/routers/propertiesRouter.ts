@@ -20,6 +20,7 @@ import {
   type RequestsToBook,
   type User,
   Offer,
+  users,
 } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { addDays } from "date-fns";
@@ -39,7 +40,7 @@ import {
   sql,
   notInArray,
 } from "drizzle-orm";
-import { z } from "zod";
+import { literal, z } from "zod";
 import {
   ALL_PROPERTY_ROOM_TYPES,
   bookedDates,
@@ -1018,7 +1019,7 @@ export const propertiesRouter = createTRPCRouter({
         location: z.string(),
       }),
     )
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
       const { location } = await getCoordinates(input.location);
       if (!location) throw new Error("Could not get coordinates for address");
       console.log("location", location);
@@ -1065,12 +1066,51 @@ export const propertiesRouter = createTRPCRouter({
       );
 
       console.log("conflictingIds", conflictingIds.length);
+      const calculateAge = (dateOfBirth: string) => {
+        const today = new Date();
+        const birthDate = new Date(dateOfBirth);
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+          age--;
+        }
+        return age;
+      };
+
+      const userAge = await db.query.users
+        .findFirst({
+          where: ctx.session?.user.id
+            ? eq(users.id, ctx.session.user.id)
+            : undefined,
+          columns: { dateOfBirth: true },
+        })
+        .then((result) => {
+          if (result?.dateOfBirth) {
+            const age = calculateAge(result.dateOfBirth);
+            return age;
+          }
+          return null; // Handle case where `dateOfBirth` is not present
+        })
+        .catch((error) => {
+          console.error("Error fetching user age:", error);
+          return null;
+        });
+
+      console.log("userAge", userAge);
+
+      const ageRestrictionCheck = sql`CASE
+        WHEN ${properties.ageRestriction} IS NULL THEN true
+        WHEN ${properties.ageRestriction} IS NOT NULL AND ${sql.raw(String(userAge))} >= ${properties.ageRestriction} THEN true
+        ELSE false
+      END`;
+
 
       const hostProperties = await db.query.properties.findMany({
         where: and(
           eq(properties.originalListingPlatform, "Hospitable"),
           propertyIsNearRequest,
           notInArray(properties.id, conflictingIds), // Exclude properties with conflicting reservations
+          ageRestrictionCheck,
         ),
       });
 
@@ -1101,8 +1141,7 @@ export const propertiesRouter = createTRPCRouter({
       // Query for scraped properties with non-intersecting dates
       const scrapedProperties = await db.query.properties.findMany({
         where: and(
-          ne(properties.originalListingPlatform, "Hospitable"),
-          ne(properties.originalListingPlatform, "Airbnb"),
+          eq(properties.originalListingPlatform, "Casamundo"),
           propertyIsNearRequest,
           ne(properties.originalNightlyPrice, -1),
           isNotNull(properties.originalNightlyPrice),

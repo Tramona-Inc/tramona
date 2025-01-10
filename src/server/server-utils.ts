@@ -376,9 +376,9 @@ export async function addProperty({
     latLngPoint?: { x: number; y: number }; // make optional
   };
 } & (
-  | { isAdmin?: boolean; userEmail: string }
-  | { isAdmin: true; userEmail?: undefined }
-)) {
+    | { isAdmin?: boolean; userEmail: string }
+    | { isAdmin: true; userEmail?: undefined }
+  )) {
   let lat = property.latLngPoint?.y;
   let lng = property.latLngPoint?.x;
 
@@ -463,13 +463,12 @@ export async function sendTextToHost({
           to: hostTeamOwner.phoneNumber,
           content: `Tramona: There is a request for ${formatCurrency(
             request.maxTotalPrice / numberOfNights,
-          )} per night for ${plural(numberOfNights, "night")} in ${
-            request.location
-          }. You have ${plural(
-            numHostPropertiesPerRequest[hostTeamId] ?? 0,
-            "eligible property",
-            "eligible properties",
-          )}. Please click here to make a match: ${env.NEXTAUTH_URL}/host/requests`,
+          )} per night for ${plural(numberOfNights, "night")} in ${request.location
+            }. You have ${plural(
+              numHostPropertiesPerRequest[hostTeamId] ?? 0,
+              "eligible property",
+              "eligible properties",
+            )}. Please click here to make a match: ${env.NEXTAUTH_URL}/host/requests`,
         });
 
         //TODO SEND WHATSAPP MESSAGE
@@ -625,6 +624,45 @@ export async function getPropertiesForRequest(
 ) {
   let propertyIsNearRequest: SQL | undefined = sql`FALSE`;
 
+  console.log("before age restriction check");
+
+  const calculateAge = (dateOfBirth: string) => {
+    const today = new Date();
+    const birthDate = new Date(dateOfBirth);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
+  const userAge = await tx.query.requests.findFirst({
+    where: eq(requests.id, req.id),
+    with: {
+      madeByGroup: {
+        with: {
+          owner: {
+            columns: { dateOfBirth: true },
+          },
+        },
+      },
+    },
+  }).then((result) => {
+    if (result?.madeByGroup.owner.dateOfBirth) {
+      const age = calculateAge(result.madeByGroup.owner.dateOfBirth);
+      return age;
+    }
+    return null;
+  });
+
+  const ageRestrictionCheck = sql`CASE
+        WHEN ${properties.ageRestriction} IS NULL THEN true
+        WHEN ${properties.ageRestriction} IS NOT NULL AND ${sql.raw(String(userAge))} >= ${properties.ageRestriction} THEN true
+        ELSE false
+      END`;
+
+
   //WAITING FOR MAP PIN TO MERGE IN TO TEST THIS
   // if (req.lat != null && req.lng != null && req.radius != null) {
   // Convert radius from miles to degrees (approximate)
@@ -689,6 +727,7 @@ export async function getPropertiesForRequest(
     where: and(
       propertyIsNearRequest,
       propertyisAvailable,
+      ageRestrictionCheck,
       or(
         isNull(properties.priceRestriction), // Include properties with no price restriction
         and(
@@ -972,9 +1011,9 @@ export function haversineDistance(
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(toRadians(lat1)) *
-      Math.cos(toRadians(lat2)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+    Math.cos(toRadians(lat2)) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c; // Distance in kilometers
 }
