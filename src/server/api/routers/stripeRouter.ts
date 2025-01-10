@@ -9,6 +9,7 @@ import { createPayHostTransfer } from "@/utils/stripe-utils";
 import { breakdownPaymentByPropertyAndTripParams } from "@/utils/payment-utils/paymentBreakdown";
 import { db } from "@/server/db";
 import { finalizeTrip } from "@/utils/webhook-functions/stripe-utils";
+import { coHostProcedure } from "../trpc";
 
 export const config = {
   api: {
@@ -611,12 +612,17 @@ export const stripeRouter = createTRPCRouter({
     }
   }),
 
-  retrieveStripeConnectAccount: protectedProcedure
-    .input(z.string())
-    .query(async ({ input }) => {
-      const account = await stripeWithSecretKey.accounts.retrieve(input);
-      return account;
-    }),
+  retrieveStripeConnectAccount: coHostProcedure(
+    "view_financial_reports",
+    z.object({ hostTeamId: z.number(), hostStripeConnectId: z.string() }),
+  ).query(async ({ input }) => {
+    console.log(input);
+    const account = await stripeWithSecretKey.accounts.retrieve(
+      input.hostStripeConnectId,
+    );
+
+    return account;
+  }),
 
   //we need this to create embedded connet account
   createStripeAccountSession: protectedProcedure

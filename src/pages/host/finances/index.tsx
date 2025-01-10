@@ -13,8 +13,11 @@ import { SettingsIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
+import { useHostTeamStore } from "@/utils/store/hostTeamStore";
+import HostPermissionDenied from "@/components/host/HostPermissionDenied";
 
 export default function Page() {
+  const { currentHostTeamId } = useHostTeamStore();
   const { data: user } = api.users.getUser.useQuery();
   const { data: hostProfile } = api.hosts.getMyHostProfile.useQuery();
   const { isStripeConnectInstanceReady } = useIsStripeConnectInstanceReady();
@@ -38,10 +41,20 @@ export default function Page() {
     },
   ];
 
-  const { data: stripeAccount, isLoading: stripeLoading } =
-    api.stripe.retrieveStripeConnectAccount.useQuery(hostStripeConnectId, {
-      enabled: !!user?.stripeConnectId,
-    });
+  const {
+    data: stripeAccount,
+    isLoading: stripeLoading,
+    error: stripeError,
+  } = api.stripe.retrieveStripeConnectAccount.useQuery(
+    { hostTeamId: currentHostTeamId!, hostStripeConnectId },
+    {
+      enabled: !!user?.stripeConnectId && !!currentHostTeamId,
+      onError: (error) => {
+        console.log(error, "FROM TRPC");
+      },
+      retry: false,
+    },
+  );
 
   useSession({ required: true });
 
@@ -88,6 +101,8 @@ export default function Page() {
               <SkeletonText className="w-1/2" />
               <Skeleton className="h-12 w-full" />
             </div>
+          ) : stripeError?.data?.code === "FORBIDDEN" ? (
+            <HostPermissionDenied message="You do not have permission to access finances." />
           ) : (
             <div className="mx-auto flex flex-col gap-y-3">
               {stripeAccount?.requirements?.currently_due &&

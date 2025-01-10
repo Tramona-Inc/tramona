@@ -469,7 +469,13 @@ export const hostTeamsRouter = createTRPCRouter({
           },
         },
       })
-      .then((res) => res?.hostTeams.map((t) => t.hostTeam) ?? []);
+      .then(
+        (res) =>
+          res?.hostTeams.map((t) => ({
+            ...t.hostTeam,
+            curUserId: ctx.user.id,
+          })) ?? [],
+      );
 
     return hostTeams;
   }),

@@ -1,5 +1,5 @@
-export const roles = {
-  MATCH_MANAGER: {
+export const coHostRoles = {
+  "Match Manager": {
     can: [
       "accept_or_reject_booking_requests",
       "adjust_property_availability",
@@ -8,11 +8,11 @@ export const roles = {
     ],
     cannot: [
       "edit_property_details_or_photos",
-      "access_financial_information",
+      "view_financial_reports",
       "modify_overall_pricing_strategy",
     ],
   },
-  LISTING_MANAGER: {
+  "Listing Manager": {
     can: [
       "update_property_descriptions_and_amenities",
       "manage_property_photos",
@@ -25,10 +25,10 @@ export const roles = {
     cannot: [
       "accept_or_reject_booking_requests",
       "modify_pricing_or_availability",
-      "access_financial_reports",
+      "view_financial_reports",
     ],
   },
-  ADMIN_ACCESS: {
+  "Admin Access": {
     can: [
       "view_financial_reports",
       "modify_overall_pricing_strategy",
@@ -51,4 +51,18 @@ export const roles = {
   },
 } as const;
 
-export type Role = keyof typeof roles;
+export type CoHostRole = keyof typeof coHostRoles;
+export type Permission = (typeof coHostRoles)[CoHostRole]["can"][number];
+
+export function checkPermission({
+  role,
+  permission,
+}: {
+  role: CoHostRole;
+  permission: Permission;
+}) {
+  if (role === "Admin Access") return true; //ADMIN CAN DO Anything
+  const rolePermissions = coHostRoles[role].can;
+
+  return rolePermissions.includes(permission);
+}

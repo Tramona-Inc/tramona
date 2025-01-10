@@ -43,7 +43,13 @@ function AllTeamsOverview() {
       {
         accessorKey: "role",
         header: "Role",
-        cell: ({ row }) => <span>{row.original.name}</span>, // Changed from row.original.name to row.original.role
+        cell: ({ row }) => {
+          const myRole = row.original.members.find(
+            (member) => member.userId,
+            row.original.curUserId,
+          )?.role;
+          return <span>{myRole}</span>;
+        }, // Changed from row.original.name to row.original.role
       },
       {
         accessorKey: "teamMembers",
