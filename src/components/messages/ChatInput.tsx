@@ -129,6 +129,9 @@ export default function ChatInput({
         return;
       }
 
+      // debugging purposes
+      console.log("moderationResult:", moderationResult.result);
+
       const newMessage: ChatMessageType = {
         id: messageId,
         createdAt: new Date().toISOString(),

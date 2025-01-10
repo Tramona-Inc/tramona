@@ -40,43 +40,53 @@ export class LlamaClient {
                     Authorization: `Bearer ${this.apiKey}`,
                 },
                 body: JSON.stringify({
-                    model: "llama3.1-70b",
-                    messages: [
+                    "model": "llama3.1-70b",
+                    "messages": [
                         {
-                            role: "system",
-                            content: "You are a content moderator checking for off-platform booking attempts and inappropriate content.",
+                            "role": "system",
+                            "content": "You are a content moderator. Your task is to analyze the message and return a structured JSON response that includes whether the message is appropriate, a confidence score, a violation type, and an explanation for your decision."
                         },
-                        { role: "user", content: message },
-                    ],
-                    functions: [
                         {
-                            name: "content_moderation",
-                            description: "Analyze message content for policy violations",
-                            parameters: {
-                                type: "object",
-                                properties: {
-                                    isAppropriate: {
-                                        type: "boolean",
-                                        description: "Whether the message complies with platform policies",
+                            "role": "user",
+                            "content": "Hey! lets take this booking off platform, email me at myemail@email.com or you can text me at 929494593"
+                        },
+                        {
+                            "role": "assistant",
+                            "content": "Here is an example of the format you should return:"
+                        }
+                    ],
+                    "functions": [
+                        {
+                            "name": "content_moderation",
+                            "description": "Analyze message content for policy violations",
+                            "parameters": {
+                                "type": "object",
+                                "properties": {
+                                    "isAppropriate": {
+                                        "type": "boolean",
+                                        "description": "Whether the message complies with platform policies"
                                     },
-                                    confidence: {
-                                        type: "number",
-                                        description: "Confidence score between 0 and 1",
+                                    "confidence": {
+                                        "type": "number",
+                                        "description": "Confidence score between 0 and 1"
                                     },
-                                    violationType: {
-                                        type: "string",
-                                        enum: ["OFF_PLATFORM_BOOKING", "CONTACT_INFO", "INAPPROPRIATE", "NONE"],
+                                    "violationType": {
+                                        "type": "string",
+                                        "enum": ["OFF_PLATFORM_BOOKING", "CONTACT_INFO", "INAPPROPRIATE", "NONE"]
                                     },
-                                    reason: {
-                                        type: "string",
-                                        description: "Explanation of the violation",
-                                    },
+                                    "reason": {
+                                        "type": "string",
+                                        "description": "Explanation of the violation"
+                                    }
                                 },
-                                required: ["isAppropriate", "confidence"],
-                            },
-                        },
+                                "required": ["isAppropriate", "confidence", "violationType", "reason"]
+                            }
+                        }
                     ],
-                    function_call: { name: "content_moderation" },
+                    "function_call": {
+                        "name": "content_moderation",
+                        "arguments": "{\"isAppropriate\": false, \"confidence\": 0.95, \"violationType\": \"OFF_PLATFORM_BOOKING\", \"reason\": \"The message contains an attempt to move the booking off-platform by providing contact information.\"}"
+                    }
                 }),
             });
 

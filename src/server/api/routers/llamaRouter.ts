@@ -16,6 +16,8 @@ export const llamaRouter = createTRPCRouter({
         .mutation(async ({ ctx, input }) => {
             try {
                 const result = await llamaClient.moderateContent(input.message);
+                // debugging purposes
+                console.log("Moderation result:", result);
 
                 return {
                     success: true,
