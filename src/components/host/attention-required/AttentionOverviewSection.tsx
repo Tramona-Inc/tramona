@@ -26,7 +26,7 @@ export default function AttentionOverviewSection({
           <NotificationCard
             action={`Sync Calendar for \n`}
             title={` ${allNotifications[0]!.name}`}
-            href={`/host/properties/${allNotifications[0]!.id}`}
+            href={`/host/calendar?propertyId=${allNotifications[0]!.id}`}
             className="col-span-1"
             length={allNotifications.length + 1}
           />

@@ -16,7 +16,7 @@ function BidsTab() {
     <div className="flex flex-col gap-y-3">
       <Link href="/unclaimed-offers">
         <Button variant="primary" className="max-w-fit">
-          <SearchIcon className="size-5 -ml-1" />
+          <SearchIcon className="-ml-1 size-5" />
           Search for more properties
         </Button>
       </Link>

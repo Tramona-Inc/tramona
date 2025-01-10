@@ -28,10 +28,12 @@ import MobileHeader from "./mobile/MobileHeader";
 import useHostBtn from "./useHostBtn";
 import LogInSignUp from "./LoginOrSignup";
 import { api } from "@/utils/api";
-
+import { useToast } from "@/components/ui/use-toast";
+import useBannerStore from "@/utils/store/bannerStore";
 export function Header({ noBanner = false }: { noBanner?: boolean }) {
   const router = useRouter();
-
+  const { toast } = useToast();
+  const { isCalendar } = useBannerStore();
   const { data: hasHostProfile, isLoading: hasHostProfileIsLoading } =
     api.users.isHost.useQuery();
   const isHost = router.pathname.includes("/host") ? true : false;
@@ -42,10 +44,17 @@ export function Header({ noBanner = false }: { noBanner?: boolean }) {
 
   return (
     <>
-      <div className="text-balance bg-primaryGreen px-4 py-2 text-center text-sm font-medium text-white">
-        Hosts, we are expanding fast. Be one of the first 100 hosts in your
-        city, and enjoy no fees on your first 5 bookings!{" "}
-      </div>
+      {isCalendar ? (
+        <div className="text-balance bg-red-500 px-4 py-2 text-center text-sm font-medium text-white">
+          Please sync your calendar to get updated availability information for
+          your listings.
+        </div>
+      ) : (
+        <div className="text-balance bg-primaryGreen px-4 py-2 text-center text-sm font-medium text-white">
+          Hosts, we are expanding fast. Be one of the first 100 hosts in your
+          city, and enjoy no fees on your first 5 bookings!{" "}
+        </div>
+      )}
       <div className="lg:hidden">
         <MobileHeader isHost={isHost} />
       </div>
@@ -95,7 +104,7 @@ export function HamburgerMenu({
 
 function LargeHeader({ isHost }: { isHost: boolean }) {
   const { status, data: session } = useSession();
-
+  const { setIsCalendar } = useBannerStore();
   const hostBtn = useHostBtn();
 
   const links = isHost ? hostCenterHeaderLinks : leftHeaderLinks;
@@ -112,6 +121,11 @@ function LargeHeader({ isHost }: { isHost: boolean }) {
             key={index}
             href={link.href}
             noChildren={link.href === "/host"}
+            onClick={() => {
+              if (link.href !== "/host/calendar") {
+                setIsCalendar(false);
+              }
+            }}
             render={({ selected }) => (
               <span
                 className={cn(
