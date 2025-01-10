@@ -6,9 +6,7 @@ import { z } from "zod";
 import { ALL_CHECKIN_TYPES, Property } from "@/server/db/schema";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { api } from "@/utils/api";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
-import Spinner from "@/components/_common/Spinner";
 
 const formSchema = z.object({
   checkInType: z.enum(ALL_CHECKIN_TYPES).nullable(),
@@ -19,20 +17,18 @@ type FormSchema = z.infer<typeof formSchema>;
 
 export default function CheckInMethodDialog({
   property,
+  refetch,
+  updateProperty,
+  isPropertyUpdating,
 }: {
-  property: Property;
+  property: Property | undefined;
+  refetch: () => void;
+  updateProperty: (property: Property) => Promise<void>;
+  isPropertyUpdating: boolean;
 }) {
-  const {
-    data: fetchedProperty,
-    refetch,
-    isLoading: fetchedPropertyLoading,
-  } = api.properties.getById.useQuery({
-    id: property.id,
-  });
-
   let modifiedCheckInType = null;
 
-  switch (fetchedProperty?.checkInType) {
+  switch (property?.checkInType) {
     case "Smart lock":
       modifiedCheckInType = 0;
       break;
@@ -47,9 +43,6 @@ export default function CheckInMethodDialog({
       break;
   }
 
-  const { mutateAsync: updateProperty, isLoading } =
-    api.properties.update.useMutation();
-
   const [selectedMethodIndex, setSelectedMethodIndex] = useState<number | null>(
     modifiedCheckInType,
   );
@@ -57,17 +50,17 @@ export default function CheckInMethodDialog({
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      checkInType: fetchedProperty?.checkInType ?? null,
-      additionalCheckInInfo: fetchedProperty?.additionalCheckInInfo ?? "",
+      checkInType: property?.checkInType ?? null,
+      additionalCheckInInfo: property?.additionalCheckInInfo ?? "",
     },
   });
 
   const onSubmit = async (formValues: FormSchema) => {
-    if (fetchedProperty) {
+    if (property) {
       await updateProperty({
-        ...fetchedProperty,
+        ...property,
         checkInType: formValues.checkInType ?? null,
-        additionalCheckInInfo: formValues.additionalCheckInInfo,
+        additionalCheckInInfo: formValues.additionalCheckInInfo ?? null,
       });
 
       void refetch();
@@ -97,76 +90,70 @@ export default function CheckInMethodDialog({
 
   return (
     <div className="space-y-8">
-      {fetchedPropertyLoading ? (
-        <Spinner />
-      ) : (
-        <>
-          <div>
-            <h1 className="text-xl font-bold">Check-in method</h1>
-            <p className="text-muted-foreground">How do travelers get in?</p>
-          </div>
-          <Form {...form}>
-            <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
-              <FormField
-                name="checkInType"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <div className="space-y-4">
-                        {methods.map((method, index) => (
-                          <div
-                            className={cn(
-                              selectedMethodIndex === index
-                                ? "bg-zinc-200"
-                                : "bg-white",
-                              "rounded-xl border p-3 hover:cursor-pointer hover:bg-zinc-100",
-                            )}
-                            key={index}
-                            onClick={() => {
-                              setSelectedMethodIndex(index);
-                              field.onChange(method.title);
-                            }}
-                          >
-                            <h2 className="font-semibold">{method.title}</h2>
-                            <p className="text-muted-foreground">
-                              {method.subtitle}
-                            </p>
-                          </div>
-                        ))}
+      <div>
+        <h1 className="text-xl font-bold">Check-in method</h1>
+        <p className="text-muted-foreground">How do travelers get in?</p>
+      </div>
+      <Form {...form}>
+        <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
+          <FormField
+            name="checkInType"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <div className="space-y-4">
+                    {methods.map((method, index) => (
+                      <div
+                        className={cn(
+                          selectedMethodIndex === index
+                            ? "bg-zinc-200"
+                            : "bg-white",
+                          "rounded-xl border p-3 hover:cursor-pointer hover:bg-zinc-100",
+                        )}
+                        key={index}
+                        onClick={() => {
+                          setSelectedMethodIndex(index);
+                          field.onChange(method.title);
+                        }}
+                      >
+                        <h2 className="font-semibold">{method.title}</h2>
+                        <p className="text-muted-foreground">
+                          {method.subtitle}
+                        </p>
                       </div>
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                name="additionalCheckInInfo"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <div>
-                        <h2 className="font-semibold">
-                          Additional check-in details
-                        </h2>
-                        <Textarea
-                          {...field}
-                          placeholder="Add any important details for getting inside your place..."
-                          value={field.value ?? ""}
-                        />
-                      </div>
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              <p className="text-muted-foreground">
-                Shared 48 hours before check-in
-              </p>
-              <DialogCancelSave isLoading={isLoading} />
-            </form>
-          </Form>
-        </>
-      )}
+                    ))}
+                  </div>
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            name="additionalCheckInInfo"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <div>
+                    <h2 className="font-semibold">
+                      Additional check-in details
+                    </h2>
+                    <Textarea
+                      {...field}
+                      placeholder="Add any important details for getting inside your place..."
+                      value={field.value ?? ""}
+                    />
+                  </div>
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <p className="text-muted-foreground">
+            Shared 48 hours before check-in
+          </p>
+          <DialogCancelSave isLoading={isPropertyUpdating} />
+        </form>
+      </Form>
     </div>
   );
 }

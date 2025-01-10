@@ -13,7 +13,6 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ALL_HOUSE_RULES, Property } from "@/server/db/schema";
-import { api } from "@/utils/api";
 import DialogCancelSave from "./DialogCancelSave";
 
 const formSchema = z.object({
@@ -23,18 +22,22 @@ const formSchema = z.object({
 
 type FormSchema = z.infer<typeof formSchema>;
 
-export default function HouseRulesDialog({ property }: { property: Property }) {
-  const { data: fetchedProperty, refetch } = api.properties.getById.useQuery({
-    id: property.id,
-  });
-  const { mutateAsync: updateProperty, isLoading } =
-    api.properties.update.useMutation();
-
+export default function HouseRulesDialog({
+  property,
+  refetch,
+  updateProperty,
+  isPropertyUpdating,
+}: {
+  property: Property | undefined;
+  refetch: () => void;
+  updateProperty: (property: Property) => Promise<void>;
+  isPropertyUpdating: boolean;
+}) {
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      houseRules: fetchedProperty?.houseRules ?? [],
-      additionalHouseRules: fetchedProperty?.additionalHouseRules ?? "",
+      houseRules: property?.houseRules ?? [],
+      additionalHouseRules: property?.additionalHouseRules ?? "",
     },
   });
 
@@ -58,14 +61,14 @@ export default function HouseRulesDialog({ property }: { property: Property }) {
   ];
 
   const onSubmit = async (formValues: FormSchema) => {
-    if (fetchedProperty) {
+    if (property) {
       await updateProperty({
-        ...fetchedProperty,
-        houseRules: formValues.houseRules,
+        ...property,
+        houseRules: formValues.houseRules ?? null,
         additionalHouseRules:
           formValues.additionalHouseRules === ""
             ? null
-            : formValues.additionalHouseRules,
+            : (formValues.additionalHouseRules ?? null),
       });
       void refetch();
     }
@@ -136,7 +139,7 @@ export default function HouseRulesDialog({ property }: { property: Property }) {
           <p className="text-muted-foreground">
             Available throughout the booking process
           </p>
-          <DialogCancelSave isLoading={isLoading} />
+          <DialogCancelSave isLoading={isPropertyUpdating} />
         </form>
       </Form>
     </div>

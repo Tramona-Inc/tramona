@@ -2,7 +2,6 @@ import { Input } from "@/components/ui/input";
 import DialogCancelSave from "./DialogCancelSave";
 import { Property } from "@/server/db/schema";
 import { z } from "zod";
-import { api } from "@/utils/api";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
@@ -14,26 +13,29 @@ const formSchema = z.object({
 
 type FormSchema = z.infer<typeof formSchema>;
 
-export default function WifiDialog({ property }: { property: Property }) {
-  const { data: fetchedProperty, refetch } = api.properties.getById.useQuery({
-    id: property.id,
-  });
-
-  const { mutateAsync: updateProperty, isLoading } =
-    api.properties.update.useMutation();
-
+export default function WifiDialog({
+  property,
+  refetch,
+  updateProperty,
+  isPropertyUpdating,
+}: {
+  property: Property | undefined;
+  refetch: () => void;
+  updateProperty: (property: Property) => Promise<void>;
+  isPropertyUpdating: boolean;
+}) {
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      wifiName: fetchedProperty?.wifiName ?? null,
-      wifiPassword: fetchedProperty?.wifiPassword ?? null,
+      wifiName: property?.wifiName ?? null,
+      wifiPassword: property?.wifiPassword ?? null,
     },
   });
 
   const onSubmit = async (formValues: FormSchema) => {
-    if (fetchedProperty) {
+    if (property) {
       await updateProperty({
-        ...fetchedProperty,
+        ...property,
         wifiName: formValues.wifiName === "" ? null : formValues.wifiName,
         wifiPassword:
           formValues.wifiPassword === "" ? null : formValues.wifiPassword,
@@ -89,7 +91,7 @@ export default function WifiDialog({ property }: { property: Property }) {
           <div className="space-y-4 text-muted-foreground">
             <p>Shared 48 hours before check-in</p>
           </div>
-          <DialogCancelSave isLoading={isLoading} />
+          <DialogCancelSave isLoading={isPropertyUpdating} />
         </form>
       </Form>
     </div>
