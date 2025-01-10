@@ -17,20 +17,6 @@ export const llamaRouter = createTRPCRouter({
             try {
                 const result = await llamaClient.moderateContent(input.message);
 
-                if (!result.isAppropriate && result.confidence >= 0.8) {
-                    await ctx.db
-                        .insert(flaggedMessages)
-                        .values({
-                            id: input.messageId,
-                            conversationId: input.conversationId,
-                            confidence: result.confidence,
-                            message: input.message,
-                            violationType: result.violationType ?? "UNKNOWN",
-                            reason: result.reason ?? "",
-                            createdAt: new Date(),
-                        });
-                }
-
                 return {
                     success: true,
                     result,

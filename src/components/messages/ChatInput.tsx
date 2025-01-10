@@ -83,8 +83,8 @@ export default function ChatInput({
           createdAt: new Date(),
         };
 
-        const { error } = await supabase
-          .from("flaggedMessages")
+        await supabase
+          .from("flagged_messages")
           .insert({
             id: newMessage.id,
             conversation_id: newMessage.conversationId,
