@@ -657,7 +657,7 @@ export async function getPropertiesForRequest(
   });
 
   const ageRestrictionCheck = sql`CASE
-        WHEN ${sql.raw(String(userAge))} IS NULL THEN true
+        WHEN ${properties.ageRestriction} IS NULL THEN true
         WHEN ${properties.ageRestriction} IS NOT NULL AND ${sql.raw(String(userAge))} >= ${properties.ageRestriction} THEN true
         ELSE false
       END`;
