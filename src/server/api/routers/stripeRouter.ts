@@ -264,8 +264,7 @@ export const stripeRouter = createTRPCRouter({
       //get hostID from the property
       // Object that can be access through webhook and client
       //check if a customer id exists
-
-      let stripeCustomerId = await ctx.db.query.users
+      let stripeCustomerId = await db.query.users
         .findFirst({
           columns: {
             stripeCustomerId: true,
@@ -273,12 +272,14 @@ export const stripeRouter = createTRPCRouter({
           where: eq(users.id, ctx.user.id),
         })
         .then((res) => res?.stripeCustomerId);
+
       if (!stripeCustomerId) {
+        console.log("ran");
         const customer = await stripeWithSecretKey.customers.create({
           email: ctx.user.email,
           name: ctx.user.name ?? ctx.user.id,
         });
-        await ctx.db
+        await db
           .update(users)
           .set({
             stripeCustomerId: customer.id,
