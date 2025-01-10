@@ -30,13 +30,21 @@ import LogInSignUp from "./LoginOrSignup";
 import { api } from "@/utils/api";
 import { useToast } from "@/components/ui/use-toast";
 import useBannerStore from "@/utils/store/bannerStore";
+import { useEffect } from "react";
 export function Header({ noBanner = false }: { noBanner?: boolean }) {
   const router = useRouter();
   const { toast } = useToast();
-  const { isCalendar } = useBannerStore();
+  const { setIsCalendar, isCalendar } = useBannerStore();
   const { data: hasHostProfile, isLoading: hasHostProfileIsLoading } =
     api.users.isHost.useQuery();
   const isHost = router.pathname.includes("/host") ? true : false;
+
+  useEffect(() => {
+    const isCalendar = router.pathname.includes("/host/calendar");
+    if (!isCalendar) {
+      setIsCalendar(false);
+    }
+  }, [router.pathname]);
 
   if (isHost && !hasHostProfile && !hasHostProfileIsLoading) {
     void router.replace("/why-list");
@@ -104,7 +112,6 @@ export function HamburgerMenu({
 
 function LargeHeader({ isHost }: { isHost: boolean }) {
   const { status, data: session } = useSession();
-  const { setIsCalendar } = useBannerStore();
   const hostBtn = useHostBtn();
 
   const links = isHost ? hostCenterHeaderLinks : leftHeaderLinks;
@@ -121,11 +128,6 @@ function LargeHeader({ isHost }: { isHost: boolean }) {
             key={index}
             href={link.href}
             noChildren={link.href === "/host"}
-            onClick={() => {
-              if (link.href !== "/host/calendar") {
-                setIsCalendar(false);
-              }
-            }}
             render={({ selected }) => (
               <span
                 className={cn(
