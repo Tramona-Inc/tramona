@@ -12,7 +12,6 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import ErrorMsg from "@/components/ui/ErrorMsg";
-import { api } from "@/utils/api";
 import { ALL_CHECKOUT_TYPES, Property } from "@/server/db/schema";
 import DialogCancelSave from "./DialogCancelSave";
 
@@ -23,30 +22,37 @@ const formSchema = z.object({
 
 type FormSchema = z.infer<typeof formSchema>;
 
-export default function CheckOutDialog({ property }: { property: Property }) {
-  const { data: fetchedProperty, refetch } = api.properties.getById.useQuery({
-    id: property.id,
-  });
-  const { mutateAsync: updateProperty } = api.properties.update.useMutation();
-
+export default function CheckOutDialog({
+  property,
+  refetch,
+  updateProperty,
+  isPropertyUpdating,
+}: {
+  property: Property | undefined;
+  refetch: () => void;
+  updateProperty: (property: Property) => Promise<void>;
+  isPropertyUpdating: boolean;
+}) {
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      checkOutInfo: fetchedProperty?.checkOutInfo ?? [],
-      additionalCheckOutInfo: fetchedProperty?.additionalCheckOutInfo ?? "",
+      checkOutInfo: property?.checkOutInfo ?? [],
+      additionalCheckOutInfo: property?.additionalCheckOutInfo ?? "",
     },
   });
 
   const onSubmit = async (formValues: FormSchema) => {
-    await updateProperty({
-      ...property,
-      checkOutInfo: formValues.checkOutInfo,
-      additionalCheckOutInfo:
-        formValues.additionalCheckOutInfo === ""
-          ? null
-          : formValues.additionalCheckOutInfo,
-    });
-    void refetch();
+    if (property) {
+      await updateProperty({
+        ...property,
+        checkOutInfo: formValues.checkOutInfo ?? null,
+        additionalCheckOutInfo:
+          formValues.additionalCheckOutInfo === ""
+            ? null
+            : (formValues.additionalCheckOutInfo ?? null),
+      });
+      void refetch();
+    }
   };
 
   const instructions = [
@@ -145,7 +151,7 @@ export default function CheckOutDialog({ property }: { property: Property }) {
           <p className="text-muted-foreground">
             Shared at 5 PM the evening before checkout
           </p>
-          <DialogCancelSave />
+          <DialogCancelSave isLoading={isPropertyUpdating} />
         </form>
       </Form>
     </div>

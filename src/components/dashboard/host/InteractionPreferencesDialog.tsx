@@ -11,7 +11,6 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import ErrorMsg from "@/components/ui/ErrorMsg";
-import { api } from "@/utils/api";
 import { Property } from "@/server/db/schema";
 import DialogCancelSave from "./DialogCancelSave";
 
@@ -30,16 +29,17 @@ type InteractionPreferences =
 
 export default function InteractionPreferencesDialog({
   property,
+  refetch,
+  updateProperty,
+  isPropertyUpdating,
 }: {
-  property: Property;
+  property: Property | undefined;
+  refetch: () => void;
+  updateProperty: (property: Property) => Promise<void>;
+  isPropertyUpdating: boolean;
 }) {
-  const { data: fetchedProperty, refetch } = api.properties.getById.useQuery({
-    id: property.id,
-  });
-  const { mutateAsync: updateProperty } = api.properties.update.useMutation();
-
   let modifiedInteractionPrefIndex = null;
-  switch (fetchedProperty?.interactionPreference) {
+  switch (property?.interactionPreference) {
     case "not available":
       modifiedInteractionPrefIndex = 0;
       break;
@@ -61,7 +61,7 @@ export default function InteractionPreferencesDialog({
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      interactionPreference: fetchedProperty?.interactionPreference ?? "",
+      interactionPreference: property?.interactionPreference ?? "",
     },
   });
 
@@ -82,7 +82,6 @@ export default function InteractionPreferencesDialog({
   ];
 
   const onSubmit = async (formValues: FormSchema) => {
-    console.log("formValues", formValues);
     let modifiedInteractionPref: InteractionPreferences = null;
     switch (formValues.interactionPreference) {
       case "I won't be available in person, and prefer communicating through the app.":
@@ -98,11 +97,13 @@ export default function InteractionPreferencesDialog({
         modifiedInteractionPref = "no preference";
         break;
     }
-    await updateProperty({
-      ...property,
-      interactionPreference: modifiedInteractionPref,
-    });
-    void refetch();
+    if (property) {
+      await updateProperty({
+        ...property,
+        interactionPreference: modifiedInteractionPref,
+      });
+      void refetch();
+    }
   };
 
   return (
@@ -147,7 +148,7 @@ export default function InteractionPreferencesDialog({
           <p className="text-muted-foreground">
             Available throughout the booking process
           </p>
-          <DialogCancelSave />
+          <DialogCancelSave isLoading={isPropertyUpdating} />
         </form>
       </Form>
     </div>

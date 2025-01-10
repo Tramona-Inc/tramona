@@ -3,7 +3,6 @@ import DialogCancelSave from "./DialogCancelSave";
 import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { api } from "@/utils/api";
 import { Property } from "@/server/db/schema";
 import {
   Form,
@@ -21,26 +20,32 @@ const formSchema = z.object({
 
 type FormSchema = z.infer<typeof formSchema>;
 
-export default function DirectionsDialog({ property }: { property: Property }) {
-  const { data: fetchedProperty, refetch } = api.properties.getById.useQuery({
-    id: property.id,
-  });
-
-  const { mutateAsync: updateProperty } = api.properties.update.useMutation();
-
+export default function DirectionsDialog({
+  property,
+  refetch,
+  updateProperty,
+  isPropertyUpdating,
+}: {
+  property: Property | undefined;
+  refetch: () => void;
+  updateProperty: (property: Property) => Promise<void>;
+  isPropertyUpdating: boolean;
+}) {
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      directions: fetchedProperty?.directions ?? null,
+      directions: property?.directions ?? null,
     },
   });
 
   const onSubmit = async (formValues: FormSchema) => {
-    await updateProperty({
-      ...property,
-      directions: formValues.directions === "" ? null : formValues.directions,
-    });
-    void refetch();
+    if (property) {
+      await updateProperty({
+        ...property,
+        directions: formValues.directions === "" ? null : formValues.directions,
+      });
+      void refetch();
+    }
   };
 
   return (
@@ -75,7 +80,7 @@ export default function DirectionsDialog({ property }: { property: Property }) {
             <p className="text-muted-foreground">
               Available throughout the booking process
             </p>
-            <DialogCancelSave />
+            <DialogCancelSave isLoading={isPropertyUpdating} />
           </form>
         </Form>
       </div>
