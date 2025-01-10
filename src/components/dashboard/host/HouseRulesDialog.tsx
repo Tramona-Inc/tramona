@@ -27,7 +27,8 @@ export default function HouseRulesDialog({ property }: { property: Property }) {
   const { data: fetchedProperty, refetch } = api.properties.getById.useQuery({
     id: property.id,
   });
-  const { mutateAsync: updateProperty } = api.properties.update.useMutation();
+  const { mutateAsync: updateProperty, isLoading } =
+    api.properties.update.useMutation();
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
@@ -57,15 +58,17 @@ export default function HouseRulesDialog({ property }: { property: Property }) {
   ];
 
   const onSubmit = async (formValues: FormSchema) => {
-    await updateProperty({
-      ...property,
-      houseRules: formValues.houseRules,
-      additionalHouseRules:
-        formValues.additionalHouseRules === ""
-          ? null
-          : formValues.additionalHouseRules,
-    });
-    void refetch();
+    if (fetchedProperty) {
+      await updateProperty({
+        ...fetchedProperty,
+        houseRules: formValues.houseRules,
+        additionalHouseRules:
+          formValues.additionalHouseRules === ""
+            ? null
+            : formValues.additionalHouseRules,
+      });
+      void refetch();
+    }
   };
 
   return (
@@ -133,7 +136,7 @@ export default function HouseRulesDialog({ property }: { property: Property }) {
           <p className="text-muted-foreground">
             Available throughout the booking process
           </p>
-          <DialogCancelSave />
+          <DialogCancelSave isLoading={isLoading} />
         </form>
       </Form>
     </div>

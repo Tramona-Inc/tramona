@@ -22,7 +22,8 @@ export default function HouseManualDialog({
     id: property.id,
   });
 
-  const { mutateAsync: updateProperty } = api.properties.update.useMutation();
+  const { mutateAsync: updateProperty, isLoading } =
+    api.properties.update.useMutation();
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
@@ -32,12 +33,14 @@ export default function HouseManualDialog({
   });
 
   const onSubmit = async (formValues: FormSchema) => {
-    await updateProperty({
-      ...property,
-      houseManual:
-        formValues.houseManual === "" ? null : formValues.houseManual,
-    });
-    void refetch();
+    if (fetchedProperty) {
+      await updateProperty({
+        ...fetchedProperty,
+        houseManual:
+          formValues.houseManual === "" ? null : formValues.houseManual,
+      });
+      void refetch();
+    }
   };
 
   return (
@@ -69,7 +72,7 @@ export default function HouseManualDialog({
           <p className="text-muted-foreground">
             Shared 48 hours before check-in
           </p>
-          <DialogCancelSave />
+          <DialogCancelSave isLoading={isLoading} />
         </form>
       </Form>
     </div>

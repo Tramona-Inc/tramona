@@ -26,7 +26,8 @@ export default function DirectionsDialog({ property }: { property: Property }) {
     id: property.id,
   });
 
-  const { mutateAsync: updateProperty } = api.properties.update.useMutation();
+  const { mutateAsync: updateProperty, isLoading } =
+    api.properties.update.useMutation();
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
@@ -36,11 +37,13 @@ export default function DirectionsDialog({ property }: { property: Property }) {
   });
 
   const onSubmit = async (formValues: FormSchema) => {
-    await updateProperty({
-      ...property,
-      directions: formValues.directions === "" ? null : formValues.directions,
-    });
-    void refetch();
+    if (fetchedProperty) {
+      await updateProperty({
+        ...fetchedProperty,
+        directions: formValues.directions === "" ? null : formValues.directions,
+      });
+      void refetch();
+    }
   };
 
   return (
@@ -75,7 +78,7 @@ export default function DirectionsDialog({ property }: { property: Property }) {
             <p className="text-muted-foreground">
               Available throughout the booking process
             </p>
-            <DialogCancelSave />
+            <DialogCancelSave isLoading={isLoading} />
           </form>
         </Form>
       </div>

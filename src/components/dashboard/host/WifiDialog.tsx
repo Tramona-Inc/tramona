@@ -19,7 +19,8 @@ export default function WifiDialog({ property }: { property: Property }) {
     id: property.id,
   });
 
-  const { mutateAsync: updateProperty } = api.properties.update.useMutation();
+  const { mutateAsync: updateProperty, isLoading } =
+    api.properties.update.useMutation();
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
@@ -30,13 +31,15 @@ export default function WifiDialog({ property }: { property: Property }) {
   });
 
   const onSubmit = async (formValues: FormSchema) => {
-    await updateProperty({
-      ...property,
-      wifiName: formValues.wifiName === "" ? null : formValues.wifiName,
-      wifiPassword:
-        formValues.wifiPassword === "" ? null : formValues.wifiPassword,
-    });
-    void refetch();
+    if (fetchedProperty) {
+      await updateProperty({
+        ...fetchedProperty,
+        wifiName: formValues.wifiName === "" ? null : formValues.wifiName,
+        wifiPassword:
+          formValues.wifiPassword === "" ? null : formValues.wifiPassword,
+      });
+      void refetch();
+    }
   };
 
   return (
@@ -86,7 +89,7 @@ export default function WifiDialog({ property }: { property: Property }) {
           <div className="space-y-4 text-muted-foreground">
             <p>Shared 48 hours before check-in</p>
           </div>
-          <DialogCancelSave />
+          <DialogCancelSave isLoading={isLoading} />
         </form>
       </Form>
     </div>

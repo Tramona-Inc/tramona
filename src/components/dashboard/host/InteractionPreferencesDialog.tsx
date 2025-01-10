@@ -36,7 +36,8 @@ export default function InteractionPreferencesDialog({
   const { data: fetchedProperty, refetch } = api.properties.getById.useQuery({
     id: property.id,
   });
-  const { mutateAsync: updateProperty } = api.properties.update.useMutation();
+  const { mutateAsync: updateProperty, isLoading } =
+    api.properties.update.useMutation();
 
   let modifiedInteractionPrefIndex = null;
   switch (fetchedProperty?.interactionPreference) {
@@ -82,7 +83,6 @@ export default function InteractionPreferencesDialog({
   ];
 
   const onSubmit = async (formValues: FormSchema) => {
-    console.log("formValues", formValues);
     let modifiedInteractionPref: InteractionPreferences = null;
     switch (formValues.interactionPreference) {
       case "I won't be available in person, and prefer communicating through the app.":
@@ -98,11 +98,13 @@ export default function InteractionPreferencesDialog({
         modifiedInteractionPref = "no preference";
         break;
     }
-    await updateProperty({
-      ...property,
-      interactionPreference: modifiedInteractionPref,
-    });
-    void refetch();
+    if (fetchedProperty) {
+      await updateProperty({
+        ...fetchedProperty,
+        interactionPreference: modifiedInteractionPref,
+      });
+      void refetch();
+    }
   };
 
   return (
@@ -147,7 +149,7 @@ export default function InteractionPreferencesDialog({
           <p className="text-muted-foreground">
             Available throughout the booking process
           </p>
-          <DialogCancelSave />
+          <DialogCancelSave isLoading={isLoading} />
         </form>
       </Form>
     </div>
