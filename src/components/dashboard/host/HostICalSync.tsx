@@ -1,7 +1,7 @@
 import { type Property } from "@/server/db/schema";
 import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/utils/api";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,7 +15,7 @@ import HostICalHowToDialog from "./HostICalHowToDialog";
 import { Label } from "@/components/ui/label";
 import { Copy, Edit2 } from "lucide-react";
 import Spinner from "@/components/_common/Spinner";
-
+import useBannerStore from "@/utils/store/bannerStore";
 export default function HostICalSync({
   property,
 }: {
@@ -24,12 +24,19 @@ export default function HostICalSync({
   const [iCalLink, setiCalLink] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const { toast } = useToast();
+  const { setIsCalendar } = useBannerStore();
 
   const { mutateAsync: syncCalendar, isLoading } =
     api.calendar.syncCalendar.useMutation();
 
+  useEffect(() => {
+    if (property && !property.iCalLink) {
+      setIsCalendar(true);
+    }
+  }, [property, setIsCalendar]);
+
   if (property === null) {
-    return <Spinner/>;
+    return <Spinner />;
   }
 
   const handleFormSubmit = async () => {
@@ -59,6 +66,9 @@ export default function HostICalSync({
   const handleEditToggle = () => {
     if (isEditing) {
       setiCalLink(property.iCalLink ?? "");
+      // if (!property.iCalLink) {
+      //   setIsCalendar(true);
+      // }
     }
     setIsEditing(!isEditing);
   };

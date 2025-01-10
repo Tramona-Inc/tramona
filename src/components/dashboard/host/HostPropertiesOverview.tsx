@@ -3,8 +3,15 @@ import { ArrowRightIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
 import { api } from "@/utils/api";
 
-export default function HostPropertiesOverview() {
-  const { data: properties } = api.properties.getHostProperties.useQuery();
+export default function HostPropertiesOverview({
+  currentHostTeamId,
+}: {
+  currentHostTeamId: number | null | undefined;
+}) {
+  const { data: properties } = api.properties.getHostProperties.useQuery(
+    { currentHostTeamId: currentHostTeamId! },
+    { enabled: !!currentHostTeamId },
+  );
 
   const listedProperties = properties?.filter(
     (property) => property.status === "Listed",

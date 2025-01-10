@@ -105,11 +105,13 @@ export default function MessagesSidebar({
   const [showAllMsgs, setShowAllMsgs] = useState(true);
 
   // Fetch only once on mount
-  const { data: fetchedConversations, isLoading } =
-    api.messages.getConversations.useQuery(undefined, {
-      refetchOnWindowFocus: false,
-      // refetchOnMount: false,
-    });
+  const {
+    data: fetchedConversations,
+    isLoading,
+    refetch,
+  } = api.messages.getConversations.useQuery(undefined, {
+    refetchOnWindowFocus: false,
+  });
 
   const conversations = useConversation((state) => state.conversationList);
 
@@ -120,11 +122,15 @@ export default function MessagesSidebar({
   useEffect(() => {
     // Check if data has been fetched and hasn't been processed yet
     if (fetchedConversations) {
+      console.log("initial fetch successful");
       setConversationList(fetchedConversations);
+    } else {
+      //refetch if data is not available
+      console.log("initial fetch unsuccessful so refetching data");
+      void refetch();
     }
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fetchedConversations]);
+  }, [fetchedConversations, setConversationList, refetch]);
 
   const optimisticIds = useMessage((state) => state.optimisticIds);
 

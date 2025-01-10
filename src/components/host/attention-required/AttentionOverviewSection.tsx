@@ -6,19 +6,27 @@ import { ZapIcon } from "lucide-react";
 import { NotificationCard, NotificationCardSkeleton } from "./NotificationCard";
 import { api } from "@/utils/api";
 
-export default function AttentionOverviewSection() {
+export default function AttentionOverviewSection({
+  currentHostTeamId,
+}: {
+  currentHostTeamId: number | undefined | null;
+}) {
+  console.log(currentHostTeamId);
   const { data: allNotifications, isLoading } =
-    api.hosts.getAllOverviewNotifications.useQuery();
+    api.hosts.getAllOverviewNotifications.useQuery(
+      { currentHostTeamId: currentHostTeamId! },
+      { enabled: !!currentHostTeamId },
+    );
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {/* Notification Card */}
-      {!isLoading ? (
+      {!isLoading && currentHostTeamId ? (
         allNotifications?.length && allNotifications.length > 0 ? (
           <NotificationCard
             action={`Sync Calendar for \n`}
             title={` ${allNotifications[0]!.name}`}
-            href={`/host/properties/${allNotifications[0]!.id}`}
+            href={`/host/calendar?propertyId=${allNotifications[0]!.id}`}
             className="col-span-1"
             length={allNotifications.length + 1}
           />
@@ -26,7 +34,7 @@ export default function AttentionOverviewSection() {
       ) : (
         <NotificationCardSkeleton className="col-span-full lg:col-span-4" />
       )}
-      {!isLoading ? (
+      {!isLoading && currentHostTeamId ? (
         allNotifications?.length && allNotifications.length > 0 ? (
           <NotificationCard
             action={`Enable Auto Offers for\n`}

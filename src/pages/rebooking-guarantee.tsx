@@ -14,7 +14,7 @@ import { ReactNode } from "react";
 export default function RebookingGuarantee() {
   return (
     <DashboardLayout>
-      <div className="mx-auto w-full space-y-12 rounded-lg bg-gray-50 p-8 shadow-lg">
+      <div className="mx-auto w-full space-y-12 rounded-lg bg-gray-50 p-8 pb-[calc(var(--mobile-header-height)+2rem)] lg:pb-8 shadow-lg">
         <HeaderSection />
         <CoverageSection />
         <CommitmentSection />

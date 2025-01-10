@@ -27,6 +27,9 @@ module.exports = {
           mulish: ["Mulish", "sans-serif"],
         },
       },
+      height: {
+        13: "52px",
+      },
       maxWidth: {
         "8xl": "90rem", // 1440px
       },

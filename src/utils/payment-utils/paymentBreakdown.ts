@@ -68,7 +68,7 @@ export function breakdownPaymentByOffer( ///// USING OFFER
     totalSavings,
   };
 }
-//------METHOD 2. Using UnifiedCheckoutData ------------
+//------METHOD 2. Using UnifiedCheckoutData OR Request to book + Property  as inputs ------------
 export function breakdownPaymentByPropertyAndTripParams(
   propertyAndTripParams: PropertyAndTripParams,
 ): PriceBreakdownOutput {

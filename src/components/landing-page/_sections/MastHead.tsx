@@ -185,7 +185,7 @@ export default function MastHead() {
             <div className="absolute inset-0 bg-black bg-opacity-40" />
 
             <div className="absolute inset-0 mx-auto flex max-w-7xl flex-col justify-center pl-4 text-left lg:hidden">
-              <h2 className="mt-8 text-left text-4xl font-bold text-white">
+              <h2 className="mt-8 text-left text-3xl font-bold text-white sm:text-4xl">
                 Lets turn empty nights into bookings
               </h2>
               <h3 className="mt-6 text-lg font-semibold text-white">
@@ -210,7 +210,7 @@ export default function MastHead() {
                 Name your own price or book it now
               </h3>
               <h3 className="mt-2 text-xl font-semibold text-white">
-                when hosts have empty nights, no one wins
+                When hosts have empty nights, no one wins
               </h3>
               <h3 className="mt-4 text-lg font-semibold text-white">
                 <button

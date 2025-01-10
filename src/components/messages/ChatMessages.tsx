@@ -13,6 +13,11 @@ export default function ChatMessages({
 
   // Fetch conversation on the client
   useEffect(() => {
+    console.log(
+      "ChatMessages: Fetching messages for conversation:",
+      conversationId,
+    );
+
     // Update conversation state
     switchConversation(conversationId);
 

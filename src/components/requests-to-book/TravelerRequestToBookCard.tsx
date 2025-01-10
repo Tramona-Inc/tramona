@@ -24,8 +24,11 @@ import RequestToBookCardBadge from "./RequestToBookCardBadge";
 import { Button } from "../ui/button";
 import { useState } from "react";
 import WithdrawRequestToBookDialog from "./WithdrawRequestToBookDialog";
+import Link from "next/link";
 
 import { RequestToBookCardPreviews } from "./RequestToBookCardPreviews";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { breakdownPaymentByPropertyAndTripParams } from "@/utils/payment-utils/paymentBreakdown";
 
 export type HostDashboardRequestToBook =
   RouterOutputs["requestsToBook"]["getHostRequestsToBookFromId"][
@@ -67,6 +70,27 @@ export default function TravelerRequestToBookCard({
   const fmtdNumGuests = plural(requestToBook.numGuests, "guest");
 
   const [open, setOpen] = useState(false);
+
+  const paymentBreakdown = breakdownPaymentByPropertyAndTripParams({
+    dates: {
+      checkIn: requestToBook.checkIn,
+      checkOut: requestToBook.checkOut,
+    },
+    travelerPriceBeforeFees:
+      requestToBook.amountAfterTravelerMarkupAndBeforeFees,
+    property: requestToBook.property,
+  });
+
+  const serviceFee =
+    paymentBreakdown.superhogFee + paymentBreakdown.stripeTransactionFee;
+
+  const totalbeforeFees =
+    paymentBreakdown.totalTripAmount - serviceFee - paymentBreakdown.taxesPaid;
+
+  const numOfNights = getNumNights(
+    requestToBook.checkIn,
+    requestToBook.checkOut,
+  );
 
   return (
     <Card className="overflow-hidden p-0">
@@ -118,6 +142,39 @@ export default function TravelerRequestToBookCard({
                 Requested <span className="font-semibold">{fmtdPrice}</span>
                 /night
               </p>
+              <Dialog>
+                <DialogTrigger>See more</DialogTrigger>
+                <DialogContent>
+                  <div className="flex flex-col gap-y-4 rounded-lg p-4 shadow-sm">
+                    <div className="flex flex-row justify-between border-b pb-2">
+                      <p className="font-semibold">Trip Breakdown</p>
+                    </div>
+                    <div className="flex flex-row justify-between">
+                      <span>$128.12 x {numOfNights} </span>
+                      <span>{formatCurrency(totalbeforeFees)}</span>
+                    </div>
+                    <div className="flex flex-row justify-between">
+                      <span>Cleaning fee</span>
+                      <span className="font-semibold">Included</span>
+                    </div>
+                    <div className="flex flex-row justify-between">
+                      <span>Tramona service fee</span>
+                      <span>{formatCurrency(serviceFee)}</span>
+                    </div>
+                    <div className="flex flex-row justify-between">
+                      <span>Taxes</span>
+                      <span>{formatCurrency(paymentBreakdown.taxesPaid)}</span>
+                    </div>
+                    <div className="flex flex-row justify-between border-t pt-2 text-lg font-semibold">
+                      <span>Total (USD)</span>
+                      <span>
+                        {formatCurrency(paymentBreakdown.totalTripAmount)}
+                      </span>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+
               <p className="flex items-center gap-2">
                 <span className="flex items-center gap-1">
                   <CalendarIcon className="h-4 w-4" />

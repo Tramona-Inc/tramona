@@ -191,8 +191,10 @@ export function DesktopSearchTab({
               priceSort,
             ),
           });
+          setIsLoading(false);
           return updatedProperties;
         });
+        // setIsLoading(false);
 
         const cursors =
           airbnbResults.data.staysSearch.results.paginationInfo.pageCursors.slice(
@@ -237,13 +239,19 @@ export function DesktopSearchTab({
   };
 
   return (
-    <div className="mt-4 w-full space-y-8 py-4">
+    <div className="mt-2 w-full space-y-8 py-4 sm:mt-4">
       <div className="">
         <div className="flex justify-center">
           {/* Mobile Search */}
-          <div className="w-full lg:hidden">
+          <div className="mx-2 w-full lg:hidden">
             <MobileSearchFormBar
-              form={form as UseFormReturn<SearchFormValues, unknown, SearchFormValues>}
+              form={
+                form as UseFormReturn<
+                  SearchFormValues,
+                  unknown,
+                  SearchFormValues
+                >
+              }
               onSubmit={handleSearch}
               isLoading={isLoading}
             />
@@ -258,7 +266,13 @@ export function DesktopSearchTab({
                 }`}
               >
                 <SearchFormBar
-                  form={form as UseFormReturn<SearchFormValues, unknown, SearchFormValues>}
+                  form={
+                    form as UseFormReturn<
+                      SearchFormValues,
+                      unknown,
+                      SearchFormValues
+                    >
+                  }
                   onSubmit={handleSearch}
                   isLoading={isLoading}
                   isCompact={isCompact}

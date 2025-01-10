@@ -11,19 +11,19 @@ import { api } from "@/utils/api";
 import { PlusCircleIcon } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import UserAvatar from "../../UserAvatar";
+import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 
 export default function HostTeamsDropdownItems({
   setChtDialogOpen,
 }: {
   setChtDialogOpen: (o: boolean) => void;
 }) {
+  const { currentHostTeamId, setCurrentHostTeam } = useHostTeamStore();
   const { data: hostProfile } = api.hosts.getMyHostProfile.useQuery();
   const { data: hostTeams } = api.hostTeams.getMyHostTeams.useQuery();
 
-  const setCurHostTeam = api.hostTeams.setCurHostTeam.useMutation();
-
   const curTeam =
-    hostProfile && hostTeams?.find((t) => t.id === hostProfile.curTeamId);
+    hostProfile && hostTeams?.find((t) => t.id === currentHostTeamId);
 
   return (
     <>
@@ -43,15 +43,14 @@ export default function HostTeamsDropdownItems({
           {hostTeams?.map((team) => (
             <DropdownMenuCheckboxItem
               key={team.id}
-              checked={hostProfile?.curTeamId === team.id}
-              disabled={setCurHostTeam.isLoading}
-              onSelect={() =>
-                setCurHostTeam
-                  .mutateAsync({ hostTeamId: team.id })
-                  .then(({ hostTeamName }) => {
-                    toast({ title: `Switched to team: ${hostTeamName}` });
-                  })
-              }
+              checked={currentHostTeamId === team.id}
+              onSelect={() => {
+                setCurrentHostTeam(team.id);
+                toast({
+                  title: `Switched to team: ${team.name}`,
+                  description: `You are now managing the team "${team.name}".`,
+                });
+              }}
               className="gap-2 px-1"
             >
               <UserAvatar size="sm" name={team.name} />

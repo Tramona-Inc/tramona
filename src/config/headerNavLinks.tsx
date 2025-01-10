@@ -76,7 +76,7 @@ export const hostManageLinks = [
   { href: "/host/messages", title: "Messages", icon: MessageCircleIcon },
   { href: "/host/requests", title: "Requests", icon: MapPinCheckIcon },
   { href: "/host/stays", title: "Stays", icon: LuggageIcon },
-  { href: "/host/team", title: "Team", icon: UsersIcon },
+  { href: "/host/teams", title: "Team", icon: UsersIcon },
 ];
 
 export const hostAccountLinks = [
@@ -94,5 +94,5 @@ export const hostCenterHeaderLinks = [
   { name: "Requests", href: "/host/requests" },
   { name: "Stays", href: "/host/stays" },
   { name: "Finances", href: "/host/finances" },
-  { name: "Team", href: "/host/team" },
+  { name: "Team", href: "/host/teams" },
 ];

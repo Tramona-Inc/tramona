@@ -7,10 +7,15 @@ import {
 } from "@/components/ui/bubble-tabs";
 import HostStaysCards from "./HostStaysCards";
 import { addWeeks, isSameDay } from "date-fns";
+import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 
 // ____ DOUBLES AS THE OVERVIEW AND PAGE _____
 export default function HostStays() {
-  const { data: allTrips } = api.trips.getHostTrips.useQuery();
+  const { currentHostTeamId } = useHostTeamStore();
+  const { data: allTrips } = api.trips.getHostTrips.useQuery(
+    { currentHostTeamId: currentHostTeamId! },
+    { enabled: !!currentHostTeamId },
+  );
 
   const currentDate = new Date();
   const twoWeeksFromNow = addWeeks(currentDate, 2);
@@ -51,23 +56,24 @@ export default function HostStays() {
           <BubbleTabsTrigger value="upcoming">Upcoming</BubbleTabsTrigger>
           <BubbleTabsTrigger value="accepted">Accepted</BubbleTabsTrigger>
           <BubbleTabsTrigger value="history">History</BubbleTabsTrigger>
-          <div className="w-5/6 border-b-4" />
         </BubbleTabsList>
         <BubbleTabsContent value="currently-hosting">
-          <HostStaysCards trips={currentlyHostingTrips} />
+          <HostStaysCards
+            trips={currentlyHostingTrips}
+            staysTab="currently-hosting"
+          />
         </BubbleTabsContent>
         <BubbleTabsContent value="upcoming">
-          <HostStaysCards trips={upcomingTrips} />
+          <HostStaysCards trips={upcomingTrips} staysTab="upcoming" />
         </BubbleTabsContent>
         <BubbleTabsContent value="accepted">
-          <HostStaysCards trips={acceptedTrips} />
+          <HostStaysCards trips={acceptedTrips} staysTab="accepted" />
         </BubbleTabsContent>
         <BubbleTabsContent value="checking-out">
-          <HostStaysCards trips={checkingOutTrips} />
+          <HostStaysCards trips={checkingOutTrips} staysTab="checking-out" />
         </BubbleTabsContent>
-
         <BubbleTabsContent value="history">
-          <HostStaysCards trips={historyTrips} />
+          <HostStaysCards trips={historyTrips} staysTab="history" />
         </BubbleTabsContent>
       </BubbleTabs>
     </div>

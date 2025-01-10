@@ -19,6 +19,7 @@ import {
   type RequestsToBook,
   type User,
   Offer,
+  users,
 } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { addDays } from "date-fns";
@@ -38,7 +39,7 @@ import {
   sql,
   notInArray,
 } from "drizzle-orm";
-import { z } from "zod";
+import { literal, z } from "zod";
 import {
   ALL_PROPERTY_ROOM_TYPES,
   bookedDates,
@@ -71,6 +72,7 @@ export type HostRequestsPageData = {
         | "location"
         | "about"
         | "dateOfBirth"
+        | "id"
       >;
     };
     properties: (Property & { taxAvailable: boolean })[];
@@ -109,7 +111,7 @@ export type HostRequestsPageOfferData = {
 };
 
 export const propertiesRouter = createTRPCRouter({
-  create: protectedProcedure
+  create: protectedProcedure //<_____________________________ COME BACK TO THIS WHEN WE NEED IT _____________________________ >
     .input(
       propertyInsertSchema
         .omit({
@@ -127,12 +129,15 @@ export const propertiesRouter = createTRPCRouter({
         }),
     )
     .mutation(async ({ ctx, input }) => {
-      const hostProfile = await db.query.hostProfiles.findFirst({
-        where: eq(hostProfiles.userId, ctx.user.id),
-        columns: { curTeamId: true },
+      // const hostProfile = await db.query.hostProfiles.findFirst({  //<_____________________________ OUTDATED LOGIC _____________________________ >
+      //   where: eq(hostProfiles.userId, ctx.user.id),
+      //   columns: { curTeamId: true },
+      // });
+      const firstHostTeam = await db.query.hostTeamMembers.findFirst({
+        where: eq(hostTeamMembers.userId, ctx.user.id),
       });
 
-      if (!hostProfile) {
+      if (!firstHostTeam) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "Host profile not found",
@@ -141,7 +146,7 @@ export const propertiesRouter = createTRPCRouter({
 
       const id = await addProperty({
         property: input,
-        hostTeamId: hostProfile.curTeamId,
+        hostTeamId: firstHostTeam.hostTeamId,
         isAdmin: ctx.user.role === "admin",
         userEmail: ctx.user.email,
       });
@@ -583,11 +588,13 @@ export const propertiesRouter = createTRPCRouter({
   //     );
   // }),
   getHostProperties: hostProcedure
-    .input(z.object({ limit: z.number().optional() }).optional())
+    .input(
+      z.object({ currentHostTeamId: z.number(), limit: z.number().optional() }),
+    )
     .query(async ({ ctx, input }) => {
       return await ctx.db.query.properties.findMany({
-        where: eq(properties.hostTeamId, ctx.hostProfile.curTeamId),
-        limit: input?.limit,
+        where: eq(properties.hostTeamId, input.currentHostTeamId),
+        limit: input.limit,
       });
     }),
 
@@ -600,112 +607,119 @@ export const propertiesRouter = createTRPCRouter({
         .where(eq(properties.id, input.propertyId));
     }),
 
-  getHostPropertiesWithRequests: hostProcedure.query(async ({ ctx }) => {
-    const hostProperties = await db.query.properties.findMany({
-      where: and(
-        eq(properties.hostTeamId, ctx.hostProfile.curTeamId),
-        eq(properties.status, "Listed"),
-      ),
-    });
+  getHostPropertiesWithRequests: hostProcedure
+    .input(z.object({ currentHostTeamId: z.number() }))
+    .query(async ({ input }) => {
+      const hostProperties = await db.query.properties.findMany({
+        where: and(
+          eq(properties.hostTeamId, input.currentHostTeamId),
+          eq(properties.status, "Listed"),
+        ),
+      });
 
-    const hostRequests = await getRequestsForProperties(hostProperties);
+      const hostRequests = await getRequestsForProperties(hostProperties);
 
-    const groupedByCity: HostRequestsPageData[] = [];
-    const citiesSet = new Set(hostProperties.map((property) => property.city));
-    citiesSet.forEach((city) => {
-      groupedByCity.push({ city, requests: [] });
-    });
+      const groupedByCity: HostRequestsPageData[] = [];
+      const citiesSet = new Set(
+        hostProperties.map((property) => property.city),
+      );
+      citiesSet.forEach((city) => {
+        groupedByCity.push({ city, requests: [] });
+      });
 
-    const findOrCreateCityGroup = (city: string) => {
-      let cityGroup = groupedByCity.find((group) => group.city === city);
-      if (!cityGroup) {
-        cityGroup = { city, requests: [] };
-        groupedByCity.push(cityGroup);
-      }
-      return cityGroup;
-    };
+      const findOrCreateCityGroup = (city: string) => {
+        let cityGroup = groupedByCity.find((group) => group.city === city);
+        if (!cityGroup) {
+          cityGroup = { city, requests: [] };
+          groupedByCity.push(cityGroup);
+        }
+        return cityGroup;
+      };
 
-    const requestsMap = new Map<
-      number,
-      {
-        request: Request & {
-          traveler: Pick<
-            User,
-            | "firstName"
-            | "lastName"
-            | "name"
-            | "image"
-            | "location"
-            | "about"
-            | "dateOfBirth"
-          >;
-        };
-        properties: (Property & { taxAvailable: boolean })[];
-      }
-    >();
+      const requestsMap = new Map<
+        number,
+        {
+          request: Request & {
+            traveler: Pick<
+              User,
+              | "firstName"
+              | "lastName"
+              | "name"
+              | "image"
+              | "location"
+              | "about"
+              | "dateOfBirth"
+              | "id"
+            >;
+          };
+          properties: (Property & { taxAvailable: boolean })[];
+        }
+      >();
 
-    for (const { property, request } of hostRequests) {
-      if (!requestsMap.has(request.id)) {
-        requestsMap.set(request.id, {
-          request,
-          properties: [],
-        });
-      }
-      requestsMap.get(request.id)!.properties.push(property);
-    }
-
-    for (const requestWithProperties of requestsMap.values()) {
-      const { request, properties } = requestWithProperties;
-      for (const property of properties) {
-        const cityGroup = findOrCreateCityGroup(property.city);
-        const existingRequest = cityGroup.requests.find(
-          (item) => item.request.id === request.id,
-        );
-
-        if (existingRequest) {
-          existingRequest.properties.push(property);
-        } else {
-          cityGroup.requests.push({
+      for (const { property, request } of hostRequests) {
+        if (!requestsMap.has(request.id)) {
+          requestsMap.set(request.id, {
             request,
-            properties: [property],
+            properties: [],
           });
         }
+        requestsMap.get(request.id)!.properties.push(property);
       }
-    }
 
-    return groupedByCity;
-  }),
+      for (const requestWithProperties of requestsMap.values()) {
+        const { request, properties } = requestWithProperties;
+        for (const property of properties) {
+          const cityGroup = findOrCreateCityGroup(property.city);
+          const existingRequest = cityGroup.requests.find(
+            (item) => item.request.id === request.id,
+          );
 
-  getHostPropertiesWithRequestsToBook: hostProcedure.query(async ({ ctx }) => {
-    const hostProperties = await db.query.properties.findMany({
-      where: and(
-        eq(properties.hostTeamId, ctx.hostProfile.curTeamId),
-        eq(properties.status, "Listed"),
-      ),
-    });
+          if (existingRequest) {
+            existingRequest.properties.push(property);
+          } else {
+            cityGroup.requests.push({
+              request,
+              properties: [property],
+            });
+          }
+        }
+      }
 
-    const hostRequestsToBook = await getRequestsToBookForProperties(
-      hostProperties,
-      { user: ctx.user },
-    );
+      return groupedByCity;
+    }),
 
-    const propertiesWithRequestsToBook = hostProperties
-      .filter((property) =>
-        hostRequestsToBook.some(
-          (requestToBook) =>
-            requestToBook.requestToBook.propertyId === property.id,
+  getHostPropertiesWithRequestsToBook: hostProcedure
+    .input(z.object({ currentHostTeamId: z.number() }))
+    .query(async ({ ctx, input }) => {
+      const hostProperties = await db.query.properties.findMany({
+        where: and(
+          eq(properties.hostTeamId, input.currentHostTeamId),
+          eq(properties.status, "Listed"),
         ),
-      )
-      .map((property) => ({
-        property,
-        requestToBook: hostRequestsToBook.filter(
-          (requestToBook) =>
-            requestToBook.requestToBook.propertyId === property.id,
-        ),
-      }));
+      });
 
-    return propertiesWithRequestsToBook;
-  }),
+      const hostRequestsToBook = await getRequestsToBookForProperties(
+        hostProperties,
+        { user: ctx.user },
+      );
+
+      const propertiesWithRequestsToBook = hostProperties
+        .filter((property) =>
+          hostRequestsToBook.some(
+            (requestToBook) =>
+              requestToBook.requestToBook.propertyId === property.id,
+          ),
+        )
+        .map((property) => ({
+          property,
+          requestToBook: hostRequestsToBook.filter(
+            (requestToBook) =>
+              requestToBook.requestToBook.propertyId === property.id,
+          ),
+        }));
+
+      return propertiesWithRequestsToBook;
+    }),
 
   // hostInsertOnboardingProperty: roleRestrictedProcedure(["host"])
   //   .input(hostPropertyFormSchema)
@@ -997,7 +1011,7 @@ export const propertiesRouter = createTRPCRouter({
         location: z.string(),
       }),
     )
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
       const { location } = await getCoordinates(input.location);
       if (!location) throw new Error("Could not get coordinates for address");
       console.log("location", location);
@@ -1044,12 +1058,51 @@ export const propertiesRouter = createTRPCRouter({
       );
 
       console.log("conflictingIds", conflictingIds.length);
+      const calculateAge = (dateOfBirth: string) => {
+        const today = new Date();
+        const birthDate = new Date(dateOfBirth);
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+          age--;
+        }
+        return age;
+      };
+
+      const userAge = await db.query.users
+        .findFirst({
+          where: ctx.session?.user.id
+            ? eq(users.id, ctx.session.user.id)
+            : undefined,
+          columns: { dateOfBirth: true },
+        })
+        .then((result) => {
+          if (result?.dateOfBirth) {
+            const age = calculateAge(result.dateOfBirth);
+            return age;
+          }
+          return null; // Handle case where `dateOfBirth` is not present
+        })
+        .catch((error) => {
+          console.error("Error fetching user age:", error);
+          return null;
+        });
+
+      console.log("userAge", userAge);
+
+      const ageRestrictionCheck = sql`CASE
+        WHEN ${sql.raw(String(userAge))} IS NULL THEN true
+        WHEN ${properties.ageRestriction} IS NOT NULL AND ${sql.raw(String(userAge))} >= ${properties.ageRestriction} THEN true
+        ELSE false
+      END`;
+
 
       const hostProperties = await db.query.properties.findMany({
         where: and(
           eq(properties.originalListingPlatform, "Hospitable"),
           propertyIsNearRequest,
           notInArray(properties.id, conflictingIds), // Exclude properties with conflicting reservations
+          ageRestrictionCheck,
         ),
       });
 
@@ -1080,8 +1133,7 @@ export const propertiesRouter = createTRPCRouter({
       // Query for scraped properties with non-intersecting dates
       const scrapedProperties = await db.query.properties.findMany({
         where: and(
-          ne(properties.originalListingPlatform, "Hospitable"),
-          ne(properties.originalListingPlatform, "Airbnb"),
+          eq(properties.originalListingPlatform, "Casamundo"),
           propertyIsNearRequest,
           ne(properties.originalNightlyPrice, -1),
           isNotNull(properties.originalNightlyPrice),
@@ -1092,12 +1144,12 @@ export const propertiesRouter = createTRPCRouter({
     }),
 
   getSearchResults: hostProcedure
-    .input(z.object({ searchQuery: z.string() }))
+    .input(z.object({ searchQuery: z.string(), currentHostTeamId: z.number() }))
     .query(async ({ ctx, input }) => {
       if (input.searchQuery !== "") {
         return await ctx.db.query.properties.findMany({
           where: and(
-            eq(properties.hostTeamId, ctx.hostProfile.curTeamId),
+            eq(properties.hostTeamId, input.currentHostTeamId),
             or(
               like(properties.name, `%${input.searchQuery}%`),
               like(properties.city, `%${capitalize(input.searchQuery)}%`),
