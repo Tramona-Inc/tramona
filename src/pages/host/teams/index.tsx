@@ -210,7 +210,7 @@ export default function Component() {
                   .mutateAsync({
                     userId: member.userId,
                     role: newRole as CoHostRole,
-                    hostTeamId: curTeam.id,
+                    currentHostTeamId: curTeam.id,
                   })
                   .then(() => {
                     toast({
@@ -219,7 +219,19 @@ export default function Component() {
                         "The co-host's role has been updated successfully",
                     });
                   })
-                  .catch(() => errorToast());
+                  .catch((error) => {
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                    if (error.data?.code === "FORBIDDEN") {
+                      toast({
+                        title:
+                          "You do not have permission to change Co-host roles.",
+                        description:
+                          "Please contact your team owner to request access.",
+                      });
+                    } else {
+                      errorToast();
+                    }
+                  });
               }}
               disabled={
                 updateRoleMutation.isLoading ||
@@ -262,7 +274,7 @@ export default function Component() {
                   removeHostTeamMemberMutation
                     .mutateAsync({
                       memberId: member.userId,
-                      hostTeamId: curTeam.id,
+                      currentHostTeamId: curTeam.id,
                     })
                     .then(() => {
                       toast({
@@ -271,7 +283,20 @@ export default function Component() {
                           "The team member has been removed successfully",
                       });
                     })
-                    .catch(() => errorToast());
+                    .catch((error) => {
+                      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                      if (error.data?.code === "FORBIDDEN") {
+                        toast({
+                          title:
+                            "You do not have permission to remove Co-hosts.",
+                          description:
+                            "Please contact your team owner to request access.",
+                        });
+                      } else {
+                        console.log(error);
+                        errorToast();
+                      }
+                    });
                 }}
                 disabled={removeHostTeamMemberMutation.isLoading}
               >

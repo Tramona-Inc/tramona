@@ -46,13 +46,11 @@ export default function Page() {
     isLoading: stripeLoading,
     error: stripeError,
   } = api.stripe.retrieveStripeConnectAccount.useQuery(
-    { hostTeamId: currentHostTeamId!, hostStripeConnectId },
+    { currentHostTeamId: currentHostTeamId!, hostStripeConnectId },
     {
       enabled: !!user?.stripeConnectId && !!currentHostTeamId,
-      onError: (error) => {
-        console.log(error, "FROM TRPC");
-      },
       retry: false,
+      refetchOnWindowFocus: false,
     },
   );
 
@@ -73,15 +71,17 @@ export default function Page() {
           <h2 className="ml-4 text-left text-2xl font-semibold tracking-tight md:text-4xl">
             Finances
           </h2>
-          <Button
-            size="icon"
-            variant="ghost"
-            className="rounded-full bg-white p-3"
-          >
-            <Link href={`/host/finances/settings/${trimmedConnectId}`}>
-              <SettingsIcon size={23} />
-            </Link>
-          </Button>
+          {!stripeError && (
+            <Button
+              size="icon"
+              variant="ghost"
+              className="rounded-full bg-white p-3"
+            >
+              <Link href={`/host/finances/settings/${trimmedConnectId}`}>
+                <SettingsIcon size={23} />
+              </Link>
+            </Button>
+          )}
         </div>
 
         {isStripeConnectInstanceReady && (

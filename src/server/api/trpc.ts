@@ -221,9 +221,8 @@ export const coHostProcedure = <T extends z.AnyZodObject>(
   inputSchema: T,
 ) =>
   t.procedure
-    .input(z.object({ hostTeamId: z.number() }).merge(inputSchema))
+    .input(z.object({ currentHostTeamId: z.number() }).merge(inputSchema))
     .use(async ({ ctx, input, next }) => {
-      console.log("hi");
       // Validate session
       if (!ctx.session?.user) {
         throw new TRPCError({ code: "UNAUTHORIZED" });
@@ -245,10 +244,10 @@ export const coHostProcedure = <T extends z.AnyZodObject>(
 
       //check for hostIdInput
 
-      // Use the provided hostTeamId to find the team member role
+      // Use the provided currentHostTeamId to find the team member role
       const hostTeamMember = await ctx.db.query.hostTeamMembers.findFirst({
         where: and(
-          eq(hostTeamMembers.hostTeamId, input.hostTeamId as number),
+          eq(hostTeamMembers.hostTeamId, input.currentHostTeamId as number),
           eq(hostTeamMembers.userId, user.id),
         ),
       });
@@ -256,7 +255,7 @@ export const coHostProcedure = <T extends z.AnyZodObject>(
       if (!hostTeamMember) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: `Host team member not found for team id ${input.hostTeamId}`,
+          message: `Host team member not found for team id ${input.currentHostTeamId}`,
         });
       }
 

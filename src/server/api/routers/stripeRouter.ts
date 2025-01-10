@@ -381,68 +381,67 @@ export const stripeRouter = createTRPCRouter({
       return intent;
     }),
 
-  rejectOrCaptureAndFinalizeRequestToBook: protectedProcedure
-    .input(
-      z.object({
-        requestToBookId: z.number(),
-        isAccepted: z.boolean(),
-      }),
-    )
-    .mutation(async ({ input }) => {
-      //check to make sure user is authorized
+  rejectOrCaptureAndFinalizeRequestToBook: coHostProcedure(
+    "accept_or_reject_booking_requests",
+    z.object({
+      requestToBookId: z.number(),
+      isAccepted: z.boolean(),
+    }),
+  ).mutation(async ({ input }) => {
+    //check to make sure user is authorized
 
-      //update results in db.
-      const curRequestToBook = await db
+    //update results in db.
+    const curRequestToBook = await db
+      .update(requestsToBook)
+      .set({
+        resolvedAt: new Date(),
+        status: input.isAccepted ? "Accepted" : "Denied",
+      })
+      .where(eq(requestsToBook.id, input.requestToBookId))
+      .returning()
+      .then((res) => res[0]!);
+
+    if (!input.isAccepted) {
+      return;
+    } else {
+      //since accepted we need to finilize the trip
+
+      await finalizeTrip({
+        //trip and tripcheckout creattion, superhog, and sending notifcations
+        paymentIntentId: curRequestToBook.paymentIntentId,
+        numOfGuests: curRequestToBook.numGuests,
+        travelerPriceBeforeFees:
+          curRequestToBook.amountAfterTravelerMarkupAndBeforeFees, //markup already happened
+        checkIn: curRequestToBook.checkIn,
+        checkOut: curRequestToBook.checkOut,
+        propertyId: curRequestToBook.propertyId,
+        userId: curRequestToBook.userId,
+        isDirectListingCharge: curRequestToBook.isDirectListing,
+        source: "Request to book",
+        requestToBookId: curRequestToBook.id,
+      });
+
+      //now we need to cancel all current request during that same time,
+      const activeRequestToBookThatNeedsToBeRemoved = await db
         .update(requestsToBook)
         .set({
           resolvedAt: new Date(),
-          status: input.isAccepted ? "Accepted" : "Denied",
+          status: "Withdrawn",
         })
-        .where(eq(requestsToBook.id, input.requestToBookId))
-        .returning()
-        .then((res) => res[0]!);
-
-      if (!input.isAccepted) {
-        return;
-      } else {
-        //since accepted we need to finilize the trip
-
-        await finalizeTrip({
-          //trip and tripcheckout creattion, superhog, and sending notifcations
-          paymentIntentId: curRequestToBook.paymentIntentId,
-          numOfGuests: curRequestToBook.numGuests,
-          travelerPriceBeforeFees:
-            curRequestToBook.amountAfterTravelerMarkupAndBeforeFees, //markup already happened
-          checkIn: curRequestToBook.checkIn,
-          checkOut: curRequestToBook.checkOut,
-          propertyId: curRequestToBook.propertyId,
-          userId: curRequestToBook.userId,
-          isDirectListingCharge: curRequestToBook.isDirectListing,
-          source: "Request to book",
-          requestToBookId: curRequestToBook.id,
-        });
-
-        //now we need to cancel all current request during that same time,
-        const activeRequestToBookThatNeedsToBeRemoved = await db
-          .update(requestsToBook)
-          .set({
-            resolvedAt: new Date(),
-            status: "Withdrawn",
-          })
-          .where(
+        .where(
+          and(
+            isNull(requestsToBook.resolvedAt),
+            ne(requestsToBook.id, curRequestToBook.id),
             and(
-              isNull(requestsToBook.resolvedAt),
-              ne(requestsToBook.id, curRequestToBook.id),
-              and(
-                lte(requestsToBook.checkIn, curRequestToBook.checkOut),
-                gte(requestsToBook.checkOut, curRequestToBook.checkIn),
-              ),
+              lte(requestsToBook.checkIn, curRequestToBook.checkOut),
+              gte(requestsToBook.checkOut, curRequestToBook.checkIn),
             ),
-          );
-        console.log(activeRequestToBookThatNeedsToBeRemoved);
-      }
-      return;
-    }),
+          ),
+        );
+      console.log(activeRequestToBookThatNeedsToBeRemoved);
+    }
+    return;
+  }),
 
   confirmSetupIntent: protectedProcedure
     .input(
@@ -614,7 +613,10 @@ export const stripeRouter = createTRPCRouter({
 
   retrieveStripeConnectAccount: coHostProcedure(
     "view_financial_reports",
-    z.object({ hostTeamId: z.number(), hostStripeConnectId: z.string() }),
+    z.object({
+      currentHostTeamId: z.number(),
+      hostStripeConnectId: z.string(),
+    }),
   ).query(async ({ input }) => {
     console.log(input);
     const account = await stripeWithSecretKey.accounts.retrieve(

@@ -1,6 +1,5 @@
 import { api } from "@/utils/api";
 import { useHostTeamStore } from "@/utils/store/hostTeamStore";
-import { useEffect } from "react";
 
 export default function useSetInitialHostTeamId() {
   const setCurrentHostTeam = useHostTeamStore(

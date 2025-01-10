@@ -52,12 +52,17 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import Spinner from "@/components/_common/Spinner";
+import { toast } from "@/components/ui/use-toast";
+import { errorToast } from "@/utils/toasts";
+import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 
 export default function HostPropertiesDetails({
   property,
 }: {
   property: Property;
 }) {
+  const { currentHostTeamId } = useHostTeamStore();
+
   const [editing, setEditing] = useState(false);
   const [handleOnboarding, setHandleOnboarding] = useState<() => void>();
   const router = useRouter();
@@ -129,7 +134,26 @@ export default function HostPropertiesDetails({
       otherHouseRules: otherHouseRules,
     };
 
-    await updateProperty(newProperty);
+    await updateProperty({
+      updatedProperty: newProperty,
+      currentHostTeamId: currentHostTeamId!,
+    })
+      .then(() => {
+        toast({
+          title: "Successfully Updated Property!",
+        });
+      })
+      .catch((error) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        if (error.data?.code === "FORBIDDEN") {
+          toast({
+            title: "You do not have permission to edit a property.",
+            description: "Please contact your team owner to request access.",
+          });
+        } else {
+          errorToast();
+        }
+      });
     await refetch();
   };
 
@@ -227,11 +251,32 @@ export default function HostPropertiesDetails({
                     variant="outline"
                     onClick={() =>
                       updateProperty({
-                        ...property,
-                        status: "Archived",
-                        checkInTime: convertTo24HourFormat(checkIn),
-                        checkOutTime: convertTo24HourFormat(checkOut),
+                        updatedProperty: {
+                          ...property,
+                          status: "Archived",
+                          checkInTime: convertTo24HourFormat(checkIn),
+                          checkOutTime: convertTo24HourFormat(checkOut),
+                        },
+                        currentHostTeamId: currentHostTeamId!,
                       })
+                        .then(() => {
+                          toast({
+                            title: "Successfully Updated Property!",
+                          });
+                        })
+                        .catch((error) => {
+                          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                          if (error.data?.code === "FORBIDDEN") {
+                            toast({
+                              title:
+                                "You do not have permission to edit a property.",
+                              description:
+                                "Please contact your team owner to request access.",
+                            });
+                          } else {
+                            errorToast();
+                          }
+                        })
                     }
                   >
                     <PackageOpen />
@@ -243,11 +288,32 @@ export default function HostPropertiesDetails({
                     variant="outline"
                     onClick={() =>
                       updateProperty({
-                        ...property,
-                        status: "Listed",
-                        checkInTime: convertTo24HourFormat(checkIn),
-                        checkOutTime: convertTo24HourFormat(checkOut),
+                        updatedProperty: {
+                          ...property,
+                          status: "Listed",
+                          checkInTime: convertTo24HourFormat(checkIn),
+                          checkOutTime: convertTo24HourFormat(checkOut),
+                        },
+                        currentHostTeamId: currentHostTeamId!,
                       })
+                        .then(() => {
+                          toast({
+                            title: "Successfully Updated Property!",
+                          });
+                        })
+                        .catch((error) => {
+                          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                          if (error.data?.code === "FORBIDDEN") {
+                            toast({
+                              title:
+                                "You do not have permission to edit a property.",
+                              description:
+                                "Please contact your team owner to request access.",
+                            });
+                          } else {
+                            errorToast();
+                          }
+                        })
                     }
                   >
                     <Upload />
@@ -260,11 +326,32 @@ export default function HostPropertiesDetails({
                       variant="secondary"
                       onClick={() =>
                         updateProperty({
-                          ...property,
-                          status: "Listed",
-                          checkInTime: convertTo24HourFormat(checkIn),
-                          checkOutTime: convertTo24HourFormat(checkOut),
+                          updatedProperty: {
+                            ...property,
+                            status: "Listed",
+                            checkInTime: convertTo24HourFormat(checkIn),
+                            checkOutTime: convertTo24HourFormat(checkOut),
+                          },
+                          currentHostTeamId: currentHostTeamId!,
                         })
+                          .then(() => {
+                            toast({
+                              title: "Successfully Updated Property!",
+                            });
+                          })
+                          .catch((error) => {
+                            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                            if (error.data?.code === "FORBIDDEN") {
+                              toast({
+                                title:
+                                  "You do not have permission to edit a property.",
+                                description:
+                                  "Please contact your team owner to request access.",
+                              });
+                            } else {
+                              errorToast();
+                            }
+                          })
                       }
                     >
                       <Upload />

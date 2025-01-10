@@ -1,4 +1,5 @@
 import {
+  coHostProcedure,
   createTRPCRouter,
   hostProcedure,
   protectedProcedure,
@@ -289,14 +290,15 @@ export const requestsRouter = createTRPCRouter({
       await ctx.db.delete(requests).where(eq(requests.id, input.id));
     }),
 
-  rejectRequest: hostProcedure
-    .input(z.object({ requestId: z.number(), currentHostTeamId: z.number() }))
-    .mutation(async ({ ctx, input }) => {
-      await ctx.db.insert(rejectedRequests).values({
-        requestId: input.requestId,
-        hostTeamId: input.currentHostTeamId,
-      });
-    }),
+  rejectRequest: coHostProcedure(
+    "accept_or_reject_booking_requests",
+    z.object({ requestId: z.number(), currentHostTeamId: z.number() }),
+  ).mutation(async ({ ctx, input }) => {
+    await ctx.db.insert(rejectedRequests).values({
+      requestId: input.requestId,
+      hostTeamId: input.currentHostTeamId,
+    });
+  }),
 });
 
 //Reusable functions

@@ -1,4 +1,5 @@
 import {
+  coHostProcedure,
   createTRPCRouter,
   hostProcedure,
   optionallyAuthedProcedure,
@@ -181,28 +182,35 @@ export const propertiesRouter = createTRPCRouter({
       } as const;
     }),
 
-  update: roleRestrictedProcedure(["admin", "host"])
-    .input(propertyUpdateSchema.omit({ hostTeamId: true, latLngPoint: true }))
-    .mutation(async ({ ctx, input }) => {
-      // TODO: auth
-      if (input.address) {
-        const { location } = await getCoordinates(input.address);
-        if (!location) throw new Error("Could not get coordinates for address");
-        const latLngPoint = createLatLngGISPoint({
-          lat: location.lat,
-          lng: location.lng,
-        });
-        await ctx.db
-          .update(properties)
-          .set({ latLngPoint })
-          .where(eq(properties.id, input.id));
-      }
-
+  update: coHostProcedure(
+    "update_property_descriptions_and_amenities",
+    z.object({
+      updatedProperty: propertyUpdateSchema.omit({
+        hostTeamId: true,
+        latLngPoint: true,
+      }),
+      currentHostTeamId: z.number(),
+    }),
+  ).mutation(async ({ ctx, input }) => {
+    // TODO: auth
+    if (input.updatedProperty.address) {
+      const { location } = await getCoordinates(input.updatedProperty.address);
+      if (!location) throw new Error("Could not get coordinates for address");
+      const latLngPoint = createLatLngGISPoint({
+        lat: location.lat,
+        lng: location.lng,
+      });
       await ctx.db
         .update(properties)
-        .set(input)
-        .where(eq(properties.id, input.id));
-    }),
+        .set({ latLngPoint })
+        .where(eq(properties.id, input.updatedProperty.id));
+    }
+
+    await ctx.db
+      .update(properties)
+      .set(input.updatedProperty)
+      .where(eq(properties.id, input.updatedProperty.id));
+  }),
 
   delete: roleRestrictedProcedure(["admin", "host"])
     .input(propertySelectSchema.pick({ id: true }))

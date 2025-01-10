@@ -45,9 +45,9 @@ function AllTeamsOverview() {
         header: "Role",
         cell: ({ row }) => {
           const myRole = row.original.members.find(
-            (member) => member.userId,
-            row.original.curUserId,
+            (member) => member.userId === row.original.curUserId,
           )?.role;
+
           return <span>{myRole}</span>;
         }, // Changed from row.original.name to row.original.role
       },

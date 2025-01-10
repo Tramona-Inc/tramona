@@ -16,6 +16,7 @@ import { add, subMinutes } from "date-fns";
 import { and, eq, or, sql, desc } from "drizzle-orm";
 import { z } from "zod";
 import {
+  coHostProcedure,
   createTRPCRouter,
   hostProcedure,
   protectedProcedure,
@@ -389,24 +390,19 @@ export const hostTeamsRouter = createTRPCRouter({
       }
     }),
 
-  removeHostTeamMember: protectedProcedure
-    .input(z.object({ memberId: z.string(), hostTeamId: z.number() }))
-    .mutation(async ({ input, ctx }) => {
-      const hostTeamOwnerId = await getHostTeamOwnerId(input.hostTeamId);
-
-      if (ctx.user.id !== hostTeamOwnerId) {
-        throw new TRPCError({ code: "UNAUTHORIZED" });
-      }
-
-      await ctx.db
-        .delete(hostTeamMembers)
-        .where(
-          and(
-            eq(hostTeamMembers.userId, input.memberId),
-            eq(hostTeamMembers.hostTeamId, input.hostTeamId),
-          ),
-        );
-    }),
+  removeHostTeamMember: coHostProcedure(
+    "remove_cohost",
+    z.object({ memberId: z.string(), currentHostTeamId: z.number() }),
+  ).mutation(async ({ input, ctx }) => {
+    await ctx.db
+      .delete(hostTeamMembers)
+      .where(
+        and(
+          eq(hostTeamMembers.userId, input.memberId),
+          eq(hostTeamMembers.hostTeamId, input.currentHostTeamId),
+        ),
+      );
+  }),
 
   getHostTeamOwner: protectedProcedure
     .input(z.object({ hostTeamId: z.number() }))
@@ -677,23 +673,22 @@ export const hostTeamsRouter = createTRPCRouter({
       return { status: "invite declined" } as const;
     }),
 
-  updateCoHostRole: protectedProcedure
-    .input(
-      z.object({
-        userId: z.string(),
-        role: z.enum(COHOST_ROLES),
-        hostTeamId: z.number(),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      await ctx.db
-        .update(hostTeamMembers)
-        .set({ role: input.role })
-        .where(
-          and(
-            eq(hostTeamMembers.hostTeamId, input.hostTeamId),
-            eq(hostTeamMembers.userId, input.userId),
-          ),
-        );
+  updateCoHostRole: coHostProcedure(
+    "update_cohost_role",
+    z.object({
+      userId: z.string(),
+      role: z.enum(COHOST_ROLES),
+      currentHostTeamId: z.number(),
     }),
+  ).mutation(async ({ ctx, input }) => {
+    await ctx.db
+      .update(hostTeamMembers)
+      .set({ role: input.role })
+      .where(
+        and(
+          eq(hostTeamMembers.hostTeamId, input.currentHostTeamId),
+          eq(hostTeamMembers.userId, input.userId),
+        ),
+      );
+  }),
 });
