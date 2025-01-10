@@ -216,6 +216,7 @@ export const roleRestrictedProcedure = <
 //Co-host Procedure
 
 export const coHostProcedure = t.procedure.use(async ({ ctx, next }) => {
+  //pass in the hostTeamId
   if (!ctx.session?.user) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
@@ -232,8 +233,7 @@ export const coHostProcedure = t.procedure.use(async ({ ctx, next }) => {
       message: `Host profile not found for user id ${user.id}`,
     });
   }
-
-  //find the host
+  //find the host within the team and retrieve the rolwe
 
   return next({
     ctx: {

@@ -143,7 +143,8 @@ export default function Onboarding1({
       hostawayAccountId: accountId,
       hostawayBearerToken: bearerToken,
     });
-    void router.push("/host");
+    //Hard reload so header query doesn't redirect user back to why-list
+    window.location.href = "/host";
     console.log({ pms, accountId, apiKey });
   });
 
