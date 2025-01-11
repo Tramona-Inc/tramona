@@ -7,6 +7,8 @@ import { ALL_CHECKIN_TYPES, Property } from "@/server/db/schema";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
+import { toast } from "@/components/ui/use-toast";
+import { errorToast } from "@/utils/toasts";
 
 const formSchema = z.object({
   checkInType: z.enum(ALL_CHECKIN_TYPES).nullable(),
@@ -20,11 +22,19 @@ export default function CheckInMethodDialog({
   refetch,
   updateProperty,
   isPropertyUpdating,
+  currentHostTeamId,
 }: {
   property: Property | undefined;
   refetch: () => void;
-  updateProperty: (property: Property) => Promise<void>;
+  updateProperty: ({
+    updatedProperty,
+    currentHostTeamId,
+  }: {
+    updatedProperty: Property;
+    currentHostTeamId: number;
+  }) => Promise<void>;
   isPropertyUpdating: boolean;
+  currentHostTeamId: number | null | undefined;
 }) {
   let modifiedCheckInType = null;
 
@@ -58,9 +68,12 @@ export default function CheckInMethodDialog({
   const onSubmit = async (formValues: FormSchema) => {
     if (property) {
       await updateProperty({
-        ...property,
-        checkInType: formValues.checkInType ?? null,
-        additionalCheckInInfo: formValues.additionalCheckInInfo ?? null,
+        updatedProperty: {
+          ...property,
+          checkInType: formValues.checkInType ?? null,
+          additionalCheckInInfo: formValues.additionalCheckInInfo ?? null,
+        },
+        currentHostTeamId: currentHostTeamId!,
       });
 
       void refetch();

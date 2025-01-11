@@ -14,6 +14,8 @@ import HostDashboardLayout from "@/components/_common/Layout/HostDashboardLayout
 import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
 import useSetInitialHostTeamId from "@/components/_common/CustomHooks/useSetInitialHostTeamId";
 import { useHostTeamStore } from "@/utils/store/hostTeamStore";
+import ConversationsEmptySvg from "@/components/_common/EmptyStateSvg/ConversationsEmptySvg";
+import EmptyStateValue from "@/components/_common/EmptyStateSvg/EmptyStateValue";
 
 function MessageDisplay() {
   const [selectedConversation, setSelectedConversation] =
@@ -82,7 +84,9 @@ function MessageDisplay() {
             setSelected={selectConversation}
           />
         ) : (
-          <Skeleton className="h-96 w-3/4" />
+          <EmptyStateValue description="You have no conversations yet">
+            <ConversationsEmptySvg />
+          </EmptyStateValue>
         )}
       </div>
     </div>

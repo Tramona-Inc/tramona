@@ -19,15 +19,18 @@ import { HostDashboardRequestToBook } from "@/components/requests-to-book/Travel
 import { api } from "@/utils/api";
 import Spinner from "@/components/_common/Spinner";
 import { toast } from "@/components/ui/use-toast";
+import { errorToast } from "@/utils/toasts";
 
 export default function HostRequestToBookDialog({
   open,
   setOpen,
   requestToBook,
+  currentHostTeamId,
 }: {
   open: boolean;
   setOpen: (open: boolean) => void;
   requestToBook: HostDashboardRequestToBook;
+  currentHostTeamId: number;
 }) {
   const { data: property, isLoading } = api.properties.getById.useQuery({
     id: requestToBook.propertyId,
@@ -177,7 +180,26 @@ export default function HostRequestToBookDialog({
                   acceptBookingRequest({
                     isAccepted: true,
                     requestToBookId: requestToBook.id,
+                    currentHostTeamId,
                   })
+                    .then(() => {
+                      toast({
+                        title: "Successfully Booked Trip!",
+                      });
+                    })
+                    .catch((error) => {
+                      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                      if (error.data?.code === "FORBIDDEN") {
+                        toast({
+                          title:
+                            "You do not have permission to respond to a booking.",
+                          description:
+                            "Please contact your team owner to request access.",
+                        });
+                      } else {
+                        errorToast();
+                      }
+                    })
                 }
               >
                 Confirm

@@ -13,6 +13,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import ErrorMsg from "@/components/ui/ErrorMsg";
 import { Property } from "@/server/db/schema";
 import DialogCancelSave from "./DialogCancelSave";
+import { toast } from "@/components/ui/use-toast";
+import { errorToast } from "@/utils/toasts";
 
 const formSchema = z.object({
   interactionPreference: z.string().optional(),
@@ -32,11 +34,19 @@ export default function InteractionPreferencesDialog({
   refetch,
   updateProperty,
   isPropertyUpdating,
+  currentHostTeamId,
 }: {
   property: Property | undefined;
   refetch: () => void;
-  updateProperty: (property: Property) => Promise<void>;
+  updateProperty: ({
+    updatedProperty,
+    currentHostTeamId,
+  }: {
+    updatedProperty: Property;
+    currentHostTeamId: number;
+  }) => Promise<void>;
   isPropertyUpdating: boolean;
+  currentHostTeamId: number | null | undefined;
 }) {
   let modifiedInteractionPrefIndex = null;
   switch (property?.interactionPreference) {
@@ -99,9 +109,28 @@ export default function InteractionPreferencesDialog({
     }
     if (property) {
       await updateProperty({
-        ...property,
-        interactionPreference: modifiedInteractionPref,
-      });
+        updatedProperty: {
+          ...property,
+          interactionPreference: modifiedInteractionPref,
+        },
+        currentHostTeamId: currentHostTeamId!,
+      })
+        .then(() => {
+          toast({
+            title: "Successfully Updated Property!",
+          });
+        })
+        .catch((error) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          if (error.data?.code === "FORBIDDEN") {
+            toast({
+              title: "You do not have permission to edit a property.",
+              description: "Please contact your team owner to request access.",
+            });
+          } else {
+            errorToast();
+          }
+        });
       void refetch();
     }
   };

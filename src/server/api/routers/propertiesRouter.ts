@@ -1,4 +1,5 @@
 import {
+  coHostProcedure,
   createTRPCRouter,
   hostProcedure,
   optionallyAuthedProcedure,
@@ -111,6 +112,34 @@ export type HostRequestsPageOfferData = {
 };
 
 export const propertiesRouter = createTRPCRouter({
+  adminUpdate: roleRestrictedProcedure(["admin"])
+    .input(
+      propertyUpdateSchema.omit({
+        hostTeamId: true,
+        latLngPoint: true,
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      // TODO: auth
+      if (input.address) {
+        const { location } = await getCoordinates(input.address);
+        if (!location) throw new Error("Could not get coordinates for address");
+        const latLngPoint = createLatLngGISPoint({
+          lat: location.lat,
+          lng: location.lng,
+        });
+        await ctx.db
+          .update(properties)
+          .set({ latLngPoint })
+          .where(eq(properties.id, input.id));
+      }
+
+      await ctx.db
+        .update(properties)
+        .set(input)
+        .where(eq(properties.id, input.id));
+    }),
+
   create: protectedProcedure //<_____________________________ COME BACK TO THIS WHEN WE NEED IT _____________________________ >
     .input(
       propertyInsertSchema
@@ -182,28 +211,35 @@ export const propertiesRouter = createTRPCRouter({
       } as const;
     }),
 
-  update: roleRestrictedProcedure(["admin", "host"])
-    .input(propertyUpdateSchema.omit({ hostTeamId: true, latLngPoint: true }))
-    .mutation(async ({ ctx, input }) => {
-      // TODO: auth
-      if (input.address) {
-        const { location } = await getCoordinates(input.address);
-        if (!location) throw new Error("Could not get coordinates for address");
-        const latLngPoint = createLatLngGISPoint({
-          lat: location.lat,
-          lng: location.lng,
-        });
-        await ctx.db
-          .update(properties)
-          .set({ latLngPoint })
-          .where(eq(properties.id, input.id));
-      }
-
+  update: coHostProcedure(
+    "update_property_descriptions_and_amenities",
+    z.object({
+      updatedProperty: propertyUpdateSchema.omit({
+        hostTeamId: true,
+        latLngPoint: true,
+      }),
+      currentHostTeamId: z.number(),
+    }),
+  ).mutation(async ({ ctx, input }) => {
+    // TODO: auth
+    if (input.updatedProperty.address) {
+      const { location } = await getCoordinates(input.updatedProperty.address);
+      if (!location) throw new Error("Could not get coordinates for address");
+      const latLngPoint = createLatLngGISPoint({
+        lat: location.lat,
+        lng: location.lng,
+      });
       await ctx.db
         .update(properties)
-        .set(input)
-        .where(eq(properties.id, input.id));
-    }),
+        .set({ latLngPoint })
+        .where(eq(properties.id, input.updatedProperty.id));
+    }
+
+    await ctx.db
+      .update(properties)
+      .set(input.updatedProperty)
+      .where(eq(properties.id, input.updatedProperty.id));
+  }),
 
   delete: roleRestrictedProcedure(["admin", "host"])
     .input(propertySelectSchema.pick({ id: true }))
@@ -764,24 +800,24 @@ export const propertiesRouter = createTRPCRouter({
       return { count };
     }),
 
-  updateRequestToBook: protectedProcedure
-    .input(
-      z.object({
-        propertyId: z.number(),
-        requestToBookMaxDiscountPercentage: z.number(),
-      }),
-    )
-    .mutation(async ({ input }) => {
-      await db
-        .update(properties)
-        .set({
-          requestToBookMaxDiscountPercentage:
-            input.requestToBookMaxDiscountPercentage,
-        })
-        .where(eq(properties.id, input.propertyId));
-      console.log("YAY");
-      return;
+  updateRequestToBook: coHostProcedure(
+    "modify_overall_pricing_strategy",
+    z.object({
+      propertyId: z.number(),
+      requestToBookMaxDiscountPercentage: z.number(),
+      currentHostTeamId: z.number(),
     }),
+  ).mutation(async ({ input }) => {
+    await db
+      .update(properties)
+      .set({
+        requestToBookMaxDiscountPercentage:
+          input.requestToBookMaxDiscountPercentage,
+      })
+      .where(eq(properties.id, input.propertyId));
+    console.log("YAY");
+    return;
+  }),
 
   toggleAutoOffer: protectedProcedure
     .input(
@@ -799,43 +835,43 @@ export const propertiesRouter = createTRPCRouter({
         .where(eq(properties.id, input.id));
     }),
 
-  toggleBookItNow: protectedProcedure
-    .input(
-      z.object({
-        id: z.number(),
-        bookItNowEnabled: z.boolean(),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      const [updatedProperty] = await ctx.db
-        .update(properties)
-        .set({
-          bookItNowEnabled: input.bookItNowEnabled,
-        })
-        .where(eq(properties.id, input.id))
-        .returning({ bookItNowEnabled: properties.bookItNowEnabled });
-
-      return updatedProperty?.bookItNowEnabled ? true : false;
+  toggleBookItNow: coHostProcedure(
+    "modify_overall_pricing_strategy",
+    z.object({
+      id: z.number(),
+      bookItNowEnabled: z.boolean(),
+      currentHostTeamId: z.number(),
     }),
+  ).mutation(async ({ ctx, input }) => {
+    const [updatedProperty] = await ctx.db
+      .update(properties)
+      .set({
+        bookItNowEnabled: input.bookItNowEnabled,
+      })
+      .where(eq(properties.id, input.id))
+      .returning({ bookItNowEnabled: properties.bookItNowEnabled });
 
-  updateBookItNow: protectedProcedure
-    .input(
-      z.object({
-        id: z.number(),
-        bookItNowHostDiscountPercentOffInput: z.number().optional(),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      await ctx.db
-        .update(properties)
-        .set({
-          ...(input.bookItNowHostDiscountPercentOffInput !== undefined && {
-            bookItNowHostDiscountPercentOffInput:
-              input.bookItNowHostDiscountPercentOffInput,
-          }),
-        })
-        .where(eq(properties.id, input.id));
+    return updatedProperty?.bookItNowEnabled ? true : false;
+  }),
+
+  updateBookItNow: coHostProcedure(
+    "modify_overall_pricing_strategy",
+    z.object({
+      id: z.number(),
+      bookItNowHostDiscountPercentOffInput: z.number().optional(),
+      currentHostTeamId: z.number(),
     }),
+  ).mutation(async ({ ctx, input }) => {
+    await ctx.db
+      .update(properties)
+      .set({
+        ...(input.bookItNowHostDiscountPercentOffInput !== undefined && {
+          bookItNowHostDiscountPercentOffInput:
+            input.bookItNowHostDiscountPercentOffInput,
+        }),
+      })
+      .where(eq(properties.id, input.id));
+  }),
 
   updatePropertyDiscountTiers: protectedProcedure
     .input(
@@ -1063,7 +1099,10 @@ export const propertiesRouter = createTRPCRouter({
         const birthDate = new Date(dateOfBirth);
         let age = today.getFullYear() - birthDate.getFullYear();
         const monthDiff = today.getMonth() - birthDate.getMonth();
-        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        if (
+          monthDiff < 0 ||
+          (monthDiff === 0 && today.getDate() < birthDate.getDate())
+        ) {
           age--;
         }
         return age;
@@ -1095,7 +1134,6 @@ export const propertiesRouter = createTRPCRouter({
         WHEN ${properties.ageRestriction} IS NOT NULL AND ${sql.raw(String(userAge))} >= ${properties.ageRestriction} THEN true
         ELSE false
       END`;
-
 
       const hostProperties = await db.query.properties.findMany({
         where: and(
@@ -1160,16 +1198,21 @@ export const propertiesRouter = createTRPCRouter({
       return null;
     }),
 
-  updatePropertySecurityDepositAmount: protectedProcedure
-    .input(z.object({ propertyId: z.number(), amount: z.number() }))
-    .mutation(async ({ input }) => {
-      const property = await db
-        .update(properties)
-        .set({
-          currentSecurityDeposit: input.amount,
-        })
-        .where(eq(properties.id, input.propertyId));
-
-      return property;
+  updatePropertySecurityDepositAmount: coHostProcedure(
+    "update_security_deposit",
+    z.object({
+      propertyId: z.number(),
+      amount: z.number(),
+      currentHostTeamId: z.number(),
     }),
+  ).mutation(async ({ input }) => {
+    const property = await db
+      .update(properties)
+      .set({
+        currentSecurityDeposit: input.amount,
+      })
+      .where(eq(properties.id, input.propertyId));
+
+    return property;
+  }),
 });

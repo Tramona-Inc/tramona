@@ -7,16 +7,17 @@
  * need to use are documented accordingly near the end.
  */
 
-import { hostProfiles, type User, users } from "../db/schema";
+import { hostProfiles, hostTeamMembers, type User, users } from "../db/schema";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 import { type Session } from "next-auth";
 import superjson from "superjson";
-import { ZodError } from "zod";
+import { z, ZodError } from "zod";
 import { getServerAuthSession } from "@/server/auth";
 import { db } from "@/server/db";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { s3 } from "../s3";
+import { checkPermission, Permission } from "@/utils/co-host-rbac";
 
 /**
  * 1. CONTEXT
@@ -215,33 +216,69 @@ export const roleRestrictedProcedure = <
 
 //Co-host Procedure
 
-export const coHostProcedure = t.procedure.use(async ({ ctx, next }) => {
-  //pass in the hostTeamId
-  if (!ctx.session?.user) {
-    throw new TRPCError({ code: "UNAUTHORIZED" });
-  }
+export const coHostProcedure = <T extends z.AnyZodObject>(
+  permission: Permission, //refer to file co-host-rbac.ts
+  inputSchema: T,
+) =>
+  t.procedure
+    .input(z.object({ currentHostTeamId: z.number() }).merge(inputSchema))
+    .use(async ({ ctx, input, next }) => {
+      // Validate session
+      if (!ctx.session?.user) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+      }
 
-  const { user, ...session } = ctx.session;
+      const { user, ...session } = ctx.session;
 
-  const hostProfile = await ctx.db.query.hostProfiles.findFirst({
-    where: eq(hostProfiles.userId, user.id),
-  });
+      // Fetch the host profile
+      const hostProfile = await ctx.db.query.hostProfiles.findFirst({
+        where: eq(hostProfiles.userId, user.id),
+      });
 
-  if (!hostProfile) {
-    throw new TRPCError({
-      code: "UNAUTHORIZED",
-      message: `Host profile not found for user id ${user.id}`,
+      if (!hostProfile) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: `Host profile not found for user id ${user.id}`,
+        });
+      }
+
+      //check for hostIdInput
+
+      // Use the provided currentHostTeamId to find the team member role
+      const hostTeamMember = await ctx.db.query.hostTeamMembers.findFirst({
+        where: and(
+          eq(hostTeamMembers.hostTeamId, input.currentHostTeamId as number),
+          eq(hostTeamMembers.userId, user.id),
+        ),
+      });
+
+      if (!hostTeamMember) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: `Host team member not found for team id ${input.currentHostTeamId}`,
+        });
+      }
+
+      //Check Permission
+      const hasPermission = checkPermission({
+        role: hostTeamMember.role,
+        permission: permission,
+      });
+      console.log(hasPermission);
+      if (!hasPermission) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "User does not have permission",
+        });
+      }
+      // Proceed to the next handler with the updated context
+      return next({
+        ctx: {
+          user,
+          hostProfile,
+          session,
+          db: ctx.db,
+          hostTeamMember, // Include the team member in the context for downstream use
+        },
+      });
     });
-  }
-  //find the host within the team and retrieve the rolwe
-
-  return next({
-    ctx: {
-      // infers the `session` as non-nullable
-      user,
-      hostProfile,
-      session,
-      db,
-    },
-  });
-});

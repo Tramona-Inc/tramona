@@ -138,7 +138,19 @@ export default function HostRequests() {
                           title: "Successfully rejected request",
                         });
                       })
-                      .catch(() => errorToast());
+                      .catch((error) => {
+                        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                        if (error.data?.code === "FORBIDDEN") {
+                          toast({
+                            title:
+                              "You do not have permission to create an offer.",
+                            description:
+                              "Please contact your team owner to request access.",
+                          });
+                        } else {
+                          errorToast();
+                        }
+                      });
                   }}
                 >
                   Reject
