@@ -1055,3 +1055,37 @@ export function formatRelativeDateShort(
   if (minutes > 0) return `${minutes}m${suffix}`;
   return "now";
 }
+
+export function convertHostInteractionPref(interactionPreference: string) {
+  let modifiedPref = null;
+  switch (interactionPreference) {
+    case "I won't be available in person, and prefer communicating through the app.":
+      modifiedPref = "not available";
+      break;
+    case "I like to say hello in person, but keep to myself otherwise.":
+      modifiedPref = "say hello";
+      break;
+    case "I like socializing and spending time with guests.":
+      modifiedPref = "socialize";
+      break;
+    case "No preferences - I follow my guests' lead.":
+      modifiedPref = "no preference";
+      break;
+
+    case "not available":
+      modifiedPref =
+        "I won't be available in person, and prefer communicating through the app.";
+      break;
+    case "say hello":
+      modifiedPref =
+        "I like to say hello in person, but keep to myself otherwise.";
+      break;
+    case "socialize":
+      modifiedPref = "I like socializing and spending time with guests.";
+      break;
+    case "no preference":
+      modifiedPref = "No preferences - I follow my guests' lead.";
+      break;
+  }
+  return modifiedPref;
+}
