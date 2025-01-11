@@ -13,8 +13,11 @@ import { SettingsIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
+import { useHostTeamStore } from "@/utils/store/hostTeamStore";
+import HostPermissionDenied from "@/components/host/HostPermissionDenied";
 
 export default function Page() {
+  const { currentHostTeamId } = useHostTeamStore();
   const { data: user } = api.users.getUser.useQuery();
   const { data: hostProfile } = api.hosts.getMyHostProfile.useQuery();
   const { isStripeConnectInstanceReady } = useIsStripeConnectInstanceReady();
@@ -38,10 +41,18 @@ export default function Page() {
     },
   ];
 
-  const { data: stripeAccount, isLoading: stripeLoading } =
-    api.stripe.retrieveStripeConnectAccount.useQuery(hostStripeConnectId, {
-      enabled: !!user?.stripeConnectId,
-    });
+  const {
+    data: stripeAccount,
+    isLoading: stripeLoading,
+    error: stripeError,
+  } = api.stripe.retrieveStripeConnectAccount.useQuery(
+    { currentHostTeamId: currentHostTeamId!, hostStripeConnectId },
+    {
+      enabled: !!user?.stripeConnectId && !!currentHostTeamId,
+      retry: false,
+      refetchOnWindowFocus: false,
+    },
+  );
 
   useSession({ required: true });
 
@@ -60,15 +71,17 @@ export default function Page() {
           <h2 className="ml-4 text-left text-2xl font-semibold tracking-tight md:text-4xl">
             Finances
           </h2>
-          <Button
-            size="icon"
-            variant="ghost"
-            className="rounded-full bg-white p-3"
-          >
-            <Link href={`/host/finances/settings/${trimmedConnectId}`}>
-              <SettingsIcon size={23} />
-            </Link>
-          </Button>
+          {!stripeError && (
+            <Button
+              size="icon"
+              variant="ghost"
+              className="rounded-full bg-white p-3"
+            >
+              <Link href={`/host/finances/settings/${trimmedConnectId}`}>
+                <SettingsIcon size={23} />
+              </Link>
+            </Button>
+          )}
         </div>
 
         {isStripeConnectInstanceReady && (
@@ -88,6 +101,8 @@ export default function Page() {
               <SkeletonText className="w-1/2" />
               <Skeleton className="h-12 w-full" />
             </div>
+          ) : stripeError?.data?.code === "FORBIDDEN" ? (
+            <HostPermissionDenied message="You do not have permission to access finances." />
           ) : (
             <div className="mx-auto flex flex-col gap-y-3">
               {stripeAccount?.requirements?.currently_due &&

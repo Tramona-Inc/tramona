@@ -5,6 +5,8 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
+import { toast } from "@/components/ui/use-toast";
+import { errorToast } from "@/utils/toasts";
 
 const formSchema = z.object({
   wifiName: z.string().nullable(),
@@ -18,11 +20,19 @@ export default function WifiDialog({
   refetch,
   updateProperty,
   isPropertyUpdating,
+  currentHostTeamId,
 }: {
   property: Property | undefined;
   refetch: () => void;
-  updateProperty: (property: Property) => Promise<void>;
+  updateProperty: ({
+    updatedProperty,
+    currentHostTeamId,
+  }: {
+    updatedProperty: Property;
+    currentHostTeamId: number;
+  }) => Promise<void>;
   isPropertyUpdating: boolean;
+  currentHostTeamId: number | null | undefined;
 }) {
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
@@ -35,11 +45,30 @@ export default function WifiDialog({
   const onSubmit = async (formValues: FormSchema) => {
     if (property) {
       await updateProperty({
-        ...property,
-        wifiName: formValues.wifiName === "" ? null : formValues.wifiName,
-        wifiPassword:
-          formValues.wifiPassword === "" ? null : formValues.wifiPassword,
-      });
+        updatedProperty: {
+          ...property,
+          wifiName: formValues.wifiName === "" ? null : formValues.wifiName,
+          wifiPassword:
+            formValues.wifiPassword === "" ? null : formValues.wifiPassword,
+        },
+        currentHostTeamId: currentHostTeamId!,
+      })
+        .then(() => {
+          toast({
+            title: "Successfully Updated Property!",
+          });
+        })
+        .catch((error) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          if (error.data?.code === "FORBIDDEN") {
+            toast({
+              title: "You do not have permission to edit a property.",
+              description: "Please contact your team owner to request access.",
+            });
+          } else {
+            errorToast();
+          }
+        });
       void refetch();
     }
   };

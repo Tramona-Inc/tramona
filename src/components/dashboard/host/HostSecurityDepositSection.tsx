@@ -22,8 +22,12 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
 import { Slider } from "@/components/ui/slider";
+import { useHostTeamStore } from "@/utils/store/hostTeamStore";
+import { errorToast } from "@/utils/toasts";
 
 function HostSecurityDepositSection({ property }: { property: Property }) {
+  const { currentHostTeamId } = useHostTeamStore();
+
   const updateSecurityDepositAmount =
     api.properties.updatePropertySecurityDepositAmount.useMutation();
 
@@ -37,18 +41,37 @@ function HostSecurityDepositSection({ property }: { property: Property }) {
   };
 
   const handleSubmit = async () => {
-    await updateSecurityDepositAmount.mutateAsync({
-      propertyId: property.id,
-      amount: customAmount * 100, //becuase in cents
-    });
+    await updateSecurityDepositAmount
+      .mutateAsync({
+        propertyId: property.id,
+        amount: customAmount * 100, //becuase in cents
+        currentHostTeamId: currentHostTeamId!,
+      })
+      .then(() => {
+        toast({
+          title: "Deposit Updated",
+          description: `Deposit for ${property.name} set to $${customAmount}.`,
+        });
+      })
+      .catch((error) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        if (error.data?.code === "FORBIDDEN") {
+          toast({
+            title: "You do not have permission to edit a property.",
+            description: "Please contact your team owner to request access.",
+          });
+        } else {
+          errorToast();
+        }
+      });
   };
 
-  if (updateSecurityDepositAmount.isSuccess) {
-    toast({
-      title: "Deposit Updated",
-      description: `Deposit for ${property.name} set to $${customAmount}.`,
-    });
-  }
+  // if (updateSecurityDepositAmount.isSuccess) {
+  //   toast({
+  //     title: "Deposit Updated",
+  //     description: `Deposit for ${property.name} set to $${customAmount}.`,
+  //   });
+  // }
 
   return (
     <Card className="border shadow-none">

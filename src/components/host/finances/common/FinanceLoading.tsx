@@ -5,8 +5,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 function FinanceLoading() {
   return (
     <div className="mx-auto w-full max-w-7xl space-y-6 p-6">
-      <h1 className="text-3xl font-bold">Finances</h1>
-
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <CardHeader>

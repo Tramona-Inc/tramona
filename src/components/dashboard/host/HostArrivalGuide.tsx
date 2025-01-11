@@ -8,6 +8,7 @@ import DirectionsDialog from "./DirectionsDialog";
 import WifiDialog from "./WifiDialog";
 import HouseManualDialog from "./HouseManualDialog";
 import { Property } from "@/server/db/schema";
+import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 import { api } from "@/utils/api";
 import Spinner from "@/components/_common/Spinner";
 import { DialogTitle } from "@radix-ui/react-dialog";
@@ -22,12 +23,15 @@ export default function HostArrivalGuide({ property }: { property: Property }) {
   const { mutateAsync: updateProperty, isLoading: isPropertyUpdating } =
     api.properties.update.useMutation();
 
+  const { currentHostTeamId } = useHostTeamStore();
+
   const guides = [
     {
       title: "Check in method",
       subtitle: "How do travelers get in?",
       dialog: (
         <CheckInMethodDialog
+          currentHostTeamId={currentHostTeamId}
           property={fetchedProperty}
           refetch={refetch}
           updateProperty={updateProperty}
@@ -40,6 +44,7 @@ export default function HostArrivalGuide({ property }: { property: Property }) {
       subtitle: "What should travelers do before they check out?",
       dialog: (
         <CheckOutDialog
+          currentHostTeamId={currentHostTeamId}
           property={fetchedProperty}
           refetch={refetch}
           updateProperty={updateProperty}
@@ -52,6 +57,7 @@ export default function HostArrivalGuide({ property }: { property: Property }) {
       subtitle: "What are the rules of your property?",
       dialog: (
         <HouseRulesDialog
+          currentHostTeamId={currentHostTeamId}
           property={fetchedProperty}
           refetch={refetch}
           updateProperty={updateProperty}
@@ -64,6 +70,7 @@ export default function HostArrivalGuide({ property }: { property: Property }) {
       subtitle: "Add details",
       dialog: (
         <InteractionPreferencesDialog
+          currentHostTeamId={currentHostTeamId}
           property={fetchedProperty}
           refetch={refetch}
           updateProperty={updateProperty}
@@ -76,6 +83,7 @@ export default function HostArrivalGuide({ property }: { property: Property }) {
       subtitle: "Add details",
       dialog: (
         <DirectionsDialog
+          currentHostTeamId={currentHostTeamId}
           property={fetchedProperty}
           refetch={refetch}
           updateProperty={updateProperty}
@@ -88,6 +96,7 @@ export default function HostArrivalGuide({ property }: { property: Property }) {
       subtitle: "Add details",
       dialog: (
         <WifiDialog
+          currentHostTeamId={currentHostTeamId}
           property={fetchedProperty}
           refetch={refetch}
           updateProperty={updateProperty}
@@ -104,6 +113,7 @@ export default function HostArrivalGuide({ property }: { property: Property }) {
           refetch={refetch}
           updateProperty={updateProperty}
           isPropertyUpdating={isPropertyUpdating}
+          currentHostTeamId={currentHostTeamId}
         />
       ),
     },
