@@ -17,7 +17,7 @@ import { getServerAuthSession } from "@/server/auth";
 import { db } from "@/server/db";
 import { and, eq } from "drizzle-orm";
 import { s3 } from "../s3";
-import { CoHostRole, checkPermission, Permission } from "@/utils/co-host-rbac";
+import { checkPermission, Permission } from "@/utils/co-host-rbac";
 
 /**
  * 1. CONTEXT

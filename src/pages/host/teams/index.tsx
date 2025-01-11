@@ -99,6 +99,23 @@ const roleDescriptions = {
       "Access financial reports",
     ],
   },
+  "Co-Host": {
+    title: "Co-Host",
+    description:
+      "Assist the primary host by managing bookings, properties, and operational tasks.",
+    icon: <Users className="h-4 w-4" />,
+    color: "bg-yellow-100 text-yellow-800",
+    checkColor: "text-yellow-500",
+    xColor: "text-yellow-300",
+    can: [
+      "All Match Manager permissions",
+      "All Listing Manager permissions",
+      "View financial reports",
+      "Modify overall pricing strategy",
+      "Manage team member access and permissions",
+    ],
+    cant: ["Access or modify payment information"],
+  },
   "Admin Access": {
     title: "Admin Access",
     description:
@@ -110,14 +127,10 @@ const roleDescriptions = {
     can: [
       "All Match Manager permissions",
       "All Listing Manager permissions",
-      "View financial reports",
-      "Modify overall pricing strategy",
-    ],
-    cant: [
+      "All Co-Host permissions",
       "Access or modify payment information",
-      "Delete the property listing",
-      "Change the primary host",
     ],
+    cant: ["Delete the property listing", "Change the primary host"],
   },
 } as const;
 
@@ -128,7 +141,7 @@ const inviteSchema = z.object({
 
 export default function Component() {
   useSetInitialHostTeamId();
-  const { currentHostTeamId, setCurrentHostTeam } = useHostTeamStore();
+  const { currentHostTeamId } = useHostTeamStore();
 
   const { data: session } = useSession({ required: true });
   const { data: hostProfile } = api.hosts.getMyHostProfile.useQuery();

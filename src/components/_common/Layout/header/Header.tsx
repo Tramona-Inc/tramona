@@ -28,11 +28,10 @@ import MobileHeader from "./mobile/MobileHeader";
 import useHostBtn from "./useHostBtn";
 import LogInSignUp from "./LoginOrSignup";
 import { api } from "@/utils/api";
-import { useToast } from "@/components/ui/use-toast";
 import useBannerStore from "@/utils/store/bannerStore";
+
 export function Header({ noBanner = false }: { noBanner?: boolean }) {
   const router = useRouter();
-  const { toast } = useToast();
   const { isCalendar } = useBannerStore();
   const { data: hasHostProfile, isLoading: hasHostProfileIsLoading } =
     api.users.isHost.useQuery();
@@ -45,7 +44,7 @@ export function Header({ noBanner = false }: { noBanner?: boolean }) {
   return (
     <>
       {isCalendar ? (
-        <div className="text-balance bg-red-500 px-4 py-2 text-center text-sm font-medium text-white">
+        <div className="text-balance bg-red-600 px-4 py-2 text-center text-sm font-medium text-white">
           Please sync your calendar to get updated availability information for
           your listings.
         </div>

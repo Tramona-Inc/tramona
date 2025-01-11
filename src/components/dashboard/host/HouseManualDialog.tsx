@@ -6,6 +6,8 @@ import { api } from "@/utils/api";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
+import { errorToast } from "@/utils/toasts";
+import { toast } from "@/components/ui/use-toast";
 
 const formSchema = z.object({
   houseManual: z.string().nullable(),
@@ -15,8 +17,10 @@ type FormSchema = z.infer<typeof formSchema>;
 
 export default function HouseManualDialog({
   property,
+  currentHostTeamId,
 }: {
   property: Property;
+  currentHostTeamId: number | null | undefined;
 }) {
   const { data: fetchedProperty, refetch } = api.properties.getById.useQuery({
     id: property.id,
@@ -33,10 +37,29 @@ export default function HouseManualDialog({
 
   const onSubmit = async (formValues: FormSchema) => {
     await updateProperty({
-      ...property,
-      houseManual:
-        formValues.houseManual === "" ? null : formValues.houseManual,
-    });
+      updatedProperty: {
+        ...property,
+        houseManual:
+          formValues.houseManual === "" ? null : formValues.houseManual,
+      },
+      currentHostTeamId: currentHostTeamId!,
+    })
+      .then(() => {
+        toast({
+          title: "Successfully Updated Property!",
+        });
+      })
+      .catch((error) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        if (error.data?.code === "FORBIDDEN") {
+          toast({
+            title: "You do not have permission to edit a property.",
+            description: "Please contact your team owner to request access.",
+          });
+        } else {
+          errorToast();
+        }
+      });
     void refetch();
   };
 

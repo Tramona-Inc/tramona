@@ -8,45 +8,80 @@ import DirectionsDialog from "./DirectionsDialog";
 import WifiDialog from "./WifiDialog";
 import HouseManualDialog from "./HouseManualDialog";
 import { Property } from "@/server/db/schema";
+import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 
 export default function HostArrivalGuide({ property }: { property: Property }) {
   const [activeDialog, setActiveDialog] = useState<number | null>(null);
+
+  const { currentHostTeamId } = useHostTeamStore();
 
   const guides = [
     {
       title: "Check in method",
       subtitle: "How do travelers get in?",
-      dialog: <CheckInMethodDialog property={property} />,
+      dialog: (
+        <CheckInMethodDialog
+          property={property}
+          currentHostTeamId={currentHostTeamId}
+        />
+      ),
     },
     {
       title: "Check out instructions",
       subtitle: "What should travelers do before they check out?",
-      dialog: <CheckOutDialog property={property} />,
+      dialog: (
+        <CheckOutDialog
+          property={property}
+          currentHostTeamId={currentHostTeamId}
+        />
+      ),
     },
     {
       title: "House rules",
       subtitle: "What are the rules of your property?",
-      dialog: <HouseRulesDialog property={property} />,
+      dialog: (
+        <HouseRulesDialog
+          property={property}
+          currentHostTeamId={currentHostTeamId}
+        />
+      ),
     },
     {
       title: "Interaction preferences",
       subtitle: "Add details",
-      dialog: <InteractionPreferencesDialog property={property} />,
+      dialog: (
+        <InteractionPreferencesDialog
+          property={property}
+          currentHostTeamId={currentHostTeamId}
+        />
+      ),
     },
     {
       title: "Directions",
       subtitle: "Add details",
-      dialog: <DirectionsDialog property={property} />,
+      dialog: (
+        <DirectionsDialog
+          property={property}
+          currentHostTeamId={currentHostTeamId}
+        />
+      ),
     },
     {
       title: "WiFi Details",
       subtitle: "Add details",
-      dialog: <WifiDialog property={property} />,
+      dialog: (
+        <WifiDialog property={property} currentHostTeamId={currentHostTeamId} />
+      ),
     },
     {
       title: "House manual",
       subtitle: "Add details",
-      dialog: <HouseManualDialog property={property} />,
+      dialog: (
+        <HouseManualDialog
+          property={property}
+          currentHostTeamId={currentHostTeamId}
+        />
+      ),
     },
   ];
 

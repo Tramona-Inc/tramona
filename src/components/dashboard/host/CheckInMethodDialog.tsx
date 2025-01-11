@@ -8,6 +8,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { api } from "@/utils/api";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
+import { toast } from "@/components/ui/use-toast";
+import { errorToast } from "@/utils/toasts";
 
 const formSchema = z.object({
   checkInType: z.enum(ALL_CHECKIN_TYPES).nullable(),
@@ -18,8 +20,10 @@ type FormSchema = z.infer<typeof formSchema>;
 
 export default function CheckInMethodDialog({
   property,
+  currentHostTeamId,
 }: {
   property: Property;
+  currentHostTeamId: number | null | undefined;
 }) {
   const { data: fetchedProperty, refetch } = api.properties.getById.useQuery({
     id: property.id,
@@ -58,10 +62,29 @@ export default function CheckInMethodDialog({
 
   const onSubmit = async (formValues: FormSchema) => {
     await updateProperty({
-      ...property,
-      checkInType: formValues.checkInType ?? null,
-      additionalCheckInInfo: formValues.additionalCheckInInfo,
-    });
+      updatedProperty: {
+        ...property,
+        checkInType: formValues.checkInType ?? null,
+        additionalCheckInInfo: formValues.additionalCheckInInfo,
+      },
+      currentHostTeamId: currentHostTeamId!,
+    })
+      .then(() => {
+        toast({
+          title: "Successfully Updated Property!",
+        });
+      })
+      .catch((error) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        if (error.data?.code === "FORBIDDEN") {
+          toast({
+            title: "You do not have permission to edit a property.",
+            description: "Please contact your team owner to request access.",
+          });
+        } else {
+          errorToast();
+        }
+      });
 
     void refetch();
   };

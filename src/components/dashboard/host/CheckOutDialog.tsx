@@ -15,6 +15,8 @@ import ErrorMsg from "@/components/ui/ErrorMsg";
 import { api } from "@/utils/api";
 import { ALL_CHECKOUT_TYPES, Property } from "@/server/db/schema";
 import DialogCancelSave from "./DialogCancelSave";
+import { toast } from "@/components/ui/use-toast";
+import { errorToast } from "@/utils/toasts";
 
 const formSchema = z.object({
   checkOutInfo: z.array(z.enum(ALL_CHECKOUT_TYPES)).optional(),
@@ -23,7 +25,13 @@ const formSchema = z.object({
 
 type FormSchema = z.infer<typeof formSchema>;
 
-export default function CheckOutDialog({ property }: { property: Property }) {
+export default function CheckOutDialog({
+  property,
+  currentHostTeamId,
+}: {
+  property: Property;
+  currentHostTeamId: number | null | undefined;
+}) {
   const { data: fetchedProperty, refetch } = api.properties.getById.useQuery({
     id: property.id,
   });
@@ -39,13 +47,32 @@ export default function CheckOutDialog({ property }: { property: Property }) {
 
   const onSubmit = async (formValues: FormSchema) => {
     await updateProperty({
-      ...property,
-      checkOutInfo: formValues.checkOutInfo,
-      additionalCheckOutInfo:
-        formValues.additionalCheckOutInfo === ""
-          ? null
-          : formValues.additionalCheckOutInfo,
-    });
+      updatedProperty: {
+        ...property,
+        checkOutInfo: formValues.checkOutInfo,
+        additionalCheckOutInfo:
+          formValues.additionalCheckOutInfo === ""
+            ? null
+            : formValues.additionalCheckOutInfo,
+      },
+      currentHostTeamId: currentHostTeamId!,
+    })
+      .then(() => {
+        toast({
+          title: "Successfully Updated Property!",
+        });
+      })
+      .catch((error) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        if (error.data?.code === "FORBIDDEN") {
+          toast({
+            title: "You do not have permission to edit a property.",
+            description: "Please contact your team owner to request access.",
+          });
+        } else {
+          errorToast();
+        }
+      });
     void refetch();
   };
 

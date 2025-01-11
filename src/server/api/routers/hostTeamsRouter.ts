@@ -2,7 +2,6 @@ import {
   COHOST_ROLES,
   conversationParticipants,
   conversations,
-  hostProfiles,
   hostTeamInvites,
   hostTeamMembers,
   hostTeams,
@@ -10,7 +9,7 @@ import {
   users,
 } from "@/server/db/schema";
 import { db } from "@/server/db";
-import { getHostTeamOwnerId, sendEmail } from "@/server/server-utils";
+import { sendEmail } from "@/server/server-utils";
 import { TRPCError } from "@trpc/server";
 import { add, subMinutes } from "date-fns";
 import { and, eq, or, sql, desc } from "drizzle-orm";

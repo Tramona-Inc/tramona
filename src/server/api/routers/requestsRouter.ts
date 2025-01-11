@@ -1,7 +1,6 @@
 import {
   coHostProcedure,
   createTRPCRouter,
-  hostProcedure,
   protectedProcedure,
   roleRestrictedProcedure,
 } from "@/server/api/trpc";

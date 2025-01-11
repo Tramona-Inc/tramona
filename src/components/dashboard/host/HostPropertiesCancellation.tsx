@@ -7,12 +7,14 @@ import { api } from "@/utils/api";
 import { getCancellationPolicyDescription } from "@/config/getCancellationPolicyDescription";
 import { useZodForm } from "@/utils/useZodForm";
 import CancellationCardSelect from "@/components/_common/CancellationCardSelect";
+import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 
 export default function HostPropertiesCancellation({
   property,
 }: {
   property: Property;
 }) {
+  const { currentHostTeamId } = useHostTeamStore();
   const [editing, setEditing] = useState(false);
 
   const { mutateAsync: updateProperty } = api.properties.update.useMutation();
@@ -29,7 +31,10 @@ export default function HostPropertiesCancellation({
   const { policy: selectedPolicy } = form.watch();
 
   const onSubmit = form.handleSubmit(async ({ policy }) => {
-    await updateProperty({ id: property.id, cancellationPolicy: policy });
+    await updateProperty({
+      updatedProperty: { id: property.id, cancellationPolicy: policy },
+      currentHostTeamId: currentHostTeamId!,
+    });
     setEditing(false);
     void refetch();
   });

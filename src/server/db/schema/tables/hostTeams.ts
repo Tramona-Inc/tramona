@@ -13,6 +13,7 @@ import { users } from "./users";
 export const COHOST_ROLES = [
   "Match Manager",
   "Listing Manager",
+  "Co-Host",
   "Admin Access",
 ] as const;
 

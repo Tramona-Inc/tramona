@@ -14,6 +14,8 @@ import ErrorMsg from "@/components/ui/ErrorMsg";
 import { api } from "@/utils/api";
 import { Property } from "@/server/db/schema";
 import DialogCancelSave from "./DialogCancelSave";
+import { toast } from "@/components/ui/use-toast";
+import { errorToast } from "@/utils/toasts";
 
 const formSchema = z.object({
   interactionPreference: z.string().optional(),
@@ -30,8 +32,10 @@ type InteractionPreferences =
 
 export default function InteractionPreferencesDialog({
   property,
+  currentHostTeamId,
 }: {
   property: Property;
+  currentHostTeamId: number | null | undefined;
 }) {
   const { data: fetchedProperty, refetch } = api.properties.getById.useQuery({
     id: property.id,
@@ -99,9 +103,28 @@ export default function InteractionPreferencesDialog({
         break;
     }
     await updateProperty({
-      ...property,
-      interactionPreference: modifiedInteractionPref,
-    });
+      updatedProperty: {
+        ...property,
+        interactionPreference: modifiedInteractionPref,
+      },
+      currentHostTeamId: currentHostTeamId!,
+    })
+      .then(() => {
+        toast({
+          title: "Successfully Updated Property!",
+        });
+      })
+      .catch((error) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        if (error.data?.code === "FORBIDDEN") {
+          toast({
+            title: "You do not have permission to edit a property.",
+            description: "Please contact your team owner to request access.",
+          });
+        } else {
+          errorToast();
+        }
+      });
     void refetch();
   };
 
