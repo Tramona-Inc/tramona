@@ -26,10 +26,15 @@ export default function CheckInMethodDialog({
 }: {
   property: Property | undefined;
   refetch: () => void;
-  updateProperty: (property: Property) => Promise<void>;
+  updateProperty: ({
+    updatedProperty,
+    currentHostTeamId,
+  }: {
+    updatedProperty: Property;
+    currentHostTeamId: number;
+  }) => Promise<void>;
   isPropertyUpdating: boolean;
   currentHostTeamId: number | null | undefined;
-
 }) {
   let modifiedCheckInType = null;
 
@@ -62,14 +67,17 @@ export default function CheckInMethodDialog({
 
   const onSubmit = async (formValues: FormSchema) => {
     if (property) {
-    await updateProperty({
-      ...property,
-      checkInType: formValues.checkInType ?? null,
-      additionalCheckInInfo: formValues.additionalCheckInInfo ?? null,
-    });
+      await updateProperty({
+        updatedProperty: {
+          ...property,
+          checkInType: formValues.checkInType ?? null,
+          additionalCheckInInfo: formValues.additionalCheckInInfo ?? null,
+        },
+        currentHostTeamId: currentHostTeamId!,
+      });
 
       void refetch();
-    }}
+    }
   };
 
   const methods = [

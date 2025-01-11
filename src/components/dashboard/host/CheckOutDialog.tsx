@@ -33,7 +33,13 @@ export default function CheckOutDialog({
 }: {
   property: Property | undefined;
   refetch: () => void;
-  updateProperty: (property: Property) => Promise<void>;
+  updateProperty: ({
+    updatedProperty,
+    currentHostTeamId,
+  }: {
+    updatedProperty: Property;
+    currentHostTeamId: number;
+  }) => Promise<void>;
   isPropertyUpdating: boolean;
   currentHostTeamId: number | null | undefined;
 }) {
@@ -50,9 +56,10 @@ export default function CheckOutDialog({
       await updateProperty({
         updatedProperty: {
           ...property,
-          checkOutInfo: formValues.checkOutInfo,
+          checkOutInfo: formValues.checkOutInfo ?? null,
           additionalCheckOutInfo:
-            formValues.additionalCheckOutInfo === ""
+            formValues.additionalCheckOutInfo === "" ||
+            formValues.additionalCheckOutInfo === undefined
               ? null
               : formValues.additionalCheckOutInfo,
         },

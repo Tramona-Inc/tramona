@@ -30,9 +30,9 @@ import LogInSignUp from "./LoginOrSignup";
 import { api } from "@/utils/api";
 import useBannerStore from "@/utils/store/bannerStore";
 import { useEffect } from "react";
+
 export function Header({ noBanner = false }: { noBanner?: boolean }) {
   const router = useRouter();
-  const { toast } = useToast();
   const { setIsCalendar, isCalendar } = useBannerStore();
   const { data: hasHostProfile, isLoading: hasHostProfileIsLoading } =
     api.users.isHost.useQuery();
