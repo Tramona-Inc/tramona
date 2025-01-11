@@ -9,9 +9,19 @@ import WifiDialog from "./WifiDialog";
 import HouseManualDialog from "./HouseManualDialog";
 import { Property } from "@/server/db/schema";
 import { useHostTeamStore } from "@/utils/store/hostTeamStore";
+import { api } from "@/utils/api";
+import Spinner from "@/components/_common/Spinner";
+import { DialogTitle } from "@radix-ui/react-dialog";
 
 export default function HostArrivalGuide({ property }: { property: Property }) {
   const [activeDialog, setActiveDialog] = useState<number | null>(null);
+  const {
+    data: fetchedProperty,
+    refetch,
+    isLoading: isPropertyLoading,
+  } = api.properties.getById.useQuery({ id: property.id });
+  const { mutateAsync: updateProperty, isLoading: isPropertyUpdating } =
+    api.properties.update.useMutation();
 
   const { currentHostTeamId } = useHostTeamStore();
 
@@ -21,8 +31,11 @@ export default function HostArrivalGuide({ property }: { property: Property }) {
       subtitle: "How do travelers get in?",
       dialog: (
         <CheckInMethodDialog
-          property={property}
           currentHostTeamId={currentHostTeamId}
+          property={fetchedProperty}
+          refetch={refetch}
+          updateProperty={updateProperty}
+          isPropertyUpdating={isPropertyUpdating}
         />
       ),
     },
@@ -31,8 +44,11 @@ export default function HostArrivalGuide({ property }: { property: Property }) {
       subtitle: "What should travelers do before they check out?",
       dialog: (
         <CheckOutDialog
-          property={property}
           currentHostTeamId={currentHostTeamId}
+          property={fetchedProperty}
+          refetch={refetch}
+          updateProperty={updateProperty}
+          isPropertyUpdating={isPropertyUpdating}
         />
       ),
     },
@@ -41,8 +57,11 @@ export default function HostArrivalGuide({ property }: { property: Property }) {
       subtitle: "What are the rules of your property?",
       dialog: (
         <HouseRulesDialog
-          property={property}
           currentHostTeamId={currentHostTeamId}
+          property={fetchedProperty}
+          refetch={refetch}
+          updateProperty={updateProperty}
+          isPropertyUpdating={isPropertyUpdating}
         />
       ),
     },
@@ -51,8 +70,11 @@ export default function HostArrivalGuide({ property }: { property: Property }) {
       subtitle: "Add details",
       dialog: (
         <InteractionPreferencesDialog
-          property={property}
           currentHostTeamId={currentHostTeamId}
+          property={fetchedProperty}
+          refetch={refetch}
+          updateProperty={updateProperty}
+          isPropertyUpdating={isPropertyUpdating}
         />
       ),
     },
@@ -61,8 +83,11 @@ export default function HostArrivalGuide({ property }: { property: Property }) {
       subtitle: "Add details",
       dialog: (
         <DirectionsDialog
-          property={property}
           currentHostTeamId={currentHostTeamId}
+          property={fetchedProperty}
+          refetch={refetch}
+          updateProperty={updateProperty}
+          isPropertyUpdating={isPropertyUpdating}
         />
       ),
     },
@@ -70,7 +95,13 @@ export default function HostArrivalGuide({ property }: { property: Property }) {
       title: "WiFi Details",
       subtitle: "Add details",
       dialog: (
-        <WifiDialog property={property} currentHostTeamId={currentHostTeamId} />
+        <WifiDialog
+          currentHostTeamId={currentHostTeamId}
+          property={fetchedProperty}
+          refetch={refetch}
+          updateProperty={updateProperty}
+          isPropertyUpdating={isPropertyUpdating}
+        />
       ),
     },
     {
@@ -78,7 +109,10 @@ export default function HostArrivalGuide({ property }: { property: Property }) {
       subtitle: "Add details",
       dialog: (
         <HouseManualDialog
-          property={property}
+          property={fetchedProperty}
+          refetch={refetch}
+          updateProperty={updateProperty}
+          isPropertyUpdating={isPropertyUpdating}
           currentHostTeamId={currentHostTeamId}
         />
       ),
@@ -87,24 +121,31 @@ export default function HostArrivalGuide({ property }: { property: Property }) {
 
   return (
     <div className="h-screen-minus-header-n-footer space-y-4 overflow-y-auto pb-16 pt-6">
-      {guides.map((guide, index) => (
-        <Dialog
-          key={index}
-          open={activeDialog === index}
-          onOpenChange={(isOpen) => !isOpen && setActiveDialog(null)}
-        >
-          <DialogTrigger
-            className="w-full text-start"
-            onClick={() => setActiveDialog(index)}
-          >
-            <div className="space-y-2 rounded-xl border p-3">
-              <h2 className="font-bold">{guide.title}</h2>
-              <p className="text-muted-foreground">{guide.subtitle}</p>
-            </div>
-          </DialogTrigger>
-          <DialogContent>{guide.dialog}</DialogContent>
-        </Dialog>
-      ))}
+      {isPropertyLoading ? (
+        <Spinner />
+      ) : (
+        <>
+          {guides.map((guide, index) => (
+            <Dialog
+              key={index}
+              open={activeDialog === index}
+              onOpenChange={(isOpen) => !isOpen && setActiveDialog(null)}
+            >
+              <DialogTrigger
+                className="w-full text-start"
+                onClick={() => setActiveDialog(index)}
+              >
+                <div className="space-y-2 rounded-xl border p-3">
+                  <h2 className="font-bold">{guide.title}</h2>
+                  <p className="text-muted-foreground">{guide.subtitle}</p>
+                </div>
+              </DialogTrigger>
+              <DialogTitle hidden></DialogTitle>
+              <DialogContent>{guide.dialog}</DialogContent>
+            </Dialog>
+          ))}
+        </>
+      )}
     </div>
   );
 }

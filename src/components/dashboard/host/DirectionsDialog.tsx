@@ -3,7 +3,6 @@ import DialogCancelSave from "./DialogCancelSave";
 import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { api } from "@/utils/api";
 import { Property } from "@/server/db/schema";
 import {
   Form,
@@ -25,49 +24,52 @@ type FormSchema = z.infer<typeof formSchema>;
 
 export default function DirectionsDialog({
   property,
+  refetch,
+  updateProperty,
+  isPropertyUpdating,
   currentHostTeamId,
 }: {
-  property: Property;
+  property: Property | undefined;
+  refetch: () => void;
+  updateProperty: (property: Property) => Promise<void>;
+  isPropertyUpdating: boolean;
   currentHostTeamId: number | null | undefined;
 }) {
-  const { data: fetchedProperty, refetch } = api.properties.getById.useQuery({
-    id: property.id,
-  });
-
-  const { mutateAsync: updateProperty } = api.properties.update.useMutation();
-
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      directions: fetchedProperty?.directions ?? null,
+      directions: property?.directions ?? null,
     },
   });
 
   const onSubmit = async (formValues: FormSchema) => {
-    await updateProperty({
-      updatedProperty: {
-        ...property,
-        directions: formValues.directions === "" ? null : formValues.directions,
-      },
-      currentHostTeamId: currentHostTeamId!,
-    })
-      .then(() => {
-        toast({
-          title: "Successfully Updated Property!",
-        });
+    if (property) {
+      await updateProperty({
+        updatedProperty: {
+          ...property,
+          directions:
+            formValues.directions === "" ? null : formValues.directions,
+        },
+        currentHostTeamId: currentHostTeamId!,
       })
-      .catch((error) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        if (error.data?.code === "FORBIDDEN") {
+        .then(() => {
           toast({
-            title: "You do not have permission to edit a property.",
-            description: "Please contact your team owner to request access.",
+            title: "Successfully Updated Property!",
           });
-        } else {
-          errorToast();
-        }
-      });
-    void refetch();
+        })
+        .catch((error) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          if (error.data?.code === "FORBIDDEN") {
+            toast({
+              title: "You do not have permission to edit a property.",
+              description: "Please contact your team owner to request access.",
+            });
+          } else {
+            errorToast();
+          }
+        });
+      void refetch();
+    }
   };
 
   return (
@@ -102,7 +104,7 @@ export default function DirectionsDialog({
             <p className="text-muted-foreground">
               Available throughout the booking process
             </p>
-            <DialogCancelSave />
+            <DialogCancelSave isLoading={isPropertyUpdating} />
           </form>
         </Form>
       </div>
