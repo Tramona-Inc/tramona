@@ -13,6 +13,7 @@ import {
   ClipboardIcon,
   UserIcon,
   SearchIcon,
+  MoreHorizontal,
 } from "lucide-react";
 
 export const adminNavLinks = [
@@ -57,9 +58,9 @@ export const hostMobileNavLinks = [
 ];
 
 export const guestMobileNavLinks = [
+  { href: "/chat-with-admin", name: "Concierge", icon: UserIcon },
   { href: "/", name: "Dashboard", icon: HomeIcon },
-  { href: "/unclaimed-offers", name: "Explore", icon: SearchIcon },
-  { href: "/", name: "Concierge", icon: UserIcon },
+  { href: "#", name: "More", icon: MoreHorizontal },
 ];
 
 export const guestMobileNavHamburgerLinks = [
@@ -67,4 +68,10 @@ export const guestMobileNavHamburgerLinks = [
   { href: "/my-trips", name: "My Trips", icon: Briefcase },
   { href: "/messages", name: "Messages", icon: MessageCircleIcon },
   { href: "/chat-with-admin", name: "Concierge", icon: MessagesSquare },
+];
+
+export const moreMenuLinks = [
+  { href: "/host/stays", name: "Stays", icon: HomeIcon },
+  { href: "/messages", name: "Messages", icon: MessageCircleIcon },
+  { href: "/requests", name: "Requests", icon: ClipboardIcon },
 ];
