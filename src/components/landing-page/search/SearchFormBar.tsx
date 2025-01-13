@@ -39,17 +39,39 @@ export function SearchFormBar({
 }: SearchFormBarProps) {
   const checkInDate = form.watch("checkIn");
   const checkOutDate = form.watch("checkOut");
-  const numGuests = form.watch("numGuests") ?? 1;
+  const numGuests = form.watch("numGuests");
 
-  // const handleSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   const values = form.getValues();
-  //   await onSubmit(values);
-  // };
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const values = form.getValues();
+    let hasError = false;
 
-  const handleSubmit = form.handleSubmit(async (values) => {
+    // Clear all previous errors first
+    form.clearErrors();
+
+    if (!values.location) {
+      form.setError("location", { message: "Please select a destination" });
+      hasError = true;
+    }
+    if (values.checkIn === undefined) {
+      form.setError("checkIn", { message: "Required" });
+      hasError = true;
+    }
+    if (values.checkOut === undefined) {
+      form.setError("checkOut", { message: "Required" });
+      hasError = true;
+    }
+
+    if (hasError) return;
+
+    // Only scroll if form is valid
+    window.scrollTo({
+      top: 350,
+      behavior: "smooth",
+    });
+
     await onSubmit(values);
-  });
+  };
 
   if (variant === "modal") {
     return (
@@ -187,7 +209,10 @@ export function SearchFormBar({
                   render={({ field }) => (
                     <FormItem className="w-full">
                       <Select
-                        onValueChange={field.onChange}
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          form.clearErrors("location");
+                        }}
                         value={field.value}
                       >
                         <FormControl>
@@ -221,6 +246,7 @@ export function SearchFormBar({
                           ))}
                         </SelectContent>
                       </Select>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -370,15 +396,10 @@ export function SearchFormBar({
               {/* Search Button */}
               <Button
                 type="submit"
-                className={`ml-2 rounded-full bg-primaryGreen text-white transition-all duration-300 ease-in-out ${
-                  isCompact ? "h-6 w-6 p-0" : "h-9 w-9 p-0"
+                className={`ml-2 aspect-square rounded-full bg-primaryGreen p-0 text-white transition-all duration-300 ease-in-out ${
+                  isCompact ? "h-6 w-6" : "h-9 w-9"
                 }`}
-                onClick={() => {
-                  window.scrollTo({
-                    top: 350,
-                    behavior: "smooth",
-                  });
-                }}
+                onClick={handleSubmit}
                 disabled={isLoading}
               >
                 {isLoading ? (
