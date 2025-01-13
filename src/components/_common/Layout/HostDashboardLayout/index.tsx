@@ -46,7 +46,7 @@ export default function HostDashboardLayout({
   return (
     <>
       <Header />
-      <div className="min-h-screen-minus-header relative lg:flex">
+      <div className="relative min-h-screen-minus-header lg:flex">
         <main className="relative min-h-[calc(100vh-4rem-3rem)] lg:flex-1">
           {children}
         </main>
@@ -54,8 +54,8 @@ export default function HostDashboardLayout({
         <div className="hidden md:contents">
           <MessagesPopover isMobile={false} isHostOnboarding={true} />
         </div>
+        {isMd && <Footer />}
       </div>
-      {isMd && <Footer />}
     </>
   );
 }
