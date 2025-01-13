@@ -125,7 +125,7 @@ export default function MastHead() {
                 : "pointer-events-none h-0 opacity-0"
             }`}
           >
-            <div className="mx-auto max-w-sm px-4 md:max-w-md lg:max-w-2xl">
+            <div className="mx-auto max-w-[95%] sm:max-w-md lg:max-w-2xl">
               <div className="flex justify-center gap-12 lg:gap-60">
                 <button
                   onClick={() => handleTabChange("search")}
