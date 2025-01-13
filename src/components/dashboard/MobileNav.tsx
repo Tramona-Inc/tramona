@@ -6,7 +6,7 @@ import { NavBarLink } from "./NavBarLink";
 export default function MobileNav({
   _type,
 }: {
-  type: "admin" | "guest" | "host" | "unlogged";
+  _type: "admin" | "guest" | "host" | "unlogged";
 }) {
   const { data: session } = useSession();
   const _isAdmin = session && session.user.role === "admin";
