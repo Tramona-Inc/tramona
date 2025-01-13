@@ -12,7 +12,6 @@ import {
   BriefcaseIcon,
   ClipboardIcon,
   UserIcon,
-  SearchIcon,
   MoreHorizontal,
 } from "lucide-react";
 
@@ -58,7 +57,7 @@ export const hostMobileNavLinks = [
 ];
 
 export const guestMobileNavLinks = [
-  { href: "/chat-with-admin", name: "Concierge", icon: UserIcon },
+  { href: "/", name: "Concierge", icon: UserIcon },
   { href: "/", name: "Dashboard", icon: HomeIcon },
   { href: "#", name: "More", icon: MoreHorizontal },
 ];

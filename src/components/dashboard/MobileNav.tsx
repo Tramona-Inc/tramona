@@ -4,14 +4,14 @@ import { useSession } from "next-auth/react";
 import { NavBarLink } from "./NavBarLink";
 
 export default function MobileNav({
-  type,
+  _type,
 }: {
   type: "admin" | "guest" | "host" | "unlogged";
 }) {
   const { data: session } = useSession();
-  const isAdmin = session && session.user.role === "admin";
+  const _isAdmin = session && session.user.role === "admin";
 
-  let navLinks = guestMobileNavLinks;
+  const navLinks = guestMobileNavLinks;
 
   return (
     <header className="fixed inset-x-0 bottom-0 z-50 flex h-mobile-header-height w-full flex-row items-center justify-around bg-background shadow-[0px_0px_10px_#0001] lg:hidden">
