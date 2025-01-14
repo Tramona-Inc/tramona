@@ -297,7 +297,7 @@ export default function MessagesPopover({ isMobile, isHostOnboarding }: { isMobi
                         return (
                           <FormItem className="flex-1">
                             <FormControl>
-                              <textarea
+                              <input
                                 placeholder="Type your question here..."
                                 className="border-none bg-transparent text-white resize-none"
                                 {...field}

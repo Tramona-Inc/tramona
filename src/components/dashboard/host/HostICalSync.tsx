@@ -96,7 +96,7 @@ export default function HostICalSync({
   return (
     <div>
       <Dialog>
-        <DialogTrigger className="">
+        <DialogTrigger className="mt-4 lg:mt-8">
           {property.iCalLink && (
             <Button variant="secondary">Edit iCal Link</Button>
           )}
