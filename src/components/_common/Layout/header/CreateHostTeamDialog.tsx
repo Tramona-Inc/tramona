@@ -49,7 +49,7 @@ export default function CreateHostTeamDialog({
           description: "Add members from the Team tab",
         });
         setOpen(false);
-        void router.push("/host/team");
+        void router.push("/host/teams");
       })
       .catch(() => errorToast());
   });
