@@ -2,6 +2,7 @@ import {
   COHOST_ROLES,
   conversationParticipants,
   conversations,
+  hostProfiles,
   hostTeamInvites,
   hostTeamMembers,
   hostTeams,
@@ -216,6 +217,7 @@ export const hostTeamsRouter = createTRPCRouter({
         id,
         expiresAt: add(new Date(), { hours: 24 }),
         hostTeamId: input.hostTeamId,
+        role: input.role,
         inviteeEmail: input.email,
         lastSentAt: now,
       });
@@ -544,7 +546,7 @@ export const hostTeamsRouter = createTRPCRouter({
       };
     }),
 
-  joinHostTeam: protectedProcedure
+  joinHostTeam: protectedProcedure //here we can create a host profile, since they are joining as a non-host
     .input(z.object({ cohostInviteId: z.string() }))
     .mutation(async ({ input, ctx }) => {
       const invite = await ctx.db.query.hostTeamInvites.findFirst({
@@ -595,9 +597,26 @@ export const hostTeamsRouter = createTRPCRouter({
         return { status: "already in team" } as const;
       }
 
+      //create the hostProfile if does not exist
+      const existingHostProfile = await db.query.hostProfiles
+        .findFirst({
+          where: eq(hostProfiles.userId, ctx.user.id),
+        })
+        .then(async (res) => {
+          if (!res) {
+            console.log("created");
+            await db.insert(hostProfiles).values({
+              userId: ctx.user.id,
+            });
+          } else {
+            console.log("not created");
+          }
+        });
+
       await ctx.db.insert(hostTeamMembers).values({
         hostTeamId: invite.hostTeam.id,
         userId: ctx.user.id,
+        role: invite.role,
       });
 
       // delete invite
