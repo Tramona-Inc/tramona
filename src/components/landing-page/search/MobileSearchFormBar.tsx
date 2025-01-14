@@ -16,7 +16,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { SearchFormBar } from "./SearchFormBar";
 import type { UseFormReturn } from "react-hook-form";
 import { type SearchFormValues } from "./schemas";
 import { locations } from "./locations";
@@ -54,18 +53,17 @@ export function MobileSearchFormBar({
     const values = form.getValues();
     let hasError = false;
 
-    // Clear all previous errors first
     form.clearErrors();
 
     if (!values.location) {
       form.setError("location", { message: "Please select a destination" });
       hasError = true;
     }
-    if (!values.checkIn) {
+    if (values.checkIn === undefined) {
       form.setError("checkIn", { message: "Required" });
       hasError = true;
     }
-    if (!values.checkOut) {
+    if (values.checkOut === undefined) {
       form.setError("checkOut", { message: "Required" });
       hasError = true;
     }
