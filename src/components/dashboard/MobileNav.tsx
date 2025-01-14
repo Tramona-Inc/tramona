@@ -1,17 +1,38 @@
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { guestMobileNavLinks, moreMenuLinks } from "@/config/sideNavLinks";
+import {
+  guestMobileNavLinks,
+  moreMenuLinks,
+  adminNavLinks,
+  hostMobileNavLinks,
+} from "@/config/sideNavLinks";
 import { useSession } from "next-auth/react";
 import { NavBarLink } from "./NavBarLink";
+import { ArrowLeftRight } from "lucide-react";
 
 export default function MobileNav({
-  _type,
+  type,
 }: {
-  _type: "admin" | "guest" | "host" | "unlogged";
+  type: "admin" | "guest" | "host" | "unlogged";
 }) {
   const { data: session } = useSession();
   const _isAdmin = session && session.user.role === "admin";
 
-  const navLinks = guestMobileNavLinks;
+  let navLinks;
+
+  switch (type) {
+    case "host":
+      navLinks = hostMobileNavLinks;
+      break;
+    default:
+      navLinks =
+        type === "admin"
+          ? [
+              ...guestMobileNavLinks,
+              { href: "/admin", name: "Switch To Admin", icon: ArrowLeftRight },
+            ]
+          : [...guestMobileNavLinks];
+      break;
+  }
 
   return (
     <header className="fixed inset-x-0 bottom-0 z-50 flex h-mobile-header-height w-full flex-row items-center justify-around bg-background shadow-[0px_0px_10px_#0001] lg:hidden">
@@ -25,9 +46,9 @@ export default function MobileNav({
               </SheetTrigger>
               <SheetContent side="bottom" className="h-[300px]">
                 <div className="grid gap-4 py-4">
-                  {moreMenuLinks.map((menuLink, menuIndex) => (
+                  {moreMenuLinks.map((menuLink, index) => (
                     <NavBarLink
-                      key={menuIndex}
+                      key={index}
                       href={menuLink.href}
                       icon={menuLink.icon}
                     >
