@@ -1,4 +1,4 @@
-import {  useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import UnclaimedOfferCards from "@/components/unclaimed-offers/UnclaimedOfferCards";
 import { LoadingProvider } from "@/components/unclaimed-offers/UnclaimedMapLoadingContext";
@@ -46,42 +46,6 @@ export default function UnclaimedMap() {
       });
     }
   }, [filters.filter]);
-
-  // const {
-  //   data: fetchedAdjustedProperties,
-  //   fetchNextPage: fetchNextPageOfAdjustedProperties,
-  //   isLoading,
-  //   isFetching,
-  // } = api.properties.getByBoundaryInfiniteScroll.useInfiniteQuery(
-  //   {
-  //     boundaries: mapBoundaries,
-  //     latLngPoint: filters.filter ? {
-  //       lat: filters.filter.lat,
-  //       lng: filters.filter.long,
-  //     } : undefined,
-  //     radius: filters.radius,
-  //   },
-  //   {
-  //     getNextPageParam: (lastPage) => lastPage.nextCursor,
-  //     refetchOnWindowFocus: false,
-  //   },
-  // );
-
-  // // useEffect(() => {
-  // //   setIsLoading(isLoading || isFetching);
-  // // }, [isLoading, isFetching, setIsLoading]);
-
-  // useEffect(() => {
-  //   if (fetchedAdjustedProperties) {
-  //     console.log("setting adjusted properties");
-  //     setAdjustedProperties(fetchedAdjustedProperties);
-  //   }
-  // }, [fetchedAdjustedProperties, setAdjustedProperties]);
-
-  // useEffect(() => {
-  //   console.log("setting function ref from UnclaimedMap");
-  //   setFunctionRef(fetchNextPageOfAdjustedProperties);
-  // }, [fetchNextPageOfAdjustedProperties, setFunctionRef]);
 
   return (
     <LoadingProvider>

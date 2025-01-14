@@ -1,7 +1,6 @@
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { type RouterOutputs } from "@/utils/api";
 import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
 import { formatCurrency, formatDateMonthDayYear, plural } from "@/utils/utils";
 import { Star, ChevronLeft, ChevronRight } from "lucide-react";
