@@ -134,7 +134,7 @@ export default function CalendarSettings({ property }: { property: Property }) {
     <Card className="h-full flex-1">
       <CardContent className="p-3 sm:px-6">
         <h2 className="mb-2 text-xl font-bold sm:mb-6 sm:text-2xl">Settings</h2>
-        <Tabs defaultValue="pricing " className="w-full">
+        <Tabs defaultValue="pricing" className="w-full">
           <TabsList
             className="mb-4 grid w-full grid-cols-2 sm:mb-6"
             noBorder={true}

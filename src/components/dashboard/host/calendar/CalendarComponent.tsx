@@ -1,4 +1,10 @@
-import React, { useMemo, useEffect, useState, useCallback } from "react";
+import React, {
+  useMemo,
+  useEffect,
+  useState,
+  useCallback,
+  useRef,
+} from "react";
 import { ChevronLeft, ChevronRight, ChevronDown, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardBanner } from "@/components/ui/card";
@@ -24,6 +30,7 @@ import {
 } from "@/components/ui/dialog";
 import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 import useSetInitialHostTeamId from "@/components/_common/CustomHooks/useSetInitialHostTeamId";
+import CalenderSettingsLoadingState from "./CalenderSettingsLoadingState";
 
 export default function CalendarComponent() {
   useSetInitialHostTeamId();
@@ -44,22 +51,28 @@ export default function CalendarComponent() {
       },
     );
 
+  //memoize initial property an host hostproperties
+  // Update the ref value only when the properties change
+  const hostPropertiesRef = useRef(hostProperties);
+
+  useEffect(() => {
+    hostPropertiesRef.current = hostProperties;
+  }, [hostProperties]);
+
+  const initialProperty = useMemo(() => {
+    return (
+      hostPropertiesRef.current?.find(
+        (property) => property.id === Number(propertyId),
+      ) ??
+      hostPropertiesRef.current?.[0] ??
+      null
+    );
+  }, [propertyId]);
+
   // Set initial selected property when data loads
   useEffect(() => {
-    if (hostProperties) {
-      const initialProperty =
-        hostProperties.find((property) => property.id === Number(propertyId)) ??
-        hostProperties[0] ??
-        null;
-      setSelectedProperty(initialProperty);
-    }
-  }, [hostProperties, propertyId]);
-
-  // const [editing, setEditing] = useState(false);
-  // const [selectedRange, setSelectedRange] = useState<{
-  //   start: Date | null;
-  //   end: Date | null;
-  // }>({ start: null, end: null });
+    setSelectedProperty(initialProperty);
+  }, [initialProperty]);
 
   const queryInput = useMemo(() => {
     if (!selectedProperty?.hospitableListingId) return null; // Early return
@@ -337,7 +350,11 @@ export default function CalendarComponent() {
       </Card>
 
       {/* SETTINGS */}
-      {selectedProperty && <CalendarSettings property={selectedProperty} />}
+      {selectedProperty ? (
+        <CalendarSettings property={selectedProperty} />
+      ) : (
+        <CalenderSettingsLoadingState />
+      )}
       {selectedProperty?.datesLastUpdated &&
         selectedProperty.iCalLinkLastUpdated &&
         selectedProperty.iCalLinkLastUpdated <
