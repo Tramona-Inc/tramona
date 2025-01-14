@@ -97,7 +97,7 @@ export default function AvatarDropdown({
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link href="/settings">
+            <Link href="/settings/personal-information">
               <SettingsIcon />
               Settings
             </Link>
