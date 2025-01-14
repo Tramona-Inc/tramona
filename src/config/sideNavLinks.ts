@@ -70,7 +70,7 @@ export const guestMobileNavHamburgerLinks = [
 ];
 
 export const moreMenuLinks = [
-  { href: "/host/stays", name: "Stays", icon: HomeIcon },
+  { href: "/my-trips", name: "Stays", icon: HomeIcon },
   { href: "/messages", name: "Messages", icon: MessageCircleIcon },
   { href: "/requests", name: "Requests", icon: ClipboardIcon },
 ];
