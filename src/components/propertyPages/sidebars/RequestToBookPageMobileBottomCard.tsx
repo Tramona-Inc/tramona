@@ -40,8 +40,8 @@ export default function RequestToBookPageMobileBottomCard({
     api.users.myVerificationStatus.useQuery();
 
   return (
-    <Card className="fixed bottom-16 left-0 w-full border-t md:hidden">
-      <CardContent className="flex flex-row items-center justify-between px-4 py-1 text-sm">
+    <Card className="fixed bottom-12 left-0 w-full border-t md:hidden">
+      <CardContent className="flex flex-row items-center justify-between px-1 pb-1 text-sm">
         <div className="flex basis-1/2 flex-col">
           <PriceDetailsBeforeTax
             property={property}
@@ -54,7 +54,11 @@ export default function RequestToBookPageMobileBottomCard({
         <div className="flex flex-row gap-x-2">
           <Dialog>
             <DialogTrigger>
-              <Button variant="outline" size="sm" className="tracking-tight">
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-sm tracking-tight"
+              >
                 Request To Book
               </Button>
             </DialogTrigger>

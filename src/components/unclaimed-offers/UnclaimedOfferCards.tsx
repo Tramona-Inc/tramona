@@ -88,7 +88,7 @@ export default function UnclaimedOfferCards({
       void router.push(
         { pathname: router.pathname, query: { ...router.query, page } },
         undefined,
-        { shallow: true },
+        { shallow: false },
       );
     },
     [router],
