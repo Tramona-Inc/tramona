@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
 import { formatCurrency, formatDateMonthDayYear, plural } from "@/utils/utils";
-import { Star, ChevronLeft, ChevronRight } from "lucide-react";
+import { Star, ChevronLeft, ChevronRight, StarIcon } from "lucide-react";
 import { Skeleton } from "../ui/skeleton";
 import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useSession } from "next-auth/react";
@@ -411,12 +411,20 @@ function UnMatchedPropertyCard({
             </div>
           </div>
           <div className="ml-2 flex items-center space-x-1 whitespace-nowrap">
-            <Star fill="black" size={12} />
+            <StarIcon className="inline size-[1em] fill-primaryGreen stroke-primaryGreen" />{" "}
             <div>
-              {"avgRating" in property ? property.avgRating.toFixed(2) : "New"}
+              {"avgRating" in property
+                ? property.avgRating !== 0
+                  ? property.avgRating.toFixed(2)
+                  : "New"
+                : "New"}
             </div>
             <div>
-              {"numRatings" in property ? `(${property.numRatings})` : ""}
+              {"numRatings" in property
+                ? property.numRatings !== 0
+                  ? `(${property.numRatings})`
+                  : ""
+                : ""}
             </div>
           </div>
         </div>
