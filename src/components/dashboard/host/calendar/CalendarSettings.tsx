@@ -131,14 +131,18 @@ export default function CalendarSettings({ property }: { property: Property }) {
   };
 
   return (
-    <Card className="w-full flex-1">
-      <CardContent className="p-3 sm:p-6">
-        <h2 className="mb-4 text-xl font-bold sm:mb-6 sm:text-2xl">Settings</h2>
-        <Tabs defaultValue="pricing">
-          <TabsList className="mb-4 w-full sm:mb-6">
+    <Card className="h-full flex-1">
+      <CardContent className="p-3 sm:px-6">
+        <h2 className="mb-2 text-xl font-bold sm:mb-6 sm:text-2xl">Settings</h2>
+        <Tabs defaultValue="pricing " className="w-full">
+          <TabsList
+            className="mb-4 grid w-full grid-cols-2 sm:mb-6"
+            noBorder={true}
+          >
             <TabsTrigger value="pricing" className="flex-1">
               Pricing
             </TabsTrigger>
+
             <TabsTrigger value="restrictions" className="flex-1">
               Restrictions
             </TabsTrigger>

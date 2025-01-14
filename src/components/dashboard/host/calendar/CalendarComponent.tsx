@@ -176,9 +176,9 @@ export default function CalendarComponent() {
   const isLoading = loadingProperties || loadingPrices;
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] flex-col gap-4 p-2 sm:p-4 lg:flex-row">
+    <div className="mb-20 flex flex-col gap-4 p-2 sm:min-h-[calc(100vh-4rem)] sm:p-4 md:mb-0 lg:flex-row">
       {/* CALENDAR */}
-      <Card className="h-full w-full max-w-[1050px] flex-shrink-0">
+      <Card className="h-full lg:w-3/5">
         {selectedProperty?.datesLastUpdated &&
           selectedProperty.iCalLinkLastUpdated &&
           selectedProperty.iCalLinkLastUpdated <
@@ -190,7 +190,7 @@ export default function CalendarComponent() {
               Calendar not synced
             </CardBanner>
           )}
-        <CardContent className="flex h-full flex-col p-3 sm:p-6">
+        <CardContent className="h-full flex-col p-3 pb-2 sm:flex sm:p-6">
           <div className="mb-4 flex items-center justify-between">
             {/* Left Side: Month/Year and Stats */}
             <div>
@@ -244,7 +244,7 @@ export default function CalendarComponent() {
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
-                    className="rounded-full border shadow-lg"
+                    className="my-1 rounded-full border shadow-lg"
                   >
                     <Globe className="mr-2 h-4 w-4" />
                     <span className="hidden sm:inline">
@@ -276,7 +276,7 @@ export default function CalendarComponent() {
               </DropdownMenu>
             </div>
           </div>
-          <div className="min-h-[600px] flex-1">
+          <div className="h-full flex-1">
             <MonthCalendar
               date={date}
               reservedDateRanges={reservedDates}
@@ -287,7 +287,7 @@ export default function CalendarComponent() {
               isLoading={isLoading}
             />
           </div>
-          <div className="mt-4 flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2">
             {/* <Button
               variant="secondary"
               size="sm"

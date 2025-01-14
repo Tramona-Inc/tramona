@@ -260,7 +260,7 @@ export default function MastHead() {
           </div>
 
           {activeTab === "search" ? (
-            <div className="px-16">
+            <div className="px-3 sm:px-16">
               <UnclaimedMap />
             </div>
           ) : (
