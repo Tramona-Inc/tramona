@@ -181,6 +181,7 @@ export function MobileSearchFormBar({
                                 ? field.value
                                 : undefined
                             }
+                            popoverSide="top"
                             placeholder="Check in"
                             disablePast
                             className="w-full rounded-lg border border-gray-300 p-4 pl-10"
@@ -215,6 +216,7 @@ export function MobileSearchFormBar({
                                 ? field.value
                                 : undefined
                             }
+                            popoverSide="top"
                             placeholder="Check out"
                             disablePast
                             className="w-full rounded-lg border border-gray-300 p-4 pl-10"

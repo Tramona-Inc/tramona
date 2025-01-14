@@ -83,7 +83,7 @@ export default function HostPropertiesRestrictions({
   };
 
   return (
-    <div className="mb-24 mt-6 space-y-2">
+    <div className="mt-6 space-y-2 overflow-y-auto">
       <div className="text-end">
         <HostPropertyEditBtn
           editing={editing}

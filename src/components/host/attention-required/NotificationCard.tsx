@@ -21,14 +21,14 @@ export function NotificationCard({
 }: ConfirmationCardProps) {
   return (
     <Card className={`${className}`}>
-      <CardContent className="flex h-full min-h-[100px] flex-col gap-y-2 px-2 py-2 md:min-h-[180px]">
+      <CardContent className="flex h-full min-h-[100px] flex-col gap-y-2 px-0 py-2 md:min-h-[180px] md:px-2">
         <div className="flex h-full flex-col justify-between gap-y-2">
-          <CardTitle className="flex flex-row items-center justify-between gap-x-2 text-xs font-semibold text-red-600 md:text-base">
+          <CardTitle className="flex flex-row items-center justify-between gap-x-1 text-xs font-semibold text-red-600 md:gap-x-2 md:text-base">
             <div className="flex flex-row gap-x-2">
-              <AlertCircle className="h-5 w-5 md:h-6 md:w-6" />
+              <AlertCircle className="size-6 md:h-6 md:w-6" />
               Confirm important details
             </div>
-            <div className="rounded-full border border-destructive px-2 text-xs text-destructive md:text-sm">
+            <div className="rounded-full border border-destructive px-1 text-xs text-destructive md:px-2 md:text-sm">
               {length}
             </div>
           </CardTitle>

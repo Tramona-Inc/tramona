@@ -306,7 +306,7 @@ export default function MessagesPopover({
                         return (
                           <FormItem className="flex-1">
                             <FormControl>
-                              <Input
+                              <input
                                 placeholder="Type your question here..."
                                 className="flex h-full w-full items-center justify-center border-none bg-transparent px-4 leading-none text-black placeholder:text-center placeholder:text-gray-500 focus:outline-none"
                                 {...field}
