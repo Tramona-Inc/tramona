@@ -1,4 +1,8 @@
 import { env } from "@/env";
+import LlamaAI from 'llamaai';
+
+const apiToken = process.env.LLAMA_API_KEY;
+const llamaAPI = new LlamaAI(apiToken);
 
 interface LlamaResponse {
     choices: {
@@ -21,76 +25,71 @@ interface ContentModerationResult {
 
 export class LlamaClient {
     private apiKey: string;
-    private baseUrl: string;
 
     constructor() {
         this.apiKey = process.env.LLAMA_API_KEY || ""; // Provide a fallback value
         if (!this.apiKey) {
             throw new Error("LLAMA_API_KEY is not defined in the environment variables");
         }
-        this.baseUrl = "https://api.llama-api.com";
     }
 
     async moderateContent(message: string): Promise<ContentModerationResult> {
         try {
-            const response = await fetch(`${this.baseUrl}/chat/completions`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${this.apiKey}`,
-                },
-                body: JSON.stringify({
-                    "model": "llama3.1-70b",
-                    "messages": [
-                        {
-                            "role": "system",
-                            "content": "You are a content moderator. Your task is to analyze the message and return a structured JSON response that includes whether the message is appropriate, a confidence score, a violation type, and an explanation for your decision."
-                        },
-                        {
-                            "role": "user",
-                            "content": "Hey! lets take this booking off platform, email me at myemail@email.com or you can text me at 929494593"
-                        },
-                        {
-                            "role": "assistant",
-                            "content": "Here is an example of the format you should return:"
-                        }
-                    ],
-                    "functions": [
-                        {
-                            "name": "content_moderation",
-                            "description": "Analyze message content for policy violations",
-                            "parameters": {
-                                "type": "object",
-                                "properties": {
-                                    "isAppropriate": {
-                                        "type": "boolean",
-                                        "description": "Whether the message complies with platform policies"
-                                    },
-                                    "confidence": {
-                                        "type": "number",
-                                        "description": "Confidence score between 0 and 1"
-                                    },
-                                    "violationType": {
-                                        "type": "string",
-                                        "enum": ["OFF_PLATFORM_BOOKING", "CONTACT_INFO", "INAPPROPRIATE", "NONE"]
-                                    },
-                                    "reason": {
-                                        "type": "string",
-                                        "description": "Explanation of the violation"
-                                    }
-                                },
-                                "required": ["isAppropriate", "confidence", "violationType", "reason"]
-                            }
-                        }
-                    ],
-                    "function_call": {
-                        "name": "content_moderation",
-                        "arguments": "{\"isAppropriate\": false, \"confidence\": 0.95, \"violationType\": \"OFF_PLATFORM_BOOKING\", \"reason\": \"The message contains an attempt to move the booking off-platform by providing contact information.\"}"
-                    }
-                }),
-            });
+            //debugging purposes
+            console.log("Llama checking message")
 
-            const data = (await response.json()) as LlamaResponse;
+            const apiRequestJson = {
+                "model": "llama3.1-70b",
+                "messages": [
+                    {
+                        "role": "system",
+                        "content": "You are a content moderator."
+                    },
+                    {
+                        "role": "user",
+                        "content": message
+                    }
+                ],
+
+                "functions": [
+                    {
+                        "name": "content_moderation",
+                        "description": "Analyze message content for policy violations and return in the format: {\"isAppropriate\": <boolean>, \"confidence\": <number>, \"violationType\": <string>, \"reason\": <string>}",
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "isAppropriate": {
+                                    "type": "boolean",
+                                    "description": "Whether the message complies with platform policies"
+                                },
+                                "confidence": {
+                                    "type": "number",
+                                    "description": "Confidence score between 0 and 1"
+                                },
+                                "violationType": {
+                                    "type": "string",
+                                    "description": "Type of violation detected: off-platform booking, contact information, inappropriate content, or none if the message complies with platform policies",
+                                    "enum": ["OFF_PLATFORM_BOOKING", "CONTACT_INFO", "INAPPROPRIATE", "NONE"]
+                                },
+                                "reason": {
+                                    "type": "string",
+                                    "description": "Explanation of the violation"
+                                }
+                            },
+                            "required": [
+                                "isAppropriate",
+                                "confidence",
+                                "violationType",
+                                "reason"
+                            ]
+                        }
+                    }
+                ],
+                "function_call": "content_moderation",
+            };
+
+            const response = await llamaAPI.run(apiRequestJson);
+            const data = response.data as LlamaResponse;
 
             // Add null checks and provide fallback
             if (!data.choices?.length) {
@@ -100,6 +99,8 @@ export class LlamaClient {
             const result = JSON.parse(
                 data.choices[0]?.message?.function_call?.arguments ?? "{}"
             );
+
+            console.log("Llama result:", result);
 
             return result as ContentModerationResult;
         } catch (error) {
