@@ -15,7 +15,11 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { api, type RouterOutputs } from "@/utils/api";
-import { getOfferDiscountPercentage, plural } from "@/utils/utils";
+import {
+  convertHostInteractionPref,
+  getOfferDiscountPercentage,
+  plural,
+} from "@/utils/utils";
 import { AspectRatio } from "../ui/aspect-ratio";
 import {
   ImagesIcon,
@@ -252,7 +256,13 @@ export default function PropertyPage({
               <h1 className="flex-1 text-xl font-semibold sm:text-2xl">
                 {property.name}
               </h1>
-              <Button onClick={() => isHospitableUser ? chatWithHost({ hostId: property.hostTeam.ownerId }) : chatWithAdmin()}>
+              <Button
+                onClick={() =>
+                  isHospitableUser
+                    ? chatWithHost({ hostId: property.hostTeam.ownerId })
+                    : chatWithAdmin()
+                }
+              >
                 <MessageCircleMore />
                 Message Host
               </Button>
@@ -261,7 +271,7 @@ export default function PropertyPage({
               <div className="flex-1">
                 <p className="gap flex flex-wrap items-center gap-x-1 pt-1 text-sm font-medium capitalize">
                   {property.propertyType} in {property.city} ·{" "}
-                  <StarIcon className="size-[1em] inline fill-primaryGreen stroke-primaryGreen" />{" "}
+                  <StarIcon className="inline size-[1em] fill-primaryGreen stroke-primaryGreen" />{" "}
                   {property.numRatings === 0 ? (
                     <>New</>
                   ) : (
@@ -375,7 +385,7 @@ export default function PropertyPage({
                 {property.roomsWithBeds.map((room, index) => (
                   <div
                     key={index}
-                    className="min-w-56 flex flex-col items-center gap-4 whitespace-pre rounded-lg border p-4"
+                    className="flex min-w-56 flex-col items-center gap-4 whitespace-pre rounded-lg border p-4"
                   >
                     <BedDoubleIcon />
                     <p className="text-lg font-semibold">{room.name}</p>
@@ -435,7 +445,7 @@ export default function PropertyPage({
                   Guest Reviews
                 </h2>
                 <div className="flex items-center gap-2 pb-4">
-                  <StarIcon className="size-[1em] inline fill-primaryGreen stroke-primaryGreen" />{" "}
+                  <StarIcon className="inline size-[1em] fill-primaryGreen stroke-primaryGreen" />{" "}
                   {property.avgRating} · {plural(property.numRatings, "review")}
                 </div>
               </div>
@@ -484,7 +494,7 @@ export default function PropertyPage({
                     />
                     <p className="text-center text-lg font-bold">{hostName}</p>
                   </div>
-                  <div className="*:p-2 divide-y">
+                  <div className="divide-y *:p-2">
                     <div>
                       <p className="text-center text-lg font-bold">
                         {property.hostNumReviews}
@@ -533,18 +543,47 @@ export default function PropertyPage({
             )}
           </section>
 
-          {property.additionalCheckInInfo !== null && (
-            <section>
-              <h2 className="subheading border-t pb-2 pt-4">
-                Check-in information
-              </h2>
-              <p>
-                {property.additionalCheckInInfo === "self"
-                  ? "Self check-in"
-                  : property.additionalCheckInInfo}
-              </p>
-            </section>
-          )}
+          <section>
+            <h2 className="subheading border-t pb-2 pt-4">
+              Check-in information
+            </h2>
+            <div className="space-y-4">
+              {property.houseRules && property.houseRules.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold">House rules</h3>
+                  <ul className="list-inside list-disc">
+                    {property.houseRules.map((rule, index) => (
+                      <li key={index}>{rule}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {property.additionalHouseRules && (
+                <div>
+                  <h3 className="text-lg font-semibold">
+                    Additional house rules
+                  </h3>
+                  <p>{property.additionalHouseRules}</p>
+                </div>
+              )}
+              {property.interactionPreference && (
+                <div>
+                  <h3 className="text-lg font-semibold">
+                    Host interaction preference
+                  </h3>
+                  <div>
+                    {convertHostInteractionPref(property.interactionPreference)}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <p>
+              {property.additionalCheckInInfo === "self"
+                ? "Self check-in"
+                : property.additionalCheckInInfo}
+            </p>
+          </section>
 
           {offer && (
             <div className="flex justify-end">
