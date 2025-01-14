@@ -259,13 +259,7 @@ export default function MastHead() {
             </div>
           </div>
 
-          {activeTab === "search" ? (
-            <div className="px-3 sm:px-16">
-              <UnclaimedMap />
-            </div>
-          ) : (
-            <NameYourPriceSection />
-          )}
+          {activeTab === "search" ? <UnclaimedMap /> : <NameYourPriceSection />}
         </div>
 
         <div className="mt-12 flex flex-col items-center gap-y-20 lg:gap-y-24">

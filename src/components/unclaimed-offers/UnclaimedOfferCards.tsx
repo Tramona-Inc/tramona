@@ -313,12 +313,12 @@ function UnMatchedPropertyCard({
   };
 
   const isAirbnb = property.originalListingPlatform === "Airbnb";
-  const checkIn = formatDateMonthDayYear(
-    new Date(router.query.checkIn as string),
-  );
-  const checkOut = formatDateMonthDayYear(
-    new Date(router.query.checkOut as string),
-  );
+  const checkIn = router.query.checkIn
+    ? formatDateMonthDayYear(new Date(router.query.checkIn as string))
+    : null;
+  const checkOut = router.query.checkOut
+    ? formatDateMonthDayYear(new Date(router.query.checkOut as string))
+    : null;
   const numGuests = 3;
   const link = isAirbnb
     ? `https://airbnb.com/rooms/${property.originalListingId}`
