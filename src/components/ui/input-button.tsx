@@ -29,11 +29,11 @@ export type InputButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> &
   );
 
 const inputButtonVariants = cva(
-  "flex items-center text-left w-full hover:bg-zinc-50 rounded-md border-input appearance-none border outline-transparent outline disabled:opacity-50 text-sm text-foreground focus-visible:border-transparent focus-visible:outline focus-visible:outline-ring disabled:cursor-not-allowed",
+  "flex items-center text-left w-full hover:bg-white rounded-md border-input appearance-none border outline-transparent outline disabled:opacity-50 text-sm text-foreground focus-visible:border-transparent focus-visible:outline focus-visible:outline-ring disabled:cursor-not-allowed",
   {
     variants: {
       variant: {
-        default: "h-10 bg-zinc-50",
+        default: "h-10 bg-white",
         lpDesktop: "h-16 pt-4",
         lpMobile: "h-12 bg-white",
         lpDesktopSearch: "h-16 pt-4",
@@ -128,10 +128,14 @@ const InputButton = React.forwardRef<HTMLButtonElement, InputButtonProps>(
         {withClearBtn && value && (
           <button
             type="button"
-            className="absolute bottom-4 right-1 rounded-full bg-white p-1 hover:bg-zinc-200"
-            onClick={() => setValue?.(undefined)}
+            className="absolute bottom-1/2 right-2 translate-y-1/2 rounded-full p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+            onClick={(e) => {
+              e.stopPropagation();
+              setValue?.(undefined);
+            }}
+            aria-label="Clear date"
           >
-            <XIcon className="h-4 w-4" />
+            <XIcon className="h-3.5 w-3.5" />
           </button>
         )}
       </div>

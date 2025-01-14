@@ -11,8 +11,12 @@ import { useState, useEffect } from "react";
 import { api } from "@/utils/api";
 import { toast } from "@/components/ui/use-toast";
 import RequestAndBidAutomationSection from "./setttingsSections/RequestAndBidAutomationSection";
+import { useHostTeamStore } from "@/utils/store/hostTeamStore";
+import { errorToast } from "@/utils/toasts";
 
 export default function CalendarSettings({ property }: { property: Property }) {
+  const { currentHostTeamId } = useHostTeamStore();
+
   // <---------------------------------- MUTATIONS ---------------------------------->
   const { mutateAsync: toggleBookItNow } =
     api.properties.toggleBookItNow.useMutation();
@@ -45,62 +49,85 @@ export default function CalendarSettings({ property }: { property: Property }) {
   const handleBookItNowSwitch = async (checked: boolean) => {
     setIsChecked(checked);
     //only update if turned off
-    try {
-      await toggleBookItNow({
-        id: property.id,
-        bookItNowEnabled: checked,
-      }).then((res) => {
+    await toggleBookItNow({
+      id: property.id,
+      bookItNowEnabled: checked,
+      currentHostTeamId: currentHostTeamId!,
+    })
+      .then((res) => {
         if (!res) {
           toast({
             title: `Book it now disabled`,
           });
         }
+      })
+      .catch((error) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        if (error.data?.code === "FORBIDDEN") {
+          toast({
+            title:
+              "You do not have permission to edit overall pricing strategy.",
+            description: "Please contact your team owner to request access.",
+          });
+        } else {
+          errorToast();
+        }
       });
-    } catch (err) {
-      toast({
-        title: "Something went wrong...",
-        variant: "destructive",
-      });
-    }
   };
 
   const handleBookItNowSlider = async () => {
-    try {
-      if (isChecked) {
-        console.log(bookItNowPercent);
-        await updateBookItNow({
-          id: property.id,
-          bookItNowHostDiscountPercentOffInput: bookItNowPercent,
+    if (isChecked) {
+      console.log(bookItNowPercent);
+      await updateBookItNow({
+        id: property.id,
+        bookItNowHostDiscountPercentOffInput: bookItNowPercent,
+        currentHostTeamId: currentHostTeamId!,
+      })
+        .then(() => {
+          toast({
+            title: "Successfully updated book it now percentage!",
+          });
+        })
+        .catch((error) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          if (error.data?.code === "FORBIDDEN") {
+            toast({
+              title:
+                "You do not have permission to edit overall pricing strategy.",
+              description: "Please contact your team owner to request access.",
+            });
+          } else {
+            errorToast();
+          }
         });
-        toast({
-          title: `Update successful.`,
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Try again",
-        description: "Something went wrong...",
-      });
     }
   };
 
   const handleBiddingSave = async () => {
     setBiddingSaved(true);
     setTimeout(() => setBiddingSaved(false), 2000);
-    try {
-      await updateRequestToBook({
-        propertyId: property.id,
-        requestToBookMaxDiscountPercentage: biddingPercent,
+    await updateRequestToBook({
+      propertyId: property.id,
+      requestToBookMaxDiscountPercentage: biddingPercent,
+      currentHostTeamId: currentHostTeamId!,
+    })
+      .then(() => {
+        toast({
+          title: "Successfully updated book it now percentage!",
+        });
+      })
+      .catch((error) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        if (error.data?.code === "FORBIDDEN") {
+          toast({
+            title:
+              "You do not have permission to edit overall pricing strategy.",
+            description: "Please contact your team owner to request access.",
+          });
+        } else {
+          errorToast();
+        }
       });
-      toast({
-        title: "Update successful",
-      });
-    } catch (error) {
-      toast({
-        title: "Something went wrong",
-        variant: "destructive",
-      });
-    }
   };
 
   return (

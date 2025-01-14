@@ -667,7 +667,7 @@ export const messagesRouter = createTRPCRouter({
         message: z.string(),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ input }) => {
       const exists = await verifyConversationExists(input.conversationId);
       if (!exists) {
         throw new Error("Conversation not found");

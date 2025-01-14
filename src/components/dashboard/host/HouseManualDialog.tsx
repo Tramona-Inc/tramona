@@ -5,6 +5,8 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
+import { errorToast } from "@/utils/toasts";
+import { toast } from "@/components/ui/use-toast";
 
 const formSchema = z.object({
   houseManual: z.string().nullable(),
@@ -17,11 +19,19 @@ export default function HouseManualDialog({
   refetch,
   updateProperty,
   isPropertyUpdating,
+  currentHostTeamId,
 }: {
   property: Property | undefined;
   refetch: () => void;
-  updateProperty: (property: Property) => Promise<void>;
+  updateProperty: ({
+    updatedProperty,
+    currentHostTeamId,
+  }: {
+    updatedProperty: Property;
+    currentHostTeamId: number;
+  }) => Promise<void>;
   isPropertyUpdating: boolean;
+  currentHostTeamId: number | null | undefined;
 }) {
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
@@ -33,10 +43,29 @@ export default function HouseManualDialog({
   const onSubmit = async (formValues: FormSchema) => {
     if (property) {
       await updateProperty({
-        ...property,
-        houseManual:
-          formValues.houseManual === "" ? null : formValues.houseManual,
-      });
+        updatedProperty: {
+          ...property,
+          houseManual:
+            formValues.houseManual === "" ? null : formValues.houseManual,
+        },
+        currentHostTeamId: currentHostTeamId!,
+      })
+        .then(() => {
+          toast({
+            title: "Successfully Updated Property!",
+          });
+        })
+        .catch((error) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          if (error.data?.code === "FORBIDDEN") {
+            toast({
+              title: "You do not have permission to edit a property.",
+              description: "Please contact your team owner to request access.",
+            });
+          } else {
+            errorToast();
+          }
+        });
       void refetch();
     }
   };

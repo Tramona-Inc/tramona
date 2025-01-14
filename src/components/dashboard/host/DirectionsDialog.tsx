@@ -13,6 +13,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import ErrorMsg from "@/components/ui/ErrorMsg";
+import { toast } from "@/components/ui/use-toast";
+import { errorToast } from "@/utils/toasts";
 
 const formSchema = z.object({
   directions: z.string().nullable(),
@@ -25,11 +27,19 @@ export default function DirectionsDialog({
   refetch,
   updateProperty,
   isPropertyUpdating,
+  currentHostTeamId,
 }: {
   property: Property | undefined;
   refetch: () => void;
-  updateProperty: (property: Property) => Promise<void>;
+  updateProperty: ({
+    updatedProperty,
+    currentHostTeamId,
+  }: {
+    updatedProperty: Property;
+    currentHostTeamId: number;
+  }) => Promise<void>;
   isPropertyUpdating: boolean;
+  currentHostTeamId: number | null | undefined;
 }) {
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
@@ -41,9 +51,29 @@ export default function DirectionsDialog({
   const onSubmit = async (formValues: FormSchema) => {
     if (property) {
       await updateProperty({
-        ...property,
-        directions: formValues.directions === "" ? null : formValues.directions,
-      });
+        updatedProperty: {
+          ...property,
+          directions:
+            formValues.directions === "" ? null : formValues.directions,
+        },
+        currentHostTeamId: currentHostTeamId!,
+      })
+        .then(() => {
+          toast({
+            title: "Successfully Updated Property!",
+          });
+        })
+        .catch((error) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          if (error.data?.code === "FORBIDDEN") {
+            toast({
+              title: "You do not have permission to edit a property.",
+              description: "Please contact your team owner to request access.",
+            });
+          } else {
+            errorToast();
+          }
+        });
       void refetch();
     }
   };

@@ -62,7 +62,7 @@ export default function GuestInput({
         />
       </PopoverTrigger>
       <PopoverContent
-        className="w-64 rounded-3xl p-6 backdrop-blur-md md:w-auto"
+        className="w-64 rounded-3xl border border-gray-200 bg-white p-6 shadow-lg backdrop-blur-md md:w-auto"
         align="center"
         side="bottom"
         avoidCollisions={false}
@@ -72,14 +72,14 @@ export default function GuestInput({
             type="button"
             variant="outline"
             size="icon"
-            className="h-8 w-8 rounded-full"
+            className="h-8 w-8 rounded-full border-[#004236] text-[#004236] hover:bg-white hover:text-[#006a56]"
             onClick={handleDecrement}
             disabled={value <= minGuests}
           >
             <Minus className="h-4 w-4" />
           </Button>
 
-          <span className="min-w-[3rem] text-center">
+          <span className="min-w-[3rem] text-center font-medium text-[#004236]">
             {value} {value === 1 ? "Guest" : "Guests"}
           </span>
 
@@ -87,7 +87,7 @@ export default function GuestInput({
             type="button"
             variant="outline"
             size="icon"
-            className="h-8 w-8 rounded-full"
+            className="h-8 w-8 rounded-full border-[#004236] text-[#004236] hover:bg-white hover:text-[#006a56]"
             onClick={handleIncrement}
             disabled={value >= maxGuests}
           >

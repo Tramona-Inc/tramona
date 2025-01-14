@@ -99,6 +99,23 @@ const roleDescriptions = {
       "Access financial reports",
     ],
   },
+  "Co-Host": {
+    title: "Co-Host",
+    description:
+      "Assist the primary host by managing bookings, properties, and operational tasks.",
+    icon: <Users className="h-4 w-4" />,
+    color: "bg-yellow-100 text-yellow-800",
+    checkColor: "text-yellow-500",
+    xColor: "text-yellow-300",
+    can: [
+      "All Match Manager permissions",
+      "All Listing Manager permissions",
+      "View financial reports",
+      "Modify overall pricing strategy",
+      "Manage team member access and permissions",
+    ],
+    cant: ["Access or modify payment information"],
+  },
   "Admin Access": {
     title: "Admin Access",
     description:
@@ -110,14 +127,10 @@ const roleDescriptions = {
     can: [
       "All Match Manager permissions",
       "All Listing Manager permissions",
-      "View financial reports",
-      "Modify overall pricing strategy",
-    ],
-    cant: [
+      "All Co-Host permissions",
       "Access or modify payment information",
-      "Delete the property listing",
-      "Change the primary host",
     ],
+    cant: ["Delete the property listing", "Change the primary host"],
   },
 } as const;
 
@@ -128,7 +141,7 @@ const inviteSchema = z.object({
 
 export default function Component() {
   useSetInitialHostTeamId();
-  const { currentHostTeamId, setCurrentHostTeam } = useHostTeamStore();
+  const { currentHostTeamId } = useHostTeamStore();
 
   const { data: session } = useSession({ required: true });
   const { data: hostProfile } = api.hosts.getMyHostProfile.useQuery();
@@ -210,7 +223,7 @@ export default function Component() {
                   .mutateAsync({
                     userId: member.userId,
                     role: newRole as CoHostRole,
-                    hostTeamId: curTeam.id,
+                    currentHostTeamId: curTeam.id,
                   })
                   .then(() => {
                     toast({
@@ -219,7 +232,19 @@ export default function Component() {
                         "The co-host's role has been updated successfully",
                     });
                   })
-                  .catch(() => errorToast());
+                  .catch((error) => {
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                    if (error.data?.code === "FORBIDDEN") {
+                      toast({
+                        title:
+                          "You do not have permission to change Co-host roles.",
+                        description:
+                          "Please contact your team owner to request access.",
+                      });
+                    } else {
+                      errorToast();
+                    }
+                  });
               }}
               disabled={
                 updateRoleMutation.isLoading ||
@@ -262,7 +287,7 @@ export default function Component() {
                   removeHostTeamMemberMutation
                     .mutateAsync({
                       memberId: member.userId,
-                      hostTeamId: curTeam.id,
+                      currentHostTeamId: curTeam.id,
                     })
                     .then(() => {
                       toast({
@@ -271,7 +296,20 @@ export default function Component() {
                           "The team member has been removed successfully",
                       });
                     })
-                    .catch(() => errorToast());
+                    .catch((error) => {
+                      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                      if (error.data?.code === "FORBIDDEN") {
+                        toast({
+                          title:
+                            "You do not have permission to remove Co-hosts.",
+                          description:
+                            "Please contact your team owner to request access.",
+                        });
+                      } else {
+                        console.log(error);
+                        errorToast();
+                      }
+                    });
                 }}
                 disabled={removeHostTeamMemberMutation.isLoading}
               >

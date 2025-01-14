@@ -14,6 +14,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ALL_HOUSE_RULES, Property } from "@/server/db/schema";
 import DialogCancelSave from "./DialogCancelSave";
+import { toast } from "@/components/ui/use-toast";
+import { errorToast } from "@/utils/toasts";
 
 const formSchema = z.object({
   houseRules: z.array(z.enum(ALL_HOUSE_RULES)).optional(),
@@ -27,11 +29,19 @@ export default function HouseRulesDialog({
   refetch,
   updateProperty,
   isPropertyUpdating,
+  currentHostTeamId,
 }: {
   property: Property | undefined;
   refetch: () => void;
-  updateProperty: (property: Property) => Promise<void>;
+  updateProperty: ({
+    updatedProperty,
+    currentHostTeamId,
+  }: {
+    updatedProperty: Property;
+    currentHostTeamId: number;
+  }) => Promise<void>;
   isPropertyUpdating: boolean;
+  currentHostTeamId: number | null | undefined;
 }) {
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
@@ -63,13 +73,33 @@ export default function HouseRulesDialog({
   const onSubmit = async (formValues: FormSchema) => {
     if (property) {
       await updateProperty({
-        ...property,
-        houseRules: formValues.houseRules ?? null,
-        additionalHouseRules:
-          formValues.additionalHouseRules === ""
-            ? null
-            : (formValues.additionalHouseRules ?? null),
-      });
+        updatedProperty: {
+          ...property,
+          houseRules: formValues.houseRules ?? null,
+          additionalHouseRules:
+            formValues.additionalHouseRules === "" ||
+            formValues.additionalHouseRules === undefined
+              ? null
+              : formValues.additionalHouseRules,
+        },
+        currentHostTeamId: currentHostTeamId!,
+      })
+        .then(() => {
+          toast({
+            title: "Successfully Updated Property!",
+          });
+        })
+        .catch((error) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          if (error.data?.code === "FORBIDDEN") {
+            toast({
+              title: "You do not have permission to edit a property.",
+              description: "Please contact your team owner to request access.",
+            });
+          } else {
+            errorToast();
+          }
+        });
       void refetch();
     }
   };
