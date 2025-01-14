@@ -23,6 +23,7 @@ import {
   roleRestrictedProcedure,
 } from "../trpc";
 import HostTeamInviteEmail from "packages/transactional/emails/HostTeamInviteEmail";
+import { sendSlackMessage } from "@/server/slack";
 
 export async function handlePendingInviteMessages(email: string) {
   const pendingInvites = await db.query.hostTeamInvites.findMany({
@@ -426,7 +427,6 @@ export const hostTeamsRouter = createTRPCRouter({
     }),
 
   getInitialHostTeamId: protectedProcedure.query(async ({ ctx }) => {
-    console.log("ran");
     const initialHostTeamId = await db.query.hostTeamMembers
       .findMany({
         where: eq(hostTeamMembers.userId, ctx.user.id),
@@ -598,18 +598,22 @@ export const hostTeamsRouter = createTRPCRouter({
       }
 
       //create the hostProfile if does not exist
-      const existingHostProfile = await db.query.hostProfiles
+      await db.query.hostProfiles
         .findFirst({
           where: eq(hostProfiles.userId, ctx.user.id),
         })
         .then(async (res) => {
           if (!res) {
-            console.log("created");
             await db.insert(hostProfiles).values({
               userId: ctx.user.id,
             });
-          } else {
-            console.log("not created");
+            void sendSlackMessage({
+              text: [
+                "*Host Profile Created:*",
+                `User ${ctx.user.id} has become a *${invite.role}* for Host Team ID: *${invite.hostTeamId}*`,
+              ].join("\n"),
+              channel: "host-bot",
+            });
           }
         });
 
