@@ -112,7 +112,7 @@ const roleDescriptions = {
       "All Listing Manager permissions",
       "View financial reports",
       "Modify overall pricing strategy",
-      "Manage team member access and permissions",
+      "Manage team member's access and permissions",
     ],
     cant: ["Access or modify payment information"],
   },
