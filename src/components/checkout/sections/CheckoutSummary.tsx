@@ -55,12 +55,10 @@ export default function CheckoutSummary({
         <UnifiedPriceDetails unifiedCheckoutData={unifiedCheckoutData} />
       </div>
       <div className="rounded-md bg-teal-900 md:rounded-b-xl md:rounded-t-none">
-        {unifiedCheckoutData.pricing.discount > 0 ? (
+        {unifiedCheckoutData.pricing.discount > 0 && (
           <h2 className="py-1 text-center text-lg font-semibold text-white md:py-2">
             {unifiedCheckoutData.pricing.discount}% Off
           </h2>
-        ) : (
-          <Separator />
         )}
       </div>
     </div>
