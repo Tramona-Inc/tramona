@@ -114,7 +114,7 @@ export default function RequestToBookPageMobileBottomCard({
                     <Button
                       variant="outline"
                       size="sm"
-                      className="text-sm tracking-tight"
+                      className="text-xs tracking-tight sm:text-sm"
                     >
                       Request To Book
                     </Button>
