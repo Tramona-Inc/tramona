@@ -115,7 +115,7 @@ export default function UnclaimedOfferCards({
 
   useEffect(() => {
     handlePageChange(1);
-  }, [mapBoundaries]);
+  }, [handlePageChange, mapBoundaries]);
 
   useEffect(() => {
     const page = Number(router.query.page) || 1;
@@ -206,9 +206,12 @@ export default function UnclaimedOfferCards({
           ) : showNoProperties ? (
             <div className="flex h-full w-full items-center justify-center">
               <div className="text-center">
-                <div className="text-lg font-bold">Find your perfect stay</div>
+                <div className="text-lg font-bold">
+                  Search for properties in the search bar above
+                </div>
                 <div className="mt-2 text-sm text-zinc-500">
-                  Search above to book properties
+                  Once you make a search, you will be able to see properties
+                  here
                 </div>
               </div>
             </div>
