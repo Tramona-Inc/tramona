@@ -25,21 +25,7 @@ import { useLoading } from "./UnclaimedMapLoadingContext";
 import { Badge } from "../ui/badge";
 import { Property } from "@/server/db/schema/tables/properties";
 
-// type Property =
-//   RouterOutputs["properties"]["getAllInfiniteScroll"]["data"][number];
-
-export type MapBoundary = {
-  north: number;
-  south: number;
-  east: number;
-  west: number;
-};
-
-export default function UnclaimedOfferCards({
-  mapBoundaries,
-}: {
-  mapBoundaries: MapBoundary | null;
-}): JSX.Element {
+export default function UnclaimedOfferCards(): JSX.Element {
   const { adjustedProperties } = useAdjustedProperties();
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
@@ -84,6 +70,7 @@ export default function UnclaimedOfferCards({
   const handlePageChange = useCallback(
     (page: number) => {
       // router.pathname.searchParams.set("page", page);
+      console.log("ran");
       setCurrentPage(page);
       void router.push(
         { pathname: router.pathname, query: { ...router.query, page } },
@@ -114,10 +101,6 @@ export default function UnclaimedOfferCards({
   }, [isLoading]);
 
   useEffect(() => {
-    handlePageChange(1);
-  }, [handlePageChange, mapBoundaries]);
-
-  useEffect(() => {
     const page = Number(router.query.page) || 1;
     setCurrentPage(page);
   }, [router.query.page]);
@@ -131,8 +114,7 @@ export default function UnclaimedOfferCards({
       <PaginationItem key={pageNum}>
         <PaginationLink
           href={`?page=${pageNum}`}
-          onClick={(e) => {
-            e.preventDefault();
+          onClick={() => {
             handlePageChange(pageNum);
           }}
           isActive={currentPage === pageNum}
@@ -431,10 +413,6 @@ function UnMatchedPropertyCard({
             </div>
           </div>
         </div>
-        {/* <div className="text-sm text-zinc-500"> */}
-        {/* {formatDateRange(offer.checkIn, offer.checkOut)} */}
-        {/* replace with check in check out'
-            </div> */}
         <div className="text-sm text-zinc-500">
           {plural(property.maxNumGuests, "Guest")}
         </div>
