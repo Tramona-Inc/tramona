@@ -43,14 +43,8 @@ export default function UnclaimedOfferCards(): JSX.Element {
     }
   }, [isDelayedLoading, adjustedProperties]);
 
-  // const allProperties = useMemo(() => {
-  //   return adjustedProperties?.pages.flatMap((page) => page.data) ?? [];
-  // }, [adjustedProperties]);
-
   const allProperties = useMemo(() => {
     return adjustedProperties?.pages;
-    // .flatMap((page) => page?.data || []) // Use optional chaining and fallback
-    // .filter(Boolean); // Filter out undefined values, if any
   }, [adjustedProperties]);
 
   const paginatedProperties = useMemo(() => {
