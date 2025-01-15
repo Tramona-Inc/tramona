@@ -1,42 +1,70 @@
-import {
-  Collapsible,
-  CollapsibleTrigger,
-  CollapsibleContent,
-} from "@/components/ui/collapsible";
-import { ChevronDown, DollarSign, Shield } from "lucide-react";
-import React from "react";
+import { Check, Clock, DollarSign, Shield } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 function PriceCardInformation() {
   return (
     <div className="mt-6 space-y-3">
-      <Collapsible>
-        <CollapsibleTrigger className="flex w-full items-center justify-between rounded-md p-2 text-left font-medium hover:bg-gray-100">
-          <div className="flex items-center gap-2">
-            <Shield className="h-5 w-5 text-green-600" />
-            <span className="text-green-600">Tramona Safety Guarantee</span>
-          </div>
-          <ChevronDown className="h-4 w-4 text-green-600" />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="pl-9 pt-2 text-muted-foreground">
-          Our safety guarantee ensures your peace of mind during your stay.
-        </CollapsibleContent>
-      </Collapsible>
-
-      <Collapsible>
-        <CollapsibleTrigger className="flex w-full items-center justify-between rounded-md p-2 text-left font-medium hover:bg-gray-100">
-          <div className="flex items-center gap-2">
-            <DollarSign className="h-5 w-5 text-green-600" />
-            <span className="text-green-600">
-              Lowest Fees Out of all the major Booking Platforms
+      {/* Payment Protection Card */}
+      <Card className="shadow-sm">
+        <CardHeader className="border-b border-[#00423620] pb-3 pt-3">
+          <CardTitle className="flex items-center gap-2 text-base text-[#004236]">
+            <Shield className="h-5 w-5" />
+            Payment Protection
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="pt-3 text-sm">
+          <p className="text-black">
+            All payments are held by Tramona until 24 hours after check-in{" "}
+            <span className="font-bold text-[#004236]">
+              to ensure your money is safe.
             </span>
-          </div>
-          <ChevronDown className="h-4 w-4 text-green-600" />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="pl-9 pt-2 text-muted-foreground">
-          We pride ourselves on offering the most competitive fees in the
-          industry.
-        </CollapsibleContent>
-      </Collapsible>
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* Why Tramona Card */}
+      <Card className="shadow-sm">
+        <CardHeader className="border-b border-[#00423620] pb-3 pt-3">
+          <CardTitle className="flex items-center gap-2 text-base text-[#004236]">
+            <DollarSign className="h-5 w-5" />
+            Why Tramona?
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="pt-3">
+          <ul className="space-y-3 text-sm">
+            <li className="flex items-start gap-3">
+              <Check className="mt-0.5 h-5 w-5 flex-shrink-0 text-[#004236]" />
+              <div>
+                <p className="text-black">
+                  <span className="font-bold">Lowest fees</span> out of all
+                  major booking platforms
+                </p>
+              </div>
+            </li>
+            <li className="flex items-start gap-3">
+              <Clock className="mt-0.5 h-5 w-5 flex-shrink-0 text-[#004236]" />
+              <div>
+                <p className="text-black">
+                  <span className="font-bold">
+                    Best customer support on the market
+                  </span>{" "}
+                  - 24/7 assistance and rebooking or instant money back
+                  guarantee
+                </p>
+              </div>
+            </li>
+            <li className="flex items-start gap-3">
+              <Shield className="mt-0.5 h-5 w-5 flex-shrink-0 text-[#004236]" />
+              <div>
+                <p className="text-black">
+                  <span className="font-bold">Money back guarantee</span> and
+                  urgent rebooking assistance
+                </p>
+              </div>
+            </li>
+          </ul>
+        </CardContent>
+      </Card>
     </div>
   );
 }

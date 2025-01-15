@@ -81,7 +81,11 @@ export const hostManageLinks = [
 
 export const hostAccountLinks = [
   { href: "/host/finances", title: "Earnings", icon: HandCoins },
-  { href: "/settings", title: "Settings", icon: SettingsIcon },
+  {
+    href: "/settings/personal-information",
+    title: "Settings",
+    icon: SettingsIcon,
+  },
 ];
 
 // ----------- HOST DESKTOP LINKS

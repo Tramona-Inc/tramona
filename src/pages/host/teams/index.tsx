@@ -15,10 +15,10 @@ import {
   Users,
   Check,
   X,
-  Trash2,
   Shield,
   ChevronDown,
   MoreVertical,
+  UserRoundMinusIcon,
 } from "lucide-react";
 import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
@@ -112,7 +112,7 @@ const roleDescriptions = {
       "All Listing Manager permissions",
       "View financial reports",
       "Modify overall pricing strategy",
-      "Manage team member access and permissions",
+      "Manage team member's access and permissions",
     ],
     cant: ["Access or modify payment information"],
   },
@@ -149,6 +149,11 @@ export default function Component() {
 
   const curTeam =
     hostProfile && hostTeams?.find((team) => team.id === currentHostTeamId);
+
+  const curRole =
+    hostProfile &&
+    curTeam?.members.find((member) => member.userId === hostProfile.userId)
+      ?.role;
 
   const updateRoleMutation = api.hostTeams.updateCoHostRole.useMutation();
 
@@ -248,7 +253,8 @@ export default function Component() {
               }}
               disabled={
                 updateRoleMutation.isLoading ||
-                member.userId === curTeam.ownerId
+                member.userId === curTeam.ownerId ||
+                (curRole !== "Admin Access" && curRole !== "Co-Host")
               }
             >
               <SelectTrigger className="w-48 pl-2">
@@ -279,44 +285,43 @@ export default function Component() {
                 )}
               </SelectContent>
             </Select>
-            {member.userId !== curTeam.ownerId && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  removeHostTeamMemberMutation
-                    .mutateAsync({
-                      memberId: member.userId,
-                      currentHostTeamId: curTeam.id,
-                    })
-                    .then(() => {
-                      toast({
-                        title: "Member removed",
-                        description:
-                          "The team member has been removed successfully",
-                      });
-                    })
-                    .catch((error) => {
-                      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                      if (error.data?.code === "FORBIDDEN") {
-                        toast({
-                          title:
-                            "You do not have permission to remove Co-hosts.",
-                          description:
-                            "Please contact your team owner to request access.",
-                        });
-                      } else {
-                        console.log(error);
-                        errorToast();
-                      }
+            <Button
+              variant="destructive"
+              size="icon"
+              onClick={() => {
+                removeHostTeamMemberMutation
+                  .mutateAsync({
+                    memberId: member.userId,
+                    currentHostTeamId: curTeam.id,
+                  })
+                  .then(() => {
+                    toast({
+                      title: "Member removed",
+                      description:
+                        "The team member has been removed successfully",
                     });
-                }}
-                disabled={removeHostTeamMemberMutation.isLoading}
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Remove
-              </Button>
-            )}
+                  })
+                  .catch((error) => {
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                    if (error.data?.code === "FORBIDDEN") {
+                      toast({
+                        title: "You do not have permission to remove Co-hosts.",
+                        description:
+                          "Please contact your team owner to request access.",
+                      });
+                    } else {
+                      console.log(error);
+                      errorToast();
+                    }
+                  });
+              }}
+              disabled={
+                removeHostTeamMemberMutation.isLoading ||
+                (curRole !== "Admin Access" && curRole !== "Co-Host")
+              }
+            >
+              <UserRoundMinusIcon className="mr-2 h-4 w-4" />
+            </Button>
           </div>
         </div>
       ))}

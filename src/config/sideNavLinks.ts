@@ -57,7 +57,7 @@ export const hostMobileNavLinks = [
 ];
 
 export const guestMobileNavLinks = [
-  { href: "/", name: "Concierge", icon: UserIcon },
+  { href: "/chat-with-admin", name: "Concierge", icon: UserIcon },
   { href: "/", name: "Dashboard", icon: HomeIcon },
   { href: "#", name: "More", icon: MoreHorizontal },
 ];

@@ -49,7 +49,7 @@ export default function UnclaimedMap() {
 
   return (
     <LoadingProvider>
-      <div className="w-full">
+      <div className="w-full px-4 sm:px-16">
         <div className={`w-full ${showMap ? "hidden" : "w-full"}`}>
           {isSearching ? (
             <div className="flex flex-col items-center justify-center py-12">

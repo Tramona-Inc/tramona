@@ -40,8 +40,10 @@ export default function MessagesPopover({
 
   const { mutateAsync: createOrRetrieveConversation } =
     api.messages.createConversationWithAdmin.useMutation();
+
   const { mutateAsync: createOrRetrieveConversationFromGuest } =
     api.messages.createConversationWithAdminFromGuest.useMutation();
+
   const { mutateAsync: createTempUserForGuest } =
     api.auth.createTempUserForGuest.useMutation();
   const { data: conversationIdAndTempUserId } =
@@ -67,30 +69,34 @@ export default function MessagesPopover({
 
   useEffect(() => {
     if (!session && typeof window !== "undefined") {
-      const storedToken = localStorage.getItem("tempToken");
-      if (storedToken) {
-        setTempToken(storedToken);
-      } else {
-        const uuid = crypto.randomUUID();
-        setTempToken(uuid);
-      }
-    }
-  }, [session]);
-
-  useEffect(() => {
-    if (tempToken && !session) {
+      let storedToken = localStorage.getItem("tempToken");
       const tempUserExists = localStorage.getItem("tempUserCreated");
+
+      if (!storedToken || !tempUserExists) {
+        const newToken = crypto.randomUUID();
+        storedToken = newToken;
+        localStorage.setItem("tempToken", newToken);
+      }
+
+      setTempToken(storedToken);
+
+      // Check if temp user exists in the database
       if (!tempUserExists) {
         void createTempUserForGuest({
           email: "temp_user@gmail.com",
           isBurner: true,
-          sessionToken: tempToken,
-        }).then(() => {
-          localStorage.setItem("tempUserCreated", "true");
-        });
+          sessionToken: storedToken,
+        })
+          .then(() => {
+            localStorage.setItem("tempUserCreated", "true");
+          })
+          .catch((error) => {
+            console.error("Failed to create temporary user:", error);
+            localStorage.removeItem("tempToken"); // Clear invalid token
+          });
       }
     }
-  }, [tempToken, session, createTempUserForGuest]);
+  }, [session, createTempUserForGuest]);
 
   useEffect(() => {
     // Ensure having a valid user ID before making the call (the session is loaded or guest has tempToken)

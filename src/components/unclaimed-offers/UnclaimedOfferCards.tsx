@@ -88,7 +88,7 @@ export default function UnclaimedOfferCards({
       void router.push(
         { pathname: router.pathname, query: { ...router.query, page } },
         undefined,
-        { shallow: true },
+        { shallow: false },
       );
     },
     [router],
@@ -115,7 +115,7 @@ export default function UnclaimedOfferCards({
 
   useEffect(() => {
     handlePageChange(1);
-  }, [mapBoundaries]);
+  }, [handlePageChange, mapBoundaries]);
 
   useEffect(() => {
     const page = Number(router.query.page) || 1;
@@ -206,9 +206,12 @@ export default function UnclaimedOfferCards({
           ) : showNoProperties ? (
             <div className="flex h-full w-full items-center justify-center">
               <div className="text-center">
-                <div className="text-lg font-bold">Find your perfect stay</div>
+                <div className="text-lg font-bold">
+                  Search for properties in the search bar above
+                </div>
                 <div className="mt-2 text-sm text-zinc-500">
-                  Search above to book properties
+                  Once you make a search, you will be able to see properties
+                  here
                 </div>
               </div>
             </div>
@@ -313,12 +316,12 @@ function UnMatchedPropertyCard({
   };
 
   const isAirbnb = property.originalListingPlatform === "Airbnb";
-  const checkIn = formatDateMonthDayYear(
-    new Date(router.query.checkIn as string),
-  );
-  const checkOut = formatDateMonthDayYear(
-    new Date(router.query.checkOut as string),
-  );
+  const checkIn = router.query.checkIn
+    ? formatDateMonthDayYear(new Date(router.query.checkIn as string))
+    : null;
+  const checkOut = router.query.checkOut
+    ? formatDateMonthDayYear(new Date(router.query.checkOut as string))
+    : null;
   const numGuests = 3;
   const link = isAirbnb
     ? `https://airbnb.com/rooms/${property.originalListingId}`
