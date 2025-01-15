@@ -1,12 +1,6 @@
 import { getCancellationPolicyDescription } from "@/config/getCancellationPolicyDescription";
 import { UnifiedCheckoutData } from "../types";
-import {
-  Dialog,
-  DialogContent,
-  DialogTrigger,
-  DialogOverlay,
-  DialogPortal,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
 export default function CancellationPolicy({
   unifiedCheckoutData,
@@ -29,14 +23,11 @@ export default function CancellationPolicy({
         <DialogTrigger className="py-1 text-sm font-semibold underline underline-offset-2">
           Full policy
         </DialogTrigger>
-        <DialogPortal>
-          <DialogOverlay className="bg-white" />
-          <DialogContent className="">
-            <div className="py-12 text-center">
-              {getCancellationPolicyDescription(policy)}
-            </div>
-          </DialogContent>
-        </DialogPortal>
+        <DialogContent className="">
+          <div className="py-12 text-center">
+            {getCancellationPolicyDescription(policy)}
+          </div>
+        </DialogContent>
       </Dialog>
     </div>
   );
