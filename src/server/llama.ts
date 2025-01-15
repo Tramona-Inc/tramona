@@ -5,15 +5,17 @@ const apiToken = process.env.LLAMA_API_KEY;
 const llamaAPI = new LlamaAI(apiToken);
 
 interface LlamaResponse {
-    choices: {
-        message: {
-            content: string;
-            function_call?: {
-                name: string;
-                arguments: string;
+    data: {
+        choices: {
+            message: {
+                content: string;
+                function_call?: {
+                    name: string;
+                    arguments: string;
+                };
             };
-        };
-    }[];
+        }[];
+    }
 }
 
 interface ContentModerationResult {
@@ -36,21 +38,10 @@ export class LlamaClient {
     async moderateContent(message: string): Promise<ContentModerationResult> {
         try {
             //debugging purposes
-            console.log("Llama checking message")
+            console.log("Llama checking message, llama.ts")
 
             const apiRequestJson = {
                 "model": "llama3.1-70b",
-                "messages": [
-                    {
-                        "role": "system",
-                        "content": "You are a content moderator."
-                    },
-                    {
-                        "role": "user",
-                        "content": message
-                    }
-                ],
-
                 "functions": [
                     {
                         "name": "content_moderation",
@@ -85,14 +76,28 @@ export class LlamaClient {
                         }
                     }
                 ],
-                "function_call": "content_moderation",
+                "function_call": { "name": "content_moderation" },
+                "messages": [
+                    {
+                        "role": "system",
+                        "content": "You are a content moderator checking this"
+                    },
+                    {
+                        "role": "user",
+                        "content": message
+                    }
+                ],
             };
 
             const response = await llamaAPI.run(apiRequestJson);
-            const data = response.data as LlamaResponse;
+
+            // debugging purposes
+            console.log("llama.ts: Llama response: ", response['choices'][0]['message']);
+
+            const data = response.data as LlamaResponse["data"];
 
             // Add null checks and provide fallback
-            if (!data.choices?.length) {
+            if (!data?.choices?.length) {
                 throw new Error("Invalid response from LLaMA API");
             }
 
@@ -100,7 +105,8 @@ export class LlamaClient {
                 data.choices[0]?.message?.function_call?.arguments ?? "{}"
             );
 
-            console.log("Llama result:", result);
+            // debugging purposes
+            console.log("llama.ts: Llama result: ", result);
 
             return result as ContentModerationResult;
         } catch (error) {
