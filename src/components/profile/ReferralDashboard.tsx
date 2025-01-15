@@ -18,7 +18,7 @@ export default function ReferralDashboard() {
   if (isLoading) return <Spinner />;
 
   return (
-    <div className="flex min-h-screen flex-col items-center bg-gray-50 px-4 sm:px-6 lg:px-8">
+    <div className="flex min-h-screen flex-col items-center bg-gray-50 px-4 pb-20 sm:px-6 lg:px-8">
       <div className="w-full max-w-6xl p-4 sm:p-8">
         <div className="mb-8 flex flex-col items-start justify-between lg:flex-row">
           <div>

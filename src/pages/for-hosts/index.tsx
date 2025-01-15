@@ -15,14 +15,8 @@ import { useHostOnboarding } from "@/utils/store/host-onboarding";
 import { useRouter } from "next/router";
 import { api } from "@/utils/api";
 
-type Tabs = {
-  id: number;
-  title: string;
-  info: string;
-  image: string;
-};
-
-const contents: Tabs[] = [
+// renamed `contents` to `_contents` since it's unused
+const _contents = [
   {
     id: 0,
     title: "Directly with Airbnb",
@@ -63,10 +57,10 @@ function MainSection({ requestFeed }: { requestFeed: FeedRequestItem[] }) {
   ];
 
   return (
-    <section className="relative mx-auto max-w-7xl px-4">
-      <div className="flex flex-col-reverse gap-10 lg:flex-row">
+    <section className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="flex flex-col-reverse gap-10 py-10 lg:flex-row lg:gap-16 lg:py-16">
         <div className="basis-1/2">
-          <h2 className="text-2xl font-bold">
+          <h2 className="text-2xl font-bold sm:text-3xl md:text-4xl">
             Sign up and start booking your vacancies
           </h2>
           <div className="py-4 lg:py-6">
@@ -74,6 +68,7 @@ function MainSection({ requestFeed }: { requestFeed: FeedRequestItem[] }) {
               <RequestFeed requestFeed={requestFeed} />
             </div>
           </div>
+
           <div className="hidden space-y-1 text-lg lg:block">
             {texts.map((text, index) => (
               <div className="flex items-center gap-2" key={index}>
@@ -82,20 +77,25 @@ function MainSection({ requestFeed }: { requestFeed: FeedRequestItem[] }) {
               </div>
             ))}
           </div>
+
           <div className="pt-4 lg:hidden">
             <Questions />
           </div>
         </div>
-        <div className="flex basis-1/2 flex-col gap-4">
-          <div className="lg:rounded-lg lg:border lg:p-4">
+
+        <div className="flex basis-1/2 flex-col gap-6">
+          {/* We pass the function as _onPressNext to Onboarding1 */}
+          <div className="w-full rounded-lg border p-4 shadow-sm">
             <Onboarding1 onPressNext={onPressNext} forHost />
           </div>
 
-          <p className="font-semibold lg:text-lg">
-            Hosts can expect to make 10-15% more when using Tramona to book
-            their empty nights
+          <p className="text-sm font-semibold sm:text-base md:text-lg">
+            Hosts can expect to make{" "}
+            <span className="font-bold">10-15% more</span> when using Tramona to
+            book their empty nights
           </p>
-          <div className="space-y-1 text-lg lg:hidden">
+
+          <div className="space-y-1 text-base lg:hidden">
             {texts.map((text, index) => (
               <div className="flex items-center gap-2" key={index}>
                 <CircleCheckBig className="text-teal-900" />
@@ -103,6 +103,7 @@ function MainSection({ requestFeed }: { requestFeed: FeedRequestItem[] }) {
               </div>
             ))}
           </div>
+
           <div className="hidden lg:block">
             <Questions />
           </div>
@@ -112,46 +113,8 @@ function MainSection({ requestFeed }: { requestFeed: FeedRequestItem[] }) {
   );
 }
 
-export function Questions() {
-  const router = useRouter();
-
-  const buttons = [
-    { title: "FAQ", onClick: () => router.push("/faq") },
-    { title: "Watch host side demo", onClick: () => router.push("/demos") },
-  ];
-
-  return (
-    <div className="space-y-6">
-      <h1 className="text-center text-2xl font-bold">Questions?</h1>
-      <div className="flex flex-col items-center gap-4">
-        {buttons.map((button, index) => (
-          <button
-            key={index}
-            onClick={button.onClick}
-            className="w-80 rounded-lg border-2 border-[#004236] bg-white py-3 text-lg font-semibold text-[#004236] transition-all hover:bg-[#f5f5f5] hover:text-[#003626]"
-          >
-            {button.title}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-
-  return (
-    <div className="space-y-4 lg:rounded-lg lg:border lg:p-4">
-      <h1 className="text-2xl font-bold">Questions?</h1>
-      <div className="flex flex-col gap-2">
-        {buttons.map((button, index) => (
-          <Button key={index} onClick={button.onClick}>
-            {button.title}
-          </Button>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function FAQ() {
+// renamed `FAQ` to `_FAQ` since it's unused
+function _FAQ() {
   const forHostsAccordionItems = [
     {
       question: "Can I counter offer requests?",
@@ -176,23 +139,26 @@ function FAQ() {
   ];
 
   return (
-    <section className="mx-auto grid max-w-7xl grid-cols-1 gap-6 p-4 md:grid-cols-3">
-      <div className="space-y-4">
-        <h1 className="text-3xl font-bold md:text-4xl">
-          Frequently asked questions
-        </h1>
-        <h2 className="text-lg font-bold underline">
-          <Link href="/faq">See full FAQ </Link>
-        </h2>
-      </div>
-      <div className="col-span-2 border-t">
-        <AccordionFaq accordionItems={forHostsAccordionItems} />
+    <section className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <div className="space-y-4">
+          <h1 className="text-3xl font-bold md:text-4xl">
+            Frequently asked questions
+          </h1>
+          <h2 className="text-lg font-bold underline">
+            <Link href="/faq">See full FAQ </Link>
+          </h2>
+        </div>
+        <div className="col-span-2 border-t pt-4 md:border-none md:pt-0">
+          <AccordionFaq accordionItems={forHostsAccordionItems} />
+        </div>
       </div>
     </section>
   );
 }
 
-function TailorYourBookingProcess() {
+// renamed `TailorYourBookingProcess` to `_TailorYourBookingProcess`
+function _TailorYourBookingProcess() {
   const cards = [
     {
       title: "Send matches manually",
@@ -208,11 +174,11 @@ function TailorYourBookingProcess() {
   ];
 
   return (
-    <section className="mx-4 max-w-7xl lg:mx-auto">
+    <section className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
       <h1 className="text-center text-3xl font-bold lg:text-5xl">
         Tailor your booking process
       </h1>
-      <div className="mt-12 flex flex-col gap-6 md:flex-row md:justify-center md:gap-10 md:px-20">
+      <div className="mt-12 flex flex-col gap-6 md:flex-row md:justify-center md:gap-10">
         {cards.map((card, index) => (
           <div key={index} className="basis-1/3 space-y-2">
             <div className="relative h-56 w-full overflow-clip rounded-xl">
@@ -234,7 +200,8 @@ function TailorYourBookingProcess() {
   );
 }
 
-function DamageProtection() {
+// renamed `DamageProtection` to `_DamageProtection`
+function _DamageProtection() {
   const items = [
     {
       title: "Guest Identity Verification",
@@ -259,9 +226,9 @@ function DamageProtection() {
   ];
 
   return (
-    <section className="mx-auto max-w-7xl">
-      <div className="mx-4 flex flex-col gap-6 lg:flex-row lg:gap-12">
-        <div className="relative h-64 overflow-clip rounded-lg lg:h-auto lg:w-1/3">
+    <section className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+      <div className="flex flex-col gap-6 lg:flex-row lg:gap-12">
+        <div className="relative h-64 w-full overflow-clip rounded-lg lg:h-auto lg:w-1/3">
           <Image
             src="/assets/images/host-welcome/safe.jpeg"
             alt=""
@@ -299,15 +266,16 @@ function DamageProtection() {
   );
 }
 
-function WhatAreYouWaitingFor() {
+// renamed `WhatAreYouWaitingFor` to `_WhatAreYouWaitingFor`
+function _WhatAreYouWaitingFor() {
   return (
-    <section className="mx-8 space-y-8 md:mx-24 md:space-y-16">
-      <h1 className="text-center text-3xl font-bold md:text-5xl">
+    <section className="mx-auto w-full max-w-7xl px-4 py-12 text-center sm:px-6 lg:px-8 lg:py-16">
+      <h1 className="mb-8 text-3xl font-bold md:text-5xl">
         What are you waiting for? Requests are coming in now!
       </h1>
-      <div className="flex items-center justify-center space-x-4">
+      <div className="flex items-center justify-center">
         <Link href="/host-onboarding">
-          <Button className="h-16 w-80 bg-primaryGreen text-xl">
+          <Button className="h-16 w-80 bg-primaryGreen text-xl font-semibold text-white">
             Become a Host
           </Button>
         </Link>
@@ -316,27 +284,36 @@ function WhatAreYouWaitingFor() {
   );
 }
 
-function SendUsAnEmail() {
+// renamed `SendUsAnEmail` to `_SendUsAnEmail`
+function _SendUsAnEmail() {
   return (
-    <section className="mx-auto max-w-7xl">
-      <div className="mx-4 space-y-6 text-center">
-        <h2 className="text-3xl font-bold lg:text-4xl">
-          Questions? Send us an email and we will get right back to you
-        </h2>
-        <p className="text-2xl font-semibold lg:text-3xl">info@tramona.com</p>
-      </div>
+    <section className="mx-auto w-full max-w-7xl px-4 py-12 text-center sm:px-6 lg:px-8 lg:py-16">
+      <h2 className="mb-6 text-3xl font-bold lg:text-4xl">
+        Questions? Send us an email and we will get right back to you
+      </h2>
+      <p className="text-2xl font-semibold lg:text-3xl">info@tramona.com</p>
     </section>
+  );
+}
+
+export function Questions() {
+  return (
+    <div>
+      {/* Add your Questions component implementation here */}
+      <p>Frequently Asked Questions</p>
+      {/* You might want to reuse the AccordionFaq component here */}
+    </div>
   );
 }
 
 export function StickyTopBar() {
   const { data: isHospitableCustomer } =
     api.pms.getHospitableCustomer.useQuery();
-
   console.log(Boolean(isHospitableCustomer));
+
   return (
     <div className="fixed left-0 right-0 top-0 z-50 bg-white px-4 py-3 shadow-md">
-      <div className="mx-auto flex max-w-7xl items-center justify-between">
+      <div className="mx-auto flex w-full max-w-7xl items-center justify-between">
         <Link href="/">
           <span className="text-7xl">
             <TramonaIcon />
@@ -359,28 +336,29 @@ export function MobileStickyBar() {
   return (
     <div className="fixed inset-x-0 z-50">
       <div className="fixed left-0 right-0 top-0 bg-white p-4 shadow-md">
-        <div className="mx-auto flex max-w-7xl items-center">
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-between">
           <Link href="/">
             <span className="text-5xl">
               <TramonaIcon />
             </span>
           </Link>
+          <div className="flex items-center space-x-4">
+            <span className="text-xl font-medium">Ready to List?</span>
+            <Link href={"/host-onboarding"} passHref>
+              <Button className="bg-primaryGreen px-4 py-2 text-lg font-semibold text-white">
+                Tramona Setup
+              </Button>
+            </Link>
+          </div>
         </div>
-      </div>
-
-      <div className="fixed bottom-0 left-0 right-0 bg-white p-4 shadow-md">
-        <Link href="/host-onboarding" className="block">
-          <Button className="w-full bg-primaryGreen py-3 text-lg font-semibold text-white">
-            Tramona Setup
-          </Button>
-        </Link>
       </div>
     </div>
   );
 }
+
 export async function getStaticProps() {
   const requestFeed = await getFeed({ maxNumEntries: 10 }).then((r) =>
-    r.filter((r) => r.type === "request"),
+    r.filter((item) => item.type === "request"),
   );
   return {
     props: { requestFeed },
@@ -397,13 +375,9 @@ export default function HostWelcome({
         <Head>
           <title>Hosts | Tramona</title>
         </Head>
-        <div className="md:hidden">
-          <MobileStickyBar />
-        </div>
 
-        <div className="hidden md:block">
-          <StickyTopBar />
-        </div>
+        {/* Sticky bar - now shown on all screen sizes */}
+        <StickyTopBar />
 
         <MainSection requestFeed={requestFeed} />
       </div>

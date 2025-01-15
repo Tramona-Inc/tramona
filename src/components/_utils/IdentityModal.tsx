@@ -6,16 +6,13 @@ import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
 import { useStripe } from "@/utils/stripe-client";
 
-const IdentityModal = ({ isPrimary = false }: { isPrimary?: boolean }) => {
+const IdentityModal = ({}: { isPrimary?: boolean }) => {
   const stripePromise = useStripe();
-
   const [stripe, setStripe] = useState<Stripe | null>(null);
   const { setVerificationStatus, setShowVerificationBanner } =
     useVerification();
   const [verificationAttempted, setVerificationAttempted] = useState(false);
-
   const { data: users } = api.users.myVerificationStatus.useQuery();
-
   const { update } = useSession();
 
   useEffect(() => {
@@ -38,23 +35,21 @@ const IdentityModal = ({ isPrimary = false }: { isPrimary?: boolean }) => {
     }
   }, [
     verificationAttempted,
-    ,
     users,
     setVerificationStatus,
     setShowVerificationBanner,
   ]);
 
   const { data } = api.stripe.createVerificationSession.useQuery();
+
   const handleClick = async () => {
     const stripe = await stripePromise;
-
     if (!stripe) {
       console.error(
         "Stripe.js hasn't loaded yet. Make sure to disable the button until Stripe.js has loaded.",
       );
       return;
     }
-
     const { error } = await stripe.verifyIdentity(data ?? "");
     if (error) {
       console.log("[error]", error);
@@ -69,10 +64,10 @@ const IdentityModal = ({ isPrimary = false }: { isPrimary?: boolean }) => {
     <VerificationProvider>
       <Button
         role="link"
-        variant={isPrimary ? "primary" : "secondary"}
+        variant="primary"
         disabled={!stripe}
         onClick={handleClick}
-        className="w-full font-semibold"
+        className="h-auto min-h-12 w-full whitespace-normal break-words px-3 py-2.5 text-sm font-semibold leading-tight sm:text-base"
       >
         Confirm your identity
       </Button>
