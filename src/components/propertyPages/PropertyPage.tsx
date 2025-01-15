@@ -152,6 +152,7 @@ export default function PropertyPage({
               src={firstImageUrl}
               alt=""
               fill
+              quality={100}
               className="object-cover object-center"
             />
           </DialogTriggerNoDrawer>
@@ -172,6 +173,7 @@ export default function PropertyPage({
                     alt=""
                     fill
                     className="object-cover object-center"
+                    quality={100}
                   />
                 </DialogTriggerNoDrawer>
               </div>
