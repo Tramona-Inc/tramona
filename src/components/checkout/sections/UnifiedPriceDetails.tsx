@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/tooltip";
 import { InfoIcon } from "lucide-react";
 import type { UnifiedCheckoutData } from "../types";
+import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 export function UnifiedPriceDetails({
   unifiedCheckoutData,
@@ -105,11 +107,73 @@ export function UnifiedPriceDetails({
           <p>{formatCurrency(paymentBreakdown.totalTripAmount)}</p>
         </div>
       </div>
-      <div className="md:hidden">
-        <p className="text-base font-bold">
-          {formatCurrency(paymentBreakdown.totalTripAmount)}
-        </p>
-        <p className="text-muted-foreground"> Total after taxes</p>
+      <div className="flex flex-row justify-between md:hidden">
+        <div>
+          <p className="text-base font-bold">
+            {formatCurrency(paymentBreakdown.totalTripAmount)}
+          </p>
+          <p className="text-muted-foreground"> Total after taxes</p>
+        </div>
+        <Dialog>
+          <DialogTrigger>
+            <Button variant="secondary" size="sm">
+              Details
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <div className="space-y-4">
+              <p className="w-full text-center text-lg font-bold">
+                Price Details
+              </p>
+              {items.map((item, index) => (
+                <div
+                  className="flex items-center justify-between text-sm font-semibold"
+                  key={index}
+                >
+                  <p className="underline">{item.title}</p>
+                  <p>{item.price}</p>
+                </div>
+              ))}
+              {unifiedCheckoutData.property.currentSecurityDeposit > 0 && (
+                <div className="flex items-center justify-between text-sm font-light">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger className="flex flex-col">
+                        <div className="flex flex-row items-center gap-x-1 font-semibold">
+                          Security deposit <InfoIcon size={13} />
+                        </div>
+                        <p className="text-xs tracking-tight">
+                          Temporary hold, not collected upfront.
+                        </p>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="max-w-lg">
+                          No immediate charge: The security deposit is an
+                          authorization hold facilitated by Tramona, not an
+                          actual charge to your card. We act as the intermediary
+                          to ensure fairness and security. Unless the host files
+                          a claim for damages or extra charges after your stay,
+                          Tramona will release the hold back to you
+                          automatically.
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <p>
+                    {formatCurrency(
+                      unifiedCheckoutData.property.currentSecurityDeposit,
+                    )}
+                  </p>
+                </div>
+              )}
+              <Separator />
+              <div className="flex items-center justify-between pb-4 font-bold">
+                <p>Total (USD)</p>
+                <p>{formatCurrency(paymentBreakdown.totalTripAmount)}</p>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </>
   );
