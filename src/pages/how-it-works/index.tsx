@@ -56,7 +56,7 @@ export default function Page() {
             </div>
           </section>
           <h1 className="mb-12 mt-12 text-center text-2xl font-semibold">
-              Sign up now to start booking your empty nights
+            Sign up now to start booking your empty nights
           </h1>
           <div className="w-full bg-[#FAF9F6] py-8">
             <div className="mx-auto max-w-screen-xl space-y-6">
@@ -306,9 +306,9 @@ export default function Page() {
 
           <div className="mx-0 flex max-w-full justify-center space-y-4 px-4 lg:mx-4 lg:mt-16 lg:flex lg:space-y-8">
             {useIsSm() ? (
-              <MobileTestimonialCarousel testimonials={howItWorksTestimonals}/>
+              <MobileTestimonialCarousel testimonials={howItWorksTestimonals} />
             ) : (
-              <TestimonialCarousel testimonials={howItWorksTestimonals}/>
+              <TestimonialCarousel testimonials={howItWorksTestimonals} />
             )}
           </div>
 
