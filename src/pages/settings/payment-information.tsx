@@ -31,12 +31,9 @@ export default function PaymentInformation() {
 
   return (
     <SettingsLayout>
-      <div className="mx-auto min-h-screen max-w-4xl space-y-5 lg:my-8 lg:min-h-screen-minus-header-n-footer">
+      <div className="mx-auto min-h-screen max-w-4xl space-y-5 lg:min-h-screen-minus-header-n-footer xl:my-8">
         <div className="space-y-4 rounded-lg border bg-white p-4">
-          <Link
-            href="/settings/personal-information"
-            className="inline-block lg:hidden"
-          >
+          <Link href="/settings" className="inline-block sm:hidden">
             <ChevronLeft />
           </Link>
           <h2 className="text-lg font-bold">Payment Method</h2>

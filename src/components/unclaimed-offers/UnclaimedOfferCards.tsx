@@ -88,7 +88,6 @@ export default function UnclaimedOfferCards(): JSX.Element {
         setIsDelayedLoading(false);
       }, 1000);
     }
-
     return () => {
       clearTimeout(timer);
     };
