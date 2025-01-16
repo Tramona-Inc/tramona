@@ -32,7 +32,7 @@ export default function UnclaimedOfferCards(): JSX.Element {
   const itemsPerPage = 36;
   const { data: session } = useSession();
   const { isLoading } = useLoading();
-  const [isDelayedLoading, setIsDelayedLoading] = useState(false);
+  const [isDelayedLoading, setIsDelayedLoading] = useState(true);
   const [showNoProperties, setShowNoProperties] = useState(false);
 
   useEffect(() => {
@@ -76,21 +76,21 @@ export default function UnclaimedOfferCards(): JSX.Element {
   );
 
   useEffect(() => {
-    // let timer: NodeJS.Timeout;
-    // if (isLoading) {
-    //   setIsDelayedLoading(true);
-    //   setShowNoProperties(false);
-    //   timer = setTimeout(() => {
-    //     setIsDelayedLoading(false);
-    //   }, 1000);
-    // } else {
-    //   timer = setTimeout(() => {
-    //     setIsDelayedLoading(false);
-    //   }, 1000);
-    // }
-    // return () => {
-    //   clearTimeout(timer);
-    // };
+    let timer: NodeJS.Timeout;
+    if (isLoading) {
+      setIsDelayedLoading(true);
+      setShowNoProperties(false);
+      timer = setTimeout(() => {
+        setIsDelayedLoading(false);
+      }, 1000);
+    } else {
+      timer = setTimeout(() => {
+        setIsDelayedLoading(false);
+      }, 1000);
+    }
+    return () => {
+      clearTimeout(timer);
+    };
   }, [isLoading]);
 
   useEffect(() => {
