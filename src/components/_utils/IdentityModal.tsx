@@ -72,7 +72,7 @@ const IdentityModal = ({ isPrimary = false }: { isPrimary?: boolean }) => {
         variant={isPrimary ? "primary" : "secondary"}
         disabled={!stripe}
         onClick={handleClick}
-        className="w-full font-semibold"
+        className="px-3 text-xs font-semibold md:text-base"
       >
         Confirm your identity
       </Button>
