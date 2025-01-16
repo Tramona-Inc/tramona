@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
 import { formatCurrency, formatDateMonthDayYear, plural } from "@/utils/utils";
-import { Star, ChevronLeft, ChevronRight, StarIcon } from "lucide-react";
+import { ChevronLeft, ChevronRight, StarIcon } from "lucide-react";
 import { Skeleton } from "../ui/skeleton";
 import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useSession } from "next-auth/react";
@@ -108,7 +108,8 @@ export default function UnclaimedOfferCards(): JSX.Element {
       <PaginationItem key={pageNum}>
         <PaginationLink
           href={`?page=${pageNum}`}
-          onClick={() => {
+          onClick={(e) => {
+            e.preventDefault();
             handlePageChange(pageNum);
           }}
           isActive={currentPage === pageNum}
