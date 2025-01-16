@@ -109,7 +109,7 @@ export default function ChatInput({
           userId: session.user.id,
           confidence: moderationResult.result.confidence,
           message: values.message,
-          violationType: moderationResult.result.violationType ?? "UNKNOWN",
+          violationType: moderationResult.result.violationType ?? "NONE",
           reason: moderationResult.result.reason ?? "",
           createdAt: new Date(),
         };

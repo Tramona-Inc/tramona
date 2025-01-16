@@ -75,7 +75,7 @@ export const flaggedMessages = pgTable(
     }),
     confidence: real("confidence").notNull(), // Change from decimal to float
     violationType: varchar("violation_type", {
-      enum: ["OFF_PLATFORM_BOOKING", "CONTACT_INFO", "INAPPROPRIATE", "UNKNOWN"], // Ensure UNKNOWN is included
+      enum: ["OFF_PLATFORM_BOOKING", "CONTACT_INFO", "INAPPROPRIATE", "NONE"], // Ensure NONE is included
     }).notNull(),
     message: varchar("message", { length: 1500 }).notNull(),
     reason: text("reason"),

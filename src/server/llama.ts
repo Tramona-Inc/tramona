@@ -5,23 +5,19 @@ const apiToken = process.env.LLAMA_API_KEY;
 const llamaAPI = new LlamaAI(apiToken);
 
 interface LlamaResponse {
-    data: {
-        choices: {
-            message: {
-                content: string;
-                function_call?: {
-                    name: string;
-                    arguments: string;
-                };
-            };
-        }[];
-    }
-}
+    message: {
+        content: string;
+        function_call?: {
+            name: string;
+            arguments: string;
+        };
+    };
+}[];
 
 interface ContentModerationResult {
     isAppropriate: boolean;
     confidence: number;
-    violationType?: "OFF_PLATFORM_BOOKING" | "CONTACT_INFO" | "INAPPROPRIATE" | "UNKNOWN";
+    violationType?: "OFF_PLATFORM_BOOKING" | "CONTACT_INFO" | "INAPPROPRIATE" | "NONE";
     reason?: string;
 }
 
@@ -92,26 +88,59 @@ export class LlamaClient {
             const response = await llamaAPI.run(apiRequestJson);
 
             // debugging purposes
+            // should be something like this:
+            // {
+            //     "role": "system",
+            //     "content": null,
+            //     "function_call": {
+            //       "name": "content_moderation",
+            //       "arguments": {
+            //         "isAppropriate": false,
+            //         "confidence": 0.85,
+            //         "violationType": "OFF_PLATFORM_BOOKING",
+            //         "reason": "Shared email and number and attempted off-platform booking."
+            //       }
+            //     }
+            //   }
             console.log("llama.ts: Llama response: ", response['choices'][0]['message']);
 
-            const data = response.data as LlamaResponse["data"];
+            const data = response.data as LlamaResponse["message"];
 
-            // Add null checks and provide fallback
-            if (!data?.choices?.length) {
-                throw new Error("Invalid response from LLaMA API");
+            // Add null checks and return a 
+            if (!data?.function_call) {
+                console.error("LLaMA API Returned null");
+                return {
+                    "isAppropriate": true,
+                    "confidence": 0.85,
+                    "violationType": "NONE",
+                    "reason": "Llama API failed to return"
+                } as ContentModerationResult;
             }
 
             const result = JSON.parse(
-                data.choices[0]?.message?.function_call?.arguments ?? "{}"
+                data.function_call?.arguments ?? "{}"
             );
 
             // debugging purposes
+            // should be something like this:
+            // {
+            //    "isAppropriate": false,
+            //    "confidence": 0.85,
+            //    "violationType": "OFF_PLATFORM_BOOKING",
+            //    "reason": "Shared email and number and attempted off-platform booking."
+            // }
             console.log("llama.ts: Llama result: ", result);
 
             return result as ContentModerationResult;
+
         } catch (error) {
             console.error("LLaMA API Error:", error);
-            throw new Error("Failed to moderate content");
+            return {
+                "isAppropriate": true,
+                "confidence": 0.85,
+                "violationType": "NONE",
+                "reason": "Llama API failed to return"
+            } as ContentModerationResult;
         }
     }
 }
