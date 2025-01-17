@@ -1,6 +1,7 @@
 import { type MessageDbType } from "@/types/supabase.message";
 import { api } from "@/utils/api";
 import {
+  Conversations,
   useConversation,
   type Conversation,
 } from "@/utils/store/conversations";
@@ -17,6 +18,7 @@ import { SidebarConversation } from "./SidebarConversation";
 import { Button } from "../ui/button";
 import { MessageSquare } from "lucide-react";
 import { useRouter } from "next/router";
+import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 
 export function MessageConversation({
   conversation,
@@ -96,22 +98,33 @@ export function MessageConversation({
 export type SidebarProps = {
   selectedConversation: Conversation | null;
   setSelected: (arg0: Conversation) => void;
+  fetchedConversations: Conversations | [] | undefined;
+  isLoading: boolean;
+  refetch: () => void;
 };
 
 export default function MessagesSidebar({
   selectedConversation,
   setSelected,
+  fetchedConversations,
+  isLoading,
+  refetch,
 }: SidebarProps) {
   const [showAllMsgs, setShowAllMsgs] = useState(true);
-
+  const { currentHostTeamId } = useHostTeamStore();
   // Fetch only once on mount
-  const {
-    data: fetchedConversations,
-    isLoading,
-    refetch,
-  } = api.messages.getConversations.useQuery(undefined, {
-    refetchOnWindowFocus: false,
-  });
+  // const {
+  //   data: fetchedConversations,
+  //   isLoading,
+  //   refetch,
+  // } = api.messages.getConversations.useQuery(
+  //   {
+  //     hostTeamId: currentHostTeamId,
+  //   },
+  //   {
+  //     refetchOnWindowFocus: false,
+  //   },
+  // );
 
   const conversations = useConversation((state) => state.conversationList);
 

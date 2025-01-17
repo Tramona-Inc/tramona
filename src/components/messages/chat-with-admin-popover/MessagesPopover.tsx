@@ -259,15 +259,15 @@ export default function MessagesPopover({
     resolver: zodResolver(formSchema),
   });
 
-  useEffect(() => {
-    if (isHostOnboarding) {
-      // Set a default message if onboarding is true
-      form.setValue(
-        "message",
-        "I need help with host onboarding. I had an issue logging in with Hospitable.",
-      );
-    }
-  }, [isHostOnboarding, form]);
+  // useEffect(() => {
+  //   if (isHostOnboarding) {
+  //     // Set a default message if onboarding is true
+  //     form.setValue(
+  //       "message",
+  //       "I need help with host onboarding. I had an issue logging in with Hospitable.",
+  //     );
+  //   }
+  // }, [isHostOnboarding, form]);
 
   return (
     <>

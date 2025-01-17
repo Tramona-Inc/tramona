@@ -11,7 +11,6 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { api } from "@/utils/api";
 import { cn } from "@/utils/utils";
-
 function MessageDisplay() {
   const [selectedConversation, setSelectedConversation] =
     useState<Conversation | null>(null);
@@ -24,6 +23,17 @@ function MessageDisplay() {
   const [isViewed, setIsViewd] = useState(false);
   const conversations = useConversation((state) => state.conversationList);
   const { query } = useRouter();
+  const {
+    data: fetchedConversations,
+    isLoading,
+    refetch,
+  } = api.messages.getConversations.useQuery(
+    {
+    },
+    {
+      refetchOnWindowFocus: false,
+    },
+  );
 
   useEffect(() => {
     if (query.conversationId && conversations.length > 0 && !isViewed) {
@@ -54,6 +64,9 @@ function MessageDisplay() {
         <MessagesSidebar
           selectedConversation={selectedConversation}
           setSelected={selectConversation}
+          fetchedConversations={fetchedConversations}
+          isLoading={isLoading}
+          refetch={refetch}
         />
       </div>
       <div

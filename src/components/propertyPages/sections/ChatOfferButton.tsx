@@ -1,26 +1,25 @@
 import { Button } from "@/components/ui/button";
 import { MessageCirclePlusIcon } from "lucide-react";
-import { useChatWithOffer } from "@/utils/messaging/useChatWithOffer";
+import { useChatWithHost } from "@/utils/messaging/useChatWithHost";
 interface ChatOfferButtonProps {
-  offerId: string;
   offerHostId: string | null;
   offerPropertyName: string;
+  hostTeamId: number;
 }
 
 export default function ChatOfferButton({
-  offerId,
   offerHostId,
   offerPropertyName,
+  hostTeamId,
 }: ChatOfferButtonProps) {
-  const chatWithOffer = useChatWithOffer();
+  const chatWithHost = useChatWithHost();
   return (
     <Button
       variant="secondary"
       onClick={() =>
-        chatWithOffer({
-          offerId,
-          offerHostId: offerHostId ?? null,
-          offerPropertyName,
+        chatWithHost({
+          hostTeamId: hostTeamId,
+          hostId: offerHostId!,
         })
       }
     >

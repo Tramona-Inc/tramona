@@ -259,7 +259,7 @@ export default function PropertyPage({
               <Button
                 onClick={() =>
                   isHospitableUser
-                    ? chatWithHost({ hostId: property.hostTeam.ownerId })
+                    ? chatWithHost({ hostId: property.hostTeam.ownerId, hostTeamId: property.hostTeam.id })
                     : chatWithAdmin()
                 }
               >
@@ -322,9 +322,9 @@ export default function PropertyPage({
             </div>
             {offer && (
               <ChatOfferButton
-                offerId={offer.id.toString()}
                 offerHostId={offer.property.hostTeam.ownerId}
                 offerPropertyName={offer.property.name}
+                hostTeamId={property.hostTeam.id}
               />
             )}
           </section>

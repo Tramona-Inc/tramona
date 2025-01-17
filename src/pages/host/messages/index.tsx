@@ -29,9 +29,11 @@ function MessageDisplay() {
   const [isViewed, setIsViewed] = useState(false);
   const conversations = useConversation((state) => state.conversationList);
   const { query } = useRouter();
-
-  const { isLoading: isSidebarLoading } =
-    api.messages.getConversations.useQuery(); // 假设有获取对话的 API
+  const { currentHostTeamId } = useHostTeamStore();
+  const { data: fetchedConversations, isLoading: isSidebarLoading, refetch } =
+    api.messages.getConversations.useQuery({
+      hostTeamId: currentHostTeamId,
+    }); // 假设有获取对话的 API
 
   useEffect(() => {
     if (query.conversationId && conversations.length > 0 && !isViewed) {
@@ -69,6 +71,9 @@ function MessageDisplay() {
           <MessagesSidebar
             selectedConversation={selectedConversation}
             setSelected={selectConversation}
+            fetchedConversations={fetchedConversations}
+            isLoading={isSidebarLoading}
+            refetch={refetch}
           />
         )}
       </div>
