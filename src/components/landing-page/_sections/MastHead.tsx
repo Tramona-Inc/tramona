@@ -180,6 +180,8 @@ export default function MastHead() {
               src={landingBg2}
               alt=""
               fill
+              quality={100}
+              unoptimized={true}
               className="object-cover object-center brightness-90"
             />
             <div className="absolute inset-0 bg-black bg-opacity-40" />
