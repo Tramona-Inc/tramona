@@ -1,6 +1,7 @@
-import CardSelect from "@/components/_common/CardSelect";
+"use client";
+
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { InlineWidget, useCalendlyEventListener } from "react-calendly";
 import {
   Dialog,
@@ -36,6 +37,48 @@ import { Link } from "lucide-react";
 import { cn } from "@/utils/utils";
 import { Questions } from "@/pages/for-hosts";
 import usePopoverStore from "@/utils/store/messagePopoverStore";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Link2,
+  CheckCircle2,
+  ArrowRight,
+} from "lucide-react";
+
+const steps = [
+  {
+    title: "Create your listing",
+    image: "/placeholder.svg?height=300&width=400",
+    description: "Start by adding some photos and details about your space.",
+  },
+  {
+    title: "Set your price",
+    image: "/placeholder.svg?height=300&width=400",
+    description: "Decide how much you want to charge per night.",
+  },
+  {
+    title: "Choose your availability",
+    image: "/placeholder.svg?height=300&width=400",
+    description: "Use the calendar to select when your space is available.",
+  },
+  {
+    title: "Set house rules",
+    image: "/placeholder.svg?height=300&width=400",
+    description: "Establish guidelines for guests staying at your place.",
+  },
+  {
+    title: "Publish your listing",
+    image: "/placeholder.svg?height=300&width=400",
+    description: "Once everything looks good, make your listing live!",
+  },
+];
 
 export default function Onboarding1({
   onPressNext,
@@ -52,8 +95,52 @@ export default function Onboarding1({
   const [dialogType, setDialogType] = useState<
     "assistedListing" | "syncPMS" | null
   >(null);
-
+  const [showSignupModal, setShowSignupModal] = useState(false);
   useCalendlyEventListener({ onEventScheduled: () => setEventScheduled(true) });
+
+  const [currentStep, setCurrentStep] = useState(0);
+  const [touchStart, setTouchStart] = useState(0);
+  const [touchEnd, setTouchEnd] = useState(0);
+  const galleryRef = useRef<HTMLDivElement>(null);
+  const [isExpanded, setIsExpanded] = useState("item-1");
+
+  const handleNextStep = () => {
+    if (currentStep < steps.length - 1) {
+      setCurrentStep(currentStep + 1);
+    } else {
+      setShowSignupModal(false);
+    }
+  };
+
+  const handlePrevStep = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (touchStart - touchEnd > 75) {
+      handleNextStep();
+    }
+
+    if (touchStart - touchEnd < -75) {
+      handlePrevStep();
+    }
+  };
+
+  useEffect(() => {
+    if (galleryRef.current) {
+      galleryRef.current.style.transform = `translateX(-${currentStep * 100}%)`;
+    }
+  }, [currentStep]);
 
   const openModal = (type: "assistedListing" | "syncPMS") => {
     setDialogType(type);
@@ -148,6 +235,12 @@ export default function Onboarding1({
     console.log({ pms, accountId, apiKey });
   });
 
+  useEffect(() => {
+    if (isHospitableCustomer) {
+      setShowSignupModal(true);
+    }
+  }, [isHospitableCustomer]);
+
   return (
     <>
       <div className="w-full flex-grow lg:grid lg:grid-cols-1">
@@ -164,32 +257,173 @@ export default function Onboarding1({
                 : "text-2xl font-semibold sm:text-4xl lg:text-3xl xl:text-4xl",
             )}
           >
-            Get started on Tramona
+            Get started hosting on Tramona
           </h1>
-          <div className="flex flex-col gap-4">
-            {items.map((item) =>
-              item.id === "1" ? (
-                <CardSelect
-                  key={item.id}
-                  title={item.title}
-                  text={item.text}
-                  onClick={item.onClick}
-                  recommended={item.recommended}
-                  disabled={isHospitableCustomer ? true : false}
+          <div className="min-h-screen bg-gradient-to-b from-primary/5 to-background">
+            {/* Hero Section */}
+            <div className="container px-4 py-16 md:py-24">
+              <div className="mx-auto max-w-3xl text-center">
+                <h1 className="mb-6 text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
+                  Get started hosting on Tramona
+                </h1>
+                <p className="mb-12 text-xl text-muted-foreground">
+                  Hosts can expect to make 10-15% more when using Tramona to
+                  book their empty nights earnings
+                </p>
+              </div>
+
+              {/* Main Card */}
+              <Card className="mx-auto max-w-2xl">
+                <CardContent className="p-6">
+                  <div className="flex items-start gap-4 rounded-lg border p-4 shadow-sm">
+                    <div className="rounded-full bg-primary/10 p-2">
+                      <Link2 className="h-6 w-6 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <h2 className="text-xl font-semibold">
+                        Create a host account
+                      </h2>
+                      <p className="mt-1 text-muted-foreground">
+                        When creating an account, you&apos;ll connect directly
+                        with Airbnb so ensure all your host settings and
+                        preferences are saved
+                      </p>
+                      <Button
+                        className="mt-4"
+                        size="lg"
+                        onClick={async () => {
+                          try {
+                            setShowHospitablePopup(true);
+                          } catch (error) {
+                            console.error("An error occurred:", error);
+                          }
+                        }}
+                      >
+                        Connect with Airbnb
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Benefits Section */}
+              <div className="mx-auto mt-16 max-w-4xl">
+                <div className="grid gap-8 md:grid-cols-3">
+                  <div className="flex flex-col items-center text-center">
+                    <div className="mb-4 rounded-full bg-primary/10 p-3">
+                      <CheckCircle2 className="h-6 w-6 text-primary" />
+                    </div>
+                    <h3 className="mb-2 font-semibold">Increase Revenue</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Earn 10-15% more when using Tramona to book empty nights
+                    </p>
+                  </div>
+                  <div className="flex flex-col items-center text-center">
+                    <div className="mb-4 rounded-full bg-primary/10 p-3">
+                      <CheckCircle2 className="h-6 w-6 text-primary" />
+                    </div>
+                    <h3 className="mb-2 font-semibold">Smart Pricing</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Our AI automatically adjusts prices based on market demand
+                    </p>
+                  </div>
+                  <div className="flex flex-col items-center text-center">
+                    <div className="mb-4 rounded-full bg-primary/10 p-3">
+                      <CheckCircle2 className="h-6 w-6 text-primary" />
+                    </div>
+                    <h3 className="mb-2 font-semibold">Easy Integration</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Seamlessly connects with your existing Airbnb listings
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* FAQ Section */}
+              <div className="mx-auto mt-16 max-w-2xl">
+                <h2 className="mb-6 text-center text-2xl font-bold">
+                  Frequently Asked Questions
+                </h2>
+                <Accordion type="single" collapsible defaultValue="item-1">
+                  <AccordionItem value="item-1">
+                    <AccordionTrigger>
+                      Can I counter-offer requests?
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      Yes, you can! Tramona gives you full control over your
+                      pricing and allows you to negotiate with potential guests.
+                    </AccordionContent>
+                  </AccordionItem>
+                  <AccordionItem value="item-2">
+                    <AccordionTrigger>
+                      Do I need to sync my calendar?
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      Only if you want to. Calendar syncing is optional but
+                      recommended for the best experience and to avoid double
+                      bookings.
+                    </AccordionContent>
+                  </AccordionItem>
+                  <AccordionItem value="item-3">
+                    <AccordionTrigger>Why list on Tramona?</AccordionTrigger>
+                    <AccordionContent>
+                      Hosts typically earn 10-15% more through Tramona. Our
+                      smart pricing algorithm and efficient booking system help
+                      maximize your revenue while minimizing vacant nights.
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              </div>
+
+              {/* Social Proof */}
+              <div className="mx-auto mt-16 max-w-2xl text-center">
+                <div className="rounded-xl bg-muted/50 p-6">
+                  <p className="text-sm font-medium text-muted-foreground">
+                    TRUSTED BY HOSTS WORLDWIDE
+                  </p>
+                  <div className="mt-4 flex flex-wrap items-center justify-center gap-8">
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl font-bold">10k+</span>
+                      <span className="text-sm text-muted-foreground">
+                        Active Hosts
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl font-bold">$2M+</span>
+                      <span className="text-sm text-muted-foreground">
+                        Extra Revenue Generated
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl font-bold">95%</span>
+                      <span className="text-sm text-muted-foreground">
+                        Satisfaction Rate
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Final CTA */}
+              <div className="mx-auto mt-16 max-w-xl text-center">
+                <h3 className="mb-4 text-2xl font-semibold">
+                  Ready to boost your earnings?
+                </h3>
+                <p className="mb-6 text-muted-foreground">
+                  Join thousands of successful hosts who are already maximizing
+                  their Airbnb revenue with Tramona
+                </p>
+                <Button
+                  size="lg"
+                  className="px-8"
+                  onClick={() => router.push("/host")}
                 >
-                  {item.icon}
-                </CardSelect>
-              ) : (
-                <CardSelect
-                  key={item.title}
-                  title={item.title}
-                  text={item.text}
-                  onClick={item.onClick}
-                >
-                  {item.icon}
-                </CardSelect>
-              ),
-            )}
+                  Get Started Now
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+            </div>
           </div>
           <p className="font-semibold lg:text-lg">
             Hosts can expect to make 10-15% more when using Tramona to book
@@ -199,33 +433,6 @@ export default function Onboarding1({
           <div className="hidden lg:block">
             <Questions />
           </div>
-          {isHospitableCustomer && (
-            <div className="flex flex-col gap-2 rounded-md border border-gray-200 p-4">
-              <div className="flex items-center gap-2 text-xl font-bold text-red-600">
-                <ExclamationTriangleIcon className="text-red-600" />
-                Having trouble?
-              </div>
-              <div>
-                We&apos;re here to help! You can either send us a message
-                directly or email our support team.
-              </div>
-              <button
-                className="rounded-md border border-gray-200 p-2"
-                onClick={() => setOpen(true)}
-              >
-                Send us a message
-              </button>
-              <div className="text-center">Or</div>
-              <button
-                className="rounded-md border border-gray-200 p-2"
-                onClick={() => {
-                  window.open("mailto:support@tramona.com", "_blank");
-                }}
-              >
-                Email us at support@tramona.com
-              </button>
-            </div>
-          )}
         </div>
       </div>
 
@@ -324,19 +531,19 @@ export default function Onboarding1({
                   </form>
                 </Form>
                 {/* <div className="mt-4 flex items-center space-x-2">
-                  <Image
-                    src="/assets/icons/help.svg"
-                    alt="Help"
-                    width={24}
-                    height={24}
-                  />
-                  <p>
-                    Have a question?{" "}
-                    <a href="#" className="text-primary">
-                      Contact us
-                    </a>
-                  </p>
-                </div> */}
+                                    <Image
+                                        src="/assets/icons/help.svg"
+                                        alt="Help"
+                                        width={24}
+                                        height={24}
+                                    />
+                                    <p>
+                                        Have a question?{" "}
+                                        <a href="#" className="text-primary">
+                                            Contact us
+                                        </a>
+                                    </p>
+                                </div> */}
               </div>
             </>
           )}
@@ -377,6 +584,68 @@ export default function Onboarding1({
           </div>
         </DialogContent>
       </Dialog>
+      {showSignupModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+          <div className="w-full max-w-md rounded-lg bg-white shadow-xl">
+            <div className="p-6">
+              <h2 className="mb-4 text-2xl font-bold">
+                {steps[currentStep].title}
+              </h2>
+              <div className="relative mb-4 h-48 overflow-hidden">
+                <div
+                  ref={galleryRef}
+                  className="flex h-full transition-transform duration-300 ease-in-out"
+                  onTouchStart={handleTouchStart}
+                  onTouchMove={handleTouchMove}
+                  onTouchEnd={handleTouchEnd}
+                >
+                  {steps.map((step, index) => (
+                    <div key={index} className="h-full w-full flex-shrink-0">
+                      <img
+                        src={step.image || "/placeholder.svg"}
+                        alt={`Step ${index + 1}`}
+                        className="h-full w-full rounded-lg object-cover"
+                      />
+                    </div>
+                  ))}
+                </div>
+                <button
+                  onClick={handlePrevStep}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 transform rounded-full bg-white p-1 shadow-md"
+                  disabled={currentStep === 0}
+                >
+                  <ChevronLeft className="h-6 w-6" />
+                </button>
+                <button
+                  onClick={handleNextStep}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 transform rounded-full bg-white p-1 shadow-md"
+                  disabled={currentStep === steps.length - 1}
+                >
+                  <ChevronRight className="h-6 w-6" />
+                </button>
+              </div>
+              <p className="mb-4 text-gray-600">
+                {steps[currentStep].description}
+              </p>
+              <div className="flex items-center justify-between">
+                <div className="space-x-1">
+                  {steps.map((_, index) => (
+                    <span
+                      key={index}
+                      className={`inline-block h-2 w-2 rounded-full ${
+                        index === currentStep ? "bg-blue-500" : "bg-gray-300"
+                      }`}
+                    ></span>
+                  ))}
+                </div>
+                <Button onClick={handleNextStep}>
+                  {currentStep === steps.length - 1 ? "Finish" : "Next"}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
