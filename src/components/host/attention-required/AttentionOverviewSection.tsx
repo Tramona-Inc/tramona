@@ -17,11 +17,12 @@ export default function AttentionOverviewSection({
       { enabled: !!currentHostTeamId },
     );
 
+  console.log(allNotifications?.length);
   return (
     <div className="grid grid-cols-2 gap-4 px-4 sm:px-0 lg:grid-cols-4">
       {/* Notification Cards */}
-      {!isLoading && currentHostTeamId ? (
-        allNotifications?.length && allNotifications.length > 0 ? (
+      {!isLoading ? (
+        allNotifications && allNotifications.length !== 0 ? (
           <>
             <NotificationCard
               action="Sync Calendar for"

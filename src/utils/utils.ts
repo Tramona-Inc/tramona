@@ -395,6 +395,7 @@ export function getDiscountPercentage(
 
 const useScreenWidth = () => useWindowSize().width ?? 0;
 
+export const useIsXs = () => useScreenWidth() < 640;
 /**
  * screen width >= 640 (same as tailwind `sm:`)
  */

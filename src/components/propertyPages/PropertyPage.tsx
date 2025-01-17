@@ -75,6 +75,13 @@ export default function PropertyPage({
   const chatWithHost = useChatWithHost();
   const chatWithAdmin = useChatWithAdmin();
 
+  console.log("ratings and reviews", {
+    ratings: property.numRatings,
+    hostNumReviews: property.hostNumReviews,
+    reviews: property.reviews,
+    bathrooms: property.numBathrooms,
+  });
+
   api.calendar.getAndUpdateHostCalendar.useQuery(
     {
       hospitableListingId: property.hospitableListingId!,
@@ -145,6 +152,7 @@ export default function PropertyPage({
               src={firstImageUrl}
               alt=""
               fill
+              quality={100}
               className="object-cover object-center"
             />
           </DialogTriggerNoDrawer>
@@ -165,6 +173,7 @@ export default function PropertyPage({
                     alt=""
                     fill
                     className="object-cover object-center"
+                    quality={100}
                   />
                 </DialogTriggerNoDrawer>
               </div>
@@ -278,7 +287,14 @@ export default function PropertyPage({
                     <>
                       {property.avgRating}{" "}
                       <a href="#reviews" className="underline">
-                        ({plural(property.numRatings, "review")})
+                        (
+                        {plural(
+                          property.reviews.length > 0
+                            ? property.reviews.length
+                            : 0,
+                          "review",
+                        )}
+                        )
                       </a>
                     </>
                   )}
@@ -287,9 +303,9 @@ export default function PropertyPage({
                   {plural(property.maxNumGuests, "guest")} ·{" "}
                   {plural(property.numBedrooms, "bedroom")} ·{" "}
                   {plural(property.numBeds, "bed")}
-                  {property.numBathrooms && property.numBathrooms > 0 && (
+                  {property.numBathrooms && property.numBathrooms > 0 ? (
                     <> · {plural(property.numBathrooms, "bath")}</>
-                  )}
+                  ) : null}
                 </p>
               </div>
               {originalListing && offer && !property.bookOnAirbnb && (
@@ -446,20 +462,37 @@ export default function PropertyPage({
                 </h2>
                 <div className="flex items-center gap-2 pb-4">
                   <StarIcon className="inline size-[1em] fill-primaryGreen stroke-primaryGreen" />{" "}
-                  {property.avgRating} · {plural(property.numRatings, "review")}
+                  {property.avgRating === 0 && property.reviews.length === 0 ? (
+                    <p>New</p>
+                  ) : (
+                    <div>
+                      {property.avgRating} ·{" "}
+                      {plural(property.numRatings, "rating")} ·{" "}
+                      {plural(
+                        property.reviews.length > 0
+                          ? property.reviews.length
+                          : 0,
+                        "review",
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
             <div className="grid gap-4">
-              {property.reviews.map(
-                (review, id) =>
-                  reviewBackupImages[id] && (
-                    <ReviewCard
-                      key={review.id}
-                      review={review}
-                      backupReview={reviewBackupImages[id]}
-                    />
-                  ),
+              {property.reviews.length > 0 ? (
+                property.reviews.map(
+                  (review, id) =>
+                    reviewBackupImages[id] && (
+                      <ReviewCard
+                        key={review.id}
+                        review={review}
+                        backupReview={reviewBackupImages[id]}
+                      />
+                    ),
+                )
+              ) : (
+                <p>No reviews have been made for this property yet.</p>
               )}
             </div>
             {originalListing && offer && (

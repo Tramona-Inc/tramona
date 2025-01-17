@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
 import { formatCurrency, formatDateMonthDayYear, plural } from "@/utils/utils";
-import { Star, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, StarIcon } from "lucide-react";
 import { Skeleton } from "../ui/skeleton";
 import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useSession } from "next-auth/react";
@@ -25,21 +25,7 @@ import { useLoading } from "./UnclaimedMapLoadingContext";
 import { Badge } from "../ui/badge";
 import { Property } from "@/server/db/schema/tables/properties";
 
-// type Property =
-//   RouterOutputs["properties"]["getAllInfiniteScroll"]["data"][number];
-
-export type MapBoundary = {
-  north: number;
-  south: number;
-  east: number;
-  west: number;
-};
-
-export default function UnclaimedOfferCards({
-  mapBoundaries,
-}: {
-  mapBoundaries: MapBoundary | null;
-}): JSX.Element {
+export default function UnclaimedOfferCards(): JSX.Element {
   const { adjustedProperties } = useAdjustedProperties();
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
@@ -57,14 +43,8 @@ export default function UnclaimedOfferCards({
     }
   }, [isDelayedLoading, adjustedProperties]);
 
-  // const allProperties = useMemo(() => {
-  //   return adjustedProperties?.pages.flatMap((page) => page.data) ?? [];
-  // }, [adjustedProperties]);
-
   const allProperties = useMemo(() => {
     return adjustedProperties?.pages;
-    // .flatMap((page) => page?.data || []) // Use optional chaining and fallback
-    // .filter(Boolean); // Filter out undefined values, if any
   }, [adjustedProperties]);
 
   const paginatedProperties = useMemo(() => {
@@ -84,6 +64,7 @@ export default function UnclaimedOfferCards({
   const handlePageChange = useCallback(
     (page: number) => {
       // router.pathname.searchParams.set("page", page);
+      console.log("ran");
       setCurrentPage(page);
       void router.push(
         { pathname: router.pathname, query: { ...router.query, page } },
@@ -107,15 +88,10 @@ export default function UnclaimedOfferCards({
         setIsDelayedLoading(false);
       }, 1000);
     }
-
     return () => {
       clearTimeout(timer);
     };
   }, [isLoading]);
-
-  useEffect(() => {
-    handlePageChange(1);
-  }, [mapBoundaries]);
 
   useEffect(() => {
     const page = Number(router.query.page) || 1;
@@ -206,9 +182,12 @@ export default function UnclaimedOfferCards({
           ) : showNoProperties ? (
             <div className="flex h-full w-full items-center justify-center">
               <div className="text-center">
-                <div className="text-lg font-bold">Find your perfect stay</div>
+                <div className="text-lg font-bold">
+                  Search for properties in the search bar above
+                </div>
                 <div className="mt-2 text-sm text-zinc-500">
-                  Search above to book properties
+                  Once you make a search, you will be able to see properties
+                  here
                 </div>
               </div>
             </div>
@@ -411,19 +390,23 @@ function UnMatchedPropertyCard({
             </div>
           </div>
           <div className="ml-2 flex items-center space-x-1 whitespace-nowrap">
-            <Star fill="black" size={12} />
+            <StarIcon className="inline size-[1em] fill-primaryGreen stroke-primaryGreen" />{" "}
             <div>
-              {"avgRating" in property ? property.avgRating.toFixed(2) : "New"}
+              {"avgRating" in property
+                ? property.avgRating !== 0
+                  ? property.avgRating.toFixed(2)
+                  : "New"
+                : "New"}
             </div>
             <div>
-              {"numRatings" in property ? `(${property.numRatings})` : ""}
+              {"numRatings" in property
+                ? property.numRatings !== 0
+                  ? `(${property.numRatings})`
+                  : ""
+                : ""}
             </div>
           </div>
         </div>
-        {/* <div className="text-sm text-zinc-500"> */}
-        {/* {formatDateRange(offer.checkIn, offer.checkOut)} */}
-        {/* replace with check in check out'
-            </div> */}
         <div className="text-sm text-zinc-500">
           {plural(property.maxNumGuests, "Guest")}
         </div>

@@ -72,12 +72,12 @@ export default function BookNowBtn(props: UnifiedProps) {
           : "primary"
       }
       size={props.btnSize}
-      className="w-full text-sm tracking-tight lg:text-base lg:tracking-normal"
+      className="w-full text-xs tracking-tight sm:text-sm lg:text-base lg:tracking-normal"
       disabled={isBooked}
     >
       {isBooked ? (
         <>
-          <BookCheckIcon className="size-5" />
+          <BookCheckIcon className="size-3 sm:size-5" />
           Booked
         </>
       ) : props.property.bookOnAirbnb ? (
@@ -87,13 +87,13 @@ export default function BookNowBtn(props: UnifiedProps) {
           rel="noopener noreferrer"
         >
           Book on Airbnb
-          <ExternalLinkIcon className="size-5" />
+          <ExternalLinkIcon className="size-3 sm:size-5" />
         </Link>
       ) : !props.property.stripeVerRequired ||
         verificationStatus?.isIdentityVerified ? (
-        <Link href={checkoutUrl}>
+        <Link href={checkoutUrl} className="">
           Book now
-          <ArrowRightIcon className="size-5" />
+          <ArrowRightIcon className="size-3 sm:size-5" />
         </Link>
       ) : verificationStatus?.isIdentityVerified === "pending" ? (
         <p>Verification pending</p>

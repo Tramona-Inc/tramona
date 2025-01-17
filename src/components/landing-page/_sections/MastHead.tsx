@@ -237,7 +237,7 @@ export default function MastHead() {
               <div className="flex w-full overflow-hidden rounded-full border border-[#004236] bg-white">
                 <button
                   onClick={() => handleTabChange("search")}
-                  className={`w-1/2 px-8 py-3 text-center text-sm font-medium transition-all duration-200 ${
+                  className={`w-1/2 px-8 py-1 text-center text-sm font-medium transition-all duration-200 md:py-3 ${
                     activeTab === "search"
                       ? "bg-[#004236] text-white"
                       : "bg-white text-[#004236]"
@@ -247,7 +247,7 @@ export default function MastHead() {
                 </button>
                 <button
                   onClick={() => handleTabChange("name-price")}
-                  className={`w-1/2 px-8 py-3 text-center text-sm font-medium transition-all duration-200 ${
+                  className={`w-1/2 px-8 py-2 text-center text-sm font-medium leading-tight transition-all duration-200 md:py-3 ${
                     activeTab === "name-price"
                       ? "bg-[#004236] text-white"
                       : "bg-white text-[#004236]"
