@@ -1,7 +1,7 @@
 import { env } from "@/env";
-import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
+import { coHostProcedure, createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { db } from "@/server/db";
-import { conversationParticipants, users } from "@/server/db/schema";
+import { conversationParticipants, hostTeamMembers, users } from "@/server/db/schema";
 import { zodString } from "@/utils/zod-utils";
 import { and, eq, inArray, ne } from "drizzle-orm";
 import { z } from "zod";
@@ -11,14 +11,15 @@ import { sendSlackMessage } from "@/server/slack";
 import { TRPCError } from "@trpc/server";
 
 const isProduction = process.env.NODE_ENV === "production";
+const ADMIN_HOST_TEAM_ID = env.ADMIN_TEAM_ID;
 const baseUrl = isProduction
   ? "https://www.tramona.com"
   : "http://localhost:3000";
 
 const ADMIN_ID = env.TRAMONA_ADMIN_USER_ID;
-
-export async function fetchUsersConversations(userId: string) {
-  return await db.query.users.findFirst({
+export async function fetchUsersConversations(userId: string, hostTeamId?: number | null) {
+  // Fetch all conversations for the user
+  const userConversations = await db.query.users.findFirst({
     where: eq(users.id, userId),
     columns: {},
     with: {
@@ -51,6 +52,46 @@ export async function fetchUsersConversations(userId: string) {
       },
     },
   });
+
+  // If a hostTeamId is provided, filter conversations based on the hostTeamId
+  // if (hostTeamId && userConversations?.conversations) {
+  //   userConversations.conversations = userConversations.conversations.filter((conversation) =>
+  //     conversation.conversation.participants.some((participant) =>
+  //       participant.hostTeamId === hostTeamId
+  //     )
+  //   );
+  // } else if (userConversations?.conversations) {
+
+  //   userConversations.conversations = userConversations.conversations.filter((conversation) =>
+  //     conversation.conversation.participants.some((participant) =>
+  //       participant.hostTeamId === null
+  //     )
+  //   );
+  // }
+
+
+
+  if (hostTeamId && userConversations?.conversations) {
+    console.log("hostTeamId", hostTeamId);
+    // Host side: Filter by hostTeamId and userId association
+    userConversations.conversations = userConversations.conversations.filter((conversation) =>
+      conversation.conversation.participants.some(
+        (participant) =>
+          participant.userId === userId && participant.hostTeamId === hostTeamId
+      )
+    );
+  } else if (userConversations?.conversations) {
+    console.log("no hostid");
+    // Traveler side: Filter by userId association and null hostTeamId
+    userConversations.conversations = userConversations.conversations.filter((conversation) =>
+      conversation.conversation.participants.some(
+        (participant) =>
+          participant.userId === userId && participant.hostTeamId === null
+      )
+    );
+  }
+
+  return userConversations;
 }
 
 export async function fetchConversationWithAdmin(userId: string) {
@@ -189,9 +230,21 @@ async function generateConversation(
 export async function createConversationWithAdmin(userId: string) {
   const conversationId = await generateConversation();
 
+  const hostTeamId = ADMIN_HOST_TEAM_ID;
+  const teamMembers = await db.query.hostTeamMembers.findMany({
+    where: eq(hostTeamMembers.hostTeamId, hostTeamId),
+  });
+
+  const promises = teamMembers.map(async (member) => {
+    await db.insert(conversationParticipants).values([
+      { conversationId, userId: member.userId },
+    ]);
+  });
+
+  await Promise.all(promises);
+
   await db.insert(conversationParticipants).values([
     { conversationId, userId: userId },
-    { conversationId, userId: ADMIN_ID },
   ]);
 
   return conversationId;
@@ -199,13 +252,24 @@ export async function createConversationWithAdmin(userId: string) {
 
 export async function createConversationWithHost(
   userId: string,
-  hostId: string,
+  hostTeamId: number,
 ) {
   const conversationId = await generateConversation();
 
+  const teamMembers = await db.query.hostTeamMembers.findMany({
+    where: eq(hostTeamMembers.hostTeamId, hostTeamId),
+  });
+
+  const promises = teamMembers.map(async (member) => {
+    await db.insert(conversationParticipants).values([
+      { conversationId, userId: member.userId, hostTeamId: hostTeamId },
+    ]);
+  });
+
+  await Promise.all(promises);
+
   await db.insert(conversationParticipants).values([
     { conversationId, userId: userId },
-    { conversationId, userId: hostId },
   ]);
 
   return conversationId;
@@ -213,16 +277,25 @@ export async function createConversationWithHost(
 
 export async function createConversationWithOfferHelper(
   userId: string,
-  offerHostOrAllAdmins: string,
   propertyName: string,
   offerId: string,
+  hostTeamId: number,
 ) {
   const conversationId = await generateConversation(propertyName, offerId);
 
+  const teamMembers = await db.query.hostTeamMembers.findMany({
+    where: eq(hostTeamMembers.hostTeamId, hostTeamId),
+  });
+  const promises = teamMembers.map(async (member) => {
+    await db.insert(conversationParticipants).values([
+      { conversationId, userId: member.userId, hostTeamId: hostTeamId },
+    ]);
+  });
+  await Promise.all(promises);
   await db.insert(conversationParticipants).values([
     { conversationId, userId: userId },
-    { conversationId, userId: offerHostOrAllAdmins },
   ]);
+
 
   return conversationId;
 }
@@ -255,53 +328,64 @@ async function verifyConversationExists(conversationId: string) {
 }
 
 export const messagesRouter = createTRPCRouter({
-  getConversations: protectedProcedure.query(async ({ ctx }) => {
-    const result = await fetchUsersConversations(ctx.user.id);
-
-    if (result) {
-      const orderedConversations = result.conversations.map(
-        ({ conversation }) => ({
-          ...conversation,
-          participants: conversation.participants
-            .filter((p) => p.user.id !== ctx.user.id)
-            .map((p) => p.user)
-            .filter(Boolean),
-        }),
+  getConversations: protectedProcedure
+    .input(
+      z.object({
+        hostTeamId: z.number().optional().nullable(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const result = await fetchUsersConversations(
+        ctx.user.id,
+        input.hostTeamId,
       );
 
-      // Order conversations by the most recent activity (conversation or message creation)
-      orderedConversations.sort((a, b) => {
-        // Get the conversation's createdAt date
-        const aConversationDate = new Date(a.createdAt);
-        const bConversationDate = new Date(b.createdAt);
+      console.log(result, "result");
 
-        // Get the latest message's createdAt date, or use the conversation's createdAt date if no messages
-        const aLatestMessageDate = a.messages[0]
-          ? new Date(a.messages[0].createdAt)
-          : aConversationDate;
-        const bLatestMessageDate = b.messages[0]
-          ? new Date(b.messages[0].createdAt)
-          : bConversationDate;
+      if (result) {
+        const orderedConversations = result.conversations.map(
+          ({ conversation }) => ({
+            ...conversation,
+            participants: conversation.participants
+              .filter((p) => p.user.id !== ctx.user.id)
+              .map((p) => p.user)
+              .filter(Boolean),
+          }),
+        );
 
-        // Use the most recent of the two dates for comparison
-        const aMostRecentDate =
-          aLatestMessageDate > aConversationDate
-            ? aLatestMessageDate
+        // Order conversations by the most recent activity (conversation or message creation)
+        orderedConversations.sort((a, b) => {
+          // Get the conversation's createdAt date
+          const aConversationDate = new Date(a.createdAt);
+          const bConversationDate = new Date(b.createdAt);
+
+          // Get the latest message's createdAt date, or use the conversation's createdAt date if no messages
+          const aLatestMessageDate = a.messages[0]
+            ? new Date(a.messages[0].createdAt)
             : aConversationDate;
-        const bMostRecentDate =
-          bLatestMessageDate > bConversationDate
-            ? bLatestMessageDate
+          const bLatestMessageDate = b.messages[0]
+            ? new Date(b.messages[0].createdAt)
             : bConversationDate;
 
-        // Sort in descending order of the most recent activity
-        return bMostRecentDate.getTime() - aMostRecentDate.getTime();
-      });
+          // Use the most recent of the two dates for comparison
+          const aMostRecentDate =
+            aLatestMessageDate > aConversationDate
+              ? aLatestMessageDate
+              : aConversationDate;
+          const bMostRecentDate =
+            bLatestMessageDate > bConversationDate
+              ? bLatestMessageDate
+              : bConversationDate;
 
-      return orderedConversations;
-    }
+          // Sort in descending order of the most recent activity
+          return bMostRecentDate.getTime() - aMostRecentDate.getTime();
+        });
 
-    return [];
-  }),
+        return orderedConversations;
+      }
+
+      return [];
+    }),
 
   createConversationWithAdmin: protectedProcedure.mutation(async ({ ctx }) => {
     const conversationId = await fetchConversationWithAdmin(ctx.user.id);
@@ -314,8 +398,8 @@ export const messagesRouter = createTRPCRouter({
     return conversationId;
   }),
 
-  createConversationHostWithUser: protectedProcedure
-    .input(z.object({ userId: zodString() }))
+  createConversationHostWithUser: coHostProcedure
+    ("communicate_with_guests", z.object({ userId: zodString(), currentHostTeamId: z.number() }))
     .mutation(async ({ ctx, input }) => {
       const conversationId = await fetchConversationWithHost(
         input.userId,
@@ -325,7 +409,7 @@ export const messagesRouter = createTRPCRouter({
       if (!conversationId) {
         const newConversationId = await createConversationWithHost(
           ctx.user.id,
-          input.userId,
+          input.currentHostTeamId,
         );
         return { id: newConversationId };
       }
@@ -334,7 +418,7 @@ export const messagesRouter = createTRPCRouter({
     }),
 
   createConversationWithHost: protectedProcedure
-    .input(z.object({ hostId: zodString() }))
+    .input(z.object({ hostId: zodString(), hostTeamId: z.number() }))
     .mutation(async ({ ctx, input }) => {
       const conversationId = await fetchConversationWithHost(
         ctx.user.id,
@@ -342,7 +426,7 @@ export const messagesRouter = createTRPCRouter({
       );
 
       if (!conversationId) {
-        return await createConversationWithHost(ctx.user.id, input.hostId);
+        return await createConversationWithHost(ctx.user.id, input.hostTeamId);
       }
 
       return conversationId;
@@ -377,37 +461,35 @@ export const messagesRouter = createTRPCRouter({
       return { tempUserId: tempUser.id, conversationId: conversationId };
     }),
 
-  createOrFetchConversationWithOffer: protectedProcedure
-    .input(
-      z.object({
-        offerId: z.string(),
-        offerHostId: z.union([z.string(), z.null()]),
-        offerPropertyName: z.string(),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      const conversationExistId = await fetchConversationWithOffer(
-        ctx.user.id,
-        input.offerId,
-      );
-      console.log(conversationExistId, "converation exist");
+  // createOrFetchConversationWithOffer: protectedProcedure
+  //   .input(
+  //     z.object({
+  //       offerId: z.string(),
+  //       offerHostId: z.union([z.string(), z.null()]),
+  //       offerPropertyName: z.string(),
+  //     }),
+  //   )
+  //   .mutation(async ({ ctx, input }) => {
+  //     const conversationExistId = await fetchConversationWithOffer(
+  //       ctx.user.id,
+  //       input.offerId,
+  //     );
+  //     console.log(conversationExistId, "converation exist");
 
-      //determine if the conversation will be with the host or the admin
-      const offerHostOrAllAdmins = input.offerHostId
-        ? input.offerHostId
-        : ADMIN_ID;
+  //     //determine if the conversation will be with the host or the admin
+  //     const offerHostOrAllAdmins = input.offerHostId
+  //       ? input.offerHostId
+  //       : ADMIN_ID;
 
-      // Create conversation with host if it doesn't exist
-      if (!conversationExistId) {
-        return await createConversationWithOfferHelper(
-          ctx.user.id,
-          offerHostOrAllAdmins,
-          input.offerPropertyName,
-          input.offerId,
-        );
-      }
-      return conversationExistId;
-    }),
+  //     // Create conversation with host if it doesn't exist
+  //     if (!conversationExistId) {
+  //       return await createConversationWithHost(
+  //         ctx.user.id,
+  //         input.currentHostTeamId,
+  //       );
+  //     }
+  //     return conversationExistId;
+  //   }),
 
   addUserToConversation: publicProcedure
     .input(

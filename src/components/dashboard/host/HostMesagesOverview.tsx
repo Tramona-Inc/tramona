@@ -10,6 +10,7 @@ import { useConversation } from "@/utils/store/conversations";
 import { useEffect } from "react";
 import supabase from "@/utils/supabase-client";
 import { useSession } from "next-auth/react";
+import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 
 export default function HostMessagesOverview({
   className,
@@ -17,8 +18,11 @@ export default function HostMessagesOverview({
   className?: string;
 }) {
   const { data: session } = useSession();
+  const { currentHostTeamId } = useHostTeamStore();
   const { data: fetchedConversations } = api.messages.getConversations.useQuery(
-    undefined,
+    {
+      hostTeamId: currentHostTeamId,
+    },
     {
       refetchOnWindowFocus: false,
       refetchOnMount: false,
