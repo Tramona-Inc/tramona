@@ -274,7 +274,7 @@ export default function MessagesSidebar({
           </Button>
         </div>
       </div>
-      <ScrollArea className="h-[35rem] border-b py-2">
+      <ScrollArea className="h-[35rem] py-2">
         {!isLoading ? (
           showAllMsgs ? (
             conversations.length > 0 ? (

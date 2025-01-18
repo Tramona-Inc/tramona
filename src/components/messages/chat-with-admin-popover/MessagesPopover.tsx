@@ -26,6 +26,7 @@ import { useEffect, useState } from "react";
 
 import { type MessageDbType } from "@/types/supabase.message";
 import usePopoverStore from "@/utils/store/messagePopoverStore";
+
 export default function MessagesPopover({
   isMobile,
   isHostOnboarding,
