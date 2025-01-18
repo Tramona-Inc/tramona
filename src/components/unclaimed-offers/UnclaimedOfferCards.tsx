@@ -2,10 +2,22 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
-import { formatCurrency, formatDateMonthDayYear, plural } from "@/utils/utils";
+import {
+  formatCurrency,
+  formatDateMonthDayYear,
+  plural,
+  validateImage,
+} from "@/utils/utils";
 import { ChevronLeft, ChevronRight, StarIcon } from "lucide-react";
 import { Skeleton, SkeletonText } from "../ui/skeleton";
-import React, { useEffect, useState, useMemo, useCallback, memo } from "react";
+import React, {
+  useEffect,
+  useState,
+  useMemo,
+  useCallback,
+  memo,
+  useRef,
+} from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import {
@@ -32,6 +44,7 @@ export default function UnclaimedOfferCards(): JSX.Element {
   const { adjustedProperties, isSearching } = useAdjustedProperties();
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
+  const [validProperties, setValidProperties] = useState<PropertyType[]>([]);
   const itemsPerPage = 36;
   const { data: session } = useSession();
   const {} = useLoading();
@@ -43,8 +56,47 @@ export default function UnclaimedOfferCards(): JSX.Element {
   const paginatedProperties = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-    return allProperties?.slice(startIndex, endIndex);
+    return allProperties.slice(startIndex, endIndex);
   }, [allProperties, currentPage, itemsPerPage]);
+
+  //filter out the properties, where images do not load/ Also caching images
+  const validationCache = useRef(new Map<string, boolean>());
+
+  const validateProperties = useCallback(async () => {
+    const valid: PropertyType[] = [];
+    const promises = paginatedProperties.map(async (property) => {
+      if (property.imageUrls.length === 0) {
+        return;
+      }
+      const firstImageUrl = property.imageUrls[0]!;
+
+      if (validationCache.current.has(firstImageUrl)) {
+        if (validationCache.current.get(firstImageUrl)) {
+          valid.push(property);
+        }
+        return;
+      }
+      const isValid: boolean = await validateImage(firstImageUrl);
+      validationCache.current.set(firstImageUrl, isValid);
+
+      if (isValid) {
+        valid.push(property);
+      } else {
+        console.error("Image failed to load on property ", property.name);
+      }
+    });
+    await Promise.all(promises);
+    return valid;
+  }, [paginatedProperties]);
+
+  // Removed the debounced effect here
+  useEffect(() => {
+    const fetchValidProperties = async () => {
+      const newValidProperties = await validateProperties();
+      setValidProperties(newValidProperties);
+    };
+    void fetchValidProperties();
+  }, [validateProperties]);
 
   const totalPages = useMemo(() => {
     return Math.max(1, Math.ceil(allProperties.length / itemsPerPage));
@@ -171,8 +223,8 @@ export default function UnclaimedOfferCards(): JSX.Element {
             <div className="flex w-full flex-col">
               <div className="mx-auto max-w-[2000px] px-4">
                 <div className="grid w-full grid-cols-1 gap-4 min-[580px]:grid-cols-2 min-[800px]:grid-cols-3 min-[1000px]:grid-cols-4 min-[1200px]:grid-cols-5 min-[1400px]:grid-cols-6">
-                  {paginatedProperties?.length &&
-                    paginatedProperties.map((property, index) => (
+                  {validProperties.length &&
+                    validProperties.map((property, index) => (
                       <ErrorBoundary key={index}>
                         <div
                           className="animate-fade-in"
