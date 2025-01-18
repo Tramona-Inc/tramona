@@ -42,6 +42,7 @@ export function SearchFormBar({
   const numGuests = form.watch("numGuests");
 
   const handleSubmit = async (e: React.FormEvent) => {
+    console.log(isLoading);
     e.preventDefault();
     const values = form.getValues();
     let hasError = false;
@@ -403,7 +404,7 @@ export function SearchFormBar({
                 disabled={isLoading}
               >
                 {isLoading ? (
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
                 ) : (
                   <Search
                     className={`transition-all duration-300 ease-in-out ${

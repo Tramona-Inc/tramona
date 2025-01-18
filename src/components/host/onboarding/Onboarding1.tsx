@@ -251,15 +251,6 @@ export default function Onboarding1({
             forHost ? "m-0 items-start" : "my-6 items-center sm:mx-20",
           )}
         >
-          <h1
-            className={cn(
-              forHost
-                ? "text-2xl font-bold"
-                : "text-2xl font-semibold sm:text-4xl lg:text-3xl xl:text-4xl",
-            )}
-          >
-            Get started hosting on Tramona
-          </h1>
           <div className="min-h-screen bg-gradient-to-b from-primary/5 to-background">
             {/* Hero Section */}
             <div className="container px-4 py-16 md:py-24">
@@ -606,6 +597,7 @@ export default function Onboarding1({
                         src={step.image || "/placeholder.svg"}
                         alt={`Step ${index + 1}`}
                         className="h-full w-full rounded-lg object-cover"
+                        fill
                       />
                     </div>
                   ))}

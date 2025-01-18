@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -32,7 +32,6 @@ import { isNumber } from "lodash";
 import { useGetOriginalPropertyPricing } from "@/utils/payment-utils/useGetOriginalPropertyPricing";
 import Link from "next/link";
 import { ZodUndefined } from "zod";
-
 export type RequestToBookDetails = {
   checkIn: Date;
   checkOut: Date;
@@ -81,6 +80,7 @@ export default function RequestToBookOrBookNowPriceCard({
       : undefined;
 
   const [error, setError] = useState<React.ReactNode | null>(null);
+
   const [requestAmount, setRequestAmount] = useState(
     propertyPricingPerNightAfterTierDiscount,
   );
@@ -231,21 +231,27 @@ export default function RequestToBookOrBookNowPriceCard({
     maxDiscount,
   ]);
 
-  const handleRequestChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const inputValue = e.target.value;
-
-    // Allow only numeric input or empty string
-    if (/^\d*$/.test(inputValue)) {
-      setRawRequestAmount(inputValue); // Update raw input state
-      const parsedValue = inputValue ? parseInt(inputValue, 10) : 0;
-      setRequestAmount(parsedValue); // Update parsed value
-      setSelectedPreset(null);
-    }
-  };
+  const handleRequestChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const inputValue = e.target.value;
+      // Allow only valid currency format input or empty string
+      if (/^\$?\d*(\.\d*)?$/.test(inputValue)) {
+        const parsedValue = inputValue
+          ? parseFloat(inputValue.replace(/[^0-9.]/g, ""))
+          : 0;
+        setRawRequestAmount(inputValue);
+        setRequestAmount(parsedValue);
+        setSelectedPreset(null);
+      }
+    },
+    [setRawRequestAmount, setRequestAmount, setSelectedPreset],
+  );
 
   const handleRequestBlur = () => {
-    setRawRequestAmount(formatCurrency(requestAmount!)); // Format the value on blur
+    if (!requestAmount) return;
+    setRawRequestAmount(formatCurrency(requestAmount)); // Format the value on blur
   };
+
   const handleSliderChange = (value: number[]) => {
     const newRequestAmount = Math.round(
       propertyPricingPerNightAfterTierDiscount! * (1 - value[0]! / 100),
@@ -254,6 +260,18 @@ export default function RequestToBookOrBookNowPriceCard({
     setRawRequestAmount(formatCurrency(newRequestAmount));
     setRequestPercentage(value[0]!);
     setSelectedPreset(null);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Check if the Delete or Backspace key was pressed
+    if (e.key === "Delete" || e.key === "Backspace") {
+      setRequestAmount(undefined);
+      setRawRequestAmount("");
+      return;
+    }
+    if (e.key === "Enter") {
+      handleRequestBlur();
+    }
   };
 
   const getRequestLikelihood = () => {
@@ -449,11 +467,17 @@ export default function RequestToBookOrBookNowPriceCard({
                         onChange={handleRequestChange}
                         onBlur={handleRequestBlur}
                         className="pl-7"
+                        onKeyDown={handleKeyDown}
                       />
                       <p className="text-xs italic leading-tight text-muted-foreground">
                         per night
                       </p>
                     </div>
+                    {!rawRequestAmount && (
+                      <p className="mx-2 mt-1 text-xs text-destructive">
+                        Price is required
+                      </p>
+                    )}
                   </div>
                   <div className="text-right">
                     <span className="text-lg font-medium text-green-600">
@@ -528,6 +552,7 @@ export default function RequestToBookOrBookNowPriceCard({
                     requestToBook={requestToBook}
                     property={property}
                     requestPercentage={requestPercentage} // we are getting the request price by using the percentage and saving that in the url for the checkout to get the price
+                    invalidInput={!rawRequestAmount}
                   />
                   <Button
                     variant="outline"
