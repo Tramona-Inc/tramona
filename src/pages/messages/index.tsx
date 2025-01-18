@@ -11,6 +11,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { api } from "@/utils/api";
 import { cn } from "@/utils/utils";
+
 function MessageDisplay() {
   const [selectedConversation, setSelectedConversation] =
     useState<Conversation | null>(null);
@@ -28,8 +29,7 @@ function MessageDisplay() {
     isLoading,
     refetch,
   } = api.messages.getConversations.useQuery(
-    {
-    },
+    {},
     {
       refetchOnWindowFocus: false,
     },
@@ -54,7 +54,7 @@ function MessageDisplay() {
   }, [conversations, isViewed, query.conversationId, selectedConversation?.id]);
 
   return (
-    <div className="flex h-screen-minus-header-n-footer divide-x">
+    <div className="flex h-[calc(100vh-12rem)] divide-x border-b lg:h-[calc(100vh-8rem)]">
       <div
         className={cn(
           "w-full bg-white md:w-96",
