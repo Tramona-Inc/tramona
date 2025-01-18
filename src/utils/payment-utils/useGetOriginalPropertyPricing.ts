@@ -94,10 +94,7 @@ export const useGetOriginalPropertyPricing = ({
   }
   //2.)apply discount tier discounts
   const hostDiscount = isHospitable //hostDiscount = percent off
-    ? getApplicableBookItNowDiscount({
-        discountTiers: property.discountTiers ?? [],
-        checkIn,
-      })
+    ? getApplicableBookItNowDiscount()
     : undefined;
 
   const originalPriceAfterTierDiscount = originalPrice
