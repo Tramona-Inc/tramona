@@ -81,9 +81,7 @@ export default function UnclaimedOfferCards(): JSX.Element {
 
       if (isValid) {
         valid.push(property);
-      } else {
-        console.error("Image failed to load on property ", property.name);
-      }
+      } // not adding failed images to valid
     });
     await Promise.all(promises);
     return valid;
