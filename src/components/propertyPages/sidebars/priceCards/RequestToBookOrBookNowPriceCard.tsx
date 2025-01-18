@@ -31,7 +31,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { isNumber } from "lodash";
 import { useGetOriginalPropertyPricing } from "@/utils/payment-utils/useGetOriginalPropertyPricing";
 import Link from "next/link";
-import { ZodUndefined } from "zod";
+import { MAX_REQUEST_TO_BOOK_PERCENTAGE } from "@/utils/constants";
+
 export type RequestToBookDetails = {
   checkIn: Date;
   checkOut: Date;
@@ -193,7 +194,7 @@ export default function RequestToBookOrBookNowPriceCard({
   const presetOptions = [
     {
       price: propertyPricingPerNightAfterTierDiscount,
-      label: "Buy Now",
+      label: property.bookItNowEnabled ? "Buy Now" : "Original Price",
       percentOff: 0,
     },
     {
@@ -220,9 +221,7 @@ export default function RequestToBookOrBookNowPriceCard({
           propertyPricingPerNightAfterTierDiscount!) *
           100,
       );
-      setRequestPercentage(
-        Math.max(minDiscount, Math.min(newPercentage, maxDiscount)),
-      );
+      setRequestPercentage(Math.max(minDiscount, Math.min(newPercentage)));
     }
   }, [
     showRequestInput,
@@ -478,6 +477,24 @@ export default function RequestToBookOrBookNowPriceCard({
                         Price is required
                       </p>
                     )}
+                    {typeof requestAmount === "number" &&
+                      typeof propertyPricingPerNightAfterTierDiscount ===
+                        "number" &&
+                      requestAmount >
+                        propertyPricingPerNightAfterTierDiscount && (
+                        <p className="mx-1 mt-1 text-xs text-destructive">
+                          Request is above the original price
+                        </p>
+                      )}
+                    {typeof requestAmount === "number" &&
+                      typeof propertyPricingPerNightAfterTierDiscount ===
+                        "number" &&
+                      requestPercentage > MAX_REQUEST_TO_BOOK_PERCENTAGE && (
+                        <p className="mx-1 mt-1 whitespace-nowrap text-xs text-destructive">
+                          Request cannot be more then{" "}
+                          {MAX_REQUEST_TO_BOOK_PERCENTAGE}% of original price
+                        </p>
+                      )}
                   </div>
                   <div className="text-right">
                     <span className="text-lg font-medium text-green-600">
@@ -547,13 +564,27 @@ export default function RequestToBookOrBookNowPriceCard({
                 </div>
 
                 <div className="flex items-center justify-between gap-4">
-                  <RequestToBookBtn
-                    btnSize="sm"
-                    requestToBook={requestToBook}
-                    property={property}
-                    requestPercentage={requestPercentage} // we are getting the request price by using the percentage and saving that in the url for the checkout to get the price
-                    invalidInput={!rawRequestAmount}
-                  />
+                  {/* if property is book it now enabled and if they selected original price */}
+                  {property.bookItNowEnabled &&
+                  propertyPricingPerNightAfterTierDiscount === requestAmount ? (
+                    <BookNowBtn
+                      property={property}
+                      requestToBook={requestToBook}
+                    />
+                  ) : (
+                    <RequestToBookBtn
+                      btnSize="sm"
+                      requestToBook={requestToBook}
+                      property={property}
+                      requestPercentage={requestPercentage} // we are getting the request price by using the percentage and saving that in the url for the checkout to get the price
+                      invalidInput={
+                        !rawRequestAmount ||
+                        !requestAmount ||
+                        !propertyPricingPerNightAfterTierDiscount ||
+                        requestAmount > propertyPricingPerNightAfterTierDiscount
+                      }
+                    />
+                  )}
                   <Button
                     variant="outline"
                     className="flex-1"
