@@ -56,6 +56,9 @@ import { useChatWithAdmin } from "@/utils/messaging/useChatWithAdmin";
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 export type PropertyPageData = RouterOutputs["properties"]["getById"];
 //export type PropertyPageData = RouterOutputs["properties"]["getById"];
+import { TRPCClientErrorLike } from "@trpc/client";
+import { AppRouter } from "@/server/api/root";
+import { signIn } from "next-auth/react";
 
 export default function PropertyPage({
   property,
@@ -153,6 +156,7 @@ export default function PropertyPage({
               alt=""
               fill
               quality={100}
+              unoptimized={true}
               className="object-cover object-center"
             />
           </DialogTriggerNoDrawer>
@@ -172,6 +176,7 @@ export default function PropertyPage({
                     src={imageUrl}
                     alt=""
                     fill
+                    unoptimized={true}
                     className="object-cover object-center"
                     quality={100}
                   />
@@ -268,8 +273,20 @@ export default function PropertyPage({
               <Button
                 onClick={() =>
                   isHospitableUser
-                    ? chatWithHost({ hostId: property.hostTeam.ownerId, hostTeamId: property.hostTeam.id })
+                    ? chatWithHost({
+                        hostId: property.hostTeam.ownerId,
+                        hostTeamId: property.hostTeam.id,
+                      })
                     : chatWithAdmin()
+                        .then()
+                        .catch((err: TRPCClientErrorLike<AppRouter>) => {
+                          if (err.data?.code === "UNAUTHORIZED") {
+                            console.log(err.data.code);
+                            void signIn("google", {
+                              callbackUrl: window.location.href,
+                            });
+                          }
+                        })
                 }
               >
                 <MessageCircleMore />
