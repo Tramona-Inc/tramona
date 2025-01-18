@@ -271,7 +271,6 @@ export function DesktopSearchTab({
                   }
                   onSubmit={handleSearch}
                   isCompact={isCompact}
-                  isLoading={false}
                 />
               </div>
 
