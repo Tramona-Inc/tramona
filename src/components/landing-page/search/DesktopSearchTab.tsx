@@ -70,11 +70,10 @@ export function DesktopSearchTab({
   const [minPrice, setMinPrice] = useState("");
   const [priceSort, setPriceSort] = useState("");
   const [open, setOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
   const router = useRouter();
   const utils = api.useUtils();
-  const { setAdjustedProperties } = useAdjustedProperties();
+  const { setAdjustedProperties, setIsSearching } = useAdjustedProperties();
 
   const sortOptions = {
     none: "Select a value",
@@ -122,7 +121,7 @@ export function DesktopSearchTab({
   );
 
   const handleSearch = async (values: SearchFormValues) => {
-    setIsLoading(true);
+    setIsSearching(true);
     const params = new URLSearchParams();
     Object.entries(values).forEach(([key, value]) => {
       if (value) params.set(key, value.toString());
@@ -191,10 +190,8 @@ export function DesktopSearchTab({
               priceSort,
             ),
           });
-          setIsLoading(false);
           return updatedProperties;
         });
-        // setIsLoading(false);
 
         const cursors =
           airbnbResults.data.staysSearch.results.paginationInfo.pageCursors.slice(
@@ -231,10 +228,10 @@ export function DesktopSearchTab({
       } catch (error) {
         console.error("Error running subscrapers:", error);
       } finally {
-        setIsLoading(false);
+        setIsSearching(false);
       }
     } else {
-      setIsLoading(false);
+      setIsSearching(false);
     }
   };
 
@@ -253,7 +250,6 @@ export function DesktopSearchTab({
                 >
               }
               onSubmit={handleSearch}
-              isLoading={isLoading}
             />
           </div>
 
@@ -274,8 +270,8 @@ export function DesktopSearchTab({
                     >
                   }
                   onSubmit={handleSearch}
-                  isLoading={isLoading}
                   isCompact={isCompact}
+                  isLoading={false}
                 />
               </div>
 
