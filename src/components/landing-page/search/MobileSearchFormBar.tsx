@@ -99,169 +99,166 @@ export function MobileSearchFormBar({
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="overflow-y-none h-[60vh] pb-16 sm:max-w-[700px]">
-        <div className="flex h-full flex-col">
-          <div className="space-y-8 p-6">
-            <h2 className="text-xl font-semibold">Where to?</h2>
-            <Form {...form}>
-              <form onSubmit={handleFormSubmit} className="w-full space-y-6">
-                {/* Location Select */}
-                <FormField
-                  control={form.control}
-                  name="location"
-                  render={({ field }) => (
-                    <FormItem>
-                      <Select
-                        onValueChange={(value) => {
-                          field.onChange(value);
-                          form.clearErrors("location");
-                        }}
-                        value={field.value}
+      <DialogContent className="overflow-y-none sm:max-w-[700px]">
+        <div className="flex h-full flex-col gap-y-8 p-4 pb-20">
+          <h2 className="text-xl font-semibold">Where to?</h2>
+          <Form {...form}>
+            <form
+              onSubmit={handleFormSubmit}
+              className="flex w-full flex-col gap-y-6"
+            >
+              {/* Location Select */}
+              <FormField
+                control={form.control}
+                name="location"
+                render={({ field }) => (
+                  <FormItem>
+                    <Select
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        form.clearErrors("location");
+                      }}
+                      value={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="flex h-13 w-full items-center justify-start rounded-lg bg-gray-50 px-3">
+                          <SearchIcon className="size-5 text-gray-400" />
+                          <div className="flex-1">
+                            <SelectValue
+                              placeholder="Search destinations"
+                              className="text-gray-400"
+                            />
+                          </div>
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent
+                        position="popper"
+                        align="center"
+                        className="h-48 w-full overflow-y-auto"
                       >
-                        <FormControl>
-                          <SelectTrigger className="flex h-13 w-full items-center justify-start rounded-lg bg-gray-50 px-3">
-                            <SearchIcon className="size-5 text-gray-400" />
-                            <div className="flex-1">
-                              <SelectValue
-                                placeholder="Search destinations"
-                                className="text-gray-400"
-                              />
-                            </div>
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent
-                          position="popper"
-                          align="center"
-                          className="h-48 w-full overflow-y-auto"
-                        >
-                          {locations.map((location) => (
-                            <SelectItem
-                              key={location.name}
-                              value={location.name}
-                              className="w-full"
-                            >
-                              {location.name}, {location.country}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                        {locations.map((location) => (
+                          <SelectItem
+                            key={location.name}
+                            value={location.name}
+                            className="w-full"
+                          >
+                            {location.name}, {location.country}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-                {/* Check-in */}
-                <FormField
-                  control={form.control}
-                  name="checkIn"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <div className="relative">
-                          <SingleDateInput
-                            {...field}
-                            value={
-                              field.value instanceof Date
-                                ? field.value
-                                : undefined
-                            }
-                            popoverSide="top"
-                            placeholder="Check in"
-                            disablePast
-                            className="w-full rounded-lg border border-gray-300 p-4 pl-10"
-                            maxDate={
-                              checkOut instanceof Date ? checkOut : undefined
-                            }
-                            onChange={(e: Date | undefined) => {
-                              field.onChange(e);
-                              form.clearErrors("checkIn");
-                            }}
-                          />
-                          <CalendarDays className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              {/* Check-in */}
+              <FormField
+                control={form.control}
+                name="checkIn"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <div className="relative">
+                        <SingleDateInput
+                          {...field}
+                          value={
+                            field.value instanceof Date
+                              ? field.value
+                              : undefined
+                          }
+                          popoverSide="bottom"
+                          placeholder="Check in"
+                          disablePast
+                          className="w-full rounded-lg border border-gray-300 p-4 pl-10"
+                          maxDate={
+                            checkOut instanceof Date ? checkOut : undefined
+                          }
+                          onChange={(e: Date | undefined) => {
+                            field.onChange(e);
+                            form.clearErrors("checkIn");
+                          }}
+                        />
+                        <CalendarDays className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-                {/* Check-out */}
-                <FormField
-                  control={form.control}
-                  name="checkOut"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <div className="relative">
-                          <SingleDateInput
-                            {...field}
-                            value={
-                              field.value instanceof Date
-                                ? field.value
-                                : undefined
-                            }
-                            popoverSide="top"
-                            placeholder="Check out"
-                            disablePast
-                            className="w-full rounded-lg border border-gray-300 p-4 pl-10"
-                            minDate={
-                              checkIn instanceof Date ? checkIn : undefined
-                            }
-                            onChange={(e: Date | undefined) => {
-                              field.onChange(e);
-                              form.clearErrors("checkOut");
-                            }}
-                          />
-                          <CalendarDays className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              {/* Check-out */}
+              <FormField
+                control={form.control}
+                name="checkOut"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <div className="relative">
+                        <SingleDateInput
+                          {...field}
+                          value={
+                            field.value instanceof Date
+                              ? field.value
+                              : undefined
+                          }
+                          popoverSide="bottom"
+                          placeholder="Check out"
+                          disablePast
+                          className="w-full rounded-lg border border-gray-300 p-4 pl-10"
+                          minDate={
+                            checkIn instanceof Date ? checkIn : undefined
+                          }
+                          onChange={(e: Date | undefined) => {
+                            field.onChange(e);
+                            form.clearErrors("checkOut");
+                          }}
+                        />
+                        <CalendarDays className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-                {/* Add Guests field */}
-                <FormField
-                  control={form.control}
-                  name="numGuests"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <div className="relative">
-                          <GuestInput
-                            {...field}
-                            placeholder="Guests"
-                            className="w-full rounded-lg border border-gray-300 p-4 pl-10"
-                            value={field.value}
-                            minGuests={1}
-                            maxGuests={999}
-                            onChange={field.onChange}
-                          />
-                          <Users className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              {/* Add Guests field */}
+              <FormField
+                control={form.control}
+                name="numGuests"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <div className="relative">
+                        <GuestInput
+                          {...field}
+                          placeholder="Guests"
+                          className="w-full rounded-lg border border-gray-300 p-4 pl-10"
+                          value={field.value}
+                          minGuests={1}
+                          maxGuests={999}
+                          onChange={field.onChange}
+                        />
+                        <Users className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-                {/* Submit Button */}
-                <Button
-                  type="submit"
-                  className="w-full rounded-full bg-primaryGreen py-6 text-white"
-                  disabled={false}
-                >
-                  {
-                    <div className="flex items-center justify-center">
-                      <Search className="mr-2 h-5 w-5" />
-                      <span>Search</span>
-                    </div>
-                  }
-                </Button>
-                <FormMessage />
-              </form>
-            </Form>
-          </div>
+              {/* Submit Button */}
+              <Button
+                type="submit"
+                className="mt-12 flex w-full items-center justify-center rounded-full bg-primaryGreen py-6 text-white"
+                disabled={false}
+              >
+                <Search className="mr-2 h-5 w-5" />
+                <span>Search</span>
+              </Button>
+              <FormMessage />
+            </form>
+          </Form>
         </div>
       </DialogContent>
     </Dialog>

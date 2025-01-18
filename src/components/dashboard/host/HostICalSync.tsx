@@ -221,8 +221,8 @@ function Step5TramonaIcalLink({
 }) {
   const [copied, setCopied] = useState(false);
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(tramonaLink);
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(tramonaLink);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -285,7 +285,7 @@ function Step6Confirmation({
   // This step can actually trigger the final form submit if you want,
   // or you can do it in Step4 / Step5. For clarity, we'll do it here:
   const finalSubmit = async () => {
-    await handleFormSubmit(); // calls syncCalendar mutation
+    handleFormSubmit(); // calls syncCalendar mutation
     onFinish();
   };
 

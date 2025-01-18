@@ -53,7 +53,11 @@ export async function handlePendingInviteMessages(email: string) {
   }
 }
 
-async function createOrGetConversation(inviteeEmail: string, hostId: string, hostTeamId?: number) {
+async function createOrGetConversation(
+  inviteeEmail: string,
+  hostId: string,
+  hostTeamId?: number,
+) {
   const inviteeUser = await db.query.users.findFirst({
     where: eq(users.email, inviteeEmail),
     columns: { id: true },
@@ -97,7 +101,11 @@ async function createOrGetConversation(inviteeEmail: string, hostId: string, hos
     if (hostTeamId) {
       await db.insert(conversationParticipants).values([
         { conversationId: newConversation[0].id, userId: inviteeUser.id },
-        { conversationId: newConversation[0].id, userId: hostId, hostTeamId: hostTeamId },
+        {
+          conversationId: newConversation[0].id,
+          userId: hostId,
+          hostTeamId: hostTeamId,
+        },
       ]);
     } else {
       await db.insert(conversationParticipants).values([

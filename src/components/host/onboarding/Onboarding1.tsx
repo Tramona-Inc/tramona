@@ -51,6 +51,7 @@ import {
   CheckCircle2,
   ArrowRight,
 } from "lucide-react";
+import Image from "next/image";
 
 const steps = [
   {
@@ -119,11 +120,11 @@ export default function Onboarding1({
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchStart(e.targetTouches[0].clientX);
+    setTouchStart(e.targetTouches[0]!.clientX);
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX);
+    setTouchEnd(e.targetTouches[0]!.clientX);
   };
 
   const handleTouchEnd = () => {
@@ -589,7 +590,7 @@ export default function Onboarding1({
           <div className="w-full max-w-md rounded-lg bg-white shadow-xl">
             <div className="p-6">
               <h2 className="mb-4 text-2xl font-bold">
-                {steps[currentStep].title}
+                {steps[currentStep]!.title}
               </h2>
               <div className="relative mb-4 h-48 overflow-hidden">
                 <div
@@ -601,7 +602,7 @@ export default function Onboarding1({
                 >
                   {steps.map((step, index) => (
                     <div key={index} className="h-full w-full flex-shrink-0">
-                      <img
+                      <Image
                         src={step.image || "/placeholder.svg"}
                         alt={`Step ${index + 1}`}
                         className="h-full w-full rounded-lg object-cover"
@@ -625,7 +626,7 @@ export default function Onboarding1({
                 </button>
               </div>
               <p className="mb-4 text-gray-600">
-                {steps[currentStep].description}
+                {steps[currentStep]!.description}
               </p>
               <div className="flex items-center justify-between">
                 <div className="space-x-1">
