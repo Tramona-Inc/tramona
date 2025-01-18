@@ -466,44 +466,41 @@ export default function HostICalSync({
   };
 
   return (
-    <div>
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger className="mt-4 lg:mt-8">
-          {property.iCalLink ? (
-            <Button variant="secondary">Edit iCal Link</Button>
-          ) : (
-            <Button size="lg">Sync your iCal</Button>
-          )}
-        </DialogTrigger>
-
-        {/* Our Enhanced Multi-step Wizard */}
-        {open && (
-          <EnhancedICalModal
-            property={property}
-            onClose={() => setOpen(false)}
-          />
-        )}
-      </Dialog>
-
-      {/* If you still want to display any info outside the modal, you can do so here.
-          But we've moved the main "Edit iCal" logic into the multi-step wizard. */}
-
-      {/* Example: A "How to" dialog button, if needed */}
-      <div className="mt-4">
+    <div className="my-6 flex w-full flex-col items-start justify-start gap-x-4 gap-y-3 md:flex-row md:items-end 2xl:mx-8">
+      <div className="flex flex-row gap-x-2">
         <HostICalHowToDialog />
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger className="w-full flex-1">
+            {property.iCalLink ? (
+              <Button variant="primary">Edit iCal Link</Button>
+            ) : (
+              <Button size="lg">Sync your iCal</Button>
+            )}
+          </DialogTrigger>
+
+          {/* Our Enhanced Multi-step Wizard */}
+          {open && (
+            <EnhancedICalModal
+              property={property}
+              onClose={() => setOpen(false)}
+            />
+          )}
+        </Dialog>
       </div>
 
       {/* Example: Show Tramona iCal link copy button outside or wherever you want */}
-      <div className="mt-2 flex items-center space-x-2">
-        <Label className="font-semibold">
-          Your Tramona iCal Link (for external apps):
-        </Label>
-        <Input
-          readOnly
-          className="w-72"
-          value={`https://tramona.com/api/ics/${property.id}`}
-        />
-        <Button onClick={handleCopyICalLink}>
+      <div className="flex flex-col items-start justify-center gap-x-1 gap-y-1 sm:flex-row sm:items-end">
+        <div className="flex flex-col gap-x-1 2xl:flex-row 2xl:items-center">
+          <Label className="text-sm font-semibold sm:mx-0">
+            Your Tramona iCal Link (for external apps):
+          </Label>
+          <Input
+            readOnly
+            className="w-72"
+            value={`https://tramona.com/api/ics/${property.id}`}
+          />
+        </div>
+        <Button onClick={handleCopyICalLink} variant="secondary">
           <Copy className="mr-1 h-4 w-4" />
           Copy
         </Button>

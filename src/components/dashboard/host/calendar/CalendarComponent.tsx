@@ -300,7 +300,7 @@ export default function CalendarComponent() {
               isLoading={isLoading}
             />
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="mx-auto flex w-full gap-2">
             {/* <Button
               variant="secondary"
               size="sm"

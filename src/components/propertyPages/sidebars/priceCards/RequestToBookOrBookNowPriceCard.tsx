@@ -31,7 +31,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { isNumber } from "lodash";
 import { useGetOriginalPropertyPricing } from "@/utils/payment-utils/useGetOriginalPropertyPricing";
 import Link from "next/link";
-import { ZodUndefined } from "zod";
+import { MAX_REQUEST_TO_BOOK_PERCENTAGE } from "@/utils/constants";
+
 export type RequestToBookDetails = {
   checkIn: Date;
   checkOut: Date;
@@ -80,6 +81,12 @@ export default function RequestToBookOrBookNowPriceCard({
       : undefined;
 
   const [error, setError] = useState<React.ReactNode | null>(null);
+
+  const [errorState, setErrorState] = useState<{
+    priceRequired?: boolean;
+    priceAboveOriginal?: boolean;
+    percentageAboveMax?: boolean;
+  }>({});
 
   const [requestAmount, setRequestAmount] = useState(
     propertyPricingPerNightAfterTierDiscount,
@@ -193,7 +200,7 @@ export default function RequestToBookOrBookNowPriceCard({
   const presetOptions = [
     {
       price: propertyPricingPerNightAfterTierDiscount,
-      label: "Buy Now",
+      label: property.bookItNowEnabled ? "Buy Now" : "Original Price",
       percentOff: 0,
     },
     {
@@ -220,9 +227,7 @@ export default function RequestToBookOrBookNowPriceCard({
           propertyPricingPerNightAfterTierDiscount!) *
           100,
       );
-      setRequestPercentage(
-        Math.max(minDiscount, Math.min(newPercentage, maxDiscount)),
-      );
+      setRequestPercentage(Math.max(minDiscount, Math.min(newPercentage)));
     }
   }, [
     showRequestInput,
@@ -248,7 +253,21 @@ export default function RequestToBookOrBookNowPriceCard({
   );
 
   const handleRequestBlur = () => {
-    if (!requestAmount) return;
+    if (!requestAmount) {
+      setErrorState({ priceRequired: true });
+      return;
+    }
+    setErrorState({
+      priceRequired: false,
+      priceAboveOriginal:
+        typeof requestAmount === "number" &&
+        typeof propertyPricingPerNightAfterTierDiscount === "number" &&
+        requestAmount > propertyPricingPerNightAfterTierDiscount,
+      percentageAboveMax:
+        typeof requestAmount === "number" &&
+        typeof propertyPricingPerNightAfterTierDiscount === "number" &&
+        requestPercentage > MAX_REQUEST_TO_BOOK_PERCENTAGE,
+    });
     setRawRequestAmount(formatCurrency(requestAmount)); // Format the value on blur
   };
 
@@ -260,6 +279,7 @@ export default function RequestToBookOrBookNowPriceCard({
     setRawRequestAmount(formatCurrency(newRequestAmount));
     setRequestPercentage(value[0]!);
     setSelectedPreset(null);
+    setErrorState({});
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -267,6 +287,7 @@ export default function RequestToBookOrBookNowPriceCard({
     if (e.key === "Delete" || e.key === "Backspace") {
       setRequestAmount(undefined);
       setRawRequestAmount("");
+      setErrorState({});
       return;
     }
     if (e.key === "Enter") {
@@ -303,6 +324,7 @@ export default function RequestToBookOrBookNowPriceCard({
       Math.max(minDiscount, Math.min(newPercentage, maxDiscount)),
     );
     setSelectedPreset(price);
+    setErrorState({});
   };
 
   return (
@@ -473,9 +495,20 @@ export default function RequestToBookOrBookNowPriceCard({
                         per night
                       </p>
                     </div>
-                    {!rawRequestAmount && (
+                    {errorState.priceRequired && (
                       <p className="mx-2 mt-1 text-xs text-destructive">
                         Price is required
+                      </p>
+                    )}
+                    {errorState.priceAboveOriginal && (
+                      <p className="mx-1 mt-1 text-xs text-destructive">
+                        Request is above the original price
+                      </p>
+                    )}
+                    {errorState.percentageAboveMax && (
+                      <p className="mx-1 mt-1 text-xs text-destructive">
+                        Request cannot be more then{" "}
+                        {MAX_REQUEST_TO_BOOK_PERCENTAGE}% of original price
                       </p>
                     )}
                   </div>
@@ -547,13 +580,27 @@ export default function RequestToBookOrBookNowPriceCard({
                 </div>
 
                 <div className="flex items-center justify-between gap-4">
-                  <RequestToBookBtn
-                    btnSize="sm"
-                    requestToBook={requestToBook}
-                    property={property}
-                    requestPercentage={requestPercentage} // we are getting the request price by using the percentage and saving that in the url for the checkout to get the price
-                    invalidInput={!rawRequestAmount}
-                  />
+                  {/* if property is book it now enabled and if they selected original price */}
+                  {property.bookItNowEnabled &&
+                  propertyPricingPerNightAfterTierDiscount === requestAmount ? (
+                    <BookNowBtn
+                      property={property}
+                      requestToBook={requestToBook}
+                    />
+                  ) : (
+                    <RequestToBookBtn
+                      btnSize="sm"
+                      requestToBook={requestToBook}
+                      property={property}
+                      requestPercentage={requestPercentage} // we are getting the request price by using the percentage and saving that in the url for the checkout to get the price
+                      invalidInput={
+                        !rawRequestAmount ||
+                        !requestAmount ||
+                        !propertyPricingPerNightAfterTierDiscount ||
+                        requestAmount > propertyPricingPerNightAfterTierDiscount
+                      }
+                    />
+                  )}
                   <Button
                     variant="outline"
                     className="flex-1"
