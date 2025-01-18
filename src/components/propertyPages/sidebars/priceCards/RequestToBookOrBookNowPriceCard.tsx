@@ -82,6 +82,12 @@ export default function RequestToBookOrBookNowPriceCard({
 
   const [error, setError] = useState<React.ReactNode | null>(null);
 
+  const [errorState, setErrorState] = useState<{
+    priceRequired?: boolean;
+    priceAboveOriginal?: boolean;
+    percentageAboveMax?: boolean;
+  }>({});
+
   const [requestAmount, setRequestAmount] = useState(
     propertyPricingPerNightAfterTierDiscount,
   );
@@ -247,7 +253,21 @@ export default function RequestToBookOrBookNowPriceCard({
   );
 
   const handleRequestBlur = () => {
-    if (!requestAmount) return;
+    if (!requestAmount) {
+      setErrorState({ priceRequired: true });
+      return;
+    }
+    setErrorState({
+      priceRequired: false,
+      priceAboveOriginal:
+        typeof requestAmount === "number" &&
+        typeof propertyPricingPerNightAfterTierDiscount === "number" &&
+        requestAmount > propertyPricingPerNightAfterTierDiscount,
+      percentageAboveMax:
+        typeof requestAmount === "number" &&
+        typeof propertyPricingPerNightAfterTierDiscount === "number" &&
+        requestPercentage > MAX_REQUEST_TO_BOOK_PERCENTAGE,
+    });
     setRawRequestAmount(formatCurrency(requestAmount)); // Format the value on blur
   };
 
@@ -259,6 +279,7 @@ export default function RequestToBookOrBookNowPriceCard({
     setRawRequestAmount(formatCurrency(newRequestAmount));
     setRequestPercentage(value[0]!);
     setSelectedPreset(null);
+    setErrorState({});
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -266,6 +287,7 @@ export default function RequestToBookOrBookNowPriceCard({
     if (e.key === "Delete" || e.key === "Backspace") {
       setRequestAmount(undefined);
       setRawRequestAmount("");
+      setErrorState({});
       return;
     }
     if (e.key === "Enter") {
@@ -302,6 +324,7 @@ export default function RequestToBookOrBookNowPriceCard({
       Math.max(minDiscount, Math.min(newPercentage, maxDiscount)),
     );
     setSelectedPreset(price);
+    setErrorState({});
   };
 
   return (
@@ -472,29 +495,22 @@ export default function RequestToBookOrBookNowPriceCard({
                         per night
                       </p>
                     </div>
-                    {!rawRequestAmount && (
+                    {errorState.priceRequired && (
                       <p className="mx-2 mt-1 text-xs text-destructive">
                         Price is required
                       </p>
                     )}
-                    {typeof requestAmount === "number" &&
-                      typeof propertyPricingPerNightAfterTierDiscount ===
-                        "number" &&
-                      requestAmount >
-                        propertyPricingPerNightAfterTierDiscount && (
-                        <p className="mx-1 mt-1 text-xs text-destructive">
-                          Request is above the original price
-                        </p>
-                      )}
-                    {typeof requestAmount === "number" &&
-                      typeof propertyPricingPerNightAfterTierDiscount ===
-                        "number" &&
-                      requestPercentage > MAX_REQUEST_TO_BOOK_PERCENTAGE && (
-                        <p className="mx-1 mt-1 whitespace-nowrap text-xs text-destructive">
-                          Request cannot be more then{" "}
-                          {MAX_REQUEST_TO_BOOK_PERCENTAGE}% of original price
-                        </p>
-                      )}
+                    {errorState.priceAboveOriginal && (
+                      <p className="mx-1 mt-1 text-xs text-destructive">
+                        Request is above the original price
+                      </p>
+                    )}
+                    {errorState.percentageAboveMax && (
+                      <p className="mx-1 mt-1 text-xs text-destructive">
+                        Request cannot be more then{" "}
+                        {MAX_REQUEST_TO_BOOK_PERCENTAGE}% of original price
+                      </p>
+                    )}
                   </div>
                   <div className="text-right">
                     <span className="text-lg font-medium text-green-600">
