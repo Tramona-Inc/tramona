@@ -812,26 +812,11 @@ export function removeTax(total: number, taxRate: number): number {
   return amountWithoutTax;
 }
 
-export const getApplicableBookItNowDiscount = ({
-  discountTiers,
-  checkIn,
-}: {
-  discountTiers: { days: number; percentOff: number }[] | null | undefined;
-  checkIn: Date;
-}): number | null => {
-  if (!discountTiers || discountTiers.length === 0) {
-    return null;
-  }
+export const getApplicableBookItNowDiscount = () => {
+  ///WE ARE NOT DOING DISCOUNT TIERS ANYMORE THATS WHY IM RETURNING NULL
+  //but i plan on adding discounts in the near future so this function can stay :)
 
-  const daysUntilCheckIn = differenceInDays(checkIn, new Date());
-
-  const sortedTiers = [...discountTiers].sort((a, b) => b.days - a.days);
-
-  const applicableDiscount = sortedTiers.find(
-    (tier) => daysUntilCheckIn >= tier.days,
-  );
-
-  return applicableDiscount?.percentOff ?? null;
+  return null;
 };
 
 export const capitalizeFirstLetter = (string: string): string => {

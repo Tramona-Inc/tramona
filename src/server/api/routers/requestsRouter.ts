@@ -443,7 +443,7 @@ export async function handleRequestSubmission(
             applicableDiscount &&
             percentOff <= applicableDiscount.percentOff
           ) {
-            //create trip checkout First
+            //create offer
             const travelerOfferedPriceBeforeFees = getTravelerOfferedPrice({
               totalBasePriceBeforeFees: requestedNightlyPrice * numNights,
               travelerMarkup: TRAVELER_MARKUP,
