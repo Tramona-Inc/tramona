@@ -22,10 +22,9 @@ import ListMessagesWithAdmin from "./ListMessagesWithAdmin";
 //Parwizstart: added useCallback for memoization ( without it the debounced would be recreated every rendering causing a problem than a solution)
 import { useEffect, useState, useCallback } from "react";
 //debounce was added to prevent too many state updates because it was causing errors (when opening and closing chat popover)
-import debounce from 'lodash/debounce';
+import debounce from "lodash/debounce";
 import { type MessageDbType } from "@/types/supabase.message";
 import usePopoverStore from "@/utils/store/messagePopoverStore";
-
 
 export default function MessagesPopover({
   isMobile,
@@ -36,8 +35,8 @@ export default function MessagesPopover({
 }) {
   // ParwizStart - Added state for client-side rendering
   // Handle server-side vs client-side rendering mismatch
-// Component only renders after it's mounted in the browser
-// This prevents hydration errors in Next.js
+  // Component only renders after it's mounted in the browser
+  // This prevents hydration errors in Next.js
   const [isClient, setIsClient] = useState(false);
   useEffect(() => {
     setIsClient(true);
@@ -71,8 +70,8 @@ export default function MessagesPopover({
     api.messages.sendChatboxSlackMessage.useMutation();
   const { fetchInitialMessages, conversations } = useMessage();
   // const setOptimisticIds = useMessage((state) => state.setOptimisticIds);
-//sort the messages by date
-//will bring the latest message to the bottom and oldest in top
+  //sort the messages by date
+  //will bring the latest message to the bottom and oldest in top
   const messages = conversationId
     ? (() => {
         const messagesList = conversations[conversationId]?.messages ?? [];
@@ -159,8 +158,8 @@ export default function MessagesPopover({
 
   const handlePostgresChange = async (payload: { new: MessageDbType }) => {
     // Add console.log to debug message handling
-    console.log('Message received:', payload.new);
-    console.log('Optimistic IDs:', optimisticIds);
+    console.log("Message received:", payload.new);
+    console.log("Optimistic IDs:", optimisticIds);
 
     // Only add message if it's not an optimistic update
     if (!optimisticIds.includes(payload.new.id)) {
@@ -175,7 +174,7 @@ export default function MessagesPopover({
         createdAt: payload.new.created_at,
         read: payload.new.read,
       };
-      
+
       // Force a small delay to ensure message state is updated
       setTimeout(() => {
         addMessageToConversation(payload.new.conversation_id, newMessage);
@@ -199,27 +198,27 @@ export default function MessagesPopover({
       "https://lh3.googleusercontent.com/a/ACg8ocJGoxiyA7Dh7_s4C1ftNnkpo4daonbAEClM6bDnZEUyTE-nMmw=s96-c",
   };
 
-// ParwizStart - Added validation to ensure message is not empty
-// Original:
-// const formSchema = z.object({
-//   message: z.string(),
-// });
-// Updated: requires the string to be at least 1 character long 
-// 
-const formSchema = z.object({
-  message: z.string().min(1, "Message cannot be empty"),
-});
-// ParwizEnd
+  // ParwizStart - Added validation to ensure message is not empty
+  // Original:
+  // const formSchema = z.object({
+  //   message: z.string(),
+  // });
+  // Updated: requires the string to be at least 1 character long
+  //
+  const formSchema = z.object({
+    message: z.string().min(1, "Message cannot be empty"),
+  });
+  // ParwizEnd
 
   const handleOnSend = async (values: z.infer<typeof formSchema>) => {
-  //parwizstart: this where I changed the structure of the message to be sent to the db
-  //for error handling I added a try catch block
+    //parwizstart: this where I changed the structure of the message to be sent to the db
+    //for error handling I added a try catch block
     //if something went wrong with messages or the db the errors at the end will go on
-  try {
+    try {
       form.reset();
-     
+
       if (!session) {
-         //parwiz start: Added validation for guest user token
+        //parwiz start: Added validation for guest user token
         if (!tempToken) {
           errorToast("Unable to send message. Please try again.");
           return;
@@ -230,7 +229,7 @@ const formSchema = z.object({
           await createOrRetrieveConversationFromGuest({
             sessionToken: tempToken,
           });
-          //parwizstart: added conversationId to the state to update for guest user
+        //parwizstart: added conversationId to the state to update for guest user
         setConversationId(conversationId);
         //parwizend
         const newMessage: ChatMessageType = {
@@ -325,7 +324,6 @@ const formSchema = z.object({
     },
     //parwizend:
   });
-  
 
   useEffect(() => {
     if (isHostOnboarding) {
@@ -343,7 +341,7 @@ const formSchema = z.object({
     debounce((value: boolean) => {
       setOpen(value);
     }, 100),
-    []
+    [],
   );
 
   const handleOpenChange = (value: boolean) => {
@@ -469,6 +467,5 @@ const formSchema = z.object({
         </>
       )}
     </>
-
   );
 }

@@ -1228,6 +1228,16 @@ export async function getRequestsToBookForProperties(
   return propertyToRequestMap;
 }
 
+export async function getHostTeamFromProperty(propertyId: number) {
+  const hostTeam = await db.query.properties.findFirst({
+    where: eq(properties.id, propertyId),
+    columns: {
+      hostTeamId: true,
+    },
+  });
+  return hostTeam?.hostTeamId;
+}
+
 export async function addHostProfile({
   userId,
   hostawayApiKey,

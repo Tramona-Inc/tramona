@@ -4,18 +4,18 @@ import {
 } from "@/server/api/routers/messagesRouter";
 import { env } from "@/env";
 
-const ADMIN_ID = env.TRAMONA_ADMIN_USER_ID;
-
 export async function createConversationWithOfferAfterBooking({
   offerId,
-  offerHostId,
+  // offerHostId,
   offerPropertyName,
   travelerId,
+  hostTeamId,
 }: {
   offerId: string;
-  offerHostId: string | null;
+  // offerHostId: string | null;
   offerPropertyName: string;
   travelerId: string;
+  hostTeamId: number;
 }) {
   //check to see if the conversation already exist
   const conversationExistId = await fetchConversationWithOffer(
@@ -25,15 +25,15 @@ export async function createConversationWithOfferAfterBooking({
   console.log(conversationExistId, "converation exist");
 
   //determine if the conversation will be with the host or the admin
-  const offerHostOrAllAdmins = offerHostId ? offerHostId : ADMIN_ID;
+  // const offerHostOrAllAdmins = offerHostId ? offerHostId : ADMIN_ID;
 
   // Create conversation with host if it doesn't exist
   if (!conversationExistId) {
     return await createConversationWithOfferHelper(
       travelerId,
-      offerHostOrAllAdmins,
       offerPropertyName,
       offerId,
+      hostTeamId,
     );
   }
   return conversationExistId;

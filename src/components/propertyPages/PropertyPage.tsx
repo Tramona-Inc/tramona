@@ -273,18 +273,10 @@ export default function PropertyPage({
               <Button
                 onClick={() =>
                   isHospitableUser
-                    ? chatWithHost({ hostId: property.hostTeam.ownerId })
-                        .then()
-                        .catch((err: TRPCClientErrorLike<AppRouter>) => {
-                          if (err.data?.code === "UNAUTHORIZED") {
-                            console.log();
-                            console.log(err.data.code);
-                            void signIn(undefined, {
-                              callbackUrl: window.location.href,
-                              redirect: false,
-                            });
-                          }
-                        })
+                    ? chatWithHost({
+                        hostId: property.hostTeam.ownerId,
+                        hostTeamId: property.hostTeam.id,
+                      })
                     : chatWithAdmin()
                         .then()
                         .catch((err: TRPCClientErrorLike<AppRouter>) => {
@@ -363,9 +355,9 @@ export default function PropertyPage({
             </div>
             {offer && (
               <ChatOfferButton
-                offerId={offer.id.toString()}
                 offerHostId={offer.property.hostTeam.ownerId}
                 offerPropertyName={offer.property.name}
+                hostTeamId={property.hostTeam.id}
               />
             )}
           </section>
