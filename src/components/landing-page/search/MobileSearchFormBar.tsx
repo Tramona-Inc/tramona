@@ -23,70 +23,54 @@ import { CalendarDays } from "lucide-react";
 import SingleDateInput from "@/components/_common/SingleDateInput";
 import GuestInput from "@/components/_common/GuestInput";
 import { Users } from "lucide-react";
+import { useAdjustedProperties } from "./AdjustedPropertiesContext";
 
 interface MobileSearchFormBarProps {
   form: UseFormReturn<SearchFormValues, unknown, SearchFormValues>;
   onSubmit: (values: SearchFormValues) => Promise<void> | void;
-  isLoading: boolean;
 }
 
 export function MobileSearchFormBar({
   form,
   onSubmit,
-  isLoading,
 }: MobileSearchFormBarProps) {
   const [open, setOpen] = React.useState(false);
   const location = form.watch("location");
   const checkIn = form.watch("checkIn");
   const checkOut = form.watch("checkOut");
   const numGuests = form.watch("numGuests");
+  const { setIsSearching } = useAdjustedProperties();
 
   const getDisplayText = () => {
-    if (location) {
-      return location;
-    }
-    return "Best prices on Airbnbs anywhere";
+    return location ?? "Best prices on Airbnbs anywhere";
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const values = form.getValues();
-    let hasError = false;
-
-    form.clearErrors();
-
-    if (!values.location) {
-      form.setError("location", { message: "Please select a destination" });
-      hasError = true;
-    }
-    if (values.checkIn === undefined) {
-      form.setError("checkIn", { message: "Required" });
-      hasError = true;
-    }
-    if (values.checkOut === undefined) {
-      form.setError("checkOut", { message: "Required" });
-      hasError = true;
-    }
-
-    if (hasError) {
-      // Keep dialog open to show error messages
-      return;
-    }
-
-    // Close dialog immediately if validation passes
+  const handleSubmit = async (values: SearchFormValues) => {
     setOpen(false);
     // Scroll to properties section
     window.scrollTo({
       top: 350,
       behavior: "smooth",
     });
-
     try {
+      setIsSearching(true);
       await onSubmit(values);
     } catch (error) {
-      console.error(error);
+      form.setError("root", {
+        message: "Something went wrong, please try again",
+      });
+    } finally {
+      setIsSearching(false);
     }
   };
+
+  const handleFormSubmit = form.handleSubmit(async (values) => {
+    // Trigger all fields to validate if there are no errors
+    await form.trigger();
+    const hasErrors = Object.keys(form.formState.errors).length > 0;
+    if (hasErrors) return;
+    await handleSubmit(values);
+  });
 
   const displayText = [
     checkIn && new Date(checkIn).toLocaleDateString(),
@@ -120,7 +104,7 @@ export function MobileSearchFormBar({
           <div className="space-y-8 p-6">
             <h2 className="text-xl font-semibold">Where to?</h2>
             <Form {...form}>
-              <form onSubmit={handleSubmit} className="w-full space-y-6">
+              <form onSubmit={handleFormSubmit} className="w-full space-y-6">
                 {/* Location Select */}
                 <FormField
                   control={form.control}
@@ -251,6 +235,7 @@ export function MobileSearchFormBar({
                             value={field.value}
                             minGuests={1}
                             maxGuests={999}
+                            onChange={field.onChange}
                           />
                           <Users className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
                         </div>
@@ -264,18 +249,16 @@ export function MobileSearchFormBar({
                 <Button
                   type="submit"
                   className="w-full rounded-full bg-primaryGreen py-6 text-white"
-                  disabled={isLoading}
-                  onClick={handleSubmit}
+                  disabled={false}
                 >
-                  {isLoading ? (
-                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                  ) : (
+                  {
                     <div className="flex items-center justify-center">
                       <Search className="mr-2 h-5 w-5" />
                       <span>Search</span>
                     </div>
-                  )}
+                  }
                 </Button>
+                <FormMessage />
               </form>
             </Form>
           </div>
