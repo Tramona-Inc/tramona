@@ -6,8 +6,6 @@ import {
   bids,
   groupMembers,
   groups,
-  trips,
-  users,
 } from "@/server/db/schema";
 import {
   counterInsertSchema,

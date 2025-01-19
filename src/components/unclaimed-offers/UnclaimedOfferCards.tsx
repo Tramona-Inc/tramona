@@ -210,10 +210,11 @@ export default function UnclaimedOfferCards(): JSX.Element {
             <div className="flex h-full w-full items-center justify-center">
               <div className="text-center">
                 <div className="text-lg font-bold">
-                  This is where you see your properties
+                  This is where you see your properties, enter preferences in
+                  the search bar to start looking
                 </div>
                 <div className="mt-2 text-sm text-zinc-500">
-                  Make a search to explore properties
+                  Let&apos;s fill empty nights
                 </div>
               </div>
             </div>
