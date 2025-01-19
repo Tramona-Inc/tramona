@@ -214,7 +214,7 @@ export default function UnclaimedOfferCards(): JSX.Element {
                   the search bar to start looking
                 </div>
                 <div className="mt-2 text-sm text-zinc-500">
-                  Let's fill empty nights
+                  Let&apos;s fill empty nights
                 </div>
               </div>
             </div>
