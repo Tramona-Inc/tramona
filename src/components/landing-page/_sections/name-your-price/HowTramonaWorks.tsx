@@ -47,8 +47,9 @@ function HowTramonaWorks({ className }: { className: string }) {
                 <h4 className="mb-2 font-semibold">Complete Control, Always</h4>
                 <p className="text-gray-600">
                   Always in full control of pricing. Accept, reject, or counter
-                  all traveler offers. Choose to put Tramona on autopilot or
-                  keep it manual.
+                  all traveler offers. Set preferences on the host side on what
+                  you are interested in seeing. Choose to put Tramona on
+                  autopilot or keep it manual.
                 </p>
               </div>
             </li>
@@ -74,8 +75,8 @@ function HowTramonaWorks({ className }: { className: string }) {
         {/* Traveler text - moved below the host section */}
         <div className="mt-12 text-center">
           <h2 className="text-2xl font-semibold text-[#000000] lg:text-3xl">
-            Travelers, the choice is simple. With Tramona, you can just travel
-            more
+            Travelers, the choice is simple. Better prices, better customer
+            service and lower fees more
           </h2>
         </div>
       </div>
