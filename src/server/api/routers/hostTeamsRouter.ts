@@ -10,25 +10,27 @@ import {
   users,
 } from "@/server/db/schema";
 import { db } from "@/server/db";
-import { getHostTeamOwnerId, sendEmail } from "@/server/server-utils";
+import { sendEmail } from "@/server/server-utils";
 import { TRPCError } from "@trpc/server";
 import { add, subMinutes } from "date-fns";
 import { and, eq, or, sql, desc } from "drizzle-orm";
 import { z } from "zod";
 import {
+  coHostProcedure,
   createTRPCRouter,
   hostProcedure,
   protectedProcedure,
   roleRestrictedProcedure,
 } from "../trpc";
 import HostTeamInviteEmail from "packages/transactional/emails/HostTeamInviteEmail";
+import { sendSlackMessage } from "@/server/slack";
 
 export async function handlePendingInviteMessages(email: string) {
   const pendingInvites = await db.query.hostTeamInvites.findMany({
     where: eq(hostTeamInvites.inviteeEmail, email),
     with: {
       hostTeam: {
-        columns: { name: true },
+        columns: { name: true, id: true },
         with: { owner: { columns: { id: true } } },
       },
     },
@@ -38,6 +40,7 @@ export async function handlePendingInviteMessages(email: string) {
     const conversationId = await createOrGetConversation(
       email,
       invite.hostTeam.owner.id,
+      invite.hostTeam.id,
     );
     if (conversationId) {
       await sendInviteMessage(
@@ -50,7 +53,11 @@ export async function handlePendingInviteMessages(email: string) {
   }
 }
 
-async function createOrGetConversation(inviteeEmail: string, hostId: string) {
+async function createOrGetConversation(
+  inviteeEmail: string,
+  hostId: string,
+  hostTeamId?: number,
+) {
   const inviteeUser = await db.query.users.findFirst({
     where: eq(users.email, inviteeEmail),
     columns: { id: true },
@@ -91,10 +98,21 @@ async function createOrGetConversation(inviteeEmail: string, hostId: string) {
       throw new Error("Failed to create new conversation");
     }
 
-    await db.insert(conversationParticipants).values([
-      { conversationId: newConversation[0].id, userId: inviteeUser.id },
-      { conversationId: newConversation[0].id, userId: hostId },
-    ]);
+    if (hostTeamId) {
+      await db.insert(conversationParticipants).values([
+        { conversationId: newConversation[0].id, userId: inviteeUser.id },
+        {
+          conversationId: newConversation[0].id,
+          userId: hostId,
+          hostTeamId: hostTeamId,
+        },
+      ]);
+    } else {
+      await db.insert(conversationParticipants).values([
+        { conversationId: newConversation[0].id, userId: inviteeUser.id },
+        { conversationId: newConversation[0].id, userId: hostId },
+      ]);
+    }
 
     return newConversation[0].id;
   }
@@ -216,6 +234,7 @@ export const hostTeamsRouter = createTRPCRouter({
         id,
         expiresAt: add(new Date(), { hours: 24 }),
         hostTeamId: input.hostTeamId,
+        role: input.role,
         inviteeEmail: input.email,
         lastSentAt: now,
       });
@@ -231,6 +250,7 @@ export const hostTeamsRouter = createTRPCRouter({
       const conversationId = await createOrGetConversation(
         input.email,
         ctx.user.id,
+        input.hostTeamId,
       );
       await sendInviteMessage(
         conversationId,
@@ -304,6 +324,7 @@ export const hostTeamsRouter = createTRPCRouter({
       const conversationId = await createOrGetConversation(
         input.email,
         ctx.user.id,
+        input.hostTeamId,
       );
       await sendInviteMessage(conversationId, hostTeam.name, true, ctx.user.id);
 
@@ -389,24 +410,19 @@ export const hostTeamsRouter = createTRPCRouter({
       }
     }),
 
-  removeHostTeamMember: protectedProcedure
-    .input(z.object({ memberId: z.string(), hostTeamId: z.number() }))
-    .mutation(async ({ input, ctx }) => {
-      const hostTeamOwnerId = await getHostTeamOwnerId(input.hostTeamId);
-
-      if (ctx.user.id !== hostTeamOwnerId) {
-        throw new TRPCError({ code: "UNAUTHORIZED" });
-      }
-
-      await ctx.db
-        .delete(hostTeamMembers)
-        .where(
-          and(
-            eq(hostTeamMembers.userId, input.memberId),
-            eq(hostTeamMembers.hostTeamId, input.hostTeamId),
-          ),
-        );
-    }),
+  removeHostTeamMember: coHostProcedure(
+    "remove_cohost",
+    z.object({ memberId: z.string(), currentHostTeamId: z.number() }),
+  ).mutation(async ({ input, ctx }) => {
+    await ctx.db
+      .delete(hostTeamMembers)
+      .where(
+        and(
+          eq(hostTeamMembers.userId, input.memberId),
+          eq(hostTeamMembers.hostTeamId, input.currentHostTeamId),
+        ),
+      );
+  }),
 
   getHostTeamOwner: protectedProcedure
     .input(z.object({ hostTeamId: z.number() }))
@@ -429,7 +445,6 @@ export const hostTeamsRouter = createTRPCRouter({
     }),
 
   getInitialHostTeamId: protectedProcedure.query(async ({ ctx }) => {
-    console.log("ran");
     const initialHostTeamId = await db.query.hostTeamMembers
       .findMany({
         where: eq(hostTeamMembers.userId, ctx.user.id),
@@ -469,7 +484,13 @@ export const hostTeamsRouter = createTRPCRouter({
           },
         },
       })
-      .then((res) => res?.hostTeams.map((t) => t.hostTeam) ?? []);
+      .then(
+        (res) =>
+          res?.hostTeams.map((t) => ({
+            ...t.hostTeam,
+            curUserId: ctx.user.id,
+          })) ?? [],
+      );
 
     return hostTeams;
   }),
@@ -543,7 +564,7 @@ export const hostTeamsRouter = createTRPCRouter({
       };
     }),
 
-  joinHostTeam: protectedProcedure
+  joinHostTeam: protectedProcedure //here we can create a host profile, since they are joining as a non-host
     .input(z.object({ cohostInviteId: z.string() }))
     .mutation(async ({ input, ctx }) => {
       const invite = await ctx.db.query.hostTeamInvites.findFirst({
@@ -594,9 +615,30 @@ export const hostTeamsRouter = createTRPCRouter({
         return { status: "already in team" } as const;
       }
 
+      //create the hostProfile if does not exist
+      await db.query.hostProfiles
+        .findFirst({
+          where: eq(hostProfiles.userId, ctx.user.id),
+        })
+        .then(async (res) => {
+          if (!res) {
+            await db.insert(hostProfiles).values({
+              userId: ctx.user.id,
+            });
+            void sendSlackMessage({
+              text: [
+                "*Host Profile Created:*",
+                `User ${ctx.user.id} has become a *${invite.role}* for Host Team ID: *${invite.hostTeamId}*`,
+              ].join("\n"),
+              channel: "host-bot",
+            });
+          }
+        });
+
       await ctx.db.insert(hostTeamMembers).values({
         hostTeamId: invite.hostTeam.id,
         userId: ctx.user.id,
+        role: invite.role,
       });
 
       // delete invite
@@ -607,6 +649,7 @@ export const hostTeamsRouter = createTRPCRouter({
       const conversationId = await createOrGetConversation(
         ctx.user.email,
         invite.hostTeam.owner.id,
+        invite.hostTeam.id,
       );
 
       await sendAcceptMessage(
@@ -661,6 +704,7 @@ export const hostTeamsRouter = createTRPCRouter({
       const conversationId = await createOrGetConversation(
         ctx.user.email,
         invite.hostTeam.owner.id,
+        invite.hostTeam.id,
       );
       await sendDeclineMessage(
         conversationId,
@@ -671,23 +715,22 @@ export const hostTeamsRouter = createTRPCRouter({
       return { status: "invite declined" } as const;
     }),
 
-  updateCoHostRole: protectedProcedure
-    .input(
-      z.object({
-        userId: z.string(),
-        role: z.enum(COHOST_ROLES),
-        hostTeamId: z.number(),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      await ctx.db
-        .update(hostTeamMembers)
-        .set({ role: input.role })
-        .where(
-          and(
-            eq(hostTeamMembers.hostTeamId, input.hostTeamId),
-            eq(hostTeamMembers.userId, input.userId),
-          ),
-        );
+  updateCoHostRole: coHostProcedure(
+    "update_cohost_role",
+    z.object({
+      userId: z.string(),
+      role: z.enum(COHOST_ROLES),
+      currentHostTeamId: z.number(),
     }),
+  ).mutation(async ({ ctx, input }) => {
+    await ctx.db
+      .update(hostTeamMembers)
+      .set({ role: input.role })
+      .where(
+        and(
+          eq(hostTeamMembers.hostTeamId, input.currentHostTeamId),
+          eq(hostTeamMembers.userId, input.userId),
+        ),
+      );
+  }),
 });

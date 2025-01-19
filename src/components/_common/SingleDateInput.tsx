@@ -22,6 +22,7 @@ export default function SingleDateInput({
   minDate,
   maxDate,
   popoverSide = "bottom",
+  withClearBtn = true,
 }: {
   className?: string;
   label?: string;
@@ -35,6 +36,7 @@ export default function SingleDateInput({
   minDate?: Date;
   maxDate?: Date;
   popoverSide?: "top" | "right" | "bottom" | "left";
+  withClearBtn?: boolean;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -57,12 +59,13 @@ export default function SingleDateInput({
           variant={variant}
           label={label}
           icon={icon}
-          value={value ? format(value, "MM/dd/yyyy") : ""}
+          value={value ? format(value, "MMM d, yyyy") : undefined}
           setValue={() => onChange(undefined)}
+          withClearBtn={!!value}
         />
       </PopoverTrigger>
       <PopoverContent
-        className="z-0 w-auto rounded-3xl p-0 backdrop-blur-md"
+        className="z-0 w-auto rounded-2xl border border-gray-200 bg-white p-3 shadow-lg backdrop-blur-md"
         align="center"
         side={popoverSide}
         avoidCollisions={false}
@@ -77,6 +80,7 @@ export default function SingleDateInput({
           disabled={dateIsDisabled}
           className="h-72"
           fromDate={minDate}
+          initialFocus
         />
       </PopoverContent>
     </Popover>

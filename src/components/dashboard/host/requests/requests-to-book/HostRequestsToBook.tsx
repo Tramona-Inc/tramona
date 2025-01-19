@@ -75,13 +75,26 @@ export default function HostRequestsToBook() {
                       await rejectRequestToBook({
                         isAccepted: false,
                         requestToBookId: data.id,
+                        currentHostTeamId: currentHostTeamId!,
                       })
                         .then(() => {
                           toast({
                             title: "Successfully rejected request",
                           });
                         })
-                        .catch(() => errorToast());
+                        .catch((error) => {
+                          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                          if (error.data?.code === "FORBIDDEN") {
+                            toast({
+                              title:
+                                "You do not have permission to respond to a booking.",
+                              description:
+                                "Please contact your team owner to request access.",
+                            });
+                          } else {
+                            errorToast();
+                          }
+                        });
                     }}
                   >
                     Reject
@@ -99,11 +112,14 @@ export default function HostRequestsToBook() {
                   <Button disabled>{data.status}</Button>
                 )}
               </HostRequestToBookCard>
-              <HostRequestToBookDialog
-                open={dialogOpen}
-                setOpen={setDialogOpen}
-                requestToBook={data}
-              />
+              {currentHostTeamId && (
+                <HostRequestToBookDialog
+                  open={dialogOpen}
+                  setOpen={setDialogOpen}
+                  requestToBook={data}
+                  currentHostTeamId={currentHostTeamId}
+                />
+              )}
             </div>
           ))}
         </div>

@@ -24,6 +24,16 @@ function MessageDisplay() {
   const [isViewed, setIsViewd] = useState(false);
   const conversations = useConversation((state) => state.conversationList);
   const { query } = useRouter();
+  const {
+    data: fetchedConversations,
+    isLoading,
+    refetch,
+  } = api.messages.getConversations.useQuery(
+    {},
+    {
+      refetchOnWindowFocus: false,
+    },
+  );
 
   useEffect(() => {
     if (query.conversationId && conversations.length > 0 && !isViewed) {
@@ -44,7 +54,7 @@ function MessageDisplay() {
   }, [conversations, isViewed, query.conversationId, selectedConversation?.id]);
 
   return (
-    <div className="flex h-screen-minus-header-n-footer divide-x">
+    <div className="flex h-[calc(100vh-12rem)] divide-x border-b lg:h-[calc(100vh-8rem)]">
       <div
         className={cn(
           "w-full bg-white md:w-96",
@@ -54,6 +64,9 @@ function MessageDisplay() {
         <MessagesSidebar
           selectedConversation={selectedConversation}
           setSelected={selectConversation}
+          fetchedConversations={fetchedConversations}
+          isLoading={isLoading}
+          refetch={refetch}
         />
       </div>
       <div

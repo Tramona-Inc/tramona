@@ -1,6 +1,7 @@
 // note that whitespace matters in template literals, make sure not to indent newlines, or else the spaces will be included in the string
 
 export function getCancellationPolicyDescription(policy: string): string {
+  console.log(policy);
   switch (policy) {
     case "Flexible":
       return `Full Refund: Guests can get a full refund if they cancel at least 24 hours before check-in.
@@ -40,6 +41,8 @@ During Stay: If they cancel less than 60 days before check-in, they will not rec
 Partial Refund: If they cancel less than 30 days before check-in, they get a 50% refund of the first month.
 After Check-In: If they cancel during their stay, the next 30 days are non-refundable.`;
 
+    case "Casamundo":
+      return "No refund is provided after booking."; //UGHHHHHHHHHHH TEMP
     case "Vacasa":
       return "For new trips, you can cancel within 24 hours of booking and receive a full refund. If you cancel 30 or more days before check-in, you can receive a refund of any rental payments you&apos;ve made, minus the booking fee and associated taxes. The 24-hour refund option doesn't apply if you book your stay the day before check-in. Reservations cannot be cancelled for a full refund on the day of check-in.";
 

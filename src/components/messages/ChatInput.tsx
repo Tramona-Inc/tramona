@@ -16,7 +16,7 @@ import { sub } from "date-fns";
 import { ArrowUp } from "lucide-react";
 import { Button } from "../ui/button";
 import { useUpdateUser } from "@/utils/utils";
-
+import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 const formSchema = z.object({
   message: z.string().refine((data) => data.trim() !== ""),
 });
@@ -26,6 +26,7 @@ export default function ChatInput({
 }: {
   conversationId: string;
 }) {
+  const { currentHostTeamId } = useHostTeamStore();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -60,7 +61,7 @@ export default function ChatInput({
   const { mutateAsync: checkMessageModeration } = api.llama.checkMessage.useMutation();
 
   const { data: _conversationExists } =
-    api.messages.getConversations.useQuery();
+    api.messages.getConversations.useQuery({ hostTeamId: currentHostTeamId });
 
   // Add check before sending message
   if (!conversationId) {

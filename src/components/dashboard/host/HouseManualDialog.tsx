@@ -2,10 +2,11 @@ import { Textarea } from "@/components/ui/textarea";
 import DialogCancelSave from "./DialogCancelSave";
 import { Property } from "@/server/db/schema";
 import { z } from "zod";
-import { api } from "@/utils/api";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
+import { errorToast } from "@/utils/toasts";
+import { toast } from "@/components/ui/use-toast";
 
 const formSchema = z.object({
   houseManual: z.string().nullable(),
@@ -15,29 +16,58 @@ type FormSchema = z.infer<typeof formSchema>;
 
 export default function HouseManualDialog({
   property,
+  refetch,
+  updateProperty,
+  isPropertyUpdating,
+  currentHostTeamId,
 }: {
-  property: Property;
+  property: Property | undefined;
+  refetch: () => void;
+  updateProperty: ({
+    updatedProperty,
+    currentHostTeamId,
+  }: {
+    updatedProperty: Property;
+    currentHostTeamId: number;
+  }) => Promise<void>;
+  isPropertyUpdating: boolean;
+  currentHostTeamId: number | null | undefined;
 }) {
-  const { data: fetchedProperty, refetch } = api.properties.getById.useQuery({
-    id: property.id,
-  });
-
-  const { mutateAsync: updateProperty } = api.properties.update.useMutation();
-
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      houseManual: fetchedProperty?.houseManual ?? null,
+      houseManual: property?.houseManual ?? null,
     },
   });
 
   const onSubmit = async (formValues: FormSchema) => {
-    await updateProperty({
-      ...property,
-      houseManual:
-        formValues.houseManual === "" ? null : formValues.houseManual,
-    });
-    void refetch();
+    if (property) {
+      await updateProperty({
+        updatedProperty: {
+          ...property,
+          houseManual:
+            formValues.houseManual === "" ? null : formValues.houseManual,
+        },
+        currentHostTeamId: currentHostTeamId!,
+      })
+        .then(() => {
+          toast({
+            title: "Successfully Updated Property!",
+          });
+        })
+        .catch((error) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          if (error.data?.code === "FORBIDDEN") {
+            toast({
+              title: "You do not have permission to edit a property.",
+              description: "Please contact your team owner to request access.",
+            });
+          } else {
+            errorToast();
+          }
+        });
+      void refetch();
+    }
   };
 
   return (
@@ -69,7 +99,7 @@ export default function HouseManualDialog({
           <p className="text-muted-foreground">
             Shared 48 hours before check-in
           </p>
-          <DialogCancelSave />
+          <DialogCancelSave isLoading={isPropertyUpdating} />
         </form>
       </Form>
     </div>

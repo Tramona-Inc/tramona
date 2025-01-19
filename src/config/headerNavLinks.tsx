@@ -71,17 +71,19 @@ export const aboutLinkItems = [
 // <----------- HOST MOBILE LINKS ---------->
 export const hostManageLinks = [
   { href: "/host", title: "Overview", icon: LayoutDashboard },
-  { href: "/calendar", title: "Calendar", icon: CalendarIcon },
+  { href: "/host/calendar", title: "Calendar", icon: CalendarIcon },
   { href: "/host/properties", title: "Listings", icon: HouseIcon },
-  { href: "/host/messages", title: "Messages", icon: MessageCircleIcon },
-  { href: "/host/requests", title: "Requests", icon: MapPinCheckIcon },
   { href: "/host/stays", title: "Stays", icon: LuggageIcon },
   { href: "/host/teams", title: "Team", icon: UsersIcon },
 ];
 
 export const hostAccountLinks = [
   { href: "/host/finances", title: "Earnings", icon: HandCoins },
-  { href: "/settings", title: "Settings", icon: SettingsIcon },
+  {
+    href: "/settings/personal-information",
+    title: "Settings",
+    icon: SettingsIcon,
+  },
 ];
 
 // ----------- HOST DESKTOP LINKS

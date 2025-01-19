@@ -6,7 +6,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BriefcaseIcon, HistoryIcon, ReceiptTextIcon } from "lucide-react";
 import { useMemo } from "react";
 import { api, type RouterOutputs } from "@/utils/api";
-import Spinner from "@/components/_common/Spinner";
 import { useRouter } from "next/router";
 import BillingOverview from "@/components/my-trips/billing/BillingOverview";
 import PaymentHistoryOverview from "@/components/my-trips/billing/PaymentHistoryOverview";
@@ -21,7 +20,7 @@ interface MyTripsProps {
 
 export default function MyTrips({ billingRoute }: MyTripsProps) {
   useSession({ required: true });
-  const { data: allTrips } = api.trips.getMyTrips.useQuery();
+  const { data: allTrips, isLoading } = api.trips.getMyTrips.useQuery();
   const router = useRouter();
   const { tab } = router.query;
 
@@ -90,36 +89,38 @@ export default function MyTrips({ billingRoute }: MyTripsProps) {
             </div>
           </TabsList>
 
-          {allTrips === undefined ? (
-            <Spinner />
-          ) : (
-            <>
-              <TabsContent value="current">
-                <TripsTab trips={currentTrips} type="current" />
-              </TabsContent>
-              <TabsContent value="upcoming">
-                <TripsTab trips={upcomingTrips} type="upcoming" />
-              </TabsContent>
-              <TabsContent value="history">
-                <PastTrips pastTrips={pastTrips} />
-              </TabsContent>
-              <TabsContent value="billing">
-                {/* Render BillingOverview or the specific billing sub-route component */}
-                {billingRoute ? (
-                  <>
-                    {billingRoute[1] === "payment-history" && (
-                      <PaymentHistoryOverview />
-                    )}
-                    {billingRoute[1] === "security-deposits" && (
-                      <SecurityDepositOverview />
-                    )}
-                  </>
-                ) : (
-                  <BillingOverview />
+          <TabsContent value="current">
+            <TripsTab
+              trips={currentTrips}
+              isTripLoading={isLoading}
+              type="current"
+            />
+          </TabsContent>
+          <TabsContent value="upcoming">
+            <TripsTab
+              trips={upcomingTrips}
+              isTripLoading={isLoading}
+              type="upcoming"
+            />
+          </TabsContent>
+          <TabsContent value="history">
+            <PastTrips pastTrips={pastTrips} />
+          </TabsContent>
+          <TabsContent value="billing">
+            {/* Render BillingOverview or the specific billing sub-route component */}
+            {billingRoute ? (
+              <>
+                {billingRoute[1] === "payment-history" && (
+                  <PaymentHistoryOverview />
                 )}
-              </TabsContent>
-            </>
-          )}
+                {billingRoute[1] === "security-deposits" && (
+                  <SecurityDepositOverview />
+                )}
+              </>
+            ) : (
+              <BillingOverview />
+            )}
+          </TabsContent>
         </Tabs>
       </InnerTravelerLayout>
     </DashboardLayout>

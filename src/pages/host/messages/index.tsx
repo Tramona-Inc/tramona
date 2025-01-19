@@ -14,6 +14,8 @@ import HostDashboardLayout from "@/components/_common/Layout/HostDashboardLayout
 import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
 import useSetInitialHostTeamId from "@/components/_common/CustomHooks/useSetInitialHostTeamId";
 import { useHostTeamStore } from "@/utils/store/hostTeamStore";
+import ConversationsEmptySvg from "@/components/_common/EmptyStateSvg/ConversationsEmptySvg";
+import EmptyStateValue from "@/components/_common/EmptyStateSvg/EmptyStateValue";
 
 function MessageDisplay() {
   const [selectedConversation, setSelectedConversation] =
@@ -27,9 +29,14 @@ function MessageDisplay() {
   const [isViewed, setIsViewed] = useState(false);
   const conversations = useConversation((state) => state.conversationList);
   const { query } = useRouter();
-
-  const { isLoading: isSidebarLoading } =
-    api.messages.getConversations.useQuery(); // 假设有获取对话的 API
+  const { currentHostTeamId } = useHostTeamStore();
+  const {
+    data: fetchedConversations,
+    isLoading: isSidebarLoading,
+    refetch,
+  } = api.messages.getConversations.useQuery({
+    hostTeamId: currentHostTeamId,
+  }); // 假设有获取对话的 API
 
   useEffect(() => {
     if (query.conversationId && conversations.length > 0 && !isViewed) {
@@ -50,7 +57,7 @@ function MessageDisplay() {
   }, [conversations, isViewed, query.conversationId, selectedConversation?.id]);
 
   return (
-    <div className="flex h-screen-minus-header-n-footer divide-x">
+    <div className="flex h-[calc(100vh-12rem)] divide-x border-b lg:h-[calc(100vh-8rem)]">
       <div
         className={cn(
           "w-full bg-white md:w-96",
@@ -67,6 +74,9 @@ function MessageDisplay() {
           <MessagesSidebar
             selectedConversation={selectedConversation}
             setSelected={selectConversation}
+            fetchedConversations={fetchedConversations}
+            isLoading={isSidebarLoading}
+            refetch={refetch}
           />
         )}
       </div>
@@ -82,7 +92,9 @@ function MessageDisplay() {
             setSelected={selectConversation}
           />
         ) : (
-          <Skeleton className="h-96 w-3/4" />
+          <EmptyStateValue description="You have no conversations yet">
+            <ConversationsEmptySvg />
+          </EmptyStateValue>
         )}
       </div>
     </div>

@@ -18,12 +18,16 @@ import { api } from "@/utils/api";
 import { DollarSignIcon } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { useHostTeamStore } from "@/utils/store/hostTeamStore";
+import { toast } from "@/components/ui/use-toast";
+import { errorToast } from "@/utils/toasts";
 
 export default function HostPropertiesRestrictions({
   property,
 }: {
   property: Property;
 }) {
+  const { currentHostTeamId } = useHostTeamStore();
   const [editing, setEditing] = useState(false);
 
   const formSchema = z.object({
@@ -55,22 +59,31 @@ export default function HostPropertiesRestrictions({
       priceRestriction: price ? price * 100 : 0, //convert to cents
       stripeVerRequired: stripeVerRequired === "yes",
     };
-    console.log("form values:", values);
-    console.log("default values:", form.getValues());
-    console.log("new priceRestriction", newProperty.priceRestriction);
-    await updateProperty(newProperty);
+
+    await updateProperty({
+      updatedProperty: newProperty,
+      currentHostTeamId: currentHostTeamId!,
+    })
+      .then(() => {
+        toast({
+          title: `Property Updated!`,
+        });
+      })
+      .catch((error) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        if (error.data?.code === "FORBIDDEN") {
+          toast({
+            title: "You do not have permission to edit the listing.",
+            description: "Please contact your team owner to request access.",
+          });
+        } else {
+          errorToast();
+        }
+      });
   };
 
   return (
-    <div className="mb-24 mt-6 space-y-2">
-      <div className="text-end">
-        <HostPropertyEditBtn
-          editing={editing}
-          setEditing={setEditing}
-          property={property}
-          onSubmit={form.handleSubmit(onSubmit)}
-        />
-      </div>
+    <div className="relative mt-6 space-y-5 overflow-y-auto">
       <div className="space-y-3 px-4">
         <Form {...form}>
           <ErrorMsg>{form.formState.errors.root?.message}</ErrorMsg>
@@ -81,7 +94,7 @@ export default function HostPropertiesRestrictions({
                 <h3 className="text-xl font-bold leading-tight">
                   Property restrictions
                 </h3>
-                <p className="text-base leading-normal">
+                <p className="text-sm leading-normal sm:text-base">
                   Travelers must be at least this old to book this property.
                 </p>
                 <FormField
@@ -110,7 +123,7 @@ export default function HostPropertiesRestrictions({
                 <h3 className="text-xl font-bold leading-tight">
                   Minimum offer price
                 </h3>
-                <p className="text-base leading-normal">
+                <p className="text-sm leading-normal sm:text-base">
                   You will only see offers equal to or higher than this price.
                 </p>
                 <FormField
@@ -142,9 +155,9 @@ export default function HostPropertiesRestrictions({
                 <h3 className="mt-6 text-xl font-bold leading-tight">
                   Stripe verification
                 </h3>
-                <p className="text-base leading-normal">
+                <p className="text-sm leading-normal sm:text-base">
                   Do you want travelers to be verified by Stripe for this
-                  property? This is an 8 hour long p
+                  property? This is an 8 hour long process.
                 </p>
                 <FormField
                   name="stripeVerRequired"
@@ -177,6 +190,14 @@ export default function HostPropertiesRestrictions({
             </div>
           </form>
         </Form>
+      </div>
+      <div className="text-end">
+        <HostPropertyEditBtn
+          editing={editing}
+          setEditing={setEditing}
+          property={property}
+          onSubmit={form.handleSubmit(onSubmit)}
+        />
       </div>
     </div>
   );

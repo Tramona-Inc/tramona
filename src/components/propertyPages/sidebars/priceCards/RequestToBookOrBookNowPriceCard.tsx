@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -18,14 +18,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import {
-  ChevronDown,
-  ChevronUp,
-  Info,
-  Clock,
-  CheckCircle,
-  Calendar as CalendarIcon,
-} from "lucide-react";
+import { ChevronDown, ChevronUp, Info, Clock, CheckCircle } from "lucide-react";
 import { useRouter } from "next/router";
 import PriceBreakdown from "./PriceBreakdown";
 
@@ -38,7 +31,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { isNumber } from "lodash";
 import { useGetOriginalPropertyPricing } from "@/utils/payment-utils/useGetOriginalPropertyPricing";
 import Link from "next/link";
-import { ZodUndefined } from "zod";
+import { MAX_REQUEST_TO_BOOK_PERCENTAGE } from "@/utils/constants";
 
 export type RequestToBookDetails = {
   checkIn: Date;
@@ -87,8 +80,14 @@ export default function RequestToBookOrBookNowPriceCard({
       ? propertyPricing.originalPriceAfterTierDiscount / numOfNights
       : undefined;
 
-
   const [error, setError] = useState<React.ReactNode | null>(null);
+
+  const [errorState, setErrorState] = useState<{
+    priceRequired?: boolean;
+    priceAboveOriginal?: boolean;
+    percentageAboveMax?: boolean;
+  }>({});
+
   const [requestAmount, setRequestAmount] = useState(
     propertyPricingPerNightAfterTierDiscount,
   );
@@ -201,7 +200,7 @@ export default function RequestToBookOrBookNowPriceCard({
   const presetOptions = [
     {
       price: propertyPricingPerNightAfterTierDiscount,
-      label: "Buy Now",
+      label: property.bookItNowEnabled ? "Buy Now" : "Original Price",
       percentOff: 0,
     },
     {
@@ -228,9 +227,7 @@ export default function RequestToBookOrBookNowPriceCard({
           propertyPricingPerNightAfterTierDiscount!) *
           100,
       );
-      setRequestPercentage(
-        Math.max(minDiscount, Math.min(newPercentage, maxDiscount)),
-      );
+      setRequestPercentage(Math.max(minDiscount, Math.min(newPercentage)));
     }
   }, [
     showRequestInput,
@@ -239,21 +236,41 @@ export default function RequestToBookOrBookNowPriceCard({
     maxDiscount,
   ]);
 
-  const handleRequestChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const inputValue = e.target.value;
-
-    // Allow only numeric input or empty string
-    if (/^\d*$/.test(inputValue)) {
-      setRawRequestAmount(inputValue); // Update raw input state
-      const parsedValue = inputValue ? parseInt(inputValue, 10) : 0;
-      setRequestAmount(parsedValue); // Update parsed value
-      setSelectedPreset(null);
-    }
-  };
+  const handleRequestChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const inputValue = e.target.value;
+      // Allow only valid currency format input or empty string
+      if (/^\$?\d*(\.\d*)?$/.test(inputValue)) {
+        const parsedValue = inputValue
+          ? parseFloat(inputValue.replace(/[^0-9.]/g, ""))
+          : 0;
+        setRawRequestAmount(inputValue);
+        setRequestAmount(parsedValue);
+        setSelectedPreset(null);
+      }
+    },
+    [setRawRequestAmount, setRequestAmount, setSelectedPreset],
+  );
 
   const handleRequestBlur = () => {
-    setRawRequestAmount(formatCurrency(requestAmount!)); // Format the value on blur
+    if (!requestAmount) {
+      setErrorState({ priceRequired: true });
+      return;
+    }
+    setErrorState({
+      priceRequired: false,
+      priceAboveOriginal:
+        typeof requestAmount === "number" &&
+        typeof propertyPricingPerNightAfterTierDiscount === "number" &&
+        requestAmount > propertyPricingPerNightAfterTierDiscount,
+      percentageAboveMax:
+        typeof requestAmount === "number" &&
+        typeof propertyPricingPerNightAfterTierDiscount === "number" &&
+        requestPercentage > MAX_REQUEST_TO_BOOK_PERCENTAGE,
+    });
+    setRawRequestAmount(formatCurrency(requestAmount)); // Format the value on blur
   };
+
   const handleSliderChange = (value: number[]) => {
     const newRequestAmount = Math.round(
       propertyPricingPerNightAfterTierDiscount! * (1 - value[0]! / 100),
@@ -262,6 +279,20 @@ export default function RequestToBookOrBookNowPriceCard({
     setRawRequestAmount(formatCurrency(newRequestAmount));
     setRequestPercentage(value[0]!);
     setSelectedPreset(null);
+    setErrorState({});
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Check if the Delete or Backspace key was pressed
+    if (e.key === "Delete" || e.key === "Backspace") {
+      setRequestAmount(undefined);
+      setRawRequestAmount("");
+      setErrorState({});
+      return;
+    }
+    if (e.key === "Enter") {
+      handleRequestBlur();
+    }
   };
 
   const getRequestLikelihood = () => {
@@ -293,6 +324,7 @@ export default function RequestToBookOrBookNowPriceCard({
       Math.max(minDiscount, Math.min(newPercentage, maxDiscount)),
     );
     setSelectedPreset(price);
+    setErrorState({});
   };
 
   return (
@@ -408,40 +440,39 @@ export default function RequestToBookOrBookNowPriceCard({
               </TooltipProvider>
             </div>
             <div className="grid grid-cols-3 gap-2 lg:gap-4">
-              {
-                presetOptions.map((option, index) => (
-                  <button
-                    key={index}
-                    onClick={() =>
-                      handlePresetSelect(
-                        propertyPricingPerNightAfterTierDiscount! *
-                          ((100 - option.percentOff) / 100),
-                      )
-                    }
-                    className={cn(
-                      "flex flex-col items-center justify-between rounded-lg border py-3 text-center transition-colors lg:p-4",
-                      selectedPreset === option.price
-                        ? "border-primary bg-primary/10"
-                        : "border-gray-200 hover:border-primary/50",
-                      option.label === "Book Now" && "font-semibold",
+              {presetOptions.map((option, index) => (
+                <button
+                  key={index}
+                  onClick={() =>
+                    handlePresetSelect(
+                      propertyPricingPerNightAfterTierDiscount! *
+                        ((100 - option.percentOff) / 100),
+                    )
+                  }
+                  className={cn(
+                    "flex flex-col items-center justify-between rounded-lg border py-3 text-center transition-colors lg:p-4",
+                    selectedPreset === option.price
+                      ? "border-primary bg-primary/10"
+                      : "border-gray-200 hover:border-primary/50",
+                    option.label === "Book Now" && "font-semibold",
+                  )}
+                >
+                  <div className="lg:text-md text-sm font-bold">
+                    {formatCurrency(
+                      propertyPricingPerNightAfterTierDiscount! *
+                        ((100 - option.percentOff) / 100),
                     )}
-                  >
-                    <div className="lg:text-md text-sm font-bold">
-                      {formatCurrency(
-                        propertyPricingPerNightAfterTierDiscount! *
-                          ((100 - option.percentOff) / 100),
-                      )}
+                  </div>
+                  <div className="text-xs leading-5 text-muted-foreground lg:text-sm">
+                    {option.label}
+                  </div>
+                  {option.percentOff > 0 && (
+                    <div className="w-full text-center text-xs font-medium text-green-600">
+                      {option.percentOff}% off
                     </div>
-                    <div className="text-xs leading-5 text-muted-foreground lg:text-sm">
-                      {option.label}
-                    </div>
-                    {option.percentOff > 0 && (
-                      <div className="w-full text-center text-xs font-medium text-green-600">
-                        {option.percentOff}% off
-                      </div>
-                    )}
-                  </button>
-                ))}
+                  )}
+                </button>
+              ))}
             </div>
 
             <div>
@@ -458,11 +489,28 @@ export default function RequestToBookOrBookNowPriceCard({
                         onChange={handleRequestChange}
                         onBlur={handleRequestBlur}
                         className="pl-7"
+                        onKeyDown={handleKeyDown}
                       />
                       <p className="text-xs italic leading-tight text-muted-foreground">
                         per night
                       </p>
                     </div>
+                    {errorState.priceRequired && (
+                      <p className="mx-2 mt-1 text-xs text-destructive">
+                        Price is required
+                      </p>
+                    )}
+                    {errorState.priceAboveOriginal && (
+                      <p className="mx-1 mt-1 text-xs text-destructive">
+                        Request is above the original price
+                      </p>
+                    )}
+                    {errorState.percentageAboveMax && (
+                      <p className="mx-1 mt-1 text-xs text-destructive">
+                        Request cannot be more then{" "}
+                        {MAX_REQUEST_TO_BOOK_PERCENTAGE}% of original price
+                      </p>
+                    )}
                   </div>
                   <div className="text-right">
                     <span className="text-lg font-medium text-green-600">
@@ -532,12 +580,27 @@ export default function RequestToBookOrBookNowPriceCard({
                 </div>
 
                 <div className="flex items-center justify-between gap-4">
-                  <RequestToBookBtn
-                    btnSize="sm"
-                    requestToBook={requestToBook}
-                    property={property}
-                    requestPercentage={requestPercentage} // we are getting the request price by using the percentage and saving that in the url for the checkout to get the price
-                  />
+                  {/* if property is book it now enabled and if they selected original price */}
+                  {property.bookItNowEnabled &&
+                  propertyPricingPerNightAfterTierDiscount === requestAmount ? (
+                    <BookNowBtn
+                      property={property}
+                      requestToBook={requestToBook}
+                    />
+                  ) : (
+                    <RequestToBookBtn
+                      btnSize="sm"
+                      requestToBook={requestToBook}
+                      property={property}
+                      requestPercentage={requestPercentage} // we are getting the request price by using the percentage and saving that in the url for the checkout to get the price
+                      invalidInput={
+                        !rawRequestAmount ||
+                        !requestAmount ||
+                        !propertyPricingPerNightAfterTierDiscount ||
+                        requestAmount > propertyPricingPerNightAfterTierDiscount
+                      }
+                    />
+                  )}
                   <Button
                     variant="outline"
                     className="flex-1"
@@ -622,33 +685,33 @@ export default function RequestToBookOrBookNowPriceCard({
               )}
             </div>
           </>
-        // ) : propertyPricing.casamundoPrice === "unavailable" ? (
-        //   <div className="flex flex-col items-center justify-center">
-        //     <div className="flex items-center gap-2">
-        //       <Info className="h-4 w-4 text-red-500" />
-        //       <div className="mb-1 text-2xl font-bold text-red-500">
-        //         Dates Unavailable
-        //       </div>
-        //     </div>
-        //     <p className="pb-4 text-center text-sm text-muted-foreground">
-        //       The selected dates are no longer available. Try adjusting your
-        //       search.
-        //     </p>
-        //     <p className="text-md pb-4 text-center text-muted-foreground">
-        //       Pricing will update once new dates are selected.
-        //     </p>
-        //     <Button
-        //       variant="darkPrimary"
-        //       className="mt-2 flex min-w-full"
-        //       onClick={() => setIsCalendarOpen(true)}
-        //     >
-        //       <div className="flex items-center gap-2">
-        //         <CalendarIcon className="h-4 w-4" />
-        //         Change Dates
-        //       </div>
-        //     </Button>
-        //   </div>
         ) : (
+          // ) : propertyPricing.casamundoPrice === "unavailable" ? (
+          //   <div className="flex flex-col items-center justify-center">
+          //     <div className="flex items-center gap-2">
+          //       <Info className="h-4 w-4 text-red-500" />
+          //       <div className="mb-1 text-2xl font-bold text-red-500">
+          //         Dates Unavailable
+          //       </div>
+          //     </div>
+          //     <p className="pb-4 text-center text-sm text-muted-foreground">
+          //       The selected dates are no longer available. Try adjusting your
+          //       search.
+          //     </p>
+          //     <p className="text-md pb-4 text-center text-muted-foreground">
+          //       Pricing will update once new dates are selected.
+          //     </p>
+          //     <Button
+          //       variant="darkPrimary"
+          //       className="mt-2 flex min-w-full"
+          //       onClick={() => setIsCalendarOpen(true)}
+          //     >
+          //       <div className="flex items-center gap-2">
+          //         <CalendarIcon className="h-4 w-4" />
+          //         Change Dates
+          //       </div>
+          //     </Button>
+          //   </div>
           // <>
           //   <div className="flex flex-col items-center justify-center">
           //     <div className="flex items-center gap-2">
@@ -694,7 +757,9 @@ export default function RequestToBookOrBookNowPriceCard({
                 <PriceBreakdown
                   requestToBookDetails={requestToBook}
                   property={property}
-                  requestAmount={propertyPricingPerNightAfterTierDiscount! * numOfNights}
+                  requestAmount={
+                    propertyPricingPerNightAfterTierDiscount! * numOfNights
+                  }
                 />
               )}
             </div>

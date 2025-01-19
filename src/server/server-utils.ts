@@ -657,7 +657,7 @@ export async function getPropertiesForRequest(
   });
 
   const ageRestrictionCheck = sql`CASE
-        WHEN ${sql.raw(String(userAge))} IS NULL THEN true
+        WHEN ${properties.ageRestriction} IS NULL THEN true
         WHEN ${properties.ageRestriction} IS NOT NULL AND ${sql.raw(String(userAge))} >= ${properties.ageRestriction} THEN true
         ELSE false
       END`;
@@ -1226,6 +1226,16 @@ export async function getRequestsToBookForProperties(
     }
   }
   return propertyToRequestMap;
+}
+
+export async function getHostTeamFromProperty(propertyId: number) {
+  const hostTeam = await db.query.properties.findFirst({
+    where: eq(properties.id, propertyId),
+    columns: {
+      hostTeamId: true,
+    },
+  });
+  return hostTeam?.hostTeamId;
 }
 
 export async function addHostProfile({

@@ -13,8 +13,9 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ALL_HOUSE_RULES, Property } from "@/server/db/schema";
-import { api } from "@/utils/api";
 import DialogCancelSave from "./DialogCancelSave";
+import { toast } from "@/components/ui/use-toast";
+import { errorToast } from "@/utils/toasts";
 
 const formSchema = z.object({
   houseRules: z.array(z.enum(ALL_HOUSE_RULES)).optional(),
@@ -23,17 +24,30 @@ const formSchema = z.object({
 
 type FormSchema = z.infer<typeof formSchema>;
 
-export default function HouseRulesDialog({ property }: { property: Property }) {
-  const { data: fetchedProperty, refetch } = api.properties.getById.useQuery({
-    id: property.id,
-  });
-  const { mutateAsync: updateProperty } = api.properties.update.useMutation();
-
+export default function HouseRulesDialog({
+  property,
+  refetch,
+  updateProperty,
+  isPropertyUpdating,
+  currentHostTeamId,
+}: {
+  property: Property | undefined;
+  refetch: () => void;
+  updateProperty: ({
+    updatedProperty,
+    currentHostTeamId,
+  }: {
+    updatedProperty: Property;
+    currentHostTeamId: number;
+  }) => Promise<void>;
+  isPropertyUpdating: boolean;
+  currentHostTeamId: number | null | undefined;
+}) {
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      houseRules: fetchedProperty?.houseRules ?? [],
-      additionalHouseRules: fetchedProperty?.additionalHouseRules ?? "",
+      houseRules: property?.houseRules ?? [],
+      additionalHouseRules: property?.additionalHouseRules ?? "",
     },
   });
 
@@ -57,15 +71,37 @@ export default function HouseRulesDialog({ property }: { property: Property }) {
   ];
 
   const onSubmit = async (formValues: FormSchema) => {
-    await updateProperty({
-      ...property,
-      houseRules: formValues.houseRules,
-      additionalHouseRules:
-        formValues.additionalHouseRules === ""
-          ? null
-          : formValues.additionalHouseRules,
-    });
-    void refetch();
+    if (property) {
+      await updateProperty({
+        updatedProperty: {
+          ...property,
+          houseRules: formValues.houseRules ?? null,
+          additionalHouseRules:
+            formValues.additionalHouseRules === "" ||
+            formValues.additionalHouseRules === undefined
+              ? null
+              : formValues.additionalHouseRules,
+        },
+        currentHostTeamId: currentHostTeamId!,
+      })
+        .then(() => {
+          toast({
+            title: "Successfully Updated Property!",
+          });
+        })
+        .catch((error) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          if (error.data?.code === "FORBIDDEN") {
+            toast({
+              title: "You do not have permission to edit a property.",
+              description: "Please contact your team owner to request access.",
+            });
+          } else {
+            errorToast();
+          }
+        });
+      void refetch();
+    }
   };
 
   return (
@@ -133,7 +169,7 @@ export default function HouseRulesDialog({ property }: { property: Property }) {
           <p className="text-muted-foreground">
             Available throughout the booking process
           </p>
-          <DialogCancelSave />
+          <DialogCancelSave isLoading={isPropertyUpdating} />
         </form>
       </Form>
     </div>

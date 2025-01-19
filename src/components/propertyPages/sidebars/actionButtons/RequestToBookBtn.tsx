@@ -23,11 +23,13 @@ export default function RequestToBookBtn({
   requestToBook,
   property,
   requestPercentage,
+  invalidInput = false,
 }: {
   btnSize: ButtonProps["size"];
   requestToBook: RequestToBookDetails;
   property: PropertyPageData;
   requestPercentage: number;
+  invalidInput?: boolean;
 }) {
   const { data: verificationStatus } =
     api.users.myVerificationStatus.useQuery();
@@ -46,6 +48,10 @@ export default function RequestToBookBtn({
       asChild={
         !property.stripeVerRequired ||
         verificationStatus?.isIdentityVerified === "true"
+          ? !invalidInput
+            ? true
+            : false
+          : false
       }
       variant={
         property.stripeVerRequired &&
@@ -55,10 +61,15 @@ export default function RequestToBookBtn({
       }
       size={btnSize}
       className="w-full"
+      disabled={invalidInput}
     >
       {!property.stripeVerRequired ||
       verificationStatus?.isIdentityVerified === "true" ? (
-        <Link href={checkoutUrl}>Request to book</Link>
+        !invalidInput ? (
+          <Link href={checkoutUrl}>Request to book</Link>
+        ) : (
+          <p>Request to book</p>
+        )
       ) : verificationStatus?.isIdentityVerified === "pending" ? (
         <p>Verification pending</p>
       ) : (

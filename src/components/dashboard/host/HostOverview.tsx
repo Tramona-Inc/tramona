@@ -18,10 +18,12 @@ export default function HostOverview() {
 
   return session ? (
     <div className="mx-auto mt-8 min-h-screen-minus-header max-w-8xl space-y-20 p-4 pb-32">
-      <h1 className="text-3xl font-semibold md:text-5xl">
-        Welcome back, {user?.firstName ? user.firstName : "Host"}!{" "}
-      </h1>
-      <AttentionOverviewSection currentHostTeamId={currentHostTeamId} />
+      <div className="space-y-8 lg:space-y-20">
+        <h1 className="text-3xl font-semibold md:text-5xl">
+          Welcome back, {user?.firstName ? user.firstName : "Host"}!{" "}
+        </h1>
+        <AttentionOverviewSection currentHostTeamId={currentHostTeamId} />
+      </div>
 
       <HostStaysOverview currentHostTeamId={currentHostTeamId} />
       <HostPotentialBookingOverview

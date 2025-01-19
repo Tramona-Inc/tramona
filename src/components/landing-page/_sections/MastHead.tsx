@@ -237,7 +237,7 @@ export default function MastHead() {
               <div className="flex w-full overflow-hidden rounded-full border border-[#004236] bg-white">
                 <button
                   onClick={() => handleTabChange("search")}
-                  className={`w-1/2 px-8 py-3 text-center text-sm font-medium transition-all duration-200 ${
+                  className={`w-1/2 px-8 py-1 text-center text-sm font-medium transition-all duration-200 md:py-3 ${
                     activeTab === "search"
                       ? "bg-[#004236] text-white"
                       : "bg-white text-[#004236]"
@@ -247,7 +247,7 @@ export default function MastHead() {
                 </button>
                 <button
                   onClick={() => handleTabChange("name-price")}
-                  className={`w-1/2 px-8 py-3 text-center text-sm font-medium transition-all duration-200 ${
+                  className={`w-1/2 px-8 py-2 text-center text-sm font-medium leading-tight transition-all duration-200 md:py-3 ${
                     activeTab === "name-price"
                       ? "bg-[#004236] text-white"
                       : "bg-white text-[#004236]"
@@ -259,13 +259,7 @@ export default function MastHead() {
             </div>
           </div>
 
-          {activeTab === "search" ? (
-            <div className="px-16">
-              <UnclaimedMap />
-            </div>
-          ) : (
-            <NameYourPriceSection />
-          )}
+          {activeTab === "search" ? <UnclaimedMap /> : <NameYourPriceSection />}
         </div>
 
         <div className="mt-12 flex flex-col items-center gap-y-20 lg:gap-y-24">
@@ -310,7 +304,7 @@ export default function MastHead() {
             </section>
 
             {/* Final CTA Banner */}
-            <section className="mb-20 w-full bg-gradient-to-r from-[#004236] to-[#006a56] py-10 text-white md:mb-0">
+            <section className="mb-4 w-full bg-gradient-to-r from-[#004236] to-[#006a56] py-10 text-white md:mb-0">
               <div className="px-4 sm:px-6 md:px-8">
                 <div className="mx-auto flex max-w-3xl flex-col gap-y-4 text-center">
                   <h2 className="text-2xl font-bold sm:text-3xl">

@@ -45,7 +45,7 @@ export default function ProfilePage() {
                 <h2 className="text-xl font-bold lg:text-2xl">
                   {profileInfo?.name}
                 </h2>
-                {true || verificationStatus?.isIdentityVerified === "true" ? ( // TODO: cleanup and display stripe verification somewhere else
+                {verificationStatus?.isIdentityVerified === "true" ? ( // TODO: cleanup and display stripe verification somewhere else
                   <div className="flex flex-row items-center gap-x-1 text-center text-xs font-semibold tracking-tighter text-green-800">
                     <BadgeCheck size={22} /> Verified
                   </div>
@@ -97,23 +97,23 @@ export default function ProfilePage() {
           </div>
         </div>
       </section>
-      {/* pop up if no verified */}
-      {verificationStatus?.isIdentityVerified === "false" && (
-        <StripeVerificationCard />
-      )}
+      <section className="mx-4 space-y-3 md:mx-auto">
+        {/* pop up if no verified */}
+        {verificationStatus?.isIdentityVerified === "true" && (
+          <StripeVerificationCard />
+        )}
 
-      {/* About Me */}
-      <section className="space-y-2 rounded-lg border p-4">
-        <h2 className="font-bold">About Me</h2>
-        <p>
-          {profileInfo?.about}
-        </p>
-        <p>
-          {"Joined Tramona " +
-            (session?.user.createdAt
-              ? new Date(session.user.createdAt).toLocaleDateString()
-              : "")}
-        </p>
+        {/* About Me */}
+        <div className="space-y-2 rounded-lg border p-4">
+          <h2 className="font-bold">About Me</h2>
+          <p>{profileInfo?.about}</p>
+          <p>
+            {"Joined Tramona " +
+              (session?.user.createdAt
+                ? new Date(session.user.createdAt).toLocaleDateString()
+                : "")}
+          </p>
+        </div>
       </section>
 
       {profileInfo && (

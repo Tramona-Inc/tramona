@@ -11,8 +11,8 @@ import { Info } from "lucide-react";
 export default function HostICalHowToDialog() {
   return (
     <Dialog>
-      <DialogTrigger className="size-sm inline-flex items-center justify-center text-sm text-muted-foreground underline underline-offset-2">
-        <Info className="h-4 w-4" />
+      <DialogTrigger className="size-sm w-full flex-1 items-center justify-center text-sm text-muted-foreground underline underline-offset-2">
+        <Info className="size-5" />
       </DialogTrigger>
       <DialogContent className="max-w-3xl p-8">
         <DialogHeader>
