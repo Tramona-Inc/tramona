@@ -91,9 +91,6 @@ export default function ChatInput({
 
       const messageId = nanoid();
 
-      // debugging purposes
-      console.log("Checking if message is appropriate, ChatInput.tsx");
-
       // checks if message is appropriate before sending
       const moderationResult = await checkMessageModeration({
         message: values.message,
