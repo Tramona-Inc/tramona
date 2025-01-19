@@ -1,3 +1,6 @@
+// CalendarComponent.tsx
+"use client";
+
 import React, {
   useMemo,
   useEffect,
@@ -13,6 +16,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { api } from "@/utils/api";
 import MonthCalendar from "./MonthCalendar";
@@ -116,27 +120,6 @@ export default function CalendarComponent() {
       platformBookedOn: "airbnb" as const,
     }));
 
-  // const handleDateClick = (date: Date) => {
-  //   if (!editing) return;
-
-  //   setSelectedRange((prev) => {
-  //     if (!prev.start || (prev.start && prev.end)) {
-  //       // Start a new range
-  //       return { start: date, end: null };
-  //     }
-  //     if (!prev.end) {
-  //       // Set the end date if it’s not already set
-  //       if (date >= prev.start) {
-  //         return { ...prev, end: date };
-  //       } else {
-  //         // If clicked date is before the start date, reverse the range
-  //         return { start: date, end: prev.start };
-  //       }
-  //     }
-  //     // Default fallback (shouldn't normally hit this point)
-  //     return { start: date, end: null };
-  //   });
-  // };
   const isDateReserved = useCallback(
     (date: string) => {
       const parsedDate = parseISO(date);
@@ -184,6 +167,47 @@ export default function CalendarComponent() {
       1,
     );
     setDate(newDate);
+  };
+
+  const [isCalendarUpdating, setIsCalendarUpdating] = useState(false);
+  const { mutateAsync: toggleBookItNow } =
+    api.properties.toggleBookItNow.useMutation();
+  const { mutateAsync: updateBookItNow } =
+    api.properties.updateBookItNow.useMutation();
+
+  const handleBookItNowSwitch = async (
+    checked: boolean,
+    bookItNowPercent: number,
+  ) => {
+    setIsCalendarUpdating(true);
+    const updatedDiscount = checked ? bookItNowPercent : 0;
+    await toggleBookItNow({
+      id: selectedProperty!.id,
+      bookItNowEnabled: checked,
+      currentHostTeamId: currentHostTeamId!,
+    })
+      .then(async (res) => {
+        if (!res) {
+          await updateBookItNow({
+            id: selectedProperty!.id,
+            bookItNowHostDiscountPercentOffInput: updatedDiscount,
+            currentHostTeamId: currentHostTeamId!,
+          });
+        }
+      })
+      .finally(() => {
+        setIsCalendarUpdating(false);
+      });
+  };
+  const handleBookItNowSlider = async (bookItNowPercent: number) => {
+    setIsCalendarUpdating(true);
+    await updateBookItNow({
+      id: selectedProperty!.id,
+      bookItNowHostDiscountPercentOffInput: bookItNowPercent,
+      currentHostTeamId: currentHostTeamId!,
+    }).finally(() => {
+      setIsCalendarUpdating(false);
+    });
   };
 
   const isLoading = loadingProperties || loadingPrices;
@@ -239,8 +263,9 @@ export default function CalendarComponent() {
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
+                {/* Updated the button to display current month here */}
                 <Button variant="ghost" onClick={() => setDate(new Date())}>
-                  Today
+                  {date.toLocaleString("default", { month: "long" })}
                 </Button>
                 <Button
                   variant="ghost"
@@ -268,6 +293,7 @@ export default function CalendarComponent() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
+                  <DropdownMenuLabel>Select property</DropdownMenuLabel>
                   {hostProperties?.map((property) => (
                     <DropdownMenuItem
                       key={property.id}
@@ -293,65 +319,24 @@ export default function CalendarComponent() {
             <MonthCalendar
               date={date}
               reservedDateRanges={reservedDates}
-              // onDateClick={handleDateClick}
-              // selectedRange={selectedRange}
-              // isEditing={editing}
               prices={prices}
               isLoading={isLoading}
+              isCalendarUpdating={isCalendarUpdating}
             />
           </div>
           <div className="mx-auto flex w-full gap-2">
-            {/* <Button
-              variant="secondary"
-              size="sm"
-              className="flex-grow sm:flex-grow-0"
-              onClick={handleBlockDates}
-            >
-              Block Dates
-            </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              className="flex-grow sm:flex-grow-0"
-              onClick={handleUnblockDates}
-            >
-              Unblock Dates
-            </Button> */}
-            {/* <Button
-              variant="secondary"
-              size="sm"
-              className="flex-grow sm:flex-grow-0"
-            >
-              Edit iCal Link
-            </Button> */}
-
             <HostICalSync property={selectedProperty} />
-            {/* <div className="w-full sm:w-auto sm:flex-1" />
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-grow sm:flex-grow-0"
-              onClick={() => {
-                setEditing(false);
-                setSelectedRange({ start: null, end: null });
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              size="sm"
-              className="flex-grow sm:flex-grow-0"
-              onClick={() => setEditing(!editing)}
-            >
-              {editing ? "Done" : "Edit"}
-            </Button> */}
           </div>
         </CardContent>
       </Card>
 
       {/* SETTINGS */}
       {selectedProperty ? (
-        <CalendarSettings property={selectedProperty} />
+        <CalendarSettings
+          property={selectedProperty}
+          handleBookItNowSwitch={handleBookItNowSwitch}
+          handleBookItNowSlider={handleBookItNowSlider}
+        />
       ) : (
         <CalenderSettingsLoadingState />
       )}

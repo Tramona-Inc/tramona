@@ -1,3 +1,6 @@
+// CalendarSettings.tsx
+"use client";
+
 import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,8 +16,214 @@ import { toast } from "@/components/ui/use-toast";
 import RequestAndBidAutomationSection from "./setttingsSections/RequestAndBidAutomationSection";
 import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 import { errorToast } from "@/utils/toasts";
+import { ArrowLeft, Minus, Plus } from "lucide-react";
+import Link from "next/link";
+import * as React from "react";
+import { Input } from "@/components/ui/input";
 
-export default function CalendarSettings({ property }: { property: Property }) {
+// EditableFee Component
+interface EditableFeeProps {
+  title?: string; // Making title optional so it doesn't error for the other fees
+  subtitle: string;
+  value: number;
+  onSave: (value: number) => void;
+  helpText?: string;
+  learnMoreLink?: string;
+  showGuestCounter?: boolean;
+  guestCount?: number;
+}
+
+function EditableFee({
+  title,
+  subtitle,
+  value,
+  onSave,
+  helpText,
+  learnMoreLink,
+  showGuestCounter = false,
+  guestCount = 1,
+}: EditableFeeProps) {
+  const [isEditing, setIsEditing] = React.useState(false);
+  const [editValue, setEditValue] = React.useState(value);
+  const [editGuestCount, setEditGuestCount] = React.useState(guestCount);
+
+  const handleSave = () => {
+    onSave(editValue);
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setEditValue(value);
+    setEditGuestCount(guestCount);
+    setIsEditing(false);
+  };
+
+  if (isEditing) {
+    return (
+      <div className="space-y-6">
+        <div className="space-y-4">
+          {title && <h2 className="mb-4 text-xl font-semibold">{title}</h2>}
+          <p className="text-lg text-muted-foreground">{subtitle}</p>
+
+          <div className="flex items-center gap-2">
+            <span className="text-4xl font-semibold">$</span>
+            <Input
+              type="number"
+              value={editValue || ""}
+              onChange={(e) => setEditValue(Number(e.target.value) || 0)}
+              className="h-16 w-32 text-4xl font-semibold"
+              min="0"
+            />
+          </div>
+
+          {showGuestCounter && (
+            <Card className="mt-4 p-4">
+              <div className="flex items-center justify-between">
+                <span>For each guest after</span>
+                <div className="flex items-center gap-4">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() =>
+                      setEditGuestCount(Math.max(1, editGuestCount - 1))
+                    }
+                  >
+                    <Minus className="h-4 w-4" />
+                  </Button>
+                  <span className="w-4 text-center">{editGuestCount}</span>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setEditGuestCount(editGuestCount + 1)}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          )}
+        </div>
+
+        {helpText && (
+          <p className="text-muted-foreground">
+            {helpText}
+            {learnMoreLink && (
+              <Button variant="link" className="h-auto px-1.5">
+                Learn more
+              </Button>
+            )}
+          </p>
+        )}
+
+        <div className="space-y-2">
+          <Button className="w-full" onClick={handleSave}>
+            Save
+          </Button>
+          <Button variant="outline" className="w-full" onClick={handleCancel}>
+            Cancel
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <Card
+      className="cursor-pointer p-6 transition-colors hover:bg-accent/50"
+      onClick={() => setIsEditing(true)}
+    >
+      <div className="space-y-6">
+        {title && <h2 className="mb-4 text-xl font-semibold">{title}</h2>}
+        <div>
+          <div className="mb-2 text-sm">{subtitle}</div>
+          <div className="text-4xl font-semibold">${value}</div>
+        </div>
+        {helpText && (
+          <p className="text-sm text-muted-foreground">
+            {helpText}
+            {learnMoreLink && (
+              <Button variant="link" className="h-auto px-1.5 text-sm">
+                Learn more
+              </Button>
+            )}
+          </p>
+        )}
+      </div>
+    </Card>
+  );
+}
+
+// HostFeeTab Component
+interface HostFeeTabProps {
+  handleSaveCleaningFee: (value: number) => void;
+  handleSavePetFee: (value: number) => void;
+  handleSaveExtraGuestFee: (value: number) => void;
+  cleaningFee: number;
+  petFee: number;
+  extraGuestFee: number;
+}
+function HostFeeTab({
+  handleSaveCleaningFee,
+  handleSavePetFee,
+  handleSaveExtraGuestFee,
+  cleaningFee,
+  petFee,
+  extraGuestFee,
+}: HostFeeTabProps) {
+  return (
+    <div className="space-y-6">
+      <Card>
+        <div className="p-6">
+          <EditableFee
+            title="Cleaning fee"
+            subtitle="Per stay"
+            value={cleaningFee}
+            onSave={handleSaveCleaningFee}
+          />
+        </div>
+      </Card>
+
+      <Card>
+        <div className="p-6">
+          <EditableFee
+            title="Pet fee"
+            subtitle="Per stay"
+            value={petFee}
+            onSave={handleSavePetFee}
+          />
+        </div>
+      </Card>
+
+      <Card>
+        <div className="p-6">
+          <EditableFee
+            title="Extra guest fee"
+            subtitle="Per night"
+            value={extraGuestFee}
+            onSave={handleSaveExtraGuestFee}
+            showGuestCounter
+            guestCount={1}
+          />
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+interface CalendarSettingsProps {
+  property: Property;
+  handleBookItNowSwitch: (
+    checked: boolean,
+    bookItNowPercent: number,
+  ) => Promise<void>;
+  handleBookItNowSlider: (bookItNowPercent: number) => Promise<void>;
+}
+
+export default function CalendarSettings({
+  property,
+  handleBookItNowSwitch,
+  handleBookItNowSlider,
+}: CalendarSettingsProps) {
   const { currentHostTeamId } = useHostTeamStore();
 
   // <---------------------------------- MUTATIONS ---------------------------------->
@@ -30,7 +239,7 @@ export default function CalendarSettings({ property }: { property: Property }) {
   const [isChecked, setIsChecked] = useState<boolean | undefined>(
     property.bookItNowEnabled,
   );
-  const [bookItNowPercent, setBookItNowPercent] = useState<number>( //HERE CHANGE THIS BECAUSE IT SUPPOSE BE CONNECTED TO THE PROPERTY PRICING
+  const [bookItNowPercent, setBookItNowPercent] = useState<number>(
     property.bookItNowHostDiscountPercentOffInput,
   );
 
@@ -40,66 +249,38 @@ export default function CalendarSettings({ property }: { property: Property }) {
     property.requestToBookMaxDiscountPercentage,
   );
 
+  const [cleaningFee, setCleaningFee] = useState(100);
+  const [petFee, setPetFee] = useState(0);
+  const [extraGuestFee, setExtraGuestFee] = useState(0);
+
   useEffect(() => {
     setIsChecked(property.bookItNowEnabled);
     setBookItNowPercent(property.bookItNowHostDiscountPercentOffInput);
     setBiddingPercent(property.requestToBookMaxDiscountPercentage);
   }, [property]); //update when the selected property changes
 
-  const handleBookItNowSwitch = async (checked: boolean) => {
-    setIsChecked(checked);
-    //only update if turned off
-    await toggleBookItNow({
-      id: property.id,
-      bookItNowEnabled: checked,
-      currentHostTeamId: currentHostTeamId!,
-    })
-      .then((res) => {
-        if (!res) {
-          toast({
-            title: `Book it now disabled`,
-          });
-        }
-      })
-      .catch((error) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        if (error.data?.code === "FORBIDDEN") {
-          toast({
-            title:
-              "You do not have permission to edit overall pricing strategy.",
-            description: "Please contact your team owner to request access.",
-          });
-        } else {
-          errorToast();
-        }
-      });
+  const handleSaveCleaningFee = (value: number) => {
+    setCleaningFee(value);
   };
 
-  const handleBookItNowSlider = async () => {
-    if (isChecked) {
-      console.log(bookItNowPercent);
-      await updateBookItNow({
-        id: property.id,
-        bookItNowHostDiscountPercentOffInput: bookItNowPercent,
-        currentHostTeamId: currentHostTeamId!,
-      })
-        .then(() => {
-          toast({
-            title: "Successfully updated book it now percentage!",
-          });
-        })
-        .catch((error) => {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          if (error.data?.code === "FORBIDDEN") {
-            toast({
-              title:
-                "You do not have permission to edit overall pricing strategy.",
-              description: "Please contact your team owner to request access.",
-            });
-          } else {
-            errorToast();
-          }
-        });
+  const handleSavePetFee = (value: number) => {
+    setPetFee(value);
+  };
+
+  const handleSaveExtraGuestFee = (value: number) => {
+    setExtraGuestFee(value);
+  };
+
+  const handleBookItNowSwitchLocal = async (checked: boolean) => {
+    if (handleBookItNowSwitch) {
+      await handleBookItNowSwitch(checked, bookItNowPercent);
+    }
+    setIsChecked(checked);
+  };
+
+  const handleBookItNowSliderLocal = async () => {
+    if (handleBookItNowSlider) {
+      await handleBookItNowSlider(bookItNowPercent);
     }
   };
 
@@ -136,13 +317,15 @@ export default function CalendarSettings({ property }: { property: Property }) {
         <h2 className="mb-2 text-xl font-bold sm:mb-6 sm:text-2xl">Settings</h2>
         <Tabs defaultValue="pricing" className="w-full">
           <TabsList
-            className="mb-4 grid w-full grid-cols-2 sm:mb-6"
+            className="mb-4 grid w-full grid-cols-3 sm:mb-6"
             noBorder={true}
           >
             <TabsTrigger value="pricing" className="flex-1">
               Pricing
             </TabsTrigger>
-
+            <TabsTrigger value="fees" className="flex-1">
+              Fees
+            </TabsTrigger>
             <TabsTrigger value="restrictions" className="flex-1">
               Restrictions
             </TabsTrigger>
@@ -166,7 +349,7 @@ export default function CalendarSettings({ property }: { property: Property }) {
                   checked={isChecked}
                   className="data-[state=checked]:bg-primaryGreen data-[state=unchecked]:bg-gray-300"
                   onCheckedChange={(checked) => {
-                    void handleBookItNowSwitch(checked);
+                    void handleBookItNowSwitchLocal(checked);
                   }}
                 />
               </div>
@@ -186,7 +369,7 @@ export default function CalendarSettings({ property }: { property: Property }) {
                   </p>
                   <div className="flex justify-end">
                     <Button
-                      onClick={handleBookItNowSlider}
+                      onClick={handleBookItNowSliderLocal}
                       disabled={isUpdatingBookItNow}
                     >
                       {isUpdatingBookItNow ? "Saving!" : "Save"}
@@ -250,6 +433,16 @@ export default function CalendarSettings({ property }: { property: Property }) {
 
             {/* Name your price section */}
             <RequestAndBidAutomationSection property={property} />
+          </TabsContent>
+          <TabsContent value="fees" className="space-y-6 sm:space-y-8">
+            <HostFeeTab
+              handleSaveCleaningFee={handleSaveCleaningFee}
+              handleSavePetFee={handleSavePetFee}
+              handleSaveExtraGuestFee={handleSaveExtraGuestFee}
+              cleaningFee={cleaningFee}
+              petFee={petFee}
+              extraGuestFee={extraGuestFee}
+            />
           </TabsContent>
           <TabsContent value="restrictions" className="space-y-6 sm:space-y-8">
             <HostPropertiesRestrictions property={property} />
