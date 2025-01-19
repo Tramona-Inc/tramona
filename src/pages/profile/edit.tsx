@@ -17,13 +17,14 @@ import Link from "next/link";
 export default function Page() {
   const { data: session } = useSession();
   const [isPhotoDialogOpen, setIsPhotoDialogOpen] = useState(false);
-  const [isButtonVisible, setIsButtonVisible] = useState(true);
 
   const { data: myUserWProfile } = api.users.getMyUserWProfile.useQuery();
   const memoizedUser = useMemo(() => myUserWProfile, [myUserWProfile]);
 
   const imageSrc =
-    myUserWProfile?.user.image ?? session?.user.image ?? "/default-profile.png";
+    myUserWProfile?.user.image ??
+    session?.user.image ??
+    "https://res.cloudinary.com/heyset/image/upload/v1689582418/buukmenow-folder/no-image-icon-0.jpg";
 
   return (
     <DashboardLayout>
@@ -65,9 +66,7 @@ export default function Page() {
         myUserWProfile={memoizedUser}
       />
       <div
-        className={`fixed bottom-0 flex w-screen flex-row items-center justify-end border-2 bg-white py-3 transition-opacity duration-300 border${
-          isButtonVisible ? "opacity-100" : "pointer-events-none opacity-0"
-        }`}
+        className={`fixed bottom-0 flex w-screen flex-row items-center justify-end border-2 bg-white py-3 transition-opacity duration-300`}
       >
         <Button variant="primary" size="sm" className="mx-auto px-4 py-2">
           <Link href={`view/${myUserWProfile?.userId}`}>Done</Link>

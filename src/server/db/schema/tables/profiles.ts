@@ -1,4 +1,4 @@
-import { pgTable } from "drizzle-orm/pg-core";
+import { pgTable, text } from "drizzle-orm/pg-core";
 import { varchar, index, boolean } from "drizzle-orm/pg-core";
 import { users } from "./users";
 
@@ -6,10 +6,10 @@ export const profiles = pgTable(
   "profiles",
   {
     // NextAuth fields
-    userId: varchar("user_id")
+    userId: text("user_id")
       .notNull()
       .primaryKey()
-      .references(() => users.id),
+      .references(() => users.id, { onDelete: "cascade" }),
 
     // Profile fields
     aboutYou: varchar("about", { length: 450 }),

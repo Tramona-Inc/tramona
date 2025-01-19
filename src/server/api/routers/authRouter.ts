@@ -59,15 +59,6 @@ async function insertUserAuth(
       .returning()
       .then((res) => res[0]!);
 
-    await retry(
-      // will throw on collisions since postgres primary keys have the unique constraint
-      tx
-        .insert(referralCodes)
-        .values({ ownerId: userId, referralCode: generateReferralCode() })
-        .returning(),
-      3,
-    );
-
     await tx.insert(profiles).values({ userId: userId }).returning();
 
     return ret;

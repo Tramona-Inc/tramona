@@ -20,21 +20,6 @@ async function createProfiles() {
 
         await db.insert(profiles).values({
           userId: user.id,
-          aboutYou: null,
-          school: null,
-          work: null,
-          pets: null,
-          funFact: null,
-          favoriteSongInHighSchool: null,
-          biographyTitle: null,
-          languagesSpoken: null,
-          dreamDestination: null,
-          hostingHabits: null,
-          showBirthDecade: null,
-          timeSpentOn: null,
-          uselessSkill: null,
-          obsession: null,
-          location: null,
         });
         console.log(
           `Successfully created profile for user with id: ${user.id}`,
@@ -58,4 +43,4 @@ async function createProfiles() {
   }
 }
 
-createProfiles();
+await createProfiles();
