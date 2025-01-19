@@ -10,9 +10,9 @@ import {
   MapPin,
   Sparkles,
   Coffee,
-  Globe,
   Heart,
 } from "lucide-react";
+import { z } from "zod";
 
 type FieldConfigItem = {
   title: string;
@@ -23,18 +23,17 @@ type FieldConfigItem = {
 
 export type FieldConfig = {
   school: FieldConfigItem;
-  wantToGo: FieldConfigItem;
   work: FieldConfigItem;
   forGuests: FieldConfigItem;
   pets: FieldConfigItem;
-  decade: FieldConfigItem;
+  showBirthDecade: FieldConfigItem;
   funFact: FieldConfigItem;
   tooMuchTime: FieldConfigItem;
   favoriteSong: FieldConfigItem;
   uselessSkill: FieldConfigItem;
-  biography: FieldConfigItem;
+  biographyTitle: FieldConfigItem;
   obsession: FieldConfigItem;
-  languages: FieldConfigItem;
+  languagesSpoken: FieldConfigItem;
   location: FieldConfigItem;
 };
 
@@ -45,12 +44,6 @@ export const fieldConfig: FieldConfig = {
       "Whether it's home school, high school, or trade school, name the school that made you who you are.",
     icon: School,
     label: "Where I went to school",
-  },
-  wantToGo: {
-    title: "Where have you always wanted to go?",
-    description: "Share that one place you've been dreaming about visiting.",
-    icon: Globe,
-    label: "Where I've always wanted to go",
   },
   work: {
     title: "What do you do for work?",
@@ -71,11 +64,11 @@ export const fieldConfig: FieldConfig = {
     icon: PawPrint,
     label: "Pets",
   },
-  decade: {
+  showBirthDecade: {
     title: "What decade were you born?",
     description: "Share the decade you were born in.",
     icon: MapPin,
-    label: "Decade I was born",
+    label: "Show what decade I was born in",
   },
   funFact: {
     title: "What's your fun fact?",
@@ -101,7 +94,7 @@ export const fieldConfig: FieldConfig = {
     icon: Sparkles,
     label: "My most useless skill",
   },
-  biography: {
+  biographyTitle: {
     title: "What would your biography title be?",
     description: "If you were to write a biography, what would the title be?",
     icon: Book,
@@ -113,7 +106,7 @@ export const fieldConfig: FieldConfig = {
     icon: Heart,
     label: "I'm obsessed with",
   },
-  languages: {
+  languagesSpoken: {
     title: "What languages do you speak?",
     description: "Share the languages you speak.",
     icon: Languages,
@@ -126,3 +119,15 @@ export const fieldConfig: FieldConfig = {
     label: "Where I live",
   },
 };
+
+const fieldConfigKeys = Object.keys(
+  fieldConfig,
+) as (keyof typeof fieldConfig)[];
+
+// Create a Zod schema for the keys
+export const FieldConfigSchema = z.enum([
+  fieldConfigKeys[0]!,
+  ...fieldConfigKeys.slice(1),
+]);
+
+export type FieldConfigKeys = z.infer<typeof FieldConfigSchema>;

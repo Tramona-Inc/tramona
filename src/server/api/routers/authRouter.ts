@@ -3,9 +3,9 @@ import VerifyEmailLink from "packages/transactional/emails/VerifyEmail";
 import { env } from "@/env";
 import { CustomPgDrizzleAdapter } from "@/server/adapter";
 import { db } from "@/server/db";
-import { referralCodes, users, type User } from "@/server/db/schema";
+import { profiles, referralCodes, users, type User } from "@/server/db/schema";
 import { addUserToGroups, sendEmail } from "@/server/server-utils";
-import { generateReferralCode } from "@/utils/utils";
+import { generateReferralCode, retry } from "@/utils/utils";
 import { zodEmail, zodPassword } from "@/utils/zod-utils";
 import { TRPCError } from "@trpc/server";
 import * as bycrypt from "bcrypt";
@@ -41,22 +41,37 @@ async function updateExistingUserAuth(
 }
 
 async function insertUserAuth(
-  // name: string,
   email: string,
   hashedPassword: string,
   makeHost = false,
 ) {
-  return await db
-    .insert(users)
-    .values({
-      id: crypto.randomUUID(),
-      // name: name,
-      email: email,
-      password: hashedPassword,
-      role: makeHost ? "host" : "guest",
-    })
-    .returning()
-    .then((res) => res[0]!);
+  const userId = crypto.randomUUID();
+
+  return await db.transaction(async (tx) => {
+    const ret = await tx
+      .insert(users)
+      .values({
+        id: userId,
+        email: email,
+        password: hashedPassword,
+        role: makeHost ? "host" : "guest",
+      })
+      .returning()
+      .then((res) => res[0]!);
+
+    await retry(
+      // will throw on collisions since postgres primary keys have the unique constraint
+      tx
+        .insert(referralCodes)
+        .values({ ownerId: userId, referralCode: generateReferralCode() })
+        .returning(),
+      3,
+    );
+
+    await tx.insert(profiles).values({ userId: userId }).returning();
+
+    return ret;
+  });
 }
 
 async function sendVerificationEmail(user: User) {

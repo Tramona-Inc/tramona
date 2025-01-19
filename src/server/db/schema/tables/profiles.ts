@@ -3,7 +3,7 @@ import { varchar, index, boolean } from "drizzle-orm/pg-core";
 import { users } from "./users";
 
 export const profiles = pgTable(
-  "profile",
+  "profiles",
   {
     // NextAuth fields
     userId: varchar("user_id")
@@ -17,16 +17,17 @@ export const profiles = pgTable(
     work: varchar("work", { length: 20 }),
     pets: varchar("pets", { length: 40 }),
     funFact: varchar("fun_fact", { length: 40 }),
-    favoriteSongInHighSchool: varchar("favorite_song_in_high_school", {
+    favoriteSong: varchar("favorite_song", {
       length: 40,
     }),
     biographyTitle: varchar("biography_title", { length: 40 }),
     languagesSpoken: varchar("languages_spoken", { length: 40 }),
     dreamDestination: varchar("dream_destination", { length: 40 }),
     hostingHabits: varchar("hosting_habits", { length: 40 }),
-    showBirthDecade: boolean("show_birth_decade").default(false),
-    timeSpentOn: varchar("time_spent_on", { length: 40 }),
+    showBirthDecade: boolean("show_birth_decade").default(false).notNull(),
+    tooMuchTime: varchar("too_much_time", { length: 40 }),
     uselessSkill: varchar("useless_skill", { length: 40 }),
+    forGuests: varchar("for_guests", { length: 40 }),
     obsession: varchar("obsession", { length: 40 }),
     location: varchar("location", { length: 40 }),
   },

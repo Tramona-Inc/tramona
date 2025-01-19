@@ -25,6 +25,8 @@ import {
 import { zodString } from "@/utils/zod-utils";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import type { FieldConfig } from "@/components/dashboard/host/profile/fieldConfig";
+import { FieldConfigSchema } from "@/components/dashboard/host/profile/fieldConfig";
 
 export const usersRouter = createTRPCRouter({
   getUser: optionallyAuthedProcedure.query(async ({ ctx }) => {
@@ -337,7 +339,7 @@ export const usersRouter = createTRPCRouter({
   //PROFILE RELATED STUFF
   getUserWithProfile: publicProcedure // for general audience
     .input(z.string())
-    .query(async ({ ctx, input }) => {
+    .query(async ({ input }) => {
       const userWProfile = await db.query.profiles.findFirst({
         where: eq(profiles.userId, input),
         with: {
@@ -362,7 +364,6 @@ export const usersRouter = createTRPCRouter({
         },
       })
       .then((res) => res!);
-
     return myProfile;
   }),
   updateUserImage: protectedProcedure
@@ -378,6 +379,46 @@ export const usersRouter = createTRPCRouter({
         .returning()
         .then((res) => res[0]);
       console.log(updatedImage);
+      return;
+    }),
+  updateProfileShowDecadeBorn: protectedProcedure
+    .input(z.boolean())
+    .mutation(async ({ input, ctx }) => {
+      await db
+        .update(profiles)
+        .set({
+          showBirthDecade: input,
+        })
+        .where(eq(profiles.userId, ctx.user.id));
+      return;
+    }),
+
+  updateProfileIntro: protectedProcedure
+    .input(z.string())
+    .mutation(async ({ input, ctx }) => {
+      await db
+        .update(profiles)
+        .set({
+          aboutYou: input,
+        })
+        .where(eq(profiles.userId, ctx.user.id));
+      return;
+    }),
+  updateUserFieldConfig: protectedProcedure
+    .input(
+      z.object({
+        key: FieldConfigSchema,
+        description: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const field = input.key;
+      await db
+        .update(profiles)
+        .set({
+          [field]: input.description,
+        })
+        .where(eq(profiles.userId, ctx.user.id));
       return;
     }),
 });

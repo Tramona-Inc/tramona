@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,15 +10,19 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { X } from "lucide-react";
+import { FieldConfig } from "./fieldConfig";
+import { api } from "@/utils/api";
+
+export type FieldConfigKeys = keyof FieldConfig;
 
 interface EditFieldDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: string;
   description?: string;
-  value: string | boolean | null;
-  onChange: (value: string | boolean | null) => void;
+  value: string | boolean | null | undefined;
   maxLength?: number;
+  activeFieldConfig: FieldConfigKeys;
 }
 
 export function EditFieldDialog({
@@ -27,17 +31,42 @@ export function EditFieldDialog({
   title,
   description,
   value,
-  onChange,
   maxLength = 40,
+  activeFieldConfig,
 }: EditFieldDialogProps) {
-  const [inputValue, setInputValue] = useState(value);
+  const { mutateAsync: updateField, isLoading } =
+    api.users.updateUserFieldConfig.useMutation();
+
+  const [inputValue, setInputValue] = useState<string | null | undefined>(
+    value != null ? String(value) : undefined,
+  );
   const remainingChars =
     typeof inputValue === "string" ? maxLength - inputValue.length : maxLength;
 
-  const handleSave = () => {
-    onChange(inputValue);
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setInputValue(e.target.value);
+    },
+    [setInputValue],
+  );
+
+  const handleSave = useCallback(async () => {
+    await updateField({
+      key: activeFieldConfig,
+      description: inputValue ? inputValue : "",
+    });
     onOpenChange(false);
-  };
+  }, [updateField, activeFieldConfig, onOpenChange, inputValue]);
+
+  const handleKeyDown = useCallback(
+    async (event: React.KeyboardEvent) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        await handleSave();
+      }
+    },
+    [handleSave],
+  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -61,10 +90,11 @@ export function EditFieldDialog({
         {typeof inputValue !== "boolean" && (
           <div className="space-y-4 py-4">
             <Input
-              value={inputValue ? inputValue : undefined}
-              onChange={(e) => setInputValue(e.target.value)}
+              value={inputValue ?? undefined}
+              onChange={handleInputChange}
               maxLength={maxLength}
               className="w-full"
+              onKeyDown={handleKeyDown}
             />
             <div className="text-right text-xs text-muted-foreground">
               {remainingChars} characters available
@@ -72,7 +102,9 @@ export function EditFieldDialog({
           </div>
         )}
         <div className="flex justify-end">
-          <Button onClick={handleSave}>Save</Button>
+          <Button onClick={handleSave} disabled={isLoading}>
+            {isLoading ? "Saving..." : "Save"}
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

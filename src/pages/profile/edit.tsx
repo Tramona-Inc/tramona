@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 
@@ -12,6 +12,7 @@ import { api } from "@/utils/api";
 import { PenSquare } from "lucide-react";
 import AllFieldDialogs from "@/components/dashboard/host/profile/AllFieldDialogs";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 
 export default function Page() {
   const { data: session } = useSession();
@@ -19,6 +20,7 @@ export default function Page() {
   const [isButtonVisible, setIsButtonVisible] = useState(true);
 
   const { data: myUserWProfile } = api.users.getMyUserWProfile.useQuery();
+  const memoizedUser = useMemo(() => myUserWProfile, [myUserWProfile]);
 
   const imageSrc =
     myUserWProfile?.user.image ?? session?.user.image ?? "/default-profile.png";
@@ -51,28 +53,16 @@ export default function Page() {
                 <h2 className="text-2xl font-semibold">Your Name</h2>
                 <p className="text-sm text-muted-foreground">Host</p>
               </div>
-              <div className="flex gap-4">
-                <div>
-                  <div className="font-semibold">1</div>
-                  <div className="text-sm text-muted-foreground">Review</div>
-                </div>
-                <div>
-                  <div className="font-semibold">2</div>
-                  <div className="text-sm text-muted-foreground">
-                    Months hosting
-                  </div>
-                </div>
-              </div>
             </div>
           </Card>
           <VerificationCard />
         </div>
-        <AllFieldDialogs myUserWProfile={myUserWProfile} />
+        <AllFieldDialogs myUserWProfile={memoizedUser} />
       </div>{" "}
       <ProfilePhotoDialog
         open={isPhotoDialogOpen}
         onOpenChange={setIsPhotoDialogOpen}
-        myUserWProfile={myUserWProfile}
+        myUserWProfile={memoizedUser}
       />
       <div
         className={`fixed bottom-0 flex w-screen flex-row items-center justify-end border-2 bg-white py-3 transition-opacity duration-300 border${
@@ -80,7 +70,7 @@ export default function Page() {
         }`}
       >
         <Button variant="primary" size="sm" className="mx-auto px-4 py-2">
-          Done
+          <Link href={`view/${myUserWProfile?.userId}`}>Done</Link>
         </Button>
       </div>
     </DashboardLayout>
