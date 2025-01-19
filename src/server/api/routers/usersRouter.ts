@@ -9,6 +9,7 @@ import {
   emergencyContacts,
   groups,
   hostProfiles,
+  profiles,
   referralCodes,
   userUpdateSchema,
   users,
@@ -331,5 +332,52 @@ export const usersRouter = createTRPCRouter({
 
         return curUser;
       }
+    }),
+
+  //PROFILE RELATED STUFF
+  getUserWithProfile: publicProcedure // for general audience
+    .input(z.string())
+    .query(async ({ ctx, input }) => {
+      const userWProfile = await db.query.profiles.findFirst({
+        where: eq(profiles.userId, input),
+        with: {
+          user: true,
+        },
+      });
+      if (!userWProfile)
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "User does not exist",
+        });
+
+      return userWProfile;
+    }),
+
+  getMyUserWProfile: protectedProcedure.query(async ({ ctx }) => {
+    const myProfile = await db.query.profiles
+      .findFirst({
+        where: eq(profiles.userId, ctx.user.id),
+        with: {
+          user: true,
+        },
+      })
+      .then((res) => res!);
+
+    return myProfile;
+  }),
+  updateUserImage: protectedProcedure
+    .input(z.string())
+    .mutation(async ({ ctx, input }) => {
+      console.log("running");
+      const updatedImage = await db
+        .update(users)
+        .set({
+          image: input,
+        })
+        .where(eq(users.id, ctx.user.id))
+        .returning()
+        .then((res) => res[0]);
+      console.log(updatedImage);
+      return;
     }),
 });
