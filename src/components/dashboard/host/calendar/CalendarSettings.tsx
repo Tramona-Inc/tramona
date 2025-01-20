@@ -272,16 +272,12 @@ export default function CalendarSettings({
   };
 
   const handleBookItNowSwitchLocal = async (checked: boolean) => {
-    if (handleBookItNowSwitch) {
-      await handleBookItNowSwitch(checked, bookItNowPercent);
-    }
+    await handleBookItNowSwitch(checked, bookItNowPercent);
     setIsChecked(checked);
   };
 
   const handleBookItNowSliderLocal = async () => {
-    if (handleBookItNowSlider) {
-      await handleBookItNowSlider(bookItNowPercent);
-    }
+    await handleBookItNowSlider(bookItNowPercent);
   };
 
   const handleBiddingSave = async () => {
