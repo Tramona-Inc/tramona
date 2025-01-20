@@ -14,7 +14,7 @@ import RequestAndBidAutomationSection from "./setttingsSections/RequestAndBidAut
 import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 import { errorToast } from "@/utils/toasts";
 import * as React from "react";
-import HostFeeTab from "../HostFeeTab";
+import HostFeeTab from "./HostFeeTab";
 
 interface CalendarSettingsProps {
   property: Property;
@@ -22,6 +22,7 @@ interface CalendarSettingsProps {
   handleBookItNowSlider: (bookItNowPercent: number) => Promise<void>;
   isUpdatingBookItNow: boolean;
   isBookItNowChecked: boolean;
+  refetch: () => void;
 }
 export default function CalendarSettings({
   property,
@@ -29,6 +30,7 @@ export default function CalendarSettings({
   handleBookItNowSlider,
   isUpdatingBookItNow,
   isBookItNowChecked,
+  refetch,
 }: CalendarSettingsProps) {
   const { currentHostTeamId } = useHostTeamStore();
 
@@ -215,7 +217,7 @@ export default function CalendarSettings({
             <RequestAndBidAutomationSection property={property} />
           </TabsContent>
           <TabsContent value="fees" className="space-y-6 sm:space-y-8">
-            <HostFeeTab property={property} />
+            <HostFeeTab property={property} refetch={refetch} />
           </TabsContent>
           <TabsContent value="restrictions" className="space-y-6 sm:space-y-8">
             <HostPropertiesRestrictions property={property} />

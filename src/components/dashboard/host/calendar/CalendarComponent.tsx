@@ -52,14 +52,17 @@ export default function CalendarComponent() {
     null,
   );
 
-  const { data: hostProperties, isLoading: loadingProperties } =
-    api.properties.getHostProperties.useQuery(
-      { currentHostTeamId: currentHostTeamId! },
-      {
-        enabled: !!currentHostTeamId,
-        refetchOnWindowFocus: false,
-      },
-    );
+  const {
+    data: hostProperties,
+    isLoading: loadingProperties,
+    refetch,
+  } = api.properties.getHostProperties.useQuery(
+    { currentHostTeamId: currentHostTeamId! },
+    {
+      enabled: !!currentHostTeamId,
+      refetchOnWindowFocus: false,
+    },
+  );
 
   //memoize initial property an host hostproperties
   // Update the ref value only when the properties change
@@ -353,6 +356,7 @@ export default function CalendarComponent() {
           handleBookItNowSlider={handleBookItNowSlider}
           isUpdatingBookItNow={isUpdatingBookItNow}
           isBookItNowChecked={isBookItNowChecked}
+          refetch={refetch} // sorry this is to invalidate the queries after the pricing update
         />
       ) : (
         <CalenderSettingsLoadingState />

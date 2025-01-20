@@ -1,44 +1,105 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-
 import { Minus, Plus } from "lucide-react";
 import * as React from "react";
 import { Input } from "@/components/ui/input";
+import type { Property } from "@/server/db/schema";
+import type { ExtraPricingField } from "./pricingfields";
+import { useHostTeamStore } from "@/utils/store/hostTeamStore";
+import { api } from "@/utils/api";
+import { TRPCClientErrorLike } from "@trpc/client";
+import { toast } from "@/components/ui/use-toast";
+import { errorToast } from "@/utils/toasts";
+import { AppRouter } from "@/server/api/root";
 
 interface EditableFeeProps {
-  title?: string; // Making title optional so it doesn't error for the other fees
+  property: Property;
+  field: ExtraPricingField;
+  title?: string;
   subtitle: string;
-  value: number;
-  onSave: (value: number) => void;
-  helpText?: string;
   learnMoreLink?: string;
+  helpText?: string;
   showGuestCounter?: boolean;
-  guestCount?: number;
+  refetch: () => void;
 }
 
 export default function EditableFee({
+  property,
+  field,
   title,
   subtitle,
-  value,
-  onSave,
   helpText,
   learnMoreLink,
   showGuestCounter = false,
-  guestCount = 1,
+  refetch,
 }: EditableFeeProps) {
-  const [isEditing, setIsEditing] = React.useState(false);
-  const [editValue, setEditValue] = React.useState(value);
-  const [editGuestCount, setEditGuestCount] = React.useState(guestCount);
+  const { currentHostTeamId } = useHostTeamStore();
+  const { mutateAsync: updatePricingField, isLoading } =
+    api.properties.updatePropertyPricingField.useMutation();
 
-  const handleSave = () => {
-    onSave(editValue);
-    setIsEditing(false);
+  const [isEditing, setIsEditing] = React.useState(false);
+  // Get the initial value from the property using the field
+  const initialValue = React.useMemo(() => property[field], [property, field]);
+  // Use a string state and do the converstion when setting the state
+  const [editValue, setEditValue] = React.useState(String(initialValue / 100));
+  const [editGuestCount, setEditGuestCount] = React.useState<number>(
+    property.maxGuestsWithoutFee ?? property.maxNumGuests,
+  );
+
+  React.useEffect(() => {
+    setEditValue(String(initialValue / 100));
+  }, [initialValue]);
+
+  const handleSave = async () => {
+    const parsedValue = parseFloat(editValue);
+    if (isNaN(parsedValue)) {
+      toast({
+        title: "Invalid Value",
+        description: "Please enter a valid number.",
+      });
+      return;
+    }
+
+    await updatePricingField({
+      currentHostTeamId: currentHostTeamId!,
+      propertyId: property.id,
+      field: field,
+      amount: parsedValue * 100, //convert dollar into cents
+      maxGuestsWithoutFee: editGuestCount,
+    })
+      .then(() => {
+        toast({
+          title: "Update Successful",
+        });
+      })
+      .catch((error: TRPCClientErrorLike<AppRouter>) => {
+        if (error.data?.code === "FORBIDDEN") {
+          toast({
+            title: "You do not have permission to change Co-host roles.",
+            description: "Please contact your team owner to request access.",
+          });
+        } else {
+          errorToast();
+        }
+      })
+      .finally(() => {
+        setIsEditing(false);
+        refetch();
+      });
   };
 
   const handleCancel = () => {
-    setEditValue(value);
-    setEditGuestCount(guestCount);
+    setEditValue(String(initialValue / 100));
+    setEditGuestCount(1);
     setIsEditing(false);
+  };
+
+  const handleEditValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // allow only numbers and decimal point
+    if (/^\d*\.?\d*$/.test(value)) {
+      setEditValue(value);
+    }
   };
 
   if (isEditing) {
@@ -51,11 +112,10 @@ export default function EditableFee({
           <div className="flex items-center gap-2">
             <span className="text-4xl font-semibold">$</span>
             <Input
-              type="number"
-              value={editValue || ""}
-              onChange={(e) => setEditValue(Number(e.target.value) || 0)}
+              type="text"
+              value={editValue}
+              onChange={handleEditValueChange}
               className="h-16 w-32 text-4xl font-semibold"
-              min="0"
             />
           </div>
 
@@ -100,7 +160,7 @@ export default function EditableFee({
 
         <div className="space-y-2">
           <Button className="w-full" onClick={handleSave}>
-            Save
+            {isLoading ? "Saving..." : "Save"}
           </Button>
           <Button variant="outline" className="w-full" onClick={handleCancel}>
             Cancel
@@ -119,7 +179,10 @@ export default function EditableFee({
         {title && <h2 className="mb-4 text-xl font-semibold">{title}</h2>}
         <div>
           <div className="mb-2 text-sm">{subtitle}</div>
-          <div className="text-4xl font-semibold">${value}</div>
+          {/* Changed this from the property value to the state value */}
+          <div className="text-4xl font-semibold">
+            ${parseFloat(editValue).toFixed(2)}
+          </div>
         </div>
         {helpText && (
           <p className="text-sm text-muted-foreground">
