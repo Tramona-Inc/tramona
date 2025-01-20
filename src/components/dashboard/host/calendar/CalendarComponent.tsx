@@ -35,17 +35,23 @@ import {
 import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 import useSetInitialHostTeamId from "@/components/_common/CustomHooks/useSetInitialHostTeamId";
 import CalenderSettingsLoadingState from "./CalenderSettingsLoadingState";
+import { toast } from "@/components/ui/use-toast";
+import { errorToast } from "@/utils/toasts";
+import { TRPCClientErrorLike } from "@trpc/client";
+import { AppRouter } from "@/server/api/root";
 
 export default function CalendarComponent() {
   useSetInitialHostTeamId();
   const { currentHostTeamId } = useHostTeamStore();
   const router = useRouter();
   const { propertyId } = router.query;
+
   const [hasDismissedModal, setHasDismissedModal] = useState(false);
   const [date, setDate] = useState<Date>(new Date());
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(
     null,
   );
+
   const { data: hostProperties, isLoading: loadingProperties } =
     api.properties.getHostProperties.useQuery(
       { currentHostTeamId: currentHostTeamId! },
@@ -89,6 +95,10 @@ export default function CalendarComponent() {
     api.calendar.getAndUpdateHostCalendar.useQuery(queryInput!, {
       enabled: Boolean(queryInput),
     });
+
+  const [isBookItNowChecked, setIsBookItNowChecked] = useState<boolean>(
+    () => selectedProperty?.bookItNowEnabled ?? false,
+  );
 
   const prices = useMemo(() => {
     const priceMap: Record<string, number | undefined> = {};
@@ -155,7 +165,7 @@ export default function CalendarComponent() {
   }, [date, isDateReserved]);
 
   const leftOnTheTable = useMemo(() => {
-    return Object.entries(prices || {})
+    return Object.entries(prices)
       .filter(([dateStr]) => !isDateReserved(dateStr))
       .reduce((sum, [_, price]) => (price ? sum + price : sum), 0);
   }, [prices, isDateReserved]);
@@ -170,35 +180,40 @@ export default function CalendarComponent() {
   };
 
   const [isCalendarUpdating, setIsCalendarUpdating] = useState(false);
+
   const { mutateAsync: toggleBookItNow } =
     api.properties.toggleBookItNow.useMutation();
-  const { mutateAsync: updateBookItNow } =
+
+  const { mutateAsync: updateBookItNow, isLoading: isUpdatingBookItNow } =
     api.properties.updateBookItNow.useMutation();
 
-  const handleBookItNowSwitch = async (
-    checked: boolean,
-    bookItNowPercent: number,
-  ) => {
-    setIsCalendarUpdating(true);
-    const updatedDiscount = checked ? bookItNowPercent : 0;
-    await toggleBookItNow({
+  const handleBookItNowSwitch = (checked: boolean) => {
+    console.log(checked);
+    return toggleBookItNow({
       id: selectedProperty!.id,
       bookItNowEnabled: checked,
       currentHostTeamId: currentHostTeamId!,
     })
-      .then(async (res) => {
-        if (!res) {
-          await updateBookItNow({
-            id: selectedProperty!.id,
-            bookItNowHostDiscountPercentOffInput: updatedDiscount,
-            currentHostTeamId: currentHostTeamId!,
-          });
-        }
+      .then(() => {
+        setIsBookItNowChecked(checked);
+        toast({
+          title: "Update Successful",
+          description: `Book it now ${checked ? "enabled" : "disabled"}`,
+        });
       })
-      .finally(() => {
-        setIsCalendarUpdating(false);
+      .catch((error: TRPCClientErrorLike<AppRouter>) => {
+        setIsBookItNowChecked((prev) => !checked);
+        if (error.data?.code === "FORBIDDEN") {
+          toast({
+            title: "You do not have permission to change Co-host roles.",
+            description: "Please contact your team owner to request access.",
+          });
+        } else {
+          errorToast();
+        }
       });
   };
+
   const handleBookItNowSlider = async (bookItNowPercent: number) => {
     setIsCalendarUpdating(true);
     await updateBookItNow({
@@ -336,6 +351,8 @@ export default function CalendarComponent() {
           property={selectedProperty}
           handleBookItNowSwitch={handleBookItNowSwitch}
           handleBookItNowSlider={handleBookItNowSlider}
+          isUpdatingBookItNow={isUpdatingBookItNow}
+          isBookItNowChecked={isBookItNowChecked}
         />
       ) : (
         <CalenderSettingsLoadingState />
