@@ -1,5 +1,4 @@
 import { env } from "@/env";
-import { createConversationWithOfferAfterBooking } from "@/utils/webhook-functions/message-utils";
 import { stripe } from "@/server/api/routers/stripeRouter";
 import { db } from "@/server/db";
 import {
@@ -38,10 +37,8 @@ import {
 import { sendSlackMessage } from "@/server/slack";
 import { formatDateMonthDay } from "@/utils/utils";
 import { breakdownPaymentByOffer } from "@/utils/payment-utils/paymentBreakdown";
-import { createConversationWithAdmin, createConversationWithHost } from "@/server/api/routers/messagesRouter";
+import { createConversationWithHostOrAdminTeam } from "@/server/api/routers/messagesRouter";
 
-
-const ADMIN_HOST_TEAM_ID = env.ADMIN_TEAM_ID;
 // ! Necessary for stripe
 export const config = {
   api: {
@@ -118,7 +115,6 @@ export default async function webhook(
             ),
             with: { hostTeam: true },
           });
-          3;
 
           //<------- Setup Intent for future charge ---->
 
@@ -342,16 +338,11 @@ export default async function webhook(
                 });
               }
               if (paymentIntentSucceeded.metadata.user_id) {
-                if (currentProperty?.hostTeam.id === ADMIN_HOST_TEAM_ID) {
-                  await createConversationWithAdmin(
-                    paymentIntentSucceeded.metadata.user_id,
-                  );
-                } else {
-                  await createConversationWithHost(
-                    paymentIntentSucceeded.metadata.user_id,
-                    currentProperty!.hostTeam.id,
-                  );
-                }
+                await createConversationWithHostOrAdminTeam(
+                  paymentIntentSucceeded.metadata.user_id,
+                  currentProperty!.hostTeam.id,
+                  currentProperty!.id,
+                );
               }
               // ------ Send Slack When trip is booked ------
               await sendSlackMessage({

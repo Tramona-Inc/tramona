@@ -42,7 +42,7 @@ export function MobileSearchFormBar({
   const { setIsSearching } = useAdjustedProperties();
 
   const getDisplayText = () => {
-    return location ?? "Best prices on Airbnbs anywhere";
+    return location;
   };
 
   const handleSubmit = async (values: SearchFormValues) => {

@@ -7,6 +7,7 @@ import {
   accounts,
   verificationTokens,
   referralCodes,
+  profiles,
 } from "./db/schema";
 import { generateReferralCode, retry } from "@/utils/utils";
 import { addUserToGroups } from "./server-utils";
@@ -33,6 +34,8 @@ export function CustomPgDrizzleAdapter(
             .returning(),
           3,
         );
+
+        await tx.insert(profiles).values({userId: userId}).returning();
 
         return ret;
       });

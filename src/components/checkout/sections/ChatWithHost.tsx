@@ -1,13 +1,17 @@
-import { useChatWithAdmin } from "@/utils/messaging/useChatWithAdmin";
+import { useChatWithHostTeam } from "@/utils/messaging/useChatWithHost";
 
-export default function ChatWithHost() {
-  const chatWithAdmin = useChatWithAdmin();
+export default function ChatWithHost({ hostId, hostTeamId, propertyId }: { hostId: string, hostTeamId: number, propertyId: number }) {
+  const chatWithHostTeam = useChatWithHostTeam();
 
   return (
     <p className="text-sm">
       Questions?{" "}
       <button
-        onClick={() => chatWithAdmin()}
+        onClick={() => chatWithHostTeam({
+          hostId,
+          hostTeamId,
+          propertyId
+        })}
         className="text-blue-600 underline underline-offset-2"
       >
         Chat with host

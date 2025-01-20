@@ -42,6 +42,7 @@ export const env = createEnv({
     HOSPITABLE_API_KEY: z.string(),
     PROXY_URL: z.string().url(),
     GEMINI_KEY: z.string(),
+    //LLAMA_API_KEY: z.string(),
   },
 
   /**
@@ -100,6 +101,7 @@ export const env = createEnv({
     HOSPITABLE_API_KEY: process.env.HOSPITABLE_API_KEY,
     PROXY_URL: process.env.PROXY_URL,
     GEMINI_KEY: process.env.GEMINI_KEY,
+    // LLAMA_API_KEY: process.env.LLAMA_API_KEY,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
