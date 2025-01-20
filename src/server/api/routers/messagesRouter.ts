@@ -152,7 +152,7 @@ export async function fetchConversationWithHostTeam(
   }
 
   // Query the user's conversations
-  const result = await db.query.users.findFirst({
+  const userConversations = await db.query.users.findFirst({
     where: eq(users.id, userId),
     with: {
       conversations: {
@@ -178,19 +178,20 @@ export async function fetchConversationWithHostTeam(
   });
 
   // Check if there's a conversation that matches the host team's members
-  const conversationWithHost = result?.conversations.find((conv) => {
+  const existingConversation = userConversations?.conversations.find((conv) => {
     const participantIds = conv.conversation.participants.map(
-      (participant) => participant.user.id,
+      (participant) => participant.userId,
     );
 
-    // Check if the conversation contains all and only the host team members
+    // Sort and compare the participant IDs
     return (
-      participantIds.length === hostTeamMemberIds.length &&
-      hostTeamMemberIds.every((id) => participantIds.includes(id))
+      participantIds.length === hostTeamMemberIds.length + 1 &&
+      [...participantIds].sort().join(",") === [...hostTeamMemberIds, userId].sort().join(",")
     );
   });
 
-  return conversationWithHost?.conversation.id ?? null;
+  console.log(existingConversation?.conversation.id, "existingConversation?.conversation.id");
+  return existingConversation?.conversation.id ?? null;
 }
 
 export async function fetchConversationWithOffer(
