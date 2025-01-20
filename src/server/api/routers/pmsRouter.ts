@@ -242,4 +242,27 @@ export const pmsRouter = createTRPCRouter({
       console.log("propertyId", propertyId);
       return await getPropertyCalendar(propertyId);
   }),
+
+  resetHospitableCustomer: protectedProcedure.mutation(async ({ ctx }) => {
+    await ctx.db.query.users.findFirst({
+      columns: { id: true },
+      where: eq(users.id, ctx.user.id),
+    }).then(async (user) => {
+      if (!user) {
+        throw new Error("User not found");
+      }
+      const { id } = user;
+      try {
+        await axios.delete(`https://connect.hospitable.com/api/v1/customers/${id}`, {
+          headers: {
+            Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
+          },
+        });
+      } catch (error) {
+        console.error("Error resetting Hospitable customer:", error);
+        throw new Error("Failed to reset Hospitable customer");
+      }
+    });
+  }),
 });
+
