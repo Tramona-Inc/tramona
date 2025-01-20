@@ -187,6 +187,54 @@ export type SupabaseDatabase = {
           },
         ];
       };
+      flagged_messages: {
+        Row: {
+          id: string;
+          conversation_id: string;
+          user_id: string | null;
+          confidence: number;
+          violation_type: "OFF_PLATFORM_BOOKING" | "CONTACT_INFO" | "INAPPROPRIATE" | "NONE";
+          message: string;
+          reason: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id: string;
+          conversation_id: string;
+          user_id?: string | null;
+          confidence: number;
+          violation_type: "OFF_PLATFORM_BOOKING" | "CONTACT_INFO" | "INAPPROPRIATE" | "NONE";
+          message: string;
+          reason?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          conversation_id?: string;
+          user_id?: string | null;
+          confidence?: number;
+          violation_type?: "OFF_PLATFORM_BOOKING" | "CONTACT_INFO" | "INAPPROPRIATE" | "NONE";
+          message?: string;
+          reason?: string | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "flagged_messages_conversation_id_conversations_id_fk";
+            columns: ["conversation_id"];
+            isOneToOne: false;
+            referencedRelation: "conversations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "flagged_messages_user_id_user_id_fk";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "user";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
       offers: {
         Row: {
           accepted_at: string | null;
@@ -427,8 +475,8 @@ export type SupabaseDatabase = {
           note: string | null;
           num_guests: number;
           property_type:
-            | SupabaseDatabase["public"]["Enums"]["property_type"]
-            | null;
+          | SupabaseDatabase["public"]["Enums"]["property_type"]
+          | null;
           resolved_at: string | null;
           user_id: string;
         };
@@ -447,8 +495,8 @@ export type SupabaseDatabase = {
           note?: string | null;
           num_guests?: number;
           property_type?:
-            | SupabaseDatabase["public"]["Enums"]["property_type"]
-            | null;
+          | SupabaseDatabase["public"]["Enums"]["property_type"]
+          | null;
           resolved_at?: string | null;
           user_id: string;
         };
@@ -467,8 +515,8 @@ export type SupabaseDatabase = {
           note?: string | null;
           num_guests?: number;
           property_type?:
-            | SupabaseDatabase["public"]["Enums"]["property_type"]
-            | null;
+          | SupabaseDatabase["public"]["Enums"]["property_type"]
+          | null;
           resolved_at?: string | null;
           user_id?: string;
         };
@@ -579,40 +627,40 @@ export type SupabaseDatabase = {
       earning_status: "pending" | "paid" | "cancelled";
       host_type: "airbnb" | "direct" | "vrbo" | "other";
       property_amenities:
-        | "Wifi"
-        | "TV"
-        | "Kitchen"
-        | "Washer"
-        | "Free parking on premises"
-        | "Paid parking on premises"
-        | "Air conditioning"
-        | "Dedicated workspace";
+      | "Wifi"
+      | "TV"
+      | "Kitchen"
+      | "Washer"
+      | "Free parking on premises"
+      | "Paid parking on premises"
+      | "Air conditioning"
+      | "Dedicated workspace";
       property_safety_items:
-        | "Smoke alarm"
-        | "First aid kit"
-        | "Fire extinguisher"
-        | "Carbon monoxide alarm";
+      | "Smoke alarm"
+      | "First aid kit"
+      | "Fire extinguisher"
+      | "Carbon monoxide alarm";
       property_standout_amenities:
-        | "Pool"
-        | "Hot tub"
-        | "Patio"
-        | "BBQ grill"
-        | "Outdoor dining area"
-        | "Fire pit"
-        | "Pool table"
-        | "Indoor fireplace"
-        | "Piano"
-        | "Exercise equipment"
-        | "Lake access"
-        | "Beach access"
-        | "Ski-in/Ski-out"
-        | "Outdoor shower";
+      | "Pool"
+      | "Hot tub"
+      | "Patio"
+      | "BBQ grill"
+      | "Outdoor dining area"
+      | "Fire pit"
+      | "Pool table"
+      | "Indoor fireplace"
+      | "Piano"
+      | "Exercise equipment"
+      | "Lake access"
+      | "Beach access"
+      | "Ski-in/Ski-out"
+      | "Outdoor shower";
       property_type:
-        | "house"
-        | "guesthouse"
-        | "apartment"
-        | "room"
-        | "townhouse";
+      | "house"
+      | "guesthouse"
+      | "apartment"
+      | "room"
+      | "townhouse";
       referral_tier: "Partner" | "Ambassador";
       role: "guest" | "host" | "admin";
     };
@@ -624,89 +672,89 @@ export type SupabaseDatabase = {
 
 export type Tables<
   PublicTableNameOrOptions extends
-    | keyof (SupabaseDatabase["public"]["Tables"] &
-        SupabaseDatabase["public"]["Views"])
-    | { schema: keyof SupabaseDatabase },
+  | keyof (SupabaseDatabase["public"]["Tables"] &
+    SupabaseDatabase["public"]["Views"])
+  | { schema: keyof SupabaseDatabase },
   TableName extends PublicTableNameOrOptions extends {
     schema: keyof SupabaseDatabase;
   }
-    ? keyof (SupabaseDatabase[PublicTableNameOrOptions["schema"]]["Tables"] &
-        SupabaseDatabase[PublicTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+  ? keyof (SupabaseDatabase[PublicTableNameOrOptions["schema"]]["Tables"] &
+    SupabaseDatabase[PublicTableNameOrOptions["schema"]]["Views"])
+  : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof SupabaseDatabase }
   ? (SupabaseDatabase[PublicTableNameOrOptions["schema"]]["Tables"] &
-      SupabaseDatabase[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+    SupabaseDatabase[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R;
     }
-    ? R
-    : never
+  ? R
+  : never
   : PublicTableNameOrOptions extends keyof (SupabaseDatabase["public"]["Tables"] &
-        SupabaseDatabase["public"]["Views"])
-    ? (SupabaseDatabase["public"]["Tables"] &
-        SupabaseDatabase["public"]["Views"])[PublicTableNameOrOptions] extends {
-        Row: infer R;
-      }
-      ? R
-      : never
-    : never;
+    SupabaseDatabase["public"]["Views"])
+  ? (SupabaseDatabase["public"]["Tables"] &
+    SupabaseDatabase["public"]["Views"])[PublicTableNameOrOptions] extends {
+      Row: infer R;
+    }
+  ? R
+  : never
+  : never;
 
 export type TablesInsert<
   PublicTableNameOrOptions extends
-    | keyof SupabaseDatabase["public"]["Tables"]
-    | { schema: keyof SupabaseDatabase },
+  | keyof SupabaseDatabase["public"]["Tables"]
+  | { schema: keyof SupabaseDatabase },
   TableName extends PublicTableNameOrOptions extends {
     schema: keyof SupabaseDatabase;
   }
-    ? keyof SupabaseDatabase[PublicTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+  ? keyof SupabaseDatabase[PublicTableNameOrOptions["schema"]]["Tables"]
+  : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof SupabaseDatabase }
   ? SupabaseDatabase[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I;
-    }
-    ? I
-    : never
+    Insert: infer I;
+  }
+  ? I
+  : never
   : PublicTableNameOrOptions extends keyof SupabaseDatabase["public"]["Tables"]
-    ? SupabaseDatabase["public"]["Tables"][PublicTableNameOrOptions] extends {
-        Insert: infer I;
-      }
-      ? I
-      : never
-    : never;
+  ? SupabaseDatabase["public"]["Tables"][PublicTableNameOrOptions] extends {
+    Insert: infer I;
+  }
+  ? I
+  : never
+  : never;
 
 export type TablesUpdate<
   PublicTableNameOrOptions extends
-    | keyof SupabaseDatabase["public"]["Tables"]
-    | { schema: keyof SupabaseDatabase },
+  | keyof SupabaseDatabase["public"]["Tables"]
+  | { schema: keyof SupabaseDatabase },
   TableName extends PublicTableNameOrOptions extends {
     schema: keyof SupabaseDatabase;
   }
-    ? keyof SupabaseDatabase[PublicTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+  ? keyof SupabaseDatabase[PublicTableNameOrOptions["schema"]]["Tables"]
+  : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof SupabaseDatabase }
   ? SupabaseDatabase[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U;
-    }
-    ? U
-    : never
+    Update: infer U;
+  }
+  ? U
+  : never
   : PublicTableNameOrOptions extends keyof SupabaseDatabase["public"]["Tables"]
-    ? SupabaseDatabase["public"]["Tables"][PublicTableNameOrOptions] extends {
-        Update: infer U;
-      }
-      ? U
-      : never
-    : never;
+  ? SupabaseDatabase["public"]["Tables"][PublicTableNameOrOptions] extends {
+    Update: infer U;
+  }
+  ? U
+  : never
+  : never;
 
 export type Enums<
   PublicEnumNameOrOptions extends
-    | keyof SupabaseDatabase["public"]["Enums"]
-    | { schema: keyof SupabaseDatabase },
+  | keyof SupabaseDatabase["public"]["Enums"]
+  | { schema: keyof SupabaseDatabase },
   EnumName extends PublicEnumNameOrOptions extends {
     schema: keyof SupabaseDatabase;
   }
-    ? keyof SupabaseDatabase[PublicEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+  ? keyof SupabaseDatabase[PublicEnumNameOrOptions["schema"]]["Enums"]
+  : never = never,
 > = PublicEnumNameOrOptions extends { schema: keyof SupabaseDatabase }
   ? SupabaseDatabase[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : PublicEnumNameOrOptions extends keyof SupabaseDatabase["public"]["Enums"]
-    ? SupabaseDatabase["public"]["Enums"][PublicEnumNameOrOptions]
-    : never;
+  ? SupabaseDatabase["public"]["Enums"][PublicEnumNameOrOptions]
+  : never;

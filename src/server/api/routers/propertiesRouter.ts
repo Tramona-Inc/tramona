@@ -1141,7 +1141,7 @@ export const propertiesRouter = createTRPCRouter({
           eq(properties.originalListingPlatform, "Hospitable"),
           propertyIsNearRequest,
           notInArray(properties.id, conflictingIds), // Exclude properties with conflicting reservations
-          ageRestrictionCheck,
+          //     ageRestrictionCheck,
         ),
       });
 

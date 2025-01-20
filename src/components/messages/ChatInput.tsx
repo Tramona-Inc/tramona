@@ -1,5 +1,6 @@
 import { useConversation } from "@/utils/store/conversations";
 import { type ChatMessageType, useMessage } from "@/utils/store/messages";
+import { type ChatFlaggedMessageType } from "@/utils/store/messages";
 import supabase from "@/utils/supabase-client";
 import { errorToast } from "@/utils/toasts";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -57,6 +58,7 @@ export default function ChatInput({
     api.messages.getParticipantsPhoneNumbers.useQuery({ conversationId });
 
   const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
+  const { mutateAsync: checkMessageModeration } = api.llama.checkMessage.useMutation();
 
   const { data: _conversationExists } =
     api.messages.getConversations.useQuery({ hostTeamId: currentHostTeamId });
@@ -88,8 +90,51 @@ export default function ChatInput({
         return;
       }
 
+      const messageId = nanoid();
+
+      // checks if message is appropriate before sending
+      const moderationResult = await checkMessageModeration({
+        message: values.message,
+        conversationId,
+        messageId: messageId,
+      });
+
+      if (!moderationResult.result.isAppropriate && moderationResult.result.confidence >= 0.8) {
+        errorToast("Message flagged for inappropriate content, and was not sent");
+        const newMessage: ChatFlaggedMessageType = {
+          id: messageId,
+          conversationId: conversationId,
+          userId: session.user.id,
+          confidence: moderationResult.result.confidence,
+          message: values.message,
+          violationType: moderationResult.result.violationType ?? "NONE",
+          reason: moderationResult.result.reason ?? "",
+          createdAt: new Date(),
+        };
+
+        await supabase
+          .from("flagged_messages")
+          .insert({
+            id: newMessage.id,
+            conversation_id: newMessage.conversationId,
+            user_id: newMessage.userId,
+            confidence: newMessage.confidence,
+            message: newMessage.message,
+            violation_type: newMessage.violationType,
+            reason: newMessage.reason,
+            created_at: newMessage.createdAt.toISOString(),
+          })
+          .select("*, user(email, name, image)")
+          .single();
+        form.reset();
+        return;
+      }
+
+      // debugging purposes
+      console.log("Message checked, moderationResult:", moderationResult.result);
+
       const newMessage: ChatMessageType = {
-        id: nanoid(),
+        id: messageId,
         createdAt: new Date().toISOString(),
         conversationId: conversationId,
         userId: session.user.id,

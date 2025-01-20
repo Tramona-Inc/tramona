@@ -1,4 +1,4 @@
-import { type MessageType } from "@/server/db/schema";
+import { type MessageType, type FlaggedMessageType } from "@/server/db/schema";
 import { formatRelative } from "date-fns";
 import { useSession } from "next-auth/react";
 import { type MessageGroup } from "./groupMessages";
@@ -53,7 +53,22 @@ export function MessageGroup({ messageGroup }: { messageGroup: MessageGroup }) {
   );
 }
 
-function Message({ message }: { message: MessageType }) {
+function Message({ message }: { message: MessageType | FlaggedMessageType }) {
+  if ("violationType" in message) {
+    return (
+      <div className="relative">
+        <p className="select-none blur-sm">
+          {message.message}
+        </p>
+        <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-xl">
+          <span className="text-sm text-white">
+            This message has been flagged for potential policy violation.
+          </span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <p>
       {message.message}

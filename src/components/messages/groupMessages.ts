@@ -30,8 +30,8 @@ export function groupMessages(
       if (
         lastMessage &&
         new Date(message.createdAt).getTime() -
-          new Date(lastMessage.createdAt).getTime() <=
-          120000
+        new Date(lastMessage.createdAt).getTime() <=
+        120000
       ) {
         lastGroup.messages.push(message);
       } else {

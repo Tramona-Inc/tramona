@@ -9,6 +9,8 @@ import { conversations, messages } from "./../../db/schema/tables/messages";
 import { protectedProcedure } from "./../trpc";
 import { sendSlackMessage } from "@/server/slack";
 import { TRPCError } from "@trpc/server";
+import { llamaClient } from "@/server/llama";
+import { flaggedMessages } from "@/server/db/schema/tables/messages";
 
 const isProduction = process.env.NODE_ENV === "production";
 const ADMIN_HOST_TEAM_ID = env.ADMIN_TEAM_ID;
@@ -827,5 +829,38 @@ export const messagesRouter = createTRPCRouter({
         throw new Error("Conversation not found");
       }
       // proceed with message creation
+    }),
+
+  checkMessage: protectedProcedure
+    .input(
+      z.object({
+        message: z.string(),
+        conversationId: z.string(),
+        messageId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      // debugging purposes
+      console.log("Calling moderateContent");
+      try {
+        // debugging purposes
+        console.log("Calling moderateContent");
+
+        const result = await llamaClient.moderateContent(input.message);
+
+        // debugging purposes
+        console.log("Moderation result:", result);
+
+        return {
+          success: true,
+          result,
+        };
+      } catch (error) {
+        console.error("Moderation error:", error);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to moderate message",
+        });
+      }
     }),
 });
