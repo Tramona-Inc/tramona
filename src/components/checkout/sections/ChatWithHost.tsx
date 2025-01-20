@@ -1,6 +1,6 @@
 import { useChatWithHostTeam } from "@/utils/messaging/useChatWithHost";
 
-export default function ChatWithHost({ hostId, hostTeamId, propertyId }: { hostId: string, hostTeamId: number, propertyId: string }) {
+export default function ChatWithHost({ hostId, hostTeamId, propertyId }: { hostId: string, hostTeamId: number, propertyId: number }) {
   const chatWithHostTeam = useChatWithHostTeam();
 
   return (

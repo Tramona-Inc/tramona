@@ -129,7 +129,7 @@ export default function PropertyPage({
 
   const hostName =
     property.hostName ??
-    `${property.hostTeam.owner.firstName} ${property.hostTeam.owner.lastName}`;
+    `${property.hostTeam.owner.firstName}`;
 
   const originalListing = getOriginalListing(property);
 
@@ -273,7 +273,7 @@ export default function PropertyPage({
                    chatWithHostTeam({
                         hostId: property.hostTeam.ownerId,
                         hostTeamId: isHospitableUser ? property.hostTeam.id : undefined,
-                        propertyId: property.id.toString()
+                        propertyId: property.id
                       })
 
                         .then()
@@ -355,7 +355,7 @@ export default function PropertyPage({
               <ChatOfferButton
                 offerHostId={offer.property.hostTeam.ownerId}
                 hostTeamId={property.hostTeam.id}
-                propertyId={property.id.toString()}
+                propertyId={property.id}
               />
             )}
           </section>

@@ -4,7 +4,7 @@ import { useChatWithHostTeam } from "@/utils/messaging/useChatWithHost";
 interface ChatOfferButtonProps {
   offerHostId: string | null;
   hostTeamId: number;
-  propertyId: string;
+  propertyId: number;
 }
 
 export default function ChatOfferButton({

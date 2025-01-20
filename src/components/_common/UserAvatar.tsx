@@ -19,15 +19,17 @@ export default function UserAvatar({
   email,
   image,
   size = "md",
+  onClick,
 }: {
   name?: string | null;
   email?: string | null;
   image?: string | null;
+  onClick?: () => void;
 } & AvatarVariants) {
   if (!name && !email && !image) return <AnonymousAvatar size={size} />;
   const fallback = name ? getInitials(name) : (email?.[0] ?? "?");
   return (
-    <Avatar size={size}>
+    <Avatar size={size} onClick={onClick}>
       {image ? (
         <AvatarImage src={image} alt="" />
       ) : (
