@@ -133,10 +133,25 @@ export async function fetchConversationWithAdmin(userId: string) {
   return conversationWithAdmin?.conversation.id ?? null;
 }
 
-export async function fetchConversationWithHost(
+export async function fetchConversationWithHostTeam(
   userId: string,
-  hostId: string,
+  hostTeamId: number,
 ) {
+  // Get the list of members in the host team
+  const hostTeamMembersList = await db.query.hostTeamMembers.findMany({
+    where: eq(hostTeamMembers.hostTeamId, hostTeamId),
+    columns: { userId: true },
+  });
+
+  // Extract user IDs from the host team members
+  const hostTeamMemberIds = hostTeamMembersList.map((member) => member.userId);
+
+  if (hostTeamMemberIds.length === 0) {
+    // If no members found, return null
+    return null;
+  }
+
+  // Query the user's conversations
   const result = await db.query.users.findFirst({
     where: eq(users.id, userId),
     with: {
@@ -162,15 +177,18 @@ export async function fetchConversationWithHost(
     },
   });
 
-  // Check if conversation contains two participants
-  // and check if admin id is in there
-  const conversationWithHost = result?.conversations.find(
-    (conv) =>
-      conv.conversation.participants.length === 2 &&
-      conv.conversation.participants.some(
-        (participant) => participant.user.id === hostId,
-      ),
-  );
+  // Check if there's a conversation that matches the host team's members
+  const conversationWithHost = result?.conversations.find((conv) => {
+    const participantIds = conv.conversation.participants.map(
+      (participant) => participant.user.id,
+    );
+
+    // Check if the conversation contains all and only the host team members
+    return (
+      participantIds.length === hostTeamMemberIds.length &&
+      hostTeamMemberIds.every((id) => participantIds.includes(id))
+    );
+  });
 
   return conversationWithHost?.conversation.id ?? null;
 }
@@ -429,9 +447,9 @@ export const messagesRouter = createTRPCRouter({
   createConversationHostWithUserForRequest: coHostProcedure
     ("communicate_with_guests", z.object({ userId: zodString(), currentHostTeamId: z.number() }))
     .mutation(async ({ ctx, input }) => {
-      const conversationId = await fetchConversationWithHost(
+      const conversationId = await fetchConversationWithHostTeam(
         input.userId,
-        ctx.user.id,
+        input.currentHostTeamId,
       );
 
       if (!conversationId) {
@@ -448,9 +466,9 @@ export const messagesRouter = createTRPCRouter({
   createConversationHostWithUser: coHostProcedure
     ("communicate_with_guests", z.object({ userId: zodString(), currentHostTeamId: z.number(), propertyId: zodString() }))
     .mutation(async ({ ctx, input }) => {
-      const conversationId = await fetchConversationWithHost(
+      const conversationId = await fetchConversationWithHostTeam(
         input.userId,
-        ctx.user.id,
+        input.currentHostTeamId,
       );
 
       if (!conversationId) {
@@ -468,14 +486,14 @@ export const messagesRouter = createTRPCRouter({
   createConversationWithHostOrAdminTeam: protectedProcedure
     .input(z.object({ hostId: zodString(), hostTeamId: z.number().optional(), propertyId: zodString() }))
     .mutation(async ({ ctx, input }) => {
-      const conversationId = await fetchConversationWithHost(
-        ctx.user.id,
-        input.hostId,
-      );
-
       if (!input.hostTeamId) {
         input.hostTeamId = ADMIN_HOST_TEAM_ID;
       }
+      const conversationId = await fetchConversationWithHostTeam(
+        ctx.user.id,
+        input.hostTeamId,
+      );
+
 
       console.log(input.propertyId, "input.propertyId");
       console.log(input.hostTeamId, "input.hostTeamId");
