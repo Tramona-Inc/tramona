@@ -2,14 +2,17 @@ import { type MessageType } from "@/server/db/schema";
 import { formatRelative } from "date-fns";
 import { useSession } from "next-auth/react";
 import { type MessageGroup } from "./groupMessages";
-import { cn } from "@/utils/utils";
+import { capitalize, cn } from "@/utils/utils";
+import { AnonymousAvatar } from "../ui/avatar";
+import UserAvatar from "../_common/UserAvatar";
+import { useRouter } from "next/router";
 
 export function MessageGroup({ messageGroup }: { messageGroup: MessageGroup }) {
   const { data: session } = useSession();
   const { user, messages } = messageGroup;
   const firstMessage = messages[0];
+  const router = useRouter();
   if (!firstMessage || !session) return null;
-
   const me = session.user.id === user?.id;
 
   return (
@@ -19,7 +22,7 @@ export function MessageGroup({ messageGroup }: { messageGroup: MessageGroup }) {
         me ? "justify-end" : "justify-start",
       )}
     >
-      {/* {user ? <UserAvatar {...user} /> : <AnonymousAvatar />} */}
+      {user ? <UserAvatar {...user} onClick={() => router.push(`/profile/view/${user.id}`)} /> : <AnonymousAvatar />}
       <div
         className={cn(
           "max-w-72 rounded-xl px-4 py-2 sm:max-w-96 lg:max-w-prose",
@@ -28,11 +31,17 @@ export function MessageGroup({ messageGroup }: { messageGroup: MessageGroup }) {
       >
         {/* <div className="flex items-baseline gap-2">
           {user ? (
-            <p className="font-semibold leading-none">{user.name}</p>
+            <p className="font-semibold leading-none">{user.firstName} {user.lastName}</p>
           ) : (
             <p className="leading-none text-muted-foreground">[deleted user]</p>
           )}
         </div> */}
+
+        {!me && (
+          <p className="mb-1 text-sm text-gray-500">
+            {user ? `${capitalize(user.firstName!)}` : "[deleted user]"}
+          </p>
+        )}
 
         <div className="space-y-1">
           {messages.map((message) => (
