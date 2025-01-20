@@ -22,7 +22,7 @@ import PastOfferCard from "./PastOfferCard";
 import PastOfferWithdrawDialog from "./PastOfferWithdrawDialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { HostRequestsPageOfferData } from "@/server/api/routers/propertiesRouter";
-import { useChatWithUser } from "@/utils/messaging/useChatWithUser";
+import { useChatWithUserForRequest } from "@/utils/messaging/useChatWithUserForRequest";
 import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 export default function HostRequests() {
   const { currentHostTeamId } = useHostTeamStore();
@@ -33,7 +33,7 @@ export default function HostRequests() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const router = useRouter();
   const { city, option } = router.query;
-  const chatWithUser = useChatWithUser();
+  const chatWithUserForRequest = useChatWithUserForRequest();
   const priceRestriction = option === "outsidePriceRestriction";
 
   const [selectedRequest, setSelectedRequest] =
@@ -121,7 +121,7 @@ export default function HostRequests() {
                 <Button
                   variant="secondary"
                   onClick={() => {
-                    void chatWithUser(requestData.request.traveler.id);
+                    void chatWithUserForRequest(requestData.request.traveler.id);
                   }}
                 >
                   Message User

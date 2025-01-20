@@ -104,8 +104,13 @@ export default function Onboarding1({
   const [touchEnd, setTouchEnd] = useState(0);
   const galleryRef = useRef<HTMLDivElement>(null);
   const [isExpanded, setIsExpanded] = useState("item-1");
+  const { mutateAsync: resetHospitableProfile } =
+    api.pms.resetHospitableCustomer.useMutation();
 
-  const handleNextStep = () => {
+  const handleNextStep = async () => {
+    if (currentStep === 0) {
+      await resetHospitableProfile();
+    }
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
@@ -127,9 +132,9 @@ export default function Onboarding1({
     setTouchEnd(e.targetTouches[0]!.clientX);
   };
 
-  const handleTouchEnd = () => {
+  const handleTouchEnd = async () => {
     if (touchStart - touchEnd > 75) {
-      handleNextStep();
+      await handleNextStep();
     }
 
     if (touchStart - touchEnd < -75) {

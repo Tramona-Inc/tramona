@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm";
+import { Column, relations } from "drizzle-orm";
 import { accounts } from "./tables/auth/accounts";
 import { sessions } from "./tables/auth/sessions";
 import { bids } from "./tables/bids";
@@ -231,9 +231,13 @@ export const hostReferralDiscountsRelations = relations(
   }),
 );
 
-export const conversationsRelations = relations(conversations, ({ many }) => ({
+export const conversationsRelations = relations(conversations, ({ many, one }) => ({
   messages: many(messages),
   participants: many(conversationParticipants),
+  property: one(properties, {
+    fields: [conversations.propertyId],
+    references: [properties.id],
+  }),
 }));
 
 export const messagesRelations = relations(messages, ({ one }) => ({
@@ -257,6 +261,10 @@ export const conversationParticipantsRelations = relations(
     user: one(users, {
       fields: [conversationParticipants.userId],
       references: [users.id],
+    }),
+    hostTeam: one(hostTeams, {
+      fields: [conversationParticipants.hostTeamId],
+      references: [hostTeams.id],
     }),
   }),
 );

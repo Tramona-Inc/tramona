@@ -217,18 +217,20 @@ export async function fetchConversationWithOffer(
 }
 
 async function generateConversation(
+  propertyId?: string,
   conversationName?: string,
   offerId?: string,
 ) {
   return await db
     .insert(conversations)
-    .values({ name: conversationName ? conversationName : null, offerId })
+    .values({ name: conversationName ? conversationName : null, offerId, propertyId: Number(propertyId) })
     .returning({ id: conversations.id })
     .then((res) => res[0]!.id);
 }
 
 export async function createConversationWithAdmin(userId: string) {
   const conversationId = await generateConversation();
+
 
   const hostTeamId = ADMIN_HOST_TEAM_ID;
   const teamMembers = await db.query.hostTeamMembers.findMany({
@@ -250,7 +252,7 @@ export async function createConversationWithAdmin(userId: string) {
   return conversationId;
 }
 
-export async function createConversationWithHost(
+export async function createConversationWithHostForRequest(
   userId: string,
   hostTeamId: number,
 ) {
@@ -275,30 +277,56 @@ export async function createConversationWithHost(
   return conversationId;
 }
 
-export async function createConversationWithOfferHelper(
+export async function createConversationWithHostOrAdminTeam(
   userId: string,
-  propertyName: string,
-  offerId: string,
   hostTeamId: number,
+  propertyId: string,
 ) {
-  const conversationId = await generateConversation(propertyName, offerId);
+  const conversationId = await generateConversation(propertyId);
 
   const teamMembers = await db.query.hostTeamMembers.findMany({
     where: eq(hostTeamMembers.hostTeamId, hostTeamId),
   });
+
   const promises = teamMembers.map(async (member) => {
     await db.insert(conversationParticipants).values([
       { conversationId, userId: member.userId, hostTeamId: hostTeamId },
     ]);
   });
+
   await Promise.all(promises);
+
   await db.insert(conversationParticipants).values([
     { conversationId, userId: userId },
   ]);
 
-
   return conversationId;
 }
+
+// export async function createConversationWithOfferHelper(
+//   userId: string,
+//   propertyName: string,
+//   offerId: string,
+//   hostTeamId: number,
+// ) {
+//   const conversationId = await generateConversation(propertyName, offerId);
+
+//   const teamMembers = await db.query.hostTeamMembers.findMany({
+//     where: eq(hostTeamMembers.hostTeamId, hostTeamId),
+//   });
+//   const promises = teamMembers.map(async (member) => {
+//     await db.insert(conversationParticipants).values([
+//       { conversationId, userId: member.userId, hostTeamId: hostTeamId },
+//     ]);
+//   });
+//   await Promise.all(promises);
+//   await db.insert(conversationParticipants).values([
+//     { conversationId, userId: userId },
+//   ]);
+
+
+//   return conversationId;
+// }
 
 async function addUserToConversation(userId: string, conversationId: string) {
   await db
@@ -306,19 +334,19 @@ async function addUserToConversation(userId: string, conversationId: string) {
     .values({ conversationId: conversationId, userId: userId });
 }
 
-export async function addTwoUserToConversation(
-  user1Id: string,
-  user2Id: string,
-) {
-  const conversationId = await generateConversation();
+// export async function addTwoUserToConversation(
+//   user1Id: string,
+//   user2Id: string,
+// ) {
+//   const conversationId = await generateConversation();
 
-  await db.insert(conversationParticipants).values([
-    { conversationId, userId: user1Id },
-    { conversationId, userId: user2Id },
-  ]);
+//   await db.insert(conversationParticipants).values([
+//     { conversationId, userId: user1Id },
+//     { conversationId, userId: user2Id },
+//   ]);
 
-  return conversationId;
-}
+//   return conversationId;
+// }
 
 async function verifyConversationExists(conversationId: string) {
   const conversation = await db.query.conversations.findFirst({
@@ -398,7 +426,7 @@ export const messagesRouter = createTRPCRouter({
     return conversationId;
   }),
 
-  createConversationHostWithUser: coHostProcedure
+  createConversationHostWithUserForRequest: coHostProcedure
     ("communicate_with_guests", z.object({ userId: zodString(), currentHostTeamId: z.number() }))
     .mutation(async ({ ctx, input }) => {
       const conversationId = await fetchConversationWithHost(
@@ -407,7 +435,7 @@ export const messagesRouter = createTRPCRouter({
       );
 
       if (!conversationId) {
-        const newConversationId = await createConversationWithHost(
+        const newConversationId = await createConversationWithHostForRequest(
           ctx.user.id,
           input.currentHostTeamId,
         );
@@ -417,16 +445,44 @@ export const messagesRouter = createTRPCRouter({
       return { id: conversationId };
     }),
 
-  createConversationWithHost: protectedProcedure
-    .input(z.object({ hostId: zodString(), hostTeamId: z.number() }))
+  createConversationHostWithUser: coHostProcedure
+    ("communicate_with_guests", z.object({ userId: zodString(), currentHostTeamId: z.number(), propertyId: zodString() }))
+    .mutation(async ({ ctx, input }) => {
+      const conversationId = await fetchConversationWithHost(
+        input.userId,
+        ctx.user.id,
+      );
+
+      if (!conversationId) {
+        const newConversationId = await createConversationWithHostOrAdminTeam(
+          ctx.user.id,
+          input.currentHostTeamId,
+          input.propertyId,
+        );
+        return { id: newConversationId };
+      }
+
+      return { id: conversationId };
+    }),
+
+  createConversationWithHostOrAdminTeam: protectedProcedure
+    .input(z.object({ hostId: zodString(), hostTeamId: z.number().optional(), propertyId: zodString() }))
     .mutation(async ({ ctx, input }) => {
       const conversationId = await fetchConversationWithHost(
         ctx.user.id,
         input.hostId,
       );
 
+      if (!input.hostTeamId) {
+        input.hostTeamId = ADMIN_HOST_TEAM_ID;
+      }
+
+      console.log(input.propertyId, "input.propertyId");
+      console.log(input.hostTeamId, "input.hostTeamId");
+      console.log(ctx.user.id, "ctx.user.id");
+      console.log(conversationId, "conversationId");
       if (!conversationId) {
-        return await createConversationWithHost(ctx.user.id, input.hostTeamId);
+        return await createConversationWithHostOrAdminTeam(ctx.user.id, input.hostTeamId, input.propertyId);
       }
 
       return conversationId;
@@ -461,36 +517,6 @@ export const messagesRouter = createTRPCRouter({
       return { tempUserId: tempUser.id, conversationId: conversationId };
     }),
 
-  // createOrFetchConversationWithOffer: protectedProcedure
-  //   .input(
-  //     z.object({
-  //       offerId: z.string(),
-  //       offerHostId: z.union([z.string(), z.null()]),
-  //       offerPropertyName: z.string(),
-  //     }),
-  //   )
-  //   .mutation(async ({ ctx, input }) => {
-  //     const conversationExistId = await fetchConversationWithOffer(
-  //       ctx.user.id,
-  //       input.offerId,
-  //     );
-  //     console.log(conversationExistId, "converation exist");
-
-  //     //determine if the conversation will be with the host or the admin
-  //     const offerHostOrAllAdmins = input.offerHostId
-  //       ? input.offerHostId
-  //       : ADMIN_ID;
-
-  //     // Create conversation with host if it doesn't exist
-  //     if (!conversationExistId) {
-  //       return await createConversationWithHost(
-  //         ctx.user.id,
-  //         input.currentHostTeamId,
-  //       );
-  //     }
-  //     return conversationExistId;
-  //   }),
-
   addUserToConversation: publicProcedure
     .input(
       z.object({
@@ -515,20 +541,20 @@ export const messagesRouter = createTRPCRouter({
         .set({ read: true })
         .where(eq(messages.id, input.messageId));
     }),
-  addTwoUsersToConversation: protectedProcedure
-    .input(
-      z.object({
-        user1Id: zodString(),
-        user2Id: zodString(),
-      }),
-    )
-    .mutation(async ({ input }) => {
-      const conversationId = await addTwoUserToConversation(
-        input.user1Id,
-        input.user2Id,
-      );
-      return conversationId;
-    }),
+  // addTwoUsersToConversation: protectedProcedure
+  //   .input(
+  //     z.object({
+  //       user1Id: zodString(),
+  //       user2Id: zodString(),
+  //     }),
+  //   )
+  //   .mutation(async ({ input }) => {
+  //     const conversationId = await addTwoUserToConversation(
+  //       input.user1Id,
+  //       input.user2Id,
+  //     );
+  //     return conversationId;
+  //   }),
 
   getParticipantsPhoneNumbers: protectedProcedure
     .input(z.object({ conversationId: zodString() }))

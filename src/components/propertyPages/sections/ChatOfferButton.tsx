@@ -1,18 +1,18 @@
 import { Button } from "@/components/ui/button";
 import { MessageCirclePlusIcon } from "lucide-react";
-import { useChatWithHost } from "@/utils/messaging/useChatWithHost";
+import { useChatWithHostTeam } from "@/utils/messaging/useChatWithHost";
 interface ChatOfferButtonProps {
   offerHostId: string | null;
-  offerPropertyName: string;
   hostTeamId: number;
+  propertyId: string;
 }
 
 export default function ChatOfferButton({
   offerHostId,
-  offerPropertyName,
   hostTeamId,
+  propertyId,
 }: ChatOfferButtonProps) {
-  const chatWithHost = useChatWithHost();
+  const chatWithHost = useChatWithHostTeam();
   return (
     <Button
       variant="secondary"
@@ -20,6 +20,7 @@ export default function ChatOfferButton({
         chatWithHost({
           hostTeamId: hostTeamId,
           hostId: offerHostId!,
+          propertyId: propertyId,
         })
       }
     >
