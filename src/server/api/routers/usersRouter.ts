@@ -25,7 +25,6 @@ import {
 import { zodString } from "@/utils/zod-utils";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import type { FieldConfig } from "@/components/dashboard/host/profile/fieldConfig";
 import { FieldConfigSchema } from "@/components/dashboard/host/profile/fieldConfig";
 
 export const usersRouter = createTRPCRouter({

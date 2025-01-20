@@ -23,7 +23,7 @@ export function ProfileField({
           <p>Show decade I born</p>
         ) : (
           <p className="mt-0.5 truncate text-sm">
-            {value || "Add " + label.toLowerCase()}
+            {value ?? "Add " + label.toLowerCase()}
           </p>
         )}
       </div>

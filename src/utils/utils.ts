@@ -3,7 +3,6 @@ import { RequestsPageOfferData, SeparatedData } from "@/server/server-utils";
 import { useWindowSize } from "@uidotdev/usehooks";
 import { clsx, type ClassValue } from "clsx";
 import {
-  differenceInDays,
   differenceInYears,
   formatDate,
   type FormatOptions,

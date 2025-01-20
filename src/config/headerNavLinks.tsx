@@ -12,8 +12,6 @@ import {
   HandCoins,
   SettingsIcon,
   CalendarIcon,
-  MessageCircleIcon,
-  MapPinCheckIcon,
   LuggageIcon,
 } from "lucide-react";
 //  <---------------- DESKTOP LINKS ----------------->
