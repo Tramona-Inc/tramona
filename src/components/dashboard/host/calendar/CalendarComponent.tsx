@@ -73,6 +73,10 @@ export default function CalendarComponent() {
   }, [hostProperties]);
 
   const initialProperty = useMemo(() => {
+    if (!hostPropertiesRef.current) {
+      //sometimes the query no good
+      void refetch();
+    }
     return (
       hostPropertiesRef.current?.find(
         (property) => property.id === Number(propertyId),
@@ -191,7 +195,6 @@ export default function CalendarComponent() {
     api.properties.updateBookItNow.useMutation();
 
   const handleBookItNowSwitch = (checked: boolean) => {
-    console.log(checked);
     return toggleBookItNow({
       id: selectedProperty!.id,
       bookItNowEnabled: checked,

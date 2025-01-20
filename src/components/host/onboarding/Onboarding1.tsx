@@ -109,6 +109,8 @@ const steps = [
   },
 ];
 
+const totalSteps = steps.length;
+
 export default function Onboarding1({
   onPressNext,
   forHost = false,
