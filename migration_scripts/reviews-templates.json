@@ -1,0 +1,23 @@
+{
+    "positive": [],
+    "negative": [],
+    "neutral": [],
+    "positiveAdjective1": [],
+    "positiveAdjective2": [],
+    "positiveVerb": [],
+    "positiveCleanliness": [],
+    "negativeAdjective1": [],
+    "negativeAdjective2": [],
+    "negativeVerb": [],
+    "negativeCleanliness": [],
+    "negativeEmotion": [],
+     "positiveExperienceAdjective": [],
+     "negativeExperienceAdjective": [],
+     "neutralExperienceAdjective": [],
+    "neutralAdjective": [],
+       "cityLocation": [],
+        "cityFood": [],
+        "cityExperience":[],
+    "nouns": [],
+    "secondNoun": []
+}
