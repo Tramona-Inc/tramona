@@ -129,7 +129,7 @@ export default function PropertyPage({
 
   const hostName =
     property.hostName ??
-    `${property.hostTeam.owner.firstName} ${property.hostTeam.owner.lastName}`;
+    `${property.hostTeam.owner.firstName}`;
 
   const originalListing = getOriginalListing(property);
 

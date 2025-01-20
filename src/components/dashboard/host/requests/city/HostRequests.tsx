@@ -121,7 +121,7 @@ export default function HostRequests() {
                 <Button
                   variant="secondary"
                   onClick={() => {
-                    void chatWithUserForRequest(requestData.request.traveler.id);
+                    void chatWithUserForRequest(requestData.request.traveler.id, requestData.request.id);
                   }}
                 >
                   Message User

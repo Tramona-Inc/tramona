@@ -238,6 +238,10 @@ export const conversationsRelations = relations(conversations, ({ many, one }) =
     fields: [conversations.propertyId],
     references: [properties.id],
   }),
+  request: one(requests, {
+    fields: [conversations.requestId],
+    references: [requests.id],
+  }),
 }));
 
 export const messagesRelations = relations(messages, ({ one }) => ({

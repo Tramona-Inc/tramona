@@ -12,6 +12,7 @@ import { nanoid } from "nanoid";
 import { users } from "./users";
 import { hostTeams } from "./hostTeams";
 import { properties } from "./properties";
+import { requests } from "./requests";
 
 export const conversations = pgTable("conversations", {
   id: varchar("id", { length: 21 }).primaryKey().$defaultFn(nanoid),
@@ -21,6 +22,7 @@ export const conversations = pgTable("conversations", {
     .defaultNow(),
   offerId: varchar("offer_id"),
   propertyId: integer("property_id").references(() => properties.id, { onDelete: "cascade" }),
+  requestId: integer("request_id").references(() => requests.id, { onDelete: "cascade" }),
 });
 
 export const messages = pgTable(
