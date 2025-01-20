@@ -193,7 +193,7 @@ export type SupabaseDatabase = {
           conversation_id: string;
           user_id: string | null;
           confidence: number;
-          violation_type: "OFF_PLATFORM_BOOKING" | "CONTACT_INFO" | "INAPPROPRIATE" | "UNKNOWN";
+          violation_type: "OFF_PLATFORM_BOOKING" | "CONTACT_INFO" | "INAPPROPRIATE" | "NONE";
           message: string;
           reason: string | null;
           created_at: string;
@@ -203,7 +203,7 @@ export type SupabaseDatabase = {
           conversation_id: string;
           user_id?: string | null;
           confidence: number;
-          violation_type: "OFF_PLATFORM_BOOKING" | "CONTACT_INFO" | "INAPPROPRIATE" | "UNKNOWN";
+          violation_type: "OFF_PLATFORM_BOOKING" | "CONTACT_INFO" | "INAPPROPRIATE" | "NONE";
           message: string;
           reason?: string | null;
           created_at?: string;
@@ -213,7 +213,7 @@ export type SupabaseDatabase = {
           conversation_id?: string;
           user_id?: string | null;
           confidence?: number;
-          violation_type?: "OFF_PLATFORM_BOOKING" | "CONTACT_INFO" | "INAPPROPRIATE" | "UNKNOWN";
+          violation_type?: "OFF_PLATFORM_BOOKING" | "CONTACT_INFO" | "INAPPROPRIATE" | "NONE";
           message?: string;
           reason?: string | null;
           created_at?: string;
