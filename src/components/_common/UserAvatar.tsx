@@ -6,7 +6,7 @@ import {
   type AvatarVariants,
 } from "../ui/avatar";
 
-function getInitials(name: string) {
+export function getInitials(name: string) {
   return name
     .split(" ")
     .map((s) => s[0])

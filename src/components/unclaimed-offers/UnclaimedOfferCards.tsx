@@ -279,7 +279,7 @@ export default function UnclaimedOfferCards(): JSX.Element {
               </div>
             </div>
           )}
-          {!isSearching && session?.user?.role === "admin" && (
+          {!isSearching && session?.user.role === "admin" && (
             <div className="mx-auto mt-20 max-w-[2000px] px-4">
               <div className="rounded-xl border-4 p-4">
                 <AddUnclaimedOffer />
