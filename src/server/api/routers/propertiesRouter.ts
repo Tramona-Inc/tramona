@@ -40,7 +40,7 @@ import {
   sql,
   notInArray,
 } from "drizzle-orm";
-import { literal, z } from "zod";
+import { z } from "zod";
 import {
   ALL_PROPERTY_ROOM_TYPES,
   bookedDates,

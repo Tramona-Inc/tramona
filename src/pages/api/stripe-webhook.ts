@@ -38,8 +38,10 @@ import {
 import { sendSlackMessage } from "@/server/slack";
 import { formatDateMonthDay } from "@/utils/utils";
 import { breakdownPaymentByOffer } from "@/utils/payment-utils/paymentBreakdown";
-import { createConversationWithAdmin, createConversationWithHost } from "@/server/api/routers/messagesRouter";
-
+import {
+  createConversationWithAdmin,
+  createConversationWithHost,
+} from "@/server/api/routers/messagesRouter";
 
 const ADMIN_HOST_TEAM_ID = env.ADMIN_TEAM_ID;
 // ! Necessary for stripe
@@ -118,7 +120,6 @@ export default async function webhook(
             ),
             with: { hostTeam: true },
           });
-          3;
 
           //<------- Setup Intent for future charge ---->
 

@@ -2,7 +2,6 @@ import {
   fetchConversationWithOffer,
   createConversationWithOfferHelper,
 } from "@/server/api/routers/messagesRouter";
-import { env } from "@/env";
 
 export async function createConversationWithOfferAfterBooking({
   offerId,

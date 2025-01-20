@@ -9,6 +9,7 @@ import {
   emergencyContacts,
   groups,
   hostProfiles,
+  profiles,
   referralCodes,
   userUpdateSchema,
   users,
@@ -24,6 +25,7 @@ import {
 import { zodString } from "@/utils/zod-utils";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { FieldConfigSchema } from "@/components/dashboard/host/profile/fieldConfig";
 
 export const usersRouter = createTRPCRouter({
   getUser: optionallyAuthedProcedure.query(async ({ ctx }) => {
@@ -331,5 +333,91 @@ export const usersRouter = createTRPCRouter({
 
         return curUser;
       }
+    }),
+
+  //PROFILE RELATED STUFF
+  getUserWithProfile: publicProcedure // for general audience
+    .input(z.string())
+    .query(async ({ input }) => {
+      const userWProfile = await db.query.profiles.findFirst({
+        where: eq(profiles.userId, input),
+        with: {
+          user: true,
+        },
+      });
+      if (!userWProfile)
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "User does not exist",
+        });
+
+      return userWProfile;
+    }),
+
+  getMyUserWProfile: protectedProcedure.query(async ({ ctx }) => {
+    const myProfile = await db.query.profiles
+      .findFirst({
+        where: eq(profiles.userId, ctx.user.id),
+        with: {
+          user: true,
+        },
+      })
+      .then((res) => res!);
+    return myProfile;
+  }),
+  updateUserImage: protectedProcedure
+    .input(z.string())
+    .mutation(async ({ ctx, input }) => {
+      console.log("running");
+      const updatedImage = await db
+        .update(users)
+        .set({
+          image: input,
+        })
+        .where(eq(users.id, ctx.user.id))
+        .returning()
+        .then((res) => res[0]);
+      console.log(updatedImage);
+      return;
+    }),
+  updateProfileShowDecadeBorn: protectedProcedure
+    .input(z.boolean())
+    .mutation(async ({ input, ctx }) => {
+      await db
+        .update(profiles)
+        .set({
+          showBirthDecade: input,
+        })
+        .where(eq(profiles.userId, ctx.user.id));
+      return;
+    }),
+
+  updateProfileIntro: protectedProcedure
+    .input(z.string())
+    .mutation(async ({ input, ctx }) => {
+      await db
+        .update(profiles)
+        .set({
+          aboutYou: input,
+        })
+        .where(eq(profiles.userId, ctx.user.id));
+      return;
+    }),
+  updateUserFieldConfig: protectedProcedure
+    .input(
+      z.object({
+        key: FieldConfigSchema,
+        description: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const field = input.key;
+      await db
+        .update(profiles)
+        .set({
+          [field]: input.description,
+        })
+        .where(eq(profiles.userId, ctx.user.id));
+      return;
     }),
 });
