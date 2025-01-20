@@ -110,7 +110,7 @@ export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
             {trip.tripsStatus !== "Cancelled" && (
               <TripCancelDialog trip={trip} />
             )}
-            <Button onClick={() => chatWithHostTeam({ hostId, hostTeamId: trip.property.hostTeam.id, propertyId: trip.property.id.toString() })}>
+            <Button onClick={() => chatWithHostTeam({ hostId, hostTeamId: trip.property.hostTeam.id, propertyId: trip.property.id })}>
               <MessageCircleMore />
               Message Host
             </Button>

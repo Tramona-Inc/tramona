@@ -73,7 +73,7 @@ export function UnifiedCheckout({ unifiedCheckoutData }: UnifiedCheckoutProps) {
             <ChatWithHost
               hostId={unifiedCheckoutData.property.hostTeam.ownerId}
               hostTeamId={unifiedCheckoutData.property.hostTeam.id}
-              propertyId={unifiedCheckoutData.property.id.toString()}
+              propertyId={unifiedCheckoutData.property.id}
             />
           </div>
         </div>
@@ -86,7 +86,7 @@ export function UnifiedCheckout({ unifiedCheckoutData }: UnifiedCheckoutProps) {
             <ChatWithHost
               hostId={unifiedCheckoutData.property.hostTeam.ownerId}
               hostTeamId={unifiedCheckoutData.property.hostTeam.id}
-              propertyId={unifiedCheckoutData.property.id.toString()}
+              propertyId={unifiedCheckoutData.property.id}
             />
           </div>
         </div>

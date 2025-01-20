@@ -141,7 +141,7 @@ export async function fetchConversationWithHostTeam({
 }: {
   userId: string;
   hostTeamId: number;
-  propertyId?: string;
+  propertyId?: number;
   requestId?: number;
 }) {
   // Get the list of members in the host team
@@ -263,7 +263,7 @@ async function generateConversation({
   conversationName,
   requestId,
 }: {
-  propertyId?: string,
+  propertyId?: number,
   conversationName?: string,
   requestId?: number,
 }) {
@@ -327,7 +327,7 @@ export async function createConversationWithHostForRequest(
 export async function createConversationWithHostOrAdminTeam(
   userId: string,
   hostTeamId: number,
-  propertyId: string,
+  propertyId: number,
 ) {
   const conversationId = await generateConversation({propertyId});
 
@@ -495,7 +495,7 @@ export const messagesRouter = createTRPCRouter({
     }),
 
   createConversationHostWithUser: coHostProcedure
-    ("communicate_with_guests", z.object({ userId: zodString(), currentHostTeamId: z.number(), propertyId: zodString() }))
+    ("communicate_with_guests", z.object({ userId: zodString(), currentHostTeamId: z.number(), propertyId: z.number() }))
     .mutation(async ({ ctx, input }) => {
       const conversationId = await fetchConversationWithHostTeam({
         userId: input.userId,
@@ -516,7 +516,7 @@ export const messagesRouter = createTRPCRouter({
     }),
 
   createConversationWithHostOrAdminTeam: protectedProcedure
-    .input(z.object({ hostId: zodString(), hostTeamId: z.number().optional(), propertyId: zodString() }))
+    .input(z.object({ hostId: zodString(), hostTeamId: z.number().optional(), propertyId: z.number() }))
     .mutation(async ({ ctx, input }) => {
       if (!input.hostTeamId) {
         input.hostTeamId = ADMIN_HOST_TEAM_ID;
