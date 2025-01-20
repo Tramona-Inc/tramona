@@ -133,10 +133,17 @@ export async function fetchConversationWithAdmin(userId: string) {
   return conversationWithAdmin?.conversation.id ?? null;
 }
 
-export async function fetchConversationWithHostTeam(
-  userId: string,
-  hostTeamId: number,
-) {
+export async function fetchConversationWithHostTeam({
+  userId,
+  hostTeamId,
+  propertyId,
+  requestId,
+}: {
+  userId: string;
+  hostTeamId: number;
+  propertyId?: string;
+  requestId?: number;
+}) {
   // Get the list of members in the host team
   const hostTeamMembersList = await db.query.hostTeamMembers.findMany({
     where: eq(hostTeamMembers.hostTeamId, hostTeamId),
@@ -170,6 +177,11 @@ export async function fetchConversationWithHostTeam(
                   },
                 },
               },
+              property: {
+                columns: {
+                  id: true,
+                },
+              },
             },
           },
         },
@@ -184,10 +196,21 @@ export async function fetchConversationWithHostTeam(
     );
 
     // Sort and compare the participant IDs
-    return (
+    const participantsMatch =
       participantIds.length === hostTeamMemberIds.length + 1 &&
-      [...participantIds].sort().join(",") === [...hostTeamMemberIds, userId].sort().join(",")
-    );
+      [...participantIds].sort().join(",") ===
+        [...hostTeamMemberIds, userId].sort().join(",");
+
+    // Check if the propertyId matches (if provided)
+    const propertyIdMatches =
+      !propertyId || conv.conversation.property?.id === Number(propertyId);
+
+    // Check if the requestId matches (if provided)
+    const requestIdMatches =
+      !requestId || conv.conversation.requestId === requestId;
+
+    // Return true only if all criteria match
+    return participantsMatch && propertyIdMatches && requestIdMatches;
   });
 
   console.log(existingConversation?.conversation.id, "existingConversation?.conversation.id");
@@ -235,20 +258,24 @@ export async function fetchConversationWithOffer(
   return conversationId;
 }
 
-async function generateConversation(
+async function generateConversation({
+  propertyId,
+  conversationName,
+  requestId,
+}: {
   propertyId?: string,
   conversationName?: string,
-  offerId?: string,
-) {
+  requestId?: number,
+}) {
   return await db
     .insert(conversations)
-    .values({ name: conversationName ? conversationName : null, offerId, propertyId: Number(propertyId) })
+    .values({ name: conversationName ? conversationName : null, propertyId: Number(propertyId), requestId })
     .returning({ id: conversations.id })
     .then((res) => res[0]!.id);
 }
 
 export async function createConversationWithAdmin(userId: string) {
-  const conversationId = await generateConversation();
+  const conversationId = await generateConversation({});
 
 
   const hostTeamId = ADMIN_HOST_TEAM_ID;
@@ -274,8 +301,9 @@ export async function createConversationWithAdmin(userId: string) {
 export async function createConversationWithHostForRequest(
   userId: string,
   hostTeamId: number,
+  requestId: number,
 ) {
-  const conversationId = await generateConversation();
+  const conversationId = await generateConversation({requestId});
 
   const teamMembers = await db.query.hostTeamMembers.findMany({
     where: eq(hostTeamMembers.hostTeamId, hostTeamId),
@@ -301,7 +329,7 @@ export async function createConversationWithHostOrAdminTeam(
   hostTeamId: number,
   propertyId: string,
 ) {
-  const conversationId = await generateConversation(propertyId);
+  const conversationId = await generateConversation({propertyId});
 
   const teamMembers = await db.query.hostTeamMembers.findMany({
     where: eq(hostTeamMembers.hostTeamId, hostTeamId),
@@ -446,17 +474,19 @@ export const messagesRouter = createTRPCRouter({
   }),
 
   createConversationHostWithUserForRequest: coHostProcedure
-    ("communicate_with_guests", z.object({ userId: zodString(), currentHostTeamId: z.number() }))
+    ("communicate_with_guests", z.object({ userId: zodString(), currentHostTeamId: z.number(), requestId: z.number() }))
     .mutation(async ({ ctx, input }) => {
-      const conversationId = await fetchConversationWithHostTeam(
-        input.userId,
-        input.currentHostTeamId,
-      );
+      const conversationId = await fetchConversationWithHostTeam({
+        userId: input.userId,
+        hostTeamId: input.currentHostTeamId,
+        requestId: input.requestId,
+      });
 
       if (!conversationId) {
         const newConversationId = await createConversationWithHostForRequest(
           ctx.user.id,
           input.currentHostTeamId,
+          input.requestId,
         );
         return { id: newConversationId };
       }
@@ -467,10 +497,11 @@ export const messagesRouter = createTRPCRouter({
   createConversationHostWithUser: coHostProcedure
     ("communicate_with_guests", z.object({ userId: zodString(), currentHostTeamId: z.number(), propertyId: zodString() }))
     .mutation(async ({ ctx, input }) => {
-      const conversationId = await fetchConversationWithHostTeam(
-        input.userId,
-        input.currentHostTeamId,
-      );
+      const conversationId = await fetchConversationWithHostTeam({
+        userId: input.userId,
+        hostTeamId: input.currentHostTeamId,
+        propertyId: input.propertyId,
+      });
 
       if (!conversationId) {
         const newConversationId = await createConversationWithHostOrAdminTeam(
@@ -490,16 +521,12 @@ export const messagesRouter = createTRPCRouter({
       if (!input.hostTeamId) {
         input.hostTeamId = ADMIN_HOST_TEAM_ID;
       }
-      const conversationId = await fetchConversationWithHostTeam(
-        ctx.user.id,
-        input.hostTeamId,
-      );
+      const conversationId = await fetchConversationWithHostTeam({
+        userId: ctx.user.id,
+        hostTeamId: input.hostTeamId,
+        propertyId: input.propertyId,
+      });
 
-
-      console.log(input.propertyId, "input.propertyId");
-      console.log(input.hostTeamId, "input.hostTeamId");
-      console.log(ctx.user.id, "ctx.user.id");
-      console.log(conversationId, "conversationId");
       if (!conversationId) {
         return await createConversationWithHostOrAdminTeam(ctx.user.id, input.hostTeamId, input.propertyId);
       }

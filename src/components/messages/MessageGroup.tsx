@@ -29,14 +29,6 @@ export function MessageGroup({ messageGroup }: { messageGroup: MessageGroup }) {
           me ? "bg-teal-900 text-white" : "bg-white",
         )}
       >
-        {/* <div className="flex items-baseline gap-2">
-          {user ? (
-            <p className="font-semibold leading-none">{user.firstName} {user.lastName}</p>
-          ) : (
-            <p className="leading-none text-muted-foreground">[deleted user]</p>
-          )}
-        </div> */}
-
         {!me && (
           <p className="mb-1 text-sm text-gray-500">
             {user ? `${capitalize(user.firstName!)}` : "[deleted user]"}
