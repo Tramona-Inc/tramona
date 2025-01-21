@@ -17,6 +17,7 @@ import {
   properties,
   Property,
   User,
+  Request,
 } from "@/server/db/schema";
 import {
   sendText,

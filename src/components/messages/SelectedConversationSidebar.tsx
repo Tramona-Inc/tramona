@@ -3,9 +3,7 @@ import { type Conversation } from "@/utils/store/conversations";
 import { format } from "date-fns";
 import { api } from "@/utils/api";
 import { formatCurrency } from "@/utils/utils";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import RequestToBookOrBookNowPriceCard from "../propertyPages/sidebars/priceCards/RequestToBookOrBookNowPriceCard";
 import WithdrawRequestToBookDialog from "../requests-to-book/WithdrawRequestToBookDialog";
 import { toast } from "../ui/use-toast";
@@ -18,6 +16,7 @@ import HostRequestDialog from "../dashboard/host/requests/city/HostRequestDialog
 import HostConfirmRequestDialog from "../dashboard/host/HostConfirmRequestDialog";
 import HostRequestToBookDialog from "../dashboard/host/requests/requests-to-book/HostRequestToBookDialog";
 import HostRequestToBookCard from "../dashboard/host/requests/requests-to-book/HostRequestToBookCard";
+import ImageCarousel from "../_common/ImageCarousel";
 
 interface SelectedConversationSidebarProps {
   conversation: Conversation;
@@ -32,7 +31,6 @@ const SelectedConversationSidebar: React.FC<
   );
 
   console.log(isHost, "isHost");
-  const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
   const [selectedProperties, setSelectedProperties] = useState<number[]>([]);
 
@@ -45,29 +43,32 @@ const SelectedConversationSidebar: React.FC<
   );
 
   const { data: hostTeamMembers, isLoading: isLoadingHostTeamMembers } =
-    api.hostTeams.getHostTeamMembers.useQuery({
-      hostTeamId: currentHostTeamId!,
-    }, {
-      enabled: !!currentHostTeamId,
-    });
-    const [selectedRequest, setSelectedRequest] =
-      useState<HostDashboardRequest | null>(null);
+    api.hostTeams.getHostTeamMembers.useQuery(
+      {
+        hostTeamId: currentHostTeamId!,
+      },
+      {
+        enabled: !!currentHostTeamId,
+      },
+    );
+  const [selectedRequest, setSelectedRequest] =
+    useState<HostDashboardRequest | null>(null);
 
-    const [properties, setProperties] = useState<
-      (Property & { taxAvailable: boolean })[] | null
-    >(null);
-    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [properties, setProperties] = useState<
+    (Property & { taxAvailable: boolean })[] | null
+  >(null);
 
   const participantIds = conversation.participants.map(
     (participant) => participant.id,
   );
 
-  const userId = !isLoadingHostTeamMembers && hostTeamMembers
-  ? participantIds.find(
-      (participantId) =>
-        !hostTeamMembers.some((member) => member.userId === participantId),
-    )
-  : undefined;
+  const userId =
+    !isLoadingHostTeamMembers && hostTeamMembers
+      ? participantIds.find(
+          (participantId) =>
+            !hostTeamMembers.some((member) => member.userId === participantId),
+        )
+      : undefined;
 
   // Ensure userId exists
   const userIdToUse = userId;
@@ -78,7 +79,7 @@ const SelectedConversationSidebar: React.FC<
   const { mutateAsync: rejectRequest } =
     api.requests.rejectRequest.useMutation();
 
-    const {data: currentRequestsToBookTraveler} =
+  const { data: currentRequestsToBookTraveler } =
     api.requestsToBook.getByPropertyId.useQuery(
       {
         propertyId: conversation.propertyId!,
@@ -90,14 +91,14 @@ const SelectedConversationSidebar: React.FC<
         enabled: !!conversation.propertyId && !isHost,
       },
     );
-    const { data: currentRequestsToBookForHost, isLoading: isLoadingRequests } =
+  const { data: currentRequestsToBookForHost, isLoading: isLoadingRequests } =
     api.requestsToBook.getByPropertyIdForHost.useQuery(
       {
         propertyId: conversation.propertyId!,
         conversationParticipants: conversation.participants.map(
           (participant) => participant.id,
         ),
-          userId: userIdToUse, // Use the safely determined userId
+        userId: userIdToUse, // Use the safely determined userId
       },
       {
         enabled: !!conversation.propertyId && !!userIdToUse && isHost, // Only run the query when userId is ready
@@ -111,7 +112,8 @@ const SelectedConversationSidebar: React.FC<
     {
       enabled:
         !!conversation.propertyId &&
-        (!currentRequestsToBookTraveler || currentRequestsToBookTraveler.length === 0) &&
+        (!currentRequestsToBookTraveler ||
+          currentRequestsToBookTraveler.length === 0) &&
         !isLoadingRequests, // Wait until currentRequestsToBook finishes loading
     },
   );
@@ -135,41 +137,24 @@ const SelectedConversationSidebar: React.FC<
     },
   );
 
-
-
   const request = isHost ? requestHost : requestTraveler;
-  const bid = isHost ? currentRequestsToBookForHost?.[0] : currentRequestsToBookTraveler?.[0];
+  const bid = isHost
+    ? currentRequestsToBookForHost?.[0]
+    : currentRequestsToBookTraveler?.[0];
   const property = propertyInfo ?? bid?.property;
 
-  console.log(propertyInfo, "propertyInfo");
+  // console.log(propertyInfo, "propertyInfo");
 
-  console.log(bid, "bid");
+  // console.log(bid, "bid");
 
-  console.log(request, "request");
+  // console.log(request, "request");
 
-  console.log(withdrawOpen, "withdrawOpen");
-
-  const nextImage = (e: React.MouseEvent): void => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (currentImageIndex < (property?.imageUrls.length ?? 0) - 1) {
-      setCurrentImageIndex((prevIndex) => prevIndex + 1);
-    }
-  };
-
-  const prevImage = (e: React.MouseEvent): void => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (currentImageIndex > 0) {
-      setCurrentImageIndex((prevIndex) => prevIndex - 1);
-    }
-  };
 
   return (
     <>
-      {(bid || request) && (
+      {(bid ?? request) && !isHost && (
         <WithdrawRequestToBookDialog
-          requestToBookId={bid?.id }
+          requestToBookId={(bid?.id ?? requestTraveler?.id)!}
           open={withdrawOpen}
           onOpenChange={setWithdrawOpen}
         />
@@ -191,52 +176,7 @@ const SelectedConversationSidebar: React.FC<
         <div className="max-h-[500px] overflow-y-auto">
           {property && (
             <div className="rounded-lg border bg-gray-50 p-4">
-              <div className="relative mb-3 h-48 w-full overflow-hidden rounded-md bg-gray-200">
-                <div
-                  className="flex h-full transition-transform duration-300 ease-in-out"
-                  style={{
-                    transform: `translateX(-${currentImageIndex * 100}%)`,
-                  }}
-                >
-                  {property.imageUrls.map((imageUrl, index) => (
-                    <div
-                      key={index}
-                      className="relative h-full w-full flex-shrink-0"
-                    >
-                      <Image
-                        src={imageUrl}
-                        alt={`Property image ${index + 1}`}
-                        fill
-                        onError={(e) => {
-                          console.error(
-                            `Error loading image for property with url ${imageUrl}:`,
-                            e,
-                          );
-                          (e.target as HTMLImageElement).src =
-                            "/placeholder.jpg";
-                        }}
-                        className="object-cover"
-                      />
-                    </div>
-                  ))}
-                </div>
-                {currentImageIndex > 0 && (
-                  <Button
-                    onClick={prevImage}
-                    className="absolute left-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white bg-opacity-50 p-2 hover:bg-opacity-80"
-                  >
-                    <ChevronLeft size={24} className="text-gray-800" />
-                  </Button>
-                )}
-                {currentImageIndex < (property.imageUrls.length || 0) - 1 && (
-                  <Button
-                    onClick={nextImage}
-                    className="absolute right-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white bg-opacity-50 p-2 hover:bg-opacity-80"
-                  >
-                    <ChevronRight size={24} className="text-gray-800" />
-                  </Button>
-                )}
-              </div>
+              <ImageCarousel imageUrls={property.imageUrls} />
               {propertyInfo && !isHost && (
                 <>
                   <RequestToBookOrBookNowPriceCard property={propertyInfo} />
@@ -244,7 +184,9 @@ const SelectedConversationSidebar: React.FC<
               )}
               {isHost && bid && (
                 <>
-                  <HostRequestToBookCard requestToBook={bid}>
+                  <HostRequestToBookCard
+                    requestToBook={currentRequestsToBookForHost![0]!}
+                  >
                     {bid.status === "Pending" && (
                       <Button
                         variant="secondary"
@@ -293,7 +235,7 @@ const SelectedConversationSidebar: React.FC<
                     <HostRequestToBookDialog
                       open={requestToBookDialogOpen}
                       setOpen={setRequestToBookDialogOpen}
-                      requestToBook={bid}
+                      requestToBook={currentRequestsToBookForHost![0]!}
                       currentHostTeamId={currentHostTeamId}
                     />
                   )}
@@ -301,86 +243,86 @@ const SelectedConversationSidebar: React.FC<
               )}
             </div>
           )}
-           {/* ) : ( */}
-             {/* <> */}
-              {!isHost && (bid ?? request) && (
-                <>
-                  <p className="text-sm text-gray-700">
-                    <span className="font-semibold">Check-in:</span>{" "}
-                    {bid?.checkIn.toLocaleDateString() ??
-                      request.checkIn.toLocaleDateString() ??
-                      "N/A"}
-                  </p>
-                  <p className="text-sm text-gray-700">
-                    <span className="font-semibold">Check-out:</span>{" "}
-                    {bid?.checkOut.toLocaleDateString() ??
-                      request.checkOut.toLocaleDateString() ??
-                      "N/A"}
-                  </p>
-                  <p className="text-sm text-gray-700">
-                    <span className="font-semibold">Amount:</span>{" "}
-                    {formatCurrency(
-                      bid?.baseAmountBeforeFees ??
-                        request.maxTotalPrice ??
-                        0,
-                    )}
-                  </p>
-                  <p className="text-sm text-gray-700">
-                    <span className="font-semibold">Guests:</span>{" "}
-                    {bid?.numGuests ?? request.numGuests ?? "N/A"}
-                  </p>
-                  {!isHost && (
-                    <div className="flex justify-end">
-                      <Button onClick={() => setWithdrawOpen(true)}>
-                        Withdraw
-                      </Button>
-                    </div>
-                  )}
-                </>
+          {/* ) : ( */}
+          {/* <> */}
+          {!isHost && (bid ?? request) && (
+            <>
+              <p className="text-sm text-gray-700">
+                <span className="font-semibold">Check-in:</span>{" "}
+                {bid?.checkIn.toLocaleDateString() ??
+                  requestTraveler?.checkIn.toLocaleDateString() ??
+                  "N/A"}
+              </p>
+              <p className="text-sm text-gray-700">
+                <span className="font-semibold">Check-out:</span>{" "}
+                {bid?.checkOut.toLocaleDateString() ??
+                  requestTraveler?.checkOut.toLocaleDateString() ??
+                  "N/A"}
+              </p>
+              <p className="text-sm text-gray-700">
+                <span className="font-semibold">Amount:</span>{" "}
+                {formatCurrency(
+                  bid?.baseAmountBeforeFees ??
+                    requestTraveler?.maxTotalPrice ??
+                    0,
+                )}
+              </p>
+              <p className="text-sm text-gray-700">
+                <span className="font-semibold">Guests:</span>{" "}
+                {bid?.numGuests ?? requestTraveler?.numGuests ?? "N/A"}
+              </p>
+              {!isHost && (
+                <div className="flex justify-end">
+                  <Button onClick={() => setWithdrawOpen(true)}>
+                    Withdraw
+                  </Button>
+                </div>
               )}
-              {isHost && request && (
-                <RequestCard request={request.request} type="host">
-                  <Button
-                    variant="secondary"
-                    onClick={async () => {
-                      await rejectRequest({
-                        requestId: request.request.id,
-                        currentHostTeamId: currentHostTeamId!,
-                      })
-                        .then(() => {
-                          toast({
-                            title: "Successfully rejected request",
-                          });
-                        })
-                        .catch((error) => {
-                          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                          if (error.data?.code === "FORBIDDEN") {
-                            toast({
-                              title:
-                                "You do not have permission to create an offer.",
-                              description:
-                                "Please contact your team owner to request access.",
-                            });
-                          } else {
-                            errorToast();
-                          }
+            </>
+          )}
+          {isHost && requestHost && (
+            <RequestCard request={requestHost.request} type="host">
+              <Button
+                variant="secondary"
+                onClick={async () => {
+                  await rejectRequest({
+                    requestId: requestHost.request.id,
+                    currentHostTeamId: currentHostTeamId!,
+                  })
+                    .then(() => {
+                      toast({
+                        title: "Successfully rejected request",
+                      });
+                    })
+                    .catch((error) => {
+                      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                      if (error.data?.code === "FORBIDDEN") {
+                        toast({
+                          title:
+                            "You do not have permission to create an offer.",
+                          description:
+                            "Please contact your team owner to request access.",
                         });
-                    }}
-                  >
-                    Reject
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      setDialogOpen(true);
-                      setSelectedRequest(request.request);
-                      setProperties(request.properties);
-                    }}
-                  >
-                    Make an offer
-                  </Button>
-                </RequestCard>
-              )}
-            {/* </> */}
+                      } else {
+                        errorToast();
+                      }
+                    });
+                }}
+              >
+                Reject
+              </Button>
+              <Button
+                onClick={() => {
+                  setDialogOpen(true);
+                  setSelectedRequest(requestHost.request);
+                  setProperties(requestHost.properties);
+                }}
+              >
+                Make an offer
+              </Button>
+            </RequestCard>
+          )}
+          {/* </> */}
           {/* )} */}
 
           {/* Created Date Section */}
