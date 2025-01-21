@@ -48,35 +48,19 @@ function PriceBreakdown(
     );
   }
 
-  const serviceFee =
-    brokedownPrice.superhogFee + brokedownPrice.stripeTransactionFee;
-
   return (
-    <div className="my-2 flex w-full flex-col gap-y-1 text-sm text-muted-foreground">
-      <div className="flex items-center justify-between font-semibold">
-        <span>
-          Trip Subtotal{" "}
-          <span className="text-xs font-light">{numOfNights}x nights</span>
+    <div className="my-4 flex w-full flex-col gap-y-1 text-sm">
+      <div className="flex items-center justify-between">
+        <span className="underline underline-offset-2">
+          {numOfNights} nights
         </span>
         <span className="font-semibold">
           {formatCurrency(
-            brokedownPrice.totalTripAmount -
-              (brokedownPrice.taxesPaid + serviceFee),
+            brokedownPrice.totalTripAmount - brokedownPrice.taxesPaid,
           )}
         </span>
       </div>
-      <div className="flex items-center justify-between font-semibold">
-        <span>Cleaning Fee</span>
-        <span className="font-semibold">Included</span>
-      </div>
-      <div className="flex items-center justify-between">
-        <span>Taxes</span>
-        <span>{formatCurrency(brokedownPrice.taxesPaid)}</span>
-      </div>
-      <div className="flex items-center justify-between">
-        <span>Service Fee</span>
-        <span>{formatCurrency(serviceFee)}</span>
-      </div>
+
       {brokedownPrice.totalSavings > 0 && (
         <div className="flex items-center justify-between text-green-600">
           <span>Savings</span>
@@ -84,9 +68,13 @@ function PriceBreakdown(
         </div>
       )}
       <div className="my-2 border-t pt-2">
-        <div className="flex items-center justify-between text-lg font-semibold text-black">
-          <span>Total</span>
-          <span>{formatCurrency(brokedownPrice.totalTripAmount)}</span>
+        <div className="flex items-center justify-between text-lg font-bold tracking-tight text-black">
+          <span>Total before taxes</span>
+          <span>
+            {formatCurrency(
+              brokedownPrice.totalTripAmount - brokedownPrice.taxesPaid,
+            )}
+          </span>
         </div>
       </div>
     </div>
