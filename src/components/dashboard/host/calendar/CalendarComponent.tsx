@@ -1,3 +1,6 @@
+// CalendarComponent.tsx
+"use client";
+
 import React, {
   useMemo,
   useEffect,
@@ -13,6 +16,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { api } from "@/utils/api";
 import MonthCalendar from "./MonthCalendar";
@@ -31,25 +35,34 @@ import {
 import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 import useSetInitialHostTeamId from "@/components/_common/CustomHooks/useSetInitialHostTeamId";
 import CalenderSettingsLoadingState from "./CalenderSettingsLoadingState";
+import { toast } from "@/components/ui/use-toast";
+import { errorToast } from "@/utils/toasts";
+import { TRPCClientErrorLike } from "@trpc/client";
+import { AppRouter } from "@/server/api/root";
 
 export default function CalendarComponent() {
   useSetInitialHostTeamId();
   const { currentHostTeamId } = useHostTeamStore();
   const router = useRouter();
   const { propertyId } = router.query;
+
   const [hasDismissedModal, setHasDismissedModal] = useState(false);
   const [date, setDate] = useState<Date>(new Date());
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(
     null,
   );
-  const { data: hostProperties, isLoading: loadingProperties } =
-    api.properties.getHostProperties.useQuery(
-      { currentHostTeamId: currentHostTeamId! },
-      {
-        enabled: !!currentHostTeamId,
-        refetchOnWindowFocus: false,
-      },
-    );
+
+  const {
+    data: hostProperties,
+    isLoading: loadingProperties,
+    refetch,
+  } = api.properties.getHostProperties.useQuery(
+    { currentHostTeamId: currentHostTeamId! },
+    {
+      enabled: !!currentHostTeamId,
+      refetchOnWindowFocus: false,
+    },
+  );
 
   //memoize initial property an host hostproperties
   // Update the ref value only when the properties change
@@ -60,6 +73,10 @@ export default function CalendarComponent() {
   }, [hostProperties]);
 
   const initialProperty = useMemo(() => {
+    if (!hostPropertiesRef.current) {
+      //sometimes the query no good
+      void refetch();
+    }
     return (
       hostPropertiesRef.current?.find(
         (property) => property.id === Number(propertyId),
@@ -85,6 +102,10 @@ export default function CalendarComponent() {
     api.calendar.getAndUpdateHostCalendar.useQuery(queryInput!, {
       enabled: Boolean(queryInput),
     });
+
+  const [isBookItNowChecked, setIsBookItNowChecked] = useState<boolean>(
+    () => selectedProperty?.bookItNowEnabled ?? false,
+  );
 
   const prices = useMemo(() => {
     const priceMap: Record<string, number | undefined> = {};
@@ -116,27 +137,6 @@ export default function CalendarComponent() {
       platformBookedOn: "airbnb" as const,
     }));
 
-  // const handleDateClick = (date: Date) => {
-  //   if (!editing) return;
-
-  //   setSelectedRange((prev) => {
-  //     if (!prev.start || (prev.start && prev.end)) {
-  //       // Start a new range
-  //       return { start: date, end: null };
-  //     }
-  //     if (!prev.end) {
-  //       // Set the end date if it’s not already set
-  //       if (date >= prev.start) {
-  //         return { ...prev, end: date };
-  //       } else {
-  //         // If clicked date is before the start date, reverse the range
-  //         return { start: date, end: prev.start };
-  //       }
-  //     }
-  //     // Default fallback (shouldn't normally hit this point)
-  //     return { start: date, end: null };
-  //   });
-  // };
   const isDateReserved = useCallback(
     (date: string) => {
       const parsedDate = parseISO(date);
@@ -172,7 +172,7 @@ export default function CalendarComponent() {
   }, [date, isDateReserved]);
 
   const leftOnTheTable = useMemo(() => {
-    return Object.entries(prices || {})
+    return Object.entries(prices)
       .filter(([dateStr]) => !isDateReserved(dateStr))
       .reduce((sum, [_, price]) => (price ? sum + price : sum), 0);
   }, [prices, isDateReserved]);
@@ -184,6 +184,51 @@ export default function CalendarComponent() {
       1,
     );
     setDate(newDate);
+  };
+
+  const [isCalendarUpdating, setIsCalendarUpdating] = useState(false);
+
+  const { mutateAsync: toggleBookItNow } =
+    api.properties.toggleBookItNow.useMutation();
+
+  const { mutateAsync: updateBookItNow, isLoading: isUpdatingBookItNow } =
+    api.properties.updateBookItNow.useMutation();
+
+  const handleBookItNowSwitch = (checked: boolean) => {
+    return toggleBookItNow({
+      id: selectedProperty!.id,
+      bookItNowEnabled: checked,
+      currentHostTeamId: currentHostTeamId!,
+    })
+      .then(() => {
+        setIsBookItNowChecked(checked);
+        toast({
+          title: "Update Successful",
+          description: `Book it now ${checked ? "enabled" : "disabled"}`,
+        });
+      })
+      .catch((error: TRPCClientErrorLike<AppRouter>) => {
+        setIsBookItNowChecked((prev) => !checked);
+        if (error.data?.code === "FORBIDDEN") {
+          toast({
+            title: "You do not have permission to change Co-host roles.",
+            description: "Please contact your team owner to request access.",
+          });
+        } else {
+          errorToast();
+        }
+      });
+  };
+
+  const handleBookItNowSlider = async (bookItNowPercent: number) => {
+    setIsCalendarUpdating(true);
+    await updateBookItNow({
+      id: selectedProperty!.id,
+      bookItNowHostDiscountPercentOffInput: bookItNowPercent,
+      currentHostTeamId: currentHostTeamId!,
+    }).finally(() => {
+      setIsCalendarUpdating(false);
+    });
   };
 
   const isLoading = loadingProperties || loadingPrices;
@@ -239,8 +284,9 @@ export default function CalendarComponent() {
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
+                {/* Updated the button to display current month here */}
                 <Button variant="ghost" onClick={() => setDate(new Date())}>
-                  Today
+                  {date.toLocaleString("default", { month: "long" })}
                 </Button>
                 <Button
                   variant="ghost"
@@ -268,6 +314,7 @@ export default function CalendarComponent() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
+                  <DropdownMenuLabel>Select property</DropdownMenuLabel>
                   {hostProperties?.map((property) => (
                     <DropdownMenuItem
                       key={property.id}
@@ -293,65 +340,27 @@ export default function CalendarComponent() {
             <MonthCalendar
               date={date}
               reservedDateRanges={reservedDates}
-              // onDateClick={handleDateClick}
-              // selectedRange={selectedRange}
-              // isEditing={editing}
               prices={prices}
               isLoading={isLoading}
+              isCalendarUpdating={isCalendarUpdating}
             />
           </div>
-          <div className="flex flex-wrap gap-2">
-            {/* <Button
-              variant="secondary"
-              size="sm"
-              className="flex-grow sm:flex-grow-0"
-              onClick={handleBlockDates}
-            >
-              Block Dates
-            </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              className="flex-grow sm:flex-grow-0"
-              onClick={handleUnblockDates}
-            >
-              Unblock Dates
-            </Button> */}
-            {/* <Button
-              variant="secondary"
-              size="sm"
-              className="flex-grow sm:flex-grow-0"
-            >
-              Edit iCal Link
-            </Button> */}
-
+          <div className="mx-auto flex w-full gap-2">
             <HostICalSync property={selectedProperty} />
-            {/* <div className="w-full sm:w-auto sm:flex-1" />
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-grow sm:flex-grow-0"
-              onClick={() => {
-                setEditing(false);
-                setSelectedRange({ start: null, end: null });
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              size="sm"
-              className="flex-grow sm:flex-grow-0"
-              onClick={() => setEditing(!editing)}
-            >
-              {editing ? "Done" : "Edit"}
-            </Button> */}
           </div>
         </CardContent>
       </Card>
 
       {/* SETTINGS */}
       {selectedProperty ? (
-        <CalendarSettings property={selectedProperty} />
+        <CalendarSettings
+          property={selectedProperty}
+          handleBookItNowSwitch={handleBookItNowSwitch}
+          handleBookItNowSlider={handleBookItNowSlider}
+          isUpdatingBookItNow={isUpdatingBookItNow}
+          isBookItNowChecked={isBookItNowChecked}
+          refetch={refetch} // sorry this is to invalidate the queries after the pricing update
+        />
       ) : (
         <CalenderSettingsLoadingState />
       )}

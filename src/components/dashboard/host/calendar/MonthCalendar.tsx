@@ -1,8 +1,13 @@
+// MonthCalendar.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { cn } from "@/utils/utils";
 import { Loader2Icon } from "lucide-react";
+import { isBefore } from "date-fns";
+import { useHostTeamStore } from "@/utils/store/hostTeamStore";
+import { api } from "@/utils/api";
+import { Property } from "@/server/db/schema/tables/properties";
 
 const daysOfWeek = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 
@@ -23,23 +28,40 @@ interface MonthCalendarProps {
   isEditing?: boolean;
   prices: Record<string, number | undefined>;
   isLoading?: boolean;
+  isCalendarUpdating?: boolean;
 }
 
 export default function MonthCalendar({
   date,
   reservedDateRanges = [],
-  // onDateClick,
-  // selectedRange,
-  // isEditing = false,
   prices,
   isLoading = false,
+  isCalendarUpdating = false,
 }: MonthCalendarProps) {
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
+  const { currentHostTeamId } = useHostTeamStore();
+  const [selectedProperty, setSelectedProperty] = useState<Property | null>(
+    null,
+  );
+  const { data: hostProperties } = api.properties.getHostProperties.useQuery(
+    { currentHostTeamId: currentHostTeamId! },
+    {
+      enabled: !!currentHostTeamId,
+      refetchOnWindowFocus: false,
+    },
+  );
 
   useEffect(() => {
     const today = new Date();
     setCurrentDate(today);
   }, []);
+
+  // Set initial selected property when data loads
+  useEffect(() => {
+    if (hostProperties?.[0]) {
+      setSelectedProperty(hostProperties[0]);
+    }
+  }, [hostProperties]);
 
   const normalizeToUTCMidnight = (d: Date) => {
     const normalized = new Date(
@@ -79,6 +101,10 @@ export default function MonthCalendar({
     return days;
   };
 
+  const getBookItNowDiscount = useMemo(() => {
+    return selectedProperty?.bookItNowHostDiscountPercentOffInput ?? 0;
+  }, [selectedProperty]);
+
   const renderMonth = () => {
     const monthDays = generateCalendarDays(date);
 
@@ -111,6 +137,11 @@ export default function MonthCalendar({
                 reservationClass = "bg-reserved-pattern-2";
               }
             }
+            const price =
+              currentDate &&
+              prices[currentDate.toISOString().split("T")[0] ?? ""];
+            const discountedPrice =
+              price && price * (1 - getBookItNowDiscount / 100);
 
             return (
               <div
@@ -134,21 +165,48 @@ export default function MonthCalendar({
                   <>
                     <span className="text-sm font-medium">{day}</span>
                     <span className="mt-1 text-xs text-muted-foreground">
-                      {isLoading ? (
+                      {isCalendarUpdating ? (
                         <Loader2Icon
                           size={20}
                           className="mx-auto animate-spin text-accent"
                         />
                       ) : (
-                        (() => {
-                          const price =
-                            prices[
-                              currentDate.toISOString().split("T")[0] ?? ""
-                            ];
-                          return price !== undefined && !isNaN(price)
-                            ? `$${price}`
-                            : "";
-                        })()
+                        <>
+                          {isLoading ? (
+                            <Loader2Icon
+                              size={20}
+                              className="mx-auto animate-spin text-accent"
+                            />
+                          ) : (
+                            (() => {
+                              return price !== undefined && !isNaN(price!) ? (
+                                <div className="flex flex-row items-center gap-1">
+                                  {selectedProperty?.bookItNowEnabled &&
+                                    getBookItNowDiscount > 0 && (
+                                      <span className="text-xs text-gray-500 line-through">
+                                        ${price?.toFixed(0)}
+                                      </span>
+                                    )}
+                                  <span
+                                    className={cn(
+                                      "text-sm",
+                                      selectedProperty?.bookItNowEnabled &&
+                                        getBookItNowDiscount > 0
+                                        ? "text-green-600"
+                                        : "text-black",
+                                    )}
+                                  >
+                                    $
+                                    {discountedPrice?.toFixed(0) ??
+                                      (price ? price.toFixed(0) : "")}
+                                  </span>
+                                </div>
+                              ) : (
+                                ""
+                              );
+                            })()
+                          )}
+                        </>
                       )}
                     </span>
                   </>

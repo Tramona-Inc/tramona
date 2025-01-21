@@ -1,5 +1,5 @@
 // SearchFormBar.tsx
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Form,
   FormControl,
@@ -21,11 +21,11 @@ import GuestInput from "@/components/_common/GuestInput";
 import type { UseFormReturn } from "react-hook-form";
 import { locations } from "./locations";
 import { SearchFormValues } from "./schemas";
+import { useAdjustedProperties } from "./AdjustedPropertiesContext";
 
 interface SearchFormBarProps {
   form: UseFormReturn<SearchFormValues, unknown, SearchFormValues>; // Added unknown as the second type parameter
   onSubmit: (values: SearchFormValues) => Promise<void> | void;
-  isLoading: boolean;
   isCompact?: boolean;
   variant?: "default" | "modal";
 }
@@ -33,15 +33,16 @@ interface SearchFormBarProps {
 export function SearchFormBar({
   form,
   onSubmit,
-  isLoading,
   isCompact = false,
   variant = "default",
 }: SearchFormBarProps) {
   const checkInDate = form.watch("checkIn");
   const checkOutDate = form.watch("checkOut");
   const numGuests = form.watch("numGuests");
+  const { isSearching } = useAdjustedProperties();
 
   const handleSubmit = async (e: React.FormEvent) => {
+    console.log(isSearching);
     e.preventDefault();
     const values = form.getValues();
     let hasError = false;
@@ -159,10 +160,10 @@ export function SearchFormBar({
           <Button
             type="submit"
             className="w-full rounded-full bg-primaryGreen py-6 text-white"
-            disabled={isLoading}
+            disabled={isSearching}
             onClick={handleSubmit}
           >
-            {isLoading ? (
+            {isSearching ? (
               <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
             ) : (
               <div className="flex items-center justify-center">
@@ -400,10 +401,10 @@ export function SearchFormBar({
                   isCompact ? "h-6 w-6" : "h-9 w-9"
                 }`}
                 onClick={handleSubmit}
-                disabled={isLoading}
+                disabled={isSearching}
               >
-                {isLoading ? (
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                {isSearching ? (
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
                 ) : (
                   <Search
                     className={`transition-all duration-300 ease-in-out ${

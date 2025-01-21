@@ -159,7 +159,8 @@ export default function ListMessages() {
           message,
           user: {
             id: session.user.id,
-            name: session.user.name,
+            firstName: session.user.firstName,
+            lastName: session.user.lastName,
             image: session.user.image,
             email: session.user.email,
           },
@@ -174,7 +175,8 @@ export default function ListMessages() {
         message,
         user: {
           id: participant.id,
-          name: participant.name,
+          firstName: participant.firstName,
+          lastName: participant.lastName,
           image: participant.image,
           email: participant.email,
         },

@@ -103,7 +103,7 @@ export default function AvatarDropdown({
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link href="/profile">
+            <Link href={`/profile/view/${session.user.id}`}>
               <User2Icon />
               Profile
             </Link>

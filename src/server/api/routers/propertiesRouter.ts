@@ -40,7 +40,7 @@ import {
   sql,
   notInArray,
 } from "drizzle-orm";
-import { literal, z } from "zod";
+import { z } from "zod";
 import {
   ALL_PROPERTY_ROOM_TYPES,
   bookedDates,
@@ -59,6 +59,7 @@ import { getCoordinates } from "@/server/google-maps";
 import { checkAvailabilityForProperties } from "@/server/direct-sites-scraping";
 import { scrapeAirbnbSearch } from "@/server/external-listings-scraping/airbnbScraper";
 import { capitalize } from "@/utils/utils";
+import { extraPricingFieldSchema } from "@/components/dashboard/host/calendar/pricingfields";
 
 export type HostRequestsPageData = {
   city: string;
@@ -1214,5 +1215,28 @@ export const propertiesRouter = createTRPCRouter({
       .where(eq(properties.id, input.propertyId));
 
     return property;
+  }),
+
+  updatePropertyPricingField: coHostProcedure(
+    "modify_overall_pricing_strategy",
+    z.object({
+      propertyId: z.number(),
+      field: extraPricingFieldSchema,
+      amount: z.number(),
+      maxGuestsWithoutFee: z.number().optional(),
+    }),
+  ).mutation(async ({ ctx, input }) => {
+    console.log(input);
+    const field = input.field;
+    await db
+      .update(properties)
+      .set({
+        ...(input.maxGuestsWithoutFee && {
+          maxGuestsWithoutFee: input.maxGuestsWithoutFee,
+        }),
+        [field]: input.amount,
+      })
+      .where(eq(properties.id, input.propertyId));
+    return;
   }),
 });

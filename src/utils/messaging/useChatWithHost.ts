@@ -1,14 +1,14 @@
 import { useRouter } from "next/router";
 import { api } from "@/utils/api";
 
-export function useChatWithHost() {
+export function useChatWithHostTeam() {
   const router = useRouter();
 
-  const { mutateAsync: useChatWithHost } =
-    api.messages.createConversationWithHost.useMutation({
+  const { mutateAsync: useChatWithHostTeam } =
+    api.messages.createConversationWithHostOrAdminTeam.useMutation({
       onSuccess: (conversationId) =>
         void router.push(`/messages?conversationId=${conversationId}`),
     });
 
-  return useChatWithHost;
+  return useChatWithHostTeam;
 }

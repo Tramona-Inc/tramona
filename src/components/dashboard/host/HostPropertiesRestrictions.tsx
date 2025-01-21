@@ -1,3 +1,5 @@
+"use client";
+
 import { Input } from "@/components/ui/input";
 import { HostPropertyEditBtn } from "./HostPropertiesLayout";
 import { useState } from "react";
@@ -83,15 +85,7 @@ export default function HostPropertiesRestrictions({
   };
 
   return (
-    <div className="mt-6 space-y-2 overflow-y-auto">
-      <div className="text-end">
-        <HostPropertyEditBtn
-          editing={editing}
-          setEditing={setEditing}
-          property={property}
-          onSubmit={form.handleSubmit(onSubmit)}
-        />
-      </div>
+    <div className="relative mt-6 space-y-5 overflow-y-auto">
       <div className="space-y-3 px-4">
         <Form {...form}>
           <ErrorMsg>{form.formState.errors.root?.message}</ErrorMsg>
@@ -102,7 +96,7 @@ export default function HostPropertiesRestrictions({
                 <h3 className="text-xl font-bold leading-tight">
                   Property restrictions
                 </h3>
-                <p className="text-base leading-normal">
+                <p className="text-sm leading-normal sm:text-base">
                   Travelers must be at least this old to book this property.
                 </p>
                 <FormField
@@ -131,7 +125,7 @@ export default function HostPropertiesRestrictions({
                 <h3 className="text-xl font-bold leading-tight">
                   Minimum offer price
                 </h3>
-                <p className="text-base leading-normal">
+                <p className="text-sm leading-normal sm:text-base">
                   You will only see offers equal to or higher than this price.
                 </p>
                 <FormField
@@ -163,9 +157,9 @@ export default function HostPropertiesRestrictions({
                 <h3 className="mt-6 text-xl font-bold leading-tight">
                   Stripe verification
                 </h3>
-                <p className="text-base leading-normal">
+                <p className="text-sm leading-normal sm:text-base">
                   Do you want travelers to be verified by Stripe for this
-                  property? This is an 8 hour long p
+                  property? This is an 8 hour long process.
                 </p>
                 <FormField
                   name="stripeVerRequired"
@@ -198,6 +192,14 @@ export default function HostPropertiesRestrictions({
             </div>
           </form>
         </Form>
+      </div>
+      <div className="text-end">
+        <HostPropertyEditBtn
+          editing={editing}
+          setEditing={setEditing}
+          property={property}
+          onSubmit={form.handleSubmit(onSubmit)}
+        />
       </div>
     </div>
   );

@@ -61,6 +61,10 @@ function PriceBreakdown(
           )}
         </span>
       </div>
+      <div className="flex items-center justify-between font-semibold">
+        <span>Cleaning Fee</span>
+        <span className="font-semibold">Included</span>
+      </div>
       <div className="flex items-center justify-between">
         <span>Taxes</span>
         <span>{formatCurrency(brokedownPrice.taxesPaid)}</span>

@@ -51,8 +51,7 @@ import { createUserNameAndPic } from "../activity-feed/admin/generationHelper";
 import ChatOfferButton from "./sections/ChatOfferButton";
 import ReasonsToBook from "./sections/ReasonsToBook";
 import UserInfo from "./sections/UserInfo";
-import { useChatWithHost } from "@/utils/messaging/useChatWithHost";
-import { useChatWithAdmin } from "@/utils/messaging/useChatWithAdmin";
+import { useChatWithHostTeam } from "@/utils/messaging/useChatWithHost";
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 export type PropertyPageData = RouterOutputs["properties"]["getById"];
 //export type PropertyPageData = RouterOutputs["properties"]["getById"];
@@ -75,8 +74,7 @@ export default function PropertyPage({
   const [isOverflowing, setIsOverflowing] = useState(false);
   const [reviewBackupImages, setReviewBackupImages] = useState<string[]>([]);
   const [openUserInfo, setOpenUserInfo] = useState(false);
-  const chatWithHost = useChatWithHost();
-  const chatWithAdmin = useChatWithAdmin();
+  const chatWithHostTeam = useChatWithHostTeam();
 
   console.log("ratings and reviews", {
     ratings: property.numRatings,
@@ -131,7 +129,7 @@ export default function PropertyPage({
 
   const hostName =
     property.hostName ??
-    `${property.hostTeam.owner.firstName} ${property.hostTeam.owner.lastName}`;
+    `${property.hostTeam.owner.firstName}`;
 
   const originalListing = getOriginalListing(property);
 
@@ -272,12 +270,12 @@ export default function PropertyPage({
               </h1>
               <Button
                 onClick={() =>
-                  isHospitableUser
-                    ? chatWithHost({
+                   chatWithHostTeam({
                         hostId: property.hostTeam.ownerId,
-                        hostTeamId: property.hostTeam.id,
+                        hostTeamId: isHospitableUser ? property.hostTeam.id : undefined,
+                        propertyId: property.id
                       })
-                    : chatWithAdmin()
+
                         .then()
                         .catch((err: TRPCClientErrorLike<AppRouter>) => {
                           if (err.data?.code === "UNAUTHORIZED") {
@@ -356,8 +354,8 @@ export default function PropertyPage({
             {offer && (
               <ChatOfferButton
                 offerHostId={offer.property.hostTeam.ownerId}
-                offerPropertyName={offer.property.name}
                 hostTeamId={property.hostTeam.id}
+                propertyId={property.id}
               />
             )}
           </section>

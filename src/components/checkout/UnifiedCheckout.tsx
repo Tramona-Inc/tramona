@@ -70,7 +70,11 @@ export function UnifiedCheckout({ unifiedCheckoutData }: UnifiedCheckoutProps) {
           <Separator className="my-6" />
           <CustomerReview />
           <div className="mt-4">
-            <ChatWithHost />
+            <ChatWithHost
+              hostId={unifiedCheckoutData.property.hostTeam.ownerId}
+              hostTeamId={unifiedCheckoutData.property.hostTeam.id}
+              propertyId={unifiedCheckoutData.property.id}
+            />
           </div>
         </div>
         <div className="sticky top-24 hidden h-fit space-y-2 md:block">
@@ -79,7 +83,11 @@ export function UnifiedCheckout({ unifiedCheckoutData }: UnifiedCheckoutProps) {
             <CustomerReview />
           </div>
           <div>
-            <ChatWithHost />
+            <ChatWithHost
+              hostId={unifiedCheckoutData.property.hostTeam.ownerId}
+              hostTeamId={unifiedCheckoutData.property.hostTeam.id}
+              propertyId={unifiedCheckoutData.property.id}
+            />
           </div>
         </div>
       </div>
