@@ -28,6 +28,7 @@ import {
   TripWithDetails,
   TripWithDetailsConfirmation,
 } from "@/components/my-trips/TripPage";
+import { PropertyPageData } from "@/components/propertyPages/PropertyPage";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -811,11 +812,13 @@ export function removeTax(total: number, taxRate: number): number {
   return amountWithoutTax;
 }
 
-export const getApplicableBookItNowDiscount = () => {
+export const getApplicableBookItNowDiscount = (
+  property: PropertyPageData | undefined,
+) => {
   ///WE ARE NOT DOING DISCOUNT TIERS ANYMORE THATS WHY IM RETURNING NULL
   //but i plan on adding discounts in the near future so this function can stay :)
 
-  return null;
+  return property?.bookItNowHostDiscountPercentOffInput ?? 0;
 };
 
 export const capitalizeFirstLetter = (string: string): string => {

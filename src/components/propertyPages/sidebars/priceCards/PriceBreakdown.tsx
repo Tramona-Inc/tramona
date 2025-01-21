@@ -48,11 +48,13 @@ function PriceBreakdown(
     );
   }
 
+  console.log("totaltripamount", brokedownPrice.totalTripAmount);
+  console.log("taxes paid", brokedownPrice.taxesPaid);
   return (
     <div className="my-4 flex w-full flex-col gap-y-1 text-sm">
       <div className="flex items-center justify-between">
         <span className="underline underline-offset-2">
-          {numOfNights} nights
+          {numOfNights} night{numOfNights > 1 ? "s" : ""}
         </span>
         <span className="font-semibold">
           {formatCurrency(

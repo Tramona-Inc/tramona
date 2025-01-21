@@ -35,24 +35,6 @@ export const useGetOriginalPropertyPricing = ({
       },
     );
   console.log(hostPricePerNight);
-
-  // Scraped property logic
-  // const {
-  //   data: casamundoPrice, // is this per night or total???
-  //   isLoading: isCasamundoPriceLoading,
-  //   refetch: refetchCasamundoPrice,
-  // } = api.misc.scrapeAverageCasamundoPrice.useQuery(
-  //   {
-  //     offerId: property?.originalListingId ?? "", // Fallback for undefined property
-  //     checkIn,
-  //     numGuests: numGuests || 2,
-  //     duration: numNights,
-  //   },
-  //   {
-  //     enabled: !isHospitable && !!property, // Ensure hooks always run but only fetch when valid
-  //     refetchOnWindowFocus: false,
-  //   },
-  // );
   const casamundoPrice = property?.tempCasamundoPrice;
   console.log("casamundoPrice", casamundoPrice);
   const isCasamundoPriceLoading = false;
@@ -82,32 +64,33 @@ export const useGetOriginalPropertyPricing = ({
       : null;
 
   //Multiply be num of nights becuase original price should be total price ++ MARKUP
-  let originalPrice = originalPricePerNight
+  let originalTravelerPrice = originalPricePerNight
     ? Math.floor(originalPricePerNight * numNights * TRAVELER_MARKUP)
     : originalPricePerNight;
 
-  console.log(originalPrice);
+  console.log(originalTravelerPrice);
   // <--------------------------------- DISCOUNTS HERE --------------------------------->
 
   // 1.) apply traveler requested bid amount if request to book
-  if (requestPercentage && originalPrice) {
-    originalPrice = originalPrice * (1 - requestPercentage / 100);
+  if (requestPercentage && originalTravelerPrice) {
+    originalTravelerPrice =
+      originalTravelerPrice * (1 - requestPercentage / 100);
   }
   //2.)apply discount tier discounts
-  const hostDiscount = isHospitable //hostDiscount = percent off
-    ? getApplicableBookItNowDiscount()
+  const hostDiscountPercentage = isHospitable //hostDiscountPercentage = percent off
+    ? getApplicableBookItNowDiscount(property)
     : undefined;
 
-  console.log(hostDiscount);
+  console.log(hostDiscountPercentage);
 
-  const originalPriceAfterTierDiscount = originalPrice
-    ? originalPrice * (1 - (hostDiscount ?? 0) / 100)
+  const originalPriceAfterTierDiscount = originalTravelerPrice
+    ? originalTravelerPrice * (1 - (hostDiscountPercentage ?? 0) / 100)
     : undefined;
 
   console.log(originalPriceAfterTierDiscount);
   // Return everything as undefined or valid values, but ensure hooks are always run
   return {
-    originalPrice, //we really only care about this with total nights
+    originalTravelerPrice, //we really only care about this with total nights
     originalPriceAfterTierDiscount,
     isLoading,
     error,

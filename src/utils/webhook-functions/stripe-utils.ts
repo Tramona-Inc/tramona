@@ -338,6 +338,7 @@ export async function createRequestToBook({
   propertyId,
   userId,
   isDirectListingCharge,
+  totalAmountAuthorized,
 }: {
   paymentIntentId: string;
   travelerPriceBeforeFees: number;
@@ -347,6 +348,7 @@ export async function createRequestToBook({
   propertyId: number;
   userId: string;
   isDirectListingCharge: boolean;
+  totalAmountAuthorized: number;
 }) {
   const user = await db.query.users
     .findFirst({
@@ -384,6 +386,7 @@ export async function createRequestToBook({
     numGuests: numOfGuests,
     baseAmountBeforeFees: removeTravelerMarkup(travelerPriceBeforeFees),
     amountAfterTravelerMarkupAndBeforeFees: Math.floor(travelerPriceBeforeFees),
+    totalAmountAuthorized: totalAmountAuthorized,
     isDirectListing: isDirectListingCharge,
   });
 

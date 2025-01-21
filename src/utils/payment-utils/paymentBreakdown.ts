@@ -155,7 +155,7 @@ export function breakdownPaymentByPropertyAndTripParams( //TAKE PRICE PER NIGHT 
     cleaningFeePerStay: additionalFees.cleaningFeePerStay,
     petFeePerStay: additionalFees.petFeePerStay,
     totalExtraGuestFee: additionalFees.totalExtraGuestFee,
-    totalAdditionalFees: additionalFees.totalFees,
+    totalAdditionalFees: additionalFees.totalFees, //includes guest, pet and cleaning
   };
 }
 

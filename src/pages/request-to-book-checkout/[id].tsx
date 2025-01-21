@@ -49,12 +49,15 @@ export default function Page() {
   if (propertyPricing.error && !propertyPricing.isLoading) {
     return (
       <MainLayout>
-        <div className="min-h-screen-minus-header-n-footer mx-auto my-8 max-w-6xl sm:my-16">
+        <div className="mx-auto my-8 min-h-screen-minus-header-n-footer max-w-6xl sm:my-16">
           Something went wrong ...
         </div>
       </MainLayout>
     );
   }
+
+  console.log(propertyPricing.originalPriceAfterTierDiscount);
+
   const unifiedCheckoutData =
     property && propertyPricing.originalPriceAfterTierDiscount
       ? requestOrBookItNowToUnifiedData({
@@ -62,6 +65,7 @@ export default function Page() {
           checkIn,
           checkOut,
           numGuests,
+          //for request to book we are just going to do an all in exceptTaxes
           travelerOfferedPriceBeforeFees:
             propertyPricing.originalPriceAfterTierDiscount,
           type: "requestToBook",
@@ -70,7 +74,7 @@ export default function Page() {
 
   return (
     <MainLayout>
-      <div className="min-h-screen-minus-header-n-footer mx-auto my-8 max-w-6xl sm:my-16">
+      <div className="mx-auto my-8 min-h-screen-minus-header-n-footer max-w-6xl sm:my-16">
         {unifiedCheckoutData && property ? (
           <UnifiedCheckout unifiedCheckoutData={unifiedCheckoutData} />
         ) : (

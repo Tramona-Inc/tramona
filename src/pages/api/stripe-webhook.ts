@@ -199,6 +199,7 @@ export default async function webhook(
                 paymentIntentSucceeded.metadata.property_id!,
               ),
               userId: paymentIntentSucceeded.metadata.user_id!,
+              totalAmountAuthorized: paymentIntentSucceeded.amount,
               isDirectListingCharge,
             });
           } else if (paymentIntentSucceeded.metadata.type === "offer") {

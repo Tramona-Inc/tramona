@@ -61,6 +61,7 @@ export const requestsToBook = pgTable(
     amountAfterTravelerMarkupAndBeforeFees: integer(
       "amount_after_traveler_markup_and_before_fees",
     ).notNull(), // this is the amount the host will see the traveler requested.
+    totalAmountAuthorized: integer("total_amount_authorized").notNull(),
     isDirectListing: boolean("is_direct_listing").notNull(), //true = scraped property : false = our property
   },
   (t) => ({
