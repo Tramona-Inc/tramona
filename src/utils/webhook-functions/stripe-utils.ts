@@ -204,6 +204,7 @@ export async function finalizeTrip({
     },
     travelerPriceBeforeFees: travelerPriceBeforeFees,
     property: property,
+    numOfGuests: numOfGuests,
   };
 
   const priceBreakdown = breakdownPaymentByPropertyAndTripParams(params);
@@ -218,6 +219,9 @@ export async function finalizeTrip({
       taxesPaid: priceBreakdown.taxesPaid,
       superhogFee: priceBreakdown.superhogFee,
       stripeTransactionFee: priceBreakdown.stripeTransactionFee,
+      cleaningFeePaid: priceBreakdown.cleaningFeePerStay ?? 0,
+      petFeePaid: priceBreakdown.petFeePerStay ?? 0,
+      extraGuestFeeTotalPaid: priceBreakdown.totalExtraGuestFee ?? 0,
       totalSavings: priceBreakdown.totalSavings,
       securityDeposit: property.currentSecurityDeposit,
     })

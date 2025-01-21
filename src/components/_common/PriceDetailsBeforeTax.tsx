@@ -88,14 +88,17 @@ export default function PriceDetailsBeforeTax({
             nightlyPrice: nightly,
           });
 
-          const payment = breakdownPaymentByOffer({
-            scrapeUrl: property.originalListingPlatform ?? null,
-            travelerOfferedPriceBeforeFees,
-            datePriceFromAirbnb: scrapedPrice,
-            checkIn: requestToBook.checkIn,
-            checkOut: requestToBook.checkOut,
-            property,
-          });
+          const payment = breakdownPaymentByOffer(
+            {
+              scrapeUrl: property.originalListingPlatform ?? null,
+              travelerOfferedPriceBeforeFees,
+              datePriceFromAirbnb: scrapedPrice,
+              checkIn: requestToBook.checkIn,
+              checkOut: requestToBook.checkOut,
+              property,
+            },
+            offer!.request!.numGuests,
+          );
 
           setBrokeDownPayment(payment);
         } else if (offer) {
@@ -106,7 +109,10 @@ export default function PriceDetailsBeforeTax({
             nightlyPrice: nightly,
           });
 
-          const payment = breakdownPaymentByOffer(offer);
+          const payment = breakdownPaymentByOffer(
+            offer,
+            offer.request!.numGuests,
+          );
           setBrokeDownPayment(payment);
         } else {
           throw new Error("Missing required booking information");

@@ -21,6 +21,11 @@ export const tripCheckouts = pgTable("trip_checkouts", {
   taxPercentage: doublePrecision("tax_percentage"), //will save as percentage ex. 2.9  = 2.9%
   superhogFee: integer("superhog_fee").notNull(),
   stripeTransactionFee: integer("stripe_transaction_fee").notNull(),
+  cleaningFeePaid: integer("cleaning_fee_paid").default(0).notNull(),
+  petFeePaid: integer("pet_fee_paid").default(0).notNull(),
+  extraGuestFeeTotalPaid: integer("extra_guest_fee_total_paid")
+    .default(0)
+    .notNull(),
   totalSavings: integer("total_savings").notNull(),
   securityDeposit: integer("security_deposit").notNull(),
 });

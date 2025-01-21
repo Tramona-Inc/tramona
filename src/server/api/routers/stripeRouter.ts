@@ -250,7 +250,7 @@ export const stripeRouter = createTRPCRouter({
         cancelUrl: z.string(),
         offerId: z.number().nullable(),
         scrapeUrl: z.string().nullable(),
-        numOfGuests: z.number().nullable(),
+        numOfGuests: z.number(),
         travelerOfferedPriceBeforeFees: z.number(),
         datePriceFromAirbnb: z.number().nullable(),
         checkIn: z.date(),
@@ -311,6 +311,7 @@ export const stripeRouter = createTRPCRouter({
         },
         travelerPriceBeforeFees: input.travelerOfferedPriceBeforeFees,
         property: curProperty,
+        numOfGuests: input.numOfGuests,
       });
 
       const metadata = {

@@ -26,8 +26,6 @@ export function UnifiedPriceDetails({
     unifiedCheckoutData.dates.checkIn,
     unifiedCheckoutData.dates.checkOut,
   );
-  const nightlyPrice =
-    unifiedCheckoutData.pricing.travelerOfferedPriceBeforeFees / numberOfNights;
 
   const paymentBreakdown = breakdownPaymentByPropertyAndTripParams({
     dates: {
@@ -37,20 +35,18 @@ export function UnifiedPriceDetails({
     travelerPriceBeforeFees:
       unifiedCheckoutData.pricing.travelerOfferedPriceBeforeFees,
     property: unifiedCheckoutData.property,
+    numOfGuests: unifiedCheckoutData.guests,
   });
+
+  const nightlyPriceBeforeTax = Math.round(
+    (paymentBreakdown.totalTripAmount - paymentBreakdown.taxesPaid) /
+      numberOfNights,
+  );
 
   const items = [
     {
-      title: `${formatCurrency(nightlyPrice)} x ${plural(numberOfNights, "night")}`,
-      price: `${formatCurrency(unifiedCheckoutData.pricing.travelerOfferedPriceBeforeFees)}`,
-    },
-    {
-      title: "Cleaning fee",
-      price: "Included",
-    },
-    {
-      title: "Tramona service fee",
-      price: `${formatCurrency(getServiceFee({ tripCheckout: paymentBreakdown }))}`,
+      title: `${formatCurrency(nightlyPriceBeforeTax)} x ${plural(numberOfNights, "night")}`,
+      price: `${formatCurrency(paymentBreakdown.totalTripAmount - paymentBreakdown.taxesPaid)}`,
     },
     {
       title: "Taxes",

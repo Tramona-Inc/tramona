@@ -33,6 +33,8 @@ import { useGetOriginalPropertyPricing } from "@/utils/payment-utils/useGetOrigi
 import Link from "next/link";
 import { MAX_REQUEST_TO_BOOK_PERCENTAGE } from "@/utils/constants";
 
+import { breakdownPaymentByPropertyAndTripParams } from "@/utils/payment-utils/paymentBreakdown";
+
 export type RequestToBookDetails = {
   checkIn: Date;
   checkOut: Date;
@@ -68,6 +70,13 @@ export default function RequestToBookOrBookNowPriceCard({
 
   // <---------------- Calculate the price here  ---------------->
   const numOfNights = getNumNights(checkIn, checkOut);
+
+  const initialRequestToBook: RequestToBookDetails = {
+    checkIn: checkIn,
+    checkOut: checkOut,
+    numGuests: numGuests,
+  };
+
   const propertyPricing = useGetOriginalPropertyPricing({
     property,
     checkIn,
@@ -80,6 +89,30 @@ export default function RequestToBookOrBookNowPriceCard({
       ? propertyPricing.originalPriceAfterTierDiscount / numOfNights
       : undefined;
 
+  const brokeDownPayment = propertyPricingPerNightAfterTierDiscount
+    ? breakdownPaymentByPropertyAndTripParams({
+        dates: {
+          checkIn: initialRequestToBook.checkIn,
+          checkOut: initialRequestToBook.checkOut,
+        },
+        property: property,
+        travelerPriceBeforeFees:
+          propertyPricingPerNightAfterTierDiscount * numOfNights,
+        numOfGuests: numGuests,
+      })
+    : undefined;
+
+  console.log(brokeDownPayment);
+
+  const nightlyPriceWithoutTax = brokeDownPayment
+    ? Math.round(
+        (brokeDownPayment.totalTripAmount - brokeDownPayment.taxesPaid) /
+          numOfNights,
+      )
+    : undefined;
+
+  console.log(nightlyPriceWithoutTax);
+  //<---------------- HOOKS ---------------->
   const [error, setError] = useState<React.ReactNode | null>(null);
 
   const [errorState, setErrorState] = useState<{
@@ -88,12 +121,10 @@ export default function RequestToBookOrBookNowPriceCard({
     percentageAboveMax?: boolean;
   }>({});
 
-  const [requestAmount, setRequestAmount] = useState(
-    propertyPricingPerNightAfterTierDiscount,
-  );
+  const [requestAmount, setRequestAmount] = useState(nightlyPriceWithoutTax);
   // Monitor `originalPrice` for errors
   useEffect(() => {
-    if (propertyPricingPerNightAfterTierDiscount === undefined) {
+    if (nightlyPriceWithoutTax === undefined) {
       setError(
         <>
           Original price is unavailable.
@@ -104,17 +135,11 @@ export default function RequestToBookOrBookNowPriceCard({
     } else {
       setError(null); // Clear the error when `originalPrice` is valid
       //setPropertyprice into state
-      setRequestAmount(propertyPricingPerNightAfterTierDiscount);
+      setRequestAmount(nightlyPriceWithoutTax);
     }
-  }, [propertyPricingPerNightAfterTierDiscount]);
+  }, [nightlyPriceWithoutTax]);
 
   // ----------------
-
-  const initialRequestToBook: RequestToBookDetails = {
-    checkIn: checkIn,
-    checkOut: checkOut,
-    numGuests: numGuests,
-  };
 
   const [date, setDate] = useState({
     from: initialRequestToBook.checkIn,
@@ -133,16 +158,12 @@ export default function RequestToBookOrBookNowPriceCard({
 
   const [requestPercentage, setRequestPercentage] = useState(0);
   const [selectedPreset, setSelectedPreset] = useState<number | null>(
-    propertyPricingPerNightAfterTierDiscount
-      ? propertyPricingPerNightAfterTierDiscount
-      : null,
+    nightlyPriceWithoutTax ? nightlyPriceWithoutTax : null,
   );
   const [requestToBook, setRequestToBook] =
     useState<RequestToBookDetails>(initialRequestToBook);
   const [rawRequestAmount, setRawRequestAmount] = useState(
-    propertyPricingPerNightAfterTierDiscount
-      ? formatCurrency(propertyPricingPerNightAfterTierDiscount)
-      : "",
+    nightlyPriceWithoutTax ? formatCurrency(nightlyPriceWithoutTax) : "",
   ); // Raw input for typing
 
   useEffect(() => {
@@ -199,21 +220,19 @@ export default function RequestToBookOrBookNowPriceCard({
   // Only set presetOptions if randomPrice is available
   const presetOptions = [
     {
-      price: propertyPricingPerNightAfterTierDiscount,
+      price: nightlyPriceWithoutTax,
       label: property.bookItNowEnabled ? "Buy Now" : "Original Price",
       percentOff: 0,
     },
     {
-      price: propertyPricingPerNightAfterTierDiscount
-        ? propertyPricingPerNightAfterTierDiscount * 0.9
-        : undefined,
+      price: nightlyPriceWithoutTax ? nightlyPriceWithoutTax * 0.9 : undefined,
       label: "Better request",
       percentOff: Math.ceil(property.requestToBookMaxDiscountPercentage / 2),
     },
     {
       price:
-        propertyPricingPerNightAfterTierDiscount !== undefined
-          ? propertyPricingPerNightAfterTierDiscount * 0.8
+        nightlyPriceWithoutTax !== undefined
+          ? nightlyPriceWithoutTax * 0.8
           : undefined,
       label: "Good request",
       percentOff: property.requestToBookMaxDiscountPercentage,
@@ -223,18 +242,12 @@ export default function RequestToBookOrBookNowPriceCard({
   useEffect(() => {
     if (showRequestInput) {
       const newPercentage = Math.round(
-        ((propertyPricingPerNightAfterTierDiscount! - requestAmount!) /
-          propertyPricingPerNightAfterTierDiscount!) *
+        ((nightlyPriceWithoutTax! - requestAmount!) / nightlyPriceWithoutTax!) *
           100,
       );
       setRequestPercentage(Math.max(minDiscount, Math.min(newPercentage)));
     }
-  }, [
-    showRequestInput,
-    requestAmount,
-    propertyPricingPerNightAfterTierDiscount,
-    maxDiscount,
-  ]);
+  }, [showRequestInput, requestAmount, nightlyPriceWithoutTax, maxDiscount]);
 
   const handleRequestChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -261,11 +274,11 @@ export default function RequestToBookOrBookNowPriceCard({
       priceRequired: false,
       priceAboveOriginal:
         typeof requestAmount === "number" &&
-        typeof propertyPricingPerNightAfterTierDiscount === "number" &&
-        requestAmount > propertyPricingPerNightAfterTierDiscount,
+        typeof nightlyPriceWithoutTax === "number" &&
+        requestAmount > nightlyPriceWithoutTax,
       percentageAboveMax:
         typeof requestAmount === "number" &&
-        typeof propertyPricingPerNightAfterTierDiscount === "number" &&
+        typeof nightlyPriceWithoutTax === "number" &&
         requestPercentage > MAX_REQUEST_TO_BOOK_PERCENTAGE,
     });
     setRawRequestAmount(formatCurrency(requestAmount)); // Format the value on blur
@@ -273,7 +286,7 @@ export default function RequestToBookOrBookNowPriceCard({
 
   const handleSliderChange = (value: number[]) => {
     const newRequestAmount = Math.round(
-      propertyPricingPerNightAfterTierDiscount! * (1 - value[0]! / 100),
+      nightlyPriceWithoutTax! * (1 - value[0]! / 100),
     );
     setRequestAmount(newRequestAmount);
     setRawRequestAmount(formatCurrency(newRequestAmount));
@@ -316,9 +329,7 @@ export default function RequestToBookOrBookNowPriceCard({
     setRawRequestAmount(formatCurrency(price)); // Update raw input state
 
     const newPercentage = Math.round(
-      ((propertyPricingPerNightAfterTierDiscount! - price) /
-        propertyPricingPerNightAfterTierDiscount!) *
-        100,
+      ((nightlyPriceWithoutTax! - price) / nightlyPriceWithoutTax!) * 100,
     );
     setRequestPercentage(
       Math.max(minDiscount, Math.min(newPercentage, maxDiscount)),
@@ -445,7 +456,7 @@ export default function RequestToBookOrBookNowPriceCard({
                   key={index}
                   onClick={() =>
                     handlePresetSelect(
-                      propertyPricingPerNightAfterTierDiscount! *
+                      nightlyPriceWithoutTax! *
                         ((100 - option.percentOff) / 100),
                     )
                   }
@@ -459,7 +470,7 @@ export default function RequestToBookOrBookNowPriceCard({
                 >
                   <div className="lg:text-md text-sm font-bold">
                     {formatCurrency(
-                      propertyPricingPerNightAfterTierDiscount! *
+                      nightlyPriceWithoutTax! *
                         ((100 - option.percentOff) / 100),
                     )}
                   </div>
@@ -490,6 +501,7 @@ export default function RequestToBookOrBookNowPriceCard({
                         onBlur={handleRequestBlur}
                         className="pl-7"
                         onKeyDown={handleKeyDown}
+                        disabled
                       />
                       <p className="text-xs italic leading-tight text-muted-foreground">
                         per night
@@ -582,7 +594,7 @@ export default function RequestToBookOrBookNowPriceCard({
                 <div className="flex items-center justify-between gap-4">
                   {/* if property is book it now enabled and if they selected original price */}
                   {property.bookItNowEnabled &&
-                  propertyPricingPerNightAfterTierDiscount === requestAmount ? (
+                  nightlyPriceWithoutTax === requestAmount ? (
                     <BookNowBtn
                       property={property}
                       requestToBook={requestToBook}
@@ -596,8 +608,8 @@ export default function RequestToBookOrBookNowPriceCard({
                       invalidInput={
                         !rawRequestAmount ||
                         !requestAmount ||
-                        !propertyPricingPerNightAfterTierDiscount ||
-                        requestAmount > propertyPricingPerNightAfterTierDiscount
+                        !nightlyPriceWithoutTax ||
+                        requestAmount > nightlyPriceWithoutTax
                       }
                     />
                   )}
@@ -619,21 +631,19 @@ export default function RequestToBookOrBookNowPriceCard({
             <Skeleton className="h-4 w-1/3" />
             <Skeleton className="h-10 w-full" />
           </div>
-        ) : isNumber(propertyPricingPerNightAfterTierDiscount) ? (
+        ) : isNumber(nightlyPriceWithoutTax) ? (
           <>
             <div>
               <div className="mb-1 text-2xl font-bold">Book it now for</div>
               <div className="flex items-baseline gap-2">
                 <div className="text-4xl font-bold text-primary lg:text-5xl">
-                  {propertyPricingPerNightAfterTierDiscount &&
+                  {nightlyPriceWithoutTax &&
                   propertyPricing.originalPrice &&
-                  propertyPricingPerNightAfterTierDiscount <
+                  nightlyPriceWithoutTax <
                     propertyPricing.originalPrice / numOfNights ? (
                     <div className="flex flex-row items-start gap-x-2 text-base">
                       <p className="text-3xl">
-                        {formatCurrency(
-                          propertyPricingPerNightAfterTierDiscount,
-                        )}
+                        {formatCurrency(nightlyPriceWithoutTax)}
                       </p>
                       <p className="text-muted-foreground line-through">
                         {formatCurrency(
@@ -642,9 +652,7 @@ export default function RequestToBookOrBookNowPriceCard({
                       </p>
                     </div>
                   ) : (
-                    <span>
-                      {formatCurrency(propertyPricingPerNightAfterTierDiscount)}
-                    </span>
+                    <span>{formatCurrency(nightlyPriceWithoutTax)}</span>
                   )}
                 </div>
                 <span className="text-xl text-muted-foreground">Per Night</span>
@@ -737,7 +745,7 @@ export default function RequestToBookOrBookNowPriceCard({
               <div className="mb-1 text-2xl font-bold">Request to book for</div>
               <div className="flex items-baseline gap-2">
                 <div className="text-4xl font-bold text-primary lg:text-5xl">
-                  {formatCurrency(propertyPricingPerNightAfterTierDiscount!)}
+                  {formatCurrency(nightlyPriceWithoutTax!)}
                 </div>
                 <span className="text-xl text-muted-foreground">Per Night</span>
               </div>

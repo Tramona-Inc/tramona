@@ -86,6 +86,7 @@ export const useGetOriginalPropertyPricing = ({
     ? Math.floor(originalPricePerNight * numNights * TRAVELER_MARKUP)
     : originalPricePerNight;
 
+  console.log(originalPrice);
   // <--------------------------------- DISCOUNTS HERE --------------------------------->
 
   // 1.) apply traveler requested bid amount if request to book
@@ -97,13 +98,16 @@ export const useGetOriginalPropertyPricing = ({
     ? getApplicableBookItNowDiscount()
     : undefined;
 
+  console.log(hostDiscount);
+
   const originalPriceAfterTierDiscount = originalPrice
     ? originalPrice * (1 - (hostDiscount ?? 0) / 100)
     : undefined;
 
+  console.log(originalPriceAfterTierDiscount);
   // Return everything as undefined or valid values, but ensure hooks are always run
   return {
-    originalPrice, //we really only care about this
+    originalPrice, //we really only care about this with total nights
     originalPriceAfterTierDiscount,
     isLoading,
     error,

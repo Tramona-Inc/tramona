@@ -27,7 +27,10 @@ function PriceBreakdown(
   let brokedownPrice;
   let numOfNights;
   if (props.offer) {
-    brokedownPrice = breakdownPaymentByOffer(props.offer);
+    brokedownPrice = breakdownPaymentByOffer(
+      props.offer,
+      props.offer.request!.numGuests,
+    );
     numOfNights = getNumNights(props.offer.checkIn, props.offer.checkOut);
   } else {
     brokedownPrice = breakdownPaymentByPropertyAndTripParams({
@@ -36,7 +39,8 @@ function PriceBreakdown(
         checkOut: props.requestToBookDetails.checkOut,
       },
       property: props.property,
-      travelerPriceBeforeFees: props.requestAmount,
+      travelerPriceBeforeFees: props.requestAmount, //NOT PER NIGHT
+      numOfGuests: props.requestToBookDetails.numGuests,
     });
     numOfNights = getNumNights(
       props.requestToBookDetails.checkIn,

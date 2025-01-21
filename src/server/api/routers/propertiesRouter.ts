@@ -1199,6 +1199,21 @@ export const propertiesRouter = createTRPCRouter({
       return null;
     }),
 
+  getPropertiesAdditionalFees: publicProcedure
+    .input(z.number())
+    .query(async ({ input }) => {
+      const additionalFees = await db.query.properties.findFirst({
+        where: eq(properties.id, input),
+        columns: {
+          cleaningFeePerStay: true,
+          petFeePerStay: true,
+          extraGuestFeePerNight: true,
+          maxGuestsWithoutFee: true,
+        },
+      });
+      return additionalFees;
+    }),
+
   updatePropertySecurityDepositAmount: coHostProcedure(
     "update_security_deposit",
     z.object({
@@ -1225,7 +1240,7 @@ export const propertiesRouter = createTRPCRouter({
       amount: z.number(),
       maxGuestsWithoutFee: z.number().optional(),
     }),
-  ).mutation(async ({ ctx, input }) => {
+  ).mutation(async ({ input }) => {
     console.log(input);
     const field = input.field;
     await db

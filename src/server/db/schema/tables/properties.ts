@@ -386,7 +386,7 @@ export const properties = pgTable(
       "request_to_book_max_discount_percentage",
     )
       .notNull()
-      .default(5),
+      .default(20),
     cleaningFeePerStay: integer("cleaning_fee_per_stay").default(0).notNull(),
     petFeePerStay: integer("pet_fee_per_stay").default(0).notNull(),
     extraGuestFeePerNight: integer("extra_guest_fee_per_night")
