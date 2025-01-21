@@ -18,7 +18,7 @@ export interface UnifiedCheckoutData {
     checkIn: Date;
     checkOut: Date;
   };
-  guests: number | null;
+  guests: number;
   scrapeUrl: string | null;
   property: PropertyPageData;
   pricing: RequestToBookPricing;
@@ -34,6 +34,7 @@ export type PropertyAndTripParams = {
   };
   travelerPriceBeforeFees: number;
   property: PropertyPageData | RequestToBookProperty;
+  numOfGuests: number;
 };
 
 //output
@@ -44,4 +45,8 @@ export type PriceBreakdownOutput = {
   superhogFee: number;
   stripeTransactionFee: number;
   totalSavings: number;
+  cleaningFeePerStay: number | null | undefined; //undefined for OFFERS  NULL OR NUMBER FOR requestToBook/bookItNow
+  petFeePerStay: number | null | undefined;
+  totalExtraGuestFee: number | null | undefined;
+  totalAdditionalFees: number | undefined;
 };

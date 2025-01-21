@@ -35,6 +35,7 @@ const CustomStripeCheckoutContainer = ({
         travelerPriceBeforeFees:
           unifiedCheckoutData.pricing.travelerOfferedPriceBeforeFees,
         property: unifiedCheckoutData.property,
+        numOfGuests: unifiedCheckoutData.guests,
       });
 
       return await authorizePayment.mutateAsync({

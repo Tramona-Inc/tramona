@@ -199,6 +199,7 @@ export default async function webhook(
                 paymentIntentSucceeded.metadata.property_id!,
               ),
               userId: paymentIntentSucceeded.metadata.user_id!,
+              totalAmountAuthorized: paymentIntentSucceeded.amount,
               isDirectListingCharge,
             });
           } else if (paymentIntentSucceeded.metadata.type === "offer") {
@@ -234,6 +235,10 @@ export default async function webhook(
                         stateCode: true,
                         country: true,
                         currentSecurityDeposit: true,
+                        maxGuestsWithoutFee: true,
+                        extraGuestFeePerNight: true,
+                        cleaningFeePerStay: true,
+                        petFeePerStay: true,
                       },
                     },
                   },
@@ -241,7 +246,10 @@ export default async function webhook(
                 })
                 .then((res) => res!);
 
-              const priceBreakdown = breakdownPaymentByOffer(offer);
+              const priceBreakdown = breakdownPaymentByOffer(
+                offer,
+                offer.request!.numGuests,
+              );
 
               const tripCheckout = await db
                 .insert(tripCheckouts)
@@ -253,6 +261,10 @@ export default async function webhook(
                   taxesPaid: priceBreakdown.taxesPaid,
                   superhogFee: priceBreakdown.superhogFee,
                   stripeTransactionFee: priceBreakdown.stripeTransactionFee,
+                  cleaningFeePaid: priceBreakdown.cleaningFeePerStay ?? 0,
+                  petFeePaid: priceBreakdown.petFeePerStay ?? 0,
+                  extraGuestFeeTotalPaid:
+                    priceBreakdown.totalExtraGuestFee ?? 0,
                   totalSavings: priceBreakdown.totalSavings,
                   securityDeposit: offer.property.currentSecurityDeposit,
                 })

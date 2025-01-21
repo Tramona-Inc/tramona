@@ -84,7 +84,7 @@ export default function CalendarComponent() {
       hostPropertiesRef.current?.[0] ??
       null
     );
-  }, [propertyId]);
+  }, [propertyId, refetch]);
 
   // Set initial selected property when data loads
   useEffect(() => {
@@ -103,9 +103,12 @@ export default function CalendarComponent() {
       enabled: Boolean(queryInput),
     });
 
-  const [isBookItNowChecked, setIsBookItNowChecked] = useState<boolean>(
-    () => selectedProperty?.bookItNowEnabled ?? false,
-  );
+  const [isBookItNowChecked, setIsBookItNowChecked] = useState<boolean>(false);
+
+  // Update isBookItNowChecked when selectedProperty changes
+  useEffect(() => {
+    setIsBookItNowChecked(!!selectedProperty?.bookItNowEnabled);
+  }, [selectedProperty]);
 
   const prices = useMemo(() => {
     const priceMap: Record<string, number | undefined> = {};

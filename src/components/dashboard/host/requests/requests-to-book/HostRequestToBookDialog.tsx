@@ -20,6 +20,10 @@ import { api } from "@/utils/api";
 import Spinner from "@/components/_common/Spinner";
 import { toast } from "@/components/ui/use-toast";
 import { errorToast } from "@/utils/toasts";
+import { getAdditionalFees } from "@/utils/payment-utils/paymentBreakdown";
+import { useMemo } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Card } from "@/components/ui/card";
 
 export default function HostRequestToBookDialog({
   open,
@@ -47,6 +51,32 @@ export default function HostRequestToBookDialog({
     });
 
   const hasCancellationPolicy = Boolean(property?.cancellationPolicy);
+  const numNights = getNumNights(requestToBook.checkIn, requestToBook.checkOut);
+
+  const additionalFees = useMemo(() => {
+    return property
+      ? getAdditionalFees({
+          property,
+          numOfGuests: requestToBook.numGuests,
+          numNights: numNights,
+        })
+      : null;
+  }, [property, requestToBook.numGuests, numNights]);
+
+  console.log(requestToBook.baseAmountBeforeFees);
+
+  const totalPriceForTripHost = useMemo(() => {
+    return (
+      requestToBook.baseAmountBeforeFees + (additionalFees?.totalFees ?? 0)
+    );
+  }, [requestToBook.baseAmountBeforeFees, additionalFees]);
+
+  const hostPayout = useMemo(() => {
+    return (
+      getHostPayout(requestToBook.baseAmountBeforeFees) +
+      (additionalFees?.totalFees ?? 0)
+    );
+  }, [requestToBook.baseAmountBeforeFees, additionalFees]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -59,23 +89,22 @@ export default function HostRequestToBookDialog({
             <DialogDescription>
               Please review the request details for your property.
             </DialogDescription>
-            <div className="space-y-2">
-              <div className="rounded-md border p-4">
+            <div className="relative space-y-2">
+              <div className="relative rounded-md border p-4">
                 <div className="mb-4 flex justify-between">
                   <div className="flex flex-col items-start">
                     <div className="text-dark text-lg font-bold">
                       {formatCurrency(
-                        requestToBook.baseAmountBeforeFees /
-                          getNumNights(
-                            requestToBook.checkIn,
-                            requestToBook.checkOut,
-                          ),
+                        Math.round(totalPriceForTripHost / numNights),
                       )}
                       /night
                     </div>
                     <div className="text-sm text-gray-600">
-                      {formatCurrency(requestToBook.baseAmountBeforeFees)} total
+                      {formatCurrency(totalPriceForTripHost)} total
                     </div>
+                    <p className="mt-1 text-xs text-muted-foreground underline">
+                      All additional fees applied
+                    </p>
                   </div>
                   <div className="flex flex-col items-center">
                     <div className="text-dark text-lg font-bold">
@@ -100,11 +129,6 @@ export default function HostRequestToBookDialog({
                     </div>
                   </div>
                 </div>
-                {/* {requestToBook.note && (
-              <div className="rounded-md bg-gray-100 p-2">
-                <div className="text-sm text-gray-700">{requestToBook.note}</div>
-              </div>
-            )} */}
               </div>
             </div>
             <div className="mt-4">
@@ -137,7 +161,6 @@ export default function HostRequestToBookDialog({
                       </div>
                     </div>
                   </div>
-
                   {!hasCancellationPolicy && (
                     <>
                       <AlertCircle
@@ -158,14 +181,17 @@ export default function HostRequestToBookDialog({
                     </>
                   )}
                   {hasCancellationPolicy && (
-                    <div className="text-sm text-gray-600">
-                      By accepting this price, you will be paid{" "}
-                      <span className="font-semibold text-black">
-                        {formatCurrency(
-                          getHostPayout(requestToBook.baseAmountBeforeFees),
-                        )}{" "}
-                      </span>
-                      all-in
+                    <div className="flex flex-col">
+                      <div className="text-sm text-black">
+                        By accepting this price, you will be paid{" "}
+                        <span className="font-bold text-black">
+                          {formatCurrency(hostPayout)}{" "}
+                        </span>
+                        all-in
+                      </div>
+                      <p className="mx-1 text-xs tracking-tight text-muted-foreground">
+                        Includes a 2.5% Tramona service fee
+                      </p>
                     </div>
                   )}
                 </div>
@@ -207,9 +233,63 @@ export default function HostRequestToBookDialog({
             </DialogFooter>
           </>
         ) : (
-          <Spinner />
+          <PropertyReviewSkeleton />
         )}
       </DialogContent>
     </Dialog>
+  );
+}
+
+function PropertyReviewSkeleton() {
+  return (
+    <div className="mx-auto max-w-2xl space-y-6 p-4">
+      {/* Header */}
+      <Skeleton className="mb-8 h-8 w-3/4" />
+
+      {/* Price and Stay Details Card */}
+      <Card className="space-y-3 p-6">
+        <div className="flex items-start justify-between">
+          <div className="space-y-2">
+            <Skeleton className="h-6 w-40" />
+            <Skeleton className="h-4 w-32" />
+          </div>
+          <div className="space-y-2 text-center">
+            <Skeleton className="h-8 w-32" />
+            <Skeleton className="h-4 w-24" />
+          </div>
+          <div className="space-y-2 text-right">
+            <Skeleton className="h-8 w-28" />
+          </div>
+        </div>
+        <Skeleton className="h-5 w-44" />
+      </Card>
+
+      {/* Property Details */}
+      <div className="space-y-3">
+        <Skeleton className="h-4 w-48" />
+
+        <Card className="p-4">
+          <div className="flex gap-4">
+            <Skeleton className="h-20 w-20 shrink-0 rounded-lg" />
+            <div className="flex-1 space-y-4">
+              <div className="space-y-2">
+                <Skeleton className="h-7 w-56" />
+                <Skeleton className="h-5 w-32" />
+              </div>
+              <div className="space-y-2 pt-4">
+                <Skeleton className="h-6 w-64" />
+                <Skeleton className="h-5 w-48" />
+              </div>
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="flex justify-end gap-4 pt-2">
+        <Skeleton className="h-8 w-24" />
+        <Skeleton className="h-8 w-24" />
+      </div>
+    </div>
   );
 }

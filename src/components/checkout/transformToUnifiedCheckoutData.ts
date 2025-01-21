@@ -10,7 +10,7 @@ export function offerToUnifiedCheckout({
 }: {
   offer: OfferWithDetails;
 }): UnifiedCheckoutData {
-  const { totalSavings } = breakdownPaymentByOffer(offer);
+  const { totalSavings } = breakdownPaymentByOffer(offer, offer.request!.numGuests);
 
   //first create the requestToBookPricing
   const pricing = {

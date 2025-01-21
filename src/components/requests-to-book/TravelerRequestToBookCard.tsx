@@ -25,7 +25,6 @@ import { Button } from "../ui/button";
 import { useState } from "react";
 import WithdrawRequestToBookDialog from "./WithdrawRequestToBookDialog";
 
-
 import { RequestToBookCardPreviews } from "./RequestToBookCardPreviews";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { breakdownPaymentByPropertyAndTripParams } from "@/utils/payment-utils/paymentBreakdown";
@@ -79,6 +78,7 @@ export default function TravelerRequestToBookCard({
     travelerPriceBeforeFees:
       requestToBook.amountAfterTravelerMarkupAndBeforeFees,
     property: requestToBook.property,
+    numOfGuests: requestToBook.numGuests,
   });
 
   const serviceFee =

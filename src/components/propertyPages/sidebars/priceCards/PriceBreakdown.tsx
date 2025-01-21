@@ -27,7 +27,10 @@ function PriceBreakdown(
   let brokedownPrice;
   let numOfNights;
   if (props.offer) {
-    brokedownPrice = breakdownPaymentByOffer(props.offer);
+    brokedownPrice = breakdownPaymentByOffer(
+      props.offer,
+      props.offer.request!.numGuests,
+    );
     numOfNights = getNumNights(props.offer.checkIn, props.offer.checkOut);
   } else {
     brokedownPrice = breakdownPaymentByPropertyAndTripParams({
@@ -36,7 +39,8 @@ function PriceBreakdown(
         checkOut: props.requestToBookDetails.checkOut,
       },
       property: props.property,
-      travelerPriceBeforeFees: props.requestAmount,
+      travelerPriceBeforeFees: props.requestAmount, //NOT PER NIGHT
+      numOfGuests: props.requestToBookDetails.numGuests,
     });
     numOfNights = getNumNights(
       props.requestToBookDetails.checkIn,
@@ -44,35 +48,21 @@ function PriceBreakdown(
     );
   }
 
-  const serviceFee =
-    brokedownPrice.superhogFee + brokedownPrice.stripeTransactionFee;
-
+  console.log("totaltripamount", brokedownPrice.totalTripAmount);
+  console.log("taxes paid", brokedownPrice.taxesPaid);
   return (
-    <div className="my-2 flex w-full flex-col gap-y-1 text-sm text-muted-foreground">
-      <div className="flex items-center justify-between font-semibold">
-        <span>
-          Trip Subtotal{" "}
-          <span className="text-xs font-light">{numOfNights}x nights</span>
+    <div className="my-4 flex w-full flex-col gap-y-1 text-sm">
+      <div className="flex items-center justify-between">
+        <span className="underline underline-offset-2">
+          {numOfNights} night{numOfNights > 1 ? "s" : ""}
         </span>
         <span className="font-semibold">
           {formatCurrency(
-            brokedownPrice.totalTripAmount -
-              (brokedownPrice.taxesPaid + serviceFee),
+            brokedownPrice.totalTripAmount - brokedownPrice.taxesPaid,
           )}
         </span>
       </div>
-      <div className="flex items-center justify-between font-semibold">
-        <span>Cleaning Fee</span>
-        <span className="font-semibold">Included</span>
-      </div>
-      <div className="flex items-center justify-between">
-        <span>Taxes</span>
-        <span>{formatCurrency(brokedownPrice.taxesPaid)}</span>
-      </div>
-      <div className="flex items-center justify-between">
-        <span>Service Fee</span>
-        <span>{formatCurrency(serviceFee)}</span>
-      </div>
+
       {brokedownPrice.totalSavings > 0 && (
         <div className="flex items-center justify-between text-green-600">
           <span>Savings</span>
@@ -80,9 +70,13 @@ function PriceBreakdown(
         </div>
       )}
       <div className="my-2 border-t pt-2">
-        <div className="flex items-center justify-between text-lg font-semibold text-black">
-          <span>Total</span>
-          <span>{formatCurrency(brokedownPrice.totalTripAmount)}</span>
+        <div className="flex items-center justify-between text-lg font-bold tracking-tight text-black">
+          <span>Total before taxes</span>
+          <span>
+            {formatCurrency(
+              brokedownPrice.totalTripAmount - brokedownPrice.taxesPaid,
+            )}
+          </span>
         </div>
       </div>
     </div>

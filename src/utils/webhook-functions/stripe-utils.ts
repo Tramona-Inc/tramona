@@ -204,6 +204,7 @@ export async function finalizeTrip({
     },
     travelerPriceBeforeFees: travelerPriceBeforeFees,
     property: property,
+    numOfGuests: numOfGuests,
   };
 
   const priceBreakdown = breakdownPaymentByPropertyAndTripParams(params);
@@ -218,6 +219,9 @@ export async function finalizeTrip({
       taxesPaid: priceBreakdown.taxesPaid,
       superhogFee: priceBreakdown.superhogFee,
       stripeTransactionFee: priceBreakdown.stripeTransactionFee,
+      cleaningFeePaid: priceBreakdown.cleaningFeePerStay ?? 0,
+      petFeePaid: priceBreakdown.petFeePerStay ?? 0,
+      extraGuestFeeTotalPaid: priceBreakdown.totalExtraGuestFee ?? 0,
       totalSavings: priceBreakdown.totalSavings,
       securityDeposit: property.currentSecurityDeposit,
     })
@@ -334,6 +338,7 @@ export async function createRequestToBook({
   propertyId,
   userId,
   isDirectListingCharge,
+  totalAmountAuthorized,
 }: {
   paymentIntentId: string;
   travelerPriceBeforeFees: number;
@@ -343,6 +348,7 @@ export async function createRequestToBook({
   propertyId: number;
   userId: string;
   isDirectListingCharge: boolean;
+  totalAmountAuthorized: number;
 }) {
   const user = await db.query.users
     .findFirst({
@@ -380,6 +386,7 @@ export async function createRequestToBook({
     numGuests: numOfGuests,
     baseAmountBeforeFees: removeTravelerMarkup(travelerPriceBeforeFees),
     amountAfterTravelerMarkupAndBeforeFees: Math.floor(travelerPriceBeforeFees),
+    totalAmountAuthorized: totalAmountAuthorized,
     isDirectListing: isDirectListingCharge,
   });
 
