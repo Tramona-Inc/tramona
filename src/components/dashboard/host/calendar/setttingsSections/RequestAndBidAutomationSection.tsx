@@ -16,6 +16,7 @@ interface DiscountTier {
 }
 
 function RequestAndBidAutomationSection({ property }: { property: Property }) {
+  console.log("property", property);
   const { mutateAsync: toggleAutoOffer } =
     api.properties.toggleAutoOffer.useMutation();
 
@@ -24,6 +25,8 @@ function RequestAndBidAutomationSection({ property }: { property: Property }) {
 
   const [nameYourPriceOpen, setNameYourPriceOpen] = useState(false);
   const [nameYourPriceSaved, setNameYourPriceSaved] = useState(false);
+
+  console.log("nameyourownprice", nameYourPriceOpen);
 
   // Name your price & Auto offers section
   const [isAutoOfferChecked, setIsAutoOfferChecked] = useState<
@@ -83,7 +86,7 @@ function RequestAndBidAutomationSection({ property }: { property: Property }) {
   return (
     <div className="relative rounded-lg border">
       {/* Overlay */}
-      {nameYourPriceOpen && (
+      {/* {nameYourPriceOpen && (
         <div
           className="absolute inset-0 z-10 bg-white bg-opacity-50 backdrop-blur-sm flex flex-col items-center justify-center"
           style={{ pointerEvents: "auto" }}
@@ -93,13 +96,15 @@ function RequestAndBidAutomationSection({ property }: { property: Property }) {
             Coming Soon
           </p>
         </div>
-      )}
+      )} */}
 
       <div
         className="relative z-20 flex cursor-pointer items-center justify-between px-6 py-8"
         onClick={() => setNameYourPriceOpen(!nameYourPriceOpen)}
       >
-        <h3 className="text-xl font-bold text-black">Requests and Bids Automation</h3>
+        <h3 className="text-xl font-bold text-black">
+          Requests and Bids Automation
+        </h3>
         <Button variant="ghost" size="sm">
           <ChevronDown
             className="h-4 w-4 transition-transform duration-300"
@@ -118,8 +123,9 @@ function RequestAndBidAutomationSection({ property }: { property: Property }) {
         }`}
       >
         <p className="text-base font-semibold">
-          Every day we get thousands of requests from travelers. Here&apos;s how you
-          can automate your response to make sure you maximize your bookings.
+          Every day we get thousands of requests from travelers. Here&apos;s how
+          you can automate your response to make sure you maximize your
+          bookings.
         </p>
 
         <div className="-mx-6 mt-4 w-[calc(100%+3rem)] border-b border-gray-200" />
@@ -130,7 +136,7 @@ function RequestAndBidAutomationSection({ property }: { property: Property }) {
               checked={isAutoOfferChecked}
               onCheckedChange={(checked) => handleAutoOfferSwitch(checked)}
               className="data-[state=checked]:bg-primaryGreen"
-              disabled={nameYourPriceOpen}
+              disabled={!nameYourPriceOpen}
             />
           </div>
 
@@ -141,7 +147,7 @@ function RequestAndBidAutomationSection({ property }: { property: Property }) {
                 variant="ghost"
                 size="sm"
                 onClick={() => setDiscountTiers([])}
-                disabled={nameYourPriceOpen}
+                disabled={!nameYourPriceOpen}
               >
                 Reset
               </Button>
@@ -151,7 +157,8 @@ function RequestAndBidAutomationSection({ property }: { property: Property }) {
               <TableBody>
                 {!discountTiers || discountTiers.length === 0 ? (
                   <div>
-                    Click &quot;Add tier&quot; to add discounts to your auto matches
+                    Click &quot;Add tier&quot; to add discounts to your auto
+                    matches
                   </div>
                 ) : (
                   discountTiers?.map((tier, index) => (
@@ -168,7 +175,9 @@ function RequestAndBidAutomationSection({ property }: { property: Property }) {
                           className="w-16 sm:w-20"
                         />
                       </TableCell>
-                      <TableCell className="p-2">days before check-in:</TableCell>
+                      <TableCell className="p-2">
+                        days before check-in:
+                      </TableCell>
                       <TableCell className="p-2">
                         <Input
                           type="number"
@@ -176,7 +185,7 @@ function RequestAndBidAutomationSection({ property }: { property: Property }) {
                           onChange={(e) => {
                             const newTiers = [...discountTiers];
                             newTiers[index]!.percentOff = parseInt(
-                              e.target.value
+                              e.target.value,
                             );
                             setDiscountTiers(newTiers);
                           }}
@@ -189,7 +198,7 @@ function RequestAndBidAutomationSection({ property }: { property: Property }) {
                           variant="ghost"
                           size="sm"
                           onClick={() => removeTier(index)}
-                          disabled={nameYourPriceOpen}
+                          disabled={!nameYourPriceOpen}
                         >
                           <X className="h-4 w-4" />
                         </Button>
@@ -205,7 +214,7 @@ function RequestAndBidAutomationSection({ property }: { property: Property }) {
                 variant="outline"
                 onClick={addTier}
                 className="w-auto"
-                disabled={nameYourPriceOpen}
+                disabled={!nameYourPriceOpen}
               >
                 Add tier
               </Button>
@@ -216,13 +225,13 @@ function RequestAndBidAutomationSection({ property }: { property: Property }) {
             <Button
               variant="outline"
               onClick={handleCancel}
-              disabled={nameYourPriceOpen}
+              disabled={!nameYourPriceOpen}
             >
               Cancel
             </Button>
             <Button
               onClick={handleNameYourPriceSave}
-              disabled={nameYourPriceOpen}
+              disabled={!nameYourPriceOpen}
             >
               {nameYourPriceSaved ? "Saved!" : "Save"}
             </Button>
