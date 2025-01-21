@@ -199,7 +199,8 @@ export function getAdditionalFees({
   const maxGuestsWithoutFee = property.maxGuestsWithoutFee ?? null;
   const extraGuestFeePerNight = property.extraGuestFeePerNight;
   const cleaningFeePerStay = property.cleaningFeePerStay;
-  const petFeePerStay = property.petFeePerStay;
+  //const petFeePerStay = property.petFeePerStay;
+  const petFeePerStay = 0;
 
   let totalExtraGuestFee: number | null = null;
 
@@ -211,7 +212,7 @@ export function getAdditionalFees({
   const totalFees =
     (totalExtraGuestFee ? totalExtraGuestFee : 0) +
     (cleaningFeePerStay ? cleaningFeePerStay : 0) +
-    (petFeePerStay ? petFeePerStay : 0);
+    (petFeePerStay ? petFeePerStay : 0); //dont delete this error becuase we dont have pet fees yet
 
   return {
     cleaningFeePerStay,
@@ -220,3 +221,5 @@ export function getAdditionalFees({
     totalFees,
   };
 }
+
+//HOST REVERSALS FUNCTIONS

@@ -642,7 +642,7 @@ export default function RequestToBookOrBookNowPriceCard({
                       <p className="text-3xl">
                         {formatCurrency(nightlyPriceWithoutTax)}
                       </p>
-                      <p className="text-muted-foreground line-through">
+                      <p className="text-destructive line-through">
                         {formatCurrency(
                           propertyPricing.originalTravelerPrice / numOfNights,
                         )}

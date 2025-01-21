@@ -1,4 +1,4 @@
-import { Offer, REFERRAL_CODE_LENGTH } from "@/server/db/schema";
+import { Offer, Property, REFERRAL_CODE_LENGTH } from "@/server/db/schema";
 import { RequestsPageOfferData, SeparatedData } from "@/server/server-utils";
 import { useWindowSize } from "@uidotdev/usehooks";
 import { clsx, type ClassValue } from "clsx";
