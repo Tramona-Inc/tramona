@@ -15,12 +15,15 @@ import {
   offers,
   rejectedRequests,
   properties,
+  Property,
+  User,
 } from "@/server/db/schema";
 import {
   sendText,
   sendWhatsApp,
   getPropertiesForRequest,
   createLatLngGISPoint,
+  getRequestsForProperties,
 } from "@/server/server-utils";
 import { sendSlackMessage } from "@/server/slack";
 import { isIncoming } from "@/utils/formatters";
@@ -47,6 +50,107 @@ import { TRAVELER_MARKUP } from "@/utils/constants";
 import { differenceInDays } from "date-fns";
 
 export const requestsRouter = createTRPCRouter({
+  getById: protectedProcedure.input(requestSelectSchema.pick({ id: true })).query(async ({ ctx, input }) => {
+    const request = await ctx.db.query.requests.findFirst({
+      where: eq(requests.id, input.id),
+      with: {
+        madeByGroup: { columns: { ownerId: true } },
+      },
+    });
+
+    if (!request) {
+      throw new Error("Request not found");
+    }
+
+    const propertiesForRequest = await getPropertiesForRequest(request, { tx: ctx.db });
+
+    const traveler = await ctx.db.query.users.findFirst({
+      where: eq(users.id, request.madeByGroup.ownerId),
+      columns: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        name: true,
+        image: true,
+        location: true,
+        about: true,
+        dateOfBirth: true,
+      },
+    });
+
+    return {
+      ...request,
+      traveler,
+      properties: propertiesForRequest,
+    };
+  }),
+
+  getByIdForHost: protectedProcedure
+    .input(z.object({ id: z.number(), hostTeamId: z.number() }))
+    .query(async ({ ctx, input }) => {
+      console.log("getById");
+      // Fetch properties with requests, filter for just the host team of the request
+      const allHostData = await ctx.db.query.requests.findFirst({
+        where: eq(requests.id, input.id),
+        with: {
+          madeByGroup: { columns: { ownerId: true } },
+        },
+      });
+
+      if (!allHostData) {
+        throw new Error("Request not found");
+      }
+
+      const hostTeamId = input.hostTeamId;
+
+
+      const hostData =
+        await ctx.db.query.properties.findMany({
+          where: and(
+            eq(properties.hostTeamId, hostTeamId),
+            eq(properties.status, "Listed"),
+          ),
+        });
+
+      console.log(hostData, "hostData");
+
+      const hostRequests = await getRequestsForProperties(hostData);
+
+      console.log(hostRequests, "hostRequests");
+
+      //Filter the results to match the specific request
+      let foundRequest: {
+        request: Request & {
+          traveler: Pick<
+            User,
+            | "firstName"
+            | "lastName"
+            | "name"
+            | "image"
+            | "location"
+            | "about"
+            | "dateOfBirth"
+            | "id"
+          >;
+        };
+        properties: (Property & { taxAvailable: boolean })[];
+      } | undefined;
+      for (const { property, request } of hostRequests) {
+        console.log(request.id, "request.id");
+        console.log(input.id, "input.id");
+        if (request.id === input.id) {
+          foundRequest = { request, properties: [{ ...property }] } // I am getting issues with types here, is there something I need to change?
+        }
+      }
+
+      if (!foundRequest) {
+        throw new Error("Request not found for this host team");
+      }
+
+
+      return foundRequest;
+    }),
+
   getMyRequests: protectedProcedure.query(async ({ ctx }) => {
     const myRequests = await ctx.db.query.requests
       .findMany({

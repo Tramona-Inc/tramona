@@ -16,6 +16,7 @@ import useSetInitialHostTeamId from "@/components/_common/CustomHooks/useSetInit
 import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 import ConversationsEmptySvg from "@/components/_common/EmptyStateSvg/ConversationsEmptySvg";
 import EmptyStateValue from "@/components/_common/EmptyStateSvg/EmptyStateValue";
+import SelectedConversationSidebar from "@/components/messages/SelectedConversationSidebar";
 
 function MessageDisplay() {
   const [selectedConversation, setSelectedConversation] =
@@ -95,6 +96,12 @@ function MessageDisplay() {
           <EmptyStateValue description="You have no conversations yet">
             <ConversationsEmptySvg />
           </EmptyStateValue>
+        )}
+        {selectedConversation &&
+        (selectedConversation.propertyId ?? selectedConversation.requestId) && (
+          <div className="w-1/4 border-l">
+            <SelectedConversationSidebar conversation={selectedConversation} isHost={true} />
+          </div>
         )}
       </div>
     </div>

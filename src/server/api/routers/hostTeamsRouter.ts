@@ -495,6 +495,14 @@ export const hostTeamsRouter = createTRPCRouter({
     return hostTeams;
   }),
 
+  getHostTeamMembers: protectedProcedure
+    .input(z.object({ hostTeamId: z.number() }))
+    .query(async ({ input, ctx }) => {
+      return await ctx.db.query.hostTeamMembers.findMany({
+        where: eq(hostTeamMembers.hostTeamId, input.hostTeamId),
+      });
+    }),
+
   createHostTeam: roleRestrictedProcedure(["host", "admin"])
     .input(z.object({ name: z.string() }))
     .mutation(async ({ ctx, input }) => {
