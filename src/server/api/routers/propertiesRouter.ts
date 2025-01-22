@@ -276,6 +276,7 @@ export const propertiesRouter = createTRPCRouter({
   getById: publicProcedure
     .input(propertySelectSchema.pick({ id: true }))
     .query(async ({ ctx, input }) => {
+      console.log("getByID")
       const property = await ctx.db.query.properties.findFirst({
         where: eq(properties.id, input.id),
         with: {

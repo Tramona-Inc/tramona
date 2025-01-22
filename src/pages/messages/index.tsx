@@ -81,11 +81,12 @@ function MessageDisplay() {
           setSelected={selectConversation}
         />
       </div>
-      {selectedConversation && (
-        <div className="w-1/4 border-l">
-          <SelectedConversationSidebar conversation={selectedConversation} />
-        </div>
-      )}
+      {selectedConversation &&
+        (selectedConversation.propertyId ?? selectedConversation.requestId) && (
+          <div className="w-1/4 border-l">
+            <SelectedConversationSidebar conversation={selectedConversation} isHost={false} />
+          </div>
+        )}
     </div>
   );
 }

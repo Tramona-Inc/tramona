@@ -262,10 +262,10 @@ export default function MastHead() {
           {activeTab === "search" ? <UnclaimedMap /> : <NameYourPriceSection />}
         </div>
 
-        <div className="mt-12 flex flex-col items-center gap-y-20 lg:gap-y-24">
+        <div className="mx-auto mt-12 flex max-w-7xl flex-col items-center gap-y-20 lg:gap-y-24">
           {/* other  sections */}
           <OverviewRequestCards />
-          <HowTramonaWorks className="max-w-6xl" />
+          <HowTramonaWorks className="max-w-7xl" />
           <div className="mx-0 flex max-w-full justify-center space-y-4 px-4 lg:mx-4 lg:flex lg:space-y-8">
             <TestimonialCarousel testimonials={landingPageTestimonals} />
           </div>

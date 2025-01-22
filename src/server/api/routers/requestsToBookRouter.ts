@@ -11,8 +11,9 @@ import {
 } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { properties } from "@/server/db/schema";
+import { zodInteger, zodString } from "@/utils/zod-utils";
 
 export const requestsToBookRouter = createTRPCRouter({
   create: protectedProcedure
@@ -189,6 +190,130 @@ export const requestsToBookRouter = createTRPCRouter({
           (requestToBook) => requestToBook.resolvedAt !== null,
         ),
       };
+    }),
+
+  getByPropertyId: protectedProcedure
+    .input(z.object({ propertyId: zodInteger(), conversationParticipants: z.array(zodString()) }))
+    .query(async ({ ctx, input }) => {
+      const requestsWithGroup = await ctx.db.query.requestsToBook.findMany({
+        with: {
+          madeByGroup: {
+            with: {
+              owner: {
+                columns: {
+                  id: true,
+                },
+              },
+            },
+          },
+          property: {
+            columns: {
+              name: true,
+              imageUrls: true,
+            },
+          },
+        },
+        where: eq(requestsToBook.propertyId, input.propertyId),
+      });
+
+      return requestsWithGroup.filter(
+        (request) =>
+          request.madeByGroup.owner.id === ctx.user.id,
+      );
+    }),
+
+  getByPropertyIdForHost: protectedProcedure
+    .input(
+      z.object({
+        propertyId: z.number(),
+        conversationParticipants: z.array(z.string()),
+        userId: z.string().optional(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const property = await ctx.db.query.properties.findFirst({
+        where: eq(properties.id, input.propertyId),
+        columns: { hostTeamId: true },
+      });
+
+      const userId = input.userId ?? ctx.user.id;
+      console.log(property, "property");
+
+
+      if (!property) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Property not found",
+        });
+      }
+
+      const allRequests = await ctx.db.query.requestsToBook.findMany({
+        where: and(
+          eq(requestsToBook.propertyId, input.propertyId),
+          inArray(
+            requestsToBook.userId,
+            input.conversationParticipants
+          ),
+        ),
+        with: {
+          property: {
+            columns: {
+              name: true,
+              imageUrls: true,
+              numBedrooms: true,
+              numBathrooms: true,
+              bookOnAirbnb: true,
+              hostName: true,
+              hostProfilePic: true,
+              city: true,
+            },
+          },
+          madeByGroup: {
+            columns: {
+              ownerId: true,
+            },
+            with: {
+              owner: {
+                columns: {
+                  firstName: true,
+                  lastName: true,
+                  name: true,
+                  image: true,
+                  location: true,
+                  about: true,
+                },
+              },
+            },
+          },
+        }
+      });
+
+      console.log(allRequests, "allRequests");
+
+
+      const transformedRequestsToBook = allRequests.map(
+        (request) => ({
+          ...request,
+          traveler: request.madeByGroup.owner,
+        }),
+      );
+
+      console.log(transformedRequestsToBook, "transformedRequestsToBook");
+
+      // Filter requests by conversation participants and get only one.
+      const requestToBook = transformedRequestsToBook.filter(
+        (request) =>
+          request.madeByGroup.ownerId === userId
+      );
+
+      if (!requestToBook || requestToBook.length === 0) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Request to book not found for this user in the current converation",
+        });
+      }
+
+      return requestToBook;
     }),
 
   getAllRequestToBookProperties: hostProcedure

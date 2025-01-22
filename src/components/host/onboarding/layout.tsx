@@ -28,7 +28,7 @@ export default function OnboardingLayout({
           {children}
         </div>
         <div className="hidden md:contents">
-          <MessagesPopover isMobile={false} isHostOnboarding={true} />
+          {/* <MessagesPopover isMobile={false} isHostOnboarding={true} /> */}
         </div>
       </div>
     </>

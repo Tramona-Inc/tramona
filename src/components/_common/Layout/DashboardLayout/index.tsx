@@ -58,7 +58,7 @@ export default function DashboardLayout({
           <main className="relative min-h-full">{children}</main>
           {status !== "loading" && <MobileNav type={navType} />}
           <div className="hidden md:contents">
-            <MessagesPopover isMobile={false} isHostOnboarding={false} />
+            {/* <MessagesPopover isMobile={false} isHostOnboarding={false} /> */}
           </div>
           {!noFooter && isMd && <Footer />}
         </div>

@@ -19,14 +19,13 @@ function Page() {
   const { data: session } = useSession();
 
   // Safely access and convert userId using optional chaining, nullish coalescing operator, and type assertion
-  const userId = router.isReady
-    ? ((router.query.id as string | undefined) ?? undefined)
-    : undefined;
+  const userId = (router.query.id as string | undefined) ?? undefined;
+  console.log(userId);
 
   const { data: userWProfile } = api.users.getUserWithProfile.useQuery(
     userId!,
     {
-      enabled: !!userId,
+      enabled: !!userId && !!router.isReady,
     },
   );
 
