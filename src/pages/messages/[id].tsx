@@ -59,19 +59,28 @@ function MessageDisplay() {
   };
 
   const conversations = useConversation((state) => state.conversationList);
+  const { setConversationList } = useConversation();
+
   const { currentHostTeamId } = useHostTeamStore();
   const {
     data: fetchedConversations,
     isLoading: isSidebarLoading,
     refetch,
   } = api.messages.getConversations.useQuery({
-    hostTeamId: currentHostTeamId, // **Keep hostTeamId for host conversations**
+    hostTeamId: null, // **Keep hostTeamId for host conversations**
   });
+
+  useEffect(() => {
+    console.log("hi");
+    if (fetchedConversations) {
+      setConversationList(fetchedConversations);
+    }
+  }, [fetchedConversations, setConversationList]);
 
   useEffect(() => {
     const conversationIdFromUrl = query.id as string | undefined; // Changed query.conversationId to query.id
 
-    if (conversationIdFromUrl && conversations) {
+    if (conversationIdFromUrl) {
       // Check if conversations is not null or undefined
       if (conversations.length > 0) {
         const conversationToSelect = conversations.find(

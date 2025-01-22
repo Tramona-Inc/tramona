@@ -43,9 +43,6 @@ function MessageDisplay() {
       if (conversation) {
         void push({
           pathname: `/host/messages/${conversation.id}`, // **Updated Path for Host Messages**
-          query: {
-            conversationData: JSON.stringify(conversation),
-          },
         });
       } else {
         void push("/host/messages"); // **Updated Path for Host Messages**
@@ -68,7 +65,13 @@ function MessageDisplay() {
   };
 
   const conversations = useConversation((state) => state.conversationList);
+
+  const setConversationList = useConversation(
+    (state) => state.setConversationList,
+  );
+
   const { currentHostTeamId } = useHostTeamStore(); // Get hostTeamId
+
   const {
     data: fetchedConversations,
     isLoading: isSidebarLoading,
@@ -78,21 +81,42 @@ function MessageDisplay() {
   });
 
   useEffect(() => {
-    if (query.conversationId && conversations.length > 0) {
-      const conversationIdToSelect = query.conversationId as string;
-      const conversationToSelect = conversations.find(
-        (conversation) => conversation.id === conversationIdToSelect,
-      );
-
-      if (
-        conversationToSelect &&
-        selectedConversation?.id !== conversationToSelect.id
-      ) {
-        setSelectedConversation(conversationToSelect);
-      }
-      console.log(conversationToSelect);
+    if (fetchedConversations) {
+      setConversationList(fetchedConversations);
     }
-  }, [conversations, query.conversationId, selectedConversation?.id]);
+  }, [fetchedConversations, setConversationList]);
+
+  useEffect(() => {
+    const conversationIdFromUrl = query.id as string | undefined; // Changed to query.id
+
+    if (conversationIdFromUrl) {
+      if (conversations.length > 0) {
+        const conversationToSelect = conversations.find(
+          (conversation) => conversation.id === conversationIdFromUrl,
+        );
+        if (conversationToSelect) {
+          setSelectedConversation(conversationToSelect);
+        } else {
+          // If conversation ID in URL is not found in fetched conversations
+          if (selectedConversation?.id === conversationIdFromUrl) {
+            setSelectedConversation(null); // Clear selected conversation if not found
+          }
+          void push("/host/messages"); // Go to messages without conversation ID if not found
+        }
+      } else {
+        // If conversations are still loading or empty but there is a conversationId in url,
+        // set selectedConversation to null initially, it will be updated when conversations are fetched.
+        if (selectedConversation?.id === conversationIdFromUrl) {
+          setSelectedConversation(null); // Clear selected conversation if conversations are empty initially
+        }
+      }
+    } else if (!conversationIdFromUrl) {
+      // If no conversationId in URL, and there was a selectedConversation, clear it.
+      if (selectedConversation) {
+        setSelectedConversation(null);
+      }
+    }
+  }, [conversations, query.id, push, selectedConversation]); // Changed to query.id and added push to dependencies
 
   return (
     <div className="flex h-[calc(100vh-12rem)] divide-x border-b lg:h-[calc(100vh-8rem)]">
