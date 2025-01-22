@@ -1,47 +1,43 @@
 // components/messages/ChatMessages.tsx
-import { useMessage } from "@/utils/store/messages";
-import { useEffect } from "react";
+import React, { useEffect } from "react"; // Make sure React and useEffect are imported
 import ListMessages from "./ListMessages";
+import { useMessage } from "@/utils/store/messages";
+import { useConversation } from "@/utils/store/conversations";
 
 export const LIMIT_MESSAGE = 20;
 
-export default function ChatMessages({
+interface ChatMessagesProps {
+  // Define an interface for props
+  conversationId: string | undefined; // Allow undefined conversationId
+  onMessagesLoadEnd: () => void; // **CRITICAL: Define onMessagesLoadEnd in props**
+}
+
+const ChatMessages: React.FC<ChatMessagesProps> = ({
+  // Use React.FC and the interface
   conversationId,
-  onMessagesLoadStart, // Add callbacks as props
-  onMessagesLoadEnd,
-}: {
-  conversationId: string;
-  onMessagesLoadStart: () => void;
-  onMessagesLoadEnd: () => void;
-}) {
+  onMessagesLoadEnd, // **Destructure onMessagesLoadEnd from props**
+}) => {
   const { switchConversation, fetchInitialMessages } = useMessage();
+  const conversations = useConversation((state) => state.conversationList);
 
   useEffect(() => {
-    console.log(
-      "ChatMessages: Fetching messages for conversation:",
-      conversationId,
-    );
-
-    onMessagesLoadStart(); // Indicate loading started
+    if (!conversationId) return; // Add a check for undefined conversationId
 
     switchConversation(conversationId);
-
-    const loadMessages = async () => {
-      await fetchInitialMessages(conversationId);
-      onMessagesLoadEnd(); // Indicate loading ended
-    };
-
-    void loadMessages();
-
-    return () => {
-      onMessagesLoadEnd(); // Ensure loading state is cleared on unmount/re-render
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [conversationId]);
+    void fetchInitialMessages(conversationId);
+  }, [
+    conversationId,
+    conversations,
+    onMessagesLoadEnd,
+    switchConversation,
+    fetchInitialMessages,
+  ]); // Add onMessagesLoadEnd to dependencies
 
   return (
     <>
       <ListMessages />
     </>
   );
-}
+};
+
+export default ChatMessages;

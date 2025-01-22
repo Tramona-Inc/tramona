@@ -1,4 +1,4 @@
-// components/messages/MessagesContent.tsx
+// components/messages/MessagesContent.tsx (Simplified)
 import { type Conversation } from "@/utils/store/conversations";
 import ChatHeader from "./ChatHeader";
 import ChatInput from "./ChatInput";
@@ -6,46 +6,29 @@ import ChatMessages from "./ChatMessages";
 import EmptyStateValue from "../_common/EmptyStateSvg/EmptyStateValue";
 import ConversationsEmptySvg from "../_common/EmptyStateSvg/ConversationsEmptySvg";
 import ErrorBoundary from "../ui/ErrorBoundary";
-import React, { useState } from "react"; // Import useState
+import React from "react";
 
 export default function MessagesContent({
   selectedConversation,
   setSelected,
+  onMessagesLoadEnd, // Keep onMessagesLoadEnd prop
 }: {
   selectedConversation: Conversation | null;
   setSelected: (arg0: Conversation | null) => void;
+  onMessagesLoadEnd: () => void; // Keep onMessagesLoadEnd prop
 }) {
-  const [isLoadingMessages, setIsLoadingMessages] = useState(false); // Add loading state
-
   return (
     <ErrorBoundary>
       <div className="relative flex h-full w-full flex-col">
-        {selectedConversation ? (
-          <>
-            <ChatHeader
-              selectedConversation={selectedConversation}
-              setSelected={setSelected}
-            />
-            <ChatMessages
-              conversationId={selectedConversation.id}
-              onMessagesLoadStart={() => setIsLoadingMessages(true)} // Pass loading start callback
-              onMessagesLoadEnd={() => setIsLoadingMessages(false)} // Pass loading end callback
-            />
-            <ChatInput conversationId={selectedConversation.id} />
-          </>
-        ) : (
-          <EmptyStateValue description="Select a conversation to read more">
-            <ConversationsEmptySvg />
-          </EmptyStateValue>
-        )}
-        {isLoadingMessages && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/50 backdrop-blur-sm">
-            {" "}
-            {/* Loading overlay */}
-            <p>Loading messages...</p>{" "}
-            {/* Replace with your loading spinner/indicator */}
-          </div>
-        )}
+        <ChatHeader
+          selectedConversation={selectedConversation}
+          setSelected={setSelected}
+        />
+        <ChatMessages
+          conversationId={selectedConversation.id}
+          onMessagesLoadEnd={onMessagesLoadEnd} // Pass down the onMessagesLoadEnd callback
+        />
+        <ChatInput conversationId={selectedConversation.id} />
       </div>
     </ErrorBoundary>
   );

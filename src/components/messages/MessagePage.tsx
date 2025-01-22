@@ -16,11 +16,6 @@ import { SkeletonText } from "@/components/ui/skeleton";
 import EmptyStateValue from "@/components/_common/EmptyStateSvg/EmptyStateValue";
 import { Button } from "@/components/ui/button";
 
-type ScreensToShow =
-  | "MessagesSidebar"
-  | "MessagesContent"
-  | "SelectedConversationSidebar";
-
 interface MessagesPageProps {
   isHost: boolean;
   basePath: string;
@@ -32,7 +27,6 @@ interface MessagesPageProps {
   useViewedStateLogic?: boolean;
   pageTitlePrefix?: string;
 }
-
 function MessageDisplay({
   isHost,
   basePath,
@@ -44,17 +38,21 @@ function MessageDisplay({
 }: MessagesPageProps) {
   const [selectedConversation, setSelectedConversation] =
     useState<Conversation | null>(null);
-
+  const [previousSelectedConversation, setPreviousSelectedConversation] = // **NEW STATE**
+    useState<Conversation | null>(null);
   const [showMobileSelectedSidebar, setShowMobileSelectedSidebar] =
     useState(true);
-
   const [showSelectedSidebar, setShowSelectedSidebar] = useState(false);
+  const [isContentLoading, setIsContentLoading] = useState(false);
 
   const { push, query } = useRouter();
 
   const selectConversation = useCallback(
     (conversation: Conversation | null) => {
+      setIsContentLoading(true);
+      setPreviousSelectedConversation(selectedConversation); // **Store previous conversation**
       setSelectedConversation(conversation);
+
       if (showMobileSidebarFeatures) {
         setShowMobileSelectedSidebar(false);
         setShowSelectedSidebar(false);
@@ -72,7 +70,13 @@ function MessageDisplay({
         );
       }
     },
-    [push, basePath, showMobileSidebarFeatures, useViewedStateLogic],
+    [
+      push,
+      basePath,
+      showMobileSidebarFeatures,
+      useViewedStateLogic,
+      selectedConversation, // Dependency for storing previous conversation
+    ],
   );
 
   const toggleMobileSelectedSidebar = () => {
@@ -95,9 +99,9 @@ function MessageDisplay({
   const [isViewed, setIsViewed] = useState(useViewedStateLogic ? false : true);
 
   useEffect(() => {
-    const conversationIdFromUrl = (query.conversationId ?? query.id) as
+    const conversationIdFromUrl = (query.conversationId || query.id) as
       | string
-      | undefined; // Check both query.conversationId and query.id
+      | undefined;
 
     if (conversationIdFromUrl) {
       if (conversations.length > 0) {
@@ -111,20 +115,17 @@ function MessageDisplay({
         ) {
           setSelectedConversation(conversationToSelect);
         } else if (!conversationToSelect) {
-          // Conversation ID in URL not found, navigate to messages index
           if (selectedConversation?.id === conversationIdFromUrl) {
-            setSelectedConversation(null); // Clear if previously selected and not found
+            setSelectedConversation(null);
           }
-          void push(basePath); // Navigate to base messages path
+          void push(basePath);
         }
       } else {
-        // Conversations are empty initially, clear selection if URL has ID
         if (selectedConversation?.id === conversationIdFromUrl) {
           setSelectedConversation(null);
         }
       }
     } else if (!conversationIdFromUrl) {
-      // No conversationId in URL, clear selected conversation
       if (selectedConversation) {
         setSelectedConversation(null);
       }
@@ -136,7 +137,7 @@ function MessageDisplay({
     selectedConversation?.id,
     push,
     basePath,
-  ]); // Added query.id and basePath
+  ]);
 
   const MemoizedMessagesContent = useMemo(
     () => {
@@ -144,6 +145,7 @@ function MessageDisplay({
         <MessagesContent
           selectedConversation={selectedConversation}
           setSelected={selectConversation}
+          onMessagesLoadEnd={() => setIsContentLoading(false)}
         />
       );
     },
@@ -156,6 +158,31 @@ function MessageDisplay({
     <MessagesContent
       selectedConversation={selectedConversation}
       setSelected={selectConversation}
+      onMessagesLoadEnd={() => setIsContentLoading(false)}
+    />
+  );
+
+  const previousMessagesContent = useMemo(
+    // **Memoized Previous Messages Content**
+    () => {
+      return (
+        <MessagesContent
+          selectedConversation={previousSelectedConversation} // **Use previousSelectedConversation**
+          setSelected={selectConversation} // Keep the same setSelected
+        />
+      );
+    },
+    memoizeMessagesContent
+      ? [previousSelectedConversation, selectConversation]
+      : [],
+  );
+
+  const renderPreviousMessages = memoizeMessagesContent ? ( // **Conditional rendering logic**
+    previousMessagesContent
+  ) : (
+    <MessagesContent
+      selectedConversation={previousSelectedConversation} // **Use previousSelectedConversation**
+      setSelected={selectConversation} // Keep the same setSelected
     />
   );
 
@@ -189,19 +216,28 @@ function MessageDisplay({
         )}
       </div>
 
-      {/* Messages Content */}
+      {/* Messages Content - **Conditional Rendering with Previous Conversation** */}
       {isMd && (
         <div
           className={cn(
             "flex h-full flex-1 items-center justify-center transition-transform duration-300",
           )}
         >
-          {!selectedConversation ? (
+          {isContentLoading ? (
+            previousSelectedConversation ? ( // **Show previous content if available while loading**
+              renderPreviousMessages
+            ) : (
+              <div className="flex h-full w-full items-center justify-center">
+                <p>Loading Conversation...</p>{" "}
+                {/* Fallback to loading message */}
+              </div>
+            )
+          ) : selectedConversation ? (
+            messagesContent
+          ) : (
             <EmptyStateValue description="Select a conversation to read more">
               {EmptyStateComponent}
             </EmptyStateValue>
-          ) : (
-            messagesContent
           )}
         </div>
       )}
