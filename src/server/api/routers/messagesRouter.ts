@@ -269,7 +269,7 @@ async function generateConversation({
 }) {
   return await db
     .insert(conversations)
-    .values({ name: conversationName ? conversationName : null, propertyId: Number(propertyId), requestId })
+    .values({ name: conversationName ? conversationName : null, propertyId: propertyId ? Number(propertyId) : null, requestId: requestId ? Number(requestId) : null })
     .returning({ id: conversations.id })
     .then((res) => res[0]!.id);
 }
@@ -303,8 +303,9 @@ export async function createConversationWithHostForRequest(
   hostTeamId: number,
   requestId: number,
 ) {
+  console.log("creating new conversation", requestId);
   const conversationId = await generateConversation({requestId});
-
+  console.log(conversationId, "conversationId");
   const teamMembers = await db.query.hostTeamMembers.findMany({
     where: eq(hostTeamMembers.hostTeamId, hostTeamId),
   });
@@ -315,11 +316,17 @@ export async function createConversationWithHostForRequest(
     ]);
   });
 
+  console.log(promises, "promises");
+
   await Promise.all(promises);
+
+  console.log("after promises");
 
   await db.insert(conversationParticipants).values([
     { conversationId, userId: userId },
   ]);
+
+  console.log("after insert");
 
   return conversationId;
 }
@@ -482,9 +489,13 @@ export const messagesRouter = createTRPCRouter({
         requestId: input.requestId,
       });
 
+      console.log(conversationId, "conversationId");
+
+      console.log(input, "input", );
       if (!conversationId) {
+        console.log("creating new conversation");
         const newConversationId = await createConversationWithHostForRequest(
-          ctx.user.id,
+          input.userId,
           input.currentHostTeamId,
           input.requestId,
         );
@@ -505,7 +516,7 @@ export const messagesRouter = createTRPCRouter({
 
       if (!conversationId) {
         const newConversationId = await createConversationWithHostOrAdminTeam(
-          ctx.user.id,
+          input.userId,
           input.currentHostTeamId,
           input.propertyId,
         );
