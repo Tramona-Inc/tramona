@@ -3,7 +3,7 @@ import {
   useConversation,
   type Conversation,
 } from "@/utils/store/conversations";
-import { cn } from "@/utils/utils";
+import { capitalizeFirstLetter, cn } from "@/utils/utils";
 import { useSession } from "next-auth/react";
 import UserAvatar from "../_common/UserAvatar";
 import { formatRelative } from "date-fns";
@@ -20,11 +20,8 @@ export function SidebarConversation({
   const { participants, messages, name } = conversation;
 
   const displayParticipants = participants
-    .map(
-      (participant) =>
-        participant.firstName
-          ? participant.firstName 
-          : participant.id,
+    .map((participant) =>
+      participant.firstName ? participant.firstName : participant.id,
     )
     .join(", ");
 
@@ -62,7 +59,7 @@ export function SidebarConversation({
       <UserAvatar
         email={participants[0]?.email}
         image={participants[0]?.image}
-        name={participants[0]?.name}
+        name={capitalizeFirstLetter(participants[0]?.firstName ?? "Tramona")}
       />
 
       <div className="flex-1">

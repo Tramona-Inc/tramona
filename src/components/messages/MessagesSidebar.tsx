@@ -7,7 +7,7 @@ import {
 } from "@/utils/store/conversations";
 import { useMessage } from "@/utils/store/messages";
 import supabase from "@/utils/supabase-client";
-import { cn, useUpdateUser, useIsMd } from "@/utils/utils";
+import { cn, useUpdateUser } from "@/utils/utils";
 import { subHours } from "date-fns";
 import { useSession } from "next-auth/react";
 import { useEffect, useState, useMemo } from "react";
@@ -119,16 +119,11 @@ export default function MessagesSidebar({
   );
 
   useEffect(() => {
-    // Check if data has been fetched and hasn't been processed yet
     if (fetchedConversations) {
-      console.log("initial fetch successful");
       setConversationList(fetchedConversations);
     } else {
-      //refetch if data is not available
-      console.log("initial fetch unsuccessful so refetching data");
       void refetch();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchedConversations, setConversationList, refetch]);
 
   const optimisticIds = useMessage((state) => state.optimisticIds);
@@ -139,7 +134,6 @@ export default function MessagesSidebar({
 
   const { data: session } = useSession();
 
-  // Memoize unreadConversations calculation - Optimization 3
   const unreadConversations = useMemo(() => {
     return conversations.filter((conversation) => {
       return (
@@ -150,7 +144,6 @@ export default function MessagesSidebar({
     });
   }, [conversations, session?.user.id]);
 
-  // Map and listen to all the connects the user is part of
   useEffect(() => {
     const handlePostgresChange = async (payload: { new: MessageDbType }) => {
       setConversationToTop(payload.new.conversation_id, {
@@ -168,7 +161,6 @@ export default function MessagesSidebar({
       if (session) {
         const channels = conversations
           .map((conversation) => conversation.id)
-          // When channel is selected turn of here so it can listen in the child
           .filter(
             (conversationId) => conversationId !== selectedConversation?.id,
           )
@@ -195,13 +187,13 @@ export default function MessagesSidebar({
     };
 
     void fetchConversationIds();
-    // Optimization 2: Changed dependency to conversation IDs string instead of full conversations array reference
   }, [
-    conversations.map((c) => c.id).join(","), // Dependency changed to conversation IDs string
+    conversations.map((c) => c.id).join(","),
     optimisticIds,
     selectedConversation?.id,
     session,
     setConversationToTop,
+    conversations,
   ]);
 
   function MessageEmptyState({ unread = false }: { unread?: boolean }) {

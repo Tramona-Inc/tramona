@@ -12,7 +12,7 @@ import { useEffect, useState, useCallback } from "react";
 import { api } from "@/utils/api";
 import { cn } from "@/utils/utils";
 import SelectedConversationSidebar from "@/components/messages/SelectedConversationSidebar";
-import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
+import { SkeletonText } from "@/components/ui/skeleton";
 import ConversationsEmptySvg from "@/components/_common/EmptyStateSvg/ConversationsEmptySvg";
 import EmptyStateValue from "@/components/_common/EmptyStateSvg/EmptyStateValue";
 import { Button } from "@/components/ui/button";
@@ -26,7 +26,8 @@ function MessageDisplay() {
 
   // **Adopt Mobile Sidebar State from Host Index Page **
   const [showMobileSelectedSidebar, setShowMobileSelectedSidebar] =
-    useState(false);
+    useState(true);
+
   const [showSelectedSidebar, setShowSelectedSidebar] = useState(false);
 
   const { push, query } = useRouter();
@@ -53,10 +54,6 @@ function MessageDisplay() {
   );
 
   // **Adopt Sidebar Toggling Functions from Host Index Page **
-  const toggleMobileSidebar = () => {
-    setShowMobileSelectedSidebar(false);
-  };
-
   const toggleMobileSelectedSidebar = () => {
     setShowMobileSelectedSidebar((prev) => !prev);
   };
@@ -92,7 +89,6 @@ function MessageDisplay() {
     }
   }, [conversations, query.conversationId, selectedConversation?.id]);
 
-  console.log(isMd);
   return (
     <div className="flex h-[calc(100vh-12rem)] divide-x border-b lg:h-[calc(100vh-8rem)]">
       {/* Messages Sidebar - **Layout from Host Index Page** */}
@@ -124,8 +120,6 @@ function MessageDisplay() {
         <div
           className={cn(
             "flex h-full flex-1 items-center justify-center transition-transform duration-300",
-            !showMobileSelectedSidebar && "sm:flex", // **Conditional Visibility from Host Index**
-            !selectedConversation && "hidden md:flex", // **Conditional Visibility from Host Index**
           )}
         >
           {!selectedConversation ? (
@@ -145,11 +139,7 @@ function MessageDisplay() {
       {selectedConversation &&
         (selectedConversation.propertyId ?? selectedConversation.requestId) && (
           <div
-            className={cn(
-              "w-1/4 border-l transition-transform duration-300",
-              showSelectedSidebar ? "md:block" : "hidden", // **Conditional Visibility from Host Index**
-              showMobileSelectedSidebar ? "sm:block" : "hidden sm:hidden", // **Conditional Visibility from Host Index**
-            )}
+            className={cn("w-1/4 border-l transition-transform duration-300")}
           >
             <SelectedConversationSidebar
               conversation={selectedConversation}

@@ -12,9 +12,8 @@ import { useEffect, useState, useCallback, memo } from "react"; // Import memo
 import { api } from "@/utils/api";
 import { cn } from "@/utils/utils";
 import SelectedConversationSidebar from "@/components/messages/SelectedConversationSidebar";
-import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
-import ConversationsEmptySvg from "@/components/_common/EmptyStateSvg/ConversationsEmptySvg";
-import EmptyStateValue from "@/components/_common/EmptyStateSvg/EmptyStateValue";
+import { SkeletonText } from "@/components/ui/skeleton";
+
 import { Button } from "@/components/ui/button";
 import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 import { useSession } from "next-auth/react";
@@ -35,6 +34,7 @@ function MessageDisplay() {
   // **Adopt Mobile Sidebar State from Host Index Page **
   const [showMobileSelectedSidebar, setShowMobileSelectedSidebar] =
     useState(false);
+
   const [showSelectedSidebar, setShowSelectedSidebar] = useState(false);
 
   const { push, query } = useRouter();
@@ -115,8 +115,6 @@ function MessageDisplay() {
           void push("/host/messages"); // Go to messages without conversation ID if not found
         }
       } else {
-        // If conversations are still loading or empty but there is a conversationId in url,
-        // set selectedConversation to null initially, it will be updated when conversations are fetched.
         if (selectedConversation?.id === conversationIdFromUrl) {
           setSelectedConversation(null); // Clear selected conversation if conversations are empty initially
         }
@@ -136,7 +134,6 @@ function MessageDisplay() {
         <div
           className={cn(
             "w-full bg-white transition-transform duration-300 md:w-96",
-            !showSelectedSidebar && "md:block", // **Conditional Visibility from Host Index**
           )}
         >
           {isSidebarLoading ? (
@@ -171,15 +168,11 @@ function MessageDisplay() {
       {selectedConversation &&
         (selectedConversation.propertyId ?? selectedConversation.requestId) && (
           <div
-            className={cn(
-              "w-1/4 border-l transition-transform duration-300",
-              showSelectedSidebar ? "md:block" : "hidden", // **Conditional Visibility from Host Index**
-              showMobileSelectedSidebar ? "sm:block" : "hidden sm:hidden", // **Conditional Visibility from Host Index**
-            )}
+            className={cn("w-1/4 border-l transition-transform duration-300")}
           >
-            <MemoizedSelectedConversationSidebar // Use memoized version
+            <MemoizedSelectedConversationSidebar
               conversation={selectedConversation}
-              isHost={true} // **isHost is true for host messages**
+              isHost={true}
             />
           </div>
         )}
@@ -203,7 +196,6 @@ function MessageDisplay() {
 
 export default function MessagePage() {
   useSession({ required: true }); // Use useSession for auth
-  const { currentHostTeamId } = useHostTeamStore(); // use this to get the correct messages depending on the team
 
   const { data: totalUnreadMessages, isLoading: isUnreadLoading } =
     api.messages.getNumUnreadMessages.useQuery();
