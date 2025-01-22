@@ -9,11 +9,12 @@ import { createUserNameAndPic } from "@/components/activity-feed/admin/generatio
 import * as fs from "node:fs/promises";
 import "dotenv/config";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { Review } from "@/server/db/schema";
 
-const maxTokensToUse = 10000;
+const maxTokensToUse = 1500000;
 let tokensUsed = 0;
 
-const googleApiKey = process.env.GOOGLE_API_KEY;
+const googleApiKey = process.env.GEMINI_API_KEY;
 const genAI = new GoogleGenerativeAI(googleApiKey ?? ""); //Added a nullish coalescing operator
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" }); // Use Gemini 1.5 Flash
 
@@ -267,7 +268,8 @@ const generateEmojis = (): string => {
 // LLM Based Review Generation
 // =======================================================
 const prompt = `You are a helpful assistant that generates realistic reviews for a booking website.
-Reviews should be varied in length, sentiment, and should be about all kinds of topics including cleanliness, amenities, communication, location etc. The property is located in {city}. Consider the location when writing the reviews.
+Reviews should be varied in length, sentiment, and should be about all kinds of topics including cleanliness, amenities, communication, location etc. The property is located in {city}. Consider the location when writing the reviews. Make sure all reviews are Complete, realistic, and natural in tone.
+
 Here are some examples of how reviews should be written:
 Review 1:
 DO NOT WASTE YOUR MONEY! Where to start? First of all the owner is a crook. My grandmother and I booked 6 nights here and could not make it 3. The facilities were dirty, rundown, and the area was dangerous. The owner offered us a different room but tried to scam us for another $175! Then another manager allowed us to change rooms because of construction happening right next to us (which was not mentioned), and again the owner demanded to get more money from us. When my grandmother complained the owner simply said, “if you don’t like it then you can leave and I’ll refund you for the nights you didn’t stay”. That was 2 weeks ago and we still have not received our refund. I have called the owner many times and each time he assures me my money is on the way, after he acts like he doesn’t remember what I’m talking about.
@@ -293,6 +295,15 @@ Review 10:
 Over nice place….. remote did not work, parking could be difficult at times…
 Review 11:
 I would be happy to pay this much if I got what was in the photos. So, dissatisfying that when we arrived I felt duped with no recourse and stuck with what I got.
+Make sure each review generated adheres to these guidelines:
+1. The review should be about the property in {city}.
+2. The review should be varied in length and sentiment.
+3. The review should be complete, realistic, and natural in tone.
+4. The review should be about all kinds of topics including cleanliness, amenities, communication, location etc.
+5. The review should be helpful to potential guests.
+6. The review should be written in a human-like manner.
+7. make sure the review ends in a closing remark.
+
 Generate a review with the following characteristics:
 Rating: {rating}
 `;
@@ -313,7 +324,7 @@ async function generateLlamaReview(
       const result = await model.generateContent(enrichedPrompt);
       const response = result.response;
       let review = response?.text() ?? "Default Review: Great place to stay";
-      review = `${review}${generateHumanLikePhrases()}`;
+      // review = `${review}${generateHumanLikePhrases()}`;
       review = adjustReviewLength(review);
       review = `${review} ${generateEmojis()}`;
       return review;
@@ -366,7 +377,7 @@ async function generateFakeReviews() {
       console.log(`Starting to generate reviews for city: ${property.city}`);
       console.log(`looping through property id: ${property.id}`);
       const numberOfReviews = Math.floor(Math.random() * 5) + 1;
-      const reviewsToInsert = [];
+      const reviewsToInsert = [] as Review [];
       for (let i = 0; i < numberOfReviews; i++) {
         console.log(`generating review ${i} out of ${numberOfReviews}`);
         if (tokensUsed >= maxTokensToUse) {
@@ -375,23 +386,23 @@ async function generateFakeReviews() {
           );
           break;
         }
-        if (reviewsGenerated >= 100) {
-          console.log("Generated 100 reviews, stopping");
-          break;
-        }
+        // if (reviewsGenerated >= 100) {
+        //   console.log("Generated 100 reviews, stopping");
+        //   break;
+        // }
         const nameAndPicItem =
           nameAndPic[Math.floor(Math.random() * nameAndPic.length)];
         const rating = ratingRandomizer();
         let reviewText: string | null;
         let reviewSource: "AI" | "Template";
-        const templateReview = await generateRandomReview(
-          rating,
-          property.city,
-        );
-        if (templateReview) {
-          reviewText = templateReview;
-          reviewSource = "Template";
-        } else {
+        // const templateReview = await generateRandomReview(
+        //   rating,
+        //   property.city,
+        // );
+        // if (templateReview) {
+        //   reviewText = templateReview;
+        //   reviewSource = "Template";
+        // } else {
           const generatedReview = await generateLlamaReview(
             rating,
             property.city,
@@ -399,7 +410,7 @@ async function generateFakeReviews() {
           reviewText = generatedReview;
           reviewSource = "AI";
           tokensUsed += 300;
-        }
+        
         if (!reviewText) {
           console.error(
             `No review could be generated for property ${property.id}`,
@@ -412,7 +423,7 @@ async function generateFakeReviews() {
           rating: rating,
           review: reviewText,
           propertyId: property.id,
-          date: generateRandomDate(),
+          createdAt: generateRandomDate(),
           verified: generateRandomBoolean(0.8),
         };
 
@@ -434,10 +445,10 @@ async function generateFakeReviews() {
           error,
         );
       }
-      if (reviewsGenerated >= 100) {
-        console.log("Generated 100 reviews, stopping property loop");
-        break;
-      }
+      // if (reviewsGenerated >= 100) {
+      //   console.log("Generated 100 reviews, stopping property loop");
+      //   break;
+      // }
     }
 
     console.log("Finished generating fake reviews.");
