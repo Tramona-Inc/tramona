@@ -1,5 +1,12 @@
 import SettingsLayout from "@/components/_common/Layout/SettingsLayout";
-import { Form, FormControl, FormMessage, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormMessage,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "@/components/ui/form";
 import {
   Select,
   SelectValue,
@@ -12,6 +19,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
+import { ChevronLeft } from "lucide-react";
+import Link from "next/link";
 
 const formSchema = z.object({
   bidNotification: z.enum(["once a day", "once a week"]),
@@ -42,11 +51,14 @@ export default function Notifications() {
 
   return (
     <SettingsLayout>
-      <div className="mx-auto my-8 max-w-4xl">
+      <div className="mx-auto max-w-4xl xl:my-8">
         <div className="space-y-4 rounded-lg border bg-white p-4">
+          <Link href="/settings" className="inline-block sm:hidden">
+            <ChevronLeft />
+          </Link>
           <h1 className="text-lg font-bold">Notifications</h1>
           <div className="flex w-full items-center gap-2">
-            <Tabs defaultValue="host">
+            <Tabs defaultValue="host" className="flex flex-col gap-y-6">
               <TabsList>
                 <TabsTrigger value="host">Host</TabsTrigger>
                 <TabsTrigger value="guest">Guest</TabsTrigger>
@@ -54,7 +66,7 @@ export default function Notifications() {
               <TabsContent value="host">
                 <Form {...hostForm}>
                   <form onSubmit={hostOnSubmit}>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-col items-center gap-y-3">
                       <p>
                         Receive notification for traveler putting bid on your
                         property
@@ -74,7 +86,10 @@ export default function Notifications() {
               </TabsContent>
               <TabsContent value="guest">
                 <Form {...guestForm}>
-                  <form onSubmit={guestOnSubmit}>
+                  <form
+                    onSubmit={guestOnSubmit}
+                    className="flex flex-row gap-x-4 pb-10"
+                  >
                     <FormField
                       control={guestForm.control}
                       name="bidNotification"

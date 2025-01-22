@@ -1,6 +1,7 @@
-import CardSelect from "@/components/_common/CardSelect";
-import { useRouter } from "next/router";
-import { useState } from "react";
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useState, useEffect, useRef } from "react";
 import { InlineWidget, useCalendlyEventListener } from "react-calendly";
 import {
   Dialog,
@@ -8,6 +9,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -29,13 +31,85 @@ import {
 import { useZodForm } from "@/utils/useZodForm";
 import { z } from "zod";
 import { SelectIcon } from "@radix-ui/react-select";
-import { CaretSortIcon, ExclamationTriangleIcon } from "@radix-ui/react-icons";
+import { CaretSortIcon } from "@radix-ui/react-icons";
 import { ALL_PROPERTY_PMS } from "@/server/db/schema";
 import { api } from "@/utils/api";
 import { Link } from "lucide-react";
 import { cn } from "@/utils/utils";
-import { Questions } from "@/pages/for-hosts";
 import usePopoverStore from "@/utils/store/messagePopoverStore";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Link2,
+  CheckCircle2,
+  ArrowRight,
+} from "lucide-react";
+import Image from "next/image";
+
+// ------------------------------------------------------------------
+// A simple Progress Indicator for the multi-step flow
+// ------------------------------------------------------------------
+function ProgressIndicator({
+  currentStep,
+  totalSteps,
+}: {
+  currentStep: number;
+  totalSteps: number;
+}) {
+  const progress = (currentStep / totalSteps) * 100;
+  return (
+    <div className="mb-6 flex w-full flex-col items-center space-y-2 sm:flex-row sm:justify-between sm:space-y-0">
+      <div className="text-sm font-medium">
+        Step {currentStep} of {totalSteps}
+      </div>
+      <div className="h-2 w-full max-w-xs overflow-hidden rounded-full bg-gray-200">
+        <div
+          className="h-full rounded-full bg-blue-600 transition-all duration-300"
+          style={{ width: `${progress}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
+const steps = [
+  {
+    title: "Oops, it looks like there was an error creating your host acccount",
+    image: null,
+    description: "Follow these steps closely so we can get you set up.",
+  },
+  {
+    title: "Start off by clicking Connect my Airbnb Account",
+    image: "/assets/images/host-modal/Step1.png",
+    description: "This will take you to the Airbnb website.",
+  },
+  {
+    title: "Then scroll down and click allow",
+    image: "/assets/images/host-modal/Step2.png",
+    description:
+      "This allows Tramona to access your Airbnb preferences so you dont have to manually add them.",
+  },
+  {
+    title: "Click connect to finalize the process",
+    image: "/assets/images/host-modal/Step3.png",
+    description: "After this, you are almost done!",
+  },
+  {
+    title: "Click take me back to Tramona",
+    image: "/assets/images/host-modal/Step4.png",
+    description:
+      "This will bring you to the host dashboard, and you can start hosting!",
+  },
+];
+
+const totalSteps = steps.length;
 
 export default function Onboarding1({
   onPressNext,
@@ -49,20 +123,47 @@ export default function Onboarding1({
   const [showModal, setShowModal] = useState(false);
   const [showHospitablePopup, setShowHospitablePopup] = useState(false);
   const [eventScheduled, setEventScheduled] = useState(false);
-  const [dialogType, setDialogType] = useState<
-    "assistedListing" | "syncPMS" | null
-  >(null);
-
+  const [showSignupModal, setShowSignupModal] = useState(false);
   useCalendlyEventListener({ onEventScheduled: () => setEventScheduled(true) });
 
-  const openModal = (type: "assistedListing" | "syncPMS") => {
-    setDialogType(type);
+  const [currentStep, setCurrentStep] = useState(1);
+  const galleryRef = useRef<HTMLDivElement>(null);
+  const [isExpanded, setIsExpanded] = useState("item-1");
+  const { mutateAsync: resetHospitableProfile } =
+    api.pms.resetHospitableCustomer.useMutation();
+
+  const handleNextStep = async () => {
+    if (currentStep === 1) {
+      await resetHospitableProfile();
+    }
+    if (currentStep < steps.length) {
+      setCurrentStep(currentStep + 1);
+    } else {
+      setShowSignupModal(false);
+    }
+  };
+
+  const handlePrevStep = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  useEffect(() => {
+    if (galleryRef.current) {
+      galleryRef.current.style.transform = `translateX(-${
+        (currentStep - 1) * 100
+      }%)`;
+    }
+  }, [currentStep]);
+
+  const openModal = () => {
     setShowModal(true);
   };
 
   const closeModal = () => {
     setShowModal(false);
-    setDialogType(null);
+
     if (eventScheduled) {
       void router.push("/host");
     }
@@ -83,27 +184,6 @@ export default function Onboarding1({
         }
       },
     },
-    // {
-    //   id: "2",
-    //   icon: <AssistedListing />,
-    //   title: "PMS",
-    //   text: "Connect with our PMS partners for effortless signup.",
-    //   onClick: () => openModal("syncPMS"),
-    // },
-    // {
-    //   id: "2",
-    //   icon: <Plus className="text-teal-900" strokeWidth={2} size={30} />,
-    //   title: "You Add",
-    //   text: "Manually list your properties",
-    //   onClick: onPressNext,
-    // },
-    // {
-    //   id: "3",
-    //   icon: <HelpCircle className="text-teal-900" strokeWidth={2} size={30} />,
-    //   title: "We Add",
-    //   text: "Have the Tramona onboarding team set up your account.",
-    //   onClick: () => openModal("assistedListing"),
-    // },
   ];
 
   const form = useZodForm({
@@ -136,17 +216,85 @@ export default function Onboarding1({
 
   const handleSubmit = form.handleSubmit(async ({ pms, accountId, apiKey }) => {
     const { bearerToken } = await generateBearerToken({ accountId, apiKey }); //hostaway
-    console.log(bearerToken);
 
     await createHostProfile({
       hostawayApiKey: apiKey,
       hostawayAccountId: accountId,
       hostawayBearerToken: bearerToken,
     });
-    //Hard reload so header query doesn't redirect user back to why-list
-    window.location.href = "/host";
-    console.log({ pms, accountId, apiKey });
+
+    router.push("/host");
   });
+
+  useEffect(() => {
+    if (isHospitableCustomer) {
+      setShowSignupModal(true);
+    }
+  }, [isHospitableCustomer]);
+
+  const renderStepContent = () => {
+    const currentStepData = steps[currentStep - 1];
+
+    if (!currentStepData) {
+      return null;
+    }
+
+    return (
+      <div className="space-y-6">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold">{currentStepData.title}</h2>
+          <p className="text-base text-gray-600">
+            {currentStepData.description}
+          </p>
+        </div>
+        {currentStepData.image && (
+          <div className="relative w-full">
+            <div className="overflow-hidden rounded-md border border-gray-300">
+              <div className="flex h-auto">
+                <div className="w-full flex-shrink-0">
+                  <div className="relative h-64 w-full">
+                    <Image
+                      src={currentStepData.image}
+                      alt={`Step ${currentStep}`}
+                      className="h-full w-full object-contain"
+                      fill
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="mt-2 text-center">
+              <p className="text-xs text-gray-500">
+                Only click the button in the flow, do not navigate away from the
+                page.
+              </p>
+            </div>
+          </div>
+        )}
+        <div className="flex flex-col space-y-2 sm:flex-row sm:justify-between sm:space-y-0">
+          {currentStep !== 1 && (
+            <Button
+              onClick={handlePrevStep}
+              variant="outline"
+              disabled={currentStep === 1}
+            >
+              Back
+            </Button>
+          )}
+          <div
+            className={cn(
+              "flex justify-end",
+              currentStep === 1 ? "w-full" : "",
+            )}
+          >
+            <Button onClick={() => handleNextStep()}>
+              {currentStep === totalSteps ? "Finish" : "Next"}
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <>
@@ -157,193 +305,250 @@ export default function Onboarding1({
             forHost ? "m-0 items-start" : "my-6 items-center sm:mx-20",
           )}
         >
-          <h1
-            className={cn(
-              forHost
-                ? "text-2xl font-bold"
-                : "text-2xl font-semibold sm:text-4xl lg:text-3xl xl:text-4xl",
-            )}
-          >
-            Get started on Tramona
-          </h1>
-          <div className="flex flex-col gap-4">
-            {items.map((item) =>
-              item.id === "1" ? (
-                <CardSelect
-                  key={item.id}
-                  title={item.title}
-                  text={item.text}
-                  onClick={item.onClick}
-                  recommended={item.recommended}
-                  disabled={isHospitableCustomer ? true : false}
-                >
-                  {item.icon}
-                </CardSelect>
-              ) : (
-                <CardSelect
-                  key={item.title}
-                  title={item.title}
-                  text={item.text}
-                  onClick={item.onClick}
-                >
-                  {item.icon}
-                </CardSelect>
-              ),
-            )}
-          </div>
-          <p className="font-semibold lg:text-lg">
-            Hosts can expect to make 10-15% more when using Tramona to book
-            their empty nights
-          </p>
+          <div className="min-h-screen bg-gradient-to-b from-primary/5 to-background">
+            {/* Hero Section */}
+            <div className="container px-4 py-16 md:py-24">
+              <div className="mx-auto max-w-3xl text-center">
+                <h1 className="mb-6 text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
+                  Get started hosting on Tramona
+                </h1>
+                <p className="mb-12 text-xl">
+                  Hosts can expect to make 10-15% more when using Tramona to
+                  book their empty nights earnings
+                </p>
+              </div>
 
-          <div className="hidden lg:block">
-            <Questions />
-          </div>
-          {isHospitableCustomer && (
-            <div className="flex flex-col gap-2 rounded-md border border-gray-200 p-4">
-              <div className="flex items-center gap-2 text-xl font-bold text-red-600">
-                <ExclamationTriangleIcon className="text-red-600" />
-                Having trouble?
+              {/* Main Card */}
+              <Card className="mx-auto max-w-2xl">
+                <CardContent className="p-6">
+                  <div className="flex items-start gap-4 rounded-lg border p-4 shadow-sm">
+                    <div className="rounded-full bg-primary/10 p-2">
+                      <Link2 className="h-6 w-6 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <h2 className="text-xl font-semibold">
+                        Create a host account
+                      </h2>
+                      <p className="mt-1 text-muted-foreground">
+                        When creating an account, you&apos;ll connect directly
+                        with Airbnb so ensure all your host settings and
+                        preferences are saved
+                      </p>
+                      <Button
+                        className="mt-4"
+                        size="lg"
+                        onClick={async () => {
+                          try {
+                            setShowHospitablePopup(true);
+                          } catch (error) {
+                            console.error("An error occurred:", error);
+                          }
+                        }}
+                      >
+                        Connect with Airbnb
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Benefits Section */}
+              <div className="mx-auto mt-16 max-w-4xl">
+                <div className="grid gap-8 md:grid-cols-3">
+                  <div className="flex flex-col items-center text-center">
+                    <div className="mb-4 rounded-full bg-primary/10 p-3">
+                      <CheckCircle2 className="h-6 w-6 text-primary" />
+                    </div>
+                    <h3 className="mb-2 font-semibold">Increase Revenue</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Earn 10-15% more when using Tramona to book empty nights
+                    </p>
+                  </div>
+                  <div className="flex flex-col items-center text-center">
+                    <div className="mb-4 rounded-full bg-primary/10 p-3">
+                      <CheckCircle2 className="h-6 w-6 text-primary" />
+                    </div>
+                    <h3 className="mb-2 font-semibold">Smart Pricing</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Our AI automatically adjusts prices based on market demand
+                    </p>
+                  </div>
+                  <div className="flex flex-col items-center text-center">
+                    <div className="mb-4 rounded-full bg-primary/10 p-3">
+                      <CheckCircle2 className="h-6 w-6 text-primary" />
+                    </div>
+                    <h3 className="mb-2 font-semibold">Easy Integration</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Seamlessly connects with your existing Airbnb listings
+                    </p>
+                  </div>
+                </div>
               </div>
-              <div>
-                We&apos;re here to help! You can either send us a message
-                directly or email our support team.
+
+              {/* FAQ Section */}
+              <div className="mx-auto mt-16 max-w-2xl">
+                <h2 className="mb-6 text-center text-2xl font-bold">
+                  Frequently Asked Questions
+                </h2>
+                <Accordion type="single" collapsible defaultValue="item-1">
+                  <AccordionItem value="item-1">
+                    <AccordionTrigger>
+                      Can I counter-offer requests?
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      Yes, you can! Tramona gives you full control over your
+                      pricing and allows you to negotiate with potential guests.
+                    </AccordionContent>
+                  </AccordionItem>
+                  <AccordionItem value="item-2">
+                    <AccordionTrigger>
+                      Do I need to sync my calendar?
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      Only if you want to. Calendar syncing is optional but
+                      recommended for the best experience and to avoid double
+                      bookings.
+                    </AccordionContent>
+                  </AccordionItem>
+                  <AccordionItem value="item-3">
+                    <AccordionTrigger>Why list on Tramona?</AccordionTrigger>
+                    <AccordionContent>
+                      Hosts typically earn 10-15% more through Tramona. Our
+                      smart pricing algorithm and efficient booking system help
+                      maximize your revenue while minimizing vacant nights.
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
               </div>
-              <button
-                className="rounded-md border border-gray-200 p-2"
-                onClick={() => setOpen(true)}
-              >
-                Send us a message
-              </button>
-              <div className="text-center">Or</div>
-              <button
-                className="rounded-md border border-gray-200 p-2"
-                onClick={() => {
-                  window.open("mailto:support@tramona.com", "_blank");
-                }}
-              >
-                Email us at support@tramona.com
-              </button>
+
+              {/* Social Proof */}
+              <div className="mx-auto mt-16 max-w-2xl text-center">
+                <div className="rounded-xl bg-muted/50 p-6">
+                  <p className="text-sm font-medium text-muted-foreground">
+                    TRUSTED BY HOSTS WORLDWIDE
+                  </p>
+                  <div className="mt-4 flex flex-wrap items-center justify-center gap-8">
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl font-bold">10k+</span>
+                      <span className="text-sm text-muted-foreground">
+                        Active Hosts
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl font-bold">$2M+</span>
+                      <span className="text-sm text-muted-foreground">
+                        Extra Revenue Generated
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl font-bold">95%</span>
+                      <span className="text-sm text-muted-foreground">
+                        Satisfaction Rate
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Final CTA */}
+              <div className="mx-auto mt-16 max-w-xl text-center">
+                <h3 className="mb-4 text-2xl font-semibold">
+                  Questions about hosting?
+                </h3>
+                <p className="mb-6 text-muted-foreground">
+                  Schedule a call with our onboarding team to see how Tramona
+                  benefits your business
+                </p>
+                <Button size="lg" className="px-8" asChild>
+                  <a
+                    href="https://calendly.com/tramona/call-with-tramona-team"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Schedule a call
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </a>
+                </Button>
+              </div>
             </div>
-          )}
+          </div>
         </div>
       </div>
-
-      {/* {!forHost && <OnboardingFooter isForm={false} />} */}
       <Dialog open={showModal} onOpenChange={closeModal}>
-        <DialogClose />
-        <DialogContent>
+        <DialogContent className="max-w-xl">
           <DialogHeader>
-            <DialogTitle>
-              {dialogType === "assistedListing"
-                ? "Assisted Listing"
-                : "Sync with PMS"}
-            </DialogTitle>
+            <DialogTitle>Sync with PMS</DialogTitle>
           </DialogHeader>
-          {dialogType === "assistedListing" ? (
-            <>
-              <p>
-                Our team will help you set up your account. Click the button
-                below to schedule a meeting with us.
-              </p>
-              <InlineWidget url="https://calendly.com/tramona" />
-            </>
-          ) : (
-            <>
-              <div className="space-y-4">
-                <Form {...form}>
-                  <form onSubmit={handleSubmit}>
-                    <FormField
-                      control={form.control}
-                      name="pms"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>PMS</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select a PMS" />
-                                <SelectIcon>
-                                  <CaretSortIcon className="h-4 w-4 opacity-50" />
-                                </SelectIcon>
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {ALL_PROPERTY_PMS.map((PMS) => (
-                                <SelectItem key={PMS} value={PMS}>
-                                  {PMS}
-                                </SelectItem>
-                              ))}
-                              {/* Future options can be added here */}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    ></FormField>
-                    <FormField
-                      control={form.control}
-                      name="accountId"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Account ID</FormLabel>
-                          <FormControl>
-                            <Input
-                              {...field}
-                              autoFocus
-                              placeholder="Account ID"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    ></FormField>
-                    <FormField
-                      control={form.control}
-                      name="apiKey"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>API Key</FormLabel>
-                          <FormControl>
-                            <Input {...field} autoFocus placeholder="API Key" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    ></FormField>
-                    <Button
-                      type="submit"
-                      //
-                      className="mt-4"
-                    >
-                      Sync with PMS
-                    </Button>
-                  </form>
-                </Form>
-                {/* <div className="mt-4 flex items-center space-x-2">
-                  <Image
-                    src="/assets/icons/help.svg"
-                    alt="Help"
-                    width={24}
-                    height={24}
-                  />
-                  <p>
-                    Have a question?{" "}
-                    <a href="#" className="text-primary">
-                      Contact us
-                    </a>
-                  </p>
-                </div> */}
-              </div>
-            </>
-          )}
+          <div className="space-y-4">
+            <Form {...form}>
+              <form onSubmit={handleSubmit}>
+                <FormField
+                  control={form.control}
+                  name="pms"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>PMS</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a PMS" />
+                            <SelectIcon>
+                              <CaretSortIcon className="h-4 w-4 opacity-50" />
+                            </SelectIcon>
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {ALL_PROPERTY_PMS.map((PMS) => (
+                            <SelectItem key={PMS} value={PMS}>
+                              {PMS}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                ></FormField>
+                <FormField
+                  control={form.control}
+                  name="accountId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Account ID</FormLabel>
+                      <FormControl>
+                        <Input {...field} autoFocus placeholder="Account ID" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                ></FormField>
+                <FormField
+                  control={form.control}
+                  name="apiKey"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>API Key</FormLabel>
+                      <FormControl>
+                        <Input {...field} autoFocus placeholder="API Key" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                ></FormField>
+                <Button type="submit" className="mt-4">
+                  Sync with PMS
+                </Button>
+              </form>
+            </Form>
+          </div>
         </DialogContent>
       </Dialog>
       <Dialog open={showHospitablePopup} onOpenChange={setShowHospitablePopup}>
-        <DialogContent>
+        <DialogContent className="max-w-xl">
           <DialogHeader>
             <DialogTitle>Connect with Airbnb</DialogTitle>
           </DialogHeader>
@@ -352,15 +557,14 @@ export default function Onboarding1({
               <strong>Please Read:</strong>
             </p>
             <p className="pb-6">
-              This next step will connect with your Airbnb account. The property
-              sync process must be completed in one session.{" "}
-              <strong>
-                If you navigate away, press back, or close this window before
-                finishing, the sync will be interrupted.
-              </strong>{" "}
-              In this case, please send us a message and we will be in touch
-              shortly to reset your host account.
+              For the best host experience,{" "}
+              <strong> all host profiles are synced with Airbnb. </strong> This
+              way, we can limit the possibility of double bookings, reduce the
+              your inputs, and reduce host fruad. The next process must be
+              completed in one session.{" "}
+              <strong>Please do not navigate away during this process.</strong>
             </p>
+
             <div className="flex justify-end">
               <Button
                 onClick={async () => {
@@ -371,12 +575,33 @@ export default function Onboarding1({
                   }
                 }}
               >
-                Connect with Airbnb
+                Create my host account
               </Button>
             </div>
           </div>
         </DialogContent>
       </Dialog>
+      {showSignupModal && (
+        <Dialog open={showSignupModal} onOpenChange={setShowSignupModal}>
+          <DialogContent className="w-full max-w-3xl p-8 sm:w-[600px]">
+            <DialogHeader>
+              <DialogTitle className="text-center sm:text-left">
+                <div className="flex items-center justify-center sm:justify-between">
+                  <DialogClose asChild></DialogClose>
+                </div>
+              </DialogTitle>
+            </DialogHeader>
+
+            <div className="flex flex-col items-center justify-center">
+              <ProgressIndicator
+                currentStep={currentStep}
+                totalSteps={totalSteps}
+              />
+              <div className="w-full">{renderStepContent()}</div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </>
   );
 }

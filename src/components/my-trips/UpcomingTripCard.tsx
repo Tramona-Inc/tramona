@@ -8,10 +8,10 @@ import UserAvatar from "../_common/UserAvatar";
 import { type TripCardDetails } from "@/pages/my-trips";
 import ChatOfferButton from "../propertyPages/sections/ChatOfferButton";
 import TripCancelDialog from "./TripCancelDialog";
-import { useChatWithHost } from "@/utils/messaging/useChatWithHost";
+import { useChatWithHostTeam } from "@/utils/messaging/useChatWithHost";
 
 export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
-  const chatWithHost = useChatWithHost();
+  const chatWithHostTeam = useChatWithHostTeam();
   const hostId = trip.property.hostTeam.ownerId;
 
   return (
@@ -110,7 +110,7 @@ export default function UpcomingTripCard({ trip }: { trip: TripCardDetails }) {
             {trip.tripsStatus !== "Cancelled" && (
               <TripCancelDialog trip={trip} />
             )}
-            <Button onClick={() => chatWithHost({ hostId })}>
+            <Button onClick={() => chatWithHostTeam({ hostId, hostTeamId: trip.property.hostTeam.id, propertyId: trip.property.id })}>
               <MessageCircleMore />
               Message Host
             </Button>

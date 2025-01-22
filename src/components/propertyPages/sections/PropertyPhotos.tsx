@@ -38,6 +38,7 @@ export default function PropertyPhotos({
                       alt="Property Image"
                       fill
                       className="object-contain"
+                      quality={100}
                     />
                   </div>
                 </CardContent>

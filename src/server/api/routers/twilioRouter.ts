@@ -40,6 +40,10 @@ export const twilioRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input }) => {
+      const isProduction = process.env.NODE_ENV === "production";
+      const isProductionOnly = true;
+      if (isProductionOnly && !isProduction) return;
+
       const { msg, to, sendAt } = input;
 
       const response = await twilio.messages.create({

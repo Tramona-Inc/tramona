@@ -387,7 +387,14 @@ export const properties = pgTable(
     )
       .notNull()
       .default(5),
+    cleaningFeePerStay: integer("cleaning_fee_per_stay").default(0).notNull(),
+    petFeePerStay: integer("pet_fee_per_stay").default(0).notNull(),
+    extraGuestFeePerNight: integer("extra_guest_fee_per_night")
+      .default(0)
+      .notNull(),
+    maxGuestsWithoutFee: integer("max_guests_without_fee"),
   },
+
   (t) => ({
     spatialIndex: index("spacial_index").using("gist", t.latLngPoint),
   }),

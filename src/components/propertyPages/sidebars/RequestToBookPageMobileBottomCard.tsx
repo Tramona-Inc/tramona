@@ -123,7 +123,7 @@ export default function RequestToBookPageMobileBottomCard({
                     <RequestToBookOrBookNowPriceCard property={property} />
                   </DialogContent>
                 </Dialog>
-                {!property.bookItNowEnabled && (
+                {property.bookItNowEnabled && (
                   <BookNowBtn
                     btnSize="sm"
                     property={property}

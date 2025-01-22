@@ -70,11 +70,10 @@ export function DesktopSearchTab({
   const [minPrice, setMinPrice] = useState("");
   const [priceSort, setPriceSort] = useState("");
   const [open, setOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
   const router = useRouter();
   const utils = api.useUtils();
-  const { setAdjustedProperties } = useAdjustedProperties();
+  const { setAdjustedProperties, setIsSearching } = useAdjustedProperties();
 
   const sortOptions = {
     none: "Select a value",
@@ -122,7 +121,7 @@ export function DesktopSearchTab({
   );
 
   const handleSearch = async (values: SearchFormValues) => {
-    setIsLoading(true);
+    setIsSearching(true);
     const params = new URLSearchParams();
     Object.entries(values).forEach(([key, value]) => {
       if (value) params.set(key, value.toString());
@@ -135,106 +134,100 @@ export function DesktopSearchTab({
 
     setAllProperties({ pages: [] });
 
-    if (values.checkIn && values.checkOut) {
-      try {
-        const propertiesInArea =
-          await utils.properties.getBookItNowProperties.fetch({
-            checkIn: values.checkIn,
-            checkOut: values.checkOut,
-            numGuests: values.numGuests,
-            location: values.location,
-          });
-
-        setAllProperties((prevState) => {
-          const updatedProperties = {
-            ...prevState,
-            pages: [
-              ...prevState.pages,
-              ...propertiesInArea.hostProperties,
-              ...propertiesInArea.scrapedProperties,
-            ],
-          };
-
-          setAdjustedProperties({
-            ...updatedProperties,
-            pages: filterProperties(
-              updatedProperties.pages as Property[],
-              minPrice !== "" ? (Number(minPrice) * 100).toString() : minPrice,
-              maxPrice !== "" ? (Number(maxPrice) * 100).toString() : maxPrice,
-              priceSort,
-            ),
-          });
-
-          return updatedProperties;
-        });
-
-        const airbnbResultsPromise = utils.misc.scrapeAirbnbInitialPage.fetch({
+    try {
+      const propertiesInArea =
+        await utils.properties.getBookItNowProperties.fetch({
           checkIn: values.checkIn,
           checkOut: values.checkOut,
           numGuests: values.numGuests,
           location: values.location,
         });
-        const airbnbResults = await airbnbResultsPromise;
 
-        setAllProperties((prevState) => {
-          const updatedProperties = {
-            ...prevState,
-            pages: [...prevState.pages, ...airbnbResults.res],
-          };
+      setAllProperties((prevState) => {
+        const updatedProperties = {
+          ...prevState,
+          pages: [
+            ...prevState.pages,
+            ...propertiesInArea.hostProperties,
+            ...propertiesInArea.scrapedProperties,
+          ],
+        };
 
-          setAdjustedProperties({
-            ...updatedProperties,
-            pages: filterProperties(
-              updatedProperties.pages as Property[],
-              minPrice !== "" ? (Number(minPrice) * 100).toString() : minPrice,
-              maxPrice !== "" ? (Number(maxPrice) * 100).toString() : maxPrice,
-              priceSort,
-            ),
-          });
-          setIsLoading(false);
-          return updatedProperties;
-        });
-        // setIsLoading(false);
-
-        const cursors =
-          airbnbResults.data.staysSearch.results.paginationInfo.pageCursors.slice(
-            1,
-          );
-
-        const finishAirbnbResultsPromise = utils.misc.scrapeAirbnbPages.fetch({
-          checkIn: values.checkIn,
-          checkOut: values.checkOut,
-          numGuests: values.numGuests,
-          location: values.location,
-          pageCursors: cursors,
+        setAdjustedProperties({
+          ...updatedProperties,
+          pages: filterProperties(
+            updatedProperties.pages as Property[],
+            minPrice !== "" ? (Number(minPrice) * 100).toString() : minPrice,
+            maxPrice !== "" ? (Number(maxPrice) * 100).toString() : maxPrice,
+            priceSort,
+          ),
         });
 
-        const finishAirbnbResults = await finishAirbnbResultsPromise;
-        setAllProperties((prevState) => {
-          const updatedProperties = {
-            ...prevState,
-            pages: [...prevState.pages, ...finishAirbnbResults],
-          };
+        return updatedProperties;
+      });
 
-          setAdjustedProperties({
-            ...updatedProperties,
-            pages: filterProperties(
-              updatedProperties.pages as Property[],
-              minPrice !== "" ? (Number(minPrice) * 100).toString() : minPrice,
-              maxPrice !== "" ? (Number(maxPrice) * 100).toString() : maxPrice,
-              priceSort,
-            ),
-          });
+      const airbnbResultsPromise = utils.misc.scrapeAirbnbInitialPage.fetch({
+        checkIn: values.checkIn,
+        checkOut: values.checkOut,
+        numGuests: values.numGuests,
+        location: values.location,
+      });
+      const airbnbResults = await airbnbResultsPromise;
 
-          return updatedProperties;
+      setAllProperties((prevState) => {
+        const updatedProperties = {
+          ...prevState,
+          pages: [...prevState.pages, ...airbnbResults.res],
+        };
+
+        setAdjustedProperties({
+          ...updatedProperties,
+          pages: filterProperties(
+            updatedProperties.pages as Property[],
+            minPrice !== "" ? (Number(minPrice) * 100).toString() : minPrice,
+            maxPrice !== "" ? (Number(maxPrice) * 100).toString() : maxPrice,
+            priceSort,
+          ),
         });
-      } catch (error) {
-        console.error("Error running subscrapers:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    } else {
-      setIsLoading(false);
+        return updatedProperties;
+      });
+
+      const cursors =
+        airbnbResults.data.staysSearch.results.paginationInfo.pageCursors.slice(
+          1,
+        );
+
+      const finishAirbnbResultsPromise = utils.misc.scrapeAirbnbPages.fetch({
+        checkIn: values.checkIn,
+        checkOut: values.checkOut,
+        numGuests: values.numGuests,
+        location: values.location,
+        pageCursors: cursors,
+      });
+
+      const finishAirbnbResults = await finishAirbnbResultsPromise;
+      setAllProperties((prevState) => {
+        const updatedProperties = {
+          ...prevState,
+          pages: [...prevState.pages, ...finishAirbnbResults],
+        };
+
+        setAdjustedProperties({
+          ...updatedProperties,
+          pages: filterProperties(
+            updatedProperties.pages as Property[],
+            minPrice !== "" ? (Number(minPrice) * 100).toString() : minPrice,
+            maxPrice !== "" ? (Number(maxPrice) * 100).toString() : maxPrice,
+            priceSort,
+          ),
+        });
+
+        return updatedProperties;
+      });
+    } catch (error) {
+      console.error("Error running subscrapers:", error);
+    } finally {
+      setIsSearching(false);
     }
   };
 
@@ -253,7 +246,6 @@ export function DesktopSearchTab({
                 >
               }
               onSubmit={handleSearch}
-              isLoading={isLoading}
             />
           </div>
 
@@ -274,7 +266,6 @@ export function DesktopSearchTab({
                     >
                   }
                   onSubmit={handleSearch}
-                  isLoading={isLoading}
                   isCompact={isCompact}
                 />
               </div>

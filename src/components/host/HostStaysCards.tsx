@@ -15,7 +15,7 @@ import { type RouterOutputs } from "@/utils/api";
 import { formatDistanceToNowStrict } from "date-fns";
 import { CheckCircle, EllipsisIcon, FlagIcon } from "lucide-react";
 import Link from "next/link";
-import { useChatWithHost } from "@/utils/messaging/useChatWithHost";
+import { useChatWithHostTeam } from "@/utils/messaging/useChatWithHost";
 import { Card, CardContent } from "../ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -35,7 +35,7 @@ export default function HostStaysCards({
   trips?: RouterOutputs["trips"]["getHostTrips"];
   staysTab?: StaysTabs;
 }) {
-  const chatWithHost = useChatWithHost();
+  const chatWithHostTeam = useChatWithHostTeam();
 
   if (!trips) return <HostStaysSkeleton />;
   if (trips.length === 0) return <HostStaysEmptyState staysTab={staysTab} />;
@@ -142,7 +142,7 @@ export default function HostStaysCards({
                 </DropdownMenu>
                 <Button
                   variant="secondary"
-                  onClick={() => chatWithHost({ hostId })}
+                  onClick={() => chatWithHostTeam({ hostId, hostTeamId: trip.property.hostTeam.id, propertyId: trip.property.id })}
                 >
                   Message
                 </Button>
@@ -152,7 +152,7 @@ export default function HostStaysCards({
             <Button
               variant="secondary"
               className="mt-2 w-full md:hidden"
-              onClick={() => chatWithHost({ hostId })}
+              onClick={() => chatWithHostTeam({ hostId, hostTeamId: trip.property.hostTeam.id, propertyId: trip.property.id })}
             >
               Message
             </Button>

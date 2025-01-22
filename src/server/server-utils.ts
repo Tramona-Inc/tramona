@@ -230,10 +230,14 @@ export async function sendTextToHostTeamMembers({
 export async function sendText({
   to,
   content,
+  isProductionOnly = true,
 }: {
   to: string;
   content: string;
+  isProductionOnly?: boolean;
 }) {
+  const isProduction = process.env.NODE_ENV === "production";
+  if (isProductionOnly && !isProduction) return;
   const response = await twilio.messages.create({
     body: content,
     from: env.TWILIO_FROM,
@@ -246,11 +250,15 @@ export async function sendScheduledText({
   to,
   content,
   sendAt,
+  isProductionOnly = true,
 }: {
   to: string;
   content: string;
   sendAt: Date;
+  isProductionOnly?: boolean;
 }) {
+  const isProduction = process.env.NODE_ENV === "production";
+  if (isProductionOnly && !isProduction) return;
   const response = await twilio.messages.create({
     body: content,
     from: env.TWILIO_FROM,
@@ -1226,6 +1234,16 @@ export async function getRequestsToBookForProperties(
     }
   }
   return propertyToRequestMap;
+}
+
+export async function getHostTeamFromProperty(propertyId: number) {
+  const hostTeam = await db.query.properties.findFirst({
+    where: eq(properties.id, propertyId),
+    columns: {
+      hostTeamId: true,
+    },
+  });
+  return hostTeam?.hostTeamId;
 }
 
 export async function addHostProfile({

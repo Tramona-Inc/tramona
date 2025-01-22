@@ -5,7 +5,10 @@ import { separateByPriceAndAgeRestriction } from "@/utils/utils";
 import EmptyRequestState from "./EmptyRequestState";
 import SidebarPropertySkeleton from "./SidebarPropertySkeleton";
 import { range } from "lodash";
-import { type SeparatedData, type RequestsPageOfferData } from "@/server/server-utils";
+import {
+  type SeparatedData,
+  type RequestsPageOfferData,
+} from "@/server/server-utils";
 import { useRouter } from "next/router";
 
 interface SidebarCityProps {
@@ -23,8 +26,12 @@ export default function SidebarCity({
   isLoading,
   initialSelectedCity,
 }: SidebarCityProps) {
-  const [selectedCity, setSelectedCity] = useState<string | null>(initialSelectedCity ?? null);
-  const [selectedCityOffers, setSelectedCityOffers] = useState<string | null>(null);
+  const [selectedCity, setSelectedCity] = useState<string | null>(
+    initialSelectedCity ?? null,
+  );
+  const [selectedCityOffers, setSelectedCityOffers] = useState<string | null>(
+    null,
+  );
   const router = useRouter();
   const { query } = router;
   const { tabs, offers, city } = query;
@@ -33,11 +40,12 @@ export default function SidebarCity({
     setSelectedCity(initialSelectedCity ?? null);
   }, [initialSelectedCity]);
 
-  const displayedData = separatedData && selectedOption !== "sent"
-    ? separatedData[selectedOption]
-    : offerData && selectedOption === "sent"
-      ? Object.values(offerData[selectedOption] || {})
-      : [];
+  const displayedData =
+    separatedData && selectedOption !== "sent"
+      ? separatedData[selectedOption]
+      : offerData && selectedOption === "sent"
+        ? Object.values(offerData[selectedOption] || {})
+        : [];
 
   const handleCityOffersClick = (city: string) => {
     setSelectedCityOffers(city);
@@ -59,7 +67,7 @@ export default function SidebarCity({
     );
   }
 
-  if (!displayedData || displayedData.length === 0) {
+  if (displayedData.length === 0) {
     return <EmptyRequestState />;
   }
 
@@ -69,10 +77,15 @@ export default function SidebarCity({
         {displayedData.map((cityData, index) => {
           const isSelected = cityData.city === city;
           return (
-            <Link href={{
-              pathname: `/host/requests/${cityData.city}`,
-              query: { tabs: 'city', option: 'sent' },
-            }} className="block" key={index} shallow={true}>
+            <Link
+              href={{
+                pathname: `/host/requests/${cityData.city}`,
+                query: { tabs: "city", option: "sent" },
+              }}
+              className="block"
+              key={index}
+              shallow={true}
+            >
               <div
                 className={`flex items-center justify-between rounded-xl p-4 ${
                   isSelected ? "bg-primaryGreen text-white" : ""
@@ -100,12 +113,18 @@ export default function SidebarCity({
       {displayedData.map((cityData, index) => {
         const isSelected = selectedCity === cityData.city;
         return (
-          <Link href={{
-            pathname: `/host/requests/${cityData.city}`,
-            query: selectedOption === "normal"
-              ? { tabs: 'city', option: 'normal' }
-              : { tabs: 'city', option: 'outsidePriceRestriction' },
-          }} className="block" key={index} shallow={true}>
+          <Link
+            href={{
+              pathname: `/host/requests/${cityData.city}`,
+              query:
+                selectedOption === "normal"
+                  ? { tabs: "city", option: "normal" }
+                  : { tabs: "city", option: "outsidePriceRestriction" },
+            }}
+            className="block"
+            key={index}
+            shallow={true}
+          >
             <div
               className={`flex items-center justify-between rounded-xl p-4 ${
                 isSelected ? "bg-primaryGreen text-white" : ""

@@ -30,7 +30,7 @@ export async function handlePendingInviteMessages(email: string) {
     where: eq(hostTeamInvites.inviteeEmail, email),
     with: {
       hostTeam: {
-        columns: { name: true },
+        columns: { name: true, id: true },
         with: { owner: { columns: { id: true } } },
       },
     },
@@ -40,6 +40,7 @@ export async function handlePendingInviteMessages(email: string) {
     const conversationId = await createOrGetConversation(
       email,
       invite.hostTeam.owner.id,
+      invite.hostTeam.id,
     );
     if (conversationId) {
       await sendInviteMessage(
@@ -52,7 +53,11 @@ export async function handlePendingInviteMessages(email: string) {
   }
 }
 
-async function createOrGetConversation(inviteeEmail: string, hostId: string) {
+async function createOrGetConversation(
+  inviteeEmail: string,
+  hostId: string,
+  hostTeamId?: number,
+) {
   const inviteeUser = await db.query.users.findFirst({
     where: eq(users.email, inviteeEmail),
     columns: { id: true },
@@ -93,10 +98,21 @@ async function createOrGetConversation(inviteeEmail: string, hostId: string) {
       throw new Error("Failed to create new conversation");
     }
 
-    await db.insert(conversationParticipants).values([
-      { conversationId: newConversation[0].id, userId: inviteeUser.id },
-      { conversationId: newConversation[0].id, userId: hostId },
-    ]);
+    if (hostTeamId) {
+      await db.insert(conversationParticipants).values([
+        { conversationId: newConversation[0].id, userId: inviteeUser.id },
+        {
+          conversationId: newConversation[0].id,
+          userId: hostId,
+          hostTeamId: hostTeamId,
+        },
+      ]);
+    } else {
+      await db.insert(conversationParticipants).values([
+        { conversationId: newConversation[0].id, userId: inviteeUser.id },
+        { conversationId: newConversation[0].id, userId: hostId },
+      ]);
+    }
 
     return newConversation[0].id;
   }
@@ -234,6 +250,7 @@ export const hostTeamsRouter = createTRPCRouter({
       const conversationId = await createOrGetConversation(
         input.email,
         ctx.user.id,
+        input.hostTeamId,
       );
       await sendInviteMessage(
         conversationId,
@@ -307,6 +324,7 @@ export const hostTeamsRouter = createTRPCRouter({
       const conversationId = await createOrGetConversation(
         input.email,
         ctx.user.id,
+        input.hostTeamId,
       );
       await sendInviteMessage(conversationId, hostTeam.name, true, ctx.user.id);
 
@@ -477,6 +495,14 @@ export const hostTeamsRouter = createTRPCRouter({
     return hostTeams;
   }),
 
+  getHostTeamMembers: protectedProcedure
+    .input(z.object({ hostTeamId: z.number() }))
+    .query(async ({ input, ctx }) => {
+      return await ctx.db.query.hostTeamMembers.findMany({
+        where: eq(hostTeamMembers.hostTeamId, input.hostTeamId),
+      });
+    }),
+
   createHostTeam: roleRestrictedProcedure(["host", "admin"])
     .input(z.object({ name: z.string() }))
     .mutation(async ({ ctx, input }) => {
@@ -631,6 +657,7 @@ export const hostTeamsRouter = createTRPCRouter({
       const conversationId = await createOrGetConversation(
         ctx.user.email,
         invite.hostTeam.owner.id,
+        invite.hostTeam.id,
       );
 
       await sendAcceptMessage(
@@ -685,6 +712,7 @@ export const hostTeamsRouter = createTRPCRouter({
       const conversationId = await createOrGetConversation(
         ctx.user.email,
         invite.hostTeam.owner.id,
+        invite.hostTeam.id,
       );
       await sendDeclineMessage(
         conversationId,

@@ -1,7 +1,7 @@
 import { env } from "@/env";
-import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
+import { coHostProcedure, createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { db } from "@/server/db";
-import { conversationParticipants, users } from "@/server/db/schema";
+import { conversationParticipants, hostTeamMembers, users } from "@/server/db/schema";
 import { zodString } from "@/utils/zod-utils";
 import { and, eq, inArray, ne } from "drizzle-orm";
 import { z } from "zod";
@@ -11,14 +11,15 @@ import { sendSlackMessage } from "@/server/slack";
 import { TRPCError } from "@trpc/server";
 
 const isProduction = process.env.NODE_ENV === "production";
+const ADMIN_HOST_TEAM_ID = env.ADMIN_TEAM_ID;
 const baseUrl = isProduction
   ? "https://www.tramona.com"
   : "http://localhost:3000";
 
 const ADMIN_ID = env.TRAMONA_ADMIN_USER_ID;
-
-export async function fetchUsersConversations(userId: string) {
-  return await db.query.users.findFirst({
+export async function fetchUsersConversations(userId: string, hostTeamId?: number | null) {
+  // Fetch all conversations for the user
+  const userConversations = await db.query.users.findFirst({
     where: eq(users.id, userId),
     columns: {},
     with: {
@@ -51,6 +52,46 @@ export async function fetchUsersConversations(userId: string) {
       },
     },
   });
+
+  // If a hostTeamId is provided, filter conversations based on the hostTeamId
+  // if (hostTeamId && userConversations?.conversations) {
+  //   userConversations.conversations = userConversations.conversations.filter((conversation) =>
+  //     conversation.conversation.participants.some((participant) =>
+  //       participant.hostTeamId === hostTeamId
+  //     )
+  //   );
+  // } else if (userConversations?.conversations) {
+
+  //   userConversations.conversations = userConversations.conversations.filter((conversation) =>
+  //     conversation.conversation.participants.some((participant) =>
+  //       participant.hostTeamId === null
+  //     )
+  //   );
+  // }
+
+
+
+  if (hostTeamId && userConversations?.conversations) {
+    console.log("hostTeamId", hostTeamId);
+    // Host side: Filter by hostTeamId and userId association
+    userConversations.conversations = userConversations.conversations.filter((conversation) =>
+      conversation.conversation.participants.some(
+        (participant) =>
+          participant.userId === userId && participant.hostTeamId === hostTeamId
+      )
+    );
+  } else if (userConversations?.conversations) {
+    console.log("no hostid");
+    // Traveler side: Filter by userId association and null hostTeamId
+    userConversations.conversations = userConversations.conversations.filter((conversation) =>
+      conversation.conversation.participants.some(
+        (participant) =>
+          participant.userId === userId && participant.hostTeamId === null
+      )
+    );
+  }
+
+  return userConversations;
 }
 
 export async function fetchConversationWithAdmin(userId: string) {
@@ -92,11 +133,33 @@ export async function fetchConversationWithAdmin(userId: string) {
   return conversationWithAdmin?.conversation.id ?? null;
 }
 
-export async function fetchConversationWithHost(
-  userId: string,
-  hostId: string,
-) {
-  const result = await db.query.users.findFirst({
+export async function fetchConversationWithHostTeam({
+  userId,
+  hostTeamId,
+  propertyId,
+  requestId,
+}: {
+  userId: string;
+  hostTeamId: number;
+  propertyId?: number;
+  requestId?: number;
+}) {
+  // Get the list of members in the host team
+  const hostTeamMembersList = await db.query.hostTeamMembers.findMany({
+    where: eq(hostTeamMembers.hostTeamId, hostTeamId),
+    columns: { userId: true },
+  });
+
+  // Extract user IDs from the host team members
+  const hostTeamMemberIds = hostTeamMembersList.map((member) => member.userId);
+
+  if (hostTeamMemberIds.length === 0) {
+    // If no members found, return null
+    return null;
+  }
+
+  // Query the user's conversations
+  const userConversations = await db.query.users.findFirst({
     where: eq(users.id, userId),
     with: {
       conversations: {
@@ -114,6 +177,11 @@ export async function fetchConversationWithHost(
                   },
                 },
               },
+              property: {
+                columns: {
+                  id: true,
+                },
+              },
             },
           },
         },
@@ -121,17 +189,32 @@ export async function fetchConversationWithHost(
     },
   });
 
-  // Check if conversation contains two participants
-  // and check if admin id is in there
-  const conversationWithHost = result?.conversations.find(
-    (conv) =>
-      conv.conversation.participants.length === 2 &&
-      conv.conversation.participants.some(
-        (participant) => participant.user.id === hostId,
-      ),
-  );
+  // Check if there's a conversation that matches the host team's members
+  const existingConversation = userConversations?.conversations.find((conv) => {
+    const participantIds = conv.conversation.participants.map(
+      (participant) => participant.userId,
+    );
 
-  return conversationWithHost?.conversation.id ?? null;
+    // Sort and compare the participant IDs
+    const participantsMatch =
+      participantIds.length === hostTeamMemberIds.length + 1 &&
+      [...participantIds].sort().join(",") ===
+        [...hostTeamMemberIds, userId].sort().join(",");
+
+    // Check if the propertyId matches (if provided)
+    const propertyIdMatches =
+      !propertyId || conv.conversation.property?.id === Number(propertyId);
+
+    // Check if the requestId matches (if provided)
+    const requestIdMatches =
+      !requestId || conv.conversation.requestId === requestId;
+
+    // Return true only if all criteria match
+    return participantsMatch && propertyIdMatches && requestIdMatches;
+  });
+
+  console.log(existingConversation?.conversation.id, "existingConversation?.conversation.id");
+  return existingConversation?.conversation.id ?? null;
 }
 
 export async function fetchConversationWithOffer(
@@ -175,57 +258,129 @@ export async function fetchConversationWithOffer(
   return conversationId;
 }
 
-async function generateConversation(
+async function generateConversation({
+  propertyId,
+  conversationName,
+  requestId,
+}: {
+  propertyId?: number,
   conversationName?: string,
-  offerId?: string,
-) {
+  requestId?: number,
+}) {
   return await db
     .insert(conversations)
-    .values({ name: conversationName ? conversationName : null, offerId })
+    .values({ name: conversationName ? conversationName : null, propertyId: propertyId ? Number(propertyId) : null, requestId: requestId ? Number(requestId) : null })
     .returning({ id: conversations.id })
     .then((res) => res[0]!.id);
 }
 
 export async function createConversationWithAdmin(userId: string) {
-  const conversationId = await generateConversation();
+  const conversationId = await generateConversation({});
+
+
+  const hostTeamId = ADMIN_HOST_TEAM_ID;
+  const teamMembers = await db.query.hostTeamMembers.findMany({
+    where: eq(hostTeamMembers.hostTeamId, hostTeamId),
+  });
+
+  const promises = teamMembers.map(async (member) => {
+    await db.insert(conversationParticipants).values([
+      { conversationId, userId: member.userId },
+    ]);
+  });
+
+  await Promise.all(promises);
 
   await db.insert(conversationParticipants).values([
     { conversationId, userId: userId },
-    { conversationId, userId: ADMIN_ID },
   ]);
 
   return conversationId;
 }
 
-export async function createConversationWithHost(
+export async function createConversationWithHostForRequest(
   userId: string,
-  hostId: string,
+  hostTeamId: number,
+  requestId: number,
 ) {
-  const conversationId = await generateConversation();
+  console.log("creating new conversation", requestId);
+  const conversationId = await generateConversation({requestId});
+  console.log(conversationId, "conversationId");
+  const teamMembers = await db.query.hostTeamMembers.findMany({
+    where: eq(hostTeamMembers.hostTeamId, hostTeamId),
+  });
+
+  const promises = teamMembers.map(async (member) => {
+    await db.insert(conversationParticipants).values([
+      { conversationId, userId: member.userId, hostTeamId: hostTeamId },
+    ]);
+  });
+
+  console.log(promises, "promises");
+
+  await Promise.all(promises);
+
+  console.log("after promises");
 
   await db.insert(conversationParticipants).values([
     { conversationId, userId: userId },
-    { conversationId, userId: hostId },
   ]);
+
+  console.log("after insert");
 
   return conversationId;
 }
 
-export async function createConversationWithOfferHelper(
+export async function createConversationWithHostOrAdminTeam(
   userId: string,
-  offerHostOrAllAdmins: string,
-  propertyName: string,
-  offerId: string,
+  hostTeamId: number,
+  propertyId: number,
 ) {
-  const conversationId = await generateConversation(propertyName, offerId);
+  const conversationId = await generateConversation({propertyId});
+
+  const teamMembers = await db.query.hostTeamMembers.findMany({
+    where: eq(hostTeamMembers.hostTeamId, hostTeamId),
+  });
+
+  const promises = teamMembers.map(async (member) => {
+    await db.insert(conversationParticipants).values([
+      { conversationId, userId: member.userId, hostTeamId: hostTeamId },
+    ]);
+  });
+
+  await Promise.all(promises);
 
   await db.insert(conversationParticipants).values([
     { conversationId, userId: userId },
-    { conversationId, userId: offerHostOrAllAdmins },
   ]);
 
   return conversationId;
 }
+
+// export async function createConversationWithOfferHelper(
+//   userId: string,
+//   propertyName: string,
+//   offerId: string,
+//   hostTeamId: number,
+// ) {
+//   const conversationId = await generateConversation(propertyName, offerId);
+
+//   const teamMembers = await db.query.hostTeamMembers.findMany({
+//     where: eq(hostTeamMembers.hostTeamId, hostTeamId),
+//   });
+//   const promises = teamMembers.map(async (member) => {
+//     await db.insert(conversationParticipants).values([
+//       { conversationId, userId: member.userId, hostTeamId: hostTeamId },
+//     ]);
+//   });
+//   await Promise.all(promises);
+//   await db.insert(conversationParticipants).values([
+//     { conversationId, userId: userId },
+//   ]);
+
+
+//   return conversationId;
+// }
 
 async function addUserToConversation(userId: string, conversationId: string) {
   await db
@@ -233,19 +388,19 @@ async function addUserToConversation(userId: string, conversationId: string) {
     .values({ conversationId: conversationId, userId: userId });
 }
 
-export async function addTwoUserToConversation(
-  user1Id: string,
-  user2Id: string,
-) {
-  const conversationId = await generateConversation();
+// export async function addTwoUserToConversation(
+//   user1Id: string,
+//   user2Id: string,
+// ) {
+//   const conversationId = await generateConversation();
 
-  await db.insert(conversationParticipants).values([
-    { conversationId, userId: user1Id },
-    { conversationId, userId: user2Id },
-  ]);
+//   await db.insert(conversationParticipants).values([
+//     { conversationId, userId: user1Id },
+//     { conversationId, userId: user2Id },
+//   ]);
 
-  return conversationId;
-}
+//   return conversationId;
+// }
 
 async function verifyConversationExists(conversationId: string) {
   const conversation = await db.query.conversations.findFirst({
@@ -255,53 +410,64 @@ async function verifyConversationExists(conversationId: string) {
 }
 
 export const messagesRouter = createTRPCRouter({
-  getConversations: protectedProcedure.query(async ({ ctx }) => {
-    const result = await fetchUsersConversations(ctx.user.id);
-
-    if (result) {
-      const orderedConversations = result.conversations.map(
-        ({ conversation }) => ({
-          ...conversation,
-          participants: conversation.participants
-            .filter((p) => p.user.id !== ctx.user.id)
-            .map((p) => p.user)
-            .filter(Boolean),
-        }),
+  getConversations: protectedProcedure
+    .input(
+      z.object({
+        hostTeamId: z.number().optional().nullable(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const result = await fetchUsersConversations(
+        ctx.user.id,
+        input.hostTeamId,
       );
 
-      // Order conversations by the most recent activity (conversation or message creation)
-      orderedConversations.sort((a, b) => {
-        // Get the conversation's createdAt date
-        const aConversationDate = new Date(a.createdAt);
-        const bConversationDate = new Date(b.createdAt);
+      console.log(result, "result");
 
-        // Get the latest message's createdAt date, or use the conversation's createdAt date if no messages
-        const aLatestMessageDate = a.messages[0]
-          ? new Date(a.messages[0].createdAt)
-          : aConversationDate;
-        const bLatestMessageDate = b.messages[0]
-          ? new Date(b.messages[0].createdAt)
-          : bConversationDate;
+      if (result) {
+        const orderedConversations = result.conversations.map(
+          ({ conversation }) => ({
+            ...conversation,
+            participants: conversation.participants
+              .filter((p) => p.user.id !== ctx.user.id)
+              .map((p) => p.user)
+              .filter(Boolean),
+          }),
+        );
 
-        // Use the most recent of the two dates for comparison
-        const aMostRecentDate =
-          aLatestMessageDate > aConversationDate
-            ? aLatestMessageDate
+        // Order conversations by the most recent activity (conversation or message creation)
+        orderedConversations.sort((a, b) => {
+          // Get the conversation's createdAt date
+          const aConversationDate = new Date(a.createdAt);
+          const bConversationDate = new Date(b.createdAt);
+
+          // Get the latest message's createdAt date, or use the conversation's createdAt date if no messages
+          const aLatestMessageDate = a.messages[0]
+            ? new Date(a.messages[0].createdAt)
             : aConversationDate;
-        const bMostRecentDate =
-          bLatestMessageDate > bConversationDate
-            ? bLatestMessageDate
+          const bLatestMessageDate = b.messages[0]
+            ? new Date(b.messages[0].createdAt)
             : bConversationDate;
 
-        // Sort in descending order of the most recent activity
-        return bMostRecentDate.getTime() - aMostRecentDate.getTime();
-      });
+          // Use the most recent of the two dates for comparison
+          const aMostRecentDate =
+            aLatestMessageDate > aConversationDate
+              ? aLatestMessageDate
+              : aConversationDate;
+          const bMostRecentDate =
+            bLatestMessageDate > bConversationDate
+              ? bLatestMessageDate
+              : bConversationDate;
 
-      return orderedConversations;
-    }
+          // Sort in descending order of the most recent activity
+          return bMostRecentDate.getTime() - aMostRecentDate.getTime();
+        });
 
-    return [];
-  }),
+        return orderedConversations;
+      }
+
+      return [];
+    }),
 
   createConversationWithAdmin: protectedProcedure.mutation(async ({ ctx }) => {
     const conversationId = await fetchConversationWithAdmin(ctx.user.id);
@@ -314,18 +480,24 @@ export const messagesRouter = createTRPCRouter({
     return conversationId;
   }),
 
-  createConversationHostWithUser: protectedProcedure
-    .input(z.object({ userId: zodString() }))
+  createConversationHostWithUserForRequest: coHostProcedure
+    ("communicate_with_guests", z.object({ userId: zodString(), currentHostTeamId: z.number(), requestId: z.number() }))
     .mutation(async ({ ctx, input }) => {
-      const conversationId = await fetchConversationWithHost(
-        input.userId,
-        ctx.user.id,
-      );
+      const conversationId = await fetchConversationWithHostTeam({
+        userId: input.userId,
+        hostTeamId: input.currentHostTeamId,
+        requestId: input.requestId,
+      });
 
+      console.log(conversationId, "conversationId");
+
+      console.log(input, "input", );
       if (!conversationId) {
-        const newConversationId = await createConversationWithHost(
-          ctx.user.id,
+        console.log("creating new conversation");
+        const newConversationId = await createConversationWithHostForRequest(
           input.userId,
+          input.currentHostTeamId,
+          input.requestId,
         );
         return { id: newConversationId };
       }
@@ -333,16 +505,41 @@ export const messagesRouter = createTRPCRouter({
       return { id: conversationId };
     }),
 
-  createConversationWithHost: protectedProcedure
-    .input(z.object({ hostId: zodString() }))
+  createConversationHostWithUser: coHostProcedure
+    ("communicate_with_guests", z.object({ userId: zodString(), currentHostTeamId: z.number(), propertyId: z.number() }))
     .mutation(async ({ ctx, input }) => {
-      const conversationId = await fetchConversationWithHost(
-        ctx.user.id,
-        input.hostId,
-      );
+      const conversationId = await fetchConversationWithHostTeam({
+        userId: input.userId,
+        hostTeamId: input.currentHostTeamId,
+        propertyId: input.propertyId,
+      });
 
       if (!conversationId) {
-        return await createConversationWithHost(ctx.user.id, input.hostId);
+        const newConversationId = await createConversationWithHostOrAdminTeam(
+          input.userId,
+          input.currentHostTeamId,
+          input.propertyId,
+        );
+        return { id: newConversationId };
+      }
+
+      return { id: conversationId };
+    }),
+
+  createConversationWithHostOrAdminTeam: protectedProcedure
+    .input(z.object({ hostId: zodString(), hostTeamId: z.number().optional(), propertyId: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      if (!input.hostTeamId) {
+        input.hostTeamId = ADMIN_HOST_TEAM_ID;
+      }
+      const conversationId = await fetchConversationWithHostTeam({
+        userId: ctx.user.id,
+        hostTeamId: input.hostTeamId,
+        propertyId: input.propertyId,
+      });
+
+      if (!conversationId) {
+        return await createConversationWithHostOrAdminTeam(ctx.user.id, input.hostTeamId, input.propertyId);
       }
 
       return conversationId;
@@ -377,38 +574,6 @@ export const messagesRouter = createTRPCRouter({
       return { tempUserId: tempUser.id, conversationId: conversationId };
     }),
 
-  createOrFetchConversationWithOffer: protectedProcedure
-    .input(
-      z.object({
-        offerId: z.string(),
-        offerHostId: z.union([z.string(), z.null()]),
-        offerPropertyName: z.string(),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      const conversationExistId = await fetchConversationWithOffer(
-        ctx.user.id,
-        input.offerId,
-      );
-      console.log(conversationExistId, "converation exist");
-
-      //determine if the conversation will be with the host or the admin
-      const offerHostOrAllAdmins = input.offerHostId
-        ? input.offerHostId
-        : ADMIN_ID;
-
-      // Create conversation with host if it doesn't exist
-      if (!conversationExistId) {
-        return await createConversationWithOfferHelper(
-          ctx.user.id,
-          offerHostOrAllAdmins,
-          input.offerPropertyName,
-          input.offerId,
-        );
-      }
-      return conversationExistId;
-    }),
-
   addUserToConversation: publicProcedure
     .input(
       z.object({
@@ -433,20 +598,20 @@ export const messagesRouter = createTRPCRouter({
         .set({ read: true })
         .where(eq(messages.id, input.messageId));
     }),
-  addTwoUsersToConversation: protectedProcedure
-    .input(
-      z.object({
-        user1Id: zodString(),
-        user2Id: zodString(),
-      }),
-    )
-    .mutation(async ({ input }) => {
-      const conversationId = await addTwoUserToConversation(
-        input.user1Id,
-        input.user2Id,
-      );
-      return conversationId;
-    }),
+  // addTwoUsersToConversation: protectedProcedure
+  //   .input(
+  //     z.object({
+  //       user1Id: zodString(),
+  //       user2Id: zodString(),
+  //     }),
+  //   )
+  //   .mutation(async ({ input }) => {
+  //     const conversationId = await addTwoUserToConversation(
+  //       input.user1Id,
+  //       input.user2Id,
+  //     );
+  //     return conversationId;
+  //   }),
 
   getParticipantsPhoneNumbers: protectedProcedure
     .input(z.object({ conversationId: zodString() }))

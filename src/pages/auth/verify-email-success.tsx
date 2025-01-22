@@ -1,4 +1,5 @@
 import MainLayout from "@/components/_common/Layout/MainLayout";
+import { CircleCheckIcon } from "lucide-react";
 
 export default function Page() {
   // const router = useRouter();
@@ -24,10 +25,12 @@ export default function Page() {
 
   return (
     <MainLayout className="flex flex-col justify-center">
-      <div className="flex min-h-screen-minus-header flex-col items-center justify-center gap-4">
-        <h1 className="text-center text-5xl font-bold tracking-tight">
-          Email Successfully Verified! You can now close this page.
+      <div className="mx-4 flex min-h-screen-minus-header flex-col items-center justify-center gap-4">
+        <CircleCheckIcon className="size-16 text-green-800 lg:size-20" />
+        <h1 className="text-center text-3xl font-semibold tracking-tight md:text-5xl">
+          Email Successfully Verified!
         </h1>
+        <p>You can now close this page.</p>
       </div>
     </MainLayout>
   );

@@ -16,6 +16,7 @@ import {
   getServiceFee,
 } from "@/utils/payment-utils/paymentBreakdown";
 import type { RequestToBookDetails } from "../propertyPages/sidebars/actionButtons/RequestToBookBtn";
+import { TRAVELER_MARKUP } from "@/utils/constants";
 
 type PaymentBreakdown = {
   totalTripAmount: number;
@@ -52,10 +53,7 @@ export default function PriceDetailsBeforeTax({
 
   let priceWithApplicableDiscount;
   if (requestToBook && property) {
-    const applicableDiscount = getApplicableBookItNowDiscount({
-      discountTiers: property.discountTiers,
-      checkIn: requestToBook.checkIn,
-    });
+    const applicableDiscount = getApplicableBookItNowDiscount();
 
     if (applicableDiscount && applicableDiscount > 0) {
       priceWithApplicableDiscount =
@@ -73,7 +71,7 @@ export default function PriceDetailsBeforeTax({
 
   const travelerOfferedPriceBeforeFees = getTravelerOfferedPrice({
     totalBasePriceBeforeFees: priceWithApplicableDiscount ?? scrapedPrice,
-    travelerMarkup: 1.015,
+    travelerMarkup: TRAVELER_MARKUP,
   });
 
   useEffect(() => {

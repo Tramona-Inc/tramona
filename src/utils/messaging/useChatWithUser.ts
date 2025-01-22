@@ -1,16 +1,21 @@
 import { useRouter } from "next/router";
 import { api } from "@/utils/api";
 import { type TRPCError } from "@trpc/server";
-
+import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 export function useChatWithUser() {
   const router = useRouter();
+  const { currentHostTeamId } = useHostTeamStore();
 
   const { mutateAsync: createConversation } =
     api.messages.createConversationHostWithUser.useMutation();
 
-  const chatWithUser = async (userId: string) => {
+  const chatWithUser = async (userId: string, propertyId: number) => {
     try {
-      const conversation = await createConversation({ userId });
+      const conversation = await createConversation({
+        userId,
+        currentHostTeamId: currentHostTeamId!,
+        propertyId,
+      });
 
       if (!conversation.id) {
         throw new Error("Failed to create conversation");

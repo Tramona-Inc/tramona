@@ -88,6 +88,77 @@ export default function HostConfirmRequestDialog({
     propertyPrices.hasOwnProperty(property.id),
   );
 
+  // const handleSubmit = async () => {
+  //   const propertiesWithNoTax = filteredSelectedProperties
+  //     .filter((property) => !property.taxAvailable)
+  //     .map((property) => property.city); // List cities of properties without tax
+
+  //   const propertiesWithTax = filteredSelectedProperties.filter(
+  //     (property) => property.taxAvailable,
+  //   );
+
+  //   await Promise.all(
+  //     // todo: make procedure accept array
+  //     propertiesWithTax.map(async (property) => {
+  //       const totalBasePriceBeforeFees =
+  //         parseInt(propertyPrices[property.id] ?? "0") * 100 * numNights;
+
+  //       await createOffersMutation
+  //         .mutateAsync({
+  //           requestId: request.id,
+  //           propertyId: property.id,
+  //           totalBasePriceBeforeFees: totalBasePriceBeforeFees,
+  //           hostPayout: getHostPayout(totalBasePriceBeforeFees),
+  //           travelerOfferedPriceBeforeFees: getTravelerOfferedPrice({
+  //             totalBasePriceBeforeFees,
+  //             travelerMarkup: TRAVELER_MARKUP,
+  //           }),
+  //         })
+  //         .catch((error) => {
+  //           console.log("Error", error);
+  //           if (error instanceof Error) {
+  //             toast({
+  //               title: "Error",
+  //               description: error.message,
+  //               variant: "destructive",
+  //             });
+  //           }
+  //         });
+  //     }),
+  //   )
+  //     .then(async () => {
+  //       if (propertiesWithNoTax.length === 0) {
+  //         // All properties had tax set up, proceed to step 2
+  //         setStep(2);
+  //       } else {
+  //         // Some properties did not have tax set up, show popup
+  //         toast({
+  //           title: "Error Creating Offers",
+  //           description: [
+  //             `We do not currently have taxes set up for these locations:`,
+  //             `${propertiesWithNoTax.join(", ")}`,
+  //             `A request for this location tax to be configured has been sent. Keep an eye on your offer details for updates! `,
+  //           ].join("\n"),
+
+  //           variant: "destructive",
+  //         });
+  //         //send slack
+  //         await slackMutation.mutateAsync({
+  //           isProductionOnly: false,
+  //           message: [
+  //             `Tramona: A host tried to create an offer without tax for the following locations: ${propertiesWithNoTax.join(", ")}.`,
+  //             `Property Ids: ${properties.map((p) => p.id).join(", ")}`,
+  //           ].join("\n"),
+  //         });
+  //         setStep(1); // Reset the step to 1 if some properties failed
+  //       }
+  //     })
+  //     .catch(() => {
+  //       errorToast();
+  //       setStep(1);
+  //     });
+  // };
+
   const handleSubmit = async () => {
     const propertiesWithNoTax = filteredSelectedProperties
       .filter((property) => !property.taxAvailable)
@@ -97,66 +168,85 @@ export default function HostConfirmRequestDialog({
       (property) => property.taxAvailable,
     );
 
-    await Promise.all(
-      // todo: make procedure accept array
-      propertiesWithTax.map(async (property) => {
-        const totalBasePriceBeforeFees =
-          parseInt(propertyPrices[property.id] ?? "0") * 100 * numNights;
+    try {
+      const results = await Promise.allSettled(
+        propertiesWithTax.map(async (property) => {
+          const totalBasePriceBeforeFees =
+            parseInt(propertyPrices[property.id] ?? "0") * 100 * numNights;
 
-        await createOffersMutation
-          .mutateAsync({
+          return createOffersMutation.mutateAsync({
             requestId: request.id,
             propertyId: property.id,
-            totalBasePriceBeforeFees: totalBasePriceBeforeFees,
+            totalBasePriceBeforeFees,
             hostPayout: getHostPayout(totalBasePriceBeforeFees),
             travelerOfferedPriceBeforeFees: getTravelerOfferedPrice({
               totalBasePriceBeforeFees,
               travelerMarkup: TRAVELER_MARKUP,
             }),
-          })
-          .catch((error) => {
-            console.log("Error", error);
-            if (error instanceof Error) {
-              toast({
-                title: "Error",
-                description: error.message,
-                variant: "destructive",
-              });
-            }
           });
-      }),
-    )
-      .then(async () => {
-        if (propertiesWithNoTax.length === 0) {
-          // All properties had tax set up, proceed to step 2
-          setStep(2);
-        } else {
-          // Some properties did not have tax set up, show popup
-          toast({
-            title: "Error Creating Offers",
-            description: [
-              `We do not currently have taxes set up for these locations:`,
-              `${propertiesWithNoTax.join(", ")}`,
-              `A request for this location tax to be configured has been sent. Keep an eye on your offer details for updates! `,
-            ].join("\n"),
+        }),
+      );
 
+      const failedProperties = propertiesWithTax.filter(
+        (_, index) => results[index]?.status === "rejected",
+      );
+
+      if (propertiesWithTax.length === 1 && failedProperties.length > 0) {
+        // Single property and it failed
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        const error = results[0]?.status === 'rejected' ? results[0].reason : undefined;
+        if (error instanceof Error) {
+          toast({
+            title: "Error",
+            description: error.message,
             variant: "destructive",
           });
-          //send slack
-          await slackMutation.mutateAsync({
-            isProductionOnly: false,
-            message: [
-              `Tramona: A host tried to create an offer without tax for the following locations: ${propertiesWithNoTax.join(", ")}.`,
-              `Property Ids: ${properties.map((p) => p.id).join(", ")}`,
-            ].join("\n"),
-          });
-          setStep(1); // Reset the step to 1 if some properties failed
         }
-      })
-      .catch(() => {
-        errorToast();
         setStep(1);
+        return; // Exit early
+      }
+
+      if (failedProperties.length > 0) {
+        toast({
+          title: "Partial Failure",
+          description: `Some offers could not be created. Please check the logs or contact support.`,
+          variant: "destructive",
+        });
+      }
+
+      if (propertiesWithNoTax.length === 0) {
+        // All properties had tax set up, proceed to step 2
+        setStep(2);
+      } else {
+        // Some properties did not have tax set up, show popup
+        toast({
+          title: "Error Creating Offers",
+          description: [
+            `We do not currently have taxes set up for these locations:`,
+            `${propertiesWithNoTax.join(", ")}`,
+            `A request for this location tax to be configured has been sent. Keep an eye on your offer details for updates!`,
+          ].join("\n"),
+          variant: "destructive",
+        });
+        // Send Slack notification
+        await slackMutation.mutateAsync({
+          isProductionOnly: false,
+          message: [
+            `Tramona: A host tried to create an offer without tax for the following locations: ${propertiesWithNoTax.join(", ")}.`,
+            `Property Ids: ${propertiesWithNoTax.join(", ")}`,
+          ].join("\n"),
+        });
+        setStep(1); // Reset the step to 1 if some properties failed
+      }
+    } catch (error) {
+      console.log("Critical error during offer creation", error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
       });
+      setStep(1); // Reset the step to 1 on failure
+    }
   };
 
   const numNights = getNumNights(request.checkIn, request.checkOut);

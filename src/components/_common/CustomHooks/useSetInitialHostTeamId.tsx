@@ -15,9 +15,7 @@ export default function useSetInitialHostTeamId() {
       enabled: !currentHostTeamId, // Only fetch if no currentHostTeamId
       onSuccess: (data) => {
         if (data && !currentHostTeamId) {
-          console.log(data);
           setCurrentHostTeam(data);
-          console.log("Loaded from API:", currentHostTeamId);
         }
       },
     });

@@ -6,19 +6,22 @@ import { CalendarClockIcon, SearchIcon } from "lucide-react";
 import Link from "next/link";
 import { Button } from "../ui/button";
 import { Alert, AlertTitle, AlertDescription } from "../ui/alert";
+import Spinner from "../_common/Spinner";
 
 export default function TripsTab({
   trips,
   type,
+  isTripLoading,
 }: {
   trips: TripCardDetails[];
   type: "upcoming" | "current";
+  isTripLoading: boolean;
 }) {
   return (
     <div className="mt-3 flex flex-col gap-y-3">
       <Link href="/unclaimed-offers">
         <Button variant="primary" className="max-w-fit">
-          <SearchIcon className="size-5 -ml-1" />
+          <SearchIcon className="-ml-1 size-5" />
           Plan Another Trip
         </Button>
       </Link>
@@ -33,7 +36,9 @@ export default function TripsTab({
             : "These are your ongoing trips. Enjoy your stay"}
         </AlertDescription>
       </Alert>
-      {trips.length > 0 ? (
+      {isTripLoading ? (
+        <Spinner />
+      ) : trips.length > 0 ? (
         <div className="grid grid-cols-1 gap-4 pt-4 xl:grid-cols-2">
           {trips.map((trip) => (
             <UpcomingTripCard key={trip.id} trip={trip} />

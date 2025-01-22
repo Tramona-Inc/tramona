@@ -3,7 +3,6 @@ import { RequestsPageOfferData, SeparatedData } from "@/server/server-utils";
 import { useWindowSize } from "@uidotdev/usehooks";
 import { clsx, type ClassValue } from "clsx";
 import {
-  differenceInDays,
   differenceInYears,
   formatDate,
   type FormatOptions,
@@ -395,6 +394,7 @@ export function getDiscountPercentage(
 
 const useScreenWidth = () => useWindowSize().width ?? 0;
 
+export const useIsXs = () => useScreenWidth() < 640;
 /**
  * screen width >= 640 (same as tailwind `sm:`)
  */
@@ -811,26 +811,11 @@ export function removeTax(total: number, taxRate: number): number {
   return amountWithoutTax;
 }
 
-export const getApplicableBookItNowDiscount = ({
-  discountTiers,
-  checkIn,
-}: {
-  discountTiers: { days: number; percentOff: number }[] | null | undefined;
-  checkIn: Date;
-}): number | null => {
-  if (!discountTiers || discountTiers.length === 0) {
-    return null;
-  }
+export const getApplicableBookItNowDiscount = () => {
+  ///WE ARE NOT DOING DISCOUNT TIERS ANYMORE THATS WHY IM RETURNING NULL
+  //but i plan on adding discounts in the near future so this function can stay :)
 
-  const daysUntilCheckIn = differenceInDays(checkIn, new Date());
-
-  const sortedTiers = [...discountTiers].sort((a, b) => b.days - a.days);
-
-  const applicableDiscount = sortedTiers.find(
-    (tier) => daysUntilCheckIn >= tier.days,
-  );
-
-  return applicableDiscount?.percentOff ?? null;
+  return null;
 };
 
 export const capitalizeFirstLetter = (string: string): string => {
@@ -1089,3 +1074,17 @@ export function convertHostInteractionPref(interactionPreference: string) {
   }
   return modifiedPref;
 }
+
+export const validateImage = (src: string): Promise<boolean> => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve(true);
+    img.onerror = () => {
+      // Suppress specific logs
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      console.error = () => {};
+      resolve(false);
+    };
+    img.src = src;
+  });
+};

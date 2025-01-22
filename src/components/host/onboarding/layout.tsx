@@ -1,4 +1,3 @@
-import { Header } from "@/components/_common/Layout/header/Header";
 import MessagesPopover from "@/components/messages/chat-with-admin-popover/MessagesPopover";
 
 import { StickyTopBar } from "@/pages/for-hosts";
@@ -29,7 +28,7 @@ export default function OnboardingLayout({
           {children}
         </div>
         <div className="hidden md:contents">
-          <MessagesPopover isMobile={false} isHostOnboarding={true} />
+          {/* <MessagesPopover isMobile={false} isHostOnboarding={true} /> */}
         </div>
       </div>
     </>

@@ -204,7 +204,7 @@ export const pmsRouter = createTRPCRouter({
         "https://connect.hospitable.com/api/v1/auth-codes",
         {
           customer_id: id,
-          redirect_url: "https://tramona.com/host",
+          redirect_url: process.env.NEXTAUTH_URL + "/load-airbnb-properties",
           // redirect_url: "https://179c-2601-600-8e81-3180-4171-fe-a3a4-da1d.ngrok-free.app/host",
         },
         {
@@ -242,4 +242,27 @@ export const pmsRouter = createTRPCRouter({
       console.log("propertyId", propertyId);
       return await getPropertyCalendar(propertyId);
   }),
+
+  resetHospitableCustomer: protectedProcedure.mutation(async ({ ctx }) => {
+    await ctx.db.query.users.findFirst({
+      columns: { id: true },
+      where: eq(users.id, ctx.user.id),
+    }).then(async (user) => {
+      if (!user) {
+        throw new Error("User not found");
+      }
+      const { id } = user;
+      try {
+        await axios.delete(`https://connect.hospitable.com/api/v1/customers/${id}`, {
+          headers: {
+            Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
+          },
+        });
+      } catch (error) {
+        console.error("Error resetting Hospitable customer:", error);
+        throw new Error("Failed to reset Hospitable customer");
+      }
+    });
+  }),
 });
+

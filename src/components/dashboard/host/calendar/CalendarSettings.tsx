@@ -13,24 +13,33 @@ import { toast } from "@/components/ui/use-toast";
 import RequestAndBidAutomationSection from "./setttingsSections/RequestAndBidAutomationSection";
 import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 import { errorToast } from "@/utils/toasts";
+import * as React from "react";
+import HostFeeTab from "./HostFeeTab";
 
-export default function CalendarSettings({ property }: { property: Property }) {
+interface CalendarSettingsProps {
+  property: Property;
+  handleBookItNowSwitch: (checked: boolean) => Promise<void>;
+  handleBookItNowSlider: (bookItNowPercent: number) => Promise<void>;
+  isUpdatingBookItNow: boolean;
+  isBookItNowChecked: boolean;
+  refetch: () => void;
+}
+export default function CalendarSettings({
+  property,
+  handleBookItNowSwitch,
+  handleBookItNowSlider,
+  isUpdatingBookItNow,
+  isBookItNowChecked,
+  refetch,
+}: CalendarSettingsProps) {
   const { currentHostTeamId } = useHostTeamStore();
 
   // <---------------------------------- MUTATIONS ---------------------------------->
-  const { mutateAsync: toggleBookItNow } =
-    api.properties.toggleBookItNow.useMutation();
-  const { mutateAsync: updateBookItNow, isLoading: isUpdatingBookItNow } =
-    api.properties.updateBookItNow.useMutation();
 
   const { mutateAsync: updateRequestToBook } =
     api.properties.updateRequestToBook.useMutation();
 
-  // Book it now section
-  const [isChecked, setIsChecked] = useState<boolean | undefined>(
-    property.bookItNowEnabled,
-  );
-  const [bookItNowPercent, setBookItNowPercent] = useState<number>( //HERE CHANGE THIS BECAUSE IT SUPPOSE BE CONNECTED TO THE PROPERTY PRICING
+  const [bookItNowPercent, setBookItNowPercent] = useState<number>(
     property.bookItNowHostDiscountPercentOffInput,
   );
 
@@ -40,67 +49,17 @@ export default function CalendarSettings({ property }: { property: Property }) {
     property.requestToBookMaxDiscountPercentage,
   );
 
+  // Local Loading State for switch
+  const [isBookItNowSwitchLoading, setIsBookItNowSwitchLoading] =
+    useState(false);
+
   useEffect(() => {
-    setIsChecked(property.bookItNowEnabled);
     setBookItNowPercent(property.bookItNowHostDiscountPercentOffInput);
     setBiddingPercent(property.requestToBookMaxDiscountPercentage);
   }, [property]); //update when the selected property changes
 
-  const handleBookItNowSwitch = async (checked: boolean) => {
-    setIsChecked(checked);
-    //only update if turned off
-    await toggleBookItNow({
-      id: property.id,
-      bookItNowEnabled: checked,
-      currentHostTeamId: currentHostTeamId!,
-    })
-      .then((res) => {
-        if (!res) {
-          toast({
-            title: `Book it now disabled`,
-          });
-        }
-      })
-      .catch((error) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        if (error.data?.code === "FORBIDDEN") {
-          toast({
-            title:
-              "You do not have permission to edit overall pricing strategy.",
-            description: "Please contact your team owner to request access.",
-          });
-        } else {
-          errorToast();
-        }
-      });
-  };
-
-  const handleBookItNowSlider = async () => {
-    if (isChecked) {
-      console.log(bookItNowPercent);
-      await updateBookItNow({
-        id: property.id,
-        bookItNowHostDiscountPercentOffInput: bookItNowPercent,
-        currentHostTeamId: currentHostTeamId!,
-      })
-        .then(() => {
-          toast({
-            title: "Successfully updated book it now percentage!",
-          });
-        })
-        .catch((error) => {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          if (error.data?.code === "FORBIDDEN") {
-            toast({
-              title:
-                "You do not have permission to edit overall pricing strategy.",
-              description: "Please contact your team owner to request access.",
-            });
-          } else {
-            errorToast();
-          }
-        });
-    }
+  const handleBookItNowSliderLocal = async () => {
+    await handleBookItNowSlider(bookItNowPercent);
   };
 
   const handleBiddingSave = async () => {
@@ -136,13 +95,15 @@ export default function CalendarSettings({ property }: { property: Property }) {
         <h2 className="mb-2 text-xl font-bold sm:mb-6 sm:text-2xl">Settings</h2>
         <Tabs defaultValue="pricing" className="w-full">
           <TabsList
-            className="mb-4 grid w-full grid-cols-2 sm:mb-6"
+            className="mb-4 grid w-full grid-cols-3 sm:mb-6"
             noBorder={true}
           >
             <TabsTrigger value="pricing" className="flex-1">
               Pricing
             </TabsTrigger>
-
+            <TabsTrigger value="fees" className="flex-1">
+              Fees
+            </TabsTrigger>
             <TabsTrigger value="restrictions" className="flex-1">
               Restrictions
             </TabsTrigger>
@@ -163,15 +124,19 @@ export default function CalendarSettings({ property }: { property: Property }) {
                   Tramona and Airbnb.
                 </p>
                 <Switch
-                  checked={isChecked}
+                  checked={isBookItNowChecked}
+                  disabled={isBookItNowSwitchLoading}
                   className="data-[state=checked]:bg-primaryGreen data-[state=unchecked]:bg-gray-300"
-                  onCheckedChange={(checked) => {
-                    void handleBookItNowSwitch(checked);
+                  onCheckedChange={async (checked) => {
+                    setIsBookItNowSwitchLoading(true);
+                    await handleBookItNowSwitch(checked).finally(() => {
+                      setIsBookItNowSwitchLoading(false);
+                    });
                   }}
                 />
               </div>
 
-              {isChecked && (
+              {isBookItNowChecked && (
                 <div className="space-y-4 pt-4">
                   <div className="my-6 w-full border-b border-gray-200" />
                   <Label>{bookItNowPercent}% OFF</Label>
@@ -186,7 +151,7 @@ export default function CalendarSettings({ property }: { property: Property }) {
                   </p>
                   <div className="flex justify-end">
                     <Button
-                      onClick={handleBookItNowSlider}
+                      onClick={handleBookItNowSliderLocal}
                       disabled={isUpdatingBookItNow}
                     >
                       {isUpdatingBookItNow ? "Saving!" : "Save"}
@@ -250,6 +215,9 @@ export default function CalendarSettings({ property }: { property: Property }) {
 
             {/* Name your price section */}
             <RequestAndBidAutomationSection property={property} />
+          </TabsContent>
+          <TabsContent value="fees" className="space-y-6 sm:space-y-8">
+            <HostFeeTab property={property} refetch={refetch} />
           </TabsContent>
           <TabsContent value="restrictions" className="space-y-6 sm:space-y-8">
             <HostPropertiesRestrictions property={property} />

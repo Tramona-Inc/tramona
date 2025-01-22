@@ -27,7 +27,7 @@ import {
 import SingleLocationMap from "../_common/GoogleMaps/SingleLocationMap";
 import { api, type RouterOutputs } from "@/utils/api";
 import { getCancellationPolicyDescription } from "@/config/getCancellationPolicyDescription";
-import { useChatWithHost } from "@/utils/messaging/useChatWithHost";
+import { useChatWithHostTeam } from "@/utils/messaging/useChatWithHost";
 export type TripWithDetails = RouterOutputs["trips"]["getMyTripsPageDetails"];
 export type TripWithDetailsConfirmation =
   RouterOutputs["trips"]["getMyTripsPageDetailsByPaymentIntentId"];
@@ -41,7 +41,7 @@ export default function TripPage({
   tripData: TripWithDetails | TripWithDetailsConfirmation;
   isConfirmation?: boolean;
 }) {
-  const chatWithHost = useChatWithHost();
+  const chatWithHostTeam = useChatWithHostTeam();
 
   const { trip, coordinates } = tripData;
 
@@ -109,7 +109,7 @@ export default function TripPage({
                   size="sm"
                   className="w-[160px] text-xs lg:w-[200px] lg:text-sm"
                   disabled={!hostId}
-                  onClick={() => chatWithHost({ hostId: hostId! })}
+                  onClick={() => chatWithHostTeam({ hostId: hostId!, hostTeamId: trip.property.hostTeam.id, propertyId: trip.property.id })}
                 >
                   <MessageCircle className="w-4 lg:w-5" /> Message your host
                 </Button>
