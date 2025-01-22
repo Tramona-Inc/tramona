@@ -149,7 +149,6 @@ const SelectedConversationSidebar: React.FC<
 
   // console.log(request, "request");
 
-
   return (
     <>
       {(bid ?? request) && !isHost && (

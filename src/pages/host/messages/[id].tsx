@@ -21,6 +21,8 @@ import { useSession } from "next-auth/react";
 import { useIsMd } from "@/utils/utils";
 
 function MessageDisplay() {
+  const isMd = useIsMd();
+
   const [selectedConversation, setSelectedConversation] =
     useState<Conversation | null>(null);
 
@@ -74,7 +76,6 @@ function MessageDisplay() {
   } = api.messages.getConversations.useQuery({
     hostTeamId: currentHostTeamId, // **Pass hostTeamId to fetch host conversations**
   });
-  const isMd = useIsMd();
 
   useEffect(() => {
     if (query.conversationId && conversations.length > 0) {
@@ -89,57 +90,53 @@ function MessageDisplay() {
       ) {
         setSelectedConversation(conversationToSelect);
       }
+      console.log(conversationToSelect);
     }
   }, [conversations, query.conversationId, selectedConversation?.id]);
 
-  console.log(isMd);
   return (
     <div className="flex h-[calc(100vh-12rem)] divide-x border-b lg:h-[calc(100vh-8rem)]">
       {/* Messages Sidebar - **Layout from Host Index Page** */}
-      <div
-        className={cn(
-          "w-full bg-white md:w-1/3 xl:w-96",
-          !showSelectedSidebar && "md:block", // **Conditional Visibility from Host Index**
-        )}
-      >
-        {isSidebarLoading ? (
-          <div className="space-y-4 p-4">
-            <SkeletonText className="w-full" />
-            <SkeletonText className="w-2/3" />
-            <SkeletonText className="w-1/2" />
-          </div>
-        ) : (
-          <MessagesSidebar
-            selectedConversation={selectedConversation}
-            setSelected={selectConversation}
-            fetchedConversations={fetchedConversations}
-            isLoading={isSidebarLoading}
-            refetch={refetch}
-          />
-        )}
-      </div>
-
-      {/* Messages Content - **Layout from Host Index Page** */}
       {isMd && (
         <div
           className={cn(
-            "flex h-full flex-1 items-center justify-center transition-transform duration-300",
-            !showMobileSelectedSidebar && "sm:flex", // **Conditional Visibility from Host Index**
-            !selectedConversation && "hidden md:flex", // **Conditional Visibility from Host Index**
+            "w-full bg-white transition-transform duration-300 md:w-96",
+            !showSelectedSidebar && "md:block", // **Conditional Visibility from Host Index**
           )}
         >
-          {!selectedConversation ? (
-            <EmptyStateValue description="Select a conversation to read more">
-              <ConversationsEmptySvg />
-            </EmptyStateValue>
+          {isSidebarLoading ? (
+            <div className="space-y-4 p-4">
+              <SkeletonText className="w-full" />
+              <SkeletonText className="w-2/3" />
+              <SkeletonText className="w-1/2" />
+            </div>
           ) : (
-            <MessagesContent
+            <MessagesSidebar
               selectedConversation={selectedConversation}
               setSelected={selectConversation}
+              fetchedConversations={fetchedConversations}
+              isLoading={isSidebarLoading}
+              refetch={refetch}
             />
           )}
         </div>
       )}
+
+      {/* Messages Content - **Layout from Host Index Page** */}
+      <div className="flex h-full flex-1 items-center justify-center transition-transform duration-300">
+        {!selectedConversation ? (
+          <div className="w-full">
+            <EmptyStateValue description="Select a conversation to read more">
+              <ConversationsEmptySvg />
+            </EmptyStateValue>
+          </div>
+        ) : (
+          <MessagesContent
+            selectedConversation={selectedConversation}
+            setSelected={selectConversation}
+          />
+        )}
+      </div>
 
       {/* Selected Conversation Sidebar - **Layout from Host Index Page** */}
       {selectedConversation &&
@@ -177,6 +174,7 @@ function MessageDisplay() {
 
 export default function MessagePage() {
   useSession({ required: true }); // Use useSession for auth
+  const { currentHostTeamId } = useHostTeamStore(); // use this to get the correct messages depending on the team
 
   const { data: totalUnreadMessages, isLoading: isUnreadLoading } =
     api.messages.getNumUnreadMessages.useQuery();

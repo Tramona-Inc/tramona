@@ -45,7 +45,7 @@ export default function Footer() {
   ));
 
   return (
-    <footer className="z-50 overflow-hidden bg-zinc-900 px-4 py-2 text-sm text-zinc-300">
+    <footer className="z-50 hidden overflow-hidden bg-zinc-900 px-4 py-2 text-sm text-zinc-300 lg:block">
       <div className="flex items-center">
         <p className="flex-1">© {currentYear} Tramona. All rights reserved.</p>
         <div className="hidden md:contents">{footerLinkComponents}</div>

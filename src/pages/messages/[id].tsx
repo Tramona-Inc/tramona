@@ -1,4 +1,4 @@
-// pages/host/messages/[id].tsx
+// pages/host/messages/index.tsx
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import MessagesContent from "@/components/messages/MessagesContent";
 import MessagesSidebar from "@/components/messages/MessagesSidebar";
@@ -8,51 +8,44 @@ import {
 } from "@/utils/store/conversations";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react"; // Import useCallback
 import { api } from "@/utils/api";
 import { cn } from "@/utils/utils";
-import SelectedConversationSidebar from "@/components/messages/SelectedConversationSidebar";
-import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
+import { SkeletonText } from "@/components/ui/skeleton";
+import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 import ConversationsEmptySvg from "@/components/_common/EmptyStateSvg/ConversationsEmptySvg";
 import EmptyStateValue from "@/components/_common/EmptyStateSvg/EmptyStateValue";
+import SelectedConversationSidebar from "@/components/messages/SelectedConversationSidebar";
 import { Button } from "@/components/ui/button";
-import { useHostTeamStore } from "@/utils/store/hostTeamStore";
-import { useSession } from "next-auth/react";
 import { useIsMd } from "@/utils/utils";
+import { useSession } from "next-auth/react"; // Import useSession
 
 function MessageDisplay() {
   const [selectedConversation, setSelectedConversation] =
     useState<Conversation | null>(null);
 
-  // **Adopt Mobile Sidebar State from Host Index Page **
   const [showMobileSelectedSidebar, setShowMobileSelectedSidebar] =
     useState(false);
   const [showSelectedSidebar, setShowSelectedSidebar] = useState(false);
 
-  const { push, query } = useRouter();
+  const { push, query } = useRouter(); // Get push from useRouter
+  const { data: session } = useSession(); // Get session
 
   const selectConversation = useCallback(
+    // Use useCallback
     (conversation: Conversation | null) => {
       setSelectedConversation(conversation);
-      // **Adopt Sidebar Toggling Logic from Host Index Page **
       setShowMobileSelectedSidebar(false);
       setShowSelectedSidebar(false);
-
       if (conversation) {
-        void push({
-          pathname: `/host/messages/${conversation.id}`, // **Updated Path for Host Messages**
-          query: {
-            conversationData: JSON.stringify(conversation),
-          },
-        });
+        void push(`/messages/${conversation.id}`); // **Updated Route to Host Message Detail Page!**
       } else {
-        void push("/host/messages"); // **Updated Path for Host Messages**
+        void push("/messages"); // **Updated Route to Host Message Index Page!**
       }
     },
     [push],
   );
 
-  // **Adopt Sidebar Toggling Functions from Host Index Page **
   const toggleMobileSidebar = () => {
     setShowMobileSelectedSidebar(false);
   };
@@ -66,91 +59,98 @@ function MessageDisplay() {
   };
 
   const conversations = useConversation((state) => state.conversationList);
-  const { currentHostTeamId } = useHostTeamStore(); // Get hostTeamId
+  const { currentHostTeamId } = useHostTeamStore();
   const {
     data: fetchedConversations,
     isLoading: isSidebarLoading,
     refetch,
   } = api.messages.getConversations.useQuery({
-    hostTeamId: currentHostTeamId, // **Pass hostTeamId to fetch host conversations**
+    hostTeamId: currentHostTeamId, // **Keep hostTeamId for host conversations**
   });
-  const isMd = useIsMd();
 
   useEffect(() => {
-    if (query.conversationId && conversations.length > 0) {
-      const conversationIdToSelect = query.conversationId as string;
-      const conversationToSelect = conversations.find(
-        (conversation) => conversation.id === conversationIdToSelect,
-      );
+    const conversationIdFromUrl = query.id as string | undefined; // Changed query.conversationId to query.id
 
-      if (
-        conversationToSelect &&
-        selectedConversation?.id !== conversationToSelect.id
-      ) {
-        setSelectedConversation(conversationToSelect);
+    if (conversationIdFromUrl && conversations) {
+      // Check if conversations is not null or undefined
+      if (conversations.length > 0) {
+        const conversationToSelect = conversations.find(
+          (conversation) => conversation.id === conversationIdFromUrl,
+        );
+
+        if (conversationToSelect) {
+          setSelectedConversation(conversationToSelect);
+        } else {
+          if (selectedConversation?.id === conversationIdFromUrl) {
+            setSelectedConversation(null);
+          }
+          void push("/host/messages");
+        }
+      } else {
+        if (selectedConversation?.id === conversationIdFromUrl) {
+          setSelectedConversation(null); // Clear selected conversation if conversations are empty initially
+        }
+      }
+    } else if (!conversationIdFromUrl) {
+      if (selectedConversation) {
+        setSelectedConversation(null);
       }
     }
-  }, [conversations, query.conversationId, selectedConversation?.id]);
+  }, [query.id, conversations, push, selectedConversation]);
 
-  console.log(isMd);
+  const isMd = useIsMd();
+
   return (
     <div className="flex h-[calc(100vh-12rem)] divide-x border-b lg:h-[calc(100vh-8rem)]">
-      {/* Messages Sidebar - **Layout from Host Index Page** */}
-      <div
-        className={cn(
-          "w-full bg-white md:w-1/3 xl:w-96",
-          !showSelectedSidebar && "md:block", // **Conditional Visibility from Host Index**
-        )}
-      >
-        {isSidebarLoading ? (
-          <div className="space-y-4 p-4">
-            <SkeletonText className="w-full" />
-            <SkeletonText className="w-2/3" />
-            <SkeletonText className="w-1/2" />
-          </div>
-        ) : (
-          <MessagesSidebar
-            selectedConversation={selectedConversation}
-            setSelected={selectConversation}
-            fetchedConversations={fetchedConversations}
-            isLoading={isSidebarLoading}
-            refetch={refetch}
-          />
-        )}
-      </div>
-
-      {/* Messages Content - **Layout from Host Index Page** */}
+      {/* Messages Sidebar */}
       {isMd && (
         <div
           className={cn(
-            "flex h-full flex-1 items-center justify-center transition-transform duration-300",
-            !showMobileSelectedSidebar && "sm:flex", // **Conditional Visibility from Host Index**
-            !selectedConversation && "hidden md:flex", // **Conditional Visibility from Host Index**
+            "w-full bg-white transition-transform duration-300 md:w-96",
+            !showSelectedSidebar && "md:block",
           )}
         >
-          {!selectedConversation ? (
-            <EmptyStateValue description="Select a conversation to read more">
-              <ConversationsEmptySvg />
-            </EmptyStateValue>
+          {isSidebarLoading ? (
+            <div className="space-y-4 p-4">
+              <SkeletonText className="w-full" />
+              <SkeletonText className="w-2/3" />
+              <SkeletonText className="w-1/2" />
+            </div>
           ) : (
-            <MessagesContent
+            <MessagesSidebar
               selectedConversation={selectedConversation}
               setSelected={selectConversation}
+              fetchedConversations={fetchedConversations}
+              isLoading={isSidebarLoading}
+              refetch={refetch}
             />
           )}
         </div>
       )}
+      {/* Messages Content */}
+      <div
+        className={cn(
+          "flex h-full flex-1 items-center justify-center transition-transform duration-300",
+          !showMobileSelectedSidebar && "sm:flex",
+          !selectedConversation && "hidden md:flex",
+        )}
+      >
+        {!selectedConversation ? (
+          <EmptyStateValue description="You have no conversations yet">
+            <ConversationsEmptySvg />
+          </EmptyStateValue>
+        ) : (
+          <MessagesContent
+            selectedConversation={selectedConversation}
+            setSelected={selectConversation}
+          />
+        )}
+      </div>
 
-      {/* Selected Conversation Sidebar - **Layout from Host Index Page** */}
+      {/* Selected Conversation Sidebar */}
       {selectedConversation &&
         (selectedConversation.propertyId ?? selectedConversation.requestId) && (
-          <div
-            className={cn(
-              "w-1/4 border-l transition-transform duration-300",
-              showSelectedSidebar ? "md:block" : "hidden", // **Conditional Visibility from Host Index**
-              showMobileSelectedSidebar ? "sm:block" : "hidden sm:hidden", // **Conditional Visibility from Host Index**
-            )}
-          >
+          <div className="w-1/4 border-l transition-transform duration-300">
             <SelectedConversationSidebar
               conversation={selectedConversation}
               isHost={true} // **isHost is true for host messages**
@@ -158,7 +158,7 @@ function MessageDisplay() {
           </div>
         )}
 
-      {/* Mobile Buttons - **Layout from Host Index Page** */}
+      {/* Mobile Buttons */}
       <div className="absolute right-2 top-2 z-50 space-x-2">
         {selectedConversation && (
           <Button
@@ -176,7 +176,8 @@ function MessageDisplay() {
 }
 
 export default function MessagePage() {
-  useSession({ required: true }); // Use useSession for auth
+  useSession(); // Use useSession for auth
+  const { currentHostTeamId } = useHostTeamStore(); // use this to get the correct messages depending on the team
 
   const { data: totalUnreadMessages, isLoading: isUnreadLoading } =
     api.messages.getNumUnreadMessages.useQuery();
