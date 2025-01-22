@@ -510,59 +510,68 @@ export async function handleRequestSubmission(
     const numNights = getNumNights(input.checkIn, input.checkOut);
     const requestedNightlyPrice = input.maxTotalPrice / numNights;
 
-    for (const property of eligibleProperties) {
-      const propertyDetails = await tx.query.properties.findFirst({
-        where: eq(properties.id, property.id),
-      });
+    const eligiblePropertiesWithAutoOffers = eligibleProperties.filter(
+      (property) => property.autoOfferEnabled && property.originalListingId !== "877854804496138577"
+    );
 
-      if (
-        propertyDetails?.autoOfferEnabled &&
-        propertyDetails.originalListingId &&
-        propertyDetails.originalListingPlatform === "Airbnb" &&
-        propertyDetails.discountTiers
-      ) {
+    const autoOfferPromises = eligiblePropertiesWithAutoOffers.map(
+      async (property) => {
         try {
-          const airbnbTotalPrice = await scrapeAirbnbPrice({
-            airbnbListingId: propertyDetails.originalListingId,
-            params: {
-              checkIn: input.checkIn,
-              checkOut: input.checkOut,
-              numGuests: input.numGuests,
-            },
+          const propertyDetails = await tx.query.properties.findFirst({
+            where: eq(properties.id, property.id),
           });
 
-          const airbnbNightlyPrice = airbnbTotalPrice / numNights;
-
-          const percentOff =
-            ((airbnbNightlyPrice - requestedNightlyPrice) /
-              airbnbNightlyPrice) *
-            100;
-
-          const daysUntilCheckIn = differenceInDays(input.checkIn, new Date());
-
-          const applicableDiscount = propertyDetails.discountTiers.find(
-            (tier) => daysUntilCheckIn >= tier.days,
-          );
-
           if (
-            applicableDiscount &&
-            percentOff <= applicableDiscount.percentOff
+            propertyDetails?.autoOfferEnabled &&
+            propertyDetails.originalListingId &&
+            propertyDetails.originalListingPlatform === "Airbnb" &&
+            propertyDetails.discountTiers
           ) {
-            //create offer
-            const travelerOfferedPriceBeforeFees = getTravelerOfferedPrice({
-              totalBasePriceBeforeFees: requestedNightlyPrice * numNights,
-              travelerMarkup: TRAVELER_MARKUP,
+
+            const airbnbTotalPrice = await scrapeAirbnbPrice({
+              airbnbListingId: propertyDetails.originalListingId,
+              params: {
+                checkIn: input.checkIn,
+                checkOut: input.checkOut,
+                numGuests: input.numGuests,
+              },
             });
 
-            await tx.insert(offers).values({
-              requestId: request.id,
-              propertyId: property.id,
-              totalBasePriceBeforeFees: input.maxTotalPrice,
-              hostPayout: getHostPayout(requestedNightlyPrice * numNights),
-              travelerOfferedPriceBeforeFees,
-              checkIn: input.checkIn,
-              checkOut: input.checkOut,
-            });
+            if (!airbnbTotalPrice) {
+              return
+            }
+            const airbnbNightlyPrice = airbnbTotalPrice / numNights;
+
+            const percentOff =
+              ((airbnbNightlyPrice - requestedNightlyPrice) / airbnbNightlyPrice) *
+              100;
+
+            const daysUntilCheckIn = differenceInDays(input.checkIn, new Date());
+
+            const applicableDiscount = propertyDetails.discountTiers.find(
+              (tier) => daysUntilCheckIn >= tier.days,
+            );
+
+            if (
+              applicableDiscount &&
+              percentOff <= applicableDiscount.percentOff
+            ) {
+              // create offer
+              const travelerOfferedPriceBeforeFees = getTravelerOfferedPrice({
+                totalBasePriceBeforeFees: requestedNightlyPrice * numNights,
+                travelerMarkup: TRAVELER_MARKUP,
+              });
+
+              await tx.insert(offers).values({
+                requestId: request.id,
+                propertyId: property.id,
+                totalBasePriceBeforeFees: input.maxTotalPrice,
+                hostPayout: getHostPayout(requestedNightlyPrice * numNights),
+                travelerOfferedPriceBeforeFees,
+                checkIn: input.checkIn,
+                checkOut: input.checkOut,
+              });
+            }
           }
         } catch (error) {
           console.error(
@@ -570,8 +579,19 @@ export async function handleRequestSubmission(
             error,
           );
         }
+
+      },
+    );
+
+    // Execute all auto offer promises simultaneously
+    const results = await Promise.allSettled(autoOfferPromises);
+
+    // Optional: You can process the results to log the outcome of each promise
+    results.forEach((result, index) => {
+      if (result.status === 'rejected') {
+        console.error(`Error with property ${eligiblePropertiesWithAutoOffers[index]?.id}:`, result.reason);
       }
-    }
+    });
 
     const propertiesWithoutAutoOffers = eligibleProperties.filter(
       (property) => !property.autoOfferEnabled,

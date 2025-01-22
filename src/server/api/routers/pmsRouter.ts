@@ -204,7 +204,7 @@ export const pmsRouter = createTRPCRouter({
         "https://connect.hospitable.com/api/v1/auth-codes",
         {
           customer_id: id,
-          redirect_url: "https://tramona.com/host",
+          redirect_url: process.env.NEXTAUTH_URL + "/load-airbnb-properties",
           // redirect_url: "https://179c-2601-600-8e81-3180-4171-fe-a3a4-da1d.ngrok-free.app/host",
         },
         {
