@@ -16,7 +16,8 @@ export default function AdminMessagesPage() {
 
   return (
     <DashboardLayout>
-      <MessagesPopover isMobile={true} isHostOnboarding={false} />
+      {/* <MessagesPopover isMobile={true} isHostOnboarding={false} /> */}
+      <div>Coming Soon</div>
     </DashboardLayout>
   );
 }
