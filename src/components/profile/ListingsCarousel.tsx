@@ -11,6 +11,7 @@ import {
 import Spinner from "../_common/Spinner";
 import ProfilePropertyCard from "./ProfilePropertyCard";
 import { useHostTeamStore } from "@/utils/store/hostTeamStore";
+import { useIsLg, useIsMd } from "@/utils/utils";
 
 export default function ListingsCarousel({
   userProfile,
@@ -35,7 +36,12 @@ export default function ListingsCarousel({
     }, [] as T[][]);
   }
 
-  const chunkedProperties = chunkArray(myProperties ?? [], 4);
+  const isMd = useIsMd();
+  const isLg = useIsLg();
+  const chunkedProperties = chunkArray(
+    myProperties ?? [],
+    isLg ? 4 : isMd ? 3 : 2,
+  );
 
   return (
     <Card className="relative">
@@ -46,7 +52,7 @@ export default function ListingsCarousel({
             <CarouselContent>
               {chunkedProperties.map((chunk, index) => (
                 <CarouselItem key={index}>
-                  <div className="grid grid-cols-4 items-center gap-4">
+                  <div className="grid grid-cols-2 items-center gap-4 md:grid-cols-3 lg:grid-cols-4">
                     {chunk.map((property) => (
                       <ProfilePropertyCard
                         key={property.id}
@@ -57,7 +63,7 @@ export default function ListingsCarousel({
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <div className="absolute -top-5 right-12">
+            <div className="absolute -top-6 right-12">
               <CarouselPrevious />
               <CarouselNext />
             </div>

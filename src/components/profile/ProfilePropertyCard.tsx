@@ -52,7 +52,7 @@ export default function ProfilePropertyCard({
           <p>{property.avgRating === 0 ? "New" : property.avgRating}</p>
         </div>
       </div>
-      <p className="text-muted-foreground">{property.name}</p>
+      <p className="truncate text-muted-foreground">{property.name}</p>
     </Link>
   );
 }
