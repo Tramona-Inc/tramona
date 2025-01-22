@@ -1051,7 +1051,6 @@ export const propertiesRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input, ctx }) => {
-      const validationCache = new Map<string, boolean>(); // <--- CREATE CACHE HERE (Procedure-Scoped)
 
       const { location } = await getCoordinates(input.location);
       if (!location) throw new Error("Could not get coordinates for address");
@@ -1189,7 +1188,7 @@ export const propertiesRouter = createTRPCRouter({
         scrapedProperties.map(async (property) => {
           if (property.imageUrls.length > 0) {
             const firstImageUrl = property.imageUrls[0]!;
-            const isValid = await validateImage(firstImageUrl, validationCache);
+            const isValid = await validateImage(firstImageUrl);
             if (isValid) {
               return property; // Keep the property if the image is valid
             } else {

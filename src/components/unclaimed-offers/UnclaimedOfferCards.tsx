@@ -38,6 +38,7 @@ import { Property } from "@/server/db/schema/tables/properties";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import { api } from "@/utils/api";
 
+
 type PropertyType = Property | AirbnbSearchResult;
 
 const validationCache = new Map<string, boolean>();
@@ -62,6 +63,10 @@ export default function UnclaimedOfferCards(): JSX.Element {
     const endIndex = startIndex + itemsPerPage;
     return allProperties.slice(startIndex, endIndex);
   }, [allProperties, currentPage, itemsPerPage]);
+
+  useEffect(() => {
+    console.log("UnclaimedOfferCards adjustedProperties updated:", adjustedProperties);
+  }, [adjustedProperties]);
 
   //filter out the properties, where images do not load/ Also caching images
   // const validationCache = useRef(new Map<string, boolean>());
@@ -240,7 +245,7 @@ export default function UnclaimedOfferCards(): JSX.Element {
             <div className="flex w-full flex-col">
               <div className="mx-auto max-w-[2000px] px-4">
                 <div className="grid w-full grid-cols-1 gap-4 min-[580px]:grid-cols-2 min-[800px]:grid-cols-3 min-[1000px]:grid-cols-4 min-[1200px]:grid-cols-5 min-[1400px]:grid-cols-6">
-                  {paginatedProperties.length &&
+                  {paginatedProperties.length > 0 &&
                     paginatedProperties.map((property, index) => (
                       <ErrorBoundary key={index}>
                         <div
@@ -318,6 +323,8 @@ const UnMatchedPropertyCard = memo(function UnMatchedPropertyCard({
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const router = useRouter();
+  const [failedImageUrls, setFailedImageUrls] = useState(new Set<string>());
+
 
   const nextImage = (e: React.MouseEvent): void => {
     e.preventDefault();
@@ -378,12 +385,26 @@ const UnMatchedPropertyCard = memo(function UnMatchedPropertyCard({
                   alt={`Property image ${index + 1}`}
                   fill
                   onError={(e) => {
-                    console.error(
-                      `Error loading image for property with url ${imageUrl}:`,
-                      e,
-                    );
-                    (e.target as HTMLImageElement).src =
-                      "/assets/images/image_not_found.png";
+                    // Check if this URL has already failed
+                    if (!failedImageUrls.has(imageUrl)) {
+                      console.error(
+                        `Error loading image for property with url ${imageUrl}:`,
+                        e,
+                      );
+                      (e.target as HTMLImageElement).src =
+                        "/assets/images/image_not_found.png";
+                      // Add the failed URL to the Set
+                      setFailedImageUrls((prevFailedUrls) =>
+                        new Set(prevFailedUrls).add(imageUrl),
+                      );
+                    } else {
+                      // If URL is already in failedImageUrls, just set fallback, no console error or state update
+                      (e.target as HTMLImageElement).src =
+                        "/assets/images/image_not_found.png";
+                      console.log(
+                        `Skipping retry/state update for already failed image: ${imageUrl}`,
+                      ); // Optional logging to confirm skipping
+                    }
                   }}
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   className="rounded-xl object-cover"
