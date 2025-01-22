@@ -70,6 +70,7 @@ export function DesktopSearchTab({
   const [minPrice, setMinPrice] = useState("");
   const [priceSort, setPriceSort] = useState("");
   const [open, setOpen] = useState(false);
+  const itemsPerPage = 36;
 
   const router = useRouter();
   const utils = api.useUtils();
@@ -166,6 +167,15 @@ export function DesktopSearchTab({
         return updatedProperties;
       });
 
+      let currentPropertiesLength =
+        propertiesInArea.hostProperties.length +
+        propertiesInArea.scrapedProperties.length;
+      console.log("currentPropertiesLength", currentPropertiesLength);
+
+      if (currentPropertiesLength >= itemsPerPage) {
+        setIsSearching(false);
+      }
+
       const airbnbResultsPromise = utils.misc.scrapeAirbnbInitialPage.fetch({
         checkIn: values.checkIn,
         checkOut: values.checkOut,
@@ -191,6 +201,13 @@ export function DesktopSearchTab({
         });
         return updatedProperties;
       });
+
+      currentPropertiesLength =
+        currentPropertiesLength + airbnbResults.res.length;
+      console.log("currentPropertiesLength", currentPropertiesLength);
+      if (currentPropertiesLength >= itemsPerPage) {
+        setIsSearching(false);
+      }
 
       const cursors =
         airbnbResults.data.staysSearch.results.paginationInfo.pageCursors.slice(

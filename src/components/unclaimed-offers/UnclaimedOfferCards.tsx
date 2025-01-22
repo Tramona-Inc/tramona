@@ -6,7 +6,6 @@ import {
   formatCurrency,
   formatDateMonthDayYear,
   plural,
-  validateImage,
 } from "@/utils/utils";
 import { ChevronLeft, ChevronRight, StarIcon } from "lucide-react";
 import { Skeleton, SkeletonText } from "../ui/skeleton";
@@ -37,8 +36,11 @@ import { useLoading } from "./UnclaimedMapLoadingContext";
 import { Badge } from "../ui/badge";
 import { Property } from "@/server/db/schema/tables/properties";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
+import { api } from "@/utils/api";
 
 type PropertyType = Property | AirbnbSearchResult;
+
+const validationCache = new Map<string, boolean>();
 
 export default function UnclaimedOfferCards(): JSX.Element {
   const { adjustedProperties, isSearching } = useAdjustedProperties();
@@ -48,6 +50,8 @@ export default function UnclaimedOfferCards(): JSX.Element {
   const itemsPerPage = 36;
   const { data: session } = useSession();
   const {} = useLoading();
+  const { mutateAsync: updatePropertyStatus } =
+    api.properties.updatePropertyStatus.useMutation();
 
   const allProperties = useMemo(() => {
     return adjustedProperties?.pages ?? [];
@@ -60,41 +64,55 @@ export default function UnclaimedOfferCards(): JSX.Element {
   }, [allProperties, currentPage, itemsPerPage]);
 
   //filter out the properties, where images do not load/ Also caching images
-  const validationCache = useRef(new Map<string, boolean>());
+  // const validationCache = useRef(new Map<string, boolean>());
 
-  const validateProperties = useCallback(async () => {
-    const valid: PropertyType[] = [];
-    const promises = paginatedProperties.map(async (property) => {
-      if (property.imageUrls.length === 0) {
-        return;
-      }
-      const firstImageUrl = property.imageUrls[0]!;
+  // const validateProperties = useCallback(async () => {
+  //   const valid: PropertyType[] = [];
+  //   const promises = paginatedProperties.map(async (property) => {
+  //     if (property.imageUrls.length === 0) {
+  //       return;
+  //     }
+  //     const firstImageUrl = property.imageUrls[0]!;
 
-      if (validationCache.current.has(firstImageUrl)) {
-        if (validationCache.current.get(firstImageUrl)) {
-          valid.push(property);
-        }
-        return;
-      }
-      const isValid: boolean = await validateImage(firstImageUrl);
-      validationCache.current.set(firstImageUrl, isValid);
+  //     if (validationCache.has(firstImageUrl)) {
+  //       if (validationCache.get(firstImageUrl)) {
+  //         valid.push(property);
+  //       }
+  //       return;
+  //     }
+  //     const isValid: boolean = await validateImage(firstImageUrl);
+  //     if (!isValid) {
+  //       if ("id" in property) {
+  //         await updatePropertyStatus({
+  //           propertyId: property.id,
+  //           status: "Archived",
+  //         });
+  //       }
+  //     }
 
-      if (isValid) {
-        valid.push(property);
-      } // not adding failed images to valid
-    });
-    await Promise.all(promises);
-    return valid;
-  }, [paginatedProperties]);
+  //     validationCache.set(firstImageUrl, isValid);
+
+  //     if (isValid) {
+  //       valid.push(property);
+  //     } // not adding failed images to valid
+  //   });
+  //   await Promise.all(promises);
+  //   return valid;
+  // }, [paginatedProperties]);
 
   // Removed the debounced effect here
-  useEffect(() => {
-    const fetchValidProperties = async () => {
-      const newValidProperties = await validateProperties();
-      setValidProperties(newValidProperties);
-    };
-    void fetchValidProperties();
-  }, [validateProperties]);
+  // useEffect(() => {
+  //   const fetchValidProperties = async () => {
+  //     const newValidProperties = await validateProperties();
+  //     //avoid re renders if the properties are the same, to prevent loops
+  //     if (
+  //       JSON.stringify(newValidProperties) !== JSON.stringify(validProperties)
+  //     ) {
+  //       setValidProperties(newValidProperties);
+  //     }
+  //   };
+  //   void fetchValidProperties();
+  // }, [validateProperties, validProperties]);
 
   const totalPages = useMemo(() => {
     return Math.max(1, Math.ceil(allProperties.length / itemsPerPage));
@@ -222,8 +240,8 @@ export default function UnclaimedOfferCards(): JSX.Element {
             <div className="flex w-full flex-col">
               <div className="mx-auto max-w-[2000px] px-4">
                 <div className="grid w-full grid-cols-1 gap-4 min-[580px]:grid-cols-2 min-[800px]:grid-cols-3 min-[1000px]:grid-cols-4 min-[1200px]:grid-cols-5 min-[1400px]:grid-cols-6">
-                  {validProperties.length &&
-                    validProperties.map((property, index) => (
+                  {paginatedProperties.length &&
+                    paginatedProperties.map((property, index) => (
                       <ErrorBoundary key={index}>
                         <div
                           className="animate-fade-in"

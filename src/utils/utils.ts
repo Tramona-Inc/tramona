@@ -28,6 +28,8 @@ import {
   TripWithDetails,
   TripWithDetailsConfirmation,
 } from "@/components/my-trips/TripPage";
+import axios from 'axios';
+
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -374,7 +376,7 @@ export async function retry<T>(f: Promise<T>, numRetries: number) {
       return await f.catch(() => {
         throw new Error();
       });
-    } catch (err) {}
+    } catch (err) { }
   }
 }
 
@@ -1075,16 +1077,59 @@ export function convertHostInteractionPref(interactionPreference: string) {
   return modifiedPref;
 }
 
-export const validateImage = (src: string): Promise<boolean> => {
+// export const validateImage = (src: string): Promise<boolean> => {
+//   return new Promise((resolve) => {
+//     const img = new Image();
+//     img.onload = () => resolve(true);
+//     img.onerror = () => {
+//       // Suppress specific logs
+//       // eslint-disable-next-line @typescript-eslint/no-empty-function
+//       console.error = () => {};
+//       resolve(false);
+//     };
+//     img.src = src;
+//   });
+// };
+
+// export const validateImage = (src: string): Promise<boolean> => {
+//   return new Promise((resolve) => {
+//     const img = new Image();
+//     const originalConsoleError = console.error;
+
+//     img.onload = () => {
+//       console.error = originalConsoleError; // Restore console.error
+//       resolve(true);
+//     };
+//     img.onerror = () => {
+//       console.error = originalConsoleError; // Restore console.error
+//       resolve(false);
+//     };
+//     img.src = src;
+//   });
+// };
+
+// src/utils/utils.ts (Correct server-side validateImage)
+
+const validationCache = new Map<string, boolean>(); // Module-level cache (optional)
+
+export const validateImage = async (src: string, cache?: Map<string, boolean>): Promise<boolean> => {
+  const currentCache = cache ?? validationCache;
+  if (currentCache.has(src)) {
+    return currentCache.get(src)!;
+  }
+
   return new Promise((resolve) => {
-    const img = new Image();
-    img.onload = () => resolve(true);
-    img.onerror = () => {
-      // Suppress specific logs
-      // eslint-disable-next-line @typescript-eslint/no-empty-function
-      console.error = () => {};
-      resolve(false);
-    };
-    img.src = src;
+    axios.head(src) // Use axios.head for HEAD request
+      .then(response => {
+        const statusCode = response.status;
+        const isValid = statusCode >= 200 && statusCode < 300;
+        currentCache.set(src, isValid);
+        resolve(isValid);
+      })
+      .catch(error => {
+        console.error("Image validation error for:", src, error);
+        currentCache.set(src, false);
+        resolve(false);
+      });
   });
 };

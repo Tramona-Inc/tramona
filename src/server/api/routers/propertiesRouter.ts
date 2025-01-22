@@ -60,6 +60,7 @@ import { checkAvailabilityForProperties } from "@/server/direct-sites-scraping";
 import { scrapeAirbnbSearch } from "@/server/external-listings-scraping/airbnbScraper";
 import { capitalize } from "@/utils/utils";
 import { extraPricingFieldSchema } from "@/components/dashboard/host/calendar/pricingfields";
+import { validateImage } from "@/utils/utils";
 
 export type HostRequestsPageData = {
   city: string;
@@ -1050,6 +1051,8 @@ export const propertiesRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input, ctx }) => {
+      const validationCache = new Map<string, boolean>(); // <--- CREATE CACHE HERE (Procedure-Scoped)
+
       const { location } = await getCoordinates(input.location);
       if (!location) throw new Error("Could not get coordinates for address");
       console.log("location", location);
@@ -1143,6 +1146,7 @@ export const propertiesRouter = createTRPCRouter({
           propertyIsNearRequest,
           notInArray(properties.id, conflictingIds), // Exclude properties with conflicting reservations
           ageRestrictionCheck,
+          eq(properties.status, "Listed"),
         ),
       });
 
@@ -1180,7 +1184,30 @@ export const propertiesRouter = createTRPCRouter({
           notInArray(properties.id, conflictingIds), // Exclude properties with conflicting reservations
         ),
       });
-      return { hostProperties: validHostProperties, scrapedProperties };
+      console.log("scrapedProperties", scrapedProperties.length);
+      const validatedScrapedProperties = await Promise.all(
+        scrapedProperties.map(async (property) => {
+          if (property.imageUrls.length > 0) {
+            const firstImageUrl = property.imageUrls[0]!;
+            const isValid = await validateImage(firstImageUrl, validationCache);
+            if (isValid) {
+              return property; // Keep the property if the image is valid
+            } else {
+              return null; // Filter out if the image is invalid
+            }
+          } else {
+            return null; // Filter out if no images
+          }
+        }),
+      );
+
+      // Filter out null values (properties with invalid or no images)
+      const filteredScrapedProperties = validatedScrapedProperties.filter(Boolean);
+
+      console.log("scrapedProperties after validation", filteredScrapedProperties.length);
+
+
+      return { hostProperties: validHostProperties, scrapedProperties: filteredScrapedProperties };
     }),
 
   getSearchResults: hostProcedure
@@ -1240,4 +1267,13 @@ export const propertiesRouter = createTRPCRouter({
       .where(eq(properties.id, input.propertyId));
     return;
   }),
+
+  updatePropertyStatus: publicProcedure
+    .input(z.object({
+      propertyId: z.number(),
+      status: z.enum(["Listed", "Drafted", "Archived"]),
+    }))
+    .mutation(async ({ input }) => {
+      await db.update(properties).set({ status: input.status }).where(eq(properties.id, input.propertyId));
+    }),
 });
