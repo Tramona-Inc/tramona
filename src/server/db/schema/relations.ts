@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm";
+import { Column, relations } from "drizzle-orm";
 import { accounts } from "./tables/auth/accounts";
 import { sessions } from "./tables/auth/sessions";
 import { bids } from "./tables/bids";
@@ -39,6 +39,7 @@ import {
   propertyMessages,
   propertyConversations,
 } from "./tables/propertyMessages";
+import { profiles } from "./tables/profiles";
 
 export const usersRelations = relations(users, ({ one, many }) => ({
   accounts: many(accounts),
@@ -48,6 +49,10 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   referralEarnings: many(referralEarnings),
   messages: many(messages),
   conversations: many(conversationParticipants),
+  profile: one(profiles, {
+    fields: [users.id],
+    references: [profiles.userId],
+  }),
   hostProfile: one(hostProfiles),
   groups: many(groupMembers),
   ownedGroups: many(groups),
@@ -63,6 +68,13 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   claimItemResolutions: many(claimItemResolutions),
   propertyConversations: many(propertyConversations, {
     relationName: "traveler",
+  }),
+}));
+
+export const profilesRelations = relations(profiles, ({ one }) => ({
+  user: one(users, {
+    fields: [profiles.userId],
+    references: [users.id],
   }),
 }));
 
@@ -219,9 +231,17 @@ export const hostReferralDiscountsRelations = relations(
   }),
 );
 
-export const conversationsRelations = relations(conversations, ({ many }) => ({
+export const conversationsRelations = relations(conversations, ({ many, one }) => ({
   messages: many(messages),
   participants: many(conversationParticipants),
+  property: one(properties, {
+    fields: [conversations.propertyId],
+    references: [properties.id],
+  }),
+  request: one(requests, {
+    fields: [conversations.requestId],
+    references: [requests.id],
+  }),
 }));
 
 export const messagesRelations = relations(messages, ({ one }) => ({
@@ -245,6 +265,10 @@ export const conversationParticipantsRelations = relations(
     user: one(users, {
       fields: [conversationParticipants.userId],
       references: [users.id],
+    }),
+    hostTeam: one(hostTeams, {
+      fields: [conversationParticipants.hostTeamId],
+      references: [hostTeams.id],
     }),
   }),
 );

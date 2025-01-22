@@ -20,6 +20,7 @@ export * from "./tables/requests";
 export * from "./tables/reservedDateRanges";
 export * from "./tables/payments";
 export * from "./tables/superhogRequests";
+export * from "./tables/profiles";
 export * from "./tables/users";
 export * from "./tables/reviews";
 export * from "./tables/trips";

@@ -11,6 +11,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { api } from "@/utils/api";
 import { cn } from "@/utils/utils";
+import SelectedConversationSidebar from "@/components/messages/SelectedConversationSidebar";
 
 function MessageDisplay() {
   const [selectedConversation, setSelectedConversation] =
@@ -80,6 +81,12 @@ function MessageDisplay() {
           setSelected={selectConversation}
         />
       </div>
+      {selectedConversation &&
+        (selectedConversation.propertyId ?? selectedConversation.requestId) && (
+          <div className="w-1/4 border-l">
+            <SelectedConversationSidebar conversation={selectedConversation} isHost={false} />
+          </div>
+        )}
     </div>
   );
 }

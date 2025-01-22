@@ -831,7 +831,7 @@ export const offersRouter = createTRPCRouter({
         if (!cityGroup) continue; // Skip if somehow the city isn't in our list
 
         const existingOffer = cityGroup.requests.find(
-          (item) => item.offer.id === offer?.id,
+          (item) => item.offer.id === offer.id,
         );
 
         if (existingOffer) {

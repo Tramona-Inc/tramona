@@ -9,11 +9,12 @@ export function useChatWithUser() {
   const { mutateAsync: createConversation } =
     api.messages.createConversationHostWithUser.useMutation();
 
-  const chatWithUser = async (userId: string) => {
+  const chatWithUser = async (userId: string, propertyId: number) => {
     try {
       const conversation = await createConversation({
         userId,
         currentHostTeamId: currentHostTeamId!,
+        propertyId,
       });
 
       if (!conversation.id) {

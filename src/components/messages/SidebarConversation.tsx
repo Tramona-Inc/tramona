@@ -23,7 +23,7 @@ export function SidebarConversation({
     .map(
       (participant) =>
         participant.firstName
-          ? participant.firstName + " " + participant.lastName
+          ? participant.firstName 
           : participant.id,
     )
     .join(", ");

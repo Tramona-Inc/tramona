@@ -63,7 +63,7 @@ export default function HostRequestsToBook() {
                 <Button
                   variant="secondary"
                   onClick={() => {
-                    void chatWithUser(data.userId);
+                    void chatWithUser(data.userId, propertyId);
                   }}
                 >
                   Message User
