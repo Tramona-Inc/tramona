@@ -144,11 +144,7 @@ function MessageDisplay() {
           !selectedConversation && "hidden md:flex",
         )}
       >
-        {!selectedConversation ? (
-          <EmptyStateValue description="You have no conversations yet">
-            <ConversationsEmptySvg />
-          </EmptyStateValue>
-        ) : (
+        {selectedConversation && (
           <MessagesContent
             selectedConversation={selectedConversation}
             setSelected={selectConversation}

@@ -8,7 +8,7 @@ import {
 } from "@/utils/store/conversations";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, memo } from "react"; // Import memo
 import { api } from "@/utils/api";
 import { cn } from "@/utils/utils";
 import SelectedConversationSidebar from "@/components/messages/SelectedConversationSidebar";
@@ -19,6 +19,12 @@ import { Button } from "@/components/ui/button";
 import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 import { useSession } from "next-auth/react";
 import { useIsMd } from "@/utils/utils";
+
+// Memoize child components to prevent unnecessary re-renders
+const MemoizedMessagesSidebar = memo(MessagesSidebar);
+const MemoizedMessagesContent = memo(MessagesContent);
+const MemoizedSelectedConversationSidebar = memo(SelectedConversationSidebar);
+const MemoizedSkeletonText = memo(SkeletonText); // Memoize SkeletonText as well if it's a custom component
 
 function MessageDisplay() {
   const isMd = useIsMd();
@@ -76,9 +82,14 @@ function MessageDisplay() {
     data: fetchedConversations,
     isLoading: isSidebarLoading,
     refetch,
-  } = api.messages.getConversations.useQuery({
-    hostTeamId: currentHostTeamId, // **Pass hostTeamId to fetch host conversations**
-  });
+  } = api.messages.getConversations.useQuery(
+    {
+      hostTeamId: currentHostTeamId, // **Pass hostTeamId to fetch host conversations**
+    },
+    {
+      refetchOnWindowFocus: false, // **Performance Optimization: Prevent refetch on window focus**
+    },
+  );
 
   useEffect(() => {
     if (fetchedConversations) {
@@ -130,12 +141,12 @@ function MessageDisplay() {
         >
           {isSidebarLoading ? (
             <div className="space-y-4 p-4">
-              <SkeletonText className="w-full" />
-              <SkeletonText className="w-2/3" />
-              <SkeletonText className="w-1/2" />
+              <MemoizedSkeletonText className="w-full" />
+              <MemoizedSkeletonText className="w-2/3" />
+              <MemoizedSkeletonText className="w-1/2" />
             </div>
           ) : (
-            <MessagesSidebar
+            <MemoizedMessagesSidebar // Use memoized version
               selectedConversation={selectedConversation}
               setSelected={selectConversation}
               fetchedConversations={fetchedConversations}
@@ -148,14 +159,8 @@ function MessageDisplay() {
 
       {/* Messages Content - **Layout from Host Index Page** */}
       <div className="flex h-full flex-1 items-center justify-center transition-transform duration-300">
-        {!selectedConversation ? (
-          <div className="w-full">
-            <EmptyStateValue description="Select a conversation to read more">
-              <ConversationsEmptySvg />
-            </EmptyStateValue>
-          </div>
-        ) : (
-          <MessagesContent
+        {selectedConversation && (
+          <MemoizedMessagesContent
             selectedConversation={selectedConversation}
             setSelected={selectConversation}
           />
@@ -172,7 +177,7 @@ function MessageDisplay() {
               showMobileSelectedSidebar ? "sm:block" : "hidden sm:hidden", // **Conditional Visibility from Host Index**
             )}
           >
-            <SelectedConversationSidebar
+            <MemoizedSelectedConversationSidebar // Use memoized version
               conversation={selectedConversation}
               isHost={true} // **isHost is true for host messages**
             />
