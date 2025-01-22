@@ -31,10 +31,10 @@ import {
 import { useZodForm } from "@/utils/useZodForm";
 import { z } from "zod";
 import { SelectIcon } from "@radix-ui/react-select";
-import { CaretSortIcon, ExclamationTriangleIcon } from "@radix-ui/react-icons";
+import { CaretSortIcon } from "@radix-ui/react-icons";
 import { ALL_PROPERTY_PMS } from "@/server/db/schema";
 import { api } from "@/utils/api";
-import { Link, X } from "lucide-react";
+import { Link } from "lucide-react";
 import { cn } from "@/utils/utils";
 import usePopoverStore from "@/utils/store/messagePopoverStore";
 import { Card, CardContent } from "@/components/ui/card";
@@ -123,27 +123,22 @@ export default function Onboarding1({
   const [showModal, setShowModal] = useState(false);
   const [showHospitablePopup, setShowHospitablePopup] = useState(false);
   const [eventScheduled, setEventScheduled] = useState(false);
-  const [dialogType, setDialogType] = useState<
-    "assistedListing" | "syncPMS" | null
-  >(null);
   const [showSignupModal, setShowSignupModal] = useState(false);
   useCalendlyEventListener({ onEventScheduled: () => setEventScheduled(true) });
 
   const [currentStep, setCurrentStep] = useState(1);
-  const [touchStart, setTouchStart] = useState(0);
-  const [touchEnd, setTouchEnd] = useState(0);
   const galleryRef = useRef<HTMLDivElement>(null);
   const [isExpanded, setIsExpanded] = useState("item-1");
   const { mutateAsync: resetHospitableProfile } =
     api.pms.resetHospitableCustomer.useMutation();
 
   const handleNextStep = async () => {
-    if (currentStep === 0) {
+    if (currentStep === 1) {
       await resetHospitableProfile();
     }
-    if (currentStep < steps.length - 1) {
+    if (currentStep < steps.length) {
       setCurrentStep(currentStep + 1);
-    } else if (isLastStep) {
+    } else {
       setShowSignupModal(false);
     }
   };
@@ -151,24 +146,6 @@ export default function Onboarding1({
   const handlePrevStep = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
-    }
-  };
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchStart(e.targetTouches[0]!.clientX);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0]!.clientX);
-  };
-
-  const handleTouchEnd = async () => {
-    if (touchStart - touchEnd > 75) {
-      await handleNextStep();
-    }
-
-    if (touchStart - touchEnd < -75) {
-      // Disable swipe gesture for now.
     }
   };
 
@@ -180,14 +157,13 @@ export default function Onboarding1({
     }
   }, [currentStep]);
 
-  const openModal = (type: "assistedListing" | "syncPMS") => {
-    setDialogType(type);
+  const openModal = () => {
     setShowModal(true);
   };
 
   const closeModal = () => {
     setShowModal(false);
-    setDialogType(null);
+
     if (eventScheduled) {
       void router.push("/host");
     }
@@ -240,16 +216,14 @@ export default function Onboarding1({
 
   const handleSubmit = form.handleSubmit(async ({ pms, accountId, apiKey }) => {
     const { bearerToken } = await generateBearerToken({ accountId, apiKey }); //hostaway
-    console.log(bearerToken);
 
     await createHostProfile({
       hostawayApiKey: apiKey,
       hostawayAccountId: accountId,
       hostawayBearerToken: bearerToken,
     });
-    //Hard reload so header query doesn't redirect user back to why-list
-    window.location.href = "/host";
-    console.log({ pms, accountId, apiKey });
+
+    router.push("/host");
   });
 
   useEffect(() => {
@@ -313,7 +287,7 @@ export default function Onboarding1({
               currentStep === 1 ? "w-full" : "",
             )}
           >
-            <Button onClick={() => handleNextStep(currentStep === totalSteps)}>
+            <Button onClick={() => handleNextStep()}>
               {currentStep === totalSteps ? "Finish" : "Next"}
             </Button>
           </div>
@@ -501,118 +475,76 @@ export default function Onboarding1({
           </div>
         </div>
       </div>
-
-      {/* {!forHost && <OnboardingFooter isForm={false} />} */}
       <Dialog open={showModal} onOpenChange={closeModal}>
         <DialogContent className="max-w-xl">
           <DialogHeader>
-            <DialogTitle>
-              {dialogType === "assistedListing"
-                ? "Assisted Listing"
-                : "Sync with PMS"}
-            </DialogTitle>
+            <DialogTitle>Sync with PMS</DialogTitle>
           </DialogHeader>
-          {dialogType === "assistedListing" ? (
-            <div className="space-y-4">
-              <p>
-                Our team will help you set up your account. Click the button
-                below to schedule a meeting with us.
-              </p>
-              {/* Wrap InlineWidget in a div with a max-width */}
-              <div style={{ maxWidth: "400px", margin: "0 auto" }}>
-                <InlineWidget url="https://calendly.com/tramona" />
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <Form {...form}>
-                <form onSubmit={handleSubmit}>
-                  <FormField
-                    control={form.control}
-                    name="pms"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>PMS</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a PMS" />
-                              <SelectIcon>
-                                <CaretSortIcon className="h-4 w-4 opacity-50" />
-                              </SelectIcon>
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {ALL_PROPERTY_PMS.map((PMS) => (
-                              <SelectItem key={PMS} value={PMS}>
-                                {PMS}
-                              </SelectItem>
-                            ))}
-                            {/* Future options can be added here */}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  ></FormField>
-                  <FormField
-                    control={form.control}
-                    name="accountId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Account ID</FormLabel>
+          <div className="space-y-4">
+            <Form {...form}>
+              <form onSubmit={handleSubmit}>
+                <FormField
+                  control={form.control}
+                  name="pms"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>PMS</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
                         <FormControl>
-                          <Input
-                            {...field}
-                            autoFocus
-                            placeholder="Account ID"
-                          />
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a PMS" />
+                            <SelectIcon>
+                              <CaretSortIcon className="h-4 w-4 opacity-50" />
+                            </SelectIcon>
+                          </SelectTrigger>
                         </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  ></FormField>
-                  <FormField
-                    control={form.control}
-                    name="apiKey"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>API Key</FormLabel>
-                        <FormControl>
-                          <Input {...field} autoFocus placeholder="API Key" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  ></FormField>
-                  <Button
-                    type="submit"
-                    //
-                    className="mt-4"
-                  >
-                    Sync with PMS
-                  </Button>
-                </form>
-              </Form>
-              {/* <div className="mt-4 flex items-center space-x-2">
-                                                    <Image
-                                                        src="/assets/icons/help.svg"
-                                                        alt="Help"
-                                                        width={24}
-                                                        height={24}
-                                                    />
-                                                    <p>
-                                                        Have a question?{" "}
-                                                        <a href="#" className="text-primary">
-                                                            Contact us
-                                                        </a>
-                                                    </p>
-                                                </div> */}
-            </div>
-          )}
+                        <SelectContent>
+                          {ALL_PROPERTY_PMS.map((PMS) => (
+                            <SelectItem key={PMS} value={PMS}>
+                              {PMS}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                ></FormField>
+                <FormField
+                  control={form.control}
+                  name="accountId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Account ID</FormLabel>
+                      <FormControl>
+                        <Input {...field} autoFocus placeholder="Account ID" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                ></FormField>
+                <FormField
+                  control={form.control}
+                  name="apiKey"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>API Key</FormLabel>
+                      <FormControl>
+                        <Input {...field} autoFocus placeholder="API Key" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                ></FormField>
+                <Button type="submit" className="mt-4">
+                  Sync with PMS
+                </Button>
+              </form>
+            </Form>
+          </div>
         </DialogContent>
       </Dialog>
       <Dialog open={showHospitablePopup} onOpenChange={setShowHospitablePopup}>

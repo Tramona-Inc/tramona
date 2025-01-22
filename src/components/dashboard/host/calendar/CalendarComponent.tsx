@@ -369,7 +369,7 @@ export default function CalendarComponent() {
         selectedProperty.iCalLinkLastUpdated <
           selectedProperty.datesLastUpdated && (
           <Dialog open={!hasDismissedModal} onOpenChange={setHasDismissedModal}>
-            <DialogContent>
+            <DialogContent className="[&>button]:hidden">
               <DialogHeader>
                 <DialogTitle>Calendar not synced</DialogTitle>
               </DialogHeader>
