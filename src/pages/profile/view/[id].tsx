@@ -12,6 +12,7 @@ import { useSession } from "next-auth/react";
 import ProfileVericationCard from "@/components/dashboard/host/profile/ProfileVericationCard";
 import { fieldConfig } from "@/components/dashboard/host/profile/fieldConfig";
 import { ViewProfileField } from "@/components/dashboard/host/profile/ViewProfileField";
+import ListingsCarousel from "@/components/profile/ListingsCarousel";
 
 function Page() {
   const router = useRouter();
@@ -121,6 +122,7 @@ function Page() {
                 })}
               </div>
               <ProfileVericationCard userWProfile={userWProfile} />
+              <ListingsCarousel userProfile={userWProfile} />
             </div>
           </div>
         </div>
