@@ -74,7 +74,7 @@ function HowTramonaWorks({ className }: { className: string }) {
 
         {/* Traveler text - moved below the host section */}
         <div className="mt-12 text-center">
-          <h2 className="text-2xl font-semibold text-[#000000] lg:text-3xl">
+          <h2 className="mx-1 text-2xl font-semibold text-[#000000] lg:text-3xl">
             Travelers, the choice is simple. Better prices, better customer
             service and lower fees more
           </h2>

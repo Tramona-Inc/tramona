@@ -57,7 +57,7 @@ export const hostMobileNavLinks = [
 ];
 
 export const guestMobileNavLinks = [
-  { href: "/chat-with-admin", name: "Concierge", icon: UserIcon },
+  // { href: "/chat-with-admin", name: "Concierge", icon: UserIcon },
   { href: "/", name: "Dashboard", icon: HomeIcon },
   { href: "#", name: "More", icon: MoreHorizontal },
 ];
@@ -66,7 +66,7 @@ export const guestMobileNavHamburgerLinks = [
   { href: "/requests", name: "Requests", icon: BadgePercent },
   { href: "/my-trips", name: "My Trips", icon: Briefcase },
   { href: "/messages", name: "Messages", icon: MessageCircleIcon },
-  { href: "/chat-with-admin", name: "Concierge", icon: MessagesSquare },
+  // { href: "/chat-with-admin", name: "Concierge", icon: MessagesSquare },
 ];
 
 export const moreMenuLinks = [
