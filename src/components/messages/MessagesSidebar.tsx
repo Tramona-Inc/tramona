@@ -18,7 +18,6 @@ import { SidebarConversation } from "./SidebarConversation";
 import { Button } from "../ui/button";
 import { MessageSquare } from "lucide-react";
 import { useRouter } from "next/router";
-import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 
 export function MessageConversation({
   conversation,

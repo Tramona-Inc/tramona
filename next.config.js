@@ -39,6 +39,7 @@ const config = {
     { source: "/redawning-tos", destination: "/html/redawning-tos.html" },
   ],
   images: {
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: "https",

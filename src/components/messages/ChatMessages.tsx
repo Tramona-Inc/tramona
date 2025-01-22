@@ -1,3 +1,4 @@
+// components/messages/ChatMessages.tsx
 import { useMessage } from "@/utils/store/messages";
 import { useEffect } from "react";
 import ListMessages from "./ListMessages";
@@ -6,23 +7,35 @@ export const LIMIT_MESSAGE = 20;
 
 export default function ChatMessages({
   conversationId,
+  onMessagesLoadStart, // Add callbacks as props
+  onMessagesLoadEnd,
 }: {
   conversationId: string;
+  onMessagesLoadStart: () => void;
+  onMessagesLoadEnd: () => void;
 }) {
   const { switchConversation, fetchInitialMessages } = useMessage();
 
-  // Fetch conversation on the client
   useEffect(() => {
     console.log(
       "ChatMessages: Fetching messages for conversation:",
       conversationId,
     );
 
-    // Update conversation state
+    onMessagesLoadStart(); // Indicate loading started
+
     switchConversation(conversationId);
 
-    // Fetch initial messages when the component mounts
-    void fetchInitialMessages(conversationId);
+    const loadMessages = async () => {
+      await fetchInitialMessages(conversationId);
+      onMessagesLoadEnd(); // Indicate loading ended
+    };
+
+    void loadMessages();
+
+    return () => {
+      onMessagesLoadEnd(); // Ensure loading state is cleared on unmount/re-render
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conversationId]);
 
