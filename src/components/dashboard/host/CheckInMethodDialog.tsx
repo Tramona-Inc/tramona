@@ -6,8 +6,9 @@ import { z } from "zod";
 import { ALL_CHECKIN_TYPES, Property } from "@/server/db/schema";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { api } from "@/utils/api";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
+import { toast } from "@/components/ui/use-toast";
+import { errorToast } from "@/utils/toasts";
 
 const formSchema = z.object({
   checkInType: z.enum(ALL_CHECKIN_TYPES).nullable(),
@@ -18,16 +19,26 @@ type FormSchema = z.infer<typeof formSchema>;
 
 export default function CheckInMethodDialog({
   property,
+  refetch,
+  updateProperty,
+  isPropertyUpdating,
+  currentHostTeamId,
 }: {
-  property: Property;
+  property: Property | undefined;
+  refetch: () => void;
+  updateProperty: ({
+    updatedProperty,
+    currentHostTeamId,
+  }: {
+    updatedProperty: Property;
+    currentHostTeamId: number;
+  }) => Promise<void>;
+  isPropertyUpdating: boolean;
+  currentHostTeamId: number | null | undefined;
 }) {
-  const { data: fetchedProperty, refetch } = api.properties.getById.useQuery({
-    id: property.id,
-  });
-
   let modifiedCheckInType = null;
 
-  switch (fetchedProperty?.checkInType) {
+  switch (property?.checkInType) {
     case "Smart lock":
       modifiedCheckInType = 0;
       break;
@@ -42,8 +53,6 @@ export default function CheckInMethodDialog({
       break;
   }
 
-  const { mutateAsync: updateProperty } = api.properties.update.useMutation();
-
   const [selectedMethodIndex, setSelectedMethodIndex] = useState<number | null>(
     modifiedCheckInType,
   );
@@ -51,19 +60,24 @@ export default function CheckInMethodDialog({
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      checkInType: fetchedProperty?.checkInType ?? null,
-      additionalCheckInInfo: fetchedProperty?.additionalCheckInInfo ?? "",
+      checkInType: property?.checkInType ?? null,
+      additionalCheckInInfo: property?.additionalCheckInInfo ?? "",
     },
   });
 
   const onSubmit = async (formValues: FormSchema) => {
-    await updateProperty({
-      ...property,
-      checkInType: formValues.checkInType ?? null,
-      additionalCheckInInfo: formValues.additionalCheckInInfo,
-    });
+    if (property) {
+      await updateProperty({
+        updatedProperty: {
+          ...property,
+          checkInType: formValues.checkInType ?? null,
+          additionalCheckInInfo: formValues.additionalCheckInInfo ?? null,
+        },
+        currentHostTeamId: currentHostTeamId!,
+      });
 
-    void refetch();
+      void refetch();
+    }
   };
 
   const methods = [
@@ -150,7 +164,7 @@ export default function CheckInMethodDialog({
           <p className="text-muted-foreground">
             Shared 48 hours before check-in
           </p>
-          <DialogCancelSave />
+          <DialogCancelSave isLoading={isPropertyUpdating} />
         </form>
       </Form>
     </div>

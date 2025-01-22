@@ -1,4 +1,10 @@
-import React, { useMemo, useEffect, useState, useCallback } from "react";
+import React, {
+  useMemo,
+  useEffect,
+  useState,
+  useCallback,
+  useRef,
+} from "react";
 import { ChevronLeft, ChevronRight, ChevronDown, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardBanner } from "@/components/ui/card";
@@ -24,6 +30,7 @@ import {
 } from "@/components/ui/dialog";
 import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 import useSetInitialHostTeamId from "@/components/_common/CustomHooks/useSetInitialHostTeamId";
+import CalenderSettingsLoadingState from "./CalenderSettingsLoadingState";
 
 export default function CalendarComponent() {
   useSetInitialHostTeamId();
@@ -44,22 +51,28 @@ export default function CalendarComponent() {
       },
     );
 
+  //memoize initial property an host hostproperties
+  // Update the ref value only when the properties change
+  const hostPropertiesRef = useRef(hostProperties);
+
+  useEffect(() => {
+    hostPropertiesRef.current = hostProperties;
+  }, [hostProperties]);
+
+  const initialProperty = useMemo(() => {
+    return (
+      hostPropertiesRef.current?.find(
+        (property) => property.id === Number(propertyId),
+      ) ??
+      hostPropertiesRef.current?.[0] ??
+      null
+    );
+  }, [propertyId]);
+
   // Set initial selected property when data loads
   useEffect(() => {
-    if (hostProperties) {
-      const initialProperty =
-        hostProperties.find((property) => property.id === Number(propertyId)) ??
-        hostProperties[0] ??
-        null;
-      setSelectedProperty(initialProperty);
-    }
-  }, [hostProperties, propertyId]);
-
-  // const [editing, setEditing] = useState(false);
-  // const [selectedRange, setSelectedRange] = useState<{
-  //   start: Date | null;
-  //   end: Date | null;
-  // }>({ start: null, end: null });
+    setSelectedProperty(initialProperty);
+  }, [initialProperty]);
 
   const queryInput = useMemo(() => {
     if (!selectedProperty?.hospitableListingId) return null; // Early return
@@ -176,9 +189,9 @@ export default function CalendarComponent() {
   const isLoading = loadingProperties || loadingPrices;
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] flex-col gap-4 p-2 sm:p-4 lg:flex-row">
+    <div className="mb-20 flex flex-col gap-4 p-2 sm:min-h-[calc(100vh-4rem)] sm:p-4 md:mb-0 lg:flex-row">
       {/* CALENDAR */}
-      <Card className="h-full w-full max-w-[1050px] flex-shrink-0">
+      <Card className="h-full lg:w-3/5">
         {selectedProperty?.datesLastUpdated &&
           selectedProperty.iCalLinkLastUpdated &&
           selectedProperty.iCalLinkLastUpdated <
@@ -190,7 +203,7 @@ export default function CalendarComponent() {
               Calendar not synced
             </CardBanner>
           )}
-        <CardContent className="flex h-full flex-col p-3 sm:p-6">
+        <CardContent className="h-full flex-col p-3 pb-2 sm:flex sm:p-6">
           <div className="mb-4 flex items-center justify-between">
             {/* Left Side: Month/Year and Stats */}
             <div>
@@ -244,7 +257,7 @@ export default function CalendarComponent() {
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
-                    className="rounded-full border shadow-lg"
+                    className="my-1 rounded-full border shadow-lg"
                   >
                     <Globe className="mr-2 h-4 w-4" />
                     <span className="hidden sm:inline">
@@ -276,7 +289,7 @@ export default function CalendarComponent() {
               </DropdownMenu>
             </div>
           </div>
-          <div className="min-h-[600px] flex-1">
+          <div className="h-full flex-1">
             <MonthCalendar
               date={date}
               reservedDateRanges={reservedDates}
@@ -287,7 +300,7 @@ export default function CalendarComponent() {
               isLoading={isLoading}
             />
           </div>
-          <div className="mt-4 flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2">
             {/* <Button
               variant="secondary"
               size="sm"
@@ -337,7 +350,11 @@ export default function CalendarComponent() {
       </Card>
 
       {/* SETTINGS */}
-      {selectedProperty && <CalendarSettings property={selectedProperty} />}
+      {selectedProperty ? (
+        <CalendarSettings property={selectedProperty} />
+      ) : (
+        <CalenderSettingsLoadingState />
+      )}
       {selectedProperty?.datesLastUpdated &&
         selectedProperty.iCalLinkLastUpdated &&
         selectedProperty.iCalLinkLastUpdated <

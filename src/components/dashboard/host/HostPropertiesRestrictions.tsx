@@ -18,12 +18,16 @@ import { api } from "@/utils/api";
 import { DollarSignIcon } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { useHostTeamStore } from "@/utils/store/hostTeamStore";
+import { toast } from "@/components/ui/use-toast";
+import { errorToast } from "@/utils/toasts";
 
 export default function HostPropertiesRestrictions({
   property,
 }: {
   property: Property;
 }) {
+  const { currentHostTeamId } = useHostTeamStore();
   const [editing, setEditing] = useState(false);
 
   const formSchema = z.object({
@@ -55,14 +59,31 @@ export default function HostPropertiesRestrictions({
       priceRestriction: price ? price * 100 : 0, //convert to cents
       stripeVerRequired: stripeVerRequired === "yes",
     };
-    console.log("form values:", values);
-    console.log("default values:", form.getValues());
-    console.log("new priceRestriction", newProperty.priceRestriction);
-    await updateProperty(newProperty);
+
+    await updateProperty({
+      updatedProperty: newProperty,
+      currentHostTeamId: currentHostTeamId!,
+    })
+      .then(() => {
+        toast({
+          title: `Property Updated!`,
+        });
+      })
+      .catch((error) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        if (error.data?.code === "FORBIDDEN") {
+          toast({
+            title: "You do not have permission to edit the listing.",
+            description: "Please contact your team owner to request access.",
+          });
+        } else {
+          errorToast();
+        }
+      });
   };
 
   return (
-    <div className="mb-24 mt-6 space-y-2">
+    <div className="mt-6 space-y-2 overflow-y-auto">
       <div className="text-end">
         <HostPropertyEditBtn
           editing={editing}

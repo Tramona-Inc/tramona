@@ -12,6 +12,7 @@ import {
   groups,
   trips,
   tripCancellations,
+  reservedDateRanges,
 } from "@/server/db/schema";
 import { cancelSuperhogReservation } from "@/utils/webhook-functions/superhog-utils";
 import { sendEmail } from "@/server/server-utils";
@@ -276,6 +277,8 @@ export const tripsRouter = createTRPCRouter({
         },
       });
 
+      console.log("ksldfkl", trip?.propertyId);
+
       const propertyLatLngPoint = await db.query.properties.findFirst({
         where: eq(properties.id, trip!.propertyId),
         columns: { latLngPoint: true },
@@ -477,6 +480,16 @@ export const tripsRouter = createTRPCRouter({
           description: currentCancellations.reason,
         },
       });
+
+      await db
+        .delete(reservedDateRanges)
+        .where(
+          and(
+            eq(reservedDateRanges.propertyId, currentTrip.propertyId),
+            eq(reservedDateRanges.start, currentTrip.checkIn.toISOString()),
+            eq(reservedDateRanges.end, currentTrip.checkOut.toISOString()),
+          ),
+        );
       return;
     }),
   getMyTripsPaymentHistory: protectedProcedure.query(async ({ ctx }) => {

@@ -174,7 +174,7 @@ export default function AdminOfferForm({
     control: form.control,
   });
 
-  const updatePropertyMutation = api.properties.update.useMutation();
+  const updatePropertyMutation = api.properties.adminUpdate.useMutation();
   const updateOfferMutation = api.offers.update.useMutation();
   const createPropertyMutation = api.properties.create.useMutation();
   const createOfferMutation = api.offers.create.useMutation();

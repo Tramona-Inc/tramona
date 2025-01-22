@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { Separator } from "../ui/separator";
 import React from "react";
-import { useIsSm } from "@/utils/utils";
+import { useIsMd } from "@/utils/utils";
 import ChatWithHost from "./sections/ChatWithHost";
 import CustomerReview from "./sections/CustomerReview";
 import MemoizedCustomStripeCheckoutContainer from "./CustomStripeCheckoutContainer";
@@ -22,7 +22,7 @@ interface UnifiedCheckoutProps {
 export function UnifiedCheckout({ unifiedCheckoutData }: UnifiedCheckoutProps) {
   useSession({ required: true });
   const router = useRouter();
-  const isMobile = !useIsSm();
+  const isMobile = !useIsMd();
 
   const renderCheckoutForm = () => {
     //if (isMobile) return null;
@@ -34,7 +34,7 @@ export function UnifiedCheckout({ unifiedCheckoutData }: UnifiedCheckoutProps) {
   };
 
   return (
-    <div className="px-4 md:px-3">
+    <div className="px-5 md:mx-8">
       <div className="mb-4 flex items-center gap-2">
         <Link
           href="#"
@@ -48,7 +48,7 @@ export function UnifiedCheckout({ unifiedCheckoutData }: UnifiedCheckoutProps) {
           <p className="font-semibold">{unifiedCheckoutData.property.name}</p>
         </Link>
       </div>
-      <div className="grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-20">
+      <div className="grid grid-cols-1 gap-x-10 gap-y-10 md:grid-cols-2 lg:gap-20">
         <div className="hidden md:block">
           <BestPriceCard />
           <TripDetails unifiedCheckoutData={unifiedCheckoutData} />
@@ -73,7 +73,7 @@ export function UnifiedCheckout({ unifiedCheckoutData }: UnifiedCheckoutProps) {
             <ChatWithHost />
           </div>
         </div>
-        <div className="sticky top-24 hidden h-fit space-y-2 md:block md:pl-10 xl:pl-20">
+        <div className="sticky top-24 hidden h-fit space-y-2 md:block">
           <div className="space-y-10">
             <CheckoutSummary unifiedCheckoutData={unifiedCheckoutData} />
             <CustomerReview />

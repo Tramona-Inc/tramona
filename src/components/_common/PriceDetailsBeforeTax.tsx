@@ -180,7 +180,7 @@ export default function PriceDetailsBeforeTax({
             </p>
           </div>
           {offer && !offer.scrapeUrl && (
-            <p className="text-sm text-muted-foreground">Total before taxes</p>
+            <p className="text-xs text-muted-foreground">Total before taxes</p>
           )}
         </div>
       </div>
@@ -190,7 +190,7 @@ export default function PriceDetailsBeforeTax({
             brokeDownPayment.totalTripAmount - brokeDownPayment.taxesPaid,
           )}
         </p>
-        <p className="text-muted-foreground">Total before taxes</p>
+        <p className="text-xs text-muted-foreground">Total before taxes</p>
       </div>
     </>
   );

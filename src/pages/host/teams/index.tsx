@@ -15,10 +15,10 @@ import {
   Users,
   Check,
   X,
-  Trash2,
   Shield,
   ChevronDown,
   MoreVertical,
+  UserRoundMinusIcon,
 } from "lucide-react";
 import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
@@ -99,6 +99,23 @@ const roleDescriptions = {
       "Access financial reports",
     ],
   },
+  "Co-Host": {
+    title: "Co-Host",
+    description:
+      "Assist the primary host by managing bookings, properties, and operational tasks.",
+    icon: <Users className="h-4 w-4" />,
+    color: "bg-yellow-100 text-yellow-800",
+    checkColor: "text-yellow-500",
+    xColor: "text-yellow-300",
+    can: [
+      "All Match Manager permissions",
+      "All Listing Manager permissions",
+      "View financial reports",
+      "Modify overall pricing strategy",
+      "Manage team member's access and permissions",
+    ],
+    cant: ["Access or modify payment information"],
+  },
   "Admin Access": {
     title: "Admin Access",
     description:
@@ -110,14 +127,10 @@ const roleDescriptions = {
     can: [
       "All Match Manager permissions",
       "All Listing Manager permissions",
-      "View financial reports",
-      "Modify overall pricing strategy",
-    ],
-    cant: [
+      "All Co-Host permissions",
       "Access or modify payment information",
-      "Delete the property listing",
-      "Change the primary host",
     ],
+    cant: ["Delete the property listing", "Change the primary host"],
   },
 } as const;
 
@@ -128,7 +141,7 @@ const inviteSchema = z.object({
 
 export default function Component() {
   useSetInitialHostTeamId();
-  const { currentHostTeamId, setCurrentHostTeam } = useHostTeamStore();
+  const { currentHostTeamId } = useHostTeamStore();
 
   const { data: session } = useSession({ required: true });
   const { data: hostProfile } = api.hosts.getMyHostProfile.useQuery();
@@ -136,6 +149,11 @@ export default function Component() {
 
   const curTeam =
     hostProfile && hostTeams?.find((team) => team.id === currentHostTeamId);
+
+  const curRole =
+    hostProfile &&
+    curTeam?.members.find((member) => member.userId === hostProfile.userId)
+      ?.role;
 
   const updateRoleMutation = api.hostTeams.updateCoHostRole.useMutation();
 
@@ -210,7 +228,7 @@ export default function Component() {
                   .mutateAsync({
                     userId: member.userId,
                     role: newRole as CoHostRole,
-                    hostTeamId: curTeam.id,
+                    currentHostTeamId: curTeam.id,
                   })
                   .then(() => {
                     toast({
@@ -219,11 +237,24 @@ export default function Component() {
                         "The co-host's role has been updated successfully",
                     });
                   })
-                  .catch(() => errorToast());
+                  .catch((error) => {
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                    if (error.data?.code === "FORBIDDEN") {
+                      toast({
+                        title:
+                          "You do not have permission to change Co-host roles.",
+                        description:
+                          "Please contact your team owner to request access.",
+                      });
+                    } else {
+                      errorToast();
+                    }
+                  });
               }}
               disabled={
                 updateRoleMutation.isLoading ||
-                member.userId === curTeam.ownerId
+                member.userId === curTeam.ownerId ||
+                (curRole !== "Admin Access" && curRole !== "Co-Host")
               }
             >
               <SelectTrigger className="w-48 pl-2">
@@ -254,31 +285,43 @@ export default function Component() {
                 )}
               </SelectContent>
             </Select>
-            {member.userId !== curTeam.ownerId && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  removeHostTeamMemberMutation
-                    .mutateAsync({
-                      memberId: member.userId,
-                      hostTeamId: curTeam.id,
-                    })
-                    .then(() => {
+            <Button
+              variant="destructive"
+              size="icon"
+              onClick={() => {
+                removeHostTeamMemberMutation
+                  .mutateAsync({
+                    memberId: member.userId,
+                    currentHostTeamId: curTeam.id,
+                  })
+                  .then(() => {
+                    toast({
+                      title: "Member removed",
+                      description:
+                        "The team member has been removed successfully",
+                    });
+                  })
+                  .catch((error) => {
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                    if (error.data?.code === "FORBIDDEN") {
                       toast({
-                        title: "Member removed",
+                        title: "You do not have permission to remove Co-hosts.",
                         description:
-                          "The team member has been removed successfully",
+                          "Please contact your team owner to request access.",
                       });
-                    })
-                    .catch(() => errorToast());
-                }}
-                disabled={removeHostTeamMemberMutation.isLoading}
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Remove
-              </Button>
-            )}
+                    } else {
+                      console.log(error);
+                      errorToast();
+                    }
+                  });
+              }}
+              disabled={
+                removeHostTeamMemberMutation.isLoading ||
+                (curRole !== "Admin Access" && curRole !== "Co-Host")
+              }
+            >
+              <UserRoundMinusIcon className="mr-2 h-4 w-4" />
+            </Button>
           </div>
         </div>
       ))}

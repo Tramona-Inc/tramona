@@ -89,7 +89,6 @@ export async function fetchConversationWithAdmin(userId: string) {
         (participant) => participant.user.id === ADMIN_ID,
       ),
   );
-
   return conversationWithAdmin?.conversation.id ?? null;
 }
 
@@ -528,6 +527,9 @@ export const messagesRouter = createTRPCRouter({
     )
     .mutation(async ({ input }) => {
       //find the receiver of the message
+      const sender = await db.query.users.findFirst({
+        where: eq(users.id, input.senderId),
+      });
       const receiver = await db.query.conversationParticipants
         .findFirst({
           where: and(
@@ -552,7 +554,7 @@ export const messagesRouter = createTRPCRouter({
         channel: "admin-messaging",
         isProductionOnly: false,
         text: [
-          `*${receiver.email} sent a message to admin*`,
+          `*${sender?.email} sent a message to admin*`,
           `${input.message}`,
           `<${baseUrl}/messages?conversationId=${input.conversationId}|Click here to respond>`,
         ].join("\n"),
@@ -665,7 +667,7 @@ export const messagesRouter = createTRPCRouter({
         message: z.string(),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ input }) => {
       const exists = await verifyConversationExists(input.conversationId);
       if (!exists) {
         throw new Error("Conversation not found");

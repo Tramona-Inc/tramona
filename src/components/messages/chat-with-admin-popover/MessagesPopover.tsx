@@ -26,7 +26,13 @@ import { useEffect, useState } from "react";
 
 import { type MessageDbType } from "@/types/supabase.message";
 import usePopoverStore from "@/utils/store/messagePopoverStore";
-export default function MessagesPopover({ isMobile, isHostOnboarding }: { isMobile: boolean, isHostOnboarding: boolean }) {
+export default function MessagesPopover({
+  isMobile,
+  isHostOnboarding,
+}: {
+  isMobile: boolean;
+  isHostOnboarding: boolean;
+}) {
   const { data: session } = useSession();
   const [conversationId, setConversationId] = useState<string>("");
   const [tempToken, setTempToken] = useState<string>("");
@@ -34,8 +40,10 @@ export default function MessagesPopover({ isMobile, isHostOnboarding }: { isMobi
 
   const { mutateAsync: createOrRetrieveConversation } =
     api.messages.createConversationWithAdmin.useMutation();
+
   const { mutateAsync: createOrRetrieveConversationFromGuest } =
     api.messages.createConversationWithAdminFromGuest.useMutation();
+
   const { mutateAsync: createTempUserForGuest } =
     api.auth.createTempUserForGuest.useMutation();
   const { data: conversationIdAndTempUserId } =
@@ -61,30 +69,34 @@ export default function MessagesPopover({ isMobile, isHostOnboarding }: { isMobi
 
   useEffect(() => {
     if (!session && typeof window !== "undefined") {
-      const storedToken = localStorage.getItem("tempToken");
-      if (storedToken) {
-        setTempToken(storedToken);
-      } else {
-        const uuid = crypto.randomUUID();
-        setTempToken(uuid);
-      }
-    }
-  }, [session]);
-
-  useEffect(() => {
-    if (tempToken && !session) {
+      let storedToken = localStorage.getItem("tempToken");
       const tempUserExists = localStorage.getItem("tempUserCreated");
+
+      if (!storedToken || !tempUserExists) {
+        const newToken = crypto.randomUUID();
+        storedToken = newToken;
+        localStorage.setItem("tempToken", newToken);
+      }
+
+      setTempToken(storedToken);
+
+      // Check if temp user exists in the database
       if (!tempUserExists) {
         void createTempUserForGuest({
           email: "temp_user@gmail.com",
           isBurner: true,
-          sessionToken: tempToken,
-        }).then(() => {
-          localStorage.setItem("tempUserCreated", "true");
-        });
+          sessionToken: storedToken,
+        })
+          .then(() => {
+            localStorage.setItem("tempUserCreated", "true");
+          })
+          .catch((error) => {
+            console.error("Failed to create temporary user:", error);
+            localStorage.removeItem("tempToken"); // Clear invalid token
+          });
       }
     }
-  }, [tempToken, session, createTempUserForGuest]);
+  }, [session, createTempUserForGuest]);
 
   useEffect(() => {
     // Ensure having a valid user ID before making the call (the session is loaded or guest has tempToken)
@@ -252,7 +264,10 @@ export default function MessagesPopover({ isMobile, isHostOnboarding }: { isMobi
   useEffect(() => {
     if (isHostOnboarding) {
       // Set a default message if onboarding is true
-      form.setValue("message", "I need help with host onboarding. I had an issue logging in with Hospitable.");
+      form.setValue(
+        "message",
+        "I need help with host onboarding. I had an issue logging in with Hospitable.",
+      );
     }
   }, [isHostOnboarding, form]);
 
@@ -261,18 +276,18 @@ export default function MessagesPopover({ isMobile, isHostOnboarding }: { isMobi
       {!isMobile ? (
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
-            <Button className="w-18 h-18 bottom-4 right-4 z-50 m-4 hidden rounded-full border p-4 lg:fixed lg:block">
-              <MessageCircleMore />
+            <Button className="w-18 h-18 bottom-4 right-4 z-50 m-4 hidden rounded-full border bg-[#004236] p-4 hover:bg-[#004236]/90 lg:fixed lg:block">
+              <MessageCircleMore className="text-white" />
             </Button>
           </PopoverTrigger>
           <PopoverContent
             side="top"
-            className="mr-7 rounded-xl border bg-black p-0"
+            className="mr-7 rounded-xl border bg-white p-0"
           >
-            <div className="relative bg-zinc-800 py-4 text-center text-xs text-white">
+            <div className="relative bg-[#004236] py-4 text-center text-xs text-white">
               <div className="absolute left-4">
                 <PopoverClose>
-                  <X />
+                  <X className="text-white" />
                 </PopoverClose>
               </div>
 
@@ -286,10 +301,10 @@ export default function MessagesPopover({ isMobile, isHostOnboarding }: { isMobi
               messages={messages}
               tempUserId={conversationIdAndTempUserId?.tempUserId ?? ""}
             />
-            <div className="p-2">
+            <div className="p-4">
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(handleOnSend)}>
-                  <div className="flex rounded-full border p-2">
+                  <div className="flex h-12 rounded-full border border-[#004236] bg-gray-50 shadow-sm">
                     <FormField
                       control={form.control}
                       name="message"
@@ -297,9 +312,9 @@ export default function MessagesPopover({ isMobile, isHostOnboarding }: { isMobi
                         return (
                           <FormItem className="flex-1">
                             <FormControl>
-                              <textarea
+                              <input
                                 placeholder="Type your question here..."
-                                className="border-none bg-transparent text-white resize-none"
+                                className="flex h-full w-full items-center justify-center border-none bg-transparent px-4 leading-none text-black placeholder:text-center placeholder:text-gray-500 focus:outline-none"
                                 {...field}
                               />
                             </FormControl>
@@ -310,9 +325,9 @@ export default function MessagesPopover({ isMobile, isHostOnboarding }: { isMobi
                     <Button
                       size="icon"
                       type="submit"
-                      className="rounded-full bg-blue-800"
+                      className="my-1 mr-1 rounded-full bg-[#004236] transition-colors hover:bg-[#004236]/90"
                     >
-                      <ArrowUp />
+                      <ArrowUp className="h-4 w-4 text-white" />
                     </Button>
                   </div>
                 </form>
@@ -321,8 +336,8 @@ export default function MessagesPopover({ isMobile, isHostOnboarding }: { isMobi
           </PopoverContent>
         </Popover>
       ) : (
-        <div className="flex h-screen-minus-header-n-footer flex-col justify-between bg-black">
-          <div className="relative bg-zinc-800 py-4 text-center text-xs text-white">
+        <div className="flex h-screen-minus-header-n-footer flex-col justify-between bg-white">
+          <div className="relative bg-[#004236] py-4 text-center text-xs text-white">
             <div className="flex items-center justify-center">
               <UserAvatar image={concierge.image} />
             </div>
@@ -334,10 +349,10 @@ export default function MessagesPopover({ isMobile, isHostOnboarding }: { isMobi
             isMobile={isMobile}
             tempUserId={conversationIdAndTempUserId?.tempUserId ?? ""}
           />
-          <div className="p-2">
+          <div className="mx-auto mb-20 w-[95%] p-2">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(handleOnSend)}>
-                <div className="flex rounded-full border p-2">
+                <div className="flex rounded-full border border-[#004236] p-2">
                   <FormField
                     control={form.control}
                     name="message"
@@ -347,7 +362,7 @@ export default function MessagesPopover({ isMobile, isHostOnboarding }: { isMobi
                           <FormControl>
                             <Input
                               placeholder="Type your question here..."
-                              className="border-none bg-transparent text-white"
+                              className="border-none bg-transparent text-black placeholder:text-center"
                               {...field}
                             />
                           </FormControl>
@@ -358,9 +373,9 @@ export default function MessagesPopover({ isMobile, isHostOnboarding }: { isMobi
                   <Button
                     size="icon"
                     type="submit"
-                    className="rounded-full bg-blue-800"
+                    className="rounded-full bg-[#004236]"
                   >
-                    <ArrowUp />
+                    <ArrowUp className="text-white" />
                   </Button>
                 </div>
               </form>

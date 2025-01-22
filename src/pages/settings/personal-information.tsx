@@ -82,7 +82,10 @@ function PersonalInformationForm({ session }: { session: Session }) {
     <SettingsLayout>
       <div className="mx-auto max-w-4xl lg:my-8">
         <div className="space-y-2 rounded-lg border bg-white p-4 lg:space-y-4">
-          <Link href="/settings" className="inline-block lg:hidden">
+          <Link
+            href="/settings/personal-information"
+            className="inline-block lg:hidden"
+          >
             <ChevronLeft />
           </Link>
           <Form {...form}>

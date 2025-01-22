@@ -2,10 +2,11 @@ import { Input } from "@/components/ui/input";
 import DialogCancelSave from "./DialogCancelSave";
 import { Property } from "@/server/db/schema";
 import { z } from "zod";
-import { api } from "@/utils/api";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
+import { toast } from "@/components/ui/use-toast";
+import { errorToast } from "@/utils/toasts";
 
 const formSchema = z.object({
   wifiName: z.string().nullable(),
@@ -14,29 +15,62 @@ const formSchema = z.object({
 
 type FormSchema = z.infer<typeof formSchema>;
 
-export default function WifiDialog({ property }: { property: Property }) {
-  const { data: fetchedProperty, refetch } = api.properties.getById.useQuery({
-    id: property.id,
-  });
-
-  const { mutateAsync: updateProperty } = api.properties.update.useMutation();
-
+export default function WifiDialog({
+  property,
+  refetch,
+  updateProperty,
+  isPropertyUpdating,
+  currentHostTeamId,
+}: {
+  property: Property | undefined;
+  refetch: () => void;
+  updateProperty: ({
+    updatedProperty,
+    currentHostTeamId,
+  }: {
+    updatedProperty: Property;
+    currentHostTeamId: number;
+  }) => Promise<void>;
+  isPropertyUpdating: boolean;
+  currentHostTeamId: number | null | undefined;
+}) {
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      wifiName: fetchedProperty?.wifiName ?? null,
-      wifiPassword: fetchedProperty?.wifiPassword ?? null,
+      wifiName: property?.wifiName ?? null,
+      wifiPassword: property?.wifiPassword ?? null,
     },
   });
 
   const onSubmit = async (formValues: FormSchema) => {
-    await updateProperty({
-      ...property,
-      wifiName: formValues.wifiName === "" ? null : formValues.wifiName,
-      wifiPassword:
-        formValues.wifiPassword === "" ? null : formValues.wifiPassword,
-    });
-    void refetch();
+    if (property) {
+      await updateProperty({
+        updatedProperty: {
+          ...property,
+          wifiName: formValues.wifiName === "" ? null : formValues.wifiName,
+          wifiPassword:
+            formValues.wifiPassword === "" ? null : formValues.wifiPassword,
+        },
+        currentHostTeamId: currentHostTeamId!,
+      })
+        .then(() => {
+          toast({
+            title: "Successfully Updated Property!",
+          });
+        })
+        .catch((error) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          if (error.data?.code === "FORBIDDEN") {
+            toast({
+              title: "You do not have permission to edit a property.",
+              description: "Please contact your team owner to request access.",
+            });
+          } else {
+            errorToast();
+          }
+        });
+      void refetch();
+    }
   };
 
   return (
@@ -86,7 +120,7 @@ export default function WifiDialog({ property }: { property: Property }) {
           <div className="space-y-4 text-muted-foreground">
             <p>Shared 48 hours before check-in</p>
           </div>
-          <DialogCancelSave />
+          <DialogCancelSave isLoading={isPropertyUpdating} />
         </form>
       </Form>
     </div>
