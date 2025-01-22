@@ -1054,7 +1054,6 @@ export const propertiesRouter = createTRPCRouter({
 
       const { location } = await getCoordinates(input.location);
       if (!location) throw new Error("Could not get coordinates for address");
-      console.log("location", location);
 
       const radiusInMeters = 20 * 1609.34;
 
@@ -1097,7 +1096,6 @@ export const propertiesRouter = createTRPCRouter({
         (item) => item.propertyId,
       );
 
-      console.log("conflictingIds", conflictingIds.length);
       const calculateAge = (dateOfBirth: string) => {
         const today = new Date();
         const birthDate = new Date(dateOfBirth);
@@ -1131,7 +1129,6 @@ export const propertiesRouter = createTRPCRouter({
           return null;
         });
 
-      console.log("userAge", userAge);
 
       const ageRestrictionCheck = sql`CASE
         WHEN ${properties.ageRestriction} IS NULL THEN true
@@ -1149,7 +1146,6 @@ export const propertiesRouter = createTRPCRouter({
         ),
       });
 
-      console.log("hostProperties", hostProperties.length);
 
       const checkInNew = new Date(checkInDate).toISOString().split("T")[0];
       const checkOutNew = new Date(checkOutDate).toISOString().split("T")[0];
@@ -1183,7 +1179,6 @@ export const propertiesRouter = createTRPCRouter({
           notInArray(properties.id, conflictingIds), // Exclude properties with conflicting reservations
         ),
       });
-      console.log("scrapedProperties", scrapedProperties.length);
       const validatedScrapedProperties = await Promise.all(
         scrapedProperties.map(async (property) => {
           if (property.imageUrls.length > 0) {
@@ -1192,6 +1187,7 @@ export const propertiesRouter = createTRPCRouter({
             if (isValid) {
               return property; // Keep the property if the image is valid
             } else {
+              void db.delete(properties).where(eq(properties.id, property.id));
               return null; // Filter out if the image is invalid
             }
           } else {
@@ -1202,9 +1198,6 @@ export const propertiesRouter = createTRPCRouter({
 
       // Filter out null values (properties with invalid or no images)
       const filteredScrapedProperties = validatedScrapedProperties.filter(Boolean);
-
-      console.log("scrapedProperties after validation", filteredScrapedProperties.length);
-
 
       return { hostProperties: validHostProperties, scrapedProperties: filteredScrapedProperties };
     }),

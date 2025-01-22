@@ -84,7 +84,9 @@ export function DesktopSearchTab({
 
   useEffect(() => {
     const data = searchSchema.safeParse(router.query);
-    if (data.success) form.reset(data.data);
+    if (data.success && data.data && Object.keys(data.data).length > 0) { // Added checks here
+      form.reset(data.data);
+    }
   }, [form, router.query]);
 
   const filterProperties = (

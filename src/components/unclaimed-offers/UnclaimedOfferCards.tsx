@@ -36,23 +36,18 @@ import { useLoading } from "./UnclaimedMapLoadingContext";
 import { Badge } from "../ui/badge";
 import { Property } from "@/server/db/schema/tables/properties";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
-import { api } from "@/utils/api";
 
 
 type PropertyType = Property | AirbnbSearchResult;
 
-const validationCache = new Map<string, boolean>();
 
 export default function UnclaimedOfferCards(): JSX.Element {
   const { adjustedProperties, isSearching } = useAdjustedProperties();
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
-  const [validProperties, setValidProperties] = useState<PropertyType[]>([]);
   const itemsPerPage = 36;
   const { data: session } = useSession();
   const {} = useLoading();
-  const { mutateAsync: updatePropertyStatus } =
-    api.properties.updatePropertyStatus.useMutation();
 
   const allProperties = useMemo(() => {
     return adjustedProperties?.pages ?? [];
@@ -392,7 +387,7 @@ const UnMatchedPropertyCard = memo(function UnMatchedPropertyCard({
                         e,
                       );
                       (e.target as HTMLImageElement).src =
-                        "/assets/images/image_not_found.png";
+                        "/assets/images/review-image.png";
                       // Add the failed URL to the Set
                       setFailedImageUrls((prevFailedUrls) =>
                         new Set(prevFailedUrls).add(imageUrl),
@@ -400,7 +395,7 @@ const UnMatchedPropertyCard = memo(function UnMatchedPropertyCard({
                     } else {
                       // If URL is already in failedImageUrls, just set fallback, no console error or state update
                       (e.target as HTMLImageElement).src =
-                        "/assets/images/image_not_found.png";
+                        "/assets/images/review-image.png";
                       console.log(
                         `Skipping retry/state update for already failed image: ${imageUrl}`,
                       ); // Optional logging to confirm skipping
