@@ -8,12 +8,14 @@ import {
 } from "@/utils/store/conversations";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { api } from "@/utils/api";
-import { cn, useIsMd } from "@/utils/utils";
-import SelectedConversationSidebar from "@/components/messages/SelectedConversationSidebar";
+import { cn } from "@/utils/utils";
 import { SkeletonText } from "@/components/ui/skeleton";
+import { useHostTeamStore } from "@/utils/store/hostTeamStore";
+import ConversationsEmptySvg from "@/components/_common/EmptyStateSvg/ConversationsEmptySvg";
 import EmptyStateValue from "@/components/_common/EmptyStateSvg/EmptyStateValue";
+import SelectedConversationSidebar from "@/components/messages/SelectedConversationSidebar";
 import { Button } from "@/components/ui/button";
 
 interface MessagesPageProps {
@@ -27,60 +29,30 @@ interface MessagesPageProps {
   useViewedStateLogic?: boolean;
   pageTitlePrefix?: string;
 }
-function MessageDisplay({
-  isHost,
-  basePath,
-  fetchConversationsQuery,
-  showMobileSidebarFeatures = false,
-  EmptyStateComponent = null,
-  memoizeMessagesContent = false,
-  useViewedStateLogic = false,
-}: MessagesPageProps) {
+
+function MessageDisplay() {
   const [selectedConversation, setSelectedConversation] =
     useState<Conversation | null>(null);
-  const [previousSelectedConversation, setPreviousSelectedConversation] = // **NEW STATE**
-    useState<Conversation | null>(null);
+  const [showMobileSidebar, setShowMobileSidebar] = useState(false);
   const [showMobileSelectedSidebar, setShowMobileSelectedSidebar] =
-    useState(true);
+    useState(false);
   const [showSelectedSidebar, setShowSelectedSidebar] = useState(false);
-  const [isContentLoading, setIsContentLoading] = useState(false);
 
-  const { push, query } = useRouter();
+  const selectConversation = (conversation: Conversation | null) => {
+    setSelectedConversation(conversation);
+    setShowMobileSidebar(false);
+    setShowMobileSelectedSidebar(false);
+    setShowSelectedSidebar(false);
+  };
 
-  const selectConversation = useCallback(
-    (conversation: Conversation | null) => {
-      setIsContentLoading(true);
-      setPreviousSelectedConversation(selectedConversation); // **Store previous conversation**
-      setSelectedConversation(conversation);
-
-      if (showMobileSidebarFeatures) {
-        setShowMobileSelectedSidebar(false);
-        setShowSelectedSidebar(false);
-      }
-
-      if (conversation) {
-        void push({
-          pathname: `${basePath}/${conversation.id}`,
-        });
-      } else {
-        void push(
-          basePath,
-          undefined,
-          useViewedStateLogic ? { shallow: true } : undefined,
-        );
-      }
-    },
-    [
-      push,
-      basePath,
-      showMobileSidebarFeatures,
-      useViewedStateLogic,
-      selectedConversation, // Dependency for storing previous conversation
-    ],
-  );
+  const toggleMobileSidebar = () => {
+    setShowMobileSidebar((prev) => !prev);
+    setShowMobileSelectedSidebar(false);
+  };
 
   const toggleMobileSelectedSidebar = () => {
     setShowMobileSelectedSidebar((prev) => !prev);
+    setShowMobileSidebar(false);
   };
 
   const toggleSelectedSidebar = () => {
@@ -88,115 +60,40 @@ function MessageDisplay({
   };
 
   const conversations = useConversation((state) => state.conversationList);
+  const { query } = useRouter();
+  const { currentHostTeamId } = useHostTeamStore();
   const {
     data: fetchedConversations,
     isLoading: isSidebarLoading,
     refetch,
-  } = api.messages.getConversations.useQuery(fetchConversationsQuery, {
-    refetchOnWindowFocus: false,
+  } = api.messages.getConversations.useQuery({
+    hostTeamId: currentHostTeamId,
   });
-  const isMd = useIsMd();
-  const [isViewed, setIsViewed] = useState(useViewedStateLogic ? false : true);
 
   useEffect(() => {
-    const conversationIdFromUrl = (query.conversationId || query.id) as
-      | string
-      | undefined;
+    if (query.conversationId && conversations.length > 0) {
+      const conversationIdToSelect = query.conversationId as string;
+      const conversationToSelect = conversations.find(
+        (conversation) => conversation.id === conversationIdToSelect,
+      );
 
-    if (conversationIdFromUrl) {
-      if (conversations.length > 0) {
-        const conversationToSelect = conversations.find(
-          (conversation) => conversation.id === conversationIdFromUrl,
-        );
-
-        if (
-          conversationToSelect &&
-          selectedConversation?.id !== conversationToSelect.id
-        ) {
-          setSelectedConversation(conversationToSelect);
-        } else if (!conversationToSelect) {
-          if (selectedConversation?.id === conversationIdFromUrl) {
-            setSelectedConversation(null);
-          }
-          void push(basePath);
-        }
-      } else {
-        if (selectedConversation?.id === conversationIdFromUrl) {
-          setSelectedConversation(null);
-        }
-      }
-    } else if (!conversationIdFromUrl) {
-      if (selectedConversation) {
-        setSelectedConversation(null);
+      if (
+        conversationToSelect &&
+        conversationToSelect !== selectedConversation
+      ) {
+        setSelectedConversation(conversationToSelect);
       }
     }
-  }, [
-    conversations,
-    query.conversationId,
-    query.id,
-    selectedConversation?.id,
-    push,
-    basePath,
-  ]);
-
-  const MemoizedMessagesContent = useMemo(
-    () => {
-      return (
-        <MessagesContent
-          selectedConversation={selectedConversation}
-          setSelected={selectConversation}
-          onMessagesLoadEnd={() => setIsContentLoading(false)}
-        />
-      );
-    },
-    memoizeMessagesContent ? [selectedConversation, selectConversation] : [],
-  );
-
-  const messagesContent = memoizeMessagesContent ? (
-    MemoizedMessagesContent
-  ) : (
-    <MessagesContent
-      selectedConversation={selectedConversation}
-      setSelected={selectConversation}
-      onMessagesLoadEnd={() => setIsContentLoading(false)}
-    />
-  );
-
-  const previousMessagesContent = useMemo(
-    // **Memoized Previous Messages Content**
-    () => {
-      return (
-        <MessagesContent
-          selectedConversation={previousSelectedConversation} // **Use previousSelectedConversation**
-          setSelected={selectConversation} // Keep the same setSelected
-        />
-      );
-    },
-    memoizeMessagesContent
-      ? [previousSelectedConversation, selectConversation]
-      : [],
-  );
-
-  const renderPreviousMessages = memoizeMessagesContent ? ( // **Conditional rendering logic**
-    previousMessagesContent
-  ) : (
-    <MessagesContent
-      selectedConversation={previousSelectedConversation} // **Use previousSelectedConversation**
-      setSelected={selectConversation} // Keep the same setSelected
-    />
-  );
+  }, [query.conversationId, conversations, selectedConversation]);
 
   return (
     <div className="flex h-[calc(100vh-12rem)] divide-x border-b lg:h-[calc(100vh-8rem)]">
       {/* Messages Sidebar */}
       <div
         className={cn(
-          "w-full bg-white md:w-1/3 xl:w-96",
-          showMobileSidebarFeatures && !showSelectedSidebar && "md:block",
-          !showMobileSidebarFeatures &&
-            selectedConversation &&
-            "hidden md:block",
-          !showMobileSidebarFeatures && !selectedConversation && "md:block",
+          "w-full bg-white transition-transform duration-300 md:w-96",
+          !showSelectedSidebar && "md:block",
+          showMobileSidebar ? "sm:block" : "hidden sm:hidden",
         )}
       >
         {isSidebarLoading ? (
@@ -216,60 +113,64 @@ function MessageDisplay({
         )}
       </div>
 
-      {/* Messages Content - **Conditional Rendering with Previous Conversation** */}
-      {isMd && (
-        <div
-          className={cn(
-            "flex h-full flex-1 items-center justify-center transition-transform duration-300",
-          )}
-        >
-          {isContentLoading ? (
-            previousSelectedConversation ? ( // **Show previous content if available while loading**
-              renderPreviousMessages
-            ) : (
-              <div className="flex h-full w-full items-center justify-center">
-                <p>Loading Conversation...</p>{" "}
-                {/* Fallback to loading message */}
-              </div>
-            )
-          ) : selectedConversation ? (
-            messagesContent
-          ) : (
-            <EmptyStateValue description="Select a conversation to read more">
-              {EmptyStateComponent}
-            </EmptyStateValue>
-          )}
-        </div>
-      )}
+      {/* Messages Content */}
+      <div
+        className={cn(
+          "flex h-full flex-1 items-center justify-center transition-transform duration-300",
+          !showMobileSidebar && !showMobileSelectedSidebar && "sm:flex",
+          !selectedConversation && "hidden md:flex",
+        )}
+      >
+        {!selectedConversation ? (
+          <EmptyStateValue description="You have no conversations yet">
+            <ConversationsEmptySvg />
+          </EmptyStateValue>
+        ) : (
+          <MessagesContent
+            selectedConversation={selectedConversation}
+            setSelected={selectConversation}
+          />
+        )}
+      </div>
 
       {/* Selected Conversation Sidebar */}
       {selectedConversation &&
         (selectedConversation.propertyId ?? selectedConversation.requestId) && (
           <div
-            className={cn("w-1/4 border-l transition-transform duration-300")}
+            className={cn(
+              "w-1/4 border-l transition-transform duration-300",
+              showSelectedSidebar ? "md:block" : "hidden", // Visible on medium and larger screens when toggled
+              showMobileSelectedSidebar ? "sm:block" : "hidden sm:hidden", // Visible on small screens when toggled
+            )}
           >
             <SelectedConversationSidebar
               conversation={selectedConversation}
-              isHost={isHost}
+              isHost={true}
             />
           </div>
         )}
 
-      {/* Mobile Buttons - Conditional rendering */}
-      {showMobileSidebarFeatures && (
-        <div className="absolute right-2 top-2 z-50 space-x-2">
-          {selectedConversation && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={toggleMobileSelectedSidebar}
-              disabled={showMobileSelectedSidebar}
-            >
-              Details
-            </Button>
-          )}
-        </div>
-      )}
+      {/* Mobile Buttons */}
+      <div className="absolute right-2 top-2 z-50 space-x-2 sm:flex md:hidden">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={toggleMobileSidebar}
+          disabled={showMobileSidebar}
+        >
+          Messages
+        </Button>
+        {selectedConversation && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={toggleMobileSelectedSidebar}
+            disabled={showMobileSelectedSidebar}
+          >
+            Details
+          </Button>
+        )}
+      </div>
     </div>
   );
 }
