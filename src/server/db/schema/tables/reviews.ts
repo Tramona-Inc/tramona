@@ -1,4 +1,4 @@
-import { integer, pgTable, serial, text, varchar } from "drizzle-orm/pg-core";
+import { integer, pgTable, serial, text, timestamp, varchar } from "drizzle-orm/pg-core";
 import { properties } from "./properties";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -13,6 +13,10 @@ export const reviews = pgTable("reviews", {
   profilePic: varchar("profile_pic"),
   rating: integer("rating").notNull(),
   review: text("review").notNull(),
+  createdAt: timestamp(
+    "created_at",
+    { withTimezone: true, mode: "string" },
+  )
 });
 
 export type Review = Omit<typeof reviews.$inferSelect, "id" | "propertyId">;
