@@ -12,7 +12,7 @@ import AccordionFaq from "@/components/_common/AccordionFaq";
 import { Check, CircleCheckBig } from "lucide-react";
 import Onboarding1 from "@/components/host/onboarding/Onboarding1";
 import { useHostOnboarding } from "@/utils/store/host-onboarding";
-import { useRouter } from "next/router";
+import { useRouter } from "next/router"; //Imported here and removed from the other section
 import { api } from "@/utils/api";
 
 type Tabs = {
@@ -91,10 +91,11 @@ function MainSection({ requestFeed }: { requestFeed: FeedRequestItem[] }) {
             <Onboarding1 onPressNext={onPressNext} forHost />
           </div>
 
-          <p className="font-semibold lg:text-lg">
+          {/*Commented out text here */}
+          {/* <p className="font-semibold lg:text-lg">
             Hosts can expect to make 10-15% more when using Tramona to book
             their empty nights
-          </p>
+          </p> */}
           <div className="space-y-1 text-lg lg:hidden">
             {texts.map((text, index) => (
               <div className="flex items-center gap-2" key={index}>
@@ -115,29 +116,26 @@ function MainSection({ requestFeed }: { requestFeed: FeedRequestItem[] }) {
 export function Questions() {
   const router = useRouter();
 
-  const buttons = [
-    { title: "FAQ", onClick: () => router.push("/faq") },
-    { title: "Watch host side demo", onClick: () => router.push("/demos") },
-  ];
-
   return (
     <div className="space-y-6">
       <h1 className="text-center text-2xl font-bold">Questions?</h1>
       <div className="flex flex-col items-center gap-4">
-        {buttons.map((button, index) => (
-          <button
-            key={index}
-            onClick={button.onClick}
-            className="w-80 rounded-lg border-2 border-[#004236] bg-white py-3 text-lg font-semibold text-[#004236] transition-all hover:bg-[#f5f5f5] hover:text-[#003626]"
-          >
-            {button.title}
-          </button>
-        ))}
+        {/*
+                {buttons.map((button, index) => (
+                  <button
+                    key={index}
+                    onClick={button.onClick}
+                    className="w-80 rounded-lg border-2 border-[#004236] bg-white py-3 text-lg font-semibold text-[#004236] transition-all hover:bg-[#f5f5f5] hover:text-[#003626]"
+                  >
+                    {button.title}
+                  </button>
+                ))}
+                  */}
       </div>
     </div>
   );
 
-  return (
+  /*return (
     <div className="space-y-4 lg:rounded-lg lg:border lg:p-4">
       <h1 className="text-2xl font-bold">Questions?</h1>
       <div className="flex flex-col gap-2">
@@ -148,7 +146,7 @@ export function Questions() {
         ))}
       </div>
     </div>
-  );
+  );*/
 }
 
 function FAQ() {
