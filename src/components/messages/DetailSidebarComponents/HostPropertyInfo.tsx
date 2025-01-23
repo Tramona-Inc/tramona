@@ -21,8 +21,8 @@ const HostPropertyInfo: React.FC<HostPropertyInfoProps> = ({ property }) => {
   return (
     <>
       {property && (
-        <div className="relative z-20 m-4 h-full rounded-lg bg-black">
-          <PropertyOnlyImage images={property.imageUrls} />
+        <div className="relative z-20 m-4 h-full">
+          <PropertyOnlyImage imageUrls={property.imageUrls} />
         </div>
       )}
     </>

@@ -1,120 +1,84 @@
-"use client";
-
-import * as React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { cn } from "@/utils/utils";
 import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
-interface PropertyOnlyImageProps {
-  images: string[];
-  interval?: number;
-  className?: string;
+interface ImageCarouselProps {
+  imageUrls: string[];
 }
 
-export default function PropertyOnlyImage({
-  images,
-  interval = 5000,
-  className,
-}: PropertyOnlyImageProps) {
-  const [currentIndex, setCurrentIndex] = React.useState(0);
-  const [isAutoPlaying, setIsAutoPlaying] = React.useState(true);
+const PropertyOnlyImage: React.FC<ImageCarouselProps> = ({ imageUrls }) => {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  const [isMounted, setIsMounted] = React.useState(false);
+  const nextImage = (e: React.MouseEvent): void => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (currentImageIndex < imageUrls.length - 1) {
+      setCurrentImageIndex((prevIndex) => prevIndex + 1);
+    }
+  };
 
-  React.useEffect(() => {
-    setIsMounted(true);
-  }, []);
+  const prevImage = (e: React.MouseEvent): void => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (currentImageIndex > 0) {
+      setCurrentImageIndex((prevIndex) => prevIndex - 1);
+    }
+  };
 
-  const goToNext = React.useCallback(() => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
-  }, [images.length]);
-
-  const goToPrevious = React.useCallback(() => {
-    setCurrentIndex(
-      (prevIndex) => (prevIndex - 1 + images.length) % images.length,
-    );
-  }, [images.length]);
-
-  const goToSlide = React.useCallback((index: number) => {
-    setCurrentIndex(index);
-  }, []);
-
-  React.useEffect(() => {
-    if (!isAutoPlaying) return;
-
-    const timer = setInterval(goToNext, interval);
-    return () => clearInterval(timer);
-  }, [goToNext, interval, isAutoPlaying]);
-
-  if (!isMounted) {
-    return null;
+  if (imageUrls.length === 0) {
+    return <div>No images available</div>;
   }
 
   return (
-    <div
-      className={cn("relative w-full overflow-hidden rounded-lg", className)}
-      onMouseEnter={() => setIsAutoPlaying(false)}
-      onMouseLeave={() => setIsAutoPlaying(true)}
-    >
-      <div className="relative aspect-[16/9]">
-        {images.map((image, index) => (
+    <div className="relative h-[calc(50vh-2rem)] w-full overflow-hidden rounded-xl">
+      <div
+        className="flex h-full transition-transform duration-300 ease-in-out"
+        style={{
+          transform: `translateX(-${currentImageIndex * 100}%)`,
+        }}
+      >
+        {imageUrls.map((imageUrl, index) => (
           <div
-            key={image}
-            className={cn(
-              "h-full transition-opacity duration-300",
-              index === currentIndex ? "opacity-100" : "opacity-0",
-            )}
+            key={index}
+            className="relative h-full w-full flex-shrink-0 overflow-hidden rounded-2xl" // Added overflow-hidden here
           >
             <Image
-              src={image || "/placeholder.svg"}
-              alt={`Slide ${index + 1}`}
+              src={imageUrl}
+              alt={`Property image ${index + 1}`}
               fill
-              className="object-cover"
-              priority={index === 0}
+              quality={90} // Adjust as needed (1-100)
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              onError={(e) => {
+                console.error(
+                  `Error loading image for property with url ${imageUrl}:`,
+                  e,
+                );
+                (e.target as HTMLImageElement).src = "/placeholder.jpg";
+              }}
+              className="rounded-xl object-cover" // Added to classname too to cover all bases
             />
           </div>
         ))}
       </div>
-
-      {/* Navigation Buttons */}
-      <Button
-        variant="outline"
-        size="icon"
-        className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-white/80 hover:bg-white"
-        onClick={goToPrevious}
-      >
-        <ChevronLeft className="h-4 w-4" />
-        <span className="sr-only">Previous slide</span>
-      </Button>
-
-      <Button
-        variant="outline"
-        size="icon"
-        className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-white/80 hover:bg-white"
-        onClick={goToNext}
-      >
-        <ChevronRight className="h-4 w-4" />
-        <span className="sr-only">Next slide</span>
-      </Button>
-
-      {/* Dot Indicators */}
-      <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-2">
-        {images.map((_, index) => (
-          <button
-            key={index}
-            className={cn(
-              "h-2 w-2 rounded-full transition-all",
-              index === currentIndex
-                ? "w-4 bg-white"
-                : "bg-white/50 hover:bg-white/75",
-            )}
-            onClick={() => goToSlide(index)}
-          >
-            <span className="sr-only">Go to slide {index + 1}</span>
-          </button>
-        ))}
-      </div>
+      {currentImageIndex > 0 && (
+        <Button
+          onClick={prevImage}
+          className="absolute left-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white bg-opacity-50 p-2 hover:bg-opacity-80"
+        >
+          <ChevronLeft size={24} className="text-gray-800" />
+        </Button>
+      )}
+      {currentImageIndex < imageUrls.length - 1 && (
+        <Button
+          onClick={nextImage}
+          className="absolute right-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white bg-opacity-50 p-2 hover:bg-opacity-80"
+        >
+          <ChevronRight size={24} className="text-gray-800" />
+        </Button>
+      )}
     </div>
   );
-}
+};
+
+export default PropertyOnlyImage;

@@ -83,7 +83,7 @@ const HostDetailsSidebar: React.FC<HostDetailsSidebarProps> = ({
       id: conversation.propertyId!,
     },
     {
-      enabled: !!conversation.propertyId && !isLoadingRequests,
+      enabled: !!conversation.propertyId,
     },
   );
 
@@ -101,17 +101,17 @@ const HostDetailsSidebar: React.FC<HostDetailsSidebarProps> = ({
   const bid = currentRequestsToBookForHost?.[0];
   const request = requestHost;
   const property = propertyInfo ?? bid?.property;
-
+  console.log(property);
   return (
     <>
-      <div className="flex h-full w-full flex-col items-center gap-6 overflow-y-auto rounded-lg border-none bg-white shadow-md">
+      <div className="">
         {/* Header */}
         <HostConversationHeader
           conversation={conversation}
           propertyName={property?.name}
         />
         {/* Property Section */}
-        <HostPropertyInfo property={property} />
+        {property && <HostPropertyInfo property={property} />}
         <HostRequestToBookInfo bid={bid} />
         {/* <HostRequestInfo
           request={request?.request}
