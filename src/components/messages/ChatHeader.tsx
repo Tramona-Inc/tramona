@@ -11,6 +11,7 @@ import { Tooltip, TooltipTrigger } from "../ui/tooltip";
 import { TooltipProvider } from "../ui/tooltip";
 import { useState } from "react";
 import { capitalizeFirstLetter } from "@/utils/utils";
+import { useRouter } from "next/router";
 
 export type ContentProps = {
   selectedConversation: Conversation;
@@ -22,12 +23,17 @@ export default function ChatHeader({
   setSelected,
 }: ContentProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
+  const router = useRouter();
 
   return (
     <div className="flex items-center justify-between border-b bg-white p-4">
       <div className="flex items-center gap-2 lg:gap-3">
         <div className="block md:hidden">
-          <Button variant="ghost" size="icon" onClick={() => setSelected(null)}>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => router.push("/messages")}
+          >
             <ChevronLeft size="2em" />
           </Button>
         </div>
