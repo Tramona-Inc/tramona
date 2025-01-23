@@ -8,16 +8,16 @@ import {
 } from "@/utils/store/conversations";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { api } from "@/utils/api";
 import { cn } from "@/utils/utils";
 import { SkeletonText } from "@/components/ui/skeleton";
 import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 import ConversationsEmptySvg from "@/components/_common/EmptyStateSvg/ConversationsEmptySvg";
 import EmptyStateValue from "@/components/_common/EmptyStateSvg/EmptyStateValue";
-import SelectedConversationSidebar from "@/components/messages/SelectedConversationSidebar";
-import { Button } from "@/components/ui/button";
+import DetailsSidebarFromSelectedConversation from "@/components/messages/DetailsSidebarFromSelectedConversation";
 import { useIsMd } from "@/utils/utils";
+import { Dialog, DialogContent } from "../ui/dialog";
 
 interface MessagesPageProps {
   isHost: boolean;
@@ -50,22 +50,6 @@ function MessageDisplay(props: MessagesPageProps) {
     });
   };
 
-  const [showMobileSelectedSidebar, setShowMobileSelectedSidebar] =
-    useState(false);
-  const [showSelectedSidebar, setShowSelectedSidebar] = useState(false);
-
-  const toggleMobileSidebar = () => {
-    setShowMobileSelectedSidebar(false);
-  };
-
-  const toggleMobileSelectedSidebar = () => {
-    setShowMobileSelectedSidebar((prev) => !prev);
-  };
-
-  const toggleSelectedSidebar = () => {
-    setShowSelectedSidebar((prev) => !prev);
-  };
-
   const conversations = useConversation((state) => state.conversationList);
   const setConversationList = useConversation(
     (state) => state.setConversationList,
@@ -73,6 +57,7 @@ function MessageDisplay(props: MessagesPageProps) {
 
   const { query } = useRouter();
   const { currentHostTeamId } = useHostTeamStore();
+
   const {
     data: fetchedConversations,
     isLoading: isSidebarLoading,
@@ -81,31 +66,28 @@ function MessageDisplay(props: MessagesPageProps) {
     hostTeamId: currentHostTeamId,
   });
 
-  // console.log(fetchedConversations);
-  // //setConversationList(fetchedConversations ?? []);
+  const conversationIdFromUrl = useMemo(() => {
+    return query.id as string | undefined;
+  }, [query.id]);
 
-  // console.log(conversations);
+  const detailsSidebarIsOpen: boolean = useMemo(() => {
+    return query.details && query.details === "true" ? true : false;
+  }, [query]);
 
   useEffect(() => {
-    console.log(query.id);
-
-    if (query.id && conversations.length > 0) {
-      console.log(conversations);
-      const conversationIdToSelect = query.id as string;
+    if (
+      conversationIdFromUrl &&
+      conversations.length > 0 &&
+      !selectedConversation
+    ) {
       const conversationToSelect = conversations.find(
-        (conversation) => conversation.id === conversationIdToSelect,
+        (conversation) => conversation.id === conversationIdFromUrl,
       );
-      console.log(conversationToSelect);
-
-      if (
-        conversationToSelect &&
-        conversationToSelect !== selectedConversation
-      ) {
-        console.log(conversationToSelect);
+      if (conversationToSelect) {
         setSelectedConversation(conversationToSelect);
       }
     }
-  }, [query.id, conversations, selectedConversation]);
+  }, [conversationIdFromUrl, selectedConversation, conversations]);
 
   useEffect(() => {
     if (fetchedConversations) {
@@ -116,7 +98,7 @@ function MessageDisplay(props: MessagesPageProps) {
   }, [fetchedConversations, setConversationList, refetch]);
 
   return (
-    <div className="flex h-[calc(100vh-12rem)] divide-x border-b lg:h-[calc(100vh-8rem)]">
+    <div className="flex h-[calc(100vh-10rem)] divide-x border-b lg:h-[calc(100vh-8rem)]">
       {/* Messages Sidebar */}
       {showSidebar && (
         <div
@@ -164,37 +146,26 @@ function MessageDisplay(props: MessagesPageProps) {
 
       {/* Selected Conversation Sidebar */}
       {selectedConversation &&
-        (selectedConversation.propertyId ?? selectedConversation.requestId) && (
+        detailsSidebarIsOpen &&
+        (isMd ? (
           <div
-            className={cn(
-              "w-1/4 border-l transition-transform duration-300",
-              showSelectedSidebar ? "md:block" : "hidden", // Visible on medium and larger screens when toggled
-              showMobileSelectedSidebar ? "sm:block" : "hidden sm:hidden", // Visible on small screens when toggled
-            )}
+            className={cn("w-1/4 border-l transition-transform duration-500")}
           >
-            <SelectedConversationSidebar
+            <DetailsSidebarFromSelectedConversation
               conversation={selectedConversation}
               isHost={true}
             />
           </div>
-        )}
-
-      {/* Mobile Buttons */}
-      <div className="absolute right-2 top-2 z-50 space-x-2 sm:flex md:hidden">
-        <Button variant="outline" size="sm" onClick={toggleMobileSidebar}>
-          Messages
-        </Button>
-        {selectedConversation && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={toggleMobileSelectedSidebar}
-            disabled={showMobileSelectedSidebar}
-          >
-            Details
-          </Button>
-        )}
-      </div>
+        ) : (
+          <Dialog open={detailsSidebarIsOpen}>
+            <DialogContent className="">
+              <DetailsSidebarFromSelectedConversation
+                conversation={selectedConversation}
+                isHost={true}
+              />
+            </DialogContent>
+          </Dialog>
+        ))}
     </div>
   );
 }

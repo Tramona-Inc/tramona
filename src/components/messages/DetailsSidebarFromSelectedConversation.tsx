@@ -17,20 +17,23 @@ import HostConfirmRequestDialog from "../dashboard/host/HostConfirmRequestDialog
 import HostRequestToBookDialog from "../dashboard/host/requests/requests-to-book/HostRequestToBookDialog";
 import HostRequestToBookCard from "../dashboard/host/requests/requests-to-book/HostRequestToBookCard";
 import ImageCarousel from "../_common/ImageCarousel";
+import { useRouter } from "next/router";
+import { XIcon } from "lucide-react";
 
-interface SelectedConversationSidebarProps {
+interface DetailsSidebarFromSelectedConversationProps {
   conversation: Conversation;
   isHost: boolean;
 }
 
-const SelectedConversationSidebar: React.FC<
-  SelectedConversationSidebarProps
+const DetailsSidebarFromSelectedConversation: React.FC<
+  DetailsSidebarFromSelectedConversationProps
 > = ({ conversation, isHost }) => {
   const currentHostTeamId = useHostTeamStore(
     (state) => state.currentHostTeamId,
   );
 
   console.log(isHost, "isHost");
+  const router = useRouter();
   const [step, setStep] = useState(0);
   const [selectedProperties, setSelectedProperties] = useState<number[]>([]);
 
@@ -73,6 +76,19 @@ const SelectedConversationSidebar: React.FC<
   // Ensure userId exists
   const userIdToUse = userId;
 
+  const handleHideDetails = () => {
+    void router.push(
+      {
+        pathname: router.pathname,
+        query: {
+          ...router.query,
+          details: "false",
+        },
+      },
+      undefined, // This is required to keep the current URL
+      { shallow: true }, // Op
+    );
+  };
   const { mutateAsync: rejectRequestToBook } =
     api.stripe.rejectOrCaptureAndFinalizeRequestToBook.useMutation();
 
@@ -161,9 +177,19 @@ const SelectedConversationSidebar: React.FC<
       <div className="flex flex-col gap-6 rounded-lg bg-white p-6 shadow-md">
         {/* Header */}
         <div className="border-b pb-4">
-          <h2 className="text-2xl font-bold text-gray-800">
-            {property?.name ?? "Property Information"}
-          </h2>
+          <div className="flex justify-between">
+            <h2 className="text-2xl font-bold text-gray-800">
+              {property?.name ?? "Property Information"}
+            </h2>
+            <Button
+              size="icon"
+              onClick={handleHideDetails}
+              variant="darkOutline"
+            >
+              {" "}
+              <XIcon />{" "}
+            </Button>
+          </div>
           {conversation.name && (
             <p className="mt-1 text-sm text-gray-500">
               Conversation ID: {conversation.id}
@@ -370,4 +396,4 @@ const SelectedConversationSidebar: React.FC<
   );
 };
 
-export default SelectedConversationSidebar;
+export default DetailsSidebarFromSelectedConversation;

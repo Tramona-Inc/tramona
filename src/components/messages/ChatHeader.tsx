@@ -102,14 +102,21 @@ export default function ChatHeader({
           </p>
         </div>
       </div>
-      {selectedConversation.offerId && (
-        <Link
-          href={`/offers/${selectedConversation.offerId}`}
-          className={buttonVariants({ variant: "darkOutline" })}
-        >
-          View trip details
-        </Link>
-      )}
+      <Button
+        variant="outline"
+        className="rounded-xl"
+        onClick={() => {
+          void router.push({
+            pathname: router.pathname,
+            query: {
+              ...router.query,
+              details: "true",
+            },
+          });
+        }}
+      >
+        Details
+      </Button>
     </div>
   );
 }
