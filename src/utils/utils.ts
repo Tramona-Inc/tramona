@@ -28,8 +28,7 @@ import {
   TripWithDetails,
   TripWithDetailsConfirmation,
 } from "@/components/my-trips/TripPage";
-import axios from 'axios';
-
+import axios from "axios";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -376,7 +375,7 @@ export async function retry<T>(f: Promise<T>, numRetries: number) {
       return await f.catch(() => {
         throw new Error();
       });
-    } catch (err) { }
+    } catch (err) {}
   }
 }
 
@@ -1087,24 +1086,69 @@ export function convertHostInteractionPref(interactionPreference: string) {
 
 const validationCache = new Map<string, boolean>(); // Module-level cache (optional)
 
-export const validateImage = async (src: string, cache?: Map<string, boolean>): Promise<boolean> => {
+export const validateImage = async (
+  src: string,
+  cache?: Map<string, boolean>,
+): Promise<boolean> => {
   const currentCache = cache ?? validationCache;
   if (currentCache.has(src)) {
     return currentCache.get(src)!;
   }
 
   return new Promise((resolve) => {
-    axios.head(src) // Use axios.head for HEAD request
-      .then(response => {
+    axios
+      .head(src) // Use axios.head for HEAD request
+      .then((response) => {
         const statusCode = response.status;
         const isValid = statusCode >= 200 && statusCode < 300;
         currentCache.set(src, isValid);
         resolve(isValid);
       })
-      .catch(error => {
+      .catch((error) => {
         console.error("Image validation error for:", src, error);
         currentCache.set(src, false);
         resolve(false);
       });
   });
 };
+
+export function generateBookingUrl(propertyId: number): string {
+  const today = new Date();
+
+  // Calculate Check-In Date (5 days from today)
+  const checkInDate = new Date(today);
+  checkInDate.setDate(today.getDate() + 5);
+
+  // Calculate Check-Out Date (5 days after Check-In, or 10 days from today)
+  const checkOutDate = new Date(checkInDate);
+  checkOutDate.setDate(checkInDate.getDate() + 5);
+
+  // Function to format the date into "Month+Day,+Year" format
+  const formatDate = (date: Date): string => {
+    const monthNames = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+    const month = monthNames[date.getMonth()];
+    const day = date.getDate();
+    const year = date.getFullYear();
+
+    return `${month}+${day}%2C+${year}`; // URL-encoded comma and space
+  };
+
+  const formattedCheckIn = formatDate(checkInDate);
+  const formattedCheckOut = formatDate(checkOutDate);
+
+  const url = `/request-to-book/${propertyId}?checkIn=${formattedCheckIn}&checkOut=${formattedCheckOut}&numGuests=2`;
+  return url;
+}

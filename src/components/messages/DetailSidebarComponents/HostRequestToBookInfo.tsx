@@ -9,7 +9,7 @@ import HostRequestToBookDialog from "../../dashboard/host/requests/requests-to-b
 import type { RequestsToBook } from "@/server/db/schema";
 
 interface HostRequestToBookInfoProps {
-  bid: RequestsToBooks | undefined;
+  bid: RequestsToBook | undefined;
 }
 
 const HostRequestToBookInfo: React.FC<HostRequestToBookInfoProps> = ({

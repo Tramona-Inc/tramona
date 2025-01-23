@@ -31,7 +31,7 @@ const PropertyOnlyImage: React.FC<ImageCarouselProps> = ({ imageUrls }) => {
   }
 
   return (
-    <div className="relative h-[calc(50vh-2rem)] w-full overflow-hidden rounded-xl">
+    <div className="relative mx-auto h-[calc(50vh-4rem)] overflow-hidden rounded-xl">
       <div
         className="flex h-full transition-transform duration-300 ease-in-out"
         style={{
@@ -64,7 +64,7 @@ const PropertyOnlyImage: React.FC<ImageCarouselProps> = ({ imageUrls }) => {
       {currentImageIndex > 0 && (
         <Button
           onClick={prevImage}
-          className="absolute left-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white bg-opacity-50 p-2 hover:bg-opacity-80"
+          className="absolute left-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white bg-opacity-90 p-2 hover:bg-opacity-100"
         >
           <ChevronLeft size={24} className="text-gray-800" />
         </Button>
@@ -72,7 +72,7 @@ const PropertyOnlyImage: React.FC<ImageCarouselProps> = ({ imageUrls }) => {
       {currentImageIndex < imageUrls.length - 1 && (
         <Button
           onClick={nextImage}
-          className="absolute right-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white bg-opacity-50 p-2 hover:bg-opacity-80"
+          className="absolute right-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white bg-opacity-90 p-2 hover:bg-opacity-100"
         >
           <ChevronRight size={24} className="text-gray-800" />
         </Button>

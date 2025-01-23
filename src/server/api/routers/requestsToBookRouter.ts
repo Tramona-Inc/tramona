@@ -193,7 +193,12 @@ export const requestsToBookRouter = createTRPCRouter({
     }),
 
   getByPropertyId: protectedProcedure
-    .input(z.object({ propertyId: zodInteger(), conversationParticipants: z.array(zodString()) }))
+    .input(
+      z.object({
+        propertyId: zodInteger(),
+        conversationParticipants: z.array(zodString()),
+      }),
+    )
     .query(async ({ ctx, input }) => {
       const requestsWithGroup = await ctx.db.query.requestsToBook.findMany({
         with: {
@@ -217,8 +222,7 @@ export const requestsToBookRouter = createTRPCRouter({
       });
 
       return requestsWithGroup.filter(
-        (request) =>
-          request.madeByGroup.owner.id === ctx.user.id,
+        (request) => request.madeByGroup.owner.id === ctx.user.id,
       );
     }),
 
@@ -228,17 +232,16 @@ export const requestsToBookRouter = createTRPCRouter({
         propertyId: z.number(),
         conversationParticipants: z.array(z.string()),
         userId: z.string().optional(),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       const property = await ctx.db.query.properties.findFirst({
         where: eq(properties.id, input.propertyId),
-        columns: { hostTeamId: true },
+        columns: { hostTeamId: true, id: true },
       });
 
       const userId = input.userId ?? ctx.user.id;
       console.log(property, "property");
-
 
       if (!property) {
         throw new TRPCError({
@@ -250,14 +253,12 @@ export const requestsToBookRouter = createTRPCRouter({
       const allRequests = await ctx.db.query.requestsToBook.findMany({
         where: and(
           eq(requestsToBook.propertyId, input.propertyId),
-          inArray(
-            requestsToBook.userId,
-            input.conversationParticipants
-          ),
+          inArray(requestsToBook.userId, input.conversationParticipants),
         ),
         with: {
           property: {
             columns: {
+              id: true,
               name: true,
               imageUrls: true,
               numBedrooms: true,
@@ -285,31 +286,28 @@ export const requestsToBookRouter = createTRPCRouter({
               },
             },
           },
-        }
+        },
       });
 
       console.log(allRequests, "allRequests");
 
-
-      const transformedRequestsToBook = allRequests.map(
-        (request) => ({
-          ...request,
-          traveler: request.madeByGroup.owner,
-        }),
-      );
+      const transformedRequestsToBook = allRequests.map((request) => ({
+        ...request,
+        traveler: request.madeByGroup.owner,
+      }));
 
       console.log(transformedRequestsToBook, "transformedRequestsToBook");
 
       // Filter requests by conversation participants and get only one.
       const requestToBook = transformedRequestsToBook.filter(
-        (request) =>
-          request.madeByGroup.ownerId === userId
+        (request) => request.madeByGroup.ownerId === userId,
       );
 
       if (!requestToBook || requestToBook.length === 0) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "Request to book not found for this user in the current converation",
+          message:
+            "Request to book not found for this user in the current converation",
         });
       }
 

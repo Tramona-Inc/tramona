@@ -211,7 +211,7 @@ export async function fetchConversationWithHostTeam({
     const participantsMatch =
       participantIds.length === hostTeamMemberIds.length + 1 &&
       [...participantIds].sort().join(",") ===
-      [...hostTeamMemberIds, userId].sort().join(",");
+        [...hostTeamMemberIds, userId].sort().join(",");
 
     // Check if the propertyId matches (if provided)
     const propertyIdMatches =
@@ -322,7 +322,6 @@ export async function createConversationWithHostForRequest(
   requestId: number,
 ) {
   console.log("creating new conversation", requestId);
-  const conversationId = await generateConversation({ requestId });
   const conversationId = await generateConversation({ requestId });
   console.log(conversationId, "conversationId");
   const teamMembers = await db.query.hostTeamMembers.findMany({
@@ -516,16 +515,16 @@ export const messagesRouter = createTRPCRouter({
 
     console.log(conversationId, "conversationId");
 
-      console.log(input, "input",);
-      if (!conversationId) {
-        console.log("creating new conversation");
-        const newConversationId = await createConversationWithHostForRequest(
-          input.userId,
-          input.currentHostTeamId,
-          input.requestId,
-        );
-        return { id: newConversationId };
-      }
+    console.log(input, "input");
+    if (!conversationId) {
+      console.log("creating new conversation");
+      const newConversationId = await createConversationWithHostForRequest(
+        input.userId,
+        input.currentHostTeamId,
+        input.requestId,
+      );
+      return { id: newConversationId };
+    }
 
     return { id: conversationId };
   }),

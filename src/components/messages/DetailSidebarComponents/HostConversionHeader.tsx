@@ -30,7 +30,7 @@ const HostConversationHeader: React.FC<HostConversationHeaderProps> = ({
 
   return (
     <div className="mx-auto flex h-20 w-full items-center justify-around border-b bg-white text-center">
-      <h2 className="text-2xl font-bold text-gray-800">
+      <h2 className="text-2xl font-semibold text-gray-800">
         {propertyName ?? "Property Information"}
       </h2>
       <Button

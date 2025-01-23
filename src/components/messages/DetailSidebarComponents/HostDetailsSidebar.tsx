@@ -101,25 +101,25 @@ const HostDetailsSidebar: React.FC<HostDetailsSidebarProps> = ({
   const bid = currentRequestsToBookForHost?.[0];
   const request = requestHost;
   const property = propertyInfo ?? bid?.property;
-  console.log(property);
+
   return (
-    <>
-      <div className="">
-        {/* Header */}
-        <HostConversationHeader
-          conversation={conversation}
-          propertyName={property?.name}
-        />
+    <div className="mx-auto">
+      {/* Header */}
+      <HostConversationHeader
+        conversation={conversation}
+        propertyName={property?.name}
+      />
+      <div className="mx-auto w-11/12">
         {/* Property Section */}
         {property && <HostPropertyInfo property={property} />}
         <HostRequestToBookInfo bid={bid} />
-        {/* <HostRequestInfo
+        <HostRequestInfo
           request={request?.request}
           properties={request?.properties}
           setSelectedRequest={setSelectedRequest}
           setDialogOpen={setDialogOpen}
           setProperties={setProperties}
-        />  */}
+        />
       </div>
       {step === 0 && properties && selectedRequest && (
         <HostRequestDialog
@@ -154,7 +154,7 @@ const HostDetailsSidebar: React.FC<HostDetailsSidebarProps> = ({
           setStep={setStep}
         />
       )}
-    </>
+    </div>
   );
 };
 
