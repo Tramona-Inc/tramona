@@ -199,7 +199,7 @@ export async function fetchConversationWithHostTeam({
     const participantsMatch =
       participantIds.length === hostTeamMemberIds.length + 1 &&
       [...participantIds].sort().join(",") ===
-        [...hostTeamMemberIds, userId].sort().join(",");
+      [...hostTeamMemberIds, userId].sort().join(",");
 
     // Check if the propertyId matches (if provided)
     const propertyIdMatches =
@@ -304,7 +304,7 @@ export async function createConversationWithHostForRequest(
   requestId: number,
 ) {
   console.log("creating new conversation", requestId);
-  const conversationId = await generateConversation({requestId});
+  const conversationId = await generateConversation({ requestId });
   console.log(conversationId, "conversationId");
   const teamMembers = await db.query.hostTeamMembers.findMany({
     where: eq(hostTeamMembers.hostTeamId, hostTeamId),
@@ -336,7 +336,7 @@ export async function createConversationWithHostOrAdminTeam(
   hostTeamId: number,
   propertyId: number,
 ) {
-  const conversationId = await generateConversation({propertyId});
+  const conversationId = await generateConversation({ propertyId });
 
   const teamMembers = await db.query.hostTeamMembers.findMany({
     where: eq(hostTeamMembers.hostTeamId, hostTeamId),
@@ -491,7 +491,7 @@ export const messagesRouter = createTRPCRouter({
 
       console.log(conversationId, "conversationId");
 
-      console.log(input, "input", );
+      console.log(input, "input",);
       if (!conversationId) {
         console.log("creating new conversation");
         const newConversationId = await createConversationWithHostForRequest(
