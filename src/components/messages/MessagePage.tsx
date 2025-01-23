@@ -14,7 +14,7 @@ import { SkeletonText } from "@/components/ui/skeleton";
 import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 import ConversationsEmptySvg from "@/components/_common/EmptyStateSvg/ConversationsEmptySvg";
 import EmptyStateValue from "@/components/_common/EmptyStateSvg/EmptyStateValue";
-import DetailsSidebarFromSelectedConversation from "./DetailsSidebarFromSelectedConversation";
+import DetailsSidebarFromSelectedConversation from "./DetailSidebarComponents/DetailsSidebarFromSelectedConversation";
 import { useIsMd, useIsSm, useIsOnlyMd, useIsLg, cn } from "@/utils/utils";
 import { Dialog, DialogContent } from "../ui/dialog";
 import { motion } from "framer-motion";
