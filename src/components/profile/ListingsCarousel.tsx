@@ -1,4 +1,6 @@
 import { api } from "@/utils/api";
+import { useHostTeamStore } from "@/utils/store/hostTeamStore";
+import { useIsLg, useIsMd } from "@/utils/utils";
 import { MyUserWProfile } from "../dashboard/host/profile/AllFieldDialogs";
 import { Card, CardContent, CardTitle } from "../ui/card";
 import {
@@ -8,16 +10,14 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "../ui/carousel";
-import Spinner from "../_common/Spinner";
 import ProfilePropertyCard from "./ProfilePropertyCard";
-import { useHostTeamStore } from "@/utils/store/hostTeamStore";
-import { useIsLg, useIsMd } from "@/utils/utils";
 
 export default function ListingsCarousel({
-  userProfile,
+  userWProfile,
 }: {
-  userProfile: MyUserWProfile;
+  userWProfile: MyUserWProfile;
 }) {
+  console.log(userWProfile);
   const { currentHostTeamId } = useHostTeamStore();
 
   const { data: myProperties } = api.properties.getHostProperties.useQuery({
@@ -44,34 +44,38 @@ export default function ListingsCarousel({
   );
 
   return (
-    <Card className="relative">
-      <CardTitle className="font-semibold">{`${userProfile.user.name}'s Listings`}</CardTitle>
-      <CardContent>
-        {myProperties ? (
-          <Carousel>
-            <CarouselContent>
-              {chunkedProperties.map((chunk, index) => (
-                <CarouselItem key={index}>
-                  <div className="grid grid-cols-2 items-center gap-4 md:grid-cols-3 lg:grid-cols-4">
-                    {chunk.map((property) => (
-                      <ProfilePropertyCard
-                        key={property.id}
-                        property={property}
-                      />
-                    ))}
-                  </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <div className="absolute -top-6 right-12">
-              <CarouselPrevious />
-              <CarouselNext />
-            </div>
-          </Carousel>
-        ) : (
-          <Spinner />
-        )}
-      </CardContent>
-    </Card>
+    <div className="">
+      {myProperties && myProperties.length > 0 ? (
+        <div className="relative p-3">
+          <div className="my-5 text-xl font-semibold lg:text-2xl">
+            {`${userWProfile.user.firstName}'s Listings`}
+          </div>
+          <div>
+            <Carousel>
+              <CarouselContent>
+                {chunkedProperties.map((chunk, index) => (
+                  <CarouselItem key={index}>
+                    <div className="grid grid-cols-2 items-center gap-4 md:grid-cols-3 lg:grid-cols-4">
+                      {chunk.map((property) => (
+                        <ProfilePropertyCard
+                          key={property.id}
+                          property={property}
+                        />
+                      ))}
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              {myProperties.length > 5 && (
+                <div className="absolute -top-6 right-12">
+                  <CarouselPrevious />
+                  <CarouselNext />
+                </div>
+              )}
+            </Carousel>
+          </div>
+        </div>
+      ) : null}
+    </div>
   );
 }

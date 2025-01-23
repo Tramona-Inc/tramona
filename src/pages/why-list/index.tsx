@@ -189,7 +189,7 @@ const Banner = () => {
             paying guests
           </h3>
           <p className="mt-4 text-sm md:text-base lg:text-lg">
-            Earn 10-15% more annually by filling empty nights with Tramona
+            Earn 10-15% more annually by filling empty nights and paying less fees
           </p>
         </div>
       </div>
@@ -213,16 +213,16 @@ const SignUpNow = ({ requestFeed }: { requestFeed: FeedRequestItem[] }) => {
       <div className="mx-12 flex flex-col justify-center gap-8 md:mx-36 lg:mx-24 lg:max-w-[70vw] lg:flex-row">
         <div className="flex-1">
           <h1 className="mb-10 mt-10 text-center text-2xl font-semibold">
-            Tramona was built for hosts to fill empty nights. Suppliment your other booking platforms by always having an option to book an empty night.
+            Tramona was built for hosts to fill empty nights and take home more of their earnings.
           </h1>
           <div className="h-[450px] rounded-lg border px-2 py-2 shadow-xl">
             <RequestFeed requestFeed={requestFeed} />
           </div>
           <h2 className="mb-12 mt-12 text-center text-2xl font-medium">
-            Everyday we have requests that go un booked.
+            Everyday we have requests that go un-booked.
           </h2>
-          <div className="mb-12 flex justify-center">
-            <Link href="/why-list">
+          <div className="mb-2 flex justify-center">
+            <Link href="/host-onboarding">
               <Button size="lg" className="bg-primaryGreen text-white">
                 Sign up and start getting booking requests
               </Button>
@@ -236,29 +236,29 @@ const SignUpNow = ({ requestFeed }: { requestFeed: FeedRequestItem[] }) => {
 
 const HowItWorks = () => {
   return (
-    <ul className="mx-auto mb-12 flex flex-col items-center gap-8 md:flex-row md:justify-center">
+    <ul className="mx-auto mb-12 flex flex-col items-stretch gap-8 md:flex-row md:justify-center">
       {/* Book it Now */}
-      <li className="flex w-full max-w-sm flex-col rounded-xl bg-white p-6 text-left shadow-lg md:w-96">
-        <h3 className="mb-6 text-center text-xl font-bold text-[primaryGreen]">
+      <li className="flex flex-col rounded-xl bg-white p-6 text-left shadow-lg md:w-96">
+        <h3 className="mb-4 text-center text-xl font-bold text-[primaryGreen]"> {/* Reduced mb-6 to mb-4 */}
           1. Book it Now
         </h3>
-        <p className="text-center font-medium md:text-left">
+        <p className="mb-4 text-center font-medium md:text-left"> {/* Added mb-4 for consistent spacing */}
           Classic book it now. Your property is showcased just like it is on Airbnb or Vrbo. Travelers can instantly book with or without waiting for approval.
         </p>
-        <div className="flex items-center">
+        <div className="flex items-center mt-6"> {/* Added mt-6 for consistent top spacing */}
           <FaInfoCircle />
-          <h4 className="m-3 ml-2 font-bold">How it Works:</h4>
+          <h4 className="ml-2 font-bold">How it Works:</h4> {/* Removed m-3 and simplified ml-2 */}
         </div>
-        <p className="text-gray-500">
+        <p className="mt-2 text-gray-500"> {/* Added mt-2 for spacing from h4 */}
           When you sign up as a host, your account is instantly synced with Airbb. Whenever you change your aavailability, price, or anything else on Airbnb. It is instantly reflected on Tramona.
         </p>
         <hr className="my-4 border-t border-gray-300" />
-        <div className="flex items-center">
+        <div className="flex items-center mt-4"> {/* Added mt-4 for consistent top spacing */}
           <FaSlidersH />
-          <h4 className="m-2 ml-2 font-bold">Your Flexibility:</h4>
+          <h4 className="ml-2 font-bold">Your Flexibility:</h4> {/* Removed m-2 and simplified ml-2 */}
         </div>
-        <ul className="m-1 ml-1">
-          <li className="flex items-center text-gray-500">
+        <ul className="mt-2 ml-1"> {/* Added mt-2 for spacing from h4 */}
+          <li className="flex items-center text-gray-500 mb-1"> {/* Added mb-1 for spacing between list items */}
             <FaCheck className="mr-2" size={12} /> Enable Book it Now for
             instant bookings
           </li>
@@ -270,35 +270,35 @@ const HowItWorks = () => {
       </li>
 
       {/* Receiving Bids */}
-      <li className="flex w-full max-w-sm flex-col rounded-xl bg-white p-6 text-left shadow-lg md:w-96">
-        <h3 className="mb-6 text-center text-xl font-bold text-[primaryGreen]">
+      <li className="flex flex-col rounded-xl bg-white p-6 text-left shadow-lg md:w-96">
+        <h3 className="mb-4 text-center text-xl font-bold text-[primaryGreen]"> {/* Reduced mb-6 to mb-4 */}
           2. Receiving Bids
         </h3>
-        <p className="text-center font-medium md:text-left">
+        <p className="mb-4 text-center font-medium md:text-left"> {/* Added mb-4 for consistent spacing */}
           Travelers can send offers for your available nights.
         </p>
 
-        <div className="flex items-center mt-4">
+        <div className="flex items-center mt-6"> {/* Changed mt-4 to mt-6 for consistency */}
           <FaInfoCircle />
-          <h4 className="m-3 ml-2 font-bold">How it Works:</h4>
+          <h4 className="ml-2 font-bold">How it Works:</h4> {/* Removed m-3 and simplified ml-2 */}
         </div>
-        <p className="text-gray-500">
+        <p className="mt-2 text-gray-500"> {/* Added mt-2 for spacing from h4 */}
           Travelers can book instantly or place a bid. You can accept, reject, or set automatic rules to approve bids that meet your criteria. Only see the offers that match your preferences.
         </p>
 
         <hr className="my-4 border-t border-gray-300" />
 
-        <div className="flex items-center">
+        <div className="flex items-center mt-4"> {/* Added mt-4 for consistent top spacing */}
           <FaSlidersH />
-          <h4 className="m-2 ml-2 font-bold">Your Flexibility:</h4>
+          <h4 className="ml-2 font-bold">Your Flexibility:</h4> {/* Removed m-2 and simplified ml-2 */}
         </div>
 
-        <ul className="m-1 ml-1">
-          <li className="flex items-center text-gray-500">
+        <ul className="mt-2 ml-1"> {/* Added mt-2 for spacing from h4 */}
+          <li className="flex items-center text-gray-500 mb-1"> {/* Added mb-1 for spacing between list items */}
             <FaCheck className="mr-2" size={12} /> Choose to automatically accept bids that meet your hidden price
           </li>
-          <li className="flex items-center text-gray-500">
-            <FaCheck className="mr-2" size={12} /> Set rules for the offers you’ll allow, ignore the rest
+          <li className="flex items-center text-gray-500 mb-1"> {/* Added mb-1 for spacing between list items */}
+            <FaCheck className="mr-2" size={12} /> Set rules for the offers you&apos;ll allow, ignore the rest
           </li>
           <li className="flex items-center text-gray-500">
             <FaCheck className="mr-2" size={12} /> If Book It Now is off, travelers can only submit bids
@@ -307,27 +307,27 @@ const HowItWorks = () => {
       </li>
 
       {/* Receiving Requests */}
-      <li className="flex w-full max-w-sm flex-col rounded-xl bg-white p-6 text-left shadow-lg md:w-96">
-        <h3 className="mb-6 text-center text-xl font-bold text-[primaryGreen]">
+      <li className="flex flex-col rounded-xl bg-white p-6 text-left shadow-lg md:w-96">
+        <h3 className="mb-4 text-center text-xl font-bold text-[primaryGreen]"> {/* Reduced mb-6 to mb-4 */}
           3. Receiving Requests
         </h3>
-        <p className="text-center font-semibold md:text-left">
+        <p className="mb-4 text-center font-semibold md:text-left"> {/* Added mb-4 for consistent spacing */}
           Never let a night sit empty.
         </p>
-        <div className="flex items-center">
+        <div className="flex items-center mt-6"> {/* Added mt-6 for consistent top spacing */}
           <FaInfoCircle />
-          <h4 className="m-3 ml-2 font-bold">How it Works:</h4>
+          <h4 className="ml-2 font-bold">How it Works:</h4> {/* Removed m-3 and simplified ml-2 */}
         </div>
-        <p className="text-gray-500">
+        <p className="mt-2 text-gray-500"> {/* Added mt-2 for spacing from h4 */}
           Travelers specify their budget, dates, and preferences, and send a request to every host on Tramona. Hosts have the option to accept, deny, or counteroffer all requests.
         </p>
         <hr className="my-4 border-t border-gray-300" />
-        <div className="flex items-center">
+        <div className="flex items-center mt-4"> {/* Added mt-4 for consistent top spacing */}
           <FaSlidersH />
-          <h4 className="m-2 ml-2 font-bold">Your Flexibility:</h4>
+          <h4 className="ml-2 font-bold">Your Flexibility:</h4> {/* Removed m-2 and simplified ml-2 */}
         </div>
-        <ul className="m-1 ml-1">
-          <li className="flex items-center text-gray-500">
+        <ul className="mt-2 ml-1"> {/* Added mt-2 for spacing from h4 */}
+          <li className="flex items-center text-gray-500 mb-1"> {/* Added mb-1 for spacing between list items */}
             <FaCheck className="mr-2" size={16} /> Choose to maually respond or automatically respond to each match.
           </li>
           <li className="flex items-center text-gray-500">
