@@ -15,7 +15,6 @@ import React, {
   useMemo,
   useCallback,
   memo,
-  useRef,
 } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
@@ -63,56 +62,6 @@ export default function UnclaimedOfferCards(): JSX.Element {
     console.log("UnclaimedOfferCards adjustedProperties updated:", adjustedProperties);
   }, [adjustedProperties]);
 
-  //filter out the properties, where images do not load/ Also caching images
-  // const validationCache = useRef(new Map<string, boolean>());
-
-  // const validateProperties = useCallback(async () => {
-  //   const valid: PropertyType[] = [];
-  //   const promises = paginatedProperties.map(async (property) => {
-  //     if (property.imageUrls.length === 0) {
-  //       return;
-  //     }
-  //     const firstImageUrl = property.imageUrls[0]!;
-
-  //     if (validationCache.has(firstImageUrl)) {
-  //       if (validationCache.get(firstImageUrl)) {
-  //         valid.push(property);
-  //       }
-  //       return;
-  //     }
-  //     const isValid: boolean = await validateImage(firstImageUrl);
-  //     if (!isValid) {
-  //       if ("id" in property) {
-  //         await updatePropertyStatus({
-  //           propertyId: property.id,
-  //           status: "Archived",
-  //         });
-  //       }
-  //     }
-
-  //     validationCache.set(firstImageUrl, isValid);
-
-  //     if (isValid) {
-  //       valid.push(property);
-  //     } // not adding failed images to valid
-  //   });
-  //   await Promise.all(promises);
-  //   return valid;
-  // }, [paginatedProperties]);
-
-  // Removed the debounced effect here
-  // useEffect(() => {
-  //   const fetchValidProperties = async () => {
-  //     const newValidProperties = await validateProperties();
-  //     //avoid re renders if the properties are the same, to prevent loops
-  //     if (
-  //       JSON.stringify(newValidProperties) !== JSON.stringify(validProperties)
-  //     ) {
-  //       setValidProperties(newValidProperties);
-  //     }
-  //   };
-  //   void fetchValidProperties();
-  // }, [validateProperties, validProperties]);
 
   const totalPages = useMemo(() => {
     return Math.max(1, Math.ceil(allProperties.length / itemsPerPage));

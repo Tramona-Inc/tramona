@@ -1246,23 +1246,6 @@ export async function getHostTeamFromProperty(propertyId: number) {
   return hostTeam?.hostTeamId;
 }
 
-export const validateImage = (src: string): Promise<boolean> => {
-  return new Promise((resolve) => {
-    const img = new Image();
-    const originalConsoleError = console.error;
-
-    img.onload = () => {
-      console.error = originalConsoleError; // Restore console.error
-      resolve(true);
-    };
-    img.onerror = () => {
-      console.error = originalConsoleError; // Restore console.error
-      resolve(false);
-    };
-    img.src = src;
-  });
-};
-
 export async function addHostProfile({
   userId,
   hostawayApiKey,

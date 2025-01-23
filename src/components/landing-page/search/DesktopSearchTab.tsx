@@ -84,7 +84,8 @@ export function DesktopSearchTab({
 
   useEffect(() => {
     const data = searchSchema.safeParse(router.query);
-    if (data.success && data.data && Object.keys(data.data).length > 0) { // Added checks here
+    if (data.success && data.data && Object.keys(data.data).length > 0) {
+      // Added checks here
       form.reset(data.data);
     }
   }, [form, router.query]);
@@ -172,7 +173,6 @@ export function DesktopSearchTab({
       let currentPropertiesLength =
         propertiesInArea.hostProperties.length +
         propertiesInArea.scrapedProperties.length;
-      console.log("currentPropertiesLength", currentPropertiesLength);
 
       if (currentPropertiesLength >= itemsPerPage) {
         setIsSearching(false);
@@ -206,7 +206,6 @@ export function DesktopSearchTab({
 
       currentPropertiesLength =
         currentPropertiesLength + airbnbResults.res.length;
-      console.log("currentPropertiesLength", currentPropertiesLength);
       if (currentPropertiesLength >= itemsPerPage) {
         setIsSearching(false);
       }

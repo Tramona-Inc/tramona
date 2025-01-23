@@ -1077,39 +1077,6 @@ export function convertHostInteractionPref(interactionPreference: string) {
   return modifiedPref;
 }
 
-// export const validateImage = (src: string): Promise<boolean> => {
-//   return new Promise((resolve) => {
-//     const img = new Image();
-//     img.onload = () => resolve(true);
-//     img.onerror = () => {
-//       // Suppress specific logs
-//       // eslint-disable-next-line @typescript-eslint/no-empty-function
-//       console.error = () => {};
-//       resolve(false);
-//     };
-//     img.src = src;
-//   });
-// };
-
-// export const validateImage = (src: string): Promise<boolean> => {
-//   return new Promise((resolve) => {
-//     const img = new Image();
-//     const originalConsoleError = console.error;
-
-//     img.onload = () => {
-//       console.error = originalConsoleError; // Restore console.error
-//       resolve(true);
-//     };
-//     img.onerror = () => {
-//       console.error = originalConsoleError; // Restore console.error
-//       resolve(false);
-//     };
-//     img.src = src;
-//   });
-// };
-
-// src/utils/utils.ts (Correct server-side validateImage)
-
 const validationCache = new Map<string, boolean>(); // Module-level cache (optional)
 
 export const validateImage = async (src: string, cache?: Map<string, boolean>): Promise<boolean> => {
