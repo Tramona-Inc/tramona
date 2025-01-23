@@ -723,6 +723,15 @@ export const hostTeamsRouter = createTRPCRouter({
       return { status: "invite declined" } as const;
     }),
 
+  isUserHostTeamOwner: protectedProcedure
+    .input(z.object({ userId: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const hostTeam = await ctx.db.query.hostTeams.findFirst({
+        where: eq(hostTeams.ownerId, input.userId),
+      });
+      return hostTeam?.ownerId === ctx.user.id;
+    }),
+
   updateCoHostRole: coHostProcedure(
     "update_cohost_role",
     z.object({
