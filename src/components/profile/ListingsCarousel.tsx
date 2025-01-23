@@ -1,8 +1,7 @@
 import { api } from "@/utils/api";
-import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 import { useIsLg, useIsMd } from "@/utils/utils";
 import { MyUserWProfile } from "../dashboard/host/profile/AllFieldDialogs";
-import { Card, CardContent, CardTitle } from "../ui/card";
+
 import {
   Carousel,
   CarouselContent,
@@ -17,13 +16,13 @@ export default function ListingsCarousel({
 }: {
   userWProfile: MyUserWProfile;
 }) {
-  console.log(userWProfile);
-  const { currentHostTeamId } = useHostTeamStore();
+  const { data: myProperties } =
+    api.properties.getAllPropertiesFromAllTeamsFromHostId.useQuery(
+      userWProfile.user.id,
+      { enabled: !!userWProfile.user.id },
+    );
 
-  const { data: myProperties } = api.properties.getHostProperties.useQuery({
-    currentHostTeamId: currentHostTeamId ?? 0,
-    limit: 4,
-  });
+  console.log(myProperties);
 
   function chunkArray<T>(array: T[], size: number): T[][] {
     return array.reduce((chunks, item, index) => {
@@ -46,7 +45,7 @@ export default function ListingsCarousel({
   return (
     <div className="">
       {myProperties && myProperties.length > 0 ? (
-        <div className="relative p-3">
+        <div className="relative max-w-5xl p-3">
           <div className="my-5 text-xl font-semibold lg:text-2xl">
             {`${userWProfile.user.firstName}'s Listings`}
           </div>

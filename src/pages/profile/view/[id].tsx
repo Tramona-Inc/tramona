@@ -29,8 +29,6 @@ function Page() {
     },
   );
 
-  console.log("userWProfile data:", userWProfile);
-
   return (
     <DashboardLayout>
       {" "}
@@ -127,8 +125,8 @@ function Page() {
                     </div>
                   );
                 })}
-              </div>
-              {userWProfile && <ListingsCarousel userWProfile={userWProfile} />}
+              </div>{" "}
+              <ListingsCarousel userWProfile={userWProfile} />
             </div>
           </div>
         </div>
