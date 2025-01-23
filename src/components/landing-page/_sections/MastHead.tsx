@@ -80,7 +80,7 @@ export default function MastHead() {
 
   const faqData = [
     {
-      question: "Can I counter offer requests?",
+      question: "What's the benefit of listing on Tramona?",
       answer:
         "Yes, as a host, you have the option to counter traveler requests, giving you flexibility and control over each booking.",
     },
@@ -90,12 +90,12 @@ export default function MastHead() {
         "Absolutely. Tramona allows you to add a co-host to help manage requests and bookings on your property.",
     },
     {
-      question: "Why list on Tramona?",
+      question: "Can I choose which dates to book",
       answer:
         "Tramona allows you to list your property at full price and still receive direct booking requests. You can offer exclusive discounts only when you choose, helping you fill empty nights without compromising on price.",
     },
     {
-      question: "Can I sync my calendar with other platforms?",
+      question: "Can I choose which guests I want?",
       answer:
         "Yes! Tramona integrates with other platforms to prevent double bookings, making it easy to manage your calendar.",
     },
@@ -205,20 +205,19 @@ export default function MastHead() {
             <div className="absolute inset-0 mx-auto hidden max-w-7xl flex-col justify-center pl-4 text-left lg:flex">
               <h2 className="mt-8 text-left text-5xl font-bold text-white">
                 Turn empty nights into opportunities
-              </h2>
+              </h2> 
               <h3 className="mt-6 text-xl font-semibold text-white">
-                Name your own price or book it now
+              Book your empty nights and keep more of your earnings
               </h3>
-              <h3 className="mt-2 text-xl font-semibold text-white">
-                When hosts have empty nights, no one wins
-              </h3>
+              <h4 className="mt-2 text-h4-size font-semibold text-white">
+  All the features and protections you&apos;re used to
+</h4>
               <h3 className="mt-4 text-lg font-semibold text-white">
                 <button
                   className="flex items-center"
-                  onClick={scrollToHowItWorks}
+                  onClick={() => router.push('/why-list')}
                 >
-                  How it works
-                  <ChevronRight className="" />
+                  <span className="underline">How it works</span>
                 </button>
               </h3>
             </div>
@@ -262,10 +261,10 @@ export default function MastHead() {
           {activeTab === "search" ? <UnclaimedMap /> : <NameYourPriceSection />}
         </div>
 
-        <div className="mx-auto mt-12 flex max-w-7xl flex-col items-center gap-y-20 lg:gap-y-24">
+        <div className="mt-12 flex flex-col items-center gap-y-20 lg:gap-y-24">
           {/* other  sections */}
           <OverviewRequestCards />
-          <HowTramonaWorks className="max-w-7xl" />
+          <HowTramonaWorks className="max-w-6xl" />
           <div className="mx-0 flex max-w-full justify-center space-y-4 px-4 lg:mx-4 lg:flex lg:space-y-8">
             <TestimonialCarousel testimonials={landingPageTestimonals} />
           </div>
