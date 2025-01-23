@@ -26,8 +26,8 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ imageUrls }) => {
     }
   };
   if (!imageUrls || imageUrls.length === 0) {
-      return <div>No images available</div>
-    }
+    return <div>No images available</div>;
+  }
 
   return (
     <div className="relative h-48 w-full overflow-hidden rounded-md bg-gray-200">

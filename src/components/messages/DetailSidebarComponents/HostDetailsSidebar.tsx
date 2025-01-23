@@ -104,7 +104,7 @@ const HostDetailsSidebar: React.FC<HostDetailsSidebarProps> = ({
 
   return (
     <>
-      <div className="flex w-full flex-col items-center gap-6 overflow-y-auto rounded-lg border-none bg-white shadow-md">
+      <div className="flex h-full w-full flex-col items-center gap-6 overflow-y-auto rounded-lg border-none bg-white shadow-md">
         {/* Header */}
         <HostConversationHeader
           conversation={conversation}

@@ -1,7 +1,7 @@
 import React from "react";
 import { Property } from "@/server/db/schema";
-import ImageCarousel from "../../_common/ImageCarousel";
-
+import PropertyOnlyImage from "./PropertyOnlyImage";
+import Image from "next/image";
 interface RequiredPropertyInfo {
   name: string;
   numBedrooms: number;
@@ -21,8 +21,8 @@ const HostPropertyInfo: React.FC<HostPropertyInfoProps> = ({ property }) => {
   return (
     <>
       {property && (
-        <div className="m-4 h-full rounded-lg bg-gray-50">
-          <ImageCarousel imageUrls={property.imageUrls} />
+        <div className="relative z-20 m-4 h-full rounded-lg bg-black">
+          <PropertyOnlyImage images={property.imageUrls} />
         </div>
       )}
     </>
