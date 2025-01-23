@@ -12,7 +12,7 @@ import { useSession } from "next-auth/react";
 import ProfileVericationCard from "@/components/dashboard/host/profile/ProfileVericationCard";
 import { fieldConfig } from "@/components/dashboard/host/profile/fieldConfig";
 import { ViewProfileField } from "@/components/dashboard/host/profile/ViewProfileField";
-
+import ListingsCarousel from "@/components/profile/ListingsCarousel";
 function Page() {
   const router = useRouter();
   const { data: session } = useSession();
@@ -52,9 +52,9 @@ function Page() {
                     </div>
                   </div>
                   <div>
-                    <h2 className="text-2xl font-semibold flex items-center">
+                    <h2 className="flex items-center text-2xl font-semibold">
                       {userWProfile.user.firstName}{" "}
-                      <span className="ml-2 relative">
+                      <span className="relative ml-2">
                         <Check className="h-5 w-5 text-green-500" />
                         <div className="absolute -bottom-1 -right-1 rounded-full bg-green-500 p-1">
                           <Check className="h-4 w-4 text-white" />
@@ -128,6 +128,7 @@ function Page() {
                   );
                 })}
               </div>
+              {userWProfile && <ListingsCarousel userWProfile={userWProfile} />}
             </div>
           </div>
         </div>
