@@ -6,8 +6,9 @@ export function useChatWithHostTeam() {
 
   const { mutateAsync: useChatWithHostTeam } =
     api.messages.createConversationWithHostOrAdminTeam.useMutation({
-      onSuccess: (conversationId) =>
-        void router.push(`/messages?conversationId=${conversationId}`),
+      onSuccess: (conversationId) => {
+        void router.push(`/messages/${conversationId}`);
+      },
     });
 
   return useChatWithHostTeam;

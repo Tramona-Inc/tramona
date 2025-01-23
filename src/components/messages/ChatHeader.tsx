@@ -2,14 +2,13 @@
 
 import type { Conversation } from "@/utils/store/conversations";
 import { ChevronLeft } from "lucide-react";
-import Link from "next/link";
 import UserAvatar from "../_common/UserAvatar";
-import { Button, buttonVariants } from "../ui/button";
+import { Button } from "../ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { TooltipContent } from "../ui/tooltip";
 import { Tooltip, TooltipTrigger } from "../ui/tooltip";
 import { TooltipProvider } from "../ui/tooltip";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { capitalizeFirstLetter } from "@/utils/utils";
 import { useRouter } from "next/router";
 
@@ -25,10 +24,14 @@ export default function ChatHeader({
   const [dialogOpen, setDialogOpen] = useState(false);
   const router = useRouter();
 
+  const detailsSidebarIsOpen = useMemo(() => {
+    return router.query.details === "true"; // Simplified boolean check
+  }, [router.query.details]);
+
   return (
-    <div className="flex items-center justify-between border-b bg-white p-4">
+    <div className="flex h-20 items-center justify-between border-b bg-white p-4">
       <div className="flex items-center gap-2 lg:gap-3">
-        <div className="block md:hidden">
+        <div className="block lg:hidden">
           <Button
             variant="ghost"
             size="icon"
@@ -102,21 +105,23 @@ export default function ChatHeader({
           </p>
         </div>
       </div>
-      <Button
-        variant="outline"
-        className="rounded-xl"
-        onClick={() => {
-          void router.push({
-            pathname: router.pathname,
-            query: {
-              ...router.query,
-              details: "true",
-            },
-          });
-        }}
-      >
-        Details
-      </Button>
+      {!detailsSidebarIsOpen && (
+        <Button
+          variant="outline"
+          className="rounded-xl"
+          onClick={() => {
+            void router.push({
+              pathname: router.pathname,
+              query: {
+                ...router.query,
+                details: "true",
+              },
+            });
+          }}
+        >
+          Details
+        </Button>
+      )}
     </div>
   );
 }

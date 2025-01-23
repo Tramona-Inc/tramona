@@ -58,8 +58,9 @@ export default function ChatInput({
 
   const twilioWhatsAppMutation = api.twilio.sendWhatsApp.useMutation();
 
-  const { data: _conversationExists } =
-    api.messages.getConversations.useQuery({ hostTeamId: currentHostTeamId });
+  const { data: _conversationExists } = api.messages.getConversations.useQuery({
+    hostTeamId: currentHostTeamId,
+  });
 
   // Add check before sending message
   if (!conversationId) {
@@ -176,7 +177,10 @@ export default function ChatInput({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="p-2 pt-0">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="mb-10 p-2 pt-0 sm:mb-8 md:mb-2"
+      >
         <div className="flex items-center overflow-clip rounded-full border-2">
           <div className="flex-1">
             <FormField

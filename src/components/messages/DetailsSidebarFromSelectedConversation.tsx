@@ -154,16 +154,11 @@ const DetailsSidebarFromSelectedConversation: React.FC<
   );
 
   const request = isHost ? requestHost : requestTraveler;
+
   const bid = isHost
     ? currentRequestsToBookForHost?.[0]
     : currentRequestsToBookTraveler?.[0];
   const property = propertyInfo ?? bid?.property;
-
-  // console.log(propertyInfo, "propertyInfo");
-
-  // console.log(bid, "bid");
-
-  // console.log(request, "request");
 
   return (
     <>
@@ -181,11 +176,7 @@ const DetailsSidebarFromSelectedConversation: React.FC<
             <h2 className="text-2xl font-bold text-gray-800">
               {property?.name ?? "Property Information"}
             </h2>
-            <Button
-              size="icon"
-              onClick={handleHideDetails}
-              variant="darkOutline"
-            >
+            <Button size="icon" onClick={handleHideDetails} variant="ghost">
               {" "}
               <XIcon />{" "}
             </Button>
@@ -268,8 +259,6 @@ const DetailsSidebarFromSelectedConversation: React.FC<
               )}
             </div>
           )}
-          {/* ) : ( */}
-          {/* <> */}
           {!isHost && (bid ?? request) && (
             <>
               <p className="text-sm text-gray-700">

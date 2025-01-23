@@ -406,6 +406,14 @@ export const useIsSm = () => useScreenWidth() >= 640;
 export const useIsMd = () => useScreenWidth() >= 768;
 
 /**
+ * for screen w md Screens
+ */
+
+export const useIsOnlyMd = () => {
+  const screenWidth = useScreenWidth();
+  return screenWidth >= 768 && screenWidth < 1024;
+};
+/**
  * screen width >= 1024 (same as tailwind `lg:`))
  */
 export const useIsLg = () => useScreenWidth() >= 1024;

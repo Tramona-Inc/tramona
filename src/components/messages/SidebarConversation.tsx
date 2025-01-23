@@ -7,6 +7,7 @@ import { capitalizeFirstLetter, cn } from "@/utils/utils";
 import { useSession } from "next-auth/react";
 import UserAvatar from "../_common/UserAvatar";
 import { formatRelative } from "date-fns";
+import { useIsOnlyMd } from "@/utils/utils";
 
 export function SidebarConversation({
   conversation,
@@ -17,6 +18,7 @@ export function SidebarConversation({
   isSelected: boolean;
   setSelected: (arg0: Conversation) => void;
 }) {
+  const isOnlyMd = useIsOnlyMd();
   const { participants, messages, name } = conversation;
 
   const displayParticipants = participants
@@ -85,11 +87,6 @@ export function SidebarConversation({
           </span>
           {messages[0]?.message ?? ""}
         </p>
-        {/* {session?.user.role === "admin" && (
-          <p className="line-clamp-1 text-xs uppercase text-muted-foreground">
-            Conversation Id: {id}
-          </p>
-        )} */}
       </div>
     </button>
   );

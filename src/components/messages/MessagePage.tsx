@@ -8,16 +8,16 @@ import {
 } from "@/utils/store/conversations";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { api } from "@/utils/api";
-import { cn } from "@/utils/utils";
 import { SkeletonText } from "@/components/ui/skeleton";
 import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 import ConversationsEmptySvg from "@/components/_common/EmptyStateSvg/ConversationsEmptySvg";
 import EmptyStateValue from "@/components/_common/EmptyStateSvg/EmptyStateValue";
-import DetailsSidebarFromSelectedConversation from "@/components/messages/DetailsSidebarFromSelectedConversation";
-import { useIsMd } from "@/utils/utils";
+import DetailsSidebarFromSelectedConversation from "./DetailsSidebarFromSelectedConversation";
+import { useIsMd, useIsSm, useIsOnlyMd, useIsLg, cn } from "@/utils/utils";
 import { Dialog, DialogContent } from "../ui/dialog";
+import { motion } from "framer-motion";
 
 interface MessagesPageProps {
   isHost: boolean;
@@ -32,9 +32,10 @@ interface MessagesPageProps {
 }
 
 function MessageDisplay(props: MessagesPageProps) {
+  const isLg = useIsLg();
+  const isOnlyMd = useIsOnlyMd();
   const isMd = useIsMd();
-  const showSidebar = isMd || props.isIndex;
-  const showMessageContent = isMd || !props.isIndex;
+  const isSm = useIsSm();
 
   const router = useRouter();
 
@@ -70,10 +71,6 @@ function MessageDisplay(props: MessagesPageProps) {
     return query.id as string | undefined;
   }, [query.id]);
 
-  const detailsSidebarIsOpen: boolean = useMemo(() => {
-    return query.details && query.details === "true" ? true : false;
-  }, [query]);
-
   useEffect(() => {
     if (
       conversationIdFromUrl &&
@@ -97,13 +94,32 @@ function MessageDisplay(props: MessagesPageProps) {
     }
   }, [fetchedConversations, setConversationList, refetch]);
 
+  //SCREEN WIDTH LOGIC
+
+  const detailsSidebarIsOpen = useMemo(() => {
+    return query.details === "true"; // Simplified boolean check
+  }, [query.details]);
+
+  //canonly be open if the details is close on md screens
+
+  const showSidebar = isLg || props.isIndex;
+
+  //content
+  const showMessageContent = isLg || !props.isIndex;
+
+  //detailsSidebar
+
+  const messagesContentWidth = useMemo(() => {
+    return detailsSidebarIsOpen && isMd ? "75%" : "100%";
+  }, [detailsSidebarIsOpen, isMd]);
+
   return (
-    <div className="flex h-[calc(100vh-10rem)] divide-x border-b lg:h-[calc(100vh-8rem)]">
+    <div className="flex h-[calc(100vh-9rem)] divide-x border-b lg:h-[calc(100vh-8rem)]">
       {/* Messages Sidebar */}
       {showSidebar && (
         <div
           className={cn(
-            "w-full bg-white transition-transform duration-300 md:w-96",
+            "w-1/4 bg-white transition-transform duration-300 2xl:w-96",
           )}
         >
           {isSidebarLoading ? (
@@ -125,11 +141,15 @@ function MessageDisplay(props: MessagesPageProps) {
       )}
       {/* Messages Content */}
       {showMessageContent && (
-        <div
+        <motion.div // Wrap MessagesContent with motion.div
           className={cn(
-            "flex h-full flex-1 items-center justify-center transition-transform duration-300",
+            "flex h-full flex-1 items-center justify-center transition-transform duration-500",
             !selectedConversation && "hidden md:flex",
           )}
+          style={{
+            width: messagesContentWidth,
+            // translateX: messagesContentTranslateX, // Keep width animation, remove translateX for shrinking effect
+          }}
         >
           {!selectedConversation ? (
             <EmptyStateValue description="You have no conversations yet">
@@ -141,24 +161,48 @@ function MessageDisplay(props: MessagesPageProps) {
               setSelected={handleSetSelectedConversation}
             />
           )}
-        </div>
+        </motion.div>
       )}
 
       {/* Selected Conversation Sidebar */}
       {selectedConversation &&
         detailsSidebarIsOpen &&
-        (isMd ? (
-          <div
-            className={cn("w-1/4 border-l transition-transform duration-500")}
+        (isSm ? (
+          <motion.div // Use motion.div for animation
+            className={cn("w-1/4 border-l transition-transform duration-300")}
+            initial={{ x: "100%" }} // Start position: off-screen to the right
+            animate={{ x: "0%" }} // Animate to: fully visible
+            exit={{ x: "100%" }} // Exit animation: slide out to the right
+            transition={{
+              duration: 0.005, // Slightly reduced duration (adjust as needed)
+              ease: "easeInOut",
+            }}
           >
             <DetailsSidebarFromSelectedConversation
               conversation={selectedConversation}
               isHost={true}
             />
-          </div>
+          </motion.div>
         ) : (
-          <Dialog open={detailsSidebarIsOpen}>
-            <DialogContent className="">
+          <Dialog
+            open={detailsSidebarIsOpen}
+            onOpenChange={(open) => {
+              if (!open && router.query.details === "true") {
+                void router.push(
+                  {
+                    pathname: router.pathname,
+                    query: {
+                      ...router.query,
+                      details: "false",
+                    },
+                  },
+                  undefined, // This is required to keep the current URL
+                  { shallow: true },
+                );
+              }
+            }}
+          >
+            <DialogContent>
               <DetailsSidebarFromSelectedConversation
                 conversation={selectedConversation}
                 isHost={true}
