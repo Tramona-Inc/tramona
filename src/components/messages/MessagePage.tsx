@@ -67,7 +67,9 @@ function MessageDisplay(props: MessagesPageProps) {
   };
 
   const conversations = useConversation((state) => state.conversationList);
-  const { setConversationList } = useConversation();
+  const setConversationList = useConversation(
+    (state) => state.setConversationList,
+  );
 
   const { query } = useRouter();
   const { currentHostTeamId } = useHostTeamStore();
@@ -79,10 +81,10 @@ function MessageDisplay(props: MessagesPageProps) {
     hostTeamId: currentHostTeamId,
   });
 
-  console.log(fetchedConversations);
-  setConversationList(fetchedConversations ?? []);
+  // console.log(fetchedConversations);
+  // //setConversationList(fetchedConversations ?? []);
 
-  console.log(conversations);
+  // console.log(conversations);
 
   useEffect(() => {
     console.log(query.id);
@@ -99,10 +101,19 @@ function MessageDisplay(props: MessagesPageProps) {
         conversationToSelect &&
         conversationToSelect !== selectedConversation
       ) {
+        console.log(conversationToSelect);
         setSelectedConversation(conversationToSelect);
       }
     }
   }, [query.id, conversations, selectedConversation]);
+
+  useEffect(() => {
+    if (fetchedConversations) {
+      setConversationList(fetchedConversations);
+    } else {
+      void refetch();
+    }
+  }, [fetchedConversations, setConversationList, refetch]);
 
   return (
     <div className="flex h-[calc(100vh-12rem)] divide-x border-b lg:h-[calc(100vh-8rem)]">

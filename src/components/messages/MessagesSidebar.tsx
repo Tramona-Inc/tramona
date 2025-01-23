@@ -38,17 +38,17 @@ export default function MessagesSidebar({
 
   const conversations = useConversation((state) => state.conversationList);
 
-  const setConversationList = useConversation(
-    (state) => state.setConversationList,
-  );
+  // const setConversationList = useConversation(
+  //   (state) => state.setConversationList,
+  // );
 
-  useEffect(() => {
-    if (fetchedConversations) {
-      setConversationList(fetchedConversations);
-    } else {
-      void refetch();
-    }
-  }, [fetchedConversations, setConversationList, refetch]);
+  // useEffect(() => {
+  //   if (fetchedConversations) {
+  //     setConversationList(fetchedConversations);
+  //   } else {
+  //     void refetch();
+  //   }
+  // }, [fetchedConversations, setConversationList, refetch]);
 
   const optimisticIds = useMessage((state) => state.optimisticIds);
 
