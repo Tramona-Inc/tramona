@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/router";
 import { useState, useEffect, useRef } from "react";
 import { InlineWidget, useCalendlyEventListener } from "react-calendly";
 import {
@@ -223,7 +223,7 @@ export default function Onboarding1({
       hostawayBearerToken: bearerToken,
     });
 
-    router.push("/host");
+    void router.push("/host");
   });
 
   useEffect(() => {

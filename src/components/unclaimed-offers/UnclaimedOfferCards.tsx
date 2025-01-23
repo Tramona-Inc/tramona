@@ -6,7 +6,6 @@ import {
   formatCurrency,
   formatDateMonthDayYear,
   plural,
-  validateImage,
 } from "@/utils/utils";
 import { ChevronLeft, ChevronRight, StarIcon } from "lucide-react";
 import { Skeleton, SkeletonText } from "../ui/skeleton";
@@ -16,7 +15,6 @@ import React, {
   useMemo,
   useCallback,
   memo,
-  useRef,
 } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
@@ -38,13 +36,14 @@ import { Badge } from "../ui/badge";
 import { Property } from "@/server/db/schema/tables/properties";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
 
+
 type PropertyType = Property | AirbnbSearchResult;
+
 
 export default function UnclaimedOfferCards(): JSX.Element {
   const { adjustedProperties, isSearching } = useAdjustedProperties();
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
-  const [validProperties, setValidProperties] = useState<PropertyType[]>([]);
   const itemsPerPage = 36;
   const { data: session } = useSession();
   const {} = useLoading();
@@ -59,42 +58,10 @@ export default function UnclaimedOfferCards(): JSX.Element {
     return allProperties.slice(startIndex, endIndex);
   }, [allProperties, currentPage, itemsPerPage]);
 
-  //filter out the properties, where images do not load/ Also caching images
-  const validationCache = useRef(new Map<string, boolean>());
-
-  const validateProperties = useCallback(async () => {
-    const valid: PropertyType[] = [];
-    const promises = paginatedProperties.map(async (property) => {
-      if (property.imageUrls.length === 0) {
-        return;
-      }
-      const firstImageUrl = property.imageUrls[0]!;
-
-      if (validationCache.current.has(firstImageUrl)) {
-        if (validationCache.current.get(firstImageUrl)) {
-          valid.push(property);
-        }
-        return;
-      }
-      const isValid: boolean = await validateImage(firstImageUrl);
-      validationCache.current.set(firstImageUrl, isValid);
-
-      if (isValid) {
-        valid.push(property);
-      } // not adding failed images to valid
-    });
-    await Promise.all(promises);
-    return valid;
-  }, [paginatedProperties]);
-
-  // Removed the debounced effect here
   useEffect(() => {
-    const fetchValidProperties = async () => {
-      const newValidProperties = await validateProperties();
-      setValidProperties(newValidProperties);
-    };
-    void fetchValidProperties();
-  }, [validateProperties]);
+    console.log("UnclaimedOfferCards adjustedProperties updated:", adjustedProperties);
+  }, [adjustedProperties]);
+
 
   const totalPages = useMemo(() => {
     return Math.max(1, Math.ceil(allProperties.length / itemsPerPage));
@@ -222,8 +189,8 @@ export default function UnclaimedOfferCards(): JSX.Element {
             <div className="flex w-full flex-col">
               <div className="mx-auto max-w-[2000px] px-4">
                 <div className="grid w-full grid-cols-1 gap-4 min-[580px]:grid-cols-2 min-[800px]:grid-cols-3 min-[1000px]:grid-cols-4 min-[1200px]:grid-cols-5 min-[1400px]:grid-cols-6">
-                  {validProperties.length &&
-                    validProperties.map((property, index) => (
+                  {paginatedProperties.length > 0 &&
+                    paginatedProperties.map((property, index) => (
                       <ErrorBoundary key={index}>
                         <div
                           className="animate-fade-in"
@@ -300,6 +267,8 @@ const UnMatchedPropertyCard = memo(function UnMatchedPropertyCard({
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const router = useRouter();
+  const [failedImageUrls, setFailedImageUrls] = useState(new Set<string>());
+
 
   const nextImage = (e: React.MouseEvent): void => {
     e.preventDefault();
@@ -360,12 +329,26 @@ const UnMatchedPropertyCard = memo(function UnMatchedPropertyCard({
                   alt={`Property image ${index + 1}`}
                   fill
                   onError={(e) => {
-                    console.error(
-                      `Error loading image for property with url ${imageUrl}:`,
-                      e,
-                    );
-                    (e.target as HTMLImageElement).src =
-                      "/assets/images/image_not_found.png";
+                    // Check if this URL has already failed
+                    if (!failedImageUrls.has(imageUrl)) {
+                      console.error(
+                        `Error loading image for property with url ${imageUrl}:`,
+                        e,
+                      );
+                      (e.target as HTMLImageElement).src =
+                        "/assets/images/review-image.png";
+                      // Add the failed URL to the Set
+                      setFailedImageUrls((prevFailedUrls) =>
+                        new Set(prevFailedUrls).add(imageUrl),
+                      );
+                    } else {
+                      // If URL is already in failedImageUrls, just set fallback, no console error or state update
+                      (e.target as HTMLImageElement).src =
+                        "/assets/images/review-image.png";
+                      console.log(
+                        `Skipping retry/state update for already failed image: ${imageUrl}`,
+                      ); // Optional logging to confirm skipping
+                    }
                   }}
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   className="rounded-xl object-cover"

@@ -60,6 +60,7 @@ import { checkAvailabilityForProperties } from "@/server/direct-sites-scraping";
 import { scrapeAirbnbSearch } from "@/server/external-listings-scraping/airbnbScraper";
 import { capitalize } from "@/utils/utils";
 import { extraPricingFieldSchema } from "@/components/dashboard/host/calendar/pricingfields";
+import { validateImage } from "@/utils/utils";
 
 export type HostRequestsPageData = {
   city: string;
@@ -1050,9 +1051,9 @@ export const propertiesRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input, ctx }) => {
+
       const { location } = await getCoordinates(input.location);
       if (!location) throw new Error("Could not get coordinates for address");
-      console.log("location", location);
 
       const radiusInMeters = 20 * 1609.34;
 
@@ -1095,7 +1096,6 @@ export const propertiesRouter = createTRPCRouter({
         (item) => item.propertyId,
       );
 
-      console.log("conflictingIds", conflictingIds.length);
       const calculateAge = (dateOfBirth: string) => {
         const today = new Date();
         const birthDate = new Date(dateOfBirth);
@@ -1129,7 +1129,6 @@ export const propertiesRouter = createTRPCRouter({
           return null;
         });
 
-      console.log("userAge", userAge);
 
       const ageRestrictionCheck = sql`CASE
         WHEN ${properties.ageRestriction} IS NULL THEN true
@@ -1143,10 +1142,10 @@ export const propertiesRouter = createTRPCRouter({
           propertyIsNearRequest,
           notInArray(properties.id, conflictingIds), // Exclude properties with conflicting reservations
           ageRestrictionCheck,
+          eq(properties.status, "Listed"),
         ),
       });
 
-      console.log("hostProperties", hostProperties.length);
 
       const checkInNew = new Date(checkInDate).toISOString().split("T")[0];
       const checkOutNew = new Date(checkOutDate).toISOString().split("T")[0];
@@ -1180,7 +1179,27 @@ export const propertiesRouter = createTRPCRouter({
           notInArray(properties.id, conflictingIds), // Exclude properties with conflicting reservations
         ),
       });
-      return { hostProperties: validHostProperties, scrapedProperties };
+      const validatedScrapedProperties = await Promise.all(
+        scrapedProperties.map(async (property) => {
+          if (property.imageUrls.length > 0) {
+            const firstImageUrl = property.imageUrls[0]!;
+            const isValid = await validateImage(firstImageUrl);
+            if (isValid) {
+              return property; // Keep the property if the image is valid
+            } else {
+              void db.delete(properties).where(eq(properties.id, property.id));
+              return null; // Filter out if the image is invalid
+            }
+          } else {
+            return null; // Filter out if no images
+          }
+        }),
+      );
+
+      // Filter out null values (properties with invalid or no images)
+      const filteredScrapedProperties = validatedScrapedProperties.filter(Boolean);
+
+      return { hostProperties: validHostProperties, scrapedProperties: filteredScrapedProperties };
     }),
 
   getSearchResults: hostProcedure
@@ -1240,4 +1259,13 @@ export const propertiesRouter = createTRPCRouter({
       .where(eq(properties.id, input.propertyId));
     return;
   }),
+
+  updatePropertyStatus: publicProcedure
+    .input(z.object({
+      propertyId: z.number(),
+      status: z.enum(["Listed", "Drafted", "Archived"]),
+    }))
+    .mutation(async ({ input }) => {
+      await db.update(properties).set({ status: input.status }).where(eq(properties.id, input.propertyId));
+    }),
 });

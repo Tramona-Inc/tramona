@@ -227,6 +227,9 @@ importers:
       bcrypt:
         specifier: ^5.1.1
         version: 5.1.1
+      buffer:
+        specifier: ^6.0.3
+        version: 6.0.3
       cheerio:
         specifier: 1.0.0
         version: 1.0.0
@@ -281,6 +284,9 @@ importers:
       html2canvas:
         specifier: ^1.4.1
         version: 1.4.1
+      https:
+        specifier: ^1.0.0
+        version: 1.0.0
       https-proxy-agent:
         specifier: ^7.0.5
         version: 7.0.5
@@ -5278,6 +5284,9 @@ packages:
   https-proxy-agent@7.0.5:
     resolution: {integrity: sha512-1e4Wqeblerz+tMKPIq2EMGiiWW1dIjZOksyHWSUm1rmuvw/how9hBHZ38lAGj5ID4Ik6EdkOw7NmWPy6LAwalw==}
     engines: {node: '>= 14'}
+
+  https@1.0.0:
+    resolution: {integrity: sha512-4EC57ddXrkaF0x83Oj8sM6SLQHAWXw90Skqu2M4AEWENZ3F02dFJE/GARA8igO79tcgYqGrD7ae4f5L3um2lgg==}
 
   human-signals@4.3.1:
     resolution: {integrity: sha512-nZXjEF2nbo7lIw3mgYjItAfgQXog3OjJogSbKa2CQIIvSGWcKgeJnQlNXip6NglNzYH45nSRiEVimMvYL8DDqQ==}
@@ -11919,7 +11928,7 @@ snapshots:
   buffer@4.9.2:
     dependencies:
       base64-js: 1.5.1
-      ieee754: 1.1.13
+      ieee754: 1.2.1
       isarray: 1.0.0
 
   buffer@5.7.1:
@@ -13625,6 +13634,8 @@ snapshots:
       debug: 4.3.7
     transitivePeerDependencies:
       - supports-color
+
+  https@1.0.0: {}
 
   human-signals@4.3.1: {}
 
