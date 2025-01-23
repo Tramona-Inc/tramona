@@ -8,10 +8,14 @@ import RequestCard, { HostDashboardRequest } from "../../requests/RequestCard";
 import { Property } from "@/server/db/schema";
 import HostRequestDialog from "../../dashboard/host/requests/city/HostRequestDialog";
 import { Request } from "@/server/db/schema";
+import type { RouterOutputs } from "@/utils/api";
+
+type PropertiesFromRequest =
+  RouterOutputs["requests"]["getByIdForHost"]["properties"];
 
 interface HostRequestInfoProps {
   request: Request | undefined;
-  properties: (Property & { taxAvailable: boolean })[] | null;
+  properties: PropertiesFromRequest | null | undefined;
   setSelectedRequest: React.Dispatch<
     React.SetStateAction<HostDashboardRequest | null>
   >;

@@ -29,21 +29,19 @@ const HostConversationHeader: React.FC<HostConversationHeaderProps> = ({
   };
 
   return (
-    <div className="border-b pb-4">
-      <div className="flex justify-between">
-        <h2 className="text-2xl font-bold text-gray-800">
-          {propertyName ?? "Property Information"}
-        </h2>
-        <Button size="icon" onClick={handleHideDetails} variant="ghost">
-          {" "}
-          <XIcon />{" "}
-        </Button>
-      </div>
-      {conversation.name && (
-        <p className="mt-1 text-sm text-gray-500">
-          Conversation ID: {conversation.id}
-        </p>
-      )}
+    <div className="mx-auto flex h-20 w-full items-center justify-around border-b bg-white text-center">
+      <h2 className="text-2xl font-bold text-gray-800">
+        {propertyName ?? "Property Information"}
+      </h2>
+      <Button
+        size="icon"
+        onClick={handleHideDetails}
+        variant="ghost"
+        className="rounded-full"
+      >
+        {" "}
+        <XIcon />{" "}
+      </Button>
     </div>
   );
 };

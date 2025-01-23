@@ -38,17 +38,17 @@ export default function MessagesSidebar({
 
   const conversations = useConversation((state) => state.conversationList);
 
-  // const setConversationList = useConversation(
-  //   (state) => state.setConversationList,
-  // );
+  const setConversationList = useConversation(
+    (state) => state.setConversationList,
+  );
 
-  // useEffect(() => {
-  //   if (fetchedConversations) {
-  //     setConversationList(fetchedConversations);
-  //   } else {
-  //     void refetch();
-  //   }
-  // }, [fetchedConversations, setConversationList, refetch]);
+  useEffect(() => {
+    if (fetchedConversations) {
+      setConversationList(fetchedConversations);
+    } else {
+      void refetch();
+    }
+  }, [fetchedConversations, setConversationList, refetch]);
 
   const optimisticIds = useMessage((state) => state.optimisticIds);
 
@@ -161,7 +161,7 @@ export default function MessagesSidebar({
 
   return (
     <div>
-      <div className="space-y-4 border-b p-4">
+      <div className="space-y-4 overflow-y-auto border-b p-4">
         <h1 className="text-2xl font-semibold">Messages</h1>
         <div className="flex items-center gap-1">
           <Button
@@ -180,7 +180,7 @@ export default function MessagesSidebar({
           </Button>
         </div>
       </div>
-      <ScrollArea className="h-[35rem] py-2 pl-1 pr-2 md:px-1">
+      <ScrollArea className="h-[50rem] py-2 pl-1 pr-2 md:px-1">
         {!isLoading ? (
           showAllMsgs ? (
             conversations.length > 0 ? (

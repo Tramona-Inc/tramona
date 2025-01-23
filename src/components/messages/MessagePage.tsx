@@ -15,8 +15,8 @@ import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 import ConversationsEmptySvg from "@/components/_common/EmptyStateSvg/ConversationsEmptySvg";
 import EmptyStateValue from "@/components/_common/EmptyStateSvg/EmptyStateValue";
 import DetailsSidebarFromSelectedConversation from "./DetailSidebarComponents/DetailsSidebarFromSelectedConversation";
-import { useIsMd, useIsSm, useIsOnlyMd, useIsLg, cn } from "@/utils/utils";
-import { Dialog, DialogContent } from "../ui/dialog";
+import { useIsMd, useIsXs, useIsOnlyMd, useIsLg, cn } from "@/utils/utils";
+import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
 import { motion } from "framer-motion";
 
 interface MessagesPageProps {
@@ -35,7 +35,7 @@ function MessageDisplay(props: MessagesPageProps) {
   const isLg = useIsLg();
   const isOnlyMd = useIsOnlyMd();
   const isMd = useIsMd();
-  const isSm = useIsSm();
+  const isXsSm = useIsXs();
 
   const router = useRouter();
 
@@ -114,7 +114,7 @@ function MessageDisplay(props: MessagesPageProps) {
   }, [detailsSidebarIsOpen, isMd]);
 
   return (
-    <div className="flex h-[calc(100vh-9rem)] divide-x border-b lg:h-[calc(100vh-8rem)]">
+    <div className="z-20 flex h-[calc(100vh-9rem)] divide-x bg-white lg:h-[calc(100vh-8rem)]">
       {/* Messages Sidebar */}
       {showSidebar && (
         <div
@@ -167,9 +167,11 @@ function MessageDisplay(props: MessagesPageProps) {
       {/* Selected Conversation Sidebar */}
       {selectedConversation &&
         detailsSidebarIsOpen &&
-        (isSm ? (
+        (isMd ? (
           <motion.div // Use motion.div for animation
-            className={cn("w-1/4 border-l transition-transform duration-300")}
+            className={cn(
+              "w-1/2 border-l transition-transform duration-300 lg:w-2/5 xl:w-4/12",
+            )}
             initial={{ x: "100%" }} // Start position: off-screen to the right
             animate={{ x: "0%" }} // Animate to: fully visible
             exit={{ x: "100%" }} // Exit animation: slide out to the right
@@ -184,9 +186,10 @@ function MessageDisplay(props: MessagesPageProps) {
             />
           </motion.div>
         ) : (
-          <Dialog
+          <Drawer
             open={detailsSidebarIsOpen}
             onOpenChange={(open) => {
+              console.log(open, "open");
               if (!open && router.query.details === "true") {
                 void router.push(
                   {
@@ -202,13 +205,14 @@ function MessageDisplay(props: MessagesPageProps) {
               }
             }}
           >
-            <DialogContent>
+            <DrawerTitle></DrawerTitle>
+            <DrawerContent className="">
               <DetailsSidebarFromSelectedConversation
                 conversation={selectedConversation}
-                isHost={true}
+                isHost={props.isHost}
               />
-            </DialogContent>
-          </Dialog>
+            </DrawerContent>
+          </Drawer>
         ))}
     </div>
   );

@@ -12,13 +12,13 @@ const DetailsSidebarFromSelectedConversation: React.FC<
   DetailsSidebarFromSelectedConversationProps
 > = ({ conversation, isHost }) => {
   return (
-    <>
+    <div className="min-h-[75vh] bg-white">
       {isHost ? (
         <HostDetailsSidebar conversation={conversation} />
       ) : (
         <TravelerDetailsSidebar conversation={conversation} />
       )}
-    </>
+    </div>
   );
 };
 

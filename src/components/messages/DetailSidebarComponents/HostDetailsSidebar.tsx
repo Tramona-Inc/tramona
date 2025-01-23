@@ -60,6 +60,9 @@ const HostDetailsSidebar: React.FC<HostDetailsSidebarProps> = ({
 
   // Ensure userId exists
   const userIdToUse = userId;
+  // THREE CASES
+
+  //.1 REQUEST TO BOOK
   const { data: currentRequestsToBookForHost, isLoading: isLoadingRequests } =
     api.requestsToBook.getByPropertyIdForHost.useQuery(
       {
@@ -74,6 +77,7 @@ const HostDetailsSidebar: React.FC<HostDetailsSidebarProps> = ({
       },
     );
 
+  //2. PROPERTY ONLY
   const { data: propertyInfo } = api.properties.getById.useQuery(
     {
       id: conversation.propertyId!,
@@ -83,6 +87,7 @@ const HostDetailsSidebar: React.FC<HostDetailsSidebarProps> = ({
     },
   );
 
+  //3. CITY REQUEST
   const { data: requestHost } = api.requests.getByIdForHost.useQuery(
     {
       id: conversation.requestId!,
@@ -96,29 +101,25 @@ const HostDetailsSidebar: React.FC<HostDetailsSidebarProps> = ({
   const bid = currentRequestsToBookForHost?.[0];
   const request = requestHost;
   const property = propertyInfo ?? bid?.property;
+
   return (
     <>
-      <div className="flex flex-col gap-6 rounded-lg bg-white p-6 shadow-md">
+      <div className="flex w-full flex-col items-center gap-6 overflow-y-auto rounded-lg border-none bg-white shadow-md">
         {/* Header */}
         <HostConversationHeader
           conversation={conversation}
           propertyName={property?.name}
         />
         {/* Property Section */}
-        <div className="max-h-[500px] overflow-y-auto">
-          <HostPropertyInfo property={property} />
-          <HostRequestToBookInfo bid={bid} />
-          <HostRequestInfo
-            request={request?.request}
-            properties={request?.properties}
-            setSelectedRequest={setSelectedRequest}
-            setDialogOpen={setDialogOpen}
-            setProperties={setProperties}
-          />
-
-          {/* Created Date Section */}
-          <HostCreatedDate conversation={conversation} />
-        </div>
+        <HostPropertyInfo property={property} />
+        <HostRequestToBookInfo bid={bid} />
+        {/* <HostRequestInfo
+          request={request?.request}
+          properties={request?.properties}
+          setSelectedRequest={setSelectedRequest}
+          setDialogOpen={setDialogOpen}
+          setProperties={setProperties}
+        />  */}
       </div>
       {step === 0 && properties && selectedRequest && (
         <HostRequestDialog
