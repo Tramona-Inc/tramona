@@ -51,7 +51,7 @@ const ConversationHeader: React.FC<ConversationHeaderProps> = ({
         size="icon"
         onClick={handleHideDetails}
         variant="ghost"
-        className="mx-1 rounded-full"
+        className="mx-1 hidden rounded-full md:block"
       >
         {" "}
         <XIcon />{" "}

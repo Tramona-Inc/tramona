@@ -12,6 +12,7 @@ import HostRequestInfo from "./HostRequestInfo";
 import { HostDashboardRequest } from "../../requests/RequestCard";
 import ConversationHeader from "./ConversationHeader";
 import { PropertySkeletons } from "./SIdeBarSkeletons";
+import GetSupportAnytime from "./GetSupportAnytime";
 interface HostDetailsSidebarProps {
   conversation: Conversation;
 }
@@ -103,14 +104,14 @@ const HostDetailsSidebar: React.FC<HostDetailsSidebarProps> = ({
   const property = propertyInfo ?? bid?.property;
 
   return (
-    <div className="mx-auto">
+    <div className="mx-auto overflow-y-scroll">
       {/* Header */}
       <ConversationHeader
         conversation={conversation}
         propertyName={property?.name}
         propertyId={property?.id}
       />
-      <div className="mx-auto my-4 flex w-11/12 flex-col gap-y-3">
+      <div className="mx-auto my-4 flex w-11/12 flex-col gap-y-6">
         {/* Property Section */}
         {property ? (
           <HostPropertyInfo property={property} />
@@ -159,6 +160,7 @@ const HostDetailsSidebar: React.FC<HostDetailsSidebarProps> = ({
           setStep={setStep}
         />
       )}
+      <GetSupportAnytime />
     </div>
   );
 };

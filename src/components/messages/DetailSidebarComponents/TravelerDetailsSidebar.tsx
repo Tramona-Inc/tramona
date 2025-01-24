@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { type Conversation } from "@/utils/store/conversations";
 import { format } from "date-fns";
 import { api } from "@/utils/api";
-import { formatCurrency } from "@/utils/utils";
+import { formatCurrency, generateBookingUrl } from "@/utils/utils";
 import { Button } from "@/components/ui/button";
 import RequestToBookOrBookNowPriceCard from "../../propertyPages/sidebars/priceCards/RequestToBookOrBookNowPriceCard";
 import WithdrawRequestToBookDialog from "../../requests-to-book/WithdrawRequestToBookDialog";
@@ -11,6 +11,8 @@ import { useRouter } from "next/router";
 import PropertyOnlyImage from "./PropertyOnlyImage";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PropertySkeletons } from "./SIdeBarSkeletons";
+import GetSupportAnytime from "./GetSupportAnytime";
+import Link from "next/link";
 
 interface TravelerDetailsSidebarProps {
   conversation: Conversation;
@@ -79,7 +81,7 @@ const TravelerDetailsSidebar: React.FC<TravelerDetailsSidebarProps> = ({
         />
         {/* Property Section */}
 
-        <div className="mx-auto my-3 w-11/12 overflow-y-auto">
+        <div className="mx-auto my-3 flex w-11/12 flex-col gap-y-6">
           {property ? (
             <div className="">
               <PropertyOnlyImage property={property} />
@@ -89,7 +91,7 @@ const TravelerDetailsSidebar: React.FC<TravelerDetailsSidebarProps> = ({
           ) : (
             <PropertySkeletons />
           )}
-          {(bid ?? request) && (
+          {(bid ?? request) ? (
             <>
               <p className="text-sm text-gray-700">
                 <span className="font-semibold">Check-in:</span>{" "}
@@ -120,7 +122,16 @@ const TravelerDetailsSidebar: React.FC<TravelerDetailsSidebarProps> = ({
                 <Button onClick={() => setWithdrawOpen(true)}>Withdraw</Button>
               </div>
             </>
+          ) : (
+            <div>
+              {property && (
+                <Link href={generateBookingUrl(property.id)}>
+                  <Button className="w-full">Request To Book</Button>
+                </Link>
+              )}
+            </div>
           )}
+          <GetSupportAnytime />
         </div>
       </div>
     </>
