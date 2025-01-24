@@ -7,7 +7,7 @@ export default function VerifyEmail() {
 
   const id = router.query.id as string;
   const token = router.query.token as string;
-  const conversationId = router.query.conversationId as string;
+  const conversationId = router.query.id as string;
   const userId = router.query.userId as string;
 
   const date = useMemo(() => new Date(), []); // useMemo from React

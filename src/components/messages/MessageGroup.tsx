@@ -22,31 +22,45 @@ export function MessageGroup({ messageGroup }: { messageGroup: MessageGroup }) {
         me ? "justify-end" : "justify-start",
       )}
     >
-      {user ? <UserAvatar {...user} onClick={() => router.push(`/profile/view/${user.id}`)} /> : <AnonymousAvatar />}
-      <div
-        className={cn(
-          "max-w-72 rounded-xl px-4 py-2 sm:max-w-96 lg:max-w-prose",
-          me ? "bg-teal-900 text-white" : "bg-white",
+      <div className="flex flex-row items-center gap-x-2">
+        {user ? (
+          <UserAvatar
+            {...user}
+            onClick={() => router.push(`/profile/view/${user.id}`)}
+          />
+        ) : (
+          <AnonymousAvatar />
         )}
-      >
-        {!me && (
-          <p className="mb-1 text-sm text-gray-500">
-            {user ? `${capitalize(user.firstName!)}` : "[deleted user]"}
-          </p>
-        )}
-
-        <div className="space-y-1">
-          {messages.map((message) => (
-            <Message key={message.id} message={message} />
-          ))}
-        </div>
-        <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
-          <p>{formatRelative(firstMessage.createdAt, new Date())}</p>
-          <p>
-            {session.user.id === firstMessage.userId && firstMessage.read && (
-              <>Read</>
+        <div
+          className={cn(
+            "flex flex-col items-start gap-1",
+            me ? "justify-end" : "justify-start",
+          )}
+        >
+          {!me && (
+            <p className="ml-3 text-start text-sm text-gray-600">
+              {user ? `${capitalize(user.firstName!)}` : "[deleted user]"}
+            </p>
+          )}
+          <div
+            className={cn(
+              "max-w-72 rounded-xl px-4 py-2 sm:max-w-96 lg:max-w-prose",
+              me ? "bg-teal-900 text-white" : "bg-zinc-100",
             )}
-          </p>
+          >
+            <div className="space-y-1">
+              {messages.map((message) => (
+                <Message key={message.id} message={message} />
+              ))}
+            </div>
+            <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
+              <p>{formatRelative(firstMessage.createdAt, new Date())}</p>
+              <p>
+                {session.user.id === firstMessage.userId &&
+                  firstMessage.read && <>Read</>}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -29,11 +29,7 @@ export default function UserAvatar({
   if (!name && !email && !image) return <AnonymousAvatar size={size} />;
   const fallback = name ? getInitials(name) : (email?.[0] ?? "?");
   return (
-    <Avatar
-      size={size}
-      onClick={onClick}
-      className={onClick && "hover:cursor-pointer"}
-    >
+    <Avatar size={size} onClick={onClick} className="cursor-pointer">
       {image ? (
         <AvatarImage src={image} alt="" />
       ) : (

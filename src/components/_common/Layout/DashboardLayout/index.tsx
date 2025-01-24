@@ -60,7 +60,7 @@ export default function DashboardLayout({
           <div className="hidden md:contents">
             {/* <MessagesPopover isMobile={false} isHostOnboarding={false} /> */}
           </div>
-          {!noFooter && isMd && <Footer />}
+          {!noFooter && <Footer />}
         </div>
       </div>
     </>
