@@ -51,14 +51,19 @@ export default function Page() {
                 </Button>
               </div>
               <div>
-                <h2 className="text-2xl font-semibold">Your Name</h2>
-                <p className="text-sm text-muted-foreground">Host</p>
+                <h2 className="text-2xl font-semibold">{session?.user.name}</h2>
+                <p className="text-sm capitalize text-muted-foreground">
+                  {session?.user.role}
+                </p>
               </div>
             </div>
           </Card>
           <VerificationCard />
         </div>
-        <AllFieldDialogs myUserWProfile={memoizedUser} />
+        <AllFieldDialogs
+          myUserWProfile={memoizedUser}
+          role={session?.user.role ?? ""}
+        />
       </div>{" "}
       <ProfilePhotoDialog
         open={isPhotoDialogOpen}

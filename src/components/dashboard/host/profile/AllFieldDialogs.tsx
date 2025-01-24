@@ -15,8 +15,10 @@ export type MyUserWProfile = RouterOutputs["users"]["getMyUserWProfile"];
 
 function AllFieldDialogs({
   myUserWProfile,
+  role,
 }: {
   myUserWProfile: MyUserWProfile | undefined;
+  role: string;
 }) {
   const [activeField, setActiveField] = useState<keyof FieldConfig | null>(
     null,
@@ -48,13 +50,20 @@ function AllFieldDialogs({
     [setProfileData],
   );
 
+  const travelerFieldConfig = Object.entries(fieldConfig).filter(
+    ([field]) => field !== "forGuests",
+  );
+
   return (
     <div className="mx-2 space-y-8">
       <div className="mt-8">
         <h1 className="mx-2 mb-6 text-3xl font-bold">Your profile</h1>
         {myUserWProfile ? (
           <div className="grid gap-2 md:grid-cols-2">
-            {Object.entries(fieldConfig).map(([field, config]) => {
+            {(role === "host"
+              ? Object.entries(fieldConfig)
+              : travelerFieldConfig
+            ).map(([field, config]) => {
               return (
                 <div
                   key={field}
