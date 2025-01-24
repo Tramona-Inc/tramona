@@ -104,7 +104,7 @@ const HostDetailsSidebar: React.FC<HostDetailsSidebarProps> = ({
   const property = propertyInfo ?? bid?.property;
 
   return (
-    <div className="mx-auto overflow-y-scroll">
+    <div className="mx-auto">
       {/* Header */}
       <ConversationHeader
         conversation={conversation}
@@ -126,41 +126,42 @@ const HostDetailsSidebar: React.FC<HostDetailsSidebarProps> = ({
           setDialogOpen={setDialogOpen}
           setProperties={setProperties}
         />
+
+        {step === 0 && properties && selectedRequest && (
+          <HostRequestDialog
+            propertyPrices={propertyPrices}
+            setPropertyPrices={setPropertyPrices}
+            open={dialogOpen}
+            setOpen={setDialogOpen}
+            properties={properties}
+            request={selectedRequest}
+            setStep={setStep}
+            setSelectedProperties={setSelectedProperties}
+            selectedProperties={selectedProperties}
+          />
+        )}
+        {step === 1 && properties && selectedRequest && (
+          <HostConfirmRequestDialog
+            request={selectedRequest}
+            properties={properties}
+            setStep={setStep}
+            propertyPrices={propertyPrices}
+            open={dialogOpen}
+            setOpen={setDialogOpen}
+            setPropertyPrices={setPropertyPrices}
+            selectedProperties={selectedProperties}
+          />
+        )}
+        {step === 2 && selectedRequest && (
+          <HostFinishRequestDialog
+            request={selectedRequest}
+            open={dialogOpen}
+            setOpen={setDialogOpen}
+            setStep={setStep}
+          />
+        )}
+        <GetSupportAnytime />
       </div>
-      {step === 0 && properties && selectedRequest && (
-        <HostRequestDialog
-          propertyPrices={propertyPrices}
-          setPropertyPrices={setPropertyPrices}
-          open={dialogOpen}
-          setOpen={setDialogOpen}
-          properties={properties}
-          request={selectedRequest}
-          setStep={setStep}
-          setSelectedProperties={setSelectedProperties}
-          selectedProperties={selectedProperties}
-        />
-      )}
-      {step === 1 && properties && selectedRequest && (
-        <HostConfirmRequestDialog
-          request={selectedRequest}
-          properties={properties}
-          setStep={setStep}
-          propertyPrices={propertyPrices}
-          open={dialogOpen}
-          setOpen={setDialogOpen}
-          setPropertyPrices={setPropertyPrices}
-          selectedProperties={selectedProperties}
-        />
-      )}
-      {step === 2 && selectedRequest && (
-        <HostFinishRequestDialog
-          request={selectedRequest}
-          open={dialogOpen}
-          setOpen={setDialogOpen}
-          setStep={setStep}
-        />
-      )}
-      <GetSupportAnytime />
     </div>
   );
 };

@@ -1,18 +1,15 @@
 import React, { useState } from "react";
 import { type Conversation } from "@/utils/store/conversations";
-import { format } from "date-fns";
 import { api } from "@/utils/api";
-import { formatCurrency, generateBookingUrl } from "@/utils/utils";
+import { generateBookingUrl } from "@/utils/utils";
 import { Button } from "@/components/ui/button";
-import RequestToBookOrBookNowPriceCard from "../../propertyPages/sidebars/priceCards/RequestToBookOrBookNowPriceCard";
 import WithdrawRequestToBookDialog from "../../requests-to-book/WithdrawRequestToBookDialog";
 import ConversationHeader from "./ConversationHeader";
-import { useRouter } from "next/router";
 import PropertyOnlyImage from "./PropertyOnlyImage";
-import { Skeleton } from "@/components/ui/skeleton";
 import { PropertySkeletons } from "./SIdeBarSkeletons";
 import GetSupportAnytime from "./GetSupportAnytime";
 import Link from "next/link";
+import TravelerBidOrRequestSection from "./TravelerBidOrRequestSection";
 
 interface TravelerDetailsSidebarProps {
   conversation: Conversation;
@@ -21,8 +18,6 @@ interface TravelerDetailsSidebarProps {
 const TravelerDetailsSidebar: React.FC<TravelerDetailsSidebarProps> = ({
   conversation,
 }) => {
-  const router = useRouter();
-
   const [withdrawOpen, setWithdrawOpen] = useState(false);
 
   const { data: currentRequestsToBookTraveler } =
@@ -92,36 +87,11 @@ const TravelerDetailsSidebar: React.FC<TravelerDetailsSidebarProps> = ({
             <PropertySkeletons />
           )}
           {(bid ?? request) ? (
-            <>
-              <p className="text-sm text-gray-700">
-                <span className="font-semibold">Check-in:</span>{" "}
-                {bid?.checkIn.toLocaleDateString() ??
-                  requestTraveler?.checkIn.toLocaleDateString() ??
-                  "N/A"}
-              </p>
-              <p className="text-sm text-gray-700">
-                <span className="font-semibold">Check-out:</span>{" "}
-                {bid?.checkOut.toLocaleDateString() ??
-                  requestTraveler?.checkOut.toLocaleDateString() ??
-                  "N/A"}
-              </p>
-              <p className="text-sm text-gray-700">
-                <span className="font-semibold">Amount:</span>{" "}
-                {formatCurrency(
-                  bid?.baseAmountBeforeFees ??
-                    requestTraveler?.maxTotalPrice ??
-                    0,
-                )}
-              </p>
-              <p className="text-sm text-gray-700">
-                <span className="font-semibold">Guests:</span>{" "}
-                {bid?.numGuests ?? requestTraveler?.numGuests ?? "N/A"}
-              </p>
-
-              <div className="flex justify-end">
-                <Button onClick={() => setWithdrawOpen(true)}>Withdraw</Button>
-              </div>
-            </>
+            <TravelerBidOrRequestSection
+              bid={bid}
+              request={request}
+              setWithdrawOpen={setWithdrawOpen}
+            />
           ) : (
             <div>
               {property && (

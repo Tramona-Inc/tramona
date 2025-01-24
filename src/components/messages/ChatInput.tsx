@@ -179,10 +179,10 @@ export default function ChatInput({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="mb-10 p-2 pt-0 sm:mb-8 md:mb-2"
+        className="z-10 mb-10 bg-transparent sm:mb-8 md:mb-2"
       >
-        <div className="flex items-center overflow-clip rounded-full border-2">
-          <div className="flex-1">
+        <div className="flex items-center overflow-clip rounded-full border-2 bg-transparent">
+          <div className="flex-1 bg-transparent">
             <FormField
               control={form.control}
               name="message"

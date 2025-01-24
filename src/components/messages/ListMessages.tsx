@@ -192,7 +192,7 @@ export default function ListMessages() {
       <div
         ref={scrollRef}
         onScroll={handleOnScroll}
-        className="relative flex flex-1 flex-col overflow-y-auto bg-white"
+        className="relative z-40 flex flex-1 flex-col overflow-y-auto bg-white"
       >
         <div className="flex-1"></div>
         <div className="absolute w-full space-y-8 p-4 pt-12">
