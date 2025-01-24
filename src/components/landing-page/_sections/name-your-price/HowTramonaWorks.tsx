@@ -22,7 +22,7 @@ function HowTramonaWorks({ className }: { className: string }) {
                 <h4 className="mb-2 font-semibold">Book More and Keep More</h4>
                 <p className="text-gray-600">
                   Tramona charges a 10% fee on all bookings, 1.5% to hosts and
-                  8.% to travelers. This is a 5-10% minimum savings compared to
+                  8.5% to travelers. This is a 5-10% minimum savings compared to
                   Airbnb, VRBO and Booking.com. When you book on Tramona, you
                   save 5-10% on the fees alone.
                   <br />
