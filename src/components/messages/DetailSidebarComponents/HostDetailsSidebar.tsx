@@ -10,7 +10,8 @@ import HostPropertyInfo from "./HostPropertyInfo";
 import HostRequestToBookInfo from "./HostRequestToBookInfo";
 import HostRequestInfo from "./HostRequestInfo";
 import { HostDashboardRequest } from "../../requests/RequestCard";
-import HostConversationHeader from "./HostConversionHeader";
+import ConversationHeader from "./ConversationHeader";
+import { PropertySkeletons } from "./SIdeBarSkeletons";
 interface HostDetailsSidebarProps {
   conversation: Conversation;
 }
@@ -104,13 +105,18 @@ const HostDetailsSidebar: React.FC<HostDetailsSidebarProps> = ({
   return (
     <div className="mx-auto">
       {/* Header */}
-      <HostConversationHeader
+      <ConversationHeader
         conversation={conversation}
         propertyName={property?.name}
+        propertyId={property?.id}
       />
-      <div className="mx-auto w-11/12">
+      <div className="mx-auto my-4 flex w-11/12 flex-col gap-y-3">
         {/* Property Section */}
-        {property && <HostPropertyInfo property={property} />}
+        {property ? (
+          <HostPropertyInfo property={property} />
+        ) : (
+          <PropertySkeletons />
+        )}
         <HostRequestToBookInfo bid={bid} />
         <HostRequestInfo
           request={request?.request}

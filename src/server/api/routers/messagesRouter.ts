@@ -756,7 +756,7 @@ export const messagesRouter = createTRPCRouter({
       //if admin then send slack from the to and from
       await sendSlackMessage({
         channel: "admin-messaging",
-        isProductionOnly: false,
+        isProductionOnly: true,
         text: [
           `*${sender?.email} sent a message to admin*`,
           `${input.message}`,

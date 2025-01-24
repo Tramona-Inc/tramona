@@ -6,10 +6,11 @@ import { formatCurrency } from "@/utils/utils";
 import { Button } from "@/components/ui/button";
 import RequestToBookOrBookNowPriceCard from "../../propertyPages/sidebars/priceCards/RequestToBookOrBookNowPriceCard";
 import WithdrawRequestToBookDialog from "../../requests-to-book/WithdrawRequestToBookDialog";
-import ImageCarousel from "../../_common/ImageCarousel";
-import { XIcon } from "lucide-react";
+import ConversationHeader from "./ConversationHeader";
 import { useRouter } from "next/router";
 import PropertyOnlyImage from "./PropertyOnlyImage";
+import { Skeleton } from "@/components/ui/skeleton";
+import { PropertySkeletons } from "./SIdeBarSkeletons";
 
 interface TravelerDetailsSidebarProps {
   conversation: Conversation;
@@ -56,19 +57,6 @@ const TravelerDetailsSidebar: React.FC<TravelerDetailsSidebarProps> = ({
     },
   );
 
-  const handleHideDetails = () => {
-    void router.push(
-      {
-        pathname: router.pathname,
-        query: {
-          ...router.query,
-          details: "false",
-        },
-      },
-      undefined, // This is required to keep the current URL
-      { shallow: true }, // Op
-    );
-  };
   const bid = currentRequestsToBookTraveler?.[0];
   const request = requestTraveler;
   const property = propertyInfo ?? bid?.property;
@@ -82,33 +70,24 @@ const TravelerDetailsSidebar: React.FC<TravelerDetailsSidebarProps> = ({
           onOpenChange={setWithdrawOpen}
         />
       )}
-      <div className="flex flex-col gap-6 rounded-lg bg-white p-6 shadow-md">
+      <div className="mx-auto">
         {/* Header */}
-        <div className="border-b pb-4">
-          <div className="flex justify-between">
-            <h2 className="text-2xl font-bold text-gray-800">
-              {property?.name ?? "Property Information"}
-            </h2>
-            <Button size="icon" onClick={handleHideDetails} variant="ghost">
-              {" "}
-              <XIcon />{" "}
-            </Button>
-          </div>
-          {conversation.name && (
-            <p className="mt-1 text-sm text-gray-500">
-              Conversation ID: {conversation.id}
-            </p>
-          )}
-        </div>
-
+        <ConversationHeader
+          conversation={conversation}
+          propertyName={property?.name}
+          propertyId={property?.id}
+        />
         {/* Property Section */}
-        <div className="max-h-[500px] overflow-y-auto">
-          {property && (
-            <div className="rounded-lg border bg-gray-50 p-4">
+
+        <div className="mx-auto my-3 w-11/12 overflow-y-auto">
+          {property ? (
+            <div className="">
               <PropertyOnlyImage property={property} />
 
               {propertyInfo && <>{/* AddRequest stuff here  */}</>}
             </div>
+          ) : (
+            <PropertySkeletons />
           )}
           {(bid ?? request) && (
             <>
@@ -142,12 +121,6 @@ const TravelerDetailsSidebar: React.FC<TravelerDetailsSidebarProps> = ({
               </div>
             </>
           )}
-          <div className="rounded-lg border bg-gray-50 p-4">
-            <p className="text-sm text-gray-700">
-              <span className="font-semibold">Created At:</span>{" "}
-              {format(new Date(conversation.createdAt), "MMMM dd, yyyy h:mm a")}
-            </p>
-          </div>
         </div>
       </div>
     </>

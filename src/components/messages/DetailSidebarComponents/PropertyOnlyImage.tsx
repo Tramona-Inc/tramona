@@ -82,7 +82,7 @@ const PropertyOnlyImage: React.FC<ImageCarouselProps> = ({ property }) => {
             <ChevronLeft size={24} className="text-gray-800" />
           </Button>
         )}
-        {property && currentImageIndex < property.imageUrls.length - 1 && (
+        {currentImageIndex < property.imageUrls.length - 1 && (
           <Button
             onClick={nextImage}
             className="absolute right-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white bg-opacity-90 p-2 hover:bg-opacity-100"
