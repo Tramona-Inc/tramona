@@ -76,6 +76,16 @@ export default function PropertyPage({
   const [openUserInfo, setOpenUserInfo] = useState(false);
   const chatWithHostTeam = useChatWithHostTeam();
 
+  const { data: hostTeamMembers } = api.hostTeams.getHostTeamMembers.useQuery({
+    hostTeamId: property.hostTeamId,
+  });
+
+  const { data: hostTeamOwner } = api.hostTeams.getHostTeamOwner.useQuery({
+    hostTeamId: property.hostTeamId,
+  });
+
+  console.log("host team members", hostTeamMembers);
+
   console.log("ratings and reviews", {
     ratings: property.numRatings,
     hostNumReviews: property.hostNumReviews,
@@ -127,9 +137,7 @@ export default function PropertyPage({
     void createReviewBackupImages();
   }, [property.reviews.length]);
 
-  const hostName =
-    property.hostName ??
-    `${property.hostTeam.owner.firstName}`;
+  const hostName = property.hostName ?? `${property.hostTeam.owner.firstName}`;
 
   const originalListing = getOriginalListing(property);
 
@@ -268,28 +276,6 @@ export default function PropertyPage({
               <h1 className="flex-1 text-xl font-semibold sm:text-2xl">
                 {property.name}
               </h1>
-              <Button
-                onClick={() =>
-                   chatWithHostTeam({
-                        hostId: property.hostTeam.ownerId,
-                        hostTeamId: isHospitableUser ? property.hostTeam.id : undefined,
-                        propertyId: property.id
-                      })
-
-                        .then()
-                        .catch((err: TRPCClientErrorLike<AppRouter>) => {
-                          if (err.data?.code === "UNAUTHORIZED") {
-                            console.log(err.data.code);
-                            void signIn("google", {
-                              callbackUrl: window.location.href,
-                            });
-                          }
-                        })
-                }
-              >
-                <MessageCircleMore />
-                Message Host
-              </Button>
             </div>
             <div className="flex flex-col gap-4 sm:flex-row">
               <div className="flex-1">
@@ -560,6 +546,65 @@ export default function PropertyPage({
               </Card>
             </section>
           )}
+
+          <section>
+            <h2 className="subheading border-t pb-2 pt-4">Meet your host</h2>
+            <div className="flex flex-col gap-10 lg:flex-row">
+              <Card className="lg:w-1/3">
+                <CardContent className="flex flex-col items-center gap-1">
+                  <UserAvatar
+                    size="huge"
+                    name={hostName}
+                    image={
+                      property.hostProfilePic ?? property.hostTeam.owner.image
+                    }
+                  />
+                  <p className="text-lg font-bold">{hostName}</p>
+                  <p className="text-sm">Host</p>
+                </CardContent>
+              </Card>
+              <div className="space-y-4">
+                <p className="text-lg font-semibold">Co-hosts</p>
+                <div className="flex items-center gap-4">
+                  {hostTeamMembers
+                    ?.filter((member) => member.id !== hostTeamOwner?.id)
+                    .map((member, index) => (
+                      <div key={index} className="flex items-center gap-2">
+                        <UserAvatar
+                          size="md"
+                          name={hostName}
+                          image={member.image}
+                        />
+                        <p>{member.firstName}</p>
+                      </div>
+                    ))}
+                </div>
+                <Button
+                  onClick={() =>
+                    chatWithHostTeam({
+                      hostId: property.hostTeam.ownerId,
+                      hostTeamId: isHospitableUser
+                        ? property.hostTeam.id
+                        : undefined,
+                      propertyId: property.id,
+                    })
+                      .then()
+                      .catch((err: TRPCClientErrorLike<AppRouter>) => {
+                        if (err.data?.code === "UNAUTHORIZED") {
+                          console.log(err.data.code);
+                          void signIn("google", {
+                            callbackUrl: window.location.href,
+                          });
+                        }
+                      })
+                  }
+                >
+                  <MessageCircleMore />
+                  Message Host
+                </Button>
+              </div>
+            </div>
+          </section>
 
           <section>
             <h2 className="subheading border-t pb-2 pt-4">House rules</h2>
