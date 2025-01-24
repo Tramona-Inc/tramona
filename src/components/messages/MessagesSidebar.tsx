@@ -26,7 +26,6 @@ export type SidebarProps = {
   isLoading: boolean;
   isHost: boolean;
   refetch: () => void;
-  isHost: boolean;
 };
 
 export default function MessagesSidebar({
