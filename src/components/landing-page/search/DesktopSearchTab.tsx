@@ -70,6 +70,7 @@ export function DesktopSearchTab({
   const [minPrice, setMinPrice] = useState("");
   const [priceSort, setPriceSort] = useState("");
   const [open, setOpen] = useState(false);
+  const itemsPerPage = 36;
 
   const router = useRouter();
   const utils = api.useUtils();
@@ -83,7 +84,10 @@ export function DesktopSearchTab({
 
   useEffect(() => {
     const data = searchSchema.safeParse(router.query);
-    if (data.success) form.reset(data.data);
+    if (data.success && data.data && Object.keys(data.data).length > 0) {
+      // Added checks here
+      form.reset(data.data);
+    }
   }, [form, router.query]);
 
   const filterProperties = (
@@ -166,6 +170,14 @@ export function DesktopSearchTab({
         return updatedProperties;
       });
 
+      let currentPropertiesLength =
+        propertiesInArea.hostProperties.length +
+        propertiesInArea.scrapedProperties.length;
+
+      if (currentPropertiesLength >= itemsPerPage) {
+        setIsSearching(false);
+      }
+
       const airbnbResultsPromise = utils.misc.scrapeAirbnbInitialPage.fetch({
         checkIn: values.checkIn,
         checkOut: values.checkOut,
@@ -191,6 +203,12 @@ export function DesktopSearchTab({
         });
         return updatedProperties;
       });
+
+      currentPropertiesLength =
+        currentPropertiesLength + airbnbResults.res.length;
+      if (currentPropertiesLength >= itemsPerPage) {
+        setIsSearching(false);
+      }
 
       const cursors =
         airbnbResults.data.staysSearch.results.paginationInfo.pageCursors.slice(

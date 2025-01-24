@@ -12,19 +12,20 @@ import { useSession } from "next-auth/react";
 import ProfileVericationCard from "@/components/dashboard/host/profile/ProfileVericationCard";
 import { fieldConfig } from "@/components/dashboard/host/profile/fieldConfig";
 import { ViewProfileField } from "@/components/dashboard/host/profile/ViewProfileField";
-
+import ListingsCarousel from "@/components/profile/ListingsCarousel";
 function Page() {
   const router = useRouter();
   const { data: session } = useSession();
 
   // Safely access and convert userId using optional chaining, nullish coalescing operator, and type assertion
-  const userId = (router.query.id as string | undefined) ?? undefined;
-  console.log(userId);
+  const userId = router.isReady
+    ? ((router.query.id as string | undefined) ?? undefined)
+    : undefined;
 
   const { data: userWProfile } = api.users.getUserWithProfile.useQuery(
     userId!,
     {
-      enabled: !!userId && !!router.isReady,
+      enabled: !!userId,
     },
   );
 
@@ -35,41 +36,47 @@ function Page() {
         <div className="mx-auto my-10 max-w-8xl space-y-6 p-4">
           <div className="flex flex-col gap-6 md:flex-row">
             {/* Profile Card */}
-            <Card className="">
-              <CardContent className="p-6">
-                <div className="relative">
-                  <div className="relative h-20 w-20 overflow-hidden rounded-full">
-                    <Image
-                      src={userWProfile.user.image!}
-                      alt={userWProfile.user.firstName ?? "users image"}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  <div className="absolute -bottom-1 -right-1 rounded-full bg-rose-600 p-1">
-                    <Check className="h-4 w-4 text-white" />
-                  </div>
-                </div>
-                <div>
-                  <h2 className="text-2xl font-semibold">
-                    {userWProfile.user.firstName}{" "}
-                  </h2>
-                  <p className="text-sm text-muted-foreground">Host</p>
-                </div>
-                <div className="flex gap-6">
-                  <div>
-                    <p className="font-semibold">1</p>
-                    <p className="text-sm text-muted-foreground">Review</p>
+            <div className="space-y-4">
+              <Card className="">
+                <CardContent className="p-6">
+                  <div className="relative">
+                    <div className="relative h-20 w-20 overflow-hidden rounded-full">
+                      <Image
+                        src={userWProfile.user.image!}
+                        alt={userWProfile.user.firstName ?? "users image"}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
                   </div>
                   <div>
-                    <p className="font-semibold">2</p>
-                    <p className="text-sm text-muted-foreground">
-                      Months hosting
-                    </p>
+                    <h2 className="flex items-center text-2xl font-semibold">
+                      {userWProfile.user.firstName}{" "}
+                      <span className="relative ml-2">
+                        <Check className="h-5 w-5 text-green-500" />
+                        <div className="absolute -bottom-1 -right-1 rounded-full bg-green-500 p-1">
+                          <Check className="h-4 w-4 text-white" />
+                        </div>
+                      </span>
+                    </h2>
+                    <p className="text-sm text-muted-foreground">Host</p>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                  <div className="flex gap-6">
+                    <div>
+                      <p className="font-semibold">1</p>
+                      <p className="text-sm text-muted-foreground">Review</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold">2</p>
+                      <p className="text-sm text-muted-foreground">
+                        Months hosting
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <ProfileVericationCard userWProfile={userWProfile} />
+            </div>
 
             {/* Main Content */}
             <div className="flex-1 space-y-6">
@@ -118,8 +125,8 @@ function Page() {
                     </div>
                   );
                 })}
-              </div>
-              <ProfileVericationCard userWProfile={userWProfile} />
+              </div>{" "}
+              <ListingsCarousel userWProfile={userWProfile} />
             </div>
           </div>
         </div>
