@@ -58,6 +58,7 @@ export type PropertyPageData = RouterOutputs["properties"]["getById"];
 import { TRPCClientErrorLike } from "@trpc/client";
 import { AppRouter } from "@/server/api/root";
 import { signIn } from "next-auth/react";
+import { useRouter } from "next/router";
 
 export default function PropertyPage({
   property,
@@ -70,6 +71,7 @@ export default function PropertyPage({
   sidebar?: React.ReactNode;
   mobileBottomCard?: React.ReactNode;
 }) {
+  const router = useRouter();
   const aboutRef = useRef<HTMLDivElement>(null);
   const [isOverflowing, setIsOverflowing] = useState(false);
   const [reviewBackupImages, setReviewBackupImages] = useState<string[]>([]);
@@ -558,6 +560,9 @@ export default function PropertyPage({
                     image={
                       property.hostProfilePic ?? property.hostTeam.owner.image
                     }
+                    onClick={() =>
+                      void router.push(`/profile/view/${hostTeamOwner?.id}`)
+                    }
                   />
                   <p className="text-lg font-bold">{hostName}</p>
                   <p className="text-sm">Host</p>
@@ -574,6 +579,9 @@ export default function PropertyPage({
                           size="md"
                           name={hostName}
                           image={member.image}
+                          onClick={() =>
+                            void router.push(`/profile/view/${member.id}`)
+                          }
                         />
                         <p>{member.firstName}</p>
                       </div>
