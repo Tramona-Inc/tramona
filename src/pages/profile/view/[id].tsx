@@ -42,7 +42,7 @@ function Page() {
                 <CardContent className="p-6">
                   <div className="relative">
                     {userWProfile.user.image ? (
-                      <div className="relative h-20 w-20 overflow-hidden rounded-full">
+                      <div className="relative h-28 w-28 overflow-hidden rounded-full">
                         <Image
                           src={userWProfile.user.image}
                           alt={userWProfile.user.firstName ?? "users image"}

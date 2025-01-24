@@ -21,6 +21,7 @@ import {
   TooltipContent,
 } from "@/components/ui/tooltip";
 import type { RouterOutputs } from "@/utils/api";
+import FileUploadImage from "@/components/_common/FileUploadImage";
 type MyUserWProfile = RouterOutputs["users"]["getMyUserWProfile"];
 
 type ProfilePhotoDialogProps = {
@@ -124,7 +125,10 @@ export function ProfilePhotoDialog({
               </div>
             ) : (
               <div className="flex h-32 w-32 items-center justify-center rounded-full bg-muted">
-                <Upload className="h-8 w-8 text-muted-foreground" />
+                <FileUploadImage
+                  onChange={handleFileChange}
+                  initialPreviewUrl={myUserWProfile?.user.image ?? null}
+                />
               </div>
             )}
             <Input
