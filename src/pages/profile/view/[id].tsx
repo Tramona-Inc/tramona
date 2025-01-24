@@ -29,7 +29,7 @@ function Page() {
       enabled: !!userId,
     },
   );
-  console.log(userWProfile);
+
   return (
     <DashboardLayout>
       {" "}

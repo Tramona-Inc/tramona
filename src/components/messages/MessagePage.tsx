@@ -133,6 +133,7 @@ function MessageDisplay(props: MessagesPageProps) {
               fetchedConversations={fetchedConversations}
               isLoading={isSidebarLoading}
               refetch={refetch}
+              isHost={props.isHost}
             />
           )}
         </div>
