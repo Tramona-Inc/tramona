@@ -24,6 +24,7 @@ export type SidebarProps = {
   setSelected: (arg0: Conversation) => void;
   fetchedConversations: Conversations | [] | undefined;
   isLoading: boolean;
+  isHost: boolean;
   refetch: () => void;
   isHost: boolean;
 };
