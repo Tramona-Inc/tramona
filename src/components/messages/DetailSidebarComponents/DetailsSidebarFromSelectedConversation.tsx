@@ -12,7 +12,7 @@ const DetailsSidebarFromSelectedConversation: React.FC<
   DetailsSidebarFromSelectedConversationProps
 > = ({ conversation, isHost }) => {
   return (
-    <div className="h-full min-h-[calc(75vh)] overflow-y-scroll bg-white">
+    <div className="h-full min-h-[calc(75vh)] overflow-x-hidden overflow-y-scroll bg-white">
       {isHost ? (
         <HostDetailsSidebar conversation={conversation} />
       ) : (

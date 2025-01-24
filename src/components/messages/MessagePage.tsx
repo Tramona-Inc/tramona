@@ -117,7 +117,7 @@ function MessageDisplay(props: MessagesPageProps) {
       {showSidebar && (
         <div
           className={cn(
-            "w-1/4 bg-white transition-transform duration-300 2xl:w-96",
+            "w-full bg-white transition-transform duration-300 lg:w-1/4 2xl:w-96",
           )}
         >
           {isSidebarLoading ? (

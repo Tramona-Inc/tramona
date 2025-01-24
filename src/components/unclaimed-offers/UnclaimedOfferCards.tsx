@@ -165,13 +165,13 @@ export default function UnclaimedOfferCards(): JSX.Element {
               </div>
             </div>
           ) : allProperties.length === 0 ? (
-            <div className="flex h-full w-full items-center justify-center">
+            <div className="my-24 flex h-full w-full items-center justify-center">
               <div className="text-center">
-                <div className="text-lg font-bold">
+                <div className="text-lg font-bold xl:text-xl">
                   This is where you see your properties, enter preferences in
                   the search bar to start looking
                 </div>
-                <div className="mt-2 text-sm text-zinc-500">
+                <div className="mt-2 text-sm text-zinc-500 xl:text-lg">
                   Let&apos;s fill empty nights
                 </div>
               </div>
