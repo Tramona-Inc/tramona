@@ -13,7 +13,7 @@ export default function HostMessageIdPage() {
 
   return (
     <MessagesPage
-      isHost={true}
+      isHost={false}
       basePath="/messages"
       fetchConversationsQuery={fetchHostConversationsQuery}
       showMobileSidebarFeatures={true}

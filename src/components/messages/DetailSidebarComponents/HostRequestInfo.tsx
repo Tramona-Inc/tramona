@@ -14,7 +14,7 @@ type PropertiesFromRequest =
   RouterOutputs["requests"]["getByIdForHost"]["properties"];
 
 interface HostRequestInfoProps {
-  request: Request | undefined;
+  request: HostDashboardRequest | undefined;
   properties: PropertiesFromRequest | null | undefined;
   setSelectedRequest: React.Dispatch<
     React.SetStateAction<HostDashboardRequest | null>
@@ -41,49 +41,50 @@ const HostRequestInfo: React.FC<HostRequestInfoProps> = ({
 
   return (
     <>
-      {request && (
-        <RequestCard request={request} type="host">
-          <Button
-            variant="secondary"
-            onClick={async () => {
-              if (!request.id) return;
-              await rejectRequest({
-                requestId: request.id,
-                currentHostTeamId: currentHostTeamId!,
-              })
-                .then(() => {
-                  toast({
-                    title: "Successfully rejected request",
-                  });
+      {request &&
+        properties && ( //if doesnt render look at this conditions
+          <RequestCard request={request} type="host">
+            <Button
+              variant="secondary"
+              onClick={async () => {
+                if (!request.id) return;
+                await rejectRequest({
+                  requestId: request.id,
+                  currentHostTeamId: currentHostTeamId!,
                 })
-                .catch((error) => {
-                  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                  if (error.data?.code === "FORBIDDEN") {
+                  .then(() => {
                     toast({
-                      title: "You do not have permission to create an offer.",
-                      description:
-                        "Please contact your team owner to request access.",
+                      title: "Successfully rejected request",
                     });
-                  } else {
-                    errorToast();
-                  }
-                });
-            }}
-          >
-            Reject
-          </Button>
-          <Button
-            onClick={() => {
-              if (!request) return;
-              setDialogOpen(true);
-              setSelectedRequest(request);
-              setProperties(properties);
-            }}
-          >
-            Make an offer
-          </Button>
-        </RequestCard>
-      )}
+                  })
+                  .catch((error) => {
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                    if (error.data?.code === "FORBIDDEN") {
+                      toast({
+                        title: "You do not have permission to create an offer.",
+                        description:
+                          "Please contact your team owner to request access.",
+                      });
+                    } else {
+                      errorToast();
+                    }
+                  });
+              }}
+            >
+              Reject
+            </Button>
+            <Button
+              onClick={() => {
+                if (!request) return;
+                setDialogOpen(true);
+                setSelectedRequest(request);
+                setProperties(properties);
+              }}
+            >
+              Make an offer
+            </Button>
+          </RequestCard>
+        )}
     </>
   );
 };

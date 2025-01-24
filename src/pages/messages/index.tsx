@@ -12,12 +12,12 @@ export default function MessagePage() {
 
   return (
     <MessagesPage
-      isHost={true}
+      isHost={false}
+      isIndex={true}
       basePath="/messages"
       fetchConversationsQuery={fetchedConversations}
-      showMobileSidebarFeatures={true} // Enable mobile sidebar for host version
-      EmptyStateComponent={<ConversationsEmptySvg />} // Pass the empty state component
-      isIndex={true} // not id router page
+      showMobileSidebarFeatures={true}
+      EmptyStateComponent={<ConversationsEmptySvg />}
     />
   );
 }

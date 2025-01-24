@@ -15,7 +15,7 @@ import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 import ConversationsEmptySvg from "@/components/_common/EmptyStateSvg/ConversationsEmptySvg";
 import EmptyStateValue from "@/components/_common/EmptyStateSvg/EmptyStateValue";
 import DetailsSidebarFromSelectedConversation from "./DetailSidebarComponents/DetailsSidebarFromSelectedConversation";
-import { useIsMd, useIsXs, useIsOnlyMd, useIsLg, cn } from "@/utils/utils";
+import { useIsMd, useIsLg, cn } from "@/utils/utils";
 import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
 import { motion } from "framer-motion";
 
@@ -33,9 +33,7 @@ interface MessagesPageProps {
 
 function MessageDisplay(props: MessagesPageProps) {
   const isLg = useIsLg();
-  const isOnlyMd = useIsOnlyMd();
   const isMd = useIsMd();
-  const isXsSm = useIsXs();
 
   const router = useRouter();
 
@@ -182,7 +180,7 @@ function MessageDisplay(props: MessagesPageProps) {
           >
             <DetailsSidebarFromSelectedConversation
               conversation={selectedConversation}
-              isHost={true}
+              isHost={props.isHost}
             />
           </motion.div>
         ) : (

@@ -9,6 +9,7 @@ import WithdrawRequestToBookDialog from "../../requests-to-book/WithdrawRequestT
 import ImageCarousel from "../../_common/ImageCarousel";
 import { XIcon } from "lucide-react";
 import { useRouter } from "next/router";
+import PropertyOnlyImage from "./PropertyOnlyImage";
 
 interface TravelerDetailsSidebarProps {
   conversation: Conversation;
@@ -104,13 +105,9 @@ const TravelerDetailsSidebar: React.FC<TravelerDetailsSidebarProps> = ({
         <div className="max-h-[500px] overflow-y-auto">
           {property && (
             <div className="rounded-lg border bg-gray-50 p-4">
-              <ImageCarousel imageUrls={property.imageUrls} />
+              <PropertyOnlyImage property={property} />
 
-              {propertyInfo && (
-                <>
-                  <RequestToBookOrBookNowPriceCard property={propertyInfo} />
-                </>
-              )}
+              {propertyInfo && <>{/* AddRequest stuff here  */}</>}
             </div>
           )}
           {(bid ?? request) && (

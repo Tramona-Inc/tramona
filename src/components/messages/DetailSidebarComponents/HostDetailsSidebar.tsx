@@ -11,7 +11,6 @@ import HostRequestToBookInfo from "./HostRequestToBookInfo";
 import HostRequestInfo from "./HostRequestInfo";
 import { HostDashboardRequest } from "../../requests/RequestCard";
 import HostConversationHeader from "./HostConversionHeader";
-import HostCreatedDate from "./HostCreatedDate";
 interface HostDetailsSidebarProps {
   conversation: Conversation;
 }

@@ -213,6 +213,7 @@ export const requestsToBookRouter = createTRPCRouter({
           },
           property: {
             columns: {
+              id: true,
               name: true,
               imageUrls: true,
             },

@@ -6,10 +6,10 @@ import { toast } from "../../ui/use-toast";
 import { errorToast } from "@/utils/toasts";
 import HostRequestToBookCard from "../../dashboard/host/requests/requests-to-book/HostRequestToBookCard";
 import HostRequestToBookDialog from "../../dashboard/host/requests/requests-to-book/HostRequestToBookDialog";
-import type { RequestsToBook } from "@/server/db/schema";
+import { HostDashboardRequestToBook } from "../../dashboard/host/requests/requests-to-book/HostRequestToBookCard";
 
 interface HostRequestToBookInfoProps {
-  bid: RequestsToBook | undefined;
+  bid: HostDashboardRequestToBook | undefined;
 }
 
 const HostRequestToBookInfo: React.FC<HostRequestToBookInfoProps> = ({
