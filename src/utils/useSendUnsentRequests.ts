@@ -34,9 +34,9 @@ export function useSendUnsentRequest() {
 
       void createRequest(unsentRequest)
         .then(() => successfulRequestToast(unsentRequest))
-        .catch(() => {
-          errorToast();
-          localStorage.setItem("unsentRequest", unsentRequestJSON);
+        .catch((error) => {
+          console.log(error);
+          errorToast("Failed to send request, please try again.");
         });
     }
 
