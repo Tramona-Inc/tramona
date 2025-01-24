@@ -36,8 +36,6 @@ export default function ListMessages() {
     ? (conversations[currentConversationId]?.messages ?? [])
     : [];
 
-  console.log("ListMessages - currentConversationId:", currentConversationId); // Log currentConversationId
-  console.log("ListMessages - messages:", messages); // Log messages array
   const { mutateAsync } = api.messages.setMessagesToRead.useMutation();
 
   const { data: session } = useSession();

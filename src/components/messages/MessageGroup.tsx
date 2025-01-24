@@ -23,14 +23,15 @@ export function MessageGroup({ messageGroup }: { messageGroup: MessageGroup }) {
       )}
     >
       <div className="flex flex-row items-center gap-x-2">
-        {user ? (
-          <UserAvatar
-            {...user}
-            onClick={() => router.push(`/profile/view/${user.id}`)}
-          />
-        ) : (
-          <AnonymousAvatar />
-        )}
+        {!me &&
+          (user ? (
+            <UserAvatar
+              {...user}
+              onClick={() => router.push(`/profile/view/${user.id}`)}
+            />
+          ) : (
+            <AnonymousAvatar />
+          ))}
         <div
           className={cn(
             "flex flex-col items-start gap-1",
@@ -62,6 +63,15 @@ export function MessageGroup({ messageGroup }: { messageGroup: MessageGroup }) {
             </div>
           </div>
         </div>
+        {me &&
+          (user ? (
+            <UserAvatar
+              {...user}
+              onClick={() => router.push(`/profile/view/${user.id}`)}
+            />
+          ) : (
+            <AnonymousAvatar />
+          ))}
       </div>
     </div>
   );
