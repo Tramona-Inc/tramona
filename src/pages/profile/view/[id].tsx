@@ -13,6 +13,7 @@ import ProfileVericationCard from "@/components/dashboard/host/profile/ProfileVe
 import { fieldConfig } from "@/components/dashboard/host/profile/fieldConfig";
 import { ViewProfileField } from "@/components/dashboard/host/profile/ViewProfileField";
 import ListingsCarousel from "@/components/profile/ListingsCarousel";
+import { AnonymousAvatar } from "@/components/ui/avatar";
 function Page() {
   const router = useRouter();
   const { data: session } = useSession();
@@ -28,7 +29,7 @@ function Page() {
       enabled: !!userId,
     },
   );
-
+  console.log(userWProfile);
   return (
     <DashboardLayout>
       {" "}
@@ -40,17 +41,21 @@ function Page() {
               <Card className="">
                 <CardContent className="p-6">
                   <div className="relative">
-                    <div className="relative h-20 w-20 overflow-hidden rounded-full">
-                      <Image
-                        src={userWProfile.user.image!}
-                        alt={userWProfile.user.firstName ?? "users image"}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
+                    {userWProfile.user.image ? (
+                      <div className="relative h-20 w-20 overflow-hidden rounded-full">
+                        <Image
+                          src={userWProfile.user.image}
+                          alt={userWProfile.user.firstName ?? "users image"}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <AnonymousAvatar className="size-20" />
+                    )}
                   </div>
                   <div>
-                    <h2 className="flex items-center text-2xl font-semibold">
+                    <h2 className="mt-2 flex items-center text-2xl font-semibold">
                       {userWProfile.user.firstName}{" "}
                       <span className="relative ml-2">
                         <Check className="h-5 w-5 text-green-500" />

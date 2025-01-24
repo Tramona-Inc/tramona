@@ -89,14 +89,6 @@ export function ProfilePhotoDialog({
             <DialogTitle className="text-xl font-semibold">
               Edit profile photo
             </DialogTitle>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              onClick={() => onOpenChange(false)}
-            >
-              <X className="h-4 w-4" />
-            </Button>
           </div>
         </DialogHeader>
         <div className="space-y-4 py-4">
@@ -139,7 +131,7 @@ export function ProfilePhotoDialog({
               type="file"
               accept="image/*"
               onChange={handleFileChange}
-              className="max-w-xs"
+              className="max-w-xs cursor-pointer"
             />
           </div>
         </div>
