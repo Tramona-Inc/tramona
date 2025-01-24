@@ -1169,7 +1169,7 @@ export async function scrapeAirbnbPagesHelper({
   return (await Promise.all(pageUrls.map(scrapePage)))
     .flatMap((data) => data.staysSearch.results.searchResults)
     .map((searchResult) =>
-      transformSearchResult({ seßarchResult, numNights, numGuests }),
+      transformSearchResult({ searchResult, numNights, numGuests }),
     )
     .filter(Boolean);
 }
