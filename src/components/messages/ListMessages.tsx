@@ -36,8 +36,6 @@ export default function ListMessages() {
     ? (conversations[currentConversationId]?.messages ?? [])
     : [];
 
-  console.log("ListMessages - currentConversationId:", currentConversationId); // Log currentConversationId
-  console.log("ListMessages - messages:", messages); // Log messages array
   const { mutateAsync } = api.messages.setMessagesToRead.useMutation();
 
   const { data: session } = useSession();
@@ -194,7 +192,7 @@ export default function ListMessages() {
       <div
         ref={scrollRef}
         onScroll={handleOnScroll}
-        className="relative flex flex-1 flex-col overflow-y-auto bg-white"
+        className="relative z-40 flex flex-1 flex-col overflow-y-auto bg-white"
       >
         <div className="flex-1"></div>
         <div className="absolute w-full space-y-8 p-4 pt-12">

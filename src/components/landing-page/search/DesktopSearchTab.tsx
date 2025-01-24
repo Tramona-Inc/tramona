@@ -32,6 +32,7 @@ import {
 import { Property } from "@/server/db/schema";
 import MobileSearchFormBar from "./MobileSearchFormBar";
 import { UseFormReturn } from "react-hook-form";
+import { ITEMS_PER_PAGE } from "@/utils/constants";
 
 interface DesktopSearchTabProps {
   isCompact?: boolean;
@@ -70,7 +71,6 @@ export function DesktopSearchTab({
   const [minPrice, setMinPrice] = useState("");
   const [priceSort, setPriceSort] = useState("");
   const [open, setOpen] = useState(false);
-  const itemsPerPage = 36;
 
   const router = useRouter();
   const utils = api.useUtils();
@@ -174,7 +174,7 @@ export function DesktopSearchTab({
         propertiesInArea.hostProperties.length +
         propertiesInArea.scrapedProperties.length;
 
-      if (currentPropertiesLength >= itemsPerPage) {
+      if (currentPropertiesLength >= ITEMS_PER_PAGE) {
         setIsSearching(false);
       }
 
@@ -206,7 +206,7 @@ export function DesktopSearchTab({
 
       currentPropertiesLength =
         currentPropertiesLength + airbnbResults.res.length;
-      if (currentPropertiesLength >= itemsPerPage) {
+      if (currentPropertiesLength >= ITEMS_PER_PAGE) {
         setIsSearching(false);
       }
 

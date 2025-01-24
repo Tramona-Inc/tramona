@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { X, Upload, Loader2Icon } from "lucide-react";
+import { X, Loader2Icon } from "lucide-react";
 import { api } from "@/utils/api";
 import { nanoid } from "nanoid";
 import { getS3ImgUrl } from "@/utils/formatters";
@@ -21,6 +21,10 @@ import {
   TooltipContent,
 } from "@/components/ui/tooltip";
 import type { RouterOutputs } from "@/utils/api";
+import FileUploadImage from "@/components/_common/FileUploadImage";
+import Image from "next/image";
+import { useSession } from "next-auth/react";
+
 type MyUserWProfile = RouterOutputs["users"]["getMyUserWProfile"];
 
 type ProfilePhotoDialogProps = {
@@ -40,6 +44,8 @@ export function ProfilePhotoDialog({
   onOpenChange,
   myUserWProfile,
 }: ProfilePhotoDialogProps) {
+  const { data: session, update } = useSession();
+
   const { mutateAsync: updateUserImage } =
     api.users.updateUserImage.useMutation();
 
@@ -62,6 +68,7 @@ export function ProfilePhotoDialog({
     uploadFile({ fileName: id })
       .then((res) => axios.put(res, file))
       .then(() => setSelectedImage({ status: "uploaded", url: s3Url }))
+
       .catch(() => {
         // TODO: errors for file too big/too small
         const error = "Couldn't upload image, please try again";
@@ -77,9 +84,12 @@ export function ProfilePhotoDialog({
         console.error("Error uploading the image url: ", e);
       } finally {
         onOpenChange(false);
+        if (session?.user) {
+          void update();
+        }
       }
     }
-  }, [selectedImage, updateUserImage, onOpenChange]);
+  }, [selectedImage, updateUserImage, onOpenChange, update, session?.user]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -95,11 +105,12 @@ export function ProfilePhotoDialog({
           <div className="flex flex-col items-center gap-4">
             {selectedImage.url ? (
               <div className="relative h-32 w-32">
-                <img
+                <Image
                   src={selectedImage.url}
                   alt="Profile preview"
+                  fill
                   className={cn(
-                    "h-full w-full rounded-full object-cover",
+                    "h-full w-full rounded-full",
                     selectedImage.status === "uploaded"
                       ? "opacity-100"
                       : "opacity-50",
@@ -124,7 +135,10 @@ export function ProfilePhotoDialog({
               </div>
             ) : (
               <div className="flex h-32 w-32 items-center justify-center rounded-full bg-muted">
-                <Upload className="h-8 w-8 text-muted-foreground" />
+                <FileUploadImage
+                  onChange={handleFileChange}
+                  initialPreviewUrl={myUserWProfile?.user.image ?? null}
+                />
               </div>
             )}
             <Input

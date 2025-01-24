@@ -2,20 +2,10 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
-import {
-  formatCurrency,
-  formatDateMonthDayYear,
-  plural,
-} from "@/utils/utils";
+import { formatCurrency, formatDateMonthDayYear, plural } from "@/utils/utils";
 import { ChevronLeft, ChevronRight, StarIcon } from "lucide-react";
 import { Skeleton, SkeletonText } from "../ui/skeleton";
-import React, {
-  useEffect,
-  useState,
-  useMemo,
-  useCallback,
-  memo,
-} from "react";
+import React, { useEffect, useState, useMemo, useCallback, memo } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import {
@@ -35,16 +25,15 @@ import { useLoading } from "./UnclaimedMapLoadingContext";
 import { Badge } from "../ui/badge";
 import { Property } from "@/server/db/schema/tables/properties";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
-
+import { ITEMS_PER_PAGE } from "@/utils/constants";
 
 type PropertyType = Property | AirbnbSearchResult;
-
 
 export default function UnclaimedOfferCards(): JSX.Element {
   const { adjustedProperties, isSearching } = useAdjustedProperties();
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 36;
+
   const { data: session } = useSession();
   const {} = useLoading();
 
@@ -53,19 +42,21 @@ export default function UnclaimedOfferCards(): JSX.Element {
   }, [adjustedProperties]);
 
   const paginatedProperties = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
     return allProperties.slice(startIndex, endIndex);
-  }, [allProperties, currentPage, itemsPerPage]);
+  }, [allProperties, currentPage, ITEMS_PER_PAGE]);
 
   useEffect(() => {
-    console.log("UnclaimedOfferCards adjustedProperties updated:", adjustedProperties);
+    console.log(
+      "UnclaimedOfferCards adjustedProperties updated:",
+      adjustedProperties,
+    );
   }, [adjustedProperties]);
 
-
   const totalPages = useMemo(() => {
-    return Math.max(1, Math.ceil(allProperties.length / itemsPerPage));
-  }, [allProperties, itemsPerPage]);
+    return Math.max(1, Math.ceil(allProperties.length / ITEMS_PER_PAGE));
+  }, [allProperties, ITEMS_PER_PAGE]);
 
   const handlePageChange = useCallback(
     (page: number) => {
@@ -268,7 +259,6 @@ const UnMatchedPropertyCard = memo(function UnMatchedPropertyCard({
   const [isHovered, setIsHovered] = useState(false);
   const router = useRouter();
   const [failedImageUrls, setFailedImageUrls] = useState(new Set<string>());
-
 
   const nextImage = (e: React.MouseEvent): void => {
     e.preventDefault();

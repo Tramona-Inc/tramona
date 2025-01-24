@@ -205,17 +205,17 @@ export default function MastHead() {
             <div className="absolute inset-0 mx-auto hidden max-w-7xl flex-col justify-center pl-4 text-left lg:flex">
               <h2 className="mt-8 text-left text-5xl font-bold text-white">
                 Turn empty nights into opportunities
-              </h2> 
+              </h2>
               <h3 className="mt-6 text-xl font-semibold text-white">
-              Book your empty nights and keep more of your earnings
+                Book your empty nights and keep more of your earnings
               </h3>
-              <h4 className="mt-2 text-h4-size font-semibold text-white">
-  All the features and protections you&apos;re used to
-</h4>
+              <h4 className="text-h4-size mt-2 font-semibold text-white">
+                All the features and protections you&apos;re used to
+              </h4>
               <h3 className="mt-4 text-lg font-semibold text-white">
                 <button
                   className="flex items-center"
-                  onClick={() => router.push('/why-list')}
+                  onClick={() => router.push("/why-list")}
                 >
                   <span className="underline">How it works</span>
                 </button>
@@ -261,7 +261,7 @@ export default function MastHead() {
           {activeTab === "search" ? <UnclaimedMap /> : <NameYourPriceSection />}
         </div>
 
-        <div className="mt-12 flex flex-col items-center gap-y-20 lg:gap-y-24">
+        <div className="mx-auto mt-12 flex max-w-8xl flex-col items-center gap-y-20 lg:gap-y-24">
           {/* other  sections */}
           <OverviewRequestCards />
           <HowTramonaWorks className="max-w-6xl" />

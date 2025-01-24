@@ -133,6 +133,7 @@ function MessageDisplay(props: MessagesPageProps) {
               fetchedConversations={fetchedConversations}
               isLoading={isSidebarLoading}
               refetch={refetch}
+              isHost={props.isHost}
             />
           )}
         </div>
@@ -168,7 +169,7 @@ function MessageDisplay(props: MessagesPageProps) {
         (isMd ? (
           <motion.div // Use motion.div for animation
             className={cn(
-              "w-1/2 border-l transition-transform duration-300 lg:w-2/5 xl:w-4/12",
+              "w-1/2 border-l transition-transform duration-300 lg:w-1/5 lg:w-2/5 xl:w-1/4",
             )}
             initial={{ x: "100%" }} // Start position: off-screen to the right
             animate={{ x: "0%" }} // Animate to: fully visible
