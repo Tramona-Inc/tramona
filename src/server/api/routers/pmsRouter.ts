@@ -204,7 +204,7 @@ export const pmsRouter = createTRPCRouter({
         "https://connect.hospitable.com/api/v1/auth-codes",
         {
           customer_id: id,
-          redirect_url: process.env.NEXTAUTH_URL + "/load-airbnb-properties",
+          redirect_url: process.env.NEXTAUTH_URL + "/load-airbnb-properties/checking-hospitable-status",
           // redirect_url: "https://179c-2601-600-8e81-3180-4171-fe-a3a4-da1d.ngrok-free.app/host",
         },
         {
@@ -258,6 +258,7 @@ export const pmsRouter = createTRPCRouter({
             Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
           },
         });
+        console.log("Hospitable customer reset successfully");
       } catch (error) {
         console.error("Error resetting Hospitable customer:", error);
         throw new Error("Failed to reset Hospitable customer");

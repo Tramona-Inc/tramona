@@ -82,22 +82,22 @@ export default function MastHead() {
     {
       question: "What's the benefit of listing on Tramona?",
       answer:
-        "Yes, as a host, you have the option to counter traveler requests, giving you flexibility and control over each booking.",
+        "Tramona acts as a way to effectly increase your bookings and revenue. Our goal is to supplement your existing booking channels, and make the life of a host easier.",
     },
     {
       question: "Can I invite a co-host?",
       answer:
-        "Absolutely. Tramona allows you to add a co-host to help manage requests and bookings on your property.",
+        "Absolutely. Tramona allows you to add a co-host to help manage requests and bookings on your property. This is available once a host account has been created.",
     },
     {
       question: "Can I choose which dates to book",
       answer:
-        "Tramona allows you to list your property at full price and still receive direct booking requests. You can offer exclusive discounts only when you choose, helping you fill empty nights without compromising on price.",
+        "Yes, you have full control over your property. You can choose which dates to book, which dates to offer, what prices you are interested in seeing and have the ability to counter traveler requests. You can set up book it now or request to book options.",
     },
     {
       question: "Can I choose which guests I want?",
       answer:
-        "Yes! Tramona integrates with other platforms to prevent double bookings, making it easy to manage your calendar.",
+        "Yes! Tramona allows you to view guests profiles and message them before booking. If there are ever any issues with a guest, please let us know ASAP",
     },
   ];
 
@@ -205,17 +205,17 @@ export default function MastHead() {
             <div className="absolute inset-0 mx-auto hidden max-w-7xl flex-col justify-center pl-4 text-left lg:flex">
               <h2 className="mt-8 text-left text-5xl font-bold text-white">
                 Turn empty nights into opportunities
-              </h2> 
+              </h2>
               <h3 className="mt-6 text-xl font-semibold text-white">
-              Book your empty nights and keep more of your earnings
+                Book your empty nights and keep more of your earnings
               </h3>
-              <h4 className="mt-2 text-h4-size font-semibold text-white">
-  All the features and protections you&apos;re used to
-</h4>
+              <h4 className="text-h4-size mt-2 font-semibold text-white">
+                All the features and protections you&apos;re used to
+              </h4>
               <h3 className="mt-4 text-lg font-semibold text-white">
                 <button
                   className="flex items-center"
-                  onClick={() => router.push('/why-list')}
+                  onClick={() => router.push("/why-list")}
                 >
                   <span className="underline">How it works</span>
                 </button>
@@ -261,7 +261,7 @@ export default function MastHead() {
           {activeTab === "search" ? <UnclaimedMap /> : <NameYourPriceSection />}
         </div>
 
-        <div className="mt-12 flex flex-col items-center gap-y-20 lg:gap-y-24">
+        <div className="mx-auto mt-12 flex max-w-8xl flex-col items-center gap-y-20 lg:gap-y-24">
           {/* other  sections */}
           <OverviewRequestCards />
           <HowTramonaWorks className="max-w-6xl" />

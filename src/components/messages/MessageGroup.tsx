@@ -22,15 +22,18 @@ export function MessageGroup({ messageGroup }: { messageGroup: MessageGroup }) {
         me ? "justify-end" : "justify-start",
       )}
     >
-      <div className="flex flex-row items-center gap-x-2">
-        {user ? (
-          <UserAvatar
-            {...user}
-            onClick={() => router.push(`/profile/view/${user.id}`)}
-          />
-        ) : (
-          <AnonymousAvatar />
-        )}
+      <div className="flex flex-row items-start gap-x-2">
+        {!me &&
+          (user ? (
+            <div className="mt-7">
+              <UserAvatar
+                {...user}
+                onClick={() => router.push(`/profile/view/${user.id}`)}
+              />
+            </div>
+          ) : (
+            <AnonymousAvatar />
+          ))}
         <div
           className={cn(
             "flex flex-col items-start gap-1",
@@ -53,7 +56,9 @@ export function MessageGroup({ messageGroup }: { messageGroup: MessageGroup }) {
                 <Message key={message.id} message={message} />
               ))}
             </div>
-            <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
+            <div
+              className={`flex items-center justify-between gap-2 text-xs ${me ? "text-zinc-300" : "text-muted-foreground"}`}
+            >
               <p>{formatRelative(firstMessage.createdAt, new Date())}</p>
               <p>
                 {session.user.id === firstMessage.userId &&
@@ -62,6 +67,17 @@ export function MessageGroup({ messageGroup }: { messageGroup: MessageGroup }) {
             </div>
           </div>
         </div>
+        {me &&
+          (user.image ? (
+            <div className="mt-2">
+              <UserAvatar
+                {...user}
+                onClick={() => router.push(`/profile/view/${user.id}`)}
+              />
+            </div>
+          ) : (
+            <AnonymousAvatar />
+          ))}
       </div>
     </div>
   );

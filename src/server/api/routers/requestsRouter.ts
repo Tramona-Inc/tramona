@@ -51,40 +51,44 @@ import { TRAVELER_MARKUP } from "@/utils/constants";
 import { differenceInDays } from "date-fns";
 
 export const requestsRouter = createTRPCRouter({
-  getById: protectedProcedure.input(requestSelectSchema.pick({ id: true })).query(async ({ ctx, input }) => {
-    const request = await ctx.db.query.requests.findFirst({
-      where: eq(requests.id, input.id),
-      with: {
-        madeByGroup: { columns: { ownerId: true } },
-      },
-    });
+  getById: protectedProcedure
+    .input(requestSelectSchema.pick({ id: true }))
+    .query(async ({ ctx, input }) => {
+      const request = await ctx.db.query.requests.findFirst({
+        where: eq(requests.id, input.id),
+        with: {
+          madeByGroup: { columns: { ownerId: true } },
+        },
+      });
 
-    if (!request) {
-      throw new Error("Request not found");
-    }
+      if (!request) {
+        throw new Error("Request not found");
+      }
 
-    const propertiesForRequest = await getPropertiesForRequest(request, { tx: ctx.db });
+      const propertiesForRequest = await getPropertiesForRequest(request, {
+        tx: ctx.db,
+      });
 
-    const traveler = await ctx.db.query.users.findFirst({
-      where: eq(users.id, request.madeByGroup.ownerId),
-      columns: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        name: true,
-        image: true,
-        location: true,
-        about: true,
-        dateOfBirth: true,
-      },
-    });
+      const traveler = await ctx.db.query.users.findFirst({
+        where: eq(users.id, request.madeByGroup.ownerId),
+        columns: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          name: true,
+          image: true,
+          location: true,
+          about: true,
+          dateOfBirth: true,
+        },
+      });
 
-    return {
-      ...request,
-      traveler,
-      properties: propertiesForRequest,
-    };
-  }),
+      return {
+        ...request,
+        traveler,
+        properties: propertiesForRequest,
+      };
+    }),
 
   getByIdForHost: protectedProcedure
     .input(z.object({ id: z.number(), hostTeamId: z.number() }))
@@ -104,14 +108,12 @@ export const requestsRouter = createTRPCRouter({
 
       const hostTeamId = input.hostTeamId;
 
-
-      const hostData =
-        await ctx.db.query.properties.findMany({
-          where: and(
-            eq(properties.hostTeamId, hostTeamId),
-            eq(properties.status, "Listed"),
-          ),
-        });
+      const hostData = await ctx.db.query.properties.findMany({
+        where: and(
+          eq(properties.hostTeamId, hostTeamId),
+          eq(properties.status, "Listed"),
+        ),
+      });
 
       console.log(hostData, "hostData");
 
@@ -120,34 +122,35 @@ export const requestsRouter = createTRPCRouter({
       console.log(hostRequests, "hostRequests");
 
       //Filter the results to match the specific request
-      let foundRequest: {
-        request: Request & {
-          traveler: Pick<
-            User,
-            | "firstName"
-            | "lastName"
-            | "name"
-            | "image"
-            | "location"
-            | "about"
-            | "dateOfBirth"
-            | "id"
-          >;
-        };
-        properties: (Property & { taxAvailable: boolean })[];
-      } | undefined;
+      let foundRequest:
+        | {
+            request: Request & {
+              traveler: Pick<
+                User,
+                | "firstName"
+                | "lastName"
+                | "name"
+                | "image"
+                | "location"
+                | "about"
+                | "dateOfBirth"
+                | "id"
+              >;
+            };
+            properties: (Property & { taxAvailable: boolean })[];
+          }
+        | undefined;
       for (const { property, request } of hostRequests) {
         console.log(request.id, "request.id");
         console.log(input.id, "input.id");
         if (request.id === input.id) {
-          foundRequest = { request, properties: [{ ...property }] } // I am getting issues with types here, is there something I need to change?
+          foundRequest = { request, properties: [{ ...property }] }; // I am getting issues with types here, is there something I need to change?
         }
       }
 
       if (!foundRequest) {
         throw new Error("Request not found for this host team");
       }
-
 
       return foundRequest;
     }),
@@ -511,7 +514,9 @@ export async function handleRequestSubmission(
     const requestedNightlyPrice = input.maxTotalPrice / numNights;
 
     const eligiblePropertiesWithAutoOffers = eligibleProperties.filter(
-      (property) => property.autoOfferEnabled && property.originalListingId !== "877854804496138577"
+      (property) =>
+        property.autoOfferEnabled &&
+        property.originalListingId !== "877854804496138577",
     );
 
     const autoOfferPromises = eligiblePropertiesWithAutoOffers.map(
@@ -527,7 +532,6 @@ export async function handleRequestSubmission(
             propertyDetails.originalListingPlatform === "Airbnb" &&
             propertyDetails.discountTiers
           ) {
-
             const airbnbTotalPrice = await scrapeAirbnbPrice({
               airbnbListingId: propertyDetails.originalListingId,
               params: {
@@ -538,15 +542,19 @@ export async function handleRequestSubmission(
             });
 
             if (!airbnbTotalPrice) {
-              return
+              return;
             }
             const airbnbNightlyPrice = airbnbTotalPrice / numNights;
 
             const percentOff =
-              ((airbnbNightlyPrice - requestedNightlyPrice) / airbnbNightlyPrice) *
+              ((airbnbNightlyPrice - requestedNightlyPrice) /
+                airbnbNightlyPrice) *
               100;
 
-            const daysUntilCheckIn = differenceInDays(input.checkIn, new Date());
+            const daysUntilCheckIn = differenceInDays(
+              input.checkIn,
+              new Date(),
+            );
 
             const applicableDiscount = propertyDetails.discountTiers.find(
               (tier) => daysUntilCheckIn >= tier.days,
@@ -579,7 +587,6 @@ export async function handleRequestSubmission(
             error,
           );
         }
-
       },
     );
 
@@ -588,8 +595,11 @@ export async function handleRequestSubmission(
 
     // Optional: You can process the results to log the outcome of each promise
     results.forEach((result, index) => {
-      if (result.status === 'rejected') {
-        console.error(`Error with property ${eligiblePropertiesWithAutoOffers[index]?.id}:`, result.reason);
+      if (result.status === "rejected") {
+        console.error(
+          `Error with property ${eligiblePropertiesWithAutoOffers[index]?.id}:`,
+          result.reason,
+        );
       }
     });
 

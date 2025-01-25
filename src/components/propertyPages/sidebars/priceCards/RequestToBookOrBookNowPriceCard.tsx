@@ -32,6 +32,7 @@ import { isNumber } from "lodash";
 import { useGetOriginalPropertyPricing } from "@/utils/payment-utils/useGetOriginalPropertyPricing";
 import Link from "next/link";
 import { MAX_REQUEST_TO_BOOK_PERCENTAGE } from "@/utils/constants";
+import { properties } from "../../../../server/db/schema/tables/properties";
 
 export type RequestToBookDetails = {
   checkIn: Date;
@@ -651,6 +652,16 @@ export default function RequestToBookOrBookNowPriceCard({
                   Per Night
                 </span>
               </div>
+              {property.randomPercentageForScrapedProperties && (
+                <div className="my-3 text-xs">
+                  Save{" "}
+                  <span className="text-green-700">
+                    {property.randomPercentageForScrapedProperties}%{" "}
+                  </span>
+                  on fees compared to{" "}
+                  <span className="text-destructive">Airbnb</span>!
+                </div>
+              )}
               <Button
                 variant="link"
                 className="mt-1 flex items-center gap-1 px-0 text-muted-foreground"

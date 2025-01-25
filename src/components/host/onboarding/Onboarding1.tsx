@@ -129,12 +129,13 @@ export default function Onboarding1({
   const [currentStep, setCurrentStep] = useState(1);
   const galleryRef = useRef<HTMLDivElement>(null);
   const [isExpanded, setIsExpanded] = useState("item-1");
+  const [isLoading, setIsLoading] = useState(false);
   const { mutateAsync: resetHospitableProfile } =
     api.pms.resetHospitableCustomer.useMutation();
 
   const handleNextStep = async () => {
     if (currentStep === 1) {
-      await resetHospitableProfile();
+      void resetHospitableProfile();
     }
     if (currentStep < steps.length) {
       setCurrentStep(currentStep + 1);
@@ -337,16 +338,22 @@ export default function Onboarding1({
                       <Button
                         className="mt-4"
                         size="lg"
+                        disabled={isLoading}
                         onClick={async () => {
+                          setIsLoading(true);
                           try {
-                            setShowHospitablePopup(true);
+                            await createHospitableCustomer();
                           } catch (error) {
                             console.error("An error occurred:", error);
+                          } finally {
+                            setIsLoading(false);
                           }
                         }}
                       >
-                        Connect with Airbnb
-                        <ArrowRight className="ml-2 h-4 w-4" />
+                        {isLoading
+                          ? "Redirecting to Hospitable Portal..."
+                          : "Create my host account"}
+                        {!isLoading && <ArrowRight className="ml-2 h-4 w-4" />}
                       </Button>
                     </div>
                   </div>

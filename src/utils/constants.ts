@@ -10,6 +10,9 @@ export const REFERRAL_CASHBACK = 2500;
 
 export const MAX_REQUEST_TO_BOOK_PERCENTAGE = 80; // for requestTObook page
 
+//ITEMS PER PAGE ON LANDING
+export const ITEMS_PER_PAGE = 24;
+
 export const airbnbHeaders = {
   "x-airbnb-api-key": "d306zoyjsyarp7ifhu67rjxn52tv0t20",
 };

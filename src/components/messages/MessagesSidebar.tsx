@@ -24,6 +24,7 @@ export type SidebarProps = {
   setSelected: (arg0: Conversation) => void;
   fetchedConversations: Conversations | [] | undefined;
   isLoading: boolean;
+  isHost: boolean;
   refetch: () => void;
 };
 
@@ -33,6 +34,7 @@ export default function MessagesSidebar({
   fetchedConversations,
   isLoading,
   refetch,
+  isHost,
 }: SidebarProps) {
   const [showAllMsgs, setShowAllMsgs] = useState(true);
 
@@ -138,7 +140,14 @@ export default function MessagesSidebar({
             ? "When you have an unread message, it will appear here."
             : "When you receive a new message, it will appear here."}
         </p>
-        {role === "guest" && (
+        {isHost ? (
+          <Button
+            className="rounded-full"
+            onClick={() => router.push("/host/requests")}
+          >
+            See all incoming requests
+          </Button>
+        ) : (
           <div className="flex w-full flex-col gap-2 px-6">
             <Button
               className="rounded-full"

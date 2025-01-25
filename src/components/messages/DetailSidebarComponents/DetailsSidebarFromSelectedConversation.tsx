@@ -11,9 +11,8 @@ interface DetailsSidebarFromSelectedConversationProps {
 const DetailsSidebarFromSelectedConversation: React.FC<
   DetailsSidebarFromSelectedConversationProps
 > = ({ conversation, isHost }) => {
-  console.log(isHost);
   return (
-    <div className="min-h-[75vh] bg-white">
+    <div className="h-full min-h-[calc(75vh)] overflow-x-hidden overflow-y-scroll bg-white">
       {isHost ? (
         <HostDetailsSidebar conversation={conversation} />
       ) : (

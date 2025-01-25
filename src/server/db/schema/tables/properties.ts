@@ -393,6 +393,9 @@ export const properties = pgTable(
       .default(0)
       .notNull(),
     maxGuestsWithoutFee: integer("max_guests_without_fee"),
+    randomPercentageForScrapedProperties: integer(
+      "random_percentage_for_scraped_properties",
+    ),
   },
 
   (t) => ({

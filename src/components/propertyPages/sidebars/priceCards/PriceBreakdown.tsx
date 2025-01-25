@@ -73,12 +73,13 @@ function PriceBreakdown(
         <span>Service Fee</span>
         <span>{formatCurrency(serviceFee)}</span>
       </div>
-      {brokedownPrice.totalSavings > 0 && (
-        <div className="flex items-center justify-between text-green-600">
-          <span>Savings</span>
-          <span>-{formatCurrency(brokedownPrice.totalSavings)}</span>
-        </div>
-      )}
+      {props.property?.originalListingPlatform !== "Casamundo" &&
+        brokedownPrice.totalSavings > 0 && (
+          <div className="flex items-center justify-between text-green-600">
+            <span>Savings</span>
+            <span>-{formatCurrency(brokedownPrice.totalSavings)}</span>
+          </div>
+        )}
       <div className="my-2 border-t pt-2">
         <div className="flex items-center justify-between text-lg font-semibold text-black">
           <span>Total</span>

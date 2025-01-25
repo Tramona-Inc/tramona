@@ -1,15 +1,15 @@
 import React, { useState } from "react";
 import { type Conversation } from "@/utils/store/conversations";
-import { format } from "date-fns";
 import { api } from "@/utils/api";
-import { formatCurrency } from "@/utils/utils";
+import { generateBookingUrl } from "@/utils/utils";
 import { Button } from "@/components/ui/button";
-import RequestToBookOrBookNowPriceCard from "../../propertyPages/sidebars/priceCards/RequestToBookOrBookNowPriceCard";
 import WithdrawRequestToBookDialog from "../../requests-to-book/WithdrawRequestToBookDialog";
-import ImageCarousel from "../../_common/ImageCarousel";
-import { XIcon } from "lucide-react";
-import { useRouter } from "next/router";
+import ConversationHeader from "./ConversationHeader";
 import PropertyOnlyImage from "./PropertyOnlyImage";
+import { PropertySkeletons } from "./SIdeBarSkeletons";
+import GetSupportAnytime from "./GetSupportAnytime";
+import Link from "next/link";
+import TravelerBidOrRequestSection from "./TravelerBidOrRequestSection";
 
 interface TravelerDetailsSidebarProps {
   conversation: Conversation;
@@ -18,8 +18,6 @@ interface TravelerDetailsSidebarProps {
 const TravelerDetailsSidebar: React.FC<TravelerDetailsSidebarProps> = ({
   conversation,
 }) => {
-  const router = useRouter();
-
   const [withdrawOpen, setWithdrawOpen] = useState(false);
 
   const { data: currentRequestsToBookTraveler } =
@@ -56,19 +54,6 @@ const TravelerDetailsSidebar: React.FC<TravelerDetailsSidebarProps> = ({
     },
   );
 
-  const handleHideDetails = () => {
-    void router.push(
-      {
-        pathname: router.pathname,
-        query: {
-          ...router.query,
-          details: "false",
-        },
-      },
-      undefined, // This is required to keep the current URL
-      { shallow: true }, // Op
-    );
-  };
   const bid = currentRequestsToBookTraveler?.[0];
   const request = requestTraveler;
   const property = propertyInfo ?? bid?.property;
@@ -82,72 +67,41 @@ const TravelerDetailsSidebar: React.FC<TravelerDetailsSidebarProps> = ({
           onOpenChange={setWithdrawOpen}
         />
       )}
-      <div className="flex flex-col gap-6 rounded-lg bg-white p-6 shadow-md">
+      <div className="mx-auto overflow-x-hidden">
         {/* Header */}
-        <div className="border-b pb-4">
-          <div className="flex justify-between">
-            <h2 className="text-2xl font-bold text-gray-800">
-              {property?.name ?? "Property Information"}
-            </h2>
-            <Button size="icon" onClick={handleHideDetails} variant="ghost">
-              {" "}
-              <XIcon />{" "}
-            </Button>
-          </div>
-          {conversation.name && (
-            <p className="mt-1 text-sm text-gray-500">
-              Conversation ID: {conversation.id}
-            </p>
-          )}
-        </div>
-
+        <ConversationHeader
+          conversation={conversation}
+          propertyName={property?.name}
+          propertyId={property?.id}
+        />
         {/* Property Section */}
-        <div className="max-h-[500px] overflow-y-auto">
-          {property && (
-            <div className="rounded-lg border bg-gray-50 p-4">
+
+        <div className="mx-auto my-3 flex w-11/12 flex-col gap-y-6">
+          {property ? (
+            <div className="">
               <PropertyOnlyImage property={property} />
 
               {propertyInfo && <>{/* AddRequest stuff here  */}</>}
             </div>
+          ) : (
+            <PropertySkeletons />
           )}
-          {(bid ?? request) && (
-            <>
-              <p className="text-sm text-gray-700">
-                <span className="font-semibold">Check-in:</span>{" "}
-                {bid?.checkIn.toLocaleDateString() ??
-                  requestTraveler?.checkIn.toLocaleDateString() ??
-                  "N/A"}
-              </p>
-              <p className="text-sm text-gray-700">
-                <span className="font-semibold">Check-out:</span>{" "}
-                {bid?.checkOut.toLocaleDateString() ??
-                  requestTraveler?.checkOut.toLocaleDateString() ??
-                  "N/A"}
-              </p>
-              <p className="text-sm text-gray-700">
-                <span className="font-semibold">Amount:</span>{" "}
-                {formatCurrency(
-                  bid?.baseAmountBeforeFees ??
-                    requestTraveler?.maxTotalPrice ??
-                    0,
-                )}
-              </p>
-              <p className="text-sm text-gray-700">
-                <span className="font-semibold">Guests:</span>{" "}
-                {bid?.numGuests ?? requestTraveler?.numGuests ?? "N/A"}
-              </p>
-
-              <div className="flex justify-end">
-                <Button onClick={() => setWithdrawOpen(true)}>Withdraw</Button>
-              </div>
-            </>
+          {(bid ?? request) ? (
+            <TravelerBidOrRequestSection
+              bid={bid}
+              request={request}
+              setWithdrawOpen={setWithdrawOpen}
+            />
+          ) : (
+            <div>
+              {property && (
+                <Link href={generateBookingUrl(property.id)}>
+                  <Button className="w-full">Request To Book</Button>
+                </Link>
+              )}
+            </div>
           )}
-          <div className="rounded-lg border bg-gray-50 p-4">
-            <p className="text-sm text-gray-700">
-              <span className="font-semibold">Created At:</span>{" "}
-              {format(new Date(conversation.createdAt), "MMMM dd, yyyy h:mm a")}
-            </p>
-          </div>
+          <GetSupportAnytime />
         </div>
       </div>
     </>
