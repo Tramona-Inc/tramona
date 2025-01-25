@@ -177,7 +177,7 @@ export default function Component() {
 
   const onSubmit = form.handleSubmit(async ({ email, role }) => {
     await inviteMutation
-      .mutateAsync({ email, role, hostTeamId: currentHostTeamId! })
+      .mutateAsync({ email, role, currentHostTeamId: currentHostTeamId! })
       .then(({ status }) => {
         console.log(status);
         switch (status) {
@@ -317,7 +317,7 @@ export default function Component() {
               }}
               disabled={
                 removeHostTeamMemberMutation.isLoading ||
-                (curRole !== "Admin Access" && curRole !== "Co-Host")
+                member.userId === session.user.id
               }
             >
               <UserRoundMinusIcon className="mr-2 h-4 w-4" />
@@ -373,7 +373,7 @@ export default function Component() {
                         resendInviteMutation
                           .mutateAsync({
                             email: invite.inviteeEmail,
-                            hostTeamId: curTeam.id,
+                            currentHostTeamId: curTeam.id,
                           })
                           .then((res) => {
                             if (res.status === "invite resent") {
@@ -448,6 +448,12 @@ export default function Component() {
         responsibilities."
           icon={Users}
         />
+
+        {/* Lists */}
+        <Card>
+          <CoHostsList />
+        </Card>
+
         {/* Add New Co-Host Form */}
         <Card>
           <CardHeader>
@@ -528,12 +534,6 @@ export default function Component() {
             </Form>
           </CardContent>
         </Card>
-
-        {/* Lists */}
-        <Card>
-          <CoHostsList />
-        </Card>
-
         <Card>
           <PendingInvitesList />
         </Card>

@@ -172,174 +172,168 @@ async function sendDeclineMessage(
 }
 
 export const hostTeamsRouter = createTRPCRouter({
-  inviteCoHost: hostProcedure
-    .input(
-      z.object({
-        email: z.string(),
-        role: z.enum(COHOST_ROLES),
-        hostTeamId: z.number(),
-      }),
-    )
-    .mutation(async ({ input, ctx }) => {
-      const hostTeam = await ctx.db.query.hostTeams.findFirst({
-        where: eq(hostTeams.id, input.hostTeamId),
-        columns: { name: true },
-        with: { owner: { columns: { id: true } } },
-      });
-
-      if (!hostTeam) {
-        throw new TRPCError({ code: "NOT_FOUND" });
-      }
-
-      if (ctx.user.id !== hostTeam.owner.id) {
-        throw new TRPCError({ code: "UNAUTHORIZED" });
-      }
-
-      const existingInvite = await ctx.db.query.hostTeamInvites.findFirst({
-        where: and(
-          eq(hostTeamInvites.hostTeamId, input.hostTeamId),
-          eq(hostTeamInvites.inviteeEmail, input.email),
-        ),
-        columns: { expiresAt: true },
-      });
-
-      if (existingInvite) {
-        return { status: "already invited" } as const;
-      }
-
-      const invitee = await ctx.db.query.users.findFirst({
-        where: eq(users.email, input.email),
-        columns: { id: true, name: true, email: true },
-      });
-
-      if (invitee) {
-        const userInTeam = await ctx.db.query.hostTeamMembers
-          .findFirst({
-            where: and(
-              eq(hostTeamMembers.hostTeamId, input.hostTeamId),
-              eq(hostTeamMembers.userId, invitee.id),
-            ),
-          })
-          .then((res) => !!res);
-
-        if (userInTeam) {
-          return { status: "already in team" } as const;
-        }
-      }
-      const now = new Date();
-
-      const id = crypto.randomUUID();
-
-      await ctx.db.insert(hostTeamInvites).values({
-        id,
-        expiresAt: add(new Date(), { hours: 24 }),
-        hostTeamId: input.hostTeamId,
-        role: input.role,
-        inviteeEmail: input.email,
-        lastSentAt: now,
-      });
-
-      // instead of making a new invite, just extend the expiration date of the existing one
-      // .onConflictDoUpdate({
-      //   target: [hostTeamInvites.hostTeamId, hostTeamInvites.inviteeEmail],
-      //   set: {
-      //     expiresAt: add(new Date(), { hours: 24 }),
-      //   },
-      // });
-
-      const conversationId = await createOrGetConversation(
-        input.email,
-        ctx.user.id,
-        input.hostTeamId,
-      );
-      await sendInviteMessage(
-        conversationId,
-        hostTeam.name,
-        false,
-        ctx.user.id,
-      );
-
-      await sendEmail({
-        to: input.email,
-        subject: `You've been invited to ${hostTeam.name}'s host team on Tramona`,
-        content: HostTeamInviteEmail({
-          cohostInviteId: id,
-          email: ctx.user.email,
-          name: ctx.user.name,
-        }),
-      });
-
-      return { status: "sent invite" } as const;
+  inviteCoHost: coHostProcedure(
+    "invite_cohost_role",
+    z.object({
+      email: z.string(),
+      role: z.enum(COHOST_ROLES),
     }),
+  ).mutation(async ({ input, ctx }) => {
+    console.log("hellow");
 
-  resendInvite: protectedProcedure
-    .input(z.object({ email: z.string(), hostTeamId: z.number() }))
-    .mutation(async ({ input, ctx }) => {
-      const hostTeam = await ctx.db.query.hostTeams.findFirst({
-        where: eq(hostTeams.id, input.hostTeamId),
-        columns: { name: true },
-        with: { owner: { columns: { id: true } } },
-      });
+    const existingInvite = await ctx.db.query.hostTeamInvites.findFirst({
+      where: and(
+        eq(hostTeamInvites.hostTeamId, input.currentHostTeamId),
+        eq(hostTeamInvites.inviteeEmail, input.email),
+      ),
+      columns: { expiresAt: true },
+    });
 
-      if (!hostTeam) {
-        throw new TRPCError({ code: "NOT_FOUND" });
-      }
+    if (existingInvite) {
+      return { status: "already invited" } as const;
+    }
 
-      if (ctx.user.id !== hostTeam.owner.id) {
-        throw new TRPCError({ code: "UNAUTHORIZED" });
-      }
+    const invitee = await ctx.db.query.users.findFirst({
+      where: eq(users.email, input.email),
+      columns: { id: true, name: true, email: true },
+    });
 
-      const existingInvite = await ctx.db.query.hostTeamInvites.findFirst({
-        where: and(
-          eq(hostTeamInvites.hostTeamId, input.hostTeamId),
-          eq(hostTeamInvites.inviteeEmail, input.email),
-        ),
-        columns: { expiresAt: true, lastSentAt: true, id: true },
-      });
-
-      if (!existingInvite) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Invite not found" });
-      }
-
-      const cooldownPeriod = subMinutes(new Date(), 2); // 2 min cooldown
-      if (existingInvite.lastSentAt > cooldownPeriod) {
-        return { status: "cooldown" } as const;
-      }
-
-      const now = new Date();
-
-      await ctx.db
-        .update(hostTeamInvites)
-        .set({
-          expiresAt: add(new Date(), { hours: 24 }),
-          lastSentAt: now,
-        })
-        .where(
-          and(
-            eq(hostTeamInvites.hostTeamId, input.hostTeamId),
-            eq(hostTeamInvites.inviteeEmail, input.email),
+    if (invitee) {
+      const isUserInTeam = await ctx.db.query.hostTeamMembers
+        .findFirst({
+          where: and(
+            eq(hostTeamMembers.hostTeamId, input.currentHostTeamId),
+            eq(hostTeamMembers.userId, invitee.id),
           ),
-        );
+        })
+        .then((res) => !!res);
 
-      const conversationId = await createOrGetConversation(
-        input.email,
-        ctx.user.id,
-        input.hostTeamId,
+      if (isUserInTeam) {
+        return { status: "already in team" } as const;
+      }
+    }
+    const now = new Date();
+
+    const id = crypto.randomUUID();
+
+    await ctx.db.insert(hostTeamInvites).values({
+      id,
+      expiresAt: add(new Date(), { hours: 24 }),
+      hostTeamId: input.currentHostTeamId,
+      role: input.role,
+      inviteeEmail: input.email,
+      lastSentAt: now,
+    });
+
+    // instead of making a new invite, just extend the expiration date of the existing one
+    // .onConflictDoUpdate({
+    //   target: [hostTeamInvites.hostTeamId, hostTeamInvites.inviteeEmail],
+    //   set: {
+    //     expiresAt: add(new Date(), { hours: 24 }),
+    //   },
+    // });
+
+    const conversationId = await createOrGetConversation(
+      input.email,
+      ctx.user.id,
+      input.currentHostTeamId,
+    );
+
+    const currentHostTeam = await db.query.hostTeams
+      .findFirst({
+        where: eq(hostTeams.id, input.currentHostTeamId),
+      })
+      .then((res) => res!);
+
+    await sendInviteMessage(
+      conversationId,
+      currentHostTeam.name,
+      false,
+      ctx.user.id,
+    );
+
+    await sendEmail({
+      to: input.email,
+      subject: `You've been invited to ${currentHostTeam.name}'s host team on Tramona`,
+      content: HostTeamInviteEmail({
+        cohostInviteId: id,
+        email: ctx.user.email,
+        name: ctx.user.name,
+      }),
+    });
+
+    return { status: "sent invite" } as const;
+  }),
+
+  resendInvite: coHostProcedure(
+    "invite_cohost_role",
+    z.object({ email: z.string(), currentHostTeamId: z.number() }),
+  ).mutation(async ({ input, ctx }) => {
+    const hostTeam = await ctx.db.query.hostTeams.findFirst({
+      where: eq(hostTeams.id, input.currentHostTeamId),
+      columns: { name: true },
+      with: { owner: { columns: { id: true } } },
+    });
+
+    if (!hostTeam) {
+      throw new TRPCError({ code: "NOT_FOUND" });
+    }
+
+    if (ctx.user.id !== hostTeam.owner.id) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+
+    const existingInvite = await ctx.db.query.hostTeamInvites.findFirst({
+      where: and(
+        eq(hostTeamInvites.hostTeamId, input.currentHostTeamId),
+        eq(hostTeamInvites.inviteeEmail, input.email),
+      ),
+      columns: { expiresAt: true, lastSentAt: true, id: true },
+    });
+
+    if (!existingInvite) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Invite not found" });
+    }
+
+    const cooldownPeriod = subMinutes(new Date(), 2); // 2 min cooldown
+    if (existingInvite.lastSentAt > cooldownPeriod) {
+      return { status: "cooldown" } as const;
+    }
+
+    const now = new Date();
+
+    await ctx.db
+      .update(hostTeamInvites)
+      .set({
+        expiresAt: add(new Date(), { hours: 24 }),
+        lastSentAt: now,
+      })
+      .where(
+        and(
+          eq(hostTeamInvites.hostTeamId, input.currentHostTeamId),
+          eq(hostTeamInvites.inviteeEmail, input.email),
+        ),
       );
-      await sendInviteMessage(conversationId, hostTeam.name, true, ctx.user.id);
 
-      await sendEmail({
-        to: input.email,
-        subject: `Reminder: You've been invited to ${hostTeam.name}'s host team on Tramona`,
-        content: HostTeamInviteEmail({
-          cohostInviteId: existingInvite.id,
-          email: ctx.user.email,
-          name: ctx.user.name,
-        }),
-      });
+    const conversationId = await createOrGetConversation(
+      input.email,
+      ctx.user.id,
+      input.currentHostTeamId,
+    );
+    await sendInviteMessage(conversationId, hostTeam.name, true, ctx.user.id);
 
-      return { status: "invite resent" } as const;
-    }),
+    await sendEmail({
+      to: input.email,
+      subject: `Reminder: You've been invited to ${hostTeam.name}'s host team on Tramona`,
+      content: HostTeamInviteEmail({
+        cohostInviteId: existingInvite.id,
+        email: ctx.user.email,
+        name: ctx.user.name,
+      }),
+    });
+
+    return { status: "invite resent" } as const;
+  }),
 
   cancelInvite: protectedProcedure
     .input(z.object({ email: z.string(), hostTeamId: z.number() }))

@@ -91,7 +91,7 @@ export default function CalendarSettings({
 
   return (
     <Card className="h-full flex-1">
-      <CardContent className="p-3 sm:px-6">
+      <CardContent className="p-1 xl:p-3">
         <h2 className="mb-2 text-xl font-bold sm:mb-6 sm:text-2xl">Settings</h2>
         <Tabs defaultValue="pricing" className="w-full">
           <TabsList
@@ -109,13 +109,11 @@ export default function CalendarSettings({
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="pricing" className="space-y-6 sm:space-y-8">
+          <TabsContent value="pricing" className="space-y-6">
             {/* Book it now section */}
-            <div className="space-y-3 rounded-lg border p-6">
+            <div className="space-y-1 rounded-lg border p-6">
               <div className="flex cursor-pointer items-center justify-between">
-                <h3 className="text-[20px] font-bold text-black">
-                  Book it now
-                </h3>
+                <h3 className="text-xl font-bold text-black">Book it now</h3>
               </div>
               <div className="flex flex-row justify-between">
                 <p className="text-base text-muted-foreground">
@@ -137,7 +135,7 @@ export default function CalendarSettings({
               </div>
 
               {isBookItNowChecked && (
-                <div className="space-y-4 pt-4">
+                <div className="space-y-4">
                   <div className="my-6 w-full border-b border-gray-200" />
                   <Label>{bookItNowPercent}% OFF</Label>
                   <Slider
