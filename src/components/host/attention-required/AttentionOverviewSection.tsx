@@ -17,7 +17,6 @@ export default function AttentionOverviewSection({
       { enabled: !!currentHostTeamId },
     );
 
-  console.log(allNotifications?.length);
   return (
     <div className="grid grid-cols-2 gap-4 px-4 sm:px-0 lg:grid-cols-4">
       {/* Notification Cards */}
@@ -29,14 +28,14 @@ export default function AttentionOverviewSection({
               title={allNotifications[0]!.name}
               href={`/host/calendar?propertyId=${allNotifications[0]!.id}`}
               className="col-span-1 sm:col-span-1"
-              length={allNotifications.length + 1}
+              length={allNotifications.length}
             />
             <NotificationCard
-              action="Enable Auto Offers for"
+              action="Enable Book-it-now for"
               title={allNotifications[0]!.name}
-              href={`/host/properties/${allNotifications[0]!.id}`}
+              href={`/host/calendar?propertyId=${allNotifications[0]!.id}`}
               className="col-span-1"
-              length={allNotifications.length + 1}
+              length={allNotifications.length}
             />
           </>
         ) : null
@@ -53,7 +52,7 @@ export default function AttentionOverviewSection({
         title="Edit Auto Pricing"
         description="Optimize pricing for higher booking chances."
         subtitle="Customize prices based on demand and season."
-        href="/host/properties"
+        href={`/host/calendar`}
         className="col-span-full w-full sm:col-span-1 md:row-start-2"
       />
       <AttentionCard
@@ -61,7 +60,7 @@ export default function AttentionOverviewSection({
         title="Turn Instant Booking On"
         description="Control instant booking options for guests."
         subtitle="Allow guests to book automatically or require approval."
-        href="/host/properties"
+        href="/host/calendar"
         className="col-span-full w-full sm:col-span-1 md:row-start-2"
       />
     </div>

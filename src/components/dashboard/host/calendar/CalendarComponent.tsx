@@ -73,10 +73,13 @@ export default function CalendarComponent() {
   }, [hostProperties]);
 
   const initialProperty = useMemo(() => {
+    console.log(propertyId);
+    console.log(hostPropertiesRef.current);
     if (!hostPropertiesRef.current) {
       //sometimes the query no good
       void refetch();
     }
+
     return (
       hostPropertiesRef.current?.find(
         (property) => property.id === Number(propertyId),
@@ -84,10 +87,11 @@ export default function CalendarComponent() {
       hostPropertiesRef.current?.[0] ??
       null
     );
-  }, [propertyId]);
+  }, [propertyId, hostPropertiesRef, refetch]);
 
   // Set initial selected property when data loads
   useEffect(() => {
+    console.log(initialProperty);
     setSelectedProperty(initialProperty);
   }, [initialProperty]);
 
@@ -307,7 +311,7 @@ export default function CalendarComponent() {
                   >
                     <Globe className="mr-2 h-4 w-4" />
                     <span className="hidden sm:inline">
-                      {selectedProperty?.name}
+                      {selectedProperty?.name ?? "Select property"}
                     </span>
                     <span className="sm:hidden">Property</span>
                     <ChevronDown className="ml-2 h-4 w-4" />

@@ -18,6 +18,10 @@ import { Copy, Edit2, CheckCircle, X } from "lucide-react";
 import useBannerStore from "@/utils/store/bannerStore";
 import HostICalHowToDialog from "./HostICalHowToDialog";
 import Image from "next/image";
+
+//Images
+import Group1 from "@/../public/assets/images/ical-modal/Group1.png";
+import Group2 from "@/../public/assets/images/ical-modal/Group2.png";
 // ------------------------------------------------------------------
 // A simple Progress Indicator for the multi-step flow
 // ------------------------------------------------------------------
@@ -56,7 +60,7 @@ function Step1Introduction({ onNext }: { onNext: () => void }) {
   return (
     <div className="space-y-6 text-center">
       <p className="text-base">
-        To keep your bookings up-to-date and avoid double-bookings, we’ll
+        To keep your bookings up-to-date and avoid double-bookings, we&apos;ll
         connect your Tramona calendar directly to Airbnb. Click the button below
         and then return here for more instructions.
       </p>
@@ -90,7 +94,7 @@ function Step2Availability({
       <div className="relative h-64 w-full overflow-hidden rounded-md border border-gray-300">
         {/* Replace with your real screenshot/image */}
         <Image
-          src="/assets/images/ical-modal/group1.png"
+          src={Group1}
           alt="Airbnb calendar page with Availability tab highlighted"
           width={500}
           height={300}
@@ -127,7 +131,7 @@ function Step3ConnectWebsite({
       <div className="relative h-64 w-full overflow-hidden rounded-md border border-gray-300">
         {/* Replace with your real screenshot/image */}
         <Image
-          src="/assets/images/ical-modal/group2.png"
+          src={Group2}
           alt="Airbnb page with Connect to another website highlighted"
           width={500}
           height={300}
@@ -413,9 +417,6 @@ function EnhancedICalModal({
         <DialogTitle>
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold">Sync Your iCal</h1>
-            <Button variant="ghost" size="icon" onClick={onClose}>
-              <X className="h-4 w-4" />
-            </Button>
           </div>
         </DialogTitle>
         <DialogDescription className="text-sm text-gray-600">
