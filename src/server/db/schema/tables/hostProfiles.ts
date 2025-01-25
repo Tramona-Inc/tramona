@@ -40,7 +40,7 @@ export const hostReferralDiscounts = pgTable(
     id: serial("id").primaryKey(),
     referralCode: text("referral_code")
       .notNull()
-      .references(() => referralCodes.referralCode),
+      .references(() => referralCodes.referralCode, { onDelete: "cascade" }),
     ownerId: text("owner_id").references(() => users.id, {
       onDelete: "cascade",
     }),
@@ -54,7 +54,9 @@ export const hostReferralDiscounts = pgTable(
       .defaultNow(),
     validatedAt: timestamp("validated_at", { withTimezone: true }), //when the referee has completed a trip
     redeemedAt: timestamp("resolved_at", { withTimezone: true }), // when the referer wants to redeem the discount
-    tripId: integer("trip_id").references(() => trips.id),
+    tripId: integer("trip_id").references(() => trips.id, {
+      onDelete: "set null",
+    }),
   },
   (t) => ({
     referralCodesIdx: index().on(t.referralCode),

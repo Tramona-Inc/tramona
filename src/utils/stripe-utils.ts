@@ -144,6 +144,6 @@ export async function createStripeConnectId({
 
     return stripeAccount;
   } else {
-    throw new Error("Stripe account already created");
+    console.log("Stripe account already created");
   }
 }

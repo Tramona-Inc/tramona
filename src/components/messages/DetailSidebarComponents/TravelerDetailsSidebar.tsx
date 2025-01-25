@@ -67,7 +67,7 @@ const TravelerDetailsSidebar: React.FC<TravelerDetailsSidebarProps> = ({
           onOpenChange={setWithdrawOpen}
         />
       )}
-      <div className="mx-auto">
+      <div className="mx-auto overflow-x-hidden">
         {/* Header */}
         <ConversationHeader
           conversation={conversation}

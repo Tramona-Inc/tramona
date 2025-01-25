@@ -388,7 +388,7 @@ export async function createRequestToBook({
   // Case 1 : DIRECT LISTING. SEND SLACK
   if (isDirectListingCharge) {
     await sendSlackMessage({
-      isProductionOnly: false,
+      isProductionOnly: true,
       channel: "tramona-bot",
       text: [
         `*${user.email} just requested to book: ${property.name}*`,

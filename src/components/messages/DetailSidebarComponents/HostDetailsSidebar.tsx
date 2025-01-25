@@ -104,7 +104,7 @@ const HostDetailsSidebar: React.FC<HostDetailsSidebarProps> = ({
   const property = propertyInfo ?? bid?.property;
 
   return (
-    <div className="mx-auto">
+    <div className="mx-auto overflow-x-hidden">
       {/* Header */}
       <ConversationHeader
         conversation={conversation}

@@ -41,7 +41,7 @@ export const requestsToBook = pgTable(
       .references(() => hostTeams.id),
     propertyId: integer("property_id")
       .notNull()
-      .references(() => properties.id),
+      .references(() => properties.id, { onDelete: "cascade" }),
     userId: text("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
