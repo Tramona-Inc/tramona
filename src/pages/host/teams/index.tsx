@@ -201,7 +201,17 @@ export default function Component() {
 
         setInviteDialogOpen(false);
       })
-      .catch(() => errorToast());
+      .catch((error) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        if (error.data?.code === "FORBIDDEN") {
+          toast({
+            title: "You do not have permission to invite new co-hosts",
+            description: "Please contact your team owner to request access.",
+          });
+        } else {
+          errorToast();
+        }
+      });
   });
 
   if (!session || !curTeam) return <Spinner />;
