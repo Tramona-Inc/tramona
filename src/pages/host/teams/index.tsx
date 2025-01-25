@@ -448,6 +448,12 @@ export default function Component() {
         responsibilities."
           icon={Users}
         />
+
+        {/* Lists */}
+        <Card>
+          <CoHostsList />
+        </Card>
+
         {/* Add New Co-Host Form */}
         <Card>
           <CardHeader>
@@ -528,12 +534,6 @@ export default function Component() {
             </Form>
           </CardContent>
         </Card>
-
-        {/* Lists */}
-        <Card>
-          <CoHostsList />
-        </Card>
-
         <Card>
           <PendingInvitesList />
         </Card>

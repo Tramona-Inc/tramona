@@ -38,6 +38,7 @@ export default function MonthCalendar({
   isLoading = false,
   isCalendarUpdating = false,
 }: MonthCalendarProps) {
+  console.log(prices);
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const { currentHostTeamId } = useHostTeamStore();
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(
@@ -102,7 +103,10 @@ export default function MonthCalendar({
   };
 
   const getBookItNowDiscount = useMemo(() => {
-    return selectedProperty?.bookItNowHostDiscountPercentOffInput ?? 0;
+    return selectedProperty?.bookItNowEnabled &&
+      selectedProperty.bookItNowHostDiscountPercentOffInput
+      ? selectedProperty.bookItNowHostDiscountPercentOffInput
+      : 0;
   }, [selectedProperty]);
 
   const renderMonth = () => {
@@ -140,7 +144,8 @@ export default function MonthCalendar({
             const price =
               currentDate &&
               prices[currentDate.toISOString().split("T")[0] ?? ""];
-            const discountedPrice =
+
+            const discountedPrice = //we need to make sure that book it now it enabled too
               price && price * (1 - getBookItNowDiscount / 100);
 
             return (
@@ -148,7 +153,7 @@ export default function MonthCalendar({
                 key={index}
                 onClick={() => currentDate && !isGrayedOut}
                 className={cn(
-                  "flex min-h-[100px] flex-col items-center justify-center p-2",
+                  "flex flex-col items-center justify-center p-2 md:min-h-[100px]",
                   day && !isGrayedOut && "cursor-pointer",
                   reservationClass,
                   isGrayedOut && "cursor-not-allowed bg-gray-200 text-gray-400",
@@ -163,7 +168,7 @@ export default function MonthCalendar({
               >
                 {day && currentDate && (
                   <>
-                    <span className="text-sm font-medium">{day}</span>
+                    <span className="text-sm font-semibold">{day}</span>
                     <span className="mt-1 text-xs text-muted-foreground">
                       {isCalendarUpdating ? (
                         <Loader2Icon
@@ -180,7 +185,7 @@ export default function MonthCalendar({
                           ) : (
                             (() => {
                               return price !== undefined && !isNaN(price!) ? (
-                                <div className="flex flex-row items-center gap-1">
+                                <div className="flex flex-col items-center gap-1 text-xs md:flex-row md:text-base">
                                   {selectedProperty?.bookItNowEnabled &&
                                     getBookItNowDiscount > 0 && (
                                       <span className="text-xs text-gray-500 line-through">
@@ -189,7 +194,7 @@ export default function MonthCalendar({
                                     )}
                                   <span
                                     className={cn(
-                                      "text-sm",
+                                      "text-xs md:text-sm",
                                       selectedProperty?.bookItNowEnabled &&
                                         getBookItNowDiscount > 0
                                         ? "text-green-600"
@@ -220,8 +225,6 @@ export default function MonthCalendar({
   };
 
   return (
-    <div className="mx-auto max-w-4xl">
-      <div className="relative">{renderMonth()}</div>
-    </div>
+    <div className="relative mx-auto min-w-full max-w-4xl">{renderMonth()}</div>
   );
 }

@@ -437,7 +437,7 @@ function EnhancedICalModal({
 export default function HostICalSync({
   property,
 }: {
-  property: Property | null;
+  property: Property | undefined;
 }) {
   const { setIsCalendar } = useBannerStore();
   const [open, setOpen] = useState(false);
