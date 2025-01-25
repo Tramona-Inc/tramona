@@ -177,7 +177,7 @@ export default function Component() {
 
   const onSubmit = form.handleSubmit(async ({ email, role }) => {
     await inviteMutation
-      .mutateAsync({ email, role, hostTeamId: currentHostTeamId! })
+      .mutateAsync({ email, role, currentHostTeamId: currentHostTeamId! })
       .then(({ status }) => {
         console.log(status);
         switch (status) {
@@ -317,7 +317,7 @@ export default function Component() {
               }}
               disabled={
                 removeHostTeamMemberMutation.isLoading ||
-                (curRole !== "Admin Access" && curRole !== "Co-Host")
+                member.userId === session.user.id
               }
             >
               <UserRoundMinusIcon className="mr-2 h-4 w-4" />
