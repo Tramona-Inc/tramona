@@ -41,12 +41,12 @@ export const trips = pgTable(
     // One of offerId and bidId will be null, and the other will be non-null.
     // This is currently only enforced by the insert schema (see below)
     offerId: integer("offer_id").references(() => offers.id, {
-      onDelete: "cascade",
+      onDelete: "set null",
     }),
     requestToBookId: integer("request_to_book_id").references(
       () => requestsToBook.id,
       {
-        onDelete: "cascade",
+        onDelete: "set null",
       },
     ),
     propertyId: integer("property_id")
