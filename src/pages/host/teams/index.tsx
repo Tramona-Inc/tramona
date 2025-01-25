@@ -373,7 +373,7 @@ export default function Component() {
                         resendInviteMutation
                           .mutateAsync({
                             email: invite.inviteeEmail,
-                            hostTeamId: curTeam.id,
+                            currentHostTeamId: curTeam.id,
                           })
                           .then((res) => {
                             if (res.status === "invite resent") {
