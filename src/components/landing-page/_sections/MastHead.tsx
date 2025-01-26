@@ -69,7 +69,7 @@ export default function MastHead() {
           top: offsetPosition,
           behavior: "smooth",
         });
-      }, 0);
+      }, 100);
     }
   };
 
