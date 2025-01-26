@@ -142,7 +142,7 @@ export default function HostStaysCards({
                 </DropdownMenu>
                 <Button
                   variant="secondary"
-                  onClick={() => chatWithHostTeam({ hostId, hostTeamId: trip.property.hostTeam.id, propertyId: trip.property.id.toString() })}
+                  onClick={() => chatWithHostTeam({ hostId, hostTeamId: trip.property.hostTeam.id, propertyId: trip.property.id })}
                 >
                   Message
                 </Button>
@@ -152,7 +152,7 @@ export default function HostStaysCards({
             <Button
               variant="secondary"
               className="mt-2 w-full md:hidden"
-              onClick={() => chatWithHostTeam({ hostId, hostTeamId: trip.property.hostTeam.id, propertyId: trip.property.id.toString() })}
+              onClick={() => chatWithHostTeam({ hostId, hostTeamId: trip.property.hostTeam.id, propertyId: trip.property.id })}
             >
               Message
             </Button>

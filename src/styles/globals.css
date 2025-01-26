@@ -41,8 +41,13 @@ body {
     --header-height: 56px;
     --footer-height: var(--mobile-header-height);
     --screen-minus-header: calc(100vh - var(--header-height));
-    --screen-minus-header-n-footer: calc(100vh - var(--header-height) - var(--footer-height));
-    --screen-minus-header-n-footer-n-searchbar: calc(100vh - var(--header-height) - var(--footer-height) - var(--searchbar-height));
+    --screen-minus-header-n-footer: calc(
+      100vh - var(--header-height) - var(--footer-height)
+    );
+    --screen-minus-header-n-footer-n-searchbar: calc(
+      100vh - var(--header-height) - var(--footer-height) -
+        var(--searchbar-height)
+    );
   }
 
   @media (min-width: 640px) {

@@ -47,7 +47,7 @@ const RequestSubmittedDialog: React.FC<RequestSubmittedDialogProps> = ({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent>
-        <DialogTitle>
+        <DialogTitle className="my-4 flex flex-row items-center gap-x-2">
           <CircleCheckBig color="#528456" className="mr-2" />
           Success! Your Request Has Been Sent!
         </DialogTitle>

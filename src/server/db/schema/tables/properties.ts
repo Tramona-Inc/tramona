@@ -387,9 +387,55 @@ export const properties = pgTable(
     )
       .notNull()
       .default(5),
+    cleaningFeePerStay: integer("cleaning_fee_per_stay").default(0).notNull(),
+    petFeePerStay: integer("pet_fee_per_stay").default(0).notNull(),
+    extraGuestFeePerNight: integer("extra_guest_fee_per_night")
+      .default(0)
+      .notNull(),
+    maxGuestsWithoutFee: integer("max_guests_without_fee"),
+    randomPercentageForScrapedProperties: integer(
+      "random_percentage_for_scraped_properties",
+    ),
   },
   (t) => ({
     spatialIndex: index("spacial_index").using("gist", t.latLngPoint),
+    hostTeamIdIdx: index("properties_host_team_id_idx").on(t.hostTeamId),
+    propertyTypeRoomTypeGuestsIdx: index("properties_type_room_guests_idx").on(
+      t.propertyType,
+      t.roomType,
+      t.maxNumGuests,
+    ),
+    cityIdx: index("properties_city_idx").on(t.city),
+    cityTypeRoomGuestsIdx: index("properties_city_type_room_guests_idx").on(
+      t.city,
+      t.propertyType,
+      t.roomType,
+      t.maxNumGuests,
+    ),
+    amenitiesGinIdx: index("properties_amenities_gin_idx")
+      .on(
+        // Corrected syntax here
+        t.amenities,
+      )
+      .with({ using: "gin" }),
+    bookItNowAutoOfferIdx: index("properties_book_it_now_auto_offer_idx").on(
+      t.bookItNowEnabled,
+      t.autoOfferEnabled,
+    ),
+    statusIdx: index("properties_status_idx").on(t.status),
+    originalNightlyPriceIdx: index("properties_nightly_price_idx").on(
+      t.originalNightlyPrice,
+    ),
+    avgRatingNumRatingsIdx: index("properties_avg_rating_num_ratings_idx").on(
+      t.avgRating,
+      t.numRatings,
+    ),
+    datesLastUpdatedIdx: index("properties_dates_last_updated_idx").on(
+      t.datesLastUpdated,
+    ),
+    listedStatusIdx: index("properties_listed_status_idx")
+      .on(t.status)
+      .where(sql`${t.status} = 'Listed'`), // Partial index for listed properties
   }),
 );
 

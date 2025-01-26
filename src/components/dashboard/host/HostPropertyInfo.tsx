@@ -11,7 +11,7 @@ import HostArrivalGuide from "./HostArrivalGuide";
 
 export default function HostPropertyInfo({ property }: { property: Property }) {
   return (
-    <div key={property.id} className="h-full space-y-4">
+    <div key={property.id} className="relative my-3 h-full space-y-4">
       <h1 className="text-2xl font-bold">Properties editor</h1>
       <Tabs defaultValue="details" className="h-full">
         <TabsList noBorder>

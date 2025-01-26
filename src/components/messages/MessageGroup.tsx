@@ -2,14 +2,17 @@ import { type MessageType } from "@/server/db/schema";
 import { formatRelative } from "date-fns";
 import { useSession } from "next-auth/react";
 import { type MessageGroup } from "./groupMessages";
-import { cn } from "@/utils/utils";
+import { capitalize, cn } from "@/utils/utils";
+import { AnonymousAvatar } from "../ui/avatar";
+import UserAvatar from "../_common/UserAvatar";
+import { useRouter } from "next/router";
 
 export function MessageGroup({ messageGroup }: { messageGroup: MessageGroup }) {
   const { data: session } = useSession();
   const { user, messages } = messageGroup;
   const firstMessage = messages[0];
+  const router = useRouter();
   if (!firstMessage || !session) return null;
-
   const me = session.user.id === user?.id;
 
   return (
@@ -19,34 +22,62 @@ export function MessageGroup({ messageGroup }: { messageGroup: MessageGroup }) {
         me ? "justify-end" : "justify-start",
       )}
     >
-      {/* {user ? <UserAvatar {...user} /> : <AnonymousAvatar />} */}
-      <div
-        className={cn(
-          "max-w-72 rounded-xl px-4 py-2 sm:max-w-96 lg:max-w-prose",
-          me ? "bg-teal-900 text-white" : "bg-white",
-        )}
-      >
-        {/* <div className="flex items-baseline gap-2">
-          {user ? (
-            <p className="font-semibold leading-none">{user.name}</p>
+      <div className="flex flex-row items-start gap-x-2">
+        {!me &&
+          (user ? (
+            <div className="mt-7">
+              <UserAvatar
+                {...user}
+                onClick={() => router.push(`/profile/view/${user.id}`)}
+              />
+            </div>
           ) : (
-            <p className="leading-none text-muted-foreground">[deleted user]</p>
-          )}
-        </div> */}
-
-        <div className="space-y-1">
-          {messages.map((message) => (
-            <Message key={message.id} message={message} />
+            <AnonymousAvatar />
           ))}
-        </div>
-        <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
-          <p>{formatRelative(firstMessage.createdAt, new Date())}</p>
-          <p>
-            {session.user.id === firstMessage.userId && firstMessage.read && (
-              <>Read</>
+        <div
+          className={cn(
+            "flex flex-col items-start gap-1",
+            me ? "justify-end" : "justify-start",
+          )}
+        >
+          {!me && (
+            <p className="ml-3 text-start text-sm text-gray-600">
+              {user ? `${capitalize(user.firstName!)}` : "[deleted user]"}
+            </p>
+          )}
+          <div
+            className={cn(
+              "max-w-72 rounded-xl px-4 py-2 sm:max-w-96 lg:max-w-prose",
+              me ? "bg-teal-900 text-white" : "bg-zinc-100",
             )}
-          </p>
+          >
+            <div className="space-y-1">
+              {messages.map((message) => (
+                <Message key={message.id} message={message} />
+              ))}
+            </div>
+            <div
+              className={`flex items-center justify-between gap-2 text-xs ${me ? "text-zinc-300" : "text-muted-foreground"}`}
+            >
+              <p>{formatRelative(firstMessage.createdAt, new Date())}</p>
+              <p>
+                {session.user.id === firstMessage.userId &&
+                  firstMessage.read && <>Read</>}
+              </p>
+            </div>
+          </div>
         </div>
+        {me &&
+          (user.image ? (
+            <div className="mt-2">
+              <UserAvatar
+                {...user}
+                onClick={() => router.push(`/profile/view/${user.id}`)}
+              />
+            </div>
+          ) : (
+            <AnonymousAvatar />
+          ))}
       </div>
     </div>
   );

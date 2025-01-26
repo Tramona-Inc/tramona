@@ -57,10 +57,10 @@ export default function HostTeamsDropdownItems({
               {team.name}
             </DropdownMenuCheckboxItem>
           ))}
-          <DropdownMenuItem onClick={() => setChtDialogOpen(true)}>
+          {/* <DropdownMenuItem onClick={() => setChtDialogOpen(true)}>
             <PlusCircleIcon />
             Create Team
-          </DropdownMenuItem>
+          </DropdownMenuItem> */}
         </DropdownMenuSubContent>
       </DropdownMenuSub>
     </>

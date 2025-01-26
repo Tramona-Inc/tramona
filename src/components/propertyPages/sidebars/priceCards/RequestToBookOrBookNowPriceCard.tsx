@@ -32,6 +32,7 @@ import { isNumber } from "lodash";
 import { useGetOriginalPropertyPricing } from "@/utils/payment-utils/useGetOriginalPropertyPricing";
 import Link from "next/link";
 import { MAX_REQUEST_TO_BOOK_PERCENTAGE } from "@/utils/constants";
+import { properties } from "../../../../server/db/schema/tables/properties";
 
 export type RequestToBookDetails = {
   checkIn: Date;
@@ -332,8 +333,8 @@ export default function RequestToBookOrBookNowPriceCard({
       <CardContent className="flex flex-col gap-y-2 rounded-xl md:p-2 xl:p-6">
         <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
           <PopoverTrigger asChild>
-            <button className="grid w-full grid-cols-2 overflow-hidden rounded-lg border text-left focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
-              <div className="border-r p-3">
+            <button className="grid w-full grid-cols-2 overflow-hidden rounded-lg border text-left focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 sm:grid-cols-1">
+              <div className="border-r p-3 sm:border-r-0">
                 <div className="text-sm text-muted-foreground">CHECK-IN</div>
                 <div className="text-base font-medium">
                   {format(date.from, "MM/dd/yyyy")}
@@ -623,13 +624,13 @@ export default function RequestToBookOrBookNowPriceCard({
           <>
             <div>
               <div className="mb-1 text-2xl font-bold">Book it now for</div>
-              <div className="flex items-baseline gap-2">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-baseline">
                 <div className="text-4xl font-bold text-primary lg:text-5xl">
                   {propertyPricingPerNightAfterTierDiscount &&
                   propertyPricing.originalPrice &&
                   propertyPricingPerNightAfterTierDiscount <
                     propertyPricing.originalPrice / numOfNights ? (
-                    <div className="flex flex-row items-start gap-x-2 text-base">
+                    <div className="flex flex-col gap-2 text-base sm:flex-row sm:items-start">
                       <p className="text-3xl">
                         {formatCurrency(
                           propertyPricingPerNightAfterTierDiscount,
@@ -647,8 +648,20 @@ export default function RequestToBookOrBookNowPriceCard({
                     </span>
                   )}
                 </div>
-                <span className="text-xl text-muted-foreground">Per Night</span>
+                <span className="mt-2 text-xl text-muted-foreground sm:ml-2 sm:mt-0">
+                  Per Night
+                </span>
               </div>
+              {property.randomPercentageForScrapedProperties && (
+                <div className="my-3 text-xs">
+                  Save{" "}
+                  <span className="text-green-700">
+                    {property.randomPercentageForScrapedProperties}%{" "}
+                  </span>
+                  on fees compared to{" "}
+                  <span className="text-destructive">Airbnb</span>!
+                </div>
+              )}
               <Button
                 variant="link"
                 className="mt-1 flex items-center gap-1 px-0 text-muted-foreground"
@@ -670,7 +683,7 @@ export default function RequestToBookOrBookNowPriceCard({
               )}
             </div>
 
-            <div className="grid grid-cols-2 gap-1">
+            <div className="grid grid-cols-2 gap-1 sm:grid-cols-1">
               <Button
                 variant="outline"
                 className={`col-auto w-full px-2 text-sm tracking-tight lg:text-base ${

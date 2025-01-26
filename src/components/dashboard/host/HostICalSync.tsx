@@ -14,10 +14,13 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Copy, Edit2, CheckCircle, X } from "lucide-react";
-import useBannerStore from "@/utils/store/bannerStore";
+import { Copy, CheckCircle } from "lucide-react";
 import HostICalHowToDialog from "./HostICalHowToDialog";
+import Image from "next/image";
 
+//Images
+import Group1 from "@/../public/assets/images/ical-modal/Group1.png";
+import Group2 from "@/../public/assets/images/ical-modal/Group2.png";
 // ------------------------------------------------------------------
 // A simple Progress Indicator for the multi-step flow
 // ------------------------------------------------------------------
@@ -56,9 +59,9 @@ function Step1Introduction({ onNext }: { onNext: () => void }) {
   return (
     <div className="space-y-6 text-center">
       <p className="text-base">
-        To keep your bookings up-to-date and avoid double-bookings, we’ll
-        connect your Tramona calendar to Airbnb via iCal. After you grab the
-        link from Airbnb, you’ll come back here.
+        To keep your bookings up-to-date and avoid double-bookings, we&apos;ll
+        connect your Tramona calendar directly to Airbnb. Click the button below
+        and then return here for more instructions.
       </p>
       <Button
         onClick={openAirbnb}
@@ -89,9 +92,11 @@ function Step2Availability({
       </p>
       <div className="relative h-64 w-full overflow-hidden rounded-md border border-gray-300">
         {/* Replace with your real screenshot/image */}
-        <img
-          src="/placeholder.svg?height=256&width=448"
+        <Image
+          src={Group1}
           alt="Airbnb calendar page with Availability tab highlighted"
+          width={500}
+          height={300}
           className="h-full w-full object-contain"
         />
       </div>
@@ -118,16 +123,17 @@ function Step3ConnectWebsite({
   return (
     <div className="space-y-6">
       <p className="text-base">
-        Scroll down until you see <strong>“Connect calendars”</strong> or
-        <strong> “Connect to another website”</strong>. Click it to get the
-        Airbnb iCal link (labeled “Step 1” on Airbnb). Copy that link and come
-        back here.
+        Scroll down until you see <strong>“Connect calendars”</strong>. Click
+        that section, and copy the <strong>Airbnb calendar link</strong>. You
+        will need to enter that in the next step.
       </p>
       <div className="relative h-64 w-full overflow-hidden rounded-md border border-gray-300">
         {/* Replace with your real screenshot/image */}
-        <img
-          src="/placeholder.svg?height=256&width=448"
+        <Image
+          src={Group2}
           alt="Airbnb page with Connect to another website highlighted"
+          width={500}
+          height={300}
           className="h-full w-full object-contain"
         />
       </div>
@@ -181,7 +187,7 @@ function Step4PasteAirbnbLink({
   return (
     <div className="space-y-6">
       <p className="text-base">
-        Paste the Airbnb iCal link you just copied into the field below.
+        Paste the Airbnb calender link you just copied into the field below.
       </p>
       <div>
         <Label htmlFor="airbnbIcal" className="mb-1 block font-medium">
@@ -234,12 +240,12 @@ function Step5TramonaIcalLink({
   return (
     <div className="space-y-6">
       <p className="text-base">
-        For a two-way sync, copy Tramona’s iCal URL below and paste it back into
-        Airbnb (on the same “Connect calendars” page).
+        To ensure a two-way sync, copy Tramona’s calendar link below, and paste
+        it back into Airbnb on the same “Connect calendars” section.
       </p>
       <div>
         <Label htmlFor="tramonaIcal" className="mb-1 block font-medium">
-          Tramona iCal URL
+          Tramona calender link
         </Label>
         <div className="flex flex-col sm:flex-row sm:space-x-2">
           <Input
@@ -252,7 +258,7 @@ function Step5TramonaIcalLink({
         </div>
       </div>
       <Button
-        variant="outline"
+        variant="primary"
         className="w-full sm:w-auto"
         onClick={openAirbnbAgain}
       >
@@ -294,9 +300,12 @@ function Step6Confirmation({
       <CheckCircle className="mx-auto h-16 w-16 text-green-500" />
       <h3 className="text-xl font-semibold">Almost done!</h3>
       <p className="text-base">
-        Once you click “Sync & Finish,” Tramona will automatically update your
-        Airbnb calendar every few hours. If you need an immediate update, use
-        “Sync Now” in your dashboard.
+        <strong>
+          Imprtant: Tramona will automatically update your Airbnb calendar every
+          two hours.
+        </strong>{" "}
+        If you need an immediate update, use “Sync Now” button in your Airbnb
+        dashboard.
       </p>
       <div className="flex flex-col items-center justify-center space-y-2 sm:flex-row sm:space-x-2 sm:space-y-0">
         <Button onClick={onFinish} variant="outline">
@@ -333,6 +342,7 @@ function EnhancedICalModal({
 
   // The final form submit that calls your TRPC mutation
   const handleFormSubmit = async () => {
+    console.log("iCalLink:", iCalLink);
     try {
       // platformBookedOn: "airbnb" for your logic
       await syncCalendar({
@@ -407,14 +417,11 @@ function EnhancedICalModal({
         <DialogTitle>
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold">Sync Your iCal</h1>
-            <Button variant="ghost" size="icon" onClick={onClose}>
-              <X className="h-4 w-4" />
-            </Button>
           </div>
         </DialogTitle>
         <DialogDescription className="text-sm text-gray-600">
-          Follow these steps to connect Tramona & Airbnb and avoid double
-          bookings.
+          Follow these steps to connect your Tramona calendar with Airbnb&apos;s
+          to avoid double bookings.
         </DialogDescription>
       </DialogHeader>
 
@@ -429,18 +436,14 @@ function EnhancedICalModal({
 // ------------------------------------------------------------------
 export default function HostICalSync({
   property,
+  calOpen,
+  setCalOpen,
 }: {
-  property: Property | null;
+  property: Property | undefined;
+  calOpen: boolean;
+  setCalOpen: (open: boolean) => void;
 }) {
-  const { setIsCalendar } = useBannerStore();
-  const [open, setOpen] = useState(false);
   const { toast } = useToast();
-
-  useEffect(() => {
-    if (property && !property.iCalLink) {
-      setIsCalendar(true);
-    }
-  }, [property, setIsCalendar]);
 
   if (!property) {
     return <Spinner />;
@@ -469,20 +472,20 @@ export default function HostICalSync({
     <div className="my-6 flex w-full flex-col items-start justify-start gap-x-4 gap-y-3 md:flex-row md:items-end 2xl:mx-8">
       <div className="flex flex-row gap-x-2">
         <HostICalHowToDialog />
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={calOpen} onOpenChange={setCalOpen}>
           <DialogTrigger className="w-full flex-1">
             {property.iCalLink ? (
-              <Button variant="primary">Edit iCal Link</Button>
+              <Button variant="primary">Edit Airbnb Calendar Link</Button>
             ) : (
-              <Button size="lg">Sync your iCal</Button>
+              <Button size="lg">Sync Calendar with Airbnb</Button>
             )}
           </DialogTrigger>
 
           {/* Our Enhanced Multi-step Wizard */}
-          {open && (
+          {calOpen && (
             <EnhancedICalModal
               property={property}
-              onClose={() => setOpen(false)}
+              onClose={() => setCalOpen(false)}
             />
           )}
         </Dialog>

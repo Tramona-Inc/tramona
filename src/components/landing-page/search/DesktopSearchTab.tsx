@@ -32,6 +32,7 @@ import {
 import { Property } from "@/server/db/schema";
 import MobileSearchFormBar from "./MobileSearchFormBar";
 import { UseFormReturn } from "react-hook-form";
+import { ITEMS_PER_PAGE } from "@/utils/constants";
 
 interface DesktopSearchTabProps {
   isCompact?: boolean;
@@ -83,7 +84,10 @@ export function DesktopSearchTab({
 
   useEffect(() => {
     const data = searchSchema.safeParse(router.query);
-    if (data.success) form.reset(data.data);
+    if (data.success && data.data && Object.keys(data.data).length > 0) {
+      // Added checks here
+      form.reset(data.data);
+    }
   }, [form, router.query]);
 
   const filterProperties = (
@@ -166,6 +170,14 @@ export function DesktopSearchTab({
         return updatedProperties;
       });
 
+      let currentPropertiesLength =
+        propertiesInArea.hostProperties.length +
+        propertiesInArea.scrapedProperties.length;
+
+      if (currentPropertiesLength >= ITEMS_PER_PAGE) {
+        setIsSearching(false);
+      }
+
       const airbnbResultsPromise = utils.misc.scrapeAirbnbInitialPage.fetch({
         checkIn: values.checkIn,
         checkOut: values.checkOut,
@@ -191,6 +203,12 @@ export function DesktopSearchTab({
         });
         return updatedProperties;
       });
+
+      currentPropertiesLength =
+        currentPropertiesLength + airbnbResults.res.length;
+      if (currentPropertiesLength >= ITEMS_PER_PAGE) {
+        setIsSearching(false);
+      }
 
       const cursors =
         airbnbResults.data.staysSearch.results.paginationInfo.pageCursors.slice(

@@ -341,7 +341,7 @@ export default async function webhook(
                 await createConversationWithHostOrAdminTeam(
                   paymentIntentSucceeded.metadata.user_id,
                   currentProperty!.hostTeam.id,
-                  currentProperty!.id.toString(),
+                  currentProperty!.id,
                 );
               }
               // ------ Send Slack When trip is booked ------

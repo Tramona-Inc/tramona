@@ -2,7 +2,7 @@ import { type MessageType, type User } from "@/server/db/schema";
 import { type ChatMessageType } from "@/utils/store/messages";
 
 export type MessageGroup = {
-  user: Pick<User, "name" | "email" | "image" | "id"> | null;
+  user: Pick<User, "firstName" | "lastName" | "email" | "image" | "id"> | null;
   messages: MessageType[];
 };
 

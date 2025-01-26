@@ -9,7 +9,7 @@ export function useChatWithUser() {
   const { mutateAsync: createConversation } =
     api.messages.createConversationHostWithUser.useMutation();
 
-  const chatWithUser = async (userId: string, propertyId: string) => {
+  const chatWithUser = async (userId: string, propertyId: number) => {
     try {
       const conversation = await createConversation({
         userId,
@@ -23,7 +23,7 @@ export function useChatWithUser() {
 
       await new Promise((resolve) => setTimeout(resolve, 500));
 
-      await router.push(`/host/messages?conversationId=${conversation.id}`);
+      await router.push(`/host/messages/${conversation.id}`);
     } catch (error) {
       const tRPCError = error as TRPCError;
       console.error("Failed to create conversation:", tRPCError.message);

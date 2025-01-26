@@ -298,7 +298,7 @@ export function HostPropertyEditBtn({
   };
 
   return (
-    <div className="z-40 block space-x-2 sm:absolute sm:right-1 sm:top-1">
+    <div className="z-40 flex flex-row gap-x-2 sm:absolute sm:right-4 sm:top-0 sm:gap-x-2">
       {editing ? (
         <>
           <Button

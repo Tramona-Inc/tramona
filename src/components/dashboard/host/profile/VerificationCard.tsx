@@ -22,9 +22,9 @@ export function VerificationCard() {
           <Check className="h-4 w-4 text-green-500" />
           <span className="text-sm">Phone number</span>
         </div>
-        <a href="#" className="text-sm text-blue-600 hover:underline">
+        {/* <a href="#" className="text-sm text-blue-600 hover:underline">
           Learn about identity verification
-        </a>
+        </a> */}
       </CardContent>
     </Card>
   );

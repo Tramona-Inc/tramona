@@ -4,7 +4,7 @@
 **/node_modules
 /.pnp
 .pnp.js
-
+node_modules/
 # testing
 /coverage
 /src/pages/hidden-test.tsx
@@ -19,6 +19,9 @@ next-env.d.ts
 
 # production
 /build
+
+#emails
+/packages/transactional/node_modules
 
 # misc
 .DS_Store

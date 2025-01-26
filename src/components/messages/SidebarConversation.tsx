@@ -3,10 +3,11 @@ import {
   useConversation,
   type Conversation,
 } from "@/utils/store/conversations";
-import { cn } from "@/utils/utils";
+import { capitalizeFirstLetter, cn } from "@/utils/utils";
 import { useSession } from "next-auth/react";
 import UserAvatar from "../_common/UserAvatar";
 import { formatRelative } from "date-fns";
+import { useIsOnlyMd } from "@/utils/utils";
 
 export function SidebarConversation({
   conversation,
@@ -17,14 +18,12 @@ export function SidebarConversation({
   isSelected: boolean;
   setSelected: (arg0: Conversation) => void;
 }) {
+  const isOnlyMd = useIsOnlyMd();
   const { participants, messages, name } = conversation;
 
   const displayParticipants = participants
-    .map(
-      (participant) =>
-        participant.firstName
-          ? participant.firstName + " " + participant.lastName
-          : participant.id,
+    .map((participant) =>
+      participant.firstName ? participant.firstName : participant.id,
     )
     .join(", ");
 
@@ -62,7 +61,7 @@ export function SidebarConversation({
       <UserAvatar
         email={participants[0]?.email}
         image={participants[0]?.image}
-        name={participants[0]?.name}
+        name={capitalizeFirstLetter(participants[0]?.firstName ?? "Tramona")}
       />
 
       <div className="flex-1">
@@ -88,11 +87,6 @@ export function SidebarConversation({
           </span>
           {messages[0]?.message ?? ""}
         </p>
-        {/* {session?.user.role === "admin" && (
-          <p className="line-clamp-1 text-xs uppercase text-muted-foreground">
-            Conversation Id: {id}
-          </p>
-        )} */}
       </div>
     </button>
   );

@@ -13,6 +13,7 @@ export default function MessagesContent({
   selectedConversation: Conversation | null;
   setSelected: (arg0: Conversation | null) => void;
 }) {
+  console.log(selectedConversation);
   return (
     <ErrorBoundary>
       {selectedConversation ? (

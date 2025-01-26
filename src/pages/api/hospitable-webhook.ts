@@ -28,7 +28,6 @@ import {
 } from "@/server/external-listings-scraping/scrapeAirbnbListing";
 import { airbnbHeaders } from "@/utils/constants";
 import { addDays } from "@/utils/utils";
-
 export async function insertHost(id: string) {
   // Insert Host info
   const user = await db.query.users.findFirst({
@@ -248,7 +247,7 @@ type ReservationResponse = {
 };
 type HospitableWebhook = ListingCreatedWebhook | ChannelActivatedWebhook;
 
-export default async function webhook(
+export default async function HospitableWebhook(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
@@ -274,6 +273,14 @@ export default async function webhook(
         console.log("listing created", webhookData.data);
 
         const userId = webhookData.data.channel.customer.id;
+
+        const user = await db.query.users
+        .findFirst({
+          where: eq(users.id, userId),
+        })
+        .then((res) => res!);
+
+      const initialTeamId = await createInitialHostTeam(user); //CREATING THE HOST TEAM ON LISTING INITIALIZATION
 
         const imageResponse = await axios.get<ImageResponse>(
           `https://connect.hospitable.com/api/v1/customers/${userId}/listings/${webhookData.data.id}/images`,
@@ -342,7 +349,6 @@ export default async function webhook(
           checkOut: dateIn5Days,
         });
 
-        console.log("listingDataUrl", listingDataUrl);
         const reviewsUrl = getReviewsUrl(listingId);
 
         const [listingData, reviewsData] = (await Promise.all(
@@ -407,14 +413,6 @@ export default async function webhook(
         if (!hostProfile) {
           throw new Error(`Host profile not found for user ${userId}`);
         }
-
-        const user = await db.query.users
-          .findFirst({
-            where: eq(users.id, userId),
-          })
-          .then((res) => res!);
-
-        const initialTeamId = await createInitialHostTeam(user); //CREATING THE HOST TEAM ON LISTING INITIALIZATION
 
         const propertyId = await db
           .insert(properties)

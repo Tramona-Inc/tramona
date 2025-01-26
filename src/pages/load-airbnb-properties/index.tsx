@@ -8,7 +8,7 @@ const loadingStates = [
   "Finalizing account creation",
 ];
 
-const TOTAL_DURATION = 9000;
+const TOTAL_DURATION = 20000;
 const UPDATE_INTERVAL = 50;
 
 function useLoadingState() {
@@ -78,7 +78,7 @@ export default function LoadingPage() {
   useEffect(() => {
     if (isComplete) {
       setTimeout(() => {
-        void router.push("/");
+        void router.push("/host");
       }, 1000);
     }
   }, [isComplete, router]);

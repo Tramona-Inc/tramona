@@ -12,7 +12,8 @@ import { useSession } from "next-auth/react";
 import ProfileVericationCard from "@/components/dashboard/host/profile/ProfileVericationCard";
 import { fieldConfig } from "@/components/dashboard/host/profile/fieldConfig";
 import { ViewProfileField } from "@/components/dashboard/host/profile/ViewProfileField";
-
+import ListingsCarousel from "@/components/profile/ListingsCarousel";
+import { AnonymousAvatar } from "@/components/ui/avatar";
 function Page() {
   const router = useRouter();
   const { data: session } = useSession();
@@ -35,29 +36,36 @@ function Page() {
       {userWProfile ? (
         <div className="mx-auto my-10 max-w-8xl space-y-6 p-4">
           <div className="flex flex-col gap-6 md:flex-row">
-            <div className="flex flex-col gap-6">
-              {/* Profile Card */}
+            {/* Profile Card */}
+            <div className="space-y-4">
               <Card className="">
                 <CardContent className="p-6">
                   <div className="relative">
-                    <div className="relative h-20 w-20 overflow-hidden rounded-full">
-                      <Image
-                        src={userWProfile.user.image!}
-                        alt={userWProfile.user.firstName ?? "users image"}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
+                    {userWProfile.user.image ? (
+                      <div className="relative h-28 w-28 overflow-hidden rounded-full">
+                        <Image
+                          src={userWProfile.user.image}
+                          alt={userWProfile.user.firstName ?? "users image"}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <AnonymousAvatar className="size-20" />
+                    )}
                   </div>
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-2xl font-semibold">
+                  <div>
+                    <h2 className="mt-2 flex items-center text-2xl font-semibold">
                       {userWProfile.user.firstName}{" "}
+                      <span className="relative ml-2">
+                        <Check className="h-5 w-5 text-green-500" />
+                        <div className="absolute -bottom-1 -right-1 rounded-full bg-green-500 p-1">
+                          <Check className="h-4 w-4 text-white" />
+                        </div>
+                      </span>
                     </h2>
-                    <div className="rounded-full bg-green-600 p-1">
-                      <Check className="h-4 w-4 text-white" />
-                    </div>
+                    <p className="text-sm text-muted-foreground">Host</p>
                   </div>
-                  <p className="text-sm text-muted-foreground">Host</p>
                   <div className="flex gap-6">
                     <div>
                       <p className="font-semibold">1</p>
@@ -122,7 +130,8 @@ function Page() {
                     </div>
                   );
                 })}
-              </div>
+              </div>{" "}
+              <ListingsCarousel userWProfile={userWProfile} />
             </div>
           </div>
         </div>

@@ -128,9 +128,7 @@ export default function PropertyPage({
     void createReviewBackupImages();
   }, [property.reviews.length]);
 
-  const hostName =
-    property.hostName ??
-    `${property.hostTeam.owner.firstName} ${property.hostTeam.owner.lastName}`;
+  const hostName = property.hostName ?? `${property.hostTeam.owner.firstName}`;
 
   const originalListing = getOriginalListing(property);
 
@@ -276,7 +274,7 @@ export default function PropertyPage({
                     hostTeamId: isHospitableUser
                       ? property.hostTeam.id
                       : undefined,
-                    propertyId: property.id.toString(),
+                    propertyId: property.id,
                   })
                     .then()
                     .catch((err: TRPCClientErrorLike<AppRouter>) => {
@@ -359,7 +357,7 @@ export default function PropertyPage({
               <ChatOfferButton
                 offerHostId={offer.property.hostTeam.ownerId}
                 hostTeamId={property.hostTeam.id}
-                propertyId={property.id.toString()}
+                propertyId={property.id}
               />
             )}
           </section>

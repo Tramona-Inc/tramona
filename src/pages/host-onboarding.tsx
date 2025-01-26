@@ -17,6 +17,11 @@ import OnboardingLinkInput from "@/components/host/onboarding/OnboardingLinkInpu
 import Onboarding13 from "@/components/host/onboarding/Onboarding13";
 import { getFeed } from "@/server/api/routers/feedRouter";
 import { type InferGetStaticPropsType } from "next";
+import { useSession } from "next-auth/react";
+import { api } from "@/utils/api";
+import { useRouter } from "next/router";
+import { useToast } from "@/components/ui/use-toast";
+import { useEffect, useState } from "react";
 
 export const getStaticProps = async () => {
   const requestFeed = await getFeed({ maxNumEntries: 10 }).then((r) =>
@@ -33,6 +38,30 @@ type Props = InferGetStaticPropsType<typeof getStaticProps>;
 export default function Onboarding({ requestFeed }: Props) {
   const progress = useHostOnboarding((state) => state.progress);
   const setProgress = useHostOnboarding((state) => state.setProgress);
+  const [isCheckingHostStatus] = useState(false);
+  const { data: session } = useSession({ required: true });
+  const router = useRouter();
+  const { toast } = useToast();
+  const { data: isUserHostTeamOwner } =
+    api.hostTeams.isUserHostTeamOwner.useQuery(
+      {
+        userId: session?.user.id ?? "",
+      },
+      {
+        enabled: isCheckingHostStatus && !!session,
+      },
+    );
+
+  useEffect(() => {
+    if (isUserHostTeamOwner) {
+      toast({
+        variant: "destructive",
+        title: `You are already a host team owner`,
+        description: "You can't create a new host team",
+      });
+      void router.push("/host");
+    }
+  }, [isUserHostTeamOwner, router, toast]);
 
   function onPressNext() {
     setProgress(progress + 1);
@@ -53,7 +82,7 @@ export default function Onboarding({ requestFeed }: Props) {
       {progress === 10 && <OnboardingLinkInput />}
       {progress === 11 && <Onboarding11 />}
       {progress === 12 && <Onboarding12 />}
-      {progress === 13 && <Onboarding13 requestFeed={requestFeed}/>}
+      {progress === 13 && <Onboarding13 requestFeed={requestFeed} />}
     </OnboardingLayout>
   );
 }

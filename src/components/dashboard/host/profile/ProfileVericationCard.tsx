@@ -29,9 +29,9 @@ function ProfileVericationCard({
           <Check className="h-4 w-4 text-green-600" />
           <span>Phone number</span>
         </div>
-        <Button variant="link" className="h-auto p-0">
+        {/* <Button variant="link" className="h-auto p-0">
           Learn about identity verification
-        </Button>
+        </Button> */}
       </CardContent>
     </Card>
   );

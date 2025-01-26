@@ -86,7 +86,6 @@ export async function cancelTripByPaymentIntent({
       where: eq(groups.id, currentTrip.groupId),
     });
 
-    console.log("Request Group Id: ", requestGroupId);
     const requestGroup = await db.query.groupMembers.findMany({
       where: eq(groupMembers.groupId, requestGroupId!.id),
       with: {
@@ -95,9 +94,9 @@ export async function cancelTripByPaymentIntent({
         },
       },
     });
-    console.log("Request Group: ", requestGroup);
+
     //get property name
-    console.log("Property: ", paymentIntentObject.metadata.property_id);
+
     const property = await db.query.properties.findFirst({
       columns: { name: true },
       where: eq(
@@ -106,7 +105,6 @@ export async function cancelTripByPaymentIntent({
       ),
     });
 
-    console.log("Property: ", property!.name);
     //send email to each member
     for (const member of requestGroup) {
       console.log("Sending Email to: ", member.user.email);

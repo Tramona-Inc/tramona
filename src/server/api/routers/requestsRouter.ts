@@ -15,12 +15,16 @@ import {
   offers,
   rejectedRequests,
   properties,
+  Property,
+  User,
+  Request,
 } from "@/server/db/schema";
 import {
   sendText,
   sendWhatsApp,
   getPropertiesForRequest,
   createLatLngGISPoint,
+  getRequestsForProperties,
 } from "@/server/server-utils";
 import { sendSlackMessage } from "@/server/slack";
 import { isIncoming } from "@/utils/formatters";
@@ -47,6 +51,110 @@ import { TRAVELER_MARKUP } from "@/utils/constants";
 import { differenceInDays } from "date-fns";
 
 export const requestsRouter = createTRPCRouter({
+  getById: protectedProcedure
+    .input(requestSelectSchema.pick({ id: true }))
+    .query(async ({ ctx, input }) => {
+      const request = await ctx.db.query.requests.findFirst({
+        where: eq(requests.id, input.id),
+        with: {
+          madeByGroup: { columns: { ownerId: true } },
+        },
+      });
+
+      if (!request) {
+        throw new Error("Request not found");
+      }
+
+      const propertiesForRequest = await getPropertiesForRequest(request, {
+        tx: ctx.db,
+      });
+
+      const traveler = await ctx.db.query.users.findFirst({
+        where: eq(users.id, request.madeByGroup.ownerId),
+        columns: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          name: true,
+          image: true,
+          location: true,
+          about: true,
+          dateOfBirth: true,
+        },
+      });
+
+      return {
+        ...request,
+        traveler,
+        properties: propertiesForRequest,
+      };
+    }),
+
+  getByIdForHost: protectedProcedure
+    .input(z.object({ id: z.number(), hostTeamId: z.number() }))
+    .query(async ({ ctx, input }) => {
+      console.log("getById");
+      // Fetch properties with requests, filter for just the host team of the request
+      const allHostData = await ctx.db.query.requests.findFirst({
+        where: eq(requests.id, input.id),
+        with: {
+          madeByGroup: { columns: { ownerId: true } },
+        },
+      });
+
+      if (!allHostData) {
+        throw new Error("Request not found");
+      }
+
+      const hostTeamId = input.hostTeamId;
+
+      const hostData = await ctx.db.query.properties.findMany({
+        where: and(
+          eq(properties.hostTeamId, hostTeamId),
+          eq(properties.status, "Listed"),
+        ),
+      });
+
+      console.log(hostData, "hostData");
+
+      const hostRequests = await getRequestsForProperties(hostData);
+
+      console.log(hostRequests, "hostRequests");
+
+      //Filter the results to match the specific request
+      let foundRequest:
+        | {
+            request: Request & {
+              traveler: Pick<
+                User,
+                | "firstName"
+                | "lastName"
+                | "name"
+                | "image"
+                | "location"
+                | "about"
+                | "dateOfBirth"
+                | "id"
+              >;
+            };
+            properties: (Property & { taxAvailable: boolean })[];
+          }
+        | undefined;
+      for (const { property, request } of hostRequests) {
+        console.log(request.id, "request.id");
+        console.log(input.id, "input.id");
+        if (request.id === input.id) {
+          foundRequest = { request, properties: [{ ...property }] }; // I am getting issues with types here, is there something I need to change?
+        }
+      }
+
+      if (!foundRequest) {
+        throw new Error("Request not found for this host team");
+      }
+
+      return foundRequest;
+    }),
+
   getMyRequests: protectedProcedure.query(async ({ ctx }) => {
     const myRequests = await ctx.db.query.requests
       .findMany({
@@ -405,59 +513,73 @@ export async function handleRequestSubmission(
     const numNights = getNumNights(input.checkIn, input.checkOut);
     const requestedNightlyPrice = input.maxTotalPrice / numNights;
 
-    for (const property of eligibleProperties) {
-      const propertyDetails = await tx.query.properties.findFirst({
-        where: eq(properties.id, property.id),
-      });
+    const eligiblePropertiesWithAutoOffers = eligibleProperties.filter(
+      (property) =>
+        property.autoOfferEnabled &&
+        property.originalListingId !== "877854804496138577",
+    );
 
-      if (
-        propertyDetails?.autoOfferEnabled &&
-        propertyDetails.originalListingId &&
-        propertyDetails.originalListingPlatform === "Airbnb" &&
-        propertyDetails.discountTiers
-      ) {
+    const autoOfferPromises = eligiblePropertiesWithAutoOffers.map(
+      async (property) => {
         try {
-          const airbnbTotalPrice = await scrapeAirbnbPrice({
-            airbnbListingId: propertyDetails.originalListingId,
-            params: {
-              checkIn: input.checkIn,
-              checkOut: input.checkOut,
-              numGuests: input.numGuests,
-            },
+          const propertyDetails = await tx.query.properties.findFirst({
+            where: eq(properties.id, property.id),
           });
 
-          const airbnbNightlyPrice = airbnbTotalPrice / numNights;
-
-          const percentOff =
-            ((airbnbNightlyPrice - requestedNightlyPrice) /
-              airbnbNightlyPrice) *
-            100;
-
-          const daysUntilCheckIn = differenceInDays(input.checkIn, new Date());
-
-          const applicableDiscount = propertyDetails.discountTiers.find(
-            (tier) => daysUntilCheckIn >= tier.days,
-          );
-
           if (
-            applicableDiscount &&
-            percentOff <= applicableDiscount.percentOff
+            propertyDetails?.autoOfferEnabled &&
+            propertyDetails.originalListingId &&
+            propertyDetails.originalListingPlatform === "Airbnb" &&
+            propertyDetails.discountTiers
           ) {
-            //create offer
-            const travelerOfferedPriceBeforeFees = getTravelerOfferedPrice({
-              totalBasePriceBeforeFees: requestedNightlyPrice * numNights,
-              travelerMarkup: TRAVELER_MARKUP,
+            const airbnbTotalPrice = await scrapeAirbnbPrice({
+              airbnbListingId: propertyDetails.originalListingId,
+              params: {
+                checkIn: input.checkIn,
+                checkOut: input.checkOut,
+                numGuests: input.numGuests,
+              },
             });
 
-            await tx.insert(offers).values({
-              requestId: request.id,
-              propertyId: property.id,
-              totalBasePriceBeforeFees: input.maxTotalPrice,
-              hostPayout: getHostPayout(requestedNightlyPrice * numNights),
-              travelerOfferedPriceBeforeFees,
-              checkIn: input.checkIn,
-              checkOut: input.checkOut,
-            });
+            if (!airbnbTotalPrice) {
+              return;
+            }
+            const airbnbNightlyPrice = airbnbTotalPrice / numNights;
+
+            const percentOff =
+              ((airbnbNightlyPrice - requestedNightlyPrice) /
+                airbnbNightlyPrice) *
+              100;
+
+            const daysUntilCheckIn = differenceInDays(
+              input.checkIn,
+              new Date(),
+            );
+
+            const applicableDiscount = propertyDetails.discountTiers.find(
+              (tier) => daysUntilCheckIn >= tier.days,
+            );
+
+            if (
+              applicableDiscount &&
+              percentOff <= applicableDiscount.percentOff
+            ) {
+              // create offer
+              const travelerOfferedPriceBeforeFees = getTravelerOfferedPrice({
+                totalBasePriceBeforeFees: requestedNightlyPrice * numNights,
+                travelerMarkup: TRAVELER_MARKUP,
+              });
+
+              await tx.insert(offers).values({
+                requestId: request.id,
+                propertyId: property.id,
+                totalBasePriceBeforeFees: input.maxTotalPrice,
+                hostPayout: getHostPayout(requestedNightlyPrice * numNights),
+                travelerOfferedPriceBeforeFees,
+                checkIn: input.checkIn,
+                checkOut: input.checkOut,
+              });
+            }
           }
         } catch (error) {
           console.error(
@@ -465,8 +587,21 @@ export async function handleRequestSubmission(
             error,
           );
         }
+      },
+    );
+
+    // Execute all auto offer promises simultaneously
+    const results = await Promise.allSettled(autoOfferPromises);
+
+    // Optional: You can process the results to log the outcome of each promise
+    results.forEach((result, index) => {
+      if (result.status === "rejected") {
+        console.error(
+          `Error with property ${eligiblePropertiesWithAutoOffers[index]?.id}:`,
+          result.reason,
+        );
       }
-    }
+    });
 
     const propertiesWithoutAutoOffers = eligibleProperties.filter(
       (property) => !property.autoOfferEnabled,

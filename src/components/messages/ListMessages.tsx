@@ -159,7 +159,8 @@ export default function ListMessages() {
           message,
           user: {
             id: session.user.id,
-            name: session.user.name,
+            firstName: session.user.firstName,
+            lastName: session.user.lastName,
             image: session.user.image,
             email: session.user.email,
           },
@@ -174,7 +175,8 @@ export default function ListMessages() {
         message,
         user: {
           id: participant.id,
-          name: participant.name,
+          firstName: participant.firstName,
+          lastName: participant.lastName,
           image: participant.image,
           email: participant.email,
         },
@@ -190,7 +192,7 @@ export default function ListMessages() {
       <div
         ref={scrollRef}
         onScroll={handleOnScroll}
-        className="relative flex flex-1 flex-col overflow-y-auto"
+        className="relative z-40 flex flex-1 flex-col overflow-y-auto bg-white"
       >
         <div className="flex-1"></div>
         <div className="absolute w-full space-y-8 p-4 pt-12">

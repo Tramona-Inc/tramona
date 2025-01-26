@@ -10,11 +10,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import { ReactNode } from "react";
+import { useRouter } from "next/router";
 
 export default function RebookingGuarantee() {
   return (
     <DashboardLayout>
-      <div className="mx-auto w-full space-y-12 rounded-lg bg-gray-50 p-8 pb-[calc(var(--mobile-header-height)+2rem)] lg:pb-8 shadow-lg">
+      <div className="mx-auto w-full space-y-12 rounded-lg bg-gray-50 p-8 pb-[calc(var(--mobile-header-height)+2rem)] shadow-lg lg:pb-8">
         <HeaderSection />
         <CoverageSection />
         <CommitmentSection />
@@ -172,6 +173,12 @@ function IssueResolutionItem({
 }
 
 function ConfidenceSection() {
+  const router = useRouter();
+
+  const handleBookNowClick = () => {
+    void router.push("/", undefined, { shallow: true });
+  };
+
   return (
     <div className="space-y-4 text-center">
       <h2 className="text-2xl font-semibold text-[#004236]">
@@ -185,8 +192,9 @@ function ConfidenceSection() {
       <Button
         size="lg"
         className="rounded-lg bg-[#004236] px-6 py-3 font-semibold text-white hover:bg-[#005a4a]"
+        onClick={handleBookNowClick}
       >
-        Book Your Stay Now
+        Book your stay now
       </Button>
     </div>
   );

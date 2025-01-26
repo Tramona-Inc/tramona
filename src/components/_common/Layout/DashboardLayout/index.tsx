@@ -52,15 +52,15 @@ export default function DashboardLayout({
 
   return (
     <>
-      <Header noBanner={noBanner} />
+      <Header />
       <div className="relative min-h-screen-minus-header-n-footer lg:flex">
         <div className="min-h-full min-w-0 lg:flex-1">
           <main className="relative min-h-full">{children}</main>
           {status !== "loading" && <MobileNav type={navType} />}
           <div className="hidden md:contents">
-            <MessagesPopover isMobile={false} isHostOnboarding={false} />
+            {/* <MessagesPopover isMobile={false} isHostOnboarding={false} /> */}
           </div>
-          {!noFooter && isMd && <Footer />}
+          {!noFooter && <Footer />}
         </div>
       </div>
     </>
