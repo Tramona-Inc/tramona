@@ -45,8 +45,6 @@ import { toast } from "@/components/ui/use-toast";
 import { errorToast } from "@/utils/toasts";
 import { TRPCClientErrorLike } from "@trpc/client";
 import { AppRouter } from "@/server/api/root";
-import { FaGalacticSenate } from "react-icons/fa";
-import useBannerStore from "@/utils/store/bannerStore";
 
 export default function CalendarComponent() {
   useSetInitialHostTeamId();
@@ -259,7 +257,8 @@ export default function CalendarComponent() {
           )}
         {!selectedProperty?.iCalLink && (
           <CardBanner className="cursor-pointer bg-red-500 text-sm text-white">
-                Please sync your calendar to get updated availability information for your listings&nbsp;
+            Please sync your calendar to get updated availability information
+            for your listings&nbsp;
             <a
               className="text-sm text-white hover:underline"
               onClick={() => setCalOpen(true)}
