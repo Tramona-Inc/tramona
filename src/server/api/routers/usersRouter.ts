@@ -111,6 +111,15 @@ export const usersRouter = createTRPCRouter({
         .returning();
     }),
 
+  updateLastTextAt: protectedProcedure
+    .input(z.object({ userId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db
+        .update(users)
+        .set({ lastTextAt: new Date() })
+        .where(eq(users.id, input.userId));
+    }),
+
   isHost: optionallyAuthedProcedure.query(async ({ ctx }) => {
     if (!ctx.user) return false;
     const res = await ctx.db.query.hostProfiles.findFirst({
