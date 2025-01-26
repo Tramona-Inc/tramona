@@ -257,7 +257,8 @@ export default function CalendarComponent() {
           )}
         {!selectedProperty?.iCalLink && (
           <CardBanner className="cursor-pointer bg-red-500 text-sm text-white">
-                Please sync your calendar to get updated availability information for your listings&nbsp;
+            Please sync your calendar to get updated availability information
+            for your listings&nbsp;
             <a
               className="text-sm text-white hover:underline"
               onClick={() => setCalOpen(true)}
