@@ -33,6 +33,7 @@ export const coHostRoles = {
     can: [
       "view_financial_reports",
       "modify_overall_pricing_strategy",
+      "invite_cohost_role",
       "update_cohost_role",
       "remove_cohost",
       //Listing

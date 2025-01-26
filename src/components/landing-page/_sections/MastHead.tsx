@@ -64,10 +64,12 @@ export default function MastHead() {
       const offsetPosition =
         elementPosition + window.pageYOffset - headerOffset;
 
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: "smooth",
-      });
+      setTimeout(() => {
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: "smooth",
+        });
+      }, 100);
     }
   };
 
@@ -82,22 +84,22 @@ export default function MastHead() {
     {
       question: "What's the benefit of listing on Tramona?",
       answer:
-        "Yes, as a host, you have the option to counter traveler requests, giving you flexibility and control over each booking.",
+        "Tramona acts as a way to effectly increase your bookings and revenue. Our goal is to supplement your existing booking channels, and make the life of a host easier.",
     },
     {
       question: "Can I invite a co-host?",
       answer:
-        "Absolutely. Tramona allows you to add a co-host to help manage requests and bookings on your property.",
+        "Absolutely. Tramona allows you to add a co-host to help manage requests and bookings on your property. This is available once a host account has been created.",
     },
     {
       question: "Can I choose which dates to book",
       answer:
-        "Tramona allows you to list your property at full price and still receive direct booking requests. You can offer exclusive discounts only when you choose, helping you fill empty nights without compromising on price.",
+        "Yes, you have full control over your property. You can choose which dates to book, which dates to offer, what prices you are interested in seeing and have the ability to counter traveler requests. You can set up book it now or request to book options.",
     },
     {
       question: "Can I choose which guests I want?",
       answer:
-        "Yes! Tramona integrates with other platforms to prevent double bookings, making it easy to manage your calendar.",
+        "Yes! Tramona allows you to view guests profiles and message them before booking. If there are ever any issues with a guest, please let us know ASAP",
     },
   ];
 

@@ -36,7 +36,7 @@ function ContactForm() {
 
   const { toast } = useToast();
 
-  const { mutateAsync } = api.emails.sendSupportEmail.useMutation({
+  const { mutateAsync, isLoading } = api.emails.sendSupportEmail.useMutation({
     onSuccess: () => {
       form.resetField("message", { defaultValue: "" });
 
@@ -111,8 +111,9 @@ function ContactForm() {
           type="submit"
           size="lg"
           className="w-full rounded-full sm:w-auto"
+          disabled={isLoading}
         >
-          Send
+          {isLoading ? "Sending..." : "Send"}
         </Button>
       </form>
     </Form>

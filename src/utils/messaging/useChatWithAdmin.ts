@@ -7,7 +7,7 @@ export function useChatWithAdmin() {
   const { mutateAsync: chatWithAdmin } =
     api.messages.createConversationWithAdmin.useMutation({
       onSuccess: (conversationId) => {
-        void router.push(`/messages?conversationId=${conversationId}`);
+        void router.push(`/messages/${conversationId}`);
       },
     });
 

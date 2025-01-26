@@ -306,14 +306,14 @@ export default function Onboarding1({
             forHost ? "m-0 items-start" : "my-6 items-center sm:mx-20",
           )}
         >
-          <div className="min-h-screen bg-gradient-to-b from-primary/5 to-background">
+          <div className="min-h-screen overflow-x-hidden bg-gradient-to-b from-primary/5 to-background">
             {/* Hero Section */}
-            <div className="container px-4 py-16 md:py-24">
+            <div className="mx-4 py-16 md:py-24">
               <div className="mx-auto max-w-3xl text-center">
-                <h1 className="mb-6 text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
+                <h1 className="mb-6 text-4xl font-bold tracking-tight sm:text-3xl md:text-6xl">
                   Get started hosting on Tramona
                 </h1>
-                <p className="mb-12 text-xl">
+                <p className="mb-12 text-lg lg:text-xl">
                   Hosts can expect to make 10-15% more when using Tramona to
                   book their empty nights earnings
                 </p>
@@ -322,40 +322,39 @@ export default function Onboarding1({
               {/* Main Card */}
               <Card className="mx-auto max-w-2xl">
                 <CardContent className="p-6">
-                  <div className="flex items-start gap-4 rounded-lg border p-4 shadow-sm">
-                    <div className="rounded-full bg-primary/10 p-2">
+                  <div className="mx-auto flex flex-col items-center gap-2 gap-y-1 rounded-lg border px-6 py-5 shadow-sm">
+                    <div className="mx-auto flex flex-row gap-x-3">
                       <Link2 className="h-6 w-6 text-primary" />
-                    </div>
-                    <div className="flex-1">
                       <h2 className="text-xl font-semibold">
                         Create a host account
                       </h2>
-                      <p className="mt-1 text-muted-foreground">
-                        When creating an account, you&apos;ll connect directly
-                        with Airbnb so ensure all your host settings and
-                        preferences are saved
-                      </p>
-                      <Button
-                        className="mt-4"
-                        size="lg"
-                        disabled={isLoading}
-                        onClick={async () => {
-                          setIsLoading(true);
-                          try {
-                            await createHospitableCustomer();
-                          } catch (error) {
-                            console.error("An error occurred:", error);
-                          } finally {
-                            setIsLoading(false);
-                          }
-                        }}
-                      >
-                        {isLoading
-                          ? "Redirecting to Hospitable Portal..."
-                          : "Create my host account"}
-                        {!isLoading && <ArrowRight className="ml-2 h-4 w-4" />}
-                      </Button>
                     </div>
+
+                    <p className="mt-2 text-center text-sm text-muted-foreground xl:text-base">
+                      When creating an account, you&apos;ll connect directly
+                      with Airbnb so ensure all your host settings and
+                      preferences are saved
+                    </p>
+                    <Button
+                      className="mt-5"
+                      size="lg"
+                      disabled={isLoading}
+                      onClick={async () => {
+                        setIsLoading(true);
+                        try {
+                          await createHospitableCustomer();
+                        } catch (error) {
+                          console.error("An error occurred:", error);
+                        } finally {
+                          setIsLoading(false);
+                        }
+                      }}
+                    >
+                      {isLoading
+                        ? "Redirecting to Hospitable Portal..."
+                        : "Create my host account"}
+                      {!isLoading && <ArrowRight className="ml-2 h-4 w-4" />}
+                    </Button>
                   </div>
                 </CardContent>
               </Card>

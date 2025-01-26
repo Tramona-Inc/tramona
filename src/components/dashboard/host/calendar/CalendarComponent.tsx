@@ -39,6 +39,7 @@ import { toast } from "@/components/ui/use-toast";
 import { errorToast } from "@/utils/toasts";
 import { TRPCClientErrorLike } from "@trpc/client";
 import { AppRouter } from "@/server/api/root";
+import { FaGalacticSenate } from "react-icons/fa";
 
 export default function CalendarComponent() {
   useSetInitialHostTeamId();
@@ -48,9 +49,9 @@ export default function CalendarComponent() {
 
   const [hasDismissedModal, setHasDismissedModal] = useState(false);
   const [date, setDate] = useState<Date>(new Date());
-  const [selectedProperty, setSelectedProperty] = useState<Property | null>(
-    null,
-  );
+  const [selectedProperty, setSelectedProperty] = useState<
+    Property | undefined
+  >(undefined);
 
   const {
     data: hostProperties,
@@ -68,27 +69,31 @@ export default function CalendarComponent() {
   // Update the ref value only when the properties change
   const hostPropertiesRef = useRef(hostProperties);
 
-  useEffect(() => {
-    hostPropertiesRef.current = hostProperties;
-  }, [hostProperties]);
+  // useEffect(() => {
+  //   hostPropertiesRef.current = hostProperties;
+  // }, [hostProperties]);
 
   const initialProperty = useMemo(() => {
-    if (!hostPropertiesRef.current) {
+    if (!hostProperties) {
       //sometimes the query no good
+      console.log("refetching");
       void refetch();
     }
-    return (
-      hostPropertiesRef.current?.find(
-        (property) => property.id === Number(propertyId),
-      ) ??
-      hostPropertiesRef.current?.[0] ??
-      null
-    );
-  }, [propertyId]);
+
+    const curProperty = propertyId
+      ? hostProperties?.find((property) => property.id === Number(propertyId))
+      : hostProperties
+        ? hostProperties[0]
+        : undefined;
+
+    return curProperty;
+  }, [propertyId, hostProperties, refetch]);
 
   // Set initial selected property when data loads
   useEffect(() => {
+    console.log(initialProperty);
     setSelectedProperty(initialProperty);
+    setIsBookItNowChecked(initialProperty?.bookItNowEnabled ?? false);
   }, [initialProperty]);
 
   const queryInput = useMemo(() => {
@@ -103,9 +108,7 @@ export default function CalendarComponent() {
       enabled: Boolean(queryInput),
     });
 
-  const [isBookItNowChecked, setIsBookItNowChecked] = useState<boolean>(
-    () => selectedProperty?.bookItNowEnabled ?? false,
-  );
+  const [isBookItNowChecked, setIsBookItNowChecked] = useState<boolean>(false);
 
   const prices = useMemo(() => {
     const priceMap: Record<string, number | undefined> = {};
@@ -234,7 +237,7 @@ export default function CalendarComponent() {
   const isLoading = loadingProperties || loadingPrices;
 
   return (
-    <div className="mb-20 flex flex-col gap-4 p-2 sm:min-h-[calc(100vh-4rem)] sm:p-4 md:mb-0 lg:flex-row">
+    <div className="mb-20 flex flex-col gap-4 sm:min-h-[calc(100vh-4rem)] sm:p-4 md:mb-0 md:p-2 lg:flex-row">
       {/* CALENDAR */}
       <Card className="h-full lg:w-3/5">
         {selectedProperty?.datesLastUpdated &&
@@ -248,7 +251,7 @@ export default function CalendarComponent() {
               Calendar not synced
             </CardBanner>
           )}
-        <CardContent className="h-full flex-col p-3 pb-2 sm:flex sm:p-6">
+        <CardContent className="h-full flex-col py-2 pb-2 sm:flex sm:p-6 md:p-3">
           <div className="mb-4 flex items-center justify-between">
             {/* Left Side: Month/Year and Stats */}
             <div>
@@ -307,7 +310,7 @@ export default function CalendarComponent() {
                   >
                     <Globe className="mr-2 h-4 w-4" />
                     <span className="hidden sm:inline">
-                      {selectedProperty?.name}
+                      {selectedProperty?.name ?? "Select property"}
                     </span>
                     <span className="sm:hidden">Property</span>
                     <ChevronDown className="ml-2 h-4 w-4" />
@@ -336,7 +339,7 @@ export default function CalendarComponent() {
               </DropdownMenu>
             </div>
           </div>
-          <div className="h-full flex-1">
+          <div className="h-full w-full">
             <MonthCalendar
               date={date}
               reservedDateRanges={reservedDates}
@@ -344,8 +347,7 @@ export default function CalendarComponent() {
               isLoading={isLoading}
               isCalendarUpdating={isCalendarUpdating}
             />
-          </div>
-          <div className="mx-auto flex w-full gap-2">
+
             <HostICalSync property={selectedProperty} />
           </div>
         </CardContent>

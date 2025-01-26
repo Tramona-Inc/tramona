@@ -19,7 +19,7 @@ export default function TripsTab({
 }) {
   return (
     <div className="mt-3 flex flex-col gap-y-3">
-      <Link href="/unclaimed-offers">
+      <Link href="/">
         <Button variant="primary" className="max-w-fit">
           <SearchIcon className="-ml-1 size-5" />
           Plan Another Trip

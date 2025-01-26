@@ -760,7 +760,7 @@ export const messagesRouter = createTRPCRouter({
         text: [
           `*${sender?.email} sent a message to admin*`,
           `${input.message}`,
-          `<${baseUrl}/messages?conversationId=${input.conversationId}|Click here to respond>`,
+          `<${baseUrl}/messages/${input.conversationId}|Click here to respond>`,
         ].join("\n"),
       });
     }),
@@ -812,7 +812,7 @@ export const messagesRouter = createTRPCRouter({
         text: [
           `*${receiver?.email} received a message from ${getSenderName()}*`,
           `${input.message}`,
-          `<${baseUrl}/messages?conversationId=${input.conversationId}|Click here to respond>`,
+          `<${baseUrl}/messages/${input.conversationId}|Click here to respond>`,
         ].join("\n"),
       });
     }),
