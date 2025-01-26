@@ -8,7 +8,13 @@ import React, {
   useCallback,
   useRef,
 } from "react";
-import { ChevronLeft, ChevronRight, ChevronDown, Globe } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronDown,
+  Globe,
+  Link,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardBanner } from "@/components/ui/card";
 import {
@@ -40,18 +46,19 @@ import { errorToast } from "@/utils/toasts";
 import { TRPCClientErrorLike } from "@trpc/client";
 import { AppRouter } from "@/server/api/root";
 import { FaGalacticSenate } from "react-icons/fa";
+import useBannerStore from "@/utils/store/bannerStore";
 
 export default function CalendarComponent() {
   useSetInitialHostTeamId();
   const { currentHostTeamId } = useHostTeamStore();
   const router = useRouter();
   const { propertyId } = router.query;
-
   const [hasDismissedModal, setHasDismissedModal] = useState(false);
   const [date, setDate] = useState<Date>(new Date());
   const [selectedProperty, setSelectedProperty] = useState<
     Property | undefined
   >(undefined);
+  const [calOpen, setCalOpen] = useState(false);
 
   const {
     data: hostProperties,
@@ -67,7 +74,6 @@ export default function CalendarComponent() {
 
   //memoize initial property an host hostproperties
   // Update the ref value only when the properties change
-  const hostPropertiesRef = useRef(hostProperties);
 
   // useEffect(() => {
   //   hostPropertiesRef.current = hostProperties;
@@ -251,6 +257,18 @@ export default function CalendarComponent() {
               Calendar not synced
             </CardBanner>
           )}
+        {!selectedProperty?.iCalLink && (
+          <CardBanner className="cursor-pointer bg-red-500 text-sm text-white">
+                Please sync your calendar to get updated availability information for your listings&nbsp;
+            <a
+              className="text-sm text-white hover:underline"
+              onClick={() => setCalOpen(true)}
+            >
+              here
+            </a>
+            .
+          </CardBanner>
+        )}
         <CardContent className="h-full flex-col py-2 pb-2 sm:flex sm:p-6 md:p-3">
           <div className="mb-4 flex items-center justify-between">
             {/* Left Side: Month/Year and Stats */}
@@ -348,7 +366,11 @@ export default function CalendarComponent() {
               isCalendarUpdating={isCalendarUpdating}
             />
 
-            <HostICalSync property={selectedProperty} />
+            <HostICalSync
+              property={selectedProperty}
+              calOpen={calOpen}
+              setCalOpen={setCalOpen}
+            />
           </div>
         </CardContent>
       </Card>

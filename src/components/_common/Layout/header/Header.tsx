@@ -33,17 +33,9 @@ import { useEffect } from "react";
 
 export function Header({ noBanner = false }: { noBanner?: boolean }) {
   const router = useRouter();
-  const { setIsCalendar, isCalendar } = useBannerStore();
   const { data: hasHostProfile, isLoading: hasHostProfileIsLoading } =
     api.users.isHost.useQuery();
   const isHost = router.pathname.includes("/host") ? true : false;
-
-  useEffect(() => {
-    const isCalendar = router.pathname.includes("/host/calendar");
-    if (!isCalendar) {
-      setIsCalendar(false);
-    }
-  }, [router.pathname]);
 
   if (isHost && !hasHostProfile && !hasHostProfileIsLoading) {
     void router.replace("/why-list");
@@ -51,17 +43,11 @@ export function Header({ noBanner = false }: { noBanner?: boolean }) {
 
   return (
     <>
-      {isCalendar ? (
-        <div className="text-balance bg-red-600 px-4 py-2 text-center text-sm font-medium text-white">
-          Please sync your calendar to get updated availability information for
-          your listings.
-        </div>
-      ) : (
-        <div className="text-balance bg-primaryGreen px-4 py-2 text-center text-sm font-medium text-white">
-          Hosts, we are expanding fast. Be one of the first 100 hosts in your
-          city, and enjoy no fees on your first 5 bookings!{" "}
-        </div>
-      )}
+      <div className="text-balance bg-primaryGreen px-4 py-2 text-center text-sm font-medium text-white">
+        Hosts, we are expanding fast. Be one of the first 100 hosts in your
+        city, and enjoy no fees on your first 5 bookings!{" "}
+      </div>
+
       <div className="lg:hidden">
         <MobileHeader isHost={isHost} />
       </div>

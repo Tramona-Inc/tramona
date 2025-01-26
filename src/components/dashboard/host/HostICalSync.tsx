@@ -343,6 +343,7 @@ function EnhancedICalModal({
 
   // The final form submit that calls your TRPC mutation
   const handleFormSubmit = async () => {
+    console.log("iCalLink:", iCalLink);
     try {
       // platformBookedOn: "airbnb" for your logic
       await syncCalendar({
@@ -436,18 +437,14 @@ function EnhancedICalModal({
 // ------------------------------------------------------------------
 export default function HostICalSync({
   property,
+  calOpen,
+  setCalOpen,
 }: {
   property: Property | undefined;
+  calOpen: boolean;
+  setCalOpen: (open: boolean) => void;
 }) {
-  const { setIsCalendar } = useBannerStore();
-  const [open, setOpen] = useState(false);
   const { toast } = useToast();
-
-  useEffect(() => {
-    if (property && !property.iCalLink) {
-      setIsCalendar(true);
-    }
-  }, [property, setIsCalendar]);
 
   if (!property) {
     return <Spinner />;
@@ -476,20 +473,20 @@ export default function HostICalSync({
     <div className="my-6 flex w-full flex-col items-start justify-start gap-x-4 gap-y-3 md:flex-row md:items-end 2xl:mx-8">
       <div className="flex flex-row gap-x-2">
         <HostICalHowToDialog />
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={calOpen} onOpenChange={setCalOpen}>
           <DialogTrigger className="w-full flex-1">
             {property.iCalLink ? (
-              <Button variant="primary">Sync Calendar with Airbnb</Button>
+              <Button variant="primary">Edit Airbnb Calendar Link</Button>
             ) : (
               <Button size="lg">Sync Calendar with Airbnb</Button>
             )}
           </DialogTrigger>
 
           {/* Our Enhanced Multi-step Wizard */}
-          {open && (
+          {calOpen && (
             <EnhancedICalModal
               property={property}
-              onClose={() => setOpen(false)}
+              onClose={() => setCalOpen(false)}
             />
           )}
         </Dialog>
