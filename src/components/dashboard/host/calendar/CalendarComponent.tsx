@@ -45,8 +45,6 @@ import { toast } from "@/components/ui/use-toast";
 import { errorToast } from "@/utils/toasts";
 import { TRPCClientErrorLike } from "@trpc/client";
 import { AppRouter } from "@/server/api/root";
-import { FaGalacticSenate } from "react-icons/fa";
-import useBannerStore from "@/utils/store/bannerStore";
 
 export default function CalendarComponent() {
   useSetInitialHostTeamId();

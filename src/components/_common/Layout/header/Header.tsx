@@ -28,10 +28,8 @@ import MobileHeader from "./mobile/MobileHeader";
 import useHostBtn from "./useHostBtn";
 import LogInSignUp from "./LoginOrSignup";
 import { api } from "@/utils/api";
-import useBannerStore from "@/utils/store/bannerStore";
-import { useEffect } from "react";
 
-export function Header({ noBanner = false }: { noBanner?: boolean }) {
+export function Header() {
   const router = useRouter();
   const { data: hasHostProfile, isLoading: hasHostProfileIsLoading } =
     api.users.isHost.useQuery();

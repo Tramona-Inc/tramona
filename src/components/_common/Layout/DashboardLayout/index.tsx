@@ -52,7 +52,7 @@ export default function DashboardLayout({
 
   return (
     <>
-      <Header noBanner={noBanner} />
+      <Header />
       <div className="relative min-h-screen-minus-header-n-footer lg:flex">
         <div className="min-h-full min-w-0 lg:flex-1">
           <main className="relative min-h-full">{children}</main>
