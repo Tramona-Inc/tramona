@@ -14,8 +14,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Copy, Edit2, CheckCircle, X } from "lucide-react";
-import useBannerStore from "@/utils/store/bannerStore";
+import { Copy, CheckCircle } from "lucide-react";
 import HostICalHowToDialog from "./HostICalHowToDialog";
 import Image from "next/image";
 
