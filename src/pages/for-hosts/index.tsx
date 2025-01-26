@@ -304,7 +304,7 @@ function WhatAreYouWaitingFor() {
         What are you waiting for? Requests are coming in now!
       </h1>
       <div className="flex items-center justify-center space-x-4">
-        <Link href="/host-onboarding">
+        <Link href="/why-list">
           <Button className="h-16 w-80 bg-primaryGreen text-xl">
             Become a Host
           </Button>
