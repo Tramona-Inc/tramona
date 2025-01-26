@@ -49,7 +49,7 @@ export default function ChatInput({
     (state) => state.removeMessageFromConversation,
   );
 
-  const { updateUser } = useUpdateUser();
+  const { mutateAsync: updateUser } = api.users.updateLastTextAt.useMutation();
   const { mutateAsync: sendSMS } = api.twilio.sendSMS.useMutation();
   const { mutateAsync: sendSlackToAdmin } =
     api.messages.sendAdminSlackMessage.useMutation();
@@ -148,12 +148,12 @@ export default function ChatInput({
       if (participantPhoneNumbers) {
         const unreadParticipants = participantPhoneNumbers.filter(
           ({ lastTextAt }) =>
-            !lastTextAt || lastTextAt <= sub(new Date(), { hours: 12 }),
+            !lastTextAt || lastTextAt <= sub(new Date(), { hours: 1 }),
         );
 
         if (unreadParticipants.length > 0) {
           void Promise.all(
-            unreadParticipants.map(async ({ phoneNumber, isWhatsApp }) => {
+            unreadParticipants.map(async ({ phoneNumber, isWhatsApp, id }) => {
               if (phoneNumber) {
                 if (isWhatsApp) {
                   await twilioWhatsAppMutation.mutateAsync({
@@ -166,7 +166,7 @@ export default function ChatInput({
                     msg: "You have a new unread message in Tramona, visit Tramona.com to view",
                   });
                 }
-                await updateUser({ lastTextAt: new Date() });
+                await updateUser({ userId: id });
               }
             }),
           );
