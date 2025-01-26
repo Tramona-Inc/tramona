@@ -588,7 +588,15 @@ export default function Onboarding1({
         </DialogContent>
       </Dialog>
       {showSignupModal && (
-        <Dialog open={showSignupModal} onOpenChange={setShowSignupModal}>
+        <Dialog
+          open={showSignupModal}
+          onOpenChange={(isOpen) => {
+            if (!isOpen) {
+              return;
+            }
+            setShowSignupModal(isOpen);
+          }}
+        >
           <DialogContent className="w-full max-w-3xl p-8 sm:w-[600px]">
             <DialogHeader>
               <DialogTitle className="text-center sm:text-left">
