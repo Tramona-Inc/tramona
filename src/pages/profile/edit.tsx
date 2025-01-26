@@ -15,7 +15,7 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 
 export default function Page() {
-  const { data: session } = useSession();
+  const { data: session } = useSession({ required: true });
   const [isPhotoDialogOpen, setIsPhotoDialogOpen] = useState(false);
 
   const { data: myUserWProfile } = api.users.getMyUserWProfile.useQuery();

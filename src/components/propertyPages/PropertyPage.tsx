@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import UserAvatar from "@/components/_common/UserAvatar";
 import { Button } from "@/components/ui/button";
@@ -39,7 +40,7 @@ import { Card, CardContent } from "../ui/card";
 import { getOriginalListing } from "@/utils/listing-sites";
 import { PropertyCompareBtn } from "./sections/PropertyCompareBtn";
 import SingleLocationMap from "../_common/GoogleMaps/SingleLocationMap";
-import Link from "next/link";
+// import Link from "next/link"; // this is redundant now
 import {
   CheckInTimeRule,
   CheckOutTimeRule,
@@ -50,7 +51,7 @@ import { getCancellationPolicyDescription } from "@/config/getCancellationPolicy
 import { createUserNameAndPic } from "../activity-feed/admin/generationHelper";
 import ChatOfferButton from "./sections/ChatOfferButton";
 import ReasonsToBook from "./sections/ReasonsToBook";
-import UserInfo from "./sections/UserInfo";
+// import UserInfo from "./sections/UserInfo"; // REMOVE THIS IMPORT
 import { useChatWithHostTeam } from "@/utils/messaging/useChatWithHost";
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 export type PropertyPageData = RouterOutputs["properties"]["getById"];
@@ -73,7 +74,7 @@ export default function PropertyPage({
   const aboutRef = useRef<HTMLDivElement>(null);
   const [isOverflowing, setIsOverflowing] = useState(false);
   const [reviewBackupImages, setReviewBackupImages] = useState<string[]>([]);
-  const [openUserInfo, setOpenUserInfo] = useState(false);
+  // const [openUserInfo, setOpenUserInfo] = useState(false); // REMOVE THIS LINE
   const chatWithHostTeam = useChatWithHostTeam();
 
   console.log("ratings and reviews", {
@@ -127,9 +128,7 @@ export default function PropertyPage({
     void createReviewBackupImages();
   }, [property.reviews.length]);
 
-  const hostName =
-    property.hostName ??
-    `${property.hostTeam.owner.firstName}`;
+  const hostName = property.hostName ?? `${property.hostTeam.owner.firstName}`;
 
   const originalListing = getOriginalListing(property);
 
@@ -270,21 +269,22 @@ export default function PropertyPage({
               </h1>
               <Button
                 onClick={() =>
-                   chatWithHostTeam({
-                        hostId: property.hostTeam.ownerId,
-                        hostTeamId: isHospitableUser ? property.hostTeam.id : undefined,
-                        propertyId: property.id
-                      })
-
-                        .then()
-                        .catch((err: TRPCClientErrorLike<AppRouter>) => {
-                          if (err.data?.code === "UNAUTHORIZED") {
-                            console.log(err.data.code);
-                            void signIn("google", {
-                              callbackUrl: window.location.href,
-                            });
-                          }
-                        })
+                  chatWithHostTeam({
+                    hostId: property.hostTeam.ownerId,
+                    hostTeamId: isHospitableUser
+                      ? property.hostTeam.id
+                      : undefined,
+                    propertyId: property.id,
+                  })
+                    .then()
+                    .catch((err: TRPCClientErrorLike<AppRouter>) => {
+                      if (err.data?.code === "UNAUTHORIZED") {
+                        console.log(err.data.code);
+                        void signIn("google", {
+                          callbackUrl: window.location.href,
+                        });
+                      }
+                    })
                 }
               >
                 <MessageCircleMore />
@@ -339,13 +339,15 @@ export default function PropertyPage({
           <section className="flex-justify-between mx-1 flex w-full border-t pt-4">
             <div
               className="flex w-5/6 items-center gap-2"
-              onClick={() => setOpenUserInfo(true)}
+              // Instead of using the UserInfo dialog, we make this a clickable link:
             >
-              <UserAvatar
-                name={hostName}
-                email={property.hostTeam.owner.email}
-                image={property.hostTeam.owner.image}
-              />
+              <Link href={`/profile/view/${property.hostTeam.ownerId}`}>
+                <UserAvatar
+                  name={hostName}
+                  email={property.hostTeam.owner.email}
+                  image={property.hostTeam.owner.image}
+                />
+              </Link>
               <div className="-space-y-1">
                 <p className="text-sm text-muted-foreground">Hosted by</p>
                 <p className="text-lg font-medium">{hostName}</p>
@@ -359,28 +361,20 @@ export default function PropertyPage({
               />
             )}
           </section>
-          <Dialog open={openUserInfo} onOpenChange={setOpenUserInfo}>
+          {/* REMOVE THIS DIALOG COMPONENT */}
+          {/* <Dialog open={openUserInfo} onOpenChange={setOpenUserInfo}>
             <DialogContent>
               <DialogTitle className="text-lg font-semibold">
                 Host Information
               </DialogTitle>
-              {/* <div className="flex space-x-2">
-                <div className="flex flex-col space-y-2"> */}
               <UserInfo
                 hostName={hostName}
                 hostPic={property.hostTeam.owner.image}
                 hostDesc={property.hostTeam.owner.about}
                 hostLocation={property.hostTeam.owner.location}
               />
-              {/* <HostVerificationInfo hostName={hostName} /> */}
-              {/* </div>
-                <div>
-                  <div className="text-lg font-bold">About {hostName}</div>{" "}
-                  {property.host?.hostProfile?.about}
-                </div>
-              </div> */}
-            </DialogContent>
-          </Dialog>
+             </DialogContent>
+          </Dialog> */}
           <section>
             <h2 className="subheading border-t pb-2 pt-4">
               About this property
@@ -593,6 +587,17 @@ export default function PropertyPage({
 
           <section>
             <h2 className="subheading border-t pb-2 pt-4">
+              Additional Information
+            </h2>
+            <textarea
+              className="w-full rounded-md border border-gray-300 p-2"
+              placeholder="Enter additional information here"
+              rows={4}
+            />
+          </section>
+
+          <section>
+            <h2 className="subheading border-t pb-2 pt-4">
               Check-in information
             </h2>
             <div className="space-y-4">
@@ -661,24 +666,3 @@ export default function PropertyPage({
     </div>
   );
 }
-
-// function HostVerificationInfo({ hostName }: { hostName: string }) {
-//   return (
-//     <div className="flex flex-col gap-2  p-4 ">
-//       <div className="space-y-1">
-//         <p className="text-lg font-semibold">{`${hostName}'s confirmed information`}</p>
-//       </div>
-//       <div className="flex items-center gap-2">
-//         <CheckIcon className="size-5" />
-//         <p className="text-md font-semibold">Email Address</p>
-//       </div>
-//       <div className="flex items-center gap-2">
-//         <CheckIcon className="size-5" />
-//         <p className="text-md font-semibold">Phone Number</p>
-//       </div>
-//       <p className="text-sm text-muted-foreground">
-//         {hostName} is a verified host
-//       </p>
-//     </div>
-//   );
-// }
