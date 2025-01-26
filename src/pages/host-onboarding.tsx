@@ -21,7 +21,7 @@ import { useSession } from "next-auth/react";
 import { api } from "@/utils/api";
 import { useRouter } from "next/router";
 import { useToast } from "@/components/ui/use-toast";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export const getStaticProps = async () => {
   const requestFeed = await getFeed({ maxNumEntries: 10 }).then((r) =>
@@ -38,6 +38,7 @@ type Props = InferGetStaticPropsType<typeof getStaticProps>;
 export default function Onboarding({ requestFeed }: Props) {
   const progress = useHostOnboarding((state) => state.progress);
   const setProgress = useHostOnboarding((state) => state.setProgress);
+  const [isCheckingHostStatus] = useState(false);
   const { data: session } = useSession({ required: true });
   const router = useRouter();
   const { toast } = useToast();
@@ -47,7 +48,7 @@ export default function Onboarding({ requestFeed }: Props) {
         userId: session?.user.id ?? "",
       },
       {
-        enabled: !!session,
+        enabled: isCheckingHostStatus && !!session,
       },
     );
 
