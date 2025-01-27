@@ -147,11 +147,8 @@ export default function CalendarComponent() {
     selectedProperty?.id
       ? api.calendar.getReservedDates.useQuery(
           { propertyId: selectedProperty.id },
-          {
-            enabled: true, // Query runs only if selectedProperty.id is present
-          },
         )
-      : { data: undefined };
+      : { data: null };
 
     const newBookedDates =
     tramonaBookedDates?.filter(
