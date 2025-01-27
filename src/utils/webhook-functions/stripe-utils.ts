@@ -391,7 +391,7 @@ export async function createRequestToBook({
       isProductionOnly: true,
       channel: "tramona-bot",
       text: [
-        `*${user.email} just requested to book: ${property.name}*`,
+        `*${user.firstName} just requested to book: ${property.name}*`,
         `*${property.city}*`,
         `through ${"a different platform (direct listing)"} · ${formatDateMonthDay(checkIn)}-${formatDateMonthDay(checkOut)}`,
         `<https://tramona.com/admin|Go to admin dashboard>`,
@@ -401,14 +401,14 @@ export async function createRequestToBook({
     // Case 2: Not DirectListing so we need to send the request to the host
     await sendTextToHostTeamMembers({
       hostTeamId: property.hostTeamId,
-      message: `${user.email} just requested to book your property`,
+      message: `${user.firstName} just requested to book your property`,
     });
 
     await sendSlackMessage({
       isProductionOnly: true,
       channel: "tramona-bot",
       text: [
-        `*${user.email} just requested to book: ${property.name}*`,
+        `*${user.firstName} just requested to book: ${property.name}*`,
         `*${property.city}*`,
         `through one of our properties· ${formatDateMonthDay(checkIn)}-${formatDateMonthDay(checkOut)}`,
         `<https://tramona.com/admin|Go to admin dashboard>`,

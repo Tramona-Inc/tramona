@@ -127,6 +127,8 @@ module.exports = {
           "repeating-linear-gradient(135deg, red, red 1px, transparent 1px, transparent 4px)",
         "reserved-pattern-2":
           "repeating-linear-gradient(135deg, hsl(var(--primary-green)), hsl(var(--primary-green)) 1px, transparent 1px, transparent 4px)",
+        "reserved-pattern-3":
+          "repeating-linear-gradient(135deg, blue, blue 1px, transparent 1px, transparent 4px)",
       },
     },
   },
