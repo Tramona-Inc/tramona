@@ -142,30 +142,26 @@ export default function CalendarComponent() {
       end: price.date,
       platformBookedOn: "airbnb" as const,
     }));
+  console.log(selectedProperty);
 
-    const { data: tramonaBookedDates } =
-    selectedProperty?.id
-      ? api.calendar.getReservedDates.useQuery(
-          { propertyId: selectedProperty.id },
-        )
-      : { data: null };
+  const { data: tramonaBookedDates } = api.calendar.getReservedDates.useQuery(
+    { propertyId: selectedProperty?.id },
+    { enabled: !!selectedProperty },
+  );
 
-    const newBookedDates =
+  const newBookedDates =
     tramonaBookedDates?.filter(
       (bookedDate) =>
-        !airbnbReservedDates?.some(
-          (reservedDate) => {
-            // Check if reservedDate falls within the bookedDate range
-            const reservedStart = new Date(reservedDate.start).getTime();
-            const reservedEnd = new Date(reservedDate.end).getTime();
-            const bookedStart = new Date(bookedDate.start).getTime();
-            const bookedEnd = new Date(bookedDate.end).getTime();
+        !airbnbReservedDates?.some((reservedDate) => {
+          // Check if reservedDate falls within the bookedDate range
+          const reservedStart = new Date(reservedDate.start).getTime();
+          const reservedEnd = new Date(reservedDate.end).getTime();
+          const bookedStart = new Date(bookedDate.start).getTime();
+          const bookedEnd = new Date(bookedDate.end).getTime();
 
-            return reservedStart >= bookedStart && reservedEnd <= bookedEnd;
-          }
-        )
+          return reservedStart >= bookedStart && reservedEnd <= bookedEnd;
+        }),
     ) ?? [];
-
 
   const isDateReserved = useCallback(
     (date: string) => {
