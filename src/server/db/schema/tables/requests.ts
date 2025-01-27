@@ -30,16 +30,22 @@ export const ALL_REQUESTABLE_AMENITIES = [
 
 export type RequestableAmenity = (typeof ALL_REQUESTABLE_AMENITIES)[number];
 
+export const REQUEST_STATUS = ["Pending", "Resolved", "Withdrawn"] as const;
+
+export const requestStatusEnum = pgEnum("request_status", REQUEST_STATUS);
+
 export const requestableAmenitiesEnum = pgEnum(
   "requestable_amenities",
   ALL_REQUESTABLE_AMENITIES,
 );
+
 export const ALL_REQUEST_MESSAGE_CASES = [
   "No matches within price range",
   "Some close matches",
   "No close matches",
   "Many close matches",
 ] as const;
+
 export type RequestMessageCase = (typeof ALL_REQUEST_MESSAGE_CASES)[number];
 export const requestMessageCasesEnum = pgEnum(
   "request_message_cases",
@@ -86,6 +92,7 @@ export const requests = pgTable(
     notifiedNoOffers: boolean("notified_no_offers").notNull().default(false),
     messageCase: requestMessageCasesEnum("message_case"),
     messageSent: timestamp("message_sent", { withTimezone: true }),
+    status: requestStatusEnum("status").default("Pending").notNull(),
   },
   (t) => ({
     madeByGroupidIdx: index().on(t.madeByGroupId),
@@ -93,6 +100,20 @@ export const requests = pgTable(
       "gist",
       t.latLngPoint,
     ),
+    statusIdx: index("request_status_idx").on(t.status),
+    checkInIdx: index("request_check_in_idx").on(t.checkIn),
+    checkOutIdx: index("request_check_out_idx").on(t.checkOut),
+    propertyTypeIdx: index("request_property_type_idx").on(t.propertyType),
+    amenitiesIdx: index("request_amenities_idx")
+      .on(t.amenities)
+      .with({ using: "gin" }),
+    createdAtIdx: index("request_created_at_idx").on(t.createdAt),
+    groupIdStatusCreatedAtIdx: index("request_group_status_created_at_idx").on(
+      t.madeByGroupId,
+      t.status,
+      t.createdAt,
+    ),
+    checkInOutIdx: index("request_check_in_out_idx").on(t.checkIn, t.checkOut),
   }),
 );
 export type Request = typeof requests.$inferSelect;

@@ -38,7 +38,7 @@ const RequestCityForm = forwardRef(
     const [showConfetti, setShowConfetti] = useState(false);
     const [madeByGroupId, setMadeByGroupId] = useState<number>();
     const [_inviteLink, setInviteLink] = useState<string | null>(null);
-    const { form, onSubmit } = useCityRequestForm({
+    const { form, onSubmit, isSubmitting } = useCityRequestForm({
       afterSubmit() {
         setRequestSubmittedDialogOpen(true);
         setShowConfetti(true);
@@ -74,7 +74,7 @@ const RequestCityForm = forwardRef(
 
     return (
       <Form {...form}>
-        <form onSubmit={onSubmit} className="space-y-2">
+        <form onSubmit={onSubmit} className="w-full space-y-2">
           <PlacesInput
             control={form.control}
             latLng={latLng}
@@ -152,7 +152,7 @@ const RequestCityForm = forwardRef(
               <Button
                 variant="ghost"
                 type="button"
-                className="hover:bg-teal-900/15 px-2 text-teal-900"
+                className="px-2 text-teal-900 hover:bg-teal-900/15"
               >
                 <FilterIcon />
                 More filters
@@ -160,7 +160,20 @@ const RequestCityForm = forwardRef(
             </CityRequestFiltersDialog>
           </div>
 
-          {isRequestsPage && <Button type="submit">Submit request</Button>}
+          {isRequestsPage && (
+            <Button className="w-full" type="submit" disabled={isSubmitting}>
+              {!isSubmitting ? (
+                "Submit request"
+              ) : (
+                <div className="flex h-full items-center justify-center space-x-2">
+                  <span className="mr-2 text-white">Submitting Request</span>
+                  <div className="h-1 w-1 animate-bounce rounded-full bg-white [animation-delay:-0.3s]"></div>
+                  <div className="h-1 w-1 animate-bounce rounded-full bg-white [animation-delay:-0.15s]"></div>
+                  <div className="h-1 w-1 animate-bounce rounded-full bg-white"></div>
+                </div>
+              )}
+            </Button>
+          )}
         </form>
 
         <RequestSubmittedDialog

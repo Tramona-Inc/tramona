@@ -8,20 +8,22 @@ import { AlertTriangle, PlusIcon } from "lucide-react";
 import { Button } from "../ui/button";
 import Link from "next/link";
 import TravelerRequestToBookCard from "../requests-to-book/TravelerRequestToBookCard";
+import RequestAndBidLoadingState from "./RequestAndBidLoadingState";
 
 export default function PastRequestsTab() {
-  const { data: requests } = api.requests.getMyRequests.useQuery();
-  const { data: requestsToBook } =
+  const { data: requests, isLoading: isCityRequestLoading } =
+    api.requests.getMyRequests.useQuery();
+
+  const { data: requestsToBook, isLoading: isRequestToBookLoading } =
     api.requestsToBook.getMyRequestsToBook.useQuery();
 
-  if (!requests) return <Spinner />;
+  const isLoading = isCityRequestLoading || isRequestToBookLoading;
 
-  return requests.inactiveRequests.length !== 0 ||
-    requestsToBook?.inactiveRequestsToBook.length !== 0 ? (
+  return (
     <div className="space-y-3 pb-32">
       <Link href="/">
         <Button variant="primary" className="max-w-fit">
-          <PlusIcon className="size-5 -ml-1" />
+          <PlusIcon className="-ml-1 size-5" />
           Make Another Trip
         </Button>
       </Link>
@@ -33,31 +35,40 @@ export default function PastRequestsTab() {
           Trips&quot; for upcoming details.
         </AlertDescription>
       </Alert>
-      {requestsToBook?.inactiveRequestsToBook.map((requestToBook) => (
-        <TravelerRequestToBookCard
-          key={requestToBook.id}
-          type="guest"
-          requestToBook={requestToBook}
-        ></TravelerRequestToBookCard>
-      ))}
-      {requests.inactiveRequests.map((request) => (
-        <RequestCard key={request.id} type="guest" request={request}>
-          <RequestCardAction request={request} />
-        </RequestCard>
-      ))}
-    </div>
-  ) : (
-    <div className="flex flex-col items-center gap-4">
-      <p className="text-center">
-        <EmptyStateValue
-          title={"You have no history"}
-          description={
-            "You haven't made any request or offers. Completed requests will show up here."
-          }
-          redirectTitle={"Request Deal"}
-          href={"/"}
-        />
-      </p>
+
+      {isLoading ? (
+        <RequestAndBidLoadingState />
+      ) : !requests ||
+        requests.inactiveRequests.length !== 0 ||
+        requestsToBook?.inactiveRequestsToBook.length !== 0 ? (
+        <>
+          {requestsToBook?.inactiveRequestsToBook.map((requestToBook) => (
+            <TravelerRequestToBookCard
+              key={requestToBook.id}
+              type="guest"
+              requestToBook={requestToBook}
+            ></TravelerRequestToBookCard>
+          ))}
+          {requests?.inactiveRequests.map((request) => (
+            <RequestCard key={request.id} type="guest" request={request}>
+              <RequestCardAction request={request} />
+            </RequestCard>
+          ))}
+        </>
+      ) : (
+        <div className="flex flex-col items-center gap-4">
+          <p className="text-center">
+            <EmptyStateValue
+              title={"You have no history"}
+              description={
+                "You haven't made any request or offers. Completed requests will show up here."
+              }
+              redirectTitle={"Request Deal"}
+              href={"/"}
+            />
+          </p>
+        </div>
+      )}
     </div>
   );
 }

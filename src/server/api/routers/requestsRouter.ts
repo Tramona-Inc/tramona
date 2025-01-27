@@ -242,11 +242,15 @@ export const requestsRouter = createTRPCRouter({
     return {
       activeRequests: myRequests.filter(
         (request) =>
-          request.resolvedAt === null && request.createdAt > fortyEightHoursAgo,
+          request.resolvedAt === null &&
+          request.createdAt > fortyEightHoursAgo &&
+          request.status === "Pending",
       ),
       inactiveRequests: myRequests.filter(
         (request) =>
-          request.resolvedAt !== null || request.createdAt < fortyEightHoursAgo,
+          request.resolvedAt !== null ||
+          request.createdAt < fortyEightHoursAgo ||
+          request.status !== "Pending",
       ),
     };
   }),
@@ -344,7 +348,7 @@ export const requestsRouter = createTRPCRouter({
 
       await ctx.db
         .update(requests)
-        .set({ resolvedAt: new Date() })
+        .set({ resolvedAt: new Date(), status: "Resolved" })
         .where(eq(requests.id, input.id));
 
       const owner = await ctx.db.query.users.findFirst({
@@ -368,7 +372,7 @@ export const requestsRouter = createTRPCRouter({
       }
     }),
 
-  delete: protectedProcedure
+  withdraw: protectedProcedure
     .input(requestSelectSchema.pick({ id: true }))
     .mutation(async ({ ctx, input }) => {
       // Only group owner and admin can delete
@@ -394,7 +398,10 @@ export const requestsRouter = createTRPCRouter({
         }
       }
 
-      await ctx.db.delete(requests).where(eq(requests.id, input.id));
+      await ctx.db
+        .update(requests)
+        .set({ status: "Withdrawn" })
+        .where(eq(requests.id, input.id));
     }),
 
   rejectRequest: coHostProcedure(

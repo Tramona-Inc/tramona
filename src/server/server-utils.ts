@@ -546,6 +546,7 @@ export async function getRequestsForProperties(
         requestIsNearProperty,
         gte(requests.checkIn, new Date()),
         gte(requests.createdAt, twentyFourHoursAgo),
+        eq(requests.status, "Pending"),
         notExists(
           db
             .select()

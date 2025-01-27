@@ -7,10 +7,10 @@ import RequestCard from "./RequestCard";
 import { RequestCardAction } from "./RequestCardAction";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
-export default function ActiveRequestsTab() {
-  const { data: requests } = api.requests.getMyRequests.useQuery();
+import RequestAndBidLoadingState from "./RequestAndBidLoadingState";
 
-  if (!requests) return <Spinner />;
+export default function ActiveRequestsTab() {
+  const { data: requests, isLoading } = api.requests.getMyRequests.useQuery();
 
   return (
     <div className="space-y-3">
@@ -26,7 +26,9 @@ export default function ActiveRequestsTab() {
           </AlertDescription>
         </Alert>
       </div>
-      {requests.activeRequests.length !== 0 ? (
+      {isLoading ? (
+        <RequestAndBidLoadingState />
+      ) : requests && requests.activeRequests.length !== 0 ? (
         <div className="space-y-3 pb-32">
           {requests.activeRequests.map((request) => (
             <RequestCard key={request.id} type="guest" request={request}>

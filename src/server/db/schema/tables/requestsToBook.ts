@@ -67,6 +67,19 @@ export const requestsToBook = pgTable(
     propertyIdIdx: index().on(t.propertyId),
     userIdIdx: index().on(t.userId),
     madeByGroupIdIdx: index().on(t.madeByGroupId),
+    hostTeamIdIdx: index("requests_to_book_host_team_id_idx").on(t.hostTeamId),
+    statusIdx: index("requests_to_book_status_idx").on(t.status),
+    propertyIdStatusIdx: index("requests_to_book_property_id_status_idx").on(
+      t.propertyId,
+      t.status,
+    ),
+    checkInIdx: index("requests_to_book_check_in_idx").on(t.checkIn),
+    checkOutIdx: index("requests_to_book_check_out_idx").on(t.checkOut),
+    checkInOutIdx: index("requests_to_book_check_in_out_idx").on(
+      t.checkIn,
+      t.checkOut,
+    ),
+    createdAtIdx: index("requests_to_book_created_at_idx").on(t.createdAt),
   }),
 );
 

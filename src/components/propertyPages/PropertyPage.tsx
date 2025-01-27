@@ -585,18 +585,7 @@ export default function PropertyPage({
             )}
           </section>
 
-          <section>
-            <h2 className="subheading border-t pb-2 pt-4">
-              Additional Information
-            </h2>
-            <textarea
-              className="w-full rounded-md border border-gray-300 p-2"
-              placeholder="Enter additional information here"
-              rows={4}
-            />
-          </section>
-
-          <section>
+          {/* <section>
             <h2 className="subheading border-t pb-2 pt-4">
               Check-in information
             </h2>
@@ -636,7 +625,7 @@ export default function PropertyPage({
                 ? "Self check-in"
                 : property.additionalCheckInInfo}
             </p>
-          </section>
+          </section> */}
 
           {offer && (
             <div className="flex justify-end">
