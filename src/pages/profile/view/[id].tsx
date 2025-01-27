@@ -109,7 +109,7 @@ function Page() {
                   const value =
                     userWProfile[field as keyof typeof userWProfile];
 
-                  if (value === null) {
+                  if (value === null || field == "showBirthDecade") {
                     return null;
                   }
 
