@@ -5,7 +5,7 @@ import { useRouter } from "next/router";
 import SidebarCity from "./sidebars/SideBarCity";
 import SidebarRequestToBook from "./sidebars/SideBarRequestToBook";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertTriangleIcon } from "lucide-react";
+import { AlertTriangleIcon, ChevronLeft } from "lucide-react";
 import { api } from "@/utils/api";
 import {
   separateByPriceAndAgeRestriction,
@@ -17,6 +17,8 @@ import {
 } from "@/server/server-utils";
 import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 import useSetInitialHostTeamId from "@/components/_common/CustomHooks/useSetInitialHostTeamId";
+import { useIsLg } from "@/utils/utils";
+import Link from "next/link";
 
 const alerts = [
   {
@@ -49,10 +51,15 @@ type RouterQuery = Record<string, string> & {
 };
 
 export default function HostRequestsLayout({
+  isIndex,
   children,
-}: React.PropsWithChildren) {
+}: {
+  isIndex: boolean;
+  children: React.ReactNode;
+}) {
   useSetInitialHostTeamId();
   const { currentHostTeamId } = useHostTeamStore();
+
   const router = useRouter();
   const query = router.query as RouterQuery;
   const [activeTab, setActiveTab] = useState<TabType>("city");
@@ -133,6 +140,11 @@ export default function HostRequestsLayout({
   const handleTabChange = useCallback(
     (tab: TabType) => {
       const newQuery: RouterQuery = { ...query, tabs: tab };
+      let newPathname = `/host/requests`;
+
+      if (query.city) {
+        newPathname = `/host/requests/${query.city}`; // Keep city in path
+      }
 
       if (
         tab === "property-bids" &&
@@ -149,7 +161,7 @@ export default function HostRequestsLayout({
       setActiveTab(tab);
       void router.push(
         {
-          pathname: "/host/requests",
+          pathname: newPathname, // Use constructed pathname
           query: newQuery as Record<string, string>,
         },
         undefined,
@@ -159,10 +171,34 @@ export default function HostRequestsLayout({
     [query, requestToBookProperties, separatedData, router],
   );
 
+  // <----------------Screen size logic ------------>
+  const isLg = useIsLg();
+  const showSidebar = isLg || isIndex;
+  const showChildren = isLg || !isIndex;
+
+  const handleOptionChange = useCallback(
+    (option: SelectedOptionType) => {
+      setSelectedOption(option);
+      let newPathname = `/host/requests`;
+      if (query.city) {
+        newPathname = `/host/requests/${query.city}`; // Keep city in path
+      }
+      void router.push(
+        {
+          pathname: newPathname, // Use constructed pathname
+          query: { ...query, option: option } as Record<string, string>, // Keep other query params and update option
+        },
+        undefined,
+        { shallow: true },
+      );
+    },
+    [query, router],
+  );
+
   return (
     <div className="flex bg-white">
-      <div className="sticky top-20 h-screen-minus-header-n-footer w-full overflow-auto border-r px-4 py-8 xl:w-96">
-        <ScrollArea className="h-1/2">
+      {showSidebar && (
+        <ScrollArea className="sticky top-20 h-screen-minus-header-n-footer w-screen overflow-auto border-r px-4 py-8 lg:w-96">
           <div className="pb-4">
             <h1 className="ml-3 text-3xl font-semibold">Requests</h1>
 
@@ -216,11 +252,16 @@ export default function HostRequestsLayout({
             />
           )}
         </ScrollArea>
-      </div>
+      )}
 
-      <div className="hidden flex-1 bg-[#fafafa] xl:block">
-        {children ? (
-          <div className="pb-30 px-4 pt-8">
+      {showChildren && (
+        <div className="flex-1 bg-[#fafafa] lg:block">
+          <div className="lg:mb-30 my-6 mb-24 px-4 lg:mt-8">
+            <div className="my-6 lg:hidden">
+              <Link href="/host/requests">
+                <ChevronLeft />
+              </Link>
+            </div>
             <div className="mx-auto max-w-5xl">
               {activeTab === "city" && (
                 <div className="mb-4 flex flex-row justify-between">
@@ -230,34 +271,14 @@ export default function HostRequestsLayout({
                         selectedOption === "normal" ? "primary" : "white"
                       }
                       className="rounded-full shadow-md"
-                      onClick={() => {
-                        setSelectedOption("normal");
-                        void router.push(
-                          {
-                            pathname: "/host/requests",
-                            query: { tabs: "city", option: "normal" },
-                          },
-                          undefined,
-                          { shallow: true },
-                        );
-                      }}
+                      onClick={() => handleOptionChange("normal")}
                     >
                       Primary
                     </Button>
                     <Button
                       variant={selectedOption === "sent" ? "primary" : "white"}
                       className="rounded-full shadow-md"
-                      onClick={() => {
-                        setSelectedOption("sent");
-                        void router.push(
-                          {
-                            pathname: "/host/requests",
-                            query: { tabs: "city", option: "sent" },
-                          },
-                          undefined,
-                          { shallow: true },
-                        );
-                      }}
+                      onClick={() => handleOptionChange("sent")}
                     >
                       Sent
                     </Button>
@@ -269,25 +290,15 @@ export default function HostRequestsLayout({
                         : "white"
                     }
                     className="rounded-full shadow-md"
-                    onClick={() => {
-                      setSelectedOption("outsidePriceRestriction");
-                      void router.push(
-                        {
-                          pathname: "/host/requests",
-                          query: {
-                            tabs: "city",
-                            option: "outsidePriceRestriction",
-                          },
-                        },
-                        undefined,
-                        { shallow: true },
-                      );
-                    }}
+                    onClick={() =>
+                      handleOptionChange("outsidePriceRestriction")
+                    }
                   >
                     Other
                   </Button>
                 </div>
               )}
+
               <Alert className="mb-2">
                 <AlertTriangleIcon />
                 <AlertTitle>Tip</AlertTitle>
@@ -306,19 +317,8 @@ export default function HostRequestsLayout({
               {children}
             </div>
           </div>
-        ) : (
-          <div className="flex h-[calc(100vh-280px)] flex-col items-center justify-center gap-2">
-            <h2 className="text-xl font-semibold">No requests found</h2>
-            <p className="text-center text-muted-foreground">
-              Consider loosen requirements or allow for more ways to book to see
-              more requests.
-            </p>
-            <Button variant="secondary" className="mt-4">
-              Change requirements
-            </Button>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -108,11 +108,6 @@ export default function HostRequests() {
 
   return (
     <div>
-      <div className="mb-4 xl:hidden">
-        <Link href="/host/requests">
-          <ChevronLeft />
-        </Link>
-      </div>
       {cityRequestsData && option === "normal" ? (
         <div className="grid gap-4 md:grid-cols-2">
           {cityRequestsData.requests.map((requestData) => (
@@ -121,7 +116,10 @@ export default function HostRequests() {
                 <Button
                   variant="secondary"
                   onClick={() => {
-                    void chatWithUserForRequest(requestData.request.traveler.id, requestData.request.id);
+                    void chatWithUserForRequest(
+                      requestData.request.traveler.id,
+                      requestData.request.id,
+                    );
                   }}
                 >
                   Message User

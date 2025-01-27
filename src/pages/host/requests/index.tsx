@@ -7,15 +7,14 @@ import { useRouter } from "next/router";
 
 export default function Page() {
   const router = useRouter();
-  const isRequestToBook =
-    router.query.tabs === "property-bids" ? true : false;
-
+  const isRequestToBook = router.query.tabs === "property-bids" ? true : false;
+  const isIndex = !router.query.option;
   return (
     <HostDashboardLayout>
       <Head>
         <title>Offers & Requests | Tramona</title>
       </Head>
-      <HostRequestsLayout>
+      <HostRequestsLayout isIndex={isIndex}>
         {isRequestToBook ? <HostRequestsToBook /> : <HostRequests />}
       </HostRequestsLayout>
     </HostDashboardLayout>
