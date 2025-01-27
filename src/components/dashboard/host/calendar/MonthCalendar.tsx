@@ -20,6 +20,7 @@ type ReservationInfo = {
 interface MonthCalendarProps {
   date: Date;
   reservedDateRanges?: ReservationInfo[];
+  newBookedDates?: ReservationInfo[];
   onDateClick?: (date: Date) => void;
   selectedRange?: {
     start: Date | null;
@@ -34,6 +35,7 @@ interface MonthCalendarProps {
 export default function MonthCalendar({
   date,
   reservedDateRanges = [],
+  newBookedDates = [],
   prices,
   isLoading = false,
   isCalendarUpdating = false,
@@ -77,6 +79,17 @@ export default function MonthCalendar({
     return reservedDateRanges.find((reservedDate) => {
       const start = normalizeToUTCMidnight(new Date(reservedDate.start));
       const end = normalizeToUTCMidnight(new Date(reservedDate.end));
+
+      return normalizedDate >= start && normalizedDate <= end;
+    });
+  };
+
+  const isNewBookedDate = (date: Date): ReservationInfo | undefined => {
+    const normalizedDate = normalizeToUTCMidnight(date);
+
+    return newBookedDates.find((newBookedDate) => {
+      const start = normalizeToUTCMidnight(new Date(newBookedDate.start));
+      const end = normalizeToUTCMidnight(new Date(newBookedDate.end));
 
       return normalizedDate >= start && normalizedDate <= end;
     });
@@ -130,7 +143,9 @@ export default function MonthCalendar({
             const reservedInfo = currentDate
               ? isDateReserved(currentDate)
               : null;
-
+            const newBookedInfo = currentDate
+              ? isNewBookedDate(currentDate)
+              : null;
             const isGrayedOut = currentDate ? isPastDate(currentDate) : false;
 
             let reservationClass = "";
@@ -140,6 +155,9 @@ export default function MonthCalendar({
               } else {
                 reservationClass = "bg-reserved-pattern-2";
               }
+            }
+            if (newBookedInfo) {
+              reservationClass = "bg-reserved-pattern-3";
             }
             const price =
               currentDate &&

@@ -133,21 +133,6 @@ export default async function webhook(
           console.log("hi");
 
           // --------- 3 Cases: 1. Book it now, 2.Request to book,  3. Offer  ---------------------------------------
-          //prevent DUPLICATES
-          //1.) trips creatations
-          const existingTrip = await db.query.trips.findFirst({
-            where: eq(trips.paymentIntentId, paymentIntentId),
-          });
-          //2.) request to book duplication
-          const existingRequestToBook = await db.query.requestsToBook.findFirst(
-            {
-              where: eq(requestsToBook.paymentIntentId, paymentIntentId),
-            },
-          );
-          if (existingRequestToBook ?? existingTrip) {
-            console.log("Trip or request to book already exist... Returning");
-            return;
-          }
 
           //1 . CASE : Book it now
           if (paymentIntentSucceeded.metadata.type === "bookItNow") {
