@@ -93,7 +93,6 @@ export default function CalendarComponent() {
 
   // Set initial selected property when data loads
   useEffect(() => {
-    console.log(initialProperty);
     setSelectedProperty(initialProperty);
     setIsBookItNowChecked(initialProperty?.bookItNowEnabled ?? false);
   }, [initialProperty]);
@@ -141,7 +140,6 @@ export default function CalendarComponent() {
       end: price.date,
       platformBookedOn: "airbnb" as const,
     }));
-  console.log(selectedProperty);
 
   const { data: tramonaBookedDates } = api.calendar.getReservedDates.useQuery(
     { propertyId: selectedProperty?.id },
@@ -213,7 +211,7 @@ export default function CalendarComponent() {
 
   const [isCalendarUpdating, setIsCalendarUpdating] = useState(false);
 
-  const { mutateAsync: toggleBookItNow } =
+  const { mutateAsync: toggleBookItNow, isLoading: isTogglingBookItNow } =
     api.properties.toggleBookItNow.useMutation();
 
   const { mutateAsync: updateBookItNow, isLoading: isUpdatingBookItNow } =
@@ -254,6 +252,7 @@ export default function CalendarComponent() {
     }).finally(() => {
       setIsCalendarUpdating(false);
     });
+    return bookItNowPercent;
   };
 
   const isLoading = loadingProperties || loadingPrices;
@@ -400,6 +399,7 @@ export default function CalendarComponent() {
           handleBookItNowSwitch={handleBookItNowSwitch}
           handleBookItNowSlider={handleBookItNowSlider}
           isUpdatingBookItNow={isUpdatingBookItNow}
+          isTogglingBookItNow={isTogglingBookItNow}
           isBookItNowChecked={isBookItNowChecked}
           refetch={refetch} // sorry this is to invalidate the queries after the pricing update
         />
