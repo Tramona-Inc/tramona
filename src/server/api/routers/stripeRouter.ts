@@ -618,7 +618,6 @@ export const stripeRouter = createTRPCRouter({
       hostStripeConnectId: z.string(),
     }),
   ).query(async ({ input }) => {
-    console.log(input);
     const account = await stripeWithSecretKey.accounts.retrieve(
       input.hostStripeConnectId,
     );
