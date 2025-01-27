@@ -33,7 +33,7 @@ const StripeConnectSessionProvider = ({
   const createStripeInstance = useCallback(
     async (clientSecret: string) => {
       try {
-        const instance = await loadConnectAndInitialize({
+        const instance = loadConnectAndInitialize({
           publishableKey: env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
           fetchClientSecret: () => Promise.resolve(clientSecret),
           appearance: {
