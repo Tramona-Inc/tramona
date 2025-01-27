@@ -126,6 +126,7 @@ export function DesktopSearchTab({
 
   const handleSearch = async (values: SearchFormValues) => {
     setIsSearching(true);
+    handleTabChange("search", true);
     const params = new URLSearchParams();
     Object.entries(values).forEach(([key, value]) => {
       if (value) params.set(key, value.toString());

@@ -154,7 +154,7 @@ export default function UnclaimedOfferCards(): JSX.Element {
         <div className="mr-auto w-full overflow-y-auto">
           {isSearching ? (
             <div className="mx-auto max-w-[2000px] px-4">
-              <div className="grid w-full grid-cols-1 gap-4 min-[580px]:grid-cols-2 min-[800px]:grid-cols-3 min-[1000px]:grid-cols-4 min-[1200px]:grid-cols-5 min-[1400px]:grid-cols-6">
+              <div className="my-3 grid w-full grid-cols-1 gap-4 min-[580px]:grid-cols-2 min-[800px]:grid-cols-3 min-[1000px]:grid-cols-4 min-[1200px]:grid-cols-5 min-[1400px]:grid-cols-6">
                 {Array(24)
                   .fill(null)
                   .map((_, index) => (
@@ -177,7 +177,7 @@ export default function UnclaimedOfferCards(): JSX.Element {
               </div>
             </div>
           ) : (
-            <div className="flex w-full flex-col">
+            <div className="my-3 flex w-full flex-col">
               <div className="mx-auto max-w-[2000px] px-4">
                 <div className="grid w-full grid-cols-1 gap-4 min-[580px]:grid-cols-2 min-[800px]:grid-cols-3 min-[1000px]:grid-cols-4 min-[1200px]:grid-cols-5 min-[1400px]:grid-cols-6">
                   {paginatedProperties.length > 0 &&

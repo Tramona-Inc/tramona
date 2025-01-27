@@ -48,7 +48,10 @@ export default function Page() {
   } = api.stripe.retrieveStripeConnectAccount.useQuery(
     { currentHostTeamId: currentHostTeamId!, hostStripeConnectId },
     {
-      enabled: !!user?.stripeConnectId && !!currentHostTeamId,
+      enabled:
+        !!user?.stripeConnectId &&
+        !!currentHostTeamId &&
+        hostStripeConnectId.length > 0,
       retry: false,
       refetchOnWindowFocus: false,
     },
