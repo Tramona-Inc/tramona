@@ -19,7 +19,7 @@ export default function WithdrawRequestDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const mutation = api.requests.delete.useMutation();
+  const mutation = api.requests.withdraw.useMutation();
 
   async function handleWithdraw() {
     await mutation

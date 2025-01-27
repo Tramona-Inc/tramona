@@ -217,7 +217,7 @@ export default async function webhook(
               if (requestId) {
                 await db
                   .update(requests)
-                  .set({ resolvedAt: confirmedDate })
+                  .set({ resolvedAt: confirmedDate, status: "Resolved" })
                   .where(eq(requests.id, requestId));
               }
 

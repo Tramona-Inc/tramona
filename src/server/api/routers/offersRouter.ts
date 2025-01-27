@@ -78,7 +78,7 @@ export const offersRouter = createTRPCRouter({
             // resolve the request if it exists
             tx
               .update(requests)
-              .set({ resolvedAt: new Date() })
+              .set({ resolvedAt: new Date(), status: "Resolved" })
               .where(eq(offers.id, offer.request.id)),
 
           offer.request &&
