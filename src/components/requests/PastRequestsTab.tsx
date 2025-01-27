@@ -31,8 +31,8 @@ export default function PastRequestsTab() {
         <AlertTriangle className="h-4 w-4" />
         <AlertTitle>Tip</AlertTitle>
         <AlertDescription>
-          This is where past accepted bids and requests show up. Check "My
-          Trips" for upcoming details.
+          This is where past accepted bids and requests show up. Check &quot;My
+          Trips&quot; for upcoming details.
         </AlertDescription>
       </Alert>
 
@@ -49,12 +49,11 @@ export default function PastRequestsTab() {
               requestToBook={requestToBook}
             ></TravelerRequestToBookCard>
           ))}
-          {requests &&
-            requests.inactiveRequests.map((request) => (
-              <RequestCard key={request.id} type="guest" request={request}>
-                <RequestCardAction request={request} />
-              </RequestCard>
-            ))}
+          {requests?.inactiveRequests.map((request) => (
+            <RequestCard key={request.id} type="guest" request={request}>
+              <RequestCardAction request={request} />
+            </RequestCard>
+          ))}
         </>
       ) : (
         <div className="flex flex-col items-center gap-4">
