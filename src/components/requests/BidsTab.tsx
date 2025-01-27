@@ -13,6 +13,7 @@ function BidsTab() {
   const { data: requestsToBook, isLoading } =
     api.requestsToBook.getMyRequestsToBook.useQuery();
 
+  console.log(isLoading);
   return (
     <div className="flex flex-col gap-y-3">
       <Link href="/">
