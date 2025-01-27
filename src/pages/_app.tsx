@@ -47,7 +47,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
             </StripeConnectSessionProvider>
 
             {/* Helps display screen size (Only in developer mode) */}
-             <TailwindIndicator />
+            <TailwindIndicator />
             <Toaster />
           </SessionProvider>
         </APIProvider>

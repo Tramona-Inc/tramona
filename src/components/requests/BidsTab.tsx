@@ -4,14 +4,16 @@ import { AlertTriangle, PackageOpenIcon, SearchIcon } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import Link from "next/link";
 import { api } from "@/utils/api";
-import Spinner from "../_common/Spinner";
+
 import TravelerRequestToBookCard from "../requests-to-book/TravelerRequestToBookCard";
 import EmptyStateValue from "../_common/EmptyStateSvg/EmptyStateValue";
+import RequestAndBidLoadingState from "./RequestAndBidLoadingState";
 
 function BidsTab() {
   const { data: requestsToBook, isLoading } =
     api.requestsToBook.getMyRequestsToBook.useQuery();
 
+  console.log(isLoading);
   return (
     <div className="flex flex-col gap-y-3">
       <Link href="/">
@@ -29,7 +31,7 @@ function BidsTab() {
         </AlertDescription>
       </Alert>
       {isLoading ? (
-        <Spinner />
+        <RequestAndBidLoadingState />
       ) : requestsToBook && requestsToBook.activeRequestsToBook.length > 0 ? (
         requestsToBook.activeRequestsToBook.map((requestToBook) => (
           <TravelerRequestToBookCard

@@ -22,7 +22,8 @@ export function useCityRequestForm({
 
   const { status } = useSession();
   const router = useRouter();
-  const { mutateAsync: createRequests } = api.requests.create.useMutation();
+  const { mutateAsync: createRequests, isLoading: isSubmitting } =
+    api.requests.create.useMutation();
 
   const onSubmit = form.handleSubmit(async (data) => {
     const { date: _date, maxNightlyPriceUSD, ...restData } = data;
@@ -61,6 +62,7 @@ export function useCityRequestForm({
   return {
     form,
     onSubmit,
+    isSubmitting,
   };
 }
 
