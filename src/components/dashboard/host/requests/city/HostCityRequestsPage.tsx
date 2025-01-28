@@ -12,6 +12,7 @@ import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 import CityRequestSection from "./CityRequestSection";
 import OffersSentSection from "./OffersSentSection";
 import { RequestCardLoadingGrid } from "../RequestCardLoadingGrid";
+import NoRequestEmptyState from "./NoRequestEmptyState";
 
 export default function HostCityRequestsPage() {
   const { currentHostTeamId } = useHostTeamStore();
@@ -67,7 +68,7 @@ export default function HostCityRequestsPage() {
           city={city}
         />
       ) : (
-        <RequestCardLoadingGrid />
+        <NoRequestEmptyState />
       )}
 
       {step === 0 && properties && selectedRequest && (

@@ -17,6 +17,7 @@ import { separateByPriceAndAgeRestriction } from "@/utils/utils";
 import { useEffect, useState } from "react";
 import { type SeparatedData } from "@/server/server-utils";
 import { useHostTeamStore } from "@/utils/store/hostTeamStore"; // Import store
+import NoRequestEmptyState from "./NoRequestEmptyState";
 
 interface CityRequestSectionProps {
   setDialogOpen: (open: boolean) => void;
@@ -86,75 +87,77 @@ const CityRequestSection: React.FC<CityRequestSectionProps> = ({
   return (
     <div className="w-full">
       {currentCityRequests && currentCityRequests.length > 0 ? (
-        currentCityRequests.map((requestData) => (
-          <div
-            key={requestData.request.id}
-            className="mb-4 grid gap-4 md:grid-cols-2"
-          >
-            <RequestCard request={requestData.request} type="host">
-              <Button
-                variant="secondary"
-                onClick={() => {
-                  void chatWithUserForRequest(
-                    requestData.request.traveler.id,
-                    requestData.request.id,
-                  );
-                }}
-              >
-                Message User
-              </Button>
-              <Button
-                variant="secondary"
-                onClick={async () => {
-                  if (!currentHostTeamId) {
-                    toast({
-                      title: "Error",
-                      description:
-                        "Could not reject request. Host team ID is missing.",
-                      variant: "destructive",
-                    });
-                    return;
-                  }
-                  await rejectRequest({
-                    requestId: requestData.request.id,
-                    currentHostTeamId: Number(currentHostTeamId), // Ensure currentHostTeamId is a Number here as well
-                  })
-                    .then(() => {
+        <div className="grid gap-4 md:grid-cols-2">
+          {currentCityRequests.map((requestData) => (
+            <div
+              key={requestData.request.id}
+              className="mb-4 grid gap-4 md:grid-cols-2"
+            >
+              <RequestCard request={requestData.request} type="host">
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    void chatWithUserForRequest(
+                      requestData.request.traveler.id,
+                      requestData.request.id,
+                    );
+                  }}
+                >
+                  Message User
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={async () => {
+                    if (!currentHostTeamId) {
                       toast({
-                        title: "Successfully rejected request",
+                        title: "Error",
+                        description:
+                          "Could not reject request. Host team ID is missing.",
+                        variant: "destructive",
                       });
+                      return;
+                    }
+                    await rejectRequest({
+                      requestId: requestData.request.id,
+                      currentHostTeamId: Number(currentHostTeamId), // Ensure currentHostTeamId is a Number here as well
                     })
-                    .catch((error) => {
-                      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                      if (error.data?.code === "FORBIDDEN") {
+                      .then(() => {
                         toast({
-                          title:
-                            "You do not have permission to create an offer.",
-                          description:
-                            "Please contact your team owner to request access.",
+                          title: "Successfully rejected request",
                         });
-                      } else {
-                        errorToast();
-                      }
-                    });
-                }}
-              >
-                Reject
-              </Button>
-              <Button
-                onClick={() => {
-                  setDialogOpen(true);
-                  setSelectedRequest(requestData.request);
-                  setProperties(requestData.properties);
-                }}
-              >
-                Make an offer
-              </Button>
-            </RequestCard>
-          </div>
-        ))
+                      })
+                      .catch((error) => {
+                        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                        if (error.data?.code === "FORBIDDEN") {
+                          toast({
+                            title:
+                              "You do not have permission to create an offer.",
+                            description:
+                              "Please contact your team owner to request access.",
+                          });
+                        } else {
+                          errorToast();
+                        }
+                      });
+                  }}
+                >
+                  Reject
+                </Button>
+                <Button
+                  onClick={() => {
+                    setDialogOpen(true);
+                    setSelectedRequest(requestData.request);
+                    setProperties(requestData.properties);
+                  }}
+                >
+                  Make an offer
+                </Button>
+              </RequestCard>
+            </div>
+          ))}
+        </div>
       ) : (
-        <div className="flex h-full items-center justify-center"></div>
+        <NoRequestEmptyState />
       )}
     </div>
   );

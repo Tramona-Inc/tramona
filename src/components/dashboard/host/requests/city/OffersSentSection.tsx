@@ -57,27 +57,26 @@ const OffersSentSection: React.FC<OffersSentSectionProps> = ({
   return (
     <div className="w-full">
       {cityOfferData.requests.length > 0 ? (
-        cityOfferData.requests.map((offerData) => (
-          <div
-            key={offerData.offer.id}
-            className="mb-4 grid gap-4 md:grid-cols-2"
-          >
-            <PastOfferCard
-              request={offerData.request}
-              offer={offerData.offer}
-              property={offerData.property}
-            >
-              <Button
-                onClick={() => {
-                  setOfferWithdrawalDialogOpen(true);
-                  setSelectedOffer(offerData.offer.id);
-                }}
+        <div className="grid gap-4 md:grid-cols-2">
+          {cityOfferData.requests.map((offerData) => (
+            <div key={offerData.offer.id} className="mb-4">
+              <PastOfferCard
+                request={offerData.request}
+                offer={offerData.offer}
+                property={offerData.property}
               >
-                Withdraw
-              </Button>
-            </PastOfferCard>
-          </div>
-        ))
+                <Button
+                  onClick={() => {
+                    setOfferWithdrawalDialogOpen(true);
+                    setSelectedOffer(offerData.offer.id);
+                  }}
+                >
+                  Withdraw
+                </Button>
+              </PastOfferCard>
+            </div>
+          ))}
+        </div>
       ) : (
         // Empty state - consider moving to a separate component
         <Card className="flex h-full items-center justify-center">
