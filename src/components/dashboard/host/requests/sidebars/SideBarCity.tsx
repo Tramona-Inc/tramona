@@ -44,8 +44,8 @@ export default function SidebarCity({
     separatedData && selectedOption !== "sent"
       ? separatedData[selectedOption]
       : offerData && selectedOption === "sent"
-        ? Object.values(offerData[selectedOption] || {})
-        : [];
+        ? Object.values(offerData[selectedOption])
+        : undefined;
 
   const handleCityOffersClick = (city: string) => {
     setSelectedCityOffers(city);
@@ -57,17 +57,17 @@ export default function SidebarCity({
     setSelectedCity(city);
   };
 
-  if (isLoading) {
+  if ((isLoading && !offerData) || !displayedData) {
     return (
       <div className="pt-4">
-        {range(7).map((i) => (
+        {range(3).map((i) => (
           <SidebarPropertySkeleton key={i} />
         ))}
       </div>
     );
   }
 
-  if (displayedData.length === 0) {
+  if (displayedData.length > 1) {
     return <EmptyRequestState />;
   }
 

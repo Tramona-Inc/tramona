@@ -17,7 +17,7 @@ import { separateByPriceAndAgeRestriction } from "@/utils/utils";
 import { useEffect, useState } from "react";
 import { type SeparatedData } from "@/server/server-utils";
 import { useHostTeamStore } from "@/utils/store/hostTeamStore"; // Import store
-import NoRequestEmptyState from "./NoRequestEmptyState";
+import NoRequestEmptyState from "../NoRequestEmptyState";
 
 interface CityRequestSectionProps {
   setDialogOpen: (open: boolean) => void;

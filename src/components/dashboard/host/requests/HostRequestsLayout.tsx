@@ -142,8 +142,8 @@ export default function HostRequestsLayout({
       const newQuery: RouterQuery = { ...query, tabs: tab };
       let newPathname = `/host/requests`;
 
-      if (query.city) {
-        newPathname = `/host/requests/${query.city}`; // Keep city in path
+      if (tab === "city" && query.city) {
+        newPathname = `/host/requests/${query.city}`; // Keep city in path only for city tab
       }
 
       if (
@@ -239,7 +239,7 @@ export default function HostRequestsLayout({
               selectedOption={selectedOption}
               separatedData={separatedData}
               offerData={offerData}
-              isLoading={isLoadingProperties || isLoadingOffers}
+              isLoading={isLoadingProperties}
               initialSelectedCity={query.city}
             />
           ) : (
