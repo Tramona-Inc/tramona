@@ -21,12 +21,16 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
+import { api } from "@/utils/api";
 
 const formSchema = z.object({
   bidNotification: z.enum(["once a day", "once a week"]),
 });
 
 export default function Notifications() {
+  const { data: hasHostProfile, isLoading: hasHostProfileIsLoading } =
+    api.users.isHost.useQuery();
+
   const guestForm = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -58,10 +62,10 @@ export default function Notifications() {
           </Link>
           <h1 className="text-lg font-bold">Notifications</h1>
           <div className="flex w-full items-center gap-2">
-            <Tabs defaultValue="host" className="flex flex-col gap-y-6">
+            <Tabs defaultValue="guest" className="flex flex-col gap-y-6">
               <TabsList>
-                <TabsTrigger value="host">Host</TabsTrigger>
                 <TabsTrigger value="guest">Guest</TabsTrigger>
+                {hasHostProfile && <TabsTrigger value="host">Host</TabsTrigger>}
               </TabsList>
               <TabsContent value="host">
                 <Form {...hostForm}>
@@ -76,7 +80,7 @@ export default function Notifications() {
                           <SelectValue placeholder="Select a notification type" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="host">Host</SelectItem>
+                          {<SelectItem value="host">Host</SelectItem>}
                           <SelectItem value="guest">Guest</SelectItem>
                         </SelectContent>
                       </Select>

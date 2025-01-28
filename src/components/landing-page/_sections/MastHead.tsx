@@ -20,8 +20,10 @@ import HowTramonaWorks from "./name-your-price/HowTramonaWorks";
 import { TestimonialCarousel } from "./testimonials/TestimonialCarousel";
 import { landingPageTestimonals } from "./testimonials/testimonials-data";
 import UnclaimedMap from "@/components/unclaimed-offers/UnclaimedMap";
+import { useIsLg } from "@/utils/utils";
 
 export default function MastHead() {
+  const isLg = useIsLg();
   const router = useRouter();
   const { query } = router;
   const activeTab = query.tab ?? "search";
@@ -58,16 +60,18 @@ export default function MastHead() {
     );
 
     if (toggleSectionRef.current) {
-      const headerOffset = 250;
+      const headerOffset = isLg ? 250 : 65;
       const elementPosition =
         toggleSectionRef.current.getBoundingClientRect().top;
       const offsetPosition =
         elementPosition + window.pageYOffset - headerOffset;
 
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: "smooth",
-      });
+      setTimeout(() => {
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: "smooth",
+        });
+      }, 100);
     }
   };
 
@@ -180,6 +184,7 @@ export default function MastHead() {
               src={landingBg2}
               alt=""
               fill
+              placeholder="blur"
               className="object-cover object-center brightness-90"
             />
             <div className="absolute inset-0 bg-black bg-opacity-40" />
@@ -215,7 +220,7 @@ export default function MastHead() {
               <h3 className="mt-4 text-lg font-semibold text-white">
                 <button
                   className="flex items-center"
-                  onClick={() => router.push("/why-list")}
+                  onClick={() => router.push("/how-it-works")}
                 >
                   <span className="underline">How it works</span>
                 </button>

@@ -105,23 +105,24 @@ export default function ChatHeader({
           </p>
         </div>
       </div>
-      {!detailsSidebarIsOpen && (
-        <Button
-          variant="outline"
-          className="rounded-xl"
-          onClick={() => {
-            void router.push({
-              pathname: router.pathname,
-              query: {
-                ...router.query,
-                details: "true",
-              },
-            });
-          }}
-        >
-          Details
-        </Button>
-      )}
+      {!detailsSidebarIsOpen &&
+        (selectedConversation.propertyId ?? selectedConversation.offerId) && (
+          <Button
+            variant="outline"
+            className="rounded-xl"
+            onClick={() => {
+              void router.push({
+                pathname: router.pathname,
+                query: {
+                  ...router.query,
+                  details: "true",
+                },
+              });
+            }}
+          >
+            Details
+          </Button>
+        )}
     </div>
   );
 }

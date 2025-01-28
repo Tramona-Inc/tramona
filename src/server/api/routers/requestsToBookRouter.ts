@@ -216,6 +216,7 @@ export const requestsToBookRouter = createTRPCRouter({
               id: true,
               name: true,
               imageUrls: true,
+              bookItNowEnabled: true,
             },
           },
         },

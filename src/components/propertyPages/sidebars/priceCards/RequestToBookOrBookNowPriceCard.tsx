@@ -653,13 +653,13 @@ export default function RequestToBookOrBookNowPriceCard({
                 </span>
               </div>
               {property.randomPercentageForScrapedProperties && (
-                <div className="my-3 text-xs">
+                <div className="my-3 text-xs md:text-sm">
                   Save{" "}
                   <span className="text-green-700">
                     {property.randomPercentageForScrapedProperties}%{" "}
                   </span>
-                  on fees compared to{" "}
-                  <span className="text-destructive">Airbnb</span>!
+                  on fees compared to other{" "}
+                  <span className="text-destructive">platforms</span>!
                 </div>
               )}
               <Button

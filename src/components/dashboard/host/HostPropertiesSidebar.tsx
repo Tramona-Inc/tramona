@@ -20,7 +20,7 @@ export default function HostPropertiesSidebar({
           <Button
             size="icon"
             onClick={onClose}
-            className="absolute right-4 top-4 rounded-full bg-transparent text-black"
+            className="absolute right-4 top-4 rounded-full bg-transparent text-black sm:hidden"
           >
             <X />
           </Button>

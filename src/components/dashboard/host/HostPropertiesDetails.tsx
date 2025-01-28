@@ -34,16 +34,6 @@ import Onboarding8 from "@/components/host/onboarding/Onboarding8";
 import Onboarding9 from "@/components/host/onboarding/Onboarding9";
 import Onboarding7 from "@/components/host/onboarding/Onboarding7";
 import Onboarding6 from "@/components/host/onboarding/Onboarding6";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { useRouter } from "next/router";
 import {
   Tooltip,
@@ -96,9 +86,7 @@ export default function HostPropertiesDetails({
   );
 
   const { mutateAsync: updateProperty } = api.properties.update.useMutation();
-  const { mutateAsync: deleteProperty } = api.properties.delete.useMutation({
-    onSuccess: () => void router.push("/host/properties"),
-  });
+
   const { data: coordinateData } = api.offers.getCoordinates.useQuery({
     location: address,
   });
@@ -217,38 +205,13 @@ export default function HostPropertiesDetails({
         <Spinner />
       ) : (
         <div>
-          <div className="flex h-full items-center justify-between">
+          <div className="my-1 flex h-full items-center justify-end">
             {editing && (
-              <div className="grid grid-cols-3 gap-2 py-2">
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant="outline" className="text-red-500">
-                      <Trash2 />
-                      Delete
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      Are you sure you want to delete this property?
-                    </AlertDialogHeader>
-                    <AlertDialogDescription>
-                      This action cannot be undone. This will permanently delete
-                      the property.
-                    </AlertDialogDescription>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => deleteProperty(property)}
-                      >
-                        Continue
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-
+              <div className="my-1 mr-auto">
                 {property.status === "Listed" && (
                   <Button
                     variant="outline"
+                    className="px-1"
                     onClick={() =>
                       updateProperty({
                         updatedProperty: {
@@ -377,7 +340,7 @@ export default function HostPropertiesDetails({
                   ))}
               </div>
             )}
-            <div className="text-end">
+            <div className="my-1">
               <HostPropertyEditBtn
                 editing={editing}
                 setEditing={setEditing}

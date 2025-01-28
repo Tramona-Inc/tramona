@@ -23,7 +23,7 @@ export function useChatWithUser() {
 
       await new Promise((resolve) => setTimeout(resolve, 500));
 
-      await router.push(`/host/messages?conversationId=${conversation.id}`);
+      await router.push(`/host/messages/${conversation.id}`);
     } catch (error) {
       const tRPCError = error as TRPCError;
       console.error("Failed to create conversation:", tRPCError.message);

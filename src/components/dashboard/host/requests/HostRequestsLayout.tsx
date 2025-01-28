@@ -101,12 +101,12 @@ export default function HostRequestsLayout({
       { currentHostTeamId: currentHostTeamId! },
       {
         enabled: !!currentHostTeamId,
-        refetchOnWindowFocus: false,
-        refetchOnMount: false,
-        refetchOnReconnect: false,
-        staleTime: Infinity,
-        cacheTime: Infinity,
-        retry: false,
+        // refetchOnWindowFocus: false,
+        // refetchOnMount: false,
+        // refetchOnReconnect: false,
+        // staleTime: Infinity,
+        // cacheTime: Infinity,
+        // retry: false,
       },
     );
 

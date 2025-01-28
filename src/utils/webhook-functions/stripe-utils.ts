@@ -299,6 +299,11 @@ export async function finalizeTrip({
   //   });
   // }
   // ------ Send Slack When trip is booked ------
+  await withdrawOverlappingOffersAndRequestsToBook({
+    propertyId: property.id,
+    checkIn,
+    checkOut,
+  });
   await sendSlackMessage({
     isProductionOnly: false,
     channel: "tramona-bot",
@@ -391,7 +396,7 @@ export async function createRequestToBook({
       isProductionOnly: true,
       channel: "tramona-bot",
       text: [
-        `*${user.email} just requested to book: ${property.name}*`,
+        `*${user.firstName} just requested to book: ${property.name}*`,
         `*${property.city}*`,
         `through ${"a different platform (direct listing)"} · ${formatDateMonthDay(checkIn)}-${formatDateMonthDay(checkOut)}`,
         `<https://tramona.com/admin|Go to admin dashboard>`,
@@ -401,14 +406,14 @@ export async function createRequestToBook({
     // Case 2: Not DirectListing so we need to send the request to the host
     await sendTextToHostTeamMembers({
       hostTeamId: property.hostTeamId,
-      message: `${user.email} just requested to book your property`,
+      message: `${user.firstName} just requested to book your property`,
     });
 
     await sendSlackMessage({
       isProductionOnly: true,
       channel: "tramona-bot",
       text: [
-        `*${user.email} just requested to book: ${property.name}*`,
+        `*${user.firstName} just requested to book: ${property.name}*`,
         `*${property.city}*`,
         `through one of our properties· ${formatDateMonthDay(checkIn)}-${formatDateMonthDay(checkOut)}`,
         `<https://tramona.com/admin|Go to admin dashboard>`,
@@ -418,7 +423,7 @@ export async function createRequestToBook({
   return;
 }
 
-export async function withdrawOverlappingOffers({
+export async function withdrawOverlappingOffersAndRequestsToBook({
   propertyId,
   checkIn,
   checkOut,
@@ -436,6 +441,32 @@ export async function withdrawOverlappingOffers({
   // 3. dates completely encompasses the booked dates
   const checkInStr = checkIn.toISOString();
   const checkOutStr = checkOut.toISOString();
+
+  const overlappingRequestsToBookQuery = db
+    .update(requestsToBook)
+    .set({
+      status: "Withdrawn",
+    })
+    .where(
+      and(
+        eq(requestsToBook.propertyId, propertyId),
+        eq(requestsToBook.status, "Pending"),
+        or(
+          and(
+            sql`${requestsToBook.checkIn}::date >= ${checkInStr}::date`,
+            sql`${requestsToBook.checkIn}::date < ${checkOutStr}::date`,
+          ),
+          and(
+            sql`${requestsToBook.checkOut}::date > ${checkInStr}::date`,
+            sql`${requestsToBook.checkOut}::date <= ${checkOutStr}::date`,
+          ),
+          and(
+            sql`${requestsToBook.checkIn}::date <= ${checkInStr}::date`,
+            sql`${requestsToBook.checkOut}::date >= ${checkOutStr}::date`,
+          ),
+        ),
+      ),
+    );
 
   const overlappingOffersQuery = db
     .update(offers)
@@ -469,5 +500,6 @@ export async function withdrawOverlappingOffers({
     .returning();
 
   const rejectedOffers = await overlappingOffersQuery;
-  return rejectedOffers;
+  const rejectedRequestsToBook = await overlappingRequestsToBookQuery;
+  return { rejectedOffers, rejectedRequestsToBook };
 }

@@ -12,10 +12,12 @@ import {
   between,
   eq,
   exists,
+  gt,
   gte,
   inArray,
   isNotNull,
   isNull,
+  lt,
   lte,
   notExists,
   or,
@@ -43,6 +45,7 @@ import {
   hostTeams,
   requestsToBook,
   hostProfiles,
+  reservedDateRanges,
 } from "./db/schema";
 import { getAddress, getCoordinates } from "./google-maps";
 import axios from "axios";
@@ -529,6 +532,8 @@ export async function getRequestsForProperties(
         requests.radius * 1609.34
       )
     `;
+
+
     //  const numberOfNights = sql`DATE_PART('day', requests.check_out::timestamp - requests.check_in::timestamp)`;
 
     //   const priceRestrictionSQL = sql`
@@ -546,6 +551,7 @@ export async function getRequestsForProperties(
         requestIsNearProperty,
         gte(requests.checkIn, new Date()),
         gte(requests.createdAt, twentyFourHoursAgo),
+        eq(requests.status, "Pending"),
         notExists(
           db
             .select()
@@ -575,6 +581,30 @@ export async function getRequestsForProperties(
               and(
                 eq(rejectedRequests.requestId, requests.id),
                 eq(rejectedRequests.hostTeamId, property.hostTeamId),
+              ),
+            ),
+        ),
+        notExists(
+          db
+            .select()
+            .from(reservedDateRanges)
+            .where(
+              and(
+                eq(reservedDateRanges.propertyId, property.id),
+                or(
+                  and(
+                    gte(reservedDateRanges.start, requests.checkIn),
+                    lt(reservedDateRanges.start, requests.checkOut),
+                  ),
+                  and(
+                    gt(reservedDateRanges.end, requests.checkIn),
+                    lte(reservedDateRanges.end, requests.checkOut),
+                  ),
+                  and(
+                    lte(reservedDateRanges.start, requests.checkIn),
+                    gte(reservedDateRanges.end, requests.checkOut),
+                  ),
+                ),
               ),
             ),
         ),

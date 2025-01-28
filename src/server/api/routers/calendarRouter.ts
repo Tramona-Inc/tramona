@@ -50,9 +50,12 @@ export async function syncCalendar({
       })),
     );
 
-    await tx.update(properties).set({
-      iCalLinkLastUpdated: new Date(),
-    }).where(eq(properties.id, propertyId));
+    await tx
+      .update(properties)
+      .set({
+        iCalLinkLastUpdated: new Date(),
+      })
+      .where(eq(properties.id, propertyId));
 
     // Update the iCalLink if it's changed
     await tx
@@ -283,12 +286,16 @@ export const calendarRouter = createTRPCRouter({
   //   }),
 
   getReservedDates: publicProcedure
-    .input(z.object({ propertyId: z.number() }))
+    .input(z.object({ propertyId: z.number().optional() }))
     .query(async ({ input }) => {
+      console.log(input);
+      if (!input.propertyId) return;
+
       const { propertyId } = input;
       const bookedDates = await db.query.reservedDateRanges.findMany({
         where: eq(reservedDateRanges.propertyId, propertyId),
       });
+      console.log(bookedDates);
       return bookedDates;
     }),
 });

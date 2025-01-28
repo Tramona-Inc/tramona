@@ -8,8 +8,6 @@ import {
   trips,
   tripCheckouts,
   users,
-  reservedDateRanges,
-  requestsToBook,
 } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
 import { buffer } from "micro";
@@ -32,7 +30,7 @@ import {
   getRequestIdByOfferId,
   finalizeTrip,
   createRequestToBook,
-  withdrawOverlappingOffers,
+  withdrawOverlappingOffersAndRequestsToBook,
 } from "@/utils/webhook-functions/stripe-utils";
 import { sendSlackMessage } from "@/server/slack";
 import { formatDateMonthDay } from "@/utils/utils";
@@ -133,21 +131,6 @@ export default async function webhook(
           console.log("hi");
 
           // --------- 3 Cases: 1. Book it now, 2.Request to book,  3. Offer  ---------------------------------------
-          //prevent DUPLICATES
-          //1.) trips creatations
-          const existingTrip = await db.query.trips.findFirst({
-            where: eq(trips.paymentIntentId, paymentIntentId),
-          });
-          //2.) request to book duplication
-          const existingRequestToBook = await db.query.requestsToBook.findFirst(
-            {
-              where: eq(requestsToBook.paymentIntentId, paymentIntentId),
-            },
-          );
-          if (existingRequestToBook ?? existingTrip) {
-            console.log("Trip or request to book already exist... Returning");
-            return;
-          }
 
           //1 . CASE : Book it now
           if (paymentIntentSucceeded.metadata.type === "bookItNow") {
@@ -170,16 +153,6 @@ export default async function webhook(
               isDirectListingCharge,
               source: "Book it now",
             });
-            // rejecting overlapping offers
-            await withdrawOverlappingOffers({
-              propertyId: parseInt(
-                paymentIntentSucceeded.metadata.property_id!,
-              ),
-              checkIn: new Date(paymentIntentSucceeded.metadata.check_in!),
-              checkOut: new Date(paymentIntentSucceeded.metadata.check_out!),
-            });
-            //we need to work on referalls/messaging for book it now
-
             // 2.  CASE : "RequestToBook"
           } else if (paymentIntentSucceeded.metadata.type === "requestToBook") {
             //not charging user or creating a superhog
@@ -217,7 +190,7 @@ export default async function webhook(
               if (requestId) {
                 await db
                   .update(requests)
-                  .set({ resolvedAt: confirmedDate })
+                  .set({ resolvedAt: confirmedDate, status: "Resolved" })
                   .where(eq(requests.id, requestId));
               }
 
@@ -281,7 +254,7 @@ export default async function webhook(
               };
 
               // rejecting overlapping offers
-              await withdrawOverlappingOffers({
+              await withdrawOverlappingOffersAndRequestsToBook({
                 propertyId: offer.propertyId,
                 checkIn: offer.checkIn,
                 checkOut: offer.checkOut,

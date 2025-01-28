@@ -7,21 +7,21 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import HostPropertiesRestrictions from "../HostPropertiesRestrictions";
 import { Property } from "@/server/db/schema/tables/properties";
-import { useState, useEffect } from "react";
 import { api } from "@/utils/api";
 import { toast } from "@/components/ui/use-toast";
 import RequestAndBidAutomationSection from "./setttingsSections/RequestAndBidAutomationSection";
 import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 import { errorToast } from "@/utils/toasts";
-import * as React from "react";
 import HostFeeTab from "./HostFeeTab";
+import { useRef, useState, useEffect } from "react";
 
 interface CalendarSettingsProps {
   property: Property;
   handleBookItNowSwitch: (checked: boolean) => Promise<void>;
-  handleBookItNowSlider: (bookItNowPercent: number) => Promise<void>;
+  handleBookItNowSlider: (bookItNowPercent: number) => Promise<number>;
   isUpdatingBookItNow: boolean;
   isBookItNowChecked: boolean;
+  isTogglingBookItNow: boolean;
   refetch: () => void;
 }
 export default function CalendarSettings({
@@ -30,6 +30,7 @@ export default function CalendarSettings({
   handleBookItNowSlider,
   isUpdatingBookItNow,
   isBookItNowChecked,
+  isTogglingBookItNow,
   refetch,
 }: CalendarSettingsProps) {
   const { currentHostTeamId } = useHostTeamStore();
@@ -43,23 +44,27 @@ export default function CalendarSettings({
     property.bookItNowHostDiscountPercentOffInput,
   );
 
+  // This is used to check if the book it now percent has changed
+  const initialBookItNowPercent = useRef<number>(
+    property.bookItNowHostDiscountPercentOffInput
+  );
+
   const [biddingOpen, setBiddingOpen] = useState(false);
   const [biddingSaved, setBiddingSaved] = useState(false);
   const [biddingPercent, setBiddingPercent] = useState<number>(
     property.requestToBookMaxDiscountPercentage,
   );
 
-  // Local Loading State for switch
-  const [isBookItNowSwitchLoading, setIsBookItNowSwitchLoading] =
-    useState(false);
 
   useEffect(() => {
     setBookItNowPercent(property.bookItNowHostDiscountPercentOffInput);
     setBiddingPercent(property.requestToBookMaxDiscountPercentage);
+    initialBookItNowPercent.current = property.bookItNowHostDiscountPercentOffInput;
   }, [property]); //update when the selected property changes
 
   const handleBookItNowSliderLocal = async () => {
-    await handleBookItNowSlider(bookItNowPercent);
+    const newBookItNowPercent = await handleBookItNowSlider(bookItNowPercent);
+    setBookItNowPercent(newBookItNowPercent);
   };
 
   const handleBiddingSave = async () => {
@@ -89,9 +94,12 @@ export default function CalendarSettings({
       });
   };
 
+  const isBookItNowSaveDisabled =
+    initialBookItNowPercent.current === bookItNowPercent;
+
   return (
     <Card className="h-full flex-1">
-      <CardContent className="p-3 sm:px-6">
+      <CardContent className="p-1 xl:p-3">
         <h2 className="mb-2 text-xl font-bold sm:mb-6 sm:text-2xl">Settings</h2>
         <Tabs defaultValue="pricing" className="w-full">
           <TabsList
@@ -109,15 +117,13 @@ export default function CalendarSettings({
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="pricing" className="space-y-6 sm:space-y-8">
+          <TabsContent value="pricing" className="space-y-6">
             {/* Book it now section */}
-            <div className="space-y-3 rounded-lg border p-6">
+            <div className="space-y-1 rounded-lg border p-6">
               <div className="flex cursor-pointer items-center justify-between">
-                <h3 className="text-[20px] font-bold text-black">
-                  Book it now
-                </h3>
+                <h3 className="text-xl font-bold text-black">Book it now</h3>
               </div>
-              <div className="flex flex-row justify-between">
+              <div className="flex flex-row justify-between space-x-1">
                 <p className="text-base text-muted-foreground">
                   Turn on Book it now to allow guests to book your property
                   instantly. All bookings automatically block off the dates on
@@ -125,19 +131,17 @@ export default function CalendarSettings({
                 </p>
                 <Switch
                   checked={isBookItNowChecked}
-                  disabled={isBookItNowSwitchLoading}
+                  disabled={isTogglingBookItNow}
                   className="data-[state=checked]:bg-primaryGreen data-[state=unchecked]:bg-gray-300"
                   onCheckedChange={async (checked) => {
-                    setIsBookItNowSwitchLoading(true);
-                    await handleBookItNowSwitch(checked).finally(() => {
-                      setIsBookItNowSwitchLoading(false);
-                    });
+                    await handleBookItNowSwitch(checked);
                   }}
+                  style={{ cursor: isTogglingBookItNow ? "wait" : "auto" }}
                 />
               </div>
 
               {isBookItNowChecked && (
-                <div className="space-y-4 pt-4">
+                <div className="space-y-4">
                   <div className="my-6 w-full border-b border-gray-200" />
                   <Label>{bookItNowPercent}% OFF</Label>
                   <Slider
@@ -152,7 +156,7 @@ export default function CalendarSettings({
                   <div className="flex justify-end">
                     <Button
                       onClick={handleBookItNowSliderLocal}
-                      disabled={isUpdatingBookItNow}
+                      disabled={isUpdatingBookItNow || isBookItNowSaveDisabled}
                     >
                       {isUpdatingBookItNow ? "Saving!" : "Save"}
                     </Button>
@@ -205,7 +209,10 @@ export default function CalendarSettings({
                     consider accepting.
                   </p>
                   <div className="flex justify-end">
-                    <Button onClick={handleBiddingSave}>
+                    <Button
+                      onClick={handleBiddingSave}
+                      disabled={biddingPercent === property.requestToBookMaxDiscountPercentage}
+                    >
                       {biddingSaved ? "Saved!" : "Save"}
                     </Button>
                   </div>

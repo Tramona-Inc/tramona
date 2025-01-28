@@ -29,7 +29,7 @@ export default function HostAvailability({ property }: { property: Property }) {
     end: Date | null;
   }>({ start: null, end: null });
   const [isRefetching, setIsRefetching] = useState(false);
-
+  // const [calOpen, setCalOpen] = useState(false);
   const { mutateAsync: syncCalendar } = api.calendar.syncCalendar.useMutation();
 
   const hospitableListingId = property.hospitableListingId;
@@ -305,7 +305,7 @@ export default function HostAvailability({ property }: { property: Property }) {
             property.iCalLink && editing ? "hidden sm:block" : "hidden"
           }
         >
-          <HostICalSync property={property} />
+          {/* <HostICalSync property={property} calOpen={calOpen} setCalOpen={setCalOpen} /> */}
         </div>
         {property.iCalLink && (
           <HostPropertyEditBtn
@@ -364,7 +364,7 @@ export default function HostAvailability({ property }: { property: Property }) {
                 : "absolute inset-0 flex items-center justify-center"
             }
           >
-            <HostICalSync property={property} />
+            {/* <HostICalSync property={property} calOpen={calOpen} setCalOpen={setCalOpen} /> */}
           </div>
 
           <div className="mt-12 flex flex-col space-y-2 text-sm">

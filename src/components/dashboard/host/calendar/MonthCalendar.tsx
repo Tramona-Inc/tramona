@@ -3,7 +3,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { cn } from "@/utils/utils";
-import { Loader2Icon } from "lucide-react";
+import { AlertCircleIcon, Loader2Icon } from "lucide-react";
 import { isBefore } from "date-fns";
 import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 import { api } from "@/utils/api";
@@ -20,6 +20,7 @@ type ReservationInfo = {
 interface MonthCalendarProps {
   date: Date;
   reservedDateRanges?: ReservationInfo[];
+  newBookedDates?: ReservationInfo[];
   onDateClick?: (date: Date) => void;
   selectedRange?: {
     start: Date | null;
@@ -34,10 +35,12 @@ interface MonthCalendarProps {
 export default function MonthCalendar({
   date,
   reservedDateRanges = [],
+  newBookedDates = [],
   prices,
   isLoading = false,
   isCalendarUpdating = false,
 }: MonthCalendarProps) {
+  console.log(prices);
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const { currentHostTeamId } = useHostTeamStore();
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(
@@ -81,6 +84,17 @@ export default function MonthCalendar({
     });
   };
 
+  const isNewBookedDate = (date: Date): ReservationInfo | undefined => {
+    const normalizedDate = normalizeToUTCMidnight(date);
+
+    return newBookedDates.find((newBookedDate) => {
+      const start = normalizeToUTCMidnight(new Date(newBookedDate.start));
+      const end = normalizeToUTCMidnight(new Date(newBookedDate.end));
+
+      return normalizedDate >= start && normalizedDate <= end;
+    });
+  };
+
   const isPastDate = (date: Date): boolean => {
     return date < new Date(currentDate.toISOString().split("T")[0]!);
   };
@@ -102,7 +116,10 @@ export default function MonthCalendar({
   };
 
   const getBookItNowDiscount = useMemo(() => {
-    return selectedProperty?.bookItNowHostDiscountPercentOffInput ?? 0;
+    return selectedProperty?.bookItNowEnabled &&
+      selectedProperty.bookItNowHostDiscountPercentOffInput
+      ? selectedProperty.bookItNowHostDiscountPercentOffInput
+      : 0;
   }, [selectedProperty]);
 
   const renderMonth = () => {
@@ -126,7 +143,9 @@ export default function MonthCalendar({
             const reservedInfo = currentDate
               ? isDateReserved(currentDate)
               : null;
-
+            const newBookedInfo = currentDate
+              ? isNewBookedDate(currentDate)
+              : null;
             const isGrayedOut = currentDate ? isPastDate(currentDate) : false;
 
             let reservationClass = "";
@@ -137,10 +156,14 @@ export default function MonthCalendar({
                 reservationClass = "bg-reserved-pattern-2";
               }
             }
+            if (newBookedInfo) {
+              reservationClass = "bg-reserved-pattern-3";
+            }
             const price =
               currentDate &&
               prices[currentDate.toISOString().split("T")[0] ?? ""];
-            const discountedPrice =
+
+            const discountedPrice = //we need to make sure that book it now it enabled too
               price && price * (1 - getBookItNowDiscount / 100);
 
             return (
@@ -148,7 +171,7 @@ export default function MonthCalendar({
                 key={index}
                 onClick={() => currentDate && !isGrayedOut}
                 className={cn(
-                  "flex min-h-[100px] flex-col items-center justify-center p-2",
+                  "relative flex flex-col items-center justify-center p-2 md:min-h-[100px]",
                   day && !isGrayedOut && "cursor-pointer",
                   reservationClass,
                   isGrayedOut && "cursor-not-allowed bg-gray-200 text-gray-400",
@@ -161,9 +184,18 @@ export default function MonthCalendar({
                     : "text-muted-foreground",
                 )}
               >
+                <div className="flex items-center gap-x-1 absolute left-0 top-0 rounded-full bg-red-500 px-1 text-[0.6rem] text-white">
+                  {/* If you comment this in, it will work only for unsynced properties */}
+                  {newBookedInfo && (
+                    <>
+                      <div>Not Synced</div>
+                      <AlertCircleIcon size={10} />
+                    </>
+                  )}
+                </div>{" "}
                 {day && currentDate && (
                   <>
-                    <span className="text-sm font-medium">{day}</span>
+                    <span className="text-sm font-semibold">{day}</span>
                     <span className="mt-1 text-xs text-muted-foreground">
                       {isCalendarUpdating ? (
                         <Loader2Icon
@@ -180,7 +212,7 @@ export default function MonthCalendar({
                           ) : (
                             (() => {
                               return price !== undefined && !isNaN(price!) ? (
-                                <div className="flex flex-row items-center gap-1">
+                                <div className="flex flex-col items-center gap-1 text-xs md:flex-row md:text-base">
                                   {selectedProperty?.bookItNowEnabled &&
                                     getBookItNowDiscount > 0 && (
                                       <span className="text-xs text-gray-500 line-through">
@@ -189,7 +221,7 @@ export default function MonthCalendar({
                                     )}
                                   <span
                                     className={cn(
-                                      "text-sm",
+                                      "text-xs md:text-sm",
                                       selectedProperty?.bookItNowEnabled &&
                                         getBookItNowDiscount > 0
                                         ? "text-green-600"
@@ -220,8 +252,6 @@ export default function MonthCalendar({
   };
 
   return (
-    <div className="mx-auto max-w-4xl">
-      <div className="relative">{renderMonth()}</div>
-    </div>
+    <div className="relative mx-auto min-w-full max-w-4xl">{renderMonth()}</div>
   );
 }

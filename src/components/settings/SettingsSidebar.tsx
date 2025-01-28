@@ -3,7 +3,7 @@ import { settingsLinks } from "./settingsLinks";
 
 export default function SettingsSidebar() {
   return (
-    <div className="w-full space-y-4 border px-1 py-6 sm:w-56 lg:block lg:w-80 lg:p-6">
+    <div className="w-full space-y-4 border px-5 py-6 sm:w-56 sm:px-2 lg:block lg:w-80 lg:p-6">
       <h1 className="text-3xl font-bold">Settings</h1>
       <div className="grid w-full grid-cols-1 gap-2">
         {settingsLinks.map(({ href, icon: Icon, label }) => (

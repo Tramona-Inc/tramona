@@ -9,6 +9,7 @@ import {
   timestamp,
 } from "drizzle-orm/pg-core";
 import { users } from "./users";
+import { sql } from "drizzle-orm";
 
 export const COHOST_ROLES = [
   "Match Manager",
@@ -34,6 +35,8 @@ export const hostTeams = pgTable(
   },
   (t) => ({
     owneridIdx: index().on(t.ownerId),
+    nameIdx: index("host_teams_name_idx").on(t.name),
+    createdAtIdx: index("host_teams_created_at_idx").on(t.createdAt), // Consider adding
   }),
 );
 
@@ -56,6 +59,11 @@ export const hostTeamMembers = pgTable(
   },
   (vt) => ({
     compoundKey: primaryKey({ columns: [vt.hostTeamId, vt.userId] }),
+    teamRoleIdx: index("host_team_members_team_role_idx").on(
+      vt.hostTeamId,
+      vt.role,
+    ),
+    userIdIdx: index("host_team_member_user_id_idx").on(vt.userId),
   }),
 );
 
@@ -73,5 +81,10 @@ export const hostTeamInvites = pgTable(
   },
   (t) => ({
     hostTeamidIdx: index().on(t.hostTeamId),
+    inviteeEmailIdx: index("host_team_invites_email_idx").on(t.inviteeEmail),
+    expiresAtIdx: index("host_team_invites_expires_at_idx").on(t.expiresAt),
+    activeInvitesExpiresAtIdx: index("host_team_invites_active_expires_at_idx") // Partial index
+      .on(t.expiresAt)
+      .where(sql`${t.expiresAt} > NOW()`), // Condition for active invites
   }),
 );
