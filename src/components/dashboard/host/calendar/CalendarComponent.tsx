@@ -389,6 +389,7 @@ export default function CalendarComponent() {
                 prices={prices}
                 isLoading={isLoading}
                 isCalendarUpdating={isCalendarUpdating}
+                setHowYourCalendarWorksOpen={setHowYourCalendarWorksOpen}
               />
 
               <div className="my-6 flex w-full flex-col items-start justify-between gap-x-4 gap-y-3 md:flex-row 2xl:mx-8">
