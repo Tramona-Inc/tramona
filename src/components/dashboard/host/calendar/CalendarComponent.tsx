@@ -43,6 +43,8 @@ import { toast } from "@/components/ui/use-toast";
 import { errorToast } from "@/utils/toasts";
 import { TRPCClientErrorLike } from "@trpc/client";
 import { AppRouter } from "@/server/api/root";
+import CalendarLegend from "./CalendarLegend";
+import HowYourCalendarWorksModal from "../HowYourCalendarWorks";
 
 export default function CalendarComponent() {
   useSetInitialHostTeamId();
@@ -55,6 +57,8 @@ export default function CalendarComponent() {
     Property | undefined
   >(undefined);
   const [calOpen, setCalOpen] = useState(false);
+  const [howYourCalendarWorksOpen, setHowYourCalendarWorksOpen] =
+    useState(false);
 
   const {
     data: hostProperties,
@@ -258,179 +262,198 @@ export default function CalendarComponent() {
   const isLoading = loadingProperties || loadingPrices;
 
   return (
-    <div className="mb-20 flex flex-col gap-4 sm:min-h-[calc(100vh-4rem)] sm:p-4 md:mb-0 md:p-2 lg:flex-row">
-      {/* CALENDAR */}
-      <Card className="h-full lg:w-3/5">
+    <>
+      <div className="mb-20 flex flex-col gap-4 sm:min-h-[calc(100vh-4rem)] sm:p-4 md:mb-0 md:p-2 lg:flex-row">
+        {/* CALENDAR */}
+        <Card className="h-full lg:w-3/5">
+          {selectedProperty?.datesLastUpdated &&
+            selectedProperty.iCalLinkLastUpdated &&
+            selectedProperty.iCalLinkLastUpdated <
+              selectedProperty.datesLastUpdated && (
+              <CardBanner
+                className="cursor-pointer bg-red-500 text-sm text-white"
+                onClick={() => setHasDismissedModal(false)}
+              >
+                Calendar not synced
+              </CardBanner>
+            )}
+          {!selectedProperty?.iCalLink && (
+            <CardBanner className="cursor-pointer bg-red-500 text-sm text-white">
+              Please sync your calendar to get updated availability information
+              for your listings&nbsp;
+              <a
+                className="text-sm text-white hover:underline"
+                onClick={() => setCalOpen(true)}
+              >
+                here
+              </a>
+              .
+            </CardBanner>
+          )}
+          <CardContent className="h-full flex-col py-2 pb-2 sm:flex sm:p-6 md:p-3">
+            <div className="mb-4 flex items-center justify-between">
+              {/* Left Side: Month/Year and Stats */}
+              <div>
+                <h2 className="mb-2 text-xl font-bold sm:text-2xl">
+                  {date.toLocaleString("default", {
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </h2>
+                <div className="text-xs font-medium sm:text-sm">
+                  <p className="py-1">
+                    {isLoading
+                      ? "Loading vacancies..."
+                      : `${totalVacancies} vacancies this month`}
+                  </p>
+                  <p>
+                    {isLoading
+                      ? "Loading money left on table..."
+                      : `$${leftOnTheTable.toFixed(2)} left on the table`}
+                  </p>
+                </div>
+              </div>
+
+              {/* Right Side: Navigation + Dropdown */}
+              <div className="flex flex-col gap-2">
+                {/* Navigation Buttons Row */}
+                <div className="flex items-center justify-end gap-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => changeMonth(-1)}
+                    className="rounded-full border bg-white shadow-lg hover:bg-gray-50"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  {/* Updated the button to display current month here */}
+                  <Button variant="ghost" onClick={() => setDate(new Date())}>
+                    {date.toLocaleString("default", { month: "long" })}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => changeMonth(1)}
+                    className="rounded-full border bg-white shadow-lg hover:bg-gray-50"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                {/* Property Dropdown */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="my-1 rounded-full border shadow-lg"
+                    >
+                      <Globe className="mr-2 h-4 w-4" />
+                      <span className="hidden sm:inline">
+                        {selectedProperty?.name ?? "Select property"}
+                      </span>
+                      <span className="sm:hidden">Property</span>
+                      <ChevronDown className="ml-2 h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuLabel>Select property</DropdownMenuLabel>
+                    {hostProperties?.map((property) => (
+                      <DropdownMenuItem
+                        key={property.id}
+                        onSelect={() =>
+                          void router.push(
+                            {
+                              pathname: router.pathname,
+                              query: {
+                                ...router.query,
+                                propertyId: property.id,
+                              },
+                            },
+                            undefined,
+                            { shallow: true },
+                          )
+                        }
+                      >
+                        {property.name}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
+            <div className="container flex h-full w-full flex-col">
+              <MonthCalendar
+                date={date}
+                reservedDateRanges={airbnbReservedDates}
+                newBookedDates={newBookedDates}
+                prices={prices}
+                isLoading={isLoading}
+                isCalendarUpdating={isCalendarUpdating}
+              />
+
+              <div className="my-6 flex w-full flex-col items-start justify-between gap-x-4 gap-y-3 md:flex-row 2xl:mx-8">
+                <div className="flex flex-col items-start justify-start gap-y-4 md:w-1/4">
+                  <CalendarLegend />
+                </div>
+                <HostICalSync
+                  property={selectedProperty}
+                  calOpen={calOpen}
+                  setCalOpen={setCalOpen}
+                />
+                <div className="flex flex-col items-start justify-start gap-y-4 md:w-1/4">
+                  <HowYourCalendarWorksModal
+                    open={howYourCalendarWorksOpen}
+                    onOpenChange={setHowYourCalendarWorksOpen}
+                  />
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* SETTINGS */}
+        {selectedProperty ? (
+          <CalendarSettings
+            property={selectedProperty}
+            handleBookItNowSwitch={handleBookItNowSwitch}
+            handleBookItNowSlider={handleBookItNowSlider}
+            isUpdatingBookItNow={isUpdatingBookItNow}
+            isTogglingBookItNow={isTogglingBookItNow}
+            isBookItNowChecked={isBookItNowChecked}
+            refetch={refetch} // sorry this is to invalidate the queries after the pricing update
+          />
+        ) : (
+          <CalenderSettingsLoadingState />
+        )}
         {selectedProperty?.datesLastUpdated &&
           selectedProperty.iCalLinkLastUpdated &&
           selectedProperty.iCalLinkLastUpdated <
             selectedProperty.datesLastUpdated && (
-            <CardBanner
-              className="cursor-pointer bg-red-500 text-sm text-white"
-              onClick={() => setHasDismissedModal(false)}
+            <Dialog
+              open={!hasDismissedModal}
+              onOpenChange={setHasDismissedModal}
             >
-              Calendar not synced
-            </CardBanner>
+              <DialogContent className="[&>button]:hidden">
+                <DialogHeader>
+                  <DialogTitle>Calendar not synced</DialogTitle>
+                </DialogHeader>
+                <DialogDescription>
+                  This calendar may be out of sync with your new bookings. The
+                  booking dates will be updated here within 2 hours (Don&apos;t
+                  worry, travelers will not be able to submit requests for the
+                  newly blocked dates.)
+                  <br />
+                  <br />
+                  If you wish to manually sync your calendar, please go on
+                  airbnb and click the &quot;Sync&quot; button.
+                </DialogDescription>
+                <Button onClick={() => setHasDismissedModal(true)}>
+                  Dismiss
+                </Button>
+              </DialogContent>
+            </Dialog>
           )}
-        {!selectedProperty?.iCalLink && (
-          <CardBanner className="cursor-pointer bg-red-500 text-sm text-white">
-            Please sync your calendar to get updated availability information
-            for your listings&nbsp;
-            <a
-              className="text-sm text-white hover:underline"
-              onClick={() => setCalOpen(true)}
-            >
-              here
-            </a>
-            .
-          </CardBanner>
-        )}
-        <CardContent className="h-full flex-col py-2 pb-2 sm:flex sm:p-6 md:p-3">
-          <div className="mb-4 flex items-center justify-between">
-            {/* Left Side: Month/Year and Stats */}
-            <div>
-              <h2 className="mb-2 text-xl font-bold sm:text-2xl">
-                {date.toLocaleString("default", {
-                  month: "long",
-                  year: "numeric",
-                })}
-              </h2>
-              <div className="text-xs font-medium sm:text-sm">
-                <p className="py-1">
-                  {isLoading
-                    ? "Loading vacancies..."
-                    : `${totalVacancies} vacancies this month`}
-                </p>
-                <p>
-                  {isLoading
-                    ? "Loading money left on table..."
-                    : `$${leftOnTheTable.toFixed(2)} left on the table`}
-                </p>
-              </div>
-            </div>
-
-            {/* Right Side: Navigation + Dropdown */}
-            <div className="flex flex-col gap-2">
-              {/* Navigation Buttons Row */}
-              <div className="flex items-center justify-end gap-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => changeMonth(-1)}
-                  className="rounded-full border bg-white shadow-lg hover:bg-gray-50"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                {/* Updated the button to display current month here */}
-                <Button variant="ghost" onClick={() => setDate(new Date())}>
-                  {date.toLocaleString("default", { month: "long" })}
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => changeMonth(1)}
-                  className="rounded-full border bg-white shadow-lg hover:bg-gray-50"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-
-              {/* Property Dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className="my-1 rounded-full border shadow-lg"
-                  >
-                    <Globe className="mr-2 h-4 w-4" />
-                    <span className="hidden sm:inline">
-                      {selectedProperty?.name ?? "Select property"}
-                    </span>
-                    <span className="sm:hidden">Property</span>
-                    <ChevronDown className="ml-2 h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuLabel>Select property</DropdownMenuLabel>
-                  {hostProperties?.map((property) => (
-                    <DropdownMenuItem
-                      key={property.id}
-                      onSelect={() =>
-                        void router.push(
-                          {
-                            pathname: router.pathname,
-                            query: { ...router.query, propertyId: property.id },
-                          },
-                          undefined,
-                          { shallow: true },
-                        )
-                      }
-                    >
-                      {property.name}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
-          <div className="h-full w-full">
-            <MonthCalendar
-              date={date}
-              reservedDateRanges={airbnbReservedDates}
-              newBookedDates={newBookedDates}
-              prices={prices}
-              isLoading={isLoading}
-              isCalendarUpdating={isCalendarUpdating}
-            />
-
-            <HostICalSync
-              property={selectedProperty}
-              calOpen={calOpen}
-              setCalOpen={setCalOpen}
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* SETTINGS */}
-      {selectedProperty ? (
-        <CalendarSettings
-          property={selectedProperty}
-          handleBookItNowSwitch={handleBookItNowSwitch}
-          handleBookItNowSlider={handleBookItNowSlider}
-          isUpdatingBookItNow={isUpdatingBookItNow}
-          isTogglingBookItNow={isTogglingBookItNow}
-          isBookItNowChecked={isBookItNowChecked}
-          refetch={refetch} // sorry this is to invalidate the queries after the pricing update
-        />
-      ) : (
-        <CalenderSettingsLoadingState />
-      )}
-      {selectedProperty?.datesLastUpdated &&
-        selectedProperty.iCalLinkLastUpdated &&
-        selectedProperty.iCalLinkLastUpdated <
-          selectedProperty.datesLastUpdated && (
-          <Dialog open={!hasDismissedModal} onOpenChange={setHasDismissedModal}>
-            <DialogContent className="[&>button]:hidden">
-              <DialogHeader>
-                <DialogTitle>Calendar not synced</DialogTitle>
-              </DialogHeader>
-              <DialogDescription>
-                This calendar may be out of sync with your new bookings. The
-                booking dates will be updated here within 2 hours (Don&apos;t
-                worry, travelers will not be able to submit requests for the
-                newly blocked dates.)
-                <br />
-                <br />
-                If you wish to manually sync your calendar, please go on airbnb
-                and click the &quot;Sync&quot; button.
-              </DialogDescription>
-              <Button onClick={() => setHasDismissedModal(true)}>
-                Dismiss
-              </Button>
-            </DialogContent>
-          </Dialog>
-        )}
-    </div>
+      </div>
+    </>
   );
 }
