@@ -68,9 +68,9 @@ export default function HostRequestsLayout({
 
   const query = router.query as RouterQuery;
 
-  const [activeTab, setActiveTab] = useState<TabType>(query.tabs || "city");
+  const [activeTab, setActiveTab] = useState<TabType>(query.tabs ?? "city");
   const [selectedOption, setSelectedOption] = useState<SelectedOptionType>(
-    (query.option as SelectedOptionType) || "normal",
+    query.option ?? "normal",
   );
 
   const [separatedData, setSeparatedData] = useState<SeparatedData | null>(
@@ -178,7 +178,7 @@ export default function HostRequestsLayout({
         pathname: newPathname,
         query: newQuery,
       };
-      router.push(url, undefined, { shallow: true });
+      void router.push(url, undefined, { shallow: true });
     },
     [query, requestToBookProperties, separatedData, router, activeTab],
   );
@@ -196,7 +196,7 @@ export default function HostRequestsLayout({
       if (query.city) {
         newPathname = `/host/requests/${query.city}`; // Keep city in path
       }
-      router.push(
+      void router.push(
         {
           pathname: newPathname,
           query: { ...query, option: option },
