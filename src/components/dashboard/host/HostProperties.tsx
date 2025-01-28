@@ -5,9 +5,19 @@ import {
   EmptyStateDescription,
   EmptyStateTitle,
 } from "@/components/ui/empty-state";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { type Property } from "@/server/db/schema/tables/properties";
 import { FenceIcon } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/router";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 export default function HostProperties({
   properties,
@@ -18,17 +28,121 @@ export default function HostProperties({
   searched?: boolean;
   onSelectedProperty: (property: Property) => void;
 }) {
+  const router = useRouter();
+  const [currentPage, setCurrentPage] = useState(1);
   const handleCardClick = (property: Property) => {
     onSelectedProperty(property);
   };
 
+  const ITEMS_PER_PAGE = 20;
+
+  const totalPages = useMemo(() => {
+    return Math.max(1, Math.ceil((properties?.length ?? 0) / ITEMS_PER_PAGE));
+  }, [properties, ITEMS_PER_PAGE]);
+
+  const handlePageChange = useCallback(
+    (page: number) => {
+      setCurrentPage(page);
+      void router.push(
+        { pathname: router.pathname, query: { ...router.query, page } },
+        undefined,
+        { shallow: false },
+      );
+    },
+    [router],
+  );
+
+  const paginatedProperties = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    return properties?.slice(startIndex, endIndex);
+  }, [properties, currentPage, ITEMS_PER_PAGE]);
+
+  useEffect(() => {
+    const page = Number(router.query.page) || 1;
+    setCurrentPage(page);
+  }, [router.query.page]);
+
+  const renderPaginationItems = useCallback(() => {
+    const items: JSX.Element[] = [];
+    const SIBLING_COUNT = 1;
+    const BOUNDARY_COUNT = 1;
+
+    if (totalPages === 0) {
+      return items;
+    }
+
+    const createPageItem = (pageNum: number): JSX.Element => (
+      <PaginationItem key={pageNum}>
+        <PaginationLink
+          href={`?page=${pageNum}`}
+          onClick={(e) => {
+            e.preventDefault();
+            handlePageChange(pageNum);
+          }}
+          isActive={currentPage === pageNum}
+        >
+          {pageNum}
+        </PaginationLink>
+      </PaginationItem>
+    );
+
+    for (let i = 1; i <= Math.min(BOUNDARY_COUNT, totalPages); i++) {
+      items.push(createPageItem(i));
+    }
+
+    const startPage = Math.max(BOUNDARY_COUNT + 1, currentPage - SIBLING_COUNT);
+    const endPage = Math.min(
+      totalPages - BOUNDARY_COUNT,
+      currentPage + SIBLING_COUNT,
+    );
+
+    if (startPage > BOUNDARY_COUNT + 1) {
+      items.push(
+        <PaginationItem key="start-ellipsis" className="px-2">
+          ...
+        </PaginationItem>,
+      );
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      if (i > BOUNDARY_COUNT && i < totalPages - BOUNDARY_COUNT + 1) {
+        items.push(createPageItem(i));
+      }
+    }
+
+    if (endPage < totalPages - BOUNDARY_COUNT) {
+      items.push(
+        <PaginationItem key="end-ellipsis" className="px-2">
+          ...
+        </PaginationItem>,
+      );
+    }
+
+    for (
+      let i = Math.max(totalPages - BOUNDARY_COUNT + 1, BOUNDARY_COUNT + 1);
+      i <= totalPages;
+      i++
+    ) {
+      if (i > endPage) {
+        items.push(createPageItem(i));
+      }
+    }
+
+    return items;
+  }, [totalPages, currentPage, handlePageChange]);
+
+  const memoizedPaginationItems = useMemo(() => {
+    return renderPaginationItems();
+  }, [renderPaginationItems]);
+
   return (
     <div>
       <div className="mx-auto my-4 max-w-8xl space-y-4">
-        {properties ? (
-          properties.length > 0 ? (
+        {paginatedProperties ? (
+          paginatedProperties.length > 0 ? (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-              {properties.map((property) => (
+              {paginatedProperties.map((property) => (
                 <PropertyCard
                   key={property.id}
                   property={property}
@@ -52,6 +166,41 @@ export default function HostProperties({
           )
         ) : (
           <Spinner />
+        )}
+        {totalPages > 1 && (
+          <Pagination>
+            <PaginationContent className="flex flex-wrap justify-center overflow-x-auto">
+              <PaginationItem>
+                <PaginationPrevious
+                  href={`?page=${Math.max(1, currentPage - 1)}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handlePageChange(Math.max(1, currentPage - 1));
+                  }}
+                  className={
+                    currentPage === 1 ? "pointer-events-none opacity-50" : ""
+                  }
+                />
+              </PaginationItem>
+              <div className="flex flex-wrap justify-center">
+                {memoizedPaginationItems}
+              </div>
+              <PaginationItem>
+                <PaginationNext
+                  href={`?page=${Math.min(totalPages, currentPage + 1)}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handlePageChange(Math.min(totalPages, currentPage + 1));
+                  }}
+                  className={
+                    currentPage === totalPages
+                      ? "pointer-events-none opacity-50"
+                      : ""
+                  }
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
         )}
       </div>
     </div>
