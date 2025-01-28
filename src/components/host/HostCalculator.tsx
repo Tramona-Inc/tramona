@@ -121,15 +121,15 @@ export default function HostCalculator() {
                 {error}
               </span>
             )}
-            <div className="*:flex-1 mt-4 flex flex-col gap-2 @sm:flex-row">
+            <div className="mt-4 flex flex-col gap-2 *:flex-1 @sm:flex-row">
               <Button
-                onClick={() => setVacancy(70)}
+                onClick={() => setVacancy(25)}
                 variant="secondary"
                 className={`border-primaryGreen ${
-                  vacancyRate === 70 ? "bg-primaryGreen text-white" : "bg-white"
-                } `}
+                  vacancyRate === 25 ? "bg-primaryGreen text-white" : "bg-white"
+                }`}
               >
-                High (70%)
+                Low (25%)
               </Button>
               <Button
                 onClick={() => setVacancy(50)}
@@ -140,18 +140,19 @@ export default function HostCalculator() {
               >
                 Medium (50%)
               </Button>
+
               <Button
-                onClick={() => setVacancy(25)}
+                onClick={() => setVacancy(75)}
                 variant="secondary"
                 className={`border-primaryGreen ${
-                  vacancyRate === 25 ? "bg-primaryGreen text-white" : "bg-white"
-                }`}
+                  vacancyRate === 77 ? "bg-primaryGreen text-white" : "bg-white"
+                } `}
               >
-                Low (25%)
+                High (70%)
               </Button>
             </div>
           </div>
-          <div className="*:flex-1 flex flex-col gap-2 @sm:flex-row">
+          <div className="flex flex-col gap-2 *:flex-1 @sm:flex-row">
             <div>
               <label className="mb-1 block text-sm font-medium text-zinc-700">
                 Average Price per Night
