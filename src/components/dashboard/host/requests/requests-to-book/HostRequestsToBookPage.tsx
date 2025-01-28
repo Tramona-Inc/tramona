@@ -15,7 +15,11 @@ import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 import useSetInitialHostTeamId from "@/components/_common/CustomHooks/useSetInitialHostTeamId";
 import { useEffect } from "react";
 
-export default function HostRequestsToBookPage() {
+export default function HostRequestsToBookPage({
+  isIndex = false,
+}: {
+  isIndex?: boolean;
+}) {
   useSetInitialHostTeamId();
   const { currentHostTeamId } = useHostTeamStore();
   const { toast } = useToast();
@@ -43,7 +47,7 @@ export default function HostRequestsToBookPage() {
   const { data: propertyRequests } =
     api.requestsToBook.getHostRequestsToBookFromId.useQuery(
       { propertyId, currentHostTeamId: currentHostTeamId! },
-      { enabled: !!currentHostTeamId },
+      { enabled: !!currentHostTeamId && !isIndex },
     );
 
   const { mutateAsync: rejectRequestToBook } =

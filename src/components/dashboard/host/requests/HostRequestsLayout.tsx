@@ -60,8 +60,8 @@ export default function HostRequestsLayout({
 }) {
   useSetInitialHostTeamId();
   const { currentHostTeamId } = useHostTeamStore();
-
   const router = useRouter();
+
   // Use pathname and searchParams
   // const pathname = usePathname(); - Removed usePathname
   // const searchParams = useSearchParams(); - Removed useSearchParams
@@ -159,10 +159,10 @@ export default function HostRequestsLayout({
 
       if (tab === "property-bids") {
         // First, check if there's a property ID available to use
-        if (query.propertyId) {
+        if (query.propertyId && isLg) {
           newPathname = `/host/requests/requests-to-book/${query.propertyId}`;
           delete newQuery.propertyId;
-        } else if (requestToBookProperties?.[0]) {
+        } else if (requestToBookProperties?.[0] && isLg) {
           //If a property ID is available, use the first property from requestToBookProperties
           newPathname = `/host/requests/requests-to-book/${requestToBookProperties[0].id}`;
           delete newQuery.propertyId;
