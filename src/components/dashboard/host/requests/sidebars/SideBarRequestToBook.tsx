@@ -49,7 +49,7 @@ function SidebarRequestToBook({
     );
   };
 
-  if (isLoading) {
+  if (!properties) {
     return <SidebarPropertySkeleton />;
   }
 

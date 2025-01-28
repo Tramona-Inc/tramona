@@ -9,8 +9,8 @@ import {
 import { Label } from "@/components/ui/label";
 import Image from "next/image";
 
-import Group1 from "@/../public/assets/images/ical-modal/Group1.png";
-import Group2 from "@/../public/assets/images/ical-modal/Group2.png";
+import Step1 from "@/../public/assets/images/how-cal-works-modal/Step1.png";
+import Step2 from "@/../public/assets/images/how-cal-works-modal/Step2.png";
 // ------------------------------------------------------------------
 // A simple Progress Indicator for the multi-step flow - REUSED from HostICalSync
 // ------------------------------------------------------------------
@@ -90,7 +90,7 @@ function Step2Screenshot1({
       </p>
       <div className="relative h-64 w-full overflow-hidden rounded-md border border-gray-300">
         <Image
-          src={Group1}
+          src={Step1}
           alt="Screenshot 1"
           width={500}
           height={300}
@@ -127,7 +127,7 @@ function Step3Screenshot2({
       </p>
       <div className="relative h-64 w-full overflow-hidden rounded-md border border-gray-300">
         <Image
-          src={Group2}
+          src={Step2}
           alt="Screenshot 2"
           width={500}
           height={300}
@@ -199,9 +199,8 @@ function HowYourCalendarWorksModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogTrigger>
-        <Button variant="primary">How Calendar Sync Works</Button>{" "}
-        {/* Or any trigger you want */}
+      <DialogTrigger asChild>
+        <Button variant="primary">How Calendar Sync Works</Button>
       </DialogTrigger>
       <DialogContent className="w-full max-w-3xl p-8 sm:w-auto">
         <DialogHeader>

@@ -30,6 +30,7 @@ interface MonthCalendarProps {
   prices: Record<string, number | undefined>;
   isLoading?: boolean;
   isCalendarUpdating?: boolean;
+  setHowYourCalendarWorksOpen?: (open: boolean) => void;
 }
 
 export default function MonthCalendar({
@@ -39,6 +40,7 @@ export default function MonthCalendar({
   prices,
   isLoading = false,
   isCalendarUpdating = false,
+  setHowYourCalendarWorksOpen,
 }: MonthCalendarProps) {
   console.log(prices);
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
@@ -187,10 +189,13 @@ export default function MonthCalendar({
                 <div className="flex items-center gap-x-1 absolute left-0 top-0 rounded-full bg-red-500 px-1 text-[0.6rem] text-white">
                   {/* If you comment this in, it will work only for unsynced properties */}
                   {newBookedInfo && (
-                    <>
-                      <div>Not Synced</div>
+                    <div
+                      onClick={() => setHowYourCalendarWorksOpen?.(true)}
+                      className="flex items-center gap-x-1 rounded-full bg-red-500 px-1 text-[0.6rem] text-white"
+                    >
+                      <div className="hidden md:block">Not Synced</div>
                       <AlertCircleIcon size={10} />
-                    </>
+                    </div>
                   )}
                 </div>{" "}
                 {day && currentDate && (

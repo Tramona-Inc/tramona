@@ -629,11 +629,18 @@ export const propertiesRouter = createTRPCRouter({
   // }),
   getHostProperties: hostProcedure
     .input(
-      z.object({ currentHostTeamId: z.number(), limit: z.number().optional() }),
+      z.object({
+        currentHostTeamId: z.number().optional(),
+        limit: z.number().optional(),
+      }),
     )
     .query(async ({ ctx, input }) => {
+      const currentHostTeamId = input.currentHostTeamId;
+      if (!currentHostTeamId) {
+        return [];
+      }
       return await ctx.db.query.properties.findMany({
-        where: eq(properties.hostTeamId, input.currentHostTeamId),
+        where: eq(properties.hostTeamId, currentHostTeamId),
         limit: input.limit,
       });
     }),
