@@ -1,24 +1,21 @@
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
-import HostRequests from "@/components/dashboard/host/requests/city/HostRequests";
+import HostCityRequestsPage from "@/components/dashboard/host/requests/city/HostCityRequestsPage";
 import HostRequestsLayout from "@/components/dashboard/host/requests/HostRequestsLayout";
 import Head from "next/head";
+import { useIsLg } from "@/utils/utils";
 
 export default function Page() {
+  const isLg = useIsLg();
+
   return (
     <DashboardLayout>
       <Head>
         <title>Offers & Requests | Tramona</title>
       </Head>
-      <div className="hidden xl:block">
-        <HostRequestsLayout>
-          <HostRequests />
-        </HostRequestsLayout>
-      </div>
-      <div className="xl:hidden">
-        <div className="mb-16">
-          <HostRequests />
-        </div>
-      </div>
+
+      <HostRequestsLayout isIndex={false}>
+        <HostCityRequestsPage />
+      </HostRequestsLayout>
     </DashboardLayout>
   );
 }

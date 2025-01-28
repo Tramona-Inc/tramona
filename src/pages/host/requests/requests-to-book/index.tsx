@@ -9,8 +9,8 @@ export default function Page() {
       <Head>
         <title>Offers & Requests | Tramona</title>
       </Head>
-      <HostRequestsLayout isIndex={false}>
-        <HostRequestsToBookPage isIndex={false} />
+      <HostRequestsLayout isIndex={true}>
+        <HostRequestsToBookPage isIndex={true} />
       </HostRequestsLayout>
     </DashboardLayout>
   );
