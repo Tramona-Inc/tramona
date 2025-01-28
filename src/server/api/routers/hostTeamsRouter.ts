@@ -427,6 +427,7 @@ export const hostTeamsRouter = createTRPCRouter({
           with: {
             owner: {
               columns: {
+                id: true,
                 phoneNumber: true,
                 isWhatsApp: true,
                 stripeConnectId: true,
@@ -492,9 +493,20 @@ export const hostTeamsRouter = createTRPCRouter({
   getHostTeamMembers: protectedProcedure
     .input(z.object({ hostTeamId: z.number() }))
     .query(async ({ input, ctx }) => {
-      return await ctx.db.query.hostTeamMembers.findMany({
+      const teamMembers = await ctx.db.query.hostTeamMembers.findMany({
+        columns: {},
+        with: {
+          user: {
+            columns: {
+              id: true,
+              firstName: true,
+              image: true,
+            },
+          },
+        },
         where: eq(hostTeamMembers.hostTeamId, input.hostTeamId),
       });
+      return teamMembers.map((member) => member.user);
     }),
 
   createHostTeam: roleRestrictedProcedure(["host", "admin"])
