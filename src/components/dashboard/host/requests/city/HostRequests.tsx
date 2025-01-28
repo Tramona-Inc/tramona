@@ -24,6 +24,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { HostRequestsPageOfferData } from "@/server/api/routers/propertiesRouter";
 import { useChatWithUserForRequest } from "@/utils/messaging/useChatWithUserForRequest";
 import { useHostTeamStore } from "@/utils/store/hostTeamStore";
+import RequestCardLoadingGrid from "../RequestCardLoadingSkeleton";
+
 export default function HostRequests() {
   const { currentHostTeamId } = useHostTeamStore();
   const { toast } = useToast();
@@ -71,17 +73,18 @@ export default function HostRequests() {
       },
     });
 
-  api.properties.getHostPropertiesWithRequests.useQuery(
-    { currentHostTeamId: currentHostTeamId! },
-    {
-      enabled: !!currentHostTeamId,
-      onSuccess: (fetchedProperties) => {
-        const separatedProperties =
-          separateByPriceAndAgeRestriction(fetchedProperties);
-        setSeparatedData(separatedProperties);
+  const { isLoading: requestsToBookIsLoading } =
+    api.properties.getHostPropertiesWithRequests.useQuery(
+      { currentHostTeamId: currentHostTeamId! },
+      {
+        enabled: !!currentHostTeamId,
+        onSuccess: (fetchedProperties) => {
+          const separatedProperties =
+            separateByPriceAndAgeRestriction(fetchedProperties);
+          setSeparatedData(separatedProperties);
+        },
       },
-    },
-  );
+    );
 
   const requestsWithProperties = priceRestriction
     ? separatedData?.outsidePriceRestriction
@@ -92,7 +95,7 @@ export default function HostRequests() {
   const { mutateAsync: rejectRequest } =
     api.requests.rejectRequest.useMutation();
 
-  api.offers.getAllHostOffers.useQuery(
+  const { isLoading: isOffersLoading } = api.offers.getAllHostOffers.useQuery(
     { currentHostTeamId: currentHostTeamId! },
     {
       enabled: !!currentHostTeamId,
@@ -108,106 +111,110 @@ export default function HostRequests() {
 
   return (
     <div>
-      {cityRequestsData && option === "normal" ? (
-        <div className="grid gap-4 md:grid-cols-2">
-          {cityRequestsData.requests.map((requestData) => (
-            <div key={requestData.request.id} className="mb-4">
-              <RequestCard request={requestData.request} type="host">
-                <Button
-                  variant="secondary"
-                  onClick={() => {
-                    void chatWithUserForRequest(
-                      requestData.request.traveler.id,
-                      requestData.request.id,
-                    );
-                  }}
-                >
-                  Message User
-                </Button>
-                <Button
-                  variant="secondary"
-                  onClick={async () => {
-                    await rejectRequest({
-                      requestId: requestData.request.id,
-                      currentHostTeamId: currentHostTeamId!,
-                    })
-                      .then(() => {
-                        toast({
-                          title: "Successfully rejected request",
-                        });
+      {isOffersLoading ? (
+        cityRequestsData && option === "normal" ? (
+          <div className="grid gap-4 md:grid-cols-2">
+            {cityRequestsData.requests.map((requestData) => (
+              <div key={requestData.request.id} className="mb-4">
+                <RequestCard request={requestData.request} type="host">
+                  <Button
+                    variant="secondary"
+                    onClick={() => {
+                      void chatWithUserForRequest(
+                        requestData.request.traveler.id,
+                        requestData.request.id,
+                      );
+                    }}
+                  >
+                    Message User
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    onClick={async () => {
+                      await rejectRequest({
+                        requestId: requestData.request.id,
+                        currentHostTeamId: currentHostTeamId!,
                       })
-                      .catch((error) => {
-                        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                        if (error.data?.code === "FORBIDDEN") {
+                        .then(() => {
                           toast({
-                            title:
-                              "You do not have permission to create an offer.",
-                            description:
-                              "Please contact your team owner to request access.",
+                            title: "Successfully rejected request",
                           });
-                        } else {
-                          errorToast();
-                        }
-                      });
-                  }}
+                        })
+                        .catch((error) => {
+                          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                          if (error.data?.code === "FORBIDDEN") {
+                            toast({
+                              title:
+                                "You do not have permission to create an offer.",
+                              description:
+                                "Please contact your team owner to request access.",
+                            });
+                          } else {
+                            errorToast();
+                          }
+                        });
+                    }}
+                  >
+                    Reject
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setDialogOpen(true);
+                      setSelectedRequest(requestData.request);
+                      setProperties(requestData.properties);
+                    }}
+                  >
+                    Make an offer
+                  </Button>
+                </RequestCard>
+              </div>
+            ))}
+          </div>
+        ) : cityOfferData && option === "sent" ? (
+          <div className="grid gap-4 md:grid-cols-2">
+            {cityOfferData.requests.map((offerData) => (
+              <div key={offerData.offer.id} className="mb-4">
+                <PastOfferCard
+                  request={offerData.request}
+                  offer={offerData.offer}
+                  property={offerData.property}
                 >
-                  Reject
-                </Button>
-                <Button
-                  onClick={() => {
-                    setDialogOpen(true);
-                    setSelectedRequest(requestData.request);
-                    setProperties(requestData.properties);
-                  }}
-                >
-                  Make an offer
-                </Button>
-              </RequestCard>
-            </div>
-          ))}
-        </div>
-      ) : cityOfferData && option === "sent" ? (
-        <div className="grid gap-4 md:grid-cols-2">
-          {cityOfferData.requests.map((offerData) => (
-            <div key={offerData.offer.id} className="mb-4">
-              <PastOfferCard
-                request={offerData.request}
-                offer={offerData.offer}
-                property={offerData.property}
+                  <Button
+                    onClick={() => {
+                      setOfferWithdrawalDialogOpen(true);
+                      setSelectedOffer(offerData.offer.id);
+                    }}
+                  >
+                    Withdraw
+                  </Button>
+                </PastOfferCard>
+              </div>
+            ))}
+          </div>
+        ) : (
+          // Empty state
+          <Card className="flex h-full items-center justify-center">
+            <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+              <Home className="mb-4 h-12 w-12 text-gray-400" />
+              <h3 className="mb-2 text-lg font-semibold text-gray-900">
+                No requests found
+              </h3>
+              <p className="max-w-sm text-sm text-gray-500">
+                Consider looser requirements or allow for more ways to book to
+                see more requests.
+              </p>
+              <Button
+                className="mt-4"
+                variant="primary"
+                onClick={() => router.push("/host/calendar")}
               >
-                <Button
-                  onClick={() => {
-                    setOfferWithdrawalDialogOpen(true);
-                    setSelectedOffer(offerData.offer.id);
-                  }}
-                >
-                  Withdraw
-                </Button>
-              </PastOfferCard>
-            </div>
-          ))}
-        </div>
+                Change Restrictions
+              </Button>
+            </CardContent>
+          </Card>
+        )
       ) : (
-        // Empty state
-        <Card className="flex h-full items-center justify-center">
-          <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-            <Home className="mb-4 h-12 w-12 text-gray-400" />
-            <h3 className="mb-2 text-lg font-semibold text-gray-900">
-              No requests found
-            </h3>
-            <p className="max-w-sm text-sm text-gray-500">
-              Consider looser requirements or allow for more ways to book to see
-              more requests.
-            </p>
-            <Button
-              className="mt-4"
-              variant="primary"
-              onClick={() => router.push("/host/calendar")}
-            >
-              Change Restrictions
-            </Button>
-          </CardContent>
-        </Card>
+        <RequestCardLoadingGrid />
       )}
       {step === 0 && properties && selectedRequest && (
         <HostRequestDialog
