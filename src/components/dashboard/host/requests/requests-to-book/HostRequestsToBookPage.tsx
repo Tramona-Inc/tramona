@@ -1,5 +1,5 @@
 import { api } from "@/utils/api";
-import { useRouter } from "next/router";
+import { useSearchParams } from "next/navigation";
 import HostRequestToBookDialog from "./HostRequestToBookDialog";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -13,14 +13,18 @@ import HostRequestToBookCard from "./HostRequestToBookCard";
 import { useChatWithUser } from "@/utils/messaging/useChatWithUser";
 import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 import useSetInitialHostTeamId from "@/components/_common/CustomHooks/useSetInitialHostTeamId";
+import { useEffect } from "react";
 
-export default function HostRequestsToBook() {
+export default function HostRequestsToBookPage() {
   useSetInitialHostTeamId();
   const { currentHostTeamId } = useHostTeamStore();
   const { toast } = useToast();
   const [dialogOpen, setDialogOpen] = useState(false);
-  const router = useRouter();
-  const propertyId = parseInt(router.query.propertyId as string) || 0; // Default to 0 if parsing fails
+  const searchParams = useSearchParams();
+
+  // Use useSearchParams to get the propertyId from the query string
+  const propertyId = parseInt(searchParams.get("propertyId") ?? "0");
+
   const { data: unusedReferralDiscounts } =
     api.referralCodes.getAllUnusedHostReferralDiscounts.useQuery(undefined, {
       onSuccess: () => {
@@ -39,14 +43,19 @@ export default function HostRequestsToBook() {
   const { data: propertyRequests } =
     api.requestsToBook.getHostRequestsToBookFromId.useQuery(
       { propertyId, currentHostTeamId: currentHostTeamId! },
-      { enabled: !!router.isReady && !!currentHostTeamId },
+      { enabled: !!currentHostTeamId },
     );
-  console.log(propertyRequests);
 
   const { mutateAsync: rejectRequestToBook } =
     api.stripe.rejectOrCaptureAndFinalizeRequestToBook.useMutation();
 
   const chatWithUser = useChatWithUser();
+
+  useEffect(() => {
+    if (!currentHostTeamId) {
+      return;
+    }
+  }, [currentHostTeamId]);
 
   return (
     <div>

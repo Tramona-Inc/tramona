@@ -89,10 +89,7 @@ const CityRequestSection: React.FC<CityRequestSectionProps> = ({
       {currentCityRequests && currentCityRequests.length > 0 ? (
         <div className="grid gap-4 md:grid-cols-2">
           {currentCityRequests.map((requestData) => (
-            <div
-              key={requestData.request.id}
-              className="mb-4 grid gap-4 md:grid-cols-2"
-            >
+            <div key={requestData.request.id} className="mb-4">
               <RequestCard request={requestData.request} type="host">
                 <Button
                   variant="secondary"
