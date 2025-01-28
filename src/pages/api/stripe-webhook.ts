@@ -8,8 +8,6 @@ import {
   trips,
   tripCheckouts,
   users,
-  reservedDateRanges,
-  requestsToBook,
 } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
 import { buffer } from "micro";
@@ -32,7 +30,7 @@ import {
   getRequestIdByOfferId,
   finalizeTrip,
   createRequestToBook,
-  withdrawOverlappingOffers,
+  withdrawOverlappingOffersAndRequestsToBook,
 } from "@/utils/webhook-functions/stripe-utils";
 import { sendSlackMessage } from "@/server/slack";
 import { formatDateMonthDay } from "@/utils/utils";
@@ -155,16 +153,6 @@ export default async function webhook(
               isDirectListingCharge,
               source: "Book it now",
             });
-            // rejecting overlapping offers
-            await withdrawOverlappingOffers({
-              propertyId: parseInt(
-                paymentIntentSucceeded.metadata.property_id!,
-              ),
-              checkIn: new Date(paymentIntentSucceeded.metadata.check_in!),
-              checkOut: new Date(paymentIntentSucceeded.metadata.check_out!),
-            });
-            //we need to work on referalls/messaging for book it now
-
             // 2.  CASE : "RequestToBook"
           } else if (paymentIntentSucceeded.metadata.type === "requestToBook") {
             //not charging user or creating a superhog
@@ -266,7 +254,7 @@ export default async function webhook(
               };
 
               // rejecting overlapping offers
-              await withdrawOverlappingOffers({
+              await withdrawOverlappingOffersAndRequestsToBook({
                 propertyId: offer.propertyId,
                 checkIn: offer.checkIn,
                 checkOut: offer.checkOut,

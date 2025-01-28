@@ -3,7 +3,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { cn } from "@/utils/utils";
-import { Loader2Icon } from "lucide-react";
+import { AlertCircleIcon, Loader2Icon } from "lucide-react";
 import { isBefore } from "date-fns";
 import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 import { api } from "@/utils/api";
@@ -30,6 +30,7 @@ interface MonthCalendarProps {
   prices: Record<string, number | undefined>;
   isLoading?: boolean;
   isCalendarUpdating?: boolean;
+  setHowYourCalendarWorksOpen?: (open: boolean) => void;
 }
 
 export default function MonthCalendar({
@@ -39,6 +40,7 @@ export default function MonthCalendar({
   prices,
   isLoading = false,
   isCalendarUpdating = false,
+  setHowYourCalendarWorksOpen,
 }: MonthCalendarProps) {
   console.log(prices);
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
@@ -171,7 +173,7 @@ export default function MonthCalendar({
                 key={index}
                 onClick={() => currentDate && !isGrayedOut}
                 className={cn(
-                  "flex flex-col items-center justify-center p-2 md:min-h-[100px]",
+                  "relative flex flex-col items-center justify-center p-2 md:min-h-[100px]",
                   day && !isGrayedOut && "cursor-pointer",
                   reservationClass,
                   isGrayedOut && "cursor-not-allowed bg-gray-200 text-gray-400",
@@ -184,6 +186,18 @@ export default function MonthCalendar({
                     : "text-muted-foreground",
                 )}
               >
+                <div className="flex items-center gap-x-1 absolute left-0 top-0 rounded-full bg-red-500 px-1 text-[0.6rem] text-white">
+                  {/* If you comment this in, it will work only for unsynced properties */}
+                  {newBookedInfo && (
+                    <div
+                      onClick={() => setHowYourCalendarWorksOpen?.(true)}
+                      className="flex items-center gap-x-1 rounded-full bg-red-500 px-1 text-[0.6rem] text-white"
+                    >
+                      <div className="hidden md:block">Not Synced</div>
+                      <AlertCircleIcon size={10} />
+                    </div>
+                  )}
+                </div>{" "}
                 {day && currentDate && (
                   <>
                     <span className="text-sm font-semibold">{day}</span>
