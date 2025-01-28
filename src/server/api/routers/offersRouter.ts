@@ -392,17 +392,27 @@ export const offersRouter = createTRPCRouter({
           checkOut: requestDetails.checkOut,
           numGuests: requestDetails.numGuests,
         };
-        const datePriceFromAirbnb = curProperty?.originalListingId
-          ? await scrapeAirbnbPrice({
-              airbnbListingId: curProperty.originalListingId,
-              params: scrapeParams,
-            }).then((res) => {
-              if (!res) {
-                throw new TRPCClientError("Error scraping airbnb price");
-              }
-              return res;
-            })
-          : null;
+
+        let datePriceFromAirbnb;
+
+        try {
+          datePriceFromAirbnb = curProperty?.originalListingId
+            ? await scrapeAirbnbPrice({
+                airbnbListingId: curProperty.originalListingId,
+                params: scrapeParams,
+              }).then((res) => {
+                if (!res) {
+                  console.warn("scrapeAirbnbPrice returned a falsy value"); // Fixed typo and added console.warn
+                }
+                return res;
+              })
+            : null;
+        } catch (error) {
+          // Renamed catch clause to 'error' to access the error object
+          console.error("Error during scrapeAirbnbPrice:", error); // Log the error for debugging
+          datePriceFromAirbnb = null;
+        }
+
         console.log(datePriceFromAirbnb);
 
         await ctx.db.insert(offers).values({

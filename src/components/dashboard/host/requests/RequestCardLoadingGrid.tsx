@@ -1,7 +1,7 @@
 import React from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
-function RequestCardLoadingSkeleton() {
+export function RequestCardLoadingSkeleton() {
   return (
     <div className="rounded-lg border bg-white p-4 shadow-sm">
       {/* Header with avatar and name */}
@@ -35,7 +35,7 @@ function RequestCardLoadingSkeleton() {
   );
 }
 
-function RequestCardLoadingGrid() {
+export function RequestCardLoadingGrid() {
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
       {Array.from({ length: 6 }).map((_, index) => (
@@ -44,5 +44,3 @@ function RequestCardLoadingGrid() {
     </div>
   );
 }
-
-export default RequestCardLoadingGrid;
