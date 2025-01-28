@@ -46,7 +46,7 @@ export default function MastHead() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleTabChange = (tab: string) => {
+  const handleTabChange = (tab: string, up?: boolean) => {
     void router.push(
       {
         pathname: router.pathname,
@@ -60,7 +60,13 @@ export default function MastHead() {
     );
 
     if (toggleSectionRef.current) {
-      const headerOffset = isLg ? 250 : 65;
+      let headerOffset;
+      if (up) {
+        headerOffset = isLg ? 100 : 65;
+      } else {
+        headerOffset = isLg ? 250 : 65;
+      }
+
       const elementPosition =
         toggleSectionRef.current.getBoundingClientRect().top;
       const offsetPosition =
