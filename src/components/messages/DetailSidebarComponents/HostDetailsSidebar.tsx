@@ -55,7 +55,7 @@ const HostDetailsSidebar: React.FC<HostDetailsSidebarProps> = ({
     !isLoadingHostTeamMembers && hostTeamMembers
       ? participantIds.find(
           (participantId) =>
-            !hostTeamMembers.some((member) => member.userId === participantId),
+            !hostTeamMembers.some((member) => member.id === participantId),
         )
       : undefined;
 
