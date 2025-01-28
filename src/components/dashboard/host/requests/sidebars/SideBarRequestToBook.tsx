@@ -22,11 +22,11 @@ interface SidebarRequestToBookProps {
 function SidebarRequestToBook({
   properties,
   isLoading,
-  initialSelectedPropertyId
+  initialSelectedPropertyId,
 }: SidebarRequestToBookProps) {
   const router = useRouter();
   const [selectedPropertyId, setSelectedPropertyId] = useState<number | null>(
-    initialSelectedPropertyId ?? null
+    initialSelectedPropertyId ?? null,
   );
 
   useEffect(() => {
@@ -38,14 +38,14 @@ function SidebarRequestToBook({
     void router.push(
       {
         pathname: "/host/requests",
-        query: { 
+        query: {
           ...router.query,
           tabs: "property-bids",
-          propertyId: propertyId.toString()
+          propertyId: propertyId.toString(),
         } as Record<string, string>,
       },
       undefined,
-      { shallow: true }
+      { shallow: true },
     );
   };
 
@@ -64,25 +64,25 @@ function SidebarRequestToBook({
           (request) => request.resolvedAt === null,
         );
         const requestCount = unResolvedRequests.length;
-        
+
         return (
           <div
             key={property.id}
             onClick={() => handlePropertyClick(property.id)}
             className={`${
-              selectedPropertyId === property.id 
-                ? "bg-primaryGreen text-white" 
+              selectedPropertyId === property.id
+                ? "bg-primaryGreen text-white"
                 : ""
-            } pointer flex items-center gap-x-3 rounded-xl border p-3 py-5 cursor-pointer`}
+            } pointer flex cursor-pointer items-center gap-x-3 rounded-xl border p-3 py-5`}
           >
-            <div className="flex-1 text-wrap min-w-0">
-              {property.name}
-            </div>
-            <div className={`flex-shrink-0 whitespace-nowrap text-xs ${
-              selectedPropertyId === property.id 
-                ? "text-white" 
-                : "text-muted-foreground"
-            }`}>
+            <div className="min-w-0 flex-1 text-wrap">{property.name}</div>
+            <div
+              className={`flex-shrink-0 whitespace-nowrap text-xs ${
+                selectedPropertyId === property.id
+                  ? "text-white"
+                  : "text-muted-foreground"
+              }`}
+            >
               {plural(requestCount, "Bid", "Bids")}
             </div>
           </div>

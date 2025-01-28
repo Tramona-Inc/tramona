@@ -186,10 +186,12 @@ export default function MonthCalendar({
               >
                 <div className="flex items-center gap-x-1 absolute left-0 top-0 rounded-full bg-red-500 px-1 text-[0.6rem] text-white">
                   {/* If you comment this in, it will work only for unsynced properties */}
-                  {/* {newBookedInfo && ( */}
-                  <div>Not Synced</div>
-                  <AlertCircleIcon size={10}/>
-                  {/* )} */}
+                  {newBookedInfo && (
+                    <>
+                      <div>Not Synced</div>
+                      <AlertCircleIcon size={10} />
+                    </>
+                  )}
                 </div>{" "}
                 {day && currentDate && (
                   <>
