@@ -22,7 +22,7 @@ const checkingStates = [
 
 const TOTAL_DURATION = 60000;
 const UPDATE_INTERVAL = 50;
-const SPEED = 3;
+const AESTHETIC_TEXT_INTERVAL = 3000;
 
 function useCombinedLoadingState({
   session,
@@ -73,7 +73,7 @@ function useCombinedLoadingState({
       startTimeRef.current = Date.now();
       timerRef.current = setInterval(() => {
         const elapsedTime = Date.now() - (startTimeRef.current ?? Date.now());
-        const newProgress = (elapsedTime / TOTAL_DURATION) * 100 * SPEED;
+        const newProgress = (elapsedTime / TOTAL_DURATION) * 100;
         console.log(
           "[useCombinedLoadingState] Interval tick - newProgress:",
           newProgress,
@@ -180,6 +180,8 @@ export default function CombinedLoadingPage() {
   const [isSessionLoaded, setIsSessionLoaded] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [loadingTimeoutExpired, setLoadingTimeoutExpired] = useState(false);
+  // ----- Aesthetic Text State -----
+  const [aestheticTextIndex, setAestheticTextIndex] = useState(0);
 
   const { data: isUserHostTeamOwner, refetch: refetchIsUserHostTeamOwner } =
     api.hostTeams.isUserHostTeamOwner.useQuery(
@@ -187,6 +189,18 @@ export default function CombinedLoadingPage() {
       { enabled: isSessionLoaded && hasHostTeamCreatedEvent },
     );
 
+  // ---- Aesthetic Text Rotation -----
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setAestheticTextIndex(
+        (prevIndex) => (prevIndex + 1) % AESTHETIC_LOADING_TEXT.length,
+      );
+    }, AESTHETIC_TEXT_INTERVAL);
+
+    return () => clearInterval(intervalId);
+  }, []);
+
+  //if logged in setState
   useEffect(() => {
     if (status === "authenticated") {
       setIsSessionLoaded(true);
@@ -276,17 +290,19 @@ export default function CombinedLoadingPage() {
     <div className="flex min-h-screen flex-col items-center justify-center bg-white">
       <AnimatePresence mode="wait">
         {!isComplete ? (
-          <motion.div
-            key={currentMessage}
-            initial={{ x: 50, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: -50, opacity: 0 }}
-            transition={{ duration: 0.5 }}
-            className="text-center text-3xl font-bold text-gray-800"
-          >
-            {currentMessage}
-            <Ellipsis />
-          </motion.div>
+          <div className="flex flex-col items-center justify-center">
+            <motion.div
+              key={AESTHETIC_LOADING_TEXT[aestheticTextIndex]}
+              initial={{ x: 50, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: -50, opacity: 0 }}
+              transition={{ duration: 0.5 }}
+              className="text-center text-3xl font-bold text-gray-800"
+            >
+              {AESTHETIC_LOADING_TEXT[aestheticTextIndex]}
+              <Ellipsis />
+            </motion.div>
+          </div>
         ) : (
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
@@ -299,6 +315,18 @@ export default function CombinedLoadingPage() {
         )}
       </AnimatePresence>
       {!isComplete && <ProgressBar progress={progress} />}
+      {!isComplete && (
+        <motion.div
+          key={currentMessage}
+          initial={{ y: 20, opacity: 0 }} // Initial position: slightly below, transparent
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: -20, opacity: 0 }}
+          transition={{ duration: 0.5 }}
+          className="mt-3 text-center text-xs font-bold text-gray-400"
+        >
+          {currentMessage}
+        </motion.div>
+      )}
       {isTimeout &&
         (console.log(
           "[CombinedLoadingPage] Redirecting text is rendering because isTimeout is:",
