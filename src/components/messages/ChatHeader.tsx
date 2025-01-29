@@ -54,7 +54,7 @@ export default function ChatHeader({
                     <UserAvatar
                       key={participant.id}
                       size="sm"
-                      name={capitalizeFirstLetter(participant.firstName!)}
+                      name={capitalizeFirstLetter(participant.firstName ?? " ")}
                       image={participant.image}
                     />
                   ))}

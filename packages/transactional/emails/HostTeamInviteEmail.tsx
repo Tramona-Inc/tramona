@@ -1,3 +1,5 @@
+/* eslint-disable @next/next/no-img-element */
+
 import { Text } from "@react-email/components";
 import { Layout } from "./EmailComponents";
 import Link from "next/link";
@@ -19,7 +21,9 @@ export default function HostTeamInviteEmail({
   const inviteUrl = `${baseUrl}/cohost-invite/${cohostInviteId}`;
 
   return (
-    <Layout title_preview={`${name ?? email} invited you to their host team on Tramona`}>
+    <Layout
+      title_preview={`${name ?? email} invited you to their host team on Tramona`}
+    >
       <div className="border-b border-gray-300 bg-white p-6 text-black">
         <div className="mb-4" style={{ display: "inline-block" }}>
           <img
@@ -44,8 +48,9 @@ export default function HostTeamInviteEmail({
         <Text className="mb-4 text-left">
           Hello,
           <br />
-          {name ?? email} has invited you to join their host team on Tramona! To accept
-          this invitation, please click the button below to sign up or login.
+          {name ?? email} has invited you to join their host team on Tramona! To
+          accept this invitation, please click the button below to sign up or
+          login.
           <div style={{ textAlign: "center", margin: "20px 0" }}>
             <a
               href={inviteUrl}
@@ -59,7 +64,7 @@ export default function HostTeamInviteEmail({
 
         <Text>
           If you have any questions about this invitation or need assistance,
-          please don't hesitate to reach out to us.
+          please don&apos;t hesitate to reach out to us.
         </Text>
         <Text>
           Best regards, <br />

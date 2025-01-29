@@ -12,6 +12,7 @@ import { UnifiedCheckoutData } from "./types";
 import TripDetails from "./sections/TripDetails";
 import CancellationPolicy from "./sections/CancellationPolicy";
 import CheckoutSummary from "./sections/CheckoutSummary";
+import RequestToBookMessage from "./sections/RequestToBookMessage";
 import { useSession } from "next-auth/react";
 
 interface UnifiedCheckoutProps {
@@ -53,7 +54,11 @@ export function UnifiedCheckout({ unifiedCheckoutData }: UnifiedCheckoutProps) {
           <BestPriceCard />
           <TripDetails unifiedCheckoutData={unifiedCheckoutData} />
           <Separator className="my-4" />
+
           <CancellationPolicy unifiedCheckoutData={unifiedCheckoutData} />
+          {unifiedCheckoutData.type === "requestToBook" && (
+            <RequestToBookMessage unifiedCheckoutData={unifiedCheckoutData} />
+          )}
           <Separator className="my-4" />
           {!isMobile && renderCheckoutForm()}
         </div>
@@ -65,6 +70,9 @@ export function UnifiedCheckout({ unifiedCheckoutData }: UnifiedCheckoutProps) {
           <CheckoutSummary unifiedCheckoutData={unifiedCheckoutData} />
           <Separator className="my-6" />
           <CancellationPolicy unifiedCheckoutData={unifiedCheckoutData} />
+          {unifiedCheckoutData.type === "requestToBook" && (
+            <RequestToBookMessage unifiedCheckoutData={unifiedCheckoutData} />
+          )}
           <Separator className="my-6" />
           {isMobile && renderCheckoutForm()}
           <Separator className="my-6" />

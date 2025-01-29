@@ -42,19 +42,7 @@ export default function Page() {
   });
   console.log(propertyPricing);
   // ----------------
-  if (router.isFallback) {
-    return <h2>Loading</h2>;
-  }
-  //error state
-  if (propertyPricing.error && !propertyPricing.isLoading) {
-    return (
-      <MainLayout>
-        <div className="min-h-screen-minus-header-n-footer mx-auto my-8 max-w-6xl sm:my-16">
-          Something went wrong ...
-        </div>
-      </MainLayout>
-    );
-  }
+
   const unifiedCheckoutData =
     property && propertyPricing.originalPriceAfterTierDiscount
       ? requestOrBookItNowToUnifiedData({
@@ -70,8 +58,8 @@ export default function Page() {
 
   return (
     <MainLayout>
-      <div className="min-h-screen-minus-header-n-footer mx-auto my-8 max-w-6xl sm:my-16">
-        {unifiedCheckoutData && property ? (
+      <div className="mx-auto my-8 min-h-screen-minus-header-n-footer max-w-6xl sm:my-16">
+        {unifiedCheckoutData && property && !propertyPricing.error ? (
           <UnifiedCheckout unifiedCheckoutData={unifiedCheckoutData} />
         ) : (
           <Spinner />
@@ -79,4 +67,15 @@ export default function Page() {
       </div>
     </MainLayout>
   );
+
+  //error state
+  if (propertyPricing.error && !propertyPricing.isLoading) {
+    return (
+      <MainLayout>
+        <div className="mx-auto my-8 min-h-screen-minus-header-n-footer max-w-6xl sm:my-16">
+          Something went wrong ...
+        </div>
+      </MainLayout>
+    );
+  }
 }
