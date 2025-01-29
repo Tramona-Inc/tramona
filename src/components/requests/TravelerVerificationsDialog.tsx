@@ -10,7 +10,10 @@ import { PastOfferRequestDetails } from "../dashboard/host/requests/city/PastOff
 export function TravelerVerificationsDialog({
   request,
 }: {
-  request: HostDashboardRequest | HostDashboardRequestToBook | PastOfferRequestDetails;
+  request:
+    | HostDashboardRequest
+    | HostDashboardRequestToBook
+    | PastOfferRequestDetails;
 }) {
   const { data: verificationList } = api.users.getUserVerifications.useQuery({
     madeByGroupId: request.madeByGroupId,
@@ -35,15 +38,11 @@ export function TravelerVerificationsDialog({
     },
   ];
 
-  const travelerLastInitial = request.traveler.lastName
-    ? request.traveler.lastName[0]
-    : "";
-
   return (
     <>
       <Dialog>
         <DialogTrigger>
-          <p>{request.traveler.firstName + " " + travelerLastInitial}</p>
+          <p>{request.traveler.firstName}</p>
         </DialogTrigger>
         <DialogContent>
           <div className="flex items-center gap-4">

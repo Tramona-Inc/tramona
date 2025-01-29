@@ -53,10 +53,7 @@ function ConversationMessage({
       >
         <div className="flex items-baseline gap-2">
           <p className="text-sm font-medium text-zinc-600">
-            {message.author.firstName}{" "}
-            {message.author.lastName
-              ? message.author.lastName.slice(0, 1) + "."
-              : ""}
+            {message.author.firstName}
           </p>
           <p className="text-xs text-zinc-500">
             {formatRelativeDateShort(message.createdAt, {
