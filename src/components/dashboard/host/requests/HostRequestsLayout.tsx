@@ -128,7 +128,7 @@ export default function HostRequestsLayout({
         if (separatedData?.normal?.[0]) {
           newPathname = `/host/requests/${separatedData.normal[0].city}`;
         }
-      } else if (tab === "property-bids") {
+      } else {
         newPathname = `/host/requests/requests-to-book`;
       }
 

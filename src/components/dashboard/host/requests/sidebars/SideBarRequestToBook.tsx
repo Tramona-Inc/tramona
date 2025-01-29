@@ -37,12 +37,7 @@ function SidebarRequestToBook({
     setSelectedPropertyId(propertyId);
     void router.push(
       {
-        pathname: "/host/requests",
-        query: {
-          ...router.query,
-          tabs: "property-bids",
-          propertyId: propertyId.toString(),
-        } as Record<string, string>,
+        pathname: `/host/requests/requests-to-book/${propertyId}`,
       },
       undefined,
       { shallow: true },
@@ -53,7 +48,7 @@ function SidebarRequestToBook({
     return <SidebarPropertySkeleton />;
   }
 
-  if (!properties || properties.length === 0) {
+  if (properties.length === 0) {
     return <EmptyRequestState />;
   }
 
