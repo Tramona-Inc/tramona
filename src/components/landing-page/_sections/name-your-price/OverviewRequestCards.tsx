@@ -14,18 +14,30 @@ function OverviewRequestCards({ className }: { className?: string }) {
   const handleNameYourPriceClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    const scrollOffset = 300; // Adjust this value to control how far below the top to scroll
+    const scrollOffset = 440; // Adjust this value to control how far below the top to scroll
     void router.push("/?tab=name-price", undefined, { scroll: false });
-    window.scrollTo({
-      top: scrollOffset,
-      behavior: "smooth",
-    });
+    setTimeout(() => {
+      window.scrollTo({
+        top: scrollOffset,
+        behavior: "smooth",
+      });
+    }, 200);
   };
 
   const handleSearchPropertiesClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    void router.push("/?tab=search", undefined, { scroll: true });
+    const scrollOffset = 0;
+    void router.push("/?tab=search", undefined, {
+      scroll: true,
+      shallow: true,
+    });
+    setTimeout(() => {
+      window.scrollTo({
+        top: scrollOffset,
+        behavior: "smooth",
+      });
+    }, 200);
   };
 
   return (

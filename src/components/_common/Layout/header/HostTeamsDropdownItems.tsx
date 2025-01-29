@@ -1,6 +1,5 @@
 import {
   DropdownMenuCheckboxItem,
-  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSub,
   DropdownMenuSubContent,

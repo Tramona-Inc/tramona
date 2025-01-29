@@ -113,17 +113,17 @@ export default function Page() {
                     All local hosts can make offers, expanding your options.
                   </p>
                 </div>
-                <div className="flex flex-col items-center text-center">
-                  <button
-                    onClick={() => {
-                      window.location.href = "/why-list";
-                    }}
-                    className="rounded-lg bg-[#004236] px-6 py-3 text-lg font-bold text-white transition-colors hover:bg-[#003228]"
-                  >
-                    Host? Learn how hosting works
-                  </button>
-                  <p className="max-w-lg text-sm text-muted-foreground"></p>
-                </div>
+              </div>
+              <div className="flex flex-col items-center text-center">
+                <button
+                  onClick={() => {
+                    window.location.href = "/why-list";
+                  }}
+                  className="rounded-lg bg-[#004236] px-6 py-3 text-lg font-bold text-white transition-colors hover:bg-[#003228]"
+                >
+                  Host? Learn how hosting works
+                </button>
+                <p className="max-w-lg text-sm text-muted-foreground"></p>
               </div>
             </div>
           </div>

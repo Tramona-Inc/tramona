@@ -21,8 +21,10 @@ import { TestimonialCarousel } from "./testimonials/TestimonialCarousel";
 import { landingPageTestimonals } from "./testimonials/testimonials-data";
 import UnclaimedMap from "@/components/unclaimed-offers/UnclaimedMap";
 import { useIsLg } from "@/utils/utils";
+import { useIsXl } from "@/utils/utils";
 
 export default function MastHead() {
+  const isXl = useIsXl();
   const isLg = useIsLg();
   const router = useRouter();
   const { query } = router;
@@ -60,7 +62,8 @@ export default function MastHead() {
     );
 
     if (toggleSectionRef.current) {
-      const headerOffset = isLg ? 250 : 65;
+      const headerOffset = isXl ? 300 : isLg ? 260 : 65;
+
       const elementPosition =
         toggleSectionRef.current.getBoundingClientRect().top;
       const offsetPosition =
