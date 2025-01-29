@@ -217,9 +217,10 @@ const SignUpNow = ({ requestFeed }: { requestFeed: FeedRequestItem[] }) => {
     <section className="flex justify-center">
       <div className="mx-12 flex flex-col justify-center gap-8 md:mx-36 lg:mx-24 lg:max-w-[70vw] lg:flex-row">
         <div className="flex-1">
-          <h1 className="mb-10 mt-10 text-center text-2xl font-semibold">
-            Tramona was built for hosts to fill empty nights and take home more
-            of their earnings.
+          <h1 className="mb-20 mt-10 text-center text-2xl font-medium">
+            Tramona charges 5-10% less in fees than other platforms, while
+            offering $50,000 in protection per booking. Allowing hosts and
+            travelers to earn more on the same booking elsewhere.
           </h1>
           <div className="h-[450px] rounded-lg border px-2 py-2 shadow-xl">
             <RequestFeed requestFeed={requestFeed} />
@@ -230,7 +231,7 @@ const SignUpNow = ({ requestFeed }: { requestFeed: FeedRequestItem[] }) => {
           <div className="mb-2 flex justify-center">
             <Link href="/host-onboarding">
               <Button size="lg" className="bg-primaryGreen text-white">
-                Sign up and start getting booking requests
+                Sign up and start earning more
               </Button>
             </Link>
           </div>
@@ -657,46 +658,52 @@ const Features2 = () => {
       <div className="flex flex-col items-center space-y-12">
         {/* First Row: Image on left, text on right */}
         <div className="mx-auto flex w-full max-w-4xl flex-col items-center gap-12 px-6 text-center sm:flex-row sm:text-left">
-          <div className="relative h-64 w-64 flex-shrink-0 overflow-hidden rounded-lg bg-gray-200 shadow-md">
+          <div className="relative h-72 w-72 flex-shrink-0 overflow-hidden rounded-lg bg-gray-200 shadow-md">
             <Image
-              src="/path/to/image-requests.jpg"
+              src="/assets/images/why-list/Why-list-request.png"
               objectFit="cover"
               layout="fill"
               alt="Requests"
             />
           </div>
-          <h2 className="text-xl font-semibold text-[#333] sm:text-2xl">
-            Full flexibility on all bookings.
+          <h2 className="text-xl font-medium text-[#333] sm:text-2xl">
+            See all incoming requests for your empty nights, accept deny or
+            reject them. Hosts can also set preferences so they only see
+            requests that match their criteria.
           </h2>
         </div>
 
         {/* Second Row: Text on left, image on right */}
         <div className="mx-auto flex w-full max-w-4xl flex-col items-center gap-12 px-6 text-center sm:flex-row-reverse sm:text-left">
-          <div className="relative h-64 w-64 flex-shrink-0 overflow-hidden rounded-lg bg-gray-200 shadow-md">
+          <div className="relative h-72 w-72 flex-shrink-0 overflow-hidden rounded-lg bg-gray-200 shadow-md">
             <Image
-              src="/path/to/image-cal.jpg"
+              src="/assets/images/why-list/Why-list-cohost.png"
               objectFit="cover"
               layout="fill"
               alt="Cal"
             />
           </div>
-          <h2 className="text-xl font-semibold text-[#333] sm:text-2xl">
-            Automatically synced calandar and pricing with Airbnb
+          <h2 className="text-xl font-medium text-[#333] sm:text-2xl">
+            Easily invite a co-host to help manage your listing. We have
+            multiple permissions to choose from. From full access to only being
+            able to preform certain actions.
           </h2>
         </div>
 
         {/* Third Row: Image on left, text on right */}
         <div className="mx-auto flex w-full max-w-4xl flex-col items-center gap-12 px-6 text-center sm:flex-row sm:text-left">
-          <div className="relative h-64 w-64 flex-shrink-0 overflow-hidden rounded-lg bg-gray-200 shadow-md">
+          <div className="relative h-72 w-72 flex-shrink-0 overflow-hidden rounded-lg bg-gray-200 shadow-md">
             <Image
-              src="/path/to/image-customized-pricing.jpg"
+              src="/assets/images/why-list/Why-list-Cal.png"
               objectFit="cover"
               layout="fill"
               alt="Customized Pricing"
             />
           </div>
-          <h2 className="text-xl font-semibold text-[#333] sm:text-2xl">
-            Choose when to give discounts, and when to keep your price regular.
+          <h2 className="text-xl font-medium text-[#333] sm:text-2xl">
+            Customize Tramona how you like. Put the prices you would consider,
+            turn on or off instant booking, and sync your calendar directlly
+            with Airbnb to eliminate double bookings.
           </h2>
         </div>
       </div>
