@@ -13,11 +13,11 @@ export default function LoadMoreMessages() {
 
   const { conversations } = useMessage();
   const page = currentConversationId
-    ? conversations[currentConversationId]?.page ?? 1
+    ? (conversations[currentConversationId]?.page ?? 1)
     : 1;
 
   const totalMessagesCount = currentConversationId
-    ? conversations[currentConversationId]?.messages.length ?? 0
+    ? (conversations[currentConversationId]?.messages.length ?? 0)
     : 0;
 
   const setMoreMessagesToConversation = useMessage(
@@ -66,8 +66,8 @@ export default function LoadMoreMessages() {
           isEdit: message.is_edit,
           user: {
             name: message.user?.name ?? "",
-            image: message.user?.image ?? "",
-            email: message.user?.email ?? "",
+            image: message.user.image,
+            email: message.user.email,
           },
         }));
 

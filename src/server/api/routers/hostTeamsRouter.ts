@@ -18,7 +18,6 @@ import { z } from "zod";
 import {
   coHostProcedure,
   createTRPCRouter,
-  hostProcedure,
   protectedProcedure,
   roleRestrictedProcedure,
 } from "../trpc";

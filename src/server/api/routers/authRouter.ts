@@ -5,7 +5,7 @@ import { CustomPgDrizzleAdapter } from "@/server/adapter";
 import { db } from "@/server/db";
 import { profiles, referralCodes, users, type User } from "@/server/db/schema";
 import { addUserToGroups, sendEmail } from "@/server/server-utils";
-import { generateReferralCode, retry } from "@/utils/utils";
+import { generateReferralCode } from "@/utils/utils";
 import { zodEmail, zodPassword } from "@/utils/zod-utils";
 import { TRPCError } from "@trpc/server";
 import * as bycrypt from "bcrypt";

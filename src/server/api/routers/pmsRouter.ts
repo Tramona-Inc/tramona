@@ -4,10 +4,11 @@ import {
   publicProcedure,
 } from "@/server/api/trpc";
 import { z } from "zod";
-import axios, { type AxiosResponse } from "axios";
+import axios, { AxiosError, type AxiosResponse } from "axios";
 import { users } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
 import { getPropertyCalendar } from "@/server/server-utils";
+import { TRPCError } from "@trpc/server";
 
 export const pmsRouter = createTRPCRouter({
   generateHostawayBearerToken: publicProcedure
@@ -175,24 +176,22 @@ export const pmsRouter = createTRPCRouter({
     if (!id || !name || !email || !phoneNumber) {
       throw new Error("User is missing required information");
     }
-
+    await axios.post(
+      "https://connect.hospitable.com/api/v1/customers",
+      {
+        id,
+        name,
+        email,
+        phone: phoneNumber,
+        timezone: "UTC",
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
+        },
+      },
+    );
     try {
-      await axios.post(
-        "https://connect.hospitable.com/api/v1/customers",
-        {
-          id,
-          name,
-          email,
-          phone: phoneNumber,
-          timezone: "UTC",
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
-          },
-        },
-      );
-
       type HospitableAuthCodeResponse = {
         data: {
           expires_at: Date;
@@ -204,7 +203,9 @@ export const pmsRouter = createTRPCRouter({
         "https://connect.hospitable.com/api/v1/auth-codes",
         {
           customer_id: id,
-          redirect_url: process.env.NEXTAUTH_URL + "/load-airbnb-properties/checking-hospitable-status",
+          redirect_url:
+            process.env.NEXTAUTH_URL +
+            "/load-airbnb-properties/checking-hospitable-status",
           // redirect_url: "https://179c-2601-600-8e81-3180-4171-fe-a3a4-da1d.ngrok-free.app/host",
         },
         {
@@ -230,8 +231,29 @@ export const pmsRouter = createTRPCRouter({
 
       return authCodeResponse.data;
     } catch (error) {
-      console.error("Error syncing with Hospitable:", error);
-      throw new Error("Failed to sync with Hospitable");
+      console.log(error);
+      if (error instanceof AxiosError) {
+        console.log(error);
+        if (
+          error.message &&
+          error.message === "Request failed with status code 422"
+        ) {
+          throw new TRPCError({
+            code: "UNPROCESSABLE_CONTENT",
+            message: "User info is not valid",
+          });
+        } else {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Please contact support",
+          });
+        }
+      } else {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Please contact support",
+        });
+      }
     }
   }),
 
@@ -241,29 +263,33 @@ export const pmsRouter = createTRPCRouter({
       const { propertyId } = input;
       console.log("propertyId", propertyId);
       return await getPropertyCalendar(propertyId);
-  }),
+    }),
 
   resetHospitableCustomer: protectedProcedure.mutation(async ({ ctx }) => {
-    await ctx.db.query.users.findFirst({
-      columns: { id: true },
-      where: eq(users.id, ctx.user.id),
-    }).then(async (user) => {
-      if (!user) {
-        throw new Error("User not found");
-      }
-      const { id } = user;
-      try {
-        await axios.delete(`https://connect.hospitable.com/api/v1/customers/${id}`, {
-          headers: {
-            Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
-          },
-        });
-        console.log("Hospitable customer reset successfully");
-      } catch (error) {
-        console.error("Error resetting Hospitable customer:", error);
-        throw new Error("Failed to reset Hospitable customer");
-      }
-    });
+    await ctx.db.query.users
+      .findFirst({
+        columns: { id: true },
+        where: eq(users.id, ctx.user.id),
+      })
+      .then(async (user) => {
+        if (!user) {
+          throw new Error("User not found");
+        }
+        const { id } = user;
+        try {
+          await axios.delete(
+            `https://connect.hospitable.com/api/v1/customers/${id}`,
+            {
+              headers: {
+                Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
+              },
+            },
+          );
+          console.log("Hospitable customer reset successfully");
+        } catch (error) {
+          console.error("Error resetting Hospitable customer:", error);
+          throw new Error("Failed to reset Hospitable customer");
+        }
+      });
   }),
 });
-

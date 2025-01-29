@@ -1,8 +1,6 @@
 "use client";
 
 import React from "react";
-import AttentionCard from "./AttentionCard";
-import { ZapIcon } from "lucide-react";
 import { NotificationCard, NotificationCardSkeleton } from "./NotificationCard";
 import { api } from "@/utils/api";
 

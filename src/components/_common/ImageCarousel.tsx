@@ -25,7 +25,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ imageUrls }) => {
       setCurrentImageIndex((prevIndex) => prevIndex - 1);
     }
   };
-  if (!imageUrls || imageUrls.length === 0) {
+  if (imageUrls.length === 0) {
     return <div>No images available</div>;
   }
 
