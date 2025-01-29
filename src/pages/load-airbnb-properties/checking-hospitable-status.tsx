@@ -25,12 +25,10 @@ const UPDATE_INTERVAL = 50;
 const AESTHETIC_TEXT_INTERVAL = 3000;
 
 function useCombinedLoadingState({
-  session,
   isSessionLoaded,
   hasHostTeamCreatedEvent,
   isUserHostTeamOwner,
 }: {
-  session: any;
   isSessionLoaded: boolean;
   hasHostTeamCreatedEvent: boolean;
   isUserHostTeamOwner: boolean | undefined;
@@ -70,10 +68,11 @@ function useCombinedLoadingState({
 
   useEffect(() => {
     if (currentStateIndex < 2) {
+      // basically index q
       startTimeRef.current = Date.now();
       timerRef.current = setInterval(() => {
         const elapsedTime = Date.now() - (startTimeRef.current ?? Date.now());
-        const newProgress = (elapsedTime / TOTAL_DURATION) * 100;
+        const newProgress = (elapsedTime / TOTAL_DURATION) * 100 + 40;
         console.log(
           "[useCombinedLoadingState] Interval tick - newProgress:",
           newProgress,
@@ -97,6 +96,9 @@ function useCombinedLoadingState({
         }
       }, UPDATE_INTERVAL);
     } else {
+      if (currentStateIndex === 2) {
+        progress.set(90);
+      }
       console.log(
         "[useCombinedLoadingState] currentStateIndex >= 2, clearing timer (not in timeout phase)",
       );
@@ -123,7 +125,10 @@ function useCombinedLoadingState({
         console.log(
           "[useCombinedLoadingState] Host team event received, moving to state 2 (Finalizing Setup) and setting progress to 100",
         );
-        progress.set(100);
+        progress.set(80);
+        setTimeout(() => {
+          progress.set(95);
+        }, 1000);
       }
     }
   }, [hasHostTeamCreatedEvent, currentStateIndex]);
@@ -189,6 +194,13 @@ export default function CombinedLoadingPage() {
       { enabled: isSessionLoaded && hasHostTeamCreatedEvent },
     );
 
+  const { currentMessage, isComplete, progress, isTimeout } =
+    useCombinedLoadingState({
+      isSessionLoaded,
+      hasHostTeamCreatedEvent,
+      isUserHostTeamOwner,
+    });
+
   // ---- Aesthetic Text Rotation -----
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -223,7 +235,7 @@ export default function CombinedLoadingPage() {
     if (loadingTimeoutExpired) {
       void router.push("/why-list");
     }
-  }, [loadingTimeoutExpired, router]);
+  }, [loadingTimeoutExpired, router, isUserHostTeamOwner]);
 
   useEffect(() => {
     const checkHostTeamOwnership = async () => {
@@ -239,10 +251,10 @@ export default function CombinedLoadingPage() {
       if (isUserHostTeamOwner) {
         setTimeout(() => {
           void router.push("/host");
-        }, 1000);
+        }, 2500);
       }
     }
-  }, [isUserHostTeamOwner, router]);
+  }, [isUserHostTeamOwner, router, isComplete]);
 
   useEffect(() => {
     if (isSessionLoaded && session?.user.id) {
@@ -274,15 +286,6 @@ export default function CombinedLoadingPage() {
     }
   }, [isSessionLoaded, session?.user.id, supabase]);
 
-  const { currentMessage, isComplete, progress, isTimeout } =
-    useCombinedLoadingState({
-      // Get isTimeout from hook
-      session,
-      isSessionLoaded,
-      hasHostTeamCreatedEvent,
-      isUserHostTeamOwner,
-    });
-
   console.log("CombinedLoadingPage isTimeout:", isTimeout); // LOG 6: Check isTimeout prop in CombinedLoadingPage
   console.log("CombinedLoadingPage progress", progress.get());
 
@@ -310,7 +313,7 @@ export default function CombinedLoadingPage() {
             transition={{ duration: 0.5 }}
             className="text-3xl font-bold text-gray-800"
           >
-            All done!
+            You&apos;re all set! Let&apos;s jump into your host dashboard
           </motion.div>
         )}
       </AnimatePresence>
@@ -324,7 +327,8 @@ export default function CombinedLoadingPage() {
           transition={{ duration: 0.5 }}
           className="mt-3 text-center text-xs font-bold text-gray-400"
         >
-          {currentMessage}
+          {/* {currentMessage} USE FOR TESTING */}
+          Just a minute more, we&apos;re almost finished!
         </motion.div>
       )}
       {isTimeout &&
