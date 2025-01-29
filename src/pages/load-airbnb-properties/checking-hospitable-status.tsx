@@ -232,10 +232,10 @@ export default function CombinedLoadingPage() {
   }, []);
 
   useEffect(() => {
-    if (loadingTimeoutExpired) {
+    if (loadingTimeoutExpired || isTimeout) {
       void router.push("/why-list");
     }
-  }, [loadingTimeoutExpired, router, isUserHostTeamOwner]);
+  }, [loadingTimeoutExpired, router, isUserHostTeamOwner, isTimeout]);
 
   useEffect(() => {
     const checkHostTeamOwnership = async () => {
@@ -292,33 +292,34 @@ export default function CombinedLoadingPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-white">
       <AnimatePresence mode="wait">
-        {!isComplete ? (
-          <div className="flex flex-col items-center justify-center">
+        {!isTimeout &&
+          (!isComplete ? (
+            <div className="flex flex-col items-center justify-center">
+              <motion.div
+                key={AESTHETIC_LOADING_TEXT[aestheticTextIndex]}
+                initial={{ x: 50, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: -50, opacity: 0 }}
+                transition={{ duration: 0.5 }}
+                className="text-center text-3xl font-bold text-gray-800"
+              >
+                {AESTHETIC_LOADING_TEXT[aestheticTextIndex]}
+                <Ellipsis />
+              </motion.div>
+            </div>
+          ) : (
             <motion.div
-              key={AESTHETIC_LOADING_TEXT[aestheticTextIndex]}
-              initial={{ x: 50, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: -50, opacity: 0 }}
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.5 }}
-              className="text-center text-3xl font-bold text-gray-800"
+              className="text-3xl font-bold text-gray-800"
             >
-              {AESTHETIC_LOADING_TEXT[aestheticTextIndex]}
-              <Ellipsis />
+              You&apos;re all set! Let&apos;s jump into your host dashboard
             </motion.div>
-          </div>
-        ) : (
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.5 }}
-            className="text-3xl font-bold text-gray-800"
-          >
-            You&apos;re all set! Let&apos;s jump into your host dashboard
-          </motion.div>
-        )}
+          ))}
       </AnimatePresence>
-      {!isComplete && <ProgressBar progress={progress} />}
-      {!isComplete && (
+      {isComplete || (!isTimeout && <ProgressBar progress={progress} />)}
+      {!isTimeout && !isComplete && (
         <motion.div
           key={currentMessage}
           initial={{ y: 20, opacity: 0 }} // Initial position: slightly below, transparent
@@ -337,7 +338,7 @@ export default function CombinedLoadingPage() {
           isTimeout,
         ), // LOG 7: Conditional Render Check
         (
-          <p className="mt-2 text-gray-500">
+          <p className="mt-2 text-gray-600">
             Redirecting you to why-list page...
           </p>
         ))}

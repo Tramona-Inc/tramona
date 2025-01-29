@@ -38,17 +38,16 @@ type Props = InferGetStaticPropsType<typeof getStaticProps>;
 export default function Onboarding({ requestFeed }: Props) {
   const progress = useHostOnboarding((state) => state.progress);
   const setProgress = useHostOnboarding((state) => state.setProgress);
-  const [isCheckingHostStatus] = useState(false);
   const { data: session } = useSession({ required: true });
   const router = useRouter();
   const { toast } = useToast();
   const { data: isUserHostTeamOwner } =
     api.hostTeams.isUserHostTeamOwner.useQuery(
       {
-        userId: session?.user.id ?? "",
+        userId: session?.user.id,
       },
       {
-        enabled: isCheckingHostStatus && !!session,
+        enabled: !!session,
       },
     );
 

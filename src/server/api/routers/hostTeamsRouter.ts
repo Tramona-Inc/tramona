@@ -730,12 +730,13 @@ export const hostTeamsRouter = createTRPCRouter({
     }),
 
   isUserHostTeamOwner: protectedProcedure
-    .input(z.object({ userId: z.string() }))
+    .input(z.object({ userId: z.string().optional() }))
     .query(async ({ input, ctx }) => {
+      if (!input.userId) return false;
       const hostTeam = await ctx.db.query.hostTeams.findFirst({
         where: eq(hostTeams.ownerId, input.userId),
       });
-      return hostTeam?.ownerId === ctx.user.id;
+      return hostTeam ? true : false;
     }),
 
   updateCoHostRole: coHostProcedure(
