@@ -52,9 +52,7 @@ export function TravelerVerificationsDialog({
               image={request.traveler.image}
             />
             <div className="flex-col">
-              <p className="text-lg font-bold">
-                {request.traveler.firstName + " " + travelerLastInitial}
-              </p>
+              <p className="text-lg font-bold">{request.traveler.firstName}</p>
               <p className="text-muted-foreground">
                 Located in {request.traveler.location}
               </p>
