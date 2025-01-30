@@ -15,6 +15,7 @@ import {
   axiosWithRetry,
   createInitialHostTeam,
   createLatLngGISPoint,
+  createOrFindInitalHostTeamId,
   getPropertyCalendar,
   proxyAgent,
 } from "@/server/server-utils";
@@ -275,12 +276,12 @@ export default async function HospitableWebhook(
         const userId = webhookData.data.channel.customer.id;
 
         const user = await db.query.users
-        .findFirst({
-          where: eq(users.id, userId),
-        })
-        .then((res) => res!);
+          .findFirst({
+            where: eq(users.id, userId),
+          })
+          .then((res) => res!);
 
-      const initialTeamId = await createInitialHostTeam(user); //CREATING THE HOST TEAM ON LISTING INITIALIZATION
+        const teamId = await createOrFindInitalHostTeamId(user); //CREATING THE HOST TEAM ON LISTING INITIALIZATION
 
         const imageResponse = await axios.get<ImageResponse>(
           `https://connect.hospitable.com/api/v1/customers/${userId}/listings/${webhookData.data.id}/images`,
@@ -381,7 +382,7 @@ export default async function HospitableWebhook(
           cancellationPolicy = "Flexible";
         }
 
-        const amenities = getAmenities(listingData, listingId);
+        const amenities = await getAmenities(listingData, listingId);
 
         // const allReviews = (
         //   await axios.get<ReviewResponse>(
@@ -417,7 +418,7 @@ export default async function HospitableWebhook(
         const propertyId = await db
           .insert(properties)
           .values({
-            hostTeamId: initialTeamId,
+            hostTeamId: teamId,
             propertyType: convertAirbnbPropertyType(
               webhookData.data.property_type,
             ),

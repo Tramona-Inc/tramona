@@ -1,5 +1,6 @@
 import { z } from "zod";
 import {
+  formatDateMonthDay,
   formatDateYearMonthDay,
   parseCurrency,
   parseHTML,
@@ -14,6 +15,7 @@ import {
 import { airbnbHeaders } from "@/utils/constants";
 import { getAddress, stringifyAddress } from "../google-maps";
 import { axiosWithRetry, proxyAgent } from "../server-utils";
+import { sendSlackMessage } from "../slack";
 
 export function encodeAirbnbId(id: string) {
   return Buffer.from(`StayListing:${id}`).toString("base64");
@@ -37,12 +39,23 @@ export function getReviewsUrl(id: string) {
   return `https://www.airbnb.com/api/v3/StaysPdpReviewsQuery/dec1c8061483e78373602047450322fd474e79ba9afa8d3dbbc27f504030f91d?operationName=StaysPdpReviewsQuery&locale=en&currency=USD&variables={"id":"${encodedId}","pdpReviewsRequest":{"fieldSelector":"for_p3_translation_only","forPreview":false,"limit":10,"offset":"0","showingTranslationButton":false,"first":10,"sortingPreference":"RATING_DESC"}}&extensions={"persistedQuery":{"version":1,"sha256Hash":"dec1c8061483e78373602047450322fd474e79ba9afa8d3dbbc27f504030f91d"}}`;
 }
 
-export function getAmenities(listingData: string, id: string) {
+export async function getAmenities(listingData: string, id: string) {
   const amenitiesStr = /"seeAllAmenitiesGroups":(.+?\}\]\}\])/.exec(
     listingData,
   )?.[1];
-  if (!amenitiesStr)
-    throw new Error(`Airbnb id ${id}: Failed to find amenities`);
+
+  if (!amenitiesStr) {
+    console.error(`Airbnb id ${id}: Failed to find amenities`);
+    await sendSlackMessage({
+      isProductionOnly: false,
+      channel: "tramona-bot",
+      text: [
+        `A host property is being created however the the amenities were not pulled in Airbnb Property ID:${id}, Listing Data :${listingData}`,
+        `<https://tramona.com/admin|Go to admin dashboard>`,
+      ].join("\n"),
+    });
+    return [""];
+  }
 
   const amenities = z
     .array(z.object({ amenities: z.array(z.object({ title: z.string() })) }))
@@ -131,7 +144,7 @@ export async function scrapeAirbnbListing(
   // )?.[1];
   // if (!amenitiesStr)
   //   throw new Error(`Airbnb id ${id}: Failed to find amenities`);
-  const amenities = getAmenities(listingData, id);
+  const amenities = await getAmenities(listingData, id);
 
   // const amenities = z
   //   .array(z.object({ amenities: z.array(z.object({ title: z.string() })) }))
