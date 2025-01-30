@@ -169,6 +169,7 @@ export default function HostPropertiesLayout() {
           properties={searchResults}
           onSelectedProperty={handleSelectedProperty}
           searched
+          currentHostTeamId={currentHostTeamId}
         />
       ) : (
         <Tabs className="mt-6" defaultValue="listed">
@@ -181,18 +182,21 @@ export default function HostPropertiesLayout() {
             <HostProperties
               properties={listedProperties ?? null}
               onSelectedProperty={handleSelectedProperty}
+              currentHostTeamId={currentHostTeamId}
             />
           </TabsContent>
           <TabsContent value="drafts">
             <HostProperties
               properties={draftedProperties ?? null}
               onSelectedProperty={handleSelectedProperty}
+              currentHostTeamId={currentHostTeamId}
             />
           </TabsContent>
           <TabsContent value="archived">
             <HostProperties
               properties={archivedProperties ?? null}
               onSelectedProperty={handleSelectedProperty}
+              currentHostTeamId={currentHostTeamId}
             />
           </TabsContent>
         </Tabs>

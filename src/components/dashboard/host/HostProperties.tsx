@@ -14,6 +14,8 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { type Property } from "@/server/db/schema/tables/properties";
+import supabase from "@/utils/supabase-client";
+import { REALTIME_SUBSCRIBE_STATES } from "@supabase/supabase-js";
 import { FenceIcon } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/router";
@@ -21,11 +23,13 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 export default function HostProperties({
   properties,
+  currentHostTeamId,
   searched = false,
   onSelectedProperty,
 }: {
   properties: Property[] | null;
   searched?: boolean;
+  currentHostTeamId: number | undefined | null;
   onSelectedProperty: (property: Property) => void;
 }) {
   const router = useRouter();
@@ -136,9 +140,46 @@ export default function HostProperties({
     return renderPaginationItems();
   }, [renderPaginationItems]);
 
+  // < -------------- LOGIC FOR SYNCING HOSPITABLE Properties loading state -------->
+  const [showIsSyncingState, setShowIsSyncingState] = useState(false);
+
+  useEffect(() => {
+    const subscription = supabase
+      .channel("properties-insert")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "properties" },
+        (payload) => {
+          console.log(payload);
+          console.log(
+            "New property added within a minute for the current team:",
+            payload.new.host_team_id,
+          );
+          if (payload.new.host_team_id === currentHostTeamId) {
+            console.log(typeof payload.new.host_team_id);
+            console.log("it matches");
+            console.log(payload.new.created_at);
+            setShowIsSyncingState(true);
+          }
+        },
+      )
+      .subscribe((status) => {
+        console.log(status);
+        if (status === REALTIME_SUBSCRIBE_STATES.SUBSCRIBED) {
+          console.log("Listening for new properties...");
+        } else {
+          setShowIsSyncingState(false);
+        }
+      });
+
+    return () => {
+      void subscription.unsubscribe();
+    };
+  }, [currentHostTeamId]);
+
   return (
     <div>
-      <div className="mx-auto my-4 max-w-8xl space-y-4">
+      <div className="mx-auto my-4 w-full max-w-8xl space-y-4">
         {paginatedProperties ? (
           paginatedProperties.length > 0 ? (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
@@ -166,6 +207,12 @@ export default function HostProperties({
           )
         ) : (
           <Spinner />
+        )}
+        {/* Loading state for properties being loaded in from hospitable */}
+        {showIsSyncingState && (
+          <div className="mx-auto w-full text-center text-gray-600">
+            Syncing properties from Airbnb ...{" "}
+          </div>
         )}
         {totalPages > 1 && (
           <Pagination>
