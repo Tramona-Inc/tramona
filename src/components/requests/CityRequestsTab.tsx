@@ -43,7 +43,7 @@ export default function ActiveRequestsTab() {
             "You don't have any active requests. Requests that you submit will show up here."
           }
           redirectTitle={"Request Deal"}
-          href={"/"}
+          href={"/?tab=name-price"}
         >
           <RequestEmptySvg />
         </EmptyStateValue>

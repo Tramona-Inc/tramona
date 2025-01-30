@@ -18,7 +18,6 @@ import {
 import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 import useSetInitialHostTeamId from "@/components/_common/CustomHooks/useSetInitialHostTeamId";
 import { useIsLg } from "@/utils/utils";
-import Link from "next/link";
 
 const alerts = [
   {
@@ -125,8 +124,8 @@ export default function HostRequestsLayout({
       let newPathname = "/host/requests";
 
       if (tab === "city") {
-        if (separatedData?.normal[0]) {
-          newPathname = `/host/requests/${separatedData.normal[0].city}?option=normal`;
+        if (separatedData?.normal[0] && isLg) {
+          newPathname = `/host/requests/${separatedData.normal[0].city}`;
         }
       } else {
         newPathname = `/host/requests/requests-to-book`;
@@ -134,7 +133,7 @@ export default function HostRequestsLayout({
 
       void router.push(newPathname, undefined, { shallow: true });
     },
-    [activeTab, router, separatedData],
+    [activeTab, router, separatedData, isLg],
   );
 
   const handleOptionChange = useCallback(
@@ -228,9 +227,17 @@ export default function HostRequestsLayout({
         <div className="flex-1 bg-[#fafafa] lg:block">
           <div className="lg:mb-30 my-6 mb-24 px-4 lg:mt-8">
             <div className="my-6 lg:hidden">
-              <Link href="/host/requests">
+              <Button
+                onClick={() =>
+                  activeTab === "property-bids"
+                    ? void router.back()
+                    : void router.push("/host/requests")
+                }
+                size="icon"
+                variant="ghost"
+              >
                 <ChevronLeft />
-              </Link>
+              </Button>
             </div>
             <div className="mx-auto max-w-5xl">
               {activeTab === "city" && (

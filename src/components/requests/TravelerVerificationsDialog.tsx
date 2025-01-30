@@ -6,6 +6,7 @@ import UserAvatar from "../_common/UserAvatar";
 import { BadgeCheck, BadgeX } from "lucide-react";
 import { HostDashboardRequestToBook } from "@/components/dashboard/host/requests/requests-to-book/HostRequestToBookCard";
 import { PastOfferRequestDetails } from "../dashboard/host/requests/city/PastOfferCard";
+import { capitalizeFirstLetter } from "@/utils/utils";
 
 export function TravelerVerificationsDialog({
   request,
@@ -42,7 +43,7 @@ export function TravelerVerificationsDialog({
     <>
       <Dialog>
         <DialogTrigger>
-          <p>{request.traveler.firstName}</p>
+          <p>{capitalizeFirstLetter(request.traveler.firstName)}</p>
         </DialogTrigger>
         <DialogContent>
           <div className="flex items-center gap-4">
@@ -52,7 +53,9 @@ export function TravelerVerificationsDialog({
               image={request.traveler.image}
             />
             <div className="flex-col">
-              <p className="text-lg font-bold">{request.traveler.firstName}</p>
+              <p className="text-lg font-bold">
+                {capitalizeFirstLetter(request.traveler.firstName)}
+              </p>
               <p className="text-muted-foreground">
                 Located in {request.traveler.location}
               </p>
