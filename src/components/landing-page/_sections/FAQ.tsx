@@ -20,7 +20,7 @@ const FAQ = () => {
     {
       question: "What happens if I don't like the price?",
       answer:
-        "If you dont like the prices, submit another offer! We dont need your credit card until you purchase your trip so there is no harm in sending a request.",
+        "If you dont like the prices, submit another offer (Hosts can reject or propose a counter offer)! We dont need your credit card until you purchase your trip so there is no harm in sending a request.",
     },
     {
       question: "When do I have to put my credit card in?",

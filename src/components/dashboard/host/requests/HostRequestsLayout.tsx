@@ -1,11 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useEffect, useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { useRouter } from "next/router";
 import SidebarCity from "./sidebars/SideBarCity";
 import SidebarRequestToBook from "./sidebars/SideBarRequestToBook";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertTriangleIcon } from "lucide-react";
+import { AlertTriangleIcon, ChevronLeft } from "lucide-react";
 import { api } from "@/utils/api";
 import {
   separateByPriceAndAgeRestriction,
@@ -17,6 +17,8 @@ import {
 } from "@/server/server-utils";
 import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 import useSetInitialHostTeamId from "@/components/_common/CustomHooks/useSetInitialHostTeamId";
+import { useIsLg } from "@/utils/utils";
+import React from "react";
 
 const alerts = [
   {
@@ -40,34 +42,27 @@ const alerts = [
 type TabType = "city" | "property-bids";
 type SelectedOptionType = "normal" | "outsidePriceRestriction" | "sent";
 
-type RouterQuery = Record<string, string> & {
-  tabs?: TabType;
-  city?: string;
-  propertyId?: string;
-  offers?: string;
-  priceRestriction?: string;
-};
-
-export default function HostRequestsLayout({
+const HostRequestsLayout = React.memo(function HostRequestsLayout({
+  isIndex,
   children,
-}: React.PropsWithChildren) {
+}: {
+  isIndex: boolean;
+  children: React.ReactNode;
+}) {
   useSetInitialHostTeamId();
   const { currentHostTeamId } = useHostTeamStore();
   const router = useRouter();
-  const query = router.query as RouterQuery;
-  const [activeTab, setActiveTab] = useState<TabType>("city");
-  const option = query.option as SelectedOptionType;
-  const [selectedOption, setSelectedOption] = useState<SelectedOptionType>(
-    option || "normal",
-  );
+  const isLg = useIsLg();
+  const showSidebar = isLg || isIndex;
+  const showChildren = isLg || !isIndex;
 
-  const [separatedData, setSeparatedData] = useState<SeparatedData | null>(
-    null,
+  const [activeTab, setActiveTab] = useState<TabType>(
+    router.asPath.includes("requests-to-book") ? "property-bids" : "city",
   );
-  const [offerData, setOfferData] = useState<RequestsPageOfferData | null>(
-    null,
-  );
+  const [selectedOption, setSelectedOption] =
+    useState<SelectedOptionType>("normal");
 
+  // <--------------------Data fetching logic ---------------->
   const { data: properties, isLoading: isLoadingProperties } =
     api.properties.getHostPropertiesWithRequests.useQuery(
       { currentHostTeamId: currentHostTeamId! },
@@ -96,73 +91,88 @@ export default function HostRequestsLayout({
       },
     );
 
-  const { data: requestToBookProperties, isLoading: isLoadingRequestToBook } =
+  const { data: requestToBookData, isLoading: isLoadingRequestToBook } =
     api.requestsToBook.getAllRequestToBookProperties.useQuery(
       { currentHostTeamId: currentHostTeamId! },
       {
         enabled: !!currentHostTeamId,
-        // refetchOnWindowFocus: false,
-        // refetchOnMount: false,
-        // refetchOnReconnect: false,
-        // staleTime: Infinity,
-        // cacheTime: Infinity,
-        // retry: false,
       },
     );
 
-  useEffect(() => {
+  const separatedData = useMemo(() => {
     if (properties) {
-      const separated = separateByPriceAndAgeRestriction(properties);
-      setSeparatedData(separated);
+      return separateByPriceAndAgeRestriction(properties);
     }
+    return null;
   }, [properties]);
-
-  useEffect(() => {
+  const offerData = useMemo(() => {
     if (offers) {
-      const formatted = formatOfferData(offers);
-      setOfferData(formatted);
+      return formatOfferData(offers);
     }
+    return null;
   }, [offers]);
-
-  useEffect(() => {
-    if (query.tabs) {
-      setActiveTab(query.tabs);
-    }
-  }, [query.tabs]);
 
   const handleTabChange = useCallback(
     (tab: TabType) => {
-      const newQuery: RouterQuery = { ...query, tabs: tab };
-
-      if (
-        tab === "property-bids" &&
-        !newQuery.propertyId &&
-        requestToBookProperties?.[0]
-      ) {
-        newQuery.propertyId = requestToBookProperties[0].id.toString();
-      }
-
-      if (tab === "city" && !newQuery.city && separatedData?.normal[0]) {
-        newQuery.city = separatedData.normal[0].city;
-      }
-
+      if (tab === activeTab) return;
       setActiveTab(tab);
+      let newPathname = "/host/requests";
+
+      if (tab === "city") {
+        if (separatedData?.normal[0] && isLg) {
+          newPathname = `/host/requests/${separatedData.normal[0].city}?option=normal`;
+        } else {
+          newPathname = `/host/requests`;
+        }
+      } else {
+        newPathname = `/host/requests/requests-to-book`;
+      }
+
+      void router.push(newPathname, undefined, { shallow: true });
+    },
+    [activeTab, router, separatedData, isLg],
+  );
+
+  const handleOptionChange = useCallback(
+    (option: SelectedOptionType) => {
+      if (option === selectedOption) return;
+      setSelectedOption(option);
+
+      let newPathname = "/host/requests";
+      if (separatedData?.normal[0]) {
+        newPathname = `/host/requests/${separatedData.normal[0].city}`;
+      }
       void router.push(
         {
-          pathname: "/host/requests",
-          query: newQuery as Record<string, string>,
+          pathname: newPathname,
+          query: { option: option },
         },
         undefined,
         { shallow: true },
       );
     },
-    [query, requestToBookProperties, separatedData, router],
+    [selectedOption, router, separatedData],
   );
 
+  const initialSelectedCity = useMemo(() => {
+    return separatedData?.normal[0]?.city
+      ? separatedData.normal[0].city
+      : undefined;
+  }, [separatedData]);
+
+  const initialSelectedPropertyId = useMemo(() => {
+    return requestToBookData &&
+      requestToBookData.length > 0 &&
+      (!isIndex || isLg)
+      ? requestToBookData[0]!.id
+      : undefined;
+  }, [requestToBookData, isIndex, isLg]);
+
+  // <--------------------------------Render------------------>
   return (
     <div className="flex bg-white">
-      <div className="sticky top-20 h-screen-minus-header-n-footer w-full overflow-auto border-r px-4 py-8 xl:w-96">
-        <ScrollArea className="h-1/2">
+      {showSidebar && (
+        <ScrollArea className="sticky top-20 h-screen-minus-header-n-footer w-screen overflow-auto border-r px-4 py-8 lg:w-96">
           <div className="pb-4">
             <h1 className="ml-3 text-3xl font-semibold">Requests</h1>
 
@@ -203,24 +213,35 @@ export default function HostRequestsLayout({
               selectedOption={selectedOption}
               separatedData={separatedData}
               offerData={offerData}
-              isLoading={isLoadingProperties || isLoadingOffers}
-              initialSelectedCity={query.city}
+              isLoading={isLoadingProperties}
+              initialSelectedCity={initialSelectedCity}
             />
           ) : (
             <SidebarRequestToBook
-              properties={requestToBookProperties}
+              properties={requestToBookData}
               isLoading={isLoadingRequestToBook}
-              initialSelectedPropertyId={
-                query.propertyId ? Number(query.propertyId) : undefined
-              }
+              initialSelectedPropertyId={initialSelectedPropertyId}
             />
           )}
         </ScrollArea>
-      </div>
+      )}
 
-      <div className="hidden flex-1 bg-[#fafafa] xl:block">
-        {children ? (
-          <div className="pb-30 px-4 pt-8">
+      {showChildren && (
+        <div className="flex-1 bg-[#fafafa] lg:block">
+          <div className="lg:mb-30 my-6 mb-24 px-4 lg:mt-8">
+            <div className="my-6 lg:hidden">
+              <Button
+                onClick={() =>
+                  activeTab === "property-bids"
+                    ? void router.push("/host/requests/requests-to-book")
+                    : void router.push("/host/requests")
+                }
+                size="icon"
+                variant="ghost"
+              >
+                <ChevronLeft />
+              </Button>
+            </div>
             <div className="mx-auto max-w-5xl">
               {activeTab === "city" && (
                 <div className="mb-4 flex flex-row justify-between">
@@ -230,34 +251,14 @@ export default function HostRequestsLayout({
                         selectedOption === "normal" ? "primary" : "white"
                       }
                       className="rounded-full shadow-md"
-                      onClick={() => {
-                        setSelectedOption("normal");
-                        void router.push(
-                          {
-                            pathname: "/host/requests",
-                            query: { tabs: "city", option: "normal" },
-                          },
-                          undefined,
-                          { shallow: true },
-                        );
-                      }}
+                      onClick={() => handleOptionChange("normal")}
                     >
                       Primary
                     </Button>
                     <Button
                       variant={selectedOption === "sent" ? "primary" : "white"}
                       className="rounded-full shadow-md"
-                      onClick={() => {
-                        setSelectedOption("sent");
-                        void router.push(
-                          {
-                            pathname: "/host/requests",
-                            query: { tabs: "city", option: "sent" },
-                          },
-                          undefined,
-                          { shallow: true },
-                        );
-                      }}
+                      onClick={() => handleOptionChange("sent")}
                     >
                       Sent
                     </Button>
@@ -269,25 +270,15 @@ export default function HostRequestsLayout({
                         : "white"
                     }
                     className="rounded-full shadow-md"
-                    onClick={() => {
-                      setSelectedOption("outsidePriceRestriction");
-                      void router.push(
-                        {
-                          pathname: "/host/requests",
-                          query: {
-                            tabs: "city",
-                            option: "outsidePriceRestriction",
-                          },
-                        },
-                        undefined,
-                        { shallow: true },
-                      );
-                    }}
+                    onClick={() =>
+                      handleOptionChange("outsidePriceRestriction")
+                    }
                   >
                     Other
                   </Button>
                 </div>
               )}
+
               <Alert className="mb-2">
                 <AlertTriangleIcon />
                 <AlertTitle>Tip</AlertTitle>
@@ -306,19 +297,10 @@ export default function HostRequestsLayout({
               {children}
             </div>
           </div>
-        ) : (
-          <div className="flex h-[calc(100vh-280px)] flex-col items-center justify-center gap-2">
-            <h2 className="text-xl font-semibold">No requests found</h2>
-            <p className="text-center text-muted-foreground">
-              Consider loosen requirements or allow for more ways to book to see
-              more requests.
-            </p>
-            <Button variant="secondary" className="mt-4">
-              Change requirements
-            </Button>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
-}
+});
+
+export default HostRequestsLayout;

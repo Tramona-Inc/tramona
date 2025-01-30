@@ -1,5 +1,5 @@
 // SearchFormBar.tsx
-import React, { useEffect } from "react";
+import React from "react";
 import {
   Form,
   FormControl,
@@ -208,7 +208,7 @@ export function SearchFormBar({
                   control={form.control}
                   name="location"
                   render={({ field }) => (
-                    <FormItem className="w-full">
+                    <FormItem className="w-fulll">
                       <Select
                         onValueChange={(value) => {
                           field.onChange(value);
@@ -247,7 +247,7 @@ export function SearchFormBar({
                           ))}
                         </SelectContent>
                       </Select>
-                      <FormMessage />
+                      <FormMessage className="-mt-1" />
                     </FormItem>
                   )}
                 />

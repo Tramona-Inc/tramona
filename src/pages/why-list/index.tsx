@@ -221,9 +221,10 @@ const SignUpNow = ({ requestFeed }: { requestFeed: FeedRequestItem[] }) => {
     <section className="flex justify-center">
       <div className="mx-12 flex flex-col justify-center gap-8 md:mx-36 lg:mx-24 lg:max-w-[70vw] lg:flex-row">
         <div className="flex-1">
-          <h1 className="mb-10 mt-10 text-center text-2xl font-semibold">
-            Tramona was built for hosts to fill empty nights and take home more
-            of their earnings.
+          <h1 className="mb-20 mt-10 text-center text-2xl font-medium">
+            Tramona charges 5-10% less in fees than other platforms, while
+            offering $50,000 in protection per booking. Allowing hosts and
+            travelers to earn more on the same booking elsewhere.
           </h1>
           <div className="h-[450px] rounded-lg border px-2 py-2 shadow-xl">
             <RequestFeed requestFeed={requestFeed} />
@@ -234,7 +235,7 @@ const SignUpNow = ({ requestFeed }: { requestFeed: FeedRequestItem[] }) => {
           <div className="mb-2 flex justify-center">
             <Link href="/host-onboarding">
               <Button size="lg" className="bg-primaryGreen text-white">
-                Sign up and start getting booking requests
+                Sign up and start earning more
               </Button>
             </Link>
           </div>
@@ -257,9 +258,8 @@ const HowItWorks = () => {
         <p className="mb-4 text-center font-medium md:text-left">
           {" "}
           {/* Added mb-4 for consistent spacing */}
-          Classic book it now. Your property is showcased just like it is on
-          Airbnb or Vrbo. Travelers can instantly book with or without waiting
-          for approval.
+          Just like on Airbnb or Vrbo, your property is showcased beautifully.
+          Travelers can instantly book their stay.
         </p>
         <div className="mt-6 flex items-center">
           {" "}
@@ -271,9 +271,8 @@ const HowItWorks = () => {
         <p className="mt-2 text-gray-500">
           {" "}
           {/* Added mt-2 for spacing from h4 */}
-          When you sign up as a host, your account is instantly synced with
-          Airbb. Whenever you change your aavailability, price, or anything else
-          on Airbnb. It is instantly reflected on Tramona.
+          When you sign up as a host, your Tramona account instantly syncs with
+          Airbnb. Getting your availability, pricing, and other booking details.
         </p>
         <hr className="my-4 border-t border-gray-300" />
         <div className="mt-4 flex items-center">
@@ -289,12 +288,12 @@ const HowItWorks = () => {
           <li className="mb-1 flex items-center text-gray-500">
             {" "}
             {/* Added mb-1 for spacing between list items */}
-            <FaCheck className="mr-2" size={12} /> Enable Book it Now for
-            instant bookings
+            <FaCheck className="mr-2" size={12} /> Choose between book it now or
+            request to book.
           </li>
           <li className="flex items-center text-gray-500">
-            <FaCheck className="mr-2" size={18} /> Turn off Book it Now and only
-            allow travelers to make bids
+            <FaCheck className="mr-2" size={18} /> Your property starts on
+            request to book.
           </li>
         </ul>
       </li>
@@ -309,7 +308,7 @@ const HowItWorks = () => {
         <p className="mb-4 text-center font-medium md:text-left">
           {" "}
           {/* Added mb-4 for consistent spacing */}
-          Travelers can send offers for your available nights.
+          Travelers can send offers for your vacant nights.
         </p>
 
         <div className="mt-6 flex items-center">
@@ -344,13 +343,13 @@ const HowItWorks = () => {
             {" "}
             {/* Added mb-1 for spacing between list items */}
             <FaCheck className="mr-2" size={12} /> Choose to automatically
-            accept bids that meet your hidden price
+            accept bids that meet your hidden price preferences
           </li>
           <li className="mb-1 flex items-center text-gray-500">
             {" "}
             {/* Added mb-1 for spacing between list items */}
-            <FaCheck className="mr-2" size={12} /> Set rules for the offers
-            you&apos;ll allow, ignore the rest
+            <FaCheck className="mr-2" size={12} /> Set preferences for offers
+            you would consider, ignore the rest
           </li>
           <li className="flex items-center text-gray-500">
             <FaCheck className="mr-2" size={12} /> If Book It Now is off,
@@ -369,7 +368,7 @@ const HowItWorks = () => {
         <p className="mb-4 text-center font-semibold md:text-left">
           {" "}
           {/* Added mb-4 for consistent spacing */}
-          Never let a night sit empty.
+          Never let a night sit empty, always have options.
         </p>
         <div className="mt-6 flex items-center">
           {" "}
@@ -382,8 +381,9 @@ const HowItWorks = () => {
           {" "}
           {/* Added mt-2 for spacing from h4 */}
           Travelers specify their budget, dates, and preferences, and send a
-          request to every host on Tramona. Hosts have the option to accept,
-          deny, or counteroffer all requests.
+          request. That request is sent to all hosts on Tramona with an empty
+          night. Hosts have the option to accept, deny, or counteroffer all
+          requests.
         </p>
         <hr className="my-4 border-t border-gray-300" />
         <div className="mt-4 flex items-center">
@@ -403,8 +403,8 @@ const HowItWorks = () => {
             automatically respond to each match.
           </li>
           <li className="flex items-center text-gray-500">
-            <FaCheck className="mr-2" size={18} /> Set hidden rules to make
-            auto-matches on certain requests
+            <FaCheck className="mr-2" size={18} /> Flexibility to accept,
+            decline or counteroffer all requests.
           </li>
         </ul>
       </li>
@@ -643,11 +643,10 @@ const Features = () => {
         ))}
       </ul>
 
-      <div className="mt-12 text-center text-lg font-bold">Plus many more</div>
       <div className="mt-6 text-center text-lg font-bold">
         <Link href="">
           <Button size="lg" className="bg-primaryGreen text-white">
-            demo
+            Demo
           </Button>
         </Link>
       </div>
@@ -660,47 +659,53 @@ const Features2 = () => {
     <section className="mb-12 mt-12 py-12">
       <div className="flex flex-col items-center space-y-12">
         {/* First Row: Image on left, text on right */}
-        <div className="mx-auto flex w-full max-w-4xl flex-col items-center gap-12 px-6 text-center sm:flex-row sm:text-left">
-          <div className="relative h-64 w-64 flex-shrink-0 overflow-hidden rounded-lg bg-gray-200 shadow-md">
+        <div className="mx-auto flex w-full max-w-4xl flex-col items-center gap-x-16 px-6 text-center sm:flex-row sm:text-left">
+          <div className="relative h-40 w-72 flex-shrink-0 overflow-hidden rounded-lg bg-gray-200 shadow-md">
             <Image
-              src="/path/to/image-requests.jpg"
-              objectFit="cover"
+              src="/assets/images/why-list/Why-list-request.png"
+              objectFit="contain"
               layout="fill"
               alt="Requests"
             />
           </div>
-          <h2 className="text-xl font-semibold text-[#333] sm:text-2xl">
-            Full flexibility on all bookings.
+          <h2 className="text-xl font-medium text-[#333] sm:text-2xl">
+            See all incoming requests for your empty nights, accept deny or
+            reject them. Hosts can also set preferences so they only see
+            requests that match their criteria.
           </h2>
         </div>
 
         {/* Second Row: Text on left, image on right */}
-        <div className="mx-auto flex w-full max-w-4xl flex-col items-center gap-12 px-6 text-center sm:flex-row-reverse sm:text-left">
-          <div className="relative h-64 w-64 flex-shrink-0 overflow-hidden rounded-lg bg-gray-200 shadow-md">
+        <div className="mx-auto flex w-full max-w-4xl flex-col items-center gap-x-16 px-6 text-center sm:flex-row-reverse sm:text-left">
+          <div className="relative h-40 w-72 flex-shrink-0 overflow-hidden rounded-lg bg-gray-200 shadow-md">
             <Image
-              src="/path/to/image-cal.jpg"
-              objectFit="cover"
+              src="/assets/images/why-list/Why-list-cohost.png"
+              objectFit="contain"
               layout="fill"
               alt="Cal"
             />
           </div>
-          <h2 className="text-xl font-semibold text-[#333] sm:text-2xl">
-            Automatically synced calandar and pricing with Airbnb
+          <h2 className="text-xl font-medium text-[#333] sm:text-2xl">
+            Easily invite a co-host to help manage your listing. We have
+            multiple permissions to choose from. From full access to only being
+            able to preform certain actions.
           </h2>
         </div>
 
         {/* Third Row: Image on left, text on right */}
-        <div className="mx-auto flex w-full max-w-4xl flex-col items-center gap-12 px-6 text-center sm:flex-row sm:text-left">
-          <div className="relative h-64 w-64 flex-shrink-0 overflow-hidden rounded-lg bg-gray-200 shadow-md">
+        <div className="mx-auto flex w-full max-w-4xl flex-col items-center gap-x-16 px-6 text-center sm:flex-row sm:text-left">
+          <div className="relative h-40 w-[280px] flex-shrink-0 overflow-hidden rounded-lg bg-gray-200 shadow-md">
             <Image
-              src="/path/to/image-customized-pricing.jpg"
-              objectFit="cover"
+              src="/assets/images/why-list/Why-list-Cal.png"
+              objectFit="contain"
               layout="fill"
               alt="Customized Pricing"
             />
           </div>
-          <h2 className="text-xl font-semibold text-[#333] sm:text-2xl">
-            Choose when to give discounts, and when to keep your price regular.
+          <h2 className="text-xl font-medium text-[#333] sm:text-2xl">
+            Customize Tramona how you like. Put the prices you would consider,
+            turn on or off instant booking, and sync your calendar directlly
+            with Airbnb to eliminate double bookings.
           </h2>
         </div>
       </div>

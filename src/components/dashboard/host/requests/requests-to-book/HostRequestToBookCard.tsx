@@ -6,6 +6,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { type RouterOutputs } from "@/utils/api";
 import {
+  capitalizeFirstLetter,
   formatCurrency,
   formatDateRange,
   getNumNights,
@@ -74,7 +75,7 @@ export default function HostRequestToBookCard({
                 image={requestToBook.madeByGroup.owner.image}
               />
               <TravelerVerificationsDialog request={requestToBook} />
-              <p>&middot;</p>
+
               <p>
                 {formatDistanceToNowStrict(requestToBook.createdAt, {
                   addSuffix: true,

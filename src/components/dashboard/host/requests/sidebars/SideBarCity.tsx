@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { plural } from "@/utils/utils";
 import { separateByPriceAndAgeRestriction } from "@/utils/utils";
 import EmptyRequestState from "./EmptyRequestState";
@@ -10,6 +10,7 @@ import {
   type RequestsPageOfferData,
 } from "@/server/server-utils";
 import { useRouter } from "next/router";
+import React from "react";
 
 interface SidebarCityProps {
   selectedOption: "normal" | "outsidePriceRestriction" | "sent";
@@ -19,7 +20,7 @@ interface SidebarCityProps {
   initialSelectedCity?: string;
 }
 
-export default function SidebarCity({
+const SidebarCity = React.memo(function SidebarCity({
   selectedOption,
   separatedData,
   offerData,
@@ -34,40 +35,41 @@ export default function SidebarCity({
   );
   const router = useRouter();
   const { query } = router;
-  const { tabs, offers, city } = query;
+  const { offers, city } = query;
 
   useEffect(() => {
     setSelectedCity(initialSelectedCity ?? null);
   }, [initialSelectedCity]);
 
-  const displayedData =
-    separatedData && selectedOption !== "sent"
+  const displayedData = useMemo(() => {
+    return separatedData && selectedOption !== "sent"
       ? separatedData[selectedOption]
       : offerData && selectedOption === "sent"
-        ? Object.values(offerData[selectedOption] || {})
-        : [];
+        ? Object.values(offerData[selectedOption])
+        : undefined;
+  }, [separatedData, offerData, selectedOption]);
 
-  const handleCityOffersClick = (city: string) => {
+  const handleCityOffersClick = useCallback((city: string) => {
     setSelectedCityOffers(city);
     setSelectedCity(null);
-  };
+  }, []);
 
-  const handleCityClick = (city: string) => {
+  const handleCityClick = useCallback((city: string) => {
     setSelectedCityOffers(null);
     setSelectedCity(city);
-  };
+  }, []);
 
-  if (isLoading) {
+  if (!displayedData) {
     return (
       <div className="pt-4">
-        {range(7).map((i) => (
+        {range(3).map((i) => (
           <SidebarPropertySkeleton key={i} />
         ))}
       </div>
     );
   }
 
-  if (displayedData.length === 0) {
+  if (displayedData.length < 1 && !isLoading) {
     return <EmptyRequestState />;
   }
 
@@ -80,7 +82,7 @@ export default function SidebarCity({
             <Link
               href={{
                 pathname: `/host/requests/${cityData.city}`,
-                query: { tabs: "city", option: "sent" },
+                query: { option: "sent" },
               }}
               className="block"
               key={index}
@@ -118,8 +120,8 @@ export default function SidebarCity({
               pathname: `/host/requests/${cityData.city}`,
               query:
                 selectedOption === "normal"
-                  ? { tabs: "city", option: "normal" }
-                  : { tabs: "city", option: "outsidePriceRestriction" },
+                  ? { option: "normal" }
+                  : { option: "outsidePriceRestriction" },
             }}
             className="block"
             key={index}
@@ -145,4 +147,5 @@ export default function SidebarCity({
       })}
     </div>
   );
-}
+});
+export default SidebarCity;

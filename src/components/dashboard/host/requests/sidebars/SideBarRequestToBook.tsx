@@ -31,29 +31,33 @@ function SidebarRequestToBook({
 
   useEffect(() => {
     setSelectedPropertyId(initialSelectedPropertyId ?? null);
+    if (initialSelectedPropertyId) {
+      void router.push(
+        {
+          pathname: `/host/requests/requests-to-book/${initialSelectedPropertyId}`,
+        },
+        undefined,
+        { shallow: true },
+      );
+    }
   }, [initialSelectedPropertyId]);
 
   const handlePropertyClick = (propertyId: number) => {
     setSelectedPropertyId(propertyId);
     void router.push(
       {
-        pathname: "/host/requests",
-        query: {
-          ...router.query,
-          tabs: "property-bids",
-          propertyId: propertyId.toString(),
-        } as Record<string, string>,
+        pathname: `/host/requests/requests-to-book/${propertyId}`,
       },
       undefined,
       { shallow: true },
     );
   };
 
-  if (isLoading) {
+  if (!properties) {
     return <SidebarPropertySkeleton />;
   }
 
-  if (!properties || properties.length === 0) {
+  if (properties.length === 0) {
     return <EmptyRequestState />;
   }
 

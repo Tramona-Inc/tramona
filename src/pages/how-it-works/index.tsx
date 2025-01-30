@@ -47,8 +47,9 @@ export default function Page() {
                   HOW IT WORKS
                 </h2>
                 <h3 className="mt-2 text-xl font-bold leading-snug md:text-3xl lg:text-4xl">
-                  Tramona connects travelers with unbeatable deals and hosts
-                  with more bookings
+                  When nights go empty, no one wins. Tramona was built to reduce
+                  empty nights, let travelers travel more, and help hosts earn
+                  more.
                 </h3>
                 <p className="mt-4 text-sm md:text-base lg:text-lg">
                   See what hosts will offer you
@@ -57,7 +58,8 @@ export default function Page() {
             </div>
           </section>
           <h1 className="mb-12 mt-12 text-center text-2xl font-semibold">
-            Sign up now to start booking your empty nights
+            Tramona charges 5-10% less in fees than other platforms, giving
+            travelers and hosts better deals.
           </h1>
           <div className="w-full bg-[#FAF9F6] py-8">
             <div className="mx-auto max-w-screen-xl space-y-6">
@@ -113,25 +115,25 @@ export default function Page() {
                     All local hosts can make offers, expanding your options.
                   </p>
                 </div>
-                <div className="flex flex-col items-center text-center">
-                  <button
-                    onClick={() => {
-                      window.location.href = "/why-list";
-                    }}
-                    className="rounded-lg bg-[#004236] px-6 py-3 text-lg font-bold text-white transition-colors hover:bg-[#003228]"
-                  >
-                    Host? Learn how hosting works
-                  </button>
-                  <p className="max-w-lg text-sm text-muted-foreground"></p>
-                </div>
+              </div>
+              <div className="flex flex-col items-center text-center">
+                <button
+                  onClick={() => {
+                    window.location.href = "/why-list";
+                  }}
+                  className="rounded-lg bg-[#004236] px-6 py-3 text-lg font-bold text-white transition-colors hover:bg-[#003228]"
+                >
+                  Host? Learn how hosting works
+                </button>
+                <p className="max-w-lg text-sm text-muted-foreground"></p>
               </div>
             </div>
           </div>
 
           <div className="flex flex-col items-center justify-center px-12 py-6">
             <p className="text-center text-2xl font-semibold lg:text-3xl">
-              When nights are empty, no one wins. Tramona makes the rental
-              market more efficient.
+              Thinking of traveling? When you book on Tramona, you save.
+              Hosting? Keep more of what you earn.
             </p>
             <p className="mt-4 text-center text-base">
               <span className="font-normal">
@@ -188,9 +190,12 @@ export default function Page() {
                     Get bookings
                   </h3>
                   <p className="text-sm text-gray-600">
-                    Tramona was built to increase your bookings. Accept, deny or
-                    counter requests, and choose to accept or deny bids. Hosts
-                    always have full control.{" "}
+                    Tramona was built to increase your bookings.{" "}
+                    <b>
+                      Accept, deny or counter requests, and choose to accept or
+                      deny bids.
+                    </b>{" "}
+                    Hosts always have full control.{" "}
                   </p>
                 </div>
               </div>
@@ -201,13 +206,14 @@ export default function Page() {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-[#004236]">
-                    Enjoy the benefits
+                    Peace of mind
                   </h3>
                   <p className="text-sm text-gray-600">
-                    Enjoy and utilize all the benefits of hosting on Tramona. We
-                    take care of taxes the same way Airbnb does, you can add a
-                    co host, give exclusive disconts while keeping your property
-                    full price else where, etc.
+                    Feel confident when signing up.{" "}
+                    <b>We offer $50,000 in protection per booking</b>, allow you
+                    to message guests before booking, and allow you to accept,
+                    counter offer or accept all booking requests. Tramona was
+                    built to make hosting easier.
                   </p>
                 </div>
               </div>
@@ -497,7 +503,7 @@ const whyListAccordionItems = [
   {
     question: "What happens if I don't like the price?",
     answer:
-      "If you dont like the prices, submit another offer! We dont need your credit card until you purchase your trip so there is no harm in sending a request.",
+      "If you dont like the prices, submit another offer (Hosts can reject or propose a counter offer)! We dont need your credit card until you purchase your trip so there is no harm in sending a request.",
   },
   {
     question: "When do I have to put my credit card in?",

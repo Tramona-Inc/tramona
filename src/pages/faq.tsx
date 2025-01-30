@@ -239,21 +239,6 @@ export default function FAQ() {
             </TabsList>
 
             <TabsContent value="travelers">
-              <div className="mb-12 grid grid-cols-3 gap-8">
-                {[
-                  "How it works (Travelers)",
-                  "How booking works",
-                  "Safety during traveler process",
-                ].map((title, index) => (
-                  <div key={index} className="flex flex-col items-center">
-                    <div className="mb-2 aspect-video w-full overflow-hidden rounded-lg bg-gray-200">
-                      <div className="animate-spin-slow h-full w-full bg-gradient-to-r from-gray-300 to-gray-100"></div>
-                    </div>
-                    <span className="text-center text-sm">{title}</span>
-                  </div>
-                ))}
-              </div>
-
               {travelersFaqData[0] && (
                 <>
                   <div className="mb-8 flex items-center justify-between">
@@ -290,21 +275,6 @@ export default function FAQ() {
             </TabsContent>
 
             <TabsContent value="hosts">
-              <div className="mb-12 grid grid-cols-3 gap-8">
-                {[
-                  "How Tramona Works (Host)",
-                  "How to list",
-                  "How Tramona benefits you",
-                ].map((title, index) => (
-                  <div key={index} className="flex flex-col items-center">
-                    <div className="mb-2 aspect-video w-full overflow-hidden rounded-lg bg-gray-200">
-                      <div className="animate-spin-slow h-full w-full bg-gradient-to-r from-gray-300 to-gray-100"></div>
-                    </div>
-                    <span className="text-center text-sm">{title}</span>
-                  </div>
-                ))}
-              </div>
-
               <div className="mb-8 flex items-center justify-between">
                 <h2 className="text-xl font-semibold text-[#134E4A]">
                   How it works

@@ -134,9 +134,7 @@ export default function RequestToBookOrBookNowPriceCard({
 
   const [requestPercentage, setRequestPercentage] = useState(0);
   const [selectedPreset, setSelectedPreset] = useState<number | null>(
-    propertyPricingPerNightAfterTierDiscount
-      ? propertyPricingPerNightAfterTierDiscount
-      : null,
+    propertyPricingPerNightAfterTierDiscount ?? null,
   );
   const [requestToBook, setRequestToBook] =
     useState<RequestToBookDetails>(initialRequestToBook);
@@ -490,6 +488,7 @@ export default function RequestToBookOrBookNowPriceCard({
                         onChange={handleRequestChange}
                         onBlur={handleRequestBlur}
                         className="pl-7"
+                        disabled
                         onKeyDown={handleKeyDown}
                       />
                       <p className="text-xs italic leading-tight text-muted-foreground">
