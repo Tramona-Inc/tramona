@@ -45,7 +45,7 @@ export async function getAmenities(listingData: string, id: string) {
   )?.[1];
 
   if (!amenitiesStr) {
-    console.error(`Airbnb id ${id}: Failed to find amenities`);
+    console.error(`Airbnb id ${id}: Failed to find amenities`); /////// WE HAVE TO HANDLE THESE ERRORS
     await sendSlackMessage({
       isProductionOnly: false,
       channel: "tramona-bot",
