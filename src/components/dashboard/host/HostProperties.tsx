@@ -14,8 +14,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { type Property } from "@/server/db/schema/tables/properties";
-import supabase from "@/utils/supabase-client";
-import { REALTIME_SUBSCRIBE_STATES } from "@supabase/supabase-js";
+import { AnimatePresence, motion } from "framer-motion";
 import { FenceIcon } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/router";
@@ -23,13 +22,13 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 export default function HostProperties({
   properties,
-  currentHostTeamId,
+  showIsSyncingState,
   searched = false,
   onSelectedProperty,
 }: {
   properties: Property[] | null;
   searched?: boolean;
-  currentHostTeamId: number | undefined | null;
+  showIsSyncingState: boolean;
   onSelectedProperty: (property: Property) => void;
 }) {
   const router = useRouter();
@@ -140,42 +139,13 @@ export default function HostProperties({
     return renderPaginationItems();
   }, [renderPaginationItems]);
 
-  // < -------------- LOGIC FOR SYNCING HOSPITABLE Properties loading state -------->
-  const [showIsSyncingState, setShowIsSyncingState] = useState(false);
+  //animation
 
-  useEffect(() => {
-    const subscription = supabase
-      .channel("properties-insert")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "properties" },
-        (payload) => {
-          console.log(payload);
-          console.log(
-            "New property added within a minute for the current team:",
-            payload.new.host_team_id,
-          );
-          if (payload.new.host_team_id === currentHostTeamId) {
-            console.log(typeof payload.new.host_team_id);
-            console.log("it matches");
-            console.log(payload.new.created_at);
-            setShowIsSyncingState(true);
-          }
-        },
-      )
-      .subscribe((status) => {
-        console.log(status);
-        if (status === REALTIME_SUBSCRIBE_STATES.SUBSCRIBED) {
-          console.log("Listening for new properties...");
-        } else {
-          setShowIsSyncingState(false);
-        }
-      });
-
-    return () => {
-      void subscription.unsubscribe();
-    };
-  }, [currentHostTeamId]);
+  const ellipsisVariants = {
+    initial: { opacity: 0, x: -5 },
+    animate: { opacity: 1, x: 0, transition: { duration: 0.5 } },
+    exit: { opacity: 0, x: 5, transition: { duration: 0.8 } },
+  };
 
   return (
     <div>
@@ -192,28 +162,57 @@ export default function HostProperties({
               ))}
             </div>
           ) : (
-            <div className="pt-10">
-              <EmptyState icon={FenceIcon}>
-                <EmptyStateTitle>
-                  {searched ? "No properties found" : "No properties yet"}
-                </EmptyStateTitle>
-                <EmptyStateDescription>
-                  {searched
-                    ? "Try a different property name or location"
-                    : "Add a property to get started!"}
-                </EmptyStateDescription>
-              </EmptyState>
-            </div>
+            !showIsSyncingState && (
+              <div className="pt-10">
+                <EmptyState icon={FenceIcon}>
+                  <EmptyStateTitle>
+                    {searched ? "No properties found" : "No properties yet"}
+                  </EmptyStateTitle>
+                  <EmptyStateDescription>
+                    {searched
+                      ? "Try a different property name or location"
+                      : "Add a property to get started!"}
+                  </EmptyStateDescription>
+                </EmptyState>
+              </div>
+            )
           )
         ) : (
           <Spinner />
         )}
         {/* Loading state for properties being loaded in from hospitable */}
-        {showIsSyncingState && (
-          <div className="mx-auto w-full text-center text-gray-600">
-            Syncing properties from Airbnb ...{" "}
-          </div>
-        )}
+        <AnimatePresence>
+          {showIsSyncingState && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+              className="mx-auto my-5 flex w-full flex-col items-center justify-center gap-x-4 text-center text-2xl text-gray-700"
+            >
+              <div className="flex items-center gap-x-2">
+                <p> Syncing properties from Airbnb </p>
+              </div>
+
+              <div className="flex items-center gap-x-4">
+                <p className="text-base"> This may take a moment </p>
+                <motion.span
+                  variants={ellipsisVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  className="text-sm"
+                >
+                  <div className="mt-1 flex flex-row gap-x-1">
+                    <div className="h-1 w-1 animate-bounce rounded-full bg-gray-500 [animation-delay:-0.3s]"></div>
+                    <div className="h-1 w-1 animate-bounce rounded-full bg-gray-500 [animation-delay:-0.15s]"></div>
+                    <div className="h-1 w-1 animate-bounce rounded-full bg-gray-500"></div>
+                  </div>
+                </motion.span>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
         {totalPages > 1 && (
           <Pagination>
             <PaginationContent className="flex flex-wrap justify-center overflow-x-auto">
