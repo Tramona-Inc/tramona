@@ -533,7 +533,6 @@ export async function getRequestsForProperties(
       )
     `;
 
-
     //  const numberOfNights = sql`DATE_PART('day', requests.check_out::timestamp - requests.check_in::timestamp)`;
 
     //   const priceRestrictionSQL = sql`
@@ -1132,6 +1131,20 @@ export async function createInitialHostTeam(
   });
 
   return teamId;
+}
+
+export async function createOrFindInitalHostTeamId(
+  user: Pick<User, "id" | "name" | "username" | "email">,
+) {
+  const existingHostTeamWhereIsOwner = await db.query.hostTeams.findFirst({
+    where: eq(hostTeams.ownerId, user.id),
+  });
+
+  if (!existingHostTeamWhereIsOwner) {
+    const newTeamId = await createInitialHostTeam(user);
+    return newTeamId;
+  }
+  return existingHostTeamWhereIsOwner.id;
 }
 
 export async function scrapeAirbnbInitialPageHelper({
