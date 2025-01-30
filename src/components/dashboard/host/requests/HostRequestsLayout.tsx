@@ -125,7 +125,9 @@ export default function HostRequestsLayout({
 
       if (tab === "city") {
         if (separatedData?.normal[0] && isLg) {
-          newPathname = `/host/requests/${separatedData.normal[0].city}`;
+          newPathname = `/host/requests/${separatedData.normal[0].city}?option=normal`;
+        } else {
+          newPathname = `/host/requests`;
         }
       } else {
         newPathname = `/host/requests/requests-to-book`;
@@ -204,9 +206,10 @@ export default function HostRequestsLayout({
               offerData={offerData}
               isLoading={isLoadingProperties}
               initialSelectedCity={
-                separatedData?.normal[0]?.city
-                  ? separatedData.normal[0].city
-                  : undefined
+                // separatedData?.normal[0]?.city
+                //   ? separatedData.normal[0].city
+                //   : undefined
+                undefined
               }
             />
           ) : (
@@ -214,7 +217,9 @@ export default function HostRequestsLayout({
               properties={requestToBookData}
               isLoading={isLoadingRequestToBook}
               initialSelectedPropertyId={
-                requestToBookData && requestToBookData.length > 0
+                requestToBookData &&
+                requestToBookData.length > 0 &&
+                (!isIndex || isLg) //dont redirect the first property on md screens <
                   ? requestToBookData[0]!.id
                   : undefined
               }
@@ -230,7 +235,7 @@ export default function HostRequestsLayout({
               <Button
                 onClick={() =>
                   activeTab === "property-bids"
-                    ? void router.back()
+                    ? void router.push("/host/requests/requests-to-book")
                     : void router.push("/host/requests")
                 }
                 size="icon"
