@@ -125,8 +125,8 @@ export default function HostRequestsLayout({
       let newPathname = "/host/requests";
 
       if (tab === "city") {
-        if (separatedData?.normal?.[0]) {
-          newPathname = `/host/requests/${separatedData.normal[0].city}`;
+        if (separatedData?.normal[0]) {
+          newPathname = `/host/requests/${separatedData.normal[0].city}?option=normal`;
         }
       } else {
         newPathname = `/host/requests/requests-to-book`;
@@ -205,7 +205,7 @@ export default function HostRequestsLayout({
               offerData={offerData}
               isLoading={isLoadingProperties}
               initialSelectedCity={
-                separatedData?.normal?.[0]?.city
+                separatedData?.normal[0]?.city
                   ? separatedData.normal[0].city
                   : undefined
               }
