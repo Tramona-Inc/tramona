@@ -657,11 +657,11 @@ const Features2 = () => {
     <section className="mb-12 mt-12 py-12">
       <div className="flex flex-col items-center space-y-12">
         {/* First Row: Image on left, text on right */}
-        <div className="mx-auto flex w-full max-w-4xl flex-col items-center gap-12 px-6 text-center sm:flex-row sm:text-left">
-          <div className="relative h-72 w-72 flex-shrink-0 overflow-hidden rounded-lg bg-gray-200 shadow-md">
+        <div className="mx-auto flex w-full max-w-4xl flex-col items-center gap-x-16 px-6 text-center sm:flex-row sm:text-left">
+          <div className="relative h-40 w-72 flex-shrink-0 overflow-hidden rounded-lg bg-gray-200 shadow-md">
             <Image
               src="/assets/images/why-list/Why-list-request.png"
-              objectFit="cover"
+              objectFit="contain"
               layout="fill"
               alt="Requests"
             />
@@ -674,11 +674,11 @@ const Features2 = () => {
         </div>
 
         {/* Second Row: Text on left, image on right */}
-        <div className="mx-auto flex w-full max-w-4xl flex-col items-center gap-12 px-6 text-center sm:flex-row-reverse sm:text-left">
-          <div className="relative h-72 w-72 flex-shrink-0 overflow-hidden rounded-lg bg-gray-200 shadow-md">
+        <div className="mx-auto flex w-full max-w-4xl flex-col items-center gap-x-16 px-6 text-center sm:flex-row-reverse sm:text-left">
+          <div className="relative h-40 w-72 flex-shrink-0 overflow-hidden rounded-lg bg-gray-200 shadow-md">
             <Image
               src="/assets/images/why-list/Why-list-cohost.png"
-              objectFit="cover"
+              objectFit="contain"
               layout="fill"
               alt="Cal"
             />
@@ -691,11 +691,11 @@ const Features2 = () => {
         </div>
 
         {/* Third Row: Image on left, text on right */}
-        <div className="mx-auto flex w-full max-w-4xl flex-col items-center gap-12 px-6 text-center sm:flex-row sm:text-left">
-          <div className="relative h-72 w-72 flex-shrink-0 overflow-hidden rounded-lg bg-gray-200 shadow-md">
+        <div className="mx-auto flex w-full max-w-4xl flex-col items-center gap-x-16 px-6 text-center sm:flex-row sm:text-left">
+          <div className="relative h-40 w-[280px] flex-shrink-0 overflow-hidden rounded-lg bg-gray-200 shadow-md">
             <Image
               src="/assets/images/why-list/Why-list-Cal.png"
-              objectFit="cover"
+              objectFit="contain"
               layout="fill"
               alt="Customized Pricing"
             />

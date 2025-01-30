@@ -61,6 +61,8 @@ export default function HostRequestsToBookPage({
     }
   }, [currentHostTeamId]);
 
+  console.log(propertyRequests);
+
   return (
     <div>
       {propertyRequests?.activeRequestsToBook ? (
