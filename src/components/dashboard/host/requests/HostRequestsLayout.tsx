@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { useRouter } from "next/router";
 import SidebarCity from "./sidebars/SideBarCity";
 import SidebarRequestToBook from "./sidebars/SideBarRequestToBook";
@@ -18,6 +18,7 @@ import {
 import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 import useSetInitialHostTeamId from "@/components/_common/CustomHooks/useSetInitialHostTeamId";
 import { useIsLg } from "@/utils/utils";
+import React from "react";
 
 const alerts = [
   {
@@ -41,7 +42,7 @@ const alerts = [
 type TabType = "city" | "property-bids";
 type SelectedOptionType = "normal" | "outsidePriceRestriction" | "sent";
 
-export default function HostRequestsLayout({
+const HostRequestsLayout = React.memo(function HostRequestsLayout({
   isIndex,
   children,
 }: {
@@ -60,13 +61,6 @@ export default function HostRequestsLayout({
   );
   const [selectedOption, setSelectedOption] =
     useState<SelectedOptionType>("normal");
-
-  const [separatedData, setSeparatedData] = useState<SeparatedData | null>(
-    null,
-  );
-  const [offerData, setOfferData] = useState<RequestsPageOfferData | null>(
-    null,
-  );
 
   // <--------------------Data fetching logic ---------------->
   const { data: properties, isLoading: isLoadingProperties } =
@@ -105,17 +99,18 @@ export default function HostRequestsLayout({
       },
     );
 
-  useEffect(() => {
+  const separatedData = useMemo(() => {
     if (properties) {
-      const separated = separateByPriceAndAgeRestriction(properties);
-      setSeparatedData(separated);
+      return separateByPriceAndAgeRestriction(properties);
     }
+    return null;
+  }, [properties]);
+  const offerData = useMemo(() => {
     if (offers) {
-      const formatted = formatOfferData(offers);
-      setOfferData(formatted);
+      return formatOfferData(offers);
     }
-  }, [properties, offers, requestToBookData]);
-  // <------------------------------------------------------->
+    return null;
+  }, [offers]);
 
   const handleTabChange = useCallback(
     (tab: TabType) => {
@@ -158,6 +153,20 @@ export default function HostRequestsLayout({
     },
     [selectedOption, router, separatedData],
   );
+
+  const initialSelectedCity = useMemo(() => {
+    return separatedData?.normal[0]?.city
+      ? separatedData.normal[0].city
+      : undefined;
+  }, [separatedData]);
+
+  const initialSelectedPropertyId = useMemo(() => {
+    return requestToBookData &&
+      requestToBookData.length > 0 &&
+      (!isIndex || isLg)
+      ? requestToBookData[0]!.id
+      : undefined;
+  }, [requestToBookData, isIndex, isLg]);
 
   // <--------------------------------Render------------------>
   return (
@@ -205,24 +214,13 @@ export default function HostRequestsLayout({
               separatedData={separatedData}
               offerData={offerData}
               isLoading={isLoadingProperties}
-              initialSelectedCity={
-                // separatedData?.normal[0]?.city
-                //   ? separatedData.normal[0].city
-                //   : undefined
-                undefined
-              }
+              initialSelectedCity={initialSelectedCity}
             />
           ) : (
             <SidebarRequestToBook
               properties={requestToBookData}
               isLoading={isLoadingRequestToBook}
-              initialSelectedPropertyId={
-                requestToBookData &&
-                requestToBookData.length > 0 &&
-                (!isIndex || isLg) //dont redirect the first property on md screens <
-                  ? requestToBookData[0]!.id
-                  : undefined
-              }
+              initialSelectedPropertyId={initialSelectedPropertyId}
             />
           )}
         </ScrollArea>
@@ -303,4 +301,6 @@ export default function HostRequestsLayout({
       )}
     </div>
   );
-}
+});
+
+export default HostRequestsLayout;
