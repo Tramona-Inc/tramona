@@ -141,7 +141,7 @@ export default function HostPropertiesLayout() {
         (payload) => {
           if (payload.new.host_team_id === currentHostTeamId) {
             console.log(
-              "New property added within a minute for the current team:",
+              "New property added within 30 seconds for the current team:",
               payload.new.host_team_id,
             );
             setShowIsSyncingState(true);
