@@ -1,10 +1,7 @@
 import { api } from "@/utils/api";
-import { useSearchParams } from "next/navigation";
 import HostRequestToBookDialog from "./HostRequestToBookDialog";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { ChevronLeft } from "lucide-react";
-import Link from "next/link";
 import { useToast } from "@/components/ui/use-toast";
 import { errorToast } from "@/utils/toasts";
 import { Home } from "lucide-react";
@@ -14,6 +11,7 @@ import { useChatWithUser } from "@/utils/messaging/useChatWithUser";
 import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 import useSetInitialHostTeamId from "@/components/_common/CustomHooks/useSetInitialHostTeamId";
 import { useEffect } from "react";
+import { useRouter } from "next/router";
 
 export default function HostRequestsToBookPage({
   isIndex = false,
@@ -24,11 +22,12 @@ export default function HostRequestsToBookPage({
   const { currentHostTeamId } = useHostTeamStore();
   const { toast } = useToast();
   const [dialogOpen, setDialogOpen] = useState(false);
-  const searchParams = useSearchParams();
+  const router = useRouter();
 
   // Use useSearchParams to get the propertyId from the query string
-  const propertyId = parseInt(searchParams.get("propertyId") ?? "0");
+  const propertyId = parseInt(router.query.id as string);
 
+  console.log(propertyId);
   const { data: unusedReferralDiscounts } =
     api.referralCodes.getAllUnusedHostReferralDiscounts.useQuery(undefined, {
       onSuccess: () => {
@@ -50,6 +49,7 @@ export default function HostRequestsToBookPage({
       { enabled: !!currentHostTeamId && !isIndex },
     );
 
+  console.log(propertyRequests);
   const { mutateAsync: rejectRequestToBook } =
     api.stripe.rejectOrCaptureAndFinalizeRequestToBook.useMutation();
 
@@ -61,13 +61,10 @@ export default function HostRequestsToBookPage({
     }
   }, [currentHostTeamId]);
 
+  console.log(propertyRequests);
+
   return (
     <div>
-      <div className="mb-4 xl:hidden">
-        <Link href="/host/requests">
-          <ChevronLeft />
-        </Link>
-      </div>
       {propertyRequests?.activeRequestsToBook ? (
         <div className="grid gap-4 md:grid-cols-2">
           {propertyRequests.activeRequestsToBook.map((data) => (

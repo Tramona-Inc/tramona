@@ -100,6 +100,7 @@ export function parseCurrency(str: string) {
  * ```
  */
 export function capitalize(str: string) {
+  if (!str) return;
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
@@ -827,7 +828,8 @@ export const getApplicableBookItNowDiscount = () => {
   return null;
 };
 
-export const capitalizeFirstLetter = (string: string): string => {
+export const capitalizeFirstLetter = (string: string | null): string => {
+  if (!string) return "";
   return string.charAt(0).toUpperCase() + string.slice(1);
 };
 

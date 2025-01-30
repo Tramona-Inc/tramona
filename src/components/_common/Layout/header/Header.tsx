@@ -42,8 +42,11 @@ export function Header() {
   return (
     <>
       <div className="text-balance bg-primaryGreen px-4 py-2 text-center text-sm font-medium text-white">
-        Hosts, we are expanding fast. Be one of the first 100 hosts in your
-        city, and enjoy no fees on your first 5 bookings!{" "}
+        Hosts, we are expanding fast.{" "}
+        <Link href="/why-list" className="underline">
+          Be one of the first 100 hosts
+        </Link>{" "}
+        in your city, and enjoy no fees on your first 5 bookings!{" "}
       </div>
 
       <div className="lg:hidden">

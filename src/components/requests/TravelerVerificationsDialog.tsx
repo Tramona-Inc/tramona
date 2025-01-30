@@ -6,11 +6,15 @@ import UserAvatar from "../_common/UserAvatar";
 import { BadgeCheck, BadgeX } from "lucide-react";
 import { HostDashboardRequestToBook } from "@/components/dashboard/host/requests/requests-to-book/HostRequestToBookCard";
 import { PastOfferRequestDetails } from "../dashboard/host/requests/city/PastOfferCard";
+import { capitalizeFirstLetter } from "@/utils/utils";
 
 export function TravelerVerificationsDialog({
   request,
 }: {
-  request: HostDashboardRequest | HostDashboardRequestToBook | PastOfferRequestDetails;
+  request:
+    | HostDashboardRequest
+    | HostDashboardRequestToBook
+    | PastOfferRequestDetails;
 }) {
   const { data: verificationList } = api.users.getUserVerifications.useQuery({
     madeByGroupId: request.madeByGroupId,
@@ -35,15 +39,11 @@ export function TravelerVerificationsDialog({
     },
   ];
 
-  const travelerLastInitial = request.traveler.lastName
-    ? request.traveler.lastName[0]
-    : "";
-
   return (
     <>
       <Dialog>
         <DialogTrigger>
-          <p>{request.traveler.firstName + " " + travelerLastInitial}</p>
+          <p>{capitalizeFirstLetter(request.traveler.firstName)}</p>
         </DialogTrigger>
         <DialogContent>
           <div className="flex items-center gap-4">
@@ -54,7 +54,7 @@ export function TravelerVerificationsDialog({
             />
             <div className="flex-col">
               <p className="text-lg font-bold">
-                {request.traveler.firstName + " " + travelerLastInitial}
+                {capitalizeFirstLetter(request.traveler.firstName)}
               </p>
               <p className="text-muted-foreground">
                 Located in {request.traveler.location}

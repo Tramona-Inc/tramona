@@ -44,14 +44,13 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Link2,
-  CheckCircle2,
-  ArrowRight,
-} from "lucide-react";
+import { Link2, CheckCircle2, ArrowRight } from "lucide-react";
 import Image from "next/image";
+import { toast } from "@/components/ui/use-toast";
+import { TRPCClientErrorLike } from "@trpc/client";
+import { AppRouter } from "@/server/api/root";
+import React from "react";
+import { errorToast } from "@/utils/toasts";
 
 // ------------------------------------------------------------------
 // A simple Progress Indicator for the multi-step flow
@@ -339,15 +338,27 @@ export default function Onboarding1({
                       className="mt-5"
                       size="lg"
                       disabled={isLoading}
-                      onClick={async () => {
+                      onClick={() => {
+                        // Removed async, returns a promise
                         setIsLoading(true);
-                        try {
-                          await createHospitableCustomer();
-                        } catch (error) {
-                          console.error("An error occurred:", error);
-                        } finally {
-                          setIsLoading(false);
-                        }
+                        createHospitableCustomer()
+                          .then(() => {
+                            // Handle success here if needed (no explicit success handling in original example)
+                          })
+                          .catch((err: TRPCClientErrorLike<AppRouter>) => {
+                            console.log(err);
+                            if (err.data?.httpStatus === 422) {
+                              toast({
+                                title: "User information is invalid", //bad phone/email/name
+                                description: "Please contact support",
+                              });
+                            } else {
+                              errorToast();
+                            }
+                          })
+                          .finally(() => {
+                            setIsLoading(false);
+                          });
                       }}
                     >
                       {isLoading

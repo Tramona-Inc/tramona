@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useEffect, useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/router";
 import SidebarCity from "./sidebars/SideBarCity";
 import SidebarRequestToBook from "./sidebars/SideBarRequestToBook";
@@ -18,7 +18,6 @@ import {
 import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 import useSetInitialHostTeamId from "@/components/_common/CustomHooks/useSetInitialHostTeamId";
 import { useIsLg } from "@/utils/utils";
-import Link from "next/link";
 
 const alerts = [
   {
@@ -42,15 +41,6 @@ const alerts = [
 type TabType = "city" | "property-bids";
 type SelectedOptionType = "normal" | "outsidePriceRestriction" | "sent";
 
-type RouterQuery = Record<string, string> & {
-  tabs?: TabType;
-  city?: string;
-  propertyId?: string;
-  offers?: string;
-  priceRestriction?: string;
-  option?: SelectedOptionType;
-};
-
 export default function HostRequestsLayout({
   isIndex,
   children,
@@ -61,17 +51,15 @@ export default function HostRequestsLayout({
   useSetInitialHostTeamId();
   const { currentHostTeamId } = useHostTeamStore();
   const router = useRouter();
+  const isLg = useIsLg();
+  const showSidebar = isLg || isIndex;
+  const showChildren = isLg || !isIndex;
 
-  // Use pathname and searchParams
-  // const pathname = usePathname(); - Removed usePathname
-  // const searchParams = useSearchParams(); - Removed useSearchParams
-
-  const query = router.query as RouterQuery;
-
-  const [activeTab, setActiveTab] = useState<TabType>(query.tabs ?? "city");
-  const [selectedOption, setSelectedOption] = useState<SelectedOptionType>(
-    query.option ?? "normal",
+  const [activeTab, setActiveTab] = useState<TabType>(
+    router.asPath.includes("requests-to-book") ? "property-bids" : "city",
   );
+  const [selectedOption, setSelectedOption] =
+    useState<SelectedOptionType>("normal");
 
   const [separatedData, setSeparatedData] = useState<SeparatedData | null>(
     null,
@@ -80,6 +68,7 @@ export default function HostRequestsLayout({
     null,
   );
 
+  // <--------------------Data fetching logic ---------------->
   const { data: properties, isLoading: isLoadingProperties } =
     api.properties.getHostPropertiesWithRequests.useQuery(
       { currentHostTeamId: currentHostTeamId! },
@@ -108,17 +97,11 @@ export default function HostRequestsLayout({
       },
     );
 
-  const { data: requestToBookProperties, isLoading: isLoadingRequestToBook } =
+  const { data: requestToBookData, isLoading: isLoadingRequestToBook } =
     api.requestsToBook.getAllRequestToBookProperties.useQuery(
       { currentHostTeamId: currentHostTeamId! },
       {
         enabled: !!currentHostTeamId,
-        // refetchOnWindowFocus: false,
-        // refetchOnMount: false,
-        // refetchOnReconnect: false,
-        // staleTime: Infinity,
-        // cacheTime: Infinity,
-        // retry: false,
       },
     );
 
@@ -127,87 +110,54 @@ export default function HostRequestsLayout({
       const separated = separateByPriceAndAgeRestriction(properties);
       setSeparatedData(separated);
     }
-  }, [properties]);
-
-  useEffect(() => {
     if (offers) {
       const formatted = formatOfferData(offers);
       setOfferData(formatted);
     }
-  }, [offers]);
+  }, [properties, offers, requestToBookData]);
+  // <------------------------------------------------------->
 
   const handleTabChange = useCallback(
     (tab: TabType) => {
       if (tab === activeTab) return;
-
-      let newQuery: RouterQuery = {
-        ...query,
-        tabs: tab,
-        propertyId: "",
-      };
-      let newPathname = `/host/requests`;
+      setActiveTab(tab);
+      let newPathname = "/host/requests";
 
       if (tab === "city") {
-        if (query.city) {
-          newPathname = `/host/requests/${query.city}`;
-          delete newQuery.propertyId;
-        } else if (!newQuery.city && separatedData?.normal[0]) {
+        if (separatedData?.normal[0] && isLg) {
           newPathname = `/host/requests/${separatedData.normal[0].city}`;
-          delete newQuery.propertyId;
         }
+      } else {
+        newPathname = `/host/requests/requests-to-book`;
       }
 
-      if (tab === "property-bids") {
-        // First, check if there's a property ID available to use
-        if (query.propertyId && isLg) {
-          newPathname = `/host/requests/requests-to-book/${query.propertyId}`;
-          delete newQuery.propertyId;
-        } else if (requestToBookProperties?.[0] && isLg) {
-          //If a property ID is available, use the first property from requestToBookProperties
-          newPathname = `/host/requests/requests-to-book/${requestToBookProperties[0].id}`;
-          delete newQuery.propertyId;
-        } else {
-          // If no property ID is available, don't switch the tab and potentially show an error
-          console.error("No property available for property-bids tab.");
-          return;
-        }
-      }
-
-      setActiveTab(tab);
-      const url = {
-        pathname: newPathname,
-        query: newQuery,
-      };
-      void router.push(url, undefined, { shallow: true });
+      void router.push(newPathname, undefined, { shallow: true });
     },
-    [query, requestToBookProperties, separatedData, router, activeTab],
+    [activeTab, router, separatedData, isLg],
   );
-  // <----------------Screen size logic ------------>
-  const isLg = useIsLg();
-  const showSidebar = isLg || isIndex;
-  const showChildren = isLg || !isIndex;
 
   const handleOptionChange = useCallback(
     (option: SelectedOptionType) => {
       if (option === selectedOption) return;
-
       setSelectedOption(option);
-      let newPathname = `/host/requests`;
-      if (query.city) {
-        newPathname = `/host/requests/${query.city}`; // Keep city in path
+
+      let newPathname = "/host/requests";
+      if (separatedData?.normal[0]) {
+        newPathname = `/host/requests/${separatedData.normal[0].city}`;
       }
       void router.push(
         {
           pathname: newPathname,
-          query: { ...query, option: option },
+          query: { option: option },
         },
         undefined,
         { shallow: true },
       );
     },
-    [query, router, selectedOption],
+    [selectedOption, router, separatedData],
   );
 
+  // <--------------------------------Render------------------>
   return (
     <div className="flex bg-white">
       {showSidebar && (
@@ -253,14 +203,20 @@ export default function HostRequestsLayout({
               separatedData={separatedData}
               offerData={offerData}
               isLoading={isLoadingProperties}
-              initialSelectedCity={query.city}
+              initialSelectedCity={
+                separatedData?.normal[0]?.city
+                  ? separatedData.normal[0].city
+                  : undefined
+              }
             />
           ) : (
             <SidebarRequestToBook
-              properties={requestToBookProperties}
+              properties={requestToBookData}
               isLoading={isLoadingRequestToBook}
               initialSelectedPropertyId={
-                query.propertyId ? Number(query.propertyId) : undefined
+                requestToBookData && requestToBookData.length > 0
+                  ? requestToBookData[0]!.id
+                  : undefined
               }
             />
           )}
@@ -271,9 +227,17 @@ export default function HostRequestsLayout({
         <div className="flex-1 bg-[#fafafa] lg:block">
           <div className="lg:mb-30 my-6 mb-24 px-4 lg:mt-8">
             <div className="my-6 lg:hidden">
-              <Link href="/host/requests">
+              <Button
+                onClick={() =>
+                  activeTab === "property-bids"
+                    ? void router.back()
+                    : void router.push("/host/requests")
+                }
+                size="icon"
+                variant="ghost"
+              >
                 <ChevronLeft />
-              </Link>
+              </Button>
             </div>
             <div className="mx-auto max-w-5xl">
               {activeTab === "city" && (
