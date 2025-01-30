@@ -31,6 +31,15 @@ function SidebarRequestToBook({
 
   useEffect(() => {
     setSelectedPropertyId(initialSelectedPropertyId ?? null);
+    if (initialSelectedPropertyId) {
+      void router.push(
+        {
+          pathname: `/host/requests/requests-to-book/${initialSelectedPropertyId}`,
+        },
+        undefined,
+        { shallow: true },
+      );
+    }
   }, [initialSelectedPropertyId]);
 
   const handlePropertyClick = (propertyId: number) => {
