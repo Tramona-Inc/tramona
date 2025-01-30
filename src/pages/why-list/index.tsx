@@ -640,11 +640,10 @@ const Features = () => {
         ))}
       </ul>
 
-      <div className="mt-12 text-center text-lg font-bold">Plus many more</div>
       <div className="mt-6 text-center text-lg font-bold">
         <Link href="">
           <Button size="lg" className="bg-primaryGreen text-white">
-            demo
+            Demo
           </Button>
         </Link>
       </div>

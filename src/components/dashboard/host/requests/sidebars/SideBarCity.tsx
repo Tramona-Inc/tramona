@@ -69,7 +69,7 @@ const SidebarCity = React.memo(function SidebarCity({
     );
   }
 
-  if (displayedData.length > 1 && !isLoading) {
+  if (displayedData.length < 1 && !isLoading) {
     return <EmptyRequestState />;
   }
 
