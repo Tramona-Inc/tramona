@@ -34,8 +34,8 @@ export default function Listings() {
       },
     );
 
-  console.log(paymentIntent)
-  console.log(requestToBookWProperty)
+  console.log(paymentIntent);
+  console.log(requestToBookWProperty);
 
   useEffect(() => {
     if (paymentIntent) {
@@ -96,22 +96,30 @@ function RaahimsComponent({
   // );
 
   // Extracting necessary information from requestToBookWProperty
-  const { property, checkIn, checkOut, amountAfterTravelerMarkupAndBeforeFees } = requestToBookWProperty;
+  const {
+    property,
+    checkIn,
+    checkOut,
+    amountAfterTravelerMarkupAndBeforeFees,
+  } = requestToBookWProperty;
 
   return (
-    <div className="flex flex-col items-center justify-center p-6 bg-gray-100">
-      <h1 className="text-2xl font-bold text-green-600">Your Bid Has Been Placed!</h1>
+    <div className="flex flex-col items-center justify-center bg-gray-100 p-6">
+      <h1 className="text-2xl font-bold text-green-600">
+        Your Bid Has Been Placed!
+      </h1>
       <p className="mt-2 text-lg text-gray-700">
-        Thank you for booking! Your bid has been successfully submitted. The host has 24 hours to respond.
+        Thank you for booking! Your bid has been successfully submitted. The
+        host has 24 hours to respond.
       </p>
 
       {/* Property Information Section */}
-      <div className="mt-4 p-4 bg-white rounded-lg shadow-md w-full max-w-md">
+      <div className="mt-4 w-full max-w-md rounded-lg bg-white p-4 shadow-md">
         <h2 className="text-xl font-semibold">Booking Confirmation</h2>
         <div className="mt-2">
-          {property.imageUrls && property.imageUrls.length > 0 && (
+          {property.imageUrls.length > 0 && (
             <Image
-              src={property.imageUrls[0]} // Display the first image
+              src={property.imageUrls[0]!} // Display the first image
               alt={property.name}
               width={400} // Set appropriate width
               height={300} // Set appropriate height
@@ -126,30 +134,48 @@ function RaahimsComponent({
           <strong>Property ID:</strong> {requestToBookWProperty.propertyId}
         </p>
         <p className="mt-1 text-gray-600">
-          <strong>Check-in Date:</strong> {new Date(checkIn).toLocaleDateString()}
+          <strong>Check-in Date:</strong>{" "}
+          {new Date(checkIn).toLocaleDateString()}
         </p>
         <p className="mt-1 text-gray-600">
-          <strong>Check-out Date:</strong> {new Date(checkOut).toLocaleDateString()}
+          <strong>Check-out Date:</strong>{" "}
+          {new Date(checkOut).toLocaleDateString()}
         </p>
         <p className="mt-1 text-gray-600">
-          <strong>Bid Price:</strong> ${amountAfterTravelerMarkupAndBeforeFees / 100} {/* Assuming the price is in cents */}
+          <strong>Bid Price:</strong> $
+          {amountAfterTravelerMarkupAndBeforeFees / 100}{" "}
+          {/* Assuming the price is in cents */}
         </p>
         <p className="mt-1 text-gray-600">
           <strong>Next Steps:</strong>
         </p>
-        <ul className="list-disc list-inside mt-1 text-gray-600">
-          <li>Place more bids to improve your chances of getting the best price.</li>
-          <li>Submit requests to see exclusive prices that hosts are willing to offer.</li>
-          <li>If one of your bids is accepted, it will be instantly booked and all other bids will be automatically withdrawn.</li>
+        <ul className="mt-1 list-inside list-disc text-gray-600">
+          <li>
+            Place more bids to improve your chances of getting the best price.
+          </li>
+          <li>
+            Submit requests to see exclusive prices that hosts are willing to
+            offer.
+          </li>
+          <li>
+            If one of your bids is accepted, it will be instantly booked and all
+            other bids will be automatically withdrawn.
+          </li>
         </ul>
       </div>
 
       {/* Action Buttons */}
       <div className="mt-6 flex space-x-4">
-        <Link href="/my-bids" className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">
+        <Link
+          href="/my-bids"
+          className="rounded bg-gray-600 px-4 py-2 text-white hover:bg-gray-700"
+        >
           View My Bids
         </Link>
-        <Link href="/search" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+        <Link
+          href="/search"
+          className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+        >
           Search More Properties
         </Link>
       </div>
