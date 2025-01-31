@@ -348,6 +348,7 @@ export const requestsToBookRouter = createTRPCRouter({
     .input(z.object({ paymentIntentId: z.string() }))
     .query(async ({ input }) => {
       console.log(input.paymentIntentId);
+      console.log(input, "input");
       const confirmedRequestToBookWithProperty =
         await db.query.requestsToBook.findFirst({
           where: eq(requestsToBook.paymentIntentId, input.paymentIntentId),
@@ -361,7 +362,7 @@ export const requestsToBookRouter = createTRPCRouter({
             hostTeam: true,
           },
         });
-      console.log(confirmedRequestToBookWithProperty);
+      console.log(confirmedRequestToBookWithProperty, "test here");
       return confirmedRequestToBookWithProperty;
     }),
 });
