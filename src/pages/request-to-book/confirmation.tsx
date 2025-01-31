@@ -57,9 +57,6 @@ export default function Listings() {
     }
   }, [requestToBookWProperty, redirectStatus, router]);
 
-  console.log(paymentIntent);
-  console.log(requestToBookWProperty);
-
   if (router.isFallback) {
     return <h2>Loading</h2>;
   }
