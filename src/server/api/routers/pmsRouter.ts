@@ -9,6 +9,11 @@ import { users } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
 import { getPropertyCalendar } from "@/server/server-utils";
 import { TRPCError } from "@trpc/server";
+import {
+  getASingleCustomerChanel,
+  getCustomersChannelByCustomerId,
+  getHospitableReviewsByChanelId,
+} from "@/utils/webhook-functions/hospitable-utils";
 
 export const pmsRouter = createTRPCRouter({
   generateHostawayBearerToken: publicProcedure
@@ -292,4 +297,43 @@ export const pmsRouter = createTRPCRouter({
         }
       });
   }),
+
+  getHospitableChannelByHospitableCustomerId: protectedProcedure
+    .input(z.object({ customerId: z.string() }))
+    .query(async ({ input }) => {
+      console.log(input.customerId);
+      const hospitableChannel = await getCustomersChannelByCustomerId(
+        input.customerId,
+      );
+      return hospitableChannel;
+    }),
+
+  getHospitableReviewsByHospitableCustomerId: protectedProcedure
+    .input(z.object({ customerId: z.string() }))
+    .query(async ({ input }) => {
+      console.log(input.customerId);
+      try {
+        const hospitableChannel = await getCustomersChannelByCustomerId(
+          input.customerId,
+        );
+        console.log(hospitableChannel.data[0]?.id);
+        if (hospitableChannel.data[0]?.id) {
+          const returnedChannel = await getASingleCustomerChanel({
+            channelId: hospitableChannel.data[0].id,
+            customerId: input.customerId,
+          });
+
+          console.log(returnedChannel);
+
+          const reviews = await getHospitableReviewsByChanelId(
+            "97cd9f01-aa96-4786-acd1-63cce241998e",
+          );
+          console.log(reviews);
+          return reviews;
+        }
+      } catch {
+        console.error("error");
+        return;
+      }
+    }),
 });

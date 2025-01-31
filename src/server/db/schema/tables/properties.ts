@@ -358,6 +358,7 @@ export const properties = pgTable(
     pricingScreenUrl: varchar("pricing_screen_url"),
     currency: currencyEnum("currency").notNull().default("USD"),
     hospitableListingId: varchar("hospitable_listing_id"),
+    hospitableChannel: varchar("hostpitable_channel"),
     datesLastUpdated: timestamp("dates_last_updated", {
       withTimezone: true,
     }).defaultNow(),
