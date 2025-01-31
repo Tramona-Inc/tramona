@@ -11,6 +11,9 @@ import type { RouterOutputs } from "@/utils/api";
 import { toast } from "@/components/ui/use-toast";
 import Image from "next/image";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { CheckCircle } from "lucide-react";
+import ConfirmationImageCarousel from "./ConfirmationImageCarousel";
 
 export type requestToBookWProperty =
   RouterOutputs["requestsToBook"]["getRequestToBookByPaymentIntentId"];
@@ -66,7 +69,7 @@ export default function Listings() {
       <Head>
         <title>Request To Book | Tramona</title>
       </Head>
-      <div className="p-4 pb-64">
+      <div className="p-4 pb-6">
         <div className="mx-auto max-w-7xl">
           {requestToBookWProperty ? (
             <RaahimsComponent requestToBookWProperty={requestToBookWProperty} />
@@ -87,14 +90,6 @@ function RaahimsComponent({
 }) {
   if (!requestToBookWProperty) return;
 
-  // return (
-  //   <div>
-  //     build stuff here just heads up you should be able to access all of the
-  //     data needed with the
-  //     <div>{requestToBookWProperty.id} </div>
-  //   </div>
-  // );
-
   // Extracting necessary information from requestToBookWProperty
   const {
     property,
@@ -105,79 +100,136 @@ function RaahimsComponent({
 
   return (
     <div className="flex flex-col items-center justify-center bg-gray-100 p-6">
-      <h1 className="text-2xl font-bold text-green-600">
-        Your Bid Has Been Placed!
-      </h1>
-      <p className="mt-2 text-lg text-gray-700">
-        Thank you for booking! Your bid has been successfully submitted. The
-        host has 24 hours to respond.
-      </p>
-
       {/* Property Information Section */}
-      <div className="mt-4 w-full max-w-md rounded-lg bg-white p-4 shadow-md">
-        <h2 className="text-xl font-semibold">Booking Confirmation</h2>
-        <div className="mt-2">
+      <div className="mt-4 w-full max-w-3xl rounded-lg bg-white p-6 shadow-md flex flex-col items-center">
+        <h2 className="text-2xl font-semibold text-center flex items-center">
+          <CheckCircle className="mr-2 text-green-600" />
+          Booking Confirmation
+        </h2>
+        <p className="mt-4 text-lg text-green-600 text-center">
+          <strong>Your Bid Has Been Accepted!</strong>
+        </p>
+        <p className="mt-2 text-lg text-gray-600 text-center">
+          Thank you for booking! Your bid has been successfully submitted. The host has 24 hours to respond.
+        </p>
+        <div className="mt-4">
+          {/* Use the new ConfirmationImageCarousel component */}
           {property.imageUrls.length > 0 && (
-            <Image
-              src={property.imageUrls[0]!} // Display the first image
-              alt={property.name}
-              width={400} // Set appropriate width
-              height={300} // Set appropriate height
-              className="rounded-lg"
-            />
+            <ConfirmationImageCarousel imageUrls={property.imageUrls} />
           )}
         </div>
-        <p className="mt-2 text-gray-600">
-          <strong>Property Name:</strong> {property.name}
-        </p>
-        <p className="mt-1 text-gray-600">
-          <strong>Property ID:</strong> {requestToBookWProperty.propertyId}
-        </p>
-        <p className="mt-1 text-gray-600">
-          <strong>Check-in Date:</strong>{" "}
-          {new Date(checkIn).toLocaleDateString()}
-        </p>
-        <p className="mt-1 text-gray-600">
-          <strong>Check-out Date:</strong>{" "}
-          {new Date(checkOut).toLocaleDateString()}
-        </p>
-        <p className="mt-1 text-gray-600">
-          <strong>Bid Price:</strong> $
-          {amountAfterTravelerMarkupAndBeforeFees / 100}{" "}
-          {/* Assuming the price is in cents */}
-        </p>
-        <p className="mt-1 text-gray-600">
-          <strong>Next Steps:</strong>
-        </p>
-        <ul className="mt-1 list-inside list-disc text-gray-600">
-          <li>
-            Place more bids to improve your chances of getting the best price.
-          </li>
-          <li>
-            Submit requests to see exclusive prices that hosts are willing to
-            offer.
-          </li>
-          <li>
-            If one of your bids is accepted, it will be instantly booked and all
-            other bids will be automatically withdrawn.
-          </li>
-        </ul>
+        <div className="w-full text-left">
+          <div className="text-left w-full">
+            <p className="mt-4 text-lg text-gray-600 text-center">
+              <strong>Property Name:</strong> {property.name}
+            </p>
+            <p className="mt-2 text-lg text-gray-600 text-center">
+              <strong>Check-in Date:</strong>{" "}
+              {new Date(checkIn).toLocaleDateString()}
+            </p>
+            <p className="mt-2 text-lg text-gray-600 text-center">
+              <strong>Check-out Date:</strong>{" "}
+              {new Date(checkOut).toLocaleDateString()}
+            </p>
+            <p className="mt-2 text-lg text-gray-600 text-center">
+              <strong>Bid Price:</strong> $
+              {amountAfterTravelerMarkupAndBeforeFees / 100}{" "}
+              {/* Assuming the price is in cents */}
+            </p>
+            <p className="mt-4 text-lg text-gray-600">
+              <strong>Next Steps:</strong>
+            </p>
+            <ul className="mt-2 list-inside list-disc text-gray-600 text-lg">
+              <li>
+                Place more bids to improve your chances of getting the best price.
+              </li>
+              <li>
+                Submit requests to see exclusive prices that hosts are willing to
+                offer.
+              </li>
+              <li>
+                If one of your bids is accepted, it will be instantly booked and all
+                other bids will be automatically withdrawn.
+              </li>
+            </ul>
+            {/* <section>
+              <h2 className="subheading border-t pb-2 pt-4">Meet your host</h2>
+              <div className="flex flex-col gap-10 lg:flex-row">
+                <Card className="lg:w-1/3">
+                  <CardContent className="flex flex-col items-center gap-1">
+                    <UserAvatar
+                      size="huge"
+                      name={hostName}
+                      image={
+                        property.hostProfilePic ?? property.hostTeam.owner.image
+                      }
+                      onClick={() =>
+                        void router.push(`/profile/view/${hostTeamOwner?.id}`)
+                      }
+                    />
+                    <p className="text-lg font-bold">{hostName}</p>
+                    <p className="text-sm">Host</p>
+                  </CardContent>
+                </Card>
+                <div className="space-y-4">
+                  <p className="text-lg font-semibold">Co-hosts</p>
+                  <div className="flex items-center gap-4">
+                    {hostTeamMembers
+                      ?.filter((member) => member.id !== hostTeamOwner?.id)
+                      .map((member, index) => (
+                        <div key={index} className="flex items-center gap-2">
+                          <UserAvatar
+                            size="md"
+                            name={hostName}
+                            image={member.image}
+                            onClick={() =>
+                              void router.push(`/profile/view/${member.id}`)
+                            }
+                          />
+                          <p>{member.firstName}</p>
+                        </div>
+                      ))}
+                  </div>
+                  <Button
+                    onClick={() =>
+                      chatWithHostTeam({
+                        hostId: property.hostTeam.ownerId,
+                        hostTeamId: isHospitableUser
+                          ? property.hostTeam.id
+                          : undefined,
+                        propertyId: property.id,
+                      })
+                        .then()
+                        .catch((err: TRPCClientErrorLike<AppRouter>) => {
+                          if (err.data?.code === "UNAUTHORIZED") {
+                            console.log(err.data.code);
+                            void signIn("google", {
+                              callbackUrl: window.location.href,
+                            });
+                          }
+                        })
+                    }
+                  >
+                    <MessageCircleMore />
+                    Message Host
+                  </Button>
+                </div>
+              </div>
+            </section> */}
+          </div>
+        </div>
       </div>
 
       {/* Action Buttons */}
       <div className="mt-6 flex space-x-4">
-        <Link
-          href="/my-bids"
-          className="rounded bg-gray-600 px-4 py-2 text-white hover:bg-gray-700"
-        >
-          View My Bids
-        </Link>
-        <Link
-          href="/search"
-          className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-        >
-          Search More Properties
-        </Link>
+        <div className="grid grid-cols-2 gap-2 sm:flex-row">
+          <Link href="/?page=1">
+            <Button className="w-full text-lg">Search More Properties</Button>
+          </Link>
+          <Link href="/requests?tab=bids">
+            <Button className="w-full flex-1 text-lg">View My Bids</Button>
+          </Link>
+        </div>
       </div>
     </div>
   );
