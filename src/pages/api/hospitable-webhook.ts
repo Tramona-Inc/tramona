@@ -415,7 +415,7 @@ export default async function HospitableWebhook(
           throw new Error(`Host profile not found for user ${userId}`);
         }
 
-        const propertyId = await db
+        const propertyId = await db //things to add 1.) checkin/out times 2.) reveiws 3.) pets 4.) additional Fees (Pets, guests fees )
           .insert(properties)
           .values({
             hostTeamId: teamId,
