@@ -15,6 +15,7 @@ import { and, eq, inArray } from "drizzle-orm";
 import { properties } from "@/server/db/schema";
 import { zodInteger, zodString } from "@/utils/zod-utils";
 import { CitiesLatLong } from "../../../utils/store/cities-filter";
+import { hostTeamMembers } from "../../db/schema/tables/hostTeams";
 const MAX_RETRIES = 3; // set a max number of retries
 const INITIAL_DELAY = 500; // set a delay in milliseconds
 
@@ -70,6 +71,24 @@ export const requestsToBookRouter = createTRPCRouter({
             hostProfilePic: true,
             originalListingUrl: true,
             originalNightlyPrice: true,
+          },
+          with: {
+            hostTeam: {
+              with: {
+                owner: true,
+                members: {
+                  with: {
+                    user: {
+                      columns: {
+                        id: true,
+                        firstName: true,
+                        image: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
           },
         },
       },
@@ -348,6 +367,7 @@ export const requestsToBookRouter = createTRPCRouter({
     .input(z.object({ paymentIntentId: z.string() }))
     .query(async ({ input }) => {
       console.log(input.paymentIntentId);
+      console.log(input, "input");
       const confirmedRequestToBookWithProperty =
         await db.query.requestsToBook.findFirst({
           where: eq(requestsToBook.paymentIntentId, input.paymentIntentId),
@@ -361,7 +381,7 @@ export const requestsToBookRouter = createTRPCRouter({
             hostTeam: true,
           },
         });
-      console.log(confirmedRequestToBookWithProperty);
+      console.log(confirmedRequestToBookWithProperty, "test here");
       return confirmedRequestToBookWithProperty;
     }),
 });
