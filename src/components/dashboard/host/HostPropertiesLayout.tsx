@@ -11,12 +11,15 @@ import {
 } from "@/server/db/schema/tables/properties";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ExpandableSearchBar from "@/components/_common/ExpandableSearchBar";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import HostPropertiesSidebar from "./HostPropertiesSidebar";
 import { cn } from "@/utils/utils";
 import HostPropertyInfo from "./HostPropertyInfo";
 import useSetInitialHostTeamId from "@/components/_common/CustomHooks/useSetInitialHostTeamId";
 import { useHostTeamStore } from "@/utils/store/hostTeamStore";
+
+import supabase from "@/utils/supabase-client";
+import { REALTIME_SUBSCRIBE_STATES } from "@supabase/supabase-js";
 
 export default function HostPropertiesLayout() {
   useSetInitialHostTeamId();
@@ -90,12 +93,13 @@ export default function HostPropertiesLayout() {
       setOriginalListingId("");
   }
 
-  const { data: properties } = api.properties.getHostProperties.useQuery(
-    { currentHostTeamId: currentHostTeamId! },
-    {
-      enabled: !!currentHostTeamId,
-    },
-  );
+  const { data: properties, refetch } =
+    api.properties.getHostProperties.useQuery(
+      { currentHostTeamId: currentHostTeamId! },
+      {
+        enabled: !!currentHostTeamId,
+      },
+    );
 
   const listedProperties = properties?.filter(
     (property) => property.status === "Listed",
@@ -123,6 +127,56 @@ export default function HostPropertiesLayout() {
       document.body.classList.remove("overflow-hidden");
     }
   }, [open]);
+
+  // < -------------- LOGIC FOR SYNCING HOSPITABLE Properties loading state -------->
+  const [showIsSyncingState, setShowIsSyncingState] = useState(false);
+  const timeoutRef = useRef<number | null>(null); // Use useRef to store the timeout ID
+
+  useEffect(() => {
+    const subscription = supabase
+      .channel("properties-insert")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "properties" },
+        (payload) => {
+          if (payload.new.host_team_id === currentHostTeamId) {
+            console.log(
+              "New property added within 30 seconds for the current team:",
+              payload.new.host_team_id,
+            );
+            setShowIsSyncingState(true);
+
+            // Clear any existing timeout
+            if (timeoutRef.current) {
+              clearTimeout(timeoutRef.current);
+            }
+
+            // Set a timeout to reset showIsSyncingState after 30 seconds
+            timeoutRef.current = window.setTimeout(() => {
+              setShowIsSyncingState(false);
+            }, 30000); // 30 seconds
+
+            // refetch properties
+            void refetch();
+          }
+        },
+      )
+      .subscribe((status) => {
+        console.log("supabase status:", status);
+        if (status === REALTIME_SUBSCRIBE_STATES.SUBSCRIBED) {
+          console.log("Listening for new properties...");
+        } else {
+          setShowIsSyncingState(false);
+        }
+      });
+
+    return () => {
+      void subscription.unsubscribe();
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current); // Clear timeout on unmount
+      }
+    };
+  }, [currentHostTeamId, refetch]);
 
   return (
     <section className="relative mx-auto mb-24 mt-7 max-w-8xl px-6 md:my-14">
@@ -169,6 +223,7 @@ export default function HostPropertiesLayout() {
           properties={searchResults}
           onSelectedProperty={handleSelectedProperty}
           searched
+          showIsSyncingState={showIsSyncingState}
         />
       ) : (
         <Tabs className="mt-6" defaultValue="listed">
@@ -181,18 +236,21 @@ export default function HostPropertiesLayout() {
             <HostProperties
               properties={listedProperties ?? null}
               onSelectedProperty={handleSelectedProperty}
+              showIsSyncingState={showIsSyncingState}
             />
           </TabsContent>
           <TabsContent value="drafts">
             <HostProperties
               properties={draftedProperties ?? null}
               onSelectedProperty={handleSelectedProperty}
+              showIsSyncingState={showIsSyncingState}
             />
           </TabsContent>
           <TabsContent value="archived">
             <HostProperties
               properties={archivedProperties ?? null}
               onSelectedProperty={handleSelectedProperty}
+              showIsSyncingState={showIsSyncingState}
             />
           </TabsContent>
         </Tabs>
