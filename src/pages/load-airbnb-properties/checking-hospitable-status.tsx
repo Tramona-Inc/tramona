@@ -128,7 +128,7 @@ function useCombinedLoadingState({
         progress.set(80);
         setTimeout(() => {
           progress.set(95);
-        }, 1000);
+        }, 1500);
       }
     }
   }, [hasHostTeamCreatedEvent, currentStateIndex]);
@@ -250,7 +250,10 @@ export default function CombinedLoadingPage() {
     if (isUserHostTeamOwner !== undefined) {
       if (isUserHostTeamOwner) {
         setTimeout(() => {
-          void router.push("/host");
+          void router.replace("/host", undefined, {
+            unstable_skipClientCache: true,
+            shallow: false,
+          });
         }, 2500);
       }
     }
@@ -321,7 +324,6 @@ export default function CombinedLoadingPage() {
       {isComplete || (!isTimeout && <ProgressBar progress={progress} />)}
       {!isTimeout && !isComplete && (
         <motion.div
-          key={currentMessage}
           initial={{ y: 20, opacity: 0 }} // Initial position: slightly below, transparent
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -20, opacity: 0 }}
@@ -329,7 +331,7 @@ export default function CombinedLoadingPage() {
           className="mt-3 text-center text-xs font-bold text-gray-400"
         >
           {/* {currentMessage} USE FOR TESTING */}
-          Just a minute more, we&apos;re almost finished!
+          Hang tight, we&apos;re almost finished!
         </motion.div>
       )}
       {isTimeout &&
