@@ -254,9 +254,8 @@ const HowItWorks = () => {
         <p className="mb-4 text-center font-medium md:text-left">
           {" "}
           {/* Added mb-4 for consistent spacing */}
-          Classic book it now. Your property is showcased just like it is on
-          Airbnb or Vrbo. Travelers can instantly book with or without waiting
-          for approval.
+          Just like on Airbnb or Vrbo, your property is showcased beautifully.
+          Travelers can instantly book their stay.
         </p>
         <div className="mt-6 flex items-center">
           {" "}
@@ -268,9 +267,8 @@ const HowItWorks = () => {
         <p className="mt-2 text-gray-500">
           {" "}
           {/* Added mt-2 for spacing from h4 */}
-          When you sign up as a host, your account is instantly synced with
-          Airbb. Whenever you change your aavailability, price, or anything else
-          on Airbnb. It is instantly reflected on Tramona.
+          When you sign up as a host, your Tramona account instantly syncs with
+          Airbnb. Getting your availability, pricing, and other booking details.
         </p>
         <hr className="my-4 border-t border-gray-300" />
         <div className="mt-4 flex items-center">
@@ -286,12 +284,12 @@ const HowItWorks = () => {
           <li className="mb-1 flex items-center text-gray-500">
             {" "}
             {/* Added mb-1 for spacing between list items */}
-            <FaCheck className="mr-2" size={12} /> Enable Book it Now for
-            instant bookings
+            <FaCheck className="mr-2" size={12} /> Choose between book it now or
+            request to book.
           </li>
           <li className="flex items-center text-gray-500">
-            <FaCheck className="mr-2" size={18} /> Turn off Book it Now and only
-            allow travelers to make bids
+            <FaCheck className="mr-2" size={18} /> Your property starts on
+            request to book.
           </li>
         </ul>
       </li>
@@ -306,7 +304,7 @@ const HowItWorks = () => {
         <p className="mb-4 text-center font-medium md:text-left">
           {" "}
           {/* Added mb-4 for consistent spacing */}
-          Travelers can send offers for your available nights.
+          Travelers can send offers for your vacant nights.
         </p>
 
         <div className="mt-6 flex items-center">
@@ -341,13 +339,13 @@ const HowItWorks = () => {
             {" "}
             {/* Added mb-1 for spacing between list items */}
             <FaCheck className="mr-2" size={12} /> Choose to automatically
-            accept bids that meet your hidden price
+            accept bids that meet your hidden price preferences
           </li>
           <li className="mb-1 flex items-center text-gray-500">
             {" "}
             {/* Added mb-1 for spacing between list items */}
-            <FaCheck className="mr-2" size={12} /> Set rules for the offers
-            you&apos;ll allow, ignore the rest
+            <FaCheck className="mr-2" size={12} /> Set preferences for offers
+            you would consider, ignore the rest
           </li>
           <li className="flex items-center text-gray-500">
             <FaCheck className="mr-2" size={12} /> If Book It Now is off,
@@ -366,7 +364,7 @@ const HowItWorks = () => {
         <p className="mb-4 text-center font-semibold md:text-left">
           {" "}
           {/* Added mb-4 for consistent spacing */}
-          Never let a night sit empty.
+          Never let a night sit empty, always have options.
         </p>
         <div className="mt-6 flex items-center">
           {" "}
@@ -379,8 +377,9 @@ const HowItWorks = () => {
           {" "}
           {/* Added mt-2 for spacing from h4 */}
           Travelers specify their budget, dates, and preferences, and send a
-          request to every host on Tramona. Hosts have the option to accept,
-          deny, or counteroffer all requests.
+          request. That request is sent to all hosts on Tramona with an empty
+          night. Hosts have the option to accept, deny, or counteroffer all
+          requests.
         </p>
         <hr className="my-4 border-t border-gray-300" />
         <div className="mt-4 flex items-center">
@@ -400,8 +399,8 @@ const HowItWorks = () => {
             automatically respond to each match.
           </li>
           <li className="flex items-center text-gray-500">
-            <FaCheck className="mr-2" size={18} /> Set hidden rules to make
-            auto-matches on certain requests
+            <FaCheck className="mr-2" size={18} /> Flexibility to accept,
+            decline or counteroffer all requests.
           </li>
         </ul>
       </li>
@@ -640,11 +639,10 @@ const Features = () => {
         ))}
       </ul>
 
-      <div className="mt-12 text-center text-lg font-bold">Plus many more</div>
       <div className="mt-6 text-center text-lg font-bold">
         <Link href="">
           <Button size="lg" className="bg-primaryGreen text-white">
-            demo
+            Demo
           </Button>
         </Link>
       </div>

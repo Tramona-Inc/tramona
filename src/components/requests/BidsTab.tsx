@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, PackageOpenIcon, SearchIcon } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
@@ -8,14 +8,24 @@ import { api } from "@/utils/api";
 import TravelerRequestToBookCard from "../requests-to-book/TravelerRequestToBookCard";
 import EmptyStateValue from "../_common/EmptyStateSvg/EmptyStateValue";
 import RequestAndBidLoadingState from "./RequestAndBidLoadingState";
+import { useRouter } from "next/router";
+import BidConfirmationDialog from "../propertyPages/BidConfirmationDialog";
 
 function BidsTab() {
   const { data: requestsToBook, isLoading } =
     api.requestsToBook.getMyRequestsToBook.useQuery();
 
-  console.log(isLoading);
+  // redirect after placing a bid - confirmation logic
+  const router = useRouter();
+
+  const payment_intent = useMemo(
+    () => router.query.payment_intent as string,
+    [router.query.payment_intent],
+  );
+
   return (
     <div className="flex flex-col gap-y-3">
+      {payment_intent && <BidConfirmationDialog isOpen={true} />}
       <Link href="/">
         <Button variant="primary" className="max-w-fit">
           <SearchIcon className="-ml-1 size-5" />

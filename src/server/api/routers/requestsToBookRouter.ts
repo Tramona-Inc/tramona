@@ -14,6 +14,12 @@ import { z } from "zod";
 import { and, eq, inArray } from "drizzle-orm";
 import { properties } from "@/server/db/schema";
 import { zodInteger, zodString } from "@/utils/zod-utils";
+import { CitiesLatLong } from "../../../utils/store/cities-filter";
+import { hostTeamMembers } from "../../db/schema/tables/hostTeams";
+const MAX_RETRIES = 3; // set a max number of retries
+const INITIAL_DELAY = 500; // set a delay in milliseconds
+
+const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
 export const requestsToBookRouter = createTRPCRouter({
   create: protectedProcedure
@@ -65,6 +71,24 @@ export const requestsToBookRouter = createTRPCRouter({
             hostProfilePic: true,
             originalListingUrl: true,
             originalNightlyPrice: true,
+          },
+          with: {
+            hostTeam: {
+              with: {
+                owner: true,
+                members: {
+                  with: {
+                    user: {
+                      columns: {
+                        id: true,
+                        firstName: true,
+                        image: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
           },
         },
       },
@@ -337,5 +361,27 @@ export const requestsToBookRouter = createTRPCRouter({
       );
 
       return allPropertiesWithRequestToBook;
+    }),
+
+  getRequestToBookByPaymentIntentId: protectedProcedure
+    .input(z.object({ paymentIntentId: z.string() }))
+    .query(async ({ input }) => {
+      console.log(input.paymentIntentId);
+      console.log(input, "input");
+      const confirmedRequestToBookWithProperty =
+        await db.query.requestsToBook.findFirst({
+          where: eq(requestsToBook.paymentIntentId, input.paymentIntentId),
+          with: {
+            property: {
+              columns: {
+                latLngPoint: false,
+              },
+            },
+            madeByGroup: true,
+            hostTeam: true,
+          },
+        });
+      console.log(confirmedRequestToBookWithProperty, "test here");
+      return confirmedRequestToBookWithProperty;
     }),
 });

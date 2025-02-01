@@ -75,12 +75,12 @@ export default function ChatHeader({
                   >
                     <UserAvatar
                       size="md"
-                      name={capitalizeFirstLetter(participant.firstName!)}
+                      name={capitalizeFirstLetter(participant.firstName)}
                       image={participant.image}
                     />
                     <div className="flex flex-col">
                       <p className="font-medium">
-                        {capitalizeFirstLetter(participant.firstName!)}
+                        {capitalizeFirstLetter(participant.firstName)}
                       </p>
                     </div>
                   </div>

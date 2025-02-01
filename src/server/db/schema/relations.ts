@@ -231,18 +231,21 @@ export const hostReferralDiscountsRelations = relations(
   }),
 );
 
-export const conversationsRelations = relations(conversations, ({ many, one }) => ({
-  messages: many(messages),
-  participants: many(conversationParticipants),
-  property: one(properties, {
-    fields: [conversations.propertyId],
-    references: [properties.id],
+export const conversationsRelations = relations(
+  conversations,
+  ({ many, one }) => ({
+    messages: many(messages),
+    participants: many(conversationParticipants),
+    property: one(properties, {
+      fields: [conversations.propertyId],
+      references: [properties.id],
+    }),
+    request: one(requests, {
+      fields: [conversations.requestId],
+      references: [requests.id],
+    }),
   }),
-  request: one(requests, {
-    fields: [conversations.requestId],
-    references: [requests.id],
-  }),
-}));
+);
 
 export const messagesRelations = relations(messages, ({ one }) => ({
   conversation: one(conversations, {
@@ -318,6 +321,7 @@ export const hostTeamsRelations = relations(hostTeams, ({ one, many }) => ({
   members: many(hostTeamMembers),
   invites: many(hostTeamInvites),
   properties: many(properties),
+  requestsToBook: many(requestsToBook),
 }));
 
 export const hostTeamMembersRelations = relations(
@@ -483,6 +487,10 @@ export const requestsToBookRelations = relations(
     property: one(properties, {
       fields: [requestsToBook.propertyId],
       references: [properties.id],
+    }),
+    hostTeam: one(hostTeams, {
+      fields: [requestsToBook.hostTeamId],
+      references: [hostTeams.id],
     }),
     trips: many(trips),
   }),

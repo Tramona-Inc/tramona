@@ -15,6 +15,7 @@ import {
   axiosWithRetry,
   createInitialHostTeam,
   createLatLngGISPoint,
+  createOrFindInitalHostTeamId,
   getPropertyCalendar,
   proxyAgent,
 } from "@/server/server-utils";
@@ -28,6 +29,8 @@ import {
 } from "@/server/external-listings-scraping/scrapeAirbnbListing";
 import { airbnbHeaders } from "@/utils/constants";
 import { addDays } from "@/utils/utils";
+import { getHospitableReviewsByChanelId } from "@/utils/webhook-functions/hospitable-utils";
+
 export async function insertHost(id: string) {
   // Insert Host info
   const user = await db.query.users.findFirst({
@@ -158,7 +161,7 @@ const roomTypeMapping = {
   shared_room: "Shared room",
 } as const;
 
-interface ListingCreatedWebhook {
+export interface ListingCreatedWebhook {
   action: "listing.created";
   data: {
     platform_id: string;
@@ -193,7 +196,7 @@ interface ListingCreatedWebhook {
   };
 }
 
-interface ChannelActivatedWebhook {
+export interface ChannelActivatedWebhook {
   action: "channel.activated";
   data: {
     name: string;
@@ -222,18 +225,6 @@ type DateResponse = {
       };
     }[];
   };
-};
-
-type ReviewResponse = {
-  data: {
-    id: string;
-    platform_id: string;
-    reservation_platform_id: string;
-    detailed_ratings: {
-      rating: number;
-      comment: string;
-    }[];
-  }[];
 };
 
 type ReservationResponse = {
@@ -275,12 +266,12 @@ export default async function HospitableWebhook(
         const userId = webhookData.data.channel.customer.id;
 
         const user = await db.query.users
-        .findFirst({
-          where: eq(users.id, userId),
-        })
-        .then((res) => res!);
+          .findFirst({
+            where: eq(users.id, userId),
+          })
+          .then((res) => res!);
 
-      const initialTeamId = await createInitialHostTeam(user); //CREATING THE HOST TEAM ON LISTING INITIALIZATION
+        const teamId = await createOrFindInitalHostTeamId(user); //CREATING THE HOST TEAM ON LISTING INITIALIZATION
 
         const imageResponse = await axios.get<ImageResponse>(
           `https://connect.hospitable.com/api/v1/customers/${userId}/listings/${webhookData.data.id}/images`,
@@ -381,7 +372,7 @@ export default async function HospitableWebhook(
           cancellationPolicy = "Flexible";
         }
 
-        const amenities = getAmenities(listingData, listingId);
+        const amenities = await getAmenities(listingData, listingId);
 
         // const allReviews = (
         //   await axios.get<ReviewResponse>(
@@ -393,6 +384,13 @@ export default async function HospitableWebhook(
         //     },
         //   )
         // ).data;
+
+        const allReviews = await getHospitableReviewsByChanelId(
+          webhookData.data.channel.id,
+        );
+
+        console.log(allReviews);
+
         // const reviewsForProperty = allReviews.data.filter((review) => {
         //   return review.platform_id === listingId;
         // })[0];
@@ -414,10 +412,10 @@ export default async function HospitableWebhook(
           throw new Error(`Host profile not found for user ${userId}`);
         }
 
-        const propertyId = await db
+        const propertyId = await db //things to add 1.) checkin/out times 2.) reveiws 3.) pets 4.) additional Fees (Pets, guests fees )
           .insert(properties)
           .values({
-            hostTeamId: initialTeamId,
+            hostTeamId: teamId,
             propertyType: convertAirbnbPropertyType(
               webhookData.data.property_type,
             ),
@@ -445,6 +443,7 @@ export default async function HospitableWebhook(
             amenities: amenities,
             cancellationPolicy: cancellationPolicy,
             hospitableListingId: webhookData.data.id,
+            hospitableChannel: webhookData.data.channel.id,
             stateName: stateName,
             stateCode: stateCode,
             county: county,
