@@ -4,6 +4,11 @@ import { PropertyPageData } from "@/components/propertyPages/PropertyPage";
 import { isNumber } from "lodash";
 import { TRAVELER_MARKUP } from "../constants";
 
+//returns 3 very important variables
+//1. originalBasePrice
+//2.  calculatedBasePrice
+//3. calculatedTravelerPrice
+
 export const useGetOriginalPropertyPricing = ({
   property,
   checkIn,
@@ -83,7 +88,7 @@ export const useGetOriginalPropertyPricing = ({
 
   //Multiply be num of nights becuase original price should be total price ++ MARKUP
   let originalPrice = originalPricePerNight
-    ? Math.floor(originalPricePerNight * numNights * TRAVELER_MARKUP)
+    ? Math.floor(originalPricePerNight * numNights * TRAVELER_MARKUP) //change it because traveler markup should be last
     : originalPricePerNight;
 
   // <--------------------------------- DISCOUNTS HERE --------------------------------->
@@ -103,6 +108,9 @@ export const useGetOriginalPropertyPricing = ({
 
   // Return everything as undefined or valid values, but ensure hooks are always run
   return {
+    //------
+    //  ADD A NEW VARIABLE HERE WITH THE calculatedTravelerPrice which would incldue the additionalProperty fees
+    //------
     originalPrice, //we really only care about this
     originalPriceAfterTierDiscount,
     isLoading,
