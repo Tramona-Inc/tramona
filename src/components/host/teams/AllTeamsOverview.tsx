@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { api, RouterOutputs } from "@/utils/api";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,10 +24,13 @@ import {
 } from "@/components/ui/tooltip";
 import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 import { toast } from "@/components/ui/use-toast";
+import { PencilLine } from "lucide-react";
+import EditTeamNameDialog from "./EditTeamNameDialog";
 
 type HostTeam = RouterOutputs["hostTeams"]["getMyHostTeams"][number];
 
 function AllTeamsOverview() {
+  const [open, setOpen] = useState(false);
   const { currentHostTeamId, setCurrentHostTeam } = useHostTeamStore();
   const { data: hostTeams = [] } = api.hostTeams.getMyHostTeams.useQuery();
 
@@ -99,11 +102,23 @@ function AllTeamsOverview() {
             >
               {row.original.id === currentHostTeamId ? "Selected" : "Select"}
             </Button>
+            {row.original.id === currentHostTeamId && (
+              <Button onClick={() => setOpen(true)}>
+                <PencilLine />
+              </Button>
+            )}
+            {currentHostTeamId && (
+              <EditTeamNameDialog
+                open={open}
+                onOpenChange={setOpen}
+                currentHostTeamId={currentHostTeamId}
+              />
+            )}
           </div>
         ),
       },
     ],
-    [currentHostTeamId, setCurrentHostTeam],
+    [currentHostTeamId, open, setCurrentHostTeam],
   );
 
   const table = useReactTable({
