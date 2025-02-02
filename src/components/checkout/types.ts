@@ -5,7 +5,7 @@ export type RequestToBookProperty =
   RouterOutputs["requestsToBook"]["getMyRequestsToBook"]["activeRequestsToBook"][number]["property"];
 
 export type RequestToBookPricing = {
-  travelerOfferedPriceBeforeFees: number;
+  travelerOfferedPrice: number;
   datePriceFromAirbnb: number | null;
   discount: number;
 };

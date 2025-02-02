@@ -163,7 +163,7 @@ export const referralCodesRouter = createTRPCRouter({
           },
           offer: {
             columns: {
-              travelerOfferedPriceBeforeFees: true,
+              travelerOfferedPrice: true,
             },
           },
         },

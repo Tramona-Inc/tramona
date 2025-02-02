@@ -220,8 +220,7 @@ export default async function webhook(
                 .insert(tripCheckouts)
                 .values({
                   paymentIntentId,
-                  travelerOfferedPriceBeforeFees:
-                    offer.travelerOfferedPriceBeforeFees,
+                  travelerOfferedPrice: offer.travelerOfferedPrice,
                   totalTripAmount: priceBreakdown.totalTripAmount,
                   taxesPaid: priceBreakdown.taxesPaid,
                   superhogFee: priceBreakdown.superhogFee,

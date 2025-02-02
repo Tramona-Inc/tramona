@@ -14,7 +14,7 @@ export function offerToUnifiedCheckout({
 
   //first create the requestToBookPricing
   const pricing = {
-    travelerOfferedPriceBeforeFees: offer.travelerOfferedPriceBeforeFees,
+    travelerOfferedPrice: offer.travelerOfferedPrice,
     datePriceFromAirbnb: offer.datePriceFromAirbnb,
     discount: totalSavings,
   };
@@ -37,20 +37,20 @@ export function requestOrBookItNowToUnifiedData({
   checkIn,
   checkOut,
   numGuests,
-  travelerOfferedPriceBeforeFees,
+  travelerOfferedPrice,
   property,
   type,
 }: {
   checkIn: Date;
   checkOut: Date;
-  travelerOfferedPriceBeforeFees: number;
+  travelerOfferedPrice: number;
   numGuests: number;
   property: PropertyPageData;
   type: "bookItNow" | "requestToBook";
 }): UnifiedCheckoutData {
   //first create the requestToBookPricing
   const pricing = {
-    travelerOfferedPriceBeforeFees: travelerOfferedPriceBeforeFees,
+    travelerOfferedPrice: travelerOfferedPrice,
     datePriceFromAirbnb: 0,
     discount: 0,
   };

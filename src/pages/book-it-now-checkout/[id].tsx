@@ -42,7 +42,7 @@ export default function Page() {
   if (propertyPricing.error && !propertyPricing.isLoading) {
     return (
       <MainLayout>
-        <div className="min-h-screen-minus-header-n-footer mx-auto my-8 max-w-6xl sm:my-16">
+        <div className="mx-auto my-8 min-h-screen-minus-header-n-footer max-w-6xl sm:my-16">
           Something went wrong ...
         </div>
       </MainLayout>
@@ -55,14 +55,13 @@ export default function Page() {
         checkIn,
         checkOut,
         numGuests,
-        travelerOfferedPriceBeforeFees:
-          propertyPricing.originalPriceAfterTierDiscount!,
+        travelerOfferedPrice: propertyPricing.originalPriceAfterTierDiscount!,
         type: "bookItNow",
       })
     : null;
   return (
     <MainLayout>
-      <div className="min-h-screen-minus-header-n-footer mx-auto my-8 max-w-6xl sm:my-16">
+      <div className="mx-auto my-8 min-h-screen-minus-header-n-footer max-w-6xl sm:my-16">
         {unifiedCheckoutData && property ? (
           <UnifiedCheckout unifiedCheckoutData={unifiedCheckoutData} />
         ) : (

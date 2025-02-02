@@ -162,7 +162,7 @@ export async function sendEmailAndWhatsupConfirmation({
       address: property.address,
       propertyImageLink: property.imageUrls[0] ?? property.imageUrls[1] ?? "",
       tripDetailLink: `https://www.tramona.com/offers/${trip.id}`,
-      tramonaPrice: trip.tripCheckout.travelerOfferedPriceBeforeFees,
+      tramonaPrice: trip.tripCheckout.travelerOfferedPrice,
       totalPrice: trip.tripCheckout.totalTripAmount,
       numOfNights: numOfNights,
       serviceFee: serviceFee,

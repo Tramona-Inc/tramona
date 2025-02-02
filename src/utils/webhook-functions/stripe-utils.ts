@@ -213,7 +213,7 @@ export async function finalizeTrip({
     .insert(tripCheckouts)
     .values({
       paymentIntentId,
-      travelerOfferedPriceBeforeFees: travelerPriceBeforeFees,
+      travelerOfferedPrice: travelerPriceBeforeFees,
       totalTripAmount: priceBreakdown.totalTripAmount,
       taxesPaid: priceBreakdown.taxesPaid,
       superhogFee: priceBreakdown.superhogFee,

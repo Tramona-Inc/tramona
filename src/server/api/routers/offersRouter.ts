@@ -284,7 +284,7 @@ export const offersRouter = createTRPCRouter({
           acceptedAt: true,
           id: true,
           hostPayout: true,
-          travelerOfferedPriceBeforeFees: true,
+          travelerOfferedPrice: true,
         },
         with: {
           request: {
@@ -323,7 +323,7 @@ export const offersRouter = createTRPCRouter({
           propertyId: z.number(),
           totalBasePriceBeforeFees: z.number().min(1),
           hostPayout: z.number(),
-          travelerOfferedPriceBeforeFees: z.number(),
+          travelerOfferedPrice: z.number(),
         })
         .and(
           z.union([
@@ -917,7 +917,7 @@ export async function getOfferPageData(offerId: number) {
       propertyId: true,
       requestId: true,
       hostPayout: true,
-      travelerOfferedPriceBeforeFees: true,
+      travelerOfferedPrice: true,
       scrapeUrl: true,
       isAvailableOnOriginalSite: true,
       randomDirectListingDiscount: true,

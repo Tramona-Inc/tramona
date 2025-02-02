@@ -251,7 +251,7 @@ export const stripeRouter = createTRPCRouter({
         offerId: z.number().nullable(),
         scrapeUrl: z.string().nullable(),
         numOfGuests: z.number().nullable(),
-        travelerOfferedPriceBeforeFees: z.number(),
+        travelerOfferedPrice: z.number(),
         datePriceFromAirbnb: z.number().nullable(),
         checkIn: z.date(),
         checkOut: z.date(),
@@ -309,7 +309,7 @@ export const stripeRouter = createTRPCRouter({
           checkIn: input.checkIn,
           checkOut: input.checkOut,
         },
-        travelerPriceBeforeFees: input.travelerOfferedPriceBeforeFees,
+        travelerPriceBeforeFees: input.travelerOfferedPrice,
         property: curProperty,
       });
 
@@ -327,8 +327,7 @@ export const stripeRouter = createTRPCRouter({
         check_out: input.checkOut.toString(),
         property_id: input.propertyId,
         host_stripe_id: curProperty.hostTeam.owner.stripeConnectId,
-        traveler_offered_price_before_fees:
-          input.travelerOfferedPriceBeforeFees,
+        traveler_offered_price_before_fees: input.travelerOfferedPrice,
         price: paymentBreakdown.totalTripAmount, // Total price included tramona fee
         total_savings: paymentBreakdown.totalSavings,
         taxes_paid: paymentBreakdown.taxesPaid,

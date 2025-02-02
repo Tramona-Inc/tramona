@@ -37,7 +37,7 @@ export type RequestToBookDetails = {
   checkIn: Date;
   checkOut: Date;
   numGuests: number;
-  travelerOfferedPriceBeforeFees?: number;
+  travelerOfferedPrice?: number;
 };
 
 export default function RequestToBookOrBookNowPriceCard({

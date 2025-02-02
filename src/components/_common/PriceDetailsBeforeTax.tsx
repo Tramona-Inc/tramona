@@ -53,7 +53,7 @@ export default function PriceDetailsBeforeTax({
 
   let priceWithApplicableDiscount;
   if (requestToBook && property) {
-    const applicableDiscount = getApplicableBookItNowDiscount();
+    const applicableDiscount = getApplicableBookItNowDiscount(property);
 
     if (applicableDiscount && applicableDiscount > 0) {
       priceWithApplicableDiscount =
@@ -69,7 +69,7 @@ export default function PriceDetailsBeforeTax({
     }
   }
 
-  const travelerOfferedPriceBeforeFees = getTravelerOfferedPrice({
+  const travelerOfferedPrice = getTravelerOfferedPrice({
     totalBasePriceBeforeFees: priceWithApplicableDiscount ?? scrapedPrice,
     travelerMarkup: TRAVELER_MARKUP,
   });
@@ -82,7 +82,7 @@ export default function PriceDetailsBeforeTax({
             requestToBook.checkIn,
             requestToBook.checkOut,
           );
-          const nightly = travelerOfferedPriceBeforeFees / nights;
+          const nightly = travelerOfferedPrice / nights;
           setPriceDetails({
             numberOfNights: nights,
             nightlyPrice: nightly,
@@ -90,7 +90,7 @@ export default function PriceDetailsBeforeTax({
 
           const payment = breakdownPaymentByOffer({
             scrapeUrl: property.originalListingPlatform ?? null,
-            travelerOfferedPriceBeforeFees,
+            travelerOfferedPrice,
             datePriceFromAirbnb: scrapedPrice,
             checkIn: requestToBook.checkIn,
             checkOut: requestToBook.checkOut,
@@ -100,7 +100,7 @@ export default function PriceDetailsBeforeTax({
           setBrokeDownPayment(payment);
         } else if (offer) {
           const nights = getNumNights(offer.checkIn, offer.checkOut);
-          const nightly = offer.travelerOfferedPriceBeforeFees / nights;
+          const nightly = offer.travelerOfferedPrice / nights;
           setPriceDetails({
             numberOfNights: nights,
             nightlyPrice: nightly,
@@ -120,13 +120,7 @@ export default function PriceDetailsBeforeTax({
     };
 
     void calculatePayment();
-  }, [
-    requestToBook,
-    property,
-    offer,
-    scrapedPrice,
-    travelerOfferedPriceBeforeFees,
-  ]);
+  }, [requestToBook, property, offer, scrapedPrice, travelerOfferedPrice]);
 
   if (loading) {
     return <div>Loading price details...</div>;

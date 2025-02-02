@@ -33,14 +33,13 @@ const CustomStripeCheckoutContainer = ({
           checkOut: unifiedCheckoutData.dates.checkOut,
         },
         travelerPriceBeforeFees:
-          unifiedCheckoutData.pricing.travelerOfferedPriceBeforeFees,
+          unifiedCheckoutData.pricing.travelerOfferedPrice,
         property: unifiedCheckoutData.property,
       });
 
       return await authorizePayment.mutateAsync({
         totalAmountPaid: totalTripAmount,
-        travelerOfferedPriceBeforeFees:
-          unifiedCheckoutData.pricing.travelerOfferedPriceBeforeFees,
+        travelerOfferedPrice: unifiedCheckoutData.pricing.travelerOfferedPrice,
         cancelUrl: pathname,
         propertyId: unifiedCheckoutData.property.id,
         offerId: unifiedCheckoutData.offerId ?? null,

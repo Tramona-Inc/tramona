@@ -44,14 +44,13 @@ export default function Page() {
   // ----------------
 
   const unifiedCheckoutData =
-    property && propertyPricing.originalPriceAfterTierDiscount
+    property && propertyPricing.calculatedTravelerPrice
       ? requestOrBookItNowToUnifiedData({
           property,
           checkIn,
           checkOut,
           numGuests,
-          travelerOfferedPriceBeforeFees:
-            propertyPricing.originalPriceAfterTierDiscount,
+          travelerOfferedPrice: propertyPricing.calculatedTravelerPrice,
           type: "requestToBook",
         })
       : null;

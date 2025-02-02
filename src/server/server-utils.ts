@@ -949,7 +949,7 @@ export async function updateTravelerandHostMarkup({
   await db
     .update(offers)
     .set({
-      travelerOfferedPriceBeforeFees: travelerPrice,
+      travelerOfferedPrice: travelerPrice,
       hostPayout: hostPay,
     })
     .where(and(eq(offers.id, offerId), isNull(offers.acceptedAt)));

@@ -27,22 +27,21 @@ export function UnifiedPriceDetails({
     unifiedCheckoutData.dates.checkOut,
   );
   const nightlyPrice =
-    unifiedCheckoutData.pricing.travelerOfferedPriceBeforeFees / numberOfNights;
+    unifiedCheckoutData.pricing.travelerOfferedPrice / numberOfNights;
 
   const paymentBreakdown = breakdownPaymentByPropertyAndTripParams({
     dates: {
       checkIn: unifiedCheckoutData.dates.checkIn,
       checkOut: unifiedCheckoutData.dates.checkOut,
     },
-    travelerPriceBeforeFees:
-      unifiedCheckoutData.pricing.travelerOfferedPriceBeforeFees,
+    travelerPriceBeforeFees: unifiedCheckoutData.pricing.travelerOfferedPrice,
     property: unifiedCheckoutData.property,
   });
 
   const items = [
     {
       title: `${formatCurrency(nightlyPrice)} x ${plural(numberOfNights, "night")}`,
-      price: `${formatCurrency(unifiedCheckoutData.pricing.travelerOfferedPriceBeforeFees)}`,
+      price: `${formatCurrency(unifiedCheckoutData.pricing.travelerOfferedPrice)}`,
     },
     {
       title: "Cleaning fee",
