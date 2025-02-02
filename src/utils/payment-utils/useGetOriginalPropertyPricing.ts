@@ -1,5 +1,8 @@
 import { api } from "@/utils/api";
-import { getNumNights, getApplicableBookItNowDiscount } from "@/utils/utils";
+import {
+  getNumNights,
+  getApplicableBookItNowAndRequestToBookDiscountPercentage,
+} from "@/utils/utils";
 import { PropertyPageData } from "@/components/propertyPages/PropertyPage";
 import { isNumber } from "lodash";
 import { TRAVELER_MARKUP } from "../constants";
@@ -99,7 +102,7 @@ export const useGetOriginalPropertyPricing = ({
   }
   //2.)apply discount tier discounts
   const hostDiscount = isHospitable //hostDiscount = percent off
-    ? getApplicableBookItNowDiscount(property)
+    ? getApplicableBookItNowAndRequestToBookDiscountPercentage(property)
     : undefined;
 
   calculatedBasePrice = calculatedBasePrice

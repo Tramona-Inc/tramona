@@ -5,7 +5,7 @@ import { RouterOutputs } from "@/utils/api";
 import { api } from "@/utils/api";
 import {
   formatDateMonthDayYear,
-  getApplicableBookItNowDiscount,
+  getApplicableBookItNowAndRequestToBookDiscountPercentage,
 } from "@/utils/utils";
 import Link from "next/link";
 import { useMemo } from "react";

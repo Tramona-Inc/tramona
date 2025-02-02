@@ -2,6 +2,7 @@ import { breakdownPaymentByOffer } from "@/utils/payment-utils/paymentBreakdown"
 import { UnifiedCheckoutData } from "./types";
 import { RouterOutputs } from "@/utils/api";
 import { PropertyPageData } from "../propertyPages/PropertyPage";
+import { getApplicableBookItNowAndRequestToBookDiscountPercentage } from "@/utils/utils";
 
 type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 
@@ -52,7 +53,8 @@ export function requestOrBookItNowToUnifiedData({
   const pricing = {
     travelerOfferedPrice: travelerOfferedPrice,
     datePriceFromAirbnb: 0,
-    discount: 0,
+    discount:
+      getApplicableBookItNowAndRequestToBookDiscountPercentage(property),
   };
 
   return {

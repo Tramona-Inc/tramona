@@ -1,7 +1,7 @@
 import { Separator } from "../ui/separator";
 import {
   formatCurrency,
-  getApplicableBookItNowDiscount,
+  getApplicableBookItNowAndRequestToBookDiscountPercentage,
   getNumNights,
   getTravelerOfferedPrice,
 } from "@/utils/utils";
@@ -53,7 +53,8 @@ export default function PriceDetailsBeforeTax({
 
   let priceWithApplicableDiscount;
   if (requestToBook && property) {
-    const applicableDiscount = getApplicableBookItNowDiscount(property);
+    const applicableDiscount =
+      getApplicableBookItNowAndRequestToBookDiscountPercentage(property);
 
     if (applicableDiscount && applicableDiscount > 0) {
       priceWithApplicableDiscount =

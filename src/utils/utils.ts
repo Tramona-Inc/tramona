@@ -818,7 +818,7 @@ export function removeTax(total: number, taxRate: number): number {
   return amountWithoutTax;
 }
 
-export const getApplicableBookItNowDiscount = (
+export const getApplicableBookItNowAndRequestToBookDiscountPercentage = (
   property: Pick<Property, "bookItNowHostDiscountPercentOffInput">,
 ) => {
   const discountPercentage = property.bookItNowHostDiscountPercentOffInput;
