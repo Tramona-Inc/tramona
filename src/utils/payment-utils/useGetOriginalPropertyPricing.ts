@@ -3,6 +3,7 @@ import { getNumNights, getApplicableBookItNowDiscount } from "@/utils/utils";
 import { PropertyPageData } from "@/components/propertyPages/PropertyPage";
 import { isNumber } from "lodash";
 import { TRAVELER_MARKUP } from "../constants";
+import { getAdditionalFees } from "./payment-utils";
 
 //returns 3 very important variables
 //1. originalBasePrice
@@ -62,6 +63,8 @@ export const useGetOriginalPropertyPricing = ({
   console.log("casamundoPrice", casamundoPrice);
   const isCasamundoPriceLoading = false;
 
+  // To retreive additionalFees
+
   // Reserved dates
   const { data: bookedDates } = api.calendar.getReservedDates.useQuery(
     {
@@ -72,12 +75,13 @@ export const useGetOriginalPropertyPricing = ({
     },
   );
 
-  // Calculate original price per night
-  const originalBasePrice = isHospitable
-    ? hostPricePerNight
-    : isNumber(casamundoPrice)
-      ? casamundoPrice
-      : undefined;
+  // unifiying data.
+  const originalBasePrice = // price of all nights!
+    isHospitable && hostPricePerNight
+      ? hostPricePerNight * numNights
+      : isNumber(casamundoPrice)
+        ? casamundoPrice
+        : undefined;
 
   // Aggregate loading states
   const isLoading = isHospitable ? isHostPriceLoading : isCasamundoPriceLoading;
@@ -98,19 +102,30 @@ export const useGetOriginalPropertyPricing = ({
     ? getApplicableBookItNowDiscount()
     : undefined;
 
-  const calculatedBasePriceAfterTierDiscount = calculatedBasePrice
-    ? calculatedBasePrice * (1 - (hostDiscount ?? 0) / 100)
+  calculatedBasePrice = calculatedBasePrice
+    ? calculatedBasePrice * (1 - (hostDiscount ?? 0) / 100) //dont mind lint error becuase there is nothing inside getApplicatbleBookItNowDiscount();
+    : undefined;
+
+  // < ----------------------- GET THE calculatedTravelerPrice. (calculatedPricePerNight  * travelerMarkup ) + additional Fees  ------------------------------------- >
+  const additionalFees = getAdditionalFees({
+    property: property!,
+    numOfNights: numNights,
+    numOfGuests: numGuests,
+    numOfPets: 0,
+  });
+
+  const calculatedTravelerPrice = calculatedBasePrice
+    ? calculatedBasePrice * TRAVELER_MARKUP + additionalFees.totalAdditionalFees
     : undefined;
 
   // Return everything as undefined or valid values, but ensure hooks are always run
   return {
     //------
     //  ADD A NEW VARIABLE HERE WITH THE calculatedTravelerPrice which would incldue the additionalProperty fees
-    //------
+    //------PRICE OF ALL NIGHTS NOT SINGLE
+    originalBasePrice,
     calculatedBasePrice, //we really only care about this
-    calculatedBasePriceAfterTierDiscount,
-    hostPricePerNight: isHospitable ? hostPricePerNight : undefined, // note: used if you want prices without modification
-
+    calculatedTravelerPrice,
     //casamundo variables
     casamundoPrice: isHospitable ? undefined : casamundoPrice, //REVISIT ONCE SCRAPER IS FIXED  note: used if you want prices without modification
     // other nonpricing variables
