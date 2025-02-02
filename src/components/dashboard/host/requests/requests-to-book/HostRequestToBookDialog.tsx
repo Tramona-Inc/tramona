@@ -65,7 +65,7 @@ export default function HostRequestToBookDialog({
                   <div className="flex flex-col items-start">
                     <div className="text-dark text-lg font-bold">
                       {formatCurrency(
-                        requestToBook.baseAmountBeforeFees /
+                        requestToBook.calculatedBasePrice /
                           getNumNights(
                             requestToBook.checkIn,
                             requestToBook.checkOut,
@@ -74,7 +74,7 @@ export default function HostRequestToBookDialog({
                       /night
                     </div>
                     <div className="text-sm text-gray-600">
-                      {formatCurrency(requestToBook.baseAmountBeforeFees)} total
+                      {formatCurrency(requestToBook.calculatedBasePrice)} total
                     </div>
                   </div>
                   <div className="flex flex-col items-center">
@@ -162,7 +162,7 @@ export default function HostRequestToBookDialog({
                       By accepting this price, you will be paid{" "}
                       <span className="font-semibold text-black">
                         {formatCurrency(
-                          getHostPayout(requestToBook.baseAmountBeforeFees),
+                          getHostPayout(requestToBook.calculatedBasePrice),
                         )}{" "}
                       </span>
                       all-in

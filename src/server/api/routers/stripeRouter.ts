@@ -410,8 +410,7 @@ export const stripeRouter = createTRPCRouter({
         //trip and tripcheckout creattion, superhog, and sending notifcations
         paymentIntentId: curRequestToBook.paymentIntentId,
         numOfGuests: curRequestToBook.numGuests,
-        travelerPriceBeforeFees:
-          curRequestToBook.amountAfterTravelerMarkupAndBeforeFees, //markup already happened
+        travelerPriceBeforeFees: curRequestToBook.calculatedTravelerPrice, //markup already happened
         checkIn: curRequestToBook.checkIn,
         checkOut: curRequestToBook.checkOut,
         propertyId: curRequestToBook.propertyId,

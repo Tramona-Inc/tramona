@@ -383,8 +383,8 @@ export async function createRequestToBook({
     checkIn,
     checkOut,
     numGuests: numOfGuests,
-    baseAmountBeforeFees: removeTravelerMarkup(travelerPriceBeforeFees),
-    amountAfterTravelerMarkupAndBeforeFees: Math.floor(travelerPriceBeforeFees),
+    calculatedBasePrice: removeTravelerMarkup(travelerPriceBeforeFees),
+    calculatedTravelerPrice: Math.floor(travelerPriceBeforeFees),
     isDirectListing: isDirectListingCharge,
   });
 
