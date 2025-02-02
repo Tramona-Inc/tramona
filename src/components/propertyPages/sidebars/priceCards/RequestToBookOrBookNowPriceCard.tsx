@@ -130,6 +130,7 @@ export default function RequestToBookOrBookNowPriceCard({
     checkOut: initialRequestToBook.checkOut,
   });
   const [showPriceBreakdown, setShowPriceBreakdown] = useState<boolean>(false);
+  const [hasOpenedRequestInput, setHasOpenedRequestInput] = useState(false);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [showRequestInput, setShowRequestInput] = useState(false);
 
@@ -144,6 +145,12 @@ export default function RequestToBookOrBookNowPriceCard({
       ? formatCurrency(calculatedTravelerPricePerNightWithoutFees)
       : "",
   ); // Raw input for typing
+
+  //price that isnt affecting the additioanlFees
+  const [discountedPriceInfo, setDiscountedPriceInfo] = useState<{
+    discountedTravelerPricePerNightWithoutFees?: number;
+    finalDiscountedTravelerPrice?: number;
+  }>({});
 
   useEffect(() => {
     if (query.checkIn && query.checkOut && query.numGuests) {
@@ -221,19 +228,40 @@ export default function RequestToBookOrBookNowPriceCard({
   ];
 
   useEffect(() => {
-    if (showRequestInput) {
+    if (
+      showRequestInput &&
+      calculatedTravelerPricePerNightWithoutFees !== undefined &&
+      propertyPricing.additionalFees.totalAdditionalFees !== undefined
+    ) {
       const newPercentage = Math.round(
-        ((calculatedTravelerPricePerNightWithoutFees! - requestAmount!) /
-          calculatedTravelerPricePerNightWithoutFees!) *
+        ((calculatedTravelerPricePerNightWithoutFees - requestAmount!) /
+          calculatedTravelerPricePerNightWithoutFees) *
           100,
       );
       setRequestPercentage(Math.max(minDiscount, Math.min(newPercentage)));
+
+      // Calculate discounted base price per night (already in requestAmount)
+      const discountedBasePricePerNight = requestAmount!;
+
+      // Calculate final discounted price (discounted base price * num nights + original fees)
+      const finalDiscountedPrice =
+        discountedBasePricePerNight * numOfNights +
+        propertyPricing.additionalFees.totalAdditionalFees;
+
+      setDiscountedPriceInfo({
+        discountedTravelerPricePerNightWithoutFees: discountedBasePricePerNight, // This is requestAmount
+        finalDiscountedTravelerPrice: finalDiscountedPrice,
+      });
+    } else {
+      setDiscountedPriceInfo({});
     }
   }, [
     showRequestInput,
     requestAmount,
     calculatedTravelerPricePerNightWithoutFees,
     maxDiscount,
+    numOfNights,
+    propertyPricing.additionalFees.totalAdditionalFees,
   ]);
 
   const handleRequestChange = useCallback(
@@ -272,14 +300,27 @@ export default function RequestToBookOrBookNowPriceCard({
   };
 
   const handleSliderChange = (value: number[]) => {
+    const newPercentage = value[0]!;
+    setRequestPercentage(newPercentage);
+
     const newRequestAmount = Math.round(
-      calculatedTravelerPricePerNightWithoutFees! * (1 - value[0]! / 100),
+      calculatedTravelerPricePerNightWithoutFees! * (1 - newPercentage / 100),
     );
-    setRequestAmount(newRequestAmount);
-    setRawRequestAmount(formatCurrency(newRequestAmount));
-    setRequestPercentage(value[0]!);
+    setRequestAmount(newRequestAmount); // Update requestAmount with per night base price
+    setRawRequestAmount(formatCurrency(newRequestAmount)); // Keep raw input updated (though we might change this later)
     setSelectedPreset(null);
     setErrorState({});
+
+    // Calculate final discounted price (discounted base price * num nights + original fees)
+    const discountedBasePricePerNight = newRequestAmount;
+    const finalDiscountedPrice =
+      discountedBasePricePerNight * numOfNights +
+      propertyPricing.additionalFees.totalAdditionalFees;
+
+    setDiscountedPriceInfo({
+      discountedTravelerPricePerNightWithoutFees: discountedBasePricePerNight,
+      finalDiscountedTravelerPrice: finalDiscountedPrice,
+    });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -311,21 +352,60 @@ export default function RequestToBookOrBookNowPriceCard({
     return "Lower chance of acceptance";
   };
 
-  const handlePresetSelect = (price: number) => {
-    setRequestAmount(price);
-    setRawRequestAmount(formatCurrency(price)); // Update raw input state
+  const handlePresetSelect = useCallback(
+    (price: number) => {
+      // `price` here is still the per night discounted base price from presetOptions
+      setRequestAmount(price); // Set requestAmount to per night base price
+      setRawRequestAmount(formatCurrency(price));
+      const newPercentage = Math.round(
+        ((calculatedTravelerPricePerNightWithoutFees! - price) /
+          calculatedTravelerPricePerNightWithoutFees!) *
+          100,
+      );
+      setRequestPercentage(
+        Math.max(minDiscount, Math.min(newPercentage, maxDiscount)),
+      );
+      setSelectedPreset(price);
+      setErrorState({});
 
-    const newPercentage = Math.round(
-      ((calculatedTravelerPricePerNightWithoutFees! - price) /
-        calculatedTravelerPricePerNightWithoutFees!) *
-        100,
-    );
-    setRequestPercentage(
-      Math.max(minDiscount, Math.min(newPercentage, maxDiscount)),
-    );
-    setSelectedPreset(price);
-    setErrorState({});
-  };
+      // Calculate final discounted price (discounted base price * num nights + original fees)
+      const discountedBasePricePerNight = price;
+      const finalDiscountedPrice =
+        discountedBasePricePerNight * numOfNights +
+        propertyPricing.additionalFees.totalAdditionalFees;
+
+      setDiscountedPriceInfo({
+        discountedTravelerPricePerNightWithoutFees: discountedBasePricePerNight,
+        finalDiscountedTravelerPrice: finalDiscountedPrice,
+      });
+    },
+    [
+      calculatedTravelerPricePerNightWithoutFees,
+      maxDiscount,
+      numOfNights,
+      propertyPricing.additionalFees.totalAdditionalFees,
+    ],
+  );
+
+  // Check if showRequestInput is now true AND it's the first time
+  useEffect(() => {
+    if (showRequestInput && !hasOpenedRequestInput) {
+      // Get the price of the first preset option (Buy Now/Original Price)
+      const firstPresetPrice = presetOptions[0]?.price;
+
+      if (firstPresetPrice !== undefined) {
+        handlePresetSelect(firstPresetPrice); // Programmatically select the first preset
+        setSelectedPreset(firstPresetPrice); // Optionally, visually highlight it as selected right away
+      }
+
+      setHasOpenedRequestInput(true); // Mark that request input has been opened once
+    }
+  }, [
+    showRequestInput,
+    hasOpenedRequestInput,
+    presetOptions,
+    handlePresetSelect,
+  ]);
 
   return (
     <Card className="w-full bg-gray-50 shadow-lg">
@@ -459,8 +539,16 @@ export default function RequestToBookOrBookNowPriceCard({
                 >
                   <div className="lg:text-md text-sm font-bold">
                     {formatCurrency(
-                      calculatedTravelerPricePerNightWithoutFees! *
-                        ((100 - option.percentOff) / 100),
+                      (() => {
+                        const discountedBasePricePerNight =
+                          calculatedTravelerPricePerNightWithoutFees! *
+                          ((100 - option.percentOff) / 100);
+                        const finalPricePerNight =
+                          discountedBasePricePerNight +
+                          propertyPricing.additionalFees.totalAdditionalFees /
+                            numOfNights; // Add fees PER NIGHT
+                        return finalPricePerNight;
+                      })(),
                     )}
                   </div>
                   <div className="text-xs leading-5 text-muted-foreground lg:text-sm">
@@ -485,11 +573,18 @@ export default function RequestToBookOrBookNowPriceCard({
                     <div className="flex flex-row items-end gap-x-2">
                       <Input
                         placeholder="Enter request"
-                        value={rawRequestAmount}
+                        value={
+                          discountedPriceInfo.finalDiscountedTravelerPrice
+                            ? formatCurrency(
+                                discountedPriceInfo.finalDiscountedTravelerPrice /
+                                  numOfNights,
+                              ) // Display final price PER NIGHT in input
+                            : rawRequestAmount // Fallback if no discounted price yet
+                        }
                         onChange={handleRequestChange}
                         onBlur={handleRequestBlur}
                         className="pl-7"
-                        disabled
+                        disabled // Keep disabled for now, as direct input might be complex to handle with fees
                         onKeyDown={handleKeyDown}
                       />
                       <p className="text-xs italic leading-tight text-muted-foreground">
@@ -594,7 +689,7 @@ export default function RequestToBookOrBookNowPriceCard({
                       btnSize="sm"
                       requestToBook={requestToBook}
                       property={property}
-                      requestPercentage={requestPercentage} // we are getting the request price by using the percentage and saving that in the url for the checkout to get the price
+                      requestPercentage={requestPercentage}
                       invalidInput={
                         !rawRequestAmount ||
                         !requestAmount ||
@@ -602,6 +697,7 @@ export default function RequestToBookOrBookNowPriceCard({
                         requestAmount >
                           calculatedTravelerPricePerNightWithoutFees
                       }
+                      // requestPrice={discountedPriceInfo.finalDiscountedTravelerPrice} // Pass the final discounted price
                     />
                   )}
                   <Button
@@ -626,11 +722,14 @@ export default function RequestToBookOrBookNowPriceCard({
           propertyPricing.calculatedTravelerPrice ? (
           <>
             <div>
-              <div className="mb-1 text-2xl font-bold">Book it now for</div>
+              <div className="mb-1 text-2xl font-bold">
+                {showRequestInput ? "Request to book for" : "Book it now for"}
+              </div>
               <div className="flex flex-col gap-2 sm:flex-row sm:items-baseline">
                 <div className="text-4xl font-bold text-primary lg:text-5xl">
                   {propertyPricing.amountSaved !== undefined &&
-                  propertyPricing.amountSaved > 0 ? (
+                  propertyPricing.amountSaved > 0 &&
+                  !showRequestInput ? ( // Only show original price strikethrough when NOT in request input and discount exists
                     <div className="flex flex-col gap-2 text-base sm:flex-row sm:items-start">
                       <p className="text-3xl">
                         {formatCurrency(
@@ -640,13 +739,19 @@ export default function RequestToBookOrBookNowPriceCard({
                       <p className="text-muted-foreground line-through">
                         {formatCurrency(
                           propertyPricing.calculatedTravelerPrice +
-                            propertyPricing.amountSaved, //pricebefore the discount
+                            propertyPricing.amountSaved,
                         )}
                       </p>
                     </div>
                   ) : (
                     <span>
-                      {formatCurrency(propertyPricing.calculatedTravelerPrice)}
+                      {formatCurrency(
+                        showRequestInput &&
+                          discountedPriceInfo.finalDiscountedTravelerPrice !==
+                            undefined
+                          ? discountedPriceInfo.finalDiscountedTravelerPrice // Display discounted price if available and in request mode
+                          : propertyPricing.calculatedTravelerPrice, // Otherwise display original calculated price
+                      )}
                     </span>
                   )}
                 </div>
@@ -680,7 +785,13 @@ export default function RequestToBookOrBookNowPriceCard({
                 <PriceBreakdown
                   requestToBookDetails={requestToBook}
                   property={property}
-                  requestAmount={requestAmount! * numOfNights}
+                  requestAmount={
+                    showRequestInput &&
+                    discountedPriceInfo.finalDiscountedTravelerPrice !==
+                      undefined
+                      ? discountedPriceInfo.finalDiscountedTravelerPrice
+                      : propertyPricing.calculatedTravelerPrice
+                  }
                 />
               )}
             </div>
@@ -752,7 +863,7 @@ export default function RequestToBookOrBookNowPriceCard({
               <div className="mb-1 text-2xl font-bold">Request to book for</div>
               <div className="flex items-baseline gap-2">
                 <div className="text-4xl font-bold text-primary lg:text-5xl">
-                  {formatCurrency(calculatedTravelerPricePerNightWithoutFees!)}
+                  {formatCurrency(propertyPricing.calculatedTravelerPrice!)}
                 </div>
                 <span className="text-xl text-muted-foreground">Per Night</span>
               </div>
