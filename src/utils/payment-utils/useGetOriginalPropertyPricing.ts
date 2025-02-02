@@ -111,7 +111,7 @@ export const useGetOriginalPropertyPricing = ({
     property: property!,
     numOfNights: numNights,
     numOfGuests: numGuests,
-    numOfPets: 0,
+    numOfPets: 0, //zero since feature isnt implemented yet
   });
 
   const calculatedTravelerPrice = calculatedBasePrice
@@ -120,9 +120,8 @@ export const useGetOriginalPropertyPricing = ({
 
   // Return everything as undefined or valid values, but ensure hooks are always run
   return {
-    //------
-    //  ADD A NEW VARIABLE HERE WITH THE calculatedTravelerPrice which would incldue the additionalProperty fees
     //------PRICE OF ALL NIGHTS NOT SINGLE
+    additionalFees,
     originalBasePrice,
     calculatedBasePrice, //we really only care about this
     calculatedTravelerPrice,
