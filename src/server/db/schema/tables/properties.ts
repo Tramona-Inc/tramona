@@ -478,6 +478,11 @@ export const bookedDates = pgTable(
       columns: [t.date, t.propertyId],
     }),
     propertyidIdx: index().on(t.propertyId),
+    dateIdx: index("booked_dates_date_idx").on(t.date),
+    propertyIdDateIdx: index("booked_dates_property_date_idx").on(
+      t.propertyId,
+      t.date,
+    ),
   }),
 );
 

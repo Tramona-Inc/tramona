@@ -622,33 +622,31 @@ export default function RequestToBookOrBookNowPriceCard({
             <Skeleton className="h-4 w-1/3" />
             <Skeleton className="h-10 w-full" />
           </div>
-        ) : isNumber(calculatedTravelerPricePerNightWithoutFees) ? (
+        ) : isNumber(calculatedTravelerPricePerNightWithoutFees) &&
+          propertyPricing.calculatedTravelerPrice ? (
           <>
             <div>
               <div className="mb-1 text-2xl font-bold">Book it now for</div>
               <div className="flex flex-col gap-2 sm:flex-row sm:items-baseline">
                 <div className="text-4xl font-bold text-primary lg:text-5xl">
-                  {calculatedTravelerPricePerNightWithoutFees &&
-                  propertyPricing.calculatedTravelerPrice &&
-                  calculatedTravelerPricePerNightWithoutFees <
-                    propertyPricing.calculatedTravelerPrice / numOfNights ? (
+                  {propertyPricing.amountSaved !== undefined &&
+                  propertyPricing.amountSaved > 0 ? (
                     <div className="flex flex-col gap-2 text-base sm:flex-row sm:items-start">
                       <p className="text-3xl">
                         {formatCurrency(
-                          calculatedTravelerPricePerNightWithoutFees,
+                          propertyPricing.calculatedTravelerPrice,
                         )}
                       </p>
                       <p className="text-muted-foreground line-through">
                         {formatCurrency(
-                          propertyPricing.calculatedTravelerPrice / numOfNights,
+                          propertyPricing.calculatedTravelerPrice +
+                            propertyPricing.amountSaved, //pricebefore the discount
                         )}
                       </p>
                     </div>
                   ) : (
                     <span>
-                      {formatCurrency(
-                        calculatedTravelerPricePerNightWithoutFees,
-                      )}
+                      {formatCurrency(propertyPricing.calculatedTravelerPrice)}
                     </span>
                   )}
                 </div>

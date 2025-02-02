@@ -49,16 +49,17 @@ export default function Page() {
     );
   }
 
-  const unifiedCheckoutData = property
-    ? requestOrBookItNowToUnifiedData({
-        property,
-        checkIn,
-        checkOut,
-        numGuests,
-        travelerOfferedPrice: propertyPricing.originalPriceAfterTierDiscount!,
-        type: "bookItNow",
-      })
-    : null;
+  const unifiedCheckoutData =
+    property && propertyPricing.calculatedTravelerPrice
+      ? requestOrBookItNowToUnifiedData({
+          property,
+          checkIn,
+          checkOut,
+          numGuests,
+          travelerOfferedPrice: propertyPricing.calculatedTravelerPrice,
+          type: "bookItNow",
+        })
+      : null;
   return (
     <MainLayout>
       <div className="mx-auto my-8 min-h-screen-minus-header-n-footer max-w-6xl sm:my-16">

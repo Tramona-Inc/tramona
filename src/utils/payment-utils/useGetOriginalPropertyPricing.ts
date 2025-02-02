@@ -86,6 +86,8 @@ export const useGetOriginalPropertyPricing = ({
         ? casamundoPrice
         : undefined;
 
+  console.log(originalBasePrice);
+
   // Aggregate loading states
   const isLoading = isHospitable ? isHostPriceLoading : isCasamundoPriceLoading;
   const error =
@@ -95,19 +97,26 @@ export const useGetOriginalPropertyPricing = ({
 
   // 1.) apply traveler requested bid amount if request to book
 
-  let calculatedBasePrice: number | undefined;
+  let calculatedBasePrice: number | undefined = 0;
 
-  if (requestPercentage && originalBasePrice) {
-    calculatedBasePrice = originalBasePrice * (1 - requestPercentage / 100);
+  if (originalBasePrice) {
+    calculatedBasePrice = requestPercentage
+      ? originalBasePrice * (1 - requestPercentage / 100)
+      : originalBasePrice;
   }
   //2.)apply discount tier discounts
-  const hostDiscount = isHospitable //hostDiscount = percent off
+  const hostDiscountPercentage = isHospitable //hostDiscountPercentage = percent off
     ? getApplicableBookItNowAndRequestToBookDiscountPercentage(property)
     : undefined;
 
-  calculatedBasePrice = calculatedBasePrice
-    ? calculatedBasePrice * (1 - (hostDiscount ?? 0) / 100) //dont mind lint error becuase there is nothing inside getApplicatbleBookItNowDiscount();
-    : undefined;
+  let amountSaved: number | undefined;
+  if (originalBasePrice && hostDiscountPercentage) {
+    amountSaved = originalBasePrice * (hostDiscountPercentage / 100);
+  }
+  console.log(amountSaved);
+
+  calculatedBasePrice =
+    calculatedBasePrice * (1 - (hostDiscountPercentage ?? 0) / 100);
 
   // < ----------------------- GET THE calculatedTravelerPrice. (calculatedPricePerNight  * travelerMarkup ) + additional Fees  ------------------------------------- >
   const additionalFees = getAdditionalFees({
@@ -116,11 +125,14 @@ export const useGetOriginalPropertyPricing = ({
     numOfGuests: numGuests,
     numOfPets: 0, //zero since feature isnt implemented yet
   });
+  console.log;
 
+  console.log(calculatedBasePrice);
   const calculatedTravelerPrice = calculatedBasePrice
     ? calculatedBasePrice * TRAVELER_MARKUP + additionalFees.totalAdditionalFees
     : undefined;
 
+  console.log(calculatedTravelerPrice);
   // Return everything as undefined or valid values, but ensure hooks are always run
   return {
     //------PRICE OF ALL NIGHTS NOT SINGLE
@@ -128,13 +140,16 @@ export const useGetOriginalPropertyPricing = ({
     originalBasePrice,
     calculatedBasePrice, //we really only care about this
     calculatedTravelerPrice,
+    hostDiscountPercentage,
+    amountSaved,
     //casamundo variables
     casamundoPrice: isHospitable ? undefined : casamundoPrice, //REVISIT ONCE SCRAPER IS FIXED  note: used if you want prices without modification
+    // refetchCasamundoPrice,
+
     // other nonpricing variables
     isLoading,
     error,
     bookedDates,
-    // refetchCasamundoPrice,
     isHostPriceLoading,
     isCasamundoPriceLoading,
   };
