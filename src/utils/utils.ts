@@ -1,4 +1,4 @@
-import { Offer, REFERRAL_CODE_LENGTH } from "@/server/db/schema";
+import { Offer, Property, REFERRAL_CODE_LENGTH } from "@/server/db/schema";
 import { RequestsPageOfferData, SeparatedData } from "@/server/server-utils";
 import { useWindowSize } from "@uidotdev/usehooks";
 import { clsx, type ClassValue } from "clsx";
@@ -821,11 +821,11 @@ export function removeTax(total: number, taxRate: number): number {
   return amountWithoutTax;
 }
 
-export const getApplicableBookItNowDiscount = () => {
-  ///WE ARE NOT DOING DISCOUNT TIERS ANYMORE THATS WHY IM RETURNING NULL
-  //but i plan on adding discounts in the near future so this function can stay :)
-
-  return null;
+export const getApplicableBookItNowDiscount = (
+  property: Pick<Property, "bookItNowHostDiscountPercentOffInput">,
+) => {
+  const discountPercentage = property.bookItNowHostDiscountPercentOffInput;
+  return discountPercentage;
 };
 
 export const capitalizeFirstLetter = (string: string | null): string => {
