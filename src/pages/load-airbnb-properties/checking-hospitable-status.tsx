@@ -250,10 +250,22 @@ export default function CombinedLoadingPage() {
     if (isUserHostTeamOwner !== undefined) {
       if (isUserHostTeamOwner) {
         setTimeout(() => {
-          void router.replace("/host", undefined, {
-            unstable_skipClientCache: true,
-            shallow: false,
-          });
+          console.log("[HardReload] About to replace to /host");
+          void router
+            .replace("/host", undefined, {
+              unstable_skipClientCache: true,
+              shallow: false,
+            })
+            .then(() => {
+              setTimeout(() => {
+                console.log("[HardReload] router.replace resolved");
+
+                console.log(
+                  "[HardReload] Performing hard reload with window.location.replace to /host",
+                );
+                window.location.replace("/host");
+              }, 250);
+            });
         }, 2500);
       }
     }
