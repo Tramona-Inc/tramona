@@ -197,10 +197,12 @@ export default function MastHead() {
                 Lets turn empty nights into bookings
               </h2>
               <h3 className="mt-6 text-lg font-semibold text-white">
-                When hosts have empty nights, no one wins
+                Supplement your existing your booking platforms by booking your
+                empty nights
               </h3>
-              <h3 className="mt-2 text-lg font-semibold text-white">
-                Name your own price or book it now
+              <h3 className="mt-2 text-xs font-semibold text-white">
+                Sign up and seamlessly sync your host account with Airbnb in
+                seconds.
               </h3>
               <h3 className="mt-4 text-lg font-semibold text-white">
                 <Link href={"/how-it-works"} className="flex items-center">
@@ -214,11 +216,13 @@ export default function MastHead() {
               <h2 className="mt-8 text-left text-5xl font-bold text-white">
                 Turn empty nights into opportunities
               </h2>
-              <h3 className="mt-6 text-xl font-semibold text-white">
-                Book your empty nights and keep more of your earnings
+              <h3 className="mt-6 text-sm font-semibold text-white lg:text-xl">
+                Supplement your existing your booking platforms by booking your
+                empty nights
               </h3>
-              <h4 className="text-h4-size mt-2 font-semibold text-white">
-                All the features and protections you&apos;re used to
+              <h4 className="text-h4-size mt-3 font-semibold text-white">
+                Sign up and seamlessly sync your host account with Airbnb in
+                seconds
               </h4>
               <h3 className="mt-4 text-lg font-semibold text-white">
                 <button
