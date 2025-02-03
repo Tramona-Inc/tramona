@@ -18,6 +18,7 @@ import {
   MapPinIcon,
   TrashIcon,
   Users2Icon,
+  ListCollapseIcon,
 } from "lucide-react";
 import { Card, CardFooter } from "../ui/card";
 import RequestToBookCardBadge from "./RequestToBookCardBadge";
@@ -25,10 +26,10 @@ import { Button } from "../ui/button";
 import { useState } from "react";
 import WithdrawRequestToBookDialog from "./WithdrawRequestToBookDialog";
 
-
 import { RequestToBookCardPreviews } from "./RequestToBookCardPreviews";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { breakdownPaymentByPropertyAndTripParams } from "@/utils/payment-utils/paymentBreakdown";
+import ViewBidDetailsContent from "./ViewBidDetailsContent";
 
 export type HostDashboardRequestToBook =
   RouterOutputs["requestsToBook"]["getHostRequestsToBookFromId"][
@@ -70,6 +71,7 @@ export default function TravelerRequestToBookCard({
   const fmtdNumGuests = plural(requestToBook.numGuests, "guest");
 
   const [open, setOpen] = useState(false);
+  const [openMoreDetails, setOpenMoreDetails] = useState(false);
 
   const paymentBreakdown = breakdownPaymentByPropertyAndTripParams({
     dates: {
@@ -99,6 +101,11 @@ export default function TravelerRequestToBookCard({
         open={open}
         onOpenChange={setOpen}
       />
+      <ViewBidDetailsContent
+        requestToBook={requestToBook}
+        openMoreDetails={openMoreDetails}
+        onOpenChangeMoreDetails={setOpenMoreDetails}
+      />
       <div className="flex flex-col gap-4 p-2 md:flex-row">
         <div className="flex-1 space-y-4 overflow-hidden p-4 pt-2">
           <div className="flex items-center gap-2">
@@ -111,10 +118,21 @@ export default function TravelerRequestToBookCard({
                     <EllipsisIcon />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem red onClick={() => setOpen(true)}>
-                    <TrashIcon />
+                <DropdownMenuContent align="end" className="">
+                  <DropdownMenuItem
+                    onClick={() => setOpenMoreDetails(true)}
+                    className="flex flex-row justify-between"
+                  >
+                    View details
+                    <ListCollapseIcon className="size-4" />
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    red
+                    onClick={() => setOpen(true)}
+                    className="mx-auto flex flex-row justify-between"
+                  >
                     Withdraw
+                    <TrashIcon className="size-4" />
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

@@ -64,7 +64,7 @@ export default function StripeCheckoutForm({
       confirmParams: {
         return_url:
           unifiedCheckoutData.type === "requestToBook"
-            ? `${baseUrl}/request-to-book/confirmation`
+            ? `${baseUrl}/requests?tab=bids`
             : `${baseUrl}/my-trips/confirmation`,
       },
     });
