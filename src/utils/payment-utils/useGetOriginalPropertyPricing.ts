@@ -139,6 +139,8 @@ export const useGetOriginalPropertyPricing = ({
     property: property,
   });
 
+  console.log(brokedownPaymentOutput);
+
   const travelerCalculatedAmountWithSecondaryLayerWithoutTaxes =
     calculatedTravelerPrice +
     brokedownPaymentOutput.stripeTransactionFee +

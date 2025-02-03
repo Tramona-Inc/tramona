@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/tooltip";
 import { ChevronDown, ChevronUp, Info, Clock, CheckCircle } from "lucide-react";
 import { useRouter } from "next/router";
-import PriceBreakdown from "./PriceBreakdown";
+import PriceBreakdownForTravelers from "./PriceBreakdownForTravelers";
 
 import PriceCardInformation from "./PriceCardInformation";
 import BookNowBtn from "../actionButtons/BookNowBtn";
@@ -141,6 +141,7 @@ export default function RequestToBookOrBookNowPriceCard({
   );
   const [requestToBook, setRequestToBook] =
     useState<RequestToBookDetails>(initialRequestToBook);
+
   const [rawRequestAmount, setRawRequestAmount] = useState(
     calculatedTravelerPricePerNightWithoutFees
       ? formatCurrency(calculatedTravelerPricePerNightWithoutFees)
@@ -795,8 +796,8 @@ export default function RequestToBookOrBookNowPriceCard({
                   ) : (
                     <span>
                       {formatCurrency(
-                        discountedPriceInfo.finalDiscountedTravelerPrice ?? // Display discounted price if available and in request mode
-                          propertyPricing.travelerCalculatedAmountWithSecondaryLayerWithoutTaxes, // Otherwise display original calculated price
+                        propertyPricing.travelerCalculatedAmountWithSecondaryLayerWithoutTaxes /
+                          numOfNights, // Otherwise display original calculated price
                       )}
                     </span>
                   )}
@@ -828,16 +829,12 @@ export default function RequestToBookOrBookNowPriceCard({
                 )}
               </Button>
               {showPriceBreakdown && (
-                <PriceBreakdown
-                  requestToBookDetails={requestToBook}
-                  property={property}
+                <PriceBreakdownForTravelers
                   requestAmount={
-                    showRequestInput &&
-                    discountedPriceInfo.finalDiscountedTravelerPrice !==
-                      undefined
-                      ? discountedPriceInfo.finalDiscountedTravelerPrice
-                      : propertyPricing.travelerCalculatedAmountWithSecondaryLayerWithoutTaxes
+                    propertyPricing.travelerCalculatedAmountWithSecondaryLayerWithoutTaxes
                   }
+                  propertyPricing={propertyPricing.brokedownPaymentOutput}
+                  numNights={numOfNights}
                 />
               )}
             </div>
@@ -904,55 +901,7 @@ export default function RequestToBookOrBookNowPriceCard({
           //     </Button>
           //   </div>
           // </>
-          <>
-            <div>
-              <div className="mb-1 text-2xl font-bold">Request to book for</div>
-              <div className="flex items-baseline gap-2">
-                <div className="text-4xl font-bold text-primary lg:text-5xl">
-                  {formatCurrency(
-                    propertyPricing.travelerCalculatedAmountWithSecondaryLayerWithoutTaxes!,
-                  )}
-                </div>
-                <span className="text-xl text-muted-foreground">Per Night</span>
-              </div>
-              <Button
-                variant="link"
-                className="mt-1 flex items-center gap-1 px-0 text-muted-foreground"
-                onClick={() => setShowPriceBreakdown(!showPriceBreakdown)}
-              >
-                Price Breakdown
-                {showPriceBreakdown ? (
-                  <ChevronUp className="h-4 w-4" />
-                ) : (
-                  <ChevronDown className="h-4 w-4" />
-                )}
-              </Button>
-              {showPriceBreakdown && (
-                <PriceBreakdown
-                  requestToBookDetails={requestToBook}
-                  property={property}
-                  requestAmount={
-                    calculatedTravelerPricePerNightWithoutFees! * numOfNights
-                  }
-                />
-              )}
-            </div>
-
-            <div className="grid grid-cols-2 gap-1">
-              <Button
-                variant="outline"
-                className={`col-auto w-full px-2 text-sm tracking-tight lg:text-base ${
-                  !property.bookItNowEnabled ? "col-span-2" : ""
-                }`}
-                onClick={() => setShowRequestInput(true)}
-              >
-                Place request
-              </Button>
-              {property.bookItNowEnabled && (
-                <BookNowBtn property={property} requestToBook={requestToBook} />
-              )}
-            </div>
-          </>
+          <></>
         )}
         <p className="my-1 text-center text-sm text-muted-foreground">
           You won&apos;t be charged yet

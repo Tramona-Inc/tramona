@@ -2,7 +2,7 @@ import { Property } from "@/server/db/schema";
 import type { OfferWithDetails } from "@/components/propertyPages/PropertyPage";
 import { CardContent, Card } from "@/components/ui/card";
 import { InfoIcon, FlameIcon } from "lucide-react";
-import PriceBreakdown from "./priceCards/PriceBreakdown";
+import PriceBreakdown from "./priceCards/PriceBreakdownForAdmin";
 import { format } from "date-fns";
 import {
   cn,
