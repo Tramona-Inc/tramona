@@ -66,8 +66,8 @@ export default function LoadMoreMessages() {
           isEdit: message.is_edit,
           user: {
             name: message.user?.name ?? "",
-            image: message.user.image,
-            email: message.user.email,
+            image: message.user?.image,
+            email: message.user?.email,
           },
         }));
 
