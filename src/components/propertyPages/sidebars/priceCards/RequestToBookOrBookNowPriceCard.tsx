@@ -76,8 +76,9 @@ export default function RequestToBookOrBookNowPriceCard({
   });
 
   const calculatedTravelerPricePerNightWithoutFees = //removed the additional fees and per night
-    propertyPricing.calculatedTravelerPrice !== undefined
-      ? (propertyPricing.calculatedTravelerPrice -
+    propertyPricing.travelerCalculatedAmountWithSecondaryLayerWithoutTaxes !==
+    undefined
+      ? (propertyPricing.travelerCalculatedAmountWithSecondaryLayerWithoutTaxes -
           propertyPricing.additionalFees.totalAdditionalFees) /
         numOfNights
       : undefined;
@@ -227,14 +228,17 @@ export default function RequestToBookOrBookNowPriceCard({
         percentOff: property.requestToBookMaxDiscountPercentage,
       },
     ],
-    [],
+    [
+      calculatedTravelerPricePerNightWithoutFees,
+      property.bookItNowEnabled,
+      property.requestToBookMaxDiscountPercentage,
+    ],
   );
 
   useEffect(() => {
     if (
       showRequestInput &&
-      calculatedTravelerPricePerNightWithoutFees !== undefined &&
-      propertyPricing.additionalFees.totalAdditionalFees !== undefined
+      calculatedTravelerPricePerNightWithoutFees !== undefined
     ) {
       const newPercentage = Math.round(
         ((calculatedTravelerPricePerNightWithoutFees - requestAmount!) /
@@ -722,12 +726,10 @@ export default function RequestToBookOrBookNowPriceCard({
             <Skeleton className="h-10 w-full" />
           </div>
         ) : isNumber(calculatedTravelerPricePerNightWithoutFees) &&
-          propertyPricing.calculatedTravelerPrice ? (
+          propertyPricing.travelerCalculatedAmountWithSecondaryLayerWithoutTaxes ? (
           <>
             <div>
-              <div className="mb-1 text-2xl font-bold">
-                {showRequestInput ? "Request to book for" : "Book it now for"}
-              </div>
+              <div className="mb-1 text-2xl font-bold">Book it now for</div>
               <div className="flex flex-col gap-2 sm:flex-row sm:items-baseline">
                 <div className="text-4xl font-bold text-primary lg:text-5xl">
                   {propertyPricing.amountSaved !== undefined &&
@@ -736,12 +738,12 @@ export default function RequestToBookOrBookNowPriceCard({
                     <div className="flex flex-col gap-2 text-base sm:flex-row sm:items-start">
                       <p className="text-3xl">
                         {formatCurrency(
-                          propertyPricing.calculatedTravelerPrice,
+                          propertyPricing.travelerCalculatedAmountWithSecondaryLayerWithoutTaxes,
                         )}
                       </p>
                       <p className="text-muted-foreground line-through">
                         {formatCurrency(
-                          propertyPricing.calculatedTravelerPrice +
+                          propertyPricing.travelerCalculatedAmountWithSecondaryLayerWithoutTaxes +
                             propertyPricing.amountSaved,
                         )}
                       </p>
@@ -753,7 +755,7 @@ export default function RequestToBookOrBookNowPriceCard({
                           discountedPriceInfo.finalDiscountedTravelerPrice !==
                             undefined
                           ? discountedPriceInfo.finalDiscountedTravelerPrice // Display discounted price if available and in request mode
-                          : propertyPricing.calculatedTravelerPrice, // Otherwise display original calculated price
+                          : propertyPricing.travelerCalculatedAmountWithSecondaryLayerWithoutTaxes, // Otherwise display original calculated price
                       )}
                     </span>
                   )}
@@ -793,7 +795,7 @@ export default function RequestToBookOrBookNowPriceCard({
                     discountedPriceInfo.finalDiscountedTravelerPrice !==
                       undefined
                       ? discountedPriceInfo.finalDiscountedTravelerPrice
-                      : propertyPricing.calculatedTravelerPrice
+                      : propertyPricing.travelerCalculatedAmountWithSecondaryLayerWithoutTaxes
                   }
                 />
               )}
@@ -866,7 +868,9 @@ export default function RequestToBookOrBookNowPriceCard({
               <div className="mb-1 text-2xl font-bold">Request to book for</div>
               <div className="flex items-baseline gap-2">
                 <div className="text-4xl font-bold text-primary lg:text-5xl">
-                  {formatCurrency(propertyPricing.calculatedTravelerPrice!)}
+                  {formatCurrency(
+                    propertyPricing.travelerCalculatedAmountWithSecondaryLayerWithoutTaxes!,
+                  )}
                 </div>
                 <span className="text-xl text-muted-foreground">Per Night</span>
               </div>
