@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -204,28 +204,31 @@ export default function RequestToBookOrBookNowPriceCard({
     updateRequestToBook({ numGuests });
   };
   // Only set presetOptions if randomPrice is available
-  const presetOptions = [
-    {
-      price: calculatedTravelerPricePerNightWithoutFees,
-      label: property.bookItNowEnabled ? "Buy Now" : "Original Price",
-      percentOff: 0,
-    },
-    {
-      price: calculatedTravelerPricePerNightWithoutFees
-        ? calculatedTravelerPricePerNightWithoutFees * 0.9
-        : undefined,
-      label: "Better request",
-      percentOff: Math.ceil(property.requestToBookMaxDiscountPercentage / 2),
-    },
-    {
-      price:
-        calculatedTravelerPricePerNightWithoutFees !== undefined
-          ? calculatedTravelerPricePerNightWithoutFees * 0.8
+  const presetOptions = useMemo(
+    () => [
+      {
+        price: calculatedTravelerPricePerNightWithoutFees,
+        label: property.bookItNowEnabled ? "Buy Now" : "Original Price",
+        percentOff: 0,
+      },
+      {
+        price: calculatedTravelerPricePerNightWithoutFees
+          ? calculatedTravelerPricePerNightWithoutFees * 0.9
           : undefined,
-      label: "Good request",
-      percentOff: property.requestToBookMaxDiscountPercentage,
-    },
-  ];
+        label: "Better request",
+        percentOff: Math.ceil(property.requestToBookMaxDiscountPercentage / 2),
+      },
+      {
+        price:
+          calculatedTravelerPricePerNightWithoutFees !== undefined
+            ? calculatedTravelerPricePerNightWithoutFees * 0.8
+            : undefined,
+        label: "Good request",
+        percentOff: property.requestToBookMaxDiscountPercentage,
+      },
+    ],
+    [],
+  );
 
   useEffect(() => {
     if (

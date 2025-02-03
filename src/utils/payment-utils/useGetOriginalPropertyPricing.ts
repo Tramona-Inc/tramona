@@ -7,11 +7,7 @@ import { PropertyPageData } from "@/components/propertyPages/PropertyPage";
 import { isNumber } from "lodash";
 import { TRAVELER_MARKUP } from "../constants";
 import { getAdditionalFees } from "./payment-utils";
-
-//returns 3 very important variables
-//1. originalBasePrice
-//2.  calculatedBasePrice
-//3. calculatedTravelerPrice
+import { breakdownPaymentByPropertyAndTripParams } from "./paymentBreakdown";
 
 export const useGetOriginalPropertyPricing = ({
   property,
@@ -45,28 +41,10 @@ export const useGetOriginalPropertyPricing = ({
     );
   console.log(hostPricePerNight);
 
-  // Scraped property logic
-  // const {
-  //   data: casamundoPrice, // is this per night or total???
-  //   isLoading: isCasamundoPriceLoading,
-  //   refetch: refetchCasamundoPrice,
-  // } = api.misc.scrapeAverageCasamundoPrice.useQuery(
-  //   {
-  //     offerId: property?.originalListingId ?? "", // Fallback for undefined property
-  //     checkIn,
-  //     numGuests: numGuests || 2,
-  //     duration: numNights,
-  //   },
-  //   {
-  //     enabled: !isHospitable && !!property, // Ensure hooks always run but only fetch when valid
-  //     refetchOnWindowFocus: false,
-  //   },
-  // );
+  // Scraped property logic - using tempCasamundoPrice
   const casamundoPrice = property?.tempCasamundoPrice;
   console.log("casamundoPrice", casamundoPrice);
   const isCasamundoPriceLoading = false;
-
-  // To retreive additionalFees
 
   // Reserved dates
   const { data: bookedDates } = api.calendar.getReservedDates.useQuery(
@@ -88,22 +66,40 @@ export const useGetOriginalPropertyPricing = ({
 
   console.log(originalBasePrice);
 
-  // Aggregate loading states
-  const isLoading = isHospitable ? isHostPriceLoading : isCasamundoPriceLoading;
-  const error =
-    originalBasePrice === undefined ? "Original price is unavailable." : null;
+  // Early exit if originalBasePrice is undefined
+  if (originalBasePrice === undefined || property === undefined) {
+    return {
+      additionalFees: getAdditionalFees({
+        property: property ?? ({} as PropertyPageData), // Provide empty object as fallback to avoid errors in getAdditionalFees
+        numOfNights: numNights,
+        numOfGuests: numGuests,
+        numOfPets: 0,
+      }),
+      originalBasePrice: undefined,
+      calculatedBasePrice: undefined,
+      calculatedTravelerPrice: undefined,
+      hostDiscountPercentage: undefined,
+      amountSaved: undefined,
+      casamundoPrice: isHospitable ? undefined : casamundoPrice,
+      isLoading: isHospitable ? isHostPriceLoading : isCasamundoPriceLoading,
+      error: "Original price is unavailable.",
+      bookedDates,
+      isHostPriceLoading,
+      isCasamundoPriceLoading,
+      brokedownPaymentOutput: undefined, // Add undefined for brokedownPaymentOutput
+      travelerCalculatedAmountWithSecondaryLayerWithoutTaxes: undefined, // Add undefined for travelerCalculatedAmountWithSecondaryLayerWithoutTaxes
+    };
+  }
 
   // <--------------------------------- DISCOUNTS HERE (goal is to create calculatedBasePrice ) --------------------------------->
 
   // 1.) apply traveler requested bid amount if request to book
+  let calculatedBasePrice: number = originalBasePrice; // Initialize with originalBasePrice
 
-  let calculatedBasePrice: number | undefined = 0;
-
-  if (originalBasePrice) {
-    calculatedBasePrice = requestPercentage
-      ? originalBasePrice * (1 - requestPercentage / 100)
-      : originalBasePrice;
+  if (requestPercentage) {
+    calculatedBasePrice = originalBasePrice * (1 - requestPercentage / 100);
   }
+
   //2.)apply discount tier discounts
   const hostDiscountPercentage = isHospitable //hostDiscountPercentage = percent off
     ? getApplicableBookItNowAndRequestToBookDiscountPercentage(property)
@@ -120,7 +116,7 @@ export const useGetOriginalPropertyPricing = ({
 
   // < ----------------------- GET THE calculatedTravelerPrice. (calculatedPricePerNight  * travelerMarkup ) + additional Fees  ------------------------------------- >
   const additionalFees = getAdditionalFees({
-    property: property!,
+    property: property,
     numOfNights: numNights,
     numOfGuests: numGuests,
     numOfPets: 0, //zero since feature isnt implemented yet
@@ -128,11 +124,26 @@ export const useGetOriginalPropertyPricing = ({
   console.log;
 
   console.log(calculatedBasePrice);
-  const calculatedTravelerPrice = calculatedBasePrice
-    ? calculatedBasePrice * TRAVELER_MARKUP + additionalFees.totalAdditionalFees
-    : undefined;
+  const calculatedTravelerPrice =
+    calculatedBasePrice * TRAVELER_MARKUP + additionalFees.totalAdditionalFees;
 
   console.log(calculatedTravelerPrice);
+
+  // this is basically everything minus taxes only use this for display and front end, dont use this for checkout calcultions or input throught stripe
+  const brokedownPaymentOutput = breakdownPaymentByPropertyAndTripParams({
+    dates: {
+      checkIn: checkIn,
+      checkOut: checkOut,
+    },
+    travelerPriceBeforeFees: calculatedTravelerPrice,
+    property: property,
+  });
+
+  const travelerCalculatedAmountWithSecondaryLayerWithoutTaxes =
+    calculatedTravelerPrice +
+    brokedownPaymentOutput.stripeTransactionFee +
+    brokedownPaymentOutput.superhogFee;
+
   // Return everything as undefined or valid values, but ensure hooks are always run
   return {
     //------PRICE OF ALL NIGHTS NOT SINGLE
@@ -142,13 +153,15 @@ export const useGetOriginalPropertyPricing = ({
     calculatedTravelerPrice,
     hostDiscountPercentage,
     amountSaved,
+    travelerCalculatedAmountWithSecondaryLayerWithoutTaxes, // for front end only used to display for travelers
+    brokedownPaymentOutput, //just in case
     //casamundo variables
     casamundoPrice: isHospitable ? undefined : casamundoPrice, //REVISIT ONCE SCRAPER IS FIXED  note: used if you want prices without modification
     // refetchCasamundoPrice,
 
     // other nonpricing variables
-    isLoading,
-    error,
+    isLoading: isHospitable ? isHostPriceLoading : isCasamundoPriceLoading,
+    error: null, // Error is handled by early exit
     bookedDates,
     isHostPriceLoading,
     isCasamundoPriceLoading,
