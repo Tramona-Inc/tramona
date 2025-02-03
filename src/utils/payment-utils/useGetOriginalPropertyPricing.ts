@@ -144,6 +144,8 @@ export const useGetOriginalPropertyPricing = ({
     brokedownPaymentOutput.stripeTransactionFee +
     brokedownPaymentOutput.superhogFee;
 
+  console.log(travelerCalculatedAmountWithSecondaryLayerWithoutTaxes);
+
   // Return everything as undefined or valid values, but ensure hooks are always run
   return {
     //------PRICE OF ALL NIGHTS NOT SINGLE
