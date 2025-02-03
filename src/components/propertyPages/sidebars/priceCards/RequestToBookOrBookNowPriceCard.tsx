@@ -395,7 +395,8 @@ export default function RequestToBookOrBookNowPriceCard({
   };
 
   const handlePresetSelect = useCallback(
-    (price: number) => {
+    (price: number, isCurrentPreselect: boolean) => {
+      if (isCurrentPreselect) return;
       // `price` here is still the per night discounted base price from presetOptions
       setRequestAmount(price); // Set requestAmount to per night base price
       setRawRequestAmount(formatCurrency(price));
@@ -569,11 +570,12 @@ export default function RequestToBookOrBookNowPriceCard({
                     handlePresetSelect(
                       calculatedTravelerPricePerNightWithoutFees! *
                         ((100 - option.percentOff) / 100),
+                      requestPercentage === option.percentOff,
                     )
                   }
                   className={cn(
                     "flex flex-col items-center justify-between rounded-lg border py-3 text-center transition-colors lg:p-4",
-                    selectedPreset === option.price
+                    requestPercentage === option.percentOff
                       ? "border-primary bg-primary/10"
                       : "border-gray-200 hover:border-primary/50",
                     option.label === "Book Now" && "font-semibold",
