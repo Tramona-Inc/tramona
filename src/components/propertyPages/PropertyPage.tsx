@@ -16,11 +16,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { api, type RouterOutputs } from "@/utils/api";
-import {
-  convertHostInteractionPref,
-  getOfferDiscountPercentage,
-  plural,
-} from "@/utils/utils";
+import { getOfferDiscountPercentage, plural } from "@/utils/utils";
 import { AspectRatio } from "../ui/aspect-ratio";
 import {
   ImagesIcon,
@@ -49,7 +45,6 @@ import {
 } from "./sections/HouseRules";
 import { getCancellationPolicyDescription } from "@/config/getCancellationPolicyDescription";
 import { createUserNameAndPic } from "../activity-feed/admin/generationHelper";
-import ChatOfferButton from "./sections/ChatOfferButton";
 import ReasonsToBook from "./sections/ReasonsToBook";
 // import UserInfo from "./sections/UserInfo"; // REMOVE THIS IMPORT
 import { useChatWithHostTeam } from "@/utils/messaging/useChatWithHost";
@@ -342,13 +337,6 @@ export default function PropertyPage({
                 <p className="text-lg font-medium">{hostName}</p>
               </div>
             </div>
-            {offer && (
-              <ChatOfferButton
-                offerHostId={offer.property.hostTeam.ownerId}
-                hostTeamId={property.hostTeam.id}
-                propertyId={property.id}
-              />
-            )}
           </section>
           {/* REMOVE THIS DIALOG COMPONENT */}
           {/* <Dialog open={openUserInfo} onOpenChange={setOpenUserInfo}>
@@ -564,24 +552,34 @@ export default function PropertyPage({
                 </CardContent>
               </Card>
               <div className="space-y-4">
-                <p className="text-lg font-semibold">Co-hosts</p>
-                <div className="flex items-center gap-4">
-                  {hostTeamMembers
-                    ?.filter((member) => member.id !== hostTeamOwner?.id)
-                    .map((member, index) => (
-                      <div key={index} className="flex items-center gap-2">
-                        <UserAvatar
-                          size="md"
-                          name={hostName}
-                          image={member.image}
-                          onClick={() =>
-                            void router.push(`/profile/view/${member.id}`)
-                          }
-                        />
-                        <p>{member.firstName}</p>
+                {hostTeamMembers &&
+                  hostTeamMembers.filter(
+                    (member) => member.id !== hostTeamOwner?.id,
+                  ).length > 0 && (
+                    <>
+                      <p className="text-lg font-semibold">Co-hosts</p>
+                      <div className="flex items-center gap-4">
+                        {hostTeamMembers
+                          .filter((member) => member.id !== hostTeamOwner?.id)
+                          .map((member, index) => (
+                            <div
+                              key={index}
+                              className="flex items-center gap-2"
+                            >
+                              <UserAvatar
+                                size="md"
+                                name={hostName}
+                                image={member.image}
+                                onClick={() =>
+                                  void router.push(`/profile/view/${member.id}`)
+                                }
+                              />
+                              <p>{member.firstName}</p>
+                            </div>
+                          ))}
                       </div>
-                    ))}
-                </div>
+                    </>
+                  )}
                 <Button
                   onClick={() =>
                     chatWithHostTeam({

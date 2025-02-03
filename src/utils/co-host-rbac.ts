@@ -53,6 +53,7 @@ export const coHostRoles = {
     can: [
       //Admin only
       "Access_or_modify payment_information",
+      "update_team_name",
       //cohost
       "view_financial_reports",
       "modify_overall_pricing_strategy",
