@@ -437,7 +437,7 @@ export default function RequestToBookOrBookNowPriceCard({
       const firstPresetPrice = presetOptions[0]?.price;
 
       if (firstPresetPrice !== undefined) {
-        handlePresetSelect(firstPresetPrice); // Programmatically select the first preset
+        handlePresetSelect(firstPresetPrice, false); // Programmatically select the first preset
         setSelectedPreset(firstPresetPrice); // Optionally, visually highlight it as selected right away
       }
 

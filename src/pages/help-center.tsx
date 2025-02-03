@@ -10,6 +10,7 @@ import {
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
+import bgImage from "@/../public/assets/images/beach.png";
 
 export default function HelpCenter() {
   const chatWithAdmin = useChatWithAdmin();
@@ -22,9 +23,10 @@ export default function HelpCenter() {
       <div className="relative h-48 lg:h-64">
         <div className="absolute inset-0">
           <Image
-            src="/assets/images/beach.png"
+            src={bgImage}
             alt="beach"
             fill
+            placeholder="blur"
             className="object-cover"
           />
         </div>
