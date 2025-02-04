@@ -59,6 +59,9 @@ export const requestsToBook = pgTable(
     paymentIntentId: text("payment_intent_id").notNull(),
     isDirectListing: boolean("is_direct_listing").notNull(), //true = scraped property : false = our property
     //what do we need we need calculated 1.) calculatedTravelerPrice and
+    requestPercentageOff: integer("request_percentage_off")
+      .notNull()
+      .default(0),
     calculatedBasePrice: integer("calculated_base_price").notNull(), // not including markup and additional fees (SOURCE OF ALL TRUTH)
     calculatedTravelerPrice: integer("calculated_traveler_price").notNull(), // this is the amount after primary layer  and before secondary
     additionalFees: integer("additional_fees").notNull().default(0), // we have this in here and trip checkout

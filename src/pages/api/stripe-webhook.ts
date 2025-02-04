@@ -158,7 +158,6 @@ export default async function webhook(
             // 2.  CASE : "RequestToBook"
           } else if (paymentIntentSucceeded.metadata.type === "requestToBook") {
             //not charging user or creating a superhog
-            console.log("hi");
             await createRequestToBook({
               paymentIntentId,
               numOfGuests: parseInt(
@@ -177,6 +176,9 @@ export default async function webhook(
               ),
               userId: paymentIntentSucceeded.metadata.user_id!,
               isDirectListingCharge,
+              requestPercentageOff: parseInt(
+                paymentIntentSucceeded.metadata.request_percentage_off ?? "0",
+              ),
               timeOfSecurityDeposit:
                 currentProperty?.currentSecurityDeposit ?? 0,
             });

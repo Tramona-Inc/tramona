@@ -344,6 +344,7 @@ export async function createRequestToBook({
   checkOut,
   propertyId,
   userId,
+  requestPercentageOff,
   isDirectListingCharge,
   timeOfSecurityDeposit,
 }: {
@@ -355,6 +356,7 @@ export async function createRequestToBook({
   checkOut: Date;
   propertyId: number;
   userId: string;
+  requestPercentageOff: number;
   isDirectListingCharge: boolean;
   timeOfSecurityDeposit: number;
 }) {
@@ -396,6 +398,7 @@ export async function createRequestToBook({
     checkIn,
     checkOut,
     numGuests: numOfGuests,
+    requestPercentageOff: requestPercentageOff,
     calculatedBasePrice: removeTravelerMarkup(calculatedTravelerPrice),
     calculatedTravelerPrice: Math.floor(calculatedTravelerPrice),
     additionalFees: additionalFeesFromWebhook,

@@ -41,7 +41,7 @@ export function UnifiedPriceDetails({
 
   const items = [
     {
-      title: `${formatCurrency(nightlyPrice)} x ${plural(numberOfNights, "night")}`,
+      title: `${formatCurrency(paymentBreakdown.totalTripAmount - paymentBreakdown.taxesPaid)} x ${plural(numberOfNights, "night")}`,
       price: `${formatCurrency(paymentBreakdown.totalTripAmount - paymentBreakdown.taxesPaid)}`,
     },
     {
