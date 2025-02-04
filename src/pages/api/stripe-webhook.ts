@@ -167,6 +167,9 @@ export default async function webhook(
               calculatedTravelerPrice: parseInt(
                 paymentIntentSucceeded.metadata.calculated_traveler_price!,
               ),
+              additionalFeesFromWebhook: parseInt(
+                paymentIntentSucceeded.metadata.additional_fees ?? "0",
+              ),
               checkIn: new Date(paymentIntentSucceeded.metadata.check_in!),
               checkOut: new Date(paymentIntentSucceeded.metadata.check_out!),
               propertyId: parseInt(
@@ -319,7 +322,7 @@ export default async function webhook(
               }
               // ------ Send Slack When trip is booked ------
               await sendSlackMessage({
-                isProductionOnly: false,
+                isProductionOnly: true,
                 channel: "tramona-bot",
                 text: [
                   `*${user?.email} just booked a trip: ${currentProperty?.name}*`,
