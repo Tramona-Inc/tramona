@@ -57,7 +57,7 @@ export default function Page() {
           checkIn,
           checkOut,
           numGuests,
-          travelerOfferedPrice: propertyPricing.calculatedTravelerPrice,
+          calculatedTravelerPrice: propertyPricing.calculatedTravelerPrice,
           type: "requestToBook",
         })
       : null;

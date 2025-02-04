@@ -40,7 +40,7 @@ export async function scrapeExternalListings(request: MinimalRequest) {
 
   await Promise.all(
     listings.map(async ({ totalPrice }, index) => {
-      const travelerOfferedPrice = getTravelerOfferedPrice({
+      const calculatedTravelerPrice = getTravelerOfferedPrice({
         totalBasePriceBeforeFees: totalPrice,
         travelerMarkup: DIRECT_LISTING_MARKUP,
       });
@@ -52,7 +52,7 @@ export async function scrapeExternalListings(request: MinimalRequest) {
         checkIn: request.checkIn,
         checkOut: request.checkOut,
         hostPayout: totalPrice * HOST_MARKUP,
-        travelerOfferedPrice,
+        calculatedTravelerPrice,
       });
     }),
   );
@@ -65,7 +65,7 @@ export async function scrapeExternalListings(request: MinimalRequest) {
   //     checkIn: request.checkIn,
   //     checkOut: request.checkOut,
   //     hostPayout: totalPrice * HOST_MARKUP,
-  //     travelerOfferedPrice: totalPrice * TRAVELER__MARKUP,
+  //     calculatedTravelerPrice: totalPrice * TRAVELER__MARKUP,
   //   })),
   // );
 }

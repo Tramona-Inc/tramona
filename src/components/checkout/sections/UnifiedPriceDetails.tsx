@@ -27,14 +27,15 @@ export function UnifiedPriceDetails({
     unifiedCheckoutData.dates.checkOut,
   );
   const nightlyPrice =
-    unifiedCheckoutData.pricing.travelerOfferedPrice / numberOfNights;
+    unifiedCheckoutData.pricing.calculatedTravelerPrice / numberOfNights;
 
   const paymentBreakdown = breakdownPaymentByPropertyAndTripParams({
     dates: {
       checkIn: unifiedCheckoutData.dates.checkIn,
       checkOut: unifiedCheckoutData.dates.checkOut,
     },
-    travelerPriceBeforeFees: unifiedCheckoutData.pricing.travelerOfferedPrice,
+    travelerPriceBeforeFees:
+      unifiedCheckoutData.pricing.calculatedTravelerPrice,
     property: unifiedCheckoutData.property,
   });
 

@@ -109,7 +109,7 @@ export default function HostConfirmRequestDialog({
   //           propertyId: property.id,
   //           totalBasePriceBeforeFees: totalBasePriceBeforeFees,
   //           hostPayout: getHostPayout(totalBasePriceBeforeFees),
-  //           travelerOfferedPrice: getTravelerOfferedPrice({
+  //           calculatedTravelerPrice: getTravelerOfferedPrice({
   //             totalBasePriceBeforeFees,
   //             travelerMarkup: TRAVELER_MARKUP,
   //           }),
@@ -179,7 +179,7 @@ export default function HostConfirmRequestDialog({
             propertyId: property.id,
             totalBasePriceBeforeFees,
             hostPayout: getHostPayout(totalBasePriceBeforeFees),
-            travelerOfferedPrice: getTravelerOfferedPrice({
+            calculatedTravelerPrice: getTravelerOfferedPrice({
               totalBasePriceBeforeFees,
               travelerMarkup: TRAVELER_MARKUP,
             }),

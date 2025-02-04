@@ -79,7 +79,7 @@ export default function TripCancellationOrPartialRefund({
 
   let totalRefundAmount: number = !tripCheckoutDetails
     ? 0
-    : tripCheckoutDetails.travelerOfferedPrice;
+    : tripCheckoutDetails.calculatedTravelerPrice;
 
   //if out property then we need to remove the superhog and tax  from the refund amount
   if (!isLoading && tripCheckoutDetails && data) {

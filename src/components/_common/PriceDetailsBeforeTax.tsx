@@ -70,7 +70,7 @@ export default function PriceDetailsBeforeTax({
     }
   }
 
-  const travelerOfferedPrice = getTravelerOfferedPrice({
+  const calculatedTravelerPrice = getTravelerOfferedPrice({
     totalBasePriceBeforeFees: priceWithApplicableDiscount ?? scrapedPrice,
     travelerMarkup: TRAVELER_MARKUP,
   });
@@ -83,7 +83,7 @@ export default function PriceDetailsBeforeTax({
             requestToBook.checkIn,
             requestToBook.checkOut,
           );
-          const nightly = travelerOfferedPrice / nights;
+          const nightly = calculatedTravelerPrice / nights;
           setPriceDetails({
             numberOfNights: nights,
             nightlyPrice: nightly,
@@ -91,7 +91,7 @@ export default function PriceDetailsBeforeTax({
 
           const payment = breakdownPaymentByOffer({
             scrapeUrl: property.originalListingPlatform ?? null,
-            travelerOfferedPrice,
+            calculatedTravelerPrice,
             datePriceFromAirbnb: scrapedPrice,
             checkIn: requestToBook.checkIn,
             checkOut: requestToBook.checkOut,
@@ -101,7 +101,7 @@ export default function PriceDetailsBeforeTax({
           setBrokeDownPayment(payment);
         } else if (offer) {
           const nights = getNumNights(offer.checkIn, offer.checkOut);
-          const nightly = offer.travelerOfferedPrice / nights;
+          const nightly = offer.calculatedTravelerPrice / nights;
           setPriceDetails({
             numberOfNights: nights,
             nightlyPrice: nightly,
@@ -121,7 +121,7 @@ export default function PriceDetailsBeforeTax({
     };
 
     void calculatePayment();
-  }, [requestToBook, property, offer, scrapedPrice, travelerOfferedPrice]);
+  }, [requestToBook, property, offer, scrapedPrice, calculatedTravelerPrice]);
 
   if (loading) {
     return <div>Loading price details...</div>;

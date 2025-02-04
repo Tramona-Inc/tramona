@@ -265,7 +265,7 @@ export default function AdminOfferForm({
         propertyId,
         totalBasePriceBeforeFees,
         hostPayout: 0,
-        travelerOfferedPrice: totalBasePriceBeforeFees,
+        calculatedTravelerPrice: totalBasePriceBeforeFees,
         checkIn: request ? request.checkIn : new Date(checkInDate!),
         checkOut: request ? request.checkOut : new Date(checkOutDate!),
         // groupId: request?.madeByGroupId,

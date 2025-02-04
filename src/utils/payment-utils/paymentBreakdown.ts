@@ -14,7 +14,7 @@ export function breakdownPaymentByOffer( ///// USING OFFER
   offer: Pick<
     Offer,
     | "scrapeUrl"
-    | "travelerOfferedPrice"
+    | "calculatedTravelerPrice"
     | "datePriceFromAirbnb"
     | "checkIn"
     | "checkOut"
@@ -36,10 +36,10 @@ export function breakdownPaymentByOffer( ///// USING OFFER
   const taxPercentage = isScraped ? 0 : getTaxPercentage(offer.property);
   const superhogFee = isScraped ? 0 : numNights * SUPERHOG_FEE_CENTS_PER_NIGHT;
   const taxesPaid = Math.round(
-    (offer.travelerOfferedPrice + superhogFee) * taxPercentage,
+    (offer.calculatedTravelerPrice + superhogFee) * taxPercentage,
   );
   const totalBeforeStripeFee =
-    offer.travelerOfferedPrice + superhogFee + taxesPaid;
+    offer.calculatedTravelerPrice + superhogFee + taxesPaid;
   const stripeFee = getStripeFee(totalBeforeStripeFee);
   const totalTripAmount = totalBeforeStripeFee + stripeFee;
   console.log(totalTripAmount);

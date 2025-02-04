@@ -71,13 +71,15 @@ export default function RequestToBookPageMobileBottomCard({
     : new Date();
   const numGuests = query.numGuests ? parseInt(query.numGuests as string) : 2;
 
-  const travelerOfferedPrice = parseInt(query.travelerOfferedPrice as string);
+  const calculatedTravelerPrice = parseInt(
+    query.calculatedTravelerPrice as string,
+  );
 
   const requestToBook = {
     checkIn,
     checkOut,
     numGuests,
-    travelerOfferedPrice,
+    calculatedTravelerPrice,
   };
   const { data: verificationStatus } =
     api.users.myVerificationStatus.useQuery();

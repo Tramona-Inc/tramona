@@ -9,7 +9,7 @@ export type RequestToBookDetails = {
   checkIn: Date;
   checkOut: Date;
   numGuests: number;
-  travelerOfferedPrice: number;
+  calculatedTravelerPrice: number;
 };
 
 export default function RequestToBookPage({

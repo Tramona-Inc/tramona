@@ -96,8 +96,8 @@ export const referralColumns: ColumnDef<ReferralTransaction>[] = [
       <DataTableColumnHeader column={column} title="Amount" />
     ),
     cell: ({ row }) => {
-      const offer: { travelerOfferedPrice: number } = row.getValue("offer");
-      return <div>{formatCurrency(offer.travelerOfferedPrice)}</div>;
+      const offer: { calculatedTravelerPrice: number } = row.getValue("offer");
+      return <div>{formatCurrency(offer.calculatedTravelerPrice)}</div>;
     },
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id));

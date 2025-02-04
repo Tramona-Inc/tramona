@@ -681,7 +681,7 @@ export function getOfferDiscountPercentage(
   offer: Pick<
     Offer,
     | "createdAt"
-    | "travelerOfferedPrice"
+    | "calculatedTravelerPrice"
     | "checkIn"
     | "checkOut"
     | "scrapeUrl"
@@ -698,10 +698,10 @@ export function getOfferDiscountPercentage(
 
   //3.) check the if the offer is by a real host and is listed on airbnb
   if (offer.datePriceFromAirbnb) {
-    console.log(offer.datePriceFromAirbnb, offer.travelerOfferedPrice);
+    console.log(offer.datePriceFromAirbnb, offer.calculatedTravelerPrice);
     return getDiscountPercentage(
       offer.datePriceFromAirbnb,
-      offer.travelerOfferedPrice,
+      offer.calculatedTravelerPrice,
     );
   }
   //4.)for other cases random number
@@ -710,7 +710,7 @@ export function getOfferDiscountPercentage(
 
 // export function getrequestToBookMaxDiscountPercentage(offer: {
 //   createdAt: Date;
-//   travelerOfferedPrice: number;
+//   calculatedTravelerPrice: number;
 //   checkIn: Date;
 //   checkOut: Date;
 //   scrapeUrl?: number | null;
@@ -718,7 +718,7 @@ export function getOfferDiscountPercentage(
 //   randomDirectListingDiscount?: number | null;
 // }) {
 //   const numNights = getNumNights(offer.checkIn, offer.checkOut);
-//   const offerNightlyPrice = offer.travelerOfferedPrice / numNights;
+//   const offerNightlyPrice = offer.calculatedTravelerPrice / numNights;
 //   //1.)check to see if scraped property(directListing) and the randomDirectListingDiscount is not null
 //   if (offer.randomDirectListingDiscount) {
 //     return offer.randomDirectListingDiscount;
@@ -730,11 +730,11 @@ export function getOfferDiscountPercentage(
 //   if (offer.datePriceFromAirbnb) {
 //     console.log(
 //       offer.datePriceFromAirbnb,
-//       offer.travelerOfferedPrice,
+//       offer.calculatedTravelerPrice,
 //     );
 //     return getDiscountPercentage(
 //       offer.datePriceFromAirbnb,
-//       offer.travelerOfferedPrice,
+//       offer.calculatedTravelerPrice,
 //     );
 //   }
 //   //4.)for other cases random number
