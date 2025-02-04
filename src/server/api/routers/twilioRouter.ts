@@ -6,7 +6,7 @@ import {
 } from "@/server/api/trpc";
 import { db } from "@/server/db";
 import { phoneNumberOTPs } from "@/server/db/schema/tables/auth/phoneNumberOTPs";
-import { sendText } from "@/server/server-utils";
+import { sendText, sendWhatsApp } from "@/server/server-utils";
 import { sendSlackMessage } from "@/server/slack";
 import { generatePhoneNumberOTP } from "@/utils/utils";
 import { TRPCError } from "@trpc/server";
@@ -18,17 +18,17 @@ import { z } from "zod";
 
 const twilio = new Twilio(env.TWILIO_ACCOUNT_SID, env.TWILIO_AUTH_TOKEN);
 
-let service: ServiceInstance; // singleton
+// let service: ServiceInstance; // singleton
+const service = twilio.verify.v2.services(env.TWILIO_VERIFY_SERVICE_SID);
+// const createService = async () => {
+//   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+//   if (service !== undefined) return;
 
-const createService = async () => {
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  if (service !== undefined) return;
-
-  service = await twilio.verify.v2.services.create({
-    friendlyName: "Tramona",
-    codeLength: 6,
-  });
-};
+// service = await twilio.verify.v2.services.create({
+//   friendlyName: "Tramona",
+//   codeLength: 6,
+//   });
+// };
 
 export const twilioRouter = createTRPCRouter({
   sendSMS: protectedProcedure
@@ -179,16 +179,17 @@ export const twilioRouter = createTRPCRouter({
   sendOTP: publicProcedure
     .input(z.object({ phoneNumber: z.string() }))
     .mutation(async ({ input }) => {
-      const code = generatePhoneNumberOTP();
+      // const code = generatePhoneNumberOTP();
+      const channel = input.phoneNumber.startsWith("+1") ? "sms" : "whatsapp";
+
+      const verification = await service.verifications.create({
+        to: channel === "whatsapp" ? `whatsapp:${input.phoneNumber}` : input.phoneNumber,
+        channel: channel
+      });
 
       await db.insert(phoneNumberOTPs).values({
         phoneNumber: input.phoneNumber,
-        code,
-      });
-
-      await sendText({
-        to: input.phoneNumber,
-        content: `Tramona: Your verification code is ${code}`,
+        verificationSid: verification.sid,
       });
     }),
 
@@ -207,39 +208,32 @@ export const twilioRouter = createTRPCRouter({
   verifyOTP: publicProcedure
     .input(z.object({ phoneNumber: z.string(), code: z.string() }))
     .mutation(async ({ input }) => {
-      await createService();
       const { phoneNumber, code } = input;
 
-      const otps = await db.query.phoneNumberOTPs.findMany({
+      const otpRecord = await db.query.phoneNumberOTPs.findFirst({
         where: eq(phoneNumberOTPs.phoneNumber, phoneNumber),
       });
 
-      if (otps.length === 0) {
+      if (!otpRecord) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: `No OTPs found for phone number ${phoneNumber}`,
         });
       }
 
-      const otp = otps.find((otp) => otp.code === code);
+      const check = await service.verificationChecks
+      .create({
+        verificationSid: otpRecord.verificationSid,
+        code: code
+      });
 
-      if (!otp) {
-        return { status: "wrong code" } as const;
-      }
-
-      if (otp.usedAt) {
-        return { status: "already used" } as const;
-      }
-
-      if (otp.createdAt < subMinutes(new Date(), 5)) {
-        return { status: "code expired" } as const;
-      }
-
+    if (check.status === 'approved') {
       await db
         .update(phoneNumberOTPs)
         .set({ usedAt: new Date() })
-        .where(eq(phoneNumberOTPs.id, otp.id));
+        .where(eq(phoneNumberOTPs.id, otpRecord.id));
+    }
 
-      return { status: "approved" } as const;
+    return { status: check.status };
     }),
 });

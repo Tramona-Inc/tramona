@@ -43,6 +43,7 @@ export const env = createEnv({
     PROXY_URL: z.string().url(),
     GEMINI_KEY: z.string(),
     //LLAMA_API_KEY: z.string(),
+    TWILIO_VERIFY_SERVICE_SID: z.string(),
   },
 
   /**
@@ -101,6 +102,7 @@ export const env = createEnv({
     HOSPITABLE_API_KEY: process.env.HOSPITABLE_API_KEY,
     PROXY_URL: process.env.PROXY_URL,
     GEMINI_KEY: process.env.GEMINI_KEY,
+    TWILIO_VERIFY_SERVICE_SID: process.env.TWILIO_VERIFY_SERVICE_SID,
     // LLAMA_API_KEY: process.env.LLAMA_API_KEY,
   },
   /**
