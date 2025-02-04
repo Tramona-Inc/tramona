@@ -18,6 +18,7 @@ export function offerToUnifiedCheckout({
     calculatedTravelerPrice: offer.calculatedTravelerPrice,
     datePriceFromAirbnb: offer.datePriceFromAirbnb,
     discount: totalSavings,
+    additionalFees: null,
   };
 
   return {
@@ -39,12 +40,14 @@ export function requestOrBookItNowToUnifiedData({
   checkOut,
   numGuests,
   calculatedTravelerPrice,
+  additionalFees,
   property,
   type,
 }: {
   checkIn: Date;
   checkOut: Date;
   calculatedTravelerPrice: number;
+  additionalFees: number;
   numGuests: number;
   property: PropertyPageData;
   type: "bookItNow" | "requestToBook";
@@ -55,6 +58,7 @@ export function requestOrBookItNowToUnifiedData({
     datePriceFromAirbnb: 0,
     discount:
       getApplicableBookItNowAndRequestToBookDiscountPercentage(property),
+    additionalFees: additionalFees, //Have to pass through stripe-webhook to prevent host future price change in same bid
   };
 
   return {

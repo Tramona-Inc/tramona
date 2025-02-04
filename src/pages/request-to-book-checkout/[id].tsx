@@ -58,6 +58,7 @@ export default function Page() {
           checkOut,
           numGuests,
           calculatedTravelerPrice: propertyPricing.calculatedTravelerPrice,
+          additionalFees: propertyPricing.additionalFees.totalAdditionalFees,
           type: "requestToBook",
         })
       : null;

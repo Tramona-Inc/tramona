@@ -130,6 +130,7 @@ export async function finalizeTrip({
   paymentIntentId,
   numOfGuests,
   calculatedTravelerPrice,
+  additionalFeesFromWebhook,
   checkIn,
   checkOut,
   propertyId,
@@ -140,6 +141,7 @@ export async function finalizeTrip({
 }: {
   paymentIntentId: string;
   calculatedTravelerPrice: number;
+  additionalFeesFromWebhook: number;
   numOfGuests: number;
   checkIn: Date;
   checkOut: Date;
@@ -219,6 +221,7 @@ export async function finalizeTrip({
       superhogFee: priceBreakdown.superhogFee,
       stripeTransactionFee: priceBreakdown.stripeTransactionFee,
       totalSavings: priceBreakdown.totalSavings,
+      additionalFees: additionalFeesFromWebhook, // we need data from webhook just incase the host changes price between bid creatation and accepting it
       securityDeposit: property.currentSecurityDeposit,
     })
     .returning()
@@ -334,6 +337,7 @@ export async function createRequestToBook({
   paymentIntentId,
   numOfGuests,
   calculatedTravelerPrice,
+  additionalFeesFromWebhook,
   checkIn,
   checkOut,
   propertyId,
@@ -342,6 +346,7 @@ export async function createRequestToBook({
 }: {
   paymentIntentId: string;
   calculatedTravelerPrice: number;
+  additionalFeesFromWebhook: number;
   numOfGuests: number;
   checkIn: Date;
   checkOut: Date;
@@ -389,6 +394,7 @@ export async function createRequestToBook({
     numGuests: numOfGuests,
     calculatedBasePrice: removeTravelerMarkup(calculatedTravelerPrice),
     calculatedTravelerPrice: Math.floor(calculatedTravelerPrice),
+    additionalFees: additionalFeesFromWebhook,
     isDirectListing: isDirectListingCharge,
   });
 

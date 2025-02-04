@@ -252,6 +252,7 @@ export const stripeRouter = createTRPCRouter({
         scrapeUrl: z.string().nullable(),
         numOfGuests: z.number().nullable(),
         calculatedTravelerPrice: z.number(),
+        additionalFees: z.number().nullable(),
         datePriceFromAirbnb: z.number().nullable(),
         checkIn: z.date(),
         checkOut: z.date(),
@@ -328,6 +329,7 @@ export const stripeRouter = createTRPCRouter({
         property_id: input.propertyId,
         host_stripe_id: curProperty.hostTeam.owner.stripeConnectId,
         calculated_traveler_price: input.calculatedTravelerPrice,
+        additional_fees: input.additionalFees ?? null,
         price: paymentBreakdown.totalTripAmount, // Total price included tramona fee
         total_savings: paymentBreakdown.totalSavings,
         taxes_paid: paymentBreakdown.taxesPaid,
@@ -410,6 +412,7 @@ export const stripeRouter = createTRPCRouter({
         paymentIntentId: curRequestToBook.paymentIntentId,
         numOfGuests: curRequestToBook.numGuests,
         calculatedTravelerPrice: curRequestToBook.calculatedTravelerPrice, //markup already happened
+        additionalFeesFromWebhook: curRequestToBook.additionalFees, //from webhook is fo for the book-it-now-case
         checkIn: curRequestToBook.checkIn,
         checkOut: curRequestToBook.checkOut,
         propertyId: curRequestToBook.propertyId,

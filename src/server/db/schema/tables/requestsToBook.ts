@@ -61,6 +61,7 @@ export const requestsToBook = pgTable(
     //what do we need we need calculated 1.) calculatedTravelerPrice and
     calculatedBasePrice: integer("calculated_base_price").notNull(), // not including markup and additional fees (SOURCE OF ALL TRUTH)
     calculatedTravelerPrice: integer("calculated_traveler_price").notNull(), // this is the amount after primary layer  and before secondary
+    additionalFees: integer("additional_fees").notNull().default(0), // we have this in here and trip checkout
   },
   (t) => ({
     propertyIdIdx: index().on(t.propertyId),

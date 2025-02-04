@@ -21,6 +21,7 @@ export const tripCheckouts = pgTable("trip_checkouts", {
   stripeTransactionFee: integer("stripe_transaction_fee").notNull(),
   totalSavings: integer("total_savings").notNull(),
   securityDeposit: integer("security_deposit").notNull(),
+  additionalFees: integer("additional_fees"), //Cleaning, pet and additional guests
 });
 
 export type TripCheckout = typeof tripCheckouts.$inferSelect;

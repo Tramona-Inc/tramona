@@ -41,6 +41,7 @@ const CustomStripeCheckoutContainer = ({
         totalAmountPaid: totalTripAmount,
         calculatedTravelerPrice:
           unifiedCheckoutData.pricing.calculatedTravelerPrice,
+        additionalFees: unifiedCheckoutData.pricing.additionalFees,
         cancelUrl: pathname,
         propertyId: unifiedCheckoutData.property.id,
         offerId: unifiedCheckoutData.offerId ?? null,
