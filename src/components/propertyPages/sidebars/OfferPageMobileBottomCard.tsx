@@ -24,7 +24,7 @@ export default function OfferPageMobileBottomCard({
     api.users.myVerificationStatus.useQuery();
 
   return (
-    <Card className="fixed bottom-16 left-0 w-full md:hidden">
+    <Card className="fixed bottom-14 left-0 w-full md:hidden">
       <CardContent className="flex flex-row items-center justify-between px-4 py-1 text-sm">
         {offer.request && (
           <div className="flex basis-1/2 flex-col">
