@@ -9,6 +9,7 @@ import {
 } from "./payment-utils";
 import { breakdownPaymentByPropertyAndTripParams } from "./paymentBreakdown";
 import type { UseGetOriginalPropertyPricingOutput } from "@/components/checkout/types";
+import type { Property } from "@/server/db/schema";
 
 export const useGetOriginalPropertyPricing = ({
   property,
@@ -17,7 +18,7 @@ export const useGetOriginalPropertyPricing = ({
   numGuests,
   requestPercentage,
 }: {
-  property: PropertyPageData | undefined;
+  property: PropertyPageData | Property | undefined;
   checkIn: Date;
   checkOut: Date;
   numGuests: number;

@@ -1,8 +1,7 @@
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
-import { formatCurrency, formatDateMonthDayYear, plural } from "@/utils/utils";
+import { formatDateMonthDayYear, plural } from "@/utils/utils";
 import { ChevronLeft, ChevronRight, StarIcon } from "lucide-react";
 import { Skeleton, SkeletonText } from "../ui/skeleton";
 import React, { useEffect, useState, useMemo, useCallback, memo } from "react";
@@ -26,8 +25,10 @@ import { Badge } from "../ui/badge";
 import { Property } from "@/server/db/schema/tables/properties";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import { ITEMS_PER_PAGE } from "@/utils/constants";
+import HospitablePricingText from "./HospitablePricingText";
+import OtherPropertyPricingText from "./OtherPropertyPricingText";
 
-type PropertyType = Property | AirbnbSearchResult;
+export type PropertyType = Property | AirbnbSearchResult;
 
 export default function UnclaimedOfferCards(): JSX.Element {
   const { adjustedProperties, isSearching } = useAdjustedProperties();
@@ -295,6 +296,18 @@ const UnMatchedPropertyCard = memo(function UnMatchedPropertyCard({
         throw new Error("Property ID is required for non-Airbnb properties");
       })();
 
+  const isHospitable = property.originalListingPlatform === "Hospitable";
+
+  // Type guard to check if a property is an AirbnbSearchResult
+  function isAirbnbSearchResult(
+    property: PropertyType,
+  ): property is AirbnbSearchResult {
+    return (
+      "originalListingPlatform" in property &&
+      property.originalListingPlatform === "Airbnb"
+    );
+  }
+
   return (
     <Link
       href={link}
@@ -421,26 +434,12 @@ const UnMatchedPropertyCard = memo(function UnMatchedPropertyCard({
           {plural(property.maxNumGuests, "Guest")}
         </div>
       </div>
-      <div className="flex justify-between">
-        <div className="flex items-center space-x-3 text-sm font-semibold">
-          <div>
-            {"originalNightlyPrice" in property &&
-            typeof property.originalNightlyPrice === "number"
-              ? formatCurrency(property.originalNightlyPrice)
-              : "N/A"}
-             night
-          </div>
-          <div className="text-xs text-zinc-500 line-through">
-            airbnb 
-            {"originalNightlyPrice" in property &&
-            typeof property.originalNightlyPrice === "number"
-              ? formatCurrency(
-                  property.originalNightlyPrice * AVG_AIRBNB_MARKUP,
-                )
-              : "N/A"}
-          </div>
-        </div>
-      </div>
+
+      {isHospitable && !isAirbnbSearchResult(property) ? (
+        <HospitablePricingText property={property} />
+      ) : (
+        <OtherPropertyPricingText property={property} />
+      )}
     </Link>
   );
 });

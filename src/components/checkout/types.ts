@@ -1,3 +1,4 @@
+import { Property } from "@/server/db/schema/tables/properties";
 import { type PropertyPageData } from "../propertyPages/PropertyPage";
 import { RouterOutputs } from "@/utils/api";
 
@@ -37,7 +38,7 @@ export type PropertyAndTripParams = {
     checkOut: Date;
   };
   calculatedTravelerPrice: number;
-  property: PropertyPageData | RequestToBookProperty;
+  property: PropertyPageData | Property | RequestToBookProperty;
 };
 
 //output
