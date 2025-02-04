@@ -414,6 +414,7 @@ export const stripeRouter = createTRPCRouter({
         numOfGuests: curRequestToBook.numGuests,
         calculatedTravelerPrice: curRequestToBook.calculatedTravelerPrice, //markup already happened
         additionalFeesFromWebhook: curRequestToBook.additionalFees, //from webhook is fo for the book-it-now-case
+        securityDepositAmount: curRequestToBook.timeOfSecurityDeposit,
         checkIn: curRequestToBook.checkIn,
         checkOut: curRequestToBook.checkOut,
         propertyId: curRequestToBook.propertyId,

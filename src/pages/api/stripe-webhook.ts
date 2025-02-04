@@ -177,6 +177,8 @@ export default async function webhook(
               ),
               userId: paymentIntentSucceeded.metadata.user_id!,
               isDirectListingCharge,
+              timeOfSecurityDeposit:
+                currentProperty?.currentSecurityDeposit ?? 0,
             });
           } else if (paymentIntentSucceeded.metadata.type === "offer") {
             // 3. Case: "OFFER"

@@ -131,6 +131,7 @@ export async function finalizeTrip({
   numOfGuests,
   calculatedTravelerPrice,
   additionalFeesFromWebhook,
+  securityDepositAmount,
   checkIn,
   checkOut,
   propertyId,
@@ -142,6 +143,7 @@ export async function finalizeTrip({
   paymentIntentId: string;
   calculatedTravelerPrice: number;
   additionalFeesFromWebhook: number;
+  securityDepositAmount?: number; //undefined for book-it-now but we need it for requestToBook
   numOfGuests: number;
   checkIn: Date;
   checkOut: Date;
@@ -222,7 +224,7 @@ export async function finalizeTrip({
       stripeTransactionFee: priceBreakdown.stripeTransactionFee,
       totalSavings: priceBreakdown.totalSavings,
       additionalFees: additionalFeesFromWebhook, // we need data from webhook just incase the host changes price between bid creatation and accepting it
-      securityDeposit: property.currentSecurityDeposit,
+      securityDeposit: securityDepositAmount ?? property.currentSecurityDeposit,
     })
     .returning()
     .then((r) => r[0]!);
@@ -343,6 +345,7 @@ export async function createRequestToBook({
   propertyId,
   userId,
   isDirectListingCharge,
+  timeOfSecurityDeposit,
 }: {
   paymentIntentId: string;
   calculatedTravelerPrice: number;
@@ -353,6 +356,7 @@ export async function createRequestToBook({
   propertyId: number;
   userId: string;
   isDirectListingCharge: boolean;
+  timeOfSecurityDeposit: number;
 }) {
   const user = await db.query.users
     .findFirst({
@@ -396,6 +400,7 @@ export async function createRequestToBook({
     calculatedTravelerPrice: Math.floor(calculatedTravelerPrice),
     additionalFees: additionalFeesFromWebhook,
     isDirectListing: isDirectListingCharge,
+    timeOfSecurityDeposit: timeOfSecurityDeposit,
   });
 
   //    ------2 CASES: 1.)no direct listing so send to the host 2.) isDirectLIsting send message to us
