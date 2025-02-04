@@ -12,7 +12,10 @@ import {
   tripCheckouts,
 } from "@/server/db/schema";
 import Stripe from "stripe";
-import { breakdownPaymentByPropertyAndTripParams } from "../payment-utils/paymentBreakdown";
+import {
+  breakdownPaymentByPropertyAndTripParams,
+  unwrapCalculatedTravelerPriceToCalculatedBasePrice,
+} from "../payment-utils/paymentBreakdown";
 import {
   captureTripPaymentWithoutSuperhog,
   sendEmailAndWhatsupConfirmation,
@@ -399,7 +402,10 @@ export async function createRequestToBook({
     checkOut,
     numGuests: numOfGuests,
     requestPercentageOff: requestPercentageOff,
-    calculatedBasePrice: removeTravelerMarkup(calculatedTravelerPrice),
+    calculatedBasePrice: unwrapCalculatedTravelerPriceToCalculatedBasePrice({
+      calculatedTravelerPrice,
+      additionalFees: additionalFeesFromWebhook,
+    }),
     calculatedTravelerPrice: Math.floor(calculatedTravelerPrice),
     additionalFees: additionalFeesFromWebhook,
     isDirectListing: isDirectListingCharge,

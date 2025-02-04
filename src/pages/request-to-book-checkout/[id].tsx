@@ -63,7 +63,14 @@ export default function Page() {
           type: "requestToBook",
         })
       : null;
-  }, [property, propertyPricing, checkIn, checkOut, numGuests]);
+  }, [
+    property,
+    propertyPricing,
+    checkIn,
+    checkOut,
+    numGuests,
+    requestPercentage,
+  ]);
 
   return (
     <DashboardLayout>

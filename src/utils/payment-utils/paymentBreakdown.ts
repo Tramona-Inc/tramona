@@ -6,7 +6,7 @@ import type {
   PriceBreakdownOutput,
   PropertyAndTripParams,
 } from "@/components/checkout/types";
-import { getNumNights } from "../utils";
+import { getNumNights, removeTravelerMarkup } from "../utils";
 
 // -------------------------- 2 Different inputs for Breakdown payment  -------------------------
 // -----METHOD 1. USING OFFER
@@ -118,6 +118,23 @@ export function breakdownPaymentByPropertyAndTripParams(
     stripeTransactionFee: stripeFee,
     totalSavings,
   };
+}
+
+export function unwrapCalculatedTravelerPriceToCalculatedBasePrice({
+  calculatedTravelerPrice,
+  additionalFees,
+}: {
+  calculatedTravelerPrice: number;
+  additionalFees: number;
+}) {
+  console.log(calculatedTravelerPrice);
+  console.log(additionalFees);
+  const calculatedBasePrice = removeTravelerMarkup(
+    calculatedTravelerPrice - additionalFees,
+  );
+  console.log(calculatedBasePrice);
+
+  return calculatedBasePrice;
 }
 
 export function getServiceFee({
