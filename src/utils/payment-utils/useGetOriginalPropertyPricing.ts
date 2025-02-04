@@ -138,7 +138,7 @@ export const useGetOriginalPropertyPricing = ({
       checkIn: checkIn,
       checkOut: checkOut,
     },
-    travelerPriceBeforeFees: calculatedTravelerPrice,
+    calculatedTravelerPrice: calculatedTravelerPrice,
     property: property,
   });
 

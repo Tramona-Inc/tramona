@@ -36,7 +36,7 @@ function PriceBreakdown(
         checkOut: props.requestToBookDetails.checkOut,
       },
       property: props.property,
-      travelerPriceBeforeFees: props.requestAmount,
+      calculatedTravelerPrice: props.requestAmount,
     });
     numOfNights = getNumNights(
       props.requestToBookDetails.checkIn,

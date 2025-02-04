@@ -12,9 +12,7 @@ import { trips } from "./trips";
 export const tripCheckouts = pgTable("trip_checkouts", {
   id: serial("id").primaryKey().notNull(),
   totalTripAmount: integer("total_trip_amount").notNull(),
-  calculatedTravelerPrice: integer(
-    "traveler_offered_price_before_fees",
-  ).notNull(),
+  calculatedTravelerPrice: integer("calculated_traveler_price").notNull(),
   paymentIntentId: varchar("payment_intent_id").notNull(),
   checkoutSessionId: varchar("checkout_session_id"),
   taxesPaid: integer("taxes_paid").notNull(),

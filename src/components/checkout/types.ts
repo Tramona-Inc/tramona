@@ -32,7 +32,7 @@ export type PropertyAndTripParams = {
     checkIn: Date;
     checkOut: Date;
   };
-  travelerPriceBeforeFees: number;
+  calculatedTravelerPrice: number;
   property: PropertyPageData | RequestToBookProperty;
 };
 

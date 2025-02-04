@@ -78,7 +78,7 @@ export default function TravelerRequestToBookCard({
       checkIn: requestToBook.checkIn,
       checkOut: requestToBook.checkOut,
     },
-    travelerPriceBeforeFees: requestToBook.calculatedTravelerPrice,
+    calculatedTravelerPrice: requestToBook.calculatedTravelerPrice,
     property: requestToBook.property,
   });
 

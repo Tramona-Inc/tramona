@@ -72,7 +72,7 @@ export function breakdownPaymentByOffer( ///// USING OFFER
 export function breakdownPaymentByPropertyAndTripParams(
   propertyAndTripParams: PropertyAndTripParams,
 ): PriceBreakdownOutput {
-  console.log(propertyAndTripParams.travelerPriceBeforeFees);
+  console.log(propertyAndTripParams.calculatedTravelerPrice);
   const numNights = getNumNights(
     propertyAndTripParams.dates.checkIn,
     propertyAndTripParams.dates.checkOut,
@@ -84,12 +84,12 @@ export function breakdownPaymentByPropertyAndTripParams(
     : getTaxPercentage(propertyAndTripParams.property);
   const superhogFee = isScraped ? 0 : numNights * SUPERHOG_FEE_CENTS_PER_NIGHT;
   const taxesPaid = Math.round(
-    (propertyAndTripParams.travelerPriceBeforeFees + superhogFee) *
+    (propertyAndTripParams.calculatedTravelerPrice + superhogFee) *
       taxPercentage,
   );
 
   const totalBeforeStripeFee =
-    propertyAndTripParams.travelerPriceBeforeFees + superhogFee + taxesPaid;
+    propertyAndTripParams.calculatedTravelerPrice + superhogFee + taxesPaid;
   console.log(totalBeforeStripeFee);
   const stripeFee = getStripeFee(totalBeforeStripeFee);
   console.log(stripeFee);

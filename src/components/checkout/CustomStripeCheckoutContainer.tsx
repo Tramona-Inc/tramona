@@ -32,7 +32,7 @@ const CustomStripeCheckoutContainer = ({
           checkIn: unifiedCheckoutData.dates.checkIn,
           checkOut: unifiedCheckoutData.dates.checkOut,
         },
-        travelerPriceBeforeFees:
+        calculatedTravelerPrice:
           unifiedCheckoutData.pricing.calculatedTravelerPrice,
         property: unifiedCheckoutData.property,
       });

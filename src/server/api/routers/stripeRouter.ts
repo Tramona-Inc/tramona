@@ -309,7 +309,7 @@ export const stripeRouter = createTRPCRouter({
           checkIn: input.checkIn,
           checkOut: input.checkOut,
         },
-        travelerPriceBeforeFees: input.calculatedTravelerPrice,
+        calculatedTravelerPrice: input.calculatedTravelerPrice,
         property: curProperty,
       });
 
@@ -327,7 +327,7 @@ export const stripeRouter = createTRPCRouter({
         check_out: input.checkOut.toString(),
         property_id: input.propertyId,
         host_stripe_id: curProperty.hostTeam.owner.stripeConnectId,
-        traveler_offered_price_before_fees: input.calculatedTravelerPrice,
+        calculated_traveler_price: input.calculatedTravelerPrice,
         price: paymentBreakdown.totalTripAmount, // Total price included tramona fee
         total_savings: paymentBreakdown.totalSavings,
         taxes_paid: paymentBreakdown.taxesPaid,
@@ -409,7 +409,7 @@ export const stripeRouter = createTRPCRouter({
         //trip and tripcheckout creattion, superhog, and sending notifcations
         paymentIntentId: curRequestToBook.paymentIntentId,
         numOfGuests: curRequestToBook.numGuests,
-        travelerPriceBeforeFees: curRequestToBook.calculatedTravelerPrice, //markup already happened
+        calculatedTravelerPrice: curRequestToBook.calculatedTravelerPrice, //markup already happened
         checkIn: curRequestToBook.checkIn,
         checkOut: curRequestToBook.checkOut,
         propertyId: curRequestToBook.propertyId,

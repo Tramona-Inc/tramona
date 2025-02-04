@@ -129,7 +129,7 @@ export async function getRequestIdByOfferId(
 export async function finalizeTrip({
   paymentIntentId,
   numOfGuests,
-  travelerPriceBeforeFees,
+  calculatedTravelerPrice,
   checkIn,
   checkOut,
   propertyId,
@@ -139,7 +139,7 @@ export async function finalizeTrip({
   requestToBookId, // AKA REQUEST TO BID ID
 }: {
   paymentIntentId: string;
-  travelerPriceBeforeFees: number;
+  calculatedTravelerPrice: number;
   numOfGuests: number;
   checkIn: Date;
   checkOut: Date;
@@ -202,7 +202,7 @@ export async function finalizeTrip({
       checkIn: checkIn,
       checkOut: checkOut,
     },
-    travelerPriceBeforeFees: travelerPriceBeforeFees,
+    calculatedTravelerPrice: calculatedTravelerPrice,
     property: property,
   };
 
@@ -213,7 +213,7 @@ export async function finalizeTrip({
     .insert(tripCheckouts)
     .values({
       paymentIntentId,
-      calculatedTravelerPrice: travelerPriceBeforeFees,
+      calculatedTravelerPrice: calculatedTravelerPrice,
       totalTripAmount: priceBreakdown.totalTripAmount,
       taxesPaid: priceBreakdown.taxesPaid,
       superhogFee: priceBreakdown.superhogFee,
@@ -333,7 +333,7 @@ export async function finalizeTrip({
 export async function createRequestToBook({
   paymentIntentId,
   numOfGuests,
-  travelerPriceBeforeFees,
+  calculatedTravelerPrice,
   checkIn,
   checkOut,
   propertyId,
@@ -341,7 +341,7 @@ export async function createRequestToBook({
   isDirectListingCharge,
 }: {
   paymentIntentId: string;
-  travelerPriceBeforeFees: number;
+  calculatedTravelerPrice: number;
   numOfGuests: number;
   checkIn: Date;
   checkOut: Date;
@@ -373,6 +373,10 @@ export async function createRequestToBook({
     groupId: madeByGroupId,
   });
 
+  console.log(
+    calculatedTravelerPrice,
+    removeTravelerMarkup(calculatedTravelerPrice),
+  );
   await db.insert(requestsToBook).values({
     hostTeamId: property.hostTeamId,
     createdAt: new Date(),
@@ -383,8 +387,8 @@ export async function createRequestToBook({
     checkIn,
     checkOut,
     numGuests: numOfGuests,
-    calculatedBasePrice: removeTravelerMarkup(travelerPriceBeforeFees),
-    calculatedTravelerPrice: Math.floor(travelerPriceBeforeFees),
+    calculatedBasePrice: removeTravelerMarkup(calculatedTravelerPrice),
+    calculatedTravelerPrice: Math.floor(calculatedTravelerPrice),
     isDirectListing: isDirectListingCharge,
   });
 

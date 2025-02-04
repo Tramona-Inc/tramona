@@ -140,9 +140,8 @@ export default async function webhook(
               numOfGuests: parseInt(
                 paymentIntentSucceeded.metadata.num_of_guests!,
               ),
-              travelerPriceBeforeFees: parseInt(
-                paymentIntentSucceeded.metadata
-                  .traveler_offered_price_before_fees!,
+              calculatedTravelerPrice: parseInt(
+                paymentIntentSucceeded.metadata.calculated_traveler_price!,
               ),
               checkIn: new Date(paymentIntentSucceeded.metadata.check_in!),
               checkOut: new Date(paymentIntentSucceeded.metadata.check_out!),
@@ -162,9 +161,8 @@ export default async function webhook(
               numOfGuests: parseInt(
                 paymentIntentSucceeded.metadata.num_of_guests!,
               ),
-              travelerPriceBeforeFees: parseInt(
-                paymentIntentSucceeded.metadata
-                  .traveler_offered_price_before_fees!,
+              calculatedTravelerPrice: parseInt(
+                paymentIntentSucceeded.metadata.calculated_traveler_price!,
               ),
               checkIn: new Date(paymentIntentSucceeded.metadata.check_in!),
               checkOut: new Date(paymentIntentSucceeded.metadata.check_out!),
