@@ -170,16 +170,20 @@ const whyListAccordionItems = [
 ];
 
 const Banner = () => {
+  const image = "/assets/images/why-list/beach2.png";
   return (
     <section className="relative -mb-1">
       <div className="relative h-[40vh] w-full">
         <Image
-          src="/assets/images/why-list/beach2.png"
+          src={image}
           alt="beach banner"
           fill
           objectFit="cover"
           objectPosition="center"
           priority
+          quality={100}
+          placeholder="blur"
+          blurDataURL={image}
         />
       </div>
       <span className="absolute inset-0 bg-black opacity-50"></span>
