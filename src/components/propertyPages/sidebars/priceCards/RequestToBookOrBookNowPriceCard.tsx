@@ -94,6 +94,8 @@ export default function RequestToBookOrBookNowPriceCard({
   const [requestAmount, setRequestAmount] = useState(
     calculatedTravelerPricePerNightWithoutFees,
   );
+
+  console.log(requestAmount);
   // Monitor `originalPrice` for errors
   useEffect(() => {
     if (calculatedTravelerPricePerNightWithoutFees === undefined) {
@@ -211,7 +213,8 @@ export default function RequestToBookOrBookNowPriceCard({
       [
         {
           price:
-            propertyPricing.travelerCalculatedAmountWithSecondaryLayerWithoutTaxes, // Buy Now price is the full price
+            propertyPricing.travelerCalculatedAmountWithSecondaryLayerWithoutTaxes! /
+            numOfNights, // Buy Now price is the full price
           label: property.bookItNowEnabled ? "Buy Now" : "Original Price",
           percentOff: 0, // 0% off for original price
         },
@@ -266,10 +269,7 @@ export default function RequestToBookOrBookNowPriceCard({
   );
 
   useEffect(() => {
-    if (
-      showRequestInput &&
-      calculatedTravelerPricePerNightWithoutFees !== undefined
-    ) {
+    if (calculatedTravelerPricePerNightWithoutFees !== undefined) {
       const newPercentage = Math.round(
         ((calculatedTravelerPricePerNightWithoutFees - requestAmount!) /
           calculatedTravelerPricePerNightWithoutFees) *
@@ -286,17 +286,19 @@ export default function RequestToBookOrBookNowPriceCard({
         propertyPricing.additionalFees.totalAdditionalFees +
         (propertyPricing.brokedownPaymentOutput?.stripeTransactionFee ?? 0) +
         (propertyPricing.brokedownPaymentOutput?.superhogFee ?? 0);
+      console.log(discountedBasePricePerNight);
       console.log(finalDiscountedPrice);
 
       setDiscountedPriceInfo({
         discountedTravelerPricePerNightWithoutFees: discountedBasePricePerNight, // This is requestAmount
         finalDiscountedTravelerPrice: finalDiscountedPrice,
       });
+
+      console.log("set", finalDiscountedPrice);
     } else {
       setDiscountedPriceInfo({});
     }
   }, [
-    showRequestInput,
     requestAmount,
     calculatedTravelerPricePerNightWithoutFees,
     maxDiscount,
@@ -315,6 +317,7 @@ export default function RequestToBookOrBookNowPriceCard({
           ? parseFloat(inputValue.replace(/[^0-9.]/g, ""))
           : 0;
         setRawRequestAmount(inputValue);
+
         setRequestAmount(parsedValue);
         setSelectedPreset(null);
       }
@@ -398,6 +401,7 @@ export default function RequestToBookOrBookNowPriceCard({
     (price: number, isCurrentPreselect: boolean) => {
       if (isCurrentPreselect) return;
       // `price` here is still the per night discounted base price from presetOptions
+      console.log(price);
       setRequestAmount(price); // Set requestAmount to per night base price
       setRawRequestAmount(formatCurrency(price));
       const newPercentage = Math.round(
@@ -432,7 +436,7 @@ export default function RequestToBookOrBookNowPriceCard({
 
   // Check if showRequestInput is now true AND it's the first time
   useEffect(() => {
-    if (showRequestInput && !hasOpenedRequestInput) {
+    if (!hasOpenedRequestInput) {
       // Get the price of the first preset option (Buy Now/Original Price)
       const firstPresetPrice = presetOptions[0]?.price;
 
@@ -443,12 +447,7 @@ export default function RequestToBookOrBookNowPriceCard({
 
       setHasOpenedRequestInput(true); // Mark that request input has been opened once
     }
-  }, [
-    showRequestInput,
-    hasOpenedRequestInput,
-    presetOptions,
-    handlePresetSelect,
-  ]);
+  }, [hasOpenedRequestInput, presetOptions, handlePresetSelect]);
 
   return (
     <Card className="w-full bg-gray-50 shadow-lg">
@@ -624,9 +623,8 @@ export default function RequestToBookOrBookNowPriceCard({
                       <Input
                         placeholder="Enter request"
                         value={
-                          showRequestInput &&
                           discountedPriceInfo.finalDiscountedTravelerPrice !==
-                            undefined
+                          undefined
                             ? formatCurrency(
                                 discountedPriceInfo.finalDiscountedTravelerPrice /
                                   numOfNights,

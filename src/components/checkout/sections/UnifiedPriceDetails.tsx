@@ -41,15 +41,7 @@ export function UnifiedPriceDetails({
   const items = [
     {
       title: `${formatCurrency(nightlyPrice)} x ${plural(numberOfNights, "night")}`,
-      price: `${formatCurrency(unifiedCheckoutData.pricing.travelerOfferedPrice)}`,
-    },
-    {
-      title: "Cleaning fee",
-      price: "Included",
-    },
-    {
-      title: "Tramona service fee",
-      price: `${formatCurrency(getServiceFee({ tripCheckout: paymentBreakdown }))}`,
+      price: `${formatCurrency(paymentBreakdown.totalTripAmount - paymentBreakdown.taxesPaid)}`,
     },
     {
       title: "Taxes",

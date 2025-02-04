@@ -106,8 +106,11 @@ export const useGetOriginalPropertyPricing = ({
     : undefined;
 
   let amountSaved: number | undefined;
-  if (originalBasePrice && hostDiscountPercentage) {
-    amountSaved = originalBasePrice * (hostDiscountPercentage / 100);
+  if (originalBasePrice && (requestPercentage ?? hostDiscountPercentage)) {
+    const hostDiscount = (hostDiscountPercentage ?? 0) / 100;
+    const requestDiscount = (requestPercentage ?? 0) / 100;
+    amountSaved =
+      originalBasePrice * hostDiscount + originalBasePrice * requestDiscount;
   }
   console.log(amountSaved);
 
