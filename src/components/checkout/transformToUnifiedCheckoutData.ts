@@ -41,6 +41,7 @@ export function requestOrBookItNowToUnifiedData({
   numGuests,
   calculatedTravelerPrice,
   additionalFees,
+  requestPercentageOff,
   property,
   type,
 }: {
@@ -49,6 +50,7 @@ export function requestOrBookItNowToUnifiedData({
   calculatedTravelerPrice: number;
   additionalFees: number;
   numGuests: number;
+  requestPercentageOff?: number;
   property: PropertyPageData;
   type: "bookItNow" | "requestToBook";
 }): UnifiedCheckoutData {
@@ -59,6 +61,7 @@ export function requestOrBookItNowToUnifiedData({
     discount:
       getApplicableBookItNowAndRequestToBookDiscountPercentage(property),
     additionalFees: additionalFees, //Have to pass through stripe-webhook to prevent host future price change in same bid
+    requestPercentageOff: requestPercentageOff,
   };
 
   return {

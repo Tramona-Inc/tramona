@@ -48,6 +48,7 @@ const CustomStripeCheckoutContainer = ({
         scrapeUrl: unifiedCheckoutData.scrapeUrl,
 
         datePriceFromAirbnb: unifiedCheckoutData.pricing.datePriceFromAirbnb,
+        requestPercentageOff: unifiedCheckoutData.pricing.requestPercentageOff,
         checkIn: unifiedCheckoutData.dates.checkIn,
         checkOut: unifiedCheckoutData.dates.checkOut,
         type: unifiedCheckoutData.type,

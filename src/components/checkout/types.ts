@@ -9,6 +9,7 @@ export type RequestToBookPricing = {
   datePriceFromAirbnb: number | null;
   discount: number;
   additionalFees: number | null;
+  requestPercentageOff?: number;
 };
 
 export interface UnifiedCheckoutData {
