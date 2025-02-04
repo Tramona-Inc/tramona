@@ -40,14 +40,14 @@ export default function TripCancellationOrPartialRefund({
   tripId,
   partialRefundPercentage,
   description,
-  totalPriceAfterFees,
+  travelerTotalPaidAmount,
   cancellationFee = 0,
   setClose,
 }: {
   tripId: number;
   partialRefundPercentage: number;
   description?: string;
-  totalPriceAfterFees: number;
+  travelerTotalPaidAmount: number;
   cancellationFee: number | undefined;
   setClose: () => void;
 }) {
@@ -210,7 +210,7 @@ export default function TripCancellationOrPartialRefund({
         <CardContent>
           <div className="flex flex-row justify-between">
             <p>Total Trip Cost </p>{" "}
-            <p>${(totalPriceAfterFees / 100).toFixed(2)}</p>
+            <p>${(travelerTotalPaidAmount / 100).toFixed(2)}</p>
           </div>
           {!isScrapedProperty && tripCheckoutDetails && (
             <div className="flex flex-row justify-between">

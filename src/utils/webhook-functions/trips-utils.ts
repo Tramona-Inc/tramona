@@ -51,7 +51,7 @@ export async function cancelTripByPaymentIntent({
       groupId: trips.groupId,
       checkIn: trips.checkIn,
       checkOut: trips.checkOut,
-      totalPriceAfterFees: trips.totalPriceAfterFees,
+      travelerTotalPaidAmount: trips.travelerTotalPaidAmount,
       tripCheckout: tripCheckouts,
     })
     .then((res) => res[0]);
@@ -121,7 +121,7 @@ export async function cancelTripByPaymentIntent({
 
           property: property!.name,
           reason: reason,
-          refund: currentTrip.totalPriceAfterFees,
+          refund: currentTrip.travelerTotalPaidAmount,
         }),
       });
     }

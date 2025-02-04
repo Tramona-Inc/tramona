@@ -109,7 +109,13 @@ export default function TripPage({
                   size="sm"
                   className="w-[160px] text-xs lg:w-[200px] lg:text-sm"
                   disabled={!hostId}
-                  onClick={() => chatWithHostTeam({ hostId: hostId!, hostTeamId: trip.property.hostTeam.id, propertyId: trip.property.id })}
+                  onClick={() =>
+                    chatWithHostTeam({
+                      hostId: hostId!,
+                      hostTeamId: trip.property.hostTeam.id,
+                      propertyId: trip.property.id,
+                    })
+                  }
                 >
                   <MessageCircle className="w-4 lg:w-5" /> Message your host
                 </Button>
@@ -206,7 +212,7 @@ export default function TripPage({
                 <p>
                   {formatCurrency(
                     trip.tripCheckout?.totalTripAmount ??
-                      trip.totalPriceAfterFees,
+                      trip.travelerTotalPaidAmount,
                   )}
                 </p>
 

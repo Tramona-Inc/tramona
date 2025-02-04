@@ -245,7 +245,7 @@ export default async function webhook(
                   propertyId: offer.propertyId,
                   offerId: offer.id,
                   paymentIntentId,
-                  totalPriceAfterFees: paymentIntentSucceeded.amount,
+                  travelerTotalPaidAmount: paymentIntentSucceeded.amount,
                   tripCheckoutId: tripCheckout.id,
                 })
                 .returning()
@@ -378,7 +378,7 @@ export default async function webhook(
           //   .set({
           //     paymentIntentId: chargeObject.payment_intent?.toString(),
 
-          //     totalPriceAfterFees: chargeObject.amount,
+          //     travelerTotalPaidAmount: chargeObject.amount,
           //   })
           //   .where(
           //     eq(trips.offerId, parseInt(chargeObject.metadata.listing_id!)),

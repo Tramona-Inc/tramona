@@ -12,7 +12,7 @@ export default function TripCancelDialog({
 }: {
   trip: Pick<
     Trip,
-    "id" | "checkIn" | "checkOut" | "createdAt" | "totalPriceAfterFees"
+    "id" | "checkIn" | "checkOut" | "createdAt" | "travelerTotalPaidAmount"
   > & {
     property: Pick<
       Property,
@@ -48,7 +48,7 @@ export default function TripCancelDialog({
             tripId={trip.id}
             partialRefundPercentage={partialRefundPercentage}
             description={description}
-            totalPriceAfterFees={trip.totalPriceAfterFees}
+            travelerTotalPaidAmount={trip.travelerTotalPaidAmount}
             setClose={() => setIsOpen(false)}
             cancellationFee={cancellationFee}
           />

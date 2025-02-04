@@ -239,7 +239,7 @@ export async function finalizeTrip({
       tripSource: source,
       propertyId: property.id,
       paymentIntentId,
-      totalPriceAfterFees: priceBreakdown.totalTripAmount,
+      travelerTotalPaidAmount: priceBreakdown.totalTripAmount,
       tripCheckoutId: tripCheckout.id,
     })
     .returning()
@@ -308,7 +308,7 @@ export async function finalizeTrip({
     checkOut,
   });
   await sendSlackMessage({
-    isProductionOnly: false,
+    isProductionOnly: true,
     channel: "tramona-bot",
     text: [
       `*${user.email} just booked a trip: ${property.name}*`,

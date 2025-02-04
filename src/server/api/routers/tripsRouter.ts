@@ -420,7 +420,7 @@ export const tripsRouter = createTRPCRouter({
 
             property: property!.name,
             reason: currentCancellations.reason,
-            refund: currentTrip.totalPriceAfterFees,
+            refund: currentTrip.travelerTotalPaidAmount,
 
             //partial refund
             //partialRefund: true
@@ -434,7 +434,7 @@ export const tripsRouter = createTRPCRouter({
       //------------- 5. Issue refund  ----------
       //$220.15
       const amountWithoutProcessingFees = Math.round(
-        Math.round((currentTrip.totalPriceAfterFees - 3) / 1.029),
+        Math.round((currentTrip.travelerTotalPaidAmount - 3) / 1.029),
       );
 
       const amountWithoutSuperhogOrTax = input.refundAmount

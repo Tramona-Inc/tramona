@@ -336,6 +336,7 @@ export const stripeRouter = createTRPCRouter({
         tax_percentage: paymentBreakdown.taxPercentage,
         stripe_transaction_fee: paymentBreakdown.stripeTransactionFee,
         superhog_paid: paymentBreakdown.superhogFee,
+        security_deposit_amount: curProperty.currentSecurityDeposit,
         is_direct_listing: input.scrapeUrl ? "true" : "false",
         num_of_guests: input.numOfGuests,
         type: input.type,

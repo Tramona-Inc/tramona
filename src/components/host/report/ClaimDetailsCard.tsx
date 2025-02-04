@@ -135,7 +135,9 @@ export default function ClaimDetailsCard({
                     <p className="text-sm text-muted-foreground">Total Price</p>
                     <p className="font-semibold">
                       $
-                      {(claimDetails.trip.totalPriceAfterFees / 100).toFixed(2)}
+                      {(
+                        claimDetails.trip.travelerTotalPaidAmount / 100
+                      ).toFixed(2)}
                     </p>
                   </CardContent>
                 </Card>
