@@ -121,18 +121,16 @@ export function breakdownPaymentByPropertyAndTripParams(
 }
 
 export function unwrapCalculatedTravelerPriceToCalculatedBasePrice({
+  //USE ONLY WITH REQUEST TO BOOK
   calculatedTravelerPrice,
   additionalFees,
 }: {
   calculatedTravelerPrice: number;
   additionalFees: number;
 }) {
-  console.log(calculatedTravelerPrice);
-  console.log(additionalFees);
   const calculatedBasePrice = removeTravelerMarkup(
     calculatedTravelerPrice - additionalFees,
   );
-  console.log(calculatedBasePrice);
 
   return calculatedBasePrice;
 }
