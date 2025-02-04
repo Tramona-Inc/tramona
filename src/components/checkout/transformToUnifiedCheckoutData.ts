@@ -2,7 +2,7 @@ import { breakdownPaymentByOffer } from "@/utils/payment-utils/paymentBreakdown"
 import { UnifiedCheckoutData } from "./types";
 import { RouterOutputs } from "@/utils/api";
 import { PropertyPageData } from "../propertyPages/PropertyPage";
-import { getApplicableBookItNowAndRequestToBookDiscountPercentage } from "@/utils/utils";
+import { getApplicableBookItNowAndRequestToBookDiscountPercentage } from "../../utils/payment-utils/payment-utils";
 
 type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 

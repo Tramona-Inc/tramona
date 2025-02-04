@@ -1,13 +1,14 @@
 import { api } from "@/utils/api";
-import {
-  getNumNights,
-  getApplicableBookItNowAndRequestToBookDiscountPercentage,
-} from "@/utils/utils";
+import { getNumNights } from "@/utils/utils";
 import { PropertyPageData } from "@/components/propertyPages/PropertyPage";
 import { isNumber } from "lodash";
 import { TRAVELER_MARKUP } from "../constants";
-import { getAdditionalFees } from "./payment-utils";
+import {
+  getAdditionalFees,
+  getApplicableBookItNowAndRequestToBookDiscountPercentage,
+} from "./payment-utils";
 import { breakdownPaymentByPropertyAndTripParams } from "./paymentBreakdown";
+import type { UseGetOriginalPropertyPricingOutput } from "@/components/checkout/types";
 
 export const useGetOriginalPropertyPricing = ({
   property,
@@ -21,7 +22,7 @@ export const useGetOriginalPropertyPricing = ({
   checkOut: Date;
   numGuests: number;
   requestPercentage?: number;
-}) => {
+}): UseGetOriginalPropertyPricingOutput => {
   // Always define these, even if property is undefined
   const isHospitable = property?.originalListingPlatform === "Hospitable";
   const numNights = getNumNights(checkIn, checkOut);
@@ -112,11 +113,13 @@ export const useGetOriginalPropertyPricing = ({
     amountSaved =
       originalBasePrice * hostDiscount + originalBasePrice * requestDiscount;
   }
+  console.log(hostDiscountPercentage);
   console.log(amountSaved);
 
   calculatedBasePrice =
     calculatedBasePrice * (1 - (hostDiscountPercentage ?? 0) / 100);
 
+  console.log(calculatedBasePrice);
   // < ----------------------- GET THE calculatedTravelerPrice. (calculatedPricePerNight  * travelerMarkup ) + additional Fees  ------------------------------------- >
   const additionalFees = getAdditionalFees({
     property: property,

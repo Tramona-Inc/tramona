@@ -810,21 +810,6 @@ export function useUpdateUser() {
   };
 }
 
-export function removeTax(total: number, taxRate: number): number {
-  if (taxRate < 0 || taxRate >= 1) {
-    throw new Error("Tax rate must be between 0 and 1");
-  }
-  const amountWithoutTax = Math.round(total / (1 + taxRate));
-  return amountWithoutTax;
-}
-
-export const getApplicableBookItNowAndRequestToBookDiscountPercentage = (
-  property: Pick<Property, "bookItNowHostDiscountPercentOffInput">,
-) => {
-  const discountPercentage = property.bookItNowHostDiscountPercentOffInput;
-  return discountPercentage;
-};
-
 export const capitalizeFirstLetter = (string: string | null): string => {
   if (!string) return "";
   return string.charAt(0).toUpperCase() + string.slice(1);

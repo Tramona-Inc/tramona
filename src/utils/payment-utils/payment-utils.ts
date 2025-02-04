@@ -1,4 +1,5 @@
 import type { Property } from "@/server/db/schema";
+import type { AdditionalFeesOutput } from "@/components/checkout/types";
 
 type MyPartialProperty = Pick<
   Property,
@@ -19,7 +20,7 @@ export const getAdditionalFees = ({
   numOfNights: number;
   numOfPets: number | undefined;
   numOfGuests: number;
-}) => {
+}): AdditionalFeesOutput => {
   const cleaningFee = property.cleaningFeePerStay;
   const petFee = property.petFeePerStay * (numOfPets ?? 0);
 
@@ -50,4 +51,20 @@ export const getAdditionalFees = ({
     extraGuestFee,
     totalAdditionalFees,
   };
+};
+
+export function removeTax(totalBeforeStripe: number, taxRate: number): number {
+  // stripe fee must be stripped first
+  if (taxRate < 0 || taxRate >= 1) {
+    throw new Error("Tax rate must be between 0 and 1");
+  }
+  const amountWithoutTax = Math.round(totalBeforeStripe / (1 + taxRate));
+  return amountWithoutTax;
+}
+
+export const getApplicableBookItNowAndRequestToBookDiscountPercentage = (
+  property: Pick<Property, "bookItNowHostDiscountPercentOffInput">,
+) => {
+  const discountPercentage = property.bookItNowHostDiscountPercentOffInput;
+  return discountPercentage;
 };

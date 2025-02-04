@@ -21,8 +21,9 @@ import { TRPCError } from "@trpc/server";
 import { and, eq, exists, isNotNull, isNull, sql, lte, ne } from "drizzle-orm";
 import { z } from "zod";
 import BookingCancellationEmail from "packages/transactional/emails/BookingCancellationEmail";
-import { formatDateRange, getNumNights, removeTax } from "@/utils/utils";
+import { formatDateRange, getNumNights } from "@/utils/utils";
 import { refundTripWithStripe } from "@/utils/stripe-utils";
+import { removeTax } from "@/utils/payment-utils/payment-utils";
 import { TAX_PERCENTAGE } from "@/utils/constants";
 
 export const tripsRouter = createTRPCRouter({

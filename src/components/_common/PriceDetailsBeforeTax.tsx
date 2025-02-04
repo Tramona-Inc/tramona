@@ -1,7 +1,6 @@
 import { Separator } from "../ui/separator";
 import {
   formatCurrency,
-  getApplicableBookItNowAndRequestToBookDiscountPercentage,
   getNumNights,
   getTravelerOfferedPrice,
 } from "@/utils/utils";
@@ -17,6 +16,7 @@ import {
 } from "@/utils/payment-utils/paymentBreakdown";
 import type { RequestToBookDetails } from "../propertyPages/sidebars/actionButtons/RequestToBookBtn";
 import { TRAVELER_MARKUP } from "@/utils/constants";
+import { getApplicableBookItNowAndRequestToBookDiscountPercentage } from "../../utils/payment-utils/payment-utils";
 
 type PaymentBreakdown = {
   totalTripAmount: number;

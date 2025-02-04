@@ -830,10 +830,7 @@ export default function RequestToBookOrBookNowPriceCard({
               </Button>
               {showPriceBreakdown && (
                 <PriceBreakdownForTravelers
-                  requestAmount={
-                    propertyPricing.travelerCalculatedAmountWithSecondaryLayerWithoutTaxes
-                  }
-                  propertyPricing={propertyPricing.brokedownPaymentOutput}
+                  propertyPricing={propertyPricing}
                   numNights={numOfNights}
                 />
               )}
