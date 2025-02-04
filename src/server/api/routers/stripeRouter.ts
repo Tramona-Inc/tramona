@@ -331,7 +331,7 @@ export const stripeRouter = createTRPCRouter({
         host_stripe_id: curProperty.hostTeam.owner.stripeConnectId,
         calculated_traveler_price: input.calculatedTravelerPrice,
         additional_fees: input.additionalFees ?? null,
-        price: paymentBreakdown.totalTripAmount, // Total price included tramona fee
+        price: paymentBreakdown.totalTripAmount!, // Total price included tramona fee
         total_savings: paymentBreakdown.totalSavings,
         taxes_paid: paymentBreakdown.taxesPaid,
         tax_percentage: paymentBreakdown.taxPercentage,

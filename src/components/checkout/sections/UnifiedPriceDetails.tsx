@@ -41,8 +41,8 @@ export function UnifiedPriceDetails({
 
   const items = [
     {
-      title: `${formatCurrency(paymentBreakdown.totalTripAmount - paymentBreakdown.taxesPaid)} x ${plural(numberOfNights, "night")}`,
-      price: `${formatCurrency(paymentBreakdown.totalTripAmount - paymentBreakdown.taxesPaid)}`,
+      title: `${formatCurrency(paymentBreakdown.totalTripAmount! - paymentBreakdown.taxesPaid)} x ${plural(numberOfNights, "night")}`,
+      price: `${formatCurrency(paymentBreakdown.totalTripAmount! - paymentBreakdown.taxesPaid)}`,
     },
     {
       title: "Taxes",
@@ -96,13 +96,13 @@ export function UnifiedPriceDetails({
         <Separator />
         <div className="flex items-center justify-between pb-4 font-bold">
           <p>Total (USD)</p>
-          <p>{formatCurrency(paymentBreakdown.totalTripAmount)}</p>
+          <p>{formatCurrency(paymentBreakdown.totalTripAmount!)}</p>
         </div>
       </div>
       <div className="flex flex-row justify-between md:hidden">
         <div>
           <p className="text-base font-bold">
-            {formatCurrency(paymentBreakdown.totalTripAmount)}
+            {formatCurrency(paymentBreakdown.totalTripAmount!)}
           </p>
           <p className="text-muted-foreground"> Total after taxes</p>
         </div>
@@ -161,7 +161,7 @@ export function UnifiedPriceDetails({
               <Separator />
               <div className="flex items-center justify-between pb-4 font-bold">
                 <p>Total (USD)</p>
-                <p>{formatCurrency(paymentBreakdown.totalTripAmount)}</p>
+                <p>{formatCurrency(paymentBreakdown.totalTripAmount!)}</p>
               </div>
             </div>
           </DialogContent>

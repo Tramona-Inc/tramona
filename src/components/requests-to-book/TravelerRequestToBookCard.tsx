@@ -86,7 +86,7 @@ export default function TravelerRequestToBookCard({
     paymentBreakdown.superhogFee + paymentBreakdown.stripeTransactionFee;
 
   const totalbeforeFees =
-    paymentBreakdown.totalTripAmount - serviceFee - paymentBreakdown.taxesPaid;
+    paymentBreakdown.totalTripAmount! - serviceFee - paymentBreakdown.taxesPaid;
 
   const numOfNights = getNumNights(
     requestToBook.checkIn,
@@ -191,7 +191,7 @@ export default function TravelerRequestToBookCard({
                     <div className="flex flex-col justify-between border-t pt-2 text-lg font-semibold sm:flex-row">
                       <span>Total (USD)</span>
                       <span className="text-right">
-                        {formatCurrency(paymentBreakdown.totalTripAmount)}
+                        {formatCurrency(paymentBreakdown.totalTripAmount!)}
                       </span>
                     </div>
                   </div>

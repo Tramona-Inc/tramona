@@ -221,7 +221,7 @@ export async function finalizeTrip({
     .values({
       paymentIntentId,
       calculatedTravelerPrice: calculatedTravelerPrice,
-      totalTripAmount: priceBreakdown.totalTripAmount,
+      totalTripAmount: priceBreakdown.totalTripAmount!,
       taxesPaid: priceBreakdown.taxesPaid,
       superhogFee: priceBreakdown.superhogFee,
       stripeTransactionFee: priceBreakdown.stripeTransactionFee,
@@ -244,7 +244,7 @@ export async function finalizeTrip({
       tripSource: source,
       propertyId: property.id,
       paymentIntentId,
-      travelerTotalPaidAmount: priceBreakdown.totalTripAmount,
+      travelerTotalPaidAmount: priceBreakdown.totalTripAmount!,
       tripCheckoutId: tripCheckout.id,
     })
     .returning()

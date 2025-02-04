@@ -38,7 +38,7 @@ const CustomStripeCheckoutContainer = ({
       });
 
       return await authorizePayment.mutateAsync({
-        totalAmountPaid: totalTripAmount,
+        totalAmountPaid: totalTripAmount!,
         calculatedTravelerPrice:
           unifiedCheckoutData.pricing.calculatedTravelerPrice,
         additionalFees: unifiedCheckoutData.pricing.additionalFees,

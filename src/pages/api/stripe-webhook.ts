@@ -229,7 +229,7 @@ export default async function webhook(
                 .values({
                   paymentIntentId,
                   calculatedTravelerPrice: offer.calculatedTravelerPrice,
-                  totalTripAmount: priceBreakdown.totalTripAmount,
+                  totalTripAmount: priceBreakdown.totalTripAmount!,
                   taxesPaid: priceBreakdown.taxesPaid,
                   superhogFee: priceBreakdown.superhogFee,
                   stripeTransactionFee: priceBreakdown.stripeTransactionFee,

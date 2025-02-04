@@ -17,15 +17,7 @@ import {
 import type { RequestToBookDetails } from "../propertyPages/sidebars/actionButtons/RequestToBookBtn";
 import { TRAVELER_MARKUP } from "@/utils/constants";
 import { getApplicableBookItNowAndRequestToBookDiscountPercentage } from "../../utils/payment-utils/payment-utils";
-
-type PaymentBreakdown = {
-  totalTripAmount: number;
-  taxesPaid: number;
-  taxPercentage: number;
-  superhogFee: number;
-  stripeTransactionFee: number;
-  totalSavings: number;
-};
+import { PriceBreakdownOutput } from "../checkout/types";
 
 type PriceDetails = {
   numberOfNights: number;
@@ -43,7 +35,7 @@ export default function PriceDetailsBeforeTax({
 }) {
   const [loading, setLoading] = useState(true);
   const [brokeDownPayment, setBrokeDownPayment] =
-    useState<PaymentBreakdown | null>(null);
+    useState<PriceBreakdownOutput | null>(null);
   const [priceDetails, setPriceDetails] = useState<PriceDetails>({
     numberOfNights: 1,
     nightlyPrice: 0,
@@ -127,7 +119,7 @@ export default function PriceDetailsBeforeTax({
     return <div>Loading price details...</div>;
   }
 
-  if (!brokeDownPayment) {
+  if (!brokeDownPayment?.totalTripAmount) {
     return (
       <div className="text-red-500">{"Unable to display price details"}</div>
     );
