@@ -1,8 +1,6 @@
-import { PropertyType } from "./UnclaimedOfferCards";
 import type { Property } from "@/server/db/schema";
 import React from "react";
 import { formatCurrency } from "@/utils/utils";
-import { AVG_AIRBNB_MARKUP } from "@/utils/constants";
 import { useGetOriginalPropertyPricing } from "@/utils/payment-utils/useGetOriginalPropertyPricing";
 import { useRouter } from "next/router";
 
