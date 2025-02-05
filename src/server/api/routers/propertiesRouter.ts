@@ -686,13 +686,13 @@ export const propertiesRouter = createTRPCRouter({
       const hostRequests = await getRequestsForProperties(hostProperties);
 
       const groupedByCity: HostRequestsPageData[] = [];
+
       const citiesSet = new Set(
         hostProperties.map((property) => property.city),
       );
       citiesSet.forEach((city) => {
         groupedByCity.push({ city, requests: [] });
       });
-
       const findOrCreateCityGroup = (city: string) => {
         let cityGroup = groupedByCity.find((group) => group.city === city);
         if (!cityGroup) {

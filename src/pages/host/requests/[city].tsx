@@ -5,8 +5,6 @@ import Head from "next/head";
 import { useIsLg } from "@/utils/utils";
 
 export default function Page() {
-  const isLg = useIsLg();
-
   return (
     <DashboardLayout>
       <Head>
