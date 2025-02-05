@@ -4,7 +4,7 @@ import {
   ScrapedListing,
 } from "@/server/direct-sites-scraping";
 import { NewReview } from "@/server/db/schema";
-import axios, { AxiosError, AxiosResponse } from "axios";
+import axios, { AxiosResponse } from "axios";
 import { z } from "zod";
 import { ALL_PROPERTY_TYPES, PropertyType } from "@/server/db/schema/common";
 import { ListingSiteName } from "@/server/db/schema/common";
@@ -374,14 +374,14 @@ interface PriceResult {
 
 type OnlyPriceResult =
   | {
-    status: "success";
-    price: number;
-    currency: string;
-    id: string;
-  }
+      status: "success";
+      price: number;
+      currency: string;
+      id: string;
+    }
   | {
-    status: "failed" | "unavailable";
-  };
+      status: "failed" | "unavailable";
+    };
 
 function formatCancellationPolicy(
   cancellationDetails: CancellationDetails,
@@ -540,7 +540,8 @@ export const fetchPriceNoRateLimit = async (
   const headers = {
     accept: "*/*",
     "accept-language": "en-US,en;q=0.9",
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+    "User-Agent":
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
     Referer: "https://www.casamundo.com/",
     Origin: "https://www.casamundo.com",
     // "sec-ch-ua":
@@ -921,45 +922,45 @@ export const casamundoSubScraper: (
   checkOut,
   numGuests: initialNumGuests,
 }) => {
-    let numGuests = initialNumGuests;
+  let numGuests = initialNumGuests;
 
-    if (scrapeUrl) {
-      try {
-        const url = new URL(scrapeUrl);
-        numGuests =
-          parseInt(url.searchParams.get("adults") ?? "", 10) || initialNumGuests;
-      } catch (error) {
-        console.error("Invalid scrapeUrl provided:", error);
-      }
+  if (scrapeUrl) {
+    try {
+      const url = new URL(scrapeUrl);
+      numGuests =
+        parseInt(url.searchParams.get("adults") ?? "", 10) || initialNumGuests;
+    } catch (error) {
+      console.error("Invalid scrapeUrl provided:", error);
     }
+  }
 
-    const numNights = getNumNights(checkIn, checkOut);
+  const numNights = getNumNights(checkIn, checkOut);
 
-    const isAvailable = await checkAvailability(
-      originalListingId,
-      checkIn,
-      checkOut,
-    );
+  const isAvailable = await checkAvailability(
+    originalListingId,
+    checkIn,
+    checkOut,
+  );
 
-    const price = await fetchPrice({
-      offerId: originalListingId,
-      numGuests,
-      checkIn: checkIn,
-      duration: numNights,
-    });
+  const price = await fetchPrice({
+    offerId: originalListingId,
+    numGuests,
+    checkIn: checkIn,
+    duration: numNights,
+  });
 
-    if (!isAvailable || price.price === -1) {
-      return {
-        isAvailableOnOriginalSite: false,
-        availabilityCheckedAt: new Date(),
-      };
-    }
+  if (!isAvailable || price.price === -1) {
     return {
-      isAvailableOnOriginalSite: true,
+      isAvailableOnOriginalSite: false,
       availabilityCheckedAt: new Date(),
-      originalNightlyPrice: Math.round((price.price / numNights) * 100),
     };
+  }
+  return {
+    isAvailableOnOriginalSite: true,
+    availabilityCheckedAt: new Date(),
+    originalNightlyPrice: Math.round((price.price / numNights) * 100),
   };
+};
 
 // export const casamundoSubScraper: SubsequentScraper = async ({
 //   originalListingId,

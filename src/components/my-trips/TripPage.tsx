@@ -52,7 +52,7 @@ export default function TripPage({
   const tripWithin48Hours = isTripWithin48Hours(tripData);
 
   return (
-    <div className="col-span-10 flex flex-col gap-5 p-4 py-10 2xl:col-span-11">
+    <div className="col-span-10 mx-auto flex flex-col gap-5 p-4 py-10 xl:mx-16 2xl:col-span-11">
       <Button asChild size="icon" variant="ghost" className="rounded-full">
         <Link href={"/my-trips"}>
           <ArrowLeftIcon />
@@ -109,7 +109,13 @@ export default function TripPage({
                   size="sm"
                   className="w-[160px] text-xs lg:w-[200px] lg:text-sm"
                   disabled={!hostId}
-                  onClick={() => chatWithHostTeam({ hostId: hostId!, hostTeamId: trip.property.hostTeam.id, propertyId: trip.property.id })}
+                  onClick={() =>
+                    chatWithHostTeam({
+                      hostId: hostId!,
+                      hostTeamId: trip.property.hostTeam.id,
+                      propertyId: trip.property.id,
+                    })
+                  }
                 >
                   <MessageCircle className="w-4 lg:w-5" /> Message your host
                 </Button>
@@ -206,7 +212,7 @@ export default function TripPage({
                 <p>
                   {formatCurrency(
                     trip.tripCheckout?.totalTripAmount ??
-                      trip.totalPriceAfterFees,
+                      trip.travelerTotalPaidAmount,
                   )}
                 </p>
 

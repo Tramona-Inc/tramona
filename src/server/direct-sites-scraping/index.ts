@@ -346,7 +346,7 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
               getNumNights(options.checkIn, options.checkOut);
 
             // ----- create checkout and offer
-            const travelerOfferedPriceBeforeFees = getTravelerOfferedPrice({
+            const calculatedTravelerPrice = getTravelerOfferedPrice({
               totalBasePriceBeforeFees: originalTotalBasePriceBeforeFees,
               travelerMarkup: DIRECT_LISTING_MARKUP,
             });
@@ -357,7 +357,7 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
               checkOut: options.checkOut,
               totalBasePriceBeforeFees: originalTotalBasePriceBeforeFees,
               hostPayout: originalTotalBasePriceBeforeFees,
-              travelerOfferedPriceBeforeFees,
+              calculatedTravelerPrice,
               scrapeUrl: listing.scrapeUrl,
               isAvailableOnOriginalSite: true,
               availabilityCheckedAt: new Date(),
@@ -418,7 +418,7 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
               realNightlyPrice *
               getNumNights(options.checkIn, options.checkOut);
 
-            const travelerOfferedPriceBeforeFees = getTravelerOfferedPrice({
+            const calculatedTravelerPrice = getTravelerOfferedPrice({
               totalBasePriceBeforeFees: originalTotalBasePriceBeforeFees,
               travelerMarkup: DIRECT_LISTING_MARKUP,
             });
@@ -429,7 +429,7 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
               checkOut: options.checkOut,
               totalBasePriceBeforeFees: originalTotalBasePriceBeforeFees,
               hostPayout: originalTotalBasePriceBeforeFees,
-              travelerOfferedPriceBeforeFees,
+              calculatedTravelerPrice,
               scrapeUrl: listing.scrapeUrl,
               isAvailableOnOriginalSite: true,
               availabilityCheckedAt: new Date(),

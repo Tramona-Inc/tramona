@@ -3,12 +3,10 @@ import { VerificationProvider } from "@/components/_utils/VerificationContext";
 import { Button, ButtonProps } from "@/components/ui/button";
 import { RouterOutputs } from "@/utils/api";
 import { api } from "@/utils/api";
-import {
-  formatDateMonthDayYear,
-  getApplicableBookItNowDiscount,
-} from "@/utils/utils";
+import { formatDateMonthDayYear } from "@/utils/utils";
 import Link from "next/link";
 import { useMemo } from "react";
+
 export type OfferWithDetails = RouterOutputs["offers"]["getByIdWithDetails"];
 export type PropertyPageData = RouterOutputs["properties"]["getById"];
 

@@ -32,21 +32,23 @@ const CustomStripeCheckoutContainer = ({
           checkIn: unifiedCheckoutData.dates.checkIn,
           checkOut: unifiedCheckoutData.dates.checkOut,
         },
-        travelerPriceBeforeFees:
-          unifiedCheckoutData.pricing.travelerOfferedPriceBeforeFees,
+        calculatedTravelerPrice:
+          unifiedCheckoutData.pricing.calculatedTravelerPrice,
         property: unifiedCheckoutData.property,
       });
 
       return await authorizePayment.mutateAsync({
-        totalAmountPaid: totalTripAmount,
-        travelerOfferedPriceBeforeFees:
-          unifiedCheckoutData.pricing.travelerOfferedPriceBeforeFees,
+        totalAmountPaid: totalTripAmount!,
+        calculatedTravelerPrice:
+          unifiedCheckoutData.pricing.calculatedTravelerPrice,
+        additionalFees: unifiedCheckoutData.pricing.additionalFees,
         cancelUrl: pathname,
         propertyId: unifiedCheckoutData.property.id,
         offerId: unifiedCheckoutData.offerId ?? null,
         scrapeUrl: unifiedCheckoutData.scrapeUrl,
 
         datePriceFromAirbnb: unifiedCheckoutData.pricing.datePriceFromAirbnb,
+        requestPercentageOff: unifiedCheckoutData.pricing.requestPercentageOff,
         checkIn: unifiedCheckoutData.dates.checkIn,
         checkOut: unifiedCheckoutData.dates.checkOut,
         type: unifiedCheckoutData.type,
