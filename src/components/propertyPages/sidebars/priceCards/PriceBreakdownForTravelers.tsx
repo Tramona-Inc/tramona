@@ -70,7 +70,6 @@ function PriceBreakdownForTravelers(
             <span>{formatCurrency(brokedownPrice.taxesPaid)}</span>
           </div>
           {props.property?.originalListingPlatform !== "Casamundo" &&
-            brokedownPrice.totalSavings &&
             brokedownPrice.totalSavings > 0 && (
               <div className="flex items-center justify-between text-green-700">
                 <span> You Save</span>
