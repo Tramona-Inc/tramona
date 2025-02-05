@@ -909,8 +909,6 @@ export async function getPropertyOriginalPrice(
         },
       );
 
-      console.log(data);
-
       const stayNights = data.data.dates.slice(0, -1);
 
       if (stayNights.length === 0) {
