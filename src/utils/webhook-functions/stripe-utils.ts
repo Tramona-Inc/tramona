@@ -223,6 +223,7 @@ export async function finalizeTrip({
       calculatedTravelerPrice: calculatedTravelerPrice,
       totalTripAmount: priceBreakdown.totalTripAmount!,
       taxesPaid: priceBreakdown.taxesPaid,
+      taxPercentage: priceBreakdown.taxPercentage.toString(),
       superhogFee: priceBreakdown.superhogFee,
       stripeTransactionFee: priceBreakdown.stripeTransactionFee,
       totalSavings: priceBreakdown.totalSavings,

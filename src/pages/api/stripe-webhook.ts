@@ -231,6 +231,7 @@ export default async function webhook(
                   calculatedTravelerPrice: offer.calculatedTravelerPrice,
                   totalTripAmount: priceBreakdown.totalTripAmount!,
                   taxesPaid: priceBreakdown.taxesPaid,
+                  taxPercentage: priceBreakdown.taxPercentage.toString(),
                   superhogFee: priceBreakdown.superhogFee,
                   stripeTransactionFee: priceBreakdown.stripeTransactionFee,
                   totalSavings: priceBreakdown.totalSavings,
