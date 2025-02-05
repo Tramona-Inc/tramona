@@ -50,7 +50,7 @@ function HospitablePricingText({ property }: { property: Property }) {
           )}
         </div>
       ) : (
-        <div className="text-sm font-semibold">Pricing Loading...</div>
+        <div className="text-sm font-semibold">Pricing unavailable</div>
       )}
     </div>
   );
