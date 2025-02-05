@@ -1,8 +1,9 @@
 import type { Property } from "@/server/db/schema";
 import React from "react";
-import { formatCurrency } from "@/utils/utils";
+import { formatCurrency, getNumNights } from "@/utils/utils";
 import { useGetOriginalPropertyPricing } from "@/utils/payment-utils/useGetOriginalPropertyPricing";
 import { useRouter } from "next/router";
+import { Skeleton } from "../ui/skeleton";
 
 function HospitablePricingText({ property }: { property: Property }) {
   const isHospitable = property.originalListingPlatform === "Hospitable";
@@ -20,22 +21,30 @@ function HospitablePricingText({ property }: { property: Property }) {
     numGuests: numGuests,
   });
 
+  const numOfNights = getNumNights(checkIn, checkOut);
   return (
     <div className="flex justify-between">
-      {propertyPricing.travelerCalculatedAmountWithSecondaryLayerWithoutTaxes ? (
+      {propertyPricing.isLoading ? (
+        <div className="flex flex-row gap-x-2 text-sm font-semibold">
+          <Skeleton className="mt-2 h-3 w-16" />{" "}
+          <Skeleton className="mt-2 h-3 w-10" />{" "}
+        </div>
+      ) : propertyPricing.travelerCalculatedAmountWithSecondaryLayerWithoutTaxes ? (
         <div className="flex items-center space-x-3 text-sm font-semibold">
           {propertyPricing.amountSaved && propertyPricing.amountSaved > 0 ? (
             <>
               <div>
                 {formatCurrency(
-                  propertyPricing.travelerCalculatedAmountWithSecondaryLayerWithoutTaxes,
+                  propertyPricing.travelerCalculatedAmountWithSecondaryLayerWithoutTaxes /
+                    numOfNights,
                 )}{" "}
                 night
               </div>
               <div className="text-xs text-zinc-500 line-through">
                 airbnb{" "}
                 {formatCurrency(
-                  propertyPricing.travelerCalculatedAmountWithSecondaryLayerWithoutTaxes +
+                  propertyPricing.travelerCalculatedAmountWithSecondaryLayerWithoutTaxes /
+                    numOfNights +
                     propertyPricing.amountSaved,
                 )}
               </div>
@@ -43,7 +52,8 @@ function HospitablePricingText({ property }: { property: Property }) {
           ) : (
             <div>
               {formatCurrency(
-                propertyPricing.travelerCalculatedAmountWithSecondaryLayerWithoutTaxes,
+                propertyPricing.travelerCalculatedAmountWithSecondaryLayerWithoutTaxes /
+                  numOfNights,
               )}{" "}
               night
             </div>
