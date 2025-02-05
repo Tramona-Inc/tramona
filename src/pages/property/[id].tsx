@@ -8,6 +8,7 @@ import { db } from "@/server/db";
 import { properties } from "@/server/db/schema/tables/properties";
 import { eq } from "drizzle-orm";
 import PropertyPage from "@/components/propertyPages/PropertyPage";
+import PropertySkeleton from "@/components/propertyPages/PropertyLoadingSkeleton";
 
 export type PropertyWithDetails = RouterOutputs["properties"]["getById"];
 
@@ -65,7 +66,11 @@ export default function Page({
       <DashboardLayout>
         <div className="px-4 pb-64 pt-6">
           <div className="mx-auto max-w-5xl">
-            {property ? <PropertyPage property={property} /> : <Spinner />}
+            {property ? (
+              <PropertyPage property={property} />
+            ) : (
+              <PropertySkeleton propertyOnly={true} />
+            )}
           </div>
         </div>
       </DashboardLayout>

@@ -1,6 +1,7 @@
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import Spinner from "@/components/_common/Spinner";
 import BidConfirmationDialog from "@/components/propertyPages/BidConfirmationDialog";
+import PropertyLoadingSkeleton from "@/components/propertyPages/PropertyLoadingSkeleton";
 import RequestToBookPage from "@/components/propertyPages/RequestToBookPage";
 import { api } from "@/utils/api";
 
@@ -39,7 +40,11 @@ export default function Listings() {
       </Head>
       <div className="p-4 pb-64">
         <div className="mx-auto max-w-7xl">
-          {property ? <RequestToBookPage property={property} /> : <Spinner />}
+          {property ? (
+            <RequestToBookPage property={property} />
+          ) : (
+            <PropertyLoadingSkeleton />
+          )}
         </div>
         {payment_intent && <BidConfirmationDialog isOpen={true} />}
       </div>
