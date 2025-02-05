@@ -29,8 +29,8 @@ export const offers = pgTable(
       .defaultNow(),
     madePublicAt: timestamp("made_public_at", { withTimezone: true }),
     acceptedAt: timestamp("accepted_at", { withTimezone: true }),
-    checkIn: date("check_in", { mode: "date" }).notNull(),
-    checkOut: date("check_out", { mode: "date" }).notNull(),
+    checkIn: timestamp("check_in", { withTimezone: true }).notNull(),
+    checkOut: timestamp("check_out", { withTimezone: true }).notNull(),
     hostPayout: integer("host_payout").notNull(), // in cents
     totalBasePriceBeforeFees: integer("total_base_price_before_fees").notNull(), // in cents
     calculatedTravelerPrice: integer("calculated_traveler_price").notNull(), // in cents

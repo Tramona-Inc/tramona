@@ -6,8 +6,9 @@ import { format } from "date-fns";
 import {
   cn,
   formatCurrency,
+  formatDateMonthDayYear,
   getNumNights,
-  getTravelerOfferedPrice,
+  formatShortDate,
 } from "@/utils/utils";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp } from "lucide-react";
@@ -46,13 +47,13 @@ export default function OfferPageSidebar({
             <div className="border-r p-3">
               <div className="text-sm text-muted-foreground">CHECK-IN</div>
               <div className="text-base font-medium">
-                {format(offer.checkIn, "MM/dd/yyyy")}
+                {formatShortDate(offer.checkIn)}
               </div>
             </div>
             <div className="p-3">
               <div className="text-sm text-muted-foreground">CHECK-OUT</div>
               <div className="text-base font-medium">
-                {format(offer.checkOut, "MM/dd/yyyy")}
+                {formatShortDate(offer.checkOut)}
               </div>
             </div>
           </div>

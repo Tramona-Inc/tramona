@@ -52,7 +52,7 @@ export default function TripPage({
   const tripWithin48Hours = isTripWithin48Hours(tripData);
 
   return (
-    <div className="col-span-10 flex flex-col gap-5 p-4 py-10 2xl:col-span-11">
+    <div className="col-span-10 mx-auto flex flex-col gap-5 p-4 py-10 xl:mx-16 2xl:col-span-11">
       <Button asChild size="icon" variant="ghost" className="rounded-full">
         <Link href={"/my-trips"}>
           <ArrowLeftIcon />

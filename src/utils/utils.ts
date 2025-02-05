@@ -213,6 +213,7 @@ export function formatDateStringWithDayName(dateStr: string): string {
     weekday: "short",
     month: "short",
     day: "numeric",
+    timeZone: "UTC",
   };
 
   // Format the Date object to the desired string format
