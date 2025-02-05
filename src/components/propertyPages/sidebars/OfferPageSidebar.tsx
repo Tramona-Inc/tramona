@@ -2,13 +2,13 @@ import { Property } from "@/server/db/schema";
 import type { OfferWithDetails } from "@/components/propertyPages/PropertyPage";
 import { CardContent, Card } from "@/components/ui/card";
 import { InfoIcon, FlameIcon } from "lucide-react";
-import PriceBreakdown from "./priceCards/PriceBreakdown";
 import { format } from "date-fns";
 import {
   cn,
   formatCurrency,
+  formatDateMonthDayYear,
   getNumNights,
-  getTravelerOfferedPrice,
+  formatShortDate,
 } from "@/utils/utils";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp } from "lucide-react";
@@ -17,6 +17,8 @@ import BookNowBtn from "./actionButtons/BookNowBtn";
 import { useState } from "react";
 import Link from "next/link";
 import { TRAVELER_MARKUP } from "@/utils/constants";
+import PriceBreakdownForTravelers from "./priceCards/PriceBreakdownForTravelers";
+import { breakdownPaymentByOffer } from "@/utils/payment-utils/paymentBreakdown";
 
 export default function OfferPageSidebar({
   offer,
@@ -35,6 +37,7 @@ export default function OfferPageSidebar({
   >;
 }) {
   const [showPriceBreakdown, setShowPriceBreakdown] = useState(false);
+  const brokedownPrice = breakdownPaymentByOffer(offer);
 
   return (
     <div className="space-y-4">
@@ -44,13 +47,13 @@ export default function OfferPageSidebar({
             <div className="border-r p-3">
               <div className="text-sm text-muted-foreground">CHECK-IN</div>
               <div className="text-base font-medium">
-                {format(offer.checkIn, "MM/dd/yyyy")}
+                {formatShortDate(offer.checkIn)}
               </div>
             </div>
             <div className="p-3">
               <div className="text-sm text-muted-foreground">CHECK-OUT</div>
               <div className="text-base font-medium">
-                {format(offer.checkOut, "MM/dd/yyyy")}
+                {formatShortDate(offer.checkOut)}
               </div>
             </div>
           </div>
@@ -66,37 +69,52 @@ export default function OfferPageSidebar({
               </div>
             </div>
           </div>
-          <div>
-            <div className="mb-1 text-2xl font-bold">Book it now for</div>
-            <div className="flex flex-col gap-2">
-              <div className="text-4xl font-bold text-primary lg:text-5xl">
-                <span>
-                  {formatCurrency(
-                    getTravelerOfferedPrice({
-                      totalBasePriceBeforeFees: offer.totalBasePriceBeforeFees,
-                      travelerMarkup: TRAVELER_MARKUP,
-                    }) / getNumNights(offer.checkIn, offer.checkOut),
+          {brokedownPrice.totalTripAmount ? (
+            <div>
+              <div className="mb-1 text-2xl font-bold">Book it now for</div>
+              <div className="flex flex-col items-start gap-2">
+                <div className="text-4xl font-bold text-primary lg:text-5xl">
+                  <span>
+                    {formatCurrency(
+                      (brokedownPrice.totalTripAmount -
+                        brokedownPrice.taxesPaid) /
+                        getNumNights(offer.checkIn, offer.checkOut),
+                    )}
+                  </span>
+                  <span className="ml-2 text-lg text-muted-foreground xl:text-xl">
+                    Per Night
+                  </span>
+                </div>
+                <Button
+                  variant="link"
+                  className="flex items-center gap-1 px-0 text-muted-foreground"
+                  onClick={() => setShowPriceBreakdown(!showPriceBreakdown)}
+                >
+                  Price Breakdown
+                  {showPriceBreakdown ? (
+                    <ChevronUp className="h-4 w-4" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4" />
                   )}
-                </span>
-                <span className="text-xl text-muted-foreground">Per Night</span>
-              </div>
-              <Button
-                variant="link"
-                className="flex items-center gap-1 px-0 text-muted-foreground"
-                onClick={() => setShowPriceBreakdown(!showPriceBreakdown)}
-              >
-                Price Breakdown
-                {showPriceBreakdown ? (
-                  <ChevronUp className="h-4 w-4" />
-                ) : (
-                  <ChevronDown className="h-4 w-4" />
+                </Button>
+                {showPriceBreakdown && (
+                  <PriceBreakdownForTravelers offer={offer} />
                 )}
-              </Button>
-              {showPriceBreakdown && <PriceBreakdown offer={offer} />}
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="flex flex-col text-center text-lg font-semibold text-destructive">
+              {" "}
+              Price unavailable{" "}
+              <span className="text-center text-xs font-normal">
+                Please contact support
+              </span>
+            </div>
+          )}
 
-          <BookNowBtn btnSize="lg" offer={offer} property={property} />
+          {brokedownPrice.totalTripAmount && (
+            <BookNowBtn btnSize="lg" offer={offer} property={property} />
+          )}
           <p className="my-1 text-center text-sm text-muted-foreground">
             You won&apos;t be charged yet
           </p>

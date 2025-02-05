@@ -93,10 +93,12 @@ const TravelerDetailsSidebar: React.FC<TravelerDetailsSidebarProps> = ({
               setWithdrawOpen={setWithdrawOpen}
             />
           ) : (
-            <div className="flex w-full flex-col gap-x-2">
+            <div className="flex w-full flex-col gap-x-2 gap-y-2">
               {property && (
                 <Link href={generateBookingUrl(property.id)}>
-                  <Button className="w-full">Request To Book</Button>
+                  <Button className="w-full" variant="secondary">
+                    Request To Book
+                  </Button>
                 </Link>
               )}
               {property && property.bookItNowEnabled && (

@@ -1,11 +1,3 @@
-// import BathBoldIcon from "@/common/components/icons/bath-bold";
-// import BedBoldIcon from "@/common/components/icons/bed-bold";
-// import EmailIcon from "@/common/components/icons/email";
-// import IdentityVerifiedIcon from "@/common/components/icons/identiy-verified";
-// import OceanIcon from "@/common/components/icons/ocean";
-// import StarIcon from "@/common/components/icons/star";
-// import SuperHostIcon from "@/common/components/icons/superhost";
-// import PaywallDialog from "@/common/components/paywall-dialog";
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import Spinner from "@/components/_common/Spinner";
 import { OfferPage } from "@/components/propertyPages/OfferPage";

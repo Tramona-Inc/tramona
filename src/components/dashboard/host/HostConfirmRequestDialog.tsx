@@ -109,7 +109,7 @@ export default function HostConfirmRequestDialog({
   //           propertyId: property.id,
   //           totalBasePriceBeforeFees: totalBasePriceBeforeFees,
   //           hostPayout: getHostPayout(totalBasePriceBeforeFees),
-  //           travelerOfferedPriceBeforeFees: getTravelerOfferedPrice({
+  //           calculatedTravelerPrice: getTravelerOfferedPrice({
   //             totalBasePriceBeforeFees,
   //             travelerMarkup: TRAVELER_MARKUP,
   //           }),
@@ -179,7 +179,7 @@ export default function HostConfirmRequestDialog({
             propertyId: property.id,
             totalBasePriceBeforeFees,
             hostPayout: getHostPayout(totalBasePriceBeforeFees),
-            travelerOfferedPriceBeforeFees: getTravelerOfferedPrice({
+            calculatedTravelerPrice: getTravelerOfferedPrice({
               totalBasePriceBeforeFees,
               travelerMarkup: TRAVELER_MARKUP,
             }),
@@ -194,7 +194,8 @@ export default function HostConfirmRequestDialog({
       if (propertiesWithTax.length === 1 && failedProperties.length > 0) {
         // Single property and it failed
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        const error = results[0]?.status === 'rejected' ? results[0].reason : undefined;
+        const error =
+          results[0]?.status === "rejected" ? results[0].reason : undefined;
         if (error instanceof Error) {
           toast({
             title: "Error",

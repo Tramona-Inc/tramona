@@ -84,7 +84,7 @@ export default function AllPreviousTrips() {
                     <TableCell>
                       <div className="space-y-1">
                         <div className="font-medium">
-                          {formatCurrency(trip.totalPriceAfterFees)}
+                          {formatCurrency(trip.travelerTotalPaidAmount)}
                         </div>
                         <div className="text-sm text-muted-foreground">
                           Offer ID: {trip.offerId}

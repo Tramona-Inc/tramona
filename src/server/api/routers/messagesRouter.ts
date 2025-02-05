@@ -506,7 +506,7 @@ export const messagesRouter = createTRPCRouter({
       currentHostTeamId: z.number(),
       requestId: z.number(),
     }),
-  ).mutation(async ({ ctx, input }) => {
+  ).mutation(async ({ input }) => {
     const conversationId = await fetchConversationWithHostTeam({
       userId: input.userId,
       hostTeamId: input.currentHostTeamId,
@@ -536,7 +536,7 @@ export const messagesRouter = createTRPCRouter({
       currentHostTeamId: z.number(),
       propertyId: z.number(),
     }),
-  ).mutation(async ({ ctx, input }) => {
+  ).mutation(async ({ input }) => {
     const conversationId = await fetchConversationWithHostTeam({
       userId: input.userId,
       hostTeamId: input.currentHostTeamId,

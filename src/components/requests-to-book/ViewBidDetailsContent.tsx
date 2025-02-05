@@ -107,9 +107,7 @@ function ViewBidDetailsContent({
                       Bid Price
                     </p>
                     <p className="text-base font-semibold">
-                      {formatCurrency(
-                        requestToBook.amountAfterTravelerMarkupAndBeforeFees,
-                      )}
+                      {formatCurrency(requestToBook.calculatedTravelerPrice)}
                     </p>
                   </div>
                 </div>

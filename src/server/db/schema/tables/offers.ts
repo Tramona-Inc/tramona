@@ -24,18 +24,16 @@ export const offers = pgTable(
       .notNull()
       .references(() => properties.id, { onDelete: "cascade" }),
 
-    totalBasePriceBeforeFees: integer("total_base_price_before_fees").notNull(), // in cents
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
     madePublicAt: timestamp("made_public_at", { withTimezone: true }),
     acceptedAt: timestamp("accepted_at", { withTimezone: true }),
-    checkIn: date("check_in", { mode: "date" }).notNull(),
-    checkOut: date("check_out", { mode: "date" }).notNull(),
+    checkIn: timestamp("check_in", { withTimezone: true }).notNull(),
+    checkOut: timestamp("check_out", { withTimezone: true }).notNull(),
     hostPayout: integer("host_payout").notNull(), // in cents
-    travelerOfferedPriceBeforeFees: integer(
-      "traveler_offered_price_before_fees",
-    ).notNull(), // in cents
+    totalBasePriceBeforeFees: integer("total_base_price_before_fees").notNull(), // in cents
+    calculatedTravelerPrice: integer("calculated_traveler_price").notNull(), // in cents
     datePriceFromAirbnb: integer("date_price_from_airbnb"), // If host uploaded property, we will scrape the price for the offer if they gave us the link for property creation
     randomDirectListingDiscount: integer("random_direct_listing_discount"),
     scrapeUrl: varchar("scrape_url"),

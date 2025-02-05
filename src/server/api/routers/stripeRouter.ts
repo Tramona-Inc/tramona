@@ -251,8 +251,10 @@ export const stripeRouter = createTRPCRouter({
         offerId: z.number().nullable(),
         scrapeUrl: z.string().nullable(),
         numOfGuests: z.number().nullable(),
-        travelerOfferedPriceBeforeFees: z.number(),
+        calculatedTravelerPrice: z.number(),
+        additionalFees: z.number().nullable(),
         datePriceFromAirbnb: z.number().nullable(),
+        requestPercentageOff: z.number().optional(),
         checkIn: z.date(),
         checkOut: z.date(),
         propertyId: z.number(),
@@ -309,7 +311,7 @@ export const stripeRouter = createTRPCRouter({
           checkIn: input.checkIn,
           checkOut: input.checkOut,
         },
-        travelerPriceBeforeFees: input.travelerOfferedPriceBeforeFees,
+        calculatedTravelerPrice: input.calculatedTravelerPrice,
         property: curProperty,
       });
 
@@ -327,14 +329,16 @@ export const stripeRouter = createTRPCRouter({
         check_out: input.checkOut.toString(),
         property_id: input.propertyId,
         host_stripe_id: curProperty.hostTeam.owner.stripeConnectId,
-        traveler_offered_price_before_fees:
-          input.travelerOfferedPriceBeforeFees,
-        price: paymentBreakdown.totalTripAmount, // Total price included tramona fee
+        calculated_traveler_price: input.calculatedTravelerPrice,
+        additional_fees: input.additionalFees ?? null,
+        price: paymentBreakdown.totalTripAmount!, // Total price included tramona fee
         total_savings: paymentBreakdown.totalSavings,
         taxes_paid: paymentBreakdown.taxesPaid,
         tax_percentage: paymentBreakdown.taxPercentage,
         stripe_transaction_fee: paymentBreakdown.stripeTransactionFee,
         superhog_paid: paymentBreakdown.superhogFee,
+        request_percentage_off: input.requestPercentageOff ?? "",
+        security_deposit_amount: curProperty.currentSecurityDeposit,
         is_direct_listing: input.scrapeUrl ? "true" : "false",
         num_of_guests: input.numOfGuests,
         type: input.type,
@@ -410,8 +414,9 @@ export const stripeRouter = createTRPCRouter({
         //trip and tripcheckout creattion, superhog, and sending notifcations
         paymentIntentId: curRequestToBook.paymentIntentId,
         numOfGuests: curRequestToBook.numGuests,
-        travelerPriceBeforeFees:
-          curRequestToBook.amountAfterTravelerMarkupAndBeforeFees, //markup already happened
+        calculatedTravelerPrice: curRequestToBook.calculatedTravelerPrice, //markup already happened
+        additionalFeesFromWebhook: curRequestToBook.additionalFees, //from webhook is fo for the book-it-now-case
+        securityDepositAmount: curRequestToBook.timeOfSecurityDeposit,
         checkIn: curRequestToBook.checkIn,
         checkOut: curRequestToBook.checkOut,
         propertyId: curRequestToBook.propertyId,

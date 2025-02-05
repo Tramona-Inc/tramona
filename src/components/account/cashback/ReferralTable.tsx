@@ -41,7 +41,7 @@ interface ReferralRowData {
     firstName: string | null;
   };
   offer: {
-    travelerOfferedPriceBeforeFees: number;
+    calculatedTravelerPrice: number;
   };
 }
 
