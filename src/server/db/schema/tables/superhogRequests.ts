@@ -85,6 +85,7 @@ export const superhogActionOnTrips = pgTable(
     action: superhogErrorAction("action").default("create").notNull(),
     superhogRequestId: integer("superhog_request_id").references(
       () => superhogRequests.id,
+      { onDelete: "set null" },
     ),
   },
   (t) => ({

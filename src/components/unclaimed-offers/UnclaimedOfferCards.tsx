@@ -26,7 +26,8 @@ import { Property } from "@/server/db/schema/tables/properties";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import { ITEMS_PER_PAGE } from "@/utils/constants";
 import HospitablePricingText from "./HospitablePricingText";
-import OtherPropertyPricingText from "./OtherPropertyPricingText";
+import CasamundoPropertyPricingText from "./CasamundoPropertyPricingText";
+import OtherPropertyPricing from "./OtherPropertyPricing";
 
 export type PropertyType = Property | AirbnbSearchResult;
 
@@ -434,11 +435,14 @@ const UnMatchedPropertyCard = memo(function UnMatchedPropertyCard({
           {plural(property.maxNumGuests, "Guest")}
         </div>
       </div>
-
-      {isHospitable && !isAirbnbSearchResult(property) ? (
-        <HospitablePricingText property={property} />
+      {!isAirbnbSearchResult(property) ? (
+        isHospitable ? (
+          <HospitablePricingText property={property} />
+        ) : (
+          <CasamundoPropertyPricingText property={property} />
+        )
       ) : (
-        <OtherPropertyPricingText property={property} />
+        <OtherPropertyPricing property={property} />
       )}
     </Link>
   );

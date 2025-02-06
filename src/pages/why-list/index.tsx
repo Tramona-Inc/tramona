@@ -178,12 +178,11 @@ const Banner = () => {
           src={image}
           alt="beach banner"
           fill
-          objectFit="cover"
-          objectPosition="center"
           priority
           quality={100}
           placeholder="blur"
           blurDataURL={image}
+          className="object-cover object-center"
         />
       </div>
       <span className="absolute inset-0 bg-black opacity-50"></span>

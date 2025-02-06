@@ -1,6 +1,7 @@
 import DashboardLayout from "@/components/_common/Layout/DashboardLayout";
 import Spinner from "@/components/_common/Spinner";
 import { OfferPage } from "@/components/propertyPages/OfferPage";
+import PropertySkeleton from "@/components/propertyPages/PropertyLoadingSkeleton";
 import { api } from "@/utils/api";
 
 import { useSession } from "next-auth/react";
@@ -30,7 +31,7 @@ export default function Listings() {
       </Head>
       <div className="p-4 pb-64">
         <div className="mx-auto max-w-7xl">
-          {offer ? <OfferPage offer={offer} /> : <Spinner />}
+          {offer ? <OfferPage offer={offer} /> : <PropertySkeleton />}
         </div>
       </div>
     </DashboardLayout>
