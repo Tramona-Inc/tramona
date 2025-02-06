@@ -441,15 +441,17 @@ export async function addProperty({
 export async function sendTextToHost({
   matchingProperties,
   request,
+  tx,
 }: {
   matchingProperties: { id: number; hostTeamId: number }[];
   request: Pick<Request, "checkIn" | "checkOut" | "maxTotalPrice" | "location">;
+  tx: typeof db;
 }) {
   const uniqueHostTeamIds = Array.from(
     new Set(matchingProperties.map((property) => property.hostTeamId)),
   );
   // Get all host team members with their contact info and lastTextAt
-  const allTeamMembers = await db.query.hostTeamMembers.findMany({
+  const allTeamMembers = await tx.query.hostTeamMembers.findMany({
     where: inArray(hostTeamMembers.hostTeamId, uniqueHostTeamIds),
     with: {
       user: {
@@ -466,25 +468,22 @@ export async function sendTextToHost({
       }
     },
   });
-
   // Filter members who haven't been texted in last 12 hours
   const eligibleMembers = allTeamMembers.filter(member => {
     const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000);
     return !member.user.lastTextAt ||
       new Date(member.user.lastTextAt) < twelveHoursAgo;
   });
-
   // Group members by host team ID
   const membersByTeam = eligibleMembers.reduce((acc, member) => {
     acc[member.hostTeam.id] = acc[member.hostTeam.id] ?? [];
     acc[member.hostTeam.id]?.push(member.user);
     return acc;
   }, {} as Record<number, typeof eligibleMembers[0]['user'][]>);
-
   // Send messages to each eligible member per team
   await Promise.all(
     Object.entries(membersByTeam).map(async ([teamId, members]) => {
-      const teamRequests = await db.query.requests.findMany({
+      const teamRequests = await tx.query.requests.findMany({
         where: and(
           eq(requests.madeByGroupId, Number(teamId)),
           gte(requests.createdAt, new Date(Date.now() - 12 * 60 * 60 * 1000))
@@ -492,7 +491,6 @@ export async function sendTextToHost({
       });
 
       // const numberOfNights = getNumNights(request.checkIn, request.checkOut);
-
       await Promise.all(members.map(async (user) => {
         if (!user.phoneNumber) return;
 
@@ -502,7 +500,7 @@ export async function sendTextToHost({
         });
 
         // Update lastTextAt after sending
-        await db.update(users)
+        await tx.update(users)
           .set({ lastTextAt: new Date() })
           .where(eq(users.id, user.id));
       }));
