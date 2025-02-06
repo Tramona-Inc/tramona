@@ -393,9 +393,9 @@ export async function addProperty({
     latLngPoint?: { x: number; y: number }; // make optional
   };
 } & (
-  | { isAdmin?: boolean; userEmail: string }
-  | { isAdmin: true; userEmail?: undefined }
-)) {
+    | { isAdmin?: boolean; userEmail: string }
+    | { isAdmin: true; userEmail?: undefined }
+  )) {
   let lat = property.latLngPoint?.y;
   let lng = property.latLngPoint?.x;
 
@@ -448,49 +448,65 @@ export async function sendTextToHost({
   const uniqueHostTeamIds = Array.from(
     new Set(matchingProperties.map((property) => property.hostTeamId)),
   );
-  const numHostPropertiesPerRequest = matchingProperties.reduce(
-    (acc, property) => {
-      if (property.hostTeamId) {
-        acc[property.hostTeamId] = (acc[property.hostTeamId] ?? 0) + 1;
+  // Get all host team members with their contact info and lastTextAt
+  const allTeamMembers = await db.query.hostTeamMembers.findMany({
+    where: inArray(hostTeamMembers.hostTeamId, uniqueHostTeamIds),
+    with: {
+      user: {
+        columns: {
+          id: true,
+          lastTextAt: true,
+          phoneNumber: true
+        },
+      },
+      hostTeam: {
+        columns: {
+          id: true
+        }
       }
-      return acc;
     },
-    {} as Record<number, number>,
-  );
+  });
 
-  waitUntil(
-    Promise.all(
-      uniqueHostTeamIds.filter(Boolean).map(async (hostTeamId) => {
-        const hostTeamOwner = await db.query.hostTeams
-          .findFirst({
-            where: eq(hostTeams.id, hostTeamId),
-            with: {
-              owner: {
-                columns: { name: true, email: true, phoneNumber: true },
-              },
-            },
-          })
-          .then((res) => res?.owner);
+  // Filter members who haven't been texted in last 12 hours
+  const eligibleMembers = allTeamMembers.filter(member => {
+    const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000);
+    return !member.user.lastTextAt ||
+      new Date(member.user.lastTextAt) < twelveHoursAgo;
+  });
 
-        if (!hostTeamOwner?.phoneNumber) return;
+  // Group members by host team ID
+  const membersByTeam = eligibleMembers.reduce((acc, member) => {
+    acc[member.hostTeam.id] = acc[member.hostTeam.id] ?? [];
+    acc[member.hostTeam.id]?.push(member.user);
+    return acc;
+  }, {} as Record<number, typeof eligibleMembers[0]['user'][]>);
 
-        const numberOfNights = getNumNights(request.checkIn, request.checkOut);
+  // Send messages to each eligible member per team
+  await Promise.all(
+    Object.entries(membersByTeam).map(async ([teamId, members]) => {
+      const teamRequests = await db.query.requests.findMany({
+        where: and(
+          eq(requests.madeByGroupId, Number(teamId)),
+          gte(requests.createdAt, new Date(Date.now() - 12 * 60 * 60 * 1000))
+        ),
+      });
+
+      // const numberOfNights = getNumNights(request.checkIn, request.checkOut);
+
+      await Promise.all(members.map(async (user) => {
+        if (!user.phoneNumber) return;
+
         await sendText({
-          to: hostTeamOwner.phoneNumber,
-          content: `Tramona: There is a request for ${formatCurrency(
-            request.maxTotalPrice / numberOfNights,
-          )} per night for ${plural(numberOfNights, "night")} in ${
-            request.location
-          }. You have ${plural(
-            numHostPropertiesPerRequest[hostTeamId] ?? 0,
-            "eligible property",
-            "eligible properties",
-          )}. Please click here to make a match: ${env.NEXTAUTH_URL}/host/requests`,
+          to: user.phoneNumber,
+          content: `Tramona: You have ${teamRequests.length} new requests! View: ${env.NEXTAUTH_URL}/host/requests`
         });
 
-        //TODO SEND WHATSAPP MESSAGE
-      }),
-    ),
+        // Update lastTextAt after sending
+        await db.update(users)
+          .set({ lastTextAt: new Date() })
+          .where(eq(users.id, user.id));
+      }));
+    })
   );
 }
 
@@ -1058,9 +1074,9 @@ export function haversineDistance(
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(toRadians(lat1)) *
-      Math.cos(toRadians(lat2)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+    Math.cos(toRadians(lat2)) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c; // Distance in kilometers
 }
