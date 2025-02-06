@@ -36,7 +36,7 @@ function PriceBreakdown(
         checkOut: props.requestToBookDetails.checkOut,
       },
       property: props.property,
-      travelerPriceBeforeFees: props.requestAmount,
+      calculatedTravelerPrice: props.requestAmount,
     });
     numOfNights = getNumNights(
       props.requestToBookDetails.checkIn,
@@ -56,7 +56,7 @@ function PriceBreakdown(
         </span>
         <span className="font-semibold">
           {formatCurrency(
-            brokedownPrice.totalTripAmount -
+            brokedownPrice.totalTripAmount! -
               (brokedownPrice.taxesPaid + serviceFee),
           )}
         </span>
@@ -83,7 +83,7 @@ function PriceBreakdown(
       <div className="my-2 border-t pt-2">
         <div className="flex items-center justify-between text-lg font-semibold text-black">
           <span>Total</span>
-          <span>{formatCurrency(brokedownPrice.totalTripAmount)}</span>
+          <span>{formatCurrency(brokedownPrice.totalTripAmount!)}</span>
         </div>
       </div>
     </div>

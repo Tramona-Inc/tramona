@@ -898,45 +898,65 @@ export async function getPropertyOriginalPrice(
     checkOut: string;
     numGuests: number;
   },
-) {
-  if (property.originalListingPlatform === "Hospitable") {
-    const formattedCheckIn = new Date(params.checkIn)
-      .toISOString()
-      .split("T")[0];
-    const formattedCheckOut = new Date(params.checkOut)
-      .toISOString()
-      .split("T")[0];
-    const { data } = await axios.get<HospitableCalendarResponse>(
-      `https://connect.hospitable.com/api/v1/listings/${property.hospitableListingId}/calendar`,
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
+): Promise<number | undefined> {
+  // Explicit return type
+  try {
+    if (property.originalListingPlatform === "Hospitable") {
+      const formattedCheckIn = new Date(params.checkIn)
+        .toISOString()
+        .split("T")[0];
+      const formattedCheckOut = new Date(params.checkOut)
+        .toISOString()
+        .split("T")[0];
+
+      console.log("formattedCheckIn", formattedCheckIn);
+      console.log("formattedCheckOut", formattedCheckOut);
+
+      const { data } = await axios.get<HospitableCalendarResponse>(
+        `https://connect.hospitable.com/api/v1/listings/${property.hospitableListingId}/calendar`,
+        {
+          headers: {
+            Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
+          },
+          params: {
+            start_date: formattedCheckIn,
+            end_date: formattedCheckOut,
+          },
         },
-        params: {
-          start_date: formattedCheckIn,
-          end_date: formattedCheckOut,
-        },
-      },
-    );
-    const averagePrice =
-      data.data.dates.reduce((acc, date) => {
+      );
+
+      const stayNights = data.data.dates.slice(0, -1);
+
+      if (stayNights.length === 0) {
+        return 0;
+      }
+
+      const totalPrice = stayNights.reduce((acc, date) => {
         return acc + date.price.amount;
-      }, 0) / data.data.dates.length;
-    return averagePrice;
-  } else if (property.originalListingPlatform === "Hostaway") {
-    const { data } = await axios.get<HostawayPriceResponse>(
-      `https://api.hostaway.com/v1/properties/${property.originalListingId}/calendar/priceDetails`,
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.HOSTAWAY_API_KEY}`,
+      }, 0);
+
+      const averagePrice = totalPrice / stayNights.length;
+
+      console.log(averagePrice);
+      return averagePrice;
+    } else if (property.originalListingPlatform === "Hostaway") {
+      const { data } = await axios.get<HostawayPriceResponse>(
+        `https://api.hostaway.com/v1/properties/${property.originalListingId}/calendar/priceDetails`,
+        {
+          headers: {
+            Authorization: `Bearer ${process.env.HOSTAWAY_API_KEY}`,
+          },
+          params,
         },
-        params,
-      },
-    );
-    const totalBasePriceBeforeFees = data.result.totalBasePriceBeforeFees;
-    return totalBasePriceBeforeFees;
+      );
+      const originalBasePrice = data.result.totalBasePriceBeforeFees;
+      return originalBasePrice;
+    }
+    // code for other options
+  } catch (error) {
+    console.error("Error fetching original price:", error);
+    return undefined; // Return undefined on error
   }
-  // code for other options
 }
 
 export interface SeparatedData {
@@ -965,7 +985,7 @@ export async function updateTravelerandHostMarkup({
   await db
     .update(offers)
     .set({
-      travelerOfferedPriceBeforeFees: travelerPrice,
+      calculatedTravelerPrice: travelerPrice,
       hostPayout: hostPay,
     })
     .where(and(eq(offers.id, offerId), isNull(offers.acceptedAt)));

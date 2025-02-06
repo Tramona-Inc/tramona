@@ -6,7 +6,7 @@ import type {
   PriceBreakdownOutput,
   PropertyAndTripParams,
 } from "@/components/checkout/types";
-import { getNumNights } from "../utils";
+import { getNumNights, removeTravelerMarkup } from "../utils";
 
 // -------------------------- 2 Different inputs for Breakdown payment  -------------------------
 // -----METHOD 1. USING OFFER
@@ -14,7 +14,7 @@ export function breakdownPaymentByOffer( ///// USING OFFER
   offer: Pick<
     Offer,
     | "scrapeUrl"
-    | "travelerOfferedPriceBeforeFees"
+    | "calculatedTravelerPrice"
     | "datePriceFromAirbnb"
     | "checkIn"
     | "checkOut"
@@ -36,10 +36,10 @@ export function breakdownPaymentByOffer( ///// USING OFFER
   const taxPercentage = isScraped ? 0 : getTaxPercentage(offer.property);
   const superhogFee = isScraped ? 0 : numNights * SUPERHOG_FEE_CENTS_PER_NIGHT;
   const taxesPaid = Math.round(
-    (offer.travelerOfferedPriceBeforeFees + superhogFee) * taxPercentage,
+    (offer.calculatedTravelerPrice + superhogFee) * taxPercentage,
   );
   const totalBeforeStripeFee =
-    offer.travelerOfferedPriceBeforeFees + superhogFee + taxesPaid;
+    offer.calculatedTravelerPrice + superhogFee + taxesPaid;
   const stripeFee = getStripeFee(totalBeforeStripeFee);
   const totalTripAmount = totalBeforeStripeFee + stripeFee;
   console.log(totalTripAmount);
@@ -72,7 +72,7 @@ export function breakdownPaymentByOffer( ///// USING OFFER
 export function breakdownPaymentByPropertyAndTripParams(
   propertyAndTripParams: PropertyAndTripParams,
 ): PriceBreakdownOutput {
-  console.log(propertyAndTripParams.travelerPriceBeforeFees);
+  console.log(propertyAndTripParams.calculatedTravelerPrice);
   const numNights = getNumNights(
     propertyAndTripParams.dates.checkIn,
     propertyAndTripParams.dates.checkOut,
@@ -84,12 +84,12 @@ export function breakdownPaymentByPropertyAndTripParams(
     : getTaxPercentage(propertyAndTripParams.property);
   const superhogFee = isScraped ? 0 : numNights * SUPERHOG_FEE_CENTS_PER_NIGHT;
   const taxesPaid = Math.round(
-    (propertyAndTripParams.travelerPriceBeforeFees + superhogFee) *
+    (propertyAndTripParams.calculatedTravelerPrice + superhogFee) *
       taxPercentage,
   );
 
   const totalBeforeStripeFee =
-    propertyAndTripParams.travelerPriceBeforeFees + superhogFee + taxesPaid;
+    propertyAndTripParams.calculatedTravelerPrice + superhogFee + taxesPaid;
   console.log(totalBeforeStripeFee);
   const stripeFee = getStripeFee(totalBeforeStripeFee);
   console.log(stripeFee);
@@ -118,6 +118,21 @@ export function breakdownPaymentByPropertyAndTripParams(
     stripeTransactionFee: stripeFee,
     totalSavings,
   };
+}
+
+export function unwrapCalculatedTravelerPriceToCalculatedBasePrice({
+  //USE ONLY WITH REQUEST TO BOOK
+  calculatedTravelerPrice,
+  additionalFees,
+}: {
+  calculatedTravelerPrice: number;
+  additionalFees: number;
+}) {
+  const calculatedBasePrice = removeTravelerMarkup(
+    calculatedTravelerPrice - additionalFees,
+  );
+
+  return calculatedBasePrice;
 }
 
 export function getServiceFee({

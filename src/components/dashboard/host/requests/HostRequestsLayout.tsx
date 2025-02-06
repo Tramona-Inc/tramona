@@ -50,6 +50,7 @@ const HostRequestsLayout = React.memo(function HostRequestsLayout({
   children: React.ReactNode;
 }) {
   useSetInitialHostTeamId();
+
   const { currentHostTeamId } = useHostTeamStore();
   const router = useRouter();
   const isLg = useIsLg();

@@ -21,8 +21,9 @@ import { TRPCError } from "@trpc/server";
 import { and, eq, exists, isNotNull, isNull, sql, lte, ne } from "drizzle-orm";
 import { z } from "zod";
 import BookingCancellationEmail from "packages/transactional/emails/BookingCancellationEmail";
-import { formatDateRange, getNumNights, removeTax } from "@/utils/utils";
+import { formatDateRange, getNumNights } from "@/utils/utils";
 import { refundTripWithStripe } from "@/utils/stripe-utils";
+import { removeTax } from "@/utils/payment-utils/payment-utils";
 import { TAX_PERCENTAGE } from "@/utils/constants";
 
 export const tripsRouter = createTRPCRouter({
@@ -420,7 +421,7 @@ export const tripsRouter = createTRPCRouter({
 
             property: property!.name,
             reason: currentCancellations.reason,
-            refund: currentTrip.totalPriceAfterFees,
+            refund: currentTrip.travelerTotalPaidAmount,
 
             //partial refund
             //partialRefund: true
@@ -434,7 +435,7 @@ export const tripsRouter = createTRPCRouter({
       //------------- 5. Issue refund  ----------
       //$220.15
       const amountWithoutProcessingFees = Math.round(
-        Math.round((currentTrip.totalPriceAfterFees - 3) / 1.029),
+        Math.round((currentTrip.travelerTotalPaidAmount - 3) / 1.029),
       );
 
       const amountWithoutSuperhogOrTax = input.refundAmount
