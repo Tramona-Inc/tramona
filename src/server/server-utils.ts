@@ -438,6 +438,18 @@ export async function addProperty({
   return insertedProperty!.id;
 }
 
+async function getRequestsInLast12HoursForHostTeam(tx: typeof db, hostTeamId: number) {
+  const propertiesForTeam = await tx.query.properties.findMany({
+    where: eq(properties.hostTeamId, hostTeamId),
+  });
+
+  const requestsForProperties = await getRequestsForProperties(propertiesForTeam, { tx });
+  return requestsForProperties.filter((request) => {
+    const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000);
+    return request.request.createdAt > twelveHoursAgo;
+  });
+}
+
 export async function sendTextToHost({
   matchingProperties,
   request,
@@ -483,12 +495,7 @@ export async function sendTextToHost({
   // Send messages to each eligible member per team
   await Promise.all(
     Object.entries(membersByTeam).map(async ([teamId, members]) => {
-      const teamRequests = await tx.query.requests.findMany({
-        where: and(
-          eq(requests.madeByGroupId, Number(teamId)),
-          gte(requests.createdAt, new Date(Date.now() - 12 * 60 * 60 * 1000))
-        ),
-      });
+      const teamRequests = await getRequestsInLast12HoursForHostTeam(tx, Number(teamId));
 
       // const numberOfNights = getNumNights(request.checkIn, request.checkOut);
       await Promise.all(members.map(async (user) => {
