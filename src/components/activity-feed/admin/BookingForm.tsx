@@ -48,7 +48,7 @@ export default function CreateBookingForm({
     defaultValues: {
       ...(booking
         ? {
-            userName: booking.group.owner.name ?? "",
+            userName: booking.group.owner.firstName ?? "",
             userProfilePicUrl: booking.group.owner.image ?? "",
             checkIn: booking.checkIn.toISOString().slice(0, 10),
             checkOut: booking.checkOut.toISOString().slice(0, 10),

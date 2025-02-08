@@ -22,7 +22,7 @@ export default function FeedOfferCard({ offer }: { offer: FeedOfferItem }) {
   const { data: session } = useSession();
   const isAdmin = session && session.user.role === "admin";
 
-  const userName = offer.request?.madeByGroup.owner.name ?? "";
+  const userName = offer.request?.madeByGroup.owner.firstName ?? "";
   const userImage = offer.request?.madeByGroup.owner.image ?? "";
   const numOfNights = getNumNights(offer.checkIn, offer.checkOut);
   const discount = offer.property.originalNightlyPrice
@@ -121,11 +121,11 @@ export default function FeedOfferCard({ offer }: { offer: FeedOfferItem }) {
                   ))}
               </CarouselContent>
               <CarouselPrevious
-                className="size-6 absolute left-2 top-1/2 -translate-y-1/2"
+                className="absolute left-2 top-1/2 size-6 -translate-y-1/2"
                 variant={"white"}
               />
               <CarouselNext
-                className="size-6 absolute right-2 top-1/2 -translate-y-1/2"
+                className="absolute right-2 top-1/2 size-6 -translate-y-1/2"
                 variant={"white"}
               />
               <CarouselDots count={count} current={current} />

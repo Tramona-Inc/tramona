@@ -47,7 +47,7 @@ export default function CreateOfferForm({
     defaultValues: {
       ...(offer
         ? {
-            userName: offer.request?.madeByGroup.owner.name ?? "",
+            userName: offer.request?.madeByGroup.owner.firstName ?? "",
             userProfilePicUrl: offer.request?.madeByGroup.owner.image ?? "",
             checkIn: offer.checkIn.toISOString().slice(0, 10),
             checkOut: offer.checkOut.toISOString().slice(0, 10),
