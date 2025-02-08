@@ -617,6 +617,7 @@ export async function handleRequestSubmission(
     await sendTextToHost({
       matchingProperties: propertiesWithoutAutoOffers,
       request: input,
+      tx,
     });
 
     return { requestId: request.id, madeByGroupId };

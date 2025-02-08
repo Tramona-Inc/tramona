@@ -393,9 +393,9 @@ export async function addProperty({
     latLngPoint?: { x: number; y: number }; // make optional
   };
 } & (
-  | { isAdmin?: boolean; userEmail: string }
-  | { isAdmin: true; userEmail?: undefined }
-)) {
+    | { isAdmin?: boolean; userEmail: string }
+    | { isAdmin: true; userEmail?: undefined }
+  )) {
   let lat = property.latLngPoint?.y;
   let lng = property.latLngPoint?.x;
 
@@ -438,59 +438,80 @@ export async function addProperty({
   return insertedProperty!.id;
 }
 
+async function getRequestsInLast12HoursForHostTeam(tx: typeof db, hostTeamId: number) {
+  const propertiesForTeam = await tx.query.properties.findMany({
+    where: eq(properties.hostTeamId, hostTeamId),
+  });
+
+  const requestsForProperties = await getRequestsForProperties(propertiesForTeam, { tx });
+  return requestsForProperties.filter((request) => {
+    const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000);
+    return request.request.createdAt > twelveHoursAgo;
+  });
+}
+
 export async function sendTextToHost({
   matchingProperties,
   request,
+  tx,
 }: {
   matchingProperties: { id: number; hostTeamId: number }[];
   request: Pick<Request, "checkIn" | "checkOut" | "maxTotalPrice" | "location">;
+  tx: typeof db;
 }) {
   const uniqueHostTeamIds = Array.from(
     new Set(matchingProperties.map((property) => property.hostTeamId)),
   );
-  const numHostPropertiesPerRequest = matchingProperties.reduce(
-    (acc, property) => {
-      if (property.hostTeamId) {
-        acc[property.hostTeamId] = (acc[property.hostTeamId] ?? 0) + 1;
+  // Get all host team members with their contact info and lastTextAt
+  const allTeamMembers = await tx.query.hostTeamMembers.findMany({
+    where: inArray(hostTeamMembers.hostTeamId, uniqueHostTeamIds),
+    with: {
+      user: {
+        columns: {
+          id: true,
+          lastTextAt: true,
+          phoneNumber: true
+        },
+      },
+      hostTeam: {
+        columns: {
+          id: true
+        }
       }
-      return acc;
     },
-    {} as Record<number, number>,
-  );
+  });
+  // Filter members who haven't been texted in last 12 hours
+  const eligibleMembers = allTeamMembers.filter(member => {
+    const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000);
+    return !member.user.lastTextAt ||
+      new Date(member.user.lastTextAt) < twelveHoursAgo;
+  });
+  // Group members by host team ID
+  const membersByTeam = eligibleMembers.reduce((acc, member) => {
+    acc[member.hostTeam.id] = acc[member.hostTeam.id] ?? [];
+    acc[member.hostTeam.id]?.push(member.user);
+    return acc;
+  }, {} as Record<number, typeof eligibleMembers[0]['user'][]>);
+  // Send messages to each eligible member per team
+  await Promise.all(
+    Object.entries(membersByTeam).map(async ([teamId, members]) => {
+      const teamRequests = await getRequestsInLast12HoursForHostTeam(tx, Number(teamId));
 
-  waitUntil(
-    Promise.all(
-      uniqueHostTeamIds.filter(Boolean).map(async (hostTeamId) => {
-        const hostTeamOwner = await db.query.hostTeams
-          .findFirst({
-            where: eq(hostTeams.id, hostTeamId),
-            with: {
-              owner: {
-                columns: { name: true, email: true, phoneNumber: true },
-              },
-            },
-          })
-          .then((res) => res?.owner);
+      // const numberOfNights = getNumNights(request.checkIn, request.checkOut);
+      await Promise.all(members.map(async (user) => {
+        if (!user.phoneNumber) return;
 
-        if (!hostTeamOwner?.phoneNumber) return;
-
-        const numberOfNights = getNumNights(request.checkIn, request.checkOut);
         await sendText({
-          to: hostTeamOwner.phoneNumber,
-          content: `Tramona: There is a request for ${formatCurrency(
-            request.maxTotalPrice / numberOfNights,
-          )} per night for ${plural(numberOfNights, "night")} in ${
-            request.location
-          }. You have ${plural(
-            numHostPropertiesPerRequest[hostTeamId] ?? 0,
-            "eligible property",
-            "eligible properties",
-          )}. Please click here to make a match: ${env.NEXTAUTH_URL}/host/requests`,
+          to: user.phoneNumber,
+          content: `Tramona: You have ${teamRequests.length} new requests! View: ${env.NEXTAUTH_URL}/host/requests`
         });
 
-        //TODO SEND WHATSAPP MESSAGE
-      }),
-    ),
+        // Update lastTextAt after sending
+        await tx.update(users)
+          .set({ lastTextAt: new Date() })
+          .where(eq(users.id, user.id));
+      }));
+    })
   );
 }
 
@@ -1078,9 +1099,9 @@ export function haversineDistance(
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(toRadians(lat1)) *
-      Math.cos(toRadians(lat2)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+    Math.cos(toRadians(lat2)) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c; // Distance in kilometers
 }
