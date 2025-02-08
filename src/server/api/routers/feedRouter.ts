@@ -49,7 +49,7 @@ export async function getFeed({ maxNumEntries = 30 } = {}) {
             owner: {
               columns: {
                 id: true,
-                name: true,
+                firstName: true,
                 image: true,
               },
             },
@@ -85,7 +85,7 @@ export async function getFeed({ maxNumEntries = 30 } = {}) {
                 owner: {
                   columns: {
                     id: true,
-                    name: true,
+                    firstName: true,
                     image: true,
                   },
                 },
@@ -113,7 +113,7 @@ export async function getFeed({ maxNumEntries = 30 } = {}) {
             owner: {
               columns: {
                 id: true,
-                name: true,
+                firstName: true,
                 image: true,
               },
             },
@@ -214,7 +214,7 @@ export async function getFeed({ maxNumEntries = 30 } = {}) {
         madeByGroup: {
           owner: {
             id: "",
-            name: item.userName,
+            firstName: item.userName,
             image: item.userProfilePicUrl,
           },
         },
@@ -240,7 +240,7 @@ export async function getFeed({ maxNumEntries = 30 } = {}) {
           madeByGroup: {
             owner: {
               id: "",
-              name: item.userName,
+              firstName: item.userName,
               image: item.userProfilePicUrl,
             },
           },
@@ -258,7 +258,7 @@ export async function getFeed({ maxNumEntries = 30 } = {}) {
         group: {
           owner: {
             id: "",
-            name: item.userName,
+            firstName: item.userName,
             image: item.userProfilePicUrl,
           },
         },

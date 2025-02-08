@@ -280,14 +280,14 @@ export function getElapsedTime(createdAt: Date): string {
   return `${diffInDays} day${diffInDays !== 1 ? "s" : ""} ago`;
 }
 
-export function getDisplayedName(realname: string | null): string {
+export function getDisplayedName(realname: string | null): string | undefined {
   const userFirstName = realname?.split(" ")[0];
-  const userLastName = realname?.split(" ")[1];
-  const userLastNameInitial = userLastName
-    ? userLastName[0]?.toUpperCase() + "."
-    : "";
-  const displayedName = userFirstName + " " + userLastNameInitial;
-  return displayedName;
+  // const userLastName = realname?.split(" ")[1];
+  // const userLastNameInitial = userLastName
+  //   ? userLastName[0]?.toUpperCase() + "."
+  //   : "";
+  // const displayedName = userFirstName + " " + userLastNameInitial;
+  return userFirstName;
 }
 // not used right now and probably will never have to:
 

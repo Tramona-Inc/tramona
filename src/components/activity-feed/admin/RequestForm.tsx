@@ -59,7 +59,7 @@ export default function CreateRequestForm({
     defaultValues: {
       ...(request
         ? {
-            userName: request.madeByGroup.owner.name ?? "",
+            userName: request.madeByGroup.owner.firstName ?? "",
             userProfilePicUrl: request.madeByGroup.owner.image ?? "",
             checkIn: request.checkIn.toISOString().slice(0, 10),
             checkOut: request.checkOut.toISOString().slice(0, 10),

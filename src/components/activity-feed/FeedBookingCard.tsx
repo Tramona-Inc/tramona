@@ -25,7 +25,7 @@ export default function FeedBookingCard({
   const { data: session } = useSession();
   const isAdmin = session && session.user.role === "admin";
 
-  const userName = booking.group.owner.name ?? "";
+  const userName = booking.group.owner.firstName ?? "";
   const userImage = booking.group.owner.image ?? "";
   const numOfNights = getNumNights(booking.checkIn, booking.checkOut);
   const discount =
@@ -125,11 +125,11 @@ export default function FeedBookingCard({
                   ))}
               </CarouselContent>
               <CarouselPrevious
-                className="size-6 absolute left-2 top-1/2 -translate-y-1/2"
+                className="absolute left-2 top-1/2 size-6 -translate-y-1/2"
                 variant={"white"}
               />
               <CarouselNext
-                className="size-6 absolute right-2 top-1/2 -translate-y-1/2"
+                className="absolute right-2 top-1/2 size-6 -translate-y-1/2"
                 variant={"white"}
               />
               <CarouselDots count={count} current={current} />
