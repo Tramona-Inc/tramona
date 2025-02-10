@@ -42,6 +42,11 @@ const navs = [
     description: "Trigger the scraping for unclaimed offers page",
     href: "/admin/scrapers",
   },
+  {
+    title: "Feed",
+    description: "See all the latest hosts who just signed up",
+    href: "/admin/feed",
+  },
 ];
 
 export default function AdminRequestsTabs() {

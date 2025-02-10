@@ -492,4 +492,29 @@ export const hostsRouter = createTRPCRouter({
       console.log(unSyncedProperties);
       return unSyncedProperties;
     }),
+
+
+  // edit this for admin/feed 
+  getAllHosts: protectedProcedure.query(async ({ ctx }) => {
+    const res = await ctx.db.query.hostProfiles.findMany({
+      columns: {
+        userId: true,
+        becameHostAt: true,
+      },
+      with: {
+        hostUser: {
+          columns: { name: true, email: true, phoneNumber: true, },
+        },
+      },
+      orderBy: (user, { desc }) => [desc(user.becameHostAt)],
+    });
+
+    // Flatten the hostUser
+    return res.map((item) => ({
+      ...item,
+      name: item.hostUser.name,
+      email: item.hostUser.email,
+      phoneNumber: item.hostUser.phoneNumber,
+    }));
+  }),
 });
