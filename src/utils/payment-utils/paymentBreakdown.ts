@@ -146,6 +146,7 @@ export function unwrapCalculatedTravelerPriceToCalculatedBasePrice({
 // <------------------------------------------------------------------- HOST CITY REQUEST/ OFFER -------------------------------------------------------------------------->
 
 export const requestAmountToBaseOfferedAmount = (
+  // we don't really need this becuase we have unwrapHostOfferAmountFromTravelerRequest below
   maxTotalPrice: number, //comes from the request table
 ): number => {
   //we need to convert the travelerRequestAmount from the request form to the base amount which is what the host sees on the request/city page
@@ -155,15 +156,16 @@ export const requestAmountToBaseOfferedAmount = (
   return baseOfferedAmount; //NOTE: Unlike Request-to-book/Bids the offer's traveler markup is also marking up the additional fees.
 };
 
-export const unwrapHostOfferAmount = ({
-  baseOfferedAmount,
+export const unwrapHostOfferAmountFromTravelerRequest = ({
   property,
   request,
 }: {
-  baseOfferedAmount: number;
   property: Property;
   request: HostDashboardRequest;
 }) => {
+  const baseOfferedAmount = request.maxTotalPrice / TRAVELER_MARKUP;
+  console.log(baseOfferedAmount);
+
   const additionalFees = getAdditionalFees({
     property: property,
     numOfNights: getNumNights(request.checkIn, request.checkOut),
@@ -177,6 +179,7 @@ export const unwrapHostOfferAmount = ({
   //in this function we are removing the Host fees ONLY FROM THE basePropertyPrice and not from the Additonal Fees
 
   return {
+    baseOfferedAmount,
     hostPayout,
     additionalFees,
   };

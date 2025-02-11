@@ -13,7 +13,10 @@ import {
 } from "@/utils/payment-utils/paymentBreakdown";
 
 function OfferPriceBreakdown({ request }: { request: HostDashboardRequest }) {
-  const baseAmount = requestAmountToBaseOfferedAmount(request.maxTotalPrice);
+  const unwrappedBreakdown = unwrapHostOfferAmountFromTravelerRequest(
+    { request, property: request}
+  );
+  const 
 
   return (
     <Accordion type="single" collapsible className="">
@@ -25,11 +28,11 @@ function OfferPriceBreakdown({ request }: { request: HostDashboardRequest }) {
           <div className="mt-3 space-y-2 text-sm">
             <div className="flex justify-between">
               <span>Base Price</span>
-              <span>{formatCurrency(request.maxTotalPrice)}</span>
+              <span>{formatCurrency(baseOfferPrice)}</span>
             </div>
             <div className="flex justify-between">
-              <span>Taxes</span>
-              <span>$80.00</span>
+              <span>Host payout</span>
+              <span>{formatCurrency(request.maxTotalPrice)}</span>
             </div>
           </div>
         </AccordionContent>
