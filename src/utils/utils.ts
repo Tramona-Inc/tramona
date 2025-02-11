@@ -1,4 +1,4 @@
-import { Offer, REFERRAL_CODE_LENGTH } from "@/server/db/schema";
+import { Offer, Property, REFERRAL_CODE_LENGTH } from "@/server/db/schema";
 import { RequestsPageOfferData, SeparatedData } from "@/server/server-utils";
 import { useWindowSize } from "@uidotdev/usehooks";
 import { clsx, type ClassValue } from "clsx";
@@ -126,38 +126,32 @@ export function formatDateRange(
   const sameMonth = isSameMonth(from, to);
   const sameYear = isSameYear(from, to);
 
-  if (withWeekday) {
-    if (!to || isSameDay(from, to)) {
-      return formatDate(from, "EEE, MMM d, yyyy");
-    }
-
-    if (sameYear) {
-      return `${formatDate(from, "EEE, MMM d")} – ${formatDate(
-        to,
-        isCurYear ? "EEE, MMM d" : "EEE, MMM d, yyyy",
-      )}`;
-    }
-  }
-
   if (!to || isSameDay(from, to)) {
-    const format = isCurYear ? "MMM d" : "MMM d, yyyy";
+    // Use full weekday name for single-day ranges
+    const format = isCurYear ? "EEEE, MMM d" : "EEEE, MMM d, yyyy";
     return formatDate(from, format);
   }
 
   if (sameMonth && sameYear) {
-    return `${formatDate(from, "MMM d")} – ${formatDate(
+    // Show full month name in both parts for clarity
+    return `${formatDate(from, "EEE, MMM d")} – ${formatDate(
       to,
-      isCurYear ? "d" : "d, yyyy",
+      isCurYear ? "EEE, MMM d" : "EEE, MMM d, yyyy",
     )}`;
   }
+
   if (sameYear) {
-    return `${formatDate(from, "MMM d")} – ${formatDate(
+    // Ensure month appears in both parts for cross-month ranges
+    return `${formatDate(from, "EEE, MMM d")} – ${formatDate(
       to,
-      isCurYear ? "MMM d" : "MMM d, yyyy",
+      isCurYear ? "EEE, MMM d" : "EEE, MMM d, yyyy",
     )}`;
   }
-  return `${formatDate(from, "MMM d, yyyy")} – ${formatDate(to, "MMM d, yyyy")}`;
+
+  // Cross-year ranges should always include the full date
+  return `${formatDate(from, "EEE, MMM d, yyyy")} – ${formatDate(to, "EEE, MMM d, yyyy")}`;
 }
+
 
 /**
  * wrapper for formatDate for YYYY-MM-DD strings only that adds a T00:00
@@ -213,6 +207,7 @@ export function formatDateStringWithDayName(dateStr: string): string {
     weekday: "short",
     month: "short",
     day: "numeric",
+    timeZone: "UTC",
   };
 
   // Format the Date object to the desired string format
@@ -279,14 +274,14 @@ export function getElapsedTime(createdAt: Date): string {
   return `${diffInDays} day${diffInDays !== 1 ? "s" : ""} ago`;
 }
 
-export function getDisplayedName(realname: string | null): string {
+export function getDisplayedName(realname: string | null): string | undefined {
   const userFirstName = realname?.split(" ")[0];
-  const userLastName = realname?.split(" ")[1];
-  const userLastNameInitial = userLastName
-    ? userLastName[0]?.toUpperCase() + "."
-    : "";
-  const displayedName = userFirstName + " " + userLastNameInitial;
-  return displayedName;
+  // const userLastName = realname?.split(" ")[1];
+  // const userLastNameInitial = userLastName
+  //   ? userLastName[0]?.toUpperCase() + "."
+  //   : "";
+  // const displayedName = userFirstName + " " + userLastNameInitial;
+  return userFirstName;
 }
 // not used right now and probably will never have to:
 
@@ -681,7 +676,7 @@ export function getOfferDiscountPercentage(
   offer: Pick<
     Offer,
     | "createdAt"
-    | "travelerOfferedPriceBeforeFees"
+    | "calculatedTravelerPrice"
     | "checkIn"
     | "checkOut"
     | "scrapeUrl"
@@ -698,13 +693,10 @@ export function getOfferDiscountPercentage(
 
   //3.) check the if the offer is by a real host and is listed on airbnb
   if (offer.datePriceFromAirbnb) {
-    console.log(
-      offer.datePriceFromAirbnb,
-      offer.travelerOfferedPriceBeforeFees,
-    );
+    console.log(offer.datePriceFromAirbnb, offer.calculatedTravelerPrice);
     return getDiscountPercentage(
       offer.datePriceFromAirbnb,
-      offer.travelerOfferedPriceBeforeFees,
+      offer.calculatedTravelerPrice,
     );
   }
   //4.)for other cases random number
@@ -713,7 +705,7 @@ export function getOfferDiscountPercentage(
 
 // export function getrequestToBookMaxDiscountPercentage(offer: {
 //   createdAt: Date;
-//   travelerOfferedPriceBeforeFees: number;
+//   calculatedTravelerPrice: number;
 //   checkIn: Date;
 //   checkOut: Date;
 //   scrapeUrl?: number | null;
@@ -721,7 +713,7 @@ export function getOfferDiscountPercentage(
 //   randomDirectListingDiscount?: number | null;
 // }) {
 //   const numNights = getNumNights(offer.checkIn, offer.checkOut);
-//   const offerNightlyPrice = offer.travelerOfferedPriceBeforeFees / numNights;
+//   const offerNightlyPrice = offer.calculatedTravelerPrice / numNights;
 //   //1.)check to see if scraped property(directListing) and the randomDirectListingDiscount is not null
 //   if (offer.randomDirectListingDiscount) {
 //     return offer.randomDirectListingDiscount;
@@ -733,11 +725,11 @@ export function getOfferDiscountPercentage(
 //   if (offer.datePriceFromAirbnb) {
 //     console.log(
 //       offer.datePriceFromAirbnb,
-//       offer.travelerOfferedPriceBeforeFees,
+//       offer.calculatedTravelerPrice,
 //     );
 //     return getDiscountPercentage(
 //       offer.datePriceFromAirbnb,
-//       offer.travelerOfferedPriceBeforeFees,
+//       offer.calculatedTravelerPrice,
 //     );
 //   }
 //   //4.)for other cases random number
@@ -812,21 +804,6 @@ export function useUpdateUser() {
     },
   };
 }
-
-export function removeTax(total: number, taxRate: number): number {
-  if (taxRate < 0 || taxRate >= 1) {
-    throw new Error("Tax rate must be between 0 and 1");
-  }
-  const amountWithoutTax = Math.round(total / (1 + taxRate));
-  return amountWithoutTax;
-}
-
-export const getApplicableBookItNowDiscount = () => {
-  ///WE ARE NOT DOING DISCOUNT TIERS ANYMORE THATS WHY IM RETURNING NULL
-  //but i plan on adding discounts in the near future so this function can stay :)
-
-  return null;
-};
 
 export const capitalizeFirstLetter = (string: string | null): string => {
   if (!string) return "";

@@ -37,7 +37,7 @@ export default function HostTeamsDropdownItems({
             <SkeletonText />
           )}
         </DropdownMenuSubTrigger>
-        <DropdownMenuSubContent>
+        <DropdownMenuSubContent className="absolute right-0 top-10 w-[20rem] sm:static sm:w-auto">
           <DropdownMenuLabel>Your teams</DropdownMenuLabel>
           {hostTeams?.map((team) => (
             <DropdownMenuCheckboxItem

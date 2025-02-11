@@ -14,7 +14,7 @@ import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 import { errorToast } from "@/utils/toasts";
 import HostFeeTab from "./HostFeeTab";
 import { useRef, useState, useEffect } from "react";
-
+import { useRouter } from "next/router";
 interface CalendarSettingsProps {
   property: Property;
   handleBookItNowSwitch: (checked: boolean) => Promise<void>;
@@ -48,6 +48,9 @@ export default function CalendarSettings({
   const initialBookItNowPercent = useRef<number>(
     property.bookItNowHostDiscountPercentOffInput
   );
+
+  const router = useRouter();
+  const activeTab = router.query.tab as string || "pricing";
 
   const [biddingOpen, setBiddingOpen] = useState(false);
   const [biddingSaved, setBiddingSaved] = useState(false);
@@ -101,18 +104,24 @@ export default function CalendarSettings({
     <Card className="h-full flex-1">
       <CardContent className="p-1 xl:p-3">
         <h2 className="mb-2 text-xl font-bold sm:mb-6 sm:text-2xl">Settings</h2>
-        <Tabs defaultValue="pricing" className="w-full">
+        <Tabs defaultValue={activeTab} className="w-full">
           <TabsList
             className="mb-4 grid w-full grid-cols-3 sm:mb-6"
             noBorder={true}
           >
-            <TabsTrigger value="pricing" className="flex-1">
+            <TabsTrigger value="pricing" className="flex-1" onClick={() => {
+              void router.push({ pathname: "/host/calendar", query: { ...router.query, tab: "pricing" } }, undefined, { shallow: true })
+            }}>
               Pricing
             </TabsTrigger>
-            <TabsTrigger value="fees" className="flex-1">
+            <TabsTrigger value="fees" className="flex-1" onClick={() => {
+              void router.push({ pathname: "/host/calendar", query: { ...router.query, tab: "fees" } }, undefined, { shallow: true })
+            }}>
               Fees
             </TabsTrigger>
-            <TabsTrigger value="restrictions" className="flex-1">
+            <TabsTrigger value="restrictions" className="flex-1" onClick={() => {
+              void router.push({ pathname: "/host/calendar", query: { ...router.query, tab: "restrictions" } }, undefined, { shallow: true })
+            }}>
               Restrictions
             </TabsTrigger>
           </TabsList>

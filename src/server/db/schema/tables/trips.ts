@@ -52,10 +52,12 @@ export const trips = pgTable(
     propertyId: integer("property_id")
       .notNull()
       .references(() => properties.id, { onDelete: "cascade" }),
-    checkIn: date("check_in", { mode: "date" }).notNull(),
-    checkOut: date("check_out", { mode: "date" }).notNull(),
+    checkIn: timestamp("check_in", { withTimezone: true }).notNull(),
+    checkOut: timestamp("check_out", { withTimezone: true }).notNull(),
     numGuests: integer("num_guests").notNull(),
-    totalPriceAfterFees: integer("total_price_after_fees").default(0).notNull(), // in cents
+    travelerTotalPaidAmount: integer("traveler_total_paid_amount")
+      .default(0)
+      .notNull(), // in cents
 
     paymentIntentId: varchar("payment_intent_id"),
     createdAt: timestamp("created_at", { withTimezone: true })

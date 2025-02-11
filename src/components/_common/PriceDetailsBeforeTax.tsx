@@ -1,7 +1,6 @@
 import { Separator } from "../ui/separator";
 import {
   formatCurrency,
-  getApplicableBookItNowDiscount,
   getNumNights,
   getTravelerOfferedPrice,
 } from "@/utils/utils";
@@ -17,15 +16,8 @@ import {
 } from "@/utils/payment-utils/paymentBreakdown";
 import type { RequestToBookDetails } from "../propertyPages/sidebars/actionButtons/RequestToBookBtn";
 import { TRAVELER_MARKUP } from "@/utils/constants";
-
-type PaymentBreakdown = {
-  totalTripAmount: number;
-  taxesPaid: number;
-  taxPercentage: number;
-  superhogFee: number;
-  stripeTransactionFee: number;
-  totalSavings: number;
-};
+import { getApplicableBookItNowAndRequestToBookDiscountPercentage } from "../../utils/payment-utils/payment-utils";
+import { PriceBreakdownOutput } from "../checkout/types";
 
 type PriceDetails = {
   numberOfNights: number;
@@ -43,7 +35,7 @@ export default function PriceDetailsBeforeTax({
 }) {
   const [loading, setLoading] = useState(true);
   const [brokeDownPayment, setBrokeDownPayment] =
-    useState<PaymentBreakdown | null>(null);
+    useState<PriceBreakdownOutput | null>(null);
   const [priceDetails, setPriceDetails] = useState<PriceDetails>({
     numberOfNights: 1,
     nightlyPrice: 0,
@@ -53,7 +45,8 @@ export default function PriceDetailsBeforeTax({
 
   let priceWithApplicableDiscount;
   if (requestToBook && property) {
-    const applicableDiscount = getApplicableBookItNowDiscount();
+    const applicableDiscount =
+      getApplicableBookItNowAndRequestToBookDiscountPercentage(property);
 
     if (applicableDiscount && applicableDiscount > 0) {
       priceWithApplicableDiscount =
@@ -69,7 +62,7 @@ export default function PriceDetailsBeforeTax({
     }
   }
 
-  const travelerOfferedPriceBeforeFees = getTravelerOfferedPrice({
+  const calculatedTravelerPrice = getTravelerOfferedPrice({
     totalBasePriceBeforeFees: priceWithApplicableDiscount ?? scrapedPrice,
     travelerMarkup: TRAVELER_MARKUP,
   });
@@ -82,7 +75,7 @@ export default function PriceDetailsBeforeTax({
             requestToBook.checkIn,
             requestToBook.checkOut,
           );
-          const nightly = travelerOfferedPriceBeforeFees / nights;
+          const nightly = calculatedTravelerPrice / nights;
           setPriceDetails({
             numberOfNights: nights,
             nightlyPrice: nightly,
@@ -90,7 +83,7 @@ export default function PriceDetailsBeforeTax({
 
           const payment = breakdownPaymentByOffer({
             scrapeUrl: property.originalListingPlatform ?? null,
-            travelerOfferedPriceBeforeFees,
+            calculatedTravelerPrice,
             datePriceFromAirbnb: scrapedPrice,
             checkIn: requestToBook.checkIn,
             checkOut: requestToBook.checkOut,
@@ -100,7 +93,7 @@ export default function PriceDetailsBeforeTax({
           setBrokeDownPayment(payment);
         } else if (offer) {
           const nights = getNumNights(offer.checkIn, offer.checkOut);
-          const nightly = offer.travelerOfferedPriceBeforeFees / nights;
+          const nightly = offer.calculatedTravelerPrice / nights;
           setPriceDetails({
             numberOfNights: nights,
             nightlyPrice: nightly,
@@ -120,19 +113,13 @@ export default function PriceDetailsBeforeTax({
     };
 
     void calculatePayment();
-  }, [
-    requestToBook,
-    property,
-    offer,
-    scrapedPrice,
-    travelerOfferedPriceBeforeFees,
-  ]);
+  }, [requestToBook, property, offer, scrapedPrice, calculatedTravelerPrice]);
 
   if (loading) {
     return <div>Loading price details...</div>;
   }
 
-  if (!brokeDownPayment) {
+  if (!brokeDownPayment?.totalTripAmount) {
     return (
       <div className="text-red-500">{"Unable to display price details"}</div>
     );

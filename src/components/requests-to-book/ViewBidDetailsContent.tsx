@@ -18,7 +18,7 @@ import {
   Check,
   DotIcon,
 } from "lucide-react";
-import ConfirmationImageCarousel from "@/pages/request-to-book/ConfirmationImageCarousel";
+import ConfirmationImageCarousel from "@/components/_common/ConfirmationImageCarousel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import UserAvatar from "../_common/UserAvatar";
 import { TRPCClientErrorLike } from "@trpc/client";
@@ -107,9 +107,7 @@ function ViewBidDetailsContent({
                       Bid Price
                     </p>
                     <p className="text-base font-semibold">
-                      {formatCurrency(
-                        requestToBook.amountAfterTravelerMarkupAndBeforeFees,
-                      )}
+                      {formatCurrency(requestToBook.calculatedTravelerPrice)}
                     </p>
                   </div>
                 </div>

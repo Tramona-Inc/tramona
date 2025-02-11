@@ -1,13 +1,18 @@
+import { Property } from "@/server/db/schema/tables/properties";
 import { type PropertyPageData } from "../propertyPages/PropertyPage";
 import { RouterOutputs } from "@/utils/api";
 
 export type RequestToBookProperty =
   RouterOutputs["requestsToBook"]["getMyRequestsToBook"]["activeRequestsToBook"][number]["property"];
 
+export type BookedDates = RouterOutputs["calendar"]["getReservedDates"];
+
 export type RequestToBookPricing = {
-  travelerOfferedPriceBeforeFees: number;
+  calculatedTravelerPrice: number;
   datePriceFromAirbnb: number | null;
   discount: number;
+  additionalFees: number | null;
+  requestPercentageOff?: number;
 };
 
 export interface UnifiedCheckoutData {
@@ -32,16 +37,47 @@ export type PropertyAndTripParams = {
     checkIn: Date;
     checkOut: Date;
   };
-  travelerPriceBeforeFees: number;
-  property: PropertyPageData | RequestToBookProperty;
+  calculatedTravelerPrice: number;
+  property: PropertyPageData | Property | RequestToBookProperty;
 };
 
 //output
 export type PriceBreakdownOutput = {
-  totalTripAmount: number;
+  totalTripAmount: number | undefined; //throw error if undefined
   taxesPaid: number;
   taxPercentage: number;
   superhogFee: number;
   stripeTransactionFee: number;
   totalSavings: number;
 };
+
+//useGetOriginalPropertyPricing output
+export type UseGetOriginalPropertyPricingOutput = {
+  additionalFees: {
+    cleaningFee: number | undefined;
+    petFee: number | undefined;
+    totalAdditionalFees: number; // Total of all fees
+    [key: string]: any; //  allows other key value pairs to exist.
+  };
+  originalBasePrice: number | undefined;
+  calculatedBasePrice: number | undefined;
+  calculatedTravelerPrice: number | undefined;
+  hostDiscountPercentage: number | undefined;
+  amountSaved: number | undefined;
+  travelerCalculatedAmountWithSecondaryLayerWithoutTaxes: number | undefined;
+  brokedownPaymentOutput: PriceBreakdownOutput | undefined; // More specific type (IMPORTANT!)
+  casamundoPrice: number | undefined | null;
+  isLoading: boolean;
+  error: string | null; // Can now be a string error message
+  bookedDates: BookedDates; //  Determine more specific type for booked dates
+  isHostPriceLoading: boolean;
+  isCasamundoPriceLoading: boolean;
+};
+
+//sub of useGetORiginalPricing
+export interface AdditionalFeesOutput {
+  cleaningFee: number | undefined;
+  petFee: number | undefined;
+  extraGuestFee: number | undefined;
+  totalAdditionalFees: number;
+}

@@ -10,7 +10,7 @@ import { errorToast } from "@/utils/toasts";
 import { useChatWithUserForRequest } from "@/utils/messaging/useChatWithUserForRequest";
 import { type Property } from "@/server/db/schema";
 import { api } from "@/utils/api";
-import { Card, CardContent } from "@/components/ui/card";
+import { useMemo } from "react";
 import { Home } from "lucide-react";
 import { useRouter } from "next/router";
 import { separateByPriceAndAgeRestriction } from "@/utils/utils";
@@ -37,8 +37,14 @@ const CityRequestSection: React.FC<CityRequestSectionProps> = ({
   const { toast } = useToast();
   const router = useRouter();
   const { query } = useRouter(); // Get query from router
-  const city = query.city as string | undefined;
-  const option = query.option as string | undefined;
+
+  const { city, option } = useMemo(() => {
+    return {
+      city: query.city as string | undefined,
+      option: query.option as string | undefined,
+    };
+  }, [query.city, query.option]);
+
   const { currentHostTeamId } = useHostTeamStore();
 
   const { mutateAsync: rejectRequest } =

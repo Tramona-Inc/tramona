@@ -776,4 +776,16 @@ export const hostTeamsRouter = createTRPCRouter({
 
       return teams.map((member) => member.hostTeam); // Return only the host team details
     }),
+
+  updateTeamName: coHostProcedure(
+    "update_team_name",
+    z.object({
+      teamName: z.string(),
+    }),
+  ).mutation(async ({ ctx, input }) => {
+    await ctx.db
+      .update(hostTeams)
+      .set({ name: input.teamName })
+      .where(eq(hostTeams.id, input.currentHostTeamId));
+  }),
 });

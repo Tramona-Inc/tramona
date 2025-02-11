@@ -57,11 +57,15 @@ export const requestsToBook = pgTable(
     resolvedAt: timestamp("resolved_at", { withTimezone: true }),
     status: statusEnum("status").default("Pending"),
     paymentIntentId: text("payment_intent_id").notNull(),
-    baseAmountBeforeFees: integer("base_amount_before_fees").notNull(), //we need both in case we change the markup it wouldn't affect previous request to books
-    amountAfterTravelerMarkupAndBeforeFees: integer(
-      "amount_after_traveler_markup_and_before_fees",
-    ).notNull(), // this is the amount the host will see the traveler requested.
     isDirectListing: boolean("is_direct_listing").notNull(), //true = scraped property : false = our property
+    //what do we need we need calculated 1.) calculatedTravelerPrice and
+    requestPercentageOff: integer("request_percentage_off")
+      .notNull()
+      .default(0),
+    calculatedBasePrice: integer("calculated_base_price").notNull(), // not including markup and additional fees (SOURCE OF ALL TRUTH)
+    calculatedTravelerPrice: integer("calculated_traveler_price").notNull(), // this is the amount after primary layer  and before secondary
+    additionalFees: integer("additional_fees").notNull().default(0), // we have this in here and trip checkout
+    timeOfSecurityDeposit: integer("time_of_security_deposit").notNull(),
   },
   (t) => ({
     propertyIdIdx: index().on(t.propertyId),

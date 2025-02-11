@@ -164,6 +164,11 @@ const roomTypeMapping = {
 export interface ListingCreatedWebhook {
   action: "listing.created";
   data: {
+    fees: {
+      fee: {
+        amount: number;
+      };
+    }[];
     platform_id: string;
     id: string;
     public_name: string;
@@ -361,7 +366,7 @@ export default async function HospitableWebhook(
           ),
         )) as [string, string];
 
-        // console.log("listingData", listingData);
+        const cleaningFee = webhookData.data.fees[0]?.fee.amount ?? 0;
 
         let cancellationPolicy;
         try {
@@ -450,6 +455,7 @@ export default async function HospitableWebhook(
             city: city,
             countryISO: countryISO,
             country: country,
+            cleaningFeePerStay: cleaningFee,
             //ratings: webhookData.data.ratings,
           })
           .returning({ id: properties.id })

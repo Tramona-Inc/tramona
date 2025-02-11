@@ -19,7 +19,7 @@ export function RequestToBookCardPreviews({
 }) {
   const numNights = getNumNights(requestToBook.checkIn, requestToBook.checkOut);
   const requestedNightlyPrice =
-    requestToBook.amountAfterTravelerMarkupAndBeforeFees / numNights;
+    requestToBook.calculatedTravelerPrice / numNights;
 
   const checkIn = formatDateMonthDayYear(requestToBook.checkIn);
   const checkOut = formatDateMonthDayYear(requestToBook.checkOut);

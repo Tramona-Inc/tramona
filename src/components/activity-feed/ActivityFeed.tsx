@@ -2,7 +2,7 @@ import { api, type RouterOutputs } from "@/utils/api";
 import FeedRequestCard from "@/components/activity-feed/FeedRequestCard";
 import FeedOfferCard from "@/components/activity-feed/FeedOfferCard";
 import FeedBookingCard from "@/components/activity-feed/FeedBookingCard";
-import Spinner from "../_common/Spinner";
+import ActivityFeedSkeleton from "./ActivityFeedSkeleton";
 
 export type FeedItem = RouterOutputs["feed"]["getFeed"][number];
 export type FeedRequestItem = Extract<FeedItem, { type: "request" }>;
@@ -16,7 +16,7 @@ export default function ActivityFeed({
 }) {
   const { data: feed } = api.feed.getFeed.useQuery({});
 
-  if (!feed) return <Spinner />;
+  if (!feed) return <ActivityFeedSkeleton />;
 
   const dataInDisplay = fillerOnly
     ? feed.filter((item) => item.isFiller)
@@ -28,7 +28,7 @@ export default function ActivityFeed({
   }
 
   return (
-    <div className="max-w-lg space-y-4 overflow-y-auto">
+    <div className="mx-auto max-w-lg space-y-4 overflow-y-auto">
       {dataInDisplay.map((item) => {
         switch (item.type) {
           case "request":

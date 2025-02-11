@@ -140,9 +140,11 @@ export default async function webhook(
               numOfGuests: parseInt(
                 paymentIntentSucceeded.metadata.num_of_guests!,
               ),
-              travelerPriceBeforeFees: parseInt(
-                paymentIntentSucceeded.metadata
-                  .traveler_offered_price_before_fees!,
+              calculatedTravelerPrice: parseInt(
+                paymentIntentSucceeded.metadata.calculated_traveler_price!,
+              ),
+              additionalFeesFromWebhook: parseInt(
+                paymentIntentSucceeded.metadata.additional_fees ?? "0",
               ),
               checkIn: new Date(paymentIntentSucceeded.metadata.check_in!),
               checkOut: new Date(paymentIntentSucceeded.metadata.check_out!),
@@ -156,15 +158,16 @@ export default async function webhook(
             // 2.  CASE : "RequestToBook"
           } else if (paymentIntentSucceeded.metadata.type === "requestToBook") {
             //not charging user or creating a superhog
-            console.log("hi");
             await createRequestToBook({
               paymentIntentId,
               numOfGuests: parseInt(
                 paymentIntentSucceeded.metadata.num_of_guests!,
               ),
-              travelerPriceBeforeFees: parseInt(
-                paymentIntentSucceeded.metadata
-                  .traveler_offered_price_before_fees!,
+              calculatedTravelerPrice: parseInt(
+                paymentIntentSucceeded.metadata.calculated_traveler_price!,
+              ),
+              additionalFeesFromWebhook: parseInt(
+                paymentIntentSucceeded.metadata.additional_fees ?? "0",
               ),
               checkIn: new Date(paymentIntentSucceeded.metadata.check_in!),
               checkOut: new Date(paymentIntentSucceeded.metadata.check_out!),
@@ -173,6 +176,11 @@ export default async function webhook(
               ),
               userId: paymentIntentSucceeded.metadata.user_id!,
               isDirectListingCharge,
+              requestPercentageOff: parseInt(
+                paymentIntentSucceeded.metadata.request_percentage_off ?? "0",
+              ),
+              timeOfSecurityDeposit:
+                currentProperty?.currentSecurityDeposit ?? 0,
             });
           } else if (paymentIntentSucceeded.metadata.type === "offer") {
             // 3. Case: "OFFER"
@@ -220,10 +228,10 @@ export default async function webhook(
                 .insert(tripCheckouts)
                 .values({
                   paymentIntentId,
-                  travelerOfferedPriceBeforeFees:
-                    offer.travelerOfferedPriceBeforeFees,
-                  totalTripAmount: priceBreakdown.totalTripAmount,
+                  calculatedTravelerPrice: offer.calculatedTravelerPrice,
+                  totalTripAmount: priceBreakdown.totalTripAmount!,
                   taxesPaid: priceBreakdown.taxesPaid,
+                  taxPercentage: priceBreakdown.taxPercentage.toString(),
                   superhogFee: priceBreakdown.superhogFee,
                   stripeTransactionFee: priceBreakdown.stripeTransactionFee,
                   totalSavings: priceBreakdown.totalSavings,
@@ -242,7 +250,7 @@ export default async function webhook(
                   propertyId: offer.propertyId,
                   offerId: offer.id,
                   paymentIntentId,
-                  totalPriceAfterFees: paymentIntentSucceeded.amount,
+                  travelerTotalPaidAmount: paymentIntentSucceeded.amount,
                   tripCheckoutId: tripCheckout.id,
                 })
                 .returning()
@@ -319,7 +327,7 @@ export default async function webhook(
               }
               // ------ Send Slack When trip is booked ------
               await sendSlackMessage({
-                isProductionOnly: false,
+                isProductionOnly: true,
                 channel: "tramona-bot",
                 text: [
                   `*${user?.email} just booked a trip: ${currentProperty?.name}*`,
@@ -375,7 +383,7 @@ export default async function webhook(
           //   .set({
           //     paymentIntentId: chargeObject.payment_intent?.toString(),
 
-          //     totalPriceAfterFees: chargeObject.amount,
+          //     travelerTotalPaidAmount: chargeObject.amount,
           //   })
           //   .where(
           //     eq(trips.offerId, parseInt(chargeObject.metadata.listing_id!)),

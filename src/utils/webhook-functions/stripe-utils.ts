@@ -12,7 +12,10 @@ import {
   tripCheckouts,
 } from "@/server/db/schema";
 import Stripe from "stripe";
-import { breakdownPaymentByPropertyAndTripParams } from "../payment-utils/paymentBreakdown";
+import {
+  breakdownPaymentByPropertyAndTripParams,
+  unwrapCalculatedTravelerPriceToCalculatedBasePrice,
+} from "../payment-utils/paymentBreakdown";
 import {
   captureTripPaymentWithoutSuperhog,
   sendEmailAndWhatsupConfirmation,
@@ -129,7 +132,9 @@ export async function getRequestIdByOfferId(
 export async function finalizeTrip({
   paymentIntentId,
   numOfGuests,
-  travelerPriceBeforeFees,
+  calculatedTravelerPrice,
+  additionalFeesFromWebhook,
+  securityDepositAmount,
   checkIn,
   checkOut,
   propertyId,
@@ -139,7 +144,9 @@ export async function finalizeTrip({
   requestToBookId, // AKA REQUEST TO BID ID
 }: {
   paymentIntentId: string;
-  travelerPriceBeforeFees: number;
+  calculatedTravelerPrice: number;
+  additionalFeesFromWebhook: number;
+  securityDepositAmount?: number; //undefined for book-it-now but we need it for requestToBook
   numOfGuests: number;
   checkIn: Date;
   checkOut: Date;
@@ -202,7 +209,7 @@ export async function finalizeTrip({
       checkIn: checkIn,
       checkOut: checkOut,
     },
-    travelerPriceBeforeFees: travelerPriceBeforeFees,
+    calculatedTravelerPrice: calculatedTravelerPrice,
     property: property,
   };
 
@@ -213,13 +220,15 @@ export async function finalizeTrip({
     .insert(tripCheckouts)
     .values({
       paymentIntentId,
-      travelerOfferedPriceBeforeFees: travelerPriceBeforeFees,
-      totalTripAmount: priceBreakdown.totalTripAmount,
+      calculatedTravelerPrice: calculatedTravelerPrice,
+      totalTripAmount: priceBreakdown.totalTripAmount!,
       taxesPaid: priceBreakdown.taxesPaid,
+      taxPercentage: priceBreakdown.taxPercentage.toString(),
       superhogFee: priceBreakdown.superhogFee,
       stripeTransactionFee: priceBreakdown.stripeTransactionFee,
       totalSavings: priceBreakdown.totalSavings,
-      securityDeposit: property.currentSecurityDeposit,
+      additionalFees: additionalFeesFromWebhook, // we need data from webhook just incase the host changes price between bid creatation and accepting it
+      securityDeposit: securityDepositAmount ?? property.currentSecurityDeposit,
     })
     .returning()
     .then((r) => r[0]!);
@@ -236,7 +245,7 @@ export async function finalizeTrip({
       tripSource: source,
       propertyId: property.id,
       paymentIntentId,
-      totalPriceAfterFees: priceBreakdown.totalTripAmount,
+      travelerTotalPaidAmount: priceBreakdown.totalTripAmount!,
       tripCheckoutId: tripCheckout.id,
     })
     .returning()
@@ -305,7 +314,7 @@ export async function finalizeTrip({
     checkOut,
   });
   await sendSlackMessage({
-    isProductionOnly: false,
+    isProductionOnly: true,
     channel: "tramona-bot",
     text: [
       `*${user.email} just booked a trip: ${property.name}*`,
@@ -333,21 +342,27 @@ export async function finalizeTrip({
 export async function createRequestToBook({
   paymentIntentId,
   numOfGuests,
-  travelerPriceBeforeFees,
+  calculatedTravelerPrice,
+  additionalFeesFromWebhook,
   checkIn,
   checkOut,
   propertyId,
   userId,
+  requestPercentageOff,
   isDirectListingCharge,
+  timeOfSecurityDeposit,
 }: {
   paymentIntentId: string;
-  travelerPriceBeforeFees: number;
+  calculatedTravelerPrice: number;
+  additionalFeesFromWebhook: number;
   numOfGuests: number;
   checkIn: Date;
   checkOut: Date;
   propertyId: number;
   userId: string;
+  requestPercentageOff: number;
   isDirectListingCharge: boolean;
+  timeOfSecurityDeposit: number;
 }) {
   const user = await db.query.users
     .findFirst({
@@ -373,6 +388,10 @@ export async function createRequestToBook({
     groupId: madeByGroupId,
   });
 
+  console.log(
+    calculatedTravelerPrice,
+    removeTravelerMarkup(calculatedTravelerPrice),
+  );
   await db.insert(requestsToBook).values({
     hostTeamId: property.hostTeamId,
     createdAt: new Date(),
@@ -383,9 +402,15 @@ export async function createRequestToBook({
     checkIn,
     checkOut,
     numGuests: numOfGuests,
-    baseAmountBeforeFees: removeTravelerMarkup(travelerPriceBeforeFees),
-    amountAfterTravelerMarkupAndBeforeFees: Math.floor(travelerPriceBeforeFees),
+    requestPercentageOff: requestPercentageOff,
+    calculatedBasePrice: unwrapCalculatedTravelerPriceToCalculatedBasePrice({
+      calculatedTravelerPrice,
+      additionalFees: additionalFeesFromWebhook,
+    }),
+    calculatedTravelerPrice: Math.floor(calculatedTravelerPrice),
+    additionalFees: additionalFeesFromWebhook,
     isDirectListing: isDirectListingCharge,
+    timeOfSecurityDeposit: timeOfSecurityDeposit,
   });
 
   //    ------2 CASES: 1.)no direct listing so send to the host 2.) isDirectLIsting send message to us

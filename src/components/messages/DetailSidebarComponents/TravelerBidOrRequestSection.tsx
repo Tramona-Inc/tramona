@@ -99,9 +99,7 @@ function TravelerBidOrRequestSection({
                 <span className="font-medium">Amount</span>
                 <span className="font-medium text-primary">
                   {formatCurrency(
-                    bid?.amountAfterTravelerMarkupAndBeforeFees ??
-                      request?.maxTotalPrice ??
-                      0,
+                    bid?.calculatedTravelerPrice ?? request?.maxTotalPrice ?? 0,
                   )}
                 </span>
               </div>

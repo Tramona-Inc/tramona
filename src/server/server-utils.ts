@@ -393,9 +393,9 @@ export async function addProperty({
     latLngPoint?: { x: number; y: number }; // make optional
   };
 } & (
-  | { isAdmin?: boolean; userEmail: string }
-  | { isAdmin: true; userEmail?: undefined }
-)) {
+    | { isAdmin?: boolean; userEmail: string }
+    | { isAdmin: true; userEmail?: undefined }
+  )) {
   let lat = property.latLngPoint?.y;
   let lng = property.latLngPoint?.x;
 
@@ -438,60 +438,94 @@ export async function addProperty({
   return insertedProperty!.id;
 }
 
+async function getRequestsInLast12HoursForHostTeam(tx: typeof db, hostTeamId: number) {
+  if (hostTeamId === 54) {
+    return [];
+  }
+  const propertiesForTeam = await tx.query.properties.findMany({
+    where: eq(properties.hostTeamId, hostTeamId),
+  });
+
+  const requestsForProperties = await getRequestsForProperties(propertiesForTeam, { tx });
+  return requestsForProperties.filter((request) => {
+    const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000);
+    return request.request.createdAt > twelveHoursAgo;
+  });
+}
+
 export async function sendTextToHost({
   matchingProperties,
   request,
+  tx,
 }: {
   matchingProperties: { id: number; hostTeamId: number }[];
   request: Pick<Request, "checkIn" | "checkOut" | "maxTotalPrice" | "location">;
+  tx: typeof db;
 }) {
   const uniqueHostTeamIds = Array.from(
     new Set(matchingProperties.map((property) => property.hostTeamId)),
   );
-  const numHostPropertiesPerRequest = matchingProperties.reduce(
-    (acc, property) => {
-      if (property.hostTeamId) {
-        acc[property.hostTeamId] = (acc[property.hostTeamId] ?? 0) + 1;
+  // Get all host team members with their contact info and lastTextAt
+  const allTeamMembers = await tx.query.hostTeamMembers.findMany({
+    where: inArray(hostTeamMembers.hostTeamId, uniqueHostTeamIds),
+    with: {
+      user: {
+        columns: {
+          id: true,
+          lastTextAt: true,
+          phoneNumber: true
+        },
+      },
+      hostTeam: {
+        columns: {
+          id: true
+        }
       }
-      return acc;
     },
-    {} as Record<number, number>,
-  );
+  });
+  // Filter members who haven't been texted in last 12 hours
+  const eligibleMembers = allTeamMembers.filter(member => {
+    const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000);
+    return !member.user.lastTextAt ||
+      new Date(member.user.lastTextAt) < twelveHoursAgo;
+  });
+  // Group members by host team ID
+  const membersByTeam = eligibleMembers.reduce((acc, member) => {
+    acc[member.hostTeam.id] = acc[member.hostTeam.id] ?? [];
+    acc[member.hostTeam.id]?.push(member.user);
+    return acc;
+  }, {} as Record<number, typeof eligibleMembers[0]['user'][]>);
 
-  waitUntil(
-    Promise.all(
-      uniqueHostTeamIds.filter(Boolean).map(async (hostTeamId) => {
-        const hostTeamOwner = await db.query.hostTeams
-          .findFirst({
-            where: eq(hostTeams.id, hostTeamId),
-            with: {
-              owner: {
-                columns: { name: true, email: true, phoneNumber: true },
-              },
-            },
-          })
-          .then((res) => res?.owner);
+  console.log(membersByTeam, "membersByTeam");
+  // Send messages to each eligible member per team
+  await Promise.all(
+    Object.entries(membersByTeam).map(async ([teamId, members]) => {
+      console.log(teamId, "teamId");
+      const teamRequests = await getRequestsInLast12HoursForHostTeam(tx, Number(teamId));
 
-        if (!hostTeamOwner?.phoneNumber) return;
+      console.log(teamRequests, "teamRequests");
 
-        const numberOfNights = getNumNights(request.checkIn, request.checkOut);
+      // const numberOfNights = getNumNights(request.checkIn, request.checkOut);
+      await Promise.all(members.map(async (user) => {
+        console.log(user, "user");
+        if (!user.phoneNumber) return;
+
         await sendText({
-          to: hostTeamOwner.phoneNumber,
-          content: `Tramona: There is a request for ${formatCurrency(
-            request.maxTotalPrice / numberOfNights,
-          )} per night for ${plural(numberOfNights, "night")} in ${
-            request.location
-          }. You have ${plural(
-            numHostPropertiesPerRequest[hostTeamId] ?? 0,
-            "eligible property",
-            "eligible properties",
-          )}. Please click here to make a match: ${env.NEXTAUTH_URL}/host/requests`,
+          to: user.phoneNumber,
+          content: `Tramona: You have ${teamRequests.length} new requests! View: ${env.NEXTAUTH_URL}/host/requests`
         });
 
-        //TODO SEND WHATSAPP MESSAGE
-      }),
-    ),
+        console.log("sent text");
+
+        // Update lastTextAt after sending
+        await tx.update(users)
+          .set({ lastTextAt: new Date() })
+          .where(eq(users.id, user.id));
+      }));
+      console.log("sent text to all members");
+    })
   );
+  console.log("done");
 }
 
 export async function getRequestsForProperties(
@@ -524,7 +558,8 @@ export async function getRequestsForProperties(
     };
   }[] = [];
 
-  for (const property of hostProperties) {
+  console.log(hostProperties, "hostProperties");
+  await Promise.all(hostProperties.map(async (property) => {
     const requestIsNearProperty = sql`
       ST_DWithin(
         ST_Transform(ST_SetSRID(requests.lat_lng_point, 4326), 3857),
@@ -542,8 +577,9 @@ export async function getRequestsForProperties(
     //       ${property.priceRestriction} >= (requests.max_total_price / DATE_PART('day', requests.check_out::timestamp - requests.check_in::timestamp)) * 1.15
     //     )
     // `;
-    requestIsNearProperties.push(requestIsNearProperty);
+    // requestIsNearProperties.push(requestIsNearProperty);
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    console.log(twentyFourHoursAgo, "twentyFourHoursAgo");
 
     const requestsForProperty = await tx.query.requests.findMany({
       where: and(
@@ -627,9 +663,11 @@ export async function getRequestsForProperties(
         },
       },
     });
+    console.log(requestsForProperty, "requestsForProperty");
 
     // Store the matched requests along with the property
     for (const request of requestsForProperty) {
+      console.log(request, "request");
       //here we can  update each of the reque
       const traveler = request.madeByGroup.owner;
       const taxInfo = calculateTotalTax(property);
@@ -646,7 +684,7 @@ export async function getRequestsForProperties(
       });
     }
     // priceRestrictionsSQL.push(priceRestrictionSQL);
-  }
+  }));
   return propertyToRequestMap;
 }
 
@@ -882,45 +920,65 @@ export async function getPropertyOriginalPrice(
     checkOut: string;
     numGuests: number;
   },
-) {
-  if (property.originalListingPlatform === "Hospitable") {
-    const formattedCheckIn = new Date(params.checkIn)
-      .toISOString()
-      .split("T")[0];
-    const formattedCheckOut = new Date(params.checkOut)
-      .toISOString()
-      .split("T")[0];
-    const { data } = await axios.get<HospitableCalendarResponse>(
-      `https://connect.hospitable.com/api/v1/listings/${property.hospitableListingId}/calendar`,
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
+): Promise<number | undefined> {
+  // Explicit return type
+  try {
+    if (property.originalListingPlatform === "Hospitable") {
+      const formattedCheckIn = new Date(params.checkIn)
+        .toISOString()
+        .split("T")[0];
+      const formattedCheckOut = new Date(params.checkOut)
+        .toISOString()
+        .split("T")[0];
+
+      console.log("formattedCheckIn", formattedCheckIn);
+      console.log("formattedCheckOut", formattedCheckOut);
+
+      const { data } = await axios.get<HospitableCalendarResponse>(
+        `https://connect.hospitable.com/api/v1/listings/${property.hospitableListingId}/calendar`,
+        {
+          headers: {
+            Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
+          },
+          params: {
+            start_date: formattedCheckIn,
+            end_date: formattedCheckOut,
+          },
         },
-        params: {
-          start_date: formattedCheckIn,
-          end_date: formattedCheckOut,
-        },
-      },
-    );
-    const averagePrice =
-      data.data.dates.reduce((acc, date) => {
+      );
+
+      const stayNights = data.data.dates.slice(0, -1);
+
+      if (stayNights.length === 0) {
+        return 0;
+      }
+
+      const totalPrice = stayNights.reduce((acc, date) => {
         return acc + date.price.amount;
-      }, 0) / data.data.dates.length;
-    return averagePrice;
-  } else if (property.originalListingPlatform === "Hostaway") {
-    const { data } = await axios.get<HostawayPriceResponse>(
-      `https://api.hostaway.com/v1/properties/${property.originalListingId}/calendar/priceDetails`,
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.HOSTAWAY_API_KEY}`,
+      }, 0);
+
+      const averagePrice = totalPrice / stayNights.length;
+
+      console.log(averagePrice);
+      return averagePrice;
+    } else if (property.originalListingPlatform === "Hostaway") {
+      const { data } = await axios.get<HostawayPriceResponse>(
+        `https://api.hostaway.com/v1/properties/${property.originalListingId}/calendar/priceDetails`,
+        {
+          headers: {
+            Authorization: `Bearer ${process.env.HOSTAWAY_API_KEY}`,
+          },
+          params,
         },
-        params,
-      },
-    );
-    const totalBasePriceBeforeFees = data.result.totalBasePriceBeforeFees;
-    return totalBasePriceBeforeFees;
+      );
+      const originalBasePrice = data.result.totalBasePriceBeforeFees;
+      return originalBasePrice;
+    }
+    // code for other options
+  } catch (error) {
+    console.error("Error fetching original price:", error);
+    return undefined; // Return undefined on error
   }
-  // code for other options
 }
 
 export interface SeparatedData {
@@ -949,7 +1007,7 @@ export async function updateTravelerandHostMarkup({
   await db
     .update(offers)
     .set({
-      travelerOfferedPriceBeforeFees: travelerPrice,
+      calculatedTravelerPrice: travelerPrice,
       hostPayout: hostPay,
     })
     .where(and(eq(offers.id, offerId), isNull(offers.acceptedAt)));
@@ -1058,9 +1116,9 @@ export function haversineDistance(
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(toRadians(lat1)) *
-      Math.cos(toRadians(lat2)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+    Math.cos(toRadians(lat2)) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c; // Distance in kilometers
 }

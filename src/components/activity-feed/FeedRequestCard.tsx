@@ -16,7 +16,7 @@ export default function FeedRequestCard({
   const fmtdDateRange = formatDateRange(request.checkIn, request.checkOut);
   const numNights = getNumNights(request.checkIn, request.checkOut);
   const fmtdPrice = formatCurrency(request.maxTotalPrice / numNights);
-  const userName = request.madeByGroup.owner.name ?? "";
+  const userName = request.madeByGroup.owner.firstName ?? "";
   const userImage = request.madeByGroup.owner.image ?? "";
 
   return (

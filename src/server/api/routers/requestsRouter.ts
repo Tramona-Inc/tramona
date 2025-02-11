@@ -173,7 +173,7 @@ export const requestsRouter = createTRPCRouter({
           offers: {
             columns: {
               id: true,
-              travelerOfferedPriceBeforeFees: true,
+              calculatedTravelerPrice: true,
               createdAt: true,
               checkIn: true,
               checkOut: true,
@@ -572,7 +572,7 @@ export async function handleRequestSubmission(
               percentOff <= applicableDiscount.percentOff
             ) {
               // create offer
-              const travelerOfferedPriceBeforeFees = getTravelerOfferedPrice({
+              const calculatedTravelerPrice = getTravelerOfferedPrice({
                 totalBasePriceBeforeFees: requestedNightlyPrice * numNights,
                 travelerMarkup: TRAVELER_MARKUP,
               });
@@ -582,7 +582,7 @@ export async function handleRequestSubmission(
                 propertyId: property.id,
                 totalBasePriceBeforeFees: input.maxTotalPrice,
                 hostPayout: getHostPayout(requestedNightlyPrice * numNights),
-                travelerOfferedPriceBeforeFees,
+                calculatedTravelerPrice,
                 checkIn: input.checkIn,
                 checkOut: input.checkOut,
               });
@@ -617,6 +617,7 @@ export async function handleRequestSubmission(
     await sendTextToHost({
       matchingProperties: propertiesWithoutAutoOffers,
       request: input,
+      tx,
     });
 
     return { requestId: request.id, madeByGroupId };

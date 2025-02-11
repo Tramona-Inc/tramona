@@ -44,7 +44,7 @@ export default function HostRequestToBookCard({
 }) {
   //remove the traveler markup and get num of nights
   const pricePerNight =
-    requestToBook.amountAfterTravelerMarkupAndBeforeFees /
+    requestToBook.calculatedTravelerPrice /
     TRAVELER_MARKUP /
     getNumNights(requestToBook.checkIn, requestToBook.checkOut);
 

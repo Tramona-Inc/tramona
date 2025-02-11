@@ -489,8 +489,23 @@ export const hostsRouter = createTRPCRouter({
           name: true,
         },
       });
-      console.log(unSyncedProperties);
-      return unSyncedProperties;
+      const propertiesWithNoBookItNow = await db.query.properties.findMany({
+        where: and(
+          eq(properties.hostTeamId, input.currentHostTeamId),
+          eq(properties.bookItNowEnabled, false),
+        ),
+      });
+      const propertiesWithNoMinPrice = await db.query.properties.findMany({
+        where: and(
+          eq(properties.hostTeamId, input.currentHostTeamId),
+          eq(properties.priceRestriction, 0),
+        ),
+      })
+      return {
+        unSyncedProperties,
+        propertiesWithNoBookItNow,
+        propertiesWithNoMinPrice,
+      };
     }),
 
 
