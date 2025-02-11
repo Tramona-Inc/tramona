@@ -439,6 +439,9 @@ export async function addProperty({
 }
 
 async function getRequestsInLast12HoursForHostTeam(tx: typeof db, hostTeamId: number) {
+  if (hostTeamId === 54) {
+    return [];
+  }
   const propertiesForTeam = await tx.query.properties.findMany({
     where: eq(properties.hostTeamId, hostTeamId),
   });
@@ -492,13 +495,19 @@ export async function sendTextToHost({
     acc[member.hostTeam.id]?.push(member.user);
     return acc;
   }, {} as Record<number, typeof eligibleMembers[0]['user'][]>);
+
+  console.log(membersByTeam, "membersByTeam");
   // Send messages to each eligible member per team
   await Promise.all(
     Object.entries(membersByTeam).map(async ([teamId, members]) => {
+      console.log(teamId, "teamId");
       const teamRequests = await getRequestsInLast12HoursForHostTeam(tx, Number(teamId));
+
+      console.log(teamRequests, "teamRequests");
 
       // const numberOfNights = getNumNights(request.checkIn, request.checkOut);
       await Promise.all(members.map(async (user) => {
+        console.log(user, "user");
         if (!user.phoneNumber) return;
 
         await sendText({
@@ -506,13 +515,17 @@ export async function sendTextToHost({
           content: `Tramona: You have ${teamRequests.length} new requests! View: ${env.NEXTAUTH_URL}/host/requests`
         });
 
+        console.log("sent text");
+
         // Update lastTextAt after sending
         await tx.update(users)
           .set({ lastTextAt: new Date() })
           .where(eq(users.id, user.id));
       }));
+      console.log("sent text to all members");
     })
   );
+  console.log("done");
 }
 
 export async function getRequestsForProperties(
@@ -545,7 +558,8 @@ export async function getRequestsForProperties(
     };
   }[] = [];
 
-  for (const property of hostProperties) {
+  console.log(hostProperties, "hostProperties");
+  await Promise.all(hostProperties.map(async (property) => {
     const requestIsNearProperty = sql`
       ST_DWithin(
         ST_Transform(ST_SetSRID(requests.lat_lng_point, 4326), 3857),
@@ -563,8 +577,9 @@ export async function getRequestsForProperties(
     //       ${property.priceRestriction} >= (requests.max_total_price / DATE_PART('day', requests.check_out::timestamp - requests.check_in::timestamp)) * 1.15
     //     )
     // `;
-    requestIsNearProperties.push(requestIsNearProperty);
+    // requestIsNearProperties.push(requestIsNearProperty);
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    console.log(twentyFourHoursAgo, "twentyFourHoursAgo");
 
     const requestsForProperty = await tx.query.requests.findMany({
       where: and(
@@ -648,9 +663,11 @@ export async function getRequestsForProperties(
         },
       },
     });
+    console.log(requestsForProperty, "requestsForProperty");
 
     // Store the matched requests along with the property
     for (const request of requestsForProperty) {
+      console.log(request, "request");
       //here we can  update each of the reque
       const traveler = request.madeByGroup.owner;
       const taxInfo = calculateTotalTax(property);
@@ -667,7 +684,7 @@ export async function getRequestsForProperties(
       });
     }
     // priceRestrictionsSQL.push(priceRestrictionSQL);
-  }
+  }));
   return propertyToRequestMap;
 }
 

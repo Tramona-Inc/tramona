@@ -16,7 +16,13 @@ export default function AttentionOverviewSection({
     );
 
   // Render null only after loading is complete
-  if (!isLoading && (!allNotifications || allNotifications.length === 0)) {
+  if (
+    !isLoading &&
+    (!allNotifications ||
+      (allNotifications.unSyncedProperties.length === 0 &&
+        allNotifications.propertiesWithNoBookItNow.length === 0 &&
+        allNotifications.propertiesWithNoMinPrice.length === 0))
+  ) {
     return null;
   }
 
@@ -25,23 +31,40 @@ export default function AttentionOverviewSection({
       {/* Notification Cards */}
       {!isLoading ? (
         <>
-          <NotificationCard
-            action="Sync Calendar for"
-            title={allNotifications[0]!.name}
-            href={`/host/calendar?propertyId=${allNotifications[0]!.id}`}
-            className="col-span-1 sm:col-span-1"
-            length={allNotifications.length}
-          />
-          <NotificationCard
-            action="Enable Book-it-now for"
-            title={allNotifications[0]!.name}
-            href={`/host/calendar?propertyId=${allNotifications[0]!.id}`}
-            className="col-span-1"
-            length={allNotifications.length}
-          />
+          {allNotifications?.unSyncedProperties.map((property) => (
+            <NotificationCard
+              key={property.id}
+              action="Sync Calendar for"
+              title={property.name}
+              href={`/host/calendar?propertyId=${property.id}`}
+              className="col-span-1 sm:col-span-1"
+              length={allNotifications.unSyncedProperties.length}
+            />
+          ))}
+          {allNotifications?.propertiesWithNoBookItNow.map((property) => (
+            <NotificationCard
+              key={property.id}
+              action="Enable Book-it-now for"
+              title={property.name}
+              href={`/host/calendar?propertyId=${property.id}`}
+              className="col-span-1"
+              length={allNotifications.propertiesWithNoBookItNow.length}
+            />
+          ))}
+          {allNotifications?.propertiesWithNoMinPrice.map((property) => (
+            <NotificationCard
+              key={property.id}
+              action="Set Minimum Price for"
+              title={property.name}
+              href={`/host/calendar?propertyId=${property.id}&tab=restrictions`}
+              className="col-span-1"
+              length={allNotifications.propertiesWithNoMinPrice.length}
+            />
+          ))}
         </>
       ) : (
         <>
+          <NotificationCardSkeleton className="col-span-full sm:col-span-1" />
           <NotificationCardSkeleton className="col-span-full sm:col-span-1" />
           <NotificationCardSkeleton className="col-span-full sm:col-span-1" />
         </>
