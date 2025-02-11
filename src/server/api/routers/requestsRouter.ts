@@ -2,6 +2,7 @@ import {
   coHostProcedure,
   createTRPCRouter,
   protectedProcedure,
+  publicProcedure,
   roleRestrictedProcedure,
 } from "@/server/api/trpc";
 import { db } from "@/server/db";
@@ -51,7 +52,7 @@ import { TRAVELER_MARKUP } from "@/utils/constants";
 import { differenceInDays } from "date-fns";
 
 export const requestsRouter = createTRPCRouter({
-  getById: protectedProcedure
+  getById: publicProcedure
     .input(requestSelectSchema.pick({ id: true }))
     .query(async ({ ctx, input }) => {
       const request = await ctx.db.query.requests.findFirst({
@@ -89,6 +90,8 @@ export const requestsRouter = createTRPCRouter({
         properties: propertiesForRequest,
       };
     }),
+
+
 
   getByIdForHost: protectedProcedure
     .input(z.object({ id: z.number(), hostTeamId: z.number() }))

@@ -18,9 +18,15 @@ export default function Referral() {
   ]);
 
   useEffect(() => {
+    const requestPreviewSource = sessionStorage.getItem("requestPreviewSource");
     if (!open) {
       try {
-        if (cohostInviteId) {
+        if (requestPreviewSource === "true") {
+          console.log("hi");
+          sessionStorage.removeItem("requestPreviewSource");
+          void router.push("/host-onboarding");
+        } else if (cohostInviteId) {
+          console.log("cohostInviteId");
           void router.push(`/cohost-invite/${cohostInviteId}`);
         } else {
           void router.push("/");

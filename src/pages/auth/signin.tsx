@@ -70,6 +70,7 @@ export default function Login() {
       }
 
       if (cohostInviteId) {
+        localStorage.removeItem("cohost-invite-storage");
         void router.push(`/cohost-invite/${cohostInviteId}`);
       } else {
         // Redirect to callback URL if sign-in is successful

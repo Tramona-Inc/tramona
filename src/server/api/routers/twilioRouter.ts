@@ -221,11 +221,20 @@ export const twilioRouter = createTRPCRouter({
         });
       }
 
-      const check = await service.verificationChecks
-      .create({
-        verificationSid: otpRecord.verificationSid,
-        code: code
-      });
+      let check;
+      try {
+        check = await service.verificationChecks
+        .create({
+          verificationSid: otpRecord.verificationSid,
+          code: code
+        });
+      } catch (error) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+          message: `Error verifying OTP for phone number ${phoneNumber}, ${error}`,
+        });
+      }
 
     if (check.status === 'approved') {
       await db
