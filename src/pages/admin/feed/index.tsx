@@ -8,6 +8,8 @@ import {
     DialogTitle,
     DialogDescription,
     DialogClose,
+    DialogTrigger,
+    DialogContent,
 } from "@/components/ui/dialog";
 import { data } from "node_modules/cheerio/dist/esm/api/attributes";
 
@@ -92,17 +94,21 @@ export default function Page() {
             </div>
 
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogTrigger>Open Dialog</DialogTrigger>
                 <DialogTitle>Host Teams</DialogTitle>
                 <DialogDescription>
-                    <ul>
-                        {hostTeams && hostTeams.length > 0 ? (
-                            hostTeams.map((team) => (
-                                <li key={team.id}>{team.name}</li>
-                            ))
-                        ) : (
-                            <li>No teams found for this host.</li>
-                        )}
-                    </ul>
+                    <DialogContent>
+                        <h2 className="text-lg font-semibold">Host Teams:</h2>
+                        <ul className="list-disc pl-5">
+                            {hostTeams && hostTeams.length > 0 ? (
+                                hostTeams.map((team) => (
+                                    <li key={team.id} className="py-1">{team.name}</li>
+                                ))
+                            ) : (
+                                <li>No teams found for this host.</li>
+                            )}
+                        </ul>
+                    </DialogContent>
                 </DialogDescription>
                 <DialogClose>Close</DialogClose>
             </Dialog>
