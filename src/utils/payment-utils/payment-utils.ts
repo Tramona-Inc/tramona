@@ -1,5 +1,6 @@
 import type { Property } from "@/server/db/schema";
 import type { AdditionalFeesOutput } from "@/components/checkout/types";
+import { TripCheckout } from "../../server/db/schema/tables/payments";
 
 type MyPartialProperty = Pick<
   Property,
@@ -68,3 +69,19 @@ export const getApplicableBookItNowAndRequestToBookDiscountPercentage = (
   const discountPercentage = property.bookItNowHostDiscountPercentOffInput;
   return discountPercentage;
 };
+
+// <------------------------------------------------------------------- BABY FUNCTIONS -------------------------------------------------------------------------->
+
+export function getServiceFee({
+  tripCheckout,
+}: {
+  tripCheckout: Pick<TripCheckout, "superhogFee" | "stripeTransactionFee">;
+}) {
+  const serviceFee =
+    tripCheckout.superhogFee + tripCheckout.stripeTransactionFee;
+  return serviceFee;
+}
+
+export function getStripeFee(amount: number) {
+  return Math.ceil(amount * 0.029 + 30);
+}

@@ -10,10 +10,8 @@ import type {
   PropertyPageData,
 } from "@/components/propertyPages/PropertyPage";
 import React, { useEffect, useState } from "react";
-import {
-  breakdownPaymentByOffer,
-  getServiceFee,
-} from "@/utils/payment-utils/paymentBreakdown";
+import { breakdownPaymentByOffer } from "@/utils/payment-utils/paymentBreakdown";
+import { getServiceFee } from "@/utils/payment-utils/payment-utils";
 import type { RequestToBookDetails } from "../propertyPages/sidebars/actionButtons/RequestToBookBtn";
 import { TRAVELER_MARKUP } from "@/utils/constants";
 import { getApplicableBookItNowAndRequestToBookDiscountPercentage } from "../../utils/payment-utils/payment-utils";
@@ -132,10 +130,10 @@ export default function PriceDetailsBeforeTax({
         priceDetails.nightlyPrice * priceDetails.numberOfNights,
       ),
     },
-    {
-      title: "Cleaning fee",
-      price: "Included",
-    },
+    // {
+    //   title: "Cleaning fee",
+    //   price: "Included",
+    // },
     {
       title: "Tramona service fee",
       price: formatCurrency(getServiceFee({ tripCheckout: brokeDownPayment })),

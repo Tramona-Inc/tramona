@@ -6,7 +6,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { type RouterOutputs } from "@/utils/api";
 import {
-  capitalizeFirstLetter,
   formatCurrency,
   formatDateRange,
   getNumNights,

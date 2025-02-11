@@ -92,7 +92,7 @@ const CityRequestSection: React.FC<CityRequestSectionProps> = ({
   }
   return (
     <div className="w-full">
-      {currentCityRequests && currentCityRequests.length > 0 ? (
+      {currentCityRequests.length > 0 ? (
         <div className="grid gap-4 md:grid-cols-2">
           {currentCityRequests.map((requestData) => (
             <div key={requestData.request.id} className="mb-4">

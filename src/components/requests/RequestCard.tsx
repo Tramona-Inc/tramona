@@ -193,8 +193,6 @@
 //   );
 // }
 
-
-
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -230,6 +228,7 @@ import { formatDistanceToNowStrict } from "date-fns";
 import { LinkInputPropertyCard } from "../_common/LinkInputPropertyCard";
 import SingleLocationMap from "../_common/GoogleMaps/SingleLocationMap";
 import { RequestCardOfferPreviews } from "./RequestCardOfferPreviews";
+import OfferPriceBreakdown from "../dashboard/host/requests/pricebreakdown/OfferPricebreakdown";
 
 export type GuestDashboardRequest = RouterOutputs["requests"]["getMyRequests"][
   | "activeRequests"
@@ -272,7 +271,9 @@ export default function RequestCard({
         open={open}
         onOpenChange={setOpen}
       />
-      <div className="flex md:flex-row flex-col"> {/* Modified to handle vertical and horizontal layouts  */}
+      <div className="flex flex-col md:flex-row">
+        {" "}
+        {/* Modified to handle vertical and horizontal layouts  */}
         <div className="flex-1 space-y-4 overflow-hidden p-4 pt-2">
           <div className="flex items-center gap-2">
             {type !== "host" && <RequestCardBadge request={request} />}
@@ -374,10 +375,11 @@ export default function RequestCard({
               <RequestCardOfferPreviews request={request} />
             )}
           </div>
+          {type === "host" && <OfferPriceBreakdown request={request} />}
           <CardFooter className="empty:hidden">{children}</CardFooter>
         </div>
         {type !== "host" && (
-          <div className="md:block hidden w-64 shrink-0 overflow-hidden rounded-lg bg-zinc-100">
+          <div className="hidden w-64 shrink-0 overflow-hidden rounded-lg bg-zinc-100 md:block">
             <SingleLocationMap
               lat={request.latLngPoint.y}
               lng={request.latLngPoint.x}

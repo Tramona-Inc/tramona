@@ -1,5 +1,8 @@
-import { SUPERHOG_FEE_CENTS_PER_NIGHT } from "../constants";
-import { TripCheckout } from "../../server/db/schema/tables/payments";
+import {
+  HOST_MARKUP,
+  SUPERHOG_FEE_CENTS_PER_NIGHT,
+  TRAVELER_MARKUP,
+} from "../constants";
 import { getTaxPercentage } from "@/utils/payment-utils/calculateTax";
 import { Offer, Property } from "@/server/db/schema";
 import type {
@@ -7,7 +10,12 @@ import type {
   PropertyAndTripParams,
 } from "@/components/checkout/types";
 import { getNumNights, removeTravelerMarkup } from "../utils";
-
+import {
+  getAdditionalFees,
+  getStripeFee,
+  getServiceFee,
+} from "./payment-utils";
+import type { HostDashboardRequest } from "@/components/requests/RequestCard";
 // -------------------------- 2 Different inputs for Breakdown payment  -------------------------
 // -----METHOD 1. USING OFFER
 export function breakdownPaymentByOffer( ///// USING OFFER
@@ -135,16 +143,41 @@ export function unwrapCalculatedTravelerPriceToCalculatedBasePrice({
   return calculatedBasePrice;
 }
 
-export function getServiceFee({
-  tripCheckout,
-}: {
-  tripCheckout: Pick<TripCheckout, "superhogFee" | "stripeTransactionFee">;
-}) {
-  const serviceFee =
-    tripCheckout.superhogFee + tripCheckout.stripeTransactionFee;
-  return serviceFee;
-}
+// <------------------------------------------------------------------- HOST CITY REQUEST/ OFFER -------------------------------------------------------------------------->
 
-export function getStripeFee(amount: number) {
-  return Math.ceil(amount * 0.029 + 30);
-}
+export const requestAmountToBaseOfferedAmount = (
+  maxTotalPrice: number, //comes from the request table
+): number => {
+  //we need to convert the travelerRequestAmount from the request form to the base amount which is what the host sees on the request/city page
+  const baseOfferedAmount = maxTotalPrice / TRAVELER_MARKUP;
+  console.log(baseOfferedAmount);
+
+  return baseOfferedAmount; //NOTE: Unlike Request-to-book/Bids the offer's traveler markup is also marking up the additional fees.
+};
+
+export const unwrapHostOfferAmount = ({
+  baseOfferedAmount,
+  property,
+  request,
+}: {
+  baseOfferedAmount: number;
+  property: Property;
+  request: HostDashboardRequest;
+}) => {
+  const additionalFees = getAdditionalFees({
+    property: property,
+    numOfNights: getNumNights(request.checkIn, request.checkOut),
+    numOfPets: undefined,
+    numOfGuests: request.numGuests,
+  });
+
+  const hostPayout =
+    ((baseOfferedAmount - additionalFees.totalAdditionalFees) * HOST_MARKUP) /
+    +additionalFees.totalAdditionalFees;
+  //in this function we are removing the Host fees ONLY FROM THE basePropertyPrice and not from the Additonal Fees
+
+  return {
+    hostPayout,
+    additionalFees,
+  };
+};
