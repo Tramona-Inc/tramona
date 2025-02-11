@@ -1,5 +1,7 @@
-import { type HostDashboardRequest } from "@/components/requests/RequestCard";
-import RequestCard from "@/components/requests/RequestCard";
+import RequestCard, {
+  type HostDashboardRequest,
+} from "@/components/requests/RequestCard";
+import HostRequestCard from "@/components/requests/RequestCard";
 import {
   RequestCardLoadingGrid,
   RequestCardLoadingSkeleton,
@@ -96,7 +98,7 @@ const CityRequestSection: React.FC<CityRequestSectionProps> = ({
         <div className="grid gap-4 md:grid-cols-2">
           {currentCityRequests.map((requestData) => (
             <div key={requestData.request.id} className="mb-4">
-              <RequestCard request={requestData.request} type="host">
+              <HostRequestCard request={requestData.request} type="host">
                 <Button
                   variant="secondary"
                   onClick={() => {
@@ -155,7 +157,7 @@ const CityRequestSection: React.FC<CityRequestSectionProps> = ({
                 >
                   Make an offer
                 </Button>
-              </RequestCard>
+              </HostRequestCard>
             </div>
           ))}
         </div>

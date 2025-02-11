@@ -7,16 +7,12 @@ import {
 } from "@/components/ui/accordion";
 import { HostDashboardRequest } from "@/components/requests/RequestCard";
 import { formatCurrency } from "@/utils/utils";
-import {
-  requestAmountToBaseOfferedAmount,
-  unwrapHostOfferAmount,
-} from "@/utils/payment-utils/paymentBreakdown";
+import { unwrapHostOfferAmount } from "@/utils/payment-utils/paymentBreakdown";
 
 function OfferPriceBreakdown({ request }: { request: HostDashboardRequest }) {
-  const unwrappedBreakdown = unwrapHostOfferAmountFromTravelerRequest(
-    { request, property: request}
-  );
-  const 
+  // const unwrappedBreakdown = unwrapHostOfferAmountFromTravelerRequest(
+  //   { request, property: request}
+  // );
 
   return (
     <Accordion type="single" collapsible className="">
@@ -28,7 +24,7 @@ function OfferPriceBreakdown({ request }: { request: HostDashboardRequest }) {
           <div className="mt-3 space-y-2 text-sm">
             <div className="flex justify-between">
               <span>Base Price</span>
-              <span>{formatCurrency(baseOfferPrice)}</span>
+              <span>{formatCurrency(2222)}</span>
             </div>
             <div className="flex justify-between">
               <span>Host payout</span>

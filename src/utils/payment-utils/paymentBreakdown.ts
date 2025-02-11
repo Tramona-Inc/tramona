@@ -146,7 +146,6 @@ export function unwrapCalculatedTravelerPriceToCalculatedBasePrice({
 // <------------------------------------------------------------------- HOST CITY REQUEST/ OFFER -------------------------------------------------------------------------->
 
 export const requestAmountToBaseOfferedAmount = (
-  // we don't really need this becuase we have unwrapHostOfferAmountFromTravelerRequest below
   maxTotalPrice: number, //comes from the request table
 ): number => {
   //we need to convert the travelerRequestAmount from the request form to the base amount which is what the host sees on the request/city page
