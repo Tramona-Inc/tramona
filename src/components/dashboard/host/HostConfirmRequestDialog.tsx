@@ -33,6 +33,7 @@ import {
   baseAmountToHostPayout,
   getTravelerOfferedPrice,
 } from "@/utils/payment-utils/paymentBreakdown";
+import OfferPriceBreakdown from "./requests/pricebreakdown/OfferPricebreakdown";
 
 export default function HostConfirmRequestDialog({
   open,
@@ -394,13 +395,12 @@ export default function HostConfirmRequestDialog({
                     )}
                     {editValue && (
                       <div className="text-sm text-gray-600">
-                        By offering this price, you will be paid{" "}
+                        By offering this price, your final payout will be{" "}
                         {formatCurrency(
                           baseAmountToHostPayout(
                             editNightlyPriceCents * numNights,
                           ),
-                        )}{" "}
-                        all-in
+                        )}
                       </div>
                     )}
                   </div>
@@ -410,9 +410,13 @@ export default function HostConfirmRequestDialog({
                       <div className="text-dark text-sm font-semibold">
                         Your offer: ${propertyPrices[property.id]} / night
                       </div>
-                      <div className="text-sm text-gray-600">
-                        Total payout: {formatCurrency(hostPayoutCents)}
+                      <div className="text-sm">
+                        Your total payout: {formatCurrency(hostPayoutCents)}
                       </div>
+                      <OfferPriceBreakdown
+                        request={request}
+                        property={property}
+                      />
                     </div>
                   </div>
                 )}

@@ -183,12 +183,19 @@ export const unwrapHostOfferAmountFromTravelerRequest = ({
     numOfGuests: request.numGuests,
   });
 
+  const hostServiceFee =
+    baseOfferedAmount -
+    (baseOfferedAmount - additionalFees.totalAdditionalFees) * HOST_MARKUP;
+
+  console.log(hostServiceFee);
+
   const hostPayout =
     (baseOfferedAmount - additionalFees.totalAdditionalFees) * HOST_MARKUP +
     additionalFees.totalAdditionalFees;
   //in this function we are removing the Host fees ONLY FROM THE basePropertyPrice and not from the Additonal Fees
   console.log(hostPayout);
   return {
+    hostServiceFee,
     baseOfferedAmount,
     hostPayout,
     additionalFees,

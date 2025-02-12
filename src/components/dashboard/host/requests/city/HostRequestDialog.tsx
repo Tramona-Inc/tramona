@@ -298,9 +298,11 @@ export default function HostRequestDialog({
                         />
 
                         {propertyPrices[property.id] && (
-                          <div className="text-sm text-gray-600">
-                            By offering this price, you will be paid{" "}
-                            {formatCurrency(hostPayoutCents)} all-in
+                          <div className="text-sm">
+                            By offering this price, your final payout will be{" "}
+                            <span className="font-bold">
+                              {formatCurrency(hostPayoutCents)}
+                            </span>
                           </div>
                         )}
                       </div>

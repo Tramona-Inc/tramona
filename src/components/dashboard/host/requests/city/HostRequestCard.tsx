@@ -139,10 +139,7 @@ export default function HostRequestCard({
       </div>
       <div className="">
         <div>
-          <p className="">
-            Looking for a stay in{" "}
-            <span className="font-semibold text-black">{request.location}</span>
-          </p>
+          <span className="font-semibold text-black">{request.location}</span>
           <p className="mt-1 text-sm">
             Your payout after fees:{" "}
             <span className="font-semibold text-black underline underline-offset-2">

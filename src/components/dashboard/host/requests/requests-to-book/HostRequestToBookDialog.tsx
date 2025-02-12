@@ -159,7 +159,7 @@ export default function HostRequestToBookDialog({
                   )}
                   {hasCancellationPolicy && (
                     <div className="text-sm text-gray-600">
-                      By accepting this price, you will be paid{" "}
+                      By accepting this price, your final payout will be{" "}
                       <span className="font-semibold text-black">
                         {formatCurrency(
                           baseAmountToHostPayout(
@@ -167,7 +167,6 @@ export default function HostRequestToBookDialog({
                           ),
                         )}{" "}
                       </span>
-                      all-in
                     </div>
                   )}
                 </div>
