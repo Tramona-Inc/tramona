@@ -299,15 +299,6 @@ export function getNumNights(from: Date | string, to: Date | string) {
   );
 }
 
-// export function getTravelerOfferedPrice({
-//   totalBasePriceBeforeFees,
-//   travelerMarkup, //we need this because can be traveler or direct listing markup
-// }: {
-//   totalBasePriceBeforeFees: number;
-//   travelerMarkup: number;
-// }) {
-//   return Math.ceil(totalBasePriceBeforeFees * travelerMarkup);
-// }
 
 export function removeTravelerMarkup(amountWithTravelerMarkup: number) {
   const basePrice = amountWithTravelerMarkup / TRAVELER_MARKUP;

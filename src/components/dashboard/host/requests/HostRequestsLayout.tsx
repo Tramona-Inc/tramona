@@ -171,7 +171,7 @@ const HostRequestsLayout = React.memo(function HostRequestsLayout({
 
   // <--------------------------------Render------------------>
   return (
-    <div className="mx-auto bg-white">
+    <div className="mx-auto flex bg-white">
       {showSidebar && (
         <ScrollArea className="sticky h-screen-minus-header-n-footer w-screen overflow-auto border-r px-4 py-8 lg:w-96">
           <div className="pb-4">

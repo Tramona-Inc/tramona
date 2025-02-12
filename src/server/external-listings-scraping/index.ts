@@ -1,9 +1,9 @@
 import { sortBy } from "lodash";
 import { db } from "../db";
 import { MinimalRequest, NewProperty, offers, properties } from "../db/schema";
-import { getNumNights, getTravelerOfferedPrice } from "@/utils/utils";
+import { getNumNights } from "@/utils/utils";
 import { DIRECT_LISTING_MARKUP, HOST_MARKUP } from "@/utils/constants";
-
+import { getTravelerOfferedPrice } from "@/utils/payment-utils/paymentBreakdown";
 // maximum discount we want to give, we don't want to go too low
 const MAX_DISCOUNT = 0.3;
 

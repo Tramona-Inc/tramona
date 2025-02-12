@@ -1,19 +1,17 @@
 import { Separator } from "../ui/separator";
-import {
-  formatCurrency,
-  getNumNights,
-  getTravelerOfferedPrice,
-} from "@/utils/utils";
+import { formatCurrency, getNumNights } from "@/utils/utils";
 import { plural } from "@/utils/utils";
 import type {
   OfferWithDetails,
   PropertyPageData,
 } from "@/components/propertyPages/PropertyPage";
 import React, { useEffect, useState } from "react";
-import { breakdownPaymentByOffer } from "@/utils/payment-utils/paymentBreakdown";
+import {
+  breakdownPaymentByOffer,
+  getTravelerOfferedPrice,
+} from "@/utils/payment-utils/paymentBreakdown";
 import { getServiceFee } from "@/utils/payment-utils/payment-utils";
 import type { RequestToBookDetails } from "../propertyPages/sidebars/actionButtons/RequestToBookBtn";
-import { TRAVELER_MARKUP } from "@/utils/constants";
 import { getApplicableBookItNowAndRequestToBookDiscountPercentage } from "../../utils/payment-utils/payment-utils";
 import { PriceBreakdownOutput } from "../checkout/types";
 
@@ -62,7 +60,6 @@ export default function PriceDetailsBeforeTax({
 
   const calculatedTravelerPrice = getTravelerOfferedPrice({
     totalBasePriceBeforeFees: priceWithApplicableDiscount ?? scrapedPrice,
-    travelerMarkup: TRAVELER_MARKUP,
   });
 
   useEffect(() => {

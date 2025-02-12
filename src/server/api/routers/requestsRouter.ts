@@ -38,8 +38,6 @@ import {
   getNumNights,
   formatDateRange,
   plural,
-  getHostPayout,
-  getTravelerOfferedPrice,
 } from "@/utils/utils";
 import { sendTextToHost, haversineDistance } from "@/server/server-utils";
 import { newLinkRequestSchema } from "@/utils/useSendUnsentRequests";
@@ -49,7 +47,10 @@ import { waitUntil } from "@vercel/functions";
 import { scrapeAirbnbPrice } from "@/server/scrapePrice";
 import { TRAVELER_MARKUP } from "@/utils/constants";
 import { differenceInDays } from "date-fns";
-
+import {
+  getTravelerOfferedPrice,
+  baseAmountToHostPayout,
+} from "@/utils/payment-utils/paymentBreakdown";
 export const requestsRouter = createTRPCRouter({
   getById: protectedProcedure
     .input(requestSelectSchema.pick({ id: true }))
@@ -574,14 +575,15 @@ export async function handleRequestSubmission(
               // create offer
               const calculatedTravelerPrice = getTravelerOfferedPrice({
                 totalBasePriceBeforeFees: requestedNightlyPrice * numNights,
-                travelerMarkup: TRAVELER_MARKUP,
               });
 
               await tx.insert(offers).values({
                 requestId: request.id,
                 propertyId: property.id,
                 totalBasePriceBeforeFees: input.maxTotalPrice,
-                hostPayout: getHostPayout(requestedNightlyPrice * numNights),
+                hostPayout: baseAmountToHostPayout(
+                  requestedNightlyPrice * numNights,
+                ),
                 calculatedTravelerPrice,
                 checkIn: input.checkIn,
                 checkOut: input.checkOut,
