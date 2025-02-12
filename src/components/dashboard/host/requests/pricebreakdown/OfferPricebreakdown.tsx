@@ -51,7 +51,7 @@ function OfferPriceBreakdown({
             </div>
             <div className="flex justify-between font-semibold">
               <span>Your payout</span>
-              <span>{formatCurrency(unwrappedBreakdown.hostPayout)}</span>
+              <span>{formatCurrency(unwrappedBreakdown.hostTotalPayout)}</span>
             </div>
           </div>
         </AccordionContent>

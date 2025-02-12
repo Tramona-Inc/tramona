@@ -169,14 +169,17 @@ export const baseAmountToHostPayout = (
 export const unwrapHostOfferAmountFromTravelerRequest = ({
   property,
   request,
+  hostInputOfferAmount,
 }: {
   property: MyPartialProperty;
   request: HostDashboardRequest;
+  hostInputOfferAmount?: number;
 }) => {
-  console.log(request.maxTotalPrice);
-  const baseOfferedAmount =
-    request.maxTotalPrice * (1 - REMOVE_TRAVELER_MARKUP);
-  console.log(baseOfferedAmount);
+  console.log("request.maxTotalPrice (Traveler Total):", request.maxTotalPrice);
+
+  const baseOfferedAmount = hostInputOfferAmount ?? request.maxTotalPrice; // Total amount traveler pays
+
+  console.log("baseOfferedAmount (Traveler Total):", baseOfferedAmount);
 
   const additionalFees = getAdditionalFees({
     property: property,
@@ -185,25 +188,44 @@ export const unwrapHostOfferAmountFromTravelerRequest = ({
     numOfGuests: request.numGuests,
   });
 
-  const hostServiceFee =
-    baseOfferedAmount -
-    (baseOfferedAmount - additionalFees.totalAdditionalFees) * HOST_MARKUP;
+  console.log(
+    "additionalFees.totalAdditionalFees:",
+    additionalFees.totalAdditionalFees,
+  );
 
-  console.log(hostServiceFee);
+  const priceBeforeFees =
+    baseOfferedAmount - additionalFees.totalAdditionalFees;
 
-  const hostPayout =
-    (baseOfferedAmount - additionalFees.totalAdditionalFees) * HOST_MARKUP +
-    additionalFees.totalAdditionalFees;
+  console.log("priceBeforeFees (Base Price Component):", priceBeforeFees);
+
+  const HOST_MARKUP = 0.975; // Host keeps 97.5%, Service fee is 2.5%
+  const serviceFeePercentage = 1 - HOST_MARKUP; // 0.025 or 2.5%
+
+  const hostServiceFee = Math.round(priceBeforeFees * serviceFeePercentage);
+
+  console.log("hostServiceFee (2.5% of Base Price Component):", hostServiceFee);
+
+  const hostBasePayout = priceBeforeFees * HOST_MARKUP;
+
+  console.log("hostBasePayout (Host Share of Base Price):", hostBasePayout);
+
+  const hostTotalPayout = hostBasePayout + additionalFees.totalAdditionalFees;
+
   //in this function we are removing the Host fees ONLY FROM THE basePropertyPrice and not from the Additonal Fees
-  console.log(hostPayout);
+  console.log(
+    "hostTotalPayout (Final Host Payout with Add. Fees):",
+    hostTotalPayout,
+  );
+
   return {
     hostServiceFee,
     baseOfferedAmount,
-    hostPayout,
+    hostBasePayout, // payout without the additional fees
+    hostTotalPayout, //total payout
     additionalFees,
+    priceBeforeFees, // Added for clarity, the base price before fees and markup
   };
 };
-
 export function getTravelerOfferedPrice({
   //for offeres only we are including additional fees in the mark up
   totalBasePriceBeforeFees,
