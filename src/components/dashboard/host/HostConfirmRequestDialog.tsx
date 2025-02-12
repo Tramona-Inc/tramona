@@ -28,7 +28,6 @@ import { api } from "@/utils/api";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
-import { errorToast } from "@/utils/toasts";
 import {
   baseAmountToHostPayout,
   getTravelerOfferedPrice,
@@ -56,6 +55,9 @@ export default function HostConfirmRequestDialog({
   setStep: (step: number) => void;
   selectedProperties: number[];
 }) {
+  //propertyPrices == base prices
+
+  console.log(propertyPrices);
   const { toast } = useToast();
   const [selectedPropertyToEdit, setSelectedPropertyToEdit] = useState<
     number | null
@@ -175,12 +177,16 @@ export default function HostConfirmRequestDialog({
       const results = await Promise.allSettled(
         propertiesWithTax.map(async (property) => {
           const totalBasePriceBeforeFees =
-            parseInt(propertyPrices[property.id] ?? "0") * 100 * numNights;
+            parseFloat(propertyPrices[property.id] ?? "0") * 100 * numNights;
+
+          console.log(propertyPrices[property.id] ?? "0");
+          console.log(totalBasePriceBeforeFees); // should be 92.5
+          console.log(baseAmountToHostPayout(totalBasePriceBeforeFees)); //should be 90.19
 
           return createOffersMutation.mutateAsync({
             requestId: request.id,
             propertyId: property.id,
-            totalBasePriceBeforeFees,
+            totalBasePriceBeforeFees: totalBasePriceBeforeFees,
             hostPayout: baseAmountToHostPayout(totalBasePriceBeforeFees),
             calculatedTravelerPrice: getTravelerOfferedPrice({
               totalBasePriceBeforeFees,
@@ -259,7 +265,7 @@ export default function HostConfirmRequestDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTitle></DialogTitle>
-      <DialogContent className="max-w-lg p-6">
+      <DialogContent className="max-w-2xl p-6">
         <DialogHeader>
           <h3 className="text-center text-lg font-bold">Respond</h3>
         </DialogHeader>

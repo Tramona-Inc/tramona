@@ -63,7 +63,7 @@ export default function HostRequestDialog({
   // const [selectedProperties, setSelectedProperties] =
   //   useState<number[]>(allPropertyIds);
 
-  const baseAmount = requestAmountToBaseOfferedAmount(request.maxTotalPrice);
+  const baseAmount = request.maxTotalPrice;
 
   const numNights = getNumNights(request.checkIn, request.checkOut);
 

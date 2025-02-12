@@ -34,14 +34,14 @@ const CityRequestSection: React.FC<CityRequestSectionProps> = ({
   const router = useRouter();
   const { query } = useRouter(); // Get query from router
 
+  const { currentHostTeamId } = useHostTeamStore();
+
   const { city, option } = useMemo(() => {
     return {
       city: query.city as string | undefined,
       option: query.option as string | undefined,
     };
   }, [query.city, query.option]);
-
-  const { currentHostTeamId } = useHostTeamStore();
 
   const [separatedData, setSeparatedData] = useState<SeparatedData | undefined>(
     undefined,
