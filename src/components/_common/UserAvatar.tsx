@@ -26,7 +26,6 @@ export default function UserAvatar({
   image?: string | null;
   onClick?: () => void;
 } & AvatarVariants) {
-  console.log(name, "name");
   if (!name && !email && !image) return <AnonymousAvatar size={size} />;
   const fallback = name ? getInitials(name) : (email?.[0] ?? "?");
   return (
