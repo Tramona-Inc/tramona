@@ -193,3 +193,12 @@ export const unwrapHostOfferAmountFromTravelerRequest = ({
     additionalFees,
   };
 };
+
+export function getTravelerOfferedPrice({
+  //for offeres only we are including additional fees in the mark up
+  totalBasePriceBeforeFees,
+}: {
+  totalBasePriceBeforeFees: number;
+}) {
+  return Math.ceil(totalBasePriceBeforeFees * TRAVELER_MARKUP);
+}

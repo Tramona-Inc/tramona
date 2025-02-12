@@ -12,9 +12,7 @@ import { type Property } from "@/server/db/schema/tables/properties";
 import {
   formatCurrency,
   formatDateRange,
-  getHostPayout,
   getNumNights,
-  getTravelerOfferedPrice,
   plural,
 } from "@/utils/utils";
 import { TRAVELER_MARKUP } from "@/utils/constants";
@@ -31,6 +29,10 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { errorToast } from "@/utils/toasts";
+import {
+  baseAmountToHostPayout,
+  getTravelerOfferedPrice,
+} from "@/utils/payment-utils/paymentBreakdown";
 
 export default function HostConfirmRequestDialog({
   open,
@@ -178,10 +180,9 @@ export default function HostConfirmRequestDialog({
             requestId: request.id,
             propertyId: property.id,
             totalBasePriceBeforeFees,
-            hostPayout: getHostPayout(totalBasePriceBeforeFees),
+            hostPayout: baseAmountToHostPayout(totalBasePriceBeforeFees),
             calculatedTravelerPrice: getTravelerOfferedPrice({
               totalBasePriceBeforeFees,
-              travelerMarkup: TRAVELER_MARKUP,
             }),
           });
         }),
@@ -303,7 +304,7 @@ export default function HostConfirmRequestDialog({
             const nightlyPriceCents =
               parseFloat(propertyPrices[property.id] ?? "0") * 100;
             const totalBasePriceBeforeFeesCents = nightlyPriceCents * numNights;
-            const hostPayoutCents = getHostPayout(
+            const hostPayoutCents = baseAmountToHostPayout(
               totalBasePriceBeforeFeesCents,
             );
 
@@ -395,7 +396,9 @@ export default function HostConfirmRequestDialog({
                       <div className="text-sm text-gray-600">
                         By offering this price, you will be paid{" "}
                         {formatCurrency(
-                          getHostPayout(editNightlyPriceCents * numNights),
+                          baseAmountToHostPayout(
+                            editNightlyPriceCents * numNights,
+                          ),
                         )}{" "}
                         all-in
                       </div>

@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { TravelerVerificationsDialog } from "@/components/requests/TravelerVerificationsDialog";
 import { Card, CardFooter } from "@/components/ui/card";
 import { formatCurrency, formatDateRange, plural } from "@/utils/utils";
-import { EllipsisIcon } from "lucide-react";
+import { CalendarIcon, Clock, EllipsisIcon, UsersIcon } from "lucide-react";
 import { ClockIcon } from "lucide-react";
 import { useState } from "react";
 import {
@@ -23,6 +23,26 @@ import { useChatWithUserForRequest } from "@/utils/messaging/useChatWithUserForR
 import { api } from "@/utils/api";
 import { toast } from "@/components/ui/use-toast";
 import { errorToast } from "@/utils/toasts";
+import { differenceInHours, differenceInMinutes } from "date-fns";
+import { Separator } from "@/components/ui/separator";
+
+function formatTimeLeft(createdAt: Date) {
+  // Add 24 hours to creation date to get expiration
+  const expirationTime = new Date(createdAt.getTime() + 24 * 60 * 60 * 1000);
+  const now = new Date();
+
+  const hoursLeft = differenceInHours(expirationTime, now);
+
+  if (hoursLeft <= 0) {
+    const minutesLeft = differenceInMinutes(expirationTime, now);
+    if (minutesLeft <= 0) {
+      return "Expired";
+    }
+    return `${minutesLeft} ${minutesLeft === 1 ? "minute" : "minutes"} left`;
+  }
+
+  return `${hoursLeft} ${hoursLeft === 1 ? "hour" : "hours"} left`;
+}
 
 export type HostDashboardRequest =
   RouterOutputs["properties"]["getHostPropertiesWithRequests"][number]["requests"][number]["request"];
@@ -39,7 +59,6 @@ export default function HostRequestCard({
   currentHostTeamId: number | null | undefined;
   children?: React.ReactNode;
 }) {
-  const [open, setOpen] = useState<boolean>(false);
   const baseAmount = requestAmountToBaseOfferedAmount(request.maxTotalPrice);
   const hostPayoutAmount = baseAmountToHostPayout(baseAmount);
   const fmtdDateRange = formatDateRange(request.checkIn, request.checkOut);
@@ -50,7 +69,7 @@ export default function HostRequestCard({
     api.requests.rejectRequest.useMutation();
 
   return (
-    <Card className="flex-1 space-y-4 overflow-hidden p-4 pt-2">
+    <Card className="flex-1 space-y-3 p-4 pt-2">
       <div className="flex w-full flex-row justify-between">
         <div className="flex items-center gap-2">
           <UserAvatar
@@ -121,24 +140,33 @@ export default function HostRequestCard({
       </div>
       <div className="">
         <div>
-          <p>
-            Requested{" "}
-            <span className="font-medium">{formatCurrency(baseAmount)}</span>
-            /night
+          <p className="">
+            Looking for a stay in{" "}
+            <span className="font-semibold text-black">{request.location}</span>
           </p>
-          <p className="text-xs text-muted-foreground">
+          <p className="mt-1 text-sm">
             Your payout after fees:{" "}
-            <span className="font-normal">
+            <span className="font-semibold text-black underline underline-offset-2">
               {formatCurrency(hostPayoutAmount)}
             </span>
           </p>
-          <p className="mt-3 flex items-center gap-2">
-            <span className="flex items-center gap-1">
-              <ClockIcon className="h-4 w-4" />
-              {fmtdDateRange}
-            </span>
-            ·<span className="flex items-center gap-1">{fmtdNumGuests}</span>
-          </p>
+          <div className="my-4 flex flex-col items-start gap-3 text-black sm:flex-row sm:items-center">
+            <Badge
+              variant="secondary"
+              className="flex items-center gap-2 px-3 py-1"
+            >
+              <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+              <span>{fmtdDateRange}</span>
+            </Badge>
+            <Separator orientation="vertical" className="hidden h-4 md:block" />
+            <Badge
+              variant="secondary"
+              className="flex items-center gap-2 px-3 py-1"
+            >
+              <UsersIcon className="h-4 w-4 text-muted-foreground" />
+              <span>{fmtdNumGuests}</span>
+            </Badge>
+          </div>
         </div>
 
         <div className="flex flex-wrap gap-1">
@@ -163,6 +191,11 @@ export default function HostRequestCard({
             <p>{request.note}</p>
           </div>
         )}
+      </div>
+      <div className="flex flex-row items-center gap-x-1 text-xs">
+        <ClockIcon className="size-3" />
+        Quick response recommended - Time remaining:{" "}
+        {formatTimeLeft(request.createdAt)}
       </div>
 
       {children && <CardFooter>{children}</CardFooter>}

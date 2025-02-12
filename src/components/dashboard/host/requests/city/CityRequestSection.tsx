@@ -87,7 +87,7 @@ const CityRequestSection: React.FC<CityRequestSectionProps> = ({
   return (
     <div className="w-full">
       {currentCityRequests.length > 0 ? (
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-y-4 overflow-x-hidden md:grid-cols-2 md:gap-4">
           {currentCityRequests.map((requestData) => (
             <div key={requestData.request.id} className="mb-4">
               <HostRequestCard

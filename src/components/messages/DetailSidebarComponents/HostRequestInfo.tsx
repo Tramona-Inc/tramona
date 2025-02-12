@@ -42,7 +42,10 @@ const HostRequestInfo: React.FC<HostRequestInfoProps> = ({
     <>
       {request &&
         properties && ( //if doesnt render look at this conditions
-          <HostRequestCard request={request}>
+          <HostRequestCard
+            request={request}
+            currentHostTeamId={currentHostTeamId}
+          >
             <Button
               variant="secondary"
               onClick={async () => {

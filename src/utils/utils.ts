@@ -152,7 +152,6 @@ export function formatDateRange(
   return `${formatDate(from, "EEE, MMM d, yyyy")} – ${formatDate(to, "EEE, MMM d, yyyy")}`;
 }
 
-
 /**
  * wrapper for formatDate for YYYY-MM-DD strings only that adds a T00:00
  * to the end of the date string to prevent the timezone from getting converted
@@ -300,19 +299,15 @@ export function getNumNights(from: Date | string, to: Date | string) {
   );
 }
 
-export function getHostPayout(totalBasePriceBeforeFees: number) {
-  return Math.floor(totalBasePriceBeforeFees * HOST_MARKUP);
-}
-
-export function getTravelerOfferedPrice({
-  totalBasePriceBeforeFees,
-  travelerMarkup, //we need this because can be traveler or direct listing markup
-}: {
-  totalBasePriceBeforeFees: number;
-  travelerMarkup: number;
-}) {
-  return Math.ceil(totalBasePriceBeforeFees * travelerMarkup);
-}
+// export function getTravelerOfferedPrice({
+//   totalBasePriceBeforeFees,
+//   travelerMarkup, //we need this because can be traveler or direct listing markup
+// }: {
+//   totalBasePriceBeforeFees: number;
+//   travelerMarkup: number;
+// }) {
+//   return Math.ceil(totalBasePriceBeforeFees * travelerMarkup);
+// }
 
 export function removeTravelerMarkup(amountWithTravelerMarkup: number) {
   const basePrice = amountWithTravelerMarkup / TRAVELER_MARKUP;

@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import {
   formatCurrency,
   formatDateRange,
-  getHostPayout,
   getNumNights,
   plural,
 } from "@/utils/utils";
@@ -20,6 +19,7 @@ import { api } from "@/utils/api";
 import Spinner from "@/components/_common/Spinner";
 import { toast } from "@/components/ui/use-toast";
 import { errorToast } from "@/utils/toasts";
+import { baseAmountToHostPayout } from "@/utils/payment-utils/paymentBreakdown";
 
 export default function HostRequestToBookDialog({
   open,
@@ -162,7 +162,9 @@ export default function HostRequestToBookDialog({
                       By accepting this price, you will be paid{" "}
                       <span className="font-semibold text-black">
                         {formatCurrency(
-                          getHostPayout(requestToBook.calculatedBasePrice),
+                          baseAmountToHostPayout(
+                            requestToBook.calculatedBasePrice,
+                          ),
                         )}{" "}
                       </span>
                       all-in
