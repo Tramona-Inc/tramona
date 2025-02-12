@@ -20,10 +20,11 @@ import {
 import { MoreVertical, MessageSquare, XCircle } from "lucide-react";
 import { TramonaLogo } from "@/components/_common/Layout/header/TramonaLogo";
 import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
 export type HostDashboardRequest =
   RouterOutputs["properties"]["getHostPropertiesWithRequests"][number]["requests"][number]["request"];
 
-export type HostPreviewRequest = RouterOutputs["requests"]["getById"];
+export type HostPreviewRequest = RouterOutputs["requests"]["getByIdForPreview"];
 
 export default function HostRequestCard({
   request,
@@ -31,6 +32,7 @@ export default function HostRequestCard({
   request: HostPreviewRequest;
 }) {
   const router = useRouter();
+  const session = useSession();
   const pricePerNight =
     request.maxTotalPrice / getNumNights(request.checkIn, request.checkOut);
   const fmtdPrice = formatCurrency(pricePerNight);
@@ -38,11 +40,20 @@ export default function HostRequestCard({
   const fmtdNumGuests = plural(request.numGuests, "guest");
 
   const handleUserClick = () => {
-    sessionStorage.setItem("requestPreviewSource", "true");
-    void router.push("/auth/signup");
+    if (session.data?.user) {
+      const user = session.data.user;
+      const isHost = user.role === "host";
+      if (isHost) {
+        void router.push("/host/requests");
+      } else {
+        console.log("hosting");
+        void router.push("/host-onboarding");
+      }
+    } else {
+      sessionStorage.setItem("requestPreviewSource", "true");
+      void router.push("/auth/signup");
+    }
   };
-
-  console.log(request.traveler?.firstName, "request.traveler.firstName");
 
   return (
     <div className="flex flex-col items-center">

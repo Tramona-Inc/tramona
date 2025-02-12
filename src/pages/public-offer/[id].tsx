@@ -42,7 +42,7 @@ const Page = ({
           description: metaDescription,
           images: [
             {
-              url: `${baseUrl}/api/og?cover=${firstImage}`,
+              url: `${baseUrl}/api/og/route?cover=${firstImage}&type=property`,
               width: 900,
               height: 800,
               alt: "Og Image Alt Second",

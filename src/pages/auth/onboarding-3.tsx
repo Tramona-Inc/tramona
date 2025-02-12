@@ -22,11 +22,9 @@ export default function Referral() {
     if (!open) {
       try {
         if (requestPreviewSource === "true") {
-          console.log("hi");
           sessionStorage.removeItem("requestPreviewSource");
           void router.push("/host-onboarding");
         } else if (cohostInviteId) {
-          console.log("cohostInviteId");
           void router.push(`/cohost-invite/${cohostInviteId}`);
         } else {
           void router.push("/");
