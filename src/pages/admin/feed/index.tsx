@@ -3,11 +3,7 @@ import Spinner from "@/components/_common/Spinner";
 import { api } from "@/utils/api";
 import Head from "next/head";
 import { useState } from "react";
-import {
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-} from "@/components/ui/dialog";
+import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog";
 
 interface Host {
   userId: string;
@@ -40,28 +36,51 @@ export default function Page() {
           </span>
 
           {hosts ? (
-            <table className="min-w-full mt-4">
+            <table className="mt-4 min-w-full">
               <thead>
                 <tr>
-                  <th className="border-b-2 border-gray-300 px-4 py-2 text-left">Name</th>
-                  <th className="border-b-2 border-gray-300 px-4 py-2 text-left">Email</th>
-                  <th className="border-b-2 border-gray-300 px-4 py-2 text-left">ID</th>
-                  <th className="border-b-2 border-gray-300 px-4 py-2 text-left">Phone Number</th>
-                  <th className="border-b-2 border-gray-300 px-4 py-2 text-left">Created At</th>
+                  <th className="border-b-2 border-gray-300 px-4 py-2 text-left">
+                    Name
+                  </th>
+                  <th className="border-b-2 border-gray-300 px-4 py-2 text-left">
+                    Email
+                  </th>
+                  <th className="border-b-2 border-gray-300 px-4 py-2 text-left">
+                    ID
+                  </th>
+                  <th className="border-b-2 border-gray-300 px-4 py-2 text-left">
+                    Phone Number
+                  </th>
+                  <th className="border-b-2 border-gray-300 px-4 py-2 text-left">
+                    Created At
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {hosts.map((host) => (
                   <tr key={host.userId}>
                     <td className="border-b border-gray-200 px-4 py-2">
-                      {host.firstName ?? host.lastName ?
-                        (host.firstName ? host.firstName : '') + (host.lastName ? ' ' + host.lastName : '') :
-                        'N/A'}
+                      {(host.firstName ?? host.lastName)
+                        ? (host.firstName ? host.firstName : "") +
+                          (host.lastName ? " " + host.lastName : "")
+                        : "N/A"}
                     </td>
-                    <td className="border-b border-gray-200 px-4 py-2">{host.email}</td>
-                    <td className="border-b border-gray-200 px-4 py-2">{host.userId}</td>
-                    <td className="border-b border-gray-200 px-4 py-2">{host.phoneNumber}</td>
-                    <td className="border-b border-gray-200 px-4 py-2">{host.becameHostAt ? new Date(host.becameHostAt).toISOString().split('T')[0] : 'N/A'}</td>
+                    <td className="border-b border-gray-200 px-4 py-2">
+                      {host.email}
+                    </td>
+                    <td className="border-b border-gray-200 px-4 py-2">
+                      {host.userId}
+                    </td>
+                    <td className="border-b border-gray-200 px-4 py-2">
+                      {host.phoneNumber}
+                    </td>
+                    <td className="border-b border-gray-200 px-4 py-2">
+                      {host.becameHostAt
+                        ? new Date(host.becameHostAt)
+                            .toISOString()
+                            .split("T")[0]
+                        : "N/A"}
+                    </td>
                     <td className="border-b border-gray-200 px-4 py-2">
                       <HostTeams hostUserId={host.userId} />
                     </td>
@@ -79,9 +98,9 @@ export default function Page() {
 }
 
 function HostTeams({ hostUserId }: { hostUserId: string }) {
-  const { data: hostTeams } = api.hostTeams.getHostTeamsByUserId.useQuery(
-    { userId: hostUserId }
-  );
+  const { data: hostTeams } = api.hostTeams.getHostTeamsByUserId.useQuery({
+    userId: hostUserId,
+  });
 
   return (
     <Dialog>
@@ -107,5 +126,5 @@ function HostTeams({ hostUserId }: { hostUserId: string }) {
         })()}
       </DialogContent>
     </Dialog>
-  )
+  );
 }
