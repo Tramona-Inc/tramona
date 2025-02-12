@@ -1,22 +1,18 @@
-import RequestCard, {
-  type HostDashboardRequest,
-} from "@/components/requests/RequestCard";
-import HostRequestCard from "@/components/requests/RequestCard";
+import { type HostDashboardRequest } from "@/components/requests/RequestCard";
+import HostRequestCard from "@/components/dashboard/host/requests/city/HostRequestCard";
 import {
   RequestCardLoadingGrid,
   RequestCardLoadingSkeleton,
 } from "../RequestCardLoadingGrid";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { errorToast } from "@/utils/toasts";
-import { useChatWithUserForRequest } from "@/utils/messaging/useChatWithUserForRequest";
+
 import { type Property } from "@/server/db/schema";
 import { api } from "@/utils/api";
 import { useMemo } from "react";
-import { Home } from "lucide-react";
 import { useRouter } from "next/router";
 import { separateByPriceAndAgeRestriction } from "@/utils/utils";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { type SeparatedData } from "@/server/server-utils";
 import { useHostTeamStore } from "@/utils/store/hostTeamStore"; // Import store
 import NoRequestEmptyState from "../NoRequestEmptyState";
@@ -34,8 +30,6 @@ const CityRequestSection: React.FC<CityRequestSectionProps> = ({
   setSelectedRequest,
   setProperties,
 }) => {
-  const chatWithUserForRequest = useChatWithUserForRequest();
-
   const { toast } = useToast();
   const router = useRouter();
   const { query } = useRouter(); // Get query from router
@@ -49,8 +43,6 @@ const CityRequestSection: React.FC<CityRequestSectionProps> = ({
 
   const { currentHostTeamId } = useHostTeamStore();
 
-  const { mutateAsync: rejectRequest } =
-    api.requests.rejectRequest.useMutation();
   const [separatedData, setSeparatedData] = useState<SeparatedData | undefined>(
     undefined,
   );
@@ -98,56 +90,10 @@ const CityRequestSection: React.FC<CityRequestSectionProps> = ({
         <div className="grid gap-4 md:grid-cols-2">
           {currentCityRequests.map((requestData) => (
             <div key={requestData.request.id} className="mb-4">
-              <HostRequestCard request={requestData.request} type="host">
-                <Button
-                  variant="secondary"
-                  onClick={() => {
-                    void chatWithUserForRequest(
-                      requestData.request.traveler.id,
-                      requestData.request.id,
-                    );
-                  }}
-                >
-                  Message User
-                </Button>
-                <Button
-                  variant="secondary"
-                  onClick={async () => {
-                    if (!currentHostTeamId) {
-                      toast({
-                        title: "Error",
-                        description:
-                          "Could not reject request. Host team ID is missing.",
-                        variant: "destructive",
-                      });
-                      return;
-                    }
-                    await rejectRequest({
-                      requestId: requestData.request.id,
-                      currentHostTeamId: Number(currentHostTeamId), // Ensure currentHostTeamId is a Number here as well
-                    })
-                      .then(() => {
-                        toast({
-                          title: "Successfully rejected request",
-                        });
-                      })
-                      .catch((error) => {
-                        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                        if (error.data?.code === "FORBIDDEN") {
-                          toast({
-                            title:
-                              "You do not have permission to create an offer.",
-                            description:
-                              "Please contact your team owner to request access.",
-                          });
-                        } else {
-                          errorToast();
-                        }
-                      });
-                  }}
-                >
-                  Reject
-                </Button>
+              <HostRequestCard
+                request={requestData.request}
+                currentHostTeamId={currentHostTeamId}
+              >
                 <Button
                   onClick={() => {
                     setDialogOpen(true);

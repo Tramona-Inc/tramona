@@ -6,13 +6,21 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { HostDashboardRequest } from "@/components/requests/RequestCard";
+import type { HostDashboardPropertyRequest } from "../city/HostRequestCard";
 import { formatCurrency } from "@/utils/utils";
-import { unwrapHostOfferAmount } from "@/utils/payment-utils/paymentBreakdown";
+import { unwrapHostOfferAmountFromTravelerRequest } from "@/utils/payment-utils/paymentBreakdown";
 
-function OfferPriceBreakdown({ request }: { request: HostDashboardRequest }) {
-  // const unwrappedBreakdown = unwrapHostOfferAmountFromTravelerRequest(
-  //   { request, property: request}
-  // );
+function OfferPriceBreakdown({
+  request,
+  property,
+}: {
+  request: HostDashboardRequest;
+  property: HostDashboardPropertyRequest;
+}) {
+  const unwrappedBreakdown = unwrapHostOfferAmountFromTravelerRequest({
+    request,
+    property: property,
+  });
 
   return (
     <Accordion type="single" collapsible className="">

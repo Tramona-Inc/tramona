@@ -4,11 +4,10 @@ import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 import { api } from "@/utils/api";
 import { toast } from "../../ui/use-toast";
 import { errorToast } from "@/utils/toasts";
-import RequestCard, { HostDashboardRequest } from "../../requests/RequestCard";
+import { HostDashboardRequest } from "../../requests/RequestCard";
 import { Property } from "@/server/db/schema";
-import HostRequestDialog from "../../dashboard/host/requests/city/HostRequestDialog";
-import { Request } from "@/server/db/schema";
 import type { RouterOutputs } from "@/utils/api";
+import HostRequestCard from "@/components/dashboard/host/requests/city/HostRequestCard";
 
 type PropertiesFromRequest =
   RouterOutputs["requests"]["getByIdForHost"]["properties"];
@@ -43,7 +42,7 @@ const HostRequestInfo: React.FC<HostRequestInfoProps> = ({
     <>
       {request &&
         properties && ( //if doesnt render look at this conditions
-          <RequestCard request={request} type="host">
+          <HostRequestCard request={request}>
             <Button
               variant="secondary"
               onClick={async () => {
@@ -83,7 +82,7 @@ const HostRequestInfo: React.FC<HostRequestInfoProps> = ({
             >
               Make an offer
             </Button>
-          </RequestCard>
+          </HostRequestCard>
         )}
     </>
   );

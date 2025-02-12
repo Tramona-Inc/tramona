@@ -27,13 +27,9 @@ import { useState } from "react";
 import WithdrawRequestDialog from "./WithdrawRequestDialog";
 
 import { Badge } from "../ui/badge";
-import UserAvatar from "../_common/UserAvatar";
-import { TravelerVerificationsDialog } from "./TravelerVerificationsDialog";
-import { formatDistanceToNowStrict } from "date-fns";
 import { LinkInputPropertyCard } from "../_common/LinkInputPropertyCard";
 import SingleLocationMap from "../_common/GoogleMaps/SingleLocationMap";
 import { RequestCardOfferPreviews } from "./RequestCardOfferPreviews";
-import OfferPriceBreakdown from "../dashboard/host/requests/pricebreakdown/OfferPricebreakdown";
 
 export type GuestDashboardRequest = RouterOutputs["requests"]["getMyRequests"][
   | "activeRequests"
@@ -53,7 +49,6 @@ export default function RequestCard({
 }: (
   | { type: "guest"; request: GuestDashboardRequest }
   | { type: "admin"; request: AdminDashboardRequst }
-  | { type: "host"; request: HostDashboardRequest }
 ) & {
   children?: React.ReactNode;
 }) {
@@ -63,8 +58,7 @@ export default function RequestCard({
   const fmtdDateRange = formatDateRange(request.checkIn, request.checkOut);
   const fmtdNumGuests = plural(request.numGuests, "guest");
 
-  const showAvatars =
-    (request.numGuests > 1 && type !== "host") || type === "admin";
+  const showAvatars = request.numGuests > 1 || type === "admin";
 
   const [open, setOpen] = useState(false);
 
@@ -81,28 +75,12 @@ export default function RequestCard({
         {/* Modified to handle vertical and horizontal layouts  */}
         <div className="flex-1 space-y-4 overflow-hidden p-4 pt-2">
           <div className="flex items-center gap-2">
-            {type !== "host" && <RequestCardBadge request={request} />}
+            <RequestCardBadge request={request} />
             {type === "guest" && request.linkInputProperty && (
               <Badge variant="pink">
                 <LinkIcon className="h-4 w-4" />
                 Airbnb Link
               </Badge>
-            )}
-            {type === "host" && (
-              <>
-                <UserAvatar
-                  size="sm"
-                  name={request.traveler.name}
-                  image={request.traveler.image}
-                />
-                <TravelerVerificationsDialog request={request} />
-                <p>·</p>
-                <p>
-                  {formatDistanceToNowStrict(request.createdAt, {
-                    addSuffix: true,
-                  })}
-                </p>
-              </>
             )}
             <div className="flex-1" />
             {showAvatars && (
@@ -128,14 +106,13 @@ export default function RequestCard({
             )}
           </div>
           <div className="space-y-1">
-            {type !== "host" && (
-              <div className="flex items-start gap-1">
-                <MapPinIcon className="shrink-0 text-primary" />
-                <h2 className="text-base font-bold text-primary md:text-lg">
-                  {request.location}
-                </h2>
-              </div>
-            )}
+            <div className="flex items-start gap-1">
+              <MapPinIcon className="shrink-0 text-primary" />
+              <h2 className="text-base font-bold text-primary md:text-lg">
+                {request.location}
+              </h2>
+            </div>
+
             <div>
               <p>
                 Requested <span className="font-medium">{fmtdPrice}</span>
@@ -171,7 +148,7 @@ export default function RequestCard({
                 <p>“{request.note}”</p>
               </div>
             )}
-            {type !== "host" && request.linkInputProperty && (
+            {request.linkInputProperty && (
               <LinkInputPropertyCard property={request.linkInputProperty} />
             )}
           </div>
@@ -180,18 +157,15 @@ export default function RequestCard({
               <RequestCardOfferPreviews request={request} />
             )}
           </div>
-          {type === "host" && <OfferPriceBreakdown request={request} />}
           <CardFooter className="empty:hidden">{children}</CardFooter>
         </div>
-        {type !== "host" && (
-          <div className="hidden w-64 shrink-0 overflow-hidden rounded-lg bg-zinc-100 md:block">
-            <SingleLocationMap
-              lat={request.latLngPoint.y}
-              lng={request.latLngPoint.x}
-              icon={true}
-            />
-          </div>
-        )}
+        <div className="hidden w-64 shrink-0 overflow-hidden rounded-lg bg-zinc-100 md:block">
+          <SingleLocationMap
+            lat={request.latLngPoint.y}
+            lng={request.latLngPoint.x}
+            icon={true}
+          />
+        </div>
       </div>
     </Card>
   );

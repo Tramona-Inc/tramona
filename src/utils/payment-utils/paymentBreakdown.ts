@@ -155,6 +155,16 @@ export const requestAmountToBaseOfferedAmount = (
   return baseOfferedAmount; //NOTE: Unlike Request-to-book/Bids the offer's traveler markup is also marking up the additional fees.
 };
 
+export const baseAmountToHostPayout = (
+  baseAmount: number, //comes from the request table
+): number => {
+  //we need to convert the travelerRequestAmount from the request form to the base amount which is what the host sees on the request/city page
+  const hostPayout = baseAmount * HOST_MARKUP;
+  console.log(hostPayout);
+
+  return hostPayout; //NOTE: Unlike Request-to-book/Bids the offer's traveler markup is also marking up the additional fees.
+};
+
 export const unwrapHostOfferAmountFromTravelerRequest = ({
   property,
   request,
