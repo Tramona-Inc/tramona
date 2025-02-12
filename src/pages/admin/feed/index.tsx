@@ -63,14 +63,32 @@ export default function Page() {
                                         <td className="border-b border-gray-200 px-4 py-2">{host.phoneNumber}</td>
                                         <td className="border-b border-gray-200 px-4 py-2">{host.becameHostAt ? new Date(host.becameHostAt).toISOString().split('T')[0] : 'N/A'}</td>
                                         <td className="border-b border-gray-200 px-4 py-2">
-                                            <Dialog>
+                                            < HostTeams hostUserId = {host.userId} />
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    ) : ( 
+                        <Spinner />
+                    )}
+                </div>
+            </div>
+        </DashboardLayout>
+    );
+} 
+
+function HostTeams( {hostUserId} : { hostUserId: string } ) {
+    const { data: hostTeams } = api.hostTeams.getHostTeamsByUserId.useQuery(
+        { userId: hostUserId! }
+    );
+
+
+    return (
+        <Dialog>
                                                 <DialogTrigger>View Details</DialogTrigger>
                                                 <DialogContent>
                                                     {(() => {
-                                                        const { data: hostTeams } = api.hostTeams.getHostTeamsByUserId.useQuery(
-                                                            { userId: host.userId! }
-                                                        );
-
                                                         return (
                                                             <>
                                                                 <h2 className="text-lg font-semibold">All Associated Teams:</h2>
@@ -90,16 +108,5 @@ export default function Page() {
                                                     })()}
                                                 </DialogContent>
                                             </Dialog>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    ) : (
-                        <Spinner />
-                    )}
-                </div>
-            </div>
-        </DashboardLayout>
-    );
-} 
+    )
+}
