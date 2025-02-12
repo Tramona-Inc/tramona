@@ -2,7 +2,7 @@ import type { Property } from "@/server/db/schema";
 import type { AdditionalFeesOutput } from "@/components/checkout/types";
 import { TripCheckout } from "../../server/db/schema/tables/payments";
 
-type MyPartialProperty = Pick<
+export type MyPartialProperty = Pick<
   Property,
   | "cleaningFeePerStay"
   | "petFeePerStay"

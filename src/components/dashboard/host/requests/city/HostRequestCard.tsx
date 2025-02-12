@@ -5,9 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { TravelerVerificationsDialog } from "@/components/requests/TravelerVerificationsDialog";
 import { Card, CardFooter } from "@/components/ui/card";
 import { formatCurrency, formatDateRange, plural } from "@/utils/utils";
-import { CalendarIcon, Clock, EllipsisIcon, UsersIcon } from "lucide-react";
+import { CalendarIcon, EllipsisIcon, UsersIcon } from "lucide-react";
 import { ClockIcon } from "lucide-react";
-import { useState } from "react";
 import {
   requestAmountToBaseOfferedAmount,
   baseAmountToHostPayout,

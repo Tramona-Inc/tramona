@@ -30,7 +30,7 @@ import {
   baseAmountToHostPayout,
 } from "@/utils/payment-utils/paymentBreakdown";
 
-import OfferPriceBreakdown from "../pricebreakdown/OfferPriceBreakdown";
+import OfferPriceBreakdown from "../pricebreakdown/OfferPricebreakdown";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -291,11 +291,11 @@ export default function HostRequestDialog({
                               % higher than the requested price.
                             </div>
                           )}
-                          <OfferPriceBreakdown
-                            request={request}
-                            property={property}
-                          />
                         </div>
+                        <OfferPriceBreakdown
+                          request={request}
+                          property={property}
+                        />
 
                         {propertyPrices[property.id] && (
                           <div className="text-sm text-gray-600">

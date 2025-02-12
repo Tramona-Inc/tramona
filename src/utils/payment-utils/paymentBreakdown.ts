@@ -16,6 +16,8 @@ import {
   getServiceFee,
 } from "./payment-utils";
 import type { HostDashboardRequest } from "@/components/requests/RequestCard";
+import type { MyPartialProperty } from "./payment-utils";
+
 // -------------------------- 2 Different inputs for Breakdown payment  -------------------------
 // -----METHOD 1. USING OFFER
 export function breakdownPaymentByOffer( ///// USING OFFER
@@ -160,7 +162,6 @@ export const baseAmountToHostPayout = (
 ): number => {
   //we need to convert the travelerRequestAmount from the request form to the base amount which is what the host sees on the request/city page
   const hostPayout = baseAmount * HOST_MARKUP;
-  console.log(hostPayout);
 
   return hostPayout; //NOTE: Unlike Request-to-book/Bids the offer's traveler markup is also marking up the additional fees.
 };
@@ -169,7 +170,7 @@ export const unwrapHostOfferAmountFromTravelerRequest = ({
   property,
   request,
 }: {
-  property: Property;
+  property: MyPartialProperty;
   request: HostDashboardRequest;
 }) => {
   const baseOfferedAmount = request.maxTotalPrice / TRAVELER_MARKUP;
@@ -183,10 +184,10 @@ export const unwrapHostOfferAmountFromTravelerRequest = ({
   });
 
   const hostPayout =
-    ((baseOfferedAmount - additionalFees.totalAdditionalFees) * HOST_MARKUP) /
-    +additionalFees.totalAdditionalFees;
+    (baseOfferedAmount - additionalFees.totalAdditionalFees) * HOST_MARKUP +
+    additionalFees.totalAdditionalFees;
   //in this function we are removing the Host fees ONLY FROM THE basePropertyPrice and not from the Additonal Fees
-
+  console.log(hostPayout);
   return {
     baseOfferedAmount,
     hostPayout,
