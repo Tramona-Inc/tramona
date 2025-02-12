@@ -126,38 +126,32 @@ export function formatDateRange(
   const sameMonth = isSameMonth(from, to);
   const sameYear = isSameYear(from, to);
 
-  if (withWeekday) {
-    if (!to || isSameDay(from, to)) {
-      return formatDate(from, "EEE, MMM d, yyyy");
-    }
-
-    if (sameYear) {
-      return `${formatDate(from, "EEE, MMM d")} – ${formatDate(
-        to,
-        isCurYear ? "EEE, MMM d" : "EEE, MMM d, yyyy",
-      )}`;
-    }
-  }
-
   if (!to || isSameDay(from, to)) {
-    const format = isCurYear ? "MMM d" : "MMM d, yyyy";
+    // Use full weekday name for single-day ranges
+    const format = isCurYear ? "EEEE, MMM d" : "EEEE, MMM d, yyyy";
     return formatDate(from, format);
   }
 
   if (sameMonth && sameYear) {
-    return `${formatDate(from, "MMM d")} – ${formatDate(
+    // Show full month name in both parts for clarity
+    return `${formatDate(from, "EEE, MMM d")} – ${formatDate(
       to,
-      isCurYear ? "d" : "d, yyyy",
+      isCurYear ? "EEE, MMM d" : "EEE, MMM d, yyyy",
     )}`;
   }
+
   if (sameYear) {
-    return `${formatDate(from, "MMM d")} – ${formatDate(
+    // Ensure month appears in both parts for cross-month ranges
+    return `${formatDate(from, "EEE, MMM d")} – ${formatDate(
       to,
-      isCurYear ? "MMM d" : "MMM d, yyyy",
+      isCurYear ? "EEE, MMM d" : "EEE, MMM d, yyyy",
     )}`;
   }
-  return `${formatDate(from, "MMM d, yyyy")} – ${formatDate(to, "MMM d, yyyy")}`;
+
+  // Cross-year ranges should always include the full date
+  return `${formatDate(from, "EEE, MMM d, yyyy")} – ${formatDate(to, "EEE, MMM d, yyyy")}`;
 }
+
 
 /**
  * wrapper for formatDate for YYYY-MM-DD strings only that adds a T00:00
