@@ -22,7 +22,7 @@ import {
 import * as cheerio from "cheerio";
 import { useSession } from "next-auth/react";
 import { api } from "./api";
-import { TRAVELER_MARKUP } from "./constants";
+import { TRAVELER_MARKUP, REMOVE_TRAVELER_MARKUP } from "./constants";
 import { InferQueryModel } from "@/server/db";
 import {
   TripWithDetails,
@@ -300,7 +300,7 @@ export function getNumNights(from: Date | string, to: Date | string) {
 }
 
 export function removeTravelerMarkup(amountWithTravelerMarkup: number) {
-  const basePrice = amountWithTravelerMarkup / TRAVELER_MARKUP;
+  const basePrice = amountWithTravelerMarkup * (1 - REMOVE_TRAVELER_MARKUP);
   return Math.round(basePrice);
 }
 

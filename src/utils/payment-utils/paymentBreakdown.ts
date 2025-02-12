@@ -1,5 +1,6 @@
 import {
   HOST_MARKUP,
+  REMOVE_TRAVELER_MARKUP,
   SUPERHOG_FEE_CENTS_PER_NIGHT,
   TRAVELER_MARKUP,
 } from "../constants";
@@ -151,7 +152,8 @@ export const requestAmountToBaseOfferedAmount = (
   maxTotalPrice: number, //comes from the request table
 ): number => {
   //we need to convert the travelerRequestAmount from the request form to the base amount which is what the host sees on the request/city page
-  const baseOfferedAmount = maxTotalPrice / TRAVELER_MARKUP;
+  console.log(maxTotalPrice);
+  const baseOfferedAmount = maxTotalPrice * (1 - REMOVE_TRAVELER_MARKUP);
   console.log(baseOfferedAmount);
 
   return baseOfferedAmount; //NOTE: Unlike Request-to-book/Bids the offer's traveler markup is also marking up the additional fees.
@@ -173,7 +175,9 @@ export const unwrapHostOfferAmountFromTravelerRequest = ({
   property: MyPartialProperty;
   request: HostDashboardRequest;
 }) => {
-  const baseOfferedAmount = request.maxTotalPrice / TRAVELER_MARKUP;
+  console.log(request.maxTotalPrice);
+  const baseOfferedAmount =
+    request.maxTotalPrice * (1 - REMOVE_TRAVELER_MARKUP);
   console.log(baseOfferedAmount);
 
   const additionalFees = getAdditionalFees({
