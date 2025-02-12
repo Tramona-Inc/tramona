@@ -22,7 +22,7 @@ import {
 import * as cheerio from "cheerio";
 import { useSession } from "next-auth/react";
 import { api } from "./api";
-import { HOST_MARKUP, TRAVELER_MARKUP } from "./constants";
+import { TRAVELER_MARKUP } from "./constants";
 import { InferQueryModel } from "@/server/db";
 import {
   TripWithDetails,
@@ -151,7 +151,6 @@ export function formatDateRange(
   // Cross-year ranges should always include the full date
   return `${formatDate(from, "EEE, MMM d, yyyy")} – ${formatDate(to, "EEE, MMM d, yyyy")}`;
 }
-
 
 /**
  * wrapper for formatDate for YYYY-MM-DD strings only that adds a T00:00
@@ -298,20 +297,6 @@ export function getNumNights(from: Date | string, to: Date | string) {
   return Math.round(
     (new Date(to).getTime() - new Date(from).getTime()) / (1000 * 60 * 60 * 24),
   );
-}
-
-export function getHostPayout(totalBasePriceBeforeFees: number) {
-  return Math.floor(totalBasePriceBeforeFees * HOST_MARKUP);
-}
-
-export function getTravelerOfferedPrice({
-  totalBasePriceBeforeFees,
-  travelerMarkup, //we need this because can be traveler or direct listing markup
-}: {
-  totalBasePriceBeforeFees: number;
-  travelerMarkup: number;
-}) {
-  return Math.ceil(totalBasePriceBeforeFees * travelerMarkup);
 }
 
 export function removeTravelerMarkup(amountWithTravelerMarkup: number) {

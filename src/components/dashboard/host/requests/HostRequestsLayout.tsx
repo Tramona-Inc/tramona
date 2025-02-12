@@ -171,9 +171,9 @@ const HostRequestsLayout = React.memo(function HostRequestsLayout({
 
   // <--------------------------------Render------------------>
   return (
-    <div className="flex bg-white">
+    <div className="mx-auto flex bg-white">
       {showSidebar && (
-        <ScrollArea className="sticky top-20 h-screen-minus-header-n-footer w-screen overflow-auto border-r px-4 py-8 lg:w-96">
+        <ScrollArea className="sticky h-screen-minus-header-n-footer w-screen overflow-auto border-r px-4 py-8 lg:w-96">
           <div className="pb-4">
             <h1 className="ml-3 text-3xl font-semibold">Requests</h1>
 
@@ -228,8 +228,8 @@ const HostRequestsLayout = React.memo(function HostRequestsLayout({
       )}
 
       {showChildren && (
-        <div className="flex-1 bg-[#fafafa] lg:block">
-          <div className="lg:mb-30 my-6 mb-24 px-4 lg:mt-8">
+        <div className="flex-1 bg-[#fafafa] px-4 lg:block">
+          <div className="lg:mb-30 mx-auto my-6 mb-24 lg:mt-8">
             <div className="my-6 lg:hidden">
               <Button
                 onClick={() =>
@@ -246,7 +246,7 @@ const HostRequestsLayout = React.memo(function HostRequestsLayout({
             <div className="mx-auto max-w-5xl">
               {activeTab === "city" && (
                 <div className="mb-4 flex flex-row justify-between">
-                  <div className="flex gap-2">
+                  <div className="flex flex-row gap-x-2">
                     <Button
                       variant={
                         selectedOption === "normal" ? "primary" : "white"
