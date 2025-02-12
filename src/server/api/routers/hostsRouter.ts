@@ -507,4 +507,31 @@ export const hostsRouter = createTRPCRouter({
         propertiesWithNoMinPrice,
       };
     }),
+
+
+  // edit this for admin/feed 
+  getAllHosts: protectedProcedure.query(async ({ ctx }) => {
+    const res = await ctx.db.query.hostProfiles.findMany({
+      columns: {
+        userId: true,
+        becameHostAt: true,
+      },
+      with: {
+        hostUser: {
+          columns: { name: true, firstName: true, lastName: true, email: true, phoneNumber: true, },
+        },
+      },
+      orderBy: (user, { desc }) => [desc(user.becameHostAt)],
+    });
+
+    // Flatten the hostUser
+    return res.map((item) => ({
+      ...item,
+      name: item.hostUser.name,
+      firstName: item.hostUser.firstName,
+      lastName: item.hostUser.lastName,
+      email: item.hostUser.email,
+      phoneNumber: item.hostUser.phoneNumber,
+    }));
+  }),
 });

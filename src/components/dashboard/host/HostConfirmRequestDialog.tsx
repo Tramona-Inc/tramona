@@ -12,9 +12,7 @@ import { type Property } from "@/server/db/schema/tables/properties";
 import {
   formatCurrency,
   formatDateRange,
-  getHostPayout,
   getNumNights,
-  getTravelerOfferedPrice,
   plural,
 } from "@/utils/utils";
 import { TRAVELER_MARKUP } from "@/utils/constants";
@@ -31,6 +29,11 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { errorToast } from "@/utils/toasts";
+import {
+  baseAmountToHostPayout,
+  getTravelerOfferedPrice,
+} from "@/utils/payment-utils/paymentBreakdown";
+import OfferPriceBreakdown from "./requests/pricebreakdown/OfferPricebreakdown";
 
 export default function HostConfirmRequestDialog({
   open,
@@ -178,10 +181,9 @@ export default function HostConfirmRequestDialog({
             requestId: request.id,
             propertyId: property.id,
             totalBasePriceBeforeFees,
-            hostPayout: getHostPayout(totalBasePriceBeforeFees),
+            hostPayout: baseAmountToHostPayout(totalBasePriceBeforeFees),
             calculatedTravelerPrice: getTravelerOfferedPrice({
               totalBasePriceBeforeFees,
-              travelerMarkup: TRAVELER_MARKUP,
             }),
           });
         }),
@@ -303,7 +305,7 @@ export default function HostConfirmRequestDialog({
             const nightlyPriceCents =
               parseFloat(propertyPrices[property.id] ?? "0") * 100;
             const totalBasePriceBeforeFeesCents = nightlyPriceCents * numNights;
-            const hostPayoutCents = getHostPayout(
+            const hostPayoutCents = baseAmountToHostPayout(
               totalBasePriceBeforeFeesCents,
             );
 
@@ -393,11 +395,12 @@ export default function HostConfirmRequestDialog({
                     )}
                     {editValue && (
                       <div className="text-sm text-gray-600">
-                        By offering this price, you will be paid{" "}
+                        By offering this price, your final payout will be{" "}
                         {formatCurrency(
-                          getHostPayout(editNightlyPriceCents * numNights),
-                        )}{" "}
-                        all-in
+                          baseAmountToHostPayout(
+                            editNightlyPriceCents * numNights,
+                          ),
+                        )}
                       </div>
                     )}
                   </div>
@@ -407,9 +410,13 @@ export default function HostConfirmRequestDialog({
                       <div className="text-dark text-sm font-semibold">
                         Your offer: ${propertyPrices[property.id]} / night
                       </div>
-                      <div className="text-sm text-gray-600">
-                        Total payout: {formatCurrency(hostPayoutCents)}
+                      <div className="text-sm">
+                        Your total payout: {formatCurrency(hostPayoutCents)}
                       </div>
+                      <OfferPriceBreakdown
+                        request={request}
+                        property={property}
+                      />
                     </div>
                   </div>
                 )}
