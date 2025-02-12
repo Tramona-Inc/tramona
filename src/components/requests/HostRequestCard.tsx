@@ -102,18 +102,26 @@ export default function HostRequestCard({
           </DropdownMenu>
         </div>
 
-        <div className="mt-4 space-y-2">
-          <p className="text-gray-500">Requested</p>
-          <p className="text-xl font-semibold">{fmtdPrice}/night</p>
-
-          <div className="mt-2 flex items-center gap-2 text-gray-600">
+        <div className="mb-4 flex flex-col">
+          <h2 className="text-xl font-semibold mb-4">{request.location}</h2>
+          <div className="flex flex-row">
+            <span className="text-gray-600 pr-4">Requested</span>
+            <div
+              className="mb-2 flex gap-1"
+              style={{ alignItems: "baseline" }}
+            >
+              <span className="text-2xl font-bold">{fmtdPrice}</span>
+              <span className="text-gray-600">/night</span>
+            </div>
+          </div>
+           <div className="mt-2 flex items-center gap-2 text-gray-600">
             <ClockIcon className="h-4 w-4 text-gray-400" />
             <span>
               {fmtdDateRange} · {fmtdNumGuests}
             </span>
           </div>
         </div>
-
+        
         <CardFooter className="mt-4">
           <Button
             className="w-full bg-green-600 text-white hover:bg-green-700"
