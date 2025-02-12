@@ -518,7 +518,7 @@ export const hostsRouter = createTRPCRouter({
       },
       with: {
         hostUser: {
-          columns: { name: true, email: true, phoneNumber: true, },
+          columns: { name: true, firstName: true, lastName: true, email: true, phoneNumber: true, },
         },
       },
       orderBy: (user, { desc }) => [desc(user.becameHostAt)],
@@ -528,6 +528,8 @@ export const hostsRouter = createTRPCRouter({
     return res.map((item) => ({
       ...item,
       name: item.hostUser.name,
+      firstName: item.hostUser.firstName,
+      lastName: item.hostUser.lastName,
       email: item.hostUser.email,
       phoneNumber: item.hostUser.phoneNumber,
     }));

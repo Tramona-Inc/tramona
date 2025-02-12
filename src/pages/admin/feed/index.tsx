@@ -5,13 +5,9 @@ import Head from "next/head";
 import { useState } from "react";
 import {
     Dialog,
-    DialogTitle,
-    DialogDescription,
-    DialogClose,
     DialogTrigger,
     DialogContent,
 } from "@/components/ui/dialog";
-import { data } from "node_modules/cheerio/dist/esm/api/attributes";
 
 interface Host {
     userId: string;
@@ -30,21 +26,6 @@ interface HostTeam {
 
 export default function Page() {
     const { data: hosts } = api.hosts.getAllHosts.useQuery();
-    const [selectedHost, setSelectedHost] = useState<string | null>(null);
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
-
-    // Use the query hook directly
-    const { data: hostTeams } = api.hostTeams.getHostTeamsByUserId.useQuery(
-        { userId: selectedHost! },
-        { enabled: !!selectedHost } // Only run query when we have a selectedHost
-    );
-
-
-    const handleViewDetails = (host: Host) => {
-        setSelectedHost(host.userId);
-        setIsDialogOpen(true);
-        console.log("Host teams: ", hostTeams, "isDialogOpen: ", isDialogOpen)
-    };
 
     return (
         <DashboardLayout>
@@ -64,6 +45,7 @@ export default function Page() {
                                 <tr>
                                     <th className="border-b-2 border-gray-300 px-4 py-2 text-left">Name</th>
                                     <th className="border-b-2 border-gray-300 px-4 py-2 text-left">Email</th>
+                                    <th className="border-b-2 border-gray-300 px-4 py-2 text-left">ID</th>
                                     <th className="border-b-2 border-gray-300 px-4 py-2 text-left">Phone Number</th>
                                     <th className="border-b-2 border-gray-300 px-4 py-2 text-left">Created At</th>
                                 </tr>
@@ -71,17 +53,43 @@ export default function Page() {
                             <tbody>
                                 {hosts.map((host) => (
                                     <tr key={host.userId}>
-                                        <td className="border-b border-gray-200 px-4 py-2">{host.name}</td>
-                                        <td className="border-b border-gray-200 px-4 py-2">{host.email}</td>
-                                        <td className="border-b border-gray-200 px-4 py-2">{host.phoneNumber}</td>
-                                        <td className="border-b border-gray-200 px-4 py-2">{host.becameHostAt ? new Date(host.becameHostAt).toLocaleDateString() : 'N/A'}</td>
                                         <td className="border-b border-gray-200 px-4 py-2">
-                                            <button
-                                                className="inline-block rounded bg-teal-900 px-4 py-2 font-bold text-white no-underline"
-                                                onClick={() => handleViewDetails(host)}
-                                            >
-                                                View Details
-                                            </button>
+                                            {host.firstName || host.lastName ?
+                                                (host.firstName ? host.firstName : '') + (host.lastName ? ' ' + host.lastName : '') :
+                                                'N/A'}
+                                        </td>
+                                        <td className="border-b border-gray-200 px-4 py-2">{host.email}</td>
+                                        <td className="border-b border-gray-200 px-4 py-2">{host.userId}</td>
+                                        <td className="border-b border-gray-200 px-4 py-2">{host.phoneNumber}</td>
+                                        <td className="border-b border-gray-200 px-4 py-2">{host.becameHostAt ? new Date(host.becameHostAt).toISOString().split('T')[0] : 'N/A'}</td>
+                                        <td className="border-b border-gray-200 px-4 py-2">
+                                            <Dialog>
+                                                <DialogTrigger>View Details</DialogTrigger>
+                                                <DialogContent>
+                                                    {(() => {
+                                                        const { data: hostTeams } = api.hostTeams.getHostTeamsByUserId.useQuery(
+                                                            { userId: host.userId! }
+                                                        );
+
+                                                        return (
+                                                            <>
+                                                                <h2 className="text-lg font-semibold">All Associated Teams:</h2>
+                                                                <ul className="list-disc pl-5">
+                                                                    {hostTeams && hostTeams.length > 0 ? (
+                                                                        hostTeams.map((team) => (
+                                                                            <li key={team.id} className="py-1">
+                                                                                {team.name} (ID: {team.id})
+                                                                            </li>
+                                                                        ))
+                                                                    ) : (
+                                                                        <li>No teams found for this host.</li>
+                                                                    )}
+                                                                </ul>
+                                                            </>
+                                                        );
+                                                    })()}
+                                                </DialogContent>
+                                            </Dialog>
                                         </td>
                                     </tr>
                                 ))}
@@ -92,26 +100,6 @@ export default function Page() {
                     )}
                 </div>
             </div>
-
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogTrigger>Open Dialog</DialogTrigger>
-                <DialogTitle>Host Teams</DialogTitle>
-                <DialogDescription>
-                    <DialogContent>
-                        <h2 className="text-lg font-semibold">Host Teams:</h2>
-                        <ul className="list-disc pl-5">
-                            {hostTeams && hostTeams.length > 0 ? (
-                                hostTeams.map((team) => (
-                                    <li key={team.id} className="py-1">{team.name}</li>
-                                ))
-                            ) : (
-                                <li>No teams found for this host.</li>
-                            )}
-                        </ul>
-                    </DialogContent>
-                </DialogDescription>
-                <DialogClose>Close</DialogClose>
-            </Dialog>
         </DashboardLayout>
     );
 } 
