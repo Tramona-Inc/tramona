@@ -152,9 +152,7 @@ export const requestAmountToBaseOfferedAmount = (
   maxTotalPrice: number, //comes from the request table
 ): number => {
   //we need to convert the travelerRequestAmount from the request form to the base amount which is what the host sees on the request/city page
-  console.log(maxTotalPrice);
   const baseOfferedAmount = maxTotalPrice * (1 - REMOVE_TRAVELER_MARKUP);
-  console.log(baseOfferedAmount);
 
   return baseOfferedAmount; //NOTE: Unlike Request-to-book/Bids the offer's traveler markup is also marking up the additional fees.
 };
@@ -164,7 +162,6 @@ export const baseAmountToHostPayout = (
 ): number => {
   //we need to convert the travelerRequestAmount from the request form to the base amount which is what the host sees on the request/city page
   const hostPayout = baseAmount * HOST_MARKUP;
-
   return hostPayout; //NOTE: Unlike Request-to-book/Bids the offer's traveler markup is also marking up the additional fees.
 };
 
