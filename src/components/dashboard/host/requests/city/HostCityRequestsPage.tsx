@@ -67,6 +67,12 @@ export default function HostCityRequestsPage() {
           setSelectedOffer={setSelectedOffer}
           city={city}
         />
+      ) : option === "outsidePriceRestriction" ? (
+        <CityRequestSection
+          setDialogOpen={setDialogOpen}
+          setSelectedRequest={setSelectedRequest}
+          setProperties={setProperties}
+        />
       ) : (
         <NoRequestEmptyState />
       )}

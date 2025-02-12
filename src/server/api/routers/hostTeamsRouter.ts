@@ -757,6 +757,26 @@ export const hostTeamsRouter = createTRPCRouter({
       );
   }),
 
+  getHostTeamsByUserId: protectedProcedure
+    .input(z.object({ userId: z.string() })) // Expecting userId as input
+    .query(async ({ input }) => {
+      const teams = await db.query.hostTeamMembers.findMany({
+        where: eq(hostTeamMembers.userId, input.userId),
+        with: {
+          hostTeam: {
+            columns: {
+              id: true,
+              name: true,
+              ownerId: true,
+              createdAt: true,
+            },
+          },
+        },
+      });
+
+      return teams.map((member) => member.hostTeam); // Return only the host team details
+    }),
+
   updateTeamName: coHostProcedure(
     "update_team_name",
     z.object({

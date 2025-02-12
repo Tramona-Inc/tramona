@@ -1,4 +1,4 @@
-import { Offer, Property, REFERRAL_CODE_LENGTH } from "@/server/db/schema";
+import { Offer, REFERRAL_CODE_LENGTH } from "@/server/db/schema";
 import { RequestsPageOfferData, SeparatedData } from "@/server/server-utils";
 import { useWindowSize } from "@uidotdev/usehooks";
 import { clsx, type ClassValue } from "clsx";
@@ -538,24 +538,39 @@ export function separateByPriceAndAgeRestriction(
         : null;
 
       const normalProperties = requestData.properties.filter((property) => {
-        if (property.city === "Seattle, WA, US") {
-          console.log(property.priceRestriction, nightlyPrice);
+        if (
+          property.ageRestriction === null ||
+          (travelerAge && travelerAge >= property.ageRestriction)
+        ) {
+          if (
+            property.priceRestriction === null ||
+            property.priceRestriction <= nightlyPrice
+          ) {
+            return true;
+          } else {
+            return false;
+          }
+        } else {
+          return false;
         }
-        return (
-          (property.priceRestriction == null ||
-            property.priceRestriction <= nightlyPrice) &&
-          (property.ageRestriction == null ||
-            (travelerAge !== null && travelerAge >= property.ageRestriction))
-        );
       });
 
-      const outsideProperties = requestData.properties.filter(
-        (property) =>
-          property.priceRestriction != null &&
-          property.priceRestriction >= nightlyPrice * 1.15 &&
-          property.ageRestriction != null &&
-          (travelerAge === null || travelerAge < property.ageRestriction),
-      );
+      const outsideProperties = requestData.properties.filter((property) => {
+        if (
+          travelerAge &&
+          property.ageRestriction &&
+          travelerAge < property.ageRestriction
+        ) {
+          return true;
+        } else if (
+          property.priceRestriction &&
+          property.priceRestriction > nightlyPrice
+        ) {
+          return true;
+        } else {
+          return false;
+        }
+      });
 
       return {
         normal:
