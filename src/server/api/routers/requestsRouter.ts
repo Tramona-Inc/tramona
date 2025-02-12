@@ -2,6 +2,7 @@ import {
   coHostProcedure,
   createTRPCRouter,
   protectedProcedure,
+  publicProcedure,
   roleRestrictedProcedure,
 } from "@/server/api/trpc";
 import { db } from "@/server/db";
@@ -88,6 +89,40 @@ export const requestsRouter = createTRPCRouter({
         ...request,
         traveler,
         properties: propertiesForRequest,
+      };
+    }),
+
+  getByIdForPreview: publicProcedure
+    .input(z.object({ id: z.number() }))
+    .query(async ({ ctx, input }) => {
+      const request = await ctx.db.query.requests.findFirst({
+        where: eq(requests.id, input.id),
+        with: {
+          madeByGroup: { columns: { ownerId: true } },
+        },
+      });
+
+      if (!request) {
+        throw new Error("Request not found");
+      }
+
+      const traveler = await ctx.db.query.users.findFirst({
+        where: eq(users.id, request.madeByGroup.ownerId),
+        columns: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          name: true,
+          image: true,
+          location: true,
+          about: true,
+          dateOfBirth: true,
+        },
+      });
+
+      return {
+        ...request,
+        traveler,
       };
     }),
 
