@@ -2,6 +2,8 @@ import { ImageResponse } from "@vercel/og";
 import { type RouterOutputs } from "@/utils/api";
 import { CalendarIcon } from "lucide-react";
 import TramonaIcon from "@/components/_icons/TramonaIcon";
+import bgImage from "@/../public/assets/images/anonymous-profile.jpg";
+
 export const runtime = "edge";
 
 type RequestPreview = RouterOutputs["requests"]["getByIdForPreview"];
@@ -113,7 +115,7 @@ export default async function handler(req: NextRequest) {
                 <div tw="flex items-center justify-between mb-4">
                   <div tw="flex items-center">
                     <img
-                      src={requestData.traveler?.image ?? "/placeholder.svg"}
+                      src={requestData.traveler?.image ?? baseUrl + bgImage.src}
                       tw="w-10 h-10 rounded-full mr-3"
                       style={{ objectFit: "cover" }}
                       alt="neals face"

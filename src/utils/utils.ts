@@ -20,9 +20,7 @@ import {
   HostRequestsPageOfferData,
 } from "@/server/api/routers/propertiesRouter";
 import * as cheerio from "cheerio";
-import { useSession } from "next-auth/react";
-import { api } from "./api";
-import { TRAVELER_MARKUP } from "./constants";
+import { REMOVE_TRAVELER_MARKUP } from "./constants";
 import { InferQueryModel } from "@/server/db";
 import {
   TripWithDetails,
@@ -300,7 +298,7 @@ export function getNumNights(from: Date | string, to: Date | string) {
 }
 
 export function removeTravelerMarkup(amountWithTravelerMarkup: number) {
-  const basePrice = amountWithTravelerMarkup / TRAVELER_MARKUP;
+  const basePrice = amountWithTravelerMarkup * (1 - REMOVE_TRAVELER_MARKUP);
   return Math.round(basePrice);
 }
 
@@ -793,17 +791,7 @@ export function logAndFilterSettledResults<T>(
     .map((r) => r.value);
 }
 
-export function useUpdateUser() {
-  const { mutateAsync: updateProfile } = api.users.updateProfile.useMutation();
-  const { update } = useSession();
 
-  return {
-    updateUser: async (updates: Parameters<typeof updateProfile>[0]) => {
-      await updateProfile(updates);
-      await update();
-    },
-  };
-}
 
 export const capitalizeFirstLetter = (string: string | null): string => {
   if (!string) return "";

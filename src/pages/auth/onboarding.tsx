@@ -26,7 +26,8 @@ import { useForm } from "react-hook-form";
 import { type Country, isValidPhoneNumber } from "react-phone-number-input";
 import { z } from "zod";
 import { zodString } from "@/utils/zod-utils";
-import { cn, useUpdateUser } from "@/utils/utils";
+import { cn } from "@/utils/utils";
+import { useUpdateUser } from "@/utils/custom-hooks/useUpdateUser";
 import { ButtonSpinner } from "@/components/ui/button-spinner";
 // feel free to refactor this lol
 
