@@ -14,7 +14,7 @@ import { api } from "@/utils/api";
 import { sub } from "date-fns";
 import { ArrowUp } from "lucide-react";
 import { Button } from "../ui/button";
-import { useUpdateUser } from "@/utils/utils";
+import { useUpdateUser } from "@/utils/custom-hooks/useUpdateUser";
 import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 const formSchema = z.object({
   message: z.string().refine((data) => data.trim() !== ""),
