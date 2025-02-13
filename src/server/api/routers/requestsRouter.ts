@@ -122,11 +122,6 @@ export const requestsRouter = createTRPCRouter({
         },
       });
 
-      if (traveler?.image === null) {
-        const userData = await createUserNameAndPic(1);
-        traveler.image = userData[0]?.picture ?? "";
-      }
-
       return {
         ...request,
         traveler,
