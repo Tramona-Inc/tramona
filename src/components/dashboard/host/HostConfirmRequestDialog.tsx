@@ -34,6 +34,7 @@ import {
   unwrapHostOfferAmountFromTravelerRequest,
 } from "@/utils/payment-utils/paymentBreakdown";
 import OfferPriceBreakdown from "./requests/pricebreakdown/OfferPricebreakdown";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function HostConfirmRequestDialog({
   open,
@@ -328,9 +329,9 @@ export default function HostConfirmRequestDialog({
             return (
               <div
                 key={property.id}
-                className="flex flex-col rounded-md border bg-white p-4"
+                className="flex flex-col rounded-md border bg-white px-3 py-4"
               >
-                <div className="mb-4 flex items-center justify-between">
+                <div className="mx-auto mb-4 flex w-11/12 items-center justify-between">
                   <div className="flex items-center gap-4">
                     <Image
                       src={property.imageUrls[0] ?? ""}
@@ -419,26 +420,36 @@ export default function HostConfirmRequestDialog({
                     )}
                   </div>
                 ) : (
-                  <div className="flex flex-col space-y-2">
-                    <div className="rounded-md bg-gray-100 p-2">
-                      <div className="text-dark text-sm font-semibold">
-                        Your offer:{" "}
-                        {formatCurrency(
-                          unwrappedOfferBreakdown.baseOfferedAmount,
-                        )}{" "}
-                        <span className="text-xs">{numNights} x night </span>
+                  <Card className="border shadow-none">
+                    <CardContent className="flex w-full flex-col">
+                      <div className="flex w-full flex-row items-center justify-between">
+                        <div className="flex flex-row items-center gap-x-1">
+                          <p className="font-semibold">Your Offer{"  "}</p>
+                          <span className="text-xs text-muted-foreground">
+                            ({numNights} nights){" "}
+                          </span>
+                        </div>
+                        <span className="">
+                          {formatCurrency(
+                            unwrappedOfferBreakdown.baseOfferedAmount,
+                          )}
+                        </span>
                       </div>
-                      <div className="text-sm">
-                        Your total payout:{" "}
-                        {formatCurrency(
-                          unwrappedOfferBreakdown.hostTotalPayout,
-                        )}
+                      <div className="flex w-full flex-row items-center justify-between font-semibold tracking-tight">
+                        Your Total Payout:{" "}
+                        <span className="font-bold">
+                          {formatCurrency(
+                            unwrappedOfferBreakdown.hostTotalPayout,
+                          )}
+                        </span>
                       </div>
-                      <OfferPriceBreakdown
-                        unwrappedOfferBreakdown={unwrappedOfferBreakdown}
-                      />
-                    </div>
-                  </div>
+                      <div className="mt-2">
+                        <OfferPriceBreakdown
+                          unwrappedOfferBreakdown={unwrappedOfferBreakdown}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
                 )}
               </div>
             );
