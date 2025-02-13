@@ -18,14 +18,14 @@ const config: DefaultSeoProps = {
     description:
       "Tramona is a platform that connects travelers with hosts to create unique deals for short-term stays.",
     siteName: "Tramona",
-    images: [
-      {
-        url: "https://www.tramona.com/assets/images/landing-page/main.png", // Fallback photo for shared links
-        width: 800,
-        height: 600,
-        alt: "Tramona",
-      },
-    ],
+    // images: [
+    //   {
+    //     url: "https://www.tramona.com/assets/images/landing-page/main.png", // Fallback photo for shared links
+    //     width: 800,
+    //     height: 600,
+    //     alt: "Tramona",
+    //   },
+    // ],
   },
   twitter: {
     handle: "@handle",
