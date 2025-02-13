@@ -88,7 +88,7 @@ export default function HostCalculator() {
   };
 
   return (
-    <Card className="w-full max-w-xl overflow-hidden rounded-lg bg-white shadow-lg @container">
+    <Card className="mx-auto my-4 w-full max-w-2xl overflow-hidden rounded-lg border bg-white px-7 shadow-md @container">
       <CardHeader>
         <CardTitle className="mt-12 text-center text-[#004236]">
           How much more could you be making annually?
