@@ -224,10 +224,10 @@ export const twilioRouter = createTRPCRouter({
       let check;
       try {
         check = await service.verificationChecks
-        .create({
-          verificationSid: otpRecord.verificationSid,
-          code: code
-        });
+          .create({
+            verificationSid: otpRecord.verificationSid,
+            code: code
+          });
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -236,13 +236,12 @@ export const twilioRouter = createTRPCRouter({
         });
       }
 
-    if (check.status === 'approved') {
-      await db
-        .update(phoneNumberOTPs)
-        .set({ usedAt: new Date() })
-        .where(eq(phoneNumberOTPs.id, otpRecord.id));
-    }
+      if (check.status === 'approved') {
+        await db
+          .delete(phoneNumberOTPs)
+          .where(eq(phoneNumberOTPs.id, otpRecord.id));
+      }
 
-    return { status: check.status };
+      return { status: check.status };
     }),
 });

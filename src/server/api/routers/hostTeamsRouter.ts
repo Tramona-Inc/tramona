@@ -543,6 +543,7 @@ export const hostTeamsRouter = createTRPCRouter({
       });
 
       if (!invite) {
+        localStorage.removeItem("cohost-invite-storage");
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Invite not found or not intended for this user",
