@@ -153,6 +153,7 @@
     "resend": "^3.1.0",
     "shadcn": "^2.1.6",
     "sharp": "^0.33.4",
+    "stream-json": "^1.9.1",
     "stripe": "^16.2.0",
     "supabase": "^1.183.5",
     "superjson": "^2.2.1",
