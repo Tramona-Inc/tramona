@@ -7,15 +7,12 @@ import {
 import { getTaxPercentage } from "@/utils/payment-utils/calculateTax";
 import { Offer, Property } from "@/server/db/schema";
 import type {
+  UnwrapHostOfferAmountFromTravelerRequestOutput,
   PriceBreakdownOutput,
   PropertyAndTripParams,
 } from "@/components/checkout/types";
 import { getNumNights, removeTravelerMarkup } from "../utils";
-import {
-  getAdditionalFees,
-  getStripeFee,
-  getServiceFee,
-} from "./payment-utils";
+import { getAdditionalFees, getStripeFee } from "./payment-utils";
 import type { HostDashboardRequest } from "@/components/requests/RequestCard";
 import type { MyPartialProperty } from "./payment-utils";
 
@@ -174,7 +171,7 @@ export const unwrapHostOfferAmountFromTravelerRequest = ({
   property: MyPartialProperty;
   request: HostDashboardRequest;
   hostInputOfferAmount?: number;
-}) => {
+}): UnwrapHostOfferAmountFromTravelerRequestOutput => {
   console.log("request.maxTotalPrice (Traveler Total):", request.maxTotalPrice);
 
   const baseOfferedAmount = hostInputOfferAmount ?? request.maxTotalPrice; // Total amount traveler pays
@@ -187,11 +184,6 @@ export const unwrapHostOfferAmountFromTravelerRequest = ({
     numOfPets: undefined,
     numOfGuests: request.numGuests,
   });
-
-  console.log(
-    "additionalFees.totalAdditionalFees:",
-    additionalFees.totalAdditionalFees,
-  );
 
   const priceBeforeFees =
     baseOfferedAmount - additionalFees.totalAdditionalFees;

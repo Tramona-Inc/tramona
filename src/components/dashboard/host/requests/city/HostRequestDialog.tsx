@@ -25,10 +25,7 @@ import {
   MessageSquare,
   Users,
 } from "lucide-react";
-import {
-  requestAmountToBaseOfferedAmount,
-  baseAmountToHostPayout,
-} from "@/utils/payment-utils/paymentBreakdown";
+import { baseAmountToHostPayout } from "@/utils/payment-utils/paymentBreakdown";
 
 import OfferPriceBreakdown from "../pricebreakdown/OfferPricebreakdown";
 
@@ -295,6 +292,7 @@ export default function HostRequestDialog({
                         <OfferPriceBreakdown
                           request={request}
                           property={property}
+                          hostInputOfferAmount={totalPriceCents}
                         />
 
                         {propertyPrices[property.id] && (

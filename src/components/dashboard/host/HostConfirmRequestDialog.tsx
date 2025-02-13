@@ -422,6 +422,7 @@ export default function HostConfirmRequestDialog({
                       <OfferPriceBreakdown
                         request={request}
                         property={property}
+                        hostInputOfferAmount={totalBasePriceBeforeFeesCents}
                       />
                     </div>
                   </div>

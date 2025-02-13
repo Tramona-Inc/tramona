@@ -1,4 +1,3 @@
-import { ChevronDown } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -9,18 +8,22 @@ import { HostDashboardRequest } from "@/components/requests/RequestCard";
 import { formatCurrency } from "@/utils/utils";
 import { unwrapHostOfferAmountFromTravelerRequest } from "@/utils/payment-utils/paymentBreakdown";
 import type { MyPartialProperty } from "@/utils/payment-utils/payment-utils";
-import { FeedOfferItem } from "@/components/activity-feed/ActivityFeed";
 
 function OfferPriceBreakdown({
   request,
   property,
+  hostInputOfferAmount,
 }: {
   request: HostDashboardRequest;
   property: MyPartialProperty;
+  hostInputOfferAmount?: number;
 }) {
+  console.log(hostInputOfferAmount);
+
   const unwrappedBreakdown = unwrapHostOfferAmountFromTravelerRequest({
     request,
     property: property,
+    hostInputOfferAmount,
   });
 
   return (
