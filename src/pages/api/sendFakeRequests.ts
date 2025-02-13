@@ -53,16 +53,13 @@ export default async function handler() {
       stateCode: true,
       country: true,
     },
-    where: ne(properties.hostTeamId, 54),
-    limit: 2,
+    where: ne(properties.hostTeamId, 37),
   });
 
   if (!hostLocations) {
     console.log("No host locations found");
     return;
   }
-
-  console.log(hostLocations);
 
   const uniqueCities = new Set(hostLocations.map((location) => location.city + ", " + location.stateCode + ", " + location.country));
 
