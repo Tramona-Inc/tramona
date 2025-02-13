@@ -29,3 +29,4 @@ export * from "./tables/linkInputProperties";
 export * from "./tables/rejectedRequests";
 export * from "./tables/auth/phoneNumberOTPs";
 export * from "./tables/requestsToBook";
+export * from "./tables/fakeRequests";

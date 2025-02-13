@@ -1434,20 +1434,20 @@ export async function generateFakeUser(email: string) {
   return fakeUser[0]!.id;
 }
 
-export async function generateFakeRequest(userId: string, location: string) {
-  // const fakeUserId = await generateFakeUser("fake-user@gmail.com");
+export async function generateFakeRequest(location: string, checkIn: Date, checkOut: Date, numGuests: number, maxTotalPrice: number) {
+  const fakeUserId = await generateFakeUser("fake-user@gmail.com");
   const fakeUser = await db.query.users.findFirst({
-    where: eq(users.id, userId),
+    where: eq(users.id, fakeUserId),
   });
   if (!fakeUser) {
     throw new Error("Fake user not found");
   }
   const fakeRequest = await handleRequestSubmission({
     location,
-    checkIn: new Date(),
-    checkOut: new Date(),
-    numGuests: 2,
-    maxTotalPrice: 1000,
+    checkIn,
+    checkOut,
+    numGuests,
+    maxTotalPrice,
   }, { user: fakeUser });
   return fakeRequest;
 }
