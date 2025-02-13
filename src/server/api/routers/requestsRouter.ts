@@ -52,6 +52,8 @@ import {
   getTravelerOfferedPrice,
   baseAmountToHostPayout,
 } from "@/utils/payment-utils/paymentBreakdown";
+import { createUserNameAndPic } from "@/components/activity-feed/admin/generationHelper";
+
 export const requestsRouter = createTRPCRouter({
   getById: protectedProcedure
     .input(requestSelectSchema.pick({ id: true }))
@@ -119,6 +121,11 @@ export const requestsRouter = createTRPCRouter({
           dateOfBirth: true,
         },
       });
+
+      if (traveler?.image === null) {
+        const userData = await createUserNameAndPic(1);
+        traveler.image = userData[0]?.picture ?? "";
+      }
 
       return {
         ...request,
