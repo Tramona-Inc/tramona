@@ -197,8 +197,8 @@ export default function MastHead() {
                 Lets turn empty nights into bookings
               </h2>
               <h3 className="mt-6 text-lg font-semibold text-white">
-                Supplement your existing your booking platforms by booking your
-                empty nights
+                Supplement your existing booking platforms and fill your empty
+                nights
               </h3>
               <h3 className="mt-2 text-xs font-semibold text-white">
                 Sign up and seamlessly sync your host account with Airbnb in
@@ -217,8 +217,8 @@ export default function MastHead() {
                 Turn empty nights into opportunities
               </h2>
               <h3 className="mt-6 text-sm font-semibold text-white lg:text-xl">
-                Supplement your existing your booking platforms by booking your
-                empty nights
+                Supplement your existing booking platforms and fill your empty
+                nights
               </h3>
               <h4 className="text-h4-size mt-3 font-semibold text-white">
                 Sign up and seamlessly sync your host account with Airbnb in
