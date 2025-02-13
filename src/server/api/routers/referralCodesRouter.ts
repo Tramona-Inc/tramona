@@ -192,6 +192,7 @@ export const referralCodesRouter = createTRPCRouter({
   ),
 
   getMyReferralCodeData: protectedProcedure.query(async ({ ctx }) => {
+    if (!ctx.user) return null;
     return await ctx.db.query.referralCodes.findFirst({
       where: eq(referralCodes.ownerId, ctx.user.id),
     });

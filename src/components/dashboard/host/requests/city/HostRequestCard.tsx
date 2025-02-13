@@ -5,8 +5,13 @@ import { Badge } from "@/components/ui/badge";
 import { TravelerVerificationsDialog } from "@/components/requests/TravelerVerificationsDialog";
 import { Card, CardFooter } from "@/components/ui/card";
 import { formatCurrency, formatDateRange, plural } from "@/utils/utils";
-import { CalendarIcon, EllipsisIcon, UsersIcon } from "lucide-react";
-import { ClockIcon } from "lucide-react";
+import {
+  CalendarIcon,
+  EllipsisIcon,
+  UsersIcon,
+  Share2Icon,
+  ClockIcon,
+} from "lucide-react";
 import {
   requestAmountToBaseOfferedAmount,
   baseAmountToHostPayout,
@@ -17,6 +22,11 @@ import {
   DropdownMenuItem,
   DropdownMenuContent,
 } from "@/components/ui/dropdown-menu";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { useChatWithUserForRequest } from "@/utils/messaging/useChatWithUserForRequest";
 import { api } from "@/utils/api";
@@ -24,6 +34,8 @@ import { toast } from "@/components/ui/use-toast";
 import { errorToast } from "@/utils/toasts";
 import { differenceInHours, differenceInMinutes } from "date-fns";
 import { Separator } from "@/components/ui/separator";
+import { useState } from "react";
+
 
 function formatTimeLeft(createdAt: Date) {
   // Add 24 hours to creation date to get expiration
@@ -62,10 +74,26 @@ export default function HostRequestCard({
   const hostPayoutAmount = baseAmountToHostPayout(baseAmount);
   const fmtdDateRange = formatDateRange(request.checkIn, request.checkOut);
   const fmtdNumGuests = plural(request.numGuests, "guest");
-
+  const [popoverOpen, setPopoverOpen] = useState(false);
   const chatWithUserForRequest = useChatWithUserForRequest();
   const { mutateAsync: rejectRequest } =
     api.requests.rejectRequest.useMutation();
+
+  const { data: code } = api.referralCodes.getMyReferralCodeData.useQuery();
+
+  const copyToClipboard = () => {
+    const isProduction = process.env.NODE_ENV === "production";
+    const baseUrl = isProduction
+      ? "https://www.tramona.com"
+      : "http://localhost:3000";
+    void navigator.clipboard.writeText(
+      `${baseUrl}/request-preview/${request.id}?referrer=${code?.referralCode}`,
+    );
+    setPopoverOpen(true);
+    setTimeout(() => {
+      setPopoverOpen(false);
+    }, 2000);
+  };
 
   return (
     <Card className="flex-1 space-y-3 p-4 pt-2">
@@ -83,6 +111,22 @@ export default function HostRequestCard({
               addSuffix: true,
             })}
           </p>
+          {/* <p>·</p> */}
+          <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="-p-2 rounded-full"
+                onClick={copyToClipboard}
+              >
+                <Share2Icon className="size-4" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0 bg-black">
+              <div className="px-3 py-2 text-sm text-white font-medium">Link copied!</div>
+            </PopoverContent>
+          </Popover>
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
