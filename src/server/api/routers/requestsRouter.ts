@@ -391,10 +391,10 @@ export const requestsRouter = createTRPCRouter({
 
       const owner = await ctx.db.query.users.findFirst({
         where: eq(users.id, request.madeByGroup.ownerId),
-        columns: { phoneNumber: true, isWhatsApp: true },
+        columns: { phoneNumber: true, isWhatsApp: true, isBurner: true },
       });
 
-      if (owner) {
+      if (owner && !owner.isBurner) {
         if (owner.isWhatsApp) {
           void sendWhatsApp({
             templateId: "HX08c870ee406c7ef4ff763917f0b3c411",
@@ -473,6 +473,7 @@ export async function handleRequestSubmission(
   { user }: { user: Session["user"] },
 ) {
   // Begin a transaction
+  console.log(input);
   console.log(user);
   const transactionResults = await db.transaction(async (tx) => {
     const madeByGroupId = await tx
@@ -653,11 +654,13 @@ export async function handleRequestSubmission(
       (property) => !property.autoOfferEnabled,
     );
 
-    await sendTextToHost({
-      matchingProperties: propertiesWithoutAutoOffers,
-      request: input,
-      tx,
-    });
+    if (!user.isBurner) {
+      await sendTextToHost({
+        matchingProperties: propertiesWithoutAutoOffers,
+        request: input,
+        tx,
+      });
+    }
 
     return { requestId: request.id, madeByGroupId };
   });

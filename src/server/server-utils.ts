@@ -66,6 +66,10 @@ import {
 } from "./external-listings-scraping/airbnbScraper";
 import { getSerpUrl } from "./external-listings-scraping/airbnbScraper";
 import { createStripeConnectId } from "@/utils/stripe-utils";
+import { handleRequestSubmission } from "./api/routers/requestsRouter";
+import { zodEmail } from "@/utils/zod-utils";
+import { z } from "zod";
+import { createUserNameAndPic } from "@/components/activity-feed/admin/generationHelper";
 
 export const proxyAgent = new HttpsProxyAgent(env.PROXY_URL);
 
@@ -1391,4 +1395,59 @@ export async function addHostProfile({
       channel: "host-bot",
     });
   }
+}
+
+export async function generateFakeUser(email: string) {
+  const userDataPromise = createUserNameAndPic(1);
+  const [userData] = await Promise.all([userDataPromise]);
+  let firstName = "";
+  let lastName = "";
+  let image = "";
+
+  if (userData[0]) {
+    firstName = userData[0].name;
+    lastName = userData[0].name;
+    image = userData[0].picture;
+  }
+  const fakeUser = await db.insert(users).values({
+    id: crypto.randomUUID(),
+    email,
+    isBurner: true,
+    stripeCustomerId: null,
+    stripeConnectId: null,
+    setupIntentId: null,
+    isIdentityVerified: 'false',
+    isWhatsApp: false,
+    role: 'guest',
+    username: null,
+    referralCodeUsed: null,
+    referralTier: 'Partner',
+    createdAt: new Date().toISOString(),
+    chargesEnabled: false,
+    name: null,
+    phoneNumber: '+11111111111',
+    firstName,
+    lastName,
+    image,
+    dateOfBirth: '6/11/1987',
+  }).returning({ id: users.id });
+  return fakeUser[0]!.id;
+}
+
+export async function generateFakeRequest(userId: string, location: string) {
+  // const fakeUserId = await generateFakeUser("fake-user@gmail.com");
+  const fakeUser = await db.query.users.findFirst({
+    where: eq(users.id, userId),
+  });
+  if (!fakeUser) {
+    throw new Error("Fake user not found");
+  }
+  const fakeRequest = await handleRequestSubmission({
+    location,
+    checkIn: new Date(),
+    checkOut: new Date(),
+    numGuests: 2,
+    maxTotalPrice: 1000,
+  }, { user: fakeUser });
+  return fakeRequest;
 }
