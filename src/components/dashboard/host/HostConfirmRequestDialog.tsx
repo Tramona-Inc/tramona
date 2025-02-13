@@ -422,10 +422,17 @@ export default function HostConfirmRequestDialog({
                   <div className="flex flex-col space-y-2">
                     <div className="rounded-md bg-gray-100 p-2">
                       <div className="text-dark text-sm font-semibold">
-                        Your offer: ${propertyPrices[property.id]} / night
+                        Your offer:{" "}
+                        {formatCurrency(
+                          unwrappedOfferBreakdown.baseOfferedAmount,
+                        )}{" "}
+                        <span className="text-xs">{numNights} x night </span>
                       </div>
                       <div className="text-sm">
-                        Your total payout: {formatCurrency(hostPayoutCents)}
+                        Your total payout:{" "}
+                        {formatCurrency(
+                          unwrappedOfferBreakdown.hostTotalPayout,
+                        )}
                       </div>
                       <OfferPriceBreakdown
                         unwrappedOfferBreakdown={unwrappedOfferBreakdown}
