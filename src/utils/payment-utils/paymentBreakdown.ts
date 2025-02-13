@@ -1,20 +1,18 @@
 import {
   HOST_MARKUP,
+  REMOVE_TRAVELER_MARKUP,
   SUPERHOG_FEE_CENTS_PER_NIGHT,
   TRAVELER_MARKUP,
 } from "../constants";
 import { getTaxPercentage } from "@/utils/payment-utils/calculateTax";
 import { Offer, Property } from "@/server/db/schema";
 import type {
+  UnwrapHostOfferAmountFromTravelerRequestOutput,
   PriceBreakdownOutput,
   PropertyAndTripParams,
 } from "@/components/checkout/types";
 import { getNumNights, removeTravelerMarkup } from "../utils";
-import {
-  getAdditionalFees,
-  getStripeFee,
-  getServiceFee,
-} from "./payment-utils";
+import { getAdditionalFees, getStripeFee } from "./payment-utils";
 import type { HostDashboardRequest } from "@/components/requests/RequestCard";
 import type { MyPartialProperty } from "./payment-utils";
 
@@ -151,8 +149,7 @@ export const requestAmountToBaseOfferedAmount = (
   maxTotalPrice: number, //comes from the request table
 ): number => {
   //we need to convert the travelerRequestAmount from the request form to the base amount which is what the host sees on the request/city page
-  const baseOfferedAmount = maxTotalPrice / TRAVELER_MARKUP;
-  console.log(baseOfferedAmount);
+  const baseOfferedAmount = maxTotalPrice * (1 - REMOVE_TRAVELER_MARKUP);
 
   return baseOfferedAmount; //NOTE: Unlike Request-to-book/Bids the offer's traveler markup is also marking up the additional fees.
 };
@@ -161,20 +158,25 @@ export const baseAmountToHostPayout = (
   baseAmount: number, //comes from the request table
 ): number => {
   //we need to convert the travelerRequestAmount from the request form to the base amount which is what the host sees on the request/city page
-  const hostPayout = baseAmount * HOST_MARKUP;
-
+  const hostPayout = Math.ceil(baseAmount * HOST_MARKUP);
+  console.log();
   return hostPayout; //NOTE: Unlike Request-to-book/Bids the offer's traveler markup is also marking up the additional fees.
 };
 
 export const unwrapHostOfferAmountFromTravelerRequest = ({
   property,
   request,
+  hostInputOfferAmount,
 }: {
   property: MyPartialProperty;
   request: HostDashboardRequest;
-}) => {
-  const baseOfferedAmount = request.maxTotalPrice / TRAVELER_MARKUP;
-  console.log(baseOfferedAmount);
+  hostInputOfferAmount?: number;
+}): UnwrapHostOfferAmountFromTravelerRequestOutput => {
+  console.log("request.maxTotalPrice (Traveler Total):", request.maxTotalPrice);
+
+  const baseOfferedAmount = hostInputOfferAmount ?? request.maxTotalPrice; // Total amount traveler pays
+
+  console.log("baseOfferedAmount (Traveler Total):", baseOfferedAmount);
 
   const additionalFees = getAdditionalFees({
     property: property,
@@ -183,25 +185,39 @@ export const unwrapHostOfferAmountFromTravelerRequest = ({
     numOfGuests: request.numGuests,
   });
 
-  const hostServiceFee =
-    baseOfferedAmount -
-    (baseOfferedAmount - additionalFees.totalAdditionalFees) * HOST_MARKUP;
+  const priceBeforeFees =
+    baseOfferedAmount - additionalFees.totalAdditionalFees;
 
-  console.log(hostServiceFee);
+  console.log("priceBeforeFees (Base Price Component):", priceBeforeFees);
 
-  const hostPayout =
-    (baseOfferedAmount - additionalFees.totalAdditionalFees) * HOST_MARKUP +
-    additionalFees.totalAdditionalFees;
+  const HOST_MARKUP = 0.975; // Host keeps 97.5%, Service fee is 2.5%
+  const serviceFeePercentage = 1 - HOST_MARKUP; // 0.025 or 2.5%
+
+  const hostServiceFee = Math.round(priceBeforeFees * serviceFeePercentage);
+
+  console.log("hostServiceFee (2.5% of Base Price Component):", hostServiceFee);
+
+  const hostBasePayout = priceBeforeFees * HOST_MARKUP;
+
+  console.log("hostBasePayout (Host Share of Base Price):", hostBasePayout);
+
+  const hostTotalPayout = hostBasePayout + additionalFees.totalAdditionalFees;
+
   //in this function we are removing the Host fees ONLY FROM THE basePropertyPrice and not from the Additonal Fees
-  console.log(hostPayout);
+  console.log(
+    "hostTotalPayout (Final Host Payout with Add. Fees):",
+    hostTotalPayout,
+  );
+
   return {
     hostServiceFee,
     baseOfferedAmount,
-    hostPayout,
+    hostBasePayout, // payout without the additional fees
+    hostTotalPayout, //total payout
     additionalFees,
+    priceBeforeFees, // Added for clarity, the base price before fees and markup
   };
 };
-
 export function getTravelerOfferedPrice({
   //for offeres only we are including additional fees in the mark up
   totalBasePriceBeforeFees,

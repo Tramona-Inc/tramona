@@ -20,7 +20,7 @@ import {
   HostRequestsPageOfferData,
 } from "@/server/api/routers/propertiesRouter";
 import * as cheerio from "cheerio";
-import { TRAVELER_MARKUP } from "./constants";
+import { REMOVE_TRAVELER_MARKUP } from "./constants";
 import { InferQueryModel } from "@/server/db";
 import {
   TripWithDetails,
@@ -298,7 +298,7 @@ export function getNumNights(from: Date | string, to: Date | string) {
 }
 
 export function removeTravelerMarkup(amountWithTravelerMarkup: number) {
-  const basePrice = amountWithTravelerMarkup / TRAVELER_MARKUP;
+  const basePrice = amountWithTravelerMarkup * (1 - REMOVE_TRAVELER_MARKUP);
   return Math.round(basePrice);
 }
 

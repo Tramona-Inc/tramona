@@ -28,12 +28,13 @@ import { api } from "@/utils/api";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
-import { errorToast } from "@/utils/toasts";
 import {
   baseAmountToHostPayout,
   getTravelerOfferedPrice,
+  unwrapHostOfferAmountFromTravelerRequest,
 } from "@/utils/payment-utils/paymentBreakdown";
 import OfferPriceBreakdown from "./requests/pricebreakdown/OfferPricebreakdown";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function HostConfirmRequestDialog({
   open,
@@ -56,6 +57,9 @@ export default function HostConfirmRequestDialog({
   setStep: (step: number) => void;
   selectedProperties: number[];
 }) {
+  //propertyPrices == base prices
+
+  console.log(propertyPrices);
   const { toast } = useToast();
   const [selectedPropertyToEdit, setSelectedPropertyToEdit] = useState<
     number | null
@@ -175,12 +179,16 @@ export default function HostConfirmRequestDialog({
       const results = await Promise.allSettled(
         propertiesWithTax.map(async (property) => {
           const totalBasePriceBeforeFees =
-            parseInt(propertyPrices[property.id] ?? "0") * 100 * numNights;
+            parseFloat(propertyPrices[property.id] ?? "0") * 100 * numNights;
+
+          console.log(propertyPrices[property.id] ?? "0");
+          console.log(totalBasePriceBeforeFees); // should be 92.5
+          console.log(baseAmountToHostPayout(totalBasePriceBeforeFees)); //should be 90.19
 
           return createOffersMutation.mutateAsync({
             requestId: request.id,
             propertyId: property.id,
-            totalBasePriceBeforeFees,
+            totalBasePriceBeforeFees: totalBasePriceBeforeFees,
             hostPayout: baseAmountToHostPayout(totalBasePriceBeforeFees),
             calculatedTravelerPrice: getTravelerOfferedPrice({
               totalBasePriceBeforeFees,
@@ -259,7 +267,7 @@ export default function HostConfirmRequestDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTitle></DialogTitle>
-      <DialogContent className="max-w-lg p-6">
+      <DialogContent className="max-w-2xl p-6">
         <DialogHeader>
           <h3 className="text-center text-lg font-bold">Respond</h3>
         </DialogHeader>
@@ -311,12 +319,19 @@ export default function HostConfirmRequestDialog({
 
             const editNightlyPriceCents = parseFloat(editValue) * 100;
 
+            const unwrappedOfferBreakdown =
+              unwrapHostOfferAmountFromTravelerRequest({
+                property,
+                request,
+                hostInputOfferAmount: totalBasePriceBeforeFeesCents,
+              });
+
             return (
               <div
                 key={property.id}
-                className="flex flex-col rounded-md border bg-white p-4"
+                className="flex flex-col rounded-md border bg-white px-3 py-4"
               >
-                <div className="mb-4 flex items-center justify-between">
+                <div className="mx-auto mb-4 flex w-11/12 items-center justify-between">
                   <div className="flex items-center gap-4">
                     <Image
                       src={property.imageUrls[0] ?? ""}
@@ -405,20 +420,36 @@ export default function HostConfirmRequestDialog({
                     )}
                   </div>
                 ) : (
-                  <div className="flex flex-col space-y-2">
-                    <div className="rounded-md bg-gray-100 p-2">
-                      <div className="text-dark text-sm font-semibold">
-                        Your offer: ${propertyPrices[property.id]} / night
+                  <Card className="border shadow-none">
+                    <CardContent className="flex w-full flex-col">
+                      <div className="flex w-full flex-row items-center justify-between">
+                        <div className="flex flex-row items-center gap-x-1">
+                          <p className="font-semibold">Your Offer{"  "}</p>
+                          <span className="text-xs text-muted-foreground">
+                            ({numNights} nights){" "}
+                          </span>
+                        </div>
+                        <span className="">
+                          {formatCurrency(
+                            unwrappedOfferBreakdown.baseOfferedAmount,
+                          )}
+                        </span>
                       </div>
-                      <div className="text-sm">
-                        Your total payout: {formatCurrency(hostPayoutCents)}
+                      <div className="flex w-full flex-row items-center justify-between font-semibold tracking-tight">
+                        Your Total Payout:{" "}
+                        <span className="font-bold">
+                          {formatCurrency(
+                            unwrappedOfferBreakdown.hostTotalPayout,
+                          )}
+                        </span>
                       </div>
-                      <OfferPriceBreakdown
-                        request={request}
-                        property={property}
-                      />
-                    </div>
-                  </div>
+                      <div className="mt-2">
+                        <OfferPriceBreakdown
+                          unwrappedOfferBreakdown={unwrappedOfferBreakdown}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
                 )}
               </div>
             );

@@ -70,8 +70,7 @@ export default function HostRequestCard({
   currentHostTeamId: number | null | undefined;
   children?: React.ReactNode;
 }) {
-  const baseAmount = requestAmountToBaseOfferedAmount(request.maxTotalPrice);
-  const hostPayoutAmount = baseAmountToHostPayout(baseAmount);
+  const hostPayoutAmount = baseAmountToHostPayout(request.maxTotalPrice);
   const fmtdDateRange = formatDateRange(request.checkIn, request.checkOut);
   const fmtdNumGuests = plural(request.numGuests, "guest");
   const [popoverOpen, setPopoverOpen] = useState(false);
