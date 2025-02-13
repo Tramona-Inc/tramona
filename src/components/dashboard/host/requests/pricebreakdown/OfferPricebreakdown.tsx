@@ -4,28 +4,14 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { HostDashboardRequest } from "@/components/requests/RequestCard";
 import { formatCurrency } from "@/utils/utils";
-import { unwrapHostOfferAmountFromTravelerRequest } from "@/utils/payment-utils/paymentBreakdown";
-import type { MyPartialProperty } from "@/utils/payment-utils/payment-utils";
+import type { UnwrapHostOfferAmountFromTravelerRequestOutput } from "@/components/checkout/types";
 
 function OfferPriceBreakdown({
-  request,
-  property,
-  hostInputOfferAmount,
+  unwrappedOfferBreakdown,
 }: {
-  request: HostDashboardRequest;
-  property: MyPartialProperty;
-  hostInputOfferAmount?: number;
+  unwrappedOfferBreakdown: UnwrapHostOfferAmountFromTravelerRequestOutput;
 }) {
-  console.log(hostInputOfferAmount);
-
-  const unwrappedBreakdown = unwrapHostOfferAmountFromTravelerRequest({
-    request,
-    property: property,
-    hostInputOfferAmount,
-  });
-
   return (
     <Accordion type="single" collapsible className="border-none">
       <AccordionItem value="price-breakdown" className="border-none">
@@ -37,24 +23,28 @@ function OfferPriceBreakdown({
             <div className="flex justify-between">
               <span>Traveler amount (Excluding taxes)</span>
               <span>
-                {formatCurrency(unwrappedBreakdown.baseOfferedAmount)}
+                {formatCurrency(unwrappedOfferBreakdown.baseOfferedAmount)}
               </span>
             </div>
             <div className="flex justify-between">
               <span>Additonal Fees (Cleaning, Pet and Additional Guests)</span>
               <span>
                 {formatCurrency(
-                  unwrappedBreakdown.additionalFees.totalAdditionalFees,
+                  unwrappedOfferBreakdown.additionalFees.totalAdditionalFees,
                 )}
               </span>
             </div>
             <div className="flex justify-between">
               <span>Host service fee (2.5%)</span>
-              <span>{formatCurrency(unwrappedBreakdown.hostServiceFee)}</span>
+              <span>
+                {formatCurrency(unwrappedOfferBreakdown.hostServiceFee)}
+              </span>
             </div>
             <div className="flex justify-between font-semibold">
               <span>Your payout</span>
-              <span>{formatCurrency(unwrappedBreakdown.hostTotalPayout)}</span>
+              <span>
+                {formatCurrency(unwrappedOfferBreakdown.hostTotalPayout)}
+              </span>
             </div>
           </div>
         </AccordionContent>

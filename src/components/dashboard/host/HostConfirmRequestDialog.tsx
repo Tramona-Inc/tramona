@@ -31,6 +31,7 @@ import { useToast } from "@/components/ui/use-toast";
 import {
   baseAmountToHostPayout,
   getTravelerOfferedPrice,
+  unwrapHostOfferAmountFromTravelerRequest,
 } from "@/utils/payment-utils/paymentBreakdown";
 import OfferPriceBreakdown from "./requests/pricebreakdown/OfferPricebreakdown";
 
@@ -317,6 +318,13 @@ export default function HostConfirmRequestDialog({
 
             const editNightlyPriceCents = parseFloat(editValue) * 100;
 
+            const unwrappedOfferBreakdown =
+              unwrapHostOfferAmountFromTravelerRequest({
+                property,
+                request,
+                hostInputOfferAmount: totalBasePriceBeforeFeesCents,
+              });
+
             return (
               <div
                 key={property.id}
@@ -420,9 +428,7 @@ export default function HostConfirmRequestDialog({
                         Your total payout: {formatCurrency(hostPayoutCents)}
                       </div>
                       <OfferPriceBreakdown
-                        request={request}
-                        property={property}
-                        hostInputOfferAmount={totalBasePriceBeforeFeesCents}
+                        unwrappedOfferBreakdown={unwrappedOfferBreakdown}
                       />
                     </div>
                   </div>
