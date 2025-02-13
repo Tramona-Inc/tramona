@@ -26,12 +26,10 @@ import {
   Users,
 } from "lucide-react";
 import {
-  requestAmountToBaseOfferedAmount,
   baseAmountToHostPayout,
+  unwrapHostOfferAmountFromTravelerRequest,
 } from "@/utils/payment-utils/paymentBreakdown";
-
 import OfferPriceBreakdown from "../pricebreakdown/OfferPricebreakdown";
-
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
@@ -63,7 +61,7 @@ export default function HostRequestDialog({
   // const [selectedProperties, setSelectedProperties] =
   //   useState<number[]>(allPropertyIds);
 
-  const baseAmount = requestAmountToBaseOfferedAmount(request.maxTotalPrice);
+  const baseAmount = request.maxTotalPrice;
 
   const numNights = getNumNights(request.checkIn, request.checkOut);
 
@@ -196,7 +194,13 @@ export default function HostRequestDialog({
                 parseFloat(propertyPrices[property.id] ?? "0") * 100;
 
               const totalPriceCents = nightlyPriceCents * numNights;
-              const hostPayoutCents = baseAmountToHostPayout(totalPriceCents);
+
+              const unwrappedOfferBreakdown =
+                unwrapHostOfferAmountFromTravelerRequest({
+                  property: property,
+                  request,
+                  hostInputOfferAmount: totalPriceCents,
+                });
 
               return (
                 <div
@@ -293,15 +297,16 @@ export default function HostRequestDialog({
                           )}
                         </div>
                         <OfferPriceBreakdown
-                          request={request}
-                          property={property}
+                          unwrappedOfferBreakdown={unwrappedOfferBreakdown}
                         />
 
                         {propertyPrices[property.id] && (
                           <div className="text-sm">
                             By offering this price, your final payout will be{" "}
                             <span className="font-bold">
-                              {formatCurrency(hostPayoutCents)}
+                              {formatCurrency(
+                                unwrappedOfferBreakdown.hostTotalPayout,
+                              )}
                             </span>
                           </div>
                         )}

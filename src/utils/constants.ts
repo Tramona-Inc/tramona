@@ -3,7 +3,11 @@ export const TAX_PERCENTAGE = 0.08;
 export const SUPERHOG_FEE_CENTS_PER_NIGHT = 300;
 export const AVG_AIRBNB_MARKUP = 1.13868;
 export const LINK_REQUEST_DISCOUNT_PERCENTAGE = 15;
+
+//TRAVELER MARKUP MAKE SURE TO CHANGE BOTH IF UPDATED
 export const TRAVELER_MARKUP = 1.075; //7.5 percent
+export const REMOVE_TRAVELER_MARKUP = 0.075;
+
 export const HOST_MARKUP = 0.975;
 export const DIRECT_LISTING_MARKUP = 1.015; // 1.5% markup for direct listings
 export const REFERRAL_CASHBACK = 2500;

@@ -81,3 +81,13 @@ export interface AdditionalFeesOutput {
   extraGuestFee: number | undefined;
   totalAdditionalFees: number;
 }
+
+//host side unwrapping
+export type UnwrapHostOfferAmountFromTravelerRequestOutput = {
+  hostServiceFee: number;
+  baseOfferedAmount: number;
+  hostBasePayout: number; // payout without the additional fees
+  hostTotalPayout: number; //total payout
+  additionalFees: AdditionalFeesOutput;
+  priceBeforeFees: number; // Added for clarity, the base price before fees and markup
+};
