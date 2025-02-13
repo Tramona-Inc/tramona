@@ -82,9 +82,7 @@ const ForHostsPage = ({
         </div>
         <hr className="mx-8 border-t border-gray-300" />
         <Features />
-        <div className="flex justify-center bg-[#FAF9F6] p-20">
-          <HostCalculator />
-        </div>
+        <HostCalculator />
         <div className="mx-0 flex max-w-full justify-center space-y-4 px-4 lg:mx-4 lg:mb-16 lg:mt-16 lg:flex lg:space-y-8">
           {useIsSm() ? (
             <MobileTestimonialCarousel testimonials={whyListTestimonals} />
@@ -96,7 +94,7 @@ const ForHostsPage = ({
           <ListInAMinute />
         </div>
         <div>
-          <h2 className="mb-16 mt-12 text-center text-3xl font-semibold">
+          <h2 className="mx-4 mb-16 mt-12 text-center text-3xl font-semibold">
             Anything we can answer? Book a call with <br />
             our onboarding team
           </h2>
@@ -220,7 +218,7 @@ const SignUpNow = ({ requestFeed }: { requestFeed: FeedRequestItem[] }) => {
     <section className="flex justify-center">
       <div className="mx-12 flex flex-col justify-center gap-8 md:mx-36 lg:mx-24 lg:max-w-[70vw] lg:flex-row">
         <div className="flex-1">
-          <h1 className="mb-20 mt-10 text-center text-2xl font-medium">
+          <h1 className="mb-20 mt-10 text-center text-lg font-medium md:text-2xl">
             Tramona charges 5-10% less in fees than other platforms, while
             offering $50,000 in protection per booking. Allowing hosts and
             travelers to earn more on the same booking elsewhere.
@@ -658,7 +656,7 @@ const Features2 = () => {
     <section className="mb-12 mt-12 py-12">
       <div className="flex flex-col items-center space-y-12">
         {/* First Row: Image on left, text on right */}
-        <div className="mx-auto flex w-full max-w-4xl flex-col items-center gap-x-16 px-6 text-center sm:flex-row sm:text-left">
+        <div className="mx-auto flex w-full max-w-4xl flex-col items-center gap-x-16 gap-y-4 px-6 text-center sm:flex-row sm:text-left">
           <div className="relative h-40 w-72 flex-shrink-0 overflow-hidden rounded-lg bg-gray-200 shadow-md">
             <Image
               src="/assets/images/why-list/Why-list-request.png"
@@ -675,7 +673,7 @@ const Features2 = () => {
         </div>
 
         {/* Second Row: Text on left, image on right */}
-        <div className="mx-auto flex w-full max-w-4xl flex-col items-center gap-x-16 px-6 text-center sm:flex-row-reverse sm:text-left">
+        <div className="mx-auto flex w-full max-w-4xl flex-col items-center gap-x-16 gap-y-4 px-6 text-center sm:flex-row-reverse sm:text-left">
           <div className="relative h-40 w-72 flex-shrink-0 overflow-hidden rounded-lg bg-gray-200 shadow-md">
             <Image
               src="/assets/images/why-list/Why-list-cohost.png"
@@ -692,7 +690,7 @@ const Features2 = () => {
         </div>
 
         {/* Third Row: Image on left, text on right */}
-        <div className="mx-auto flex w-full max-w-4xl flex-col items-center gap-x-16 px-6 text-center sm:flex-row sm:text-left">
+        <div className="mx-auto flex w-full max-w-4xl flex-col items-center gap-x-16 gap-y-4 px-6 text-center sm:flex-row sm:text-left">
           <div className="relative h-40 w-[280px] flex-shrink-0 overflow-hidden rounded-lg bg-gray-200 shadow-md">
             <Image
               src="/assets/images/why-list/Why-list-Cal.png"

@@ -20,9 +20,7 @@ import {
   HostRequestsPageOfferData,
 } from "@/server/api/routers/propertiesRouter";
 import * as cheerio from "cheerio";
-import { useSession } from "next-auth/react";
-import { api } from "./api";
-import { HOST_MARKUP, TRAVELER_MARKUP } from "./constants";
+import { REMOVE_TRAVELER_MARKUP } from "./constants";
 import { InferQueryModel } from "@/server/db";
 import {
   TripWithDetails,
@@ -151,7 +149,6 @@ export function formatDateRange(
   // Cross-year ranges should always include the full date
   return `${formatDate(from, "EEE, MMM d, yyyy")} – ${formatDate(to, "EEE, MMM d, yyyy")}`;
 }
-
 
 /**
  * wrapper for formatDate for YYYY-MM-DD strings only that adds a T00:00
@@ -300,22 +297,8 @@ export function getNumNights(from: Date | string, to: Date | string) {
   );
 }
 
-export function getHostPayout(totalBasePriceBeforeFees: number) {
-  return Math.floor(totalBasePriceBeforeFees * HOST_MARKUP);
-}
-
-export function getTravelerOfferedPrice({
-  totalBasePriceBeforeFees,
-  travelerMarkup, //we need this because can be traveler or direct listing markup
-}: {
-  totalBasePriceBeforeFees: number;
-  travelerMarkup: number;
-}) {
-  return Math.ceil(totalBasePriceBeforeFees * travelerMarkup);
-}
-
 export function removeTravelerMarkup(amountWithTravelerMarkup: number) {
-  const basePrice = amountWithTravelerMarkup / TRAVELER_MARKUP;
+  const basePrice = amountWithTravelerMarkup * (1 - REMOVE_TRAVELER_MARKUP);
   return Math.round(basePrice);
 }
 
@@ -808,17 +791,7 @@ export function logAndFilterSettledResults<T>(
     .map((r) => r.value);
 }
 
-export function useUpdateUser() {
-  const { mutateAsync: updateProfile } = api.users.updateProfile.useMutation();
-  const { update } = useSession();
 
-  return {
-    updateUser: async (updates: Parameters<typeof updateProfile>[0]) => {
-      await updateProfile(updates);
-      await update();
-    },
-  };
-}
 
 export const capitalizeFirstLetter = (string: string | null): string => {
   if (!string) return "";

@@ -48,7 +48,7 @@ export default function Invite() {
           description: "Invite link to join group",
           images: [
             {
-              url: "tramona.com/api/og?cover=https://a0.muscache.com/im/pictures/prohost-api/Hosting-1162477721754661798/original/0c00ec02-540d-4d24-ba50-638ccd676340.jpeg?im_w=720",
+              url: "tramona.com/api/og/route?cover=https://a0.muscache.com/im/pictures/prohost-api/Hosting-1162477721754661798/original/0c00ec02-540d-4d24-ba50-638ccd676340.jpeg?im_w=720&type=property",
               width: 900,
               height: 800,
               alt: "Og Image Alt Second",

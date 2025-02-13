@@ -7,7 +7,7 @@ import {
 } from "@/utils/store/conversations";
 import { useMessage } from "@/utils/store/messages";
 import supabase from "@/utils/supabase-client";
-import { cn, useUpdateUser } from "@/utils/utils";
+import { useUpdateUser } from "@/utils/custom-hooks/useUpdateUser";
 import { subHours } from "date-fns";
 import { useSession } from "next-auth/react";
 import { useEffect, useState, useMemo } from "react";

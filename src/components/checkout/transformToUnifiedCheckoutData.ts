@@ -18,7 +18,7 @@ export function offerToUnifiedCheckout({
     calculatedTravelerPrice: offer.calculatedTravelerPrice,
     datePriceFromAirbnb: offer.datePriceFromAirbnb,
     discount: totalSavings,
-    additionalFees: null,
+    additionalFees: null, //comeback to this make a reusable function that can extract the fees from the property // it should not effect the pricing here tho
   };
 
   return {

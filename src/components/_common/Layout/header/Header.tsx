@@ -33,9 +33,9 @@ export function Header() {
   const router = useRouter();
   const { data: hasHostProfile, isLoading: hasHostProfileIsLoading } =
     api.users.isHost.useQuery();
-  const isHost = router.pathname.includes("/host") ? true : false;
+  const isHost = router.pathname.includes("/host") || router.pathname.includes("/request-preview");
 
-  if (isHost && !hasHostProfile && !hasHostProfileIsLoading) {
+  if (isHost && !hasHostProfile && !hasHostProfileIsLoading && !router.pathname.includes("/request-preview")) {
     void router.replace("/why-list");
   }
 

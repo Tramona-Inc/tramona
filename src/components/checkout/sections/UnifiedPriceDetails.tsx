@@ -2,10 +2,8 @@ import { Separator } from "../../ui/separator";
 import { formatCurrency, getNumNights } from "@/utils/utils";
 import { plural } from "@/utils/utils";
 import React from "react";
-import {
-  breakdownPaymentByPropertyAndTripParams,
-  getServiceFee,
-} from "@/utils/payment-utils/paymentBreakdown";
+import { breakdownPaymentByPropertyAndTripParams } from "@/utils/payment-utils/paymentBreakdown";
+import { getServiceFee } from "@/utils/payment-utils/payment-utils";
 import {
   Tooltip,
   TooltipContent,

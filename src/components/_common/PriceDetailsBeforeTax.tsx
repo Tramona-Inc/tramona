@@ -1,9 +1,5 @@
 import { Separator } from "../ui/separator";
-import {
-  formatCurrency,
-  getNumNights,
-  getTravelerOfferedPrice,
-} from "@/utils/utils";
+import { formatCurrency, getNumNights } from "@/utils/utils";
 import { plural } from "@/utils/utils";
 import type {
   OfferWithDetails,
@@ -12,10 +8,10 @@ import type {
 import React, { useEffect, useState } from "react";
 import {
   breakdownPaymentByOffer,
-  getServiceFee,
+  getTravelerOfferedPrice,
 } from "@/utils/payment-utils/paymentBreakdown";
+import { getServiceFee } from "@/utils/payment-utils/payment-utils";
 import type { RequestToBookDetails } from "../propertyPages/sidebars/actionButtons/RequestToBookBtn";
-import { TRAVELER_MARKUP } from "@/utils/constants";
 import { getApplicableBookItNowAndRequestToBookDiscountPercentage } from "../../utils/payment-utils/payment-utils";
 import { PriceBreakdownOutput } from "../checkout/types";
 
@@ -64,7 +60,6 @@ export default function PriceDetailsBeforeTax({
 
   const calculatedTravelerPrice = getTravelerOfferedPrice({
     totalBasePriceBeforeFees: priceWithApplicableDiscount ?? scrapedPrice,
-    travelerMarkup: TRAVELER_MARKUP,
   });
 
   useEffect(() => {
@@ -132,10 +127,10 @@ export default function PriceDetailsBeforeTax({
         priceDetails.nightlyPrice * priceDetails.numberOfNights,
       ),
     },
-    {
-      title: "Cleaning fee",
-      price: "Included",
-    },
+    // {
+    //   title: "Cleaning fee",
+    //   price: "Included",
+    // },
     {
       title: "Tramona service fee",
       price: formatCurrency(getServiceFee({ tripCheckout: brokeDownPayment })),

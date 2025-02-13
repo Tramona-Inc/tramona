@@ -23,7 +23,6 @@ import { eq, and, inArray } from "drizzle-orm";
 import {
   createRandomMarkupEightToFourteenPercent,
   getNumNights,
-  getTravelerOfferedPrice,
   logAndFilterSettledResults,
 } from "@/utils/utils";
 import { DIRECT_LISTING_MARKUP } from "@/utils/constants";
@@ -32,6 +31,7 @@ import { cleanbnbScraper, cleanbnbSubScraper } from "./cleanbnb-scrape";
 import { z } from "zod";
 import { formatZodError } from "../../utils/zod-utils";
 import { env } from "@/env";
+import { getTravelerOfferedPrice } from "@/utils/payment-utils/paymentBreakdown";
 
 type ScraperOptions = {
   location: string;

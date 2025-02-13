@@ -221,19 +221,27 @@ export const twilioRouter = createTRPCRouter({
         });
       }
 
-      const check = await service.verificationChecks
-      .create({
-        verificationSid: otpRecord.verificationSid,
-        code: code
-      });
+      let check;
+      try {
+        check = await service.verificationChecks
+          .create({
+            verificationSid: otpRecord.verificationSid,
+            code: code
+          });
+      } catch (error) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+          message: `Error verifying OTP for phone number ${phoneNumber}, ${error}`,
+        });
+      }
 
-    if (check.status === 'approved') {
-      await db
-        .update(phoneNumberOTPs)
-        .set({ usedAt: new Date() })
-        .where(eq(phoneNumberOTPs.id, otpRecord.id));
-    }
+      if (check.status === 'approved') {
+        await db
+          .delete(phoneNumberOTPs)
+          .where(eq(phoneNumberOTPs.id, otpRecord.id));
+      }
 
-    return { status: check.status };
+      return { status: check.status };
     }),
 });

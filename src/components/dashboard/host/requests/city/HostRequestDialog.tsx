@@ -12,14 +12,26 @@ import { type Property } from "@/server/db/schema/tables/properties";
 import {
   formatCurrency,
   formatDateRange,
-  getHostPayout,
   getNumNights,
   plural,
 } from "@/utils/utils";
 import Image from "next/image";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { AlertCircle } from "lucide-react";
+import {
+  AlertCircle,
+  Calendar,
+  DollarSign,
+  MessageSquare,
+  Users,
+} from "lucide-react";
+import {
+  baseAmountToHostPayout,
+  unwrapHostOfferAmountFromTravelerRequest,
+} from "@/utils/payment-utils/paymentBreakdown";
+import OfferPriceBreakdown from "../pricebreakdown/OfferPricebreakdown";
+import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 export default function HostRequestDialog({
   open,
@@ -48,6 +60,8 @@ export default function HostRequestDialog({
 
   // const [selectedProperties, setSelectedProperties] =
   //   useState<number[]>(allPropertyIds);
+
+  const baseAmount = request.maxTotalPrice;
 
   const numNights = getNumNights(request.checkIn, request.checkOut);
 
@@ -81,7 +95,7 @@ export default function HostRequestDialog({
     }
   };
 
-  const fmtdNightlyPrice = (request.maxTotalPrice / numNights / 100).toFixed(2);
+  const fmtdNightlyPrice = (baseAmount / numNights / 100).toFixed(2);
 
   // console.log("selectedProperties1", selectedProperties);
 
@@ -110,7 +124,7 @@ export default function HostRequestDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="max-w-lg p-6">
+      <DialogContent className="max-w-2xl p-6">
         <DialogHeader>
           <h3 className="text-center text-lg font-bold">Respond</h3>
         </DialogHeader>
@@ -118,39 +132,47 @@ export default function HostRequestDialog({
           Please select the properties you would like to offer and set the
           price.
         </DialogDescription>
-        <div className="space-y-2">
-          <div className="rounded-md border p-4">
-            <div className="mb-4 flex justify-between">
-              <div className="flex flex-col items-start">
-                <div className="text-dark text-lg font-bold">
-                  {formatCurrency(request.maxTotalPrice / numNights)}
-                  /night
-                </div>
-                <div className="text-sm text-gray-600">
-                  {formatCurrency(request.maxTotalPrice)} total
-                </div>
-              </div>
-              <div className="flex flex-col items-center">
-                <div className="text-dark text-lg font-bold">
-                  {formatDateRange(request.checkIn, request.checkOut)}
-                </div>
-                <div className="text-sm text-gray-600">
-                  {plural(numNights, "night")}
-                </div>
-              </div>
-              <div className="flex flex-col items-end">
-                <div className="text-dark text-lg font-bold">
-                  {plural(request.numGuests, "guest")}
-                </div>
-              </div>
+        <Card>
+          <CardContent className="space-y-4 p-6">
+            <div className="grid grid-cols-2 gap-4">
+              <SummaryItem
+                icon={<Calendar className="h-5 w-5 text-muted-foreground" />}
+                title="Trip dates"
+                content={formatDateRange(request.checkIn, request.checkOut)}
+                subtitle={plural(numNights, "night")}
+              />
+              <SummaryItem
+                icon={<Users className="h-5 w-5 text-muted-foreground" />}
+                title="Travelers"
+                content={plural(request.numGuests, "guest")}
+              />
+              <SummaryItem
+                icon={<DollarSign className="h-5 w-5 text-muted-foreground" />}
+                title="Requested amount"
+                content={`${formatCurrency(baseAmount / numNights)}/night`}
+                subtitle={`${formatCurrency(baseAmount)} total`}
+              />
             </div>
+
             {request.note && (
-              <div className="rounded-md bg-gray-100 p-2">
-                <div className="text-sm text-gray-700">{request.note}</div>
-              </div>
+              <>
+                <Separator />
+                <div className="flex items-start gap-3 rounded-md bg-muted p-3">
+                  <MessageSquare className="mt-0.5 h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <div className="mb-1 text-sm font-medium">
+                      Guest&apos;s Note:
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      {request.note}
+                    </div>
+                  </div>
+                </div>
+              </>
             )}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
+
         <div className="mt-4">
           <div className="mb-2 flex justify-between">
             <h4 className="text-dark text-lg font-bold">
@@ -172,7 +194,13 @@ export default function HostRequestDialog({
                 parseFloat(propertyPrices[property.id] ?? "0") * 100;
 
               const totalPriceCents = nightlyPriceCents * numNights;
-              const hostPayoutCents = getHostPayout(totalPriceCents);
+
+              const unwrappedOfferBreakdown =
+                unwrapHostOfferAmountFromTravelerRequest({
+                  property: property,
+                  request,
+                  hostInputOfferAmount: totalPriceCents,
+                });
 
               return (
                 <div
@@ -252,24 +280,34 @@ export default function HostRequestDialog({
                               }
                             />
                           </div>
+                          {(request.maxTotalPrice / numNights / 100) * 1.1 <
+                            parseInt(propertyPrices[property.id] ?? "0") && (
+                            <div className="text-xs text-red-600">
+                              This offer is unlikely to get accepted since it is{" "}
+                              {Math.round(
+                                ((parseFloat(
+                                  propertyPrices[property.id] ?? "0",
+                                ) -
+                                  request.maxTotalPrice / numNights / 100) /
+                                  (request.maxTotalPrice / numNights / 100)) *
+                                  100,
+                              )}
+                              % higher than the requested price.
+                            </div>
+                          )}
                         </div>
-                        {(request.maxTotalPrice / numNights / 100) * 1.1 <
-                          parseInt(propertyPrices[property.id] ?? "0") && (
-                          <div className="text-sm text-red-600">
-                            This offer is unlikely to get accepted since it is{" "}
-                            {Math.round(
-                              ((parseFloat(propertyPrices[property.id] ?? "0") -
-                                request.maxTotalPrice / numNights / 100) /
-                                (request.maxTotalPrice / numNights / 100)) *
-                                100,
-                            )}
-                            % higher than the requested price.
-                          </div>
-                        )}
+                        <OfferPriceBreakdown
+                          unwrappedOfferBreakdown={unwrappedOfferBreakdown}
+                        />
+
                         {propertyPrices[property.id] && (
-                          <div className="text-sm text-gray-600">
-                            By offering this price, you will be paid{" "}
-                            {formatCurrency(hostPayoutCents)} all-in
+                          <div className="text-sm">
+                            By offering this price, your final payout will be{" "}
+                            <span className="font-bold">
+                              {formatCurrency(
+                                unwrappedOfferBreakdown.hostTotalPayout,
+                              )}
+                            </span>
                           </div>
                         )}
                       </div>
@@ -287,5 +325,29 @@ export default function HostRequestDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+interface SummaryItemProps {
+  icon: React.ReactNode;
+  title: string;
+  content: string;
+  subtitle?: string;
+}
+
+function SummaryItem({ icon, title, content, subtitle }: SummaryItemProps) {
+  return (
+    <div className="flex items-start gap-3">
+      <div className="mt-0.5">{icon}</div>
+      <div>
+        <div className="mb-1 text-sm font-medium text-muted-foreground">
+          {title}
+        </div>
+        <div className="font-semibold">{content}</div>
+        {subtitle && (
+          <div className="text-sm text-muted-foreground">{subtitle}</div>
+        )}
+      </div>
+    </div>
   );
 }

@@ -3,10 +3,11 @@ import { api } from "@/utils/api";
 import { type HostDashboardRequest } from "./RequestCard";
 import { getAge } from "@/utils/utils";
 import UserAvatar from "../_common/UserAvatar";
-import { BadgeCheck, BadgeX } from "lucide-react";
+import { BadgeCheck, BadgeX, CheckIcon } from "lucide-react";
 import { HostDashboardRequestToBook } from "@/components/dashboard/host/requests/requests-to-book/HostRequestToBookCard";
 import { PastOfferRequestDetails } from "../dashboard/host/requests/city/PastOfferCard";
 import { capitalizeFirstLetter } from "@/utils/utils";
+import { Badge } from "../ui/badge";
 
 export function TravelerVerificationsDialog({
   request,
@@ -94,13 +95,15 @@ export function TravelerVerificationsDialog({
           /*verificationList.emailVerified &&
         verificationList.censoredPhoneNumber &&
         verificationList.dateOfBirth*/ true ? (
-            <div className="flex items-center gap-1 text-teal-800">
-              <BadgeCheck size={16} />
-              <p>Verified</p>
-            </div>
+            <Badge variant="green" size="sm">
+              <div className="flex items-center gap-1 text-xs text-teal-800">
+                <CheckIcon size={12} />
+                <p>Verified</p>
+              </div>
+            </Badge>
           ) : (
             <div className="flex items-center gap-1 text-red-500">
-              <BadgeX size={16} />
+              <BadgeX size={12} />
               <p>Not verified</p>
             </div>
           )

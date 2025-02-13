@@ -16,9 +16,9 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import {
   convertMonthToNumber,
-  useUpdateUser,
   validateDateValues,
 } from "@/utils/utils";
+import { useUpdateUser } from "@/utils/custom-hooks/useUpdateUser";
 import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";

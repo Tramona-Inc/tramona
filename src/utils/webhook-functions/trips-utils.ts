@@ -25,7 +25,7 @@ import ReservationConfirmedEmail from "packages/transactional/emails/Reservation
 import { stripeWithSecretKey } from "@/server/api/routers/stripeRouter";
 import BookingCancellationEmail from "packages/transactional/emails/BookingCancellationEmail";
 import { sendSlackMessage } from "@/server/slack";
-import { getServiceFee } from "../payment-utils/paymentBreakdown";
+import { getServiceFee } from "../payment-utils/payment-utils";
 
 export type TripWCheckout = Trip & { tripCheckout: TripCheckout };
 
