@@ -7,9 +7,7 @@ import {
 } from "@/server/api/trpc";
 import { db } from "@/server/db";
 import {
-  groupMembers,
-  groups,
-  requestInsertSchema,
+  groupMembers, requestInsertSchema,
   requestSelectSchema,
   requests,
   users,
@@ -18,41 +16,20 @@ import {
   properties,
   Property,
   User,
-  Request,
+  Request
 } from "@/server/db/schema";
 import {
   sendText,
   sendWhatsApp,
-  getPropertiesForRequest,
-  createLatLngGISPoint,
-  getRequestsForProperties,
+  getPropertiesForRequest, getRequestsForProperties
 } from "@/server/server-utils";
-import { sendSlackMessage } from "@/server/slack";
 import { isIncoming } from "@/utils/formatters";
 import { TRPCError } from "@trpc/server";
 import { and, eq, exists, lt } from "drizzle-orm";
 import { z } from "zod";
-import type { Session } from "next-auth";
 import { linkInputProperties } from "@/server/db/schema/tables/linkInputProperties";
-import {
-  formatCurrency,
-  getNumNights,
-  formatDateRange,
-  plural,
-} from "@/utils/utils";
-import { sendTextToHost, haversineDistance } from "@/server/server-utils";
 import { newLinkRequestSchema } from "@/utils/useSendUnsentRequests";
-import { getCoordinates } from "@/server/google-maps";
-import { scrapeDirectListings } from "@/server/direct-sites-scraping";
-import { waitUntil } from "@vercel/functions";
-import { scrapeAirbnbPrice } from "@/server/scrapePrice";
-import { TRAVELER_MARKUP } from "@/utils/constants";
-import { differenceInDays } from "date-fns";
-import {
-  getTravelerOfferedPrice,
-  baseAmountToHostPayout,
-} from "@/utils/payment-utils/paymentBreakdown";
-import { createUserNameAndPic } from "@/components/activity-feed/admin/generationHelper";
+import { handleRequestSubmission } from "@/server/request-utils";
 
 export const requestsRouter = createTRPCRouter({
   getById: protectedProcedure
@@ -468,222 +445,4 @@ const modifiedRequestSchema = requestInsertSchema
 // Infer the type from the modified schema
 export type RequestInput = z.infer<typeof modifiedRequestSchema>;
 
-export async function handleRequestSubmission(
-  input: RequestInput,
-  { user }: { user: Session["user"] },
-) {
-  // Begin a transaction
-  console.log(input);
-  console.log(user);
-  const transactionResults = await db.transaction(async (tx) => {
-    const madeByGroupId = await tx
-      .insert(groups)
-      .values({ ownerId: user.id })
-      .returning()
-      .then((res) => res[0]!.id);
 
-    await tx.insert(groupMembers).values({
-      userId: user.id,
-      groupId: madeByGroupId,
-    });
-
-    let lat = input.lat;
-    let lng = input.lng;
-    let radius = input.radius;
-    if (lat === undefined || lng === undefined || radius === undefined) {
-      const coordinates = await getCoordinates(input.location);
-      if (coordinates.location) {
-        lat = coordinates.location.lat;
-        lng = coordinates.location.lng;
-        if (coordinates.bounds) {
-          radius =
-            haversineDistance(
-              coordinates.bounds.northeast.lat,
-              coordinates.bounds.northeast.lng,
-              coordinates.bounds.southwest.lat,
-              coordinates.bounds.southwest.lng,
-            ) / 2;
-        } else {
-          radius = 10;
-        }
-      }
-    }
-    let latLngPoint = null;
-    if (lat && lng) {
-      latLngPoint = createLatLngGISPoint({ lat, lng });
-    }
-
-    if (!radius || !latLngPoint) {
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: "Failed to get coordinates for the location",
-      });
-    }
-
-    const request = await tx
-      .insert(requests)
-      .values({ ...input, madeByGroupId, latLngPoint, radius })
-      .returning({ latLngPoint: requests.latLngPoint, id: requests.id })
-      .then((res) => res[0]!);
-
-    //TO DO - figure out if i need to get coordinates here or elsewhere
-
-    // if (input.lat === undefined || input.lng === null || input.radius === null) {
-    //   const coordinates = await getCoordinates(input.location);
-    //   if (coordinates.location) {
-
-    //   }
-    // }
-
-    waitUntil(
-      scrapeDirectListings({
-        checkIn: input.checkIn,
-        checkOut: input.checkOut,
-        requestNightlyPrice:
-          input.maxTotalPrice / getNumNights(input.checkIn, input.checkOut),
-        requestId: request.id,
-        location: input.location,
-        latitude: lat,
-        longitude: lng,
-        numGuests: input.numGuests,
-      }).catch((error) => {
-        console.error("Error scraping listings: " + error);
-      }),
-    );
-
-    const eligibleProperties = await getPropertiesForRequest(
-      { ...input, id: request.id, latLngPoint: request.latLngPoint, radius },
-      { tx },
-    );
-
-    const numNights = getNumNights(input.checkIn, input.checkOut);
-    const requestedNightlyPrice = input.maxTotalPrice / numNights;
-
-    const eligiblePropertiesWithAutoOffers = eligibleProperties.filter(
-      (property) =>
-        property.autoOfferEnabled &&
-        property.originalListingId !== "877854804496138577",
-    );
-
-    const autoOfferPromises = eligiblePropertiesWithAutoOffers.map(
-      async (property) => {
-        try {
-          const propertyDetails = await tx.query.properties.findFirst({
-            where: eq(properties.id, property.id),
-          });
-
-          if (
-            propertyDetails?.autoOfferEnabled &&
-            propertyDetails.originalListingId &&
-            propertyDetails.originalListingPlatform === "Airbnb" &&
-            propertyDetails.discountTiers
-          ) {
-            const airbnbTotalPrice = await scrapeAirbnbPrice({
-              airbnbListingId: propertyDetails.originalListingId,
-              params: {
-                checkIn: input.checkIn,
-                checkOut: input.checkOut,
-                numGuests: input.numGuests,
-              },
-            });
-
-            if (!airbnbTotalPrice) {
-              return;
-            }
-            const airbnbNightlyPrice = airbnbTotalPrice / numNights;
-
-            const percentOff =
-              ((airbnbNightlyPrice - requestedNightlyPrice) /
-                airbnbNightlyPrice) *
-              100;
-
-            const daysUntilCheckIn = differenceInDays(
-              input.checkIn,
-              new Date(),
-            );
-
-            const applicableDiscount = propertyDetails.discountTiers.find(
-              (tier) => daysUntilCheckIn >= tier.days,
-            );
-
-            if (
-              applicableDiscount &&
-              percentOff <= applicableDiscount.percentOff
-            ) {
-              // create offer
-              const calculatedTravelerPrice = getTravelerOfferedPrice({
-                totalBasePriceBeforeFees: requestedNightlyPrice * numNights,
-              });
-
-              await tx.insert(offers).values({
-                requestId: request.id,
-                propertyId: property.id,
-                totalBasePriceBeforeFees: input.maxTotalPrice,
-                hostPayout: baseAmountToHostPayout(
-                  requestedNightlyPrice * numNights,
-                ),
-                calculatedTravelerPrice,
-                checkIn: input.checkIn,
-                checkOut: input.checkOut,
-              });
-            }
-          }
-        } catch (error) {
-          console.error(
-            `Error processing auto-offer for property ${property.id}:`,
-            error,
-          );
-        }
-      },
-    );
-
-    // Execute all auto offer promises simultaneously
-    const results = await Promise.allSettled(autoOfferPromises);
-
-    // Optional: You can process the results to log the outcome of each promise
-    results.forEach((result, index) => {
-      if (result.status === "rejected") {
-        console.error(
-          `Error with property ${eligiblePropertiesWithAutoOffers[index]?.id}:`,
-          result.reason,
-        );
-      }
-    });
-
-    const propertiesWithoutAutoOffers = eligibleProperties.filter(
-      (property) => !property.autoOfferEnabled,
-    );
-
-    if (!user.isBurner) {
-      await sendTextToHost({
-        matchingProperties: propertiesWithoutAutoOffers,
-        request: input,
-        tx,
-      });
-    }
-
-    return { requestId: request.id, madeByGroupId };
-  });
-
-  // Messaging based on user preferences or environment.
-  const name = user.name ?? user.email;
-  const pricePerNight =
-    input.maxTotalPrice / getNumNights(input.checkIn, input.checkOut);
-  const fmtdPrice = formatCurrency(pricePerNight);
-  const fmtdDateRange = formatDateRange(input.checkIn, input.checkOut);
-  const fmtdNumGuests = plural(input.numGuests ?? 1, "guest");
-
-  if (user.role !== "admin") {
-    await sendSlackMessage({
-      isProductionOnly: true,
-      channel: "tramona-bot",
-      text: [
-        `*${name} just made a request: ${input.location}*`,
-        `requested ${fmtdPrice}/night · ${fmtdDateRange} · ${fmtdNumGuests}`,
-        `<https://tramona.com/admin|Go to admin dashboard>`,
-      ].join("\n"),
-    });
-  }
-
-  return transactionResults;
-}

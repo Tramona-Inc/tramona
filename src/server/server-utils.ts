@@ -66,10 +66,10 @@ import {
 } from "./external-listings-scraping/airbnbScraper";
 import { getSerpUrl } from "./external-listings-scraping/airbnbScraper";
 import { createStripeConnectId } from "@/utils/stripe-utils";
-import { handleRequestSubmission } from "./api/routers/requestsRouter";
 import { zodEmail } from "@/utils/zod-utils";
 import { z } from "zod";
 import { createUserNameAndPic } from "@/components/activity-feed/admin/generationHelper";
+import { handleRequestSubmission } from "./request-utils";
 
 export const proxyAgent = new HttpsProxyAgent(env.PROXY_URL);
 
@@ -1434,20 +1434,3 @@ export async function generateFakeUser(email: string) {
   return fakeUser[0]!.id;
 }
 
-export async function generateFakeRequest(location: string, checkIn: Date, checkOut: Date, numGuests: number, maxTotalPrice: number) {
-  const fakeUserId = await generateFakeUser("fake-user@gmail.com");
-  const fakeUser = await db.query.users.findFirst({
-    where: eq(users.id, fakeUserId),
-  });
-  if (!fakeUser) {
-    throw new Error("Fake user not found");
-  }
-  const fakeRequest = await handleRequestSubmission({
-    location,
-    checkIn,
-    checkOut,
-    numGuests,
-    maxTotalPrice,
-  }, { user: fakeUser });
-  return fakeRequest;
-}

@@ -2,13 +2,13 @@ import { fakeRequests, properties } from "@/server/db/schema";
 import { eq, ne } from "drizzle-orm";
 import { db } from "@/server/db";
 
-import { generateFakeRequest } from "@/server/server-utils";
+import { generateFakeRequest } from "@/server/request-utils";
 
-function generateDateTimeInBetweenLast24HoursAndLast3Days() {
+function generateDateTimeInBetweenLast24HoursAndLast4Days() {
   const now = new Date();
   const last24Hours = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-  const last3Days = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000);
-  return new Date(last24Hours.getTime() + Math.random() * (last3Days.getTime() - last24Hours.getTime()));
+  const last4Days = new Date(now.getTime() - 4 * 24 * 60 * 60 * 1000);
+  return new Date(last24Hours.getTime() + Math.random() * (last4Days.getTime() - last24Hours.getTime()));
 }
 
 function generateRandomPriceBetween100And450(numNights: number) {
@@ -46,26 +46,28 @@ function generateRandomNumGuestsBetween1And4() {
 
 
 export default async function handler() {
-  // const hostLocations = await db.query.properties.findFirst({
-  //   columns: {
-  //     id: true,
-  //     city: true,
-  //   },
-  //   where: ne(properties.hostTeamId, 54),
-  // });
+  const hostLocations = await db.query.properties.findMany({
+    columns: {
+      id: true,
+      city: true,
+      stateCode: true,
+      country: true,
+    },
+    where: ne(properties.hostTeamId, 54),
+    limit: 2,
+  });
 
-  // if (!hostLocations) {
-  //   console.log("No host locations found");
-  //   return;
-  // }
+  if (!hostLocations) {
+    console.log("No host locations found");
+    return;
+  }
 
-  // console.log(hostLocations);
+  console.log(hostLocations);
 
-  // const uniqueCities = new Set(hostLocations.map((location) => location.city));
+  const uniqueCities = new Set(hostLocations.map((location) => location.city + ", " + location.stateCode + ", " + location.country));
 
-  // for (const city of hostLocations?.city) {
-  const city = "Los Angeles"
-    console.log(city);
+  for (const city of uniqueCities) {
+
     const cityLastSent = await db.query.fakeRequests.findFirst({
       columns: {
         lastSent: true,
@@ -73,14 +75,11 @@ export default async function handler() {
       where: eq(fakeRequests.city, city),
     }).then((res) => res?.lastSent);
 
-    if (cityLastSent && cityLastSent > generateDateTimeInBetweenLast24HoursAndLast3Days()) {
-      // continue;
-      return;
+    if (cityLastSent && cityLastSent > generateDateTimeInBetweenLast24HoursAndLast4Days()) {
+      continue;
     } else if (!cityLastSent) {
       const { checkInDate, checkOutDate, numNights } = generateRandomCheckInAndCheckOutDates();
-      console.log(checkInDate, checkOutDate, numNights);
       const randomPrice = generateRandomPriceBetween100And450(numNights);
-      console.log(randomPrice);
 
       await generateFakeRequest(city, checkInDate, checkOutDate, generateRandomNumGuestsBetween1And4(), randomPrice).then(async () => {
         await db
@@ -91,17 +90,15 @@ export default async function handler() {
       });
     } else {
       const { checkInDate, checkOutDate, numNights } = generateRandomCheckInAndCheckOutDates();
-      console.log(checkInDate, checkOutDate, numNights);
       const randomPrice = generateRandomPriceBetween100And450(numNights);
-      console.log(randomPrice);
       await generateFakeRequest(city, checkInDate, checkOutDate, generateRandomNumGuestsBetween1And4(), randomPrice).then(async () => {
         await db
-        .update(fakeRequests)
-        .set({
-          lastSent: new Date(),
-        })
+          .update(fakeRequests)
+          .set({
+            lastSent: new Date(),
+          })
           .where(eq(fakeRequests.city, city));
       });
-    //}
+    }
   }
 }
