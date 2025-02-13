@@ -1405,8 +1405,8 @@ export async function generateFakeUser(email: string) {
   let image = "";
 
   if (userData[0]) {
-    firstName = userData[0].name;
-    lastName = userData[0].name;
+    firstName = userData[0].name.split(" ")[0] ?? "";
+    lastName = userData[0].name.split(" ")[1] ?? "";
     image = userData[0].picture;
   }
   const fakeUser = await db.insert(users).values({

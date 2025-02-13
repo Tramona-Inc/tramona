@@ -46,17 +46,26 @@ function generateRandomNumGuestsBetween1And4() {
 
 
 export default async function handler() {
-  const hostLocations = await db.query.properties.findMany({
-    columns: {
-      id: true,
-      city: true,
-    },
-    where: ne(properties.hostTeamId, 54),
-  });
+  // const hostLocations = await db.query.properties.findFirst({
+  //   columns: {
+  //     id: true,
+  //     city: true,
+  //   },
+  //   where: ne(properties.hostTeamId, 54),
+  // });
 
-  const uniqueCities = new Set(hostLocations.map((location) => location.city));
+  // if (!hostLocations) {
+  //   console.log("No host locations found");
+  //   return;
+  // }
 
-  for (const city of uniqueCities) {
+  // console.log(hostLocations);
+
+  // const uniqueCities = new Set(hostLocations.map((location) => location.city));
+
+  // for (const city of hostLocations?.city) {
+  const city = "Los Angeles"
+    console.log(city);
     const cityLastSent = await db.query.fakeRequests.findFirst({
       columns: {
         lastSent: true,
@@ -65,11 +74,15 @@ export default async function handler() {
     }).then((res) => res?.lastSent);
 
     if (cityLastSent && cityLastSent > generateDateTimeInBetweenLast24HoursAndLast3Days()) {
-      continue;
+      // continue;
+      return;
     } else if (!cityLastSent) {
       const { checkInDate, checkOutDate, numNights } = generateRandomCheckInAndCheckOutDates();
+      console.log(checkInDate, checkOutDate, numNights);
+      const randomPrice = generateRandomPriceBetween100And450(numNights);
+      console.log(randomPrice);
 
-      await generateFakeRequest(city, checkInDate, checkOutDate, generateRandomNumGuestsBetween1And4(), generateRandomPriceBetween100And450(numNights)).then(async () => {
+      await generateFakeRequest(city, checkInDate, checkOutDate, generateRandomNumGuestsBetween1And4(), randomPrice).then(async () => {
         await db
           .insert(fakeRequests)
           .values({
@@ -78,7 +91,10 @@ export default async function handler() {
       });
     } else {
       const { checkInDate, checkOutDate, numNights } = generateRandomCheckInAndCheckOutDates();
-      await generateFakeRequest(city, checkInDate, checkOutDate, generateRandomNumGuestsBetween1And4(), generateRandomPriceBetween100And450(numNights)).then(async () => {
+      console.log(checkInDate, checkOutDate, numNights);
+      const randomPrice = generateRandomPriceBetween100And450(numNights);
+      console.log(randomPrice);
+      await generateFakeRequest(city, checkInDate, checkOutDate, generateRandomNumGuestsBetween1And4(), randomPrice).then(async () => {
         await db
         .update(fakeRequests)
         .set({
@@ -86,6 +102,6 @@ export default async function handler() {
         })
           .where(eq(fakeRequests.city, city));
       });
-    }
+    //}
   }
 }
