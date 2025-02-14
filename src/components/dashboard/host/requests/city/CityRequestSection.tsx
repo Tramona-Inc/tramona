@@ -7,10 +7,11 @@ import { Button } from "@/components/ui/button";
 
 import { type Property } from "@/server/db/schema";
 import { api } from "@/utils/api";
-import { useMemo } from "react";
 import { useRouter } from "next/router";
+import { useState, useMemo } from "react";
 import { useHostTeamStore } from "@/utils/store/hostTeamStore"; // Import store
 import NoRequestEmptyState from "../NoRequestEmptyState";
+import PaginationButtons from "@/components/_common/PaginationButtons";
 
 interface CityRequestSectionProps {
   setDialogOpen: (open: boolean) => void;
@@ -68,6 +69,21 @@ const CityRequestSection: React.FC<CityRequestSectionProps> = ({
 
   const currentCityRequests = cityRequestsData?.requests;
 
+  //pagination logic begins (used for PaginationButtons.tsx)
+  // todo: put all logic into PaginationButtons.tsx
+
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const ITEMS_PER_PAGE = 8;
+
+  const paginatedCityRequests = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    return currentCityRequests?.slice(startIndex, endIndex);
+  }, [currentCityRequests, currentPage, ITEMS_PER_PAGE]);
+
+  // pagination logic ends
+
   if (
     isRequestsLoading ||
     !router.isReady ||
@@ -81,9 +97,9 @@ const CityRequestSection: React.FC<CityRequestSectionProps> = ({
   }
   return (
     <div className="w-full">
-      {currentCityRequests.length > 0 ? (
+      {paginatedCityRequests && paginatedCityRequests.length > 0 ? (
         <div className="grid gap-y-4 overflow-x-hidden md:grid-cols-2 md:gap-4">
-          {currentCityRequests.map((requestData) => (
+          {paginatedCityRequests.map((requestData) => (
             <div key={requestData.request.id} className="mb-4">
               <HostRequestCard
                 request={requestData.request}
@@ -105,6 +121,13 @@ const CityRequestSection: React.FC<CityRequestSectionProps> = ({
       ) : (
         <NoRequestEmptyState />
       )}
+      <PaginationButtons
+        items={currentCityRequests}
+        setCurrentPage={setCurrentPage}
+        currentPage={currentPage}
+        itemsPerPage={ITEMS_PER_PAGE}
+        router={router}
+      />
     </div>
   );
 };

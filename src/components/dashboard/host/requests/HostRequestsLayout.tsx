@@ -163,13 +163,12 @@ const HostRequestsLayout = React.memo(function HostRequestsLayout({
 
   // <--------------------------------Render------------------>
   return (
-    <div className="mx-auto flex bg-white">
+    <div className="mx-auto flex">
       {showSidebar && (
-        <ScrollArea className="sticky h-screen-minus-header-n-footer w-screen overflow-auto border-r px-4 py-8 lg:w-96">
-          <div className="pb-4">
-            <h1 className="ml-3 text-3xl font-semibold">Requests</h1>
-
-            <div className="mt-6 border-b">
+        <div className="border-b border-r bg-white">
+          <div className="pt-6">
+            <h1 className="pl-6 text-3xl font-semibold">Requests</h1>
+            <div className="mt-6">
               <div className="flex w-full">
                 <button
                   onClick={() => handleTabChange("city")}
@@ -200,23 +199,26 @@ const HostRequestsLayout = React.memo(function HostRequestsLayout({
               </div>
             </div>
           </div>
-
-          {activeTab === "city" && separatedData ? (
-            <SidebarCity
-              selectedOption={selectedOption}
-              separatedData={separatedData}
-              offerData={offerData}
-              isLoading={isLoadingProperties}
-              initialSelectedCity={initialSelectedCity}
-            />
-          ) : (
-            <SidebarRequestToBook
-              properties={requestToBookData}
-              isLoading={isLoadingRequestToBook}
-              initialSelectedPropertyId={initialSelectedPropertyId}
-            />
-          )}
-        </ScrollArea>
+          <ScrollArea className="sticky h-screen w-screen overflow-auto border-t px-4 py-8 lg:w-96">
+            {activeTab === "city" ?  (
+              separatedData && (
+                <SidebarCity
+                  selectedOption={selectedOption}
+                  separatedData={separatedData}
+                  offerData={offerData}
+                  isLoading={isLoadingProperties}
+                  initialSelectedCity={initialSelectedCity}
+                />
+              )
+            ) : (
+              <SidebarRequestToBook
+                properties={requestToBookData}
+                isLoading={isLoadingRequestToBook}
+                initialSelectedPropertyId={initialSelectedPropertyId}
+              />
+            )}
+          </ScrollArea>
+        </div>
       )}
 
       {showChildren && (

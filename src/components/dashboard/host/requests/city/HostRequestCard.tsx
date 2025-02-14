@@ -36,8 +36,7 @@ import { differenceInHours, differenceInMinutes } from "date-fns";
 import { Separator } from "@/components/ui/separator";
 import { useState } from "react";
 
-
-function formatTimeLeft(createdAt: Date) {
+export function formatTimeLeft(createdAt: Date) {
   // Add 24 hours to creation date to get expiration
   const expirationTime = new Date(createdAt.getTime() + 24 * 60 * 60 * 1000);
   const now = new Date();
@@ -122,8 +121,10 @@ export default function HostRequestCard({
                 <Share2Icon className="size-4" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0 bg-black">
-              <div className="px-3 py-2 text-sm text-white font-medium">Link copied!</div>
+            <PopoverContent className="w-auto bg-black p-0">
+              <div className="px-3 py-2 text-sm font-medium text-white">
+                Link copied!
+              </div>
             </PopoverContent>
           </Popover>
         </div>

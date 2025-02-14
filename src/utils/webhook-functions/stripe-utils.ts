@@ -332,10 +332,12 @@ export async function finalizeTrip({
     });
   } else {
     //send text to traveler
-    await sendText({
-      to: user.phoneNumber!,
-      content: `Your request to book ${property.name} has been accepted by the host. You're going to ${property.city} from ${formatDateMonthDay(checkIn)} to ${formatDateMonthDay(checkOut)}!`,
-    });
+    if (!user.isBurner) {
+      await sendText({
+        to: user.phoneNumber!,
+        content: `Your request to book ${property.name} has been accepted by the host. You're going to ${property.city} from ${formatDateMonthDay(checkIn)} to ${formatDateMonthDay(checkOut)}!`,
+      });
+    }
   }
 }
 
