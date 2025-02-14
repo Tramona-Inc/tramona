@@ -41,8 +41,8 @@ const SidebarCity = React.memo(function SidebarCity({
   }, [initialSelectedCity]);
 
   const displayedData = useMemo(() => {
-    return separatedData && selectedOption !== "sent"
-      ? separatedData[selectedOption]
+    return selectedOption !== "sent"
+      ? separatedData?.[selectedOption]
       : offerData && selectedOption === "sent"
         ? Object.values(offerData[selectedOption])
         : undefined;

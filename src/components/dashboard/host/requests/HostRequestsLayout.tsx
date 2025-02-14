@@ -201,15 +201,14 @@ const HostRequestsLayout = React.memo(function HostRequestsLayout({
           </div>
           <ScrollArea className="sticky h-screen w-screen overflow-auto border-t px-4 py-8 lg:w-96">
             {activeTab === "city" ?  (
-              separatedData && (
                 <SidebarCity
                   selectedOption={selectedOption}
-                  separatedData={separatedData}
+                  separatedData={separatedData ?? null}
                   offerData={offerData}
                   isLoading={isLoadingProperties}
                   initialSelectedCity={initialSelectedCity}
                 />
-              )
+
             ) : (
               <SidebarRequestToBook
                 properties={requestToBookData}
