@@ -68,6 +68,7 @@ const CityRequestSection: React.FC<CityRequestSectionProps> = ({
   const currentCityRequests = cityRequestsData?.requests;
 
   //pagination logic begins (used for PaginationButtons.tsx)
+  // todo: put all logic into PaginationButtons.tsx
 
   const [currentPage, setCurrentPage] = useState(1);
 

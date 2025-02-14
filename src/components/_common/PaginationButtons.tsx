@@ -119,7 +119,7 @@ export default function PaginationButtons({
   return (
     <div>
       {totalPages > 1 && (
-        <Pagination>
+        <Pagination className="mt-8">
           <PaginationContent className="flex flex-wrap justify-center overflow-x-auto">
             <PaginationItem>
               <PaginationPrevious

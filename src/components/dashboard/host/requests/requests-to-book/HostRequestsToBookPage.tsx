@@ -77,7 +77,7 @@ export default function HostRequestsToBookPage({
     return propertyRequests?.activeRequestsToBook.slice(startIndex, endIndex);
   }, [propertyRequests?.activeRequestsToBook, currentPage, ITEMS_PER_PAGE]);
 
-  // pagination logic end
+  // pagination logic ends
 
   return (
     <div>
