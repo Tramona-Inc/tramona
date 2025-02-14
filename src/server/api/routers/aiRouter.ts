@@ -36,128 +36,130 @@ export const aiRouter = createTRPCRouter({
         radius: z.number().optional(), // You might remove radius from input as prompt is radius-free now
       }),
     )
-    .mutation(async ({ input }) => {
-      if (!input.requestedLocationLatLng) return;
-      let fullResponseText = "";
-      let thinkContent = "";
-      let identifiedCityName: string | null = null; // Variable to store identified city name
+    .mutation(
+      async ({ input }) => {
+        if (!input.requestedLocationLatLng) return;
+        let fullResponseText = "";
+        let thinkContent = "";
+        let identifiedCityName: string | null = null; // Variable to store identified city name
 
-      try {
-        console.log("Input to makeOllamaCall:", input); // Log input for debugging
+        // < _______________________________________________________  OLLAMA CALL _______________________________________________________ >
+        // try {
+        //   console.log("Input to makeOllamaCall:", input); // Log input for debugging
 
-        // --- 1. Call Ollama API ---
-        const ollamaResponse = await fetch(
-          "http://localhost:11434/api/generate",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              model: "DeepSeek-r1",
-              prompt: getPromptWithLatLngValues(
-                // Using the updated prompt
-                input.requestedLocationLatLng.lat,
-                input.requestedLocationLatLng.lng,
-              ),
-              temperature: 0.1, // Keep temperature low for focused output
+        //   // --- 1. Call Ollama API ---
+        //   const ollamaResponse = await fetch(
+        //     "http://localhost:11434/api/generate",
+        //     {
+        //       method: "POST",
+        //       headers: {
+        //         "Content-Type": "application/json",
+        //       },
+        //       body: JSON.stringify({
+        //         model: "DeepSeek-r1",
+        //         prompt: getPromptWithLatLngValues(
+        //           // Using the updated prompt
+        //           input.requestedLocationLatLng.lat,
+        //           input.requestedLocationLatLng.lng,
+        //         ),
+        //         temperature: 0.1, // Keep temperature low for focused output
+        //       }),
+        //     },
+        //   );
+
+        //   if (!ollamaResponse.ok) {
+        //     console.error(
+        //       "Ollama API Error:",
+        //       ollamaResponse.status,
+        //       ollamaResponse.statusText,
+        //     );
+        //     throw new TRPCError({
+        //       code: "INTERNAL_SERVER_ERROR",
+        //       message: "Error calling Ollama API",
+        //       cause: `Ollama API responded with status ${ollamaResponse.status} ${ollamaResponse.statusText}`,
+        //     });
+        //   }
+
+        //   // --- 2. Process ReadableStream --- (Stream processing remains the same)
+        //   if (ollamaResponse.body) {
+        //     // ... (ReadableStream processing code - unchanged from previous robust version) ... }
+
+        //     // --- 3. Extract <think> content and clean fullResponseText --- (Think tag extraction - unchanged)
+        //     const thinkTagRegex = /<think>(.*?)<\/think>/gs; // ... (Think tag regex and extraction - unchanged) ... }
+
+        //     const cleanedResponseText = fullResponseText
+        //       .replace(thinkTagRegex, "")
+        //       .trim();
+
+        //     console.log(fullResponseText);
+
+        //     // --- 4. Robust JSON Parsing: Split and Parse Objects --- (Robust JSON parsing - unchanged)
+        //     const suggestedNeighborhoods: NeighborhoodType[] = []; // ... (Robust JSON parsing loop - unchanged) ... }
+
+        //     if (suggestedNeighborhoods.length === 0) {
+        //       // Check for empty neighborhoods - unchanged
+        //       console.log("Ollama did not return any valid neighborhoods."); // ... (Error handling for no neighborhoods - unchanged) ... }
+
+        //       // --- 5. Extract IDENTIFIED CITY NAME from the FIRST object in suggestedNeighborhoods ---
+        //       if (
+        //         suggestedNeighborhoods[0]
+        //       ) {
+        //         identifiedCityName = suggestedNeighborhoods[0].city; // Extract city from the FIRST object
+        //         console.log("Identified City Name from AI:", identifiedCityName); // Log identified city
+        //       } else {
+        //         console.warn("Warning: No city name identified by AI."); // Warn if no city name found
+        //         identifiedCityName = null; // Set to null if not found
+        //      }
+
+        // <---------------------------------------------------- METHOD 2: Find appropriate cities
+
+        // <-----------------------------------------------------RETRIEVE EMAILS - FILTERED BY CITY------------------------------------>
+        let managers: PropertyManagerContact[] = []; // Initialize managers array
+        if (identifiedCityName) {
+          // Only query if we have a city name
+          managers = await db.query.propertyManagerContacts
+            .findMany({
+              where: eq(propertyManagerContacts.city, identifiedCityName), // ✅ FILTER MANAGERS BY CITY NAME
+            })
+            .then((res) =>
+              res.map((manager) => ({ ...manager, email: manager.email! })),
+            );
+          console.log(
+            `Found ${managers.length} managers in city: ${identifiedCityName}`,
+          ); // Log number of managers found
+        } else {
+          console.warn("Skipping database query - No city name identified."); // Warn if skipping query
+        }
+        //console.log(cleanedResponseText);
+        console.log("Managers to email:", managers); // Log managers to be emailed
+        // <------------------------------------------------------- EMAIL SECTION -------------------------------------------------->
+
+        for (const manager of managers) {
+          if (!manager.email) return;
+          await sendEmail({
+            // Email sending loop - unchanged
+            to: manager.email,
+            subject: `${manager.propertyManagerName} Potential Travelers looking for a stay in ${input.requestLocation}`,
+            content: RequestOutreachEmail({
+              requestLocation: input.requestLocation, // Email content still uses requestLocation for now
             }),
-          },
-        );
-
-        if (!ollamaResponse.ok) {
-          console.error(
-            "Ollama API Error:",
-            ollamaResponse.status,
-            ollamaResponse.statusText,
-          );
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Error calling Ollama API",
-            cause: `Ollama API responded with status ${ollamaResponse.status} ${ollamaResponse.statusText}`,
           });
         }
 
-        // --- 2. Process ReadableStream --- (Stream processing remains the same)
-        if (ollamaResponse.body) {
-          // ... (ReadableStream processing code - unchanged from previous robust version) ... }
-
-          // --- 3. Extract <think> content and clean fullResponseText --- (Think tag extraction - unchanged)
-          const thinkTagRegex = /<think>(.*?)<\/think>/gs; // ... (Think tag regex and extraction - unchanged) ... }
-
-          const cleanedResponseText = fullResponseText
-            .replace(thinkTagRegex, "")
-            .trim();
-
-          console.log(fullResponseText);
-
-          // --- 4. Robust JSON Parsing: Split and Parse Objects --- (Robust JSON parsing - unchanged)
-          const suggestedNeighborhoods: NeighborhoodType[] = []; // ... (Robust JSON parsing loop - unchanged) ... }
-
-          if (suggestedNeighborhoods.length === 0) {
-            // Check for empty neighborhoods - unchanged
-            console.log("Ollama did not return any valid neighborhoods."); // ... (Error handling for no neighborhoods - unchanged) ... }
-
-            // --- 5. Extract IDENTIFIED CITY NAME from the FIRST object in suggestedNeighborhoods ---
-            if (
-              suggestedNeighborhoods.length > 0 &&
-              suggestedNeighborhoods[0]
-            ) {
-              identifiedCityName = suggestedNeighborhoods[0].city; // Extract city from the FIRST object
-              console.log("Identified City Name from AI:", identifiedCityName); // Log identified city
-            } else {
-              console.warn("Warning: No city name identified by AI."); // Warn if no city name found
-              identifiedCityName = null; // Set to null if not found
-            }
-
-            // <-----------------------------------------------------RETRIEVE EMAILS - FILTERED BY CITY------------------------------------>
-            let managers: PropertyManagerContact[] = []; // Initialize managers array
-            if (identifiedCityName) {
-              // Only query if we have a city name
-              managers = await db.query.propertyManagerContacts
-                .findMany({
-                  where: eq(propertyManagerContacts.city, identifiedCityName), // ✅ FILTER MANAGERS BY CITY NAME
-                })
-                .then((res) =>
-                  res.map((manager) => ({ ...manager, email: manager.email! })),
-                );
-              console.log(
-                `Found ${managers.length} managers in city: ${identifiedCityName}`,
-              ); // Log number of managers found
-            } else {
-              console.warn(
-                "Skipping database query - No city name identified.",
-              ); // Warn if skipping query
-            }
-            console.log(cleanedResponseText);
-            console.log("Managers to email:", managers); // Log managers to be emailed
-            // <------------------------------------------------------- EMAIL SECTION -------------------------------------------------->
-
-            for (const manager of managers) {
-              if (!manager.email) return;
-              await sendEmail({
-                // Email sending loop - unchanged
-                to: manager.email,
-                subject: `Travelers looking for a stay in ${input.requestLocation}`, // Subject still uses requestLocation for now
-                content: RequestOutreachEmail({
-                  requestLocation: input.requestLocation, // Email content still uses requestLocation for now
-                }),
-              });
-            }
-
-            return {
-              suggestedNeighborhoods: suggestedNeighborhoods, // Return array of neighborhoods (including city as first element)
-              think: thinkContent.trim(), // Return think content
-              identifiedCity: identifiedCityName, // Return identified city name in the response
-              emailedManagerCount: managers.length, // Return the count of emailed managers
-            };
-          }
-        }
-      } catch (error) {
-        // Error handling - unchanged
-        console.log(error);
-      }
-    }),
+        return {
+          suggestedNeighborhoods: suggestedNeighborhoods, // Return array of neighborhoods (including city as first element)
+          think: thinkContent.trim(), // Return think content
+          identifiedCity: identifiedCityName, // Return identified city name in the response
+          emailedManagerCount: managers.length, // Return the count of emailed managers
+        };
+      },
+      //   }
+      // }
+      // catch (error) {
+      //   // Error handling - unchanged
+      //   console.log(error);
+      // }
+    ),
 });
 
 function getPromptWithLatLngValues(latitude: number, longitude: number) {
