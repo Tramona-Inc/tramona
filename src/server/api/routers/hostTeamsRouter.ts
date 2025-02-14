@@ -7,6 +7,7 @@ import {
   hostTeamMembers,
   hostTeams,
   messages,
+  properties,
   users,
 } from "@/server/db/schema";
 import { db } from "@/server/db";
@@ -14,7 +15,7 @@ import { sendEmail } from "@/server/server-utils";
 import { TRPCError } from "@trpc/server";
 import { add, subMinutes } from "date-fns";
 import { and, eq, or, sql, desc } from "drizzle-orm";
-import { z } from "zod";
+import { promise, z } from "zod";
 import {
   coHostProcedure,
   createTRPCRouter,
@@ -789,4 +790,38 @@ export const hostTeamsRouter = createTRPCRouter({
       .set({ name: input.teamName })
       .where(eq(hostTeams.id, input.currentHostTeamId));
   }),
+
+  getHostTeam: protectedProcedure
+    .input(z.object({ currentHostTeamId: z.number() }))
+    .query(async ({ input, ctx }) => {
+      return await ctx.db.query.hostTeams.findFirst({
+        where: eq(hostTeams.id, input.currentHostTeamId),
+      });
+    }),
+
+  updateHostTeamWithOfferPercentage: protectedProcedure
+    .input(
+      z.object({
+        id: z.number(),
+        offerPercentage: z.number(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db
+        .update(hostTeams)
+        .set({ hasOfferPercentage: true })
+        .where(eq(hostTeams.id, input.id));
+      const hostTeamProperties = await ctx.db.query.properties.findMany({
+        where: eq(properties.hostTeamId, input.id),
+      });
+      await Promise.all(
+        hostTeamProperties.map(async (property) => {
+          await ctx.db
+            .update(properties)
+            .set({ priceRestriction: input.offerPercentage })
+            .where(eq(properties.id, property.id));
+        }),
+      );
+    }),
+
 });

@@ -20,6 +20,7 @@ import {
   lt,
   lte,
   notExists,
+  notInArray,
   or,
   sql,
   type SQL,
@@ -794,35 +795,43 @@ export async function getPropertiesForRequest(
   //   }
   // }
 
-  const propertyisAvailable = notExists(
-    tx
-      .select()
-      .from(bookedDates)
-      .where(
-        and(
-          eq(bookedDates.propertyId, properties.id),
-          between(bookedDates.date, req.checkIn, req.checkOut),
+  const checkInDate = req.checkIn.toISOString();
+  const checkOutDate = req.checkOut.toISOString();
+
+  const conflictingPropertyIds = await db.query.reservedDateRanges.findMany(
+    {
+      columns: { propertyId: true },
+      where: and(
+        or(
+          and(
+            lte(reservedDateRanges.start, checkInDate),
+            gte(reservedDateRanges.end, checkInDate),
+          ),
+          and(
+            lte(reservedDateRanges.start, checkOutDate),
+            gte(reservedDateRanges.end, checkOutDate),
+          ),
+          and(
+            gte(reservedDateRanges.start, checkInDate),
+            lte(reservedDateRanges.end, checkOutDate),
+          ),
         ),
       ),
+    },
+  );
+
+  // Extract conflicting property IDs into an array
+  const conflictingIds = conflictingPropertyIds.map(
+    (item) => item.propertyId,
   );
 
   const numberOfNights = getNumNights(req.checkIn, req.checkOut);
 
-  return await tx.query.properties.findMany({
+  const filteredProperties = await tx.query.properties.findMany({
     where: and(
       propertyIsNearRequest,
-      propertyisAvailable,
+      notInArray(properties.id, conflictingIds),
       ageRestrictionCheck,
-      or(
-        isNull(properties.priceRestriction), // Include properties with no price restriction
-        and(
-          isNotNull(properties.priceRestriction),
-          lte(
-            properties.priceRestriction,
-            Math.round((req.maxTotalPrice / numberOfNights) * 1.15),
-          ),
-        ),
-      ),
     ),
     columns: {
       id: true,
@@ -830,8 +839,48 @@ export async function getPropertiesForRequest(
       autoOfferEnabled: true,
       discountTiers: true,
       originalListingId: true,
+      hospitableListingId: true,
+      priceRestriction: true,
     },
   });
+
+  const fetchNightlyPrices = async (listingId: string, checkIn: string, checkOut: string) => {
+    const url = `https://connect.hospitable.com/api/v1/listings/${listingId}/calendar?start_date=${checkIn}&end_date=${checkOut}`;
+    const response = await fetch(url, {
+      headers: { Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}` },
+    });
+
+    if (!response.ok) return null;
+
+    const data = await response.json() as HospitableCalendarResponse;
+    if (!data?.data?.dates) return null;
+
+    // Extract nightly prices (ignoring availability)
+    const nightlyPrices = data.data.dates.map((day: any) => day.price.amount / 100); // Convert cents to dollars
+
+    return nightlyPrices.length ? nightlyPrices : null;
+  };
+
+  const propertiesWithValidPricing = [];
+
+  for (const property of filteredProperties) {
+    if (!property.hospitableListingId) continue; // Skip if no Hospitable listing ID
+
+    const nightlyPrices = await fetchNightlyPrices(property.hospitableListingId, req.checkIn.toISOString(), req.checkOut.toISOString());
+    if (!nightlyPrices) continue; // Skip if no pricing data available
+
+    const avgNightlyPrice = nightlyPrices.reduce((sum: number, price: number) => sum + price, 0) / nightlyPrices.length;
+    const minAllowedPrice = avgNightlyPrice * (1 - property.priceRestriction / 100);
+
+    if (req.maxTotalPrice / numberOfNights >= minAllowedPrice) {
+      propertiesWithValidPricing.push(property);
+    }
+  }
+
+  return propertiesWithValidPricing;
+
+
+
 }
 
 export async function getAdminId() {

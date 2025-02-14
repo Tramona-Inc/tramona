@@ -20,8 +20,9 @@ export default function AttentionOverviewSection({
     !isLoading &&
     (!allNotifications ||
       (allNotifications.unSyncedProperties.length === 0 &&
-        allNotifications.propertiesWithNoBookItNow.length === 0 &&
-        allNotifications.propertiesWithNoMinPrice.length === 0))
+        allNotifications.propertiesWithNoBookItNow.length === 0))
+        //  &&
+        // allNotifications.propertiesWithNoMinPrice.length === 0))
   ) {
     return null;
   }
@@ -51,7 +52,7 @@ export default function AttentionOverviewSection({
               length={allNotifications.propertiesWithNoBookItNow.length}
             />
           ))}
-          {allNotifications?.propertiesWithNoMinPrice.map((property) => (
+          {/* {allNotifications?.propertiesWithNoMinPrice.map((property) => (
             <NotificationCard
               key={property.id}
               action="Set Minimum Price for"
@@ -60,7 +61,7 @@ export default function AttentionOverviewSection({
               className="col-span-1"
               length={allNotifications.propertiesWithNoMinPrice.length}
             />
-          ))}
+          ))} */}
         </>
       ) : (
         <>

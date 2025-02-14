@@ -674,25 +674,36 @@ export const propertiesRouter = createTRPCRouter({
     }),
 
   getHostPropertiesWithRequests: hostProcedure
-    .input(z.object({ currentHostTeamId: z.number() }))
+    .input(z.object({ currentHostTeamId: z.number(), city: z.string().optional() }))
     .query(async ({ input }) => {
+      const whereConditions = [
+        eq(properties.hostTeamId, input.currentHostTeamId),
+        eq(properties.status, "Listed"),
+      ];
+
+      if (input.city) {
+        whereConditions.push(eq(properties.city, input.city));
+      }
+
       const hostProperties = await db.query.properties.findMany({
-        where: and(
-          eq(properties.hostTeamId, input.currentHostTeamId),
-          eq(properties.status, "Listed"),
-        ),
+        where: and(...whereConditions),
       });
 
       const hostRequests = await getRequestsForProperties(hostProperties);
 
       const groupedByCity: HostRequestsPageData[] = [];
 
-      const citiesSet = new Set(
-        hostProperties.map((property) => property.city),
-      );
-      citiesSet.forEach((city) => {
-        groupedByCity.push({ city, requests: [] });
-      });
+      if (input.city) {
+        // If filtering by a single city, initialize it directly
+        groupedByCity.push({ city: input.city, requests: [] });
+      } else {
+        // Otherwise, create groups for all cities
+        const citiesSet = new Set(hostProperties.map((property) => property.city));
+        citiesSet.forEach((city) => {
+          groupedByCity.push({ city, requests: [] });
+        });
+      }
+
       const findOrCreateCityGroup = (city: string) => {
         let cityGroup = groupedByCity.find((group) => group.city === city);
         if (!cityGroup) {

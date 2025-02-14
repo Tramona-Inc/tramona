@@ -51,7 +51,10 @@ const CityRequestSection: React.FC<CityRequestSectionProps> = ({
 
   const { isLoading: isRequestsLoading } =
     api.properties.getHostPropertiesWithRequests.useQuery(
-      { currentHostTeamId: Number(currentHostTeamId!) },
+      {
+        currentHostTeamId: Number(currentHostTeamId!),
+        city: city,
+      },
       {
         enabled: !!currentHostTeamId,
         onSuccess: (fetchedProperties) => {

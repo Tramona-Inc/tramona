@@ -495,21 +495,21 @@ export const hostsRouter = createTRPCRouter({
           eq(properties.bookItNowEnabled, false),
         ),
       });
-      const propertiesWithNoMinPrice = await db.query.properties.findMany({
-        where: and(
-          eq(properties.hostTeamId, input.currentHostTeamId),
-          eq(properties.priceRestriction, 0),
-        ),
-      })
+      // const propertiesWithNoMinPrice = await db.query.properties.findMany({
+      //   where: and(
+      //     eq(properties.hostTeamId, input.currentHostTeamId),
+      //     eq(properties.priceRestriction, 0),
+      //   ),
+      // })
       return {
         unSyncedProperties,
         propertiesWithNoBookItNow,
-        propertiesWithNoMinPrice,
+        // propertiesWithNoMinPrice,
       };
     }),
 
 
-  // edit this for admin/feed 
+  // edit this for admin/feed
   getAllHosts: protectedProcedure.query(async ({ ctx }) => {
     const res = await ctx.db.query.hostProfiles.findMany({
       columns: {
