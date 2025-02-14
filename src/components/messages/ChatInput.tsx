@@ -153,8 +153,8 @@ export default function ChatInput({
 
         if (unreadParticipants.length > 0) {
           void Promise.all(
-            unreadParticipants.map(async ({ phoneNumber, isWhatsApp, id }) => {
-              if (phoneNumber) {
+            unreadParticipants.map(async ({ phoneNumber, isWhatsApp, id, isBurner }) => {
+              if (phoneNumber && !isBurner) {
                 if (isWhatsApp) {
                   await twilioWhatsAppMutation.mutateAsync({
                     templateId: "HXae95c5b28aa2f5448a5d63ee454ccb74",

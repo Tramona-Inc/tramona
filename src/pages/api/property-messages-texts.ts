@@ -15,7 +15,7 @@ export default async function handler() {
           with: { hostTeam: { columns: { id: true } } },
         },
         traveler: {
-          columns: { id: true, phoneNumber: true },
+          columns: { id: true, phoneNumber: true, isBurner: true },
         },
         messages: {
           columns: { authorId: true, createdAt: true },
@@ -82,13 +82,15 @@ export default async function handler() {
   );
 
   for (const traveler of travelers) {
-    const numUnreadMessages = sumBy(
-      travelersConvosWithUnreads.filter((c) => c.traveler.id === traveler.id),
-      (c) => c.messages.length,
+    if (!traveler.isBurner) {
+      const numUnreadMessages = sumBy(
+        travelersConvosWithUnreads.filter((c) => c.traveler.id === traveler.id),
+        (c) => c.messages.length,
     );
     await sendText({
       to: traveler.phoneNumber!,
-      content: `You have ${numUnreadMessages} unread messages, visit tramona.com/messages to view`,
-    });
+        content: `You have ${numUnreadMessages} unread messages, visit tramona.com/messages to view`,
+      });
+    }
   }
 }
