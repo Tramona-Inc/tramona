@@ -25,12 +25,14 @@ import { calendarRouter } from "./routers/calendarRouter";
 import { requestsToBookRouter } from "./routers/requestsToBookRouter";
 import { claimsRouter } from "./routers/claimsRouter";
 import { propertyMessagesRouter } from "./routers/propertyMessagesRouter";
+import { aiRouter } from "./routers/aiRouter";
 /**
  * This is the primary router for your server.
  *
  * All routers added in /api/routers should be manually added here.
  */
 export const appRouter = createTRPCRouter({
+  ai: aiRouter,
   users: usersRouter,
   hosts: hostsRouter,
   referralCodes: referralCodesRouter,
