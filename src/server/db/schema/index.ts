@@ -13,6 +13,7 @@ export * from "./tables/hostProfiles";
 export * from "./tables/hostTeams";
 export * from "./tables/emergencyContacts";
 export * from "./tables/messages";
+export * from "./tables/outreach";
 export * from "./tables/propertyMessages";
 export * from "./tables/offers";
 export * from "./tables/properties";
