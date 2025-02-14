@@ -818,7 +818,7 @@ export const hostTeamsRouter = createTRPCRouter({
         hostTeamProperties.map(async (property) => {
           await ctx.db
             .update(properties)
-            .set({ priceRestriction: input.offerPercentage })
+            .set({ offerDiscountPercentage: input.offerPercentage })
             .where(eq(properties.id, property.id));
         }),
       );

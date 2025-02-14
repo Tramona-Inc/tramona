@@ -12,7 +12,7 @@ import { useRouter } from "next/router";
 import React from "react";
 
 interface SidebarCityProps {
-  selectedOption: "normal" | "outsidePriceRestriction" | "sent";
+  selectedOption: "normal" | "other" | "sent";
   separatedData: SeparatedData | null;
   offerData: RequestsPageOfferData | null;
   isLoading: boolean;
@@ -120,7 +120,7 @@ const SidebarCity = React.memo(function SidebarCity({
               query:
                 selectedOption === "normal"
                   ? { option: "normal" }
-                  : { option: "outsidePriceRestriction" },
+                  : { option: "other" },
             }}
             className="block"
             key={index}

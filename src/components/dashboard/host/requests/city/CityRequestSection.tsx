@@ -42,7 +42,7 @@ const CityRequestSection: React.FC<CityRequestSectionProps> = ({
   //   undefined,
   // );
 
-  const priceRestriction = option === "outsidePriceRestriction";
+  const priceRestriction = option === "other";
 
   const { data: separatedData, isLoading: isRequestsLoading } =
     api.properties.getHostPropertiesWithRequests.useQuery(
@@ -62,7 +62,7 @@ const CityRequestSection: React.FC<CityRequestSectionProps> = ({
     );
 
   const requestsWithProperties = priceRestriction
-    ? separatedData?.outsidePriceRestriction
+    ? separatedData?.other
     : separatedData?.normal;
 
   const cityRequestsData = requestsWithProperties?.find((p) => p.city === city);

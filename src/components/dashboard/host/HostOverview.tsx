@@ -34,10 +34,9 @@ export default function HostOverview() {
   });
   const onSubmit = async (data: {offerPercentage: number}) => {
 
-    console.log(data);
     updateHostTeam.mutate({
       id: currentHostTeamId!,
-      offerPercentage: data.offerPercentage * 100,
+      offerPercentage: data.offerPercentage,
     });
     setOpen(false);
   };

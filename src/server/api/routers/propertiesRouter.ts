@@ -705,17 +705,14 @@ export const propertiesRouter = createTRPCRouter({
           if (property.ageRestriction && travelersAge < property.ageRestriction) {
             isValid = false;
           }
-          console.log(isValid);
 
           // Check price validity
-          const nightlyPrices = await fetchNightlyPrices(property.hospitableListingId, request.checkIn.toISOString(), request.checkOut.toISOString());
-          if (!nightlyPrices) {
+          const avgNightlyPrice = await getPropertyOriginalPrice(property, { checkIn: request.checkIn.toISOString(), checkOut: request.checkOut.toISOString(), numGuests: request.numGuests });
+          if (!avgNightlyPrice) {
             isValid = false;
           } else {
-            const avgNightlyPrice = nightlyPrices.reduce((sum, price) => sum + price, 0) / nightlyPrices.length;
-            console.log(avgNightlyPrice);
-            const minAllowedPrice = avgNightlyPrice * (1 - property.priceRestriction / 100);
-            console.log(minAllowedPrice);
+            const offerDiscountPercentage = property.offerDiscountPercentage;
+            const minAllowedPrice = avgNightlyPrice * (1 - offerDiscountPercentage / 100);
             if (requestedNightlyPrice < minAllowedPrice) {
               isValid = false;
             }
@@ -764,7 +761,7 @@ export const propertiesRouter = createTRPCRouter({
 
       return {
         normal: normalGroupedByCity,
-        outsidePriceRestriction: outsidePriceRestrictionGroupedByCity,
+        other: outsidePriceRestrictionGroupedByCity,
       };
     }),
 

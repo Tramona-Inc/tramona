@@ -616,30 +616,30 @@ export async function getRequestsForProperties(
               ),
             ),
         ),
-        notExists(
-          db
-            .select()
-            .from(reservedDateRanges)
-            .where(
-              and(
-                eq(reservedDateRanges.propertyId, property.id),
-                or(
-                  and(
-                    gte(reservedDateRanges.start, requests.checkIn),
-                    lt(reservedDateRanges.start, requests.checkOut),
-                  ),
-                  and(
-                    gt(reservedDateRanges.end, requests.checkIn),
-                    lte(reservedDateRanges.end, requests.checkOut),
-                  ),
-                  and(
-                    lte(reservedDateRanges.start, requests.checkIn),
-                    gte(reservedDateRanges.end, requests.checkOut),
-                  ),
-                ),
-              ),
-            ),
-        ),
+        // notExists(
+        //   db
+        //     .select()
+        //     .from(reservedDateRanges)
+        //     .where(
+        //       and(
+        //         eq(reservedDateRanges.propertyId, property.id),
+        //         or(
+        //           and(
+        //             gte(reservedDateRanges.start, requests.checkIn),
+        //             lt(reservedDateRanges.start, requests.checkOut),
+        //           ),
+        //           and(
+        //             gt(reservedDateRanges.end, requests.checkIn),
+        //             lte(reservedDateRanges.end, requests.checkOut),
+        //           ),
+        //           and(
+        //             lte(reservedDateRanges.start, requests.checkIn),
+        //             gte(reservedDateRanges.end, requests.checkOut),
+        //           ),
+        //         ),
+        //       ),
+        //     ),
+        // ),
       ),
       with: {
         madeByGroup: {
@@ -660,7 +660,6 @@ export async function getRequestsForProperties(
         },
       },
     });
-    console.log(requestsForProperty, "requestsForProperty");
 
     // Store the matched requests along with the property
     for (const request of requestsForProperty) {
@@ -820,7 +819,7 @@ export async function getPropertiesForRequest(
       discountTiers: true,
       originalListingId: true,
       hospitableListingId: true,
-      priceRestriction: true,
+      offerDiscountPercentage: true,
     },
   });
 
@@ -831,9 +830,9 @@ export async function getPropertiesForRequest(
 
     const nightlyPrices = await fetchNightlyPrices(property.hospitableListingId, req.checkIn.toISOString(), req.checkOut.toISOString());
     if (!nightlyPrices) continue; // Skip if no pricing data available
-
+    const offerDiscountPercentage = property.offerDiscountPercentage;
     const avgNightlyPrice = nightlyPrices.reduce((sum: number, price: number) => sum + price, 0) / nightlyPrices.length;
-    const minAllowedPrice = avgNightlyPrice * (1 - property.priceRestriction / 100);
+    const minAllowedPrice = avgNightlyPrice * (1 - offerDiscountPercentage / 100);
 
     if (req.maxTotalPrice / numberOfNights >= minAllowedPrice) {
       propertiesWithValidPricing.push(property);
@@ -848,6 +847,8 @@ export const fetchNightlyPrices = async (listingId: string, checkIn: string, che
   const response = await fetch(url, {
     headers: { Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}` },
   });
+
+  console.log(response, "response");
 
   if (!response.ok) return null;
 
@@ -1023,7 +1024,7 @@ export async function getPropertyOriginalPrice(
 
 export interface SeparatedData {
   normal: HostRequestsPageData[];
-  outsidePriceRestriction: HostRequestsPageData[];
+  other: HostRequestsPageData[];
 }
 
 export interface RequestsPageOfferData {

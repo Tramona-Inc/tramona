@@ -35,7 +35,7 @@ const alerts = [
 ];
 
 type TabType = "city" | "property-bids";
-type SelectedOptionType = "normal" | "outsidePriceRestriction" | "sent";
+type SelectedOptionType = "normal" | "other" | "sent";
 
 const HostRequestsLayout = React.memo(function HostRequestsLayout({
   isIndex,
@@ -260,13 +260,13 @@ const HostRequestsLayout = React.memo(function HostRequestsLayout({
                   </div>
                   <Button
                     variant={
-                      selectedOption === "outsidePriceRestriction"
+                      selectedOption === "other"
                         ? "primary"
                         : "white"
                     }
                     className="rounded-full shadow-md"
                     onClick={() =>
-                      handleOptionChange("outsidePriceRestriction")
+                      handleOptionChange("other")
                     }
                   >
                     Other
@@ -284,7 +284,7 @@ const HostRequestsLayout = React.memo(function HostRequestsLayout({
                         selectedOption === "normal"
                       ? alerts[1]?.text
                       : activeTab === "city" &&
-                          selectedOption === "outsidePriceRestriction"
+                          selectedOption === "other"
                         ? alerts[2]?.text
                         : alerts[3]?.text}
                 </AlertDescription>
