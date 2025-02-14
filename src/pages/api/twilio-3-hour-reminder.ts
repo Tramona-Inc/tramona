@@ -48,6 +48,7 @@ export default async function handler(res: NextApiResponse) {
           userId: groupMembers.userId,
           isWhatsApp: users.isWhatsApp,
           phoneNumber: users.phoneNumber,
+          isBurner: users.isBurner,
         })
         .from(groupMembers)
         .leftJoin(users, eq(groupMembers.userId, users.id))
@@ -65,6 +66,9 @@ export default async function handler(res: NextApiResponse) {
       //   .where(and(eq(bids.id, bid.bid_id), ne(groups.ownerId, bid.user_id)));
 
       for (const member of groupMembersWithUnconfirmedRequests) {
+        if (member.isBurner) {
+          continue;
+        }
         if (member.isWhatsApp) {
           await sendWhatsApp({
             templateId: "HX5a68298da1bf273a3e5fcb1211b17d0a",

@@ -285,7 +285,7 @@ export default function AdminOfferForm({
       : [];
 
     for (const traveler of travelers) {
-      if (traveler.phoneNumber) {
+      if (traveler.phoneNumber && !traveler.isBurner) {
         if (traveler.isWhatsApp) {
           await twilioWhatsAppMutation.mutateAsync({
             templateId: "HXfeb90955f0801d551e95a6170a5cc015",

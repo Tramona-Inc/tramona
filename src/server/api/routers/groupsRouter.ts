@@ -221,7 +221,7 @@ export const groupsRouter = createTRPCRouter({
       return await ctx.db.query.groupMembers
         .findMany({
           columns: {},
-          with: { user: { columns: { phoneNumber: true, isWhatsApp: true } } },
+          with: { user: { columns: { phoneNumber: true, isWhatsApp: true, isBurner: true } } },
           where: eq(groupMembers.groupId, groupId),
         })
         .then((res) => res.map((member) => member.user));

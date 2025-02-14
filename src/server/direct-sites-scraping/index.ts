@@ -137,7 +137,7 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
     .findFirst({
       where: eq(requests.id, options.requestId!),
       with: {
-        madeByGroup: { with: { owner: { columns: { phoneNumber: true } } } },
+        madeByGroup: { with: { owner: { columns: { phoneNumber: true, isBurner: true } } } },
       },
     })
     .then((res) => res?.madeByGroup.owner);
@@ -206,7 +206,7 @@ export const scrapeDirectListings = async (options: ScraperOptions) => {
     wideMatches.length === 0
   ) {
     console.log("Case 1: No properties in the area");
-    if (userFromRequest) {
+    if (userFromRequest && !userFromRequest.isBurner) {
       await sendText({
         to: userFromRequest.phoneNumber!,
         content: `Tramona: We’re not live in ${options.location} just yet, but we’re actively working on it! We’ll send you an email as soon as we launch there.\n\nIn the meantime, if you’re flexible with your travel plans, feel free to submit a request for a different location and discover the great deals our hosts can offer you.\n\nThank you for your interest in Tramona!`,
