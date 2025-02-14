@@ -41,7 +41,7 @@ import { scrapeDirectListings } from "@/server/direct-sites-scraping";
 import { createNormalDistributionDates } from "@/server/server-utils";
 import { scrapeAirbnbPrice } from "@/server/scrapePrice";
 import { breakdownPaymentByOffer } from "@/utils/payment-utils/paymentBreakdown";
-import { HostRequestsPageOfferData } from "./propertiesRouter";
+import { HostRequestsPageOfferData } from "@/server/types/propertiesRouter";
 
 export const offersRouter = createTRPCRouter({
   accept: protectedProcedure

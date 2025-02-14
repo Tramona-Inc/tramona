@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { plural } from "@/utils/utils";
-import { separateByPriceAndAgeRestriction } from "@/utils/utils";
 import EmptyRequestState from "./EmptyRequestState";
 import SidebarPropertySkeleton from "./SidebarPropertySkeleton";
 import { range } from "lodash";

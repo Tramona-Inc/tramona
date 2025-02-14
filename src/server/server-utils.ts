@@ -4,35 +4,28 @@ import { env } from "@/env";
 import { type ReactElement } from "react";
 import { Twilio } from "twilio";
 import { db } from "./db";
-import { waitUntil } from "@vercel/functions";
-import { formatCurrency, getNumNights, plural } from "@/utils/utils";
+import { getNumNights } from "@/utils/utils";
 import axiosRetry from "axios-retry";
 import {
-  and,
-  between,
-  eq,
+  and, eq,
   exists,
   gt,
   gte,
-  inArray,
-  isNotNull,
-  isNull,
+  inArray, isNull,
   lt,
   lte,
   notExists,
   notInArray,
   or,
   sql,
-  type SQL,
+  type SQL
 } from "drizzle-orm";
 import {
   type NewProperty,
   type Property,
   type User,
   type Request,
-  type RequestsToBook,
-  bookedDates,
-  groupInvites,
+  type RequestsToBook, groupInvites,
   groupMembers,
   groups,
   hostTeamMembers,
@@ -46,7 +39,7 @@ import {
   hostTeams,
   requestsToBook,
   hostProfiles,
-  reservedDateRanges,
+  reservedDateRanges
 } from "./db/schema";
 import { getAddress, getCoordinates } from "./google-maps";
 import axios from "axios";
@@ -57,7 +50,7 @@ import { HOST_MARKUP, TRAVELER_MARKUP } from "@/utils/constants";
 import {
   HostRequestsPageData,
   HostRequestsPageOfferData,
-} from "./api/routers/propertiesRouter";
+} from "@/server/types/propertiesRouter";
 import { Session } from "next-auth";
 import { calculateTotalTax } from "@/utils/payment-utils/taxData";
 import {
@@ -559,7 +552,6 @@ export async function getRequestsForProperties(
     };
   }[] = [];
 
-  console.log(hostProperties, "hostProperties");
   await Promise.all(hostProperties.map(async (property) => {
     const requestIsNearProperty = sql`
       ST_DWithin(
@@ -706,22 +698,6 @@ export async function getPropertiesForRequest(
 ) {
   let propertyIsNearRequest: SQL | undefined = sql`FALSE`;
 
-  console.log("before age restriction check");
-
-  const calculateAge = (dateOfBirth: string) => {
-    const today = new Date();
-    const birthDate = new Date(dateOfBirth);
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    if (
-      monthDiff < 0 ||
-      (monthDiff === 0 && today.getDate() < birthDate.getDate())
-    ) {
-      age--;
-    }
-    return age;
-  };
-
   const userAge = await tx.query.requests
     .findFirst({
       where: eq(requests.id, req.id),
@@ -844,23 +820,6 @@ export async function getPropertiesForRequest(
     },
   });
 
-  const fetchNightlyPrices = async (listingId: string, checkIn: string, checkOut: string) => {
-    const url = `https://connect.hospitable.com/api/v1/listings/${listingId}/calendar?start_date=${checkIn}&end_date=${checkOut}`;
-    const response = await fetch(url, {
-      headers: { Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}` },
-    });
-
-    if (!response.ok) return null;
-
-    const data = await response.json() as HospitableCalendarResponse;
-    if (!data?.data?.dates) return null;
-
-    // Extract nightly prices (ignoring availability)
-    const nightlyPrices = data.data.dates.map((day: any) => day.price.amount / 100); // Convert cents to dollars
-
-    return nightlyPrices.length ? nightlyPrices : null;
-  };
-
   const propertiesWithValidPricing = [];
 
   for (const property of filteredProperties) {
@@ -878,10 +837,38 @@ export async function getPropertiesForRequest(
   }
 
   return propertiesWithValidPricing;
-
-
-
 }
+
+export const fetchNightlyPrices = async (listingId: string, checkIn: string, checkOut: string) => {
+  const url = `https://connect.hospitable.com/api/v1/listings/${listingId}/calendar?start_date=${checkIn}&end_date=${checkOut}`;
+  const response = await fetch(url, {
+    headers: { Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}` },
+  });
+
+  if (!response.ok) return null;
+
+  const data = await response.json() as HospitableCalendarResponse;
+  if (!data?.data?.dates) return null;
+
+  // Extract nightly prices (ignoring availability)
+  const nightlyPrices = data.data.dates.map((day) => day.price.amount / 100); // Convert cents to dollars
+
+  return nightlyPrices.length ? nightlyPrices : null;
+};
+
+export const calculateAge = (dateOfBirth: string) => {
+  const today = new Date();
+  const birthDate = new Date(dateOfBirth);
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  if (
+    monthDiff < 0 ||
+    (monthDiff === 0 && today.getDate() < birthDate.getDate())
+  ) {
+    age--;
+  }
+  return age;
+};
 
 export async function getAdminId() {
   return await db.query.users

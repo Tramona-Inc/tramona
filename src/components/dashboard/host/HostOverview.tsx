@@ -35,7 +35,7 @@ export default function HostOverview() {
   const onSubmit = async (data: {offerPercentage: number}) => {
 
     console.log(data);
-    await updateHostTeam.mutate({
+    updateHostTeam.mutate({
       id: currentHostTeamId!,
       offerPercentage: data.offerPercentage * 100,
     });
@@ -75,7 +75,7 @@ export default function HostOverview() {
                               }
                             }}
                             onBlur={() => {
-                              if (field.value === "") {
+                              if (String(field.value) === "") {
                                 field.onChange(0); // Reset to 0 only when the field is blurred
                               }
                             }}

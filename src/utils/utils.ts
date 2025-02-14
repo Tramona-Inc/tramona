@@ -18,7 +18,7 @@ import duration from "dayjs/plugin/duration";
 import {
   HostRequestsPageData,
   HostRequestsPageOfferData,
-} from "@/server/api/routers/propertiesRouter";
+} from "@/server/types/propertiesRouter";
 import * as cheerio from "cheerio";
 import { REMOVE_TRAVELER_MARKUP } from "./constants";
 import { InferQueryModel } from "@/server/db";
@@ -521,96 +521,96 @@ export function scrollToTop() {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-export function separateByPriceAndAgeRestriction(
-  organizedData: HostRequestsPageData[],
-): SeparatedData {
-  const processedData = organizedData.map((cityData) => {
-    const processedRequests = cityData.requests.map((requestData) => {
-      const nightlyPrice =
-        requestData.request.maxTotalPrice /
-        getNumNights(requestData.request.checkIn, requestData.request.checkOut);
+// export function separateByPriceAndAgeRestriction(
+//   organizedData: HostRequestsPageData[],
+// ): SeparatedData {
+//   const processedData = organizedData.map((cityData) => {
+//     const processedRequests = cityData.requests.map((requestData) => {
+//       const nightlyPrice =
+//         requestData.request.maxTotalPrice /
+//         getNumNights(requestData.request.checkIn, requestData.request.checkOut);
 
-      const travelerAge = requestData.request.traveler.dateOfBirth
-        ? getAge(requestData.request.traveler.dateOfBirth)
-        : null;
+//       const travelerAge = requestData.request.traveler.dateOfBirth
+//         ? getAge(requestData.request.traveler.dateOfBirth)
+//         : null;
 
-      const normalProperties = requestData.properties.filter((property) => {
-        if (
-          property.ageRestriction === null ||
-          (travelerAge && travelerAge >= property.ageRestriction)
-        ) {
-          if (
-            property.priceRestriction === null ||
-            property.priceRestriction <= nightlyPrice
-          ) {
-            return true;
-          } else {
-            return false;
-          }
-        } else {
-          return false;
-        }
-      });
+//       const normalProperties = requestData.properties.filter((property) => {
+//         if (
+//           property.ageRestriction === null ||
+//           (travelerAge && travelerAge >= property.ageRestriction)
+//         ) {
+//           if (
+//             property.priceRestriction === null ||
+//             property.priceRestriction <= nightlyPrice
+//           ) {
+//             return true;
+//           } else {
+//             return false;
+//           }
+//         } else {
+//           return false;
+//         }
+//       });
 
-      const outsideProperties = requestData.properties.filter((property) => {
-        if (
-          travelerAge &&
-          property.ageRestriction &&
-          travelerAge < property.ageRestriction
-        ) {
-          return true;
-        } else if (
-          property.priceRestriction &&
-          property.priceRestriction > nightlyPrice
-        ) {
-          return true;
-        } else {
-          return false;
-        }
-      });
+//       const outsideProperties = requestData.properties.filter((property) => {
+//         if (
+//           travelerAge &&
+//           property.ageRestriction &&
+//           travelerAge < property.ageRestriction
+//         ) {
+//           return true;
+//         } else if (
+//           property.priceRestriction &&
+//           property.priceRestriction > nightlyPrice
+//         ) {
+//           return true;
+//         } else {
+//           return false;
+//         }
+//       });
 
-      return {
-        normal:
-          normalProperties.length > 0
-            ? { ...requestData, properties: normalProperties }
-            : null,
-        outside:
-          outsideProperties.length > 0
-            ? { ...requestData, properties: outsideProperties }
-            : null,
-      };
-    });
+//       return {
+//         normal:
+//           normalProperties.length > 0
+//             ? { ...requestData, properties: normalProperties }
+//             : null,
+//         outside:
+//           outsideProperties.length > 0
+//             ? { ...requestData, properties: outsideProperties }
+//             : null,
+//       };
+//     });
 
-    const normalRequests = processedRequests
-      .map((req) => req.normal)
-      .filter(
-        (req): req is HostRequestsPageData["requests"][number] => req !== null,
-      );
-    const outsideRequests = processedRequests
-      .map((req) => req.outside)
-      .filter(
-        (req): req is HostRequestsPageData["requests"][number] => req !== null,
-      );
+//     const normalRequests = processedRequests
+//       .map((req) => req.normal)
+//       .filter(
+//         (req): req is HostRequestsPageData["requests"][number] => req !== null,
+//       );
+//     const outsideRequests = processedRequests
+//       .map((req) => req.outside)
+//       .filter(
+//         (req): req is HostRequestsPageData["requests"][number] => req !== null,
+//       );
 
-    return {
-      normal: {
-        city: cityData.city,
-        requests: normalRequests,
-      },
-      outsidePriceRestriction: {
-        city: cityData.city,
-        requests: outsideRequests,
-      },
-    };
-  });
+//     return {
+//       normal: {
+//         city: cityData.city,
+//         requests: normalRequests,
+//       },
+//       outsidePriceRestriction: {
+//         city: cityData.city,
+//         requests: outsideRequests,
+//       },
+//     };
+//   });
 
-  return {
-    normal: processedData.map((data) => data.normal),
-    outsidePriceRestriction: processedData.map(
-      (data) => data.outsidePriceRestriction,
-    ),
-  };
-}
+//   return {
+//     normal: processedData.map((data) => data.normal),
+//     outsidePriceRestriction: processedData.map(
+//       (data) => data.outsidePriceRestriction,
+//     ),
+//   };
+// }
 
 export function formatOfferData(
   organizedData: HostRequestsPageOfferData[],

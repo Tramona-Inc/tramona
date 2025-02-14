@@ -55,18 +55,18 @@ function formatTimeLeft(createdAt: Date) {
   return `${hoursLeft} ${hoursLeft === 1 ? "hour" : "hours"} left`;
 }
 
-export type HostDashboardRequest =
-  RouterOutputs["properties"]["getHostPropertiesWithRequests"][number]["requests"][number]["request"];
+export type NormalHostDashboardRequest =
+  RouterOutputs["properties"]["getHostPropertiesWithRequests"]["normal"][number]["requests"][number]["request"];
 
 export type HostDashboardPropertyRequest =
-  RouterOutputs["properties"]["getHostPropertiesWithRequests"][number]["requests"][number]["properties"][number];
+  RouterOutputs["properties"]["getHostPropertiesWithRequests"]["normal"][number]["requests"][number]["properties"][number];
 
 export default function HostRequestCard({
   currentHostTeamId,
   request,
   children,
 }: {
-  request: HostDashboardRequest;
+  request: NormalHostDashboardRequest;
   currentHostTeamId: number | null | undefined;
   children?: React.ReactNode;
 }) {

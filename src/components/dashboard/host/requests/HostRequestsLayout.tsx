@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useState, useCallback, useEffect, useMemo } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/router";
 import SidebarCity from "./sidebars/SideBarCity";
 import SidebarRequestToBook from "./sidebars/SideBarRequestToBook";
@@ -8,13 +8,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangleIcon, ChevronLeft } from "lucide-react";
 import { api } from "@/utils/api";
 import {
-  separateByPriceAndAgeRestriction,
-  formatOfferData,
+  formatOfferData
 } from "@/utils/utils";
-import {
-  type SeparatedData,
-  type RequestsPageOfferData,
-} from "@/server/server-utils";
 import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 import useSetInitialHostTeamId from "@/components/_common/CustomHooks/useSetInitialHostTeamId";
 import { useIsLg } from "@/utils/utils";
@@ -64,7 +59,7 @@ const HostRequestsLayout = React.memo(function HostRequestsLayout({
     useState<SelectedOptionType>("normal");
 
   // <--------------------Data fetching logic ---------------->
-  const { data: properties, isLoading: isLoadingProperties } =
+  const { data: separatedData, isLoading: isLoadingProperties } =
     api.properties.getHostPropertiesWithRequests.useQuery(
       { currentHostTeamId: currentHostTeamId! },
       {
@@ -77,6 +72,8 @@ const HostRequestsLayout = React.memo(function HostRequestsLayout({
         retry: false,
       },
     );
+
+  console.log(separatedData);
 
   const { data: offers, isLoading: isLoadingOffers } =
     api.offers.getAllHostOffers.useQuery(
@@ -100,12 +97,7 @@ const HostRequestsLayout = React.memo(function HostRequestsLayout({
       },
     );
 
-  const separatedData = useMemo(() => {
-    if (properties) {
-      return separateByPriceAndAgeRestriction(properties);
-    }
-    return null;
-  }, [properties]);
+
   const offerData = useMemo(() => {
     if (offers) {
       return formatOfferData(offers);
@@ -209,7 +201,7 @@ const HostRequestsLayout = React.memo(function HostRequestsLayout({
             </div>
           </div>
 
-          {activeTab === "city" ? (
+          {activeTab === "city" && separatedData ? (
             <SidebarCity
               selectedOption={selectedOption}
               separatedData={separatedData}
