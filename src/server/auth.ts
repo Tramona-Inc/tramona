@@ -51,6 +51,7 @@ declare module "next-auth" {
       | "isWhatsApp"
       | "dateOfBirth"
       | "chargesEnabled"
+      | "isBurner"
     >;
   }
 }

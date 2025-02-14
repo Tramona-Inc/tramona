@@ -418,7 +418,7 @@ export const offersRouter = createTRPCRouter({
               madeByGroup: {
                 with: {
                   owner: {
-                    columns: { id: true, phoneNumber: true, isWhatsApp: true },
+                    columns: { id: true, phoneNumber: true, isWhatsApp: true, isBurner: true },
                   },
                 },
               },
@@ -428,6 +428,7 @@ export const offersRouter = createTRPCRouter({
 
         traveler &&
           request &&
+          !traveler.isBurner &&
           (await sendText({
             to: traveler.phoneNumber!,
             content: `Tramona: You have 1 match for your request for ${request.location} from ${formatDateRange(request.checkIn, request.checkOut)} for ${request.maxTotalPrice / getNumNights(request.checkIn, request.checkOut)}. Please tap below to view your offer: ${env.NEXTAUTH_URL}/requests/${request.id}`,
@@ -537,6 +538,7 @@ export const offersRouter = createTRPCRouter({
                           phoneNumber: true,
                           isWhatsApp: true,
                           id: true,
+                          isBurner: true,
                         },
                       },
                     },
@@ -586,7 +588,7 @@ export const offersRouter = createTRPCRouter({
         const url = `${env.NEXTAUTH_URL}/requests`;
 
         if (member.phoneNumber) {
-          if (member.isWhatsApp) {
+          if (member.isWhatsApp && !member.isBurner) {
             memberHasOtherOffers
               ? void sendWhatsApp({
                   templateId: "HXd5256ff10d6debdf70a13d70504d39d5",
@@ -605,7 +607,7 @@ export const offersRouter = createTRPCRouter({
                   checkIn: offer.checkIn,
                   checkOut: offer.checkOut,
                 });
-          } else {
+          } else if (!member.isBurner) {
             void sendText({
               to: member.phoneNumber,
               content: `Tramona: Hello, your ${property.name} in ${request?.location} offer from ${fmtdDateRange} has expired. ${memberHasOtherOffers ? `Please tap below view your other offers: ${url}` : ""}`,

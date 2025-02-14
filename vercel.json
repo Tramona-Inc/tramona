@@ -1,6 +1,10 @@
 {
   "crons": [
     {
+      "path": "/api/sendFakeRequests",
+      "schedule": "0 * * * *"
+    },
+    {
       "path": "/api/twilio-3-hour-reminder",
       "schedule": "0 * * * *"
     },
