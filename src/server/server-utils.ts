@@ -778,7 +778,7 @@ export async function getPropertiesForRequest(
   const checkInDate = req.checkIn.toISOString();
   const checkOutDate = req.checkOut.toISOString();
 
-  const conflictingPropertyIds = await db.query.reservedDateRanges.findMany(
+  const conflictingPropertyIds = await tx.query.reservedDateRanges.findMany(
     {
       columns: { propertyId: true },
       where: and(
