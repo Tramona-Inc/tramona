@@ -67,7 +67,7 @@ export default function HostRequestToBookCard({
         onOpenChange={setOpen}
       />
       <div className="flex p-2">
-        <div className="flex-1 space-y-4 overflow-hidden p-4 pt-2">
+        <div className="flex-1 space-y-3 overflow-hidden p-4 pt-2">
           <div className="flex items-center gap-2">
             <UserAvatar
               size="sm"
@@ -102,7 +102,7 @@ export default function HostRequestToBookCard({
               </DropdownMenu>
             )}
           </div>
-          <div className="space-y-4">
+          <div className="">
             <div>
               <p className="font-semibold text-primary md:text-base">
                 {requestToBook.property.city}
@@ -117,7 +117,7 @@ export default function HostRequestToBookCard({
                 {fmtdPrice} / night
               </span>
             </p>
-            <div className="flex flex-col items-start gap-3 text-black sm:flex-row sm:items-center">
+            <div className="my-2 flex flex-col items-start gap-3 text-black sm:flex-row sm:items-center">
               <Badge
                 variant="secondary"
                 className="flex items-center gap-2 px-3 py-1"
@@ -138,7 +138,7 @@ export default function HostRequestToBookCard({
               </Badge>
             </div>
             {formatTimeLeft(requestToBook.createdAt) !== "Expired" && (
-              <div className="flex flex-row items-center gap-x-1 text-xs">
+              <div className="my-1 flex flex-row items-center gap-x-1 text-xs">
                 <ClockIcon className="size-3" />
                 Quick response recommended - Time remaining:{" "}
                 {formatTimeLeft(requestToBook.createdAt)}
