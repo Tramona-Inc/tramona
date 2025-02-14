@@ -616,30 +616,30 @@ export async function getRequestsForProperties(
               ),
             ),
         ),
-        // notExists(
-        //   db
-        //     .select()
-        //     .from(reservedDateRanges)
-        //     .where(
-        //       and(
-        //         eq(reservedDateRanges.propertyId, property.id),
-        //         or(
-        //           and(
-        //             gte(reservedDateRanges.start, requests.checkIn),
-        //             lt(reservedDateRanges.start, requests.checkOut),
-        //           ),
-        //           and(
-        //             gt(reservedDateRanges.end, requests.checkIn),
-        //             lte(reservedDateRanges.end, requests.checkOut),
-        //           ),
-        //           and(
-        //             lte(reservedDateRanges.start, requests.checkIn),
-        //             gte(reservedDateRanges.end, requests.checkOut),
-        //           ),
-        //         ),
-        //       ),
-        //     ),
-        // ),
+        notExists(
+          db
+            .select()
+            .from(reservedDateRanges)
+            .where(
+              and(
+                eq(reservedDateRanges.propertyId, property.id),
+                or(
+                  and(
+                    gte(reservedDateRanges.start, requests.checkIn),
+                    lt(reservedDateRanges.start, requests.checkOut),
+                  ),
+                  and(
+                    gt(reservedDateRanges.end, requests.checkIn),
+                    lte(reservedDateRanges.end, requests.checkOut),
+                  ),
+                  and(
+                    lte(reservedDateRanges.start, requests.checkIn),
+                    gte(reservedDateRanges.end, requests.checkOut),
+                  ),
+                ),
+              ),
+            ),
+        ),
       ),
       with: {
         madeByGroup: {
