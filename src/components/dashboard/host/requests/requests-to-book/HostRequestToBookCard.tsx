@@ -13,11 +13,10 @@ import {
 } from "@/utils/utils";
 import {
   CalendarIcon,
+  ClockIcon,
   EllipsisIcon,
-  Home,
-  MapPinIcon,
   TrashIcon,
-  Users2Icon,
+  UsersIcon,
 } from "lucide-react";
 import { Card, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -28,6 +27,9 @@ import { TravelerVerificationsDialog } from "@/components/requests/TravelerVerif
 import WithdrawRequestToBookDialog from "@/components/requests-to-book/WithdrawRequestToBookDialog";
 import RequestToBookCardBadge from "@/components/requests-to-book/RequestToBookCardBadge";
 import { TRAVELER_MARKUP } from "@/utils/constants";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { formatTimeLeft } from "../city/HostRequestCard";
 
 export type HostDashboardRequestToBook =
   RouterOutputs["requestsToBook"]["getHostRequestsToBookFromId"][
@@ -67,20 +69,19 @@ export default function HostRequestToBookCard({
       <div className="flex p-2">
         <div className="flex-1 space-y-4 overflow-hidden p-4 pt-2">
           <div className="flex items-center gap-2">
-            <>
-              <UserAvatar
-                size="sm"
-                name={requestToBook.madeByGroup.owner.name}
-                image={requestToBook.madeByGroup.owner.image}
-              />
-              <TravelerVerificationsDialog request={requestToBook} />
-
-              <p>
-                {formatDistanceToNowStrict(requestToBook.createdAt, {
-                  addSuffix: true,
-                })}
-              </p>
-            </>
+            <UserAvatar
+              size="sm"
+              name={requestToBook.madeByGroup.owner.name}
+              image={requestToBook.madeByGroup.owner.image}
+            />
+            <TravelerVerificationsDialog request={requestToBook} />
+            <p>&middot;</p>
+            <p className="text-xs">
+              {formatDistanceToNowStrict(requestToBook.createdAt, {
+                addSuffix: true,
+              })}
+            </p>
+            <p>&middot;</p>
 
             <RequestToBookCardBadge requestToBook={requestToBook} />
             <div className="flex-1" />
@@ -101,37 +102,48 @@ export default function HostRequestToBookCard({
               </DropdownMenu>
             )}
           </div>
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <MapPinIcon className="h-5 w-5 shrink-0 text-primary" />
-              <h2 className="text-sm font-semibold text-primary md:text-base">
-                {requestToBook.property.city}
-              </h2>
-            </div>
-            <div className="flex items-start gap-2">
-              <Home className="mt-1 h-5 w-5 shrink-0 text-primary" />
-              <h2 className="text-sm font-semibold text-primary md:text-base">
-                {requestToBook.property.name}
-              </h2>
-            </div>
-
+          <div className="space-y-4">
             <div>
-              <p>
-                Requested <span className="font-semibold">{fmtdPrice}</span>
-                /night
+              <p className="font-semibold text-primary md:text-base">
+                {requestToBook.property.city}
               </p>
-              <p className="flex items-center gap-2">
-                <span className="flex items-center gap-1">
-                  <CalendarIcon className="h-4 w-4" />
-                  {fmtdDateRange}
-                </span>
-                &middot;
-                <span className="flex items-center gap-1">
-                  <Users2Icon className="h-4 w-4" />
-                  {fmtdNumGuests}
-                </span>
+              <p className="text-sm text-primary md:text-base">
+                {requestToBook.property.name}
               </p>
             </div>
+            <p>
+              Requested:{" "}
+              <span className="font-semibold underline">
+                {fmtdPrice} / night
+              </span>
+            </p>
+            <div className="flex flex-col items-start gap-3 text-black sm:flex-row sm:items-center">
+              <Badge
+                variant="secondary"
+                className="flex items-center gap-2 px-3 py-1"
+              >
+                <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                <span>{fmtdDateRange}</span>
+              </Badge>
+              <Separator
+                orientation="vertical"
+                className="hidden h-4 md:block"
+              />
+              <Badge
+                variant="secondary"
+                className="flex items-center gap-2 px-3 py-1"
+              >
+                <UsersIcon className="h-4 w-4 text-muted-foreground" />
+                <span>{fmtdNumGuests}</span>
+              </Badge>
+            </div>
+            {formatTimeLeft(requestToBook.createdAt) !== "Expired" && (
+              <div className="flex flex-row items-center gap-x-1 text-xs">
+                <ClockIcon className="size-3" />
+                Quick response recommended - Time remaining:{" "}
+                {formatTimeLeft(requestToBook.createdAt)}
+              </div>
+            )}
           </div>
           <CardFooter className="empty:hidden">{children}</CardFooter>
         </div>
