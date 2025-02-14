@@ -48,7 +48,7 @@ const CityRequestSection: React.FC<CityRequestSectionProps> = ({
   );
 
   const priceRestriction = option === "outsidePriceRestriction";
-
+  console.log(currentHostTeamId);
   const { isLoading: isRequestsLoading } =
     api.properties.getHostPropertiesWithRequests.useQuery(
       { currentHostTeamId: Number(currentHostTeamId!) },

@@ -1,9 +1,9 @@
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
-import { getAddress, getCoordinates } from "@/server/google-maps";
 import { z } from "zod";
 import { sendEmail } from "@/server/server-utils";
-import RequestOutreachEmail from "packages/transactional/emails/RequestOutReachEmail";
+import RequestOutreachEmail from "packages/transactional/emails/RequestOutreachEmail";
+import { db } from "@/server/db";
 
 interface OllamaStreamChunk {
   model?: string;
@@ -176,15 +176,23 @@ export const aiRouter = createTRPCRouter({
 
         // <-----------------------------------------------------RETRIEVE EMAILS--------------------------------------------------->
 
-        // <------------------------------------------------------- EMAIL SECTION -------------------------------------------------->
-        const emails: string[] = [
-          "ueharaneal@gmail.com",
-          "ueharanealpt@gmail.com",
-        ];
+        const managers = await db.query.propertyManagerContacts
+          .findMany({
+            columns: {
+              email: true,
+              propertyManagerName: true,
+            },
+          })
+          .then((res) =>
+            res.map((manager) => ({ ...manager, email: manager.email! })),
+          );
 
-        for (const email of emails) {
+        console.log(managers);
+        // <------------------------------------------------------- EMAIL SECTION -------------------------------------------------->
+
+        for (const manager of managers) {
           await sendEmail({
-            to: email,
+            to: manager.email,
             subject: `Travelers looking for a stay in ${input.requestLocation}`,
             content: RequestOutreachEmail({
               requestLocation: input.requestLocation,
