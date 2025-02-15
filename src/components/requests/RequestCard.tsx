@@ -40,7 +40,7 @@ export type AdminDashboardRequst = RouterOutputs["requests"]["getAll"][
   | "pastRequests"][number];
 
 export type HostDashboardRequest =
-  RouterOutputs["properties"]["getHostPropertiesWithRequests"][number]["requests"][number]["request"];
+  RouterOutputs["properties"]["getHostPropertiesWithRequests"]["normal"][number]["requests"][number]["request"];
 
 export default function RequestCard({
   request,

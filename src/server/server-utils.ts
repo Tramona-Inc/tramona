@@ -4,34 +4,28 @@ import { env } from "@/env";
 import { type ReactElement } from "react";
 import { Twilio } from "twilio";
 import { db } from "./db";
-import { waitUntil } from "@vercel/functions";
-import { formatCurrency, getNumNights, plural } from "@/utils/utils";
+import { getNumNights } from "@/utils/utils";
 import axiosRetry from "axios-retry";
 import {
-  and,
-  between,
-  eq,
+  and, eq,
   exists,
   gt,
   gte,
-  inArray,
-  isNotNull,
-  isNull,
+  inArray, isNull,
   lt,
   lte,
   notExists,
+  notInArray,
   or,
   sql,
-  type SQL,
+  type SQL
 } from "drizzle-orm";
 import {
   type NewProperty,
   type Property,
   type User,
   type Request,
-  type RequestsToBook,
-  bookedDates,
-  groupInvites,
+  type RequestsToBook, groupInvites,
   groupMembers,
   groups,
   hostTeamMembers,
@@ -45,7 +39,7 @@ import {
   hostTeams,
   requestsToBook,
   hostProfiles,
-  reservedDateRanges,
+  reservedDateRanges
 } from "./db/schema";
 import { getAddress, getCoordinates } from "./google-maps";
 import axios from "axios";
@@ -56,7 +50,7 @@ import { HOST_MARKUP, TRAVELER_MARKUP } from "@/utils/constants";
 import {
   HostRequestsPageData,
   HostRequestsPageOfferData,
-} from "./api/routers/propertiesRouter";
+} from "@/server/types/propertiesRouter";
 import { Session } from "next-auth";
 import { calculateTotalTax } from "@/utils/payment-utils/taxData";
 import {
@@ -562,7 +556,6 @@ export async function getRequestsForProperties(
     };
   }[] = [];
 
-  console.log(hostProperties, "hostProperties");
   await Promise.all(hostProperties.map(async (property) => {
     const requestIsNearProperty = sql`
       ST_DWithin(
@@ -667,7 +660,6 @@ export async function getRequestsForProperties(
         },
       },
     });
-    console.log(requestsForProperty, "requestsForProperty");
 
     // Store the matched requests along with the property
     for (const request of requestsForProperty) {
@@ -708,22 +700,6 @@ export async function getPropertiesForRequest(
   { tx = db } = {},
 ) {
   let propertyIsNearRequest: SQL | undefined = sql`FALSE`;
-
-  console.log("before age restriction check");
-
-  const calculateAge = (dateOfBirth: string) => {
-    const today = new Date();
-    const birthDate = new Date(dateOfBirth);
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    if (
-      monthDiff < 0 ||
-      (monthDiff === 0 && today.getDate() < birthDate.getDate())
-    ) {
-      age--;
-    }
-    return age;
-  };
 
   const userAge = await tx.query.requests
     .findFirst({
@@ -798,35 +774,43 @@ export async function getPropertiesForRequest(
   //   }
   // }
 
-  const propertyisAvailable = notExists(
-    tx
-      .select()
-      .from(bookedDates)
-      .where(
-        and(
-          eq(bookedDates.propertyId, properties.id),
-          between(bookedDates.date, req.checkIn, req.checkOut),
+  const checkInDate = req.checkIn.toISOString();
+  const checkOutDate = req.checkOut.toISOString();
+
+  const conflictingPropertyIds = await tx.query.reservedDateRanges.findMany(
+    {
+      columns: { propertyId: true },
+      where: and(
+        or(
+          and(
+            lte(reservedDateRanges.start, checkInDate),
+            gte(reservedDateRanges.end, checkInDate),
+          ),
+          and(
+            lte(reservedDateRanges.start, checkOutDate),
+            gte(reservedDateRanges.end, checkOutDate),
+          ),
+          and(
+            gte(reservedDateRanges.start, checkInDate),
+            lte(reservedDateRanges.end, checkOutDate),
+          ),
         ),
       ),
+    },
+  );
+
+  // Extract conflicting property IDs into an array
+  const conflictingIds = conflictingPropertyIds.map(
+    (item) => item.propertyId,
   );
 
   const numberOfNights = getNumNights(req.checkIn, req.checkOut);
 
-  return await tx.query.properties.findMany({
+  const filteredProperties = await tx.query.properties.findMany({
     where: and(
       propertyIsNearRequest,
-      propertyisAvailable,
+      notInArray(properties.id, conflictingIds),
       ageRestrictionCheck,
-      or(
-        isNull(properties.priceRestriction), // Include properties with no price restriction
-        and(
-          isNotNull(properties.priceRestriction),
-          lte(
-            properties.priceRestriction,
-            Math.round((req.maxTotalPrice / numberOfNights) * 1.15),
-          ),
-        ),
-      ),
     ),
     columns: {
       id: true,
@@ -834,9 +818,62 @@ export async function getPropertiesForRequest(
       autoOfferEnabled: true,
       discountTiers: true,
       originalListingId: true,
+      hospitableListingId: true,
+      offerDiscountPercentage: true,
     },
   });
+
+  const propertiesWithValidPricing = [];
+
+  for (const property of filteredProperties) {
+    if (!property.hospitableListingId) continue; // Skip if no Hospitable listing ID
+
+    const nightlyPrices = await fetchNightlyPrices(property.hospitableListingId, req.checkIn.toISOString(), req.checkOut.toISOString());
+    if (!nightlyPrices) continue; // Skip if no pricing data available
+    const offerDiscountPercentage = property.offerDiscountPercentage;
+    const avgNightlyPrice = nightlyPrices.reduce((sum: number, price: number) => sum + price, 0) / nightlyPrices.length;
+    const minAllowedPrice = avgNightlyPrice * (1 - offerDiscountPercentage / 100);
+
+    if (req.maxTotalPrice / numberOfNights >= minAllowedPrice) {
+      propertiesWithValidPricing.push(property);
+    }
+  }
+
+  return propertiesWithValidPricing;
 }
+
+export const fetchNightlyPrices = async (listingId: string, checkIn: string, checkOut: string) => {
+  const url = `https://connect.hospitable.com/api/v1/listings/${listingId}/calendar?start_date=${checkIn}&end_date=${checkOut}`;
+  const response = await fetch(url, {
+    headers: { Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}` },
+  });
+
+  console.log(response, "response");
+
+  if (!response.ok) return null;
+
+  const data = await response.json() as HospitableCalendarResponse;
+  if (!data?.data?.dates) return null;
+
+  // Extract nightly prices (ignoring availability)
+  const nightlyPrices = data.data.dates.map((day) => day.price.amount / 100); // Convert cents to dollars
+
+  return nightlyPrices.length ? nightlyPrices : null;
+};
+
+export const calculateAge = (dateOfBirth: string) => {
+  const today = new Date();
+  const birthDate = new Date(dateOfBirth);
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  if (
+    monthDiff < 0 ||
+    (monthDiff === 0 && today.getDate() < birthDate.getDate())
+  ) {
+    age--;
+  }
+  return age;
+};
 
 export async function getAdminId() {
   return await db.query.users
@@ -987,7 +1024,7 @@ export async function getPropertyOriginalPrice(
 
 export interface SeparatedData {
   normal: HostRequestsPageData[];
-  outsidePriceRestriction: HostRequestsPageData[];
+  other: HostRequestsPageData[];
 }
 
 export interface RequestsPageOfferData {

@@ -1,5 +1,5 @@
 import React from "react";
-import { HostRequestsPageOfferData } from "@/server/api/routers/propertiesRouter";
+import { HostRequestsPageOfferData } from "@/server/types/propertiesRouter";
 import PastOfferCard from "./PastOfferCard";
 import { Button } from "@/components/ui/button";
 import {

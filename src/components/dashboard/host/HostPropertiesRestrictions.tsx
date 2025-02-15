@@ -44,7 +44,7 @@ export default function HostPropertiesRestrictions({
     resolver: zodResolver(formSchema),
     defaultValues: {
       age: property.ageRestriction ?? null,
-      price: property.priceRestriction ? property.priceRestriction / 100 : 0,
+      price: property.offerDiscountPercentage ? property.offerDiscountPercentage : 0,
       stripeVerRequired: property.stripeVerRequired ? "yes" : "no",
     },
     mode: "onChange",
@@ -58,7 +58,7 @@ export default function HostPropertiesRestrictions({
     const newProperty = {
       ...property,
       ageRestriction: age,
-      priceRestriction: price ? price * 100 : 0, //convert to cents
+      offerDiscountPercentage: price ? price : 0, //convert to cents
       stripeVerRequired: stripeVerRequired === "yes",
     };
 

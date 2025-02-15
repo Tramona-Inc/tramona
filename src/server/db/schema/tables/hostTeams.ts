@@ -6,6 +6,7 @@ import {
   primaryKey,
   serial,
   text,
+  boolean,
   timestamp,
 } from "drizzle-orm/pg-core";
 import { users } from "./users";
@@ -32,6 +33,7 @@ export const hostTeams = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
+    hasOfferPercentage: boolean("has_offer_percentage").notNull().default(false),
   },
   (t) => ({
     owneridIdx: index().on(t.ownerId),
