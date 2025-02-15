@@ -1,5 +1,5 @@
 // CalendarComponent.tsx
-import React, { useMemo, useEffect, useState, useCallback } from "react";
+import { useMemo, useEffect, useState, useCallback } from "react";
 import { ChevronLeft, ChevronRight, ChevronDown, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardBanner } from "@/components/ui/card";

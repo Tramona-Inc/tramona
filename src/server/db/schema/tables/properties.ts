@@ -146,6 +146,16 @@ export const ALL_INTERACTION_PREFERENCES = [
   "no preference",
 ] as const;
 
+export type DailyDiscounts = {
+  monday: number;
+  tuesday: number;
+  wednesday: number;
+  thursday: number;
+  friday: number;
+  saturday: number;
+  sunday: number;
+};
+
 export const propertySafetyItemsEnum = pgEnum(
   "property_safety_items",
   ALL_PROPERTY_SAFETY_ITEMS,
@@ -397,6 +407,10 @@ export const properties = pgTable(
     randomPercentageForScrapedProperties: integer(
       "random_percentage_for_scraped_properties",
     ),
+    weekdayDiscount: integer("weekday_discount").default(0).notNull(),
+    weekendDiscount: integer("weekend_discount").default(0).notNull(),
+    dailyDiscounts: jsonb("daily_discounts").default('{}').notNull(),
+    customizeDaily: boolean("customize_daily").default(false).notNull(),
   },
   (t) => ({
     spatialIndex: index("spacial_index").using("gist", t.latLngPoint),

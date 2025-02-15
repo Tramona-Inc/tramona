@@ -15,7 +15,7 @@ import { sendEmail } from "@/server/server-utils";
 import { TRPCError } from "@trpc/server";
 import { add, subMinutes } from "date-fns";
 import { and, eq, or, sql, desc } from "drizzle-orm";
-import { promise, z } from "zod";
+import { z } from "zod";
 import {
   coHostProcedure,
   createTRPCRouter,
