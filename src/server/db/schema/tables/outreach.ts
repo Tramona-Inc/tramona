@@ -1,4 +1,4 @@
-import { pgTable, serial, text, index } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, index, geometry } from "drizzle-orm/pg-core";
 
 export const propertyManagerContacts = pgTable(
   "property_manager_contacts",
@@ -9,6 +9,11 @@ export const propertyManagerContacts = pgTable(
     state: text("state"),
     url: text("url"),
     propertyManagerName: text("property_manager_name"),
+    latLngPoint: geometry("lat_lng_point", {
+      type: "point",
+      mode: "xy",
+      srid: 4326,
+    }),
   },
   (table) => {
     return {

@@ -525,12 +525,7 @@ export const propertiesRouter = createTRPCRouter({
           bookItNowIsEnabled: properties.bookItNowEnabled,
           // lat: properties.latitude,
           // long: properties.longitude,
-          distance: sql`
-            6371 * ACOS(
-              SIN(${(lat * Math.PI) / 180}) * SIN(radians(ST_Y(${properties.latLngPoint}))) +
-              COS(${(lat * Math.PI) / 180}) * COS(radians(ST_Y(${properties.latLngPoint}))) *
-              COS(radians(ST_X(${properties.latLngPoint})) - ${(lng * Math.PI) / 180})
-            ) AS distance`,
+
           vacancyCount: sql`
             (SELECT COUNT(booked_dates.property_id)
             FROM booked_dates

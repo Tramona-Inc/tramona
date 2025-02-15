@@ -4,7 +4,7 @@ import { z } from "zod";
 import { sendEmail } from "@/server/server-utils";
 import RequestOutreachEmail from "packages/transactional/emails/RequestOutreachEmail";
 import { db } from "@/server/db";
-import { eq } from "drizzle-orm"; // Import 'eq' for database queries
+import { eq, sql } from "drizzle-orm"; // Import 'eq' for database queries
 import {
   PropertyManagerContact,
   propertyManagerContacts,
@@ -39,6 +39,7 @@ export const aiRouter = createTRPCRouter({
     .mutation(
       async ({ input }) => {
         if (!input.requestedLocationLatLng) return;
+        console.log(input);
         let fullResponseText = "";
         let thinkContent = "";
         let identifiedCityName: string | null = null; // Variable to store identified city name
@@ -110,47 +111,147 @@ export const aiRouter = createTRPCRouter({
         //         console.warn("Warning: No city name identified by AI."); // Warn if no city name found
         //         identifiedCityName = null; // Set to null if not found
         //      }
-
-        // <---------------------------------------------------- METHOD 2: Find appropriate cities
-
-        // <-----------------------------------------------------RETRIEVE EMAILS - FILTERED BY CITY------------------------------------>
-        let managers: PropertyManagerContact[] = []; // Initialize managers array
-        if (identifiedCityName) {
-          // Only query if we have a city name
-          managers = await db.query.propertyManagerContacts
-            .findMany({
-              where: eq(propertyManagerContacts.city, identifiedCityName), // ✅ FILTER MANAGERS BY CITY NAME
-            })
-            .then((res) =>
-              res.map((manager) => ({ ...manager, email: manager.email! })),
-            );
-          console.log(
-            `Found ${managers.length} managers in city: ${identifiedCityName}`,
-          ); // Log number of managers found
-        } else {
-          console.warn("Skipping database query - No city name identified."); // Warn if skipping query
-        }
+        // // <-----------------------------------------------------RETRIEVE EMAILS - FILTERED BY CITY------------------------------------>
+        // let managers: PropertyManagerContact[] = []; // Initialize managers array
+        // if (identifiedCityName) {
+        //   // Only query if we have a city name
+        //   managers = await db.query.propertyManagerContacts
+        //     .findMany({
+        //       where: eq(propertyManagerContacts.city, identifiedCityName), // ✅ FILTER MANAGERS BY CITY NAME
+        //     })
+        //     .then((res) =>
+        //       res.map((manager) => ({ ...manager, email: manager.email! })),
+        //     );
+        //   console.log(
+        //     `Found ${managers.length} managers in city: ${identifiedCityName}`,
+        //   ); // Log number of managers found
+        // } else {
+        //   console.warn("Skipping database query - No city name identified."); // Warn if skipping query
+        // }
         //console.log(cleanedResponseText);
-        console.log("Managers to email:", managers); // Log managers to be emailed
+
+        // <---------------------------------------------------- METHOD 2: Find appropriate cities ------------------------------------>
+
+        //   const allNearByPropertyManager = await db
+        //     .select()
+        //     .from(propertyManagerContacts)
+        //     .where(    const requestIsNearPropertyManager = sql`
+        //       ST_DWithin(
+        //         ST_Transform(ST_SetSRID(requests.lat_lng_point, 4326), 3857),
+        //         ST_Transform(ST_SetSRID(ST_MakePoint(${propertyManagerContact.latLngPoint.x}, ${propertyManagerContact.latLngPoint.y}), 4326), 3857),
+        //         requests.radius * 1609.34
+        //       )
+        //     `;
+        // );
+        console.log("hi");
+
+        console.log(input.requestedLocationLatLng.lng);
+        console.log(input.requestedLocationLatLng.lat);
+
+        try {
+          const diagnostics = await db.execute(sql`
+            WITH point_of_interest AS (
+              SELECT ST_SetSRID(ST_MakePoint(${input.requestedLocationLatLng.lng}, ${input.requestedLocationLatLng.lat}), 4326) as point
+            )
+            SELECT 
+              email,
+              property_manager_name,
+              ST_AsText(lat_lng_point) as point_text,
+              ST_Distance(
+                ST_Transform(lat_lng_point, 3857),
+                ST_Transform((SELECT point FROM point_of_interest), 3857)
+              ) as distance_meters
+            FROM property_manager_contacts
+            ORDER BY distance_meters ASC
+            LIMIT 5;
+          `);
+
+          console.log("Diagnostic results:", diagnostics);
+
+          const debugQuery = await db.execute(sql`
+            SELECT 
+              email,
+              property_manager_name,
+              ST_AsText(lat_lng_point) as point_text,
+              ST_Distance(
+                ST_Transform(lat_lng_point, 3857),
+                ST_Transform(ST_SetSRID(ST_MakePoint(${input.requestedLocationLatLng.lng}, ${input.requestedLocationLatLng.lat}), 4326), 3857)
+              ) as distance_meters
+            FROM property_manager_contacts
+            WHERE lat_lng_point IS NOT NULL
+            ORDER BY distance_meters ASC
+            LIMIT 5;
+          `);
+
+          console.log("Debug results:", debugQuery);
+          const managerds = await db.query.propertyManagerContacts.findMany({
+            where: sql`
+              lat_lng_point IS NOT NULL
+              AND ST_DWithin(
+                ST_Transform(ST_SetSRID(lat_lng_point, 4326), 3857),
+                ST_Transform(ST_SetSRID(ST_MakePoint(${input.requestedLocationLatLng.lng}, ${input.requestedLocationLatLng.lat}), 4326), 3857),
+                ${1000}
+              )
+            `,
+            columns: {
+              email: true,
+              propertyManagerName: true,
+              latLngPoint: true,
+            },
+          });
+
+          // const managerds = await db.query.propertyManagerContacts.findMany({
+          //   where: sql`
+          //   ST_DWithin(
+          //     ST_Transform(ST_SetSRID("propertyManagerContacts".lat_lng_point, 4326), 3857),
+          //     ST_Transform(ST_SetSRID(ST_MakePoint(${input.requestedLocationLatLng.lng}, ${input.requestedLocationLatLng.lat}), 4326), 3857),
+          //     ${1000}
+          //   )
+          // `,
+          //   columns: {
+          //     email: true,
+          //     propertyManagerName: true,
+          //     latLngPoint: true,
+          //   },
+          // });
+
+          console.log(managerds);
+        } catch (err) {
+          console.log(err);
+        }
+
+        console.log("stops here ");
+        const allNearByPropertyManager =
+          await db.query.propertyManagerContacts.findMany({
+            where: sql`ST_DWithin(
+            ST_Transform(ST_SetSRID(POINT(${input.requestedLocationLatLng.lng}, ${input.requestedLocationLatLng.lat}), 4326), 3857),
+            ST_Transform(property_manager_contacts.lat_lng_point, 3857),
+            ${10}
+                      )`,
+          });
+
+        console.log(allNearByPropertyManager);
+
         // <------------------------------------------------------- EMAIL SECTION -------------------------------------------------->
 
-        for (const manager of managers) {
-          if (!manager.email) return;
-          await sendEmail({
-            // Email sending loop - unchanged
-            to: manager.email,
-            subject: `${manager.propertyManagerName} Potential Travelers looking for a stay in ${input.requestLocation}`,
-            content: RequestOutreachEmail({
-              requestLocation: input.requestLocation, // Email content still uses requestLocation for now
-            }),
-          });
-        }
+        // console.log("Managers to email:", managers); // Log managers to be emailed
+        // for (const manager of managers) {
+        //   if (!manager.email) return;
+        //   await sendEmail({
+        //     // Email sending loop - unchanged
+        //     to: manager.email,
+        //     subject: `${manager.propertyManagerName} Potential Travelers looking for a stay in ${input.requestLocation}`,
+        //     content: RequestOutreachEmail({
+        //       requestLocation: input.requestLocation, // Email content still uses requestLocation for now
+        //     }),
+        //   });
+        // }
 
         return {
-          suggestedNeighborhoods: suggestedNeighborhoods, // Return array of neighborhoods (including city as first element)
+          //suggestedNeighborhoods: suggestedNeighborhoods, // Return array of neighborhoods (including city as first element)
           think: thinkContent.trim(), // Return think content
           identifiedCity: identifiedCityName, // Return identified city name in the response
-          emailedManagerCount: managers.length, // Return the count of emailed managers
+          //emailedManagerCount: managers.length, // Return the count of emailed managers
         };
       },
       //   }

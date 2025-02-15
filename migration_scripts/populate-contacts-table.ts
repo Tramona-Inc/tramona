@@ -1,9 +1,12 @@
-// import { db } from "@/server/db";
-// import {
-//   propertyManagerContacts,
-//   type PropertyManagerContactInsert,
-// } from "@/server/db/schema";
+import { db } from "@/server/db";
+import {
+  propertyManagerContacts,
+  type PropertyManagerContactInsert,
+} from "@/server/db/schema";
 // import { faker } from "@faker-js/faker";
+
+import { createLatLngGISPoint } from "@/server/server-utils";
+import { eq, isNull } from "drizzle-orm";
 
 // // Initialize Bun SQLite database
 
@@ -40,3 +43,24 @@
 // }
 
 // await main();
+
+//function to populate the table with gis points
+export const populateGIS = async () => {
+  const latLngPoint = createLatLngGISPoint({
+    lat: 33.985664,
+    lng: -117.885414,
+  });
+
+  await db
+    .update(propertyManagerContacts)
+    .set({
+      latLngPoint: latLngPoint,
+    })
+    .where(
+      eq(propertyManagerContacts.id, 1),
+      //isNull(propertyManagerContacts.latLngPoint)
+    )
+    .then((res) => res.map((property) => console.log("updated:", property)));
+};
+
+await populateGIS();
