@@ -42,7 +42,6 @@ import {
   bookedDates,
   discountTierSchema,
   properties,
-  PropertiesWithDiscounts,
   propertyDiscountsUpdateSchema,
   type Property,
 } from "./../../db/schema/tables/properties";
