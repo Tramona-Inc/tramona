@@ -407,10 +407,6 @@ export const properties = pgTable(
     randomPercentageForScrapedProperties: integer(
       "random_percentage_for_scraped_properties",
     ),
-    weekdayDiscount: integer("weekday_discount").default(0).notNull(),
-    weekendDiscount: integer("weekend_discount").default(0).notNull(),
-    dailyDiscounts: jsonb("daily_discounts").default('{}').notNull(),
-    customizeDaily: boolean("customize_daily").default(false).notNull(),
   },
   (t) => ({
     spatialIndex: index("spacial_index").using("gist", t.latLngPoint),
@@ -500,6 +496,28 @@ export const bookedDates = pgTable(
   }),
 );
 
+export const propertyDiscounts = pgTable(
+  "property_discounts",
+  {
+    propertyId: integer("property_id").references(() => properties.id, { onDelete: "cascade" }),
+    weekdayDiscount: integer("weekday_discount").default(0).notNull(),
+    weekendDiscount: integer("weekend_discount").default(0).notNull(),
+    mondayDiscount: integer("monday_discount").default(0).notNull(),
+    tuesdayDiscount: integer("tuesday_discount").default(0).notNull(),
+    wednesdayDiscount: integer("wednesday_discount").default(0).notNull(),
+    thursdayDiscount: integer("thursday_discount").default(0).notNull(),
+    fridayDiscount: integer("friday_discount").default(0).notNull(),
+    saturdayDiscount: integer("saturday_discount").default(0).notNull(),
+    sundayDiscount: integer("sunday_discount").default(0).notNull(),
+    isDailyDiscountsCustomized: boolean("is_daily_discounts_customized").default(false).notNull(),
+  },
+);
+
+export type PropertyDiscounts = typeof propertyDiscounts.$inferSelect;
+export const propertyDiscountsInsertSchema = createInsertSchema(propertyDiscounts);
+export const propertyDiscountsUpdateSchema = propertyDiscountsInsertSchema.partial().required({
+  propertyId: true,
+});
 // - added neals stuff to db
 // - did sasha already update drizzle schema and usages of latitude and longitude?
 // - I did and got Offset is outside the bounds of the DataView for the map

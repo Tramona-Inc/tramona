@@ -38,7 +38,7 @@ export default function StripeVerificationSection({
 
   return (
     <div className="rounded-lg border">
-      <CalendarSettingsDropdown title="Stripe Verification" open={open} setOpen={setOpen} />
+      <CalendarSettingsDropdown title="Stripe Verification" description="Require the user to be Stripe-verified." open={open} setOpen={setOpen} />
 
       <div
         className={`overflow-hidden transition-all duration-300 ease-in-out ${

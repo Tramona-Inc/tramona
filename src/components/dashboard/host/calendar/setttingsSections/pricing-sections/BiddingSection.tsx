@@ -2,12 +2,12 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import CalendarSettingsDropdown from "../../components/CalendarSettingsDropdown";
-import { Property } from "@/server/db/schema";
 import { errorToast } from "@/utils/toasts";
 import { toast } from "@/components/ui/use-toast";
 import { useState } from "react";
 import { api } from "@/utils/api";
 import { useHostTeamStore } from "@/utils/store/hostTeamStore";
+import { Property } from "@/server/db/schema/tables/properties";
 export default function BiddingSection({
   property,
   biddingPercent,
@@ -54,6 +54,7 @@ export default function BiddingSection({
     <div className="rounded-lg border">
       <CalendarSettingsDropdown
         title="Bidding"
+        description="Set the maximum discount percentage you would consider accepting for a booking request."
         open={biddingOpen}
         setOpen={setBiddingOpen}
       />

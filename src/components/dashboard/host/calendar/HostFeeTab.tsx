@@ -1,9 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
-import * as React from "react";
 import { useState } from "react";
-import type { Property } from "@/server/db/schema";
 import EditableFee from "./EditableFee";
+import { Property } from "@/server/db/schema/tables/properties";
 
 export default function HostFeeTab({
   property,

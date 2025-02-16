@@ -9,17 +9,13 @@ import {
 } from "@/server/api/trpc";
 import { db } from "@/server/db";
 import {
-  hostProfiles,
   hostTeams,
   propertyInsertSchema,
   propertySelectSchema,
   propertyUpdateSchema,
   reservedDateRanges,
-  type Request,
-  type RequestsToBook,
-  type User,
-  Offer,
-  users,
+  propertyDiscounts,
+  type Request, type User, users
 } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { addDays } from "date-fns";
@@ -46,16 +42,18 @@ import {
   bookedDates,
   discountTierSchema,
   properties,
+  PropertiesWithDiscounts,
+  propertyDiscountsUpdateSchema,
   type Property,
 } from "./../../db/schema/tables/properties";
 import {
   addProperty,
-  createLatLngGISPoint,
-  fetchNightlyPrices,
-  getPropertyOriginalPrice,
+  createLatLngGISPoint, getPropertyOriginalPrice,
+  getPropertyOriginalPriceByDays,
   getRequestsForProperties,
   getRequestsToBookForProperties,
-  SeparatedData,
+  isRequestFulfillingThreshold,
+  SeparatedData
 } from "@/server/server-utils";
 import { getCoordinates } from "@/server/google-maps";
 import { checkAvailabilityForProperties } from "@/server/direct-sites-scraping";
@@ -165,6 +163,25 @@ export const propertiesRouter = createTRPCRouter({
         status: "success",
       } as const;
     }),
+
+  updateDiscounts: coHostProcedure(
+    "modify_overall_pricing_strategy",
+    z.object({
+      updatedDiscounts: propertyDiscountsUpdateSchema,
+      currentHostTeamId: z.number(),
+    }),
+  ).mutation(async ({ ctx, input }) => {
+    if (!input.updatedDiscounts.propertyId) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Property ID is required",
+      });
+    }
+    await ctx.db
+      .update(propertyDiscounts)
+      .set(input.updatedDiscounts)
+      .where(eq(propertyDiscounts.propertyId, input.updatedDiscounts.propertyId));
+  }),
 
   update: coHostProcedure(
     "update_property_descriptions_and_amenities",
@@ -597,6 +614,51 @@ export const propertiesRouter = createTRPCRouter({
       });
     }),
 
+  getDiscountPreferences: hostProcedure
+    .input(z.object({ propertyId: z.number() }))
+    .query(async ({ ctx, input }) => {
+      return await ctx.db.query.propertyDiscounts.findFirst({
+        where: eq(propertyDiscounts.propertyId, input.propertyId),
+      });
+    }),
+
+  // getHostPropertiesWithDiscounts: hostProcedure
+  //   .input(z.object({ currentHostTeamId: z.number() }))
+  //   .query(async ({ ctx, input }) => {
+  //     const hostProperties = await ctx.db.query.properties.findMany({
+  //       where: eq(properties.hostTeamId, input.currentHostTeamId),
+  //     });
+
+  //     const hostPropertiesWithDiscounts = await ctx.db.query.propertyDiscounts.findMany({
+  //       where: inArray(propertyDiscounts.propertyId, hostProperties.map((property) => property.id)),
+  //     });
+
+  //     const hostPropertiesWithDiscountsAndProperties: PropertiesWithDiscounts[] = hostProperties.map(
+  //       (property) => {
+  //         const discount = hostPropertiesWithDiscounts.find(
+  //           (discount) => discount.propertyId === property.id
+  //         )!; // Non-null assertion because discounts are guaranteed
+
+  //         return {
+  //           ...property, // Spread all properties from the Property type
+  //           weekdayDiscount: discount.weekdayDiscount,
+  //           weekendDiscount: discount.weekendDiscount,
+  //           mondayDiscount: discount.mondayDiscount,
+  //           tuesdayDiscount: discount.tuesdayDiscount,
+  //           wednesdayDiscount: discount.wednesdayDiscount,
+  //           thursdayDiscount: discount.thursdayDiscount,
+  //           fridayDiscount: discount.fridayDiscount,
+  //           saturdayDiscount: discount.saturdayDiscount,
+  //           sundayDiscount: discount.sundayDiscount,
+  //           isDailyDiscountsCustomized: discount.isDailyDiscountsCustomized,
+  //         };
+  //       }
+  //     );
+
+  //     return hostPropertiesWithDiscountsAndProperties;
+
+  //   }),
+
   getAllPropertiesFromAllTeamsFromHostId: publicProcedure
     .input(z.string())
     .query(async ({ input }) => {
@@ -625,7 +687,7 @@ export const propertiesRouter = createTRPCRouter({
         .where(eq(properties.id, input.propertyId));
     }),
 
-    getHostPropertiesWithRequests: hostProcedure
+  getHostPropertiesWithRequests: hostProcedure
     .input(z.object({ currentHostTeamId: z.number(), city: z.string().optional() }))
     .query(async ({ input }): Promise<SeparatedData> => {
       console.log(input);
@@ -689,7 +751,6 @@ export const propertiesRouter = createTRPCRouter({
       for (const requestWithProperties of requestsMap.values()) {
         const { request, properties, city: requestCity } = requestWithProperties;
         const travelersAge = getAge(request.traveler.dateOfBirth!);
-        const requestedNightlyPrice = request.maxTotalPrice / getNumNights(request.checkIn, request.checkOut);
 
         let isOutsidePriceRestrictionRequest = false;
         const validPropertiesForRequest: (Property & { taxAvailable: boolean })[] = [];
@@ -707,13 +768,12 @@ export const propertiesRouter = createTRPCRouter({
           }
 
           // Check price validity
-          const avgNightlyPrice = await getPropertyOriginalPrice(property, { checkIn: request.checkIn.toISOString(), checkOut: request.checkOut.toISOString(), numGuests: request.numGuests });
-          if (!avgNightlyPrice) {
+          const priceMap = await getPropertyOriginalPriceByDays(property, { checkIn: request.checkIn.toISOString(), checkOut: request.checkOut.toISOString() });
+          if (!priceMap) {
             isValid = false;
           } else {
-            const offerDiscountPercentage = property.offerDiscountPercentage;
-            const minAllowedPrice = avgNightlyPrice * (1 - offerDiscountPercentage / 100);
-            if (requestedNightlyPrice < minAllowedPrice) {
+            const valid = await isRequestFulfillingThreshold(property.id, request.checkIn.toISOString(), request.checkOut.toISOString(), request.maxTotalPrice, priceMap);
+            if (!valid) {
               isValid = false;
             }
           }
@@ -1193,7 +1253,6 @@ export const propertiesRouter = createTRPCRouter({
             const originalPrice = await getPropertyOriginalPrice(property, {
               checkIn: checkInNew!,
               checkOut: checkOutNew!,
-              numGuests: input.numGuests,
             });
             property.originalNightlyPrice = originalPrice ?? null;
 

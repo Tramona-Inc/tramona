@@ -1,7 +1,7 @@
 import RequestAndBidAutomationSection from "./setttingsSections/pricing-sections/RequestAndBidAutomationSection";
-import { Property } from "@/server/db/schema";
 import BookItNowSection from "./setttingsSections/pricing-sections/BookItNowSection";
 import BiddingSection from "./setttingsSections/pricing-sections/BiddingSection";
+import { Property } from "@/server/db/schema/tables/properties";
 export default function PricingTab({
   property,
   handleBookItNowSlider,

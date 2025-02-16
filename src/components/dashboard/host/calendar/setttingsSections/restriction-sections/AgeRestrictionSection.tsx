@@ -7,14 +7,13 @@ import { useHostTeamStore } from "@/utils/store/hostTeamStore"
 import { toast } from "@/components/ui/use-toast"
 import { errorToast } from "@/utils/toasts"
 import CalendarSettingsDropdown from "../../components/CalendarSettingsDropdown"
-import type { Property } from "@/server/db/schema"
 
 export default function AgeRestrictionSection({
   ageRestriction,
-  property,
+  propertyId,
 }: {
   ageRestriction: number | null
-  property: Property
+  propertyId: number
 }) {
   const { currentHostTeamId } = useHostTeamStore()
   const { mutateAsync: updateProperty } = api.properties.update.useMutation()
@@ -25,7 +24,7 @@ export default function AgeRestrictionSection({
   const handleSave = async () => {
     try {
       await updateProperty({
-        updatedProperty: { ...property, ageRestriction: age },
+        updatedProperty: { id: propertyId, ageRestriction: age },
         currentHostTeamId: currentHostTeamId!,
       })
       toast({ title: "Property Updated!" })
@@ -36,7 +35,7 @@ export default function AgeRestrictionSection({
 
   return (
     <div className="rounded-lg border">
-      <CalendarSettingsDropdown title="Age Restriction" open={open} setOpen={setOpen} />
+      <CalendarSettingsDropdown title="Age Restriction" description="Set the minimum age requirement for guests to make booking requests." open={open} setOpen={setOpen} />
 
       <div
         className={`overflow-hidden transition-all duration-300 ease-in-out ${

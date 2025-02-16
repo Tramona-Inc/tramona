@@ -87,6 +87,7 @@ function RequestAndBidAutomationSection({ property }: { property: Property }) {
         <div
           className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white bg-opacity-50 backdrop-blur-sm"
           style={{ pointerEvents: "auto" }}
+          onClick={() => setNameYourPriceOpen(false)}
         >
           <Lock className="h-8 w-8 text-gray-500" />
           <p className="mt-2 text-lg font-semibold text-gray-600">
@@ -97,6 +98,7 @@ function RequestAndBidAutomationSection({ property }: { property: Property }) {
 
       <CalendarSettingsDropdown
         title="Requests and Bids Automation"
+        description="Automate your response to make sure you maximize your bookings."
         open={nameYourPriceOpen}
         setOpen={setNameYourPriceOpen}
       />
