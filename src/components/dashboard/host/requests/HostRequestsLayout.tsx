@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useState, useCallback, useEffect, useMemo } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/router";
 import SidebarCity from "./sidebars/SideBarCity";
 import SidebarRequestToBook from "./sidebars/SideBarRequestToBook";
@@ -8,13 +8,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangleIcon, ChevronLeft } from "lucide-react";
 import { api } from "@/utils/api";
 import {
-  separateByPriceAndAgeRestriction,
-  formatOfferData,
+  formatOfferData
 } from "@/utils/utils";
-import {
-  type SeparatedData,
-  type RequestsPageOfferData,
-} from "@/server/server-utils";
 import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 import useSetInitialHostTeamId from "@/components/_common/CustomHooks/useSetInitialHostTeamId";
 import { useIsLg } from "@/utils/utils";
@@ -40,7 +35,7 @@ const alerts = [
 ];
 
 type TabType = "city" | "property-bids";
-type SelectedOptionType = "normal" | "outsidePriceRestriction" | "sent";
+type SelectedOptionType = "normal" | "other" | "sent";
 
 const HostRequestsLayout = React.memo(function HostRequestsLayout({
   isIndex,
@@ -64,7 +59,7 @@ const HostRequestsLayout = React.memo(function HostRequestsLayout({
     useState<SelectedOptionType>("normal");
 
   // <--------------------Data fetching logic ---------------->
-  const { data: properties, isLoading: isLoadingProperties } =
+  const { data: separatedData, isLoading: isLoadingProperties } =
     api.properties.getHostPropertiesWithRequests.useQuery(
       { currentHostTeamId: currentHostTeamId! },
       {
@@ -77,6 +72,8 @@ const HostRequestsLayout = React.memo(function HostRequestsLayout({
         retry: false,
       },
     );
+
+  console.log(separatedData);
 
   const { data: offers, isLoading: isLoadingOffers } =
     api.offers.getAllHostOffers.useQuery(
@@ -100,12 +97,7 @@ const HostRequestsLayout = React.memo(function HostRequestsLayout({
       },
     );
 
-  const separatedData = useMemo(() => {
-    if (properties) {
-      return separateByPriceAndAgeRestriction(properties);
-    }
-    return null;
-  }, [properties]);
+
   const offerData = useMemo(() => {
     if (offers) {
       return formatOfferData(offers);
@@ -208,14 +200,15 @@ const HostRequestsLayout = React.memo(function HostRequestsLayout({
             </div>
           </div>
           <ScrollArea className="sticky h-screen w-screen overflow-auto border-t px-4 py-8 lg:w-96">
-            {activeTab === "city" ? (
-              <SidebarCity
-                selectedOption={selectedOption}
-                separatedData={separatedData}
-                offerData={offerData}
-                isLoading={isLoadingProperties}
-                initialSelectedCity={initialSelectedCity}
-              />
+            {activeTab === "city" ?  (
+                <SidebarCity
+                  selectedOption={selectedOption}
+                  separatedData={separatedData ?? null}
+                  offerData={offerData}
+                  isLoading={isLoadingProperties}
+                  initialSelectedCity={initialSelectedCity}
+                />
+
             ) : (
               <SidebarRequestToBook
                 properties={requestToBookData}
@@ -266,13 +259,13 @@ const HostRequestsLayout = React.memo(function HostRequestsLayout({
                   </div>
                   <Button
                     variant={
-                      selectedOption === "outsidePriceRestriction"
+                      selectedOption === "other"
                         ? "primary"
                         : "white"
                     }
                     className="rounded-full shadow-md"
                     onClick={() =>
-                      handleOptionChange("outsidePriceRestriction")
+                      handleOptionChange("other")
                     }
                   >
                     Other
@@ -290,7 +283,7 @@ const HostRequestsLayout = React.memo(function HostRequestsLayout({
                         selectedOption === "normal"
                       ? alerts[1]?.text
                       : activeTab === "city" &&
-                          selectedOption === "outsidePriceRestriction"
+                          selectedOption === "other"
                         ? alerts[2]?.text
                         : alerts[3]?.text}
                 </AlertDescription>

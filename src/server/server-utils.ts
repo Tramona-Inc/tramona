@@ -4,34 +4,28 @@ import { env } from "@/env";
 import { type ReactElement } from "react";
 import { Twilio } from "twilio";
 import { db } from "./db";
-import { waitUntil } from "@vercel/functions";
-import { formatCurrency, getNumNights, plural } from "@/utils/utils";
+import { getNumNights } from "@/utils/utils";
 import axiosRetry from "axios-retry";
 import {
-  and,
-  between,
-  eq,
+  and, eq,
   exists,
   gt,
   gte,
-  inArray,
-  isNotNull,
-  isNull,
+  inArray, isNull,
   lt,
   lte,
   notExists,
+  notInArray,
   or,
   sql,
-  type SQL,
+  type SQL
 } from "drizzle-orm";
 import {
   type NewProperty,
   type Property,
   type User,
   type Request,
-  type RequestsToBook,
-  bookedDates,
-  groupInvites,
+  type RequestsToBook, groupInvites,
   groupMembers,
   groups,
   hostTeamMembers,
@@ -46,6 +40,7 @@ import {
   requestsToBook,
   hostProfiles,
   reservedDateRanges,
+  propertyDiscounts
 } from "./db/schema";
 import { getAddress, getCoordinates } from "./google-maps";
 import axios from "axios";
@@ -56,7 +51,7 @@ import { HOST_MARKUP, TRAVELER_MARKUP } from "@/utils/constants";
 import {
   HostRequestsPageData,
   HostRequestsPageOfferData,
-} from "./api/routers/propertiesRouter";
+} from "@/server/types/propertiesRouter";
 import { Session } from "next-auth";
 import { calculateTotalTax } from "@/utils/payment-utils/taxData";
 import {
@@ -66,10 +61,7 @@ import {
 } from "./external-listings-scraping/airbnbScraper";
 import { getSerpUrl } from "./external-listings-scraping/airbnbScraper";
 import { createStripeConnectId } from "@/utils/stripe-utils";
-import { zodEmail } from "@/utils/zod-utils";
-import { z } from "zod";
 import { createUserNameAndPic } from "@/components/activity-feed/admin/generationHelper";
-import { handleRequestSubmission } from "./request-utils";
 
 export const proxyAgent = new HttpsProxyAgent(env.PROXY_URL);
 
@@ -562,7 +554,6 @@ export async function getRequestsForProperties(
     };
   }[] = [];
 
-  console.log(hostProperties, "hostProperties");
   await Promise.all(hostProperties.map(async (property) => {
     const requestIsNearProperty = sql`
       ST_DWithin(
@@ -667,7 +658,6 @@ export async function getRequestsForProperties(
         },
       },
     });
-    console.log(requestsForProperty, "requestsForProperty");
 
     // Store the matched requests along with the property
     for (const request of requestsForProperty) {
@@ -708,22 +698,6 @@ export async function getPropertiesForRequest(
   { tx = db } = {},
 ) {
   let propertyIsNearRequest: SQL | undefined = sql`FALSE`;
-
-  console.log("before age restriction check");
-
-  const calculateAge = (dateOfBirth: string) => {
-    const today = new Date();
-    const birthDate = new Date(dateOfBirth);
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    if (
-      monthDiff < 0 ||
-      (monthDiff === 0 && today.getDate() < birthDate.getDate())
-    ) {
-      age--;
-    }
-    return age;
-  };
 
   const userAge = await tx.query.requests
     .findFirst({
@@ -798,35 +772,43 @@ export async function getPropertiesForRequest(
   //   }
   // }
 
-  const propertyisAvailable = notExists(
-    tx
-      .select()
-      .from(bookedDates)
-      .where(
-        and(
-          eq(bookedDates.propertyId, properties.id),
-          between(bookedDates.date, req.checkIn, req.checkOut),
+  const checkInDate = req.checkIn.toISOString();
+  const checkOutDate = req.checkOut.toISOString();
+
+  const conflictingPropertyIds = await tx.query.reservedDateRanges.findMany(
+    {
+      columns: { propertyId: true },
+      where: and(
+        or(
+          and(
+            lte(reservedDateRanges.start, checkInDate),
+            gte(reservedDateRanges.end, checkInDate),
+          ),
+          and(
+            lte(reservedDateRanges.start, checkOutDate),
+            gte(reservedDateRanges.end, checkOutDate),
+          ),
+          and(
+            gte(reservedDateRanges.start, checkInDate),
+            lte(reservedDateRanges.end, checkOutDate),
+          ),
         ),
       ),
+    },
+  );
+
+  // Extract conflicting property IDs into an array
+  const conflictingIds = conflictingPropertyIds.map(
+    (item) => item.propertyId,
   );
 
   const numberOfNights = getNumNights(req.checkIn, req.checkOut);
 
-  return await tx.query.properties.findMany({
+  const filteredProperties = await tx.query.properties.findMany({
     where: and(
       propertyIsNearRequest,
-      propertyisAvailable,
+      notInArray(properties.id, conflictingIds),
       ageRestrictionCheck,
-      or(
-        isNull(properties.priceRestriction), // Include properties with no price restriction
-        and(
-          isNotNull(properties.priceRestriction),
-          lte(
-            properties.priceRestriction,
-            Math.round((req.maxTotalPrice / numberOfNights) * 1.15),
-          ),
-        ),
-      ),
     ),
     columns: {
       id: true,
@@ -834,9 +816,62 @@ export async function getPropertiesForRequest(
       autoOfferEnabled: true,
       discountTiers: true,
       originalListingId: true,
+      hospitableListingId: true,
+      offerDiscountPercentage: true,
+      originalListingPlatform: true,
     },
   });
+
+  const propertiesWithValidPricing = [];
+
+  for (const property of filteredProperties) {
+    if (!property.hospitableListingId) continue; // Skip if no Hospitable listing ID
+
+    const priceMap = await getPropertyOriginalPriceByDays(property, { checkIn: req.checkIn.toISOString(), checkOut: req.checkOut.toISOString() });
+    if (!priceMap) continue; // Skip if no pricing data available
+    const valid = await isRequestFulfillingThreshold(property.id, req.checkIn.toISOString(), req.checkOut.toISOString(), req.maxTotalPrice, priceMap, { tx });
+
+
+    if (valid) {
+      propertiesWithValidPricing.push(property);
+    }
+  }
+
+  return propertiesWithValidPricing;
 }
+
+export const fetchNightlyPrices = async (listingId: string, checkIn: string, checkOut: string) => {
+  const url = `https://connect.hospitable.com/api/v1/listings/${listingId}/calendar?start_date=${checkIn}&end_date=${checkOut}`;
+  const response = await fetch(url, {
+    headers: { Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}` },
+  });
+
+  console.log(response, "response");
+
+  if (!response.ok) return null;
+
+  const data = await response.json() as HospitableCalendarResponse;
+  if (!data?.data?.dates) return null;
+
+  // Extract nightly prices (ignoring availability)
+  const nightlyPrices = data.data.dates.map((day) => day.price.amount / 100); // Convert cents to dollars
+
+  return nightlyPrices.length ? nightlyPrices : null;
+};
+
+export const calculateAge = (dateOfBirth: string) => {
+  const today = new Date();
+  const birthDate = new Date(dateOfBirth);
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  if (
+    monthDiff < 0 ||
+    (monthDiff === 0 && today.getDate() < birthDate.getDate())
+  ) {
+    age--;
+  }
+  return age;
+};
 
 export async function getAdminId() {
   return await db.query.users
@@ -848,6 +883,7 @@ type HospitableCalendarResponse = {
   data: {
     dates: {
       date: string;
+      day: string;
       price: {
         amount: number;
         currency: string;
@@ -914,6 +950,135 @@ export async function getPropertyCalendar(propertyId: string) {
   return combinedPricingAndCalendarResponse;
 }
 
+export async function getPropertyOriginalPriceByDays(
+  property: Pick<
+    Property,
+    "hospitableListingId" | "originalListingPlatform" | "originalListingId"
+  >,
+  params: {
+    checkIn: string;
+    checkOut: string;
+  },
+) {
+  try {
+    if (property.originalListingPlatform === "Hospitable") {
+      const formattedCheckIn = new Date(params.checkIn)
+        .toISOString()
+        .split("T")[0];
+      const formattedCheckOut = new Date(params.checkOut)
+        .toISOString()
+        .split("T")[0];
+
+      const { data } = await axios.get<HospitableCalendarResponse>(
+        `https://connect.hospitable.com/api/v1/listings/${property.hospitableListingId}/calendar`,
+        {
+          headers: {
+            Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
+          },
+          params: {
+            start_date: formattedCheckIn,
+            end_date: formattedCheckOut,
+          },
+        },
+      );
+
+      const dayToPriceMap = data.data.dates.reduce((acc: Record<string, number>, date) => {
+        acc[date.day] = date.price.amount / 100;
+        return acc;
+      }, {});
+
+      console.log(dayToPriceMap);
+
+      return dayToPriceMap;
+    }
+  } catch (error) {
+    console.error("Error fetching original price:", error);
+    return undefined; // Return undefined on error
+  }
+}
+
+type DiscountPropertyKeys =
+  | "mondayDiscount"
+  | "tuesdayDiscount"
+  | "wednesdayDiscount"
+  | "thursdayDiscount"
+  | "fridayDiscount"
+  | "saturdayDiscount"
+  | "sundayDiscount";
+
+
+export async function isRequestFulfillingThreshold(
+  propertyId: number, // Use PropertiesWithDiscounts type
+  checkIn: string,
+  checkOut: string,
+  maxTotalPrice: number,
+  priceMap: Record<string, number>,
+  options: { tx?: typeof db } = {},
+): Promise<boolean> {
+  const { tx = db } = options;
+
+  const propertyDiscountInfo = await tx.query.propertyDiscounts.findFirst({
+    where: eq(propertyDiscounts.propertyId, propertyId)
+  });
+
+  if (!propertyDiscountInfo) {
+    return false; // Or handle the case where priceMap is not available as needed
+  }
+
+  if (!priceMap) {
+    return false; // Or handle the case where priceMap is not available as needed
+  }
+
+  let totalNightsCount = 0;
+  let totalDiscountedPrice = 0;
+  const currentDate = new Date(checkIn);
+  const endDate = new Date(checkOut);
+
+  while (currentDate < endDate) {
+    totalNightsCount++;
+    const dayOfWeek = currentDate.getDay();
+
+    const dayName = [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+    ][dayOfWeek]!;
+
+    const originalNightlyPrice = priceMap[dayName]; // Access price using dayName
+
+    if (originalNightlyPrice === undefined) {
+      console.warn(`No price found for day: ${dayName}`); // Handle missing day price if needed
+      currentDate.setDate(currentDate.getDate() + 1);
+      continue; // Skip to the next day
+    }
+
+    let discountedPrice = originalNightlyPrice;
+
+    if (propertyDiscountInfo.isDailyDiscountsCustomized) {
+      const dailyDiscountKey = `${dayName}Discount` as DiscountPropertyKeys; // Type assertion here
+      // Apply daily discounts if customized
+      discountedPrice = discountedPrice * (1 - (propertyDiscountInfo[dailyDiscountKey]) / 100);
+    } else {
+      // Apply weekday/weekend discounts
+      if ([1, 2, 3, 4, 5].includes(dayOfWeek)) {
+        // Monday to Friday (Weekday)
+        discountedPrice = discountedPrice * (1 - propertyDiscountInfo.weekdayDiscount / 100);
+      } else {
+        // Saturday or Sunday (Weekend)
+        discountedPrice = discountedPrice * (1 - propertyDiscountInfo.weekendDiscount / 100);
+      }
+    }
+    totalDiscountedPrice += discountedPrice;
+    currentDate.setDate(currentDate.getDate() + 1); // Move to the next day
+  }
+
+  return totalDiscountedPrice <= (maxTotalPrice / 100);
+}
+
 export async function getPropertyOriginalPrice(
   property: Pick<
     Property,
@@ -922,7 +1087,6 @@ export async function getPropertyOriginalPrice(
   params: {
     checkIn: string;
     checkOut: string;
-    numGuests: number;
   },
 ): Promise<number | undefined> {
   // Explicit return type
@@ -987,7 +1151,7 @@ export async function getPropertyOriginalPrice(
 
 export interface SeparatedData {
   normal: HostRequestsPageData[];
-  outsidePriceRestriction: HostRequestsPageData[];
+  other: HostRequestsPageData[];
 }
 
 export interface RequestsPageOfferData {
@@ -1433,4 +1597,6 @@ export async function generateFakeUser(email: string) {
   }).returning({ id: users.id });
   return fakeUser[0]!.id;
 }
+
+
 

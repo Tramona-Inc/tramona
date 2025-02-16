@@ -162,7 +162,6 @@ export const miscRouter = createTRPCRouter({
       const averagePrice = await getPropertyOriginalPrice(property, {
         checkIn,
         checkOut,
-        numGuests,
       });
       return averagePrice;
     }),

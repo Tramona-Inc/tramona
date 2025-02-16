@@ -7,6 +7,7 @@ import {
   hostTeamMembers,
   hostTeams,
   messages,
+  properties,
   users,
 } from "@/server/db/schema";
 import { db } from "@/server/db";
@@ -789,4 +790,26 @@ export const hostTeamsRouter = createTRPCRouter({
       .set({ name: input.teamName })
       .where(eq(hostTeams.id, input.currentHostTeamId));
   }),
+
+  getHostTeam: protectedProcedure
+    .input(z.object({ currentHostTeamId: z.number() }))
+    .query(async ({ input, ctx }) => {
+      return await ctx.db.query.hostTeams.findFirst({
+        where: eq(hostTeams.id, input.currentHostTeamId),
+      });
+    }),
+
+  updateHostTeamWithOfferPercentage: protectedProcedure
+    .input(
+      z.object({
+        id: z.number(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db
+        .update(hostTeams)
+        .set({ hasOfferPercentage: true })
+        .where(eq(hostTeams.id, input.id));
+    }),
+
 });

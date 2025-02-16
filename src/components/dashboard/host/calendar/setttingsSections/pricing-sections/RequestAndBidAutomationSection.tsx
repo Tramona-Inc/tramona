@@ -1,5 +1,4 @@
-import React from "react";
-import { ChevronDown, X, Lock } from "lucide-react";
+import { X, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,6 +8,7 @@ import { Property } from "@/server/db/schema/tables/properties";
 import { useState, useEffect } from "react";
 import { api } from "@/utils/api";
 import { toast } from "@/components/ui/use-toast";
+import CalendarSettingsDropdown from "../../components/CalendarSettingsDropdown";
 
 interface DiscountTier {
   days: number;
@@ -85,8 +85,9 @@ function RequestAndBidAutomationSection({ property }: { property: Property }) {
       {/* Overlay */}
       {nameYourPriceOpen && (
         <div
-          className="absolute inset-0 z-10 bg-white bg-opacity-50 backdrop-blur-sm flex flex-col items-center justify-center"
+          className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white bg-opacity-50 backdrop-blur-sm"
           style={{ pointerEvents: "auto" }}
+          onClick={() => setNameYourPriceOpen(false)}
         >
           <Lock className="h-8 w-8 text-gray-500" />
           <p className="mt-2 text-lg font-semibold text-gray-600">
@@ -95,20 +96,12 @@ function RequestAndBidAutomationSection({ property }: { property: Property }) {
         </div>
       )}
 
-      <div
-        className="relative z-20 flex cursor-pointer items-center justify-between px-6 py-8"
-        onClick={() => setNameYourPriceOpen(!nameYourPriceOpen)}
-      >
-        <h3 className="text-xl font-bold text-black">Requests and Bids Automation</h3>
-        <Button variant="ghost" size="sm">
-          <ChevronDown
-            className="h-4 w-4 transition-transform duration-300"
-            style={{
-              transform: nameYourPriceOpen ? "rotate(180deg)" : "rotate(0deg)",
-            }}
-          />
-        </Button>
-      </div>
+      <CalendarSettingsDropdown
+        title="Requests and Bids Automation"
+        description="Automate your response to make sure you maximize your bookings."
+        open={nameYourPriceOpen}
+        setOpen={setNameYourPriceOpen}
+      />
 
       <div
         className={`relative overflow-hidden transition-all duration-300 ease-in-out ${
@@ -118,8 +111,9 @@ function RequestAndBidAutomationSection({ property }: { property: Property }) {
         }`}
       >
         <p className="text-base font-semibold">
-          Every day we get thousands of requests from travelers. Here&apos;s how you
-          can automate your response to make sure you maximize your bookings.
+          Every day we get thousands of requests from travelers. Here&apos;s how
+          you can automate your response to make sure you maximize your
+          bookings.
         </p>
 
         <div className="-mx-6 mt-4 w-[calc(100%+3rem)] border-b border-gray-200" />
@@ -151,10 +145,11 @@ function RequestAndBidAutomationSection({ property }: { property: Property }) {
               <TableBody>
                 {!discountTiers || discountTiers.length === 0 ? (
                   <div>
-                    Click &quot;Add tier&quot; to add discounts to your auto matches
+                    Click &quot;Add tier&quot; to add discounts to your auto
+                    matches
                   </div>
                 ) : (
-                  discountTiers?.map((tier, index) => (
+                  discountTiers.map((tier, index) => (
                     <TableRow key={index}>
                       <TableCell className="p-2">
                         <Input
@@ -168,7 +163,9 @@ function RequestAndBidAutomationSection({ property }: { property: Property }) {
                           className="w-16 sm:w-20"
                         />
                       </TableCell>
-                      <TableCell className="p-2">days before check-in:</TableCell>
+                      <TableCell className="p-2">
+                        days before check-in:
+                      </TableCell>
                       <TableCell className="p-2">
                         <Input
                           type="number"
@@ -176,7 +173,7 @@ function RequestAndBidAutomationSection({ property }: { property: Property }) {
                           onChange={(e) => {
                             const newTiers = [...discountTiers];
                             newTiers[index]!.percentOff = parseInt(
-                              e.target.value
+                              e.target.value,
                             );
                             setDiscountTiers(newTiers);
                           }}

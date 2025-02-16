@@ -146,6 +146,16 @@ export const ALL_INTERACTION_PREFERENCES = [
   "no preference",
 ] as const;
 
+export type DailyDiscounts = {
+  monday: number;
+  tuesday: number;
+  wednesday: number;
+  thursday: number;
+  friday: number;
+  saturday: number;
+  sunday: number;
+};
+
 export const propertySafetyItemsEnum = pgEnum(
   "property_safety_items",
   ALL_PROPERTY_SAFETY_ITEMS,
@@ -352,7 +362,7 @@ export const properties = pgTable(
       .defaultNow(),
     isPrivate: boolean("is_private").notNull().default(false),
     ageRestriction: integer("age_restriction"),
-    priceRestriction: integer("price_restriction").default(0),
+    offerDiscountPercentage: integer("offer_discount_percentage").default(0).notNull(),
     stripeVerRequired: boolean("stripe_ver_required").default(false),
     status: propertyStatusEnum("property_status").default("Listed"),
     pricingScreenUrl: varchar("pricing_screen_url"),
@@ -486,6 +496,28 @@ export const bookedDates = pgTable(
   }),
 );
 
+export const propertyDiscounts = pgTable(
+  "property_discounts",
+  {
+    propertyId: integer("property_id").references(() => properties.id, { onDelete: "cascade" }),
+    weekdayDiscount: integer("weekday_discount").default(0).notNull(),
+    weekendDiscount: integer("weekend_discount").default(0).notNull(),
+    mondayDiscount: integer("monday_discount").default(0).notNull(),
+    tuesdayDiscount: integer("tuesday_discount").default(0).notNull(),
+    wednesdayDiscount: integer("wednesday_discount").default(0).notNull(),
+    thursdayDiscount: integer("thursday_discount").default(0).notNull(),
+    fridayDiscount: integer("friday_discount").default(0).notNull(),
+    saturdayDiscount: integer("saturday_discount").default(0).notNull(),
+    sundayDiscount: integer("sunday_discount").default(0).notNull(),
+    isDailyDiscountsCustomized: boolean("is_daily_discounts_customized").default(false).notNull(),
+  },
+);
+
+export type PropertyDiscounts = typeof propertyDiscounts.$inferSelect;
+export const propertyDiscountsInsertSchema = createInsertSchema(propertyDiscounts);
+export const propertyDiscountsUpdateSchema = propertyDiscountsInsertSchema.partial().required({
+  propertyId: true,
+});
 // - added neals stuff to db
 // - did sasha already update drizzle schema and usages of latitude and longitude?
 // - I did and got Offset is outside the bounds of the DataView for the map

@@ -2,12 +2,11 @@ import { type HostDashboardRequest } from "@/components/requests/RequestCard";
 import HostRequestCard from "@/components/dashboard/host/requests/city/HostRequestCard";
 import { RequestCardLoadingGrid } from "../RequestCardLoadingGrid";
 import { Button } from "@/components/ui/button";
+
 import { type Property } from "@/server/db/schema";
 import { api } from "@/utils/api";
 import { useRouter } from "next/router";
-import { separateByPriceAndAgeRestriction } from "@/utils/utils";
 import { useState, useMemo } from "react";
-import { type SeparatedData } from "@/server/server-utils";
 import { useHostTeamStore } from "@/utils/store/hostTeamStore"; // Import store
 import NoRequestEmptyState from "../NoRequestEmptyState";
 import PaginationButtons from "@/components/_common/PaginationButtons";
@@ -37,30 +36,31 @@ const CityRequestSection: React.FC<CityRequestSectionProps> = ({
     };
   }, [query.city, query.option]);
 
-  const [separatedData, setSeparatedData] = useState<SeparatedData | undefined>(
-    undefined,
-  );
+  // const [separatedData, setSeparatedData] = useState<SeparatedData | undefined>(
+  //   undefined,
+  // );
 
   const priceRestriction = option === "outsidePriceRestriction";
-  console.log(currentHostTeamId);
+
   const { isLoading: isRequestsLoading } =
     api.properties.getHostPropertiesWithRequests.useQuery(
-      { currentHostTeamId: Number(currentHostTeamId!) },
+      {
+        currentHostTeamId: Number(currentHostTeamId!),
+        city: city,
+      },
       {
         enabled: !!currentHostTeamId,
-        onSuccess: (fetchedProperties) => {
-          const separatedProperties =
-            separateByPriceAndAgeRestriction(fetchedProperties);
-          setSeparatedData(separatedProperties);
-        },
-        onError: () => {
-          // Handle error if needed, perhaps set an error state
-        },
+        // onSuccess: (fetchedProperties) => { // fetchedProperties is now SeparatedData
+        //   setSeparatedData(fetchedProperties); // Directly set SeparatedData
+        // },
+        // onError: () => {
+        //   // Handle error if needed, perhaps set an error state
+        // },
       },
     );
 
   const requestsWithProperties = priceRestriction
-    ? separatedData?.outsidePriceRestriction
+    ? separatedData?.other
     : separatedData?.normal;
 
   const cityRequestsData = requestsWithProperties?.find((p) => p.city === city);

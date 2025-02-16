@@ -22,7 +22,7 @@ import { TramonaLogo } from "@/components/_common/Layout/header/TramonaLogo";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 export type HostDashboardRequest =
-  RouterOutputs["properties"]["getHostPropertiesWithRequests"][number]["requests"][number]["request"];
+  RouterOutputs["properties"]["getHostPropertiesWithRequests"]["normal"][number]["requests"][number]["request"];
 
 export type HostPreviewRequest = RouterOutputs["requests"]["getByIdForPreview"];
 
@@ -121,7 +121,7 @@ export default function HostRequestCard({
             </span>
           </div>
         </div>
-        
+
         <CardFooter className="mt-4">
           <Button
             className="w-full bg-green-600 text-white hover:bg-green-700"

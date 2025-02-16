@@ -9,17 +9,13 @@ import {
 } from "@/server/api/trpc";
 import { db } from "@/server/db";
 import {
-  hostProfiles,
   hostTeams,
   propertyInsertSchema,
   propertySelectSchema,
   propertyUpdateSchema,
   reservedDateRanges,
-  type Request,
-  type RequestsToBook,
-  type User,
-  Offer,
-  users,
+  propertyDiscounts,
+  type Request, type User, users
 } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { addDays } from "date-fns";
@@ -46,73 +42,26 @@ import {
   bookedDates,
   discountTierSchema,
   properties,
+  propertyDiscountsUpdateSchema,
   type Property,
 } from "./../../db/schema/tables/properties";
 import {
   addProperty,
-  createLatLngGISPoint,
-  getPropertyOriginalPrice,
+  createLatLngGISPoint, getPropertyOriginalPrice,
+  getPropertyOriginalPriceByDays,
   getRequestsForProperties,
   getRequestsToBookForProperties,
+  isRequestFulfillingThreshold,
+  SeparatedData
 } from "@/server/server-utils";
 import { getCoordinates } from "@/server/google-maps";
 import { checkAvailabilityForProperties } from "@/server/direct-sites-scraping";
 import { scrapeAirbnbSearch } from "@/server/external-listings-scraping/airbnbScraper";
-import { capitalize } from "@/utils/utils";
+import { capitalize, getAge, getNumNights } from "@/utils/utils";
 import { extraPricingFieldSchema } from "@/components/dashboard/host/calendar/pricingfields";
 import { validateImage } from "@/utils/utils";
 import { hostTeamMembers } from "../../db/schema/tables/hostTeams";
-
-export type HostRequestsPageData = {
-  city: string;
-  requests: {
-    request: Request & {
-      traveler: Pick<
-        User,
-        | "firstName"
-        | "lastName"
-        | "name"
-        | "image"
-        | "location"
-        | "about"
-        | "dateOfBirth"
-        | "id"
-      >;
-    };
-    properties: (Property & { taxAvailable: boolean })[];
-  }[];
-};
-
-export type HostRequestsToBookPageData = {
-  requestToBook: (RequestsToBook & {
-    traveler: Pick<
-      User,
-      "firstName" | "lastName" | "name" | "image" | "location" | "about"
-    >;
-  })[];
-  property: Property & { taxAvailable: boolean };
-}[];
-
-export type HostRequestsPageOfferData = {
-  city: string;
-  requests: {
-    offer: Offer;
-    request: {
-      id: number;
-      madeByGroupId: number;
-      maxTotalPrice: number;
-      checkIn: Date;
-      checkOut: Date;
-      numGuests: number;
-      location: string;
-      traveler: Pick<
-        User,
-        "firstName" | "lastName" | "name" | "image" | "location" | "about"
-      >;
-    };
-    property: { city: string; name: string };
-  }[];
-};
+import { HostRequestsPageData } from "@/server/types/propertiesRouter";
 
 export const propertiesRouter = createTRPCRouter({
   adminUpdate: roleRestrictedProcedure(["admin"])
@@ -213,6 +162,43 @@ export const propertiesRouter = createTRPCRouter({
         status: "success",
       } as const;
     }),
+
+  updateDiscountForWholeHostTeam: coHostProcedure(
+    "modify_overall_pricing_strategy",
+    z.object({
+      updatedDiscounts: propertyDiscountsUpdateSchema.omit({ propertyId: true }),
+      currentHostTeamId: z.number(),
+    }),
+  ).mutation(async ({ ctx, input }) => {
+
+    const allHostTeamProperties = await ctx.db.query.properties.findMany({
+      where: eq(properties.hostTeamId, input.currentHostTeamId),
+    });
+
+    await ctx.db
+      .update(propertyDiscounts)
+      .set(input.updatedDiscounts)
+      .where(inArray(propertyDiscounts.propertyId, allHostTeamProperties.map((property) => property.id)));
+  }),
+
+  updateDiscounts: coHostProcedure(
+    "modify_overall_pricing_strategy",
+    z.object({
+      updatedDiscounts: propertyDiscountsUpdateSchema,
+      currentHostTeamId: z.number(),
+    }),
+  ).mutation(async ({ ctx, input }) => {
+    if (!input.updatedDiscounts.propertyId) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Property ID is required",
+      });
+    }
+    await ctx.db
+      .update(propertyDiscounts)
+      .set(input.updatedDiscounts)
+      .where(eq(propertyDiscounts.propertyId, input.updatedDiscounts.propertyId));
+  }),
 
   update: coHostProcedure(
     "update_property_descriptions_and_amenities",
@@ -640,6 +626,51 @@ export const propertiesRouter = createTRPCRouter({
       });
     }),
 
+  getDiscountPreferences: hostProcedure
+    .input(z.object({ propertyId: z.number() }))
+    .query(async ({ ctx, input }) => {
+      return await ctx.db.query.propertyDiscounts.findFirst({
+        where: eq(propertyDiscounts.propertyId, input.propertyId),
+      });
+    }),
+
+  // getHostPropertiesWithDiscounts: hostProcedure
+  //   .input(z.object({ currentHostTeamId: z.number() }))
+  //   .query(async ({ ctx, input }) => {
+  //     const hostProperties = await ctx.db.query.properties.findMany({
+  //       where: eq(properties.hostTeamId, input.currentHostTeamId),
+  //     });
+
+  //     const hostPropertiesWithDiscounts = await ctx.db.query.propertyDiscounts.findMany({
+  //       where: inArray(propertyDiscounts.propertyId, hostProperties.map((property) => property.id)),
+  //     });
+
+  //     const hostPropertiesWithDiscountsAndProperties: PropertiesWithDiscounts[] = hostProperties.map(
+  //       (property) => {
+  //         const discount = hostPropertiesWithDiscounts.find(
+  //           (discount) => discount.propertyId === property.id
+  //         )!; // Non-null assertion because discounts are guaranteed
+
+  //         return {
+  //           ...property, // Spread all properties from the Property type
+  //           weekdayDiscount: discount.weekdayDiscount,
+  //           weekendDiscount: discount.weekendDiscount,
+  //           mondayDiscount: discount.mondayDiscount,
+  //           tuesdayDiscount: discount.tuesdayDiscount,
+  //           wednesdayDiscount: discount.wednesdayDiscount,
+  //           thursdayDiscount: discount.thursdayDiscount,
+  //           fridayDiscount: discount.fridayDiscount,
+  //           saturdayDiscount: discount.saturdayDiscount,
+  //           sundayDiscount: discount.sundayDiscount,
+  //           isDailyDiscountsCustomized: discount.isDailyDiscountsCustomized,
+  //         };
+  //       }
+  //     );
+
+  //     return hostPropertiesWithDiscountsAndProperties;
+
+  //   }),
+
   getAllPropertiesFromAllTeamsFromHostId: publicProcedure
     .input(z.string())
     .query(async ({ input }) => {
@@ -669,26 +700,30 @@ export const propertiesRouter = createTRPCRouter({
     }),
 
   getHostPropertiesWithRequests: hostProcedure
-    .input(z.object({ currentHostTeamId: z.number() }))
-    .query(async ({ input }) => {
+    .input(z.object({ currentHostTeamId: z.number(), city: z.string().optional() }))
+    .query(async ({ input }): Promise<SeparatedData> => {
+      console.log(input);
+      const whereConditions = [
+        eq(properties.hostTeamId, input.currentHostTeamId),
+        eq(properties.status, "Listed"),
+      ];
+
+      if (input.city) {
+        whereConditions.push(eq(properties.city, input.city));
+      }
+
       const hostProperties = await db.query.properties.findMany({
-        where: and(
-          eq(properties.hostTeamId, input.currentHostTeamId),
-          eq(properties.status, "Listed"),
-        ),
+        where: and(...whereConditions),
       });
+
+      console.log(hostProperties);
 
       const hostRequests = await getRequestsForProperties(hostProperties);
 
-      const groupedByCity: HostRequestsPageData[] = [];
+      const normalGroupedByCity: HostRequestsPageData[] = [];
+      const outsidePriceRestrictionGroupedByCity: HostRequestsPageData[] = [];
 
-      const citiesSet = new Set(
-        hostProperties.map((property) => property.city),
-      );
-      citiesSet.forEach((city) => {
-        groupedByCity.push({ city, requests: [] });
-      });
-      const findOrCreateCityGroup = (city: string) => {
+      const findOrCreateCityGroup = (city: string, groupedByCity: HostRequestsPageData[]) => {
         let cityGroup = groupedByCity.find((group) => group.city === city);
         if (!cityGroup) {
           cityGroup = { city, requests: [] };
@@ -701,53 +736,107 @@ export const propertiesRouter = createTRPCRouter({
         number,
         {
           request: Request & {
-            traveler: Pick<
-              User,
-              | "firstName"
-              | "lastName"
-              | "name"
-              | "image"
-              | "location"
-              | "about"
-              | "dateOfBirth"
-              | "id"
-            >;
+            traveler: Pick<User, "firstName" | "lastName" | "name" | "image" | "location" | "about" | "dateOfBirth" | "id">;
           };
           properties: (Property & { taxAvailable: boolean })[];
+          city: string;
         }
       >();
 
+      console.log(hostRequests);
+
+      // Loop through requests and group properties by request
       for (const { property, request } of hostRequests) {
         if (!requestsMap.has(request.id)) {
           requestsMap.set(request.id, {
             request,
             properties: [],
+            city: property.city,
           });
         }
         requestsMap.get(request.id)!.properties.push(property);
       }
 
-      for (const requestWithProperties of requestsMap.values()) {
-        const { request, properties } = requestWithProperties;
-        for (const property of properties) {
-          const cityGroup = findOrCreateCityGroup(property.city);
-          const existingRequest = cityGroup.requests.find(
-            (item) => item.request.id === request.id,
-          );
+      console.log(requestsMap);
 
-          if (existingRequest) {
-            existingRequest.properties.push(property);
+      // Process each request and validate properties
+      for (const requestWithProperties of requestsMap.values()) {
+        const { request, properties, city: requestCity } = requestWithProperties;
+        const travelersAge = getAge(request.traveler.dateOfBirth!);
+
+        let isOutsidePriceRestrictionRequest = false;
+        const validPropertiesForRequest: (Property & { taxAvailable: boolean })[] = [];
+        const invalidPropertiesForRequest: (Property & { taxAvailable: boolean })[] = [];
+
+
+        for (const property of properties) {
+          if (!property.hospitableListingId) continue;
+
+          let isValid = true;
+
+          // Check age restriction
+          if (property.ageRestriction && travelersAge < property.ageRestriction) {
+            isValid = false;
+          }
+
+          // Check price validity
+          const priceMap = await getPropertyOriginalPriceByDays(property, { checkIn: request.checkIn.toISOString(), checkOut: request.checkOut.toISOString() });
+          if (!priceMap) {
+            isValid = false;
           } else {
+            const valid = await isRequestFulfillingThreshold(property.id, request.checkIn.toISOString(), request.checkOut.toISOString(), request.maxTotalPrice, priceMap);
+            if (!valid) {
+              isValid = false;
+            }
+          }
+
+          if (!isValid) {
+            isOutsidePriceRestrictionRequest = true;
+            invalidPropertiesForRequest.push(property); // Keeping track of invalid properties for potential future use, though not used in OG type
+          } else {
+            validPropertiesForRequest.push(property);
+          }
+        }
+
+        if (isOutsidePriceRestrictionRequest) {
+          const cityGroup = findOrCreateCityGroup(requestCity, outsidePriceRestrictionGroupedByCity); // Use last property's city, all properties in a request should be in same city
+          let existingRequest = cityGroup.requests.find((item) => item.request.id === request.id);
+
+          if (!existingRequest) {
             cityGroup.requests.push({
               request,
-              properties: [property],
+              properties: [],
             });
+
+            // Reassign after pushing to ensure we reference the newly added request
+            existingRequest = cityGroup.requests[cityGroup.requests.length - 1];
           }
+          existingRequest!.properties.push(...validPropertiesForRequest); // Add valid properties to outsidePriceRestriction for OG type requirement, even though request is categorized as outside restriction. If you dont want to show valid properties under outside restriction, just leave this line out.
+
+        } else {
+          const cityGroup = findOrCreateCityGroup(requestCity, normalGroupedByCity);  // Use last property's city
+          let existingRequest = cityGroup.requests.find((item) => item.request.id === request.id);
+
+          if (!existingRequest) {
+            cityGroup.requests.push({
+              request,
+              properties: [],
+            });
+
+            // Reassign after pushing to ensure we reference the newly added request
+            existingRequest = cityGroup.requests[cityGroup.requests.length - 1];
+          }
+          existingRequest!.properties.push(...validPropertiesForRequest);
         }
       }
 
-      return groupedByCity;
+
+      return {
+        normal: normalGroupedByCity,
+        other: outsidePriceRestrictionGroupedByCity,
+      };
     }),
+
 
   getHostPropertiesWithRequestsToBook: hostProcedure
     .input(z.object({ currentHostTeamId: z.number() }))
@@ -1176,7 +1265,6 @@ export const propertiesRouter = createTRPCRouter({
             const originalPrice = await getPropertyOriginalPrice(property, {
               checkIn: checkInNew!,
               checkOut: checkOutNew!,
-              numGuests: input.numGuests,
             });
             property.originalNightlyPrice = originalPrice ?? null;
 

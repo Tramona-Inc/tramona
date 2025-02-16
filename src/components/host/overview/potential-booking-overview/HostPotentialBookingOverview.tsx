@@ -56,6 +56,8 @@ export default function HostPotentialBookingOverview({
       { enabled: !!currentHostTeamId },
     );
 
+  const normalRequests = requestsWithProperties?.normal;
+
   return (
     <div className={cn("space-y-4", className)}>
       <div className="flex w-full items-center gap-x-2 pb-2">
@@ -74,11 +76,11 @@ export default function HostPotentialBookingOverview({
           <BubbleTabsTrigger value="property">Property</BubbleTabsTrigger>
         </BubbleTabsList>
         <BubbleTabsContent value="city">
-          {!requestsWithProperties || requestsWithProperties.length === 0 ? (
+          {!normalRequests || normalRequests.length === 0 ? (
             <EmptyBookingState type="city" isLoading={isLoading} />
           ) : (
             <div className="flex max-h-[400px] flex-row gap-4 overflow-x-auto pb-4">
-              {requestsWithProperties.flatMap((cityRequest) =>
+              {normalRequests.flatMap((cityRequest) =>
                 cityRequest.requests.map((request, index) => (
                   <Card
                     key={`${cityRequest.city}-${index}`}

@@ -1,4 +1,4 @@
-import { Column, relations } from "drizzle-orm";
+import { relations } from "drizzle-orm";
 import { accounts } from "./tables/auth/accounts";
 import { sessions } from "./tables/auth/sessions";
 import { bids } from "./tables/bids";
@@ -17,7 +17,11 @@ import {
 } from "./tables/messages";
 import { emergencyContacts } from "./tables/emergencyContacts";
 import { offers } from "./tables/offers";
-import { bookedDates, properties } from "./tables/properties";
+import {
+  bookedDates,
+  properties,
+  propertyDiscounts,
+} from "./tables/properties";
 import { requests } from "./tables/requests";
 import { reservedDateRanges } from "./tables/reservedDateRanges";
 import {
@@ -110,11 +114,22 @@ export const hostProfilesRelations = relations(hostProfiles, ({ one }) => ({
   }),
 }));
 
+export const propertyDiscountsRelations = relations(
+  propertyDiscounts,
+  ({ one }) => ({
+    property: one(properties, {
+      fields: [propertyDiscounts.propertyId],
+      references: [properties.id],
+    }),
+  }),
+);
+
 export const propertiesRelations = relations(properties, ({ one, many }) => ({
   hostTeam: one(hostTeams, {
     fields: [properties.hostTeamId],
     references: [hostTeams.id],
   }),
+  propertyDiscount: one(propertyDiscounts),
   offers: many(offers),
   bids: many(bids),
   bookedDates: many(bookedDates),
