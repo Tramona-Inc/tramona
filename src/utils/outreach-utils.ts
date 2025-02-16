@@ -2,7 +2,7 @@ import { sendEmail } from "@/server/server-utils";
 import RequestOutreachEmail from "packages/transactional/emails/RequestOutreachEmail";
 import { db } from "@/server/db";
 import { eq, sql } from "drizzle-orm"; // Import 'eq' for database queries
-import { propertyManagerContacts } from "@/server/db/schema";
+import { propertyManagerContactsTest } from "@/server/db/secondary-schema";
 
 interface EmailPMFromCityRequestInput {
   requestLocation: string;
@@ -33,8 +33,8 @@ export async function emailPMFromCityRequest(
 
     const nearbyProperyManagers = await db
       .select({
-        email: propertyManagerContacts.email,
-        propertyManagerName: propertyManagerContacts.propertyManagerName,
+        email: propertyManagerContactsTest.email,
+        propertyManagerName: propertyManagerContactsTest.name,
         latLngPoint: sql<string>`ST_AsText(lat_lng_point)`.as("latLngPoint"),
         distanceMeters: sql<number>`
           ST_Distance(
@@ -43,7 +43,7 @@ export async function emailPMFromCityRequest(
           )
         `.as("distance_meters"),
       })
-      .from(propertyManagerContacts)
+      .from(propertyManagerContactsTest)
       .where(
         sql`
           lat_lng_point IS NOT NULL
@@ -63,18 +63,20 @@ export async function emailPMFromCityRequest(
     console.log("Managers to email:", nearbyProperyManagers); // Log managers to be emailed
 
     for (const manager of nearbyProperyManagers) {
-      if (!manager.email) {
+      if (!manager.email || manager.email.length < 1) {
         console.log(`Skipping email for manager without email:`, manager);
         continue; // Skip to the next manager if email is missing
       }
-      await sendEmail({
-        to: manager.email,
-        subject: `${manager.propertyManagerName} Potential Travelers looking for a stay in ${input.requestLocation}`,
-        content: RequestOutreachEmail({
-          requestLocation: input.requestLocation, // Email content still uses requestLocation for now
-        }),
-      });
-      console.log(`Email sent to: ${manager.email}`);
+      for (const email of manager.email) {
+        await sendEmail({
+          to: email,
+          subject: `${manager.propertyManagerName} Potential Travelers looking for a stay in ${input.requestLocation}`,
+          content: RequestOutreachEmail({
+            requestLocation: input.requestLocation, // Email content still uses requestLocation for now
+          }),
+        });
+        console.log(`Email sent to: ${email}`);
+      }
     }
   } catch (err) {
     console.error("Error in emailPMFromCityRequest:", err);
