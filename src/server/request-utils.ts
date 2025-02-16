@@ -5,30 +5,46 @@ import { RequestInput } from "./api/routers/requestsRouter";
 import { db } from "./db";
 import { waitUntil } from "@vercel/functions";
 import { formatCurrency, getNumNights, plural } from "@/utils/utils";
-import {
-  eq
-} from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import {
   groupMembers,
-  groups, properties,
-  offers, requests,
-  users
+  groups,
+  properties,
+  offers,
+  requests,
+  users,
 } from "./db/schema";
 import { getCoordinates } from "./google-maps";
 import { sendSlackMessage } from "./slack";
 import { Session } from "next-auth";
 import { TRPCError } from "@trpc/server";
-import { haversineDistance, createLatLngGISPoint, getPropertiesForRequest, sendTextToHost } from "./server-utils";
+import {
+  haversineDistance,
+  createLatLngGISPoint,
+  getPropertiesForRequest,
+  sendTextToHost,
+} from "./server-utils";
 import { scrapeDirectListings } from "./direct-sites-scraping";
 import { scrapeAirbnbPrice } from "./scrapePrice";
-import { getTravelerOfferedPrice, baseAmountToHostPayout } from "@/utils/payment-utils/paymentBreakdown";
+import {
+  getTravelerOfferedPrice,
+  baseAmountToHostPayout,
+} from "@/utils/payment-utils/paymentBreakdown";
 import { differenceInDays } from "date-fns";
 import { generateFakeUser } from "./server-utils";
+import { emailPMFromCityRequest } from "@/utils/outreach-utils";
 
 export async function handleRequestSubmission(
   input: RequestInput,
   { user }: { user: Session["user"] },
 ) {
+  console.log("hit");
+  await emailPMFromCityRequest({
+    requestLocation: input.location,
+    requestedLocationLatLng: { lat: input.lat, lng: input.lng },
+    radius: input.radius,
+  });
+
   // Begin a transaction
   const transactionResults = await db.transaction(async (tx) => {
     const madeByGroupId = await tx
@@ -243,7 +259,13 @@ export async function handleRequestSubmission(
   return transactionResults;
 }
 
-export async function generateFakeRequest(location: string, checkIn: Date, checkOut: Date, numGuests: number, maxTotalPrice: number) {
+export async function generateFakeRequest(
+  location: string,
+  checkIn: Date,
+  checkOut: Date,
+  numGuests: number,
+  maxTotalPrice: number,
+) {
   const fakeUserId = await generateFakeUser("fake-user@gmail.com");
   const fakeUser = await db.query.users.findFirst({
     where: eq(users.id, fakeUserId),
@@ -251,12 +273,15 @@ export async function generateFakeRequest(location: string, checkIn: Date, check
   if (!fakeUser) {
     throw new Error("Fake user not found");
   }
-  const fakeRequest = await handleRequestSubmission({
-    location,
-    checkIn,
-    checkOut,
-    numGuests,
-    maxTotalPrice,
-  }, { user: fakeUser });
+  const fakeRequest = await handleRequestSubmission(
+    {
+      location,
+      checkIn,
+      checkOut,
+      numGuests,
+      maxTotalPrice,
+    },
+    { user: fakeUser },
+  );
   return fakeRequest;
 }

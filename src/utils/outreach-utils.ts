@@ -6,14 +6,20 @@ import { propertyManagerContacts } from "@/server/db/schema";
 
 interface EmailPMFromCityRequestInput {
   requestLocation: string;
-  requestedLocationLatLng?: { lat: number; lng: number };
+  requestedLocationLatLng?: {
+    lat: number | undefined;
+    lng: number | undefined;
+  };
   radius?: number; // You might remove radius from input as prompt is radius-free now
 }
 
 export async function emailPMFromCityRequest(
   input: EmailPMFromCityRequestInput,
 ) {
-  if (!input.requestedLocationLatLng) {
+  if (
+    !input.requestedLocationLatLng?.lat ||
+    !input.requestedLocationLatLng?.lat
+  ) {
     console.log("No requestedLocationLatLng provided, exiting function.");
     return; // Early return if latLng is missing, mirroring the tRPC behavior
   }

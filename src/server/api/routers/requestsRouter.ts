@@ -7,7 +7,8 @@ import {
 } from "@/server/api/trpc";
 import { db } from "@/server/db";
 import {
-  groupMembers, requestInsertSchema,
+  groupMembers,
+  requestInsertSchema,
   requestSelectSchema,
   requests,
   users,
@@ -16,12 +17,13 @@ import {
   properties,
   Property,
   User,
-  Request
+  Request,
 } from "@/server/db/schema";
 import {
   sendText,
   sendWhatsApp,
-  getPropertiesForRequest, getRequestsForProperties
+  getPropertiesForRequest,
+  getRequestsForProperties,
 } from "@/server/server-utils";
 import { isIncoming } from "@/utils/formatters";
 import { TRPCError } from "@trpc/server";
@@ -444,5 +446,3 @@ const modifiedRequestSchema = requestInsertSchema
 
 // Infer the type from the modified schema
 export type RequestInput = z.infer<typeof modifiedRequestSchema>;
-
-
