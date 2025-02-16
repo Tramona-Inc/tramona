@@ -39,7 +39,8 @@ import {
   hostTeams,
   requestsToBook,
   hostProfiles,
-  reservedDateRanges
+  reservedDateRanges,
+  propertyDiscounts
 } from "./db/schema";
 import { getAddress, getCoordinates } from "./google-maps";
 import axios from "axios";
@@ -60,10 +61,7 @@ import {
 } from "./external-listings-scraping/airbnbScraper";
 import { getSerpUrl } from "./external-listings-scraping/airbnbScraper";
 import { createStripeConnectId } from "@/utils/stripe-utils";
-import { zodEmail } from "@/utils/zod-utils";
-import { z } from "zod";
 import { createUserNameAndPic } from "@/components/activity-feed/admin/generationHelper";
-import { handleRequestSubmission } from "./request-utils";
 
 export const proxyAgent = new HttpsProxyAgent(env.PROXY_URL);
 
@@ -820,6 +818,7 @@ export async function getPropertiesForRequest(
       originalListingId: true,
       hospitableListingId: true,
       offerDiscountPercentage: true,
+      originalListingPlatform: true,
     },
   });
 
@@ -828,13 +827,12 @@ export async function getPropertiesForRequest(
   for (const property of filteredProperties) {
     if (!property.hospitableListingId) continue; // Skip if no Hospitable listing ID
 
-    const nightlyPrices = await fetchNightlyPrices(property.hospitableListingId, req.checkIn.toISOString(), req.checkOut.toISOString());
-    if (!nightlyPrices) continue; // Skip if no pricing data available
-    const offerDiscountPercentage = property.offerDiscountPercentage;
-    const avgNightlyPrice = nightlyPrices.reduce((sum: number, price: number) => sum + price, 0) / nightlyPrices.length;
-    const minAllowedPrice = avgNightlyPrice * (1 - offerDiscountPercentage / 100);
+    const priceMap = await getPropertyOriginalPriceByDays(property, { checkIn: req.checkIn.toISOString(), checkOut: req.checkOut.toISOString() });
+    if (!priceMap) continue; // Skip if no pricing data available
+    const valid = await isRequestFulfillingThreshold(property.id, req.checkIn.toISOString(), req.checkOut.toISOString(), req.maxTotalPrice, priceMap, { tx });
 
-    if (req.maxTotalPrice / numberOfNights >= minAllowedPrice) {
+
+    if (valid) {
       propertiesWithValidPricing.push(property);
     }
   }
@@ -885,6 +883,7 @@ type HospitableCalendarResponse = {
   data: {
     dates: {
       date: string;
+      day: string;
       price: {
         amount: number;
         currency: string;
@@ -951,6 +950,135 @@ export async function getPropertyCalendar(propertyId: string) {
   return combinedPricingAndCalendarResponse;
 }
 
+export async function getPropertyOriginalPriceByDays(
+  property: Pick<
+    Property,
+    "hospitableListingId" | "originalListingPlatform" | "originalListingId"
+  >,
+  params: {
+    checkIn: string;
+    checkOut: string;
+  },
+) {
+  try {
+    if (property.originalListingPlatform === "Hospitable") {
+      const formattedCheckIn = new Date(params.checkIn)
+        .toISOString()
+        .split("T")[0];
+      const formattedCheckOut = new Date(params.checkOut)
+        .toISOString()
+        .split("T")[0];
+
+      const { data } = await axios.get<HospitableCalendarResponse>(
+        `https://connect.hospitable.com/api/v1/listings/${property.hospitableListingId}/calendar`,
+        {
+          headers: {
+            Authorization: `Bearer ${process.env.HOSPITABLE_API_KEY}`,
+          },
+          params: {
+            start_date: formattedCheckIn,
+            end_date: formattedCheckOut,
+          },
+        },
+      );
+
+      const dayToPriceMap = data.data.dates.reduce((acc: Record<string, number>, date) => {
+        acc[date.day] = date.price.amount / 100;
+        return acc;
+      }, {});
+
+      console.log(dayToPriceMap);
+
+      return dayToPriceMap;
+    }
+  } catch (error) {
+    console.error("Error fetching original price:", error);
+    return undefined; // Return undefined on error
+  }
+}
+
+type DiscountPropertyKeys =
+  | "mondayDiscount"
+  | "tuesdayDiscount"
+  | "wednesdayDiscount"
+  | "thursdayDiscount"
+  | "fridayDiscount"
+  | "saturdayDiscount"
+  | "sundayDiscount";
+
+
+export async function isRequestFulfillingThreshold(
+  propertyId: number, // Use PropertiesWithDiscounts type
+  checkIn: string,
+  checkOut: string,
+  maxTotalPrice: number,
+  priceMap: Record<string, number>,
+  options: { tx?: typeof db } = {},
+): Promise<boolean> {
+  const { tx = db } = options;
+
+  const propertyDiscountInfo = await tx.query.propertyDiscounts.findFirst({
+    where: eq(propertyDiscounts.propertyId, propertyId)
+  });
+
+  if (!propertyDiscountInfo) {
+    return false; // Or handle the case where priceMap is not available as needed
+  }
+
+  if (!priceMap) {
+    return false; // Or handle the case where priceMap is not available as needed
+  }
+
+  let totalNightsCount = 0;
+  let totalDiscountedPrice = 0;
+  const currentDate = new Date(checkIn);
+  const endDate = new Date(checkOut);
+
+  while (currentDate < endDate) {
+    totalNightsCount++;
+    const dayOfWeek = currentDate.getDay();
+
+    const dayName = [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+    ][dayOfWeek]!;
+
+    const originalNightlyPrice = priceMap[dayName]; // Access price using dayName
+
+    if (originalNightlyPrice === undefined) {
+      console.warn(`No price found for day: ${dayName}`); // Handle missing day price if needed
+      currentDate.setDate(currentDate.getDate() + 1);
+      continue; // Skip to the next day
+    }
+
+    let discountedPrice = originalNightlyPrice;
+
+    if (propertyDiscountInfo.isDailyDiscountsCustomized) {
+      const dailyDiscountKey = `${dayName}Discount` as DiscountPropertyKeys; // Type assertion here
+      // Apply daily discounts if customized
+      discountedPrice = discountedPrice * (1 - (propertyDiscountInfo[dailyDiscountKey]) / 100);
+    } else {
+      // Apply weekday/weekend discounts
+      if ([1, 2, 3, 4, 5].includes(dayOfWeek)) {
+        // Monday to Friday (Weekday)
+        discountedPrice = discountedPrice * (1 - propertyDiscountInfo.weekdayDiscount / 100);
+      } else {
+        // Saturday or Sunday (Weekend)
+        discountedPrice = discountedPrice * (1 - propertyDiscountInfo.weekendDiscount / 100);
+      }
+    }
+    totalDiscountedPrice += discountedPrice;
+    currentDate.setDate(currentDate.getDate() + 1); // Move to the next day
+  }
+
+  return totalDiscountedPrice <= (maxTotalPrice / 100);
+}
+
 export async function getPropertyOriginalPrice(
   property: Pick<
     Property,
@@ -959,7 +1087,6 @@ export async function getPropertyOriginalPrice(
   params: {
     checkIn: string;
     checkOut: string;
-    numGuests: number;
   },
 ): Promise<number | undefined> {
   // Explicit return type
@@ -1470,4 +1597,6 @@ export async function generateFakeUser(email: string) {
   }).returning({ id: users.id });
   return fakeUser[0]!.id;
 }
+
+
 

@@ -9,11 +9,14 @@ import useSetInitialHostTeamId from "@/components/_common/CustomHooks/useSetInit
 import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { Form, FormItem, FormLabel, FormControl } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Controller } from "react-hook-form";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { toast } from "@/components/ui/use-toast";
+import { errorToast } from "@/utils/toasts";
+import { Switch } from "@/components/ui/switch";
+import { Slider } from "@/components/ui/slider";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/utils/utils";
 export default function HostOverview() {
   useSetInitialHostTeamId();
   const { currentHostTeamId } = useHostTeamStore();
@@ -24,78 +27,194 @@ export default function HostOverview() {
   const { data: hostTeam } = api.hostTeams.getHostTeam.useQuery({
     currentHostTeamId: currentHostTeamId!,
   });
+
   const updateHostTeam = api.hostTeams.updateHostTeamWithOfferPercentage.useMutation();
 
   const [open, setOpen] = useState(true);
-  const form = useForm({
-    defaultValues: {
-      offerPercentage: 0,
-    },
-  });
-  const onSubmit = async (data: {offerPercentage: number}) => {
 
-    updateHostTeam.mutate({
-      id: currentHostTeamId!,
-      offerPercentage: data.offerPercentage,
-    });
-    setOpen(false);
+  const { mutateAsync: updateDiscountForWholeHostTeam } = api.properties.updateDiscountForWholeHostTeam.useMutation();
+  const [weekdayDiscount, setWeekdayDiscount] = useState(0);
+  const [weekendDiscount, setWeekendDiscount] = useState(0);
+  const [customizeDaily, setCustomizeDaily] = useState(false);
+  const [mondayDiscount, setMondayDiscount] = useState(0);
+  const [tuesdayDiscount, setTuesdayDiscount] = useState(0);
+  const [wednesdayDiscount, setWednesdayDiscount] = useState(0);
+  const [thursdayDiscount, setThursdayDiscount] = useState(0);
+  const [fridayDiscount, setFridayDiscount] = useState(0);
+  const [saturdayDiscount, setSaturdayDiscount] = useState(0);
+  const [sundayDiscount, setSundayDiscount] = useState(0);
+
+  const handleDailyDiscountChange = (dayOfWeek: string, value: number) => {
+    switch (dayOfWeek) {
+      case "monday":
+        setMondayDiscount(value);
+        break;
+      case "tuesday":
+        setTuesdayDiscount(value);
+        break;
+      case "wednesday":
+        setWednesdayDiscount(value);
+        break;
+      case "thursday":
+        setThursdayDiscount(value);
+        break;
+      case "friday":
+        setFridayDiscount(value);
+        break;
+      case "saturday":
+        setSaturdayDiscount(value);
+        break;
+      case "sunday":
+        setSundayDiscount(value);
+        break;
+      default:
+        break;
+    }
   };
+
+  const handleCustomizeDailyChange = async (checked: boolean) => {
+    setCustomizeDaily(checked);
+    try {
+      await updateDiscountForWholeHostTeam({ // Call the new mutation for switch
+        updatedDiscounts: {
+          isDailyDiscountsCustomized: checked,
+        },
+        currentHostTeamId: currentHostTeamId!,
+      });
+      // if (checked) {
+      //   toast({ title: "Daily Discounts On!" });
+      // } else {
+      //   toast({ title: "Daily Discounts Off!" });
+      // }
+    } catch (error) {
+      setCustomizeDaily(!checked); // Revert UI on error
+      errorToast();
+    }
+  };
+
+
+  const handleSave = async () => {
+    try {
+      await updateDiscountForWholeHostTeam({
+        updatedDiscounts: {
+          weekdayDiscount,
+          weekendDiscount,
+          isDailyDiscountsCustomized: customizeDaily,
+          mondayDiscount,
+          tuesdayDiscount,
+          wednesdayDiscount,
+          thursdayDiscount,
+          fridayDiscount,
+          saturdayDiscount,
+          sundayDiscount,
+        },
+        currentHostTeamId: currentHostTeamId!,
+      });
+      void updateHostTeam.mutate({
+        id: currentHostTeamId!,
+      });
+      toast({ title: "Discount Preferences Updated!" });
+      setOpen(false);
+    } catch (error) {
+      errorToast();
+    }
+  };
+
+  const dailyDiscountsConfig = {
+    monday: mondayDiscount,
+    tuesday: tuesdayDiscount,
+    wednesday: wednesdayDiscount,
+    thursday: thursdayDiscount,
+    friday: fridayDiscount,
+    saturday: saturdayDiscount,
+    sunday: sundayDiscount,
+  };
+
+  const mutedClasses = customizeDaily ? "opacity-50 text-gray-500 cursor-not-allowed" : "";
+  // const onSubmit = async (data: { offerPercentage: number }) => {
+  //   updateHostTeam.mutate({
+  //     id: currentHostTeamId!,
+  //     offerPercentage: data.offerPercentage,
+  //   });
+  //   setOpen(false);
+  // };
   return session ? (
     <>
       {hostTeam && hostTeam.hasOfferPercentage === false && (
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogContent>
-            <div className="flex flex-col gap-4">
-              <p>Please set up your offer percentage.</p>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)}>
-                  <FormItem>
-                    <FormLabel>Offer Percentage</FormLabel>
-                    <FormControl>
-                      <Controller
-                        name="offerPercentage"
-                        control={form.control}
-                        rules={{
-                          required: true,
-                          min: 0,
-                          max: 100,
-                        }}
-                        render={({ field }) => (
-                          <Input
-                            {...field}
-                            type="number"
-                            placeholder="Enter offer percentage"
-                            className="text-black"
-                            value={field.value === 0 ? "" : field.value} // Show empty string when cleared
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              if (value === "" || (!isNaN(Number(value)) && Number(value) >= 0 && Number(value) <= 100)) {
-                                field.onChange(value === "" ? "" : Number(value));
-                              }
-                            }}
-                            onBlur={() => {
-                              if (String(field.value) === "") {
-                                field.onChange(0); // Reset to 0 only when the field is blurred
-                              }
-                            }}
-                          />
-                        )}
-                      />
-                    </FormControl>
-                  </FormItem>
-                  <div className="flex justify-end pt-4">
-                    <Button
-                      type="submit"
-                      disabled={form.formState.isSubmitting}
-                      onClick={() => {
-                        void form.handleSubmit(onSubmit)();
-                      }}
-                    >
-                      {form.formState.isSubmitting ? "Submitting..." : "Submit"}
-                    </Button>
-                  </div>
-                </form>
-              </Form>
+            <DialogTitle>Discount Preferences</DialogTitle>
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label className={cn(customizeDaily && mutedClasses)}>
+                    Weekday Discount ({weekdayDiscount}%)
+                  </Label>
+                  <Slider
+                    value={[weekdayDiscount]}
+                    onValueChange={([value]) => setWeekdayDiscount(value ?? 0)}
+                    max={50}
+                    step={1}
+                    disabled={customizeDaily} // Disable when customizeDaily is true
+                    className={cn(customizeDaily && mutedClasses)} // Gray out visually
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className={cn(customizeDaily && mutedClasses)}>
+                    Weekend Discount ({weekendDiscount}%)
+                  </Label>
+                  <Slider
+                    value={[weekendDiscount]}
+                    onValueChange={([value]) => setWeekendDiscount(value ?? 0)}
+                    max={50}
+                    step={1}
+                    disabled={customizeDaily} // Disable when customizeDaily is true
+                    className={cn(customizeDaily && mutedClasses)} // Gray out visually
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <Label>
+                  {customizeDaily
+                    ? "Customize per day (Overrides Weekday/Weekend)"
+                    : "Customize per day"}{" "}
+                  {/* Clearer Label */}
+                </Label>
+                <Switch
+                  checked={customizeDaily}
+                  onCheckedChange={handleCustomizeDailyChange}
+                />{" "}
+                {/* Use separate handler */}
+              </div>
+
+              {customizeDaily && (
+                <div className="grid grid-cols-1 gap-6 pt-4 md:grid-cols-2">
+                  {Object.entries(dailyDiscountsConfig).map(
+                    ([day, discount]) => (
+                      <div key={day} className="space-y-2">
+                        <Label className="capitalize">
+                          {day} ({discount}%)
+                        </Label>
+                        <Slider
+                          value={[discount]}
+                          onValueChange={([value]) =>
+                            handleDailyDiscountChange(day, value ?? 0)
+                          }
+                          max={50}
+                          step={1}
+                        />
+                      </div>
+                    ),
+                  )}
+                </div>
+              )}
+
+              <Button className="w-full" onClick={handleSave}>
+                {" "}
+                {/* Disable Save when customizeDaily is on, if that's desired behavior */}
+                Save Settings
+              </Button>
             </div>
           </DialogContent>
         </Dialog>

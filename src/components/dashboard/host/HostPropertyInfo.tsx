@@ -3,7 +3,7 @@ import { type Property } from "@/server/db/schema";
 import HostPropertiesDetails from "./HostPropertiesDetails";
 import { AlertCircle } from "lucide-react";
 import HostAvailability from "./HostAvailability";
-import HostPropertiesRestrictions from "./HostPropertiesRestrictions";
+import HostPropertiesRestrictions from "./calendar/HostPropertiesRestrictionsTab";
 //import HostAutoOffer from "./HostAutoOffer";
 // import HostBookItNow from "./HostBookItNow";
 import HostPolicySection from "./HostPolicySection";

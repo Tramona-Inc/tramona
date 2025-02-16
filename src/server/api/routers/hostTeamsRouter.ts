@@ -15,7 +15,7 @@ import { sendEmail } from "@/server/server-utils";
 import { TRPCError } from "@trpc/server";
 import { add, subMinutes } from "date-fns";
 import { and, eq, or, sql, desc } from "drizzle-orm";
-import { promise, z } from "zod";
+import { z } from "zod";
 import {
   coHostProcedure,
   createTRPCRouter,
@@ -803,7 +803,6 @@ export const hostTeamsRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.number(),
-        offerPercentage: z.number(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -811,17 +810,6 @@ export const hostTeamsRouter = createTRPCRouter({
         .update(hostTeams)
         .set({ hasOfferPercentage: true })
         .where(eq(hostTeams.id, input.id));
-      const hostTeamProperties = await ctx.db.query.properties.findMany({
-        where: eq(properties.hostTeamId, input.id),
-      });
-      await Promise.all(
-        hostTeamProperties.map(async (property) => {
-          await ctx.db
-            .update(properties)
-            .set({ offerDiscountPercentage: input.offerPercentage })
-            .where(eq(properties.id, property.id));
-        }),
-      );
     }),
 
 });

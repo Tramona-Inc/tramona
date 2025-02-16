@@ -1,9 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Minus, Plus } from "lucide-react";
-import * as React from "react";
 import { Input } from "@/components/ui/input";
-import type { Property } from "@/server/db/schema";
+import { Property } from "@/server/db/schema/tables/properties";
 import type { ExtraPricingField } from "./pricingfields";
 import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 import { api } from "@/utils/api";
@@ -11,7 +10,7 @@ import { TRPCClientErrorLike } from "@trpc/client";
 import { toast } from "@/components/ui/use-toast";
 import { errorToast } from "@/utils/toasts";
 import { AppRouter } from "@/server/api/root";
-
+import { useState, useMemo, useEffect } from "react";
 interface EditableFeeProps {
   property: Property;
   field: ExtraPricingField;
@@ -37,16 +36,16 @@ export default function EditableFee({
   const { mutateAsync: updatePricingField, isLoading } =
     api.properties.updatePropertyPricingField.useMutation();
 
-  const [isEditing, setIsEditing] = React.useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   // Get the initial value from the property using the field
-  const initialValue = React.useMemo(() => property[field], [property, field]);
+  const initialValue = useMemo(() => property[field], [property, field]);
   // Use a string state and do the converstion when setting the state
-  const [editValue, setEditValue] = React.useState(String(initialValue / 100));
-  const [editGuestCount, setEditGuestCount] = React.useState<number>(
+  const [editValue, setEditValue] = useState(String(initialValue / 100));
+  const [editGuestCount, setEditGuestCount] = useState<number>(
     property.maxGuestsWithoutFee ?? property.maxNumGuests,
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     setEditValue(String(initialValue / 100));
   }, [initialValue]);
 
