@@ -1,12 +1,13 @@
-import { db } from "@/server/db";
-import {
-  propertyManagerContacts,
-  type PropertyManagerContactInsert,
-} from "@/server/db/schema";
+import { db, secondaryDb } from "@/server/db";
+// import {
+//   propertyManagerContacts,
+//   type PropertyManagerContactInsert,
+// } from "@/server/db/schema";
 // import { faker } from "@faker-js/faker";
 
 import { createLatLngGISPoint } from "@/server/server-utils";
 import { eq, isNull } from "drizzle-orm";
+import { propertyManagersTest } from "@/server/db/secondary-schema";
 
 // // Initialize Bun SQLite database
 
@@ -45,22 +46,27 @@ import { eq, isNull } from "drizzle-orm";
 // await main();
 
 //function to populate the table with gis points
-export const populateGIS = async () => {
-  const latLngPoint = createLatLngGISPoint({
-    lat: 33.985664,
-    lng: -117.885414,
-  });
+// export const populateGIS = async () => {
+//   const latLngPoint = createLatLngGISPoint({
+//     lat: 33.985664,
+//     lng: -117.885414,
+//   });
 
-  await db
-    .update(propertyManagerContacts)
-    .set({
-      latLngPoint: latLngPoint,
-    })
-    .where(
-      eq(propertyManagerContacts.id, 1),
-      //isNull(propertyManagerContacts.latLngPoint)
-    )
-    .then((res) => res.map((property) => console.log("updated:", property)));
-};
+//   await db
+//     .update(propertyManagerContacts)
+//     .set({
+//       latLngPoint: latLngPoint,
+//     })
+//     .where(
+//       eq(propertyManagerContacts.id, 1),
+//       //isNull(propertyManagerContacts.latLngPoint)
+//     )
+//     .then((res) => res.map((property) => console.log("updated:", property)));
+// };
 
-await populateGIS();
+// await populateGIS();
+
+
+export const populateLatLngPoint(){ 
+  const updatedContacts = await secondaryDb.update(propertyManagersTest).where( isNull( ))
+}

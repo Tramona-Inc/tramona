@@ -11,7 +11,7 @@ export default defineConfig({
   dialect: "postgresql",
   verbose: true,
   dbCredentials: {
-    url: process.env.SECONDARY_DATABASE_URL,
+    url: env.SECONDARY_DATABASE_URL,
     wranglerConfigPath: "./wrangler.toml",
     dbName: "db",
   } as DBCredentials,
