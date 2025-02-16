@@ -12,6 +12,7 @@ export const env = createEnv({
     NEXTAUTH_SECRET: z.string(),
     NEXTAUTH_URL: z.string().url(),
     DATABASE_URL: z.string().url(),
+    SECONDARY_DATABASE_URL: z.string().url(),
     SMTP_USER: z.string(),
     SMTP_PASSWORD: z.string(),
     SMTP_HOST: z.string(),
@@ -56,6 +57,10 @@ export const env = createEnv({
     NEXT_PUBLIC_GOOGLE_PLACES_KEY: z.string(),
     NEXT_PUBLIC_SUPABASE_URL: z.string(),
     NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string(),
+
+    //secondary
+    NEXT_PUBLIC_SECONDARY_SUPABASE_URL: z.string(),
+    NEXT_PUBLIC_SECONDARY_SUPABASE_ANON_KEY: z.string(),
   },
 
   /**
@@ -66,6 +71,11 @@ export const env = createEnv({
     NODE_ENV: process.env.NODE_ENV,
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,
     DATABASE_URL: process.env.DATABASE_URL,
+    SECONDARY_DATABASE_URL: process.env.SECONDARY_DATABASE_URL,
+    NEXT_PUBLIC_SECONDARY_SUPABASE_URL:
+      process.env.NEXT_PUBLIC_SECONDARY_DATABASE_URL,
+    NEXT_PUBLIC_SECONDARY_SUPABASE_ANON_KEY:
+      process.env.NEXT_PUBLIC_SECONDARY_SUPABASE_ANON_KEY,
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
     SMTP_USER: process.env.SMTP_USER,
     SMTP_PASSWORD: process.env.SMTP_PASSWORD,

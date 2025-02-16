@@ -12,6 +12,7 @@
     "lint": "next lint --max-warnings=0",
     "format": "prettier --write ./",
     "db:push": "drizzle-kit push",
+    "db:push:readonly": "drizzle-kit push --config drizzle.readonly.config.ts",
     "db:generate": "drizzle-kit generate",
     "db:introspect": "drizzle-kit introspect",
     "stripe:listen": "stripe listen --forward-to localhost:3000/api/stripe-webhook",
