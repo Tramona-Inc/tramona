@@ -163,6 +163,24 @@ export const propertiesRouter = createTRPCRouter({
       } as const;
     }),
 
+  updateDiscountForWholeHostTeam: coHostProcedure(
+    "modify_overall_pricing_strategy",
+    z.object({
+      updatedDiscounts: propertyDiscountsUpdateSchema.omit({ propertyId: true }),
+      currentHostTeamId: z.number(),
+    }),
+  ).mutation(async ({ ctx, input }) => {
+
+    const allHostTeamProperties = await ctx.db.query.properties.findMany({
+      where: eq(properties.hostTeamId, input.currentHostTeamId),
+    });
+
+    await ctx.db
+      .update(propertyDiscounts)
+      .set(input.updatedDiscounts)
+      .where(inArray(propertyDiscounts.propertyId, allHostTeamProperties.map((property) => property.id)));
+  }),
+
   updateDiscounts: coHostProcedure(
     "modify_overall_pricing_strategy",
     z.object({
