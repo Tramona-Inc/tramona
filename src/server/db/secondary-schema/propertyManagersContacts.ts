@@ -5,8 +5,8 @@ export const propertyManagerContacts = pgTable(
   {
     id: serial("id").primaryKey(),
     name: text("name"),
-    email: text("email"),
-    phoneNumber: text("phone_number"),
+    email: text("email").array(), // Changed to array of text
+    phoneNumber: text("phone_number").array(), // Changed to array of text
     city: text("city"),
     state: text("state"),
     url: text("url"),

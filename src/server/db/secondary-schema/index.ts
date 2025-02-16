@@ -1,1 +1,2 @@
-export * from "./propertyManagersTest";
+export * from "./propertyManagersContactsTest";
+export * from "./propertyManagersContacts";

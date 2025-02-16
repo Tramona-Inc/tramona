@@ -12,7 +12,6 @@ export default defineConfig({
   verbose: true,
   dbCredentials: {
     url: env.SECONDARY_DATABASE_URL,
-    wranglerConfigPath: "./wrangler.toml",
     dbName: "db",
   } as DBCredentials,
   out: "./src/server/drizzle",
