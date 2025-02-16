@@ -6,8 +6,9 @@ import { db, secondaryDb } from "@/server/db";
 // import { faker } from "@faker-js/faker";
 
 import { createLatLngGISPoint } from "@/server/server-utils";
-import { eq, isNull } from "drizzle-orm";
-import { propertyManagersTest } from "@/server/db/secondary-schema";
+import { and, eq, exists, isNotNull, isNull } from "drizzle-orm";
+import { propertyManagerContacts } from "@/server/db/secondary-schema";
+import { getCoordinates } from "@/server/google-maps";
 
 // // Initialize Bun SQLite database
 
@@ -66,7 +67,65 @@ import { propertyManagersTest } from "@/server/db/secondary-schema";
 
 // await populateGIS();
 
+export async function populateLatLngPoint() {
+  try {
+    const managersWOLatLng =
+      await secondaryDb.query.propertyManagerContacts.findMany({
+        where: and(
+          isNull(propertyManagerContacts.latLngPoint),
+          isNotNull(propertyManagerContacts.city),
+        ),
+        columns: {
+          // Select only necessary columns for efficiency
+          id: true,
+          city: true,
+        },
+      });
 
-export const populateLatLngPoint(){ 
-  const updatedContacts = await secondaryDb.update(propertyManagersTest).where( isNull( ))
+    console.log(
+      `Found ${managersWOLatLng.length} managers without LatLng to update.`,
+    );
+
+    for (const manager of managersWOLatLng) {
+      if (!manager.city) {
+        console.warn(
+          `Skipping manager with id ${manager.id} due to missing city.`,
+        ); // Warn if city is unexpectedly missing
+        continue; // Skip to the next manager
+      }
+
+      try {
+        const coords = await getCoordinates(manager.city);
+        if (coords.location) {
+          const latLongPont = createLatLngGISPoint({
+            lat: coords.location.lat,
+            lng: coords.location.lng,
+          });
+          console.log(`Fetched coordinates for ${manager.city}:`, coords);
+          await secondaryDb
+            .update(propertyManagerContacts)
+            .set({ latLngPoint: latLongPont }) // Use the fetched coords
+            .where(eq(propertyManagerContacts.id, manager.id)); // Target the specific manager
+
+          console.log(
+            `Updated latLngPoint for manager id ${manager.id} in city ${manager.city}`,
+          );
+        } else {
+          console.warn(
+            `Could not get coordinates for city: ${manager.city}. Skipping update for manager id ${manager.id}.`,
+          );
+        }
+      } catch (geoError) {
+        console.error(
+          `Error fetching coordinates for city ${manager.city} (manager id ${manager.id}):`,
+          geoError,
+        );
+        // Consider more robust error handling, e.g., retry logic or storing error details
+      }
+    }
+
+    console.log("Finished populating latLngPoint for property managers.");
+  } catch (dbError) {
+    console.error("Error in populateLatLngPoint function:", dbError);
+  }
 }
