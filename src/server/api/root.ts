@@ -25,40 +25,40 @@ import { calendarRouter } from "./routers/calendarRouter";
 import { requestsToBookRouter } from "./routers/requestsToBookRouter";
 import { claimsRouter } from "./routers/claimsRouter";
 import { propertyMessagesRouter } from "./routers/propertyMessagesRouter";
-import { aiRouter } from "./routers/aiRouter";
+import { outreachRouter } from "./routers/outreachRouter";
 /**
  * This is the primary router for your server.
  *
  * All routers added in /api/routers should be manually added here.
  */
 export const appRouter = createTRPCRouter({
-  ai: aiRouter,
-  users: usersRouter,
+  auth: authRouter,
+  biddings: biddingRouter,
+  calendar: calendarRouter,
+  claims: claimsRouter,
+  emails: emailRouter,
+  feed: feedRouter,
+  files: filesRouter,
+  groups: groupsRouter,
+  hostTeams: hostTeamsRouter,
   hosts: hostsRouter,
+  messages: messagesRouter,
+  misc: miscRouter,
+  offers: offersRouter,
+  outreach: outreachRouter,
+  pms: pmsRouter,
+  profile: profileRouter,
+  properties: propertiesRouter,
+  propertyMessages: propertyMessagesRouter,
   referralCodes: referralCodesRouter,
   requests: requestsRouter,
-  properties: propertiesRouter,
-  offers: offersRouter,
+  requestsToBook: requestsToBookRouter,
+  reviews: reviewsRouter,
   stripe: stripeRouter,
-  auth: authRouter,
+  superhog: superhogRouter,
   trips: tripsRouter,
   twilio: twilioRouter,
-  messages: messagesRouter,
-  files: filesRouter,
-  misc: miscRouter,
-  groups: groupsRouter,
-  emails: emailRouter,
-  biddings: biddingRouter,
-  hostTeams: hostTeamsRouter,
-  profile: profileRouter,
-  superhog: superhogRouter,
-  pms: pmsRouter,
-  reviews: reviewsRouter,
-  feed: feedRouter,
-  calendar: calendarRouter,
-  requestsToBook: requestsToBookRouter,
-  claims: claimsRouter,
-  propertyMessages: propertyMessagesRouter,
+  users: usersRouter,
 });
 
 // export type definition of API
