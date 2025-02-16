@@ -192,7 +192,7 @@
     "@typescript-eslint/parser": "^6.19.1",
     "@ubilabs/google-maps-react-hooks": "^2.0.2",
     "autoprefixer": "^10.4.17",
-    "drizzle-kit": "^0.30.4",
+    "drizzle-kit": "^0.24.0",
     "embla-carousel": "8.1.8",
     "eslint": "^8.56.0",
     "eslint-config-next": "^14.1.0",

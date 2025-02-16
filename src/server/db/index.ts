@@ -15,7 +15,7 @@ const client = postgres(env.DATABASE_URL, { prepare: false, max: 1 });
 export const db = drizzle(client, { schema });
 
 //seconary db
-const secondaryDbClient = postgres(env.DATABASE_URL, {
+const secondaryDbClient = postgres(env.SECONDARY_DATABASE_URL, {
   prepare: false,
   max: 1,
 });
