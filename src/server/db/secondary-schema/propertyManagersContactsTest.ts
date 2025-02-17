@@ -28,7 +28,7 @@ export const propertyManagerContactsTest = pgTable(
   },
   (table) => {
     return {
-      cityIdx: index("property_manager_contacts_city_idx").on(table.city),
+      cityIdx: index("property_manager_contacts_test_city_idx").on(table.city),
     };
   },
 );

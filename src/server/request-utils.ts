@@ -43,11 +43,11 @@ export async function handleRequestSubmission(
 
   // Trigger lambda scraping functions
 
-  // await emailPMFromCityRequest({
-  //   requestLocation: input.location,
-  //   requestedLocationLatLng: { lat: input.lat, lng: input.lng },
-  //   radius: input.radius,
-  // });
+  await emailPMFromCityRequest({
+    requestLocation: input.location,
+    requestedLocationLatLng: { lat: input.lat, lng: input.lng },
+    radius: input.radius,
+  });
 
   // Begin a transaction
   const transactionResults = await db.transaction(async (tx) => {
