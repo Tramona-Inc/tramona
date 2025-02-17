@@ -1,7 +1,7 @@
 import { sendEmail } from "@/server/server-utils";
 import RequestOutreachEmail from "packages/transactional/emails/RequestOutreachEmail";
 import { db } from "@/server/db";
-import { eq, sql } from "drizzle-orm"; // Import 'eq' for database queries
+import { sql } from "drizzle-orm"; // Import 'eq' for database queries
 import { propertyManagerContactsTest } from "@/server/db/secondary-schema";
 
 interface EmailPMFromCityRequestInput {
@@ -16,9 +16,10 @@ interface EmailPMFromCityRequestInput {
 export async function emailPMFromCityRequest(
   input: EmailPMFromCityRequestInput,
 ) {
+  console.log("is this running ? ", input);
   if (
     !input.requestedLocationLatLng?.lat ||
-    !input.requestedLocationLatLng?.lat
+    !input.requestedLocationLatLng.lat
   ) {
     console.log("No requestedLocationLatLng provided, exiting function.");
     return; // Early return if latLng is missing, mirroring the tRPC behavior

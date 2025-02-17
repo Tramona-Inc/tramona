@@ -1,4 +1,11 @@
-import { pgTable, serial, text, index, geometry } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  serial,
+  text,
+  index,
+  geometry,
+  timestamp,
+} from "drizzle-orm/pg-core";
 
 export const propertyManagerContacts = pgTable(
   "property_manager_contacts",
@@ -17,6 +24,7 @@ export const propertyManagerContacts = pgTable(
       mode: "xy",
       srid: 4326,
     }),
+    lastEmailSentAt: timestamp("last_email_sent_at", { withTimezone: true }),
   },
   (table) => {
     return {

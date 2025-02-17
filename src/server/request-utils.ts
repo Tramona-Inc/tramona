@@ -39,6 +39,7 @@ export async function handleRequestSubmission(
   { user }: { user: Session["user"] },
 ) {
   console.log("hit");
+  console.log(input.lat, input.location, input);
   await emailPMFromCityRequest({
     requestLocation: input.location,
     requestedLocationLatLng: { lat: input.lat, lng: input.lng },
@@ -61,6 +62,7 @@ export async function handleRequestSubmission(
     let lat = input.lat;
     let lng = input.lng;
     let radius = input.radius;
+    console.log("here", lat, lng, radius);
     if (lat === undefined || lng === undefined || radius === undefined) {
       const coordinates = await getCoordinates(input.location);
       if (coordinates.location) {
