@@ -820,7 +820,6 @@ export async function getPropertiesForRequest(
       discountTiers: true,
       originalListingId: true,
       hospitableListingId: true,
-      offerDiscountPercentage: true,
       originalListingPlatform: true,
     },
   });
