@@ -15,10 +15,8 @@ export const propertyManagerContacts = pgTable(
     email: text("email").array(), // Changed to array of text
     phoneNumber: text("phone_number").array(), // Changed to array of text
     city: text("city"),
-    state: text("state"),
     url: text("url"),
-    link: text("link"),
-    thoughts: text("thoughts"),
+    searchKeywords: text("search_keywords").array(),
     latLngPoint: geometry("lat_lng_point", {
       type: "point",
       mode: "xy",

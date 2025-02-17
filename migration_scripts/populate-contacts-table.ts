@@ -16,61 +16,64 @@ import { getCoordinates } from "@/server/google-maps";
 
 // // Initialize Bun SQLite database
 
-async function populatePropertyManagerContacts(numberOfRows: number) {
-  const inserts: PropertyManagerContactTest[] = []; // 1. Declare inserts array with the type
-  for (let i = 0; i < numberOfRows; i++) {
-    const email: string = "ueharaneal@gmail.com"; // Explicitly typed as string
-    const city = faker.location.city(); // Explicitly typed as string
-    const state: string = faker.location.state({ abbreviated: true }); // Explicitly typed as string
-    const url: string = faker.internet.url(); // Explicitly typed as string
-    const propertyManagerName: string = faker.company.name(); //
-    inserts.push({
-      email: ["ueharaneal@gmail.com"], // Type assertion as string
-      city: faker.location.city() as string, // Type assertion as string
-      state: faker.location.state({ abbreviated: true }) as string, // Type assertion as string
-      url: faker.internet.url() as string, // Type assertion as string
-      name: faker.company.name() as string, // Type assertion as string
-    });
-  }
-  console.log(inserts);
+// async function populatePropertyManagerContacts(numberOfRows: number) {
+//   const inserts: PropertyManagerContactTest[] = []; // 1. Declare inserts array with the type
+//   for (let i = 0; i < numberOfRows; i++) {
+//     const email: string = "ueharaneal@gmail.com"; // Explicitly typed as string
+//     const city = faker.location.city(); // Explicitly typed as string
+//     const state: string = faker.location.state({ abbreviated: true }); // Explicitly typed as string
+//     const url: string = faker.internet.url(); // Explicitly typed as string
+//     const propertyManagerName: string = faker.company.name(); //
+//     inserts.push({
+//       email: ["ueharaneal@gmail.com"], // Type assertion as string
+//       city: faker.location.city() as string, // Type assertion as string
+//       state: faker.location.state({ abbreviated: true }) as string, // Type assertion as string
+//       url: faker.internet.url() as string, // Type assertion as string
+//       name: faker.company.name() as string, // Type assertion as string
+//     });
+//   }
+//   console.log(inserts);
 
-  try {
-    await secondaryDb.insert(propertyManagerContactsTest).values(inserts); // 3. Use inserts array in the insert query
-    console.log(
-      `Successfully inserted ${numberOfRows} rows into propertyManagerContactsTests table.`,
-    );
-  } catch (error) {
-    console.error("Error inserting data:", error);
-  }
-}
+//   try {
+//     await secondaryDb.insert(propertyManagerContactsTest).values(inserts); // 3. Use inserts array in the insert query
+//     console.log(
+//       `Successfully inserted ${numberOfRows} rows into propertyManagerContactsTests table.`,
+//     );
+//   } catch (error) {
+//     console.error("Error inserting data:", error);
+//   }
+// }
 
-async function main() {
-  const numberOfRowsToInsert = 1; // You can change this number
-  await populatePropertyManagerContacts(numberOfRowsToInsert);
-}
+// async function main() {
+//   const numberOfRowsToInsert = 1; // You can change this number
+//   await populatePropertyManagerContacts(numberOfRowsToInsert);
+// }
 
-await main();
+// await main();
 
 //function to populate the table with gis points
-// export const populateGIS = async () => {
+// export const populateGIS = async ( id : number) => {
 //   const latLngPoint = createLatLngGISPoint({
 //     lat: 33.985664,
 //     lng: -117.885414,
 //   });
 
 //   await secondaryDb
-//     .update(propertyManagerContacts)
+//     .update(propertyManagerContactsTest)
 //     .set({
 //       latLngPoint: latLngPoint,
 //     })
 //     .where(
-//       eq(propertyManagerContacts.id, 1),
+//       eq(propertyManagerContactsTest.id, id),
 //       //isNull(propertyManagerContacts.latLngPoint)
 //     )
 //     .then((res) => res.map((property) => console.log("updated:", property)));
 // };
 
-// await populateGIS();
+// console.log("hit");
+
+// const desiredId = pickk one
+// await populateGIS( desiredID);
 
 // export async function populateLatLngPoint() {
 //   try {

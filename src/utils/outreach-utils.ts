@@ -80,6 +80,7 @@ export async function emailPMFromCityRequest(
         console.log(`Email sent to: ${email}`);
       }
     }
+    return;
   } catch (err) {
     console.error("Error in emailPMFromCityRequest:", err);
   }

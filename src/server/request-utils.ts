@@ -43,12 +43,6 @@ export async function handleRequestSubmission(
 
   // Trigger lambda scraping functions
 
-  await emailPMFromCityRequest({
-    requestLocation: input.location,
-    requestedLocationLatLng: { lat: input.lat, lng: input.lng },
-    radius: input.radius,
-  });
-
   // Begin a transaction
   const transactionResults = await db.transaction(async (tx) => {
     const madeByGroupId = await tx
@@ -66,9 +60,21 @@ export async function handleRequestSubmission(
     let lng = input.lng;
     let radius = input.radius;
     console.log("here", lat, lng, radius);
+
     if (lat === undefined || lng === undefined || radius === undefined) {
       const coordinates = await getCoordinates(input.location);
+
+      //trigger lambda function
       if (coordinates.location) {
+        await emailPMFromCityRequest({
+          requestLocation: input.location,
+          requestedLocationLatLng: {
+            lat: coordinates.location.lat,
+            lng: coordinates.location.lng,
+          },
+          radius: input.radius,
+        });
+
         lat = coordinates.location.lat;
         lng = coordinates.location.lng;
         if (coordinates.bounds) {
