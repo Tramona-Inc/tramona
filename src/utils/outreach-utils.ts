@@ -2,7 +2,7 @@ import { sendEmail } from "@/server/server-utils";
 import RequestOutreachEmail from "packages/transactional/emails/RequestOutreachEmail";
 import { secondaryDb } from "@/server/db";
 import { eq, sql } from "drizzle-orm"; // Import 'eq' for database queries
-import { propertyManagerContacts as propertyManagerContacts } from "@/server/db/secondary-schema";
+import { propertyManagerContactsTest as propertyManagerContacts } from "@/server/db/secondary-schema";
 //import { propertyManagerContacts } from "@/server/db/secondary-schema";
 
 interface EmailPMFromCityRequestInput {
@@ -38,7 +38,7 @@ export async function emailPMFromCityRequest(
         id: propertyManagerContacts.id,
         email: propertyManagerContacts.email,
         propertyManagerName: propertyManagerContacts.name,
-        lastEmailSent: propertyManagerContacts.lastEmailSentAt,
+        lastEmailSentAt: propertyManagerContacts.lastEmailSentAt,
         latLngPoint: sql<string>`ST_AsText(lat_lng_point)`.as("latLngPoint"),
         distanceMeters: sql<number>`
           ST_Distance(
@@ -71,6 +71,7 @@ export async function emailPMFromCityRequest(
         console.log(`Skipping email for manager without email:`, manager);
         continue; // Skip to the next manager if email is missing
       }
+
       for (const email of manager.email) {
         try {
           await sendEmail({

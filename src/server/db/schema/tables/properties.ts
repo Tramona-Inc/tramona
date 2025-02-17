@@ -362,7 +362,6 @@ export const properties = pgTable(
       .defaultNow(),
     isPrivate: boolean("is_private").notNull().default(false),
     ageRestriction: integer("age_restriction"),
-    offerDiscountPercentage: integer("offer_discount_percentage").default(0).notNull(),
     stripeVerRequired: boolean("stripe_ver_required").default(false),
     status: propertyStatusEnum("property_status").default("Listed"),
     pricingScreenUrl: varchar("pricing_screen_url"),

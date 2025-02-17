@@ -63,18 +63,8 @@ export async function handleRequestSubmission(
 
     if (lat === undefined || lng === undefined || radius === undefined) {
       const coordinates = await getCoordinates(input.location);
-
-      //trigger lambda function
+      console.log(coordinates, "coordinates ");
       if (coordinates.location) {
-        await emailPMFromCityRequest({
-          requestLocation: input.location,
-          requestedLocationLatLng: {
-            lat: coordinates.location.lat,
-            lng: coordinates.location.lng,
-          },
-          radius: input.radius,
-        });
-
         lat = coordinates.location.lat;
         lng = coordinates.location.lng;
         if (coordinates.bounds) {
@@ -92,8 +82,20 @@ export async function handleRequestSubmission(
     }
     let latLngPoint = null;
     if (lat && lng) {
+      console.log("hihidft");
       latLngPoint = createLatLngGISPoint({ lat, lng });
     }
+
+    //Trigger lambda function
+    console.log("asdfsadfasdf");
+    await emailPMFromCityRequest({
+      requestLocation: input.location,
+      requestedLocationLatLng: {
+        lat: lat,
+        lng: lng,
+      },
+      radius: input.radius,
+    });
 
     if (!radius || !latLngPoint) {
       throw new TRPCError({
