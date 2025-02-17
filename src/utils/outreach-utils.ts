@@ -1,6 +1,6 @@
 import { sendEmail } from "@/server/server-utils";
 import RequestOutreachEmail from "packages/transactional/emails/RequestOutreachEmail";
-import { db } from "@/server/db";
+import { secondaryDb } from "@/server/db";
 import { sql } from "drizzle-orm"; // Import 'eq' for database queries
 import { propertyManagerContactsTest } from "@/server/db/secondary-schema";
 
@@ -32,10 +32,11 @@ export async function emailPMFromCityRequest(
     const transformedInputPoint = sql`ST_Transform(${requestedPoint}, 3857)`;
     const transformedLatLngPoint = sql`ST_Transform(lat_lng_point, 3857)`;
 
-    const nearbyProperyManagers = await db
+    const nearbyProperyManagers = await secondaryDb
       .select({
         email: propertyManagerContactsTest.email,
         propertyManagerName: propertyManagerContactsTest.name,
+        lastEmailSent: propertyManagerContactsTest.lastEmailSentAt,
         latLngPoint: sql<string>`ST_AsText(lat_lng_point)`.as("latLngPoint"),
         distanceMeters: sql<number>`
           ST_Distance(
