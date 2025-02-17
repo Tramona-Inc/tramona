@@ -32,7 +32,7 @@ export default function HostOverview() {
 
   const [open, setOpen] = useState(true);
 
-  const { mutateAsync: updateDiscountForWholeHostTeam } = api.properties.updateDiscountForWholeHostTeam.useMutation();
+  const { mutateAsync: insertDiscountFromHostOverview } = api.properties.insertDiscountFromHostOverview.useMutation();
   const [weekdayDiscount, setWeekdayDiscount] = useState(0);
   const [weekendDiscount, setWeekendDiscount] = useState(0);
   const [customizeDaily, setCustomizeDaily] = useState(false);
@@ -75,7 +75,11 @@ export default function HostOverview() {
   const handleCustomizeDailyChange = async (checked: boolean) => {
     setCustomizeDaily(checked);
     try {
-      await updateDiscountForWholeHostTeam({ // Call the new mutation for switch
+      localStorage.setItem("discountFields", JSON.stringify({
+        ...JSON.parse(localStorage.getItem("discountFields") ?? "{}") as Record<string, any>,
+        isDailyDiscountsCustomized: checked,
+      }));
+      await insertDiscountFromHostOverview({
         updatedDiscounts: {
           isDailyDiscountsCustomized: checked,
         },
@@ -95,7 +99,7 @@ export default function HostOverview() {
 
   const handleSave = async () => {
     try {
-      await updateDiscountForWholeHostTeam({
+      await insertDiscountFromHostOverview({
         updatedDiscounts: {
           weekdayDiscount,
           weekendDiscount,
@@ -110,6 +114,19 @@ export default function HostOverview() {
         },
         currentHostTeamId: currentHostTeamId!,
       });
+
+      localStorage.setItem("discountFields", JSON.stringify({
+        weekdayDiscount,
+        weekendDiscount,
+        isDailyDiscountsCustomized: customizeDaily,
+        mondayDiscount,
+        tuesdayDiscount,
+        wednesdayDiscount,
+        thursdayDiscount,
+        fridayDiscount,
+        saturdayDiscount,
+        sundayDiscount,
+      }));
       void updateHostTeam.mutate({
         id: currentHostTeamId!,
       });

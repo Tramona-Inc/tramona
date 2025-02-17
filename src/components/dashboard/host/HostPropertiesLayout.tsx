@@ -8,6 +8,7 @@ import { api } from "@/utils/api";
 import {
   CancellationPolicyWithInternals,
   type Property,
+  type PropertyDiscounts,
 } from "@/server/db/schema/tables/properties";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ExpandableSearchBar from "@/components/_common/ExpandableSearchBar";
@@ -17,6 +18,7 @@ import { cn } from "@/utils/utils";
 import HostPropertyInfo from "./HostPropertyInfo";
 import useSetInitialHostTeamId from "@/components/_common/CustomHooks/useSetInitialHostTeamId";
 import { useHostTeamStore } from "@/utils/store/hostTeamStore";
+import { useSession } from "next-auth/react";
 
 import supabase from "@/utils/supabase-client";
 import { REALTIME_SUBSCRIBE_STATES } from "@supabase/supabase-js";
@@ -28,9 +30,9 @@ export default function HostPropertiesLayout() {
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState<Property>();
   const [open, setOpen] = useState(false);
-
+  const [triggerUpdateDiscounts, setTriggerUpdateDiscounts] = useState(false);
   const setProgress = useHostOnboarding((state) => state.setProgress);
-
+  const { data: session } = useSession();
   const setPropertyType = useHostOnboarding((state) => state.setPropertyType);
   const setMaxGuests = useHostOnboarding((state) => state.setMaxGuests);
   const setBedrooms = useHostOnboarding((state) => state.setBedrooms);
@@ -61,6 +63,9 @@ export default function HostPropertiesLayout() {
   const setOriginalListingId = useHostOnboarding(
     (state) => state.setOriginalListingId,
   );
+
+  const { mutateAsync: insertAndUpdateDiscountForWholeHostTeam } =
+    api.properties.insertAndUpdateDiscountForWholeHostTeam.useMutation();
 
   function setStatesDefault() {
     setProgress(0);
@@ -97,7 +102,7 @@ export default function HostPropertiesLayout() {
     api.properties.getHostProperties.useQuery(
       { currentHostTeamId: currentHostTeamId! },
       {
-        enabled: !!currentHostTeamId,
+        enabled: !!currentHostTeamId && !!session,
       },
     );
 
@@ -154,6 +159,8 @@ export default function HostPropertiesLayout() {
             // Set a timeout to reset showIsSyncingState after 30 seconds
             timeoutRef.current = window.setTimeout(() => {
               setShowIsSyncingState(false);
+              //update property discounts
+              setTriggerUpdateDiscounts(true);
             }, 30000); // 30 seconds
 
             // refetch properties
@@ -167,6 +174,7 @@ export default function HostPropertiesLayout() {
           console.log("Listening for new properties...");
         } else {
           setShowIsSyncingState(false);
+          //update property discounts
         }
       });
 
@@ -177,6 +185,43 @@ export default function HostPropertiesLayout() {
       }
     };
   }, [currentHostTeamId, refetch]);
+
+  useEffect(() => {
+    if (triggerUpdateDiscounts) {
+      const applyDiscountsAsync = async () => {
+        // Separate async function
+        setTriggerUpdateDiscounts(false); // Reset trigger immediately
+        const discountFields = JSON.parse(
+          localStorage.getItem("discountFields") ?? "[]",
+        ) as PropertyDiscounts;
+        console.log("discountFields", discountFields);
+        if (Object.keys(discountFields).length > 0) {
+          try {
+            await insertAndUpdateDiscountForWholeHostTeam({
+              // Your tRPC mutation
+              currentHostTeamId: currentHostTeamId!,
+              updatedDiscounts: discountFields,
+            });
+            console.log("Discounts applied successfully via tRPC mutation.");
+            localStorage.removeItem("discountFields");
+            void refetch(); // Refresh properties in UI
+          } catch (error) {
+            console.error("Error applying discounts:", error);
+            // Handle error
+          }
+        } else {
+          console.log("No discounts to apply (localStorage empty or invalid).");
+        }
+      };
+
+      void applyDiscountsAsync(); // Execute the async function (note: void to avoid misused-promises warning here too if applyDiscountsAsync's return isn't explicitly handled)
+    }
+  }, [
+    triggerUpdateDiscounts,
+    currentHostTeamId,
+    refetch,
+    insertAndUpdateDiscountForWholeHostTeam,
+  ]);
 
   return (
     <section className="relative mx-auto mb-24 mt-7 max-w-8xl px-6 md:my-14">

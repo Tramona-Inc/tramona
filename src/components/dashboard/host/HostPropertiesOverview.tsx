@@ -2,15 +2,17 @@ import { Button } from "@/components/ui/button";
 import { ArrowRightIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
 import { api } from "@/utils/api";
+import { useSession } from "next-auth/react";
 
 export default function HostPropertiesOverview({
   currentHostTeamId,
 }: {
   currentHostTeamId: number | null | undefined;
 }) {
+  const { data: session } = useSession();
   const { data: properties } = api.properties.getHostProperties.useQuery(
     { currentHostTeamId: currentHostTeamId! },
-    { enabled: !!currentHostTeamId },
+    { enabled: !!currentHostTeamId && !!session },
   );
 
   const listedProperties = properties?.filter(

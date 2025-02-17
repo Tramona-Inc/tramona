@@ -295,7 +295,6 @@ export const calendarRouter = createTRPCRouter({
       const bookedDates = await db.query.reservedDateRanges.findMany({
         where: eq(reservedDateRanges.propertyId, propertyId),
       });
-      console.log(bookedDates);
       return bookedDates;
     }),
 });

@@ -14,8 +14,8 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Copy, CheckCircle } from "lucide-react";
-import HostICalHowToDialog from "./HostICalHowToDialog";
+import { CheckCircle } from "lucide-react";
+import HowYourCalendarWorksModal from "./HowYourCalendarWorks";
 import Image from "next/image";
 
 //Images
@@ -443,6 +443,7 @@ export default function HostICalSync({
   setCalOpen: (open: boolean) => void;
 }) {
   const { toast } = useToast();
+  const [infoOpen, setInfoOpen] = useState(false);
 
   if (!property) {
     return <Spinner />;
@@ -468,41 +469,14 @@ export default function HostICalSync({
   };
 
   return (
-    // <div className="my-6 flex w-full flex-col items-start justify-between gap-x-4 gap-y-3 md:flex-row 2xl:mx-8">
-    //   {/* Left side legend */}
-    //   <div className="flex flex-col items-start justify-start gap-y-4 md:w-1/4">
-    //     <div className="flex flex-col gap-y-3">
-    //       <div className="flex items-center gap-x-2">
-    //         <div
-    //           className="h-6 w-6"
-    //           style={{
-    //             backgroundImage:
-    //               "repeating-linear-gradient(135deg, red, red 1px, transparent 1px, transparent 4px)",
-    //             backgroundSize: "4px 4px",
-    //           }}
-    //         />
-    //         <Label className="text-sm font-semibold">Synced with Airbnb</Label>
-    //       </div>
-    //       <div className="flex items-center gap-x-2">
-    //         <div
-    //           className="h-6 w-6"
-    //           style={{
-    //             backgroundImage:
-    //               "repeating-linear-gradient(135deg, blue, blue 1px, transparent 1px, transparent 4px)",
-    //             backgroundSize: "4px 4px",
-    //           }}
-    //         />
-    //         <Label className="text-sm font-semibold">
-    //           Booked on Tramona (Not Synced with Airbnb Yet)
-    //         </Label>
-    //       </div>
-    //     </div>
-    //   </div>
     <div>
       {/* Right side content */}
       <div className="flex flex-col items-start justify-start gap-y-3 md:items-end 2xl:mx-8">
         <div className="flex flex-row gap-x-2">
-          <HostICalHowToDialog />
+          <HowYourCalendarWorksModal
+            open={infoOpen}
+            onOpenChange={setInfoOpen}
+          />
           <Dialog open={calOpen} onOpenChange={setCalOpen}>
             <DialogTrigger className="w-full flex-1">
               {property.iCalLink ? (
@@ -521,24 +495,6 @@ export default function HostICalSync({
             )}
           </Dialog>
         </div>
-
-        {/* Example: Show Tramona iCal link copy button outside or wherever you want */}
-        {/* <div className="flex flex-col items-start justify-center gap-x-1 gap-y-1 sm:items-end">
-          <div className="flex flex-col gap-x-1">
-            <Label className="text-sm font-semibold sm:mx-0">
-              Your Tramona iCal Link (for external apps):
-            </Label>
-            <Input
-              readOnly
-              className="w-72"
-              value={`https://tramona.com/api/ics/${property.id}`}
-            />
-          </div>
-          <Button onClick={handleCopyICalLink} variant="secondary">
-            <Copy className="mr-1 h-4 w-4" />
-            Copy
-          </Button>
-        </div> */}
       </div>
     </div>
   );

@@ -62,6 +62,7 @@ import { extraPricingFieldSchema } from "@/components/dashboard/host/calendar/pr
 import { validateImage } from "@/utils/utils";
 import { hostTeamMembers } from "../../db/schema/tables/hostTeams";
 import { HostRequestsPageData } from "@/server/types/propertiesRouter";
+import { update } from "lodash";
 
 export const propertiesRouter = createTRPCRouter({
   adminUpdate: roleRestrictedProcedure(["admin"])
@@ -163,22 +164,75 @@ export const propertiesRouter = createTRPCRouter({
       } as const;
     }),
 
-  updateDiscountForWholeHostTeam: coHostProcedure(
+  insertDiscountFromHostOverview: coHostProcedure(
     "modify_overall_pricing_strategy",
     z.object({
       updatedDiscounts: propertyDiscountsUpdateSchema.omit({ propertyId: true }),
       currentHostTeamId: z.number(),
     }),
   ).mutation(async ({ ctx, input }) => {
-
     const allHostTeamProperties = await ctx.db.query.properties.findMany({
       where: eq(properties.hostTeamId, input.currentHostTeamId),
     });
 
-    await ctx.db
-      .update(propertyDiscounts)
-      .set(input.updatedDiscounts)
-      .where(inArray(propertyDiscounts.propertyId, allHostTeamProperties.map((property) => property.id)));
+    const discountFields = Object.keys(input.updatedDiscounts).filter((key) => key !== "propertyId");
+
+    await ctx.db.insert(propertyDiscounts).values(allHostTeamProperties.map((property) => ({
+      propertyId: property.id,
+      ...discountFields.reduce((acc, key) => ({
+        ...acc,
+        [key]: input.updatedDiscounts[key as keyof typeof input.updatedDiscounts]
+      }), {})
+    })));
+  }),
+
+  insertAndUpdateDiscountForWholeHostTeam: coHostProcedure(
+    "modify_overall_pricing_strategy",
+    z.object({
+      updatedDiscounts: propertyDiscountsUpdateSchema.omit({ propertyId: true }),
+      currentHostTeamId: z.number(),
+    }),
+  ).mutation(async ({ ctx, input }) => {
+    const allHostTeamProperties = await ctx.db.query.properties.findMany({
+      where: eq(properties.hostTeamId, input.currentHostTeamId),
+    });
+
+    const propertyIds = allHostTeamProperties.map((property) => property.id);
+    const existingDiscounts = await ctx.db.query.propertyDiscounts.findMany({
+      where: inArray(propertyDiscounts.propertyId, propertyIds),
+    });
+
+    const discountFields = Object.keys(input.updatedDiscounts);
+
+    // Convert existing discounts to a lookup for quick access
+    const existingDiscountMap = new Map(existingDiscounts.map((d) => [d.propertyId, d]));
+
+    const updates = [];
+    const inserts = [];
+
+    for (const property of allHostTeamProperties) {
+      const discountData = discountFields.reduce((acc, key) => ({
+        ...acc,
+        [key]: input.updatedDiscounts[key as keyof typeof input.updatedDiscounts]
+      }), {});
+
+      if (existingDiscountMap.has(property.id)) {
+        // Update existing discount
+        updates.push(ctx.db.update(propertyDiscounts)
+          .set(discountData)
+          .where(eq(propertyDiscounts.propertyId, property.id))
+        );
+      } else {
+        // Insert new discount
+        inserts.push(ctx.db.insert(propertyDiscounts).values({
+          propertyId: property.id,
+          ...discountData
+        }));
+      }
+    }
+
+    // Perform batch update & insert
+    await Promise.all([...updates, ...inserts]);
   }),
 
   updateDiscounts: coHostProcedure(

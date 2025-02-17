@@ -2,9 +2,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { cn } from "@/utils/utils";
 import { AlertCircleIcon, Loader2Icon } from "lucide-react";
-import { isBefore } from "date-fns";
 import { useHostTeamStore } from "@/utils/store/hostTeamStore";
-import { api } from "@/utils/api";
 import { Property } from "@/server/db/schema/tables/properties";
 
 const daysOfWeek = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
@@ -29,6 +27,7 @@ interface MonthCalendarProps {
   isLoading?: boolean;
   isCalendarUpdating?: boolean;
   setHowYourCalendarWorksOpen?: (open: boolean) => void;
+  hostProperties: Property[];
 }
 
 export default function MonthCalendar({
@@ -39,19 +38,12 @@ export default function MonthCalendar({
   isLoading = false,
   isCalendarUpdating = false,
   setHowYourCalendarWorksOpen,
+  hostProperties,
 }: MonthCalendarProps) {
   console.log(prices);
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
-  const { currentHostTeamId } = useHostTeamStore();
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(
     null,
-  );
-  const { data: hostProperties } = api.properties.getHostProperties.useQuery(
-    { currentHostTeamId: currentHostTeamId! },
-    {
-      enabled: !!currentHostTeamId,
-      refetchOnWindowFocus: false,
-    },
   );
 
   useEffect(() => {
@@ -62,7 +54,7 @@ export default function MonthCalendar({
   // Set initial selected property when data loads
   useEffect(() => {
     if (hostProperties?.[0]) {
-      setSelectedProperty(hostProperties[0] as Property);
+      setSelectedProperty(hostProperties[0]);
     }
   }, [hostProperties]);
 

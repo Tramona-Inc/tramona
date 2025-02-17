@@ -33,7 +33,7 @@ import { TRPCClientErrorLike } from "@trpc/client";
 import { AppRouter } from "@/server/api/root";
 import CalendarLegend from "./CalendarLegend";
 import HowYourCalendarWorksModal from "../HowYourCalendarWorks";
-
+import { useSession } from "next-auth/react";
 export default function CalendarComponent() {
   useSetInitialHostTeamId();
   const { currentHostTeamId } = useHostTeamStore();
@@ -44,6 +44,7 @@ export default function CalendarComponent() {
   const [selectedProperty, setSelectedProperty] = useState<
     Property | undefined
   >(undefined);
+  const { data: session } = useSession();
   const [calOpen, setCalOpen] = useState(false);
   const [howYourCalendarWorksOpen, setHowYourCalendarWorksOpen] =
     useState(false);
@@ -55,7 +56,7 @@ export default function CalendarComponent() {
   } = api.properties.getHostProperties.useQuery(
     { currentHostTeamId: currentHostTeamId! },
     {
-      enabled: !!currentHostTeamId,
+      enabled: !!currentHostTeamId && !!session,
       refetchOnWindowFocus: false,
     },
   );
@@ -382,10 +383,11 @@ export default function CalendarComponent() {
                 isLoading={isLoading}
                 isCalendarUpdating={isCalendarUpdating}
                 setHowYourCalendarWorksOpen={setHowYourCalendarWorksOpen}
+                hostProperties={hostProperties ?? []}
               />
 
-              <div className="my-6 flex w-full flex-col items-start justify-between gap-x-4 gap-y-3 md:flex-row 2xl:mx-8">
-                <div className="flex flex-col items-start justify-start gap-y-4 md:w-1/4">
+              <div className="my-6 flex w-full flex-col items-center justify-between gap-x-4 gap-y-3 md:flex-row 2xl:mx-8">
+                <div className="flex flex-col items-start justify-start gap-y-4">
                   <CalendarLegend />
                 </div>
                 <HostICalSync
@@ -393,12 +395,6 @@ export default function CalendarComponent() {
                   calOpen={calOpen}
                   setCalOpen={setCalOpen}
                 />
-                <div className="flex flex-col items-start justify-start gap-y-4 md:w-1/4">
-                  <HowYourCalendarWorksModal
-                    open={howYourCalendarWorksOpen}
-                    onOpenChange={setHowYourCalendarWorksOpen}
-                  />
-                </div>
               </div>
             </div>
           </CardContent>
