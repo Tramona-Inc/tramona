@@ -439,7 +439,7 @@ export async function addProperty({
 }
 
 async function getRequestsInLast12HoursForHostTeam(tx: typeof db, hostTeamId: number) {
-  if (hostTeamId === 54) {
+  if (hostTeamId === env.ADMIN_TEAM_ID) {
     return [];
   }
   const propertiesForTeam = await tx.query.properties.findMany({
@@ -509,6 +509,9 @@ export async function sendTextToHost({
       await Promise.all(members.map(async (user) => {
         console.log(user, "user");
         if (!user.phoneNumber) return;
+        if (env.NODE_ENV !== "production") {
+          return;
+        }
 
         await sendText({
           to: user.phoneNumber,
