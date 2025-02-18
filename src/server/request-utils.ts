@@ -5,30 +5,44 @@ import { RequestInput } from "./api/routers/requestsRouter";
 import { db } from "./db";
 import { waitUntil } from "@vercel/functions";
 import { formatCurrency, getNumNights, plural } from "@/utils/utils";
-import {
-  eq
-} from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import {
   groupMembers,
-  groups, properties,
-  offers, requests,
-  users
+  groups,
+  properties,
+  offers,
+  requests,
+  users,
 } from "./db/schema";
 import { getCoordinates } from "./google-maps";
 import { sendSlackMessage } from "./slack";
 import { Session } from "next-auth";
 import { TRPCError } from "@trpc/server";
-import { haversineDistance, createLatLngGISPoint, getPropertiesForRequest, sendTextToHost } from "./server-utils";
+import {
+  haversineDistance,
+  createLatLngGISPoint,
+  getPropertiesForRequest,
+  sendTextToHost,
+} from "./server-utils";
 import { scrapeDirectListings } from "./direct-sites-scraping";
 import { scrapeAirbnbPrice } from "./scrapePrice";
-import { getTravelerOfferedPrice, baseAmountToHostPayout } from "@/utils/payment-utils/paymentBreakdown";
+import {
+  getTravelerOfferedPrice,
+  baseAmountToHostPayout,
+} from "@/utils/payment-utils/paymentBreakdown";
 import { differenceInDays } from "date-fns";
 import { generateFakeUser } from "./server-utils";
+import { emailPMFromCityRequest } from "@/utils/outreach-utils";
 
 export async function handleRequestSubmission(
   input: RequestInput,
   { user }: { user: Session["user"] },
 ) {
+  console.log("hit");
+  console.log(input.lat, input.location, input);
+
+  // Trigger lambda scraping functions
+
   // Begin a transaction
   const transactionResults = await db.transaction(async (tx) => {
     const madeByGroupId = await tx
@@ -45,8 +59,10 @@ export async function handleRequestSubmission(
     let lat = input.lat;
     let lng = input.lng;
     let radius = input.radius;
+
     if (lat === undefined || lng === undefined || radius === undefined) {
       const coordinates = await getCoordinates(input.location);
+      console.log(coordinates, "coordinates ");
       if (coordinates.location) {
         lat = coordinates.location.lat;
         lng = coordinates.location.lng;
@@ -67,6 +83,16 @@ export async function handleRequestSubmission(
     if (lat && lng) {
       latLngPoint = createLatLngGISPoint({ lat, lng });
     }
+
+    //T < -------------- Trigger lambda function HERE  ------------------- >
+    await emailPMFromCityRequest({
+      requestLocation: input.location,
+      requestedLocationLatLng: {
+        lat: lat,
+        lng: lng,
+      },
+      radius: input.radius,
+    });
 
     if (!radius || !latLngPoint) {
       throw new TRPCError({
@@ -243,7 +269,13 @@ export async function handleRequestSubmission(
   return transactionResults;
 }
 
-export async function generateFakeRequest(location: string, checkIn: Date, checkOut: Date, numGuests: number, maxTotalPrice: number) {
+export async function generateFakeRequest(
+  location: string,
+  checkIn: Date,
+  checkOut: Date,
+  numGuests: number,
+  maxTotalPrice: number,
+) {
   const fakeUserId = await generateFakeUser("fake-user@gmail.com");
   const fakeUser = await db.query.users.findFirst({
     where: eq(users.id, fakeUserId),
@@ -251,12 +283,15 @@ export async function generateFakeRequest(location: string, checkIn: Date, check
   if (!fakeUser) {
     throw new Error("Fake user not found");
   }
-  const fakeRequest = await handleRequestSubmission({
-    location,
-    checkIn,
-    checkOut,
-    numGuests,
-    maxTotalPrice,
-  }, { user: fakeUser });
+  const fakeRequest = await handleRequestSubmission(
+    {
+      location,
+      checkIn,
+      checkOut,
+      numGuests,
+      maxTotalPrice,
+    },
+    { user: fakeUser },
+  );
   return fakeRequest;
 }

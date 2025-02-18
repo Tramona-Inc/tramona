@@ -1,6 +1,7 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "./schema";
+import * as secondarySchema from "./secondary-schema/index";
 
 import { env } from "@/env";
 import {
@@ -12,6 +13,16 @@ import {
 const client = postgres(env.DATABASE_URL, { prepare: false, max: 1 });
 
 export const db = drizzle(client, { schema });
+
+//seconary db
+const secondaryDbClient = postgres(env.SECONDARY_DATABASE_URL, {
+  prepare: false,
+  max: 1,
+});
+
+export const secondaryDb = drizzle(secondaryDbClient, {
+  schema: secondarySchema,
+});
 
 ///////// InferQueryModel type helper //////////////
 
