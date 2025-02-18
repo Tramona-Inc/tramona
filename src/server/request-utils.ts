@@ -59,7 +59,6 @@ export async function handleRequestSubmission(
     let lat = input.lat;
     let lng = input.lng;
     let radius = input.radius;
-    console.log("here", lat, lng, radius);
 
     if (lat === undefined || lng === undefined || radius === undefined) {
       const coordinates = await getCoordinates(input.location);
@@ -82,12 +81,10 @@ export async function handleRequestSubmission(
     }
     let latLngPoint = null;
     if (lat && lng) {
-      console.log("hihidft");
       latLngPoint = createLatLngGISPoint({ lat, lng });
     }
 
-    //Trigger lambda function
-    console.log("asdfsadfasdf");
+    //T < -------------- Trigger lambda function HERE  ------------------- >
     await emailPMFromCityRequest({
       requestLocation: input.location,
       requestedLocationLatLng: {
