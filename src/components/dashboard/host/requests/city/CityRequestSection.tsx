@@ -1,8 +1,6 @@
 import { type HostDashboardRequest } from "@/components/requests/RequestCard";
 import HostRequestCard from "@/components/dashboard/host/requests/city/HostRequestCard";
-import {
-  RequestCardLoadingGrid
-} from "../RequestCardLoadingGrid";
+import { RequestCardLoadingGrid } from "../RequestCardLoadingGrid";
 import { Button } from "@/components/ui/button";
 
 import { type Property } from "@/server/db/schema";
