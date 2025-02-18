@@ -1051,34 +1051,6 @@ export function convertHostInteractionPref(interactionPreference: string) {
   return modifiedPref;
 }
 
-const validationCache = new Map<string, boolean>(); // Module-level cache (optional)
-
-export const validateImage = async (
-  src: string,
-  cache?: Map<string, boolean>,
-): Promise<boolean> => {
-  const currentCache = cache ?? validationCache;
-  if (currentCache.has(src)) {
-    return currentCache.get(src)!;
-  }
-
-  return new Promise((resolve) => {
-    axios
-      .head(src) // Use axios.head for HEAD request
-      .then((response) => {
-        const statusCode = response.status;
-        const isValid = statusCode >= 200 && statusCode < 300;
-        currentCache.set(src, isValid);
-        resolve(isValid);
-      })
-      .catch((error) => {
-        console.error("Image validation error for:", src, error);
-        currentCache.set(src, false);
-        resolve(false);
-      });
-  });
-};
-
 export function generateBookingUrl(propertyId: number): string {
   const today = new Date();
 

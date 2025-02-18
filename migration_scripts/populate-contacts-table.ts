@@ -1,48 +1,57 @@
-import { secondaryDb } from "@/server/db";
+// import { secondaryDb } from "@/server/db";
+// // import {
+// //   propertyManagerContacts,
+// //   type PropertyManagerContactInsert,
+// // } from "@/server/secondaryDb/schema";
+// import { faker } from "@faker-js/faker";
+
+// import { createLatLngGISPoint } from "@/server/server-utils";
+// import { and, eq, exists, isNotNull, isNull } from "drizzle-orm";
 // import {
-//   propertyManagerContacts,
-//   type PropertyManagerContactInsert,
-// } from "@/server/secondaryDb/schema";
-import { faker } from "@faker-js/faker";
+//   propertyManagerContactsTest,
+//   PropertyManagerContactTest,
+// } from "@/server/db/secondary-schema";
 
-import { createLatLngGISPoint } from "@/server/server-utils";
-import { and, eq, exists, isNotNull, isNull } from "drizzle-orm";
-import {
-  propertyManagerContactsTest,
-  PropertyManagerContactTest,
-} from "@/server/db/secondary-schema";
+// import { getCoordinates } from "@/server/google-maps";
 
-import { getCoordinates } from "@/server/google-maps";
-
-// // Initialize Bun SQLite database
+// // // Initialize Bun SQLite database
 
 // async function populatePropertyManagerContacts(numberOfRows: number) {
 //   const inserts: PropertyManagerContactTest[] = []; // 1. Declare inserts array with the type
 //   for (let i = 0; i < numberOfRows; i++) {
-//     const email: string = "ueharaneal@gmail.com"; // Explicitly typed as string
-//     const city = faker.location.city(); // Explicitly typed as string
-//     const state: string = faker.location.state({ abbreviated: true }); // Explicitly typed as string
+//     const email: string[] = ["sashagordin22@gmail.com"]; // Explicitly typed as string
+//     const city: string = "Seattle, WA"; // Explicitly typed as string
 //     const url: string = faker.internet.url(); // Explicitly typed as string
 //     const propertyManagerName: string = faker.company.name(); //
-//     inserts.push({
-//       email: ["ueharaneal@gmail.com"], // Type assertion as string
-//       city: faker.location.city() as string, // Type assertion as string
-//       state: faker.location.state({ abbreviated: true }) as string, // Type assertion as string
-//       url: faker.internet.url() as string, // Type assertion as string
-//       name: faker.company.name() as string, // Type assertion as string
-//     });
-//   }
-//   console.log(inserts);
+//     const coords = await getCoordinates(city);
+//     let latLngPoint: { x: number; y: number } | null = null;
+//     console.log("coords", coords);
+//     if (coords.location) {
+//       latLngPoint = createLatLngGISPoint({
+//         lat: coords.location.lat,
+//         lng: coords.location.lng,
+//       });
+//     }
 
-//   try {
-//     await secondaryDb.insert(propertyManagerContactsTest).values(inserts); // 3. Use inserts array in the insert query
-//     console.log(
-//       `Successfully inserted ${numberOfRows} rows into propertyManagerContactsTests table.`,
-//     );
-//   } catch (error) {
-//     console.error("Error inserting data:", error);
+//       inserts.push({
+//         email: email, // Type assertion as string
+//         city: "Seattle, WA", // Type assertion as string
+//         url: url, // Type assertion as string
+//         name: propertyManagerName, // Type assertion as string
+//         latLngPoint: latLngPoint,
+//       });
+//     }
+//     console.log(inserts);
+
+//     try {
+//       await secondaryDb.insert(propertyManagerContactsTest).values(inserts); // 3. Use inserts array in the insert query
+//       console.log(
+//         `Successfully inserted ${numberOfRows} rows into propertyManagerContactsTests table.`,
+//       );
+//     } catch (error) {
+//       console.error("Error inserting data:", error);
+//     }
 //   }
-// }
 
 // async function main() {
 //   const numberOfRowsToInsert = 1; // You can change this number
@@ -50,6 +59,8 @@ import { getCoordinates } from "@/server/google-maps";
 // }
 
 // await main();
+
+// process.exit(0);
 
 //function to populate the table with gis points
 // export const populateGIS = async ( id : number) => {

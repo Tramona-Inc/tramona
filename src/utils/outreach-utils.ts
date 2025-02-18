@@ -3,6 +3,8 @@ import RequestOutreachEmail from "packages/transactional/emails/RequestOutreachE
 import { secondaryDb } from "@/server/db";
 import { eq, sql } from "drizzle-orm"; // Import 'eq' for database queries
 import { propertyManagerContactsTest as propertyManagerContacts } from "@/server/db/secondary-schema";
+import { cities } from "@/server/db/secondary-schema/cities";
+import { warmLeads } from "@/server/db/secondary-schema/warmLeads";
 //import { propertyManagerContacts } from "@/server/db/secondary-schema";
 
 interface EmailPMFromCityRequestInput {
@@ -119,5 +121,94 @@ export async function emailPMFromCityRequest(
     return;
   } catch (err) {
     console.error("Error in emailPMFromCityRequest:", err);
+  }
+}
+
+
+interface EmailWarmLeadsFromCityRequestInput {
+  requestLocation: string;
+  requestedLocationLatLng?: {
+    lat: number | undefined;
+    lng: number | undefined;
+  };
+}
+
+export async function emailWarmLeadsFromCityRequest(
+  input: EmailWarmLeadsFromCityRequestInput,
+) {
+  console.log("Processing warm leads email request:", input);
+
+  if (!input.requestedLocationLatLng?.lat || !input.requestedLocationLatLng.lng) {
+    console.log("No requestedLocationLatLng provided, exiting function.");
+    return;
+  }
+
+  console.log("Input LatLng:", input.requestedLocationLatLng);
+
+  try {
+    const requestedPoint = sql`ST_SetSRID(ST_MakePoint(${input.requestedLocationLatLng.lng}, ${input.requestedLocationLatLng.lat}), 4326)`;
+    const transformedInputPoint = sql`ST_Transform(${requestedPoint}, 3857)`;
+    const transformedLatLngPoint = sql`ST_Transform(cities.lat_lng_point, 3857)`;
+
+    const warmLeadsToEmail = await secondaryDb
+      .select({
+        id: warmLeads.id,
+        email: warmLeads.email,
+        lastEmailSentAt: warmLeads.lastEmailSentAt,
+      })
+      .from(warmLeads)
+      .where(
+        sql`EXISTS (
+          SELECT 1 FROM ${cities}
+          WHERE cities.warm_lead_id = warm_leads.id
+          AND cities.lat_lng_point IS NOT NULL
+          AND ST_DWithin(
+            ${transformedLatLngPoint},
+            ${transformedInputPoint},
+            10000
+          )
+        )`
+      );
+
+    console.log("Warm leads to email:", warmLeadsToEmail);
+
+    for (const lead of warmLeadsToEmail) {
+      if (!lead.email) {
+        console.log(`Skipping warm lead ${lead.id} due to missing email.`);
+        continue;
+      }
+
+      if (lead.lastEmailSentAt) {
+        const lastSentDate = new Date(lead.lastEmailSentAt);
+        const now = new Date();
+        const daysDiff = Math.ceil((now.getTime() - lastSentDate.getTime()) / (1000 * 3600 * 24));
+
+        if (daysDiff <= 3) {
+          console.log(`Skipping email for warm lead ${lead.id}, last email sent ${daysDiff} days ago.`);
+          continue;
+        }
+      }
+
+      try {
+        await sendEmail({
+          to: lead.email,
+          subject: `Potential Travelers looking for a stay in ${input.requestLocation}`,
+          content: RequestOutreachEmail({
+            requestLocation: input.requestLocation,
+          }),
+        });
+        console.log(`Email sent to warm lead: ${lead.email}`);
+
+        await secondaryDb
+          .update(warmLeads)
+          .set({ lastEmailSentAt: new Date() })
+          .where(eq(warmLeads.id, lead.id));
+      } catch (err) {
+        console.error(`Failed to send email to warm lead ${lead.id}:`, err);
+        continue;
+      }
+    }
+  } catch (err) {
+    console.error("Error in emailWarmLeadsFromCityRequest:", err);
   }
 }

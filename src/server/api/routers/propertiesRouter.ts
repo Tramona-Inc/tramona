@@ -62,7 +62,7 @@ import { checkAvailabilityForProperties } from "@/server/direct-sites-scraping";
 import { scrapeAirbnbSearch } from "@/server/external-listings-scraping/airbnbScraper";
 import { capitalize, getAge, getNumNights } from "@/utils/utils";
 import { extraPricingFieldSchema } from "@/components/dashboard/host/calendar/pricingfields";
-import { validateImage } from "@/utils/utils";
+import { validateImage } from "@/server/server-utils";
 import { hostTeamMembers } from "../../db/schema/tables/hostTeams";
 import { HostRequestsPageData } from "@/server/types/propertiesRouter";
 import { update } from "lodash";
