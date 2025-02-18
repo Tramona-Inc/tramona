@@ -14,7 +14,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { ChevronRight, HelpCircle } from "lucide-react";
+import { ChevronRight, HelpCircle, Mail } from "lucide-react";
 import OverviewRequestCards from "./name-your-price/OverviewRequestCards";
 import HowTramonaWorks from "./name-your-price/HowTramonaWorks";
 import { TestimonialCarousel } from "./testimonials/TestimonialCarousel";
@@ -22,7 +22,17 @@ import { landingPageTestimonals } from "./testimonials/testimonials-data";
 import UnclaimedMap from "@/components/unclaimed-offers/UnclaimedMap";
 import { useIsLg } from "@/utils/utils";
 import { useIsXl } from "@/utils/utils";
+import { Input } from "@/components/ui/input";
+import { motion, AnimatePresence } from "framer-motion";
+import { Badge } from "@/components/ui/badge";
+import { Plus, X } from "lucide-react";
 
+interface Location {
+  lat: number;
+  lng: number;
+  size: number;
+  color: string;
+}
 export default function MastHead() {
   const isXl = useIsXl();
   const isLg = useIsLg();
@@ -32,6 +42,19 @@ export default function MastHead() {
   const [isScrolled, setIsScrolled] = useState(false);
   const toggleSectionRef = useRef<HTMLDivElement>(null);
   const [hasPassedButtons, setHasPassedButtons] = useState(false);
+  const [newCity, setNewCity] = useState("");
+  const [cities, setCities] = useState<string[]>([]);
+  const [email, setEmail] = useState("");
+  const handleAddCity = () => {
+    if (newCity.trim() && !cities.includes(newCity)) {
+      setCities([...cities, newCity]);
+      setNewCity("");
+    }
+  };
+
+  const handleRemoveCity = (index: number) => {
+    setCities(cities.filter((_, i) => i !== index));
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -182,7 +205,7 @@ export default function MastHead() {
         </div>
 
         <div className="relative">
-          <div className="relative h-96">
+          <div className="h-96">
             <Image
               src={landingBg2}
               alt=""
@@ -212,31 +235,133 @@ export default function MastHead() {
               </h3>
             </div>
 
-            <div className="absolute inset-0 mx-auto hidden max-w-7xl flex-col justify-center pl-4 text-left lg:flex">
-              <h2 className="mt-8 text-left text-5xl font-bold text-white">
-                Turn empty nights into opportunities
-              </h2>
-              <h3 className="mt-6 text-sm font-semibold text-white lg:text-xl">
-                Supplement your existing booking platforms and fill your empty
-                nights
-              </h3>
-              <h4 className="text-h4-size mt-3 font-semibold text-white">
-                Sign up and seamlessly sync your host account with Airbnb in
-                seconds
-              </h4>
-              <h3 className="mt-4 text-lg font-semibold text-white">
-                <button
-                  className="flex items-center"
-                  onClick={() => router.push("/how-it-works")}
-                >
-                  <span className="underline">How it works</span>
-                </button>
-              </h3>
+            <div className="max-w-9xl absolute inset-0 mx-auto hidden px-24 lg:flex lg:flex-row lg:items-center lg:justify-between">
+              {/* Left side - Text Content */}
+              <div className="w-full text-left lg:w-2/3">
+                <h2 className="mt-8 text-5xl font-bold text-white">
+                  Turn empty nights into opportunities
+                </h2>
+                <h3 className="mt-6 text-xl font-semibold text-white">
+                  Supplement your existing booking platforms and fill your empty
+                  nights
+                </h3>
+                <h4 className="text-h4-size mt-3 font-semibold text-white">
+                  Sign up and seamlessly sync your host account with Airbnb in
+                  seconds
+                </h4>
+                <h3 className="mt-4 text-lg font-semibold text-white">
+                  <button
+                    className="flex items-center"
+                    onClick={() => router.push("/how-it-works")}
+                  >
+                    <span className="underline">How it works</span>
+                  </button>
+                </h3>
+              </div>
+
+              {/* Right side - Newsletter Signup (Desktop) */}
+              {isXl && (
+                <div className="items-center justify-center 2xl:pr-12">
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.2 }}
+                    className="mt-6 w-full lg:mt-0 lg:w-[400px]"
+                  >
+                    <div className="rounded-xl border border-white/20 bg-white/10 p-6 shadow-2xl backdrop-blur-md">
+                      <h3 className="mb-1 text-2xl font-semibold text-white">
+                        Hey Hosts! 👋
+                      </h3>
+                      <p className="mb-4 text-sm text-white/90">
+                        Not ready to sign up? Enter your email below and we will
+                        send you booking requests as they come in.
+                      </p>
+
+                      <div className="space-y-4">
+                        {/* City Selection */}
+                        <div className="space-y-2">
+                          <label className="text-xs font-medium text-white">
+                            Where are your properties located?
+                          </label>
+                          <div className="flex gap-2">
+                            <Input
+                              type="text"
+                              placeholder="Enter city name"
+                              value={newCity}
+                              onChange={(e) => setNewCity(e.target.value)}
+                              className="border-white/20 bg-white/20 text-sm text-white placeholder:text-white/60"
+                              onKeyDown={(e) =>
+                                e.key === "Enter" && handleAddCity()
+                              }
+                            />
+                            <Button
+                              onClick={handleAddCity}
+                              variant="secondary"
+                              size="icon"
+                            >
+                              <Plus className="h-4 w-4" />
+                            </Button>
+                          </div>
+
+                          {/* City List */}
+                          <div className="flex max-h-[80px] min-h-[40px] flex-wrap gap-2 overflow-y-hidden">
+                            <AnimatePresence>
+                              {cities.map((city, index) => (
+                                <motion.div
+                                  key={city}
+                                  initial={{ opacity: 0, scale: 0.8 }}
+                                  animate={{ opacity: 1, scale: 1 }}
+                                  exit={{ opacity: 0, scale: 0.8 }}
+                                  transition={{ duration: 0.2 }}
+                                >
+                                  <Badge
+                                    variant="secondary"
+                                    className="flex items-center gap-2 px-2 py-1 text-xs"
+                                  >
+                                    {city}
+                                    <X
+                                      className="h-3 w-3 cursor-pointer hover:text-destructive"
+                                      onClick={() => handleRemoveCity(index)}
+                                    />
+                                  </Badge>
+                                </motion.div>
+                              ))}
+                            </AnimatePresence>
+                          </div>
+                        </div>
+
+                        {/* Email Input */}
+                        <div className="space-y-2">
+                          <label className="text-xs font-medium text-white">
+                            Your email address
+                          </label>
+                          <div className="flex gap-2">
+                            <Input
+                              type="email"
+                              placeholder="name@example.com"
+                              value={email}
+                              onChange={(e) => setEmail(e.target.value)}
+                              className="border-white/20 bg-white/20 text-sm text-white placeholder:text-white/60"
+                            />
+                            <Button className="whitespace text-sm">
+                              <Mail className="mr-2 h-4 w-4" />
+                              Get Booking Requests
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                </div>
+              )}
             </div>
           </div>
         </div>
+        {/* Right side - Newsletter Signup (Mobile) - Now outside the image div */}
 
         <div className="relative -mt-4">
+          {" "}
+          {/* Keep this div wrapping the toggle and map/name-price section */}
           {/* Original Booking Toggle */}
           <div
             ref={toggleSectionRef}
@@ -269,13 +394,106 @@ export default function MastHead() {
               </div>
             </div>
           </div>
-
           {activeTab === "search" ? <UnclaimedMap /> : <NameYourPriceSection />}
         </div>
 
         <div className="mx-auto mt-12 flex max-w-8xl flex-col items-center gap-y-20 lg:gap-y-24">
           {/* other  sections */}
           <OverviewRequestCards />
+          {!isLg && (
+            <div className="items-center justify-center mx-2">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="mt-6 w-full lg:mt-0 lg:w-[400px]"
+              >
+                <div className="rounded-xl border border-gray-900/20 p-6">
+                  <h3 className="mb-1 text-2xl font-semibold text-gray-900">
+                    Hey Hosts! 👋
+                  </h3>
+                  <p className="mb-4 text-sm text-gray-900/90">
+                    Not ready to sign up? Enter your email below and we will
+                    send you booking requests as they come in.
+                  </p>
+
+                  <div className="space-y-4">
+                    {/* City Selection */}
+                    <div className="space-y-2">
+                      <label className="text-xs font-medium text-gray-900">
+                        Where are your properties located?
+                      </label>
+                      <div className="flex gap-2">
+                        <Input
+                          type="text"
+                          placeholder="Enter city name"
+                          value={newCity}
+                          onChange={(e) => setNewCity(e.target.value)}
+                          className="border-gray-900/20 bg-gray-900/20 text-sm text-gray-900 placeholder:text-gray-900/60"
+                          onKeyDown={(e) =>
+                            e.key === "Enter" && handleAddCity()
+                          }
+                        />
+                        <Button
+                          onClick={handleAddCity}
+                          variant="secondary"
+                          size="icon"
+                        >
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </div>
+
+                      {/* City List */}
+                      <div className="flex max-h-[80px] min-h-[40px] flex-wrap gap-2 overflow-y-hidden">
+                        <AnimatePresence>
+                          {cities.map((city, index) => (
+                            <motion.div
+                              key={city}
+                              initial={{ opacity: 0, scale: 0.8 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              exit={{ opacity: 0, scale: 0.8 }}
+                              transition={{ duration: 0.2 }}
+                            >
+                              <Badge
+                                variant="secondary"
+                                className="flex items-center gap-2 px-2 py-1 text-xs"
+                              >
+                                {city}
+                                <X
+                                  className="h-3 w-3 cursor-pointer hover:text-destructive"
+                                  onClick={() => handleRemoveCity(index)}
+                                />
+                              </Badge>
+                            </motion.div>
+                          ))}
+                        </AnimatePresence>
+                      </div>
+                    </div>
+
+                    {/* Email Input */}
+                    <div className="space-y-2">
+                      <label className="text-xs font-medium text-gray-900">
+                        Your email address
+                      </label>
+                      <div className="flex gap-2">
+                        <Input
+                          type="email"
+                          placeholder="name@example.com"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          className="border-gray-900/20 bg-gray-900/20 text-sm text-gray-900 placeholder:text-gray-900/60"
+                        />
+                        <Button className="whitespace text-sm">
+                          <Mail className="mr-2 h-4 w-4" />
+                          Get Booking Requests
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          )}
           <HowTramonaWorks className="max-w-6xl" />
           <div className="mx-0 flex max-w-full justify-center space-y-4 px-4 lg:mx-4 lg:flex lg:space-y-8">
             <TestimonialCarousel testimonials={landingPageTestimonals} />
