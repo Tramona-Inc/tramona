@@ -72,7 +72,29 @@ export async function emailPMFromCityRequest(
         continue; // Skip to the next manager if email is missing
       }
 
+      // Check if lastEmailSentAt is within the last 3 days (as previously implemented)
+      if (manager.lastEmailSentAt) {
+        const lastSentDate = new Date(manager.lastEmailSentAt);
+        const now = new Date();
+        const timeDiff = now.getTime() - lastSentDate.getTime();
+        const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+
+        if (daysDiff <= 3) {
+          console.log(
+            `Skipping email for manager ${manager.propertyManagerName} (last email sent ${daysDiff} days ago, which is within 3 days).`,
+          );
+          continue; // Skip to the next manager if last email was sent recently
+        }
+      }
+      const sentEmails = new Set<string>(); // Initialize a Set to track sent emails
+
       for (const email of manager.email) {
+        if (sentEmails.has(email)) {
+          // Check if email is already in the Set
+          console.log(`Skipping duplicate email to: ${email}`);
+          continue; // Skip to the next email if already sent in this run
+        }
+
         try {
           await sendEmail({
             to: email,
@@ -82,6 +104,7 @@ export async function emailPMFromCityRequest(
             }),
           });
           console.log(`Email sent to: ${email}`);
+          sentEmails.add(email); // Add email to the Set after successful sending
           await secondaryDb
             .update(propertyManagerContacts)
             .set({
