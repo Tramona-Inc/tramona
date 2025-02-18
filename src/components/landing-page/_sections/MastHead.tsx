@@ -26,6 +26,9 @@ import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Plus, X } from "lucide-react";
+import { api } from "@/utils/api";
+import { toast } from "@/components/ui/use-toast";
+
 
 interface Location {
   lat: number;
@@ -45,6 +48,13 @@ export default function MastHead() {
   const [newCity, setNewCity] = useState("");
   const [cities, setCities] = useState<string[]>([]);
   const [email, setEmail] = useState("");
+  const { mutate: insertWarmLead } = api.outreach.insertWarmLead.useMutation({
+    onSuccess: () => {
+      toast({
+        title: "Warm lead inserted successfully",
+      });
+    },
+  });
   const handleAddCity = () => {
     if (newCity.trim() && !cities.includes(newCity)) {
       setCities([...cities, newCity]);
@@ -343,7 +353,7 @@ export default function MastHead() {
                               onChange={(e) => setEmail(e.target.value)}
                               className="border-white/20 bg-white/20 text-sm text-white placeholder:text-white/60"
                             />
-                            <Button className="whitespace text-sm">
+                            <Button className="whitespace text-sm" onClick={() => insertWarmLead({ email, cities })}>
                               <Mail className="mr-2 h-4 w-4" />
                               Get Booking Requests
                             </Button>
@@ -483,7 +493,7 @@ export default function MastHead() {
                           onChange={(e) => setEmail(e.target.value)}
                           className="border-gray-900/20 bg-gray-900/20 text-sm text-gray-900 placeholder:text-gray-900/60"
                         />
-                        <Button className="whitespace text-sm">
+                        <Button className="whitespace text-sm" onClick={() => insertWarmLead({ email, cities })}>
                           <Mail className="mr-2 h-4 w-4" />
                           Get Booking Requests
                         </Button>

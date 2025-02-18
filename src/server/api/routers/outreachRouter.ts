@@ -3,13 +3,17 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { sendEmail } from "@/server/server-utils";
 import RequestOutreachEmail from "packages/transactional/emails/RequestOutreachEmail";
-import { db } from "@/server/db";
+import { secondaryDb } from "@/server/db";
 import { eq, sql } from "drizzle-orm"; // Import 'eq' for database queries
 import {
   PropertyManagerContact,
   propertyManagerContacts,
 } from "@/server/db/schema";
 import { RADIUS_FALL_BACK } from "@/utils/constants";
+import { warmLeads } from "@/server/db/secondary-schema/warmLeads";
+import { cities } from "@/server/db/secondary-schema/cities";
+import { getCoordinates } from "@/server/google-maps";
+import { createLatLngGISPoint } from "@/server/server-utils";
 
 interface OllamaStreamChunk {
   model?: string;
@@ -26,6 +30,20 @@ interface NeighborhoodType {
 }
 
 export const outreachRouter = createTRPCRouter({
+  insertWarmLead: publicProcedure
+    .input(z.object({ email: z.string(), cities: z.string().array() }))
+    .mutation(async ({ input }) => {
+      const warmLead = await secondaryDb.insert(warmLeads).values({ email: input.email }).returning();
+      for (const city of input.cities) {
+        const { location } = await getCoordinates(city);
+        if (!location) continue;
+        const latLngPoint = createLatLngGISPoint({
+          lat: location.lat,
+          lng: location.lng,
+        });
+        await secondaryDb.insert(cities).values({ warmLeadId: warmLead[0]!.id, name: city, latLngPoint: latLngPoint });
+      }
+    }),
   emailPMFromCityRequest: publicProcedure
     .input(
       z.object({
@@ -48,7 +66,7 @@ export const outreachRouter = createTRPCRouter({
         const transformedInputPoint = sql`ST_Transform(${requestedPoint}, 3857)`;
         const transformedLatLngPoint = sql`ST_Transform(lat_lng_point, 3857)`;
 
-        const nearbyProperyManagers = await db
+        const nearbyProperyManagers = await secondaryDb
           .select({
             email: propertyManagerContacts.email,
             propertyManagerName: propertyManagerContacts.propertyManagerName,

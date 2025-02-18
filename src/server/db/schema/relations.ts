@@ -44,6 +44,8 @@ import {
   propertyConversations,
 } from "./tables/propertyMessages";
 import { profiles } from "./tables/profiles";
+import { warmLeads } from "../secondary-schema/warmLeads";
+import { cities } from "../secondary-schema/cities";
 
 export const usersRelations = relations(users, ({ one, many }) => ({
   accounts: many(accounts),
@@ -73,6 +75,10 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   propertyConversations: many(propertyConversations, {
     relationName: "traveler",
   }),
+}));
+
+export const warmLeadsRelations = relations(warmLeads, ({ one, many }) => ({
+  cities: many(cities),
 }));
 
 export const profilesRelations = relations(profiles, ({ one }) => ({
