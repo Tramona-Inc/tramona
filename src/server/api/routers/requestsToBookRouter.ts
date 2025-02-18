@@ -8,14 +8,20 @@ import {
   requestsToBook,
   requestsToBookInsertSchema,
   statusEnumArray,
+  users,
+  properties,
+  groups,
+  hostTeams,
 } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { and, eq, inArray } from "drizzle-orm";
-import { properties } from "@/server/db/schema";
 import { zodInteger, zodString } from "@/utils/zod-utils";
 import { CitiesLatLong } from "../../../utils/store/cities-filter";
 import { hostTeamMembers } from "../../db/schema/tables/hostTeams";
+import RequestToBookBtn from "@/components/propertyPages/sidebars/actionButtons/RequestToBookBtn";
+import { request } from "http";
+import { Users } from "lucide-react";
 const MAX_RETRIES = 3; // set a max number of retries
 const INITIAL_DELAY = 500; // set a delay in milliseconds
 
@@ -384,4 +390,45 @@ export const requestsToBookRouter = createTRPCRouter({
       console.log(confirmedRequestToBookWithProperty, "test here");
       return confirmedRequestToBookWithProperty;
     }),
+
+  getAdminRequestsToBook: protectedProcedure.query(async ({ ctx }) => {
+    try {
+      const requests = await db
+        .select({
+          id: requestsToBook.id,
+          status: requestsToBook.status,
+          checkIn: requestsToBook.checkIn,
+          checkOut: requestsToBook.checkOut,
+          numGuests: requestsToBook.numGuests,
+          createdAt: requestsToBook.createdAt,
+          resolvedAt: requestsToBook.resolvedAt,
+          calculatedTravelerPrice: requestsToBook.calculatedTravelerPrice,
+          isDirectListing: requestsToBook.isDirectListing,
+          // Join with users
+          guestName: users.name,
+          // Join with properties
+          propertyName: properties.name,
+          propertyCity: properties.city,
+        })
+        .from(requestsToBook)
+        .leftJoin(users, eq(requestsToBook.userId, users.id))
+        .leftJoin(properties, eq(requestsToBook.propertyId, properties.id))
+        .orderBy(requestsToBook.createdAt);
+
+      return {
+        activeRequests: requests.filter(
+          (req) => req.status === "Pending" && !req.resolvedAt
+        ),
+        pastRequests: requests.filter(
+          (req) => req.status !== "Pending" || req.resolvedAt
+        ),
+      };
+    } catch (error) {
+      console.error("Error fetching requests:", error);
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to fetch requests",
+      });
+    }
+  }),
 });

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Card, CardDescription, CardHeader, CardTitle } from "../ui/card";
+import { Description } from "@radix-ui/react-dialog";
 
 const navs = [
   {
@@ -47,6 +48,11 @@ const navs = [
     description: "See all the latest hosts who just signed up",
     href: "/admin/feed",
   },
+  {
+    title: "Requests to Book",
+    description: "See all requests to book",
+    href: "/admin/requests",
+  }
 ];
 
 export default function AdminRequestsTabs() {

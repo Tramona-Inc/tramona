@@ -52,7 +52,7 @@ export default function HostDashboardLayout({
         </main>
         {status !== "loading" && <MobileNav type={navType} />}
         <div className="hidden md:contents">
-          {/* <MessagesPopover isMobile={false} isHostOnboarding={true} /> */}
+         <MessagesPopover isMobile={false} isHostOnboarding={true} /> 
         </div>
       </div>
       {isMd && <Footer />}
