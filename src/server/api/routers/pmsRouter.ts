@@ -262,13 +262,13 @@ export const pmsRouter = createTRPCRouter({
     }
   }),
 
-  getHospitableCalendar: protectedProcedure
-    .input(z.object({ propertyId: z.string() }))
-    .query(async ({ input }) => {
-      const { propertyId } = input;
-      console.log("propertyId", propertyId);
-      return await getPropertyCalendar(propertyId);
-    }),
+  // getHospitableCalendar: protectedProcedure
+  //   .input(z.object({ propertyId: z.string() }))
+  //   .query(async ({ input }) => {
+  //     const { propertyId } = input;
+  //     console.log("propertyId", propertyId);
+  //     return await getPropertyCalendar(propertyId);
+  //   }),
 
   resetHospitableCustomer: protectedProcedure.mutation(async ({ ctx }) => {
     await ctx.db.query.users

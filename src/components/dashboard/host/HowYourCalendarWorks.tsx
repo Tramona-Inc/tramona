@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import Image from "next/image";
-
+import { Info } from "lucide-react";
 import Step1 from "@/../public/assets/images/how-cal-works-modal/Step1.png";
 import Step2 from "@/../public/assets/images/how-cal-works-modal/Step2.png";
 // ------------------------------------------------------------------
@@ -199,8 +199,8 @@ function HowYourCalendarWorksModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogTrigger asChild>
-        <Button variant="primary">How Calendar Sync Works</Button>
+      <DialogTrigger className="size-sm w-full flex-1 items-center justify-center text-sm text-muted-foreground underline underline-offset-2">
+        <Info className="size-5" />
       </DialogTrigger>
       <DialogContent className="w-full max-w-3xl p-8 sm:w-auto">
         <DialogHeader>

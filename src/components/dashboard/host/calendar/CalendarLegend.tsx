@@ -24,7 +24,10 @@ export default function CalendarLegend() {
           }}
         />
         <Label className="text-sm font-semibold">
-          Booked on Tramona (Not Synced with Airbnb Yet)
+          <div className="flex items-center gap-x-1">
+            Booked on Tramona
+            <span className="text-xs text-muted-foreground">(Not Synced with Airbnb Yet)</span>
+          </div>
         </Label>
       </div>
     </div>
