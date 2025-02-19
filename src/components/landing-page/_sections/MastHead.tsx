@@ -28,7 +28,7 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, X } from "lucide-react";
 import { api } from "@/utils/api";
 import { toast } from "@/components/ui/use-toast";
-
+import CityAutocomplete from "@/components/_common/CityAutocomplete";
 
 interface Location {
   lat: number;
@@ -47,7 +47,10 @@ export default function MastHead() {
   const [hasPassedButtons, setHasPassedButtons] = useState(false);
   const [newCity, setNewCity] = useState("");
   const [cities, setCities] = useState<string[]>([]);
+  const [stateCode, setStateCode] = useState("");
+  const [country, setCountry] = useState("");
   const [email, setEmail] = useState("");
+  const [popoverOpen, setPopoverOpen] = useState(false);
   const { mutate: insertWarmLead } = api.outreach.insertWarmLead.useMutation({
     onSuccess: () => {
       toast({
@@ -57,8 +60,18 @@ export default function MastHead() {
   });
   const handleAddCity = () => {
     if (newCity.trim() && !cities.includes(newCity)) {
-      setCities([...cities, newCity]);
+      const [city, stateCode, country] = newCity.split(",");
+      if (city) {
+        setCities([...cities, city]);
+      }
+      if (stateCode) {
+        setStateCode(stateCode);
+      }
+      if (country) {
+        setCountry(country);
+      }
       setNewCity("");
+      setPopoverOpen(false);
     }
   };
 
@@ -294,15 +307,27 @@ export default function MastHead() {
                             Where are your properties located?
                           </label>
                           <div className="flex gap-2">
-                            <Input
-                              type="text"
-                              placeholder="Enter city name"
+                            <CityAutocomplete
                               value={newCity}
-                              onChange={(e) => setNewCity(e.target.value)}
-                              className="border-white/20 bg-white/20 text-sm text-white placeholder:text-white/60"
-                              onKeyDown={(e) =>
-                                e.key === "Enter" && handleAddCity()
-                              }
+                              onValueChange={(value) => {
+                                setNewCity(value);
+                                setPopoverOpen(false); // Close popover when a valid city is selected
+                              }}
+                              open={popoverOpen}
+                              setOpen={setPopoverOpen}
+                              trigger={({ value, disabled }) => (
+                                <Input
+                                  type="text"
+                                  placeholder="Enter city name"
+                                  value={value}
+                                  onFocus={() => setPopoverOpen(true)}
+                                  className="border-white/20 bg-white/20 text-sm text-white placeholder:text-white/60"
+                                  onKeyDown={(e) =>
+                                    e.key === "Enter" && handleAddCity()
+                                  }
+                                  disabled={disabled}
+                                />
+                              )}
                             />
                             <Button
                               onClick={handleAddCity}
@@ -353,7 +378,14 @@ export default function MastHead() {
                               onChange={(e) => setEmail(e.target.value)}
                               className="border-white/20 bg-white/20 text-sm text-white placeholder:text-white/60"
                             />
-                            <Button className="whitespace text-sm" onClick={() => insertWarmLead({ email, cities })}>
+                            <Button
+                              className="whitespace text-sm"
+                              onClick={() => {
+                                insertWarmLead({ email, cities, stateCode, country });
+                                setEmail("");
+                                setCities([]);
+                              }}
+                            >
                               <Mail className="mr-2 h-4 w-4" />
                               Get Booking Requests
                             </Button>
@@ -411,7 +443,7 @@ export default function MastHead() {
           {/* other  sections */}
           <OverviewRequestCards />
           {!isLg && (
-            <div className="items-center justify-center mx-2">
+            <div className="mx-2 items-center justify-center">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -434,15 +466,27 @@ export default function MastHead() {
                         Where are your properties located?
                       </label>
                       <div className="flex gap-2">
-                        <Input
-                          type="text"
-                          placeholder="Enter city name"
+                        <CityAutocomplete
                           value={newCity}
-                          onChange={(e) => setNewCity(e.target.value)}
-                          className="border-gray-900/20 bg-gray-900/20 text-sm text-gray-900 placeholder:text-gray-900/60"
-                          onKeyDown={(e) =>
-                            e.key === "Enter" && handleAddCity()
-                          }
+                          onValueChange={(value) => {
+                            setNewCity(value);
+                            setPopoverOpen(false); // Close popover when a valid city is selected
+                          }}
+                          open={popoverOpen}
+                          setOpen={setPopoverOpen}
+                          trigger={({ value, disabled }) => (
+                            <Input
+                              type="text"
+                              placeholder="Enter city name"
+                              value={value}
+                              onFocus={() => setPopoverOpen(true)}
+                              className="border-white/20 bg-white/20 text-sm text-white placeholder:text-white/60"
+                              onKeyDown={(e) =>
+                                e.key === "Enter" && handleAddCity()
+                              }
+                              disabled={disabled}
+                            />
+                          )}
                         />
                         <Button
                           onClick={handleAddCity}
@@ -493,7 +537,10 @@ export default function MastHead() {
                           onChange={(e) => setEmail(e.target.value)}
                           className="border-gray-900/20 bg-gray-900/20 text-sm text-gray-900 placeholder:text-gray-900/60"
                         />
-                        <Button className="whitespace text-sm" onClick={() => insertWarmLead({ email, cities })}>
+                        <Button
+                          className="whitespace text-sm"
+                          onClick={() => insertWarmLead({ email, cities, stateCode, country   })}
+                        >
                           <Mail className="mr-2 h-4 w-4" />
                           Get Booking Requests
                         </Button>

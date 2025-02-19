@@ -1,6 +1,10 @@
 {
   "crons": [
     {
+      "path": "/api/cron/sendWarmLeadsEmails",
+      "schedule": "*/10 * * * *"
+    },
+    {
       "path": "/api/sendFakeRequests",
       "schedule": "0 * * * *"
     },

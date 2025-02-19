@@ -1,7 +1,8 @@
 import { fakeRequests, properties } from "@/server/db/schema";
 import { eq, ne } from "drizzle-orm";
 import { db } from "@/server/db";
-
+import { cities } from "@/server/db/secondary-schema/cities";
+import { secondaryDb } from "@/server/db";
 import { generateFakeRequest } from "@/server/request-utils";
 
 function generateDateTimeInBetweenLast24HoursAndLast4Days() {
@@ -56,14 +57,21 @@ export default async function handler() {
     where: ne(properties.hostTeamId, 37),
   });
 
+  const warmLeadsLocations = await secondaryDb.select({
+    city: cities.name,
+    stateCode: cities.stateCode,
+    country: cities.country,
+  }).from(cities);
+
   if (!hostLocations) {
     console.log("No host locations found");
     return;
   }
 
   const uniqueCities = new Set(hostLocations.map((location) => location.city + ", " + location.stateCode + ", " + location.country));
-
-  for (const city of uniqueCities) {
+  const uniqueWarmLeadsCities = new Set(warmLeadsLocations.map((location) => location.city + ", " + location.stateCode + ", " + location.country));
+  const uniqueCitiesToGenerateRequestsFor = new Set([...uniqueCities, ...uniqueWarmLeadsCities]);
+  for (const city of uniqueCitiesToGenerateRequestsFor) {
 
     const cityLastSent = await db.query.fakeRequests.findFirst({
       columns: {

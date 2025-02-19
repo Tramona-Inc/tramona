@@ -32,7 +32,7 @@ import {
 } from "@/utils/payment-utils/paymentBreakdown";
 import { differenceInDays } from "date-fns";
 import { generateFakeUser } from "./server-utils";
-import { emailPMFromCityRequest } from "@/utils/outreach-utils";
+import { emailPMFromCityRequest, emailWarmLeadsFromCityRequest } from "@/utils/outreach-utils";
 
 export async function handleRequestSubmission(
   input: RequestInput,
@@ -84,14 +84,22 @@ export async function handleRequestSubmission(
       latLngPoint = createLatLngGISPoint({ lat, lng });
     }
 
-    //T < -------------- Trigger lambda function HERE  ------------------- >
-    await emailPMFromCityRequest({
+    // Send emails to property managers and warm leads
+    void emailPMFromCityRequest({
       requestLocation: input.location,
       requestedLocationLatLng: {
         lat: lat,
         lng: lng,
       },
       radius: input.radius,
+    });
+
+    void emailWarmLeadsFromCityRequest({
+      requestLocation: input.location,
+      requestedLocationLatLng: {
+        lat: lat,
+        lng: lng,
+      },
     });
 
     if (!radius || !latLngPoint) {

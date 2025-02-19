@@ -31,7 +31,7 @@ interface NeighborhoodType {
 
 export const outreachRouter = createTRPCRouter({
   insertWarmLead: publicProcedure
-    .input(z.object({ email: z.string(), cities: z.string().array() }))
+    .input(z.object({ email: z.string(), cities: z.string().array(), stateCode: z.string(), country: z.string() }))
     .mutation(async ({ input }) => {
       const warmLead = await secondaryDb.insert(warmLeads).values({ email: input.email }).returning();
       for (const city of input.cities) {
@@ -41,7 +41,7 @@ export const outreachRouter = createTRPCRouter({
           lat: location.lat,
           lng: location.lng,
         });
-        await secondaryDb.insert(cities).values({ warmLeadId: warmLead[0]!.id, name: city, latLngPoint: latLngPoint });
+        await secondaryDb.insert(cities).values({ warmLeadId: warmLead[0]!.id, name: city, stateCode: input.stateCode, country: input.country, latLngPoint: latLngPoint });
       }
     }),
   emailPMFromCityRequest: publicProcedure

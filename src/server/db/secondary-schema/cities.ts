@@ -12,6 +12,8 @@ export const cities = pgTable(
   {
     id: serial("id").primaryKey(),
     name: text("name"),
+    stateCode: text("state_code"),
+    country: text("country"),
     latLngPoint: geometry("lat_lng_point", {
       type: "point",
       mode: "xy",
