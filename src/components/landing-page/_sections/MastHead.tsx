@@ -29,14 +29,37 @@ import { Plus, X } from "lucide-react";
 import { api } from "@/utils/api";
 import { toast } from "@/components/ui/use-toast";
 import CityAutocomplete from "@/components/_common/CityAutocomplete";
-
+import { useForm, Controller } from "react-hook-form";
 interface Location {
   lat: number;
   lng: number;
   size: number;
   color: string;
 }
+type FormData = {
+  email: string;
+  cities: string[];
+  stateCode: string;
+  country: string;
+};
 export default function MastHead() {
+  const {
+    register,
+    control,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+    clearErrors,
+  } = useForm<FormData>({
+    defaultValues: {
+      email: "",
+      cities: [],
+      stateCode: "",
+      country: "",
+    },
+    mode: "onChange",
+  });
+
   const isXl = useIsXl();
   const isLg = useIsLg();
   const router = useRouter();
@@ -47,10 +70,8 @@ export default function MastHead() {
   const [hasPassedButtons, setHasPassedButtons] = useState(false);
   const [newCity, setNewCity] = useState("");
   const [cities, setCities] = useState<string[]>([]);
-  const [stateCode, setStateCode] = useState("");
-  const [country, setCountry] = useState("");
-  const [email, setEmail] = useState("");
   const [popoverOpen, setPopoverOpen] = useState(false);
+  const cityAutocompleteRef = useRef<HTMLInputElement>(null); // Create a ref
   const { mutate: insertWarmLead } = api.outreach.insertWarmLead.useMutation({
     onSuccess: () => {
       toast({
@@ -58,23 +79,38 @@ export default function MastHead() {
       });
     },
   });
-  const handleAddCity = () => {
-    if (newCity.trim() && !cities.includes(newCity)) {
-      const [city, stateCode, country] = newCity.split(",");
+  const handleAddCity = (selectedCity?: string) => {
+    let cityToAdd = newCity;
+    if (selectedCity) {
+      cityToAdd = selectedCity;
+    }
+    if (cityToAdd.trim() && !cities.includes(cityToAdd)) {
+      const [city, stateCode, country] = cityToAdd.split(",");
       if (city) {
         setCities([...cities, city]);
+        setValue("cities", [...cities, city]);
       }
       if (stateCode) {
-        setStateCode(stateCode);
+        setValue("stateCode", stateCode);
       }
       if (country) {
-        setCountry(country);
+        setValue("country", country);
       }
       setNewCity("");
       setPopoverOpen(false);
+      cityAutocompleteRef.current?.blur();
+      return false;
     }
   };
 
+  const onSubmit = (data: FormData) => {
+    insertWarmLead(data);
+    setCities([]);
+    setNewCity("");
+    setPopoverOpen(false);
+    clearErrors("email"); // Clear email errors on successful submit if any were previously shown
+    cityAutocompleteRef.current?.blur();
+  };
   const handleRemoveCity = (index: number) => {
     setCities(cities.filter((_, i) => i !== index));
   };
@@ -284,18 +320,21 @@ export default function MastHead() {
 
               {/* Right side - Newsletter Signup (Desktop) */}
               {isXl && (
-                <div className="items-center justify-center 2xl:pr-12">
+                <form
+                  onSubmit={handleSubmit(onSubmit)}
+                  className="items-center justify-center 2xl:pr-12"
+                >
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.2 }}
                     className="mt-6 w-full lg:mt-0 lg:w-[400px]"
                   >
-                    <div className="rounded-xl border border-white/20 bg-white/10 p-6 shadow-2xl backdrop-blur-md">
+                    <div className="rounded-xl border border-white/20 bg-white/10 p-5 shadow-2xl backdrop-blur-md">
                       <h3 className="mb-1 text-2xl font-semibold text-white">
                         Hey Hosts! 👋
                       </h3>
-                      <p className="mb-4 text-sm text-white/90">
+                      <p className="text-xs text-white/90">
                         Not ready to sign up? Enter your email below and we will
                         send you booking requests as they come in.
                       </p>
@@ -309,30 +348,36 @@ export default function MastHead() {
                           <div className="flex gap-2">
                             <CityAutocomplete
                               value={newCity}
-                              onValueChange={(value) => {
-                                setNewCity(value);
-                                setPopoverOpen(false); // Close popover when a valid city is selected
-                              }}
+                              onValueChange={(value) => setNewCity(value)}
                               open={popoverOpen}
                               setOpen={setPopoverOpen}
+                              //   onCitySelect={(city) => { // Add onCitySelect prop
+                              //   handleAddCity(city); // Call handleAddCity with selected city
+                              // }}
                               trigger={({ value, disabled }) => (
                                 <Input
+                                  // ref={cityAutocompleteRef}
                                   type="text"
                                   placeholder="Enter city name"
                                   value={value}
-                                  onFocus={() => setPopoverOpen(true)}
+                                  onChange={(e) => setNewCity(e.target.value)}
+                                  // onFocus={() => setPopoverOpen(true)}
                                   className="border-white/20 bg-white/20 text-sm text-white placeholder:text-white/60"
-                                  onKeyDown={(e) =>
-                                    e.key === "Enter" && handleAddCity()
-                                  }
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Enter") {
+                                      e.preventDefault();
+                                      handleAddCity();
+                                    }
+                                  }}
                                   disabled={disabled}
                                 />
                               )}
                             />
                             <Button
-                              onClick={handleAddCity}
+                              onClick={() => handleAddCity()}
                               variant="secondary"
                               size="icon"
+                              type="button"
                             >
                               <Plus className="h-4 w-4" />
                             </Button>
@@ -370,21 +415,42 @@ export default function MastHead() {
                           <label className="text-xs font-medium text-white">
                             Your email address
                           </label>
-                          <div className="flex gap-2">
-                            <Input
-                              type="email"
-                              placeholder="name@example.com"
-                              value={email}
-                              onChange={(e) => setEmail(e.target.value)}
-                              className="border-white/20 bg-white/20 text-sm text-white placeholder:text-white/60"
-                            />
+                          <div className="flex flex-col gap-2">
+                            {" "}
+                            {/* Changed to flex-col and gap-2 */}
+                            <div className="relative min-h-[60px]">
+                              {" "}
+                              {/* Add min-height container */}
+                              <Controller
+                                name="email"
+                                control={control}
+                                rules={{
+                                  required: "Email is required",
+                                  pattern: {
+                                    value:
+                                      /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+                                    message: "Invalid email format",
+                                  },
+                                }}
+                                render={({ field }) => (
+                                  <Input
+                                    {...field}
+                                    type="email"
+                                    placeholder="name@example.com"
+                                    className="border-white/20 bg-white/20 text-sm text-white placeholder:text-white/60"
+                                  />
+                                )}
+                              />
+                              {/* Position error absolutely within container */}
+                              {errors.email && (
+                                <p className="absolute bottom-[-5px] text-xs text-red-500">
+                                  {errors.email.message}
+                                </p>
+                              )}
+                            </div>
                             <Button
                               className="whitespace text-sm"
-                              onClick={() => {
-                                insertWarmLead({ email, cities, stateCode, country });
-                                setEmail("");
-                                setCities([]);
-                              }}
+                              type="submit"
                             >
                               <Mail className="mr-2 h-4 w-4" />
                               Get Booking Requests
@@ -394,7 +460,7 @@ export default function MastHead() {
                       </div>
                     </div>
                   </motion.div>
-                </div>
+                </form>
               )}
             </div>
           </div>
@@ -459,7 +525,7 @@ export default function MastHead() {
                     send you booking requests as they come in.
                   </p>
 
-                  <div className="space-y-4">
+                  <div className="">
                     {/* City Selection */}
                     <div className="space-y-2">
                       <label className="text-xs font-medium text-gray-900">
@@ -470,26 +536,32 @@ export default function MastHead() {
                           value={newCity}
                           onValueChange={(value) => {
                             setNewCity(value);
-                            setPopoverOpen(false); // Close popover when a valid city is selected
                           }}
                           open={popoverOpen}
                           setOpen={setPopoverOpen}
+                          // onCitySelect={(city) => { // Add onCitySelect prop
+                          //   handleAddCity(city); // Call handleAddCity with selected city
+                          // }}
                           trigger={({ value, disabled }) => (
                             <Input
+                              // ref={ref}
                               type="text"
                               placeholder="Enter city name"
                               value={value}
-                              onFocus={() => setPopoverOpen(true)}
-                              className="border-white/20 bg-white/20 text-sm text-white placeholder:text-white/60"
-                              onKeyDown={(e) =>
-                                e.key === "Enter" && handleAddCity()
-                              }
+                              // onFocus={() => setPopoverOpen(true)}
+                              className="border-gray-900/20 bg-white text-sm text-black placeholder:text-gray-900/60" // Modified classes
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                  e.preventDefault();
+                                  handleAddCity();
+                                }
+                              }}
                               disabled={disabled}
                             />
                           )}
                         />
                         <Button
-                          onClick={handleAddCity}
+                          onClick={() => handleAddCity()}
                           variant="secondary"
                           size="icon"
                         >
@@ -529,17 +601,31 @@ export default function MastHead() {
                       <label className="text-xs font-medium text-gray-900">
                         Your email address
                       </label>
-                      <div className="flex gap-2">
+                      <div className="flex flex-col gap-2">
+                        {" "}
+                        {/* Changed to flex-col and gap-2 */}
                         <Input
+                          {...register("email", {
+                            required: "Email is required",
+                            pattern: {
+                              value:
+                                /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+                              message: "Invalid email format",
+                            },
+                          })}
                           type="email"
                           placeholder="name@example.com"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
                           className="border-gray-900/20 bg-gray-900/20 text-sm text-gray-900 placeholder:text-gray-900/60"
                         />
+                        {errors.email && (
+                          <p className="text-xs text-red-500">
+                            {errors.email.message}
+                          </p>
+                        )}{" "}
+                        {/* text-xs and placed below */}
                         <Button
                           className="whitespace text-sm"
-                          onClick={() => insertWarmLead({ email, cities, stateCode, country   })}
+                          onClick={handleSubmit(onSubmit)} // Use handleSubmit here to trigger form validation and submission
                         >
                           <Mail className="mr-2 h-4 w-4" />
                           Get Booking Requests
