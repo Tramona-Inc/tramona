@@ -21,6 +21,7 @@ interface RequestOutreachEmailProps {
   numOfGuest?: number;
   notes?: string;
   maximumPerNightAmount?: number;
+  requestDates?: string;
 }
 
 export default function RequestOutreachEmail({
@@ -29,6 +30,7 @@ export default function RequestOutreachEmail({
   numOfGuest = 3,
   notes,
   maximumPerNightAmount = 300,
+  requestDates = "October 26-27",
 }: RequestOutreachEmailProps) {
   const isProduction = process.env.NODE_ENV === "production";
   const baseUrl = isProduction
@@ -37,16 +39,12 @@ export default function RequestOutreachEmail({
 
   return (
     <Layout
-      title_preview={`Booking Request for Your Property in ${requestLocation}`}
+      title_preview={`Booking request for ${requestLocation}`}
     >
       <Container style={container}>
-        <Heading style={h1}>New Booking Request</Heading>
-        <Text style={{ ...text, fontWeight: "bold" }}>
-          Booking request for your empty night!
-        </Text>
+        <Heading style={h1}>{`New Booking Request for ${requestLocation}`}</Heading>
         <Text style={text}>
-          We have travelers seeking accommodations in{" "}
-          <strong>{requestLocation}</strong> for their upcoming trip.
+          We have a booking request for <strong>{requestLocation}</strong>, for <strong>{requestDates}</strong>.
         </Text>
         <Section style={detailsContainer}>
           <Text style={detailsHeading}>Request Details:</Text>
@@ -60,11 +58,10 @@ export default function RequestOutreachEmail({
               : "N/A"}
           </Text>
           <Text style={detailsText}>
-            <strong>Number of guests:</strong> {numOfGuest}{" "}
-            {plural(numOfGuest, "guest")}
+            <strong>Number of guests:</strong> {numOfGuest} {plural(numOfGuest, "guest")}
           </Text>
           <Text style={{ ...detailsText, ...totalBudgetStyle }}>
-            <strong>Potential earnings for this empty night:</strong>{" "}
+            <strong>Potential earnings for your empty night:</strong>{" "}
             {requestAmount ? formatCurrency(requestAmount / 100) : "N/A"}
           </Text>
         </Section>
@@ -74,20 +71,14 @@ export default function RequestOutreachEmail({
             <Text style={notesText}>&apos;{notes}&apos;</Text>
           </Section>
         )}
-        <Text style={text}>What is Tramona?</Text>
-        <Text style={numberedListText}>
-          1. Tramona is the only OTA built to fill your empty nights
-        </Text>
-        <Text style={numberedListText}>
-          2. All bookings come with $50,000 of protection.
-        </Text>
-        <Text style={numberedListText}>
-          3. Sign up instantly with our direct Airbnb connection.
-        </Text>
+        <Text style={{ ...text, fontWeight: 'bold', fontSize: '18px' }}>What is Tramona?</Text>
+        <Text style={numberedListText}>1. Tramona is the only OTA built to fill your empty nights</Text>
+        <Text style={numberedListText}>2. All bookings come with $50,000 of protection.</Text>
+        <Text style={numberedListText}>3. Sign up instantly, with our direct Airbnb connection. This auto connects your calendars, pricing, properties and anything else on Airbnb</Text>
+        <Text style={numberedListText}>4. Complete host side customization.</Text>
 
-        <Text style={signUpText}>
-          If you want this booking, you need to sign up to claim it!
-        </Text>
+
+        <Text style={signUpText}>If you want this booking, or more like it. Sign up now to book your empty night.</Text>
 
         <CustomButton
           title="Review Request & Accept Booking"
@@ -154,10 +145,10 @@ const detailsText = {
 };
 
 const totalBudgetStyle = {
-  fontSize: "20px", // Make it bigger
-  textAlign: "center" as const, // Center align
-  marginTop: "20px", // Add some spacing
-  fontWeight: "bold", // Make it stand out
+  fontSize: "20px",
+  textAlign: "center" as const,
+  marginTop: "20px",
+  fontWeight: "bold",
 };
 
 const notesContainer = {
@@ -195,8 +186,8 @@ const numberedListText = {
   fontSize: "16px",
   lineHeight: "24px",
   margin: "8px 0",
-  textAlign: "left" as const, // or center if you prefer
-  paddingLeft: "20px", // Indent slightly for list appearance
+  textAlign: "left" as const,
+  paddingLeft: "20px",
 };
 
 const signUpText = {
@@ -205,5 +196,5 @@ const signUpText = {
   lineHeight: "24px",
   margin: "16px 0",
   textAlign: "center" as const,
-  fontWeight: "bold", // Make it stand out
+  fontWeight: "bold",
 };

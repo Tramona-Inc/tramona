@@ -75,7 +75,8 @@ export default function MastHead() {
   const { mutate: insertWarmLead } = api.outreach.insertWarmLead.useMutation({
     onSuccess: () => {
       toast({
-        title: "Warm lead inserted successfully",
+        title: "Success!",
+        description: "We'll send you booking requests as they come in!",
       });
     },
   });
@@ -106,6 +107,7 @@ export default function MastHead() {
   const onSubmit = (data: FormData) => {
     insertWarmLead(data);
     setCities([]);
+    setValue("email", "");
     setNewCity("");
     setPopoverOpen(false);
     clearErrors("email"); // Clear email errors on successful submit if any were previously shown
@@ -351,17 +353,13 @@ export default function MastHead() {
                               onValueChange={(value) => setNewCity(value)}
                               open={popoverOpen}
                               setOpen={setPopoverOpen}
-                              //   onCitySelect={(city) => { // Add onCitySelect prop
-                              //   handleAddCity(city); // Call handleAddCity with selected city
-                              // }}
                               trigger={({ value, disabled }) => (
                                 <Input
-                                  // ref={cityAutocompleteRef}
+                                  ref={cityAutocompleteRef}
                                   type="text"
                                   placeholder="Enter city name"
                                   value={value}
                                   onChange={(e) => setNewCity(e.target.value)}
-                                  // onFocus={() => setPopoverOpen(true)}
                                   className="border-white/20 bg-white/20 text-sm text-white placeholder:text-white/60"
                                   onKeyDown={(e) => {
                                     if (e.key === "Enter") {
@@ -384,7 +382,7 @@ export default function MastHead() {
                           </div>
 
                           {/* City List */}
-                          <div className="flex max-h-[80px] min-h-[40px] flex-wrap gap-2 overflow-y-hidden">
+                          <div className="flex max-h-[40px] min-h-[40px] flex-wrap gap-2 overflow-y-auto">
                             <AnimatePresence>
                               {cities.map((city, index) => (
                                 <motion.div
@@ -505,10 +503,10 @@ export default function MastHead() {
           {activeTab === "search" ? <UnclaimedMap /> : <NameYourPriceSection />}
         </div>
 
-        <div className="mx-auto mt-12 flex max-w-8xl flex-col items-center gap-y-20 lg:gap-y-24">
+        <div className="mx-auto mt-12 flex flex-col items-center gap-y-20 lg:gap-y-24">
           {/* other  sections */}
           <OverviewRequestCards />
-          {!isLg && (
+          {!isXl && (
             <div className="mx-2 items-center justify-center">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -539,16 +537,13 @@ export default function MastHead() {
                           }}
                           open={popoverOpen}
                           setOpen={setPopoverOpen}
-                          // onCitySelect={(city) => { // Add onCitySelect prop
-                          //   handleAddCity(city); // Call handleAddCity with selected city
-                          // }}
                           trigger={({ value, disabled }) => (
                             <Input
-                              // ref={ref}
+                              ref={cityAutocompleteRef}
                               type="text"
                               placeholder="Enter city name"
                               value={value}
-                              // onFocus={() => setPopoverOpen(true)}
+                              onChange={(e) => setNewCity(e.target.value)}
                               className="border-gray-900/20 bg-white text-sm text-black placeholder:text-gray-900/60" // Modified classes
                               onKeyDown={(e) => {
                                 if (e.key === "Enter") {
@@ -564,13 +559,14 @@ export default function MastHead() {
                           onClick={() => handleAddCity()}
                           variant="secondary"
                           size="icon"
+                          type="button"
                         >
                           <Plus className="h-4 w-4" />
                         </Button>
                       </div>
 
                       {/* City List */}
-                      <div className="flex max-h-[80px] min-h-[40px] flex-wrap gap-2 overflow-y-hidden">
+                      <div className="flex max-h-[40px] min-h-[40px] flex-wrap gap-2 overflow-y-auto">
                         <AnimatePresence>
                           {cities.map((city, index) => (
                             <motion.div
@@ -604,24 +600,33 @@ export default function MastHead() {
                       <div className="flex flex-col gap-2">
                         {" "}
                         {/* Changed to flex-col and gap-2 */}
-                        <Input
-                          {...register("email", {
-                            required: "Email is required",
-                            pattern: {
-                              value:
-                                /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-                              message: "Invalid email format",
-                            },
-                          })}
-                          type="email"
-                          placeholder="name@example.com"
-                          className="border-gray-900/20 bg-gray-900/20 text-sm text-gray-900 placeholder:text-gray-900/60"
-                        />
-                        {errors.email && (
-                          <p className="text-xs text-red-500">
-                            {errors.email.message}
-                          </p>
-                        )}{" "}
+                        <div className="relative min-h-[60px]">
+                          <Controller
+                            name="email"
+                            control={control}
+                            rules={{
+                              required: "Email is required",
+                              pattern: {
+                                value:
+                                  /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+                                message: "Invalid email format",
+                              },
+                            }}
+                            render={({ field }) => (
+                              <Input
+                                {...field}
+                                type="email"
+                                placeholder="name@example.com"
+                                className="border-gray-900/20 bg-white text-sm text-black placeholder:text-gray-900/60" // Modified classes
+                              />
+                            )}
+                          />
+                          {errors.email && (
+                            <p className="text-xs text-red-500">
+                              {errors.email.message}
+                            </p>
+                          )}
+                        </div>
                         {/* text-xs and placed below */}
                         <Button
                           className="whitespace text-sm"
