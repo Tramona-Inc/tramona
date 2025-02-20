@@ -14,7 +14,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { ChevronRight, HelpCircle, Mail } from "lucide-react";
+import { ChevronRight, HelpCircle } from "lucide-react";
 import OverviewRequestCards from "./name-your-price/OverviewRequestCards";
 import HowTramonaWorks from "./name-your-price/HowTramonaWorks";
 import { TestimonialCarousel } from "./testimonials/TestimonialCarousel";
@@ -22,44 +22,10 @@ import { landingPageTestimonals } from "./testimonials/testimonials-data";
 import UnclaimedMap from "@/components/unclaimed-offers/UnclaimedMap";
 import { useIsLg } from "@/utils/utils";
 import { useIsXl } from "@/utils/utils";
-import { Input } from "@/components/ui/input";
-import { motion, AnimatePresence } from "framer-motion";
-import { Badge } from "@/components/ui/badge";
-import { Plus, X } from "lucide-react";
-import { api } from "@/utils/api";
-import { toast } from "@/components/ui/use-toast";
-import CityAutocomplete from "@/components/_common/CityAutocomplete";
-import { useForm, Controller } from "react-hook-form";
 import HeyHosts from "./hey-hosts/HeyHosts";
-interface Location {
-  lat: number;
-  lng: number;
-  size: number;
-  color: string;
-}
-type FormData = {
-  email: string;
-  cities: string[];
-  stateCode: string;
-  country: string;
-};
+
 export default function MastHead() {
-  const {
-    register,
-    control,
-    handleSubmit,
-    formState: { errors },
-    setValue,
-    clearErrors,
-  } = useForm<FormData>({
-    defaultValues: {
-      email: "",
-      cities: [],
-      stateCode: "",
-      country: "",
-    },
-    mode: "onChange",
-  });
+
 
   const isXl = useIsXl();
   const isLg = useIsLg();
@@ -69,54 +35,6 @@ export default function MastHead() {
   const [isScrolled, setIsScrolled] = useState(false);
   const toggleSectionRef = useRef<HTMLDivElement>(null);
   const [hasPassedButtons, setHasPassedButtons] = useState(false);
-  const [newCity, setNewCity] = useState("");
-  const [cities, setCities] = useState<string[]>([]);
-  const [popoverOpen, setPopoverOpen] = useState(false);
-  const cityAutocompleteRef = useRef<HTMLInputElement>(null); // Create a ref
-  const { mutate: insertWarmLead } = api.outreach.insertWarmLead.useMutation({
-    onSuccess: () => {
-      toast({
-        title: "Success!",
-        description: "We'll send you booking requests as they come in!",
-      });
-    },
-  });
-  const handleAddCity = (selectedCity?: string) => {
-    let cityToAdd = newCity;
-    if (selectedCity) {
-      cityToAdd = selectedCity;
-    }
-    if (cityToAdd.trim() && !cities.includes(cityToAdd)) {
-      const [city, stateCode, country] = cityToAdd.split(",");
-      if (city) {
-        setCities([...cities, city]);
-        setValue("cities", [...cities, city]);
-      }
-      if (stateCode) {
-        setValue("stateCode", stateCode);
-      }
-      if (country) {
-        setValue("country", country);
-      }
-      setNewCity("");
-      setPopoverOpen(false);
-      cityAutocompleteRef.current?.blur();
-      return false;
-    }
-  };
-
-  const onSubmit = (data: FormData) => {
-    insertWarmLead(data);
-    setCities([]);
-    setValue("email", "");
-    setNewCity("");
-    setPopoverOpen(false);
-    clearErrors("email"); // Clear email errors on successful submit if any were previously shown
-    cityAutocompleteRef.current?.blur();
-  };
-  const handleRemoveCity = (index: number) => {
-    setCities(cities.filter((_, i) => i !== index));
-  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -500,8 +418,6 @@ export default function MastHead() {
         <div className="mx-auto mt-12 flex flex-col items-center gap-y-20 lg:gap-y-24">
           {/* other  sections */}
           <OverviewRequestCards />
-
-
 
           <HowTramonaWorks className="max-w-6xl" />
           <div className="mx-0 flex max-w-full justify-center space-y-4 px-4 lg:mx-4 lg:flex lg:space-y-8">
