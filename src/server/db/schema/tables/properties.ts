@@ -498,7 +498,7 @@ export const bookedDates = pgTable(
 export const propertyDiscounts = pgTable(
   "property_discounts",
   {
-    propertyId: integer("property_id").references(() => properties.id, { onDelete: "cascade" }),
+    propertyId: integer("property_id").primaryKey().references(() => properties.id, { onDelete: "cascade" }),
     weekdayDiscount: integer("weekday_discount").default(0).notNull(),
     weekendDiscount: integer("weekend_discount").default(0).notNull(),
     mondayDiscount: integer("monday_discount").default(0).notNull(),

@@ -10,25 +10,56 @@ import { errorToast } from "@/utils/toasts";
 import { Property } from "@/server/db/schema/tables/properties";
 import { cn } from "@/utils/utils";
 import { useState, useEffect } from "react";
+import { PropertyDiscounts } from "@/server/db/schema/tables/properties";
+import { Skeleton } from "@/components/ui/skeleton";
 
-export default function DiscountPreferencesSection({ property }: { property: Property }) {
+export default function DiscountPreferencesSection({
+  property,
+  discountInfo,
+  isLoadingDiscountInfo,
+}: {
+  property: Property;
+  discountInfo: PropertyDiscounts | undefined;
+  isLoadingDiscountInfo: boolean;
+}) {
   const { currentHostTeamId } = useHostTeamStore();
-  const { data: discountInfo, isLoading: isLoadingDiscountInfo } = api.properties.getDiscountPreferences.useQuery({
-    propertyId: property.id,
-  });
-  const { mutateAsync: updateDiscounts } = api.properties.updateDiscounts.useMutation();
+
+  const { mutateAsync: updateDiscounts } =
+    api.properties.updateDiscounts.useMutation();
 
   const [biddingOpen, setBiddingOpen] = useState(false);
-  const [weekdayDiscount, setWeekdayDiscount] = useState(discountInfo?.weekdayDiscount ?? 0);
-  const [weekendDiscount, setWeekendDiscount] = useState(discountInfo?.weekendDiscount ?? 0);
-  const [customizeDaily, setCustomizeDaily] = useState(discountInfo?.isDailyDiscountsCustomized ?? false);
-  const [mondayDiscount, setMondayDiscount] = useState(discountInfo?.mondayDiscount ?? 0);
-  const [tuesdayDiscount, setTuesdayDiscount] = useState(discountInfo?.tuesdayDiscount ?? 0);
-  const [wednesdayDiscount, setWednesdayDiscount] = useState(discountInfo?.wednesdayDiscount ?? 0);
-  const [thursdayDiscount, setThursdayDiscount] = useState(discountInfo?.thursdayDiscount ?? 0);
-  const [fridayDiscount, setFridayDiscount] = useState(discountInfo?.fridayDiscount ?? 0);
-  const [saturdayDiscount, setSaturdayDiscount] = useState(discountInfo?.saturdayDiscount ?? 0);
-  const [sundayDiscount, setSundayDiscount] = useState(discountInfo?.sundayDiscount ?? 0);
+  const [weekdayDiscount, setWeekdayDiscount] = useState(
+    discountInfo?.weekdayDiscount ?? 0,
+  );
+  const [weekendDiscount, setWeekendDiscount] = useState(
+    discountInfo?.weekendDiscount ?? 0,
+  );
+  const [customizeDaily, setCustomizeDaily] = useState(
+    discountInfo?.isDailyDiscountsCustomized ?? false,
+  );
+  const [mondayDiscount, setMondayDiscount] = useState(
+    discountInfo?.mondayDiscount ?? 0,
+  );
+  const [tuesdayDiscount, setTuesdayDiscount] = useState(
+    discountInfo?.tuesdayDiscount ?? 0,
+  );
+  const [wednesdayDiscount, setWednesdayDiscount] = useState(
+    discountInfo?.wednesdayDiscount ?? 0,
+  );
+  const [thursdayDiscount, setThursdayDiscount] = useState(
+    discountInfo?.thursdayDiscount ?? 0,
+  );
+  const [fridayDiscount, setFridayDiscount] = useState(
+    discountInfo?.fridayDiscount ?? 0,
+  );
+  const [saturdayDiscount, setSaturdayDiscount] = useState(
+    discountInfo?.saturdayDiscount ?? 0,
+  );
+  const [sundayDiscount, setSundayDiscount] = useState(
+    discountInfo?.sundayDiscount ?? 0,
+  );
+
+  const showLoading = biddingOpen && isLoadingDiscountInfo;
 
   useEffect(() => {
     if (discountInfo) {
@@ -75,11 +106,16 @@ export default function DiscountPreferencesSection({ property }: { property: Pro
 
   const handleCustomizeDailyChange = async (checked: boolean) => {
     setCustomizeDaily(checked);
+    setWeekdayDiscount(0);
+    setWeekendDiscount(0);
     try {
-      await updateDiscounts({ // Call the new mutation for switch
+      await updateDiscounts({
+        // Call the new mutation for switch
         updatedDiscounts: {
           propertyId: property.id,
           isDailyDiscountsCustomized: checked,
+          weekdayDiscount: 0,
+          weekendDiscount: 0,
         },
         currentHostTeamId: currentHostTeamId!,
       });
@@ -93,7 +129,6 @@ export default function DiscountPreferencesSection({ property }: { property: Pro
       errorToast();
     }
   };
-
 
   const handleSave = async () => {
     try {
@@ -129,22 +164,61 @@ export default function DiscountPreferencesSection({ property }: { property: Pro
     sunday: sundayDiscount,
   };
 
-  const mutedClasses = customizeDaily ? "opacity-50 text-gray-500 cursor-not-allowed" : "";
+  const mutedClasses = customizeDaily
+    ? "opacity-50 text-gray-500 cursor-not-allowed"
+    : "";
 
+  const SliderSkeleton = () => (
+    <div className="space-y-2">
+      <Skeleton className="h-4 w-[120px]" />
+      <Skeleton className="h-8 rounded-full" />
+    </div>
+  );
 
-  if (isLoadingDiscountInfo) {
-    return <div>Loading...</div>;
+  if (showLoading) {
+    return (
+      <div className="rounded-lg border">
+        <CalendarSettingsDropdown
+          title="Discount Preferences"
+          description="Loading settings..."
+          open={biddingOpen}
+          setOpen={setBiddingOpen}
+        />
+        <div className="p-6">
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <SliderSkeleton />
+              <SliderSkeleton />
+            </div>
+            <div className="flex items-center justify-between">
+              <Skeleton className="h-4 w-[160px]" />
+              <Skeleton className="h-6 w-11 rounded-full" />
+            </div>
+            <Skeleton className="h-10 w-full" />
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="rounded-lg border">
-      <CalendarSettingsDropdown title="Discount Preferences" description="Control the minimum price guests can offer." open={biddingOpen} setOpen={setBiddingOpen} />
+      <CalendarSettingsDropdown
+        title="Discount Preferences"
+        description="Control the minimum price guests can offer."
+        open={biddingOpen}
+        setOpen={setBiddingOpen}
+      />
 
-      <div className={`overflow-hidden transition-all duration-300 ease-in-out ${biddingOpen ? "max-h-[1000px] p-6 opacity-100" : "max-h-0 opacity-0"}`}>
+      <div
+        className={`overflow-hidden transition-all duration-300 ease-in-out ${biddingOpen ? "max-h-[1000px] p-6 opacity-100" : "max-h-0 opacity-0"}`}
+      >
         <div className="space-y-6">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div className="space-y-2">
-              <Label className={cn(customizeDaily && mutedClasses)}>Weekday Discount ({weekdayDiscount}%)</Label>
+              <Label className={cn(customizeDaily && mutedClasses)}>
+                Weekday Discount ({weekdayDiscount}%)
+              </Label>
               <Slider
                 value={[weekdayDiscount]}
                 onValueChange={([value]) => setWeekdayDiscount(value ?? 0)}
@@ -155,7 +229,9 @@ export default function DiscountPreferencesSection({ property }: { property: Pro
               />
             </div>
             <div className="space-y-2">
-              <Label className={cn(customizeDaily && mutedClasses)}>Weekend Discount ({weekendDiscount}%)</Label>
+              <Label className={cn(customizeDaily && mutedClasses)}>
+                Weekend Discount ({weekendDiscount}%)
+              </Label>
               <Slider
                 value={[weekendDiscount]}
                 onValueChange={([value]) => setWeekendDiscount(value ?? 0)}
@@ -169,19 +245,30 @@ export default function DiscountPreferencesSection({ property }: { property: Pro
 
           <div className="flex items-center justify-between">
             <Label>
-              {customizeDaily ? "Customize per day (Overrides Weekday/Weekend)" : "Customize per day"} {/* Clearer Label */}
+              {customizeDaily
+                ? "Customize per day (Overrides Weekday/Weekend)"
+                : "Customize per day"}{" "}
+              {/* Clearer Label */}
             </Label>
-            <Switch checked={customizeDaily} onCheckedChange={handleCustomizeDailyChange} /> {/* Use separate handler */}
+            <Switch
+              checked={customizeDaily}
+              onCheckedChange={handleCustomizeDailyChange}
+            />{" "}
+            {/* Use separate handler */}
           </div>
 
           {customizeDaily && (
             <div className="grid grid-cols-1 gap-6 pt-4 md:grid-cols-2">
               {Object.entries(dailyDiscountsConfig).map(([day, discount]) => (
                 <div key={day} className="space-y-2">
-                  <Label className="capitalize">{day} ({discount}%)</Label>
+                  <Label className="capitalize">
+                    {day} ({discount}%)
+                  </Label>
                   <Slider
                     value={[discount]}
-                    onValueChange={([value]) => handleDailyDiscountChange(day, value ?? 0)}
+                    onValueChange={([value]) =>
+                      handleDailyDiscountChange(day, value ?? 0)
+                    }
                     max={50}
                     step={1}
                   />
@@ -190,7 +277,9 @@ export default function DiscountPreferencesSection({ property }: { property: Pro
             </div>
           )}
 
-          <Button className="w-full" onClick={handleSave}> {/* Disable Save when customizeDaily is on, if that's desired behavior */}
+          <Button className="w-full" onClick={handleSave}>
+            {" "}
+            {/* Disable Save when customizeDaily is on, if that's desired behavior */}
             Save Settings
           </Button>
         </div>

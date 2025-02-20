@@ -32,7 +32,7 @@ export default function HostOverview() {
 
   const [open, setOpen] = useState(true);
 
-  const { mutateAsync: insertDiscountFromHostOverview } = api.properties.insertDiscountFromHostOverview.useMutation();
+  const { mutateAsync: insertDiscountFromHostOverview } = api.properties.insertAndUpdateDiscountForWholeHostTeam.useMutation();
   const [weekdayDiscount, setWeekdayDiscount] = useState(0);
   const [weekendDiscount, setWeekendDiscount] = useState(0);
   const [customizeDaily, setCustomizeDaily] = useState(false);
@@ -74,6 +74,8 @@ export default function HostOverview() {
 
   const handleCustomizeDailyChange = async (checked: boolean) => {
     setCustomizeDaily(checked);
+    setWeekdayDiscount(0);
+    setWeekendDiscount(0);
     try {
       localStorage.setItem("discountFields", JSON.stringify({
         ...JSON.parse(localStorage.getItem("discountFields") ?? "{}") as Record<string, any>,
@@ -82,6 +84,8 @@ export default function HostOverview() {
       await insertDiscountFromHostOverview({
         updatedDiscounts: {
           isDailyDiscountsCustomized: checked,
+          weekdayDiscount: 0,
+          weekendDiscount: 0,
         },
         currentHostTeamId: currentHostTeamId!,
       });
