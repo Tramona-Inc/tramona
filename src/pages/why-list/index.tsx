@@ -698,9 +698,9 @@ const Features2 = () => {
 
         {/* Third Row: Image on left, text on right */}
         <div className="mx-auto flex w-full max-w-4xl flex-col items-center gap-x-16 gap-y-4 px-6 text-center sm:flex-row sm:text-left">
-          <div className="relative h-40 w-[280px] flex-shrink-0 overflow-hidden rounded-lg bg-gray-200 shadow-md">
+          <div className="relative h-40 w-72 flex-shrink-0 overflow-hidden rounded-lg bg-gray-200 shadow-md">
             <Image
-              src="/assets/images/why-list/Why-list-Cal.png"
+              src="/assets/images/why-list/Why-list-cal.png"
               objectFit="contain"
               layout="fill"
               alt="Customized Pricing"
