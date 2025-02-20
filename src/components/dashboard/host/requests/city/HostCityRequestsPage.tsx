@@ -11,7 +11,7 @@ import PastOfferWithdrawDialog from "./PastOfferWithdrawDialog";
 import CityRequestSection from "./CityRequestSection";
 import OffersSentSection from "./OffersSentSection";
 import NoRequestEmptyState from "../NoRequestEmptyState";
-
+import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 export default function HostCityRequestsPage() {
   const { toast } = useToast();
   const [propertyPrices, setPropertyPrices] = useState<Record<number, string>>(
@@ -20,6 +20,9 @@ export default function HostCityRequestsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const router = useRouter();
   const { city, option } = router.query;
+
+  const { currentHostTeamId } = useHostTeamStore();
+
 
   const [selectedRequest, setSelectedRequest] =
     useState<HostDashboardRequest | null>(null);
@@ -50,6 +53,31 @@ export default function HostCityRequestsPage() {
       },
     });
 
+    const { data: separatedData, isLoading: isRequestsLoading } =
+    api.properties.getHostPropertiesWithRequests.useQuery(
+      {
+        currentHostTeamId: Number(currentHostTeamId!),
+      },
+      {
+        enabled: !!currentHostTeamId,
+      },
+    );
+
+
+  const { normal, other } = separatedData ?? { normal: [], other: [] };
+  const noNormalRequests = normal.length === 0;
+  const hasOtherRequests = other.length > 0;
+  const completelyEmpty = noNormalRequests && other.length === 0;
+
+  // useEffect(() => {
+  //   if (separatedData) {
+  //     setProperties(separatedData.normal);
+  //   }
+  // }, [separatedData]);
+
+  console.log(normal);
+  console.log(other);
+
   return (
     <div>
       {option === "normal" ? (
@@ -57,6 +85,8 @@ export default function HostCityRequestsPage() {
           setDialogOpen={setDialogOpen}
           setSelectedRequest={setSelectedRequest}
           setProperties={setProperties}
+          separatedData={separatedData}
+          isRequestsLoading={isRequestsLoading}
         />
       ) : option === "sent" ? (
         <OffersSentSection
@@ -69,6 +99,8 @@ export default function HostCityRequestsPage() {
           setDialogOpen={setDialogOpen}
           setSelectedRequest={setSelectedRequest}
           setProperties={setProperties}
+          separatedData={separatedData}
+          isRequestsLoading={isRequestsLoading}
         />
       ) : (
         <NoRequestEmptyState />

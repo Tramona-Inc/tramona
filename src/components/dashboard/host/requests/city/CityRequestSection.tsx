@@ -18,12 +18,16 @@ interface CityRequestSectionProps {
   setProperties: React.Dispatch<
     React.SetStateAction<({ taxAvailable: boolean } & Property)[] | null>
   >;
+  separatedData: SeparatedData | undefined;
+  isRequestsLoading: boolean;
 }
 
 const CityRequestSection: React.FC<CityRequestSectionProps> = ({
   setDialogOpen,
   setSelectedRequest,
   setProperties,
+  separatedData,
+  isRequestsLoading,
 }) => {
   const router = useRouter();
   const { query } = useRouter(); // Get query from router
@@ -40,29 +44,11 @@ const CityRequestSection: React.FC<CityRequestSectionProps> = ({
 
   const priceRestriction = option === "other";
 
-  const { data: separatedData, isLoading: isRequestsLoading } =
-    api.properties.getHostPropertiesWithRequests.useQuery(
-      {
-        currentHostTeamId: Number(currentHostTeamId!),
-        city: city,
-      },
-      {
-        enabled: !!currentHostTeamId,
-        // onSuccess: (fetchedProperties) => { // fetchedProperties is now SeparatedData
-        //   setSeparatedData(fetchedProperties); // Directly set SeparatedData
-        // },
-        // onError: () => {
-        //   // Handle error if needed, perhaps set an error state
-        // },
-      },
-    );
-
 
   const { normal, other } = separatedData ?? { normal: [], other: [] };
   const noNormalRequests = normal.length === 0;
   const hasOtherRequests = other.length > 0;
   const completelyEmpty = noNormalRequests && other.length === 0;
-
 
   const requestsWithProperties = priceRestriction
     ? separatedData?.other
