@@ -131,10 +131,13 @@ export function ReferralCodeForm() {
 function SuccessSlide({
   ownerPromise,
 }: {
-  ownerPromise: Promise<{ name: string; image: string | null }>;
+  ownerPromise: Promise<{
+    firstName: string;
+    image: string | null;
+  }>;
 }) {
   const [owner, setOwner] = useState<{
-    name: string;
+    firstName: string;
     image: string | null;
   } | null>(null);
 
@@ -149,12 +152,12 @@ function SuccessSlide({
       <DialogHeader className="flex flex-col items-center gap-2 sm:flex-row sm:items-start">
         <UserAvatar
           size="lg"
-          name={owner.name}
+          name={owner.firstName}
           email={null}
           image={owner.image}
         />
         <div className="flex-1">
-          <DialogTitle>Successfully referred by {owner.name}</DialogTitle>
+          <DialogTitle>Successfully referred by {owner.firstName}</DialogTitle>
           <DialogDescription>
             They will earn a profit every time you book on Tramona!
           </DialogDescription>

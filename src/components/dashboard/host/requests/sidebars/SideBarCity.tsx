@@ -10,6 +10,7 @@ import {
 } from "@/server/server-utils";
 import { useRouter } from "next/router";
 import React from "react";
+import OnlyOtherRequestState from "../city/OnlyOtherRequestState";
 
 interface SidebarCityProps {
   selectedOption: "normal" | "other" | "sent";
@@ -68,8 +69,14 @@ const SidebarCity = React.memo(function SidebarCity({
     );
   }
 
-  if (displayedData.length < 1 && !isLoading) {
-    return <EmptyRequestState />;
+  const { normal, other } = separatedData ?? { normal: [], other: [] };
+  const noNormalRequests = normal.length === 0;
+  const hasOtherRequests = other.length > 0;
+  const completelyEmpty = noNormalRequests && other.length === 0;
+
+  if (!isLoading) {
+    if (completelyEmpty) return <EmptyRequestState />;
+    if (noNormalRequests && hasOtherRequests) return <EmptyRequestState />;
   }
 
   if (selectedOption === "sent") {

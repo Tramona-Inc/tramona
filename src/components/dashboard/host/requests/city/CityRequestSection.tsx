@@ -10,7 +10,8 @@ import { useState, useMemo } from "react";
 import { useHostTeamStore } from "@/utils/store/hostTeamStore"; // Import store
 import NoRequestEmptyState from "../NoRequestEmptyState";
 import PaginationButtons from "@/components/_common/PaginationButtons";
-
+import OnlyOtherRequestState from "./OnlyOtherRequestState";
+import { SeparatedData } from "@/server/server-utils";
 interface CityRequestSectionProps {
   setDialogOpen: (open: boolean) => void;
   setSelectedRequest: (request: HostDashboardRequest | null) => void;
@@ -36,9 +37,6 @@ const CityRequestSection: React.FC<CityRequestSectionProps> = ({
     };
   }, [query.city, query.option]);
 
-  // const [separatedData, setSeparatedData] = useState<SeparatedData | undefined>(
-  //   undefined,
-  // );
 
   const priceRestriction = option === "other";
 
@@ -59,13 +57,25 @@ const CityRequestSection: React.FC<CityRequestSectionProps> = ({
       },
     );
 
+
+  const { normal, other } = separatedData ?? { normal: [], other: [] };
+  const noNormalRequests = normal.length === 0;
+  const hasOtherRequests = other.length > 0;
+  const completelyEmpty = noNormalRequests && other.length === 0;
+
+
   const requestsWithProperties = priceRestriction
     ? separatedData?.other
     : separatedData?.normal;
 
+  console.log(requestsWithProperties);
+
   const cityRequestsData = requestsWithProperties?.find((p) => p.city === city);
+  console.log(cityRequestsData);
 
   const currentCityRequests = cityRequestsData?.requests;
+
+  console.log(currentCityRequests);
 
   //pagination logic begins (used for PaginationButtons.tsx)
   // todo: put all logic into PaginationButtons.tsx
@@ -84,9 +94,12 @@ const CityRequestSection: React.FC<CityRequestSectionProps> = ({
 
   if (
     isRequestsLoading ||
-    !router.isReady ||
-    currentCityRequests === undefined
-  ) {
+    !router.isReady
+    // currentCityRequests === undefined
+  )
+
+  {
+    console.log("loading");
     return (
       <div className="w-full">
         <RequestCardLoadingGrid />
@@ -117,15 +130,20 @@ const CityRequestSection: React.FC<CityRequestSectionProps> = ({
           ))}
         </div>
       ) : (
-        <NoRequestEmptyState />
+        <>
+          {completelyEmpty && <NoRequestEmptyState />}
+          {noNormalRequests && hasOtherRequests && <OnlyOtherRequestState />}
+        </>
       )}
-      <PaginationButtons
-        items={currentCityRequests}
-        setCurrentPage={setCurrentPage}
-        currentPage={currentPage}
-        itemsPerPage={ITEMS_PER_PAGE}
-        router={router}
-      />
+      {currentCityRequests && currentCityRequests.length > 0 && (
+        <PaginationButtons
+          items={currentCityRequests}
+          setCurrentPage={setCurrentPage}
+          currentPage={currentPage}
+          itemsPerPage={ITEMS_PER_PAGE}
+          router={router}
+        />
+      )}
     </div>
   );
 };

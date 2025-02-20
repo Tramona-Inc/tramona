@@ -72,14 +72,14 @@ export const referralCodesRouter = createTRPCRouter({
       const referralCodeOwner = await ctx.db.query.users.findFirst({
         where: eq(users.id, referralCode.ownerId),
         columns: {
-          name: true,
+          firstName: true,
           image: true,
         },
       });
 
       return {
         owner: {
-          name: referralCodeOwner?.name ?? "an anonymous person",
+          firstName: referralCodeOwner?.firstName ?? "an anonymous person",
           image: referralCodeOwner?.image ?? null,
         },
       };

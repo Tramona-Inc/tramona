@@ -8,14 +8,11 @@ import HostConfirmRequestDialog from "../../HostConfirmRequestDialog";
 import HostFinishRequestDialog from "./HostFinishRequestDialog";
 import { useToast } from "@/components/ui/use-toast";
 import PastOfferWithdrawDialog from "./PastOfferWithdrawDialog";
-import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 import CityRequestSection from "./CityRequestSection";
 import OffersSentSection from "./OffersSentSection";
-import { RequestCardLoadingGrid } from "../RequestCardLoadingGrid";
 import NoRequestEmptyState from "../NoRequestEmptyState";
 
 export default function HostCityRequestsPage() {
-  const { currentHostTeamId } = useHostTeamStore();
   const { toast } = useToast();
   const [propertyPrices, setPropertyPrices] = useState<Record<number, string>>(
     {},

@@ -1,19 +1,18 @@
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { useRouter } from "next/router";
 import SidebarCity from "./sidebars/SideBarCity";
 import SidebarRequestToBook from "./sidebars/SideBarRequestToBook";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangleIcon, ChevronLeft } from "lucide-react";
 import { api } from "@/utils/api";
-import {
-  formatOfferData
-} from "@/utils/utils";
+import { formatOfferData } from "@/utils/utils";
 import { useHostTeamStore } from "@/utils/store/hostTeamStore";
 import useSetInitialHostTeamId from "@/components/_common/CustomHooks/useSetInitialHostTeamId";
 import { useIsLg } from "@/utils/utils";
 import React from "react";
+import { SeparatedData } from "@/server/server-utils";
 
 const alerts = [
   {
@@ -55,25 +54,25 @@ const HostRequestsLayout = React.memo(function HostRequestsLayout({
   const [activeTab, setActiveTab] = useState<TabType>(
     router.asPath.includes("requests-to-book") ? "property-bids" : "city",
   );
-  const [selectedOption, setSelectedOption] =
-    useState<SelectedOptionType>("normal");
+
+  const selectedOption =
+    (router.query.option as SelectedOptionType) ?? "normal";
 
   // <--------------------Data fetching logic ---------------->
   const { data: separatedData, isLoading: isLoadingProperties } =
-    api.properties.getHostPropertiesWithRequests.useQuery(
-      { currentHostTeamId: currentHostTeamId! },
-      {
-        enabled: !!currentHostTeamId,
-        refetchOnWindowFocus: false,
-        refetchOnMount: false,
-        refetchOnReconnect: false,
-        staleTime: Infinity,
-        cacheTime: Infinity,
-        retry: false,
-      },
-    );
+  api.properties.getHostPropertiesWithRequests.useQuery(
+    { currentHostTeamId: currentHostTeamId! },
+    {
+      enabled: !!currentHostTeamId,
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      staleTime: Infinity,
+      cacheTime: Infinity,
+      retry: false,
+    },
+  );
 
-  console.log(separatedData);
 
   const { data: offers, isLoading: isLoadingOffers } =
     api.offers.getAllHostOffers.useQuery(
@@ -96,6 +95,45 @@ const HostRequestsLayout = React.memo(function HostRequestsLayout({
         enabled: !!currentHostTeamId,
       },
     );
+
+  const { normal, other } = separatedData ?? { normal: [], other: [] };
+  const noNormalRequests = normal.length === 0;
+  const hasOtherRequests = other.length > 0;
+  const completelyEmpty = noNormalRequests && other.length === 0;
+
+  const initialNavigationDone = useRef(false);
+
+  useEffect(() => {
+    if (!router.isReady || isLoadingProperties || initialNavigationDone.current) return;
+
+    const currentPath = router.asPath.split('?')[0];
+    const currentOption = router.query.option;
+
+    // Get the first normal city in a stable way
+    const targetCity = separatedData?.normal[0]?.city;
+    const shouldNavigateToCity = !!targetCity && isLg;
+
+    // Determine target route
+    const targetPath = shouldNavigateToCity
+      ? `/host/requests/${targetCity}`
+      : '/host/requests';
+
+    const targetOption = shouldNavigateToCity ? 'normal' : undefined;
+
+    // Check if we need to navigate
+    const needsNavigation = currentPath !== targetPath || currentOption !== targetOption;
+
+    if (needsNavigation) {
+      initialNavigationDone.current = true;
+      void router.push({
+        pathname: targetPath,
+        query: targetOption ? { option: targetOption } : undefined,
+      });
+    } else {
+      initialNavigationDone.current = true;
+    }
+  }, [router, router.isReady, isLoadingProperties, separatedData?.normal, isLg]);
+
 
 
   const offerData = useMemo(() => {
@@ -129,10 +167,13 @@ const HostRequestsLayout = React.memo(function HostRequestsLayout({
   const handleOptionChange = useCallback(
     (option: SelectedOptionType) => {
       if (option === selectedOption) return;
-      setSelectedOption(option);
 
       let newPathname = "/host/requests";
-      if (separatedData?.normal[0]) {
+      if (option === "other") {
+        if (separatedData?.other[0]) {
+          newPathname = `/host/requests/${separatedData.other[0].city}`;
+        }
+      } else if (separatedData?.normal[0]) {
         newPathname = `/host/requests/${separatedData.normal[0].city}`;
       }
       void router.push(
@@ -160,6 +201,8 @@ const HostRequestsLayout = React.memo(function HostRequestsLayout({
       ? requestToBookData[0]!.id
       : undefined;
   }, [requestToBookData, isIndex, isLg]);
+
+  console.log(selectedOption);
 
   // <--------------------------------Render------------------>
   return (
@@ -200,15 +243,14 @@ const HostRequestsLayout = React.memo(function HostRequestsLayout({
             </div>
           </div>
           <ScrollArea className="sticky h-screen w-screen overflow-auto border-t px-4 py-8 lg:w-96">
-            {activeTab === "city" ?  (
-                <SidebarCity
-                  selectedOption={selectedOption}
-                  separatedData={separatedData ?? null}
-                  offerData={offerData}
-                  isLoading={isLoadingProperties}
-                  initialSelectedCity={initialSelectedCity}
-                />
-
+            {activeTab === "city" ? (
+              <SidebarCity
+                selectedOption={selectedOption}
+                separatedData={separatedData ?? null}
+                offerData={offerData}
+                isLoading={isLoadingProperties}
+                initialSelectedCity={initialSelectedCity}
+              />
             ) : (
               <SidebarRequestToBook
                 properties={requestToBookData}
@@ -258,15 +300,9 @@ const HostRequestsLayout = React.memo(function HostRequestsLayout({
                     </Button>
                   </div>
                   <Button
-                    variant={
-                      selectedOption === "other"
-                        ? "primary"
-                        : "white"
-                    }
+                    variant={selectedOption === "other" ? "primary" : "white"}
                     className="rounded-full shadow-md"
-                    onClick={() =>
-                      handleOptionChange("other")
-                    }
+                    onClick={() => handleOptionChange("other")}
                   >
                     Other
                   </Button>
@@ -282,8 +318,7 @@ const HostRequestsLayout = React.memo(function HostRequestsLayout({
                     : activeTab === "property-bids" &&
                         selectedOption === "normal"
                       ? alerts[1]?.text
-                      : activeTab === "city" &&
-                          selectedOption === "other"
+                      : activeTab === "city" && selectedOption === "other"
                         ? alerts[2]?.text
                         : alerts[3]?.text}
                 </AlertDescription>
