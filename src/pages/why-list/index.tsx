@@ -11,7 +11,7 @@ import React from "react";
 import HostCalculator from "@/components/host/HostCalculator";
 import { StickyTopBar } from "@/pages/for-hosts";
 import { MobileStickyBar } from "@/pages/for-hosts";
-
+import HeyHosts from "@/components/landing-page/_sections/hey-hosts/HeyHosts";
 import {
   FaInfoCircle,
   FaSlidersH,
@@ -36,12 +36,12 @@ const ForHostsPage = ({
   requestFeed,
 }: InferGetStaticPropsType<typeof getStaticProps>) => {
   return (
-    <div className="relative space-y-32 overflow-x-hidden bg-white pb-20 md:pb-0">
+    <div className="relative  overflow-x-hidden bg-white md:pb-0">
       <Head>
         <title>For Hosts | Tramona</title>
       </Head>
       <div>
-        <div className="bg-white">
+        <div className="bg-white pb-10">
           <Banner />
           <div className="md:hidden">
             <MobileStickyBar />
@@ -51,7 +51,7 @@ const ForHostsPage = ({
           </div>
           <SignUpNow requestFeed={requestFeed} />
         </div>
-        <div className="bg-[#FAF9F6]">
+        <div className="bg-[#FAF9F6] p-10">
           <h1 className="mt-12 text-center text-3xl font-semibold">
             How Tramona Works for Hosts
           </h1>
@@ -99,6 +99,9 @@ const ForHostsPage = ({
             our onboarding team
           </h2>
           <Questions />
+        </div>
+        <div className="pb-4 md:pb-20 flex justify-center">
+          <HeyHosts />
         </div>
         <div className="bg-[#FAF9F6] p-20 pb-4 md:pb-8">
           <FAQ />
@@ -493,7 +496,11 @@ const Questions = () => {
   return (
     <ul className="mx-12 mb-12 flex flex-wrap justify-center gap-24">
       <div className="flex flex-col items-center">
-        <Link href="https://calendly.com/tramona">
+        <Link
+          href="https://calendly.com/tramona"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           <Button size="lg" className="bg-primaryGreen text-white">
             Book a Call
           </Button>
@@ -665,7 +672,7 @@ const Features2 = () => {
               alt="Requests"
             />
           </div>
-          <h2 className="text-xl font-medium text-[#333] sm:text-2xl">
+          <h2 className="text-md font-medium text-[#333]">
             See all incoming requests for your empty nights, accept deny or
             reject them. Hosts can also set preferences so they only see
             requests that match their criteria.
@@ -682,7 +689,7 @@ const Features2 = () => {
               alt="Cal"
             />
           </div>
-          <h2 className="text-xl font-medium text-[#333] sm:text-2xl">
+          <h2 className="text-md font-medium text-[#333]">
             Easily invite a co-host to help manage your listing. We have
             multiple permissions to choose from. From full access to only being
             able to preform certain actions.
@@ -699,7 +706,7 @@ const Features2 = () => {
               alt="Customized Pricing"
             />
           </div>
-          <h2 className="text-xl font-medium text-[#333] sm:text-2xl">
+          <h2 className="text-md font-medium text-[#333]">
             Customize Tramona how you like. Put the prices you would consider,
             turn on or off instant booking, and sync your calendar directlly
             with Airbnb to eliminate double bookings.
