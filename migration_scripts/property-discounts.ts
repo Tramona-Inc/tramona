@@ -4,8 +4,6 @@ import { propertyDiscounts } from "@/server/db/schema";
 const properties = await db.query.properties.findMany();
 const allDiscountValues = properties.map((property) => ({
   propertyId: property.id,
-  weekdayDiscount: 0,
-  weekendDiscount: 0,
   mondayDiscount: 0,
   tuesdayDiscount: 0,
   wednesdayDiscount: 0,
@@ -13,7 +11,6 @@ const allDiscountValues = properties.map((property) => ({
   fridayDiscount: 0,
   saturdayDiscount: 0,
   sundayDiscount: 0,
-  isDailyDiscountsCustomized: false,
 }));
 
 const batchSize = 1000;

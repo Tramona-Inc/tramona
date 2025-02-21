@@ -499,8 +499,6 @@ export const propertyDiscounts = pgTable(
   "property_discounts",
   {
     propertyId: integer("property_id").primaryKey().references(() => properties.id, { onDelete: "cascade" }),
-    weekdayDiscount: integer("weekday_discount").default(0).notNull(),
-    weekendDiscount: integer("weekend_discount").default(0).notNull(),
     mondayDiscount: integer("monday_discount").default(0).notNull(),
     tuesdayDiscount: integer("tuesday_discount").default(0).notNull(),
     wednesdayDiscount: integer("wednesday_discount").default(0).notNull(),
@@ -508,7 +506,6 @@ export const propertyDiscounts = pgTable(
     fridayDiscount: integer("friday_discount").default(0).notNull(),
     saturdayDiscount: integer("saturday_discount").default(0).notNull(),
     sundayDiscount: integer("sunday_discount").default(0).notNull(),
-    isDailyDiscountsCustomized: boolean("is_daily_discounts_customized").default(false).notNull(),
   },
 );
 

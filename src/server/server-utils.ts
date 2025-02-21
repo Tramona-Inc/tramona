@@ -1010,7 +1010,7 @@ type DiscountPropertyKeys =
 
 
 export async function isRequestFulfillingThreshold(
-  propertyId: number, // Use PropertiesWithDiscounts type
+  propertyId: number,
   checkIn: string,
   checkOut: string,
   maxTotalPrice: number,
@@ -1023,23 +1023,16 @@ export async function isRequestFulfillingThreshold(
     where: eq(propertyDiscounts.propertyId, propertyId)
   });
 
-  if (!propertyDiscountInfo) {
-    return false; // Or handle the case where priceMap is not available as needed
+  if (!propertyDiscountInfo || !priceMap) {
+    return false;
   }
 
-  if (!priceMap) {
-    return false; // Or handle the case where priceMap is not available as needed
-  }
-
-  let totalNightsCount = 0;
   let totalDiscountedPrice = 0;
   const currentDate = new Date(checkIn);
   const endDate = new Date(checkOut);
 
   while (currentDate < endDate) {
-    totalNightsCount++;
     const dayOfWeek = currentDate.getDay();
-
     const dayName = [
       "Sunday",
       "Monday",
@@ -1050,32 +1043,20 @@ export async function isRequestFulfillingThreshold(
       "Saturday",
     ][dayOfWeek]!;
 
-    const originalNightlyPrice = priceMap[dayName]; // Access price using dayName
+    const originalNightlyPrice = priceMap[dayName];
 
     if (originalNightlyPrice === undefined) {
-      console.warn(`No price found for day: ${dayName}`); // Handle missing day price if needed
+      console.warn(`No price found for day: ${dayName}`);
       currentDate.setDate(currentDate.getDate() + 1);
-      continue; // Skip to the next day
+      continue;
     }
 
-    let discountedPrice = originalNightlyPrice;
+    // Get the discount for the current day of the week
+    const dailyDiscountKey = `${dayName.toLowerCase()}Discount` as DiscountPropertyKeys;
+    const discountedPrice = originalNightlyPrice * (1 - (propertyDiscountInfo[dailyDiscountKey]) / 100);
 
-    if (propertyDiscountInfo.isDailyDiscountsCustomized) {
-      const dailyDiscountKey = `${dayName}Discount` as DiscountPropertyKeys; // Type assertion here
-      // Apply daily discounts if customized
-      discountedPrice = discountedPrice * (1 - (propertyDiscountInfo[dailyDiscountKey]) / 100);
-    } else {
-      // Apply weekday/weekend discounts
-      if ([1, 2, 3, 4, 5].includes(dayOfWeek)) {
-        // Monday to Friday (Weekday)
-        discountedPrice = discountedPrice * (1 - propertyDiscountInfo.weekdayDiscount / 100);
-      } else {
-        // Saturday or Sunday (Weekend)
-        discountedPrice = discountedPrice * (1 - propertyDiscountInfo.weekendDiscount / 100);
-      }
-    }
     totalDiscountedPrice += discountedPrice;
-    currentDate.setDate(currentDate.getDate() + 1); // Move to the next day
+    currentDate.setDate(currentDate.getDate() + 1);
   }
 
   return totalDiscountedPrice <= (maxTotalPrice / 100);

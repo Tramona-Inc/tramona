@@ -78,7 +78,7 @@ export default function BiddingSection({
           />
           <p className="text-base text-muted-foreground">
             You can think of this as request to book. To ensure you don&apos;t
-            get lowballed, tell us the %off you would consider accepting.
+            get lowballed, tell us the percentage off you would consider accepting.
           </p>
           <div className="flex justify-end">
             <Button
