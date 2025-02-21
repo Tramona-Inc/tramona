@@ -178,7 +178,7 @@ export default function MonthCalendar({
               >
                 <div className="flex items-center gap-x-1 absolute left-0 top-0 rounded-full bg-red-500 px-1 text-[0.6rem] text-white">
                   {/* If you comment this in, it will work only for unsynced properties */}
-                  {newBookedInfo && (
+                  {newBookedInfo && !isGrayedOut && (
                     <div
                       onClick={() => setHowYourCalendarWorksOpen?.(true)}
                       className="flex items-center gap-x-1 rounded-full bg-red-500 px-1 text-[0.6rem] text-white"
@@ -187,7 +187,7 @@ export default function MonthCalendar({
                       <AlertCircleIcon size={10} />
                     </div>
                   )}
-                </div>{" "}
+                </div>
                 {day && currentDate && (
                   <>
                     <span className="text-sm font-semibold">{day}</span>

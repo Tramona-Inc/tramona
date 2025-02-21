@@ -14,7 +14,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { ChevronRight, HelpCircle, Mail } from "lucide-react";
+import { ChevronRight, HelpCircle } from "lucide-react";
 import OverviewRequestCards from "./name-your-price/OverviewRequestCards";
 import HowTramonaWorks from "./name-your-price/HowTramonaWorks";
 import { TestimonialCarousel } from "./testimonials/TestimonialCarousel";
@@ -22,43 +22,10 @@ import { landingPageTestimonals } from "./testimonials/testimonials-data";
 import UnclaimedMap from "@/components/unclaimed-offers/UnclaimedMap";
 import { useIsLg } from "@/utils/utils";
 import { useIsXl } from "@/utils/utils";
-import { Input } from "@/components/ui/input";
-import { motion, AnimatePresence } from "framer-motion";
-import { Badge } from "@/components/ui/badge";
-import { Plus, X } from "lucide-react";
-import { api } from "@/utils/api";
-import { toast } from "@/components/ui/use-toast";
-import CityAutocomplete from "@/components/_common/CityAutocomplete";
-import { useForm, Controller } from "react-hook-form";
-interface Location {
-  lat: number;
-  lng: number;
-  size: number;
-  color: string;
-}
-type FormData = {
-  email: string;
-  cities: string[];
-  stateCode: string;
-  country: string;
-};
+import HeyHosts from "./hey-hosts/HeyHosts";
+
 export default function MastHead() {
-  const {
-    register,
-    control,
-    handleSubmit,
-    formState: { errors },
-    setValue,
-    clearErrors,
-  } = useForm<FormData>({
-    defaultValues: {
-      email: "",
-      cities: [],
-      stateCode: "",
-      country: "",
-    },
-    mode: "onChange",
-  });
+
 
   const isXl = useIsXl();
   const isLg = useIsLg();
@@ -68,54 +35,6 @@ export default function MastHead() {
   const [isScrolled, setIsScrolled] = useState(false);
   const toggleSectionRef = useRef<HTMLDivElement>(null);
   const [hasPassedButtons, setHasPassedButtons] = useState(false);
-  const [newCity, setNewCity] = useState("");
-  const [cities, setCities] = useState<string[]>([]);
-  const [popoverOpen, setPopoverOpen] = useState(false);
-  const cityAutocompleteRef = useRef<HTMLInputElement>(null); // Create a ref
-  const { mutate: insertWarmLead } = api.outreach.insertWarmLead.useMutation({
-    onSuccess: () => {
-      toast({
-        title: "Success!",
-        description: "We'll send you booking requests as they come in!",
-      });
-    },
-  });
-  const handleAddCity = (selectedCity?: string) => {
-    let cityToAdd = newCity;
-    if (selectedCity) {
-      cityToAdd = selectedCity;
-    }
-    if (cityToAdd.trim() && !cities.includes(cityToAdd)) {
-      const [city, stateCode, country] = cityToAdd.split(",");
-      if (city) {
-        setCities([...cities, city]);
-        setValue("cities", [...cities, city]);
-      }
-      if (stateCode) {
-        setValue("stateCode", stateCode);
-      }
-      if (country) {
-        setValue("country", country);
-      }
-      setNewCity("");
-      setPopoverOpen(false);
-      cityAutocompleteRef.current?.blur();
-      return false;
-    }
-  };
-
-  const onSubmit = (data: FormData) => {
-    insertWarmLead(data);
-    setCities([]);
-    setValue("email", "");
-    setNewCity("");
-    setPopoverOpen(false);
-    clearErrors("email"); // Clear email errors on successful submit if any were previously shown
-    cityAutocompleteRef.current?.blur();
-  };
-  const handleRemoveCity = (index: number) => {
-    setCities(cities.filter((_, i) => i !== index));
-  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -296,9 +215,9 @@ export default function MastHead() {
               </h3>
             </div>
 
-            <div className="max-w-9xl absolute inset-0 mx-auto hidden px-24 lg:flex lg:flex-row lg:items-center lg:justify-between">
+            <div className="max-w-8xl absolute inset-0 mx-auto hidden px-24 lg:flex lg:flex-row lg:items-center lg:justify-between">
               {/* Left side - Text Content */}
-              <div className="w-full text-left lg:w-2/3">
+              <div className="w-full text-left">
                 <h2 className="mt-8 text-5xl font-bold text-white">
                   Turn empty nights into opportunities
                 </h2>
@@ -320,12 +239,10 @@ export default function MastHead() {
                 </h3>
               </div>
 
-              {/* Right side - Newsletter Signup (Desktop) */}
-              {isXl && (
-                <form
-                  onSubmit={handleSubmit(onSubmit)}
-                  className="items-center justify-center 2xl:pr-12"
-                >
+              {/* <form
+                onSubmit={handleSubmit(onSubmit)}
+                className="items-center justify-center 2xl:pr-12"
+              >
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -342,7 +259,6 @@ export default function MastHead() {
                       </p>
 
                       <div className="space-y-4">
-                        {/* City Selection */}
                         <div className="space-y-2">
                           <label className="text-xs font-medium text-white">
                             Where are your properties located?
@@ -381,7 +297,6 @@ export default function MastHead() {
                             </Button>
                           </div>
 
-                          {/* City List */}
                           <div className="flex max-h-[40px] min-h-[40px] flex-wrap gap-2 overflow-y-auto">
                             <AnimatePresence>
                               {cities.map((city, index) => (
@@ -408,17 +323,13 @@ export default function MastHead() {
                           </div>
                         </div>
 
-                        {/* Email Input */}
                         <div className="space-y-2">
                           <label className="text-xs font-medium text-white">
                             Your email address
                           </label>
                           <div className="flex flex-col gap-2">
                             {" "}
-                            {/* Changed to flex-col and gap-2 */}
                             <div className="relative min-h-[60px]">
-                              {" "}
-                              {/* Add min-height container */}
                               <Controller
                                 name="email"
                                 control={control}
@@ -439,7 +350,6 @@ export default function MastHead() {
                                   />
                                 )}
                               />
-                              {/* Position error absolutely within container */}
                               {errors.email && (
                                 <p className="absolute bottom-[-5px] text-xs text-red-500">
                                   {errors.email.message}
@@ -459,7 +369,9 @@ export default function MastHead() {
                     </div>
                   </motion.div>
                 </form>
-              )}
+
+                */}
+
             </div>
           </div>
         </div>
@@ -506,146 +418,13 @@ export default function MastHead() {
         <div className="mx-auto mt-12 flex flex-col items-center gap-y-20 lg:gap-y-24">
           {/* other  sections */}
           <OverviewRequestCards />
-          {!isXl && (
-            <div className="mx-2 items-center justify-center">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="mt-6 w-full lg:mt-0 lg:w-[400px]"
-              >
-                <div className="rounded-xl border border-gray-900/20 p-6">
-                  <h3 className="mb-1 text-2xl font-semibold text-gray-900">
-                    Hey Hosts! 👋
-                  </h3>
-                  <p className="mb-4 text-sm text-gray-900/90">
-                    Not ready to sign up? Enter your email below and we will
-                    send you booking requests as they come in.
-                  </p>
 
-                  <div className="">
-                    {/* City Selection */}
-                    <div className="space-y-2">
-                      <label className="text-xs font-medium text-gray-900">
-                        Where are your properties located?
-                      </label>
-                      <div className="flex gap-2">
-                        <CityAutocomplete
-                          value={newCity}
-                          onValueChange={(value) => {
-                            setNewCity(value);
-                          }}
-                          open={popoverOpen}
-                          setOpen={setPopoverOpen}
-                          trigger={({ value, disabled }) => (
-                            <Input
-                              ref={cityAutocompleteRef}
-                              type="text"
-                              placeholder="Enter city name"
-                              value={value}
-                              onChange={(e) => setNewCity(e.target.value)}
-                              className="border-gray-900/20 bg-white text-sm text-black placeholder:text-gray-900/60" // Modified classes
-                              onKeyDown={(e) => {
-                                if (e.key === "Enter") {
-                                  e.preventDefault();
-                                  handleAddCity();
-                                }
-                              }}
-                              disabled={disabled}
-                            />
-                          )}
-                        />
-                        <Button
-                          onClick={() => handleAddCity()}
-                          variant="secondary"
-                          size="icon"
-                          type="button"
-                        >
-                          <Plus className="h-4 w-4" />
-                        </Button>
-                      </div>
-
-                      {/* City List */}
-                      <div className="flex max-h-[40px] min-h-[40px] flex-wrap gap-2 overflow-y-auto">
-                        <AnimatePresence>
-                          {cities.map((city, index) => (
-                            <motion.div
-                              key={city}
-                              initial={{ opacity: 0, scale: 0.8 }}
-                              animate={{ opacity: 1, scale: 1 }}
-                              exit={{ opacity: 0, scale: 0.8 }}
-                              transition={{ duration: 0.2 }}
-                            >
-                              <Badge
-                                variant="secondary"
-                                className="flex items-center gap-2 px-2 py-1 text-xs"
-                              >
-                                {city}
-                                <X
-                                  className="h-3 w-3 cursor-pointer hover:text-destructive"
-                                  onClick={() => handleRemoveCity(index)}
-                                />
-                              </Badge>
-                            </motion.div>
-                          ))}
-                        </AnimatePresence>
-                      </div>
-                    </div>
-
-                    {/* Email Input */}
-                    <div className="space-y-2">
-                      <label className="text-xs font-medium text-gray-900">
-                        Your email address
-                      </label>
-                      <div className="flex flex-col gap-2">
-                        {" "}
-                        {/* Changed to flex-col and gap-2 */}
-                        <div className="relative min-h-[60px]">
-                          <Controller
-                            name="email"
-                            control={control}
-                            rules={{
-                              required: "Email is required",
-                              pattern: {
-                                value:
-                                  /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-                                message: "Invalid email format",
-                              },
-                            }}
-                            render={({ field }) => (
-                              <Input
-                                {...field}
-                                type="email"
-                                placeholder="name@example.com"
-                                className="border-gray-900/20 bg-white text-sm text-black placeholder:text-gray-900/60" // Modified classes
-                              />
-                            )}
-                          />
-                          {errors.email && (
-                            <p className="text-xs text-red-500">
-                              {errors.email.message}
-                            </p>
-                          )}
-                        </div>
-                        {/* text-xs and placed below */}
-                        <Button
-                          className="whitespace text-sm"
-                          onClick={handleSubmit(onSubmit)} // Use handleSubmit here to trigger form validation and submission
-                        >
-                          <Mail className="mr-2 h-4 w-4" />
-                          Get Booking Requests
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            </div>
-          )}
           <HowTramonaWorks className="max-w-6xl" />
           <div className="mx-0 flex max-w-full justify-center space-y-4 px-4 lg:mx-4 lg:flex lg:space-y-8">
             <TestimonialCarousel testimonials={landingPageTestimonals} />
           </div>
+
+          <HeyHosts />
 
           <div className="mx-2 my-12 flex flex-col items-center gap-y-20 lg:gap-y-24">
             {/* FAQ */}
