@@ -8,24 +8,20 @@ export default function PricingTab({
   handleBookItNowSwitch,
   isBookItNowChecked,
   isTogglingBookItNow,
-  isUpdatingBookItNow,
   bookItNowPercent,
   setBookItNowPercent,
   biddingPercent,
   setBiddingPercent,
-  isBookItNowSaveDisabled,
 }: {
   property: Property;
   handleBookItNowSlider: (bookItNowPercent: number) => Promise<number>;
   handleBookItNowSwitch: (checked: boolean) => Promise<void>;
   isBookItNowChecked: boolean;
   isTogglingBookItNow: boolean;
-  isUpdatingBookItNow: boolean;
   bookItNowPercent: number;
   setBookItNowPercent: (percent: number) => void;
   biddingPercent: number;
   setBiddingPercent: (percent: number) => void;
-  isBookItNowSaveDisabled: boolean;
 }) {
   return (
     <>
@@ -34,10 +30,8 @@ export default function PricingTab({
         isBookItNowChecked={isBookItNowChecked}
         isTogglingBookItNow={isTogglingBookItNow}
         handleBookItNowSwitch={handleBookItNowSwitch}
-        isUpdatingBookItNow={isUpdatingBookItNow}
         bookItNowPercent={bookItNowPercent}
         setBookItNowPercent={setBookItNowPercent}
-        isBookItNowSaveDisabled={isBookItNowSaveDisabled}
       />
 
       {/* Bidding section */}

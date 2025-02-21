@@ -10,7 +10,6 @@ interface CalendarSettingsProps {
   property: Property;
   handleBookItNowSwitch: (checked: boolean) => Promise<void>;
   handleBookItNowSlider: (bookItNowPercent: number) => Promise<number>;
-  isUpdatingBookItNow: boolean;
   isBookItNowChecked: boolean;
   isTogglingBookItNow: boolean;
   refetch: () => void;
@@ -19,7 +18,6 @@ export default function CalendarSettings({
   property,
   handleBookItNowSwitch,
   handleBookItNowSlider,
-  isUpdatingBookItNow,
   isBookItNowChecked,
   isTogglingBookItNow,
   refetch,
@@ -39,9 +37,6 @@ export default function CalendarSettings({
   const initialBookItNowPercent = useRef<number>(
     property.bookItNowHostDiscountPercentOffInput,
   );
-
-  const isBookItNowSaveDisabled =
-    initialBookItNowPercent.current === bookItNowPercent;
 
   const router = useRouter();
   const activeTab = (router.query.tab as string) || "pricing";
@@ -155,12 +150,10 @@ export default function CalendarSettings({
               handleBookItNowSwitch={handleBookItNowSwitch}
               isBookItNowChecked={isBookItNowChecked}
               isTogglingBookItNow={isTogglingBookItNow}
-              isUpdatingBookItNow={isUpdatingBookItNow}
               bookItNowPercent={bookItNowPercent}
               setBookItNowPercent={setBookItNowPercent}
               biddingPercent={biddingPercent}
               setBiddingPercent={setBiddingPercent}
-              isBookItNowSaveDisabled={isBookItNowSaveDisabled}
             />
           </TabsContent>
           <TabsContent value="fees" className="space-y-6 sm:space-y-8">
