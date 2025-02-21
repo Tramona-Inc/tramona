@@ -52,6 +52,8 @@ export default function CalendarSettings({
     property.requestToBookMaxDiscountPercentage,
   );
 
+  console.log("biddingPercent", biddingPercent);
+
   useEffect(() => {
     setBookItNowPercent(property.bookItNowHostDiscountPercentOffInput);
     setBiddingPercent(property.requestToBookMaxDiscountPercentage);

@@ -84,6 +84,8 @@ export default function CalendarComponent() {
     return curProperty;
   }, [propertyId, hostProperties, refetch]);
 
+  console.log("initialProperty", initialProperty);
+
   // Set initial selected property when data loads
   useEffect(() => {
     setSelectedProperty(initialProperty);
